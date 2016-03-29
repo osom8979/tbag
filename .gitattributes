@@ -1,0 +1,4 @@
+# GIT ATTRIBUTES FILE.
+
+*.bat -crlf
+
