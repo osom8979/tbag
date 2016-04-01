@@ -97,6 +97,7 @@ function (default_build _libs _tests _exes)
     # Build project.
     foreach (_cursor ${_libs} ${_tests} ${_exes})
         set (_project_is_verbose OFF)
+        set (_project_default_install OFF)
         set (_project_objects)
         set (_project_libraries)
 
@@ -172,13 +173,15 @@ function (default_build _libs _tests _exes)
 
         # ----------------
         # Insatll setting.
-        install (TARGETS ${_project_name}
-                 RUNTIME DESTINATION bin
-                 LIBRARY DESTINATION lib
-                 ARCHIVE DESTINATION lib)
-        install (DIRECTORY ${_project_dir}
-                 DESTINATION "include"
-                 FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+        if (_project_default_install)
+            install (TARGETS ${_project_name}
+                     RUNTIME DESTINATION bin
+                     LIBRARY DESTINATION lib
+                     ARCHIVE DESTINATION lib)
+            install (DIRECTORY ${_project_dir}
+                     DESTINATION "include"
+                     FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+        endif ()
     endforeach ()
 endfunction ()
 

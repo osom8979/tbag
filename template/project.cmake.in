@@ -1,6 +1,7 @@
 ## CMake subproject properties.
 
 if (_project_is_verbose)
+    message ("++ _project_default_install: ${_project_default_install}")
     message ("++ _project_dir: ${_project_dir}")
     message ("++ _project_type: ${_project_type}")
     message ("++ _project_name: ${_project_name}")
