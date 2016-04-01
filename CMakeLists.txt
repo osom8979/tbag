@@ -39,6 +39,7 @@ include (cmake/util.cmake)
 
 exists_define_or_die (MAIN_NAME)
 
+string (TOUPPER ${MAIN_NAME} MAIN_NAME_UPPER)
 string (TIMESTAMP _timestamp "%Y-%m-%d_%H%M%S")
 set (VERSION_TWEAK "${_timestamp}")
 set (VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")

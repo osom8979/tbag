@@ -20,3 +20,7 @@ set (_project_include_dirs ${CMAKE_CURRENT_LIST_DIR})
 set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
 set (_project_cxxflags     -fPIC)
 
+# libuv setting.
+set (_project_include_dirs ${UV_INCLUDE_DIRS})
+set (_project_ldflags      ${UV_LIBRARIES})
+

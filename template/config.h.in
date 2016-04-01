@@ -5,8 +5,8 @@
  * @date   2016-02-23
  */
 
-#ifndef __INCLUDE_MAIN__MAIN_CONFIG_H__
-#define __INCLUDE_MAIN__MAIN_CONFIG_H__
+#ifndef __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_H__
+#define __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_H__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,7 +16,6 @@
 #if defined(UNICODE) || defined(_UNICODE)
 #error "Don't using UNICODE from the main project."
 #endif
-
 
 /**
  * @defgroup __DOXYGEN_GROUP__PREFIX_INFORMATION__ Prefix information
@@ -63,11 +62,12 @@
     TO_STRING(VERSION_MINOR)  VERSION_SEPARATOR \
     TO_STRING(VERSION_PATCH)
 
-#define TITLE_PREFIX  "[" TITLE_NAME "]"
+#define TITLE_STRING  TO_STRING(TITLE_NAME)
+#define TITLE_PREFIX  "[" TITLE_STRING "]"
 
 /** Main Title. */
 #define MAIN_TITLE \
-    TITLE_NAME " v" VERSION_STRING
+    TITLE_STRING " v" VERSION_STRING
 
 /** Unused parameter macro. */
 #ifndef UNUSED_PARAM
@@ -297,18 +297,5 @@
 #define NAMESPACE_ANONYMOUS_CLOSE  }
 #endif
 
-#ifndef NAMESPACE_MAIN
-#define NAMESPACE_MAIN        TITLE_NAME
-#define NAMESPACE_MAIN_OPEN   namespace NAMESPACE_MAIN {
-#define NAMESPACE_MAIN_CLOSE  }
-#define USING_NAMESPACE_MAIN  using namespace NAMESPACE_MAIN;
-#endif
-
-#if defined(__LANG_STDCPP__)
-NAMESPACE_MAIN_OPEN
-NAMESPACE_MAIN_CLOSE
-namespace m = NAMESPACE_MAIN;
-#endif // __LANG_STDCPP__
-
-#endif // __INCLUDE_MAIN__MAIN_CONFIG_H__
+#endif // __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_H__
 

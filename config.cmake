@@ -23,7 +23,7 @@ add_library_value ("zlib"      OFF)
 add_library_value ("gtest"     ON)
 add_library_value ("protobuf"  OFF)
 # Extension project:
-add_library_value ("libuv"     OFF)
+add_library_value ("libuv"     ON)
 
 # Continuous Integration.
 option (USE_DOXYGEN "API documentation." ON)
