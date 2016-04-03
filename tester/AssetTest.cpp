@@ -23,8 +23,14 @@ public:
     }
 };
 
-TEST_F(AssetTest, Directory)
+TEST_F(AssetTest, PathOperators)
 {
-    ASSERT_TRUE(true);
+# if defined(WIN32) || defined(_WIN32)
+    EXPECT_EQ(GetPathSeparator(), '\\');
+    EXPECT_EQ(GetPathSplitter(),  ';');
+# else
+    EXPECT_EQ(GetPathSeparator(), '/');
+    EXPECT_EQ(GetPathSplitter(),  ':');
+# endif
 }
 

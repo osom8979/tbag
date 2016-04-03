@@ -20,9 +20,35 @@
 #include <string>
 #include <uv.h>
 
+#ifndef PATH_SEPARATOR
+# if defined(WIN32) || defined(_WIN32)
+#  define PATH_SEPARATOR '\\'
+# else
+#  define PATH_SEPARATOR '/'
+# endif
+#endif // PATH_SEPARATOR
+
+#ifndef PATH_SPLITTER
+# if defined(WIN32) || defined(_WIN32)
+#  define PATH_SPLITTER ';'
+# else
+#  define PATH_SPLITTER ':'
+# endif
+#endif // PATH_SPLITTER
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+constexpr char GetPathSeparator() noexcept(true)
+{
+    return PATH_SEPARATOR;
+}
+
+constexpr char GetPathSplitter() noexcept(true)
+{
+    return PATH_SPLITTER;
+}
 
 /**
  * Asset class prototype.
@@ -33,10 +59,13 @@ NAMESPACE_LIBTBAG_OPEN
 class Asset : public Noncopyable
 {
 private:
-    std::set<std::string> dirs;
+    using PathSet = std::set<std::string>;
+    PathSet dirs;
 
 public:
     Asset() {
+    }
+    Asset(PathSet & dirs) {
     }
     Asset(Asset const & obj) {
     }
@@ -47,9 +76,10 @@ public:
 
 public:
     Asset & operator = (Asset const & obj) {
-        return *this;
+        return copy(obj);
     }
     Asset & operator = (Asset && obj) {
+        swap(obj);
         return *this;
     }
 
