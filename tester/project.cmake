@@ -16,9 +16,12 @@ if (_project_is_verbose)
     message ("++ _project_ldflags: ${_project_ldflags}")
 endif ()
 
-set (_project_dependencies tbag)
-set (_project_definitions  -D__TESTER__)
+set (_project_definitions  -D__LIBTBAG__)
 set (_project_include_dirs ${CMAKE_CURRENT_LIST_DIR})
 set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
-#set (_project_cxxflags     -std=c++11)
+set (_project_cxxflags     -std=c++11)
+
+# libuv setting.
+list (APPEND _project_include_dirs ${UV_INCLUDE_DIRS})
+list (APPEND _project_ldflags      ${UV_LIBRARIES})
 
