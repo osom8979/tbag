@@ -18,36 +18,36 @@
 
 #include <set>
 #include <string>
+
 #include <uv.h>
-
-#ifndef PATH_SEPARATOR
-# if defined(WIN32) || defined(_WIN32)
-#  define PATH_SEPARATOR '\\'
-# else
-#  define PATH_SEPARATOR '/'
-# endif
-#endif // PATH_SEPARATOR
-
-#ifndef PATH_SPLITTER
-# if defined(WIN32) || defined(_WIN32)
-#  define PATH_SPLITTER ';'
-# else
-#  define PATH_SPLITTER ':'
-# endif
-#endif // PATH_SPLITTER
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-constexpr char GetPathSeparator() noexcept(true)
+#if defined(__OS_WINDOWS__)
+char const PATH_SEPARATOR = '\\';
+char const PATH_SPLITTER  = ';';
+char const * const HOME_ENV_NAME = "USERPROFILE";
+#else
+char const PATH_SEPARATOR = '/';
+char const PATH_SPLITTER  = ':';
+char const * const HOME_ENV_NAME = "HOME";
+#endif
+
+constexpr char const GetPathSeparator() noexcept(true)
 {
     return PATH_SEPARATOR;
 }
 
-constexpr char GetPathSplitter() noexcept(true)
+constexpr char const GetPathSplitter() noexcept(true)
 {
     return PATH_SPLITTER;
+}
+
+constexpr char const * const GetHomeEnvName() noexcept(true)
+{
+    return HOME_ENV_NAME;
 }
 
 /**
@@ -58,36 +58,54 @@ constexpr char GetPathSplitter() noexcept(true)
  */
 class Asset : public Noncopyable
 {
-private:
+public:
     using PathSet = std::set<std::string>;
+
+private:
     PathSet dirs;
 
 public:
     Asset() {
     }
-    Asset(PathSet & dirs) {
+
+    Asset(PathSet const & dirs) {
+        this->dirs = dirs;
     }
+
     Asset(Asset const & obj) {
+        this->copy(obj);
     }
+
     Asset(Asset && obj) {
+        this->swap(obj);
     }
+
     virtual ~Asset() {
+        this->dirs.clear();
     }
 
 public:
     Asset & operator = (Asset const & obj) {
-        return copy(obj);
+        return this->copy(obj);
     }
+
     Asset & operator = (Asset && obj) {
-        swap(obj);
+        this->swap(obj);
         return *this;
     }
 
 public:
     Asset & copy(Asset const & obj) {
+        if (this != &obj) {
+            this->dirs = obj.dirs;
+        }
         return *this;
     }
+
     void swap(Asset & obj) {
+        if (this != &obj) {
+            this->dirs.swap(obj.dirs);
+        }
     }
 };
 
