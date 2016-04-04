@@ -66,20 +66,23 @@ constexpr char const * const GetHomeEnvName() noexcept(true)
 #endif
 }
 
-char const * const HOME_DIRECTORY_NAME = "HOME";
-char const * const ROOT_DIRECTORY_NAME = "ROOT";
+char const * const HOME_DIRECTORY_ASSET_NAME = "HOME";
+char const * const  EXE_DIRECTORY_ASSET_NAME = "EXE";
 
 /**
  * Asset class prototype.
  *
  * @author zer0
  * @date   2016-04-03
+ *
+ * @remarks
+ *  Resource manager class.
  */
 class Asset : public Noncopyable
 {
 public:
     /** Default setting for the constructor. */
-    class default_setting { };
+    struct default_setting { /* Empty Body. */ };
 
 public:
     using PathMap = std::map<std::string, std::string>;
@@ -92,7 +95,10 @@ public:
         // EMPTY.
     }
 
-    explicit Asset(default_setting const & __unused__) {
+    /** Construct of Default settings. */
+    explicit Asset(default_setting const & UNUSED_PARAM(empty_value)) {
+        this->dirs.insert(std::make_pair(getHomeDirKeyName(), getHomeDir()));
+        this->dirs.insert(std::make_pair(getExeDirKeyName(), getExeDir()));
     }
 
     Asset(PathMap const & dirs) {
@@ -136,6 +142,49 @@ public:
     }
 
 public:
+    /**
+     * Obtain directory name.
+     *
+     * @param key [in] Directory key name.
+     *
+     * @return
+     *  - Empty string: If it can't find.
+     *  - Otherwise: Successful find.
+     */
+    std::string getDir(std::string const & key) {
+        auto itr = this->dirs.find(key);
+        if (itr == this->dirs.end()) {
+            return "";
+        }
+        return itr->second;
+    }
+
+    /**
+     * Insert directory name.
+     *
+     * @param key   [in] Directory key name.
+     * @param value [in] Directory path string.
+     */
+    void insertDir(std::string const & key, std::string const & value) {
+        this->dirs.insert(std::make_pair(key, value));
+    }
+
+    std::size_t size() const noexcept(true) {
+        return this->dirs.size();
+    }
+
+// Static methods.
+public:
+    /** Obtain HOME directory key name. */
+    static std::string getHomeDirKeyName() {
+        return std::string(HOME_DIRECTORY_ASSET_NAME);
+    }
+
+    /** Obtain executable file directory key name. */
+    static std::string getExeDirKeyName() {
+        return std::string(EXE_DIRECTORY_ASSET_NAME);
+    }
+
     /** Obtain HOME directory. */
     static std::string getHomeDir() {
         std::size_t path_length = (__ASSET_CONFIG__MAX_PATH_LENGTH__);
