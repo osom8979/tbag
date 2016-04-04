@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/util/Noncopyable.hpp>
+#include <libtbag/Strings.hpp>
 
 #include <set>
 #include <string>
@@ -115,31 +116,8 @@ public:
     }
 
 public:
-    static PathSet parsePathVariable(std::string const & path_env) {
-        PathSet result;
-        std::string const DELIMITER = std::string() + GetPathSplitter();
-
-        std::size_t start = 0;
-        std::size_t end = path_env.find(DELIMITER);
-
-        std::string current;
-
-        while (end != std::string::npos) {
-            current = path_env.substr(start, end - start);
-            if (current.size() > 0) {
-                result.insert(current);
-            }
-            start = end + DELIMITER.length();
-            end = path_env.find(DELIMITER, start);
-        }
-
-        // Last token.
-        current = path_env.substr(start, end);
-        if (current.size() > 0) {
-            result.insert(current);
-        }
-
-        return result;
+    static PathSet parsePathVariable(std::string const & source) {
+        return strings::splitTokens(source, std::string() + GetPathSplitter());
     }
 };
 
