@@ -30,7 +30,7 @@ TEST(AssetStaticTest, insertDir_getDir)
 
     Asset asset;
     asset.insertDir(key, value);
-    ASSERT_EQ(asset.size(), 1);
+    ASSERT_EQ(asset.size(), 1U);
     ASSERT_EQ(value, asset.getDir(key));
 }
 
@@ -63,14 +63,14 @@ public:
 TEST_F(AssetTest, getHomeDir)
 {
     std::string dir = Asset::getHomeDir();
-    ASSERT_GT(dir.size(), 0);
+    ASSERT_GT(dir.size(), 0U);
     ASSERT_EQ(dir, _asset.getDir(_asset.getHomeDirKeyName()));
 }
 
 TEST_F(AssetTest, getExeDir)
 {
     std::string dir = Asset::getExeDir();
-    ASSERT_GT(dir.size(), 0);
+    ASSERT_GT(dir.size(), 0U);
     ASSERT_EQ(dir, _asset.getDir(_asset.getExeDirKeyName()));
 }
 
