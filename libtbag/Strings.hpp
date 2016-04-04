@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/util/Noncopyable.hpp>
+#include <libtbag/Noncopyable.hpp>
 
 #include <string>
 #include <set>
