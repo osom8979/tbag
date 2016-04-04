@@ -1,5 +1,5 @@
 /**
- * @file   basic.cpp
+ * @file   AssetTest.cpp
  * @brief  Asset class tester.
  * @author zer0
  * @date   2016-04-03
@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/Asset.hpp>
+#include <iostream>
 
 using namespace libtbag;
 
@@ -42,17 +43,15 @@ TEST_F(AssetTest, PathOperators)
 # endif
 }
 
-TEST_F(AssetTest, splitPaths)
+TEST_F(AssetTest, getHomeDir)
 {
-    Asset::PathSet set;
-    std::string paths;
+    std::string dir = Asset::getHomeDir();
+    ASSERT_GT(dir.size(), 0);
+}
 
-    paths = _temp1 + GetPathSplitter() + _temp2 + GetPathSplitter() + GetPathSplitter() + _temp3;
-    set = Asset::splitPaths(paths);
-
-    ASSERT_EQ(set.size(), 3U);
-    ASSERT_EQ(*set.find(_temp1), _temp1);
-    ASSERT_EQ(*set.find(_temp2), _temp2);
-    ASSERT_EQ(*set.find(_temp3), _temp3);
+TEST_F(AssetTest, getExeDir)
+{
+    std::string dir = Asset::getExeDir();
+    ASSERT_GT(dir.size(), 0);
 }
 

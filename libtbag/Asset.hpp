@@ -17,10 +17,15 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Strings.hpp>
 
-#include <set>
+#include <vector>
+#include <map>
 #include <string>
 
 #include <uv.h>
+
+#ifndef __ASSET_CONFIG__MAX_PATH_LENGTH__
+#define __ASSET_CONFIG__MAX_PATH_LENGTH__ 256
+#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -44,6 +49,14 @@ constexpr char const GetPathSplitter() noexcept(true)
 #endif
 }
 
+/**
+ * home directory environment variable name.
+ *
+ * @warning
+ *  Don't use for the purpose of obtaining a Home directory.
+ *
+ * @translate{ko, 홈 디렉토리를 획득하기 위한 용도로 사용해선 안된다.}
+ */
 constexpr char const * const GetHomeEnvName() noexcept(true)
 {
 #if defined(__OS_WINDOWS__)
@@ -52,6 +65,9 @@ constexpr char const * const GetHomeEnvName() noexcept(true)
     return "HOME";
 #endif
 }
+
+char const * const HOME_DIRECTORY_NAME = "HOME";
+char const * const ROOT_DIRECTORY_NAME = "ROOT";
 
 /**
  * Asset class prototype.
@@ -62,21 +78,25 @@ constexpr char const * const GetHomeEnvName() noexcept(true)
 class Asset : public Noncopyable
 {
 public:
-    using PathSet = std::set<std::string>;
+    /** Default setting for the constructor. */
+    class default_setting { };
+
+public:
+    using PathMap = std::map<std::string, std::string>;
 
 private:
-    PathSet dirs;
+    PathMap dirs;
 
 public:
     Asset() {
+        // EMPTY.
     }
 
-    Asset(PathSet const & dirs) {
+    explicit Asset(default_setting const & __unused__) {
+    }
+
+    Asset(PathMap const & dirs) {
         this->dirs = dirs;
-    }
-
-    Asset(std::string const & paths) {
-        this->dirs = splitPaths(paths);
     }
 
     Asset(Asset const & obj) {
@@ -116,8 +136,32 @@ public:
     }
 
 public:
-    static PathSet splitPaths(std::string const & paths) {
-        return strings::splitTokens(paths, std::string() + GetPathSplitter());
+    /** Obtain HOME directory. */
+    static std::string getHomeDir() {
+        std::size_t path_length = (__ASSET_CONFIG__MAX_PATH_LENGTH__);
+        std::vector<char> buffer;
+        buffer.resize(path_length);
+
+        if (uv_os_homedir(&buffer[0], &path_length) != 0) {
+            return "";
+        }
+        return std::string(buffer.begin(), buffer.begin() + path_length);
+    }
+
+    /** Obtain executable file directory. */
+    static std::string getExeDir() {
+        std::size_t path_length = (__ASSET_CONFIG__MAX_PATH_LENGTH__);
+        std::vector<char> buffer;
+        buffer.resize(path_length);
+
+        if (uv_exepath(&buffer[0], &path_length) != 0) {
+            return "";
+        }
+
+        // Separate directory & filename.
+        std::string path(buffer.begin(), buffer.begin() + path_length);
+        std::size_t last_separator_index = path.rfind(std::string() + GetPathSeparator());
+        return path.substr(0, last_separator_index);
     }
 };
 

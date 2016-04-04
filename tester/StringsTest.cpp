@@ -1,5 +1,5 @@
 /**
- * @file   Strings.cpp
+ * @file   StringsTest.cpp
  * @brief  Strings class tester.
  * @author zer0
  * @date   2016-04-04
