@@ -24,6 +24,7 @@ add_library_value ("gtest"     ON)
 add_library_value ("protobuf"  OFF)
 # Extension project:
 add_library_value ("libuv"     ON)
+add_library_value ("tinyxml2"  ON)
 
 # Continuous Integration.
 option (USE_DOXYGEN "API documentation." ON)
