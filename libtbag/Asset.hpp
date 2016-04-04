@@ -75,8 +75,8 @@ public:
         this->dirs = dirs;
     }
 
-    Asset(std::string const & path_env) {
-        this->dirs = parsePathVariable(path_env);
+    Asset(std::string const & paths) {
+        this->dirs = splitPaths(paths);
     }
 
     Asset(Asset const & obj) {
@@ -116,8 +116,8 @@ public:
     }
 
 public:
-    static PathSet parsePathVariable(std::string const & source) {
-        return strings::splitTokens(source, std::string() + GetPathSplitter());
+    static PathSet splitPaths(std::string const & paths) {
+        return strings::splitTokens(paths, std::string() + GetPathSplitter());
     }
 };
 

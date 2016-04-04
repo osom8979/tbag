@@ -28,6 +28,11 @@ NAMESPACE_LIBTBAG_OPEN
  *
  * @author zer0
  * @date   2016-04-04
+ *
+ * @remarks
+ *  Without using the inline function, class for using static method.
+ *
+ * @translate{ko, inline function을 사용하지 않고, static method를 사용하기 위한 클래스.}
  */
 template <typename T = char>
 class Strings : public Noncopyable
@@ -41,6 +46,15 @@ public:
     ~Strings() = default;
 
 public:
+    /**
+     * Separate tokens.
+     *
+     * @param source    [in] Original string.
+     * @param delimiter [in] Delimiter string.
+     *
+     * @return
+     *  Token set.
+     */
     static std::set<BaseString> splitTokens(BaseString const & source, BaseString const & delimiter)
     {
         std::set<BaseString> result;
@@ -55,6 +69,7 @@ public:
                 result.insert(token);
             }
 
+            // Calculate next token index.
             start = end + delimiter.length();
             end = source.find(delimiter, start);
         }

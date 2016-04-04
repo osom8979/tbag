@@ -17,7 +17,6 @@ public:
     std::string _temp1;
     std::string _temp2;
     std::string _temp3;
-    std::string _path_env;
 
 public:
     virtual void SetUp() {
@@ -43,13 +42,14 @@ TEST_F(AssetTest, PathOperators)
 # endif
 }
 
-TEST_F(AssetTest, parsePathVariable1)
+TEST_F(AssetTest, splitPaths)
 {
     Asset::PathSet set;
-    std::string path_env;
+    std::string paths;
 
-    path_env = _temp1 + GetPathSplitter() + _temp2 + GetPathSplitter() + GetPathSplitter() + _temp3;
-    set = Asset::parsePathVariable(path_env);
+    paths = _temp1 + GetPathSplitter() + _temp2 + GetPathSplitter() + GetPathSplitter() + _temp3;
+    set = Asset::splitPaths(paths);
+
     ASSERT_EQ(set.size(), 3U);
     ASSERT_EQ(*set.find(_temp1), _temp1);
     ASSERT_EQ(*set.find(_temp2), _temp2);
