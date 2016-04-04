@@ -25,29 +25,31 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-#if defined(__OS_WINDOWS__)
-char const PATH_SEPARATOR = '\\';
-char const PATH_SPLITTER  = ';';
-char const * const HOME_ENV_NAME = "USERPROFILE";
-#else
-char const PATH_SEPARATOR = '/';
-char const PATH_SPLITTER  = ':';
-char const * const HOME_ENV_NAME = "HOME";
-#endif
-
 constexpr char const GetPathSeparator() noexcept(true)
 {
-    return PATH_SEPARATOR;
+#if defined(__OS_WINDOWS__)
+    return '\\';
+#else
+    return '/';
+#endif
 }
 
 constexpr char const GetPathSplitter() noexcept(true)
 {
-    return PATH_SPLITTER;
+#if defined(__OS_WINDOWS__)
+    return ';';
+#else
+    return ':';
+#endif
 }
 
 constexpr char const * const GetHomeEnvName() noexcept(true)
 {
-    return HOME_ENV_NAME;
+#if defined(__OS_WINDOWS__)
+    return "USERPROFILE";
+#else
+    return "HOME";
+#endif
 }
 
 /**
