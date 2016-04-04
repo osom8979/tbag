@@ -25,3 +25,7 @@ set (_project_cxxflags     -std=c++11)
 list (APPEND _project_include_dirs ${UV_INCLUDE_DIRS})
 list (APPEND _project_ldflags      ${UV_LIBRARIES})
 
+# TinyXML2 setting.
+list (APPEND _project_include_dirs ${TINYXML2_INCLUDE_DIRS})
+list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
+
