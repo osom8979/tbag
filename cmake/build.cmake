@@ -114,11 +114,21 @@ function (default_build _libs _tests _exes)
         # User defined sub-project settings.
         include ("${PROJECT_SOURCE_DIR}/${_project_dir}/${BUILD_PROJECT_FILE_NAME}")
 
-        # --------------
-        # Compile files.
-        find_compile_object (_find_project_objects _find_project_libraries "${PROJECT_SOURCE_DIR}/${_project_dir}")
-        list (APPEND _project_objects ${_find_project_objects})
-        list (APPEND _project_ldflags ${_find_project_libraries})
+        # -------------------------------------
+        # Find & Create, compiled object files.
+        find_compile_object (_find_objs
+                             _find_definitions
+                             _find_include_dirs
+                             _find_cxxflags
+                             _find_ldflags
+                             "${PROJECT_SOURCE_DIR}/${_project_dir}")
+
+        # Result assign.
+        list (APPEND _project_objects      ${_find_objs})
+        list (APPEND _project_definitions  ${_find_definitions})
+        list (APPEND _project_include_dirs ${_find_include_dirs})
+        list (APPEND _project_cxxflags     ${_find_cxxflags})
+        list (APPEND _project_ldflags      ${_find_ldflags})
 
         # -------------------------------
         # Register library or executable.

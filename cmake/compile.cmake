@@ -85,14 +85,13 @@ endfunction ()
 
 #! find object & library files.
 #
-# \param _objs      [out] value name of result object files.
-# \param _libs      [out] value name of result library files.
-# \param _find_dir  [in]  find directory.
-function (find_compile_object _objs _libs _find_dir)
-    #message ("_objs: ${_objs}")
-    #message ("_libs: ${_libs}")
-    #message ("_find_dir: ${_find_dir}")
-
+# \param _objs         [out] value name of result object files.
+# \param _definitions  [out] value name of result defines.
+# \param _include_dirs [out] value name of result defines.
+# \param _cxxflags     [out] value name of result cxxflags.
+# \param _ldflags      [out] value name of result ldflags.
+# \param _find_dir     [in]  find directory.
+function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflags _find_dir)
     set (_obj_suffix   ".o")
     set (_src_suffix   ".cpp")
     set (_obfus_suffix ".obf.cpp")
@@ -100,14 +99,15 @@ function (find_compile_object _objs _libs _find_dir)
     set (_cuda_suffix  ".cu")
 
     set (${_objs})
-    set (${_libs})
-    set (_static_libs)
-
+    set (${_definitions})
+    set (${_include_dirs})
+    set (${_cxxflags})
+    set (${_ldflags})
+    set (_static_libs) # Deprecated.
 
     # source files.
     get_filename_component (_absolute "${_find_dir}" ABSOLUTE)
     file (GLOB_RECURSE _find_srcs "${_absolute}/*${_src_suffix}")
-
 
     # C++ Obfuscator or Native C/C++ Source files.
     set (_obfus_excepted_path "${CMAKE_CURRENT_SOURCE_DIR}/excepted.obfus")
@@ -125,8 +125,8 @@ function (find_compile_object _objs _libs _find_dir)
         if (${_find_protos_length} GREATER 0)
             protobuf_generate_cpp2 (_proto_srcs _proto_headers "${_find_protos}")
             list (APPEND ${_objs} ${_proto_srcs})
-            list (APPEND ${_libs} ${PROTOBUF_LIBRARIES})
-            list (APPEND ${_libs} "-lz")
+            list (APPEND ${_include_dirs} ${PROTOBUF_INCLUDE_DIRS})
+            list (APPEND ${_ldflags} ${PROTOBUF_LIBRARIES} -lz)
             #list (APPEND _static_libs "${PROTOBUF_LIBRARY}")
         endif ()
     endif ()
@@ -140,7 +140,11 @@ function (find_compile_object _objs _libs _find_dir)
                 cuda_compile (_cuda_cusor_object ${_cuda_cusor})
                 list (APPEND ${_objs} ${_cuda_cusor_object})
             endforeach ()
-            list (APPEND ${_libs} ${CUDA_CUDART_LIBRARY})
+            list (APPEND ${_include_dirs} ${CUDA_INCLUDE_DIRS})
+            list (APPEND ${_ldflags} ${CUDA_LIBRARIES})
+            if (USE_CUBLAS)
+                list (APPEND ${_ldflags} ${CUDA_CUBLAS_LIBRARIES})
+            endif ()
         endif ()
     endif ()
 
@@ -148,11 +152,14 @@ function (find_compile_object _objs _libs _find_dir)
     list (LENGTH _static_libs _static_libs_length)
     if (${_static_libs_length} GREATER 0)
         insert_whole_archive_flags (_static_libs)
-        list (INSERT ${_libs} 0 ${_static_libs})
+        list (INSERT ${_ldflags} 0 ${_static_libs})
     endif ()
 
     # Result output.
-    set (${_objs} ${${_objs}} PARENT_SCOPE)
-    set (${_libs} ${${_libs}} PARENT_SCOPE)
+    set (${_objs}         ${${_objs}}         PARENT_SCOPE)
+    set (${_definitions}  ${${_definitions}}  PARENT_SCOPE)
+    set (${_include_dirs} ${${_include_dirs}} PARENT_SCOPE)
+    set (${_cxxflags}     ${${_cxxflags}}     PARENT_SCOPE)
+    set (${_ldflags}      ${${_ldflags}}      PARENT_SCOPE)
 endfunction ()
 
