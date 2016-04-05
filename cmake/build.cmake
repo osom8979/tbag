@@ -99,8 +99,6 @@ function (default_build _libs _tests _exes)
         set (_project_is_verbose OFF)
         set (_project_default_install OFF)
         set (_project_objects)
-        set (_project_libraries)
-
         set (_project_dependencies)
         set (_project_definitions)
         set (_project_include_dirs)
@@ -112,20 +110,15 @@ function (default_build _libs _tests _exes)
         get_project_name (_project_name "${_project_type}" "${_cursor}")
         project (${_project_name})
 
-        # Compile files.
-        find_compile_object (_project_objects _project_libraries "${PROJECT_SOURCE_DIR}/${_project_dir}")
-
-        # Test project settings.
-        if ("${_project_type}" STREQUAL "${BUILD_PROJECT_TYPE_TEST}")
-            find_package (GTest)
-            if (GTEST_FOUND)
-                list (APPEND _project_libraries "${GTEST_BOTH_LIBRARIES}" "-lpthread")
-            endif ()
-        endif ()
-
         # ----------------------------------
         # User defined sub-project settings.
         include ("${PROJECT_SOURCE_DIR}/${_project_dir}/${BUILD_PROJECT_FILE_NAME}")
+
+        # --------------
+        # Compile files.
+        find_compile_object (_find_project_objects _find_project_libraries "${PROJECT_SOURCE_DIR}/${_project_dir}")
+        list (APPEND _project_objects ${_find_project_objects})
+        list (APPEND _project_ldflags ${_find_project_libraries})
 
         # -------------------------------
         # Register library or executable.
@@ -138,6 +131,14 @@ function (default_build _libs _tests _exes)
             endif ()
         else ()
             message (FATAL_ERROR "Not found ${_project_name} object files.")
+        endif ()
+
+        # Test project settings.
+        if ("${_project_type}" STREQUAL "${BUILD_PROJECT_TYPE_TEST}")
+            find_package (GTest)
+            if (GTEST_FOUND)
+                list (APPEND _project_ldflags "${GTEST_BOTH_LIBRARIES}" "-lpthread")
+            endif ()
         endif ()
 
         # Dependencies setting.
@@ -165,7 +166,7 @@ function (default_build _libs _tests _exes)
         endif ()
 
         # Linker options.
-        list (APPEND _project_ldflags ${_project_dependencies} ${_project_libraries})
+        list (APPEND _project_ldflags ${_project_dependencies})
         list (LENGTH _project_ldflags _project_ldflags_length)
         if (${_project_ldflags_length} GREATER 0)
             target_link_libraries (${_project_name} PRIVATE ${_project_ldflags})

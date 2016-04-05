@@ -9,24 +9,6 @@ enable_language (CXX)
 # CMake settings.
 # ---------------
 
-set (_CMAKE_BUILD_TYPE_DEBUG           "Debug")
-set (_CMAKE_BUILD_TYPE_RELEASE         "Release")
-set (_CMAKE_BUILD_TYPE_RELWITHDEBINFO  "RelWithDebInfo")
-set (_CMAKE_BUILD_TYPE_MINSIZEREL      "MinSizeRel")
-
-set (CMAKE_MACOSX_RPATH  1) # CMP0042
-
-#set (CMAKE_VERBOSE_MAKEFILE ON)
- set (BUILD_SHARED_LIBS      ON)
-
-#set (CMAKE_BUILD_TYPE "Debug")
-#set (CMAKE_BUILD_TYPE "Release")
-
- set (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-#set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}")
-#set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
-#set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
-
 list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
 # User defined settings.
@@ -120,6 +102,27 @@ endif ()
 link_directories (${PROJECT_SOURCE_DIR})
 if (IS_DIRECTORY ${THIRD_LIB})
     link_directories (${THIRD_LIB})
+endif ()
+
+set (CMAKE_MACOSX_RPATH  1) # CMP0042
+set (BUILD_SHARED_LIBS  ON)
+
+# Build type: Debug, Release, RelWithDebInfo, MinSizeRel
+#set (CMAKE_BUILD_TYPE Release)
+
+ set (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+#set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}")
+#set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
+#set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+
+# C++11 Standard.
+if ((WIN32 AND MINGW) AND NOT CYGWIN AND NOT MSYS)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+else ()
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif ()
+if (USE_CUDA AND CUDA_FOUND)
+    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -std=c++11)
 endif ()
 
 # ------------
