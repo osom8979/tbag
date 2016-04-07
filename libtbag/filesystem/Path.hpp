@@ -23,6 +23,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
+namespace filesystem {
+
 constexpr char const GetPathSeparator() noexcept(true)
 {
 #if defined(__OS_WINDOWS__)
@@ -118,6 +120,8 @@ public:
         return path;
     }
 };
+
+} // namespace filesystem
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

@@ -9,6 +9,7 @@
 #include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
+using namespace libtbag::filesystem;
 
 TEST(PathStaticTest, GlobalFunction)
 {

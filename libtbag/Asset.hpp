@@ -190,7 +190,8 @@ public:
 
         // Separate directory & filename.
         std::string path(buffer.begin(), buffer.begin() + path_length);
-        std::size_t last_separator_index = path.rfind(std::string() + GetPathSeparator());
+        std::string separator = std::string() + filesystem::GetPathSeparator();
+        std::size_t last_separator_index = path.rfind(separator);
         return path.substr(0, last_separator_index);
     }
 };
