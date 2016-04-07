@@ -10,19 +10,6 @@
 
 using namespace libtbag;
 
-TEST(AssetStaticTest, PathOperators)
-{
-# if defined(WIN32) || defined(_WIN32)
-    EXPECT_EQ(GetPathSeparator(), '\\');
-    EXPECT_EQ(GetPathSplitter(), ';');
-    EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
-# else
-    EXPECT_EQ(GetPathSeparator(), '/');
-    EXPECT_EQ(GetPathSplitter(), ':');
-    EXPECT_STREQ(GetHomeEnvName(), "HOME");
-# endif
-}
-
 TEST(AssetStaticTest, CopyOperators)
 {
     Asset asset1 = Asset(Asset::default_setting());

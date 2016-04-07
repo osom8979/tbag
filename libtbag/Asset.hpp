@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Strings.hpp>
+#include <libtbag/Path.hpp>
 
 #include <vector>
 #include <map>
@@ -29,41 +29,6 @@
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
-
-constexpr char const GetPathSeparator() noexcept(true)
-{
-#if defined(__OS_WINDOWS__)
-    return '\\';
-#else
-    return '/';
-#endif
-}
-
-constexpr char const GetPathSplitter() noexcept(true)
-{
-#if defined(__OS_WINDOWS__)
-    return ';';
-#else
-    return ':';
-#endif
-}
-
-/**
- * home directory environment variable name.
- *
- * @warning
- *  Don't use for the purpose of obtaining a Home directory.
- *
- * @translate{ko, 홈 디렉토리를 획득하기 위한 용도로 사용해선 안된다.}
- */
-constexpr char const * const GetHomeEnvName() noexcept(true)
-{
-#if defined(__OS_WINDOWS__)
-    return "USERPROFILE";
-#else
-    return "HOME";
-#endif
-}
 
 char const * const HOME_DIRECTORY_ASSET_NAME = "HOME";
 char const * const  EXE_DIRECTORY_ASSET_NAME = "EXE";
@@ -91,7 +56,7 @@ private:
 
 public:
     Asset() {
-        // EMPTY.
+        __EMPTY_BLOCK__;
     }
 
     /** Construct of Default settings. */
