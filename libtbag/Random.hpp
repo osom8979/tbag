@@ -17,6 +17,7 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <random>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,6 +38,7 @@ public:
 public:
     template <typename Integer>
     static Integer gen(Integer min, Integer max) {
+        static_assert(std::is_integral<Integer>::value, "This is not an integer type.");
         std::random_device device;
         std::mt19937 engine(device());
         std::uniform_int_distribution<Integer> distribution(min, max);
