@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Path.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 #include <vector>
 #include <map>

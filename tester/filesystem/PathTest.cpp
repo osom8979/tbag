@@ -6,7 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/Path.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
 

@@ -3,10 +3,12 @@
  * @brief  Path class prototype.
  * @author zer0
  * @date   2016-04-07
+ *
+ * @see <http://www.boost.org/doc/libs/1_60_0/libs/filesystem/doc/reference.html>
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PATH_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_PATH_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_PATH_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_PATH_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -14,6 +16,8 @@
 #endif
 
 #include <libtbag/config.h>
+
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -119,5 +123,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_PATH_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_PATH_HPP__
 
