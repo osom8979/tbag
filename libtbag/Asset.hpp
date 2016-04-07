@@ -14,7 +14,6 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/Strings.hpp>
 
 #include <vector>
@@ -78,7 +77,7 @@ char const * const  EXE_DIRECTORY_ASSET_NAME = "EXE";
  * @remarks
  *  Resource manager class.
  */
-class Asset : public Noncopyable
+class Asset
 {
 public:
     /** Default setting for the constructor. */
