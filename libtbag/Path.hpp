@@ -38,23 +38,6 @@ constexpr char const GetPathSplitter() noexcept(true)
 }
 
 /**
- * home directory environment variable name.
- *
- * @warning
- *  Don't use for the purpose of obtaining a Home directory.
- *
- * @translate{ko, 홈 디렉토리를 획득하기 위한 용도로 사용해선 안된다.}
- */
-constexpr char const * const GetHomeEnvName() noexcept(true)
-{
-#if defined(__OS_WINDOWS__)
-    return "USERPROFILE";
-#else
-    return "HOME";
-#endif
-}
-
-/**
  * Path class prototype.
  *
  * @author zer0

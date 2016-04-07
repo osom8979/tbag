@@ -30,8 +30,25 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-char const * const HOME_DIRECTORY_ASSET_NAME = "HOME";
-char const * const  EXE_DIRECTORY_ASSET_NAME = "EXE";
+/**
+ * home directory environment variable name.
+ *
+ * @warning
+ *  Don't use for the purpose of obtaining a Home directory.
+ *
+ * @translate{ko, 홈 디렉토리를 획득하기 위한 용도로 사용해선 안된다.}
+ */
+constexpr char const * const GetHomeEnvName() noexcept(true)
+{
+#if defined(__OS_WINDOWS__)
+    return "USERPROFILE";
+#else
+    return "HOME";
+#endif
+}
+
+char const * const HOME_DIRECTORY_ASSET_NAME = "__HOME__";
+char const * const  EXE_DIRECTORY_ASSET_NAME = "__EXE__";
 
 /**
  * Asset class prototype.

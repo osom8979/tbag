@@ -10,18 +10,17 @@
 
 using namespace libtbag;
 
-TEST(PathStaticTest, PathOperators)
+TEST(PathStaticTest, GlobalFunction)
 {
 # if defined(WIN32) || defined(_WIN32)
     EXPECT_EQ(GetPathSeparator(), '\\');
-    EXPECT_EQ(GetPathSplitter(), ';');
-    EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
+    EXPECT_EQ(GetPathSplitter(),  ';');
 # else
     EXPECT_EQ(GetPathSeparator(), '/');
-    EXPECT_EQ(GetPathSplitter(), ':');
-    EXPECT_STREQ(GetHomeEnvName(), "HOME");
+    EXPECT_EQ(GetPathSplitter(),  ':');
 # endif
 }
+
 TEST(PathStaticTest, CopyOperators)
 {
     Path path1 = Path("TEMP");

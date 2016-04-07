@@ -10,6 +10,15 @@
 
 using namespace libtbag;
 
+TEST(AssetStaticTest, GlobalFunction)
+{
+# if defined(WIN32) || defined(_WIN32)
+    EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
+# else
+    EXPECT_STREQ(GetHomeEnvName(), "HOME");
+# endif
+}
+
 TEST(AssetStaticTest, CopyOperators)
 {
     Asset asset1 = Asset(Asset::default_setting());
