@@ -7,7 +7,6 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/Random.hpp>
-#include <iostream>
 
 using namespace libtbag;
 
@@ -20,7 +19,6 @@ TEST(RandomStaticTest, gen)
 
     for (int i = 0; i < test_count; ++i) {
         current = Random::gen(min, max);
-        std::cout << current;
         ASSERT_GE(current, min);
         ASSERT_LE(current, max);
     }
