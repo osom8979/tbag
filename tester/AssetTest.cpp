@@ -34,6 +34,28 @@ TEST(AssetStaticTest, CopyOperators)
     ASSERT_EQ(asset3.size(), asset1.size());
 }
 
+TEST(AssetStaticTest, MoveOperators)
+{
+    auto rvalue_test = []() -> Asset {
+        return Asset();
+    };
+
+#if defined(__COMP_LLVM__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpessimizing-move"
+#endif
+
+    Asset asset1 = std::move(rvalue_test());
+    Asset asset2;
+
+#if defined(__COMP_LLVM__)
+# pragma GCC diagnostic pop
+#endif
+
+    asset2 = rvalue_test();
+    ASSERT_EQ(asset1.size(), asset2.size());
+}
+
 TEST(AssetStaticTest, insertDir_getDir)
 {
     std::string key = "key";
