@@ -23,6 +23,17 @@ TEST(AssetStaticTest, PathOperators)
 # endif
 }
 
+TEST(AssetStaticTest, CopyOperators)
+{
+    Asset asset1 = Asset(Asset::default_setting());
+    Asset asset2 = asset1;
+    Asset asset3;
+    asset3 = asset1;
+
+    ASSERT_EQ(asset2.size(), asset1.size());
+    ASSERT_EQ(asset3.size(), asset1.size());
+}
+
 TEST(AssetStaticTest, insertDir_getDir)
 {
     std::string key = "key";
@@ -64,13 +75,13 @@ TEST_F(AssetTest, getHomeDir)
 {
     std::string dir = Asset::getHomeDir();
     ASSERT_GT(dir.size(), 0U);
-    ASSERT_EQ(dir, _asset.getDir(_asset.getHomeDirKeyName()));
+    ASSERT_EQ(dir, _asset.getDir(Asset::getHomeDirKeyName()));
 }
 
 TEST_F(AssetTest, getExeDir)
 {
     std::string dir = Asset::getExeDir();
     ASSERT_GT(dir.size(), 0U);
-    ASSERT_EQ(dir, _asset.getDir(_asset.getExeDirKeyName()));
+    ASSERT_EQ(dir, _asset.getDir(Asset::getExeDirKeyName()));
 }
 
