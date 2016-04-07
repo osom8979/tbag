@@ -32,7 +32,7 @@ NAMESPACE_LIBTBAG_OPEN
  * @remarks
  *  Without using the inline function, class for using static method.
  *
- * @translate{ko, inline function을 사용하지 않고, static method를 사용하기 위한 클래스.}
+ * @translate{ko, inline function을 사용하지 않고\, static method를 사용하기 위한 클래스.}
  */
 template <typename T = char>
 class Strings : public Noncopyable
