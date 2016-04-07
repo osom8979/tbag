@@ -146,3 +146,11 @@ doxygen_generate ("${OUT_DOXYFILE}")
 #print_os ()
 #print_compiler_id ()
 
+# -----------------
+# Project settings.
+# -----------------
+
+install (DIRECTORY ${MAIN_NAME}
+         DESTINATION "include"
+         FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+
