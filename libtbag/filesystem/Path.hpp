@@ -17,6 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/filesystem/Common.hpp>
+#include <libtbag/Strings.hpp>
 
 #include <string>
 #include <regex>
@@ -43,8 +44,8 @@ public:
     struct update_generic { __EMPTY_BLOCK__ };
 
 public:
-    using CharType = char;
-    using BaseString = std::basic_string<CharType>;
+    using BaseType = char;
+    using BaseString = std::basic_string<BaseType>;
 
 private:
     BaseString _path;
@@ -58,11 +59,11 @@ public:
         this->_path = path;
     }
 
-    explicit Path(CharType const * path) : Path(BaseString(path)) {
+    explicit Path(BaseType const * path) : Path(BaseString(path)) {
         __EMPTY_BLOCK__
     }
 
-    explicit Path(CharType       const * path
+    explicit Path(BaseType       const * path
                 , update_generic const & UNUSED_PARAM(empty_value))
             : Path(BaseString(path)){
         this->updateGeneric();
@@ -140,6 +141,10 @@ public:
         return *this;
     }
 
+    static BaseString removeLastSeparator(BaseString const & path) {
+        return std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*$)"), "");
+    }
+
     /**
      * Clean an overlapped separators.
      *
@@ -149,7 +154,8 @@ public:
      * @return Cleared path string.
      */
     static BaseString cleanSeparator(BaseString const & path, BaseString const & separator) {
-        return std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*)"), separator);
+        std::string temp = std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*)"), separator);
+        return removeLastSeparator(std::move(temp));
     }
 
 // APPEND
@@ -168,10 +174,15 @@ public:
     }
 
 public:
-    static std::vector<BaseString> splitNodes(BaseString const & path
-                                            , BaseString const & separator) {
+    std::vector<BaseString> splitNodes() {
+        return Path::splitNodes(this->_path);
+    }
+
+    static std::vector<BaseString> splitNodes(BaseString const & path) {
         std::vector<BaseString> result;
-        return result;
+        Path generic(path, Path::update_generic());
+        std::string separator = std::string() + GetGenericPathSeparator();
+        return strings::splitTokens(generic.getString(), separator);
     }
 };
 

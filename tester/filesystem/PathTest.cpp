@@ -72,6 +72,13 @@ public:
     std::string _native_separator;
     std::string _generic_separator;
 
+    std::string _depth0_name;
+    std::string _depth1_name;
+    std::string _depth2_name;
+    std::string _depth3_name;
+    std::string _depth4_name;
+    std::string _depth5_name;
+
     std::string _test_path;
     std::string _windows_path;
     std::string _unix_path;
@@ -88,7 +95,14 @@ public:
         _native_separator  = std::string() + GetPathSeparator();
         _generic_separator = std::string() + GetGenericPathSeparator();
 
-        _test_path      = std::string("O:\\\\Temp\\Directory/..\\.////\\\\/File.tmp");
+        _depth0_name    = std::string("O:");
+        _depth1_name    = std::string("Temp");
+        _depth2_name    = std::string("Directory");
+        _depth3_name    = std::string("..");
+        _depth4_name    = std::string(".");
+        _depth5_name    = std::string("File.tmp");
+
+        _test_path      = std::string("O:\\\\Temp\\Directory/..\\.////\\\\/File.tmp\\/");
         _windows_path   = std::string("O:\\Temp\\File.tmp");
         _unix_path      = std::string("O:/Temp/Directory/.././File.tmp");
         _generic_path   = std::string("O:/Temp/Directory/.././File.tmp");
@@ -120,4 +134,15 @@ TEST_F(PathTest, getNative)
 # endif
 }
 
+TEST_F(PathTest, splitNodes)
+{
+    std::vector<Path::BaseString> nodes = _path.splitNodes();
+    ASSERT_EQ(nodes.size(), 6U);
+    ASSERT_EQ(nodes[0], _depth0_name);
+    ASSERT_EQ(nodes[1], _depth1_name);
+    ASSERT_EQ(nodes[2], _depth2_name);
+    ASSERT_EQ(nodes[3], _depth3_name);
+    ASSERT_EQ(nodes[4], _depth4_name);
+    ASSERT_EQ(nodes[5], _depth5_name);
+}
 

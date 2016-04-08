@@ -17,7 +17,7 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <string>
-#include <set>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -53,11 +53,11 @@ public:
      * @param delimiter [in] Delimiter string.
      *
      * @return
-     *  Token set.
+     *  Token vector.
      */
-    static std::set<BaseString> splitTokens(BaseString const & source, BaseString const & delimiter)
+    static std::vector<BaseString> splitTokens(BaseString const & source, BaseString const & delimiter)
     {
-        std::set<BaseString> result;
+        std::vector<BaseString> result;
         std::string token;
 
         std::size_t start = 0;
@@ -66,7 +66,7 @@ public:
         while (end != std::string::npos) {
             token = source.substr(start, end - start);
             if (token.size() > 0) {
-                result.insert(token);
+                result.push_back(token);
             }
 
             // Calculate next token index.
@@ -77,7 +77,7 @@ public:
         // Last token.
         token = source.substr(start, end);
         if (token.size() > 0) {
-            result.insert(token);
+            result.push_back(token);
         }
 
         return result;
