@@ -39,6 +39,10 @@ namespace filesystem {
 class Path
 {
 public:
+    /** Update Generic Format. */
+    struct update_generic { __EMPTY_BLOCK__ };
+
+public:
     using CharType = char;
     using BaseString = std::basic_string<CharType>;
 
@@ -47,15 +51,27 @@ private:
 
 public:
     Path() {
-        __EMPTY_BLOCK__;
+        __EMPTY_BLOCK__
     }
 
-    explicit Path(CharType const * path) {
-        this->_path = BaseString(path);
-    }
-
-    Path(BaseString const & path) {
+    explicit Path(BaseString const & path) : Path() {
         this->_path = path;
+    }
+
+    explicit Path(CharType const * path) : Path(BaseString(path)) {
+        __EMPTY_BLOCK__
+    }
+
+    explicit Path(CharType       const * path
+                , update_generic const & UNUSED_PARAM(empty_value))
+            : Path(BaseString(path)){
+        this->updateGeneric();
+    }
+
+    explicit Path(BaseString     const & path
+                , update_generic const & UNUSED_PARAM(empty_value))
+            : Path(path){
+        this->updateGeneric();
     }
 
     Path(Path const & obj) {
@@ -103,15 +119,25 @@ public:
     /**
      * Generic path format.
      */
-    BaseString getGeneric() const noexcept {
+    BaseString getGeneric() const {
         return Path::cleanSeparator(this->_path, std::string() + GetGenericPathSeparator());
+    }
+
+    Path & updateGeneric() {
+        this->_path = getGeneric();
+        return *this;
     }
 
     /**
      * Operating system dependent path.
      */
-    BaseString getNative() const noexcept {
+    BaseString getNative() const {
         return Path::cleanSeparator(this->_path, std::string() + GetPathSeparator());
+    }
+
+    Path & updateNative() {
+        this->_path = getNative();
+        return *this;
     }
 
     /**
@@ -128,14 +154,17 @@ public:
 
 // APPEND
 public:
-    void append(BaseString const & sub) {
+    Path & append(BaseString const & sub) {
+        this->_path += GetGenericPathSeparator() + sub;
+        return *this;
     }
 
     Path & operator /= (BaseString const & sub) {
-        return *this;
+        return append(sub);
     }
+
     Path & operator += (BaseString const & sub) {
-        return *this;
+        return append(sub);
     }
 
 public:

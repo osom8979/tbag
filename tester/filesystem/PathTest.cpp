@@ -104,6 +104,11 @@ public:
 TEST_F(PathTest, getGeneric)
 {
     ASSERT_EQ(_path.getGeneric(), _generic_path);
+
+    Path p1(_test_path.c_str(), Path::update_generic());
+    Path p2(_test_path, Path::update_generic());
+    ASSERT_EQ(p1.getString(), _generic_path);
+    ASSERT_EQ(p2.getString(), _generic_path);
 }
 
 TEST_F(PathTest, getNative)
