@@ -122,16 +122,30 @@ public:
         return this->_path;
     }
 
+    /**
+     * Generic path format.
+     */
     BaseString getGeneric() const noexcept {
-        std::regex  regexp(R"((\\|\/)(\\|\/)*)");
-        std::string replace_string = std::string() + GetGenericPathSeparator();
-        return std::regex_replace(this->_path, regexp, replace_string);
+        return Path::cleanSeparator(this->_path, std::string() + GetGenericPathSeparator());
     }
 
+    /**
+     * Operating system dependent path.
+     */
     BaseString getNative() const noexcept {
-        std::regex  regexp(R"((\\|\/)(\\|\/)*)");
-        std::string replace_string = std::string() + GetPathSeparator();
-        return std::regex_replace(this->_path, regexp, replace_string);
+        return Path::cleanSeparator(this->_path, std::string() + GetPathSeparator());
+    }
+
+    /**
+     * Clean an overlapped separators.
+     *
+     * @param path      [in] Path string.
+     * @param separator [in] Separator string.
+     *
+     * @return Cleared path string.
+     */
+    static BaseString cleanSeparator(BaseString const & path, BaseString const & separator) {
+        return std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*)"), separator);
     }
 
 // APPEND
