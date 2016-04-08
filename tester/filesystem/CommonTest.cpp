@@ -33,6 +33,7 @@ TEST(CommonStaticTest, GetHomeEnvName)
 
 TEST(CommonStaticTest, RepresentationDirectory)
 {
+    ASSERT_GT(Common::getWorkDir().size(), 0U);
     ASSERT_GT(Common::getHomeDir().size(), 0U);
     ASSERT_GT(Common::getExeDir().size(), 0U);
 }

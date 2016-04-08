@@ -84,6 +84,19 @@ private:
     ~Common() = delete;
 
 public:
+    /** Obtain Working directory. */
+    static std::string getWorkDir() {
+        std::size_t path_length = __MAX_PATH_BUFFER_SIZE__;
+        std::vector<char> buffer;
+        buffer.resize(path_length);
+
+        if (uv_cwd(&buffer[0], &path_length) != 0) {
+            return "";
+        }
+
+        return std::string(buffer.begin(), buffer.begin() + path_length);
+    }
+
     /** Obtain HOME directory. */
     static std::string getHomeDir() {
         std::size_t path_length = __MAX_PATH_BUFFER_SIZE__;
@@ -93,6 +106,7 @@ public:
         if (uv_os_homedir(&buffer[0], &path_length) != 0) {
             return "";
         }
+
         return std::string(buffer.begin(), buffer.begin() + path_length);
     }
 
