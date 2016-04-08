@@ -55,3 +55,55 @@ TEST(PathStaticTest, MoveOperators)
     ASSERT_EQ(path1.getString(), path2.getString());
 }
 
+// Fixture.
+
+class PathTest : public ::testing::Test
+{
+public:
+    std::string _native_separator;
+    std::string _generic_separator;
+
+    std::string _test_path;
+    std::string _windows_path;
+    std::string _unix_path;
+    std::string _generic_path;
+    std::string _canonical_path;
+    Path _path;
+
+public:
+    PathTest() = default;
+    virtual ~PathTest() = default;
+
+public:
+    virtual void SetUp() override {
+        _native_separator  = std::string() + GetPathSeparator();
+        _generic_separator = std::string() + GetGenericPathSeparator();
+
+        _test_path      = std::string("O:\\\\Temp\\Directory/..\\.////\\\\/File.tmp");
+        _windows_path   = std::string("O:\\Temp\\File.tmp");
+        _unix_path      = std::string("O:/Temp/Directory/.././File.tmp");
+        _generic_path   = std::string("O:/Temp/Directory/.././File.tmp");
+        _canonical_path = std::string("O:/Temp/File.tmp");
+
+        _path = Path(_test_path);
+    }
+
+    virtual void TearDown() override {
+    }
+};
+
+TEST_F(PathTest, getGeneric)
+{
+    ASSERT_EQ(_path.getGeneric(), _generic_path);
+}
+
+TEST_F(PathTest, getNative)
+{
+# if defined(WIN32) || defined(_WIN32)
+    ASSERT_EQ(_path.getNative(), _windows_path);
+# else
+    ASSERT_EQ(_path.getNative(), _unix_path);
+# endif
+}
+
+

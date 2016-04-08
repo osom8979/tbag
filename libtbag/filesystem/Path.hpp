@@ -18,6 +18,7 @@
 #include <libtbag/config.h>
 
 #include <string>
+#include <regex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-constexpr char const GetPathSeparator() noexcept(true)
+constexpr char const GetPathSeparator() noexcept
 {
 #if defined(__OS_WINDOWS__)
     return '\\';
@@ -34,7 +35,12 @@ constexpr char const GetPathSeparator() noexcept(true)
 #endif
 }
 
-constexpr char const GetPathSplitter() noexcept(true)
+constexpr char const GetGenericPathSeparator() noexcept
+{
+    return '/';
+}
+
+constexpr char const GetPathSplitter() noexcept
 {
 #if defined(__OS_WINDOWS__)
     return ';';
@@ -110,14 +116,41 @@ public:
         }
     }
 
+// Path to String.
 public:
-    BaseString getString() const noexcept(true) {
+    BaseString getString() const noexcept {
         return this->_path;
     }
 
+    BaseString getGeneric() const noexcept {
+        std::regex  regexp(R"((\\|\/)(\\|\/)*)");
+        std::string replace_string = std::string() + GetGenericPathSeparator();
+        return std::regex_replace(this->_path, regexp, replace_string);
+    }
+
+    BaseString getNative() const noexcept {
+        std::regex  regexp(R"((\\|\/)(\\|\/)*)");
+        std::string replace_string = std::string() + GetPathSeparator();
+        return std::regex_replace(this->_path, regexp, replace_string);
+    }
+
+// APPEND
 public:
-    friend Path & operator / (Path & path, BaseString const & sub) {
-        return path;
+    void append(BaseString const & sub) {
+    }
+
+    Path & operator /= (BaseString const & sub) {
+        return *this;
+    }
+    Path & operator += (BaseString const & sub) {
+        return *this;
+    }
+
+public:
+    static std::vector<BaseString> splitNodes(BaseString const & path
+                                            , BaseString const & separator) {
+        std::vector<BaseString> result;
+        return result;
     }
 };
 
