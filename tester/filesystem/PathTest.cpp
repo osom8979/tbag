@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(PathStaticTest, GlobalFunction)
+TEST(PathStaticTest, GlobalPathOperators)
 {
 # if defined(WIN32) || defined(_WIN32)
     EXPECT_EQ(GetPathSeparator(), '\\');
@@ -19,6 +19,15 @@ TEST(PathStaticTest, GlobalFunction)
 # else
     EXPECT_EQ(GetPathSeparator(), '/');
     EXPECT_EQ(GetPathSplitter(),  ':');
+# endif
+}
+
+TEST(PathStaticTest, GetHomeEnvName)
+{
+# if defined(WIN32) || defined(_WIN32)
+    EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
+# else
+    EXPECT_STREQ(GetHomeEnvName(), "HOME");
 # endif
 }
 

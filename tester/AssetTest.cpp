@@ -10,15 +10,6 @@
 
 using namespace libtbag;
 
-TEST(AssetStaticTest, GlobalFunction)
-{
-# if defined(WIN32) || defined(_WIN32)
-    EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
-# else
-    EXPECT_STREQ(GetHomeEnvName(), "HOME");
-# endif
-}
-
 TEST(AssetStaticTest, CopyOperators)
 {
     Asset asset1 = Asset(Asset::default_setting());
@@ -88,17 +79,16 @@ public:
     }
 };
 
-
 TEST_F(AssetTest, getHomeDir)
 {
-    std::string dir = Asset::getHomeDir();
+    std::string dir = filesystem::GetHomeDir();
     ASSERT_GT(dir.size(), 0U);
     ASSERT_EQ(dir, _asset.getDir(Asset::getHomeDirKeyName()));
 }
 
 TEST_F(AssetTest, getExeDir)
 {
-    std::string dir = Asset::getExeDir();
+    std::string dir = filesystem::GetExeDir();
     ASSERT_GT(dir.size(), 0U);
     ASSERT_EQ(dir, _asset.getDir(Asset::getExeDirKeyName()));
 }
