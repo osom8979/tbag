@@ -21,6 +21,7 @@
 
 #include <string>
 #include <regex>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -158,6 +159,30 @@ public:
         return removeLastSeparator(std::move(temp));
     }
 
+// QUERY
+public:
+    bool hasAbsolute() const {
+#if defined(__OS_WINDOWS__)
+        return hasAbsoluteOfWindows();
+#else
+        return hasAbsoluteOfPosix();
+#endif
+    }
+
+    bool hasAbsoluteOfWindows() const {
+        if (std::regex_search(this->_path, std::regex(R"(^[a-zA-Z]:)"))) {
+            return true;
+        }
+        return false;
+    }
+
+    bool hasAbsoluteOfPosix() const {
+        if (this->_path.empty() == false && this->_path.at(0) == PATH_SEPARATOR_OF_POSIX) {
+            return true;
+        }
+        return false;
+    }
+
 // APPEND
 public:
     Path & append(BaseString const & sub) {
@@ -179,6 +204,7 @@ public:
     }
 
     static std::vector<BaseString> splitNodes(BaseString const & path) {
+        static_assert(std::is_same<Path::BaseString, strings::BaseString>::value, "This is not a same type.");
         std::vector<BaseString> result;
         Path generic(path, Path::update_generic());
         std::string separator = std::string() + GetGenericPathSeparator();

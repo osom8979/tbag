@@ -81,7 +81,7 @@ public:
 
     std::string _test_path;
     std::string _windows_path;
-    std::string _unix_path;
+    std::string _posix_path;
     std::string _generic_path;
     std::string _canonical_path;
     Path _path;
@@ -104,7 +104,7 @@ public:
 
         _test_path      = std::string("O:\\\\Temp\\Directory/..\\.////\\\\/File.tmp\\/");
         _windows_path   = std::string("O:\\Temp\\File.tmp");
-        _unix_path      = std::string("O:/Temp/Directory/.././File.tmp");
+        _posix_path     = std::string("O:/Temp/Directory/.././File.tmp");
         _generic_path   = std::string("O:/Temp/Directory/.././File.tmp");
         _canonical_path = std::string("O:/Temp/File.tmp");
 
@@ -127,11 +127,17 @@ TEST_F(PathTest, getGeneric)
 
 TEST_F(PathTest, getNative)
 {
-# if defined(WIN32) || defined(_WIN32)
+#if defined(WIN32) || defined(_WIN32)
     ASSERT_EQ(_path.getNative(), _windows_path);
-# else
-    ASSERT_EQ(_path.getNative(), _unix_path);
-# endif
+#else
+    ASSERT_EQ(_path.getNative(), _posix_path);
+#endif
+}
+
+TEST_F(PathTest, hasAbsoluteOfWindows)
+{
+    ASSERT_TRUE(_path.hasAbsoluteOfWindows());
+    ASSERT_FALSE(_path.hasAbsoluteOfPosix());
 }
 
 TEST_F(PathTest, splitNodes)

@@ -28,22 +28,22 @@ using namespace libtbag::filesystem;
 
 TEST(CommonStaticTest, GlobalPathOperators)
 {
-# if defined(WIN32) || defined(_WIN32)
+#if defined(WIN32) || defined(_WIN32)
     EXPECT_EQ(GetPathSeparator(), '\\');
     EXPECT_EQ(GetPathSplitter(),  ';');
-# else
+#else
     EXPECT_EQ(GetPathSeparator(), '/');
     EXPECT_EQ(GetPathSplitter(),  ':');
-# endif
+#endif
 }
 
 TEST(CommonStaticTest, GetHomeEnvName)
 {
-# if defined(WIN32) || defined(_WIN32)
+#if defined(WIN32) || defined(_WIN32)
     EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
-# else
+#else
     EXPECT_STREQ(GetHomeEnvName(), "HOME");
-# endif
+#endif
 }
 
 TEST(CommonStaticTest, RepresentationDirectory)
