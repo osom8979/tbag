@@ -136,8 +136,8 @@ TEST_F(PathTest, getNative)
 
 TEST_F(PathTest, hasAbsoluteOfWindows)
 {
-    ASSERT_TRUE(_path.hasAbsoluteOfWindows());
-    ASSERT_FALSE(_path.hasAbsoluteOfPosix());
+    ASSERT_TRUE(_path.isAbsoluteOfWindows());
+    ASSERT_FALSE(_path.isAbsoluteOfPosix());
 }
 
 TEST_F(PathTest, splitNodes)

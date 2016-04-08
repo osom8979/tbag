@@ -159,28 +159,60 @@ public:
         return removeLastSeparator(std::move(temp));
     }
 
-// QUERY
+// DECOMPOSITION
 public:
-    bool hasAbsolute() const {
+    /**
+     * root-directory, if @c _path includes root-directory,
+     * otherwise empty string.
+     *
+     * @remarks
+     *  Don't use regex library.
+     */
+    BaseString getRootDir() const {
 #if defined(__OS_WINDOWS__)
-        return hasAbsoluteOfWindows();
+        return getRootDirOfWindows();
 #else
-        return hasAbsoluteOfPosix();
+        return getRootDirOfPosix();
 #endif
     }
 
-    bool hasAbsoluteOfWindows() const {
-        if (std::regex_search(this->_path, std::regex(R"(^[a-zA-Z]:)"))) {
-            return true;
+    BaseString getRootDirOfWindows() const {
+        if (this->_path.size() < 2) {
+            return "";
         }
-        return false;
+        if (this->_path[1] != ':') {
+            return "";
+        }
+        if (/**/('a' <= COMPARE_AND(this->_path[0]) <= 'z')
+             || ('A' <= COMPARE_AND(this->_path[0]) <= 'Z')) {
+            return this->_path.substr(0, 2);
+        }
+        return "";
     }
 
-    bool hasAbsoluteOfPosix() const {
-        if (this->_path.empty() == false && this->_path.at(0) == PATH_SEPARATOR_OF_POSIX) {
-            return true;
+    BaseString getRootDirOfPosix() const {
+        if (this->_path.empty() || this->_path[0] != '/') {
+            return "";
         }
-        return false;
+        return "/";
+    }
+
+// QUERY
+public:
+    bool isAbsolute() const {
+#if defined(__OS_WINDOWS__)
+        return isAbsoluteOfWindows();
+#else
+        return isAbsoluteOfPosix();
+#endif
+    }
+
+    bool isAbsoluteOfWindows() const {
+        return !(getRootDirOfWindows().empty());
+    }
+
+    bool isAbsoluteOfPosix() const {
+        return !(getRootDirOfPosix().empty());
     }
 
 // APPEND
