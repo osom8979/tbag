@@ -8,6 +8,21 @@
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/Common.hpp>
 
+#include <iostream>
+
+// ---------------------
+NAMESPACE_ANONYMOUS_OPEN
+// ---------------------
+
+constexpr bool IsPrintRepresentationDirectory() noexcept
+{
+    return true;
+}
+
+// ----------------------
+NAMESPACE_ANONYMOUS_CLOSE
+// ----------------------
+
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
@@ -33,8 +48,20 @@ TEST(CommonStaticTest, GetHomeEnvName)
 
 TEST(CommonStaticTest, RepresentationDirectory)
 {
-    ASSERT_GT(Common::getWorkDir().size(), 0U);
-    ASSERT_GT(Common::getHomeDir().size(), 0U);
-    ASSERT_GT(Common::getExeDir().size(), 0U);
+    std::string work_dir = Common::getWorkDir();
+    std::string home_dir = Common::getHomeDir();
+    std::string exe_dir  = Common::getExeDir();
+
+    if (::IsPrintRepresentationDirectory()) {
+        using std::cout;
+        using std::endl;
+        cout << "Working directory: " << work_dir << endl
+             << "Home directory: "    << home_dir << endl
+             << "Execute directory: " << exe_dir  << endl;
+    }
+
+    ASSERT_GT(work_dir.size(), 0U);
+    ASSERT_GT(home_dir.size(), 0U);
+    ASSERT_GT(exe_dir.size(), 0U);
 }
 

@@ -21,15 +21,19 @@
 
 #include <uv.h>
 
-#ifndef __MAX_PATH_BUFFER_SIZE__
-#define __MAX_PATH_BUFFER_SIZE__ 256
-#endif
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace filesystem {
+
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS = 32768;
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API = 256;
+
+/**
+ * Max path buffer size.
+ */
+std::size_t const MAX_PATH_BUFFER_SIZE = MAX_PATH_LENGTH_OF_WINDOWS_API;
 
 constexpr char const GetPathSeparator() noexcept
 {
@@ -83,45 +87,56 @@ private:
     Common() = delete;
     ~Common() = delete;
 
+// Representation Directory.
 public:
-    /** Obtain Working directory. */
+    using DirFunction = int (*)(char * buffer, std::size_t * size);
+
+    /**
+     * For the libuv miscellaneous function.
+     */
+    static std::string getRepresentationDirectory(DirFunction func) {
+        std::size_t path_length = MAX_PATH_BUFFER_SIZE;
+        std::vector<char> buffer;
+        buffer.resize(path_length);
+
+        if (func(&buffer[0], &path_length) != 0) {
+            return "";
+        }
+        return std::string(buffer.begin(), buffer.begin() + path_length);
+    }
+
+public:
+    /**
+     * Obtain Working directory.
+     */
     static std::string getWorkDir() {
-        std::size_t path_length = __MAX_PATH_BUFFER_SIZE__;
-        std::vector<char> buffer;
-        buffer.resize(path_length);
-
-        if (uv_cwd(&buffer[0], &path_length) != 0) {
-            return "";
-        }
-
-        return std::string(buffer.begin(), buffer.begin() + path_length);
+        return getRepresentationDirectory(&uv_cwd);
     }
 
-    /** Obtain HOME directory. */
+    /**
+     * Obtain HOME directory.
+     */
     static std::string getHomeDir() {
-        std::size_t path_length = __MAX_PATH_BUFFER_SIZE__;
-        std::vector<char> buffer;
-        buffer.resize(path_length);
-
-        if (uv_os_homedir(&buffer[0], &path_length) != 0) {
-            return "";
-        }
-
-        return std::string(buffer.begin(), buffer.begin() + path_length);
+        return getRepresentationDirectory(&uv_os_homedir);
     }
 
-    /** Obtain executable file directory. */
-    static std::string getExeDir() {
-        std::size_t path_length = __MAX_PATH_BUFFER_SIZE__;
-        std::vector<char> buffer;
-        buffer.resize(path_length);
+    /**
+     * Obtain executable file path.
+     */
+    static std::string getExePath() {
+        return getRepresentationDirectory(&uv_exepath);
+    }
 
-        if (uv_exepath(&buffer[0], &path_length) != 0) {
+    /**
+     * Obtain executable file directory.
+     */
+    static std::string getExeDir() {
+        std::string path = getExePath();
+        if (path.size() == 0U) {
             return "";
         }
 
         // Separate directory & filename.
-        std::string path(buffer.begin(), buffer.begin() + path_length);
         std::string separator = std::string() + filesystem::GetPathSeparator();
         std::size_t last_separator_index = path.rfind(separator);
         return path.substr(0, last_separator_index);
