@@ -81,14 +81,14 @@ public:
 
 TEST_F(AssetTest, getHomeDir)
 {
-    std::string dir = filesystem::GetHomeDir();
+    std::string dir = filesystem::Common::getHomeDir();
     ASSERT_GT(dir.size(), 0U);
     ASSERT_EQ(dir, _asset.getDir(Asset::getHomeDirKeyName()));
 }
 
 TEST_F(AssetTest, getExeDir)
 {
-    std::string dir = filesystem::GetExeDir();
+    std::string dir = filesystem::Common::getExeDir();
     ASSERT_GT(dir.size(), 0U);
     ASSERT_EQ(dir, _asset.getDir(Asset::getExeDirKeyName()));
 }

@@ -55,8 +55,9 @@ public:
 
     /** Construct of Default settings. */
     explicit Asset(default_setting const & UNUSED_PARAM(empty_value)) {
-        this->dirs.insert(std::make_pair(getHomeDirKeyName(), filesystem::GetHomeDir()));
-        this->dirs.insert(std::make_pair(getExeDirKeyName(), filesystem::GetExeDir()));
+        using filesystem::Common;
+        this->dirs.insert(std::make_pair(getHomeDirKeyName(), Common::getHomeDir()));
+        this->dirs.insert(std::make_pair(getExeDirKeyName(), Common::getExeDir()));
     }
 
     Asset(PathMap const & dirs) {
