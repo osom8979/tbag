@@ -107,6 +107,25 @@ TEST(PathStaticTest, removeLastSeparator)
     ASSERT_EQ(posix, PREFIX + WINDOWS_SUFFIX);
 }
 
+TEST(PathStaticTest, replaceHomeDirectoryShortcut_1)
+{
+    std::string const HOME = Common::getHomeDir();
+    std::string const TEMP = "~";
+    ASSERT_EQ(Path::replaceHomeDirectoryShortcut(TEMP), HOME);
+}
+
+TEST(PathStaticTest, replaceHomeDirectoryShortcut_2)
+{
+    std::string const HOME = Common::getHomeDir();
+    std::string const TEMP = "TEMP";
+    std::string const TEST = std::string("~/") + TEMP;
+
+    Path p1 = Path(Path::replaceHomeDirectoryShortcut(TEMP), Path::update_generic());
+    Path p2 = Path(Common::getHomeDir(), Path::update_generic());
+    p2.append(TEMP);
+    ASSERT_EQ(p2.getNative(), p2.getNative());
+}
+
 // Fixture.
 
 class PathTest : public ::testing::Test

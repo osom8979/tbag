@@ -415,9 +415,21 @@ public:
         return Path::splitNodesOfPosix(path);
     }
 
-    Nodes splitNodes() {
+    Nodes splitNodes() const {
         return Path::splitNodes(this->_path);
     }
+
+// Directory shortcut.
+public:
+    static BaseString replaceHomeDirectoryShortcut(BaseString const & path) {
+        if (!path.empty() && path[0] == DIRECTORY_SHORTCUT_HOME[0]) {
+            return Common::getHomeDir() + path.substr(1);
+        }
+        return path;
+    }
+
+// Canonical operators.
+public:
 };
 
 } // namespace filesystem

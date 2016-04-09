@@ -110,6 +110,10 @@ constexpr char const * const GetHomeEnvName() noexcept(true)
 #endif
 }
 
+constexpr char const * const DIRECTORY_SHORTCUT_PARENT  = "..";
+constexpr char const * const DIRECTORY_SHORTCUT_CURRENT =  ".";
+constexpr char const * const DIRECTORY_SHORTCUT_HOME    =  "~";
+
 /**
  * Common filesystem class prototype.
  *
