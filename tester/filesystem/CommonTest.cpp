@@ -26,23 +26,34 @@ NAMESPACE_ANONYMOUS_CLOSE
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(CommonStaticTest, GlobalPathOperators)
+TEST(CommonStaticTest, GetPathSeparator)
 {
 #if defined(WIN32) || defined(_WIN32)
-    EXPECT_EQ(GetPathSeparator(), '\\');
-    EXPECT_EQ(GetPathSplitter(),  ';');
+    ASSERT_EQ(GetPathSeparator(), '\\');
+    ASSERT_EQ(GetPathSplitter(),  ';');
 #else
-    EXPECT_EQ(GetPathSeparator(), '/');
-    EXPECT_EQ(GetPathSplitter(),  ':');
+    ASSERT_EQ(GetPathSeparator(), '/');
+    ASSERT_EQ(GetPathSplitter(),  ':');
+#endif
+}
+
+TEST(CommonStaticTest, GetPathSeparatorString)
+{
+#if defined(WIN32) || defined(_WIN32)
+    ASSERT_STREQ(GetPathSeparatorString(), "\\");
+    ASSERT_STREQ(GetPathSplitterString(),  ";");
+#else
+    ASSERT_STREQ(GetPathSeparatorString(), "/");
+    ASSERT_STREQ(GetPathSplitterString(),  ":");
 #endif
 }
 
 TEST(CommonStaticTest, GetHomeEnvName)
 {
 #if defined(WIN32) || defined(_WIN32)
-    EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
+    ASSERT_STREQ(GetHomeEnvName(), "USERPROFILE");
 #else
-    EXPECT_STREQ(GetHomeEnvName(), "HOME");
+    ASSERT_STREQ(GetHomeEnvName(), "HOME");
 #endif
 }
 

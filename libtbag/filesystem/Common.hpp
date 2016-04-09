@@ -47,9 +47,26 @@ constexpr char const GetPathSeparator() noexcept
 #endif
 }
 
+constexpr char const * const PATH_SEPARATOR_STRING_OF_WINDOWS = "\\";
+constexpr char const * const PATH_SEPARATOR_STRING_OF_POSIX   = "/";
+
+constexpr char const * const GetPathSeparatorString() noexcept
+{
+#if defined(__OS_WINDOWS__)
+    return PATH_SEPARATOR_STRING_OF_WINDOWS;
+#else
+    return PATH_SEPARATOR_STRING_OF_POSIX;
+#endif
+}
+
 constexpr char const GetGenericPathSeparator() noexcept
 {
     return PATH_SEPARATOR_OF_POSIX;
+}
+
+constexpr char const * const GetGenericPathSeparatorString() noexcept
+{
+    return PATH_SEPARATOR_STRING_OF_POSIX;
 }
 
 char const PATH_SPLITTER_OF_WINDOWS = ';';
@@ -61,6 +78,18 @@ constexpr char const GetPathSplitter() noexcept
     return PATH_SPLITTER_OF_WINDOWS;
 #else
     return PATH_SPLITTER_OF_POSIX;
+#endif
+}
+
+constexpr char const * const PATH_SPLITTER_STRING_OF_WINDOWS = ";";
+constexpr char const * const PATH_SPLITTER_STRING_OF_POSIX   = ":";
+
+constexpr char const * const GetPathSplitterString() noexcept
+{
+#if defined(__OS_WINDOWS__)
+    return PATH_SPLITTER_STRING_OF_WINDOWS;
+#else
+    return PATH_SPLITTER_STRING_OF_POSIX;
 #endif
 }
 

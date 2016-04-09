@@ -147,8 +147,9 @@ TEST_F(WindowsPathTest, getNative)
 
 TEST_F(WindowsPathTest, hasAbsoluteOfWindows)
 {
-    ASSERT_TRUE(path.isAbsoluteOfWindows());
-    ASSERT_FALSE(path.isAbsoluteOfPosix());
+    std::string path_string = path.getString();
+    ASSERT_TRUE(Path::isAbsoluteOfWindows(path_string));
+    ASSERT_FALSE(Path::isAbsoluteOfPosix(path_string));
 }
 
 TEST_F(WindowsPathTest, splitNodes)
@@ -245,8 +246,9 @@ TEST_F(PosixPathTest, getNative)
 
 TEST_F(PosixPathTest, hasAbsoluteOfWindows)
 {
-    ASSERT_TRUE(path.isAbsoluteOfPosix());
-    ASSERT_FALSE(path.isAbsoluteOfWindows());
+    std::string path_string = path.getString();
+    ASSERT_FALSE(Path::isAbsoluteOfWindows(path_string));
+    ASSERT_TRUE(Path::isAbsoluteOfPosix(path_string));
 }
 
 TEST_F(PosixPathTest, splitNodes)

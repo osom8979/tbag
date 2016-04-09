@@ -161,6 +161,10 @@ public:
 
 // DECOMPOSITION
 public:
+    BaseString getRootDir() const noexcept {
+        return Path::getRootDir(this->_path);
+    }
+
     /**
      * root-directory, if @c _path includes root-directory,
      * otherwise empty string.
@@ -168,51 +172,52 @@ public:
      * @remarks
      *  Don't use regex library.
      */
-    BaseString getRootDir() const {
+    static BaseString getRootDir(BaseString const & path) noexcept {
 #if defined(__OS_WINDOWS__)
-        return getRootDirOfWindows();
+        return Path::getRootDirOfWindows(path);
 #else
-        return getRootDirOfPosix();
+        return Path::getRootDirOfPosix(path);
 #endif
     }
 
-    BaseString getRootDirOfWindows() const {
-        if (this->_path.size() < 2) {
+    static BaseString getRootDirOfWindows(BaseString const & path) noexcept {
+        if (path.size() < 2 || path[1] != ':') {
             return "";
         }
-        if (this->_path[1] != ':') {
-            return "";
-        }
-        if (/**/('a' <= COMPARE_AND(this->_path[0]) <= 'z')
-             || ('A' <= COMPARE_AND(this->_path[0]) <= 'Z')) {
-            return this->_path.substr(0, 2);
+        if (/**/('a' <= COMPARE_AND(path[0]) <= 'z')
+             || ('A' <= COMPARE_AND(path[0]) <= 'Z')) {
+            return path.substr(0, 2);
         }
         return "";
     }
 
-    BaseString getRootDirOfPosix() const {
-        if (this->_path.empty() || this->_path[0] != '/') {
+    static BaseString getRootDirOfPosix(BaseString const & path) noexcept {
+        if (path.empty() || path[0] != PATH_SEPARATOR_OF_POSIX) {
             return "";
         }
-        return "/";
+        return PATH_SEPARATOR_STRING_OF_POSIX;
     }
 
 // QUERY
 public:
-    bool isAbsolute() const {
+    bool isAbsolute() const noexcept {
+        return Path::isAbsolute(this->_path);
+    }
+
+    static bool isAbsolute(BaseString const & path) noexcept {
 #if defined(__OS_WINDOWS__)
-        return isAbsoluteOfWindows();
+        return Path::isAbsoluteOfWindows(path);
 #else
-        return isAbsoluteOfPosix();
+        return Path::isAbsoluteOfPosix(path);
 #endif
     }
 
-    bool isAbsoluteOfWindows() const {
-        return !(getRootDirOfWindows().empty());
+    static bool isAbsoluteOfWindows(BaseString const & path) noexcept {
+        return !(getRootDirOfWindows(path).empty());
     }
 
-    bool isAbsoluteOfPosix() const {
-        return !(getRootDirOfPosix().empty());
+    static bool isAbsoluteOfPosix(BaseString const & path) noexcept {
+        return !(getRootDirOfPosix(path).empty());
     }
 
 // APPEND
@@ -236,7 +241,11 @@ public:
     }
 
     static std::vector<BaseString> splitNodes(BaseString const & path) {
-        static_assert(std::is_same<Path::BaseString, strings::BaseString>::value, "This is not a same type.");
+        using ltype   = Path::BaseString;
+        using rtype   = strings::BaseString;
+        using is_same = std::is_same<ltype, rtype>;
+        static_assert(is_same::value, "This is not a same type.");
+
         std::vector<BaseString> result;
         Path generic(path, Path::update_generic());
         std::string separator = std::string() + GetGenericPathSeparator();
