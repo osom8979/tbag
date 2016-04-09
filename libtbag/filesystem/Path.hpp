@@ -247,40 +247,26 @@ public:
     }
 
 public:
+    inline static BaseString
+    getNative(BaseString const & path) {
+        return Path::makePreferred(path, std::string(GetPathSeparatorString()));
+    }
+
     /**
      * Operating system dependent path.
      */
-    BaseString getNative() const {
-        return Path::makePreferred(this->_path, std::string() + GetPathSeparator());
+    inline BaseString getNative() const {
+        return Path::getNative(this->_path);
     }
 
-    Path & updateNative() {
+    inline Path & updateNative() {
         this->_path = getNative();
         return *this;
     }
 
 // DECOMPOSITION
 public:
-    BaseString getRootDir() const noexcept {
-        return Path::getRootDir(this->_path);
-    }
-
-    /**
-     * root-directory, if @c _path includes root-directory,
-     * otherwise empty string.
-     *
-     * @remarks
-     *  Don't use regex library.
-     */
-    static BaseString getRootDir(BaseString const & path) noexcept {
-#if defined(__OS_WINDOWS__)
-        return Path::getRootDirOfWindows(path);
-#else
-        return Path::getRootDirOfPosix(path);
-#endif
-    }
-
-    static BaseString getRootDirOfWindows(BaseString const & path) noexcept {
+    static BaseString getRootDirOfWindows(BaseString const & path) {
         if (path.size() < 2 || path[1] != ':') {
             return BaseString();
         }
@@ -291,11 +277,30 @@ public:
         return BaseString();
     }
 
-    static BaseString getRootDirOfPosix(BaseString const & path) noexcept {
+    static BaseString getRootDirOfPosix(BaseString const & path) {
         if (path.size() < 1 || path[0] != PATH_SEPARATOR_OF_POSIX) {
             return BaseString();
         }
         return BaseString(PATH_SEPARATOR_STRING_OF_POSIX);
+    }
+
+    /**
+     * root-directory, if @c _path includes root-directory,
+     * otherwise empty string.
+     *
+     * @remarks
+     *  Don't use regex library.
+     */
+    static BaseString getRootDir(BaseString const & path) {
+#if defined(__OS_WINDOWS__)
+        return Path::getRootDirOfWindows(path);
+#else
+        return Path::getRootDirOfPosix(path);
+#endif
+    }
+
+    BaseString getRootDir() const noexcept {
+        return Path::getRootDir(this->_path);
     }
 
 // QUERY

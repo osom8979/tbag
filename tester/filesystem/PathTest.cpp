@@ -172,3 +172,14 @@ TEST_F(PathTest, getGeneric)
     ASSERT_EQ(Path::getGenericOfPosix(test_path), generic_path);
 }
 
+TEST_F(PathTest, getNative)
+{
+#if defined(WIN32) || defined(_WIN32)
+    setupOfWindows();
+    ASSERT_EQ(path.getNative(), windows_path);
+#else
+    setupOfPosix();
+    ASSERT_EQ(path.getNative(), posix_path);
+#endif
+}
+
