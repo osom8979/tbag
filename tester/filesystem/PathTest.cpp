@@ -192,3 +192,14 @@ TEST_F(PathTest, getRootDir)
     ASSERT_EQ(Path::getRootDirOfPosix(test_path), depth0);
 }
 
+TEST_F(PathTest, isAbsolute)
+{
+    setupOfWindows();
+    ASSERT_TRUE(Path::isAbsoluteOfWindows(test_path));
+    ASSERT_FALSE(Path::isAbsoluteOfPosix(test_path));
+
+    setupOfPosix();
+    ASSERT_TRUE(Path::isAbsoluteOfPosix(test_path));
+    ASSERT_FALSE(Path::isAbsoluteOfWindows(test_path));
+}
+

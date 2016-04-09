@@ -305,8 +305,12 @@ public:
 
 // QUERY
 public:
-    bool isAbsolute() const noexcept {
-        return Path::isAbsolute(this->_path);
+    static bool isAbsoluteOfWindows(BaseString const & path) noexcept {
+        return (getRootDirOfWindows(path).empty() == false);
+    }
+
+    static bool isAbsoluteOfPosix(BaseString const & path) noexcept {
+        return (getRootDirOfPosix(path).empty() == false);
     }
 
     static bool isAbsolute(BaseString const & path) noexcept {
@@ -317,24 +321,12 @@ public:
 #endif
     }
 
-    static bool isAbsoluteOfWindows(BaseString const & path) noexcept {
-        return (getRootDirOfWindows(path).empty() == false);
-    }
-
-    static bool isAbsoluteOfPosix(BaseString const & path) noexcept {
-        return (getRootDirOfPosix(path).empty() == false);
+    bool isAbsolute() const noexcept {
+        return Path::isAbsolute(this->_path);
     }
 
 // FILENAME QUERY.
 public:
-    static bool isProhibitedFilename(BaseString const & path) noexcept {
-#if defined(__OS_WINDOWS__)
-        return Path::isProhibitedFilenameOfWindows(path);
-#else
-        return Path::isProhibitedFilenameOfPosix(path);
-#endif
-    }
-
     static bool isProhibitedFilenameOfWindows(BaseString const & path) noexcept {
         for (auto cursor : path) {
             if (0x00 <= COMPARE_AND(cursor) <= 0x1F) {
@@ -357,6 +349,14 @@ public:
             }
         }
         return false;
+    }
+
+    static bool isProhibitedFilename(BaseString const & path) noexcept {
+#if defined(__OS_WINDOWS__)
+        return Path::isProhibitedFilenameOfWindows(path);
+#else
+        return Path::isProhibitedFilenameOfPosix(path);
+#endif
     }
 
 // APPEND
