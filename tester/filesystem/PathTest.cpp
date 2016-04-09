@@ -66,89 +66,198 @@ TEST(PathStaticTest, MoveOperators)
 
 // Fixture.
 
-class PathTest : public ::testing::Test
+class WindowsPathTest : public ::testing::Test
 {
 public:
-    std::string _native_separator;
-    std::string _generic_separator;
+    std::string ws;
+    std::string ps;
+    std::string gs;
+    std::string s;
 
-    std::string _depth0_name;
-    std::string _depth1_name;
-    std::string _depth2_name;
-    std::string _depth3_name;
-    std::string _depth4_name;
-    std::string _depth5_name;
+    std::string depth0;
+    std::string depth1;
+    std::string depth2;
+    std::string depth3;
+    std::string depth4;
+    std::string depth5;
 
-    std::string _test_path;
-    std::string _windows_path;
-    std::string _posix_path;
-    std::string _generic_path;
-    std::string _canonical_path;
-    Path _path;
+    std::string test_path;
+    std::string windows_path;
+    std::string posix_path;
+    std::string generic_path;
+    std::string canonical_path;
+
+    Path path;
 
 public:
-    PathTest() = default;
-    virtual ~PathTest() = default;
+    WindowsPathTest() {
+        ws = std::string() + PATH_SEPARATOR_OF_WINDOWS;
+        ps = std::string() + PATH_SEPARATOR_OF_POSIX;
+        gs = std::string() + GetGenericPathSeparator();
+        s  = std::string() + GetPathSeparator();
+    }
+
+    virtual ~WindowsPathTest() {
+        __EMPTY_BLOCK__
+    }
 
 public:
     virtual void SetUp() override {
-        _native_separator  = std::string() + GetPathSeparator();
-        _generic_separator = std::string() + GetGenericPathSeparator();
+        depth0 = "O:";
+        depth1 = "Temp";
+        depth2 = "Directory";
+        depth3 = "..";
+        depth4 = ".";
+        depth5 = "File.tmp";
 
-        _depth0_name    = std::string("O:");
-        _depth1_name    = std::string("Temp");
-        _depth2_name    = std::string("Directory");
-        _depth3_name    = std::string("..");
-        _depth4_name    = std::string(".");
-        _depth5_name    = std::string("File.tmp");
+        test_path      += depth0 + ws + ws + depth1 + ws + depth2 + ps
+                        + depth3 + ws + depth4 + ps + ps + ws + ws + ps
+                        + depth5 + ws + ps;
+        windows_path   += depth0 + ws + depth1 + ws + depth5;
+        posix_path     += depth0 + ps + depth1 + ps + depth2 + ps
+                        + depth3 + ps + depth4 + ps + depth5;
+        generic_path   += posix_path;
+        canonical_path += depth0 + ps + depth1 + ps  + depth5;
 
-        _test_path      = std::string("O:\\\\Temp\\Directory/..\\.////\\\\/File.tmp\\/");
-        _windows_path   = std::string("O:\\Temp\\File.tmp");
-        _posix_path     = std::string("O:/Temp/Directory/.././File.tmp");
-        _generic_path   = std::string("O:/Temp/Directory/.././File.tmp");
-        _canonical_path = std::string("O:/Temp/File.tmp");
-
-        _path = Path(_test_path);
+        path = Path(test_path);
     }
 
     virtual void TearDown() override {
     }
 };
 
-TEST_F(PathTest, getGeneric)
+TEST_F(WindowsPathTest, getGeneric)
 {
-    ASSERT_EQ(_path.getGeneric(), _generic_path);
+    ASSERT_EQ(path.getGeneric(), generic_path);
 
-    Path p1(_test_path.c_str(), Path::update_generic());
-    Path p2(_test_path, Path::update_generic());
-    ASSERT_EQ(p1.getString(), _generic_path);
-    ASSERT_EQ(p2.getString(), _generic_path);
+    Path p1(test_path.c_str(), Path::update_generic());
+    Path p2(test_path, Path::update_generic());
+    ASSERT_EQ(p1.getString(), generic_path);
+    ASSERT_EQ(p2.getString(), generic_path);
 }
 
-TEST_F(PathTest, getNative)
+TEST_F(WindowsPathTest, getNative)
 {
 #if defined(WIN32) || defined(_WIN32)
-    ASSERT_EQ(_path.getNative(), _windows_path);
+    ASSERT_EQ(path.getNative(), windows_path);
 #else
-    ASSERT_EQ(_path.getNative(), _posix_path);
+    ASSERT_EQ(path.getNative(), posix_path);
 #endif
 }
 
-TEST_F(PathTest, hasAbsoluteOfWindows)
+TEST_F(WindowsPathTest, hasAbsoluteOfWindows)
 {
-    ASSERT_TRUE(_path.isAbsoluteOfWindows());
-    ASSERT_FALSE(_path.isAbsoluteOfPosix());
+    ASSERT_TRUE(path.isAbsoluteOfWindows());
+    ASSERT_FALSE(path.isAbsoluteOfPosix());
 }
 
-TEST_F(PathTest, splitNodes)
+TEST_F(WindowsPathTest, splitNodes)
 {
-    std::vector<Path::BaseString> nodes = _path.splitNodes();
+    std::vector<Path::BaseString> nodes = path.splitNodes();
     ASSERT_EQ(nodes.size(), 6U);
-    ASSERT_EQ(nodes[0], _depth0_name);
-    ASSERT_EQ(nodes[1], _depth1_name);
-    ASSERT_EQ(nodes[2], _depth2_name);
-    ASSERT_EQ(nodes[3], _depth3_name);
-    ASSERT_EQ(nodes[4], _depth4_name);
-    ASSERT_EQ(nodes[5], _depth5_name);
+    ASSERT_EQ(nodes[0], depth0);
+    ASSERT_EQ(nodes[1], depth1);
+    ASSERT_EQ(nodes[2], depth2);
+    ASSERT_EQ(nodes[3], depth3);
+    ASSERT_EQ(nodes[4], depth4);
+    ASSERT_EQ(nodes[5], depth5);
+}
+
+// Fixture.
+
+class PosixPathTest : public ::testing::Test
+{
+public:
+    std::string ws;
+    std::string ps;
+    std::string gs;
+    std::string s;
+
+    std::string depth0;
+    std::string depth1;
+    std::string depth2;
+    std::string depth3;
+    std::string depth4;
+    std::string depth5;
+
+    std::string test_path;
+    std::string windows_path;
+    std::string posix_path;
+    std::string generic_path;
+    std::string canonical_path;
+
+    Path path;
+
+public:
+    PosixPathTest() {
+        ws = std::string() + PATH_SEPARATOR_OF_WINDOWS;
+        ps = std::string() + PATH_SEPARATOR_OF_POSIX;
+        gs = std::string() + GetGenericPathSeparator();
+        s  = std::string() + GetPathSeparator();
+    }
+
+    virtual ~PosixPathTest() {
+        __EMPTY_BLOCK__
+    }
+
+public:
+    virtual void SetUp() override {
+        depth0 = "/";
+        depth1 = "Temp";
+        depth2 = "\\Directory";
+        depth3 = "..";
+        depth4 = ".";
+        depth5 = "File.tmp";
+
+        test_path      += depth0 + depth1 + ps + depth2 + ps + depth3 + ps
+                        + depth4 + ps + ps + ps + ps + ps + depth5 + ps + ps;
+        windows_path   += depth0 + depth1 + ps + depth5;
+        posix_path     += depth0 + depth1 + ps + depth2 + ps
+                        + depth3 + ps + depth4 + ps  + depth5;
+        generic_path   += posix_path;
+        canonical_path += depth0 + depth1 + ps + depth5;
+
+        path = Path(test_path);
+    }
+
+    virtual void TearDown() override {
+    }
+};
+
+TEST_F(PosixPathTest, getGeneric)
+{
+    ASSERT_EQ(path.getGeneric(), generic_path);
+
+    Path p1(test_path.c_str(), Path::update_generic());
+    Path p2(test_path, Path::update_generic());
+    ASSERT_EQ(p1.getString(), generic_path);
+    ASSERT_EQ(p2.getString(), generic_path);
+}
+
+TEST_F(PosixPathTest, getNative)
+{
+#if defined(WIN32) || defined(_WIN32)
+    ASSERT_EQ(path.getNative(), windows_path);
+#else
+    ASSERT_EQ(path.getNative(), posix_path);
+#endif
+}
+
+TEST_F(PosixPathTest, hasAbsoluteOfWindows)
+{
+    ASSERT_TRUE(path.isAbsoluteOfPosix());
+    ASSERT_FALSE(path.isAbsoluteOfWindows());
+}
+
+TEST_F(PosixPathTest, splitNodes)
+{
+    std::vector<Path::BaseString> nodes = path.splitNodes();
+    ASSERT_EQ(nodes.size(), 6U);
+    ASSERT_EQ(nodes[0], depth0);
+    ASSERT_EQ(nodes[1], depth1);
+    ASSERT_EQ(nodes[2], depth2);
+    ASSERT_EQ(nodes[3], depth3);
+    ASSERT_EQ(nodes[4], depth4);
+    ASSERT_EQ(nodes[5], depth5);
 }
 
