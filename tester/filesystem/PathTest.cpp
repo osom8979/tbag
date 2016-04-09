@@ -68,6 +68,21 @@ TEST(PathStaticTest, AssignOperators)
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 }
 
+TEST(PathStaticTest, isProhibitedFilename)
+{
+    std::string const FILENAME1 = "TEMP";
+    ASSERT_FALSE(Path::isProhibitedFilenameOfWindows(FILENAME1));
+    ASSERT_FALSE(Path::isProhibitedFilenameOfPosix(FILENAME1));
+    
+    std::string const FILENAME2 = "TE\\MP";
+    ASSERT_TRUE(Path::isProhibitedFilenameOfWindows(FILENAME2));
+    ASSERT_FALSE(Path::isProhibitedFilenameOfPosix(FILENAME2));
+
+    std::string const FILENAME3 = "TE/MP";
+    ASSERT_TRUE(Path::isProhibitedFilenameOfWindows(FILENAME3));
+    ASSERT_TRUE(Path::isProhibitedFilenameOfPosix(FILENAME3));
+}
+
 TEST(PathStaticTest, removeLastSeparator)
 {
     std::string const PREFIX = "\\/TE/\\MP";

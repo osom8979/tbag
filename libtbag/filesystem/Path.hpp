@@ -149,6 +149,40 @@ public:
         this->_path.assign(path);
     }
 
+// FILENAME QUERY.
+public:
+    static bool isProhibitedFilenameOfWindows(BaseString const & path) noexcept {
+        for (auto cursor : path) {
+            if (0x00 <= COMPARE_AND(cursor) <= 0x1F) {
+                return true;
+            }
+
+            switch (cursor) {
+            case '*': case '<': case '>':
+            case '?': case '/': case '|': case '\\':
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool isProhibitedFilenameOfPosix(BaseString const & path) noexcept {
+        for (auto cursor : path) {
+            if (cursor == 0x00 || cursor == '/') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool isProhibitedFilename(BaseString const & path) noexcept {
+#if defined(__OS_WINDOWS__)
+        return Path::isProhibitedFilenameOfWindows(path);
+#else
+        return Path::isProhibitedFilenameOfPosix(path);
+#endif
+    }
+
 // Regexp utilities.
 public:
     inline static BaseString
@@ -325,45 +359,15 @@ public:
         return Path::isAbsolute(this->_path);
     }
 
-// FILENAME QUERY.
-public:
-    static bool isProhibitedFilenameOfWindows(BaseString const & path) noexcept {
-        for (auto cursor : path) {
-            if (0x00 <= COMPARE_AND(cursor) <= 0x1F) {
-                return true;
-            }
-
-            switch (cursor) {
-            case '*': case '<': case '>':
-            case '?': case '/': case '|': case '\\':
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static bool isProhibitedFilenameOfPosix(BaseString const & path) noexcept {
-        for (auto cursor : path) {
-            if (cursor == 0x00 || cursor == '/') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static bool isProhibitedFilename(BaseString const & path) noexcept {
-#if defined(__OS_WINDOWS__)
-        return Path::isProhibitedFilenameOfWindows(path);
-#else
-        return Path::isProhibitedFilenameOfPosix(path);
-#endif
-    }
-
 // APPEND
 public:
-    Path & append(BaseString const & sub) {
-        this->_path += GetGenericPathSeparator() + sub;
+    Path & append(BaseString const & sub, BaseString const & separator) {
+        this->_path += separator + sub;
         return *this;
+    }
+
+    Path & append(BaseString const & sub) {
+        return append(sub, BaseString(GetGenericPathSeparatorString()));
     }
 
     Path & operator /= (BaseString const & sub) {
