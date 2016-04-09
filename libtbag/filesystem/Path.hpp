@@ -346,7 +346,7 @@ public:
         return Path::getRootDir(this->_path);
     }
 
-// QUERY
+// Query.
 public:
     static bool isAbsoluteOfWindows(BaseString const & path) noexcept {
         return !getRootDirOfWindows(path).empty();
@@ -364,7 +364,7 @@ public:
         return Path::isAbsolute(this->_path);
     }
 
-// APPEND
+// Append.
 public:
     Path & append(BaseString const & sub, BaseString const & separator) {
         this->_path += separator + sub;
@@ -383,21 +383,40 @@ public:
         return append(sub);
     }
 
+// Node operators.
 public:
-    std::vector<BaseString> splitNodes() {
-        return Path::splitNodes(this->_path);
+    using PathBaseString = Path::BaseString;
+    using StringsBaseString = strings::BaseString;
+    using BaseStringSame = std::is_same<PathBaseString, StringsBaseString>;
+    static_assert(BaseStringSame::value, "This is not a same type.");
+
+    using Nodes = std::vector<BaseString>;
+
+    static Nodes splitNodesOfWindows(BaseString const & path) {
+        return strings::splitTokens(Path::getGenericOfWindows(path),
+                                    BaseString(GetGenericPathSeparatorString()));
     }
 
-    static std::vector<BaseString> splitNodes(BaseString const & path) {
-        using ltype   = Path::BaseString;
-        using rtype   = strings::BaseString;
-        using is_same = std::is_same<ltype, rtype>;
-        static_assert(is_same::value, "This is not a same type.");
+    static Nodes splitNodesOfPosix(BaseString const & path) {
+        Nodes result = strings::splitTokens(Path::getGenericOfPosix(path),
+                                            BaseString(GetGenericPathSeparatorString()));
+        BaseString separator = Path::getRootDirOfPosix(path);
+        if (!separator.empty()) {
+            // Force insert the POSIX root directory.
+            result.insert(result.begin(), separator);
+        }
+        return result;
+    }
 
-        std::vector<BaseString> result;
-        Path generic = Path(path, Path::update_generic());
-        std::string separator = GetGenericPathSeparatorString();
-        return strings::splitTokens(generic.getString(), separator);
+    static Nodes splitNodes(BaseString const & path) {
+        if (Path::isWindowsStyle()) {
+            return Path::splitNodesOfWindows(path);
+        }
+        return Path::splitNodesOfPosix(path);
+    }
+
+    Nodes splitNodes() {
+        return Path::splitNodes(this->_path);
     }
 };
 

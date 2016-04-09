@@ -229,3 +229,26 @@ TEST_F(PathTest, isAbsolute)
     ASSERT_FALSE(Path::isAbsoluteOfWindows(test_path));
 }
 
+TEST_F(PathTest, splitNodes)
+{
+    setupOfWindows();
+    Path::Nodes nodes = Path::splitNodesOfWindows(test_path);
+    ASSERT_EQ(nodes.size(), 6U);
+    ASSERT_EQ(nodes[0], depth0);
+    ASSERT_EQ(nodes[1], depth1);
+    ASSERT_EQ(nodes[2], depth2);
+    ASSERT_EQ(nodes[3], depth3);
+    ASSERT_EQ(nodes[4], depth4);
+    ASSERT_EQ(nodes[5], depth5);
+
+    setupOfPosix();
+    nodes = Path::splitNodesOfPosix(test_path);
+    ASSERT_EQ(nodes.size(), 6U);
+    ASSERT_EQ(nodes[0], depth0);
+    ASSERT_EQ(nodes[1], depth1);
+    ASSERT_EQ(nodes[2], depth2);
+    ASSERT_EQ(nodes[3], depth3);
+    ASSERT_EQ(nodes[4], depth4);
+    ASSERT_EQ(nodes[5], depth5);
+}
+
