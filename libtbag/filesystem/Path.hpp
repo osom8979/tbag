@@ -182,20 +182,20 @@ public:
 
     static BaseString getRootDirOfWindows(BaseString const & path) noexcept {
         if (path.size() < 2 || path[1] != ':') {
-            return "";
+            return BaseString();
         }
         if (/**/('a' <= COMPARE_AND(path[0]) <= 'z')
              || ('A' <= COMPARE_AND(path[0]) <= 'Z')) {
             return path.substr(0, 2);
         }
-        return "";
+        return BaseString();
     }
 
     static BaseString getRootDirOfPosix(BaseString const & path) noexcept {
-        if (path.empty() || path[0] != PATH_SEPARATOR_OF_POSIX) {
-            return "";
+        if (path.size() < 1 || path[0] != PATH_SEPARATOR_OF_POSIX) {
+            return BaseString();
         }
-        return PATH_SEPARATOR_STRING_OF_POSIX;
+        return BaseString(PATH_SEPARATOR_STRING_OF_POSIX);
     }
 
 // QUERY
@@ -213,11 +213,11 @@ public:
     }
 
     static bool isAbsoluteOfWindows(BaseString const & path) noexcept {
-        return !(getRootDirOfWindows(path).empty());
+        return (getRootDirOfWindows(path).empty() == false);
     }
 
     static bool isAbsoluteOfPosix(BaseString const & path) noexcept {
-        return !(getRootDirOfPosix(path).empty());
+        return (getRootDirOfPosix(path).empty() == false);
     }
 
 // APPEND
