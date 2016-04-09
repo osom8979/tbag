@@ -189,11 +189,10 @@ public:
     }
 
     static bool isProhibitedFilename(BaseString const & path) noexcept {
-#if defined(__OS_WINDOWS__)
-        return Path::isProhibitedFilenameOfWindows(path);
-#else
+        if (Path::isWindowsStyle()) {
+            return Path::isProhibitedFilenameOfWindows(path);
+        }
         return Path::isProhibitedFilenameOfPosix(path);
-#endif
     }
 
 // Regexp utilities.
@@ -226,11 +225,10 @@ public:
 
     inline static BaseString
     removeLastSeparator(BaseString const & path) {
-#if defined(__OS_WINDOWS__)
-        return Path::removeLastSeparatorOfWindows(path);
-#else
+        if (Path::isWindowsStyle()) {
+            return Path::removeLastSeparatorOfWindows(path);
+        }
         return Path::removeLastSeparatorOfPosix(path);
-#endif
     }
 
 // makePreferred() methods.
@@ -257,11 +255,10 @@ public:
      */
     inline static BaseString
     makePreferred(BaseString const & path, BaseString const & separator) {
-#if defined(__OS_WINDOWS__)
-        return Path::makePreferredOfWindows(path, separator);
-#else
+        if (Path::isWindowsStyle()) {
+            return Path::makePreferredOfWindows(path, separator);
+        }
         return Path::makePreferredOfPosix(path, separator);
-#endif
     }
 
 // Generic string.
@@ -339,11 +336,10 @@ public:
      *  Don't use regex library.
      */
     static BaseString getRootDir(BaseString const & path) {
-#if defined(__OS_WINDOWS__)
-        return Path::getRootDirOfWindows(path);
-#else
+        if (Path::isWindowsStyle()) {
+            return Path::getRootDirOfWindows(path);
+        }
         return Path::getRootDirOfPosix(path);
-#endif
     }
 
     BaseString getRootDir() const noexcept {
