@@ -136,14 +136,11 @@ public:
         depth4 = ".";
         depth5 = "File.tmp";
 
-        test_path      = depth0 + ws + ws + depth1 + ws + depth2 + ps
-                       + depth3 + ws + depth4 + ps + ps + ws + ws + ps
-                       + depth5 + ws + ps;
-        windows_path   = depth0 + ws + depth1 + ws + depth5;
-        posix_path     = depth0 + ps + depth1 + ps + depth2 + ps
-                       + depth3 + ps + depth4 + ps + depth5;
-        generic_path   = posix_path;
-        canonical_path = depth0 + ps + depth1 + ps  + depth5;
+        test_path       = R"(O:\\Temp\Directory/..\.//\\/File.tmp\/)";
+        windows_path    = R"(O:\Temp\File.tmp)";
+        posix_path      = R"(O:/Temp/Directory/.././File.tmp)";
+        generic_path    = R"(O:/Temp/Directory/.././File.tmp)";
+        canonical_path  = R"(O:/Temp/File.tmp)";
 
         path = Path(test_path);
     }
@@ -156,15 +153,22 @@ public:
         depth4 = ".";
         depth5 = "File.tmp";
 
-        test_path      = depth0 + depth1 + ps + depth2 + ps + depth3 + ps
-                       + depth4 + ps + ps + ps + ps + ps + depth5 + ps + ps;
-        windows_path   = depth0 + depth1 + ps + depth5;
-        posix_path     = depth0 + depth1 + ps + depth2 + ps
-                       + depth3 + ps + depth4 + ps  + depth5;
-        generic_path   = posix_path;
-        canonical_path = depth0 + depth1 + ps + depth5;
+        test_path       = R"(/Temp/\Directory/.././////File.tmp//)";
+        windows_path    = R"(/Temp/File.tmp)";
+        posix_path      = R"(/Temp/\Directory/.././File.tmp)";
+        generic_path    = R"(/Temp/\Directory/.././File.tmp)";
+        canonical_path  = R"(/Temp/File.tmp)";
 
         path = Path(test_path);
     }
 };
+
+TEST_F(PathTest, getGeneric)
+{
+    setupOfWindows();
+    ASSERT_EQ(Path::getGenericOfWindows(test_path), generic_path);
+
+    setupOfPosix();
+    ASSERT_EQ(Path::getGenericOfPosix(test_path), generic_path);
+}
 

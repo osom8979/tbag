@@ -149,15 +149,23 @@ public:
         this->_path.assign(path);
     }
 
+// Regexp utilities.
 public:
-    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_WINDOWS = R"((\\|\/)(\\|\/)*)";
-    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_POSIX   = R"(\/\/)*)";
+    inline static BaseString
+    replaceRegex(BaseString const & path, BaseString const & regex, BaseString const & replace) {
+        return std::regex_replace(path, std::regex(regex), replace);
+    }
 
     inline static BaseString
     removeRegex(BaseString const & path, BaseString const & regex) {
-        return std::regex_replace(path, std::regex(regex), "");
+        return Path::replaceRegex(path, regex, "");
     }
 
+public:
+    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_WINDOWS = R"((\\|\/)(\\|\/)*)";
+    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_POSIX   = R"(\/\/*)";
+
+// removeLastSeparator() methods.
 public:
     inline static BaseString
     removeLastSeparatorOfWindows(BaseString const & path) {
@@ -169,7 +177,8 @@ public:
         return Path::removeRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_POSIX) + "$");
     }
 
-    inline static BaseString removeLastSeparator(BaseString const & path) {
+    inline static BaseString
+    removeLastSeparator(BaseString const & path) {
 #if defined(__OS_WINDOWS__)
         return Path::removeLastSeparatorOfWindows(path);
 #else
@@ -177,34 +186,20 @@ public:
 #endif
     }
 
-// Generic string.
+// makePreferred() methods.
 public:
-    /**
-     * Generic path format.
-     */
-    BaseString getGeneric() const {
-        return Path::cleanSeparator(this->_path, std::string() + GetGenericPathSeparator());
+    inline static BaseString
+    makePreferredOfWindows(BaseString const & path, BaseString const & separator) {
+        return Path::removeLastSeparatorOfWindows(
+                replaceRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_WINDOWS), separator));
     }
 
-    Path & updateGeneric() {
-        this->_path = getGeneric();
-        return *this;
+    inline static BaseString
+    makePreferredOfPosix(BaseString const & path, BaseString const & separator) {
+        return Path::removeLastSeparatorOfPosix(
+                replaceRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_POSIX), separator));
     }
 
-public:
-    /**
-     * Operating system dependent path.
-     */
-    BaseString getNative() const {
-        return Path::cleanSeparator(this->_path, std::string() + GetPathSeparator());
-    }
-
-    Path & updateNative() {
-        this->_path = getNative();
-        return *this;
-    }
-
-public:
     /**
      * Clean an overlapped separators.
      *
@@ -213,22 +208,55 @@ public:
      *
      * @return Cleared path string.
      */
-    static BaseString cleanSeparator(BaseString const & path, BaseString const & separator) {
+    inline static BaseString
+    makePreferred(BaseString const & path, BaseString const & separator) {
 #if defined(__OS_WINDOWS__)
-        return Path::cleanSeparatorOfWindows(path, separator);
+        return Path::makePreferredOfWindows(path, separator);
 #else
-        return Path::cleanSeparatorOfPosix(path, separator);
+        return Path::makePreferredOfPosix(path, separator);
 #endif
     }
 
-    static BaseString cleanSeparatorOfWindows(BaseString const & path, BaseString const & separator) {
-        std::string temp = std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*)"), separator);
-        return Path::removeLastSeparatorOfWindows(std::move(temp));
+// Generic string.
+public:
+    inline static BaseString
+    getGenericOfWindows(BaseString const & path) {
+        return Path::makePreferredOfWindows(path, std::string(GetGenericPathSeparatorString()));
     }
 
-    static BaseString cleanSeparatorOfPosix(BaseString const & path, BaseString const & separator) {
-        std::string temp = std::regex_replace(path, std::regex(R"(\/\/*)"), separator);
-        return Path::removeLastSeparatorOfPosix(std::move(temp));
+    inline static BaseString
+    getGenericOfPosix(BaseString const & path) {
+        return Path::makePreferredOfPosix(path, std::string(GetGenericPathSeparatorString()));
+    }
+
+    inline static BaseString
+    getGeneric(BaseString const & path) {
+        return Path::makePreferred(path, std::string(GetGenericPathSeparatorString()));
+    }
+
+    /**
+     * Generic path format.
+     */
+    inline BaseString getGeneric() const {
+        return Path::getGeneric(this->_path);
+    }
+
+    inline Path & updateGeneric() {
+        this->_path.assign(getGeneric());
+        return *this;
+    }
+
+public:
+    /**
+     * Operating system dependent path.
+     */
+    BaseString getNative() const {
+        return Path::makePreferred(this->_path, std::string() + GetPathSeparator());
+    }
+
+    Path & updateNative() {
+        this->_path = getNative();
+        return *this;
     }
 
 // DECOMPOSITION
