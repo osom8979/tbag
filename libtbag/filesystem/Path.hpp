@@ -149,7 +149,35 @@ public:
         this->_path.assign(path);
     }
 
-// Path to String.
+public:
+    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_WINDOWS = R"((\\|\/)(\\|\/)*)";
+    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_POSIX   = R"(\/\/)*)";
+
+    inline static BaseString
+    removeRegex(BaseString const & path, BaseString const & regex) {
+        return std::regex_replace(path, std::regex(regex), "");
+    }
+
+public:
+    inline static BaseString
+    removeLastSeparatorOfWindows(BaseString const & path) {
+        return Path::removeRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_WINDOWS) + "$");
+    }
+
+    inline static BaseString
+    removeLastSeparatorOfPosix(BaseString const & path) {
+        return Path::removeRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_POSIX) + "$");
+    }
+
+    inline static BaseString removeLastSeparator(BaseString const & path) {
+#if defined(__OS_WINDOWS__)
+        return Path::removeLastSeparatorOfWindows(path);
+#else
+        return Path::removeLastSeparatorOfPosix(path);
+#endif
+    }
+
+// Generic string.
 public:
     /**
      * Generic path format.
@@ -163,6 +191,7 @@ public:
         return *this;
     }
 
+public:
     /**
      * Operating system dependent path.
      */
@@ -175,22 +204,7 @@ public:
         return *this;
     }
 
-    static BaseString removeLastSeparator(BaseString const & path) {
-#if defined(__OS_WINDOWS__)
-        return Path::removeLastSeparatorOfWindows(path);
-#else
-        return Path::removeLastSeparatorOfPosix(path);
-#endif
-    }
-
-    static BaseString removeLastSeparatorOfWindows(BaseString const & path) {
-        return std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*$)"), "");
-    }
-
-    static BaseString removeLastSeparatorOfPosix(BaseString const & path) {
-        return std::regex_replace(path, std::regex(R"(\/\/*$)"), "");
-    }
-
+public:
     /**
      * Clean an overlapped separators.
      *

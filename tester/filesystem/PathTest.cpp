@@ -68,6 +68,19 @@ TEST(PathStaticTest, AssignOperators)
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 }
 
+TEST(PathStaticTest, removeLastSeparator)
+{
+    std::string const PREFIX = "\\/TE/\\MP";
+    std::string const WINDOWS_SUFFIX = "\\\\";
+    std::string const TEMP = PREFIX + WINDOWS_SUFFIX + "//";
+
+    Path::BaseString windows = Path::removeLastSeparatorOfWindows(TEMP);
+    Path::BaseString posix   = Path::removeLastSeparatorOfPosix(TEMP);
+
+    ASSERT_EQ(windows, PREFIX);
+    ASSERT_EQ(posix, PREFIX + WINDOWS_SUFFIX);
+}
+
 // Fixture.
 
 class PathTest : public ::testing::Test
@@ -95,10 +108,10 @@ public:
 
 public:
     PathTest() {
-        ws = std::string() + PATH_SEPARATOR_OF_WINDOWS;
-        ps = std::string() + PATH_SEPARATOR_OF_POSIX;
-        gs = std::string() + GetGenericPathSeparator();
-        s  = std::string() + GetPathSeparator();
+        ws = PATH_SEPARATOR_STRING_OF_WINDOWS;
+        ps = PATH_SEPARATOR_STRING_OF_POSIX;
+        gs = GetGenericPathSeparatorString();
+        s  = GetPathSeparatorString();
     }
 
     virtual ~PathTest() {
@@ -107,7 +120,7 @@ public:
 
 public:
     virtual void SetUp() override {
-        setupOfWindows();
+        __EMPTY_BLOCK__
     }
 
     virtual void TearDown() override {
@@ -154,46 +167,4 @@ public:
         path = Path(test_path);
     }
 };
-
-TEST_F(PathTest, getGeneric)
-{
-    ASSERT_EQ(path.getGeneric(), generic_path);
-
-    Path p1(test_path.c_str(), Path::update_generic());
-    Path p2(test_path, Path::update_generic());
-    ASSERT_EQ(p1.getString(), generic_path);
-    ASSERT_EQ(p2.getString(), generic_path);
-}
-
-TEST_F(PathTest, getNative)
-{
-#if defined(WIN32) || defined(_WIN32)
-    ASSERT_EQ(path.getNative(), windows_path);
-#else
-    ASSERT_EQ(path.getNative(), posix_path);
-#endif
-}
-
-TEST_F(PathTest, hasAbsoluteOfWindows)
-{
-    setupOfWindows();
-    ASSERT_TRUE(Path::isAbsoluteOfWindows(test_path));
-    ASSERT_FALSE(Path::isAbsoluteOfPosix(test_path));
-
-    setupOfPosix();
-    ASSERT_TRUE(Path::isAbsoluteOfPosix(test_path));
-    ASSERT_FALSE(Path::isAbsoluteOfWindows(test_path));
-}
-
-TEST_F(PathTest, splitNodes)
-{
-    std::vector<Path::BaseString> nodes = path.splitNodes();
-    ASSERT_EQ(nodes.size(), 6U);
-    ASSERT_EQ(nodes[0], depth0);
-    ASSERT_EQ(nodes[1], depth1);
-    ASSERT_EQ(nodes[2], depth2);
-    ASSERT_EQ(nodes[3], depth3);
-    ASSERT_EQ(nodes[4], depth4);
-    ASSERT_EQ(nodes[5], depth5);
-}
 
