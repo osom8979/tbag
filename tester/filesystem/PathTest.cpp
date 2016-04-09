@@ -11,57 +11,61 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(PathStaticTest, GlobalPathOperators)
+TEST(PathStaticTest, Constructors)
 {
-# if defined(WIN32) || defined(_WIN32)
-    EXPECT_EQ(GetPathSeparator(), '\\');
-    EXPECT_EQ(GetPathSplitter(),  ';');
-# else
-    EXPECT_EQ(GetPathSeparator(), '/');
-    EXPECT_EQ(GetPathSplitter(),  ':');
-# endif
+    char const * const TEMP = "TEMP";
+
+    Path p0;
+    Path p1 = Path(TEMP);
+    Path p2 = Path(std::string(TEMP));
+    Path p3 = Path(TEMP, Path::update_generic());
+    Path p4 = Path(std::string(TEMP), Path::update_generic());
+    Path p5 = p1;
+    Path p6_move = Path(TEMP);
+    Path p6 = std::move(p6_move);
+
+    ASSERT_STREQ(p0.getString().c_str(), "");
+    ASSERT_STREQ(p1.getString().c_str(), TEMP);
+    ASSERT_STREQ(p2.getString().c_str(), TEMP);
+    ASSERT_STREQ(p3.getString().c_str(), TEMP);
+    ASSERT_STREQ(p4.getString().c_str(), TEMP);
+    ASSERT_STREQ(p5.getString().c_str(), TEMP);
+    ASSERT_STREQ(p6.getString().c_str(), TEMP);
 }
 
-TEST(PathStaticTest, GetHomeEnvName)
+TEST(PathStaticTest, AssignOperators)
 {
-# if defined(WIN32) || defined(_WIN32)
-    EXPECT_STREQ(GetHomeEnvName(), "USERPROFILE");
-# else
-    EXPECT_STREQ(GetHomeEnvName(), "HOME");
-# endif
-}
+    char const * const TEMP = "TEMP";
 
-TEST(PathStaticTest, CopyOperators)
-{
-    Path path1 = Path("TEMP");
-    Path path2 = path1;
-    Path path3;
-    path3 = path1;
-
-    ASSERT_EQ(path2.getString(), path1.getString());
-    ASSERT_EQ(path3.getString(), path1.getString());
-}
-
-TEST(PathStaticTest, MoveOperators)
-{
-    auto rvalue_test = []() -> Path {
-        return Path("TEMP");
+    auto rvalue_test = [&]() -> Path {
+        return Path(TEMP);
     };
 
-#if defined(__COMP_LLVM__)
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wpessimizing-move"
-#endif
+    Path const TEMP_PATH = Path(TEMP);
+    std::string const TEMP_STRING = TEMP;
+    ASSERT_STREQ(TEMP_PATH.getString().c_str(), TEMP);
 
-    Path path1 = std::move(rvalue_test());
-    Path path2;
+    Path p0;
 
-#if defined(__COMP_LLVM__)
-# pragma GCC diagnostic pop
-#endif
+    p0.setString("");
+    p0 = TEMP;
+    ASSERT_STREQ(p0.getString().c_str(), TEMP);
 
-    path2 = rvalue_test();
-    ASSERT_EQ(path1.getString(), path2.getString());
+    p0.setString("");
+    p0 = TEMP_STRING;
+    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+
+    p0.setString("");
+    p0 = std::string(TEMP);
+    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+
+    p0.setString("");
+    p0 = TEMP_PATH;
+    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+
+    p0.setString("");
+    p0 = rvalue_test();
+    ASSERT_STREQ(p0.getString().c_str(), TEMP);
 }
 
 // Fixture.

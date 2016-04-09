@@ -51,13 +51,14 @@ public:
 private:
     BaseString _path;
 
+// Constructors.
 public:
-    Path() {
+    Path() noexcept {
         __EMPTY_BLOCK__
     }
 
     explicit Path(BaseString const & path) : Path() {
-        this->_path = path;
+        this->_path.assign(path);
     }
 
     explicit Path(BaseType const * path) : Path(BaseString(path)) {
@@ -84,11 +85,33 @@ public:
         this->swap(obj);
     }
 
+// Destructor.
+public:
     ~Path() {
-        __EMPTY_BLOCK__;
+        __EMPTY_BLOCK__
     }
 
+// Assign operators.
 public:
+    Path & operator =(BaseType const * path) {
+        this->_path.assign(path);
+        return *this;
+    }
+
+    Path & operator =(BaseString const & path) {
+        if (&(this->_path) != &path) {
+            this->_path = path;
+        }
+        return *this;
+    }
+
+    Path & operator =(BaseString && path) {
+        if (&(this->_path) != &path) {
+            this->_path.swap(path);
+        }
+        return *this;
+    }
+
     Path & operator =(Path const & obj) {
         return this->copy(obj);
     }
@@ -112,12 +135,22 @@ public:
         }
     }
 
-// Path to String.
+// Accessors & Mutators.
 public:
-    BaseString getString() const noexcept {
+    inline BaseString getString() const noexcept {
         return this->_path;
     }
 
+    inline void setString(BaseString const & path) {
+        this->_path.assign(path);
+    }
+
+    inline void setString(BaseType const * path) {
+        this->_path.assign(path);
+    }
+
+// Path to String.
+public:
     /**
      * Generic path format.
      */
@@ -167,8 +200,21 @@ public:
      * @return Cleared path string.
      */
     static BaseString cleanSeparator(BaseString const & path, BaseString const & separator) {
+#if defined(__OS_WINDOWS__)
+        return Path::cleanSeparatorOfWindows(path, separator);
+#else
+        return Path::cleanSeparatorOfPosix(path, separator);
+#endif
+    }
+
+    static BaseString cleanSeparatorOfWindows(BaseString const & path, BaseString const & separator) {
         std::string temp = std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*)"), separator);
-        return removeLastSeparator(std::move(temp));
+        return Path::removeLastSeparatorOfWindows(std::move(temp));
+    }
+
+    static BaseString cleanSeparatorOfPosix(BaseString const & path, BaseString const & separator) {
+        std::string temp = std::regex_replace(path, std::regex(R"(\/\/*)"), separator);
+        return Path::removeLastSeparatorOfPosix(std::move(temp));
     }
 
 // DECOMPOSITION
