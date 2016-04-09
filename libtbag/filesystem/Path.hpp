@@ -143,7 +143,19 @@ public:
     }
 
     static BaseString removeLastSeparator(BaseString const & path) {
+#if defined(__OS_WINDOWS__)
+        return Path::removeLastSeparatorOfWindows(path);
+#else
+        return Path::removeLastSeparatorOfPosix(path);
+#endif
+    }
+
+    static BaseString removeLastSeparatorOfWindows(BaseString const & path) {
         return std::regex_replace(path, std::regex(R"((\\|\/)(\\|\/)*$)"), "");
+    }
+
+    static BaseString removeLastSeparatorOfPosix(BaseString const & path) {
+        return std::regex_replace(path, std::regex(R"(\/\/*$)"), "");
     }
 
     /**
@@ -218,6 +230,40 @@ public:
 
     static bool isAbsoluteOfPosix(BaseString const & path) noexcept {
         return (getRootDirOfPosix(path).empty() == false);
+    }
+
+// FILENAME QUERY.
+public:
+    static bool isProhibitedFilename(BaseString const & path) noexcept {
+#if defined(__OS_WINDOWS__)
+        return Path::isProhibitedFilenameOfWindows(path);
+#else
+        return Path::isProhibitedFilenameOfPosix(path);
+#endif
+    }
+
+    static bool isProhibitedFilenameOfWindows(BaseString const & path) noexcept {
+        for (auto cursor : path) {
+            if (0x00 <= COMPARE_AND(cursor) <= 0x1F) {
+                return true;
+            }
+
+            switch (cursor) {
+            case '*': case '<': case '>':
+            case '?': case '/': case '|': case '\\':
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool isProhibitedFilenameOfPosix(BaseString const & path) noexcept {
+        for (auto cursor : path) {
+            if (cursor == 0x00 || cursor == '/') {
+                return true;
+            }
+        }
+        return false;
     }
 
 // APPEND
