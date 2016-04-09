@@ -183,3 +183,12 @@ TEST_F(PathTest, getNative)
 #endif
 }
 
+TEST_F(PathTest, getRootDir)
+{
+    setupOfWindows();
+    ASSERT_EQ(Path::getRootDirOfWindows(test_path), depth0);
+
+    setupOfPosix();
+    ASSERT_EQ(Path::getRootDirOfPosix(test_path), depth0);
+}
+
