@@ -48,6 +48,19 @@ public:
     using BaseType = char;
     using BaseString = std::basic_string<BaseType>;
 
+public:
+    static constexpr bool isWindowsStyle() noexcept {
+#if defined(__OS_WINDOWS__)
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    static constexpr bool isPosixStyle() noexcept {
+        return !Path::isWindowsStyle();
+    }
+
 private:
     BaseString _path;
 
@@ -340,19 +353,15 @@ public:
 // QUERY
 public:
     static bool isAbsoluteOfWindows(BaseString const & path) noexcept {
-        return (getRootDirOfWindows(path).empty() == false);
+        return !getRootDirOfWindows(path).empty();
     }
 
     static bool isAbsoluteOfPosix(BaseString const & path) noexcept {
-        return (getRootDirOfPosix(path).empty() == false);
+        return !getRootDirOfPosix(path).empty();
     }
 
     static bool isAbsolute(BaseString const & path) noexcept {
-#if defined(__OS_WINDOWS__)
-        return Path::isAbsoluteOfWindows(path);
-#else
-        return Path::isAbsoluteOfPosix(path);
-#endif
+        return !Path::getRootDir(path).empty();
     }
 
     bool isAbsolute() const noexcept {
@@ -390,8 +399,8 @@ public:
         static_assert(is_same::value, "This is not a same type.");
 
         std::vector<BaseString> result;
-        Path generic(path, Path::update_generic());
-        std::string separator = std::string() + GetGenericPathSeparator();
+        Path generic = Path(path, Path::update_generic());
+        std::string separator = GetGenericPathSeparatorString();
         return strings::splitTokens(generic.getString(), separator);
     }
 };

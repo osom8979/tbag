@@ -11,6 +11,17 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
+TEST(PathStaticTest, StyleChecker)
+{
+#if defined(WIN32) || defined(_WIN32)
+    ASSERT_TRUE(Path::isWindowsStyle());
+    ASSERT_FALSE(Path::isPosixStyle());
+#else
+    ASSERT_FALSE(Path::isWindowsStyle());
+    ASSERT_TRUE(Path::isPosixStyle());
+#endif
+}
+
 TEST(PathStaticTest, Constructors)
 {
     char const * const TEMP = "TEMP";
