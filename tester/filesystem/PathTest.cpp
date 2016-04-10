@@ -260,6 +260,72 @@ TEST_F(PathTest, append)
     ASSERT_EQ(p0.getGeneric(), generic_path);
 }
 
+TEST_F(PathTest, getParentOfWindows)
+{
+    setupOfWindows();
+    Path::BaseString test1 = Path::getParentOfWindows(test_path);
+    Path::BaseString test2 = R"(O:\\Temp\Directory/..\.//\\)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfWindows(test1);
+    test2 = R"(O:\\Temp\Directory/..)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfWindows(test1);
+    test2 = R"(O:\\Temp\Directory)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfWindows(test1);
+    test2 = R"(O:\\Temp)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfWindows(test1);
+    test2 = R"(O:\)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfWindows(test1);
+    test2 = "";
+    ASSERT_EQ(test1, test2);
+
+    // OTHER.
+    test1 = Path::getParentOfWindows("TEST_PATH");
+    test2 = "";
+    ASSERT_EQ(test1, test2);
+}
+
+TEST_F(PathTest, getParentOfPosix)
+{
+    setupOfPosix();
+    Path::BaseString test1 = Path::getParentOfPosix(test_path);
+    Path::BaseString test2 = R"(/Temp/\Directory/.././///)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfPosix(test1);
+    test2 = R"(/Temp/\Directory/..)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfPosix(test1);
+    test2 = R"(/Temp/\Directory)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfPosix(test1);
+    test2 = R"(/Temp)";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfPosix(test1);
+    test2 = "/";
+    ASSERT_EQ(test1, test2);
+
+    test1 = Path::getParentOfPosix(test1);
+    test2 = "";
+    ASSERT_EQ(test1, test2);
+
+    // OTHER.
+    test1 = Path::getParentOfPosix("TEST_PATH");
+    test2 = "";
+    ASSERT_EQ(test1, test2);
+}
+
 TEST_F(PathTest, splitNodes)
 {
     setupOfWindows();

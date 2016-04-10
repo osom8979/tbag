@@ -19,6 +19,7 @@
 #include <libtbag/filesystem/Common.hpp>
 #include <libtbag/Strings.hpp>
 
+#include <iterator>
 #include <string>
 #include <regex>
 #include <type_traits>
@@ -208,7 +209,7 @@ public:
     }
 
 public:
-    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_WINDOWS = R"((\\|\/)(\\|\/)*)";
+    constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_WINDOWS = R"([\\\/][\\\/]*)";
     constexpr static BaseType const * const REMOVE_SEPARATOR_REGEX_OF_POSIX   = R"(\/\/*)";
 
 // removeLastSeparator() methods.
@@ -380,16 +381,50 @@ public:
         return append(sub, BaseString(GetGenericPathSeparatorString()));
     }
 
-    Path & operator /= (BaseString const & sub) {
+    Path & operator /=(BaseString const & sub) {
         return append(sub);
     }
 
-    Path & operator += (BaseString const & sub) {
+    Path & operator +=(BaseString const & sub) {
         return append(sub);
     }
 
 // Parent.
 public:
+    static BaseString getParentOfWindows(BaseString const & path) {
+        BaseString temp = Path::removeLastSeparatorOfWindows(path);
+        for (auto ritr = temp.rbegin(); ritr != temp.rend();  ++ritr) {
+            if (*ritr == PATH_SEPARATOR_OF_WINDOWS || *ritr == PATH_SEPARATOR_OF_POSIX) {
+                return temp.substr(0, temp.size() - std::distance(temp.rbegin(), ritr) - 1U);
+            }
+        }
+        return BaseString();
+    }
+
+    static BaseString getParentOfPosix(BaseString const & path) {
+        if (path.size() == 1U && path[0] == PATH_SEPARATOR_OF_POSIX) {
+            return BaseString();
+        }
+        BaseString temp = Path::removeLastSeparatorOfWindows(path);
+        BaseString::size_type last_separator_index = temp.rfind(PATH_SEPARATOR_STRING_OF_POSIX);
+        if (last_separator_index == 0U && temp.size() > 1U && temp[0] == PATH_SEPARATOR_OF_POSIX) {
+            return BaseString(PATH_SEPARATOR_STRING_OF_POSIX);
+        } else if (last_separator_index == BaseString::npos) {
+            return BaseString();
+        }
+        return temp.substr(0, last_separator_index);
+    }
+
+    static BaseString getParent(BaseString const & path) {
+        if (Path::isWindowsStyle()) {
+            return Path::getParentOfWindows(path);
+        }
+        return Path::getParentOfPosix(path);
+    }
+
+    BaseString getParent() const {
+        return Path::getParent(this->_path);
+    }
 
 // Node operators.
 public:
