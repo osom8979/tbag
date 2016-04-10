@@ -248,6 +248,18 @@ TEST_F(PathTest, isAbsolute)
     ASSERT_FALSE(Path::isAbsoluteOfWindows(test_path));
 }
 
+TEST_F(PathTest, append)
+{
+    Path p0;
+    p0.append(depth0);
+    p0.append(depth1, Path::BaseString(GetGenericPathSeparatorString()));
+    p0 /= depth2;
+    p0 += depth3;
+    p0.append(depth4);
+    p0.append(depth5);
+    ASSERT_EQ(p0.getGeneric(), generic_path);
+}
+
 TEST_F(PathTest, splitNodes)
 {
     setupOfWindows();

@@ -290,6 +290,7 @@ public:
         return *this;
     }
 
+// Native string.
 public:
     inline static BaseString
     getNative(BaseString const & path) {
@@ -308,7 +309,7 @@ public:
         return *this;
     }
 
-// DECOMPOSITION
+// Decomposition.
 public:
     static BaseString getRootDirOfWindows(BaseString const & path) {
         if (path.size() < 2 || path[1] != ':') {
@@ -328,13 +329,6 @@ public:
         return BaseString(PATH_SEPARATOR_STRING_OF_POSIX);
     }
 
-    /**
-     * root-directory, if @c _path includes root-directory,
-     * otherwise empty string.
-     *
-     * @remarks
-     *  Don't use regex library.
-     */
     static BaseString getRootDir(BaseString const & path) {
         if (Path::isWindowsStyle()) {
             return Path::getRootDirOfWindows(path);
@@ -342,6 +336,10 @@ public:
         return Path::getRootDirOfPosix(path);
     }
 
+    /**
+     * root-directory, if @c _path includes root-directory,
+     * otherwise empty string.
+     */
     BaseString getRootDir() const noexcept {
         return Path::getRootDir(this->_path);
     }
@@ -364,10 +362,17 @@ public:
         return Path::isAbsolute(this->_path);
     }
 
+    bool isRelative() const noexcept {
+        return !isAbsolute();
+    }
+
 // Append.
 public:
     Path & append(BaseString const & sub, BaseString const & separator) {
-        this->_path += separator + sub;
+        this->_path += separator;
+        if (separator != sub) {
+            this->_path += sub;
+        }
         return *this;
     }
 
@@ -382,6 +387,9 @@ public:
     Path & operator += (BaseString const & sub) {
         return append(sub);
     }
+
+// Parent.
+public:
 
 // Node operators.
 public:
