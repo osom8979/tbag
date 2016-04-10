@@ -22,6 +22,7 @@
 #include <iterator>
 #include <string>
 #include <regex>
+#include <initializer_list>
 #include <type_traits>
 
 // -------------------
@@ -89,6 +90,12 @@ public:
                 , update_generic const & UNUSED_PARAM(empty_value))
             : Path(path){
         this->updateGeneric();
+    }
+
+    Path(std::initializer_list<BaseString> list) {
+        for (auto cursor : list) {
+            this->append(cursor);
+        }
     }
 
     Path(Path const & obj) {
@@ -370,10 +377,13 @@ public:
 // Append.
 public:
     Path & append(BaseString const & sub, BaseString const & separator) {
-        this->_path += separator;
-        if (separator != sub) {
-            this->_path += sub;
+        if (!this->_path.empty() && sub != separator) {
+            BaseString last_char = BaseString() + this->_path.back();
+            if (last_char != separator) {
+                this->_path += separator;
+            }
         }
+        this->_path += sub;
         return *this;
     }
 

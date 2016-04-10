@@ -44,6 +44,12 @@ TEST(PathStaticTest, Constructors)
     ASSERT_STREQ(p6.getString().c_str(), TEMP);
 }
 
+TEST(PathStaticTest, initializer_list)
+{
+    Path p0 = {"/", "TE", "M", "P"};
+    ASSERT_EQ(p0.getString(), Path::BaseString("/TE/M/P"));
+}
+
 TEST(PathStaticTest, AssignOperators)
 {
     char const * const TEMP = "TEMP";
@@ -258,6 +264,10 @@ TEST_F(PathTest, append)
     p0.append(depth4);
     p0.append(depth5);
     ASSERT_EQ(p0.getGeneric(), generic_path);
+
+    p0 = "";
+    p0.append("/");
+    ASSERT_EQ(p0.getString(), Path::BaseString("/"));
 }
 
 TEST_F(PathTest, getParentOfWindows)
