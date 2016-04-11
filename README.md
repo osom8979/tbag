@@ -15,6 +15,8 @@
 
 # TBAG
 
+[![Build Status](https://travis-ci.org/osom8979/tbag.svg?branch=master)](https://travis-ci.org/osom8979/tbag)
+
 ## About
 
 Tea-bag is Third party extension utility project.
