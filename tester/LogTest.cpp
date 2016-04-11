@@ -10,8 +10,24 @@
 
 using namespace libtbag;
 
-TEST(Log, CoverageOnly)
+TEST(LogStaticTest, CoverageOnly)
 {
-    Log::getConsole()->info("Log/Console/Info");
+    Log::getInstance()->setLevel(Log::Level::DBG);
+    Log::getInstance()->setDefaultFormat();
+
+    Log::getInstance()->setEnableConsole();
+    Log::getInstance()->setEnableFile();
+
+    Log::getInstance()->initConsole();
+    Log::getInstance()->initFile("Log");
+
+    Log::getInstance()->trace("Trace");
+    Log::getInstance()->debug("Debug");
+    Log::getInstance()->info("Info");
+    Log::getInstance()->error("Error");
+    Log::getInstance()->emerg("Emergency");
+
+    _TLOG("TRACE");
+    _DLOG("DEBUG");
 }
 
