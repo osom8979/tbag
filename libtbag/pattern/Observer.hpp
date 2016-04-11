@@ -19,11 +19,8 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <functional>
-#include <unordered_set>
-#include <map>
-#include <memory>
+#include <set>
 #include <mutex>
-#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,118 +28,19 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace pattern {
 
-
-/**
- * Observer interface.
- *
- * @author zer0
- * @date   2015-08-26
- */
-class Observer
+template <typename T>
+struct ObservableInterface
 {
 public:
-    Observer() noexcept = default;
-    virtual ~Observer() noexcept = default;
+    using Observer = T;
 
 public:
-    /**
-     * Function of callback event.
-     */
-    virtual void notify(void * data) = 0;
-};
-
-/** Observer class to hash code. */
-template <typename ObserverType = Observer>
-inline std::size_t toObserverHash(ObserverType * observer)
-{
-    return reinterpret_cast<size_t>(observer);
-}
-
-/** Shared object for the Observer class. */
-using SharedObserver = std::shared_ptr<Observer>;
-
-/**
- * SmartObserver hash class.
- *
- * @author zer0
- * @date   2015-08-26
- * @date   2015-10-12 (Switch to the template class)
- */
-template <typename ObserverType = Observer
-        , typename SmartPointer = std::shared_ptr<ObserverType>
-        , typename HashFunctor  = std::hash<SmartPointer>
->
-struct SmartObserverHash : public HashFunctor
-{
-    std::size_t operator()(SmartPointer p) const noexcept
-    {
-        return toObserverHash<ObserverType>(p.get());
-    }
-};
-
-/**
- * SmartObserver equal_to class.
- *
- * @author zer0
- * @date   2015-08-26
- * @date   2015-10-12 (Switch to the template class)
- */
-template <typename ObserverType  = Observer
-        , typename SmartPointer  = std::shared_ptr<ObserverType>
-        , typename BinaryFunctor = std::binary_function<SmartPointer, SmartPointer, bool>
->
-struct SmartObserverEqualTo: public BinaryFunctor
-{
-    bool operator()(SmartPointer const & x, SmartPointer const & y) const
-    {
-        return reinterpret_cast<std::size_t>(x.get()) == reinterpret_cast<std::size_t>(y.get());
-    }
-};
-
-
-/**
- * Interface of Observable like classes.
- *
- * @author zer0
- * @date   2015-08-27
- * @date   2015-10-12 (Switch to the template class)
- */
-template <typename ObserverType = Observer
-        , typename ValueType = std::shared_ptr<ObserverType>
-        , typename ParamType = std::shared_ptr<void>
->
-class ObservableBase
-{
-public:
-    using Value = ValueType;
-    using Param = ParamType;
+    ObservableInterface() = default;
+    virtual ~ObservableInterface() = default;
 
 public:
-    ObservableBase() noexcept = default;
-    virtual ~ObservableBase() = default;
-
-public:
-    virtual void registerObserver(Value const & observer) = 0;
-    virtual void unregisterObserver(Value const & observer) = 0;
-    virtual void notifyObserver(Param const & data) = 0;
-
-public:
-    void notifyObserverFromNullParam()
-    {
-        this->notifyObserver(Param(nullptr));
-    }
-
-    void asyncNotifyObserverFromNullParam()
-    {
-        this->asyncNotifyObserver(Param(nullptr));
-    }
-
-    void asyncNotifyObserver(Param const & data)
-    {
-        using Caller = void(ObservableBase::*)(Param const &);
-        std::thread thread(static_cast<Caller>(&ObservableBase::notifyObserver), this, data);
-        thread.detach();
-    }
+    virtual bool add(Observer const & observer) = 0;
+    virtual void notify() = 0;
 };
 
 /**
@@ -151,171 +49,65 @@ public:
  * @author zer0
  * @date   2015-08-26
  * @date   2015-10-12 (Switch to the template class)
+ * @date   2016-04-11 (Remove std::shared_ptr template class)
  */
-template <typename ObserverType = Observer
-        , typename ValueType = std::shared_ptr<ObserverType>
-        , typename ParamType = std::shared_ptr<void>
-        , typename HashType  = SmartObserverHash<ObserverType, ValueType>
-        , typename PredType  = SmartObserverEqualTo<ObserverType, ValueType>
-        , typename SetType   = std::unordered_set<ValueType, HashType, PredType>
->
-class ObservableSet : public ObservableBase<ObserverType, ValueType, ParamType>, public Noncopyable
+template <typename T = std::function<void(void)> >
+class ObservableSet : public ObservableInterface<T>, public Noncopyable
 {
 public:
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
+    using Observer = typename ObservableInterface<T>::Observer;
+
+public:
+    struct ObserverLess : std::binary_function<Observer, Observer, bool>
+    {
+        bool operator ()(Observer const & x, Observer const & y) const {
+            return reinterpret_cast<std::size_t>(&x) < reinterpret_cast<std::size_t>(&y);
+        }
+    };
+
+public:
+    using Collection = std::set<Observer, ObserverLess>;
 
 private:
-    Mutex _locker;
-    Mutex _notify_locker;
-    SetType _collection;
+    std::mutex _locker;
+    Collection _collection;
 
 public:
     ObservableSet() = default;
-    virtual ~ObservableSet() = default;
+    ~ObservableSet() = default;
 
 public:
-    virtual void registerObserver(ValueType const & observer) override
-    {
-        Guard guard(this->_locker);
+    virtual bool add(Observer const & observer) override {
+        std::lock_guard<std::mutex> guard(this->_locker);
         if (_collection.size() + 1 >= _collection.max_size()) {
-            return;
+            return false;
         }
         _collection.insert(observer);
+        return true;
     }
-
-    virtual void unregisterObserver(ValueType const & observer) override
-    {
-        Guard guard(this->_locker);
-        _collection.erase(observer);
-    }
-
-    virtual void notifyObserver(ParamType const & data) override
-    {
-        Guard guard(this->_notify_locker);
-        //{
-        _locker.lock();
-        SetType clone = _collection;
-        _locker.unlock();
-        //}
-
-        if (clone.size() == 0) {
-            return;
-        }
-        for (auto cursor : clone) {
-            cursor->notify(data.get());
-        }
-    }
-};
-
-
-/**
- * ObservableMap class prototype.
- *
- * @author zer0
- * @date   2015-08-27
- * @date   2015-10-12 (Switch to the template class)
- */
-template <typename ObserverType = Observer
-        , typename KeyType   = int
-        , typename ValueType = std::shared_ptr<ObserverType>
-        , typename ParamType = std::shared_ptr<void>
-        , typename MapType   = std::multimap<KeyType, ValueType>
->
-class ObservableMap : public ObservableBase<ObserverType, ValueType, ParamType>, public Noncopyable
-{
-public:
-    using Mutex   = std::mutex;
-    using Guard   = std::lock_guard<Mutex>;
-    using MapPair = typename MapType::value_type;
-
-public:
-    static const KeyType MIN_ORDER;
-    static const KeyType MAX_ORDER;
-    static const KeyType DEFAULT_ORDER;
 
 private:
-    Mutex _locker;
-    Mutex _notify_locker;
-    MapType _collection;
+    std::mutex _notify_locker;
 
 public:
-    ObservableMap() = default;
-    virtual ~ObservableMap() = default;
-
-public:
-    void registerObserver(KeyType const & order, ValueType const & observer)
-    {
-        Guard guard(this->_locker);
-        if (_collection.size() + 1 >= _collection.max_size()) {
-            return;
-        }
-        _collection.insert(MapPair(order, observer));
-    }
-
-    void registerObserver(ValueType const & observer)
-    {
-        this->registerObserver(DEFAULT_ORDER, observer);
-    }
-
-    void unregisterObserver(ValueType const & observer)
-    {
-        Guard guard(this->_locker);
-        if (_collection.size() == 0) {
-            return;
-        }
-
-        std::size_t compare_hash = toObserverHash(observer.get());
-        std::size_t current_hash = 0;
-
-        for (auto itr = _collection.begin(); itr != _collection.end(); ++itr) {
-            current_hash = toObserverHash(itr->second.get());
-            if (current_hash == compare_hash) {
-                _collection.erase(itr);
-                break;
-            }
-        }
-    }
-
-    void notifyObserver(ParamType const & data)
-    {
-        Guard guard(this->_notify_locker);
+    virtual void notify() override {
+        std::lock_guard<std::mutex> guard(this->_notify_locker);
         //{
-        _locker.lock();
-        MapType clone = _collection;
-        _locker.unlock();
+        this->_locker.lock();
+        Collection clone = this->_collection;
+        this->_locker.unlock();
         //}
 
-        if (clone.size() == 0) {
-            return;
-        }
         for (auto cursor : clone) {
-            cursor.second->notify(data.get());
+            cursor();
         }
     }
 };
 
-template <typename ObserverType, typename KeyType, typename ValueType
-        , typename ParamType, typename MapType>
-const KeyType ObservableMap<ObserverType, KeyType, ValueType, ParamType, MapType>::MIN_ORDER
-        = std::numeric_limits<KeyType>::min();
+// --------------------
+// Default type define.
+// --------------------
 
-template <typename ObserverType, typename KeyType, typename ValueType
-        , typename ParamType, typename MapType>
-const KeyType ObservableMap<ObserverType, KeyType, ValueType, ParamType, MapType>::MAX_ORDER
-        = std::numeric_limits<KeyType>::max();
-
-template <typename ObserverType, typename KeyType, typename ValueType
-        , typename ParamType, typename MapType>
-const KeyType ObservableMap<ObserverType, KeyType, ValueType, ParamType, MapType>::DEFAULT_ORDER
-        = static_cast<KeyType>(100);
-
-
-// ---------------------
-// Default type defined.
-// ---------------------
-
-using OrderedObservable   = ObservableMap<>;
 using UnorderedObservable = ObservableSet<>;
 
 } // namespace pattern
