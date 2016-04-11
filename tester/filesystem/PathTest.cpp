@@ -64,23 +64,18 @@ TEST(PathStaticTest, AssignOperators)
 
     Path p0;
 
-    p0.setString("");
     p0 = TEMP;
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 
-    p0.setString("");
     p0 = TEMP_STRING;
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 
-    p0.setString("");
     p0 = std::string(TEMP);
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 
-    p0.setString("");
     p0 = TEMP_PATH;
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 
-    p0.setString("");
     p0 = rvalue_test();
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 }
@@ -336,7 +331,7 @@ TEST_F(PathTest, getParentOfPosix)
     ASSERT_EQ(test1, test2);
 }
 
-TEST_F(PathTest, splitNodes)
+TEST_F(PathTest, splitNodesOfWindows)
 {
     setupOfWindows();
     Path::Nodes nodes = Path::splitNodesOfWindows(test_path);
@@ -347,9 +342,12 @@ TEST_F(PathTest, splitNodes)
     ASSERT_EQ(nodes[3], depth3);
     ASSERT_EQ(nodes[4], depth4);
     ASSERT_EQ(nodes[5], depth5);
+}
 
+TEST_F(PathTest, splitNodesOfPosix)
+{
     setupOfPosix();
-    nodes = Path::splitNodesOfPosix(test_path);
+    Path::Nodes nodes = Path::splitNodesOfPosix(test_path);
     ASSERT_EQ(nodes.size(), 6U);
     ASSERT_EQ(nodes[0], depth0);
     ASSERT_EQ(nodes[1], depth1);
