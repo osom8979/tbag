@@ -29,7 +29,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 constexpr char const * const DEFAULT_LOGGER_OF_CONSOLE = "_C";
 constexpr char const * const DEFAULT_LOGGER_OF_FILE = "_F";
-constexpr char const * const DEFAULT_LOGGER_FORMAT = "%L[%Y-%m-%dT%H%M%S.%e%z@%t] %v";
+constexpr char const * const DEFAULT_LOGGER_FORMAT = "%L [%Y-%m-%dT%H:%M:%S.%e] [%t] %v";
 
 constexpr bool IsAsynchronousLogging() noexcept
 {
