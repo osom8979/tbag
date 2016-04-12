@@ -92,6 +92,140 @@ public:
         }
     }
 
+// XML.
+public:
+    bool readFile(std::string const & path, std::string const & tag) {
+        this->_tag = tag;
+        this->_map = Resource::readFromXmlFile(path, tag);
+        return !this->_map.empty();
+    }
+
+    bool readString(std::string const & xml, std::string const & tag) {
+        this->_tag = tag;
+        this->_map = Resource::readFromXmlString(xml, tag);
+        return !this->_map.empty();
+    }
+
+    bool save(std::string const & path) {
+        return Resource::save(path, this->_tag, this->_map);
+    }
+
+// Accessor.
+public:
+    template <typename Type, typename Converter>
+    bool getValue(std::string const & key, Type * result, Converter func) const {
+        auto find_value = this->_map.find(key);
+        if (find_value == this->_map.end()) {
+            return false;
+        }
+
+        Type convert = 0;
+        try {
+            convert = func(find_value->second);
+        } catch (std::invalid_argument & e) {
+            // e.what();
+            return false;
+        }
+
+        if (result != nullptr) {
+            *result = convert;
+        }
+        return true;
+    }
+
+public:
+    bool get(std::string const & key, std::string * result) const {
+        auto find_value = this->_map.find(key);
+        if (find_value == this->_map.end()) {
+            return false;
+        }
+
+        if (result != nullptr) {
+            *result = find_value->second;
+        }
+
+        return true;
+    }
+
+    std::string get(std::string const & key, std::string default_value) const {
+        std::string result;
+        if (get(key, &result)) {
+            return result;
+        }
+        return default_value;
+    }
+
+    std::string get(std::string const & key) const {
+        return get(key, std::string(""));
+    }
+
+#ifndef __RESOURCE_ACCESSOR_IMPLEMENT
+#define __RESOURCE_ACCESSOR_IMPLEMENT(name, type, func, value)      \
+public:                                                             \
+    bool get##name(std::string const & key, type * result) const {  \
+        return getValue(key, result                                 \
+                , [](std::string const & str) -> type {             \
+                    return func(str);                               \
+                });                                                 \
+    }                                                               \
+    type get##name(std::string const & key                          \
+                 , type default_value = value) const {              \
+        type result = 0;                                            \
+        if (get##name(key, &result)) {                              \
+            return result;                                          \
+        }                                                           \
+        return default_value;                                       \
+    }
+#endif
+
+public:
+    __RESOURCE_ACCESSOR_IMPLEMENT(Integer,    int,                   std::stoi,   0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(UnInteger,  unsigned int,          std::stoul,  0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(LongLong,   long long,             std::stoll,  0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(UnLongLong, unsigned long long,    std::stoull, 0);
+
+    __RESOURCE_ACCESSOR_IMPLEMENT(Float,      float,       std::stof,  0.0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(Double,     double,      std::stod,  0.0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(LongDouble, long double, std::stold, 0.0);
+
+// Mutator.
+public:
+    void set(std::string const & key, std::string const & value) {
+        auto find_value = this->_map.find(key);
+        if (find_value == this->_map.end()) {
+            this->_map.insert(std::make_pair(key, value));
+        } else {
+            find_value->second = value;
+        }
+    }
+
+#ifndef __RESOURCE_MUTATOR_IMPLEMENT
+#define __RESOURCE_MUTATOR_IMPLEMENT(name, type)                    \
+public:                                                             \
+    void set##name(std::string const & key, type const & value) {   \
+        this->set(key, std::to_string(value));                      \
+    }
+#endif
+
+public:
+    __RESOURCE_MUTATOR_IMPLEMENT(Integer,    int);
+    __RESOURCE_MUTATOR_IMPLEMENT(UnInteger,  unsigned int);
+    __RESOURCE_MUTATOR_IMPLEMENT(LongLong,   long long);
+    __RESOURCE_MUTATOR_IMPLEMENT(UnLongLong, unsigned long long);
+
+    __RESOURCE_MUTATOR_IMPLEMENT(Float,      float);
+    __RESOURCE_MUTATOR_IMPLEMENT(Double,     double);
+    __RESOURCE_MUTATOR_IMPLEMENT(LongDouble, long double);
+
+public:
+    std::string & at(std::string const & key) {
+        return this->_map.at(key);
+    }
+
+    std::string const & at(std::string const & key) const {
+        return this->_map.at(key);
+    }
+
 // TinyXML2 operators.
 public:
     using Document = tinyxml2::XMLDocument;
@@ -99,7 +233,7 @@ public:
     using Node = tinyxml2::XMLNode;
 
 public:
-    static Map read(Document const & doc, Str const & tag) {
+    static Map readFromXmlDocument(Document const & doc, std::string const & tag) {
         Element const * root = doc.FirstChildElement(ROOT_TAG);
         if (root == nullptr) {
             return Map();
@@ -109,32 +243,32 @@ public:
         Map map;
 
         while (cursor != nullptr) {
-            map.insert(std::make_pair(Str(cursor->Attribute(NAME_ATTRIBUTE))
-                                    , Str(cursor->GetText())));
+            map.insert(std::make_pair(std::string(cursor->Attribute(NAME_ATTRIBUTE))
+                                    , std::string(cursor->GetText())));
             cursor = cursor->NextSiblingElement(tag.c_str());
         }
         return map;
     }
 
 public:
-    static Map readFromString(Str const & xml, Str const & tag) {
+    static Map readFromXmlString(std::string const & xml, std::string const & tag) {
         Document doc;
         if (doc.Parse(xml.c_str()) == tinyxml2::XML_NO_ERROR) {
-            return Resource::read(doc, tag);
+            return Resource::readFromXmlDocument(doc, tag);
         }
         return Map();
     }
 
-    static Map read(Str const & path, Str const & tag) {
+    static Map readFromXmlFile(std::string const & path, std::string const & tag) {
         Document doc;
         if (doc.LoadFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
-            return Resource::read(doc, tag);
+            return Resource::readFromXmlDocument(doc, tag);
         }
         return Map();
     }
 
 public:
-    static bool save(Str const & path, Str const & tag, Map const & map) {
+    static bool save(std::string const & path, std::string const & tag, Map const & map) {
         Document doc;
         Node * node = doc.InsertFirstChild(doc.NewElement(ROOT_TAG));
         for (auto cursor : map) {

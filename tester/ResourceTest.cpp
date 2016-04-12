@@ -15,29 +15,60 @@ class ResourceTest : public ::testing::Test
 public:
     std::string xml;
     std::string tag;
+
     std::string attribute1;
     std::string attribute2;
     std::string attribute3;
     std::string attribute4;
+    std::string attribute5;
 
+    Resource _res;
+
+    std::string value1;
+    std::string value2;
+    std::string value3;
+    std::string value4;
+    std::string value5;
+
+    std::string value1_2;
+    std::string value2_2;
+    int         value3_2;
+    int         value4_2;
+    float       value5_2;
 public:
     ResourceTest() = default;
     virtual ~ResourceTest() = default;
 
 public:
     virtual void SetUp() override {
-        xml = "<?xml version=\"1.0\"?>"
-              "<resource>"
-              "<property name=\"title1\">test&amp;title1</property>"
-              "<property name=\"title2\">test&amp;title2</property>"
-              "<property name=\"number\">100</property>"
-              "<property name=\"number\">101</property>"
-              "</resource>";
-        tag = "property";
         attribute1 = "title1";
         attribute2 = "title2";
         attribute3 = "number";
         attribute4 = "number";
+        attribute5 = "floating";
+
+        value1 = "test&amp;title1";
+        value2 = "test&amp;title2";
+        value3 = "100";
+        value4 = "50";
+        value5 = "55.555555";
+
+        value1_2 = "test&title1";
+        value2_2 = "test&title2";
+        value3_2 = 100;
+        value4_2 = 50;
+        value5_2 = 55.555555;
+
+        xml = std::string() + "<?xml version=\"1.0\"?>" + "<resource>"
+              + "<property name=\"" + attribute1 + "\">" + value1 + "</property>"
+              + "<property name=\"" + attribute2 + "\">" + value2 + "</property>"
+              + "<property name=\"" + attribute3 + "\">" + value3 + "</property>"
+              + "<property name=\"" + attribute4 + "\">" + value4 + "</property>"
+              + "<property name=\"" + attribute5 + "\">" + value5 + "</property>"
+              + "</resource>";
+        tag = "property";
+
+        _res.readString(xml, tag);
     }
 
     virtual void TearDown() override {
@@ -45,21 +76,71 @@ public:
     }
 };
 
-TEST_F(ResourceTest, readFromString)
+TEST_F(ResourceTest, readFromXmlString)
 {
     Resource::Map map;
-    map = Resource::readFromString(xml, tag);
+    map = Resource::readFromXmlString(xml, tag);
 
-    ASSERT_EQ(map.size(), 3U);
-    ASSERT_STREQ(map.find(attribute1)->second.c_str(), "test&title1");
-    ASSERT_STREQ(map.find(attribute2)->second.c_str(), "test&title2");
-    ASSERT_STREQ(map.find(attribute3)->second.c_str(), "100");
+    ASSERT_EQ(map.size(), 4U);
+    ASSERT_EQ(map.find(attribute1)->second, value1_2);
+    ASSERT_EQ(map.find(attribute2)->second, value2_2);
+    ASSERT_EQ(map.find(attribute3)->second, value3);
 }
 
 TEST_F(ResourceTest, save)
 {
     Resource::Map map;
-    map = Resource::readFromString(xml, tag);
+    map = Resource::readFromXmlString(xml, tag);
     ASSERT_TRUE(Resource::save("Resource_Test_save.xml", tag, map));
+}
+
+TEST_F(ResourceTest, get)
+{
+    ASSERT_EQ(_res.get(attribute1), value1_2);
+
+    ASSERT_EQ(_res.getInteger(attribute3), value3_2);
+    ASSERT_EQ(_res.getInteger(attribute1), 0);
+
+    ASSERT_EQ(_res.getUnInteger(attribute3), value3_2);
+    ASSERT_EQ(_res.getUnInteger(attribute1), 0);
+
+    ASSERT_EQ(_res.getLongLong(attribute3), value3_2);
+    ASSERT_EQ(_res.getLongLong(attribute1), 0);
+
+    ASSERT_EQ(_res.getUnLongLong(attribute3), value3_2);
+    ASSERT_EQ(_res.getUnLongLong(attribute1), 0);
+
+    ASSERT_FLOAT_EQ(_res.getFloat(attribute5), value5_2);
+    ASSERT_FLOAT_EQ(_res.getFloat(attribute1), 0.0);
+
+    float abs_error = 0.0001;
+
+    ASSERT_NEAR(_res.getFloat(attribute5), value5_2, abs_error);
+    ASSERT_NEAR(_res.getFloat(attribute1),      0.0, abs_error);
+
+    ASSERT_NEAR(_res.getDouble(attribute5), value5_2, abs_error);
+    ASSERT_NEAR(_res.getDouble(attribute1),      0.0, abs_error);
+
+    ASSERT_NEAR(_res.getLongDouble(attribute5), value5_2, abs_error);
+    ASSERT_NEAR(_res.getLongDouble(attribute1),      0.0, abs_error);
+}
+
+TEST_F(ResourceTest, set)
+{
+    Resource res;
+    res.setInteger(attribute3, value3_2);
+    ASSERT_EQ(res.get(attribute3), value3);
+
+    res.setInteger(attribute4, value4_2);
+    ASSERT_EQ(res.get(attribute4), value4);
+}
+
+TEST_F(ResourceTest, at)
+{
+    ASSERT_EQ(_res.at(attribute1), value1_2);
+
+    std::string const TEST = "TEST";
+    _res.at(attribute1) = TEST;
+    ASSERT_EQ(_res.at(attribute1), TEST);
 }
 
