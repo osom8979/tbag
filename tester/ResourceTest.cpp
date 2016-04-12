@@ -101,14 +101,14 @@ TEST_F(ResourceTest, get)
     ASSERT_EQ(_res.getInteger(attribute3), value3_2);
     ASSERT_EQ(_res.getInteger(attribute1), 0);
 
-    ASSERT_EQ(_res.getUnInteger(attribute3), value3_2);
-    ASSERT_EQ(_res.getUnInteger(attribute1), 0);
+    ASSERT_EQ(_res.getUnInteger(attribute3), static_cast<unsigned int>(value3_2));
+    ASSERT_EQ(_res.getUnInteger(attribute1), 0U);
 
     ASSERT_EQ(_res.getLongLong(attribute3), value3_2);
     ASSERT_EQ(_res.getLongLong(attribute1), 0);
 
-    ASSERT_EQ(_res.getUnLongLong(attribute3), value3_2);
-    ASSERT_EQ(_res.getUnLongLong(attribute1), 0);
+    ASSERT_EQ(_res.getUnLongLong(attribute3), static_cast<unsigned long long>(value3_2));
+    ASSERT_EQ(_res.getUnLongLong(attribute1), 0U);
 
     ASSERT_FLOAT_EQ(_res.getFloat(attribute5), value5_2);
     ASSERT_FLOAT_EQ(_res.getFloat(attribute1), 0.0);
