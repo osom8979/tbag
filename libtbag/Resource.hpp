@@ -148,7 +148,7 @@ public:
     }
 
 public:
-    bool get(std::string const & key, std::string * result) const {
+    bool getString(std::string const & key, std::string * result) const {
         auto find_value = this->_map.find(key);
         if (find_value == this->_map.end()) {
             return false;
@@ -161,16 +161,22 @@ public:
         return true;
     }
 
-    std::string get(std::string const & key, std::string default_value) const {
+    std::string getString(std::string const & key, std::string default_value) const {
         std::string result;
-        if (get(key, &result)) {
+        if (getString(key, &result)) {
             return result;
         }
         return default_value;
     }
 
-    std::string get(std::string const & key) const {
-        return get(key, std::string(""));
+    std::string getString(std::string const & key) const {
+        return getString(key, std::string(""));
+    }
+
+    auto get(std::string const & key
+           , std::string default_value) const
+           -> decltype(default_value) {
+        return getString(key, std::string(""));
     }
 
 #ifndef __RESOURCE_ACCESSOR_IMPLEMENT
@@ -189,6 +195,11 @@ public:                                                             \
             return result;                                          \
         }                                                           \
         return default_value;                                       \
+    }                                                               \
+    auto get(std::string const & key                                \
+           , type default_value = value) const                      \
+           -> decltype(default_value) {                             \
+        return this->get##name(key, default_value);                 \
     }
 #endif
 

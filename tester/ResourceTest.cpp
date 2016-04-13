@@ -108,9 +108,9 @@ TEST_F(ResourceTest, save)
     ASSERT_TRUE(Resource::save("Resource_Test_save.xml", tag, map));
 }
 
-TEST_F(ResourceTest, get)
+TEST_F(ResourceTest, getValue)
 {
-    ASSERT_EQ(res.get(attribute1), value1_2);
+    ASSERT_EQ(res.getString(attribute1), value1_2);
 
     ASSERT_EQ(res.getInteger(attribute3), value3_2);
     ASSERT_EQ(res.getInteger(attribute1), 0);
@@ -139,14 +139,29 @@ TEST_F(ResourceTest, get)
     ASSERT_NEAR(res.getLongDouble(attribute1),      0.0, abs_error);
 }
 
+TEST_F(ResourceTest, get)
+{
+    ASSERT_EQ(res.get(attribute1, ""), value1_2);
+
+    ASSERT_EQ(res.get(attribute3, static_cast<int>(0)), value3_2);
+    ASSERT_EQ(res.get(attribute3, static_cast<unsigned int>(0)), static_cast<unsigned int>(value3_2));
+    ASSERT_EQ(res.get(attribute3, static_cast<long long>(0)), value3_2);
+    ASSERT_EQ(res.get(attribute3, static_cast<unsigned long long>(0)), static_cast<unsigned long long>(value3_2));
+
+    float abs_error = 0.0001;
+    ASSERT_NEAR(res.get(attribute5, static_cast<float>(0)), value5_2, abs_error);
+    ASSERT_NEAR(res.get(attribute5, static_cast<double>(0)), value5_2, abs_error);
+    ASSERT_NEAR(res.get(attribute5, static_cast<long double>(0)), value5_2, abs_error);
+}
+
 TEST_F(ResourceTest, set)
 {
     Resource res;
     res.setInteger(attribute3, value3_2);
-    ASSERT_EQ(res.get(attribute3), value3);
+    ASSERT_EQ(res.getString(attribute3), value3);
 
     res.setInteger(attribute4, value4_2);
-    ASSERT_EQ(res.get(attribute4), value4);
+    ASSERT_EQ(res.getString(attribute4), value4);
 }
 
 TEST_F(ResourceTest, at)
