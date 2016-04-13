@@ -225,22 +225,22 @@ public:
     }
 
 #ifndef __RESOURCE_MUTATOR_IMPLEMENT
-#define __RESOURCE_MUTATOR_IMPLEMENT(name, type)                    \
-public:                                                             \
-    void set##name(std::string const & key, type const & value) {   \
-        this->set(key, std::to_string(value));                      \
+#define __RESOURCE_MUTATOR_IMPLEMENT(type)                  \
+public:                                                     \
+    void set(std::string const & key, type const & value) { \
+        this->set(key, std::to_string(value));              \
     }
 #endif
 
 public:
-    __RESOURCE_MUTATOR_IMPLEMENT(Integer,    int);
-    __RESOURCE_MUTATOR_IMPLEMENT(UnInteger,  unsigned int);
-    __RESOURCE_MUTATOR_IMPLEMENT(LongLong,   long long);
-    __RESOURCE_MUTATOR_IMPLEMENT(UnLongLong, unsigned long long);
+    __RESOURCE_MUTATOR_IMPLEMENT(int);
+    __RESOURCE_MUTATOR_IMPLEMENT(unsigned int);
+    __RESOURCE_MUTATOR_IMPLEMENT(long long);
+    __RESOURCE_MUTATOR_IMPLEMENT(unsigned long long);
 
-    __RESOURCE_MUTATOR_IMPLEMENT(Float,      float);
-    __RESOURCE_MUTATOR_IMPLEMENT(Double,     double);
-    __RESOURCE_MUTATOR_IMPLEMENT(LongDouble, long double);
+    __RESOURCE_MUTATOR_IMPLEMENT(float);
+    __RESOURCE_MUTATOR_IMPLEMENT(double);
+    __RESOURCE_MUTATOR_IMPLEMENT(long double);
 
 public:
     std::string & at(std::string const & key) {

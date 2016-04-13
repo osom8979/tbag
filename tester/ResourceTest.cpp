@@ -10,6 +10,8 @@
 
 using namespace libtbag;
 
+// Fixture.
+
 class ResourceTest : public ::testing::Test
 {
 public:
@@ -157,10 +159,10 @@ TEST_F(ResourceTest, get)
 TEST_F(ResourceTest, set)
 {
     Resource res;
-    res.setInteger(attribute3, value3_2);
+    res.set(attribute3, value3_2);
     ASSERT_EQ(res.getString(attribute3), value3);
 
-    res.setInteger(attribute4, value4_2);
+    res.set(attribute4, value4_2);
     ASSERT_EQ(res.getString(attribute4), value4);
 }
 
