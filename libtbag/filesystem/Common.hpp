@@ -180,6 +180,18 @@ public:
         std::size_t last_separator_index = path.rfind(separator);
         return path.substr(0, last_separator_index);
     }
+
+public:
+    static bool isAccessFile(std::string const & path) {
+        uv_fs_t request;
+        int error_code = uv_fs_access(nullptr, &request, path.c_str(), F_OK, nullptr);
+        uv_fs_req_cleanup(&request);
+
+        if (error_code == 0 && request.result == 0) {
+            return true;
+        }
+        return false;
+    }
 };
 
 } // namespace filesystem
