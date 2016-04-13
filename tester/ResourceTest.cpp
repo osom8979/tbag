@@ -22,8 +22,6 @@ public:
     std::string attribute4;
     std::string attribute5;
 
-    Resource _res;
-
     std::string value1;
     std::string value2;
     std::string value3;
@@ -35,6 +33,9 @@ public:
     int         value3_2;
     int         value4_2;
     float       value5_2;
+
+    Resource res;
+
 public:
     ResourceTest() = default;
     virtual ~ResourceTest() = default;
@@ -68,13 +69,26 @@ public:
               + "</resource>";
         tag = "property";
 
-        _res.readString(xml, tag);
+        res.readString(xml, tag);
     }
 
     virtual void TearDown() override {
         __EMPTY_BLOCK__
     }
 };
+
+TEST_F(ResourceTest, clear_and_size)
+{
+    ASSERT_GT(res.size(), 0U);
+
+    res.clear();
+    ASSERT_EQ(res.size(), 0U);
+}
+
+TEST_F(ResourceTest, get_tag)
+{
+    ASSERT_EQ(res.get_tag(), tag);
+}
 
 TEST_F(ResourceTest, readFromXmlString)
 {
@@ -96,33 +110,33 @@ TEST_F(ResourceTest, save)
 
 TEST_F(ResourceTest, get)
 {
-    ASSERT_EQ(_res.get(attribute1), value1_2);
+    ASSERT_EQ(res.get(attribute1), value1_2);
 
-    ASSERT_EQ(_res.getInteger(attribute3), value3_2);
-    ASSERT_EQ(_res.getInteger(attribute1), 0);
+    ASSERT_EQ(res.getInteger(attribute3), value3_2);
+    ASSERT_EQ(res.getInteger(attribute1), 0);
 
-    ASSERT_EQ(_res.getUnInteger(attribute3), static_cast<unsigned int>(value3_2));
-    ASSERT_EQ(_res.getUnInteger(attribute1), 0U);
+    ASSERT_EQ(res.getUnInteger(attribute3), static_cast<unsigned int>(value3_2));
+    ASSERT_EQ(res.getUnInteger(attribute1), 0U);
 
-    ASSERT_EQ(_res.getLongLong(attribute3), value3_2);
-    ASSERT_EQ(_res.getLongLong(attribute1), 0);
+    ASSERT_EQ(res.getLongLong(attribute3), value3_2);
+    ASSERT_EQ(res.getLongLong(attribute1), 0);
 
-    ASSERT_EQ(_res.getUnLongLong(attribute3), static_cast<unsigned long long>(value3_2));
-    ASSERT_EQ(_res.getUnLongLong(attribute1), 0U);
+    ASSERT_EQ(res.getUnLongLong(attribute3), static_cast<unsigned long long>(value3_2));
+    ASSERT_EQ(res.getUnLongLong(attribute1), 0U);
 
-    ASSERT_FLOAT_EQ(_res.getFloat(attribute5), value5_2);
-    ASSERT_FLOAT_EQ(_res.getFloat(attribute1), 0.0);
+    ASSERT_FLOAT_EQ(res.getFloat(attribute5), value5_2);
+    ASSERT_FLOAT_EQ(res.getFloat(attribute1), 0.0);
 
     float abs_error = 0.0001;
 
-    ASSERT_NEAR(_res.getFloat(attribute5), value5_2, abs_error);
-    ASSERT_NEAR(_res.getFloat(attribute1),      0.0, abs_error);
+    ASSERT_NEAR(res.getFloat(attribute5), value5_2, abs_error);
+    ASSERT_NEAR(res.getFloat(attribute1),      0.0, abs_error);
 
-    ASSERT_NEAR(_res.getDouble(attribute5), value5_2, abs_error);
-    ASSERT_NEAR(_res.getDouble(attribute1),      0.0, abs_error);
+    ASSERT_NEAR(res.getDouble(attribute5), value5_2, abs_error);
+    ASSERT_NEAR(res.getDouble(attribute1),      0.0, abs_error);
 
-    ASSERT_NEAR(_res.getLongDouble(attribute5), value5_2, abs_error);
-    ASSERT_NEAR(_res.getLongDouble(attribute1),      0.0, abs_error);
+    ASSERT_NEAR(res.getLongDouble(attribute5), value5_2, abs_error);
+    ASSERT_NEAR(res.getLongDouble(attribute1),      0.0, abs_error);
 }
 
 TEST_F(ResourceTest, set)
@@ -137,10 +151,10 @@ TEST_F(ResourceTest, set)
 
 TEST_F(ResourceTest, at)
 {
-    ASSERT_EQ(_res.at(attribute1), value1_2);
+    ASSERT_EQ(res.at(attribute1), value1_2);
 
     std::string const TEST = "TEST";
-    _res.at(attribute1) = TEST;
-    ASSERT_EQ(_res.at(attribute1), TEST);
+    res.at(attribute1) = TEST;
+    ASSERT_EQ(res.at(attribute1), TEST);
 }
 

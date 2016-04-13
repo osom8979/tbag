@@ -92,6 +92,20 @@ public:
         }
     }
 
+public:
+    void clear() noexcept {
+        this->_tag.assign("");
+        this->_map.clear();
+    }
+
+    std::size_t size() const noexcept {
+        return this->_map.size();
+    }
+
+    std::string get_tag() const noexcept {
+        return this->_tag;
+    }
+
 // XML.
 public:
     bool readFile(std::string const & path, std::string const & tag) {
