@@ -102,6 +102,11 @@ public:
         return this->_map.size();
     }
 
+public:
+    void set_tag(std::string const & tag) noexcept {
+        this->_tag = tag;
+    }
+
     std::string get_tag() const noexcept {
         return this->_tag;
     }
