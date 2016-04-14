@@ -1,6 +1,6 @@
 ## CMake build script.
 
-cmake_minimum_required (VERSION 2.8.7)
+cmake_minimum_required (VERSION 2.8.8)
 
 enable_language (C)
 enable_language (CXX)
