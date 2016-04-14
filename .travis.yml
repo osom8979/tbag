@@ -1,3 +1,39 @@
+# Travis CI Build.
 
 language: cpp
+
+cache:
+    apt: true
+
+compiler: gcc
+
+before_install:
+    - export THREAD_NUM=4
+    - export TPARTY_HOME=$HOME/tparty
+    - sudo apt-get -qq update
+    - sudo apt-get install -y git cmake
+
+install:
+    - echo $PWD
+    - pushd .
+    - git clone https://github.com/osom8979/tparty.git $TPARTY_HOME
+    - cd $TPARTY_HOME
+    - echo 'tinyxml2' >> cache
+    - echo 'spdlog' >> cache
+    - echo 'ncurses' >> cache
+    - mkdir build
+    - cd build
+    - ./install.sh
+    - popd
+
+script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j$THREAD_NUM
+
+notifications:
+    email:
+        on_success: always
+        on_failure: always
 
