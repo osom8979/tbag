@@ -13,9 +13,10 @@ before_install:
     - export THREAD_NUM=4
     - export TPARTY_HOME=$HOME/tparty
     - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
+    - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
     - sudo add-apt-repository --yes ppa:kalakris/cmake
     - sudo apt-get -qq update
-    - sudo apt-get install -y git cmake libncurses-dev
+    - sudo apt-get install -y gcc-4.8 git cmake libncurses-dev
 
 install:
     - echo $PWD
@@ -24,6 +25,7 @@ install:
     - cd $TPARTY_HOME
     - echo 'tinyxml2.sh' >> cache
     - echo 'spdlog.sh'   >> cache
+    - echo 'libuv.sh'    >> cache
     - ./install.sh -y
     - popd
 
