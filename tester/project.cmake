@@ -19,10 +19,20 @@ set (_project_include_dirs ${CMAKE_CURRENT_LIST_DIR})
 set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
 
 # libuv setting.
-list (APPEND _project_include_dirs ${UV_INCLUDE_DIRS})
-list (APPEND _project_ldflags      ${UV_LIBRARIES})
+if (USE_libuv)
+    list (APPEND _project_include_dirs ${UV_INCLUDE_DIRS})
+    list (APPEND _project_ldflags      ${UV_LIBRARIES})
+endif ()
 
 # TinyXML2 setting.
-list (APPEND _project_include_dirs ${TINYXML2_INCLUDE_DIRS})
-list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
+if (USE_tinyxml2)
+    list (APPEND _project_include_dirs ${TINYXML2_INCLUDE_DIRS})
+    list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
+endif ()
+
+# Curses setting.
+if (USE_ncurses)
+    list (APPEND _project_include_dirs ${CURSES_INCLUDE_DIR})
+    list (APPEND _project_ldflags      ${CURSES_LIBRARIES})
+endif ()
 

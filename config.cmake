@@ -25,6 +25,7 @@ add_library_value ("protobuf"  OFF)
 # Extension project:
 add_library_value ("libuv"     ON)
 add_library_value ("tinyxml2"  ON)
+add_library_value ("ncurses"   OFF)
 
 # Continuous Integration.
 option (USE_DOXYGEN "API documentation." ON)
