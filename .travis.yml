@@ -1,4 +1,6 @@
 # Travis CI Build.
+# HOME path: /home/travis
+# Git clone path: /home/travis/build/osom8979/tbag
 
 language: cpp
 
@@ -19,10 +21,8 @@ install:
     - git clone https://github.com/osom8979/tparty.git $TPARTY_HOME
     - cd $TPARTY_HOME
     - echo 'tinyxml2' >> cache
-    - echo 'spdlog' >> cache
-    - echo 'ncurses' >> cache
-    - mkdir build
-    - cd build
+    - echo 'spdlog'   >> cache
+    - echo 'ncurses'  >> cache
     - ./install.sh
     - popd
 
@@ -31,6 +31,7 @@ script:
     - cd build
     - cmake ..
     - make -j$THREAD_NUM
+    - ./tester
 
 notifications:
     email:
