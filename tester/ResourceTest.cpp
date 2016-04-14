@@ -10,6 +10,30 @@
 
 using namespace libtbag;
 
+TEST(ResourceStaticTest, utf8)
+{
+    unsigned char hangul [] = {
+            0xea, 0xb0, 0x80, 0xeb, 0x82, 0x98, 0xeb, 0x8b, 0xa4, 0xeb
+          , 0x9d, 0xbc, 0xeb, 0xa7, 0x88, 0xeb, 0xb0, 0x94, 0xec, 0x82
+          , 0xac, 0xec, 0x95, 0x84, 0xec, 0x9e, 0x90, 0xec, 0xb0, 0xa8
+          , 0xec, 0xb9, 0xb4, 0xed, 0x83, 0x80, 0xed, 0x8c, 0x8c, 0xed
+          , 0x95, 0x98, '\0' };
+    std::string const HANGUL_UTF8 = "가나다라마바사아자차카타파하";
+
+    char const * const TEST_NAME = "hangul";
+    char const * const TEST_TAG = "utf8";
+    char const * const FILE_NAME = "__resource_test_utf8.xml";
+
+    Resource res;
+    res.set(TEST_NAME, (char*)hangul);
+    res.set_tag(TEST_TAG);
+    ASSERT_TRUE(res.save(FILE_NAME));
+
+    res.clear();
+    ASSERT_TRUE(res.readFile(FILE_NAME, TEST_TAG));
+    ASSERT_EQ(res.getString(TEST_NAME), HANGUL_UTF8);
+}
+
 // Fixture.
 
 class ResourceTest : public ::testing::Test
