@@ -129,9 +129,11 @@ TEST_F(ResourceTest, readFromXmlString)
 
 TEST_F(ResourceTest, save)
 {
+    char const * const FILE_NAME = "__resource_test_save.xml";
+
     Resource::Map map;
     map = Resource::readFromXmlString(xml, tag);
-    ASSERT_TRUE(Resource::save("Resource_Test_save.xml", tag, map));
+    ASSERT_TRUE(Resource::save(FILE_NAME, tag, map));
 }
 
 TEST_F(ResourceTest, getValue)
