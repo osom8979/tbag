@@ -10,7 +10,6 @@ cache:
 compiler: g++
 
 before_install:
-    - export THREAD_NUM=4
     - export TPARTY_HOME=$HOME/tparty
     - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
     - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
@@ -24,6 +23,7 @@ install:
     - pushd .
     - git clone https://github.com/osom8979/tparty.git $TPARTY_HOME
     - cd $TPARTY_HOME
+    - echo 'gtest.sh'    >> cache
     - echo 'tinyxml2.sh' >> cache
     - echo 'spdlog.sh'   >> cache
     - echo 'libuv.sh'    >> cache
@@ -34,7 +34,7 @@ script:
     - mkdir build
     - cd build
     - cmake ..
-    - make -j$THREAD_NUM
+    - make
     - ./tester
 
 notifications:
