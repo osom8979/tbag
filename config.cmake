@@ -23,6 +23,7 @@ add_library_value ("zlib"      OFF)
 add_library_value ("gtest"     ON)
 add_library_value ("protobuf"  OFF)
 # Extension project:
+add_library_value ("spdlog"    ON)
 add_library_value ("libuv"     ON)
 add_library_value ("tinyxml2"  ON)
 add_library_value ("ncurses"   OFF)

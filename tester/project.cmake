@@ -18,6 +18,11 @@ set (_project_definitions  -D__LIBTBAG__)
 set (_project_include_dirs ${CMAKE_CURRENT_LIST_DIR})
 set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
 
+# speed-log setting.
+if (USE_spdlog)
+    list (APPEND _project_include_dirs ${SPDLOG_INCLUDE_DIRS})
+endif ()
+
 # libuv setting.
 if (USE_libuv)
     list (APPEND _project_include_dirs ${UV_INCLUDE_DIRS})
