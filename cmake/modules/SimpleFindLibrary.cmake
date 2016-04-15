@@ -101,7 +101,7 @@ function (simple_find_library _prefix  _headers _libs)
 
     set (LOOKED_FOR ${_prefix}_INCLUDE_DIRS)
     if (NOT "${_libs}" STREQUAL "")
-        list (APPEND LOOKED_FOR ${_prefix}_LIBRARIES)
+        list (INSERT LOOKED_FOR 0 ${_prefix}_LIBRARIES)
     endif ()
 
     include (FindPackageHandleStandardArgs)
