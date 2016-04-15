@@ -4,13 +4,6 @@
 
 language: cpp
 
-addons:
-    sources:
-        - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
-    packages:
-        - cmake
-        - cmake-data
-
 cache:
     apt: true
 
@@ -20,8 +13,9 @@ before_install:
     - export TPARTY_HOME=$HOME/tparty
     - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
     - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+    - sudo add-apt-repository --yes ppa:george-edison55/precise-backports
     - sudo apt-get -qq update
-    - sudo apt-get install -y git g++-4.8 libncurses-dev
+    - sudo apt-get install -y git cmake cmake-data g++-4.8 libncurses-dev
     - export CXX=g++-4.8
 
 install:
