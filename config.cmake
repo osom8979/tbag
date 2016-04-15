@@ -26,7 +26,7 @@ add_library_value ("protobuf"  OFF)
 add_library_value ("spdlog"    ON)
 add_library_value ("libuv"     ON)
 add_library_value ("tinyxml2"  ON)
-add_library_value ("ncurses"   OFF)
+add_library_value ("ncurses"   ON)
 
 # Continuous Integration.
 option (USE_DOXYGEN "API documentation." ON)
