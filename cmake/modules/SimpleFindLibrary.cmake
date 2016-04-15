@@ -99,10 +99,9 @@ function (simple_find_library _prefix  _headers _libs)
     find_headers (${_prefix}_INCLUDE_DIRS "${_search_include_paths}" "${_headers}")
     find_libraries (${_prefix}_LIBRARIES "${_search_library_paths}" "${_libs}")
 
+    set (LOOKED_FOR ${_prefix}_INCLUDE_DIRS)
     if (NOT "${_libs}" STREQUAL "")
-        set (LOOKED_FOR ${_prefix}_LIBRARIES ${_prefix}_INCLUDE_DIRS)
-    else ()
-        set (LOOKED_FOR ${_prefix}_INCLUDE_DIRS)
+        list (APPEND LOOKED_FOR ${_prefix}_LIBRARIES)
     endif ()
 
     include (FindPackageHandleStandardArgs)
