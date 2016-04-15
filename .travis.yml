@@ -15,7 +15,7 @@ before_install:
     - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
     - sudo add-apt-repository --yes ppa:george-edison55/precise-backports
     - sudo apt-get -qq update
-    - sudo apt-get install -y git cmake cmake-data g++-4.8 libncurses-dev
+    - sudo apt-get install -y git cmake cmake-data g++-4.9 libncurses-dev
     - export CXX=g++-4.9
 
 install:
