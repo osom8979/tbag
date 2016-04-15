@@ -47,7 +47,7 @@ TEST(PathStaticTest, Constructors)
 TEST(PathStaticTest, initializer_list)
 {
     Path p0 = {"/", "TE", "M", "P"};
-    ASSERT_EQ(p0.getString(), Path::BaseString("/TE/M/P"));
+    ASSERT_EQ(p0.getString(), std::string("/TE/M/P"));
 }
 
 TEST(PathStaticTest, AssignOperators)
@@ -101,8 +101,8 @@ TEST(PathStaticTest, removeLastSeparator)
     std::string const WINDOWS_SUFFIX = "\\\\";
     std::string const TEMP = PREFIX + WINDOWS_SUFFIX + "//";
 
-    Path::BaseString windows = Path::removeLastSeparatorOfWindows(TEMP);
-    Path::BaseString posix   = Path::removeLastSeparatorOfPosix(TEMP);
+    std::string windows = Path::removeLastSeparatorOfWindows(TEMP);
+    std::string posix   = Path::removeLastSeparatorOfPosix(TEMP);
 
     ASSERT_EQ(windows, PREFIX);
     ASSERT_EQ(posix, PREFIX + WINDOWS_SUFFIX);
@@ -253,7 +253,7 @@ TEST_F(PathTest, append)
 {
     Path p0;
     p0.append(depth0);
-    p0.append(depth1, Path::BaseString(GetGenericPathSeparatorString()));
+    p0.append(depth1, std::string(GetGenericPathSeparatorString()));
     p0 /= depth2;
     p0 += depth3;
     p0.append(depth4);
@@ -262,14 +262,14 @@ TEST_F(PathTest, append)
 
     p0 = "";
     p0.append("/");
-    ASSERT_EQ(p0.getString(), Path::BaseString("/"));
+    ASSERT_EQ(p0.getString(), std::string("/"));
 }
 
 TEST_F(PathTest, getParentOfWindows)
 {
     setupOfWindows();
-    Path::BaseString test1 = Path::getParentOfWindows(test_path);
-    Path::BaseString test2 = R"(O:\\Temp\Directory/..\.//\\)";
+    std::string test1 = Path::getParentOfWindows(test_path);
+    std::string test2 = R"(O:\\Temp\Directory/..\.//\\)";
     ASSERT_EQ(test1, test2);
 
     test1 = Path::getParentOfWindows(test1);
@@ -301,8 +301,8 @@ TEST_F(PathTest, getParentOfWindows)
 TEST_F(PathTest, getParentOfPosix)
 {
     setupOfPosix();
-    Path::BaseString test1 = Path::getParentOfPosix(test_path);
-    Path::BaseString test2 = R"(/Temp/\Directory/.././///)";
+    std::string test1 = Path::getParentOfPosix(test_path);
+    std::string test2 = R"(/Temp/\Directory/.././///)";
     ASSERT_EQ(test1, test2);
 
     test1 = Path::getParentOfPosix(test1);

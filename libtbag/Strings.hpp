@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <regex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -34,12 +35,10 @@ NAMESPACE_LIBTBAG_OPEN
  *
  * @translate{ko, inline function을 사용하지 않고\, static method를 사용하기 위한 클래스.}
  */
-template <typename T = char>
 class Strings : public Noncopyable
 {
 public:
-    using BaseType = T;
-    using BaseString = std::basic_string<BaseType>;
+    static constexpr char const * const EMPTY_STRING = "";
 
 public:
     constexpr Strings() = default;
@@ -55,9 +54,9 @@ public:
      * @return
      *  Token vector.
      */
-    static std::vector<BaseString> splitTokens(BaseString const & source, BaseString const & delimiter)
-    {
-        std::vector<BaseString> result;
+    static std::vector<std::string> splitTokens(std::string const & source
+                                              , std::string const & delimiter) {
+        std::vector<std::string> result;
         std::string token;
 
         std::size_t start = 0;
@@ -82,10 +81,20 @@ public:
 
         return result;
     }
-};
 
-using strings  = Strings<char>;
-using wstrings = Strings<wchar_t>;
+// Regexp utilities.
+public:
+    static std::string replaceRegex(std::string const & path
+                                  , std::string const & regex
+                                  , std::string const & replace) {
+        return std::regex_replace(path, std::regex(regex), replace);
+    }
+
+    static std::string removeRegex(std::string const & path
+                                 , std::string const & regex) {
+        return Strings::replaceRegex(path, regex, Strings::EMPTY_STRING);
+    }
+};
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
