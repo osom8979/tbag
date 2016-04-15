@@ -20,6 +20,8 @@
 #include <libtbag/filesystem/Common.hpp>
 #include <libtbag/Strings.hpp>
 
+#include <cassert>
+
 #include <iterator>
 #include <string>
 #include <regex>
@@ -76,17 +78,24 @@ public:
 
 // Make preferred.
 public:
-    static std::string makePreferred(std::string const & path
-                                   , std::string const & separator) {
-        return removeLastSeparator(Strings::replaceRegex(path
-                                                       , REMOVE_SEPARATOR_REGEX
-                                                       , separator));
+    /**
+     * No change.
+     */
+    inline static std::string makePreferred(std::string const & path) {
+        return path;
+    }
+
+    static std::string removeDuplicateSeparators(std::string const & path) {
+        return Strings::replaceRegex(path, REMOVE_SEPARATOR_REGEX, PATH_SEPARATOR_STRING);
     }
 
 // Generic string.
 public:
+    /**
+     * @c makePreferred -> @c removeDuplicateSeparators -> @c removeLastSeparator
+     */
     static std::string getGeneric(std::string const & path) {
-        return makePreferred(path, GetGenericPathSeparatorString());
+        return removeLastSeparator(removeDuplicateSeparators(makePreferred(path)));
     }
 
 // Decomposition.
@@ -124,7 +133,8 @@ public:
             return std::string(); // PARENT OF ROOT (Maybe relative path).
         }
 
-        return temp.substr(0, last_separator_index); // PARENT DIRECTORY.
+        assert(last_separator_index != std::string::npos);
+        return temp.substr(0, last_separator_index + 1); // PARENT DIRECTORY.
     }
 
 // Node operators.
