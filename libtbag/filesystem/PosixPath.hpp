@@ -21,11 +21,7 @@
 #include <libtbag/Strings.hpp>
 
 #include <cassert>
-
-#include <iterator>
 #include <string>
-#include <regex>
-#include <initializer_list>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -89,13 +85,20 @@ public:
         return Strings::replaceRegex(path, REMOVE_SEPARATOR_REGEX, PATH_SEPARATOR_STRING);
     }
 
-// Generic string.
+// Path string.
 public:
     /**
-     * @c makePreferred -> @c removeDuplicateSeparators -> @c removeLastSeparator
+     * makePreferred -> removeDuplicateSeparators -> removeLastSeparator
+     */
+    static std::string getNative(std::string const & path) {
+        return removeLastSeparator(removeDuplicateSeparators(makePreferred(path)));
+    }
+
+    /**
+     * Equals to getNative
      */
     static std::string getGeneric(std::string const & path) {
-        return removeLastSeparator(removeDuplicateSeparators(makePreferred(path)));
+        return getNative(path);
     }
 
 // Decomposition.
