@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(PathStaticTest, StyleChecker)
+TEST(PathTest, StyleChecker)
 {
 #if defined(WIN32) || defined(_WIN32)
     ASSERT_TRUE(Path::isWindowsStyle());
@@ -22,7 +22,7 @@ TEST(PathStaticTest, StyleChecker)
 #endif
 }
 
-TEST(PathStaticTest, Constructors)
+TEST(PathTest, Constructors)
 {
     char const * const TEMP = "TEMP";
 
@@ -44,13 +44,13 @@ TEST(PathStaticTest, Constructors)
     ASSERT_STREQ(p6.getString().c_str(), TEMP);
 }
 
-TEST(PathStaticTest, initializer_list)
+TEST(PathTest, initializer_list)
 {
     Path p0 = {"/", "TE", "M", "P"};
     ASSERT_EQ(p0.getString(), std::string("/TE/M/P"));
 }
 
-TEST(PathStaticTest, AssignOperators)
+TEST(PathTest, AssignOperators)
 {
     char const * const TEMP = "TEMP";
 

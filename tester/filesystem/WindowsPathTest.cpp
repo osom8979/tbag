@@ -13,7 +13,7 @@ using namespace libtbag::filesystem;
 
 using TestPath = WindowsPath<char>;
 
-TEST(WindowsPathStaticTest, isProhibitedFilename_WithPosix)
+TEST(WindowsPathTest, isProhibitedFilename_WithPosix)
 {
     char const * const TEMP0 = "TEMP";
     char const * const TEMP1 = "/TEMP";
@@ -26,7 +26,7 @@ TEST(WindowsPathStaticTest, isProhibitedFilename_WithPosix)
     ASSERT_TRUE(TestPath::isProhibitedFilename(TEMP3));
 }
 
-TEST(WindowsPathStaticTest, isProhibitedFilename_OnlyWindows)
+TEST(WindowsPathTest, isProhibitedFilename_OnlyWindows)
 {
     char const * const TEMP0 = "TE\\MP";
     char const * const TEMP1 = "?TEMP";
@@ -39,7 +39,7 @@ TEST(WindowsPathStaticTest, isProhibitedFilename_OnlyWindows)
     ASSERT_FALSE(TestPath::isProhibitedFilename(TEMP3));
 }
 
-TEST(WindowsPathStaticTest, removeLastSeparator)
+TEST(WindowsPathTest, removeLastSeparator)
 {
     char const * const TEMP0 = "/\\/TEMP";
     char const * const RESULT0 = "/\\/TEMP";
@@ -58,28 +58,28 @@ TEST(WindowsPathStaticTest, removeLastSeparator)
     ASSERT_STREQ(TestPath::removeLastSeparator(TEMP3).c_str(), RESULT3);
 }
 
-TEST(WindowsPathStaticTest, makePreferred)
+TEST(WindowsPathTest, makePreferred)
 {
     char const * const TEMP0 = "/\\/TEMP\\/\\";
     char const * const RESULT0 = "\\\\\\TEMP\\\\\\";
     ASSERT_STREQ(TestPath::makePreferred(TEMP0).c_str(), RESULT0);
 }
 
-TEST(WindowsPathStaticTest, removeDuplicateSeparators)
+TEST(WindowsPathTest, removeDuplicateSeparators)
 {
     char const * const TEMP0 = "/\\////\\\\TEMP\\//\\/";
     char const * const RESULT0 = "\\TEMP\\";
     ASSERT_STREQ(TestPath::removeDuplicateSeparators(TEMP0).c_str(), RESULT0);
 }
 
-TEST(WindowsPathStaticTest, getGeneric)
+TEST(WindowsPathTest, getGeneric)
 {
     char const * const TEMP0 = "/\\////\\\\TEMP\\//\\/";
     char const * const RESULT0 = "/TEMP";
     ASSERT_STREQ(TestPath::getGeneric(TEMP0).c_str(), RESULT0);
 }
 
-TEST(WindowsPathStaticTest, getRootDir)
+TEST(WindowsPathTest, getRootDir)
 {
     char const * const TEMP0 = "/TEMP";
     char const * const RESULT0 = "";
@@ -102,7 +102,7 @@ TEST(WindowsPathStaticTest, getRootDir)
     ASSERT_STREQ(TestPath::getRootDir(TEMP4).c_str(), RESULT4);
 }
 
-TEST(WindowsPathStaticTest, QueryOperators)
+TEST(WindowsPathTest, QueryOperators)
 {
     char const * const TEMP0 = "D:/TEMP";
     ASSERT_TRUE(TestPath::isAbsolute(TEMP0));
@@ -117,7 +117,7 @@ TEST(WindowsPathStaticTest, QueryOperators)
     ASSERT_TRUE(TestPath::isRelative(TEMP2));
 }
 
-TEST(WindowsPathStaticTest, getParent_1)
+TEST(WindowsPathTest, getParent_1)
 {
     char const * const TEMP0 = "/TEMP";
     char const * const RESULT0 = "/";
@@ -140,7 +140,7 @@ TEST(WindowsPathStaticTest, getParent_1)
     ASSERT_STREQ(TestPath::getParent(TEMP4).c_str(), RESULT4);
 }
 
-TEST(WindowsPathStaticTest, getParent_2)
+TEST(WindowsPathTest, getParent_2)
 {
     char const * const TEMP0 = "G:/TEMP\\//\\/.///..//TEST\\/";
     char const * const TEMP1 = "G:/TEMP\\//\\/.///..//";
@@ -156,7 +156,7 @@ TEST(WindowsPathStaticTest, getParent_2)
     ASSERT_STREQ(TestPath::getParent(TEMP4).c_str(), TEMP5);
 }
 
-TEST(WindowsPathStaticTest, splitNodes_1)
+TEST(WindowsPathTest, splitNodes_1)
 {
     char const * const TEMP0 = "../TEMP\\//";
     char const * const RESULT0 = "..";
@@ -168,7 +168,7 @@ TEST(WindowsPathStaticTest, splitNodes_1)
     ASSERT_STREQ(nodes[1].c_str(), RESULT1);
 }
 
-TEST(WindowsPathStaticTest, splitNodes_2)
+TEST(WindowsPathTest, splitNodes_2)
 {
     char const * const TEMP0 = "D:/TEMP\\//\\/.///..//TEST\\/";
     char const * const RESULT0 = "D:";

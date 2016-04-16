@@ -13,7 +13,7 @@ using namespace libtbag::filesystem;
 
 using TestPath = PosixPath<char>;
 
-TEST(PosixPathStaticTest, isProhibitedFilename)
+TEST(PosixPathTest, isProhibitedFilename)
 {
     char const * const TEMP0 = "TEMP";
     char const * const TEMP1 = "/TEMP";
@@ -26,7 +26,7 @@ TEST(PosixPathStaticTest, isProhibitedFilename)
     ASSERT_TRUE(TestPath::isProhibitedFilename(TEMP3));
 }
 
-TEST(PosixPathStaticTest, removeLastSeparator)
+TEST(PosixPathTest, removeLastSeparator)
 {
     char const * const TEMP0 = "/\\/TEMP";
     char const * const RESULT0 = "/\\/TEMP";
@@ -45,28 +45,28 @@ TEST(PosixPathStaticTest, removeLastSeparator)
     ASSERT_STREQ(TestPath::removeLastSeparator(TEMP3).c_str(), RESULT3);
 }
 
-TEST(PosixPathStaticTest, makePreferred)
+TEST(PosixPathTest, makePreferred)
 {
     char const * const TEMP0 = "/\\/TEMP\\/\\";
     char const * const RESULT0 = "/\\/TEMP\\/\\";
     ASSERT_STREQ(TestPath::makePreferred(TEMP0).c_str(), RESULT0);
 }
 
-TEST(PosixPathStaticTest, removeDuplicateSeparators)
+TEST(PosixPathTest, removeDuplicateSeparators)
 {
     char const * const TEMP0 = "/\\////\\\\TEMP\\//\\/";
     char const * const RESULT0 = "/\\/\\\\TEMP\\/\\/";
     ASSERT_STREQ(TestPath::removeDuplicateSeparators(TEMP0).c_str(), RESULT0);
 }
 
-TEST(PosixPathStaticTest, getGeneric)
+TEST(PosixPathTest, getGeneric)
 {
     char const * const TEMP0 = "/\\////\\\\TEMP\\//\\/";
     char const * const RESULT0 = "/\\/\\\\TEMP\\/\\";
     ASSERT_STREQ(TestPath::getGeneric(TEMP0).c_str(), RESULT0);
 }
 
-TEST(PosixPathStaticTest, getRootDir)
+TEST(PosixPathTest, getRootDir)
 {
     char const * const TEMP0 = "/TEMP";
     char const * const RESULT0 = "/";
@@ -81,7 +81,7 @@ TEST(PosixPathStaticTest, getRootDir)
     ASSERT_STREQ(TestPath::getRootDir(TEMP2).c_str(), RESULT2);
 }
 
-TEST(PosixPathStaticTest, QueryOperators)
+TEST(PosixPathTest, QueryOperators)
 {
     char const * const TEMP0 = "/TEMP";
     ASSERT_TRUE(TestPath::isAbsolute(TEMP0));
@@ -96,7 +96,7 @@ TEST(PosixPathStaticTest, QueryOperators)
     ASSERT_TRUE(TestPath::isRelative(TEMP2));
 }
 
-TEST(PosixPathStaticTest, getParent_1)
+TEST(PosixPathTest, getParent_1)
 {
     char const * const TEMP0 = "/TEMP";
     char const * const RESULT0 = "/";
@@ -119,7 +119,7 @@ TEST(PosixPathStaticTest, getParent_1)
     ASSERT_STREQ(TestPath::getParent(TEMP4).c_str(), RESULT4);
 }
 
-TEST(PosixPathStaticTest, getParent_2)
+TEST(PosixPathTest, getParent_2)
 {
     char const * const TEMP0 = "/TEMP\\//\\/.///..//TEST\\/";
     char const * const TEMP1 = "/TEMP\\//\\/.///..//";
@@ -137,7 +137,7 @@ TEST(PosixPathStaticTest, getParent_2)
     ASSERT_STREQ(TestPath::getParent(TEMP5).c_str(), TEMP6);
 }
 
-TEST(PosixPathStaticTest, splitNodes_1)
+TEST(PosixPathTest, splitNodes_1)
 {
     char const * const TEMP0 = "../TEMP\\//";
     char const * const RESULT0 = "..";
@@ -149,7 +149,7 @@ TEST(PosixPathStaticTest, splitNodes_1)
     ASSERT_STREQ(nodes[1].c_str(), RESULT1);
 }
 
-TEST(PosixPathStaticTest, splitNodes_2)
+TEST(PosixPathTest, splitNodes_2)
 {
     char const * const TEMP0 = "/TEMP\\//\\/.///..//TEST\\/";
     char const * const RESULT0 = "/";
