@@ -10,19 +10,6 @@
 
 #include <iostream>
 
-// ---------------------
-NAMESPACE_ANONYMOUS_OPEN
-// ---------------------
-
-constexpr bool IsPrintRepresentationDirectory() noexcept
-{
-    return true;
-}
-
-// ----------------------
-NAMESPACE_ANONYMOUS_CLOSE
-// ----------------------
-
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
@@ -37,39 +24,17 @@ TEST(CommonStaticTest, GetPathSeparator)
 #endif
 }
 
-TEST(CommonStaticTest, GetPathSeparatorString)
-{
-#if defined(WIN32) || defined(_WIN32)
-    ASSERT_STREQ(GetPathSeparatorString(), "\\");
-    ASSERT_STREQ(GetPathSplitterString(),  ";");
-#else
-    ASSERT_STREQ(GetPathSeparatorString(), "/");
-    ASSERT_STREQ(GetPathSplitterString(),  ":");
-#endif
-}
-
-TEST(CommonStaticTest, GetHomeEnvName)
-{
-#if defined(WIN32) || defined(_WIN32)
-    ASSERT_STREQ(GetHomeEnvName(), "USERPROFILE");
-#else
-    ASSERT_STREQ(GetHomeEnvName(), "HOME");
-#endif
-}
-
 TEST(CommonStaticTest, RepresentationDirectory)
 {
+    using namespace std;
+
     std::string work_dir = Common::getWorkDir();
     std::string home_dir = Common::getHomeDir();
     std::string exe_dir  = Common::getExeDir();
 
-    if (::IsPrintRepresentationDirectory()) {
-        using std::cout;
-        using std::endl;
-        cout << "Working directory: " << work_dir << endl
-             << "Home directory: "    << home_dir << endl
-             << "Execute directory: " << exe_dir  << endl;
-    }
+    cout << "* Working directory: " << work_dir << endl
+         << "* Home directory: "    << home_dir << endl
+         << "* Execute directory: " << exe_dir  << endl;
 
     ASSERT_GT(work_dir.size(), 0U);
     ASSERT_GT(home_dir.size(), 0U);

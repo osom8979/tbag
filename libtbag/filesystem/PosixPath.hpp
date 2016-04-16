@@ -57,10 +57,21 @@ public:
 public:
     static constexpr ValueType const PATH_SEPARATOR
             = static_cast<ValueType const>(PATH_SEPARATOR_OF_POSIX);
-    static constexpr ValueType const * const PATH_SEPARATOR_STRING
-            = static_cast<ValueType const * const>(PATH_SEPARATOR_STRING_OF_POSIX);
-    static constexpr ValueType const * const REMOVE_SEPARATOR_REGEX
-            = R"(\/\/*)";
+    static constexpr ValueType const GENERIC_PATH_SEPARATOR
+            = static_cast<ValueType const>(GetGenericPathSeparator());
+
+public:
+    inline static String getPathSeparator() {
+        return { PATH_SEPARATOR };
+    }
+
+    inline static String getGenericPathSeparator() {
+        return { GENERIC_PATH_SEPARATOR };
+    }
+
+    inline static String getRemoveSeparatorRegex() {
+        return { '\\', '/', '\\', '/', '*' };
+    }
 
 public:
     constexpr PosixPath() noexcept = default;
@@ -74,7 +85,7 @@ public:
     struct ProhibitedBy
     {
         inline bool operator()(ValueType v) const noexcept {
-            if (v == 0x00 || v == '/') {
+            if (v == 0x00 || v == static_cast<ValueType>('/')) {
                 return true;
             }
             return false;
@@ -88,7 +99,8 @@ public:
 // Remove last separator.
 public:
     static String removeLastSeparator(String const & path) {
-        return Strings::removeRegex(path, String(REMOVE_SEPARATOR_REGEX) + "$");
+        return Strings::removeRegex(path, getRemoveSeparatorRegex()
+                                          + static_cast<ValueType>('$'));
     }
 
 // Make preferred.
@@ -101,7 +113,9 @@ public:
     }
 
     static String removeDuplicateSeparators(String const & path) {
-        return Strings::replaceRegex(path, REMOVE_SEPARATOR_REGEX, PATH_SEPARATOR_STRING);
+        return Strings::replaceRegex(path
+                                   , getRemoveSeparatorRegex()
+                                   , getPathSeparator());
     }
 
 // Path string.
@@ -122,11 +136,14 @@ public:
 
 // Decomposition.
 public:
+    /**
+     * Root directory is only '/'.
+     */
     static String getRootDir(String const & path) {
         if (path.size() < 1 || path[0] != PATH_SEPARATOR) {
             return String();
         }
-        return PATH_SEPARATOR_STRING;
+        return getPathSeparator();
     }
 
 // Query.
@@ -147,10 +164,10 @@ public:
         }
 
         String temp = removeLastSeparator(path);
-        std::size_t last_separator_index = temp.rfind(PATH_SEPARATOR_STRING);
+        std::size_t last_separator_index = temp.rfind(getPathSeparator());
 
         if (last_separator_index == 0U && temp.size() > 1U && temp[0] == PATH_SEPARATOR) {
-            return PATH_SEPARATOR_STRING; // ROOT DIRECTORY.
+            return getPathSeparator(); // ROOT DIRECTORY.
         } else if (last_separator_index == String::npos) {
             return String(); // PARENT OF ROOT (Maybe relative path).
         }
@@ -164,7 +181,7 @@ public:
     static std::vector<String> splitNodes(String const & path) {
         std::vector<String> result =
                 Strings::splitTokens(getGeneric(path),
-                                     GetGenericPathSeparatorString());
+                                     getGenericPathSeparator());
         String root = getRootDir(path);
         if (!root.empty()) {
             // Force insert the POSIX root directory.

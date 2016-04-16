@@ -251,7 +251,7 @@ public:
     BasePath & append(String const & child) {
         // 문지열이 공백일 경우, 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다.
         if (!this->_path.empty() && this->_path.back() != NativePath::PATH_SEPARATOR) {
-            this->_path += NativePath::PATH_SEPARATOR_STRING;
+            this->_path += NativePath::getPathSeparator();
         }
         this->_path += child;
         return *this;

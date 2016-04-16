@@ -47,26 +47,9 @@ constexpr char const GetPathSeparator() noexcept
 #endif
 }
 
-constexpr char const * const PATH_SEPARATOR_STRING_OF_WINDOWS = "\\";
-constexpr char const * const PATH_SEPARATOR_STRING_OF_POSIX   = "/";
-
-constexpr char const * const GetPathSeparatorString() noexcept
-{
-#if defined(__OS_WINDOWS__)
-    return PATH_SEPARATOR_STRING_OF_WINDOWS;
-#else
-    return PATH_SEPARATOR_STRING_OF_POSIX;
-#endif
-}
-
 constexpr char const GetGenericPathSeparator() noexcept
 {
     return PATH_SEPARATOR_OF_POSIX;
-}
-
-constexpr char const * const GetGenericPathSeparatorString() noexcept
-{
-    return PATH_SEPARATOR_STRING_OF_POSIX;
 }
 
 char const PATH_SPLITTER_OF_WINDOWS = ';';
@@ -80,39 +63,6 @@ constexpr char const GetPathSplitter() noexcept
     return PATH_SPLITTER_OF_POSIX;
 #endif
 }
-
-constexpr char const * const PATH_SPLITTER_STRING_OF_WINDOWS = ";";
-constexpr char const * const PATH_SPLITTER_STRING_OF_POSIX   = ":";
-
-constexpr char const * const GetPathSplitterString() noexcept
-{
-#if defined(__OS_WINDOWS__)
-    return PATH_SPLITTER_STRING_OF_WINDOWS;
-#else
-    return PATH_SPLITTER_STRING_OF_POSIX;
-#endif
-}
-
-/**
- * home directory environment variable name.
- *
- * @warning
- *  Don't use for the purpose of obtaining a Home directory.
- *
- * @translate{ko, 홈 디렉토리를 획득하기 위한 용도로 사용해선 안된다.}
- */
-constexpr char const * const GetHomeEnvName() noexcept(true)
-{
-#if defined(__OS_WINDOWS__)
-    return "USERPROFILE";
-#else
-    return "HOME";
-#endif
-}
-
-constexpr char const * const DIRECTORY_SHORTCUT_PARENT  = "..";
-constexpr char const * const DIRECTORY_SHORTCUT_CURRENT =  ".";
-constexpr char const * const DIRECTORY_SHORTCUT_HOME    =  "~";
 
 /**
  * Common filesystem class prototype.
