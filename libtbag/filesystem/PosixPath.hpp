@@ -41,7 +41,7 @@ namespace filesystem {
  * @warning
  *  Supports multibyte-string only.
  */
-class PosixPath : public Noncopyable
+class PosixPath
 {
 public:
     static constexpr char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
@@ -49,8 +49,8 @@ public:
     static constexpr char const * const REMOVE_SEPARATOR_REGEX = R"(\/\/*)";
 
 public:
-    constexpr PosixPath() = default;
-    ~PosixPath() = default;
+    constexpr PosixPath() noexcept = default;
+    ~PosixPath() noexcept = default;
 
 // Filename query.
 public:
@@ -146,10 +146,10 @@ public:
         std::vector<std::string> result =
                 Strings::splitTokens(getGeneric(path),
                                      GetGenericPathSeparatorString());
-        std::string separator = getRootDir(path);
-        if (!separator.empty()) {
+        std::string root = getRootDir(path);
+        if (!root.empty()) {
             // Force insert the POSIX root directory.
-            result.insert(result.begin(), separator);
+            result.insert(result.begin(), root);
         }
         return result;
     }

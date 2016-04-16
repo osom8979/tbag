@@ -17,11 +17,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/filesystem/Common.hpp>
+#include <libtbag/filesystem/WindowsPath.hpp>
+#include <libtbag/filesystem/PosixPath.hpp>
 #include <libtbag/Strings.hpp>
 
-#include <iterator>
 #include <string>
-#include <regex>
 #include <initializer_list>
 #include <type_traits>
 
@@ -30,6 +30,12 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace filesystem {
+
+#if defined(__OS_WINDOWS__)
+using NativePath = WindowsPath;
+#else
+using NativePath = PosixPath;
+#endif
 
 /**
  * Path class prototype.
@@ -40,7 +46,7 @@ namespace filesystem {
  * @warning
  *  Supports multibyte-string only.
  */
-class Path
+class Path : public NativePath
 {
 public:
     /** Update Generic Format. */
@@ -64,7 +70,7 @@ private:
 
 // Constructors.
 public:
-    Path() noexcept {
+    Path() noexcept(std::is_nothrow_default_constructible<std::string>::value) {
         __EMPTY_BLOCK__
     }
 
@@ -166,301 +172,105 @@ public:
         this->_path.assign(path);
     }
 
-// FILENAME QUERY.
+// Path string.
 public:
-    static bool isProhibitedFilenameOfWindows(std::string const & path) noexcept {
-        for (auto cursor : path) {
-            if (0x00 <= COMPARE_AND(cursor) <= 0x1F) {
-                return true;
-            }
-
-            switch (cursor) {
-            case '*': case '<': case '>':
-            case '?': case '/': case '|': case '\\':
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static bool isProhibitedFilenameOfPosix(std::string const & path) noexcept {
-        for (auto cursor : path) {
-            if (cursor == 0x00 || cursor == '/') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static bool isProhibitedFilename(std::string const & path) noexcept {
-        if (Path::isWindowsStyle()) {
-            return Path::isProhibitedFilenameOfWindows(path);
-        }
-        return Path::isProhibitedFilenameOfPosix(path);
-    }
-
-// Regexp utilities.
-public:
-    inline static std::string
-    replaceRegex(std::string const & path, std::string const & regex, std::string const & replace) {
-        return std::regex_replace(path, std::regex(regex), replace);
-    }
-
-    inline static std::string
-    removeRegex(std::string const & path, std::string const & regex) {
-        return Path::replaceRegex(path, regex, "");
-    }
-
-public:
-    constexpr static char const * const REMOVE_SEPARATOR_REGEX_OF_WINDOWS = R"([\\\/][\\\/]*)";
-    constexpr static char const * const REMOVE_SEPARATOR_REGEX_OF_POSIX   = R"(\/\/*)";
-
-// removeLastSeparator() methods.
-public:
-    inline static std::string
-    removeLastSeparatorOfWindows(std::string const & path) {
-        return Path::removeRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_WINDOWS) + "$");
-    }
-
-    inline static std::string
-    removeLastSeparatorOfPosix(std::string const & path) {
-        return Path::removeRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_POSIX) + "$");
-    }
-
-    inline static std::string
-    removeLastSeparator(std::string const & path) {
-        if (Path::isWindowsStyle()) {
-            return Path::removeLastSeparatorOfWindows(path);
-        }
-        return Path::removeLastSeparatorOfPosix(path);
-    }
-
-// makePreferred() methods.
-public:
-    inline static std::string
-    makePreferredOfWindows(std::string const & path, std::string const & separator) {
-        return Path::removeLastSeparatorOfWindows(
-                replaceRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_WINDOWS), separator));
-    }
-
-    inline static std::string
-    makePreferredOfPosix(std::string const & path, std::string const & separator) {
-        return Path::removeLastSeparatorOfPosix(
-                replaceRegex(path, std::string(REMOVE_SEPARATOR_REGEX_OF_POSIX), separator));
-    }
-
-    /**
-     * Clean an overlapped separators.
-     *
-     * @param path      [in] Path string.
-     * @param separator [in] Separator string.
-     *
-     * @return Cleared path string.
-     */
-    inline static std::string
-    makePreferred(std::string const & path, std::string const & separator) {
-        if (Path::isWindowsStyle()) {
-            return Path::makePreferredOfWindows(path, separator);
-        }
-        return Path::makePreferredOfPosix(path, separator);
-    }
-
-// Generic string.
-public:
-    inline static std::string
-    getGenericOfWindows(std::string const & path) {
-        return Path::makePreferredOfWindows(path, std::string(GetGenericPathSeparatorString()));
-    }
-
-    inline static std::string
-    getGenericOfPosix(std::string const & path) {
-        return Path::makePreferredOfPosix(path, std::string(GetGenericPathSeparatorString()));
-    }
-
-    inline static std::string
-    getGeneric(std::string const & path) {
-        return Path::makePreferred(path, std::string(GetGenericPathSeparatorString()));
-    }
-
     /**
      * Generic path format.
      */
-    inline std::string getGeneric() const {
-        return Path::getGeneric(this->_path);
+    std::string getGenericString() const {
+        return NativePath::getGeneric(this->_path);
     }
 
-    inline Path & updateGeneric() {
-        this->_path.assign(getGeneric());
-        return *this;
-    }
-
-// Native string.
-public:
-    inline static std::string
-    getNative(std::string const & path) {
-        return Path::makePreferred(path, std::string(GetPathSeparatorString()));
+    Path getGeneric() const {
+        return Path(getGenericString());
     }
 
     /**
      * Operating system dependent path.
      */
-    inline std::string getNative() const {
-        return Path::getNative(this->_path);
+    std::string getNativeString() const {
+        return NativePath::getNative(this->_path);
     }
 
-    inline Path & updateNative() {
-        this->_path = getNative();
+    Path getNative() const {
+        return Path(getNativeString());
+    }
+
+// Modifiers.
+public:
+    Path & updateGeneric() {
+        setString(getGenericString());
+        return *this;
+    }
+
+    Path & updateNative() {
+        setString(getNativeString());
         return *this;
     }
 
 // Decomposition.
 public:
-    static std::string getRootDirOfWindows(std::string const & path) {
-        if (path.size() < 2 || path[1] != ':') {
-            return std::string();
-        }
-        if (/**/('a' <= COMPARE_AND(path[0]) <= 'z')
-             || ('A' <= COMPARE_AND(path[0]) <= 'Z')) {
-            return path.substr(0, 2);
-        }
-        return std::string();
-    }
-
-    static std::string getRootDirOfPosix(std::string const & path) {
-        if (path.size() < 1 || path[0] != PATH_SEPARATOR_OF_POSIX) {
-            return std::string();
-        }
-        return std::string(PATH_SEPARATOR_STRING_OF_POSIX);
-    }
-
-    static std::string getRootDir(std::string const & path) {
-        if (Path::isWindowsStyle()) {
-            return Path::getRootDirOfWindows(path);
-        }
-        return Path::getRootDirOfPosix(path);
-    }
-
     /**
      * root-directory, if @c _path includes root-directory,
      * otherwise empty string.
      */
-    std::string getRootDir() const noexcept {
-        return Path::getRootDir(this->_path);
+    std::string getRootDirString() const {
+        return NativePath::getRootDir(this->_path);
+    }
+
+    Path getRootDir() const {
+        return Path(getRootDirString());
     }
 
 // Query.
 public:
-    static bool isAbsoluteOfWindows(std::string const & path) noexcept {
-        return !getRootDirOfWindows(path).empty();
+    bool isAbsolute() const {
+        return NativePath::isAbsolute(this->_path);
     }
 
-    static bool isAbsoluteOfPosix(std::string const & path) noexcept {
-        return !getRootDirOfPosix(path).empty();
-    }
-
-    static bool isAbsolute(std::string const & path) noexcept {
-        return !Path::getRootDir(path).empty();
-    }
-
-    bool isAbsolute() const noexcept {
-        return Path::isAbsolute(this->_path);
-    }
-
-    bool isRelative() const noexcept {
-        return !isAbsolute();
+    bool isRelative() const {
+        return NativePath::isRelative(this->_path);
     }
 
 // Append.
 public:
-    Path & append(std::string const & sub, std::string const & separator) {
-        if (!this->_path.empty() && sub != separator) {
-            std::string last_char = std::string() + this->_path.back();
-            if (last_char != separator) {
-                this->_path += separator;
-            }
+    Path & append(std::string const & child) {
+        // 문지열이 공백일 경우, 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다.
+        if (!this->_path.empty() && this->_path.back() != PATH_SEPARATOR) {
+            this->_path += PATH_SEPARATOR_STRING;
         }
-        this->_path += sub;
+        this->_path += child;
         return *this;
     }
 
-    Path & append(std::string const & sub) {
-        return append(sub, std::string(GetGenericPathSeparatorString()));
+    Path & operator /=(std::string const & child) {
+        return append(child);
     }
 
-    Path & operator /=(std::string const & sub) {
-        return append(sub);
+    Path & operator +=(std::string const & child) {
+        return append(child);
     }
 
-    Path & operator +=(std::string const & sub) {
-        return append(sub);
+// Casting
+public:
+    operator std::string () const {
+        return this->_path;
     }
 
 // Parent.
 public:
-    static std::string getParentOfWindows(std::string const & path) {
-        std::string temp = Path::removeLastSeparatorOfWindows(path);
-        for (auto ritr = temp.rbegin(); ritr != temp.rend();  ++ritr) {
-            if (*ritr == PATH_SEPARATOR_OF_WINDOWS || *ritr == PATH_SEPARATOR_OF_POSIX) {
-                return temp.substr(0, temp.size() - std::distance(temp.rbegin(), ritr) - 1U);
-            }
-        }
-        return std::string();
+    std::string getParentString() const {
+        return NativePath::getParent(this->_path);
     }
 
-    static std::string getParentOfPosix(std::string const & path) {
-        if (path.size() == 1U && path[0] == PATH_SEPARATOR_OF_POSIX) {
-            return std::string();
-        }
-        std::string temp = Path::removeLastSeparatorOfWindows(path);
-        std::string::size_type last_separator_index = temp.rfind(PATH_SEPARATOR_STRING_OF_POSIX);
-        if (last_separator_index == 0U && temp.size() > 1U && temp[0] == PATH_SEPARATOR_OF_POSIX) {
-            return std::string(PATH_SEPARATOR_STRING_OF_POSIX);
-        } else if (last_separator_index == std::string::npos) {
-            return std::string();
-        }
-        return temp.substr(0, last_separator_index);
-    }
-
-    static std::string getParent(std::string const & path) {
-        if (Path::isWindowsStyle()) {
-            return Path::getParentOfWindows(path);
-        }
-        return Path::getParentOfPosix(path);
-    }
-
-    std::string getParent() const {
-        return Path::getParent(this->_path);
+    Path getParent() const {
+        return Path(getParentString());
     }
 
 // Node operators.
 public:
-    using Nodes = std::vector<std::string>;
-
-    static Nodes splitNodesOfWindows(std::string const & path) {
-        return Strings::splitTokens(Path::getGenericOfWindows(path),
-                                    std::string(GetGenericPathSeparatorString()));
-    }
-
-    static Nodes splitNodesOfPosix(std::string const & path) {
-        Nodes result = Strings::splitTokens(Path::getGenericOfPosix(path),
-                                            std::string(GetGenericPathSeparatorString()));
-        std::string separator = Path::getRootDirOfPosix(path);
-        if (!separator.empty()) {
-            // Force insert the POSIX root directory.
-            result.insert(result.begin(), separator);
-        }
-        return result;
-    }
-
-    static Nodes splitNodes(std::string const & path) {
-        if (Path::isWindowsStyle()) {
-            return Path::splitNodesOfWindows(path);
-        }
-        return Path::splitNodesOfPosix(path);
-    }
-
-    Nodes splitNodes() const {
-        return Path::splitNodes(this->_path);
+    std::vector<std::string> splitNodes() const {
+        return NativePath::splitNodes(this->_path);
     }
 
 // Directory shortcut.

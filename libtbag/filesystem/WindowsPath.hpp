@@ -42,7 +42,7 @@ namespace filesystem {
  * @warning
  *  Supports multibyte-string only.
  */
-class WindowsPath : public Noncopyable
+class WindowsPath
 {
 public:
     static constexpr char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
@@ -50,8 +50,8 @@ public:
     static constexpr char const * const REMOVE_SEPARATOR_REGEX = R"([\\\/][\\\/]*)";
 
 public:
-    constexpr WindowsPath() = default;
-    ~WindowsPath() = default;
+    constexpr WindowsPath() noexcept = default;
+    ~WindowsPath() noexcept = default;
 
 // Filename query.
 public:
