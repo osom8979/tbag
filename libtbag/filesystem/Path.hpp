@@ -16,10 +16,8 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/filesystem/Common.hpp>
 #include <libtbag/filesystem/WindowsPath.hpp>
 #include <libtbag/filesystem/PosixPath.hpp>
-#include <libtbag/Strings.hpp>
 
 #include <string>
 #include <initializer_list>
@@ -293,6 +291,7 @@ public:
 };
 
 using Path = BasePath<char>;
+using WidePath = BasePath<wchar_t>;
 
 } // namespace filesystem
 

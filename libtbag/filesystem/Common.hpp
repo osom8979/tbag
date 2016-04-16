@@ -69,6 +69,9 @@ constexpr char const GetPathSplitter() noexcept
  *
  * @author zer0
  * @date   2016-04-08
+ *
+ * @warning
+ *  Supports multibyte-string only.
  */
 class Common : public Noncopyable
 {

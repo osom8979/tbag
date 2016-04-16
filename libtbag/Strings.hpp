@@ -35,14 +35,21 @@ NAMESPACE_LIBTBAG_OPEN
  *
  * @translate{ko, inline function을 사용하지 않고\, static method를 사용하기 위한 클래스.}
  */
-class Strings : public Noncopyable
+template <typename CharType = char>
+class BaseStrings : public Noncopyable
 {
 public:
-    static constexpr char const * const EMPTY_STRING = "";
+    using ValueType = CharType;
+    using String    = std::basic_string<ValueType>;
+
+    static_assert(std::is_pod<ValueType>::value
+            , "Character type of BaseStrings must be a POD");
+    static_assert(std::is_same<ValueType, typename String::value_type>::value
+            , "String::value_type must be the same type as ValueType");
 
 public:
-    constexpr Strings() = default;
-    ~Strings() = default;
+    constexpr BaseStrings() noexcept = default;
+    ~BaseStrings() noexcept = default;
 
 public:
     /**
@@ -54,15 +61,15 @@ public:
      * @return
      *  Token vector.
      */
-    static std::vector<std::string> splitTokens(std::string const & source
-                                              , std::string const & delimiter) {
-        std::vector<std::string> result;
-        std::string token;
+    static std::vector<String> splitTokens(String const & source
+                                         , String const & delimiter) {
+        std::vector<String> result;
+        String token;
 
         std::size_t start = 0;
         std::size_t end = source.find(delimiter);
 
-        while (end != std::string::npos) {
+        while (end != String::npos) {
             token = source.substr(start, end - start);
             if (token.size() > 0) {
                 result.push_back(token);
@@ -84,17 +91,20 @@ public:
 
 // Regexp utilities.
 public:
-    static std::string replaceRegex(std::string const & path
-                                  , std::string const & regex
-                                  , std::string const & replace) {
+    static String replaceRegex(String const & path
+                             , String const & regex
+                             , String const & replace) {
         return std::regex_replace(path, std::regex(regex), replace);
     }
 
-    static std::string removeRegex(std::string const & path
-                                 , std::string const & regex) {
-        return Strings::replaceRegex(path, regex, Strings::EMPTY_STRING);
+    static String removeRegex(String const & path
+                            , String const & regex) {
+        return replaceRegex(path, regex, String());
     }
 };
+
+using Strings = BaseStrings<char>;
+using WideStrings = BaseStrings<wchar_t>;
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

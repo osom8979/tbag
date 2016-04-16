@@ -38,9 +38,6 @@ namespace filesystem {
  *
  * @remarks
  *  ISO/IEC 9945 POSIX API.
- *
- * @warning
- *  Supports multibyte-string only.
  */
 template <typename CharType = char>
 class PosixPath

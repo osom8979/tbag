@@ -39,9 +39,6 @@ namespace filesystem {
  *
  * @remarks
  *  Windows API.
- *
- * @warning
- *  Supports multibyte-string only.
  */
 template <typename CharType = char>
 class WindowsPath
