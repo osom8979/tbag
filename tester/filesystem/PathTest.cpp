@@ -80,10 +80,3 @@ TEST(PathStaticTest, AssignOperators)
     ASSERT_STREQ(p0.getString().c_str(), TEMP);
 }
 
-TEST(PathStaticTest, replaceHomeDirectoryShortcut)
-{
-    std::string const HOME = Common::getHomeDir();
-    std::string const TEMP = "~";
-    ASSERT_EQ(Path::replaceHomeDirectoryShortcut(TEMP), HOME);
-}
-

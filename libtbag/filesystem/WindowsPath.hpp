@@ -23,6 +23,7 @@
 #include <cassert>
 #include <string>
 #include <iterator> // std::distance
+#include <algorithm>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,12 +43,25 @@ namespace filesystem {
  * @warning
  *  Supports multibyte-string only.
  */
+template <typename CharType = char>
 class WindowsPath
 {
 public:
-    static constexpr char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
-    static constexpr char const * const PATH_SEPARATOR_STRING = PATH_SEPARATOR_STRING_OF_WINDOWS;
-    static constexpr char const * const REMOVE_SEPARATOR_REGEX = R"([\\\/][\\\/]*)";
+    using ValueType = CharType;
+    using String    = std::basic_string<ValueType>;
+
+    static_assert(std::is_pod<ValueType>::value
+            , "Character type of WindowsPath must be a POD");
+    static_assert(std::is_same<ValueType, typename String::value_type>::value
+            , "String::value_type must be the same type as ValueType");
+
+public:
+    static constexpr ValueType const PATH_SEPARATOR
+            = static_cast<ValueType const>(PATH_SEPARATOR_OF_WINDOWS);
+    static constexpr ValueType const * const PATH_SEPARATOR_STRING
+            = static_cast<ValueType const * const>(PATH_SEPARATOR_STRING_OF_WINDOWS);
+    static constexpr ValueType const * const REMOVE_SEPARATOR_REGEX
+            = R"([\\\/][\\\/]*)";
 
 public:
     constexpr WindowsPath() noexcept = default;
@@ -62,25 +76,29 @@ public:
      * @remarks
      *  Many operating systems prohibit the ASCII control characters (0x00-0x1F) in filenames.
      */
-    static bool isProhibitedFilename(std::string const & path) noexcept {
-        for (char const & cursor : path) {
-            if (0x00 <= COMPARE_AND(cursor) <= 0x1F) {
+    struct ProhibitedBy
+    {
+        inline bool operator()(ValueType v) const noexcept {
+            if (0x00 <= COMPARE_AND(v) <= 0x1F) {
                 return true;
             }
-
-            switch (cursor) {
+            switch (v) {
                 case '*': case '<': case '>':
                 case '?': case '/': case '|': case '\\':
                     return true;
             }
+            return false;
         }
-        return false;
+    };
+
+    static bool isProhibitedFilename(String const & path) noexcept {
+        return std::any_of(path.begin(), path.end(), ProhibitedBy());
     }
 
 // Remove last separator.
 public:
-    static std::string removeLastSeparator(std::string const & path) {
-        return Strings::removeRegex(path, std::string(REMOVE_SEPARATOR_REGEX) + "$");
+    static String removeLastSeparator(String const & path) {
+        return Strings::removeRegex(path, String(REMOVE_SEPARATOR_REGEX) + "$");
     }
 
 // Make preferred.
@@ -88,13 +106,13 @@ public:
     /**
      * Slashes converted to backslashes.
      */
-    inline static std::string makePreferred(std::string const & path) {
+    inline static String makePreferred(String const & path) {
         return Strings::replaceRegex(path
                                    , PATH_SEPARATOR_STRING_OF_POSIX
                                    , PATH_SEPARATOR_STRING);
     }
 
-    static std::string removeDuplicateSeparators(std::string const & path) {
+    static String removeDuplicateSeparators(String const & path) {
         return Strings::replaceRegex(path
                                    , REMOVE_SEPARATOR_REGEX
                                    , PATH_SEPARATOR_STRING);
@@ -105,14 +123,14 @@ public:
     /**
      * makePreferred -> removeDuplicateSeparators -> removeLastSeparator
      */
-    static std::string getNative(std::string const & path) {
+    static String getNative(String const & path) {
         return removeLastSeparator(removeDuplicateSeparators(makePreferred(path)));
     }
 
     /**
      * getNative -> generic formatting.
      */
-    static std::string getGeneric(std::string const & path) {
+    static String getGeneric(String const & path) {
         return Strings::replaceRegex(getNative(path)
                                    , REMOVE_SEPARATOR_REGEX
                                    , GetGenericPathSeparatorString());
@@ -120,42 +138,42 @@ public:
 
 // Decomposition.
 public:
-    static std::string getRootDir(std::string const & path) {
+    static String getRootDir(String const & path) {
         if (path.size() < 2 || path[1] != ':') {
-            return std::string();
+            return String();
         }
         if (/**/('a' <= COMPARE_AND(path[0]) <= 'z')
              || ('A' <= COMPARE_AND(path[0]) <= 'Z')) {
             return path.substr(0, 2);
         }
-        return std::string();
+        return String();
     }
 
 // Query.
 public:
-    static bool isAbsolute(std::string const & path) {
+    static bool isAbsolute(String const & path) {
         return !getRootDir(path).empty();
     }
 
-    static bool isRelative(std::string const & path) {
+    static bool isRelative(String const & path) {
         return !isAbsolute(path);
     }
 
 // Parent.
 public:
-    static std::string getParent(std::string const & path) {
-        std::string temp = removeLastSeparator(path);
+    static String getParent(String const & path) {
+        String temp = removeLastSeparator(path);
         for (auto ritr = temp.rbegin(); ritr != temp.rend();  ++ritr) {
             if (*ritr == PATH_SEPARATOR_OF_WINDOWS || *ritr == PATH_SEPARATOR_OF_POSIX) {
                 return temp.substr(0, temp.size() - std::distance(temp.rbegin(), ritr));
             }
         }
-        return std::string();
+        return String();
     }
 
 // Node operators.
 public:
-    static std::vector<std::string> splitNodes(std::string const & path) {
+    static std::vector<String> splitNodes(String const & path) {
         return Strings::splitTokens(getGeneric(path),
                                     GetGenericPathSeparatorString());
     }
