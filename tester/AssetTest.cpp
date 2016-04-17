@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <libtbag/Asset.hpp>
 
+#include <iostream>
+
 using namespace libtbag;
 
 TEST(AssetStaticTest, CopyOperators)
@@ -91,5 +93,14 @@ TEST_F(AssetTest, getExeDir)
     std::string dir = filesystem::Common::getExeDir();
     ASSERT_GT(dir.size(), 0U);
     ASSERT_EQ(dir, _asset.getDir(Asset::getExeDirKeyName()));
+}
+
+TEST_F(AssetTest, scanDirs)
+{
+    using namespace std;
+    auto result = _asset.scanDirs(".");
+    for (auto cursor : result) {
+        cout << "File: " << cursor << endl;
+    }
 }
 

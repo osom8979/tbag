@@ -137,6 +137,23 @@ public:
         return this->_dirs.size();
     }
 
+    std::set<std::string> scanDirs(std::string const & dir_name) const {
+        std::set<std::string> result;
+        std::set<std::string> scan_result;
+        filesystem::Path path;
+        for (auto cursor : this->_dirs) {
+            path  = cursor.second;
+            path /= dir_name;
+
+            scan_result.clear();
+            scan_result = filesystem::Common::scanDir(path.getNativeString());
+            for (auto file : scan_result) {
+                result.insert(filesystem::Path::append(path, file));
+            }
+        }
+        return result;
+    }
+
 // Static methods.
 public:
     /** Obtain HOME directory key name. */

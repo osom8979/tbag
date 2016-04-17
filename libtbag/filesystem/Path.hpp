@@ -246,12 +246,18 @@ public:
 
 // Append.
 public:
-    BasePath & append(String const & child) {
+    static String append(String const & parent, String const & child) {
+        String result = parent;
         // 문지열이 공백일 경우, 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다.
-        if (!this->_path.empty() && this->_path.back() != NativePath::PATH_SEPARATOR) {
-            this->_path += NativePath::getPathSeparator();
+        if (!parent.empty() && parent.back() != NativePath::PATH_SEPARATOR) {
+            result += NativePath::getPathSeparator();
         }
-        this->_path += child;
+        result += child;
+        return result;
+    }
+
+    BasePath & append(String const & child) {
+        this->_path = append(this->_path, child);
         return *this;
     }
 
