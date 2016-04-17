@@ -33,6 +33,11 @@ extern "C" {
  */
 LIBTBAG_TEST_EXPORT int __libtbag_test__add__(int v1, int v2);
 
+/**
+ * Add function test2.
+ */
+LIBTBAG_TEST_EXPORT void __libtbag_test__add2__(int v1, int v2, int * result);
+
 #if defined(__cplusplus)
 } /** extern "C" */
 #endif
