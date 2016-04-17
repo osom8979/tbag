@@ -24,8 +24,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-char const * const HOME_DIRECTORY_ASSET_NAME = "__HOME__";
-char const * const  EXE_DIRECTORY_ASSET_NAME = "__EXE__";
+constexpr char const * const HOME_DIRECTORY_ASSET_NAME = "__HOME__";
+constexpr char const * const  EXE_DIRECTORY_ASSET_NAME = "__EXE__";
 
 /**
  * Asset class prototype.
@@ -39,29 +39,34 @@ char const * const  EXE_DIRECTORY_ASSET_NAME = "__EXE__";
 class Asset
 {
 public:
-    /** Default setting for the constructor. */
-    struct default_setting { /* Empty Body. */ };
+    using String    = std::string;
+    using ValueType = typename String::value_type;
+    using PathMap   = std::map<String, String>;
+
+    static_assert(std::is_same<ValueType, char>::value
+            , "ValueType must be the same type as char");
 
 public:
-    using PathMap = std::map<std::string, std::string>;
+    /** Default setting for the constructor. */
+    struct default_setting { __EMPTY_BLOCK__ };
 
 private:
-    PathMap dirs;
+    PathMap _dirs;
 
 public:
-    Asset() {
-        __EMPTY_BLOCK__;
+    Asset() noexcept(std::is_nothrow_default_constructible<PathMap>::value) {
+        __EMPTY_BLOCK__
     }
 
     /** Construct of Default settings. */
     explicit Asset(default_setting const & UNUSED_PARAM(empty_value)) {
         using filesystem::Common;
-        this->dirs.insert(std::make_pair(getHomeDirKeyName(), Common::getHomeDir()));
-        this->dirs.insert(std::make_pair(getExeDirKeyName(), Common::getExeDir()));
+        this->_dirs.insert(std::make_pair(getHomeDirKeyName(), Common::getHomeDir()));
+        this->_dirs.insert(std::make_pair(getExeDirKeyName(), Common::getExeDir()));
     }
 
     Asset(PathMap const & dirs) {
-        this->dirs = dirs;
+        this->_dirs = dirs;
     }
 
     Asset(Asset const & obj) {
@@ -72,16 +77,16 @@ public:
         this->swap(obj);
     }
 
-    virtual ~Asset() {
-        this->dirs.clear();
+    ~Asset() {
+        __EMPTY_BLOCK__
     }
 
 public:
-    Asset & operator = (Asset const & obj) {
+    Asset & operator =(Asset const & obj) {
         return this->copy(obj);
     }
 
-    Asset & operator = (Asset && obj) {
+    Asset & operator =(Asset && obj) {
         this->swap(obj);
         return *this;
     }
@@ -89,14 +94,14 @@ public:
 public:
     Asset & copy(Asset const & obj) {
         if (this != &obj) {
-            this->dirs = obj.dirs;
+            this->_dirs = obj._dirs;
         }
         return *this;
     }
 
     void swap(Asset & obj) {
         if (this != &obj) {
-            this->dirs.swap(obj.dirs);
+            this->_dirs.swap(obj._dirs);
         }
     }
 
@@ -110,9 +115,9 @@ public:
      *  - Empty string: If it can't find.
      *  - Otherwise: Successful find.
      */
-    std::string getDir(std::string const & key) {
-        auto itr = this->dirs.find(key);
-        if (itr == this->dirs.end()) {
+    String getDir(String const & key) const {
+        auto itr = this->_dirs.find(key);
+        if (itr == this->_dirs.end()) {
             return "";
         }
         return itr->second;
@@ -124,24 +129,24 @@ public:
      * @param key   [in] Directory key name.
      * @param value [in] Directory path string.
      */
-    void insertDir(std::string const & key, std::string const & value) {
-        this->dirs.insert(std::make_pair(key, value));
+    void insertDir(String const & key, String const & value) {
+        this->_dirs.insert(std::make_pair(key, value));
     }
 
     std::size_t size() const noexcept(true) {
-        return this->dirs.size();
+        return this->_dirs.size();
     }
 
 // Static methods.
 public:
     /** Obtain HOME directory key name. */
-    static std::string getHomeDirKeyName() {
-        return std::string(HOME_DIRECTORY_ASSET_NAME);
+    static String getHomeDirKeyName() {
+        return String(HOME_DIRECTORY_ASSET_NAME);
     }
 
     /** Obtain executable file directory key name. */
-    static std::string getExeDirKeyName() {
-        return std::string(EXE_DIRECTORY_ASSET_NAME);
+    static String getExeDirKeyName() {
+        return String(EXE_DIRECTORY_ASSET_NAME);
     }
 };
 

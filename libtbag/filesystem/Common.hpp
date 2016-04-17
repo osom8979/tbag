@@ -16,8 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 
-#include <vector>
+#include <cassert>
 #include <string>
+#include <vector>
+#include <set>
 
 #include <uv.h>
 
@@ -144,6 +146,23 @@ public:
             return true;
         }
         return false;
+    }
+
+    static std::set<std::string> scanDir(std::string const & path) {
+        std::set<std::string> result;
+        uv_fs_t request;
+        uv_dirent_t dictate;
+
+        int element_count = uv_fs_scandir(nullptr, &request, path.c_str(), 0, nullptr);
+        if (element_count > 0) {
+            while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
+                result.insert(std::string(dictate.name));
+            }
+        }
+        uv_fs_req_cleanup(&request);
+
+        assert(result.size() == static_cast<std::size_t>(element_count));
+        return result;
     }
 };
 

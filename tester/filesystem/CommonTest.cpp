@@ -41,3 +41,15 @@ TEST(CommonStaticTest, RepresentationDirectory)
     ASSERT_GT(exe_dir.size(), 0U);
 }
 
+TEST(CommonStaticTest, scanDir)
+{
+    using namespace std;
+
+    std::set<std::string> files = Common::scanDir(".");
+
+    for (auto cursor : files) {
+        cout << "* File: " << cursor << endl;
+    }
+
+    ASSERT_GT(files.size(), 0U);
+}
