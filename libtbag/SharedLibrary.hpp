@@ -16,8 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 
-#include <cstdlib>
+#include <cstring>
 #include <string>
+
 #include <uv.h>
 
 // -------------------
@@ -38,7 +39,7 @@ private:
 
 public:
     SharedLibrary() : _open(false) {
-        std::memset(&this->_lib, 0x00, sizeof(this->_lib));
+        memset(&this->_lib, 0x00, sizeof(this->_lib));
     }
 
     SharedLibrary(std::string const & path) : SharedLibrary() {
