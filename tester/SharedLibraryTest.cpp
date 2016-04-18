@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/SharedLibrary.hpp>
 #include <libtbag/filesystem/Path.hpp>
 

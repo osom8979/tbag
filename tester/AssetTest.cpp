@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/Asset.hpp>
 
 #include <iostream>
