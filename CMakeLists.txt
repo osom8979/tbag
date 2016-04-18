@@ -76,15 +76,12 @@ test_find_package (DOXYGEN Doxygen)
 set (TEMPLATE_PREFIX "${PROJECT_SOURCE_DIR}/template")
 set (MAIN_DIR "${PROJECT_SOURCE_DIR}/${MAIN_NAME}")
 
-set (IN_PREFIX    "${TEMPLATE_PREFIX}/prefix.h.in")
 set (IN_CONFIG    "${TEMPLATE_PREFIX}/config.h.in")
 set (IN_DOXYFILE  "${TEMPLATE_PREFIX}/Doxyfile.in")
 
-set (OUT_PREFIX   "${MAIN_DIR}/prefix.h")
 set (OUT_CONFIG   "${MAIN_DIR}/config.h")
 set (OUT_DOXYFILE "${PROJECT_SOURCE_DIR}/Doxyfile")
 
-configure_file (${IN_PREFIX}   ${OUT_PREFIX}   NEWLINE_STYLE UNIX)
 configure_file (${IN_CONFIG}   ${OUT_CONFIG}   NEWLINE_STYLE UNIX)
 configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 
