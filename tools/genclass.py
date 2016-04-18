@@ -5,12 +5,13 @@ import os
 import sys
 import datetime
 import getpass
-import __main__ as main
+import subprocess
+import re
 
 HELP_MESSAGE   = 'Usage: python ' + sys.argv[0] + ' {package/path/classname} {author}'
 
 ## Path & Directory setting.
-#THIS_FILE_PATH  = os.path.abspath(main.__file__)
+#THIS_FILE_PATH  = os.path.abspath(main.__file__) # import __main__ as main
 THIS_FILE_PATH   = os.path.realpath(__file__)
 TOOLS_DIR        = os.path.dirname(THIS_FILE_PATH)
 PROJECT_DIR      = os.path.normpath(TOOLS_DIR + '/..')
@@ -18,9 +19,23 @@ SOURCE_DIR       = os.path.normpath(PROJECT_DIR + '/')
 TEMPLATE_DIR     = os.path.normpath(PROJECT_DIR + '/template')
 HEADER_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'class.hpp.in')
 SOURCE_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'class.cpp.in')
+CONFIG_CMAKE     = os.path.join(PROJECT_DIR, 'config.cmake')
+
+def getProjectName():
+    result = ''
+    output = subprocess.check_output(['cmake', '-L', '-P', CONFIG_CMAKE])
+
+    for line in output.splitlines():
+        if re.match(r'^MAIN_NAME.*=.*$', line):
+            result = line[line.find('=')+1:]
+            break
+
+    if len(result) == 0:
+        return 'main' # Default project name.
+    return result
 
 ## Pre-defined properties:
-PROJECT_NAME     = 'libtbag'
+PROJECT_NAME     = getProjectName()
 PROJECT_CONFIG   = PROJECT_NAME + '/config.h'
 HEADER_EXTENSION = '.hpp'
 SOURCE_EXTENSION = '.cpp'
