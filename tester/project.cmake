@@ -35,9 +35,3 @@ if (USE_tinyxml2)
     list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
 endif ()
 
-# Curses setting.
-if (USE_ncurses)
-    list (APPEND _project_include_dirs ${CURSES_INCLUDE_DIR})
-    list (APPEND _project_ldflags      ${CURSES_LIBRARIES})
-endif ()
-
