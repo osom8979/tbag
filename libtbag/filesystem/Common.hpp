@@ -78,8 +78,8 @@ constexpr char const GetPathSplitter() noexcept
 class Common : public Noncopyable
 {
 private:
-    Common() = delete;
-    ~Common() = delete;
+    constexpr Common() noexcept = delete;
+    ~Common() noexcept = delete;
 
 // Representation Directory.
 public:
@@ -94,7 +94,7 @@ public:
         buffer.resize(path_length);
 
         if (func(&buffer[0], &path_length) != 0) {
-            return "";
+            return std::string();
         }
         return std::string(buffer.begin(), buffer.begin() + path_length);
     }
@@ -126,8 +126,8 @@ public:
      */
     static std::string getExeDir() {
         std::string path = getExePath();
-        if (path.size() == 0U) {
-            return "";
+        if (path.empty()) {
+            return std::string();
         }
 
         // Separate directory & filename.
@@ -150,6 +150,7 @@ public:
 
     static std::set<std::string> scanDir(std::string const & path) {
         std::set<std::string> result;
+
         uv_fs_t request;
         uv_dirent_t dictate;
 
@@ -162,6 +163,7 @@ public:
         uv_fs_req_cleanup(&request);
 
         assert(result.size() == static_cast<std::size_t>(element_count));
+
         return result;
     }
 };

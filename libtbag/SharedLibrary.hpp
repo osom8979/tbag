@@ -103,16 +103,9 @@ public:
     }
 };
 
-
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
-#ifndef SHARED_LIBRARY_SYMBOL
-#define SHARED_LIBRARY_SYMBOL
-#endif // SHARED_LIBRARY_SYMBOL
-
-
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_SHAREDLIBRARY_HPP__
 

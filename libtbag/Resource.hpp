@@ -42,11 +42,11 @@ public:
     static constexpr char const * const NAME_ATTRIBUTE = "name";
 
 public:
-    using Str = std::string;
-    using Map = std::unordered_map<Str, Str>;
+    using String = std::string;
+    using Map = std::unordered_map<String, String>;
 
 private:
-    Str _tag;
+    String _tag;
     Map _map;
 
 public:

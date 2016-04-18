@@ -92,14 +92,14 @@ public:
                 return true;
             }
             switch (v) {
-                case static_cast<ValueType>('*'):
-                case static_cast<ValueType>('<'):
-                case static_cast<ValueType>('>'):
-                case static_cast<ValueType>('?'):
-                case static_cast<ValueType>('/'):
-                case static_cast<ValueType>('|'):
-                case static_cast<ValueType>('\\'):
-                    return true;
+            case static_cast<ValueType>('*'):
+            case static_cast<ValueType>('<'):
+            case static_cast<ValueType>('>'):
+            case static_cast<ValueType>('?'):
+            case static_cast<ValueType>('/'):
+            case static_cast<ValueType>('|'):
+            case static_cast<ValueType>('\\'):
+                return true;
             }
             return false;
         }
