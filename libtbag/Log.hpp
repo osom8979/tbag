@@ -95,7 +95,7 @@ public:
         spdlog::set_level(static_cast<spdlog::level::level_enum>(level));
     }
 
-    inline void setDefaultLevel(Level level) noexcept {
+    inline void setDefaultLevel() noexcept {
         spdlog::set_level(static_cast<spdlog::level::level_enum>(Level::INFO));
     }
 
