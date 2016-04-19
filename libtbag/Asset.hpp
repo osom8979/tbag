@@ -24,9 +24,6 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-constexpr char const * const HOME_DIRECTORY_ASSET_NAME = "__HOME__";
-constexpr char const * const  EXE_DIRECTORY_ASSET_NAME = "__EXE__";
-
 /**
  * Asset class prototype.
  *
@@ -49,6 +46,10 @@ public:
 public:
     /** Default setting for the constructor. */
     struct default_setting { __EMPTY_BLOCK__ };
+
+public:
+    static constexpr char const * const HOME_DIRECTORY_ASSET_NAME = "__HOME__";
+    static constexpr char const * const  EXE_DIRECTORY_ASSET_NAME = "__EXE__";
 
 private:
     PathMap _dirs;

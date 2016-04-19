@@ -56,7 +56,7 @@ public:
     static constexpr ValueType const PATH_SEPARATOR
             = static_cast<ValueType const>(PATH_SEPARATOR_OF_WINDOWS);
     static constexpr ValueType const GENERIC_PATH_SEPARATOR
-            = static_cast<ValueType const>(GetGenericPathSeparator());
+            = static_cast<ValueType const>(getGenericPathSeparator());
 
 public:
     inline static String getPathSeparator() {

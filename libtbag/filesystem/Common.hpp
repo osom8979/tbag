@@ -41,7 +41,7 @@ std::size_t const MAX_PATH_BUFFER_SIZE = MAX_PATH_LENGTH_OF_WINDOWS_API;
 char const PATH_SEPARATOR_OF_WINDOWS = '\\';
 char const PATH_SEPARATOR_OF_POSIX   = '/';
 
-constexpr char const GetPathSeparator() noexcept
+constexpr char const getPathSeparator() noexcept
 {
 #if defined(__OS_WINDOWS__)
     return PATH_SEPARATOR_OF_WINDOWS;
@@ -50,7 +50,7 @@ constexpr char const GetPathSeparator() noexcept
 #endif
 }
 
-constexpr char const GetGenericPathSeparator() noexcept
+constexpr char const getGenericPathSeparator() noexcept
 {
     return PATH_SEPARATOR_OF_POSIX;
 }
@@ -58,7 +58,7 @@ constexpr char const GetGenericPathSeparator() noexcept
 char const PATH_SPLITTER_OF_WINDOWS = ';';
 char const PATH_SPLITTER_OF_POSIX   = ':';
 
-constexpr char const GetPathSplitter() noexcept
+constexpr char const getPathSplitter() noexcept
 {
 #if defined(__OS_WINDOWS__)
     return PATH_SPLITTER_OF_WINDOWS;
@@ -132,7 +132,7 @@ public:
         }
 
         // Separate directory & filename.
-        std::string separator = std::string() + filesystem::GetPathSeparator();
+        std::string separator = std::string() + filesystem::getPathSeparator();
         std::size_t last_separator_index = path.rfind(separator);
         return path.substr(0, last_separator_index);
     }

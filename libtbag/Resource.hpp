@@ -24,7 +24,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-constexpr bool IsCompactXmlFile() noexcept
+constexpr bool isCompactXmlFile() noexcept
 {
     return false;
 }
@@ -307,7 +307,7 @@ public:
             element->SetText(cursor.second.c_str());
             node->InsertEndChild(element);
         }
-        if (doc.SaveFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
+        if (doc.SaveFile(path.c_str(), isCompactXmlFile()) == tinyxml2::XML_NO_ERROR) {
             return true;
         }
         return false;

@@ -13,14 +13,14 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(CommonStaticTest, GetPathSeparator)
+TEST(CommonStaticTest, getPathSeparator)
 {
 #if defined(WIN32) || defined(_WIN32)
     ASSERT_EQ(GetPathSeparator(), '\\');
     ASSERT_EQ(GetPathSplitter(),  ';');
 #else
-    ASSERT_EQ(GetPathSeparator(), '/');
-    ASSERT_EQ(GetPathSplitter(),  ':');
+    ASSERT_EQ(getPathSeparator(), '/');
+    ASSERT_EQ(getPathSplitter(),  ':');
 #endif
 }
 
