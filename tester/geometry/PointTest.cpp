@@ -48,9 +48,9 @@ TEST(PointTest, makePoint)
 #if defined(__COMP_GNUC__) || defined(__COMP_CLANG__)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wunused-variable"
-# if defined(__COMP_GNUC__)
-#  pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-# endif
+#endif
+#if !defined(__COMP_CLANG__)
+# pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
     Point p1_1 = makePoint( 0,  0);
@@ -73,7 +73,7 @@ TEST(PointTest, makePoint)
     Point const p4_3 = makePoint(v3, v2);
     Point const p4_4 = makePoint(v3, v3);
 
-#if defined(__COMP_GNUC__)
+#if defined(__COMP_GNUC__) || defined(__COMP_CLANG__)
 # pragma GCC diagnostic pop
 #endif
 }
