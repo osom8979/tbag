@@ -10,7 +10,7 @@
 
 using namespace libtbag;
 
-TEST(ResourceStaticTest, utf8)
+TEST(ResourceTest, utf8)
 {
     unsigned char hangul [] = {
             0xea, 0xb0, 0x80, 0xeb, 0x82, 0x98, 0xeb, 0x8b, 0xa4, 0xeb
@@ -34,9 +34,7 @@ TEST(ResourceStaticTest, utf8)
     ASSERT_EQ(res.getString(TEST_NAME), HANGUL_UTF8);
 }
 
-// Fixture.
-
-class ResourceTest : public ::testing::Test
+class ResourceFixtureTest : public ::testing::Test
 {
 public:
     std::string xml;
@@ -63,8 +61,8 @@ public:
     Resource res;
 
 public:
-    ResourceTest() = default;
-    virtual ~ResourceTest() = default;
+    ResourceFixtureTest() = default;
+    ~ResourceFixtureTest() = default;
 
 public:
     virtual void SetUp() override {
@@ -103,7 +101,7 @@ public:
     }
 };
 
-TEST_F(ResourceTest, clear_and_size)
+TEST_F(ResourceFixtureTest, clear_and_size)
 {
     ASSERT_GT(res.size(), 0U);
 
@@ -111,12 +109,12 @@ TEST_F(ResourceTest, clear_and_size)
     ASSERT_EQ(res.size(), 0U);
 }
 
-TEST_F(ResourceTest, get_tag)
+TEST_F(ResourceFixtureTest, get_tag)
 {
     ASSERT_EQ(res.get_tag(), tag);
 }
 
-TEST_F(ResourceTest, readFromXmlString)
+TEST_F(ResourceFixtureTest, readFromXmlString)
 {
     Resource::Map map;
     map = Resource::readFromXmlString(xml, tag);
@@ -127,7 +125,7 @@ TEST_F(ResourceTest, readFromXmlString)
     ASSERT_EQ(map.find(attribute3)->second, value3);
 }
 
-TEST_F(ResourceTest, save)
+TEST_F(ResourceFixtureTest, save)
 {
     char const * const FILE_NAME = "__resource_test_save.xml";
 
@@ -136,7 +134,7 @@ TEST_F(ResourceTest, save)
     ASSERT_TRUE(Resource::save(FILE_NAME, tag, map));
 }
 
-TEST_F(ResourceTest, getValue)
+TEST_F(ResourceFixtureTest, getValue)
 {
     ASSERT_EQ(res.getString(attribute1), value1_2);
 
@@ -167,7 +165,7 @@ TEST_F(ResourceTest, getValue)
     ASSERT_NEAR(res.getLongDouble(attribute1),      0.0, abs_error);
 }
 
-TEST_F(ResourceTest, get)
+TEST_F(ResourceFixtureTest, get)
 {
     ASSERT_EQ(res.get(attribute1, ""), value1_2);
 
@@ -182,7 +180,7 @@ TEST_F(ResourceTest, get)
     ASSERT_NEAR(res.get(attribute5, static_cast<long double>(0)), value5_2, abs_error);
 }
 
-TEST_F(ResourceTest, set)
+TEST_F(ResourceFixtureTest, set)
 {
     Resource res;
     res.set(attribute3, value3_2);
@@ -192,7 +190,7 @@ TEST_F(ResourceTest, set)
     ASSERT_EQ(res.getString(attribute4), value4);
 }
 
-TEST_F(ResourceTest, at)
+TEST_F(ResourceFixtureTest, at)
 {
     ASSERT_EQ(res.at(attribute1), value1_2);
 

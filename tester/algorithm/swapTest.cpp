@@ -16,6 +16,7 @@ TEST(swapTest, Default)
     int v2 = 20;
 
     algorithm::swapWithPod(v1, v2);
+
     ASSERT_EQ(v1, 20);
     ASSERT_EQ(v2, 10);
 }

@@ -10,7 +10,7 @@
 
 using namespace libtbag;
 
-TEST(Strings, splitTokens)
+TEST(StringsTest, splitTokens)
 {
     std::string delimiter = "//";
     std::string temp1 = std::string("1TEMP1");

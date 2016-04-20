@@ -27,28 +27,31 @@ public:
     CREATE_PROPERTY(std::string, StringKey, "TEST");
 };
 
-// Fixture.
-
-class PropertyTest : public ::testing::Test
+class PropertyFixtureTest : public ::testing::Test
 {
 public:
     DemoProperty property;
 
 public:
-    PropertyTest() {
-        this->property.loadOrCreate();
+    PropertyFixtureTest() {
+        property.loadOrCreate();
     }
-    virtual ~PropertyTest() = default;
+
+    ~PropertyFixtureTest() {
+        __EMPTY_BLOCK__
+    }
 
 public:
     virtual void SetUp() override {
+        __EMPTY_BLOCK__
     }
 
     virtual void TearDown() override {
+        __EMPTY_BLOCK__
     }
 };
 
-TEST_F(PropertyTest, test)
+TEST_F(PropertyFixtureTest, test)
 {
     ASSERT_EQ(this->property.get_IntegerKey(), 100);
     ASSERT_EQ(this->property.get_StringKey(), "TEST");

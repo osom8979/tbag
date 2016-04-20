@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::pattern;
 
-TEST(ObserverStaticTest, UnorderedObservable)
+TEST(ObserverTest, UnorderedObservable)
 {
     int const TEST_NUMBER = 100;
     int test0 = 0;

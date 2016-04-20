@@ -10,12 +10,12 @@
 
 using namespace libtbag;
 
-TEST(RandomStaticTest, gen)
+TEST(RandomTest, gen)
 {
     int min = 0;
     int max = 10;
     int current = 0;
-    int test_count = 100;
+    int test_count = 200;
 
     for (int i = 0; i < test_count; ++i) {
         current = Random::gen(min, max);

@@ -1,5 +1,5 @@
 /**
- * @file   basic.cpp
+ * @file   Basic.cpp
  * @brief  Basic tester.
  * @author zer0
  * @date   2016-01-18

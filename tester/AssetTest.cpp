@@ -13,7 +13,7 @@
 
 using namespace libtbag;
 
-TEST(AssetStaticTest, CopyOperators)
+TEST(AssetTest, CopyOperators)
 {
     Asset asset1 = Asset(Asset::default_setting());
     Asset asset2 = asset1;
@@ -24,29 +24,21 @@ TEST(AssetStaticTest, CopyOperators)
     ASSERT_EQ(asset3.size(), asset1.size());
 }
 
-TEST(AssetStaticTest, MoveOperators)
+TEST(AssetTest, MoveOperators)
 {
     auto rvalue_test = []() -> Asset {
         return Asset();
     };
 
-#if defined(__COMP_LLVM__)
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wpessimizing-move"
-#endif
-
-    Asset asset1 = std::move(rvalue_test());
+    Asset asset0;
+    Asset asset1 = std::move(asset0);
     Asset asset2;
-
-#if defined(__COMP_LLVM__)
-# pragma GCC diagnostic pop
-#endif
 
     asset2 = rvalue_test();
     ASSERT_EQ(asset1.size(), asset2.size());
 }
 
-TEST(AssetStaticTest, insertDir_getDir)
+TEST(AssetTest, insertDir_getDir)
 {
     std::string key = "key";
     std::string value = "value";
@@ -57,51 +49,53 @@ TEST(AssetStaticTest, insertDir_getDir)
     ASSERT_EQ(value, asset.getDir(key));
 }
 
-// Fixture.
-
-class AssetTest : public ::testing::Test
+class AssetFixtureTest : public ::testing::Test
 {
 public:
-    Asset _asset;
-    std::string _temp1;
-    std::string _temp2;
-    std::string _temp3;
+    std::string temp1;
+    std::string temp2;
+    std::string temp3;
+
+    Asset asset;
 
 public:
-    AssetTest() : _asset(Asset::default_setting()) {
-    }
+    AssetFixtureTest() = default;
+    ~AssetFixtureTest() = default;
 
 public:
     virtual void SetUp() {
-        _temp1 = std::string("1TEMP1");
-        _temp2 = std::string("2TEMP2");
-        _temp3 = std::string("3TEMP3");
+        temp1 = std::string("1TEMP1");
+        temp2 = std::string("2TEMP2");
+        temp3 = std::string("3TEMP3");
+
+        asset = Asset(Asset::default_setting());
     }
 
     virtual void TearDown() {
+        __EMPTY_BLOCK__
     }
 };
 
-TEST_F(AssetTest, getHomeDir)
+TEST_F(AssetFixtureTest, getHomeDir)
 {
     std::string dir = filesystem::Common::getHomeDir();
     ASSERT_GT(dir.size(), 0U);
-    ASSERT_EQ(dir, _asset.getDir(Asset::getHomeDirKeyName()));
+    ASSERT_EQ(dir, asset.getDir(Asset::getHomeDirKeyName()));
 }
 
-TEST_F(AssetTest, getExeDir)
+TEST_F(AssetFixtureTest, getExeDir)
 {
     std::string dir = filesystem::Common::getExeDir();
-    ASSERT_GT(dir.size(), 0U);
-    ASSERT_EQ(dir, _asset.getDir(Asset::getExeDirKeyName()));
+    ASSERT_GE(dir.size(), 1U);
+    ASSERT_EQ(dir, asset.getDir(Asset::getExeDirKeyName()));
 }
 
-TEST_F(AssetTest, scanDirs)
+TEST_F(AssetFixtureTest, scanDirs)
 {
-    using namespace std;
-    auto result = _asset.scanDirs(".");
-    for (auto cursor : result) {
-        cout << "File: " << cursor << endl;
+    std::set<std::string> files = asset.scanDirs(".");
+    for (auto cursor : files) {
+        std::cout << "* Scan file: " << cursor << std::endl;
     }
+    ASSERT_GE(files.size(), 1U);
 }
 
