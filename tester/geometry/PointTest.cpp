@@ -48,6 +48,9 @@ TEST(PointTest, makePoint)
 #if defined(__COMP_GNUC__) || defined(__COMP_CLANG__)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wunused-variable"
+# if defined(__COMP_GNUC__)
+#  pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+# endif
 #endif
 
     Point p1_1 = makePoint( 0,  0);
