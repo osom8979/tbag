@@ -177,7 +177,7 @@ operator !=(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
 }
 
 // -------------------
-// Stream overloading.
+// String overloading.
 // -------------------
 
 char const __POINT_PREFIX_CHAR = 'P';

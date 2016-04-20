@@ -237,7 +237,7 @@ clipRect(BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
 }
 
 // -------------------
-// Stream overloading.
+// String overloading.
 // -------------------
 
 char const __RECT_PREFIX_CHAR             = 'R';
