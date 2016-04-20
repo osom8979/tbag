@@ -12,6 +12,8 @@ endmacro ()
 # Solution properties.
 # --------------------
 
+option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
+
 # Information.
 set (MAIN_NAME   "libtbag"             CACHE STRING  "Solution name string.")
 set (MAIN_AUTHOR "zer0"                CACHE STRING  "Solution author.")

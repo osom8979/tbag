@@ -143,8 +143,16 @@ function (default_build _libs _tests _exes)
             message (FATAL_ERROR "Not found ${_project_name} object files.")
         endif ()
 
-        # Test project settings.
-        if ("${_project_type}" STREQUAL "${BUILD_PROJECT_TYPE_TEST}")
+        if ("${_project_type}" STREQUAL "${BUILD_PROJECT_TYPE_LIB}")
+            # Library project settings.
+            set_target_properties (${_project_name} PROPERTIES
+                                   VERSION   "${VERSION}"
+                                   SOVERSION "${SOVERSION}")
+
+        elseif ("${_project_type}" STREQUAL "${BUILD_PROJECT_TYPE_EXE}")
+            # Executable project settings.
+        elseif ("${_project_type}" STREQUAL "${BUILD_PROJECT_TYPE_TEST}")
+            # Test project settings.
             find_package (GTest)
             if (GTEST_FOUND)
                 list (APPEND _project_ldflags "${GTEST_BOTH_LIBRARIES}" "-lpthread")

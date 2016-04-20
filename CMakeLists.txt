@@ -2,6 +2,10 @@
 
 cmake_minimum_required (VERSION 2.8.8)
 
+if (POLICY CMP0046)
+    cmake_policy (SET CMP0042 NEW)
+endif ()
+
 enable_language (C)
 enable_language (CXX)
 
@@ -24,7 +28,8 @@ exists_define_or_die (MAIN_NAME)
 string (TOUPPER ${MAIN_NAME} MAIN_NAME_UPPER)
 string (TIMESTAMP _timestamp "%Y-%m-%d_%H%M%S")
 set (VERSION_TWEAK "${_timestamp}")
-set (VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+set (VERSION   "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+set (SOVERSION "${VERSION_MAJOR}")
 
 # Third-party libraries.
 set (THIRD_BIN "${THIRD_PREFIX}/bin")
@@ -46,8 +51,9 @@ list (INSERT CMAKE_LIBRARY_PATH 0 "${THIRD_LIB}")
 list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_SOURCE_DIR}")
 list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_SOURCE_DIR}")
 
-set (CMAKE_INSTALL_RPATH "." "${THIRD_LIB}")
-set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+#set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+#set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set  (CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
 # Extension variables.
 set (ZLIB_ROOT     "${THIRD_PREFIX}")
@@ -87,7 +93,20 @@ configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 # Properties.
 # -----------
 
-if (CMAKE_BUILD_TYPE MATCHES "${_CMAKE_BUILD_TYPE_DEBUG}")
+#set (BUILD_SHARED_LIBS                ON) # User's variable.
+#set (CMAKE_MACOSX_RPATH                1) # CMP0042
+#set (CMAKE_BUILD_TYPE            Release) # User's variable.
+set  (CMAKE_CXX_EXTENSIONS            OFF) # Change: -std=gnu++11 -> -std=c++11
+set  (CMAKE_CXX_STANDARD               11) # C++ standard 11
+set  (CMAKE_POSITION_INDEPENDENT_CODE  ON) # -fPIC
+
+set  (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -Wall")
+#set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}")
+#set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
+#set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+
+# Build type: Debug, Release, RelWithDebInfo, MinSizeRel
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
     add_definitions (-DDEBUG)
 else ()
     add_definitions (-DNDEBUG -DRELEASE)
@@ -101,27 +120,6 @@ endif ()
 link_directories (${PROJECT_SOURCE_DIR})
 if (IS_DIRECTORY ${THIRD_LIB})
     link_directories (${THIRD_LIB})
-endif ()
-
-set (CMAKE_MACOSX_RPATH  1) # CMP0042
-set (BUILD_SHARED_LIBS  ON)
-
-# Build type: Debug, Release, RelWithDebInfo, MinSizeRel
-#set (CMAKE_BUILD_TYPE Release)
-
- set (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -Wall -fPIC")
-#set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}")
-#set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
-#set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
-
-# C++11 Standard.
-if ((WIN32 AND MINGW) AND NOT CYGWIN AND NOT MSYS)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
-else ()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-endif ()
-if (USE_CUDA AND CUDA_FOUND)
-    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -std=c++11)
 endif ()
 
 # ------------
