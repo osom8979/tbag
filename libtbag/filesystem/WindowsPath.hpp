@@ -63,7 +63,7 @@ public:
         return { PATH_SEPARATOR };
     }
 
-    inline static String getGenericPathSeparator() {
+    inline static String getGenericPathSeparatorString() {
         return { GENERIC_PATH_SEPARATOR };
     }
 
@@ -152,7 +152,7 @@ public:
     static String getGeneric(String const & path) {
         return Strings::replaceRegex(getNative(path)
                                    , getRemoveSeparatorRegex()
-                                   , getGenericPathSeparator());
+                                   , getGenericPathSeparatorString());
     }
 
 // Decomposition.
@@ -198,7 +198,7 @@ public:
 public:
     static std::vector<String> splitNodes(String const & path) {
         return Strings::splitTokens(getGeneric(path),
-                                    getGenericPathSeparator());
+                                    getGenericPathSeparatorString());
     }
 };
 

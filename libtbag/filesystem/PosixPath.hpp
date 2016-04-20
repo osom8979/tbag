@@ -62,7 +62,7 @@ public:
         return { PATH_SEPARATOR };
     }
 
-    inline static String getGenericPathSeparator() {
+    inline static String getGenericPathSeparatorString() {
         return { GENERIC_PATH_SEPARATOR };
     }
 
@@ -178,7 +178,7 @@ public:
     static std::vector<String> splitNodes(String const & path) {
         std::vector<String> result =
                 Strings::splitTokens(getGeneric(path),
-                                     getGenericPathSeparator());
+                                     getGenericPathSeparatorString());
         String root = getRootDir(path);
         if (!root.empty()) {
             // Force insert the POSIX root directory.
