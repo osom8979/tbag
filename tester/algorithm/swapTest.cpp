@@ -10,7 +10,7 @@
 
 using namespace libtbag;
 
-TEST(swapTest, Default)
+TEST(swapTest, swapWithPod)
 {
     int v1 = 10;
     int v2 = 20;
