@@ -22,7 +22,7 @@ TEST(PointTest, Constructor)
     Point p2 = {value, 2};
     Point p3 = p2;
     Point p4_move = Point{3, 4};
-    Point p4 = std::move(p4_move);
+    Point p4 = p4_move;
 
     p1 = Point{-1, -2};
 
@@ -45,14 +45,6 @@ TEST(PointTest, makePoint)
     int const v2 =  1;
     int     & v3 = v1;
 
-#if defined(__COMP_GNUC__) || defined(__COMP_CLANG__)
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wunused-variable"
-#endif
-#if !defined(__COMP_CLANG__)
-# pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
-
     Point p1_1 = makePoint( 0,  0);
     Point p1_2 = makePoint( 0, v1);
     Point p1_3 = makePoint( 0, v2);
@@ -73,9 +65,14 @@ TEST(PointTest, makePoint)
     Point const p4_3 = makePoint(v3, v2);
     Point const p4_4 = makePoint(v3, v3);
 
-#if defined(__COMP_GNUC__) || defined(__COMP_CLANG__)
-# pragma GCC diagnostic pop
-#endif
+    REMOVE_UNUSED_VARIABLE(p1_1 == p1_2);
+    REMOVE_UNUSED_VARIABLE(p1_3 == p1_4);
+    REMOVE_UNUSED_VARIABLE(p2_1 == p2_2);
+    REMOVE_UNUSED_VARIABLE(p2_3 == p2_4);
+    REMOVE_UNUSED_VARIABLE(p3_1 == p3_2);
+    REMOVE_UNUSED_VARIABLE(p3_3 == p3_4);
+    REMOVE_UNUSED_VARIABLE(p4_1 == p4_2);
+    REMOVE_UNUSED_VARIABLE(p4_3 == p4_4);
 }
 
 TEST(PointTest, Operators)
