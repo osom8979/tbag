@@ -18,25 +18,50 @@
 #include <libtbag/pattern/Observer.hpp>
 
 #include <cstdlib>
+
 #include <atomic>
 #include <mutex>
-
-/**
- * Don't use @c std::atexit function.
- *
- * @remarks
- *  Default variable is true.
- */
-constexpr bool isManualRelease() noexcept
-{
-    return false;
-}
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace pattern {
+
+/**
+ * Don't use @c std::atexit function.
+ *
+ * @remarks
+ *  Default variable is false.
+ */
+constexpr bool isManualRelease() noexcept
+{
+    return false;
+}
+
+/**
+ * Singleton property template class.
+ *
+ * @author zer0
+ * @date   2016-04-22
+ */
+template <typename T>
+struct SingletonProperty
+{
+public:
+    using BaseType = T;
+
+protected:
+    static std::atomic<BaseType*> _instance;
+    static std::mutex _instance_lock;
+};
+
+template <typename T>
+std::atomic<T*> SingletonProperty<T>::_instance{nullptr};
+
+template <typename T>
+std::mutex SingletonProperty<T>::_instance_lock;
 
 /**
  * SingletonLifeManager class prototype.
@@ -47,10 +72,16 @@ namespace pattern {
  * @remarks
  *  Management of Singleton classes.
  */
-class SingletonLifeManager : public Noncopyable
+class SingletonLifeManager
+        : public SingletonProperty<SingletonLifeManager>
+        , public Noncopyable
 {
 public:
-    UnorderedObservable _observable;
+    using Observable = UnorderedObservable;
+    using Property   = SingletonProperty<SingletonLifeManager>;
+
+private:
+    Observable _observable;
 
 protected:
     SingletonLifeManager() {
@@ -67,33 +98,28 @@ public:
         this->_observable.add(observer);
     }
 
-// Singleton section.
-private:
-    static std::atomic<SingletonLifeManager*> __instance;
-    static std::mutex __instance_lock;
-
 public:
     static void releaseInstance() {
-        SingletonLifeManager * temp = __instance.load();
+        SingletonLifeManager * temp = Property::_instance.load();
         if (temp != nullptr) {
-            std::lock_guard<std::mutex> guard(__instance_lock);
-            temp = __instance.load();
+            std::lock_guard<std::mutex> guard(Property::_instance_lock);
+            temp = Property::_instance.load();
             if (temp != nullptr) {
                 delete temp; // Release, all singleton objects.
-                __instance.store(nullptr);
+                Property::_instance.store(nullptr);
             }
         }
     }
 
 public:
     static SingletonLifeManager * getInstance() {
-        SingletonLifeManager * temp = __instance.load();
+        SingletonLifeManager * temp = Property::_instance.load();
         if (temp == nullptr) {
-            std::lock_guard<std::mutex> guard(__instance_lock);
-            temp = __instance.load();
+            std::lock_guard<std::mutex> guard(_instance_lock);
+            temp = _instance.load();
             if (temp == nullptr) {
                 temp = new SingletonLifeManager();
-                __instance.store(temp);
+                _instance.store(temp);
 
                 if (!isManualRelease()) {
                     // Register release method.
@@ -105,67 +131,93 @@ public:
     }
 };
 
-std::atomic<SingletonLifeManager*> SingletonLifeManager::__instance(nullptr);
-std::mutex SingletonLifeManager::__instance_lock;
+/**
+ * Singleton template class.
+ *
+ * @author zer0
+ * @date   2016-04-22
+ */
+template <typename T>
+class Singleton : public SingletonProperty<T>, public Noncopyable
+{
+public:
+    using BaseType = T;
+    using Property = SingletonProperty<BaseType>;
+
+    static_assert(std::is_same<BaseType, typename Property::BaseType>::value
+            , "Property::BaseType must be the same type as BaseType");
+
+protected:
+    Singleton() {
+        __EMPTY_BLOCK__
+    }
+
+    virtual ~Singleton() {
+        __EMPTY_BLOCK__
+    }
+
+private:
+    static void releaseInstance() {
+        BaseType * temp = Property::_instance.load();
+        if (temp != nullptr) {
+            std::lock_guard<std::mutex> guard(Property::_instance_lock);
+            temp = Property::_instance.load();
+            if (temp != nullptr) {
+                delete temp;
+                Property::_instance.store(nullptr);
+            }
+        }
+    }
+
+public:
+    static BaseType * getInstance() {
+        BaseType * temp = Property::_instance.load();
+        if (temp == nullptr) {
+            std::lock_guard<std::mutex> guard(Property::_instance_lock);
+            temp = Property::_instance.load();
+            if (temp == nullptr) {
+                temp = new BaseType();
+                Property::_instance.store(temp);
+                using namespace libtbag::pattern;
+                SingletonLifeManager::getInstance()->add([](){
+                        Singleton<BaseType>::releaseInstance();
+                    });
+            }
+        }
+        return temp;
+    }
+};
 
 } // namespace pattern
-
-#ifndef SINGLETON_PROTOTYPE
-#define SINGLETON_PROTOTYPE(base_class)                         \
-    protected:                                                  \
-        base_class();                                           \
-    public:                                                     \
-        ~base_class();                                          \
-    private:                                                    \
-        static std::atomic<base_class*> __instance;             \
-        static std::mutex __instance_lock;                      \
-    private:                                                    \
-        static void releaseInstance();                          \
-    public:                                                     \
-        static base_class * getInstance();                      \
-    private: // default access modifier of class.
-#endif
-
-#ifndef SINGLETON_IMPLEMENT
-#define SINGLETON_IMPLEMENT(base_class)                             \
-    std::atomic<base_class*> base_class::__instance(nullptr);       \
-    std::mutex base_class::__instance_lock;                         \
-                                                                    \
-    void base_class::releaseInstance() {                            \
-        base_class * temp = __instance.load();                      \
-        if (temp != nullptr) {                                      \
-            std::lock_guard<std::mutex> guard(__instance_lock);     \
-            temp = __instance.load();                               \
-            if (temp != nullptr) {                                  \
-                delete temp;                                        \
-                __instance.store(nullptr);                          \
-            }                                                       \
-        }                                                           \
-    }                                                               \
-                                                                    \
-    base_class * base_class::getInstance()                          \
-    {                                                               \
-        base_class * temp = __instance.load();                      \
-        if (temp == nullptr) {                                      \
-            std::lock_guard<std::mutex> guard(__instance_lock);     \
-            temp = __instance.load();                               \
-            if (temp == nullptr) {                                  \
-                temp = new base_class();                            \
-                __instance.store(temp);                             \
-                using namespace libtbag;                            \
-                using namespace libtbag::pattern;                   \
-                SingletonLifeManager::getInstance()->add([](){      \
-                        base_class::releaseInstance();              \
-                    });                                             \
-            }                                                       \
-        }                                                           \
-        return temp;                                                \
-    }
-#endif
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+#ifndef SINGLETON_INHERITANCE
+#define SINGLETON_INHERITANCE(class_name) \
+    public ::libtbag::pattern::Singleton<class_name>
+#endif
+
+#ifndef SINGLETON_RESTRICT
+#define SINGLETON_RESTRICT(class_name)  \
+    public:                             \
+        friend Singleton<class_name>;   \
+    protected:                          \
+        class_name(){}                  \
+    public:                             \
+        virtual ~class_name(){}         \
+    private: // default access modifier of class.
+#endif
+
+#ifndef SINGLETON_CLASS_OPEN
+#define SINGLETON_CLASS_OPEN(class_name)                    \
+    class class_name : SINGLETON_INHERITANCE(class_name)    \
+    {                                                       \
+    public:                                                 \
+        SINGLETON_RESTRICT(class_name)                      \
+    private: // default access modifier of class.
+#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PATTERN_SINGLETON_HPP__
 

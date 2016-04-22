@@ -42,10 +42,10 @@ constexpr bool isAsynchronousLogging() noexcept
  * @author zer0
  * @date   2016-04-04
  */
-class Log : public Noncopyable
+class Log : SINGLETON_INHERITANCE(Log)
 {
 public:
-    SINGLETON_PROTOTYPE(Log);
+    SINGLETON_RESTRICT(Log);
 
 public:
     enum class Level : int
@@ -146,18 +146,6 @@ public:
     __SPDLOG_LOGGING_IMPLEMENT(alert);
     __SPDLOG_LOGGING_IMPLEMENT(emerg);
 };
-
-SINGLETON_IMPLEMENT(Log);
-
-Log::Log()
-{
-    __EMPTY_BLOCK__
-}
-
-Log::~Log()
-{
-    __EMPTY_BLOCK__
-}
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
