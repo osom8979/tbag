@@ -24,10 +24,3 @@ TEST(RandomTest, gen)
     }
 }
 
-#include <libtbag/Log.hpp>
-
-TEST(RandomTest, gen2)
-{
-    Log::getInstance()->trace("Trace");
-}
-
