@@ -1,4 +1,5 @@
 ## CMake subproject properties.
+
 if (_project_is_verbose)
     message ("++ _project_default_install: ${_project_default_install}")
     message ("++ _project_dir: ${_project_dir}")
@@ -14,7 +15,7 @@ if (_project_is_verbose)
     message ("++ _project_ldflags: ${_project_ldflags}")
 endif ()
 
-set (_project_definitions  -D__LIBTBAG__)
+set (_project_definitions  -DCURSES_APP)
 set (_project_include_dirs ${CMAKE_CURRENT_LIST_DIR})
 set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
 
@@ -36,5 +37,12 @@ if (USE_tinyxml2)
     list (APPEND _project_definitions  -DUSE_TINYXML2)
     list (APPEND _project_include_dirs ${TINYXML2_INCLUDE_DIRS})
     list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
+endif ()
+
+# Curses setting.
+if (USE_ncurses)
+    list (APPEND _project_definitions  -DUSE_NCURSES)
+    list (APPEND _project_include_dirs ${CURSES_INCLUDE_DIR})
+    list (APPEND _project_ldflags      ${CURSES_LIBRARIES})
 endif ()
 

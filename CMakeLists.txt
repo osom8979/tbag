@@ -61,6 +61,7 @@ set (GTEST_ROOT    "${THIRD_PREFIX}")
 set (SPDLOG_ROOT   "${THIRD_PREFIX}")
 set (UV_ROOT       "${THIRD_PREFIX}")
 set (TINYXML2_ROOT "${THIRD_PREFIX}")
+set (NCURSES_ROOT  "${THIRD_PREFIX}")
 
 # Test packages.
 test_find_package  (zlib      ZLIB)
@@ -69,6 +70,7 @@ test_find_package  (protobuf  Protobuf)
 test_find_package  (spdlog    Spdlog)
 test_find_package  (libuv     UV)
 test_find_package  (tinyxml2  TinyXML2)
+test_find_package  (ncurses   Curses)
 
 # Continuous Integration.
 test_find_package (DOXYGEN Doxygen)
