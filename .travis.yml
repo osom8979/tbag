@@ -15,7 +15,7 @@ before_install:
     - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
     - sudo add-apt-repository --yes ppa:george-edison55/precise-backports
     - sudo apt-get -qq update
-    - sudo apt-get install -y git cmake cmake-data g++-4.9 libncurses-dev
+    - sudo apt-get install -y git cmake cmake-data curl unzip g++-4.9
     - export CXX=g++-4.9
 
 install:
@@ -27,6 +27,7 @@ install:
     - echo 'tinyxml2.sh' >> cache
     - echo 'spdlog.sh'   >> cache
     - echo 'libuv.sh'    >> cache
+    - echo 'ncurses.sh'  >> cache
     - ./install.sh -y
     - popd
 
