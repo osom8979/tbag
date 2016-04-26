@@ -19,26 +19,6 @@ set (_project_definitions  -DCURSES_APP)
 set (_project_include_dirs ${CMAKE_CURRENT_LIST_DIR})
 set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
 
-# speed-log setting.
-if (USE_spdlog)
-    list (APPEND _project_definitions  -DUSE_SPDLOG)
-    list (APPEND _project_include_dirs ${SPDLOG_INCLUDE_DIRS})
-endif ()
-
-# libuv setting.
-if (USE_libuv)
-    list (APPEND _project_definitions  -DUSE_LIBUV)
-    list (APPEND _project_include_dirs ${UV_INCLUDE_DIRS})
-    list (APPEND _project_ldflags      ${UV_LIBRARIES})
-endif ()
-
-# TinyXML2 setting.
-if (USE_tinyxml2)
-    list (APPEND _project_definitions  -DUSE_TINYXML2)
-    list (APPEND _project_include_dirs ${TINYXML2_INCLUDE_DIRS})
-    list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
-endif ()
-
 # Curses setting.
 if (USE_ncurses)
     list (APPEND _project_definitions  -DUSE_NCURSES)
