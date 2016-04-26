@@ -10,93 +10,80 @@
 
 using namespace libtbag;
 
-void pressAnyKey(curses::Context & c)
-{
-    c.print("Press any key to continue...\n");
-    c.getChar(); // WAIT!
-}
-
 void testCurses()
 {
     using Window = ::libtbag::curses::Context::NcursesWindow;
     using Color  = ::libtbag::curses::Context::ColorTable;
 
     curses::Context c;
+    c.clear();
+    c.initialize();
+
+    c.move(0, 1);
+    c.addChar('a');
+    c.addChar('A');
+    c.print("bB");
+    c.addChar('\n');
 
     int const BUFFER_SIZE = 256;
     char STR_BUFFER[BUFFER_SIZE] = { 0, };
 
-    c.clear();
-    c.initialize();
-    Window * main_window = c.getStandardWindow();
-
     int cols  = c.getTerminalWidth();
     int lines = c.getTerminalHeight();
     c.movePrint(0, 0, "Width: %d, Height: %d\n", cols, lines);
-    c.refresh();
+    c.update();
 
     c.startColorMode();
     c.initPair(1, Color::CYAN , Color::MAGENTA);
     c.initPair(2, Color::GREEN, Color::BLUE);
 
-    int x1 = c.getCursorX(main_window);
-    int y1 = c.getCursorY(main_window);
-    int x2 = c.getBeginningX(main_window);
-    int y2 = c.getBeginningY(main_window);
-    int x3 = c.getMaxX(main_window);
-    int y3 = c.getMaxY(main_window);
-    int x4 = c.getParentRelativeX(main_window);
-    int y4 = c.getParentRelativeY(main_window);
-
-    c.onAttributeWithColorPair(c.getColorPair(1));
-    c.print("Cursor: %d, %d\n", x1, y1);
-    c.print("Beginning: %d, %d\n", x2, y2);
-    c.print("Max: %d, %d\n", x3, y3);
-    c.print("Parent: %d, %d\n", x4, y4);
-    c.offAttributeWithColorPair(c.getColorPair(1));
-
     c.print("String input: ");
     c.getString(STR_BUFFER, BUFFER_SIZE);
+    c.print("Result string: %s\n", STR_BUFFER);
 
     Window * win = c.createWindow(0, 10, 32, 10);
     c.setBox(win, '*', '+');
-    c.refresh(win);
+    int x1 = c.getCursorX(win);
+    int y1 = c.getCursorY(win);
+    int x2 = c.getBeginningX(win);
+    int y2 = c.getBeginningY(win);
+    int x3 = c.getMaxX(win);
+    int y3 = c.getMaxY(win);
+    int x4 = c.getParentRelativeX(win);
+    int y4 = c.getParentRelativeY(win);
+    c.onAttribute(win, c.getColorPair(1));
+    c.movePrint(win, 2, 2, "Cursor: %d, %d", x1, y1);
+    c.movePrint(win, 2, 3, "Beginning: %d, %d", x2, y2);
+    c.movePrint(win, 2, 4, "Max: %d, %d", x3, y3);
+    c.movePrint(win, 2, 5, "Parent: %d, %d", x4, y4);
+    c.offAttribute(win, c.getColorPair(1));
+    c.update(win);
 
-    pressAnyKey(c);
-
-    c.onAttributeWithColorPair(c.getColorPair(2));
-    x1 = c.getCursorX(win);
-    y1 = c.getCursorY(win);
-    x2 = c.getBeginningX(win);
-    y2 = c.getBeginningY(win);
-    x3 = c.getMaxX(win);
-    y3 = c.getMaxY(win);
-    x4 = c.getParentRelativeX(win);
-    y4 = c.getParentRelativeY(win);
-    c.movePrintWithWindow(win, 2, 2, "Cursor: %d, %d\n", x1, y1);
-    c.movePrintWithWindow(win, 2, 3, "Beginning: %d, %d\n", x2, y2);
-    c.movePrintWithWindow(win, 2, 4, "Max: %d, %d\n", x3, y3);
-    c.movePrintWithWindow(win, 2, 5, "Parent: %d, %d\n", x4, y4);
-    c.offAttributeWithColorPair(c.getColorPair(2));
+    c.print("Press any key to continue...\n");
+    c.update();
+    c.getChar(); // WAIT!
 
     c.setBorder(win, '1', '2', '3', '4', '5', '6', '7', '8');
-    c.refresh(win);
+    c.update(win);
+
+    c.print("Press any key to continue...\n");
+    c.update();
+    c.getChar(); // WAIT!
+
     c.destroyWindow(win);
 
-    // ONLY COVERAGE.
+    // Only coverage.
     c.setRaw();
     c.setCbreak();
     c.setEcho();
-    c.setNoEcho();
-    c.setKeypad(main_window, true);
+    c.setNoecho();
+    c.setKeypad(c.getStandardWindow(), true);
     c.setCursor(0);
 
-    c.addChar('b');
-    c.addChar('B');
-    pressAnyKey(c);
-    c.release();
+    c.print("Press any key to continue...\n");
+    c.update();
+    c.getChar(); // WAIT!
 
-    pressAnyKey(c);
     c.release();
 }
 

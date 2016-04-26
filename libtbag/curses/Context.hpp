@@ -17,8 +17,11 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <exception>
+#include <vector>
 
 #include <ncurses/ncurses.h>
+
+#define NCURSES_EXTENSION
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -79,6 +82,36 @@ public:
         WHITE   = COLOR_WHITE   ,
     };
 
+    enum class AttributeTable : CharType
+    {
+        NORMAL      = A_NORMAL,
+        ATTRIBUTES  = A_ATTRIBUTES,
+        CHARTEXT    = A_CHARTEXT,
+        COLOR       = A_COLOR,
+        STANDOUT    = A_STANDOUT,
+        UNDERLINE   = A_UNDERLINE,
+        REVERSE     = A_REVERSE,
+        BLINK       = A_BLINK,
+        DIM         = A_DIM,
+        BOLD        = A_BOLD,
+        ALTCHARSET  = A_ALTCHARSET,
+        INVIS       = A_INVIS,
+        PROTECT     = A_PROTECT,
+        HORIZONTAL  = A_HORIZONTAL,
+        LEFT        = A_LEFT,
+        LOW         = A_LOW,
+        RIGHT       = A_RIGHT,
+        TOP         = A_TOP,
+        VERTICAL    = A_VERTICAL,
+
+        // Ncurses extension.
+#if defined(A_ITALIC)
+        ITALIC      = A_ITALIC,
+#else
+        ITALIC      = NCURSES_BITS(1U, 23),
+#endif
+    };
+
 public:
     Context() throw(UnsupportedNcursesException) {
         if (!isEnableNcurses()) {
@@ -104,24 +137,25 @@ public:
         return ::endwin();
     }
 
-    template <typename ... Args>
-    int print(std::string const & format, Args ... args) {
-        return ::printw(format.c_str(), args...);
-    }
-
-    template <typename ... Args>
-    int movePrint(int x, int y, std::string const & format, Args ... args) {
-        return ::mvprintw(y, x, format.c_str(), args...);
+public:
+    int getChar(NcursesWindow * window) {
+        return ::wgetch(window);
     }
 
     int getChar() {
-        return ::getch();
+        return getChar(getStandardWindow());
+    }
+
+public:
+    int getString(NcursesWindow * window, char * result, std::size_t buffer_size) {
+        return ::wgetnstr(window, result, buffer_size);
     }
 
     int getString(char * result, std::size_t buffer_size) {
-        return ::wgetnstr(getStandardWindow(), result, buffer_size);
+        return getString(getStandardWindow(), result, buffer_size);
     }
 
+public:
     int clear() {
         return ::clear();
     }
@@ -138,24 +172,18 @@ public:
 
 // Update methods.
 public:
-    int refresh() {
-        return ::refresh();
+    int update(NcursesWindow * window) {
+        return ::wrefresh(window);
     }
 
-    int refresh(NcursesWindow * window) {
-        return ::wrefresh(window);
+    int update() {
+        return update(getStandardWindow());
     }
 
 // Window style.
 public:
     int setBox(NcursesWindow * window, CharType vertical, CharType horizontal) {
         return ::box(window, vertical, horizontal);
-    }
-
-    int setBox(NcursesWindow * window, char vertical, char horizontal) {
-        return setBox(window
-                    , static_cast<CharType>(vertical)
-                    , static_cast<CharType>(horizontal));
     }
 
     /**
@@ -169,21 +197,11 @@ public:
      * @param     bl [in] bottom left-hand corner.
      * @param     br [in] bottom right-hand corner.
      */
-    template <typename T>
-    int setBorder(NcursesWindow * window, T ls, T rs
-                                        , T ts, T bs
-                                        , T tl, T tr
-                                        , T bl, T br) {
-        return ::wborder(window, static_cast<CharType>(ls), static_cast<CharType>(rs)
-                               , static_cast<CharType>(ts), static_cast<CharType>(bs)
-                               , static_cast<CharType>(tl), static_cast<CharType>(tr)
-                               , static_cast<CharType>(bl), static_cast<CharType>(br));
-    }
-
-public:
-    template <typename ... Args>
-    int movePrintWithWindow(NcursesWindow * window, int x, int y, std::string const & format, Args ... args) {
-        return ::mvwprintw(window, y, x, format.c_str(), args...);
+    int setBorder(NcursesWindow * window, CharType ls, CharType rs
+                                        , CharType ts, CharType bs
+                                        , CharType tl, CharType tr
+                                        , CharType bl, CharType br) {
+        return ::wborder(window, ls, rs, ts, bs, tl, tr, bl, br);
     }
 
 // Color methods.
@@ -196,6 +214,7 @@ public:
         return ::init_color(color, r, g, b);
     }
 
+public:
     PairType getColorPair(int number) {
         return COLOR_PAIR(number);
     }
@@ -239,27 +258,8 @@ public:
         return ::echo();
     }
 
-    int setNoEcho() {
+    int setNoecho() {
         return ::noecho();
-    }
-
-// Attribute methods.
-public:
-    int onAttribute(AttributeType flags) {
-        return ::attron(flags);
-    }
-
-    int offAttribute(AttributeType flags) {
-        return ::attroff(flags);
-    }
-
-public:
-    int onAttributeWithColorPair(PairType pair) {
-        return ::attron(pair);
-    }
-
-    int offAttributeWithColorPair(PairType pair) {
-        return ::attron(pair);
     }
 
 public:
@@ -271,32 +271,74 @@ public:
         return ::curs_set(flag);
     }
 
-// Query methods.
+// Attribute ON methods.
+public:
+    int onAttribute(NcursesWindow * window, AttributeType flags) {
+        return ::wattron(window, flags);
+    }
+
+    int onAttribute(AttributeType flags) {
+        return onAttribute(getStandardWindow(), flags);
+    }
+
+    int onAttribute(NcursesWindow * window, PairType pair) {
+        return ::wattron(window, pair);
+    }
+
+    int onAttribute(PairType pair) {
+        return onAttribute(getStandardWindow(), pair);
+    }
+
+// Attribute OFF methods.
+public:
+    int offAttribute(NcursesWindow * window, AttributeType flags) {
+        return ::wattroff(window, flags);
+    }
+
+    int offAttribute(AttributeType flags) {
+        return offAttribute(getStandardWindow(), flags);
+    }
+
+    int offAttribute(NcursesWindow * window, PairType pair) {
+        return ::wattroff(window, pair);
+    }
+
+    int offAttribute(PairType pair) {
+        return offAttribute(getStandardWindow(), pair);
+    }
+
 public:
     inline int getCursorX(NcursesWindow * window) {
         return getcurx(window);
     };
+
     inline int getCursorY(NcursesWindow * window) {
         return getcury(window);
     };
 
+public:
     inline int getBeginningX(NcursesWindow * window) {
         return getbegx(window);
     };
+
     inline int getBeginningY(NcursesWindow * window) {
         return getbegy(window);
     };
 
+public:
     inline int getMaxX(NcursesWindow * window) {
         return getmaxx(window);
     };
+
     inline int getMaxY(NcursesWindow * window) {
         return getmaxy(window);
     };
 
+public:
     inline int getParentRelativeX(NcursesWindow * window) {
         return getparx(window);
     };
+
     inline int getParentRelativeY(NcursesWindow * window) {
         return getpary(window);
     };
@@ -310,65 +352,53 @@ public:
         return LINES;
     }
 
+
+public:
+    int move(NcursesWindow * window, int x, int y) {
+        return ::wmove(window, y, x);
+    }
+
+    int move(int x, int y) {
+        return move(getStandardWindow(), x, y);
+    }
+
 public:
     /**
      * Print single character & move next cursor.
      */
-    int addChar(NcursesWindow * window, CharType c) {
-        return ::waddch(window, c);
+    int addChar(NcursesWindow * window, char c, CharType flags = 0) {
+        return ::waddch(window, static_cast<CharType>(c) | flags);
     }
 
     /**
      * Print single character & move next cursor.
      */
-    int addChar(CharType c) {
-        return addChar(getStandardWindow(), c);
+    int addChar(char c, CharType flags = 0) {
+        return addChar(getStandardWindow(), c, flags);
+    }
+
+public:
+    template <typename ... Args>
+    int print(NcursesWindow * window, std::string const & format, Args ... args) {
+        return ::wprintw(window, format.c_str(), args...);
+    }
+
+    template <typename ... Args>
+    int print(std::string const & format, Args ... args) {
+        return print(getStandardWindow(), format, args...);
+    }
+
+public:
+    template <typename ... Args>
+    int movePrint(NcursesWindow * window, int x, int y, std::string const & format, Args ... args) {
+        return ::mvwprintw(window, y, x, format.c_str(), args...);
+    }
+
+    template <typename ... Args>
+    int movePrint(int x, int y, std::string const & format, Args ... args) {
+        return movePrint(getStandardWindow(), x, y, format, args...);
     }
 };
-
-//#define addchnstr(str,n)	waddchnstr(stdscr,(str),(n))
-//#define addchstr(str)		waddchstr(stdscr,(str))
-//#define addnstr(str,n)		waddnstr(stdscr,(str),(n))
-//#define addstr(str)		waddnstr(stdscr,(str),-1)
-//#define attroff(at)		wattroff(stdscr,(at))
-//#define attron(at)		wattron(stdscr,(at))
-//#define attrset(at)		wattrset(stdscr,(at))
-//#define attr_get(ap,cp,o)	wattr_get(stdscr,(ap),(cp),(o))
-//#define attr_off(a,o)		wattr_off(stdscr,(a),(o))
-//#define attr_on(a,o)		wattr_on(stdscr,(a),(o))
-//#define attr_set(a,c,o)		wattr_set(stdscr,(a),(c),(o))
-//#define bkgd(ch)		wbkgd(stdscr,(ch))
-//#define bkgdset(ch)		wbkgdset(stdscr,(ch))
-//#define chgat(n,a,c,o)		wchgat(stdscr,(n),(a),(c),(o))
-//#define clear()			wclear(stdscr)
-//#define clrtobot()		wclrtobot(stdscr)
-//#define clrtoeol()		wclrtoeol(stdscr)
-//#define color_set(c,o)		wcolor_set(stdscr,(c),(o))
-//#define delch()			wdelch(stdscr)
-//#define deleteln()		winsdelln(stdscr,-1)
-//#define echochar(c)		wechochar(stdscr,(c))
-//#define erase()			werase(stdscr)
-//#define getch()			wgetch(stdscr)
-//#define getstr(str)		wgetstr(stdscr,(str))
-//#define inch()			winch(stdscr)
-//#define inchnstr(s,n)		winchnstr(stdscr,(s),(n))
-//#define inchstr(s)		winchstr(stdscr,(s))
-//#define innstr(s,n)		winnstr(stdscr,(s),(n))
-//#define insch(c)		winsch(stdscr,(c))
-//#define insdelln(n)		winsdelln(stdscr,(n))
-//#define insertln()		winsdelln(stdscr,1)
-//#define insnstr(s,n)		winsnstr(stdscr,(s),(n))
-//#define insstr(s)		winsstr(stdscr,(s))
-//#define instr(s)		winstr(stdscr,(s))
-//#define move(y,x)		wmove(stdscr,(y),(x))
-//#define refresh()		wrefresh(stdscr)
-//#define scrl(n)			wscrl(stdscr,(n))
-//#define setscrreg(t,b)		wsetscrreg(stdscr,(t),(b))
-//#define standend()		wstandend(stdscr)
-//#define standout()		wstandout(stdscr)
-//#define timeout(delay)		wtimeout(stdscr,(delay))
-//#define wdeleteln(win)		winsdelln(win,-1)
-//#define winsertln(win)		winsdelln(win,1)
 
 } // namespace curses
 
