@@ -200,11 +200,29 @@ public:
         return COLOR_PAIR(number);
     }
 
-    template <typename T>
-    int initPair(PairType pair, T foreground, T background) {
-        return ::init_pair(pair
-                         , static_cast<ColorType>(foreground)
-                         , static_cast<ColorType>(background));
+    int initPair(PairType  pair
+               , ColorType foreground
+               , ColorType background) {
+        return ::init_pair(pair, foreground, background);
+    }
+
+    int initPair(PairType   pair
+               , ColorTable foreground
+               , ColorTable background) {
+        return initPair(pair, static_cast<ColorType>(foreground)
+                            , static_cast<ColorType>(background));
+    }
+
+    int initPairWithPairNumber(int       pair_number
+                             , ColorType foreground
+                             , ColorType background) {
+        return initPair(getColorPair(pair_number), foreground, background);
+    }
+
+    int initPairWithPairNumber(int        pair_number
+                             , ColorTable foreground
+                             , ColorTable background) {
+        return initPair(getColorPair(pair_number), foreground, background);
     }
 
 // Terminal methods.
@@ -255,31 +273,31 @@ public:
 
 // Query methods.
 public:
-    int getCursorX(NcursesWindow * window) {
+    inline int getCursorX(NcursesWindow * window) {
         return getcurx(window);
     };
-    int getCursorY(NcursesWindow * window) {
+    inline int getCursorY(NcursesWindow * window) {
         return getcury(window);
     };
 
-    int getBeginningX(NcursesWindow * window) {
+    inline int getBeginningX(NcursesWindow * window) {
         return getbegx(window);
     };
-    int getBeginningY(NcursesWindow * window) {
+    inline int getBeginningY(NcursesWindow * window) {
         return getbegy(window);
     };
 
-    int getMaxX(NcursesWindow * window) {
+    inline int getMaxX(NcursesWindow * window) {
         return getmaxx(window);
     };
-    int getMaxY(NcursesWindow * window) {
+    inline int getMaxY(NcursesWindow * window) {
         return getmaxy(window);
     };
 
-    int getParentRelativeX(NcursesWindow * window) {
+    inline int getParentRelativeX(NcursesWindow * window) {
         return getparx(window);
     };
-    int getParentRelativeY(NcursesWindow * window) {
+    inline int getParentRelativeY(NcursesWindow * window) {
         return getpary(window);
     };
 
@@ -291,7 +309,66 @@ public:
     inline int getTerminalHeight() {
         return LINES;
     }
+
+public:
+    /**
+     * Print single character & move next cursor.
+     */
+    int addChar(NcursesWindow * window, CharType c) {
+        return ::waddch(window, c);
+    }
+
+    /**
+     * Print single character & move next cursor.
+     */
+    int addChar(CharType c) {
+        return addChar(getStandardWindow(), c);
+    }
 };
+
+//#define addchnstr(str,n)	waddchnstr(stdscr,(str),(n))
+//#define addchstr(str)		waddchstr(stdscr,(str))
+//#define addnstr(str,n)		waddnstr(stdscr,(str),(n))
+//#define addstr(str)		waddnstr(stdscr,(str),-1)
+//#define attroff(at)		wattroff(stdscr,(at))
+//#define attron(at)		wattron(stdscr,(at))
+//#define attrset(at)		wattrset(stdscr,(at))
+//#define attr_get(ap,cp,o)	wattr_get(stdscr,(ap),(cp),(o))
+//#define attr_off(a,o)		wattr_off(stdscr,(a),(o))
+//#define attr_on(a,o)		wattr_on(stdscr,(a),(o))
+//#define attr_set(a,c,o)		wattr_set(stdscr,(a),(c),(o))
+//#define bkgd(ch)		wbkgd(stdscr,(ch))
+//#define bkgdset(ch)		wbkgdset(stdscr,(ch))
+//#define chgat(n,a,c,o)		wchgat(stdscr,(n),(a),(c),(o))
+//#define clear()			wclear(stdscr)
+//#define clrtobot()		wclrtobot(stdscr)
+//#define clrtoeol()		wclrtoeol(stdscr)
+//#define color_set(c,o)		wcolor_set(stdscr,(c),(o))
+//#define delch()			wdelch(stdscr)
+//#define deleteln()		winsdelln(stdscr,-1)
+//#define echochar(c)		wechochar(stdscr,(c))
+//#define erase()			werase(stdscr)
+//#define getch()			wgetch(stdscr)
+//#define getstr(str)		wgetstr(stdscr,(str))
+//#define inch()			winch(stdscr)
+//#define inchnstr(s,n)		winchnstr(stdscr,(s),(n))
+//#define inchstr(s)		winchstr(stdscr,(s))
+//#define innstr(s,n)		winnstr(stdscr,(s),(n))
+//#define insch(c)		winsch(stdscr,(c))
+//#define insdelln(n)		winsdelln(stdscr,(n))
+//#define insertln()		winsdelln(stdscr,1)
+//#define insnstr(s,n)		winsnstr(stdscr,(s),(n))
+//#define insstr(s)		winsstr(stdscr,(s))
+//#define instr(s)		winstr(stdscr,(s))
+//#define move(y,x)		wmove(stdscr,(y),(x))
+//#define refresh()		wrefresh(stdscr)
+//#define scrl(n)			wscrl(stdscr,(n))
+//#define setscrreg(t,b)		wsetscrreg(stdscr,(t),(b))
+//#define standend()		wstandend(stdscr)
+//#define standout()		wstandout(stdscr)
+//#define timeout(delay)		wtimeout(stdscr,(delay))
+//#define wdeleteln(win)		winsdelln(win,-1)
+//#define winsertln(win)		winsdelln(win,1)
 
 } // namespace curses
 

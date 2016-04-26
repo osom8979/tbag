@@ -91,6 +91,11 @@ void testCurses()
     c.setKeypad(main_window, true);
     c.setCursor(0);
 
+    c.addChar('b');
+    c.addChar('B');
+    pressAnyKey(c);
+    c.release();
+
     pressAnyKey(c);
     c.release();
 }
