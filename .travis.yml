@@ -28,6 +28,7 @@ install:
     - echo 'spdlog.sh'   >> cache
     - echo 'libuv.sh'    >> cache
     - echo 'ncurses.sh'  >> cache
+    - echo 'lua.sh'      >> cache
     - ./install.sh -y
     - popd
 
