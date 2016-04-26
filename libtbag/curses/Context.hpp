@@ -36,6 +36,21 @@ constexpr bool isEnableNcurses() noexcept
 }
 
 /**
+ * Unsupported NCurses exception class prototype.
+ *
+ * @author zer0
+ * @date   2016-04-24
+ */
+struct UnsupportedNcursesException : public std::exception
+{
+    static constexpr char const * const MESSAGE = "Does not supported NCurses library.";
+
+    virtual const char * what() const noexcept override {
+        return MESSAGE;
+    }
+};
+
+/**
  * Context class prototype.
  *
  * @author zer0
@@ -44,8 +59,8 @@ constexpr bool isEnableNcurses() noexcept
 class Context : public Noncopyable
 {
 public:
-    using Screen        = SCREEN;
-    using Window        = WINDOW;
+    using NcursesScreen = SCREEN;
+    using NcursesWindow = WINDOW;
     using CharType      = chtype;
     using AttributeType = attr_t;
     using ColorType     = NCURSES_COLOR_T;
@@ -65,22 +80,6 @@ public:
     };
 
 public:
-    /**
-     * Unsupported NCurses exception class prototype.
-     *
-     * @author zer0
-     * @date   2016-04-24
-     */
-    struct UnsupportedNcursesException : public std::exception
-    {
-        static constexpr char const * const MESSAGE = "Does not supported NCurses library.";
-
-        virtual const char * what() const noexcept override {
-            return MESSAGE;
-        }
-    };
-
-public:
     Context() throw(UnsupportedNcursesException) {
         if (!isEnableNcurses()) {
             throw UnsupportedNcursesException();
@@ -93,11 +92,11 @@ public:
 
 // NCurses stdscr methods.
 public:
-    inline Window * getStandardWindow() {
+    inline NcursesWindow * getStandardWindow() {
         return stdscr;
     }
 
-    Window * initialize() {
+    NcursesWindow * initialize() {
         return ::initscr();
     }
 
@@ -129,11 +128,11 @@ public:
 
 // Window new/del methods.
 public:
-    Window * createWindow(int x, int y, int width, int height) {
+    NcursesWindow * createWindow(int x, int y, int width, int height) {
         return ::newwin(height, width, y, x);
     }
 
-    int destroyWindow(Window * window) {
+    int destroyWindow(NcursesWindow * window) {
         return ::delwin(window);
     }
 
@@ -143,17 +142,17 @@ public:
         return ::refresh();
     }
 
-    int refresh(Window * window) {
+    int refresh(NcursesWindow * window) {
         return ::wrefresh(window);
     }
 
 // Window style.
 public:
-    int setBox(Window * window, CharType vertical, CharType horizontal) {
+    int setBox(NcursesWindow * window, CharType vertical, CharType horizontal) {
         return ::box(window, vertical, horizontal);
     }
 
-    int setBox(Window * window, char vertical, char horizontal) {
+    int setBox(NcursesWindow * window, char vertical, char horizontal) {
         return setBox(window
                     , static_cast<CharType>(vertical)
                     , static_cast<CharType>(horizontal));
@@ -171,10 +170,10 @@ public:
      * @param     br [in] bottom right-hand corner.
      */
     template <typename T>
-    int setBorder(Window * window, T ls, T rs
-                                 , T ts, T bs
-                                 , T tl, T tr
-                                 , T bl, T br) {
+    int setBorder(NcursesWindow * window, T ls, T rs
+                                        , T ts, T bs
+                                        , T tl, T tr
+                                        , T bl, T br) {
         return ::wborder(window, static_cast<CharType>(ls), static_cast<CharType>(rs)
                                , static_cast<CharType>(ts), static_cast<CharType>(bs)
                                , static_cast<CharType>(tl), static_cast<CharType>(tr)
@@ -183,7 +182,7 @@ public:
 
 public:
     template <typename ... Args>
-    int movePrintWithWindow(Window * window, int x, int y, std::string const & format, Args ... args) {
+    int movePrintWithWindow(NcursesWindow * window, int x, int y, std::string const & format, Args ... args) {
         return ::mvwprintw(window, y, x, format.c_str(), args...);
     }
 
@@ -246,7 +245,7 @@ public:
     }
 
 public:
-    int setKeypad(Window * window, bool enable_function_key) {
+    int setKeypad(NcursesWindow * window, bool enable_function_key) {
         return ::keypad(window, (enable_function_key ? TRUE : FALSE));
     }
 
@@ -256,31 +255,31 @@ public:
 
 // Query methods.
 public:
-    int getCursorX(Window * window) {
+    int getCursorX(NcursesWindow * window) {
         return getcurx(window);
     };
-    int getCursorY(Window * window) {
+    int getCursorY(NcursesWindow * window) {
         return getcury(window);
     };
 
-    int getBeginningX(Window * window) {
+    int getBeginningX(NcursesWindow * window) {
         return getbegx(window);
     };
-    int getBeginningY(Window * window) {
+    int getBeginningY(NcursesWindow * window) {
         return getbegy(window);
     };
 
-    int getMaxX(Window * window) {
+    int getMaxX(NcursesWindow * window) {
         return getmaxx(window);
     };
-    int getMaxY(Window * window) {
+    int getMaxY(NcursesWindow * window) {
         return getmaxy(window);
     };
 
-    int getParentRelativeX(Window * window) {
+    int getParentRelativeX(NcursesWindow * window) {
         return getparx(window);
     };
-    int getParentRelativeY(Window * window) {
+    int getParentRelativeY(NcursesWindow * window) {
         return getpary(window);
     };
 

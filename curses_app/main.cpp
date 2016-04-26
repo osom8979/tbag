@@ -18,7 +18,7 @@ void pressAnyKey(curses::Context & c)
 
 void testCurses()
 {
-    using Window = ::libtbag::curses::Context::Window;
+    using Window = ::libtbag::curses::Context::NcursesWindow;
     using Color  = ::libtbag::curses::Context::ColorTable;
 
     curses::Context c;
