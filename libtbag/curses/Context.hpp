@@ -23,6 +23,12 @@
 
 #define NCURSES_EXTENSION
 
+#if defined(NCURSES_EXTENSION) && defined(A_ITALIC)
+# define ATTRIBUTE_TABLE_ITALIC  A_ITALIC
+#else
+# define ATTRIBUTE_TABLE_ITALIC  NCURSES_BITS(1U, 23)
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -70,48 +76,6 @@ public:
     using PairType      = NCURSES_PAIRS_T;
 
 public:
-    enum class ColorTable : ColorType
-    {
-        BLACK   = COLOR_BLACK   ,
-        RED     = COLOR_RED     ,
-        GREEN   = COLOR_GREEN   ,
-        YELLOW  = COLOR_YELLOW  ,
-        BLUE    = COLOR_BLUE    ,
-        MAGENTA = COLOR_MAGENTA ,
-        CYAN    = COLOR_CYAN    ,
-        WHITE   = COLOR_WHITE   ,
-    };
-
-    enum class AttributeTable : CharType
-    {
-        NORMAL      = A_NORMAL,
-        ATTRIBUTES  = A_ATTRIBUTES,
-        CHARTEXT    = A_CHARTEXT,
-        COLOR       = A_COLOR,
-        STANDOUT    = A_STANDOUT,
-        UNDERLINE   = A_UNDERLINE,
-        REVERSE     = A_REVERSE,
-        BLINK       = A_BLINK,
-        DIM         = A_DIM,
-        BOLD        = A_BOLD,
-        ALTCHARSET  = A_ALTCHARSET,
-        INVIS       = A_INVIS,
-        PROTECT     = A_PROTECT,
-        HORIZONTAL  = A_HORIZONTAL,
-        LEFT        = A_LEFT,
-        LOW         = A_LOW,
-        RIGHT       = A_RIGHT,
-        TOP         = A_TOP,
-        VERTICAL    = A_VERTICAL,
-
-        // Ncurses extension.
-#if defined(A_ITALIC)
-        ITALIC      = A_ITALIC,
-#else
-        ITALIC      = NCURSES_BITS(1U, 23),
-#endif
-    };
-
 public:
     Context() throw(UnsupportedNcursesException) {
         if (!isEnableNcurses()) {
@@ -206,6 +170,18 @@ public:
 
 // Color methods.
 public:
+    enum class ColorTable : ColorType
+    {
+        BLACK   = COLOR_BLACK   ,
+        RED     = COLOR_RED     ,
+        GREEN   = COLOR_GREEN   ,
+        YELLOW  = COLOR_YELLOW  ,
+        BLUE    = COLOR_BLUE    ,
+        MAGENTA = COLOR_MAGENTA ,
+        CYAN    = COLOR_CYAN    ,
+        WHITE   = COLOR_WHITE   ,
+    };
+
     int startColorMode() {
         return ::start_color();
     }
@@ -269,6 +245,40 @@ public:
 
     int setCursor(int flag) {
         return ::curs_set(flag);
+    }
+
+// Attribute methods.
+public:
+    enum class AttributeTable : CharType
+    {
+        NORMAL      = A_NORMAL,
+        ATTRIBUTES  = A_ATTRIBUTES,
+        CHARTEXT    = A_CHARTEXT,
+        COLOR       = A_COLOR,
+        STANDOUT    = A_STANDOUT,
+        UNDERLINE   = A_UNDERLINE,
+        REVERSE     = A_REVERSE,
+        BLINK       = A_BLINK,
+        DIM         = A_DIM,
+        BOLD        = A_BOLD,
+        ALTCHARSET  = A_ALTCHARSET,
+        INVIS       = A_INVIS,
+        PROTECT     = A_PROTECT,
+        HORIZONTAL  = A_HORIZONTAL,
+        LEFT        = A_LEFT,
+        LOW         = A_LOW,
+        RIGHT       = A_RIGHT,
+        TOP         = A_TOP,
+        VERTICAL    = A_VERTICAL,
+        ITALIC      = ATTRIBUTE_TABLE_ITALIC,
+    };
+
+    CharType getCharType(char c, std::vector<AttributeTable> const & attributes) {
+        CharType result = static_cast<CharType>(c);
+        for (auto cursor : attributes) {
+            result |= static_cast<CharType>(cursor);
+        }
+        return result;
     }
 
 // Attribute ON methods.

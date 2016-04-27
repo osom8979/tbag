@@ -12,26 +12,16 @@ using namespace libtbag;
 
 void testCurses()
 {
-    using Window = ::libtbag::curses::Context::NcursesWindow;
-    using Color  = ::libtbag::curses::Context::ColorTable;
-
-    curses::Context c;
-    c.clear();
-    c.initialize();
-
-    c.move(0, 1);
-    c.addChar('a');
-    c.addChar('A');
-    c.print("bB");
-    c.addChar('\n');
+    using Window    = ::libtbag::curses::Context::NcursesWindow;
+    using Color     = ::libtbag::curses::Context::ColorTable;
+    using Attribute = ::libtbag::curses::Context::AttributeTable;
 
     int const BUFFER_SIZE = 256;
     char STR_BUFFER[BUFFER_SIZE] = { 0, };
 
-    int cols  = c.getTerminalWidth();
-    int lines = c.getTerminalHeight();
-    c.movePrint(0, 0, "Width: %d, Height: %d\n", cols, lines);
-    c.update();
+    ::libtbag::curses::Context c;
+    c.initialize();
+    c.clear();
 
     c.startColorMode();
     c.initPair(1, Color::CYAN , Color::MAGENTA);
@@ -41,7 +31,29 @@ void testCurses()
     c.getString(STR_BUFFER, BUFFER_SIZE);
     c.print("Result string: %s\n", STR_BUFFER);
 
-    Window * win = c.createWindow(0, 10, 32, 10);
+    c.setNoecho();
+    c.print("Press any key to continue...\n");
+    c.update();
+    c.getChar(); // WAIT!
+
+    // Only coverage.
+    //c.setEcho();
+    c.setCbreak();
+    //c.setRaw();
+    c.setKeypad(c.getStandardWindow(), true);
+    c.setCursor(0);
+
+    c.move(0, 5);
+    c.addChar('a');
+    c.addChar(c.getCharType('A', { Attribute::BOLD, Attribute::BLINK }));
+    c.print("PRINT.\n");
+
+    int cols  = c.getTerminalWidth();
+    int lines = c.getTerminalHeight();
+    c.movePrint(0, 6, "Width: %d, Height: %d\n", cols, lines);
+    c.update();
+
+    Window * win = c.createWindow(0, 15, 32, 10);
     c.setBox(win, '*', '+');
     int x1 = c.getCursorX(win);
     int y1 = c.getCursorY(win);
@@ -71,19 +83,6 @@ void testCurses()
     c.getChar(); // WAIT!
 
     c.destroyWindow(win);
-
-    // Only coverage.
-    c.setRaw();
-    c.setCbreak();
-    c.setEcho();
-    c.setNoecho();
-    c.setKeypad(c.getStandardWindow(), true);
-    c.setCursor(0);
-
-    c.print("Press any key to continue...\n");
-    c.update();
-    c.getChar(); // WAIT!
-
     c.release();
 }
 
