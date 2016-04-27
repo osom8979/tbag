@@ -319,38 +319,38 @@ public:
 public:
     inline int getCursorX(NcursesWindow * window) {
         return getcurx(window);
-    };
+    }
 
     inline int getCursorY(NcursesWindow * window) {
         return getcury(window);
-    };
+    }
 
 public:
     inline int getBeginningX(NcursesWindow * window) {
         return getbegx(window);
-    };
+    }
 
     inline int getBeginningY(NcursesWindow * window) {
         return getbegy(window);
-    };
+    }
 
 public:
     inline int getMaxX(NcursesWindow * window) {
         return getmaxx(window);
-    };
+    }
 
     inline int getMaxY(NcursesWindow * window) {
         return getmaxy(window);
-    };
+    }
 
 public:
     inline int getParentRelativeX(NcursesWindow * window) {
         return getparx(window);
-    };
+    }
 
     inline int getParentRelativeY(NcursesWindow * window) {
         return getpary(window);
-    };
+    }
 
 public:
     inline int getTerminalWidth() {

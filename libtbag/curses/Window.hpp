@@ -28,7 +28,7 @@ namespace curses {
  * @author zer0
  * @date   2016-04-27
  */
-class Window : public Noncopyable
+class Window : protected Context
 {
 public:
     using NcursesWindow = typename ::libtbag::curses::Context::NcursesWindow;
@@ -41,7 +41,6 @@ public:
     using Native = NcursesWindow;
 
 private:
-    Context _context;
     Native * _native;
 
 public:
@@ -50,35 +49,35 @@ public:
     }
 
 public:
-    Window(int x, int y, int w, int h) : _context() {
-        this->_native = this->_context.createWindow(x, y, w, h);
+    Window(int x, int y, int w, int h) {
+        this->_native = Context::createWindow(x, y, w, h);
     }
 
     ~Window() {
         if (isReady()) {
-            this->_context.destroyWindow(this->_native);
+            Context::destroyWindow(this->_native);
         }
     }
 
 public:
     int getChar() {
-        return this->_context.getChar(this->_native);
+        return Context::getChar(this->_native);
     }
 
     int getString(char * result, std::size_t buffer_size) {
-        return this->_context.getString(this->_native, result, buffer_size);
+        return Context::getString(this->_native, result, buffer_size);
     }
 
 // Update methods.
 public:
     int update() {
-        return this->_context.update(this->_native);
+        return Context::update(this->_native);
     }
 
 // Window style.
 public:
     int setBox(CharType vertical, CharType horizontal) {
-        return this->_context.setBox(this->_native, vertical, horizontal);
+        return Context::setBox(this->_native, vertical, horizontal);
     }
 
     /**
@@ -95,74 +94,73 @@ public:
                 , CharType ts, CharType bs
                 , CharType tl, CharType tr
                 , CharType bl, CharType br) {
-        return this->_context.setBorder(this->_native, ls, rs, ts, bs, tl, tr, bl, br);
+        return Context::setBorder(this->_native, ls, rs, ts, bs, tl, tr, bl, br);
     }
 
 public:
     int setKeypad(bool enable_function_key) {
-        return this->_context.setKeypad(this->_native, enable_function_key);
+        return Context::setKeypad(this->_native, enable_function_key);
     }
 
 // Attribute ON methods.
 public:
     int onAttribute(AttributeType flags) {
-        return this->_context.onAttribute(this->_native, flags);
+        return Context::onAttribute(this->_native, flags);
     }
 
     int onAttribute(PairType pair) {
-        return this->_context.onAttribute(this->_native, pair);
+        return Context::onAttribute(this->_native, pair);
     }
 
 // Attribute OFF methods.
 public:
     int offAttribute(AttributeType flags) {
-        return this->_context.offAttribute(this->_native, flags);
+        return Context::offAttribute(this->_native, flags);
     }
 
     int offAttribute(PairType pair) {
-        return this->_context.offAttribute(this->_native, pair);
+        return Context::offAttribute(this->_native, pair);
     }
-
 
 public:
     inline int getCursorX() {
-        return this->_context.getCursorX(this->_native);
-    };
+        return Context::getCursorX(this->_native);
+    }
 
     inline int getCursorY() {
-        return this->_context.getCursorY(this->_native);
-    };
+        return Context::getCursorY(this->_native);
+    }
 
 public:
     inline int getBeginningX() {
-        return this->_context.getBeginningX(this->_native);
-    };
+        return Context::getBeginningX(this->_native);
+    }
 
     inline int getBeginningY() {
-        return this->_context.getBeginningY(this->_native);
-    };
+        return Context::getBeginningY(this->_native);
+    }
 
 public:
     inline int getMaxX() {
-        return this->_context.getMaxX(this->_native);
-    };
+        return Context::getMaxX(this->_native);
+    }
 
     inline int getMaxY() {
-        return this->_context.getMaxY(this->_native);
-    };
+        return Context::getMaxY(this->_native);
+    }
 
 public:
     inline int getParentRelativeX() {
-        return this->_context.getParentRelativeX(this->_native);
-    };
+        return Context::getParentRelativeX(this->_native);
+    }
 
     inline int getParentRelativeY() {
-        return this->_context.getParentRelativeY(this->_native);
-    };
+        return Context::getParentRelativeY(this->_native);
+    }
 
 public:
     int move(int x, int y) {
-        return this->_context.move(this->_native, x, y);
+        return Context::move(this->_native, x, y);
     }
 
 public:
@@ -170,19 +168,19 @@ public:
      * Print single character & move next cursor.
      */
     int addChar(char c, CharType flags = 0) {
-        return this->_context.addChar(this->_native, c, flags);
+        return Context::addChar(this->_native, c, flags);
     }
 
 public:
     template <typename ... Args>
     int print(std::string const & format, Args ... args) {
-        return this->_context.print(this->_native, format, args...);
+        return Context::print(this->_native, format, args...);
     }
 
 public:
     template <typename ... Args>
     int movePrint(int x, int y, std::string const & format, Args ... args) {
-        return this->_context.movePrint(this->_native, x, y, format, args...);
+        return Context::movePrint(this->_native, x, y, format, args...);
     }
 };
 
