@@ -7,19 +7,20 @@
 
 #include <iostream>
 #include <libtbag/curses/Context.hpp>
+#include <libtbag/curses/Window.hpp>
 
 using namespace libtbag;
+using namespace libtbag::curses;
 
 void testCurses()
 {
-    using Window    = ::libtbag::curses::Context::NcursesWindow;
-    using Color     = ::libtbag::curses::Context::ColorTable;
-    using Attribute = ::libtbag::curses::Context::AttributeTable;
+    using Color     = Context::ColorTable;
+    using Attribute = Context::AttributeTable;
 
     int const BUFFER_SIZE = 256;
     char STR_BUFFER[BUFFER_SIZE] = { 0, };
 
-    ::libtbag::curses::Context c;
+    Context c;
     c.initialize();
     c.clear();
 
@@ -53,36 +54,35 @@ void testCurses()
     c.movePrint(0, 6, "Width: %d, Height: %d\n", cols, lines);
     c.update();
 
-    Window * win = c.createWindow(0, 15, 32, 10);
-    c.setBox(win, '*', '+');
-    int x1 = c.getCursorX(win);
-    int y1 = c.getCursorY(win);
-    int x2 = c.getBeginningX(win);
-    int y2 = c.getBeginningY(win);
-    int x3 = c.getMaxX(win);
-    int y3 = c.getMaxY(win);
-    int x4 = c.getParentRelativeX(win);
-    int y4 = c.getParentRelativeY(win);
-    c.onAttribute(win, c.getColorPair(1));
-    c.movePrint(win, 2, 2, "Cursor: %d, %d", x1, y1);
-    c.movePrint(win, 2, 3, "Beginning: %d, %d", x2, y2);
-    c.movePrint(win, 2, 4, "Max: %d, %d", x3, y3);
-    c.movePrint(win, 2, 5, "Parent: %d, %d", x4, y4);
-    c.offAttribute(win, c.getColorPair(1));
-    c.update(win);
+    Window win(0, 15, 32, 10);
+    win.setBox('*', '+');
+    int x1 = win.getCursorX();
+    int y1 = win.getCursorY();
+    int x2 = win.getBeginningX();
+    int y2 = win.getBeginningY();
+    int x3 = win.getMaxX();
+    int y3 = win.getMaxY();
+    int x4 = win.getParentRelativeX();
+    int y4 = win.getParentRelativeY();
+    win.onAttribute(c.getColorPair(1));
+    win.movePrint(2, 2, "Cursor: %d, %d", x1, y1);
+    win.movePrint(2, 3, "Beginning: %d, %d", x2, y2);
+    win.movePrint(2, 4, "Max: %d, %d", x3, y3);
+    win.movePrint(2, 5, "Parent: %d, %d", x4, y4);
+    win.offAttribute(c.getColorPair(1));
+
+    win.move(2, 6);
+    win.print("Press any key to continue...");
+    win.update();
+    win.getChar(); // WAIT!
+
+    win.setBorder('1', '2', '3', '4', '5', '6', '7', '8');
+    win.update();
 
     c.print("Press any key to continue...\n");
     c.update();
     c.getChar(); // WAIT!
 
-    c.setBorder(win, '1', '2', '3', '4', '5', '6', '7', '8');
-    c.update(win);
-
-    c.print("Press any key to continue...\n");
-    c.update();
-    c.getChar(); // WAIT!
-
-    c.destroyWindow(win);
     c.release();
 }
 

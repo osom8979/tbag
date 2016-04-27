@@ -76,7 +76,6 @@ public:
     using PairType      = NCURSES_PAIRS_T;
 
 public:
-public:
     Context() throw(UnsupportedNcursesException) {
         if (!isEnableNcurses()) {
             throw UnsupportedNcursesException();
