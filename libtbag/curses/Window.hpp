@@ -28,14 +28,14 @@ namespace curses {
  * @author zer0
  * @date   2016-04-27
  */
-class Window : protected Context
+class Window : public Context
 {
 public:
-    using NcursesWindow = typename ::libtbag::curses::Context::NcursesWindow;
-    using CharType      = typename ::libtbag::curses::Context::CharType;
-    using AttributeType = typename ::libtbag::curses::Context::AttributeType;
-    using ColorType     = typename ::libtbag::curses::Context::ColorType;
-    using PairType      = typename ::libtbag::curses::Context::PairType;
+    using NcursesWindow = typename Context::NcursesWindow;
+    using CharType      = typename Context::CharType;
+    using AttributeType = typename Context::AttributeType;
+    using ColorType     = typename Context::ColorType;
+    using PairType      = typename Context::PairType;
 
 public:
     using Native = NcursesWindow;
@@ -49,14 +49,38 @@ public:
     }
 
 public:
-    Window(int x, int y, int w, int h) {
-        this->_native = Context::createWindow(x, y, w, h);
+    Window() : _native(nullptr) {
+        __EMPTY_BLOCK__
     }
 
-    ~Window() {
+    Window(int x, int y, int w, int h) : Window() {
+        create(x, y, w, h);
+    }
+
+    virtual ~Window() {
+        destroy();
+    }
+
+public:
+    bool create(int x, int y, int w, int h) {
+        this->_native = Context::createWindow(x, y, w, h);
+        return isReady();
+    }
+
+    void destroy() {
         if (isReady()) {
             Context::destroyWindow(this->_native);
+            this->_native = nullptr;
         }
+    }
+
+protected:
+    inline Native * getNative() noexcept {
+        return this->_native;
+    }
+
+    inline void setNative(Native * native) noexcept {
+        this->_native = native;
     }
 
 public:
@@ -80,16 +104,6 @@ public:
         return Context::setBox(this->_native, vertical, horizontal);
     }
 
-    /**
-     * @param ls [in] left side.
-     * @param rs [in] right side.
-     * @param ts [in] top side.
-     * @param bs [in] bottom side.
-     * @param tl [in] top left-hand corner.
-     * @param tr [in] top right-hand corner.
-     * @param bl [in] bottom left-hand corner.
-     * @param br [in] bottom right-hand corner.
-     */
     int setBorder(CharType ls, CharType rs
                 , CharType ts, CharType bs
                 , CharType tl, CharType tr
@@ -112,6 +126,10 @@ public:
         return Context::onAttribute(this->_native, pair);
     }
 
+    int onColorAttribute(int pair_number) {
+        return Context::onColorAttribute(this->_native, pair_number);
+    }
+
 // Attribute OFF methods.
 public:
     int offAttribute(AttributeType flags) {
@@ -120,6 +138,10 @@ public:
 
     int offAttribute(PairType pair) {
         return Context::offAttribute(this->_native, pair);
+    }
+
+    int offColorAttribute(int pair_number) {
+        return Context::offColorAttribute(this->_native, pair_number);
     }
 
 public:

@@ -17,13 +17,11 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <exception>
-#include <vector>
+#include <string>
 
 #include <ncurses/ncurses.h>
 
-#define NCURSES_EXTENSION
-
-#if defined(NCURSES_EXTENSION) && defined(A_ITALIC)
+#if defined(A_ITALIC)
 # define ATTRIBUTE_TABLE_ITALIC  A_ITALIC
 #else
 # define ATTRIBUTE_TABLE_ITALIC  NCURSES_BITS(1U, 23)
@@ -75,7 +73,7 @@ public:
     using ColorType     = NCURSES_COLOR_T;
     using PairType      = NCURSES_PAIRS_T;
 
-public:
+protected:
     Context() throw(UnsupportedNcursesException) {
         if (!isEnableNcurses()) {
             throw UnsupportedNcursesException();
@@ -88,167 +86,103 @@ public:
 
 // NCurses stdscr methods.
 public:
-    inline NcursesWindow * getStandardWindow() {
+    static inline NcursesWindow * getStandardWindow() {
         return stdscr;
     }
 
-    NcursesWindow * initialize() {
+    static NcursesWindow * initialize() {
         return ::initscr();
     }
 
-    int release() {
+    static int release() {
         return ::endwin();
     }
 
 public:
-    int getChar(NcursesWindow * window) {
+    static int getChar(NcursesWindow * window) {
         return ::wgetch(window);
     }
 
-    int getChar() {
-        return getChar(getStandardWindow());
-    }
-
-public:
-    int getString(NcursesWindow * window, char * result, std::size_t buffer_size) {
+    static int getString(NcursesWindow * window, char * result, std::size_t buffer_size) {
         return ::wgetnstr(window, result, buffer_size);
     }
 
-    int getString(char * result, std::size_t buffer_size) {
-        return getString(getStandardWindow(), result, buffer_size);
-    }
-
 public:
-    int clear() {
+    static int clear() {
         return ::clear();
     }
 
 // Window new/del methods.
 public:
-    NcursesWindow * createWindow(int x, int y, int width, int height) {
+    static NcursesWindow * createWindow(int x, int y, int width, int height) {
         return ::newwin(height, width, y, x);
     }
 
-    int destroyWindow(NcursesWindow * window) {
+    static int destroyWindow(NcursesWindow * window) {
         return ::delwin(window);
     }
 
 // Update methods.
 public:
-    int update(NcursesWindow * window) {
+    static int update(NcursesWindow * window) {
         return ::wrefresh(window);
-    }
-
-    int update() {
-        return update(getStandardWindow());
-    }
-
-// Window style.
-public:
-    int setBox(NcursesWindow * window, CharType vertical, CharType horizontal) {
-        return ::box(window, vertical, horizontal);
-    }
-
-    /**
-     * @param window [in] Window pointer.
-     * @param     ls [in] left side.
-     * @param     rs [in] right side.
-     * @param     ts [in] top side.
-     * @param     bs [in] bottom side.
-     * @param     tl [in] top left-hand corner.
-     * @param     tr [in] top right-hand corner.
-     * @param     bl [in] bottom left-hand corner.
-     * @param     br [in] bottom right-hand corner.
-     */
-    int setBorder(NcursesWindow * window, CharType ls, CharType rs
-                                        , CharType ts, CharType bs
-                                        , CharType tl, CharType tr
-                                        , CharType bl, CharType br) {
-        return ::wborder(window, ls, rs, ts, bs, tl, tr, bl, br);
-    }
-
-// Color methods.
-public:
-    enum class ColorTable : ColorType
-    {
-        BLACK   = COLOR_BLACK   ,
-        RED     = COLOR_RED     ,
-        GREEN   = COLOR_GREEN   ,
-        YELLOW  = COLOR_YELLOW  ,
-        BLUE    = COLOR_BLUE    ,
-        MAGENTA = COLOR_MAGENTA ,
-        CYAN    = COLOR_CYAN    ,
-        WHITE   = COLOR_WHITE   ,
-    };
-
-    int startColorMode() {
-        return ::start_color();
-    }
-
-    int initColor(ColorType color, ColorType r, ColorType g, ColorType b) {
-        return ::init_color(color, r, g, b);
-    }
-
-public:
-    PairType getColorPair(int number) {
-        return COLOR_PAIR(number);
-    }
-
-    int initPair(PairType  pair
-               , ColorType foreground
-               , ColorType background) {
-        return ::init_pair(pair, foreground, background);
-    }
-
-    int initPair(PairType   pair
-               , ColorTable foreground
-               , ColorTable background) {
-        return initPair(pair, static_cast<ColorType>(foreground)
-                            , static_cast<ColorType>(background));
-    }
-
-    int initPairWithPairNumber(int       pair_number
-                             , ColorType foreground
-                             , ColorType background) {
-        return initPair(getColorPair(pair_number), foreground, background);
-    }
-
-    int initPairWithPairNumber(int        pair_number
-                             , ColorTable foreground
-                             , ColorTable background) {
-        return initPair(getColorPair(pair_number), foreground, background);
     }
 
 // Terminal methods.
 public:
-    int setRaw() {
+    static int setRaw() {
         return ::raw();
     }
 
-    int setCbreak() {
+    static int setCbreak() {
         return ::cbreak();
     }
 
-    int setEcho() {
+    static int setEcho() {
         return ::echo();
     }
 
-    int setNoecho() {
+    static int setNoecho() {
         return ::noecho();
     }
 
+    static int setCursor(int flag) {
+        return ::curs_set(flag);
+    }
+
 public:
-    int setKeypad(NcursesWindow * window, bool enable_function_key) {
+    static int setKeypad(NcursesWindow * window, bool enable_function_key) {
         return ::keypad(window, (enable_function_key ? TRUE : FALSE));
     }
 
-    int setCursor(int flag) {
-        return ::curs_set(flag);
+// Cursor methods.
+public:
+    static int move(NcursesWindow * window, int x, int y) {
+        return ::wmove(window, y, x);
+    }
+
+// Output methods.
+public:
+    /** Print single character & move next cursor. */
+    static int addChar(NcursesWindow * window, char c, CharType flags = 0) {
+        return ::waddch(window, static_cast<CharType>(c) | flags);
+    }
+
+public:
+    template <typename ... Args>
+    static int print(NcursesWindow * window, std::string const & format, Args ... args) {
+        return ::wprintw(window, format.c_str(), args...);
+    }
+
+public:
+    template <typename ... Args>
+    static int movePrint(NcursesWindow * window, int x, int y, std::string const & format, Args ... args) {
+        return ::mvwprintw(window, y, x, format.c_str(), args...);
     }
 
 // Attribute methods.
 public:
-    enum class AttributeTable : CharType
+    enum AttributeTable
     {
         NORMAL      = A_NORMAL,
         ATTRIBUTES  = A_ATTRIBUTES,
@@ -272,140 +206,138 @@ public:
         ITALIC      = ATTRIBUTE_TABLE_ITALIC,
     };
 
-    CharType getCharType(char c, std::vector<AttributeTable> const & attributes) {
-        CharType result = static_cast<CharType>(c);
-        for (auto cursor : attributes) {
-            result |= static_cast<CharType>(cursor);
-        }
-        return result;
-    }
+    enum ColorTable
+    {
+        BLACK   = COLOR_BLACK   ,
+        RED     = COLOR_RED     ,
+        GREEN   = COLOR_GREEN   ,
+        YELLOW  = COLOR_YELLOW  ,
+        BLUE    = COLOR_BLUE    ,
+        MAGENTA = COLOR_MAGENTA ,
+        CYAN    = COLOR_CYAN    ,
+        WHITE   = COLOR_WHITE   ,
+    };
 
 // Attribute ON methods.
 public:
-    int onAttribute(NcursesWindow * window, AttributeType flags) {
+    static int onAttribute(NcursesWindow * window, AttributeType flags) {
         return ::wattron(window, flags);
     }
 
-    int onAttribute(AttributeType flags) {
-        return onAttribute(getStandardWindow(), flags);
-    }
-
-    int onAttribute(NcursesWindow * window, PairType pair) {
+    static int onAttribute(NcursesWindow * window, PairType pair) {
         return ::wattron(window, pair);
-    }
-
-    int onAttribute(PairType pair) {
-        return onAttribute(getStandardWindow(), pair);
     }
 
 // Attribute OFF methods.
 public:
-    int offAttribute(NcursesWindow * window, AttributeType flags) {
+    static int offAttribute(NcursesWindow * window, AttributeType flags) {
         return ::wattroff(window, flags);
     }
 
-    int offAttribute(AttributeType flags) {
-        return offAttribute(getStandardWindow(), flags);
-    }
-
-    int offAttribute(NcursesWindow * window, PairType pair) {
+    static int offAttribute(NcursesWindow * window, PairType pair) {
         return ::wattroff(window, pair);
     }
 
-    int offAttribute(PairType pair) {
-        return offAttribute(getStandardWindow(), pair);
+public:
+    static int startColorMode() {
+        return ::start_color();
+    }
+
+    static bool hasColors() {
+        return (::has_colors() == TRUE ? true : false);
     }
 
 public:
-    inline int getCursorX(NcursesWindow * window) {
+    static int initColor(ColorType color, ColorType r, ColorType g, ColorType b) {
+        return ::init_color(color, r, g, b);
+    }
+
+public:
+    static PairType getColorPair(int number) {
+        return COLOR_PAIR(number);
+    }
+
+    static int initPair(int pair_number, ColorType foreground, ColorType background) {
+        return ::init_pair(static_cast<PairType>(pair_number), foreground, background);
+    }
+
+public:
+    static int onColorAttribute(NcursesWindow * window, int pair_number) {
+        return onAttribute(window, getColorPair(pair_number));
+    }
+
+    static int offColorAttribute(NcursesWindow * window, int pair_number) {
+        return offAttribute(window, getColorPair(pair_number));
+    }
+
+// Window style.
+public:
+    int setBox(NcursesWindow * window, CharType vertical, CharType horizontal) {
+        return ::box(window, vertical, horizontal);
+    }
+
+    /**
+     * @param window [in] NCurses WINDOW.
+     * @param     ls [in] left side.
+     * @param     rs [in] right side.
+     * @param     ts [in] top side.
+     * @param     bs [in] bottom side.
+     * @param     tl [in] top left-hand corner.
+     * @param     tr [in] top right-hand corner.
+     * @param     bl [in] bottom left-hand corner.
+     * @param     br [in] bottom right-hand corner.
+     */
+    int setBorder(NcursesWindow * window, CharType ls, CharType rs
+                                        , CharType ts, CharType bs
+                                        , CharType tl, CharType tr
+                                        , CharType bl, CharType br) {
+        return ::wborder(window, ls, rs, ts, bs, tl, tr, bl, br);
+    }
+
+// Position mehtod.
+public:
+    static inline int getCursorX(NcursesWindow * window) {
         return getcurx(window);
     }
 
-    inline int getCursorY(NcursesWindow * window) {
+    static inline int getCursorY(NcursesWindow * window) {
         return getcury(window);
     }
 
 public:
-    inline int getBeginningX(NcursesWindow * window) {
+    static inline int getBeginningX(NcursesWindow * window) {
         return getbegx(window);
     }
 
-    inline int getBeginningY(NcursesWindow * window) {
+    static inline int getBeginningY(NcursesWindow * window) {
         return getbegy(window);
     }
 
 public:
-    inline int getMaxX(NcursesWindow * window) {
+    static inline int getMaxX(NcursesWindow * window) {
         return getmaxx(window);
     }
 
-    inline int getMaxY(NcursesWindow * window) {
+    static inline int getMaxY(NcursesWindow * window) {
         return getmaxy(window);
     }
 
 public:
-    inline int getParentRelativeX(NcursesWindow * window) {
+    static inline int getParentRelativeX(NcursesWindow * window) {
         return getparx(window);
     }
 
-    inline int getParentRelativeY(NcursesWindow * window) {
+    static inline int getParentRelativeY(NcursesWindow * window) {
         return getpary(window);
     }
 
 public:
-    inline int getTerminalWidth() {
+    static inline int getTerminalWidth() {
         return COLS;
     }
 
-    inline int getTerminalHeight() {
+    static inline int getTerminalHeight() {
         return LINES;
-    }
-
-
-public:
-    int move(NcursesWindow * window, int x, int y) {
-        return ::wmove(window, y, x);
-    }
-
-    int move(int x, int y) {
-        return move(getStandardWindow(), x, y);
-    }
-
-public:
-    /**
-     * Print single character & move next cursor.
-     */
-    int addChar(NcursesWindow * window, char c, CharType flags = 0) {
-        return ::waddch(window, static_cast<CharType>(c) | flags);
-    }
-
-    /**
-     * Print single character & move next cursor.
-     */
-    int addChar(char c, CharType flags = 0) {
-        return addChar(getStandardWindow(), c, flags);
-    }
-
-public:
-    template <typename ... Args>
-    int print(NcursesWindow * window, std::string const & format, Args ... args) {
-        return ::wprintw(window, format.c_str(), args...);
-    }
-
-    template <typename ... Args>
-    int print(std::string const & format, Args ... args) {
-        return print(getStandardWindow(), format, args...);
-    }
-
-public:
-    template <typename ... Args>
-    int movePrint(NcursesWindow * window, int x, int y, std::string const & format, Args ... args) {
-        return ::mvwprintw(window, y, x, format.c_str(), args...);
-    }
-
-    template <typename ... Args>
-    int movePrint(int x, int y, std::string const & format, Args ... args) {
-        return movePrint(getStandardWindow(), x, y, format, args...);
     }
 };
 

@@ -5,57 +5,49 @@
  * @date   2016-04-23
  */
 
-#include <iostream>
-#include <libtbag/curses/Context.hpp>
-#include <libtbag/curses/Window.hpp>
+#include <libtbag/curses/Application.hpp>
 
 using namespace libtbag;
 using namespace libtbag::curses;
 
 void testCurses()
 {
-    using Color     = Context::ColorTable;
-    using Attribute = Context::AttributeTable;
-
     int const BUFFER_SIZE = 256;
     char STR_BUFFER[BUFFER_SIZE] = { 0, };
 
-    Context c;
-    c.initialize();
-    c.clear();
+    using Application = ::libtbag::curses::Application;
+    Application app;
+    app.clear();
 
-    c.startColorMode();
-    c.initPair(1, Color::CYAN , Color::MAGENTA);
-    c.initPair(2, Color::GREEN, Color::BLUE);
+    app.startColorMode();
+    app.initPair(1, Application::CYAN , Application::MAGENTA);
+    app.initPair(2, Application::GREEN, Application::BLUE);
 
-    c.print("String input: ");
-    c.getString(STR_BUFFER, BUFFER_SIZE);
-    c.print("Result string: %s\n", STR_BUFFER);
+    app.print("String input: ");
+    app.getString(STR_BUFFER, BUFFER_SIZE);
+    app.print("Result string: %s\n", STR_BUFFER);
 
-    c.setNoecho();
-    c.print("Press any key to continue...\n");
-    c.update();
-    c.getChar(); // WAIT!
+    app.setNoecho();
+    app.print("Press any key to continue...\n");
+    app.update();
+    app.getChar();
 
-    // Only coverage.
-    //c.setEcho();
-    c.setCbreak();
-    //c.setRaw();
-    c.setKeypad(c.getStandardWindow(), true);
-    c.setCursor(0);
+    app.setCbreak();
+    app.setKeypad(true);
+    app.setCursor(0);
 
-    c.move(0, 5);
-    c.addChar('a');
-    c.addChar(c.getCharType('A', { Attribute::BOLD, Attribute::BLINK }));
-    c.print("PRINT.\n");
+    app.move(0, 4);
+    app.addChar('!');
+    app.print("PRINT.\n");
 
-    int cols  = c.getTerminalWidth();
-    int lines = c.getTerminalHeight();
-    c.movePrint(0, 6, "Width: %d, Height: %d\n", cols, lines);
-    c.update();
+    int cols  = app.getTerminalWidth();
+    int lines = app.getTerminalHeight();
+    app.movePrint(0, 5, "Width: %d, Height: %d\n", cols, lines);
+    app.update();
 
-    Window win(0, 15, 32, 10);
-    win.setBox('*', '+');
+    Window win(0, 7, 32, 10);
+    win.setBox('|', '-');
+
     int x1 = win.getCursorX();
     int y1 = win.getCursorY();
     int x2 = win.getBeginningX();
@@ -64,26 +56,30 @@ void testCurses()
     int y3 = win.getMaxY();
     int x4 = win.getParentRelativeX();
     int y4 = win.getParentRelativeY();
-    win.onAttribute(c.getColorPair(1));
-    win.movePrint(2, 2, "Cursor: %d, %d", x1, y1);
+
+    win.onColorAttribute(1);
+    win.movePrint(2, 2, "Cursor: %d, %d"   , x1, y1);
     win.movePrint(2, 3, "Beginning: %d, %d", x2, y2);
-    win.movePrint(2, 4, "Max: %d, %d", x3, y3);
-    win.movePrint(2, 5, "Parent: %d, %d", x4, y4);
-    win.offAttribute(c.getColorPair(1));
+    win.offColorAttribute(1);
+    win.onColorAttribute(2);
+    win.movePrint(2, 4, "Max: %d, %d"      , x3, y3);
+    win.movePrint(2, 5, "Parent: %d, %d"   , x4, y4);
+    win.offColorAttribute(2);
 
     win.move(2, 6);
     win.print("Press any key to continue...");
     win.update();
-    win.getChar(); // WAIT!
+    win.getChar();
 
     win.setBorder('1', '2', '3', '4', '5', '6', '7', '8');
     win.update();
 
-    c.print("Press any key to continue...\n");
-    c.update();
-    c.getChar(); // WAIT!
+    app.move(0, y2 + y3 + 1);
+    app.print("Press any key to continue...\n");
+    app.update();
+    app.getChar();
 
-    c.release();
+    app.release();
 }
 
 int main(int argc, char ** argv)
