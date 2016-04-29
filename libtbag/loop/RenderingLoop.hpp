@@ -15,7 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Time.hpp>
 #include <libtbag/Log.hpp>
 
 #include <atomic>

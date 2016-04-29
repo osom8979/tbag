@@ -8,8 +8,6 @@
 #include <gtest/gtest.h>
 #include <libtbag/loop/RenderingLoop.hpp>
 
-#include <thread>
-
 using namespace libtbag;
 using namespace libtbag::loop;
 
