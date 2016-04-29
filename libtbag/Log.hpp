@@ -73,11 +73,11 @@ private:
     Logger _file;
 
 public:
-    inline Logger get_console() const noexcept {
+    inline Logger getConsole() const noexcept {
         return this->_console;
     }
 
-    inline Logger get_file() const noexcept {
+    inline Logger getFile() const noexcept {
         return this->_file;
     }
 
@@ -124,6 +124,15 @@ public:
     }
 
 public:
+    inline bool isInitConsole() const noexcept {
+        return (this->_console.get() != nullptr ? true : false);
+    }
+
+    inline bool isInitFile() const noexcept {
+        return (this->_file.get() != nullptr ? true : false);
+    }
+
+public:
 #ifndef __SPDLOG_LOGGING_IMPLEMENT
 #define __SPDLOG_LOGGING_IMPLEMENT(level)               \
     template <typename... Args>                         \
@@ -151,16 +160,32 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#ifndef NDEBUG
-#define _TLOG(...)  \
-    SPDLOG_TRACE(::libtbag::Log::getInstance()->get_console(), __VA_ARGS__);  \
-    SPDLOG_TRACE(::libtbag::Log::getInstance()->get_file(),    __VA_ARGS__);
-#define _DLOG(...)  \
-    SPDLOG_DEBUG(::libtbag::Log::getInstance()->get_console(), __VA_ARGS__);  \
-    SPDLOG_DEBUG(::libtbag::Log::getInstance()->get_file(),    __VA_ARGS__);
+#if defined(NDEBUG)
+# define _TLOG(...)
+# define _DLOG(...)
 #else
-#define _TLOG(...)
-#define _DLOG(...)
+# define _TLOG(...)  \
+    SPDLOG_TRACE(::libtbag::Log::getInstance()->getConsole(), __VA_ARGS__);  \
+    SPDLOG_TRACE(::libtbag::Log::getInstance()->getFile(),    __VA_ARGS__);
+# define _DLOG(...)  \
+    SPDLOG_DEBUG(::libtbag::Log::getInstance()->getConsole(), __VA_ARGS__);  \
+    SPDLOG_DEBUG(::libtbag::Log::getInstance()->getFile(),    __VA_ARGS__);
+#endif
+
+#if defined(NDEBUG)
+# define _DIRECT_CONSOLE_LOG(format, ...)
+#else
+# include <cstdio>
+# define _DIRECT_CONSOLE_LOG(format, ...) \
+    std::fprintf(stdout, "[%s] " format, __LOCATION__, __VA_ARGS__)
+#endif
+
+#include <libtbag/predef.hpp>
+#if !defined(NDEBUG) && defined(__OS_WINDOWS__)
+# include <windows.h>
+# define _DIRECT_DEBUG_VIEW_LOG(msg) OutputDebugStringA(msg)
+#else
+# define _DIRECT_DEBUG_VIEW_LOG(msg)
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_HPP__
