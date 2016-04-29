@@ -22,6 +22,15 @@
 #include <chrono>
 #include <thread>
 
+//#define ENABLE_RENDERING_LOOP_DEBUG_VERBOSE
+
+#if defined(ENABLE_RENDERING_LOOP_DEBUG_VERBOSE)
+# define __RENDERING_LOOP_DEBUG_VERBOSE_LOG(format, ...) \
+    _DIRECT_CONSOLE_LOG(format, __VA_ARGS__)
+#else
+# define __RENDERING_LOOP_DEBUG_VERBOSE_LOG(format, ...)
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -128,18 +137,20 @@ private:
 
             while (_time_lag >= _time_step) {
                 _time_lag -= _time_step;
-                _DIRECT_CONSOLE_LOG("UPDATE: LAG[%lld] DUR[%lld]\n"
-                                    , _time_lag.count()
-                                    , _duration.count());
+                __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
+                        "UPDATE: LAG[%lld] DUR[%lld]\n"
+                        , _time_lag.count()
+                        , _duration.count());
                 if (!_callback.update(*this)) {
                     _exit.store(true);
                     break;
                 }
             }
 
-            _DIRECT_CONSOLE_LOG("RENDER: LAG[%lld] DURA[%lld]\n"
-                                , _time_lag.count()
-                                , _duration.count());
+            __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
+                    "RENDER: LAG[%lld] DURA[%lld]\n"
+                    , _time_lag.count()
+                    , _duration.count());
             _callback.render(*this);
 
             if (enable_sleep_step) {
