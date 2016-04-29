@@ -118,44 +118,37 @@ private:
      *   @endcode
      */
     void loop(bool enable_sleep_step = true) {
-        while (!this->_exit.load()) {
-            this->updateLoopVariables();
+        TimeUnit sleep_time;
 
-            while (this->_time_lag >= _time_step) {
-                this->_time_lag -= this->_time_step;
-                _DIRECT_CONSOLE_LOG("%s\n", "UPDATE!");
-                if (!this->_callback.update(*this)) {
-                    this->_exit.store(true);
+        while (!_exit.load()) {
+            _now_start = SystemClock::now();
+            _duration  = _now_start - _pre_start;
+            _pre_start = _now_start;
+            _time_lag += _duration;
+
+            while (_time_lag >= _time_step) {
+                _time_lag -= _time_step;
+                _DIRECT_CONSOLE_LOG("UPDATE: LAG[%lld] DUR[%lld]\n"
+                                    , _time_lag.count()
+                                    , _duration.count());
+                if (!_callback.update(*this)) {
+                    _exit.store(true);
                     break;
                 }
             }
 
-            _DIRECT_CONSOLE_LOG("%s\n", "RENDER!");
-            this->_callback.render(*this);
+            _DIRECT_CONSOLE_LOG("RENDER: LAG[%lld] DURA[%lld]\n"
+                                , _time_lag.count()
+                                , _duration.count());
+            _callback.render(*this);
 
             if (enable_sleep_step) {
-                _DIRECT_CONSOLE_LOG("%s\n", "SLEEP!");
-                sleepIfFreeTime();
+                sleep_time = SystemClock::now() - _now_start;
+                if (sleep_time < _time_step) {
+                    // std::this_thread::yield();
+                    std::this_thread::sleep_for(_time_step - sleep_time);
+                }
             }
-        }
-    }
-
-private:
-    void updateLoopVariables() {
-        this->_now_start = SystemClock::now();
-        this->_duration  = _now_start - _pre_start;
-        this->_pre_start = _now_start;
-        this->_time_lag += _duration;
-    }
-
-private:
-    TimeUnit _temp_for_sleep;
-
-    void sleepIfFreeTime() {
-        this->_temp_for_sleep = SystemClock::now() - this->_now_start;
-        if (this->_temp_for_sleep < this->_time_step) {
-            std::this_thread::yield();
-            std::this_thread::sleep_for(this->_time_step - this->_temp_for_sleep);
         }
     }
 
