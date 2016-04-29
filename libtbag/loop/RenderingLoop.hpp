@@ -16,13 +16,11 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Time.hpp>
+#include <libtbag/Log.hpp>
 
 #include <atomic>
-#include <mutex>
 #include <chrono>
-
-#include <iostream>
-#include <string>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -47,7 +45,8 @@ private:
 public:
     struct Callback
     {
-        using Looper = RenderingLoop<TimeUnit>;
+        using Looper   = RenderingLoop<TimeUnit>;
+        using TimeUnit = typename Looper::TimeUnit;
 
         virtual void onStart (Looper &) { __EMPTY_BLOCK__ }
         virtual void onEnd   (Looper &) { __EMPTY_BLOCK__ }
@@ -56,44 +55,43 @@ public:
         virtual void render  (Looper &) { __EMPTY_BLOCK__ }
     };
 
+// User's settings.
 private:
     Callback & _callback;
-    TimeUnit  _time_step;
+    TimeUnit   _time_step;
 
 // Sync object.
 private:
     std::atomic_bool _exit;
-    std::mutex _locker;
+    std::atomic_int  _result_code;
 
 // Loop variables.
 private:
-    TimePoint _pre_start;
-    TimePoint _now_start;
-    TimeUnit  _duration;
-    TimeUnit  _time_lag;
+    TimePoint  _pre_start;
+    TimePoint  _now_start;
+    TimeUnit   _duration;
+    TimeUnit   _time_lag;
 
 public:
     RenderingLoop(Callback & callback, TimeUnit step)
             : _callback(callback)
             , _time_step(step)
-            , _exit(false) {
+            , _exit(false)
+            , _result_code(0) {
         __EMPTY_BLOCK__
     }
 
     ~RenderingLoop() {
         this->_exit.store(true);
-        this->_locker.lock();
-        this->_locker.unlock();
     }
 
 public:
-    int run() {
-        std::lock_guard<std::mutex> guard(this->_locker);
+    int run(bool enable_sleep_step = true) {
         this->init();
         this->_callback.onStart(*this);
         this->loop();
         this->_callback.onEnd(*this);
-        return 0;
+        return _result_code;
     }
 
 private:
@@ -104,6 +102,7 @@ private:
         this->_time_lag  = TimeUnit(0);
     }
 
+private:
     /**
      * Main loop.
      *
@@ -118,21 +117,45 @@ private:
      *     }
      *   @endcode
      */
-    void loop() {
-        while (!_exit.load()) {
-            _now_start = SystemClock::now();
-            _duration  = _now_start - _pre_start;
-            _pre_start = _now_start;
-            _time_lag += _duration;
+    void loop(bool enable_sleep_step = true) {
+        while (!this->_exit.load()) {
+            this->updateLoopVariables();
 
-            while (_time_lag >= _time_step) {
-                _time_lag -= _time_step;
-                if (!_callback.update(*this)) {
+            while (this->_time_lag >= _time_step) {
+                this->_time_lag -= this->_time_step;
+                _DIRECT_CONSOLE_LOG("%s\n", "UPDATE!");
+                if (!this->_callback.update(*this)) {
                     this->_exit.store(true);
+                    break;
                 }
             }
 
-            _callback.render(*this);
+            _DIRECT_CONSOLE_LOG("%s\n", "RENDER!");
+            this->_callback.render(*this);
+
+            if (enable_sleep_step) {
+                _DIRECT_CONSOLE_LOG("%s\n", "SLEEP!");
+                sleepIfFreeTime();
+            }
+        }
+    }
+
+private:
+    void updateLoopVariables() {
+        this->_now_start = SystemClock::now();
+        this->_duration  = _now_start - _pre_start;
+        this->_pre_start = _now_start;
+        this->_time_lag += _duration;
+    }
+
+private:
+    TimeUnit _temp_for_sleep;
+
+    void sleepIfFreeTime() {
+        this->_temp_for_sleep = SystemClock::now() - this->_now_start;
+        if (this->_temp_for_sleep < this->_time_step) {
+            std::this_thread::yield();
+            std::this_thread::sleep_for(this->_time_step - this->_temp_for_sleep);
         }
     }
 
@@ -149,6 +172,10 @@ public:
 
     inline void exit() noexcept {
         this->setExit(true);
+    }
+
+    inline void setResultCode(int code) noexcept {
+        this->_result_code = code;
     }
 
 // Loop variables.

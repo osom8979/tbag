@@ -64,7 +64,7 @@ public:
     }
 };
 
-TEST(RenderingLoopTest, OnlyCoverage)
+TEST(RenderingLoopTest, CoverageOnly)
 {
     RenderingCallback callback(1);
     RenderingLoop<> loop(callback, std::chrono::milliseconds(1));
@@ -72,6 +72,7 @@ TEST(RenderingLoopTest, OnlyCoverage)
     loop.getTimeStep();
     loop.setExit();
     loop.exit();
+    loop.setResultCode(0);
     loop.getPreStart();
     loop.getNowStart();
     loop.getDuration();
@@ -98,6 +99,7 @@ TEST(RenderingLoopTest, SlowMachine)
 
     ASSERT_GE(callback.update_count, MIN_FPS);
     ASSERT_LE(callback.update_count, MAX_FPS);
+
     ASSERT_LT(callback.render_count, FPS);
 }
 
@@ -121,6 +123,7 @@ TEST(RenderingLoopTest, FastMachine)
 
     ASSERT_GE(callback.update_count, MIN_FPS);
     ASSERT_LE(callback.update_count, MAX_FPS);
-    ASSERT_GT(callback.render_count, FPS);
+
+    ASSERT_GE(callback.render_count, FPS);
 }
 
