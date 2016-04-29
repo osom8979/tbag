@@ -29,6 +29,7 @@ add_library_value ("spdlog"    ON)
 add_library_value ("libuv"     ON)
 add_library_value ("tinyxml2"  ON)
 add_library_value ("ncurses"   ON)
+add_library_value ("sqlite3"   ON)
 
 # Continuous Integration.
 option (USE_DOXYGEN "API documentation." ON)

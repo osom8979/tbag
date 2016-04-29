@@ -38,3 +38,10 @@ if (USE_tinyxml2)
     list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
 endif ()
 
+# SQLite3 setting.
+if (USE_sqlite3)
+    list (APPEND _project_definitions  -DUSE_SQLITE3)
+    list (APPEND _project_include_dirs ${SQLITE3_INCLUDE_DIRS})
+    list (APPEND _project_ldflags      ${SQLITE3_LIBRARIES})
+endif ()
+
