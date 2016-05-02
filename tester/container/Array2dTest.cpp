@@ -31,16 +31,16 @@ TEST(Array2dTest, Default)
     Array2d<int> a3 = Array2d<int>(TEST3, TEST3);
     a1 = Array2d<int>(TEST1, TEST1);
 
-    ASSERT_EQ(a1.size(), TEST1 * TEST1);
-    ASSERT_EQ(a2.size(), TEST2 * TEST2);
-    ASSERT_EQ(a3.size(), TEST3 * TEST3);
+    ASSERT_EQ(a1.size(), static_cast<std::size_t>(TEST1 * TEST1));
+    ASSERT_EQ(a2.size(), static_cast<std::size_t>(TEST2 * TEST2));
+    ASSERT_EQ(a3.size(), static_cast<std::size_t>(TEST3 * TEST3));
 
     a2 = a3;
-    ASSERT_EQ(a2.size(), TEST3 * TEST3);
-    ASSERT_EQ(a3.size(), TEST3 * TEST3);
+    ASSERT_EQ(a2.size(), static_cast<std::size_t>(TEST3 * TEST3));
+    ASSERT_EQ(a3.size(), static_cast<std::size_t>(TEST3 * TEST3));
 
     a1 = Array2d<int>(TEST4, TEST4);
-    ASSERT_EQ(a1.size(), TEST4 * TEST4);
+    ASSERT_EQ(a1.size(), static_cast<std::size_t>(TEST4 * TEST4));
 }
 
 TEST(Array2dTest, Index)
