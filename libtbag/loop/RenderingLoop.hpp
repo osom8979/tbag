@@ -54,7 +54,6 @@ public:
     struct Callback
     {
         using Looper   = RenderingLoop<TimeUnit>;
-        using TimeUnit = typename Looper::TimeUnit;
 
         virtual void onStart (Looper &) { __EMPTY_BLOCK__ }
         virtual void onEnd   (Looper &) { __EMPTY_BLOCK__ }
