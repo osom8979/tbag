@@ -29,7 +29,7 @@ TEST(SqliteContextTest, Default)
 
     ASSERT_TRUE(db.open(PATH));
     ASSERT_EQ(db.getErrorCode(), 0);
-    ASSERT_GT(db.getErrorMessage().size(), 0L);
+    ASSERT_GT(db.getErrorMessage().size(), 0U);
 
     ASSERT_TRUE(db.execute(CREATE_TABLE));
     ASSERT_TRUE(db.execute(INSERT_ITEM1));
