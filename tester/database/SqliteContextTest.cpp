@@ -29,7 +29,7 @@ TEST(SqliteContextTest, Default)
 
     ASSERT_TRUE(db.open(PATH));
     ASSERT_EQ(db.getErrorCode(), 0);
-    ASSERT_GT(db.getErrorMessage().size(), 0);
+    ASSERT_GT(db.getErrorMessage().size(), 0L);
 
     ASSERT_TRUE(db.execute(CREATE_TABLE));
     ASSERT_TRUE(db.execute(INSERT_ITEM1));
@@ -41,7 +41,7 @@ TEST(SqliteContextTest, Default)
     };
     auto result = db.prepare<RowType>(SELECT_ITEM, callback);
 
-    ASSERT_EQ(result.size(), 2);
+    ASSERT_EQ(result.size(), 2L);
     ASSERT_EQ(std::get<0>(result[0]), 1);
     ASSERT_EQ(std::get<0>(result[1]), 2);
     ASSERT_EQ(std::get<1>(result[0]), std::string("temp_name1"));

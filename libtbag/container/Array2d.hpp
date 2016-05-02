@@ -246,7 +246,7 @@ public:
             throw exception::IllegalArgumentException();
         }
 
-        if (w * h == size()) {
+        if (static_cast<std::size_t>(w * h) == size()) {
             this->_width  = w;
             this->_height = h;
         } else {
