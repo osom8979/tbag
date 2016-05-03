@@ -67,7 +67,7 @@ public:
     }
 
     inline static String getRemoveSeparatorRegex() {
-        return { '\\', '/', '\\', '/', '*' };
+        return CHAR_OR_WIDECHAR(ValueType, R"(\/\/*)");
     }
 
 public:
