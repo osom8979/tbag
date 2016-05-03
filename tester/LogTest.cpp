@@ -12,7 +12,7 @@ using namespace libtbag;
 
 TEST(LogStaticTest, CoverageOnly)
 {
-    Log::getInstance()->setLevel(Log::Level::DBG);
+    Log::getInstance()->setLevel(Log::LOG_LEVEL_DEBUG);
     Log::getInstance()->setDefaultFormat();
 
     Log::getInstance()->setEnableConsole();

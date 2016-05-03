@@ -48,18 +48,22 @@ public:
     SINGLETON_RESTRICT(Log);
 
 public:
-    enum class Level : int
+    /**
+     * @remarks
+     *  Conflict issue: DEBUG(stdlib), ERR(NCurses) symbol.
+     */
+    enum LogLevel
     {
-        TRACE    = spdlog::level::level_enum::trace    ,
-        DBG      = spdlog::level::level_enum::debug    ,
-        INFO     = spdlog::level::level_enum::info     ,
-        NOTICE   = spdlog::level::level_enum::notice   ,
-        WARN     = spdlog::level::level_enum::warn     ,
-        ERR      = spdlog::level::level_enum::err      ,
-        CRITICAL = spdlog::level::level_enum::critical ,
-        ALERT    = spdlog::level::level_enum::alert    ,
-        EMERG    = spdlog::level::level_enum::emerg    ,
-        OFF      = spdlog::level::level_enum::off      ,
+        LOG_LEVEL_TRACE     = spdlog::level::level_enum::trace    ,
+        LOG_LEVEL_DEBUG     = spdlog::level::level_enum::debug    ,
+        LOG_LEVEL_INFO      = spdlog::level::level_enum::info     ,
+        LOG_LEVEL_NOTICE    = spdlog::level::level_enum::notice   ,
+        LOG_LEVEL_WARNING   = spdlog::level::level_enum::warn     ,
+        LOG_LEVEL_ERROR     = spdlog::level::level_enum::err      ,
+        LOG_LEVEL_CRITICAL  = spdlog::level::level_enum::critical ,
+        LOG_LEVEL_ALERT     = spdlog::level::level_enum::alert    ,
+        LOG_LEVEL_EMERGENCY = spdlog::level::level_enum::emerg    ,
+        LOG_LEVEL_OFF       = spdlog::level::level_enum::off      ,
     };
 
 public:
@@ -91,12 +95,12 @@ public:
     }
 
 public:
-    inline void setLevel(Level level) noexcept {
+    inline void setLevel(LogLevel level) noexcept {
         spdlog::set_level(static_cast<spdlog::level::level_enum>(level));
     }
 
     inline void setDefaultLevel() noexcept {
-        spdlog::set_level(static_cast<spdlog::level::level_enum>(Level::INFO));
+        spdlog::set_level(static_cast<spdlog::level::level_enum>(LOG_LEVEL_INFO));
     }
 
     inline void setFormat(std::string const & format) noexcept {
@@ -145,15 +149,17 @@ public:
         }                                               \
     }
 #endif
-    __SPDLOG_LOGGING_IMPLEMENT(trace);
-    __SPDLOG_LOGGING_IMPLEMENT(debug);
-    __SPDLOG_LOGGING_IMPLEMENT(info);
-    __SPDLOG_LOGGING_IMPLEMENT(notice);
-    __SPDLOG_LOGGING_IMPLEMENT(warn);
-    __SPDLOG_LOGGING_IMPLEMENT(error);
+
+public:
+    __SPDLOG_LOGGING_IMPLEMENT(trace   );
+    __SPDLOG_LOGGING_IMPLEMENT(debug   );
+    __SPDLOG_LOGGING_IMPLEMENT(info    );
+    __SPDLOG_LOGGING_IMPLEMENT(notice  );
+    __SPDLOG_LOGGING_IMPLEMENT(warn    );
+    __SPDLOG_LOGGING_IMPLEMENT(error   );
     __SPDLOG_LOGGING_IMPLEMENT(critical);
-    __SPDLOG_LOGGING_IMPLEMENT(alert);
-    __SPDLOG_LOGGING_IMPLEMENT(emerg);
+    __SPDLOG_LOGGING_IMPLEMENT(alert   );
+    __SPDLOG_LOGGING_IMPLEMENT(emerg   );
 };
 
 // --------------------

@@ -41,7 +41,7 @@ TEST(SqliteContextTest, Default)
     };
     auto result = db.prepare<RowType>(SELECT_ITEM, callback);
 
-    ASSERT_EQ(result.size(), 2L);
+    ASSERT_EQ(result.size(), 2U);
     ASSERT_EQ(std::get<0>(result[0]), 1);
     ASSERT_EQ(std::get<0>(result[1]), 2);
     ASSERT_EQ(std::get<1>(result[0]), std::string("temp_name1"));
