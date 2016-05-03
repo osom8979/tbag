@@ -42,6 +42,9 @@ public:
     using ValueType = CharType;
     using String    = std::basic_string<ValueType>;
 
+    using Regex = std::basic_regex<ValueType>;
+    using RegexTokenIterator = std::regex_token_iterator<typename String::const_iterator>;
+
     static_assert(std::is_pod<ValueType>::value
             , "Character type of BaseStrings must be a POD");
     static_assert(std::is_same<ValueType, typename String::value_type>::value
@@ -92,12 +95,12 @@ public:
     /**
      * Regex based token.
      */
-    static std::vector<String> splitMatch(String     const & source
-                                        , std::regex const & match) {
-        auto itr = std::sregex_token_iterator(source.begin(), source.end(), match);
-        auto end = std::sregex_token_iterator();
+    static std::vector<String> splitMatch(String const & source
+                                        , Regex  const & match) {
+        auto itr = RegexTokenIterator(source.begin(), source.end(), match);
+        auto end = RegexTokenIterator();
 
-        std::vector<std::string> result;
+        std::vector<String> result;
         while (itr != end) {
             result.push_back(itr->str());
             ++itr;
@@ -110,7 +113,7 @@ public:
     static String replaceRegex(String const & path
                              , String const & regex
                              , String const & replace) {
-        return std::regex_replace(path, std::regex(regex), replace);
+        return std::regex_replace(path, Regex(regex), replace);
     }
 
     static String removeRegex(String const & path
