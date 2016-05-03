@@ -72,3 +72,50 @@ TEST(StringsTest, splitMatch)
     ASSERT_STREQ(list[2].c_str(), "TEST");
 }
 
+TEST(StringsTest, trimLeft)
+{
+    std::string t1 = "  TEST";
+    std::string t2 = "  ";
+    std::string t3 = "T  ";
+    std::string t4 = "T EST";
+    std::string t5 = "";
+
+    ASSERT_STREQ(Strings::trimLeft(t1).c_str(), "TEST");
+    ASSERT_STREQ(Strings::trimLeft(t2).c_str(), "");
+    ASSERT_STREQ(Strings::trimLeft(t3).c_str(), "T  ");
+    ASSERT_STREQ(Strings::trimLeft(t4).c_str(), "T EST");
+    ASSERT_STREQ(Strings::trimLeft(t5).c_str(), "");
+}
+
+TEST(StringsTest, trimRight)
+{
+    std::string t1 = "TEST  ";
+    std::string t2 = "  ";
+    std::string t3 = "  T";
+    std::string t4 = "TES T";
+    std::string t5 = "";
+
+    ASSERT_STREQ(Strings::trimRight(t1).c_str(), "TEST");
+    ASSERT_STREQ(Strings::trimRight(t2).c_str(), "");
+    ASSERT_STREQ(Strings::trimRight(t3).c_str(), "  T");
+    ASSERT_STREQ(Strings::trimRight(t4).c_str(), "TES T");
+    ASSERT_STREQ(Strings::trimRight(t5).c_str(), "");
+}
+
+TEST(StringsTest, trim)
+{
+    std::string t1 = " TEST  ";
+    std::string t2 = "  ";
+    std::string t3 = "  T";
+    std::string t4 = "T  ";
+    std::string t5 = "TE ST";
+    std::string t6 = "";
+
+    ASSERT_STREQ(Strings::trim(t1).c_str(), "TEST");
+    ASSERT_STREQ(Strings::trim(t2).c_str(), "");
+    ASSERT_STREQ(Strings::trim(t3).c_str(), "T");
+    ASSERT_STREQ(Strings::trim(t4).c_str(), "T");
+    ASSERT_STREQ(Strings::trim(t5).c_str(), "TE ST");
+    ASSERT_STREQ(Strings::trim(t6).c_str(), "");
+}
+

@@ -127,6 +127,11 @@ public:
         return result;
     }
 
+    static std::vector<String> splitMatch(String const & source
+                                        , String const & match) {
+        return splitMatch(source, Regex(match));
+    }
+
 // Regexp utilities.
 public:
     static String replaceRegex(String const & path
@@ -138,6 +143,35 @@ public:
     static String removeRegex(String const & path
                             , String const & regex) {
         return replaceRegex(path, regex, String());
+    }
+
+public:
+    static constexpr ValueType const CHAR_SPACE  = ' ';
+    static constexpr ValueType const CHAR_TAB    = '\t';
+    static constexpr ValueType const CHAR_RETURN = '\n';
+
+    static String trimLeft(String const & str) {
+        auto itr = str.begin();
+        for (; itr != str.end(); ++itr) {
+            if (*itr != CHAR_SPACE && *itr != CHAR_TAB && *itr != CHAR_RETURN) {
+                break;
+            }
+        }
+        return String(itr, str.end());
+    }
+
+    static String trimRight(String const & str) {
+        auto itr = str.rbegin();
+        for (; itr != str.rend(); ++itr) {
+            if (*itr != CHAR_SPACE && *itr != CHAR_TAB && *itr != CHAR_RETURN) {
+                break;
+            }
+        }
+        return String(str.begin(), itr.base());
+    }
+
+    static String trim(String const & str) {
+        return trimRight(trimLeft(str));
     }
 };
 
