@@ -89,6 +89,22 @@ public:
         return result;
     }
 
+    /**
+     * Regex based token.
+     */
+    static std::vector<String> splitMatch(String     const & source
+                                        , std::regex const & match) {
+        auto itr = std::sregex_token_iterator(source.begin(), source.end(), match);
+        auto end = std::sregex_token_iterator();
+
+        std::vector<std::string> result;
+        while (itr != end) {
+            result.push_back(itr->str());
+            ++itr;
+        }
+        return result;
+    }
+
 // Regexp utilities.
 public:
     static String replaceRegex(String const & path

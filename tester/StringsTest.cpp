@@ -60,3 +60,15 @@ TEST(StringsTest, splitTokens)
     ASSERT_EQ(path_set[1], temp2);
 }
 
+TEST(StringsTest, splitMatch)
+{
+    std::string match = R"(TEST[^ ]*)";
+    std::string content = std::string("TEST1 TEST10 TEST");
+
+    std::vector<std::string> list = Strings::splitMatch(content, std::regex(match));
+    ASSERT_EQ(list.size(), 3U);
+    ASSERT_STREQ(list[0].c_str(), "TEST1");
+    ASSERT_STREQ(list[1].c_str(), "TEST10");
+    ASSERT_STREQ(list[2].c_str(), "TEST");
+}
+
