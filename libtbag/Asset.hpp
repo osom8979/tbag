@@ -32,16 +32,22 @@ NAMESPACE_LIBTBAG_OPEN
  *
  * @remarks
  *  Resource manager class.
+ *
+ * @warning
+ *  Not supported wchar_t string.
  */
 class Asset
 {
 public:
-    using String    = std::string;
-    using ValueType = typename String::value_type;
-    using PathMap   = std::map<String, String>;
+    using ValueType = char;
+    using String    = std::basic_string<ValueType>;
+    using Path      = ::libtbag::filesystem::Path;
+    using PathMap   = std::map<String, Path>;
 
     static_assert(std::is_same<ValueType, char>::value
             , "ValueType must be the same type as char");
+    static_assert(std::is_same<ValueType, typename String::value_type>::value
+            , "ValueType must be the same type as String::value_type");
 
 public:
     /** Default setting for the constructor. */
@@ -61,9 +67,8 @@ public:
 
     /** Construct of Default settings. */
     explicit Asset(default_setting const & UNUSED_PARAM(empty_value)) {
-        using filesystem::Common;
-        this->_dirs.insert(std::make_pair(getHomeDirKeyName(), Common::getHomeDir()));
-        this->_dirs.insert(std::make_pair(getExeDirKeyName(), Common::getExeDir()));
+        this->insertDir(getHomeDirKeyName(), getHomeDirPath());
+        this->insertDir(getExeDirKeyName(), getExeDirPath());
     }
 
     Asset(PathMap const & dirs) {
@@ -78,7 +83,7 @@ public:
         this->swap(obj);
     }
 
-    ~Asset() {
+    virtual ~Asset() {
         __EMPTY_BLOCK__
     }
 
@@ -116,12 +121,26 @@ public:
      *  - Empty string: If it can't find.
      *  - Otherwise: Successful find.
      */
-    String getDir(String const & key) const {
+    Path getDirPath(String const & key) const {
         auto itr = this->_dirs.find(key);
         if (itr == this->_dirs.end()) {
-            return "";
+            return Path();
         }
         return itr->second;
+    }
+
+    String getDirString(String const & key) const {
+        return getDirPath(key).getString();
+    }
+
+    /**
+     * Insert directory name.
+     *
+     * @param key   [in] Directory key name.
+     * @param value [in] Directory path.
+     */
+    void insertDir(String const & key, Path const & value) {
+        this->_dirs.insert(std::make_pair(key, value));
     }
 
     /**
@@ -131,25 +150,26 @@ public:
      * @param value [in] Directory path string.
      */
     void insertDir(String const & key, String const & value) {
-        this->_dirs.insert(std::make_pair(key, value));
+        this->insertDir(key, Path(value));
     }
 
     std::size_t size() const noexcept(true) {
         return this->_dirs.size();
     }
 
-    std::set<std::string> scanDirs(std::string const & dir_name) const {
-        std::set<std::string> result;
-        std::set<std::string> scan_result;
-        filesystem::Path path;
+    std::set<Path> scanDirs(std::string const & dir_name) const {
+        std::set<Path> result;
+        std::set<String> scan_result;
+        Path path_cursor;
+
         for (auto cursor : this->_dirs) {
-            path  = cursor.second;
-            path /= dir_name;
+            path_cursor  = cursor.second;
+            path_cursor /= dir_name;
 
             scan_result.clear();
-            scan_result = filesystem::Common::scanDir(path.getNativeString());
+            scan_result = filesystem::Common::scanDir(path_cursor.getNativeString());
             for (auto file : scan_result) {
-                result.insert(filesystem::Path::append(path, file));
+                result.insert(Path(Path::append(path_cursor, file)));
             }
         }
         return result;
@@ -166,6 +186,39 @@ public:
     static String getExeDirKeyName() {
         return String(EXE_DIRECTORY_ASSET_NAME);
     }
+
+    /** Obtain HOME directory path. */
+    static Path getHomeDirPath() {
+        using filesystem::Common;
+        return Path(Common::getHomeDir());
+    }
+
+    /** Obtain executable file directory path. */
+    static Path getExeDirPath() {
+        using filesystem::Common;
+        return Path(Common::getExeDir());
+    }
+
+#ifndef CREATE_ASSET_PATH
+/** Create a subdirectory accessor & mutator macro. */
+#define CREATE_ASSET_PATH(name, path)                           \
+    public:                                                     \
+        static constexpr ValueType const * const                \
+                ASSET_NAME_KEY_##name = #name;                  \
+        void insert_##name() {                                  \
+            insertDir(ASSET_NAME_KEY_##name, path);             \
+        }                                                       \
+        Path get_##name() const {                               \
+            return getDirPath(ASSET_NAME_KEY_##name);           \
+        }                                                       \
+        bool create_##name() const {                            \
+            return filesystem::Common::createDir(get_##name()); \
+        }                                                       \
+        bool remove_##name() const {                            \
+            return filesystem::Common::removeDir(get_##name()); \
+        }                                                       \
+    private:
+#endif
 };
 
 // --------------------

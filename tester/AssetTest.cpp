@@ -46,7 +46,7 @@ TEST(AssetTest, insertDir_getDir)
     Asset asset;
     asset.insertDir(key, value);
     ASSERT_EQ(asset.size(), 1U);
-    ASSERT_EQ(value, asset.getDir(key));
+    ASSERT_EQ(value, asset.getDirString(key));
 }
 
 class AssetFixtureTest : public ::testing::Test
@@ -80,22 +80,44 @@ TEST_F(AssetFixtureTest, getHomeDir)
 {
     std::string dir = filesystem::Common::getHomeDir();
     ASSERT_GT(dir.size(), 0U);
-    ASSERT_EQ(dir, asset.getDir(Asset::getHomeDirKeyName()));
+    ASSERT_EQ(dir, asset.getDirString(Asset::getHomeDirKeyName()));
 }
 
 TEST_F(AssetFixtureTest, getExeDir)
 {
     std::string dir = filesystem::Common::getExeDir();
     ASSERT_GE(dir.size(), 1U);
-    ASSERT_EQ(dir, asset.getDir(Asset::getExeDirKeyName()));
+    ASSERT_EQ(dir, asset.getDirString(Asset::getExeDirKeyName()));
 }
 
 TEST_F(AssetFixtureTest, scanDirs)
 {
-    std::set<std::string> files = asset.scanDirs(".");
+    auto files = asset.scanDirs(".");
     for (auto cursor : files) {
         std::cout << "* Scan file: " << cursor << std::endl;
     }
     ASSERT_GE(files.size(), 1U);
+}
+
+class AssetDemo : public Asset
+{
+public:
+    AssetDemo() {
+    }
+
+    virtual ~AssetDemo() {
+    }
+
+public:
+    CREATE_ASSET_PATH(root_res, Asset::getExeDirPath() / "__asset_demo_test.dir");
+};
+
+TEST(AssetDemoTest, create_asset_path)
+{
+    AssetDemo demo;
+    demo.insert_root_res();
+    demo.get_root_res();
+    ASSERT_TRUE(demo.create_root_res());
+    ASSERT_TRUE(demo.remove_root_res());
 }
 

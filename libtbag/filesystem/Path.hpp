@@ -266,16 +266,13 @@ public:
         return append(child);
     }
 
-    BasePath & operator += (String const & child) {
-        return append(child);
+    friend BasePath operator / (BasePath const & path, String const & child) {
+        BasePath result = path;
+        result.append(child);
+        return result;
     }
 
-    friend BasePath & operator / (BasePath & path, String const & child) {
-        path.append(child);
-        return path;
-    }
-
-    friend BasePath & operator + (BasePath & path, String const & child) {
+    friend BasePath operator / (BasePath && path, String const & child) {
         path.append(child);
         return path;
     }
