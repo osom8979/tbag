@@ -139,14 +139,12 @@ public:
 
 public:
     static bool isAccessFile(std::string const & path) {
+        int mode = 0; // F_OK // test for existence of file, include <sys/unistd.h>
         uv_fs_t request;
-        int error_code = uv_fs_access(nullptr, &request, path.c_str(), F_OK, nullptr);
+        int error_code = uv_fs_access(nullptr, &request, path.c_str(), mode, nullptr);
         uv_fs_req_cleanup(&request);
 
-        if (error_code == 0 && request.result == 0) {
-            return true;
-        }
-        return false;
+        return (error_code == 0 ? true : false);
     }
 
     static std::set<std::string> scanDir(std::string const & path) {
@@ -166,6 +164,24 @@ public:
         assert(result.size() == static_cast<std::size_t>(element_count));
 
         return result;
+    }
+
+// Directory.
+public:
+    static bool createDir(std::string const & path, int mode = 0755) {
+        uv_fs_t request;
+        int error_code = uv_fs_mkdir(nullptr, &request, path.c_str(), mode, nullptr);
+        uv_fs_req_cleanup(&request);
+
+        return (error_code == 0 ? true : false);
+    }
+
+    static bool removeDir(std::string const & path) {
+        uv_fs_t request;
+        int error_code = uv_fs_rmdir(nullptr, &request, path.c_str(), nullptr);
+        uv_fs_req_cleanup(&request);
+
+        return (error_code == 0 ? true : false);
     }
 };
 

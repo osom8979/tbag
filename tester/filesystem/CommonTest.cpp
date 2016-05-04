@@ -50,3 +50,10 @@ TEST(CommonTest, scanDir)
     ASSERT_GE(files.size(), 1U);
 }
 
+TEST(CommonTest, create_and_remove)
+{
+    std::string dir_name = "__filesystem_common_dir_test.dir";
+    ASSERT_TRUE(Common::createDir(dir_name));
+    ASSERT_TRUE(Common::removeDir(dir_name));
+}
+

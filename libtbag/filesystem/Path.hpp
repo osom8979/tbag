@@ -262,12 +262,22 @@ public:
         return *this;
     }
 
-    BasePath & operator /=(String const & child) {
+    BasePath & operator /= (String const & child) {
         return append(child);
     }
 
-    BasePath & operator +=(String const & child) {
+    BasePath & operator += (String const & child) {
         return append(child);
+    }
+
+    friend BasePath & operator / (BasePath & path, String const & child) {
+        path.append(child);
+        return path;
+    }
+
+    friend BasePath & operator + (BasePath & path, String const & child) {
+        path.append(child);
+        return path;
     }
 
 // Casting
