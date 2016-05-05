@@ -138,15 +138,46 @@ public:
     }
 
 public:
-    static bool isAccessFile(std::string const & path) {
-        int mode = 0; // F_OK // test for existence of file, include <sys/unistd.h>
+    /**
+     * List of access mode.
+     *
+     * @remarks
+     *  POSIX: include <sys/unistd.h>
+     */
+    enum AccessModeTable
+    {
+        ACCESS_MODE_EXISTS  = (0   ), ///< F_OK: test for existence of file.
+        ACCESS_MODE_EXECUTE = (1<<0), ///< X_OK: test for execute or search permission.
+        ACCESS_MODE_WRITE   = (1<<1), ///< W_OK: test for write permission
+        ACCESS_MODE_READ    = (1<<2), ///< R_OK: test for read permission.
+    };
+
+    static bool isAccessFile(std::string const & path, int mode = ACCESS_MODE_EXISTS) {
         uv_fs_t request;
         int error_code = uv_fs_access(nullptr, &request, path.c_str(), mode, nullptr);
         uv_fs_req_cleanup(&request);
-
         return (error_code == 0 ? true : false);
     }
 
+    static bool isExistsFile(std::string const & path) {
+        return isAccessFile(path, ACCESS_MODE_EXISTS);
+    }
+
+public:
+    static uint64_t getPermission(std::string const & path) {
+        uint64_t result = 0;
+        uv_fs_t  request;
+
+        int error_code = uv_fs_stat(nullptr, &request, path.c_str(), nullptr);
+        if (error_code == 0 && request.result == 0) {
+            result = request.statbuf.st_mode;
+        }
+        uv_fs_req_cleanup(&request);
+
+        return result;
+    }
+
+public:
     static std::set<std::string> scanDir(std::string const & path) {
         std::set<std::string> result;
 
