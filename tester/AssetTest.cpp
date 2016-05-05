@@ -109,15 +109,17 @@ public:
     }
 
 public:
-    CREATE_ASSET_PATH(root_res, Asset::getExeDirPath() / "__asset_demo_test.dir");
+    CREATE_ASSET_PATH(root_res1, Asset::getExeDirPath() / "__asset_demo_test1.dir");
+    CREATE_ASSET_PATH(root_res2, Asset::getExeDirPath() / "__asset_demo_test2.dir");
 };
 
 TEST(AssetDemoTest, create_asset_path)
 {
     AssetDemo demo;
-    demo.insert_root_res();
-    demo.get_root_res();
-    ASSERT_TRUE(demo.create_root_res());
-    ASSERT_TRUE(demo.remove_root_res());
+
+    demo.insert_root_res1();
+    demo.get_root_res1();
+    ASSERT_TRUE(demo.create_root_res1());
+    ASSERT_TRUE(demo.remove_root_res1());
 }
 

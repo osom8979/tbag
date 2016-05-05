@@ -157,6 +157,17 @@ public:
         return this->_dirs.size();
     }
 
+public:
+    std::set<Path> scanDirPathWithKey(std::string const & key) const {
+        std::set<Path> result;
+        Path path = getDirPath(key);
+
+        for (auto cursor : filesystem::Common::scanDir(path.getNativeString())) {
+            result.insert(Path(Path::append(path, cursor)));
+        }
+        return result;
+    }
+
     std::set<Path> scanDirs(std::string const & dir_name) const {
         std::set<Path> result;
         std::set<String> scan_result;
