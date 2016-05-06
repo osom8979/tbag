@@ -90,15 +90,6 @@ TEST_F(AssetFixtureTest, getExeDir)
     ASSERT_EQ(dir, asset.getDirString(Asset::getExeDirKeyName()));
 }
 
-TEST_F(AssetFixtureTest, scanDirs)
-{
-    auto files = asset.scanDirs(".");
-    for (auto cursor : files) {
-        std::cout << "* Scan file: " << cursor << std::endl;
-    }
-    ASSERT_GE(files.size(), 1U);
-}
-
 class AssetDemo : public Asset
 {
 public:
@@ -110,16 +101,59 @@ public:
 
 public:
     CREATE_ASSET_PATH(root_res1, Asset::getExeDirPath() / "__asset_demo_test1.dir");
+    CREATE_ASSET_PATH_SUB(root_res1, sub1, "sub1");
+    CREATE_ASSET_PATH_SUB(root_res1, sub2, "sub2");
+
+public:
     CREATE_ASSET_PATH(root_res2, Asset::getExeDirPath() / "__asset_demo_test2.dir");
 };
 
-TEST(AssetDemoTest, create_asset_path)
+TEST(AssetDemoTest, Default)
 {
     AssetDemo demo;
 
     demo.insert_root_res1();
+    demo.insert_root_res2();
+
     demo.get_root_res1();
+    demo.get_root_res2();
+
+    if (demo.exists_root_res1_sub1()) {
+        demo.remove_root_res1_sub1();
+    }
+    if (demo.exists_root_res1_sub2()) {
+        demo.remove_root_res1_sub2();
+    }
+    if (demo.exists_root_res1()) {
+        demo.remove_root_res1();
+    }
+    if (demo.exists_root_res2()) {
+        demo.remove_root_res2();
+    }
+
     ASSERT_TRUE(demo.create_root_res1());
+    ASSERT_TRUE(demo.create_root_res2());
+    ASSERT_TRUE(demo.create_root_res1_sub1());
+    ASSERT_TRUE(demo.create_root_res1_sub2());
+
+    ASSERT_TRUE(demo.exists_root_res1_sub1());
+    ASSERT_TRUE(demo.exists_root_res1_sub2());
+    ASSERT_TRUE(demo.exists_root_res1());
+    ASSERT_TRUE(demo.exists_root_res2());
+
+    auto list1 = demo.scan_root_res1();
+    auto list2 = demo.scan_root_res2();
+    ASSERT_EQ(list1.size(), 2U);
+    ASSERT_EQ(list2.size(), 0U);
+
+    ASSERT_TRUE(demo.remove_root_res1_sub1());
+    ASSERT_TRUE(demo.remove_root_res1_sub2());
     ASSERT_TRUE(demo.remove_root_res1());
+    ASSERT_TRUE(demo.remove_root_res2());
+
+    ASSERT_FALSE(demo.exists_root_res1_sub1());
+    ASSERT_FALSE(demo.exists_root_res1_sub2());
+    ASSERT_FALSE(demo.exists_root_res1());
+    ASSERT_FALSE(demo.exists_root_res2());
 }
 

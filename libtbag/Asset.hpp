@@ -122,11 +122,11 @@ public:
      *  - Otherwise: Successful find.
      */
     Path getDirPath(String const & key) const {
-        auto itr = this->_dirs.find(key);
-        if (itr == this->_dirs.end()) {
+        try {
+            return this->_dirs.at(key);
+        } catch (std::out_of_range & e) {
             return Path();
         }
-        return itr->second;
     }
 
     String getDirString(String const & key) const {
@@ -158,32 +158,25 @@ public:
     }
 
 public:
-    std::set<Path> scanDirPathWithKey(std::string const & key) const {
-        std::set<Path> result;
-        Path path = getDirPath(key);
+    std::vector<Path> scanDirWithKey(std::string const & key) const {
+        return scanDir(getDirPath(key));
+    }
 
+    static std::vector<Path> scanDir(Path const & path) {
+        std::vector<Path> result;
         for (auto cursor : filesystem::Common::scanDir(path.getNativeString())) {
-            result.insert(Path(Path::append(path, cursor)));
+            result.push_back(Path(Path::append(path, cursor)));
         }
         return result;
     }
 
-    std::set<Path> scanDirs(std::string const & dir_name) const {
-        std::set<Path> result;
-        std::set<String> scan_result;
-        Path path_cursor;
+public:
+    bool isDirectoryWithKey(std::string const & key) {
+        return isDirectory(getDirPath(key));
+    }
 
-        for (auto cursor : this->_dirs) {
-            path_cursor  = cursor.second;
-            path_cursor /= dir_name;
-
-            scan_result.clear();
-            scan_result = filesystem::Common::scanDir(path_cursor.getNativeString());
-            for (auto file : scan_result) {
-                result.insert(Path(Path::append(path_cursor, file)));
-            }
-        }
-        return result;
+    static bool isDirectory(Path const & path) {
+        return filesystem::Common::isDirectory(path.getNativeString());
     }
 
 // Static methods.
@@ -211,24 +204,52 @@ public:
     }
 
 #ifndef CREATE_ASSET_PATH
+/** Create a main directory accessor & mutator macro. */
+#define CREATE_ASSET_PATH(name, path)                       \
+public:                                                     \
+    static constexpr ValueType const * const                \
+            ASSET_NAME_KEY_##name = #name;                  \
+    void insert_##name() {                                  \
+        insertDir(ASSET_NAME_KEY_##name, path);             \
+    }                                                       \
+    Path get_##name() const {                               \
+        return getDirPath(ASSET_NAME_KEY_##name);           \
+    }                                                       \
+    bool create_##name() const {                            \
+        return filesystem::Common::createDir(get_##name()); \
+    }                                                       \
+    bool remove_##name() const {                            \
+        return filesystem::Common::removeDir(get_##name()); \
+    }                                                       \
+    bool exists_##name() const {                            \
+        return isDirectory(get_##name());                   \
+    }                                                       \
+    std::vector<Path> scan_##name() const {                 \
+        return scanDir(get_##name());                       \
+    }                                                       \
+private:
+#endif
+
+#ifndef CREATE_ASSET_PATH_SUB
 /** Create a subdirectory accessor & mutator macro. */
-#define CREATE_ASSET_PATH(name, path)                           \
-    public:                                                     \
-        static constexpr ValueType const * const                \
-                ASSET_NAME_KEY_##name = #name;                  \
-        void insert_##name() {                                  \
-            insertDir(ASSET_NAME_KEY_##name, path);             \
-        }                                                       \
-        Path get_##name() const {                               \
-            return getDirPath(ASSET_NAME_KEY_##name);           \
-        }                                                       \
-        bool create_##name() const {                            \
-            return filesystem::Common::createDir(get_##name()); \
-        }                                                       \
-        bool remove_##name() const {                            \
-            return filesystem::Common::removeDir(get_##name()); \
-        }                                                       \
-    private:
+#define CREATE_ASSET_PATH_SUB(name, sub, path)                      \
+public:                                                             \
+    Path get_##name##_##sub() const {                               \
+        return getDirPath(ASSET_NAME_KEY_##name) / path;            \
+    }                                                               \
+    bool create_##name##_##sub() const {                            \
+        return filesystem::Common::createDir(get_##name##_##sub()); \
+    }                                                               \
+    bool remove_##name##_##sub() const {                            \
+        return filesystem::Common::removeDir(get_##name##_##sub()); \
+    }                                                               \
+    bool exists_##name##_##sub() const {                            \
+        return isDirectory(get_##name##_##sub());                   \
+    }                                                               \
+    std::vector<Path> scan_##name##_##sub() const {                 \
+        return scanDir(get_##name##_##sub());                       \
+    }                                                               \
+private:
 #endif
 };
 

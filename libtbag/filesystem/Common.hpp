@@ -224,8 +224,6 @@ public:
         }
         uv_fs_req_cleanup(&request);
 
-        assert(result.size() == static_cast<std::size_t>(element_count));
-
         return result;
     }
 
