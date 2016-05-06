@@ -177,14 +177,46 @@ public:
         return result;
     }
 
+    /**
+     * @defgroup __DOXYGEN_GROUP__FILE_TYPE__ List of file type.
+     * @remarks
+     *  POSIX: include <sys/stat.h>
+     * @{
+     */
+
+    static constexpr uint64_t const FILE_TYPE_S_IFMT   = 0170000; ///< type of file.
+    static constexpr uint64_t const FILE_TYPE_S_IFIFO  = 0010000; ///< named pipe (fifo).
+    static constexpr uint64_t const FILE_TYPE_S_IFCHR  = 0020000; ///< character special.
+    static constexpr uint64_t const FILE_TYPE_S_IFDIR  = 0040000; ///< directory.
+    static constexpr uint64_t const FILE_TYPE_S_IFBLK  = 0060000; ///< block special.
+    static constexpr uint64_t const FILE_TYPE_S_IFREG  = 0100000; ///< regular.
+    static constexpr uint64_t const FILE_TYPE_S_IFLNK  = 0120000; ///< symbolic link.
+    static constexpr uint64_t const FILE_TYPE_S_IFSOCK = 0140000; ///< socket.
+
+    /**
+     * @}
+     */
+
+    static bool checkFileType(std::string const & path, uint64_t type) {
+        return ((getPermission(path) & FILE_TYPE_S_IFMT) == type ? true : false);
+    }
+
+    static bool isDirectory(std::string const & path) {
+        return checkFileType(path, FILE_TYPE_S_IFDIR);
+    }
+
+    static bool isRegularFile(std::string const & path) {
+        return checkFileType(path, FILE_TYPE_S_IFREG);
+    }
+
 public:
-    static std::set<std::string> scanDir(std::string const & path) {
+    static std::set<std::string> scanDir(std::string const & dir_path) {
         std::set<std::string> result;
 
         uv_fs_t request;
         uv_dirent_t dictate;
 
-        int element_count = uv_fs_scandir(nullptr, &request, path.c_str(), 0, nullptr);
+        int element_count = uv_fs_scandir(nullptr, &request, dir_path.c_str(), 0, nullptr);
         if (element_count > 0) {
             while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
                 result.insert(std::string(dictate.name));
@@ -210,6 +242,15 @@ public:
     static bool removeDir(std::string const & path) {
         uv_fs_t request;
         int error_code = uv_fs_rmdir(nullptr, &request, path.c_str(), nullptr);
+        uv_fs_req_cleanup(&request);
+
+        return (error_code == 0 ? true : false);
+    }
+
+public:
+    static bool rename(std::string const & from, std::string const & to) {
+        uv_fs_t request;
+        int error_code = uv_fs_rename(nullptr, &request, from.c_str(), to.c_str(), nullptr);
         uv_fs_req_cleanup(&request);
 
         return (error_code == 0 ? true : false);
