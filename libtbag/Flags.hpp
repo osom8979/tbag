@@ -73,14 +73,14 @@ public:
 public:
     BaseFlags & copy(BaseFlags const & obj) {
         if (this != &obj) {
-            this->_buffer = obj._map;
+            this->_buffer = obj._buffer;
         }
         return *this;
     }
 
     void swap(BaseFlags & obj) {
         if (this != &obj) {
-            this->_buffer.swap(obj._map);
+            this->_buffer.swap(obj._buffer);
         }
     }
 
@@ -95,6 +95,14 @@ public:
 
     void push(FlagType const & flag) {
         this->_buffer.push_back(flag);
+    }
+
+    FlagType & at(int index) {
+        return this->_buffer.at(index);
+    }
+
+    FlagType const & at(int index) const {
+        return this->_buffer.at(index);
     }
 
 public:

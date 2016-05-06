@@ -49,6 +49,21 @@ TEST(FlagsTest, convertFlag)
     ASSERT_STREQ(t3.second.c_str(), "value=temp");
 }
 
+TEST(FlagsTest, at)
+{
+    Flags flags;
+    flags.push(std::make_pair("arg1", "temp1"));
+    flags.push(std::make_pair("arg2", "temp2"));
+
+    Flags const CONST_FLAGS = flags;
+
+    ASSERT_EQ(CONST_FLAGS.size(), 2U);
+    ASSERT_STREQ(CONST_FLAGS.at(0).first.c_str(), "arg1");
+    ASSERT_STREQ(CONST_FLAGS.at(0).second.c_str(), "temp1");
+    ASSERT_STREQ(CONST_FLAGS.at(1).first.c_str(), "arg2");
+    ASSERT_STREQ(CONST_FLAGS.at(1).second.c_str(), "temp2");
+}
+
 TEST(FlagsTest, parse_and_find)
 {
     std::string args = "temp --arg1 --arg2=temp";
