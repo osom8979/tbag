@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/exception/Exception.hpp>
+#include <libtbag/Exception.hpp>
 
 #include <cassert>
 
@@ -241,9 +241,9 @@ public:
         this->_height = 0;
     }
 
-    void resize(SizeType w, SizeType h) throw (exception::IllegalArgumentException) {
+    void resize(SizeType w, SizeType h) throw (IllegalArgumentException) {
         if (w <= 0 || h <= 0) {
-            throw exception::IllegalArgumentException();
+            throw IllegalArgumentException();
         }
 
         if (static_cast<std::size_t>(w * h) == size()) {
@@ -260,31 +260,31 @@ public:
     }
 
 public:
-    DataType & at(IndexType x, IndexType y) throw (exception::OutOfRangeException) {
+    DataType & at(IndexType x, IndexType y) throw (OutOfRangeException) {
         if (x < 0 || _width <= x || y < 0 || _height <= y) {
-            throw exception::OutOfRangeException();
+            throw OutOfRangeException();
         }
         return *(_data + (_width * y + x));
     }
 
-    DataType & at(std::size_t index) throw (exception::OutOfRangeException) {
+    DataType & at(std::size_t index) throw (OutOfRangeException) {
         if (size() <= index) {
-            throw exception::OutOfRangeException();
+            throw OutOfRangeException();
         }
         return *(_data + index);
     }
 
 public:
-    DataType get(IndexType x, IndexType y) const throw (exception::OutOfRangeException) {
+    DataType get(IndexType x, IndexType y) const throw (OutOfRangeException) {
         if (x < 0 || _width <= x || y < 0 || _height <= y) {
-            throw exception::OutOfRangeException();
+            throw OutOfRangeException();
         }
         return *(_data + (_width * y + x));
     }
 
-    DataType get(std::size_t index) const throw (exception::OutOfRangeException) {
+    DataType get(std::size_t index) const throw (OutOfRangeException) {
         if (size() <= index) {
-            throw exception::OutOfRangeException();
+            throw OutOfRangeException();
         }
         return *(_data + index);
     }

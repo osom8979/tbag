@@ -7,12 +7,12 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/container/Array2d.hpp>
+
 #include <vector>
 #include <algorithm>
 
 using namespace libtbag;
 using namespace libtbag::container;
-using namespace libtbag::exception;
 
 TEST(Array2dTest, Default)
 {

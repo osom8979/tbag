@@ -5,8 +5,8 @@
  * @date   2016-04-24
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_EXCEPTION_EXCEPTION_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_EXCEPTION_EXCEPTION_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_EXCEPTION_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_EXCEPTION_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -14,14 +14,11 @@
 #endif
 
 #include <libtbag/config.h>
-
 #include <exception>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
-
-namespace exception {
 
 #ifndef __CREATE_EXCEPTION_CLASS
 #define __CREATE_EXCEPTION_CLASS(class_name, message)           \
@@ -51,8 +48,6 @@ __CREATE_EXCEPTION_CLASS(IllegalArgumentException, "Illegal argument exception."
 /**
  * @}
  */
-
-} // namespace exception
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
