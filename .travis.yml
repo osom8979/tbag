@@ -34,7 +34,7 @@ before_install:
   - export CXX=g++-4.9
 
 install:
-  - ./script/travis_install.sh
+  - bash script/travis_install.sh
 
 script:
   - mkdir cmake_build
