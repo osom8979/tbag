@@ -5,43 +5,46 @@
 language: cpp
 
 cache:
-    apt: true
-    directories:
-        - /home/travis/tparty
+  apt: true
+  directories:
+    - /home/travis/tparty
 
 compiler: g++
 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports
+    packages:
+      - git
+      - cmake
+      - cmake-data
+      - curl
+      - unzip
+      - g++-4.9
+
 before_install:
-    - export TPARTY_HOME=$HOME/tparty
-    - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
-    - export CXX=g++-4.9
+  #- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+  #- sudo add-apt-repository --yes ppa:george-edison55/precise-backports
+  #- sudo apt-get -qq update
+  #- sudo apt-get install -y git cmake cmake-data curl unzip g++-4.9
+  - export TPARTY_HOME=$HOME/tparty
+  - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
+  - export CXX=g++-4.9
 
 install:
-    - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-    - sudo add-apt-repository --yes ppa:george-edison55/precise-backports
-    - sudo apt-get -qq update
-    - sudo apt-get install -y git cmake cmake-data curl unzip g++-4.9
-    - pushd .
-    - git clone https://github.com/osom8979/tparty.git $TPARTY_HOME
-    - cd $TPARTY_HOME
-    - echo 'gtest.sh'    >> cache
-    - echo 'tinyxml2.sh' >> cache
-    - echo 'spdlog.sh'   >> cache
-    - echo 'libuv.sh'    >> cache
-    - echo 'ncurses.sh'  >> cache
-    - echo 'lua.sh'      >> cache
-    - ./install.sh -y
-    - popd
+  - ./script/travis_install.sh
 
 script:
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make VERBOSE=0
-    - ./tester
+  - mkdir cmake_build
+  - cd cmake_build
+  - cmake ..
+  - make VERBOSE=0
+  - ./tester
 
 notifications:
-    email:
-        on_success: always
-        on_failure: always
+  email:
+    on_success: always
+    on_failure: always
 
