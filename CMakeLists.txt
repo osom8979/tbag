@@ -100,9 +100,19 @@ configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 #set (BUILD_SHARED_LIBS                ON) # User's variable.
 #set (CMAKE_MACOSX_RPATH                1) # CMP0042
 #set (CMAKE_BUILD_TYPE            Release) # User's variable.
-set  (CMAKE_CXX_EXTENSIONS            OFF) # Change: -std=gnu++11 -> -std=c++11
-set  (CMAKE_CXX_STANDARD               11) # C++ standard 11
 set  (CMAKE_POSITION_INDEPENDENT_CODE  ON) # -fPIC
+
+# C++11 settings.
+if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=gnu++11")
+    else ()
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
+    endif ()
+else ()
+    set (CMAKE_CXX_EXTENSIONS  OFF) # Change: -std=gnu++11 -> -std=c++11
+    set (CMAKE_CXX_STANDARD     11) # C++ standard 11
+endif ()
 
 set  (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -Wall")
 #set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}")
