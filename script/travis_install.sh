@@ -1,10 +1,17 @@
 #!/bin/bash
 
+echo "Update tparty library: start."
+
 WORKING=$PWD
 pushd $WORKING
 
+# Check .git directory.
+if [[ ! -d "$TPARTY_HOME/.git" ]]; then
+    rm -rf "$TPARTY_HOME"
+fi
+
 # Clone or update.
-if [[ -d "$TPARTY_HOME" ]]; then
+if [[ -d "$TPARTY_HOME/.git" ]]; then
     cd "$TPARTY_HOME" && git pull --all
 else
     git clone https://github.com/osom8979/tparty.git $TPARTY_HOME
@@ -31,4 +38,5 @@ if [[ -d "$TPARTY_HOME/tmp/build" ]]; then
 fi
 
 popd
+echo "Update tparty library: done."
 
