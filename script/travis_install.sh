@@ -27,6 +27,7 @@ cd "$TPARTY_HOME"
 echo 'gtest.sh'     > cache
 echo 'tinyxml2.sh' >> cache
 echo 'spdlog.sh'   >> cache
+echo 'sqlite3.sh'  >> cache
 echo 'libuv.sh'    >> cache
 echo 'ncurses.sh'  >> cache
 echo 'lua.sh'      >> cache
