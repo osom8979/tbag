@@ -99,9 +99,18 @@ public:
 
     void removeThread(std::thread * thread) {
         lock::WriteLockGuard guard(_lock);
-        List::iterator itr = std::find(_list.begin(), _list.end(), thread);
-        if (itr != _list.end()) {
-            _list.erase(itr);
+
+        // [WARNING]
+        // Don't use std::find.
+        // Reason: No matching function for call to std::find (in G++).
+        //         'std::find(List::iterator, List::iterator, std::thread * &)'
+        // List::iterator itr = std::find(_list.begin(), _list.end(), thread);
+
+        for (List::iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
+            if ((*itr) == thread) {
+                _list.erase(itr);
+                break;
+            }
         }
     }
 
