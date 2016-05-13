@@ -63,7 +63,7 @@ public:
 public:
     bool exists(std::thread::id const & id) const {
         lock::ReadLockGuard guard(_lock);
-        for (List::const_iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
+        for (List::const_iterator itr = _list.cbegin(), end = _list.cend(); itr != end; ++itr) {
             if ((*itr)->get_id() == id) {
                 return true;
             }
@@ -99,7 +99,7 @@ public:
 
     void removeThread(std::thread * thread) {
         lock::WriteLockGuard guard(_lock);
-        List::iterator const itr = std::find(_list.begin(), _list.end(), thread);
+        List::iterator itr = std::find(_list.begin(), _list.end(), thread);
         if (itr != _list.end()) {
             _list.erase(itr);
         }
