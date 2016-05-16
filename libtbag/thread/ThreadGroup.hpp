@@ -83,9 +83,9 @@ public:
     }
 
 public:
-    template <typename Function>
-    std::thread * createThread(Function callback) {
-        std::thread * create_thread = new (std::nothrow) std::thread(callback);
+    template <typename ...Args>
+    std::thread * createThread(Args ... args) {
+        std::thread * create_thread = new (std::nothrow) std::thread(args...);
         addThread(create_thread);
         return create_thread;
     }
