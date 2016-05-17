@@ -15,56 +15,16 @@
 
 #include <libtbag/config.h>
 
-#ifndef VERSION_NUMBER_ZERO
-#define VERSION_NUMBER_ZERO 0
-#endif
-
-// ---------
 // Language.
-// ---------
+#include <libtbag/config/language/c.hpp>
+#include <libtbag/config/language/cpp.hpp>
+#include <libtbag/config/language/objc.hpp>
 
-#if defined(__STDC__)
-# define __LANG_STDC__
-# if (__STDC_VERSION__ > 0)
-#  define __LANG_STDC_VERSION__  __STDC_VERSION__
-# else
-#  define __LANG_STDC_VERSION__  VERSION_NUMBER_ZERO
-# endif
-#endif
-
-#if defined(__cplusplus)
-# define __LANG_STDCPP__
-# if (__cplusplus > 0)
-#  define __LANG_STDCPP_VERSION__  __cplusplus
-# else
-#  define __LANG_STDCPP_VERSION__  VERSION_NUMBER_ZERO
-# endif
-#endif
-
-#if defined(__OBJC__)
-# define __LANG_OBJC__
-# define __LANG_OBJC_VERSION__  VERSION_NUMBER_ZERO
-#endif
-
-// ---------
 // Compiler.
-// ---------
-
-#if defined(__clang__)
-#define __COMP_CLANG__
-#endif
-
-#if defined(__GNUC__)
-#define __COMP_GNUC__
-#endif
-
-#if defined(__llvm__)
-#define __COMP_LLVM__
-#endif
-
-#if defined(_MSC_VER)
-#define __COMP_MSVC__
-#endif
+#include <libtbag/config/compiler/gcc.hpp>
+#include <libtbag/config/compiler/clang.hpp>
+#include <libtbag/config/compiler/llvm.hpp>
+#include <libtbag/config/compiler/msvc.hpp>
 
 // -----------------
 // Operating System.

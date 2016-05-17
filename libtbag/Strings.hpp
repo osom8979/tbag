@@ -16,6 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 
+#define CHECK_GNUC_CXX_REGEX
+#include <libtbag/predef.hpp>
+
 #include <string>
 #include <vector>
 #include <regex>
