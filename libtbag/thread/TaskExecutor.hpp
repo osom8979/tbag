@@ -41,7 +41,7 @@ namespace thread {
 class TaskExecutor : public Noncopyable
 {
 public:
-    using Task       = std::function<bool(void)>;
+    using Task       = std::function<void(void)>;
     using SharedTask = std::shared_ptr<Task>;
     using TaskQueue  = std::queue<SharedTask>;
 
@@ -81,7 +81,7 @@ public:
 
         std::lock_guard<std::mutex> guard(this->_queue_lock);
         this->_queue.push(SharedTask(new (std::nothrow) Task(task)));
-        this->_thread_condition.notify_all();
+        this->_thread_condition.notify_one();
         return true;
     }
 
@@ -93,7 +93,7 @@ public:
 
         SharedTask result = this->_queue.front();
         this->_queue.pop();
-        this->_thread_condition.notify_all();
+        this->_thread_condition.notify_one();
         return result;
     }
 
@@ -124,10 +124,7 @@ private:
             current_task = this->pop();
             while (current_task.get() != nullptr) {
                 if (static_cast<bool>(*current_task) == true) {
-                    if ((*current_task)() == false) {
-                        // FORCE EXIT.
-                        return;
-                    }
+                    (*current_task)();
                 }
                 current_task = this->pop();
             }

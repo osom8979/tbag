@@ -19,8 +19,9 @@ TEST(TaskExecutorTest, async1)
     int t1 = 0;
     int t2 = 0;
 
-    executor.push([&]() -> bool { t1 = TEST_NUMBER; return true; });
-    executor.push([&]() -> bool { t2 = TEST_NUMBER; return false; });
+    executor.push([&](){ t1 = TEST_NUMBER; });
+    executor.push([&](){ t2 = TEST_NUMBER; });
+    executor.exit();
 
     ASSERT_EQ(t1, 0);
     ASSERT_EQ(t2, 0);
@@ -42,12 +43,12 @@ TEST(TaskExecutorTest, async2)
     int t3 = 0;
     int t4 = 0;
 
-    executor.push([&]() -> bool { t1 = TEST_NUMBER; return true; });
-    executor.push([&]() -> bool { t2 = TEST_NUMBER; return true; });
+    executor.push([&](){ t1 = TEST_NUMBER; });
+    executor.push([&](){ t2 = TEST_NUMBER; });
 
     executor.runAsync(2U);
-    executor.push([&]() -> bool { t3 = TEST_NUMBER; return true; });
-    executor.push([&]() -> bool { t4 = TEST_NUMBER; return true; });
+    executor.push([&](){ t3 = TEST_NUMBER; });
+    executor.push([&](){ t4 = TEST_NUMBER; });
 
     executor.exit();
     executor.join();
@@ -74,8 +75,8 @@ TEST(TaskExecutorTest, reset)
     int t3 = 0;
     int t4 = 0;
 
-    executor.push([&]() -> bool { t1 = TEST_NUMBER; return true; });
-    executor.push([&]() -> bool { t2 = TEST_NUMBER; return true; });
+    executor.push([&](){ t1 = TEST_NUMBER; });
+    executor.push([&](){ t2 = TEST_NUMBER; });
     executor.runAsync(2U);
     ASSERT_EQ(executor.getThreadCount(), 2U);
 
@@ -90,8 +91,8 @@ TEST(TaskExecutorTest, reset)
     ASSERT_EQ(executor.getThreadCount(), 0U);
 
     executor.runAsync(1U);
-    executor.push([&]() -> bool { t3 = TEST_NUMBER; return true; });
-    executor.push([&]() -> bool { t4 = TEST_NUMBER; return true; });
+    executor.push([&](){ t3 = TEST_NUMBER; });
+    executor.push([&](){ t4 = TEST_NUMBER; });
     ASSERT_EQ(executor.getThreadCount(), 1U);
 
     executor.exit();
