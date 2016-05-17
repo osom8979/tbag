@@ -105,9 +105,9 @@ set  (CMAKE_POSITION_INDEPENDENT_CODE  ON) # -fPIC
 # C++11 settings.
 if (CMAKE_VERSION VERSION_LESS "3.1")
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=gnu++11")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
     else ()
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif ()
 else ()
     set (CMAKE_CXX_EXTENSIONS  OFF) # Change: -std=gnu++11 -> -std=c++11
