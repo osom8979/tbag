@@ -1,5 +1,5 @@
 /**
- * @file   main.cpp
+ * @file   curses_test.cpp
  * @brief  Program entry-point.
  * @author zer0
  * @date   2016-04-23
