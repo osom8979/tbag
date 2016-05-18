@@ -37,6 +37,7 @@ NAMESPACE_LIBTBAG_OPEN
  * @{
  */
 
+__CREATE_EXCEPTION_CLASS(InitializeException,      "Initialize exception.");
 __CREATE_EXCEPTION_CLASS(BadCastException,         "Bad casting exception.");
 __CREATE_EXCEPTION_CLASS(DivideByZeroException,    "Divide by zero exception.");
 __CREATE_EXCEPTION_CLASS(OutOfRangeException,      "Out of range exception.");

@@ -137,8 +137,8 @@ private:
                                     // 1루프당 1TIME_STEP을 초과하였는지 확인할 수 있다.
                                     // TIME_LAG는 항상 양수를 보장받아야 한다.
 
-            assert(_curation.count() > 0);
-            assert(_time_lag.count() > 0);
+            assert(_duration.count() >= 0);
+            assert(_time_lag.count() >= 0);
 
             // 1루프 당 1회의 업데이트를 위한 중첩 LOOP.
             while (_time_lag >= _time_step) {
@@ -158,7 +158,7 @@ private:
                 }
             }
 
-            assert(_time_lag.count() > 0);
+            assert(_time_lag.count() >= 0);
 
             __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
                     "RENDER: LAG[%lld] DURA[%lld]\n"
