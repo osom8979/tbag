@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <cstring>
 #include <string>
 
@@ -26,7 +27,7 @@ void runOutput(OutputStream & ostream, char const * argument = nullptr)
 int main(int argc, char ** argv)
 {
     if (argc < 2) {
-        std::cout << "Usage: " << argv[0] << " {out|err} {argument}\n";
+        std::cout << "Usage: " << argv[0] << " {out|err|file} {argument}\n";
         return 1;
     }
 
@@ -42,6 +43,14 @@ int main(int argc, char ** argv)
         } else {
             runOutput(std::cerr);
         }
+    } else if (strcmp(argv[1], "file") == 0) {
+        std::ofstream file("__process_test_file");
+        if (argc >= 3) {
+            runOutput(file, argv[2]);
+        } else {
+            runOutput(file);
+        }
+        file.close();
     } else {
         std::cout << "Unknown command.\n";
         return 1;

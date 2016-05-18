@@ -103,6 +103,8 @@ TEST(RenderingLoopTest, SlowMachine)
 
 TEST(RenderingLoopTest, FastMachine)
 {
+    // TODO: Some time, test fails.
+
     int const FPS = 10;
     int const EPSILON = 1;
 

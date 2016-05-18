@@ -96,7 +96,10 @@ private:
     }
 
 public:
-    ProcessResult run(std::string const & exe, std::vector<std::string> const & args, std::string const & work) {
+    ProcessResult run(std::string              const & exe
+                    , std::vector<std::string> const & args
+                    , std::string              const & work) {
+
         SharedProcess process = createProcess();
         process->setExecuteFile(exe);
         process->setArguments(args);

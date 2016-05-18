@@ -43,6 +43,13 @@ TEST(ProcessManagerTest, exit_code_success)
     ASSERT_EQ(result.terminate_signal, 0);
 }
 
+TEST(ProcessManagerTest, file_test)
+{
+    auto result = runTestProgram("file", "content\n");
+    ASSERT_EQ(result.exit_status, 0);
+    ASSERT_EQ(result.terminate_signal, 0);
+}
+
 TEST(ProcessManagerTest, exit_code_failure)
 {
     auto result = runTestProgram("unknown", "unknown");
