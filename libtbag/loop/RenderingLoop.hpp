@@ -17,6 +17,8 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Log.hpp>
 
+#include <cassert>
+
 #include <atomic>
 #include <chrono>
 #include <thread>
@@ -131,27 +133,43 @@ private:
             _now_start = SystemClock::now();
             _duration  = _now_start - _pre_start;
             _pre_start = _now_start;
-            _time_lag += _duration;
+            _time_lag += _duration; // 직전 루프의 경과시간을 TIME_LAG에 더해 준다.
+                                    // 1루프당 1TIME_STEP을 초과하였는지 확인할 수 있다.
+                                    // TIME_LAG는 항상 양수를 보장받아야 한다.
 
+            assert(_curation.count() > 0);
+            assert(_time_lag.count() > 0);
+
+            // 1루프 당 1회의 업데이트를 위한 중첩 LOOP.
             while (_time_lag >= _time_step) {
+
+                // 1루프 당 1회의 업데이트를 보장하기 위해 아래와 같이 TIME_STEP 뺀다.
                 _time_lag -= _time_step;
+
                 __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
                         "UPDATE: LAG[%lld] DUR[%lld]\n"
                         , _time_lag.count()
                         , _duration.count());
+
+                // 만약 이벤트 확보를 위한 콜백이 필요하다면 UPDATE 콜백에 추가한다.
                 if (!_callback.update(*this)) {
                     _exit.store(true);
                     break;
                 }
             }
 
+            assert(_time_lag.count() > 0);
+
             __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
                     "RENDER: LAG[%lld] DURA[%lld]\n"
                     , _time_lag.count()
                     , _duration.count());
+
             _callback.render(*this);
 
             if (enable_sleep_step) {
+                // 1루프를 1TIME_STEP 보다 더 빠르게 끝냈을 경우
+                // 강제로 1TIME_STEP을 맞추기 위한 SLEEP.
                 sleep_time = SystemClock::now() - _now_start;
                 if (sleep_time < _time_step) {
                     // std::this_thread::yield();
