@@ -21,6 +21,7 @@
 #include <list>
 #include <string>
 #include <mutex>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
