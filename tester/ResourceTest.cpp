@@ -136,6 +136,36 @@ TEST_F(ResourceFixtureTest, save)
 
 TEST_F(ResourceFixtureTest, getValue)
 {
+    /* TODO: Valgrind memory leak:
+     * ==38325== 272 bytes in 1 blocks are definitely lost in loss record 86 of 107
+     * ==38325==    at 0x100277EBB: malloc (in /usr/local/Cellar/valgrind/3.11.0/lib/valgrind/vgpreload_memcheck-amd64-darwin.so)
+     * ==38325==    by 0x1005E4B58: getPerThreadBufferFor_dlerror(unsigned long) (in /usr/lib/system/libdyld.dylib)
+     * ==38325==    by 0x7FFF5FC0BFA4: dlerrorSet(char const*) (in /usr/lib/dyld)
+     * ==38325==    by 0x7FFF5FC0C2D2: dlopen (in /usr/lib/dyld)
+     * ==38325==    by 0x1005E479B: dlopen (in /usr/lib/system/libdyld.dylib)
+     * ==38325==    by 0x100E4661C: std::logic_error::~logic_error() (in /usr/lib/libc++abi.dylib)
+     * ==38325==    by 0x100E43D6A: __cxa_decrement_exception_refcount (in /usr/lib/libc++abi.dylib)
+     * ==38325==    by 0x1001157BF: bool libtbag::Resource::getValue<int, libtbag::Resource::getInteger(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int*) const::{lambda(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)#1}>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int*, libtbag::Resource::getInteger(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int*) const::{lambda(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)#1}) const (in ./tester)
+     * ==38325==    by 0x100115554: libtbag::Resource::getInteger(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int*) const (in ./tester)
+     * ==38325==    by 0x1001154FD: libtbag::Resource::getInteger(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int) const (in ./tester)
+     * ==38325==    by 0x10011A91A: ResourceFixtureTest_getValue_Test::TestBody() (in ./tester)
+     * ==38325==    by 0x1001786C9: void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) (gtest.cc:2078)
+     *
+     * ==38325== 508 (80 direct, 428 indirect) bytes in 1 blocks are definitely lost in loss record 92 of 107
+     * ==38325==    at 0x100277EBB: malloc (in /usr/local/Cellar/valgrind/3.11.0/lib/valgrind/vgpreload_memcheck-amd64-darwin.so)
+     * ==38325==    by 0x1006608D6: __Balloc_D2A (in /usr/lib/system/libsystem_c.dylib)
+     * ==38325==    by 0x10066121F: __d2b_D2A (in /usr/lib/system/libsystem_c.dylib)
+     * ==38325==    by 0x100662F29: __rvOK_D2A (in /usr/lib/system/libsystem_c.dylib)
+     * ==38325==    by 0x100663D27: __strtodg (in /usr/lib/system/libsystem_c.dylib)
+     * ==38325==    by 0x100664EAA: strtof_l (in /usr/lib/system/libsystem_c.dylib)
+     * ==38325==    by 0x100441A21: std::__1::stof(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long*) (in /usr/lib/libc++.1.dylib)
+     * ==38325==    by 0x1001262CF: libtbag::Resource::getFloat(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, float*) const::{lambda(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)#1}::operator()(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const (in ./tester)
+     * ==38325==    by 0x100126211: bool libtbag::Resource::getValue<float, libtbag::Resource::getFloat(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, float*) const::{lambda(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)#1}>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, float*, libtbag::Resource::getFloat(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, float*) const::{lambda(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)#1}) const (in ./tester)
+     * ==38325==    by 0x100125FF4: libtbag::Resource::getFloat(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, float*) const (in ./tester)
+     * ==38325==    by 0x10011FA6D: libtbag::Resource::getFloat(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, float) const (in ./tester)
+     * ==38325==    by 0x10011B589: ResourceFixtureTest_getValue_Test::TestBody() (in ./tester)
+     */
+
     ASSERT_EQ(res.getString(attribute1), value1_2);
 
     ASSERT_EQ(res.getInteger(attribute3), value3_2);

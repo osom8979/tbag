@@ -45,6 +45,22 @@ TEST(Array2dTest, Default)
 
 TEST(Array2dTest, Index)
 {
+    /* TODO: Valgrind memory leak:
+     * ==38325== 16 bytes in 1 blocks are definitely lost in loss record 7 of 107
+     * ==38325==    at 0x1002785B9: calloc (in /usr/local/Cellar/valgrind/3.11.0/lib/valgrind/vgpreload_memcheck-amd64-darwin.so)
+     * ==38325==    by 0x100E437CE: __cxa_get_globals (in /usr/lib/libc++abi.dylib)
+     * ==38325==    by 0x100E43BB1: __cxa_throw (in /usr/lib/libc++abi.dylib)
+     * ==38325==    by 0x1000687CF: libtbag::container::Array2d<int, std::__1::allocator<int> >::at(unsigned long) (in ./tester)
+     * ==38325==    by 0x1000636BD: Array2dTest_Index_Test::TestBody() (in ./tester)
+     * ==38325==    by 0x1001786C9: void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) (gtest.cc:2078)
+     * ==38325==    by 0x100165149: testing::Test::Run() (gtest.cc:2150)
+     * ==38325==    by 0x100165E01: testing::TestInfo::Run() (gtest.cc:2326)
+     * ==38325==    by 0x100166642: testing::TestCase::Run() (gtest.cc:2444)
+     * ==38325==    by 0x10016D77A: testing::internal::UnitTestImpl::RunAllTests() (gtest.cc:4315)
+     * ==38325==    by 0x100178EE2: bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) (gtest.cc:2078)
+     * ==38325==    by 0x10016D3ED: testing::UnitTest::Run() (gtest.cc:3926)
+     */
+
     int const TEST1  = 2;
     int const VALUE1 = 10;
 

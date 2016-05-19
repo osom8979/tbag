@@ -15,6 +15,36 @@ using namespace libtbag;
 
 TEST(TimeTest, ctime)
 {
+    /* TODO: Valgrind memory leak:
+     * ==38325== 56 bytes in 1 blocks are definitely lost in loss record 49 of 107
+     * ==38325==    at 0x100277EBB: malloc (in /usr/local/Cellar/valgrind/3.11.0/lib/valgrind/vgpreload_memcheck-amd64-darwin.so)
+     * ==38325==    by 0x100696956: gmtime (in /usr/lib/system/libsystem_c.dylib)
+     * ==38325==    by 0x100157820: libtbag::Time::getCurrentGmtTime(long const&) (in ./tester)
+     * ==38325==    by 0x100154BC3: TimeTest_ctime_Test::TestBody() (in ./tester)
+     * ==38325==    by 0x1001786C9: void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) (gtest.cc:2078)
+     * ==38325==    by 0x100165149: testing::Test::Run() (gtest.cc:2150)
+     * ==38325==    by 0x100165E01: testing::TestInfo::Run() (gtest.cc:2326)
+     * ==38325==    by 0x100166642: testing::TestCase::Run() (gtest.cc:2444)
+     * ==38325==    by 0x10016D77A: testing::internal::UnitTestImpl::RunAllTests() (gtest.cc:4315)
+     * ==38325==    by 0x100178EE2: bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) (gtest.cc:2078)
+     * ==38325==    by 0x10016D3ED: testing::UnitTest::Run() (gtest.cc:3926)
+     * ==38325==    by 0x10017E310: main (gtest.h:2288)
+     *
+     * ==38325== 56 bytes in 1 blocks are definitely lost in loss record 50 of 107
+     * ==38325==    at 0x100277EBB: malloc (in /usr/local/Cellar/valgrind/3.11.0/lib/valgrind/vgpreload_memcheck-amd64-darwin.so)
+     * ==38325==    by 0x10069680A: localtime (in /usr/lib/system/libsystem_c.dylib)
+     * ==38325==    by 0x100157860: libtbag::Time::getCurrentLocalTime(long const&) (in ./tester)
+     * ==38325==    by 0x100154BD6: TimeTest_ctime_Test::TestBody() (in ./tester)
+     * ==38325==    by 0x1001786C9: void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) (gtest.cc:2078)
+     * ==38325==    by 0x100165149: testing::Test::Run() (gtest.cc:2150)
+     * ==38325==    by 0x100165E01: testing::TestInfo::Run() (gtest.cc:2326)
+     * ==38325==    by 0x100166642: testing::TestCase::Run() (gtest.cc:2444)
+     * ==38325==    by 0x10016D77A: testing::internal::UnitTestImpl::RunAllTests() (gtest.cc:4315)
+     * ==38325==    by 0x100178EE2: bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) (gtest.cc:2078)
+     * ==38325==    by 0x10016D3ED: testing::UnitTest::Run() (gtest.cc:3926)
+     * ==38325==    by 0x10017E310: main (gtest.h:2288)
+     */
+
     time_t time = Time::getCurrentTime();
 
     tm *   gmt = Time::getCurrentGmtTime(time);
