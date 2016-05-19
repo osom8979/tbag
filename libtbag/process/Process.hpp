@@ -70,8 +70,13 @@ public:
         this->addHandle((uv_handle_t*)&this->_process);
     }
 
-    ~Process() {
+    virtual ~Process() {
         this->removeHandle((uv_handle_t*)&this->_process);
+    }
+
+protected:
+    uv_process_options_t & atOptions() noexcept {
+        return this->_options;
     }
 
 private:
@@ -142,10 +147,7 @@ public:
 
 public:
     bool exe() {
-        if (uv_spawn(this->getLoopPointer(), &this->_process, &this->_options) == 0) {
-            return runDefault();
-        }
-        return false;
+        return (uv_spawn(this->getLoopPointer(), &this->_process, &this->_options) == 0 ? true : false);
     }
 
     bool exe(std::string              const & file
@@ -163,10 +165,6 @@ public:
     void onExit(uv_process_t * process, int64_t exit_status, int term_signal) override {
         this->_exit_status.store(exit_status);
         this->_terminate_signal.store(term_signal);
-    }
-
-    virtual void onClose(uv_handle_t * handle) override {
-        __EMPTY_BLOCK__
     }
 
 public:

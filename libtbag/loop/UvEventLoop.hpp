@@ -94,26 +94,67 @@ public:
     }
 
 public:
-    virtual void onAlloc        (uv_handle_t      * handle, size_t suggested_size, uv_buf_t * buf){}
-    virtual void onRead         (uv_stream_t      * stream, ssize_t nread, uv_buf_t const * buf){}
-    virtual void onWrite        (uv_write_t       * req, int status){}
-    virtual void onConnect      (uv_connect_t     * req, int status){}
-    virtual void onShutdown     (uv_shutdown_t    * req, int status){}
-    virtual void onConnection   (uv_stream_t      * server, int status){}
-    virtual void onClose        (uv_handle_t      * handle){}
-    virtual void onPoll         (uv_poll_t        * handle, int status, int events){}
-    virtual void onTimer        (uv_timer_t       * handle){}
-    virtual void onAsync        (uv_async_t       * handle){}
-    virtual void onPrepare      (uv_prepare_t     * handle){}
-    virtual void onCheck        (uv_check_t       * handle){}
-    virtual void onIdle         (uv_idle_t        * handle){}
-    virtual void onExit         (uv_process_t     * process, int64_t exit_status, int term_signal){}
-    virtual void onWalk         (uv_handle_t      * handle, void * arg){}
-    virtual void onFs           (uv_fs_t          * req){}
-    virtual void onWork         (uv_work_t        * req){}
-    virtual void onAfterWork    (uv_work_t        * req, int status){}
-    virtual void onGetaddrinfo  (uv_getaddrinfo_t * req, int status, struct addrinfo* res){}
-    virtual void onGetnameinfo  (uv_getnameinfo_t * req, int status, char const * hostname, char const * service){}
+    /**
+     * @remarks
+     *  Type definition for callback passed to uv_read_start() and uv_udp_recv_start(). @n
+     *  The user must fill the supplied uv_buf_t structure with whatever size,          @n
+     *  as long as it's > 0. A suggested size (65536 at the moment) is provided,        @n
+     *  but it doesn't need to be honored. Setting the buffer's length to 0 will        @n
+     *  trigger a UV_ENOBUFS error in the uv_udp_recv_cb or uv_read_cb callback.
+     */
+    virtual void onAlloc(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf) {
+        __EMPTY_BLOCK__
+    }
+
+    /**
+     * Callback called when data was read on a stream.
+     *
+     * @remarks
+     *  nread is > 0 if there is data available or < 0 on error.                @n
+     *  When we've reached EOF, nread will be set to UV_EOF. When nread < 0,    @n
+     *  the buf parameter might not point to a valid buffer;                    @n
+     *  in that case buf.len and buf.base are both set to 0.
+     *
+     * - NOTE: @n
+     *   nread might be 0, which does not indicate an error or EOF. @n
+     *   This is equivalent to EAGAIN or EWOULDBLOCK under read(2).
+     *
+     *  The callee is responsible for stopping closing the stream       @n
+     *  when an error happens by calling uv_read_stop() or uv_close().  @n
+     *  Trying to read from the stream again is undefined.
+     *
+     *  The callee is responsible for freeing the buffer, libuv does not reuse it. @n
+     *  The buffer may be a null buffer (where buf->base=NULL and buf->len=0) on error.
+     */
+    virtual void onRead(uv_stream_t * stream, ssize_t nread, uv_buf_t const * buf) {
+        __EMPTY_BLOCK__
+    }
+
+    /**
+     * Callback called after data was written on a stream. @n
+     * @c status will be 0 in case of success, < 0 otherwise.
+     */
+    virtual void onWrite(uv_write_t * req, int status) {
+        __EMPTY_BLOCK__
+    }
+
+    virtual void onConnect     (uv_connect_t     * req, int status){}
+    virtual void onShutdown    (uv_shutdown_t    * req, int status){}
+    virtual void onConnection  (uv_stream_t      * server, int status){}
+    virtual void onClose       (uv_handle_t      * handle){}
+    virtual void onPoll        (uv_poll_t        * handle, int status, int events){}
+    virtual void onTimer       (uv_timer_t       * handle){}
+    virtual void onAsync       (uv_async_t       * handle){}
+    virtual void onPrepare     (uv_prepare_t     * handle){}
+    virtual void onCheck       (uv_check_t       * handle){}
+    virtual void onIdle        (uv_idle_t        * handle){}
+    virtual void onExit        (uv_process_t     * process, int64_t exit_status, int term_signal){}
+    virtual void onWalk        (uv_handle_t      * handle, void * arg){}
+    virtual void onFs          (uv_fs_t          * req){}
+    virtual void onWork        (uv_work_t        * req){}
+    virtual void onAfterWork   (uv_work_t        * req, int status){}
+    virtual void onGetaddrinfo (uv_getaddrinfo_t * req, int status, struct addrinfo* res){}
+    virtual void onGetnameinfo (uv_getnameinfo_t * req, int status, char const * hostname, char const * service){}
 };
 
 /**

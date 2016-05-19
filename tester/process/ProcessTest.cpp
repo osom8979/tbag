@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/process/Process.hpp>
+#include <libtbag/process/PipeProcess.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/predef.hpp>
 
@@ -25,7 +26,7 @@ constexpr char const * const getProcessTestFileName() noexcept
 
 static int64_t runTestProgram(std::string const & arg1, std::string const & arg2)
 {
-    Process process;
+    PipeProcess process;
     Path exe_dir        = Path(Common::getExeDir());
     Path test_program   = exe_dir / getProcessTestFileName();
 
@@ -34,6 +35,10 @@ static int64_t runTestProgram(std::string const & arg1, std::string const & arg2
     args.push_back(arg2);
 
     process.exe(test_program, args, exe_dir);
+    process.read();
+    process.runDefault();
+    // process.getStandardOutput()
+    // process.getStandardError()
     return process.getExitStatus();
 }
 
