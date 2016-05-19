@@ -94,26 +94,26 @@ public:
     }
 
 public:
-    void onAlloc        (uv_handle_t      * handle, size_t suggested_size, uv_buf_t * buf){}
-    void onRead         (uv_stream_t      * stream, ssize_t nread, uv_buf_t const * buf){}
-    void onWrite        (uv_write_t       * req, int status){}
-    void onConnect      (uv_connect_t     * req, int status){}
-    void onShutdown     (uv_shutdown_t    * req, int status){}
-    void onConnection   (uv_stream_t      * server, int status){}
-    void onClose        (uv_handle_t      * handle){}
-    void onPoll         (uv_poll_t        * handle, int status, int events){}
-    void onTimer        (uv_timer_t       * handle){}
-    void onAsync        (uv_async_t       * handle){}
-    void onPrepare      (uv_prepare_t     * handle){}
-    void onCheck        (uv_check_t       * handle){}
-    void onIdle         (uv_idle_t        * handle){}
-    void onExit         (uv_process_t     * process, int64_t exit_status, int term_signal){}
-    void onWalk         (uv_handle_t      * handle, void * arg){}
-    void onFs           (uv_fs_t          * req){}
-    void onWork         (uv_work_t        * req){}
-    void onAfterWork    (uv_work_t        * req, int status){}
-    void onGetaddrinfo  (uv_getaddrinfo_t * req, int status, struct addrinfo* res){}
-    void onGetnameinfo  (uv_getnameinfo_t * req, int status, char const * hostname, char const * service){}
+    virtual void onAlloc        (uv_handle_t      * handle, size_t suggested_size, uv_buf_t * buf){}
+    virtual void onRead         (uv_stream_t      * stream, ssize_t nread, uv_buf_t const * buf){}
+    virtual void onWrite        (uv_write_t       * req, int status){}
+    virtual void onConnect      (uv_connect_t     * req, int status){}
+    virtual void onShutdown     (uv_shutdown_t    * req, int status){}
+    virtual void onConnection   (uv_stream_t      * server, int status){}
+    virtual void onClose        (uv_handle_t      * handle){}
+    virtual void onPoll         (uv_poll_t        * handle, int status, int events){}
+    virtual void onTimer        (uv_timer_t       * handle){}
+    virtual void onAsync        (uv_async_t       * handle){}
+    virtual void onPrepare      (uv_prepare_t     * handle){}
+    virtual void onCheck        (uv_check_t       * handle){}
+    virtual void onIdle         (uv_idle_t        * handle){}
+    virtual void onExit         (uv_process_t     * process, int64_t exit_status, int term_signal){}
+    virtual void onWalk         (uv_handle_t      * handle, void * arg){}
+    virtual void onFs           (uv_fs_t          * req){}
+    virtual void onWork         (uv_work_t        * req){}
+    virtual void onAfterWork    (uv_work_t        * req, int status){}
+    virtual void onGetaddrinfo  (uv_getaddrinfo_t * req, int status, struct addrinfo* res){}
+    virtual void onGetnameinfo  (uv_getnameinfo_t * req, int status, char const * hostname, char const * service){}
 };
 
 /**
@@ -163,54 +163,56 @@ public:
             }
         }
     }
-
-private:
-#ifndef __STATIC_UV_EVNET_IMPLEMENT
-#define __STATIC_UV_EVNET_IMPLEMENT
-#define __STATIC_UV_EVNET_IMPLEMENT_PARAM0(name, handle_type)                           \
-    static void name(handle_type * h) {                                                 \
-        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);              \
-        if (c != nullptr) { c->name(h); }                                               \
-    }
-#define __STATIC_UV_EVNET_IMPLEMENT_PARAM1(name, handle_type, param1)                   \
-    static void name(handle_type * h, param1 p1) {                                      \
-        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);              \
-        if (c != nullptr) { c->name(h, p1); }                                           \
-    }
-#define __STATIC_UV_EVNET_IMPLEMENT_PARAM2(name, handle_type, param1, param2)           \
-    static void name(handle_type * h, param1 p1, param2 p2) {                           \
-        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);              \
-        if (c != nullptr) { c->name(h, p1, p2); }                                       \
-    }
-#define __STATIC_UV_EVNET_IMPLEMENT_PARAM3(name, handle_type, param1, param2, param3)   \
-    static void name(handle_type * h, param1 p1, param2 p2, param3 p3) {                \
-        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);              \
-        if (c != nullptr) { c->name(h, p1, p2, p3); }                                   \
-    }
-#endif // __STATIC_UV_EVNET_IMPLEMENT
-
-private:
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM2(onAlloc       , uv_handle_t      , size_t,  uv_buf_t       *);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM2(onRead        , uv_stream_t      , ssize_t, uv_buf_t const *);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM1(onWrite       , uv_write_t       , int);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM1(onConnect     , uv_connect_t     , int);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM1(onShutdown    , uv_shutdown_t    , int);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM1(onConnection  , uv_stream_t      , int);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onClose       , uv_handle_t      );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM2(onPoll        , uv_poll_t        , int, int);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onTimer       , uv_timer_t       );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onAsync       , uv_async_t       );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onPrepare     , uv_prepare_t     );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onCheck       , uv_check_t       );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onIdle        , uv_idle_t        );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM2(onExit        , uv_process_t     , int64_t, int);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM1(onWalk        , uv_handle_t      , void *);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onFs          , uv_fs_t          );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM0(onWork        , uv_work_t        );
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM1(onAfterWork   , uv_work_t        , int);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM2(onGetaddrinfo , uv_getaddrinfo_t , int, struct addrinfo *);
-    __STATIC_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo , uv_getnameinfo_t , int, char const *, char const *);
 };
+
+#ifndef __TBAG_UV_EVNET_IMPLEMENT
+#define __TBAG_UV_EVNET_IMPLEMENT
+#define __TBAG_UV_EVNET_IMPLEMENT_PARAM0(name, handle_type)                         \
+    inline void name(handle_type * h) {                                             \
+        using Handler = typename UvEventManager::Handler;                           \
+        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);          \
+        if (c != nullptr) { c->name(h); }                                           \
+    }
+#define __TBAG_UV_EVNET_IMPLEMENT_PARAM1(name, handle_type, param1)                 \
+    inline void name(handle_type * h, param1 p1) {                                  \
+        using Handler = typename UvEventManager::Handler;                           \
+        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);          \
+        if (c != nullptr) { c->name(h, p1); }                                       \
+    }
+#define __TBAG_UV_EVNET_IMPLEMENT_PARAM2(name, handle_type, param1, param2)         \
+    inline void name(handle_type * h, param1 p1, param2 p2) {                       \
+        using Handler = typename UvEventManager::Handler;                           \
+        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);          \
+        if (c != nullptr) { c->name(h, p1, p2); }                                   \
+    }
+#define __TBAG_UV_EVNET_IMPLEMENT_PARAM3(name, handle_type, param1, param2, param3) \
+    inline void name(handle_type * h, param1 p1, param2 p2, param3 p3) {            \
+        using Handler = typename UvEventManager::Handler;                           \
+        Handler * c = UvEventManager::getInstance()->get((uv_handle_t*)h);          \
+        if (c != nullptr) { c->name(h, p1, p2, p3); }                               \
+    }
+#endif // __TBAG_UV_EVNET_IMPLEMENT
+
+__TBAG_UV_EVNET_IMPLEMENT_PARAM2(onAlloc       , uv_handle_t      , size_t,  uv_buf_t       *);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM2(onRead        , uv_stream_t      , ssize_t, uv_buf_t const *);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM1(onWrite       , uv_write_t       , int);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM1(onConnect     , uv_connect_t     , int);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM1(onShutdown    , uv_shutdown_t    , int);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM1(onConnection  , uv_stream_t      , int);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onClose       , uv_handle_t      );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM2(onPoll        , uv_poll_t        , int, int);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onTimer       , uv_timer_t       );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onAsync       , uv_async_t       );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onPrepare     , uv_prepare_t     );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onCheck       , uv_check_t       );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onIdle        , uv_idle_t        );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM2(onExit        , uv_process_t     , int64_t, int);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM1(onWalk        , uv_handle_t      , void *);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onFs          , uv_fs_t          );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM0(onWork        , uv_work_t        );
+__TBAG_UV_EVNET_IMPLEMENT_PARAM1(onAfterWork   , uv_work_t        , int);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM2(onGetaddrinfo , uv_getaddrinfo_t , int, struct addrinfo *);
+__TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo , uv_getnameinfo_t , int, char const *, char const *);
 
 /**
  * UvEventLoop class prototype.
@@ -269,6 +271,11 @@ private:
             uv_run(&this->_loop, UV_RUN_DEFAULT);
         }
         return (uv_loop_close(&this->_loop) == 0 ? true : false);
+    }
+
+public:
+    uv_loop_t * getLoopPointer() noexcept {
+        return &this->_loop;
     }
 
 public:
