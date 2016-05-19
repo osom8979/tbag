@@ -23,6 +23,7 @@
 #include <chrono>
 #include <thread>
 
+// Developer only.
 //#define ENABLE_RENDERING_LOOP_DEBUG_VERBOSE
 
 #if defined(ENABLE_RENDERING_LOOP_DEBUG_VERBOSE)
@@ -47,7 +48,7 @@ namespace loop {
 template <typename Unit = std::chrono::nanoseconds>
 class RenderingLoop : public Noncopyable
 {
-private:
+public:
     using SystemClock = std::chrono::system_clock;
     using TimePoint   = SystemClock::time_point;
     using TimeUnit    = Unit;
@@ -60,8 +61,10 @@ public:
         virtual void onStart (Looper &) { __EMPTY_BLOCK__ }
         virtual void onEnd   (Looper &) { __EMPTY_BLOCK__ }
 
-        virtual bool update  (Looper &) { return true;    }
+        virtual void update  (Looper &) { __EMPTY_BLOCK__ }
         virtual void render  (Looper &) { __EMPTY_BLOCK__ }
+
+        virtual bool isExit  (Looper &) { return false;   }
     };
 
 // User's settings.
@@ -98,7 +101,7 @@ public:
     int run(bool enable_sleep_step = true) {
         this->init();
         this->_callback.onStart(*this);
-        this->loop();
+        this->loop(enable_sleep_step);
         this->_callback.onEnd(*this);
         return _result_code;
     }
@@ -106,7 +109,7 @@ public:
 private:
     void init() {
         this->_pre_start = SystemClock::now();
-        this->_now_start = SystemClock::now();
+        this->_now_start = this->_pre_start;
         this->_duration  = TimeUnit(0);
         this->_time_lag  = TimeUnit(0);
     }
@@ -126,17 +129,26 @@ private:
      *     }
      *   @endcode
      */
-    void loop(bool enable_sleep_step = true) {
+    void loop(bool enable_sleep_step) {
         TimeUnit sleep_time;
 
         while (!_exit.load()) {
+            _pre_start = _now_start;
             _now_start = SystemClock::now();
             _duration  = _now_start - _pre_start;
-            _pre_start = _now_start;
             _time_lag += _duration; // 직전 루프의 경과시간을 TIME_LAG에 더해 준다.
                                     // 1루프당 1TIME_STEP을 초과하였는지 확인할 수 있다.
                                     // TIME_LAG는 항상 양수를 보장받아야 한다.
 
+            __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
+                    "START LOOP: PRE[%09lld] NOW[%09lld] LAG[%09lld] DUR[%09lld] STEP[%09lld]\n"
+                    , _pre_start.time_since_epoch().count()
+                    , _now_start.time_since_epoch().count()
+                    , _time_lag.count()
+                    , _duration.count()
+                    , _time_step.count());
+
+            assert(_pre_start.time_since_epoch().count() <= _now_start.time_since_epoch().count());
             assert(_duration.count() >= 0);
             assert(_time_lag.count() >= 0);
 
@@ -147,21 +159,18 @@ private:
                 _time_lag -= _time_step;
 
                 __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
-                        "UPDATE: LAG[%lld] DUR[%lld]\n"
+                        "UPDATE LOOP: LAG[%09lld] DUR[%09lld]\n"
                         , _time_lag.count()
                         , _duration.count());
 
-                // 만약 이벤트 확보를 위한 콜백이 필요하다면 UPDATE 콜백에 추가한다.
-                if (!_callback.update(*this)) {
-                    _exit.store(true);
-                    break;
-                }
+                // 만약 이벤트 확보를 위한 EVENT 콜백이 필요하다면 UPDATE 콜백에 추가한다.
+                _callback.update(*this);
             }
 
             assert(_time_lag.count() >= 0);
 
             __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
-                    "RENDER: LAG[%lld] DURA[%lld]\n"
+                    "RENDER: LAG[%09lld] DURA[%09lld]\n"
                     , _time_lag.count()
                     , _duration.count());
 
@@ -172,9 +181,18 @@ private:
                 // 강제로 1TIME_STEP을 맞추기 위한 SLEEP.
                 sleep_time = SystemClock::now() - _now_start;
                 if (sleep_time < _time_step) {
+
+                    __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
+                            "SLEEP TIME: %09lld\n", sleep_time.count());
+
                     // std::this_thread::yield();
                     std::this_thread::sleep_for(_time_step - sleep_time);
                 }
+            }
+
+            if (_callback.isExit(*this) == true) {
+                _exit.store(true);
+                break;
             }
         }
     }

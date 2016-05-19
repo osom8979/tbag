@@ -11,18 +11,27 @@
 using namespace libtbag;
 using namespace libtbag::loop;
 
+static int const _FPS           = 10;
+static int const _TEST_MILLISEC = 100;
+static int const _TIME_STEP     = _TEST_MILLISEC / _FPS;
+
+static int const _SLOW_SLEEP_TIME_MILLISEC = 20;
+static int const _FAST_SLEEP_TIME_MILLISEC =  1;
+
+static int const _EPSILON = (_SLOW_SLEEP_TIME_MILLISEC / _TIME_STEP) + 1;
+static int const _MIN_FPS = _FPS - _EPSILON;
+static int const _MAX_FPS = _FPS + _EPSILON;
+
+
 class RenderingCallback : public RenderingLoop<>::Callback
 {
 public:
     using Looper = typename RenderingLoop<>::Callback::Looper;
 
 public:
-    static constexpr int getTestTime() noexcept {
-        return 100;
-    }
-
-public:
     std::chrono::system_clock::time_point start_time;
+    std::chrono::nanoseconds test_time;
+
     int sleep_time = 0;
 
     int  start_count = 0;
@@ -32,33 +41,40 @@ public:
 
 public:
     RenderingCallback(int time) {
+        using namespace std::chrono;
         this->sleep_time = time;
+        this->test_time  = duration_cast<nanoseconds>(milliseconds(_TEST_MILLISEC));
     }
 
     ~RenderingCallback() {
+        __EMPTY_BLOCK__
     }
 
 public:
     virtual void onStart(Looper &) override {
-        ++start_count;
         start_time = std::chrono::system_clock::now();
+        ++start_count;
     }
 
     virtual void onEnd(Looper &) override {
         ++end_count;
     }
 
-    virtual bool update(Looper &) override {
+    virtual void update(Looper &) override {
         ++update_count;
-        if (std::chrono::system_clock::now() - start_time >= std::chrono::milliseconds(getTestTime())) {
-            return false;
-        }
-        return true;
     }
 
     virtual void render(Looper &) override {
         ++render_count;
         std::this_thread::sleep_for(std::chrono::milliseconds(this->sleep_time));
+    }
+
+    virtual bool isExit(Looper &) override {
+        using namespace std::chrono;
+        if (system_clock::now() - start_time >= test_time) {
+            return true;
+        }
+        return false;
     }
 };
 
@@ -79,51 +95,27 @@ TEST(RenderingLoopTest, CoverageOnly)
 
 TEST(RenderingLoopTest, SlowMachine)
 {
-    int const FPS = 10;
-    int const EPSILON = 1;
-
-    int const MIN_FPS = FPS - EPSILON;
-    int const MAX_FPS = FPS + EPSILON;
-
-    int const TIME_STEP = RenderingCallback::getTestTime() / FPS;
-    int const SLEEP_TIME = 20;
-
-    RenderingCallback callback(SLEEP_TIME);
-    RenderingLoop<> loop(callback, std::chrono::milliseconds(TIME_STEP));
+    RenderingCallback callback(_SLOW_SLEEP_TIME_MILLISEC);
+    RenderingLoop<> loop(callback, std::chrono::milliseconds(_TIME_STEP));
     loop.run();
 
-    ASSERT_EQ(callback.start_count, 1);
-    ASSERT_EQ(callback.end_count, 1);
-
-    ASSERT_GE(callback.update_count, MIN_FPS);
-    ASSERT_LE(callback.update_count, MAX_FPS);
-
-    ASSERT_LT(callback.render_count, FPS);
+    ASSERT_EQ(callback.start_count,  1);
+    ASSERT_EQ(callback.end_count,    1);
+    ASSERT_GE(callback.update_count, _MIN_FPS);
+    ASSERT_LE(callback.update_count, _MAX_FPS);
+    ASSERT_LE(callback.render_count, _FPS);
 }
 
 TEST(RenderingLoopTest, FastMachine)
 {
-    // TODO: Some time, test fails.
-
-    int const FPS = 10;
-    int const EPSILON = 1;
-
-    int const MIN_FPS = FPS - EPSILON;
-    int const MAX_FPS = FPS + EPSILON;
-
-    int const TIME_STEP = RenderingCallback::getTestTime() / FPS;
-    int const SLEEP_TIME = 1;
-
-    RenderingCallback callback(SLEEP_TIME);
-    RenderingLoop<> loop(callback, std::chrono::milliseconds(TIME_STEP));
+    RenderingCallback callback(_FAST_SLEEP_TIME_MILLISEC);
+    RenderingLoop<> loop(callback, std::chrono::milliseconds(_TIME_STEP));
     loop.run();
 
-    ASSERT_EQ(callback.start_count, 1);
-    ASSERT_EQ(callback.end_count, 1);
-
-    ASSERT_GE(callback.update_count, MIN_FPS);
-    ASSERT_LE(callback.update_count, MAX_FPS);
-
-    ASSERT_GE(callback.render_count, FPS);
+    ASSERT_EQ(callback.start_count,  1);
+    ASSERT_EQ(callback.end_count,    1);
+    ASSERT_GE(callback.update_count, _MIN_FPS);
+    ASSERT_LE(callback.update_count, _MAX_FPS);
+    ASSERT_LE(callback.render_count, _FPS);
 }
 
