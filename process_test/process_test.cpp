@@ -10,6 +10,8 @@
 #include <cstring>
 #include <string>
 
+static const char * const OUTPUT_FILE_NAME = "__process_test_file.txt";
+
 template <typename OutputStream>
 void runOutput(OutputStream & ostream, char const * argument = nullptr)
 {
@@ -37,20 +39,23 @@ int main(int argc, char ** argv)
         } else {
             runOutput(std::cout);
         }
+
     } else if (strcmp(argv[1], "err") == 0) {
         if (argc >= 3) {
             runOutput(std::cerr, argv[2]);
         } else {
             runOutput(std::cerr);
         }
+
     } else if (strcmp(argv[1], "file") == 0) {
-        std::ofstream file("__process_test_file");
+        std::ofstream file(OUTPUT_FILE_NAME);
         if (argc >= 3) {
             runOutput(file, argv[2]);
         } else {
             runOutput(file);
         }
         file.close();
+
     } else {
         std::cout << "Unknown command.\n";
         return 1;

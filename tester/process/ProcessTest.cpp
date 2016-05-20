@@ -75,7 +75,7 @@ TEST(PipeProcessTest, stderr)
 
 TEST(PipeProcessTest, file)
 {
-    filesystem::Path const TEST_FILE("__process_test_file");
+    filesystem::Path const TEST_FILE("__process_test_file.txt");
     if (filesystem::Common::existsFile(TEST_FILE)) {
         filesystem::Common::remove(TEST_FILE);
     }
