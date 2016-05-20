@@ -20,6 +20,8 @@
 #include <vector>
 #include <sstream>
 
+#include <iostream>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -74,24 +76,28 @@ private:
     void initPipe() {
         // The ipc argument is a boolean to indicate
         // if this pipe will be used for handle passing between processes.
-        int const ENABLE_IPC = 0; // enable == 1, disable == 0.
+        int const ENABLE_IPC  = 1;
+        int const DISABLE_IPC = 0;
 
-        // uv_pipe_init(this->getLoopPointer(), &_pipe_stdin , ENABLE_IPC);
-        uv_pipe_init(this->getLoopPointer(), &_pipe_stdout, ENABLE_IPC);
-        uv_pipe_init(this->getLoopPointer(), &_pipe_stderr, ENABLE_IPC);
+        REMOVE_UNUSED_VARIABLE(ENABLE_IPC);
+        REMOVE_UNUSED_VARIABLE(DISABLE_IPC);
 
-        uv_stdio_flags const PIPE_FLAGS =
+        uv_pipe_init(this->getLoopPointer(), &_pipe_stdin , DISABLE_IPC);
+        uv_pipe_init(this->getLoopPointer(), &_pipe_stdout, DISABLE_IPC);
+        uv_pipe_init(this->getLoopPointer(), &_pipe_stderr, DISABLE_IPC);
+
+        uv_stdio_flags const READ_PIPE_FLAGS =
+                static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_READABLE_PIPE);
+        uv_stdio_flags const WRITE_PIPE_FLAGS =
                 static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
 
-        //this->_stdios[STANDARD_INPUT_FD ].flags = PIPE_FLAGS;
-        //this->_stdios[STANDARD_INPUT_FD ].data.stream = (uv_stream_t*)&this->_pipe_stdin;
-        this->_stdios[STANDARD_INPUT_FD ].flags = UV_IGNORE;
-        this->_stdios[STANDARD_INPUT_FD ].data.stream = nullptr;
+        this->_stdios[STANDARD_INPUT_FD].flags = READ_PIPE_FLAGS;
+        this->_stdios[STANDARD_INPUT_FD].data.stream = (uv_stream_t*)&this->_pipe_stdin;
 
-        this->_stdios[STANDARD_OUTPUT_FD].flags = PIPE_FLAGS;
+        this->_stdios[STANDARD_OUTPUT_FD].flags = WRITE_PIPE_FLAGS;
         this->_stdios[STANDARD_OUTPUT_FD].data.stream = (uv_stream_t*)&this->_pipe_stdout;
 
-        this->_stdios[STANDARD_ERROR_FD ].flags = PIPE_FLAGS;
+        this->_stdios[STANDARD_ERROR_FD ].flags = WRITE_PIPE_FLAGS;
         this->_stdios[STANDARD_ERROR_FD ].data.stream = (uv_stream_t*)&this->_pipe_stderr;
 
         uv_process_options_t & options = this->atOptions();
@@ -140,6 +146,11 @@ public:
 
 public:
     virtual void onWrite(uv_write_t * req, int status) override {
+        if (status == 0) {
+            // SUCCESS.
+        } else {
+            // ERROR.
+        }
     }
 
 public:
@@ -156,9 +167,49 @@ public:
         return (error_code == 0 ? true : false);
     }
 
+private:
+    std::string _standard_input_cache;
+
+public:
+    void setStandardInput(std::string const & input) {
+        this->_standard_input_cache = input;
+    }
+
+private:
+    std::vector<char> _buffer_stdin;
+    uv_buf_t          _buffer_info_stdin;
+    uv_write_t        _write_stdin;
+
+private:
+    bool write(std::string const & write) {
+        this->_buffer_stdin.clear();
+        this->_buffer_stdin.insert(this->_buffer_stdin.begin(), write.begin(), write.end());
+
+        this->_buffer_info_stdin.base = &this->_buffer_stdin[0];
+        this->_buffer_info_stdin.len  =  this->_buffer_stdin.size();
+
+        int error_code = 0;
+        REMOVE_UNUSED_VARIABLE(error_code);
+
+        error_code = uv_write(&this->_write_stdin
+                            , (uv_stream_t*) &this->_pipe_stdin
+                            , &this->_buffer_info_stdin
+                            , 1
+                            , &loop::uv_event::onWrite);
+
+        // std::cout << uv_err_name(error_code) << ": "
+        //           << uv_strerror(error_code) << std::endl;
+
+        return (error_code == 0 ? true : false);
+    }
+
+    bool write() {
+        return this->write(this->_standard_input_cache);
+    }
+
 public:
     virtual bool exe() override {
-        if (this->spawn() && this->read()) {
+        if (this->spawn() && this->write() && this->read()) {
             return this->runDefault();
         }
         return false;
