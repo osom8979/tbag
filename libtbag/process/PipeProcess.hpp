@@ -147,13 +147,21 @@ public:
         int error_code = 0;
         REMOVE_UNUSED_VARIABLE(error_code);
 
-        error_code |= uv_read_start((uv_stream_t*) &this->_pipe_stdout, &loop::onAlloc, &loop::onRead);
+        error_code |= uv_read_start((uv_stream_t*) &this->_pipe_stdout, &loop::uv_event::onAlloc, &loop::uv_event::onRead);
         assert(error_code == 0);
 
-        error_code |= uv_read_start((uv_stream_t*) &this->_pipe_stderr, &loop::onAlloc, &loop::onRead);
+        error_code |= uv_read_start((uv_stream_t*) &this->_pipe_stderr, &loop::uv_event::onAlloc, &loop::uv_event::onRead);
         assert(error_code == 0);
 
         return (error_code == 0 ? true : false);
+    }
+
+public:
+    virtual bool exe() override {
+        if (this->spawn() && this->read()) {
+            return this->runDefault();
+        }
+        return false;
     }
 
 public:

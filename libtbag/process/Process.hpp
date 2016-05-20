@@ -66,7 +66,7 @@ private:
 public:
     Process() : _exit_status(UNKNOWN_EXIT_CODE), _terminate_signal(UNKNOWN_TERMINATE_SIGNAL) {
         memset((void*)&this->_options, 0x00, sizeof(this->_options));
-        this->_options.exit_cb = &loop::onExit;
+        this->_options.exit_cb = &loop::uv_event::onExit;
         this->addHandle((uv_handle_t*)&this->_process);
     }
 
@@ -146,19 +146,16 @@ public:
     }
 
 public:
-    bool exe() {
+    bool spawn() {
         return (uv_spawn(this->getLoopPointer(), &this->_process, &this->_options) == 0 ? true : false);
     }
 
-    bool exe(std::string              const & file
-           , std::vector<std::string> const & args
-           , std::string              const & work
-           , unsigned int flags = 0) {
-        this->setExecuteFile(file);
-        this->setArguments(args);
-        this->setWorkingDirectory(work);
-        this->setFlags(flags);
-        return exe();
+public:
+    virtual bool exe() {
+        if (this->spawn()) {
+            return this->runDefault();
+        }
+        return false;
     }
 
 public:

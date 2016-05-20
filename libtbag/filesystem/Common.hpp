@@ -18,6 +18,8 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
+#include <cstdio>
+
 #include <string>
 #include <vector>
 #include <set>
@@ -159,7 +161,7 @@ public:
         return (error_code == 0 ? true : false);
     }
 
-    static bool isExistsFile(std::string const & path) {
+    static bool existsFile(std::string const & path) {
         return isAccessFile(path, ACCESS_MODE_EXISTS);
     }
 
@@ -252,6 +254,10 @@ public:
         uv_fs_req_cleanup(&request);
 
         return (error_code == 0 ? true : false);
+    }
+
+    static bool remove(std::string const & path) {
+        return (::remove(path.c_str()) == 0 ? true : false);
     }
 };
 

@@ -234,6 +234,14 @@ public:
     }
 #endif // __TBAG_UV_EVNET_IMPLEMENT
 
+namespace uv_event {
+
+/**
+ * @defgroup __DOXYGEN_GROUP__UV_EVENT_FUNCTION__ libuv event function.
+ * @brief libuv event function.
+ * @{
+ */
+
 __TBAG_UV_EVNET_IMPLEMENT_PARAM2(onAlloc       , uv_handle_t      , size_t,  uv_buf_t       *);
 __TBAG_UV_EVNET_IMPLEMENT_PARAM2(onRead        , uv_stream_t      , ssize_t, uv_buf_t const *);
 __TBAG_UV_EVNET_IMPLEMENT_PARAM1(onWrite       , uv_write_t       , int);
@@ -254,6 +262,12 @@ __TBAG_UV_EVNET_IMPLEMENT_PARAM0(onWork        , uv_work_t        );
 __TBAG_UV_EVNET_IMPLEMENT_PARAM1(onAfterWork   , uv_work_t        , int);
 __TBAG_UV_EVNET_IMPLEMENT_PARAM2(onGetaddrinfo , uv_getaddrinfo_t , int, struct addrinfo *);
 __TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo , uv_getnameinfo_t , int, char const *, char const *);
+
+/**
+ * @}
+ */
+
+} // namespace uv_event
 
 /**
  * UvEventLoop class prototype.
