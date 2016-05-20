@@ -20,8 +20,6 @@
 #include <vector>
 #include <sstream>
 
-#include <iostream>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
