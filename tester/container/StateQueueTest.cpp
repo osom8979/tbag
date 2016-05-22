@@ -23,6 +23,6 @@ TEST(StateQueueTest, Default)
     QueueDemo q3_move = QueueDemo();
     QueueDemo q4 = std::move(q3_move);
 
-    ASSERT_EQ(QueueDemo::QUEUE_COUNT, 3);
+    ASSERT_EQ(QueueDemo::getStateCount(), 3);
 }
 

@@ -33,21 +33,23 @@ namespace container {
  * @date   2016-05-21
  */
 template <typename     Type
-        , std::size_t  Count
+        , std::size_t  StateCount
         , typename     Queue = std::queue<Type>
         , typename     Mutex = std::mutex >
 class StateQueue
 {
 public:
-    static std::size_t const QUEUE_COUNT;
-
-public:
     using BaseType   = Type;
     using QueueType  = Queue;
-    using QueueArray = std::array<Queue, QUEUE_COUNT>;
+    using QueueArray = std::array<Queue, StateCount>;
 
     using MutexType  = Mutex;
-    using MutexArray = std::array<Mutex, QUEUE_COUNT>;
+    using MutexArray = std::array<Mutex, StateCount>;
+
+public:
+    static constexpr std::size_t getStateCount() noexcept {
+        return StateCount;
+    }
 
 private:
     QueueArray _queues;
@@ -92,9 +94,6 @@ public:
         }
     }
 };
-
-template <typename Type, std::size_t Count, typename Queue, typename Mutex>
-std::size_t const StateQueue<Type, Count, Queue, Mutex>::QUEUE_COUNT = Count;
 
 } // namespace container
 
