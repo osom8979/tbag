@@ -21,8 +21,10 @@ set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
 
 # Curses setting.
 if (USE_ncurses)
-    list (APPEND _project_definitions  -DUSE_NCURSES)
-    list (APPEND _project_include_dirs ${CURSES_INCLUDE_DIR})
-    list (APPEND _project_ldflags      ${CURSES_LIBRARIES})
+    list  (APPEND _project_definitions  -DUSE_NCURSES)
+    #list (APPEND _project_include_dirs ${CURSES_INCLUDE_DIR})
+    #list (APPEND _project_ldflags      ${CURSES_LIBRARIES})
+    list  (APPEND _project_include_dirs ${NCURSES_INCLUDE_DIRS})
+    list  (APPEND _project_ldflags      ${NCURSES_LIBRARIES})
 endif ()
 

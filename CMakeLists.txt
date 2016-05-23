@@ -71,7 +71,7 @@ test_find_package  (protobuf  Protobuf)
 test_find_package  (spdlog    Spdlog)
 test_find_package  (libuv     UV)
 test_find_package  (tinyxml2  TinyXML2)
-test_find_package  (ncurses   Curses)
+test_find_package  (ncurses   NCurses)
 test_find_package  (sqlite3   SQLite3)
 
 # Continuous Integration.
