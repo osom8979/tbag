@@ -3,6 +3,9 @@
  * @brief  Singleton class prototype.
  * @author zer0
  * @date   2016-04-04
+ *
+ * @remarsk
+ *  Singleton with double-checked locking pattern.
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_PATTERN_SINGLETON_HPP__
@@ -28,6 +31,26 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace pattern {
+
+#ifndef SINGLETON_WITH_DOUBLE_CHECKED_LOCKING_PATTERN
+#define SINGLETON_WITH_DOUBLE_CHECKED_LOCKING_PATTERN
+#define SINGLETON_WITH_DOUBLE_CHECKED_LOCKING_PATTERN_OPEN(__result_type, __atomic_instance, __mutex, __temp) \
+    __result_type * __temp = __atomic_instance.load();   \
+    if (__temp == nullptr) {                             \
+        std::lock_guard<std::mutex> guard(__mutex);      \
+        __temp = __atomic_instance.load();               \
+        if (__temp == nullptr) {                         \
+            __temp = new (std::nothrow) __result_type(); \
+            __atomic_instance.store(__temp);
+#define SINGLETON_WITH_DOUBLE_CHECKED_LOCKING_PATTERN_CLOSE(__temp) \
+        }                                                \
+    }                                                    \
+    return __temp;
+#define __SINGLETON_IMPL_OPEN(__r, __i, __m, __t) \
+    SINGLETON_WITH_DOUBLE_CHECKED_LOCKING_PATTERN_OPEN(__r, __i, __m, __t)
+#define __SINGLETON_IMPL_CLOSE(__t) \
+    SINGLETON_WITH_DOUBLE_CHECKED_LOCKING_PATTERN_CLOSE(__t)
+#endif // SINGLETON_WITH_DOUBLE_CHECKED_LOCKING_PATTERN_OPEN
 
 /**
  * Don't use @c std::atexit function.
@@ -113,21 +136,16 @@ public:
 
 public:
     static SingletonLifeManager * getInstance() {
-        SingletonLifeManager * temp = Property::_instance.load();
-        if (temp == nullptr) {
-            std::lock_guard<std::mutex> guard(_instance_lock);
-            temp = _instance.load();
-            if (temp == nullptr) {
-                temp = new SingletonLifeManager();
-                _instance.store(temp);
-
-                if (!isManualRelease()) {
-                    // Register release method.
-                    std::atexit(&SingletonLifeManager::releaseInstance);
-                }
+        // @formatter:off
+        __SINGLETON_IMPL_OPEN(SingletonLifeManager, Property::_instance, Property::_instance_lock, temp);
+        {
+            if (!isManualRelease()) {
+                // Register release method.
+                std::atexit(&SingletonLifeManager::releaseInstance);
             }
         }
-        return temp;
+        __SINGLETON_IMPL_CLOSE(temp);
+        // @formatter:on
     }
 };
 
@@ -171,20 +189,16 @@ private:
 
 public:
     static BaseType * getInstance() {
-        BaseType * temp = Property::_instance.load();
-        if (temp == nullptr) {
-            std::lock_guard<std::mutex> guard(Property::_instance_lock);
-            temp = Property::_instance.load();
-            if (temp == nullptr) {
-                temp = new BaseType();
-                Property::_instance.store(temp);
-                using namespace libtbag::pattern;
-                SingletonLifeManager::getInstance()->add([](){
-                        Singleton<BaseType>::releaseInstance();
-                    });
-            }
+        // @formatter:off
+        __SINGLETON_IMPL_OPEN(BaseType, Property::_instance, Property::_instance_lock, temp);
+        {
+            using namespace libtbag::pattern;
+            SingletonLifeManager::getInstance()->add([](){
+                Singleton<BaseType>::releaseInstance();
+            });
         }
-        return temp;
+        __SINGLETON_IMPL_CLOSE(temp);
+        // @formatter:on
     }
 };
 
