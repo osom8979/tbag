@@ -36,11 +36,7 @@ public:
     static constexpr bool const   LOCKED =  true;
     static constexpr bool const UNLOCKED = false;
 
-#if defined(TEST_LIBTBAG_SPINLOCK)
-public:
-#else
 private:
-#endif
     std::atomic_bool _state;
 
 public:
@@ -53,10 +49,6 @@ public:
         while (this->_state.exchange(LOCKED, std::memory_order_acquire) == LOCKED) {
             // BUSY WAIT.
         }
-    }
-
-    bool try_lock() noexcept {
-        return !(this->_state.exchange(LOCKED, std::memory_order_acquire) == LOCKED);
     }
 
     void unlock() volatile noexcept {
