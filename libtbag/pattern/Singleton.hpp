@@ -4,7 +4,7 @@
  * @author zer0
  * @date   2016-04-04
  *
- * @remarsk
+ * @remarks
  *  Singleton with double-checked locking pattern.
  */
 

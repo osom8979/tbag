@@ -52,7 +52,7 @@ public:
      *
      * @translate{ko, 보간된 값을 반환하는 가상함수.}
      *
-     * @param millisec
+     * @param rep
      *          [in] Current time.
      *
      * @return Interpolated value.
