@@ -97,17 +97,27 @@ configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 # Properties.
 # -----------
 
-#set (BUILD_SHARED_LIBS                ON) # User's variable.
-#set (CMAKE_MACOSX_RPATH                1) # CMP0042
-#set (CMAKE_BUILD_TYPE            Release) # User's variable.
-set  (CMAKE_POSITION_INDEPENDENT_CODE  ON) # -fPIC
+#set (BUILD_SHARED_LIBS        ON) # User's variable.
+#set (CMAKE_MACOSX_RPATH        1) # CMP0042
+#set (CMAKE_BUILD_TYPE    Release) # User's variable.
+
+# Position independent code settings.
+if (CMAKE_VERSION VERSION_LESS "3.0.2")
+    set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+else ()
+    set (CMAKE_POSITION_INDEPENDENT_CODE  ON) # -fPIC
+endif ()
 
 # C++11 settings.
 if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CUDA_FOUND)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
     else ()
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif ()
+    if (CUDA_FOUND)
+        set (CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
     endif ()
 else ()
     set (CMAKE_CXX_EXTENSIONS  OFF) # Change: -std=gnu++11 -> -std=c++11
