@@ -1,28 +1,30 @@
 ## Find library module.
 
+include (TbagFindHeaders)
+
 #! Find headers function.
 #
 # \param _header_prefix  [out] Variable result prefix.
 # \param _search_paths   [in]  Search directories.
 # \param _headers        [in]  Find header files.
-function (find_headers _header_prefix _search_paths _headers)
-    set (${_header_prefix})
-    set (_index 0)
-
-    foreach (_cursor ${_headers})
-        set (_temp_name ${_header_prefix}_${_index})
-        find_path (${_temp_name}
-            NAMES ${_cursor}
-            PATHS ${_search_paths})
-        math (EXPR _index "${_index} + 1")
-
-        if (IS_DIRECTORY "${${_temp_name}}")
-            list (APPEND ${_header_prefix} "${${_temp_name}}")
-        endif ()
-    endforeach ()
-
-    set (${_header_prefix} ${${_header_prefix}} PARENT_SCOPE)
-endfunction ()
+#function (find_headers _header_prefix _search_paths _headers)
+#    set (${_header_prefix})
+#    set (_index 0)
+#
+#    foreach (_cursor ${_headers})
+#        set (_temp_name ${_header_prefix}_${_index})
+#        find_path (${_temp_name}
+#            NAMES ${_cursor}
+#            PATHS ${_search_paths})
+#        math (EXPR _index "${_index} + 1")
+#
+#        if (IS_DIRECTORY "${${_temp_name}}")
+#            list (APPEND ${_header_prefix} "${${_temp_name}}")
+#        endif ()
+#    endforeach ()
+#
+#    set (${_header_prefix} ${${_header_prefix}} PARENT_SCOPE)
+#endfunction ()
 
 #! Find libraries function.
 #
