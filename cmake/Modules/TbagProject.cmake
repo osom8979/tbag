@@ -3,82 +3,42 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
+include (TbagProjectCommon)
 include (TbagStrings)
-
-set (__tbag_project_file_prefix  "project")
-set (__tbag_project_file_suffix  "cmake")
-
-set (__tbag_project_library_prefix     "lib")
-set (__tbag_project_executable_prefix  "")
-
-set (__tbag_project_file_name    "${__tbag_project_file_prefix}.${__tbag_project_file_suffix}")
-set (__tbag_project_file_regex   "[^/]+/${__tbag_project_file_prefix}\\.${__tbag_project_file_suffix}")
 
 #/// Find project list.
 #///
-#/// @param _lib_projs  [out] value name of library project list.
-#/// @param _exe_projs  [out] value name of executable project list.
+#/// @param __lib_projs  [out] value name of library project list.
+#/// @param __exe_projs  [out] value name of executable project list.
 #/// @param __root_dir   [in]  Find root directory.
-function (find_project _lib_projs _exe_projs __root_dir)
-    set (__tbag_project_library_glob    "^${__tbag_project_library_prefix}${__tbag_project_file_regex}$")
-    set (__tbag_project_executable_glob "^${__tbag_project_executable_prefix}${__tbag_project_file_regex}$")
+function (find_project __lib_projs __exe_projs __root_dir)
+    set (__tbag_project_library_glob    "^${TBAG_PROJECT_LIBRARY_PREFIX}${TBAG_PROJECT_FILE_REGEX}$")
+    set (__tbag_project_executable_glob "^${TBAG_PROJECT_EXECUTABLE_PREFIX}${TBAG_PROJECT_FILE_REGEX}$")
 
     # Find all project.
-    file (GLOB_RECURSE _find_project_list RELATIVE "${__root_dir}" "${__tbag_project_file_name}")
+    file (GLOB_RECURSE __find_project_list RELATIVE "${__root_dir}" "${TBAG_PROJECT_FILE_NAME}")
 
     # Find library project.
-    tbag_list_regex (_find_lib_proj "${__tbag_project_library_glob}" "${_find_project_list}")
-    list (LENGTH _find_lib_proj _find_lib_proj_length)
+    tbag_list_regex (__find_lib_proj "${__tbag_project_library_glob}" "${__find_project_list}")
+    list (LENGTH __find_lib_proj __find_lib_proj_length)
 
     # Remove library project in the all project.
-    if (${_find_lib_proj_length} GREATER 0)
-        list (REMOVE_ITEM _find_project_list ${_find_lib_proj})
+    if (${__find_lib_proj_length} GREATER 0)
+        list (REMOVE_ITEM __find_project_list ${__find_lib_proj})
     endif ()
 
     # Find executable project.
-    tbag_list_regex (_find_exe_proj "${__tbag_project_executable_glob}" "${_find_project_list}")
+    tbag_list_regex (__find_exe_proj "${__tbag_project_executable_glob}" "${__find_project_list}")
 
-    string (REPLACE "/${__tbag_project_file_name}" "" ${_lib_projs}  "${_find_lib_proj}")
-    string (REPLACE "/${__tbag_project_file_name}" "" ${_exe_projs}  "${_find_exe_proj}")
+    string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__lib_projs}  "${__find_lib_proj}")
+    string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__exe_projs}  "${__find_exe_proj}")
 
     unset (__tbag_project_library_glob)
     unset (__tbag_project_executable_glob)
 
     # result:
-    set (${_lib_projs}  ${${_lib_projs}}  PARENT_SCOPE)
-    set (${_exe_projs}  ${${_exe_projs}}  PARENT_SCOPE)
-endfunction ()
-
-set (BUILD_PROJECT_TYPE_LIB  "${__tbag_project_library_prefix}")
-set (BUILD_PROJECT_TYPE_TEST "${__tbag_project_test_prefix}")
-set (BUILD_PROJECT_TYPE_EXE  "${__tbag_project_executable_prefix}")
-
-#! Check the project type.
-#
-# \param _value             [out] value name of result type string.
-# \param _project_dir_name  [in]  project directory name.
-function (get_project_type _value _project_dir_name)
-    if (${_project_dir_name} MATCHES "^${__tbag_project_library_prefix}.+")
-        set (${_value} "${BUILD_PROJECT_TYPE_LIB}" PARENT_SCOPE)
-    elseif (${_project_dir_name} MATCHES "^${__tbag_project_test_prefix}.+")
-        set (${_value} "${BUILD_PROJECT_TYPE_TEST}" PARENT_SCOPE)
-    else ()
-        set (${_value} "${BUILD_PROJECT_TYPE_EXE}" PARENT_SCOPE)
-    endif ()
-endfunction()
-
-#! Check the project type.
-#
-# \param _value             [out] value name of result type string.
-# \param _type              [in]  project type name.
-# \param _project_dir_name  [in]  project directory name.
-function (get_project_name _value _type _project_dir_name)
-    if ("${_type}" STREQUAL "${BUILD_PROJECT_TYPE_LIB}")
-        string (REPLACE "${BUILD_PROJECT_TYPE_LIB}" "" _temp_name "${_project_dir_name}")
-        set (${_value} "${_temp_name}" PARENT_SCOPE)
-    else ()
-        set (${_value} "${_project_dir_name}" PARENT_SCOPE)
-    endif ()
+    set (${__lib_projs}  ${${__lib_projs}}  PARENT_SCOPE)
+    set (${__exe_projs}  ${${__exe_projs}}  PARENT_SCOPE)
 endfunction ()
 
 macro (tbag_project_clear_properties)
@@ -98,11 +58,8 @@ endmacro ()
 
 macro (tbag_project_update_const __project_dir_name)
     set (TBAG_PROJECT_CONST_DIR_NAME "${__project_dir_name}")
-    get_project_type (TBAG_PROJECT_CONST_TYPE
-                      "${__project_dir_name}")
-    get_project_name (TBAG_PROJECT_CONST_NAME
-                      "${TBAG_PROJECT_CONST_TYPE}"
-                      "${__project_dir_name}")
+    tbag_get_project_type (TBAG_PROJECT_CONST_TYPE "${__project_dir_name}")
+    tbag_get_project_name (TBAG_PROJECT_CONST_NAME "${__project_dir_name}")
 endmacro ()
 
 #/// Assign soversion property.
@@ -232,7 +189,7 @@ function (default_build __libs __exes __root_dir)
         tbag_project_update_const ("${__cursor}")
 
         project (${TBAG_PROJECT_CONST_NAME})
-        include ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}/${__tbag_project_file_name}")
+        include ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}/${TBAG_PROJECT_FILE_NAME}")
 
         tbag_project_update_objects ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}")
         tbag_project_register_object_of_library ()
@@ -245,7 +202,7 @@ function (default_build __libs __exes __root_dir)
         tbag_project_update_const ("${__cursor}")
 
         project (${TBAG_PROJECT_CONST_NAME})
-        include ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}/${__tbag_project_file_name}")
+        include ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}/${TBAG_PROJECT_FILE_NAME}")
 
         tbag_project_update_objects ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}")
         tbag_project_register_object_of_executable ()
