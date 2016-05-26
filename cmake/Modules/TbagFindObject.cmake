@@ -3,20 +3,6 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
-#! Insert whole-archive flags.
-#
-# \param _value [out] value name of output list.
-macro (insert_whole_archive_flags _value)
-    #message ("_value: ${_value} (${${_value}})")
-
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        list (INSERT ${_value} 0 "-Wl,-force_load")
-    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        list (INSERT ${_value} 0 "-Wl,--whole-archive")
-        list (APPEND ${_value} "-Wl,--no-whole-archive")
-    endif ()
-endmacro ()
-
 #! Use Doxygen to create the HTML based API documentation.
 #
 # \param _config [in] Doxyfile path.
@@ -106,7 +92,6 @@ function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflag
     set (${_include_dirs})
     set (${_cxxflags})
     set (${_ldflags})
-    set (_static_libs) # Deprecated.
 
     # source files.
     get_filename_component (_absolute "${_find_dir}" ABSOLUTE)
@@ -130,7 +115,6 @@ function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflag
             list (APPEND ${_objs} ${_proto_srcs})
             list (APPEND ${_include_dirs} ${PROTOBUF_INCLUDE_DIRS})
             list (APPEND ${_ldflags} ${PROTOBUF_LIBRARIES} -lz)
-            #list (APPEND _static_libs "${PROTOBUF_LIBRARY}")
         endif ()
     endif ()
 
@@ -149,13 +133,6 @@ function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflag
                 list (APPEND ${_ldflags} ${CUDA_CUBLAS_LIBRARIES})
             endif ()
         endif ()
-    endif ()
-
-    # whole-archive, static libraries.
-    list (LENGTH _static_libs _static_libs_length)
-    if (${_static_libs_length} GREATER 0)
-        insert_whole_archive_flags (_static_libs)
-        list (INSERT ${_ldflags} 0 ${_static_libs})
     endif ()
 
     # Result output.
