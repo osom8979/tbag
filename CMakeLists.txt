@@ -19,8 +19,7 @@ list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 include (config.cmake)
 
 # CMake extension script.
-include (cmake/compile.cmake)
-
+include (TbagFindObject)
 include (TbagProject)
 include (TbagFilesystem)
 include (TbagInformation)

@@ -1,4 +1,7 @@
-## CMake compile utility script.
+#/// @file   TbagFindObject.cmake
+#/// @brief  tbag_find_object function prototype.
+#/// @author zer0
+#/// @date   2016-05-26
 
 #! Insert whole-archive flags.
 #
@@ -20,8 +23,8 @@ endmacro ()
 function (doxygen_generate _config)
     if (USE_DOXYGEN AND DOXYGEN_FOUND)
         add_custom_target (doc ALL
-            ${DOXYGEN_EXECUTABLE} "${_config}"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+                ${DOXYGEN_EXECUTABLE} "${_config}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     endif ()
 endfunction ()
 
@@ -68,12 +71,12 @@ function (protobuf_generate_cpp2 _sources _headers _protos)
         endif ()
 
         add_custom_command (
-            OUTPUT  ${_cursor_of_cc_path}
-                    ${_cursor_of_h_path}
-            COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out ${_output_dir} ${_protoc_include} ${_absolute}
-            DEPENDS ${_absolute}
-            WORKING_DIRECTORY ${_output_dir}
-            COMMENT "Running C++ protocol buffer compiler on ${_cursor}" VERBATIM)
+                OUTPUT  ${_cursor_of_cc_path}
+                ${_cursor_of_h_path}
+                COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out ${_output_dir} ${_protoc_include} ${_absolute}
+                DEPENDS ${_absolute}
+                WORKING_DIRECTORY ${_output_dir}
+                COMMENT "Running C++ protocol buffer compiler on ${_cursor}" VERBATIM)
     endforeach ()
 
     set_source_files_properties (${${_sources}} ${${_headers}} PROPERTIES GENERATED TRUE)
@@ -162,4 +165,3 @@ function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflag
     set (${_cxxflags}     ${${_cxxflags}}     PARENT_SCOPE)
     set (${_ldflags}      ${${_ldflags}}      PARENT_SCOPE)
 endfunction ()
-
