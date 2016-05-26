@@ -16,7 +16,34 @@ enable_language (CXX)
 list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
 # User defined settings.
-include (config.cmake)
+include (TbagCMakeConfig)
+
+# --------------------
+# Solution properties.
+# --------------------
+
+option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
+
+tbag_config_init_main_information (
+        libtbag zer0 osom8979@gmail.com
+        "THIRD-PARTY EXTENSION UTILITY PROJECT")
+tbag_config_init_version (0 0 0 0 0 0)
+
+# Libraries.
+tbag_config_add_library_option ("zlib"      OFF)
+tbag_config_add_library_option ("gtest"     ON)
+tbag_config_add_library_option ("protobuf"  OFF)
+tbag_config_add_library_option ("spdlog"    ON)
+tbag_config_add_library_option ("libuv"     ON)
+tbag_config_add_library_option ("tinyxml2"  ON)
+tbag_config_add_library_option ("ncurses"   ON)
+tbag_config_add_library_option ("sqlite3"   ON)
+
+# Continuous Integration.
+option (USE_DOXYGEN "API documentation." ON)
+
+# 3rd-party library prefix.
+set (THIRD_PREFIX "$ENV{TPARTY_HOME}/local" CACHE STRING "3rd-party library prefix")
 
 # CMake extension script.
 include (TbagFindObject)
@@ -26,14 +53,9 @@ include (TbagFilesystem)
 include (TbagInformation)
 include (TbagCommon)
 include (TbagStrings)
+include (TbagCMakeConfig)
 
-tbag_exists_define_or_die (MAIN_NAME)
-
-string (TOUPPER ${MAIN_NAME} MAIN_NAME_UPPER)
-string (TIMESTAMP _timestamp "%Y-%m-%d_%H%M%S")
-set (VERSION_TWEAK "${_timestamp}")
-set (VERSION   "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-set (SOVERSION "${VERSION_MAJOR}")
+tbag_config_exists_main_information ()
 
 # Third-party libraries.
 set (THIRD_BIN "${THIRD_PREFIX}/bin")

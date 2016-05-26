@@ -1,5 +1,5 @@
 #/// @file   TbagModuleGTest.cmake
-#/// @brief  Google-test cmake module.
+#/// @brief  Google-test tbag cmake module.
 #/// @author zer0
 #/// @date   2016-05-26
 
