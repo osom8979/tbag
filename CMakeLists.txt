@@ -13,7 +13,7 @@ enable_language (CXX)
 # CMake settings.
 # ---------------
 
-list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
+list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
 # User defined settings.
 include (config.cmake)
