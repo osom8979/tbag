@@ -17,19 +17,18 @@ list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
 # User defined settings.
 include (TbagCMakeConfig)
-
-# --------------------
-# Solution properties.
-# --------------------
-
-option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
+include (TbagCMakeTparty)
 
 tbag_config_init_main_information (
         libtbag zer0 osom8979@gmail.com
         "THIRD-PARTY EXTENSION UTILITY PROJECT")
-tbag_config_init_version (0 0 0 0 0 0)
+tbag_config_init_version (
+        0 0 0
+        0 0
+        0)
+tbag_tparty_init ()
 
-# Libraries.
+# List of libraries.
 tbag_config_add_library_option ("zlib"      OFF)
 tbag_config_add_library_option ("gtest"     ON)
 tbag_config_add_library_option ("protobuf"  OFF)
@@ -42,8 +41,7 @@ tbag_config_add_library_option ("sqlite3"   ON)
 # Continuous Integration.
 option (USE_DOXYGEN "API documentation." ON)
 
-# 3rd-party library prefix.
-set (THIRD_PREFIX "$ENV{TPARTY_HOME}/local" CACHE STRING "3rd-party library prefix")
+option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
 
 # CMake extension script.
 include (TbagFindObject)
@@ -57,23 +55,6 @@ include (TbagCMakeConfig)
 
 tbag_config_exists_main_information ()
 
-# Third-party libraries.
-set (THIRD_BIN "${THIRD_PREFIX}/bin")
-set (THIRD_INC "${THIRD_PREFIX}/include")
-set (THIRD_LIB "${THIRD_PREFIX}/lib")
-
-if (IS_DIRECTORY ${THIRD_BIN})
-    set (ENV{PATH} "${THIRD_BIN}${PATH_SEPARATOR}$ENV{PATH}")
-endif ()
-if (IS_DIRECTORY ${THIRD_INC})
-    set (ENV{CPATH} "${THIRD_INC}${PATH_SEPARATOR}$ENV{CPATH}")
-endif ()
-if (IS_DIRECTORY ${THIRD_LIB})
-    set (ENV{LIBRARY_PATH} "${THIRD_LIB}${PATH_SEPARATOR}$ENV{LIBRARY_PATH}")
-endif ()
-
-list (INSERT CMAKE_PROGRAM_PATH 0 "${THIRD_BIN}")
-list (INSERT CMAKE_LIBRARY_PATH 0 "${THIRD_LIB}")
 list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_SOURCE_DIR}")
 list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_SOURCE_DIR}")
 
@@ -163,14 +144,7 @@ else ()
 endif ()
 
 include_directories (${PROJECT_SOURCE_DIR})
-if (IS_DIRECTORY ${THIRD_INC})
-    include_directories (${THIRD_INC})
-endif ()
-
-link_directories (${PROJECT_SOURCE_DIR})
-if (IS_DIRECTORY ${THIRD_LIB})
-    link_directories (${THIRD_LIB})
-endif ()
+link_directories    (${PROJECT_SOURCE_DIR})
 
 # ------------
 # Sub-project.
