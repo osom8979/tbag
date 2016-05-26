@@ -5,6 +5,7 @@
 
 include (TbagProjectCommon)
 
+#/// Clear project properties.
 macro (tbag_project_clear_properties)
     set (TBAG_PROJECT_OBJECTS)
     set (TBAG_PROJECT_DEPENDENCIES)
@@ -13,13 +14,15 @@ macro (tbag_project_clear_properties)
     set (TBAG_PROJECT_CXXFLAGS)
     set (TBAG_PROJECT_LDFLAGS)
 
+    # constant variables.
     set (TBAG_PROJECT_CONST_DIR_NAME)
-    set (TBAG_PROJECT_CONST_DIR_PATH)
-    set (TBAG_PROJECT_CONST_CMAKE)
     set (TBAG_PROJECT_CONST_TYPE)
     set (TBAG_PROJECT_CONST_NAME)
 endmacro ()
 
+#/// Clear project properties.
+#///
+#/// @param __project_dir_name [in] Project directory name.
 macro (tbag_project_update_const __project_dir_name)
     set (TBAG_PROJECT_CONST_DIR_NAME "${__project_dir_name}")
     tbag_get_project_type (TBAG_PROJECT_CONST_TYPE "${__project_dir_name}")
@@ -32,8 +35,8 @@ endmacro ()
 #///  Recommended apply to the library project.
 macro (tbag_project_assign_soversion)
     set_target_properties (${TBAG_PROJECT_CONST_NAME} PROPERTIES
-            VERSION   "${VERSION}"
-            SOVERSION "${SOVERSION}")
+                           VERSION   "${VERSION}"
+                           SOVERSION "${SOVERSION}")
 endmacro ()
 
 #/// Assign google-test libraries.
@@ -65,39 +68,86 @@ macro (tbag_project_assign_default_install)
              FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
 endmacro ()
 
-macro (tbag_project_update_target)
-    # Dependencies setting.
+#/// Dependencies setting.
+macro (tbag_project_update_dependencies)
     list (LENGTH TBAG_PROJECT_DEPENDENCIES __tbag_project_dependencies_length)
     if (${__tbag_project_dependencies_length} GREATER 0)
         add_dependencies (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_DEPENDENCIES})
     endif ()
+    unset (__tbag_project_dependencies_length)
+endmacro ()
 
-    # Define setting.
+#/// Define setting.
+macro (tbag_project_update_definitions)
     list (LENGTH TBAG_PROJECT_DEFINITIONS __project_definitions_length)
     if (${__project_definitions_length} GREATER 0)
         target_compile_definitions (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_DEFINITIONS})
     endif ()
+    unset (__project_definitions_length)
+endmacro ()
 
-    # Include setting.
+#/// Include directories settings.
+macro (tbag_project_update_include)
     list (LENGTH TBAG_PROJECT_INCLUDE_DIRS __project_include_dirs_length)
     if (${__project_include_dirs_length} GREATER 0)
         target_include_directories (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_INCLUDE_DIRS})
     endif ()
+    unset (__project_include_dirs_length)
+endmacro ()
 
-    # Compile options.
+#/// C++ compiler flags.
+macro (tbag_project_update_cxx_flags)
     list (LENGTH TBAG_PROJECT_CXXFLAGS __project_cxxflags_length)
     if (${__project_cxxflags_length} GREATER 0)
         target_compile_options (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_CXXFLAGS})
     endif ()
+    unset (__project_cxxflags_length)
+endmacro ()
 
-    # Linker options.
+#/// Linker flags.
+macro (tbag_project_update_linker_flags)
     list (APPEND TBAG_PROJECT_LDFLAGS ${TBAG_PROJECT_DEPENDENCIES})
     list (LENGTH TBAG_PROJECT_LDFLAGS __project_ldflags_length)
     if (${__project_ldflags_length} GREATER 0)
         target_link_libraries (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_LDFLAGS})
     endif ()
+    unset (__project_ldflags_length)
 endmacro ()
 
+#/// Update all of target.
+macro (tbag_project_update_all)
+    tbag_project_update_dependencies ()
+    tbag_project_update_definitions  ()
+    tbag_project_update_include      ()
+    tbag_project_update_cxx_flags    ()
+    tbag_project_update_linker_flags ()
+endmacro ()
+
+#/// Register executable target.
+macro (tbag_project_register_object_of_executable)
+    list (LENGTH TBAG_PROJECT_OBJECTS __tbag_project_objects_length)
+    if (${__tbag_project_objects_length} GREATER 0)
+        add_executable (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
+    else ()
+        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
+    endif ()
+    unset (__tbag_project_objects_length)
+endmacro ()
+
+#/// Register library target.
+macro (tbag_project_register_object_of_library)
+    list (LENGTH TBAG_PROJECT_OBJECTS __tbag_project_objects_length)
+    if (${__tbag_project_objects_length} GREATER 0)
+        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
+    else ()
+        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
+    endif ()
+    unset (__tbag_project_objects_length)
+endmacro ()
+
+#/// Find & register object files.
+#///
+#/// @param __find_directory [in] find directory path.
 macro (tbag_project_update_objects __find_directory)
     find_compile_object (__find_compile_objs
                          __find_compile_definitions
@@ -120,57 +170,44 @@ macro (tbag_project_update_objects __find_directory)
     unset (__find_compile_ldflags)
 endmacro ()
 
-macro (tbag_project_register_object_of_executable)
-    list (LENGTH TBAG_PROJECT_OBJECTS __tbag_project_objects_length)
-    if (${__tbag_project_objects_length} GREATER 0)
-        add_executable (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
-    else ()
-        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
-    endif ()
-    unset (__tbag_project_objects_length)
-endmacro ()
+#/// Default build process.
+#///
+#/// @param __is_library        [in] YES is library project, NO is executable project.
+#/// @param __project_dir_name  [in] Project directory name.
+#/// @param __root_dir          [in] Find root directory (Source code directory).
+macro (tbag_project_default_build __is_library __project_dir_name __root_dir)
+    set (__project_dir_path    "${__root_dir}/${__project_dir_name}")
+    set (__project_cmake_path  "${__project_dir_path}/${TBAG_PROJECT_FILE_NAME}")
 
-macro (tbag_project_register_object_of_library)
-    # -------------------------------
-    # Register library or executable.
-    list (LENGTH TBAG_PROJECT_OBJECTS __tbag_project_objects_length)
-    if (${__tbag_project_objects_length} GREATER 0)
-        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
-    else ()
-        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
-    endif ()
-    unset (__tbag_project_objects_length)
-endmacro ()
+    tbag_project_clear_properties ()
+    tbag_project_update_const ("${__cursor}")
 
-#! Default build process.
-#
-# \param __libs  [in] List of library.
-# \param __exes  [in] List of executable.
-function (default_build __libs __exes __root_dir)
-    # Loop of subproject builder.
-    foreach (__cursor ${__libs})
-        tbag_project_clear_properties ()
-        tbag_project_update_const ("${__cursor}")
+    project (${TBAG_PROJECT_CONST_NAME})
+    include ("${__project_cmake_path}")
 
-        project (${TBAG_PROJECT_CONST_NAME})
-        include ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}/${TBAG_PROJECT_FILE_NAME}")
-
-        tbag_project_update_objects ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}")
+    tbag_project_update_objects ("${__project_dir_path}")
+    if (${__is_library})
         tbag_project_register_object_of_library ()
-        tbag_project_update_target ()
+    else ()
+        tbag_project_register_object_of_executable ()
+    endif ()
+    tbag_project_update_all ()
+endmacro ()
+
+#/// Default build process.
+#///
+#/// @param __libs     [in] List of library.
+#/// @param __exes     [in] List of executable.
+#/// @param __root_dir [in] Find root directory (Source code directory).
+function (tbag_project_default_build_all __libs __exes __root_dir)
+    # Loop of library project.
+    foreach (__cursor ${__libs})
+        tbag_project_default_build (YES "${__cursor}" "${__root_dir}")
     endforeach ()
 
-    # Loop of subproject builder.
+    # Loop of executable project.
     foreach (__cursor ${__exes})
-        tbag_project_clear_properties ()
-        tbag_project_update_const ("${__cursor}")
-
-        project (${TBAG_PROJECT_CONST_NAME})
-        include ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}/${TBAG_PROJECT_FILE_NAME}")
-
-        tbag_project_update_objects ("${__root_dir}/${TBAG_PROJECT_CONST_DIR_NAME}")
-        tbag_project_register_object_of_executable ()
-        tbag_project_update_target ()
+        tbag_project_default_build (NO "${__cursor}" "${__root_dir}")
     endforeach ()
 
 endfunction ()

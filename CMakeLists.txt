@@ -159,7 +159,7 @@ find_project (_lib_proj_list _exe_proj_list "${PROJECT_SOURCE_DIR}")
 message ("** Find library project: ${_lib_proj_list}")
 message ("** Find executable project: ${_exe_proj_list}")
 
-default_build ("${_lib_proj_list}" "${_exe_proj_list}" "${PROJECT_SOURCE_DIR}")
+tbag_project_default_build_all ("${_lib_proj_list}" "${_exe_proj_list}" "${PROJECT_SOURCE_DIR}")
 
 # -----------------------
 # Continuous Integration.

@@ -10,7 +10,7 @@ include (TbagStrings)
 #///
 #/// @param __lib_projs  [out] value name of library project list.
 #/// @param __exe_projs  [out] value name of executable project list.
-#/// @param __root_dir   [in]  Find root directory.
+#/// @param __root_dir   [in]  Find root directory (Source code directory).
 function (find_project __lib_projs __exe_projs __root_dir)
     set (__library_glob    "^${TBAG_PROJECT_LIBRARY_PREFIX}${TBAG_PROJECT_FILE_REGEX}$")
     set (__executable_glob "^${TBAG_PROJECT_EXECUTABLE_PREFIX}${TBAG_PROJECT_FILE_REGEX}$")
