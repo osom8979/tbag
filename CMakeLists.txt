@@ -21,7 +21,11 @@ include (config.cmake)
 # CMake extension script.
 include (cmake/compile.cmake)
 include (cmake/build.cmake)
-include (cmake/util.cmake)
+
+include (TbagFilesystem)
+include (TbagInformation)
+include (TbagCommon)
+include (TbagStrings)
 
 tbag_exists_define_or_die (MAIN_NAME)
 

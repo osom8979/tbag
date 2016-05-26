@@ -1,6 +1,6 @@
 ## CMake build utility script.
 
-include (${PROJECT_SOURCE_DIR}/cmake/util.cmake)
+include (TbagStrings)
 
 set (BUILD_PROJECT_FILE_PREFIX "project")
 set (BUILD_PROJECT_FILE_SUFFIX "cmake")
