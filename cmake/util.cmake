@@ -2,34 +2,8 @@
 
 include (TbagFilesystem)
 include (TbagInformation)
+include (TbagCommon)
 
-#! Check the exists define.
-# If not exists, it send a fatal error.
-#
-# \param _value [in] check value name.
-function (exists_define_or_die _value)
-    if (NOT DEFINED ${_value})
-        message (FATAL_ERROR "Not defined ${_value} variable.")
-    endif()
-endfunction ()
-
-## -----------------
-## Module utilities.
-## -----------------
-
-#! Test find_package() function.
-#
-# \param _enable      [in] Enable variable.
-# \param _module_name [in] Module name.
-macro (test_find_package _enable _module_name)
-    if (USE_${_enable})
-        find_package (${_module_name})
-    endif ()
-endmacro ()
-
-## ------------------
-## String operations.
-## ------------------
 
 #! List of regex.
 #

@@ -23,7 +23,7 @@ include (cmake/compile.cmake)
 include (cmake/build.cmake)
 include (cmake/util.cmake)
 
-exists_define_or_die (MAIN_NAME)
+tbag_exists_define_or_die (MAIN_NAME)
 
 string (TOUPPER ${MAIN_NAME} MAIN_NAME_UPPER)
 string (TIMESTAMP _timestamp "%Y-%m-%d_%H%M%S")
@@ -65,17 +65,17 @@ set (NCURSES_ROOT  "${THIRD_PREFIX}")
 set (SQLITE3_ROOT  "${THIRD_PREFIX}")
 
 # Test packages.
-test_find_package  (zlib      ZLIB)
-test_find_package  (gtest     GTest)
-test_find_package  (protobuf  Protobuf)
-test_find_package  (spdlog    Spdlog)
-test_find_package  (libuv     UV)
-test_find_package  (tinyxml2  TinyXML2)
-test_find_package  (ncurses   NCurses)
-test_find_package  (sqlite3   SQLite3)
+tbag_find_package  (USE_zlib      ZLIB)
+tbag_find_package  (USE_gtest     GTest)
+tbag_find_package  (USE_protobuf  Protobuf)
+tbag_find_package  (USE_spdlog    Spdlog)
+tbag_find_package  (USE_libuv     UV)
+tbag_find_package  (USE_tinyxml2  TinyXML2)
+tbag_find_package  (USE_ncurses   NCurses)
+tbag_find_package  (USE_sqlite3   SQLite3)
 
 # Continuous Integration.
-test_find_package (DOXYGEN Doxygen)
+tbag_find_package (DOXYGEN Doxygen)
 
 # -------------------
 # Configure settings.
