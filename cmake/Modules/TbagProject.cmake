@@ -9,7 +9,6 @@ set (__tbag_project_file_prefix  "project")
 set (__tbag_project_file_suffix  "cmake")
 
 set (__tbag_project_library_prefix     "lib")
-set (__tbag_project_test_prefix        "test")
 set (__tbag_project_executable_prefix  "")
 
 set (__tbag_project_file_name    "${__tbag_project_file_prefix}.${__tbag_project_file_suffix}")
@@ -18,13 +17,10 @@ set (__tbag_project_file_regex   "[^/]+/${__tbag_project_file_prefix}\\.${__tbag
 #/// Find project list.
 #///
 #/// @param _lib_projs  [out] value name of library project list.
-#/// @param _test_projs [out] value name of test project list.
 #/// @param _exe_projs  [out] value name of executable project list.
 #/// @param __root_dir   [in]  Find root directory.
-function (find_project _lib_projs _test_projs _exe_projs __root_dir)
-
+function (find_project _lib_projs _exe_projs __root_dir)
     set (__tbag_project_library_glob    "^${__tbag_project_library_prefix}${__tbag_project_file_regex}$")
-    set (__tbag_project_test_glob       "^${__tbag_project_test_prefix}${__tbag_project_file_regex}$")
     set (__tbag_project_executable_glob "^${__tbag_project_executable_prefix}${__tbag_project_file_regex}$")
 
     # Find all project.
@@ -39,29 +35,17 @@ function (find_project _lib_projs _test_projs _exe_projs __root_dir)
         list (REMOVE_ITEM _find_project_list ${_find_lib_proj})
     endif ()
 
-    # Find test executable project.
-    tbag_list_regex (_find_test_proj "${__tbag_project_test_glob}" "${_find_project_list}")
-    list (LENGTH _find_test_proj _find_test_proj_length)
-
-    # Remove test project in the all project.
-    if (${_find_test_proj_length} GREATER 0)
-        list (REMOVE_ITEM _find_project_list ${_find_test_proj})
-    endif ()
-
     # Find executable project.
     tbag_list_regex (_find_exe_proj "${__tbag_project_executable_glob}" "${_find_project_list}")
 
     string (REPLACE "/${__tbag_project_file_name}" "" ${_lib_projs}  "${_find_lib_proj}")
-    string (REPLACE "/${__tbag_project_file_name}" "" ${_test_projs} "${_find_test_proj}")
     string (REPLACE "/${__tbag_project_file_name}" "" ${_exe_projs}  "${_find_exe_proj}")
 
     unset (__tbag_project_library_glob)
-    unset (__tbag_project_test_glob)
     unset (__tbag_project_executable_glob)
 
     # result:
     set (${_lib_projs}  ${${_lib_projs}}  PARENT_SCOPE)
-    set (${_test_projs} ${${_test_projs}} PARENT_SCOPE)
     set (${_exe_projs}  ${${_exe_projs}}  PARENT_SCOPE)
 endfunction ()
 
@@ -240,9 +224,8 @@ endmacro ()
 #! Default build process.
 #
 # \param __libs  [in] List of library.
-# \param __tests [in] List of test.
 # \param __exes  [in] List of executable.
-function (default_build __libs __tests __exes __root_dir)
+function (default_build __libs __exes __root_dir)
     # Loop of subproject builder.
     foreach (__cursor ${__libs})
         tbag_project_clear_properties ()
@@ -257,7 +240,7 @@ function (default_build __libs __tests __exes __root_dir)
     endforeach ()
 
     # Loop of subproject builder.
-    foreach (__cursor ${__tests} ${__exes})
+    foreach (__cursor ${__exes})
         tbag_project_clear_properties ()
         tbag_project_update_const ("${__cursor}")
 

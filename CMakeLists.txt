@@ -153,22 +153,18 @@ endif ()
 # Sub-project.
 # ------------
 
-find_project (_lib_proj_list _test_proj_list _exe_proj_list "${PROJECT_SOURCE_DIR}")
+find_project (_lib_proj_list _exe_proj_list "${PROJECT_SOURCE_DIR}")
 
 message ("** Find library project: ${_lib_proj_list}")
-message ("** Find test project: ${_test_proj_list}")
 message ("** Find executable project: ${_exe_proj_list}")
 
-default_build ("${_lib_proj_list}" "${_test_proj_list}" "${_exe_proj_list}" "${PROJECT_SOURCE_DIR}")
+default_build ("${_lib_proj_list}" "${_exe_proj_list}" "${PROJECT_SOURCE_DIR}")
 
 # -----------------------
 # Continuous Integration.
 # -----------------------
 
 doxygen_generate ("${OUT_DOXYFILE}")
-
-#print_os ()
-#print_compiler_id ()
 
 # -----------------
 # Project settings.
