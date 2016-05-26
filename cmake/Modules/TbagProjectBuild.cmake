@@ -5,6 +5,9 @@
 
 include (TbagProjectCommon)
 
+# Modules.
+tbag_module (GTest)
+
 #/// Clear project properties.
 macro (tbag_project_clear_properties)
     set (TBAG_PROJECT_OBJECTS)
@@ -37,18 +40,6 @@ macro (tbag_project_assign_soversion)
     set_target_properties (${TBAG_PROJECT_CONST_NAME} PROPERTIES
                            VERSION   "${VERSION}"
                            SOVERSION "${SOVERSION}")
-endmacro ()
-
-#/// Assign google-test libraries.
-#///
-#/// @remarsk
-#///  Recommended apply to the test project.
-macro (tbag_project_assign_gtest)
-    find_package (GTest)
-    if (GTEST_FOUND)
-        list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_GTEST)
-        list (APPEND TBAG_PROJECT_LDFLAGS      ${GTEST_BOTH_LIBRARIES} -lpthread)
-    endif ()
 endmacro ()
 
 #/// Assign default install property.
@@ -192,6 +183,9 @@ macro (tbag_project_default_build __is_library __project_dir_name __root_dir)
         tbag_project_register_object_of_executable ()
     endif ()
     tbag_project_update_all ()
+
+    unset (__project_dir_path)
+    unset (__project_cmake_path)
 endmacro ()
 
 #/// Default build process.
@@ -209,6 +203,5 @@ function (tbag_project_default_build_all __libs __exes __root_dir)
     foreach (__cursor ${__exes})
         tbag_project_default_build (NO "${__cursor}" "${__root_dir}")
     endforeach ()
-
 endfunction ()
 
