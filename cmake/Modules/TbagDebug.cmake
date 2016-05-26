@@ -4,20 +4,25 @@
 #/// @date   2016-05-25
 
 #/// Print debug message.
+#///
+#/// @param ... [in] message arguments.
 function (tbag_debug_message)
     message (STATUS "@ " ${ARGN})
 endfunction ()
 
 #/// Print debug message with list.
+#///
+#/// @param ... [in] message arguments.
 function (tbag_debug_message_list)
     foreach (__list_cursor ${ARGN})
         tbag_debug_message (${__list_cursor})
     endforeach ()
 endfunction ()
 
-#/// LOG function.
+#/// Logging-like debugging message function.
 #///
 #/// @param __tag [in] tag name.
+#/// @param ...   [in] message arguments.
 #///
 #/// @remarks
 #///  Check the global variables:

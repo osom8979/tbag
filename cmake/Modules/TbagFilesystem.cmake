@@ -26,7 +26,7 @@ function (tbag_convert_msys_to_windows_path __value __paths)
     unset (__replace_cursor1)
     unset (__replace_cursor2)
 
-    # result:
+    # update result.
     set (${__value} ${${__value}} PARENT_SCOPE)
 endfunction ()
 

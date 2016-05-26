@@ -63,7 +63,7 @@ function (tbag_simple_find_library __prefix  __headers __libs)
         mark_as_advanced (${__looked_for})
     endif ()
 
-    # result:
+    # update result.
     set (${__prefix}_FOUND        ${${__prefix}_FOUND}        PARENT_SCOPE)
     set (${__prefix}_INCLUDE_DIRS ${${__prefix}_INCLUDE_DIRS} PARENT_SCOPE)
     set (${__prefix}_LIBRARIES    ${${__prefix}_LIBRARIES}    PARENT_SCOPE)

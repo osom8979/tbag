@@ -41,7 +41,7 @@ function (tbag_find_libraries __result __paths __libs)
     unset (__lib_cursor)
     unset (__name_index)
 
-    # result:
+    # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 

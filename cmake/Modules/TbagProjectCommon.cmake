@@ -12,7 +12,7 @@ set (TBAG_PROJECT_EXECUTABLE_PREFIX  "")
 set (TBAG_PROJECT_FILE_NAME    "${TBAG_PROJECT_FILE_PREFIX}.${TBAG_PROJECT_FILE_SUFFIX}")
 set (TBAG_PROJECT_FILE_REGEX   "[^/]+/${TBAG_PROJECT_FILE_PREFIX}\\.${TBAG_PROJECT_FILE_SUFFIX}")
 
-#/// Check the project type.
+#/// Obtain the project type.
 #///
 #/// @param __result           [out] value name of result type string.
 #/// @param __project_dir_name [in]  project directory name.
@@ -26,7 +26,7 @@ function (tbag_get_project_type __result __project_dir_name)
     endif ()
 endfunction()
 
-#/// Check the project type.
+#/// Obtain the project name.
 #///
 #/// @param __result           [out] value name of result type string.
 #/// @param __project_dir_name [in]  project directory name.
@@ -40,6 +40,7 @@ function (tbag_get_project_name __result __project_dir_name)
     else ()
         set (${__result} "${__project_dir_name}" PARENT_SCOPE)
     endif ()
+
     unset (__project_type)
 endfunction ()
 

@@ -40,7 +40,7 @@ function (tbag_find_headers __result __paths __headers)
     unset (__header_cursor)
     unset (__name_index)
 
-    # result:
+    # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 

@@ -4,6 +4,10 @@
 #/// @date   2016-05-25
 
 #/// Arguments to string.
+#///
+#/// @param __result    [out] Output value name.
+#/// @param __delimiter [in]  Delimiter string.
+#/// @param ...         [in]  List of arguments.
 function (tabg_arguments_to_string __result __delimiter)
     set (${__result})
     set (__is_first_setting NO)
@@ -26,21 +30,21 @@ endfunction ()
 
 #/// List of regex.
 #///
-#/// @param __value   [out] output value name.
+#/// @param __result  [out] output value name.
 #/// @param __regex   [in]  Regex string.
 #/// @param __source  [in]  Original list.
-function (tbag_list_regex __value __regex __source)
-    set (${__value})
+function (tbag_list_regex __result __regex __source)
+    set (${__result})
 
     foreach (__list_cursor ${__source})
         string (REGEX MATCH "${__regex}" __match_cursor ${__list_cursor})
-        list (APPEND ${__value} ${__match_cursor})
+        list (APPEND ${__result} ${__match_cursor})
     endforeach ()
 
     unset (__list_cursor)
     unset (__match_cursor)
 
-    # result:
-    set (${__value} ${${__value}} PARENT_SCOPE)
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 

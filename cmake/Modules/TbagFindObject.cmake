@@ -135,7 +135,7 @@ function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflag
         endif ()
     endif ()
 
-    # Result output.
+    # update result.
     set (${_objs}         ${${_objs}}         PARENT_SCOPE)
     set (${_definitions}  ${${_definitions}}  PARENT_SCOPE)
     set (${_include_dirs} ${${_include_dirs}} PARENT_SCOPE)
