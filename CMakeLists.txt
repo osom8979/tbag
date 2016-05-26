@@ -52,6 +52,7 @@ include (TbagInformation)
 include (TbagCommon)
 include (TbagStrings)
 include (TbagCMakeConfig)
+include (TbagFlags)
 
 tbag_config_exists_main_information ()
 
@@ -136,15 +137,8 @@ set  (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -Wall")
 #set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
 #set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 
-# Build type: Debug, Release, RelWithDebInfo, MinSizeRel
-if (CMAKE_BUILD_TYPE MATCHES "Debug")
-    add_definitions (-DDEBUG)
-else ()
-    add_definitions (-DNDEBUG -DRELEASE)
-endif ()
-
-include_directories (${PROJECT_SOURCE_DIR})
-link_directories    (${PROJECT_SOURCE_DIR})
+tbag_flags__add_debug_define ()
+tbag_flags__include_and_link_for_source_dir ()
 
 # ------------
 # Sub-project.

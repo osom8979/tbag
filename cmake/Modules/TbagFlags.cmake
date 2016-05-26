@@ -11,7 +11,7 @@ set (TBAG_FLAG_GNU_OFF_WHOLE_ARCHIVE  "-Wl,--no-whole-archive")
 #///
 #/// @param __result [out] value name of output list.
 #/// @param ...      [in]  flag list.
-function (tbag_whole_archive __result)
+function (tbag_flags__whole_archive __result)
     set (${__result})
 
     # Turn on.
@@ -33,5 +33,21 @@ function (tbag_whole_archive __result)
 
     # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
+#/// Assign default debug definition.
+function (tbag_flags__add_debug_define)
+    # Build type: Debug, Release, RelWithDebInfo, MinSizeRel
+    if (CMAKE_BUILD_TYPE MATCHES "Debug")
+        add_definitions (-DDEBUG)
+    else ()
+        add_definitions (-DNDEBUG -DRELEASE)
+    endif ()
+endfunction ()
+
+#/// Assign default debug definition.
+function (tbag_flags__include_and_link_for_source_dir)
+    include_directories (${PROJECT_SOURCE_DIR})
+    link_directories    (${PROJECT_SOURCE_DIR})
 endfunction ()
 

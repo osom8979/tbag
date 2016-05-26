@@ -3,7 +3,7 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
-include (TbagFilesystem) # Use the PATH_SEPARATOR variable.
+include (TbagFilesystem) # For the PATH_SEPARATOR variable.
 
 macro (tbag_tparty_init)
     # 3rd-party library prefix.
