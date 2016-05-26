@@ -1,55 +1,7 @@
 ## Find library module.
 
 include (TbagFindHeaders)
-
-#! Find headers function.
-#
-# \param _header_prefix  [out] Variable result prefix.
-# \param _search_paths   [in]  Search directories.
-# \param _headers        [in]  Find header files.
-#function (find_headers _header_prefix _search_paths _headers)
-#    set (${_header_prefix})
-#    set (_index 0)
-#
-#    foreach (_cursor ${_headers})
-#        set (_temp_name ${_header_prefix}_${_index})
-#        find_path (${_temp_name}
-#            NAMES ${_cursor}
-#            PATHS ${_search_paths})
-#        math (EXPR _index "${_index} + 1")
-#
-#        if (IS_DIRECTORY "${${_temp_name}}")
-#            list (APPEND ${_header_prefix} "${${_temp_name}}")
-#        endif ()
-#    endforeach ()
-#
-#    set (${_header_prefix} ${${_header_prefix}} PARENT_SCOPE)
-#endfunction ()
-
-#! Find libraries function.
-#
-# \param _lib_prefix    [out] Variable result prefix.
-# \param _search_paths  [in]  Search directories.
-# \param _libs          [in]  Find library files.
-function (find_libraries _lib_prefix _search_paths _libs)
-    set (${_lib_prefix})
-    set (_index 0)
-
-    foreach (_cursor ${_libs})
-        set (_temp_name ${_lib_prefix}_${_index})
-        find_library (${_temp_name}
-            NAMES "${_cursor}"
-            PATHS ${_search_paths}
-            PATH_SUFFIXES Debug Release)
-        math (EXPR _index "${_index} + 1")
-
-        if (EXISTS "${${_temp_name}}")
-            list (APPEND ${_lib_prefix} "${${_temp_name}}")
-        endif ()
-    endforeach ()
-
-    set (${_lib_prefix} ${${_lib_prefix}} PARENT_SCOPE)
-endfunction ()
+include (TbagFindLibraries)
 
 #! Find {Library} function.
 #
@@ -98,8 +50,8 @@ function (simple_find_library _prefix  _headers _libs)
                                ${${_root_library_paths}}
                                ${_lib64_paths})
 
-    find_headers (${_prefix}_INCLUDE_DIRS "${_search_include_paths}" "${_headers}")
-    find_libraries (${_prefix}_LIBRARIES "${_search_library_paths}" "${_libs}")
+    tbag_find_headers (${_prefix}_INCLUDE_DIRS "${_search_include_paths}" "${_headers}")
+    tbag_find_libraries (${_prefix}_LIBRARIES "${_search_library_paths}" "${_libs}")
 
     set (LOOKED_FOR ${_prefix}_INCLUDE_DIRS)
     if (NOT "${_libs}" STREQUAL "")

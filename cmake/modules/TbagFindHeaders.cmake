@@ -1,5 +1,5 @@
 #/// @file   TbagFindHeaders.cmake
-#/// @brief  find_headers function prototype.
+#/// @brief  tbag_find_headers function prototype.
 #/// @author zer0
 #/// @date   2016-05-25
 
@@ -11,7 +11,7 @@ include (TbagStrings)
 #/// @param __result  [out] Variable result prefix.
 #/// @param __paths   [in]  Search directories.
 #/// @param __headers [in]  Find header files.
-function (find_headers __result __paths __headers)
+function (tbag_find_headers __result __paths __headers)
     set (${__result})
     set (__name_index 0)
 
