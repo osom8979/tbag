@@ -21,6 +21,7 @@ include (config.cmake)
 # CMake extension script.
 include (TbagFindObject)
 include (TbagProject)
+include (TbagProjectBuild)
 include (TbagFilesystem)
 include (TbagInformation)
 include (TbagCommon)
