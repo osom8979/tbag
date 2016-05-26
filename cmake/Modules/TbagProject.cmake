@@ -15,19 +15,20 @@ set (__tbag_project_executable_prefix  "")
 set (__tbag_project_file_name    "${__tbag_project_file_prefix}.${__tbag_project_file_suffix}")
 set (__tbag_project_file_regex   "[^/]+/${__tbag_project_file_prefix}\\.${__tbag_project_file_suffix}")
 
-#! Find project list.
-#
-# \param _lib_projs  [out] value name of library project list.
-# \param _test_projs [out] value name of test project list.
-# \param _exe_projs  [out] value name of executable project list.
-function (find_project _lib_projs _test_projs _exe_projs)
+#/// Find project list.
+#///
+#/// @param _lib_projs  [out] value name of library project list.
+#/// @param _test_projs [out] value name of test project list.
+#/// @param _exe_projs  [out] value name of executable project list.
+#/// @param _root_dir   [in]  Find root directory.
+function (find_project _lib_projs _test_projs _exe_projs _root_dir)
 
     set (__tbag_project_library_glob    "^${__tbag_project_library_prefix}${__tbag_project_file_regex}$")
     set (__tbag_project_test_glob       "^${__tbag_project_test_prefix}${__tbag_project_file_regex}$")
     set (__tbag_project_executable_glob "^${__tbag_project_executable_prefix}${__tbag_project_file_regex}$")
 
     # Find all project.
-    file (GLOB_RECURSE _find_project_list RELATIVE "${PROJECT_SOURCE_DIR}" "${__tbag_project_file_name}")
+    file (GLOB_RECURSE _find_project_list RELATIVE "${_root_dir}" "${__tbag_project_file_name}")
 
     # Find library project.
     tbag_list_regex (_find_lib_proj "${__tbag_project_library_glob}" "${_find_project_list}")
@@ -104,7 +105,6 @@ endfunction ()
 function (default_build _libs _tests _exes _root_dir)
     # Build project.
     foreach (_cursor ${_libs} ${_tests} ${_exes})
-        set (_project_is_verbose OFF)
         set (_project_default_install OFF)
         set (_project_objects)
         set (_project_dependencies)
