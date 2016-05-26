@@ -101,7 +101,7 @@ endfunction ()
 # \param _libs  [in] List of library.
 # \param _tests [in] List of test.
 # \param _exes  [in] List of executable.
-function (default_build _libs _tests _exes)
+function (default_build _libs _tests _exes _root_dir)
     # Build project.
     foreach (_cursor ${_libs} ${_tests} ${_exes})
         set (_project_is_verbose OFF)
@@ -120,7 +120,7 @@ function (default_build _libs _tests _exes)
 
         # ----------------------------------
         # User defined sub-project settings.
-        include ("${PROJECT_SOURCE_DIR}/${_project_dir}/${__tbag_project_file_name}")
+        include ("${_root_dir}/${_project_dir}/${__tbag_project_file_name}")
 
         # -------------------------------------
         # Find & Create, compiled object files.
@@ -129,7 +129,7 @@ function (default_build _libs _tests _exes)
                 _find_include_dirs
                 _find_cxxflags
                 _find_ldflags
-                "${PROJECT_SOURCE_DIR}/${_project_dir}")
+                "${_root_dir}/${_project_dir}")
 
         # Result assign.
         list (APPEND _project_objects      ${_find_objs})

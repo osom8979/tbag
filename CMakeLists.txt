@@ -20,8 +20,8 @@ include (config.cmake)
 
 # CMake extension script.
 include (cmake/compile.cmake)
-include (cmake/build.cmake)
 
+include (TbagProject)
 include (TbagFilesystem)
 include (TbagInformation)
 include (TbagCommon)
@@ -160,7 +160,7 @@ message ("** Find library project: ${_lib_proj_list}")
 message ("** Find test project: ${_test_proj_list}")
 message ("** Find executable project: ${_exe_proj_list}")
 
-default_build ("${_lib_proj_list}" "${_test_proj_list}" "${_exe_proj_list}")
+default_build ("${_lib_proj_list}" "${_test_proj_list}" "${_exe_proj_list}" "${PROJECT_SOURCE_DIR}")
 
 # -----------------------
 # Continuous Integration.
