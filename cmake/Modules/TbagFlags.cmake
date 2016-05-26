@@ -3,9 +3,14 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
-set (TBAG_FLAG_CLANG_WHOLE_ARCHIVE    "-Wl,-force_load")
-set (TBAG_FLAG_GNU_ON_WHOLE_ARCHIVE   "-Wl,--whole-archive")
-set (TBAG_FLAG_GNU_OFF_WHOLE_ARCHIVE  "-Wl,--no-whole-archive")
+#set (BUILD_SHARED_LIBS        ON) # User's variable.
+#set (CMAKE_BUILD_TYPE    Release) # User's variable.
+#set (CMAKE_MACOSX_RPATH        1) # CMP0042
+
+#set (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS}")
+#set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}")
+#set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
+#set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 
 #/// Assign whole-archive flags.
 #///
@@ -16,9 +21,9 @@ function (tbag_flags__whole_archive __result)
 
     # Turn on.
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        list (APPEND ${__result} ${TBAG_FLAG_CLANG_WHOLE_ARCHIVE})
+        list (APPEND ${__result} "-Wl,-force_load")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        list (APPEND ${__result} ${TBAG_FLAG_GNU_ON_WHOLE_ARCHIVE})
+        list (APPEND ${__result} "-Wl,--whole-archive")
     endif ()
 
     # Append arguments.
@@ -28,7 +33,7 @@ function (tbag_flags__whole_archive __result)
 
     # Turn off.
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        list (APPEND ${__result} ${TBAG_FLAG_GNU_OFF_WHOLE_ARCHIVE})
+        list (APPEND ${__result} "-Wl,--no-whole-archive")
     endif ()
 
     # update result.
@@ -36,18 +41,50 @@ function (tbag_flags__whole_archive __result)
 endfunction ()
 
 #/// Assign default debug definition.
-function (tbag_flags__add_debug_define)
+macro (tbag_flags__add_debug_define)
     # Build type: Debug, Release, RelWithDebInfo, MinSizeRel
     if (CMAKE_BUILD_TYPE MATCHES "Debug")
         add_definitions (-DDEBUG)
     else ()
         add_definitions (-DNDEBUG -DRELEASE)
     endif ()
-endfunction ()
+endmacro ()
 
-#/// Assign default debug definition.
-function (tbag_flags__include_and_link_for_source_dir)
+#/// include & link directory for source directory.
+macro (tbag_flags__include_and_link_for_source_dir)
     include_directories (${PROJECT_SOURCE_DIR})
     link_directories    (${PROJECT_SOURCE_DIR})
-endfunction ()
+endmacro ()
+
+#/// Assign C++11 standard.
+macro (tbag_flags__cpp_standard_11)
+    if (CMAKE_VERSION VERSION_LESS "3.1")
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CUDA_FOUND)
+            set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+        else ()
+            set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        endif ()
+        if (CUDA_FOUND)
+            set (CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
+        endif ()
+    else ()
+        set (CMAKE_CXX_STANDARD     11) # C++ standard 11
+        set (CMAKE_CXX_EXTENSIONS  OFF) # Don't change the -std=gnu++11 to -std=c++11
+    endif ()
+endmacro ()
+
+#/// Assign Position Independent Code.
+macro (tbag_flags__position_independent_code)
+    if (CMAKE_VERSION VERSION_LESS "3.0.2")
+        set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    else ()
+        set (CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC
+    endif ()
+endmacro ()
+
+#/// Print all compile warning.
+macro (tbag_flags__print_all_compile_warning)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endmacro ()
 
