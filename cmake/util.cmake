@@ -1,10 +1,6 @@
 ## CMake common utility script.
 
-if (WIN32 AND NOT MSYS AND NOT CYGWIN)
-    set (PATH_SEPARATOR ";")
-else ()
-    set (PATH_SEPARATOR ":")
-endif ()
+include (TbagFilesystem)
 
 ## -------------------
 ## System information.
