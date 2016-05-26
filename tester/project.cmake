@@ -1,47 +1,35 @@
 ## CMake subproject properties.
-if (_project_is_verbose)
-    message ("++ _project_default_install: ${_project_default_install}")
-    message ("++ _project_dir: ${_project_dir}")
-    message ("++ _project_type: ${_project_type}")
-    message ("++ _project_name: ${_project_name}")
 
-    # Empty variables:
-    message ("++ _project_objects: ${_project_objects}")
-    message ("++ _project_dependencies: ${_project_dependencies}")
-    message ("++ _project_definitions: ${_project_definitions}")
-    message ("++ _project_include_dirs: ${_project_include_dirs}")
-    message ("++ _project_cxxflags: ${_project_cxxflags}")
-    message ("++ _project_ldflags: ${_project_ldflags}")
-endif ()
+set (TBAG_PROJECT_DEFINITIONS  -D__LIBTBAG__)
+set (TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
+set (TBAG_PROJECT_LDFLAGS      -L${CMAKE_CURRENT_LIST_DIR})
 
-set (_project_definitions  -D__LIBTBAG__)
-set (_project_include_dirs ${CMAKE_CURRENT_LIST_DIR})
-set (_project_ldflags      -L${CMAKE_CURRENT_LIST_DIR})
+tbag_project_assign_gtest ()
 
 # speed-log setting.
 if (USE_spdlog)
-    list (APPEND _project_definitions  -DUSE_SPDLOG)
-    list (APPEND _project_include_dirs ${SPDLOG_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_SPDLOG)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${SPDLOG_INCLUDE_DIRS})
 endif ()
 
 # libuv setting.
 if (USE_libuv)
-    list (APPEND _project_definitions  -DUSE_LIBUV)
-    list (APPEND _project_include_dirs ${UV_INCLUDE_DIRS})
-    list (APPEND _project_ldflags      ${UV_LIBRARIES})
+    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_LIBUV)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${UV_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
 endif ()
 
-# TinyXML2 setting.
+# TinyXML2 settinG.
 if (USE_tinyxml2)
-    list (APPEND _project_definitions  -DUSE_TINYXML2)
-    list (APPEND _project_include_dirs ${TINYXML2_INCLUDE_DIRS})
-    list (APPEND _project_ldflags      ${TINYXML2_LIBRARIES})
+    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_TINYXML2)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${TINYXML2_LIBRARIES})
 endif ()
 
 # SQLite3 setting.
 if (USE_sqlite3)
-    list (APPEND _project_definitions  -DUSE_SQLITE3)
-    list (APPEND _project_include_dirs ${SQLITE3_INCLUDE_DIRS})
-    list (APPEND _project_ldflags      ${SQLITE3_LIBRARIES})
+    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_SQLITE3)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${SQLITE3_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${SQLITE3_LIBRARIES})
 endif ()
 
