@@ -24,3 +24,23 @@ function (tabg_arguments_to_string __result __delimiter)
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 
+#/// List of regex.
+#///
+#/// @param __value   [out] output value name.
+#/// @param __regex   [in]  Regex string.
+#/// @param __source  [in]  Original list.
+function (tbag_list_regex __value __regex __source)
+    set (${__value})
+
+    foreach (__list_cursor ${__source})
+        string (REGEX MATCH "${__regex}" __match_cursor ${__list_cursor})
+        list (APPEND ${__value} ${__match_cursor})
+    endforeach ()
+
+    unset (__list_cursor)
+    unset (__match_cursor)
+
+    # result:
+    set (${__value} ${${__value}} PARENT_SCOPE)
+endfunction ()
+

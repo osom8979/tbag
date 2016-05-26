@@ -27,7 +27,7 @@ function (find_project _lib_projs _test_projs _exe_projs)
     file (GLOB_RECURSE _find_project_list RELATIVE "${PROJECT_SOURCE_DIR}" "${BUILD_PROJECT_FILE_NAME}")
 
     # Find library project.
-    list_regex (_find_lib_proj "${BUILD_LIB_PROJ_GLOB}" "${_find_project_list}")
+    tbag_list_regex (_find_lib_proj "${BUILD_LIB_PROJ_GLOB}" "${_find_project_list}")
     list (LENGTH _find_lib_proj _find_lib_proj_length)
 
     # Remove library project in the all project.
@@ -36,7 +36,7 @@ function (find_project _lib_projs _test_projs _exe_projs)
     endif ()
 
     # Find test executable project.
-    list_regex (_find_test_proj "${BUILD_TEST_PROJ_GLOB}" "${_find_project_list}")
+    tbag_list_regex (_find_test_proj "${BUILD_TEST_PROJ_GLOB}" "${_find_project_list}")
     list (LENGTH _find_test_proj _find_test_proj_length)
 
     # Remove test project in the all project.
@@ -45,7 +45,7 @@ function (find_project _lib_projs _test_projs _exe_projs)
     endif ()
 
     # Find executable project.
-    list_regex (_find_exe_proj "${BUILD_EXE_PROJ_GLOB}" "${_find_project_list}")
+    tbag_list_regex (_find_exe_proj "${BUILD_EXE_PROJ_GLOB}" "${_find_project_list}")
 
     string (REPLACE "/${BUILD_PROJECT_FILE_NAME}" "" ${_lib_projs}  "${_find_lib_proj}")
     string (REPLACE "/${BUILD_PROJECT_FILE_NAME}" "" ${_test_projs} "${_find_test_proj}")
