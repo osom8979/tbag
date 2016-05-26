@@ -8,10 +8,10 @@
 #  LEVELDB_INCLUDE_DIRS
 #  LEVELDB_LIBRARIES
 
-include (SimpleFindLibrary)
+include (TbagSimpleFindLibrary)
 
 set (_headers  "leveldb/options.h")
 set (_libs     "leveldb")
 
-simple_find_library (LEVELDB "${_headers}" "${_libs}")
+tbag_simple_find_library (LEVELDB "${_headers}" "${_libs}")
 

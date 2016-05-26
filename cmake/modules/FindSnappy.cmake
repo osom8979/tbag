@@ -8,10 +8,10 @@
 #  SNAPPY_INCLUDE_DIRS
 #  SNAPPY_LIBRARIES
 
-include (SimpleFindLibrary)
+include (TbagSimpleFindLibrary)
 
 set (_headers  "snappy.h")
 set (_libs     "snappy")
 
-simple_find_library (SNAPPY "${_headers}" "${_libs}")
+tbag_simple_find_library (SNAPPY "${_headers}" "${_libs}")
 

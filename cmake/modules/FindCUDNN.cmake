@@ -28,10 +28,10 @@ else ()
                                   ${CUDNN_ROOT_LIBRARY_PATHS})
 endif ()
 
-include (SimpleFindLibrary)
+include (TbagSimpleFindLibrary)
 
 set (_headers  "cudnn.h")
 set (_libs     "cudnn")
 
-simple_find_library (CUDNN "${_headers}" "${_libs}")
+tbag_simple_find_library (CUDNN "${_headers}" "${_libs}")
 

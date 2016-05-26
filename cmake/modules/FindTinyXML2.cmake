@@ -8,10 +8,10 @@
 #  TINYXML2_INCLUDE_DIRS
 #  TINYXML2_LIBRARIES
 
-include (SimpleFindLibrary)
+include (TbagSimpleFindLibrary)
 
 set (_headers  "tinyxml2.h")
 set (_libs     "tinyxml2")
 
-simple_find_library (TINYXML2 "${_headers}" "${_libs}")
+tbag_simple_find_library (TINYXML2 "${_headers}" "${_libs}")
 

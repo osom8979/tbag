@@ -8,10 +8,10 @@
 #  UV_INCLUDE_DIRS
 #  UV_LIBRARIES
 
-include (SimpleFindLibrary)
+include (TbagSimpleFindLibrary)
 
 set (_headers  "uv.h")
 set (_libs     "uv")
 
-simple_find_library (UV "${_headers}" "${_libs}")
+tbag_simple_find_library (UV "${_headers}" "${_libs}")
 
