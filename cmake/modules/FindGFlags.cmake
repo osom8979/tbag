@@ -8,10 +8,10 @@
 #  GFLAGS_INCLUDE_DIRS
 #  GFLAGS_LIBRARIES
 
+set (__prefix   GFLAGS)
+set (__headers  "gflags/gflags.h")
+set (__libs     "gflags")
+
 include (TbagSimpleFindLibrary)
-
-set (_headers  "gflags/gflags.h")
-set (_libs     "gflags")
-
-tbag_simple_find_library (GFLAGS "${_headers}" "${_libs}")
+tbag_simple_find_library ("${__prefix}" "${__headers}" "${__libs}")
 

@@ -8,10 +8,10 @@
 #  OPENBLAS_INCLUDE_DIRS
 #  OPENBLAS_LIBRARIES
 
+set (__prefix   OPENBLAS)
+set (__headers  "openblas_config.h")
+set (__libs     "openblas")
+
 include (TbagSimpleFindLibrary)
-
-set (_headers  "openblas_config.h")
-set (_libs     "openblas")
-
-tbag_simple_find_library (OPENBLAS "${_headers}" "${_libs}")
+tbag_simple_find_library ("${__prefix}" "${__headers}" "${__libs}")
 

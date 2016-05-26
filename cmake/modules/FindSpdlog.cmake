@@ -8,9 +8,10 @@
 #  SPDLOG_INCLUDE_DIRS
 #  SPDLOG_LIBRARIES
 
+set (__prefix   SPDLOG)
+set (__headers  "spdlog/spdlog.h")
+set (__libs     "")
+
 include (TbagSimpleFindLibrary)
-
-set (_headers  "spdlog/spdlog.h")
-
-tbag_simple_find_library (SPDLOG "${_headers}" "")
+tbag_simple_find_library ("${__prefix}" "${__headers}" "${__libs}")
 

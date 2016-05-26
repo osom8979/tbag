@@ -9,29 +9,25 @@
 #  CUDNN_LIBRARIES
 
 if (NOT CUDA_FOUND)
-    message ("** Find cuDNN: Not found CUDA.")
+    message (WARNING "FindCUDNN: Not found CUDA.")
     return ()
 endif ()
 
 set (CUDNN_ROOT_INCLUDE_PATHS "/usr/cuda/include"
                               "/usr/local/cuda/include"
                               ${CUDNN_ROOT_INCLUDE_PATHS})
+set (CUDNN_ROOT_LIBRARY_PATHS "/usr/cuda/lib"
+                              "/usr/local/cuda/lib"
+                              ${CUDNN_ROOT_LIBRARY_PATHS})
+
 if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set (CUDNN_ROOT_LIBRARY_PATHS "/usr/cuda/lib"
-                                  "/usr/cuda/lib64"
-                                  "/usr/local/cuda/lib"
-                                  "/usr/local/cuda/lib64"
-                                  ${CUDNN_ROOT_LIBRARY_PATHS})
-else ()
-    set (CUDNN_ROOT_LIBRARY_PATHS "/usr/cuda/lib"
-                                  "/usr/local/cuda/lib"
-                                  ${CUDNN_ROOT_LIBRARY_PATHS})
+    list (APPEND CUDNN_ROOT_LIBRARY_PATHS 0 "/usr/cuda/lib64" "/usr/local/cuda/lib64")
 endif ()
 
+set (__prefix   CUDNN)
+set (__headers  "cudnn.h")
+set (__libs     "cudnn")
+
 include (TbagSimpleFindLibrary)
-
-set (_headers  "cudnn.h")
-set (_libs     "cudnn")
-
-tbag_simple_find_library (CUDNN "${_headers}" "${_libs}")
+tbag_simple_find_library ("${__prefix}" "${__headers}" "${__libs}")
 

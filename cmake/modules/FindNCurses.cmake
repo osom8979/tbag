@@ -8,10 +8,10 @@
 #  NCURSES_INCLUDE_DIRS
 #  NCURSES_LIBRARIES
 
+set (__prefix   NCURSES)
+set (__headers  "ncurses/curses.h")
+set (__libs     "ncurses")
+
 include (TbagSimpleFindLibrary)
-
-set (_headers  "ncurses/curses.h")
-set (_libs     "ncurses")
-
-tbag_simple_find_library (NCURSES "${_headers}" "${_libs}")
+tbag_simple_find_library ("${__prefix}" "${__headers}" "${__libs}")
 

@@ -8,10 +8,10 @@
 #  SQLITE3_INCLUDE_DIRS
 #  SQLITE3_LIBRARIES
 
+set (__prefix   SQLITE3)
+set (__headers  "sqlite3.h")
+set (__libs     "sqlite3")
+
 include (TbagSimpleFindLibrary)
-
-set (_headers  "sqlite3.h")
-set (_libs     "sqlite3")
-
-tbag_simple_find_library (SQLITE3 "${_headers}" "${_libs}")
+tbag_simple_find_library ("${__prefix}" "${__headers}" "${__libs}")
 
