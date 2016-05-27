@@ -1,5 +1,5 @@
 #/// @file   TbagDoxygenGenerator.cmake
-#/// @brief  doxygen_generate function prototype.
+#/// @brief  tbag_doxygen_generate function prototype.
 #/// @author zer0
 #/// @date   2016-05-27
 
@@ -22,43 +22,45 @@ endfunction ()
 #///
 #/// @param __output_path [in] Output html file path.
 function (tbag_doxygen_generate__index_html __output_path)
-    if (NOT EXISTS "${__output_path}")
-        set (__write_content "<meta http-equiv=\"refresh\" content=\"0; url=doxygen/index.html\" />")
-        file (WRITE "${__output_path}" "${__write_content}")
+    if (EXISTS "${__output_path}")
+        file (REMOVE "${__output_path}")
     endif ()
+
+    file (WRITE "${__output_path}" "<meta http-equiv=\"refresh\" content=\"0; url=doxygen/index.html\" />")
 endfunction()
 
 #/// Write default Doxyfile.
 #///
 #/// @param __output_path [in] Output Doxyfile file path.
 function (tbag_doxygen_generate__default_doxyfile __output_path)
-    if (NOT EXISTS "${__output_path}")
-        string (CONCAT __write_content
-                "DOXYFILE_ENCODING       = UTF-8                        \n"
-                "PROJECT_NAME            = \"${MAIN_NAME}\"             \n"
-                "PROJECT_NUMBER          = \"${VERSION}\"               \n"
-                "PROJECT_BRIEF           = \"${MAIN_BRIEF}\"            \n"
-                "OUTPUT_DIRECTORY        = \"${PROJECT_BINARY_DIR}\"    \n"
-                "OUTPUT_LANGUAGE         = Korean-en                    \n"
-                "ALIASES                 = translate{2}=\"<dl class='section remarks'><dt>Translate-\\1</dt><dd>\\2</dd></dl>\" \n"
-                "MARKDOWN_SUPPORT        = NO                           \n"
-                "WARN_IF_UNDOCUMENTED    = NO                           \n"
-                "INPUT                   = \"${PROJECT_SOURCE_DIR}\"    \n"
-                "FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ *.d *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.inc \n"
-                "RECURSIVE               = YES                          \n"
-                "EXCLUDE_PATTERNS        = *build/*                     \n"
-                "HTML_TIMESTAMP          = YES                          \n"
-                "HTML_OUTPUT             = doxygen                      \n"
-                "GENERATE_LATEX          = NO                           \n"
-                "LATEX_OUTPUT            = latex                        \n"
-                "MACRO_EXPANSION         = YES                          \n"
-                "INCLUDE_PATH            = \"${PROJECT_SOURCE_DIR}\"    \n"
-                "INCLUDE_FILE_PATTERNS   = *.h *.hh *.hxx *.hpp *.h++   \n"
-                "USE_MATHJAX             = YES                          \n"
-                "MATHJAX_RELPATH         = https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML \n"
-                "QUIET                   = YES                          \n")
-        file (WRITE "${__output_path}" "${__write_content}")
+    if (EXISTS "${__output_path}")
+        file (REMOVE "${__output_path}")
     endif ()
+
+    file (WRITE "${__output_path}"
+            "DOXYFILE_ENCODING       = UTF-8                        \n"
+            "PROJECT_NAME            = \"${MAIN_NAME}\"             \n"
+            "PROJECT_NUMBER          = \"${VERSION}\"               \n"
+            "PROJECT_BRIEF           = \"${MAIN_BRIEF}\"            \n"
+            "OUTPUT_DIRECTORY        = \"${PROJECT_BINARY_DIR}\"    \n"
+            "OUTPUT_LANGUAGE         = Korean-en                    \n"
+            "ALIASES                 = translate{2}=\"<dl class='section remarks'><dt>Translate-\\1</dt><dd>\\2</dd></dl>\" \n"
+            "MARKDOWN_SUPPORT        = NO                           \n"
+            "WARN_IF_UNDOCUMENTED    = NO                           \n"
+            "INPUT                   = \"${PROJECT_SOURCE_DIR}\"    \n"
+            "FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ *.d *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.inc \n"
+            "RECURSIVE               = YES                          \n"
+            "EXCLUDE_PATTERNS        = *build/*                     \n"
+            "HTML_TIMESTAMP          = YES                          \n"
+            "HTML_OUTPUT             = doxygen                      \n"
+            "GENERATE_LATEX          = NO                           \n"
+            "LATEX_OUTPUT            = latex                        \n"
+            "MACRO_EXPANSION         = YES                          \n"
+            "INCLUDE_PATH            = \"${PROJECT_SOURCE_DIR}\"    \n"
+            "INCLUDE_FILE_PATTERNS   = *.h *.hh *.hxx *.hpp *.h++   \n"
+            "USE_MATHJAX             = YES                          \n"
+            "MATHJAX_RELPATH         = https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML \n"
+            "QUIET                   = YES                          \n")
 endfunction()
 
 macro (tbag_doxygen_generate__auto_default)

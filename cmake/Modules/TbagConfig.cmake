@@ -10,6 +10,7 @@ include (TbagFlags)
 include (TbagTparty)
 include (TbagProject)
 
+include (TbagCxxConfigGenerator)
 include (TbagDoxygenGenerator)
 include (ProtobufGenerator)
 

@@ -39,23 +39,13 @@ set (SQLite3_ROOT  "${THIRD_PREFIX}")
 
 tbag_config__add_library_list (GTest UV Spdlog TinyXML2 NCurses SQLite3 Doxygen)
 
-## -------------------
 ## Configure settings.
-## -------------------
+tbag_cxx_config_generate ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
+tbag_doxygen_generate__auto_default ()
 
-set (TEMPLATE_PREFIX "${PROJECT_SOURCE_DIR}/template")
-
-set (IN_CONFIG  "${TEMPLATE_PREFIX}/config.h.in")
-set (OUT_CONFIG "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
-configure_file (${IN_CONFIG} ${OUT_CONFIG} NEWLINE_STYLE UNIX)
-
-## -----------------
-## Project settings.
-## -----------------
-
+## Run project.
 tbag_project__default ()
 
-tbag_doxygen_generate__auto_default ()
 tbag_module_install__assign_library (${MAIN_NAME})
 tbag_info__print_preview ()
 
