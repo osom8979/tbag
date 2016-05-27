@@ -25,12 +25,13 @@ tbag_config__init_version (
         0)
 
 tbag_config__exists_main_information ()
+tbag_config__caching_shared_library_option ()
 tbag_flags__default ()
 tbag_tparty__default ()
 
-## ---------------------------------
-## Initialize the library variables.
-## ---------------------------------
+## ------------------
+## Library variables.
+## ------------------
 
 # Extension variables.
 set (ZLIB_ROOT     "${THIRD_PREFIX}")
@@ -63,9 +64,6 @@ tbag_config__add_library_option  (PNG       OFF)
 tbag_config__add_library_option  (wxWidgets OFF)
 #tbag_config__add_library_option (Tbag      OFF)
 
-# Build options.
-option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
-
 ## -------------------
 ## Configure settings.
 ## -------------------
@@ -80,25 +78,13 @@ set (IN_DOXYFILE  "${TEMPLATE_PREFIX}/Doxyfile.in")
 set (OUT_DOXYFILE "${PROJECT_SOURCE_DIR}/Doxyfile")
 configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 
-## ------------
-## Sub-project.
-## ------------
-
-tbag_project__default ()
-
-## -----------------------
-## Continuous Integration.
-## -----------------------
-
-doxygen_generate ("${OUT_DOXYFILE}")
-
 ## -----------------
 ## Project settings.
 ## -----------------
 
-install (DIRECTORY ${MAIN_NAME}
-         DESTINATION "include"
-         FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+tbag_project__default ()
 
+doxygen_generate ("${OUT_DOXYFILE}")
+tbag_module_install__assign_library (${MAIN_NAME})
 tbag_info__print_preview ()
 

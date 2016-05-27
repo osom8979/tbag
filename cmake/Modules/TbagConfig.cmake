@@ -51,6 +51,10 @@ macro (tbag_config__init_version __major __minor __patch __packet_major __packet
     # Extension: release version number.
     set (VERSION_RELEASE __release)
 
+    mark_as_advanced (VERSION_MAJOR VERSION_MINOR VERSION_PATCH
+                      VERSION_PACKET_MAJOR VERSION_PACKET_MINOR
+                      VERSION_RELEASE)
+
     set (VERSION   "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
     set (SOVERSION "${VERSION_MAJOR}")
 endmacro ()
@@ -74,6 +78,11 @@ macro (tbag_config__exists_main_information)
 
     # Extension version number.
     tbag_common__exists_define_or_die (VERSION_RELEASE)
+endmacro ()
+
+#/// The caching shared library options.
+macro (tbag_config__caching_shared_library_option)
+    option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
 endmacro ()
 
 #/// Create & cacheing library option.
