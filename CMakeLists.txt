@@ -134,3 +134,5 @@ install (DIRECTORY ${MAIN_NAME}
          DESTINATION "include"
          FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
 
+tbag_info__print_preview ()
+
