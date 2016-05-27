@@ -1,9 +1,9 @@
-DOXYFILE_ENCODING        = UTF-8
+#DOXYFILE_ENCODING       = UTF-8
 #PROJECT_NAME            =
 #PROJECT_NUMBER          =
 #PROJECT_BRIEF           =
-PROJECT_LOGO             =
-OUTPUT_DIRECTORY         =
+#PROJECT_LOGO            =
+#OUTPUT_DIRECTORY        =
 CREATE_SUBDIRS           = NO
 #ALLOW_UNICODE_NAMES     = NO # Doxygen v1.8.6 unsupported tag.
 #OUTPUT_LANGUAGE         = English
@@ -29,7 +29,7 @@ OPTIMIZE_OUTPUT_JAVA     = NO
 OPTIMIZE_FOR_FORTRAN     = NO
 OPTIMIZE_OUTPUT_VHDL     = NO
 EXTENSION_MAPPING        =
-MARKDOWN_SUPPORT         = YES
+#MARKDOWN_SUPPORT        = YES
 AUTOLINK_SUPPORT         = YES
 BUILTIN_STL_SUPPORT      = NO
 CPP_CLI_SUPPORT          = NO
@@ -264,20 +264,23 @@ GENERATE_LEGEND          = YES
 DOT_CLEANUP              = YES
 
 ## AUTO GENERATE CODE:
+DOXYFILE_ENCODING       = UTF-8
 PROJECT_NAME            = "${MAIN_NAME}"
 PROJECT_NUMBER          = "${VERSION}"
 PROJECT_BRIEF           = "${MAIN_BRIEF}"
+PROJECT_LOGO            = # .doxygen/favicon.png
+OUTPUT_DIRECTORY        = "${PROJECT_BINARY_DIR}"
 OUTPUT_LANGUAGE         = Korean-en
 ALIASES                 = translate{2}="<dl class='section remarks'><dt>Translate-\1</dt><dd>\2</dd></dl>"
+MARKDOWN_SUPPORT        = NO
 WARN_IF_UNDOCUMENTED    = NO
-INPUT                   = .
+INPUT                   = "${PROJECT_SOURCE_DIR}"
 FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ *.d *.java *.ii *.ixx *.ipp *.i++ \
-                          *.inl *.h *.hh *.hxx *.hpp *.h++  *.idl *.odl *.cs *.php *.php3 \
-                          *.inc *.m *.markdown *.md *.mm *.dox *.py *.f90  *.f *.for *.vhd *.vhdl
+                          *.inl *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.inc
 RECURSIVE               = YES
-EXCLUDE_PATTERNS        = *3rd/* *build/* *tparty/*
+EXCLUDE_PATTERNS        = *build/*
 HTML_TIMESTAMP          = YES
-HTML_OUTPUT             = .html
+HTML_OUTPUT             = .doxygen
 GENERATE_LATEX          = NO
 LATEX_OUTPUT            = .latex
 #RTF_SOURCE_CODE        = NO # Doxygen v1.8.6 unsupported tag.

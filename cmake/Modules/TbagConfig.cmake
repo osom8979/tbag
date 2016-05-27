@@ -10,6 +10,9 @@ include (TbagFlags)
 include (TbagTparty)
 include (TbagProject)
 
+include (DoxygenGenerator)
+include (ProtobufGenerator)
+
 #/// Initialize & caching main information.
 #///
 #/// @param __name   [in] main project name.
@@ -35,9 +38,9 @@ endmacro ()
 #/// @param __release       [in] Release number.
 macro (tbag_config__init_version __major __minor __patch __packet_major __packet_minor __release)
     # Main version.
-    set (VERSION_MAJOR __major)
-    set (VERSION_MINOR __minor)
-    set (VERSION_PATCH __patch)
+    set (VERSION_MAJOR ${__major})
+    set (VERSION_MINOR ${__minor})
+    set (VERSION_PATCH ${__patch})
 
     # Tweak version.
     string (TIMESTAMP __timestamp "%Y-%m-%d_%H%M%S")
@@ -45,11 +48,11 @@ macro (tbag_config__init_version __major __minor __patch __packet_major __packet
     unset (__timestamp)
 
     # Extension: Packet version.
-    set (VERSION_PACKET_MAJOR __packet_major)
-    set (VERSION_PACKET_MINOR __packet_minor)
+    set (VERSION_PACKET_MAJOR ${__packet_major})
+    set (VERSION_PACKET_MINOR ${__packet_minor})
 
     # Extension: release version number.
-    set (VERSION_RELEASE __release)
+    set (VERSION_RELEASE ${__release})
 
     mark_as_advanced (VERSION_MAJOR VERSION_MINOR VERSION_PATCH
                       VERSION_PACKET_MAJOR VERSION_PACKET_MINOR
