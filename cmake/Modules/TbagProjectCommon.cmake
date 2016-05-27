@@ -44,16 +44,3 @@ function (tbag_get_project_name __result __project_dir_name)
     unset (__project_type)
 endfunction ()
 
-## -----------------
-## Module operators.
-## -----------------
-
-set (TBAG_MODULE_PREFIX "TbagModule")
-
-#/// Include tbag module.
-#///
-#/// @param __module [in] module name.
-macro (tbag_module __module)
-    include (${TBAG_MODULE_PREFIX}${__module})
-endmacro (tbag_module)
-

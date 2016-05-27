@@ -16,8 +16,8 @@ enable_language (CXX)
 list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
 # User defined settings.
-include (TbagCMakeConfig)
-include (TbagCMakeTparty)
+include (TbagConfig)
+include (TbagTparty)
 include (TbagFlags)
 
 tbag_config_init_main_information (
@@ -27,48 +27,31 @@ tbag_config_init_version (
         0 0 0
         0 0
         0)
+tbag_config_exists_main_information ()
 
-tbag_flags__position_independent_code ()
-tbag_flags__cpp_standard_11 ()
-tbag_flags__add_debug_define ()
+tbag_flags__position_independent_code       ()
+tbag_flags__cpp_standard_11                 ()
+tbag_flags__add_debug_define                ()
 tbag_flags__include_and_link_for_source_dir ()
-tbag_flags__print_all_compile_warning ()
+tbag_flags__print_all_compile_warning       ()
+#tbag_flags__install_rpath ()
 
 tbag_tparty_init ()
 
 # List of libraries.
-tbag_config_add_library_option ("zlib"      OFF)
-tbag_config_add_library_option ("gtest"     ON)
-tbag_config_add_library_option ("protobuf"  OFF)
-tbag_config_add_library_option ("spdlog"    ON)
-tbag_config_add_library_option ("libuv"     ON)
-tbag_config_add_library_option ("tinyxml2"  ON)
-tbag_config_add_library_option ("ncurses"   ON)
-tbag_config_add_library_option ("sqlite3"   ON)
+tbag_config_add_library_option (ZLIB      OFF)
+tbag_config_add_library_option (GTEST     ON)
+tbag_config_add_library_option (PROTOBUF  OFF)
+tbag_config_add_library_option (SPDLOG    ON)
+tbag_config_add_library_option (LIBUV     ON)
+tbag_config_add_library_option (TINYXML2  ON)
+tbag_config_add_library_option (NCURSES   ON)
+tbag_config_add_library_option (SQLITE3   ON)
+tbag_config_add_library_option (DOXYGEN   ON)
 
-# Continuous Integration.
-option (USE_DOXYGEN "API documentation." ON)
-
+# Build options.
 option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
 
-# CMake extension script.
-include (TbagFindObject)
-include (TbagProject)
-include (TbagProjectBuild)
-include (TbagFilesystem)
-include (TbagInformation)
-include (TbagCommon)
-include (TbagStrings)
-include (TbagCMakeConfig)
-
-tbag_config_exists_main_information ()
-
-list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_SOURCE_DIR}")
-list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_SOURCE_DIR}")
-
-#set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-#set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set  (CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
 # Extension variables.
 set (ZLIB_ROOT     "${THIRD_PREFIX}")
@@ -79,18 +62,8 @@ set (TINYXML2_ROOT "${THIRD_PREFIX}")
 set (NCURSES_ROOT  "${THIRD_PREFIX}")
 set (SQLITE3_ROOT  "${THIRD_PREFIX}")
 
-# Test packages.
-tbag_find_package  (USE_zlib      ZLIB)
-tbag_find_package  (USE_gtest     GTest)
-tbag_find_package  (USE_protobuf  Protobuf)
-tbag_find_package  (USE_spdlog    Spdlog)
-tbag_find_package  (USE_libuv     UV)
-tbag_find_package  (USE_tinyxml2  TinyXML2)
-tbag_find_package  (USE_ncurses   NCurses)
-tbag_find_package  (USE_sqlite3   SQLite3)
-
 # Continuous Integration.
-tbag_find_package (DOXYGEN Doxygen)
+#tbag_find_package (DOXYGEN Doxygen)
 
 ## -------------------
 ## Configure settings.
@@ -105,11 +78,6 @@ configure_file (${IN_CONFIG} ${OUT_CONFIG} NEWLINE_STYLE UNIX)
 set (IN_DOXYFILE  "${TEMPLATE_PREFIX}/Doxyfile.in")
 set (OUT_DOXYFILE "${PROJECT_SOURCE_DIR}/Doxyfile")
 configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
-
-## -----------
-## Properties.
-## -----------
-
 
 # ------------
 # Sub-project.

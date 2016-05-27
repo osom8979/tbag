@@ -51,6 +51,12 @@ macro (tbag_flags__add_debug_define)
 endmacro ()
 
 #/// include & link directory for source directory.
+macro (tbag_flags__path_for_source_dir)
+    list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_SOURCE_DIR}")
+    list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_SOURCE_DIR}")
+endmacro ()
+
+#/// include & link directory for source directory.
 macro (tbag_flags__include_and_link_for_source_dir)
     include_directories (${PROJECT_SOURCE_DIR})
     link_directories    (${PROJECT_SOURCE_DIR})
@@ -86,5 +92,12 @@ endmacro ()
 #/// Print all compile warning.
 macro (tbag_flags__print_all_compile_warning)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endmacro ()
+
+#/// Setup RPATH variables.
+macro (tbag_flags__install_rpath)
+    set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE)
+    set (CMAKE_INSTALL_RPATH     "${CMAKE_INSTALL_PREFIX}/lib")
+    set (CMAKE_INSTALL_NAME_DIR  "${CMAKE_INSTALL_PREFIX}/lib")
 endmacro ()
 

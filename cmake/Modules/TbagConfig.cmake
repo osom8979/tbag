@@ -1,9 +1,17 @@
-#/// @file   TbagCMakeConfig.cmake
+#/// @file   TbagConfig.cmake
 #/// @brief  Default tbag cmake configure.
 #/// @author zer0
 #/// @date   2016-05-26
 
 include (TbagCommon)
+
+# Tbag for cmake extension script.
+include (TbagStrings)
+include (TbagInformation)
+include (TbagFlags)
+include (TbagTparty)
+include (TbagProject)
+include (TbagProjectBuild)
 
 #/// Initialize & caching main information.
 #///

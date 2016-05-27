@@ -4,9 +4,8 @@
 #/// @date   2016-05-26
 
 include (TbagProjectCommon)
-
-# Modules.
-tbag_module (GTest)
+include (TbagFindObject)
+include (TbagModules)
 
 #/// Clear project properties.
 macro (tbag_project_clear_properties)

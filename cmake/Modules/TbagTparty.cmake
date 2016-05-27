@@ -1,4 +1,4 @@
-#/// @file   TbagCMakeTparty.cmake
+#/// @file   TbagTparty.cmake
 #/// @brief  Default tbag with tpary cmake configure.
 #/// @author zer0
 #/// @date   2016-05-26

@@ -17,17 +17,3 @@ function (tbag_exists_define_or_die __value)
     endif()
 endfunction ()
 
-## -----------------
-## Module utilities.
-## -----------------
-
-#/// Test find_package() macro.
-#///
-#/// @param __enable      [in] Enable variable.
-#/// @param __module_name [in] Module name.
-macro (tbag_find_package __enable __module_name)
-    if (${__enable})
-        find_package (${__module_name})
-    endif ()
-endmacro ()
-
