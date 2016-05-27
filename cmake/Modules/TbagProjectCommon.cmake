@@ -16,7 +16,7 @@ set (TBAG_PROJECT_FILE_REGEX   "[^/]+/${TBAG_PROJECT_FILE_PREFIX}\\.${TBAG_PROJE
 #///
 #/// @param __result           [out] value name of result type string.
 #/// @param __project_dir_name [in]  project directory name.
-function (tbag_get_project_type __result __project_dir_name)
+function (tbag_project_common__get_type __result __project_dir_name)
     set (${__result})
 
     if (${__project_dir_name} MATCHES "^${TBAG_PROJECT_LIBRARY_PREFIX}.+")
@@ -30,9 +30,9 @@ endfunction()
 #///
 #/// @param __result           [out] value name of result type string.
 #/// @param __project_dir_name [in]  project directory name.
-function (tbag_get_project_name __result __project_dir_name)
+function (tbag_project_common__get_name __result __project_dir_name)
     set (${__result})
-    tbag_get_project_type (__project_type "${__project_dir_name}")
+    tbag_project_common__get_type (__project_type "${__project_dir_name}")
 
     if ("${__project_type}" STREQUAL "${TBAG_PROJECT_LIBRARY_PREFIX}")
         string (REPLACE "${TBAG_PROJECT_LIBRARY_PREFIX}" "" __temp_name "${__project_dir_name}")
@@ -40,7 +40,5 @@ function (tbag_get_project_name __result __project_dir_name)
     else ()
         set (${__result} "${__project_dir_name}" PARENT_SCOPE)
     endif ()
-
-    unset (__project_type)
 endfunction ()
 

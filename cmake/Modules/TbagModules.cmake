@@ -24,6 +24,33 @@ macro (tbag_module__assign_default __define)
     set (TBAG_PROJECT_LDFLAGS      -L${CMAKE_CURRENT_LIST_DIR})
 endmacro ()
 
+#/// Assign soversion property.
+#///
+#/// @remarsk
+#///  Recommended apply to the library project.
+macro (tbag_module__assign_soversion)
+    set_target_properties (${TBAG_PROJECT_CONST_NAME} PROPERTIES
+                           VERSION   "${VERSION}"
+                           SOVERSION "${SOVERSION}")
+endmacro ()
+
+#/// Assign default install properties.
+#///
+#/// @remarsk
+#///  Recommended apply to the library & executable project.
+macro (tbag_module__assign_default_install)
+    # Target install.
+    install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
+
+    # Header install.
+    install (DIRECTORY "${TBAG_PROJECT_CONST_DIR_NAME}"
+            DESTINATION "include"
+            FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+endmacro ()
+
 # Extension modules.
 tbag_module (GTest)
 tbag_module (NCurses)

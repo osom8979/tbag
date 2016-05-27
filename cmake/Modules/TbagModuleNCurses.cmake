@@ -1,5 +1,5 @@
 #/// @file   TbagModuleNCurses.cmake
-#/// @brief  NCurses tbag cmake module.
+#/// @brief  NCurses tbag module.
 #/// @author zer0
 #/// @date   2016-05-27
 
@@ -7,7 +7,7 @@
 #///
 #/// @remarsk
 #///  Recommended apply to the test project.
-macro (tbag_module__assign_ncurses)
+macro (tbag_module_ncurses__assign)
     if (NOT NCurses_FOUND)
         find_package (NCurses)
     endif ()

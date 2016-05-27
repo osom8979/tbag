@@ -1,5 +1,5 @@
 #/// @file   TbagModuleSQLite3.cmake
-#/// @brief  SQLite3 tbag cmake module.
+#/// @brief  SQLite3 tbag module.
 #/// @author zer0
 #/// @date   2016-05-27
 
@@ -7,7 +7,7 @@
 #///
 #/// @remarsk
 #///  Recommended apply to the test project.
-macro (tbag_module__assign_sqlite3)
+macro (tbag_module_sqlite3__assign)
     if (NOT SQLite3_FOUND)
         find_package (SQLite3)
     endif ()

@@ -1,5 +1,5 @@
 #/// @file   TbagProject.cmake
-#/// @brief  Tbag project function prototype.
+#/// @brief  tbag_project function prototype.
 #/// @author zer0
 #/// @date   2016-05-27
 
@@ -15,7 +15,7 @@ function (tbag_project __root_dir)
     message ("** Find library project: ${__libs}")
     message ("** Find executable project: ${__exes}")
 
-    tbag_project_build ("${__libs}" "${__exes}" "${__root_dir}")
+    tbag_project_build_default ("${__libs}" "${__exes}" "${__root_dir}")
 endfunction ()
 
 #/// run default tbag project.

@@ -6,16 +6,16 @@
 #/// Print debug message.
 #///
 #/// @param ... [in] message arguments.
-function (tbag_debug_message)
+function (tbag_debug__message)
     message (STATUS "@ " ${ARGN})
 endfunction ()
 
 #/// Print debug message with list.
 #///
 #/// @param ... [in] message arguments.
-function (tbag_debug_message_list)
+function (tbag_debug__message_with_list)
     foreach (__list_cursor ${ARGN})
-        tbag_debug_message (${__list_cursor})
+        tbag_debug__message (${__list_cursor})
     endforeach ()
 endfunction ()
 
@@ -29,7 +29,7 @@ endfunction ()
 #///  - TBAG_DEBUG_TAG: Regex conditions of print.
 function (tbag_debug __tag)
     if (TBAG_DEBUG_TAG AND ("${__tag}" MATCHES "${TBAG_DEBUG_TAG}"))
-        tbag_debug_message ("[${__tag}] ${ARGN}")
+        tbag_debug__message ("[${__tag}] ${ARGN}")
     endif ()
 endfunction ()
 

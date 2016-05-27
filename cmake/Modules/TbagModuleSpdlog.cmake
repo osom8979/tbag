@@ -1,5 +1,5 @@
 #/// @file   TbagModuleSpdlog.cmake
-#/// @brief  Speed-log tbag cmake module.
+#/// @brief  Speed-log tbag module.
 #/// @author zer0
 #/// @date   2016-05-27
 
@@ -7,7 +7,7 @@
 #///
 #/// @remarsk
 #///  Recommended apply to the test project.
-macro (tbag_module__assign_spdlog)
+macro (tbag_module_spdlog__assign)
     if (NOT Spdlog_FOUND)
         find_package (Spdlog)
     endif ()

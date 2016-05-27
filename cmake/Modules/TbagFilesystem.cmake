@@ -1,5 +1,5 @@
 #/// @file   TbagFilesystem.cmake
-#/// @brief  filesystem utilities.
+#/// @brief  File system utilities.
 #/// @author zer0
 #/// @date   2016-05-26
 
@@ -13,7 +13,7 @@ endif ()
 #///
 #/// @param __value [out] output value name.
 #/// @param __paths [in]  MSYS path list.
-function (tbag_convert_msys_to_windows_path __value __paths)
+function (tbag_filesystem__convert_msys_to_windows_path __value __paths)
     set (${__value})
 
     foreach (__path_cursor ${__paths})
@@ -21,10 +21,6 @@ function (tbag_convert_msys_to_windows_path __value __paths)
         string (REGEX REPLACE "/+" "\\\\" __replace_cursor2 ${__replace_cursor1})
         list (APPEND ${__value} ${__replace_cursor2})
     endforeach ()
-
-    unset (__path_cursor)
-    unset (__replace_cursor1)
-    unset (__replace_cursor2)
 
     # update result.
     set (${__value} ${${__value}} PARENT_SCOPE)

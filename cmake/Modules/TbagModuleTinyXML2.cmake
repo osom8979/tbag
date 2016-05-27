@@ -1,5 +1,5 @@
 #/// @file   TbagModuleTinyXML2.cmake
-#/// @brief  TinyXML2 tbag cmake module.
+#/// @brief  TinyXML2 tbag module.
 #/// @author zer0
 #/// @date   2016-05-27
 
@@ -7,7 +7,7 @@
 #///
 #/// @remarsk
 #///  Recommended apply to the test project.
-macro (tbag_module__assign_tinyxml2)
+macro (tbag_module_tinyxml2__assign)
     if (NOT TinyXML2_FOUND)
         find_package (TinyXML2)
     endif ()

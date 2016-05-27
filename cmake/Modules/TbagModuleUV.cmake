@@ -1,5 +1,5 @@
 #/// @file   TbagModuleUV.cmake
-#/// @brief  libuv tbag cmake module.
+#/// @brief  libuv tbag module.
 #/// @author zer0
 #/// @date   2016-05-27
 
@@ -7,7 +7,7 @@
 #///
 #/// @remarsk
 #///  Recommended apply to the test project.
-macro (tbag_module__assign_uv)
+macro (tbag_module_uv__assign)
     if (NOT UV_FOUND)
         find_package (UV)
     endif ()

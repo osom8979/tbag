@@ -1,6 +1,4 @@
-## CMake subproject properties.
+## Tbag CMake subproject.
 
-set (TBAG_PROJECT_DEFINITIONS  -DPROCESS_TEST)
-set (TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
-set (TBAG_PROJECT_LDFLAGS      -L${CMAKE_CURRENT_LIST_DIR})
+tbag_module__assign_default (PROCESS_TEST)
 

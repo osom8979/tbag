@@ -29,17 +29,12 @@ function (tbag_find_libraries __result __paths __libs)
     endforeach ()
 
     # Preview
-    tabg_arguments_to_string (__preview_result "," ${${__result}})
+    tabg_strings__arguments_to_string (__preview_result "," ${${__result}})
     tbag_debug (find_libraries "Result variable name: ${__result} (${__preview_result})")
-    tabg_arguments_to_string (__preview_result "," ${__paths})
+    tabg_strings__arguments_to_string (__preview_result "," ${__paths})
     tbag_debug (find_libraries "Search directories: ${__preview_result}")
-    tabg_arguments_to_string (__preview_result "," ${__libs})
+    tabg_strings__arguments_to_string (__preview_result "," ${__libs})
     tbag_debug (find_libraries "Find library files: ${__preview_result}")
-
-    unset (__preview_result)
-    unset (__find_name)
-    unset (__lib_cursor)
-    unset (__name_index)
 
     # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)

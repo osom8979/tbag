@@ -9,9 +9,9 @@ endif ()
 enable_language (C)
 enable_language (CXX)
 
-# ---------------
-# CMake settings.
-# ---------------
+## ---------------
+## CMake settings.
+## ---------------
 
 list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 include (TbagConfig)
@@ -86,15 +86,15 @@ configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 
 tbag_project__default ()
 
-# -----------------------
-# Continuous Integration.
-# -----------------------
+## -----------------------
+## Continuous Integration.
+## -----------------------
 
 doxygen_generate ("${OUT_DOXYFILE}")
 
-# -----------------
-# Project settings.
-# -----------------
+## -----------------
+## Project settings.
+## -----------------
 
 install (DIRECTORY ${MAIN_NAME}
          DESTINATION "include"

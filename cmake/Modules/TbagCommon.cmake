@@ -11,7 +11,7 @@
 #/// If not exists, it send a fatal error.
 #///
 #/// @param __value [in] check value name.
-function (tbag_exists_define_or_die __value)
+function (tbag_common__exists_define_or_die __value)
     if (NOT DEFINED ${__value})
         message (FATAL_ERROR "Not defined ${__value} variable.")
     endif()

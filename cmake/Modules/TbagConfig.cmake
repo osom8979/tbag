@@ -4,8 +4,6 @@
 #/// @date   2016-05-26
 
 include (TbagCommon)
-
-# Tbag for cmake extension script.
 include (TbagStrings)
 include (TbagInformation)
 include (TbagFlags)
@@ -60,22 +58,22 @@ endmacro ()
 #/// Exists main information.
 macro (tbag_config__exists_main_information)
     # Main information.
-    tbag_exists_define_or_die (MAIN_NAME)
-    tbag_exists_define_or_die (MAIN_AUTHOR)
-    tbag_exists_define_or_die (MAIN_EMAIL)
-    tbag_exists_define_or_die (MAIN_BRIEF)
+    tbag_common__exists_define_or_die (MAIN_NAME)
+    tbag_common__exists_define_or_die (MAIN_AUTHOR)
+    tbag_common__exists_define_or_die (MAIN_EMAIL)
+    tbag_common__exists_define_or_die (MAIN_BRIEF)
 
     # Main version.
-    tbag_exists_define_or_die (VERSION_MAJOR)
-    tbag_exists_define_or_die (VERSION_MINOR)
-    tbag_exists_define_or_die (VERSION_PATCH)
+    tbag_common__exists_define_or_die (VERSION_MAJOR)
+    tbag_common__exists_define_or_die (VERSION_MINOR)
+    tbag_common__exists_define_or_die (VERSION_PATCH)
 
     # Packet version.
-    tbag_exists_define_or_die (VERSION_PACKET_MAJOR)
-    tbag_exists_define_or_die (VERSION_PACKET_MINOR)
+    tbag_common__exists_define_or_die (VERSION_PACKET_MAJOR)
+    tbag_common__exists_define_or_die (VERSION_PACKET_MINOR)
 
     # Extension version number.
-    tbag_exists_define_or_die (VERSION_RELEASE)
+    tbag_common__exists_define_or_die (VERSION_RELEASE)
 endmacro ()
 
 #/// Create & cacheing library option.

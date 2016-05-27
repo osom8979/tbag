@@ -8,7 +8,7 @@
 #/// @param __result    [out] Output value name.
 #/// @param __delimiter [in]  Delimiter string.
 #/// @param ...         [in]  List of arguments.
-function (tabg_arguments_to_string __result __delimiter)
+function (tabg_strings__arguments_to_string __result __delimiter)
     set (${__result})
     set (__is_first_setting NO)
 
@@ -30,7 +30,7 @@ endfunction ()
 #/// @param __result  [out] output value name.
 #/// @param __regex   [in]  Regex string.
 #/// @param __source  [in]  Original list.
-function (tbag_list_regex __result __regex __source)
+function (tbag_strings__list_regex __result __regex __source)
     set (${__result})
 
     foreach (__list_cursor ${__source})

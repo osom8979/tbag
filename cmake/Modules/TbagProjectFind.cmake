@@ -1,5 +1,5 @@
 #/// @file   TbagProjectFind.cmake
-#/// @brief  Tbag project find function prototype.
+#/// @brief  tbag_project_find function prototype.
 #/// @author zer0
 #/// @date   2016-05-26
 
@@ -19,7 +19,7 @@ function (tbag_project_find __lib_projs __exe_projs __root_dir)
     file (GLOB_RECURSE __find_project_list RELATIVE "${__root_dir}" "${TBAG_PROJECT_FILE_NAME}")
 
     # Find library project.
-    tbag_list_regex (__find_lib_proj "${__library_glob}" "${__find_project_list}")
+    tbag_strings__list_regex (__find_lib_proj "${__library_glob}" "${__find_project_list}")
     list (LENGTH __find_lib_proj __find_lib_proj_length)
 
     # Remove library project in the all project.
@@ -28,7 +28,7 @@ function (tbag_project_find __lib_projs __exe_projs __root_dir)
     endif ()
 
     # Find executable project.
-    tbag_list_regex (__find_exe_proj "${__executable_glob}" "${__find_project_list}")
+    tbag_strings__list_regex (__find_exe_proj "${__executable_glob}" "${__find_project_list}")
 
     string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__lib_projs}  "${__find_lib_proj}")
     string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__exe_projs}  "${__find_exe_proj}")
