@@ -84,12 +84,7 @@ configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 ## Sub-project.
 ## ------------
 
-tbag_project_find (_lib_proj_list _exe_proj_list "${PROJECT_SOURCE_DIR}")
-
-message ("** Find library project: ${_lib_proj_list}")
-message ("** Find executable project: ${_exe_proj_list}")
-
-tbag_project_build ("${_lib_proj_list}" "${_exe_proj_list}" "${PROJECT_SOURCE_DIR}")
+tbag_project__default ()
 
 # -----------------------
 # Continuous Integration.

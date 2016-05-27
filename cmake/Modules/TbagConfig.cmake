@@ -10,8 +10,7 @@ include (TbagStrings)
 include (TbagInformation)
 include (TbagFlags)
 include (TbagTparty)
-include (TbagProjectFind)
-include (TbagProjectBuild)
+include (TbagProject)
 
 #/// Initialize & caching main information.
 #///
