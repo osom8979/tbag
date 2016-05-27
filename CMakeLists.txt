@@ -18,6 +18,7 @@ list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 # User defined settings.
 include (TbagCMakeConfig)
 include (TbagCMakeTparty)
+include (TbagFlags)
 
 tbag_config_init_main_information (
         libtbag zer0 osom8979@gmail.com
@@ -26,6 +27,13 @@ tbag_config_init_version (
         0 0 0
         0 0
         0)
+
+tbag_flags__position_independent_code ()
+tbag_flags__cpp_standard_11 ()
+tbag_flags__add_debug_define ()
+tbag_flags__include_and_link_for_source_dir ()
+tbag_flags__print_all_compile_warning ()
+
 tbag_tparty_init ()
 
 # List of libraries.
@@ -52,7 +60,6 @@ include (TbagInformation)
 include (TbagCommon)
 include (TbagStrings)
 include (TbagCMakeConfig)
-include (TbagFlags)
 
 tbag_config_exists_main_information ()
 
@@ -103,11 +110,6 @@ configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
 ## Properties.
 ## -----------
 
-tbag_flags__position_independent_code ()
-tbag_flags__cpp_standard_11 ()
-tbag_flags__add_debug_define ()
-tbag_flags__include_and_link_for_source_dir ()
-tbag_flags__print_all_compile_warning ()
 
 # ------------
 # Sub-project.
