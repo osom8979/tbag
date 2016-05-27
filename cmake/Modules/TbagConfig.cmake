@@ -97,3 +97,33 @@ macro (tbag_config__add_library_option __name __enable)
     endif ()
 endmacro ()
 
+#/// Create & cacheing library list.
+#///
+#/// @param ... [in] list of library name.
+macro (tbag_config__add_library_list)
+    foreach (__list_cursor ${ARGN})
+        tbag_config__add_library_option (${__list_cursor} ON)
+    endforeach ()
+endmacro ()
+
+# List of libraries.
+#tbag_config__add_library_option (ZLIB      OFF)
+#tbag_config__add_library_option (LMDB      OFF)
+#tbag_config__add_library_option (GTest     ON)
+#tbag_config__add_library_option (Spdlog    ON)
+#tbag_config__add_library_option (UV        ON)
+#tbag_config__add_library_option (TinyXML2  ON)
+#tbag_config__add_library_option (NCurses   ON)
+#tbag_config__add_library_option (SQLite3   ON)
+#tbag_config__add_library_option (Doxygen   ON)
+#tbag_config__add_library_option (Protobuf  OFF)
+#tbag_config__add_library_option (GFlags    OFF)
+#tbag_config__add_library_option (GLog      OFF)
+#tbag_config__add_library_option (HDF5-2    OFF) # Don't use standard module. (FindHDF5.cmake)
+#tbag_config__add_library_option (OpenBLAS  OFF)
+#tbag_config__add_library_option (Snappy    OFF)
+#tbag_config__add_library_option (LevelDB   OFF)
+#tbag_config__add_library_option (PNG       OFF)
+#tbag_config__add_library_option (wxWidgets OFF)
+#tbag_config__add_library_option (Tbag      OFF)
+
