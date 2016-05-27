@@ -7,7 +7,7 @@
 #///
 #/// @remarsk
 #///  Recommended apply to the test project.
-macro (tbag_project_assign_gtest)
+macro (tbag_module__assign_gtest)
     if (NOT GTEST_FOUND)
         find_package (GTest)
     endif ()

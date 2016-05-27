@@ -1,17 +1,16 @@
 ## Find the TinyXML2 library.
 #
 # The following variables are optionally searched for defaults
-#  TINYXML2_ROOT
+#  TinyXML2_ROOT
 #
 # The following are set after configuration is done:
-#  TINYXML2_FOUND
-#  TINYXML2_INCLUDE_DIRS
-#  TINYXML2_LIBRARIES
+#  TinyXML2_FOUND
+#  TinyXML2_INCLUDE_DIRS
+#  TinyXML2_LIBRARIES
 
-set (__prefix   TINYXML2)
 set (__headers  "tinyxml2.h")
 set (__libs     "tinyxml2")
 
 include (TbagSimpleFindLibrary)
-tbag_simple_find_library ("${__prefix}" "${__headers}" "${__libs}")
+tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")
 

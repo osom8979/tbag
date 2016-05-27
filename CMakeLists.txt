@@ -38,21 +38,6 @@ tbag_flags__print_all_compile_warning       ()
 
 tbag_tparty_init ()
 
-# List of libraries.
-tbag_config_add_library_option (ZLIB      OFF)
-tbag_config_add_library_option (GTEST     ON)
-tbag_config_add_library_option (PROTOBUF  OFF)
-tbag_config_add_library_option (SPDLOG    ON)
-tbag_config_add_library_option (LIBUV     ON)
-tbag_config_add_library_option (TINYXML2  ON)
-tbag_config_add_library_option (NCURSES   ON)
-tbag_config_add_library_option (SQLITE3   ON)
-tbag_config_add_library_option (DOXYGEN   ON)
-
-# Build options.
-option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
-
-
 # Extension variables.
 set (ZLIB_ROOT     "${THIRD_PREFIX}")
 set (GTEST_ROOT    "${THIRD_PREFIX}")
@@ -61,6 +46,31 @@ set (UV_ROOT       "${THIRD_PREFIX}")
 set (TINYXML2_ROOT "${THIRD_PREFIX}")
 set (NCURSES_ROOT  "${THIRD_PREFIX}")
 set (SQLITE3_ROOT  "${THIRD_PREFIX}")
+
+# List of libraries.
+tbag_config_add_library_option  (ZLIB      OFF)
+tbag_config_add_library_option  (LMDB      OFF)
+tbag_config_add_library_option  (GTest     ON)
+tbag_config_add_library_option  (Spdlog    ON)
+tbag_config_add_library_option  (UV        ON)
+tbag_config_add_library_option  (TinyXML2  ON)
+tbag_config_add_library_option  (NCurses   ON)
+tbag_config_add_library_option  (SQLite3   ON)
+tbag_config_add_library_option  (Doxygen   ON)
+
+tbag_config_add_library_option  (Protobuf  OFF)
+tbag_config_add_library_option  (GFlags    OFF)
+tbag_config_add_library_option  (GLog      OFF)
+tbag_config_add_library_option  (HDF5-2    OFF) # Don't use standard module. (FindHDF5.cmake)
+tbag_config_add_library_option  (OpenBLAS  OFF)
+tbag_config_add_library_option  (Snappy    OFF)
+tbag_config_add_library_option  (LevelDB   OFF)
+tbag_config_add_library_option  (PNG       OFF)
+tbag_config_add_library_option  (wxWidgets OFF)
+#tbag_config_add_library_option (Tbag      OFF)
+
+# Build options.
+option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
 
 # Continuous Integration.
 #tbag_find_package (DOXYGEN Doxygen)

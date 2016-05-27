@@ -1,11 +1,11 @@
 ## Find the C++ Obfuscator program.
 #
 # The following variables are optionally searched for defaults
-#  CXX_OBFUSCATOR_ROOT
+#  CxxObfuscator_ROOT
 #
 # The following are set after configuration is done:
-#  CXX_OBFUSCATOR_FOUND
-#  CXX_OBFUSCATOR_COMPILER
+#  CxxObfuscator_FOUND
+#  CxxObfuscator_COMPILER
 
 set (CXX_OBFUSCATOR_SEARCH_PATHS
     "/usr/bin"
@@ -23,7 +23,7 @@ find_program (CXX_OBFUSCATOR_COMPILER
 set (LOOKED_FOR CXX_OBFUSCATOR_COMPILER)
 
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (CXX_OBFUSCATOR DEFAULT_MSG ${LOOKED_FOR})
+find_package_handle_standard_args (CxxObfuscator DEFAULT_MSG ${LOOKED_FOR})
 
 if (CXX_OBFUSCATOR_FOUND)
     mark_as_advanced (${LOOKED_FOR})

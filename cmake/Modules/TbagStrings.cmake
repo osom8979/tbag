@@ -21,9 +21,6 @@ function (tabg_arguments_to_string __result __delimiter)
         endif ()
     endforeach ()
 
-    unset (__args_cursor)
-    unset (__is_first_setting)
-
     # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
@@ -41,8 +38,43 @@ function (tbag_list_regex __result __regex __source)
         list (APPEND ${__result} ${__match_cursor})
     endforeach ()
 
-    unset (__list_cursor)
-    unset (__match_cursor)
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
+#/// Obtain file name. (not contain extension)
+#///
+#/// @param __result   [out] output value name.
+#/// @param __filename [in]  File name.
+#///
+#/// @warning
+#///  Don't use regex in string() cmake method.
+function (tabg_strings__get_filename_and_not_extension __result __filename)
+    set (${__result})
+
+    get_filename_component (__temp_name      "${__filename}"  NAME)
+    get_filename_component (__temp_extension "${__filename}"  EXT)
+
+    string (LENGTH "${__temp_name}"      __temp_name_length)
+    string (LENGTH "${__temp_extension}" __temp_extension_length)
+
+    math (EXPR __temp_substring_length "${__temp_name_length} - ${__temp_extension_length}")
+    string (SUBSTRING "${__temp_name}" 0 ${__temp_substring_length} "${__result}")
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
+#/// Obtain current cmake script file name.
+#///
+#/// @param __result [out] output value name.
+#/// @param __prefix [in]  File name.
+#/// @param __prefix [in]  Module prefix (e.g. Find)
+function (tbag_strings__current_module_name __result __filename __prefix)
+    set (${__result})
+
+    tabg_strings__get_filename_and_not_extension (__temp_name "${__filename}")
+    string (REGEX REPLACE "^${__prefix}" "" "${__result}" "${__temp_name}")
 
     # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)

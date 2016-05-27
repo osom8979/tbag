@@ -8,14 +8,14 @@
 #/// @remarsk
 #///  Recommended apply to the test project.
 macro (tbag_module__assign_ncurses)
-    if (NOT NCURSES_FOUND)
+    if (NOT NCurses_FOUND)
         find_package (NCurses)
     endif ()
 
-    if (NCURSES_FOUND)
+    if (NCurses_FOUND)
         list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_NCURSES)
-        list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NCURSES_INCLUDE_DIRS})
-        list (APPEND TBAG_PROJECT_LDFLAGS      ${NCURSES_LIBRARIES})
+        list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NCurses_INCLUDE_DIRS})
+        list (APPEND TBAG_PROJECT_LDFLAGS      ${NCurses_LIBRARIES})
     endif ()
 endmacro ()
 

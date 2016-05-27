@@ -83,7 +83,11 @@ endmacro ()
 #///
 #/// @remarks
 #///  - USE_${_name}: library variable.
-macro (tbag_config_add_library_option _name _enable)
-    set (USE_${_name} ${_enable} CACHE BOOL "Use the ${_name} library.")
+macro (tbag_config_add_library_option __name __enable)
+    set (USE_${__name} ${__enable} CACHE BOOL "Use the ${__name} library.")
+
+    if (${__enable})
+        find_package (${__name})
+    endif ()
 endmacro ()
 

@@ -5,6 +5,7 @@
 
 include (TbagFindHeaders)
 include (TbagFindLibraries)
+include (TbagStrings)
 
 #/// Find {Library} function.
 #///
@@ -68,4 +69,14 @@ function (tbag_simple_find_library __prefix  __headers __libs)
     set (${__prefix}_INCLUDE_DIRS ${${__prefix}_INCLUDE_DIRS} PARENT_SCOPE)
     set (${__prefix}_LIBRARIES    ${${__prefix}_LIBRARIES}    PARENT_SCOPE)
 endfunction ()
+
+#/// Find {Library} function with module prefix.
+#///
+#/// @param __prefix  [in] Variable result prefix.
+#/// @param __headers [in] Find header files.
+macro (tbag_simple_find_library_with_module_prefix __headers __libs)
+    tbag_strings__current_module_name (__current_module_name ${CMAKE_CURRENT_LIST_FILE} "Find")
+    tbag_simple_find_library ("${__current_module_name}" "${__headers}" "${__libs}")
+    unset (__current_module_name)
+endmacro ()
 
