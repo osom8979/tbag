@@ -49,21 +49,13 @@ set (IN_CONFIG  "${TEMPLATE_PREFIX}/config.h.in")
 set (OUT_CONFIG "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
 configure_file (${IN_CONFIG} ${OUT_CONFIG} NEWLINE_STYLE UNIX)
 
-set (IN_DOXYFILE  "${TEMPLATE_PREFIX}/Doxyfile.in")
-set (OUT_DOXYFILE "${PROJECT_BINARY_DIR}/Doxyfile")
-configure_file (${IN_DOXYFILE} ${OUT_DOXYFILE} NEWLINE_STYLE UNIX)
-
-set (IN_DOXY_INDEX  "${TEMPLATE_PREFIX}/doxygen.html.in")
-set (OUT_DOXY_INDEX "${PROJECT_BINARY_DIR}/doxygen.html")
-configure_file (${IN_DOXY_INDEX} ${OUT_DOXY_INDEX} COPYONLY)
-
 ## -----------------
 ## Project settings.
 ## -----------------
 
 tbag_project__default ()
 
-doxygen_generate ("${OUT_DOXYFILE}" "${PROJECT_BINARY_DIR}")
+tbag_doxygen_generate__auto_default ()
 tbag_module_install__assign_library (${MAIN_NAME})
 tbag_info__print_preview ()
 

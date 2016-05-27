@@ -10,7 +10,7 @@ include (TbagFlags)
 include (TbagTparty)
 include (TbagProject)
 
-include (DoxygenGenerator)
+include (TbagDoxygenGenerator)
 include (ProtobufGenerator)
 
 #/// Initialize & caching main information.

@@ -19,7 +19,7 @@ SOURCE_DIR       = os.path.normpath(PROJECT_DIR + '/')
 TEMPLATE_DIR     = os.path.normpath(PROJECT_DIR + '/template')
 HEADER_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'class.hpp.in')
 SOURCE_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'class.cpp.in')
-CONFIG_CMAKE     = os.path.join(PROJECT_DIR, 'config.cmake')
+CONFIG_CMAKE     = os.path.join(PROJECT_DIR,  'CMakeLists.cmake')
 
 def getProjectName():
     result = ''
