@@ -27,4 +27,8 @@ endmacro ()
 # Extension modules.
 tbag_module (GTest)
 tbag_module (NCurses)
+tbag_module (Spdlog)
+tbag_module (SQLite3)
+tbag_module (TinyXML2)
+tbag_module (UV)
 

@@ -1,35 +1,10 @@
-## CMake subproject properties.
+## Tbag CMake subproject.
 
-set (TBAG_PROJECT_DEFINITIONS  -D__LIBTBAG__)
-set (TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
-set (TBAG_PROJECT_LDFLAGS      -L${CMAKE_CURRENT_LIST_DIR})
+tbag_module__assign_default (LIBTBAG)
 
-tbag_project_assign_gtest ()
-
-# speed-log setting.
-if (USE_spdlog)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_SPDLOG)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${SPDLOG_INCLUDE_DIRS})
-endif ()
-
-# libuv setting.
-if (USE_libuv)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_LIBUV)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${UV_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
-endif ()
-
-# TinyXML2 settinG.
-if (USE_tinyxml2)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_TINYXML2)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${TINYXML2_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${TINYXML2_LIBRARIES})
-endif ()
-
-# SQLite3 setting.
-if (USE_sqlite3)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_SQLITE3)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${SQLITE3_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${SQLITE3_LIBRARIES})
-endif ()
+tbag_project_assign_gtest    ()
+tbag_module__assign_uv       ()
+tbag_module__assign_spdlog   ()
+tbag_module__assign_tinyxml2 ()
+tbag_module__assign_sqlite3  ()
 

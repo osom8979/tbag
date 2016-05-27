@@ -8,7 +8,10 @@
 #/// @remarsk
 #///  Recommended apply to the test project.
 macro (tbag_project_assign_gtest)
-    find_package (GTest)
+    if (NOT GTEST_FOUND)
+        find_package (GTest)
+    endif ()
+
     if (GTEST_FOUND)
         list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_GTEST)
         list (APPEND TBAG_PROJECT_LDFLAGS      ${GTEST_BOTH_LIBRARIES} -lpthread)
