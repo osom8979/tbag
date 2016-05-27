@@ -7,81 +7,80 @@
 #  CxxObfuscator_FOUND
 #  CxxObfuscator_COMPILER
 
-set (CXX_OBFUSCATOR_SEARCH_PATHS
+set (CxxObfuscator_SEARCH_PATHS
     "/usr/bin"
     "/usr/local/bin"
     "/Applications/Run\ C++\ Obfuscator.app/Contents/Resources/bin/"
-    "${CXX_OBFUSCATOR_ROOT}"
-    "${CXX_OBFUSCATOR_ROOT}/bin"
-    "$ENV{CXX_OBFUSCATOR_ROOT}"
-    "$ENV{CXX_OBFUSCATOR_ROOT}/bin")
+    "${CxxObfuscator_ROOT}"
+    "${CxxObfuscator_ROOT}/bin"
+    "$ENV{CxxObfuscator_ROOT}"
+    "$ENV{CxxObfuscator_ROOT}/bin")
 
-find_program (CXX_OBFUSCATOR_COMPILER
+find_program (CxxObfuscator_COMPILER
     NAMES "cxx-obfus"
-    PATHS ${CXX_OBFUSCATOR_SEARCH_PATHS})
+    PATHS ${CxxObfuscator_SEARCH_PATHS})
 
-set (LOOKED_FOR CXX_OBFUSCATOR_COMPILER)
+set (LOOKED_FOR CxxObfuscator_COMPILER)
 
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (CxxObfuscator DEFAULT_MSG ${LOOKED_FOR})
 
-if (CXX_OBFUSCATOR_FOUND)
+if (CxxObfuscator_FOUND)
     mark_as_advanced (${LOOKED_FOR})
-    message (STATUS "Found C++ Obfuscator (Compiler: ${CXX_OBFUSCATOR_COMPILER})")
+    message (STATUS "Found C++ Obfuscator (Compiler: ${CxxObfuscator_COMPILER})")
 endif ()
-
 
 # ----------------
 # Module function.
 # ----------------
 
-#! Generate obfuscated c/c++ source file.
-#
-# \param _obfus       [out] value name of result Obfuscated source files.
-# \param _sources     [in]  original source files.
-# \param _except_file [in]  file path of exception symbol list.
-function (obfus_generate_cpp _obfus _sources _except_file)
-    #message ("_obfus (${_obfus}): ${${_obfus}}")
-    #message ("_sources (${_sources}): ${${_sources}}")
+#/// Generate obfuscated c/c++ source file.
+#///
+#/// @param __obfus       [out] value name of result Obfuscated source files.
+#/// @param __sources     [in]  original source files.
+#/// @param __except_file [in]  file path of exception symbol list.
+function (obfus_generate_cpp __obfus __sources __except_file)
+    #message ("__obfus (${__obfus}): ${${__obfus}}")
+    #message ("__sources (${__sources}): ${${__sources}}")
 
-    set (${_obfus})
-    set (_flags)
+    set (${__obfus})
+    set (__flags)
 
-    get_filename_component (_absolute_except ${_except_file} ABSOLUTE)
+    get_filename_component (_absolute_except ${__except_file} ABSOLUTE)
 
     if (EXISTS ${_absolute_except})
-        list (APPEND _flags -x ${_absolute_except})
+        list (APPEND __flags -x ${_absolute_except})
     endif ()
 
-    foreach (_cursor ${_sources})
-        get_filename_component (_absolute  ${_cursor}   ABSOLUTE)
-        get_filename_component (_directory ${_absolute} DIRECTORY)
-        get_filename_component (_extension ${_absolute} EXT)
-        get_filename_component (_name_we   ${_absolute} NAME_WE)
+    foreach (__cursor ${__sources})
+        get_filename_component (__absolute  ${__cursor}   ABSOLUTE)
+        get_filename_component (__directory ${__absolute} DIRECTORY)
+        get_filename_component (__extension ${__absolute} EXT)
+        get_filename_component (__name_we   ${__absolute} NAME_WE)
 
-        string (REPLACE "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" _bin_path ${_directory})
+        string (REPLACE "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" __bin_path ${__directory})
 
-        set (_obfus_extension ".obfus${_extension}")
-        set (_cursor_of_obfus_path "${_bin_path}/${_name_we}${_obfus_extension}")
+        set (__obfus_extension ".obfus${__extension}")
+        set (__cursor_of_obfus_path "${__bin_path}/${__name_we}${__obfus_extension}")
 
-        get_filename_component (_cursor_of_output_dir ${_cursor_of_obfus_path} DIRECTORY)
+        get_filename_component (__cursor_of_output_dir ${__cursor_of_obfus_path} DIRECTORY)
 
-        if (NOT EXISTS ${_cursor_of_output_dir})
-            file (MAKE_DIRECTORY ${_cursor_of_output_dir})
+        if (NOT EXISTS ${__cursor_of_output_dir})
+            file (MAKE_DIRECTORY ${__cursor_of_output_dir})
         endif ()
 
         add_custom_command (
-            OUTPUT  ${_cursor_of_obfus_path}
-            COMMAND "${CXX_OBFUSCATOR_COMPILER}" ${_absolute} -o ${_cursor_of_obfus_path} ${_flags}
-            DEPENDS ${_absolute}
-            COMMENT "Running C++ Obfuscator compiler on ${_cursor}" VERBATIM)
+            OUTPUT  ${__cursor_of_obfus_path}
+            COMMAND "${CxxObfuscator_COMPILER}" ${__absolute} -o ${__cursor_of_obfus_path} ${__flags}
+            DEPENDS ${__absolute}
+            COMMENT "Running C++ Obfuscator compiler on ${__cursor}" VERBATIM)
 
-        list (APPEND ${_obfus} ${_cursor_of_obfus_path})
+        list (APPEND ${__obfus} ${__cursor_of_obfus_path})
     endforeach ()
 
-    set_source_files_properties (${${_obfus}} PROPERTIES GENERATED TRUE)
+    set_source_files_properties (${${__obfus}} PROPERTIES GENERATED TRUE)
 
     # result output.
-    set (${_obfus} ${${_obfus}} PARENT_SCOPE)
+    set (${__obfus} ${${__obfus}} PARENT_SCOPE)
 endfunction ()
 
