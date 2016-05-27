@@ -101,3 +101,13 @@ macro (tbag_flags__install_rpath)
     set (CMAKE_INSTALL_NAME_DIR  "${CMAKE_INSTALL_PREFIX}/lib")
 endmacro ()
 
+#/// Default tbag project setup.
+macro (tbag_flags__default)
+    tbag_flags__position_independent_code       ()
+    tbag_flags__cpp_standard_11                 ()
+    tbag_flags__add_debug_define                ()
+    tbag_flags__include_and_link_for_source_dir ()
+    tbag_flags__print_all_compile_warning       ()
+    #tbag_flags__install_rpath ()
+endmacro ()
+

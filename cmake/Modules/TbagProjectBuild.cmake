@@ -192,7 +192,7 @@ endmacro ()
 #/// @param __libs     [in] List of library.
 #/// @param __exes     [in] List of executable.
 #/// @param __root_dir [in] Find root directory (Source code directory).
-function (tbag_project_default_build_all __libs __exes __root_dir)
+function (tbag_project_build __libs __exes __root_dir)
     # Loop of library project.
     foreach (__cursor ${__libs})
         tbag_project_default_build (YES "${__cursor}" "${__root_dir}")

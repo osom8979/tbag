@@ -10,7 +10,7 @@ include (TbagStrings)
 include (TbagInformation)
 include (TbagFlags)
 include (TbagTparty)
-include (TbagProject)
+include (TbagProjectFind)
 include (TbagProjectBuild)
 
 #/// Initialize & caching main information.
@@ -19,7 +19,7 @@ include (TbagProjectBuild)
 #/// @param __author [in] project author.
 #/// @param __email  [in] E-mail address.
 #/// @param __brief  [in] Solution brief.
-macro (tbag_config_init_main_information __name __author __email __brief)
+macro (tbag_config__init_main_information __name __author __email __brief)
     set (MAIN_NAME   "${__name}"   CACHE STRING  "Solution name string.")
     set (MAIN_AUTHOR "${__author}" CACHE STRING  "Solution author.")
     set (MAIN_EMAIL  "${__email}"  CACHE STRING  "Author E-mail address.")
@@ -36,7 +36,7 @@ endmacro ()
 #/// @param __packet_major  [in] Packet major version.
 #/// @param __packet_minor  [in] Packet minor version.
 #/// @param __release       [in] Release number.
-macro (tbag_config_init_version __major __minor __patch __packet_major __packet_minor __release)
+macro (tbag_config__init_version __major __minor __patch __packet_major __packet_minor __release)
     # Main version.
     set (VERSION_MAJOR __major)
     set (VERSION_MINOR __minor)
@@ -59,7 +59,7 @@ macro (tbag_config_init_version __major __minor __patch __packet_major __packet_
 endmacro ()
 
 #/// Exists main information.
-macro (tbag_config_exists_main_information)
+macro (tbag_config__exists_main_information)
     # Main information.
     tbag_exists_define_or_die (MAIN_NAME)
     tbag_exists_define_or_die (MAIN_AUTHOR)
@@ -83,7 +83,7 @@ endmacro ()
 #///
 #/// @remarks
 #///  - USE_${_name}: library variable.
-macro (tbag_config_add_library_option __name __enable)
+macro (tbag_config__add_library_option __name __enable)
     set (USE_${__name} ${__enable} CACHE BOOL "Use the ${__name} library.")
 
     if (${__enable})

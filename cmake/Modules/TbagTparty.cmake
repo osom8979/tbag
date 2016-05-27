@@ -6,7 +6,7 @@
 include (TbagFilesystem) # For the PATH_SEPARATOR variable.
 
 #/// Initialize third-party library variables.
-macro (tbag_tparty_init)
+macro (tbag_tparty__default)
     # Third-party library directory.
     set (THIRD_PREFIX "$ENV{TPARTY_HOME}/local" CACHE STRING "3rd-party library prefix")
 

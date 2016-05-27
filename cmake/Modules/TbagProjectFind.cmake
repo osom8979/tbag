@@ -1,5 +1,5 @@
-#/// @file   TbagProject.cmake
-#/// @brief  Tbag project function prototype.
+#/// @file   TbagProjectFind.cmake
+#/// @brief  Tbag project find function prototype.
 #/// @author zer0
 #/// @date   2016-05-26
 
@@ -11,7 +11,7 @@ include (TbagStrings)
 #/// @param __lib_projs  [out] value name of library project list.
 #/// @param __exe_projs  [out] value name of executable project list.
 #/// @param __root_dir   [in]  Find root directory (Source code directory).
-function (find_project __lib_projs __exe_projs __root_dir)
+function (tbag_project_find __lib_projs __exe_projs __root_dir)
     set (__library_glob    "^${TBAG_PROJECT_LIBRARY_PREFIX}${TBAG_PROJECT_FILE_REGEX}$")
     set (__executable_glob "^${TBAG_PROJECT_EXECUTABLE_PREFIX}${TBAG_PROJECT_FILE_REGEX}$")
 
@@ -32,13 +32,6 @@ function (find_project __lib_projs __exe_projs __root_dir)
 
     string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__lib_projs}  "${__find_lib_proj}")
     string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__exe_projs}  "${__find_exe_proj}")
-
-    unset (__find_lib_proj)
-    unset (__find_exe_proj)
-    unset (__find_lib_proj_length)
-    unset (__find_project_list)
-    unset (__library_glob)
-    unset (__executable_glob)
 
     # update result.
     set (${__lib_projs}  ${${__lib_projs}}  PARENT_SCOPE)
