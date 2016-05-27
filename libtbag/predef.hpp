@@ -15,6 +15,9 @@
 
 #include <libtbag/config.h>
 
+// Common.
+#include <libtbag/config/macro.hpp>
+
 // Language.
 #include <libtbag/config/language/c.hpp>
 #include <libtbag/config/language/cpp.hpp>
