@@ -60,9 +60,17 @@ function (tbag_simple_find_library __prefix  __headers __libs)
     include (FindPackageHandleStandardArgs)
     find_package_handle_standard_args (${__prefix} DEFAULT_MSG ${__looked_for})
 
+    # If the variables <var1> to <varN> are all valid, then <UPPERCASED_NAME>_FOUND will be set to TRUE.
+    string (TOUPPER "${__prefix}" __prefix_upper)
+    set (${__prefix}_FOUND "${${__prefix_upper}_FOUND}")
+
     if (${__prefix}_FOUND)
         mark_as_advanced (${__looked_for})
     endif ()
+
+    tbag_debug (tbag_simple_find_library ${__prefix}_FOUND        ":" ${${__prefix}_FOUND})
+    tbag_debug (tbag_simple_find_library ${__prefix}_INCLUDE_DIRS ":" ${${__prefix}_INCLUDE_DIRS})
+    tbag_debug (tbag_simple_find_library ${__prefix}_LIBRARIES    ":" ${${__prefix}_LIBRARIES})
 
     # update result.
     set (${__prefix}_FOUND        ${${__prefix}_FOUND}        PARENT_SCOPE)

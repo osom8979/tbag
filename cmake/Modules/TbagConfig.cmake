@@ -99,7 +99,7 @@ macro (tbag_config__add_library_option __name __enable)
     set (USE_${__name} ${__enable} CACHE BOOL "Use the ${__name} library.")
 
     if (${__enable})
-        find_package (${__name})
+        #find_package (${__name})
     endif ()
 endmacro ()
 
