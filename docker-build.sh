@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WORKING=$PWD
-NAME=`cmake -L -P CMakeLists.cmake | grep MAIN_NAME | sed -e 's/^MAIN_NAME.*=\\(.*\\)$/\\1/g'`
+NAME=`cat $WORKING/INFORMATION | grep NAME | sed -e 's/^NAME.*=\\(.*\\)$/\\1/g'`
 
 FLAGS_UBUNTU_14_04=''
 FLAGS_UBUNTU_14_04="$FLAGS_UBUNTU_14_04 --tag=$NAME-ubuntu-14.04"
