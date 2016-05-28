@@ -33,3 +33,11 @@ function (tbag_debug __tag)
     endif ()
 endfunction ()
 
+#/// Print variable.
+#///
+#/// @param __tag      [in] tag name.
+#/// @param __variable [in] Variable name.
+function (tbag_debug__variable __tag __variable)
+    tbag_debug ("${__tag}" "${__variable}: ${${__variable}}")
+endfunction ()
+

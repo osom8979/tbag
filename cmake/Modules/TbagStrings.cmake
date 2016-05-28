@@ -65,6 +65,31 @@ function (tabg_strings__get_filename_and_not_extension __result __filename)
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 
+#/// Remove quoring.
+#///
+#/// @param __result [out] output value name.
+#/// @param __string [in]  string.
+function (tbag_strings__remove_quoting __result __string)
+    set (${__result} "${__string}")
+
+    if ("${__string}" MATCHES "^\".*\"$")
+        string (REGEX REPLACE "^\"" "" __temp_string ${${__result}})
+        set (${__result} ${__temp_string})
+        string (REGEX REPLACE "\"$" "" __temp_string ${${__result}})
+        set (${__result} ${__temp_string})
+    endif ()
+
+    if ("${__string}" MATCHES "^'.*'$")
+        string (REGEX REPLACE "^'" "" __temp_string ${${__result}})
+        set (${__result} ${__temp_string})
+        string (REGEX REPLACE "'$" "" __temp_string ${${__result}})
+        set (${__result} ${__temp_string})
+    endif ()
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
 #/// Obtain current cmake script file name.
 #///
 #/// @param __result [out] output value name.

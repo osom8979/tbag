@@ -9,35 +9,10 @@ endif ()
 enable_language (C)
 enable_language (CXX)
 
-## ---------------
-## CMake settings.
-## ---------------
-
+## Tbag project.
 list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 include (TbagConfig)
-
-tbag_config__init_main_information (
-        libtbag zer0 osom8979@gmail.com
-        "THIRD-PARTY EXTENSION UTILITY PROJECT")
-tbag_config__init_version (
-        0 0 0
-        0 0
-        0)
-
-tbag_config__exists_main_information ()
-tbag_config__caching_shared_library_option ()
-tbag_flags__default ()
-tbag_tparty__default ()
-
-# Library extension variables.
-set (GTEST_ROOT    "${THIRD_PREFIX}")
-set (Spdlog_ROOT   "${THIRD_PREFIX}")
-set (UV_ROOT       "${THIRD_PREFIX}")
-set (TinyXML2_ROOT "${THIRD_PREFIX}")
-set (NCurses_ROOT  "${THIRD_PREFIX}")
-set (SQLite3_ROOT  "${THIRD_PREFIX}")
-
-tbag_config__add_library_list (GTest UV Spdlog TinyXML2 NCurses SQLite3 Doxygen)
+tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
 ## Configure settings.
 tbag_cxx_config_generate ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")

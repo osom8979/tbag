@@ -1,4 +1,4 @@
-#/// @file   TbagFlags.cmake
+#/// @file   TbagCxxFlags.cmake
 #/// @brief  C/C++ Flag helper.
 #/// @author zer0
 #/// @date   2016-05-26

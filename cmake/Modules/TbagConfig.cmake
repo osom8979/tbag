@@ -3,10 +3,12 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
+include (TbagDebug)
 include (TbagCommon)
+include (TbagConfigFile)
 include (TbagStrings)
 include (TbagInformation)
-include (TbagFlags)
+include (TbagCxxFlags)
 include (TbagTparty)
 include (TbagProject)
 
@@ -103,9 +105,13 @@ endmacro ()
 
 #/// Create & cacheing library list.
 #///
-#/// @param ... [in] list of library name.
-macro (tbag_config__add_library_list)
+#/// @param __default_root  [in] Default library root directory.
+#/// @param ...             [in] list of library name.
+macro (tbag_config__add_library_list __default_root)
     foreach (__list_cursor ${ARGN})
+        tbag_debug (tbag_config__add_library_list "Add ${__list_cursor} library.")
+
+        set ("${__list_cursor}_ROOT" "${__default_root}" CACHE PATH "${__list_cursor} library root directory.")
         tbag_config__add_library_option (${__list_cursor} ON)
     endforeach ()
 endmacro ()
@@ -130,4 +136,57 @@ endmacro ()
 #tbag_config__add_library_option (PNG       OFF)
 #tbag_config__add_library_option (wxWidgets OFF)
 #tbag_config__add_library_option (Tbag      OFF)
+
+#/// Read information file and initialize.
+#///
+#/// @param __path [in] Information file path.
+macro (tbag_config__init_from_file __path)
+    tbag_config_file__read (__tbag_config "${__path}")
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_NAME)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_AUTHOR)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_EMAIL)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_BRIEF)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_MAJOR)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_MINOR)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_PATCH)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_PACKET_MINOR)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_RELEASE)
+    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_LIBRARIES)
+
+    # Main information.
+    tbag_config__init_main_information (
+            "${__tbag_config_INFORMATION_MAIN_NAME}"
+            "${__tbag_config_INFORMATION_MAIN_AUTHOR}"
+            "${__tbag_config_INFORMATION_MAIN_EMAIL}"
+            "${__tbag_config_INFORMATION_MAIN_BRIEF}")
+    tbag_config__init_version (
+            "${__tbag_config_INFORMATION_VERSION_MAJOR}"
+            "${__tbag_config_INFORMATION_VERSION_MINOR}"
+            "${__tbag_config_INFORMATION_VERSION_PATCH}"
+            "${__tbag_config_INFORMATION_VERSION_PACKET_MAJOR}"
+            "${__tbag_config_INFORMATION_VERSION_PACKET_MINOR}"
+            "${__tbag_config_INFORMATION_VERSION_RELEASE}"
+            "${__tbag_config_INFORMATION_LIBRARIES}")
+
+    # Exists.
+    tbag_config__exists_main_information ()
+
+    # Options.
+    tbag_config__caching_shared_library_option ()
+
+    # Default settings.
+    tbag_flags__default ()
+    tbag_tparty__default ()
+
+    # Libraryies.
+    tbag_config__add_library_list ("${THIRD_PREFIX}" ${__tbag_config_INFORMATION_LIBRARIES})
+endmacro ()
+
+#/// Default config macro.
+#///
+#/// @param __path [in] Information file path.
+macro (tbag_config __path)
+    tbag_config__init_from_file ("${__path}")
+endmacro ()
 
