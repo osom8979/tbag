@@ -4,77 +4,114 @@
 #/// @date   2016-05-26
 
 include (TbagFindObjectConfig)
+include (TbagObjects)
+
+set (TABG_DEFAULT_CXX_SUFFIX ".cpp")
 
 #! find object & library files.
 #
-# \param _objs         [out] value name of result object files.
-# \param _definitions  [out] value name of result defines.
-# \param _include_dirs [out] value name of result defines.
-# \param _cxxflags     [out] value name of result cxxflags.
-# \param _ldflags      [out] value name of result ldflags.
-# \param _find_dir     [in]  find directory.
-function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflags _find_dir)
-    set (_obj_suffix   ".o")
+# \param __objs         [out] value name of result object files.
+# \param __dependencies [out] value name of result defines.
+# \param __definitions  [out] value name of result defines.
+# \param __include_dirs [out] value name of result defines.
+# \param __cxxflags     [out] value name of result cxxflags.
+# \param __ldflags      [out] value name of result ldflags.
+# \param __find_dir     [in]  find directory.
+function (find_compile_object __objs __dependencies __definitions __include_dirs __cxxflags __ldflags __find_dir)
     set (_src_suffix   ".cpp")
     set (_obfus_suffix ".obf.cpp")
     set (_proto_suffix ".proto")
     set (_cuda_suffix  ".cu")
 
-    set (${_objs})
-    set (${_definitions})
-    set (${_include_dirs})
-    set (${_cxxflags})
-    set (${_ldflags})
+    #message (STATUS "TBAG_OBJECT_OBJECTS: ${TBAG_OBJECT_OBJECTS}")
+    #message (STATUS "TBAG_OBJECT_DEPENDENCIES: ${TBAG_OBJECT_DEPENDENCIES}")
+    #message (STATUS "TBAG_OBJECT_DEFINITIONS: ${TBAG_OBJECT_DEFINITIONS}")
+    #message (STATUS "TBAG_OBJECT_INCLUDE_DIRS: ${TBAG_OBJECT_INCLUDE_DIRS}")
+    #message (STATUS "TBAG_OBJECT_CXXFLAGS: ${TBAG_OBJECT_CXXFLAGS}")
+    #message (STATUS "TBAG_OBJECT_LDFLAGS: ${TBAG_OBJECT_LDFLAGS}")
 
-    tbag_find_object_config (__config_files "${_find_dir}")
+    # constant variables.
+    #message (STATUS "TBAG_OBJECT_CONST_SOURCES: ${TBAG_OBJECT_CONST_SOURCES}")
+    #message (STATUS "TBAG_OBJECT_CONST_DIR_NAME: ${TBAG_OBJECT_CONST_DIR_NAME}")
+    #message (STATUS "TBAG_OBJECT_CONST_TYPE: ${TBAG_OBJECT_CONST_TYPE}")
+    #message (STATUS "TBAG_OBJECT_CONST_NAME: ${TBAG_OBJECT_CONST_NAME}")
+
+    set (${__objs})
+    set (${__dependencies})
+    set (${__definitions})
+    set (${__include_dirs})
+    set (${__cxxflags})
+    set (${__ldflags})
+
+    tbag_find_object_config (__config_files "${__find_dir}")
     tbag_debug__list (tbag_project_build__update_objects ${__config_files})
-
-    # source files.
-    get_filename_component (_absolute "${_find_dir}" ABSOLUTE)
-    file (GLOB_RECURSE _find_srcs "${_absolute}/*${_src_suffix}")
-
-    # C++ Obfuscator or Native C/C++ Source files.
-    set (_obfus_excepted_path "${CMAKE_CURRENT_SOURCE_DIR}/excepted.obfus")
-    if (USE_OBFUSCATE AND CXX_OBFUSCATOR_FOUND AND (EXISTS "${_obfus_excepted_path}"))
-        obfus_generate_cpp (_find_obfus "${_find_srcs}" "${_obfus_excepted_path}")
-        list (APPEND ${_objs} ${_find_obfus})
+    if ("${__config_files}" STREQUAL "")
+        get_filename_component (__find_dir_absolute "${__find_dir}" ABSOLUTE)
+        file (GLOB_RECURSE ${__objs} "${__find_dir_absolute}/*${TABG_DEFAULT_CXX_SUFFIX}")
     else ()
-        list (APPEND ${_objs} ${_find_srcs})
-    endif ()
+        foreach (__config_file_cursor ${__config_files})
+            if (EXISTS "${__config_file_cursor}")
+                tbag_object__clear ()
+                tbag_object__update_const ("${__config_file_cursor}")
 
-    # Google-protocol-buffers files.
-    if (USE_protobuf AND PROTOBUF_FOUND)
-        file (GLOB_RECURSE _find_protos "${_absolute}/*${_proto_suffix}")
-        list (LENGTH _find_protos _find_protos_length)
-        if (${_find_protos_length} GREATER 0)
-            protobuf_generate_cpp2 (_proto_srcs _proto_headers "${_find_protos}")
-            list (APPEND ${_objs} ${_proto_srcs})
-            list (APPEND ${_include_dirs} ${PROTOBUF_INCLUDE_DIRS})
-            list (APPEND ${_ldflags} ${PROTOBUF_LIBRARIES} -lz)
-        endif ()
-    endif ()
+                # Call object config file.
+                include ("${__config_file_cursor}")
 
-    # NVIDIA CUDA files.
-    if (USE_CUDA AND CUDA_FOUND)
-        file (GLOB_RECURSE _find_cudas "${_absolute}/*${_cuda_suffix}")
-        list (LENGTH _find_cudas _find_cudas_length)
-        if (${_find_cudas_length} GREATER 0)
-            foreach (_cuda_cusor ${_find_cudas})
-                cuda_compile (_cuda_cusor_object ${_cuda_cusor})
-                list (APPEND ${_objs} ${_cuda_cusor_object})
-            endforeach ()
-            list (APPEND ${_include_dirs} ${CUDA_INCLUDE_DIRS})
-            list (APPEND ${_ldflags} ${CUDA_LIBRARIES})
-            if (USE_CUBLAS)
-                list (APPEND ${_ldflags} ${CUDA_CUBLAS_LIBRARIES})
+                list (APPEND ${__objs}         ${TBAG_OBJECT_OBJECTS})
+                list (APPEND ${__dependencies} ${TBAG_OBJECT_DEPENDENCIES})
+                list (APPEND ${__definitions}  ${TBAG_OBJECT_DEFINITIONS})
+                list (APPEND ${__include_dirs} ${TBAG_OBJECT_INCLUDE_DIRS})
+                list (APPEND ${__cxxflags}     ${TBAG_OBJECT_CXXFLAGS})
+                list (APPEND ${__ldflags}      ${TBAG_OBJECT_LDFLAGS})
+            else ()
+                message (WARNING "Not found ${__config_file_cursor}")
             endif ()
-        endif ()
+        endforeach()
     endif ()
+
+#    # C++ Obfuscator or Native C/C++ Source files.
+#    set (_obfus_excepted_path "${CMAKE_CURRENT_SOURCE_DIR}/excepted.obfus")
+#    if (USE_OBFUSCATE AND CXX_OBFUSCATOR_FOUND AND (EXISTS "${_obfus_excepted_path}"))
+#        obfus_generate_cpp (_find_obfus "${_find_srcs}" "${_obfus_excepted_path}")
+#        list (APPEND ${__objs} ${_find_obfus})
+#    else ()
+#        list (APPEND ${__objs} ${_find_srcs})
+#    endif ()
+#
+#    # Google-protocol-buffers files.
+#    if (USE_protobuf AND PROTOBUF_FOUND)
+#        file (GLOB_RECURSE _find_protos "${_absolute}/*${_proto_suffix}")
+#        list (LENGTH _find_protos _find_protos_length)
+#        if (${_find_protos_length} GREATER 0)
+#            protobuf_generate_cpp2 (_proto_srcs _proto_headers "${_find_protos}")
+#            list (APPEND ${__objs} ${_proto_srcs})
+#            list (APPEND ${__include_dirs} ${PROTOBUF_INCLUDE_DIRS})
+#            list (APPEND ${__ldflags} ${PROTOBUF_LIBRARIES} -lz)
+#        endif ()
+#    endif ()
+#
+#    # NVIDIA CUDA files.
+#    if (USE_CUDA AND CUDA_FOUND)
+#        file (GLOB_RECURSE _find_cudas "${_absolute}/*${_cuda_suffix}")
+#        list (LENGTH _find_cudas _find_cudas_length)
+#        if (${_find_cudas_length} GREATER 0)
+#            foreach (_cuda_cusor ${_find_cudas})
+#                cuda_compile (_cuda_cusor_object ${_cuda_cusor})
+#                list (APPEND ${__objs} ${_cuda_cusor_object})
+#            endforeach ()
+#            list (APPEND ${__include_dirs} ${CUDA_INCLUDE_DIRS})
+#            list (APPEND ${__ldflags} ${CUDA_LIBRARIES})
+#            if (USE_CUBLAS)
+#                list (APPEND ${__ldflags} ${CUDA_CUBLAS_LIBRARIES})
+#            endif ()
+#        endif ()
+#    endif ()
 
     # update result.
-    set (${_objs}         ${${_objs}}         PARENT_SCOPE)
-    set (${_definitions}  ${${_definitions}}  PARENT_SCOPE)
-    set (${_include_dirs} ${${_include_dirs}} PARENT_SCOPE)
-    set (${_cxxflags}     ${${_cxxflags}}     PARENT_SCOPE)
-    set (${_ldflags}      ${${_ldflags}}      PARENT_SCOPE)
+    set (${__objs}         ${${__objs}}         PARENT_SCOPE)
+    set (${__dependencies} ${${__dependencies}} PARENT_SCOPE)
+    set (${__definitions}  ${${__definitions}}  PARENT_SCOPE)
+    set (${__include_dirs} ${${__include_dirs}} PARENT_SCOPE)
+    set (${__cxxflags}     ${${__cxxflags}}     PARENT_SCOPE)
+    set (${__ldflags}      ${${__ldflags}}      PARENT_SCOPE)
 endfunction ()

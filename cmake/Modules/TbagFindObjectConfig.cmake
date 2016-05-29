@@ -28,11 +28,11 @@ function (tbag_find_object_config__get_filter_name __result __file_path)
         set (__filter_name "${CMAKE_MATCH_1}")
     endif ()
 
-    #tbag_debug (tbag_find_object_config__get_filter_name "File name: ${__file_name}")
-    #tbag_debug (tbag_find_object_config__get_filter_name "Filter name: ${__filter_name}")
+    tbag_debug (tbag_find_object_config__get_filter_name "File name: ${__file_name}")
+    tbag_debug (tbag_find_object_config__get_filter_name "Filter name: ${__filter_name}")
 
     # update result.
-    set (${__result} ${${__result}} PARENT_SCOPE)
+    set (${__result} ${__filter_name} PARENT_SCOPE)
 endfunction ()
 
 #/// find object config files.

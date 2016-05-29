@@ -13,6 +13,7 @@ include (TbagModules)
 #/// @param __find_directory [in] find directory path.
 macro (tbag_project_build__update_objects __find_directory)
     find_compile_object (__find_compile_objs
+                         __find_compile_dependencies
                          __find_compile_definitions
                          __find_compile_include_dirs
                          __find_compile_cxxflags
@@ -21,6 +22,7 @@ macro (tbag_project_build__update_objects __find_directory)
 
     # Result assign.
     list (APPEND TBAG_PROJECT_OBJECTS      ${__find_compile_objs})
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__find_compile_dependencies})
     list (APPEND TBAG_PROJECT_DEFINITIONS  ${__find_compile_definitions})
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${__find_compile_include_dirs})
     list (APPEND TBAG_PROJECT_CXXFLAGS     ${__find_compile_cxxflags})
