@@ -35,6 +35,7 @@ macro (tbag_module__assign_soversion)
 endmacro ()
 
 # Extension modules.
+tbag_module (Common)
 tbag_module (Install)
 tbag_module (GTest)
 tbag_module (NCurses)
