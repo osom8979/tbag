@@ -8,34 +8,21 @@ include (TbagObjects)
 
 set (TABG_DEFAULT_CXX_SUFFIX ".cpp")
 
-#! find object & library files.
-#
-# \param __objs         [out] value name of result object files.
-# \param __dependencies [out] value name of result defines.
-# \param __definitions  [out] value name of result defines.
-# \param __include_dirs [out] value name of result defines.
-# \param __cxxflags     [out] value name of result cxxflags.
-# \param __ldflags      [out] value name of result ldflags.
-# \param __find_dir     [in]  find directory.
-function (find_compile_object __objs __dependencies __definitions __include_dirs __cxxflags __ldflags __find_dir)
-    set (_src_suffix   ".cpp")
-    set (_obfus_suffix ".obf.cpp")
-    set (_proto_suffix ".proto")
-    set (_cuda_suffix  ".cu")
+#set (_src_suffix   ".cpp")
+#set (_obfus_suffix ".obf.cpp")
+#set (_proto_suffix ".proto")
+#set (_cuda_suffix  ".cu")
 
-    #message (STATUS "TBAG_OBJECT_OBJECTS: ${TBAG_OBJECT_OBJECTS}")
-    #message (STATUS "TBAG_OBJECT_DEPENDENCIES: ${TBAG_OBJECT_DEPENDENCIES}")
-    #message (STATUS "TBAG_OBJECT_DEFINITIONS: ${TBAG_OBJECT_DEFINITIONS}")
-    #message (STATUS "TBAG_OBJECT_INCLUDE_DIRS: ${TBAG_OBJECT_INCLUDE_DIRS}")
-    #message (STATUS "TBAG_OBJECT_CXXFLAGS: ${TBAG_OBJECT_CXXFLAGS}")
-    #message (STATUS "TBAG_OBJECT_LDFLAGS: ${TBAG_OBJECT_LDFLAGS}")
-
-    # constant variables.
-    #message (STATUS "TBAG_OBJECT_CONST_SOURCES: ${TBAG_OBJECT_CONST_SOURCES}")
-    #message (STATUS "TBAG_OBJECT_CONST_DIR_NAME: ${TBAG_OBJECT_CONST_DIR_NAME}")
-    #message (STATUS "TBAG_OBJECT_CONST_TYPE: ${TBAG_OBJECT_CONST_TYPE}")
-    #message (STATUS "TBAG_OBJECT_CONST_NAME: ${TBAG_OBJECT_CONST_NAME}")
-
+#/// Find compile object.
+#///
+#/// @param __objs         [out] value name of result object files.
+#/// @param __dependencies [out] value name of result dependencies.
+#/// @param __definitions  [out] value name of result definitions.
+#/// @param __include_dirs [out] value name of result include directories.
+#/// @param __cxxflags     [out] value name of result cxx flags.
+#/// @param __ldflags      [out] value name of result linker flags.
+#/// @param __find_dir     [in]  find directory.
+function (tbag_find_object __objs __dependencies __definitions __include_dirs __cxxflags __ldflags __find_dir)
     set (${__objs})
     set (${__dependencies})
     set (${__definitions})
@@ -77,7 +64,7 @@ function (find_compile_object __objs __dependencies __definitions __include_dirs
 #    else ()
 #        list (APPEND ${__objs} ${_find_srcs})
 #    endif ()
-#
+
 #    # Google-protocol-buffers files.
 #    if (USE_protobuf AND PROTOBUF_FOUND)
 #        file (GLOB_RECURSE _find_protos "${_absolute}/*${_proto_suffix}")
@@ -89,7 +76,7 @@ function (find_compile_object __objs __dependencies __definitions __include_dirs
 #            list (APPEND ${__ldflags} ${PROTOBUF_LIBRARIES} -lz)
 #        endif ()
 #    endif ()
-#
+
 #    # NVIDIA CUDA files.
 #    if (USE_CUDA AND CUDA_FOUND)
 #        file (GLOB_RECURSE _find_cudas "${_absolute}/*${_cuda_suffix}")

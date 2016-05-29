@@ -12,13 +12,13 @@ include (TbagModules)
 #///
 #/// @param __find_directory [in] find directory path.
 macro (tbag_project_build__update_objects __find_directory)
-    find_compile_object (__find_compile_objs
-                         __find_compile_dependencies
-                         __find_compile_definitions
-                         __find_compile_include_dirs
-                         __find_compile_cxxflags
-                         __find_compile_ldflags
-                         "${__find_directory}")
+    tbag_find_object (__find_compile_objs
+                      __find_compile_dependencies
+                      __find_compile_definitions
+                      __find_compile_include_dirs
+                      __find_compile_cxxflags
+                      __find_compile_ldflags
+                      "${__find_directory}")
 
     # Result assign.
     list (APPEND TBAG_PROJECT_OBJECTS      ${__find_compile_objs})
@@ -38,19 +38,19 @@ macro (tbag_project_build __is_library __project_dir_name __root_dir)
     set (__project_dir_path    "${__root_dir}/${__project_dir_name}")
     set (__project_cmake_path  "${__project_dir_path}/${TBAG_PROJECT_FILE_NAME}")
 
-    tbag_project_build__clear ()
-    tbag_project_build__update_const ("${__cursor}")
+    tbag_module__clear ()
+    tbag_module__update_const ("${__cursor}")
 
     project (${TBAG_PROJECT_CONST_NAME})
     include ("${__project_cmake_path}")
 
     tbag_project_build__update_objects ("${__project_dir_path}")
     if (${__is_library})
-        tbag_project_build__register_object_of_library ()
+        tbag_module__register_object_of_library ()
     else ()
-        tbag_project_build__register_object_of_executable ()
+        tbag_module__register_object_of_executable ()
     endif ()
-    tbag_project_build__update_all ()
+    tbag_module__update_all ()
 endmacro ()
 
 #/// Run default build.
