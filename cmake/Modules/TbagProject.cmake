@@ -3,14 +3,14 @@
 #/// @author zer0
 #/// @date   2016-05-27
 
-include (TbagProjectFind)
+include (TbagFindProject)
 include (TbagProjectBuild)
 
 #/// run tbag project.
 #///
 #/// @param __root_dir [in] Find root directory (Source code directory).
 function (tbag_project __root_dir)
-    tbag_project_find (__libs __exes "${__root_dir}")
+    tbag_find_project (__libs __exes "${__root_dir}")
 
     message ("** Find library project: ${__libs}")
     message ("** Find executable project: ${__exes}")
