@@ -34,9 +34,12 @@ macro (tbag_module__assign_soversion)
                            SOVERSION "${SOVERSION}")
 endmacro ()
 
-# Extension modules.
+# Default modules.
 tbag_module (Common)
 tbag_module (Install)
+
+# Extension modules.
+tbag_module (CxxObfuscator)
 tbag_module (GTest)
 tbag_module (NCurses)
 tbag_module (Spdlog)
