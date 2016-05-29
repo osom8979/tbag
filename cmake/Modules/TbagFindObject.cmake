@@ -3,6 +3,8 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
+include (TbagFindObjectConfig)
+
 #! find object & library files.
 #
 # \param _objs         [out] value name of result object files.
@@ -23,6 +25,9 @@ function (find_compile_object _objs _definitions _include_dirs _cxxflags _ldflag
     set (${_include_dirs})
     set (${_cxxflags})
     set (${_ldflags})
+
+    tbag_find_object_config (__config_files "${_find_dir}")
+    tbag_debug__list (tbag_project_build__update_objects ${__config_files})
 
     # source files.
     get_filename_component (_absolute "${_find_dir}" ABSOLUTE)

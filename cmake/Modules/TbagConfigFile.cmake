@@ -111,8 +111,6 @@ function (tbag_config_file__read __prefix __path)
     tbag_config_file__parse_versions (__version_list "${__information_version}")
     tbag_config_file__parse_libs     (__lib_list     "${__information_libs}")
 
-    #tbag_debug__message_with_list (${__versions})
-    #tbag_debug__message_with_list (${__libs})
     tbag_debug (tbag_config__read_information_file "NAME: ${__information_name}")
     tbag_debug (tbag_config__read_information_file "AUTHOR: ${__information_author}")
     tbag_debug (tbag_config__read_information_file "EMAIL: ${__information_email}")

@@ -10,15 +10,6 @@ function (tbag_debug__message)
     message (STATUS "@ " ${ARGN})
 endfunction ()
 
-#/// Print debug message with list.
-#///
-#/// @param ... [in] message arguments.
-function (tbag_debug__message_with_list)
-    foreach (__list_cursor ${ARGN})
-        tbag_debug__message (${__list_cursor})
-    endforeach ()
-endfunction ()
-
 #/// Logging-like debugging message function.
 #///
 #/// @param __tag [in] tag name.
@@ -39,5 +30,17 @@ endfunction ()
 #/// @param __variable [in] Variable name.
 function (tbag_debug__variable __tag __variable)
     tbag_debug ("${__tag}" "${__variable}: ${${__variable}}")
+endfunction ()
+
+#/// Print debug message with list.
+#///
+#/// @param __tag [in] tag name.
+#/// @param ...   [in] list arguments.
+function (tbag_debug__list __tag)
+    set (__list_index 0)
+    foreach (__list_cursor ${ARGN})
+        tbag_debug ("${__tag}" "#${__list_index} ${__list_cursor}")
+        math (EXPR __list_index "${__list_index} + 1")
+    endforeach ()
 endfunction ()
 
