@@ -7,9 +7,16 @@ include (TbagUtils)
 include (TbagCxxFlags)
 include (TbagProject)
 
-include (TbagCxxConfigGenerator)
 include (TbagDoxygenGenerator)
 include (ProtobufGenerator)
+
+## -----------------
+## Global variables.
+## -----------------
+
+if (NOT DEFINED TBAG_CONFIG_TEMPLATE_DIR)
+    set (TBAG_CONFIG_TEMPLATE_DIR "${CMAKE_CURRENT_LIST_DIR}/TbagTemplate")
+endif ()
 
 ## -----------------
 ## Main information.
@@ -355,4 +362,20 @@ macro (tbag_config __path)
     unset (__tbag_config_INFORMATION_VERSION_RELEASE)
     unset (__tbag_config_INFORMATION_LIBRARIES)
 endmacro ()
+
+## ----------
+## Generator.
+## ----------
+
+#/// Write C/C++ header file.
+#///
+#/// @param __output_path [in] Output header file path.
+function (tbag_config__generate_c_header __output_path)
+    configure_file ("${TBAG_CONFIG_TEMPLATE_DIR}/${__template_name}/config.h.in" "${__output_path}" NEWLINE_STYLE UNIX)
+    if (EXISTS "${__output_path}")
+        message (STATUS "Write a config header file: ${__output_path}")
+    else ()
+        message (FATAL_ERROR "Not found config header file: ${__output_path}")
+    endif ()
+endfunction ()
 

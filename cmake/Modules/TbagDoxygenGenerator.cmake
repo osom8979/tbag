@@ -79,10 +79,10 @@ endmacro()
 #PROJECT_BRIEF           =
 #PROJECT_LOGO            =
 #OUTPUT_DIRECTORY        =
-#CREATE_SUBDIRS           = NO
+#CREATE_SUBDIRS          = NO
 #ALLOW_UNICODE_NAMES     = NO # Doxygen v1.8.6 unsupported tag.
 #OUTPUT_LANGUAGE         = English
-#BRIEF_MEMBER_DESC        = YES
+#BRIEF_MEMBER_DESC       = YES
 
 #REPEAT_BRIEF             = YES
 #ABBREVIATE_BRIEF         =
@@ -99,7 +99,7 @@ endmacro()
 #INHERIT_DOCS             = YES
 #SEPARATE_MEMBER_PAGES    = NO
 #TAB_SIZE                 = 4
-#ALIASES                 =
+#ALIASES                  =
 #TCL_SUBST                =
 #OPTIMIZE_OUTPUT_FOR_C    = NO
 #OPTIMIZE_OUTPUT_JAVA     = NO
@@ -107,14 +107,14 @@ endmacro()
 #OPTIMIZE_OUTPUT_VHDL     = NO
 
 #EXTENSION_MAPPING        =
-#MARKDOWN_SUPPORT        = YES
+#MARKDOWN_SUPPORT         = YES
 #AUTOLINK_SUPPORT         = YES
 #BUILTIN_STL_SUPPORT      = NO
 #CPP_CLI_SUPPORT          = NO
 #SIP_SUPPORT              = NO
 #IDL_PROPERTY_SUPPORT     = YES
 #DISTRIBUTE_GROUP_DOC     = NO
-#GROUP_NESTED_COMPOUNDS  = NO # Doxygen v1.8.6 unsupported tag.
+#GROUP_NESTED_COMPOUNDS   = NO # Doxygen v1.8.6 unsupported tag.
 #SUBGROUPING              = YES
 
 #INLINE_GROUPED_CLASSES   = NO
@@ -136,7 +136,7 @@ endmacro()
 #INTERNAL_DOCS            = NO
 #CASE_SENSE_NAMES         = NO
 #HIDE_SCOPE_NAMES         = NO
-#HIDE_COMPOUND_REFERENCE = NO # Doxygen v1.8.6 unsupported tag.
+#HIDE_COMPOUND_REFERENCE  = NO # Doxygen v1.8.6 unsupported tag.
 #SHOW_INCLUDE_FILES       = YES
 
 #SHOW_GROUPED_MEMB_INC    = NO
@@ -162,22 +162,22 @@ endmacro()
 #LAYOUT_FILE              =
 
 #CITE_BIB_FILES           =
-#QUIET                   = NO
+#QUIET                    = NO
 #WARNINGS                 = YES
-#WARN_IF_UNDOCUMENTED    = YES
+#WARN_IF_UNDOCUMENTED     = YES
 #WARN_IF_DOC_ERROR        = YES
 #WARN_NO_PARAMDOC         = NO
-#WARN_AS_ERROR           = NO # Doxygen v1.8.6 unsupported tag.
+#WARN_AS_ERROR            = NO # Doxygen v1.8.6 unsupported tag.
 #WARN_FORMAT              = "$file:$line: $text"
 #WARN_LOGFILE             =
-#INPUT                   =
+#INPUT                    =
 
 #INPUT_ENCODING           = UTF-8
-#FILE_PATTERNS           =
-#RECURSIVE               = NO
+#FILE_PATTERNS            =
+#RECURSIVE                = NO
 #EXCLUDE                  =
 #EXCLUDE_SYMLINKS         = NO
-#EXCLUDE_PATTERNS        =
+#EXCLUDE_PATTERNS         =
 #EXCLUDE_SYMBOLS          =
 #EXAMPLE_PATH             =
 #EXAMPLE_PATTERNS         =
@@ -203,7 +203,7 @@ endmacro()
 #COLS_IN_ALPHA_INDEX      = 5
 #IGNORE_PREFIX            =
 #GENERATE_HTML            = YES
-#HTML_OUTPUT             = html
+#HTML_OUTPUT              = html
 
 #HTML_FILE_EXTENSION      = .html
 #HTML_HEADER              =
@@ -214,7 +214,7 @@ endmacro()
 #HTML_COLORSTYLE_HUE      = 220
 #HTML_COLORSTYLE_SAT      = 100
 #HTML_COLORSTYLE_GAMMA    = 80
-#HTML_TIMESTAMP          = NO
+#HTML_TIMESTAMP           = NO
 
 #HTML_DYNAMIC_SECTIONS    = NO
 #HTML_INDEX_NUM_ENTRIES   = 100
@@ -250,9 +250,9 @@ endmacro()
 #FORMULA_FONTSIZE         = 10
 
 #FORMULA_TRANSPARENT      = YES
-#USE_MATHJAX             = NO
+#USE_MATHJAX              = NO
 #MATHJAX_FORMAT           = HTML-CSS
-#MATHJAX_RELPATH         = http://cdn.mathjax.org/mathjax/latest
+#MATHJAX_RELPATH          = http://cdn.mathjax.org/mathjax/latest
 #MATHJAX_EXTENSIONS       =
 #MATHJAX_CODEFILE         =
 #SEARCHENGINE             = YES
@@ -263,8 +263,8 @@ endmacro()
 #SEARCHDATA_FILE          = searchdata.xml
 #EXTERNAL_SEARCH_ID       =
 #EXTRA_SEARCH_MAPPINGS    =
-#GENERATE_LATEX          = YES
-#LATEX_OUTPUT            = latex
+#GENERATE_LATEX           = YES
+#LATEX_OUTPUT             = latex
 #LATEX_CMD_NAME           = latex
 #MAKEINDEX_CMD_NAME       = makeindex
 #COMPACT_LATEX            = NO
@@ -273,7 +273,7 @@ endmacro()
 
 #LATEX_HEADER             =
 #LATEX_FOOTER             =
-#LATEX_EXTRA_STYLESHEET  = # Doxygen v1.8.6 unsupported tag.
+#LATEX_EXTRA_STYLESHEET   = # Doxygen v1.8.6 unsupported tag.
 #LATEX_EXTRA_FILES        =
 #PDF_HYPERLINKS           = YES
 #USE_PDFLATEX             = YES
@@ -282,26 +282,26 @@ endmacro()
 #LATEX_SOURCE_CODE        = NO
 #LATEX_BIB_STYLE          = plain
 
-#LATEX_TIMESTAMP         = NO # Doxygen v1.8.6 unsupported tag.
+#LATEX_TIMESTAMP          = NO # Doxygen v1.8.6 unsupported tag.
 #GENERATE_RTF             = NO
 #RTF_OUTPUT               = rtf
 #COMPACT_RTF              = NO
 #RTF_HYPERLINKS           = NO
 #RTF_STYLESHEET_FILE      =
 #RTF_EXTENSIONS_FILE      =
-#RTF_SOURCE_CODE         = NO
+#RTF_SOURCE_CODE          = NO
 #GENERATE_MAN             = NO
 #MAN_OUTPUT               = man
 
 #MAN_EXTENSION            = .3
-#MAN_SUBDIR              = # Doxygen v1.8.6 unsupported tag.
+#MAN_SUBDIR               = # Doxygen v1.8.6 unsupported tag.
 #MAN_LINKS                = NO
 #GENERATE_XML             = NO
 #XML_OUTPUT               = xml
 #XML_PROGRAMLISTING       = YES
 #GENERATE_DOCBOOK         = NO
 #DOCBOOK_OUTPUT           = docbook
-#DOCBOOK_PROGRAMLISTING  = NO # Doxygen v1.8.6 unsupported tag.
+#DOCBOOK_PROGRAMLISTING   = NO # Doxygen v1.8.6 unsupported tag.
 #GENERATE_AUTOGEN_DEF     = NO
 
 #GENERATE_PERLMOD         = NO
@@ -309,11 +309,11 @@ endmacro()
 #PERLMOD_PRETTY           = YES
 #PERLMOD_MAKEVAR_PREFIX   =
 #ENABLE_PREPROCESSING     = YES
-#MACRO_EXPANSION         = NO
+#MACRO_EXPANSION          = NO
 #EXPAND_ONLY_PREDEF       = NO
 #SEARCH_INCLUDES          = YES
-#INCLUDE_PATH            =
-#INCLUDE_FILE_PATTERNS   =
+#INCLUDE_PATH             =
+#INCLUDE_FILE_PATTERNS    =
 
 #PREDEFINED               =
 #EXPAND_AS_DEFINED        =
@@ -354,8 +354,8 @@ endmacro()
 #DOTFILE_DIRS             =
 #MSCFILE_DIRS             =
 #DIAFILE_DIRS             =
-#PLANTUML_JAR_PATH       = # Doxygen v1.8.6 unsupported tag.
-#PLANTUML_INCLUDE_PATH   = # Doxygen v1.8.6 unsupported tag.
+#PLANTUML_JAR_PATH        = # Doxygen v1.8.6 unsupported tag.
+#PLANTUML_INCLUDE_PATH    = # Doxygen v1.8.6 unsupported tag.
 #DOT_GRAPH_MAX_NODES      = 50
 #MAX_DOT_GRAPH_DEPTH      = 0
 
