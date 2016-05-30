@@ -6,7 +6,6 @@
 include (TbagDebug)
 include (TbagUtils)
 
-include (TbagStrings)
 include (TbagInformation)
 include (TbagCxxFlags)
 include (TbagProject)
@@ -173,7 +172,7 @@ function (tbag_config__read_value __result __key __content)
     string (STRIP "${__match_variable}" __strip_variable)
 
     # Remove quoting.
-    tbag_strings__remove_quoting (${__result} "${__strip_variable}")
+    tbag_utils__remove_quoting (${__result} "${__strip_variable}")
 
     # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)

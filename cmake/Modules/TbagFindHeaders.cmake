@@ -4,7 +4,7 @@
 #/// @date   2016-05-25
 
 include (TbagDebug)
-include (TbagStrings)
+include (TbagUtils)
 
 #/// Find headers function.
 #///
@@ -28,11 +28,11 @@ function (tbag_find_headers __result __paths __headers)
     endforeach ()
 
     # Preview
-    tabg_strings__arguments_to_string (__preview_result "," ${${__result}})
+    tabg_utils__arguments_to_string (__preview_result "," ${${__result}})
     tbag_debug (find_headers "Result variable name: ${__result} (${__preview_result})")
-    tabg_strings__arguments_to_string (__preview_result "," ${__paths})
+    tabg_utils__arguments_to_string (__preview_result "," ${__paths})
     tbag_debug (find_headers "Search directories: ${__preview_result}")
-    tabg_strings__arguments_to_string (__preview_result "," ${__headers})
+    tabg_utils__arguments_to_string (__preview_result "," ${__headers})
     tbag_debug (find_headers "Find header files: ${__preview_result}")
 
     # update result.

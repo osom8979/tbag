@@ -4,7 +4,7 @@
 #/// @date   2016-05-26
 
 include (TbagProjectCommon)
-include (TbagStrings)
+include (TbagUtils)
 
 #/// Find project list.
 #///
@@ -19,7 +19,7 @@ function (tbag_find_project __lib_projs __exe_projs __root_dir)
     file (GLOB_RECURSE __find_project_list RELATIVE "${__root_dir}" "${TBAG_PROJECT_FILE_NAME}")
 
     # Find library project.
-    tbag_strings__list_regex (__find_lib_proj "${__library_glob}" "${__find_project_list}")
+    tbag_utils__list_regex (__find_lib_proj "${__library_glob}" "${__find_project_list}")
     list (LENGTH __find_lib_proj __find_lib_proj_length)
 
     # Remove library project in the all project.
@@ -28,7 +28,7 @@ function (tbag_find_project __lib_projs __exe_projs __root_dir)
     endif ()
 
     # Find executable project.
-    tbag_strings__list_regex (__find_exe_proj "${__executable_glob}" "${__find_project_list}")
+    tbag_utils__list_regex (__find_exe_proj "${__executable_glob}" "${__find_project_list}")
 
     string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__lib_projs}  "${__find_lib_proj}")
     string (REPLACE "/${TBAG_PROJECT_FILE_NAME}" "" ${__exe_projs}  "${__find_exe_proj}")
