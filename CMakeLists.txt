@@ -23,6 +23,6 @@ tbag_doxygen_generate__auto_default ()
 ## Run project.
 tbag_project ()
 
-tbag_module_install__assign_library (${MAIN_NAME})
+tbag_module_install_headers (${MAIN_NAME})
 tbag_info_print_preview ()
 

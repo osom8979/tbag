@@ -1,3 +1,3 @@
 ## Tbag CMake object config.
 
-tbag_object__by_pass ()
+tbag_object_property__source_to_object ()

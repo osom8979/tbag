@@ -31,33 +31,34 @@ endmacro ()
 
 #/// Assign header install.
 #///
+#/// @param __parent_path [in] parent of include directory.
+#///
 #/// @remarsk
 #///  Recommended apply to the library project.
-macro (tbag_module_install__assign_library __directory)
+macro (tbag_module_install_headers __parent_path)
     # Header install.
-    install (DIRECTORY "${__directory}"
-            DESTINATION include
-            FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+    install (DIRECTORY "${__parent_path}"
+             DESTINATION include
+             FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
 endmacro ()
 
 #/// Assign default install properties.
 #///
 #/// @remarsk
 #///  Recommended apply to the library & executable project.
-macro (tbag_module_install__assign_default)
+macro (tbag_module_install_targets)
     # Target install.
     install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
-            RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib)
+             RUNTIME DESTINATION bin
+             LIBRARY DESTINATION lib
+             ARCHIVE DESTINATION lib)
 
-    # Header install.
-    tbag_module_install__assign_library ("${TBAG_PROJECT_CONST_DIR_NAME}")
+    tbag_module_install_headers ("${TBAG_PROJECT_CONST_DIR_NAME}")
 endmacro ()
 
-## -------------------------
-## Extension library Object.
-## -------------------------
+## --------------
+## Object filter.
+## --------------
 
 #/// C++ Obfuscator or Native C/C++ Source files.
 #///
@@ -111,9 +112,9 @@ macro (tbag_object_protobuf)
     endif ()
 endmacro ()
 
-## --------------------------
-## Extension library modules.
-## --------------------------
+## ----------------
+## Project modules.
+## ----------------
 
 #/// Assign google-test libraries.
 #///
@@ -208,5 +209,4 @@ macro (tbag_module_uv)
         list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
     endif ()
 endmacro ()
-
 
