@@ -8,8 +8,8 @@
 #  Tbag_INCLUDE_DIRS
 #  Tbag_LIBRARIES
 
-set (__headers  "libtbag/config.h")
-set (__libs     "")
+set (__headers "libtbag/config.h")
+set (__libs    "")
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")

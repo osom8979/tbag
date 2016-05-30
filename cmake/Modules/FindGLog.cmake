@@ -8,8 +8,8 @@
 #  GLog_INCLUDE_DIRS
 #  GLog_LIBRARIES
 
-set (__headers  "glog/logging.h")
-set (__libs     "glog")
+set (__headers "glog/logging.h")
+set (__libs    "glog")
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")

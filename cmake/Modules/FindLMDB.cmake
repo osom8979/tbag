@@ -8,8 +8,8 @@
 #  LMDB_INCLUDE_DIRS
 #  LMDB_LIBRARIES
 
-set (__headers  "lmdb.h")
-set (__libs     "lmdb")
+set (__headers "lmdb.h")
+set (__libs    "lmdb")
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")

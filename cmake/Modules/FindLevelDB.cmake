@@ -8,8 +8,8 @@
 #  LevelDB_INCLUDE_DIRS
 #  LevelDB_LIBRARIES
 
-set (__headers  "leveldb/options.h")
-set (__libs     "leveldb")
+set (__headers "leveldb/options.h")
+set (__libs    "leveldb")
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")
