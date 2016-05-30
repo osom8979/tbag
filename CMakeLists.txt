@@ -24,5 +24,5 @@ tbag_doxygen_generate__auto_default ()
 tbag_project__default ()
 
 tbag_module_install__assign_library (${MAIN_NAME})
-tbag_info__print_preview ()
+tbag_info_print_preview ()
 

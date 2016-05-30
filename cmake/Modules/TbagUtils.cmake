@@ -199,3 +199,87 @@ function (tbag_debug_list __tag)
     endforeach ()
 endfunction ()
 
+## --------------------
+## Information Preview.
+## --------------------
+
+#/// Print information.
+#///
+#/// @param ... [in] message arguments.
+function (tbag_info_print)
+    message ("## " ${ARGN})
+endfunction ()
+
+#/// Print variable.
+#///
+#/// @param __value [in] value name.
+function (tbag_info_print_variable __value)
+    tbag_info_print ("${__value}: " ${${__value}})
+endfunction ()
+
+#/// Print os information.
+#///
+#/// @remarks
+#///  - ${WIN32}: Prior to 2.8.4 this included CygWin.
+#///  - ${UNIX}: including Apple OS X and CygWin.
+function (tbag_info_print_os)
+    if (WIN32)
+        if (CYGWIN)
+            tbag_info_print ("Windows OS and Cygwin.")
+        elseif (MSYS)
+            tbag_info_print ("Windows OS and MSYS.")
+        else ()
+            tbag_info_print ("Windows OS.")
+        endif ()
+    elseif (UNIX)
+        if (APPLE)
+            tbag_info_print ("Apple systems.")
+        else ()
+            tbag_info_print ("Unix-like OS's.")
+        endif ()
+    else ()
+        tbag_info_print ("Unknown OS.")
+    endif ()
+endfunction ()
+
+#/// Print compiler information.
+function (tbag_info_print_compiler)
+    # Compiler & IDE:
+    # CLANG GNU
+    # MINGW MSYS CYGWIN
+    # BORLAND WATCOM
+    # MSVC MSVC_IDE MSVC60 MSVC70 MSVC71 MSVC80 CMAKE_COMPILER_2005 MSVC90 MSVC10
+    message (WARNING "Not implement.")
+endfunction ()
+
+#/// Print your compiler.
+function (tbag_info_print_compiler_id)
+    tbag_info_print ("Compiler id: ${CMAKE_CXX_COMPILER_ID}")
+endfunction ()
+
+#/// Preview information.
+function (tbag_info_print_preview)
+    message ("")
+    tbag_info_print ("#################### PREVIEW INFORMATION ####################")
+    tbag_info_print ("")
+
+    tbag_info_print_os ()
+    tbag_info_print_compiler_id ()
+    tbag_info_print ("")
+
+    tbag_info_print_variable (CMAKE_BUILD_TYPE)
+    tbag_info_print_variable (BUILD_SHARED_LIBS)
+    tbag_info_print ("")
+
+    tbag_info_print_variable (CMAKE_CXX_FLAGS)
+    tbag_info_print_variable (CMAKE_EXE_LINKER_FLAGS)
+    tbag_info_print_variable (CMAKE_MODULE_LINKER_FLAGS)
+    tbag_info_print_variable (CMAKE_SHARED_LINKER_FLAGS)
+    tbag_info_print ("")
+
+    tbag_info_print_variable (PROJECT_SOURCE_DIR)
+    tbag_info_print_variable (PROJECT_BINARY_DIR)
+    tbag_info_print_variable (CMAKE_INSTALL_PREFIX)
+    message ("")
+endfunction ()
+

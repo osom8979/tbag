@@ -4,8 +4,6 @@
 #/// @date   2016-05-26
 
 include (TbagUtils)
-
-include (TbagInformation)
 include (TbagCxxFlags)
 include (TbagProject)
 
