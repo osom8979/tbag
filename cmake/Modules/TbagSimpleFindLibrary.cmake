@@ -27,11 +27,11 @@ function (tbag_find_headers __result __paths __headers)
     endforeach ()
 
     # Preview
-    tabg_utils__arguments_to_string (__preview_result "," ${${__result}})
+    tabg_utils__list_to_string (__preview_result "," ${${__result}})
     tbag_debug (tbag_find_headers "Result variable name: ${__result} (${__preview_result})")
-    tabg_utils__arguments_to_string (__preview_result "," ${__paths})
+    tabg_utils__list_to_string (__preview_result "," ${__paths})
     tbag_debug (tbag_find_headers "Search directories: ${__preview_result}")
-    tabg_utils__arguments_to_string (__preview_result "," ${__headers})
+    tabg_utils__list_to_string (__preview_result "," ${__headers})
     tbag_debug (tbag_find_headers "Find header files: ${__preview_result}")
 
     # update result.
@@ -61,11 +61,11 @@ function (tbag_find_libraries __result __paths __libs)
     endforeach ()
 
     # Preview
-    tabg_utils__arguments_to_string (__preview_result "," ${${__result}})
+    tabg_utils__list_to_string (__preview_result "," ${${__result}})
     tbag_debug (tbag_find_libraries "Result variable name: ${__result} (${__preview_result})")
-    tabg_utils__arguments_to_string (__preview_result "," ${__paths})
+    tabg_utils__list_to_string (__preview_result "," ${__paths})
     tbag_debug (tbag_find_libraries "Search directories: ${__preview_result}")
-    tabg_utils__arguments_to_string (__preview_result "," ${__libs})
+    tabg_utils__list_to_string (__preview_result "," ${__libs})
     tbag_debug (tbag_find_libraries "Find library files: ${__preview_result}")
 
     # update result.

@@ -97,7 +97,7 @@ endfunction ()
 #/// @param __result    [out] Output value name.
 #/// @param __delimiter [in]  Delimiter string.
 #/// @param ...         [in]  List of arguments.
-function (tabg_utils__arguments_to_string __result __delimiter)
+function (tabg_utils__list_to_string __result __delimiter)
     set (${__result})
     set (__is_first_setting NO)
 
