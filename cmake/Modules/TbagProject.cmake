@@ -217,7 +217,22 @@ macro (tbag_project_build __is_library __project_dir_name __root_dir)
     tbag_project_property__set_const ("${__cursor}")
 
     project (${TBAG_PROJECT_CONST_NAME})
-    include ("${__project_cmake_path}") # Read project.cmake files.
+    if (EXISTS "${__project_cmake_path}")
+        include ("${__project_cmake_path}") # Read project.cmake files.
+    else ()
+        message (FATAL_ERROR "Not found ${__project_cmake_path}")
+    endif ()
+
+    tbag_debug          (tbag_project_build "Project path: ${__project_cmake_path}")
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_DIR_NAME)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_TYPE)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_NAME)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_OBJECTS)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_DEPENDENCIES)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_DEFINITIONS)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_INCLUDE_DIRS)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CXXFLAGS)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_LDFLAGS)
 
     tbag_project_property__update_objects ("${__project_dir_path}")
 
