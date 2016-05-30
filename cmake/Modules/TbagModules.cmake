@@ -210,3 +210,18 @@ macro (tbag_module_uv)
     endif ()
 endmacro ()
 
+#/// Assign libtbag.
+#///
+#/// @remarsk
+#///  Recommended apply to the test project.
+macro (tbag_module_tbag)
+    if (NOT Tbag_FOUND)
+        find_package (Tbag)
+    endif ()
+
+    if (Tbag_FOUND)
+        list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_TBAG)
+        list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Tbag_INCLUDE_DIRS})
+    endif ()
+endmacro ()
+
