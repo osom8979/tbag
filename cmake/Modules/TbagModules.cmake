@@ -47,13 +47,7 @@ endmacro ()
 #/// @remarsk
 #///  Recommended apply to the library & executable project.
 macro (tbag_module_install_targets)
-    # Target install.
-    install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
-             RUNTIME DESTINATION bin
-             LIBRARY DESTINATION lib
-             ARCHIVE DESTINATION lib)
-
-    tbag_module_install_headers ("${TBAG_PROJECT_CONST_DIR_NAME}")
+    set (TBAG_PROJECT_FLAG_TARGET_INSTALL ON)
 endmacro ()
 
 ## --------------

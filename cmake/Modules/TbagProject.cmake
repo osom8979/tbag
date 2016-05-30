@@ -92,6 +92,10 @@ endfunction ()
 
 #/// Clear project properties.
 macro (tbag_project_property__clear)
+    # Flag variables.
+    set (TBAG_PROJECT_FLAG_TARGET_INSTALL OFF)
+
+    # List variables.
     set (TBAG_PROJECT_OBJECTS)
     set (TBAG_PROJECT_DEPENDENCIES)
     set (TBAG_PROJECT_DEFINITIONS)
@@ -99,7 +103,7 @@ macro (tbag_project_property__clear)
     set (TBAG_PROJECT_CXXFLAGS)
     set (TBAG_PROJECT_LDFLAGS)
 
-    # constant variables.
+    # Constant variables.
     set (TBAG_PROJECT_CONST_DIR_NAME)
     set (TBAG_PROJECT_CONST_TYPE)
     set (TBAG_PROJECT_CONST_NAME)
@@ -107,6 +111,10 @@ endmacro ()
 
 #/// Clear project properties.
 macro (tbag_project_property__print)
+    # Flag variables.
+    message (STATUS "TBAG_PROJECT_FLAG_TARGET_INSTALL: ${TBAG_PROJECT_FLAG_TARGET_INSTALL}")
+
+    # List variables.
     message (STATUS "TBAG_PROJECT_OBJECTS: ${TBAG_PROJECT_OBJECTS}")
     message (STATUS "TBAG_PROJECT_DEPENDENCIES: ${TBAG_PROJECT_DEPENDENCIES}")
     message (STATUS "TBAG_PROJECT_DEFINITIONS: ${TBAG_PROJECT_DEFINITIONS}")
@@ -114,7 +122,7 @@ macro (tbag_project_property__print)
     message (STATUS "TBAG_PROJECT_CXXFLAGS: ${TBAG_PROJECT_CXXFLAGS}")
     message (STATUS "TBAG_PROJECT_LDFLAGS: ${TBAG_PROJECT_LDFLAGS}")
 
-    # constant variables.
+    # Constant variables.
     message (STATUS "TBAG_PROJECT_CONST_DIR_NAME: ${TBAG_PROJECT_CONST_DIR_NAME}")
     message (STATUS "TBAG_PROJECT_CONST_TYPE: ${TBAG_PROJECT_CONST_TYPE}")
     message (STATUS "TBAG_PROJECT_CONST_NAME: ${TBAG_PROJECT_CONST_NAME}")
@@ -170,13 +178,24 @@ macro (tbag_project_property__update_linker_flags)
     endif ()
 endmacro ()
 
+#/// Target install.
+macro (tbag_project_property__update_target_install)
+    if (TBAG_PROJECT_FLAG_TARGET_INSTALL)
+        install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
+                 RUNTIME DESTINATION bin
+                 LIBRARY DESTINATION lib
+                 ARCHIVE DESTINATION lib)
+    endif ()
+endmacro ()
+
 #/// Update all of target.
 macro (tbag_project_property__update_all)
-    tbag_project_property__update_dependencies ()
-    tbag_project_property__update_definitions  ()
-    tbag_project_property__update_include      ()
-    tbag_project_property__update_cxx_flags    ()
-    tbag_project_property__update_linker_flags ()
+    tbag_project_property__update_dependencies   ()
+    tbag_project_property__update_definitions    ()
+    tbag_project_property__update_include        ()
+    tbag_project_property__update_cxx_flags      ()
+    tbag_project_property__update_linker_flags   ()
+    tbag_project_property__update_target_install ()
 endmacro ()
 
 #/// Find & register object files.
@@ -223,16 +242,20 @@ macro (tbag_project_build __is_library __project_dir_name __root_dir)
         message (FATAL_ERROR "Not found ${__project_cmake_path}")
     endif ()
 
-    tbag_debug          (tbag_project_build "Project path: ${__project_cmake_path}")
-    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_DIR_NAME)
-    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_TYPE)
-    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_NAME)
+    tbag_debug (tbag_project_build "Project path: ${__project_cmake_path}")
+    # Flag variables.
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_FLAG_TARGET_INSTALL)
+    # List variables.
     tbag_debug_variable (tbag_project_build TBAG_PROJECT_OBJECTS)
     tbag_debug_variable (tbag_project_build TBAG_PROJECT_DEPENDENCIES)
     tbag_debug_variable (tbag_project_build TBAG_PROJECT_DEFINITIONS)
     tbag_debug_variable (tbag_project_build TBAG_PROJECT_INCLUDE_DIRS)
     tbag_debug_variable (tbag_project_build TBAG_PROJECT_CXXFLAGS)
     tbag_debug_variable (tbag_project_build TBAG_PROJECT_LDFLAGS)
+    # Constant variables.
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_DIR_NAME)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_TYPE)
+    tbag_debug_variable (tbag_project_build TBAG_PROJECT_CONST_NAME)
 
     tbag_project_property__update_objects ("${__project_dir_path}")
 
