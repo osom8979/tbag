@@ -1,4 +1,4 @@
-#/// @file   TbagDoxygenGenerator.cmake
+#/// @file   TbagDoxygen.cmake
 #/// @brief  tbag_doxygen_generate function prototype.
 #/// @author zer0
 #/// @date   2016-05-27

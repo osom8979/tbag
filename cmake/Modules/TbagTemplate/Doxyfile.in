@@ -20,7 +20,7 @@ INCLUDE_PATH            = "${PROJECT_SOURCE_DIR}"
 INCLUDE_FILE_PATTERNS   = *.h *.hh *.hxx *.hpp *.h++
 USE_MATHJAX             = YES
 MATHJAX_RELPATH         = https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-QUIET                   = YES                          )
+QUIET                   = YES
 
 ## -----------------
 ## Doxyfile content.
