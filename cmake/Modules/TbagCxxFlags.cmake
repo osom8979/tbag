@@ -77,18 +77,6 @@ macro (tbag_cxx_flags__set_debug_define)
     endif ()
 endmacro ()
 
-#/// include & link directory for source directory.
-macro (tbag_cxx_flags__set_path_for_source_dir)
-    list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_SOURCE_DIR}")
-    list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_SOURCE_DIR}")
-endmacro ()
-
-#/// include & link directory for source directory.
-macro (tbag_cxx_flags__set_include_and_link_for_source_dir)
-    include_directories (${PROJECT_SOURCE_DIR})
-    link_directories    (${PROJECT_SOURCE_DIR})
-endmacro ()
-
 #/// Print all compile warning.
 macro (tbag_cxx_flags__set_print_all_compile_warning)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -103,12 +91,10 @@ endmacro ()
 
 #/// Default tbag project setup.
 macro (tbag_cxx_flags)
-    tbag_cxx_flags__set_position_independent_code       ()
-    tbag_cxx_flags__set_cpp_standard_11                 ()
-    tbag_cxx_flags__set_debug_define                    ()
-    tbag_cxx_flags__set_path_for_source_dir             ()
-    tbag_cxx_flags__set_include_and_link_for_source_dir ()
-    tbag_cxx_flags__set_print_all_compile_warning       ()
-    #tbag_cxx_flags__set_install_rpath                  ()
+    tbag_cxx_flags__set_position_independent_code ()
+    tbag_cxx_flags__set_cpp_standard_11           ()
+    tbag_cxx_flags__set_debug_define              ()
+    tbag_cxx_flags__set_print_all_compile_warning ()
+    #tbag_cxx_flags__set_install_rpath            ()
 endmacro ()
 

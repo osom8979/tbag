@@ -10,7 +10,7 @@ set (TBAG_MODULE_PREFIX "TbagModule")
 #/// @param __module [in] module name.
 macro (tbag_module __module)
     include (${TBAG_MODULE_PREFIX}${__module})
-endmacro (tbag_module)
+endmacro ()
 
 #/// Assign default module settings.
 #///

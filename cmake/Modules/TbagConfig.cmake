@@ -142,11 +142,31 @@ macro (tbag_config__add_third __root_dir)
         set (ENV{LIBRARY_PATH} "${THIRD_LIB}${TBAG_PATH_SEPARATOR}$ENV{LIBRARY_PATH}")
     endif ()
 
-    list (INSERT CMAKE_PROGRAM_PATH 0 "${THIRD_BIN}")
-    list (INSERT CMAKE_LIBRARY_PATH 0 "${THIRD_LIB}")
+    list (INSERT CMAKE_PROGRAM_PATH 0 ${THIRD_BIN})
+    list (INSERT CMAKE_INCLUDE_PATH 0 ${THIRD_INC})
+    list (INSERT CMAKE_LIBRARY_PATH 0 ${THIRD_LIB})
+endmacro ()
 
-    include_directories (${THIRD_INC})
-    link_directories (${THIRD_LIB})
+#/// Initialize PATH's variables.
+#///
+#/// @remarks
+#///  - ${CMAKE_PROGRAM_PATH}
+#///  - ${CMAKE_INCLUDE_PATH}
+#///  - ${CMAKE_LIBRARY_PATH}
+macro (tbag_config__add_root_paths)
+    list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_SOURCE_DIR}")
+    list (INSERT CMAKE_INCLUDE_PATH 0 "${PROJECT_SOURCE_DIR}")
+    list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_SOURCE_DIR}")
+
+    #list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_BINARY_DIR}")
+    #list (INSERT CMAKE_INCLUDE_PATH 0 "${PROJECT_BINARY_DIR}")
+    #list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_BINARY_DIR}")
+endmacro ()
+
+#/// Setup include & link directories.
+macro (tbag_config__set_include_and_link_directories)
+    include_directories (${CMAKE_INCLUDE_PATH})
+    link_directories (${CMAKE_LIBRARY_PATH})
 endmacro ()
 
 ## ------------------------
@@ -339,17 +359,18 @@ macro (tbag_config __path)
     tbag_config__exists_main_information    ()
     tbag_config__exists_version_information ()
 
-    # Options.
+    # Configure cmake settings.
     tbag_config__add_shared_library_option ()
-
-    # Default settings.
-    tbag_cxx_flags ()
-
     tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
+    tbag_config__add_root_paths ()
 
-    # Libraryies.
     tbag_utils__exists_define_or_die (THIRD_PREFIX)
     tbag_config__add_libraries ("${THIRD_PREFIX}" ${__tbag_config_INFORMATION_LIBRARIES})
+
+    tbag_config__set_include_and_link_directories ()
+
+    # C/C++ flags.
+    tbag_cxx_flags ()
 
     unset (__tbag_config_INFORMATION_MAIN_NAME)
     unset (__tbag_config_INFORMATION_MAIN_AUTHOR)
