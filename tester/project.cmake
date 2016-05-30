@@ -1,11 +1,11 @@
 ## Tbag CMake subproject.
 
-tbag_module__assign_default (LIBTBAG)
+tbag_module_default (LIBTBAG)
 
 # Extension.
-tbag_module_gtest__assign    ()
-tbag_module_uv__assign       ()
-tbag_module_spdlog__assign   ()
-tbag_module_tinyxml2__assign ()
-tbag_module_sqlite3__assign  ()
+tbag_module_gtest    ()
+tbag_module_uv       ()
+tbag_module_spdlog   ()
+tbag_module_tinyxml2 ()
+tbag_module_sqlite3  ()
 
