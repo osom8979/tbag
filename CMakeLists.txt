@@ -21,7 +21,7 @@ tbag_config__generate_c_header ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
 tbag_doxygen_generate__auto_default ()
 
 ## Run project.
-tbag_project__default ()
+tbag_project ()
 
 tbag_module_install__assign_library (${MAIN_NAME})
 tbag_info_print_preview ()
