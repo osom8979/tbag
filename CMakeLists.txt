@@ -18,7 +18,9 @@ set (GTEST_ROOT "${THIRD_PREFIX}")
 
 ## Configure settings.
 tbag_config__generate_c_header ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
-tbag_doxygen_generate__auto_default ()
+
+include (TbagDoxygen)
+tbag_doxygen_generate ()
 
 ## Run project.
 tbag_project ()

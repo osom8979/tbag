@@ -15,6 +15,10 @@ if (NOT DEFINED TBAG_PATH_SEPARATOR)
     endif ()
 endif ()
 
+if (NOT DEFINED TBAG_CONFIG_TEMPLATE_DIR)
+    set (TBAG_CONFIG_TEMPLATE_DIR "${CMAKE_CURRENT_LIST_DIR}/TbagTemplate")
+endif ()
+
 ## -------------------
 ## Variable utilities.
 ## -------------------
@@ -27,6 +31,23 @@ function (tbag_utils__exists_define_or_die __value)
     if (NOT DEFINED ${__value})
         message (FATAL_ERROR "Not defined ${__value} variable.")
     endif()
+endfunction ()
+
+## ----------
+## Configure.
+## ----------
+
+#/// Write configure file.
+#///
+#/// @param __output_path [in] Output configure file path.
+function (tbag_utils__write_configure __template_name __output_path)
+    configure_file ("${TBAG_CONFIG_TEMPLATE_DIR}/${__template_name}" "${__output_path}" NEWLINE_STYLE UNIX)
+
+    if (EXISTS "${__output_path}")
+        message (STATUS "Write a configure file: ${__output_path}")
+    else ()
+        message (FATAL_ERROR "Not found configure file: ${__output_path}")
+    endif ()
 endfunction ()
 
 ## -----------
