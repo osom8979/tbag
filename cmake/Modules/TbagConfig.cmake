@@ -343,7 +343,8 @@ macro (tbag_config __path)
     tbag_config__add_shared_library_option ()
 
     # Default settings.
-    tbag_flags__default  ()
+    tbag_cxx_flags ()
+
     tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
 
     # Libraryies.
