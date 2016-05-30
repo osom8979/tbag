@@ -1,5 +1,5 @@
 #/// @file   TbagConfig.cmake
-#/// @brief  Default tbag cmake configure.
+#/// @brief  Tbag configure macros.
 #/// @author zer0
 #/// @date   2016-05-26
 
@@ -15,6 +15,10 @@ include (TbagProject)
 include (TbagCxxConfigGenerator)
 include (TbagDoxygenGenerator)
 include (ProtobufGenerator)
+
+## -----------------
+## Main information.
+## -----------------
 
 #/// Initialize & caching main information.
 #///
@@ -39,7 +43,7 @@ endmacro ()
 #/// @param __packet_major  [in] Packet major version.
 #/// @param __packet_minor  [in] Packet minor version.
 #/// @param __release       [in] Release number.
-macro (tbag_config__init_version __major __minor __patch __packet_major __packet_minor __release)
+macro (tbag_config__init_version_information __major __minor __patch __packet_major __packet_minor __release)
     # Main version.
     set (VERSION_MAJOR ${__major})
     set (VERSION_MINOR ${__minor})
@@ -67,29 +71,34 @@ endmacro ()
 
 #/// Exists main information.
 macro (tbag_config__exists_main_information)
-    # Main information.
     tbag_utils__exists_define_or_die (MAIN_NAME)
     tbag_utils__exists_define_or_die (MAIN_AUTHOR)
     tbag_utils__exists_define_or_die (MAIN_EMAIL)
     tbag_utils__exists_define_or_die (MAIN_BRIEF)
+endmacro ()
 
-    # Main version.
+#/// Exists version information.
+macro (tbag_config__exists_version_information)
     tbag_utils__exists_define_or_die (VERSION_MAJOR)
     tbag_utils__exists_define_or_die (VERSION_MINOR)
     tbag_utils__exists_define_or_die (VERSION_PATCH)
-
-    # Packet version.
     tbag_utils__exists_define_or_die (VERSION_PACKET_MAJOR)
     tbag_utils__exists_define_or_die (VERSION_PACKET_MINOR)
-
-    # Extension version number.
     tbag_utils__exists_define_or_die (VERSION_RELEASE)
 endmacro ()
 
+## --------------
+## CMake options.
+## --------------
+
 #/// The caching shared library options.
-macro (tbag_config__caching_shared_library_option)
+macro (tbag_config__add_shared_library_option)
     option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
 endmacro ()
+
+## ----------------------
+## Libraries information.
+## ----------------------
 
 #/// Create & cacheing library option.
 #///
@@ -97,62 +106,41 @@ endmacro ()
 #///  - USE_${_name}: library variable.
 macro (tbag_config__add_library_option __name __enable)
     set (USE_${__name} ${__enable} CACHE BOOL "Use the ${__name} library.")
-
-    #if (${__enable})
-    #    find_package (${__name})
-    #endif ()
 endmacro ()
 
 #/// Create & cacheing library list.
 #///
-#/// @param __default_root  [in] Default library root directory.
+#/// @param __default_root  [in] Default root directory of libraries.
 #/// @param ...             [in] list of library name.
-macro (tbag_config__add_library_list __default_root)
+macro (tbag_config__add_libraries __default_root)
     foreach (__list_cursor ${ARGN})
-        tbag_debug (tbag_config__add_library_list "Add ${__list_cursor} library.")
+        tbag_debug (tbag_config__add_libraries "Add ${__list_cursor} library.")
 
         set ("${__list_cursor}_ROOT" "${__default_root}" CACHE PATH "${__list_cursor} library root directory.")
         tbag_config__add_library_option (${__list_cursor} ON)
     endforeach ()
 endmacro ()
 
-# List of libraries.
-#tbag_config__add_library_option (ZLIB      OFF)
-#tbag_config__add_library_option (LMDB      OFF)
-#tbag_config__add_library_option (GTest     ON)
-#tbag_config__add_library_option (Spdlog    ON)
-#tbag_config__add_library_option (UV        ON)
-#tbag_config__add_library_option (TinyXML2  ON)
-#tbag_config__add_library_option (NCurses   ON)
-#tbag_config__add_library_option (SQLite3   ON)
-#tbag_config__add_library_option (Doxygen   ON)
-#tbag_config__add_library_option (Protobuf  OFF)
-#tbag_config__add_library_option (GFlags    OFF)
-#tbag_config__add_library_option (GLog      OFF)
-#tbag_config__add_library_option (HDF5-2    OFF) # Don't use standard module. (FindHDF5.cmake)
-#tbag_config__add_library_option (OpenBLAS  OFF)
-#tbag_config__add_library_option (Snappy    OFF)
-#tbag_config__add_library_option (LevelDB   OFF)
-#tbag_config__add_library_option (PNG       OFF)
-#tbag_config__add_library_option (wxWidgets OFF)
-#tbag_config__add_library_option (Tbag      OFF)
+## -----------
+## ALL IN ONE.
+## -----------
 
 #/// Read information file and initialize.
 #///
 #/// @param __path [in] Information file path.
-macro (tbag_config__init_from_file __path)
+macro (tbag_config __path)
     tbag_config_file__read (__tbag_config "${__path}")
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_NAME)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_AUTHOR)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_EMAIL)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_MAIN_BRIEF)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_MAJOR)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_MINOR)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_PATCH)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_PACKET_MINOR)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_VERSION_RELEASE)
-    tbag_debug__variable (tbag_config__init_from_file __tbag_config_INFORMATION_LIBRARIES)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_NAME)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_AUTHOR)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_EMAIL)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_BRIEF)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_MAJOR)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_MINOR)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_PATCH)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MINOR)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_RELEASE)
+    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_LIBRARIES)
 
     # Main information.
     tbag_config__init_main_information (
@@ -160,7 +148,7 @@ macro (tbag_config__init_from_file __path)
             "${__tbag_config_INFORMATION_MAIN_AUTHOR}"
             "${__tbag_config_INFORMATION_MAIN_EMAIL}"
             "${__tbag_config_INFORMATION_MAIN_BRIEF}")
-    tbag_config__init_version (
+    tbag_config__init_version_information (
             "${__tbag_config_INFORMATION_VERSION_MAJOR}"
             "${__tbag_config_INFORMATION_VERSION_MINOR}"
             "${__tbag_config_INFORMATION_VERSION_PATCH}"
@@ -170,23 +158,30 @@ macro (tbag_config__init_from_file __path)
             "${__tbag_config_INFORMATION_LIBRARIES}")
 
     # Exists.
-    tbag_config__exists_main_information ()
+    tbag_config__exists_main_information    ()
+    tbag_config__exists_version_information ()
 
     # Options.
-    tbag_config__caching_shared_library_option ()
+    tbag_config__add_shared_library_option ()
 
     # Default settings.
-    tbag_flags__default ()
-    tbag_tparty__default ()
+    tbag_flags__default  ()
+    tbag_tparty__default () # Setup the THIRD_PREFIX variable.
 
     # Libraryies.
-    tbag_config__add_library_list ("${THIRD_PREFIX}" ${__tbag_config_INFORMATION_LIBRARIES})
-endmacro ()
+    tbag_utils__exists_define_or_die (THIRD_PREFIX)
+    tbag_config__add_libraries ("${THIRD_PREFIX}" ${__tbag_config_INFORMATION_LIBRARIES})
 
-#/// Default config macro.
-#///
-#/// @param __path [in] Information file path.
-macro (tbag_config __path)
-    tbag_config__init_from_file ("${__path}")
+    unset (__tbag_config_INFORMATION_MAIN_NAME)
+    unset (__tbag_config_INFORMATION_MAIN_AUTHOR)
+    unset (__tbag_config_INFORMATION_MAIN_EMAIL)
+    unset (__tbag_config_INFORMATION_MAIN_BRIEF)
+    unset (__tbag_config_INFORMATION_VERSION_MAJOR)
+    unset (__tbag_config_INFORMATION_VERSION_MINOR)
+    unset (__tbag_config_INFORMATION_VERSION_PATCH)
+    unset (__tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
+    unset (__tbag_config_INFORMATION_VERSION_PACKET_MINOR)
+    unset (__tbag_config_INFORMATION_VERSION_RELEASE)
+    unset (__tbag_config_INFORMATION_LIBRARIES)
 endmacro ()
 
