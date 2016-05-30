@@ -9,7 +9,6 @@ include (TbagUtils)
 include (TbagStrings)
 include (TbagInformation)
 include (TbagCxxFlags)
-include (TbagTparty)
 include (TbagProject)
 
 include (TbagCxxConfigGenerator)
@@ -119,6 +118,32 @@ macro (tbag_config__add_libraries __default_root)
         set ("${__list_cursor}_ROOT" "${__default_root}" CACHE PATH "${__list_cursor} library root directory.")
         tbag_config__add_library_option (${__list_cursor} ON)
     endforeach ()
+endmacro ()
+
+#/// Initialize 3rd-party library variables.
+#///
+#/// @param __root_dir [in] Root directory of libraries.
+macro (tbag_config__add_third __root_dir)
+    set (THIRD_PREFIX  "${__root_dir}"           CACHE PATH "3rd-party prefix directory.")
+    set (THIRD_BIN     "${THIRD_PREFIX}/bin"     CACHE PATH "3rd-party binary directory.")
+    set (THIRD_INC     "${THIRD_PREFIX}/include" CACHE PATH "3rd-party include directory.")
+    set (THIRD_LIB     "${THIRD_PREFIX}/lib"     CACHE PATH "3rd-party library directory.")
+
+    if (IS_DIRECTORY ${THIRD_BIN})
+        set (ENV{PATH} "${THIRD_BIN}${TBAG_PATH_SEPARATOR}$ENV{PATH}")
+    endif ()
+    if (IS_DIRECTORY ${THIRD_INC})
+        set (ENV{CPATH} "${THIRD_INC}${TBAG_PATH_SEPARATOR}$ENV{CPATH}")
+    endif ()
+    if (IS_DIRECTORY ${THIRD_LIB})
+        set (ENV{LIBRARY_PATH} "${THIRD_LIB}${TBAG_PATH_SEPARATOR}$ENV{LIBRARY_PATH}")
+    endif ()
+
+    list (INSERT CMAKE_PROGRAM_PATH 0 "${THIRD_BIN}")
+    list (INSERT CMAKE_LIBRARY_PATH 0 "${THIRD_LIB}")
+
+    include_directories (${THIRD_INC})
+    link_directories (${THIRD_LIB})
 endmacro ()
 
 ## ------------------------
@@ -316,7 +341,7 @@ macro (tbag_config __path)
 
     # Default settings.
     tbag_flags__default  ()
-    tbag_tparty__default () # Setup the THIRD_PREFIX variable.
+    tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
 
     # Libraryies.
     tbag_utils__exists_define_or_die (THIRD_PREFIX)
