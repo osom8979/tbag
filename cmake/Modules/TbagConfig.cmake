@@ -4,7 +4,7 @@
 #/// @date   2016-05-26
 
 include (TbagDebug)
-include (TbagCommon)
+include (TbagUtils)
 include (TbagConfigFile)
 include (TbagStrings)
 include (TbagInformation)
@@ -68,22 +68,22 @@ endmacro ()
 #/// Exists main information.
 macro (tbag_config__exists_main_information)
     # Main information.
-    tbag_common__exists_define_or_die (MAIN_NAME)
-    tbag_common__exists_define_or_die (MAIN_AUTHOR)
-    tbag_common__exists_define_or_die (MAIN_EMAIL)
-    tbag_common__exists_define_or_die (MAIN_BRIEF)
+    tbag_utils__exists_define_or_die (MAIN_NAME)
+    tbag_utils__exists_define_or_die (MAIN_AUTHOR)
+    tbag_utils__exists_define_or_die (MAIN_EMAIL)
+    tbag_utils__exists_define_or_die (MAIN_BRIEF)
 
     # Main version.
-    tbag_common__exists_define_or_die (VERSION_MAJOR)
-    tbag_common__exists_define_or_die (VERSION_MINOR)
-    tbag_common__exists_define_or_die (VERSION_PATCH)
+    tbag_utils__exists_define_or_die (VERSION_MAJOR)
+    tbag_utils__exists_define_or_die (VERSION_MINOR)
+    tbag_utils__exists_define_or_die (VERSION_PATCH)
 
     # Packet version.
-    tbag_common__exists_define_or_die (VERSION_PACKET_MAJOR)
-    tbag_common__exists_define_or_die (VERSION_PACKET_MINOR)
+    tbag_utils__exists_define_or_die (VERSION_PACKET_MAJOR)
+    tbag_utils__exists_define_or_die (VERSION_PACKET_MINOR)
 
     # Extension version number.
-    tbag_common__exists_define_or_die (VERSION_RELEASE)
+    tbag_utils__exists_define_or_die (VERSION_RELEASE)
 endmacro ()
 
 #/// The caching shared library options.
