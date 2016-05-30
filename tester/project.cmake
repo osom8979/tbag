@@ -9,3 +9,4 @@ tbag_module_spdlog   ()
 tbag_module_tinyxml2 ()
 tbag_module_sqlite3  ()
 
+#tbag_module_install_targets ()

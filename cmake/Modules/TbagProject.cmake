@@ -198,13 +198,6 @@ macro (tbag_project_property__update_objects __find_directory)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${__find_compile_include_dirs})
     list (APPEND TBAG_PROJECT_CXXFLAGS     ${__find_compile_cxxflags})
     list (APPEND TBAG_PROJECT_LDFLAGS      ${__find_compile_ldflags})
-
-    unset (__find_compile_objs)
-    unset (__find_compile_dependencies)
-    unset (__find_compile_definitions)
-    unset (__find_compile_include_dirs)
-    unset (__find_compile_cxxflags)
-    unset (__find_compile_ldflags)
 endmacro ()
 
 ## --------------

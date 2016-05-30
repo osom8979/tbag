@@ -360,18 +360,6 @@ macro (tbag_config __path)
 
     # C/C++ flags.
     tbag_cxx_flags ()
-
-    unset (__tbag_config_INFORMATION_MAIN_NAME)
-    unset (__tbag_config_INFORMATION_MAIN_AUTHOR)
-    unset (__tbag_config_INFORMATION_MAIN_EMAIL)
-    unset (__tbag_config_INFORMATION_MAIN_BRIEF)
-    unset (__tbag_config_INFORMATION_VERSION_MAJOR)
-    unset (__tbag_config_INFORMATION_VERSION_MINOR)
-    unset (__tbag_config_INFORMATION_VERSION_PATCH)
-    unset (__tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
-    unset (__tbag_config_INFORMATION_VERSION_PACKET_MINOR)
-    unset (__tbag_config_INFORMATION_VERSION_RELEASE)
-    unset (__tbag_config_INFORMATION_LIBRARIES)
 endmacro ()
 
 ## ----------
