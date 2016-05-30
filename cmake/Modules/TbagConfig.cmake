@@ -3,7 +3,6 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
-include (TbagDebug)
 include (TbagUtils)
 
 include (TbagInformation)
@@ -304,17 +303,17 @@ endfunction ()
 #/// @param __path [in] Information file path.
 macro (tbag_config __path)
     tbag_config__read_information_file (__tbag_config "${__path}")
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_NAME)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_AUTHOR)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_EMAIL)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_MAIN_BRIEF)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_MAJOR)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_MINOR)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_PATCH)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MINOR)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_VERSION_RELEASE)
-    tbag_debug__variable (tbag_config  __tbag_config_INFORMATION_LIBRARIES)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_NAME)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_AUTHOR)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_EMAIL)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_BRIEF)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_MAJOR)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_MINOR)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_PATCH)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MINOR)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_RELEASE)
+    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_LIBRARIES)
 
     # Main information.
     tbag_config__init_main_information (

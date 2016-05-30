@@ -3,7 +3,7 @@
 #/// @author zer0
 #/// @date   2016-05-29
 
-include (TbagDebug)
+include (TbagUtils)
 
 set (TBAG_OBJECT_CONFIG_PREFIX  "object")
 set (TBAG_OBJECT_CONFIG_SUFFIX  "cmake")

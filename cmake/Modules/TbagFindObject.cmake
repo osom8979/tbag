@@ -3,6 +3,7 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
+include (TbagUtils)
 include (TbagFindObjectConfig)
 include (TbagObjects)
 include (TbagModules)
@@ -27,7 +28,7 @@ function (tbag_find_object __objs __dependencies __definitions __include_dirs __
     set (${__ldflags})
 
     tbag_find_object_config (__config_files "${__find_dir}")
-    tbag_debug__list (tbag_project_build__update_objects ${__config_files})
+    tbag_debug_list (tbag_project_build__update_objects ${__config_files})
     if ("${__config_files}" STREQUAL "")
         get_filename_component (__find_dir_absolute "${__find_dir}" ABSOLUTE)
         file (GLOB_RECURSE ${__objs} "${__find_dir_absolute}/*${TABG_DEFAULT_CXX_SUFFIX}")
