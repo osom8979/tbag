@@ -3,15 +3,44 @@
 #/// @author zer0
 #/// @date   2016-05-27
 
-#/// bug fix version of protobuf_generate_cpp function.
+#/// Tbag version of protobuf_generate function.
 #///
-#/// @param __sources [out] value name of result source files.
-#/// @param __headers [out] value name of result header files.
-#/// @param __protos  [in]  list of proto files.
-function (protobuf_generate_cpp2 __sources __headers __protos)
-    set (__protoc_include)
+#/// @param __sources [out] Value name of result source files.
+#/// @param __headers [out] Value name of result header files.
+#/// @param __type    [in]  Result file type (cpp, csharp, java, javanano, js, objc, python, ruby).
+#/// @param __protos  [in]  List of proto files.
+function (tbag_protobuf__generate __sources __headers __type __protos)
     set (${__sources})
     set (${__headers})
+
+    set (__output_flag)
+    set (__output_source_extension)
+    set (__output_header_extension)
+    set (__protoc_include)
+
+    # Select protobuf type.
+    if ("${__type}" STREQUAL "cpp")
+        set (__output_source_extension ".pb.cc")
+        set (__output_header_extension ".pb.h")
+    elseif ("${__type}" STREQUAL "csharp")
+        set (__output_source_extension ".cs")
+    elseif ("${__type}" STREQUAL "java")
+        message (FATAL_ERROR "Unsupported protobuf type: ${__type}")
+    elseif ("${__type}" STREQUAL "javanano")
+        message (FATAL_ERROR "Unsupported protobuf type: ${__type}")
+    elseif ("${__type}" STREQUAL "js")
+        set (__output_source_extension ".js")
+    elseif ("${__type}" STREQUAL "objc")
+        set (__output_source_extension ".pbobjc.m")
+        set (__output_header_extension ".pbobjc.h")
+    elseif ("${__type}" STREQUAL "python")
+        set (__output_source_extension "_pb2.py")
+    elseif ("${__type}" STREQUAL "ruby")
+        set (__output_source_extension ".rb")
+    else ()
+        message (FATAL_ERROR "Unknown protobuf type: ${__type}")
+    endif ()
+    set (__output_flag "--${__type}_out")
 
     # loop of proto_path list.
     foreach (__dir_cursor ${PROTOBUF_INCLUDE_DIRS})
@@ -26,27 +55,35 @@ function (protobuf_generate_cpp2 __sources __headers __protos)
 
     # loop of protoc command.
     foreach (__proto_cursor ${__protos})
-        get_filename_component (__absolute ${__proto_cursor} ABSOLUTE)
+        get_filename_component (__absolute  ${__proto_cursor} ABSOLUTE)
+        get_filename_component (__extension ${__proto_cursor} EXT)
 
-        set (__cursor_of_bin_path "${__absolute}")
-        string (REPLACE ".proto" ".pb.cc" __cursor_of_cc_path ${__cursor_of_bin_path})
-        string (REPLACE ".proto" ".pb.h"  __cursor_of_h_path  ${__cursor_of_bin_path})
-        get_filename_component (__output_dir ${__cursor_of_cc_path} DIRECTORY)
+        if (NOT "${__extension}" STREQUAL ".proto")
+            message (WARNING "Is it really a protobuf file? ${__proto_cursor}")
+        endif ()
 
-        list (APPEND ${__sources} ${__cursor_of_cc_path})
-        list (APPEND ${__headers} ${__cursor_of_h_path})
+        string (REPLACE "${__extension}" "${__output_source_extension}" __cursor_of_source_path "${__absolute}")
+        list (APPEND ${__sources} ${__cursor_of_source_path})
+        get_filename_component (__output_dir ${__cursor_of_source_path} DIRECTORY)
+
+        # Check the result of header file.
+        if ("${__output_header_extension}" STREQUAL "")
+            set (__cursor_of_header_path)
+        else ()
+            string (REPLACE "${__extension}" "${__output_header_extension}" __cursor_of_header_path "${__absolute}")
+            list (APPEND ${__headers} ${__cursor_of_header_path})
+        endif ()
 
         if (NOT EXISTS ${__output_dir})
             file (MAKE_DIRECTORY ${__output_dir})
         endif ()
 
         add_custom_command (
-                OUTPUT  ${__cursor_of_cc_path}
-                ${__cursor_of_h_path}
-                COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out ${__output_dir} ${__protoc_include} ${__absolute}
+                OUTPUT  "${__cursor_of_source_path}" "${__cursor_of_header_path}"
+                COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ${__output_flag} ${__output_dir} ${__protoc_include} ${__absolute}
                 DEPENDS ${__absolute}
                 WORKING_DIRECTORY ${__output_dir}
-                COMMENT "Running C++ protocol buffer compiler on ${__proto_cursor}" VERBATIM)
+                COMMENT "Running Google-protocol-buffers compiler on ${__proto_cursor}" VERBATIM)
     endforeach ()
 
     set_source_files_properties (${${__sources}} ${${__headers}} PROPERTIES GENERATED TRUE)
@@ -55,4 +92,12 @@ function (protobuf_generate_cpp2 __sources __headers __protos)
     set (${__sources} ${${__sources}} PARENT_SCOPE)
     set (${__headers} ${${__headers}} PARENT_SCOPE)
 endfunction ()
+
+macro (tbag_protobuf__generate_cpp __sources __headers __protos)
+    tbag_protobuf__generate ("${__sources}" "${__headers}" cpp "${__protos}")
+endmacro ()
+
+macro (tbag_protobuf__generate_py __sources __headers __protos)
+    tbag_protobuf__generate ("${__sources}" "${__headers}" python "${__protos}")
+endmacro ()
 

@@ -92,17 +92,32 @@ macro (tbag_object_cuda)
 endmacro ()
 
 #/// Google-protocol-buffers files.
-macro (tbag_object_protobuf)
+macro (tbag_object_protobuf_cpp)
     if (NOT PROTOBUF_FOUND)
-        find_package (CxxObfuscator)
+        find_package (Protobuf)
     endif ()
 
     if (PROTOBUF_FOUND)
-        include (ProtobufGenerator)
-        protobuf_generate_cpp2 (__proto_srcs __proto_headers "${TBAG_OBJECT_CONST_SOURCES}")
+        include (TbagProtobuf)
+        tbag_protobuf__generate_cpp (__proto_srcs __proto_headers "${TBAG_OBJECT_CONST_SOURCES}")
         list (APPEND TBAG_OBJECT_OBJECTS        ${__proto_srcs})
         list (APPEND TBAG_OBJECT_INCLUDE_DIRS   ${PROTOBUF_INCLUDE_DIRS})
         list (APPEND TBAG_OBJECT_LDFLAGS        ${PROTOBUF_LIBRARIES} -lz)
+    endif ()
+endmacro ()
+
+#/// Google-protocol-buffers files.
+macro (tbag_object_protobuf_py)
+    if (NOT PROTOBUF_FOUND)
+        find_package (Protobuf)
+    endif ()
+
+    if (PROTOBUF_FOUND)
+        include (TbagProtobuf)
+        tbag_protobuf__generate_py (__proto_srcs __proto_headers "${TBAG_OBJECT_CONST_SOURCES}")
+
+        add_custom_target (${TBAG_PROJECT_CONST_NAME}_python ALL DEPENDS ${__proto_srcs})
+        list (APPEND TBAG_OBJECT_DEPENDENCIES ${TBAG_PROJECT_CONST_NAME}_python)
     endif ()
 endmacro ()
 

@@ -171,7 +171,6 @@ endmacro ()
 
 #/// Linker flags.
 macro (tbag_project_property__update_linker_flags)
-    list (APPEND TBAG_PROJECT_LDFLAGS ${TBAG_PROJECT_DEPENDENCIES})
     list (LENGTH TBAG_PROJECT_LDFLAGS __project_ldflags_length)
     if (${__project_ldflags_length} GREATER 0)
         target_link_libraries (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_LDFLAGS})
