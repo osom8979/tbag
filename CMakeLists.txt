@@ -20,7 +20,7 @@ enable_language (CXX)
 #tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
 ## Tbag project.
-list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 

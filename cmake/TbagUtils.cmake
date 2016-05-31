@@ -15,8 +15,10 @@ if (NOT DEFINED TBAG_PATH_SEPARATOR)
     endif ()
 endif ()
 
+set (TBAG_CMAKE_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
+
 if (NOT DEFINED TBAG_CONFIG_TEMPLATE_DIR)
-    set (TBAG_CONFIG_TEMPLATE_DIR "${CMAKE_CURRENT_LIST_DIR}/TbagTemplate")
+    set (TBAG_CONFIG_TEMPLATE_DIR "${TBAG_CMAKE_ROOT_DIR}/TbagTemplate")
 endif ()
 
 ## -------------------
