@@ -316,6 +316,11 @@ endfunction ()
 #///
 #/// @param __path [in] Information file path.
 macro (tbag_config __path)
+    # Update CMAKE_MODULE_PATH
+    tbag_utils__append_find_package_path ()
+    tbag_utils__append_module_path ()
+
+    # Read INFORMATION file.
     tbag_config__read_information_file (__tbag_config "${__path}")
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_NAME)
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_AUTHOR)
