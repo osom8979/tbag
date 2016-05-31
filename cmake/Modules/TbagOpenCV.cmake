@@ -7,7 +7,7 @@
 #///  The following variables are optionally searched for defaults
 #///    OpenCV_ROOT
 
-# OpenCV settings:
+#/// Setup & find FindOpenCV.cmake file.
 macro (tbag_opencv__find_package)
     if (NOT DEFINED OpenCV_ROOT)
         set (OpenCV_ROOT "${THIRD_PREFIX}")
