@@ -101,10 +101,10 @@ endmacro ()
 
 #/// Default tbag project setup.
 macro (tbag_cxx_flags)
-    tbag_cxx_flags__set_position_independent_code ()
-    tbag_cxx_flags__set_cpp_standard_11           ()
-    tbag_cxx_flags__set_debug_define              ()
-    tbag_cxx_flags__set_print_all_compile_warning ()
-    #tbag_cxx_flags__set_install_rpath            ()
+    tbag_cxx_flags__set_position_independent_code  ()
+    tbag_cxx_flags__set_cpp_standard_11            ()
+    tbag_cxx_flags__set_debug_define               ()
+    #tbag_cxx_flags__set_print_all_compile_warning ()
+    #tbag_cxx_flags__set_install_rpath             ()
 endmacro ()
 
