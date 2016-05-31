@@ -40,6 +40,16 @@ function (tbag_cxx_flags__whole_archive __result)
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 
+#/// Append flags.
+#///
+#/// @param __value [in] Append value name.
+#/// @param ...     [in] List of flags.
+macro (tbag_flags__append __value)
+    foreach (__flag_cursor ${ARGN})
+        set (${__value} "${${__value}} ${__flag_cursor}")
+    endforeach ()
+endmacro ()
+
 #/// Assign Position Independent Code.
 macro (tbag_cxx_flags__set_position_independent_code)
     if (CMAKE_VERSION VERSION_LESS "3.0.2")
