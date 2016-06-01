@@ -1,11 +1,10 @@
 ## Tbag CMake subproject.
-
-tbag_module_default (LIBTBAG)
+tbag_modules__include_project (Default)
 
 # Extension.
-tbag_module_gtest    ()
-tbag_module_uv       ()
-tbag_module_spdlog   ()
-tbag_module_tinyxml2 ()
-tbag_module_sqlite3  ()
+tbag_modules__include_project (GTest)
+tbag_modules__include_project (UV)
+tbag_modules__include_project (TinyXML2)
+tbag_modules__include_project (Spdlog)
+tbag_modules__include_project (SQlite3)
 

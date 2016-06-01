@@ -3,11 +3,45 @@
 #/// @author zer0
 #/// @date   2016-05-26
 
-include (TbagUtils)
-include (TbagCxxFlags)
+include (TbagUtils) # Use the TBAG_CMAKE_ROOT_DIR variable.
+include (TbagFlags)
 include (TbagProject)
 include (TbagInformation)
 include (TbagPreview)
+
+## -----------------
+## Global variables.
+## -----------------
+
+if (NOT IS_DIRECTORY "${TBAG_CMAKE_ROOT_DIR}")
+    message (FATAL_ERROR "Not found directory: ${TBAG_CMAKE_ROOT_DIR}")
+endif()
+if (NOT DEFINED TBAG_FIND_PACKAGE_DIR)
+    set (TBAG_FIND_PACKAGE_DIR "${TBAG_CMAKE_ROOT_DIR}/TbagFindPackage")
+endif ()
+if (NOT DEFINED TBAG_MODULE_DIR)
+    set (TBAG_MODULE_DIR "${TBAG_CMAKE_ROOT_DIR}/TbagModule")
+endif ()
+
+## ------------
+## Path macros.
+## ------------
+
+#/// Append TbagFindPackage directory.
+macro (tbag_config__append_find_package_path)
+    if (NOT IS_DIRECTORY "${TBAG_FIND_PACKAGE_DIR}")
+        message (FATAL_ERROR "Not found directory: ${TBAG_FIND_PACKAGE_DIR}")
+    endif()
+    list (APPEND CMAKE_MODULE_PATH "${TBAG_FIND_PACKAGE_DIR}")
+endmacro ()
+
+#/// Append TbagModule directory.
+macro (tbag_config__append_module_path)
+    if (NOT IS_DIRECTORY "${TBAG_MODULE_DIR}")
+        message (FATAL_ERROR "Not found directory: ${TBAG_MODULE_DIR}")
+    endif()
+    list (APPEND CMAKE_MODULE_PATH "${TBAG_MODULE_DIR}")
+endmacro ()
 
 ## -----------------
 ## Main information.
@@ -177,8 +211,8 @@ endmacro ()
 #/// @param __path [in] Information file path.
 macro (tbag_config __path)
     # Update CMAKE_MODULE_PATH
-    tbag_utils__append_find_package_path ()
-    tbag_utils__append_module_path ()
+    tbag_config__append_find_package_path ()
+    tbag_config__append_module_path ()
 
     # Read INFORMATION file.
     tbag_information__read_file (__tbag_config "${__path}")
@@ -225,7 +259,7 @@ macro (tbag_config __path)
     tbag_config__set_include_and_link_directories ()
 
     # C/C++ flags.
-    tbag_cxx_flags ()
+    tbag_flags__default_setup ()
 endmacro ()
 
 ## ----------

@@ -1,5 +1,5 @@
-#/// @file   TbagCxxFlags.cmake
-#/// @brief  C/C++ Flag helper.
+#/// @file   TbagFlags.cmake
+#/// @brief  Flag helper.
 #/// @author zer0
 #/// @date   2016-05-26
 
@@ -16,7 +16,7 @@
 #///
 #/// @param __result [out] value name of output list.
 #/// @param ...      [in]  flag list.
-function (tbag_cxx_flags__whole_archive __result)
+function (tbag_flags__whole_archive __result)
     set (${__result})
 
     # Turn on.
@@ -51,7 +51,7 @@ macro (tbag_flags__append __value)
 endmacro ()
 
 #/// Assign Position Independent Code.
-macro (tbag_cxx_flags__set_position_independent_code)
+macro (tbag_flags__set_position_independent_code)
     if (CMAKE_VERSION VERSION_LESS "3.0.2")
         set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
@@ -61,7 +61,7 @@ macro (tbag_cxx_flags__set_position_independent_code)
 endmacro ()
 
 #/// Assign C++11 standard.
-macro (tbag_cxx_flags__set_cpp_standard_11)
+macro (tbag_flags__set_cpp_standard_11)
     if (CMAKE_VERSION VERSION_LESS "3.1")
         if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CUDA_FOUND)
             set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
@@ -78,7 +78,7 @@ macro (tbag_cxx_flags__set_cpp_standard_11)
 endmacro ()
 
 #/// Assign default debug definition.
-macro (tbag_cxx_flags__set_debug_define)
+macro (tbag_flags__set_debug_define)
     # Build type: Debug, Release, RelWithDebInfo, MinSizeRel
     if (CMAKE_BUILD_TYPE MATCHES "Debug")
         add_definitions (-DDEBUG)
@@ -88,23 +88,24 @@ macro (tbag_cxx_flags__set_debug_define)
 endmacro ()
 
 #/// Print all compile warning.
-macro (tbag_cxx_flags__set_print_all_compile_warning)
+macro (tbag_flags__set_print_all_compile_warning)
+    set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endmacro ()
 
 #/// Setup RPATH variables.
-macro (tbag_cxx_flags__set_install_rpath)
+macro (tbag_flags__set_install_rpath)
     set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE)
     set (CMAKE_INSTALL_RPATH     "${CMAKE_INSTALL_PREFIX}/lib")
     set (CMAKE_INSTALL_NAME_DIR  "${CMAKE_INSTALL_PREFIX}/lib")
 endmacro ()
 
 #/// Default tbag project setup.
-macro (tbag_cxx_flags)
-    tbag_cxx_flags__set_position_independent_code  ()
-    tbag_cxx_flags__set_cpp_standard_11            ()
-    tbag_cxx_flags__set_debug_define               ()
-    #tbag_cxx_flags__set_print_all_compile_warning ()
-    #tbag_cxx_flags__set_install_rpath             ()
+macro (tbag_flags__default_setup)
+    tbag_flags__set_position_independent_code  ()
+    tbag_flags__set_cpp_standard_11            ()
+    tbag_flags__set_debug_define               ()
+    #tbag_flags__set_print_all_compile_warning ()
+    #tbag_flags__set_install_rpath             ()
 endmacro ()
 

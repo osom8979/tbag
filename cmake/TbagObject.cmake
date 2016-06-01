@@ -1,5 +1,5 @@
-#/// @file   TbagFindObject.cmake
-#/// @brief  tbag_find_object function prototype.
+#/// @file   Tbagbject.cmake
+#/// @brief  Find object files.
 #/// @author zer0
 #/// @date   2016-05-26
 
@@ -120,7 +120,7 @@ set (TABG_DEFAULT_CXX_SUFFIX ".cpp")
 #/// @param __cxxflags     [out] value name of result cxx flags.
 #/// @param __ldflags      [out] value name of result linker flags.
 #/// @param __find_dir     [in]  find directory.
-function (tbag_find_object __objs __dependencies __definitions __include_dirs __cxxflags __ldflags __find_dir)
+function (tbag_object__find __objs __dependencies __definitions __include_dirs __cxxflags __ldflags __find_dir)
     set (${__objs})
     set (${__dependencies})
     set (${__definitions})

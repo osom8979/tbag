@@ -1,7 +1,6 @@
 ## Tbag CMake subproject.
-
-tbag_module_default (CURSES_TEST)
+tbag_modules__include_project (Default)
 
 # Extension.
-tbag_module_ncurses ()
+tbag_modules__include_project (NCurses)
 
