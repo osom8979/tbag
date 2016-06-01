@@ -27,11 +27,11 @@ function (tbag_find_headers __result __paths __headers)
     endforeach ()
 
     # Preview
-    tabg_utils__list_to_string (__preview_result "," ${${__result}})
+    tbag_utils__list_to_string (__preview_result "," ${${__result}})
     tbag_debug (tbag_find_headers "Result variable name: ${__result} (${__preview_result})")
-    tabg_utils__list_to_string (__preview_result "," ${__paths})
+    tbag_utils__list_to_string (__preview_result "," ${__paths})
     tbag_debug (tbag_find_headers "Search directories: ${__preview_result}")
-    tabg_utils__list_to_string (__preview_result "," ${__headers})
+    tbag_utils__list_to_string (__preview_result "," ${__headers})
     tbag_debug (tbag_find_headers "Find header files: ${__preview_result}")
 
     # update result.
@@ -61,11 +61,11 @@ function (tbag_find_libraries __result __paths __libs)
     endforeach ()
 
     # Preview
-    tabg_utils__list_to_string (__preview_result "," ${${__result}})
+    tbag_utils__list_to_string (__preview_result "," ${${__result}})
     tbag_debug (tbag_find_libraries "Result variable name: ${__result} (${__preview_result})")
-    tabg_utils__list_to_string (__preview_result "," ${__paths})
+    tbag_utils__list_to_string (__preview_result "," ${__paths})
     tbag_debug (tbag_find_libraries "Search directories: ${__preview_result}")
-    tabg_utils__list_to_string (__preview_result "," ${__libs})
+    tbag_utils__list_to_string (__preview_result "," ${__libs})
     tbag_debug (tbag_find_libraries "Find library files: ${__preview_result}")
 
     # update result.
@@ -148,7 +148,7 @@ endfunction ()
 #/// @param __prefix  [in] Variable result prefix.
 #/// @param __headers [in] Find header files.
 macro (tbag_simple_find_library_with_module_prefix __headers __libs)
-    tbag_utils__current_module_name (__current_module_name ${CMAKE_CURRENT_LIST_FILE} "Find")
+    tbag_utils__current_module_name (__current_module_name "${CMAKE_CURRENT_LIST_FILE}" "Find")
     tbag_simple_find_library ("${__current_module_name}" "${__headers}" "${__libs}")
     unset (__current_module_name)
 endmacro ()

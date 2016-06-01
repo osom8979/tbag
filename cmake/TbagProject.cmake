@@ -152,13 +152,13 @@ endmacro ()
 #///
 #/// @param __find_directory [in] find directory path.
 macro (tbag_project__update_objects __find_directory)
-    tbag_object__find (__find_compile_objs
-                      __find_compile_dependencies
-                      __find_compile_definitions
-                      __find_compile_include_dirs
-                      __find_compile_cxxflags
-                      __find_compile_ldflags
-                      "${__find_directory}")
+    tbag_object__update (__find_compile_objs
+                         __find_compile_dependencies
+                         __find_compile_definitions
+                         __find_compile_include_dirs
+                         __find_compile_cxxflags
+                         __find_compile_ldflags
+                         "${__find_directory}")
 
     # Result assign.
     list (APPEND TBAG_PROJECT_OBJECTS      ${__find_compile_objs})

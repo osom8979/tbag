@@ -14,7 +14,7 @@ set (TBAG_OBJECT_CONFIG_SUFFIX  "cmake")
 #///
 #/// @param __result      [out] Value name of config file name.
 #/// @param __filter_name [in]  filter name.
-function (tbag_object_filter__get_filename __result __filter_name)
+function (tbag_object__get_filename __result __filter_name)
     set (${__result} "${TBAG_OBJECT_CONFIG_PREFIX}.${__filter_name}.${TBAG_OBJECT_CONFIG_SUFFIX}" PARENT_SCOPE)
 endfunction ()
 
@@ -22,7 +22,7 @@ endfunction ()
 #///
 #/// @param __result    [out] Value name of filter name.
 #/// @param __file_path [in]  config file path.
-function (tbag_object_filter__get_name __result __file_path)
+function (tbag_object__get_name __result __file_path)
     set (${__result})
 
     get_filename_component (__file_name "${__file_path}"  NAME)
@@ -30,8 +30,8 @@ function (tbag_object_filter__get_name __result __file_path)
         set (__filter_name "${CMAKE_MATCH_1}")
     endif ()
 
-    tbag_debug (tbag_object_filter__get_name "File name: ${__file_name}")
-    tbag_debug (tbag_object_filter__get_name "Filter name: ${__filter_name}")
+    tbag_debug (tbag_object__get_name "File name: ${__file_name}")
+    tbag_debug (tbag_object__get_name "Filter name: ${__filter_name}")
 
     # update result.
     set (${__result} ${__filter_name} PARENT_SCOPE)
@@ -41,7 +41,7 @@ endfunction ()
 #///
 #/// @param __result      [out] Value name of result config list.
 #/// @param __project_dir [in]  Project directory.
-function (tbag_find_object_filter __result __project_dir)
+function (tbag_object__find __result __project_dir)
     set (${__result})
 
     get_filename_component (__absolute "${__project_dir}" ABSOLUTE)
@@ -91,7 +91,7 @@ endmacro ()
 #///
 #/// @param __project_dir_name [in] Project directory name.
 macro (tbag_object_property__set_const __config_file_path)
-    tbag_object_filter__get_name (TBAG_OBJECT_CONST_FILTER "${__config_file_path}")
+    tbag_object__get_name (TBAG_OBJECT_CONST_FILTER "${__config_file_path}")
     get_filename_component (TBAG_OBJECT_CONST_NAME "${__config_file_path}" NAME)
     get_filename_component (TBAG_OBJECT_CONST_DIR  "${__config_file_path}" DIRECTORY)
 
@@ -120,7 +120,7 @@ set (TABG_DEFAULT_CXX_SUFFIX ".cpp")
 #/// @param __cxxflags     [out] value name of result cxx flags.
 #/// @param __ldflags      [out] value name of result linker flags.
 #/// @param __find_dir     [in]  find directory.
-function (tbag_object__find __objs __dependencies __definitions __include_dirs __cxxflags __ldflags __find_dir)
+function (tbag_object__update __objs __dependencies __definitions __include_dirs __cxxflags __ldflags __find_dir)
     set (${__objs})
     set (${__dependencies})
     set (${__definitions})
@@ -128,7 +128,7 @@ function (tbag_object__find __objs __dependencies __definitions __include_dirs _
     set (${__cxxflags})
     set (${__ldflags})
 
-    tbag_find_object_filter (__config_files "${__find_dir}")
+    tbag_object__find (__config_files "${__find_dir}")
     tbag_debug_list (tbag_project_build__update_objects ${__config_files})
     if ("${__config_files}" STREQUAL "")
         get_filename_component (__find_dir_absolute "${__find_dir}" ABSOLUTE)

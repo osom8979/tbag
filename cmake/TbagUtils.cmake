@@ -80,7 +80,7 @@ endfunction ()
 #///
 #/// @warning
 #///  Don't use regex in string() cmake method.
-function (tabg_utils__get_filename_and_not_extension __result __filename)
+function (tbag_utils__get_filename_and_not_extension __result __filename)
     set (${__result})
 
     get_filename_component (__temp_name      "${__filename}"  NAME)
@@ -104,7 +104,7 @@ endfunction ()
 function (tbag_utils__current_module_name __result __filename __prefix)
     set (${__result})
 
-    tabg_utils__get_filename_and_not_extension (__temp_name "${__filename}")
+    tbag_utils__get_filename_and_not_extension (__temp_name "${__filename}")
     string (REGEX REPLACE "^${__prefix}" "" "${__result}" "${__temp_name}")
 
     # update result.
@@ -120,7 +120,7 @@ endfunction ()
 #/// @param __result    [out] Output value name.
 #/// @param __delimiter [in]  Delimiter string.
 #/// @param ...         [in]  List of arguments.
-function (tabg_utils__list_to_string __result __delimiter)
+function (tbag_utils__list_to_string __result __delimiter)
     set (${__result})
     set (__is_first_setting NO)
 

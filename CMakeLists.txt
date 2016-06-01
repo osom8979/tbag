@@ -35,6 +35,6 @@ tbag_doxygen_generate ()
 ## Run project.
 tbag_project ()
 
-tbag_module_install_headers (${MAIN_NAME})
+tbag_config__install_cxx_headers (${MAIN_NAME})
 tbag_preview ()
 

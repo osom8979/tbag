@@ -202,6 +202,24 @@ macro (tbag_config__set_include_and_link_directories)
     link_directories (${CMAKE_LIBRARY_PATH})
 endmacro ()
 
+#/// Assign soversion property.
+#///
+#/// @param __target_name [in] Target name.
+macro (tbag_config__soversion __target_name)
+    set_target_properties (${__target_name} PROPERTIES
+                           VERSION   "${VERSION}"
+                           SOVERSION "${SOVERSION}")
+endmacro ()
+
+#/// Install C/C++ header files.
+#///
+#/// @param __parent_dir [in] parent of include directory.
+macro (tbag_config__install_cxx_headers __parent_dir)
+    install (DIRECTORY "${__parent_dir}"
+             DESTINATION include
+             FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+endmacro ()
+
 ## -----------
 ## ALL IN ONE.
 ## -----------
