@@ -167,12 +167,12 @@ endfunction ()
 #///
 #/// @param __result  [out] output value name.
 #/// @param __regex   [in]  Regex string.
-#/// @param __source  [in]  Original list.
-function (tbag_utils__list_regex __result __regex __source)
+#/// @param ...       [in]  Original list.
+function (tbag_utils__list_of_regex __result __regex)
     set (${__result})
 
-    foreach (__list_cursor ${__source})
-        string (REGEX MATCH "${__regex}" __match_cursor ${__list_cursor})
+    foreach (__argument_cursor ${ARGN})
+        string (REGEX MATCH "${__regex}" __match_cursor ${__argument_cursor})
         list (APPEND ${__result} ${__match_cursor})
     endforeach ()
 
@@ -208,127 +208,5 @@ function (tbag_utils__remove_quoting __result __string)
 
     # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)
-endfunction ()
-
-## ----------
-## Debugging.
-## ----------
-
-#/// Logging-like debugging message function.
-#///
-#/// @param __tag [in] tag name.
-#/// @param ...   [in] message arguments.
-#///
-#/// @remarks
-#///  Check the global variables:
-#///  - TBAG_DEBUG_TAG: Regex conditions of print.
-function (tbag_debug __tag)
-    if (TBAG_DEBUG_TAG AND ("${__tag}" MATCHES "${TBAG_DEBUG_TAG}"))
-        message (STATUS "@ [${__tag}] " ${ARGN})
-    endif ()
-endfunction ()
-
-#/// Print variable.
-#///
-#/// @param __tag      [in] tag name.
-#/// @param __variable [in] Variable name.
-function (tbag_debug_variable __tag __variable)
-    tbag_debug ("${__tag}" "${__variable}: ${${__variable}}")
-endfunction ()
-
-#/// Print debug message with list.
-#///
-#/// @param __tag [in] tag name.
-#/// @param ...   [in] list arguments.
-function (tbag_debug_list __tag)
-    set (__list_index 0)
-    foreach (__list_cursor ${ARGN})
-        tbag_debug ("${__tag}" "#${__list_index} ${__list_cursor}")
-        math (EXPR __list_index "${__list_index} + 1")
-    endforeach ()
-endfunction ()
-
-## --------------------
-## Information Preview.
-## --------------------
-
-#/// Print information.
-#///
-#/// @param ... [in] message arguments.
-function (tbag_info_print)
-    message ("## " ${ARGN})
-endfunction ()
-
-#/// Print variable.
-#///
-#/// @param __value [in] value name.
-function (tbag_info_print_variable __value)
-    tbag_info_print ("${__value}: " ${${__value}})
-endfunction ()
-
-#/// Print os information.
-#///
-#/// @remarks
-#///  - ${WIN32}: Prior to 2.8.4 this included CygWin.
-#///  - ${UNIX}: including Apple OS X and CygWin.
-function (tbag_info_print_os)
-    if (WIN32)
-        if (CYGWIN)
-            tbag_info_print ("Windows OS and Cygwin.")
-        elseif (MSYS)
-            tbag_info_print ("Windows OS and MSYS.")
-        else ()
-            tbag_info_print ("Windows OS.")
-        endif ()
-    elseif (UNIX)
-        if (APPLE)
-            tbag_info_print ("Apple systems.")
-        else ()
-            tbag_info_print ("Unix-like OS's.")
-        endif ()
-    else ()
-        tbag_info_print ("Unknown OS.")
-    endif ()
-endfunction ()
-
-#/// Print compiler information.
-function (tbag_info_print_compiler)
-    # Compiler & IDE:
-    # CLANG GNU
-    # MINGW MSYS CYGWIN
-    # BORLAND WATCOM
-    # MSVC MSVC_IDE MSVC60 MSVC70 MSVC71 MSVC80 CMAKE_COMPILER_2005 MSVC90 MSVC10
-    message (WARNING "Not implement.")
-endfunction ()
-
-#/// Print your compiler.
-function (tbag_info_print_compiler_id)
-    tbag_info_print ("Compiler id: ${CMAKE_CXX_COMPILER_ID}")
-endfunction ()
-
-#/// Preview information.
-function (tbag_info_print_preview)
-    message ("")
-    tbag_info_print ("#################### PREVIEW INFORMATION ####################")
-    tbag_info_print ("")
-
-    tbag_info_print_os ()
-    tbag_info_print_compiler_id ()
-    tbag_info_print ("")
-
-    tbag_info_print_variable (CMAKE_BUILD_TYPE)
-    tbag_info_print_variable (BUILD_SHARED_LIBS)
-    tbag_info_print ("")
-
-    tbag_info_print_variable (CMAKE_CXX_FLAGS)
-    tbag_info_print_variable (CMAKE_EXE_LINKER_FLAGS)
-    tbag_info_print_variable (CMAKE_MODULE_LINKER_FLAGS)
-    tbag_info_print_variable (CMAKE_SHARED_LINKER_FLAGS)
-    tbag_info_print ("")
-
-    tbag_info_print_variable (PROJECT_SOURCE_DIR)
-    tbag_info_print_variable (PROJECT_BINARY_DIR)
-    tbag_info_print_variable (CMAKE_INSTALL_PREFIX)
-    message ("")
 endfunction ()
 

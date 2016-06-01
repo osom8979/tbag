@@ -6,6 +6,8 @@
 include (TbagUtils)
 include (TbagCxxFlags)
 include (TbagProject)
+include (TbagInformation)
+include (TbagPreview)
 
 ## -----------------
 ## Main information.
@@ -101,13 +103,13 @@ endmacro ()
 
 #/// Create & cacheing library list.
 #///
-#/// @param __default_root  [in] Default root directory of libraries.
-#/// @param ...             [in] list of library name.
-macro (tbag_config__add_libraries __default_root)
+#/// @param __default_root_dir [in] Default root directory of libraries.
+#/// @param ...                [in] list of library name.
+macro (tbag_config__add_libraries __default_root_dir)
     foreach (__list_cursor ${ARGN})
         tbag_debug (tbag_config__add_libraries "Add ${__list_cursor} library.")
 
-        set ("${__list_cursor}_ROOT" "${__default_root}" CACHE PATH "${__list_cursor} library root directory.")
+        set ("${__list_cursor}_ROOT" "${__default_root_dir}" CACHE PATH "${__list_cursor} library root directory.")
         tbag_config__add_library_option (${__list_cursor} ON)
     endforeach ()
 endmacro ()
@@ -136,20 +138,28 @@ macro (tbag_config__add_third __root_dir)
     list (INSERT CMAKE_LIBRARY_PATH 0 ${THIRD_LIB})
 endmacro ()
 
-#/// Initialize PATH's variables.
+#/// Add SOURCE PATH's.
 #///
 #/// @remarks
 #///  - ${CMAKE_PROGRAM_PATH}
 #///  - ${CMAKE_INCLUDE_PATH}
 #///  - ${CMAKE_LIBRARY_PATH}
-macro (tbag_config__add_root_paths)
+macro (tbag_config__add_source_dir_paths)
     list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_SOURCE_DIR}")
     list (INSERT CMAKE_INCLUDE_PATH 0 "${PROJECT_SOURCE_DIR}")
     list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_SOURCE_DIR}")
+endmacro ()
 
-    #list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_BINARY_DIR}")
-    #list (INSERT CMAKE_INCLUDE_PATH 0 "${PROJECT_BINARY_DIR}")
-    #list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_BINARY_DIR}")
+#/// Add BINARY PATH's.
+#///
+#/// @remarks
+#///  - ${CMAKE_PROGRAM_PATH}
+#///  - ${CMAKE_INCLUDE_PATH}
+#///  - ${CMAKE_LIBRARY_PATH}
+macro (tbag_config__add_binary_dir_paths)
+    list (INSERT CMAKE_PROGRAM_PATH 0 "${PROJECT_BINARY_DIR}")
+    list (INSERT CMAKE_INCLUDE_PATH 0 "${PROJECT_BINARY_DIR}")
+    list (INSERT CMAKE_LIBRARY_PATH 0 "${PROJECT_BINARY_DIR}")
 endmacro ()
 
 #/// Setup include & link directories.
@@ -157,156 +167,6 @@ macro (tbag_config__set_include_and_link_directories)
     include_directories (${CMAKE_INCLUDE_PATH})
     link_directories (${CMAKE_LIBRARY_PATH})
 endmacro ()
-
-## ------------------------
-## INFORMATION File reader.
-## ------------------------
-
-#/// Read variable.
-#///
-#/// @param __result  [out] value name of output result.
-#/// @param __key     [in]  Key name.
-#/// @param __content [in]  Content string.
-#///
-#/// @remarks
-#///  Example content format: <code>KEY=VALUE</code>
-function (tbag_config__read_value __result __key __content)
-    set (${__result})
-
-    # Find key & value.
-    string (REGEX MATCH "${__key}[ \t]*=([^\n]+|$)" __match_content "${__content}")
-    if ("${__match_content}" STREQUAL "")
-        set (${__result} "" PARENT_SCOPE)
-        return ()
-    endif ()
-
-    # Remove key name & strip.
-    string (REGEX REPLACE "^${__key}[ \t]*=" "" __match_variable "${__match_content}")
-    string (STRIP "${__match_variable}" __strip_variable)
-
-    # Remove quoting.
-    tbag_utils__remove_quoting (${__result} "${__strip_variable}")
-
-    # update result.
-    set (${__result} ${${__result}} PARENT_SCOPE)
-endfunction ()
-
-#/// Parse library list.
-#///
-#/// @param __result  [out] value name of output result.
-#/// @param __content [in]  Content string.
-#///
-#/// @remarks
-#///  Example content format: <code>GTest UV Spdlog</code>
-function (tbag_config__parse_libs __result __content)
-    set (${__result})
-
-    string (REGEX MATCHALL "[a-zA-Z0-9]+" ${__result} "${__content}")
-
-    # update result.
-    set (${__result} ${${__result}} PARENT_SCOPE)
-endfunction ()
-
-#/// Parse version list.
-#///
-#/// @param __result  [out] value name of output result.
-#/// @param __content [in]  Content string.
-#///
-#/// @remarks
-#///  Example content format: <code>0.1.2-3.4-5</code>
-function (tbag_config__parse_versions __result __content)
-    set (${__result})
-
-    string (REGEX MATCHALL "[0-9]+" ${__result} "${__content}")
-
-    # update result.
-    set (${__result} ${${__result}} PARENT_SCOPE)
-endfunction ()
-
-#/// Read version from version-list.
-#///
-#/// @param __result       [out] value name of output result.
-#/// @param __version_list [in]  Version list.
-#/// @param __index        [in]  Index of version list.
-function (tbag_config__read_version __result __version_list __index)
-    set (${__result})
-
-    list (LENGTH "${__version_list}" __version_list_length)
-    if (__version_list_length GREATER ${__index})
-        list (GET ${__version_list} ${__index} ${__result})
-    else ()
-        # Default version number: 0
-        set (${__result} 0)
-    endif ()
-
-    # update result.
-    set (${__result} ${${__result}} PARENT_SCOPE)
-endfunction ()
-
-#/// Read information file.
-#///
-#/// @param __prefix [in] Result variable prefix.
-#/// @param __path   [in] Information file path.
-#///
-#/// @remarks
-#///  - ${__prefix}_INFORMATION_MAIN_NAME
-#///  - ${__prefix}_INFORMATION_MAIN_AUTHOR
-#///  - ${__prefix}_INFORMATION_MAIN_EMAIL
-#///  - ${__prefix}_INFORMATION_MAIN_BRIEF
-#///  - ${__prefix}_INFORMATION_VERSION_MAJOR
-#///  - ${__prefix}_INFORMATION_VERSION_MINOR
-#///  - ${__prefix}_INFORMATION_VERSION_PATCH
-#///  - ${__prefix}_INFORMATION_VERSION_PACKET_MAJOR
-#///  - ${__prefix}_INFORMATION_VERSION_PACKET_MINOR
-#///  - ${__prefix}_INFORMATION_VERSION_RELEASE
-#///  - ${__prefix}_INFORMATION_LIBRARIES
-function (tbag_config__read_information_file __prefix __path)
-    if (NOT EXISTS "${__path}")
-        message (FATAL_ERROR "Not found ${__path}")
-    endif ()
-
-    file (READ "${__path}" __information_content)
-
-    tbag_config__read_value (__information_name     NAME    ${__information_content})
-    tbag_config__read_value (__information_author   AUTHOR  ${__information_content})
-    tbag_config__read_value (__information_email    EMAIL   ${__information_content})
-    tbag_config__read_value (__information_brief    BRIEF   ${__information_content})
-    tbag_config__read_value (__information_version  VERSION ${__information_content})
-    tbag_config__read_value (__information_libs     LIBS    ${__information_content})
-
-    tbag_debug (tbag_config__read_information_file "NAME: ${__information_name}")
-    tbag_debug (tbag_config__read_information_file "AUTHOR: ${__information_author}")
-    tbag_debug (tbag_config__read_information_file "EMAIL: ${__information_email}")
-    tbag_debug (tbag_config__read_information_file "BRIEF: ${__information_brief}")
-    tbag_debug (tbag_config__read_information_file "VERSION: ${__information_version}")
-    tbag_debug (tbag_config__read_information_file "LIBS: ${__information_libs}")
-
-    tbag_config__parse_versions (__version_list "${__information_version}")
-    tbag_config__parse_libs     (__lib_list     "${__information_libs}")
-
-    # Update main information.
-    set (${__prefix}_INFORMATION_MAIN_NAME   "${__information_name}"   PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_MAIN_AUTHOR "${__information_author}" PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_MAIN_EMAIL  "${__information_email}"  PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_MAIN_BRIEF  "${__information_brief}"  PARENT_SCOPE)
-
-    # Update version.
-    tbag_config__read_version (__version_0 "${__version_list}" 0)
-    tbag_config__read_version (__version_1 "${__version_list}" 1)
-    tbag_config__read_version (__version_2 "${__version_list}" 2)
-    tbag_config__read_version (__version_3 "${__version_list}" 3)
-    tbag_config__read_version (__version_4 "${__version_list}" 4)
-    tbag_config__read_version (__version_5 "${__version_list}" 5)
-    set (${__prefix}_INFORMATION_VERSION_MAJOR         "${__version_0}" PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_VERSION_MINOR         "${__version_1}" PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_VERSION_PATCH         "${__version_2}" PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_VERSION_PACKET_MAJOR  "${__version_3}" PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_VERSION_PACKET_MINOR  "${__version_4}" PARENT_SCOPE)
-    set (${__prefix}_INFORMATION_VERSION_RELEASE       "${__version_5}" PARENT_SCOPE)
-
-    # Update libraries.
-    set (${__prefix}_INFORMATION_LIBRARIES "${__lib_list}" PARENT_SCOPE)
-endfunction ()
 
 ## -----------
 ## ALL IN ONE.
@@ -321,7 +181,7 @@ macro (tbag_config __path)
     tbag_utils__append_module_path ()
 
     # Read INFORMATION file.
-    tbag_config__read_information_file (__tbag_config "${__path}")
+    tbag_information__read_file (__tbag_config "${__path}")
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_NAME)
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_AUTHOR)
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_MAIN_EMAIL)
@@ -356,7 +216,8 @@ macro (tbag_config __path)
     # Configure cmake settings.
     tbag_config__add_shared_library_option ()
     tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
-    tbag_config__add_root_paths ()
+    tbag_config__add_source_dir_paths  ()
+    #tbag_config__add_binary_dir_paths ()
 
     tbag_utils__exists_define_or_die (THIRD_PREFIX)
     tbag_config__add_libraries ("${THIRD_PREFIX}" ${__tbag_config_INFORMATION_LIBRARIES})

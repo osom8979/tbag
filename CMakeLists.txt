@@ -36,5 +36,5 @@ tbag_doxygen_generate ()
 tbag_project ()
 
 tbag_module_install_headers (${MAIN_NAME})
-tbag_info_print_preview ()
+tbag_preview ()
 
