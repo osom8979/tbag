@@ -1,5 +1,5 @@
 #/// @file   TbagProjectSpdlog.cmake
-#/// @brief  libspdlog project module.
+#/// @brief  speed-log project module.
 #/// @author zer0
 #/// @date   2016-06-01
 

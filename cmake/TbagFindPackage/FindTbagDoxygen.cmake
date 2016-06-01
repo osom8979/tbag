@@ -1,7 +1,12 @@
 #/// @file   FindTbagDoxygen.cmake
-#/// @brief  tbag_doxygen macro prototype.
+#/// @brief  Find the Doxygen program.
 #/// @author zer0
 #/// @date   2016-05-27
+#///
+#/// @remarks
+#///  The following are set after configuration is done:
+#///   DOXYGEN_FOUND
+#///   DOXYGEN_EXECUTABLE
 
 include (TbagUtils)
 
@@ -32,13 +37,14 @@ endfunction()
 #/// @param __doxyfile [in] Doxyfile path.
 #/// @param __working  [in] Working directory.
 function (tbag_doxygen__target __doxyfile __working)
-    if (NOT DOXYGEN_FOUND)
-        find_package (Doxygen)
-    endif ()
+    #if (NOT DOXYGEN_FOUND)
+    #    find_package (Doxygen)
+    #endif ()
 
     if (DOXYGEN_FOUND)
-        add_custom_target (doxygen ALL "${DOXYGEN_EXECUTABLE}" "${__doxyfile}"
-                           WORKING_DIRECTORY "${__working}")
+        add_custom_target (
+                doxygen ALL "${DOXYGEN_EXECUTABLE}" "${__doxyfile}"
+                WORKING_DIRECTORY "${__working}")
     endif ()
 endfunction ()
 

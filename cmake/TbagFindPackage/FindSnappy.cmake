@@ -1,4 +1,4 @@
-## Find the snappy library.
+## Find the Snappy library.
 #
 # The following variables are optionally searched for defaults
 #  Snappy_ROOT

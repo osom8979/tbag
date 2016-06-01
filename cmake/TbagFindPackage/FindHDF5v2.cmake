@@ -1,4 +1,4 @@
-## Find the OpenBLAS library.
+## Find the HDF5 library.
 #
 # The following variables are optionally searched for defaults
 #  HDF5v2_ROOT
@@ -21,7 +21,7 @@ if ((WIN32 AND MINGW) AND NOT CYGWIN AND NOT MSYS)
     set (__hdf5_lib_c_name  "libhdf5")
     set (__hdf5_lib_hl_name "libhdf5_hl")
 else ()
-    set (_hdf5_lib_c_name  "hdf5")
+    set (_hdf5_lib_c_name   "hdf5")
     set (__hdf5_lib_hl_name "hdf5_hl")
 endif ()
 

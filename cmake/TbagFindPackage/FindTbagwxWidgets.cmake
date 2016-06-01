@@ -1,11 +1,15 @@
 #/// @file   TbagwxWidgets.cmake
-#/// @brief  tbag_wxwidgets__find_package function prototype.
+#/// @brief  Find the wxWidgets library.
 #/// @author zer0
 #/// @date   2016-05-31
 #///
 #/// @remarks
-#///  The following variables are optionally searched for defaults
+#///  The following variables are optionally searched for defaults:
 #///    wxWidgets_ROOT
+#///  The following are set after configuration is done:
+#///   wxWidgets_FOUND
+#///   wxWidgets_INCLUDE_DIRS
+#///   wxWidgets_LIBRARY_DIRS
 
 include (TbagUtils)
 

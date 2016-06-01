@@ -1,5 +1,5 @@
-#/// @file   TbagProject.cmake
-#/// @brief  tbag_project function prototype.
+#/// @file   TbagProject.cmak
+#/// @brief  Find project files.
 #/// @author zer0
 #/// @date   2016-05-27
 

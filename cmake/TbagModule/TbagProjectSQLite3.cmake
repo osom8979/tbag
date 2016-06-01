@@ -1,5 +1,5 @@
 #/// @file   TbagProjectSQLite3.cmake
-#/// @brief  libsqlite3 project module.
+#/// @brief  SQLite3 project module.
 #/// @author zer0
 #/// @date   2016-06-01
 

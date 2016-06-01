@@ -1,5 +1,5 @@
 #/// @file   TbagProjectPreview.cmake
-#/// @brief  Preview tbag project module.
+#/// @brief  Preview tbag properties project module.
 #/// @author zer0
 #/// @date   2016-06-01
 

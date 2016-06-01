@@ -1,4 +1,4 @@
-## Find the tbag library.
+## Find the libtbag library.
 #
 # The following variables are optionally searched for defaults
 #  Tbag_ROOT

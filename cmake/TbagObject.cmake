@@ -71,22 +71,6 @@ macro (tbag_object_property__clear)
     set (TBAG_OBJECT_CONST_SOURCES)
 endmacro ()
 
-#/// Print object properties.
-macro (tbag_object_property__print)
-    message (STATUS "TBAG_OBJECT_OBJECTS: ${TBAG_OBJECT_OBJECTS}")
-    message (STATUS "TBAG_OBJECT_DEPENDENCIES: ${TBAG_OBJECT_DEPENDENCIES}")
-    message (STATUS "TBAG_OBJECT_DEFINITIONS: ${TBAG_OBJECT_DEFINITIONS}")
-    message (STATUS "TBAG_OBJECT_INCLUDE_DIRS: ${TBAG_OBJECT_INCLUDE_DIRS}")
-    message (STATUS "TBAG_OBJECT_CXXFLAGS: ${TBAG_OBJECT_CXXFLAGS}")
-    message (STATUS "TBAG_OBJECT_LDFLAGS: ${TBAG_OBJECT_LDFLAGS}")
-
-    # constant variables.
-    message (STATUS "TBAG_OBJECT_CONST_FILTER: ${TBAG_OBJECT_CONST_FILTER}")
-    message (STATUS "TBAG_OBJECT_CONST_NAME: ${TBAG_OBJECT_CONST_NAME}")
-    message (STATUS "TBAG_OBJECT_CONST_DIR: ${TBAG_OBJECT_CONST_DIR}")
-    message (STATUS "TBAG_OBJECT_CONST_SOURCES: ${TBAG_OBJECT_CONST_SOURCES}")
-endmacro ()
-
 #/// Update constant variables.
 #///
 #/// @param __project_dir_name [in] Project directory name.

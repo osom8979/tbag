@@ -1,5 +1,5 @@
 #/// @file   TbagProjectNCurses.cmake
-#/// @brief  libncurses project module.
+#/// @brief  NCurses project module.
 #/// @author zer0
 #/// @date   2016-06-01
 

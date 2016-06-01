@@ -1,5 +1,5 @@
-#/// @file   TbagProjectUV.cmake
-#/// @brief  libuv project module.
+#/// @file   TbagProjectGTest.cmake
+#/// @brief  Google-gtest project module.
 #/// @author zer0
 #/// @date   2016-06-01
 

@@ -1,4 +1,4 @@
-## Find the ncurses library.
+## Find the NCurses library.
 #
 # The following variables are optionally searched for defaults
 #  NCurses_ROOT

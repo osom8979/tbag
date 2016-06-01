@@ -25,6 +25,7 @@ set (LOOKED_FOR CxxObfuscator_COMPILER)
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (CxxObfuscator DEFAULT_MSG ${LOOKED_FOR})
 
+set (CxxObfuscator_FOUND ${CXXOBFUSCATOR_FOUND})
 if (CxxObfuscator_FOUND)
     mark_as_advanced (${LOOKED_FOR})
     message (STATUS "Found C++ Obfuscator (Compiler: ${CxxObfuscator_COMPILER})")
@@ -40,9 +41,6 @@ endif ()
 #/// @param __sources     [in]  original source files.
 #/// @param __except_file [in]  file path of exception symbol list.
 function (obfus_generate_cpp __obfus __sources __except_file)
-    #message ("__obfus (${__obfus}): ${${__obfus}}")
-    #message ("__sources (${__sources}): ${${__sources}}")
-
     set (${__obfus})
     set (__flags)
 
@@ -70,9 +68,9 @@ function (obfus_generate_cpp __obfus __sources __except_file)
         endif ()
 
         add_custom_command (
-            OUTPUT  ${__cursor_of_obfus_path}
+            OUTPUT  "${__cursor_of_obfus_path}"
             COMMAND "${CxxObfuscator_COMPILER}" ${__absolute} -o ${__cursor_of_obfus_path} ${__flags}
-            DEPENDS ${__absolute}
+            DEPENDS "${__absolute}"
             COMMENT "Running C++ Obfuscator compiler on ${__cursor}" VERBATIM)
 
         list (APPEND ${__obfus} ${__cursor_of_obfus_path})
