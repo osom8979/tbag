@@ -3,6 +3,10 @@
 #/// @author zer0
 #/// @date   2016-05-27
 
+if (NOT PROTOBUF_FOUND)
+    find_package (Protobuf)
+endif ()
+
 #/// Tbag version of protobuf_generate function.
 #///
 #/// @param __sources [out] Value name of result source files.

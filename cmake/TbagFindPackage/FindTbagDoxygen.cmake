@@ -1,9 +1,13 @@
-#/// @file   TbagDoxygen.cmake
-#/// @brief  tbag_doxygen_generate function prototype.
+#/// @file   FindTbagDoxygen.cmake
+#/// @brief  tbag_doxygen macro prototype.
 #/// @author zer0
 #/// @date   2016-05-27
 
 include (TbagUtils)
+
+if (NOT DOXYGEN_FOUND)
+    find_package (Doxygen)
+endif ()
 
 #/// Write Doxygen config file.
 #///
@@ -34,14 +38,14 @@ function (tbag_doxygen__target __doxyfile __working)
 
     if (DOXYGEN_FOUND)
         add_custom_target (doxygen ALL "${DOXYGEN_EXECUTABLE}" "${__doxyfile}"
-                WORKING_DIRECTORY "${__working}")
+                           WORKING_DIRECTORY "${__working}")
     endif ()
 endfunction ()
 
 #/// Default doxygen generator.
-macro (tbag_doxygen_generate)
+macro (tbag_doxygen)
     tbag_doxygen__generate_doxyfile ("${PROJECT_BINARY_DIR}/Doxyfile")
     tbag_doxygen__generate_index ("${PROJECT_BINARY_DIR}/doxygen.html")
     tbag_doxygen__target ("${PROJECT_BINARY_DIR}/Doxyfile" "${PROJECT_BINARY_DIR}")
-endmacro()
+endmacro ()
 
