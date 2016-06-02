@@ -25,7 +25,7 @@ if (NOT IS_DIRECTORY "${__tbag_opencv_module_dir}")
 endif ()
 
 if (NOT OpenCV_FOUND)
-    list (FIND ${CMAKE_MODULE_PATH} "${__tbag_opencv_module_dir}" __opencv_module_index)
+    list (FIND "${CMAKE_MODULE_PATH}" "${__tbag_opencv_module_dir}" __opencv_module_index)
     if (__opencv_module_index EQUAL -1)
         list (APPEND CMAKE_MODULE_PATH "${__tbag_opencv_module_dir}")
     endif ()
