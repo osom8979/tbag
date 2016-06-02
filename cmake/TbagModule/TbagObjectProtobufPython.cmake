@@ -10,8 +10,9 @@ endif ()
 if (PROTOBUF_FOUND)
     tbag_protobuf__generate_py (__proto_srcs __proto_headers "${TBAG_OBJECT_CONST_SOURCES}")
 
-    #add_custom_target ("${TBAG_PROJECT_CONST_NAME}_pythyon" ALL DEPENDS ${__proto_srcs})
-    add_custom_target ("${TBAG_PROJECT_CONST_NAME}_${__proto_srcs}" ALL DEPENDS ${__proto_srcs})
+    string (MD5 __proto_srcs_hash "${__proto_srcs}")
+    set (__protobuf_python_target_name "${TBAG_PROJECT_CONST_NAME}_protobuf_python_${__proto_srcs_hash}")
+    add_custom_target ("${__protobuf_python_target_name}" ALL DEPENDS ${__proto_srcs})
     list (APPEND TBAG_OBJECT_DEPENDENCIES ${TBAG_PROJECT_CONST_NAME}_python)
 endif ()
 
