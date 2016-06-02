@@ -1,4 +1,4 @@
-#/// @file   TbagObjectCxxProtobuf.cmake
+#/// @file   TbagObjectProtobufCxx.cmake
 #/// @brief  Google-protocol-buffers C++ object module.
 #/// @author zer0
 #/// @date   2016-06-01

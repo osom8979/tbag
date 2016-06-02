@@ -1,4 +1,4 @@
-#/// @file   TbagObjectPythonProtobuf.cmake
+#/// @file   TbagObjectProtobufPython.cmake
 #/// @brief  Google-protocol-buffers python object module.
 #/// @author zer0
 #/// @date   2016-06-01

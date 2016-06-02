@@ -15,8 +15,8 @@ if (CUDA_FOUND)
 
     list (APPEND TBAG_OBJECT_INCLUDE_DIRS ${CUDA_INCLUDE_DIRS})
     list (APPEND TBAG_OBJECT_LDFLAGS ${CUDA_LIBRARIES})
-    #if (USE_CUBLAS)
-    #    list (APPEND ${__ldflags} ${CUDA_CUBLAS_LIBRARIES})
-    #endif ()
+    if (USE_CUBLAS)
+        list (APPEND TBAG_OBJECT_LDFLAGS ${CUDA_CUBLAS_LIBRARIES})
+    endif ()
 endif ()
 
