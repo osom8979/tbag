@@ -5,10 +5,8 @@
 #///
 #/// @remarks
 #///  The following are set after configuration is done:
-#///   DOXYGEN_FOUND
-#///   DOXYGEN_EXECUTABLE
-
-include (TbagUtils)
+#///   - ${DOXYGEN_FOUND}
+#///   - ${DOXYGEN_EXECUTABLE}
 
 if (NOT DOXYGEN_FOUND)
     find_package (Doxygen)
@@ -18,6 +16,7 @@ endif ()
 #///
 #/// @param __output_path [in] Output Doxyfile path.
 function (tbag_doxygen__generate_doxyfile __output_path)
+    include (TbagUtils)
     tbag_utils__write_configure (Doxyfile.in "${__output_path}")
 endfunction ()
 
@@ -42,9 +41,8 @@ function (tbag_doxygen__target __doxyfile __working)
     #endif ()
 
     if (DOXYGEN_FOUND)
-        add_custom_target (
-                doxygen ALL "${DOXYGEN_EXECUTABLE}" "${__doxyfile}"
-                WORKING_DIRECTORY "${__working}")
+        add_custom_target (doxygen ALL "${DOXYGEN_EXECUTABLE}" "${__doxyfile}"
+                           WORKING_DIRECTORY "${__working}")
     endif ()
 endfunction ()
 

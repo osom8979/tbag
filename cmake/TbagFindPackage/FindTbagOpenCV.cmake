@@ -1,11 +1,11 @@
 #/// @file   FindTbagOpenCV.cmake
-#/// @brief  tbag_opencv__find_package function prototype.
+#/// @brief  Find the OpenCV library.
 #/// @author zer0
 #/// @date   2016-05-31
 #///
 #/// @remarks
-#///  The following variables are optionally searched for defaults
-#///    OpenCV_ROOT
+#///  The following variables are optionally searched for defaults:
+#///    - ${OpenCV_ROOT}
 
 if (NOT DEFINED OpenCV_ROOT)
     if (IS_DIRECTORY "${THIRD_PREFIX}")

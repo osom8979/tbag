@@ -17,8 +17,8 @@ set (CxxObfuscator_SEARCH_PATHS
     "$ENV{CxxObfuscator_ROOT}/bin")
 
 find_program (CxxObfuscator_COMPILER
-    NAMES "cxx-obfus"
-    PATHS ${CxxObfuscator_SEARCH_PATHS})
+              NAMES "cxx-obfus"
+              PATHS ${CxxObfuscator_SEARCH_PATHS})
 
 set (LOOKED_FOR CxxObfuscator_COMPILER)
 

@@ -150,6 +150,5 @@ endfunction ()
 macro (tbag_simple_find_library_with_module_prefix __headers __libs)
     tbag_utils__current_module_name (__current_module_name "${CMAKE_CURRENT_LIST_FILE}" "Find")
     tbag_simple_find_library ("${__current_module_name}" "${__headers}" "${__libs}")
-    unset (__current_module_name)
 endmacro ()
 

@@ -1,17 +1,16 @@
-#/// @file   TbagwxWidgets.cmake
+#/// @file   FindTbagwxWidgets.cmake
 #/// @brief  Find the wxWidgets library.
 #/// @author zer0
 #/// @date   2016-05-31
 #///
 #/// @remarks
 #///  The following variables are optionally searched for defaults:
-#///    wxWidgets_ROOT
+#///   - ${wxWidgets_ROOT}
+#///
 #///  The following are set after configuration is done:
-#///   wxWidgets_FOUND
-#///   wxWidgets_INCLUDE_DIRS
-#///   wxWidgets_LIBRARY_DIRS
-
-include (TbagUtils)
+#///   - ${wxWidgets_FOUND}
+#///   - ${wxWidgets_INCLUDE_DIRS}
+#///   - ${wxWidgets_LIBRARY_DIRS}
 
 if (NOT DEFINED wxWidgets_ROOT)
     if (IS_DIRECTORY "${THIRD_PREFIX}")
@@ -35,6 +34,7 @@ find_package (wxWidgets)
 if (wxWidgets_FOUND)
     # Change: MSYS PATH -> WINDOWS PATH.
     if (WIN32 AND NOT CYGWIN AND NOT MSYS)
+        include (TbagUtils)
         tbag_utils__convert_msys_to_windows_path (__convert_path "${wxWidgets_INCLUDE_DIRS}")
         set (wxWidgets_INCLUDE_DIRS ${__convert_path})
     endif ()

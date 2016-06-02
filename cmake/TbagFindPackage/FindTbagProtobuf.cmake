@@ -1,5 +1,5 @@
-#/// @file   TbagProtobuf.cmake
-#/// @brief  protobuf_generate function prototype.
+#/// @file   FindTbagProtobuf.cmake
+#/// @brief  Find the Google-protocol-buffers library.
 #/// @author zer0
 #/// @date   2016-05-27
 
