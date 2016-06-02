@@ -24,13 +24,23 @@ list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
-set (GTEST_ROOT "${THIRD_PREFIX}")
+tbag_config__set_library_prefix (GTEST_ROOT)
+tbag_config__set_library_prefix (UV_ROOT)
+tbag_config__set_library_prefix (Spdlog_ROOT)
+tbag_config__set_library_prefix (TinyXML2_ROOT)
+tbag_config__set_library_prefix (NCurses_ROOT)
+tbag_config__set_library_prefix (SQLite3_ROOT)
+tbag_config__set_library_prefix (Doxygen_ROOT)
+
+tbag_config__set_option (USE_Doxygen)
 
 ## Configure settings.
 tbag_config__generate_c_header ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
 
-find_package (TbagDoxygen)
-tbag_doxygen ()
+if (USE_Doxygen)
+    find_package (TbagDoxygen)
+    tbag_doxygen ()
+endif ()
 
 ## Run project.
 tbag_project ()

@@ -103,7 +103,6 @@ endfunction ()
 #///  - ${__prefix}_INFORMATION_VERSION_PACKET_MAJOR
 #///  - ${__prefix}_INFORMATION_VERSION_PACKET_MINOR
 #///  - ${__prefix}_INFORMATION_VERSION_RELEASE
-#///  - ${__prefix}_INFORMATION_LIBRARIES
 function (tbag_information__read_file __prefix __path)
     if (NOT EXISTS "${__path}")
         message (FATAL_ERROR "Not found ${__path}")
@@ -111,22 +110,17 @@ function (tbag_information__read_file __prefix __path)
 
     file (READ "${__path}" __information_content)
 
-    tbag_information__read_value (__information_name     NAME    ${__information_content})
-    tbag_information__read_value (__information_author   AUTHOR  ${__information_content})
-    tbag_information__read_value (__information_email    EMAIL   ${__information_content})
-    tbag_information__read_value (__information_brief    BRIEF   ${__information_content})
-    tbag_information__read_value (__information_version  VERSION ${__information_content})
-    tbag_information__read_value (__information_libs     LIBS    ${__information_content})
+    tbag_information__read_value (__information_name    NAME    ${__information_content})
+    tbag_information__read_value (__information_author  AUTHOR  ${__information_content})
+    tbag_information__read_value (__information_email   EMAIL   ${__information_content})
+    tbag_information__read_value (__information_brief   BRIEF   ${__information_content})
+    tbag_information__read_value (__information_version VERSION ${__information_content})
 
     tbag_debug (tbag_information__read_file "NAME: ${__information_name}")
     tbag_debug (tbag_information__read_file "AUTHOR: ${__information_author}")
     tbag_debug (tbag_information__read_file "EMAIL: ${__information_email}")
     tbag_debug (tbag_information__read_file "BRIEF: ${__information_brief}")
     tbag_debug (tbag_information__read_file "VERSION: ${__information_version}")
-    tbag_debug (tbag_information__read_file "LIBS: ${__information_libs}")
-
-    tbag_information__parse_versions (__version_list "${__information_version}")
-    tbag_information__parse_libs     (__lib_list     "${__information_libs}")
 
     # Update main information.
     set (${__prefix}_INFORMATION_MAIN_NAME   "${__information_name}"   PARENT_SCOPE)
@@ -135,6 +129,7 @@ function (tbag_information__read_file __prefix __path)
     set (${__prefix}_INFORMATION_MAIN_BRIEF  "${__information_brief}"  PARENT_SCOPE)
 
     # Update version.
+    tbag_information__parse_versions (__version_list "${__information_version}")
     tbag_information__read_version (__version_0 "${__version_list}" 0)
     tbag_information__read_version (__version_1 "${__version_list}" 1)
     tbag_information__read_version (__version_2 "${__version_list}" 2)
@@ -147,8 +142,5 @@ function (tbag_information__read_file __prefix __path)
     set (${__prefix}_INFORMATION_VERSION_PACKET_MAJOR  "${__version_3}" PARENT_SCOPE)
     set (${__prefix}_INFORMATION_VERSION_PACKET_MINOR  "${__version_4}" PARENT_SCOPE)
     set (${__prefix}_INFORMATION_VERSION_RELEASE       "${__version_5}" PARENT_SCOPE)
-
-    # Update libraries.
-    set (${__prefix}_INFORMATION_LIBRARIES "${__lib_list}" PARENT_SCOPE)
 endfunction ()
 

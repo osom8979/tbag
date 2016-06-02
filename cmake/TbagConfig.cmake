@@ -10,10 +10,6 @@ include (TbagInformation)
 include (TbagPreview)
 
 ## -----------------
-## Global variables.
-## -----------------
-
-## -----------------
 ## Main information.
 ## -----------------
 
@@ -93,30 +89,28 @@ macro (tbag_config__add_shared_library_option)
     option (BUILD_SHARED_LIBS "Create shared libraries if on." ON)
 endmacro ()
 
+#/// Default library path.
+#///
+#/// @param __value [in] value name.
+macro (tbag_config__set_library_prefix __value)
+    if (DEFINED THIRD_PREFIX)
+        set (${__value} "${THIRD_PREFIX}")
+    else ()
+        set (${__value} "/usr/local")
+    endif ()
+    set (${__value} "${${__value}}" CACHE PATH "Library prefix directory.")
+endmacro ()
+
+#/// CMake option value.
+#///
+#/// @param __value [in] value name.
+macro (tbag_config__set_option __value)
+    option (${__value} "ON/OFF Option value." ON)
+endmacro ()
+
 ## ----------------------
 ## Libraries information.
 ## ----------------------
-
-#/// Create & cacheing library option.
-#///
-#/// @remarks
-#///  - USE_${_name}: library variable.
-macro (tbag_config__add_library_option __name __enable)
-    set (USE_${__name} ${__enable} CACHE BOOL "Use the ${__name} library.")
-endmacro ()
-
-#/// Create & cacheing library list.
-#///
-#/// @param __default_root_dir [in] Default root directory of libraries.
-#/// @param ...                [in] list of library name.
-macro (tbag_config__add_libraries __default_root_dir)
-    foreach (__list_cursor ${ARGN})
-        tbag_debug (tbag_config__add_libraries "Add ${__list_cursor} library.")
-
-        set ("${__list_cursor}_ROOT" "${__default_root_dir}" CACHE PATH "${__list_cursor} library root directory.")
-        tbag_config__add_library_option (${__list_cursor} ON)
-    endforeach ()
-endmacro ()
 
 #/// Initialize 3rd-party library variables.
 #///
@@ -214,7 +208,6 @@ macro (tbag_config __path)
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MAJOR)
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_PACKET_MINOR)
     tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_VERSION_RELEASE)
-    tbag_debug_variable (tbag_config  __tbag_config_INFORMATION_LIBRARIES)
 
     # Main information.
     tbag_config__init_main_information (
@@ -228,8 +221,7 @@ macro (tbag_config __path)
             "${__tbag_config_INFORMATION_VERSION_PATCH}"
             "${__tbag_config_INFORMATION_VERSION_PACKET_MAJOR}"
             "${__tbag_config_INFORMATION_VERSION_PACKET_MINOR}"
-            "${__tbag_config_INFORMATION_VERSION_RELEASE}"
-            "${__tbag_config_INFORMATION_LIBRARIES}")
+            "${__tbag_config_INFORMATION_VERSION_RELEASE}")
 
     # Exists.
     tbag_config__exists_main_information    ()
@@ -240,10 +232,6 @@ macro (tbag_config __path)
     tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
     tbag_config__add_source_dir_paths ()
     tbag_config__add_binary_dir_paths ()
-
-    tbag_utils__exists_define_or_die (THIRD_PREFIX)
-    tbag_config__add_libraries ("${THIRD_PREFIX}" ${__tbag_config_INFORMATION_LIBRARIES})
-
     tbag_config__set_include_and_link_directories ()
 
     # C/C++ flags.
