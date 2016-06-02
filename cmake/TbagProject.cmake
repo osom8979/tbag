@@ -169,74 +169,6 @@ macro (tbag_project__update_objects __find_directory)
     list (APPEND TBAG_PROJECT_LDFLAGS      ${__find_compile_ldflags})
 endmacro ()
 
-## --------------
-## Project build.
-## --------------
-
-#/// Build process.
-#///
-#/// @param __is_library        [in] YES is library project, NO is executable project.
-#/// @param __root_dir          [in] Find root directory (Source code directory).
-#/// @param __project_dir_name  [in] Project directory name.
-macro (tbag_project__build __is_library __root_dir __project_dir_name)
-    tbag_project__clear_property ()
-    tbag_project__set_const_property ("${__root_dir}" "${__project_dir_name}")
-
-    project (${TBAG_PROJECT_CONST_NAME})
-    if (EXISTS "${TBAG_PROJECT_CONST_CMAKE_PATH}")
-        include ("${TBAG_PROJECT_CONST_CMAKE_PATH}") # Read project.cmake files.
-    else ()
-        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_CMAKE_PATH}")
-    endif ()
-
-    # Flag variables.
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_FLAG_TARGET_INSTALL)
-    # List variables.
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_OBJECTS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_DEPENDENCIES)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_DEFINITIONS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_INCLUDE_DIRS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CXXFLAGS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_LDFLAGS)
-    # Constant variables.
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_DIR_NAME)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_TYPE)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_NAME)
-
-    tbag_project__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}")
-
-    # Exists objects.
-    if ("${TBAG_PROJECT_OBJECTS}" STREQUAL "")
-        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
-    endif ()
-
-    # Register object files.
-    if (${__is_library})
-        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
-    else ()
-        add_executable (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
-    endif ()
-
-    tbag_project__update_all_properties ()
-endmacro ()
-
-#/// Run default build.
-#///
-#/// @param __libs     [in] List of library.
-#/// @param __exes     [in] List of executable.
-#/// @param __root_dir [in] Find root directory (Source code directory).
-function (tbag_project__auto_build __libs __exes __root_dir)
-    # Loop of library project.
-    foreach (__cursor ${__libs})
-        tbag_project__build (YES "${__root_dir}" "${__cursor}")
-    endforeach ()
-
-    # Loop of executable project.
-    foreach (__cursor ${__exes})
-        tbag_project__build (NO "${__root_dir}" "${__cursor}")
-    endforeach ()
-endfunction ()
-
 ## -------------
 ## Find project.
 ## -------------
@@ -273,6 +205,56 @@ function (tbag_project__find __lib_projs __exe_projs __root_dir)
     set (${__exe_projs}  ${${__exe_projs}}  PARENT_SCOPE)
 endfunction ()
 
+## --------------
+## Project build.
+## --------------
+
+#/// Build process.
+#///
+#/// @param __root_dir          [in] Find root directory (Source code directory).
+#/// @param __project_dir_name  [in] Project directory name.
+macro (tbag_project__build __root_dir __project_dir_name)
+    tbag_project__clear_property ()
+    tbag_project__set_const_property ("${__root_dir}" "${__project_dir_name}")
+
+    project (${TBAG_PROJECT_CONST_NAME})
+    if (EXISTS "${TBAG_PROJECT_CONST_CMAKE_PATH}")
+        include ("${TBAG_PROJECT_CONST_CMAKE_PATH}") # Read project.cmake files.
+    else ()
+        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_CMAKE_PATH}")
+    endif ()
+
+    # Flag variables.
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_FLAG_TARGET_INSTALL)
+    # List variables.
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_OBJECTS)
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_DEPENDENCIES)
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_DEFINITIONS)
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_INCLUDE_DIRS)
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CXXFLAGS)
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_LDFLAGS)
+    # Constant variables.
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_DIR_NAME)
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_TYPE)
+    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_NAME)
+
+    tbag_project__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}")
+
+    # Exists objects.
+    if ("${TBAG_PROJECT_OBJECTS}" STREQUAL "")
+        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
+    endif ()
+
+    # Register object files.
+    if ("${TBAG_PROJECT_CONST_TYPE}" STREQUAL "${TBAG_PROJECT_LIBRARY_PREFIX}")
+        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
+    else ()
+        add_executable (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
+    endif ()
+
+    tbag_project__update_all_properties ()
+endmacro ()
+
 #/// Find & Build tbag project.
 #///
 #/// @param __root_dir [in] Find root directory (Source code directory).
@@ -282,7 +264,9 @@ function (tbag_project__find_and_build __root_dir)
     message ("** Find library project: ${__libs}")
     message ("** Find executable project: ${__exes}")
 
-    tbag_project__auto_build ("${__libs}" "${__exes}" "${__root_dir}")
+    foreach (__project_cursor ${__libs} ${__exes})
+        tbag_project__build ("${__root_dir}" "${__project_cursor}")
+    endforeach ()
 endfunction ()
 
 #/// run default tbag project.

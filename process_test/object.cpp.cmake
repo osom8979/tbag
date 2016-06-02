@@ -1,3 +1,4 @@
 ## Tbag CMake object config.
 
-tbag_object_property__source_to_object ()
+tbag_modules__include_object (SourceToObject)
+
