@@ -32,12 +32,12 @@ tbag_config__set_library_prefix (NCurses_ROOT)
 tbag_config__set_library_prefix (SQLite3_ROOT)
 tbag_config__set_library_prefix (Doxygen_ROOT)
 
-tbag_config__set_option (USE_Doxygen)
+tbag_config__set_option (USE_DOXYGEN)
 
 ## Configure settings.
 tbag_config__generate_c_header ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
 
-if (USE_Doxygen)
+if (USE_DOXYGEN)
     find_package (TbagDoxygen)
     tbag_doxygen ()
 endif ()
