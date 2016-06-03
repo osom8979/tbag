@@ -18,5 +18,8 @@ if (CUDA_FOUND)
     if (USE_CUBLAS)
         list (APPEND TBAG_OBJECT_LDFLAGS ${CUDA_CUBLAS_LIBRARIES})
     endif ()
+    if (USE_CURAND)
+        list (APPEND TBAG_OBJECT_LDFLAGS ${CUDA_curand_LIBRARY})
+    endif ()
 endif ()
 
