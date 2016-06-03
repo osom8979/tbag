@@ -8,7 +8,7 @@ if (NOT PYTHONINTERP_FOUND)
 endif ()
 
 if (PYTHONINTERP_FOUND)
-    message (STATUS "Python interpreter: ${PYTHON_EXECUTABLE}")
-    message (STATUS "Python interpreter version: ${PYTHON_VERSION_STRING}")
+    #message (STATUS "Python interpreter: ${PYTHON_EXECUTABLE}")
+    #message (STATUS "Python interpreter version: ${PYTHON_VERSION_STRING}")
 endif ()
 
