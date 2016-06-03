@@ -67,10 +67,9 @@ macro (tbag_flags__set_cpp_standard_11)
         #else ()
         #    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
         #endif ()
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
     endif ()
 
-    set (CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
     set (CMAKE_CXX_STANDARD     11) # C++ standard 11
     set (CMAKE_CXX_EXTENSIONS  OFF) # Don't change the -std=gnu++11 to -std=c++11
 endmacro ()
