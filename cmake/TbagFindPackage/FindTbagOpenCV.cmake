@@ -20,7 +20,7 @@ if (NOT IS_DIRECTORY "${__tbag_opencv_module_dir}")
     if (IS_DIRECTORY "/usr/local/share/OpenCV")
         set (__tbag_opencv_module_dir "/usr/local/share/OpenCV")
     else ()
-        message (WARNING "Not found OpenCV Modules directory: ${__tbag_opencv_module_dir}")
+        #message (WARNING "Not found OpenCV Modules directory: ${__tbag_opencv_module_dir}")
     endif ()
 endif ()
 
