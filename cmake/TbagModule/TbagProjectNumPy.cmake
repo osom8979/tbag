@@ -8,7 +8,6 @@ if (NOT NumPy_FOUND)
 endif ()
 
 if (NumPy_FOUND)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_NUMPY)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NumPy_INCLUDE_DIRS})
 endif ()
 

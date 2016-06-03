@@ -31,19 +31,18 @@ endif ()
 
 find_package (wxWidgets)
 
-if (wxWidgets_FOUND)
-    # Change: MSYS PATH -> WINDOWS PATH.
-    if (WIN32 AND NOT CYGWIN AND NOT MSYS)
-        include (TbagUtils)
-        tbag_utils__convert_msys_to_windows_path (__convert_path "${wxWidgets_INCLUDE_DIRS}")
-        set (wxWidgets_INCLUDE_DIRS ${__convert_path})
-    endif ()
-
-    # compile time link dirs, useful for rpath on UNIX.
-    # Typically an empty string in WIN32 environment.
-    if (UNIX)
-        set (ENV{LIBRARY_PATH} "${wxWidgets_LIBRARY_DIRS}${TBAG_PATH_SEPARATOR}$ENV{LIBRARY_PATH}")
-        list (INSERT CMAKE_LIBRARY_PATH 0 "${wxWidgets_LIBRARY_DIRS}")
-    endif ()
-endif ()
+#if (wxWidgets_FOUND)
+#    # Change: MSYS PATH -> WINDOWS PATH.
+#    if (WIN32 AND NOT CYGWIN AND NOT MSYS)
+#        # Convert MSYS -> WINDOWS PATH: (__convert_path "${wxWidgets_INCLUDE_DIRS}")
+#        # set (wxWidgets_INCLUDE_DIRS ${__convert_path})
+#    endif ()
+#
+#    # compile time link dirs, useful for rpath on UNIX.
+#    # Typically an empty string in WIN32 environment.
+#    if (UNIX)
+#        set (ENV{LIBRARY_PATH} "${wxWidgets_LIBRARY_DIRS}${TBAG_PATH_SEPARATOR}$ENV{LIBRARY_PATH}")
+#        list (INSERT CMAKE_LIBRARY_PATH 0 "${wxWidgets_LIBRARY_DIRS}")
+#    endif ()
+#endif ()
 

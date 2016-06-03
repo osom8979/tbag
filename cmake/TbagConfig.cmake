@@ -104,8 +104,14 @@ endmacro ()
 #/// CMake option value.
 #///
 #/// @param __value [in] value name.
+#///
+#/// @remarks
+#///  If enabled, add a definitions.
 macro (tbag_config__set_option __value)
     option (${__value} "ON/OFF Option value." ON)
+    if (${__value})
+        add_definitions (-D${__value})
+    endif ()
 endmacro ()
 
 ## ----------------------
@@ -248,4 +254,20 @@ endmacro ()
 function (tbag_config__generate_c_header __output_path)
     tbag_utils__write_configure (config.h.in "${__output_path}")
 endfunction ()
+
+macro (tbag_config__default_generate_c_header)
+    tbag_utils__exists_define_or_die (MAIN_NAME)
+    tbag_config__generate_c_header ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
+endmacro ()
+
+#/// Write Doxygen config file.
+#///
+#/// @param __output_path [in] Output Doxyfile path.
+function (tbag_config__generate_doxyfile __output_path)
+    tbag_utils__write_configure (Doxyfile.in "${__output_path}")
+endfunction ()
+
+macro (tbag_config__default_generate_doxyfile)
+    tbag_config__generate_doxyfile ("${PROJECT_BINARY_DIR}/Doxyfile")
+endmacro ()
 

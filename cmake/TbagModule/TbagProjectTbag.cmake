@@ -8,7 +8,6 @@ if (NOT Tbag_FOUND)
 endif ()
 
 if (Tbag_FOUND)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_TBAG)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Tbag_INCLUDE_DIRS})
 endif ()
 

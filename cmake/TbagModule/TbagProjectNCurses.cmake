@@ -8,7 +8,6 @@ if (NOT NCurses_FOUND)
 endif ()
 
 if (NCurses_FOUND)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_NCURSES)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NCurses_INCLUDE_DIRS})
     list (APPEND TBAG_PROJECT_LDFLAGS      ${NCurses_LIBRARIES})
 endif ()

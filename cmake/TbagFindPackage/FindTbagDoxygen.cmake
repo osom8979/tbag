@@ -12,14 +12,6 @@ if (NOT DOXYGEN_FOUND)
     find_package (Doxygen)
 endif ()
 
-#/// Write Doxygen config file.
-#///
-#/// @param __output_path [in] Output Doxyfile path.
-function (tbag_doxygen__generate_doxyfile __output_path)
-    include (TbagUtils)
-    tbag_utils__write_configure (Doxyfile.in "${__output_path}")
-endfunction ()
-
 #/// Write doxygen index html file.
 #///
 #/// @param __output_path [in] Output html file path.
@@ -48,7 +40,6 @@ endfunction ()
 
 #/// Default doxygen generator.
 macro (tbag_doxygen)
-    tbag_doxygen__generate_doxyfile ("${PROJECT_BINARY_DIR}/Doxyfile")
     tbag_doxygen__generate_index ("${PROJECT_BINARY_DIR}/doxygen.html")
     tbag_doxygen__target ("${PROJECT_BINARY_DIR}/Doxyfile" "${PROJECT_BINARY_DIR}")
 endmacro ()

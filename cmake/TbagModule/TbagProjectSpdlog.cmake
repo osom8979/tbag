@@ -8,7 +8,6 @@ if (NOT Spdlog_FOUND)
 endif ()
 
 if (Spdlog_FOUND)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  -DUSE_SPDLOG)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Spdlog_INCLUDE_DIRS})
 endif ()
 
