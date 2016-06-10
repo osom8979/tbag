@@ -35,9 +35,13 @@ if (__result MATCHES 0)
 endif ()
 
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args(NumPy
-                                  REQUIRED_VARS NumPy_INCLUDE_DIRS NumPy_VERSION
-                                  VERSION_VAR   NumPy_VERSION)
+find_package_handle_standard_args (NumPy
+                                   REQUIRED_VARS NumPy_INCLUDE_DIRS NumPy_VERSION
+                                   VERSION_VAR   NumPy_VERSION)
+
+# If the variables <var1> to <varN> are all valid,
+# then <UPPERCASED_NAME>_FOUND will be set to TRUE.
+set (NumPy_FOUND "${NUMPY_FOUND}")
 
 if (NumPy_FOUND)
     message (STATUS "NumPy ver. ${NumPy_VERSION} found (include: ${NumPy_INCLUDE_DIRS})")
