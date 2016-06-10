@@ -4,11 +4,9 @@
 #/// @date   2016-06-03
 
 if (NOT PYTHONINTERP_FOUND)
-    find_package (PythonInterp)
+    message (WARNING "Not found Python interpreter.")
 endif ()
 
-if (PYTHONINTERP_FOUND)
-    #message (STATUS "Python interpreter: ${PYTHON_EXECUTABLE}")
-    #message (STATUS "Python interpreter version: ${PYTHON_VERSION_STRING}")
-endif ()
+#message (STATUS "Python interpreter: ${PYTHON_EXECUTABLE}")
+#message (STATUS "Python interpreter version: ${PYTHON_VERSION_STRING}")
 

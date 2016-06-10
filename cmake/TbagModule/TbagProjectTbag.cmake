@@ -4,10 +4,9 @@
 #/// @date   2016-06-01
 
 if (NOT Tbag_FOUND)
-    find_package (Tbag)
+    message (WARNING "Not found Tbag.")
 endif ()
 
-if (Tbag_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Tbag_INCLUDE_DIRS})
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Tbag_INCLUDE_DIRS})
+#list(APPEND TBAG_PROJECT_LDFLAGS      ${Tbag_LIBRARIES})
 

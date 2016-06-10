@@ -190,6 +190,15 @@ macro (tbag_config__install_cxx_headers __parent_dir)
              FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
 endmacro ()
 
+#/// Find package with list.
+#///
+#/// @param ... [in] message arguments.
+macro (tbag_config__find_packages)
+    foreach (__package_cursor ${ARGN})
+        find_package (${__package_cursor})
+    endforeach ()
+endmacro ()
+
 ## -----------
 ## ALL IN ONE.
 ## -----------

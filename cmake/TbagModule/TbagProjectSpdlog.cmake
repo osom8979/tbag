@@ -4,10 +4,8 @@
 #/// @date   2016-06-01
 
 if (NOT Spdlog_FOUND)
-    find_package (Spdlog)
+    message (WARNING "Not found speed-log.")
 endif ()
 
-if (Spdlog_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Spdlog_INCLUDE_DIRS})
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Spdlog_INCLUDE_DIRS})
 

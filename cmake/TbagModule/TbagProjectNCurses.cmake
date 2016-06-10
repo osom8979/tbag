@@ -4,11 +4,9 @@
 #/// @date   2016-06-01
 
 if (NOT NCurses_FOUND)
-    find_package (NCurses)
+    message (WARNING "Not found NCurses.")
 endif ()
 
-if (NCurses_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NCurses_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${NCurses_LIBRARIES})
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NCurses_INCLUDE_DIRS})
+list (APPEND TBAG_PROJECT_LDFLAGS      ${NCurses_LIBRARIES})
 

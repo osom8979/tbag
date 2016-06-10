@@ -4,10 +4,8 @@
 #/// @date   2016-06-01
 
 if (NOT GTEST_FOUND)
-    find_package (GTest)
+    message (WARNING "Not found Google-gtest.")
 endif ()
 
-if (GTEST_FOUND)
-    list (APPEND TBAG_PROJECT_LDFLAGS ${GTEST_BOTH_LIBRARIES} -lpthread)
-endif ()
+list (APPEND TBAG_PROJECT_LDFLAGS ${GTEST_BOTH_LIBRARIES} -lpthread)
 

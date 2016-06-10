@@ -52,25 +52,16 @@ endmacro ()
 
 #/// Assign Position Independent Code.
 macro (tbag_flags__set_position_independent_code)
-    #if (CMAKE_VERSION VERSION_LESS "3.0.2")
     set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-    #endif ()
 
     # Don't use this variables:
-    set (CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC
+    #set (CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC
 endmacro ()
 
 #/// Assign C++11 standard.
 macro (tbag_flags__set_cpp_standard_11)
-    #if (CMAKE_VERSION VERSION_LESS "3.1")
-    ##if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CUDA_FOUND)
-    ##    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-    ##else ()
-    ##    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    ##endif ()
-    set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-    #endif ()
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ")
 
     # Don't use this variables:
     #set (CMAKE_CXX_STANDARD     11) # C++ standard 11
@@ -89,7 +80,7 @@ endmacro ()
 
 #/// Print all compile warning.
 macro (tbag_flags__set_print_all_compile_warning)
-    set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall")
+    set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endmacro ()
 
@@ -105,7 +96,5 @@ macro (tbag_flags__default_setup)
     tbag_flags__set_position_independent_code  ()
     tbag_flags__set_cpp_standard_11            ()
     tbag_flags__set_debug_define               ()
-    #tbag_flags__set_print_all_compile_warning ()
-    #tbag_flags__set_install_rpath             ()
 endmacro ()
 

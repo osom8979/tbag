@@ -9,6 +9,5 @@
 # Default project setting:
 #  tbag_modules__include_project (Default)
 
-# User's settings.
 tbag_modules__include_project (Default)
 

@@ -4,11 +4,9 @@
 #/// @date   2016-06-01
 
 if (NOT UV_FOUND)
-    find_package (UV)
+    message (WARNING "Not found libuv.")
 endif ()
 
-if (UV_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${UV_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${UV_INCLUDE_DIRS})
+list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
 

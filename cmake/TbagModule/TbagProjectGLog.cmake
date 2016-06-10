@@ -8,11 +8,9 @@ if (WIN32)
 endif ()
 
 if (NOT GLog_FOUND)
-    find_package (GLog)
+    message (WARNING "Not found Google-glog.")
 endif ()
 
-if (GLog_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${GLog_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${GLog_LIBRARIES})
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${GLog_INCLUDE_DIRS})
+list (APPEND TBAG_PROJECT_LDFLAGS      ${GLog_LIBRARIES})
 

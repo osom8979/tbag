@@ -4,10 +4,8 @@
 #/// @date   2016-06-03
 
 if (NOT NumPy_FOUND)
-    find_package (NumPy)
+    message (WARNING "Not found Python NumPy.")
 endif ()
 
-if (NumPy_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NumPy_INCLUDE_DIRS})
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NumPy_INCLUDE_DIRS})
 

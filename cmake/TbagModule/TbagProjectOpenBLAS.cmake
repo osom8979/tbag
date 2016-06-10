@@ -4,11 +4,9 @@
 #/// @date   2016-06-02
 
 if (NOT OpenBLAS_FOUND)
-    find_package (OpenBLAS)
+    message (WARNING "Not found OpenBLAS.")
 endif ()
 
-if (OpenBLAS_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenBLAS_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenBLAS_LIBRARIES})
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenBLAS_INCLUDE_DIRS})
+list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenBLAS_LIBRARIES})
 

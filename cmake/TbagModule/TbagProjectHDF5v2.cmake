@@ -4,11 +4,9 @@
 #/// @date   2016-06-02
 
 if (NOT HDF5v2_FOUND)
-    find_package (HDF5v2)
+    message (WARNING "Not found HDF5.")
 endif ()
 
-if (HDF5v2_FOUND)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${HDF5v2_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${HDF5v2_LIBRARIES}) # HL, C
-endif ()
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${HDF5v2_INCLUDE_DIRS})
+list (APPEND TBAG_PROJECT_LDFLAGS      ${HDF5v2_LIBRARIES}) # HL, C
 

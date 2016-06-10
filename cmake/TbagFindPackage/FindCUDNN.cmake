@@ -8,11 +8,6 @@
 #  CUDNN_INCLUDE_DIRS
 #  CUDNN_LIBRARIES
 
-if (NOT CUDA_FOUND)
-    message (WARNING "FindCUDNN: Not found CUDA.")
-    return ()
-endif ()
-
 set (CUDNN_ROOT_INCLUDE_PATHS "/usr/cuda/include"
                               "/usr/local/cuda/include"
                               ${CUDNN_ROOT_INCLUDE_PATHS})
