@@ -16,7 +16,7 @@
 #///  - ${CUDA_HOST_COMPILER}
 #///  - ${CUDA_NVCC_FLAGS}
 #///  - ${CUDA_NVCC_FLAGS_<CONFIG>}
-#///  - ${CUDA_PROPAGATE_HOST_FLAGS}
+#///  - ${CUDA_PROPAGATE_HOST_FLAGS}    (Default ON) ${CMAKE_{C,CXX}_FLAGS} to -Xcompiler flag.
 #///  - ${CUDA_SEPARABLE_COMPILATION}
 #///  - ${CUDA_VERBOSE_BUILD}
 #///
@@ -181,7 +181,9 @@ function (tabg_cuda__select_nvcc_arch_flags __result)
     set (${__result}_readable ${__nvcc_archs_readable} PARENT_SCOPE)
 endfunction ()
 
-find_package (CUDA 5.5 QUIET)
+############ FIND ############
+find_package (CUDA 5.5 QUIET)#
+##############################
 
 # cmake 2.8.7 compartibility which doesn't search for curand.
 find_cuda_helper_libs (curand)
@@ -198,4 +200,17 @@ message (STATUS "Added CUDA NVCC flags for: ${NVCC_FLAGS_EXTRA_readable}")
 #    # avoid warning for CMake >= 2.8.12
 #    set (CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \"-DBOOST_NOINLINE=__attribute__((noinline))\" ")
 #endif ()
+
+## See: cmake revision 48040c1 - Merge topic 'FindCUDA.cmake/C++11Flags'
+if (CMAKE_VERSION VERSION_LESS "3.2.2")
+    # Process the C++11 flag.
+    # cc1: warning: command line option ‘-std=c++11’ is valid for C++/ObjC++ but not for C
+    if ("${CMAKE_CXX_FLAGS}" MATCHES "-std=c\\+\\+11")
+        # Add the c++11 flag to nvcc if it isn't already present.  Note that we only look at
+        # the main flag instead of the configuration specific flags.
+        if (NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std;c\\+\\+11" )
+            list (APPEND CUDA_NVCC_FLAGS --std c++11)
+        endif ()
+    endif ()
+endif ()
 
