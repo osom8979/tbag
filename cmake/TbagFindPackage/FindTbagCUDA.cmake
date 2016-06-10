@@ -185,6 +185,10 @@ endfunction ()
 find_package (CUDA 5.5 QUIET)#
 ##############################
 
+if (NOT CUDA_FOUND)
+    return ()
+endif ()
+
 # cmake 2.8.7 compartibility which doesn't search for curand.
 find_cuda_helper_libs (curand)
 

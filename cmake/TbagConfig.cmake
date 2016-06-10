@@ -108,7 +108,13 @@ endmacro ()
 #/// @remarks
 #///  If enabled, add a definitions.
 macro (tbag_config__set_option __value)
-    option (${__value} "ON/OFF Option value." ON)
+    if (${ARGC} GREATER 0)
+        set (__default_option ${ARG0})
+    else ()
+        set (__default_option ON)
+    endif ()
+
+    option (${__value} "${__value} on/off option value." ${__default_option})
     if (${__value})
         add_definitions (-D${__value})
     endif ()
