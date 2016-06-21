@@ -108,8 +108,14 @@ endmacro ()
 #/// @remarks
 #///  If enabled, add a definitions.
 macro (tbag_config__set_option __value)
-    if (${ARGC} GREATER 0)
-        set (__default_option ${ARG0})
+    if (${ARGC} GREATER 1)
+        ## Error in CMake 2.8.12.2 (Ubuntu 14.04):
+        ## - list (GET ${ARGN} 0 __flag)
+        ## The 'foreach' statement of the following alternatives:
+        foreach (__flag ${ARGN})
+            set (__default_option ${__flag})
+            break ()
+        endforeach ()
     else ()
         set (__default_option ON)
     endif ()
