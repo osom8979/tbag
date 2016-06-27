@@ -107,6 +107,10 @@ public:
         this->updateGeneric();
     }
 
+    BasePath(std::vector<String> const & nodes) {
+        this->append(nodes);
+    }
+
     BasePath(std::initializer_list<String> list) {
         for (auto cursor : list) {
             this->append(cursor);
@@ -124,7 +128,7 @@ public:
 // Destructor.
 public:
     ~BasePath() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 // Assign operators.
@@ -163,6 +167,12 @@ public:
             this->_path = obj._path;
         }
         return *this;
+    }
+
+    void swap(BasePath && obj) {
+        if (this != &obj) {
+            this->_path.swap(obj._path);
+        }
     }
 
     void swap(BasePath & obj) {
@@ -212,12 +222,17 @@ public:
 // Modifiers.
 public:
     BasePath & updateGeneric() {
-        setString(getGenericString());
+        this->setString(getGenericString());
         return *this;
     }
 
     BasePath & updateNative() {
-        setString(getNativeString());
+        this->setString(getNativeString());
+        return *this;
+    }
+
+    BasePath & updateCanonical() {
+        this->swap(BasePath(splitNodesWithCanonical()));
         return *this;
     }
 
@@ -262,6 +277,13 @@ public:
         return *this;
     }
 
+    BasePath & append(std::vector<String> const & nodes) {
+        for (auto cursor : nodes) {
+            this->append(cursor);
+        }
+        return *this;
+    }
+
     BasePath & operator /= (String const & child) {
         return append(child);
     }
@@ -301,6 +323,48 @@ public:
 public:
     std::vector<String> splitNodes() const {
         return NativePath::splitNodes(this->_path);
+    }
+
+    std::vector<String> splitNodesWithCanonical() const {
+        std::vector<String> result;
+        std::vector<String> nodes = splitNodes();
+        using NodeItr = typename std::vector<String>::iterator;
+
+        NodeItr itr;
+        NodeItr end = nodes.end();
+
+        if (isAbsolute() == true) {
+            itr = nodes.begin();
+        } else {
+            if (nodes.size() >= 1 && nodes.at(0) == "~") {
+                result = BasePath(Common::getHomeDir()).splitNodes();
+                itr = nodes.begin() + 1;
+            } else {
+                result = BasePath(Common::getWorkDir()).splitNodes();
+                itr = nodes.begin();
+            }
+        }
+
+        for (; itr != end; ++itr) {
+            if (*itr == ".") {
+                // skip.
+            } else if (*itr == "..") {
+                result.pop_back();
+            } else {
+                result.push_back(*itr);
+            }
+        }
+
+        return result;
+    }
+
+public:
+    String getName() const {
+        auto nodes = splitNodes();
+        if (nodes.rbegin() == nodes.rend()) {
+            return String();
+        }
+        return *nodes.rbegin();
     }
 };
 
