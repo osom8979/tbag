@@ -72,6 +72,14 @@ TEST(StringsTest, splitMatch)
     ASSERT_STREQ(list[2].c_str(), "TEST");
 }
 
+TEST(StringsTest, isMatch)
+{
+    std::string content = "https://www.blackhole-project.com:8080/test";
+    std::string match   = R"(^https?:\/\/[a-zA-Z0-9\.\-]+(:[0-9]+)?\/.*$)";
+
+    ASSERT_TRUE(Strings::isMatch(content, match));
+}
+
 TEST(StringsTest, trimLeft)
 {
     std::string t1 = "  TEST";

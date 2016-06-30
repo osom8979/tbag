@@ -148,6 +148,16 @@ public:
         return replaceRegex(path, regex, String());
     }
 
+    static bool isMatch(String const & original
+                      , Regex  const & regex) {
+        return std::regex_match(original, regex);
+    }
+
+    static bool isMatch(String const & original
+                      , String const & regex) {
+        return isMatch(original, Regex(regex));
+    }
+
 public:
     static constexpr ValueType const CHAR_SPACE  = ' ';
     static constexpr ValueType const CHAR_TAB    = '\t';
