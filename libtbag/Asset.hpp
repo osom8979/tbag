@@ -43,6 +43,7 @@ public:
     using String    = std::basic_string<ValueType>;
     using Path      = ::libtbag::filesystem::Path;
     using PathMap   = std::map<String, Path>;
+    using Regex     = std::basic_regex<ValueType>;
 
     static_assert(std::is_same<ValueType, char>::value
             , "ValueType must be the same type as char");
@@ -155,6 +156,18 @@ public:
 
     std::size_t size() const noexcept(true) {
         return this->_dirs.size();
+    }
+
+public:
+    Path find(String const & name) {
+        Path path;
+        for (auto cursor : this->_dirs) {
+            path = (cursor.second / name);
+            if (filesystem::Common::existsFile(path) == true) {
+                return path;
+            }
+        }
+        return Path();
     }
 
 public:

@@ -25,3 +25,12 @@ TEST(DemoAssetTest, Exists)
     ASSERT_EQ(image_list.size(), 1U);
 }
 
+TEST(DemoAssetTest, Find)
+{
+    DemoAsset demo_asset;
+    Asset image_asset;
+
+    image_asset.insertDir("image", demo_asset.get_tester_dir_image());
+    ASSERT_GT(image_asset.find("lena.png").getString().size(), 0U);
+}
+
