@@ -219,6 +219,17 @@ public:
         return BasePath(getNativeString());
     }
 
+    /**
+     * Canonical path.
+     */
+    BasePath getCanonical() const {
+        return BasePath(splitNodesWithCanonical());
+    }
+
+    String getCanonicalString() const {
+        return getCanonical().getString();
+    }
+
 // Modifiers.
 public:
     BasePath & updateGeneric() {
@@ -232,7 +243,7 @@ public:
     }
 
     BasePath & updateCanonical() {
-        this->swap(BasePath(splitNodesWithCanonical()));
+        this->setString(getCanonicalString());
         return *this;
     }
 
