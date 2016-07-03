@@ -9,7 +9,7 @@
 #  ICU_LIBRARIES
 
 set (__headers "unicode/utf.h")
-set (__libs    "icuuc" "icui18n")
+set (__libs    "icuuc" "icui18n" "icudata")
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")
