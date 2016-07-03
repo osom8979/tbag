@@ -34,7 +34,7 @@ tbag_config__set_library_prefix (Doxygen_ROOT)
 tbag_config__set_option (USE_DOXYGEN)
 tbag_config__set_option (USE_NCURSES)
 
-tbag_config__find_packages (GTest UV Spdlog TinyXML2 NCurses SQLite3 TbagDoxygen)
+tbag_config__find_packages (GTest UV Spdlog TinyXML2 NCurses SQLite3 ICU TbagDoxygen)
 
 ## Configure settings.
 tbag_config__default_generate_c_header ()
