@@ -24,7 +24,6 @@ tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
 ## Find packages.
 tbag_config__set_library_prefix (GTEST_ROOT)
-tbag_config__set_library_prefix (UV_ROOT)
 tbag_config__set_library_prefix (Spdlog_ROOT)
 tbag_config__set_library_prefix (TinyXML2_ROOT)
 tbag_config__set_library_prefix (NCurses_ROOT)
@@ -34,7 +33,7 @@ tbag_config__set_library_prefix (Doxygen_ROOT)
 tbag_config__set_option (USE_DOXYGEN)
 tbag_config__set_option (USE_NCURSES)
 
-tbag_config__find_packages (GTest UV Spdlog TinyXML2 NCurses SQLite3 ICU TbagDoxygen)
+tbag_config__find_packages (GTest Spdlog TinyXML2 NCurses SQLite3 ICU TbagDoxygen)
 
 ## Configure settings.
 tbag_config__default_generate_c_header ()
