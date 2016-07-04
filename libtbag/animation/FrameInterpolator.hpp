@@ -62,13 +62,7 @@ public:
     virtual ~FrameInterpolator() noexcept = default;
 
 public:
-    inline void set(long  start_millisec
-                  , long  fps_millisec
-                  , int   frame_size) noexcept {
-        this->_start_millisec = start_millisec;
-        this->_fps_millisec   = fps_millisec;
-        this->_frame_size     = frame_size;
-    }
+    void set(long start_millisec, long fps_millisec, int frame_size) noexcept;
 
 public:
     /**
@@ -82,12 +76,7 @@ public:
      *  int frame_number = static_cast<int>(animation.getInterpolation(millisec));
      *  @endcode
      */
-    virtual ValueType getInterpolation(RepType rep) noexcept override {
-        if (_fps_millisec == 0 || _frame_size == 0) {
-            return 0;
-        }
-        return std::abs((rep - _start_millisec) / _fps_millisec % _frame_size /* + 0.5f */);
-    }
+    virtual ValueType getInterpolation(RepType rep) noexcept override;
 };
 
 } // namespace animation
