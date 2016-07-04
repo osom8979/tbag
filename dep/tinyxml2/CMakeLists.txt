@@ -46,7 +46,7 @@ endif(MSVC)
 
 ################################
 # Add targets
-option(BUILD_SHARED_LIBS "build shared or static libraries" ON)
+option(BUILD_SHARED_LIBS "build shared or static libraries" OFF)
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 set_target_properties(tinyxml2 PROPERTIES
         COMPILE_DEFINITIONS "TINYXML2_EXPORT"
