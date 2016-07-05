@@ -49,3 +49,10 @@ list (APPEND TBAG_PROJECT_LDFLAGS       ${TBAG_DEP_LUA_LIBRARIES})
 
 tbag_modules__include_project (WholeArchiveOff)
 
+if (UNIX)
+    list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    if (NOT APPLE)
+        list (APPEND TBAG_PROJECT_LDFLAGS -lrt -lnsl -ldl)
+    endif ()
+endif ()
+
