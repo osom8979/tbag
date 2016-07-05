@@ -20,7 +20,7 @@ add_custom_target (${TBAG_DEP_GTEST_NAME} ALL DEPENDS ${TBAG_DEP_GTEST_LIBRARIES
 
 add_custom_command (
         OUTPUT ${TBAG_DEP_GTEST_LIBRARIES}
-        COMMAND make gtest.a gtest_main.a > "${TBAG_DEP_GTEST_LOG_PREFIX}" 2>&1
+        COMMAND make CXXFLAGS=-fPIC gtest.a gtest_main.a > "${TBAG_DEP_GTEST_LOG_PREFIX}" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/gtest/make/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/gtest/make/")
 

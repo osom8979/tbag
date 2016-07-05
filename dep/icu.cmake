@@ -21,13 +21,13 @@ add_custom_target (${TBAG_DEP_ICU_NAME} ALL DEPENDS ${TBAG_DEP_ICU_LIBRARIES})
 
 add_custom_command (
         OUTPUT "${PROJECT_SOURCE_DIR}/dep/icu/Makefile"
-        COMMAND ./configure --enable-release --enable-static --disable-shared --disable-tests --disable-samples > "${TBAG_DEP_ICU_LOG_PREFIX}.1" 2>&1
+        COMMAND ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-release --enable-static --disable-shared --disable-tests --disable-samples > "${TBAG_DEP_ICU_LOG_PREFIX}.1" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/icu/configure"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/icu/")
 
 add_custom_command (
         OUTPUT ${TBAG_DEP_ICU_LIBRARIES}
-        COMMAND make > "${TBAG_DEP_ICU_LOG_PREFIX}.2" 2>&1
+        COMMAND make V=1 > "${TBAG_DEP_ICU_LOG_PREFIX}.2" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/icu/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/icu/")
 
