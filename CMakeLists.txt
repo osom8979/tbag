@@ -29,7 +29,7 @@ tbag_config__default_generate_c_header ()
 ## Find packages.
 tbag_config__set_library_prefix (Doxygen_ROOT)
 tbag_config__set_option (USE_DOXYGEN)
-tbag_config__find_packages (TbagDoxygen ICU)
+tbag_config__find_packages (TbagDoxygen)
 
 if (USE_DOXYGEN)
     tbag_doxygen ()
