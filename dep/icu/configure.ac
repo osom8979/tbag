@@ -1350,36 +1350,7 @@ AC_CONFIG_FILES([icudefs.mk \
 		tools/icuswap/Makefile \
 		tools/pkgdata/Makefile \
 		tools/tzcode/Makefile \
-		tools/gencfu/Makefile \
-		test/Makefile \
-		test/compat/Makefile \
-		test/testdata/Makefile \
-		test/testdata/pkgdataMakefile \
-		test/hdrtst/Makefile \
-		test/intltest/Makefile \
-		test/cintltst/Makefile \
-		test/iotest/Makefile \
-		test/letest/Makefile \
-		test/perf/Makefile \
-		test/perf/collationperf/Makefile \
-		test/perf/collperf/Makefile \
-		test/perf/collperf2/Makefile \
-		test/perf/dicttrieperf/Makefile \
-		test/perf/ubrkperf/Makefile \
-		test/perf/charperf/Makefile \
-		test/perf/convperf/Makefile \
-		test/perf/normperf/Makefile \
-		test/perf/DateFmtPerf/Makefile \
-		test/perf/howExpensiveIs/Makefile \
-		test/perf/strsrchperf/Makefile \
-		test/perf/unisetperf/Makefile \
-		test/perf/usetperf/Makefile \
-		test/perf/ustrperf/Makefile \
-		test/perf/utfperf/Makefile \
-		test/perf/utrie2perf/Makefile \
-		test/perf/leperf/Makefile \
-		samples/Makefile samples/date/Makefile \
-		samples/cal/Makefile samples/layout/Makefile])
+		tools/gencfu/Makefile])
 AC_OUTPUT
 
 echo
