@@ -13,8 +13,11 @@ tbag_modules__include_project (Default)
 
 # Extension.
 tbag_modules__include_project (GTest)
-tbag_modules__include_project (Spdlog)
 tbag_modules__include_project (ICU)
+
+## libtbag-spdlog
+include (${PROJECT_SOURCE_DIR}/dep/spdlog.cmake)
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_SPDLOG_INCLUDE_DIRS})
 
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbag)
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/libtbag)

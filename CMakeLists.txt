@@ -24,12 +24,11 @@ tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
 ## Find packages.
 tbag_config__set_library_prefix (GTEST_ROOT)
-tbag_config__set_library_prefix (Spdlog_ROOT)
 tbag_config__set_library_prefix (Doxygen_ROOT)
 
 tbag_config__set_option (USE_DOXYGEN)
 
-tbag_config__find_packages (GTest Spdlog ICU TbagDoxygen)
+tbag_config__find_packages (GTest ICU TbagDoxygen)
 
 ## Configure settings.
 tbag_config__default_generate_c_header ()
