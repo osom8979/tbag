@@ -16,7 +16,10 @@ set (TBAG_DEP_UV_LOG_PREFIX    "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_UV_N
 set (TBAG_DEP_UV_LIBRARIES_BUILD "${PROJECT_SOURCE_DIR}/dep/uv/.libs/libuv.a")
 set (TBAG_DEP_UV_LIBRARIES       ${TBAG_DEP_UV_LIBRARIES_BUILD})
 if (UNIX)
-    list (APPEND TBAG_DEP_UV_LIBRARIES -lrt -lpthread -lnsl -ldl)
+    list (APPEND TBAG_DEP_UV_LIBRARIES -lpthread)
+    if (NOT APPLE)
+        list (APPEND TBAG_DEP_UV_LIBRARIES -lrt -lnsl -ldl)
+    endif ()
 endif ()
 
 ## libuv custom target.
