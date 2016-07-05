@@ -256,7 +256,7 @@ macro (tbag_config __path)
 
     # Configure cmake settings.
     tbag_config__add_shared_library_option ()
-    tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
+    # tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
     tbag_config__add_source_dir_paths ()
     tbag_config__add_binary_dir_paths ()
     tbag_config__set_include_and_link_directories ()

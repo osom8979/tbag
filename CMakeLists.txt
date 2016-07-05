@@ -22,6 +22,9 @@ endif ()
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
+# Setup the THIRD_PREFIX variable.
+#tbag_config__add_third ("$ENV{TPARTY_HOME}/local")
+
 ## Configure settings.
 tbag_config__default_generate_doxyfile ()
 tbag_config__default_generate_c_header ()
