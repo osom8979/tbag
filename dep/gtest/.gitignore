@@ -1,0 +1,4 @@
+!make/Makefile
+make/*.o
+make/*.a
+
