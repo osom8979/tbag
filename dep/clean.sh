@@ -41,21 +41,8 @@ rm -f uv/src/win/*.lo
 rm -f uv/*.lo
 
 ## sqlite3
-rm -rf sqlite3/.deps/
-rm -rf sqlite3/.libs/
-rm -rf sqlite3/_libs/
-
-rm -f sqlite3/so_locations
-rm -f sqlite3/Makefile
-rm -f sqlite3/config.log
-rm -f sqlite3/config.status
-rm -f sqlite3/libsqlite3.la
-rm -f sqlite3/libtool
-rm -f sqlite3/sqlite3
-rm -f sqlite3/sqlite3.pc
-
 rm -f sqlite3/*.o
-rm -f sqlite3/*.lo
+rm -f sqlite3/*.a
 
 ## gtest
 rm -f gtest/make/*.o

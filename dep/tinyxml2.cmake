@@ -19,13 +19,13 @@ add_custom_target (${TBAG_DEP_TINYXML2_NAME} ALL DEPENDS ${TBAG_DEP_TINYXML2_LIB
 
 add_custom_command (
         OUTPUT "${PROJECT_SOURCE_DIR}/dep/tinyxml2/Makefile"
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_MACOSX_RPATH=1 . &> "${TBAG_DEP_TINYXML2_LOG_PREFIX}.1"
+        COMMAND ${CMAKE_COMMAND} -DCMAKE_MACOSX_RPATH=1 . > "${TBAG_DEP_TINYXML2_LOG_PREFIX}.1" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/tinyxml2/CMakeLists.txt"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/tinyxml2/")
 
 add_custom_command (
         OUTPUT ${TBAG_DEP_TINYXML2_LIBRARIES}
-        COMMAND make &> "${TBAG_DEP_TINYXML2_LOG_PREFIX}.1"
+        COMMAND make > "${TBAG_DEP_TINYXML2_LOG_PREFIX}.1" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/tinyxml2/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/tinyxml2/")
 
