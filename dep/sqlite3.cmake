@@ -23,7 +23,8 @@ add_custom_command (
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/sqlite3/")
 
 add_custom_command (
-        OUTPUT "${TBAG_DEP_SQLITE3_LIBRARIES}"
+        OUTPUT ${TBAG_DEP_SQLITE3_LIBRARIES}
+               "${PROJECT_SOURCE_DIR}/dep/sqlite3/libsqlite3.la"
         COMMAND make
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/sqlite3/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/sqlite3/")

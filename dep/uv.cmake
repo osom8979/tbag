@@ -29,7 +29,8 @@ add_custom_command (
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/uv/")
 
 add_custom_command (
-        OUTPUT "${TBAG_DEP_UV_LIBRARIES}"
+        OUTPUT ${TBAG_DEP_UV_LIBRARIES}
+               "${PROJECT_SOURCE_DIR}/dep/uv/libuv.la"
         COMMAND make
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/uv/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/uv/")
