@@ -3,6 +3,9 @@
 tbag_modules__include_project (Default)
 tbag_modules__include_project (InstallTarget)
 
+## Thread settings.
+list (APPEND TBAG_PROJECT_LDFLAGS ${CMAKE_THREAD_LIBS_INIT})
+
 ## -------------
 ## Dependencies.
 ## -------------
@@ -37,6 +40,12 @@ include (${PROJECT_SOURCE_DIR}/dep/icu.cmake)
 list (APPEND TBAG_PROJECT_DEPENDENCIES  ${TBAG_DEP_ICU_NAME})
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_ICU_INCLUDE_DIRS})
 list (APPEND TBAG_PROJECT_LDFLAGS       ${TBAG_DEP_ICU_LIBRARIES})
+
+## libtbag-lua
+include (${PROJECT_SOURCE_DIR}/dep/lua.cmake)
+list (APPEND TBAG_PROJECT_DEPENDENCIES  ${TBAG_DEP_LUA_NAME})
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_LUA_INCLUDE_DIRS})
+list (APPEND TBAG_PROJECT_LDFLAGS       ${TBAG_DEP_LUA_LIBRARIES})
 
 tbag_modules__include_project (WholeArchiveOff)
 

@@ -11,11 +11,16 @@
 
 set (TBAG_DEP_UV_NAME          "libtbag-uv")
 set (TBAG_DEP_UV_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/dep/uv/include")
-set (TBAG_DEP_UV_LIBRARIES     "${PROJECT_SOURCE_DIR}/dep/uv/.libs/libuv.a")
 set (TBAG_DEP_UV_LOG_PREFIX    "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_UV_NAME}.dir/build.log")
 
+set (TBAG_DEP_UV_LIBRARIES_BUILD "${PROJECT_SOURCE_DIR}/dep/uv/.libs/libuv.a")
+set (TBAG_DEP_UV_LIBRARIES       ${TBAG_DEP_UV_LIBRARIES_BUILD})
+if (UNIX)
+    list (APPEND TBAG_DEP_UV_LIBRARIES -lrt -lpthread -lnsl -ldl)
+endif ()
+
 ## libuv custom target.
-add_custom_target (${TBAG_DEP_UV_NAME} ALL DEPENDS ${TBAG_DEP_UV_LIBRARIES})
+add_custom_target (${TBAG_DEP_UV_NAME} ALL DEPENDS ${TBAG_DEP_UV_LIBRARIES_BUILD})
 
 add_custom_command (
         OUTPUT "${PROJECT_SOURCE_DIR}/dep/uv/configure"
@@ -30,7 +35,7 @@ add_custom_command (
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/uv/")
 
 add_custom_command (
-        OUTPUT ${TBAG_DEP_UV_LIBRARIES}
+        OUTPUT ${TBAG_DEP_UV_LIBRARIES_BUILD}
                "${PROJECT_SOURCE_DIR}/dep/uv/libuv.la"
         COMMAND make V=1 > "${TBAG_DEP_UV_LOG_PREFIX}.3" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/uv/Makefile"

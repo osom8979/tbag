@@ -29,12 +29,15 @@ tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 tbag_config__default_generate_doxyfile ()
 tbag_config__default_generate_c_header ()
 
-## Find packages.
+## Thread settings.
+tbag_config__find_thread ()
+
+## Doxygen settings.
 tbag_config__set_library_prefix (Doxygen_ROOT)
 tbag_config__set_option (USE_DOXYGEN)
-tbag_config__find_packages (TbagDoxygen)
 
 if (USE_DOXYGEN)
+    find_package (TbagDoxygen)
     tbag_doxygen ()
 endif ()
 
