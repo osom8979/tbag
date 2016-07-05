@@ -52,11 +52,6 @@ function (tbag_preview__print_compiler)
     message (WARNING "Not implement.")
 endfunction ()
 
-#/// Print your compiler.
-function (tbag_preview__print_compiler_id)
-    tbag_preview__print ("Compiler id: ${CMAKE_CXX_COMPILER_ID}")
-endfunction ()
-
 #/// Preview information.
 function (tbag_preview)
     message ("")
@@ -64,22 +59,86 @@ function (tbag_preview)
     tbag_preview__print ("")
 
     tbag_preview__print_os ()
-    tbag_preview__print_compiler_id ()
+    tbag_preview__print ("")
+
+    tbag_preview__print_variable (CMAKE_HOST_SYSTEM_NAME)
+    tbag_preview__print_variable (CMAKE_HOST_SYSTEM_VERSION)
+    tbag_preview__print_variable (CMAKE_HOST_SYSTEM_PROCESSOR)
+    tbag_preview__print ("")
+
+    if (CMAKE_CROSSCOMPILING)
+        tbag_preview__print_variable (CMAKE_SYSTEM_NAME)
+        tbag_preview__print_variable (CMAKE_SYSTEM_VERSION)
+        tbag_preview__print_variable (CMAKE_SYSTEM_PROCESSOR)
+        tbag_preview__print ("")
+    endif ()
+
+    tbag_preview__print_variable (CMAKE_VERSION)
+    tbag_preview__print_variable (CMAKE_GENERATOR)
+    tbag_preview__print_variable (CMAKE_BUILD_TOOL)
+    tbag_preview__print ("")
+
+    tbag_preview__print_variable (CMAKE_CXX_COMPILER_ID)
+    tbag_preview__print_variable (CMAKE_C_COMPILER)
+    tbag_preview__print_variable (CMAKE_CXX_COMPILER)
     tbag_preview__print ("")
 
     tbag_preview__print_variable (CMAKE_BUILD_TYPE)
     tbag_preview__print_variable (BUILD_SHARED_LIBS)
     tbag_preview__print ("")
 
-    tbag_preview__print_variable (CMAKE_CXX_FLAGS)
-    tbag_preview__print_variable (CMAKE_EXE_LINKER_FLAGS)
-    tbag_preview__print_variable (CMAKE_MODULE_LINKER_FLAGS)
-    tbag_preview__print_variable (CMAKE_SHARED_LINKER_FLAGS)
-    tbag_preview__print ("")
-
     tbag_preview__print_variable (PROJECT_SOURCE_DIR)
     tbag_preview__print_variable (PROJECT_BINARY_DIR)
     tbag_preview__print_variable (CMAKE_INSTALL_PREFIX)
-    message ("")
+    tbag_preview__print ("")
+
+    tbag_preview__print_variable (MAIN_NAME)
+    tbag_preview__print_variable (MAIN_AUTHOR)
+    tbag_preview__print_variable (MAIN_EMAIL)
+    tbag_preview__print_variable (MAIN_BRIEF)
+    tbag_preview__print_variable (VERSION)
+    tbag_preview__print_variable (VERSION_TWEAK)
+    tbag_preview__print ("PACKET VERSION: ${VERSION_PACKET_MAJOR}.${VERSION_PACKET_MINOR}")
+    tbag_preview__print ("RELEASE VERSION: ${VERSION_RELEASE}")
+    tbag_preview__print ("")
+
+    #tbag_preview__print_variable (CMAKE_C_FLAGS)
+    #tbag_preview__print_variable (CMAKE_C_FLAGS_DEBUG)
+    #tbag_preview__print_variable (CMAKE_C_FLAGS_RELEASE)
+    tbag_preview__print_variable (CMAKE_CXX_FLAGS)
+    tbag_preview__print_variable (CMAKE_CXX_FLAGS_DEBUG)
+    tbag_preview__print_variable (CMAKE_CXX_FLAGS_RELEASE)
+    tbag_preview__print ("")
+
+    #tbag_preview__print_variable (CMAKE_EXE_LINKER_FLAGS)
+    #tbag_preview__print_variable (CMAKE_EXE_LINKER_FLAGS_DEBUG)
+    #tbag_preview__print_variable (CMAKE_EXE_LINKER_FLAGS_RELEASE)
+
+    #tbag_preview__print_variable (CMAKE_MODULE_LINKER_FLAGS)
+    #tbag_preview__print_variable (CMAKE_MODULE_LINKER_FLAGS_DEBUG)
+    #tbag_preview__print_variable (CMAKE_MODULE_LINKER_FLAGS_RELEASE)
+
+    #tbag_preview__print_variable (CMAKE_SHARED_LINKER_FLAGS)
+    #tbag_preview__print_variable (CMAKE_SHARED_LINKER_FLAGS_DEBUG)
+    #tbag_preview__print_variable (CMAKE_SHARED_LINKER_FLAGS_RELEASE)
+
+    #tbag_preview__print_variable (CMAKE_C_FLAGS_DEBUG_INIT)
+    #tbag_preview__print_variable (CMAKE_C_FLAGS_MINSIZEREL_INIT)
+    #tbag_preview__print_variable (CMAKE_C_FLAGS_RELEASE_INIT)
+    #tbag_preview__print_variable (CMAKE_C_FLAGS_RELWITHDEBINFO_INITT)
+
+    #tbag_preview__print_variable (CMAKE_CXX_FLAGS_DEBUG_INIT)
+    #tbag_preview__print_variable (CMAKE_CXX_FLAGS_MINSIZEREL_INIT)
+    #tbag_preview__print_variable (CMAKE_CXX_FLAGS_RELEASE_INIT)
+    #tbag_preview__print_variable (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INITT)
+
+    if (TBAG_DEBUG_TAG)
+        tbag_preview__print ("ENABLE TBAG_DEBUG_TAG: ${TBAG_DEBUG_TAG}")
+    else ()
+        tbag_preview__print ("DISABLE TBAG_DEBUG_TAG")
+    endif ()
+
+    tbag_preview__print ("")
+    tbag_preview__print ("#################################################")
 endfunction ()
 
