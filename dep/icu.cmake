@@ -10,7 +10,8 @@
 #///   - ${TBAG_DEP_ICU_LIBRARIES}
 
 set (TBAG_DEP_ICU_NAME          "libtbag-icu")
-set (TBAG_DEP_ICU_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/dep/icu/common")
+set (TBAG_DEP_ICU_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/dep/icu/common"
+                                "${PROJECT_SOURCE_DIR}/dep/icu/i18n")
 set (TBAG_DEP_ICU_LIBRARIES     "${PROJECT_SOURCE_DIR}/dep/icu/lib/libicudata.a"
                                 "${PROJECT_SOURCE_DIR}/dep/icu/lib/libicui18n.a"
                                 "${PROJECT_SOURCE_DIR}/dep/icu/lib/libicuuc.a")
