@@ -14,19 +14,20 @@ set (TBAG_DEP_ICU_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/dep/icu/common")
 set (TBAG_DEP_ICU_LIBRARIES     "${PROJECT_SOURCE_DIR}/dep/icu/lib/libicudata.a"
                                 "${PROJECT_SOURCE_DIR}/dep/icu/lib/libicui18n.a"
                                 "${PROJECT_SOURCE_DIR}/dep/icu/lib/libicuuc.a")
+set (TBAG_DEP_ICU_LOG_PREFIX    "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_ICU_NAME}.dir/build.log")
 
 ## icu4c custom target.
 add_custom_target (${TBAG_DEP_ICU_NAME} ALL DEPENDS ${TBAG_DEP_ICU_LIBRARIES})
 
 add_custom_command (
         OUTPUT "${PROJECT_SOURCE_DIR}/dep/icu/Makefile"
-        COMMAND ./configure --enable-release --enable-static --disable-shared --disable-tests --disable-samples
+        COMMAND ./configure --enable-release --enable-static --disable-shared --disable-tests --disable-samples &> "${TBAG_DEP_ICU_LOG_PREFIX}.1"
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/icu/configure"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/icu/")
 
 add_custom_command (
         OUTPUT ${TBAG_DEP_ICU_LIBRARIES}
-        COMMAND make
+        COMMAND make &> "${TBAG_DEP_ICU_LOG_PREFIX}.2"
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/icu/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/icu/")
 
