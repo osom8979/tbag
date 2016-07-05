@@ -46,6 +46,7 @@ tbag_project ()
 
 ## Install & external settings.
 tbag_config__install_cxx_headers (${MAIN_NAME})
+tbag_config__soversion (tbag)
 
 ## Print result messages.
 tbag_preview ()
