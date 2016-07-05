@@ -1,4 +1,4 @@
-#.SUFFIXES: .cpp .o
+#.SUFFIXES: .c .o
 
 CC=gcc
 TARGET=libsqlite3.a

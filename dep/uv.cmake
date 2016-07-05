@@ -32,7 +32,7 @@ add_custom_command (
 add_custom_command (
         OUTPUT ${TBAG_DEP_UV_LIBRARIES}
                "${PROJECT_SOURCE_DIR}/dep/uv/libuv.la"
-        COMMAND make > "${TBAG_DEP_UV_LOG_PREFIX}.3" 2>&1
+        COMMAND make "CFLAGS=-w -O2 -fvisibility=hidden -fPIC" V=1 > "${TBAG_DEP_UV_LOG_PREFIX}.3" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/uv/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/uv/")
 
