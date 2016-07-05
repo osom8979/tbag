@@ -24,8 +24,15 @@ fi
 
 # Install.
 cd "$TPARTY_HOME"
-echo 'gtest.sh'     > cache
-echo 'lua.sh'      >> cache
+touch cache
+# echo 'gtest.sh'    >> cache
+# echo 'icu.sh'      >> cache
+# echo 'libuv.sh'    >> cache
+# echo 'lua.sh'      >> cache
+# echo 'ncurses.sh'  >> cache
+# echo 'spdlog.sh'   >> cache
+# echo 'sqlite3.sh'  >> cache
+# echo 'tinyxml2.sh' >> cache
 ./install.sh -y
 
 # Remove build dir.
