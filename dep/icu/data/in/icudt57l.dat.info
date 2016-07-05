@@ -1,0 +1,11 @@
+ICU Data Library Customizer
+
+Select data:
+* Charset Mapping Tables (218 KB)
+** ibm-943_P15A-2003.cnv	Japanese (Shift-JIS with byte 0x5C <-> backslash mapping)	89
+** ibm-949_P110-1999.cnv	Korean (KSC_5601)	2
+** ibm-949_P11A-1999.cnv	Korean (KSC_5601)	127
+* Base Data (294 KB) - ALL
+
+http://apps.icu-project.org/datacustom/
+
