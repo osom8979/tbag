@@ -22,27 +22,24 @@ endif ()
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
-## Find packages.
-tbag_config__set_library_prefix (GTEST_ROOT)
-tbag_config__set_library_prefix (Doxygen_ROOT)
-
-tbag_config__set_option (USE_DOXYGEN)
-
-tbag_config__find_packages (GTest ICU TbagDoxygen)
-
 ## Configure settings.
-tbag_config__default_generate_c_header ()
 tbag_config__default_generate_doxyfile ()
+tbag_config__default_generate_c_header ()
+
+## Find packages.
+tbag_config__set_library_prefix (Doxygen_ROOT)
+tbag_config__set_option (USE_DOXYGEN)
+tbag_config__find_packages (TbagDoxygen ICU)
+
+if (USE_DOXYGEN)
+    tbag_doxygen ()
+endif ()
 
 ## Run project.
 tbag_project ()
 
 ## Install & external settings.
 tbag_config__install_cxx_headers (${MAIN_NAME})
-
-if (USE_DOXYGEN)
-    tbag_doxygen ()
-endif ()
 
 ## Print result messages.
 tbag_preview ()

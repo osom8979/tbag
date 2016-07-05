@@ -3,8 +3,6 @@
 tbag_modules__include_project (Default)
 tbag_modules__include_project (InstallTarget)
 
-list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/dep/uv/include)
-
 ## -------------
 ## Dependencies.
 ## -------------

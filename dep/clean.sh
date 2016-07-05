@@ -57,3 +57,7 @@ rm -f sqlite3/sqlite3.pc
 rm -f sqlite3/*.o
 rm -f sqlite3/*.lo
 
+## gtest
+rm -f gtest/make/*.o
+rm -f gtest/make/*.a
+
