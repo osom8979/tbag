@@ -1,9 +1,4 @@
-.deps/
-.libs/
-Makefile
-config.log
-config.status
-libtool
-sqlite3
-sqlite3.pc
+*.o
+*.a
+!Makefile
 
