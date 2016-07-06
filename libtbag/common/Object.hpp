@@ -15,26 +15,16 @@
 
 #include <libtbag/config.h>
 
-#include <string>
-
-#define IMPLEMENT_GET_INSTANCE_NAME_AND_QUALIFIER(name, qualifier) \
-    virtual std::string getInstanceName() qualifier \
-    { \
-        static std::string const INSTANCE_NAME = name; \
-        return INSTANCE_NAME; \
-    }
-
-#define IMPLEMENT_GET_INSTANCE_NAME(name) \
-    IMPLEMENT_GET_INSTANCE_NAME_AND_QUALIFIER(name, const override)
-
-#define IMPLEMENT_GET_INSTANCE_CURRENT_FILE_NAME \
-    IMPLEMENT_GET_INSTANCE_NAME(CURRENT_FILE_NAME_WITH_REMOVED_EXTENSION)
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-// TODO: Forward declaration.
+namespace common {
+
+#define IMPLEMENT_GET_CLASS_NAME(name) \
+    static constexpr char const * const getClassName() noexcept { \
+        return #name; \
+    }
 
 /**
  * Object class prototype.
@@ -42,25 +32,68 @@ NAMESPACE_LIBTBAG_OPEN
  * @author zer0
  * @date   2016-06-05
  */
-class Object /** : public Noncopyable */
+class Object
 {
+public:
+    IMPLEMENT_GET_CLASS_NAME(Object);
+
+public:
+    typedef std::size_t Id;
+
 private:
-    // TODO: Insert member variables.
+    Id _id;
 
 public:
-    Object();
-    Object(Object const & obj);
-    Object(Object && obj);
-    virtual ~Object();
+    Object() noexcept
+    {
+        _id = reinterpret_cast<Id>(this);
+    }
+
+    Object(Object const & obj) noexcept : Object()
+    {
+        // EMPTY.
+    }
+
+    Object(Object && obj) noexcept : Object()
+    {
+        // EMPTY.
+    }
+
+    virtual ~Object() noexcept
+    {
+        // EMPTY.
+    }
 
 public:
-    Object & operator =(Object const & obj);
-    Object & operator =(Object && obj);
+    inline Object & operator =(Object const & obj) noexcept
+    {
+        return *this;
+    }
+
+    inline Object & operator =(Object && obj) noexcept
+    {
+        return *this;
+    }
 
 public:
-    Object & copy(Object const & obj);
-    void swap(Object & obj);
+    inline bool operator ==(Object const & obj) noexcept
+    {
+        return (this == &obj);
+    }
+
+    inline bool operator !=(Object const & obj) noexcept
+    {
+        return (this != &obj);
+    }
+
+public:
+    inline Id getId() const noexcept
+    {
+        return _id;
+    }
 };
+
+} // namespace common
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
