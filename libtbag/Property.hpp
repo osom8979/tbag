@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Resource.hpp>
+#include <libtbag/dom/Resource.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 // -------------------
@@ -35,7 +35,7 @@ public:
     static constexpr char const * const DEFAULT_FILE_NAME = "property.xml";
 
 private:
-    Resource _res;
+    dom::Resource _res;
 
 public:
     Property() {
@@ -47,11 +47,11 @@ public:
     }
 
 protected:
-    Resource & getResource() {
+    dom::Resource & getResource() {
         return this->_res;
     }
 
-    Resource const & getResource() const {
+    dom::Resource const & getResource() const {
         return this->_res;
     }
 
