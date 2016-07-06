@@ -348,10 +348,10 @@ public:
             itr = nodes.begin();
         } else {
             if (nodes.size() >= 1 && nodes.at(0) == "~") {
-                result = BasePath(Common::getHomeDir()).splitNodes();
+                result = BasePath(common::getHomeDir()).splitNodes();
                 itr = nodes.begin() + 1;
             } else {
-                result = BasePath(Common::getWorkDir()).splitNodes();
+                result = BasePath(common::getWorkDir()).splitNodes();
                 itr = nodes.begin();
             }
         }

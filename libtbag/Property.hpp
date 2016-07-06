@@ -83,7 +83,7 @@ public:
 public:
     bool loadOrCreate(std::string const & path) {
         using namespace filesystem;
-        if (Common::isAccessFile(path)) {
+        if (common::isAccessFile(path)) {
             return this->load(path);
         } else {
             this->setDefault();
@@ -103,7 +103,7 @@ public:
 public:
     static std::string getDefaultPath() {
         using namespace filesystem;
-        Path path = Path(Common::getExeDir());
+        Path path = Path(common::getExeDir());
         path /= DEFAULT_FILE_NAME;
         return path.getGeneric();
     }

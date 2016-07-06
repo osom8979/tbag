@@ -1,0 +1,156 @@
+/**
+ * @file   Common.cpp
+ * @brief  Common filesystem methods.
+ * @author zer0
+ * @date   2016-07-06
+ */
+
+#include <libtbag/filesystem/Common.hpp>
+#include <uv.h>
+
+// -------------------
+NAMESPACE_LIBTBAG_OPEN
+// -------------------
+
+namespace filesystem {
+namespace common     {
+
+std::string getRepresentationDirectory(DirFunction func)
+{
+    std::size_t path_length = MAX_PATH_BUFFER_SIZE;
+    std::vector<char> buffer;
+
+    buffer.resize(path_length);
+
+    if (func(&buffer[0], &path_length) != 0) {
+        return std::string();
+    }
+    return std::string(buffer.begin(), buffer.begin() + path_length);
+}
+
+std::string getWorkDir()
+{
+    return getRepresentationDirectory(&uv_cwd);
+}
+
+std::string getHomeDir()
+{
+    return getRepresentationDirectory(&uv_os_homedir);
+}
+
+std::string getExePath()
+{
+    return getRepresentationDirectory(&uv_exepath);
+}
+
+std::string getExeDir()
+{
+    std::string path = getExePath();
+    if (path.empty()) {
+        return std::string();
+    }
+
+    // Separate directory & filename.
+    std::string separator = std::string() + filesystem::common::getPathSeparator();
+    std::size_t last_separator_index = path.rfind(separator);
+    return path.substr(0, last_separator_index);
+}
+
+bool isAccessFile(std::string const & path, int mode)
+{
+    uv_fs_t request;
+    int error_code = uv_fs_access(nullptr, &request, path.c_str(), mode, nullptr);
+    uv_fs_req_cleanup(&request);
+    return (error_code == 0 ? true : false);
+}
+
+bool existsFile(std::string const & path)
+{
+    return isAccessFile(path, ACCESS_MODE_EXISTS);
+}
+
+uint64_t getPermission(std::string const & path)
+{
+    uint64_t result = 0;
+    uv_fs_t  request;
+
+    int error_code = uv_fs_stat(nullptr, &request, path.c_str(), nullptr);
+    if (error_code == 0 && request.result == 0) {
+        result = request.statbuf.st_mode;
+    }
+    uv_fs_req_cleanup(&request);
+
+    return result;
+}
+
+bool checkFileType(std::string const & path, uint64_t type)
+{
+    return ((getPermission(path) & FILE_TYPE_S_IFMT) == type ? true : false);
+}
+
+bool isDirectory(std::string const & path)
+{
+    return checkFileType(path, FILE_TYPE_S_IFDIR);
+}
+
+bool isRegularFile(std::string const & path)
+{
+    return checkFileType(path, FILE_TYPE_S_IFREG);
+}
+
+std::set<std::string> scanDir(std::string const & dir_path)
+{
+    std::set<std::string> result;
+
+    uv_fs_t request;
+    uv_dirent_t dictate;
+
+    int element_count = uv_fs_scandir(nullptr, &request, dir_path.c_str(), 0, nullptr);
+    if (element_count > 0) {
+        while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
+            result.insert(std::string(dictate.name));
+        }
+    }
+    uv_fs_req_cleanup(&request);
+
+    return result;
+}
+
+bool createDir(std::string const & path, int mode)
+{
+    uv_fs_t request;
+    int error_code = uv_fs_mkdir(nullptr, &request, path.c_str(), mode, nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return (error_code == 0 ? true : false);
+}
+
+bool removeDir(std::string const & path) {
+    uv_fs_t request;
+    int error_code = uv_fs_rmdir(nullptr, &request, path.c_str(), nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return (error_code == 0 ? true : false);
+}
+
+bool rename(std::string const & from, std::string const & to)
+{
+    uv_fs_t request;
+    int error_code = uv_fs_rename(nullptr, &request, from.c_str(), to.c_str(), nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return (error_code == 0 ? true : false);
+}
+
+bool remove(std::string const & path)
+{
+    return (::remove(path.c_str()) == 0 ? true : false);
+}
+
+} // namespace common
+} // namespace filesystem
+
+// --------------------
+NAMESPACE_LIBTBAG_CLOSE
+// --------------------
+

@@ -28,7 +28,7 @@ TEST(SharedLibraryTest, Default)
     char const * const FUNC1_NAME = "__libtbag_test__add__";
     char const * const FUNC2_NAME = "__libtbag_test__add2__";
 
-    filesystem::Path path = filesystem::Path(filesystem::Common::getExeDir());
+    filesystem::Path path = filesystem::Path(filesystem::common::getExeDir());
     path /= getLibraryName();
 
     SharedLibrary lib;

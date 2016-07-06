@@ -12,12 +12,13 @@
 
 using namespace libtbag;
 using namespace libtbag::filesystem;
+using namespace libtbag::filesystem::common;
 
 TEST(CommonTest, getPathSeparator)
 {
 #if defined(WIN32) || defined(_WIN32)
-    ASSERT_EQ(GetPathSeparator(), '\\');
-    ASSERT_EQ(GetPathSplitter(),  ';');
+    ASSERT_EQ(getPathSeparator(), '\\');
+    ASSERT_EQ(getPathSplitter(),  ';');
 #else
     ASSERT_EQ(getPathSeparator(), '/');
     ASSERT_EQ(getPathSplitter(),  ':');
@@ -28,9 +29,9 @@ TEST(CommonTest, RepresentationDirectory)
 {
     using namespace std;
 
-    std::string work_dir = Common::getWorkDir();
-    std::string home_dir = Common::getHomeDir();
-    std::string exe_dir  = Common::getExeDir();
+    std::string work_dir = getWorkDir();
+    std::string home_dir = getHomeDir();
+    std::string exe_dir  = getExeDir();
 
     cout << "* Working directory: " << work_dir << endl
          << "* Home directory: "    << home_dir << endl
@@ -43,7 +44,7 @@ TEST(CommonTest, RepresentationDirectory)
 
 TEST(CommonTest, scanDir)
 {
-    std::set<std::string> files = Common::scanDir(Common::getExeDir());
+    std::set<std::string> files = scanDir(getExeDir());
     for (auto cursor : files) {
         std::cout << "* Scan file: " << cursor << std::endl;
     }
@@ -53,7 +54,7 @@ TEST(CommonTest, scanDir)
 TEST(CommonTest, create_and_remove)
 {
     std::string dir_name = "__filesystem_common_dir_test.dir";
-    ASSERT_TRUE(Common::createDir(dir_name));
-    ASSERT_TRUE(Common::removeDir(dir_name));
+    ASSERT_TRUE(createDir(dir_name));
+    ASSERT_TRUE(removeDir(dir_name));
 }
 

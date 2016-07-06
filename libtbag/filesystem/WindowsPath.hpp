@@ -54,9 +54,9 @@ public:
 
 public:
     static constexpr ValueType const PATH_SEPARATOR
-            = static_cast<ValueType const>(PATH_SEPARATOR_OF_WINDOWS);
+            = static_cast<ValueType const>(common::PATH_SEPARATOR_OF_WINDOWS);
     static constexpr ValueType const GENERIC_PATH_SEPARATOR
-            = static_cast<ValueType const>(getGenericPathSeparator());
+            = static_cast<ValueType const>(common::getGenericPathSeparator());
 
 public:
     inline static String getPathSeparator() {
@@ -118,7 +118,7 @@ public:
 // Make preferred.
 public:
     static String getReplaceStringOfPosix() {
-        return {PATH_SEPARATOR_OF_POSIX};
+        return { common::PATH_SEPARATOR_OF_POSIX };
     }
 
     /**
@@ -185,8 +185,8 @@ public:
     static String getParent(String const & path) {
         String temp = removeLastSeparator(path);
         for (auto itr = temp.rbegin(); itr != temp.rend(); ++itr) {
-            if (/**/*itr == static_cast<ValueType>(PATH_SEPARATOR_OF_WINDOWS)
-                 || *itr == static_cast<ValueType>(PATH_SEPARATOR_OF_POSIX)) {
+            if (/**/*itr == static_cast<ValueType>(common::PATH_SEPARATOR_OF_WINDOWS)
+                 || *itr == static_cast<ValueType>(common::PATH_SEPARATOR_OF_POSIX)) {
                 return temp.substr(0, temp.size() - std::distance(temp.rbegin(), itr));
             }
         }

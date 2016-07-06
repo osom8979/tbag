@@ -163,7 +163,7 @@ public:
         Path path;
         for (auto cursor : this->_dirs) {
             path = (cursor.second / name);
-            if (filesystem::Common::existsFile(path) == true) {
+            if (filesystem::common::existsFile(path) == true) {
                 return path;
             }
         }
@@ -177,7 +177,7 @@ public:
 
     static std::vector<Path> scanDir(Path const & path) {
         std::vector<Path> result;
-        for (auto cursor : filesystem::Common::scanDir(path.getNativeString())) {
+        for (auto cursor : filesystem::common::scanDir(path.getNativeString())) {
             result.push_back(Path(Path::append(path, cursor)));
         }
         return result;
@@ -189,7 +189,7 @@ public:
     }
 
     static bool isDirectory(Path const & path) {
-        return filesystem::Common::isDirectory(path.getNativeString());
+        return filesystem::common::isDirectory(path.getNativeString());
     }
 
 // Static methods.
@@ -206,14 +206,14 @@ public:
 
     /** Obtain HOME directory path. */
     static Path getHomeDirPath() {
-        using filesystem::Common;
-        return Path(Common::getHomeDir());
+        using namespace filesystem::common;
+        return Path(getHomeDir());
     }
 
     /** Obtain executable file directory path. */
     static Path getExeDirPath() {
-        using filesystem::Common;
-        return Path(Common::getExeDir());
+        using namespace filesystem::common;
+        return Path(getExeDir());
     }
 
 #ifndef CREATE_ASSET_PATH
@@ -229,12 +229,12 @@ public:                                                 \
         return getDirPath(ASSET_NAME_KEY_##name);       \
     }                                                   \
     bool create_##name() const {                        \
-        using Common = ::libtbag::filesystem::Common;   \
-        return Common::createDir(get_##name());         \
+        using namespace ::libtbag::filesystem::common;  \
+        return createDir(get_##name());                 \
     }                                                   \
     bool remove_##name() const {                        \
-        using Common = ::libtbag::filesystem::Common;   \
-        return Common::removeDir(get_##name());         \
+        using namespace ::libtbag::filesystem::common;  \
+        return removeDir(get_##name());                 \
     }                                                   \
     bool exists_##name() const {                        \
         return isDirectory(get_##name());               \
@@ -253,12 +253,12 @@ public:                                                  \
         return getDirPath(ASSET_NAME_KEY_##name) / path; \
     }                                                    \
     bool create_##name##_##sub() const {                 \
-        using Common = ::libtbag::filesystem::Common;    \
-        return Common::createDir(get_##name##_##sub());  \
+        using namespace ::libtbag::filesystem::common;   \
+        return createDir(get_##name##_##sub());          \
     }                                                    \
     bool remove_##name##_##sub() const {                 \
-        using Common = ::libtbag::filesystem::Common;    \
-        return Common::removeDir(get_##name##_##sub());  \
+        using namespace ::libtbag::filesystem::common;   \
+        return removeDir(get_##name##_##sub());          \
     }                                                    \
     bool exists_##name##_##sub() const {                 \
         return isDirectory(get_##name##_##sub());        \

@@ -30,7 +30,7 @@ static bool runTestProgram(Process           * process
                          , std::string const & arg1
                          , std::string const & arg2)
 {
-    Path exe_dir      = Path(Common::getExeDir());
+    Path exe_dir      = Path(common::getExeDir());
     Path test_program = exe_dir / getProcessTestFileName();
 
     std::vector<std::string> args;
@@ -94,10 +94,10 @@ TEST(PipeProcessTest, StandardError)
 TEST(PipeProcessTest, FileOutput)
 {
     filesystem::Path const TEST_FILE("__process_test_file.txt");
-    if (filesystem::Common::existsFile(TEST_FILE)) {
-        filesystem::Common::remove(TEST_FILE);
+    if (filesystem::common::existsFile(TEST_FILE)) {
+        filesystem::common::remove(TEST_FILE);
     }
-    ASSERT_FALSE(filesystem::Common::existsFile(TEST_FILE));
+    ASSERT_FALSE(filesystem::common::existsFile(TEST_FILE));
 
     std::string const  TEST_STRING = "TEST";
     std::string const EMPTY_STRING = "";
@@ -110,8 +110,8 @@ TEST(PipeProcessTest, FileOutput)
     ASSERT_EQ(process.getStandardOutput(), EMPTY_STRING);
     ASSERT_EQ(process.getStandardError(),  EMPTY_STRING);
 
-    ASSERT_TRUE(filesystem::Common::existsFile(TEST_FILE));
-    ASSERT_TRUE(filesystem::Common::isRegularFile(TEST_FILE));
+    ASSERT_TRUE(filesystem::common::existsFile(TEST_FILE));
+    ASSERT_TRUE(filesystem::common::isRegularFile(TEST_FILE));
 
     std::ifstream file(TEST_FILE.getString());
     std::string   file_body;

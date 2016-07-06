@@ -53,9 +53,9 @@ public:
 
 public:
     static constexpr ValueType const PATH_SEPARATOR
-            = static_cast<ValueType const>(PATH_SEPARATOR_OF_POSIX);
+            = static_cast<ValueType const>(common::PATH_SEPARATOR_OF_POSIX);
     static constexpr ValueType const GENERIC_PATH_SEPARATOR
-            = static_cast<ValueType const>(getGenericPathSeparator());
+            = static_cast<ValueType const>(common::getGenericPathSeparator());
 
 public:
     inline static String getPathSeparator() {

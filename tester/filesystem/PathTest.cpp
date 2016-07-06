@@ -105,8 +105,8 @@ TEST(PathTest, getName)
 
 TEST(PathTest, splitNodesWithCanonical_1)
 {
-    std::string home = Common::getHomeDir();
-    std::string work = Common::getWorkDir();
+    std::string home = common::getHomeDir();
+    std::string work = common::getWorkDir();
 
     char const * const TEMP1 = "~/TEMP1/TEMP2/../TEMP3/./../../TEMP4";
     char const * const TEMP2 = "TEMP2/.";
