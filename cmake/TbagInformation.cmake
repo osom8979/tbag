@@ -75,9 +75,12 @@ endfunction ()
 function (tbag_information__read_version __result __version_list __index)
     set (${__result})
 
-    list (LENGTH "${__version_list}" __version_list_length)
-    if (__version_list_length GREATER ${__index})
-        list (GET ${__version_list} ${__index} ${__result})
+    # list (LENGTH "${__version_list}" __list_length) # [BUG] Not working!!
+    tbag_utils__get_args_size (__list_length ${__version_list})
+
+    if (__list_length GREATER ${__index})
+        # list (GET ${__version_list} ${__index} ${__result}) # [BUG] Not working!!
+        tbag_utils__get_args_index (${__result} ${__index} ${__version_list})
     else ()
         # Default version number: 0
         set (${__result} 0)

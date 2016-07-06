@@ -146,6 +146,42 @@ endfunction ()
 ## String & List.
 ## --------------
 
+#/// size of arguments.
+#///
+#/// @param __result [out] Output value name.
+#/// @param ...      [in]  List of arguments.
+function (tbag_utils__get_args_size __result)
+    set (${__result} 0)
+
+    foreach (__args_cursor ${ARGN})
+        math (EXPR ${__result} "${${__result}} + 1")
+    endforeach ()
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
+#/// obtain arguments[index].
+#///
+#/// @param __result [out] Output value name.
+#/// @param __index  [in]  Argument index.
+#/// @param ...      [in]  List of arguments.
+function (tbag_utils__get_args_index __result __index)
+    set (${__result})
+    set (__index_count 0)
+
+    foreach (__args_cursor ${ARGN})
+        if (${__index_count} EQUAL ${__index})
+            set (${__result} ${__args_cursor})
+            break ()
+        endif ()
+        math (EXPR __index_count "${__index_count} + 1")
+    endforeach ()
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
 #/// Arguments to string.
 #///
 #/// @param __result    [out] Output value name.
