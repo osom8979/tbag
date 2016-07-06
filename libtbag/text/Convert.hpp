@@ -56,7 +56,7 @@ public:
     }
 };
 
-std::vector<std::string> getAvailableConverterNames()
+inline std::vector<std::string> getAvailableConverterNames()
 {
     std::vector<std::string> result;
     int32_t count = ucnv_countAvailable();
@@ -66,7 +66,7 @@ std::vector<std::string> getAvailableConverterNames()
     return result;
 }
 
-std::string convertFromUtf8(std::string const & utf8, std::string const & to_charset) throw (ConvertException)
+inline std::string convertFromUtf8(std::string const & utf8, std::string const & to_charset) throw (ConvertException)
 {
     UErrorCode status = U_ZERO_ERROR;
     UConverter * converter = ucnv_open(to_charset.c_str(), &status);
@@ -100,7 +100,7 @@ std::string convertFromUtf8(std::string const & utf8, std::string const & to_cha
     return result;
 }
 
-std::string convertToUtf8(std::string const & from_string, std::string const & from_charset) throw (ConvertException)
+inline std::string convertToUtf8(std::string const & from_string, std::string const & from_charset) throw (ConvertException)
 {
     UErrorCode status = U_ZERO_ERROR;
     UConverter * converter = ucnv_open(from_charset.c_str(), &status);
