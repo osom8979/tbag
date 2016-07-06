@@ -5,7 +5,6 @@ tbag_modules__include_project (Default)
 ## TODO Remove this code.
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_UV_INCLUDE_DIRS})
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_SPDLOG_INCLUDE_DIRS})
-list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_TINYXML2_INCLUDE_DIRS})
 
 ## libtbag-gtest
 include (${PROJECT_SOURCE_DIR}/dep/gtest.cmake)

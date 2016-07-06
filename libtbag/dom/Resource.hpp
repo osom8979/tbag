@@ -14,11 +14,8 @@
 #endif
 
 #include <libtbag/config.h>
-
-#include <string>
 #include <unordered_map>
-
-#include <tinyxml2.h>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -82,7 +79,8 @@ public:
 // Accessor.
 public:
     template <typename Type, typename Converter>
-    bool getValue(std::string const & key, Type * result, Converter func) const {
+    bool getValue(std::string const & key, Type * result, Converter func) const
+    {
         auto find_value = this->_map.find(key);
         if (find_value == this->_map.end()) {
             return false;
@@ -171,18 +169,9 @@ public:
     std::string & at(std::string const & key);
     std::string const & at(std::string const & key) const;
 
-// TinyXML2 operators.
 public:
-    using Document = tinyxml2::XMLDocument;
-    using Element = tinyxml2::XMLElement;
-    using Node = tinyxml2::XMLNode;
-
-public:
-    static Map readFromXmlDocument(Document const & doc, std::string const & tag);
     static Map readFromXmlString(std::string const & xml, std::string const & tag);
     static Map readFromXmlFile(std::string const & path, std::string const & tag);
-
-public:
     static bool save(std::string const & path, std::string const & tag, Map const & map);
 };
 
