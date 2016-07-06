@@ -20,10 +20,7 @@ set (TBAG_DEP_UV_ARCHIVES     "${PROJECT_SOURCE_DIR}/dep/uv/.libs/libuv.a")
 
 set (TBAG_DEP_UV_DEPENDENCIES "")
 if (UNIX)
-    list (APPEND TBAG_DEP_UV_DEPENDENCIES -lpthread)
-    if (NOT APPLE)
-        list (APPEND TBAG_DEP_UV_DEPENDENCIES -lrt -lnsl -ldl)
-    endif ()
+    list (APPEND TBAG_DEP_UV_DEPENDENCIES -lpthread -ldl)
 endif ()
 
 set (TBAG_DEP_UV_LIBRARIES ${TBAG_DEP_UV_ARCHIVES}
