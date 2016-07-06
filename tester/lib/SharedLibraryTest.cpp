@@ -7,10 +7,11 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/SharedLibrary.hpp>
+#include <libtbag/lib/SharedLibrary.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
+using namespace libtbag::lib;
 
 constexpr char const * const getLibraryName() noexcept
 {

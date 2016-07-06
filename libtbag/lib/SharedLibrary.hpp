@@ -5,8 +5,8 @@
  * @date   2016-04-17
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SHAREDLIBRARY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SHAREDLIBRARY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LIB_SHAREDLIBRARY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LIB_SHAREDLIBRARY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,15 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-
-#include <cstring>
 #include <string>
-
-#include <uv.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+namespace lib {
 
 /**
  * SharedLibrary class prototype.
@@ -33,49 +31,25 @@ NAMESPACE_LIBTBAG_OPEN
  */
 class SharedLibrary : public Noncopyable
 {
+public:
+    using FakeLib = void;
+
 private:
     bool _open;
-    uv_lib_t _lib;
+    FakeLib * _lib;
 
 public:
-    SharedLibrary() : _open(false) {
-        memset(&this->_lib, 0x00, sizeof(this->_lib));
-    }
-
-    SharedLibrary(std::string const & path) : SharedLibrary() {
-        open(path);
-    }
-
-    ~SharedLibrary() {
-        close();
-    }
+    SharedLibrary();
+    SharedLibrary(std::string const & path);
+    ~SharedLibrary();
 
 public:
-    bool open(std::string const & path) {
-        if (uv_dlopen(path.c_str(), &this->_lib) == 0) {
-            this->_open = true;
-        } else {
-            this->_open = false;
-        }
-        return this->_open;
-    }
+    bool open(std::string const & path);
+    void close();
+    void * symbol(std::string const & name);
 
-    void close() {
-        if (this->_open) {
-            uv_dlclose(&this->_lib);
-            this->_open = false;
-        }
-    }
-
-    void * symbol(std::string const & name) {
-        if (this->_open) {
-            void * result = nullptr;
-            if (uv_dlsym(&this->_lib, name.c_str(), &result) == 0) {
-                return result;
-            }
-        }
-        return nullptr;
-    }
+public:
+    std::string getError() const;
 
 public:
     template <typename ReturnType, typename ... Arg>
@@ -96,16 +70,13 @@ public:
             func(args ...);
         }
     }
-
-public:
-    std::string getError() const {
-        return std::string(uv_dlerror(&this->_lib));
-    }
 };
+
+} // namespace lib
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SHAREDLIBRARY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LIB_SHAREDLIBRARY_HPP__
 
