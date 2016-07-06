@@ -13,5 +13,10 @@ using namespace libtbag::script;
 
 TEST(LuaMachineTest, Default)
 {
+    LuaMachine machine;
+
+    ASSERT_TRUE(machine.initialize());
+
+    machine.release();
 }
 

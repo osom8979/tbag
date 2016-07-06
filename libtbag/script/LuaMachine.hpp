@@ -16,12 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 
-#include <cassert>
-
 #include <string>
-#include <algorithm>
-
-#include <lua.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,6 +33,9 @@ namespace script {
 class LuaMachine : public Noncopyable
 {
 public:
+    using FakeLuaState = void;
+
+public:
     enum class LuaType : int
     {
         NIL = 0,
@@ -51,97 +49,43 @@ public:
     };
 
 private:
-    lua_State * _machine;
+    FakeLuaState * _machine;
 
 public:
-    LuaMachine() : _machine(nullptr) {
-        __EMPTY_BLOCK__
-    }
-
-    ~LuaMachine() {
-        this->release();
-    }
+    LuaMachine();
+    ~LuaMachine();
 
 public:
-    inline bool isReady() const {
-        return (this->_machine != nullptr ? true : false);
+    inline bool isReady() const
+    {
+        return (_machine != nullptr);
     }
 
 public:
-    bool initialize() {
-        this->_machine = luaL_newstate();
-        if (this->_machine != nullptr) {
-            luaL_openlibs(this->_machine);
-        }
-        return isReady();
-    }
-
-    void release() {
-        if (isReady()) {
-            lua_close(this->_machine);
-            this->_machine = nullptr;
-        }
-    }
+    bool initialize();
+    void release();
 
 // File operators.
 public:
-    bool load(std::string const & path) {
-        if (!isReady()) {
-            return false;
-        }
-
-        if (luaL_loadfile(this->_machine, path.c_str()) != 0) {
-            // maybe LUA_ERRFILE
-            return false;
-        }
-        lua_pcall(this->_machine, 0, 0, 0);
-        return true;
-    }
+    bool load(std::string const & path);
 
 // Stack operators.
 public:
-    int getStackSize() const {
-        return lua_gettop(this->_machine);
-    }
+    int getStackSize() const;
 
-    void pop(int size) {
-        lua_pop(this->_machine, size);
-    }
+public:
+    void pop(int size);
 
-    void push() {
-        lua_pushnil(this->_machine);
-    }
-
-    void push(bool value) {
-        lua_pushboolean(this->_machine, value);
-    }
-
-    void push(int value) {
-        lua_pushinteger(this->_machine, value);
-    }
-
-    void push(double value) {
-        lua_pushnumber(this->_machine, value);
-    }
-
-    void push(std::string const & value) {
-        lua_pushstring(this->_machine, value.c_str());
-    }
+public:
+    void push();
+    void push(bool value);
+    void push(int value);
+    void push(double value);
+    void push(std::string const & value);
 
 // Variables.
 public:
-    std::string getLuaString(std::string const & name) {
-        lua_pushstring(this->_machine, name.c_str());
-        lua_rawget(this->_machine, LUA_REGISTRYINDEX);
-
-        if (lua_isstring(this->_machine, -1)) {
-            assert(false);
-        }
-
-        std::string result = lua_tostring(this->_machine, -1);
-        lua_pop(this->_machine, 1);
-        return result;
-    }
+    std::string getLuaString(std::string const & name);
 };
 
 } // namespace script
