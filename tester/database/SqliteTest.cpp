@@ -1,20 +1,21 @@
 /**
- * @file   SqliteContextTest.cpp
- * @brief  SqliteContext class tester.
+ * @file   SqliteTest.cpp
+ * @brief  Sqlite class tester.
  * @author zer0
  * @date   2016-04-29
+ * @date   2016-07-06 (Rename: SqliteContextTest -> SqliteTest)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/database/SqliteContext.hpp>
+#include <libtbag/database/Sqlite.hpp>
 
 using namespace libtbag;
 using namespace libtbag::database;
 
-TEST(SqliteContextTest, Default)
+TEST(SqliteTest, Default)
 {
     std::string const PATH = "__database_test_sqlite3.sqlite";
-    SqliteContext db;
+    Sqlite db;
 
     std::string const CREATE_TABLE =
             "CREATE TABLE IF NOT EXISTS test (id INT PRIMARY KEY, name CHAR(20));";
@@ -36,7 +37,7 @@ TEST(SqliteContextTest, Default)
     ASSERT_TRUE(db.execute(INSERT_ITEM2));
 
     using RowType = std::tuple<int, std::string>;
-    auto callback = [](SqliteContext::Statement const & statement) -> RowType {
+    auto callback = [](Sqlite::Statement const & statement) -> RowType {
         return RowType(statement.getInt(0), statement.getString(1));
     };
     auto result = db.prepare<RowType>(SELECT_ITEM, callback);
