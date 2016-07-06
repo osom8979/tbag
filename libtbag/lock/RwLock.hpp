@@ -15,9 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Exception.hpp>
 
-#include <uv.h>
+#include <exception>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,17 +39,20 @@ public:
     static constexpr char const * const MESSAGE = "Unsupported RwLock exception.";
 
 public:
-    UnsupportedRwLockException(int error_code) : _error_code(error_code) {
-        __EMPTY_BLOCK__
+    UnsupportedRwLockException(int error_code) : _error_code(error_code)
+    {
+        // EMPTY.
     }
 
 public:
-    inline int getErrorCode() const noexcept {
+    inline int getErrorCode() const noexcept
+    {
         return _error_code;
     }
 
 public:
-    virtual const char * what() const noexcept override {
+    virtual const char * what() const noexcept override
+    {
         return MESSAGE;
     }
 };
@@ -66,51 +68,26 @@ public:
  */
 class RwLock : public Noncopyable
 {
+public:
+    using FakeRwLock = void;
+
 private:
     bool _is_init;
-    uv_rwlock_t _lock;
+    FakeRwLock * _lock;
 
 public:
-    RwLock() throw (UnsupportedRwLockException) : _is_init(false) {
-        int error_code = uv_rwlock_init(&_lock);
-        if (error_code == 0) {
-            _is_init = true;
-        } else {
-            throw UnsupportedRwLockException(error_code);
-        }
-    }
-
-    ~RwLock() {
-        if (_is_init) {
-            uv_rwlock_destroy(&_lock);
-        }
-    }
+    RwLock() throw (UnsupportedRwLockException);
+    ~RwLock();
 
 public:
-    void readLock() {
-        uv_rwlock_rdlock(&_lock);
-    }
-
-    bool tryReadLock() {
-        return (uv_rwlock_tryrdlock(&_lock) == 0 ? true : false);
-    }
-
-    void readUnlock() {
-        uv_rwlock_rdunlock(&_lock);
-    }
+    void readLock();
+    bool tryReadLock();
+    void readUnlock();
 
 public:
-    void writeLock() {
-        uv_rwlock_wrlock(&_lock);
-    }
-
-    bool tryWriteLock() {
-        return (uv_rwlock_trywrlock(&_lock) == 0 ? true : false);
-    }
-
-    void writeUnlock() {
-        uv_rwlock_wrunlock(&_lock);
-    }
+    void writeLock();
+    bool tryWriteLock();
+    void writeUnlock();
 };
 
 /**
@@ -125,13 +102,8 @@ private:
     RwLock & _lock;
 
 public:
-    ReadLockGuard(RwLock & lock) : _lock(lock) {
-        _lock.readLock();
-    }
-
-    ~ReadLockGuard() {
-        _lock.readUnlock();
-    }
+    ReadLockGuard(RwLock & lock);
+    ~ReadLockGuard();
 };
 
 /**
@@ -146,13 +118,8 @@ private:
     RwLock & _lock;
 
 public:
-    WriteLockGuard(RwLock & lock) : _lock(lock) {
-        _lock.writeLock();
-    }
-
-    ~WriteLockGuard() {
-        _lock.writeUnlock();
-    }
+    WriteLockGuard(RwLock & lock);
+    ~WriteLockGuard();
 };
 
 } // namespace lock
