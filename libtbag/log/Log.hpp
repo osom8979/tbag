@@ -38,6 +38,11 @@ constexpr bool isAsynchronousLogging() noexcept
     return true;
 }
 
+constexpr bool isMultithreadLogging() noexcept
+{
+    return false;
+}
+
 /**
  * Log class prototype.
  *
@@ -114,7 +119,7 @@ public:
     }
 
     void initConsole() {
-        if (isAsynchronousLogging()) {
+        if (isMultithreadLogging()) {
             this->_console = spdlog::stdout_logger_mt(DEFAULT_LOGGER_OF_CONSOLE);
         } else {
             this->_console = spdlog::stdout_logger_st(DEFAULT_LOGGER_OF_CONSOLE);
@@ -122,10 +127,20 @@ public:
     }
 
     void initFile(std::string const & path) {
-        if (isAsynchronousLogging()) {
+        if (isMultithreadLogging()) {
             this->_file = spdlog::daily_logger_mt(DEFAULT_LOGGER_OF_FILE, path, 0, 0);
         } else {
             this->_file = spdlog::daily_logger_st(DEFAULT_LOGGER_OF_FILE, path, 0, 0);
+        }
+    }
+
+    /**
+     * @warning
+     *  queue size must be power of 2.
+     */
+    void setAsyncMode(std::size_t queue_size = 8192) {
+        if (isAsynchronousLogging()) {
+            spdlog::set_async_mode(queue_size);
         }
     }
 
