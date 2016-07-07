@@ -5,8 +5,8 @@
  * @date   2016-07-03
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_TEXT_CONVERT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_TEXT_CONVERT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOCALE_CONVERT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOCALE_CONVERT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -22,7 +22,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace text    {
+namespace locale  {
 namespace convert {
 
 /**
@@ -70,11 +70,11 @@ std::string convertToUtf8(std::string const & from_string
                         , std::string const & from_charset) throw (ConvertException);
 
 } // namespace convert
-} // namespace text
+} // namespace locale
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_TEXT_CONVERT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOCALE_CONVERT_HPP__
 

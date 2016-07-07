@@ -6,11 +6,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/text/Convert.hpp>
+#include <libtbag/locale/Convert.hpp>
 
 using namespace libtbag;
-using namespace libtbag::text;
-using namespace libtbag::text::convert;
+using namespace libtbag::locale;
+using namespace libtbag::locale::convert;
 
 TEST(ConvertTest, Default)
 {

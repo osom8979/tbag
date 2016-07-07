@@ -5,7 +5,7 @@
  * @date   2016-07-06
  */
 
-#include <libtbag/text/Convert.hpp>
+#include <libtbag/locale/Convert.hpp>
 
 #include <cassert>
 
@@ -17,7 +17,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace text    {
+namespace locale  {
 namespace convert {
 
 std::vector<std::string> getAvailableConverterNames()
@@ -106,7 +106,7 @@ std::string convertToUtf8(std::string const & from_string
 }
 
 } // namespace convert
-} // namespace text
+} // namespace locale
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
