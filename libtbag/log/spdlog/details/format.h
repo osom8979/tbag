@@ -4492,9 +4492,9 @@ operator"" _a(const wchar_t *s, std::size_t)
 # pragma clang diagnostic pop
 #endif
 
-//#ifdef FMT_HEADER_ONLY
-//# include "format.cc"
-//#endif
+#ifdef FMT_HEADER_ONLY
+# include "format.cc.h"
+#endif
 
 #endif  // FMT_FORMAT_H_
 
