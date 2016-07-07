@@ -26,7 +26,6 @@ tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 #tbag_config__add_third ("$ENV{TPARTY_HOME}/local")
 
 ## Configure settings.
-tbag_config__default_generate_doxyfile ()
 tbag_config__default_generate_c_header ()
 
 ## Thread settings.
@@ -38,7 +37,14 @@ tbag_config__set_option (USE_DOXYGEN)
 
 if (USE_DOXYGEN)
     find_package (TbagDoxygen)
-    tbag_doxygen ()
+    if (DOXYGEN_FOUND)
+        set (DOXYFILE_INPUT   "${PROJECT_SOURCE_DIR}/template/Doxyfile.in")
+        set (DOXYFILE_OUTPUT  "${PROJECT_BINARY_DIR}/Doxyfile")
+
+        configure_file ("${DOXYFILE_INPUT}" "${DOXYFILE_OUTPUT}")
+        tbag_doxygen__generate_index ("${PROJECT_BINARY_DIR}/doxygen.html")
+        tbag_doxygen__target ("${DOXYFILE_OUTPUT}" "${PROJECT_BINARY_DIR}")
+    endif ()
 endif ()
 
 ## Run project.

@@ -1,0 +1,24 @@
+DOXYFILE_ENCODING       = UTF-8
+PROJECT_NAME            = "${MAIN_NAME}"
+PROJECT_NUMBER          = "${VERSION}"
+PROJECT_BRIEF           = "${MAIN_BRIEF}"
+OUTPUT_DIRECTORY        = "${PROJECT_BINARY_DIR}"
+OUTPUT_LANGUAGE         = Korean-en
+ALIASES                 = translate{2}="<dl class='section remarks'><dt>Translate-\1</dt><dd>\2</dd></dl>"
+MARKDOWN_SUPPORT        = NO
+WARN_IF_UNDOCUMENTED    = NO
+INPUT                   = "${PROJECT_SOURCE_DIR}/libtbag"
+FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ *.d *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.inc
+RECURSIVE               = YES
+EXCLUDE_PATTERNS        = */spdlog/*
+HTML_TIMESTAMP          = YES
+HTML_OUTPUT             = doxygen
+GENERATE_LATEX          = NO
+LATEX_OUTPUT            = latex
+MACRO_EXPANSION         = YES
+INCLUDE_PATH            = "${PROJECT_SOURCE_DIR}"
+INCLUDE_FILE_PATTERNS   = *.h *.hh *.hxx *.hpp *.h++
+USE_MATHJAX             = YES
+MATHJAX_RELPATH         = https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+QUIET                   = YES
+
