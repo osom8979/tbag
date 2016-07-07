@@ -9,7 +9,7 @@
 #  Tbag_LIBRARIES
 
 set (__headers "libtbag/config.h")
-set (__libs    "")
+set (__libs    "tbag")
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")

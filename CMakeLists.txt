@@ -54,6 +54,11 @@ tbag_project ()
 tbag_config__install_cxx_headers (${MAIN_NAME})
 tbag_config__soversion (tbag)
 
+## libtbag-cmake build packages.
+install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
+         DESTINATION "share/libtbag"
+         FILES_MATCHING REGEX ".*\\.[Cc][Mm][Aa][Kk][Ee]")
+
 ## Print result messages.
 tbag_preview ()
 
