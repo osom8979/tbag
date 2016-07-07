@@ -12,7 +12,6 @@ list (APPEND TBAG_PROJECT_LDFLAGS ${CMAKE_THREAD_LIBS_INIT})
 
 include (${PROJECT_SOURCE_DIR}/dep/icu.cmake)
 include (${PROJECT_SOURCE_DIR}/dep/lua.cmake)
-include (${PROJECT_SOURCE_DIR}/dep/spdlog.cmake)
 include (${PROJECT_SOURCE_DIR}/dep/sqlite3.cmake)
 include (${PROJECT_SOURCE_DIR}/dep/tinyxml2.cmake)
 include (${PROJECT_SOURCE_DIR}/dep/uv.cmake)
@@ -25,7 +24,6 @@ list (APPEND TBAG_PROJECT_DEPENDENCIES  ${TBAG_DEP_ICU_NAME}
 
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_ICU_INCLUDE_DIRS}
                                         ${TBAG_DEP_LUA_INCLUDE_DIRS}
-                                        ${TBAG_DEP_SPDLOG_INCLUDE_DIRS}
                                         ${TBAG_DEP_SQLITE3_INCLUDE_DIRS}
                                         ${TBAG_DEP_TINYXML2_INCLUDE_DIRS}
                                         ${TBAG_DEP_UV_INCLUDE_DIRS})
