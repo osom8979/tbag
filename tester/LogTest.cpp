@@ -6,9 +6,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/Log.hpp>
+#include <libtbag/log/Log.hpp>
 
 using namespace libtbag;
+using namespace libtbag::log;
 
 TEST(LogStaticTest, CoverageOnly)
 {

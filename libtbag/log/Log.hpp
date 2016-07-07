@@ -5,8 +5,8 @@
  * @date   2016-04-04
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -21,11 +21,13 @@
 
 #define SPDLOG_TRACE_ON // [DEV-ONLY] TRACE LOGGING.
 #define SPDLOG_DEBUG_ON // [DEV-ONLY] DEBUG LOGGING.
-#include <spdlog/spdlog.h>
+#include <libtbag/log/spdlog/spdlog.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+namespace log {
 
 constexpr char const * const DEFAULT_LOGGER_OF_CONSOLE = "_C";
 constexpr char const * const DEFAULT_LOGGER_OF_FILE = "_F";
@@ -162,6 +164,8 @@ public:
     __SPDLOG_LOGGING_IMPLEMENT(emerg   );
 };
 
+} // namespace log
+
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
@@ -194,5 +198,5 @@ NAMESPACE_LIBTBAG_CLOSE
 # define _DIRECT_DEBUG_VIEW_LOG(msg)
 #endif
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__
 

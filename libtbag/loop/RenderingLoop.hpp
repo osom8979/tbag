@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Log.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 
