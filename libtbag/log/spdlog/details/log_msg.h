@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <spdlog/common.h>
-#include <spdlog/details/format.h>
+#include <libtbag/log/spdlog/common.h>
+#include <libtbag/log/spdlog/details/format.h>
 
 #include <string>
 #include <utility>

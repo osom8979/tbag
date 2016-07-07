@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <spdlog/sinks/base_sink.h>
-#include <spdlog/common.h>
+#include <libtbag/log/spdlog/sinks/base_sink.h>
+#include <libtbag/log/spdlog/common.h>
 
 #include <string>
 #include <map>

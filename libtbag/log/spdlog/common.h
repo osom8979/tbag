@@ -16,7 +16,7 @@
 #include <locale>
 #endif
 
-#include <spdlog/details/null_mutex.h>
+#include <libtbag/log/spdlog/details/null_mutex.h>
 
 //visual studio upto 2013 does not support noexcept nor constexpr
 #if defined(_MSC_VER) && (_MSC_VER < 1900)

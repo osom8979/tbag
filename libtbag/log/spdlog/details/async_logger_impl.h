@@ -8,8 +8,8 @@
 // Async Logger implementation
 // Use an async_sink (queue per logger) to perform the logging in a worker thread
 
-#include <spdlog/details/async_log_helper.h>
-#include <spdlog/async_logger.h>
+#include <libtbag/log/spdlog/details/async_log_helper.h>
+#include <libtbag/log/spdlog/async_logger.h>
 
 #include <string>
 #include <functional>

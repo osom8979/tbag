@@ -10,10 +10,10 @@
 // If user requests a non existing logger, nullptr will be returned
 // This class is thread safe
 
-#include <spdlog/details/null_mutex.h>
-#include <spdlog/logger.h>
-#include <spdlog/async_logger.h>
-#include <spdlog/common.h>
+#include <libtbag/log/spdlog/details/null_mutex.h>
+#include <libtbag/log/spdlog/logger.h>
+#include <libtbag/log/spdlog/async_logger.h>
+#include <libtbag/log/spdlog/common.h>
 
 #include <chrono>
 #include <functional>

@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include <spdlog/tweakme.h>
-#include <spdlog/common.h>
-#include <spdlog/logger.h>
+#include <libtbag/log/spdlog/tweakme.h>
+#include <libtbag/log/spdlog/common.h>
+#include <libtbag/log/spdlog/logger.h>
 
 #include <memory>
 #include <functional>
@@ -150,4 +150,4 @@ void drop_all();
 }
 
 
-#include <spdlog/details/spdlog_impl.h>
+#include <libtbag/log/spdlog/details/spdlog_impl.h>
