@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/dom/Resource.hpp>
-#include <tinyxml2.h>
+#include <libtbag/dom/tinyxml2/tinyxml2.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
