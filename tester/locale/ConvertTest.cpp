@@ -10,7 +10,6 @@
 
 using namespace libtbag;
 using namespace libtbag::locale;
-using namespace libtbag::locale::convert;
 
 TEST(ConvertTest, Default)
 {

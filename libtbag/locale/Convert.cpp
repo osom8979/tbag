@@ -18,7 +18,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace locale  {
-namespace convert {
 
 std::vector<std::string> getAvailableConverterNames()
 {
@@ -105,7 +104,6 @@ std::string convertToUtf8(std::string const & from_string
     return result;
 }
 
-} // namespace convert
 } // namespace locale
 
 // --------------------

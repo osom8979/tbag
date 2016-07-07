@@ -23,7 +23,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace locale  {
-namespace convert {
 
 /**
  * Convert exception class.
@@ -69,7 +68,6 @@ std::string convertFromUtf8(std::string const & utf8
 std::string convertToUtf8(std::string const & from_string
                         , std::string const & from_charset) throw (ConvertException);
 
-} // namespace convert
 } // namespace locale
 
 // --------------------
