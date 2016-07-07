@@ -1,5 +1,5 @@
 /**
- * @file   TickLoopTest.cpp
+ * @file   TickLoop.hpp
  * @brief  TickLoop class tester.
  * @author zer0
  * @date   2016-04-29
