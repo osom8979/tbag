@@ -17,7 +17,7 @@
 */
 #ifndef _SQLITE3EXT_H_
 #define _SQLITE3EXT_H_
-#include "sqlite3.h"
+#include <libtbag/database/sqlite3/sqlite3.h>
 
 typedef struct sqlite3_api_routines sqlite3_api_routines;
 
