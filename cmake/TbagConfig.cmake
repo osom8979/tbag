@@ -101,6 +101,22 @@ macro (tbag_config__set_library_prefix __value)
     set (${__value} "${${__value}}" CACHE PATH "Library prefix directory.")
 endmacro ()
 
+#/// CMake library option.
+#///
+#/// @param __value        [in] value name.
+#/// @param __package_name [in] parameter of find_package.
+#/// @param __found_value  [in] found value. (e.g. XXX_FOUND)
+macro (tbag_config__set_library_option __value __package_name __found_value)
+    if ((DEFINED ${__value} AND ${__value}) OR (NOT DEFINED ${__value}))
+        find_package (${__package_name})
+        set (${__value} ${${__found_value}})
+    else ()
+        set (${__value} OFF)
+    endif ()
+
+    option (${__value} "Use the ${__package_name} library if on." ${${__value}})
+endmacro ()
+
 #/// CMake option value.
 #///
 #/// @param __value [in] value name.

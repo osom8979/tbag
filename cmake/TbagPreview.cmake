@@ -78,8 +78,11 @@ function (tbag_preview)
     tbag_preview__print_variable (CMAKE_BUILD_TOOL)
     tbag_preview__print ("")
 
-    tbag_preview__print_variable (CMAKE_CXX_COMPILER_ID)
+    tbag_preview__print_variable (CMAKE_C_COMPILER_ID)
     tbag_preview__print_variable (CMAKE_C_COMPILER)
+    tbag_preview__print ("")
+
+    tbag_preview__print_variable (CMAKE_CXX_COMPILER_ID)
     tbag_preview__print_variable (CMAKE_CXX_COMPILER)
     tbag_preview__print ("")
 
@@ -102,9 +105,11 @@ function (tbag_preview)
     tbag_preview__print ("RELEASE VERSION: ${VERSION_RELEASE}")
     tbag_preview__print ("")
 
-    #tbag_preview__print_variable (CMAKE_C_FLAGS)
-    #tbag_preview__print_variable (CMAKE_C_FLAGS_DEBUG)
-    #tbag_preview__print_variable (CMAKE_C_FLAGS_RELEASE)
+    tbag_preview__print_variable (CMAKE_C_FLAGS)
+    tbag_preview__print_variable (CMAKE_C_FLAGS_DEBUG)
+    tbag_preview__print_variable (CMAKE_C_FLAGS_RELEASE)
+    tbag_preview__print ("")
+
     tbag_preview__print_variable (CMAKE_CXX_FLAGS)
     tbag_preview__print_variable (CMAKE_CXX_FLAGS_DEBUG)
     tbag_preview__print_variable (CMAKE_CXX_FLAGS_RELEASE)
