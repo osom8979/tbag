@@ -1,0 +1,15 @@
+#ifndef __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_EX_H__
+#define __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_EX_H__
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#pragma once
+#endif
+
+/* Define to 1 if you have the <syscall.h> header file. */
+#cmakedefine HAVE_SYSCALL_H
+
+/* Define to 1 if you have the <sys/syscall.h> header file. */
+#cmakedefine HAVE_SYS_SYSCALL_H
+
+#endif /* __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_EX_H__ */
+

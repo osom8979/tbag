@@ -204,4 +204,5 @@ fabric.properties
 /Doxyfile
 /**/prefix.h
 /**/config.h
+/**/config-ex.h
 

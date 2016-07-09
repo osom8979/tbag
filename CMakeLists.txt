@@ -47,6 +47,18 @@ if (USE_DOXYGEN)
     endif ()
 endif ()
 
+## Header checker.
+include (CheckIncludeFile)
+## - ${CMAKE_REQUIRED_FLAGS}: string of compile command line flags
+## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
+## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
+check_include_file (sys/syscall.h  HAVE_SYS_SYSCALL_H)
+check_include_file (syscall.h      HAVE_SYSCALL_H)
+
+set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
+set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")
+configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
+
 ## Run project.
 tbag_project ()
 
