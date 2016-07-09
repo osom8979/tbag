@@ -2,7 +2,7 @@
  * @file   RawTest.cpp
  * @brief  Raw logging tester.
  * @author zer0
- * @date   2016-04-04
+ * @date   2016-07-09
  */
 
 #include <gtest/gtest.h>

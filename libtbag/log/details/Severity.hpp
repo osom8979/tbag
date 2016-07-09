@@ -52,7 +52,7 @@ int const LOG_SEVERITY_DEBUG         = SEVERITY_TABLE[7].level;
 int const LOG_SEVERITY_OFF           = SEVERITY_TABLE[8].level;
 
 
-inline const char * const getLogString(int level)
+inline const char * const getLogString(int level) noexcept
 {
     if (0 <= COMPARE_AND(level) < LOG_SEVERITY_COUNT) {
         return SEVERITY_TABLE[level].text;
