@@ -25,6 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tmp {
 
 template <typename BaseType, bool IsUnsigned> struct BitFlagImplement;
+template <typename BaseType> struct BitFlag;
 
 template <typename BaseType>
 struct BitFlagImplement<BaseType, true>
@@ -48,12 +49,50 @@ struct BitFlagImplement<BaseType, false>
     }
 };
 
+/**
+ * @see <https://en.wikipedia.org/wiki/Arithmetic_shift>
+ * @see <https://en.wikipedia.org/wiki/Bitwise_operation#Arithmetic_shift>
+ */
+constexpr bool isArithmeticShift() noexcept
+{
+    using TestBitFlag = BitFlagImplement<char, false>;
+    return ((TestBitFlag::max() >> 1) & TestBitFlag::max());
+}
+
+/**
+ * @see <https://en.wikipedia.org/wiki/Bitwise_operation#Logical_shift>
+ * @see <https://en.wikipedia.org/wiki/Logical_shift>
+ */
+constexpr bool isLogicalShift() noexcept
+{
+    return !isArithmeticShift();
+}
+
 template <typename BaseType>
 struct BitFlag
 {
+    using Implement = BitFlagImplement<BaseType, std::is_unsigned<BaseType>::value>;
+
     static constexpr BaseType max() noexcept
     {
-        return BitFlagImplement<BaseType, std::is_unsigned<BaseType>::value>::max();
+        return Implement::max();
+    }
+
+    static inline BaseType getRightLogicalShift(BaseType flag) noexcept
+    {
+        if (isArithmeticShift() && std::is_signed<BaseType>::value && (flag & max())) {
+            return (flag >> 1) ^ max();
+        }
+        return flag >> 1;
+    }
+
+    static BaseType findHighBit(BaseType flag) noexcept
+    {
+        BaseType mask = max();
+        while (mask != 0 && !(flag & mask)) {
+            mask = getRightLogicalShift(mask);
+        }
+        return flag & mask;
     }
 };
 
