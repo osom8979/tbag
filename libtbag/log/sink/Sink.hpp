@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/log/details/MsgPacket.hpp>
+#include <libtbag/lock/FakeLock.hpp>
+
 #include <mutex>
 
 // -------------------
@@ -30,31 +32,48 @@ namespace sink {
  * @author zer0
  * @date   2016-07-08
  */
-template <typename MutexType, typename CharType = char>
+template <typename MutexType = lock::FakeLock, typename CharType = char>
 class BaseSink
 {
 public:
-    using Message = details::BaseMsgPacket<CharType>;
+    using Value   = CharType;
+    using Mutex   = MutexType;
+    using Message = details::BaseMsgPacket<Value>;
+
+private:
+    Mutex _mutex;
+    bool  _force_flush;
 
 public:
-    constexpr BaseSink() = default;
-    virtual ~BaseSink() = default;
+    BaseSink() : _mutex(), _force_flush(false) {}
+    BaseSink(bool force_flush) : _mutex(), _force_flush(force_flush) {}
+    virtual ~BaseSink() {}
 
 protected:
-    virtual void logReal(Message const & msg) = 0;
+    virtual void writeReal(Message const & msg) = 0;
     virtual void flushReal() = 0;
 
 public:
-    void log(Message const & msg)
+    void write(Message const & msg)
     {
-        std::lock_guard<MutexType> guard;
-        logReal(msg);
+        std::lock_guard<Mutex> guard(_mutex);
+        writeReal(msg);
+        if (_force_flush) {
+            flushReal();
+        }
     }
 
     void flush()
     {
-        std::lock_guard<MutexType> guard;
+        std::lock_guard<Mutex> guard(_mutex);
         flushReal();
+    }
+
+public:
+    template <typename ... Args>
+    constexpr inline static Message makeMessage(Args && ... args) noexcept
+    {
+        return Message(std::forward<Args>(args) ...);
     }
 };
 

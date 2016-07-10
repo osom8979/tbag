@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/log/details/Severity.hpp>
+#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

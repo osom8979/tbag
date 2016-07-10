@@ -19,6 +19,8 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/log/details/Severity.hpp>
+
 #include <string>
 #include <algorithm>
 
@@ -48,20 +50,32 @@ public:
             , "String::value_type must be the same type as ValueType");
 
 private:
-    String _message;
+    Severity _severity;
+    String   _message;
 
 public:
-    BaseMsgPacket() : _message()
+    BaseMsgPacket() : _severity(), _message()
     {
         // EMPTY.
     }
 
-    BaseMsgPacket(BaseMsgPacket const & obj)
+    BaseMsgPacket(String const & message) : _severity(), _message(message)
+    {
+        // EMPTY.
+    }
+
+    BaseMsgPacket(Severity const & severity, String const & message)
+            : _severity(severity), _message(message)
+    {
+        // EMPTY.
+    }
+
+    BaseMsgPacket(BaseMsgPacket const & obj) : BaseMsgPacket()
     {
         this->copy(obj);
     }
 
-    BaseMsgPacket(BaseMsgPacket && obj)
+    BaseMsgPacket(BaseMsgPacket && obj) : BaseMsgPacket()
     {
         this->swap(obj);
     }
@@ -83,6 +97,12 @@ public:
         return *this;
     }
 
+    BaseMsgPacket & operator =(String const & message)
+    {
+        _message = message;
+        return *this;
+    }
+
     String operator ()() const
     {
         return _message;
@@ -92,6 +112,7 @@ public:
     BaseMsgPacket & copy(BaseMsgPacket const & obj)
     {
         if (this != &obj) {
+            _severity = obj._severity;
             _message = obj._message;
         }
         return *this;
@@ -100,8 +121,25 @@ public:
     void swap(BaseMsgPacket & obj)
     {
         if (this != &obj) {
+            std::swap(_severity, obj._severity);
             std::swap(_message, obj._message);
         }
+    }
+
+public:
+    inline String getString() const noexcept
+    {
+        return _message;
+    }
+
+    inline ValueType const * getStringPointer() const noexcept
+    {
+        return _message.c_str();
+    }
+
+    inline std::size_t getStringSize() const noexcept
+    {
+        return _message.size();
     }
 };
 
