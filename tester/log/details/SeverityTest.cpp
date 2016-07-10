@@ -15,8 +15,19 @@ using namespace libtbag::log::details;
 TEST(SeverityTest, Default)
 {
     ASSERT_EQ(LOG_SEVERITY_OFF + 1, LOG_SEVERITY_COUNT);
-    ASSERT_STREQ(getLogString(LOG_SEVERITY_EMERGENCY), SEVERITY_TABLE[LOG_SEVERITY_EMERGENCY].text);
+    ASSERT_STREQ(getLogString(LOG_SEVERITY_EMERGENCY), DEFAULT_SEVERITY[LOG_SEVERITY_EMERGENCY].text);
     ASSERT_STREQ(getLogString(-1), UNKNOWN_LOG_SEVERITY_STRING);
     ASSERT_STREQ(getLogString(LOG_SEVERITY_OFF + 1), UNKNOWN_LOG_SEVERITY_STRING);
 }
 
+TEST(SeverityTest, Severity)
+{
+    Severity s1 = 0b1;
+    Severity s2 = s1;
+
+    s2 ^= s1;
+    ASSERT_EQ(s2.getFlag(), 0b0);
+
+    s1 = s1 | s2;
+    ASSERT_EQ(s1.getFlag(), 0b1);
+}
