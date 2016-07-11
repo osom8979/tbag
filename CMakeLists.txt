@@ -68,8 +68,7 @@ tbag_config__soversion (tbag)
 
 ## libtbag-cmake build packages.
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
-         DESTINATION "share/libtbag"
-         FILES_MATCHING REGEX ".*\\.[Cc][Mm][Aa][Kk][Ee]")
+         DESTINATION "share/libtbag")
 
 ## Print result messages.
 tbag_preview ()
