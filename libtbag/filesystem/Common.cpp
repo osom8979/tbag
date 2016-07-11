@@ -15,6 +15,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace common     {
 
+static_assert(std::is_same<int, uv_file>::value, "int must be the same type as uv_file");
+
 std::string getRepresentationDirectory(DirFunction func)
 {
     std::size_t path_length = MAX_PATH_BUFFER_SIZE;
@@ -122,10 +124,12 @@ bool createDir(std::string const & path, int mode)
     int error_code = uv_fs_mkdir(nullptr, &request, path.c_str(), mode, nullptr);
     uv_fs_req_cleanup(&request);
 
+    // EXISTS DIRECTORY: (error_code == UV_EEXIST)
     return (error_code == 0 ? true : false);
 }
 
-bool removeDir(std::string const & path) {
+bool removeDir(std::string const & path)
+{
     uv_fs_t request;
     int error_code = uv_fs_rmdir(nullptr, &request, path.c_str(), nullptr);
     uv_fs_req_cleanup(&request);
@@ -145,6 +149,34 @@ bool rename(std::string const & from, std::string const & to)
 bool remove(std::string const & path)
 {
     return (::remove(path.c_str()) == 0 ? true : false);
+}
+
+int open(std::string const & path, int flags, int mode)
+{
+
+    uv_fs_t request;
+    int result = uv_fs_open(nullptr, &request, path.c_str(), flags, mode, nullptr);
+    uv_fs_req_cleanup(&request);
+    return result;
+}
+
+bool close(int fd)
+{
+    uv_fs_t request;
+    int result = uv_fs_close(nullptr, &request, fd, nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return (result == 0 ? true : false);
+}
+
+int write(int fd, char * buffer, std::size_t buffer_size, int64_t offset)
+{
+    uv_fs_t request;
+    uv_buf_t buf = { buffer, buffer_size };
+    int result = uv_fs_write(nullptr, &request, static_cast<uv_file>(fd), &buf, 1, offset, nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return result;
 }
 
 } // namespace common

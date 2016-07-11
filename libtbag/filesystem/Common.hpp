@@ -139,6 +139,30 @@ bool removeDir(std::string const & path);
 bool rename(std::string const & from, std::string const & to);
 bool remove(std::string const & path);
 
+//
+/**
+ * open, creat - open and possibly create a file or device.
+ *
+ * @return
+ *  return the new file descriptor, or -1 if an error occurred.
+ *
+ * @warning
+ *  On Windows libuv uses CreateFileW and thus the file is always opened in binary mode. @n
+ *  Because of this the O_BINARY and O_TEXT flags are not supported.
+ *
+ * @see <http://docs.libuv.org/en/v1.x/fs.html>
+ */
+int open(std::string const & path, int flags, int mode);
+
+
+/**
+ * @return
+ *  returns zero on success. On error, -1 is returned, and errno is set appropriately.
+ */
+bool close(int fd);
+
+int write(int fd, char * buffer, std::size_t buffer_size, int64_t offset = -1);
+
 } // namespace common
 } // namespace filesystem
 
