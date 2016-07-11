@@ -49,6 +49,13 @@ TEST(AssetTest, insertDir_getDir)
     ASSERT_EQ(value, asset.getDirString(key));
 }
 
+TEST(AssetTest, getDirs)
+{
+    Asset asset = Asset(Asset::default_setting());
+    auto dirs = asset.getDirs();
+    ASSERT_EQ(dirs.size(), 2U);
+}
+
 class AssetFixtureTest : public ::testing::Test
 {
 public:

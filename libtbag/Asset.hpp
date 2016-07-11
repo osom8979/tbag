@@ -43,6 +43,7 @@ public:
     using String    = std::basic_string<ValueType>;
     using Path      = ::libtbag::filesystem::Path;
     using PathMap   = std::map<String, Path>;
+    using Pair      = typename PathMap::value_type;
     using Regex     = std::basic_regex<ValueType>;
 
     static_assert(std::is_same<ValueType, char>::value
@@ -132,6 +133,10 @@ public:
 
     String getDirString(String const & key) const {
         return getDirPath(key).getString();
+    }
+
+    std::vector<Pair> getDirs() const {
+        return std::vector<Pair>(_dirs.begin(), _dirs.end());
     }
 
     /**
