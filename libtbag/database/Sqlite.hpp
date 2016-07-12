@@ -81,7 +81,7 @@ public:
 
     public:
         int getByte(int index) const;
-        int getDouble(int index) const;
+        double getDouble(int index) const;
         int getInt(int index) const;
         str getString(int index) const;
     };

@@ -59,7 +59,7 @@ int Sqlite::Statement::getByte(int index) const
     return sqlite3_column_bytes(sqlite3_stmt_cast(_statement), index);
 }
 
-int Sqlite::Statement::getDouble(int index) const
+double Sqlite::Statement::getDouble(int index) const
 {
     return sqlite3_column_double(sqlite3_stmt_cast(_statement), index);
 }
