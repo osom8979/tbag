@@ -153,7 +153,6 @@ bool remove(std::string const & path)
 
 int open(std::string const & path, int flags, int mode)
 {
-
     uv_fs_t request;
     int result = uv_fs_open(nullptr, &request, path.c_str(), flags, mode, nullptr);
     uv_fs_req_cleanup(&request);
@@ -169,11 +168,21 @@ bool close(int fd)
     return (result == 0 ? true : false);
 }
 
-int write(int fd, char * buffer, std::size_t buffer_size, int64_t offset)
+int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset)
 {
     uv_fs_t request;
-    uv_buf_t buf = { buffer, buffer_size };
+    uv_buf_t const buf = { const_cast<char*>(buffer), buffer_size };
     int result = uv_fs_write(nullptr, &request, static_cast<uv_file>(fd), &buf, 1, offset, nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return result;
+}
+
+int read(int fd, char * buffer, std::size_t buffer_size, int64_t offset)
+{
+    uv_fs_t request;
+    uv_buf_t const buf = { buffer, buffer_size };
+    int result = uv_fs_read(nullptr, &request, static_cast<uv_file>(fd), &buf, 1, offset, nullptr);
     uv_fs_req_cleanup(&request);
 
     return result;

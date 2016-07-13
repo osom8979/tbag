@@ -114,14 +114,43 @@ uint64_t getPermission(std::string const & path);
  * @{
  */
 
-uint64_t const FILE_TYPE_S_IFMT   = 0170000; ///< type of file.
-uint64_t const FILE_TYPE_S_IFIFO  = 0010000; ///< named pipe (fifo).
-uint64_t const FILE_TYPE_S_IFCHR  = 0020000; ///< character special.
-uint64_t const FILE_TYPE_S_IFDIR  = 0040000; ///< directory.
-uint64_t const FILE_TYPE_S_IFBLK  = 0060000; ///< block special.
-uint64_t const FILE_TYPE_S_IFREG  = 0100000; ///< regular.
-uint64_t const FILE_TYPE_S_IFLNK  = 0120000; ///< symbolic link.
-uint64_t const FILE_TYPE_S_IFSOCK = 0140000; ///< socket.
+uint32_t const FILE_TYPE_S_IFMT   = 0170000; ///< type of file.
+uint32_t const FILE_TYPE_S_IFIFO  = 0010000; ///< named pipe (fifo).
+uint32_t const FILE_TYPE_S_IFCHR  = 0020000; ///< character special.
+uint32_t const FILE_TYPE_S_IFDIR  = 0040000; ///< directory.
+uint32_t const FILE_TYPE_S_IFBLK  = 0060000; ///< block special.
+uint32_t const FILE_TYPE_S_IFREG  = 0100000; ///< regular.
+uint32_t const FILE_TYPE_S_IFLNK  = 0120000; ///< symbolic link.
+uint32_t const FILE_TYPE_S_IFSOCK = 0140000; ///< socket.
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup __DOXYGEN_GROUP__FILE_MODE__ List of file mode flags.
+ * @remarks
+ *  include <fcntl.h>
+ * @{
+ */
+
+// Read, write, execute/search by owner.
+uint32_t const FILE_MODE_OWNER_ALL      = 0000700;  ///< [XSI] RWX mask for owner.
+uint32_t const FILE_MODE_OWNER_READ     = 0000400;  ///< [XSI] R for owner.
+uint32_t const FILE_MODE_OWNER_WRITE    = 0000200;  ///< [XSI] W for owner.
+uint32_t const FILE_MODE_OWNER_EXECUTE  = 0000100;  ///< [XSI] X for owner.
+
+// Read, write, execute/search by group.
+uint32_t const FILE_MODE_GROUP_ALL      = 0000070;  ///< [XSI] RWX mask for group.
+uint32_t const FILE_MODE_GROUP_READ     = 0000040;  ///< [XSI] R for group.
+uint32_t const FILE_MODE_GROUP_WRITE    = 0000020;  ///< [XSI] W for group.
+uint32_t const FILE_MODE_GROUP_EXECUTE  = 0000010;  ///< [XSI] X for group.
+
+// Read, write, execute/search by others.
+uint32_t const FILE_MODE_OTHER_ALL      = 0000007;  ///< [XSI] RWX mask for other.
+uint32_t const FILE_MODE_OTHER_READ     = 0000004;  ///< [XSI] R for other.
+uint32_t const FILE_MODE_OTHER_WRITE    = 0000002;  ///< [XSI] W for other.
+uint32_t const FILE_MODE_OTHER_EXECUTE  = 0000001;  ///< [XSI] X for other.
 
 /**
  * @}
@@ -139,7 +168,35 @@ bool removeDir(std::string const & path);
 bool rename(std::string const & from, std::string const & to);
 bool remove(std::string const & path);
 
-//
+/**
+ * @defgroup __DOXYGEN_GROUP__FILE_OPEN_FLAGS__ List of file open flags.
+ * @{
+ */
+
+uint32_t const FILE_OPEN_FLAG_READ_ONLY  = 0x0000;  ///< open for reading only.
+uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = 0x0001;  ///< open for writing only.
+uint32_t const FILE_OPEN_FLAG_READ_WRITE = 0x0002;  ///< open for reading and writing.
+uint32_t const FILE_OPEN_FLAG_ACCESS_ALL = 0x0003;  ///< mask for above modes.
+
+uint32_t const FILE_OPEN_NON_BLOCK      = 0x0004;  ///< no delay.
+uint32_t const FILE_OPEN_APPEND         = 0x0008;  ///< set append mode.
+
+// #if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+uint32_t const FILE_OPEN_SHARED_LOCK    = 0x0010;  ///< open with shared file lock.
+uint32_t const FILE_OPEN_EXCLUSIVE_LOCK = 0x0020;  ///< open with exclusive file lock.
+uint32_t const FILE_OPEN_ASYNC          = 0x0040;  ///< signal pgrp when data ready.
+uint32_t const FILE_OPEN_SYNC           = 0x0080;  ///< synch I/O file integrity. (source compatibility: do not use)
+uint32_t const FILE_OPEN_NOFOLLOW       = 0x0100;  ///< don't follow symlinks.
+// #endif // (_POSIX_C_SOURCE && !_DARWIN_C_SOURCE)
+
+uint32_t const FILE_OPEN_CREATE         = 0x0200;  ///< create if nonexistant.
+uint32_t const FILE_OPEN_TRUNCATE       = 0x0400;  ///< truncate to zero length.
+uint32_t const FILE_OPEN_EXISTS_ERROR   = 0x0800;  ///< error if already exists.
+
+/**
+ * @}
+ */
+
 /**
  * open, creat - open and possibly create a file or device.
  *
@@ -154,14 +211,14 @@ bool remove(std::string const & path);
  */
 int open(std::string const & path, int flags, int mode);
 
-
 /**
  * @return
  *  returns zero on success. On error, -1 is returned, and errno is set appropriately.
  */
 bool close(int fd);
 
-int write(int fd, char * buffer, std::size_t buffer_size, int64_t offset = -1);
+int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset = -1);
+int  read(int fd, char       * buffer, std::size_t buffer_size, int64_t offset = -1);
 
 } // namespace common
 } // namespace filesystem
