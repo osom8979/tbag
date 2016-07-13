@@ -216,20 +216,11 @@ NAMESPACE_LIBTBAG_CLOSE
 #ifndef SINGLETON_RESTRICT
 #define SINGLETON_RESTRICT(class_name)  \
     public:                             \
-        friend Singleton<class_name>;   \
+        friend libtbag::pattern::Singleton<class_name>; \
     protected:                          \
         class_name(){}                  \
     public:                             \
         virtual ~class_name(){}         \
-    private: // default access modifier of class.
-#endif
-
-#ifndef SINGLETON_CLASS_OPEN
-#define SINGLETON_CLASS_OPEN(class_name)                    \
-    class class_name : SINGLETON_INHERITANCE(class_name)    \
-    {                                                       \
-    public:                                                 \
-        SINGLETON_RESTRICT(class_name)                      \
     private: // default access modifier of class.
 #endif
 
