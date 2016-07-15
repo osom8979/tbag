@@ -216,7 +216,7 @@ NAMESPACE_LIBTBAG_CLOSE
 #ifndef SINGLETON_RESTRICT
 #define SINGLETON_RESTRICT(class_name)  \
     public:                             \
-        friend libtbag::pattern::Singleton<class_name>; \
+        friend ::libtbag::pattern::Singleton<class_name>; \
     protected:                          \
         class_name(){}                  \
     public:                             \
