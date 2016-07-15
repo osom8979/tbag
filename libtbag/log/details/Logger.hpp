@@ -15,7 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/log/details/LoggerInterface.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,7 +29,7 @@ namespace details {
  * @author zer0
  * @date   2016-07-15
  */
-class Logger : public LoggerInterface, public Noncopyable
+class Logger : public Noncopyable
 {
 public:
     Logger();
