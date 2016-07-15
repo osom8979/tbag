@@ -27,6 +27,8 @@
 #include <vector>
 #include <set>
 
+#include <fcntl.h>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -135,22 +137,28 @@ uint32_t const FILE_TYPE_S_IFSOCK = 0140000; ///< socket.
  */
 
 // Read, write, execute/search by owner.
-uint32_t const FILE_MODE_OWNER_ALL      = 0000700;  ///< [XSI] RWX mask for owner.
-uint32_t const FILE_MODE_OWNER_READ     = 0000400;  ///< [XSI] R for owner.
-uint32_t const FILE_MODE_OWNER_WRITE    = 0000200;  ///< [XSI] W for owner.
-uint32_t const FILE_MODE_OWNER_EXECUTE  = 0000100;  ///< [XSI] X for owner.
+uint32_t const FILE_MODE_OWNER_ALL      = S_IRWXU;  ///< [XSI] RWX mask for owner.
+uint32_t const FILE_MODE_OWNER_READ     = S_IRUSR;  ///< [XSI] R for owner.
+uint32_t const FILE_MODE_OWNER_WRITE    = S_IWUSR;  ///< [XSI] W for owner.
+uint32_t const FILE_MODE_OWNER_EXECUTE  = S_IXUSR;  ///< [XSI] X for owner.
 
 // Read, write, execute/search by group.
-uint32_t const FILE_MODE_GROUP_ALL      = 0000070;  ///< [XSI] RWX mask for group.
-uint32_t const FILE_MODE_GROUP_READ     = 0000040;  ///< [XSI] R for group.
-uint32_t const FILE_MODE_GROUP_WRITE    = 0000020;  ///< [XSI] W for group.
-uint32_t const FILE_MODE_GROUP_EXECUTE  = 0000010;  ///< [XSI] X for group.
+uint32_t const FILE_MODE_GROUP_ALL      = S_IRWXG;  ///< [XSI] RWX mask for group.
+uint32_t const FILE_MODE_GROUP_READ     = S_IRGRP;  ///< [XSI] R for group.
+uint32_t const FILE_MODE_GROUP_WRITE    = S_IWGRP;  ///< [XSI] W for group.
+uint32_t const FILE_MODE_GROUP_EXECUTE  = S_IXGRP;  ///< [XSI] X for group.
 
 // Read, write, execute/search by others.
-uint32_t const FILE_MODE_OTHER_ALL      = 0000007;  ///< [XSI] RWX mask for other.
-uint32_t const FILE_MODE_OTHER_READ     = 0000004;  ///< [XSI] R for other.
-uint32_t const FILE_MODE_OTHER_WRITE    = 0000002;  ///< [XSI] W for other.
-uint32_t const FILE_MODE_OTHER_EXECUTE  = 0000001;  ///< [XSI] X for other.
+uint32_t const FILE_MODE_OTHER_ALL      = S_IRWXO;  ///< [XSI] RWX mask for other.
+uint32_t const FILE_MODE_OTHER_READ     = S_IROTH;  ///< [XSI] R for other.
+uint32_t const FILE_MODE_OTHER_WRITE    = S_IWOTH;  ///< [XSI] W for other.
+uint32_t const FILE_MODE_OTHER_EXECUTE  = S_IXOTH;  ///< [XSI] X for other.
+
+#if 0
+uint32_t const FILE_MODE_S_ISUID        = S_ISUID;  ///< [XSI] set user id on execution.
+uint32_t const FILE_MODE_S_ISGID        = S_ISGID;  ///< [XSI] set group id on execution.
+uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrcted delete.
+#endif
 
 /**
  * @}
@@ -170,28 +178,30 @@ bool remove(std::string const & path);
 
 /**
  * @defgroup __DOXYGEN_GROUP__FILE_OPEN_FLAGS__ List of file open flags.
+ * @remarks
+ *  include <fcntl.h>
  * @{
  */
 
-uint32_t const FILE_OPEN_FLAG_READ_ONLY  = 0x0000;  ///< open for reading only.
-uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = 0x0001;  ///< open for writing only.
-uint32_t const FILE_OPEN_FLAG_READ_WRITE = 0x0002;  ///< open for reading and writing.
-uint32_t const FILE_OPEN_FLAG_ACCESS_ALL = 0x0003;  ///< mask for above modes.
+uint32_t const FILE_OPEN_FLAG_READ_ONLY  = O_RDONLY;    ///< open for reading only.
+uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = O_WRONLY;    ///< open for writing only.
+uint32_t const FILE_OPEN_FLAG_READ_WRITE = O_RDWR;      ///< open for reading and writing.
+uint32_t const FILE_OPEN_FLAG_ACCESS_ALL = O_ACCMODE;   ///< mask for above modes.
 
-uint32_t const FILE_OPEN_NON_BLOCK      = 0x0004;  ///< no delay.
-uint32_t const FILE_OPEN_APPEND         = 0x0008;  ///< set append mode.
+uint32_t const FILE_OPEN_NON_BLOCK      = O_NONBLOCK;   ///< no delay.
+uint32_t const FILE_OPEN_APPEND         = O_APPEND;     ///< set append mode.
 
-// #if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
-uint32_t const FILE_OPEN_SHARED_LOCK    = 0x0010;  ///< open with shared file lock.
-uint32_t const FILE_OPEN_EXCLUSIVE_LOCK = 0x0020;  ///< open with exclusive file lock.
-uint32_t const FILE_OPEN_ASYNC          = 0x0040;  ///< signal pgrp when data ready.
-uint32_t const FILE_OPEN_SYNC           = 0x0080;  ///< synch I/O file integrity. (source compatibility: do not use)
-uint32_t const FILE_OPEN_NOFOLLOW       = 0x0100;  ///< don't follow symlinks.
-// #endif // (_POSIX_C_SOURCE && !_DARWIN_C_SOURCE)
+uint32_t const FILE_OPEN_CREATE         = O_CREAT;      ///< create if nonexistant.
+uint32_t const FILE_OPEN_TRUNCATE       = O_TRUNC;      ///< truncate to zero length.
+uint32_t const FILE_OPEN_EXISTS_ERROR   = O_EXCL;       ///< error if already exists.
 
-uint32_t const FILE_OPEN_CREATE         = 0x0200;  ///< create if nonexistant.
-uint32_t const FILE_OPEN_TRUNCATE       = 0x0400;  ///< truncate to zero length.
-uint32_t const FILE_OPEN_EXISTS_ERROR   = 0x0800;  ///< error if already exists.
+#if 0 // !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+uint32_t const FILE_OPEN_SHARED_LOCK    = O_SHLOCK;     ///< open with shared file lock.
+uint32_t const FILE_OPEN_EXCLUSIVE_LOCK = O_EXLOCK;     ///< open with exclusive file lock.
+uint32_t const FILE_OPEN_ASYNC          = O_ASYNC;      ///< signal pgrp when data ready.
+uint32_t const FILE_OPEN_SYNC           = O_FSYNC;      ///< synch I/O file integrity. (source compatibility: do not use)
+uint32_t const FILE_OPEN_NOFOLLOW       = O_NOFOLLOW;   ///< don't follow symlinks.
+#endif // (_POSIX_C_SOURCE && !_DARWIN_C_SOURCE)
 
 /**
  * @}
