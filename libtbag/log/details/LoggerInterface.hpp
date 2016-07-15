@@ -1,12 +1,12 @@
 /**
- * @file   Logger.hpp
- * @brief  Logger class prototype.
+ * @file   LoggerInterface.hpp
+ * @brief  Logger interface.
  * @author zer0
  * @date   2016-07-15
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGERINTERFACE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGERINTERFACE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -14,8 +14,6 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/log/details/LoggerInterface.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,16 +23,16 @@ namespace log     {
 namespace details {
 
 /**
- * Logger class prototype.
+ * Logger interface.
  *
  * @author zer0
  * @date   2016-07-15
  */
-class Logger : public LoggerInterface, public Noncopyable
+class LoggerInterface
 {
 public:
-    Logger();
-    virtual ~Logger();
+    constexpr LoggerInterface() = default;
+    virtual ~LoggerInterface() = default;
 };
 
 } // namespace details
@@ -44,5 +42,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGERINTERFACE_HPP__
 
