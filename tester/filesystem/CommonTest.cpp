@@ -9,6 +9,7 @@
 #include <libtbag/filesystem/Common.hpp>
 
 #include <iostream>
+#include <libtbag/debug/UvError.hpp>
 
 using namespace libtbag;
 using namespace libtbag::filesystem;
@@ -63,19 +64,22 @@ TEST(CommonTest, file_rw)
     std::string file_name = "__filesystem_common_file_write_test";
 
     std::string const TEST = "TEST";
+    int const PERMISSION = 0644;
     std::vector<char> read_buffer;
-    read_buffer.resize(TEST.size() + 1, 0x00);
+    read_buffer.resize(TEST.size(), 0x00);
 
-    // int fd = common::open(file_name, FILE_OPEN_FLAG_WRITE_ONLY | FILE_OPEN_CREATE, 0744);
-    // ASSERT_TRUE(fd != 0);
-    // ASSERT_TRUE(common::existsFile(file_name));
+    int fd = common::open(file_name, (FILE_OPEN_FLAG_READ_WRITE | FILE_OPEN_CREATE), PERMISSION);
+    ASSERT_GE(fd, 0);
+    ASSERT_TRUE(common::existsFile(file_name));
+    ASSERT_EQ(common::getPermission(file_name), PERMISSION);
 
-    // ASSERT_GT(common::write(fd, TEST.data(), TEST.size()), 0);
-    // ASSERT_GT(common::read(fd, read_buffer.data(), read_buffer.size(), 0), 0);
-    // std::string buffer_to_string;
-    // buffer_to_string.assign(read_buffer.begin(), read_buffer.end());
-    // ASSERT_EQ(buffer_to_string, TEST);
-    // ASSERT_TRUE(common::remove(file_name));
-    // ASSERT_FALSE(common::existsFile(file_name));
+    ASSERT_EQ(common::write(fd, TEST.data(), TEST.size()), TEST.size());
+    ASSERT_EQ(common::read(fd, read_buffer.data(), read_buffer.size(), 0), read_buffer.size());
+
+    std::string buffer_to_string;
+    buffer_to_string.assign(read_buffer.begin(), read_buffer.end());
+    ASSERT_EQ(buffer_to_string, TEST);
+    ASSERT_TRUE(common::remove(file_name));
+    ASSERT_FALSE(common::existsFile(file_name));
 }
 

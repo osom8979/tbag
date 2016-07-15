@@ -107,23 +107,27 @@ enum AccessModeTable
 bool isAccessFile(std::string const & path, int mode = ACCESS_MODE_EXISTS);
 bool existsFile(std::string const & path);
 
+/**
+ * @see <http://linux.die.net/man/2/stat>
+ */
+uint64_t getStatus(std::string const & path);
 uint64_t getPermission(std::string const & path);
 
 /**
  * @defgroup __DOXYGEN_GROUP__FILE_TYPE__ List of file type.
  * @remarks
- *  POSIX: include <sys/stat.h>
+ *  POSIX: include <sys/stat.h> or <fcntl.h>
  * @{
  */
 
-uint32_t const FILE_TYPE_S_IFMT   = 0170000; ///< type of file.
-uint32_t const FILE_TYPE_S_IFIFO  = 0010000; ///< named pipe (fifo).
-uint32_t const FILE_TYPE_S_IFCHR  = 0020000; ///< character special.
-uint32_t const FILE_TYPE_S_IFDIR  = 0040000; ///< directory.
-uint32_t const FILE_TYPE_S_IFBLK  = 0060000; ///< block special.
-uint32_t const FILE_TYPE_S_IFREG  = 0100000; ///< regular.
-uint32_t const FILE_TYPE_S_IFLNK  = 0120000; ///< symbolic link.
-uint32_t const FILE_TYPE_S_IFSOCK = 0140000; ///< socket.
+uint32_t const FILE_TYPE_S_IFMT   = S_IFMT;     ///< type of file.
+uint32_t const FILE_TYPE_S_IFIFO  = S_IFIFO;    ///< named pipe (fifo).
+uint32_t const FILE_TYPE_S_IFCHR  = S_IFCHR;    ///< character special.
+uint32_t const FILE_TYPE_S_IFDIR  = S_IFDIR;    ///< directory.
+uint32_t const FILE_TYPE_S_IFBLK  = S_IFBLK;    ///< block special.
+uint32_t const FILE_TYPE_S_IFREG  = S_IFREG;    ///< regular.
+uint32_t const FILE_TYPE_S_IFLNK  = S_IFLNK;    ///< symbolic link.
+uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK;   ///< socket.
 
 /**
  * @}
@@ -218,17 +222,36 @@ uint32_t const FILE_OPEN_NOFOLLOW       = O_NOFOLLOW;   ///< don't follow symlin
  *  Because of this the O_BINARY and O_TEXT flags are not supported.
  *
  * @see <http://docs.libuv.org/en/v1.x/fs.html>
+ * @see <http://linux.die.net/man/2/open>
  */
 int open(std::string const & path, int flags, int mode);
 
 /**
  * @return
- *  returns zero on success. On error, -1 is returned, and errno is set appropriately.
+ *  Returns zero on success.
+ *
+ * @see <http://docs.libuv.org/en/v1.x/fs.html>
+ * @see <http://linux.die.net/man/2/close>
  */
 bool close(int fd);
 
+/**
+ * @return
+ *  On success, return the number of bytes written.
+ *
+ * @see <http://docs.libuv.org/en/v1.x/fs.html>
+ * @see <http://linux.die.net/man/2/pwritev>
+ */
 int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset = -1);
-int  read(int fd, char       * buffer, std::size_t buffer_size, int64_t offset = -1);
+
+/**
+ * @return
+ *  On success, return the number of bytes read.
+ *
+ * @see <http://docs.libuv.org/en/v1.x/fs.html>
+ * @see <http://linux.die.net/man/2/preadv>
+ */
+int read(int fd, char * buffer, std::size_t buffer_size, int64_t offset = -1);
 
 } // namespace common
 } // namespace filesystem

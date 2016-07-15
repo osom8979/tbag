@@ -71,7 +71,7 @@ bool existsFile(std::string const & path)
     return isAccessFile(path, ACCESS_MODE_EXISTS);
 }
 
-uint64_t getPermission(std::string const & path)
+uint64_t getStatus(std::string const & path)
 {
     uint64_t result = 0;
     uv_fs_t  request;
@@ -85,9 +85,14 @@ uint64_t getPermission(std::string const & path)
     return result;
 }
 
+uint64_t getPermission(std::string const & path)
+{
+    return getStatus(path) & (FILE_MODE_OWNER_ALL | FILE_MODE_GROUP_ALL | FILE_MODE_OTHER_ALL);
+}
+
 bool checkFileType(std::string const & path, uint64_t type)
 {
-    return ((getPermission(path) & FILE_TYPE_S_IFMT) == type ? true : false);
+    return ((getStatus(path) & FILE_TYPE_S_IFMT) == type ? true : false);
 }
 
 bool isDirectory(std::string const & path)
@@ -151,20 +156,27 @@ bool remove(std::string const & path)
     return (::remove(path.c_str()) == 0 ? true : false);
 }
 
-int open(std::string const & path, int flags, int mode)
+int open(std::string const & path, int flags = (FILE_OPEN_FLAG_READ_WRITE | FILE_OPEN_CREATE), int mode = 0644)
 {
     uv_fs_t request;
     int result = uv_fs_open(nullptr, &request, path.c_str(), flags, mode, nullptr);
     uv_fs_req_cleanup(&request);
+
+    // Assert Check:
+    //  - Source code: uv/test/test-fs-event.c
+    //  - Method prototype: static void create_file(const char* name)
     return result;
 }
 
 bool close(int fd)
 {
     uv_fs_t request;
-    int result = uv_fs_close(nullptr, &request, fd, nullptr);
+    int result = uv_fs_close(nullptr, &request, static_cast<uv_file>(fd), nullptr);
     uv_fs_req_cleanup(&request);
 
+    // Assert Check:
+    //  - Source code: uv/test/test-fs-event.c
+    //  - Method prototype: static void create_file(const char* name)
     return (result == 0 ? true : false);
 }
 
