@@ -15,6 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/pattern/Singleton.hpp>
+#include <libtbag/log/details/LoggerInterface.hpp>
+
+#include <unordered_map>
+#include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,6 +38,20 @@ class LoggerManager : SINGLETON_INHERITANCE(LoggerManager)
 {
 public:
     SINGLETON_RESTRICT(LoggerManager);
+
+public:
+    using LoggerPtr = std::unique_ptr<LoggerInterface>;
+    using LoggerMap = std::unordered_map<std::string, LoggerPtr>;
+    using LoggerPair = typename LoggerMap::value_type;
+
+private:
+    LoggerMap _logs;
+
+public:
+    void addLogger(std::string const & name, LoggerInterface * new_logger);
+    void removeLogger(std::string const & name);
+    std::size_t getSize() const noexcept;
+    LoggerInterface * getLoggerPtr() noexcept;
 };
 
 } // namespace details
