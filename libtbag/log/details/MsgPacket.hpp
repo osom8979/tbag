@@ -20,9 +20,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/log/details/Severity.hpp>
+#include <libtbag/string/fmt/format.h>
+#include <libtbag/Strings.hpp>
 
 #include <string>
-#include <algorithm>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -172,7 +174,7 @@ public:
     __LEFT_SHIFT_OPERATOR(type, value, std::to_string(static_cast<type>(value)))
 
 public:
-    friend BaseMsgPacket & operator <<(BaseMsgPacket & msg, char value)
+    friend BaseMsgPacket & operator <<(BaseMsgPacket & msg, ValueType value)
     {
         msg._message.append(1, value);
         return msg;
@@ -194,8 +196,16 @@ public:
 
 public:
     __LEFT_SHIFT_OPERATOR(void *, value, std::to_string(reinterpret_cast<std::size_t>(value)));
-    __LEFT_SHIFT_OPERATOR(char const *, value, value);
-    __LEFT_SHIFT_OPERATOR(std::string const &, value, value);
+    __LEFT_SHIFT_OPERATOR(ValueType const *, value, value);
+    __LEFT_SHIFT_OPERATOR(String const &, value, value);
+
+public:
+    template <typename ... Args>
+    BaseMsgPacket & format(String const & format_string, Args && ... args)
+    {
+        _message = fmt::format(format_string, std::forward<Args>(args) ...);
+        return *this;
+    }
 };
 
 using MsgPacket     = BaseMsgPacket<char>;

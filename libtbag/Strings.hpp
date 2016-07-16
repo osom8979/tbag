@@ -28,16 +28,16 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 template <typename T>
-inline T const * charOrWidechar(char const * c, wchar_t const * w);
+constexpr T const * charOrWidechar(char const * c, wchar_t const * w);
 
 template <>
-inline char const * charOrWidechar<char>(char const * c, wchar_t const * w)
+constexpr char const * charOrWidechar<char>(char const * c, wchar_t const * w)
 {
     return c;
 }
 
 template <>
-inline wchar_t const * charOrWidechar<wchar_t>(char const * c, wchar_t const * w)
+constexpr wchar_t const * charOrWidechar<wchar_t>(char const * c, wchar_t const * w)
 {
     return w;
 }
