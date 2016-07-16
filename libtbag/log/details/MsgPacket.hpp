@@ -59,7 +59,14 @@ public:
         // EMPTY.
     }
 
-    BaseMsgPacket(String const & message) : _severity(), _message(message)
+    BaseMsgPacket(String const & message)
+            : _severity(), _message(message)
+    {
+        // EMPTY.
+    }
+
+    BaseMsgPacket(Severity const & severity)
+            : _severity(severity), _message()
     {
         // EMPTY.
     }
@@ -103,7 +110,12 @@ public:
         return *this;
     }
 
-    String operator ()() const
+    operator ValueType const * () const noexcept
+    {
+        return _message.c_str();
+    }
+
+    operator String () const
     {
         return _message;
     }
@@ -126,28 +138,71 @@ public:
         }
     }
 
+    void swap(BaseMsgPacket && obj)
+    {
+        if (this != &obj) {
+            _severity = std::move(obj._severity);
+            _message  = std::move(obj._message);
+        }
+    }
+
 public:
     inline String getString() const noexcept
-    {
-        return _message;
-    }
-
+    { return _message;          }
     inline ValueType const * getStringPointer() const noexcept
-    {
-        return _message.c_str();
+    { return _message.c_str();  }
+    inline std::size_t getStringSize() const noexcept
+    { return _message.size();   }
+    inline Severity getSeverity() const noexcept
+    {   return _severity;       }
+
+    inline void clearString() noexcept
+    { _message.clear();         }
+
+public:
+#define __LEFT_SHIFT_OPERATOR(type, value, append)  \
+    friend BaseMsgPacket &                          \
+    operator <<(BaseMsgPacket & msg, type value)    \
+    {                                               \
+        msg._message += append;                     \
+        return msg;                                 \
     }
 
-    inline std::size_t getStringSize() const noexcept
+#define __LEFT_SHIFT_OPERATOR_TO_STRING(type) \
+    __LEFT_SHIFT_OPERATOR(type, value, std::to_string(static_cast<type>(value)))
+
+public:
+    friend BaseMsgPacket & operator <<(BaseMsgPacket & msg, char value)
     {
-        return _message.size();
+        msg._message.append(1, value);
+        return msg;
     }
+
+public:
+    __LEFT_SHIFT_OPERATOR_TO_STRING(short);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(int);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(long);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(long long);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(unsigned char);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(unsigned short);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(unsigned int);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(unsigned long);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(unsigned long long);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(float);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(double);
+    __LEFT_SHIFT_OPERATOR_TO_STRING(long double);
+
+public:
+    __LEFT_SHIFT_OPERATOR(void *, value, std::to_string(reinterpret_cast<std::size_t>(value)));
+    __LEFT_SHIFT_OPERATOR(char const *, value, value);
+    __LEFT_SHIFT_OPERATOR(std::string const &, value, value);
 };
 
 using MsgPacket     = BaseMsgPacket<char>;
 using WideMsgPacket = BaseMsgPacket<wchar_t>;
 
 } // namespace details
-} //namespace log
+} // namespace log
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

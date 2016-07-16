@@ -27,18 +27,47 @@ namespace log  {
 namespace sink {
 
 /**
+ * Sink interface.
+ *
+ * @author zer0
+ * @date   2016-07-16
+ */
+template <typename CharType = char>
+class BaseSinkInterface
+{
+public:
+    using Message = details::BaseMsgPacket<CharType>;
+
+public:
+    constexpr BaseSinkInterface() = default;
+    virtual ~BaseSinkInterface() = default;
+
+public:
+    virtual void writeReal(Message const & msg) = 0;
+    virtual void flushReal() = 0;
+
+public:
+    virtual void write(Message const & msg) = 0;
+    virtual void flush() = 0;
+};
+
+using SinkInterface     = BaseSinkInterface<char>;
+using WideSinkInterface = BaseSinkInterface<wchar_t>;
+
+/**
  * Base Sink interface.
  *
  * @author zer0
  * @date   2016-07-08
  */
 template <typename MutexType = lock::FakeLock, typename CharType = char>
-class BaseSink
+class BaseSink : public BaseSinkInterface<CharType>
 {
 public:
     using Value   = CharType;
     using Mutex   = MutexType;
-    using Message = details::BaseMsgPacket<Value>;
+    using Parent  = BaseSinkInterface<CharType>;
+    using Message = typename Parent::Message;
 
 private:
     Mutex _mutex;
@@ -49,24 +78,20 @@ public:
     BaseSink(bool force_flush) : _mutex(), _force_flush(force_flush) {}
     virtual ~BaseSink() {}
 
-protected:
-    virtual void writeReal(Message const & msg) = 0;
-    virtual void flushReal() = 0;
-
 public:
-    void write(Message const & msg)
+    virtual void write(Message const & msg) override
     {
         std::lock_guard<Mutex> guard(_mutex);
-        writeReal(msg);
+        this->writeReal(msg);
         if (_force_flush) {
-            flushReal();
+            this->flushReal();
         }
     }
 
-    void flush()
+    virtual void flush() override
     {
         std::lock_guard<Mutex> guard(_mutex);
-        flushReal();
+        this->flushReal();
     }
 
 public:

@@ -15,6 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/log/sink/Sink.hpp>
+
+#include <string>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,6 +35,14 @@ namespace details {
  */
 class Logger : public Noncopyable
 {
+public:
+    using CharType = char;
+    using SinkType = sink::BaseSinkInterface<CharType>;
+    using SinkPtr  = std::unique_ptr<SinkType>;
+
+private:
+    SinkPtr _sink;
+
 public:
     Logger();
     virtual ~Logger();
