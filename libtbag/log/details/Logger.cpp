@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/log/details/Logger.hpp>
+#include <libtbag/log/sink/NullSink.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -14,7 +15,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-Logger::Logger()
+Logger::Logger() : _sink(new ::libtbag::log::sink::NullSink<>())
+{
+    // EMPTY.
+}
+
+Logger::Logger(SinkType * sink) : _sink(sink)
 {
     // EMPTY.
 }

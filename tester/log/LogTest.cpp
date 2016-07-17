@@ -9,10 +9,12 @@
 #include <libtbag/log/Log.hpp>
 
 using namespace libtbag;
-using namespace libtbag::log;
 
 TEST(LogStaticTest, CoverageOnly)
 {
+    log::createDefaultConsoleLogger();
+    log::removeDefaultLogger();
+
 //    Log::getInstance()->setLevel(Log::LOG_LEVEL_DEBUG);
 //    Log::getInstance()->setDefaultFormat();
 //    Log::getInstance()->setAsyncMode();

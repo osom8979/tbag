@@ -45,6 +45,7 @@ private:
 
 public:
     Logger();
+    Logger(SinkType * sink);
     virtual ~Logger();
 };
 

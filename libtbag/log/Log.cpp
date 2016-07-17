@@ -7,6 +7,9 @@
 
 #include <libtbag/log/Log.hpp>
 #include <libtbag/log/details/LoggerManager.hpp>
+#include <libtbag/log/sink/CoutSink.hpp>
+
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -20,7 +23,9 @@ using Logger = ::libtbag::log::details::Logger;
 Logger * createDefaultConsoleLogger()
 {
     try {
-        // LogMgr::getInstance()->addLogger(TBAG_DEFAULT_LOGGER_NAME, );
+        Logger * logger = new Logger(new ::libtbag::log::sink::CoutSink<std::mutex>(true));
+        LogMgr::getInstance()->addLogger(TBAG_DEFAULT_LOGGER_NAME, logger);
+        return logger;
     } catch (...) {
         // EMPTY.
     }
@@ -39,6 +44,7 @@ Logger * createDefaultFileLogger(std::string const & path, bool auto_flush)
 Logger * getDefaultLogger()
 {
     try {
+        return LogMgr::getInstance()->getLoggerPtr(TBAG_DEFAULT_LOGGER_NAME);
     } catch (...) {
         // EMPTY.
     }
@@ -47,6 +53,11 @@ Logger * getDefaultLogger()
 
 void setDefaultLevel(LogLevel level)
 {
+}
+
+void removeDefaultLogger()
+{
+    LogMgr::getInstance()->removeLogger(TBAG_DEFAULT_LOGGER_NAME);
 }
 
 } // namespace log

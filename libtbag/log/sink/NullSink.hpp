@@ -39,7 +39,7 @@ public:
 
 public:
     NullSink() = default;
-    virtual ~StreamSink() = default;
+    virtual ~NullSink() = default;
 
 public:
     virtual void writeReal(Message const & msg) override

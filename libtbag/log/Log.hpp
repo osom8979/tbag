@@ -57,6 +57,12 @@ enum class LogLevel : int
 
 void setDefaultLevel(LogLevel level);
 
+/**
+ * @warning
+ *  REMOVE DEFAULT LOG.
+ */
+void removeDefaultLogger();
+
 } // namespace log
 
 // --------------------
