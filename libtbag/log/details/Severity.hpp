@@ -44,7 +44,7 @@ struct DefaultSeverityProperty
     SeverityFlagType flag;
 };
 
-DefaultSeverityProperty const DEFAULT_SEVERITY [] = {
+constexpr DefaultSeverityProperty const DEFAULT_SEVERITY [] = {
         { "EMERGENCY",      0, 0b00000001 }, // System is unusable.
         { "ALERT",          1, 0b00000011 }, // Action must be taken immediately.
         { "CRITICAL",       2, 0b00000111 }, // Critical conditions.
@@ -59,15 +59,15 @@ DefaultSeverityProperty const DEFAULT_SEVERITY [] = {
 int const LOG_SEVERITY_COUNT = sizeof(DEFAULT_SEVERITY) / sizeof(DEFAULT_SEVERITY[0]);
 char const * const UNKNOWN_LOG_SEVERITY_STRING = "UNKNOWN";
 
-int const LOG_SEVERITY_EMERGENCY     = DEFAULT_SEVERITY[0].level;
-int const LOG_SEVERITY_ALERT         = DEFAULT_SEVERITY[1].level;
-int const LOG_SEVERITY_CRITICAL      = DEFAULT_SEVERITY[2].level;
-int const LOG_SEVERITY_ERROR         = DEFAULT_SEVERITY[3].level;
-int const LOG_SEVERITY_WARNING       = DEFAULT_SEVERITY[4].level;
-int const LOG_SEVERITY_NOTICE        = DEFAULT_SEVERITY[5].level;
-int const LOG_SEVERITY_INFORMATIONAL = DEFAULT_SEVERITY[6].level;
-int const LOG_SEVERITY_DEBUG         = DEFAULT_SEVERITY[7].level;
-int const LOG_SEVERITY_OFF           = DEFAULT_SEVERITY[8].level;
+constexpr int const LOG_SEVERITY_EMERGENCY     = DEFAULT_SEVERITY[0].level;
+constexpr int const LOG_SEVERITY_ALERT         = DEFAULT_SEVERITY[1].level;
+constexpr int const LOG_SEVERITY_CRITICAL      = DEFAULT_SEVERITY[2].level;
+constexpr int const LOG_SEVERITY_ERROR         = DEFAULT_SEVERITY[3].level;
+constexpr int const LOG_SEVERITY_WARNING       = DEFAULT_SEVERITY[4].level;
+constexpr int const LOG_SEVERITY_NOTICE        = DEFAULT_SEVERITY[5].level;
+constexpr int const LOG_SEVERITY_INFORMATIONAL = DEFAULT_SEVERITY[6].level;
+constexpr int const LOG_SEVERITY_DEBUG         = DEFAULT_SEVERITY[7].level;
+constexpr int const LOG_SEVERITY_OFF           = DEFAULT_SEVERITY[8].level;
 
 inline const char * const getLogString(int level) noexcept
 {

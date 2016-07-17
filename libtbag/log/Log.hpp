@@ -17,18 +17,13 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/log/details/Severity.hpp>
-
-#include <atomic>
+#include <libtbag/log/details/Logger.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace log {
-
-//constexpr char const * const DEFAULT_LOGGER_OF_CONSOLE = "_C";
-//constexpr char const * const DEFAULT_LOGGER_OF_FILE = "_F";
-//constexpr char const * const DEFAULT_LOGGER_FORMAT = "%L [%Y-%m-%dT%H:%M:%S.%e] [%t] %v";
 
 constexpr char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_logger__";
 
@@ -42,28 +37,31 @@ constexpr bool isMultithreadLogging() noexcept
     return false;
 }
 
-/**
- * Log class.
- */
-class Log
+enum class LogLevel : int
 {
+    LEVEL_EMERGENCY = ::libtbag::log::details::LOG_SEVERITY_EMERGENCY,
+    LEVEL_ALERT     = ::libtbag::log::details::LOG_SEVERITY_ALERT,
+    LEVEL_CRITICAL  = ::libtbag::log::details::LOG_SEVERITY_CRITICAL,
+    LEVEL_ERROR     = ::libtbag::log::details::LOG_SEVERITY_ERROR,
+    LEVEL_WARNING   = ::libtbag::log::details::LOG_SEVERITY_WARNING,
+    LEVEL_NOTICE    = ::libtbag::log::details::LOG_SEVERITY_NOTICE,
+    LEVEL_INFO      = ::libtbag::log::details::LOG_SEVERITY_INFORMATIONAL,
+    LEVEL_DEBUG     = ::libtbag::log::details::LOG_SEVERITY_DEBUG,
+    LEVEL_OFF       = ::libtbag::log::details::LOG_SEVERITY_OFF,
 };
 
-}; // namespace log
+::libtbag::log::details::Logger * createDefaultConsoleLogger();
+::libtbag::log::details::Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
+
+::libtbag::log::details::Logger * getDefaultLogger();
+
+void setDefaultLevel(LogLevel level);
+
+} // namespace log
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
-#define tbEMERGENCY LOG_SEVERITY_EMERGENCY
-#define tbALERT     LOG_SEVERITY_ALERT
-#define tbCRITICAL  LOG_SEVERITY_CRITICAL
-#define tbERROR     LOG_SEVERITY_ERROR
-#define tbWARNING   LOG_SEVERITY_WARNING
-#define tbNOTICE    LOG_SEVERITY_NOTICE
-#define tbINFO      LOG_SEVERITY_INFORMATIONAL
-#define tbDEBUG     LOG_SEVERITY_DEBUG
-#define tbOFF       LOG_SEVERITY_OFF
 
 #if defined(DISABLE_TBAG_LOG)
 # define tbLOG(level, msg, ...)
