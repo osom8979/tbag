@@ -35,7 +35,6 @@ class NullSink : public BaseSink<Mutex, CharType>, public Noncopyable
 {
 public:
     using Parent  = BaseSink<Mutex, CharType>;
-    using Stream  = OutputStream;
     using Message = typename Parent::Message;
 
 public:
