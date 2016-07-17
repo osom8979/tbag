@@ -20,11 +20,6 @@ Severity::Severity() noexcept : _text(), _flag()
     // EMPTY.
 }
 
-Severity::Severity(Flag flag) noexcept : _text(), _flag(flag)
-{
-    // EMPTY.
-}
-
 Severity::Severity(String const & text, Flag flag) noexcept
         : _text(text), _flag(flag)
 {
@@ -33,6 +28,11 @@ Severity::Severity(String const & text, Flag flag) noexcept
 
 Severity::Severity(DefaultSeverityProperty const & property) noexcept
         : Severity(property.text, property.flag)
+{
+    // EMPTY.
+}
+
+Severity::Severity(int level) noexcept : Severity(DEFAULT_SEVERITY[level])
 {
     // EMPTY.
 }
@@ -68,11 +68,6 @@ Severity::operator String() const noexcept
     return _text;
 }
 
-Severity::operator Flag() const noexcept
-{
-    return _flag;
-}
-
 Severity & Severity::copy(Severity const & obj) noexcept
 {
     if (this != &obj) {
@@ -106,21 +101,6 @@ Severity & Severity::operator &=(Severity const & obj) noexcept
 {
     _flag &= obj._flag;
     return *this;
-}
-
-Severity operator |(Severity const & obj1, Severity const & obj2) noexcept
-{
-    return obj1._flag | obj2._flag;
-}
-
-Severity operator ^(Severity const & obj1, Severity const & obj2) noexcept
-{
-    return obj1._flag ^ obj2._flag;
-}
-
-Severity operator &(Severity const & obj1, Severity const & obj2) noexcept
-{
-    return obj1._flag & obj2._flag;
 }
 
 bool Severity::operator ==(Severity const & obj) const noexcept

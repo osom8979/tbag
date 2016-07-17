@@ -45,28 +45,30 @@ TEST(TimeTest, ctime)
      * ==38325==    by 0x10017E310: main (gtest.h:2288)
      */
 
-    time_t time = Time::getCurrentTime();
+    std::chrono::system_clock::time_point tp = Time::getNowSystemClock();
+    time_t time = Time::getTime(tp);
+    int millisec = getMillisec(tp);
 
-    tm *   gmt = Time::getCurrentGmtTime(time);
-    tm * local = Time::getCurrentLocalTime(time);
+    tm *   gmt = Time::getGmtTime(time);
+    tm * local = Time::getLocalTime(time);
 
-    std::string    gmt_long_format = Time::getFormatString(Time::TIMESTAMP_LONG_FORMAT,  gmt);
-    std::string   gmt_short_format = Time::getFormatString(Time::TIMESTAMP_SHORT_FORMAT, gmt);
-    std::string  local_long_format = Time::getFormatString(Time::TIMESTAMP_LONG_FORMAT,  local);
-    std::string local_short_format = Time::getFormatString(Time::TIMESTAMP_SHORT_FORMAT, local);
+    std::string    gmt_long_format = Time::getFormatString(TIMESTAMP_LONG_FORMAT,  gmt);
+    std::string   gmt_short_format = Time::getFormatString(TIMESTAMP_SHORT_FORMAT, gmt);
+    std::string  local_long_format = Time::getFormatString(TIMESTAMP_LONG_FORMAT,  local);
+    std::string local_short_format = Time::getFormatString(TIMESTAMP_SHORT_FORMAT, local);
 
-    std::cout <<  "* Long format timestamp: " <<    gmt_long_format << std::endl;
-    std::cout << "* Short format timestamp: " <<   gmt_short_format << std::endl;
-    std::cout <<  "* Long format timestamp: " <<  local_long_format << std::endl;
-    std::cout << "* Short format timestamp: " << local_short_format << std::endl;
+    std::cout <<  "* Long format timestamp: " <<    gmt_long_format << "," << millisec << std::endl;
+    std::cout << "* Short format timestamp: " <<   gmt_short_format << "," << millisec << std::endl;
+    std::cout <<  "* Long format timestamp: " <<  local_long_format << "," << millisec << std::endl;
+    std::cout << "* Short format timestamp: " << local_short_format << "," << millisec << std::endl;
 }
 
 TEST(TimeTest, chrono)
 {
     int test_count = 200;
     for (int i = 0; i < test_count; ++i) {
-        ASSERT_GE(Time::getMillisec(std::chrono::system_clock::now()), 0);
-        ASSERT_LT(Time::getMillisec(std::chrono::system_clock::now()), 1000);
+        ASSERT_GE(getMillisec(std::chrono::system_clock::now()), 0);
+        ASSERT_LT(getMillisec(std::chrono::system_clock::now()), 1000);
     }
 }
 

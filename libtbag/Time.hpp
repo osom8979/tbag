@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/Strings.hpp>
 
 #include <ctime>
 
@@ -29,6 +30,91 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 /**
+ * Long date/time format.
+ *
+ * @warning
+ *  Not ISO/IEC 8601:2004
+ *
+ * @remarks
+ *  @code
+ *   YYYY-MM-DDThh:mm:ss
+ *  @endcode
+ */
+constexpr char    const * const TIMESTAMP_LONG_FORMAT      =  "%Y-%m-%dT%H:%M:%S";
+constexpr wchar_t const * const WIDE_TIMESTAMP_LONG_FORMAT = L"%Y-%m-%dT%H:%M:%S";
+
+template <typename CharType = char>
+constexpr CharType const * const getDefaultTimestampLongFormat() noexcept;
+
+template <>
+constexpr char const * const getDefaultTimestampLongFormat<char>() noexcept
+{
+    return TIMESTAMP_LONG_FORMAT;
+}
+
+template <>
+constexpr wchar_t const * const getDefaultTimestampLongFormat<wchar_t>() noexcept
+{
+    return WIDE_TIMESTAMP_LONG_FORMAT;
+}
+
+/**
+ * Short date/time format.
+ *
+ * @warning
+ *  Not ISO/IEC 8601:2004
+ *
+ * @remarks
+ *  @code
+ *   YYYYMMDDThhmmss
+ *  @endcode
+ */
+constexpr char    const * const TIMESTAMP_SHORT_FORMAT      =  "%Y%m%dT%H%M%S";
+constexpr wchar_t const * const WIDE_TIMESTAMP_SHORT_FORMAT = L"%Y%m%dT%H%M%S";
+
+template <typename CharType>
+constexpr CharType const * const getDefaultTimestampShortFormat() noexcept;
+
+template <>
+constexpr char const * const getDefaultTimestampShortFormat<char>() noexcept
+{
+    return TIMESTAMP_SHORT_FORMAT;
+}
+
+template <>
+constexpr wchar_t const * const getDefaultTimestampShortFormat<wchar_t>() noexcept
+{
+    return WIDE_TIMESTAMP_SHORT_FORMAT;
+}
+
+/** Years since 1900 */
+constexpr int const YEARS_SINCE = 1900;
+
+/** Months since january: 0-11 */
+constexpr int const MONTHS_SINCE = 1;
+
+/** millisecond part of the second 0-999. */
+int getMillisec(std::chrono::system_clock::time_point const & time);
+
+std::string  getMillisecMbs(std::chrono::system_clock::time_point const & time);
+std::wstring getMillisecWcs(std::chrono::system_clock::time_point const & time);
+
+template <typename CharType>
+void getMillisecString(std::chrono::system_clock::time_point const & time, std::basic_string<CharType> & result);
+
+template <>
+inline void getMillisecString<char>(std::chrono::system_clock::time_point const & time, std::basic_string<char> & result)
+{
+    result = getMillisecMbs(time);
+}
+
+template <>
+inline void getMillisecString<wchar_t>(std::chrono::system_clock::time_point const & time, std::basic_string<wchar_t> & result)
+{
+    result = getMillisecWcs(time);
+}
+
+/**
  * Time class prototype.
  *
  * @author zer0
@@ -40,50 +126,26 @@ public:
     constexpr Time() noexcept = default;
     ~Time() noexcept = default;
 
-    /**
-     * Long date/time format.
-     *
-     * @warning
-     *  Not ISO/IEC 8601:2004
-     *
-     * @remarks
-     *  @code
-     *   YYYY-MM-DDThh:mm:ss
-     *  @endcode
-     */
-    static constexpr char const * const TIMESTAMP_LONG_FORMAT = "%Y-%m-%dT%H:%M:%S";
-
-    /**
-     * Short date/time format.
-     *
-     * @warning
-     *  Not ISO/IEC 8601:2004
-     *
-     * @remarks
-     *  @code
-     *   YYYYMMDDThhmmss
-     *  @endcode
-     */
-    static constexpr char const * const TIMESTAMP_SHORT_FORMAT = "%Y%m%dT%H%M%S";
-
-    /** Years since 1900 */
-    static constexpr int const YEARS_SINCE = 1900;
-
-    /** Months since january: 0-11 */
-    static constexpr int const MONTHS_SINCE = 1;
-
 // ctime wrapper.
 public:
-    /** Obtain current time. */
-    static time_t getCurrentTime() noexcept {
-        return std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    static std::chrono::system_clock::time_point getNowSystemClock() noexcept {
+        return std::chrono::system_clock::now();
     }
 
-    static tm * getCurrentGmtTime(time_t const & t) noexcept {
+    static time_t getTime(std::chrono::system_clock::time_point const & time_point) noexcept {
+        return std::chrono::system_clock::to_time_t(time_point);
+    }
+
+    /** Obtain current time. */
+    static time_t getCurrentTime() noexcept {
+        return getTime(getNowSystemClock());
+    }
+
+    static tm * getGmtTime(time_t const & t) noexcept {
         return gmtime(&t);
     }
 
-    static tm * getCurrentLocalTime(time_t const & t) noexcept {
+    static tm * getLocalTime(time_t const & t) noexcept {
         return localtime(&t);
     }
 
@@ -92,28 +154,29 @@ public:
         std::vector<char> buffer;
         buffer.resize(allocate_size, static_cast<typename std::vector<char>::value_type>(0x00));
 
-        std::size_t length = strftime(&buffer[0], allocate_size, format.c_str(), t);
+        std::size_t length = std::strftime(&buffer[0], allocate_size, format.c_str(), t);
         if (length >= allocate_size) {
             return getFormatString(format, t, allocate_size * 2);
         }
         return std::string(buffer.begin(), buffer.begin() + length);
     }
 
+    static std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size = 128) {
+        // The expected size of the buffer.
+        std::vector<wchar_t> buffer;
+        buffer.resize(allocate_size, static_cast<typename std::vector<wchar_t>::value_type>(0x00));
+
+        std::size_t length = std::wcsftime(&buffer[0], allocate_size, format.c_str(), t);
+        if (length >= allocate_size) {
+            return getFormatString(format, t, allocate_size * 2);
+        }
+        return std::wstring(buffer.begin(), buffer.begin() + length);
+    }
+
 public:
     template <typename TimeUnit = std::chrono::milliseconds>
     static TimeUnit getElapsedTime(std::chrono::system_clock::time_point const & time) {
         return std::chrono::duration_cast<TimeUnit>(std::chrono::system_clock::now() - time);
-    }
-
-    /** millisecond part of the second 0-999. */
-    static int getMillisec(std::chrono::system_clock::time_point const & time) {
-        std::chrono::system_clock::duration epoch = time.time_since_epoch();
-        epoch -= std::chrono::duration_cast<std::chrono::seconds>(epoch);
-
-        // It does not work on some platforms:
-        // return std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
-
-        return static_cast<int>(epoch / std::chrono::milliseconds(1));
     }
 };
 

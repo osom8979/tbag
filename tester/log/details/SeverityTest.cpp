@@ -22,12 +22,21 @@ TEST(SeverityTest, Default)
 
 TEST(SeverityTest, Severity)
 {
-    Severity s1 = 0b1;
+    Severity s1 = LOG_SEVERITY_EMERGENCY;
     Severity s2 = s1;
 
+    ASSERT_EQ(s1.getFlag(), 0b1);
+    ASSERT_EQ(s2.getFlag(), 0b1);
+
     s2 ^= s1;
+    ASSERT_EQ(s1.getFlag(), 0b1);
     ASSERT_EQ(s2.getFlag(), 0b0);
 
-    s1 = s1 | s2;
+    s1 |= s2;
     ASSERT_EQ(s1.getFlag(), 0b1);
+    ASSERT_EQ(s2.getFlag(), 0b0);
+
+    s1 &= s2;
+    ASSERT_EQ(s1.getFlag(), 0b0);
+    ASSERT_EQ(s2.getFlag(), 0b0);
 }

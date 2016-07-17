@@ -38,3 +38,9 @@ TEST(MsgPacketTest, Operator)
     packet.clearString();
 }
 
+TEST(MsgPacketTest, Prefix)
+{
+    MsgPacket packet;
+    std::cout << "MsgPacket default prefix: " << packet.getDefaultPrefix() << std::endl;
+}
+

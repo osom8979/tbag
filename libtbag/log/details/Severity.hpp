@@ -95,9 +95,10 @@ private:
 
 public:
     Severity() noexcept;
-    Severity(Flag flag) noexcept;
-    Severity(String const & text, Flag flag = 0x00) noexcept;
+    Severity(String const & text, Flag flag) noexcept;
     Severity(DefaultSeverityProperty const & property) noexcept;
+    Severity(int level) noexcept;
+
     Severity(Severity const & obj) noexcept;
     Severity(Severity && obj) noexcept;
     ~Severity() noexcept;
@@ -108,7 +109,6 @@ public:
 
 public:
     operator String() const noexcept;
-    operator Flag() const noexcept;
 
 public:
     Severity & copy(Severity const & obj) noexcept;
@@ -118,10 +118,6 @@ public:
     Severity & operator |=(Severity const & obj) noexcept;
     Severity & operator ^=(Severity const & obj) noexcept;
     Severity & operator &=(Severity const & obj) noexcept;
-
-    friend Severity operator |(Severity const & obj1, Severity const & obj2) noexcept;
-    friend Severity operator ^(Severity const & obj1, Severity const & obj2) noexcept;
-    friend Severity operator &(Severity const & obj1, Severity const & obj2) noexcept;
 
 public:
     bool operator ==(Severity const & obj) const noexcept;

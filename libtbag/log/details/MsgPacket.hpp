@@ -22,9 +22,12 @@
 #include <libtbag/log/details/Severity.hpp>
 #include <libtbag/string/fmt/format.h>
 #include <libtbag/Strings.hpp>
+#include <libtbag/Time.hpp>
 
 #include <string>
+#include <sstream>
 #include <utility>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -56,13 +59,13 @@ private:
     String   _message;
 
 public:
-    BaseMsgPacket() : _severity(), _message()
+    BaseMsgPacket() : _severity(LOG_SEVERITY_INFORMATIONAL), _message()
     {
         // EMPTY.
     }
 
     BaseMsgPacket(String const & message)
-            : _severity(), _message(message)
+            : _severity(LOG_SEVERITY_INFORMATIONAL), _message(message)
     {
         // EMPTY.
     }
@@ -205,6 +208,39 @@ public:
     {
         _message = fmt::format(format_string, std::forward<Args>(args) ...);
         return *this;
+    }
+
+private:
+    String getMillisecFormat(std::chrono::system_clock::time_point const & time_point)
+    {
+        String result;
+        getMillisecString(time_point, result);
+        return String(CHAR_OR_WIDECHAR(ValueType, ",")) + result;
+    }
+
+public:
+    String getDefaultPrefix()
+    {
+        std::basic_stringstream<ValueType> ss;
+
+        // Timestamp.
+        auto tp = Time::getNowSystemClock();
+        time_t time = Time::getTime(tp);
+        ss << Time::getFormatString(getDefaultTimestampLongFormat<ValueType>(), Time::getLocalTime(time));
+
+        // Milliseconds.
+        ss << getMillisecFormat(tp);
+
+        // Current thread.
+        ss << CHAR_OR_WIDECHAR(ValueType, " @");
+        ss << std::this_thread::get_id();
+
+        // Severity.
+        ss << CHAR_OR_WIDECHAR(ValueType, " [");
+        ss << _severity.getText();
+        ss << CHAR_OR_WIDECHAR(ValueType, "] ");
+
+        return ss.str();
     }
 };
 
