@@ -130,6 +130,9 @@ public:
 public:
     void setFlag(Flag flag) noexcept;
     Flag getFlag() const noexcept;
+
+public:
+    bool isContain(Flag flag);
 };
 
 } // namespace details

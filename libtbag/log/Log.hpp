@@ -27,35 +27,15 @@ namespace log {
 
 constexpr char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_logger__";
 
-constexpr bool isAsynchronousLogging() noexcept
-{
-    return true;
-}
-
-constexpr bool isMultithreadLogging() noexcept
-{
-    return false;
-}
-
-enum class LogLevel : int
-{
-    LEVEL_EMERGENCY = ::libtbag::log::details::LOG_SEVERITY_EMERGENCY,
-    LEVEL_ALERT     = ::libtbag::log::details::LOG_SEVERITY_ALERT,
-    LEVEL_CRITICAL  = ::libtbag::log::details::LOG_SEVERITY_CRITICAL,
-    LEVEL_ERROR     = ::libtbag::log::details::LOG_SEVERITY_ERROR,
-    LEVEL_WARNING   = ::libtbag::log::details::LOG_SEVERITY_WARNING,
-    LEVEL_NOTICE    = ::libtbag::log::details::LOG_SEVERITY_NOTICE,
-    LEVEL_INFO      = ::libtbag::log::details::LOG_SEVERITY_INFORMATIONAL,
-    LEVEL_DEBUG     = ::libtbag::log::details::LOG_SEVERITY_DEBUG,
-    LEVEL_OFF       = ::libtbag::log::details::LOG_SEVERITY_OFF,
-};
+//constexpr bool isAsynchronousLogging() noexcept { return true;  }
+//constexpr bool  isMultithreadLogging() noexcept { return false; }
 
 ::libtbag::log::details::Logger * createDefaultConsoleLogger();
 ::libtbag::log::details::Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
 
 ::libtbag::log::details::Logger * getDefaultLogger();
 
-void setDefaultLevel(LogLevel level);
+void setDefaultLevel(::libtbag::log::details::LogLevel level);
 
 /**
  * @warning

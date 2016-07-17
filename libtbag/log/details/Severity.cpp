@@ -133,6 +133,11 @@ Severity::Flag Severity::getFlag() const noexcept
     return _flag;
 }
 
+bool Severity::isContain(Flag flag)
+{
+    return ((_flag & flag) == flag);
+}
+
 } // namespace details
 } // namespace log
 

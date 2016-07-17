@@ -10,9 +10,14 @@
 
 using namespace libtbag;
 
-TEST(LogStaticTest, CoverageOnly)
+TEST(LogTest, Default)
 {
     log::createDefaultConsoleLogger();
+
+    log::getDefaultLogger()->emergency("LOG_EMERGENCY");
+    log::getDefaultLogger()->debug("LOG_DEBUG");
+    log::getDefaultLogger()->informational("LOG_INFORMATIONAL");
+
     log::removeDefaultLogger();
 
 //    Log::getInstance()->setLevel(Log::LOG_LEVEL_DEBUG);

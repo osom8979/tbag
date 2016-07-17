@@ -59,9 +59,9 @@ public:
     virtual ~StreamSink() = default;
 
 public:
-    virtual void writeReal(Message const & msg) override
+    virtual void writeReal(std::basic_string<CharType> const & msg) override
     {
-        _stream.write(msg.getStringPointer(), msg.getStringSize());
+        _stream.write(msg.c_str(), msg.size());
     }
 
     virtual void flushReal() override

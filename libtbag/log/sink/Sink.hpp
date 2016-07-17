@@ -16,7 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/lock/FakeLock.hpp>
+#include <libtbag/Strings.hpp>
 
+#include <string>
 #include <mutex>
 
 // -------------------
@@ -43,7 +45,7 @@ public:
     virtual ~BaseSinkInterface() = default;
 
 public:
-    virtual void writeReal(Message const & msg) = 0;
+    virtual void writeReal(std::basic_string<CharType> const & msg) = 0;
     virtual void flushReal() = 0;
 
 public:
@@ -82,7 +84,8 @@ public:
     virtual void write(Message const & msg) override
     {
         std::lock_guard<Mutex> guard(_mutex);
-        this->writeReal(msg);
+
+        this->writeReal(msg.getDefaultPrefix() + msg.getString() + CHAR_OR_WIDECHAR(Value, "\n"));
         if (_force_flush) {
             this->flushReal();
         }

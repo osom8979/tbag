@@ -70,6 +70,12 @@ public:
         // EMPTY.
     }
 
+    BaseMsgPacket(ValueType const * message)
+            : _severity(LOG_SEVERITY_INFORMATIONAL), _message(message)
+    {
+        // EMPTY.
+    }
+
     BaseMsgPacket(Severity const & severity)
             : _severity(severity), _message()
     {
@@ -110,6 +116,12 @@ public:
     }
 
     BaseMsgPacket & operator =(String const & message)
+    {
+        _message = message;
+        return *this;
+    }
+
+    BaseMsgPacket & operator =(ValueType const * message)
     {
         _message = message;
         return *this;
@@ -211,7 +223,7 @@ public:
     }
 
 private:
-    String getMillisecFormat(std::chrono::system_clock::time_point const & time_point)
+    String getMillisecFormat(std::chrono::system_clock::time_point const & time_point) const
     {
         String result;
         time::getMillisecString(time_point, result);
@@ -219,7 +231,7 @@ private:
     }
 
 public:
-    String getDefaultPrefix()
+    String getDefaultPrefix() const
     {
         std::basic_stringstream<ValueType> ss;
 

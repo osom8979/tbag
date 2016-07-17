@@ -42,7 +42,7 @@ public:
     virtual ~NullSink() = default;
 
 public:
-    virtual void writeReal(Message const & msg) override
+    virtual void writeReal(std::basic_string<CharType> const & msg) override
     {
         // EMPTY.
     }

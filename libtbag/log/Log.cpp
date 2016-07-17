@@ -17,8 +17,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
-using LogMgr = ::libtbag::log::details::LoggerManager;
-using Logger = ::libtbag::log::details::Logger;
+using LogMgr   = ::libtbag::log::details::LoggerManager;
+using Logger   = ::libtbag::log::details::Logger;
+using LogLevel = ::libtbag::log::details::LogLevel;
 
 Logger * createDefaultConsoleLogger()
 {
@@ -53,6 +54,14 @@ Logger * getDefaultLogger()
 
 void setDefaultLevel(LogLevel level)
 {
+    try {
+        Logger * logger = LogMgr::getInstance()->getLoggerPtr(TBAG_DEFAULT_LOGGER_NAME);
+        if (logger != nullptr) {
+            logger->setLogLevel(level);
+        }
+    } catch (...) {
+        // EMPTY.
+    }
 }
 
 void removeDefaultLogger()
