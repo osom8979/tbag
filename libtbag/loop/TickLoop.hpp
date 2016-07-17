@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Time.hpp>
+#include <libtbag/time/Time.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -73,7 +73,7 @@ public:
         while (_exit.load() == false) {
             start = SystemClock::now();
             _callback();
-            duration = Time::getElapsedTime(start);
+            duration = time::getElapsedTime(start);
 
             if (duration < _time_step) {
                 std::this_thread::yield(); // hint of thread schedule.

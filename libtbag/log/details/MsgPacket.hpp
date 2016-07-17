@@ -22,7 +22,7 @@
 #include <libtbag/log/details/Severity.hpp>
 #include <libtbag/string/fmt/format.h>
 #include <libtbag/Strings.hpp>
-#include <libtbag/Time.hpp>
+#include <libtbag/time/Time.hpp>
 
 #include <string>
 #include <sstream>
@@ -214,7 +214,7 @@ private:
     String getMillisecFormat(std::chrono::system_clock::time_point const & time_point)
     {
         String result;
-        getMillisecString(time_point, result);
+        time::getMillisecString(time_point, result);
         return String(CHAR_OR_WIDECHAR(ValueType, ",")) + result;
     }
 
@@ -224,9 +224,9 @@ public:
         std::basic_stringstream<ValueType> ss;
 
         // Timestamp.
-        auto tp = Time::getNowSystemClock();
-        time_t time = Time::getTime(tp);
-        ss << Time::getFormatString(getDefaultTimestampLongFormat<ValueType>(), Time::getLocalTime(time));
+        auto tp = time::getNowSystemClock();
+        time_t time = time::getTime(tp);
+        ss << time::getFormatString(time::getDefaultTimestampLongFormat<ValueType>(), time::getLocalTime(time));
 
         // Milliseconds.
         ss << getMillisecFormat(tp);

@@ -6,7 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/Time.hpp>
+#include <libtbag/time/Time.hpp>
 
 #include <sstream>
 #include <iostream>
@@ -19,7 +19,7 @@ TEST(TimeTest, ctime)
      * ==38325== 56 bytes in 1 blocks are definitely lost in loss record 49 of 107
      * ==38325==    at 0x100277EBB: malloc (in /usr/local/Cellar/valgrind/3.11.0/lib/valgrind/vgpreload_memcheck-amd64-darwin.so)
      * ==38325==    by 0x100696956: gmtime (in /usr/lib/system/libsystem_c.dylib)
-     * ==38325==    by 0x100157820: libtbag::Time::getCurrentGmtTime(long const&) (in ./tester)
+     * ==38325==    by 0x100157820: libtbag::time::getCurrentGmtTime(long const&) (in ./tester)
      * ==38325==    by 0x100154BC3: TimeTest_ctime_Test::TestBody() (in ./tester)
      * ==38325==    by 0x1001786C9: void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) (gtest.cc:2078)
      * ==38325==    by 0x100165149: testing::Test::Run() (gtest.cc:2150)
@@ -33,7 +33,7 @@ TEST(TimeTest, ctime)
      * ==38325== 56 bytes in 1 blocks are definitely lost in loss record 50 of 107
      * ==38325==    at 0x100277EBB: malloc (in /usr/local/Cellar/valgrind/3.11.0/lib/valgrind/vgpreload_memcheck-amd64-darwin.so)
      * ==38325==    by 0x10069680A: localtime (in /usr/lib/system/libsystem_c.dylib)
-     * ==38325==    by 0x100157860: libtbag::Time::getCurrentLocalTime(long const&) (in ./tester)
+     * ==38325==    by 0x100157860: libtbag::time::getCurrentLocalTime(long const&) (in ./tester)
      * ==38325==    by 0x100154BD6: TimeTest_ctime_Test::TestBody() (in ./tester)
      * ==38325==    by 0x1001786C9: void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) (gtest.cc:2078)
      * ==38325==    by 0x100165149: testing::Test::Run() (gtest.cc:2150)
@@ -45,17 +45,17 @@ TEST(TimeTest, ctime)
      * ==38325==    by 0x10017E310: main (gtest.h:2288)
      */
 
-    std::chrono::system_clock::time_point tp = Time::getNowSystemClock();
-    time_t time = Time::getTime(tp);
-    int millisec = getMillisec(tp);
+    std::chrono::system_clock::time_point tp = time::getNowSystemClock();
+    time_t time = time::getTime(tp);
+    int millisec = time::getMillisec(tp);
 
-    tm *   gmt = Time::getGmtTime(time);
-    tm * local = Time::getLocalTime(time);
+    tm *   gmt = time::getGmtTime(time);
+    tm * local = time::getLocalTime(time);
 
-    std::string    gmt_long_format = Time::getFormatString(TIMESTAMP_LONG_FORMAT,  gmt);
-    std::string   gmt_short_format = Time::getFormatString(TIMESTAMP_SHORT_FORMAT, gmt);
-    std::string  local_long_format = Time::getFormatString(TIMESTAMP_LONG_FORMAT,  local);
-    std::string local_short_format = Time::getFormatString(TIMESTAMP_SHORT_FORMAT, local);
+    std::string    gmt_long_format = time::getFormatString(time::TIMESTAMP_LONG_FORMAT,  gmt);
+    std::string   gmt_short_format = time::getFormatString(time::TIMESTAMP_SHORT_FORMAT, gmt);
+    std::string  local_long_format = time::getFormatString(time::TIMESTAMP_LONG_FORMAT,  local);
+    std::string local_short_format = time::getFormatString(time::TIMESTAMP_SHORT_FORMAT, local);
 
     std::cout <<  "* Long format timestamp: " <<    gmt_long_format << "," << millisec << std::endl;
     std::cout << "* Short format timestamp: " <<   gmt_short_format << "," << millisec << std::endl;
@@ -67,16 +67,16 @@ TEST(TimeTest, chrono)
 {
     int test_count = 200;
     for (int i = 0; i < test_count; ++i) {
-        ASSERT_GE(getMillisec(std::chrono::system_clock::now()), 0);
-        ASSERT_LT(getMillisec(std::chrono::system_clock::now()), 1000);
+        ASSERT_GE(time::getMillisec(std::chrono::system_clock::now()), 0);
+        ASSERT_LT(time::getMillisec(std::chrono::system_clock::now()), 1000);
     }
 }
 
 TEST(TimeTest, Duration)
 {
     std::stringstream ss;
-    long millisec = getDuration([&ss](){
-        Duration<std::stringstream, std::chrono::nanoseconds> duration(ss);
+    long millisec = time::getDuration([&ss](){
+        time::Duration<std::stringstream, std::chrono::nanoseconds> duration(ss);
     });
     ASSERT_GE(millisec, 0);
 
