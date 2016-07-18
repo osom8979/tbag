@@ -95,6 +95,7 @@ endmacro ()
 macro (tbag_config__set_library_prefix __value)
     set (${__value} "/usr/local") # DEFAULT SETTING.
     tbag_utils__get_args_size (__library_prefix_arg_length ${ARGN})
+
     if (${__library_prefix_arg_length} GREATER 0)
         foreach (__library_prefix_cursor ${ARGN})
             if (IS_DIRECTORY "${__library_prefix_cursor}")
@@ -105,6 +106,8 @@ macro (tbag_config__set_library_prefix __value)
     elseif (DEFINED THIRD_PREFIX)
         set (${__value} "${THIRD_PREFIX}")
     endif ()
+
+    tbag_debug_variable (tbag_config__set_library_prefix ${__value})
     set (${__value} "${${__value}}" CACHE PATH "Library prefix directory.")
 endmacro ()
 
@@ -172,6 +175,7 @@ macro (tbag_config__add_third __root_dir)
         set (ENV{LIBRARY_PATH} "${THIRD_LIB}${TBAG_PATH_SEPARATOR}$ENV{LIBRARY_PATH}")
     endif ()
 
+    message (STATUS "THIRD_PREFIX: ${THIRD_PREFIX}")
     list (INSERT CMAKE_PROGRAM_PATH 0 ${THIRD_BIN})
     list (INSERT CMAKE_INCLUDE_PATH 0 ${THIRD_INC})
     list (INSERT CMAKE_LIBRARY_PATH 0 ${THIRD_LIB})
