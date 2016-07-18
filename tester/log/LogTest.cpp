@@ -13,10 +13,37 @@
 
 using namespace libtbag;
 
-TEST(LogTest, Default)
+TEST(LogTest, Console)
 {
     log::createDefaultConsoleLogger();
     log::setDefaultLevel(log::LogLevel::LEVEL_NOTICE);
+
+    log::emergency("LogTest: emergency");
+    log::alert    ("LogTest: alert");
+    log::critical ("LogTest: critical");
+    log::error    ("LogTest: error");
+    log::warning  ("LogTest: warning");
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    log::notice   ("LogTest: notice");
+    log::info     ("LogTest: info");
+    log::debug    ("LogTest: debug");
+
+    tDLogE("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogA("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogC("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogR("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogW("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogN("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogI("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogD("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+
+    log::removeDefaultLogger();
+}
+
+TEST(LogTest, File)
+{
+    log::createDefaultFileLogger("__log_test_file");
+    log::setDefaultLevel(log::LogLevel::LEVEL_WARNING);
 
     log::emergency("LogTest: emergency");
     log::alert    ("LogTest: alert");

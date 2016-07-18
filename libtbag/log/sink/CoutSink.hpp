@@ -22,7 +22,6 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-
 namespace log  {
 namespace sink {
 

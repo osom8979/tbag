@@ -47,11 +47,10 @@ public:
 
 public:
     Stream & _stream;
-    bool _force_flush;
 
 public:
     StreamSink(Stream & stream, bool force_flush = false)
-            : Parent(force_flush), _stream(stream), _force_flush(force_flush)
+            : Parent(force_flush), _stream(stream)
     {
         // EMPTY.
     }
