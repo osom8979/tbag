@@ -15,11 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/log/details/Severity.hpp>
 #include <libtbag/log/sink/Sink.hpp>
 
 #include <string>
 #include <memory>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -27,19 +29,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log     {
 namespace details {
-
-enum class LogLevel : int
-{
-    LEVEL_EMERGENCY = ::libtbag::log::details::LOG_SEVERITY_EMERGENCY,
-    LEVEL_ALERT     = ::libtbag::log::details::LOG_SEVERITY_ALERT,
-    LEVEL_CRITICAL  = ::libtbag::log::details::LOG_SEVERITY_CRITICAL,
-    LEVEL_ERROR     = ::libtbag::log::details::LOG_SEVERITY_ERROR,
-    LEVEL_WARNING   = ::libtbag::log::details::LOG_SEVERITY_WARNING,
-    LEVEL_NOTICE    = ::libtbag::log::details::LOG_SEVERITY_NOTICE,
-    LEVEL_INFO      = ::libtbag::log::details::LOG_SEVERITY_INFORMATIONAL,
-    LEVEL_DEBUG     = ::libtbag::log::details::LOG_SEVERITY_DEBUG,
-    LEVEL_OFF       = ::libtbag::log::details::LOG_SEVERITY_OFF,
-};
 
 /**
  * Logger class prototype.
@@ -50,16 +39,19 @@ enum class LogLevel : int
 class Logger : public Noncopyable
 {
 public:
-    using SinkType = sink::BaseSinkInterface<char>;
+    using CharType = char;
+    using SinkType = sink::BaseSinkInterface<CharType>;
+    using Message  = typename SinkType::Message;
     using SinkPtr  = std::unique_ptr<SinkType>;
+    using String   = std::basic_string<CharType>;
 
 private:
     SinkPtr _sink;
     Severity _severity;
 
 public:
-    Logger();
     Logger(SinkType * sink);
+    Logger();
     virtual ~Logger();
 
 public:
@@ -67,25 +59,38 @@ public:
     void setLogLevel(LogLevel level);
 
 public:
-    void log(LogLevel level, std::string const & msg);
+    void log(Message const & msg);
+    void log(LogLevel level, String const & msg);
 
 public:
-    inline void emergency(std::string const & msg)
-    { this->log(LogLevel::LEVEL_EMERGENCY, msg);    }
-    inline void alert(std::string const & msg)
+    template <typename ... Args>
+    void logf(LogLevel level, String const & format, Args && ... args)
+    {
+        Message msg = SinkType::makeMessage(level);
+        msg.format(format, std::forward<Args>(args) ...);
+        this->log(msg);
+    }
+
+public:
+    inline void emergency(String const & msg)
+    {   this->log(LogLevel::LEVEL_EMERGENCY, msg);  }
+    inline void alert(String const & msg)
     {   this->log(LogLevel::LEVEL_ALERT, msg);      }
-    inline void critical(std::string const & msg)
+    inline void critical(String const & msg)
     {   this->log(LogLevel::LEVEL_CRITICAL, msg);   }
-    inline void error(std::string const & msg)
+    inline void error(String const & msg)
     {   this->log(LogLevel::LEVEL_ERROR, msg);      }
-    inline void warning(std::string const & msg)
+    inline void warning(String const & msg)
     {   this->log(LogLevel::LEVEL_WARNING, msg);    }
-    inline void notice(std::string const & msg)
+    inline void notice(String const & msg)
     {   this->log(LogLevel::LEVEL_NOTICE, msg);     }
-    inline void informational(std::string const & msg)
+    inline void informational(String const & msg)
     {   this->log(LogLevel::LEVEL_INFO, msg);       }
-    inline void debug(std::string const & msg)
+    inline void debug(String const & msg)
     {   this->log(LogLevel::LEVEL_DEBUG, msg);      }
+
+public:
+    friend Logger & operator <<(Logger & logger, Message const & msg);
 };
 
 } // namespace details

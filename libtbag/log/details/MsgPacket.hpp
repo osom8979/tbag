@@ -59,25 +59,31 @@ private:
     String   _message;
 
 public:
-    BaseMsgPacket() : _severity(LOG_SEVERITY_INFORMATIONAL), _message()
+    BaseMsgPacket() : _severity(LogLevel::LEVEL_INFO), _message()
     {
         // EMPTY.
     }
 
     BaseMsgPacket(String const & message)
-            : _severity(LOG_SEVERITY_INFORMATIONAL), _message(message)
+            : _severity(LogLevel::LEVEL_INFO), _message(message)
     {
         // EMPTY.
     }
 
     BaseMsgPacket(ValueType const * message)
-            : _severity(LOG_SEVERITY_INFORMATIONAL), _message(message)
+            : _severity(LogLevel::LEVEL_INFO), _message(message)
     {
         // EMPTY.
     }
 
     BaseMsgPacket(Severity const & severity)
             : _severity(severity), _message()
+    {
+        // EMPTY.
+    }
+
+    BaseMsgPacket(LogLevel level)
+            : _severity(level), _message()
     {
         // EMPTY.
     }

@@ -51,6 +51,13 @@ public:
 public:
     virtual void write(Message const & msg) = 0;
     virtual void flush() = 0;
+
+public:
+    template <typename ... Args>
+    constexpr inline static Message makeMessage(Args && ... args) noexcept
+    {
+        return Message(std::forward<Args>(args) ...);
+    }
 };
 
 using SinkInterface     = BaseSinkInterface<char>;
@@ -95,13 +102,6 @@ public:
     {
         std::lock_guard<Mutex> guard(_mutex);
         this->flushReal();
-    }
-
-public:
-    template <typename ... Args>
-    constexpr inline static Message makeMessage(Args && ... args) noexcept
-    {
-        return Message(std::forward<Args>(args) ...);
     }
 };
 

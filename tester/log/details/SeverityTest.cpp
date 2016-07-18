@@ -22,7 +22,7 @@ TEST(SeverityTest, Default)
 
 TEST(SeverityTest, Severity)
 {
-    Severity s1 = LOG_SEVERITY_EMERGENCY;
+    Severity s1 = LogLevel::LEVEL_EMERGENCY;
     Severity s2 = s1;
 
     ASSERT_EQ(s1.getFlag(), 0b1);

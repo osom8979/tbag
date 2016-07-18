@@ -69,6 +69,23 @@ constexpr int const LOG_SEVERITY_INFORMATIONAL = DEFAULT_SEVERITY[6].level;
 constexpr int const LOG_SEVERITY_DEBUG         = DEFAULT_SEVERITY[7].level;
 constexpr int const LOG_SEVERITY_OFF           = DEFAULT_SEVERITY[8].level;
 
+/**
+ * Logging level.
+ */
+enum class LogLevel : int
+{
+    LEVEL_EMERGENCY = ::libtbag::log::details::LOG_SEVERITY_EMERGENCY,
+    LEVEL_ALERT     = ::libtbag::log::details::LOG_SEVERITY_ALERT,
+    LEVEL_CRITICAL  = ::libtbag::log::details::LOG_SEVERITY_CRITICAL,
+    LEVEL_ERROR     = ::libtbag::log::details::LOG_SEVERITY_ERROR,
+    LEVEL_WARNING   = ::libtbag::log::details::LOG_SEVERITY_WARNING,
+    LEVEL_NOTICE    = ::libtbag::log::details::LOG_SEVERITY_NOTICE,
+    LEVEL_INFO      = ::libtbag::log::details::LOG_SEVERITY_INFORMATIONAL,
+    LEVEL_DEBUG     = ::libtbag::log::details::LOG_SEVERITY_DEBUG,
+    LEVEL_OFF       = ::libtbag::log::details::LOG_SEVERITY_OFF,
+};
+
+
 inline const char * const getLogString(int level) noexcept
 {
     if (0 <= COMPARE_AND(level) < LOG_SEVERITY_COUNT) {
@@ -97,7 +114,7 @@ public:
     Severity() noexcept;
     Severity(String const & text, Flag flag) noexcept;
     Severity(DefaultSeverityProperty const & property) noexcept;
-    Severity(int level) noexcept;
+    Severity(LogLevel level) noexcept;
 
     Severity(Severity const & obj) noexcept;
     Severity(Severity && obj) noexcept;

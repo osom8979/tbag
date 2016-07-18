@@ -30,18 +30,33 @@ constexpr char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_logger__
 //constexpr bool isAsynchronousLogging() noexcept { return true;  }
 //constexpr bool  isMultithreadLogging() noexcept { return false; }
 
-::libtbag::log::details::Logger * createDefaultConsoleLogger();
-::libtbag::log::details::Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
+using Logger   = ::libtbag::log::details::Logger;
+using LogLevel = ::libtbag::log::details::LogLevel;
 
-::libtbag::log::details::Logger * getDefaultLogger();
-
-void setDefaultLevel(::libtbag::log::details::LogLevel level);
-
-/**
- * @warning
- *  REMOVE DEFAULT LOG.
- */
+Logger * createDefaultConsoleLogger();
+Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
 void removeDefaultLogger();
+
+Logger * getDefaultLogger();
+void setDefaultLevel(LogLevel level);
+
+inline void emergency    (Logger * logger, std::string const & msg) { if (logger) { logger->emergency(msg);     } }
+inline void alert        (Logger * logger, std::string const & msg) { if (logger) { logger->alert(msg);         } }
+inline void critical     (Logger * logger, std::string const & msg) { if (logger) { logger->critical(msg);      } }
+inline void error        (Logger * logger, std::string const & msg) { if (logger) { logger->error(msg);         } }
+inline void warning      (Logger * logger, std::string const & msg) { if (logger) { logger->warning(msg);       } }
+inline void notice       (Logger * logger, std::string const & msg) { if (logger) { logger->notice(msg);        } }
+inline void informational(Logger * logger, std::string const & msg) { if (logger) { logger->informational(msg); } }
+inline void debug        (Logger * logger, std::string const & msg) { if (logger) { logger->debug(msg);         } }
+
+inline void emergency    (std::string const & msg) { emergency    (getDefaultLogger(), msg); }
+inline void alert        (std::string const & msg) { alert        (getDefaultLogger(), msg); }
+inline void critical     (std::string const & msg) { critical     (getDefaultLogger(), msg); }
+inline void error        (std::string const & msg) { error        (getDefaultLogger(), msg); }
+inline void warning      (std::string const & msg) { warning      (getDefaultLogger(), msg); }
+inline void notice       (std::string const & msg) { notice       (getDefaultLogger(), msg); }
+inline void informational(std::string const & msg) { informational(getDefaultLogger(), msg); }
+inline void debug        (std::string const & msg) { debug        (getDefaultLogger(), msg); }
 
 } // namespace log
 
@@ -50,19 +65,19 @@ NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
 #if defined(DISABLE_TBAG_LOG)
-# define tbLOG(level, msg, ...)
+# define tbLOG(name, level, msg, ...)
 #else
-# define tbLOG(level, msg, ...)
+# define tbLOG(name, level, msg, ...)
 #endif
 
-#define tbLOGE(msg, ...)  tbLOG(tbEMERGENCY , msg, __VA_ARGS__)
-#define tbLOGA(msg, ...)  tbLOG(tbALERT     , msg, __VA_ARGS__)
-#define tbLOGC(msg, ...)  tbLOG(tbCRITICAL  , msg, __VA_ARGS__)
-#define tbLOGR(msg, ...)  tbLOG(tbERROR     , msg, __VA_ARGS__)
-#define tbLOGW(msg, ...)  tbLOG(tbWARNING   , msg, __VA_ARGS__)
-#define tbLOGN(msg, ...)  tbLOG(tbNOTICE    , msg, __VA_ARGS__)
-#define tbLOGI(msg, ...)  tbLOG(tbINFO      , msg, __VA_ARGS__)
-#define tbLOGD(msg, ...)  tbLOG(tbDEBUG     , msg, __VA_ARGS__)
+#define tbLOGE(name, msg, ...)  tbLOG(name, tbEMERGENCY , msg, __VA_ARGS__)
+#define tbLOGA(name, msg, ...)  tbLOG(name, tbALERT     , msg, __VA_ARGS__)
+#define tbLOGC(name, msg, ...)  tbLOG(name, tbCRITICAL  , msg, __VA_ARGS__)
+#define tbLOGR(name, msg, ...)  tbLOG(name, tbERROR     , msg, __VA_ARGS__)
+#define tbLOGW(name, msg, ...)  tbLOG(name, tbWARNING   , msg, __VA_ARGS__)
+#define tbLOGN(name, msg, ...)  tbLOG(name, tbNOTICE    , msg, __VA_ARGS__)
+#define tbLOGI(name, msg, ...)  tbLOG(name, tbINFO      , msg, __VA_ARGS__)
+#define tbLOGD(name, msg, ...)  tbLOG(name, tbDEBUG     , msg, __VA_ARGS__)
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__
 

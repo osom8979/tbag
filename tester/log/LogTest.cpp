@@ -8,35 +8,25 @@
 #include <gtest/gtest.h>
 #include <libtbag/log/Log.hpp>
 
+#include <thread>
+#include <chrono>
+
 using namespace libtbag;
 
 TEST(LogTest, Default)
 {
     log::createDefaultConsoleLogger();
 
-    log::getDefaultLogger()->emergency("LOG_EMERGENCY");
-    log::getDefaultLogger()->debug("LOG_DEBUG");
-    log::getDefaultLogger()->informational("LOG_INFORMATIONAL");
+    log::emergency    ("LOG_TEST: emergency");
+    log::alert        ("LOG_TEST: alert");
+    log::critical     ("LOG_TEST: critical");
+    log::error        ("LOG_TEST: error");
+    log::warning      ("LOG_TEST: warning");
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    log::notice       ("LOG_TEST: notice");
+    log::informational("LOG_TEST: informational");
+    log::debug        ("LOG_TEST: debug");
 
     log::removeDefaultLogger();
-
-//    Log::getInstance()->setLevel(Log::LOG_LEVEL_DEBUG);
-//    Log::getInstance()->setDefaultFormat();
-//    Log::getInstance()->setAsyncMode();
-//
-//    Log::getInstance()->setEnableConsole();
-//    Log::getInstance()->setEnableFile();
-//
-//    Log::getInstance()->initConsole();
-//    Log::getInstance()->initFile("Log");
-//
-//    Log::getInstance()->trace("Trace");
-//    Log::getInstance()->debug("Debug");
-//    Log::getInstance()->info("Info");
-//    Log::getInstance()->error("Error");
-//    Log::getInstance()->emerg("Emergency");
-//
-//    _TLOG("TRACE");
-//    _DLOG("DEBUG");
 }
 

@@ -32,7 +32,7 @@ Severity::Severity(DefaultSeverityProperty const & property) noexcept
     // EMPTY.
 }
 
-Severity::Severity(int level) noexcept : Severity(DEFAULT_SEVERITY[level])
+Severity::Severity(LogLevel level) noexcept : Severity(DEFAULT_SEVERITY[static_cast<int>(level)])
 {
     // EMPTY.
 }
