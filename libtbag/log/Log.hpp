@@ -40,23 +40,39 @@ void removeDefaultLogger();
 Logger * getDefaultLogger();
 void setDefaultLevel(LogLevel level);
 
-inline void emergency    (Logger * logger, std::string const & msg) { if (logger) { logger->emergency(msg);     } }
-inline void alert        (Logger * logger, std::string const & msg) { if (logger) { logger->alert(msg);         } }
-inline void critical     (Logger * logger, std::string const & msg) { if (logger) { logger->critical(msg);      } }
-inline void error        (Logger * logger, std::string const & msg) { if (logger) { logger->error(msg);         } }
-inline void warning      (Logger * logger, std::string const & msg) { if (logger) { logger->warning(msg);       } }
-inline void notice       (Logger * logger, std::string const & msg) { if (logger) { logger->notice(msg);        } }
-inline void informational(Logger * logger, std::string const & msg) { if (logger) { logger->informational(msg); } }
-inline void debug        (Logger * logger, std::string const & msg) { if (logger) { logger->debug(msg);         } }
+template <typename ... Args>
+inline void emergency(Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_EMERGENCY, format, std::forward<Args>(args) ...); } }
+template <typename ... Args>
+inline void alert    (Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_ALERT    , format, std::forward<Args>(args) ...); } }
+template <typename ... Args>
+inline void critical (Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_CRITICAL , format, std::forward<Args>(args) ...); } }
+template <typename ... Args>
+inline void error    (Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_ERROR    , format, std::forward<Args>(args) ...); } }
+template <typename ... Args>
+inline void warning  (Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_WARNING  , format, std::forward<Args>(args) ...); } }
+template <typename ... Args>
+inline void notice   (Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_NOTICE   , format, std::forward<Args>(args) ...); } }
+template <typename ... Args>
+inline void info     (Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_INFO     , format, std::forward<Args>(args) ...); } }
+template <typename ... Args>
+inline void debug    (Logger * logger, std::string const & format, Args && ... args) { if (logger) { logger->logf(LogLevel::LEVEL_DEBUG    , format, std::forward<Args>(args) ...); } }
 
-inline void emergency    (std::string const & msg) { emergency    (getDefaultLogger(), msg); }
-inline void alert        (std::string const & msg) { alert        (getDefaultLogger(), msg); }
-inline void critical     (std::string const & msg) { critical     (getDefaultLogger(), msg); }
-inline void error        (std::string const & msg) { error        (getDefaultLogger(), msg); }
-inline void warning      (std::string const & msg) { warning      (getDefaultLogger(), msg); }
-inline void notice       (std::string const & msg) { notice       (getDefaultLogger(), msg); }
-inline void informational(std::string const & msg) { informational(getDefaultLogger(), msg); }
-inline void debug        (std::string const & msg) { debug        (getDefaultLogger(), msg); }
+template <typename ... Args>
+inline void emergency(std::string const & msg, Args && ... args) { emergency(getDefaultLogger(), msg, std::forward<Args>(args) ...); }
+template <typename ... Args>
+inline void alert    (std::string const & msg, Args && ... args) { alert    (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
+template <typename ... Args>
+inline void critical (std::string const & msg, Args && ... args) { critical (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
+template <typename ... Args>
+inline void error    (std::string const & msg, Args && ... args) { error    (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
+template <typename ... Args>
+inline void warning  (std::string const & msg, Args && ... args) { warning  (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
+template <typename ... Args>
+inline void notice   (std::string const & msg, Args && ... args) { notice   (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
+template <typename ... Args>
+inline void info     (std::string const & msg, Args && ... args) { info     (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
+template <typename ... Args>
+inline void debug    (std::string const & msg, Args && ... args) { debug    (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
 
 } // namespace log
 
