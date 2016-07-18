@@ -41,6 +41,7 @@ public:
     using Parent  = BaseSink<Mutex, CharType>;
     using Stream  = std::basic_ofstream<CharType>;
     using Message = typename Parent::Message;
+    using String  = typename Parent::String;
 
     static_assert(std::is_same<typename Stream::char_type, CharType>::value
             , "Stream::char_type and CharType are not same type");
@@ -49,7 +50,7 @@ public:
     Stream _stream;
 
 public:
-    OfstreamSink(std::basic_string<CharType> const & path, bool force_flush = false)
+    OfstreamSink(String const & path, bool force_flush = false)
             : Parent(force_flush), _stream(path /*, std::ios_base::binary | std::ios_base::out */)
     {
         // EMPTY.
@@ -63,7 +64,7 @@ public:
     }
 
 public:
-    virtual void writeReal(std::basic_string<CharType> const & msg) override
+    virtual void writeReal(String const & msg) override
     {
         _stream.write(msg.c_str(), msg.size());
     }

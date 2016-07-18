@@ -39,13 +39,14 @@ class BaseSinkInterface
 {
 public:
     using Message = details::BaseMsgPacket<CharType>;
+    using String  = typename Message::String;
 
 public:
     constexpr BaseSinkInterface() = default;
     virtual ~BaseSinkInterface() = default;
 
 public:
-    virtual void writeReal(std::basic_string<CharType> const & msg) = 0;
+    virtual void writeReal(String const & msg) = 0;
     virtual void flushReal() = 0;
 
 public:

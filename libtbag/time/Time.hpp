@@ -127,7 +127,7 @@ time_t getCurrentTime() noexcept;
 tm * getGmtTime(time_t const & t) noexcept;
 tm * getLocalTime(time_t const & t) noexcept;
 
-std::string getFormatString(std::string const & format, tm const * t, std::size_t allocate_size = 128);
+std::string  getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
 std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size = 128);
 
 template <typename TimeUnit = std::chrono::milliseconds>
