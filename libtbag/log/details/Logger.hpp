@@ -18,6 +18,7 @@
 #include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/log/details/Severity.hpp>
 #include <libtbag/log/sink/Sink.hpp>
+#include <libtbag/log/details/Formatter.hpp>
 
 #include <string>
 #include <memory>
@@ -44,10 +45,12 @@ public:
     using Message  = typename SinkType::Message;
     using SinkPtr  = std::unique_ptr<SinkType>;
     using String   = std::basic_string<CharType>;
+    using Format   = BaseFormatter<CharType>;
 
 private:
     SinkPtr _sink;
     Severity _severity;
+    Format _formatter;
 
 public:
     Logger(SinkType * sink);
@@ -60,37 +63,14 @@ public:
 
 public:
     void log(Message const & msg);
-    void log(LogLevel level, String const & msg);
 
 public:
     template <typename ... Args>
     void logf(LogLevel level, String const & format, Args && ... args)
     {
-        Message msg = SinkType::makeMessage(level);
-        msg.format(format, std::forward<Args>(args) ...);
-        this->log(msg);
+        this->log(SinkType::makeMessage(level
+                , _formatter.getDefaultPrefix(level) + _formatter.format(format, std::forward<Args>(args) ...)));
     }
-
-public:
-    inline void emergency(String const & msg)
-    {   this->log(LogLevel::LEVEL_EMERGENCY, msg);  }
-    inline void alert(String const & msg)
-    {   this->log(LogLevel::LEVEL_ALERT, msg);      }
-    inline void critical(String const & msg)
-    {   this->log(LogLevel::LEVEL_CRITICAL, msg);   }
-    inline void error(String const & msg)
-    {   this->log(LogLevel::LEVEL_ERROR, msg);      }
-    inline void warning(String const & msg)
-    {   this->log(LogLevel::LEVEL_WARNING, msg);    }
-    inline void notice(String const & msg)
-    {   this->log(LogLevel::LEVEL_NOTICE, msg);     }
-    inline void informational(String const & msg)
-    {   this->log(LogLevel::LEVEL_INFO, msg);       }
-    inline void debug(String const & msg)
-    {   this->log(LogLevel::LEVEL_DEBUG, msg);      }
-
-public:
-    friend Logger & operator <<(Logger & logger, Message const & msg);
 };
 
 } // namespace details

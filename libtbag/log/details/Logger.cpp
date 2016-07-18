@@ -48,17 +48,6 @@ void Logger::log(Message const & msg)
     }
 }
 
-void Logger::log(LogLevel level, String const & msg)
-{
-    this->log(Message(Severity(level), msg));
-}
-
-Logger & operator <<(Logger & logger, Logger::Message const & msg)
-{
-    logger.log(msg);
-    return logger;
-}
-
 } // namespace details
 } // namespace log
 

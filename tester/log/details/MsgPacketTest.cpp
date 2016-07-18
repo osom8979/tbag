@@ -32,15 +32,5 @@ TEST(MsgPacketTest, Operator)
     packet << &test;
     ASSERT_GT(std::stoul(packet.getStringPointer()), 0U);
     packet.clearString();
-
-    packet.format("{}", 50);
-    ASSERT_EQ(packet.getString(), "50");
-    packet.clearString();
-}
-
-TEST(MsgPacketTest, Prefix)
-{
-    MsgPacket packet;
-    std::cout << "MsgPacket default prefix: " << packet.getDefaultPrefix() << std::endl;
 }
 

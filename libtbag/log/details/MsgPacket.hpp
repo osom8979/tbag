@@ -20,9 +20,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/log/details/Severity.hpp>
-#include <libtbag/string/fmt/format.h>
-#include <libtbag/Strings.hpp>
-#include <libtbag/time/Time.hpp>
 
 #include <string>
 #include <sstream>
@@ -219,47 +216,6 @@ public:
     __LEFT_SHIFT_OPERATOR(void *, value, std::to_string(reinterpret_cast<std::size_t>(value)));
     __LEFT_SHIFT_OPERATOR(ValueType const *, value, value);
     __LEFT_SHIFT_OPERATOR(String const &, value, value);
-
-public:
-    template <typename ... Args>
-    BaseMsgPacket & format(String const & format_string, Args && ... args)
-    {
-        _message = fmt::format(format_string, std::forward<Args>(args) ...);
-        return *this;
-    }
-
-private:
-    String getMillisecFormat(std::chrono::system_clock::time_point const & time_point) const
-    {
-        String result;
-        time::getMillisecString(time_point, result);
-        return String(CHAR_OR_WIDECHAR(ValueType, ",")) + result;
-    }
-
-public:
-    String getDefaultPrefix() const
-    {
-        std::basic_stringstream<ValueType> ss;
-
-        // Timestamp.
-        auto tp = time::getNowSystemClock();
-        time_t time = time::getTime(tp);
-        ss << time::getFormatString(time::getDefaultTimestampLongFormat<ValueType>(), time::getLocalTime(time));
-
-        // Milliseconds.
-        ss << getMillisecFormat(tp);
-
-        // Current thread.
-        ss << CHAR_OR_WIDECHAR(ValueType, " @");
-        ss << std::this_thread::get_id();
-
-        // Severity.
-        ss << CHAR_OR_WIDECHAR(ValueType, " [");
-        ss << _severity.getText();
-        ss << CHAR_OR_WIDECHAR(ValueType, "] ");
-
-        return ss.str();
-    }
 };
 
 using MsgPacket     = BaseMsgPacket<char>;

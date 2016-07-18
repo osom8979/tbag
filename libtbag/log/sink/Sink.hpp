@@ -92,7 +92,7 @@ public:
     {
         std::lock_guard<Mutex> guard(_mutex);
 
-        this->writeReal(msg.getDefaultPrefix() + msg.getString() + CHAR_OR_WIDECHAR(Value, "\n"));
+        this->writeReal(msg.getString() + CHAR_OR_WIDECHAR(Value, "\n"));
         if (_force_flush) {
             this->flushReal();
         }
