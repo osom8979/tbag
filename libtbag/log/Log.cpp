@@ -19,11 +19,11 @@ namespace log {
 
 using LoggerManager = ::libtbag::log::details::LoggerManager;
 
-Logger * createDefaultConsoleLogger()
+Logger * createDefaultConsoleLogger(bool auto_flush)
 {
     try {
         using namespace ::libtbag::log::sink;
-        Logger * logger = new Logger(new CoutSink<std::mutex>(true));
+        Logger * logger = new Logger(new CoutSink<std::mutex>(auto_flush));
         LoggerManager::getInstance()->addLogger(TBAG_DEFAULT_LOGGER_NAME, logger);
         return logger;
     } catch (...) {
@@ -41,26 +41,32 @@ Logger * createDefaultFileLogger(std::string const & path, bool auto_flush)
     return nullptr;
 }
 
-Logger * getDefaultLogger()
+Logger * getLogger(std::string const & name)
 {
     try {
-        return LoggerManager::getInstance()->getLoggerPtr(TBAG_DEFAULT_LOGGER_NAME);
+        return LoggerManager::getInstance()->getLoggerPtr(name);
     } catch (...) {
         // EMPTY.
     }
     return nullptr;
 }
 
+Logger * getDefaultLogger()
+{
+    return getLogger(TBAG_DEFAULT_LOGGER_NAME);
+}
+
+void setLevel(std::string const & name, LogLevel level)
+{
+    Logger * logger = getLogger(name);
+    if (logger != nullptr) {
+        logger->setLogLevel(level);
+    }
+}
+
 void setDefaultLevel(LogLevel level)
 {
-    try {
-        Logger * logger = LoggerManager::getInstance()->getLoggerPtr(TBAG_DEFAULT_LOGGER_NAME);
-        if (logger != nullptr) {
-            logger->setLogLevel(level);
-        }
-    } catch (...) {
-        // EMPTY.
-    }
+    setLevel(TBAG_DEFAULT_LOGGER_NAME, level);
 }
 
 void removeDefaultLogger()

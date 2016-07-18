@@ -28,14 +28,14 @@ TEST(LogTest, Default)
     log::info     ("LogTest: info");
     log::debug    ("LogTest: debug");
 
-    log::emergency("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
-    log::alert    ("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
-    log::critical ("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
-    log::error    ("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
-    log::warning  ("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
-    log::notice   ("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
-    log::info     ("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
-    log::debug    ("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogE("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogA("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogC("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogR("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogW("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogN("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogI("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
+    tDLogD("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "TEST", 0.1, 'T');
 
     log::removeDefaultLogger();
 }
