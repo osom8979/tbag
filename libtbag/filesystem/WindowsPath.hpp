@@ -196,8 +196,8 @@ public:
 // Node operators.
 public:
     static std::vector<String> splitNodes(String const & path) {
-        return Strings::splitTokens(getGeneric(path),
-                                    getGenericPathSeparatorString());
+        return string::splitTokens(getGeneric(path),
+                                   getGenericPathSeparatorString());
     }
 };
 

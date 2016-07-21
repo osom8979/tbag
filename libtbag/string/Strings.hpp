@@ -27,6 +27,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
+namespace string {
+
 template <typename T>
 constexpr T const * charOrWidechar(char const * c, wchar_t const * w);
 
@@ -43,8 +45,53 @@ constexpr wchar_t const * charOrWidechar<wchar_t>(char const * c, wchar_t const 
 }
 
 #ifndef CHAR_OR_WIDECHAR
-#define CHAR_OR_WIDECHAR(type, str) ::libtbag::charOrWidechar<type>(str, L##str)
+#define CHAR_OR_WIDECHAR(type, str) ::libtbag::string::charOrWidechar<type>(str, L##str)
 #endif
+
+/**
+ * Separate tokens.
+ *
+ * @param source    [in] Original string.
+ * @param delimiter [in] Delimiter string.
+ *
+ * @return
+ *  Token vector.
+ */
+template <typename CharType = char>
+std::vector<std::basic_string<CharType> > splitTokens(
+          std::basic_string<CharType> const & source
+        , std::basic_string<CharType> const & delimiter)
+{
+    using String = std::basic_string<CharType>;
+    using StringVector = std::vector<String>;
+
+    StringVector result;
+    String token;
+
+    size_t start = 0;
+    size_t end   = source.find(delimiter);
+
+    while (end != String::npos) {
+        token = source.substr(start, end - start);
+        if (token.empty() == false) {
+            result.push_back(token);
+        }
+
+        // Calculate next token index.
+        start = end + delimiter.length();
+        end   = source.find(delimiter, start);
+    }
+
+    // Last token.
+    token = source.substr(start, end);
+    if (token.empty() == false) {
+        result.push_back(token);
+    }
+
+    return result;
+}
+
+} // namespace string
 
 /**
  * String utility class.
@@ -77,43 +124,6 @@ public:
     ~BaseStrings() noexcept = default;
 
 public:
-    /**
-     * Separate tokens.
-     *
-     * @param source    [in] Original string.
-     * @param delimiter [in] Delimiter string.
-     *
-     * @return
-     *  Token vector.
-     */
-    static std::vector<String> splitTokens(String const & source
-                                         , String const & delimiter) {
-        std::vector<String> result;
-        String token;
-
-        std::size_t start = 0;
-        std::size_t end = source.find(delimiter);
-
-        while (end != String::npos) {
-            token = source.substr(start, end - start);
-            if (token.size() > 0) {
-                result.push_back(token);
-            }
-
-            // Calculate next token index.
-            start = end + delimiter.length();
-            end = source.find(delimiter, start);
-        }
-
-        // Last token.
-        token = source.substr(start, end);
-        if (token.size() > 0) {
-            result.push_back(token);
-        }
-
-        return result;
-    }
-
     /**
      * Regex based token.
      */

@@ -20,41 +20,41 @@ TEST(StringsTest, splitTokens)
     std::string content;
 
     content = std::string() + delimiter;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 0U);
 
     content = std::string() + delimiter + delimiter;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 0U);
 
     content = std::string() + delimiter + delimiter + temp1;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 1U);
     ASSERT_EQ(path_set[0], temp1);
 
     content = std::string() + delimiter + delimiter + temp1;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 1U);
     ASSERT_EQ(path_set[0], temp1);
 
     content = temp1;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 1U);
     ASSERT_EQ(path_set[0], temp1);
 
     content = temp1 + delimiter;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 1U);
     ASSERT_EQ(path_set[0], temp1);
 
     content = temp1 + delimiter + temp2;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 2U);
     ASSERT_EQ(path_set[0], temp1);
     ASSERT_EQ(path_set[1], temp2);
 
     content = temp1 + delimiter + temp2 + delimiter;
-    path_set = Strings::splitTokens(content, delimiter);
+    path_set = string::splitTokens(content, delimiter);
     ASSERT_EQ(path_set.size(), 2U);
     ASSERT_EQ(path_set[0], temp1);
     ASSERT_EQ(path_set[1], temp2);

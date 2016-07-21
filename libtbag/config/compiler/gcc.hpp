@@ -29,7 +29,18 @@
 #define __COMP_GNUC_VERSION__ 0
 #endif
 
-// Test regex:  GCC, C++, GCC < 4.9
+/**
+ * @def CHECK_GNUC_CXX_REGEX
+ *
+ * Test regex: GCC, C++, GCC < 4.9
+ *
+ * @remarks
+ *  Usage:
+ *  @code{.cpp}
+ *   #define CHECK_GNUC_CXX_REGEX
+ *   #include <libtbag/predef.hpp>
+ *  @endcode
+ */
 #if defined(CHECK_GNUC_CXX_REGEX)
 # if defined(__COMP_GNUC_CXX__) && !defined(__clang__)
 #  if (__COMP_GNUC_VERSION__ < 40900)

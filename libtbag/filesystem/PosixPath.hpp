@@ -177,8 +177,8 @@ public:
 public:
     static std::vector<String> splitNodes(String const & path) {
         std::vector<String> result =
-                Strings::splitTokens(getGeneric(path),
-                                     getGenericPathSeparatorString());
+                string::splitTokens(getGeneric(path),
+                                    getGenericPathSeparatorString());
         String root = getRootDir(path);
         if (!root.empty()) {
             // Force insert the POSIX root directory.
