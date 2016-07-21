@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Strings.hpp>
+#include <libtbag/string/Strings.hpp>
 
 #include <ctime>
 

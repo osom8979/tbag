@@ -18,7 +18,7 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/filesystem/Common.hpp>
-#include <libtbag/Strings.hpp>
+#include <libtbag/string/Strings.hpp>
 
 #include <cassert>
 #include <string>

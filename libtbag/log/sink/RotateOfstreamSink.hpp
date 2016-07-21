@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/log/sink/OfstreamSink.hpp>
 #include <libtbag/time/Time.hpp>
-#include <libtbag/Strings.hpp>
+#include <libtbag/string/Strings.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

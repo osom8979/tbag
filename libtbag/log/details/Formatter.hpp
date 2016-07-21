@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/string/fmt/format.h>
-#include <libtbag/Strings.hpp>
+#include <libtbag/string/Strings.hpp>
 #include <libtbag/time/Time.hpp>
 #include <libtbag/log/details/Severity.hpp>
 

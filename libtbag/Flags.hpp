@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Strings.hpp>
+#include <libtbag/string/Strings.hpp>
 
 #include <string>
 #include <vector>

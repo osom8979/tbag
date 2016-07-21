@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/lock/FakeLock.hpp>
-#include <libtbag/Strings.hpp>
+#include <libtbag/string/Strings.hpp>
 
 #include <string>
 #include <mutex>
