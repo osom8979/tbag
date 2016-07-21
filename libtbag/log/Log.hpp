@@ -34,6 +34,7 @@ using Logger   = ::libtbag::log::details::Logger;
 using LogLevel = ::libtbag::log::details::LogLevel;
 
 Logger * createDefaultConsoleLogger(bool auto_flush = false);
+Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
 Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
 void removeDefaultLogger();
 

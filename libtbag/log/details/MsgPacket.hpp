@@ -56,55 +56,21 @@ private:
     String   _message;
 
 public:
-    BaseMsgPacket() : _severity(LogLevel::LEVEL_INFO), _message()
-    {
-        // EMPTY.
-    }
+    // @formatter:off
+    BaseMsgPacket()                                               : _severity(LogLevel::LEVEL_INFO), _message()    { }
+    BaseMsgPacket(LogLevel level)                                 : _severity(level),                _message()    { }
+    BaseMsgPacket(Severity  const & severity)                     : _severity(severity),             _message()    { }
+    BaseMsgPacket(String    const & msg)                          : _severity(LogLevel::LEVEL_INFO), _message(msg) { }
+    BaseMsgPacket(ValueType const * msg)                          : _severity(LogLevel::LEVEL_INFO), _message(msg) { }
+    BaseMsgPacket(Severity  const & severity, String const & msg) : _severity(severity),             _message(msg) { }
+    virtual ~BaseMsgPacket() { }
+    // @formatter:on
 
-    BaseMsgPacket(String const & message)
-            : _severity(LogLevel::LEVEL_INFO), _message(message)
-    {
-        // EMPTY.
-    }
-
-    BaseMsgPacket(ValueType const * message)
-            : _severity(LogLevel::LEVEL_INFO), _message(message)
-    {
-        // EMPTY.
-    }
-
-    BaseMsgPacket(Severity const & severity)
-            : _severity(severity), _message()
-    {
-        // EMPTY.
-    }
-
-    BaseMsgPacket(LogLevel level)
-            : _severity(level), _message()
-    {
-        // EMPTY.
-    }
-
-    BaseMsgPacket(Severity const & severity, String const & message)
-            : _severity(severity), _message(message)
-    {
-        // EMPTY.
-    }
-
+public:
     BaseMsgPacket(BaseMsgPacket const & obj) : BaseMsgPacket()
-    {
-        this->copy(obj);
-    }
-
+    { this->copy(obj); }
     BaseMsgPacket(BaseMsgPacket && obj) : BaseMsgPacket()
-    {
-        this->swap(obj);
-    }
-
-    virtual ~BaseMsgPacket()
-    {
-        // EMPTY.
-    }
+    { this->swap(obj); }
 
 public:
     BaseMsgPacket & operator =(BaseMsgPacket const & obj)
@@ -130,15 +96,11 @@ public:
         return *this;
     }
 
-    operator ValueType const * () const noexcept
-    {
-        return _message.c_str();
-    }
-
-    operator String () const
-    {
-        return _message;
-    }
+public:
+    inline operator ValueType const * () const noexcept
+    { return _message.c_str(); }
+    inline operator String () const
+    { return _message; }
 
 public:
     BaseMsgPacket & copy(BaseMsgPacket const & obj)

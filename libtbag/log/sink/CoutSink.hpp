@@ -37,6 +37,7 @@ class CoutSink : public StreamSink<std::basic_ostream<char>, Mutex, char>
 public:
     using Stream  = std::basic_ostream<char>;
     using Parent  = StreamSink<Stream, Mutex, char>;
+    using String  = typename Parent::String;
     using Message = typename Parent::Message;
 
 public:

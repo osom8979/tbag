@@ -31,6 +31,9 @@ using SeverityFlagType = uint32_t;
 
 static_assert(std::is_unsigned<SeverityFlagType>::value, "SeverityFlagType must be a unsigned");
 
+#define SEVERITY_FLAG_CHECK(value, check) \
+        ((check & value) == value)
+
 /**
  * List of severity.
  *
@@ -84,7 +87,6 @@ enum class LogLevel : int
     LEVEL_DEBUG     = ::libtbag::log::details::LOG_SEVERITY_DEBUG,
     LEVEL_OFF       = ::libtbag::log::details::LOG_SEVERITY_OFF,
 };
-
 
 inline const char * const getLogString(int level) noexcept
 {
