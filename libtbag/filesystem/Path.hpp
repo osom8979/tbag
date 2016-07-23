@@ -112,7 +112,7 @@ public:
     }
 
     BasePath(std::initializer_list<String> list) {
-        for (auto cursor : list) {
+        for (auto & cursor : list) {
             this->append(cursor);
         }
     }
@@ -289,7 +289,7 @@ public:
     }
 
     BasePath & append(std::vector<String> const & nodes) {
-        for (auto cursor : nodes) {
+        for (auto & cursor : nodes) {
             this->append(cursor);
         }
         return *this;

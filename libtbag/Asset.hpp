@@ -166,7 +166,7 @@ public:
 public:
     Path find(String const & name) {
         Path path;
-        for (auto cursor : this->_dirs) {
+        for (auto & cursor : this->_dirs) {
             path = (cursor.second / name);
             if (filesystem::common::existsFile(path) == true) {
                 return path;
@@ -182,7 +182,7 @@ public:
 
     static std::vector<Path> scanDir(Path const & path) {
         std::vector<Path> result;
-        for (auto cursor : filesystem::common::scanDir(path.getNativeString())) {
+        for (auto & cursor : filesystem::common::scanDir(path.getNativeString())) {
             result.push_back(Path(Path::append(path, cursor)));
         }
         return result;

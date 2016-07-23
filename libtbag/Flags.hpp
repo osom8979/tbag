@@ -140,7 +140,7 @@ public:
 
     void parse(String const & args) {
         clear();
-        for (auto cursor : splitTokens(args)) {
+        for (auto & cursor : splitTokens(args)) {
             push(convertFlag(cursor));
         }
     }

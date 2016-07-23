@@ -217,7 +217,7 @@ bool Resource::save(std::string const & path, std::string const & tag, Map const
     Document doc;
     Node * node = doc.InsertFirstChild(doc.NewElement(ROOT_TAG));
 
-    for (auto cursor : map) {
+    for (auto & cursor : map) {
         Element * element = doc.NewElement(tag.c_str());
         element->SetAttribute(NAME_ATTRIBUTE, cursor.first.c_str());
         element->SetText(cursor.second.c_str());

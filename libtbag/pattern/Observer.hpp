@@ -98,7 +98,7 @@ public:
         this->_locker.unlock();
         //}
 
-        for (auto cursor : clone) {
+        for (auto & cursor : clone) {
             cursor();
         }
     }
