@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/thread/TaskExecutor.hpp>
+#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::thread;

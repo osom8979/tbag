@@ -17,14 +17,29 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/thread/ThreadGroup.hpp>
 #include <libtbag/Exception.hpp>
+#include <libtbag/lock/SpinLock.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <queue>
 #include <memory>
 #include <chrono>
-#include <atomic>
 #include <mutex>
 #include <functional>
 #include <condition_variable>
+
+//#define ENABLE_TASKEXECUTOR_DEBUG
+
+#if defined(ENABLE_TASKEXECUTOR_DEBUG)
+# define __TASKEXECUTOR_DEBUG_PREFIX         "[TaskExecutor] "
+# define __TASKEXECUTOR_DEBUG(m)             tDLogD(__TASKEXECUTOR_DEBUG_PREFIX m)
+# define __TASKEXECUTOR_DEBUG_FORMAT(m, ...) tDLogDF(__TASKEXECUTOR_DEBUG_PREFIX m, __VA_ARGS__)
+#else
+# define __TASKEXECUTOR_DEBUG(m)
+# define __TASKEXECUTOR_DEBUG_FORMAT(m, ...)
+#endif
+
+#define __ENTER_TASKEXECUTOR_LOCK(mutex) __TASKEXECUTOR_DEBUG("LOCK!!"); mutex.lock();
+#define __LEAVE_TASKEXECUTOR_LOCK(mutex) __TASKEXECUTOR_DEBUG("UNLOCK"); mutex.unlock();
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -50,121 +65,166 @@ public:
     using Signal = std::condition_variable;
 
 private:
-    std::atomic_bool _exit;
-    std::atomic_int _wait_count;
     ThreadGroup _threads;
 
 private:
-    std::mutex _thread_mutex;
-    Signal _thread_condition;
-
-public:
-    TaskExecutor() : _exit(false), _wait_count(0) {
-        __EMPTY_BLOCK__
-    }
-
-    ~TaskExecutor() {
-        this->clear();
-        this->exit();
-        this->join();
-    }
-
-private:
-    mutable std::mutex _queue_lock;
+    mutable std::mutex _locker;
+    Signal    _condition;
     TaskQueue _queue;
+    bool      _exit;
 
 public:
-    bool push(Task const & task) {
-        if (_exit.load()) {
+    TaskExecutor() : _exit(false)
+    {
+#if defined(ENABLE_TASKEXECUTOR_DEBUG)
+        if (log::getDefaultLogger() == nullptr) {
+            log::createDefaultColorConsoleLogger();
+            log::setDefaultLevel(log::LogLevel::LEVEL_DEBUG);
+        }
+#endif
+        __TASKEXECUTOR_DEBUG("TaskExecutor()");
+    }
+
+    ~TaskExecutor()
+    {
+        this->exit();
+        this->clear();
+        this->join();
+        __TASKEXECUTOR_DEBUG("~TaskExecutor()");
+    }
+
+public:
+    bool push(Task const & task)
+    {
+        SharedTask new_task;
+        try {
+            new_task = SharedTask(new Task(task));
+        } catch (...) {
             return false;
         }
 
-        std::lock_guard<std::mutex> guard(this->_queue_lock);
-        this->_queue.push(SharedTask(new (std::nothrow) Task(task)));
-        this->_thread_condition.notify_one();
-        return true;
-    }
+        bool result = false;
 
-    SharedTask pop() {
-        std::lock_guard<std::mutex> guard(this->_queue_lock);
-        if (this->_queue.empty()) {
-            return SharedTask();
+        __ENTER_TASKEXECUTOR_LOCK(_locker);
+        if (_exit == false) {
+            _queue.push(new_task);
+            result = true;
         }
+        __LEAVE_TASKEXECUTOR_LOCK(_locker);
 
-        SharedTask result = this->_queue.front();
-        this->_queue.pop();
-        this->_thread_condition.notify_one();
+        _condition.notify_one();
         return result;
     }
 
-    void clear() {
-        std::lock_guard<std::mutex> guard(this->_queue_lock);
-        while (this->_queue.empty() == false) {
-            this->_queue.pop();
+    SharedTask pop()
+    {
+        SharedTask result;
+
+        __ENTER_TASKEXECUTOR_LOCK(_locker);
+        if (_queue.empty() == false) {
+            result = this->_queue.front();
+            _queue.pop();
         }
-        this->_thread_condition.notify_all();
+        __LEAVE_TASKEXECUTOR_LOCK(_locker);
+
+        _condition.notify_one();
+        return result;
     }
 
-    std::size_t sizeOfQueue() const {
-        std::lock_guard<std::mutex> guard(this->_queue_lock);
-        return this->_queue.size();
+    void clear()
+    {
+        __ENTER_TASKEXECUTOR_LOCK(_locker);
+        while (_queue.empty() == false) {
+            _queue.pop();
+        }
+        __LEAVE_TASKEXECUTOR_LOCK(_locker);
+        _condition.notify_all();
+    }
+
+    void exit(bool flag = true)
+    {
+        __ENTER_TASKEXECUTOR_LOCK(_locker);
+        _exit = flag;
+        __LEAVE_TASKEXECUTOR_LOCK(_locker);
+        _condition.notify_all();
+    }
+
+    bool isExit() const
+    {
+        std::lock_guard<std::mutex> guard(_locker);
+        return _exit;
+    }
+
+    std::size_t sizeOfQueue() const
+    {
+        std::lock_guard<std::mutex> guard(_locker);
+        return _queue.size();
+    }
+
+    bool emptyOfQueue() const
+    {
+        std::lock_guard<std::mutex> guard(_locker);
+        return _queue.empty();
     }
 
 private:
-    void runner() {
-        std::unique_lock<std::mutex> locker(this->_thread_mutex);
-        SharedTask current_task;
+    void runner()
+    {
+        __TASKEXECUTOR_DEBUG("runner() START");
 
         do {
-            // IMPORTANT: Don't change condition check order.
-            if (this->sizeOfQueue() == 0 && this->_exit.load() == false) {
-                this->_thread_condition.wait_for(locker, std::chrono::milliseconds(1));
+            __TASKEXECUTOR_DEBUG("runner() LOCK");
+            {
+                std::unique_lock<std::mutex> locker(_locker);
+                _condition.wait(locker, [&]() -> bool {
+                    return (_exit || _queue.empty() == false);
+                });
             }
+            __TASKEXECUTOR_DEBUG("runner() UNLOCK");
 
-            current_task = this->pop();
+            SharedTask current_task = this->pop();
             while (current_task.get() != nullptr) {
-                if (static_cast<bool>(*current_task) == true) {
+                if (static_cast<bool>(*current_task)) {
                     (*current_task)();
                 }
                 current_task = this->pop();
             }
-        } while (this->_exit.load() == false);
+        } while (isExit() == false);
+
+        __TASKEXECUTOR_DEBUG("runner() END");
     }
 
 public:
     void runAsync(std::size_t size = 1U) throw (IllegalArgumentException) {
+        __TASKEXECUTOR_DEBUG_FORMAT("runAsync({})", size);
         if (size == 0) {
             throw (IllegalArgumentException());
         }
 
         for (std::size_t cursor = 0; cursor < size; ++cursor) {
-            this->_threads.createThread(&TaskExecutor::runner, this);
+            _threads.createThread(&TaskExecutor::runner, this);
         }
     }
 
-    void reset() {
+    void reset()
+    {
         this->clear();
-        this->setExit(false);
+        this->exit(false);
 
-        this->_threads.joinAll();
-        this->_threads.clear();
+        _threads.joinAll();
+        _threads.clear();
     }
 
-    void setExit(bool flag = true) {
-        this->_exit.store(flag);
-        this->_thread_condition.notify_all();
+    void join()
+    {
+        __TASKEXECUTOR_DEBUG("join() START");
+        _threads.joinAll();
+        __TASKEXECUTOR_DEBUG("join() END");
     }
 
-    void exit() {
-        this->setExit(true);
-    }
-
-    void join() {
-        this->_threads.joinAll();
-    }
-
-    std::size_t getThreadCount() const noexcept {
-        return this->_threads.size();
+    std::size_t getThreadCount() const noexcept
+    {
+        return _threads.size();
     }
 };
 

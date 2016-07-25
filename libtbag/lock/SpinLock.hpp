@@ -41,7 +41,6 @@ private:
 
 public:
     SpinLock() : _state(UNLOCKED) {
-        __EMPTY_BLOCK__
     }
 
 public:
