@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/id/Id.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,7 +39,7 @@ public:
     IMPLEMENT_GET_CLASS_NAME(Object);
 
 public:
-    typedef std::size_t Id;
+    using Id = id::Id;
 
 private:
     Id _id;
