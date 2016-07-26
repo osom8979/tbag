@@ -141,6 +141,16 @@ public:
         return true;
     }
 
+    bool push(ValueType && value)
+    {
+        LockGuard guard(_mutex);
+        if (_cleaning == true) {
+            return false;
+        }
+        _insert_queue.push_back(value);
+        return true;
+    }
+
 public:
     bool work(Worker const & worker)
     {
