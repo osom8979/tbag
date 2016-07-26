@@ -21,6 +21,20 @@
 
 Tea-bag is Third party extension utility project.
 
+## Dependencies
+
+- dep
+ - gtest 1.7.0 (BSD 3-clause license)
+ - icu4c 57.1 (ICU license; http://source.icu-project.org/repos/icu/icu/trunk/LICENSE)
+ - lua 5.3.3 (MIT license)
+ - libuv 1.9.1 (MIT license)
+- inline
+ - stx-btree 0.9 (Boost Software License, Version 1.0): libtbag/container/stx
+ - sqlite 3.13.0 (Public Domain): libtbag/database/sqlite3
+ - google-glog 0.3.4 (BSD 3-clause license): libtbag/debug/demangle
+ - TinyXML2 3.0.0 (zlib license): libtbag/dom/tinyxml2
+ - fmt 3.0.0 (BSD license): libtbag/string/fmt
+
 ## LICENSE
 
 Compatible with zlib license.
