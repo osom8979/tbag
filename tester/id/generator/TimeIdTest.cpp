@@ -14,9 +14,10 @@ using namespace libtbag::id::generator;
 
 TEST(TimeIdTest, Default)
 {
-    int const TEST_COUNT = 10000;
+    int const TEST_COUNT = 1000;
     for (int i = 0; i < TEST_COUNT; ++i) {
-        ASSERT_NE(genTimeId(), genTimeId());
+        ASSERT_NE(genTimeId(true), genTimeId(true));
+        ASSERT_NE(genTimeId(false), genTimeId(false));
     }
 }
 

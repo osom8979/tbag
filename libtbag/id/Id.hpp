@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <cstdint>
+#include <cstddef>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

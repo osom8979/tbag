@@ -24,10 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace id        {
 namespace generator {
 
-inline Id genTimeId()
-{
-    return static_cast<Id>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-}
+Id genTimeId(bool sleep_wait = false);
 
 } // namespace generator
 } // namespace id
