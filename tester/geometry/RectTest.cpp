@@ -93,7 +93,7 @@ TEST(RectTest, CheckInside)
     ASSERT_FALSE(checkInside(r, p6));
 }
 
-TEST(RectTest, Utility)
+TEST(RectTest, clipRect_true)
 {
     /*
      *  0 |  10  20  30  40  50
@@ -109,10 +109,28 @@ TEST(RectTest, Utility)
      *    |
      * 50 |
      */
-    Rect r = clipRect(Rect{ {20, 20}, {20, 20} }, Rect{ {30, 30}, {-20, -20} });
-    Rect predict = { {20, 20}, {10, 10} };
+    Rect clip;
+    ASSERT_TRUE(clipRect(Rect{ {20, 20}, {20, 20} }, Rect{ {30, 30}, {-20, -20} }, &clip));
 
-    ASSERT_EQ(r, predict);
+    Rect predict = { {20, 20}, {10, 10} };
+    ASSERT_EQ(clip, predict);
+}
+
+TEST(RectTest, clipRect_false)
+{
+    /*
+     *  0 |  10  20  30  40  50
+     * ---+--------------------
+     *    |
+     * 10 |           +---+
+     *    |           |   |
+     * 20 |   +---+   +---+
+     *    |   |   |
+     * 30 |   +---+
+     *    |
+     * 40 |
+     */
+    ASSERT_FALSE(clipRect(Rect{ {10, 20}, {10, 10} }, Rect{ {30, 10}, {10, 10} }));
 }
 
 TEST(RectTest, String)

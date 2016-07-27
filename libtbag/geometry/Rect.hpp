@@ -219,22 +219,45 @@ checkInside(BaseRect<T> const & base, BasePoint<T> const & p) noexcept
     return checkInside(base, p.x, p.y);
 }
 
+template <typename T>
+inline bool
+checkOverlap(BaseRect<T> const & r1, BaseRect<T> const & r2, BaseRect<T> & overlap)
+{
+    T x_tl = std::max(getLeftTopX(r1), getLeftTopX(r2));
+    T y_tl = std::max(getLeftTopY(r1), getLeftTopY(r2));
+    T x_br = std::min(getRightBottomX(r1), getRightBottomX(r2));
+    T y_br = std::min(getRightBottomY(r1), getRightBottomY(r2));
+
+    if (x_tl < x_br && y_tl < y_br) {
+        overlap = makeRect(x_tl, y_tl, x_br - x_tl, y_br - y_tl);
+        return true;
+    }
+    return false;
+}
+
 // ---------
 // Clipping.
 // ---------
 
 template <typename T>
-inline BaseRect<typename remove_cr<T>::type>
-clipRect(BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
+inline bool
+clipRect(BaseRect<T> const & r1, BaseRect<T> const & r2, BaseRect<T> * clip = nullptr) noexcept
 {
-    typedef typename remove_cr<T>::type __remove_cr;
-    typedef BaseRect<__remove_cr> __rect_type;
-    __rect_type result;
-    result.point.x = std::max(getLeftTopX(r1), getLeftTopX(r2));
-    result.point.y = std::max(getLeftTopY(r1), getLeftTopY(r2));
-    result.size.w = std::min(getRightBottomX(r1), getRightBottomX(r2)) - result.point.x;
-    result.size.h = std::min(getRightBottomY(r1), getRightBottomY(r2)) - result.point.y;
-    return result;
+    T lt_x = std::max(getLeftTopX(r1), getLeftTopX(r2));
+    T lt_y = std::max(getLeftTopY(r1), getLeftTopY(r2));
+    T rb_x = std::min(getRightBottomX(r1), getRightBottomX(r2));
+    T rb_y = std::min(getRightBottomY(r1), getRightBottomY(r2));
+
+    if (lt_x < rb_x && lt_y < rb_y) {
+        if (clip != nullptr) {
+            clip->point.x = lt_x;
+            clip->point.y = lt_y;
+            clip->size.w  = rb_x - lt_x;
+            clip->size.h  = rb_y - lt_y;
+        }
+        return true;
+    }
+    return false;
 }
 
 // -------------------
