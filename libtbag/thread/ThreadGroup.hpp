@@ -42,91 +42,33 @@ private:
     List _list;
 
 public:
-    ThreadGroup() {
-        __EMPTY_BLOCK__
-    }
-
-    ~ThreadGroup() {
-        clear();
-    }
+    ThreadGroup();
+    ~ThreadGroup();
 
 public:
-    void clear() {
-        lock::WriteLockGuard guard(_lock);
-        for (List::iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
-            delete *itr;
-        }
-        _list.clear();
-    }
+    void clear();
 
 // exists thread.
 public:
-    bool exists(std::thread::id const & id) const {
-        lock::ReadLockGuard guard(_lock);
-        for (List::const_iterator itr = _list.cbegin(), end = _list.cend(); itr != end; ++itr) {
-            if ((*itr)->get_id() == id) {
-                return true;
-            }
-        }
-        return false;
-    }
+    bool exists(std::thread::id const & id) const;
+    bool exists(std::thread const * thread) const;
+    bool existsThis() const;
 
-    bool exists(std::thread const * thread) const {
-        if (thread != nullptr) {
-            return exists(thread->get_id());
-        }
-        return true;
-    }
+public:
+    void addThread(std::thread * thread);
+    void removeThread(std::thread * thread);
 
-    bool existsThis() const {
-        return exists(std::this_thread::get_id());
-    }
+public:
+    void joinAll();
+    std::size_t size() const noexcept;
 
 public:
     template <typename ...Args>
-    std::thread * createThread(Args ... args) {
+    std::thread * createThread(Args ... args)
+    {
         std::thread * create_thread = new (std::nothrow) std::thread(args...);
-        addThread(create_thread);
+        this->addThread(create_thread);
         return create_thread;
-    }
-
-    void addThread(std::thread * thread) {
-        if (thread != nullptr && exists(thread) == false) {
-            lock::WriteLockGuard guard(_lock);
-            _list.push_back(thread);
-        }
-    }
-
-    void removeThread(std::thread * thread) {
-        lock::WriteLockGuard guard(_lock);
-
-        // [WARNING]
-        // Don't use std::find.
-        // Reason: No matching function for call to std::find (in G++).
-        //         'std::find(List::iterator, List::iterator, std::thread * &)'
-        // List::iterator itr = std::find(_list.begin(), _list.end(), thread);
-
-        for (List::iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
-            if ((*itr) == thread) {
-                _list.erase(itr);
-                break;
-            }
-        }
-    }
-
-public:
-    void joinAll() {
-        lock::ReadLockGuard guard(_lock);
-        for (List::iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
-            if ((*itr)->joinable()) {
-                (*itr)->join();
-            }
-        }
-    }
-
-    std::size_t size() const noexcept {
-        lock::ReadLockGuard guard(_lock);
-        return _list.size();
     }
 };
 
