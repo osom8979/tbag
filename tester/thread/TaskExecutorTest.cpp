@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <libtbag/thread/TaskExecutor.hpp>
 
+#include <chrono>
+
 using namespace libtbag;
 using namespace libtbag::thread;
 
@@ -120,11 +122,11 @@ TEST(TaskExecutorTest, joinTask)
     ASSERT_EQ(test, 321);
 
     ASSERT_TRUE(executor.push([](){}));
-    ASSERT_TRUE(joinTask(executor, [&](){ test += 4000; }));
+    ASSERT_TRUE(joinTask(executor, [&](){ test += 4000; std::this_thread::sleep_for(std::chrono::milliseconds(1)); }));
     ASSERT_EQ(test, 4321);
 
     ASSERT_TRUE(executor.push([](){}));
-    ASSERT_TRUE(joinTask(executor, [&](){ test += 50000; }));
+    ASSERT_TRUE(joinTask(executor, [&](){ test += 50000; std::this_thread::sleep_for(std::chrono::nanoseconds(1)); }));
     ASSERT_EQ(test, 54321);
 }
 
