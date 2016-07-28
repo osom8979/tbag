@@ -58,6 +58,7 @@ private:
 
 public:
     TaskExecutor();
+    TaskExecutor(std::size_t size);
     ~TaskExecutor();
 
 public:
@@ -78,6 +79,18 @@ public:
     void join();
     std::size_t getThreadCount() const noexcept;
 };
+
+// ----------------
+// EXTRA UTILITIES.
+// ----------------
+
+/**
+ * Synchronized task process.
+ *
+ * @warning
+ *  Don't use the @c std::condition_variable class.
+ */
+bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task);
 
 } // namespace thread
 

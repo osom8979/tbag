@@ -39,6 +39,11 @@ TaskExecutor::TaskExecutor() : _exit(false)
     __TASKEXECUTOR_DEBUG("TaskExecutor()");
 }
 
+TaskExecutor::TaskExecutor(std::size_t size) : TaskExecutor()
+{
+    this->runAsync(size);
+}
+
 TaskExecutor::~TaskExecutor()
 {
     this->exit();
@@ -177,6 +182,41 @@ void TaskExecutor::join()
 std::size_t TaskExecutor::getThreadCount() const noexcept
 {
     return _threads.size();
+}
+
+// ----------------
+// EXTRA UTILITIES.
+// ----------------
+
+bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
+{
+    std::mutex locker;
+    locker.lock();
+
+    bool is_push = executor.push([&](){
+        task();
+        locker.unlock(); // If the push is successful.
+    });
+    if (is_push == false) {
+        locker.unlock(); // If the push is failed.
+        return false;
+    }
+
+    std::thread thread;
+    try {
+        thread = std::thread([&](){
+            locker.lock();
+        });
+    } catch (...) {
+        locker.unlock();
+        return false;
+    }
+
+    assert(thread.joinable());
+    thread.join();
+    locker.unlock();
+
+    return true;
 }
 
 } // namespace thread

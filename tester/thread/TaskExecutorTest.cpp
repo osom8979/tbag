@@ -7,7 +7,6 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/thread/TaskExecutor.hpp>
-#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::thread;
@@ -98,8 +97,34 @@ TEST(TaskExecutorTest, reset)
 
     executor.exit();
     executor.join();
-    ASSERT_EQ(executor.sizeOfQueue(), 0U);
+    ASSERT_EQ(executor.sizeOfQueue(), 0U); // ERROR!!!
     ASSERT_EQ(t3, TEST_NUMBER);
     ASSERT_EQ(t4, TEST_NUMBER);
+}
+
+TEST(TaskExecutorTest, joinTask)
+{
+    TaskExecutor executor(2U);
+    int test = 0;
+
+    ASSERT_TRUE(executor.push([](){}));
+    ASSERT_TRUE(joinTask(executor, [&](){ test += 1; }));
+    ASSERT_EQ(test, 1);
+
+    ASSERT_TRUE(executor.push([](){}));
+    ASSERT_TRUE(joinTask(executor, [&](){ test += 20; }));
+    ASSERT_EQ(test, 21);
+
+    ASSERT_TRUE(executor.push([](){}));
+    ASSERT_TRUE(joinTask(executor, [&](){ test += 300; }));
+    ASSERT_EQ(test, 321);
+
+    ASSERT_TRUE(executor.push([](){}));
+    ASSERT_TRUE(joinTask(executor, [&](){ test += 4000; }));
+    ASSERT_EQ(test, 4321);
+
+    ASSERT_TRUE(executor.push([](){}));
+    ASSERT_TRUE(joinTask(executor, [&](){ test += 50000; }));
+    ASSERT_EQ(test, 54321);
 }
 
