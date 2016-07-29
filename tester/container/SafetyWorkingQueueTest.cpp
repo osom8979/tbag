@@ -68,6 +68,31 @@ TEST(SafetyWorkingQueueTest, Exception)
     ASSERT_THROW(queue.popFromRemoveQueue(), ContainerEmptyException);
 }
 
+TEST(SafetyWorkingQueueTest, Remove)
+{
+    SafetyWorkingQueue<int> queue;
+    queue.push(100);
+    queue.push(20);
+    queue.push(0);
+    ASSERT_EQ(queue.sizeOfInsertQueue(), 3U);
+
+    ASSERT_TRUE(queue.removeFromInsertQueue([](int const & value) -> bool {
+        return value == 20;
+    }));
+    ASSERT_EQ(queue.sizeOfInsertQueue(), 2U);
+    ASSERT_EQ(queue.getWorkingCount(), 0U);
+    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+
+    ASSERT_TRUE(queue.work());
+    ASSERT_TRUE(queue.work());
+    ASSERT_EQ(queue.sizeOfInsertQueue(), 0U);
+    ASSERT_EQ(queue.getWorkingCount(), 0U);
+    ASSERT_EQ(queue.sizeOfRemoveQueue(), 2U);
+
+    ASSERT_EQ(queue.popFromRemoveQueue(), 100);
+    ASSERT_EQ(queue.popFromRemoveQueue(), 0);
+}
+
 TEST(SafetyWorkingQueueTest, Clear)
 {
     SafetyWorkingQueue<int> queue;

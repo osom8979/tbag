@@ -151,6 +151,16 @@ public:
         return true;
     }
 
+    bool removeFromInsertQueue(std::function<bool(ValueType const &)> const & predicate)
+    {
+        LockGuard guard(_mutex);
+        auto itr = std::find_if(_insert_queue.begin(), _insert_queue.end(), predicate);
+        if (itr == _insert_queue.end()) {
+            return false;
+        }
+        return (_insert_queue.erase(itr) != _insert_queue.end());
+    }
+
 public:
     bool work(Worker const & worker)
     {
@@ -171,6 +181,11 @@ public:
         }
 
         return true;
+    }
+
+    inline bool work()
+    {
+        return this->work([](ValueType&) -> bool { return true; });
     }
 
 public:
