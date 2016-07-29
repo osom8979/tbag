@@ -128,5 +128,9 @@ TEST(TaskExecutorTest, joinTask)
     ASSERT_TRUE(executor.push([](){}));
     ASSERT_TRUE(joinTask(executor, [&](){ test += 50000; std::this_thread::sleep_for(std::chrono::nanoseconds(1)); }));
     ASSERT_EQ(test, 54321);
+
+    executor.exit();
+    ASSERT_FALSE(joinTask(executor, [&](){ test += 600000; }));
+    ASSERT_EQ(test, 54321);
 }
 

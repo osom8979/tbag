@@ -7,6 +7,7 @@
 
 #include <libtbag/thread/TaskExecutor.hpp>
 #include <libtbag/log/Log.hpp>
+#include <chrono>
 
 //#define ENABLE_TASKEXECUTOR_DEBUG
 
@@ -193,30 +194,46 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
     std::mutex locker;
     locker.lock();
 
-    bool is_push = executor.push([&](){
-        task();
-        locker.unlock(); // If the push is successful.
-    });
-    if (is_push == false) {
-        locker.unlock(); // If the push is failed.
-        return false;
-    }
+    // CURRENT LOCKING COUNT: 1
 
     std::thread thread;
     try {
         thread = std::thread([&](){
-            locker.lock();
+#if 0 // TEST CODE
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#endif
+            locker.lock(); // FORCE WAITING.
         });
     } catch (...) {
         locker.unlock();
         return false;
     }
 
+    // CURRENT LOCKING COUNT: 2
+
+    auto const THREAD_LOCKER_UNLOCK_FUNCTOR = [&](){
+        // Thread-locker it is not locked.
+        while (locker.try_lock() == true) {
+            locker.unlock();
+        }
+        locker.unlock();
+    };
+
+    bool is_pushed = executor.push([&](){
+        task();
+        THREAD_LOCKER_UNLOCK_FUNCTOR(); // If the push is successful.
+    });
+    if (is_pushed == false) {
+        THREAD_LOCKER_UNLOCK_FUNCTOR(); // If the push is failed.
+    }
+
+    // CURRENT LOCKING COUNT: 1
+
     assert(thread.joinable());
     thread.join();
     locker.unlock();
 
-    return true;
+    return is_pushed;
 }
 
 } // namespace thread
