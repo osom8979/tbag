@@ -194,8 +194,6 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
     std::mutex locker;
     locker.lock();
 
-    // CURRENT LOCKING COUNT: 1
-
     std::thread thread;
     try {
         thread = std::thread([&](){
@@ -209,7 +207,7 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
         return false;
     }
 
-    // CURRENT LOCKING COUNT: 2
+    // CURRENT LOCKING COUNT: 2(Working thread) OR 1(Not working thread)
 
     auto const THREAD_LOCKER_UNLOCK_FUNCTOR = [&](){
         // Thread-locker it is not locked.
@@ -226,8 +224,6 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
     if (is_pushed == false) {
         THREAD_LOCKER_UNLOCK_FUNCTOR(); // If the push is failed.
     }
-
-    // CURRENT LOCKING COUNT: 1
 
     assert(thread.joinable());
     thread.join();
