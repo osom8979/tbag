@@ -103,8 +103,9 @@ public:
         auto end = _remove_queue.end();
         for (auto itr = _remove_queue.begin(); itr != end; ++itr) {
             if (predicate(*itr) == true) {
+                ValueType result = *itr;
                 _remove_queue.erase(itr);
-                return *itr;
+                return result;
             }
         }
         throw NotFoundException();
