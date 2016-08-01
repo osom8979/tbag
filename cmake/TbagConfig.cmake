@@ -125,6 +125,9 @@ macro (tbag_config__set_library_option __value __package_name __found_value)
     endif ()
 
     option (${__value} "Use the ${__package_name} library if on." ${${__value}})
+    if (${__value})
+        add_definitions (-D${__value})
+    endif ()
 endmacro ()
 
 #/// CMake option value.
