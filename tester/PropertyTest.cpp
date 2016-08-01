@@ -38,16 +38,16 @@ public:
     }
 
     ~PropertyFixtureTest() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:
     virtual void SetUp() override {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     virtual void TearDown() override {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 };
 

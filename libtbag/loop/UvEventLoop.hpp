@@ -104,7 +104,7 @@
 //     *  trigger a UV_ENOBUFS error in the uv_udp_recv_cb or uv_read_cb callback.
 //     */
 //    virtual void onAlloc(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf) {
-//        __EMPTY_BLOCK__
+//        // EMPTY.
 //    }
 //
 //    /**
@@ -128,7 +128,7 @@
 //     *  The buffer may be a null buffer (where buf->base=NULL and buf->len=0) on error.
 //     */
 //    virtual void onRead(uv_stream_t * stream, ssize_t nread, uv_buf_t const * buf) {
-//        __EMPTY_BLOCK__
+//        // EMPTY.
 //    }
 //
 //    /**
@@ -136,7 +136,7 @@
 //     * @c status will be 0 in case of success, < 0 otherwise.
 //     */
 //    virtual void onWrite(uv_write_t * req, int status) {
-//        __EMPTY_BLOCK__
+//        // EMPTY.
 //    }
 //
 //    virtual void onConnect     (uv_connect_t     * req, int status){}

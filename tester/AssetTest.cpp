@@ -79,7 +79,7 @@ public:
     }
 
     virtual void TearDown() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 };
 

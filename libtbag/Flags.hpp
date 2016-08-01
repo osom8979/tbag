@@ -45,7 +45,7 @@ private:
 
 public:
     BaseFlags() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     BaseFlags(BaseFlags const & obj) {
@@ -57,7 +57,7 @@ public:
     }
 
     ~BaseFlags() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:

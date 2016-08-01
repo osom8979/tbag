@@ -48,7 +48,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace math {
 
-__EMPTY_BLOCK__
+// EMPTY.
 
 } // namespace math
 

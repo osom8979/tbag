@@ -36,7 +36,7 @@ public:
 
 public:
     void lock() noexcept {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     bool try_lock() noexcept {
@@ -44,7 +44,7 @@ public:
     }
 
     void unlock() noexcept {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 };
 

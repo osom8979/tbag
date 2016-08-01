@@ -53,7 +53,7 @@ public:
 
 public:
     /** Default setting for the constructor. */
-    struct default_setting { __EMPTY_BLOCK__ };
+    struct default_setting { /* EMPTY */ };
 
 public:
     static constexpr char const * const HOME_DIRECTORY_ASSET_NAME = "__HOME__";
@@ -64,7 +64,7 @@ private:
 
 public:
     Asset() noexcept(std::is_nothrow_default_constructible<PathMap>::value) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     /** Construct of Default settings. */
@@ -86,7 +86,7 @@ public:
     }
 
     virtual ~Asset() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:

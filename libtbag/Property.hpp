@@ -43,7 +43,7 @@ public:
     }
 
     virtual ~Property() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 protected:
@@ -97,7 +97,7 @@ public:
 
 public:
     virtual void updateDefault() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:

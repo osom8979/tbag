@@ -108,7 +108,7 @@ private:
 
 protected:
     SingletonLifeManager() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:
@@ -167,11 +167,11 @@ public:
 
 protected:
     Singleton() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     virtual ~Singleton() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 private:

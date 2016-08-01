@@ -58,11 +58,11 @@ public:
     {
         using Looper   = RenderingLoop<TimeUnit>;
 
-        virtual void onStart (Looper &) { __EMPTY_BLOCK__ }
-        virtual void onEnd   (Looper &) { __EMPTY_BLOCK__ }
+        virtual void onStart (Looper &) { /* EMPTY. */ }
+        virtual void onEnd   (Looper &) { /* EMPTY. */ }
 
-        virtual void update  (Looper &) { __EMPTY_BLOCK__ }
-        virtual void render  (Looper &) { __EMPTY_BLOCK__ }
+        virtual void update  (Looper &) { /* EMPTY. */ }
+        virtual void render  (Looper &) { /* EMPTY. */ }
 
         virtual bool isExit  (Looper &) { return false;   }
     };
@@ -90,7 +90,7 @@ public:
             , _time_step(step)
             , _exit(false)
             , _result_code(0) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     ~RenderingLoop() {

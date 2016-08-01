@@ -47,7 +47,7 @@ public:
     }
 
     ~RenderingCallback() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:

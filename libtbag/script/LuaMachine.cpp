@@ -27,7 +27,7 @@ inline lua_State * lua_state_cast(T * object)
 
 LuaMachine::LuaMachine() : _machine(nullptr)
 {
-    __EMPTY_BLOCK__
+    // EMPTY.
 }
 
 LuaMachine::~LuaMachine()

@@ -9,10 +9,6 @@
 #error "Don't using UNICODE from the main project."
 #endif
 
-#ifndef __EMPTY_BLOCK__
-#define __EMPTY_BLOCK__
-#endif
-
 #define ${MAIN_NAME_UPPER}_TITLE_NAME        ${MAIN_NAME}
 #define ${MAIN_NAME_UPPER}_TITLE_NAME_UPPER  ${MAIN_NAME_UPPER}
 

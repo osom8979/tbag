@@ -63,7 +63,7 @@ public:
 
 public:
     /** Update Generic Format. */
-    struct update_generic { __EMPTY_BLOCK__ };
+    struct update_generic { /* EMPTY */ };
 
 public:
     static constexpr bool isWindowsStyle() noexcept {
@@ -84,7 +84,7 @@ private:
 // Constructors.
 public:
     BasePath() noexcept(std::is_nothrow_default_constructible<String>::value) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     explicit BasePath(String const & path) : BasePath() {
@@ -92,7 +92,7 @@ public:
     }
 
     explicit BasePath(ValueType const * path) : BasePath(String(path)) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     explicit BasePath(ValueType      const * path

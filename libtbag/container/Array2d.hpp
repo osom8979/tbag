@@ -65,19 +65,19 @@ public:
 
 public:
     Array2dIterator() noexcept : cursor(nullptr), step(1) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     Array2dIterator(pointer cursor, difference_type step = 1) noexcept : cursor(cursor), step(step) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     Array2dIterator(Self const & obj) noexcept : cursor(obj.cursor), step(obj.step) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     ~Array2dIterator() noexcept {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:
@@ -158,7 +158,7 @@ private:
 
 public:
     Array2d() : _width(0), _height(0), _data(nullptr) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     Array2d(SizeType w, SizeType h) : Array2d() {

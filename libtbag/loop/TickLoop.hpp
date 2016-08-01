@@ -58,11 +58,11 @@ public:
             , _time_step(step)
             , _exit(false)
             , _result_code(0) {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
     ~TickLoop() {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 
 public:

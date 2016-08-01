@@ -98,7 +98,7 @@ public:
     }
 
     virtual void TearDown() override {
-        __EMPTY_BLOCK__
+        // EMPTY.
     }
 };
 
