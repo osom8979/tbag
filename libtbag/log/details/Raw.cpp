@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/log/details/Raw.hpp>
-#include <libtbag/config/macro.hpp>
+#include <libtbag/macro/utils.hpp>
 
 #include <cstdarg>
 #include <cstdio>

@@ -5,8 +5,8 @@
  * @date   2016-05-17
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_LANGUAGE_C_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_LANGUAGE_C_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MACRO_LANGUAGE_C_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MACRO_LANGUAGE_C_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -22,5 +22,5 @@
 # endif
 #endif
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_LANGUAGE_C_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_LANGUAGE_C_HPP__
 

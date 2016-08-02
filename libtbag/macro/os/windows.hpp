@@ -5,8 +5,8 @@
  * @date   2016-05-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_OS_WINDOWS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_OS_WINDOWS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_WINDOWS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_WINDOWS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -47,5 +47,5 @@
 # endif
 #endif // defined(__OS_WINDOWS__)
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_OS_WINDOWS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_WINDOWS_HPP__
 

@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/config/macro.hpp>
+#include <libtbag/macro/utils.hpp>
 
 #include <string>
 #include <numeric>

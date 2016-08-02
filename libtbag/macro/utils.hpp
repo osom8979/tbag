@@ -1,12 +1,12 @@
 /**
- * @file   macro.hpp
+ * @file   utils.hpp
  * @brief  common macro utilities.
  * @author zer0
  * @date   2016-05-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_MACRO_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_MACRO_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MACRO_UTILS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MACRO_UTILS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -73,5 +73,5 @@
 # endif /* __cplusplus */
 #endif
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_CONFIG_MACRO_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_UTILS_HPP__
 

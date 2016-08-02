@@ -16,18 +16,18 @@
 #include <libtbag/config.h>
 
 // Common.
-#include <libtbag/config/macro.hpp>
+#include <libtbag/macro/utils.hpp>
 
 // Language.
-#include <libtbag/config/language/c.hpp>
-#include <libtbag/config/language/cpp.hpp>
-#include <libtbag/config/language/objc.hpp>
+#include <libtbag/macro/language/c.hpp>
+#include <libtbag/macro/language/cpp.hpp>
+#include <libtbag/macro/language/objc.hpp>
 
 // Compiler.
-#include <libtbag/config/compiler/gcc.hpp>
-#include <libtbag/config/compiler/clang.hpp>
-#include <libtbag/config/compiler/llvm.hpp>
-#include <libtbag/config/compiler/msvc.hpp>
+#include <libtbag/macro/compiler/gcc.hpp>
+#include <libtbag/macro/compiler/clang.hpp>
+#include <libtbag/macro/compiler/llvm.hpp>
+#include <libtbag/macro/compiler/msvc.hpp>
 
 // -----------------
 // Operating System.
