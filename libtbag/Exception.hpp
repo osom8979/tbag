@@ -37,14 +37,17 @@ NAMESPACE_LIBTBAG_OPEN
  * @{
  */
 
-__CREATE_EXCEPTION_CLASS(InitializeException,      "Initialize exception.");
-__CREATE_EXCEPTION_CLASS(BadCastException,         "Bad casting exception.");
-__CREATE_EXCEPTION_CLASS(DivideByZeroException,    "Divide by zero exception.");
-__CREATE_EXCEPTION_CLASS(OutOfRangeException,      "Out of range exception.");
-__CREATE_EXCEPTION_CLASS(ContainerEmptyException,  "Container empty exception.");
-__CREATE_EXCEPTION_CLASS(NotFoundException,        "Not found exception.");
-__CREATE_EXCEPTION_CLASS(NullPointerException,     "Null pointer exception.");
-__CREATE_EXCEPTION_CLASS(IllegalArgumentException, "Illegal argument exception.");
+__CREATE_EXCEPTION_CLASS(InitializeException,        "Initialize exception.");
+__CREATE_EXCEPTION_CLASS(BadAllocationException,     "Bad allocation exception.");
+__CREATE_EXCEPTION_CLASS(BadCastException,           "Bad casting exception.");
+__CREATE_EXCEPTION_CLASS(DivideByZeroException,      "Divide by zero exception.");
+__CREATE_EXCEPTION_CLASS(OutOfRangeException,        "Out of range exception.");
+__CREATE_EXCEPTION_CLASS(ContainerEmptyException,    "Container empty exception.");
+__CREATE_EXCEPTION_CLASS(NotFoundException,          "Not found exception.");
+__CREATE_EXCEPTION_CLASS(DuplicateVariableException, "Duplicate variable exception.");
+__CREATE_EXCEPTION_CLASS(AlreadyExistsException,     "Already exists exception.");
+__CREATE_EXCEPTION_CLASS(NullPointerException,       "Null pointer exception.");
+__CREATE_EXCEPTION_CLASS(IllegalArgumentException,   "Illegal argument exception.");
 
 /**
  * @}
