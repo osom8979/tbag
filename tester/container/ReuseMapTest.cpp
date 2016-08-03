@@ -11,6 +11,24 @@
 using namespace libtbag;
 using namespace libtbag::container;
 
+TEST(ReuseMapTest, Constructor)
+{
+    using Map = ReuseMap<int, int>;
+    Map map1;
+    Map map2;
+    Map map3;
+
+    map1.create(1);
+    map2 = std::move(map1);
+    ASSERT_EQ(map1.size(), 0U);
+    ASSERT_EQ(map2.size(), 1U);
+
+    map3 = map2;
+    ASSERT_EQ(map1.size(), 0U);
+    ASSERT_EQ(map2.size(), 1U);
+    ASSERT_EQ(map3.size(), 1U);
+}
+
 TEST(ReuseMapTest, Default)
 {
     ReuseMap<std::string, int> map;
@@ -58,5 +76,30 @@ TEST(ReuseMapTest, Default)
     map.clear();
     ASSERT_TRUE(map.empty());
     ASSERT_TRUE(map.emptyOfRemoveQueue());
+}
+
+TEST(ReuseMapTest, ReusePtrMap)
+{
+    ReusePtrMap<int, int> map;
+
+    int const TEST_NUMBER = 100;
+
+    auto item = map.create(0);
+    ASSERT_TRUE(item != nullptr);
+    item->reset(new int(TEST_NUMBER));
+    ASSERT_EQ(map.size(), 1U);
+    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
+
+    map.erase(0);
+    ASSERT_EQ(map.size(), 0U);
+    ASSERT_EQ(map.sizeOfRemoveQueue(), 1U);
+
+    map.create(1);
+    ASSERT_EQ(map.size(), 1U);
+    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
+
+    auto find_item = map.find(1);
+    ASSERT_TRUE(find_item != nullptr);
+    ASSERT_EQ(*(find_item->get()), TEST_NUMBER);
 }
 

@@ -17,7 +17,7 @@
 
 #include <map>
 #include <queue>
-#include <mutex>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -131,6 +131,9 @@ public:
     inline bool emptyOfRemoveQueue() const noexcept
     { return _remove_queue.empty(); }
 };
+
+template <typename Key, typename Value>
+using ReusePtrMap = ReuseMap<Key, std::shared_ptr<Value> >;
 
 } // namespace container
 
