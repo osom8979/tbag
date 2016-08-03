@@ -1,12 +1,12 @@
 /**
- * @file   SafetyReuseMap.hpp
- * @brief  SafetyReuseMap class prototype.
+ * @file   ReuseMap.hpp
+ * @brief  ReuseMap class prototype.
  * @author zer0
  * @date   2016-08-03
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_SAFETYREUSEMAP_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_SAFETYREUSEMAP_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_REUSEMAP_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_REUSEMAP_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -14,7 +14,6 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Noncopyable.hpp>
 
 #include <map>
 #include <queue>
@@ -27,47 +26,46 @@ NAMESPACE_LIBTBAG_OPEN
 namespace container {
 
 /**
- * SafetyReuseMap class prototype.
+ * ReuseMap class prototype.
  *
  * @author zer0
  * @date   2016-08-03
  *
  * @warning
- *  Don't use the std::multimap class template.
+ *  - Don't use the std::multimap class template.
+ *  - This class is not thread-safe.
  */
 template <typename KeyType
         , typename ValueType
-        , typename MapType   = std::map<KeyType, ValueType>
-        , typename MutexType = std::mutex>
-class SafetyReuseMap : public Noncopyable
+        , typename MapType = std::map<KeyType, ValueType> >
+class ReuseMap
 {
 public:
     using Key     = KeyType;
     using Value   = ValueType;
     using Map     = MapType;
-    using Mutex   = MutexType;
 
     using MapItr  = typename MapType::iterator;
     using MapPair = typename Map::value_type;
     using Queue   = std::queue<Value>;
-    using Guard   = std::lock_guard<Mutex>;
 
 private:
-    mutable Mutex _mutex;
     Map   _active_map;
     Queue _remove_queue;
 
 public:
-    SafetyReuseMap() = default;
-    ~SafetyReuseMap()
-    {
-        clear();
-    }
+    ReuseMap() = default;
+    ReuseMap(ReuseMap const & obj) = default;
+    ReuseMap(ReuseMap && obj) = default;
+    ~ReuseMap() = default;
+
+public:
+    ReuseMap & operator =(ReuseMap const & obj) = default;
+    ReuseMap & operator =(ReuseMap && obj) = default;
 
 public:
     void clear()
     {
-        Guard guard(_mutex);
         _active_map.clear();
         if (_remove_queue.empty() == false) {
             _remove_queue.pop();
@@ -77,7 +75,6 @@ public:
 public:
     Value * create(KeyType const & key)
     {
-        Guard guard(_mutex);
         if (_active_map.find(key) != _active_map.end()) {
             // Found in the active map.
             return nullptr;
@@ -101,7 +98,6 @@ public:
 
     bool erase(KeyType const & key)
     {
-        Guard guard(_mutex);
         auto active_itr = _active_map.find(key);
         if (active_itr == _active_map.end()) {
             // Not found in the active map.
@@ -115,7 +111,6 @@ public:
 
     Value * find(KeyType const & key)
     {
-        Guard guard(_mutex);
         auto active_itr = _active_map.find(key);
         if (active_itr == _active_map.end()) {
             // Not found in the active map.
@@ -127,28 +122,14 @@ public:
 
 public:
     inline std::size_t size() const noexcept
-    {
-        Guard guard(_mutex);
-        return _active_map.size();
-    }
-
+    { return _active_map.size(); }
     inline bool empty() const noexcept
-    {
-        Guard guard(_mutex);
-        return _active_map.empty();
-    }
+    { return _active_map.empty(); }
 
     inline std::size_t sizeOfRemoveQueue() const noexcept
-    {
-        Guard guard(_mutex);
-        return _remove_queue.size();
-    }
-
+    { return _remove_queue.size(); }
     inline bool emptyOfRemoveQueue() const noexcept
-    {
-        Guard guard(_mutex);
-        return _remove_queue.empty();
-    }
+    { return _remove_queue.empty(); }
 };
 
 } // namespace container
@@ -157,5 +138,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_SAFETYREUSEMAP_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_REUSEMAP_HPP__
 

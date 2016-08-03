@@ -1,23 +1,19 @@
 /**
- * @file   SafetyReuseMapTest.cpp
- * @brief  SafetyReuseMap class tester.
+ * @file   ReuseMapTest.cpp
+ * @brief  ReuseMap class tester.
  * @author zer0
  * @date   2016-08-03
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/container/SafetyReuseMap.hpp>
-#include <libtbag/lock/SpinLock.hpp>
-
-#include <unordered_map>
-#include <thread>
+#include <libtbag/container/ReuseMap.hpp>
 
 using namespace libtbag;
 using namespace libtbag::container;
 
-TEST(SafetyReuseMapTest, Default)
+TEST(ReuseMapTest, Default)
 {
-    SafetyReuseMap<std::string, int> map;
+    ReuseMap<std::string, int> map;
 
     ASSERT_EQ(map.size(), 0U);
     ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
@@ -58,31 +54,6 @@ TEST(SafetyReuseMapTest, Default)
 
     ASSERT_TRUE(map.find(TEST1) != nullptr);
     ASSERT_TRUE(map.find(TEST4) == nullptr);
-
-    map.clear();
-    ASSERT_TRUE(map.empty());
-    ASSERT_TRUE(map.emptyOfRemoveQueue());
-}
-
-TEST(SafetyReuseMapTest, SpinLock)
-{
-    SafetyReuseMap<std::string, int, std::unordered_map<std::string, int>, lock::SpinLock> map;
-
-    ASSERT_EQ(map.size(), 0U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
-
-    char const * const TEST1 = "TEST1";
-    int * test1_value = map.create(TEST1);
-
-    ASSERT_TRUE(test1_value != nullptr);
-    ASSERT_EQ(map.size(), 1U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
-
-    ASSERT_TRUE(map.erase(TEST1));
-    ASSERT_FALSE(map.erase(TEST1));
-    ASSERT_EQ(map.size(), 0U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 1U);
-    ASSERT_TRUE(map.find(TEST1) == nullptr);
 
     map.clear();
     ASSERT_TRUE(map.empty());
