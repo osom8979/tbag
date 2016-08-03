@@ -12,6 +12,10 @@
 #///   - ${TBAG_DEP_ICU_DEPENDENCIES}
 #///   - ${TBAG_DEP_ICU_LIBRARIES}: Archives + Dependencies
 
+if (DEFINED TBAG_DEP_ICU_NAME)
+    return ()
+endif ()
+
 set (TBAG_DEP_ICU_NAME          "libtbag-icu")
 set (TBAG_DEP_ICU_LOG_PREFIX    "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_ICU_NAME}.dir/build.log")
 set (TBAG_DEP_ICU_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/dep/icu/common"

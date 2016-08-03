@@ -12,6 +12,10 @@
 #///   - ${TBAG_DEP_LUA_DEPENDENCIES}
 #///   - ${TBAG_DEP_LUA_LIBRARIES}: Archives + Dependencies
 
+if (DEFINED TBAG_DEP_LUA_NAME)
+    return ()
+endif ()
+
 set (TBAG_DEP_LUA_NAME          "libtbag-lua")
 set (TBAG_DEP_LUA_LOG_PREFIX    "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_LUA_NAME}.dir/build.log")
 set (TBAG_DEP_LUA_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/dep/lua")

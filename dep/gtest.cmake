@@ -12,6 +12,10 @@
 #///   - ${TBAG_DEP_GTEST_DEPENDENCIES}
 #///   - ${TBAG_DEP_GTEST_LIBRARIES}: Archives + Dependencies
 
+if (DEFINED TBAG_DEP_GTEST_NAME)
+    return ()
+endif ()
+
 set (TBAG_DEP_GTEST_NAME          "libtbag-gtest")
 set (TBAG_DEP_GTEST_LOG_PREFIX    "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_GTEST_NAME}.dir/build.log")
 set (TBAG_DEP_GTEST_INCLUDE_DIRS  "${PROJECT_SOURCE_DIR}/dep/gtest/include")

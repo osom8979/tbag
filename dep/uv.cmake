@@ -13,6 +13,10 @@
 #///   - ${TBAG_DEP_UV_DEPENDENCIES}
 #///   - ${TBAG_DEP_UV_LIBRARIES}: Archives + Dependencies
 
+if (DEFINED TBAG_DEP_UV_NAME)
+    return ()
+endif ()
+
 set (TBAG_DEP_UV_NAME         "libtbag-uv")
 set (TBAG_DEP_UV_LOG_PREFIX   "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_UV_NAME}.dir/build.log")
 set (TBAG_DEP_UV_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/dep/uv/include")
