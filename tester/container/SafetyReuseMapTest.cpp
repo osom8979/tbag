@@ -37,6 +37,11 @@ TEST(SafetyReuseMapTest, Default)
     ASSERT_EQ(map.size(), 2U);
     ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
 
+    *test1_value = 100;
+    *test2_value = 200;
+    ASSERT_EQ(*map.find(TEST1), 100);
+    ASSERT_EQ(*map.find(TEST2), 200);
+
     map.erase(TEST1);
     test1_value = nullptr;
     ASSERT_EQ(map.size(), 1U);

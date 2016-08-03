@@ -59,13 +59,10 @@ private:
 
 public:
     SafetyReuseMap() = default;
-    SafetyReuseMap(SafetyReuseMap const & obj) = default;
-    SafetyReuseMap(SafetyReuseMap && obj) = default;
-    ~SafetyReuseMap() = default;
-
-public:
-    SafetyReuseMap & operator =(SafetyReuseMap const & obj) = default;
-    SafetyReuseMap & operator =(SafetyReuseMap && obj) = default;
+    ~SafetyReuseMap()
+    {
+        clear();
+    }
 
 public:
     void clear()
