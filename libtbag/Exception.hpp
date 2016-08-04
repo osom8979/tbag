@@ -48,6 +48,7 @@ __CREATE_EXCEPTION_CLASS(DuplicateVariableException, "Duplicate variable excepti
 __CREATE_EXCEPTION_CLASS(AlreadyExistsException,     "Already exists exception.");
 __CREATE_EXCEPTION_CLASS(NullPointerException,       "Null pointer exception.");
 __CREATE_EXCEPTION_CLASS(IllegalArgumentException,   "Illegal argument exception.");
+__CREATE_EXCEPTION_CLASS(IllegalStateException,      "Illegal state exception.");
 
 /**
  * @}
