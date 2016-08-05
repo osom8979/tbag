@@ -216,6 +216,18 @@ public:
         return _reading_map.insert(PacketMapPair(packet._id, packet)).first->second;
     }
 
+    bool popAndReadEnd() throw (IllegalArgumentException)
+    {
+        Guard guard(_mutex);
+        auto packet = _active_queue.front();
+        if (tryActiveToReading(packet._state) == false) {
+            throw IllegalArgumentException();
+        }
+
+        _active_queue.pop();
+        return _remove_map.insert(PacketMapPair(packet._id, packet)).second;
+    }
+
     void readEnd(Packet const & packet) throw (IllegalArgumentException, NotFoundException)
     {
         Guard guard(_mutex);

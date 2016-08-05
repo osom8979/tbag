@@ -51,3 +51,18 @@ TEST(SafetyPrepareQueueTest, Default)
     ASSERT_TRUE(queue.emptyOfRemoveSet());
 }
 
+TEST(SafetyPrepareQueueTest, popAndReadEnd)
+{
+    SafetyPrepareQueue<int> queue;
+
+    queue.push(queue.prepare());
+    ASSERT_EQ(queue.size(), 1U);
+    ASSERT_EQ(queue.sizeOfReadingSet(), 0U);
+    ASSERT_EQ(queue.sizeOfRemoveSet(), 0U);
+
+    ASSERT_TRUE(queue.popAndReadEnd());
+    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.sizeOfReadingSet(), 0U);
+    ASSERT_EQ(queue.sizeOfRemoveSet(), 1U);
+}
+
