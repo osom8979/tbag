@@ -239,7 +239,8 @@ public:
         auto itr = _remove_map.begin();
         auto end = _remove_map.end();
 
-        static_assert(!std::is_const<decltype(itr)>::value, "Iterator is should not be const-type.");
+        static_assert(std::is_const<decltype(itr)>::value == false
+                , "Iterator is should not be const-type.");
 
         for (; itr != end; ++itr) {
             // FIND READY DATA.
@@ -273,9 +274,13 @@ public:
         _remove_map.erase(itr);
     }
 
-    Packet const & pop() throw (IllegalArgumentException)
+    Packet const & pop() throw (ContainerEmptyException, IllegalArgumentException)
     {
         Guard guard(_mutex);
+        if (_active_queue.empty()) {
+            throw ContainerEmptyException();
+        }
+
         auto packet = _active_queue.front();
         if (tryActiveToReading(packet._state) == false) {
             throw IllegalArgumentException();
@@ -285,7 +290,7 @@ public:
         return _reading_map.insert(PacketMapPair(packet._id, packet)).first->second;
     }
 
-    inline Readable autoPop()
+    inline Readable autoPop() throw (ContainerEmptyException, IllegalArgumentException)
     {
         return Readable(new ReadablePacket(*this, pop()));
     }
