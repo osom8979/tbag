@@ -66,3 +66,28 @@ TEST(SafetyPrepareQueueTest, popAndReadEnd)
     ASSERT_EQ(queue.sizeOfRemoveSet(), 1U);
 }
 
+TEST(SafetyPrepareQueueTest, autoOperator)
+{
+    SafetyPrepareQueue<int> queue;
+
+    {
+        auto prepare = queue.autoPrepare();
+        ASSERT_EQ(queue.size(), 0U);
+        ASSERT_EQ(queue.sizeOfReadingSet(), 0U);
+        ASSERT_EQ(queue.sizeOfRemoveSet(), 1U);
+    }
+    ASSERT_EQ(queue.size(), 1U);
+    ASSERT_EQ(queue.sizeOfReadingSet(), 0U);
+    ASSERT_EQ(queue.sizeOfRemoveSet(), 0U);
+
+    {
+        auto pop = queue.autoPop();
+        ASSERT_EQ(queue.size(), 0U);
+        ASSERT_EQ(queue.sizeOfReadingSet(), 1U);
+        ASSERT_EQ(queue.sizeOfRemoveSet(), 0U);
+    }
+    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.sizeOfReadingSet(), 0U);
+    ASSERT_EQ(queue.sizeOfRemoveSet(), 1U);
+}
+

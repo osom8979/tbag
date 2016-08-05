@@ -19,6 +19,7 @@
 #include <libtbag/id/generator/TimeId.hpp>
 
 #include <mutex>
+#include <memory>
 #include <queue>
 #include <map>
 #include <type_traits>
@@ -116,6 +117,67 @@ public:
         }
     };
 
+    /**
+     * PreparePacket class prototype.
+     *
+     * @author zer0
+     * @date   2016-08-05
+     */
+    struct PreparePacket : public Noncopyable
+    {
+    private:
+        SafetyPrepareQueue & _queue;
+        Packet & _packet;
+
+    public:
+        PreparePacket(SafetyPrepareQueue & queue, Packet & packet)
+                : _queue(queue), _packet(packet)
+        {
+            // EMPTY.
+        }
+
+        ~PreparePacket()
+        {
+            _queue.push(_packet);
+        }
+
+    public:
+        inline Value & at()
+        { return _packet.at(); }
+    };
+
+    /**
+     * ReadablePacket class prototype.
+     *
+     * @author zer0
+     * @date   2016-08-05
+     */
+    struct ReadablePacket : public Noncopyable
+    {
+    private:
+        SafetyPrepareQueue & _queue;
+        Packet const & _packet;
+
+    public:
+        ReadablePacket(SafetyPrepareQueue & queue, Packet const & packet)
+                : _queue(queue), _packet(packet)
+        {
+            // EMPTY.
+        }
+
+        ~ReadablePacket()
+        {
+            _queue.readEnd(_packet);
+        }
+
+    public:
+        inline Value const & at() const
+        { return _packet.at(); }
+    };
+
+    using Prepare  = std::shared_ptr<PreparePacket>;
+    using Readable = std::shared_ptr<ReadablePacket>;
+
     using Queue         = std::queue<Packet>;
     using PacketMap     = std::map<Key, Packet>;
     using PacketMapPair = typename PacketMap::value_type;
@@ -188,6 +250,11 @@ public:
         return _remove_map.insert(PacketMapPair(new_packet._id, new_packet)).first->second;
     }
 
+    inline Prepare autoPrepare()
+    {
+        return Prepare(new PreparePacket(*this, prepare()));
+    }
+
     void push(Packet const & packet) throw (IllegalArgumentException, NotFoundException)
     {
         Guard guard(_mutex);
@@ -214,6 +281,11 @@ public:
 
         _active_queue.pop();
         return _reading_map.insert(PacketMapPair(packet._id, packet)).first->second;
+    }
+
+    inline Readable autoPop()
+    {
+        return Readable(new ReadablePacket(*this, pop()));
     }
 
     bool popAndReadEnd() throw (IllegalArgumentException)
