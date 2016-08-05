@@ -38,9 +38,11 @@ namespace container {
  *
  * @remarks
  *  @code
- *      *<---(push)--- USER_WRITE / [PREPARE] <----(prepare)----*
- *      |                                                       |
- *   [ACTIVE] --(pop)-> [READING] / USER_READ --(readEnd)--> [REMOVE] <== (NEW DATA if EMPTY)
+ *      *<---------------(OR/autoPrepare)<--------------------*
+ *      *<---(push)--- [USER_WRITE/PREPARE] <----(prepare)----*
+ *      |                                                     |
+ *   [ACTIVE] --(pop)-> [READING/USER_READ] --(readEnd)--> [REMOVE] <== (NEW DATA if EMPTY)
+ *      *----------------->(OR/autoPop)---------------------->*
  *  @endcode
  */
 template <typename ValueType
