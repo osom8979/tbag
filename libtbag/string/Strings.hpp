@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/type.hpp>
 
 #define CHECK_GNUC_CXX_REGEX
 #include <libtbag/predef.hpp>
@@ -58,11 +59,11 @@ constexpr wchar_t const * charOrWidechar<wchar_t>(char const * c, wchar_t const 
  *  Token vector.
  */
 template <typename CharType = char>
-std::vector<std::basic_string<CharType> > splitTokens(
-          std::basic_string<CharType> const & source
-        , std::basic_string<CharType> const & delimiter)
+std::vector<std::basic_string<typename libtbag::remove_cr<CharType>::type> > splitTokens(
+          std::basic_string<typename libtbag::remove_cr<CharType>::type> const & source
+        , std::basic_string<typename libtbag::remove_cr<CharType>::type> const & delimiter)
 {
-    using String = std::basic_string<CharType>;
+    using String = std::basic_string<typename libtbag::remove_cr<CharType>::type>;
     using StringVector = std::vector<String>;
 
     StringVector result;
