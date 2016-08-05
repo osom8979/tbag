@@ -130,22 +130,42 @@ public:
     private:
         SafetyPrepareQueue & _queue;
         Packet & _packet;
+        std::atomic_bool _cancel;
 
     public:
         PreparePacket(SafetyPrepareQueue & queue, Packet & packet)
-                : _queue(queue), _packet(packet)
+                : _queue(queue), _packet(packet), _cancel(false)
         {
             // EMPTY.
         }
 
         ~PreparePacket()
         {
-            _queue.push(_packet);
+            if (_cancel == false) {
+                _queue.push(_packet);
+            }
         }
 
     public:
-        inline Value & at()
-        { return _packet.at(); }
+        void cancel()
+        {
+            if (_cancel == false) {
+                try {
+                    _queue.cancel(_packet);
+                    _cancel = true;
+                } catch (...) {
+                    // EMPTY.
+                }
+            }
+        }
+
+        inline Value & at() throw (IllegalStateException)
+        {
+            if (_cancel == true) {
+                throw IllegalStateException();
+            }
+            return _packet.at();
+        }
     };
 
     /**
@@ -231,6 +251,10 @@ private:
     static inline bool tryPrepareToActive(PacketState & state) noexcept
     { return compareExchangeState(state, PacketState::PREPARE, PacketState::ACTIVE); }
 
+    /** CANCEL OPERATION. */
+    static inline bool tryPrepareToRemove(PacketState & state) noexcept
+    { return compareExchangeState(state, PacketState::PREPARE, PacketState::REMOVE); }
+
 public:
     Packet & prepare()
     {
@@ -256,6 +280,20 @@ public:
     inline Prepare autoPrepare()
     {
         return Prepare(new PreparePacket(*this, prepare()));
+    }
+
+    void cancel(Packet const & packet) throw (IllegalArgumentException, NotFoundException)
+    {
+        Guard guard(_mutex);
+
+        auto itr = _remove_map.find(packet.getId());
+        if (itr == _remove_map.end()) {
+            throw NotFoundException();
+        }
+
+        if (tryPrepareToRemove(itr->second._state) == false) {
+            throw IllegalArgumentException();
+        }
     }
 
     void push(Packet const & packet) throw (IllegalArgumentException, NotFoundException)

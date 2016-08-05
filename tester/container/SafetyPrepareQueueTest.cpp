@@ -91,3 +91,20 @@ TEST(SafetyPrepareQueueTest, autoOperator)
     ASSERT_EQ(queue.sizeOfRemoveSet(), 1U);
 }
 
+TEST(SafetyPrepareQueueTest, cancel)
+{
+    SafetyPrepareQueue<int> queue;
+
+    {
+        auto prepare = queue.autoPrepare();
+        ASSERT_EQ(queue.size(), 0U);
+        ASSERT_EQ(queue.sizeOfReadingSet(), 0U);
+        ASSERT_EQ(queue.sizeOfRemoveSet(), 1U);
+        prepare->cancel();
+    }
+
+    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.sizeOfReadingSet(), 0U);
+    ASSERT_EQ(queue.sizeOfRemoveSet(), 1U);
+}
+
