@@ -19,6 +19,7 @@
 #include <libtbag/id/generator/TimeId.hpp>
 
 #include <mutex>
+#include <atomic>
 #include <memory>
 #include <queue>
 #include <map>
