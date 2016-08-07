@@ -75,9 +75,9 @@ private:
 
 // Sync object.
 private:
-    std::mutex       _mutex;
-    std::atomic_bool _exit;
-    std::atomic_int  _result_code;
+    mutable std::mutex _mutex;
+    std::atomic_bool   _exit;
+    std::atomic_int    _result_code;
 
 // Loop variables.
 private:
