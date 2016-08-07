@@ -252,6 +252,10 @@ private:
     static inline bool tryPrepareToActive(PacketState & state) noexcept
     { return compareExchangeState(state, PacketState::PREPARE, PacketState::ACTIVE); }
 
+    /** POP AND READ-END. */
+    static inline bool tryActiveToRemove(PacketState & state) noexcept
+    { return compareExchangeState(state, PacketState::ACTIVE, PacketState::REMOVE); }
+
     /** CANCEL OPERATION. */
     static inline bool tryPrepareToRemove(PacketState & state) noexcept
     { return compareExchangeState(state, PacketState::PREPARE, PacketState::REMOVE); }
@@ -338,7 +342,7 @@ public:
     {
         Guard guard(_mutex);
         auto packet = _active_queue.front();
-        if (tryActiveToReading(packet._state) == false) {
+        if (tryActiveToRemove(packet._state) == false) {
             throw IllegalArgumentException();
         }
 
