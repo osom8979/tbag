@@ -364,18 +364,20 @@ public:
 
 public:
     inline std::size_t size() const noexcept
-    { return _active_queue.size(); }
-    inline std::size_t sizeOfReadingSet() const noexcept
-    { return _reading_map.size();  }
-    inline std::size_t sizeOfRemoveSet() const noexcept
-    { return _remove_map.size();   }
+    { Guard g(_mutex); return _active_queue.size(); }
+    inline std::size_t sizeOfReading() const noexcept
+    { Guard g(_mutex); return _reading_map.size();  }
+    inline std::size_t sizeOfRemove() const noexcept
+    { Guard g(_mutex); return _remove_map.size();   }
+    inline std::size_t sizeOfAll() const noexcept
+    { Guard g(_mutex); return _active_queue.size() + _reading_map.size() + _remove_map.size();   }
 
     inline bool empty() const noexcept
-    { return _active_queue.empty(); }
-    inline bool emptyOfReadingSet() const noexcept
-    { return _reading_map.empty();  }
-    inline bool emptyOfRemoveSet() const noexcept
-    { return _remove_map.empty();   }
+    { Guard g(_mutex); return _active_queue.empty(); }
+    inline bool emptyOfReading() const noexcept
+    { Guard g(_mutex); return _reading_map.empty();  }
+    inline bool emptyOfRemove() const noexcept
+    { Guard g(_mutex); return _remove_map.empty();   }
 };
 
 } // namespace container
