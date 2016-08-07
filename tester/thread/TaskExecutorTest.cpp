@@ -99,7 +99,7 @@ TEST(TaskExecutorTest, reset)
 
     executor.exit();
     executor.join();
-    ASSERT_EQ(executor.sizeOfQueue(), 0U); // ERROR!!!
+    ASSERT_EQ(executor.sizeOfQueue(), 0U); // ERROR? [2016/08/07 BUG FIX] Require testing.
     ASSERT_EQ(t3, TEST_NUMBER);
     ASSERT_EQ(t4, TEST_NUMBER);
 }

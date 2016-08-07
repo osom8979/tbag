@@ -111,7 +111,7 @@ void TaskExecutor::exit(bool flag)
 bool TaskExecutor::isExit() const
 {
     std::lock_guard<std::mutex> guard(_locker);
-    return _exit;
+    return _exit && _queue.empty();
 }
 
 std::size_t TaskExecutor::sizeOfQueue() const
@@ -166,8 +166,8 @@ void TaskExecutor::runAsync(std::size_t size) throw (IllegalArgumentException)
 
 void TaskExecutor::reset()
 {
-    this->clear();
     this->exit(false);
+    this->clear();
 
     _threads.joinAll();
     _threads.clear();
