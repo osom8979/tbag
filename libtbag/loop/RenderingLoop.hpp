@@ -19,6 +19,7 @@
 
 #include <cassert>
 
+#include <mutex>
 #include <atomic>
 #include <chrono>
 #include <thread>
@@ -74,6 +75,7 @@ private:
 
 // Sync object.
 private:
+    std::mutex       _mutex;
     std::atomic_bool _exit;
     std::atomic_int  _result_code;
 
@@ -98,12 +100,23 @@ public:
     }
 
 public:
-    int run(bool enable_sleep_step = true) {
+    int run(bool enable_sleep_step = true)
+    {
+        std::lock_guard<std::mutex> guard(_mutex);
         this->init();
         this->_callback.onStart(*this);
         this->loop(enable_sleep_step);
         this->_callback.onEnd(*this);
         return _result_code;
+    }
+
+    inline bool isRunning() const noexcept
+    {
+        if (_mutex.try_lock()) {
+            _mutex.unlock();
+            return false;
+        }
+        return true;
     }
 
 private:
