@@ -37,7 +37,7 @@
 #define __OS_CYGWIN__
 #endif
 
-#if defined(linux) || defined(__linux)
+#if defined(linux) || defined(__linux__) || defined(__linux)
 #define __OS_LINUX__
 #endif
 
@@ -51,7 +51,7 @@
 # define __OS_MACOS__
 #endif
 
-#if defined(unix) || defined(__unix) || \
+#if defined(unix) || defined(__unix) || defined(__unix__) || \
     defined(_XOPEN_SOURCE) || defined(_POSIX_SOURCE)
 #define __OS_UNIX__
 #endif
