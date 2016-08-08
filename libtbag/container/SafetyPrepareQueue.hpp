@@ -18,6 +18,8 @@
 #include <libtbag/Exception.hpp>
 #include <libtbag/id/generator/TimeId.hpp>
 
+#include <cassert>
+
 #include <mutex>
 #include <atomic>
 #include <memory>
@@ -58,14 +60,6 @@ public:
     using Guard = std::lock_guard<Mutex>;
 
 public:
-    enum class PacketState : int
-    {
-        ACTIVE,
-        READING,
-        REMOVE,
-        PREPARE,
-    };
-
     /**
      * Packet class prototype.
      *
@@ -78,12 +72,11 @@ public:
         friend SafetyPrepareQueue;
 
     protected:
-        PacketState  _state;
-        Key          _id;
-        Value        _value;
+        Key   _id;
+        Value _value;
 
     public:
-        Packet() : _state(PacketState::PREPARE), _id(id::generator::genTimeId()), _value()
+        Packet() : _id(id::generator::genTimeId()), _value()
         {
             // EMPTY.
         }
@@ -97,27 +90,14 @@ public:
         Packet & operator =(Packet && obj) = default;
 
     public:
-        inline PacketState getState() const noexcept
-        { return _state; }
         inline Key getId() const noexcept
         { return _id;    }
 
     public:
-        inline Value const & at() const throw (IllegalStateException)
-        {
-            if (_state != PacketState::READING) {
-                throw IllegalStateException();
-            }
-            return _value;
-        }
-
-        inline Value & at() throw (IllegalStateException)
-        {
-            if (_state != PacketState::PREPARE) {
-                throw IllegalStateException();
-            }
-            return _value;
-        }
+        inline Value const & at() const
+        { return _value; }
+        inline Value & at()
+        { return _value; }
     };
 
     /**
@@ -150,13 +130,9 @@ public:
     public:
         void cancel()
         {
-            if (_cancel == false) {
-                try {
-                    _queue.cancel(_packet);
-                    _cancel = true;
-                } catch (...) {
-                    // EMPTY.
-                }
+            bool compare = false;
+            if (_cancel.compare_exchange_weak(compare, true)) {
+                _queue.cancel(_packet);
             }
         }
 
@@ -203,13 +179,15 @@ public:
 
     using Queue         = std::queue<Packet>;
     using PacketMap     = std::map<Key, Packet>;
+    using PacketMapItr  = typename PacketMap::iterator;
     using PacketMapPair = typename PacketMap::value_type;
 
 private:
     mutable Mutex _mutex;
-    Queue         _active_queue;
-    PacketMap     _reading_map;
-    PacketMap     _remove_map;
+    Queue     _active_queue;
+    PacketMap _reading_map;
+    PacketMap _remove_map;
+    PacketMap _prepare_map;
 
 public:
     SafetyPrepareQueue()
@@ -231,93 +209,58 @@ public:
         }
         _reading_map.clear();
         _remove_map.clear();
+        _prepare_map.clear();
     }
-
-private:
-    static inline bool compareExchangeState(PacketState & state, PacketState expected, PacketState desired) noexcept
-    {
-        if (state == expected) {
-            state = desired;
-            return true;
-        }
-        return false;
-    }
-
-    static inline bool tryActiveToReading(PacketState & state) noexcept
-    { return compareExchangeState(state, PacketState::ACTIVE, PacketState::READING); }
-    static inline bool tryReadingToRemove(PacketState & state) noexcept
-    { return compareExchangeState(state, PacketState::READING, PacketState::REMOVE); }
-    static inline bool tryRemoveToPrepare(PacketState & state) noexcept
-    { return compareExchangeState(state, PacketState::REMOVE, PacketState::PREPARE); }
-    static inline bool tryPrepareToActive(PacketState & state) noexcept
-    { return compareExchangeState(state, PacketState::PREPARE, PacketState::ACTIVE); }
-
-    /** POP AND READ-END. */
-    static inline bool tryActiveToRemove(PacketState & state) noexcept
-    { return compareExchangeState(state, PacketState::ACTIVE, PacketState::REMOVE); }
-
-    /** CANCEL OPERATION. */
-    static inline bool tryPrepareToRemove(PacketState & state) noexcept
-    { return compareExchangeState(state, PacketState::PREPARE, PacketState::REMOVE); }
 
 public:
-    Packet & prepare()
+    Packet & prepareManual()
     {
         Guard guard(_mutex);
 
         auto itr = _remove_map.begin();
-        auto end = _remove_map.end();
-
-        static_assert(std::is_const<decltype(itr)>::value == false
-                , "Iterator is should not be const-type.");
-
-        for (; itr != end; ++itr) {
-            // FIND READY DATA.
-            if (tryRemoveToPrepare(itr->second._state)) {
-                return itr->second;
-            }
+        if (itr != _remove_map.end()) {
+            auto inserted_packet = _prepare_map.insert(PacketMapPair(itr->first, itr->second));
+            assert(inserted_packet.second);
+            _remove_map.erase(itr);
+            return inserted_packet.first->second;
         }
 
         Packet new_packet;
-        return _remove_map.insert(PacketMapPair(new_packet._id, new_packet)).first->second;
+        return _prepare_map.insert(PacketMapPair(new_packet._id, new_packet)).first->second;
     }
 
-    inline Prepare autoPrepare()
+    inline Prepare prepare()
     {
-        return Prepare(new PreparePacket(*this, prepare()));
+        return Prepare(new PreparePacket(*this, prepareManual()));
     }
 
-    void cancel(Packet const & packet) throw (IllegalArgumentException, NotFoundException)
+    void cancel(Packet const & packet) throw (NotFoundException)
     {
         Guard guard(_mutex);
 
-        auto itr = _remove_map.find(packet.getId());
-        if (itr == _remove_map.end()) {
+        auto itr = _prepare_map.find(packet.getId());
+        if (itr == _prepare_map.end()) {
             throw NotFoundException();
         }
 
-        if (tryPrepareToRemove(itr->second._state) == false) {
-            throw IllegalArgumentException();
-        }
+        auto inserted_packet = _remove_map.insert(PacketMapPair(itr->first, itr->second));
+        assert(inserted_packet.second);
+        _prepare_map.erase(itr);
     }
 
-    void push(Packet const & packet) throw (IllegalArgumentException, NotFoundException)
+    void push(Packet const & packet) throw (NotFoundException)
     {
         Guard guard(_mutex);
-        auto itr = _remove_map.find(packet.getId());
-        if (itr == _remove_map.end()) {
+        auto itr = _prepare_map.find(packet.getId());
+        if (itr == _prepare_map.end()) {
             throw NotFoundException();
-        }
-
-        if (tryPrepareToActive(itr->second._state) == false) {
-            throw IllegalArgumentException();
         }
 
         _active_queue.push(itr->second);
-        _remove_map.erase(itr);
+        _prepare_map.erase(itr);
     }
 
-    Packet const & pop() throw (ContainerEmptyException, IllegalArgumentException)
+    Packet const & popManual() throw (ContainerEmptyException)
     {
         Guard guard(_mutex);
         if (_active_queue.empty()) {
@@ -325,41 +268,47 @@ public:
         }
 
         auto packet = _active_queue.front();
-        if (tryActiveToReading(packet._state) == false) {
-            throw IllegalArgumentException();
-        }
-
         _active_queue.pop();
         return _reading_map.insert(PacketMapPair(packet._id, packet)).first->second;
     }
 
-    inline Readable autoPop() throw (ContainerEmptyException, IllegalArgumentException)
+    inline Readable pop() throw (ContainerEmptyException)
     {
-        return Readable(new ReadablePacket(*this, pop()));
+        return Readable(new ReadablePacket(*this, popManual()));
     }
 
     bool popAndReadEnd() throw (IllegalArgumentException)
     {
         Guard guard(_mutex);
         auto packet = _active_queue.front();
-        if (tryActiveToRemove(packet._state) == false) {
-            throw IllegalArgumentException();
-        }
-
         _active_queue.pop();
         return _remove_map.insert(PacketMapPair(packet._id, packet)).second;
     }
 
-    void readEnd(Packet const & packet) throw (IllegalArgumentException, NotFoundException)
+    Readable popUntil(std::size_t size = 0U) throw (IllegalStateException)
+    {
+        Guard guard(_mutex);
+        if (_active_queue.size() <= size) {
+            throw IllegalStateException();
+        }
+
+        while (_active_queue.size() - 1 > size) {
+            auto packet = _active_queue.front();
+            _active_queue.pop();
+            _remove_map.insert(PacketMapPair(packet._id, packet));
+        }
+
+        auto packet = _active_queue.front();
+        _active_queue.pop();
+        return Readable(new ReadablePacket(*this, _reading_map.insert(PacketMapPair(packet._id, packet)).first->second));
+    }
+
+    void readEnd(Packet const & packet) throw (NotFoundException)
     {
         Guard guard(_mutex);
         auto itr = _reading_map.find(packet.getId());
         if (itr == _reading_map.end()) {
             throw NotFoundException();
-        }
-
-        if (tryReadingToRemove(itr->second._state) == false) {
-            throw IllegalArgumentException();
         }
 
         _remove_map.insert(PacketMapPair(itr->first, itr->second));
@@ -373,8 +322,17 @@ public:
     { Guard g(_mutex); return _reading_map.size();  }
     inline std::size_t sizeOfRemove() const noexcept
     { Guard g(_mutex); return _remove_map.size();   }
+    inline std::size_t sizeOfPrepare() const noexcept
+    { Guard g(_mutex); return _prepare_map.size();   }
+
     inline std::size_t sizeOfAll() const noexcept
-    { Guard g(_mutex); return _active_queue.size() + _reading_map.size() + _remove_map.size();   }
+    {
+        Guard g(_mutex);
+        return   _active_queue.size()
+               +  _reading_map.size()
+               +   _remove_map.size()
+               +  _prepare_map.size();
+    }
 
     inline bool empty() const noexcept
     { Guard g(_mutex); return _active_queue.empty(); }
@@ -382,6 +340,8 @@ public:
     { Guard g(_mutex); return _reading_map.empty();  }
     inline bool emptyOfRemove() const noexcept
     { Guard g(_mutex); return _remove_map.empty();   }
+    inline bool emptyOfPrepare() const noexcept
+    { Guard g(_mutex); return _prepare_map.empty();   }
 };
 
 } // namespace container

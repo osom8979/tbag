@@ -21,53 +21,88 @@ TEST(SafetyPrepareQueueTest, Default)
 
     SafetyPrepareQueue<int> queue;
 
-    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.size(),          0U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 
-    auto & prepare = queue.prepare();
-    ASSERT_EQ(queue.size(), 0U);
+    auto & prepare = queue.prepareManual();
+    ASSERT_EQ(queue.size(),          0U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 1U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 1U);
 
     prepare.at() = TEST_VALUE;
-
     queue.push(prepare);
-    ASSERT_EQ(queue.size(), 1U);
+    ASSERT_EQ(queue.size(),          1U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 
-    auto & pop = queue.pop();
-    ASSERT_EQ(queue.size(), 0U);
+    auto & pop = queue.popManual();
+    ASSERT_EQ(queue.size(),          0U);
     ASSERT_EQ(queue.sizeOfReading(), 1U);
-    ASSERT_EQ(queue.sizeOfRemove(), 0U);
-
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
     ASSERT_EQ(pop.at(), TEST_VALUE);
 
+    {
+        queue.prepare();
+        ASSERT_EQ(queue.size(),          1U);
+        ASSERT_EQ(queue.sizeOfReading(), 1U);
+        ASSERT_EQ(queue.sizeOfRemove(),  0U);
+        ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    }
+
     queue.readEnd(pop);
-    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.size(),          1U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 1U);
+    ASSERT_EQ(queue.sizeOfRemove(),  1U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 
     queue.clear();
     ASSERT_TRUE(queue.empty());
     ASSERT_TRUE(queue.emptyOfReading());
     ASSERT_TRUE(queue.emptyOfRemove());
+    ASSERT_TRUE(queue.emptyOfPrepare());
 }
 
 TEST(SafetyPrepareQueueTest, popAndReadEnd)
 {
     SafetyPrepareQueue<int> queue;
 
-    queue.push(queue.prepare());
-    ASSERT_EQ(queue.size(), 1U);
+    queue.push(queue.prepareManual());
+    ASSERT_EQ(queue.size(),          1U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 
     ASSERT_TRUE(queue.popAndReadEnd());
-    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.size(),          0U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 1U);
+    ASSERT_EQ(queue.sizeOfRemove(),  1U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+}
+
+TEST(SafetyPrepareQueueTest, popUntil)
+{
+    SafetyPrepareQueue<int> queue;
+
+    queue.push(queue.prepareManual());
+    queue.push(queue.prepareManual());
+    queue.push(queue.prepareManual());
+    queue.push(queue.prepareManual());
+    queue.push(queue.prepareManual());
+    ASSERT_EQ(queue.size(),          5U);
+    ASSERT_EQ(queue.sizeOfReading(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+
+    queue.popUntil(0U);
+    ASSERT_EQ(queue.size(),          0U);
+    ASSERT_EQ(queue.sizeOfReading(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  5U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 }
 
 TEST(SafetyPrepareQueueTest, autoOperator)
@@ -75,24 +110,28 @@ TEST(SafetyPrepareQueueTest, autoOperator)
     SafetyPrepareQueue<int> queue;
 
     {
-        auto prepare = queue.autoPrepare();
-        ASSERT_EQ(queue.size(), 0U);
+        auto prepare = queue.prepare();
+        ASSERT_EQ(queue.size(),          0U);
         ASSERT_EQ(queue.sizeOfReading(), 0U);
-        ASSERT_EQ(queue.sizeOfRemove(), 1U);
+        ASSERT_EQ(queue.sizeOfRemove(),  0U);
+        ASSERT_EQ(queue.sizeOfPrepare(), 1U);
     }
-    ASSERT_EQ(queue.size(), 1U);
+    ASSERT_EQ(queue.size(),          1U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 
     {
-        auto pop = queue.autoPop();
-        ASSERT_EQ(queue.size(), 0U);
+        auto pop = queue.pop();
+        ASSERT_EQ(queue.size(),          0U);
         ASSERT_EQ(queue.sizeOfReading(), 1U);
-        ASSERT_EQ(queue.sizeOfRemove(), 0U);
+        ASSERT_EQ(queue.sizeOfRemove(),  0U);
+        ASSERT_EQ(queue.sizeOfPrepare(), 0U);
     }
-    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.size(),          0U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 1U);
+    ASSERT_EQ(queue.sizeOfRemove(),  1U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 }
 
 TEST(SafetyPrepareQueueTest, cancel)
@@ -100,16 +139,17 @@ TEST(SafetyPrepareQueueTest, cancel)
     SafetyPrepareQueue<int> queue;
 
     {
-        auto prepare = queue.autoPrepare();
-        ASSERT_EQ(queue.size(), 0U);
+        auto prepare = queue.prepare();
+        ASSERT_EQ(queue.size(),          0U);
         ASSERT_EQ(queue.sizeOfReading(), 0U);
-        ASSERT_EQ(queue.sizeOfRemove(), 1U);
+        ASSERT_EQ(queue.sizeOfRemove(),  0U);
+        ASSERT_EQ(queue.sizeOfPrepare(), 1U);
         prepare->cancel();
     }
-
-    ASSERT_EQ(queue.size(), 0U);
+    ASSERT_EQ(queue.size(),          0U);
     ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(), 1U);
+    ASSERT_EQ(queue.sizeOfRemove(),  1U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 }
 
 TEST(SafetyPrepareQueueTest, Thread)
@@ -126,7 +166,7 @@ TEST(SafetyPrepareQueueTest, Thread)
             std::size_t all_count = queue.sizeOfAll();
             std::size_t remove_count = queue.sizeOfRemove();
 
-            auto prepare = queue.autoPrepare();
+            auto prepare = queue.prepare();
 
             if (remove_count >= 1) {
                 ASSERT_EQ(queue.sizeOfAll(), all_count);
@@ -146,7 +186,7 @@ TEST(SafetyPrepareQueueTest, Thread)
                 std::this_thread::sleep_for(std::chrono::nanoseconds(1));
             }
 
-            auto reading = queue.autoPop();
+            auto reading = queue.pop();
             ASSERT_EQ(*reading->at().get(), reading_index);
             ++reading_index;
         }
