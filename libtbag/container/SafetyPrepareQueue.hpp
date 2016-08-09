@@ -17,6 +17,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Exception.hpp>
 #include <libtbag/id/generator/TimeId.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 
@@ -26,6 +27,17 @@
 #include <queue>
 #include <map>
 #include <type_traits>
+
+//#define ENABLE_SAFETY_PREPARE_QUEUE_DEBUG
+
+#if defined(ENABLE_SAFETY_PREPARE_QUEUE_DEBUG)
+# define SAFETY_PREPARE_QUEUE_DEBUG_PREFIX         "[SafetyPrepareQueue] "
+# define SAFETY_PREPARE_QUEUE_DEBUG(m)             tDLogD(SAFETY_PREPARE_QUEUE_DEBUG_PREFIX m)
+# define SAFETY_PREPARE_QUEUE_DEBUG_FORMAT(m, ...) tDLogDF(SAFETY_PREPARE_QUEUE_DEBUG_PREFIX m, __VA_ARGS__)
+#else
+# define SAFETY_PREPARE_QUEUE_DEBUG(m)
+# define SAFETY_PREPARE_QUEUE_DEBUG_FORMAT(m, ...)
+#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,12 +52,21 @@ namespace container {
  * @date   2016-08-04
  *
  * @remarks
+ *  List of Buffers:
+ *  - ACTIVE
+ *  - READING
+ *  - REMOVE
+ *  - PREPARE
+ *
+ *  Life Cycle:
  *  @code
- *      *<---------------(OR/autoPrepare)<--------------------*
- *      *<---(push)--- [USER_WRITE/PREPARE] <----(prepare)----*
- *      |                                                     |
- *   [ACTIVE] --(pop)-> [READING/USER_READ] --(readEnd)--> [REMOVE] <== (NEW DATA if EMPTY)
- *      *----------------->(OR/autoPop)---------------------->*
+ *      *<---------------------(OR/prepare)<------------------------*
+ *      V                                                           ^
+ *      *<---(push)--- [PREPARE/USER_WRITE] <----(prepareManual)----* <== (NEW DATA if EMPTY)
+ *      |                                                           |
+ *   [ACTIVE] --(popManual)-> [READING/USER_READ] --(readEnd)--> [REMOVE]
+ *      V                                                           ^
+ *      *----------------------->(OR/pop)-------------------------->*
  *  @endcode
  */
 template <typename ValueType
@@ -258,6 +279,12 @@ public:
 
         _active_queue.push(itr->second);
         _prepare_map.erase(itr);
+
+        SAFETY_PREPARE_QUEUE_DEBUG_FORMAT("PUSH (a{}/r{}/m{}/p{})"
+                , _active_queue.size()
+                , _reading_map.size()
+                , _remove_map.size()
+                , _prepare_map.size());
     }
 
     Packet const & popManual() throw (ContainerEmptyException)
@@ -269,7 +296,15 @@ public:
 
         auto packet = _active_queue.front();
         _active_queue.pop();
-        return _reading_map.insert(PacketMapPair(packet._id, packet)).first->second;
+        Packet const & result = _reading_map.insert(PacketMapPair(packet._id, packet)).first->second;
+
+        SAFETY_PREPARE_QUEUE_DEBUG_FORMAT("POP (a{}/r{}/m{}/p{})"
+                , _active_queue.size()
+                , _reading_map.size()
+                , _remove_map.size()
+                , _prepare_map.size());
+
+        return result;
     }
 
     inline Readable pop() throw (ContainerEmptyException)
