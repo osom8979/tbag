@@ -35,6 +35,19 @@ TEST(SafetyQueueTest, Default)
     ASSERT_EQ(queue.size(), 0U);
 }
 
+TEST(SafetyQueueTest, popUntil)
+{
+    SafetyQueue<int> queue;
+    queue.push(0);
+    queue.push(0);
+    queue.push(0);
+    queue.push(0);
+    queue.push(0);
+    ASSERT_EQ(queue.size(), 5U);
+    queue.popUntil(1U);
+    ASSERT_EQ(queue.size(), 1U);
+}
+
 TEST(SafetyQueueTest, SpinLock)
 {
     SafetyQueue<int, lock::SpinLock> queue;

@@ -72,6 +72,13 @@ public:
         }
     }
 
+    void popUntil(std::size_t size) {
+        LockGuard guard(_mutex);
+        while (_queue.size() > size) {
+            _queue.pop();
+        }
+    }
+
 public:
     ValueType frontAndPop() throw(ContainerEmptyException) {
         LockGuard guard(_mutex);
