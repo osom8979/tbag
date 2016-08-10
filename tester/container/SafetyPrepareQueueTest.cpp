@@ -86,7 +86,26 @@ TEST(SafetyPrepareQueueTest, popAndReadEnd)
 
 TEST(SafetyPrepareQueueTest, popUntil)
 {
-    SafetyPrepareQueue<int> queue;
+    using SharedInt = std::shared_ptr<int>;
+    SafetyPrepareQueue<SharedInt> queue;
+
+    int const TEST_NUMBER_01 = 100;
+    int const TEST_NUMBER_02 = 200;
+    {
+        auto prepare = queue.prepare();
+        prepare.get()->at().reset(new int (TEST_NUMBER_01));
+    }
+    ASSERT_THROW(queue.popUntil(1U), IllegalStateException);
+    {
+        auto prepare = queue.prepare();
+        prepare.get()->at().reset(new int (TEST_NUMBER_02));
+    }
+    {
+        auto pop = queue.popUntil(1U);
+        ASSERT_EQ(*pop.get()->at().get(), TEST_NUMBER_01);
+    }
+    ASSERT_THROW(queue.popUntil(1U), IllegalStateException);
+    ASSERT_EQ(*queue.popUntil(0U).get()->at().get(), TEST_NUMBER_02);
 
     queue.push(queue.prepareManual());
     queue.push(queue.prepareManual());
