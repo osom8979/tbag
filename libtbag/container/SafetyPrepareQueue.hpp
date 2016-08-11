@@ -24,7 +24,7 @@
 #include <mutex>
 #include <atomic>
 #include <memory>
-#include <queue>
+#include <deque>
 #include <map>
 #include <type_traits>
 
@@ -153,7 +153,7 @@ public:
         {
             bool compare = false;
             if (_cancel.compare_exchange_weak(compare, true)) {
-                _queue.cancel(_packet);
+                _queue.cancelPrepare(_packet);
             }
         }
 
@@ -177,28 +177,44 @@ public:
     private:
         SafetyPrepareQueue & _queue;
         Packet const & _packet;
+        std::atomic_bool _cancel;
 
     public:
         ReadablePacket(SafetyPrepareQueue & queue, Packet const & packet)
-                : _queue(queue), _packet(packet)
+                : _queue(queue), _packet(packet), _cancel(false)
         {
             // EMPTY.
         }
 
         ~ReadablePacket()
         {
-            _queue.readEnd(_packet);
+            if (_cancel == false) {
+                _queue.readEnd(_packet);
+            }
         }
 
     public:
-        inline Value const & at() const
-        { return _packet.at(); }
+        void cancel()
+        {
+            bool compare = false;
+            if (_cancel.compare_exchange_weak(compare, true)) {
+                _queue.cancelPop(_packet);
+            }
+        }
+
+        inline Value const & at() const throw (IllegalStateException)
+        {
+            if (_cancel == true) {
+                throw IllegalStateException();
+            }
+            return _packet.at();
+        }
     };
 
     using Prepare  = std::shared_ptr<PreparePacket>;
     using Readable = std::shared_ptr<ReadablePacket>;
 
-    using Queue         = std::queue<Packet>;
+    using Queue         = std::deque<Packet>;
     using PacketMap     = std::map<Key, Packet>;
     using PacketMapItr  = typename PacketMap::iterator;
     using PacketMapPair = typename PacketMap::value_type;
@@ -226,7 +242,7 @@ public:
     {
         Guard guard(_mutex);
         while (_active_queue.empty() == false) {
-            _active_queue.pop();
+            _active_queue.pop_front();
         }
         _reading_map.clear();
         _remove_map.clear();
@@ -255,7 +271,7 @@ public:
         return Prepare(new PreparePacket(*this, prepareManual()));
     }
 
-    void cancel(Packet const & packet) throw (NotFoundException)
+    void cancelPrepare(Packet const & packet) throw (NotFoundException)
     {
         Guard guard(_mutex);
 
@@ -277,7 +293,7 @@ public:
             throw NotFoundException();
         }
 
-        _active_queue.push(itr->second);
+        _active_queue.push_back(itr->second);
         _prepare_map.erase(itr);
 
         SAFETY_PREPARE_QUEUE_DEBUG_FORMAT("PUSH (a{}/r{}/m{}/p{})"
@@ -295,7 +311,7 @@ public:
         }
 
         auto packet = _active_queue.front();
-        _active_queue.pop();
+        _active_queue.pop_front();
         Packet const & result = _reading_map.insert(PacketMapPair(packet._id, packet)).first->second;
 
         SAFETY_PREPARE_QUEUE_DEBUG_FORMAT("POP (a{}/r{}/m{}/p{})"
@@ -312,11 +328,24 @@ public:
         return Readable(new ReadablePacket(*this, popManual()));
     }
 
+    void cancelPop(Packet const & packet) throw (NotFoundException)
+    {
+        Guard guard(_mutex);
+
+        auto itr = _reading_map.find(packet.getId());
+        if (itr == _reading_map.end()) {
+            throw NotFoundException();
+        }
+
+        _active_queue.push_front(itr->second);
+        _reading_map.erase(itr);
+    }
+
     bool popAndReadEnd() throw (IllegalArgumentException)
     {
         Guard guard(_mutex);
         auto packet = _active_queue.front();
-        _active_queue.pop();
+        _active_queue.pop_front();
         return _remove_map.insert(PacketMapPair(packet._id, packet)).second;
     }
 
@@ -329,12 +358,12 @@ public:
 
         while (_active_queue.size() - 1 > size) {
             auto packet = _active_queue.front();
-            _active_queue.pop();
+            _active_queue.pop_front();
             _remove_map.insert(PacketMapPair(packet._id, packet));
         }
 
         auto packet = _active_queue.front();
-        _active_queue.pop();
+        _active_queue.pop_front();
         return Readable(new ReadablePacket(*this, _reading_map.insert(PacketMapPair(packet._id, packet)).first->second));
     }
 

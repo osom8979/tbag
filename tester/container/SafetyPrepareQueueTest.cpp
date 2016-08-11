@@ -153,7 +153,7 @@ TEST(SafetyPrepareQueueTest, autoOperator)
     ASSERT_EQ(queue.sizeOfPrepare(), 0U);
 }
 
-TEST(SafetyPrepareQueueTest, cancel)
+TEST(SafetyPrepareQueueTest, cancelPrepare)
 {
     SafetyPrepareQueue<int> queue;
 
@@ -169,6 +169,44 @@ TEST(SafetyPrepareQueueTest, cancel)
     ASSERT_EQ(queue.sizeOfReading(), 0U);
     ASSERT_EQ(queue.sizeOfRemove(),  1U);
     ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+}
+
+TEST(SafetyPrepareQueueTest, cancelPop)
+{
+    SafetyPrepareQueue<int> queue;
+    int const TEST_VALUE_01 = 100;
+    int const TEST_VALUE_02 = 200;
+
+    {
+        auto prepare = queue.prepare();
+        prepare->at() = TEST_VALUE_01;
+    }
+    {
+        auto prepare = queue.prepare();
+        prepare->at() = TEST_VALUE_02;
+    }
+    queue.push(queue.prepareManual());
+    ASSERT_EQ(queue.size(),          3U);
+    ASSERT_EQ(queue.sizeOfReading(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+
+    {
+        auto pop = queue.pop();
+        ASSERT_EQ(pop->at(), TEST_VALUE_01);
+        ASSERT_EQ(queue.size(),          2U);
+        ASSERT_EQ(queue.sizeOfReading(), 1U);
+        ASSERT_EQ(queue.sizeOfRemove(),  0U);
+        ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+        pop->cancel();
+    }
+    ASSERT_EQ(queue.size(),          3U);
+    ASSERT_EQ(queue.sizeOfReading(), 0U);
+    ASSERT_EQ(queue.sizeOfRemove(),  0U);
+    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+
+    auto pop = queue.pop();
+    ASSERT_EQ(pop->at(), TEST_VALUE_01);
 }
 
 TEST(SafetyPrepareQueueTest, Thread)
