@@ -134,3 +134,52 @@ TEST(TaskExecutorTest, joinTask)
     ASSERT_EQ(test, 54321);
 }
 
+TEST(TaskExecutorTest, waitCallback)
+{
+    TaskExecutor executor;
+
+    std::mutex signal_mutex;
+    std::condition_variable signal;
+
+    std::atomic_int some_wait_counter(0);
+    std::atomic_int all_wait_counter(0);
+    std::atomic_int task_counter(0);
+
+    executor.setWaitCallback([&](TaskExecutor::StateMap const & state){
+        bool all_wait = true;
+        for (auto cursor : state) {
+            if (cursor.second == false) {
+                all_wait = false;
+                break;
+            }
+        }
+
+        if (all_wait) {
+            all_wait_counter++;
+            signal.notify_one();
+        } else {
+            some_wait_counter++;
+        }
+    });
+
+    int const THREAD_COUNT = 4;
+    int const TASK_COUNT   = 8;
+
+    for (int i = 0; i < TASK_COUNT; ++i) {
+        ASSERT_TRUE(executor.push([&](){
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            task_counter++;
+        }));
+    }
+    executor.runAsync(THREAD_COUNT);
+
+    {
+        std::unique_lock<std::mutex> unique(signal_mutex);
+        signal.wait(unique);
+    }
+    ASSERT_EQ(task_counter, TASK_COUNT);
+    ASSERT_GT(some_wait_counter, 0);
+    ASSERT_GT(all_wait_counter, 0);
+    ASSERT_TRUE(executor.emptyOfQueue());
+}
+
