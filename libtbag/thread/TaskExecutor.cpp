@@ -7,6 +7,8 @@
 
 #include <libtbag/thread/TaskExecutor.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cassert>
 #include <chrono>
 
 //#define ENABLE_TASKEXECUTOR_DEBUG
@@ -51,12 +53,6 @@ TaskExecutor::~TaskExecutor()
     this->clear();
     this->join();
     __TASKEXECUTOR_DEBUG("~TaskExecutor()");
-}
-
-void TaskExecutor::setWaitCallback(WaitCallback const & callback)
-{
-    std::lock_guard<std::mutex> guard(_locker);
-    _wait_callback = callback;
 }
 
 bool TaskExecutor::push(Task const & task)
@@ -134,25 +130,19 @@ bool TaskExecutor::emptyOfQueue() const
 
 void TaskExecutor::runner()
 {
-    _locker.lock();
-    _state.insert(std::make_pair(std::this_thread::get_id(), false));
-    _locker.unlock();
-    __TASKEXECUTOR_DEBUG_FORMAT("runner() @{} START", std::this_thread::get_id());
+    __TASKEXECUTOR_DEBUG("runner() START");
 
     do {
-        __TASKEXECUTOR_DEBUG_FORMAT("runner() @{} LOCK", std::this_thread::get_id());
+        __TASKEXECUTOR_DEBUG("runner() LOCK");
         {
             std::unique_lock<std::mutex> locker(_locker);
             while (_exit == false && _queue.empty()) {
-                _state.find(std::this_thread::get_id())->second = true;
-                if (static_cast<bool>(_wait_callback)) {
-                    _wait_callback(_state);
-                }
+                _waits.find(std::this_thread::get_id())->second = true;
                 _condition.wait(locker);
-                _state.find(std::this_thread::get_id())->second = false;
+                _waits.find(std::this_thread::get_id())->second = false;
             }
         }
-        __TASKEXECUTOR_DEBUG_FORMAT("runner() @{} UNLOCK", std::this_thread::get_id());
+        __TASKEXECUTOR_DEBUG("runner() UNLOCK");
 
         SharedTask current_task = this->pop();
         while (current_task.get() != nullptr) {
@@ -163,9 +153,9 @@ void TaskExecutor::runner()
         }
     } while (isExit() == false);
 
-    __TASKEXECUTOR_DEBUG_FORMAT("runner() @{} END", std::this_thread::get_id());
+    __TASKEXECUTOR_DEBUG("runner() END");
     _locker.lock();
-    _state.erase(std::this_thread::get_id());
+    _waits.erase(std::this_thread::get_id());
     _locker.unlock();
 }
 
@@ -177,7 +167,11 @@ void TaskExecutor::runAsync(std::size_t size) throw (IllegalArgumentException)
     }
 
     for (std::size_t cursor = 0; cursor < size; ++cursor) {
-        _threads.createThread(&TaskExecutor::runner, this);
+        std::thread * new_thread = _threads.createThread(&TaskExecutor::runner, this);
+
+        _locker.lock();
+        _waits.insert(std::make_pair(new_thread->get_id(), false));
+        _locker.unlock();
     }
 }
 

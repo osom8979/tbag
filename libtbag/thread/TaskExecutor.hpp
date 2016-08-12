@@ -40,13 +40,12 @@ namespace thread {
 class TaskExecutor : public Noncopyable
 {
 public:
-    using Task         = std::function<void(void)>;
-    using SharedTask   = std::shared_ptr<Task>;
-    using TaskQueue    = std::queue<SharedTask>;
+    using Task       = std::function<void(void)>;
+    using SharedTask = std::shared_ptr<Task>;
+    using TaskQueue  = std::queue<SharedTask>;
 
-    using ThreadId     = typename std::thread::id;
-    using StateMap     = std::map<ThreadId, bool>;
-    using WaitCallback = std::function<void(StateMap const &)>;
+    using ThreadId = typename std::thread::id;
+    using WaitMap  = std::map<ThreadId, bool>;
 
 public:
     using Mutex  = std::mutex;
@@ -59,17 +58,13 @@ private:
     mutable std::mutex _locker;
     Signal    _condition;
     TaskQueue _queue;
-    StateMap  _state;
+    WaitMap   _waits;
     bool      _exit;
-    WaitCallback _wait_callback;
 
 public:
     TaskExecutor();
     TaskExecutor(std::size_t size);
     ~TaskExecutor();
-
-public:
-    void setWaitCallback(WaitCallback const & callback);
 
 public:
     bool push(Task const & task);
