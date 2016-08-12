@@ -150,9 +150,10 @@ TEST(TaskExecutorTest, waitAllTask)
         }));
     }
     executor.runAsync(THREAD_COUNT);
+    executor.waitAllTask();
 
-    executor.exit();
-    executor.join();
+    // executor.exit();
+    // executor.join();
 
     ASSERT_EQ(task_counter, TASK_COUNT);
     ASSERT_TRUE(executor.emptyOfQueue());

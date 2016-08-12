@@ -76,6 +76,9 @@ public:
     bool emptyOfQueue() const;
 
 private:
+    bool __isAllWaits();
+
+private:
     void runner();
 
 public:
@@ -83,6 +86,15 @@ public:
     void reset();
     void join();
     std::size_t getThreadCount() const noexcept;
+
+private:
+    mutable std::mutex _task_locker;
+    bool   _all_thread_wait = true; // True, NO WAIT.
+    Signal _task_end_condition;
+
+public:
+    void waitAllTask();
+
 };
 
 // ----------------

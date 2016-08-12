@@ -128,6 +128,16 @@ bool TaskExecutor::emptyOfQueue() const
     return _queue.empty();
 }
 
+bool TaskExecutor::__isAllWaits()
+{
+    for (auto & cursor : _waits) {
+        if (cursor.second == false) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void TaskExecutor::runner()
 {
     __TASKEXECUTOR_DEBUG("runner() START");
@@ -138,8 +148,19 @@ void TaskExecutor::runner()
             std::unique_lock<std::mutex> locker(_locker);
             while (_exit == false && _queue.empty()) {
                 _waits.find(std::this_thread::get_id())->second = true;
+
+                _task_locker.lock();
+                _all_thread_wait = __isAllWaits();
+                _task_locker.unlock();
+                _task_end_condition.notify_all();
+
                 _condition.wait(locker);
                 _waits.find(std::this_thread::get_id())->second = false;
+
+                _task_locker.lock();
+                _all_thread_wait = false;
+                _task_locker.unlock();
+                _task_end_condition.notify_all();
             }
         }
         __TASKEXECUTOR_DEBUG("runner() UNLOCK");
@@ -156,6 +177,12 @@ void TaskExecutor::runner()
     __TASKEXECUTOR_DEBUG("runner() END");
     _locker.lock();
     _waits.erase(std::this_thread::get_id());
+    {
+        _task_locker.lock();
+        _all_thread_wait = __isAllWaits();
+        _task_locker.unlock();
+        _task_end_condition.notify_all();
+    }
     _locker.unlock();
 }
 
@@ -169,9 +196,17 @@ void TaskExecutor::runAsync(std::size_t size) throw (IllegalArgumentException)
     for (std::size_t cursor = 0; cursor < size; ++cursor) {
         std::thread * new_thread = _threads.createThread(&TaskExecutor::runner, this);
 
+        assert(new_thread != nullptr);
         _locker.lock();
         _waits.insert(std::make_pair(new_thread->get_id(), false));
+        {
+            _task_locker.lock();
+            _all_thread_wait = __isAllWaits();
+            _task_locker.unlock();
+            _task_end_condition.notify_all();
+        }
         _locker.unlock();
+
     }
 }
 
@@ -241,6 +276,12 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
     locker.unlock();
 
     return is_pushed;
+}
+
+void TaskExecutor::waitAllTask()
+{
+    std::unique_lock<std::mutex> unique(_task_locker);
+    _task_end_condition.wait(unique, [&]() -> bool { return _all_thread_wait; });
 }
 
 } // namespace thread
