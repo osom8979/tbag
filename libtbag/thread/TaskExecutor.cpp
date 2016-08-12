@@ -193,6 +193,10 @@ void TaskExecutor::runAsync(std::size_t size) throw (IllegalArgumentException)
         throw (IllegalArgumentException());
     }
 
+    _locker.lock();
+    _exit = false;
+    _locker.unlock();
+
     for (std::size_t cursor = 0; cursor < size; ++cursor) {
         std::thread * new_thread = _threads.createThread(&TaskExecutor::runner, this);
 
@@ -206,8 +210,16 @@ void TaskExecutor::runAsync(std::size_t size) throw (IllegalArgumentException)
             _task_end_condition.notify_all();
         }
         _locker.unlock();
-
     }
+
+    // [BUG FIX]
+    // Kernel release: 4.2.0-27-generic
+    // Kernel version: #32~14.04.1-Ubuntu SMP Fri Jan 22 15:32:26 UTC 2016
+    // Machine: x86_64
+    // 이 함수가 끝나면 exit 플래그가 true로 변경되는 버그가 발견되었다.
+    //{
+    this->exit(false);
+    //}
 }
 
 void TaskExecutor::reset()

@@ -22,16 +22,20 @@ TEST(TaskExecutorTest, async1)
     int t1 = 0;
     int t2 = 0;
 
-    executor.push([&](){ t1 = TEST_NUMBER; });
-    executor.push([&](){ t2 = TEST_NUMBER; });
-    executor.exit();
+    ASSERT_TRUE(executor.push([&](){ t1 = TEST_NUMBER; }));
+    ASSERT_TRUE(executor.push([&](){ t2 = TEST_NUMBER; }));
 
     ASSERT_EQ(t1, 0);
     ASSERT_EQ(t2, 0);
     ASSERT_EQ(executor.sizeOfQueue(), 2U);
 
     executor.runAsync(1U);
+    executor.exit();
     executor.join();
+
+    ASSERT_FALSE(executor.push([&](){}));
+    ASSERT_FALSE(executor.push([&](){}));
+
     ASSERT_EQ(t1, TEST_NUMBER);
     ASSERT_EQ(t2, TEST_NUMBER);
 }
@@ -46,12 +50,12 @@ TEST(TaskExecutorTest, async2)
     int t3 = 0;
     int t4 = 0;
 
-    executor.push([&](){ t1 = TEST_NUMBER; });
-    executor.push([&](){ t2 = TEST_NUMBER; });
+    ASSERT_TRUE(executor.push([&](){ t1 = TEST_NUMBER; }));
+    ASSERT_TRUE(executor.push([&](){ t2 = TEST_NUMBER; }));
 
     executor.runAsync(2U);
-    executor.push([&](){ t3 = TEST_NUMBER; });
-    executor.push([&](){ t4 = TEST_NUMBER; });
+    ASSERT_TRUE(executor.push([&](){ t3 = TEST_NUMBER; }));
+    ASSERT_TRUE(executor.push([&](){ t4 = TEST_NUMBER; }));
 
     executor.exit();
     executor.join();
@@ -94,8 +98,8 @@ TEST(TaskExecutorTest, reset)
     ASSERT_EQ(executor.getThreadCount(), 0U);
 
     executor.runAsync(1U);
-    executor.push([&](){ t3 = TEST_NUMBER; });
-    executor.push([&](){ t4 = TEST_NUMBER; });
+    ASSERT_TRUE(executor.push([&](){ t3 = TEST_NUMBER; }));
+    ASSERT_TRUE(executor.push([&](){ t4 = TEST_NUMBER; }));
     ASSERT_EQ(executor.getThreadCount(), 1U);
 
     executor.exit();
@@ -151,9 +155,6 @@ TEST(TaskExecutorTest, waitAllTask)
     }
     executor.runAsync(THREAD_COUNT);
     executor.waitAllTask();
-
-    // executor.exit();
-    // executor.join();
 
     ASSERT_EQ(task_counter, TASK_COUNT);
     ASSERT_TRUE(executor.emptyOfQueue());
