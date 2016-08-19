@@ -20,7 +20,8 @@ endif ()
 set (TBAG_DEP_UV_NAME         "libtbag-uv")
 set (TBAG_DEP_UV_LOG_PREFIX   "${PROJECT_BINARY_DIR}/CMakeFiles/${TBAG_DEP_UV_NAME}.dir/build.log")
 set (TBAG_DEP_UV_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/dep/uv/include")
-set (TBAG_DEP_UV_ARCHIVES     "${PROJECT_SOURCE_DIR}/dep/uv/.libs/libuv.a")
+set (TBAG_DEP_UV_ARCHIVES_PRE "${PROJECT_SOURCE_DIR}/dep/uv/.libs/libuv.a")
+set (TBAG_DEP_UV_ARCHIVES     "${PROJECT_SOURCE_DIR}/dep/uv/libuv.a")
 
 set (TBAG_DEP_UV_DEPENDENCIES "")
 if (UNIX)
@@ -49,9 +50,14 @@ add_custom_command (
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/uv/")
 
 add_custom_command (
-        OUTPUT ${TBAG_DEP_UV_ARCHIVES}
-               "${PROJECT_SOURCE_DIR}/dep/uv/libuv.la"
+        OUTPUT ${TBAG_DEP_UV_ARCHIVES_PRE}
         COMMAND make V=1 > "${TBAG_DEP_UV_LOG_PREFIX}.3" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/uv/Makefile"
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/uv/")
+
+add_custom_command (
+        OUTPUT ${TBAG_DEP_UV_ARCHIVES}
+        COMMAND ${CMAKE_COMMAND} -E copy ${TBAG_DEP_UV_ARCHIVES_PRE} ${TBAG_DEP_UV_ARCHIVES}
+        DEPENDS "${TBAG_DEP_UV_ARCHIVES_PRE}"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/uv/")
 
