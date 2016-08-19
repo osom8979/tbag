@@ -14,16 +14,16 @@
 //#define ENABLE_TASKEXECUTOR_DEBUG
 
 #if defined(ENABLE_TASKEXECUTOR_DEBUG)
-# define __TASKEXECUTOR_DEBUG_PREFIX         "[TaskExecutor] "
-# define __TASKEXECUTOR_DEBUG(m)             tDLogD(__TASKEXECUTOR_DEBUG_PREFIX m)
-# define __TASKEXECUTOR_DEBUG_FORMAT(m, ...) tDLogDF(__TASKEXECUTOR_DEBUG_PREFIX m, __VA_ARGS__)
+# define TASKEXECUTOR_DEBUG_PREFIX         "[TaskExecutor] "
+# define TASKEXECUTOR_DEBUG(m)             tDLogD(TASKEXECUTOR_DEBUG_PREFIX m)
+# define TASKEXECUTOR_DEBUG_FORMAT(m, ...) tDLogDF(TASKEXECUTOR_DEBUG_PREFIX m, __VA_ARGS__)
 #else
-# define __TASKEXECUTOR_DEBUG(m)
-# define __TASKEXECUTOR_DEBUG_FORMAT(m, ...)
+# define TASKEXECUTOR_DEBUG(m)
+# define TASKEXECUTOR_DEBUG_FORMAT(m, ...)
 #endif
 
-#define ENTER_TASKEXECUTOR_LOCK(mutex) __TASKEXECUTOR_DEBUG("LOCK!!"); mutex.lock();
-#define LEAVE_TASKEXECUTOR_LOCK(mutex) __TASKEXECUTOR_DEBUG("UNLOCK"); mutex.unlock();
+#define ENTER_TASKEXECUTOR_LOCK(mutex) TASKEXECUTOR_DEBUG("LOCK!!"); mutex.lock();
+#define LEAVE_TASKEXECUTOR_LOCK(mutex) TASKEXECUTOR_DEBUG("UNLOCK"); mutex.unlock();
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,39 +39,39 @@ TaskExecutor::TaskExecutor() : _exit(false)
         log::setDefaultLevel(log::LogLevel::LEVEL_DEBUG);
     }
 #endif
-    __TASKEXECUTOR_DEBUG("TaskExecutor()");
+    TASKEXECUTOR_DEBUG("TaskExecutor()");
 }
 
 TaskExecutor::TaskExecutor(std::size_t size) : TaskExecutor()
 {
-    this->runAsync(size);
+    runAsync(size);
 }
 
 TaskExecutor::~TaskExecutor()
 {
-    this->exit();
-    this->clear();
-    this->join();
-    __TASKEXECUTOR_DEBUG("~TaskExecutor()");
+    exit();
+    clear();
+    join();
+    TASKEXECUTOR_DEBUG("~TaskExecutor()");
 }
 
 bool TaskExecutor::push(Task const & task)
 {
     SharedTask new_task;
     try {
-        new_task = SharedTask(new Task(task));
+        new_task = SharedTask(new SharedTask::element_type(task));
     } catch (...) {
         return false;
     }
 
     bool result = false;
 
-    ENTER_TASKEXECUTOR_LOCK(_locker);
+    ENTER_TASKEXECUTOR_LOCK(_mutex);
     if (_exit == false) {
         _queue.push(new_task);
         result = true;
     }
-    LEAVE_TASKEXECUTOR_LOCK(_locker);
+    LEAVE_TASKEXECUTOR_LOCK(_mutex);
 
     _condition.notify_one();
     return result;
@@ -81,12 +81,12 @@ TaskExecutor::SharedTask TaskExecutor::pop()
 {
     SharedTask result;
 
-    ENTER_TASKEXECUTOR_LOCK(_locker);
+    ENTER_TASKEXECUTOR_LOCK(_mutex);
     if (_queue.empty() == false) {
-        result = this->_queue.front();
+        result = _queue.front();
         _queue.pop();
     }
-    LEAVE_TASKEXECUTOR_LOCK(_locker);
+    LEAVE_TASKEXECUTOR_LOCK(_mutex);
 
     _condition.notify_one();
     return result;
@@ -94,122 +94,65 @@ TaskExecutor::SharedTask TaskExecutor::pop()
 
 void TaskExecutor::clear()
 {
-    ENTER_TASKEXECUTOR_LOCK(_locker);
+    ENTER_TASKEXECUTOR_LOCK(_mutex);
     while (_queue.empty() == false) {
         _queue.pop();
     }
-    LEAVE_TASKEXECUTOR_LOCK(_locker);
+    LEAVE_TASKEXECUTOR_LOCK(_mutex);
     _condition.notify_all();
 }
 
 void TaskExecutor::exit(bool flag)
 {
-    ENTER_TASKEXECUTOR_LOCK(_locker);
+    ENTER_TASKEXECUTOR_LOCK(_mutex);
     _exit = flag;
-    LEAVE_TASKEXECUTOR_LOCK(_locker);
+    LEAVE_TASKEXECUTOR_LOCK(_mutex);
     _condition.notify_all();
 }
 
 bool TaskExecutor::isExit() const
 {
-    std::lock_guard<std::mutex> guard(_locker);
+    Guard guard(_mutex);
     return _exit && _queue.empty();
-}
-
-std::size_t TaskExecutor::sizeOfQueue() const
-{
-    std::lock_guard<std::mutex> guard(_locker);
-    return _queue.size();
-}
-
-bool TaskExecutor::emptyOfQueue() const
-{
-    std::lock_guard<std::mutex> guard(_locker);
-    return _queue.empty();
-}
-
-bool TaskExecutor::__isAllWaits()
-{
-    for (auto & cursor : _waits) {
-        if (cursor.second == false) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void TaskExecutor::runner()
 {
-    __TASKEXECUTOR_DEBUG("runner() START");
+    TASKEXECUTOR_DEBUG("runner() START");
 
     do {
-        __TASKEXECUTOR_DEBUG("runner() LOCK");
+        TASKEXECUTOR_DEBUG("runner() WAIT-LOCK");
         {
-            std::unique_lock<std::mutex> locker(_locker);
+            std::unique_lock<std::mutex> locker(_mutex);
             while (_exit == false && _queue.empty()) {
-                _waits.find(std::this_thread::get_id())->second = true;
-
-                _task_locker.lock();
-                _all_thread_wait = __isAllWaits();
-                _task_locker.unlock();
-                _task_end_condition.notify_all();
-
                 _condition.wait(locker);
-                _waits.find(std::this_thread::get_id())->second = false;
-
-                _task_locker.lock();
-                _all_thread_wait = false;
-                _task_locker.unlock();
-                _task_end_condition.notify_all();
             }
         }
-        __TASKEXECUTOR_DEBUG("runner() UNLOCK");
+        TASKEXECUTOR_DEBUG("runner() WAIT-UNLOCK");
 
-        SharedTask current_task = this->pop();
+        SharedTask current_task = pop();
         while (current_task.get() != nullptr) {
             if (static_cast<bool>(*current_task)) {
                 (*current_task)();
             }
-            current_task = this->pop();
+            current_task = pop();
         }
     } while (isExit() == false);
 
-    __TASKEXECUTOR_DEBUG("runner() END");
-    _locker.lock();
-    _waits.erase(std::this_thread::get_id());
-    {
-        _task_locker.lock();
-        _all_thread_wait = __isAllWaits();
-        _task_locker.unlock();
-        _task_end_condition.notify_all();
-    }
-    _locker.unlock();
+    TASKEXECUTOR_DEBUG("runner() END");
 }
 
 void TaskExecutor::runAsync(std::size_t size) throw (IllegalArgumentException)
 {
-    __TASKEXECUTOR_DEBUG_FORMAT("runAsync({})", size);
     if (size == 0) {
         throw (IllegalArgumentException());
     }
 
-    _locker.lock();
-    _exit = false;
-    _locker.unlock();
+    TASKEXECUTOR_DEBUG_FORMAT("runAsync({})", size);
 
     for (std::size_t cursor = 0; cursor < size; ++cursor) {
         std::thread * new_thread = _threads.createThread(&TaskExecutor::runner, this);
-
         assert(new_thread != nullptr);
-        _locker.lock();
-        _waits.insert(std::make_pair(new_thread->get_id(), false));
-        {
-            _task_locker.lock();
-            _all_thread_wait = __isAllWaits();
-            _task_locker.unlock();
-            _task_end_condition.notify_all();
-        }
-        _locker.unlock();
     }
 
     // [BUG FIX]
@@ -218,14 +161,14 @@ void TaskExecutor::runAsync(std::size_t size) throw (IllegalArgumentException)
     // Machine: x86_64
     // 이 함수가 끝나면 exit 플래그가 true로 변경되는 버그가 발견되었다.
     //{
-    this->exit(false);
+    exit(false);
     //}
 }
 
 void TaskExecutor::reset()
 {
-    this->exit(false);
-    this->clear();
+    exit(false);
+    clear();
 
     _threads.joinAll();
     _threads.clear();
@@ -233,14 +176,9 @@ void TaskExecutor::reset()
 
 void TaskExecutor::join()
 {
-    __TASKEXECUTOR_DEBUG("join() START");
+    TASKEXECUTOR_DEBUG("join() START");
     _threads.joinAll();
-    __TASKEXECUTOR_DEBUG("join() END");
-}
-
-std::size_t TaskExecutor::getThreadCount() const noexcept
-{
-    return _threads.size();
+    TASKEXECUTOR_DEBUG("join() END");
 }
 
 // ----------------
@@ -249,8 +187,8 @@ std::size_t TaskExecutor::getThreadCount() const noexcept
 
 bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
 {
-    std::mutex locker;
-    locker.lock();
+    std::mutex mutex;
+    mutex.lock();
 
     std::thread thread;
     try {
@@ -258,10 +196,10 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
 #if 0 // TEST CODE
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
 #endif
-            locker.lock(); // FORCE WAITING.
+            mutex.lock(); // FORCE WAITING.
         });
     } catch (...) {
-        locker.unlock();
+        mutex.unlock();
         return false;
     }
 
@@ -269,10 +207,10 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
 
     auto const THREAD_LOCKER_UNLOCK_FUNCTOR = [&](){
         // Thread-locker it is not locked.
-        while (locker.try_lock() == true) {
-            locker.unlock();
+        while (mutex.try_lock() == true) {
+            mutex.unlock();
         }
-        locker.unlock();
+        mutex.unlock();
     };
 
     bool is_pushed = executor.push([&](){
@@ -285,15 +223,9 @@ bool joinTask(TaskExecutor & executor, std::function<void(void)> const & task)
 
     assert(thread.joinable());
     thread.join();
-    locker.unlock();
+    mutex.unlock();
 
     return is_pushed;
-}
-
-void TaskExecutor::waitAllTask()
-{
-    std::unique_lock<std::mutex> unique(_task_locker);
-    _task_end_condition.wait(unique, [&]() -> bool { return _all_thread_wait; });
 }
 
 } // namespace thread

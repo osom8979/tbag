@@ -44,21 +44,18 @@ public:
     using SharedTask = std::shared_ptr<Task>;
     using TaskQueue  = std::queue<SharedTask>;
 
-    using ThreadId = typename std::thread::id;
-    using WaitMap  = std::map<ThreadId, bool>;
-
 public:
     using Mutex  = std::mutex;
+    using Guard  = std::lock_guard<Mutex>;
     using Signal = std::condition_variable;
 
 private:
     ThreadGroup _threads;
 
 private:
-    mutable std::mutex _locker;
+    mutable Mutex _mutex;
     Signal    _condition;
     TaskQueue _queue;
-    WaitMap   _waits;
     bool      _exit;
 
 public:
@@ -70,13 +67,16 @@ public:
     bool push(Task const & task);
     SharedTask pop();
     void clear();
+
+public:
     void exit(bool flag = true);
     bool isExit() const;
-    std::size_t sizeOfQueue() const;
-    bool emptyOfQueue() const;
 
-private:
-    bool __isAllWaits();
+public:
+    inline std::size_t size() const
+    { Guard g(_mutex); return _queue.size(); }
+    inline bool empty() const
+    { Guard g(_mutex); return _queue.empty(); }
 
 private:
     void runner();
@@ -85,16 +85,10 @@ public:
     void runAsync(std::size_t size = 1U) throw (IllegalArgumentException);
     void reset();
     void join();
-    std::size_t getThreadCount() const noexcept;
-
-private:
-    mutable std::mutex _task_locker;
-    bool   _all_thread_wait = true; // True, NO WAIT.
-    Signal _task_end_condition;
 
 public:
-    void waitAllTask();
-
+    inline std::size_t getThreadCount() const noexcept
+    { return _threads.size(); }
 };
 
 // ----------------

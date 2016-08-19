@@ -27,7 +27,7 @@ TEST(TaskExecutorTest, async1)
 
     ASSERT_EQ(t1, 0);
     ASSERT_EQ(t2, 0);
-    ASSERT_EQ(executor.sizeOfQueue(), 2U);
+    ASSERT_EQ(executor.size(), 2U);
 
     executor.runAsync(1U);
     executor.exit();
@@ -89,12 +89,12 @@ TEST(TaskExecutorTest, reset)
 
     executor.exit();
     executor.join();
-    ASSERT_EQ(executor.sizeOfQueue(), 0U);
+    ASSERT_EQ(executor.size(), 0U);
     ASSERT_EQ(t1, TEST_NUMBER);
     ASSERT_EQ(t2, TEST_NUMBER);
 
     executor.reset();
-    ASSERT_EQ(executor.sizeOfQueue(), 0U);
+    ASSERT_EQ(executor.size(), 0U);
     ASSERT_EQ(executor.getThreadCount(), 0U);
 
     executor.runAsync(1U);
@@ -104,7 +104,7 @@ TEST(TaskExecutorTest, reset)
 
     executor.exit();
     executor.join();
-    ASSERT_EQ(executor.sizeOfQueue(), 0U); // ERROR? [2016/08/07 BUG FIX] Require testing.
+    ASSERT_TRUE(executor.empty()); // ERROR? [2016/08/07 BUG FIX] Require testing.
     ASSERT_EQ(t3, TEST_NUMBER);
     ASSERT_EQ(t4, TEST_NUMBER);
 }
@@ -137,26 +137,5 @@ TEST(TaskExecutorTest, joinTask)
     executor.exit();
     ASSERT_FALSE(joinTask(executor, [&](){ test += 600000; }));
     ASSERT_EQ(test, 54321);
-}
-
-TEST(TaskExecutorTest, waitAllTask)
-{
-    TaskExecutor executor;
-    std::atomic_int task_counter(0);
-
-    int const THREAD_COUNT = 4;
-    int const TASK_COUNT   = 8;
-
-    for (int i = 0; i < TASK_COUNT; ++i) {
-        ASSERT_TRUE(executor.push([&](){
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            task_counter++;
-        }));
-    }
-    executor.runAsync(THREAD_COUNT);
-    executor.waitAllTask();
-
-    ASSERT_EQ(task_counter, TASK_COUNT);
-    ASSERT_TRUE(executor.emptyOfQueue());
 }
 
