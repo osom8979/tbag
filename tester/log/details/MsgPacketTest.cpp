@@ -19,18 +19,18 @@ TEST(MsgPacketTest, Operator)
     MsgPacket packet;
 
     packet << 100 << 'c';
-    ASSERT_STREQ(packet.getStringPointer(), "100c");
+    ASSERT_STREQ("100c", packet.getStringPointer());
     packet.clearString();
 
     packet << "TEST";
-    ASSERT_STREQ(packet.getStringPointer(), "TEST");
+    ASSERT_STREQ("TEST", packet.getStringPointer());
     packet << std::string("TEMP");
-    ASSERT_STREQ(packet.getStringPointer(), "TESTTEMP");
+    ASSERT_STREQ("TESTTEMP", packet.getStringPointer());
     packet.clearString();
 
     int test = 0;
     packet << &test;
-    ASSERT_GT(std::stoul(packet.getStringPointer()), 0U);
+    ASSERT_LT(0U, std::stoul(packet.getStringPointer()));
     packet.clearString();
 }
 

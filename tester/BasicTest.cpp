@@ -10,11 +10,11 @@
 
 TEST(BasicTest, String)
 {
-    ASSERT_EQ(static_cast<wchar_t>('T'), L'T');
-    ASSERT_EQ(static_cast<char>(L'T'), 'T');
+    ASSERT_EQ(L'T', static_cast<wchar_t>( 'T'));
+    ASSERT_EQ( 'T', static_cast<   char>(L'T'));
 
     std::wstring const WSTRING_TEST = {'T', 'E', 'S', 'T'};
-    ASSERT_STREQ(WSTRING_TEST.c_str(), L"TEST");
+    ASSERT_STREQ(L"TEST", WSTRING_TEST.c_str());
 };
 
 TEST(BasicTest, Integer)

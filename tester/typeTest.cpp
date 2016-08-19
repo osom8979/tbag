@@ -19,7 +19,7 @@ struct TestPoint
 TEST(typeTest, Default)
 {
     TestPoint<int> p = makeTrivial2<TestPoint>(1, 2);
-    ASSERT_EQ(p.x, 1);
-    ASSERT_EQ(p.y, 2);
+    ASSERT_EQ(1, p.x);
+    ASSERT_EQ(2, p.y);
 }
 

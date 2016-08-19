@@ -20,8 +20,8 @@ TEST(FrameInterpolatorTest, Default)
     FrameInterpolator interpolator;
     interpolator.set(START_MILLISEC, FPS_MILLISEC, FRAME_SIZE);
 
-    ASSERT_EQ(static_cast<int>(interpolator.getInterpolation( 900)), 9);
-    ASSERT_EQ(static_cast<int>(interpolator.getInterpolation(1000)), 0);
-    ASSERT_EQ(static_cast<int>(interpolator.getInterpolation(1100)), 1);
+    ASSERT_EQ(9, static_cast<int>(interpolator.getInterpolation( 900)));
+    ASSERT_EQ(0, static_cast<int>(interpolator.getInterpolation(1000)));
+    ASSERT_EQ(1, static_cast<int>(interpolator.getInterpolation(1100)));
 }
 

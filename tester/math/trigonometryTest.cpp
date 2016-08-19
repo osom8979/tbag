@@ -29,8 +29,8 @@ TEST(trigonometryTest, Default)
     float adjacent   = 1; // b
     float hypotenuse = MATH_CONSTANT_SQRT2; // h
 
-    ASSERT_NEAR(sinA(opposite, hypotenuse), MATH_CONSTANT_SQRT1_2, 0.0001);
-    ASSERT_NEAR(cosA(adjacent, hypotenuse), MATH_CONSTANT_SQRT1_2, 0.0001);
-    ASSERT_NEAR(tanA(opposite, adjacent),                     1.0, 0.0001);
+    ASSERT_NEAR(MATH_CONSTANT_SQRT1_2, sinA(opposite, hypotenuse), 0.0001);
+    ASSERT_NEAR(MATH_CONSTANT_SQRT1_2, cosA(adjacent, hypotenuse), 0.0001);
+    ASSERT_NEAR(                  1.0, tanA(opposite, adjacent),   0.0001);
 }
 

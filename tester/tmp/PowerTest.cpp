@@ -16,15 +16,15 @@ TEST(PowerTest, Default)
     int64_t test_value = 0;
 
     test_value = Power<7, 0>::value;
-    ASSERT_EQ(test_value, 1);
+    ASSERT_EQ(1, test_value);
 
     test_value = Power<7, 1>::value;
-    ASSERT_EQ(test_value, 7);
+    ASSERT_EQ(7, test_value);
 
     test_value = Power<7, 2>::value;
-    ASSERT_EQ(test_value, 49);
+    ASSERT_EQ(49, test_value);
 
     test_value = Power<7, 3>::value;
-    ASSERT_EQ(test_value, 343);
+    ASSERT_EQ(343, test_value);
 }
 

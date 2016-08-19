@@ -13,6 +13,6 @@ using namespace libtbag::math;
 
 TEST(scaleTest, scale)
 {
-    ASSERT_EQ(math::scale(0, 100, -1, 1, 50), 0);
+    ASSERT_EQ(0, math::scale(0, 100, -1, 1, 50));
 }
 

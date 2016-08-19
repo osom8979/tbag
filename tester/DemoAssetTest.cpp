@@ -22,7 +22,7 @@ TEST(DemoAssetTest, Exists)
     ASSERT_TRUE(asset.exists_tester_dir_image());
 
     auto image_list = asset.scan_tester_dir_image();
-    ASSERT_EQ(image_list.size(), 1U);
+    ASSERT_EQ(1U, image_list.size());
 }
 
 TEST(DemoAssetTest, Find)
@@ -31,6 +31,6 @@ TEST(DemoAssetTest, Find)
     Asset image_asset;
 
     image_asset.insertDir("image", demo_asset.get_tester_dir_image());
-    ASSERT_GT(image_asset.find("lena.png").getString().size(), 0U);
+    ASSERT_LT(0U, image_asset.find("lena.png").getString().size());
 }
 

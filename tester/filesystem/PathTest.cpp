@@ -37,13 +37,13 @@ TEST(PathTest, Constructors_1)
     Path p6_move = Path(TEMP);
     Path p6 = std::move(p6_move);
 
-    ASSERT_STREQ(p0.getString().c_str(), "");
-    ASSERT_STREQ(p1.getString().c_str(), TEMP);
-    ASSERT_STREQ(p2.getString().c_str(), TEMP);
-    ASSERT_STREQ(p3.getString().c_str(), TEMP);
-    ASSERT_STREQ(p4.getString().c_str(), TEMP);
-    ASSERT_STREQ(p5.getString().c_str(), TEMP);
-    ASSERT_STREQ(p6.getString().c_str(), TEMP);
+    ASSERT_STREQ("", p0.getString().c_str());
+    ASSERT_STREQ(TEMP, p1.getString().c_str());
+    ASSERT_STREQ(TEMP, p2.getString().c_str());
+    ASSERT_STREQ(TEMP, p3.getString().c_str());
+    ASSERT_STREQ(TEMP, p4.getString().c_str());
+    ASSERT_STREQ(TEMP, p5.getString().c_str());
+    ASSERT_STREQ(TEMP, p6.getString().c_str());
 }
 
 TEST(PathTest, Constructors_2)
@@ -53,13 +53,13 @@ TEST(PathTest, Constructors_2)
     nodes.push_back("2");
 
     Path p = nodes;
-    ASSERT_STREQ(p.getString().c_str(), "1/2");
+    ASSERT_STREQ("1/2", p.getString().c_str());
 }
 
 TEST(PathTest, initializer_list)
 {
     Path p0 = {"/", "TE", "M", "P"};
-    ASSERT_EQ(p0.getString(), std::string("/TE/M/P"));
+    ASSERT_STREQ("/TE/M/P", p0.getString().c_str());
 }
 
 TEST(PathTest, AssignOperators)
@@ -72,24 +72,24 @@ TEST(PathTest, AssignOperators)
 
     Path const TEMP_PATH = Path(TEMP);
     std::string const TEMP_STRING = TEMP;
-    ASSERT_STREQ(TEMP_PATH.getString().c_str(), TEMP);
+    ASSERT_STREQ(TEMP, TEMP_PATH.getString().c_str());
 
     Path p0;
 
     p0 = TEMP;
-    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+    ASSERT_STREQ(TEMP, p0.getString().c_str());
 
     p0 = TEMP_STRING;
-    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+    ASSERT_STREQ(TEMP, p0.getString().c_str());
 
     p0 = std::string(TEMP);
-    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+    ASSERT_STREQ(TEMP, p0.getString().c_str());
 
     p0 = TEMP_PATH;
-    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+    ASSERT_STREQ(TEMP, p0.getString().c_str());
 
     p0 = rvalue_test();
-    ASSERT_STREQ(p0.getString().c_str(), TEMP);
+    ASSERT_STREQ(TEMP, p0.getString().c_str());
 }
 
 TEST(PathTest, getName)
@@ -97,10 +97,10 @@ TEST(PathTest, getName)
     char const * const TEMP = "/1/2/3/4/5.test";
 
     Path const path1(TEMP);
-    ASSERT_STREQ(path1.getName().c_str(), "5.test");
+    ASSERT_STREQ("5.test", path1.getName().c_str());
 
     Path const path2("");
-    ASSERT_STREQ(path2.getName().c_str(), "");
+    ASSERT_STREQ("", path2.getName().c_str());
 }
 
 TEST(PathTest, splitNodesWithCanonical_1)
@@ -117,8 +117,8 @@ TEST(PathTest, splitNodesWithCanonical_1)
     path1.updateCanonical();
     path2.updateCanonical();
 
-    ASSERT_EQ(path1.getString(), home + "/TEMP4");
-    ASSERT_EQ(path2.getString(), work + "/TEMP2");
+    ASSERT_EQ(home + "/TEMP4", path1.getString());
+    ASSERT_EQ(work + "/TEMP2", path2.getString());
 }
 
 TEST(PathTest, splitNodesWithCanonical_2)
@@ -131,6 +131,6 @@ TEST(PathTest, splitNodesWithCanonical_2)
 
     Path const temp(TEMP);
     Path const path = Path(temp.splitNodesWithCanonical());
-    ASSERT_STREQ(temp.getString().c_str(), TEMP);
+    ASSERT_STREQ(TEMP, temp.getString().c_str());
 }
 

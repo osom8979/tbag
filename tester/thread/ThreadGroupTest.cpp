@@ -31,10 +31,10 @@ TEST(ThreadGroupTest, Default)
     ASSERT_TRUE(group.exists(thread3));
     ASSERT_TRUE(group.exists(thread4));
 
-    ASSERT_EQ(t1, TEST_NUMBER);
-    ASSERT_EQ(t2, TEST_NUMBER);
-    ASSERT_EQ(t3, TEST_NUMBER);
-    ASSERT_EQ(t4, TEST_NUMBER);
+    ASSERT_EQ(TEST_NUMBER, t1);
+    ASSERT_EQ(TEST_NUMBER, t2);
+    ASSERT_EQ(TEST_NUMBER, t3);
+    ASSERT_EQ(TEST_NUMBER, t4);
 }
 
 TEST(ThreadGroupTest, add_and_remove)
@@ -45,10 +45,10 @@ TEST(ThreadGroupTest, add_and_remove)
     thread::ThreadGroup group;
     std::thread * thread1 = new std::thread([&](){ while ((++t1) < TEST_NUMBER); });
     group.addThread(thread1);
-    ASSERT_EQ(group.size(), 1U);
+    ASSERT_EQ(1U, group.size());
 
     group.removeThread(thread1);
-    ASSERT_EQ(group.size(), 0U);
+    ASSERT_EQ(0U, group.size());
 
     thread1->join();
     delete thread1;

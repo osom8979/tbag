@@ -23,24 +23,24 @@ TEST(Array2dTest, Default)
 
     Array2d<int> a1;
 
-    ASSERT_EQ(a1.width(), 0);
-    ASSERT_EQ(a1.height(), 0);
-    ASSERT_TRUE(a1.data() == nullptr);
+    ASSERT_EQ(0, a1.width());
+    ASSERT_EQ(0, a1.height());
+    ASSERT_EQ(nullptr, a1.data());
 
     Array2d<int> a2(TEST2, TEST2);
     Array2d<int> a3 = Array2d<int>(TEST3, TEST3);
     a1 = Array2d<int>(TEST1, TEST1);
 
-    ASSERT_EQ(a1.size(), static_cast<std::size_t>(TEST1 * TEST1));
-    ASSERT_EQ(a2.size(), static_cast<std::size_t>(TEST2 * TEST2));
-    ASSERT_EQ(a3.size(), static_cast<std::size_t>(TEST3 * TEST3));
+    ASSERT_EQ(static_cast<std::size_t>(TEST1 * TEST1), a1.size());
+    ASSERT_EQ(static_cast<std::size_t>(TEST2 * TEST2), a2.size());
+    ASSERT_EQ(static_cast<std::size_t>(TEST3 * TEST3), a3.size());
 
     a2 = a3;
-    ASSERT_EQ(a2.size(), static_cast<std::size_t>(TEST3 * TEST3));
-    ASSERT_EQ(a3.size(), static_cast<std::size_t>(TEST3 * TEST3));
+    ASSERT_EQ(static_cast<std::size_t>(TEST3 * TEST3), a2.size());
+    ASSERT_EQ(static_cast<std::size_t>(TEST3 * TEST3), a3.size());
 
     a1 = Array2d<int>(TEST4, TEST4);
-    ASSERT_EQ(a1.size(), static_cast<std::size_t>(TEST4 * TEST4));
+    ASSERT_EQ(static_cast<std::size_t>(TEST4 * TEST4), a1.size());
 }
 
 TEST(Array2dTest, Index)
@@ -67,11 +67,11 @@ TEST(Array2dTest, Index)
     Array2d<int> a1(TEST1, TEST1);
     a1.at(0, 0) = VALUE1;
 
-    ASSERT_EQ(*a1.data()   , VALUE1);
-    ASSERT_EQ( a1[0]       , VALUE1);
-    ASSERT_EQ( a1.at(0)    , VALUE1);
-    ASSERT_EQ( a1.get(0)   , VALUE1);
-    ASSERT_EQ( a1.get(0, 0), VALUE1);
+    ASSERT_EQ(VALUE1, *a1.data()   );
+    ASSERT_EQ(VALUE1,  a1[0]       );
+    ASSERT_EQ(VALUE1,  a1.at(0)    );
+    ASSERT_EQ(VALUE1,  a1.get(0)   );
+    ASSERT_EQ(VALUE1,  a1.get(0, 0));
 
     ASSERT_THROW(a1.at(TEST1 * TEST1) , OutOfRangeException);
     ASSERT_THROW(a1.get(TEST1 * TEST1), OutOfRangeException);
@@ -107,7 +107,7 @@ TEST(Array2dTest, ConstIterator)
     ASSERT_TRUE(itr1 == end1);
     ASSERT_TRUE(itr2 == end2);
 
-    ASSERT_EQ(Array2dIterator<int>::getDataSize(), sizeof(int));
+    ASSERT_EQ(sizeof(int), Array2dIterator<int>::getDataSize());
 }
 
 TEST(Array2dTest, Iterator)
@@ -117,22 +117,22 @@ TEST(Array2dTest, Iterator)
     Array2d<int>::Iterator end = a1.end();
 
     *itr = 10;
-    ASSERT_EQ(a1.at(0, 0), 10);
+    ASSERT_EQ(10, a1.at(0, 0));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 20;
-    ASSERT_EQ(a1.at(1, 0), 20);
+    ASSERT_EQ(20, a1.at(1, 0));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 30;
-    ASSERT_EQ(a1.at(0, 1), 30);
+    ASSERT_EQ(30, a1.at(0, 1));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 40;
-    ASSERT_EQ(a1.at(1, 1), 40);
+    ASSERT_EQ(40, a1.at(1, 1));
     itr++;
     ASSERT_TRUE(itr == end);
 }
@@ -144,12 +144,12 @@ TEST(Array2dTest, HeightIterator)
     Array2d<int>::Iterator end = a1.endWithHeight();
 
     *itr = 10;
-    ASSERT_EQ(a1.at(0, 0), 10);
+    ASSERT_EQ(10, a1.at(0, 0));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 20;
-    ASSERT_EQ(a1.at(0, 1), 20);
+    ASSERT_EQ(20, a1.at(0, 1));
     itr++;
     ASSERT_TRUE(itr == end);
 }
@@ -164,9 +164,9 @@ TEST(Array2dTest, Iterator_StdCopy)
 
     std::vector<int> vec(4);
     std::copy(a1.begin(), a1.end(), vec.begin());
-    ASSERT_EQ(a1[0], vec[0]);
-    ASSERT_EQ(a1[1], vec[1]);
-    ASSERT_EQ(a1[2], vec[2]);
-    ASSERT_EQ(a1[3], vec[3]);
+    ASSERT_EQ(vec[0], a1[0]);
+    ASSERT_EQ(vec[1], a1[1]);
+    ASSERT_EQ(vec[2], a1[2]);
+    ASSERT_EQ(vec[3], a1[3]);
 }
 

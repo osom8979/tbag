@@ -26,7 +26,7 @@ TEST(TickLoopTest, Default)
         }
     }, std::chrono::milliseconds(100));
 
-    ASSERT_EQ(loop.run(), RESULT_CODE);
-    ASSERT_EQ(count, TEST_COUNT);
+    ASSERT_EQ(RESULT_CODE, loop.run());
+    ASSERT_EQ( TEST_COUNT, count);
 }
 

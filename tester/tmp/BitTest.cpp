@@ -17,8 +17,8 @@ TEST(BitTest, max)
     uint8_t max_8bit_unsigned = 0b10000000;
     int8_t  max_8bit_signed   = 0b10000000;
 
-    ASSERT_EQ(BitFlag<uint8_t>::max(), max_8bit_unsigned);
-    ASSERT_EQ(BitFlag<int8_t>::max(), max_8bit_signed);
+    ASSERT_EQ(max_8bit_unsigned, BitFlag<uint8_t>::max());
+    ASSERT_EQ(  max_8bit_signed, BitFlag< int8_t>::max());
 }
 
 TEST(BitTest, findMax_by_signed)
@@ -37,12 +37,12 @@ TEST(BitTest, findMax_by_signed)
     int8_t test5_result = 0b00001000;
     int8_t test6_result = 0b00000000;
 
-    ASSERT_EQ(BitFlag<int8_t>::findHighBit(test1), test1_result);
-    ASSERT_EQ(BitFlag<int8_t>::findHighBit(test2), test2_result);
-    ASSERT_EQ(BitFlag<int8_t>::findHighBit(test3), test3_result);
-    ASSERT_EQ(BitFlag<int8_t>::findHighBit(test4), test4_result);
-    ASSERT_EQ(BitFlag<int8_t>::findHighBit(test5), test5_result);
-    ASSERT_EQ(BitFlag<int8_t>::findHighBit(test6), test6_result);
+    ASSERT_EQ(test1_result, BitFlag<int8_t>::findHighBit(test1));
+    ASSERT_EQ(test2_result, BitFlag<int8_t>::findHighBit(test2));
+    ASSERT_EQ(test3_result, BitFlag<int8_t>::findHighBit(test3));
+    ASSERT_EQ(test4_result, BitFlag<int8_t>::findHighBit(test4));
+    ASSERT_EQ(test5_result, BitFlag<int8_t>::findHighBit(test5));
+    ASSERT_EQ(test6_result, BitFlag<int8_t>::findHighBit(test6));
 }
 
 TEST(BitTest, findMax_by_unsigned)
@@ -61,10 +61,11 @@ TEST(BitTest, findMax_by_unsigned)
     uint8_t test5_result = 0b00001000;
     uint8_t test6_result = 0b00000000;
 
-    ASSERT_EQ(BitFlag<uint8_t>::findHighBit(test1), test1_result);
-    ASSERT_EQ(BitFlag<uint8_t>::findHighBit(test2), test2_result);
-    ASSERT_EQ(BitFlag<uint8_t>::findHighBit(test3), test3_result);
-    ASSERT_EQ(BitFlag<uint8_t>::findHighBit(test4), test4_result);
-    ASSERT_EQ(BitFlag<uint8_t>::findHighBit(test5), test5_result);
-    ASSERT_EQ(BitFlag<uint8_t>::findHighBit(test6), test6_result);
+    ASSERT_EQ(test1_result, BitFlag<uint8_t>::findHighBit(test1));
+    ASSERT_EQ(test2_result, BitFlag<uint8_t>::findHighBit(test2));
+    ASSERT_EQ(test3_result, BitFlag<uint8_t>::findHighBit(test3));
+    ASSERT_EQ(test4_result, BitFlag<uint8_t>::findHighBit(test4));
+    ASSERT_EQ(test5_result, BitFlag<uint8_t>::findHighBit(test5));
+    ASSERT_EQ(test6_result, BitFlag<uint8_t>::findHighBit(test6));
 }
+

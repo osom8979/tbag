@@ -12,12 +12,11 @@ using namespace libtbag;
 
 TEST(swapTest, swapWithPod)
 {
-    int v1 = 10;
-    int v2 = 20;
+    int v1 = 100;
+    int v2 = 200;
 
     algorithm::swapWithPod(v1, v2);
-
-    ASSERT_EQ(v1, 20);
-    ASSERT_EQ(v2, 10);
+    ASSERT_EQ(200, v1);
+    ASSERT_EQ(100, v2);
 }
 

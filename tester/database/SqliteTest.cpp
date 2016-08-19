@@ -29,8 +29,8 @@ TEST(SqliteTest, Default)
             "DELETE FROM test WHERE id > 0;";
 
     ASSERT_TRUE(db.open(PATH));
-    ASSERT_EQ(db.getErrorCode(), 0);
-    ASSERT_GT(db.getErrorMessage().size(), 0U);
+    ASSERT_EQ(0 , db.getErrorCode());
+    ASSERT_LT(0U, db.getErrorMessage().size());
 
     ASSERT_TRUE(db.execute(CREATE_TABLE));
     ASSERT_TRUE(db.execute(INSERT_ITEM1));
@@ -42,11 +42,11 @@ TEST(SqliteTest, Default)
     };
     auto result = db.prepare<RowType>(SELECT_ITEM, callback);
 
-    ASSERT_EQ(result.size(), 2U);
-    ASSERT_EQ(std::get<0>(result[0]), 1);
-    ASSERT_EQ(std::get<0>(result[1]), 2);
-    ASSERT_EQ(std::get<1>(result[0]), std::string("temp_name1"));
-    ASSERT_EQ(std::get<1>(result[1]), std::string("temp_name2"));
+    ASSERT_EQ(2U, result.size());
+    ASSERT_EQ(1, std::get<0>(result[0]));
+    ASSERT_EQ(2, std::get<0>(result[1]));
+    ASSERT_STREQ("temp_name1", std::get<1>(result[0]).c_str());
+    ASSERT_STREQ("temp_name2", std::get<1>(result[1]).c_str());
     ASSERT_TRUE(db.execute(DELETE_ITEM));
 
     db.close();

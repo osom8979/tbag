@@ -20,21 +20,21 @@ TEST(ReuseMapTest, Constructor)
 
     map1.create(1);
     map2 = std::move(map1);
-    ASSERT_EQ(map1.size(), 0U);
-    ASSERT_EQ(map2.size(), 1U);
+    ASSERT_EQ(0U, map1.size());
+    ASSERT_EQ(1U, map2.size());
 
     map3 = map2;
-    ASSERT_EQ(map1.size(), 0U);
-    ASSERT_EQ(map2.size(), 1U);
-    ASSERT_EQ(map3.size(), 1U);
+    ASSERT_EQ(0U, map1.size());
+    ASSERT_EQ(1U, map2.size());
+    ASSERT_EQ(1U, map3.size());
 }
 
 TEST(ReuseMapTest, Default)
 {
     ReuseMap<std::string, int> map;
 
-    ASSERT_EQ(map.size(), 0U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(0U, map.size());
+    ASSERT_EQ(0U, map.sizeOfRemoveQueue());
 
     ASSERT_TRUE(map.empty());
     ASSERT_TRUE(map.emptyOfRemoveQueue());
@@ -46,32 +46,32 @@ TEST(ReuseMapTest, Default)
 
     int * test1_value = map.create(TEST1);
     int * test2_value = map.create(TEST2);
-    ASSERT_TRUE(test1_value != nullptr);
-    ASSERT_TRUE(test2_value != nullptr);
-    ASSERT_EQ(map.size(), 2U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
+    ASSERT_NE(nullptr, test1_value);
+    ASSERT_NE(nullptr, test2_value);
+    ASSERT_EQ(2U, map.size());
+    ASSERT_EQ(0U, map.sizeOfRemoveQueue());
 
     *test1_value = 100;
     *test2_value = 200;
-    ASSERT_EQ(*map.find(TEST1), 100);
-    ASSERT_EQ(*map.find(TEST2), 200);
+    ASSERT_EQ(100, *map.find(TEST1));
+    ASSERT_EQ(200, *map.find(TEST2));
 
     map.erase(TEST1);
     test1_value = nullptr;
-    ASSERT_EQ(map.size(), 1U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 1U);
+    ASSERT_EQ(1U, map.size());
+    ASSERT_EQ(1U, map.sizeOfRemoveQueue());
 
     int * test3_value = map.create(TEST3);
-    ASSERT_TRUE(test3_value != nullptr);
-    ASSERT_EQ(map.size(), 2U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
+    ASSERT_NE(nullptr, test3_value);
+    ASSERT_EQ(2U, map.size());
+    ASSERT_EQ(0U, map.sizeOfRemoveQueue());
 
     map.create(TEST1);
     ASSERT_EQ(map.size(), 3U);
     ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
 
-    ASSERT_TRUE(map.find(TEST1) != nullptr);
-    ASSERT_TRUE(map.find(TEST4) == nullptr);
+    ASSERT_NE(nullptr, map.find(TEST1));
+    ASSERT_EQ(nullptr, map.find(TEST4));
 
     map.clear();
     ASSERT_TRUE(map.empty());
@@ -85,21 +85,21 @@ TEST(ReuseMapTest, ReusePtrMap)
     int const TEST_NUMBER = 100;
 
     auto item = map.create(0);
-    ASSERT_TRUE(item != nullptr);
+    ASSERT_NE(nullptr, item);
     item->reset(new int(TEST_NUMBER));
-    ASSERT_EQ(map.size(), 1U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(1U, map.size());
+    ASSERT_EQ(0U, map.sizeOfRemoveQueue());
 
     map.erase(0);
-    ASSERT_EQ(map.size(), 0U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 1U);
+    ASSERT_EQ(0U, map.size());
+    ASSERT_EQ(1U, map.sizeOfRemoveQueue());
 
     map.create(1);
-    ASSERT_EQ(map.size(), 1U);
-    ASSERT_EQ(map.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(1U, map.size());
+    ASSERT_EQ(0U, map.sizeOfRemoveQueue());
 
     auto find_item = map.find(1);
-    ASSERT_TRUE(find_item != nullptr);
-    ASSERT_EQ(*(find_item->get()), TEST_NUMBER);
+    ASSERT_NE(nullptr, find_item);
+    ASSERT_EQ(TEST_NUMBER, *(find_item->get()));
 }
 

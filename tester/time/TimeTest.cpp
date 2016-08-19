@@ -67,8 +67,8 @@ TEST(TimeTest, chrono)
 {
     int test_count = 200;
     for (int i = 0; i < test_count; ++i) {
-        ASSERT_GE(time::getMillisec(std::chrono::system_clock::now()), 0);
-        ASSERT_LT(time::getMillisec(std::chrono::system_clock::now()), 1000);
+        ASSERT_LE(   0, time::getMillisec(std::chrono::system_clock::now()));
+        ASSERT_GT(1000, time::getMillisec(std::chrono::system_clock::now()));
     }
 }
 
@@ -78,10 +78,10 @@ TEST(TimeTest, Duration)
     long millisec = time::getDuration([&ss](){
         time::Duration<std::stringstream, std::chrono::nanoseconds> duration(ss);
     });
-    ASSERT_GE(millisec, 0);
+    ASSERT_LE(0, millisec);
 
     std::string result = ss.str();
-    ASSERT_EQ(result.empty(), false);
-    ASSERT_GE(atoi(ss.str().c_str()), 0);
+    ASSERT_FALSE(result.empty());
+    ASSERT_LE(0, atoi(ss.str().c_str()));
 }
 

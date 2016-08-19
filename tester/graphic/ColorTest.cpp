@@ -21,10 +21,10 @@ TEST(ColorTest, Constructor)
 
     c1 = Color{8, 9, 10, 11};
 
-    ASSERT_EQ(c1.r, 8);
-    ASSERT_EQ(c1.g, 9);
-    ASSERT_EQ(c1.b, 10);
-    ASSERT_EQ(c1.a, 11);
+    ASSERT_EQ( 8, c1.r);
+    ASSERT_EQ( 9, c1.g);
+    ASSERT_EQ(10, c1.b);
+    ASSERT_EQ(11, c1.a);
 
     ASSERT_EQ(c2, c3);
     ASSERT_NE(c3, c4);

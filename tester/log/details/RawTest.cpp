@@ -18,6 +18,6 @@ TEST(RawTest, format)
     char buffer[buffer_size + 1] = { 0, };
 
     ASSERT_TRUE(formatToMemory(buffer, buffer_size, "%s%d", "Test", 0));
-    ASSERT_STREQ(buffer, "Test0");
+    ASSERT_STREQ("Test0", buffer);
 }
 

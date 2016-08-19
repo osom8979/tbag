@@ -23,6 +23,6 @@ TEST(StreamSinkTest, Default)
     sink.write(message);
     sink.flush();
 
-    ASSERT_GE(ss.str().size(), 4U);
+    ASSERT_LE(4U, ss.str().size());
 }
 

@@ -88,11 +88,11 @@ TEST(RwLockTest, Default)
     write_thread.join();
     read_thread3.join();
 
-    ASSERT_EQ(size_before[0], size_after[0]);
-    ASSERT_EQ(size_before[1], size_after[1]);
-    ASSERT_EQ(size_before[2], size_after[2]);
-    ASSERT_EQ(size_before[3], size_after[3]);
+    ASSERT_EQ(size_after[0], size_before[0]);
+    ASSERT_EQ(size_after[1], size_before[1]);
+    ASSERT_EQ(size_after[2], size_before[2]);
+    ASSERT_EQ(size_after[3], size_before[3]);
 
-    ASSERT_EQ(total_data, test_total + TEST_VALUE);
+    ASSERT_EQ(test_total + TEST_VALUE, total_data);
 }
 

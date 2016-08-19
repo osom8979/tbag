@@ -19,49 +19,49 @@ TEST(ReuseQueueTest, Constructor)
 
     q1.push();
     q2 = std::move(q1);
-    ASSERT_EQ(q1.size(), 0U);
-    ASSERT_EQ(q2.size(), 1U);
+    ASSERT_EQ(0U, q1.size());
+    ASSERT_EQ(1U, q2.size());
 
     q3 = q2;
-    ASSERT_EQ(q1.size(), 0U);
-    ASSERT_EQ(q2.size(), 1U);
-    ASSERT_EQ(q3.size(), 1U);
+    ASSERT_EQ(0U, q1.size());
+    ASSERT_EQ(1U, q2.size());
+    ASSERT_EQ(1U, q3.size());
 }
 
 TEST(ReuseQueueTest, Default)
 {
     ReuseQueue<int> queue;
 
-    ASSERT_EQ(queue.size(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     ASSERT_TRUE(queue.empty());
     ASSERT_TRUE(queue.emptyOfRemoveQueue());
 
     int * test1_value = queue.push();
     int * test2_value = queue.push();
-    ASSERT_TRUE(test1_value != nullptr);
-    ASSERT_TRUE(test2_value != nullptr);
-    ASSERT_EQ(queue.size(), 2U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_NE(nullptr, test1_value);
+    ASSERT_NE(nullptr, test2_value);
+    ASSERT_EQ(2U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     *test1_value = 100;
     *test2_value = 200;
-    ASSERT_EQ(*queue.front(), 100);
+    ASSERT_EQ(100, *queue.front());
 
     queue.pop();
-    ASSERT_EQ(*queue.front(), 200);
-    ASSERT_EQ(queue.size(), 1U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 1U);
+    ASSERT_EQ(200, *queue.front());
+    ASSERT_EQ(1U,   queue.size());
+    ASSERT_EQ(1U,   queue.sizeOfRemoveQueue());
 
     int * test3_value = queue.push();
-    ASSERT_TRUE(test3_value != nullptr);
-    ASSERT_EQ(queue.size(), 2U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_NE(nullptr, test3_value);
+    ASSERT_EQ(2U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     queue.push();
-    ASSERT_EQ(queue.size(), 3U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(3U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     queue.clear();
     ASSERT_TRUE(queue.empty());
@@ -75,21 +75,21 @@ TEST(ReuseQueueTest, ReusePtrQueue)
     int const TEST_NUMBER = 100;
 
     auto item = queue.push();
-    ASSERT_TRUE(item != nullptr);
+    ASSERT_NE(nullptr, item);
     item->reset(new int(TEST_NUMBER));
-    ASSERT_EQ(queue.size(), 1U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(1U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     queue.pop();
-    ASSERT_EQ(queue.size(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 1U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(1U, queue.sizeOfRemoveQueue());
 
     queue.push();
-    ASSERT_EQ(queue.size(), 1U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(1U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     auto find_item = queue.front();
-    ASSERT_TRUE(find_item != nullptr);
-    ASSERT_EQ(*(find_item->get()), TEST_NUMBER);
+    ASSERT_NE(nullptr, find_item);
+    ASSERT_EQ(TEST_NUMBER, *(find_item->get()));
 }
 

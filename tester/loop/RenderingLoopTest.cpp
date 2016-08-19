@@ -99,11 +99,11 @@ TEST(RenderingLoopTest, SlowMachine)
     RenderingLoop<> loop(callback, std::chrono::milliseconds(_TIME_STEP));
     loop.run();
 
-    ASSERT_EQ(callback.start_count,  1);
-    ASSERT_EQ(callback.end_count,    1);
-    ASSERT_GE(callback.update_count, _MIN_FPS);
-    ASSERT_LE(callback.update_count, _MAX_FPS);
-    ASSERT_LE(callback.render_count, _FPS);
+    ASSERT_EQ(       1, callback.start_count);
+    ASSERT_EQ(       1, callback.end_count);
+    ASSERT_LE(_MIN_FPS, callback.update_count);
+    ASSERT_GE(_MAX_FPS, callback.update_count);
+    ASSERT_GE(    _FPS, callback.render_count);
 }
 
 TEST(RenderingLoopTest, FastMachine)
@@ -112,10 +112,10 @@ TEST(RenderingLoopTest, FastMachine)
     RenderingLoop<> loop(callback, std::chrono::milliseconds(_TIME_STEP));
     loop.run();
 
-    ASSERT_EQ(callback.start_count,  1);
-    ASSERT_EQ(callback.end_count,    1);
-    ASSERT_GE(callback.update_count, _MIN_FPS);
-    ASSERT_LE(callback.update_count, _MAX_FPS);
-    ASSERT_LE(callback.render_count, _FPS);
+    ASSERT_EQ(       1, callback.start_count);
+    ASSERT_EQ(       1, callback.end_count);
+    ASSERT_LE(_MIN_FPS, callback.update_count);
+    ASSERT_GE(_MAX_FPS, callback.update_count);
+    ASSERT_GE(    _FPS, callback.render_count);
 }
 

@@ -24,6 +24,6 @@ public:
 
 TEST(SingletonTest, Default)
 {
-    ASSERT_EQ(DemoSingleton::getInstance()->test(), 1);
+    ASSERT_EQ(1, DemoSingleton::getInstance()->test());
 }
 

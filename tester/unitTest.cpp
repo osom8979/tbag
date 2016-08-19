@@ -12,10 +12,10 @@ using namespace libtbag;
 
 TEST(unitTest, Byte)
 {
-    ASSERT_EQ(     BYTE_UNIT, 1024ull);
-    ASSERT_EQ(KILO_BYTE_UNIT, 1024ull * 1024ull);
-    ASSERT_EQ(MEGA_BYTE_UNIT, 1024ull * 1024ull * 1024ull);
-    ASSERT_EQ(GIGA_BYTE_UNIT, 1024ull * 1024ull * 1024ull * 1024ull);
-    ASSERT_EQ(TERA_BYTE_UNIT, 1024ull * 1024ull * 1024ull * 1024ull * 1024ull);
+    ASSERT_EQ(                                        1024ull,      BYTE_UNIT);
+    ASSERT_EQ(                              1024ull * 1024ull, KILO_BYTE_UNIT);
+    ASSERT_EQ(                    1024ull * 1024ull * 1024ull, MEGA_BYTE_UNIT);
+    ASSERT_EQ(          1024ull * 1024ull * 1024ull * 1024ull, GIGA_BYTE_UNIT);
+    ASSERT_EQ(1024ull * 1024ull * 1024ull * 1024ull * 1024ull, TERA_BYTE_UNIT);
 }
 

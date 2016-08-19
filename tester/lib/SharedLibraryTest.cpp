@@ -38,14 +38,14 @@ TEST(SharedLibraryTest, Default)
     typedef int (*AddFunction)(int,int);
     AddFunction func = (AddFunction) lib.symbol(FUNC1_NAME);
     ASSERT_TRUE(func != nullptr);
-    ASSERT_EQ((*func)(1, 1), 2);
-    ASSERT_EQ((*func)(100, 100), 200);
-    ASSERT_EQ((*func)(11, 22), 33);
+    ASSERT_EQ(  2, (*func)(  1,   1));
+    ASSERT_EQ(200, (*func)(100, 100));
+    ASSERT_EQ( 33, (*func)( 11,  22));
 
-    ASSERT_EQ(lib.call<int>(FUNC1_NAME, 10, 10), 20);
+    ASSERT_EQ(20, lib.call<int>(FUNC1_NAME, 10, 10));
 
     int add2_result = 0;
     lib.callVoid(FUNC2_NAME, 40, 15, &add2_result);
-    ASSERT_EQ(add2_result, 55);
+    ASSERT_EQ(55, add2_result);
 }
 

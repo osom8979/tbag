@@ -20,8 +20,8 @@ TEST(AssetTest, CopyOperators)
     Asset asset3;
     asset3 = asset1;
 
-    ASSERT_EQ(asset2.size(), asset1.size());
-    ASSERT_EQ(asset3.size(), asset1.size());
+    ASSERT_EQ(asset1.size(), asset2.size());
+    ASSERT_EQ(asset1.size(), asset3.size());
 }
 
 TEST(AssetTest, MoveOperators)
@@ -35,7 +35,7 @@ TEST(AssetTest, MoveOperators)
     Asset asset2;
 
     asset2 = rvalue_test();
-    ASSERT_EQ(asset1.size(), asset2.size());
+    ASSERT_EQ(asset2.size(), asset1.size());
 }
 
 TEST(AssetTest, insertDir_getDir)
@@ -45,15 +45,15 @@ TEST(AssetTest, insertDir_getDir)
 
     Asset asset;
     asset.insertDir(key, value);
-    ASSERT_EQ(asset.size(), 1U);
-    ASSERT_EQ(value, asset.getDirString(key));
+    ASSERT_EQ(1U, asset.size());
+    ASSERT_EQ(asset.getDirString(key), value);
 }
 
 TEST(AssetTest, getDirs)
 {
     Asset asset = Asset(Asset::default_setting());
     auto dirs = asset.getDirs();
-    ASSERT_EQ(dirs.size(), 2U);
+    ASSERT_EQ(2U, dirs.size());
 }
 
 class AssetFixtureTest : public ::testing::Test
@@ -86,15 +86,15 @@ public:
 TEST_F(AssetFixtureTest, getHomeDir)
 {
     std::string dir = filesystem::common::getHomeDir();
-    ASSERT_GT(dir.size(), 0U);
-    ASSERT_EQ(dir, asset.getDirString(Asset::getHomeDirKeyName()));
+    ASSERT_LT(0U, dir.size());
+    ASSERT_EQ(asset.getDirString(Asset::getHomeDirKeyName()), dir);
 }
 
 TEST_F(AssetFixtureTest, getExeDir)
 {
     std::string dir = filesystem::common::getExeDir();
-    ASSERT_GE(dir.size(), 1U);
-    ASSERT_EQ(dir, asset.getDirString(Asset::getExeDirKeyName()));
+    ASSERT_LE(1U, dir.size());
+    ASSERT_EQ(asset.getDirString(Asset::getExeDirKeyName()), dir);
 }
 
 class AssetDemo : public Asset
@@ -150,8 +150,8 @@ TEST(AssetDemoTest, Default)
 
     auto list1 = demo.scan_root_res1();
     auto list2 = demo.scan_root_res2();
-    ASSERT_EQ(list1.size(), 2U);
-    ASSERT_EQ(list2.size(), 0U);
+    ASSERT_EQ(2U, list1.size());
+    ASSERT_EQ(0U, list2.size());
 
     ASSERT_TRUE(demo.remove_root_res1_sub1());
     ASSERT_TRUE(demo.remove_root_res1_sub2());

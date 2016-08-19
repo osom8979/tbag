@@ -18,12 +18,12 @@ using namespace libtbag::container::simple;
 TEST(listTest, Default)
 {
     list::Node<int> * first = nullptr;
-    ASSERT_EQ(list::size(first), 0U);
+    ASSERT_EQ(0U, list::size(first));
 
     first = list::createNode<int>(0, nullptr);
-    ASSERT_EQ(list::size(first), 1U);
+    ASSERT_EQ(1U, list::size(first));
 
     list::releaseNode(&first);
-    ASSERT_EQ(first, nullptr);
+    ASSERT_EQ(nullptr, first);
 }
 

@@ -21,32 +21,32 @@ TEST(FlagsTest, splitTokens)
                        "  noarg1 noarg2              ";
 
     auto result = Flags::splitTokens(args);
-    ASSERT_EQ(result.size(), 10U);
-    ASSERT_STREQ(result[0].c_str(), "temp");
-    ASSERT_STREQ(result[1].c_str(), "--arg1=temp");
-    ASSERT_STREQ(result[2].c_str(), "--arg2=space temp");
-    ASSERT_STREQ(result[3].c_str(), "--arg3=\"value quoting");
-    ASSERT_STREQ(result[4].c_str(), "--arg4='single quotes");
-    ASSERT_STREQ(result[5].c_str(), "1");
-    ASSERT_STREQ(result[6].c_str(), "2");
-    ASSERT_STREQ(result[7].c_str(), "3");
-    ASSERT_STREQ(result[8].c_str(), "noarg1");
-    ASSERT_STREQ(result[9].c_str(), "noarg2");
+    ASSERT_EQ(10U, result.size());
+    ASSERT_STREQ(                  "temp", result[0].c_str());
+    ASSERT_STREQ(           "--arg1=temp", result[1].c_str());
+    ASSERT_STREQ(     "--arg2=space temp", result[2].c_str());
+    ASSERT_STREQ("--arg3=\"value quoting", result[3].c_str());
+    ASSERT_STREQ( "--arg4='single quotes", result[4].c_str());
+    ASSERT_STREQ(                     "1", result[5].c_str());
+    ASSERT_STREQ(                     "2", result[6].c_str());
+    ASSERT_STREQ(                     "3", result[7].c_str());
+    ASSERT_STREQ(                "noarg1", result[8].c_str());
+    ASSERT_STREQ(                "noarg2", result[9].c_str());
 }
 
 TEST(FlagsTest, convertFlag)
 {
     auto t1 = Flags::convertFlag("--arg1=temp");
-    ASSERT_STREQ(t1.first.c_str(), "arg1");
-    ASSERT_STREQ(t1.second.c_str(), "temp");
+    ASSERT_STREQ("arg1", t1. first.c_str());
+    ASSERT_STREQ("temp", t1.second.c_str());
 
     auto t2 = Flags::convertFlag("--arg1_temp");
-    ASSERT_STREQ(t2.first.c_str(), "arg1_temp");
-    ASSERT_STREQ(t2.second.c_str(), "");
+    ASSERT_STREQ("arg1_temp", t2. first.c_str());
+    ASSERT_STREQ(         "", t2.second.c_str());
 
     auto t3 = Flags::convertFlag("value=temp");
-    ASSERT_STREQ(t3.first.c_str(), "");
-    ASSERT_STREQ(t3.second.c_str(), "value=temp");
+    ASSERT_STREQ(          "", t3. first.c_str());
+    ASSERT_STREQ("value=temp", t3.second.c_str());
 }
 
 TEST(FlagsTest, at)
@@ -57,11 +57,11 @@ TEST(FlagsTest, at)
 
     Flags const CONST_FLAGS = flags;
 
-    ASSERT_EQ(CONST_FLAGS.size(), 2U);
-    ASSERT_STREQ(CONST_FLAGS.at(0).first.c_str(), "arg1");
-    ASSERT_STREQ(CONST_FLAGS.at(0).second.c_str(), "temp1");
-    ASSERT_STREQ(CONST_FLAGS.at(1).first.c_str(), "arg2");
-    ASSERT_STREQ(CONST_FLAGS.at(1).second.c_str(), "temp2");
+    ASSERT_EQ(2U, CONST_FLAGS.size());
+    ASSERT_STREQ( "arg1", CONST_FLAGS.at(0). first.c_str());
+    ASSERT_STREQ("temp1", CONST_FLAGS.at(0).second.c_str());
+    ASSERT_STREQ( "arg2", CONST_FLAGS.at(1). first.c_str());
+    ASSERT_STREQ("temp2", CONST_FLAGS.at(1).second.c_str());
 }
 
 TEST(FlagsTest, parse_and_find)
@@ -70,22 +70,22 @@ TEST(FlagsTest, parse_and_find)
     Flags flags;
     flags.parse(args);
 
-    ASSERT_EQ(flags.size(), 3U);
+    ASSERT_EQ(3U, flags.size());
 
     auto flag1 = flags.findWithKey("temp");
-    ASSERT_STREQ(flag1.first.c_str(), "");
-    ASSERT_STREQ(flag1.second.c_str(), "");
+    ASSERT_STREQ("", flag1. first.c_str());
+    ASSERT_STREQ("", flag1.second.c_str());
 
     auto flag2 = flags.findWithKey("arg1");
-    ASSERT_STREQ(flag2.first.c_str(), "arg1");
-    ASSERT_STREQ(flag2.second.c_str(), "");
+    ASSERT_STREQ("arg1", flag2. first.c_str());
+    ASSERT_STREQ(    "", flag2.second.c_str());
 
     auto flag3 = flags.findWithKey("arg2");
-    ASSERT_STREQ(flag3.first.c_str(), "arg2");
-    ASSERT_STREQ(flag3.second.c_str(), "temp");
+    ASSERT_STREQ("arg2", flag3. first.c_str());
+    ASSERT_STREQ("temp", flag3.second.c_str());
 
     auto flag4 = flags.findWithValue("temp");
-    ASSERT_STREQ(flag4.first.c_str(), "");
-    ASSERT_STREQ(flag4.second.c_str(), "temp");
+    ASSERT_STREQ(    "", flag4. first.c_str());
+    ASSERT_STREQ("temp", flag4.second.c_str());
 }
 

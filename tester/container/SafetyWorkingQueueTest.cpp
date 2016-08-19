@@ -20,9 +20,9 @@ TEST(SafetyWorkingQueueTest, Default)
     SafetyWorkingQueue<int> queue;
 
     queue.push(TEST_VALUE);
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 1U);
-    ASSERT_EQ(queue.getWorkingCount(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(1U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     std::atomic_bool end_working(false);
     std::atomic_bool is_waiting(false);
@@ -41,25 +41,25 @@ TEST(SafetyWorkingQueueTest, Default)
     while (is_waiting.load() == false) {
         // WAITING...
     }
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 0U);
-    ASSERT_EQ(queue.getWorkingCount(), 1U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(1U, queue.getWorkingCount());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     end_working.store(true);
     worker_thread.join();
 
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 0U);
-    ASSERT_EQ(queue.getWorkingCount(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 1U);
+    ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
+    ASSERT_EQ(1U, queue.sizeOfRemoveQueue());
 
     int find_value = queue.findAndRemoveFromRemoveQueue([&](int value) -> bool {
         return value == TEST_VALUE;
     });
-    ASSERT_EQ(find_value, TEST_VALUE);
+    ASSERT_EQ(TEST_VALUE, find_value);
 
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 0U);
-    ASSERT_EQ(queue.getWorkingCount(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 }
 
 TEST(SafetyWorkingQueueTest, Exception)
@@ -74,26 +74,26 @@ TEST(SafetyWorkingQueueTest, Remove)
     queue.push(100);
     queue.push(20);
     queue.push(0);
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 3U);
+    ASSERT_EQ(3U, queue.sizeOfInsertQueue());
 
     ASSERT_TRUE(queue.removeFromInsertQueue([](int const & value) -> bool {
         return value == 20;
     }));
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 2U);
-    ASSERT_EQ(queue.getWorkingCount(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(2U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     ASSERT_TRUE(queue.work());
     ASSERT_TRUE(queue.work());
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 0U);
-    ASSERT_EQ(queue.getWorkingCount(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 2U);
+    ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
+    ASSERT_EQ(2U, queue.sizeOfRemoveQueue());
 
-    ASSERT_EQ(queue.popFromRemoveQueue(), 100);
-    ASSERT_EQ(queue.popFromRemoveQueue(), 0);
+    ASSERT_EQ(100, queue.popFromRemoveQueue());
+    ASSERT_EQ(  0, queue.popFromRemoveQueue());
 }
 
-TEST(SafetyWorkingQueueTest, Clear)
+TEST(SafetyWorkingQueueTest, clear)
 {
     SafetyWorkingQueue<int> queue;
     queue.push(100);
@@ -101,13 +101,13 @@ TEST(SafetyWorkingQueueTest, Clear)
     queue.push(0);
     queue.work([](int&) -> bool { return true; });
 
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 2U);
-    ASSERT_EQ(queue.getWorkingCount(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 1U);
+    ASSERT_EQ(2U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
+    ASSERT_EQ(1U, queue.sizeOfRemoveQueue());
 
     queue.clear();
-    ASSERT_EQ(queue.sizeOfInsertQueue(), 0U);
-    ASSERT_EQ(queue.getWorkingCount(), 0U);
-    ASSERT_EQ(queue.sizeOfRemoveQueue(), 0U);
+    ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
+    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 }
 

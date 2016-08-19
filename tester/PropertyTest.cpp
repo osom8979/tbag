@@ -53,7 +53,7 @@ public:
 
 TEST_F(PropertyFixtureTest, test)
 {
-    ASSERT_EQ(this->property.get_IntegerKey(), 100);
-    ASSERT_EQ(this->property.get_StringKey(), "TEST");
+    ASSERT_EQ(   100, this->property.get_IntegerKey());
+    ASSERT_EQ("TEST", this->property.get_StringKey());
 }
 

@@ -27,7 +27,7 @@ TEST(haarTest, haar1d)
     std::vector<TestType>  input(INPUT,    INPUT    +    INPUT_LENGTH);
     std::vector<TestType> result(RESULT1D, RESULT1D + RESULT1D_LENGTH);
 
-    ASSERT_EQ(input.size(), result.size());
+    ASSERT_EQ(result.size(), input.size());
 
     // Forward.
     std::vector<TestType> forward;
@@ -37,7 +37,7 @@ TEST(haarTest, haar1d)
     {
         for (auto itr1 = forward.begin(), end1 = forward.end()
                 , itr2 =  result.begin(), end2 =  result.end(); itr1 != end1 && itr2 != end2; ++itr1, ++itr2) {
-            ASSERT_EQ(*itr1, *itr2);
+            ASSERT_EQ(*itr2, *itr1);
         }
     }
 
@@ -49,7 +49,7 @@ TEST(haarTest, haar1d)
     {
         for (auto itr1 = inverse.begin(), end1 = inverse.end()
                 , itr2 =   input.begin(), end2 =   input.end(); itr1 != end1 && itr2 != end2; ++itr1, ++itr2) {
-            ASSERT_EQ(*itr1, *itr2);
+            ASSERT_EQ(*itr2, *itr1);
         }
     }
 }
@@ -63,8 +63,8 @@ TEST(haarTest, haar2d)
     std::size_t const TEST_INPUT_HEIGHT = 2;
     std::size_t const TEST_INPUT_SIZE   = TEST_INPUT_WIDTH * TEST_INPUT_HEIGHT;
 
-    ASSERT_EQ(input.size(), result.size());
-    ASSERT_EQ(input.size(), TEST_INPUT_SIZE);
+    ASSERT_EQ(  result.size(), input.size());
+    ASSERT_EQ(TEST_INPUT_SIZE, input.size());
 
     // Forward.
     std::vector<TestType> forward;
@@ -74,7 +74,7 @@ TEST(haarTest, haar2d)
     {
         for (auto itr1 = forward.begin(), end1 = forward.end()
                 , itr2 =  result.begin(), end2 =  result.end(); itr1 != end1 && itr2 != end2; ++itr1, ++itr2) {
-            ASSERT_EQ(*itr1, *itr2);
+            ASSERT_EQ(*itr2, *itr1);
         }
     }
 
@@ -86,7 +86,7 @@ TEST(haarTest, haar2d)
     {
         for (auto itr1 = inverse.begin(), end1 = inverse.end()
                 , itr2 =   input.begin(), end2 =   input.end(); itr1 != end1 && itr2 != end2; ++itr1, ++itr2) {
-            ASSERT_EQ(*itr1, *itr2);
+            ASSERT_EQ(*itr2, *itr1);
         }
     }
 }

@@ -21,44 +21,44 @@ TEST(SafetyPrepareQueueTest, Default)
 
     SafetyPrepareQueue<int> queue;
 
-    ASSERT_EQ(queue.size(),          0U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     auto & prepare = queue.prepareManual();
-    ASSERT_EQ(queue.size(),          0U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 1U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(1U, queue.sizeOfPrepare());
 
     prepare.at() = TEST_VALUE;
     queue.push(prepare);
-    ASSERT_EQ(queue.size(),          1U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(1U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     auto & pop = queue.popManual();
-    ASSERT_EQ(queue.size(),          0U);
-    ASSERT_EQ(queue.sizeOfReading(), 1U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
-    ASSERT_EQ(pop.at(), TEST_VALUE);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(1U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
+    ASSERT_EQ(TEST_VALUE, pop.at());
 
     {
         queue.prepare();
-        ASSERT_EQ(queue.size(),          1U);
-        ASSERT_EQ(queue.sizeOfReading(), 1U);
-        ASSERT_EQ(queue.sizeOfRemove(),  0U);
-        ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+        ASSERT_EQ(1U, queue.size());
+        ASSERT_EQ(1U, queue.sizeOfReading());
+        ASSERT_EQ(0U, queue.sizeOfRemove());
+        ASSERT_EQ(0U, queue.sizeOfPrepare());
     }
 
     queue.readEnd(pop);
-    ASSERT_EQ(queue.size(),          1U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  1U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(1U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(1U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     queue.clear();
     ASSERT_TRUE(queue.empty());
@@ -72,16 +72,16 @@ TEST(SafetyPrepareQueueTest, popAndReadEnd)
     SafetyPrepareQueue<int> queue;
 
     queue.push(queue.prepareManual());
-    ASSERT_EQ(queue.size(),          1U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(1U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     ASSERT_TRUE(queue.popAndReadEnd());
-    ASSERT_EQ(queue.size(),          0U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  1U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(1U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
 TEST(SafetyPrepareQueueTest, popUntil)
@@ -102,26 +102,26 @@ TEST(SafetyPrepareQueueTest, popUntil)
     }
     {
         auto pop = queue.popUntil(1U);
-        ASSERT_EQ(*pop.get()->at().get(), TEST_NUMBER_01);
+        ASSERT_EQ(TEST_NUMBER_01, *pop.get()->at().get());
     }
     ASSERT_THROW(queue.popUntil(1U), IllegalStateException);
-    ASSERT_EQ(*queue.popUntil(0U).get()->at().get(), TEST_NUMBER_02);
+    ASSERT_EQ(TEST_NUMBER_02, *queue.popUntil(0U).get()->at().get());
 
     queue.push(queue.prepareManual());
     queue.push(queue.prepareManual());
     queue.push(queue.prepareManual());
     queue.push(queue.prepareManual());
     queue.push(queue.prepareManual());
-    ASSERT_EQ(queue.size(),          5U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(5U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     queue.popUntil(0U);
-    ASSERT_EQ(queue.size(),          0U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  5U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(5U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
 TEST(SafetyPrepareQueueTest, autoOperator)
@@ -130,27 +130,27 @@ TEST(SafetyPrepareQueueTest, autoOperator)
 
     {
         auto prepare = queue.prepare();
-        ASSERT_EQ(queue.size(),          0U);
-        ASSERT_EQ(queue.sizeOfReading(), 0U);
-        ASSERT_EQ(queue.sizeOfRemove(),  0U);
-        ASSERT_EQ(queue.sizeOfPrepare(), 1U);
+        ASSERT_EQ(0U, queue.size());
+        ASSERT_EQ(0U, queue.sizeOfReading());
+        ASSERT_EQ(0U, queue.sizeOfRemove());
+        ASSERT_EQ(1U, queue.sizeOfPrepare());
     }
-    ASSERT_EQ(queue.size(),          1U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(1U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     {
         auto pop = queue.pop();
-        ASSERT_EQ(queue.size(),          0U);
-        ASSERT_EQ(queue.sizeOfReading(), 1U);
-        ASSERT_EQ(queue.sizeOfRemove(),  0U);
-        ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+        ASSERT_EQ(0U, queue.size());
+        ASSERT_EQ(1U, queue.sizeOfReading());
+        ASSERT_EQ(0U, queue.sizeOfRemove());
+        ASSERT_EQ(0U, queue.sizeOfPrepare());
     }
-    ASSERT_EQ(queue.size(),          0U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  1U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(1U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
 TEST(SafetyPrepareQueueTest, cancelPrepare)
@@ -159,16 +159,16 @@ TEST(SafetyPrepareQueueTest, cancelPrepare)
 
     {
         auto prepare = queue.prepare();
-        ASSERT_EQ(queue.size(),          0U);
-        ASSERT_EQ(queue.sizeOfReading(), 0U);
-        ASSERT_EQ(queue.sizeOfRemove(),  0U);
-        ASSERT_EQ(queue.sizeOfPrepare(), 1U);
+        ASSERT_EQ(0U, queue.size());
+        ASSERT_EQ(0U, queue.sizeOfReading());
+        ASSERT_EQ(0U, queue.sizeOfRemove());
+        ASSERT_EQ(1U, queue.sizeOfPrepare());
         prepare->cancel();
     }
-    ASSERT_EQ(queue.size(),          0U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  1U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(1U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
 TEST(SafetyPrepareQueueTest, cancelPop)
@@ -186,27 +186,27 @@ TEST(SafetyPrepareQueueTest, cancelPop)
         prepare->at() = TEST_VALUE_02;
     }
     queue.push(queue.prepareManual());
-    ASSERT_EQ(queue.size(),          3U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(3U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     {
         auto pop = queue.pop();
-        ASSERT_EQ(pop->at(), TEST_VALUE_01);
-        ASSERT_EQ(queue.size(),          2U);
-        ASSERT_EQ(queue.sizeOfReading(), 1U);
-        ASSERT_EQ(queue.sizeOfRemove(),  0U);
-        ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+        ASSERT_EQ(TEST_VALUE_01, pop->at());
+        ASSERT_EQ(2U, queue.size());
+        ASSERT_EQ(1U, queue.sizeOfReading());
+        ASSERT_EQ(0U, queue.sizeOfRemove());
+        ASSERT_EQ(0U, queue.sizeOfPrepare());
         pop->cancel();
     }
-    ASSERT_EQ(queue.size(),          3U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
-    ASSERT_EQ(queue.sizeOfRemove(),  0U);
-    ASSERT_EQ(queue.sizeOfPrepare(), 0U);
+    ASSERT_EQ(3U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
+    ASSERT_EQ(0U, queue.sizeOfRemove());
+    ASSERT_EQ(0U, queue.sizeOfPrepare());
 
     auto pop = queue.pop();
-    ASSERT_EQ(pop->at(), TEST_VALUE_01);
+    ASSERT_EQ(TEST_VALUE_01, pop->at());
 }
 
 TEST(SafetyPrepareQueueTest, Thread)
@@ -226,7 +226,7 @@ TEST(SafetyPrepareQueueTest, Thread)
             auto prepare = queue.prepare();
 
             if (remove_count >= 1) {
-                ASSERT_EQ(queue.sizeOfAll(), all_count);
+                ASSERT_EQ(all_count, queue.sizeOfAll());
             }
 
             if (static_cast<bool>(prepare->at()) == false) {
@@ -244,7 +244,7 @@ TEST(SafetyPrepareQueueTest, Thread)
             }
 
             auto reading = queue.pop();
-            ASSERT_EQ(*reading->at().get(), reading_index);
+            ASSERT_EQ(reading_index, *reading->at().get());
             ++reading_index;
         }
     });
@@ -252,11 +252,11 @@ TEST(SafetyPrepareQueueTest, Thread)
     t1.join();
     t2.join();
 
-    ASSERT_EQ(queue.size(), 0U);
-    ASSERT_EQ(queue.sizeOfReading(), 0U);
+    ASSERT_EQ(0U, queue.size());
+    ASSERT_EQ(0U, queue.sizeOfReading());
 
     std::cout << "SafetyPrepareQueue.sizeOfRemove: " << queue.sizeOfRemove() << std::endl;
-    ASSERT_GT(queue.sizeOfRemove(), 1U);
-    ASSERT_LT(queue.sizeOfRemove(), static_cast<std::size_t>(MAX_TEST));
+    ASSERT_LT(1U, queue.sizeOfRemove());
+    ASSERT_GT(static_cast<std::size_t>(MAX_TEST), queue.sizeOfRemove());
 }
 

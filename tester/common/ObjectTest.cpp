@@ -26,6 +26,6 @@ TEST(ObjectTest, Default)
 
     ASSERT_TRUE(o1 != o2);
     ASSERT_FALSE(o1 == o6);
-    ASSERT_STREQ(Object::getClassName(), "Object");
+    ASSERT_STREQ("Object", Object::getClassName());
 }
 

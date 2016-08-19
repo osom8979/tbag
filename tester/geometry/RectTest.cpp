@@ -21,25 +21,25 @@ TEST(RectTest, Constructor)
 
     r1 = r2;
 
-    ASSERT_EQ(r1.point.x, 1);
-    ASSERT_EQ(r1.point.y, 2);
-    ASSERT_EQ(r1.size.w, 3);
-    ASSERT_EQ(r1.size.h, 4);
+    ASSERT_EQ(1, r1.point.x);
+    ASSERT_EQ(2, r1.point.y);
+    ASSERT_EQ(3, r1.size.w );
+    ASSERT_EQ(4, r1.size.h );
 
-    ASSERT_EQ(r2.point.x, 1);
-    ASSERT_EQ(r2.point.y, 2);
-    ASSERT_EQ(r2.size.w, 3);
-    ASSERT_EQ(r2.size.h, 4);
+    ASSERT_EQ(1, r2.point.x);
+    ASSERT_EQ(2, r2.point.y);
+    ASSERT_EQ(3, r2.size.w );
+    ASSERT_EQ(4, r2.size.h );
 
-    ASSERT_EQ(r3.point.x, 1);
-    ASSERT_EQ(r3.point.y, 2);
-    ASSERT_EQ(r3.size.w, 3);
-    ASSERT_EQ(r3.size.h, 4);
+    ASSERT_EQ(1, r3.point.x);
+    ASSERT_EQ(2, r3.point.y);
+    ASSERT_EQ(3, r3.size.w );
+    ASSERT_EQ(4, r3.size.h );
 
-    ASSERT_EQ(r4.point.x, 5);
-    ASSERT_EQ(r4.point.y, 6);
-    ASSERT_EQ(r4.size.w, 7);
-    ASSERT_EQ(r4.size.h, 8);
+    ASSERT_EQ(5, r4.point.x);
+    ASSERT_EQ(6, r4.point.y);
+    ASSERT_EQ(7, r4.size.w );
+    ASSERT_EQ(8, r4.size.h );
 
     ASSERT_EQ(r1, r2);
     ASSERT_EQ(r2, r3);
@@ -58,10 +58,10 @@ TEST(RectTest, Methods)
      */
     Rect r = { {20, 20}, {-10, -10} };
 
-    ASSERT_EQ(getLeftTop(r)    , makePoint(10, 10));
-    ASSERT_EQ(getRightTop(r)   , makePoint(20, 10));
-    ASSERT_EQ(getLeftBottom(r) , makePoint(10, 20));
-    ASSERT_EQ(getRightBottom(r), makePoint(20, 20));
+    ASSERT_EQ(makePoint(10, 10), getLeftTop(r)    );
+    ASSERT_EQ(makePoint(20, 10), getRightTop(r)   );
+    ASSERT_EQ(makePoint(10, 20), getLeftBottom(r) );
+    ASSERT_EQ(makePoint(20, 20), getRightBottom(r));
 }
 
 TEST(RectTest, CheckInside)
@@ -113,7 +113,7 @@ TEST(RectTest, clipRect_true)
     ASSERT_TRUE(clipRect(Rect{ {20, 20}, {20, 20} }, Rect{ {30, 30}, {-20, -20} }, &clip));
 
     Rect predict = { {20, 20}, {10, 10} };
-    ASSERT_EQ(clip, predict);
+    ASSERT_EQ(predict, clip);
 }
 
 TEST(RectTest, clipRect_false)
@@ -136,36 +136,6 @@ TEST(RectTest, clipRect_false)
 TEST(RectTest, String)
 {
     Rect p = { {1, 2}, {3, 4} };
-    std::string estimated;
-
-    estimated += __RECT_PREFIX_CHAR;
-    estimated += __RECT_STREAM_BRACE_OPEN;
-    estimated += "1";
-    estimated += __RECT_STREAM_VALUE_SEPARATOR;
-    estimated += "2";
-    estimated += __RECT_STREAM_VALUE_SEPARATOR;
-    estimated += "3";
-    estimated += __RECT_STREAM_VALUE_SEPARATOR;
-    estimated += "4";
-    estimated += __RECT_STREAM_BRACE_CLOSE;
-
-    ASSERT_EQ(toString(p), estimated);
+    toString(p);
 }
-
-////#include <atomic>
-//TEST(RectTest, Atomic)
-//{
-//    std::atomic<Rect> r1;
-//    r1.store(Rect{1, 1, 1, 1});
-//
-//    ASSERT_EQ(r1.load().x, 1);
-//    ASSERT_EQ(r1.load().y, 1);
-//    ASSERT_EQ(r1.load().w, 1);
-//    ASSERT_EQ(r1.load().h, 1);
-//
-//    Rect r2 = r1;
-//
-//    ASSERT_EQ(r2.x, 1);
-//    ASSERT_EQ(r2.y, 1);
-//}
 

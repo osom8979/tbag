@@ -26,7 +26,7 @@ TEST(ObserverTest, UnorderedObservable)
         });
     observable.notify();
 
-    ASSERT_GE(test0, TEST_NUMBER);
-    ASSERT_GE(test1, TEST_NUMBER);
+    ASSERT_LE(TEST_NUMBER, test0);
+    ASSERT_LE(TEST_NUMBER, test1);
 }
 

@@ -19,8 +19,8 @@ TEST(RandomTest, gen)
 
     for (int i = 0; i < test_count; ++i) {
         current = Random::gen(min, max);
-        ASSERT_GE(current, min);
-        ASSERT_LE(current, max);
+        ASSERT_LE(min, current);
+        ASSERT_GE(max, current);
     }
 }
 
