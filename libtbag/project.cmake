@@ -31,3 +31,5 @@ tbag_modules__include_project (WholeArchiveOff)
 
 list (APPEND TBAG_PROJECT_LDFLAGS ${TBAG_DEP_UV_DEPENDENCIES})
 
+#tbag_modules__include_project (PCH ${CMAKE_SOURCE_DIR}/libtbag/config.h)
+
