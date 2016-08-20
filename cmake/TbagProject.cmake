@@ -116,7 +116,7 @@ endmacro ()
 macro (tbag_project__update_cxx_flags_property)
     list (LENGTH TBAG_PROJECT_CXXFLAGS __project_cxxflags_length)
     if (${__project_cxxflags_length} GREATER 0)
-        target_compile_options (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_CXXFLAGS})
+        target_compile_options (${TBAG_PROJECT_CONST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TBAG_PROJECT_CXXFLAGS}>)
     endif ()
 endmacro ()
 

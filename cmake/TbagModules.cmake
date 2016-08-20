@@ -60,13 +60,29 @@ function (tbag_module__print_projects)
     message (STATUS "Tbag project modules: ${__project_modules}")
 endfunction ()
 
+#/// Include Tbag module file.
+#///
+#/// @param __prefix [in] module prefix name.
+#/// @param __suffix [in] module suffix name.
+#/// @param ...      [in] list arguments.
+macro (tbag_modules__include __prefix __suffix)
+    set (__include_name "${__prefix}${__suffix}")
+    set (__include_name_index 0)
+    foreach (__arg_cursor ${ARGN})
+        set (__arg_name "${__include_name}_${__include_name_index}")
+        set (${__arg_name} "${__arg_cursor}")
+        math (EXPR __include_name_index "${__include_name_index} + 1")
+    endforeach ()
+    include (${__include_name})
+endmacro ()
+
 #/// Include TbagObject cmake file.
 macro (tbag_modules__include_object __file_name)
-    include (${TBAG_MODULES_OBJECT_CMAKE_PREFIX}${__file_name})
+    tbag_modules__include (${TBAG_MODULES_OBJECT_CMAKE_PREFIX} ${__file_name} ${ARGN})
 endmacro ()
 
 #/// Include TbagProject cmake file.
 macro (tbag_modules__include_project __file_name)
-    include (${TBAG_MODULES_PROJECT_CMAKE_PREFIX}${__file_name})
+    tbag_modules__include (${TBAG_MODULES_PROJECT_CMAKE_PREFIX} ${__file_name} ${ARGN})
 endmacro ()
 
