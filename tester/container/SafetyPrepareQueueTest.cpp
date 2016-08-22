@@ -256,7 +256,6 @@ TEST(SafetyPrepareQueueTest, Thread)
     ASSERT_EQ(0U, queue.sizeOfReading());
 
     std::cout << "SafetyPrepareQueue.sizeOfRemove: " << queue.sizeOfRemove() << std::endl;
-    ASSERT_LT(1U, queue.sizeOfRemove());
-    ASSERT_GT(static_cast<std::size_t>(MAX_TEST), queue.sizeOfRemove());
+    ASSERT_LE(1U, queue.sizeOfRemove());
 }
 
