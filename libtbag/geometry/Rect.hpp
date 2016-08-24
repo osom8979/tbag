@@ -39,12 +39,12 @@ namespace geometry {
  * @date   2015-08-22 (Move the world library)
  * @date   2015-10-18 (Change to the trivial type)
  * @date   2015-10-21 (Bug fix: assign atomic type)
+ * @date   2016-08-24 (Remove BasePoint & BaseSize)
  */
 template <typename T>
 struct BaseRect
 {
-    BasePoint<T> point;
-    BaseSize<T>  size;
+    T x, y, w, h;
 };
 
 // ------------
@@ -53,7 +53,7 @@ struct BaseRect
 
 using Rect = BaseRect<int>;
 
-Rect const EMPTY_RECT = { {0, 0}, {0, 0} };
+Rect const EMPTY_RECT = {0, 0, 0, 0};
 
 static_assert(std::is_trivial<Rect>::value, "Rect is not trivial type.");
 
@@ -66,10 +66,7 @@ template <typename T>
 inline bool
 operator == (BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
 {
-    if (/**/r1.point.x != r2.point.x
-         || r1.point.y != r2.point.y
-         || r1.size.w  != r2.size.w
-         || r1.size.h  != r2.size.h) {
+    if (r1.x != r2.x || r1.y != r2.y || r1.w != r2.w || r1.h != r2.h) {
         return false;
     }
     return true;
@@ -92,8 +89,7 @@ makeRect(T1 && x, T2 && y, T3 && w, T4 && h) noexcept
 {
     typedef typename remove_cr<T1>::type __remove_cr;
     typedef BaseRect<__remove_cr> __rect_type;
-    return (__rect_type{ {std::forward<T1>(x), std::forward<T2>(y)}
-                       , {std::forward<T3>(w), std::forward<T4>(h)} });
+    return __rect_type{std::forward<T1>(x), std::forward<T2>(y), std::forward<T3>(w), std::forward<T4>(h)};
 }
 
 template <typename T>
@@ -102,7 +98,7 @@ makeRect(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
 {
     typedef typename remove_cr<T>::type __remove_cr;
     typedef BaseRect<__remove_cr> __rect_type;
-    return (__rect_type{ {p.x, p.y}, {s.w, s.h} });
+    return __rect_type{p.x, p.y, s.w, s.h};
 }
 
 // ------------------
@@ -113,56 +109,56 @@ template <typename T>
 inline typename remove_cr<T>::type
 getLeftTopX(BaseRect<T> const & r) noexcept
 {
-    return std::min(r.point.x, r.point.x + r.size.w);
+    return std::min(r.x, r.x + r.w);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getLeftTopY(BaseRect<T> const & r) noexcept
 {
-    return std::min(r.point.y, r.point.y + r.size.h);
+    return std::min(r.y, r.y + r.h);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightTopX(BaseRect<T> const & r) noexcept
 {
-    return std::max(r.point.x, r.point.x + r.size.w);
+    return std::max(r.x, r.x + r.w);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightTopY(BaseRect<T> const & r) noexcept
 {
-    return std::min(r.point.y, r.point.y + r.size.h);
+    return std::min(r.y, r.y + r.h);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getLeftBottomX(BaseRect<T> const & r) noexcept
 {
-    return std::min(r.point.x, r.point.x + r.size.w);
+    return std::min(r.x, r.x + r.w);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getLeftBottomY(BaseRect<T> const & r) noexcept
 {
-    return std::max(r.point.y, r.point.y + r.size.h);
+    return std::max(r.y, r.y + r.h);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightBottomX(BaseRect<T> const & r) noexcept
 {
-    return std::max(r.point.x, r.point.x + r.size.w);
+    return std::max(r.x, r.x + r.w);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightBottomY(BaseRect<T> const & r) noexcept
 {
-    return std::max(r.point.y, r.point.y + r.size.h);
+    return std::max(r.y, r.y + r.h);
 }
 
 template <typename T>
@@ -205,8 +201,8 @@ template <typename T>
 inline bool
 checkInside(BaseRect<T> const & base, T const & x, T const & y) noexcept
 {
-    if (/**/base.point.x <= COMPARE_AND(x) <= (base.point.x + base.size.w)
-         && base.point.y <= COMPARE_AND(y) <= (base.point.y + base.size.h)) {
+    if (/* * */base.x <= COMPARE_AND(x) <= (base.x + base.w)
+            && base.y <= COMPARE_AND(y) <= (base.y + base.h)) {
         return true;
     }
     return false;
@@ -219,22 +215,6 @@ checkInside(BaseRect<T> const & base, BasePoint<T> const & p) noexcept
     return checkInside(base, p.x, p.y);
 }
 
-template <typename T>
-inline bool
-checkOverlap(BaseRect<T> const & r1, BaseRect<T> const & r2, BaseRect<T> & overlap)
-{
-    T x_tl = std::max(getLeftTopX(r1), getLeftTopX(r2));
-    T y_tl = std::max(getLeftTopY(r1), getLeftTopY(r2));
-    T x_br = std::min(getRightBottomX(r1), getRightBottomX(r2));
-    T y_br = std::min(getRightBottomY(r1), getRightBottomY(r2));
-
-    if (x_tl < x_br && y_tl < y_br) {
-        overlap = makeRect(x_tl, y_tl, x_br - x_tl, y_br - y_tl);
-        return true;
-    }
-    return false;
-}
-
 // ---------
 // Clipping.
 // ---------
@@ -243,17 +223,17 @@ template <typename T>
 inline bool
 clipRect(BaseRect<T> const & r1, BaseRect<T> const & r2, BaseRect<T> * clip = nullptr) noexcept
 {
-    T lt_x = std::max(getLeftTopX(r1), getLeftTopX(r2));
-    T lt_y = std::max(getLeftTopY(r1), getLeftTopY(r2));
+    T lt_x = std::max(    getLeftTopX(r1),     getLeftTopX(r2));
+    T lt_y = std::max(    getLeftTopY(r1),     getLeftTopY(r2));
     T rb_x = std::min(getRightBottomX(r1), getRightBottomX(r2));
     T rb_y = std::min(getRightBottomY(r1), getRightBottomY(r2));
 
     if (lt_x < rb_x && lt_y < rb_y) {
         if (clip != nullptr) {
-            clip->point.x = lt_x;
-            clip->point.y = lt_y;
-            clip->size.w  = rb_x - lt_x;
-            clip->size.h  = rb_y - lt_y;
+            clip->x = lt_x;
+            clip->y = lt_y;
+            clip->w = rb_x - lt_x;
+            clip->h = rb_y - lt_y;
         }
         return true;
     }
@@ -274,10 +254,10 @@ std::string toString(BaseRect<T> const & rect)
 {
     std::stringstream ss;
     ss << __RECT_PREFIX_CHAR << __RECT_STREAM_BRACE_OPEN
-       << rect.point.x << __RECT_STREAM_VALUE_SEPARATOR
-       << rect.point.y << __RECT_STREAM_VALUE_SEPARATOR
-       << rect.size.w  << __RECT_STREAM_VALUE_SEPARATOR
-       << rect.size.h  << __RECT_STREAM_BRACE_CLOSE;
+       << rect.x << __RECT_STREAM_VALUE_SEPARATOR
+       << rect.y << __RECT_STREAM_VALUE_SEPARATOR
+       << rect.w << __RECT_STREAM_VALUE_SEPARATOR
+       << rect.h << __RECT_STREAM_BRACE_CLOSE;
     return ss.str();
 }
 

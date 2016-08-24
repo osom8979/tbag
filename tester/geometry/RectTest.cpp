@@ -14,32 +14,32 @@ using namespace libtbag::geometry;
 TEST(RectTest, Constructor)
 {
     Rect r1;
-    Rect r2 = { {1, 2}, {3, 4} };
+    Rect r2 = {1, 2, 3, 4};
     Rect r3 = r2;
-    Rect r4_move = Rect{ {5, 6}, {7, 8} };
+    Rect r4_move = Rect{5, 6, 7, 8};
     Rect r4 = std::move(r4_move);
 
     r1 = r2;
 
-    ASSERT_EQ(1, r1.point.x);
-    ASSERT_EQ(2, r1.point.y);
-    ASSERT_EQ(3, r1.size.w );
-    ASSERT_EQ(4, r1.size.h );
+    ASSERT_EQ(1, r1.x);
+    ASSERT_EQ(2, r1.y);
+    ASSERT_EQ(3, r1.w);
+    ASSERT_EQ(4, r1.h);
 
-    ASSERT_EQ(1, r2.point.x);
-    ASSERT_EQ(2, r2.point.y);
-    ASSERT_EQ(3, r2.size.w );
-    ASSERT_EQ(4, r2.size.h );
+    ASSERT_EQ(1, r2.x);
+    ASSERT_EQ(2, r2.y);
+    ASSERT_EQ(3, r2.w);
+    ASSERT_EQ(4, r2.h);
 
-    ASSERT_EQ(1, r3.point.x);
-    ASSERT_EQ(2, r3.point.y);
-    ASSERT_EQ(3, r3.size.w );
-    ASSERT_EQ(4, r3.size.h );
+    ASSERT_EQ(1, r3.x);
+    ASSERT_EQ(2, r3.y);
+    ASSERT_EQ(3, r3.w);
+    ASSERT_EQ(4, r3.h);
 
-    ASSERT_EQ(5, r4.point.x);
-    ASSERT_EQ(6, r4.point.y);
-    ASSERT_EQ(7, r4.size.w );
-    ASSERT_EQ(8, r4.size.h );
+    ASSERT_EQ(5, r4.x);
+    ASSERT_EQ(6, r4.y);
+    ASSERT_EQ(7, r4.w);
+    ASSERT_EQ(8, r4.h);
 
     ASSERT_EQ(r1, r2);
     ASSERT_EQ(r2, r3);
@@ -56,11 +56,11 @@ TEST(RectTest, Methods)
      *    |   |   |
      * 20 |   +---+
      */
-    Rect r = { {20, 20}, {-10, -10} };
+    Rect r = {20, 20, -10, -10};
 
-    ASSERT_EQ(makePoint(10, 10), getLeftTop(r)    );
-    ASSERT_EQ(makePoint(20, 10), getRightTop(r)   );
-    ASSERT_EQ(makePoint(10, 20), getLeftBottom(r) );
+    ASSERT_EQ(makePoint(10, 10),     getLeftTop(r));
+    ASSERT_EQ(makePoint(20, 10),    getRightTop(r));
+    ASSERT_EQ(makePoint(10, 20),  getLeftBottom(r));
     ASSERT_EQ(makePoint(20, 20), getRightBottom(r));
 }
 
@@ -76,7 +76,7 @@ TEST(RectTest, CheckInside)
      *    |       |   |
      * 30 |       +---+
      */
-    Rect r = { {20, 20}, {10, 10} };
+    Rect r = {20, 20, 10, 10};
 
     Point p1 = {30, 25};
     Point p2 = {25, 25};
@@ -110,9 +110,9 @@ TEST(RectTest, clipRect_true)
      * 50 |
      */
     Rect clip;
-    ASSERT_TRUE(clipRect(Rect{ {20, 20}, {20, 20} }, Rect{ {30, 30}, {-20, -20} }, &clip));
+    ASSERT_TRUE(clipRect(Rect{20, 20, 20, 20}, Rect{30, 30, -20, -20}, &clip));
 
-    Rect predict = { {20, 20}, {10, 10} };
+    Rect predict = {20, 20, 10, 10};
     ASSERT_EQ(predict, clip);
 }
 
@@ -130,12 +130,12 @@ TEST(RectTest, clipRect_false)
      *    |
      * 40 |
      */
-    ASSERT_FALSE(clipRect(Rect{ {10, 20}, {10, 10} }, Rect{ {30, 10}, {10, 10} }));
+    ASSERT_FALSE(clipRect(Rect{10, 20, 10, 10}, Rect{30, 10, 10, 10}));
 }
 
 TEST(RectTest, String)
 {
-    Rect p = { {1, 2}, {3, 4} };
+    Rect p = {1, 2, 3, 4};
     toString(p);
 }
 
