@@ -35,13 +35,10 @@ namespace animation {
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  */
-class FrameInterpolator : public TimeInterpolator<int, std::chrono::milliseconds>
+class FrameInterpolator : public TimeInterpolator<std::chrono::microseconds>
 {
 public:
-    using BaseInterpolator = TimeInterpolator<int, std::chrono::milliseconds>;
-    using ValueType        = typename BaseInterpolator::ValueType;
-    using PeriodType       = typename BaseInterpolator::PeriodType;
-    using RepType          = typename BaseInterpolator::RepType;
+    using Parent = TimeInterpolator<std::chrono::microseconds>;
 
 private:
     /**
@@ -49,20 +46,31 @@ private:
      *
      * @translate{ko, 연산을 시작할 기준 시간.}
      */
-    RepType _start_millisec = 0;
+    Rep _start = 0;
 
     /** Frames per milliseconds (FPS). */
-    RepType _fps_millisec = 1;
+    int _fps = 1;
 
     /** Total frame count. */
-    ValueType _frame_size = 1;
+    int _frame_count = 1;
 
 public:
     FrameInterpolator() noexcept = default;
     virtual ~FrameInterpolator() noexcept = default;
 
 public:
-    void set(long start_millisec, long fps_millisec, int frame_size) noexcept;
+    inline void setStart(Rep start) noexcept
+    { _start = start; }
+    inline void setFps(int fps) noexcept
+    { _fps = fps; }
+    inline void setFrameSize(int frame_count) noexcept
+    { _frame_count = frame_count; }
+    inline void set(Rep start, int fps, int frame_count) noexcept
+    {
+        _start = start;
+        _fps = fps;
+        _frame_count = frame_count;
+    }
 
 public:
     /**
@@ -73,10 +81,10 @@ public:
      * @remarks
      *  Example code:
      *  @code{.cpp}
-     *  int frame_number = static_cast<int>(animation.getInterpolation(millisec));
+     *   int frame_number = static_cast<int>(animation.getInterpolation(millisec));
      *  @endcode
      */
-    virtual ValueType getInterpolation(RepType rep) noexcept override;
+    virtual Rep getInterpolation(Rep rep) noexcept override;
 };
 
 } // namespace animation

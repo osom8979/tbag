@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 
 #include <chrono>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,18 +34,17 @@ namespace animation {
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  */
-template <typename Value    = double
-        , typename Duration = std::chrono::nanoseconds>
-class TimeInterpolator
+template <typename DurationType = std::chrono::microseconds>
+struct TimeInterpolator
 {
 public:
-    using ValueType   = Value;
-    using PeriodType  = typename Duration::period;
-    using RepType     = typename Duration::rep;
+    using Duration = DurationType;
+    using Rep      = typename Duration::rep;
+    using Period   = typename Duration::period;
 
 public:
-    TimeInterpolator() noexcept = default;
-    virtual ~TimeInterpolator() noexcept = default;
+    constexpr TimeInterpolator() noexcept = default;
+    virtual  ~TimeInterpolator() noexcept = default;
 
 public:
     /**
@@ -57,7 +57,7 @@ public:
      *
      * @return Interpolated value.
      */
-    virtual ValueType getInterpolation(RepType rep) noexcept = 0;
+    virtual Rep getInterpolation(Rep rep) noexcept = 0;
 };
 
 } // namespace animation

@@ -13,22 +13,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-void FrameInterpolator::set(long  start_millisec
-                          , long  fps_millisec
-                          , int   frame_size) noexcept
+FrameInterpolator::Rep FrameInterpolator::getInterpolation(FrameInterpolator::Rep rep) noexcept
 {
-    this->_start_millisec = start_millisec;
-    this->_fps_millisec   = fps_millisec;
-    this->_frame_size     = frame_size;
-}
-
-FrameInterpolator::ValueType FrameInterpolator::getInterpolation(FrameInterpolator::RepType rep) noexcept
-{
-    if (_fps_millisec == 0 || _frame_size == 0) {
+    if (_fps == 0 || _frame_count == 0) {
         return 0;
     }
-
-    return std::abs((rep - _start_millisec) / _fps_millisec % _frame_size /* + 0.5f */);
+    return std::abs((rep - _start) / _fps % _frame_count /* + 0.5f */);
 }
 
 } // namespace animation
