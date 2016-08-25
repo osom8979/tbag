@@ -189,6 +189,8 @@ function (tbag_project__find __lib_projs __exe_projs __root_dir)
     # Find all project.
     file (GLOB_RECURSE __find_project_list RELATIVE "${__root_dir}" "${TBAG_PROJECT_FILE_NAME}")
 
+    tbag_debug_list (tbag_project__find/find_project_list ${__find_project_list})
+
     # Find library project.
     tbag_utils__list_of_regex (__find_lib_proj "${__library_glob}" ${__find_project_list})
     list (LENGTH __find_lib_proj __find_lib_proj_length)
