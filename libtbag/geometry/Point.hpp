@@ -60,8 +60,8 @@ struct BaseSize
 using Point = BasePoint<int>;
 using Size  = BaseSize <int>;
 
-Point const EMPTY_POINT = { 0, 0 };
-Size  const EMPTY_SIZE  = { 0, 0 };
+Point const EMPTY_POINT = {0, 0};
+Size  const EMPTY_SIZE  = {0, 0};
 
 static_assert(std::is_trivial<Point>::value, "Point is not trivial type.");
 static_assert(std::is_trivial< Size>::value,  "Size is not trivial type.");
@@ -71,28 +71,64 @@ static_assert(std::is_trivial< Size>::value,  "Size is not trivial type.");
 // ------------------------------------
 
 template <typename T>
-inline BasePoint<typename remove_cr<T>::type>
+inline BasePoint<T> &
+operator +=(BasePoint<T> & p1, BasePoint<T> const & p2) noexcept
+{
+    p1.x += p2.x;
+    p1.y += p2.y;
+    return p1;
+}
+
+template <typename T>
+inline BasePoint<T> &
+operator -=(BasePoint<T> & p1, BasePoint<T> const & p2) noexcept
+{
+    p1.x -= p2.x;
+    p1.y -= p2.y;
+    return p1;
+}
+
+template <typename T>
+inline BasePoint<T>
 operator +(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
 {
     return BasePoint<T>{p1.x + p2.x, p1.y + p2.y};
 }
 
 template <typename T>
-inline BasePoint<typename remove_cr<T>::type>
-operator +(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
-{
-    return BasePoint<T>{p.x + s.w, p.y + s.h};
-}
-
-template <typename T>
-inline BasePoint<typename remove_cr<T>::type>
+inline BasePoint<T>
 operator -(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
 {
     return BasePoint<T>{p1.x - p2.x, p1.y - p2.y};
 }
 
 template <typename T>
-inline BasePoint<typename remove_cr<T>::type>
+inline BasePoint<T> &
+operator +=(BasePoint<T> & p, BaseSize<T> const & s) noexcept
+{
+    p.x += s.w;
+    p.y += s.h;
+    return p;
+}
+
+template <typename T>
+inline BasePoint<T> &
+operator -=(BasePoint<T> & p, BaseSize<T> const & s) noexcept
+{
+    p.x -= s.w;
+    p.y -= s.h;
+    return p;
+}
+
+template <typename T>
+inline BasePoint<T>
+operator +(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
+{
+    return BasePoint<T>{p.x + s.w, p.y + s.h};
+}
+
+template <typename T>
+inline BasePoint<T>
 operator -(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
 {
     return BasePoint<T>{p.x - s.w, p.y - s.h};
@@ -103,14 +139,32 @@ operator -(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
 // -----------------------------------
 
 template <typename T>
-inline BaseSize<typename remove_cr<T>::type>
+inline BaseSize<T> &
+operator +=(BaseSize<T> & s1, BaseSize<T> const & s2) noexcept
+{
+    s1.w += s2.w;
+    s1.h += s2.h;
+    return s1;
+}
+
+template <typename T>
+inline BaseSize<T> &
+operator -=(BaseSize<T> & s1, BaseSize<T> const & s2) noexcept
+{
+    s1.w -= s2.w;
+    s1.h -= s2.h;
+    return s1;
+}
+
+template <typename T>
+inline BaseSize<T>
 operator +(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
 {
     return BaseSize<T>{s1.w + s2.w, s1.h + s2.h};
 }
 
 template <typename T>
-inline BaseSize<typename remove_cr<T>::type>
+inline BaseSize<T>
 operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
 {
     return BaseSize<T>{s1.w - s2.w, s1.h - s2.h};
@@ -123,7 +177,7 @@ operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
  *  A scalar does not have a direction, but vector has a direction.
  */
 template <typename T>
-inline BaseSize<typename remove_cr<T>::type>
+inline BaseSize<T>
 operator +(BaseSize<T> const & s, BasePoint<T> const & p) noexcept = delete;
 
 /**
@@ -133,7 +187,7 @@ operator +(BaseSize<T> const & s, BasePoint<T> const & p) noexcept = delete;
  *  A scalar does not have a direction, but vector has a direction.
  */
 template <typename T>
-inline BaseSize<typename remove_cr<T>::type>
+inline BaseSize<T>
 operator -(BaseSize<T> const & s, BasePoint<T> const & p) noexcept = delete;
 
 // -----------------------------

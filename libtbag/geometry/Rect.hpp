@@ -57,19 +57,16 @@ Rect const EMPTY_RECT = {0, 0, 0, 0};
 
 static_assert(std::is_trivial<Rect>::value, "Rect is not trivial type.");
 
-// -----------------------------
-// Equals Operation overloading.
-// -----------------------------
+// ----------------------
+// Operation overloading.
+// ----------------------
 
 /** The Rect are equal? */
 template <typename T>
 inline bool
-operator == (BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
+operator ==(BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
 {
-    if (r1.x != r2.x || r1.y != r2.y || r1.w != r2.w || r1.h != r2.h) {
-        return false;
-    }
-    return true;
+    return r1.x == r2.x && r1.y == r2.y && r1.w == r2.w && r1.h == r2.h;
 }
 
 template <typename T>
@@ -77,6 +74,112 @@ inline bool
 operator != (BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
 {
     return !(r1 == r2);
+}
+
+template <typename T>
+inline BaseRect<T> &
+operator +=(BaseRect<T> & r, BasePoint<T> const & p) noexcept
+{
+    r.x += p.x;
+    r.y += p.y;
+    return r;
+}
+
+template <typename T>
+inline BaseRect<T> &
+operator -=(BaseRect<T> & r, BasePoint<T> const & p) noexcept
+{
+    r.x -= p.x;
+    r.y -= p.y;
+    return r;
+}
+
+template <typename T>
+inline BaseRect<T> &
+operator +=(BaseRect<T> & r, BaseSize<T> const & s) noexcept
+{
+    r.w += s.w;
+    r.h += s.h;
+    return r;
+}
+
+template <typename T>
+inline BaseRect<T> &
+operator -=(BaseRect<T> & r, BaseSize<T> const & s) noexcept
+{
+    r.w -= s.w;
+    r.h -= s.h;
+    return r;
+}
+
+template <typename T>
+inline BaseRect<T> &
+operator &=(BaseRect<T> & r1, BaseRect<T> const & r2) noexcept
+{
+    T x1 = std::max(r1.x, r2.x);
+    T y1 = std::max(r1.y, r2.y);
+    r1.w = std::min(r1.x + r1.w, r2.x + r2.w) - x1;
+    r1.h = std::min(r1.y + r1.h, r2.y + r2.h) - y1;
+    r1.x = x1;
+    r1.y = y1;
+    return r1;
+}
+
+template <typename T>
+inline BaseRect<T> &
+operator |=(BaseRect<T> & r1, BaseRect<T> const & r2) noexcept
+{
+    T x1 = std::min(r1.x, r2.x);
+    T y1 = std::min(r1.y, r2.y);
+    r1.w = std::max(r1.x + r1.w, r2.x + r2.w) - x1;
+    r1.h = std::max(r1.y + r1.h, r2.y + r2.h) - y1;
+    r1.x = x1;
+    r1.y = y1;
+    return r1;
+}
+
+template <typename T>
+inline BaseRect<T>
+operator +(BaseRect<T> const & r, BasePoint<T> const & p) noexcept
+{
+    return BaseRect<T>{r.x + p.x, r.y + p.y, r.w, r.h};
+}
+
+template <typename T>
+inline BaseRect<T>
+operator -(BaseRect<T> const & r, BasePoint<T> const & p) noexcept
+{
+    return BaseRect<T>{r.x - p.x, r.y - p.y, r.w, r.h};
+}
+
+template <typename T>
+inline BaseRect<T>
+operator +(BaseRect<T> const & r, BaseSize<T> const & s) noexcept
+{
+    return BaseRect<T>{r.x, r.y, r.w + s.w, r.h + s.h};
+}
+
+template <typename T>
+inline BaseRect<T>
+operator -(BaseRect<T> const & r, BaseSize<T> const & s) noexcept
+{
+    return BaseRect<T>{r.x, r.y, r.w - s.w, r.h - s.h};
+}
+
+template <typename T>
+inline BaseRect<T>
+operator &(BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
+{
+    BaseRect<T> result = r1;
+    return result &= r2;
+}
+
+template <typename T>
+inline BaseRect<T>
+operator |(BaseRect<T> const & r1, BaseRect<T> const & r2) noexcept
+{
+    BaseRect<T> result = r1;
+    return result |= r2;
 }
 
 // --------
@@ -99,6 +202,27 @@ makeRect(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
     typedef typename remove_cr<T>::type __remove_cr;
     typedef BaseRect<__remove_cr> __rect_type;
     return __rect_type{p.x, p.y, s.w, s.h};
+}
+
+template <typename T>
+inline BasePoint<typename remove_cr<T>::type>
+getPoint(BaseRect<T> const & r) noexcept
+{
+    return BasePoint<typename remove_cr<T>::type>{r.x, r.y};
+}
+
+template <typename T>
+inline BaseSize<typename remove_cr<T>::type>
+getSize(BaseRect<T> const & r) noexcept
+{
+    return BaseSize<typename remove_cr<T>::type>{r.w, r.h};
+}
+
+template <typename T>
+inline typename remove_cr<T>::type
+getArea(BaseRect<T> const & r) noexcept
+{
+    return r.w * r.h;
 }
 
 // ------------------

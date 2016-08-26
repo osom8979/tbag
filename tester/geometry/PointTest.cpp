@@ -75,7 +75,7 @@ TEST(PointTest, makePoint)
     REMOVE_UNUSED_VARIABLE(p4_3 == p4_4);
 }
 
-TEST(PointTest, Operators)
+TEST(PointTest, Operators_01)
 {
     Point       p1 = {0, 1};
     Point const p2 = {4, 5};
@@ -107,10 +107,32 @@ TEST(PointTest, Operators)
     Size       s3 = {0,  0};
     Size const s4 = {8, 10};
 
-    ASSERT_EQ(p1 - s1, p3);
-    ASSERT_EQ(p1 + s2, p4);
-    ASSERT_EQ(s1 - s2, s3);
-    ASSERT_EQ(s1 + s2, s4);
+    ASSERT_EQ(p3, p1 - s1);
+    ASSERT_EQ(p4, p1 + s2);
+    ASSERT_EQ(s3, s1 - s2);
+    ASSERT_EQ(s4, s1 + s2);
+}
+
+TEST(PointTest, Operators_02)
+{
+    Point const p1 = {1, 2};
+    Size  const s1 = {3, 4};
+
+    Point p2;
+    Size  s2;
+
+    p2 = p1; p2 += p1;
+    ASSERT_EQ(makePoint(2, 4), p2);
+    p2 = p1; p2 -= p1;
+    ASSERT_EQ(makePoint(0, 0), p2);
+    p2 = p1; p2 += s1;
+    ASSERT_EQ(makePoint(4, 6), p2);
+    p2 = p1; p2 -= s1;
+    ASSERT_EQ(makePoint(-2, -2), p2);
+    s2 = s1; s2 += s1;
+    ASSERT_EQ(makeSize(6, 8), s2);
+    s2 = s1; s2 -= s1;
+    ASSERT_EQ(makeSize(0, 0), s2);
 }
 
 TEST(PointTest, Equals)
@@ -138,6 +160,9 @@ TEST(PointTest, String)
 {
     Point p = {1, 2};
     toString(p);
+
+    Size s = {1, 2};
+    toString(s);
 }
 
 TEST(PointTest, Atomic)

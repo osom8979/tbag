@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <libtbag/geometry/Rect.hpp>
 
+#include <atomic>
+
 using namespace libtbag;
 using namespace libtbag::geometry;
 
@@ -45,6 +47,63 @@ TEST(RectTest, Constructor)
     ASSERT_EQ(r2, r3);
     ASSERT_NE(r3, r4);
 }
+
+TEST(RectTest, Operators_01)
+{
+    Point p = {1, 2};
+    Size  s = {3, 4};
+    Rect  r = {5, 6, 7, 8};
+
+    ASSERT_EQ(makeRect(6, 8,  7,  8), r + p);
+    ASSERT_EQ(makeRect(4, 4,  7,  8), r - p);
+    ASSERT_EQ(makeRect(5, 6, 10, 12), r + s);
+    ASSERT_EQ(makeRect(5, 6,  4,  4), r - s);
+
+    Rect temp;
+    temp = r; temp += p;
+    ASSERT_EQ(makeRect(6, 8,  7,  8), temp);
+    temp = r; temp -= p;
+    ASSERT_EQ(makeRect(4, 4,  7,  8), temp);
+    temp = r; temp += s;
+    ASSERT_EQ(makeRect(5, 6, 10, 12), temp);
+    temp = r; temp -= s;
+    ASSERT_EQ(makeRect(5, 6,  4,  4), temp);
+}
+
+TEST(RectTest, Operators_02)
+{
+    /*
+     * 0 |  1  2  3  4  5
+     * --+--------------------
+     *   |
+     * 1 |  +-----+
+     *   |  |     |
+     * 2 |  |  +-----+
+     *   |  |  |  |  |
+     * 3 |  +- |--+  |
+     *   |     |     |
+     * 4 |     +-----+
+     *   |
+     * 5 |
+     */
+    Rect r1 = {1, 1, 2, 2};
+    Rect r2 = {2, 2, 2, 2};
+
+    ASSERT_EQ(makeRect(2, 2,  1,  1), r1 & r2);
+    ASSERT_EQ(makeRect(1, 1,  3,  3), r1 | r2);
+}
+
+TEST(RectTest, Utility)
+{
+    Point p = {10, 20};
+    Size  s = {30, 40};
+    Rect  r = {p.x, p.y, s.w, s.h};
+    int   a = s.w * s.h;
+
+    ASSERT_EQ(p, getPoint(r));
+    ASSERT_EQ(s, getSize (r));
+    ASSERT_EQ(a, getArea (r));
+};
 
 TEST(RectTest, Methods)
 {
@@ -137,5 +196,23 @@ TEST(RectTest, String)
 {
     Rect p = {1, 2, 3, 4};
     toString(p);
+}
+
+TEST(RectTest, Atomic)
+{
+    std::atomic<Rect> r1;
+    r1.store(Rect{1, 2, 3, 4});
+
+    ASSERT_EQ(1, r1.load().x);
+    ASSERT_EQ(2, r1.load().y);
+    ASSERT_EQ(3, r1.load().w);
+    ASSERT_EQ(4, r1.load().h);
+
+    Rect r2 = r1;
+
+    ASSERT_EQ(1, r2.x);
+    ASSERT_EQ(2, r2.y);
+    ASSERT_EQ(3, r2.w);
+    ASSERT_EQ(4, r2.h);
 }
 
