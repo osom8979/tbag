@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/geometry/Point.hpp>
 #include <cassert>
 
 // -------------------
@@ -90,6 +91,64 @@ getLinearEquationWithTwoPoint(T x1, T y1, T x2, T y2)
     LinearEquation<T> result;
     result.a = (y2 - y1) / (x2 - x1);
     result.b = result.a * (-1) * x1 + y1;
+    return result;
+}
+
+/**
+ * Obtain the linear-equation.
+ *
+ * @param p1 [in] Point 1.
+ * @param p2 [in] Point 2.
+ */
+template <typename T>
+inline LinearEquation<T>
+getLinearEquationWithTwoPoint(geometry::BasePoint<T> const & p1, geometry::BasePoint<T> const & p2)
+{
+    return getLinearEquationWithTwoPoint(p1.x, p1.y, p2.x, p2.y);
+}
+
+/**
+ * Check the two equations are parallel.
+ *
+ * @translate{ko, 두 직선이 평행한지 확인한다.}
+ */
+template <typename T>
+inline bool
+isParallelWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquation<T> const & e2)
+{
+    return e1.a == e2.a;
+}
+
+/**
+ * Calculate the intersection of two equations(lines).
+ *
+ * @translate{ko, 두 직선의 교차점을 구한다.}
+ *
+ * @remarks
+ *  Two linear equation:
+ *  \f[
+ *   y = a_1x + b_1 \\
+ *   y = a_2x + b_2 \\
+ *  \f]
+ *  Explanation:
+ *  \f[
+ *   \begin{align}
+ *     a_1x + b_1  &= a_2x + b_2 \\
+ *     a_1x - a_2x &= b_2 - b_1 \\
+ *    (a_1 - a_2)x &= b_2 - b_1 \\
+ *               x &= \frac{b_2 - b_1}{a_1 - a_2} \\
+ *   \end{align}
+ *   \\
+ *   RESULT: x = \frac{b_2 - b_1}{a_1 - a_2}, y = a_1x + b_1, (a_1 \neq a_2)
+ *  \f]
+ */
+template <typename T>
+inline geometry::BasePoint<T>
+getIntersectionWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquation<T> const & e2)
+{
+    geometry::BasePoint<T> result;
+    result.x = (e2.b - e1.b) / (e1.a - e2.a);
+    result.y = e1.a * result.x + e1.b;
     return result;
 }
 
