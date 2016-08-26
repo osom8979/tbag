@@ -198,21 +198,23 @@ TEST(RectTest, String)
     toString(p);
 }
 
-TEST(RectTest, Atomic)
-{
-    std::atomic<Rect> r1;
-    r1.store(Rect{1, 2, 3, 4});
-
-    ASSERT_EQ(1, r1.load().x);
-    ASSERT_EQ(2, r1.load().y);
-    ASSERT_EQ(3, r1.load().w);
-    ASSERT_EQ(4, r1.load().h);
-
-    Rect r2 = r1;
-
-    ASSERT_EQ(1, r2.x);
-    ASSERT_EQ(2, r2.y);
-    ASSERT_EQ(3, r2.w);
-    ASSERT_EQ(4, r2.h);
-}
+// Don't use std::atomic<Rect>
+// undefined reference to `__atomic_load_16' in GCC 4.9 (Docker-Ubuntu)
+//TEST(RectTest, Atomic)
+//{
+//    std::atomic<Rect> r1;
+//    r1.store(Rect{1, 2, 3, 4});
+//
+//    ASSERT_EQ(1, r1.load().x);
+//    ASSERT_EQ(2, r1.load().y);
+//    ASSERT_EQ(3, r1.load().w);
+//    ASSERT_EQ(4, r1.load().h);
+//
+//    Rect r2 = r1;
+//
+//    ASSERT_EQ(1, r2.x);
+//    ASSERT_EQ(2, r2.y);
+//    ASSERT_EQ(3, r2.w);
+//    ASSERT_EQ(4, r2.h);
+//}
 
