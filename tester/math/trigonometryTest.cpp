@@ -10,7 +10,7 @@
 #include <libtbag/math/constant.hpp>
 
 using namespace libtbag;
-using namespace libtbag::trigonometry;
+using namespace libtbag::math;
 
 TEST(trigonometryTest, Default)
 {

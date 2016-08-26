@@ -31,7 +31,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace trigonometry {
+namespace math {
 
 /**
  * Return the sine A.
@@ -105,7 +105,7 @@ inline T cotA(T a, T b)
     return b / a;
 }
 
-} // namespace trigonometry
+} // namespace math
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
