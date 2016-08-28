@@ -21,8 +21,10 @@
 #include <libtbag/predef.hpp>
 
 #include <string>
+#include <sstream>
 #include <vector>
 #include <regex>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -52,27 +54,27 @@ constexpr wchar_t const * charOrWidechar<wchar_t>(char const * c, wchar_t const 
 /**
  * Separate tokens.
  *
+ * @tparam CharType    Character type.
+ * @tparam StringType  String type (Don't change this typename).
+ *
  * @param source    [in] Original string.
  * @param delimiter [in] Delimiter string.
  *
  * @return
  *  Token vector.
  */
-template <typename CharType = char>
-std::vector<std::basic_string<typename libtbag::remove_cr<CharType>::type> > splitTokens(
-          std::basic_string<typename libtbag::remove_cr<CharType>::type> const & source
-        , std::basic_string<typename libtbag::remove_cr<CharType>::type> const & delimiter)
+template <typename CharType   = char
+        , typename StringType = std::basic_string<typename libtbag::remove_cr<CharType>::type> >
+std::vector<StringType> splitTokens(StringType const & source
+                                  , StringType const & delimiter)
 {
-    using String = std::basic_string<typename libtbag::remove_cr<CharType>::type>;
-    using StringVector = std::vector<String>;
+    std::vector<StringType> result;
+    StringType token;
 
-    StringVector result;
-    String token;
+    std::size_t start = 0;
+    std::size_t end   = source.find(delimiter);
 
-    size_t start = 0;
-    size_t end   = source.find(delimiter);
-
-    while (end != String::npos) {
+    while (end != StringType::npos) {
         token = source.substr(start, end - start);
         if (token.empty() == false) {
             result.push_back(token);
@@ -90,6 +92,19 @@ std::vector<std::basic_string<typename libtbag::remove_cr<CharType>::type> > spl
     }
 
     return result;
+}
+
+template <typename FloatingType, typename CharType = char>
+std::basic_string<CharType> convertStringWithFloatingPoint(FloatingType floating, int precision = 2)
+{
+    static_assert(std::is_floating_point<FloatingType>::value, "Not floating point type.");
+
+    std::basic_stringstream<CharType> ss;
+    ss.setf(std::ios_base::showpoint);
+    ss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    ss.precision(precision);
+    ss << floating;
+    return ss.str();
 }
 
 } // namespace string

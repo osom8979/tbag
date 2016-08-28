@@ -9,6 +9,7 @@
 #include <libtbag/string/Strings.hpp>
 
 using namespace libtbag;
+using namespace libtbag::string;
 
 TEST(StringsTest, splitTokens)
 {
@@ -20,44 +21,50 @@ TEST(StringsTest, splitTokens)
     std::string content;
 
     content = std::string() + delimiter;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(0U, path_set.size());
 
     content = std::string() + delimiter + delimiter;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(0U, path_set.size());
 
     content = std::string() + delimiter + delimiter + temp1;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(1U, path_set.size());
     ASSERT_EQ(temp1, path_set[0]);
 
     content = std::string() + delimiter + delimiter + temp1;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(1U, path_set.size());
     ASSERT_EQ(temp1, path_set[0]);
 
     content = temp1;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(1U, path_set.size());
     ASSERT_EQ(temp1, path_set[0]);
 
     content = temp1 + delimiter;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(1U, path_set.size());
     ASSERT_EQ(temp1, path_set[0]);
 
     content = temp1 + delimiter + temp2;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(2U, path_set.size());
     ASSERT_EQ(temp1, path_set[0]);
     ASSERT_EQ(temp2, path_set[1]);
 
     content = temp1 + delimiter + temp2 + delimiter;
-    path_set = string::splitTokens(content, delimiter);
+    path_set = splitTokens(content, delimiter);
     ASSERT_EQ(2U, path_set.size());
     ASSERT_EQ(temp1, path_set[0]);
     ASSERT_EQ(temp2, path_set[1]);
+}
+
+TEST(StringsTest, convertStringWithFloatingPoint)
+{
+    std::string result = convertStringWithFloatingPoint(10.5542, 2);
+    ASSERT_STREQ("10.55", result.c_str());
 }
 
 TEST(StringsTest, splitMatch)
