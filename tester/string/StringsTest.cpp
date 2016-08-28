@@ -67,6 +67,12 @@ TEST(StringsTest, convertStringWithFloatingPoint)
     ASSERT_STREQ("10.55", result.c_str());
 }
 
+TEST(StringsTest, convertStringWithThreadId)
+{
+    std::string result = convertStringWithThreadId(std::this_thread::get_id());
+    ASSERT_FALSE(result.empty());
+}
+
 TEST(StringsTest, splitMatch)
 {
     std::string match = R"(TEST[^ ]*)";

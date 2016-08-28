@@ -24,6 +24,7 @@
 #include <sstream>
 #include <vector>
 #include <regex>
+#include <thread>
 #include <type_traits>
 
 // -------------------
@@ -104,6 +105,17 @@ std::basic_string<CharType> convertStringWithFloatingPoint(FloatingType floating
     ss.setf(std::ios_base::fixed, std::ios_base::floatfield);
     ss.precision(precision);
     ss << floating;
+    return ss.str();
+}
+
+/**
+ * Thread ID to string.
+ */
+template <typename CharType = char>
+std::basic_string<CharType> convertStringWithThreadId(std::thread::id const & id)
+{
+    std::basic_stringstream<CharType> ss;
+    ss << id;
     return ss.str();
 }
 
