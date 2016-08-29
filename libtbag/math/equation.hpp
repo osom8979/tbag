@@ -97,6 +97,8 @@ getLinearEquationWithTwoPoint(T x1, T y1, T x2, T y2)
 /**
  * Obtain the linear-equation.
  *
+ * @translate{ko, 두 점을 사용하여 일차 방정식을 구한다.}
+ *
  * @param p1 [in] Point 1.
  * @param p2 [in] Point 2.
  */
@@ -117,6 +119,18 @@ inline bool
 isParallelWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquation<T> const & e2)
 {
     return e1.a == e2.a;
+}
+
+/**
+ * Check the two equations are perpendicular.
+ *
+ * @translate{ko, 두 직선이 수직한지 확인한다.}
+ */
+template <typename T>
+inline bool
+isPerpendicularWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquation<T> const & e2)
+{
+    return e1.a * e2.b == -1;
 }
 
 /**
@@ -146,6 +160,7 @@ template <typename T>
 inline geometry::BasePoint<T>
 getIntersectionWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquation<T> const & e2)
 {
+    assert(e1.a != e2.a);
     geometry::BasePoint<T> result;
     result.x = (e2.b - e1.b) / (e1.a - e2.a);
     result.y = e1.a * result.x + e1.b;
