@@ -133,10 +133,10 @@ isParallelWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquation<T> 
  *  Explanation:
  *  \f[
  *   \begin{align}
- *     a_1x + b_1  &= a_2x + b_2 \\
- *     a_1x - a_2x &= b_2 - b_1 \\
- *    (a_1 - a_2)x &= b_2 - b_1 \\
- *               x &= \frac{b_2 - b_1}{a_1 - a_2} \\
+ *     a_1x + b_1   &= a_2x + b_2 \\
+ *     a_1x - a_2x  &= b_2 - b_1 \\
+ *    (a_1  - a_2)x &= b_2 - b_1 \\
+ *                x &= \frac{b_2 - b_1}{a_1 - a_2} \\
  *   \end{align}
  *   \\
  *   RESULT: x = \frac{b_2 - b_1}{a_1 - a_2}, y = a_1x + b_1, (a_1 \neq a_2)

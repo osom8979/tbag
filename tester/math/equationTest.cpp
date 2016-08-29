@@ -20,10 +20,10 @@ TEST(equationTest, getLinearEquationWithTwoPoint)
 
 TEST(equationTest, getIntersectionWithTwoLinearEquation)
 {
-    LinearEquation<int> e1{ 1, -1};
-    LinearEquation<int> e2{-1,  1};
+    LinearEquation<double> e1{ 2,  0};
+    LinearEquation<double> e2{-2,  2};
     auto p = getIntersectionWithTwoLinearEquation(e1, e2);
-    ASSERT_EQ(1, p.x);
-    ASSERT_EQ(0, p.y);
+    ASSERT_NEAR(0.5, p.x, 1);
+    ASSERT_NEAR(1.0, p.y, 1);
 }
 
