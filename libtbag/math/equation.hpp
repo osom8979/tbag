@@ -35,8 +35,11 @@ namespace math {
  *  \f[
  *   y = ax + b
  *  \f]
- *  - a: 기울기 (Gradient).
- *  - b: Y절편 (Y-intercept).
+ *  - a: Gradient (기울기).
+ *  - b: Y-intercept (Y절편).
+ *
+ * @warning
+ *  Impossible equation: \f$ x = b \f$
  */
 template <typename T>
 struct LinearEquation
