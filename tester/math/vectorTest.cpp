@@ -34,3 +34,46 @@ TEST(vectorTest, getCrossProduct)
     ASSERT_EQ(  1, v.z);
 }
 
+TEST(vectorTest, getRelativePositionOfPointToLine)
+{
+    /*
+     *    |
+     *   2|       * p2
+     *    |
+     *   1|   *------>*
+     *    |   P0      p1
+     *   -+------------------
+     *    |   1   3   5
+     */
+    geometry::BasePoint<int> p1{1, 1};
+    geometry::BasePoint<int> p2{5, 1};
+    geometry::BasePoint<int> p3{3, 2};
+    ASSERT_LT(0, getRelativePositionOfPointToLine(p1, p2, p3));
+
+    /*
+     *    |
+     *   2|   *------>*
+     *    |   P0      p1
+     *   1|       * p2
+     *    |
+     *   -+------------------
+     *    |   1   3   5
+     */
+    p1 = geometry::makePoint(1, 2);
+    p2 = geometry::makePoint(5, 2);
+    p3 = geometry::makePoint(3, 1);
+    ASSERT_GT(0, getRelativePositionOfPointToLine(p1, p2, p3));
+
+    /*
+     *    |       p2
+     *   1|   *---*-->*
+     *    |   P0      p1
+     *   -+------------------
+     *    |   1   3   5
+     */
+    p1 = geometry::makePoint(1, 1);
+    p2 = geometry::makePoint(5, 1);
+    p3 = geometry::makePoint(3, 1);
+    ASSERT_EQ(0, getRelativePositionOfPointToLine(p1, p2, p3));
+}
+

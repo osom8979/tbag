@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/geometry/Point.hpp>
 #include <cmath>
 
 // -------------------
@@ -138,7 +139,6 @@ inline T getDotProduct(T s1, T s2, double theta)
  *  행렬을 획득하게 되는 외적(Outer-product)과는 다르다.
  *
  * @see <https://en.wikipedia.org/wiki/Cross_product>
- * @see <https://ko.wikipedia.org/wiki/%EB%B2%A1%ED%84%B0%EA%B3%B1>
  */
 template <typename T>
 inline Vector3<T>
@@ -147,6 +147,46 @@ getCrossProduct(Vector3<T> const & v1, Vector3<T> const & v2)
     return Vector3<T>{(v1.y * v2.z) - (v1.z * v2.y)
                     , (v1.z * v2.x) - (v1.x * v2.z)
                     , (v1.x * v2.y) - (v1.y * v2.x)};
+}
+
+/**
+ * Obtain the relative position of point to line.
+ *
+ * @translate{ko, 라인을 기준으로 점의 상대적 위치를 확인한다.}
+ *
+ * @param p0    [in] Point 0 of line.
+ * @param p1    [in] Point 1 of line.
+ * @param check [in] Check point.
+ *
+ * @return If a positive number, the left side of the vector. @n
+ *         if a negative number, the right side of the vector. @n
+ *         if 0 is on the line.
+ *
+ * @remarks
+ *  Example:
+ *  @code
+ *    |
+ *    |         * p2
+ *    |
+ *    |  p0 *------>* p1
+ *    |
+ *   -+------------------
+ *    |
+ *  @endcode
+ *  \f[
+ *   \vec{v_1} = p1 - p0 = [p1_x - p0_x, p1_y - p0_y, 0]
+ *   \vec{v_2} = p2 - p0 = [p2_x - p0_x, p2_y - p0_y, 0]
+ *   \vec{v_1} \times \vec{v_2} = [0, 0, ((p1_x - p0_x) * (p2_y - p0_y) - (p1_y - p0_y) * (p2_x - p0_x))]
+ *  \f]
+ *  외적(Cross-Product)의 오늘손 법칙을 사용하여, Vector(p1 - p0)과 Vector(p2 - p0)의 위치에 따라 음수 또는 양수로 변하는 성질을 이용한다.
+ */
+template <typename T>
+inline T
+getRelativePositionOfPointToLine(geometry::BasePoint<T> const & p0
+                               , geometry::BasePoint<T> const & p1
+                               , geometry::BasePoint<T> const & check)
+{
+    return ((p1.x - p0.x) * (check.y - p0.y)) - ((p1.y - p0.y) * (check.x - p0.x));
 }
 
 } // namespace math
