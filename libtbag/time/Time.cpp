@@ -75,36 +75,31 @@ int getMillisec(std::chrono::system_clock::time_point const & time)
     return static_cast<int>(epoch / std::chrono::milliseconds(1));
 }
 
+inline namespace impl {
+
+template <typename CharType
+        , typename StringType = std::basic_string<CharType> >
+static inline StringType
+getPrecisionStringForMillisec(StringType const & millisec_string)
+{
+    switch (millisec_string.size()) {
+    case 2:  return StringType() + CHAR_OR_WIDECHAR(CharType,   "0") + millisec_string;
+    case 1:  return StringType() + CHAR_OR_WIDECHAR(CharType,  "00") + millisec_string;
+    case 0:  return StringType() + CHAR_OR_WIDECHAR(CharType, "000") + millisec_string;
+    default: return millisec_string;
+    }
+}
+
+} // inline namespace impl
+
 std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)
 {
-    using BaseString = std::string;
-    BaseString result = std::to_string(getMillisec(time));
-
-    if (result.size() == 2) {
-        return BaseString("0") + result;
-    } else if (result.size() == 1) {
-        return BaseString("00") + result;
-    } else if (result.size() == 0) {
-        return BaseString("000");
-    } else {
-        return result;
-    }
+    return getPrecisionStringForMillisec<char>(std::to_string(getMillisec(time)));
 }
 
 std::wstring getMillisecWcs(std::chrono::system_clock::time_point const & time)
 {
-    using BaseString = std::wstring;
-    BaseString result = std::to_wstring(getMillisec(time));
-
-    if (result.size() == 2) {
-        return BaseString(L"0") + result;
-    } else if (result.size() == 1) {
-        return BaseString(L"00") + result;
-    } else if (result.size() == 0) {
-        return BaseString(L"000");
-    } else {
-        return result;
-    }
+    return getPrecisionStringForMillisec<wchar_t>(std::to_wstring(getMillisec(time)));
 }
 
 } // namespace time
