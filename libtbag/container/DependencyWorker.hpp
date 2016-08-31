@@ -19,6 +19,7 @@
 #include <vector>
 #include <set>
 #include <unordered_map>
+#include <algorithm>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

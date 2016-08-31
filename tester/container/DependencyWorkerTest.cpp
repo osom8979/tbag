@@ -60,3 +60,29 @@ TEST(DependencyWorkerTest, EndlessLoopGuard)
     ASSERT_FALSE(result2);
 }
 
+TEST(DependencyWorkerTest, Default)
+{
+    DependencyWorker<int> worker;
+
+    int index   = 0;
+    int result1 = 0;
+    int result2 = 0;
+    int result3 = 0;
+    int result4 = 0;
+
+    ASSERT_TRUE(worker.insert(1, DependencyWorker<int>::Dependencies{3, 4}, [&](){ result1 = index++; }));
+    ASSERT_TRUE(worker.insert(2, DependencyWorker<int>::Dependencies{3},    [&](){ result2 = index++; }));
+    ASSERT_TRUE(worker.insert(3, DependencyWorker<int>::Dependencies(),     [&](){ result3 = index++; }));
+    ASSERT_TRUE(worker.insert(4, DependencyWorker<int>::Dependencies{2},    [&](){ result4 = index++; }));
+
+    ASSERT_TRUE(worker.run(1));
+    ASSERT_EQ(3, result1);
+    ASSERT_EQ(1, result2);
+    ASSERT_EQ(0, result3);
+    ASSERT_EQ(2, result4);
+
+    ASSERT_TRUE(worker.run(2));
+    ASSERT_TRUE(worker.run(3));
+    ASSERT_TRUE(worker.run(4));
+}
+
