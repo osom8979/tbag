@@ -13,7 +13,10 @@
 #pragma once
 #endif
 
-#if defined(_WIN32) || defined(_WIN64) || \
+#if defined(WIN32) || defined(_WIN32) || \
+    defined(WIN64) || defined(_WIN64) || \
+    defined(WINCE) || defined(_WINCE) || \
+    defined(__TOS_WIN__) || \
     defined(__WIN32__) || defined(__TOS_WIN__) || \
     defined(__WINDOWS__)
 #define __OS_WINDOWS__

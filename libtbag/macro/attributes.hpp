@@ -13,11 +13,15 @@
 #pragma once
 #endif
 
+// OS.
+#include <libtbag/macro/os/windows.hpp>
+#include <libtbag/macro/os/cygwin.hpp>
+
 // Compiler.
-#include <libtbag/config/compiler/gcc.hpp>
-#include <libtbag/config/compiler/clang.hpp>
-#include <libtbag/config/compiler/llvm.hpp>
-#include <libtbag/config/compiler/msvc.hpp>
+#include <libtbag/macro/compiler/gcc.hpp>
+#include <libtbag/macro/compiler/clang.hpp>
+#include <libtbag/macro/compiler/llvm.hpp>
+#include <libtbag/macro/compiler/msvc.hpp>
 
 #ifndef ATTRIBUTE_FORCE_INLINE
 # if defined(__COMP_GNUC_CXX__) && (__COMP_GNUC_VERSION__ >= 30100)
@@ -64,6 +68,24 @@
 #  define ATTRIBUTE_NO_WARNING_DEPRECATED(code)
 # endif
 #endif
+
+#if defined(TBAG_EXPORT_API)
+# if defined(__OS_WINDOWS__) || defined(__OS_CYGWIN__)
+#  define TBAG_EXPORTS __declspec(dllexport)
+# elif defined(__COMP_GNUC__) && (__COMP_GNUC_VERSION__ >= 40000)
+#  define TBAG_EXPORTS __attribute__ ((visibility ("default"))
+# else
+#  define TBAG_EXPORTS
+# endif
+#else // defined(TBAG_EXPORT_API)
+# if defined(__OS_WINDOWS__) || defined(__OS_CYGWIN__)
+#  define TBAG_EXPORTS __declspec(dllimport)
+# elif defined(__COMP_GNUC__) && (__COMP_GNUC_VERSION__ >= 40000)
+#  define TBAG_EXPORTS
+# else
+#  define TBAG_EXPORTS
+# endif
+#endif // defined(TBAG_EXPORT_API)
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_ATTRIBUTES_HPP__
 
