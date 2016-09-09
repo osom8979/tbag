@@ -145,6 +145,13 @@ public:
         }
     }
 
+    void parse(String const & args, String const & prefix, String const & delimiter) {
+        clear();
+        for (auto & cursor : splitTokens(args)) {
+            push(convertFlag(cursor, prefix, delimiter));
+        }
+    }
+
 public:
     static FlagType convertFlag(String const & str, String const & prefix, String const & delimiter) {
         if (str.substr(0, prefix.size()) == prefix) {
