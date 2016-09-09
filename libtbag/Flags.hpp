@@ -35,125 +35,97 @@ template <typename CharType = char>
 class BaseFlags
 {
 public:
-    using ValueType  = CharType;
-    using String     = std::basic_string<ValueType>;
-    using FlagType   = std::pair<String, String>;
-    using BufferType = std::vector<FlagType>;
+    using Value       = CharType;
+    using String      = std::basic_string<Value>;
+    using Flag        = std::pair<String, String>;
+    using FlagVector  = std::vector<Flag>;
 
 private:
-    BufferType _buffer;
+    FlagVector _flags;
 
 public:
-    BaseFlags() {
-        // EMPTY.
-    }
-
-    BaseFlags(BaseFlags const & obj) {
-        this->copy(obj);
-    }
-
-    BaseFlags(BaseFlags && obj) {
-        this->swap(obj);
-    }
-
-    ~BaseFlags() {
-        // EMPTY.
-    }
+    BaseFlags() = default;
+    BaseFlags(BaseFlags const & obj) = default;
+    BaseFlags(BaseFlags && obj) = default;
+    ~BaseFlags() = default;
 
 public:
-    BaseFlags & operator =(BaseFlags const & obj) {
-        return this->copy(obj);
-    }
-
-    BaseFlags & operator =(BaseFlags && obj) {
-        this->swap(obj);
-        return *this;
-    }
+    BaseFlags & operator =(BaseFlags const & obj) = default;
+    BaseFlags & operator =(BaseFlags && obj) = default;
 
 public:
-    BaseFlags & copy(BaseFlags const & obj) {
-        if (this != &obj) {
-            this->_buffer = obj._buffer;
-        }
-        return *this;
-    }
-
-    void swap(BaseFlags & obj) {
-        if (this != &obj) {
-            this->_buffer.swap(obj._buffer);
-        }
-    }
+    inline void clear() noexcept
+    { _flags.clear(); }
+    inline std::size_t size() const noexcept
+    { return _flags.size(); }
+    inline bool empty() const noexcept
+    { return _flags.empty(); }
 
 public:
-    void clear() {
-        this->_buffer.clear();
-    }
-
-    std::size_t size() const noexcept {
-        return this->_buffer.size();
-    }
-
-    void push(FlagType const & flag) {
-        this->_buffer.push_back(flag);
-    }
-
-    FlagType & at(int index) {
-        return this->_buffer.at(index);
-    }
-
-    FlagType const & at(int index) const {
-        return this->_buffer.at(index);
-    }
+    inline void push(Flag const & flag)
+    { _flags.push_back(flag); }
 
 public:
-    FlagType findWithKey(String const & key) const {
-        auto result = std::find_if(this->_buffer.begin(), this->_buffer.end(), [&key](FlagType const & flag) -> bool {
+    inline Flag & at(int index)
+    { return _flags.at(index); }
+    inline Flag const & at(int index) const
+    { return _flags.at(index); }
+
+public:
+    Flag findWithKey(String const & key) const
+    {
+        auto result = std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
             return (flag.first == key);
         });
 
-        if (result == this->_buffer.end()) {
-            return FlagType();
+        if (result == _flags.end()) {
+            return Flag();
         }
-
         return *result;
     }
 
-    FlagType findWithValue(String const & value) const {
-        auto result = std::find_if(this->_buffer.begin(), this->_buffer.end(), [&value](FlagType const & flag) -> bool {
+    Flag findWithValue(String const & value) const
+    {
+        auto result = std::find_if(_flags.begin(), _flags.end(), [&value](Flag const & flag) -> bool {
             return (flag.second == value);
         });
 
-        if (result == this->_buffer.end()) {
-            return FlagType();
+        if (result == _flags.end()) {
+            return Flag();
         }
-
         return *result;
     }
 
 public:
-    void parse(int argc, ValueType ** argv) {
+    void parse(int argc, Value ** argv)
+    {
         clear();
         for (int index = 0; index < argc; ++index) {
             push(convertFlag(String(argv[index])));
         }
     }
 
-    void parse(String const & args) {
+    void parse(String const & args, String const & prefix, String const & delimiter)
+    {
         clear();
-        for (auto & cursor : splitTokens(args)) {
-            push(convertFlag(cursor));
-        }
-    }
 
-    void parse(String const & args, String const & prefix, String const & delimiter) {
-        clear();
         for (auto & cursor : splitTokens(args)) {
             push(convertFlag(cursor, prefix, delimiter));
         }
     }
 
+    void parse(String const & args)
+    {
+        parse(args, getDefaultPrefix(), getDefaultDelimiter());
+    }
+
+// ---------------
+// Static methods.
+// ---------------
+
 public:
-    static FlagType convertFlag(String const & str, String const & prefix, String const & delimiter) {
+    static Flag convertFlag(String const & str, String const & prefix, String const & delimiter)
+    {
         if (str.substr(0, prefix.size()) == prefix) {
             // ENABLE KEY.
             std::size_t delimiter_pos = str.find(delimiter);
@@ -173,21 +145,25 @@ public:
         return std::make_pair(String(), String(str));
     }
 
-    static FlagType convertFlag(String const & str) {
+    static Flag convertFlag(String const & str)
+    {
         return convertFlag(str, getDefaultPrefix(), getDefaultDelimiter());
     }
 
-    inline static String getDefaultPrefix() {
-        return CHAR_OR_WIDECHAR(ValueType, "--");
+    constexpr static String getDefaultPrefix()
+    {
+        return CHAR_OR_WIDECHAR(Value, "--");
     }
 
-    inline static String getDefaultDelimiter() {
-        return CHAR_OR_WIDECHAR(ValueType, "=");
+    constexpr static String getDefaultDelimiter()
+    {
+        return CHAR_OR_WIDECHAR(Value, "=");
     }
 
 public:
-    static std::vector<String> splitTokens(String const & args) {
-        String trim_right_args = BaseStrings<ValueType>::trimRight(args);
+    static std::vector<String> splitTokens(String const & args)
+    {
+        String trim_right_args = BaseStrings<Value>::trimRight(args);
         std::size_t args_size = trim_right_args.size();
         std::size_t all_process_count     = 0U;
         std::size_t current_process_count = 0U;
@@ -203,13 +179,14 @@ public:
     }
 
 public:
-    static constexpr ValueType const        ESCAPE = '\\';
-    static constexpr ValueType const DOUBLE_QUOTES = '"';
-    static constexpr ValueType const SINGLE_QUOTES = '\'';
-    static constexpr ValueType const  SPACE_QUOTES = ' ';
+    static constexpr Value const        ESCAPE = '\\';
+    static constexpr Value const DOUBLE_QUOTES = '"';
+    static constexpr Value const SINGLE_QUOTES = '\'';
+    static constexpr Value const  SPACE_QUOTES = ' ';
 
-    static String splitFirst(String const & args, std::size_t * process_count = nullptr) {
-        String trim_left_args = BaseStrings<ValueType>::trimLeft(args);
+    static String splitFirst(String const & args, std::size_t * process_count = nullptr)
+    {
+        String trim_left_args = BaseStrings<Value>::trimLeft(args);
         if (trim_left_args.empty()) {
             return String();
         }
@@ -218,7 +195,7 @@ public:
 
         auto itr = trim_left_args.begin();
 
-        ValueType quotation_mark;
+        Value quotation_mark;
         if (*itr == DOUBLE_QUOTES) {
             quotation_mark = DOUBLE_QUOTES;
         } else if (*itr == SINGLE_QUOTES) {
