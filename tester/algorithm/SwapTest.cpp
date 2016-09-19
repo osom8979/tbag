@@ -6,11 +6,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/algorithm/swap.hpp>
+#include <libtbag/algorithm/Swap.hpp>
 
 using namespace libtbag;
 
-TEST(swapTest, swapWithPod)
+TEST(SwapTest, Default)
 {
     int v1 = 100;
     int v2 = 200;
