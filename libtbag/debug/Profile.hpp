@@ -1,0 +1,100 @@
+/**
+ * @file   Profile.hpp
+ * @brief  Profile class prototype.
+ * @author zer0
+ * @date   2016-09-21
+ */
+
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_PROFILE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_PROFILE_HPP__
+
+// MS compatible compilers support #pragma once
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#pragma once
+#endif
+
+#include <libtbag/config.h>
+#include <libtbag/Noncopyable.hpp>
+
+#include <functional>
+#include <chrono>
+#include <memory>
+
+// -------------------
+NAMESPACE_LIBTBAG_OPEN
+// -------------------
+
+namespace debug {
+
+/**
+ * Profile class prototype.
+ *
+ * @author zer0
+ * @date   2016-09-21
+ */
+class Profile : public Noncopyable
+{
+public:
+    using TimePoint = std::chrono::system_clock::time_point;
+    using Duration  = typename TimePoint::duration;
+    using Rep       = typename TimePoint::rep;
+    using Period    = typename TimePoint::period;
+
+    using RepeatCallback = std::function<void(Rep average)>;
+
+public:
+    class Timer : public Noncopyable
+    {
+    public:
+        friend class Profile;
+
+    private:
+        Profile & _profile;
+        TimePoint _start;
+
+    public:
+        Timer(Profile & profile);
+        ~Timer();
+    };
+
+public:
+    using SharedTimer = std::shared_ptr<Timer>;
+
+private:
+    std::size_t _cycle_count;
+    std::size_t _current_cycle;
+
+private:
+    Rep _total_duration;
+    RepeatCallback _callback;
+
+public:
+    Profile();
+    Profile(std::size_t cycle);
+    Profile(std::size_t cycle, RepeatCallback const & callback);
+    virtual ~Profile();
+
+public:
+    inline std::size_t getCycleCount() const noexcept
+    { return _cycle_count; }
+    inline void setCycleCount(std::size_t cycle) noexcept
+    { _cycle_count = cycle; }
+
+    inline void setCallback(RepeatCallback const & callback) noexcept
+    { _callback = callback; }
+
+private:
+    void update(Duration duration);
+
+public:
+    SharedTimer tick();
+};
+
+} // namespace debug
+
+// --------------------
+NAMESPACE_LIBTBAG_CLOSE
+// --------------------
+
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_PROFILE_HPP__
+

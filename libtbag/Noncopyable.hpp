@@ -25,7 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
  * @author zer0
  * @date   2016-04-03
  */
-class Noncopyable
+struct Noncopyable
 {
 protected:
     constexpr Noncopyable() = default;
