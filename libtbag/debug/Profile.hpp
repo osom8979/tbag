@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <chrono>
+#include <atomic>
 #include <memory>
 #include <type_traits>
 
@@ -69,13 +70,22 @@ private:
     Rep _total_duration;
     RepeatCallback _callback;
 
+private:
+    std::atomic_bool _enable;
+
 public:
     Profile();
     Profile(std::size_t cycle);
     Profile(std::size_t cycle, RepeatCallback const & callback);
-    virtual ~Profile();
+    Profile(std::size_t cycle, RepeatCallback const & callback, bool enable);
+    ~Profile();
 
 public:
+    inline bool isEnable() const noexcept
+    { return _enable; }
+    inline void setEnable(bool enable = true) noexcept
+    { _enable = enable; }
+
     inline std::size_t getCycleCount() const noexcept
     { return _cycle_count; }
     inline void setCycleCount(std::size_t cycle) noexcept

@@ -24,8 +24,13 @@ Profile::Timer::~Timer()
     _profile.update(std::chrono::system_clock::now() - _start);
 }
 
-Profile::Profile(std::size_t cycle, RepeatCallback const & callback)
-        : _cycle_count(cycle), _current_cycle(0), _total_duration(0), _callback(callback)
+Profile::Profile(std::size_t cycle, RepeatCallback const & callback, bool enable)
+        : _cycle_count(cycle), _current_cycle(0), _total_duration(0), _callback(callback), _enable(enable)
+{
+    // EMPTY.
+}
+
+Profile::Profile(std::size_t cycle, RepeatCallback const & callback) : Profile(cycle, callback, true)
 {
     // EMPTY.
 }
