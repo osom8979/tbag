@@ -177,6 +177,25 @@ typename Unit::rep getDuration(std::function<void(void)> const & runner)
     return std::chrono::duration_cast<Unit>(std::chrono::system_clock::now() - start).count();
 }
 
+// ----------
+// Time unit.
+// ----------
+
+template <typename Duration> struct TimeUnit;
+
+template <> struct TimeUnit<std::chrono::nanoseconds>
+{ static constexpr char const * const value = "nano"; };
+template <> struct TimeUnit<std::chrono::microseconds>
+{ static constexpr char const * const value = "micro"; };
+template <> struct TimeUnit<std::chrono::milliseconds>
+{ static constexpr char const * const value = "milli"; };
+template <> struct TimeUnit<std::chrono::seconds>
+{ static constexpr char const * const value = "sec"; };
+template <> struct TimeUnit<std::chrono::minutes>
+{ static constexpr char const * const value = "min"; };
+template <> struct TimeUnit<std::chrono::hours>
+{ static constexpr char const * const value = "hour"; };
+
 } // namespace time
 
 // --------------------

@@ -29,3 +29,8 @@ TEST(ProfileTest, Default)
     ASSERT_EQ(static_cast<std::size_t>(TOTAL / CYCLE), update_callback);
 }
 
+TEST(ProfileTest, getUnitString)
+{
+    ASSERT_FALSE(std::string(Profile::getTimeUnitString()).empty());
+}
+

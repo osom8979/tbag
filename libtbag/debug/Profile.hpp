@@ -19,6 +19,7 @@
 #include <functional>
 #include <chrono>
 #include <memory>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -88,6 +89,9 @@ private:
 
 public:
     SharedTimer tick();
+
+public:
+    static char const * const getTimeUnitString() noexcept;
 };
 
 } // namespace debug
