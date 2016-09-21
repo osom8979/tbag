@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/time/Time.hpp>
+#include <libtbag/string/Strings.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

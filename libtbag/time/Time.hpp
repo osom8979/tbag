@@ -14,15 +14,10 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/string/Strings.hpp>
 
 #include <ctime>
-
 #include <string>
-#include <vector>
 #include <chrono>
-#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -128,25 +123,6 @@ tm * getLocalTime(time_t const & t) noexcept;
 
 std::string  getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
 std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size = 128);
-
-// ----------
-// Time unit.
-// ----------
-
-template <typename Duration> struct TimeUnit;
-
-template <> struct TimeUnit<std::chrono::nanoseconds>
-{ static constexpr char const * const value = "nano"; };
-template <> struct TimeUnit<std::chrono::microseconds>
-{ static constexpr char const * const value = "micro"; };
-template <> struct TimeUnit<std::chrono::milliseconds>
-{ static constexpr char const * const value = "milli"; };
-template <> struct TimeUnit<std::chrono::seconds>
-{ static constexpr char const * const value = "sec"; };
-template <> struct TimeUnit<std::chrono::minutes>
-{ static constexpr char const * const value = "min"; };
-template <> struct TimeUnit<std::chrono::hours>
-{ static constexpr char const * const value = "hour"; };
 
 } // namespace time
 

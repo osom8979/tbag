@@ -7,6 +7,7 @@
 
 #include <libtbag/debug/Profile.hpp>
 #include <libtbag/time/Time.hpp>
+#include <libtbag/time/DurationString.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -75,7 +76,7 @@ Profile::SharedTimer Profile::tick()
 
 char const * const Profile::getTimeUnitString() noexcept
 {
-    return libtbag::time::TimeUnit<Profile::Duration>::value;
+    return libtbag::time::DurationString<Profile::Duration>::value;
 }
 
 } // namespace debug
