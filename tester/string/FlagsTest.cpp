@@ -6,9 +6,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/Flags.hpp>
+#include <libtbag/string/Flags.hpp>
 
 using namespace libtbag;
+using namespace libtbag::string;
 
 TEST(FlagsTest, splitTokens)
 {

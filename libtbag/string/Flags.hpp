@@ -5,8 +5,8 @@
  * @date   2016-05-03
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FLAGS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FLAGS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_STRING_FLAGS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_STRING_FLAGS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,6 +24,8 @@
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+namespace string {
 
 /**
  * Flags class prototype.
@@ -108,7 +110,6 @@ public:
     void parse(String const & args, String const & prefix, String const & delimiter)
     {
         clear();
-
         for (auto & cursor : splitTokens(args)) {
             push(convertFlag(cursor, prefix, delimiter));
         }
@@ -150,12 +151,12 @@ public:
         return convertFlag(str, getDefaultPrefix(), getDefaultDelimiter());
     }
 
-    constexpr static String getDefaultPrefix()
+    static constexpr String getDefaultPrefix()
     {
         return CHAR_OR_WIDECHAR(Value, "--");
     }
 
-    constexpr static String getDefaultDelimiter()
+    static constexpr String getDefaultDelimiter()
     {
         return CHAR_OR_WIDECHAR(Value, "=");
     }
@@ -236,9 +237,11 @@ public:
 using Flags = BaseFlags<char>;
 using WideFlags = BaseFlags<wchar_t>;
 
+} // namespace string
+
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FLAGS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_STRING_FLAGS_HPP__
 
