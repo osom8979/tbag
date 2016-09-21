@@ -72,16 +72,3 @@ TEST(TimeTest, chrono)
     }
 }
 
-TEST(TimeTest, Duration)
-{
-    std::stringstream ss;
-    long millisec = time::getDuration([&ss](){
-        time::Duration<std::stringstream, std::chrono::nanoseconds> duration(ss);
-    });
-    ASSERT_LE(0, millisec);
-
-    std::string result = ss.str();
-    ASSERT_FALSE(result.empty());
-    ASSERT_LE(0, atoi(ss.str().c_str()));
-}
-
