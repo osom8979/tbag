@@ -50,15 +50,19 @@ std::basic_string<CharType> getDefaultPrefix()
 
     // Timestamp.
     auto tp = time::getNowSystemClock();
-    time_t time = time::getTime(tp);
-    ss << time::getFormatString(time::getDefaultTimestampLongFormat<CharType>(), time::getLocalTime(time));
+    tm time = {0,};
 
-    // Milliseconds.
-    ss << ::libtbag::log::details::getMillisecFormat<CharType>(tp);
+    if (time::getLocalTime(time::getTime(tp), &time)) {
+        ss << time::getFormatString(time::getDefaultTimestampLongFormat<CharType>(), &time)
+           << ::libtbag::log::details::getMillisecFormat<CharType>(tp); // Milliseconds.
+    } else {
+        ss << CHAR_OR_WIDECHAR(CharType, "SINCE")
+           << tp.time_since_epoch().count();
+    }
 
     // Current thread.
-    ss << CHAR_OR_WIDECHAR(CharType, " @");
-    ss << std::this_thread::get_id();
+    ss << CHAR_OR_WIDECHAR(CharType, " @")
+       << std::this_thread::get_id();
 
     return ss.str();
 }

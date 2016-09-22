@@ -49,13 +49,16 @@ TEST(TimeTest, ctime)
     time_t time = time::getTime(tp);
     int millisec = time::getMillisec(tp);
 
-    tm *   gmt = time::getGmtTime(time);
-    tm * local = time::getLocalTime(time);
+    tm   gmt = {0,};
+    tm local = {0,};
 
-    std::string    gmt_long_format = time::getFormatString(time::TIMESTAMP_LONG_FORMAT,  gmt);
-    std::string   gmt_short_format = time::getFormatString(time::TIMESTAMP_SHORT_FORMAT, gmt);
-    std::string  local_long_format = time::getFormatString(time::TIMESTAMP_LONG_FORMAT,  local);
-    std::string local_short_format = time::getFormatString(time::TIMESTAMP_SHORT_FORMAT, local);
+    ASSERT_TRUE(time::getGmtTime(time, &gmt));
+    ASSERT_TRUE(time::getLocalTime(time, &local));
+
+    std::string    gmt_long_format = time::getFormatString(time::TIMESTAMP_LONG_FORMAT,  &gmt);
+    std::string   gmt_short_format = time::getFormatString(time::TIMESTAMP_SHORT_FORMAT, &gmt);
+    std::string  local_long_format = time::getFormatString(time::TIMESTAMP_LONG_FORMAT,  &local);
+    std::string local_short_format = time::getFormatString(time::TIMESTAMP_SHORT_FORMAT, &local);
 
     std::cout <<  "* Long format timestamp: " <<    gmt_long_format << "," << millisec << std::endl;
     std::cout << "* Short format timestamp: " <<   gmt_short_format << "," << millisec << std::endl;

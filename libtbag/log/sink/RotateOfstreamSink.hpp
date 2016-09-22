@@ -18,6 +18,8 @@
 #include <libtbag/time/Time.hpp>
 #include <libtbag/string/Strings.hpp>
 
+#include <sstream>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -50,8 +52,19 @@ public:
 public:
     static String getNowTimeString()
     {
-        return time::getFormatString(time::getDefaultTimestampShortFormat<CharType>()
-                , time::getLocalTime(time::getCurrentTime()));
+        std::basic_stringstream<CharType> ss;
+
+        // Timestamp.
+        auto tp = time::getNowSystemClock();
+        tm time = {0,};
+
+        if (time::getLocalTime(time::getTime(tp), &time)) {
+            ss << time::getFormatString(time::getDefaultTimestampShortFormat<CharType>(), &time);
+        } else {
+            ss << CHAR_OR_WIDECHAR(CharType, "SINCE") << tp.time_since_epoch().count();
+        }
+
+        return ss.str();
     }
 
     static String getInsertedDateIntoFilename(String const & path)

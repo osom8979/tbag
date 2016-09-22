@@ -7,12 +7,76 @@
 
 #include <libtbag/time/Time.hpp>
 #include <libtbag/string/Strings.hpp>
+#include <libtbag/pattern/Singleton.hpp>
+
+#include <cstring>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace time {
+
+inline namespace impl {
+
+/**
+ * SafetyTimeGetter class prototype & implementation.
+ *
+ * @translate{ko, 이 클래스는 표준C 라이브러리의 데이터 경쟁(Data race)상태를 해결하기 위해 작성되었다.}
+ *
+ * @author zer0
+ * @date   2016-09-22
+ *
+ * @remarks
+ *  This class is the solution of the data race conditions.
+ */
+class SafetyTimeGetter : SINGLETON_INHERITANCE(SafetyTimeGetter)
+{
+public:
+    SINGLETON_RESTRICT(SafetyTimeGetter);
+
+public:
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
+
+private:
+    mutable Mutex _mutex;
+
+private:
+    template <typename Predicated>
+    inline bool tryCatch(Predicated predicated) const
+    {
+        try {
+            Guard g(_mutex);
+            predicated();
+        } catch (...) {
+            return false;
+        }
+        return true;
+    }
+
+public:
+    inline bool getGmtTime(time_t const & t, tm * output) const
+    {
+        return tryCatch([&](){
+            if (output != nullptr) {
+                memcpy(output, gmtime(&t), sizeof(tm)); // Position of data race!
+            }
+        });
+    }
+
+    inline bool getLocalTime(time_t const & t, tm * output) const
+    {
+        return tryCatch([&](){
+            if (output != nullptr) {
+                memcpy(output, localtime(&t), sizeof(tm)); // Position of data race!
+            }
+        });
+    }
+};
+
+} // namespace impl
 
 std::chrono::system_clock::time_point getNowSystemClock() noexcept
 {
@@ -29,14 +93,14 @@ time_t getCurrentTime() noexcept
     return getTime(getNowSystemClock());
 }
 
-tm * getGmtTime(time_t const & t) noexcept
+bool getGmtTime(time_t const & t, tm * output)
 {
-    return gmtime(&t);
+    return SafetyTimeGetter::getInstance()->getGmtTime(t, output);
 }
 
-tm * getLocalTime(time_t const & t) noexcept
+bool getLocalTime(time_t const & t, tm * output)
 {
-    return localtime(&t);
+    return SafetyTimeGetter::getInstance()->getLocalTime(t, output);
 }
 
 std::string getFormatString(std::string const & format, tm const * t, std::size_t allocate_size)

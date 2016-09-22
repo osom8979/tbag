@@ -118,8 +118,8 @@ time_t getTime(std::chrono::system_clock::time_point const & time_point) noexcep
 
 /** Obtain current time. */
 time_t getCurrentTime() noexcept;
-tm * getGmtTime(time_t const & t) noexcept;
-tm * getLocalTime(time_t const & t) noexcept;
+bool getGmtTime(time_t const & t, tm * output);
+bool getLocalTime(time_t const & t, tm * output);
 
 std::string  getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
 std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size = 128);
