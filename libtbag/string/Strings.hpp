@@ -69,11 +69,16 @@ template <typename CharType   = char
 std::vector<StringType> splitTokens(StringType const & source
                                   , StringType const & delimiter)
 {
+    if (source.empty() || delimiter.empty()) {
+        return std::vector<StringType>();
+    }
+
     std::vector<StringType> result;
     StringType token;
 
     std::size_t start = 0;
     std::size_t end   = source.find(delimiter);
+
 
     while (end != StringType::npos) {
         token = source.substr(start, end - start);
