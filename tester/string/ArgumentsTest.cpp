@@ -136,8 +136,8 @@ TEST_F(ArgumentsFixture, optPoint)
     ASSERT_FALSE(args.optIntegerRect (TEST_INDEX, &result.r1));
     ASSERT_FALSE(args.optDoubleRect  (TEST_INDEX, &result.r2));
 
-    ASSERT_TRUE(libtbag::geometry::makePoint<int   >(9  , 10  ) == result.p1);
-    ASSERT_TRUE(libtbag::geometry::makePoint<double>(9.0, 10.0) == result.p2);
+    ASSERT_EQ(libtbag::geometry::makePoint<int   >(9  , 10  ), result.p1);
+    ASSERT_EQ(libtbag::geometry::makePoint<double>(9.0, 10.0), result.p2);
 }
 
 TEST_F(ArgumentsFixture, optRect)
@@ -153,8 +153,8 @@ TEST_F(ArgumentsFixture, optRect)
     ASSERT_TRUE( args.optIntegerRect (TEST_INDEX, &result.r1));
     ASSERT_TRUE( args.optDoubleRect  (TEST_INDEX, &result.r2));
 
-    ASSERT_TRUE(libtbag::geometry::makeRect<int   >(100   , 200  , 300  , 400  ) == result.r1);
-    ASSERT_TRUE(libtbag::geometry::makeRect<double>(100.10, 200.2, 300.0, 400.0) == result.r2);
+    ASSERT_EQ(libtbag::geometry::makeRect<int   >(100   , 200  , 300  , 400  ), result.r1);
+    ASSERT_EQ(libtbag::geometry::makeRect<double>(100.10, 200.2, 300.0, 400.0), result.r2);
 }
 
 TEST_F(ArgumentsFixture, checkPointDelimiter)
