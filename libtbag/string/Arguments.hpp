@@ -233,6 +233,69 @@ public:
                                              , std::stod(tokens.at(3)));
         });
     }
+
+private:
+    template <typename Type, typename Predicated>
+    inline std::vector<Type> getVector(Predicated predicated) const
+    {
+        std::size_t const SIZE = _args.size();
+        std::vector<Type> result;
+        Type temp;
+        for (std::size_t index = 0 ; index < SIZE; ++index) {
+            if (predicated(index, &temp)) {
+                result.push_back(temp);
+            }
+        }
+        return result;
+    }
+
+public:
+    inline std::vector<String> getStrings() const
+    {
+        return _args;
+    }
+
+    inline std::vector<int> getIntegers() const
+    {
+        return getVector<int>([this](std::size_t index, int * output){
+            return this->optInteger(index, output);
+        });
+    }
+
+    inline std::vector<double> getDoubles() const
+    {
+        return getVector<double>([this](std::size_t index, double * output){
+            return this->optDouble(index, output);
+        });
+    }
+
+    inline std::vector<IntegerPoint> getIntegerPoints() const
+    {
+        return getVector<IntegerPoint>([this](std::size_t index, IntegerPoint * output){
+            return this->optIntegerPoint(index, output);
+        });
+    }
+
+    inline std::vector<DoublePoint> getDoublePoints() const
+    {
+        return getVector<DoublePoint>([this](std::size_t index, DoublePoint * output){
+            return this->optDoublePoint(index, output);
+        });
+    }
+
+    inline std::vector<IntegerRect> getIntegerRects() const
+    {
+        return getVector<IntegerRect>([this](std::size_t index, IntegerRect * output){
+            return this->optIntegerRect(index, output);
+        });
+    }
+
+    inline std::vector<DoubleRect> getDoubleRects() const
+    {
+        return getVector<DoubleRect>([this](std::size_t index, DoubleRect * output){
+            return this->optDoubleRect(index, output);
+        });
+    }
 };
 
 using Arguments = BaseArguments<char>;

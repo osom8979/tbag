@@ -74,6 +74,17 @@ TEST_F(ArgumentsFixture, Default)
     ASSERT_EQ(6U, args.size());
 }
 
+TEST_F(ArgumentsFixture, getVector)
+{
+    ASSERT_EQ(6U, args.getStrings().size());
+    ASSERT_EQ(2U, args.getIntegers().size());
+    ASSERT_EQ(2U, args.getDoubles().size());
+    ASSERT_EQ(1U, args.getIntegerPoints().size());
+    ASSERT_EQ(1U, args.getDoublePoints().size());
+    ASSERT_EQ(1U, args.getIntegerRects().size());
+    ASSERT_EQ(1U, args.getDoubleRects().size());
+}
+
 TEST_F(ArgumentsFixture, optString)
 {
     int const TEST_INDEX = 0;
