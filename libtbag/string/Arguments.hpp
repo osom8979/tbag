@@ -64,7 +64,7 @@ public:
                 , String arguments
                 , String delimiter       = DEFAULT_DELIMITER
                 , String point_delimiter = DEFAULT_POINT_DELIMITER) throw(InitializeException)
-            : _name(), _args(), _delimiter(delimiter), _point_delimiter(point_delimiter)
+            : _name(name), _args(), _delimiter(delimiter), _point_delimiter(point_delimiter)
     {
         if (parse(arguments) == false) {
             throw InitializeException();
