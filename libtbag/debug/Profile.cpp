@@ -53,6 +53,10 @@ Profile::~Profile()
 
 void Profile::update(Duration duration)
 {
+    if (_enable == false) {
+        return;
+    }
+
     // UPDATE
     _total_duration += duration.count();
     ++_current_cycle;
@@ -71,7 +75,10 @@ void Profile::update(Duration duration)
 
 Profile::SharedTimer Profile::tick()
 {
-    return SharedTimer(new Timer(*this));
+    if (_enable) {
+        return SharedTimer(new Timer(*this));
+    }
+    return SharedTimer();
 }
 
 char const * const Profile::getTimeUnitString() noexcept
