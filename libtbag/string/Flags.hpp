@@ -134,7 +134,6 @@ public:
 public:
     void parse(int argc, Value ** argv)
     {
-        clear();
         for (int index = 0; index < argc; ++index) {
             push(convertFlag(String(argv[index])));
         }
@@ -142,7 +141,6 @@ public:
 
     void parse(String const & args, String const & prefix, String const & delimiter)
     {
-        clear();
         for (auto & cursor : splitTokens(args)) {
             push(convertFlag(cursor, prefix, delimiter));
         }
