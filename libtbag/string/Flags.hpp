@@ -111,12 +111,12 @@ public:
 public:
     inline bool existsWithKey(String const & key) const
     {
-        return findWithKey(key).key != "";
+        return !findWithKey(key).key.empty();
     }
 
     inline bool existsWithValue(String const & value) const
     {
-        return findWithValue(value).value != "";
+        return !findWithValue(value).value.empty();
     }
 
 public:
