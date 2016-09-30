@@ -113,6 +113,22 @@ public:
         return true;
     }
 
+    std::string toString()
+    {
+        if (_args.empty()) {
+            return std::string();
+        } else if (_args.size() == 1) {
+            return _args.at(0);
+        }
+
+        std::size_t const SIZE = _args.size();
+        std::string result = _args.at(0);
+        for (std::size_t index = 1; index < SIZE; ++index) {
+            result += _delimiter + _args.at(index);
+        }
+        return result;
+    }
+
 private:
     template <typename OutputType, typename Predicated>
     inline bool tryObtainArgument(std::size_t index, OutputType * output, Predicated predicated) const

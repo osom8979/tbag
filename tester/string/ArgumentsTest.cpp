@@ -39,12 +39,15 @@ TEST(ArgumentsTest, OnlyCoverage)
 struct ArgumentsFixture : public testing::Test
 {
 public:
+    static constexpr char const * const ARGUMENT_STRING = "test,1,2.1,9x10,100.10x200.2x300x400,x";
+
+public:
     Arguments args;
 
 protected:
     virtual void SetUp() override
     {
-        args.parse("test,1,2.1,9x10,100.10x200.2x300x400,x");
+        args.parse(ARGUMENT_STRING);
     }
 
     virtual void TearDown() override
@@ -72,6 +75,11 @@ TEST_F(ArgumentsFixture, Default)
 {
     ASSERT_FALSE(args.empty());
     ASSERT_EQ(6U, args.size());
+}
+
+TEST_F(ArgumentsFixture, toString)
+{
+    ASSERT_STREQ(ARGUMENT_STRING, args.toString().c_str());
 }
 
 TEST_F(ArgumentsFixture, getVector)
