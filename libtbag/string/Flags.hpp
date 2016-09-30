@@ -37,10 +37,22 @@ template <typename CharType = char>
 class BaseFlags
 {
 public:
-    using Value       = CharType;
-    using String      = std::basic_string<Value>;
-    using Flag        = std::pair<String, String>;
-    using FlagVector  = std::vector<Flag>;
+    using Value        = CharType;
+    using String       = std::basic_string<Value>;
+
+public:
+    struct Flag
+    {
+        String key;
+        String value;
+
+        Flag(String k = "", String v = "") : key(k), value(v)
+        { /* EMPTY. */ }
+    };
+
+public:
+    using FlagVector   = std::vector<Flag>;
+    using StringVector = std::vector<String>;
 
 private:
     FlagVector _flags;
@@ -74,28 +86,49 @@ public:
     { return _flags.at(index); }
 
 public:
-    Flag findWithKey(String const & key) const
+    inline Flag find(typename FlagVector::const_iterator itr) const
     {
-        auto result = std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
-            return (flag.first == key);
-        });
-
-        if (result == _flags.end()) {
+        if (itr == _flags.end()) {
             return Flag();
         }
-        return *result;
+        return *itr;
     }
 
-    Flag findWithValue(String const & value) const
+    inline Flag findWithKey(String const & key) const
     {
-        auto result = std::find_if(_flags.begin(), _flags.end(), [&value](Flag const & flag) -> bool {
-            return (flag.second == value);
-        });
+        return find(std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
+            return (flag.key == key);
+        }));
+    }
 
-        if (result == _flags.end()) {
-            return Flag();
+    inline Flag findWithValue(String const & value) const
+    {
+        return find(std::find_if(_flags.begin(), _flags.end(), [&value](Flag const & flag) -> bool {
+            return (flag.value == value);
+        }));
+    }
+
+public:
+    inline bool existsWithKey(String const & key) const
+    {
+        return findWithKey(key).key != "";
+    }
+
+    inline bool existsWithValue(String const & value) const
+    {
+        return findWithValue(value).value != "";
+    }
+
+public:
+    inline StringVector getUnnamedValues() const
+    {
+        StringVector result;
+        for (auto & cursor : _flags) {
+            if (cursor.key == "" && cursor.value.empty() == false) {
+                result.push_back(cursor.value);
+            }
         }
-        return *result;
+        return result;
     }
 
 public:
@@ -134,16 +167,16 @@ public:
 
             if (delimiter_pos == String::npos) {
                 // ONLY KEY.
-                return std::make_pair(key, String());
+                return Flag(key);
             } else {
                 // KEY & VALUE.
                 String value = str.substr(delimiter_pos + 1);
-                return std::make_pair(key, value);
+                return Flag(key, value);
             }
         }
 
         // ONLY VALUE.
-        return std::make_pair(String(), String(str));
+        return Flag(String(), String(str));
     }
 
     static Flag convertFlag(String const & str)
