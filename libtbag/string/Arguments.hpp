@@ -104,11 +104,31 @@ public:
     inline std::size_t size() const noexcept
     { return _args.size(); }
 
+    inline String get(std::size_t index) const
+    { return _args.at(index); }
+
+public:
+    inline void erase(std::size_t index)
+    { _args.erase(_args.begin() + index); }
+    inline void erase(String argument)
+    { _args.erase(std::find(_args.begin(), _args.end(), argument)); }
+
+    inline void push(String argument)
+    { _args.push_back(argument); }
+    inline void pop()
+    { erase(0); }
+
+public:
+    void insert(std::size_t index, String argument)
+    {
+        _args.insert(_args.begin() + index, argument);
+    }
+
 public:
     bool parse(String arguments)
     {
         for (auto & cursor : libtbag::string::splitTokens(arguments, _delimiter)) {
-            _args.push_back(cursor);
+            push(cursor);
         }
         return true;
     }

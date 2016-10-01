@@ -82,6 +82,15 @@ TEST_F(ArgumentsFixture, toString)
     ASSERT_STREQ(ARGUMENT_STRING, args.toString().c_str());
 }
 
+TEST_F(ArgumentsFixture, ModifyMethods)
+{
+    ASSERT_EQ("test", args.get(0));
+    args.pop();
+    ASSERT_EQ("1", args.get(0));
+    args.insert(0, "test");
+    ASSERT_EQ("test", args.get(0));
+}
+
 TEST_F(ArgumentsFixture, getVector)
 {
     ASSERT_EQ(6U, args.getStrings().size());
