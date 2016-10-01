@@ -37,8 +37,8 @@ template <typename CharType = char>
 class BaseFlags
 {
 public:
-    using Value        = CharType;
-    using String       = std::basic_string<Value>;
+    using Value  = CharType;
+    using String = std::basic_string<Value>;
 
 public:
     struct Flag
@@ -58,10 +58,28 @@ private:
     FlagVector _flags;
 
 public:
+    BaseFlags(int argc, Value ** argv)
+    {
+        parse(argc, argv);
+    }
+
+    BaseFlags(String const & args, String const & prefix, String const & delimiter)
+    {
+        parse(args, prefix, delimiter);
+    }
+
+    BaseFlags(String const & args)
+    {
+        parse(args);
+    }
+
+public:
     BaseFlags() = default;
+    ~BaseFlags() = default;
+
+public:
     BaseFlags(BaseFlags const & obj) = default;
     BaseFlags(BaseFlags && obj) = default;
-    ~BaseFlags() = default;
 
 public:
     BaseFlags & operator =(BaseFlags const & obj) = default;
