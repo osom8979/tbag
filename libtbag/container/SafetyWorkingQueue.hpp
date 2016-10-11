@@ -34,6 +34,7 @@ namespace container {
  *
  * @author zer0
  * @date   2016-07-26
+ * @date   2016-10-11 (Remove @c _working_count member value)
  */
 template <typename Value
         , typename Mutex = std::mutex>
@@ -48,13 +49,11 @@ public:
 
 private:
     mutable MutexType _mutex;
-    std::size_t  _working_count;
-    bool         _cleaning;
-    QueueType    _insert_queue;
-    QueueType    _remove_queue;
+    QueueType _insert_queue;
+    QueueType _remove_queue;
 
 public:
-    SafetyWorkingQueue() : _working_count(0), _cleaning(false)
+    SafetyWorkingQueue()
     {
         // EMPTY.
     }
@@ -67,22 +66,9 @@ public:
 public:
     void clear()
     {
-        {   // Clear insert_queue.
-            LockGuard guard(_mutex);
-            _cleaning = true;
-            _insert_queue.clear();
-        }
-
-        // Waiting workers.
-        while (true) {
-            LockGuard guard(_mutex);
-            if (_working_count == 0) {
-                // Clear remove_queue.
-                _remove_queue.clear();
-                _cleaning = false;
-                break;
-            }
-        }
+        LockGuard guard(_mutex);
+        _insert_queue.clear();
+        _remove_queue.clear();
     }
 
     ValueType popFromRemoveQueue() throw (ContainerEmptyException)
@@ -120,7 +106,6 @@ private:
         }
         ValueType result = _insert_queue.front();
         _insert_queue.pop_front();
-        ++_working_count;
         return result;
     }
 
@@ -128,16 +113,12 @@ private:
     {
         LockGuard guard(_mutex);
         _remove_queue.push_back(value);
-        --_working_count;
     }
 
 public:
     bool push(ValueType const & value)
     {
         LockGuard guard(_mutex);
-        if (_cleaning == true) {
-            return false;
-        }
         _insert_queue.push_back(value);
         return true;
     }
@@ -145,9 +126,6 @@ public:
     bool push(ValueType && value)
     {
         LockGuard guard(_mutex);
-        if (_cleaning == true) {
-            return false;
-        }
         _insert_queue.push_back(value);
         return true;
     }
@@ -190,12 +168,6 @@ public:
     }
 
 public:
-    std::size_t getWorkingCount() const
-    {
-        LockGuard guard(_mutex);
-        return _working_count;
-    }
-
     std::size_t sizeOfInsertQueue() const
     {
         LockGuard guard(_mutex);
