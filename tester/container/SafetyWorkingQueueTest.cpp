@@ -1,12 +1,12 @@
 /**
  * @file   SafetyWorkingQueueTest.cpp
- * @brief  WorkingQueue class tester.
+ * @brief  SafetyWorkingQueue class tester.
  * @author zer0
  * @date   2016-07-26
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/container/WorkingQueue.hpp>
+#include <libtbag/container/SafetyWorkingQueue.hpp>
 
 #include <thread>
 #include <atomic>
@@ -17,10 +17,11 @@ using namespace libtbag::container;
 TEST(SafetyWorkingQueueTest, Default)
 {
     int const TEST_VALUE = 100;
-    WorkingQueue<int> queue;
+    SafetyWorkingQueue<int> queue;
 
     queue.push(TEST_VALUE);
     ASSERT_EQ(1U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
     ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     std::atomic_bool end_working(false);
@@ -41,12 +42,14 @@ TEST(SafetyWorkingQueueTest, Default)
         // WAITING...
     }
     ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(1U, queue.getWorkingCount());
     ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     end_working.store(true);
     worker_thread.join();
 
     ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
     ASSERT_EQ(1U, queue.sizeOfRemoveQueue());
 
     int find_value = queue.findAndRemoveFromRemoveQueue([&](int value) -> bool {
@@ -55,18 +58,19 @@ TEST(SafetyWorkingQueueTest, Default)
     ASSERT_EQ(TEST_VALUE, find_value);
 
     ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
     ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 }
 
 TEST(SafetyWorkingQueueTest, Exception)
 {
-    WorkingQueue<int> queue;
+    SafetyWorkingQueue<int> queue;
     ASSERT_THROW(queue.popFromRemoveQueue(), ContainerEmptyException);
 }
 
 TEST(SafetyWorkingQueueTest, Remove)
 {
-    WorkingQueue<int> queue;
+    SafetyWorkingQueue<int> queue;
     queue.push(100);
     queue.push(20);
     queue.push(0);
@@ -76,11 +80,13 @@ TEST(SafetyWorkingQueueTest, Remove)
         return value == 20;
     }));
     ASSERT_EQ(2U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
     ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
     ASSERT_TRUE(queue.work());
     ASSERT_TRUE(queue.work());
     ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
     ASSERT_EQ(2U, queue.sizeOfRemoveQueue());
 
     ASSERT_EQ(100, queue.popFromRemoveQueue());
@@ -89,17 +95,19 @@ TEST(SafetyWorkingQueueTest, Remove)
 
 TEST(SafetyWorkingQueueTest, clear)
 {
-    WorkingQueue<int> queue;
+    SafetyWorkingQueue<int> queue;
     queue.push(100);
     queue.push(20);
     queue.push(0);
     queue.work([](int&) -> bool { return true; });
 
     ASSERT_EQ(2U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
     ASSERT_EQ(1U, queue.sizeOfRemoveQueue());
 
     queue.clear();
     ASSERT_EQ(0U, queue.sizeOfInsertQueue());
+    ASSERT_EQ(0U, queue.getWorkingCount());
     ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 }
 
