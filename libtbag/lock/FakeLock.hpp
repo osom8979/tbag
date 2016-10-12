@@ -35,17 +35,14 @@ public:
     ~FakeLock() = default;
 
 public:
-    void lock() noexcept {
-        // EMPTY.
-    }
+    inline void lock() noexcept
+    { /* EMPTY. */ }
 
-    bool try_lock() noexcept {
-        return false;
-    }
+    inline bool try_lock() noexcept
+    { return false; }
 
-    void unlock() noexcept {
-        // EMPTY.
-    }
+    inline void unlock() noexcept
+    { /* EMPTY. */ }
 };
 
 } // namespace lock

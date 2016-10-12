@@ -40,17 +40,19 @@ private:
     std::atomic_bool _state;
 
 public:
-    SpinLock() : _state(UNLOCKED) {
-    }
+    SpinLock() : _state(UNLOCKED)
+    { /* EMPTY. */ }
 
 public:
-    void lock() noexcept {
+    void lock() noexcept
+    {
         while (this->_state.exchange(LOCKED, std::memory_order_acquire) == LOCKED) {
             // BUSY WAIT.
         }
     }
 
-    void unlock() volatile noexcept {
+    void unlock() volatile noexcept
+    {
         this->_state.store(UNLOCKED, std::memory_order_release);
     }
 };

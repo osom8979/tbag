@@ -21,6 +21,10 @@ inline uv_cond_t * cast_uv_cond(T * v) noexcept
     return static_cast<uv_cond_t*>(v);
 }
 
+// ---------------------------
+// UvCondition implementation.
+// ---------------------------
+
 UvCondition::UvCondition() throw (InitializeException) : _handle(new uv_cond_t)
 {
     int error_code = ::uv_cond_init(cast_uv_cond(_handle));

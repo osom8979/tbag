@@ -20,6 +20,10 @@ inline uv_mutex_t * cast_uv_mutex(T * v) noexcept
     return static_cast<uv_mutex_t*>(v);
 }
 
+// ----------------------
+// UvLock implementation.
+// ----------------------
+
 UvLock::UvLock() throw (InitializeException) : _handle(new uv_mutex_t)
 {
     int error_code = ::uv_mutex_init(cast_uv_mutex(_handle));
