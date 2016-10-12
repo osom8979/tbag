@@ -36,6 +36,11 @@ namespace thread {
  *
  * @author zer0
  * @date   2016-05-16
+ *
+ * @warning
+ *  It has a potential bug.
+ *
+ * @deprecated
  */
 class TaskExecutor : public Noncopyable
 {
