@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
 
+#include <memory>
 #include <exception>
 
 // -------------------
@@ -32,29 +33,23 @@ namespace lock {
  */
 struct UnsupportedRwLockException : public std::exception
 {
+public:
+    static constexpr char const * const MESSAGE = "Unsupported RwLock exception.";
+
 private:
     int _error_code;
 
 public:
-    static constexpr char const * const MESSAGE = "Unsupported RwLock exception.";
-
-public:
     UnsupportedRwLockException(int error_code) : _error_code(error_code)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
 public:
     inline int getErrorCode() const noexcept
-    {
-        return _error_code;
-    }
+    { return _error_code; }
 
 public:
     virtual const char * what() const noexcept override
-    {
-        return MESSAGE;
-    }
+    { return MESSAGE; }
 };
 
 /**
@@ -69,11 +64,11 @@ public:
 class RwLock : public Noncopyable
 {
 public:
-    using FakeRwLock = void;
+    struct RwLockPimpl;
+    using Lock = std::unique_ptr<RwLockPimpl>;
 
 private:
-    bool _is_init;
-    FakeRwLock * _lock;
+    Lock _lock;
 
 public:
     RwLock() throw (UnsupportedRwLockException);
@@ -102,8 +97,10 @@ private:
     RwLock & _lock;
 
 public:
-    ReadLockGuard(RwLock & lock);
-    ~ReadLockGuard();
+    inline ReadLockGuard(RwLock & lock) : _lock(lock)
+    { _lock.readLock(); }
+    inline ~ReadLockGuard()
+    { _lock.readUnlock(); }
 };
 
 /**
@@ -118,8 +115,10 @@ private:
     RwLock & _lock;
 
 public:
-    WriteLockGuard(RwLock & lock);
-    ~WriteLockGuard();
+    inline WriteLockGuard(RwLock & lock) : _lock(lock)
+    { _lock.writeLock(); }
+    inline ~WriteLockGuard()
+    { _lock.writeUnlock(); }
 };
 
 } // namespace lock
