@@ -1,6 +1,6 @@
 /**
- * @file   swap.hpp
- * @brief  swap algorithm prototype.
+ * @file   Swap.hpp
+ * @brief  Swap algorithm prototype.
  * @author zer0
  * @date   2016-04-19
  */
