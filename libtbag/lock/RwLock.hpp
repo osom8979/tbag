@@ -15,42 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
-
-#include <memory>
-#include <exception>
+#include <libtbag/Exception.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace lock {
-
-/**
- * Unsupported RwLock exception class.
- *
- * @author zer0
- * @date   2016-05-12
- */
-struct UnsupportedRwLockException : public std::exception
-{
-public:
-    static constexpr char const * const MESSAGE = "Unsupported RwLock exception.";
-
-private:
-    int _error_code;
-
-public:
-    UnsupportedRwLockException(int error_code) : _error_code(error_code)
-    { /* EMPTY. */ }
-
-public:
-    inline int getErrorCode() const noexcept
-    { return _error_code; }
-
-public:
-    virtual const char * what() const noexcept override
-    { return MESSAGE; }
-};
 
 /**
  * RwLock class prototype.
@@ -63,15 +34,11 @@ public:
  */
 class RwLock : public Noncopyable
 {
-public:
-    struct RwLockPimpl;
-    using Lock = std::unique_ptr<RwLockPimpl>;
-
 private:
-    Lock _lock;
+    void * _handle;
 
 public:
-    RwLock() throw (UnsupportedRwLockException);
+    RwLock() throw (InitializeException);
     ~RwLock();
 
 public:

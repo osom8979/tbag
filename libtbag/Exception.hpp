@@ -25,6 +25,12 @@ NAMESPACE_LIBTBAG_OPEN
     struct class_name : public std::exception                   \
     {                                                           \
         static constexpr char const * const MESSAGE = message;  \
+                                                                \
+        int code;                                               \
+                                                                \
+        class_name() : code(0) { }                              \
+        class_name(int c) : code(c) { }                         \
+                                                                \
         virtual const char * what() const noexcept override {   \
             return MESSAGE;                                     \
         }                                                       \
