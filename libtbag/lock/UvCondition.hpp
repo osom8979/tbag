@@ -1,12 +1,12 @@
 /**
- * @file   UvLock.hpp
- * @brief  UvLock class prototype.
+ * @file   UvCondition.hpp
+ * @brief  UvCondition class prototype.
  * @author zer0
  * @date   2016-10-12
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOCK_UVLOCK_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOCK_UVLOCK_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOCK_UVCONDITION_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOCK_UVCONDITION_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,35 +17,43 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Exception.hpp>
 
+#include <cstdint>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace lock {
 
+// Forward declaration.
+class UvLock;
+
 /**
- * UvLock class prototype.
+ * UvCondition class prototype.
  *
  * @author zer0
  * @date   2016-10-12
  */
-class UvLock : public Noncopyable
+class UvCondition : public Noncopyable
 {
 private:
     void * _handle;
 
 public:
-    UvLock() throw (InitializeException);
-    ~UvLock();
+    UvCondition() throw (InitializeException);
+    virtual ~UvCondition();
 
 public:
     inline void * getHandle() noexcept
     { return _handle; }
 
 public:
-    void lock();
-    bool tryLock();
-    void unlock();
+    void wait(UvLock & lock);
+    void wait(UvLock & lock, int64_t timeout_nano);
+
+public:
+    void signal();
+    void broadcast();
 };
 
 } // namespace lock
@@ -54,5 +62,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOCK_UVLOCK_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOCK_UVCONDITION_HPP__
 
