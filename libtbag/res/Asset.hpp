@@ -17,9 +17,9 @@
 #include <libtbag/config.h>
 #include <libtbag/filesystem/Path.hpp>
 
+#include <string>
 #include <vector>
 #include <map>
-#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,17 +42,17 @@ namespace res {
 class Asset
 {
 public:
-    using ValueType = char;
-    using String    = std::basic_string<ValueType>;
-    using Path      = ::libtbag::filesystem::Path;
-    using PathMap   = std::map<String, Path>;
-    using Pair      = typename PathMap::value_type;
-    using Regex     = std::basic_regex<ValueType>;
+    using Value   = char;
+    using String  = std::basic_string<Value>;
 
-    static_assert(std::is_same<ValueType, char>::value
-            , "ValueType must be the same type as char");
-    static_assert(std::is_same<ValueType, typename String::value_type>::value
-            , "ValueType must be the same type as String::value_type");
+    using Path        = ::libtbag::filesystem::Path;
+    using PathMap     = std::map<String, Path>;
+    using PathMapPair = typename PathMap::value_type;
+
+    static_assert(std::is_same<Value, char>::value
+            , "Value must be the same type as char");
+    static_assert(std::is_same<Value, typename String::value_type>::value
+            , "Value must be the same type as String::value_type");
 
 public:
     /** Default setting for the constructor. */
@@ -66,55 +66,25 @@ private:
     PathMap _dirs;
 
 public:
-    Asset() noexcept(std::is_nothrow_default_constructible<PathMap>::value) {
-        // EMPTY.
-    }
+    Asset() = default;
+    virtual ~Asset() = default;
 
     /** Construct of Default settings. */
-    explicit Asset(default_setting const & UNUSED_PARAM(empty_value)) {
-        this->insertDir(getHomeDirKeyName(), getHomeDirPath());
-        this->insertDir(getExeDirKeyName(), getExeDirPath());
+    explicit Asset(default_setting const & UNUSED_PARAM(empty_value)) noexcept(std::is_nothrow_default_constructible<PathMap>::value)
+    {
+        insertDir(getHomeDirKeyName(), getHomeDirPath());
+        insertDir(getExeDirKeyName(), getExeDirPath());
     }
 
-    Asset(PathMap const & dirs) {
-        this->_dirs = dirs;
-    }
+    Asset(PathMap const & dirs) : _dirs(dirs)
+    { /* EMPTY. */ }
 
-    Asset(Asset const & obj) {
-        this->copy(obj);
-    }
-
-    Asset(Asset && obj) {
-        this->swap(obj);
-    }
-
-    virtual ~Asset() {
-        // EMPTY.
-    }
+    Asset(Asset const & obj) = default;
+    Asset(Asset && obj) = default;
 
 public:
-    Asset & operator =(Asset const & obj) {
-        return this->copy(obj);
-    }
-
-    Asset & operator =(Asset && obj) {
-        this->swap(obj);
-        return *this;
-    }
-
-public:
-    Asset & copy(Asset const & obj) {
-        if (this != &obj) {
-            this->_dirs = obj._dirs;
-        }
-        return *this;
-    }
-
-    void swap(Asset & obj) {
-        if (this != &obj) {
-            this->_dirs.swap(obj._dirs);
-        }
-    }
+    Asset & operator =(Asset const & obj) = default;
+    Asset & operator =(Asset && obj) = default;
 
 public:
     /**
@@ -126,20 +96,23 @@ public:
      *  - Empty string: If it can't find.
      *  - Otherwise: Successful find.
      */
-    Path getDirPath(String const & key) const {
+    Path getDirPath(String const & key) const
+    {
         try {
-            return this->_dirs.at(key);
+            return _dirs.at(key);
         } catch (std::out_of_range & e) {
             return Path();
         }
     }
 
-    String getDirString(String const & key) const {
+    String getDirString(String const & key) const
+    {
         return getDirPath(key).getString();
     }
 
-    std::vector<Pair> getDirs() const {
-        return std::vector<Pair>(_dirs.begin(), _dirs.end());
+    std::vector<PathMapPair> getDirs() const
+    {
+        return std::vector<PathMapPair>(_dirs.begin(), _dirs.end());
     }
 
     /**
@@ -148,8 +121,9 @@ public:
      * @param key   [in] Directory key name.
      * @param value [in] Directory path.
      */
-    void insertDir(String const & key, Path const & value) {
-        this->_dirs.insert(std::make_pair(key, value));
+    void insertDir(String const & key, Path const & value)
+    {
+        _dirs.insert(std::make_pair(key, value));
     }
 
     /**
@@ -158,18 +132,21 @@ public:
      * @param key   [in] Directory key name.
      * @param value [in] Directory path string.
      */
-    void insertDir(String const & key, String const & value) {
-        this->insertDir(key, Path(value));
+    void insertDir(String const & key, String const & value)
+    {
+        insertDir(key, Path(value));
     }
 
-    std::size_t size() const noexcept(true) {
-        return this->_dirs.size();
-    }
+    inline bool empty() const noexcept(noexcept(_dirs.empty()))
+    { return _dirs.empty(); }
+    inline std::size_t size() const noexcept(noexcept(_dirs.size()))
+    { return _dirs.size(); }
 
 public:
-    Path find(String const & name) {
+    Path find(String const & name)
+    {
         Path path;
-        for (auto & cursor : this->_dirs) {
+        for (auto & cursor : _dirs) {
             path = (cursor.second / name);
             if (filesystem::common::existsFile(path) == true) {
                 return path;
@@ -179,11 +156,13 @@ public:
     }
 
 public:
-    std::vector<Path> scanDirWithKey(std::string const & key) const {
+    std::vector<Path> scanDirWithKey(std::string const & key) const
+    {
         return scanDir(getDirPath(key));
     }
 
-    static std::vector<Path> scanDir(Path const & path) {
+    static std::vector<Path> scanDir(Path const & path)
+    {
         std::vector<Path> result;
         for (auto & cursor : filesystem::common::scanDir(path.getNativeString())) {
             result.push_back(Path(Path::append(path, cursor)));
@@ -192,43 +171,50 @@ public:
     }
 
 public:
-    bool isDirectoryWithKey(std::string const & key) {
+    bool isDirectoryWithKey(std::string const & key)
+    {
         return isDirectory(getDirPath(key));
     }
 
-    static bool isDirectory(Path const & path) {
+    static bool isDirectory(Path const & path)
+    {
         return filesystem::common::isDirectory(path.getNativeString());
     }
 
 // Static methods.
 public:
     /** Obtain HOME directory key name. */
-    static String getHomeDirKeyName() {
+    static String getHomeDirKeyName()
+    {
         return String(HOME_DIRECTORY_ASSET_NAME);
     }
 
     /** Obtain executable file directory key name. */
-    static String getExeDirKeyName() {
+    static String getExeDirKeyName()
+    {
         return String(EXE_DIRECTORY_ASSET_NAME);
     }
 
     /** Obtain HOME directory path. */
-    static Path getHomeDirPath() {
+    static Path getHomeDirPath()
+    {
         using namespace filesystem::common;
         return Path(getHomeDir());
     }
 
     /** Obtain executable file directory path. */
-    static Path getExeDirPath() {
+    static Path getExeDirPath()
+    {
         using namespace filesystem::common;
         return Path(getExeDir());
     }
+};
 
 #ifndef CREATE_ASSET_PATH
 /** Create a main directory accessor & mutator macro. */
 #define CREATE_ASSET_PATH(name, path)                   \
 public:                                                 \
-    static constexpr ValueType const * const            \
+    static constexpr Value const * const            \
             ASSET_NAME_KEY_##name = #name;              \
     void insert_##name() {                              \
         insertDir(ASSET_NAME_KEY_##name, path);         \
@@ -276,7 +262,6 @@ public:                                                  \
     }                                                    \
 private:
 #endif
-};
 
 } // namespace res
 
