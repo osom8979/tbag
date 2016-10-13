@@ -133,8 +133,8 @@ void ThreadPool::exit()
 {
     _mutex.lock();
     _exit = true;
-    _mutex.unlock();
     _signal.broadcast();
+    _mutex.unlock();
 }
 
 bool ThreadPool::push(Task const & task)
@@ -145,8 +145,8 @@ bool ThreadPool::push(Task const & task)
         _task.push(SharedTask(new Task(task)));
         result = true;
     }
-    _mutex.unlock();
     _signal.signal();
+    _mutex.unlock();
     return result;
 }
 
@@ -162,8 +162,8 @@ bool ThreadPool::waitTask(ThreadPool & pool, Task const & task)
 
         mutex.lock();
         task_end = true;
-        mutex.unlock();
         signal.signal();
+        mutex.unlock();
     });
 
     if (result) {
