@@ -19,7 +19,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -44,10 +43,7 @@ class Asset
 public:
     using Value  = char;
     using String = std::basic_string<Value>;
-
-    using Path        = ::libtbag::filesystem::Path;
-    using PathMap     = std::map<String, Path>;
-    using PathMapPair = typename PathMap::value_type;
+    using Path   = libtbag::filesystem::Path;
 
     static_assert(std::is_same<Value, char>::value
             , "Value must be the same type as char");

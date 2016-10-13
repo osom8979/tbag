@@ -6,10 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/predef.hpp>
 #include <libtbag/res/Asset.hpp>
-
-#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::res;
@@ -35,7 +32,7 @@ public:
     CREATE_ASSET_PATH(root_res2, getTestDirPath2());
 };
 
-TEST(AssetDemoTest, Default)
+TEST(AssetTest, Default)
 {
     AssetDemo demo;
 
