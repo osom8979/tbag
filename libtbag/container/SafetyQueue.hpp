@@ -33,76 +33,91 @@ namespace container {
  * @author zer0
  * @date   2016-05-22
  */
-template <typename Value
-        , typename Mutex = std::mutex>
+template <typename ValueType
+        , typename MutexType = std::mutex>
 class SafetyQueue : public Noncopyable
 {
 public:
-    using ValueType = Value;
-    using MutexType = Mutex;
-    using QueueType = std::queue<ValueType>;
-    using LockGuard = std::lock_guard<MutexType>;
+    using Value = ValueType;
+    using Queue = std::queue<Value>;
+
+    using Mutex = MutexType;
+    using Guard = std::lock_guard<Mutex>;
 
 private:
-    mutable MutexType _mutex;
-    QueueType _queue;
+    mutable Mutex _mutex;
+    Queue _queue;
 
 public:
-    SafetyQueue()  = default;
-    ~SafetyQueue() = default;
+    SafetyQueue()
+    { /* EMPTY. */ }
+    ~SafetyQueue()
+    { clear(); }
 
-// Queue operations.
 public:
-    void clear() {
-        LockGuard guard(_mutex);
+    inline bool empty() const
+    { Guard g(_mutex); return _queue.empty(); }
+    inline std::size_t size() const
+    { Guard g(_mutex); return _queue.size(); }
+
+public:
+    void clear()
+    {
+        Guard guard(_mutex);
         while (_queue.empty() == false) {
             _queue.pop();
         }
     }
 
-    void push(ValueType value) {
-        LockGuard guard(_mutex);
+    void push(Value const & value)
+    {
+        Guard guard(_mutex);
         _queue.push(value);
     }
 
-    void pop() {
-        LockGuard guard(_mutex);
+    void push(Value && value)
+    {
+        Guard guard(_mutex);
+        _queue.push(value);
+    }
+
+    void pop()
+    {
+        Guard guard(_mutex);
         if (_queue.empty() == false) {
             _queue.pop();
         }
     }
 
-    void popUntil(std::size_t size) {
-        LockGuard guard(_mutex);
+    void popUntil(std::size_t size) throw(ContainerEmptyException)
+    {
+        Guard guard(_mutex);
         while (_queue.size() > size) {
+            if (_queue.empty()) {
+                throw ContainerEmptyException();
+            }
             _queue.pop();
         }
     }
 
-public:
-    ValueType frontAndPop() throw(ContainerEmptyException) {
-        LockGuard guard(_mutex);
-        if (_queue.empty() == true) {
-            throw ContainerEmptyException();
-        }
-        ValueType result = _queue.front();
-        _queue.pop();
-        return result;
-    }
-
-public:
-    ValueType front() throw(ContainerEmptyException) {
-        LockGuard guard(_mutex);
+    Value front() throw(ContainerEmptyException)
+    {
+        Guard guard(_mutex);
         if (_queue.empty() == true) {
             throw ContainerEmptyException();
         }
         return _queue.front();
     }
 
-public:
-    std::size_t size() const {
-        LockGuard guard(_mutex);
-        return _queue.size();
+    Value frontAndPop() throw(ContainerEmptyException)
+    {
+        Guard guard(_mutex);
+        if (_queue.empty()) {
+            throw ContainerEmptyException();
+        }
+        Value result = _queue.front();
+        _queue.pop();
+        return result;
     }
 };
 
