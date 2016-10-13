@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/Asset.hpp>
+#include <libtbag/res/Asset.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
  * @author zer0
  * @date   2016-06-30
  */
-class DemoAsset : public libtbag::Asset
+class DemoAsset : public libtbag::res::Asset
 {
 public:
     DemoAsset() {

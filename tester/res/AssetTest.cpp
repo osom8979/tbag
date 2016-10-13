@@ -7,11 +7,12 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Asset.hpp>
+#include <libtbag/res/Asset.hpp>
 
 #include <iostream>
 
 using namespace libtbag;
+using namespace libtbag::res;
 
 TEST(AssetTest, CopyOperators)
 {

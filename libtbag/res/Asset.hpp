@@ -3,10 +3,11 @@
  * @brief  Asset class prototype.
  * @author zer0
  * @date   2016-04-03
+ * @date   2016-10-13 (Change namespace: libtbag -> libtbag::res)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ASSET_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_ASSET_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_RES_ASSET_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_RES_ASSET_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -23,6 +24,8 @@
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+namespace res {
 
 /**
  * Asset class prototype.
@@ -275,9 +278,11 @@ private:
 #endif
 };
 
+} // namespace res
+
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_ASSET_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_RES_ASSET_HPP__
 

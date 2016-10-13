@@ -10,6 +10,7 @@
 #include <tester/DemoAsset.hpp>
 
 using namespace libtbag;
+using namespace libtbag::res;
 
 TEST(DemoAssetTest, Exists)
 {
