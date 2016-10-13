@@ -22,10 +22,23 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace common {
 
-#define IMPLEMENT_GET_CLASS_NAME(name) \
-    static constexpr char const * const getClassName() noexcept { \
-        return #name; \
-    }
+#ifndef IMPLEMENT_GET_CLASS_NAME
+#define IMPLEMENT_GET_CLASS_NAME(name, qualify) \
+    static constexpr char const * const getClassName() noexcept \
+    { return #name; } \
+    virtual char const * const getName() qualify \
+    { return getClassName(); }
+#endif
+
+#ifndef IMPLEMENT_GET_PARENT_CLASS_NAME
+#define IMPLEMENT_GET_PARENT_CLASS_NAME(name) \
+    IMPLEMENT_GET_CLASS_NAME(name, const noexcept)
+#endif
+
+#ifndef IMPLEMENT_GET_CHILD_CLASS_NAME
+#define IMPLEMENT_GET_CHILD_CLASS_NAME(name) \
+    IMPLEMENT_GET_CLASS_NAME(name, const noexcept override)
+#endif
 
 /**
  * Object class prototype.
@@ -36,7 +49,7 @@ namespace common {
 class Object
 {
 public:
-    IMPLEMENT_GET_CLASS_NAME(Object);
+    IMPLEMENT_GET_PARENT_CLASS_NAME(Object);
 
 public:
     using Id = id::Id;
@@ -51,47 +64,28 @@ public:
     }
 
     Object(Object const & obj) noexcept : Object()
-    {
-        // EMPTY.
-    }
-
+    { /* EMPTY. */ }
     Object(Object && obj) noexcept : Object()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
     virtual ~Object() noexcept
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
 public:
     inline Object & operator =(Object const & obj) noexcept
-    {
-        return *this;
-    }
-
+    { return *this; }
     inline Object & operator =(Object && obj) noexcept
-    {
-        return *this;
-    }
+    { return *this; }
 
 public:
     inline bool operator ==(Object const & obj) noexcept
-    {
-        return (this == &obj);
-    }
-
+    { return (this == &obj); }
     inline bool operator !=(Object const & obj) noexcept
-    {
-        return (this != &obj);
-    }
+    { return (this != &obj); }
 
 public:
     inline Id getId() const noexcept
-    {
-        return _id;
-    }
+    { return _id; }
 };
 
 } // namespace common
