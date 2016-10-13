@@ -29,22 +29,16 @@ NAMESPACE_LIBTBAG_OPEN
 class DemoAsset : public libtbag::res::Asset
 {
 public:
-    DemoAsset() {
-        this->insert_tester_dir();
-    }
-
-    ~DemoAsset() {
-        // EMPTY.
-    }
+    DemoAsset() = default;
+    ~DemoAsset() = default;
 
 public:
-    static Path getTesterAssetDir() {
-        return (Path(__FILE__).getParent() / "asset");
-    }
+    static Path getTesterAssetDir()
+    { return (Path(__FILE__).getParent() / "asset"); }
 
 public:
-    CREATE_ASSET_PATH(tester_dir, DemoAsset::getTesterAssetDir());
-    CREATE_ASSET_PATH_SUB(tester_dir, image, "image");
+    CREATE_ASSET_PATH(tester_dir,       getTesterAssetDir());
+    CREATE_ASSET_PATH(tester_dir_image, getTesterAssetDir() / "image");
 };
 
 // --------------------

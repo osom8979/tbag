@@ -6,8 +6,9 @@
  */
 
 #include <gtest/gtest.h>
-#include <iostream>
 #include <tester/DemoAsset.hpp>
+
+#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::res;
@@ -24,14 +25,5 @@ TEST(DemoAssetTest, Exists)
 
     auto image_list = asset.scan_tester_dir_image();
     ASSERT_EQ(1U, image_list.size());
-}
-
-TEST(DemoAssetTest, Find)
-{
-    DemoAsset demo_asset;
-    Asset image_asset;
-
-    image_asset.insertDir("image", demo_asset.get_tester_dir_image());
-    ASSERT_LT(0U, image_asset.find("lena.png").getString().size());
 }
 
