@@ -58,7 +58,7 @@ std::string getExeDir()
     return path.substr(0, last_separator_index);
 }
 
-bool isAccessFile(std::string const & path, int mode)
+bool checkAccessMode(std::string const & path, int mode)
 {
     uv_fs_t request;
     int error_code = uv_fs_access(nullptr, &request, path.c_str(), mode, nullptr);
@@ -66,24 +66,24 @@ bool isAccessFile(std::string const & path, int mode)
     return (error_code == 0 ? true : false);
 }
 
-bool existsFile(std::string const & path)
+bool isExistsMode(std::string const & path)
 {
-    return isAccessFile(path, ACCESS_MODE_EXISTS);
+    return checkAccessMode(path, ACCESS_MODE_EXISTS);
 }
 
-bool isExecuteFile(std::string const & path)
+bool isExecutableMode(std::string const & path)
 {
-    return isAccessFile(path, ACCESS_MODE_EXECUTE);
+    return checkAccessMode(path, ACCESS_MODE_EXECUTE);
 }
 
-bool isWriteFile(std::string const & path)
+bool isWritableMode(std::string const & path)
 {
-    return isAccessFile(path, ACCESS_MODE_WRITE);
+    return checkAccessMode(path, ACCESS_MODE_WRITE);
 }
 
-bool isReadFile(std::string const & path)
+bool isReadableMode(std::string const & path)
 {
-    return isAccessFile(path, ACCESS_MODE_READ);
+    return checkAccessMode(path, ACCESS_MODE_READ);
 }
 
 uint64_t getStatus(std::string const & path)

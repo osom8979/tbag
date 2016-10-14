@@ -104,11 +104,11 @@ enum AccessModeTable
     ACCESS_MODE_READ    = (1<<2), ///< R_OK: test for read permission.
 };
 
-bool isAccessFile(std::string const & path, int mode = ACCESS_MODE_EXISTS);
-bool existsFile(std::string const & path);
-bool isExecuteFile(std::string const & path);
-bool isWriteFile(std::string const & path);
-bool isReadFile(std::string const & path);
+bool checkAccessMode(std::string const & path, int mode);
+bool isExistsMode(std::string const & path);
+bool isExecutableMode(std::string const & path);
+bool isWritableMode(std::string const & path);
+bool isReadableMode(std::string const & path);
 
 /**
  * @see <http://linux.die.net/man/2/stat>

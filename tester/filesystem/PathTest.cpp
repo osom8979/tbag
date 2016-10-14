@@ -134,3 +134,34 @@ TEST(PathTest, splitNodesWithCanonical_2)
     ASSERT_STREQ(TEMP, temp.getString().c_str());
 }
 
+TEST(PathTest, FilesystemOperators)
+{
+    char const * const FILENAME = "__path_test.dir/filesystem_operators.dir";
+    Path path = Path::getExeDir() / FILENAME;
+
+    ASSERT_FALSE(path.createDir());
+    ASSERT_TRUE(path.createDirWithRecursive());
+
+    ASSERT_TRUE(path.exists());
+    ASSERT_TRUE(path.isExecutable());
+    ASSERT_TRUE(path.isWritable());
+    ASSERT_TRUE(path.isReadable());
+
+    ASSERT_FALSE(path.isRegularFile());
+    ASSERT_TRUE(path.isDirectory());
+    ASSERT_FALSE(path.removeFile());
+
+    ASSERT_FALSE(path.getParent().removeDir());
+    ASSERT_TRUE(path.getParent().removeDirWithRecursive());
+
+    ASSERT_EQ(0U, path.scanDir().size());
+}
+
+TEST(PathTest, SpecialDirectories)
+{
+    ASSERT_EQ(Path::getWorkDir().getString(), common::getWorkDir());
+    ASSERT_EQ(Path::getHomeDir().getString(), common::getHomeDir());
+    ASSERT_EQ(Path::getExePath().getString(), common::getExePath());
+    ASSERT_EQ(Path::getExeDir ().getString(), common::getExeDir ());
+}
+

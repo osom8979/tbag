@@ -199,16 +199,17 @@ public:
 
 // Filesystem operators.
 public:
-    bool existsFile() const;
-    bool isExecuteFile() const;
-    bool isWriteFile() const;
-    bool isReadFile() const;
+    bool exists() const;
+    bool isExecutable() const;
+    bool isWritable() const;
+    bool isReadable() const;
 
     bool isRegularFile() const;
     bool isDirectory() const;
 
     bool createDir() const;
     bool createDirWithRecursive() const;
+    bool remove() const;
     bool removeFile() const;
     bool removeDir() const;
     bool removeDirWithRecursive() const;

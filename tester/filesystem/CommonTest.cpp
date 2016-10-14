@@ -70,7 +70,7 @@ TEST(CommonTest, file_rw)
 
     int fd = common::open(file_name, (FILE_OPEN_FLAG_READ_WRITE | FILE_OPEN_CREATE), PERMISSION);
     ASSERT_LT(0, fd);
-    ASSERT_TRUE(common::existsFile(file_name));
+    ASSERT_TRUE(common::isExistsMode(file_name));
     ASSERT_EQ(PERMISSION, common::getPermission(file_name));
 
     ASSERT_EQ(TEST.size(), common::write(fd, TEST.data(), TEST.size()));
@@ -80,6 +80,6 @@ TEST(CommonTest, file_rw)
     buffer_to_string.assign(read_buffer.begin(), read_buffer.end());
     ASSERT_EQ(TEST, buffer_to_string);
     ASSERT_TRUE(common::remove(file_name));
-    ASSERT_FALSE(common::existsFile(file_name));
+    ASSERT_FALSE(common::isExistsMode(file_name));
 }
 

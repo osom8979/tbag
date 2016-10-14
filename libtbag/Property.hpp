@@ -83,7 +83,7 @@ public:
 public:
     bool loadOrCreate(std::string const & path) {
         using namespace filesystem;
-        if (common::isAccessFile(path)) {
+        if (common::isExistsMode(path)) {
             return this->load(path);
         } else {
             this->setDefault();

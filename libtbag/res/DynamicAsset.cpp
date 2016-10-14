@@ -65,7 +65,7 @@ DynamicAsset::PathVector DynamicAsset::scan(String const & key) const
 DynamicAsset::Path DynamicAsset::findWriteableDir() const
 {
     for (auto & path : _paths) {
-        if (path.second.isDirectory() && path.second.isWriteFile()) {
+        if (path.second.isDirectory() && path.second.isWritable()) {
             return path.second;
         }
     }
@@ -76,7 +76,7 @@ DynamicAsset::Path DynamicAsset::findFile(String const & filename) const
 {
     for (auto & path : _paths) {
         auto file_path = path.second / filename;
-        if (file_path.existsFile()) {
+        if (file_path.exists()) {
             return file_path;
         }
     }
