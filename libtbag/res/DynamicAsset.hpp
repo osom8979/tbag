@@ -78,6 +78,7 @@ public:
     bool addPath(String const & key, Path const & path);
     Path getPath(String const & key) const;
     StringVector getKeys() const;
+    PathVector getPaths() const;
 
 public:
     bool exists(String const & key) const;

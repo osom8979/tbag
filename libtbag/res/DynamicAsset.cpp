@@ -42,6 +42,15 @@ DynamicAsset::StringVector DynamicAsset::getKeys() const
     return result;
 }
 
+DynamicAsset::PathVector DynamicAsset::getPaths() const
+{
+    PathVector result;
+    for (auto & path : _paths) {
+        result.push_back(path.second);
+    }
+    return result;
+}
+
 bool DynamicAsset::exists(String const & key) const
 {
     return filesystem::common::isDirectory(_paths.at(key));
