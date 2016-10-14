@@ -16,9 +16,9 @@
 //constexpr char const * const getProcessTestFileName() noexcept
 //{
 //#if __OS_WINDOWS__
-//    return "process_test.exe";
+//    return "tbproc.exe";
 //#else
-//    return "process_test";
+//    return "tbproc";
 //#endif
 //}
 //
