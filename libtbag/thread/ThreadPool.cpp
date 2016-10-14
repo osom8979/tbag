@@ -137,6 +137,15 @@ void ThreadPool::exit()
     _mutex.unlock();
 }
 
+bool ThreadPool::isExit() const
+{
+    bool result;
+    _mutex.lock();
+    result = _exit;
+    _mutex.unlock();
+    return result;
+}
+
 bool ThreadPool::push(Task const & task)
 {
     bool result = false;

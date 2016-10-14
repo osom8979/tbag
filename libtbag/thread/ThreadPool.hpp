@@ -71,6 +71,7 @@ private:
 public:
     void clear();
     void exit();
+    bool isExit() const;
     bool push(Task const & task);
 
 public:
