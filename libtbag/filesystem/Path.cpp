@@ -98,6 +98,16 @@ Path & Path::operator =(Path && obj)
     return *this;
 }
 
+bool Path::operator ==(Path const & path)
+{
+    return getCanonicalString() == path.getCanonicalString();
+}
+
+bool Path::operator ==(String const & path)
+{
+    return getCanonicalString() == Path(path).getCanonicalString();
+}
+
 Path & Path::copy(Path const & obj)
 {
     if (this != &obj) {
@@ -176,6 +186,11 @@ Path::String Path::getRootDirString() const
 Path Path::getRootDir() const
 {
     return Path(getRootDirString());
+}
+
+bool Path::isRootDir() const
+{
+    return Path(_path) == getRootDir();
 }
 
 bool Path::isAbsolute() const
@@ -331,7 +346,24 @@ bool Path::isDirectory()
 
 bool Path::createDir()
 {
-    return libtbag::filesystem::common::createDir(_path);
+    auto parent = getParent();
+    if (parent.isDirectory() && parent.isWriteFile()) {
+        return libtbag::filesystem::common::createDir(_path);
+    }
+    return false;
+}
+
+bool Path::createDirWithRecursive()
+{
+    // @formatter:off
+    if (createDir()) { return  true; }
+    if (isRootDir()) { return false; }
+    // @formatter:on
+
+    if (getParent().createDirWithRecursive()) {
+        return createDir();
+    }
+    return false;
 }
 
 bool Path::removeFile()
@@ -342,6 +374,19 @@ bool Path::removeFile()
 bool Path::removeDir()
 {
     return libtbag::filesystem::common::removeDir(_path);
+}
+
+bool Path::removeDirWithRecursive()
+{
+    bool all_success = true;
+    for (auto & path : scanDir()) {
+        if (path.isDirectory()) {
+            all_success &= path.removeDirWithRecursive();
+        } else {
+            all_success &= path.removeFile();
+        }
+    }
+    return all_success;
 }
 
 std::vector<Path> Path::scanDir()

@@ -16,12 +16,11 @@ namespace res {
 
 bool DynamicAsset::init()
 {
+    bool all_success = true;
     for (auto & path : _paths) {
-        if (path.second.createDir() == false) {
-            return false;
-        }
+        all_success &= path.second.createDirWithRecursive();
     }
-    return true;
+    return all_success;
 }
 
 bool DynamicAsset::addPath(String const & key, Path const & path)

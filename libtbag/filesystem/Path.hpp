@@ -109,6 +109,10 @@ public:
     Path & operator =(Path && obj);
 
 public:
+    bool operator ==(Path const & path);
+    bool operator ==(String const & path);
+
+public:
     Path & copy(Path const & obj);
     void swap(Path && obj);
     void swap(Path & obj);
@@ -159,6 +163,7 @@ public:
 
 // Query.
 public:
+    bool isRootDir() const;
     bool isAbsolute() const;
     bool isRelative() const;
 
@@ -203,8 +208,10 @@ public:
     bool isDirectory();
 
     bool createDir();
+    bool createDirWithRecursive();
     bool removeFile();
     bool removeDir();
+    bool removeDirWithRecursive();
 
     std::vector<Path> scanDir();
 
