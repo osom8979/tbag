@@ -33,16 +33,17 @@ namespace res {
  * @author zer0
  * @date   2016-10-13
  */
-class DynamicAsset : public Noncopyable
+class DynamicAsset
 {
 public:
     using Value  = char;
     using String = std::basic_string<Value>;
     using Path   = libtbag::filesystem::Path;
 
-    using PathVector  = std::vector<Path>;
-    using PathMap     = std::map<String, Path>;
-    using PathMapPair = typename PathMap::value_type;
+    using StringVector = std::vector<String>;
+    using PathVector   = std::vector<Path>;
+    using PathMap      = std::map<String, Path>;
+    using PathMapPair  = typename PathMap::value_type;
 
     static_assert(std::is_same<Value, char>::value
             , "Value must be the same type as char");
@@ -82,18 +83,6 @@ public:
     bool create(String const & key);
     bool remove(String const & key);
     PathVector scan(String const & key);
-
-public:
-    static bool existsFile(Path const & path);
-    static bool removeFile(Path const & path);
-    static bool existsDir(Path const & path);
-    static bool createDir(Path const & path);
-    static bool removeDir(Path const & path);
-    static PathVector scanDir(Path const & path);
-
-public:
-    static Path getHomeDirPath();
-    static Path getExeDirPath();
 };
 
 } // namespace res

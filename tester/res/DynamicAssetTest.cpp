@@ -14,17 +14,18 @@ using namespace libtbag::res;
 TEST(DynamicAssetTest, Default)
 {
     char const * const KEY = "KEY";
+    using Path = DynamicAsset::Path;
     DynamicAsset asset;
-    DynamicAsset::Path path = DynamicAsset::getExeDirPath() / "dynamic_asset";
+    Path path = Path::getExeDir() / "dynamic_asset";
 
     ASSERT_TRUE(asset.addPath(KEY, path));
     ASSERT_TRUE(asset.init());
 
-    ASSERT_TRUE(DynamicAsset::existsDir(asset.getPath(KEY)));
+    ASSERT_TRUE(asset.getPath(KEY).isDirectory());
     ASSERT_TRUE(asset.exists(KEY));
     ASSERT_TRUE(asset.scan(KEY).empty());
 
     ASSERT_TRUE(asset.remove(KEY));
-    ASSERT_FALSE(DynamicAsset::existsDir(asset.getPath(KEY)));
+    ASSERT_FALSE(asset.getPath(KEY).isDirectory());
 }
 
