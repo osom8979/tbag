@@ -76,13 +76,18 @@ public:
 
 public:
     bool addPath(String const & key, Path const & path);
-    Path getPath(String const & key);
+    Path getPath(String const & key) const;
+    StringVector getKeys() const;
 
 public:
-    bool exists(String const & key);
-    bool create(String const & key);
-    bool remove(String const & key);
-    PathVector scan(String const & key);
+    bool exists(String const & key) const;
+    bool create(String const & key) const;
+    bool remove(String const & key) const;
+    PathVector scan(String const & key) const;
+
+public:
+    Path findWriteableDir() const;
+    Path findFile(String const & filename) const;
 };
 
 } // namespace res
