@@ -199,21 +199,21 @@ public:
 
 // Filesystem operators.
 public:
-    bool existsFile();
-    bool isExecuteFile();
-    bool isWriteFile();
-    bool isReadFile();
+    bool existsFile() const;
+    bool isExecuteFile() const;
+    bool isWriteFile() const;
+    bool isReadFile() const;
 
-    bool isRegularFile();
-    bool isDirectory();
+    bool isRegularFile() const;
+    bool isDirectory() const;
 
-    bool createDir();
-    bool createDirWithRecursive();
-    bool removeFile();
-    bool removeDir();
-    bool removeDirWithRecursive();
+    bool createDir() const;
+    bool createDirWithRecursive() const;
+    bool removeFile() const;
+    bool removeDir() const;
+    bool removeDirWithRecursive() const;
 
-    std::vector<Path> scanDir();
+    std::vector<Path> scanDir() const;
 
 // Special directories.
 public:

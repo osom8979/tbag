@@ -314,37 +314,37 @@ Path::String Path::getName() const
     return *nodes.rbegin();
 }
 
-bool Path::existsFile()
+bool Path::existsFile() const
 {
     return libtbag::filesystem::common::existsFile(_path);
 }
 
-bool Path::isExecuteFile()
+bool Path::isExecuteFile() const
 {
     return libtbag::filesystem::common::isExecuteFile(_path);
 }
 
-bool Path::isWriteFile()
+bool Path::isWriteFile() const
 {
     return libtbag::filesystem::common::isWriteFile(_path);
 }
 
-bool Path::isReadFile()
+bool Path::isReadFile() const
 {
     return libtbag::filesystem::common::isReadFile(_path);
 }
 
-bool Path::isRegularFile()
+bool Path::isRegularFile() const
 {
     return libtbag::filesystem::common::isRegularFile(_path);
 }
 
-bool Path::isDirectory()
+bool Path::isDirectory() const
 {
     return libtbag::filesystem::common::isDirectory(_path);
 }
 
-bool Path::createDir()
+bool Path::createDir() const
 {
     auto parent = getParent();
     if (parent.isDirectory() && parent.isWriteFile()) {
@@ -353,7 +353,7 @@ bool Path::createDir()
     return false;
 }
 
-bool Path::createDirWithRecursive()
+bool Path::createDirWithRecursive() const
 {
     // @formatter:off
     if (createDir()) { return  true; }
@@ -366,17 +366,17 @@ bool Path::createDirWithRecursive()
     return false;
 }
 
-bool Path::removeFile()
+bool Path::removeFile() const
 {
     return libtbag::filesystem::common::remove(_path);
 }
 
-bool Path::removeDir()
+bool Path::removeDir() const
 {
     return libtbag::filesystem::common::removeDir(_path);
 }
 
-bool Path::removeDirWithRecursive()
+bool Path::removeDirWithRecursive() const
 {
     bool all_success = true;
     for (auto & path : scanDir()) {
@@ -389,7 +389,7 @@ bool Path::removeDirWithRecursive()
     return all_success;
 }
 
-std::vector<Path> Path::scanDir()
+std::vector<Path> Path::scanDir() const
 {
     std::vector<Path> result;
     for (auto & path : libtbag::filesystem::common::scanDir(_path)) {
