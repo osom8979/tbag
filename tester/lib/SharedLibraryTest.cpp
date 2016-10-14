@@ -13,27 +13,17 @@
 using namespace libtbag;
 using namespace libtbag::lib;
 
-constexpr char const * const getLibraryName() noexcept
-{
-#if defined(__OS_WINDOWS__)
-    return "tbag_test.dll";
-#elif defined(__OS_MACOS__)
-    return "libtbag_test.dylib";
-#else
-    return "libtbag_test.so";
-#endif
-}
-
 TEST(SharedLibraryTest, Default)
 {
-    char const * const FUNC1_NAME = "__libtbag_test__add__";
-    char const * const FUNC2_NAME = "__libtbag_test__add2__";
+    char const * const LIBRARY_NAME = "tbtest";
+    char const * const FUNC1_NAME   = "libtbtest_add";
+    char const * const FUNC2_NAME   = "libtbtest_add2";
 
-    filesystem::Path path = filesystem::Path(filesystem::common::getExeDir());
-    path /= getLibraryName();
+    using Path = filesystem::Path;
+    Path const PATH = Path::getExeDir() / getLibraryName(LIBRARY_NAME);
 
     SharedLibrary lib;
-    ASSERT_TRUE(lib.open(path.getNativeString()));
+    ASSERT_TRUE(lib.open(PATH.getNativeString()));
 
     typedef int (*AddFunction)(int,int);
     AddFunction func = (AddFunction) lib.symbol(FUNC1_NAME);

@@ -1,12 +1,13 @@
 /**
- * @file   libtbag_test.h
- * @brief  libtbag_test represent header.
+ * @file   libtbtest.h
+ * @brief  libtbtest represent header.
  * @author zer0
  * @date   2016-04-17
+ * @date   2016-10-14 (Rename: libtbag_test -> libtbtest)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_TEST_LIBTEST_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_TEST_LIBTEST_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBTESTER_LIBTBTEST_H__
+#define __INCLUDE_LIBTBAG__LIBTBTESTER_LIBTBTEST_H__
 
 /* MS compatible compilers support #pragma once */
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -28,19 +29,15 @@
 extern "C" {
 #endif
 
-/**
- * Add function test.
- */
-LIBTBAG_TEST_EXPORT int __libtbag_test__add__(int v1, int v2);
+/** * Add function test. */
+LIBTBAG_TEST_EXPORT int libtbtest_add(int v1, int v2);
 
-/**
- * Add function test2.
- */
-LIBTBAG_TEST_EXPORT void __libtbag_test__add2__(int v1, int v2, int * result);
+/** * Add function test2. */
+LIBTBAG_TEST_EXPORT void libtbtest_add2(int v1, int v2, int * result);
 
 #if defined(__cplusplus)
 } /** extern "C" */
 #endif
 
-#endif /** __INCLUDE_LIBTBAG__LIBTBAG_TEST_LIBTEST_HPP__ */
+#endif /** __INCLUDE_LIBTBAG__LIBTBTESTER_LIBTBTEST_H__ */
 

@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/lib/SharedLibrary.hpp>
+#include <libtbag/predef.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -18,6 +19,35 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace lib {
+
+std::string getLibraryPrefix()
+{
+#if defined(__OS_WINDOWS__) && !defined(__PLAT_MINGW__)
+    return "";
+#else
+    return "lib";
+#endif
+}
+
+std::string getLibrarySuffix()
+{
+#if defined(__OS_WINDOWS__)
+# if defined(__PLAT_MINGW__)
+    return ".dll.so";
+# else
+    return ".dll";
+# endif
+#elif defined(__OS_MACOS__)
+    return ".dylib";
+#else
+    return ".so";
+#endif
+}
+
+std::string getLibraryName(std::string const & name)
+{
+    return getLibraryPrefix() + name + getLibrarySuffix();
+}
 
 template <typename T>
 inline uv_lib_t * uv_lib_cast(T * object)

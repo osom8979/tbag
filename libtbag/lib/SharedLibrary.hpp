@@ -23,6 +23,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace lib {
 
+std::string getLibraryPrefix();
+std::string getLibrarySuffix();
+std::string getLibraryName(std::string const & name);
+
 /**
  * SharedLibrary class prototype.
  *
