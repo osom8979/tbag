@@ -43,16 +43,15 @@ using BaseNativePath = PosixPath<CharType>;
  *
  * @author zer0
  * @date   2016-04-07
+ * @date   2016-10-14 (Change: class template -> class)
  *
  * @warning
  *  Supports multibyte-string only.
  */
-template <typename CharType = char>
-class BasePath : public BaseNativePath<CharType>
+class Path : public BaseNativePath<char>
 {
 public:
-    using ImplPath   = BasePath<CharType>;
-    using NativePath = BaseNativePath<CharType>;
+    using NativePath = BaseNativePath<char>;
     using ValueType  = typename NativePath::ValueType;
     using String     = typename NativePath::String;
 
@@ -66,7 +65,8 @@ public:
     struct update_generic { /* EMPTY */ };
 
 public:
-    static constexpr bool isWindowsStyle() noexcept {
+    static constexpr bool isWindowsStyle() noexcept
+    {
 #if defined(__OS_WINDOWS__)
         return true;
 #else
@@ -74,178 +74,79 @@ public:
 #endif
     }
 
-    static constexpr bool isPosixStyle() noexcept {
-        return !isWindowsStyle();
-    }
+    static constexpr bool isPosixStyle() noexcept
+    { return !isWindowsStyle(); }
 
 private:
     String _path;
 
 // Constructors.
 public:
-    BasePath() noexcept(std::is_nothrow_default_constructible<String>::value) {
-        // EMPTY.
-    }
+    Path() noexcept(std::is_nothrow_default_constructible<String>::value);
+    explicit Path(String const & path);
+    explicit Path(ValueType const * path);
 
-    explicit BasePath(String const & path) : BasePath() {
-        this->_path.assign(path);
-    }
+    explicit Path(ValueType const * path, update_generic const & UNUSED_PARAM(empty_value));
+    explicit Path(String const & path, update_generic const & UNUSED_PARAM(empty_value));
 
-    explicit BasePath(ValueType const * path) : BasePath(String(path)) {
-        // EMPTY.
-    }
+    Path(std::vector<String> const & nodes);
+    Path(std::initializer_list<String> list);
 
-    explicit BasePath(ValueType      const * path
-                    , update_generic const & UNUSED_PARAM(empty_value))
-            : BasePath(String(path)){
-        this->updateGeneric();
-    }
-
-    explicit BasePath(String         const & path
-                    , update_generic const & UNUSED_PARAM(empty_value))
-            : BasePath(path){
-        this->updateGeneric();
-    }
-
-    BasePath(std::vector<String> const & nodes) {
-        this->append(nodes);
-    }
-
-    BasePath(std::initializer_list<String> list) {
-        for (auto & cursor : list) {
-            this->append(cursor);
-        }
-    }
-
-    BasePath(BasePath const & obj) {
-        this->copy(obj);
-    }
-
-    BasePath(BasePath && obj) {
-        this->swap(obj);
-    }
+    Path(Path const & obj);
+    Path(Path && obj);
 
 // Destructor.
 public:
-    ~BasePath() {
-        // EMPTY.
-    }
+    ~Path();
 
 // Assign operators.
 public:
-    BasePath & operator =(ValueType const * path) {
-        this->_path.assign(path);
-        return *this;
-    }
+    Path & operator =(ValueType const * path);
+    Path & operator =(String const & path);
+    Path & operator =(String && path);
 
-    BasePath & operator =(String const & path) {
-        if (&(this->_path) != &path) {
-            this->_path = path;
-        }
-        return *this;
-    }
-
-    BasePath & operator =(String && path) {
-        if (&(this->_path) != &path) {
-            this->_path.swap(path);
-        }
-        return *this;
-    }
-
-    BasePath & operator =(BasePath const & obj) {
-        return this->copy(obj);
-    }
-
-    BasePath & operator =(BasePath && obj) {
-        this->swap(obj);
-        return *this;
-    }
+    Path & operator =(Path const & obj);
+    Path & operator =(Path && obj);
 
 public:
-    BasePath & copy(BasePath const & obj) {
-        if (this != &obj) {
-            this->_path = obj._path;
-        }
-        return *this;
-    }
-
-    void swap(BasePath && obj) {
-        if (this != &obj) {
-            this->_path.swap(obj._path);
-        }
-    }
-
-    void swap(BasePath & obj) {
-        if (this != &obj) {
-            this->_path.swap(obj._path);
-        }
-    }
+    Path & copy(Path const & obj);
+    void swap(Path && obj);
+    void swap(Path & obj);
 
 // Accessors & Mutators.
 public:
-    inline String getString() const noexcept {
-        return this->_path;
-    }
-
-    inline void setString(String const & path) {
-        this->_path.assign(path);
-    }
-
-    inline void setString(ValueType const * path) {
-        this->_path.assign(path);
-    }
+    inline String getString() const noexcept(noexcept(String(_path)))
+    { return _path; }
+    inline void setString(String const & path)
+    { _path.assign(path); }
+    inline void setString(ValueType const * path)
+    { _path.assign(path); }
 
 // Path string.
 public:
     /**
      * Generic path format.
      */
-    String getGenericString() const {
-        return NativePath::getGeneric(this->_path);
-    }
-
-    BasePath getGeneric() const {
-        return BasePath(getGenericString());
-    }
+    String getGenericString() const;
+    Path getGeneric() const;
 
     /**
      * Operating system dependent path.
      */
-    String getNativeString() const {
-        return NativePath::getNative(this->_path);
-    }
-
-    BasePath getNative() const {
-        return BasePath(getNativeString());
-    }
+    String getNativeString() const;
+    Path getNative() const;
 
     /**
      * Canonical path.
      */
-    BasePath getCanonical() const {
-        return BasePath(splitNodesWithCanonical());
-    }
-
-    String getCanonicalString() const {
-        return getCanonical().getString();
-    }
+    Path getCanonical() const;
+    String getCanonicalString() const;
 
 // Modifiers.
 public:
-    BasePath & updateGeneric() {
-        this->setString(getGenericString());
-        return *this;
-    }
-
-    BasePath & updateNative() {
-        this->setString(getNativeString());
-        return *this;
-    }
-
-    BasePath & updateCanonical() {
-        this->setString(getCanonicalString());
-        return *this;
-    }
+    Path & updateGeneric();
+    Path & updateNative();
+    Path & updateCanonical();
 
 // Decomposition.
 public:
@@ -253,134 +154,67 @@ public:
      * root-directory, if @c _path includes root-directory,
      * otherwise empty string.
      */
-    String getRootDirString() const {
-        return NativePath::getRootDir(this->_path);
-    }
-
-    BasePath getRootDir() const {
-        return BasePath(getRootDirString());
-    }
+    String getRootDirString() const;
+    Path getRootDir() const;
 
 // Query.
 public:
-    bool isAbsolute() const {
-        return NativePath::isAbsolute(this->_path);
-    }
-
-    bool isRelative() const {
-        return NativePath::isRelative(this->_path);
-    }
+    bool isAbsolute() const;
+    bool isRelative() const;
 
 // Append.
 public:
-    static String append(String const & parent, String const & child) {
-        String result = parent;
-        // 문지열이 공백일 경우, 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다.
-        if (!parent.empty() && parent.back() != NativePath::PATH_SEPARATOR) {
-            result += NativePath::getPathSeparator();
-        }
-        result += child;
-        return result;
-    }
+    static String append(String const & parent, String const & child);
 
-    BasePath & append(String const & child) {
-        this->_path = append(this->_path, child);
-        return *this;
-    }
+    Path & append(String const & child);
+    Path & append(std::vector<String> const & nodes);
 
-    BasePath & append(std::vector<String> const & nodes) {
-        for (auto & cursor : nodes) {
-            this->append(cursor);
-        }
-        return *this;
-    }
+    Path & operator /=(String const & child);
 
-    BasePath & operator /= (String const & child) {
-        return append(child);
-    }
-
-    friend BasePath operator / (BasePath const & path, String const & child) {
-        BasePath result = path;
-        result.append(child);
-        return result;
-    }
-
-    friend BasePath operator / (BasePath && path, String const & child) {
-        path.append(child);
-        return path;
-    }
+    friend Path operator /(Path const & path, String const & child);
+    friend Path operator /(Path && path, String const & child);
 
 // Casting
 public:
-    operator String () const {
-        return this->_path;
-    }
-
-    operator ValueType const * () const {
-        return this->_path.c_str();
-    }
+    operator String() const;
+    operator ValueType const *() const;
 
 // Parent.
 public:
-    String getParentString() const {
-        return NativePath::getParent(this->_path);
-    }
-
-    BasePath getParent() const {
-        return BasePath(getParentString());
-    }
+    String getParentString() const;
+    Path getParent() const;
 
 // Node operators.
 public:
-    std::vector<String> splitNodes() const {
-        return NativePath::splitNodes(this->_path);
-    }
-
-    std::vector<String> splitNodesWithCanonical() const {
-        std::vector<String> result;
-        std::vector<String> nodes = splitNodes();
-        using NodeItr = typename std::vector<String>::iterator;
-
-        NodeItr itr;
-        NodeItr end = nodes.end();
-
-        if (isAbsolute() == true) {
-            itr = nodes.begin();
-        } else {
-            if (nodes.size() >= 1 && nodes.at(0) == "~") {
-                result = BasePath(common::getHomeDir()).splitNodes();
-                itr = nodes.begin() + 1;
-            } else {
-                result = BasePath(common::getWorkDir()).splitNodes();
-                itr = nodes.begin();
-            }
-        }
-
-        for (; itr != end; ++itr) {
-            if (*itr == ".") {
-                // skip.
-            } else if (*itr == "..") {
-                result.pop_back();
-            } else {
-                result.push_back(*itr);
-            }
-        }
-
-        return result;
-    }
+    std::vector<String> splitNodes() const;
+    std::vector<String> splitNodesWithCanonical() const;
 
 public:
-    String getName() const {
-        auto nodes = splitNodes();
-        if (nodes.rbegin() == nodes.rend()) {
-            return String();
-        }
-        return *nodes.rbegin();
-    }
-};
+    String getName() const;
 
-using Path = BasePath<char>;
-using WidePath = BasePath<wchar_t>;
+// Filesystem operators.
+public:
+    bool existsFile();
+    bool isExecuteFile();
+    bool isWriteFile();
+    bool isReadFile();
+
+    bool isRegularFile();
+    bool isDirectory();
+
+    bool createDir();
+    bool removeFile();
+    bool removeDir();
+
+    std::vector<Path> scanDir();
+
+// Special directories.
+public:
+    static Path getWorkDir();
+    static Path getHomeDir();
+    static Path getExePath();
+    static Path getExeDir();
+};
 
 } // namespace filesystem
 
