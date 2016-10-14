@@ -28,14 +28,24 @@ Path::Path(ValueType const * path) : Path(String(path))
     // EMPTY.
 }
 
-Path::Path(ValueType const * path, update_generic const & UNUSED_PARAM(empty_value)) : Path(String(path))
+Path::Path(ValueType const * path, update_generic const & UNUSED_PARAM(v)) : Path(String(path))
 {
     updateGeneric();
 }
 
-Path::Path(String const & path, update_generic const & UNUSED_PARAM(empty_value)) : Path(path)
+Path::Path(String const & path, update_generic const & UNUSED_PARAM(v)) : Path(path)
 {
     updateGeneric();
+}
+
+Path::Path(ValueType const * path, update_canonical const & UNUSED_PARAM(v)) : Path(String(path))
+{
+    updateCanonical();
+}
+
+Path::Path(String const & path, update_canonical const & UNUSED_PARAM(v)) : Path(path)
+{
+    updateCanonical();
 }
 
 Path::Path(std::vector<String> const & nodes) : Path()

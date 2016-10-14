@@ -37,6 +37,9 @@ TEST(PathTest, Constructors_1)
     Path p6_move = Path(TEMP);
     Path p6 = std::move(p6_move);
 
+    Path p7 = Path(TEMP, Path::update_canonical());
+    Path p8 = Path(std::string(TEMP), Path::update_canonical());
+
     ASSERT_STREQ("", p0.getString().c_str());
     ASSERT_STREQ(TEMP, p1.getString().c_str());
     ASSERT_STREQ(TEMP, p2.getString().c_str());

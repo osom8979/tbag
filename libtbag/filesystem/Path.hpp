@@ -64,6 +64,9 @@ public:
     /** Update Generic Format. */
     struct update_generic { /* EMPTY */ };
 
+    /** Update Canonical Format. */
+    struct update_canonical { /* EMPTY */ };
+
 public:
     static constexpr bool isWindowsStyle() noexcept
     {
@@ -86,8 +89,11 @@ public:
     explicit Path(String const & path);
     explicit Path(ValueType const * path);
 
-    explicit Path(ValueType const * path, update_generic const & UNUSED_PARAM(empty_value));
-    explicit Path(String const & path, update_generic const & UNUSED_PARAM(empty_value));
+    explicit Path(ValueType const * path, update_generic const & UNUSED_PARAM(v));
+    explicit Path(String const & path, update_generic const & UNUSED_PARAM(v));
+
+    explicit Path(ValueType const * path, update_canonical const & UNUSED_PARAM(v));
+    explicit Path(String const & path, update_canonical const & UNUSED_PARAM(v));
 
     Path(std::vector<String> const & nodes);
     Path(std::initializer_list<String> list);
