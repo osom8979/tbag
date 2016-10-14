@@ -106,6 +106,9 @@ enum AccessModeTable
 
 bool isAccessFile(std::string const & path, int mode = ACCESS_MODE_EXISTS);
 bool existsFile(std::string const & path);
+bool isExecuteFile(std::string const & path);
+bool isWriteFile(std::string const & path);
+bool isReadFile(std::string const & path);
 
 /**
  * @see <http://linux.die.net/man/2/stat>
