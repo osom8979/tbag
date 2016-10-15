@@ -37,12 +37,10 @@ namespace loop {
 class UvEventLoop : public Noncopyable
 {
 public:
-    struct HandlePimpl;
+    struct LoopPimpl;
+    using UniqueHandle = std::unique_ptr<LoopPimpl>;
 
-public:
-    using UniqueHandle = std::unique_ptr<HandlePimpl>;
-
-public:
+private:
     UniqueHandle _handle;
 
 public:
