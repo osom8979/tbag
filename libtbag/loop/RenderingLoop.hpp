@@ -28,8 +28,7 @@
 //#define ENABLE_RENDERING_LOOP_DEBUG_VERBOSE
 
 #if defined(ENABLE_RENDERING_LOOP_DEBUG_VERBOSE)
-# define __RENDERING_LOOP_DEBUG_VERBOSE_LOG(format, ...) \
-    _DIRECT_CONSOLE_LOG(format, __VA_ARGS__)
+# define __RENDERING_LOOP_DEBUG_VERBOSE_LOG(format, ...)
 #else
 # define __RENDERING_LOOP_DEBUG_VERBOSE_LOG(format, ...)
 #endif
