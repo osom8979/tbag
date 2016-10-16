@@ -42,22 +42,22 @@ public:
     using UvHandle = libtbag::container::Pointer<void>;
 
 #if defined(__OS_MACOS__) && !defined(NDEBUG)
-    using HandleSet = std::set<UvHandle>;
+    using UvHandleSet = std::set<UvHandle>;
 #else
-    using HandleSet = std::unordered_set<UvHandle, UvHandle::Hash>;
+    using UvHandleSet = std::unordered_set<UvHandle, UvHandle::Hash>;
 #endif
 
 private:
-    HandleSet _handles;
+    UvHandleSet _handles;
 
 public:
-    UvEventHandler();
-    virtual ~UvEventHandler();
+    UvEventHandler() = default;
+    virtual ~UvEventHandler() = default;
 
 public:
     void add(void * handle);
     void remove(void * handle);
-    bool exists(void * handle);
+    bool exists(void * handle) const;
 
 public:
     // formatter:off
