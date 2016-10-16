@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/loop/event/UvEventHandler.hpp>
 #include <libtbag/Exception.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
@@ -34,13 +35,16 @@ namespace loop { class UvEventLoop; }
 
 namespace process {
 
+std::string getExecutableSuffix();
+std::string getExecutableName(std::string const & name);
+
 /**
  * Process class prototype.
  *
  * @author zer0
  * @date   2016-05-17
  */
-class Process : public Noncopyable
+class Process : public libtbag::loop::event::UvEventHandler
 {
 public:
     struct ProcPimpl;
@@ -56,8 +60,8 @@ public:
 public:
     struct Param
     {
-        String exe_path;
-        String work_dir;
+        String exe_path; ///< Executable file path.
+        String work_dir; ///< Working directory.
 
         Strings args; ///< Arguments.
         Strings envs; ///< Environment variables.
@@ -92,9 +96,19 @@ protected:
     UniqueProcPimpl        _process;
     UniqueProcOptionPimpl  _options;
 
+private:
+    int64_t _exit_status;
+    int _terminate_signal;
+
 public:
     Process() throw(InitializeException);
     virtual ~Process();
+
+public:
+    inline int64_t getExitStatus() const noexcept
+    { return _exit_status; }
+    inline int getTerminateSignal() const noexcept
+    { return _terminate_signal; }
 
 private:
     bool spawn();
@@ -105,8 +119,7 @@ public:
     bool exe(Path const & exe_path);
 
 public:
-    int64_t getExitStatus() const noexcept;
-    int getTerminateSignal() const noexcept;
+    virtual void onExit(void * process, int64_t exit_status, int term_signal) override;
 };
 
 } // namespace process

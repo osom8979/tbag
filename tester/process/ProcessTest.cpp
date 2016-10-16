@@ -8,30 +8,21 @@
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/process/Process.hpp>
-#include <libtbag/predef.hpp>
-
-#include <fstream>
-
-constexpr char const * const getProcessTestFileName() noexcept
-{
-#if __OS_WINDOWS__
-    return "tbproc.exe";
-#else
-    return "tbproc";
-#endif
-}
 
 using namespace libtbag;
 using namespace libtbag::process;
 
 TEST(ProcessTest, exit_code_failure)
 {
-    using Path = libtbag::filesystem::Path;
-    Process process;
-    ASSERT_TRUE(process.exe(Path::getExeDir() / getProcessTestFileName(), Path::getExeDir()));
+    char const * const EXE_NAME = "tbproc";
 
-//    ASSERT_EQ(process.getExitStatus(), 1);
-//    ASSERT_EQ(process.getTerminateSignal(), 0);
+    using Path = libtbag::filesystem::Path;
+    Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
+
+    Process process;
+    ASSERT_TRUE(process.exe(EXE_PATH, Path::getExeDir()));
+    ASSERT_EQ(1, process.getExitStatus());
+    ASSERT_EQ(0, process.getTerminateSignal());
 }
 
 //TEST(PipeProcessTest, StandardOutput)
