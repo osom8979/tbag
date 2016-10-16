@@ -14,6 +14,8 @@
 #endif
 
 #include <libtbag/config.h>
+#include <functional>
+#include <algorithm>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,7 +35,7 @@ struct Pointer
     using Type = T;
     Type * ptr = nullptr;
 
-    inline Pointer(Type * p) noexcept : ptr(p)
+    constexpr Pointer(Type * p) noexcept : ptr(p)
     { /* EMPTY. */ }
 
     inline Pointer() noexcept : ptr(nullptr)
@@ -79,6 +81,24 @@ struct Pointer
     { return ptr; }
     inline Type const * get() const noexcept
     { return ptr; }
+
+    /**
+     * Specialization of class template for @c libtbag::container::Pointer.
+     *
+     * @author zer0
+     * @date   2016-10-16
+     */
+    struct Hash
+    {
+        using argument_type  = Pointer;
+        using hash_base_type = Type;
+        using result_type    = std::size_t;
+
+        inline result_type operator()(argument_type const & obj) const
+        {
+            return std::hash<hash_base_type*>()(obj.ptr);
+        }
+    };
 };
 
 } // namespace container
