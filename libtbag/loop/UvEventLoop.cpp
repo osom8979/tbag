@@ -90,7 +90,11 @@ public:
     }
 };
 
-UvEventLoop::UvEventLoop() throw(InitializeException) : _handle(new LoopPimpl())
+// ---------------------------
+// UvEventLoop implementation.
+// ---------------------------
+
+UvEventLoop::UvEventLoop() throw(InitializeException) : _loop(new LoopPimpl())
 {
     // EMPTY.
 }
@@ -102,17 +106,17 @@ UvEventLoop::~UvEventLoop()
 
 bool UvEventLoop::runDefault()
 {
-    return _handle->runDefault();
+    return _loop->runDefault();
 }
 
 void * UvEventLoop::getNative()
 {
-    return _handle->getNative();
+    return _loop->getNative();
 }
 
 void const * UvEventLoop::getNative() const
 {
-    return _handle->getNative();
+    return _loop->getNative();
 }
 
 } // namespace loop

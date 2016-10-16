@@ -38,14 +38,14 @@ class UvEventLoop : public Noncopyable
 {
 public:
     struct LoopPimpl;
-    using UniqueHandle = std::unique_ptr<LoopPimpl>;
+    using  UniqueLoop = std::unique_ptr<LoopPimpl>;
 
 private:
-    UniqueHandle _handle;
+    UniqueLoop _loop;
 
 public:
     UvEventLoop() throw(InitializeException);
-    ~UvEventLoop();
+    virtual ~UvEventLoop();
 
 public:
     bool runDefault();
