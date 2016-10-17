@@ -43,8 +43,6 @@ if (UNIX)
     else ()
         add_definitions (-DLUA_USE_POSIX)
     endif ()
-else ()
-    tbag_preview__print ("Unknown OS.")
 endif ()
 
 add_library (lua STATIC ${CORE_SRCS} ${LIB_SRCS})
