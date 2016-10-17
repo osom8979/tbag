@@ -45,9 +45,9 @@ if (WIN32)
     prepend (WIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/win"
             async.c core.c dl.c error.c fs-event.c fs.c getaddrinfo.c getnameinfo.c handle.c
             loop-watcher.c pipe.c poll.c process-stdio.c process.c req.c signal.c stream.c
-            tcp.c thread.c timer.c tty.c udp.c util.c winapi.c winsock.o)
+            tcp.c thread.c timer.c tty.c udp.c util.c winapi.c winsock.c)
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src/win")
-    add_definitions (-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600)
+    add_definitions (-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600 -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
     set (ALL_SRCS ${COMMON_SRCS} ${WIN_SRCS})
 
 elseif (UNIX)
@@ -55,8 +55,8 @@ elseif (UNIX)
     prepend (UNIX_COMMON_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/unix"
             async.c core.c dl.c fs.c getaddrinfo.c getnameinfo.c loop-watcher.c loop.c pipe.c
             poll.c process.c signal.c stream.c tcp.c thread.c timer.c tty.c udp.c)
-
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src/unix")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu89 -pedantic -Wall -Wextra -Wno-unused-parameter")
 
     include (CheckIncludeFile)
     check_include_and_define (sys/types.h HAVE_SYS_TYPES_H)
