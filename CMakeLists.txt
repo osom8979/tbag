@@ -23,13 +23,16 @@ include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
 # Setup the THIRD_PREFIX variable.
-#tbag_config__add_third ("$ENV{TPARTY_HOME}/local")
+tbag_config__add_third ("$ENV{TPARTY_HOME}/local")
 
 ## Configure settings.
 tbag_config__default_generate_c_header ()
 
 ## Thread settings.
 tbag_config__find_thread ()
+
+## SFML settings.
+tbag_config__set_library_option (USE_SFML TbagSFML SFML_FOUND)
 
 ## Doxygen settings.
 tbag_config__set_library_prefix (Doxygen_ROOT)
