@@ -28,6 +28,9 @@ tbag_config__add_third ("$ENV{TPARTY_HOME}/local")
 ## Configure settings.
 tbag_config__default_generate_c_header ()
 
+## Sub-project.
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
+
 ## Thread settings.
 tbag_config__find_thread ()
 
