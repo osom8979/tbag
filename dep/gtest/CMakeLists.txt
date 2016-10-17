@@ -6,8 +6,17 @@ if (POLICY CMP0046)
     cmake_policy (SET CMP0042 NEW)
 endif ()
 
+function (prepend __result __prefix)
+    set (${__result})
+    foreach (__cursor ${ARGN})
+        list (APPEND ${__result} "${__prefix}/${__cursor}")
+    endforeach ()
+    set (${__result} "${${__result}}" PARENT_SCOPE)
+endfunction ()
+
 enable_language (C)
 enable_language (CXX)
+
 
 ## Find thread library.
 find_package (Threads)
@@ -18,14 +27,15 @@ endif ()
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}")
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
-set (LIB_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest.cc"
-              "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest-death-test.cc"
-              "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest-filepath.cc"
-              "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest-port.cc"
-              "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest-printers.cc"
-              "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest-test-part.cc"
-              "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest-test-part.cc")
-set (MAIN_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/gtest_main.cc)
+prepend (LIB_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
+        gtest.cc
+        gtest-death-test.cc
+        gtest-filepath.cc
+        gtest-port.cc
+        gtest-printers.cc
+        gtest-test-part.cc
+        gtest-test-part.cc)
+set (MAIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest_main.cc")
 
 #add_library (gtest      STATIC ${LIB_SRCS})
 add_library  (gtest_main STATIC ${LIB_SRCS} ${MAIN_SRCS})
