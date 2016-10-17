@@ -33,7 +33,7 @@ list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_ICU_INCLUDE_DIRS})
 
 ## whole-archive files.
 tbag_modules__include_project (WholeArchiveOn)
-list (APPEND TBAG_PROJECT_LDFLAGS -llua -luv ${TBAG_DEP_ICU_ARCHIVES})
+list (APPEND TBAG_PROJECT_LDFLAGS lua uv ${TBAG_DEP_ICU_ARCHIVES})
 tbag_modules__include_project (WholeArchiveOff)
 
 #tbag_modules__include_project (PCH ${CMAKE_SOURCE_DIR}/libtbag/config.h)
