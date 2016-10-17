@@ -40,7 +40,7 @@ add_custom_command (
 
 add_custom_command (
         OUTPUT ${TBAG_DEP_ICU_ARCHIVES}
-        COMMAND make V=1 > "${TBAG_DEP_ICU_LOG_PREFIX}.2" 2>&1
+        COMMAND make VERBOSE=1 > "${TBAG_DEP_ICU_LOG_PREFIX}.2" 2>&1
         DEPENDS "${PROJECT_SOURCE_DIR}/dep/icu/Makefile"
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/dep/icu/")
 
