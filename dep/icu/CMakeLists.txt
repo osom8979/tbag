@@ -6,23 +6,9 @@ if (POLICY CMP0046)
     cmake_policy (SET CMP0042 NEW)
 endif ()
 
-function (prepend __result __prefix)
-    set (${__result})
-    foreach (__cursor ${ARGN})
-        list (APPEND ${__result} "${__prefix}/${__cursor}")
-    endforeach ()
-    set (${__result} "${${__result}}" PARENT_SCOPE)
-endfunction ()
-
 enable_language (C)
 enable_language (CXX)
 
-
-## Find thread library.
-find_package (Threads)
-if (CMAKE_THREAD_LIBS_INIT)
-    message (STATUS "Thread flags: ${CMAKE_THREAD_LIBS_INIT}")
-endif ()
 
 if (NOT WIN32)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
@@ -40,4 +26,12 @@ file (GLOB_RECURSE ICUUC_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/common/*.c"
 add_library (icuuc STATIC ${ICUUC_SRCS})
 target_compile_definitions (icuuc PRIVATE -DU_ATTRIBUTE_DEPRECATED= -DU_COMMON_IMPLEMENTATION)
 target_include_directories (icuuc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/common")
+
+## icu-i18n (i18n)
+file (GLOB_RECURSE ICUI18N_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/i18n/*.c"
+                                "${CMAKE_CURRENT_SOURCE_DIR}/i18n/*.cpp")
+add_library (icui18n STATIC ${ICUI18N_SRCS})
+target_compile_definitions (icui18n PRIVATE -DU_ATTRIBUTE_DEPRECATED= -DU_I18N_IMPLEMENTATION)
+target_include_directories (icui18n PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/common"
+                                            "${CMAKE_CURRENT_SOURCE_DIR}/i18n")
 
