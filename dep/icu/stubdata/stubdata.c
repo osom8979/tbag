@@ -34,7 +34,7 @@
 //    const void *const data;
 //    } toc[1];
 //    */
-//   int   fakeNameAndData[4];       /* TODO:  Change this header type from */
+//   int   fakeNameAndData[4];       /*        Change this header type from */
 //                                   /*        pointerTOC to OffsetTOC.     */
 //} ICU_Data_Header;
 
@@ -71,4 +71,8 @@
 //    }
 //};
 
+char const * const __empty_icu_stubdata_stubdata_c__()
+{
+    return "__empty_icu_stubdata_stubdata_c__";
+}
 

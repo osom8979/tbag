@@ -29,13 +29,13 @@ else (WIN32)
 endif ()
 
 ## dep/icu
-list (APPEND TBAG_PROJECT_DEPENDENCIES  icudata icuuc icui18n)
+list (APPEND TBAG_PROJECT_DEPENDENCIES  icuuc icui18n)
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/icu/common
                                         ${CMAKE_SOURCE_DIR}/dep/icu/i18n)
 
 ## whole-archive files.
 tbag_modules__include_project (WholeArchiveOn)
-list (APPEND TBAG_PROJECT_LDFLAGS lua uv icudata icuuc icui18n)
+list (APPEND TBAG_PROJECT_LDFLAGS lua uv icuuc icui18n)
 tbag_modules__include_project (WholeArchiveOff)
 
 #tbag_modules__include_project (PCH ${CMAKE_SOURCE_DIR}/libtbag/config.h)

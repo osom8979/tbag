@@ -14,15 +14,10 @@ if (NOT WIN32)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif ()
 
-## icu-data (Data)
-file (GLOB_RECURSE ICUDATA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/stubdata/*.c")
-add_library (icudata STATIC ${ICUDATA_SRCS})
-target_compile_definitions (icudata PRIVATE -DU_ATTRIBUTE_DEPRECATED= -DU_COMMON_IMPLEMENTATION)
-target_include_directories (icudata PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/common")
-
 ## icu-uc (Common)
 file (GLOB_RECURSE ICUUC_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/common/*.c"
-                              "${CMAKE_CURRENT_SOURCE_DIR}/common/*.cpp")
+                              "${CMAKE_CURRENT_SOURCE_DIR}/common/*.cpp"
+                              "${CMAKE_CURRENT_SOURCE_DIR}/stubdata/*.c")
 add_library (icuuc STATIC ${ICUUC_SRCS})
 target_compile_definitions (icuuc PRIVATE -DU_ATTRIBUTE_DEPRECATED= -DU_COMMON_IMPLEMENTATION)
 target_include_directories (icuuc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/common")
