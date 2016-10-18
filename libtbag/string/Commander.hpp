@@ -43,9 +43,9 @@ public:
 
     using Arguments  = libtbag::string::BaseArguments<Value>;
     using Flags      = libtbag::string::BaseFlags<Value>;
-    using ArgsVector = std::vector<BaseCommander::Arguments>;
+    using ArgsVector = std::vector<Arguments>;
 
-    using Callback = std::function<void(BaseCommander::Arguments const &)>;
+    using Callback = std::function<void(Arguments const &)>;
 
     using CommandMap  = std::map<String, Callback>;
     using CommandPair = typename CommandMap::value_type;
@@ -94,13 +94,13 @@ public:
 public:
     ArgsVector parseArguments(String const & arguments)
     {
-        BaseCommander::Flags const FLAGS(arguments);
-        std::size_t          const SIZE = FLAGS.size();
+        Flags const FLAGS(arguments);
+        std::size_t const SIZE = FLAGS.size();
 
         ArgsVector result;
 
         for (std::size_t index = 0; index < SIZE; ++index) {
-            result.push_back(BaseCommander::Arguments(FLAGS.at(index).key, FLAGS.at(index).value));
+            result.push_back(Arguments(FLAGS.at(index).key, FLAGS.at(index).value));
         }
 
         return result;
@@ -115,7 +115,7 @@ public:
     }
 
 public:
-    virtual void onRequest(BaseCommander::Arguments const & arguments)
+    virtual void onRequest(Arguments const & arguments)
     {
         auto find_itr = _commands.find(arguments.getName());
         if (find_itr != _commands.end() && static_cast<bool>(find_itr->second)) {
