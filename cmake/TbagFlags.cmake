@@ -12,34 +12,6 @@
 #set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
 #set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 
-#/// Assign whole-archive flags.
-#///
-#/// @param __result [out] value name of output list.
-#/// @param ...      [in]  flag list.
-function (tbag_flags__whole_archive __result)
-    set (${__result})
-
-    # Turn on.
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        list (APPEND ${__result} "-Wl,-force_load")
-    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        list (APPEND ${__result} "-Wl,--whole-archive")
-    endif ()
-
-    # Append arguments.
-    foreach (__flag_cursor ${ARGN})
-        list (APPEND ${__result} ${__flag_cursor})
-    endforeach ()
-
-    # Turn off.
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        list (APPEND ${__result} "-Wl,--no-whole-archive")
-    endif ()
-
-    # update result.
-    set (${__result} ${${__result}} PARENT_SCOPE)
-endfunction ()
-
 #/// Append flags.
 #///
 #/// @param __value [in] Append value name.
@@ -52,8 +24,10 @@ endmacro ()
 
 #/// Assign Position Independent Code.
 macro (tbag_flags__set_position_independent_code)
-    set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    endif ()
 
     # Don't use this variables:
     #set (CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC
@@ -61,11 +35,22 @@ endmacro ()
 
 #/// Assign C++11 standard.
 macro (tbag_flags__set_cpp_standard_11)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ")
+    endif ()
 
     # Don't use this variables:
     #set (CMAKE_CXX_STANDARD     11) # C++ standard 11
     #set (CMAKE_CXX_EXTENSIONS  OFF) # Don't change the -std=gnu++11 to -std=c++11
+
+    # Don't use this code:
+    #if (CMAKE_VERSION VERSION_LESS "3.1")
+    #    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    #        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ")
+    #    endif ()
+    #else ()
+    #    set (CMAKE_CXX_STANDARD 11)
+    #endif ()
 endmacro ()
 
 #/// Assign default debug definition.
