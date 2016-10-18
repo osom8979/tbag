@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/animation/TimeInterpolator.hpp>
 
 #include <cmath>
@@ -35,7 +36,7 @@ namespace animation {
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  */
-class FrameInterpolator : public TimeInterpolator<std::chrono::microseconds>
+class TBAG_EXPORTS FrameInterpolator : public TimeInterpolator<std::chrono::microseconds>
 {
 public:
     using Parent = TimeInterpolator<std::chrono::microseconds>;

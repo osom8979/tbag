@@ -15,6 +15,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <string>
@@ -35,7 +36,7 @@ namespace database {
  * @date   2016-04-29
  * @date   2016-07-06 (Rename: SqliteContext -> Sqlite)
  */
-class Sqlite : public Noncopyable
+class TBAG_EXPORTS Sqlite : public Noncopyable
 {
 public:
     /** Fake @c sqlite3_stmt struct. */
@@ -51,7 +52,7 @@ public:
      * @author zer0
      * @date   2016-04-29
      */
-    class Transaction : public Noncopyable
+    class TBAG_EXPORTS Transaction : public Noncopyable
     {
     private:
         Sqlite & _context;

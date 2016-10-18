@@ -3,6 +3,9 @@
 tbag_modules__include_project (Default)
 tbag_modules__include_project (InstallTarget)
 
+## TBAG EXPORT API.
+list (APPEND TBAG_PROJECT_DEFINITIONS -DTBAG_EXPORT_API)
+
 ## Thread settings.
 list (APPEND TBAG_PROJECT_LDFLAGS ${CMAKE_THREAD_LIBS_INIT})
 

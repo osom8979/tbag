@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <functional>
@@ -34,7 +35,7 @@ namespace debug {
  * @author zer0
  * @date   2016-09-21
  */
-class Profile : public Noncopyable
+class TBAG_EXPORTS Profile : public Noncopyable
 {
 public:
     using TimePoint = std::chrono::system_clock::time_point;
