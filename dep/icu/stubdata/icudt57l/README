@@ -1,0 +1,29 @@
+Download ICU DATA Library:
+    http://apps.icu-project.org/datacustom/
+
+Download path:
+    ./data/in/icudt57l.dat
+
+Run configuration:
+    ./configure
+
+Check icupkg.inc file:
+    ./data/icupkg.inc
+
+[IMPORTANT]
+    Don't use the assembly argument in icupkg.inc file.
+    Remove GENCCODE_ASSEMBLY_TYPE value in icupkg.inc file.
+
+Extract items from the package:
+    ./bin/icupkg -d ./data/out/build/icudt57l --list -x \* ./data/in/icudt57l.dat -o ./data/out/tmp/icudata.lst
+
+Produce packaged ICU data from the given list(s) of files:
+    ./bin/pkgdata -O ./data/icupkg.inc -q -c -s ./data/out/build/icudt57l -d ./lib -e icudt57 -T ./out/tmp \
+                  -p icudt57l -m static -r 57.1 -L icudata ./out/tmp/icudata.lst
+
+Check directory:
+    ./data/out/tmp
+
+Copy *.c files:
+    ./data/out/tmp/*.c
+
