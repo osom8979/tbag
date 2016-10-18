@@ -17,6 +17,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
@@ -94,19 +95,19 @@ constexpr char const getPathSplitter() noexcept
 using DirFunction = int (*)(char * buffer, std::size_t * size);
 
 /** For the libuv miscellaneous function. */
-std::string getRepresentationDirectory(DirFunction func);
+TBAG_EXPORTS std::string getRepresentationDirectory(DirFunction func);
 
 /** Obtain Working directory. */
-std::string getWorkDir();
+TBAG_EXPORTS std::string getWorkDir();
 
 /** Obtain HOME directory. */
-std::string getHomeDir();
+TBAG_EXPORTS std::string getHomeDir();
 
 /** Obtain executable file path. */
-std::string getExePath();
+TBAG_EXPORTS std::string getExePath();
 
 /** Obtain executable file directory. */
-std::string getExeDir();
+TBAG_EXPORTS std::string getExeDir();
 
 /**
  * List of access mode.
@@ -122,17 +123,17 @@ enum AccessModeTable
     ACCESS_MODE_READ    = (1<<2), ///< R_OK: test for read permission.
 };
 
-bool checkAccessMode(std::string const & path, int mode);
-bool isExistsMode(std::string const & path);
-bool isExecutableMode(std::string const & path);
-bool isWritableMode(std::string const & path);
-bool isReadableMode(std::string const & path);
+TBAG_EXPORTS bool checkAccessMode(std::string const & path, int mode);
+TBAG_EXPORTS bool isExistsMode(std::string const & path);
+TBAG_EXPORTS bool isExecutableMode(std::string const & path);
+TBAG_EXPORTS bool isWritableMode(std::string const & path);
+TBAG_EXPORTS bool isReadableMode(std::string const & path);
 
 /**
  * @see <http://linux.die.net/man/2/stat>
  */
-uint64_t getStatus(std::string const & path);
-uint64_t getPermission(std::string const & path);
+TBAG_EXPORTS uint64_t getStatus(std::string const & path);
+TBAG_EXPORTS uint64_t getPermission(std::string const & path);
 
 /**
  * @defgroup __DOXYGEN_GROUP__FILE_TYPE__ List of file type.
@@ -194,17 +195,17 @@ uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrct
  * @}
  */
 
-bool checkFileType(std::string const & path, uint64_t type);
-bool isDirectory(std::string const & path);
-bool isRegularFile(std::string const & path);
+TBAG_EXPORTS bool checkFileType(std::string const & path, uint64_t type);
+TBAG_EXPORTS bool isDirectory(std::string const & path);
+TBAG_EXPORTS bool isRegularFile(std::string const & path);
 
-std::set<std::string> scanDir(std::string const & dir_path);
+TBAG_EXPORTS std::set<std::string> scanDir(std::string const & dir_path);
 
-bool createDir(std::string const & path, int mode = 0755);
-bool removeDir(std::string const & path);
+TBAG_EXPORTS bool createDir(std::string const & path, int mode = 0755);
+TBAG_EXPORTS bool removeDir(std::string const & path);
 
-bool rename(std::string const & from, std::string const & to);
-bool remove(std::string const & path);
+TBAG_EXPORTS bool rename(std::string const & from, std::string const & to);
+TBAG_EXPORTS bool remove(std::string const & path);
 
 /**
  * @defgroup __DOXYGEN_GROUP__FILE_OPEN_FLAGS__ List of file open flags.
@@ -250,7 +251,7 @@ uint32_t const FILE_OPEN_NOFOLLOW        = O_NOFOLLOW;  ///< don't follow symlin
  * @see <http://docs.libuv.org/en/v1.x/fs.html>
  * @see <http://linux.die.net/man/2/open>
  */
-int open(std::string const & path, int flags, int mode);
+TBAG_EXPORTS int open(std::string const & path, int flags, int mode);
 
 /**
  * @return
@@ -259,7 +260,7 @@ int open(std::string const & path, int flags, int mode);
  * @see <http://docs.libuv.org/en/v1.x/fs.html>
  * @see <http://linux.die.net/man/2/close>
  */
-bool close(int fd);
+TBAG_EXPORTS bool close(int fd);
 
 /**
  * @return
@@ -268,7 +269,7 @@ bool close(int fd);
  * @see <http://docs.libuv.org/en/v1.x/fs.html>
  * @see <http://linux.die.net/man/2/pwritev>
  */
-int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset = -1);
+TBAG_EXPORTS int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset = -1);
 
 /**
  * @return
@@ -277,7 +278,7 @@ int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset =
  * @see <http://docs.libuv.org/en/v1.x/fs.html>
  * @see <http://linux.die.net/man/2/preadv>
  */
-int read(int fd, char * buffer, std::size_t buffer_size, int64_t offset = -1);
+TBAG_EXPORTS int read(int fd, char * buffer, std::size_t buffer_size, int64_t offset = -1);
 
 } // namespace common
 } // namespace filesystem

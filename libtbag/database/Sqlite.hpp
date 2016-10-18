@@ -68,7 +68,7 @@ public:
      * @author zer0
      * @date   2016-04-29
      */
-    class Statement : public Noncopyable
+    class TBAG_EXPORTS Statement : public Noncopyable
     {
     public:
         using str = std::string;

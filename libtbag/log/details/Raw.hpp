@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -22,7 +23,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-bool formatToMemory(char * buf, int size, char const * format, ...);
+TBAG_EXPORTS bool formatToMemory(char * buf, int size, char const * format, ...);
 
 } // namespace details
 } //namespace log

@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Exception.hpp>
 #include <libtbag/lock/UvLock.hpp>
@@ -36,7 +37,7 @@ namespace thread {
  * @author zer0
  * @date   2016-10-12
  */
-class ThreadPool : public Noncopyable
+class TBAG_EXPORTS ThreadPool : public Noncopyable
 {
 public:
     struct ThreadPimpl;

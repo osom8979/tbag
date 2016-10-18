@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 // -------------------
@@ -29,7 +30,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class Server : public Noncopyable
+class TBAG_EXPORTS Server : public Noncopyable
 {
 public:
     Server();

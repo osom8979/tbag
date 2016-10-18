@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Exception.hpp>
 
@@ -32,7 +33,7 @@ namespace lock {
  * @remarks
  *  Use the libuv.
  */
-class RwLock : public Noncopyable
+class TBAG_EXPORTS RwLock : public Noncopyable
 {
 private:
     void * _handle;

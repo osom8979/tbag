@@ -46,7 +46,7 @@ public:
     using RepeatCallback = std::function<void(Rep average)>;
 
 public:
-    class Timer : public Noncopyable
+    class TBAG_EXPORTS Timer : public Noncopyable
     {
     public:
         friend class Profile;

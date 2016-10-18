@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Exception.hpp>
 
@@ -34,7 +35,7 @@ class UvLock;
  * @author zer0
  * @date   2016-10-12
  */
-class UvCondition : public Noncopyable
+class TBAG_EXPORTS UvCondition : public Noncopyable
 {
 private:
     void * _handle;

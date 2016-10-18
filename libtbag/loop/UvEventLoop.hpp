@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Exception.hpp>
 
@@ -34,7 +35,7 @@ namespace loop {
  * @remarks
  *  Use the libuv event loop.
  */
-class UvEventLoop : public Noncopyable
+class TBAG_EXPORTS UvEventLoop : public Noncopyable
 {
 public:
     struct LoopPimpl;

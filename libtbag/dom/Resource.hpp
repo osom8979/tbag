@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <unordered_map>
 #include <string>
 
@@ -34,7 +35,7 @@ constexpr bool isCompactXmlFile() noexcept
  * @author zer0
  * @date   2016-04-12
  */
-class Resource
+class TBAG_EXPORTS Resource
 {
 public:
     static constexpr char const * const ROOT_TAG = "resource";

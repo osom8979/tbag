@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 
 #include <ctime>
 #include <string>
@@ -90,10 +91,10 @@ constexpr int const YEARS_SINCE = 1900;
 constexpr int const MONTHS_SINCE = 1;
 
 /** millisecond part of the second 0-999. */
-int getMillisec(std::chrono::system_clock::time_point const & time);
+TBAG_EXPORTS int getMillisec(std::chrono::system_clock::time_point const & time);
 
-std::string  getMillisecMbs(std::chrono::system_clock::time_point const & time);
-std::wstring getMillisecWcs(std::chrono::system_clock::time_point const & time);
+TBAG_EXPORTS std::string  getMillisecMbs(std::chrono::system_clock::time_point const & time);
+TBAG_EXPORTS std::wstring getMillisecWcs(std::chrono::system_clock::time_point const & time);
 
 template <typename CharType>
 void getMillisecString(std::chrono::system_clock::time_point const & time
@@ -113,16 +114,16 @@ inline void getMillisecString<wchar_t>(std::chrono::system_clock::time_point con
     result = getMillisecWcs(time);
 }
 
-std::chrono::system_clock::time_point getNowSystemClock() noexcept;
-time_t getTime(std::chrono::system_clock::time_point const & time_point) noexcept;
+TBAG_EXPORTS std::chrono::system_clock::time_point getNowSystemClock() noexcept;
+TBAG_EXPORTS time_t getTime(std::chrono::system_clock::time_point const & time_point) noexcept;
 
 /** Obtain current time. */
-time_t getCurrentTime() noexcept;
-bool getGmtTime(time_t const & t, tm * output);
-bool getLocalTime(time_t const & t, tm * output);
+TBAG_EXPORTS time_t getCurrentTime() noexcept;
+TBAG_EXPORTS bool getGmtTime(time_t const & t, tm * output);
+TBAG_EXPORTS bool getLocalTime(time_t const & t, tm * output);
 
-std::string  getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
-std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size = 128);
+TBAG_EXPORTS std::string  getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
+TBAG_EXPORTS std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size = 128);
 
 } // namespace time
 

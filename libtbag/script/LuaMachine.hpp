@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <string>
@@ -30,7 +31,7 @@ namespace script {
  * @author zer0
  * @date   2016-04-26
  */
-class LuaMachine : public Noncopyable
+class TBAG_EXPORTS LuaMachine : public Noncopyable
 {
 public:
     using FakeLuaState = void;

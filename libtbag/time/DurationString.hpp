@@ -37,6 +37,7 @@ template <> struct DurationString<std::chrono::minutes>
 template <> struct DurationString<std::chrono::hours>
 { static constexpr char const * const value = "hour"; };
 
+// TODO: CHECK THIS CLASS!!
 template <typename Duration> struct DurationString
 {
 	static constexpr char const * const value = "duration";

@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/id/Id.hpp>
 #include <chrono>
 
@@ -24,7 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace id        {
 namespace generator {
 
-Id genTimeId(bool sleep_wait = false);
+TBAG_EXPORTS Id genTimeId(bool sleep_wait = false);
 
 } // namespace generator
 } // namespace id

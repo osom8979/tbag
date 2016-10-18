@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Pointer.hpp>
 
@@ -46,7 +47,7 @@ namespace uv {
  *  but it doesn't need to be honored. Setting the buffer's length to 0 will        @n
  *  trigger a UV_ENOBUFS error in the uv_udp_recv_cb or uv_read_cb callback.
  */
-void onAlloc(/* uv_handle_t */ void * handle, size_t suggested_size, /* uv_buf_t */ void * buf);
+TBAG_EXPORTS void onAlloc(/* uv_handle_t */ void * handle, size_t suggested_size, /* uv_buf_t */ void * buf);
 
 /**
  * Callback called when data was read on a stream.
@@ -68,31 +69,31 @@ void onAlloc(/* uv_handle_t */ void * handle, size_t suggested_size, /* uv_buf_t
  *  The callee is responsible for freeing the buffer, libuv does not reuse it. @n
  *  The buffer may be a null buffer (where buf->base=NULL and buf->len=0) on error.
  */
-void onRead(/* uv_stream_t */ void * stream, ssize_t nread, /* uv_buf_t */ void const * buf);
+TBAG_EXPORTS void onRead(/* uv_stream_t */ void * stream, ssize_t nread, /* uv_buf_t */ void const * buf);
 
 /**
  * Callback called after data was written on a stream. @n
  * @c status will be 0 in case of success, < 0 otherwise.
  */
-void onWrite(/* uv_write_t */ void * req, int status);
+TBAG_EXPORTS void onWrite(/* uv_write_t */ void * req, int status);
 
-void onConnect     (/* uv_connect_t     */ void * req, int status);
-void onShutdown    (/* uv_shutdown_t    */ void * req, int status);
-void onConnection  (/* uv_stream_t      */ void * server, int status);
-void onClose       (/* uv_handle_t      */ void * handle);
-void onPoll        (/* uv_poll_t        */ void * handle, int status, int events);
-void onTimer       (/* uv_timer_t       */ void * handle);
-void onAsync       (/* uv_async_t       */ void * handle);
-void onPrepare     (/* uv_prepare_t     */ void * handle);
-void onCheck       (/* uv_check_t       */ void * handle);
-void onIdle        (/* uv_idle_t        */ void * handle);
-void onExit        (/* uv_process_t     */ void * process, int64_t exit_status, int term_signal);
-void onWalk        (/* uv_handle_t      */ void * handle, void * arg);
-void onFs          (/* uv_fs_t          */ void * req);
-void onWork        (/* uv_work_t        */ void * req);
-void onAfterWork   (/* uv_work_t        */ void * req, int status);
-void onGetaddrinfo (/* uv_getaddrinfo_t */ void * req, int status, /* struct addrinfo */ void * addr);
-void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char const * hostname, char const * service);
+TBAG_EXPORTS void onConnect     (/* uv_connect_t     */ void * req, int status);
+TBAG_EXPORTS void onShutdown    (/* uv_shutdown_t    */ void * req, int status);
+TBAG_EXPORTS void onConnection  (/* uv_stream_t      */ void * server, int status);
+TBAG_EXPORTS void onClose       (/* uv_handle_t      */ void * handle);
+TBAG_EXPORTS void onPoll        (/* uv_poll_t        */ void * handle, int status, int events);
+TBAG_EXPORTS void onTimer       (/* uv_timer_t       */ void * handle);
+TBAG_EXPORTS void onAsync       (/* uv_async_t       */ void * handle);
+TBAG_EXPORTS void onPrepare     (/* uv_prepare_t     */ void * handle);
+TBAG_EXPORTS void onCheck       (/* uv_check_t       */ void * handle);
+TBAG_EXPORTS void onIdle        (/* uv_idle_t        */ void * handle);
+TBAG_EXPORTS void onExit        (/* uv_process_t     */ void * process, int64_t exit_status, int term_signal);
+TBAG_EXPORTS void onWalk        (/* uv_handle_t      */ void * handle, void * arg);
+TBAG_EXPORTS void onFs          (/* uv_fs_t          */ void * req);
+TBAG_EXPORTS void onWork        (/* uv_work_t        */ void * req);
+TBAG_EXPORTS void onAfterWork   (/* uv_work_t        */ void * req, int status);
+TBAG_EXPORTS void onGetaddrinfo (/* uv_getaddrinfo_t */ void * req, int status, /* struct addrinfo */ void * addr);
+TBAG_EXPORTS void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char const * hostname, char const * service);
 
 } // namespace uv
 
@@ -102,7 +103,7 @@ void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char const * 
  * @author zer0
  * @date   2016-10-16
  */
-struct UvEventHandler : public Noncopyable
+struct TBAG_EXPORTS UvEventHandler : public Noncopyable
 {
 public:
     using UvHandle = libtbag::container::Pointer<void>;

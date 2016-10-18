@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/log/details/Logger.hpp>
 
@@ -34,7 +35,7 @@ namespace details {
  * @author zer0
  * @date   2016-07-15
  */
-class LoggerManager : SINGLETON_INHERITANCE(LoggerManager)
+class TBAG_EXPORTS LoggerManager : SINGLETON_INHERITANCE(LoggerManager)
 {
 public:
     SINGLETON_RESTRICT(LoggerManager);

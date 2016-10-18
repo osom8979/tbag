@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <string>
 
@@ -23,9 +24,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace lib {
 
-std::string getLibraryPrefix();
-std::string getLibrarySuffix();
-std::string getLibraryName(std::string const & name);
+TBAG_EXPORTS std::string getLibraryPrefix();
+TBAG_EXPORTS std::string getLibrarySuffix();
+TBAG_EXPORTS std::string getLibraryName(std::string const & name);
 
 /**
  * SharedLibrary class prototype.
@@ -33,7 +34,7 @@ std::string getLibraryName(std::string const & name);
  * @author zer0
  * @date   2016-04-17
  */
-class SharedLibrary : public Noncopyable
+class TBAG_EXPORTS SharedLibrary : public Noncopyable
 {
 public:
     using FakeLib = void;

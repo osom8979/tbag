@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
@@ -33,7 +34,7 @@ namespace res {
  * @author zer0
  * @date   2016-10-13
  */
-class DynamicAsset
+class TBAG_EXPORTS DynamicAsset
 {
 public:
     using Value  = char;

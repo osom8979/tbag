@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/log/details/Severity.hpp>
@@ -33,16 +34,16 @@ constexpr char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_logger__
 using Logger   = ::libtbag::log::details::Logger;
 using LogLevel = ::libtbag::log::details::LogLevel;
 
-Logger * createDefaultConsoleLogger(bool auto_flush = false);
-Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
-Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
-void removeDefaultLogger();
+TBAG_EXPORTS Logger * createDefaultConsoleLogger(bool auto_flush = false);
+TBAG_EXPORTS Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
+TBAG_EXPORTS Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
+TBAG_EXPORTS void removeDefaultLogger();
 
-Logger * getLogger(std::string const & name);
-Logger * getDefaultLogger();
+TBAG_EXPORTS Logger * getLogger(std::string const & name);
+TBAG_EXPORTS Logger * getDefaultLogger();
 
-void setLevel(std::string const & name, LogLevel level);
-void setDefaultLevel(LogLevel level);
+TBAG_EXPORTS void setLevel(std::string const & name, LogLevel level);
+TBAG_EXPORTS void setDefaultLevel(LogLevel level);
 
 template <typename ... Args>
 inline void logging(Logger * logger, LogLevel level, std::string const & format, Args && ... args)

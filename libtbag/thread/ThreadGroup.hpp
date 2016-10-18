@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/lock/RwLock.hpp>
 
 #include <thread>
@@ -31,7 +32,7 @@ namespace thread {
  * @author zer0
  * @date   2016-05-12
  */
-class ThreadGroup : public Noncopyable
+class TBAG_EXPORTS ThreadGroup : public Noncopyable
 {
 public:
     using ThreadPointer = std::thread*;

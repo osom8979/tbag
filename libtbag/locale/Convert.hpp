@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <exception>
 #include <string>
 #include <vector>
@@ -30,43 +31,32 @@ namespace locale  {
  * @author zer0
  * @date   2016-07-03
  */
-class ConvertException : public std::exception
+struct ConvertException : public std::exception
 {
-private:
     std::string _message;
 
-public:
     ConvertException(std::string const & msg) : _message(msg)
-    {
-        // EMPTY.
-    }
-
-public:
+    { /* EMPTY. */ }
     virtual ~ConvertException()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
-public:
     virtual const char * what() const noexcept override
-    {
-        return _message.c_str();
-    }
+    { return _message.c_str(); }
 };
 
-std::vector<std::string> getAvailableConverterNames();
+TBAG_EXPORTS std::vector<std::string> getAvailableConverterNames();
 
 /**
  * Convert from UTF-8 string.
  */
-std::string convertFromUtf8(std::string const & utf8
-                          , std::string const & to_charset) throw (ConvertException);
+TBAG_EXPORTS std::string convertFromUtf8(std::string const & utf8
+                                       , std::string const & to_charset) throw (ConvertException);
 
 /**
  * Convert to UTF-8 string.
  */
-std::string convertToUtf8(std::string const & from_string
-                        , std::string const & from_charset) throw (ConvertException);
+TBAG_EXPORTS std::string convertToUtf8(std::string const & from_string
+                                     , std::string const & from_charset) throw (ConvertException);
 
 } // namespace locale
 

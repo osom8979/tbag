@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/macro/utils.hpp>
 
 #include <string>
@@ -102,7 +103,7 @@ inline const char * const getLogString(int level) noexcept
  * @author zer0
  * @date   2016-07-09
  */
-class Severity
+class TBAG_EXPORTS Severity
 {
 public:
     using String = std::basic_string<char>;

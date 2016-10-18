@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/log/details/Severity.hpp>
@@ -37,7 +38,7 @@ namespace details {
  * @author zer0
  * @date   2016-07-15
  */
-class Logger : public Noncopyable
+class TBAG_EXPORTS Logger : public Noncopyable
 {
 public:
     using CharType = char;

@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/res/DynamicAsset.hpp>
 
 #include <string>
@@ -56,7 +57,7 @@ namespace res {
  *  }
  *  @endcode
  */
-class MultiAsset
+class TBAG_EXPORTS MultiAsset
 {
 public:
     using DynamicAsset = libtbag::res::DynamicAsset;

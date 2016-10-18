@@ -16,6 +16,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/WindowsPath.hpp>
 #include <libtbag/filesystem/PosixPath.hpp>
@@ -48,7 +49,7 @@ using BaseNativePath = PosixPath<CharType>;
  * @warning
  *  Supports multibyte-string only.
  */
-class Path : public BaseNativePath<char>
+class TBAG_EXPORTS Path : public BaseNativePath<char>
 {
 public:
     using NativePath = BaseNativePath<char>;

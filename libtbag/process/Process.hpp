@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/macro/attributes.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/loop/event/UvEventHandler.hpp>
 #include <libtbag/Exception.hpp>
@@ -35,8 +36,8 @@ namespace loop { class UvEventLoop; }
 
 namespace process {
 
-std::string getExecutableSuffix();
-std::string getExecutableName(std::string const & name);
+TBAG_EXPORTS std::string getExecutableSuffix();
+TBAG_EXPORTS std::string getExecutableName(std::string const & name);
 
 /**
  * Process class prototype.
@@ -44,7 +45,7 @@ std::string getExecutableName(std::string const & name);
  * @author zer0
  * @date   2016-05-17
  */
-class Process : public libtbag::loop::event::UvEventHandler
+class TBAG_EXPORTS Process : public libtbag::loop::event::UvEventHandler
 {
 public:
     struct ProcPimpl;
