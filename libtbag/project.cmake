@@ -27,13 +27,12 @@ if (UNIX)
 endif ()
 
 ## dep/icu
-include (${PROJECT_SOURCE_DIR}/dep/icu.cmake)
-list (APPEND TBAG_PROJECT_DEPENDENCIES  ${TBAG_DEP_ICU_NAME})
-list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${TBAG_DEP_ICU_INCLUDE_DIRS})
+list (APPEND TBAG_PROJECT_DEPENDENCIES  icudata icuuc)
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/lua/common)
 
 ## whole-archive files.
 tbag_modules__include_project (WholeArchiveOn)
-list (APPEND TBAG_PROJECT_LDFLAGS lua uv ${TBAG_DEP_ICU_ARCHIVES})
+list (APPEND TBAG_PROJECT_LDFLAGS lua uv icudata icuuc)
 tbag_modules__include_project (WholeArchiveOff)
 
 #tbag_modules__include_project (PCH ${CMAKE_SOURCE_DIR}/libtbag/config.h)
