@@ -9,7 +9,13 @@
 #///   - ${DOXYGEN_EXECUTABLE}
 
 if (NOT DOXYGEN_FOUND)
-    find_package (Doxygen)
+    if (TbagDoxygen_FIND_QUIETLY)
+        set (__tbag_doxygen_quiet QUIET)
+    else ()
+        set (__tbag_doxygen_quiet)
+    endif ()
+
+    find_package (Doxygen ${__tbag_doxygen_quiet})
 endif ()
 
 #/// Write doxygen index html file.

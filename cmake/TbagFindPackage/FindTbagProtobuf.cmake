@@ -4,7 +4,13 @@
 #/// @date   2016-05-27
 
 if (NOT PROTOBUF_FOUND)
-    find_package (Protobuf)
+    if (TbagProtobuf_FIND_QUIETLY)
+        set (__tbag_protobuf_quiet QUIET)
+    else ()
+        set (__tbag_protobuf_quiet)
+    endif ()
+
+    find_package (Protobuf ${__tbag_protobuf_quiet})
 endif ()
 
 #/// Tbag version of protobuf_generate function.

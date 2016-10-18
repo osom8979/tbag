@@ -29,7 +29,14 @@ if (NOT SFML_FOUND)
     if (__sfml_module_index EQUAL -1)
         list (APPEND CMAKE_MODULE_PATH "${__tbag_sfml_module_dir}")
     endif ()
-    find_package (SFML 2 COMPONENTS system window graphics audio)
+
+    if (TbagSFML_FIND_QUIETLY)
+        set (__tbag_sfml_quiet QUIET)
+    else ()
+        set (__tbag_sfml_quiet)
+    endif ()
+
+    find_package (SFML 2 ${__tbag_sfml_quiet} COMPONENTS system window graphics audio)
 endif ()
 
 if (SFML_FOUND)

@@ -29,7 +29,14 @@ if (NOT OpenCV_FOUND)
     if (__opencv_module_index EQUAL -1)
         list (APPEND CMAKE_MODULE_PATH "${__tbag_opencv_module_dir}")
     endif ()
-    find_package (OpenCV REQUIRED)
+
+    if (TbagOpenCV_FIND_QUIETLY)
+        set (__tbag_opencv_quiet QUIET)
+    else ()
+        set (__tbag_opencv_quiet)
+    endif ()
+
+    find_package (OpenCV ${__tbag_opencv_quiet} REQUIRED)
 endif ()
 
 if (OpenCV_FOUND)

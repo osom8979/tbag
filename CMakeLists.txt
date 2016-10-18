@@ -36,7 +36,12 @@ if (WIN32 AND MSVC)
 endif()
 
 # Setup the THIRD_PREFIX variable.
-tbag_config__add_third ("$ENV{TPARTY_HOME}/local")
+set (__tparty_home_path "$ENV{TPARTY_HOME}/local")
+if (IS_DIRECTORY "${__tparty_home_path}")
+    tbag_config__add_third ("${__tparty_home_path}")
+else ()
+    message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
+endif ()
 
 ## Configure settings.
 tbag_config__default_generate_c_header ()

@@ -29,7 +29,13 @@ if (WIN32 AND NOT CYGWIN AND NOT MSYS)
     set (CMAKE_CROSSCOMPILING YES)
 endif ()
 
-find_package (wxWidgets)
+if (TbagwxWidgets_FIND_QUIETLY)
+    set (__tbag_wxwidgets_quiet QUIET)
+else ()
+    set (__tbag_wxwidgets_quiet)
+endif ()
+
+find_package (wxWidgets ${__tbag_wxwidgets_quiet})
 
 #if (wxWidgets_FOUND)
 #    # Change: MSYS PATH -> WINDOWS PATH.
