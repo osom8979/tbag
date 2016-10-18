@@ -34,9 +34,10 @@ list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/icu/common
                                         ${CMAKE_SOURCE_DIR}/dep/icu/i18n)
 
 ## whole-archive files.
-tbag_modules__include_project (WholeArchiveOn)
-list (APPEND TBAG_PROJECT_LDFLAGS lua uv icuuc icui18n)
-tbag_modules__include_project (WholeArchiveOff)
+tbag_project__set_whole_archive ($<TARGET_FILE:lua>)
+tbag_project__set_whole_archive ($<TARGET_FILE:uv>)
+tbag_project__set_whole_archive ($<TARGET_FILE:icuuc>)
+tbag_project__set_whole_archive ($<TARGET_FILE:icui18n>)
 
 #tbag_modules__include_project (PCH ${CMAKE_SOURCE_DIR}/libtbag/config.h)
 

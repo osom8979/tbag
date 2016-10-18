@@ -8,6 +8,10 @@ endif ()
 #if (POLICY CMP0054)
 #    cmake_policy (SET CMP0054 NEW)
 #endif ()
+#if (POLICY CMP0026)
+#    # Disallow use of the LOCATION target property.
+#    cmake_policy (SET CMP0026 NEW)
+#endif ()
 
 enable_language (C)
 enable_language (CXX)
