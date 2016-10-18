@@ -15,7 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/macro/attributes.hpp>
-#include <libtbag/Noncopyable.hpp>
+#include <libtbag/loop/UvEventLoop.hpp>
+#include <libtbag/loop/event/UvEventHandler.hpp>
+
+#include <string>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,11 +34,39 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_EXPORTS Server : public Noncopyable
+class TBAG_EXPORTS Server : public libtbag::loop::event::UvEventHandler
 {
+public:
+    struct TcpPimpl;
+    struct SockAddrPimpl;
+
+    using UniqueTcp = std::unique_ptr<TcpPimpl>;
+    using UniqueSockAddr = std::unique_ptr<SockAddrPimpl>;
+
+    using Parent = libtbag::loop::event::UvEventHandler;
+    using Loop   = libtbag::loop::UvEventLoop;
+
+public:
+    static constexpr int LISTEN_QUEUE_LIMIT = 128;
+
+private:
+    Loop _loop;
+    UniqueTcp _server;
+    UniqueSockAddr _sockaddr;
+
 public:
     Server();
     virtual ~Server();
+
+public:
+    bool runIpv4(std::string const & ip, int port);
+
+public:
+    virtual void onAlloc(void * handle, size_t suggested_size, void * buf) override;
+    virtual void onRead(void * stream, ssize_t nread, void const * buf) override;
+    virtual void onWrite(void * req, int status) override;
+    virtual void onConnection(void * server, int status) override;
+
 };
 
 } // namespace socket
