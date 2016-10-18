@@ -183,8 +183,8 @@ public:
 
     Path & operator /=(String const & child);
 
-    friend Path operator /(Path const & path, String const & child);
-    friend Path operator /(Path && path, String const & child);
+    TBAG_EXPORTS friend Path operator /(Path const & path, String const & child);
+    TBAG_EXPORTS friend Path operator /(Path && path, String const & child);
 
 // Casting
 public:
