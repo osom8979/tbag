@@ -166,21 +166,3 @@ TEST(PointTest, String)
     toString(s);
 }
 
-TEST(PointTest, Atomic)
-{
-#if !defined(__OS_WINDOWS__) || \
-    (defined(__OS_WINDOWS__) && defined(_ENABLE_ATOMIC_ALIGNMENT_FIX))
-    std::atomic<Point> p1;
-    p1.store(Point{1, 1});
-
-    ASSERT_EQ(1, p1.load().x);
-    ASSERT_EQ(1, p1.load().y);
-
-    Point p2 = p1;
-    ASSERT_EQ(1, p2.x);
-    ASSERT_EQ(1, p2.y);
-#else
-    std::cout << "Skip: PointTest.Atomic\n";
-#endif
-}
-
