@@ -28,6 +28,25 @@
 #include <set>
 
 #include <fcntl.h>
+#include <sys/stat.h>
+
+#if defined(__OS_WINDOWS__)
+# include <io.h>
+# ifndef S_IRUSR
+#  define S_IRUSR _S_IREAD
+# endif
+# ifndef S_IWUSR
+#  define S_IWUSR _S_IWRITE
+# endif
+#endif // defined(__OS_WINDOWS__)
+
+#ifndef __TBAG_UNDERLINE
+# if defined(__OS_WINDOWS__)
+#  define __TBAG_UNDERLINE(f) _##f
+# else
+#  define __TBAG_UNDERLINE(f) f
+# endif
+#endif // __TBAG_UNDERLINE
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,8 +55,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace common     {
 
-std::size_t const MAX_PATH_LENGTH_OF_WINDOWS = 32768;
-std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API = 256;
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS     = 32768;
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API =   256;
 
 /**
  * Max path buffer size.
@@ -123,18 +142,19 @@ uint64_t getPermission(std::string const & path);
  * @{
  */
 
-uint32_t const FILE_TYPE_S_IFMT   = S_IFMT;     ///< type of file.
-uint32_t const FILE_TYPE_S_IFIFO  = S_IFIFO;    ///< named pipe (fifo).
-uint32_t const FILE_TYPE_S_IFCHR  = S_IFCHR;    ///< character special.
-uint32_t const FILE_TYPE_S_IFDIR  = S_IFDIR;    ///< directory.
-uint32_t const FILE_TYPE_S_IFBLK  = S_IFBLK;    ///< block special.
-uint32_t const FILE_TYPE_S_IFREG  = S_IFREG;    ///< regular.
-uint32_t const FILE_TYPE_S_IFLNK  = S_IFLNK;    ///< symbolic link.
-uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK;   ///< socket.
+uint32_t const FILE_TYPE_S_IFMT   = __TBAG_UNDERLINE(S_IFMT);   ///< type of file.
+uint32_t const FILE_TYPE_S_IFIFO  = __TBAG_UNDERLINE(S_IFIFO);  ///< named pipe (fifo).
+uint32_t const FILE_TYPE_S_IFCHR  = __TBAG_UNDERLINE(S_IFCHR);  ///< character special.
+uint32_t const FILE_TYPE_S_IFDIR  = __TBAG_UNDERLINE(S_IFDIR);  ///< directory.
+uint32_t const FILE_TYPE_S_IFBLK  = __TBAG_UNDERLINE(S_IFBLK);  ///< block special.
+uint32_t const FILE_TYPE_S_IFREG  = __TBAG_UNDERLINE(S_IFREG);  ///< regular.
+uint32_t const FILE_TYPE_S_IFLNK  = __TBAG_UNDERLINE(S_IFLNK);  ///< symbolic link.
+uint32_t const FILE_TYPE_S_IFSOCK = __TBAG_UNDERLINE(S_IFSOCK); ///< socket.
 
 /**
  * @}
  */
+
 
 /**
  * @defgroup __DOXYGEN_GROUP__FILE_MODE__ List of file mode flags.
@@ -144,9 +164,11 @@ uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK;   ///< socket.
  */
 
 // Read, write, execute/search by owner.
+uint32_t const FILE_MODE_OWNER_READ  = __TBAG_UNDERLINE(S_IRUSR);  ///< [XSI] R for owner.
+uint32_t const FILE_MODE_OWNER_WRITE = __TBAG_UNDERLINE(S_IWUSR);  ///< [XSI] W for owner.
+
+#if 0
 uint32_t const FILE_MODE_OWNER_ALL      = S_IRWXU;  ///< [XSI] RWX mask for owner.
-uint32_t const FILE_MODE_OWNER_READ     = S_IRUSR;  ///< [XSI] R for owner.
-uint32_t const FILE_MODE_OWNER_WRITE    = S_IWUSR;  ///< [XSI] W for owner.
 uint32_t const FILE_MODE_OWNER_EXECUTE  = S_IXUSR;  ///< [XSI] X for owner.
 
 // Read, write, execute/search by group.
@@ -161,7 +183,6 @@ uint32_t const FILE_MODE_OTHER_READ     = S_IROTH;  ///< [XSI] R for other.
 uint32_t const FILE_MODE_OTHER_WRITE    = S_IWOTH;  ///< [XSI] W for other.
 uint32_t const FILE_MODE_OTHER_EXECUTE  = S_IXOTH;  ///< [XSI] X for other.
 
-#if 0
 uint32_t const FILE_MODE_S_ISUID        = S_ISUID;  ///< [XSI] set user id on execution.
 uint32_t const FILE_MODE_S_ISGID        = S_ISGID;  ///< [XSI] set group id on execution.
 uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrcted delete.
@@ -190,25 +211,25 @@ bool remove(std::string const & path);
  * @{
  */
 
-uint32_t const FILE_OPEN_FLAG_READ_ONLY  = O_RDONLY;    ///< open for reading only.
-uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = O_WRONLY;    ///< open for writing only.
-uint32_t const FILE_OPEN_FLAG_READ_WRITE = O_RDWR;      ///< open for reading and writing.
+uint32_t const FILE_OPEN_FLAG_READ_ONLY  = __TBAG_UNDERLINE(O_RDONLY); ///< open for reading only.
+uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = __TBAG_UNDERLINE(O_WRONLY); ///< open for writing only.
+uint32_t const FILE_OPEN_FLAG_READ_WRITE = __TBAG_UNDERLINE(O_RDWR);   ///< open for reading and writing.
+uint32_t const FILE_OPEN_APPEND          = __TBAG_UNDERLINE(O_APPEND); ///< set append mode.
+
+uint32_t const FILE_OPEN_CREATE          = __TBAG_UNDERLINE(O_CREAT);  ///< create if nonexistant.
+uint32_t const FILE_OPEN_TRUNCATE        = __TBAG_UNDERLINE(O_TRUNC);  ///< truncate to zero length.
+uint32_t const FILE_OPEN_EXISTS_ERROR    = __TBAG_UNDERLINE(O_EXCL);   ///< error if already exists.
+
+#if 0
+// !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
 uint32_t const FILE_OPEN_FLAG_ACCESS_ALL = O_ACCMODE;   ///< mask for above modes.
-
-uint32_t const FILE_OPEN_NON_BLOCK      = O_NONBLOCK;   ///< no delay.
-uint32_t const FILE_OPEN_APPEND         = O_APPEND;     ///< set append mode.
-
-uint32_t const FILE_OPEN_CREATE         = O_CREAT;      ///< create if nonexistant.
-uint32_t const FILE_OPEN_TRUNCATE       = O_TRUNC;      ///< truncate to zero length.
-uint32_t const FILE_OPEN_EXISTS_ERROR   = O_EXCL;       ///< error if already exists.
-
-#if 0 // !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
-uint32_t const FILE_OPEN_SHARED_LOCK    = O_SHLOCK;     ///< open with shared file lock.
-uint32_t const FILE_OPEN_EXCLUSIVE_LOCK = O_EXLOCK;     ///< open with exclusive file lock.
-uint32_t const FILE_OPEN_ASYNC          = O_ASYNC;      ///< signal pgrp when data ready.
-uint32_t const FILE_OPEN_SYNC           = O_FSYNC;      ///< synch I/O file integrity. (source compatibility: do not use)
-uint32_t const FILE_OPEN_NOFOLLOW       = O_NOFOLLOW;   ///< don't follow symlinks.
-#endif // (_POSIX_C_SOURCE && !_DARWIN_C_SOURCE)
+uint32_t const FILE_OPEN_NON_BLOCK       = O_NONBLOCK;  ///< no delay.
+uint32_t const FILE_OPEN_SHARED_LOCK     = O_SHLOCK;    ///< open with shared file lock.
+uint32_t const FILE_OPEN_EXCLUSIVE_LOCK  = O_EXLOCK;    ///< open with exclusive file lock.
+uint32_t const FILE_OPEN_ASYNC           = O_ASYNC;     ///< signal pgrp when data ready.
+uint32_t const FILE_OPEN_SYNC            = O_FSYNC;     ///< synch I/O file integrity. (source compatibility: do not use)
+uint32_t const FILE_OPEN_NOFOLLOW        = O_NOFOLLOW;  ///< don't follow symlinks.
+#endif
 
 /**
  * @}

@@ -102,7 +102,11 @@ uint64_t getStatus(std::string const & path)
 
 uint64_t getPermission(std::string const & path)
 {
-    return getStatus(path) & (FILE_MODE_OWNER_ALL | FILE_MODE_GROUP_ALL | FILE_MODE_OTHER_ALL);
+#if defined(__OS_WINDOWS__)
+    return getStatus(path) & (S_IRUSR | S_IWUSR);
+#else
+    return getStatus(path) & (S_IRWXU | S_IRWXG | S_IRWXO);
+#endif
 }
 
 bool checkFileType(std::string const & path, uint64_t type)
