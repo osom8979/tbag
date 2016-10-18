@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 
 #if defined(__OS_WINDOWS__)
-# include <io.h>
 # ifndef S_IRUSR
 #  define S_IRUSR _S_IREAD
 # endif
@@ -143,13 +142,16 @@ uint64_t getPermission(std::string const & path);
  */
 
 uint32_t const FILE_TYPE_S_IFMT   = __TBAG_UNDERLINE(S_IFMT);   ///< type of file.
-uint32_t const FILE_TYPE_S_IFIFO  = __TBAG_UNDERLINE(S_IFIFO);  ///< named pipe (fifo).
 uint32_t const FILE_TYPE_S_IFCHR  = __TBAG_UNDERLINE(S_IFCHR);  ///< character special.
 uint32_t const FILE_TYPE_S_IFDIR  = __TBAG_UNDERLINE(S_IFDIR);  ///< directory.
+uint32_t const FILE_TYPE_S_IFREG  = __TBAG_UNDERLINE(S_IFREG);  ///< regular file.
+
+#if 0
+uint32_t const FILE_TYPE_S_IFIFO  = __TBAG_UNDERLINE(S_IFIFO);  ///< named pipe (fifo).
 uint32_t const FILE_TYPE_S_IFBLK  = __TBAG_UNDERLINE(S_IFBLK);  ///< block special.
-uint32_t const FILE_TYPE_S_IFREG  = __TBAG_UNDERLINE(S_IFREG);  ///< regular.
 uint32_t const FILE_TYPE_S_IFLNK  = __TBAG_UNDERLINE(S_IFLNK);  ///< symbolic link.
 uint32_t const FILE_TYPE_S_IFSOCK = __TBAG_UNDERLINE(S_IFSOCK); ///< socket.
+#endif
 
 /**
  * @}
@@ -164,8 +166,8 @@ uint32_t const FILE_TYPE_S_IFSOCK = __TBAG_UNDERLINE(S_IFSOCK); ///< socket.
  */
 
 // Read, write, execute/search by owner.
-uint32_t const FILE_MODE_OWNER_READ  = __TBAG_UNDERLINE(S_IRUSR);  ///< [XSI] R for owner.
-uint32_t const FILE_MODE_OWNER_WRITE = __TBAG_UNDERLINE(S_IWUSR);  ///< [XSI] W for owner.
+uint32_t const FILE_MODE_OWNER_READ  = S_IRUSR;  ///< [XSI] R for owner.
+uint32_t const FILE_MODE_OWNER_WRITE = S_IWUSR;  ///< [XSI] W for owner.
 
 #if 0
 uint32_t const FILE_MODE_OWNER_ALL      = S_IRWXU;  ///< [XSI] RWX mask for owner.

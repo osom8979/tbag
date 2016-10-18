@@ -202,7 +202,9 @@ bool close(int fd)
 int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset)
 {
     uv_fs_t request;
-    uv_buf_t const buf = { const_cast<char*>(buffer), buffer_size };
+    uv_buf_t buf;
+    buf.len = buffer_size;
+    buf.base = const_cast<char*>(buffer);
     int result = uv_fs_write(nullptr, &request, static_cast<uv_file>(fd), &buf, 1, offset, nullptr);
     uv_fs_req_cleanup(&request);
 
@@ -212,7 +214,9 @@ int write(int fd, char const * buffer, std::size_t buffer_size, int64_t offset)
 int read(int fd, char * buffer, std::size_t buffer_size, int64_t offset)
 {
     uv_fs_t request;
-    uv_buf_t const buf = { buffer, buffer_size };
+    uv_buf_t buf;
+    buf.len = buffer_size;
+    buf.base = buffer;
     int result = uv_fs_read(nullptr, &request, static_cast<uv_file>(fd), &buf, 1, offset, nullptr);
     uv_fs_req_cleanup(&request);
 

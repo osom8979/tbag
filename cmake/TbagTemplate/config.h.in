@@ -5,9 +5,9 @@
 #pragma once
 #endif
 
-#if defined(UNICODE) || defined(_UNICODE)
-#error "Don't using UNICODE from the main project."
-#endif
+//#if defined(UNICODE) || defined(_UNICODE)
+//#error "Don't using UNICODE from the main project."
+//#endif
 
 #define ${MAIN_NAME_UPPER}_TITLE_NAME        ${MAIN_NAME}
 #define ${MAIN_NAME_UPPER}_TITLE_NAME_UPPER  ${MAIN_NAME_UPPER}

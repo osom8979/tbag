@@ -24,6 +24,8 @@ if (UNIX)
     else ()
         list (APPEND TBAG_PROJECT_LDFLAGS -lrt -lnsl -ldl)
     endif ()
+else (WIN32)
+    list (APPEND TBAG_PROJECT_LDFLAGS ws2_32.lib iphlpapi.lib winmm.lib psapi.lib userenv.lib)
 endif ()
 
 ## dep/icu

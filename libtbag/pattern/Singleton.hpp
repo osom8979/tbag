@@ -81,7 +81,7 @@ protected:
 };
 
 template <typename T>
-std::atomic<T*> SingletonProperty<T>::_instance{nullptr};
+std::atomic<T*> SingletonProperty<T>::_instance;
 
 template <typename T>
 std::mutex SingletonProperty<T>::_instance_lock;

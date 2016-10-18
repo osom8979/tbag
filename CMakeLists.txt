@@ -25,6 +25,12 @@ endif ()
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
+if (WIN32 AND MSVC)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4595")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") ## declared deprecated warning.
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
 # Setup the THIRD_PREFIX variable.
 tbag_config__add_third ("$ENV{TPARTY_HOME}/local")
 

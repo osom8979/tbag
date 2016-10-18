@@ -23,6 +23,12 @@
 #include <unordered_set>
 #include <set>
 
+#if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
+typedef intptr_t ssize_t;
+# define _SSIZE_T_
+# define _SSIZE_T_DEFINED
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
