@@ -624,7 +624,7 @@ U_NAMESPACE_END
  *      our common data.                                                *
  *                                                                      *
  *----------------------------------------------------------------------*/
-extern "C" const DataHeader U_DATA_API U_ICUDATA_ENTRY_POINT;
+extern "C" const DataHeader /* U_DATA_API */ U_ICUDATA_ENTRY_POINT;
 
 /*
  * This would be a good place for weak-linkage declarations of

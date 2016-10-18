@@ -17,7 +17,7 @@ extern const char
     icudt57l_nfkc_cf_nrm[],
     icudt57l_uts46_nrm[];
 
-U_EXPORT struct {
+/* U_EXPORT */ struct {
     uint16_t headerSize;
     uint8_t magic1, magic2;
     UDataInfo info;
