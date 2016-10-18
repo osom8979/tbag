@@ -53,6 +53,14 @@ private:
     std::atomic_int  _result_code;
 
 public:
+    TickLoop() : _callback()
+               , _time_step(DurationType(1))
+               , _exit(false)
+               , _result_code(0)
+    {
+        // EMPTY.
+    }
+
     TickLoop(Callback const & callback, Duration step)
             : _callback(callback)
             , _time_step(step)
@@ -66,6 +74,12 @@ public:
     {
         // EMPTY.
     }
+
+public:
+    inline void setCallback(Callback const & callback)
+    { _callback = callback; }
+    inline void setDuration(Duration const & step)
+    { _time_step = step; }
 
 public:
     int run()

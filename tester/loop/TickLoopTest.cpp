@@ -17,14 +17,16 @@ TEST(TickLoopTest, Default)
     int const TEST_COUNT  = 10;
     int count = 0;
 
-    TickLoop<> loop([&](){
+    TickLoop<> loop;
+    loop.setCallback([&](){
         if (count == TEST_COUNT) {
             loop.exit();
             loop.setResultCode(RESULT_CODE);
         } else {
             ++count;
         }
-    }, std::chrono::milliseconds(100));
+    });
+    loop.setDuration(std::chrono::milliseconds(100));
 
     ASSERT_EQ(RESULT_CODE, loop.run());
     ASSERT_EQ( TEST_COUNT, count);
