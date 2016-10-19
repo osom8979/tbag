@@ -28,6 +28,10 @@
 #ifndef FMT_OSTREAM_H_
 #define FMT_OSTREAM_H_
 
+#ifndef FMT_HEADER_ONLY
+#define FMT_HEADER_ONLY
+#endif
+
 #include <libtbag/string/fmt/format.h>
 #include <ostream>
 
@@ -127,7 +131,7 @@ FMT_VARIADIC(int, fprintf, std::ostream &, CStringRef)
 }  // namespace fmt
 
 #ifdef FMT_HEADER_ONLY
-# include <libtbag/string/fmt/ostream.h>
+# include <libtbag/string/fmt/ostream.cpp.h>
 #endif
 
 #endif  // FMT_OSTREAM_H_
