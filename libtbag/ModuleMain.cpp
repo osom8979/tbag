@@ -53,7 +53,7 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL
     case DLL_THREAD_ATTACH:  result = ::libtbag::setUp();    break;
     case DLL_THREAD_DETACH:  result = ::libtbag::tearDown(); break;
     }
-    return (result == true : TRUE : FALSE);
+    return (result == true ? TRUE : FALSE);
 }
 #endif // defined(__OS_WINDOWS__)
 
