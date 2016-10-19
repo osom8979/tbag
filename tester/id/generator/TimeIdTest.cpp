@@ -12,11 +12,18 @@ using namespace libtbag;
 using namespace libtbag::id;
 using namespace libtbag::id::generator;
 
-TEST(TimeIdTest, Default)
+TEST(TimeIdTest, genTimeId_sleep)
 {
-    int const TEST_COUNT = 1000;
+    int const TEST_COUNT = 100;
     for (int i = 0; i < TEST_COUNT; ++i) {
         ASSERT_NE(genTimeId(true), genTimeId(true));
+    }
+}
+
+TEST(TimeIdTest, genTimeId_nosleep)
+{
+    int const TEST_COUNT = 100;
+    for (int i = 0; i < TEST_COUNT; ++i) {
         ASSERT_NE(genTimeId(false), genTimeId(false));
     }
 }
