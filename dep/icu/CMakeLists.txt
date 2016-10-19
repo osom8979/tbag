@@ -14,6 +14,8 @@ if (NOT WIN32)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif ()
 
+add_definitions (-DU_COMBINED_IMPLEMENTATION)
+
 ## icu-uc (Common)
 file (GLOB_RECURSE ICUUC_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/common/*.c"
                               "${CMAKE_CURRENT_SOURCE_DIR}/common/*.cpp"
