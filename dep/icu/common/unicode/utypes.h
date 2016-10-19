@@ -401,7 +401,19 @@ typedef double UDate;
  */
 #if defined(__cplusplus) && U_DEBUG && U_OVERRIDE_CXX_ALLOCATION && (_MSC_VER>=1200) && !defined(U_STATIC_IMPLEMENTATION) && (defined(U_COMMON_IMPLEMENTATION) || defined(U_I18N_IMPLEMENTATION) || defined(U_IO_IMPLEMENTATION) || defined(U_LAYOUT_IMPLEMENTATION) || defined(U_LAYOUTEX_IMPLEMENTATION))
 
-#ifndef U_HIDE_INTERNAL_API
+/*
+ * Don't use this section.
+ *
+ * Fix user: zer0
+ * Fix date: 2016-10-19
+ *
+ * Reson:
+ * The unintended method call.
+ * 'new (std::noexcept) T()' in 'Singleton<T>::getInstance() method.'
+ */
+/* #ifndef U_HIDE_INTERNAL_API */
+#if 0
+
 /**
  * Global operator new, defined only inside ICU4C, must not be used.
  * Crashes intentionally.
