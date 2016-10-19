@@ -85,5 +85,13 @@
 # endif
 #endif // defined(TBAG_EXPORT_API)
 
+#if defined(TBAG_EXPORT_API) && defined(__COMP_GNUC__)
+# define TBAG_CONSTRUCTOR __attribute__((constructor))
+# define TBAG_DESTRUCTOR  __attribute__((destructor))
+#else // defined(TBAG_EXPORT_API)
+# define TBAG_CONSTRUCTOR
+# define TBAG_DESTRUCTOR
+#endif // defined(TBAG_EXPORT_API)
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_ATTRIBUTES_HPP__
 
