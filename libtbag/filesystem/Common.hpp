@@ -130,12 +130,6 @@ TBAG_EXPORTS bool isWritableMode(std::string const & path);
 TBAG_EXPORTS bool isReadableMode(std::string const & path);
 
 /**
- * @see <http://linux.die.net/man/2/stat>
- */
-TBAG_EXPORTS uint64_t getStatus(std::string const & path);
-TBAG_EXPORTS uint64_t getPermission(std::string const & path);
-
-/**
  * @defgroup __DOXYGEN_GROUP__FILE_TYPE__ List of file type.
  * @remarks
  *  POSIX: include <sys/stat.h> or <fcntl.h>
@@ -195,8 +189,11 @@ uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrct
  * @}
  */
 
-TBAG_EXPORTS uint64_t getFixedPermissionOfWindows(uint64_t mode);
-TBAG_EXPORTS uint64_t getFixedPermissionOfPosix(uint64_t mode);
+/**
+ * @see <http://linux.die.net/man/2/stat>
+ */
+TBAG_EXPORTS uint64_t getStatus(std::string const & path);
+TBAG_EXPORTS uint64_t getPermission(std::string const & path);
 TBAG_EXPORTS uint64_t getFixedPermission(uint64_t mode);
 
 TBAG_EXPORTS bool checkFileType(std::string const & path, uint64_t type);

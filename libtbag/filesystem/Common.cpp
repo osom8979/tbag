@@ -109,22 +109,12 @@ uint64_t getPermission(std::string const & path)
 #endif
 }
 
-uint64_t getFixedPermissionOfWindows(uint64_t mode)
-{
-    return mode & (S_IRUSR | S_IWUSR);
-}
-
-uint64_t getFixedPermissionOfPosix(uint64_t mode)
-{
-    return mode & (S_IRWXU | S_IRWXG | S_IRWXO);
-}
-
 uint64_t getFixedPermission(uint64_t mode)
 {
 #if defined(__OS_WINDOWS__)
-    return getFixedPermissionOfWindows(mode);
+    return mode & (S_IRUSR | S_IWUSR);
 #else
-    return getFixedPermissionOfPosix(mode);
+    return mode & (S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
 }
 
