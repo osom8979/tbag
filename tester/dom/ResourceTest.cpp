@@ -19,7 +19,11 @@ TEST(ResourceTest, utf8)
           , 0xac, 0xec, 0x95, 0x84, 0xec, 0x9e, 0x90, 0xec, 0xb0, 0xa8
           , 0xec, 0xb9, 0xb4, 0xed, 0x83, 0x80, 0xed, 0x8c, 0x8c, 0xed
           , 0x95, 0x98, '\0' };
-    std::string const HANGUL_UTF8 = u8"가나다라마바사아자차카타파하";
+
+    // TEST STRING: "가나다라마바사아자차카타파하"
+    std::string const HANGUL_UTF8 = "\xea\xb0\x80\xeb\x82\x98\xeb\x8b\xa4\xeb\x9d\xbc\xeb\xa7\x88\xeb"
+                                    "\xb0\x94\xec\x82\xac\xec\x95\x84\xec\x9e\x90\xec\xb0\xa8\xec\xb9"
+                                    "\xb4\xed\x83\x80\xed\x8c\x8c\xed\x95\x98"; // Don't use u8 literal.
 
     char const * const TEST_NAME = "hangul";
     char const * const TEST_TAG = "utf8";
