@@ -21,7 +21,6 @@
 #include <libtbag/network/socket/Tcp.hpp>
 
 #include <string>
-#include <memory>
 
 #if defined(__OS_WINDOWS__)
 #include <winsock2.h>
@@ -64,7 +63,7 @@ public:
 public:
     bool runIpv4(std::string const & ip, int port);
 
-public:
+protected:
     virtual void onAlloc(void * handle, size_t suggested_size, void * buf) override;
     virtual void onRead(void * stream, ssize_t nread, void const * buf) override;
     virtual void onWrite(void * req, int status) override;
