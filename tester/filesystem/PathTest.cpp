@@ -56,13 +56,13 @@ TEST(PathTest, Constructors_2)
     nodes.push_back("2");
 
     Path p = nodes;
-    ASSERT_STREQ("1/2", p.getString().c_str());
+    ASSERT_STREQ("1/2", p.getGenericString().c_str());
 }
 
 TEST(PathTest, initializer_list)
 {
     Path p0 = {"/", "TE", "M", "P"};
-    ASSERT_STREQ("/TE/M/P", p0.getString().c_str());
+    ASSERT_STREQ("/TE/M/P", p0.getGenericString().c_str());
 }
 
 TEST(PathTest, AssignOperators)
@@ -120,8 +120,8 @@ TEST(PathTest, splitNodesWithCanonical_1)
     path1.updateCanonical();
     path2.updateCanonical();
 
-    ASSERT_EQ(home + "/TEMP4", path1.getString());
-    ASSERT_EQ(work + "/TEMP2", path2.getString());
+    ASSERT_EQ(Path(home + "/TEMP4").getGenericString(), path1.getGenericString());
+    ASSERT_EQ(Path(work + "/TEMP2").getGenericString(), path2.getGenericString());
 }
 
 TEST(PathTest, splitNodesWithCanonical_2)
