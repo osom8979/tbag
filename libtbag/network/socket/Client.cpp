@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/network/socket/Client.hpp>
+#include <uv.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

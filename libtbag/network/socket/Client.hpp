@@ -15,7 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/macro/attributes.hpp>
-#include <libtbag/Noncopyable.hpp>
+#include <libtbag/loop/UvEventLoop.hpp>
+#include <libtbag/loop/event/UvEventHandler.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,7 +31,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_EXPORTS Client : public Noncopyable
+class TBAG_EXPORTS Client : public libtbag::loop::event::UvEventHandler
 {
 public:
     Client();

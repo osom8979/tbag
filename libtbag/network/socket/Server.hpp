@@ -14,12 +14,20 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/macro/attributes.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
 #include <libtbag/loop/event/UvEventHandler.hpp>
+#include <libtbag/network/socket/Tcp.hpp>
 
 #include <string>
 #include <memory>
+
+#if defined(__OS_WINDOWS__)
+#include <winsock2.h>
+#else
+#include <netinet/in.h>
+#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,22 +45,17 @@ namespace socket  {
 class TBAG_EXPORTS Server : public libtbag::loop::event::UvEventHandler
 {
 public:
-    struct TcpPimpl;
-    struct SockAddrPimpl;
-
-    using UniqueTcp = std::unique_ptr<TcpPimpl>;
-    using UniqueSockAddr = std::unique_ptr<SockAddrPimpl>;
-
-    using Parent = libtbag::loop::event::UvEventHandler;
-    using Loop   = libtbag::loop::UvEventLoop;
+    using Loop = libtbag::loop::UvEventLoop;
 
 public:
     static constexpr int LISTEN_QUEUE_LIMIT = 128;
 
 private:
     Loop _loop;
-    UniqueTcp _server;
-    UniqueSockAddr _sockaddr;
+    Tcp  _tcp;
+
+private:
+    sockaddr_in _sockaddr;
 
 public:
     Server();
