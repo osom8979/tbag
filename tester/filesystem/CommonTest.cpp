@@ -71,7 +71,7 @@ TEST(CommonTest, file_rw)
     int fd = common::open(file_name, (FILE_OPEN_FLAG_READ_WRITE | FILE_OPEN_CREATE), PERMISSION);
     ASSERT_LT(0, fd);
     ASSERT_TRUE(common::isExistsMode(file_name));
-    ASSERT_EQ(PERMISSION, common::getPermission(file_name));
+    ASSERT_EQ(getFixedPermission(PERMISSION), common::getPermission(file_name));
 
     ASSERT_EQ(TEST.size(), common::write(fd, TEST.data(), TEST.size()));
     ASSERT_EQ(read_buffer.size(), common::read(fd, read_buffer.data(), read_buffer.size(), 0));

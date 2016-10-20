@@ -195,6 +195,10 @@ uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrct
  * @}
  */
 
+TBAG_EXPORTS uint64_t getFixedPermissionOfWindows(uint64_t mode);
+TBAG_EXPORTS uint64_t getFixedPermissionOfPosix(uint64_t mode);
+TBAG_EXPORTS uint64_t getFixedPermission(uint64_t mode);
+
 TBAG_EXPORTS bool checkFileType(std::string const & path, uint64_t type);
 TBAG_EXPORTS bool isDirectory(std::string const & path);
 TBAG_EXPORTS bool isRegularFile(std::string const & path);
