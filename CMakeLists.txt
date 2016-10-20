@@ -36,7 +36,7 @@ if (WIN32 AND MSVC)
 endif()
 
 # Setup the THIRD_PREFIX variable.
-set (__tparty_home_path "$ENV{TPARTY_HOME}/local")
+string (REPLACE "\\" "/" __tparty_home_path "$ENV{TPARTY_HOME}/local")
 if (IS_DIRECTORY "${__tparty_home_path}")
     tbag_config__add_third ("${__tparty_home_path}")
 else ()
