@@ -34,15 +34,16 @@ tbag_project__set_whole_archive ($<TARGET_FILE:icuuc>)
 tbag_project__set_whole_archive ($<TARGET_FILE:icui18n>)
 
 ## external libraries.
-if (UNIX)
+if (WIN32)
+    list (APPEND TBAG_PROJECT_LDFLAGS advapi32.lib iphlpapi.lib psapi.lib shell32.lib
+                                      user32.lib userenv.lib winmm.lib ws2_32.lib)
+else ()
     list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
     if (APPLE)
         list (APPEND TBAG_PROJECT_LDFLAGS -ldl)
     else ()
         list (APPEND TBAG_PROJECT_LDFLAGS -lnsl -ldl -lrt)
     endif ()
-else (WIN32)
-    list (APPEND TBAG_PROJECT_LDFLAGS ws2_32.lib iphlpapi.lib winmm.lib psapi.lib userenv.lib)
 endif ()
 
 #tbag_modules__include_project (PCH ${CMAKE_SOURCE_DIR}/libtbag/config.h)

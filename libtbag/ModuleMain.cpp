@@ -8,6 +8,7 @@
 #include <libtbag/config.h>
 #include <libtbag/macro/attributes.hpp>
 #include <libtbag/macro/utils.hpp>
+#include <libtbag/loop/UvEventLoop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,6 +16,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 static bool setUp()
 {
+    libtbag::loop::UvEventLoop loop;
+    loop.runDefault();
+
     return true;
 }
 
@@ -25,8 +29,7 @@ static bool tearDown()
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
-NAMESPACE_ANONYMOUS_OPEN
-// ---------------------
+// --------------------
 
 static void TBAG_CONSTRUCTOR
 __tbag_constructor(void)
@@ -56,9 +59,4 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL
     return (result == true ? TRUE : FALSE);
 }
 #endif // defined(__OS_WINDOWS__)
-
-// ----------------------
-NAMESPACE_ANONYMOUS_CLOSE
-// ----------------------
-
 

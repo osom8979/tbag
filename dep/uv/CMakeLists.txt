@@ -47,7 +47,8 @@ if (WIN32)
             loop-watcher.c pipe.c poll.c process-stdio.c process.c req.c signal.c stream.c
             tcp.c thread.c timer.c tty.c udp.c util.c winapi.c winsock.c)
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src/win")
-    add_definitions (-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600 -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
+    add_definitions (-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600 -D_GNU_SOURCE
+                     -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
     set (ALL_SRCS ${COMMON_SRCS} ${WIN_SRCS})
 
 elseif (UNIX)
