@@ -51,9 +51,6 @@ void Client::onWrite(void * req, int status)
 }
 
 uv_write_t write_request;
-char ECHO_STRING[] = "HELLO";
-uv_buf_t buf = { ECHO_STRING, 4 };
-
 
 void Client::onConnect(void * req, int status)
 {
@@ -62,6 +59,11 @@ void Client::onConnect(void * req, int status)
         // error!
         return;
     }
+
+    static char ECHO_STRING[] = "HELLO";
+    static uv_buf_t buf;
+    buf.len = 4;
+    buf.base = ECHO_STRING;
 
     ::uv_write(&write_request
             , (uv_stream_t *) _tcp.getNative()

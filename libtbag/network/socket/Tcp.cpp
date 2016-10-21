@@ -25,7 +25,7 @@ Tcp::Tcp(Handler * handler) : _handler(handler), _tcp(new uv_tcp_t)
 Tcp::~Tcp()
 {
     _handler->remove(_tcp);
-    delete _tcp;
+    delete static_cast<uv_tcp_t*>(_tcp);
 }
 
 } // namespace network
