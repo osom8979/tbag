@@ -6,10 +6,17 @@
  */
 
 #include <iostream>
+#include <libtbag/network/socket/Client.hpp>
 
 int main(int argc, char ** argv)
 {
-    std::cout << "Hello, World!\n";
+    using Client = libtbag::network::socket::Client;
+    Client client;
+
+    std::cout << "Client start!\n";
+    client.connect("127.0.0.1", 9999);
+
+    std::cout << "Client end.\n";
     return 0;
 }
 
