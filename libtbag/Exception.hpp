@@ -22,19 +22,18 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 #ifndef __CREATE_EXCEPTION_CLASS
-#define __CREATE_EXCEPTION_CLASS(class_name, message)           \
-    struct class_name : public std::exception                   \
-    {                                                           \
-        static constexpr char const * const MESSAGE = message;  \
-                                                                \
-        int code;                                               \
-                                                                \
-        class_name() : code(0) { }                              \
-        class_name(int c) : code(c) { }                         \
-                                                                \
-        virtual const char * what() const TBAG_NOEXCEPT override {   \
-            return MESSAGE;                                     \
-        }                                                       \
+#define __CREATE_EXCEPTION_CLASS(name, msg)   \
+    struct name : public std::exception       \
+    {                                         \
+        int code;                             \
+                                              \
+        name() : code(0) { }                  \
+        name(int c) : code(c) { }             \
+                                              \
+        virtual const char *                  \
+        what() const TBAG_NOEXCEPT override { \
+            return msg;                       \
+        }                                     \
     };
 #endif
 
