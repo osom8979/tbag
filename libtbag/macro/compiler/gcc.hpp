@@ -49,16 +49,6 @@
 # endif
 #endif
 
-#ifndef TBAG_CONSTEXPR
-# if (defined(__COMP_MSVC__)     && (__COMP_MSVC_VERSION__  >=  1900)) || \
-     (defined(__COMP_CLANG__)    && (__COMP_CLANG_VERSION__ >= 30100)) || \
-     (defined(__COMP_GNUC_CXX__) && (__COMP_GNUC_VERSION__  >= 40600))
-#  define TBAG_CONSTEXPR constexpr
-# else
-#  define TBAG_CONSTEXPR const
-# endif
-#endif // TBAG_CONSTEXPR
-
 #if defined(__COMP_GNUC_CXX__)
 // C++0x features in 4.6.n and later
 # if (__COMP_GNUC_VERSION__ >= 40600)
