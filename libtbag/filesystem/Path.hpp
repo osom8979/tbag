@@ -16,7 +16,6 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/macro/attributes.hpp>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/WindowsPath.hpp>
 #include <libtbag/filesystem/PosixPath.hpp>

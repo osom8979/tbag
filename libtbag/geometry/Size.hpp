@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/geometry/Point.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_SIZE_HPP__

@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/log/sink/OfstreamSink.hpp>
 #include <libtbag/time/Time.hpp>
 #include <libtbag/string/Strings.hpp>

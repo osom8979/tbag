@@ -14,8 +14,8 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/macro/attributes.hpp>
 #include <libtbag/loop/event/UvEventHandler.hpp>
 
 // -------------------

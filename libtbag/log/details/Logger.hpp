@@ -14,7 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/macro/attributes.hpp>
+#include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/log/details/Severity.hpp>

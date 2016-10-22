@@ -17,6 +17,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/pattern/Observer.hpp>
 

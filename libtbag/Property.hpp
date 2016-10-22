@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/dom/Resource.hpp>
 #include <libtbag/filesystem/Path.hpp>

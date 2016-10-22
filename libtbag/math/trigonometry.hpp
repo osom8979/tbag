@@ -26,6 +26,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

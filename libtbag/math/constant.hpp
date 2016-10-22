@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 
 /**
  * @defgroup __DOXYGEN_GROUP__MATHEMATICAL_CONSTANT__ Mathematical constant

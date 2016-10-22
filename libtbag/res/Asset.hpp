@@ -15,6 +15,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 #include <string>
