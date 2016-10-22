@@ -41,5 +41,13 @@
 # define __COMP_MSVC_VERSION__ 0
 #endif
 
+#if defined(__COMP_MSVC__)
+// C++0x features in 14.0(2015) and later
+# if (__COMP_MSVC_VERSION__ >= 1900)
+# define TBAG_HAS_CONSTEXPR
+# define TBAG_HAS_NOEXCEPT
+# endif
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_COMPILER_MSVC_HPP__
 

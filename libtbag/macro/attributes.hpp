@@ -93,5 +93,23 @@
 # define TBAG_DESTRUCTOR
 #endif // defined(TBAG_EXPORT_API)
 
+#ifndef TBAG_CONSTEXPR
+# if defined(TBAG_HAS_CONSTEXPR)
+#  define TBAG_CONSTEXPR constexpr
+#  define TBAG_CONST_OR_CONSTEXPR constexpr
+# else
+#  define TBAG_CONSTEXPR
+#  define TBAG_CONST_OR_CONSTEXPR const
+# endif
+#endif
+
+#ifndef TBAG_NOEXCEPT
+# if defined(TBAG_HAS_NOEXCEPT)
+#  define TBAG_NOEXCEPT noexcept
+# else
+#  define TBAG_NOEXCEPT
+# endif
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_ATTRIBUTES_HPP__
 

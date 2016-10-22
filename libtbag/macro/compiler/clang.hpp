@@ -17,5 +17,24 @@
 #define __COMP_CLANG__
 #endif
 
+#if defined(__COMP_CLANG__)
+#define __COMP_CLANG_VERSION__          \
+    ( (__clang_major__      * 10000 )   \
+    + (__clang_minor__      * 100   )   \
+    + (__clang_patchlevel__ * 1     ) )
+#else
+#define __COMP_CLANG_VERSION__ 0
+#endif
+
+#if defined(__COMP_CLANG__)
+# if __has_feature(cxx_constexpr)
+# define TBAG_HAS_CONSTEXPR
+# endif
+
+# if __has_feature(cxx_noexcept)
+# define TBAG_HAS_NOEXCEPT
+# endif
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_COMPILER_CLANG_HPP__
 
