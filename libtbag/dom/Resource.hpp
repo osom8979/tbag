@@ -38,8 +38,10 @@ constexpr bool isCompactXmlFile() TBAG_NOEXCEPT
 class TBAG_EXPORTS Resource
 {
 public:
-    static constexpr char const * const ROOT_TAG = "resource";
-    static constexpr char const * const NAME_ATTRIBUTE = "name";
+    static TBAG_CONSTEXPR char const * const getRootTagName() TBAG_NOEXCEPT
+    { return "resource"; }
+    static TBAG_CONSTEXPR char const * const getAttributeName() TBAG_NOEXCEPT
+    { return "name"; }
 
 public:
     using String = std::string;

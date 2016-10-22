@@ -23,7 +23,7 @@ using Node = tinyxml2::XMLNode;
 
 static Resource::Map readFromXmlDocument(Document const & doc, std::string const & tag)
 {
-    Element const * root = doc.FirstChildElement(Resource::ROOT_TAG);
+    Element const * root = doc.FirstChildElement(Resource::getRootTagName());
     if (root == nullptr) {
         return Resource::Map();
     }
@@ -32,7 +32,7 @@ static Resource::Map readFromXmlDocument(Document const & doc, std::string const
     Resource::Map map;
 
     while (cursor != nullptr) {
-        map.insert(std::make_pair(std::string(cursor->Attribute(Resource::NAME_ATTRIBUTE))
+        map.insert(std::make_pair(std::string(cursor->Attribute(Resource::getAttributeName()))
                 , std::string(cursor->GetText())));
         cursor = cursor->NextSiblingElement(tag.c_str());
     }
@@ -215,11 +215,11 @@ Resource::Map Resource::readFromXmlFile(std::string const & path, std::string co
 bool Resource::save(std::string const & path, std::string const & tag, Map const & map)
 {
     Document doc;
-    Node * node = doc.InsertFirstChild(doc.NewElement(ROOT_TAG));
+    Node * node = doc.InsertFirstChild(doc.NewElement(getRootTagName()));
 
     for (auto & cursor : map) {
         Element * element = doc.NewElement(tag.c_str());
-        element->SetAttribute(NAME_ATTRIBUTE, cursor.first.c_str());
+        element->SetAttribute(getAttributeName(), cursor.first.c_str());
         element->SetText(cursor.second.c_str());
         node->InsertEndChild(element);
     }

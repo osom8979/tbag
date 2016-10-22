@@ -53,18 +53,12 @@ public:
             , "String::value_type must be the same type as ValueType");
 
 public:
-    static constexpr ValueType const PATH_SEPARATOR
-            = static_cast<ValueType const>(common::PATH_SEPARATOR_OF_POSIX);
-    static constexpr ValueType const GENERIC_PATH_SEPARATOR
-            = static_cast<ValueType const>(common::getGenericPathSeparator());
-
-public:
     inline static String getPathSeparator() {
-        return { PATH_SEPARATOR };
+        return { common::PATH_SEPARATOR_OF_POSIX };
     }
 
     inline static String getGenericPathSeparatorString() {
-        return { GENERIC_PATH_SEPARATOR };
+        return { common::getGenericPathSeparator() };
     }
 
     inline static String getRemoveSeparatorRegex() {
@@ -138,7 +132,7 @@ public:
      * Root directory is only '/'.
      */
     static String getRootDir(String const & path) {
-        if (path.size() < 1 || path[0] != PATH_SEPARATOR) {
+        if (path.size() < 1 || path[0] != common::PATH_SEPARATOR_OF_POSIX) {
             return String();
         }
         return getPathSeparator();
@@ -157,14 +151,14 @@ public:
 // Parent.
 public:
     static String getParent(String const & path) {
-        if (path.size() == 1U && path[0] == PATH_SEPARATOR) {
+        if (path.size() == 1U && path[0] == common::PATH_SEPARATOR_OF_POSIX) {
             return String(); // PARENT OF ROOT.
         }
 
         String temp = removeLastSeparator(path);
         std::size_t last_separator_index = temp.rfind(getPathSeparator());
 
-        if (last_separator_index == 0U && temp.size() > 1U && temp[0] == PATH_SEPARATOR) {
+        if (last_separator_index == 0U && temp.size() > 1U && temp[0] == common::PATH_SEPARATOR_OF_POSIX) {
             return getPathSeparator(); // ROOT DIRECTORY.
         } else if (last_separator_index == String::npos) {
             return String(); // PARENT OF ROOT (Maybe relative path).

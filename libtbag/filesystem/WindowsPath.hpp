@@ -54,18 +54,12 @@ public:
             , "String::value_type must be the same type as ValueType");
 
 public:
-    static constexpr ValueType const PATH_SEPARATOR
-            = static_cast<ValueType const>(common::PATH_SEPARATOR_OF_WINDOWS);
-    static constexpr ValueType const GENERIC_PATH_SEPARATOR
-            = static_cast<ValueType const>(common::getGenericPathSeparator());
-
-public:
     inline static String getPathSeparator() {
-        return { PATH_SEPARATOR };
+        return { common::PATH_SEPARATOR_OF_WINDOWS };
     }
 
     inline static String getGenericPathSeparatorString() {
-        return { GENERIC_PATH_SEPARATOR };
+        return { common::getGenericPathSeparator() };
     }
 
     inline static String getRemoveSeparatorRegex() {
