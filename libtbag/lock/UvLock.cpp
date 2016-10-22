@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace lock {
 
 template <typename T>
-inline uv_mutex_t * cast_uv_mutex(T * v) noexcept
+inline uv_mutex_t * cast_uv_mutex(T * v) TBAG_NOEXCEPT
 {
     return static_cast<uv_mutex_t*>(v);
 }

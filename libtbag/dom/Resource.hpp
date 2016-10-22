@@ -24,7 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace dom {
 
-constexpr bool isCompactXmlFile() noexcept
+constexpr bool isCompactXmlFile() TBAG_NOEXCEPT
 {
     return false;
 }
@@ -64,12 +64,12 @@ public:
     void swap(Resource & obj);
 
 public:
-    void clear() noexcept;
-    std::size_t size() const noexcept;
+    void clear() TBAG_NOEXCEPT;
+    std::size_t size() const TBAG_NOEXCEPT;
 
 public:
-    void set_tag(std::string const & tag) noexcept;
-    std::string get_tag() const noexcept;
+    void set_tag(std::string const & tag) TBAG_NOEXCEPT;
+    std::string get_tag() const TBAG_NOEXCEPT;
 
 // XML.
 public:

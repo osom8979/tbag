@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace lock {
 
 template <typename T>
-inline uv_rwlock_t * cast_rwlock(T * v) noexcept
+inline uv_rwlock_t * cast_rwlock(T * v) TBAG_NOEXCEPT
 {
     return static_cast<uv_rwlock_t*>(v);
 }

@@ -78,17 +78,17 @@ public:
 
 } // namespace impl
 
-std::chrono::system_clock::time_point getNowSystemClock() noexcept
+std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT
 {
     return std::chrono::system_clock::now();
 }
 
-time_t getTime(std::chrono::system_clock::time_point const & time_point) noexcept
+time_t getTime(std::chrono::system_clock::time_point const & time_point) TBAG_NOEXCEPT
 {
     return std::chrono::system_clock::to_time_t(time_point);
 }
 
-time_t getCurrentTime() noexcept
+time_t getCurrentTime() TBAG_NOEXCEPT
 {
     return getTime(getNowSystemClock());
 }

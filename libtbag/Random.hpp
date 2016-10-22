@@ -33,8 +33,8 @@ NAMESPACE_LIBTBAG_OPEN
 class Random : public Noncopyable
 {
 public:
-    constexpr Random() noexcept = default;
-    ~Random() noexcept = default;
+    constexpr Random() TBAG_NOEXCEPT = default;
+    ~Random() TBAG_NOEXCEPT = default;
 
 public:
     template <typename Integer>

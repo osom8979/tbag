@@ -88,7 +88,7 @@ template <template <typename Tp> class TrivialType
         , typename T1
         , typename T2 = T1>
 inline constexpr TrivialType<typename remove_cr<T1>::type>
-makeTrivial2(T1 && v1, T2 && v2) noexcept
+makeTrivial2(T1 && v1, T2 && v2) TBAG_NOEXCEPT
 {
     typedef typename remove_cr<T1>::type __remove_cr;
     typedef TrivialType<__remove_cr> __trivial_type;

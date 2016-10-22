@@ -72,8 +72,8 @@ public:
     }
 
 public:
-    constexpr PosixPath() noexcept = default;
-    ~PosixPath() noexcept = default;
+    constexpr PosixPath() TBAG_NOEXCEPT = default;
+    ~PosixPath() TBAG_NOEXCEPT = default;
 
 // Filename query.
 public:
@@ -82,7 +82,7 @@ public:
      */
     struct ProhibitedBy
     {
-        inline bool operator()(ValueType v) const noexcept {
+        inline bool operator()(ValueType v) const TBAG_NOEXCEPT {
             if (v == 0x00 || v == static_cast<ValueType>('/')) {
                 return true;
             }
@@ -90,7 +90,7 @@ public:
         }
     };
 
-    static bool isProhibitedFilename(String const & path) noexcept {
+    static bool isProhibitedFilename(String const & path) TBAG_NOEXCEPT {
         return std::any_of(path.begin(), path.end(), ProhibitedBy());
     }
 

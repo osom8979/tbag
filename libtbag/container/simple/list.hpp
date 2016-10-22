@@ -65,7 +65,7 @@ inline void releaseNode(Node<T> ** node) throw (NullPointerException)
 }
 
 template <typename T>
-Node<T> * atNode(Node<T> * node, std::size_t index = 0) noexcept
+Node<T> * atNode(Node<T> * node, std::size_t index = 0) TBAG_NOEXCEPT
 {
     while (index > 0) {
         if (node == nullptr) {
@@ -79,7 +79,7 @@ Node<T> * atNode(Node<T> * node, std::size_t index = 0) noexcept
 }
 
 template <typename T>
-bool insertNext(Node<T> * node, T data) noexcept
+bool insertNext(Node<T> * node, T data) TBAG_NOEXCEPT
 {
     if (node == nullptr) {
         return false;
@@ -101,13 +101,13 @@ bool insertNext(Node<T> * node, T data) noexcept
 }
 
 template <typename T>
-bool insertNext(Node<T> * node, std::size_t index, T data) noexcept
+bool insertNext(Node<T> * node, std::size_t index, T data) TBAG_NOEXCEPT
 {
     return insertNext(atNode(node, index), data);
 }
 
 template <typename T>
-bool eraseNext(Node<T> * node) noexcept
+bool eraseNext(Node<T> * node) TBAG_NOEXCEPT
 {
     if (node == nullptr) {
         return false;
@@ -134,7 +134,7 @@ bool eraseNext(Node<T> * node) noexcept
 }
 
 template <typename T>
-bool eraseNext(Node<T> * node, std::size_t index) noexcept
+bool eraseNext(Node<T> * node, std::size_t index) TBAG_NOEXCEPT
 {
     return eraseNext(atNode(node, index));
 }

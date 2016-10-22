@@ -99,7 +99,7 @@ public:
     void close();
 
 public:
-    bool isOpen() const noexcept;
+    bool isOpen() const TBAG_NOEXCEPT;
 
 public:
     bool execute(std::string const & query);
@@ -114,8 +114,8 @@ public:
     bool endTransaction();
 
 public:
-    int getErrorCode() const noexcept;
-    std::string getErrorMessage() const noexcept;
+    int getErrorCode() const TBAG_NOEXCEPT;
+    std::string getErrorMessage() const TBAG_NOEXCEPT;
 
 public:
     template <typename Tuple>

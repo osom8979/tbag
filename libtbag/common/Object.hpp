@@ -25,7 +25,7 @@ namespace common {
 
 #ifndef IMPLEMENT_GET_CLASS_NAME
 #define IMPLEMENT_GET_CLASS_NAME(name, qualify) \
-    static constexpr char const * const getClassName() noexcept \
+    static constexpr char const * const getClassName() TBAG_NOEXCEPT \
     { return #name; } \
     virtual char const * const getName() qualify \
     { return getClassName(); }
@@ -33,12 +33,12 @@ namespace common {
 
 #ifndef IMPLEMENT_GET_PARENT_CLASS_NAME
 #define IMPLEMENT_GET_PARENT_CLASS_NAME(name) \
-    IMPLEMENT_GET_CLASS_NAME(name, const noexcept)
+    IMPLEMENT_GET_CLASS_NAME(name, const TBAG_NOEXCEPT)
 #endif
 
 #ifndef IMPLEMENT_GET_CHILD_CLASS_NAME
 #define IMPLEMENT_GET_CHILD_CLASS_NAME(name) \
-    IMPLEMENT_GET_CLASS_NAME(name, const noexcept override)
+    IMPLEMENT_GET_CLASS_NAME(name, const TBAG_NOEXCEPT override)
 #endif
 
 /**
@@ -59,33 +59,33 @@ private:
     Id _id;
 
 public:
-    Object() noexcept
+    Object() TBAG_NOEXCEPT
     {
         _id = reinterpret_cast<Id>(this);
     }
 
-    Object(Object const & obj) noexcept : Object()
+    Object(Object const & obj) TBAG_NOEXCEPT : Object()
     { /* EMPTY. */ }
-    Object(Object && obj) noexcept : Object()
-    { /* EMPTY. */ }
-
-    virtual ~Object() noexcept
+    Object(Object && obj) TBAG_NOEXCEPT : Object()
     { /* EMPTY. */ }
 
-public:
-    inline Object & operator =(Object const & obj) noexcept
-    { return *this; }
-    inline Object & operator =(Object && obj) noexcept
-    { return *this; }
+    virtual ~Object() TBAG_NOEXCEPT
+    { /* EMPTY. */ }
 
 public:
-    inline bool operator ==(Object const & obj) noexcept
+    inline Object & operator =(Object const & obj) TBAG_NOEXCEPT
+    { return *this; }
+    inline Object & operator =(Object && obj) TBAG_NOEXCEPT
+    { return *this; }
+
+public:
+    inline bool operator ==(Object const & obj) TBAG_NOEXCEPT
     { return (this == &obj); }
-    inline bool operator !=(Object const & obj) noexcept
+    inline bool operator !=(Object const & obj) TBAG_NOEXCEPT
     { return (this != &obj); }
 
 public:
-    inline Id getId() const noexcept
+    inline Id getId() const TBAG_NOEXCEPT
     { return _id; }
 };
 

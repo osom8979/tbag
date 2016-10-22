@@ -15,60 +15,60 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-Severity::Severity() noexcept : _text(), _flag()
+Severity::Severity() TBAG_NOEXCEPT : _text(), _flag()
 {
     // EMPTY.
 }
 
-Severity::Severity(String const & text, Flag flag) noexcept
+Severity::Severity(String const & text, Flag flag) TBAG_NOEXCEPT
         : _text(text), _flag(flag)
 {
     // EMPTY.
 }
 
-Severity::Severity(DefaultSeverityProperty const & property) noexcept
+Severity::Severity(DefaultSeverityProperty const & property) TBAG_NOEXCEPT
         : Severity(property.text, property.flag)
 {
     // EMPTY.
 }
 
-Severity::Severity(LogLevel level) noexcept : Severity(DEFAULT_SEVERITY[static_cast<int>(level)])
+Severity::Severity(LogLevel level) TBAG_NOEXCEPT : Severity(DEFAULT_SEVERITY[static_cast<int>(level)])
 {
     // EMPTY.
 }
 
-Severity::Severity(Severity const & obj) noexcept
+Severity::Severity(Severity const & obj) TBAG_NOEXCEPT
 {
     this->copy(obj);
 }
 
-Severity::Severity(Severity && obj) noexcept
+Severity::Severity(Severity && obj) TBAG_NOEXCEPT
 {
     this->swap(obj);
 }
 
-Severity::~Severity() noexcept
+Severity::~Severity() TBAG_NOEXCEPT
 {
     // EMPTY.
 }
 
-Severity & Severity::operator =(Severity const & obj) noexcept
+Severity & Severity::operator =(Severity const & obj) TBAG_NOEXCEPT
 {
     return this->copy(obj);
 }
 
-Severity & Severity::operator =(Severity && obj) noexcept
+Severity & Severity::operator =(Severity && obj) TBAG_NOEXCEPT
 {
     this->swap(obj);
     return *this;
 }
 
-Severity::operator String() const noexcept
+Severity::operator String() const TBAG_NOEXCEPT
 {
     return _text;
 }
 
-Severity & Severity::copy(Severity const & obj) noexcept
+Severity & Severity::copy(Severity const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _text = obj._text;
@@ -77,7 +77,7 @@ Severity & Severity::copy(Severity const & obj) noexcept
     return *this;
 }
 
-void Severity::swap(Severity & obj) noexcept
+void Severity::swap(Severity & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         std::swap(_text, obj._text);
@@ -85,50 +85,50 @@ void Severity::swap(Severity & obj) noexcept
     }
 }
 
-Severity & Severity::operator |=(Severity const & obj) noexcept
+Severity & Severity::operator |=(Severity const & obj) TBAG_NOEXCEPT
 {
     _flag |= obj._flag;
     return *this;
 }
 
-Severity & Severity::operator ^=(Severity const & obj) noexcept
+Severity & Severity::operator ^=(Severity const & obj) TBAG_NOEXCEPT
 {
     _flag ^= obj._flag;
     return *this;
 }
 
-Severity & Severity::operator &=(Severity const & obj) noexcept
+Severity & Severity::operator &=(Severity const & obj) TBAG_NOEXCEPT
 {
     _flag &= obj._flag;
     return *this;
 }
 
-bool Severity::operator ==(Severity const & obj) const noexcept
+bool Severity::operator ==(Severity const & obj) const TBAG_NOEXCEPT
 {
     return _flag == obj._flag;
 }
 
-bool Severity::operator !=(Severity const & obj) const noexcept
+bool Severity::operator !=(Severity const & obj) const TBAG_NOEXCEPT
 {
     return _flag != obj._flag;
 }
 
-void Severity::setText(String const & text) noexcept
+void Severity::setText(String const & text) TBAG_NOEXCEPT
 {
     _text = text;
 }
 
-Severity::String Severity::getText() const noexcept
+Severity::String Severity::getText() const TBAG_NOEXCEPT
 {
     return _text;
 }
 
-void Severity::setFlag(Flag flag) noexcept
+void Severity::setFlag(Flag flag) TBAG_NOEXCEPT
 {
     _flag = flag;
 }
 
-Severity::Flag Severity::getFlag() const noexcept
+Severity::Flag Severity::getFlag() const TBAG_NOEXCEPT
 {
     return _flag;
 }

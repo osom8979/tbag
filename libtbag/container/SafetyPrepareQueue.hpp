@@ -112,7 +112,7 @@ public:
         Packet & operator =(Packet && obj) = default;
 
     public:
-        inline Key getId() const noexcept
+        inline Key getId() const TBAG_NOEXCEPT
         { return _id;    }
 
     public:
@@ -381,16 +381,16 @@ public:
     }
 
 public:
-    inline std::size_t size() const noexcept
+    inline std::size_t size() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _active_queue.size(); }
-    inline std::size_t sizeOfReading() const noexcept
+    inline std::size_t sizeOfReading() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _reading_map.size();  }
-    inline std::size_t sizeOfRemove() const noexcept
+    inline std::size_t sizeOfRemove() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _remove_map.size();   }
-    inline std::size_t sizeOfPrepare() const noexcept
+    inline std::size_t sizeOfPrepare() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _prepare_map.size();   }
 
-    inline std::size_t sizeOfAll() const noexcept
+    inline std::size_t sizeOfAll() const TBAG_NOEXCEPT
     {
         Guard g(_mutex);
         return   _active_queue.size()
@@ -399,13 +399,13 @@ public:
                +  _prepare_map.size();
     }
 
-    inline bool empty() const noexcept
+    inline bool empty() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _active_queue.empty(); }
-    inline bool emptyOfReading() const noexcept
+    inline bool emptyOfReading() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _reading_map.empty();  }
-    inline bool emptyOfRemove() const noexcept
+    inline bool emptyOfRemove() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _remove_map.empty();   }
-    inline bool emptyOfPrepare() const noexcept
+    inline bool emptyOfPrepare() const TBAG_NOEXCEPT
     { Guard g(_mutex); return _prepare_map.empty();   }
 };
 

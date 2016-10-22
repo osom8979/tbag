@@ -92,7 +92,7 @@ void ThreadGroup::joinAll()
     }
 }
 
-std::size_t ThreadGroup::size() const noexcept
+std::size_t ThreadGroup::size() const TBAG_NOEXCEPT
 {
     lock::ReadLockGuard guard(_lock);
     return _list.size();

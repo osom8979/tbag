@@ -87,11 +87,11 @@ public:
     BaseFlags & operator =(BaseFlags && obj) = default;
 
 public:
-    inline void clear() noexcept
+    inline void clear() TBAG_NOEXCEPT
     { _flags.clear(); }
-    inline std::size_t size() const noexcept
+    inline std::size_t size() const TBAG_NOEXCEPT
     { return _flags.size(); }
-    inline bool empty() const noexcept
+    inline bool empty() const TBAG_NOEXCEPT
     { return _flags.empty(); }
 
 public:

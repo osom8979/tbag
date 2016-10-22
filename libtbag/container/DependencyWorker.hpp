@@ -79,13 +79,13 @@ public:
     DependencyWorker & operator =(DependencyWorker && obj) = default;
 
 public:
-    inline std::size_t getMaxRecursive() const noexcept
+    inline std::size_t getMaxRecursive() const TBAG_NOEXCEPT
     { return _max_recursive; }
-    inline void setMaxRecursive(std::size_t count) noexcept
+    inline void setMaxRecursive(std::size_t count) TBAG_NOEXCEPT
     { _max_recursive = count; }
-    inline bool empty() const noexcept
+    inline bool empty() const TBAG_NOEXCEPT
     { return _workers.empty(); }
-    inline std::size_t size() const noexcept
+    inline std::size_t size() const TBAG_NOEXCEPT
     { return _workers.size(); }
 
 public:

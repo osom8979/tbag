@@ -73,7 +73,7 @@ static_assert(std::is_trivial< Size>::value,  "Size is not trivial type.");
 
 template <typename T>
 inline BasePoint<T> &
-operator +=(BasePoint<T> & p1, BasePoint<T> const & p2) noexcept
+operator +=(BasePoint<T> & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
 {
     p1.x += p2.x;
     p1.y += p2.y;
@@ -82,7 +82,7 @@ operator +=(BasePoint<T> & p1, BasePoint<T> const & p2) noexcept
 
 template <typename T>
 inline BasePoint<T> &
-operator -=(BasePoint<T> & p1, BasePoint<T> const & p2) noexcept
+operator -=(BasePoint<T> & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
 {
     p1.x -= p2.x;
     p1.y -= p2.y;
@@ -91,21 +91,21 @@ operator -=(BasePoint<T> & p1, BasePoint<T> const & p2) noexcept
 
 template <typename T>
 inline BasePoint<T>
-operator +(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
+operator +(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
 {
     return BasePoint<T>{p1.x + p2.x, p1.y + p2.y};
 }
 
 template <typename T>
 inline BasePoint<T>
-operator -(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
+operator -(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
 {
     return BasePoint<T>{p1.x - p2.x, p1.y - p2.y};
 }
 
 template <typename T>
 inline BasePoint<T> &
-operator +=(BasePoint<T> & p, BaseSize<T> const & s) noexcept
+operator +=(BasePoint<T> & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
     p.x += s.w;
     p.y += s.h;
@@ -114,7 +114,7 @@ operator +=(BasePoint<T> & p, BaseSize<T> const & s) noexcept
 
 template <typename T>
 inline BasePoint<T> &
-operator -=(BasePoint<T> & p, BaseSize<T> const & s) noexcept
+operator -=(BasePoint<T> & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
     p.x -= s.w;
     p.y -= s.h;
@@ -123,14 +123,14 @@ operator -=(BasePoint<T> & p, BaseSize<T> const & s) noexcept
 
 template <typename T>
 inline BasePoint<T>
-operator +(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
+operator +(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
     return BasePoint<T>{p.x + s.w, p.y + s.h};
 }
 
 template <typename T>
 inline BasePoint<T>
-operator -(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
+operator -(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
     return BasePoint<T>{p.x - s.w, p.y - s.h};
 }
@@ -141,7 +141,7 @@ operator -(BasePoint<T> const & p, BaseSize<T> const & s) noexcept
 
 template <typename T>
 inline BaseSize<T> &
-operator +=(BaseSize<T> & s1, BaseSize<T> const & s2) noexcept
+operator +=(BaseSize<T> & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
     s1.w += s2.w;
     s1.h += s2.h;
@@ -150,7 +150,7 @@ operator +=(BaseSize<T> & s1, BaseSize<T> const & s2) noexcept
 
 template <typename T>
 inline BaseSize<T> &
-operator -=(BaseSize<T> & s1, BaseSize<T> const & s2) noexcept
+operator -=(BaseSize<T> & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
     s1.w -= s2.w;
     s1.h -= s2.h;
@@ -159,14 +159,14 @@ operator -=(BaseSize<T> & s1, BaseSize<T> const & s2) noexcept
 
 template <typename T>
 inline BaseSize<T>
-operator +(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
+operator +(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
     return BaseSize<T>{s1.w + s2.w, s1.h + s2.h};
 }
 
 template <typename T>
 inline BaseSize<T>
-operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
+operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
     return BaseSize<T>{s1.w - s2.w, s1.h - s2.h};
 }
@@ -179,7 +179,7 @@ operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
  */
 template <typename T>
 inline BaseSize<T>
-operator +(BaseSize<T> const & s, BasePoint<T> const & p) noexcept = delete;
+operator +(BaseSize<T> const & s, BasePoint<T> const & p) TBAG_NOEXCEPT = delete;
 
 /**
  * You can not subtract a position at size.
@@ -189,7 +189,7 @@ operator +(BaseSize<T> const & s, BasePoint<T> const & p) noexcept = delete;
  */
 template <typename T>
 inline BaseSize<T>
-operator -(BaseSize<T> const & s, BasePoint<T> const & p) noexcept = delete;
+operator -(BaseSize<T> const & s, BasePoint<T> const & p) TBAG_NOEXCEPT = delete;
 
 // -----------------------------
 // Equals Operation overloading.
@@ -198,7 +198,7 @@ operator -(BaseSize<T> const & s, BasePoint<T> const & p) noexcept = delete;
 /** The Point are equal? */
 template <typename T>
 inline bool
-operator ==(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
+operator ==(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
 {
     if (p1.x != p2.x || p1.y != p2.y) {
         return false;
@@ -208,7 +208,7 @@ operator ==(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
 
 template <typename T>
 inline bool
-operator !=(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
+operator !=(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
 {
     return !(p1 == p2);
 }
@@ -216,7 +216,7 @@ operator !=(BasePoint<T> const & p1, BasePoint<T> const & p2) noexcept
 /** The Size are equal? */
 template <typename T>
 inline bool
-operator ==(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
+operator ==(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
     if (s1.w != s2.w || s1.h != s2.h) {
         return false;
@@ -226,7 +226,7 @@ operator ==(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
 
 template <typename T>
 inline bool
-operator !=(BaseSize<T> const & s1, BaseSize<T> const & s2) noexcept
+operator !=(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
     return !(s1 == s2);
 }
@@ -268,14 +268,14 @@ std::string toString(BaseSize<T> const & size)
 
 template <typename T1, typename T2 = T1>
 constexpr BasePoint<typename remove_cr<T1>::type>
-makePoint(T1 && x, T2 && y) noexcept
+makePoint(T1 && x, T2 && y) TBAG_NOEXCEPT
 {
     return makeTrivial2<BasePoint, T1, T2>(std::forward<T1>(x), std::forward<T2>(y));
 }
 
 template <typename T1, typename T2 = T1>
 constexpr BaseSize<typename remove_cr<T1>::type>
-makeSize(T1 && x, T2 && y) noexcept
+makeSize(T1 && x, T2 && y) TBAG_NOEXCEPT
 {
     return makeTrivial2<BaseSize, T1, T2>(std::forward<T1>(x), std::forward<T2>(y));
 }

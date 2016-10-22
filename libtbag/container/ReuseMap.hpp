@@ -122,14 +122,14 @@ public:
     }
 
 public:
-    inline std::size_t size() const noexcept
+    inline std::size_t size() const TBAG_NOEXCEPT
     { return _active_map.size(); }
-    inline bool empty() const noexcept
+    inline bool empty() const TBAG_NOEXCEPT
     { return _active_map.empty(); }
 
-    inline std::size_t sizeOfRemoveQueue() const noexcept
+    inline std::size_t sizeOfRemoveQueue() const TBAG_NOEXCEPT
     { return _remove_queue.size(); }
-    inline bool emptyOfRemoveQueue() const noexcept
+    inline bool emptyOfRemoveQueue() const TBAG_NOEXCEPT
     { return _remove_queue.empty(); }
 };
 

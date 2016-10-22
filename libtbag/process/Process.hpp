@@ -106,9 +106,9 @@ public:
     virtual ~Process();
 
 public:
-    inline int64_t getExitStatus() const noexcept
+    inline int64_t getExitStatus() const TBAG_NOEXCEPT
     { return _exit_status; }
-    inline int getTerminateSignal() const noexcept
+    inline int getTerminateSignal() const TBAG_NOEXCEPT
     { return _terminate_signal; }
 
 private:

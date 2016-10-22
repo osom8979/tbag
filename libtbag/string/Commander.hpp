@@ -72,9 +72,9 @@ public:
     BaseCommander & operator =(BaseCommander && obj) = default;
 
 public:
-    inline bool empty() const noexcept
+    inline bool empty() const TBAG_NOEXCEPT
     { return _commands.empty(); }
-    inline std::size_t size() const noexcept
+    inline std::size_t size() const TBAG_NOEXCEPT
     { return _commands.size(); }
 
     inline void setDefaultCallback(Callback const & callback)

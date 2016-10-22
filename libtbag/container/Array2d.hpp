@@ -60,38 +60,38 @@ public:
     difference_type step;
 
 public:
-    static constexpr std::size_t getDataSize() noexcept {
+    static constexpr std::size_t getDataSize() TBAG_NOEXCEPT {
         return sizeof(Value);
     }
 
 public:
-    Array2dIterator() noexcept : cursor(nullptr), step(1) {
+    Array2dIterator() TBAG_NOEXCEPT : cursor(nullptr), step(1) {
         // EMPTY.
     }
 
-    Array2dIterator(pointer cursor, difference_type step = 1) noexcept : cursor(cursor), step(step) {
+    Array2dIterator(pointer cursor, difference_type step = 1) TBAG_NOEXCEPT : cursor(cursor), step(step) {
         // EMPTY.
     }
 
-    Array2dIterator(Self const & obj) noexcept : cursor(obj.cursor), step(obj.step) {
+    Array2dIterator(Self const & obj) TBAG_NOEXCEPT : cursor(obj.cursor), step(obj.step) {
         // EMPTY.
     }
 
-    ~Array2dIterator() noexcept {
+    ~Array2dIterator() TBAG_NOEXCEPT {
         // EMPTY.
     }
 
 public:
-    reference operator *() const noexcept {
+    reference operator *() const TBAG_NOEXCEPT {
         return *cursor;
     }
 
-    pointer operator ->() const noexcept {
+    pointer operator ->() const TBAG_NOEXCEPT {
         return cursor;
     }
 
 public:
-    Self & operator =(Self const & obj) const noexcept {
+    Self & operator =(Self const & obj) const TBAG_NOEXCEPT {
         if (this != &obj) {
             this->cursor = obj.cursor;
             this->step   = obj.step;
@@ -100,33 +100,33 @@ public:
     }
 
 public:
-    bool operator ==(Self const & obj) const noexcept {
+    bool operator ==(Self const & obj) const TBAG_NOEXCEPT {
         return (this->cursor == obj.cursor ? true : false);
     }
 
-    bool operator !=(Self const & obj) const noexcept {
+    bool operator !=(Self const & obj) const TBAG_NOEXCEPT {
         return (this->cursor != obj.cursor ? true : false);
     }
 
 public:
-    Self & operator ++() noexcept {
+    Self & operator ++() TBAG_NOEXCEPT {
         cursor += step;
         return *this;
     }
 
-    Self & operator --() noexcept {
+    Self & operator --() TBAG_NOEXCEPT {
         cursor -= step;
         return *this;
     }
 
 public:
-    Self operator ++(int) noexcept {
+    Self operator ++(int) TBAG_NOEXCEPT {
         Self temp(*this);
         cursor += step;
         return temp;
     }
 
-    Self operator --(int) noexcept {
+    Self operator --(int) TBAG_NOEXCEPT {
         Self temp(*this);
         cursor -= step;
         return temp;
@@ -180,18 +180,18 @@ public:
     }
 
 public:
-    Array2d & operator =(Array2d const & obj) noexcept {
+    Array2d & operator =(Array2d const & obj) TBAG_NOEXCEPT {
         return this->copy(obj);
     }
 
-    Array2d & operator =(Array2d && obj) noexcept {
+    Array2d & operator =(Array2d && obj) TBAG_NOEXCEPT {
         this->clear();
         this->swap(obj);
         return *this;
     }
 
 public:
-    Array2d & copy(Array2d const & obj) noexcept {
+    Array2d & copy(Array2d const & obj) TBAG_NOEXCEPT {
         if (this != &obj) {
             this->resize(obj._width, obj._height);
             std::copy(obj._data, obj._data + obj.size(), this->_data);
@@ -199,7 +199,7 @@ public:
         return *this;
     }
 
-    void swap(Array2d & obj) noexcept {
+    void swap(Array2d & obj) TBAG_NOEXCEPT {
         if (this != &obj) {
             std::swap(this->_width,  obj._width);
             std::swap(this->_height, obj._height);
@@ -208,23 +208,23 @@ public:
     }
 
 public:
-    inline SizeType width() const noexcept {
+    inline SizeType width() const TBAG_NOEXCEPT {
         return _width;
     }
 
-    inline SizeType height() const noexcept {
+    inline SizeType height() const TBAG_NOEXCEPT {
         return _height;
     }
 
-    inline DataType * data() noexcept {
+    inline DataType * data() TBAG_NOEXCEPT {
         return _data;
     }
 
-    inline DataType const * data() const noexcept {
+    inline DataType const * data() const TBAG_NOEXCEPT {
         return _data;
     }
 
-    inline std::size_t size() const noexcept {
+    inline std::size_t size() const TBAG_NOEXCEPT {
         return _width * _height;
     }
 
@@ -296,38 +296,38 @@ public:
     }
 
 public:
-    Iterator begin() noexcept {
+    Iterator begin() TBAG_NOEXCEPT {
         return  Iterator(_data);
     }
 
-    ConstIterator cbegin() const noexcept {
+    ConstIterator cbegin() const TBAG_NOEXCEPT {
         return ConstIterator(_data);
     }
 
 public:
-    Iterator end() noexcept {
+    Iterator end() TBAG_NOEXCEPT {
         return  Iterator(_data + size());
     }
 
-    ConstIterator cend() const noexcept {
+    ConstIterator cend() const TBAG_NOEXCEPT {
         return ConstIterator(_data + size());
     }
 
 public:
-    Iterator beginWithHeight() noexcept {
+    Iterator beginWithHeight() TBAG_NOEXCEPT {
         return  Iterator(_data, _width);
     }
 
-    ConstIterator cbeginWithHeight() const noexcept {
+    ConstIterator cbeginWithHeight() const TBAG_NOEXCEPT {
         return  ConstIterator(_data, _width);
     }
 
 public:
-    Iterator endWithHeight() noexcept {
+    Iterator endWithHeight() TBAG_NOEXCEPT {
         return  Iterator(_data + size(), _width);
     }
 
-    ConstIterator cendWithHeight() const noexcept {
+    ConstIterator cendWithHeight() const TBAG_NOEXCEPT {
         return  ConstIterator(_data + size(), _width);
     }
 };

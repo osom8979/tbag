@@ -103,7 +103,7 @@ void Sqlite::close()
     }
 }
 
-bool Sqlite::isOpen() const noexcept
+bool Sqlite::isOpen() const TBAG_NOEXCEPT
 {
     return (_db != nullptr);
 }
@@ -162,12 +162,12 @@ bool Sqlite::endTransaction()
     return this->execute("END;");
 }
 
-int Sqlite::getErrorCode() const noexcept
+int Sqlite::getErrorCode() const TBAG_NOEXCEPT
 {
     return sqlite3_errcode(sqlite3_cast(_db));
 }
 
-std::string Sqlite::getErrorMessage() const noexcept
+std::string Sqlite::getErrorMessage() const TBAG_NOEXCEPT
 {
     return std::string(sqlite3_errmsg(sqlite3_cast(_db)));
 }

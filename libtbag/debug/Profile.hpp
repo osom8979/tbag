@@ -82,17 +82,17 @@ public:
     ~Profile();
 
 public:
-    inline bool isEnable() const noexcept
+    inline bool isEnable() const TBAG_NOEXCEPT
     { return _enable; }
-    inline void setEnable(bool enable = true) noexcept
+    inline void setEnable(bool enable = true) TBAG_NOEXCEPT
     { _enable = enable; }
 
-    inline std::size_t getCycleCount() const noexcept
+    inline std::size_t getCycleCount() const TBAG_NOEXCEPT
     { return _cycle_count; }
-    inline void setCycleCount(std::size_t cycle) noexcept
+    inline void setCycleCount(std::size_t cycle) TBAG_NOEXCEPT
     { _cycle_count = cycle; }
 
-    inline void setCallback(RepeatCallback const & callback) noexcept
+    inline void setCallback(RepeatCallback const & callback) TBAG_NOEXCEPT
     { _callback = callback; }
 
 private:
@@ -102,7 +102,7 @@ public:
     SharedTimer tick();
 
 public:
-    static char const * const getTimeUnitString() noexcept;
+    static char const * const getTimeUnitString() TBAG_NOEXCEPT;
 };
 
 } // namespace debug

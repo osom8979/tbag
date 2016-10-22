@@ -34,7 +34,7 @@ static_assert(std::is_pod<Channel>::value, "Channel is not POD type.");
 /**
  * Minimum channel value.
  */
-inline constexpr Channel channel_min() noexcept
+inline constexpr Channel channel_min() TBAG_NOEXCEPT
 {
     return std::numeric_limits<Channel>::min();
 }
@@ -42,7 +42,7 @@ inline constexpr Channel channel_min() noexcept
 /**
  * Maximum channel value.
  */
-inline constexpr Channel channel_max() noexcept
+inline constexpr Channel channel_max() TBAG_NOEXCEPT
 {
     return std::numeric_limits<Channel>::max();
 }
@@ -50,7 +50,7 @@ inline constexpr Channel channel_max() noexcept
 /**
  * Half channel value.
  */
-inline constexpr Channel channel_half() noexcept
+inline constexpr Channel channel_half() TBAG_NOEXCEPT
 {
     static_assert((channel_min() + channel_max()) != 0, "Divide by zero is NaN.");
     return static_cast<Channel>((channel_min() + channel_max()) / 2);
@@ -123,7 +123,7 @@ Color const ASBESTOS_COLOR      = {127, 140, 141, channel_max()};
 // --------
 
 /** The Rect are equal? */
-inline bool operator == (Color const & c1, Color const & c2) noexcept
+inline bool operator == (Color const & c1, Color const & c2) TBAG_NOEXCEPT
 {
     if (/**/c1.r != c2.r
          || c1.g != c2.g
@@ -134,7 +134,7 @@ inline bool operator == (Color const & c1, Color const & c2) noexcept
     return true;
 }
 
-inline bool operator != (Color const & c1, Color const & c2) noexcept
+inline bool operator != (Color const & c1, Color const & c2) TBAG_NOEXCEPT
 {
     return !(c1 == c2);
 }
@@ -143,13 +143,13 @@ inline bool operator != (Color const & c1, Color const & c2) noexcept
 constexpr Color makeColor(Channel r = channel_max()
                         , Channel g = channel_max()
                         , Channel b = channel_max()
-                        , Channel a = channel_max()) noexcept
+                        , Channel a = channel_max()) TBAG_NOEXCEPT
 {
     return Color{r, g, b, a};
 }
 
 /** Inverse color. */
-inline Color inverse(Color const & c) noexcept
+inline Color inverse(Color const & c) TBAG_NOEXCEPT
 {
     return Color{static_cast<Channel>(channel_max() ^ c.r)
                , static_cast<Channel>(channel_max() ^ c.g)

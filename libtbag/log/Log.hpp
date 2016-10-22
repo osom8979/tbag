@@ -28,8 +28,8 @@ namespace log {
 
 constexpr char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_logger__";
 
-//constexpr bool isAsynchronousLogging() noexcept { return true;  }
-//constexpr bool  isMultithreadLogging() noexcept { return false; }
+//constexpr bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
+//constexpr bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
 
 using Logger   = ::libtbag::log::details::Logger;
 using LogLevel = ::libtbag::log::details::LogLevel;

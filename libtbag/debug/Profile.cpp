@@ -81,7 +81,7 @@ Profile::SharedTimer Profile::tick()
     return SharedTimer();
 }
 
-char const * const Profile::getTimeUnitString() noexcept
+char const * const Profile::getTimeUnitString() TBAG_NOEXCEPT
 {
     return libtbag::time::DurationString<Profile::Duration>::value;
 }

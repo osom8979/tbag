@@ -36,13 +36,13 @@ public:
     ~FakeLock() = default;
 
 public:
-    inline void lock() noexcept
+    inline void lock() TBAG_NOEXCEPT
     { /* EMPTY. */ }
 
-    inline bool try_lock() noexcept
+    inline bool try_lock() TBAG_NOEXCEPT
     { return false; }
 
-    inline void unlock() noexcept
+    inline void unlock() TBAG_NOEXCEPT
     { /* EMPTY. */ }
 };
 

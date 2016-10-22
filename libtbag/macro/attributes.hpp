@@ -105,9 +105,11 @@
 
 #ifndef TBAG_NOEXCEPT
 # if defined(TBAG_HAS_NOEXCEPT)
-#  define TBAG_NOEXCEPT noexcept
+#  define TBAG_NOEXCEPT         noexcept
+#  define TBAG_NOEXCEPT_EXPR(e) noexcept(e)
 # else
 #  define TBAG_NOEXCEPT
+#  define TBAG_NOEXCEPT_EXPR(e)
 # endif
 #endif
 

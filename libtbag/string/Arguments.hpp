@@ -98,11 +98,11 @@ public:
     inline void setPointDelimiter(String point_delimiter)
     { _point_delimiter = point_delimiter; }
 
-    inline void clear() noexcept
+    inline void clear() TBAG_NOEXCEPT
     { _args.clear(); }
-    inline bool empty() const noexcept
+    inline bool empty() const TBAG_NOEXCEPT
     { return _args.empty(); }
-    inline std::size_t size() const noexcept
+    inline std::size_t size() const TBAG_NOEXCEPT
     { return _args.size(); }
 
     inline String get(std::size_t index) const

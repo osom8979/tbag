@@ -44,8 +44,8 @@ public:
     using Period   = typename Duration::period;
 
 public:
-    constexpr TimeInterpolator() noexcept = default;
-    virtual  ~TimeInterpolator() noexcept = default;
+    constexpr TimeInterpolator() TBAG_NOEXCEPT = default;
+    virtual  ~TimeInterpolator() TBAG_NOEXCEPT = default;
 
 public:
     /**
@@ -58,7 +58,7 @@ public:
      *
      * @return Interpolated value.
      */
-    virtual Rep getInterpolation(Rep rep) noexcept = 0;
+    virtual Rep getInterpolation(Rep rep) TBAG_NOEXCEPT = 0;
 };
 
 } // namespace animation

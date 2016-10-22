@@ -56,17 +56,17 @@ private:
     int _frame_count = 1;
 
 public:
-    FrameInterpolator() noexcept = default;
-    virtual ~FrameInterpolator() noexcept = default;
+    FrameInterpolator() TBAG_NOEXCEPT = default;
+    virtual ~FrameInterpolator() TBAG_NOEXCEPT = default;
 
 public:
-    inline void setStart(Rep start) noexcept
+    inline void setStart(Rep start) TBAG_NOEXCEPT
     { _start = start; }
-    inline void setFps(int fps) noexcept
+    inline void setFps(int fps) TBAG_NOEXCEPT
     { _fps = fps; }
-    inline void setFrameSize(int frame_count) noexcept
+    inline void setFrameSize(int frame_count) TBAG_NOEXCEPT
     { _frame_count = frame_count; }
-    inline void set(Rep start, int fps, int frame_count) noexcept
+    inline void set(Rep start, int fps, int frame_count) TBAG_NOEXCEPT
     {
         _start = start;
         _fps = fps;
@@ -85,7 +85,7 @@ public:
      *   int frame_number = static_cast<int>(animation.getInterpolation(millisec));
      *  @endcode
      */
-    virtual Rep getInterpolation(Rep rep) noexcept override;
+    virtual Rep getInterpolation(Rep rep) TBAG_NOEXCEPT override;
 };
 
 } // namespace animation

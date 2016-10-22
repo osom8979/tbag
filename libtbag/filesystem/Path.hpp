@@ -68,7 +68,7 @@ public:
     struct update_canonical { /* EMPTY */ };
 
 public:
-    static constexpr bool isWindowsStyle() noexcept
+    static constexpr bool isWindowsStyle() TBAG_NOEXCEPT
     {
 #if defined(__OS_WINDOWS__)
         return true;
@@ -77,7 +77,7 @@ public:
 #endif
     }
 
-    static constexpr bool isPosixStyle() noexcept
+    static constexpr bool isPosixStyle() TBAG_NOEXCEPT
     { return !isWindowsStyle(); }
 
 private:
@@ -85,7 +85,7 @@ private:
 
 // Constructors.
 public:
-    Path() noexcept(std::is_nothrow_default_constructible<String>::value);
+    Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<String>::value);
     explicit Path(String const & path);
     explicit Path(ValueType const * path);
 
@@ -125,7 +125,7 @@ public:
 
 // Accessors & Mutators.
 public:
-    inline String getString() const noexcept(noexcept(String(_path)))
+    inline String getString() const TBAG_NOEXCEPT(TBAG_NOEXCEPT(String(_path)))
     { return _path; }
     inline void setString(String const & path)
     { _path.assign(path); }

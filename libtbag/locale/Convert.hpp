@@ -41,7 +41,7 @@ struct ConvertException : public std::exception
     virtual ~ConvertException()
     { /* EMPTY. */ }
 
-    virtual const char * what() const noexcept override
+    virtual const char * what() const TBAG_NOEXCEPT override
     { return _message.c_str(); }
 };
 

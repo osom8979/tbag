@@ -13,7 +13,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-FrameInterpolator::Rep FrameInterpolator::getInterpolation(FrameInterpolator::Rep rep) noexcept
+FrameInterpolator::Rep FrameInterpolator::getInterpolation(FrameInterpolator::Rep rep) TBAG_NOEXCEPT
 {
     if (_fps == 0 || _frame_count == 0) {
         return 0;

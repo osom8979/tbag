@@ -51,7 +51,7 @@ private:
 public:
     bool addLogger(std::string const & name, Logger * new_logger);
     bool removeLogger(std::string const & name);
-    std::size_t getSize() const noexcept;
+    std::size_t getSize() const TBAG_NOEXCEPT;
     Logger * getLoggerPtr(std::string const & name);
 };
 

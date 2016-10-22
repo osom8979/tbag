@@ -48,9 +48,9 @@ public:
     ~Tcp();
 
 public:
-    inline void * getNative() noexcept
+    inline void * getNative() TBAG_NOEXCEPT
     { return _tcp; }
-    inline void const * getNative() const noexcept
+    inline void const * getNative() const TBAG_NOEXCEPT
     { return _tcp; }
 };
 

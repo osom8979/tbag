@@ -65,11 +65,11 @@ public:
     DynamicAsset & operator =(DynamicAsset && obj) = default;
 
 public:
-    inline bool empty() const noexcept(noexcept(_paths.empty()))
+    inline bool empty() const TBAG_NOEXCEPT(TBAG_NOEXCEPT(_paths.empty()))
     { return _paths.empty(); }
-    inline std::size_t size() const noexcept(noexcept(_paths.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT(TBAG_NOEXCEPT(_paths.size()))
     { return _paths.size(); }
-    inline void clear() noexcept(noexcept(_paths.clear()))
+    inline void clear() TBAG_NOEXCEPT(TBAG_NOEXCEPT(_paths.clear()))
     { _paths.clear(); }
 
 public:

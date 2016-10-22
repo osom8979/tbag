@@ -24,7 +24,7 @@ bool LoggerManager::removeLogger(std::string const & name)
     return (_logs.erase(name) >= 1 ? true : false);
 }
 
-std::size_t LoggerManager::getSize() const noexcept
+std::size_t LoggerManager::getSize() const TBAG_NOEXCEPT
 {
     return _logs.size();
 }

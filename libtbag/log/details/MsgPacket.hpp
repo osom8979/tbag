@@ -98,7 +98,7 @@ public:
     }
 
 public:
-    inline operator ValueType const * () const noexcept
+    inline operator ValueType const * () const TBAG_NOEXCEPT
     { return _message.c_str(); }
     inline operator String () const
     { return _message; }
@@ -130,16 +130,16 @@ public:
     }
 
 public:
-    inline String getString() const noexcept
+    inline String getString() const TBAG_NOEXCEPT
     { return _message;          }
-    inline ValueType const * getStringPointer() const noexcept
+    inline ValueType const * getStringPointer() const TBAG_NOEXCEPT
     { return _message.c_str();  }
-    inline std::size_t getStringSize() const noexcept
+    inline std::size_t getStringSize() const TBAG_NOEXCEPT
     { return _message.size();   }
-    inline Severity getSeverity() const noexcept
+    inline Severity getSeverity() const TBAG_NOEXCEPT
     {   return _severity;       }
 
-    inline void clearString() noexcept
+    inline void clearString() TBAG_NOEXCEPT
     { _message.clear();         }
 
 public:

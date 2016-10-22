@@ -32,7 +32,7 @@ NAMESPACE_LIBTBAG_OPEN
         class_name() : code(0) { }                              \
         class_name(int c) : code(c) { }                         \
                                                                 \
-        virtual const char * what() const noexcept override {   \
+        virtual const char * what() const TBAG_NOEXCEPT override {   \
             return MESSAGE;                                     \
         }                                                       \
     };

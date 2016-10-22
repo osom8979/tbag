@@ -40,7 +40,7 @@ public:
     ~UvLock();
 
 public:
-    inline void * getHandle() noexcept
+    inline void * getHandle() TBAG_NOEXCEPT
     { return _handle; }
 
 public:

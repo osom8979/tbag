@@ -96,11 +96,11 @@ public:
     MultiAsset & operator =(MultiAsset && obj) = default;
 
 public:
-    inline bool empty() const noexcept(noexcept(_assets.empty()))
+    inline bool empty() const TBAG_NOEXCEPT(TBAG_NOEXCEPT(_assets.empty()))
     { return _assets.empty(); }
-    inline std::size_t size() const noexcept(noexcept(_assets.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT(TBAG_NOEXCEPT(_assets.size()))
     { return _assets.size(); }
-    inline void clear() noexcept(noexcept(_assets.clear()))
+    inline void clear() TBAG_NOEXCEPT(TBAG_NOEXCEPT(_assets.clear()))
     { _assets.clear(); }
 
 public:

@@ -56,7 +56,7 @@ public:
 
 public:
     template <typename ... Args>
-    constexpr inline static Message makeMessage(Args && ... args) noexcept
+    constexpr inline static Message makeMessage(Args && ... args) TBAG_NOEXCEPT
     {
         return Message(std::forward<Args>(args) ...);
     }

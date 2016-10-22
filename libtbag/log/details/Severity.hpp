@@ -88,7 +88,7 @@ enum class LogLevel : int
     LEVEL_OFF       = ::libtbag::log::details::LOG_SEVERITY_OFF,
 };
 
-inline const char * const getLogString(int level) noexcept
+inline const char * const getLogString(int level) TBAG_NOEXCEPT
 {
     if (0 <= COMPARE_AND(level) < LOG_SEVERITY_COUNT) {
         return DEFAULT_SEVERITY[level].text;
@@ -113,42 +113,42 @@ private:
     Flag   _flag;
 
 public:
-    Severity() noexcept;
-    Severity(String const & text, Flag flag) noexcept;
-    Severity(DefaultSeverityProperty const & property) noexcept;
-    Severity(LogLevel level) noexcept;
+    Severity() TBAG_NOEXCEPT;
+    Severity(String const & text, Flag flag) TBAG_NOEXCEPT;
+    Severity(DefaultSeverityProperty const & property) TBAG_NOEXCEPT;
+    Severity(LogLevel level) TBAG_NOEXCEPT;
 
-    Severity(Severity const & obj) noexcept;
-    Severity(Severity && obj) noexcept;
-    ~Severity() noexcept;
-
-public:
-    Severity & operator =(Severity const & obj) noexcept;
-    Severity & operator =(Severity && obj) noexcept;
+    Severity(Severity const & obj) TBAG_NOEXCEPT;
+    Severity(Severity && obj) TBAG_NOEXCEPT;
+    ~Severity() TBAG_NOEXCEPT;
 
 public:
-    operator String() const noexcept;
+    Severity & operator =(Severity const & obj) TBAG_NOEXCEPT;
+    Severity & operator =(Severity && obj) TBAG_NOEXCEPT;
 
 public:
-    Severity & copy(Severity const & obj) noexcept;
-    void swap(Severity & obj) noexcept;
+    operator String() const TBAG_NOEXCEPT;
 
 public:
-    Severity & operator |=(Severity const & obj) noexcept;
-    Severity & operator ^=(Severity const & obj) noexcept;
-    Severity & operator &=(Severity const & obj) noexcept;
+    Severity & copy(Severity const & obj) TBAG_NOEXCEPT;
+    void swap(Severity & obj) TBAG_NOEXCEPT;
 
 public:
-    bool operator ==(Severity const & obj) const noexcept;
-    bool operator !=(Severity const & obj) const noexcept;
+    Severity & operator |=(Severity const & obj) TBAG_NOEXCEPT;
+    Severity & operator ^=(Severity const & obj) TBAG_NOEXCEPT;
+    Severity & operator &=(Severity const & obj) TBAG_NOEXCEPT;
 
 public:
-    void setText(String const & text) noexcept;
-    String getText() const noexcept;
+    bool operator ==(Severity const & obj) const TBAG_NOEXCEPT;
+    bool operator !=(Severity const & obj) const TBAG_NOEXCEPT;
 
 public:
-    void setFlag(Flag flag) noexcept;
-    Flag getFlag() const noexcept;
+    void setText(String const & text) TBAG_NOEXCEPT;
+    String getText() const TBAG_NOEXCEPT;
+
+public:
+    void setFlag(Flag flag) TBAG_NOEXCEPT;
+    Flag getFlag() const TBAG_NOEXCEPT;
 
 public:
     bool isContain(Flag flag);

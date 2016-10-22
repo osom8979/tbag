@@ -94,23 +94,23 @@ void Resource::swap(Resource & obj)
     }
 }
 
-void Resource::clear() noexcept
+void Resource::clear() TBAG_NOEXCEPT
 {
     _tag.assign("");
     _map.clear();
 }
 
-std::size_t Resource::size() const noexcept
+std::size_t Resource::size() const TBAG_NOEXCEPT
 {
     return _map.size();
 }
 
-void Resource::set_tag(std::string const & tag) noexcept
+void Resource::set_tag(std::string const & tag) TBAG_NOEXCEPT
 {
     _tag = tag;
 }
 
-std::string Resource::get_tag() const noexcept
+std::string Resource::get_tag() const TBAG_NOEXCEPT
 {
     return _tag;
 }

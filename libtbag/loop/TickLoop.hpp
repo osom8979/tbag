@@ -103,16 +103,16 @@ public:
     }
 
 public:
-    inline Duration getTimeStep() const noexcept
+    inline Duration getTimeStep() const TBAG_NOEXCEPT
     { return _time_step; }
 
 // Sync object.
 public:
-    inline void setExit(bool exit = true) noexcept
+    inline void setExit(bool exit = true) TBAG_NOEXCEPT
     { _exit = exit; }
-    inline void exit() noexcept
+    inline void exit() TBAG_NOEXCEPT
     { setExit(true); }
-    inline void setResultCode(int code) noexcept
+    inline void setResultCode(int code) TBAG_NOEXCEPT
     { _result_code = code; }
 };
 

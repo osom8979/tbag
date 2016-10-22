@@ -36,51 +36,51 @@ struct Pointer
     using Type = T;
     Type * ptr = nullptr;
 
-    constexpr Pointer(Type * p) noexcept : ptr(p)
+    constexpr Pointer(Type * p) TBAG_NOEXCEPT : ptr(p)
     { /* EMPTY. */ }
 
-    inline Pointer() noexcept : ptr(nullptr)
+    inline Pointer() TBAG_NOEXCEPT : ptr(nullptr)
     { /* EMPTY. */ }
     inline ~Pointer()
     { /* EMPTY. */ }
 
-    inline Pointer(Pointer const & obj) noexcept
+    inline Pointer(Pointer const & obj) TBAG_NOEXCEPT
     { if (this != &obj) { ptr = obj.ptr; } }
-    inline Pointer(Pointer && obj) noexcept
+    inline Pointer(Pointer && obj) TBAG_NOEXCEPT
     { if (this != &obj) { std::swap(ptr, obj.ptr); } }
 
-    inline Pointer & operator =(Type * p) noexcept
+    inline Pointer & operator =(Type * p) TBAG_NOEXCEPT
     { ptr = p; return *this; }
 
-    inline Pointer & operator =(Pointer const & obj) noexcept
+    inline Pointer & operator =(Pointer const & obj) TBAG_NOEXCEPT
     { if (this != &obj) { ptr = obj.ptr; } return *this; }
-    inline Pointer & operator =(Pointer && obj) noexcept
+    inline Pointer & operator =(Pointer && obj) TBAG_NOEXCEPT
     { if (this != &obj) { std::swap(ptr, obj.ptr); } return *this; }
 
-    inline bool operator ==(Pointer const & obj) const noexcept
+    inline bool operator ==(Pointer const & obj) const TBAG_NOEXCEPT
     { return ptr == obj.ptr; }
-    inline bool operator !=(Pointer const & obj) const noexcept
+    inline bool operator !=(Pointer const & obj) const TBAG_NOEXCEPT
     { return ptr != obj.ptr; }
-    inline bool operator <(Pointer const & obj) const noexcept
+    inline bool operator <(Pointer const & obj) const TBAG_NOEXCEPT
     { return ptr < obj.ptr; }
-    inline bool operator >(Pointer const & obj) const noexcept
+    inline bool operator >(Pointer const & obj) const TBAG_NOEXCEPT
     { return ptr > obj.ptr; }
 
-    inline operator bool() const noexcept
+    inline operator bool() const TBAG_NOEXCEPT
     { return ptr != nullptr; }
 
-    inline Type * operator ->() noexcept
+    inline Type * operator ->() TBAG_NOEXCEPT
     { return ptr; }
-    inline Type const * operator ->() const noexcept
+    inline Type const * operator ->() const TBAG_NOEXCEPT
     { return ptr; }
 
     template <typename CastType>
-    inline CastType * cast() noexcept
+    inline CastType * cast() TBAG_NOEXCEPT
     { return static_cast<CastType*>(ptr); }
 
-    inline Type * get() noexcept
+    inline Type * get() TBAG_NOEXCEPT
     { return ptr; }
-    inline Type const * get() const noexcept
+    inline Type const * get() const TBAG_NOEXCEPT
     { return ptr; }
 
     /**

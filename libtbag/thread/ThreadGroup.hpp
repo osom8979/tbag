@@ -61,7 +61,7 @@ public:
 
 public:
     void joinAll();
-    std::size_t size() const noexcept;
+    std::size_t size() const TBAG_NOEXCEPT;
 
 public:
     template <typename ...Args>

@@ -41,16 +41,16 @@ constexpr char    const * const TIMESTAMP_LONG_FORMAT      =  "%Y-%m-%dT%H:%M:%S
 constexpr wchar_t const * const WIDE_TIMESTAMP_LONG_FORMAT = L"%Y-%m-%dT%H:%M:%S";
 
 template <typename CharType = char>
-constexpr CharType const * const getDefaultTimestampLongFormat() noexcept;
+constexpr CharType const * const getDefaultTimestampLongFormat() TBAG_NOEXCEPT;
 
 template <>
-constexpr char const * const getDefaultTimestampLongFormat<char>() noexcept
+constexpr char const * const getDefaultTimestampLongFormat<char>() TBAG_NOEXCEPT
 {
     return TIMESTAMP_LONG_FORMAT;
 }
 
 template <>
-constexpr wchar_t const * const getDefaultTimestampLongFormat<wchar_t>() noexcept
+constexpr wchar_t const * const getDefaultTimestampLongFormat<wchar_t>() TBAG_NOEXCEPT
 {
     return WIDE_TIMESTAMP_LONG_FORMAT;
 }
@@ -70,16 +70,16 @@ constexpr char    const * const TIMESTAMP_SHORT_FORMAT      =  "%Y%m%dT%H%M%S";
 constexpr wchar_t const * const WIDE_TIMESTAMP_SHORT_FORMAT = L"%Y%m%dT%H%M%S";
 
 template <typename CharType>
-constexpr CharType const * const getDefaultTimestampShortFormat() noexcept;
+constexpr CharType const * const getDefaultTimestampShortFormat() TBAG_NOEXCEPT;
 
 template <>
-constexpr char const * const getDefaultTimestampShortFormat<char>() noexcept
+constexpr char const * const getDefaultTimestampShortFormat<char>() TBAG_NOEXCEPT
 {
     return TIMESTAMP_SHORT_FORMAT;
 }
 
 template <>
-constexpr wchar_t const * const getDefaultTimestampShortFormat<wchar_t>() noexcept
+constexpr wchar_t const * const getDefaultTimestampShortFormat<wchar_t>() TBAG_NOEXCEPT
 {
     return WIDE_TIMESTAMP_SHORT_FORMAT;
 }
@@ -114,11 +114,11 @@ inline void getMillisecString<wchar_t>(std::chrono::system_clock::time_point con
     result = getMillisecWcs(time);
 }
 
-TBAG_EXPORTS std::chrono::system_clock::time_point getNowSystemClock() noexcept;
-TBAG_EXPORTS time_t getTime(std::chrono::system_clock::time_point const & time_point) noexcept;
+TBAG_EXPORTS std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT;
+TBAG_EXPORTS time_t getTime(std::chrono::system_clock::time_point const & time_point) TBAG_NOEXCEPT;
 
 /** Obtain current time. */
-TBAG_EXPORTS time_t getCurrentTime() noexcept;
+TBAG_EXPORTS time_t getCurrentTime() TBAG_NOEXCEPT;
 TBAG_EXPORTS bool getGmtTime(time_t const & t, tm * output);
 TBAG_EXPORTS bool getLocalTime(time_t const & t, tm * output);
 

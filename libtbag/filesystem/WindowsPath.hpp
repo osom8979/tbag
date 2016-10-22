@@ -73,8 +73,8 @@ public:
     }
 
 public:
-    constexpr WindowsPath() noexcept = default;
-    ~WindowsPath() noexcept = default;
+    constexpr WindowsPath() TBAG_NOEXCEPT = default;
+    ~WindowsPath() TBAG_NOEXCEPT = default;
 
 // Filename query.
 public:
@@ -87,7 +87,7 @@ public:
      */
     struct ProhibitedBy
     {
-        inline bool operator()(ValueType v) const noexcept {
+        inline bool operator()(ValueType v) const TBAG_NOEXCEPT {
             if (0x00 <= COMPARE_AND(v) <= 0x1F) {
                 return true;
             }
@@ -105,7 +105,7 @@ public:
         }
     };
 
-    static bool isProhibitedFilename(String const & path) noexcept {
+    static bool isProhibitedFilename(String const & path) TBAG_NOEXCEPT {
         return std::any_of(path.begin(), path.end(), ProhibitedBy());
     }
 

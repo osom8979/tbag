@@ -110,7 +110,7 @@ public:
         return _result_code;
     }
 
-    inline bool isRunning() const noexcept
+    inline bool isRunning() const TBAG_NOEXCEPT
     {
         if (_mutex.try_lock()) {
             _mutex.unlock();
@@ -211,39 +211,39 @@ private:
     }
 
 public:
-    inline TimeUnit getTimeStep() const noexcept {
+    inline TimeUnit getTimeStep() const TBAG_NOEXCEPT {
         return this->_time_step;
     }
 
 // Sync object.
 public:
-    inline void setExit(bool exit = true) noexcept {
+    inline void setExit(bool exit = true) TBAG_NOEXCEPT {
         this->_exit = exit;
     }
 
-    inline void exit() noexcept {
+    inline void exit() TBAG_NOEXCEPT {
         this->setExit(true);
     }
 
-    inline void setResultCode(int code) noexcept {
+    inline void setResultCode(int code) TBAG_NOEXCEPT {
         this->_result_code = code;
     }
 
 // Loop variables.
 public:
-    inline TimePoint getPreStart() const noexcept {
+    inline TimePoint getPreStart() const TBAG_NOEXCEPT {
         return this->_pre_start;
     }
 
-    inline TimePoint getNowStart() const noexcept {
+    inline TimePoint getNowStart() const TBAG_NOEXCEPT {
         return this->_now_start;
     }
 
-    inline TimeUnit  getDuration() const noexcept {
+    inline TimeUnit  getDuration() const TBAG_NOEXCEPT {
         return this->_duration;
     }
 
-    inline TimeUnit  getTimeLag() const noexcept {
+    inline TimeUnit  getTimeLag() const TBAG_NOEXCEPT {
         return this->_time_lag;
     }
 };

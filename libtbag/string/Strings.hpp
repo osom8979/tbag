@@ -154,8 +154,8 @@ public:
             , "String::value_type must be the same type as ValueType");
 
 public:
-    constexpr BaseStrings() noexcept = default;
-    ~BaseStrings() noexcept = default;
+    constexpr BaseStrings() TBAG_NOEXCEPT = default;
+    ~BaseStrings() TBAG_NOEXCEPT = default;
 
 public:
     /**

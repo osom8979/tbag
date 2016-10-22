@@ -33,7 +33,7 @@ struct BitFlagImplement<BaseType, true>
 {
     static_assert(std::is_unsigned<BaseType>::value, "BaseType must be a unsigned");
 
-    static constexpr BaseType max() noexcept
+    static constexpr BaseType max() TBAG_NOEXCEPT
     {
         return std::numeric_limits<BaseType>::max() ^ (std::numeric_limits<BaseType>::max() >> 1);
     }
@@ -44,7 +44,7 @@ struct BitFlagImplement<BaseType, false>
 {
     static_assert(std::is_signed<BaseType>::value, "BaseType must be a signed");
 
-    static constexpr BaseType max() noexcept
+    static constexpr BaseType max() TBAG_NOEXCEPT
     {
         return (std::numeric_limits<BaseType>::max() + 1);
     }
@@ -54,7 +54,7 @@ struct BitFlagImplement<BaseType, false>
  * @see <https://en.wikipedia.org/wiki/Arithmetic_shift>
  * @see <https://en.wikipedia.org/wiki/Bitwise_operation#Arithmetic_shift>
  */
-constexpr bool isArithmeticShift() noexcept
+constexpr bool isArithmeticShift() TBAG_NOEXCEPT
 {
     using TestBitFlag = BitFlagImplement<char, false>;
     return ((TestBitFlag::max() >> 1) & TestBitFlag::max());
@@ -64,7 +64,7 @@ constexpr bool isArithmeticShift() noexcept
  * @see <https://en.wikipedia.org/wiki/Bitwise_operation#Logical_shift>
  * @see <https://en.wikipedia.org/wiki/Logical_shift>
  */
-constexpr bool isLogicalShift() noexcept
+constexpr bool isLogicalShift() TBAG_NOEXCEPT
 {
     return !isArithmeticShift();
 }
@@ -74,12 +74,12 @@ struct BitFlag
 {
     using Implement = BitFlagImplement<BaseType, std::is_unsigned<BaseType>::value>;
 
-    static constexpr BaseType max() noexcept
+    static constexpr BaseType max() TBAG_NOEXCEPT
     {
         return Implement::max();
     }
 
-    static inline BaseType getRightLogicalShift(BaseType flag) noexcept
+    static inline BaseType getRightLogicalShift(BaseType flag) TBAG_NOEXCEPT
     {
         if (isArithmeticShift() && std::is_signed<BaseType>::value && (flag & max())) {
             return (flag >> 1) ^ max();
@@ -87,7 +87,7 @@ struct BitFlag
         return flag >> 1;
     }
 
-    static BaseType findHighBit(BaseType flag) noexcept
+    static BaseType findHighBit(BaseType flag) TBAG_NOEXCEPT
     {
         BaseType mask = max();
         while (mask != 0 && !(flag & mask)) {
