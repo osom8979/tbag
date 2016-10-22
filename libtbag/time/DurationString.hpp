@@ -25,24 +25,43 @@ namespace time {
 
 template <typename Duration> struct DurationString;
 
-template <> struct DurationString<std::chrono::nanoseconds>
-{ static constexpr char const * const value = "nano"; };
-template <> struct DurationString<std::chrono::microseconds>
-{ static constexpr char const * const value = "micro"; };
-template <> struct DurationString<std::chrono::milliseconds>
-{ static constexpr char const * const value = "milli"; };
-template <> struct DurationString<std::chrono::seconds>
-{ static constexpr char const * const value = "sec"; };
-template <> struct DurationString<std::chrono::minutes>
-{ static constexpr char const * const value = "min"; };
-template <> struct DurationString<std::chrono::hours>
-{ static constexpr char const * const value = "hour"; };
+#ifndef TBAG_TIME_DURATIONSTRING_IMPL
+# if defined(TBAG_HAS_CONSTEXPR)
+#  define TBAG_TIME_DURATIONSTRING_IMPL(duration, name) \
+    template <> struct DurationString<duration>         \
+    { static constexpr char const * const value = name; };
+# else
+#  define TBAG_TIME_DURATIONSTRING_IMPL(duration, name) \
+    template <> struct DurationString<duration>         \
+    { static char const * const value; };               \
+    const char * const DurationString<duration>::value = name;
+# endif
+#endif // TBAG_TIME_DURATIONSTRING_IMPL
 
-// TODO: CHECK THIS CLASS!!
+TBAG_CONSTEXPR char const * const    __TBAG_NANO_DURATION_STRING__ =  "nano";
+TBAG_CONSTEXPR char const * const   __TBAG_MICRO_DURATION_STRING__ = "micro";
+TBAG_CONSTEXPR char const * const   __TBAG_MILLI_DURATION_STRING__ = "milli";
+TBAG_CONSTEXPR char const * const     __TBAG_SEC_DURATION_STRING__ =   "sec";
+TBAG_CONSTEXPR char const * const     __TBAG_MIN_DURATION_STRING__ =   "min";
+TBAG_CONSTEXPR char const * const    __TBAG_HOUR_DURATION_STRING__ =  "hour";
+TBAG_CONSTEXPR char const * const __TBAG_DEFAULT_DURATION_STRING__ =   "dur";
+
+TBAG_TIME_DURATIONSTRING_IMPL(std::chrono::nanoseconds,   __TBAG_NANO_DURATION_STRING__);
+TBAG_TIME_DURATIONSTRING_IMPL(std::chrono::microseconds, __TBAG_MICRO_DURATION_STRING__);
+TBAG_TIME_DURATIONSTRING_IMPL(std::chrono::milliseconds, __TBAG_MILLI_DURATION_STRING__);
+TBAG_TIME_DURATIONSTRING_IMPL(std::chrono::seconds,        __TBAG_SEC_DURATION_STRING__);
+TBAG_TIME_DURATIONSTRING_IMPL(std::chrono::minutes,        __TBAG_MIN_DURATION_STRING__);
+TBAG_TIME_DURATIONSTRING_IMPL(std::chrono::hours,         __TBAG_HOUR_DURATION_STRING__);
+
+#if defined(TBAG_HAS_CONSTEXPR)
 template <typename Duration> struct DurationString
-{
-	static constexpr char const * const value = "duration";
-};
+{ static constexpr char const * const value = __TBAG_DEFAULT_DURATION_STRING__; };
+#else
+template <typename Duration> struct DurationString
+{ static char const * const value; };
+template <typename Duration>
+const char * const DurationString<Duration>::value = __TBAG_DEFAULT_DURATION_STRING__;
+#endif
 
 } // namespace time
 
