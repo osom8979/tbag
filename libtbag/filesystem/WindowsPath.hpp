@@ -67,7 +67,7 @@ public:
     }
 
 public:
-    constexpr WindowsPath() TBAG_NOEXCEPT = default;
+    TBAG_CONSTEXPR WindowsPath() TBAG_NOEXCEPT = default;
     ~WindowsPath() TBAG_NOEXCEPT = default;
 
 // Filename query.

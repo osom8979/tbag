@@ -33,7 +33,7 @@ NAMESPACE_LIBTBAG_OPEN
 class Random : public Noncopyable
 {
 public:
-    constexpr Random() TBAG_NOEXCEPT = default;
+    TBAG_CONSTEXPR Random() TBAG_NOEXCEPT = default;
     ~Random() TBAG_NOEXCEPT = default;
 
 public:

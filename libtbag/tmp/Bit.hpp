@@ -33,7 +33,7 @@ struct BitFlagImplement<BaseType, true>
 {
     static_assert(std::is_unsigned<BaseType>::value, "BaseType must be a unsigned");
 
-    static constexpr BaseType max() TBAG_NOEXCEPT
+    static TBAG_CONSTEXPR BaseType max() TBAG_NOEXCEPT
     {
         return std::numeric_limits<BaseType>::max() ^ (std::numeric_limits<BaseType>::max() >> 1);
     }
@@ -44,7 +44,7 @@ struct BitFlagImplement<BaseType, false>
 {
     static_assert(std::is_signed<BaseType>::value, "BaseType must be a signed");
 
-    static constexpr BaseType max() TBAG_NOEXCEPT
+    static TBAG_CONSTEXPR BaseType max() TBAG_NOEXCEPT
     {
         return (std::numeric_limits<BaseType>::max() + 1);
     }
@@ -54,7 +54,7 @@ struct BitFlagImplement<BaseType, false>
  * @see <https://en.wikipedia.org/wiki/Arithmetic_shift>
  * @see <https://en.wikipedia.org/wiki/Bitwise_operation#Arithmetic_shift>
  */
-constexpr bool isArithmeticShift() TBAG_NOEXCEPT
+TBAG_CONSTEXPR bool isArithmeticShift() TBAG_NOEXCEPT
 {
     using TestBitFlag = BitFlagImplement<char, false>;
     return ((TestBitFlag::max() >> 1) & TestBitFlag::max());
@@ -64,7 +64,7 @@ constexpr bool isArithmeticShift() TBAG_NOEXCEPT
  * @see <https://en.wikipedia.org/wiki/Bitwise_operation#Logical_shift>
  * @see <https://en.wikipedia.org/wiki/Logical_shift>
  */
-constexpr bool isLogicalShift() TBAG_NOEXCEPT
+TBAG_CONSTEXPR bool isLogicalShift() TBAG_NOEXCEPT
 {
     return !isArithmeticShift();
 }
@@ -74,7 +74,7 @@ struct BitFlag
 {
     using Implement = BitFlagImplement<BaseType, std::is_unsigned<BaseType>::value>;
 
-    static constexpr BaseType max() TBAG_NOEXCEPT
+    static TBAG_CONSTEXPR BaseType max() TBAG_NOEXCEPT
     {
         return Implement::max();
     }

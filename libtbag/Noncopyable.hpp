@@ -29,7 +29,7 @@ NAMESPACE_LIBTBAG_OPEN
 struct Noncopyable
 {
 protected:
-    constexpr Noncopyable() = default;
+    TBAG_CONSTEXPR Noncopyable() = default;
     ~Noncopyable() = default;
 
 protected:

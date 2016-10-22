@@ -60,7 +60,7 @@ public:
     difference_type step;
 
 public:
-    static constexpr std::size_t getDataSize() TBAG_NOEXCEPT {
+    static TBAG_CONSTEXPR std::size_t getDataSize() TBAG_NOEXCEPT {
         return sizeof(Value);
     }
 

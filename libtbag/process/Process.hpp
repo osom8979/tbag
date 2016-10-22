@@ -89,8 +89,8 @@ public:
     using UniqueProcOptionPimpl = std::unique_ptr<ProcOptionPimpl>;
 
 public:
-    constexpr static int64_t const UNKNOWN_EXIT_CODE        = std::numeric_limits<int64_t>::min();
-    constexpr static int     const UNKNOWN_TERMINATE_SIGNAL = std::numeric_limits<int    >::min();
+    TBAG_CONSTEXPR static int64_t const UNKNOWN_EXIT_CODE        = std::numeric_limits<int64_t>::min();
+    TBAG_CONSTEXPR static int     const UNKNOWN_TERMINATE_SIGNAL = std::numeric_limits<int    >::min();
 
 protected:
     UniqueEventLoop        _loop;

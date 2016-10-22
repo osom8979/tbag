@@ -43,7 +43,7 @@ public:
     using String  = typename Message::String;
 
 public:
-    constexpr BaseSinkInterface() = default;
+    TBAG_CONSTEXPR BaseSinkInterface() = default;
     virtual ~BaseSinkInterface() = default;
 
 public:
@@ -56,7 +56,7 @@ public:
 
 public:
     template <typename ... Args>
-    constexpr inline static Message makeMessage(Args && ... args) TBAG_NOEXCEPT
+    TBAG_CONSTEXPR inline static Message makeMessage(Args && ... args) TBAG_NOEXCEPT
     {
         return Message(std::forward<Args>(args) ...);
     }

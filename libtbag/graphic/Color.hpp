@@ -34,7 +34,7 @@ static_assert(std::is_pod<Channel>::value, "Channel is not POD type.");
 /**
  * Minimum channel value.
  */
-inline constexpr Channel channel_min() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR Channel channel_min() TBAG_NOEXCEPT
 {
     return std::numeric_limits<Channel>::min();
 }
@@ -42,7 +42,7 @@ inline constexpr Channel channel_min() TBAG_NOEXCEPT
 /**
  * Maximum channel value.
  */
-inline constexpr Channel channel_max() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR Channel channel_max() TBAG_NOEXCEPT
 {
     return std::numeric_limits<Channel>::max();
 }
@@ -50,9 +50,11 @@ inline constexpr Channel channel_max() TBAG_NOEXCEPT
 /**
  * Half channel value.
  */
-inline constexpr Channel channel_half() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
 {
+#if defined(TBAG_HAS_CONSTEXPR)
     static_assert((channel_min() + channel_max()) != 0, "Divide by zero is NaN.");
+#endif
     return static_cast<Channel>((channel_min() + channel_max()) / 2);
 }
 
@@ -140,7 +142,7 @@ inline bool operator != (Color const & c1, Color const & c2) TBAG_NOEXCEPT
 }
 
 /** Create color instance. */
-constexpr Color makeColor(Channel r = channel_max()
+TBAG_CONSTEXPR Color makeColor(Channel r = channel_max()
                         , Channel g = channel_max()
                         , Channel b = channel_max()
                         , Channel a = channel_max()) TBAG_NOEXCEPT

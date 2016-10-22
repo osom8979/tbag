@@ -44,8 +44,10 @@ public:
     using StringVector = std::vector<String>;
 
 public:
-    static constexpr Value const * const DEFAULT_DELIMITER       = CHAR_OR_WIDECHAR(Value, ",");
-    static constexpr Value const * const DEFAULT_POINT_DELIMITER = CHAR_OR_WIDECHAR(Value, "x");
+    static TBAG_CONSTEXPR Value const * const getDefaultDelimiter() TBAG_NOEXCEPT
+    { return CHAR_OR_WIDECHAR(Value, ","); }
+    static TBAG_CONSTEXPR Value const * const getDefaultPointDelimiter() TBAG_NOEXCEPT
+    { return CHAR_OR_WIDECHAR(Value, "x"); }
 
 private:
     String       _name;
@@ -56,15 +58,15 @@ private:
     String _point_delimiter;
 
 public:
-    BaseArguments() : _name(), _args(), _delimiter(DEFAULT_DELIMITER), _point_delimiter(DEFAULT_POINT_DELIMITER)
+    BaseArguments() : _name(), _args(), _delimiter(getDefaultDelimiter()), _point_delimiter(getDefaultPointDelimiter())
     {
         // EMPTY.
     }
 
     BaseArguments(String name
                 , String arguments
-                , String delimiter       = DEFAULT_DELIMITER
-                , String point_delimiter = DEFAULT_POINT_DELIMITER) throw(InitializeException)
+                , String delimiter       = getDefaultDelimiter()
+                , String point_delimiter = getDefaultPointDelimiter()) throw(InitializeException)
             : _name(name), _args(), _delimiter(delimiter), _point_delimiter(point_delimiter)
     {
         if (parse(arguments) == false) {

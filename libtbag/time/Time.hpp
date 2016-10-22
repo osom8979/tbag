@@ -37,20 +37,20 @@ namespace time {
  *   YYYY-MM-DDThh:mm:ss
  *  @endcode
  */
-constexpr char    const * const TIMESTAMP_LONG_FORMAT      =  "%Y-%m-%dT%H:%M:%S";
-constexpr wchar_t const * const WIDE_TIMESTAMP_LONG_FORMAT = L"%Y-%m-%dT%H:%M:%S";
+TBAG_CONSTEXPR char    const * const TIMESTAMP_LONG_FORMAT      =  "%Y-%m-%dT%H:%M:%S";
+TBAG_CONSTEXPR wchar_t const * const WIDE_TIMESTAMP_LONG_FORMAT = L"%Y-%m-%dT%H:%M:%S";
 
 template <typename CharType = char>
-constexpr CharType const * const getDefaultTimestampLongFormat() TBAG_NOEXCEPT;
+TBAG_CONSTEXPR CharType const * const getDefaultTimestampLongFormat() TBAG_NOEXCEPT;
 
 template <>
-constexpr char const * const getDefaultTimestampLongFormat<char>() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR char const * const getDefaultTimestampLongFormat<char>() TBAG_NOEXCEPT
 {
     return TIMESTAMP_LONG_FORMAT;
 }
 
 template <>
-constexpr wchar_t const * const getDefaultTimestampLongFormat<wchar_t>() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR wchar_t const * const getDefaultTimestampLongFormat<wchar_t>() TBAG_NOEXCEPT
 {
     return WIDE_TIMESTAMP_LONG_FORMAT;
 }
@@ -66,29 +66,29 @@ constexpr wchar_t const * const getDefaultTimestampLongFormat<wchar_t>() TBAG_NO
  *   YYYYMMDDThhmmss
  *  @endcode
  */
-constexpr char    const * const TIMESTAMP_SHORT_FORMAT      =  "%Y%m%dT%H%M%S";
-constexpr wchar_t const * const WIDE_TIMESTAMP_SHORT_FORMAT = L"%Y%m%dT%H%M%S";
+TBAG_CONSTEXPR char    const * const TIMESTAMP_SHORT_FORMAT      =  "%Y%m%dT%H%M%S";
+TBAG_CONSTEXPR wchar_t const * const WIDE_TIMESTAMP_SHORT_FORMAT = L"%Y%m%dT%H%M%S";
 
 template <typename CharType>
-constexpr CharType const * const getDefaultTimestampShortFormat() TBAG_NOEXCEPT;
+TBAG_CONSTEXPR CharType const * const getDefaultTimestampShortFormat() TBAG_NOEXCEPT;
 
 template <>
-constexpr char const * const getDefaultTimestampShortFormat<char>() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR char const * const getDefaultTimestampShortFormat<char>() TBAG_NOEXCEPT
 {
     return TIMESTAMP_SHORT_FORMAT;
 }
 
 template <>
-constexpr wchar_t const * const getDefaultTimestampShortFormat<wchar_t>() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR wchar_t const * const getDefaultTimestampShortFormat<wchar_t>() TBAG_NOEXCEPT
 {
     return WIDE_TIMESTAMP_SHORT_FORMAT;
 }
 
 /** Years since 1900 */
-constexpr int const YEARS_SINCE = 1900;
+TBAG_CONSTEXPR int const YEARS_SINCE = 1900;
 
 /** Months since january: 0-11 */
-constexpr int const MONTHS_SINCE = 1;
+TBAG_CONSTEXPR int const MONTHS_SINCE = 1;
 
 /** millisecond part of the second 0-999. */
 TBAG_EXPORTS int getMillisec(std::chrono::system_clock::time_point const & time);

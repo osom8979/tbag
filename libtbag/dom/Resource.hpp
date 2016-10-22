@@ -24,7 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace dom {
 
-constexpr bool isCompactXmlFile() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
 {
     return false;
 }

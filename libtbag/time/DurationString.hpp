@@ -29,7 +29,7 @@ template <typename Duration> struct DurationString;
 # if defined(TBAG_HAS_CONSTEXPR)
 #  define TBAG_TIME_DURATIONSTRING_IMPL(duration, name) \
     template <> struct DurationString<duration>         \
-    { static constexpr char const * const value = name; };
+    { static TBAG_CONSTEXPR char const * const value = name; };
 # else
 #  define TBAG_TIME_DURATIONSTRING_IMPL(duration, name) \
     template <> struct DurationString<duration>         \
@@ -55,7 +55,7 @@ TBAG_TIME_DURATIONSTRING_IMPL(std::chrono::hours,         __TBAG_HOUR_DURATION_S
 
 #if defined(TBAG_HAS_CONSTEXPR)
 template <typename Duration> struct DurationString
-{ static constexpr char const * const value = __TBAG_DEFAULT_DURATION_STRING__; };
+{ static TBAG_CONSTEXPR char const * const value = __TBAG_DEFAULT_DURATION_STRING__; };
 #else
 template <typename Duration> struct DurationString
 { static char const * const value; };

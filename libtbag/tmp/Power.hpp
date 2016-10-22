@@ -30,7 +30,7 @@ namespace tmp {
 template <uint64_t _Base, uint64_t _Power>
 struct Power
 {
-    static constexpr uint64_t const value = _Base * Power<_Base, _Power -1>::value;
+    static TBAG_CONSTEXPR uint64_t const value = _Base * Power<_Base, _Power -1>::value;
 };
 
 /**
@@ -39,7 +39,7 @@ struct Power
 template <uint64_t _Base>
 struct Power<_Base, 1>
 {
-    static constexpr uint64_t const value = _Base;
+    static TBAG_CONSTEXPR uint64_t const value = _Base;
 };
 
 /**
@@ -49,7 +49,7 @@ template <uint64_t _Base>
 struct Power<_Base, 0>
 {
     static_assert(_Base != 0, "0 Power 0 is NaN.");
-    static constexpr uint64_t const value = 1;
+    static TBAG_CONSTEXPR uint64_t const value = 1;
 };
 
 } // namespace tmp

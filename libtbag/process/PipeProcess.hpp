@@ -36,11 +36,11 @@ namespace process {
 class PipeProcess : public Process
 {
 public:
-    static constexpr int const STANDARD_INPUT_FD  = 0; ///< @c stdin
-    static constexpr int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
-    static constexpr int const STANDARD_ERROR_FD  = 2; ///< @c stderr
+    static TBAG_CONSTEXPR int const STANDARD_INPUT_FD  = 0; ///< @c stdin
+    static TBAG_CONSTEXPR int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
+    static TBAG_CONSTEXPR int const STANDARD_ERROR_FD  = 2; ///< @c stderr
 
-    static constexpr int const STDIO_SIZE = 3;
+    static TBAG_CONSTEXPR int const STDIO_SIZE = 3;
 
 private:
     uv_pipe_t _pipe_stdin;

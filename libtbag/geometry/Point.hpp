@@ -267,14 +267,14 @@ std::string toString(BaseSize<T> const & size)
 // -----------------
 
 template <typename T1, typename T2 = T1>
-constexpr BasePoint<typename remove_cr<T1>::type>
+TBAG_CONSTEXPR BasePoint<typename remove_cr<T1>::type>
 makePoint(T1 && x, T2 && y) TBAG_NOEXCEPT
 {
     return makeTrivial2<BasePoint, T1, T2>(std::forward<T1>(x), std::forward<T2>(y));
 }
 
 template <typename T1, typename T2 = T1>
-constexpr BaseSize<typename remove_cr<T1>::type>
+TBAG_CONSTEXPR BaseSize<typename remove_cr<T1>::type>
 makeSize(T1 && x, T2 && y) TBAG_NOEXCEPT
 {
     return makeTrivial2<BaseSize, T1, T2>(std::forward<T1>(x), std::forward<T2>(y));

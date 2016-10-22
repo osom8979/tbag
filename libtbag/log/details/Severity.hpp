@@ -27,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-constexpr char const * const DEFAULT_SEVERITY [] = {
+TBAG_CONSTEXPR char const * const DEFAULT_SEVERITY [] = {
         "EMERGENCY"     , // System is unusable.
         "ALERT"         , // Action must be taken immediately.
         "CRITICAL"      , // Critical conditions.

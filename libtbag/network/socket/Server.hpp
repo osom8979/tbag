@@ -45,9 +45,6 @@ class TBAG_EXPORTS Server : public libtbag::loop::event::UvEventHandler
 public:
     using Loop = libtbag::loop::UvEventLoop;
 
-public:
-    static constexpr int LISTEN_QUEUE_LIMIT = 128;
-
 private:
     Loop _loop;
     Tcp  _tcp;

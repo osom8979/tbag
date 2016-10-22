@@ -66,7 +66,7 @@ public:
     }
 
 public:
-    constexpr PosixPath() TBAG_NOEXCEPT = default;
+    TBAG_CONSTEXPR PosixPath() TBAG_NOEXCEPT = default;
     ~PosixPath() TBAG_NOEXCEPT = default;
 
 // Filename query.

@@ -27,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace math {
 
-constexpr float const DEFAULT_FLOATING_POINT_EQUALS_EPSILON = 0.001;
+TBAG_CONSTEXPR float const DEFAULT_FLOATING_POINT_EQUALS_EPSILON = 0.001;
 
 /**
  * Check the equals for the floating point types.

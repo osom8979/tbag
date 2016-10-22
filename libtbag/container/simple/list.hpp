@@ -46,7 +46,7 @@ struct Node
 };
 
 template <typename T>
-constexpr Node<typename remove_cr<T>::type> *
+TBAG_CONSTEXPR Node<typename remove_cr<T>::type> *
 createNode(T && data, Node<typename remove_cr<T>::type> * node = nullptr)
 {
     typedef typename remove_cr<T>::type __remove_cr;

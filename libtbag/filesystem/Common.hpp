@@ -65,7 +65,7 @@ std::size_t const MAX_PATH_BUFFER_SIZE = MAX_PATH_LENGTH_OF_WINDOWS_API;
 char const PATH_SEPARATOR_OF_WINDOWS = '\\';
 char const PATH_SEPARATOR_OF_POSIX   = '/';
 
-constexpr char const getPathSeparator() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR char const getPathSeparator() TBAG_NOEXCEPT
 {
 #if defined(__OS_WINDOWS__)
     return PATH_SEPARATOR_OF_WINDOWS;
@@ -74,7 +74,7 @@ constexpr char const getPathSeparator() TBAG_NOEXCEPT
 #endif
 }
 
-constexpr char const getGenericPathSeparator() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR char const getGenericPathSeparator() TBAG_NOEXCEPT
 {
     return PATH_SEPARATOR_OF_POSIX;
 }
@@ -82,7 +82,7 @@ constexpr char const getGenericPathSeparator() TBAG_NOEXCEPT
 char const PATH_SPLITTER_OF_WINDOWS = ';';
 char const PATH_SPLITTER_OF_POSIX   = ':';
 
-constexpr char const getPathSplitter() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR char const getPathSplitter() TBAG_NOEXCEPT
 {
 #if defined(__OS_WINDOWS__)
     return PATH_SPLITTER_OF_WINDOWS;

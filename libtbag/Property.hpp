@@ -32,15 +32,17 @@ NAMESPACE_LIBTBAG_OPEN
 class Property : public Noncopyable
 {
 public:
-    static constexpr char const * const DEFAULT_TAG_NAME  = "property";
-    static constexpr char const * const DEFAULT_FILE_NAME = "property.xml";
+    static TBAG_CONSTEXPR char const * const getDefaultTagName() TBAG_NOEXCEPT
+    { return "property"; }
+    static TBAG_CONSTEXPR char const * const getDefaultFileName() TBAG_NOEXCEPT
+    { return "property.xml"; }
 
 private:
     dom::Resource _res;
 
 public:
     Property() {
-        this->_res.set_tag(DEFAULT_TAG_NAME);
+        this->_res.set_tag(getDefaultTagName());
     }
 
     virtual ~Property() {
@@ -59,13 +61,13 @@ protected:
 public:
     void setDefault() {
         this->_res.clear();
-        this->_res.set_tag(DEFAULT_TAG_NAME);
+        this->_res.set_tag(getDefaultTagName());
         updateDefault();
     }
 
 public:
     bool load(std::string const & path) {
-        return this->_res.readFile(path, std::string(DEFAULT_TAG_NAME));
+        return this->_res.readFile(path, std::string(getDefaultTagName()));
     }
 
     bool load() {
@@ -105,7 +107,7 @@ public:
     static std::string getDefaultPath() {
         using namespace filesystem;
         Path path = Path(common::getExeDir());
-        path /= DEFAULT_FILE_NAME;
+        path /= getDefaultFileName();
         return path.getGeneric();
     }
 };
@@ -114,13 +116,12 @@ public:
 /** Create a property accessor & mutator macro. */
 #define CREATE_PROPERTY(type, name, default_value)                          \
     public:                                                                 \
-        static constexpr char const * const PROPERTY_KEY_##name = #name;    \
         type get_##name() const {                                           \
-            return getResource().get(std::string(PROPERTY_KEY_##name)       \
+            return getResource().get(std::string(#name)       \
                                    , static_cast<type>(default_value));     \
         }                                                                   \
         void set_##name(type const & value = default_value) {               \
-            getResource().set(std::string(PROPERTY_KEY_##name)              \
+            getResource().set(std::string(#name)              \
                             , static_cast<type>(value));                    \
         }
 #endif

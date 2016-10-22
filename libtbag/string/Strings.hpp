@@ -35,16 +35,16 @@ NAMESPACE_LIBTBAG_OPEN
 namespace string {
 
 template <typename T>
-constexpr T const * charOrWidechar(char const * c, wchar_t const * w);
+TBAG_CONSTEXPR T const * charOrWidechar(char const * c, wchar_t const * w);
 
 template <>
-constexpr char const * charOrWidechar<char>(char const * c, wchar_t const * w)
+inline TBAG_CONSTEXPR char const * charOrWidechar<char>(char const * c, wchar_t const * w)
 {
     return c;
 }
 
 template <>
-constexpr wchar_t const * charOrWidechar<wchar_t>(char const * c, wchar_t const * w)
+inline TBAG_CONSTEXPR wchar_t const * charOrWidechar<wchar_t>(char const * c, wchar_t const * w)
 {
     return w;
 }
@@ -154,7 +154,7 @@ public:
             , "String::value_type must be the same type as ValueType");
 
 public:
-    constexpr BaseStrings() TBAG_NOEXCEPT = default;
+    TBAG_CONSTEXPR BaseStrings() TBAG_NOEXCEPT = default;
     ~BaseStrings() TBAG_NOEXCEPT = default;
 
 public:
@@ -203,9 +203,9 @@ public:
     }
 
 public:
-    static constexpr ValueType const CHAR_SPACE  = ' ';
-    static constexpr ValueType const CHAR_TAB    = '\t';
-    static constexpr ValueType const CHAR_RETURN = '\n';
+    static TBAG_CONSTEXPR ValueType const CHAR_SPACE  = ' ';
+    static TBAG_CONSTEXPR ValueType const CHAR_TAB    = '\t';
+    static TBAG_CONSTEXPR ValueType const CHAR_RETURN = '\n';
 
     static String trimLeft(String const & str) {
         auto itr = str.begin();

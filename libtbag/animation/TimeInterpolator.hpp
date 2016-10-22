@@ -44,7 +44,7 @@ public:
     using Period   = typename Duration::period;
 
 public:
-    constexpr TimeInterpolator() TBAG_NOEXCEPT = default;
+    TBAG_CONSTEXPR TimeInterpolator() TBAG_NOEXCEPT = default;
     virtual  ~TimeInterpolator() TBAG_NOEXCEPT = default;
 
 public:

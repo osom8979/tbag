@@ -25,7 +25,7 @@ namespace common {
 
 #ifndef IMPLEMENT_GET_CLASS_NAME
 #define IMPLEMENT_GET_CLASS_NAME(name, qualify) \
-    static constexpr char const * const getClassName() TBAG_NOEXCEPT \
+    static TBAG_CONSTEXPR char const * const getClassName() TBAG_NOEXCEPT \
     { return #name; } \
     virtual char const * const getName() qualify \
     { return getClassName(); }

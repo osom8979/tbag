@@ -36,7 +36,7 @@ struct Pointer
     using Type = T;
     Type * ptr = nullptr;
 
-    constexpr Pointer(Type * p) TBAG_NOEXCEPT : ptr(p)
+    TBAG_CONSTEXPR Pointer(Type * p) TBAG_NOEXCEPT : ptr(p)
     { /* EMPTY. */ }
 
     inline Pointer() TBAG_NOEXCEPT : ptr(nullptr)

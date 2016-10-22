@@ -68,7 +68,7 @@ public:
     struct update_canonical { /* EMPTY */ };
 
 public:
-    static constexpr bool isWindowsStyle() TBAG_NOEXCEPT
+    static TBAG_CONSTEXPR bool isWindowsStyle() TBAG_NOEXCEPT
     {
 #if defined(__OS_WINDOWS__)
         return true;
@@ -77,7 +77,7 @@ public:
 #endif
     }
 
-    static constexpr bool isPosixStyle() TBAG_NOEXCEPT
+    static TBAG_CONSTEXPR bool isPosixStyle() TBAG_NOEXCEPT
     { return !isWindowsStyle(); }
 
 private:

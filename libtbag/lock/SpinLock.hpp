@@ -34,8 +34,8 @@ namespace lock {
 class SpinLock : public Noncopyable
 {
 public:
-    static constexpr bool const   LOCKED =  true;
-    static constexpr bool const UNLOCKED = false;
+    static TBAG_CONSTEXPR bool const   LOCKED =  true;
+    static TBAG_CONSTEXPR bool const UNLOCKED = false;
 
 private:
     std::atomic_bool _state;

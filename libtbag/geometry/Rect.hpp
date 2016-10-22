@@ -187,7 +187,7 @@ operator |(BaseRect<T> const & r1, BaseRect<T> const & r2) TBAG_NOEXCEPT
 // --------
 
 template <typename T1, typename T2 = T1, typename T3 = T1, typename T4 = T1>
-constexpr BaseRect<typename remove_cr<T1>::type>
+TBAG_CONSTEXPR BaseRect<typename remove_cr<T1>::type>
 makeRect(T1 && x, T2 && y, T3 && w, T4 && h) TBAG_NOEXCEPT
 {
     typedef typename remove_cr<T1>::type __remove_cr;
@@ -196,7 +196,7 @@ makeRect(T1 && x, T2 && y, T3 && w, T4 && h) TBAG_NOEXCEPT
 }
 
 template <typename T>
-constexpr BaseRect<typename remove_cr<T>::type>
+TBAG_CONSTEXPR BaseRect<typename remove_cr<T>::type>
 makeRect(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
     typedef typename remove_cr<T>::type __remove_cr;

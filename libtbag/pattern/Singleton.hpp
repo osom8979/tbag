@@ -59,7 +59,7 @@ namespace pattern {
  * @remarks
  *  Default variable is false.
  */
-constexpr bool isManualRelease() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR bool isManualRelease() TBAG_NOEXCEPT
 {
     return false;
 }

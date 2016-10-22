@@ -38,7 +38,8 @@ template <typename KeyType>
 class DependencyWorker
 {
 public:
-    static constexpr std::size_t DEFAULT_MAX_RECURSIVE = 10;
+    static TBAG_CONSTEXPR std::size_t getDefaultMaxRecursive() TBAG_NOEXCEPT
+    { return 10; }
 
 public:
     using Key          = KeyType;
@@ -57,18 +58,16 @@ public:
     using WorkingPair = typename WorkingMap::value_type;
 
 private:
-    std::size_t _max_recursive = DEFAULT_MAX_RECURSIVE;
+    std::size_t _max_recursive;
     WorkingMap  _workers;
 
 public:
-    DependencyWorker() = default;
-    ~DependencyWorker() = default;
-
-public:
     DependencyWorker(std::size_t max_recursive) : _max_recursive(max_recursive)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY */ }
+    DependencyWorker() : DependencyWorker(getDefaultMaxRecursive())
+    { /* EMPTY */ }
+    ~DependencyWorker()
+    { /* EMPTY */ }
 
 public:
     DependencyWorker(DependencyWorker const & obj) = default;

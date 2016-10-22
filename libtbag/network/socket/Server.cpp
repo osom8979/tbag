@@ -33,6 +33,7 @@ Server::~Server()
 bool Server::runIpv4(std::string const & ip, int port)
 {
     unsigned int const BIND_FLAGS = 0;
+    static int const LISTEN_QUEUE_LIMIT = 128;
 
     ::uv_tcp_init(static_cast<uv_loop_t*>(_loop.getNative()), TBAG_TCP_NATIVE_CASTING(_tcp));
     ::uv_ip4_addr(ip.c_str(), port, &_sockaddr);

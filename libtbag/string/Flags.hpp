@@ -201,12 +201,12 @@ public:
         return convertFlag(str, getDefaultPrefix(), getDefaultDelimiter());
     }
 
-    static constexpr String getDefaultPrefix()
+    static TBAG_CONSTEXPR String getDefaultPrefix()
     {
         return CHAR_OR_WIDECHAR(Value, "--");
     }
 
-    static constexpr String getDefaultDelimiter()
+    static TBAG_CONSTEXPR String getDefaultDelimiter()
     {
         return CHAR_OR_WIDECHAR(Value, "=");
     }
@@ -230,10 +230,10 @@ public:
     }
 
 public:
-    static constexpr Value const        ESCAPE = '\\';
-    static constexpr Value const DOUBLE_QUOTES = '"';
-    static constexpr Value const SINGLE_QUOTES = '\'';
-    static constexpr Value const  SPACE_QUOTES = ' ';
+    static TBAG_CONSTEXPR Value const        ESCAPE = '\\';
+    static TBAG_CONSTEXPR Value const DOUBLE_QUOTES = '"';
+    static TBAG_CONSTEXPR Value const SINGLE_QUOTES = '\'';
+    static TBAG_CONSTEXPR Value const  SPACE_QUOTES = ' ';
 
     static String splitFirst(String const & args, std::size_t * process_count = nullptr)
     {
