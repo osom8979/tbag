@@ -37,13 +37,12 @@ void Logger::setSeverity(Severity const & severity)
 
 void Logger::setLogLevel(LogLevel level)
 {
-    _severity.setFlag(DEFAULT_SEVERITY[static_cast<int>(level)].flag);
-    _severity.setText(DEFAULT_SEVERITY[static_cast<int>(level)].text);
+    _severity = level;
 }
 
 void Logger::log(Message const & msg)
 {
-    if (static_cast<bool>(_sink) && _severity.isContain(msg.getSeverity().getFlag()) ) {
+    if (static_cast<bool>(_sink) && _severity.isContain(msg.getSeverity())) {
         _sink->write(msg);
     }
 }

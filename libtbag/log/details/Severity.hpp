@@ -27,73 +27,48 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-using SeverityFlagType = uint32_t;
-
-static_assert(std::is_unsigned<SeverityFlagType>::value, "SeverityFlagType must be a unsigned");
-
-#define SEVERITY_FLAG_CHECK(value, check) \
-        ((check & value) == value)
-
-/**
- * List of severity.
- *
- * @author zer0
- * @date   2016-07-09
- */
-struct DefaultSeverityProperty
-{
-    char const * const text;
-    int level;
-    SeverityFlagType flag;
-};
-
-constexpr DefaultSeverityProperty const DEFAULT_SEVERITY [] = {
-        { "EMERGENCY",      0, 0b00000001 }, // System is unusable.
-        { "ALERT",          1, 0b00000011 }, // Action must be taken immediately.
-        { "CRITICAL",       2, 0b00000111 }, // Critical conditions.
-        { "ERROR",          3, 0b00001111 }, // Error conditions.
-        { "WARNING",        4, 0b00011111 }, // Warning conditions.
-        { "NOTICE",         5, 0b00111111 }, // Normal but significant condition.
-        { "INFORMATIONAL",  6, 0b01111111 }, // Informational messages.
-        { "DEBUG",          7, 0b11111111 }, // Debug-level messages.
-        { "OFF",            8, 0b00000000 }, // Hide all messages.
+constexpr char const * const DEFAULT_SEVERITY [] = {
+        "EMERGENCY"     , // System is unusable.
+        "ALERT"         , // Action must be taken immediately.
+        "CRITICAL"      , // Critical conditions.
+        "ERROR"         , // Error conditions.
+        "WARNING"       , // Warning conditions.
+        "NOTICE"        , // Normal but significant condition.
+        "INFORMATIONAL" , // Informational messages.
+        "DEBUG"         , // Debug-level messages.
+        "OFF"           , // Hide all messages.
 };
 
 int const LOG_SEVERITY_COUNT = sizeof(DEFAULT_SEVERITY) / sizeof(DEFAULT_SEVERITY[0]);
 char const * const UNKNOWN_LOG_SEVERITY_STRING = "UNKNOWN";
-
-constexpr int const LOG_SEVERITY_EMERGENCY     = DEFAULT_SEVERITY[0].level;
-constexpr int const LOG_SEVERITY_ALERT         = DEFAULT_SEVERITY[1].level;
-constexpr int const LOG_SEVERITY_CRITICAL      = DEFAULT_SEVERITY[2].level;
-constexpr int const LOG_SEVERITY_ERROR         = DEFAULT_SEVERITY[3].level;
-constexpr int const LOG_SEVERITY_WARNING       = DEFAULT_SEVERITY[4].level;
-constexpr int const LOG_SEVERITY_NOTICE        = DEFAULT_SEVERITY[5].level;
-constexpr int const LOG_SEVERITY_INFORMATIONAL = DEFAULT_SEVERITY[6].level;
-constexpr int const LOG_SEVERITY_DEBUG         = DEFAULT_SEVERITY[7].level;
-constexpr int const LOG_SEVERITY_OFF           = DEFAULT_SEVERITY[8].level;
 
 /**
  * Logging level.
  */
 enum class LogLevel : int
 {
-    LEVEL_EMERGENCY = ::libtbag::log::details::LOG_SEVERITY_EMERGENCY,
-    LEVEL_ALERT     = ::libtbag::log::details::LOG_SEVERITY_ALERT,
-    LEVEL_CRITICAL  = ::libtbag::log::details::LOG_SEVERITY_CRITICAL,
-    LEVEL_ERROR     = ::libtbag::log::details::LOG_SEVERITY_ERROR,
-    LEVEL_WARNING   = ::libtbag::log::details::LOG_SEVERITY_WARNING,
-    LEVEL_NOTICE    = ::libtbag::log::details::LOG_SEVERITY_NOTICE,
-    LEVEL_INFO      = ::libtbag::log::details::LOG_SEVERITY_INFORMATIONAL,
-    LEVEL_DEBUG     = ::libtbag::log::details::LOG_SEVERITY_DEBUG,
-    LEVEL_OFF       = ::libtbag::log::details::LOG_SEVERITY_OFF,
+    LEVEL_EMERGENCY = 0,
+    LEVEL_ALERT        ,
+    LEVEL_CRITICAL     ,
+    LEVEL_ERROR        ,
+    LEVEL_WARNING      ,
+    LEVEL_NOTICE       ,
+    LEVEL_INFO         ,
+    LEVEL_DEBUG        ,
+    LEVEL_OFF          ,
 };
 
 inline const char * const getLogString(int level) TBAG_NOEXCEPT
 {
     if (0 <= COMPARE_AND(level) < LOG_SEVERITY_COUNT) {
-        return DEFAULT_SEVERITY[level].text;
+        return DEFAULT_SEVERITY[level];
     }
     return UNKNOWN_LOG_SEVERITY_STRING;
+}
+
+inline const char * const getLogString(LogLevel level) TBAG_NOEXCEPT
+{
+    return getLogString(static_cast<int>(level));
 }
 
 /**
@@ -102,56 +77,76 @@ inline const char * const getLogString(int level) TBAG_NOEXCEPT
  * @author zer0
  * @date   2016-07-09
  */
-class TBAG_EXPORTS Severity
+struct Severity
 {
 public:
     using String = std::basic_string<char>;
-    using Flag   = SeverityFlagType;
-
-private:
-    String _text;
-    Flag   _flag;
 
 public:
-    Severity() TBAG_NOEXCEPT;
-    Severity(String const & text, Flag flag) TBAG_NOEXCEPT;
-    Severity(DefaultSeverityProperty const & property) TBAG_NOEXCEPT;
-    Severity(LogLevel level) TBAG_NOEXCEPT;
-
-    Severity(Severity const & obj) TBAG_NOEXCEPT;
-    Severity(Severity && obj) TBAG_NOEXCEPT;
-    ~Severity() TBAG_NOEXCEPT;
+    int    level;
+    String text;
 
 public:
-    Severity & operator =(Severity const & obj) TBAG_NOEXCEPT;
-    Severity & operator =(Severity && obj) TBAG_NOEXCEPT;
+    Severity() : level(), text()
+    { /* EMPTY */ }
+    Severity(LogLevel log_level) : level(static_cast<int>(log_level)), text(getLogString(static_cast<int>(log_level)))
+    { /* EMPTY */ }
+
+    Severity(Severity const & obj) : level(obj.level), text(obj.text)
+    { /* EMPTY */ }
+    Severity(Severity && obj) : level(obj.level), text(std::move(obj.text))
+    { /* EMPTY */ }
 
 public:
-    operator String() const TBAG_NOEXCEPT;
+    Severity & operator =(LogLevel log_level)
+    {
+        level = static_cast<int>(log_level);
+        text  = getLogString(static_cast<int>(log_level));
+        return *this;
+    }
+
+    Severity & operator =(Severity const & obj)
+    {
+        if (this != &obj) {
+            level = obj.level;
+            text  = obj.text;
+        }
+        return *this;
+    }
+
+    Severity & operator =(Severity && obj)
+    {
+        if (this != &obj) {
+            std::swap(level, obj.level);
+            std::swap(text , obj.text );
+        }
+        return *this;
+    }
 
 public:
-    Severity & copy(Severity const & obj) TBAG_NOEXCEPT;
-    void swap(Severity & obj) TBAG_NOEXCEPT;
+    inline operator int() const TBAG_NOEXCEPT
+    { return level; }
+    inline operator String() const TBAG_NOEXCEPT
+    { return text; }
 
 public:
-    Severity & operator |=(Severity const & obj) TBAG_NOEXCEPT;
-    Severity & operator ^=(Severity const & obj) TBAG_NOEXCEPT;
-    Severity & operator &=(Severity const & obj) TBAG_NOEXCEPT;
+    inline bool operator ==(Severity const & obj) const TBAG_NOEXCEPT
+    { return level == obj.level; }
+    inline bool operator !=(Severity const & obj) const TBAG_NOEXCEPT
+    { return level != obj.level; }
 
-public:
-    bool operator ==(Severity const & obj) const TBAG_NOEXCEPT;
-    bool operator !=(Severity const & obj) const TBAG_NOEXCEPT;
+    inline bool operator <(Severity const & obj) const TBAG_NOEXCEPT
+    { return level < obj.level; }
+    inline bool operator >(Severity const & obj) const TBAG_NOEXCEPT
+    { return level > obj.level; }
 
-public:
-    void setText(String const & text) TBAG_NOEXCEPT;
-    String getText() const TBAG_NOEXCEPT;
+    inline bool operator <=(Severity const & obj) const TBAG_NOEXCEPT
+    { return level <= obj.level; }
+    inline bool operator >=(Severity const & obj) const TBAG_NOEXCEPT
+    { return level >= obj.level; }
 
-public:
-    void setFlag(Flag flag) TBAG_NOEXCEPT;
-    Flag getFlag() const TBAG_NOEXCEPT;
-
-public:
-    bool isContain(Flag flag);
+    inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
+    { return level >= obj.level; }
 };
 
 } // namespace details

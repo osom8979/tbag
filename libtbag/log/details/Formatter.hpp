@@ -73,7 +73,7 @@ std::basic_string<CharType> getDefaultSeverityString(Severity const & severity)
 {
     std::basic_string<CharType> result;
     result += CHAR_OR_WIDECHAR(CharType, " [");
-    result += severity.getText();
+    result += severity.text;
     result += CHAR_OR_WIDECHAR(CharType, "] ");
     return result;
 }
