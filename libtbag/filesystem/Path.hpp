@@ -125,7 +125,7 @@ public:
 
 // Accessors & Mutators.
 public:
-    inline String getString() const TBAG_NOEXCEPT(TBAG_NOEXCEPT(String(_path)))
+    inline String getString() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(String(_path)))
     { return _path; }
     inline void setString(String const & path)
     { _path.assign(path); }
