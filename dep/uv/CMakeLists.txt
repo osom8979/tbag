@@ -40,7 +40,7 @@ include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src"
 prepend (COMMON_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
         fs-poll.c inet.c threadpool.c uv-common.c version.c)
 
-if (WIN32)
+if (WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL MSVC))
     ## Windows
     prepend (WIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/win"
             async.c core.c dl.c error.c fs-event.c fs.c getaddrinfo.c getnameinfo.c handle.c
@@ -49,6 +49,7 @@ if (WIN32)
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src/win")
     add_definitions (-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600 -D_GNU_SOURCE
                      -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+    add_compile_options (/wd4244) ## conversion from 'type1' to 'type2', possible loss of data.
     set (ALL_SRCS ${COMMON_SRCS} ${WIN_SRCS})
 
 elseif (UNIX)
