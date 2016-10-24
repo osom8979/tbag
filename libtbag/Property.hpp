@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/dom/Resource.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/Common.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -17,13 +17,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/filesystem/Common.hpp>
-#include <libtbag/string/Strings.hpp>
 
-#include <cassert>
 #include <string>
-#include <algorithm>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,147 +36,75 @@ namespace filesystem {
  * @remarks
  *  ISO/IEC 9945 POSIX API.
  */
-template <typename CharType = char>
 class PosixPath
 {
-public:
-    using ValueType = CharType;
-    using String    = std::basic_string<ValueType>;
-
-    static_assert(std::is_pod<ValueType>::value
-            , "Character type of PosixPath must be a POD");
-    static_assert(std::is_same<ValueType, typename String::value_type>::value
-            , "String::value_type must be the same type as ValueType");
-
-public:
-    inline static String getPathSeparator() {
-        return { common::PATH_SEPARATOR_OF_POSIX };
-    }
-
-    inline static String getGenericPathSeparatorString() {
-        return { common::getGenericPathSeparator() };
-    }
-
-    inline static String getRemoveSeparatorRegex() {
-        return CHAR_OR_WIDECHAR(ValueType, R"(\/\/*)");
-    }
-
-public:
-    TBAG_CONSTEXPR PosixPath() TBAG_NOEXCEPT = default;
-    ~PosixPath() TBAG_NOEXCEPT = default;
-
-// Filename query.
 public:
     /**
      * Characters prohibited in filename: 0x00, '/'
      */
     struct ProhibitedBy
     {
-        inline bool operator()(ValueType v) const TBAG_NOEXCEPT {
-            if (v == 0x00 || v == static_cast<ValueType>('/')) {
-                return true;
-            }
-            return false;
-        }
+        inline bool operator()(char v) const TBAG_NOEXCEPT
+        { return v == '\0' || v == '/'; }
     };
 
-    static bool isProhibitedFilename(String const & path) TBAG_NOEXCEPT {
-        return std::any_of(path.begin(), path.end(), ProhibitedBy());
-    }
+public:
+    PosixPath() TBAG_NOEXCEPT;
+    ~PosixPath();
+
+public:
+    static std::string getPathSeparator();
+    static std::string getGenericPathSeparatorString();
+    static std::string getRemoveSeparatorRegex();
+
+// Filename query.
+public:
+    static bool isProhibitedFilename(std::string const & path) TBAG_NOEXCEPT;
 
 // Remove last separator.
 public:
-    static String removeLastSeparator(String const & path) {
-        return Strings::removeRegex(path, getRemoveSeparatorRegex()
-                                          + static_cast<ValueType>('$'));
-    }
+    static std::string removeLastSeparator(std::string const & path);
 
 // Make preferred.
 public:
     /**
      * No change.
      */
-    inline static String makePreferred(String const & path) {
-        return path;
-    }
+    static std::string makePreferred(std::string const & path);
 
-    static String removeDuplicateSeparators(String const & path) {
-        return Strings::replaceRegex(path
-                                   , getRemoveSeparatorRegex()
-                                   , getPathSeparator());
-    }
+    static std::string removeDuplicateSeparators(std::string const & path);
 
 // Path string.
 public:
     /**
      * makePreferred -> removeDuplicateSeparators -> removeLastSeparator
      */
-    static String getNative(String const & path) {
-        return removeLastSeparator(removeDuplicateSeparators(makePreferred(path)));
-    }
+    static std::string getNative(std::string const & path);
 
     /**
      * Equals to getNative
      */
-    static String getGeneric(String const & path) {
-        return getNative(path);
-    }
+    static std::string getGeneric(std::string const & path);
 
 // Decomposition.
 public:
     /**
      * Root directory is only '/'.
      */
-    static String getRootDir(String const & path) {
-        if (path.size() < 1 || path[0] != common::PATH_SEPARATOR_OF_POSIX) {
-            return String();
-        }
-        return getPathSeparator();
-    }
+    static std::string getRootDir(std::string const & path);
 
 // Query.
 public:
-    static bool isAbsolute(String const & path) {
-        return !getRootDir(path).empty();
-    }
-
-    static bool isRelative(String const & path) {
-        return !isAbsolute(path);
-    }
+    static bool isAbsolute(std::string const & path);
+    static bool isRelative(std::string const & path);
 
 // Parent.
 public:
-    static String getParent(String const & path) {
-        if (path.size() == 1U && path[0] == common::PATH_SEPARATOR_OF_POSIX) {
-            return String(); // PARENT OF ROOT.
-        }
-
-        String temp = removeLastSeparator(path);
-        std::size_t last_separator_index = temp.rfind(getPathSeparator());
-
-        if (last_separator_index == 0U && temp.size() > 1U && temp[0] == common::PATH_SEPARATOR_OF_POSIX) {
-            return getPathSeparator(); // ROOT DIRECTORY.
-        } else if (last_separator_index == String::npos) {
-            return String(); // PARENT OF ROOT (Maybe relative path).
-        }
-
-        assert(last_separator_index != String::npos);
-        return temp.substr(0, last_separator_index + 1); // PARENT DIRECTORY.
-    }
+    static std::string getParent(std::string const & path);
 
 // Node operators.
 public:
-    static std::vector<String> splitNodes(String const & path) {
-        std::vector<String> result =
-                string::splitTokens(getGeneric(path),
-                                    getGenericPathSeparatorString());
-        String root = getRootDir(path);
-        if (!root.empty()) {
-            // Force insert the POSIX root directory.
-            result.insert(result.begin(), root);
-        }
-        return result;
-    }
+    static std::vector<std::string> splitNodes(std::string const & path);
 };
 
 } // namespace filesystem

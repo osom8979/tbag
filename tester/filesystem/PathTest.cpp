@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/Common.hpp>
 
 #include <iostream>
 

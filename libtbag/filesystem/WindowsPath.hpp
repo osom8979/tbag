@@ -17,14 +17,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/filesystem/Common.hpp>
-#include <libtbag/string/Strings.hpp>
 
-#include <cassert>
 #include <string>
-#include <iterator> // std::distance
-#include <algorithm>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,36 +36,8 @@ namespace filesystem {
  * @remarks
  *  Windows API.
  */
-template <typename CharType = char>
 class WindowsPath
 {
-public:
-    using ValueType = CharType;
-    using String    = std::basic_string<ValueType>;
-
-    static_assert(std::is_pod<ValueType>::value
-            , "Character type of WindowsPath must be a POD");
-    static_assert(std::is_same<ValueType, typename String::value_type>::value
-            , "String::value_type must be the same type as ValueType");
-
-public:
-    inline static String getPathSeparator() {
-        return { common::PATH_SEPARATOR_OF_WINDOWS };
-    }
-
-    inline static String getGenericPathSeparatorString() {
-        return { common::getGenericPathSeparator() };
-    }
-
-    inline static String getRemoveSeparatorRegex() {
-        return CHAR_OR_WIDECHAR(ValueType, R"([\\\/][\\\/]*)");
-    }
-
-public:
-    TBAG_CONSTEXPR WindowsPath() TBAG_NOEXCEPT = default;
-    ~WindowsPath() TBAG_NOEXCEPT = default;
-
-// Filename query.
 public:
     /**
      * Characters prohibited in filename:
@@ -81,119 +48,78 @@ public:
      */
     struct ProhibitedBy
     {
-        inline bool operator()(ValueType v) const TBAG_NOEXCEPT {
+        inline bool operator()(char v) const TBAG_NOEXCEPT
+        {
             if (0x00 <= COMPARE_AND(v) <= 0x1F) {
                 return true;
             }
             switch (v) {
-            case static_cast<ValueType>('*'):
-            case static_cast<ValueType>('<'):
-            case static_cast<ValueType>('>'):
-            case static_cast<ValueType>('?'):
-            case static_cast<ValueType>('/'):
-            case static_cast<ValueType>('|'):
-            case static_cast<ValueType>('\\'):
+            case '*': case '<': case '>':
+            case '?': case '/': case '|': case '\\':
                 return true;
             }
             return false;
         }
     };
 
-    static bool isProhibitedFilename(String const & path) TBAG_NOEXCEPT {
-        return std::any_of(path.begin(), path.end(), ProhibitedBy());
-    }
+public:
+    WindowsPath() TBAG_NOEXCEPT;
+    ~WindowsPath();
+
+public:
+    static std::string getPathSeparator();
+    static std::string getGenericPathSeparatorString();
+    static std::string getRemoveSeparatorRegex();
+
+// Filename query.
+public:
+    static bool isProhibitedFilename(std::string const & path);
 
 // Remove last separator.
 public:
-    static String removeLastSeparator(String const & path) {
-        return Strings::removeRegex(path, getRemoveSeparatorRegex()
-                                          + static_cast<ValueType>('$'));
-    }
+    static std::string removeLastSeparator(std::string const & path);
 
 // Make preferred.
 public:
-    static String getReplaceStringOfPosix() {
-        return { common::PATH_SEPARATOR_OF_POSIX };
-    }
+    static std::string getReplaceStringOfPosix();
 
     /**
      * Slashes converted to backslashes.
      */
-    inline static String makePreferred(String const & path) {
-        return Strings::replaceRegex(path
-                                   , getReplaceStringOfPosix()
-                                   , getPathSeparator());
-    }
-
-    static String removeDuplicateSeparators(String const & path) {
-        return Strings::replaceRegex(path
-                                   , getRemoveSeparatorRegex()
-                                   , getPathSeparator());
-    }
+    static std::string makePreferred(std::string const & path);
+    static std::string removeDuplicateSeparators(std::string const & path);
 
 // Path string.
 public:
     /**
      * makePreferred -> removeDuplicateSeparators -> removeLastSeparator
      */
-    static String getNative(String const & path) {
-        return removeLastSeparator(removeDuplicateSeparators(makePreferred(path)));
-    }
+    static std::string getNative(std::string const & path);
 
     /**
      * getNative -> generic formatting.
      */
-    static String getGeneric(String const & path) {
-        return Strings::replaceRegex(getNative(path)
-                                   , getRemoveSeparatorRegex()
-                                   , getGenericPathSeparatorString());
-    }
+    static std::string getGeneric(std::string const & path);
 
 // Decomposition.
 public:
     /**
      * Root directory is like "C:".
      */
-    static String getRootDir(String const & path) {
-        if (path.size() < 2 || path[1] != static_cast<ValueType>(':')) {
-            return String();
-        }
-        if (/**/(static_cast<ValueType>('a') <= COMPARE_AND(path[0]) <= static_cast<ValueType>('z'))
-             || (static_cast<ValueType>('A') <= COMPARE_AND(path[0]) <= static_cast<ValueType>('Z'))) {
-            return path.substr(0, 2);
-        }
-        return String();
-    }
+    static std::string getRootDir(std::string const & path);
 
 // Query.
 public:
-    static bool isAbsolute(String const & path) {
-        return !getRootDir(path).empty();
-    }
-
-    static bool isRelative(String const & path) {
-        return !isAbsolute(path);
-    }
+    static bool isAbsolute(std::string const & path);
+    static bool isRelative(std::string const & path);
 
 // Parent.
 public:
-    static String getParent(String const & path) {
-        String temp = removeLastSeparator(path);
-        for (auto itr = temp.rbegin(); itr != temp.rend(); ++itr) {
-            if (/**/*itr == static_cast<ValueType>(common::PATH_SEPARATOR_OF_WINDOWS)
-                 || *itr == static_cast<ValueType>(common::PATH_SEPARATOR_OF_POSIX)) {
-                return temp.substr(0, temp.size() - std::distance(temp.rbegin(), itr));
-            }
-        }
-        return String();
-    }
+    static std::string getParent(std::string const & path);
 
 // Node operators.
 public:
-    static std::vector<String> splitNodes(String const & path) {
-        return string::splitTokens(getGeneric(path),
-                                   getGenericPathSeparatorString());
-    }
+    static std::vector<std::string> splitNodes(std::string const & path);
 };
 
 } // namespace filesystem

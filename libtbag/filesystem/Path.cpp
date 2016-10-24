@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/Common.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -13,47 +14,47 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-Path::Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<String>::value)
+Path::Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<std::string>::value)
 {
     // EMPTY.
 }
 
-Path::Path(String const & path) : _path(path)
+Path::Path(std::string const & path) : _path(path)
 {
     // EMPTY.
 }
 
-Path::Path(ValueType const * path) : Path(String(path))
+Path::Path(char const * path) : Path(std::string(path))
 {
     // EMPTY.
 }
 
-Path::Path(ValueType const * path, update_generic const & UNUSED_PARAM(v)) : Path(String(path))
+Path::Path(char const * path, update_generic const & UNUSED_PARAM(v)) : Path(std::string(path))
 {
     updateGeneric();
 }
 
-Path::Path(String const & path, update_generic const & UNUSED_PARAM(v)) : Path(path)
+Path::Path(std::string const & path, update_generic const & UNUSED_PARAM(v)) : Path(path)
 {
     updateGeneric();
 }
 
-Path::Path(ValueType const * path, update_canonical const & UNUSED_PARAM(v)) : Path(String(path))
+Path::Path(char const * path, update_canonical const & UNUSED_PARAM(v)) : Path(std::string(path))
 {
     updateCanonical();
 }
 
-Path::Path(String const & path, update_canonical const & UNUSED_PARAM(v)) : Path(path)
+Path::Path(std::string const & path, update_canonical const & UNUSED_PARAM(v)) : Path(path)
 {
     updateCanonical();
 }
 
-Path::Path(std::vector<String> const & nodes) : Path()
+Path::Path(std::vector<std::string> const & nodes) : Path()
 {
     append(nodes);
 }
 
-Path::Path(std::initializer_list<String> list) : Path()
+Path::Path(std::initializer_list<std::string> list) : Path()
 {
     for (auto & cursor : list) {
         append(cursor);
@@ -75,13 +76,13 @@ Path::~Path()
     // EMPTY.
 }
 
-Path & Path::operator =(ValueType const * path)
+Path & Path::operator =(char const * path)
 {
     _path.assign(path);
     return *this;
 }
 
-Path & Path::operator =(String const & path)
+Path & Path::operator =(std::string const & path)
 {
     if (&(_path) != &path) {
         _path = path;
@@ -89,7 +90,7 @@ Path & Path::operator =(String const & path)
     return *this;
 }
 
-Path & Path::operator =(String && path)
+Path & Path::operator =(std::string && path)
 {
     if (&(_path) != &path) {
         _path.swap(path);
@@ -113,7 +114,7 @@ bool Path::operator ==(Path const & path)
     return getCanonicalString() == path.getCanonicalString();
 }
 
-bool Path::operator ==(String const & path)
+bool Path::operator ==(std::string const & path)
 {
     return getCanonicalString() == Path(path).getCanonicalString();
 }
@@ -140,7 +141,7 @@ void Path::swap(Path & obj)
     }
 }
 
-Path::String Path::getGenericString() const
+std::string Path::getGenericString() const
 {
     return NativePath::getGeneric(_path);
 }
@@ -150,7 +151,7 @@ Path Path::getGeneric() const
     return Path(getGenericString());
 }
 
-Path::String Path::getNativeString() const
+std::string Path::getNativeString() const
 {
     return NativePath::getNative(_path);
 }
@@ -165,7 +166,7 @@ Path Path::getCanonical() const
     return Path(splitNodesWithCanonical());
 }
 
-Path::String Path::getCanonicalString() const
+std::string Path::getCanonicalString() const
 {
     return getCanonical().getString();
 }
@@ -188,7 +189,7 @@ Path & Path::updateCanonical()
     return *this;
 }
 
-Path::String Path::getRootDirString() const
+std::string Path::getRootDirString() const
 {
     return NativePath::getRootDir(_path);
 }
@@ -213,9 +214,9 @@ bool Path::isRelative() const
     return NativePath::isRelative(_path);
 }
 
-Path::String Path::append(String const & parent, String const & child)
+std::string Path::append(std::string const & parent, std::string const & child)
 {
-    String result = parent;
+    std::string result = parent;
     // 문지열이 공백일 경우, 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다.
     if (!parent.empty() && parent.back() != NativePath::getPathSeparator()[0]) {
         result += NativePath::getPathSeparator();
@@ -224,13 +225,13 @@ Path::String Path::append(String const & parent, String const & child)
     return result;
 }
 
-Path & Path::append(String const & child)
+Path & Path::append(std::string const & child)
 {
     _path = append(this->_path, child);
     return *this;
 }
 
-Path & Path::append(std::vector<String> const & nodes)
+Path & Path::append(std::vector<std::string> const & nodes)
 {
     for (auto & cursor : nodes) {
         append(cursor);
@@ -238,35 +239,35 @@ Path & Path::append(std::vector<String> const & nodes)
     return *this;
 }
 
-Path & Path::operator /=(String const & child)
+Path & Path::operator /=(std::string const & child)
 {
     return append(child);
 }
 
-/* FRIEND */ Path operator /(Path const & path, Path::String const & child)
+/* FRIEND */ Path operator /(Path const & path, std::string const & child)
 {
     Path result = path;
     result.append(child);
     return result;
 }
 
-/* FRIEND */ Path operator /(Path && path, Path::String const & child)
+/* FRIEND */ Path operator /(Path && path, std::string const & child)
 {
     path.append(child);
     return path;
 }
 
-Path::operator String() const
+Path::operator std::string() const
 {
     return _path;
 }
 
-Path::operator ValueType const * () const
+Path::operator char const * () const
 {
     return _path.c_str();
 }
 
-Path::String Path::getParentString() const
+std::string Path::getParentString() const
 {
     return NativePath::getParent(_path);
 }
@@ -276,16 +277,16 @@ Path Path::getParent() const
     return Path(getParentString());
 }
 
-std::vector<Path::String> Path::splitNodes() const
+std::vector<std::string> Path::splitNodes() const
 {
     return NativePath::splitNodes(_path);
 }
 
-std::vector<Path::String> Path::splitNodesWithCanonical() const
+std::vector<std::string> Path::splitNodesWithCanonical() const
 {
-    std::vector<String> result;
-    std::vector<String> nodes = splitNodes();
-    using NodeItr = typename std::vector<String>::iterator;
+    std::vector<std::string> result;
+    std::vector<std::string> nodes = splitNodes();
+    using NodeItr = typename std::vector<std::string>::iterator;
 
     NodeItr itr;
     NodeItr end = nodes.end();
@@ -315,11 +316,11 @@ std::vector<Path::String> Path::splitNodesWithCanonical() const
     return result;
 }
 
-Path::String Path::getName() const
+std::string Path::getName() const
 {
     auto nodes = splitNodes();
     if (nodes.rbegin() == nodes.rend()) {
-        return String();
+        return std::string();
     }
     return *nodes.rbegin();
 }

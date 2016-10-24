@@ -31,11 +31,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 
 #if defined(__OS_WINDOWS__)
-template <typename CharType>
-using BaseNativePath = WindowsPath<CharType>;
+using BaseNativePath = WindowsPath;
 #else
-template <typename CharType>
-using BaseNativePath = PosixPath<CharType>;
+using BaseNativePath = PosixPath;
 #endif
 
 /**
@@ -48,17 +46,10 @@ using BaseNativePath = PosixPath<CharType>;
  * @warning
  *  Supports multibyte-string only.
  */
-class TBAG_EXPORTS Path : public BaseNativePath<char>
+class TBAG_EXPORTS Path : public BaseNativePath
 {
 public:
-    using NativePath = BaseNativePath<char>;
-    using ValueType  = typename NativePath::ValueType;
-    using String     = typename NativePath::String;
-
-    static_assert(std::is_pod<ValueType>::value
-            , "Character type of PosixPath must be a POD");
-    static_assert(std::is_same<ValueType, typename String::value_type>::value
-            , "String::value_type must be the same type as ValueType");
+    using NativePath = BaseNativePath;
 
 public:
     /** Update Generic Format. */
@@ -68,7 +59,7 @@ public:
     struct update_canonical { /* EMPTY */ };
 
 public:
-    static TBAG_CONSTEXPR bool isWindowsStyle() TBAG_NOEXCEPT
+    inline static TBAG_CONSTEXPR bool isWindowsStyle() TBAG_NOEXCEPT
     {
 #if defined(__OS_WINDOWS__)
         return true;
@@ -77,26 +68,29 @@ public:
 #endif
     }
 
-    static TBAG_CONSTEXPR bool isPosixStyle() TBAG_NOEXCEPT
-    { return !isWindowsStyle(); }
+    inline static TBAG_CONSTEXPR bool isPosixStyle() TBAG_NOEXCEPT
+    {
+        return !isWindowsStyle();
+    }
 
 private:
-    String _path;
+    std::string _path;
 
 // Constructors.
 public:
-    Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<String>::value);
-    explicit Path(String const & path);
-    explicit Path(ValueType const * path);
+    Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<std::string>::value);
 
-    explicit Path(ValueType const * path, update_generic const & UNUSED_PARAM(v));
-    explicit Path(String const & path, update_generic const & UNUSED_PARAM(v));
+    explicit Path(std::string const & path);
+    explicit Path(char const * path);
 
-    explicit Path(ValueType const * path, update_canonical const & UNUSED_PARAM(v));
-    explicit Path(String const & path, update_canonical const & UNUSED_PARAM(v));
+    explicit Path(char const * path, update_generic const & UNUSED_PARAM(v));
+    explicit Path(std::string const & path, update_generic const & UNUSED_PARAM(v));
 
-    Path(std::vector<String> const & nodes);
-    Path(std::initializer_list<String> list);
+    explicit Path(char const * path, update_canonical const & UNUSED_PARAM(v));
+    explicit Path(std::string const & path, update_canonical const & UNUSED_PARAM(v));
+
+    Path(std::vector<std::string> const & nodes);
+    Path(std::initializer_list<std::string> list);
 
     Path(Path const & obj);
     Path(Path && obj);
@@ -107,16 +101,16 @@ public:
 
 // Assign operators.
 public:
-    Path & operator =(ValueType const * path);
-    Path & operator =(String const & path);
-    Path & operator =(String && path);
+    Path & operator =(char const * path);
+    Path & operator =(std::string const & path);
+    Path & operator =(std::string && path);
 
     Path & operator =(Path const & obj);
     Path & operator =(Path && obj);
 
 public:
     bool operator ==(Path const & path);
-    bool operator ==(String const & path);
+    bool operator ==(std::string const & path);
 
 public:
     Path & copy(Path const & obj);
@@ -125,11 +119,11 @@ public:
 
 // Accessors & Mutators.
 public:
-    inline String getString() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(String(_path)))
+    inline std::string getString() const
     { return _path; }
-    inline void setString(String const & path)
+    inline void setString(std::string const & path)
     { _path.assign(path); }
-    inline void setString(ValueType const * path)
+    inline void setString(char const * path)
     { _path.assign(path); }
 
 // Path string.
@@ -137,20 +131,20 @@ public:
     /**
      * Generic path format.
      */
-    String getGenericString() const;
+    std::string getGenericString() const;
     Path getGeneric() const;
 
     /**
      * Operating system dependent path.
      */
-    String getNativeString() const;
+    std::string getNativeString() const;
     Path getNative() const;
 
     /**
      * Canonical path.
      */
     Path getCanonical() const;
-    String getCanonicalString() const;
+    std::string getCanonicalString() const;
 
 // Modifiers.
 public:
@@ -164,7 +158,7 @@ public:
      * root-directory, if @c _path includes root-directory,
      * otherwise empty string.
      */
-    String getRootDirString() const;
+    std::string getRootDirString() const;
     Path getRootDir() const;
 
 // Query.
@@ -175,33 +169,33 @@ public:
 
 // Append.
 public:
-    static String append(String const & parent, String const & child);
+    static std::string append(std::string const & parent, std::string const & child);
 
-    Path & append(String const & child);
-    Path & append(std::vector<String> const & nodes);
+    Path & append(std::string const & child);
+    Path & append(std::vector<std::string> const & nodes);
 
-    Path & operator /=(String const & child);
+    Path & operator /=(std::string const & child);
 
-    TBAG_EXPORTS friend Path operator /(Path const & path, String const & child);
-    TBAG_EXPORTS friend Path operator /(Path && path, String const & child);
+    TBAG_EXPORTS friend Path operator /(Path const & path, std::string const & child);
+    TBAG_EXPORTS friend Path operator /(Path && path, std::string const & child);
 
 // Casting
 public:
-    operator String() const;
-    operator ValueType const *() const;
+    operator std::string() const;
+    operator char const *() const;
 
 // Parent.
 public:
-    String getParentString() const;
+    std::string getParentString() const;
     Path getParent() const;
 
 // Node operators.
 public:
-    std::vector<String> splitNodes() const;
-    std::vector<String> splitNodesWithCanonical() const;
+    std::vector<std::string> splitNodes() const;
+    std::vector<std::string> splitNodesWithCanonical() const;
 
 public:
-    String getName() const;
+    std::string getName() const;
 
 // Filesystem operators.
 public:

@@ -17,6 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/Common.hpp>
 
 #include <string>
 #include <vector>
