@@ -3,10 +3,6 @@
 #/// @author zer0
 #/// @date   2016-06-02
 
-if (WIN32)
-    message (WARNING "Not supported Windows OS.")
-endif ()
-
 if (NOT GLog_FOUND)
     message (WARNING "Not found Google-glog.")
 endif ()
