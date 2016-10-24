@@ -142,8 +142,8 @@ Process::Process() throw(InitializeException)
         : _loop(new loop::UvEventLoop())
         , _process(new ProcPimpl(*this))
         , _options(new ProcOptionPimpl())
-        , _exit_status(Process::UNKNOWN_EXIT_CODE)
-        , _terminate_signal(Process::UNKNOWN_TERMINATE_SIGNAL)
+        , _exit_status(Process::getUnknownExitCode())
+        , _terminate_signal(Process::getUnknownTerminateSignal())
 {
     // EMPTY.
 }

@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Pointer.hpp>
 
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 

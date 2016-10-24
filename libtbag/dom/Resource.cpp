@@ -14,7 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace dom {
 
-inline namespace implementation {
+/* inline */ namespace impl {
 
 // TinyXML2 operators.
 using Document = tinyxml2::XMLDocument;
@@ -40,7 +40,7 @@ static Resource::Map readFromXmlDocument(Document const & doc, std::string const
     return map;
 }
 
-} // namespace implementation
+} // namespace impl
 
 // ------------------------
 // Resource implementation.
@@ -194,9 +194,9 @@ std::string const & Resource::at(std::string const & key) const
 
 Resource::Map Resource::readFromXmlString(std::string const & xml, std::string const & tag)
 {
-    Document doc;
+    impl::Document doc;
     if (doc.Parse(xml.c_str()) == tinyxml2::XML_NO_ERROR) {
-        return readFromXmlDocument(doc, tag);
+        return impl::readFromXmlDocument(doc, tag);
     }
 
     return Map();
@@ -204,9 +204,9 @@ Resource::Map Resource::readFromXmlString(std::string const & xml, std::string c
 
 Resource::Map Resource::readFromXmlFile(std::string const & path, std::string const & tag)
 {
-    Document doc;
+    impl::Document doc;
     if (doc.LoadFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
-        return readFromXmlDocument(doc, tag);
+        return impl::readFromXmlDocument(doc, tag);
     }
 
     return Map();
@@ -214,11 +214,11 @@ Resource::Map Resource::readFromXmlFile(std::string const & path, std::string co
 
 bool Resource::save(std::string const & path, std::string const & tag, Map const & map)
 {
-    Document doc;
-    Node * node = doc.InsertFirstChild(doc.NewElement(getRootTagName()));
+    impl::Document doc;
+    impl::Node * node = doc.InsertFirstChild(doc.NewElement(getRootTagName()));
 
     for (auto & cursor : map) {
-        Element * element = doc.NewElement(tag.c_str());
+        impl::Element * element = doc.NewElement(tag.c_str());
         element->SetAttribute(getAttributeName(), cursor.first.c_str());
         element->SetText(cursor.second.c_str());
         node->InsertEndChild(element);

@@ -21,6 +21,7 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
+#include <cstdint>
 #include <cstdio>
 
 #include <string>

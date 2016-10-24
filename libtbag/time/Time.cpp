@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace time {
 
-inline namespace impl {
+/* inline */ namespace impl {
 
 /**
  * SafetyTimeGetter class prototype & implementation.
@@ -95,12 +95,12 @@ time_t getCurrentTime() TBAG_NOEXCEPT
 
 bool getGmtTime(time_t const & t, tm * output)
 {
-    return SafetyTimeGetter::getInstance()->getGmtTime(t, output);
+    return impl::SafetyTimeGetter::getInstance()->getGmtTime(t, output);
 }
 
 bool getLocalTime(time_t const & t, tm * output)
 {
-    return SafetyTimeGetter::getInstance()->getLocalTime(t, output);
+    return impl::SafetyTimeGetter::getInstance()->getLocalTime(t, output);
 }
 
 std::string getFormatString(std::string const & format, tm const * t, std::size_t allocate_size)
@@ -140,7 +140,7 @@ int getMillisec(std::chrono::system_clock::time_point const & time)
     return static_cast<int>(epoch / std::chrono::milliseconds(1));
 }
 
-inline namespace impl {
+/* inline */ namespace impl {
 
 template <typename CharType
         , typename StringType = std::basic_string<CharType> >
@@ -159,12 +159,12 @@ getPrecisionStringForMillisec(StringType const & millisec_string)
 
 std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)
 {
-    return getPrecisionStringForMillisec<char>(std::to_string(getMillisec(time)));
+    return impl::getPrecisionStringForMillisec<char>(std::to_string(getMillisec(time)));
 }
 
 std::wstring getMillisecWcs(std::chrono::system_clock::time_point const & time)
 {
-    return getPrecisionStringForMillisec<wchar_t>(std::to_wstring(getMillisec(time)));
+    return impl::getPrecisionStringForMillisec<wchar_t>(std::to_wstring(getMillisec(time)));
 }
 
 } // namespace time
