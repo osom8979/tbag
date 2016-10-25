@@ -90,10 +90,12 @@ public:
     ~MultiAsset() = default;
 
     MultiAsset(MultiAsset const & obj) = default;
-    MultiAsset(MultiAsset && obj) = default;
-
     MultiAsset & operator =(MultiAsset const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    MultiAsset(MultiAsset && obj) = default;
     MultiAsset & operator =(MultiAsset && obj) = default;
+#endif
 
 public:
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.empty()))

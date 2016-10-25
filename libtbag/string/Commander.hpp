@@ -63,13 +63,13 @@ public:
     BaseCommander() = default;
     virtual ~BaseCommander() = default;
 
-public:
     BaseCommander(BaseCommander const & obj) = default;
-    BaseCommander(BaseCommander && obj) = default;
-
-public:
     BaseCommander & operator =(BaseCommander const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    BaseCommander(BaseCommander && obj) = default;
     BaseCommander & operator =(BaseCommander && obj) = default;
+#endif
 
 public:
     inline bool empty() const TBAG_NOEXCEPT

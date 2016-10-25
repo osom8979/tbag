@@ -38,7 +38,7 @@ template <typename KeyType>
 class DependencyWorker
 {
 public:
-    static TBAG_CONSTEXPR std::size_t getDefaultMaxRecursive() TBAG_NOEXCEPT
+    inline static TBAG_CONSTEXPR std::size_t getDefaultMaxRecursive() TBAG_NOEXCEPT
     { return 10; }
 
 public:
@@ -71,11 +71,12 @@ public:
 
 public:
     DependencyWorker(DependencyWorker const & obj) = default;
-    DependencyWorker(DependencyWorker && obj) = default;
-
-public:
     DependencyWorker & operator =(DependencyWorker const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    DependencyWorker(DependencyWorker && obj) = default;
     DependencyWorker & operator =(DependencyWorker && obj) = default;
+#endif
 
 public:
     inline std::size_t getMaxRecursive() const TBAG_NOEXCEPT

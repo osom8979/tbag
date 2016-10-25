@@ -44,13 +44,15 @@ private:
 
 public:
     ReuseQueue() = default;
-    ReuseQueue(ReuseQueue const & obj) = default;
-    ReuseQueue(ReuseQueue && obj) = default;
     ~ReuseQueue() = default;
 
-public:
+    ReuseQueue(ReuseQueue const & obj) = default;
     ReuseQueue & operator =(ReuseQueue const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    ReuseQueue(ReuseQueue && obj) = default;
     ReuseQueue & operator =(ReuseQueue && obj) = default;
+#endif
 
 public:
     void clear()

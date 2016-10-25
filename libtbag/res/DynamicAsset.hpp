@@ -59,10 +59,12 @@ public:
     ~DynamicAsset() = default;
 
     DynamicAsset(DynamicAsset const & obj) = default;
-    DynamicAsset(DynamicAsset && obj) = default;
-
     DynamicAsset & operator =(DynamicAsset const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    DynamicAsset(DynamicAsset && obj) = default;
     DynamicAsset & operator =(DynamicAsset && obj) = default;
+#endif
 
 public:
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.empty()))

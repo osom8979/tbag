@@ -121,7 +121,7 @@
  * @warning
  * move constructors and move assignment operators example:
  * @code{.cpp}
- * #ifndef TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION
+ * #if defind(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
  *  class(class && v) TBAG_DEFAULTED_FUNCTIONS;
  *  class & operator =(class && v) TBAG_DEFAULTED_FUNCTIONS;
  * #endif

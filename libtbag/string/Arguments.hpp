@@ -59,9 +59,7 @@ private:
 
 public:
     BaseArguments() : _name(), _args(), _delimiter(getDefaultDelimiter()), _point_delimiter(getDefaultPointDelimiter())
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
     BaseArguments(String name
                 , String arguments
@@ -74,16 +72,16 @@ public:
         }
     }
 
-public:
-    ~BaseArguments() = default;
+    ~BaseArguments()
+    { /* EMPTY. */ }
 
-public:
     BaseArguments(BaseArguments const & obj) = default;
-    BaseArguments(BaseArguments && obj) = default;
-
-public:
     BaseArguments & operator =(BaseArguments const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    BaseArguments(BaseArguments && obj) = default;
     BaseArguments & operator =(BaseArguments && obj) = default;
+#endif
 
 public:
     inline String getName() const

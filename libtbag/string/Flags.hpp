@@ -78,13 +78,13 @@ public:
     BaseFlags() = default;
     ~BaseFlags() = default;
 
-public:
     BaseFlags(BaseFlags const & obj) = default;
-    BaseFlags(BaseFlags && obj) = default;
-
-public:
     BaseFlags & operator =(BaseFlags const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    BaseFlags(BaseFlags && obj) = default;
     BaseFlags & operator =(BaseFlags && obj) = default;
+#endif
 
 public:
     inline void clear() TBAG_NOEXCEPT

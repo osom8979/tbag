@@ -57,10 +57,12 @@ public:
     ~Asset() = default;
 
     Asset(Asset const & obj) = default;
-    Asset(Asset && obj) = default;
-
     Asset & operator =(Asset const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    Asset(Asset && obj) = default;
     Asset & operator =(Asset && obj) = default;
+#endif
 
 public:
     static std::vector<Path> scanDir(Path const & path)

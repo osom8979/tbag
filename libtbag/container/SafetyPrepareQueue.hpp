@@ -99,17 +99,17 @@ public:
 
     public:
         Packet() : _id(id::generator::genTimeId()), _value()
-        {
-            // EMPTY.
-        }
+        { /* EMPTY. */ }
+        ~Packet()
+        { /* EMPTY. */ }
 
         Packet(Packet const & obj) = default;
-        Packet(Packet && obj) = default;
-
-        ~Packet() = default;
-
         Packet & operator =(Packet const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+        Packet(Packet && obj) = default;
         Packet & operator =(Packet && obj) = default;
+#endif
 
     public:
         inline Key getId() const TBAG_NOEXCEPT

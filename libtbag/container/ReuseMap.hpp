@@ -56,13 +56,15 @@ private:
 
 public:
     ReuseMap() = default;
-    ReuseMap(ReuseMap const & obj) = default;
-    ReuseMap(ReuseMap && obj) = default;
     ~ReuseMap() = default;
 
-public:
+    ReuseMap(ReuseMap const & obj) = default;
     ReuseMap & operator =(ReuseMap const & obj) = default;
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+    ReuseMap(ReuseMap && obj) = default;
     ReuseMap & operator =(ReuseMap && obj) = default;
+#endif
 
 public:
     void clear()
