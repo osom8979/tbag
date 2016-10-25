@@ -93,6 +93,10 @@
 # define TBAG_DESTRUCTOR
 #endif // defined(TBAG_EXPORT_API)
 
+// -------------
+// CXX Features.
+// -------------
+
 #ifndef TBAG_CONSTEXPR
 # if defined(TBAG_HAS_CONSTEXPR)
 #  define TBAG_CONSTEXPR constexpr
@@ -108,6 +112,26 @@
 # else
 #  define TBAG_NOEXCEPT
 #  define TBAG_NOEXCEPT_EXPR(e)
+# endif
+#endif
+
+/**
+ * @def TBAG_DEFAULTED_FUNCTIONS
+ *
+ * @warning
+ * move constructors and move assignment operators example:
+ * @code{.cpp}
+ * #ifndef TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION
+ *  class(class && v) TBAG_DEFAULTED_FUNCTIONS;
+ *  class & operator =(class && v) TBAG_DEFAULTED_FUNCTIONS;
+ * #endif
+ * @endcode
+ */
+#ifndef TBAG_DEFAULTED_FUNCTIONS
+# if defined(TBAG_HAS_DEFAULTED_FUNCTIONS)
+#  define TBAG_DEFAULTED_FUNCTIONS =default
+# else
+#  define TBAG_DEFAULTED_FUNCTIONS
 # endif
 #endif
 

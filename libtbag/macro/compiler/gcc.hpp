@@ -49,16 +49,30 @@
 # endif
 #endif
 
+// =============
+// FEATURE OPEN.
 #if defined(__COMP_GNUC_CXX__)
+// C++0x features in 4.4.n and later
+# if (__COMP_GNUC_VERSION__ >= 40400)
+#  define TBAG_HAS_AUTO_DECLARATIONS
+#  define TBAG_HAS_AUTO_MULTIDECLARATIONS
+#  define TBAG_HAS_CHAR16_T
+#  define TBAG_HAS_CHAR32_T
+#  define TBAG_HAS_HDR_INITIALIZER_LIST
+#  define TBAG_HAS_DEFAULTED_FUNCTIONS
+# endif
+
 // C++0x features in 4.6.n and later
 # if (__COMP_GNUC_VERSION__ >= 40600)
-# define TBAG_HAS_CONSTEXPR
-# define TBAG_HAS_NOEXCEPT
-# define TBAG_HAS_NULLPTR
-# define TBAG_HAS_RANGE_BASED_FOR
-# define TBAG_HAS_UNIFIED_INITIALIZATION_SYNTAX
+#  define TBAG_HAS_CONSTEXPR
+#  define TBAG_HAS_NOEXCEPT
+#  define TBAG_HAS_NULLPTR
+#  define TBAG_HAS_RANGE_BASED_FOR
+#  define TBAG_HAS_UNIFIED_INITIALIZATION_SYNTAX
 # endif
-#endif
+#endif // defined(__COMP_GNUC_CXX__)
+// FEATURE CLOSE.
+// ==============
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_COMPILER_GCC_HPP__
 

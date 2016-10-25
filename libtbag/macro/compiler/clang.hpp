@@ -26,6 +26,8 @@
 #define __COMP_CLANG_VERSION__ 0
 #endif
 
+// =============
+// FEATURE OPEN.
 #if defined(__COMP_CLANG__)
 # if __has_feature(cxx_constexpr)
 # define TBAG_HAS_CONSTEXPR
@@ -34,7 +36,17 @@
 # if __has_feature(cxx_noexcept)
 # define TBAG_HAS_NOEXCEPT
 # endif
-#endif
+
+# if __has_feature(cxx_defaulted_functions)
+# define TBAG_HAS_DEFAULTED_FUNCTIONS
+# endif
+
+# if __has_feature(cxx_deleted_functions)
+# define TBAG_HAS_DELETED_FUNCTIONS
+# endif
+#endif // defined(__COMP_CLANG__)
+// FEATURE CLOSE.
+// ==============
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_COMPILER_CLANG_HPP__
 
