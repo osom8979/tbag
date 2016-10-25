@@ -41,9 +41,9 @@ public:
     SINGLETON_RESTRICT(LoggerManager);
 
 public:
-    using LoggerPtr = std::unique_ptr<Logger>;
-    using LoggerMap = std::unordered_map<std::string, LoggerPtr>;
-    using LoggerPair = typename LoggerMap::value_type;
+    using LoggerPtr  = std::unique_ptr<Logger>;
+    using LoggerMap  = std::unordered_map<std::string, LoggerPtr>;
+    using LoggerPair = LoggerMap::value_type;
 
 private:
     LoggerMap _logs;

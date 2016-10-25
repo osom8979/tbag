@@ -54,12 +54,11 @@ private:
     std::atomic_int  _result_code;
 
 public:
-    TickLoop() : _callback()
-               , _time_step(DurationType(1))
-               , _exit(false)
-               , _result_code(0)
+    TickLoop() : _callback(), _time_step(DurationType(1))
     {
-        // EMPTY.
+        // The 'atomic_bool(bool) & atomic_int(int) constructor' does not exist in MSVC 2013.
+        _exit = false;
+        _result_code = 0;
     }
 
     TickLoop(Callback const & callback, Duration step)

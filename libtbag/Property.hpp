@@ -106,10 +106,10 @@ public:
 
 public:
     static std::string getDefaultPath() {
-        using namespace filesystem;
-        Path path = Path(common::getExeDir());
+        using Path = filesystem::Path;
+        Path path = Path::getExeDir();
         path /= getDefaultFileName();
-        return path.getGeneric();
+        return path.getGenericString();
     }
 };
 

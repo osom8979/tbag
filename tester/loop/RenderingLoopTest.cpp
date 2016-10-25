@@ -26,7 +26,7 @@ static int const _MAX_FPS = _FPS + _EPSILON;
 class RenderingCallback : public RenderingLoop<>::Callback
 {
 public:
-    using Looper = typename RenderingLoop<>::Callback::Looper;
+    using Looper = RenderingLoop<>::Callback::Looper;
 
 public:
     std::chrono::system_clock::time_point start_time;

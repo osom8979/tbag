@@ -107,7 +107,7 @@ std::string getFormatString(std::string const & format, tm const * t, std::size_
 {
     // The expected size of the buffer.
     std::vector<char> buffer;
-    buffer.resize(allocate_size, static_cast<typename std::vector<char>::value_type>(0x00));
+    buffer.resize(allocate_size, static_cast<char>(0x00));
 
     std::size_t length = std::strftime(&buffer[0], allocate_size, format.c_str(), t);
     if (length >= allocate_size) {
@@ -120,7 +120,7 @@ std::wstring getFormatString(std::wstring const & format, tm const * t, std::siz
 {
     // The expected size of the buffer.
     std::vector<wchar_t> buffer;
-    buffer.resize(allocate_size, static_cast<typename std::vector<wchar_t>::value_type>(0x00));
+    buffer.resize(allocate_size, static_cast<wchar_t>(0x00));
 
     std::size_t length = std::wcsftime(&buffer[0], allocate_size, format.c_str(), t);
     if (length >= allocate_size) {

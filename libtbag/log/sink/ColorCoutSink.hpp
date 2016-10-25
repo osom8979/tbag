@@ -50,23 +50,25 @@ public:
 public:
     virtual void write(Message const & msg) override
     {
-        using namespace details;
         String message;
 
+        // Don't use 'using namespace details;'
+        // 'LogLevel' ambiguous symbol (MSVC 2013 error)
+        // Fix the 'details::LogLevel'
         switch (msg.getSeverity().level) {
-        case static_cast<int>(LogLevel::LEVEL_EMERGENCY):
+        case static_cast<int>(details::LogLevel::LEVEL_EMERGENCY):
             message = tces::DISPLAY_ATTRIBUTE_BG_RED;
             message += tces::DISPLAY_ATTRIBUTE_FG_CYAN;
             break;
 
-        case static_cast<int>(LogLevel::LEVEL_ALERT    ): message = tces::DISPLAY_ATTRIBUTE_FG_RED;    break;
-        case static_cast<int>(LogLevel::LEVEL_CRITICAL ): message = tces::DISPLAY_ATTRIBUTE_FG_RED;    break;
-        case static_cast<int>(LogLevel::LEVEL_ERROR    ): message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW; break;
-        case static_cast<int>(LogLevel::LEVEL_WARNING  ): message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW; break;
-        case static_cast<int>(LogLevel::LEVEL_NOTICE   ): message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;  break;
-        case static_cast<int>(LogLevel::LEVEL_INFO     ): message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;  break;
-        case static_cast<int>(LogLevel::LEVEL_DEBUG    ): message = tces::DISPLAY_ATTRIBUTE_FG_BLUE;   break;
-        case static_cast<int>(LogLevel::LEVEL_OFF      ): default: break;
+        case static_cast<int>(details::LogLevel::LEVEL_ALERT   ): message = tces::DISPLAY_ATTRIBUTE_FG_RED;    break;
+        case static_cast<int>(details::LogLevel::LEVEL_CRITICAL): message = tces::DISPLAY_ATTRIBUTE_FG_RED;    break;
+        case static_cast<int>(details::LogLevel::LEVEL_ERROR   ): message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW; break;
+        case static_cast<int>(details::LogLevel::LEVEL_WARNING ): message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW; break;
+        case static_cast<int>(details::LogLevel::LEVEL_NOTICE  ): message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;  break;
+        case static_cast<int>(details::LogLevel::LEVEL_INFO    ): message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;  break;
+        case static_cast<int>(details::LogLevel::LEVEL_DEBUG   ): message = tces::DISPLAY_ATTRIBUTE_FG_BLUE;   break;
+        case static_cast<int>(details::LogLevel::LEVEL_OFF     ): default: break;
         }
 
         message += msg.getString() + tces::DISPLAY_ATTRIBUTE_RESET;

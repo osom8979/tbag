@@ -62,17 +62,17 @@ class TBAG_EXPORTS MultiAsset
 public:
     using DynamicAsset = libtbag::res::DynamicAsset;
 
-    using Value  = typename DynamicAsset::Value;
-    using String = typename DynamicAsset::String;
-    using Path   = typename DynamicAsset::Path;
+    using Value  = DynamicAsset::Value;
+    using String = DynamicAsset::String;
+    using Path   = DynamicAsset::Path;
 
-    using StringVector = typename DynamicAsset::StringVector;
-    using PathVector   = typename DynamicAsset::PathVector;
-    using PathMap      = typename DynamicAsset::PathMap;
-    using PathMapPair  = typename DynamicAsset::PathMapPair;
+    using StringVector = DynamicAsset::StringVector;
+    using PathVector   = DynamicAsset::PathVector;
+    using PathMap      = DynamicAsset::PathMap;
+    using PathMapPair  = DynamicAsset::PathMapPair;
 
     using AssetMap     = std::map<String, DynamicAsset>;
-    using AssetMapPair = typename AssetMap::value_type;
+    using AssetMapPair = AssetMap::value_type;
 
     static_assert(std::is_same<Value, char>::value
             , "Value must be the same type as char");

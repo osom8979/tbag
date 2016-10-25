@@ -43,7 +43,7 @@ class TBAG_EXPORTS Logger : public Noncopyable
 public:
     using CharType = char;
     using SinkType = sink::BaseSinkInterface<CharType>;
-    using Message  = typename SinkType::Message;
+    using Message  = SinkType::Message;
     using SinkPtr  = std::unique_ptr<SinkType>;
     using String   = std::basic_string<CharType>;
     using Format   = BaseFormatter<CharType>;

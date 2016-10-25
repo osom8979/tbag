@@ -44,7 +44,7 @@ public:
     using StringVector = std::vector<String>;
     using PathVector   = std::vector<Path>;
     using PathMap      = std::map<String, Path>;
-    using PathMapPair  = typename PathMap::value_type;
+    using PathMapPair  = PathMap::value_type;
 
     static_assert(std::is_same<Value, char>::value
             , "Value must be the same type as char");

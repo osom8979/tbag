@@ -41,8 +41,11 @@ private:
     std::atomic_bool _state;
 
 public:
-    SpinLock() : _state(UNLOCKED)
-    { /* EMPTY. */ }
+    SpinLock()
+    {
+        // The 'atomic_bool(bool) constructor' does not exist in MSVC 2013.
+        _state = UNLOCKED;
+    }
 
 public:
     void lock() TBAG_NOEXCEPT

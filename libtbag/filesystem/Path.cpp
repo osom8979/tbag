@@ -286,7 +286,7 @@ std::vector<std::string> Path::splitNodesWithCanonical() const
 {
     std::vector<std::string> result;
     std::vector<std::string> nodes = splitNodes();
-    using NodeItr = typename std::vector<std::string>::iterator;
+    using NodeItr = std::vector<std::string>::iterator;
 
     NodeItr itr;
     NodeItr end = nodes.end();

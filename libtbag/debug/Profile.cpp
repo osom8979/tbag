@@ -26,9 +26,10 @@ Profile::Timer::~Timer()
 }
 
 Profile::Profile(std::size_t cycle, RepeatCallback const & callback, bool enable)
-        : _cycle_count(cycle), _current_cycle(0), _total_duration(0), _callback(callback), _enable(enable)
+        : _cycle_count(cycle), _current_cycle(0), _total_duration(0), _callback(callback)
 {
-    // EMPTY.
+    // The 'atomic_bool(bool) constructor' does not exist in MSVC 2013.
+    _enable = enable;
 }
 
 Profile::Profile(std::size_t cycle, RepeatCallback const & callback) : Profile(cycle, callback, true)

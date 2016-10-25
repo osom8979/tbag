@@ -39,9 +39,9 @@ class TBAG_EXPORTS Profile : public Noncopyable
 {
 public:
     using TimePoint = std::chrono::system_clock::time_point;
-    using Duration  = typename TimePoint::duration;
-    using Rep       = typename TimePoint::rep;
-    using Period    = typename TimePoint::period;
+    using Duration  = TimePoint::duration;
+    using Rep       = TimePoint::rep;
+    using Period    = TimePoint::period;
 
     using RepeatCallback = std::function<void(Rep average)>;
 
