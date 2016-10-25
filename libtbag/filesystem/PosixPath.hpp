@@ -36,7 +36,7 @@ namespace filesystem {
  * @remarks
  *  ISO/IEC 9945 POSIX API.
  */
-class PosixPath
+class TBAG_EXPORTS PosixPath
 {
 public:
     /**

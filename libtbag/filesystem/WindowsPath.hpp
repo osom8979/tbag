@@ -36,7 +36,7 @@ namespace filesystem {
  * @remarks
  *  Windows API.
  */
-class WindowsPath
+class TBAG_EXPORTS WindowsPath
 {
 public:
     /**
