@@ -30,12 +30,6 @@ enable_language (C)
 enable_language (CXX)
 
 
-## Find thread library.
-find_package (Threads)
-if (CMAKE_THREAD_LIBS_INIT)
-    message (STATUS "Thread flags: ${CMAKE_THREAD_LIBS_INIT}")
-endif ()
-
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src"
                      "${CMAKE_CURRENT_SOURCE_DIR}/include"
                      "${CMAKE_CURRENT_SOURCE_DIR}")

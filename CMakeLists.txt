@@ -47,11 +47,15 @@ endif ()
 ## Configure settings.
 tbag_config__default_generate_c_header ()
 
-## Sub-project.
+## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
+
+## Test subproject.
+add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbproc)
+add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbshare)
 
 ## Thread settings.
 tbag_config__find_thread ()
