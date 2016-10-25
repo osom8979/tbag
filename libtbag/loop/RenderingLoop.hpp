@@ -87,12 +87,11 @@ private:
     TimeUnit   _time_lag;
 
 public:
-    RenderingLoop(Callback & callback, TimeUnit step)
-            : _callback(callback)
-            , _time_step(step)
-            , _exit(false)
-            , _result_code(0) {
-        // EMPTY.
+    RenderingLoop(Callback & callback, TimeUnit step) : _callback(callback), _time_step(step)
+    {
+        // The 'atomic_bool(bool) & atomic_int(int) constructor' does not exist in MSVC 2013.
+        _exit = false;
+        _result_code = 0;
     }
 
     ~RenderingLoop() {

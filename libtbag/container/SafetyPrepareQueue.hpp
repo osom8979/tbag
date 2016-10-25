@@ -136,10 +136,10 @@ public:
         std::atomic_bool _cancel;
 
     public:
-        PreparePacket(SafetyPrepareQueue & queue, Packet & packet)
-                : _queue(queue), _packet(packet), _cancel(false)
+        PreparePacket(SafetyPrepareQueue & queue, Packet & packet) : _queue(queue), _packet(packet)
         {
-            // EMPTY.
+            // The 'atomic_bool(bool) constructor' does not exist in MSVC 2013.
+            _cancel = false;
         }
 
         ~PreparePacket()
