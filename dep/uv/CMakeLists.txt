@@ -47,7 +47,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     ## Windows
     prepend (WIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/win"
             async.c core.c dl.c error.c fs-event.c fs.c getaddrinfo.c getnameinfo.c handle.c
-            loop-watcher.c pipe.c poll.c process-stdio.c process.c req.c signal.c stream.c
+            loop-watcher.c pipe.c poll.c process-stdio.c process.c req.c signal.c snprintf.c stream.c
             tcp.c thread.c timer.c tty.c udp.c util.c winapi.c winsock.c)
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src/win")
     add_definitions (-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600 -D_GNU_SOURCE

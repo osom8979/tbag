@@ -182,9 +182,10 @@ public:
 
     public:
         ReadablePacket(SafetyPrepareQueue & queue, Packet const & packet)
-                : _queue(queue), _packet(packet), _cancel(false)
+                : _queue(queue), _packet(packet)
         {
-            // EMPTY.
+            // The 'atomic_bool(bool) constructor' does not exist in MSVC 2013.
+            _cancel = false;
         }
 
         ~ReadablePacket()
