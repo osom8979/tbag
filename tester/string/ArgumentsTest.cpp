@@ -39,7 +39,8 @@ TEST(ArgumentsTest, OnlyCoverage)
 struct ArgumentsFixture : public testing::Test
 {
 public:
-    static constexpr char const * const ARGUMENT_STRING = "test,1,2.1,9x10,100.10x200.2x300x400,x";
+    inline static TBAG_CONSTEXPR char const * const getArgumentString()
+    { return "test,1,2.1,9x10,100.10x200.2x300x400,x"; }
 
 public:
     Arguments args;
@@ -47,7 +48,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        args.parse(ARGUMENT_STRING);
+        args.parse(getArgumentString());
     }
 
     virtual void TearDown() override
@@ -79,7 +80,7 @@ TEST_F(ArgumentsFixture, Default)
 
 TEST_F(ArgumentsFixture, toString)
 {
-    ASSERT_STREQ(ARGUMENT_STRING, args.toString().c_str());
+    ASSERT_STREQ(getArgumentString(), args.toString().c_str());
 }
 
 TEST_F(ArgumentsFixture, ModifyMethods)

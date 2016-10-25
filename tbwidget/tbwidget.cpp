@@ -5,6 +5,7 @@
  * @date   2016-10-17
  */
 
+#include <libtbag/predef.hpp>
 #include <iostream>
 
 static char const * const WINDOW_TITLE = "TBAG WIDGET with SFML";
@@ -41,7 +42,7 @@ int runSfmlSample(int argc, char ** argv)
 }
 #endif // defined(USE_SFML)
 
-constexpr bool isUseSfml() noexcept
+inline static TBAG_CONSTEXPR bool isUseSfml() TBAG_NOEXCEPT
 {
 #if defined(USE_SFML)
     return true;
