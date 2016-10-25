@@ -135,9 +135,9 @@ int getMillisec(std::chrono::system_clock::time_point const & time)
     epoch -= std::chrono::duration_cast<std::chrono::seconds>(epoch);
 
     // It does not work on some platforms:
-    // return std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    // return static_cast<int>(epoch / std::chrono::milliseconds(1));
 
-    return static_cast<int>(epoch / std::chrono::milliseconds(1));
+    return std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
 }
 
 /* inline */ namespace impl {

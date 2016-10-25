@@ -75,3 +75,17 @@ TEST(TimeTest, chrono)
     }
 }
 
+TEST(TimeTest, getMillisec)
+{
+    std::chrono::system_clock::time_point tp;
+    tp += std::chrono::hours(1);
+    tp += std::chrono::minutes(2);
+    tp += std::chrono::seconds(3);
+    tp += std::chrono::milliseconds(4);
+
+    ASSERT_EQ(4, time::getMillisec(tp));
+
+    tp += std::chrono::milliseconds(1001);
+    ASSERT_EQ(5, time::getMillisec(tp));
+}
+
