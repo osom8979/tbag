@@ -14,7 +14,7 @@ if (NOT DEFINED TbagProjectPCH_NAME)
     string (REPLACE "." "-" TbagProjectPCH_NAME "${TbagProjectPCH_ORIGINAL_NAME}-pch")
     set (TbagProjectPCH_COPY_PATH ${CMAKE_BINARY_DIR}/${TbagProjectPCH_ORIGINAL_NAME})
 
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GCC")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set (TbagProjectPCH_RESULT_PATH "${TbagProjectPCH_COPY_PATH}.gch")
     else ()
         set (TbagProjectPCH_RESULT_PATH "${TbagProjectPCH_COPY_PATH}.pch")
