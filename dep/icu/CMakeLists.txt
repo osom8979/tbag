@@ -10,7 +10,9 @@ enable_language (C)
 enable_language (CXX)
 
 
-if (NOT WIN32)
+if (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
+    add_compile_options (/wd4244) ## conversion from 'type1' to 'type2', possible loss of data.
+else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif ()
 

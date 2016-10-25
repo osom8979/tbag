@@ -40,7 +40,7 @@ include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src"
 prepend (COMMON_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
         fs-poll.c inet.c threadpool.c uv-common.c version.c)
 
-if (WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL MSVC))
+if (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
     ## Windows
     prepend (WIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/win"
             async.c core.c dl.c error.c fs-event.c fs.c getaddrinfo.c getnameinfo.c handle.c
