@@ -20,5 +20,5 @@ list (APPEND TBAG_PROJECT_LDFLAGS      tbag)
 
 ## Test project.
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbshare_copy)
-list (APPEND TBAG_PROJECT_DEPENDENCIES tbproc)
+list (APPEND TBAG_PROJECT_DEPENDENCIES tbproc_copy)
 
