@@ -15,9 +15,9 @@ using namespace libtbag::lib;
 
 TEST(SharedLibraryTest, Default)
 {
-    char const * const LIBRARY_NAME = "tbtest";
-    char const * const FUNC1_NAME   = "libtbtest_add";
-    char const * const FUNC2_NAME   = "libtbtest_add2";
+    char const * const LIBRARY_NAME = "tbshare";
+    char const * const FUNC1_NAME   = "tbshare_add";
+    char const * const FUNC2_NAME   = "tbshare_add2";
 
     using Path = filesystem::Path;
     Path const PATH = Path::getExeDir() / getLibraryName(LIBRARY_NAME);

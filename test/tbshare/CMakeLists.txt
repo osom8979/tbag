@@ -13,3 +13,14 @@ add_definitions (-DUSE_LIBTEST_EXPORT)
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}")
 add_library (tbshare SHARED ${SRCS})
 
+## Result target.
+set (tbshare_test_filename "${CMAKE_SHARED_LIBRARY_PREFIX}tbshare${CMAKE_SHARED_LIBRARY_SUFFIX}")
+set (tbshare_test_path "${CMAKE_BINARY_DIR}/${tbshare_test_filename}")
+add_custom_target (tbshare_copy ALL DEPENDS "${tbshare_test_path}")
+
+add_custom_command (
+        OUTPUT  "${tbshare_test_path}"
+        COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:tbshare>" "${tbshare_test_path}"
+        DEPENDS tbshare
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
