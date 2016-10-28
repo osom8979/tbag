@@ -53,7 +53,7 @@ function (tabg_cuda__find_detect_arch __result)
         message (FATAL_ERROR "Not found nvcc executable: ${CUDA_NVCC_EXECUTABLE}")
     endif ()
 
-    if(NOT __gpu_detect_output)
+    if (NOT __gpu_detect_output)
         set (__cuda_source_file "${PROJECT_BINARY_DIR}/tabg_cuda__find_detect_arch.cu")
 
         file (WRITE ${__cuda_source_file} ""
@@ -77,24 +77,24 @@ function (tabg_cuda__find_detect_arch __result)
                 "    return 0;"
                 "}")
 
-        execute_process(COMMAND "${CUDA_NVCC_EXECUTABLE}" "--run" "${__cuda_source_file}"
+        execute_process (COMMAND "${CUDA_NVCC_EXECUTABLE}" "--run" "${__cuda_source_file}"
                 WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/CMakeFiles/"
                 RESULT_VARIABLE __nvcc_exit_code
                 OUTPUT_VARIABLE __nvcc_output
                 ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-        if(__nvcc_exit_code EQUAL 0)
+        if (__nvcc_exit_code EQUAL 0)
             string (REPLACE "2.1" "2.1(2.0)" __nvcc_output "${__nvcc_output}")
             set (__gpu_detect_output ${__nvcc_output} CACHE INTERNAL "Returned GPU architetures" FORCE)
-        endif()
-    endif()
+        endif ()
+    endif ()
 
-    if(NOT __gpu_detect_output)
+    if (NOT __gpu_detect_output)
         message (STATUS "Automatic GPU detection failed. Building for all known architectures.")
         set (${__result} ${TBAG_CUDA_KNOWN_GPU_ARCHS})
-    else()
+    else ()
         set (${__result} ${__gpu_detect_output})
-    endif()
+    endif ()
 
     # Update result.
     set (${__result} ${${__result}} PARENT_SCOPE)
