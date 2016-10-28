@@ -95,10 +95,6 @@ configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
 ## Run project.
 tbag_project ()
 
-## Install & external settings.
-tbag_config__install_cxx_headers (${MAIN_NAME})
-tbag_config__soversion (tbag)
-
 ## libtbag-cmake build packages.
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
          DESTINATION "share/libtbag")

@@ -5,6 +5,27 @@
 
 include (TbagUtils)
 
+## -----------
+## Properties.
+## -----------
+
+macro (tbag_modules__preview)
+    # List variables.
+    message (STATUS "TBAG_PROJECT_OBJECTS: ${TBAG_PROJECT_OBJECTS}")
+    message (STATUS "TBAG_PROJECT_DEPENDENCIES: ${TBAG_PROJECT_DEPENDENCIES}")
+    message (STATUS "TBAG_PROJECT_DEFINITIONS: ${TBAG_PROJECT_DEFINITIONS}")
+    message (STATUS "TBAG_PROJECT_INCLUDE_DIRS: ${TBAG_PROJECT_INCLUDE_DIRS}")
+    message (STATUS "TBAG_PROJECT_CXXFLAGS: ${TBAG_PROJECT_CXXFLAGS}")
+    message (STATUS "TBAG_PROJECT_LDFLAGS: ${TBAG_PROJECT_LDFLAGS}")
+
+    # Constant variables.
+    message (STATUS "TBAG_PROJECT_CONST_CMAKE_PATH: ${TBAG_PROJECT_CONST_CMAKE_PATH}")
+    message (STATUS "TBAG_PROJECT_CONST_DIR_PATH: ${TBAG_PROJECT_CONST_DIR_PATH}")
+    message (STATUS "TBAG_PROJECT_CONST_DIR_NAME: ${TBAG_PROJECT_CONST_DIR_NAME}")
+    message (STATUS "TBAG_PROJECT_CONST_TYPE: ${TBAG_PROJECT_CONST_TYPE}")
+    message (STATUS "TBAG_PROJECT_CONST_NAME: ${TBAG_PROJECT_CONST_NAME}")
+endmacro ()
+
 ## ------------------
 ## Find object files.
 ## ------------------
@@ -23,51 +44,9 @@ macro (tbag_modules__update_default_objects)
     tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cpp")
 endmacro ()
 
-## ----------
-## Libraries.
-## ----------
-
-macro (tbag_modules__check_boost)
-    if (NOT Boost_FOUND)
-        message (WARNING "Not found Boost.")
-    endif ()
-    #message (STATUS "Boost system: ${Boost_SYSTEM_FOUND}")
-    #message (STATUS "Boost thread: ${Boost_THREAD_FOUND}")
-    #message (STATUS "Boost python: ${Boost_PYTHON_FOUND}")
-endmacro ()
-
-macro (tbag_modules__apply_boost)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${Boost_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__check_cuda)
-    if (NOT CUDA_FOUND)
-        message (WARNING "Not found CUDA.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_cublas)
-    list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_CUBLAS_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__apply_cuda)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CUDA_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${CUDA_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__apply_include_of_cuda)
-    cuda_include_directories (${TBAG_PROJECT_INCLUDE_DIRS})
-endmacro ()
-
-macro (tbag_modules__apply_cudnn)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CUDNN_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${CUDNN_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__apply_curand)
-    list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_curand_LIBRARY})
-endmacro ()
+## -----------------
+## Project settings.
+## -----------------
 
 macro (tbag_modules__apply_default)
     string (TOUPPER "${TBAG_PROJECT_CONST_NAME}" __tbag_project_upper_name)
@@ -86,114 +65,6 @@ macro (tbag_modules__apply_default)
     endif ()
 endmacro ()
 
-macro (tbag_modules__check_gflags)
-    if (NOT GFlags_FOUND)
-        message (WARNING "Not found Google-gflags.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_gflags)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${GFlags_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${GFlags_LIBRARIES})
-    if (WIN32 AND NOT CYGWIN)
-        list (APPEND TBAG_PROJECT_LDFLAGS "shlwapi.lib")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__check_glog)
-    if (NOT GLog_FOUND)
-        message (WARNING "Not found Google-glog.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_glog)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${GLog_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${GLog_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__check_gtest)
-    if (NOT GTEST_FOUND)
-        message (WARNING "Not found Google-gtest.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_gtest)
-    list (APPEND TBAG_PROJECT_LDFLAGS ${GTEST_BOTH_LIBRARIES})
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
-    endif ()
-endmacro ()
-
-macro (tbag_modules__check_hdf5v2)
-    if (NOT HDF5v2_FOUND)
-        message (WARNING "Not found HDF5.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_hdf5v2)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${HDF5v2_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${HDF5v2_LIBRARIES}) # HL, C
-endmacro ()
-
-macro (tbag_modules__check_icu)
-    if (NOT ICU_FOUND)
-        message (WARNING "Not found ICU.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_icu)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${ICU_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${ICU_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__install_target)
-    set (TBAG_PROJECT_FLAG_TARGET_INSTALL ON)
-endmacro ()
-
-macro (tbag_modules__check_ncurses)
-    if (NOT NCurses_FOUND)
-        message (WARNING "Not found NCurses.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_ncurses)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NCurses_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${NCurses_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__check_numpy)
-    if (NOT NumPy_FOUND)
-        message (WARNING "Not found Python NumPy.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_numpy)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NumPy_INCLUDE_DIRS})
-endmacro ()
-
-macro (tbag_modules__check_openblas)
-    if (NOT OpenBLAS_FOUND)
-        message (WARNING "Not found OpenBLAS.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_openblas)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenBLAS_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenBLAS_LIBRARIES})
-endmacro ()
-
-macro (tbag_modules__check_opencv)
-    if (NOT OpenCV_FOUND)
-        message (WARNING "Not found OpenCV.")
-    endif ()
-endmacro ()
-
-macro (tbag_modules__apply_opencv)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenCV_LIBS})
-endmacro ()
-
-#/// TODO: FIX THE ERROR!!
 macro (tbag_modules__apply_pch __original_pch)
     if (NOT EXISTS ${__original_pch})
         message (FATAL_ERROR "Not found original header file path: ${__original_pch}")
@@ -264,24 +135,174 @@ macro (tbag_modules__apply_pch __original_pch)
     list (APPEND TBAG_PROJECT_CXXFLAGS -include ${TbagProjectPCH_COPY_PATH})
 endmacro ()
 
-macro (tbag_modules__preview)
-    # Flag variables.
-    message (STATUS "TBAG_PROJECT_FLAG_TARGET_INSTALL: ${TBAG_PROJECT_FLAG_TARGET_INSTALL}")
+macro (tbag_modules__add_whole_archive __lib_name)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION)
+        if (NOT MSVC_VERSION LESS 1900)
+            #list (APPEND TBAG_PROJECT_LDFLAGS "/WHOLEARCHIVE:${__lib_name}") ## ERROR: Auto converting '/' -> '\'
+            list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
+        else ()
+            list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
+        endif ()
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -Wl,-force_load,${__lib_name}) ## All files: -Wl,-all_load
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        list (APPEND TBAG_PROJECT_LDFLAGS -Wl,--whole-archive ${__lib_name} -Wl,--no-whole-archive)
+    else ()
+        list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
+    endif ()
+endmacro ()
 
-    # List variables.
-    message (STATUS "TBAG_PROJECT_OBJECTS: ${TBAG_PROJECT_OBJECTS}")
-    message (STATUS "TBAG_PROJECT_DEPENDENCIES: ${TBAG_PROJECT_DEPENDENCIES}")
-    message (STATUS "TBAG_PROJECT_DEFINITIONS: ${TBAG_PROJECT_DEFINITIONS}")
-    message (STATUS "TBAG_PROJECT_INCLUDE_DIRS: ${TBAG_PROJECT_INCLUDE_DIRS}")
-    message (STATUS "TBAG_PROJECT_CXXFLAGS: ${TBAG_PROJECT_CXXFLAGS}")
-    message (STATUS "TBAG_PROJECT_LDFLAGS: ${TBAG_PROJECT_LDFLAGS}")
+## -----
+## CUDA.
+## -----
 
-    # Constant variables.
-    message (STATUS "TBAG_PROJECT_CONST_CMAKE_PATH: ${TBAG_PROJECT_CONST_CMAKE_PATH}")
-    message (STATUS "TBAG_PROJECT_CONST_DIR_PATH: ${TBAG_PROJECT_CONST_DIR_PATH}")
-    message (STATUS "TBAG_PROJECT_CONST_DIR_NAME: ${TBAG_PROJECT_CONST_DIR_NAME}")
-    message (STATUS "TBAG_PROJECT_CONST_TYPE: ${TBAG_PROJECT_CONST_TYPE}")
-    message (STATUS "TBAG_PROJECT_CONST_NAME: ${TBAG_PROJECT_CONST_NAME}")
+macro (tbag_modules__check_cuda)
+    if (NOT CUDA_FOUND)
+        message (WARNING "Not found CUDA.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_include_of_cuda)
+    cuda_include_directories (${TBAG_PROJECT_INCLUDE_DIRS})
+endmacro ()
+
+macro (tbag_modules__apply_cublas)
+    list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_CUBLAS_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__apply_cuda)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CUDA_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${CUDA_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__apply_cudnn)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CUDNN_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${CUDNN_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__apply_curand)
+    list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_curand_LIBRARY})
+endmacro ()
+
+## ----------------
+## Other libraries.
+## ----------------
+
+macro (tbag_modules__check_boost)
+    if (NOT Boost_FOUND)
+        message (WARNING "Not found Boost.")
+    endif ()
+    #message (STATUS "Boost system: ${Boost_SYSTEM_FOUND}")
+    #message (STATUS "Boost thread: ${Boost_THREAD_FOUND}")
+    #message (STATUS "Boost python: ${Boost_PYTHON_FOUND}")
+endmacro ()
+
+macro (tbag_modules__apply_boost)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${Boost_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__check_gflags)
+    if (NOT GFlags_FOUND)
+        message (WARNING "Not found Google-gflags.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_gflags)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${GFlags_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${GFlags_LIBRARIES})
+    if (WIN32 AND NOT CYGWIN)
+        list (APPEND TBAG_PROJECT_LDFLAGS "shlwapi.lib")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__check_glog)
+    if (NOT GLog_FOUND)
+        message (WARNING "Not found Google-glog.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_glog)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${GLog_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${GLog_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__check_gtest)
+    if (NOT GTEST_FOUND)
+        message (WARNING "Not found Google-gtest.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_gtest)
+    list (APPEND TBAG_PROJECT_LDFLAGS ${GTEST_BOTH_LIBRARIES})
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+endmacro ()
+
+macro (tbag_modules__check_hdf5v2)
+    if (NOT HDF5v2_FOUND)
+        message (WARNING "Not found HDF5.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_hdf5v2)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${HDF5v2_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${HDF5v2_LIBRARIES}) # HL, C
+endmacro ()
+
+macro (tbag_modules__check_icu)
+    if (NOT ICU_FOUND)
+        message (WARNING "Not found ICU.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_icu)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${ICU_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${ICU_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__check_ncurses)
+    if (NOT NCurses_FOUND)
+        message (WARNING "Not found NCurses.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_ncurses)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NCurses_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${NCurses_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__check_numpy)
+    if (NOT NumPy_FOUND)
+        message (WARNING "Not found Python NumPy.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_numpy)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${NumPy_INCLUDE_DIRS})
+endmacro ()
+
+macro (tbag_modules__check_openblas)
+    if (NOT OpenBLAS_FOUND)
+        message (WARNING "Not found OpenBLAS.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_openblas)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenBLAS_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenBLAS_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__check_opencv)
+    if (NOT OpenCV_FOUND)
+        message (WARNING "Not found OpenCV.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_opencv)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenCV_LIBS})
 endmacro ()
 
 macro (tbag_modules__check_protobuf)
@@ -386,23 +407,6 @@ macro (tbag_modules__apply_uv)
     list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
 endmacro ()
 
-macro (tbag_modules__add_whole_archive __lib_name)
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION)
-        if (NOT MSVC_VERSION LESS 1900)
-            #list (APPEND TBAG_PROJECT_LDFLAGS "/WHOLEARCHIVE:${__lib_name}") ## ERROR: Auto converting '/' -> '\'
-            list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
-        else ()
-            list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
-        endif ()
-    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        list (APPEND TBAG_PROJECT_LDFLAGS -Wl,-force_load,${__lib_name}) ## All files: -Wl,-all_load
-    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list (APPEND TBAG_PROJECT_LDFLAGS -Wl,--whole-archive ${__lib_name} -Wl,--no-whole-archive)
-    else ()
-        list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
-    endif ()
-endmacro ()
-
 ## --------------
 ## Final process.
 ## --------------
@@ -451,19 +455,7 @@ macro (tbag_modules__update_linker_flags_property)
     endif ()
 endmacro ()
 
-#/// Target install.
-macro (tbag_modules__update_target_install_property)
-    if (TBAG_PROJECT_FLAG_TARGET_INSTALL)
-        install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
-                 RUNTIME DESTINATION bin
-                 LIBRARY DESTINATION lib
-                 ARCHIVE DESTINATION lib)
-    endif ()
-endmacro ()
-
 macro (tbag_modules__add_target)
-    # Flag variables.
-    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_FLAG_TARGET_INSTALL)
     # List variables.
     tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_OBJECTS)
     tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_DEPENDENCIES)
@@ -471,6 +463,7 @@ macro (tbag_modules__add_target)
     tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_INCLUDE_DIRS)
     tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_CXXFLAGS)
     tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_LDFLAGS)
+
     # Constant variables.
     tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_CONST_DIR_NAME)
     tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_CONST_TYPE)
@@ -496,6 +489,34 @@ macro (tbag_modules__update_all_properties)
     tbag_modules__update_include_dirs_property   ()
     tbag_modules__update_cxx_flags_property      ()
     tbag_modules__update_linker_flags_property   ()
-    tbag_modules__update_target_install_property ()
+endmacro ()
+
+macro (tbag_modules__update_version __version __soversion)
+    set_target_properties (${TBAG_PROJECT_CONST_NAME} PROPERTIES
+                           VERSION   "${__version}"
+                           SOVERSION "${__soversion}")
+endmacro ()
+
+macro (tbag_modules__update_default_version)
+    tbag_modules__update_version (${VERSION} ${SOVERSION})
+endmacro ()
+
+macro (tbag_modules__install_target)
+    install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
+             RUNTIME DESTINATION bin
+             LIBRARY DESTINATION lib
+             ARCHIVE DESTINATION lib)
+endmacro ()
+
+macro (tbag_modules__install_cxx_headers __parent_dir)
+    install (DIRECTORY "${__parent_dir}"
+             DESTINATION include
+             FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+endmacro ()
+
+macro (tbag_modules__install_default_cxx_headers)
+    install (DIRECTORY "${TBAG_PROJECT_CONST_DIR_PATH}"
+            DESTINATION include
+            FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
 endmacro ()
 

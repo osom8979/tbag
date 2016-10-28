@@ -3,7 +3,6 @@
 include (TbagModules)
 
 tbag_modules__apply_default ()
-tbag_modules__install_target ()
 tbag_modules__update_default_objects ()
 
 ## TBAG EXPORT API.
@@ -58,4 +57,7 @@ endif ()
 ## Final process.
 tbag_modules__add_target ()
 tbag_modules__update_all_properties ()
+tbag_modules__update_default_version ()
+tbag_modules__install_target ()
+tbag_modules__install_default_cxx_headers ()
 
