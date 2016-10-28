@@ -40,36 +40,43 @@ public:
     int render_count = 0;
 
 public:
-    RenderingCallback(int time) {
+    RenderingCallback(int time)
+    {
         using namespace std::chrono;
         this->sleep_time = time;
         this->test_time  = duration_cast<nanoseconds>(milliseconds(_TEST_MILLISEC));
     }
 
-    ~RenderingCallback() {
+    ~RenderingCallback()
+    {
         // EMPTY.
     }
 
 public:
-    virtual void onStart(Looper &) override {
+    virtual void onStart(Looper &) override
+    {
         start_time = std::chrono::system_clock::now();
         ++start_count;
     }
 
-    virtual void onEnd(Looper &) override {
+    virtual void onEnd(Looper &) override
+    {
         ++end_count;
     }
 
-    virtual void update(Looper &) override {
+    virtual void update(Looper &) override
+    {
         ++update_count;
     }
 
-    virtual void render(Looper &) override {
+    virtual void render(Looper &) override
+    {
         ++render_count;
         std::this_thread::sleep_for(std::chrono::milliseconds(this->sleep_time));
     }
 
-    virtual bool isExit(Looper &) override {
+    virtual bool isExit(Looper &) override
+    {
         using namespace std::chrono;
         if (system_clock::now() - start_time >= test_time) {
             return true;

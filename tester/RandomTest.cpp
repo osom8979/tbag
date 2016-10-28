@@ -10,7 +10,7 @@
 
 using namespace libtbag;
 
-TEST(RandomTest, gen)
+TEST(RandomTest, Gen)
 {
     int min = 0;
     int max = 10;

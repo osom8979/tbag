@@ -35,7 +35,7 @@ TEST(SafetyQueueTest, Default)
     ASSERT_EQ(0U, queue.size());
 }
 
-TEST(SafetyQueueTest, popUntil)
+TEST(SafetyQueueTest, PopUntil)
 {
     SafetyQueue<int> queue;
     queue.push(0);

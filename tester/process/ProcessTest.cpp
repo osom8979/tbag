@@ -12,7 +12,7 @@
 using namespace libtbag;
 using namespace libtbag::process;
 
-TEST(ProcessTest, exit_code_failure)
+TEST(ProcessTest, ExitCodeFailure)
 {
     char const * const EXE_NAME = "tbproc";
 

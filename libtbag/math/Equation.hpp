@@ -1,6 +1,6 @@
 /**
- * @file   equation.hpp
- * @brief  equation class prototype.
+ * @file   Equation.hpp
+ * @brief  Equation.
  * @author zer0
  * @date   2016-08-26
  */

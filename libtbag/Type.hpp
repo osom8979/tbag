@@ -1,6 +1,6 @@
 /**
- * @file   type.hpp
- * @brief  type utilities.
+ * @file   Type.hpp
+ * @brief  Type utilities.
  * @author zer0
  * @date   2016-04-20
  */

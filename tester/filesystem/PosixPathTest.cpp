@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(PosixPathTest, isProhibitedFilename)
+TEST(PosixPathTest, IsProhibitedFilename)
 {
     char const * const TEMP0 = "TEMP";
     char const * const TEMP1 = "/TEMP";
@@ -24,7 +24,7 @@ TEST(PosixPathTest, isProhibitedFilename)
     ASSERT_TRUE(PosixPath::isProhibitedFilename(TEMP3));
 }
 
-TEST(PosixPathTest, removeLastSeparator)
+TEST(PosixPathTest, RemoveLastSeparator)
 {
     char const * const TEMP0 = "/\\/TEMP";
     char const * const RESULT0 = "/\\/TEMP";
@@ -43,28 +43,28 @@ TEST(PosixPathTest, removeLastSeparator)
     ASSERT_STREQ(RESULT3, PosixPath::removeLastSeparator(TEMP3).c_str());
 }
 
-TEST(PosixPathTest, makePreferred)
+TEST(PosixPathTest, MakePreferred)
 {
     char const * const TEMP0 = "/\\/TEMP\\/\\";
     char const * const RESULT0 = "/\\/TEMP\\/\\";
     ASSERT_STREQ(RESULT0, PosixPath::makePreferred(TEMP0).c_str());
 }
 
-TEST(PosixPathTest, removeDuplicateSeparators)
+TEST(PosixPathTest, RemoveDuplicateSeparators)
 {
     char const * const TEMP0 = "/\\////\\\\TEMP\\//\\/";
     char const * const RESULT0 = "/\\/\\\\TEMP\\/\\/";
     ASSERT_STREQ(RESULT0, PosixPath::removeDuplicateSeparators(TEMP0).c_str());
 }
 
-TEST(PosixPathTest, getGeneric)
+TEST(PosixPathTest, GetGeneric)
 {
     char const * const TEMP0 = "/\\////\\\\TEMP\\//\\/";
     char const * const RESULT0 = "/\\/\\\\TEMP\\/\\";
     ASSERT_STREQ(RESULT0, PosixPath::getGeneric(TEMP0).c_str());
 }
 
-TEST(PosixPathTest, getRootDir)
+TEST(PosixPathTest, GetRootDir)
 {
     char const * const TEMP0 = "/TEMP";
     char const * const RESULT0 = "/";
@@ -94,7 +94,7 @@ TEST(PosixPathTest, QueryOperators)
     ASSERT_TRUE(PosixPath::isRelative(TEMP2));
 }
 
-TEST(PosixPathTest, getParent_1)
+TEST(PosixPathTest, GetParent_1)
 {
     char const * const TEMP0 = "/TEMP";
     char const * const RESULT0 = "/";
@@ -117,7 +117,7 @@ TEST(PosixPathTest, getParent_1)
     ASSERT_STREQ(RESULT4, PosixPath::getParent(TEMP4).c_str());
 }
 
-TEST(PosixPathTest, getParent_2)
+TEST(PosixPathTest, GetParent_2)
 {
     char const * const TEMP0 = "/TEMP\\//\\/.///..//TEST\\/";
     char const * const TEMP1 = "/TEMP\\//\\/.///..//";
@@ -135,7 +135,7 @@ TEST(PosixPathTest, getParent_2)
     ASSERT_STREQ(TEMP6, PosixPath::getParent(TEMP5).c_str());
 }
 
-TEST(PosixPathTest, splitNodes_1)
+TEST(PosixPathTest, SplitNodes_1)
 {
     char const * const TEMP0 = "../TEMP\\//";
     char const * const RESULT0 = "..";
@@ -147,7 +147,7 @@ TEST(PosixPathTest, splitNodes_1)
     ASSERT_STREQ(RESULT1, nodes[1].c_str());
 }
 
-TEST(PosixPathTest, splitNodes_2)
+TEST(PosixPathTest, SplitNodes_2)
 {
     char const * const TEMP0 = "/TEMP\\//\\/.///..//TEST\\/";
     char const * const RESULT0 = "/";

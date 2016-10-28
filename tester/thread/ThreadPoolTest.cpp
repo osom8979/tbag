@@ -41,7 +41,7 @@ TEST(ThreadPoolTest, Exception)
     ASSERT_THROW(ThreadPool(0U), IllegalArgumentException);
 }
 
-TEST(ThreadPoolTest, waitTask)
+TEST(ThreadPoolTest, WaitTask)
 {
     ThreadPool pool(2U);
     int test = 0;

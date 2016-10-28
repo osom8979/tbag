@@ -1,12 +1,12 @@
 /**
- * @file   haarTest.cpp
- * @brief  haar structure tester.
+ * @file   HaarTest.cpp
+ * @brief  Haar structure tester.
  * @author zer0
  * @date   2016-05-24
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/science/wavelet/haar.hpp>
+#include <libtbag/science/wavelet/Haar.hpp>
 
 using namespace libtbag;
 using namespace libtbag::science;
@@ -22,7 +22,7 @@ static std::size_t const    INPUT_LENGTH = sizeof(INPUT) / sizeof(INPUT[0]);
 static std::size_t const RESULT1D_LENGTH = sizeof(RESULT1D) / sizeof(RESULT1D[0]);
 static std::size_t const RESULT2D_LENGTH = sizeof(RESULT2D) / sizeof(RESULT2D[0]);
 
-TEST(haarTest, haar1d)
+TEST(HaarTest, Haar1d)
 {
     std::vector<TestType>  input(INPUT,    INPUT    +    INPUT_LENGTH);
     std::vector<TestType> result(RESULT1D, RESULT1D + RESULT1D_LENGTH);
@@ -54,7 +54,7 @@ TEST(haarTest, haar1d)
     }
 }
 
-TEST(haarTest, haar2d)
+TEST(HaarTest, Haar2d)
 {
     std::vector<TestType>  input(INPUT,    INPUT    +    INPUT_LENGTH);
     std::vector<TestType> result(RESULT2D, RESULT2D + RESULT2D_LENGTH);

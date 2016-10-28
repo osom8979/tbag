@@ -1,31 +1,31 @@
 /**
- * @file   equationTest.cpp
- * @brief  equation header tester.
+ * @file   EquationTest.cpp
+ * @brief  Equation tester.
  * @author zer0
  * @date   2016-08-26
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/math/equation.hpp>
+#include <libtbag/math/Equation.hpp>
 
 using namespace libtbag;
 using namespace libtbag::math;
 
-TEST(equationTest, getLinearEquationWithTwoPoint)
+TEST(EquationTest, GetLinearEquationWithTwoPoint)
 {
     auto e = getLinearEquationWithTwoPoint(1, 1, 2, 2);
     ASSERT_EQ(1, e.a);
     ASSERT_EQ(0, e.b);
 }
 
-TEST(equationTest, isParallelWithTwoLinearEquation)
+TEST(EquationTest, IsParallelWithTwoLinearEquation)
 {
     LinearEquation<double> e1{2.4, 1};
     LinearEquation<double> e2{2.4, 2};
     ASSERT_TRUE(isParallelWithTwoLinearEquation(e1, e2));
 }
 
-TEST(equationTest, getIntersectionWithTwoLinearEquation)
+TEST(EquationTest, GetIntersectionWithTwoLinearEquation)
 {
     LinearEquation<double> e1{ 2, 0};
     LinearEquation<double> e2{-2, 2};

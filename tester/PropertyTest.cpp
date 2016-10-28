@@ -17,7 +17,8 @@ public:
     virtual ~DemoProperty() = default;
 
 public:
-    virtual void updateDefault() override {
+    virtual void updateDefault() override
+    {
         set_IntegerKey();
         set_StringKey();
     }
@@ -33,25 +34,29 @@ public:
     DemoProperty property;
 
 public:
-    PropertyFixtureTest() {
+    PropertyFixtureTest()
+    {
         property.loadOrCreate();
     }
 
-    ~PropertyFixtureTest() {
+    ~PropertyFixtureTest()
+    {
         // EMPTY.
     }
 
 public:
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         // EMPTY.
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // EMPTY.
     }
 };
 
-TEST_F(PropertyFixtureTest, test)
+TEST_F(PropertyFixtureTest, Test)
 {
     ASSERT_EQ(   100, this->property.get_IntegerKey());
     ASSERT_EQ("TEST", this->property.get_StringKey());

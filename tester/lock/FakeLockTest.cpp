@@ -21,7 +21,7 @@ TEST(FakeLockTest, Default)
     ASSERT_FALSE(lock.try_lock());
 }
 
-TEST(FakeLockTest, lock_guard)
+TEST(FakeLockTest, LockGuard)
 {
     FakeLock lock;
     std::lock_guard<FakeLock> guard(lock);

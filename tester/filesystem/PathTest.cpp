@@ -60,7 +60,7 @@ TEST(PathTest, Constructors_2)
     ASSERT_STREQ("1/2", p.getGenericString().c_str());
 }
 
-TEST(PathTest, initializer_list)
+TEST(PathTest, InitializerList)
 {
     Path p0 = {"/", "TE", "M", "P"};
     ASSERT_STREQ("/TE/M/P", p0.getGenericString().c_str());
@@ -96,7 +96,7 @@ TEST(PathTest, AssignOperators)
     ASSERT_STREQ(TEMP, p0.getString().c_str());
 }
 
-TEST(PathTest, getName)
+TEST(PathTest, GetName)
 {
     char const * const TEMP = "/1/2/3/4/5.test";
 
@@ -107,7 +107,7 @@ TEST(PathTest, getName)
     ASSERT_STREQ("", path2.getName().c_str());
 }
 
-TEST(PathTest, splitNodesWithCanonical_1)
+TEST(PathTest, SplitNodesWithCanonical_1)
 {
     std::string home = common::getHomeDir();
     std::string work = common::getWorkDir();
@@ -125,7 +125,7 @@ TEST(PathTest, splitNodesWithCanonical_1)
     ASSERT_EQ(Path(work + "/TEMP2").getGenericString(), path2.getGenericString());
 }
 
-TEST(PathTest, splitNodesWithCanonical_2)
+TEST(PathTest, SplitNodesWithCanonical_2)
 {
 #if defined(WIN32) || defined(_WIN32)
     char const * const TEMP = "/TEMP";

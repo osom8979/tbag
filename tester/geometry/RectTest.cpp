@@ -48,7 +48,7 @@ TEST(RectTest, Constructor)
     ASSERT_NE(r3, r4);
 }
 
-TEST(RectTest, Operators_01)
+TEST(RectTest, Operators_1)
 {
     Point p = {1, 2};
     Size  s = {3, 4};
@@ -70,7 +70,7 @@ TEST(RectTest, Operators_01)
     ASSERT_EQ(makeRect(5, 6,  4,  4), temp);
 }
 
-TEST(RectTest, Operators_02)
+TEST(RectTest, Operators_2)
 {
     /*
      * 0 |  1  2  3  4  5
@@ -152,7 +152,7 @@ TEST(RectTest, CheckInside)
     ASSERT_FALSE(checkInside(r, p6));
 }
 
-TEST(RectTest, clipRect_true)
+TEST(RectTest, ClipRect_True)
 {
     /*
      *  0 |  10  20  30  40  50
@@ -175,7 +175,7 @@ TEST(RectTest, clipRect_true)
     ASSERT_EQ(predict, clip);
 }
 
-TEST(RectTest, clipRect_false)
+TEST(RectTest, ClipRect_False)
 {
     /*
      *  0 |  10  20  30  40  50

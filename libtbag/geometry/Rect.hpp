@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/geometry/Point.hpp>
-#include <libtbag/type.hpp>
+#include <libtbag/Type.hpp>
 
 #include <cmath>
 #include <cstdlib>

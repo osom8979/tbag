@@ -1,6 +1,6 @@
 /**
- * @file   unit.hpp
- * @brief  unit package.
+ * @file   Unit.hpp
+ * @brief  Unit package.
  * @author zer0
  * @date   2016-04-20
  */

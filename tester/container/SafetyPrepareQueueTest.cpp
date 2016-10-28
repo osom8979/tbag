@@ -67,7 +67,7 @@ TEST(SafetyPrepareQueueTest, Default)
     ASSERT_TRUE(queue.emptyOfPrepare());
 }
 
-TEST(SafetyPrepareQueueTest, popAndReadEnd)
+TEST(SafetyPrepareQueueTest, PopAndReadEnd)
 {
     SafetyPrepareQueue<int> queue;
 
@@ -84,7 +84,7 @@ TEST(SafetyPrepareQueueTest, popAndReadEnd)
     ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
-TEST(SafetyPrepareQueueTest, popUntil)
+TEST(SafetyPrepareQueueTest, PopUntil)
 {
     using SharedInt = std::shared_ptr<int>;
     SafetyPrepareQueue<SharedInt> queue;
@@ -124,7 +124,7 @@ TEST(SafetyPrepareQueueTest, popUntil)
     ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
-TEST(SafetyPrepareQueueTest, autoOperator)
+TEST(SafetyPrepareQueueTest, AutoOperator)
 {
     SafetyPrepareQueue<int> queue;
 
@@ -153,7 +153,7 @@ TEST(SafetyPrepareQueueTest, autoOperator)
     ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
-TEST(SafetyPrepareQueueTest, cancelPrepare)
+TEST(SafetyPrepareQueueTest, CancelPrepare)
 {
     SafetyPrepareQueue<int> queue;
 
@@ -171,7 +171,7 @@ TEST(SafetyPrepareQueueTest, cancelPrepare)
     ASSERT_EQ(0U, queue.sizeOfPrepare());
 }
 
-TEST(SafetyPrepareQueueTest, cancelPop)
+TEST(SafetyPrepareQueueTest, CancelPop)
 {
     SafetyPrepareQueue<int> queue;
     int const TEST_VALUE_01 = 100;

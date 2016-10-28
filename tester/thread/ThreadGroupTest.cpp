@@ -37,7 +37,7 @@ TEST(ThreadGroupTest, Default)
     ASSERT_EQ(TEST_NUMBER, t4);
 }
 
-TEST(ThreadGroupTest, add_and_remove)
+TEST(ThreadGroupTest, Add_And_Remove)
 {
     int const TEST_NUMBER = 10000;
     int t1 = 0;

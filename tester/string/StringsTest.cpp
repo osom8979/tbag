@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::string;
 
-TEST(StringsTest, splitTokens)
+TEST(StringsTest, SplitTokens)
 {
     std::string delimiter = "//";
     std::string temp1 = std::string("1TEMP1");
@@ -61,19 +61,19 @@ TEST(StringsTest, splitTokens)
     ASSERT_EQ(temp2, path_set[1]);
 }
 
-TEST(StringsTest, convertStringWithFloatingPoint)
+TEST(StringsTest, ConvertStringWithFloatingPoint)
 {
     std::string result = convertStringWithFloatingPoint(10.5542, 2);
     ASSERT_STREQ("10.55", result.c_str());
 }
 
-TEST(StringsTest, convertStringWithThreadId)
+TEST(StringsTest, ConvertStringWithThreadId)
 {
     std::string result = convertStringWithThreadId(std::this_thread::get_id());
     ASSERT_FALSE(result.empty());
 }
 
-TEST(StringsTest, splitMatch)
+TEST(StringsTest, SplitMatch)
 {
     std::string match = R"(TEST[^ ]*)";
     std::string content = std::string("TEST1 TEST10 TEST");
@@ -85,7 +85,7 @@ TEST(StringsTest, splitMatch)
     ASSERT_STREQ("TEST", list[2].c_str());
 }
 
-TEST(StringsTest, isMatch)
+TEST(StringsTest, IsMatch)
 {
     std::string content = "https://www.blackhole-project.com:8080/test";
     std::string match   = R"(^https?:\/\/[a-zA-Z0-9\.\-]+(:[0-9]+)?\/.*$)";
@@ -93,7 +93,7 @@ TEST(StringsTest, isMatch)
     ASSERT_TRUE(Strings::isMatch(content, match));
 }
 
-TEST(StringsTest, trimLeft)
+TEST(StringsTest, TrimLeft)
 {
     std::string t1 = "  TEST";
     std::string t2 = "  ";
@@ -108,7 +108,7 @@ TEST(StringsTest, trimLeft)
     ASSERT_STREQ(     "", Strings::trimLeft(t5).c_str());
 }
 
-TEST(StringsTest, trimRight)
+TEST(StringsTest, TrimRight)
 {
     std::string t1 = "TEST  ";
     std::string t2 = "  ";
@@ -123,7 +123,7 @@ TEST(StringsTest, trimRight)
     ASSERT_STREQ(     "", Strings::trimRight(t5).c_str());
 }
 
-TEST(StringsTest, trim)
+TEST(StringsTest, Trim)
 {
     std::string t1 = " TEST  ";
     std::string t2 = "  ";

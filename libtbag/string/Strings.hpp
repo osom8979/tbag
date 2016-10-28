@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/type.hpp>
+#include <libtbag/Type.hpp>
 
 #define CHECK_GNUC_CXX_REGEX
 #include <libtbag/predef.hpp>

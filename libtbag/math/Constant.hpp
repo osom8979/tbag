@@ -1,5 +1,5 @@
 /**
- * @file   constant.hpp
+ * @file   Constant.hpp
  * @brief  Mathematical constant.
  * @author zer0
  * @date   2016-04-21

@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/type.hpp>
+#include <libtbag/Type.hpp>
 
 #include <algorithm>
 #include <sstream>

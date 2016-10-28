@@ -12,7 +12,7 @@ using namespace libtbag;
 using namespace libtbag::log;
 using namespace libtbag::log::details;
 
-TEST(RawTest, format)
+TEST(RawTest, Format)
 {
     std::size_t const buffer_size = 256;
     char buffer[buffer_size + 1] = { 0, };

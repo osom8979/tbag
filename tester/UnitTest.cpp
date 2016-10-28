@@ -1,16 +1,16 @@
 /**
- * @file   unitTest.cpp
- * @brief  unit package tester.
+ * @file   UnitTest.cpp
+ * @brief  Unit package tester.
  * @author zer0
  * @date   2016-04-20
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/unit.hpp>
+#include <libtbag/Unit.hpp>
 
 using namespace libtbag;
 
-TEST(unitTest, Byte)
+TEST(UnitTest, Byte)
 {
     ASSERT_EQ(                                        1024ull,      BYTE_UNIT);
     ASSERT_EQ(                              1024ull * 1024ull, KILO_BYTE_UNIT);

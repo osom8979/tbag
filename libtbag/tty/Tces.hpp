@@ -1,5 +1,5 @@
 /**
- * @file   tces.hpp
+ * @file   Tces.hpp
  * @brief  Terminal Control Escape Sequences.
  * @author zer0
  * @date   2016-07-21

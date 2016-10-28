@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::dom;
 
-TEST(ResourceTest, utf8)
+TEST(ResourceTest, Utf8)
 {
     unsigned char hangul [] = {
             0xea, 0xb0, 0x80, 0xeb, 0x82, 0x98, 0xeb, 0x8b, 0xa4, 0xeb
@@ -71,7 +71,8 @@ public:
     ~ResourceFixtureTest() = default;
 
 public:
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         attribute1 = "title1";
         attribute2 = "title2";
         attribute3 = "number";
@@ -102,25 +103,25 @@ public:
         res.readString(xml, tag);
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         // EMPTY.
     }
 };
 
-TEST_F(ResourceFixtureTest, clear_and_size)
+TEST_F(ResourceFixtureTest, Clear)
 {
     ASSERT_LT(0U, res.size());
-
     res.clear();
     ASSERT_EQ(0U, res.size());
 }
 
-TEST_F(ResourceFixtureTest, get_tag)
+TEST_F(ResourceFixtureTest, GetTag)
 {
     ASSERT_EQ(tag, res.get_tag());
 }
 
-TEST_F(ResourceFixtureTest, readFromXmlString)
+TEST_F(ResourceFixtureTest, ReadFromXmlString)
 {
     Resource::Map map;
     map = Resource::readFromXmlString(xml, tag);
@@ -131,7 +132,7 @@ TEST_F(ResourceFixtureTest, readFromXmlString)
     ASSERT_EQ(value3  , map.find(attribute3)->second);
 }
 
-TEST_F(ResourceFixtureTest, save)
+TEST_F(ResourceFixtureTest, Save)
 {
     char const * const FILE_NAME = "__resource_test_save.xml";
 
@@ -140,7 +141,7 @@ TEST_F(ResourceFixtureTest, save)
     ASSERT_TRUE(Resource::save(FILE_NAME, tag, map));
 }
 
-TEST_F(ResourceFixtureTest, getValue)
+TEST_F(ResourceFixtureTest, GetValue)
 {
     /* TODO: Valgrind memory leak:
      * ==38325== 272 bytes in 1 blocks are definitely lost in loss record 86 of 107
@@ -201,7 +202,7 @@ TEST_F(ResourceFixtureTest, getValue)
     ASSERT_NEAR(     0.0, res.getLongDouble(attribute1), abs_error);
 }
 
-TEST_F(ResourceFixtureTest, get)
+TEST_F(ResourceFixtureTest, Get)
 {
     ASSERT_EQ(value1_2, res.get(attribute1, ""));
 
@@ -217,7 +218,7 @@ TEST_F(ResourceFixtureTest, get)
     ASSERT_NEAR(value5_2, res.get(attribute5, static_cast<long double>(0)), abs_error);
 }
 
-TEST_F(ResourceFixtureTest, set)
+TEST_F(ResourceFixtureTest, Set)
 {
     Resource res;
     res.set(attribute3, value3_2);
@@ -227,7 +228,7 @@ TEST_F(ResourceFixtureTest, set)
     ASSERT_EQ(value4, res.getString(attribute4));
 }
 
-TEST_F(ResourceFixtureTest, at)
+TEST_F(ResourceFixtureTest, At)
 {
     ASSERT_EQ(value1_2, res.at(attribute1));
 

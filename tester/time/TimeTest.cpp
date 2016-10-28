@@ -13,7 +13,7 @@
 
 using namespace libtbag;
 
-TEST(TimeTest, ctime)
+TEST(TimeTest, Ctime)
 {
     /* TODO: Valgrind memory leak:
      * ==38325== 56 bytes in 1 blocks are definitely lost in loss record 49 of 107
@@ -66,7 +66,7 @@ TEST(TimeTest, ctime)
     std::cout << "* Short format timestamp: " << local_short_format << "," << millisec << std::endl;
 }
 
-TEST(TimeTest, chrono)
+TEST(TimeTest, Chrono)
 {
     int test_count = 200;
     for (int i = 0; i < test_count; ++i) {
@@ -75,7 +75,7 @@ TEST(TimeTest, chrono)
     }
 }
 
-TEST(TimeTest, getMillisec)
+TEST(TimeTest, GetMillisec)
 {
     std::chrono::system_clock::time_point tp;
     tp += std::chrono::hours(1);

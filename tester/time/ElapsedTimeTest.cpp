@@ -27,7 +27,7 @@ TEST(ElapsedTimeTest, Default)
     ASSERT_LE(WAIT_TIME.count(), atoi(ss.str().c_str()));
 }
 
-TEST(ElapsedTimeTest, getDuration)
+TEST(ElapsedTimeTest, GetDuration)
 {
     auto start = std::chrono::system_clock::now();
     std::chrono::milliseconds const WAIT_TIME(1);
@@ -37,7 +37,7 @@ TEST(ElapsedTimeTest, getDuration)
     ASSERT_LE(WAIT_TIME.count(), result.count());
 }
 
-TEST(ElapsedTimeTest, getDurationWithPredicated)
+TEST(ElapsedTimeTest, GetDurationWithPredicated)
 {
     std::chrono::milliseconds const WAIT_TIME(1);
     bool check_point = false;

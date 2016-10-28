@@ -1,6 +1,6 @@
 /**
- * @file   scale.hpp
- * @brief  scale utilities.
+ * @file   Scale.hpp
+ * @brief  Scale utilities.
  * @author zer0
  * @date   2016-04-21
  */

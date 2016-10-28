@@ -1,6 +1,6 @@
 /**
- * @file   list.hpp
- * @brief  list class prototype.
+ * @file   List.hpp
+ * @brief  List class prototype.
  * @author zer0
  * @date   2016-05-23
  */
@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Exception.hpp>
-#include <libtbag/type.hpp>
+#include <libtbag/Type.hpp>
 
 #include <cstddef>
 

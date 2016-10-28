@@ -1,6 +1,6 @@
 /**
- * @file   trigonometry.hpp
- * @brief  trigonometry functions.
+ * @file   Trigonometry.hpp
+ * @brief  Trigonometry functions.
  * @author zer0
  * @date   2016-04-21
  *

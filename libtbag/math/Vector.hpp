@@ -1,6 +1,6 @@
 /**
- * @file   vector.hpp
- * @brief  vector class prototype.
+ * @file   Vector.hpp
+ * @brief  Vector class prototype.
  * @author zer0
  * @date   2016-08-29
  */

@@ -12,7 +12,7 @@
 using namespace libtbag;
 using namespace libtbag::tmp;
 
-TEST(BitTest, max)
+TEST(BitTest, Max)
 {
     uint8_t const max_8bit_unsigned = 0x80; // 0b10000000;
     int8_t  const max_8bit_signed   = 0x80; // 0b10000000;
@@ -21,7 +21,7 @@ TEST(BitTest, max)
     ASSERT_EQ(  max_8bit_signed, BitFlag< int8_t>::max());
 }
 
-TEST(BitTest, findMax_by_signed)
+TEST(BitTest, FindMax_Signed)
 {
     int8_t const test1 = 0x41; // 0b01000001;
     int8_t const test2 = 0xC0; // 0b11000000;
@@ -45,7 +45,7 @@ TEST(BitTest, findMax_by_signed)
     ASSERT_EQ(test6_result, BitFlag<int8_t>::findHighBit(test6));
 }
 
-TEST(BitTest, findMax_by_unsigned)
+TEST(BitTest, FindMax_Unsigned)
 {
     uint8_t const test1 = 0x41; // 0b01000001;
     uint8_t const test2 = 0xC0; // 0b11000000;

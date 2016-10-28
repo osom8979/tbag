@@ -78,7 +78,7 @@ TEST_F(ArgumentsFixture, Default)
     ASSERT_EQ(6U, args.size());
 }
 
-TEST_F(ArgumentsFixture, toString)
+TEST_F(ArgumentsFixture, ToString)
 {
     ASSERT_STREQ(getArgumentString(), args.toString().c_str());
 }
@@ -92,7 +92,7 @@ TEST_F(ArgumentsFixture, ModifyMethods)
     ASSERT_EQ("test", args.get(0));
 }
 
-TEST_F(ArgumentsFixture, getVector)
+TEST_F(ArgumentsFixture, GetVector)
 {
     ASSERT_EQ(6U, args.getStrings().size());
     ASSERT_EQ(2U, args.getIntegers().size());
@@ -103,7 +103,7 @@ TEST_F(ArgumentsFixture, getVector)
     ASSERT_EQ(1U, args.getDoubleRects().size());
 }
 
-TEST_F(ArgumentsFixture, optString)
+TEST_F(ArgumentsFixture, OptString)
 {
     int const TEST_INDEX = 0;
     TestResult result;
@@ -118,7 +118,7 @@ TEST_F(ArgumentsFixture, optString)
     ASSERT_STREQ("test", result.s1.c_str());
 }
 
-TEST_F(ArgumentsFixture, optInteger)
+TEST_F(ArgumentsFixture, OptInteger)
 {
     int const TEST_INDEX = 1;
     TestResult result;
@@ -135,7 +135,7 @@ TEST_F(ArgumentsFixture, optInteger)
     ASSERT_EQ(1, result.v2);
 }
 
-TEST_F(ArgumentsFixture, optDouble)
+TEST_F(ArgumentsFixture, OptDouble)
 {
     int const TEST_INDEX = 2;
     TestResult result;
@@ -152,7 +152,7 @@ TEST_F(ArgumentsFixture, optDouble)
     ASSERT_EQ(2.1, result.v2);
 }
 
-TEST_F(ArgumentsFixture, optPoint)
+TEST_F(ArgumentsFixture, OptPoint)
 {
     int const TEST_INDEX = 3;
     TestResult result;
@@ -169,7 +169,7 @@ TEST_F(ArgumentsFixture, optPoint)
     ASSERT_EQ(libtbag::geometry::makePoint<double>(9.0, 10.0), result.p2);
 }
 
-TEST_F(ArgumentsFixture, optRect)
+TEST_F(ArgumentsFixture, OptRect)
 {
     int const TEST_INDEX = 4;
     TestResult result;
@@ -186,7 +186,7 @@ TEST_F(ArgumentsFixture, optRect)
     ASSERT_EQ(libtbag::geometry::makeRect<double>(100.10, 200.2, 300.0, 400.0), result.r2);
 }
 
-TEST_F(ArgumentsFixture, checkPointDelimiter)
+TEST_F(ArgumentsFixture, CheckPointDelimiter)
 {
     int const TEST_INDEX = 5;
     TestResult result;

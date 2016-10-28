@@ -1,6 +1,6 @@
 /**
- * @file   haar.hpp
- * @brief  haar structure prototype.
+ * @file   Haar.hpp
+ * @brief  Haar structure prototype.
  * @author zer0
  * @date   2016-05-24
  */

@@ -15,7 +15,7 @@ using namespace libtbag;
 using namespace libtbag::filesystem;
 using namespace libtbag::filesystem::common;
 
-TEST(CommonTest, getPathSeparator)
+TEST(CommonTest, GetPathSeparator)
 {
 #if defined(WIN32) || defined(_WIN32)
     ASSERT_EQ('\\', getPathSeparator());
@@ -43,7 +43,7 @@ TEST(CommonTest, RepresentationDirectory)
     ASSERT_LT(0U,  exe_dir.size());
 }
 
-TEST(CommonTest, scanDir)
+TEST(CommonTest, ScanDir)
 {
     std::set<std::string> files = scanDir(getExeDir());
     for (auto cursor : files) {
@@ -52,14 +52,14 @@ TEST(CommonTest, scanDir)
     ASSERT_LE(1U, files.size());
 }
 
-TEST(CommonTest, create_and_remove)
+TEST(CommonTest, Create_Remove)
 {
     std::string dir_name = "__filesystem_common_dir_test.dir";
     ASSERT_TRUE(createDir(dir_name));
     ASSERT_TRUE(removeDir(dir_name));
 }
 
-TEST(CommonTest, file_rw)
+TEST(CommonTest, FileReadWrite)
 {
     std::string file_name = "__filesystem_common_file_write_test";
 

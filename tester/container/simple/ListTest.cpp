@@ -1,12 +1,12 @@
 /**
- * @file   listTest.cpp
- * @brief  list container tester.
+ * @file   ListTest.cpp
+ * @brief  List container tester.
  * @author zer0
  * @date   2016-05-23
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/container/simple/list.hpp>
+#include <libtbag/container/simple/List.hpp>
 
 #include <vector>
 #include <algorithm>
@@ -15,7 +15,7 @@ using namespace libtbag;
 using namespace libtbag::container;
 using namespace libtbag::container::simple;
 
-TEST(listTest, Default)
+TEST(ListTest, Default)
 {
     list::Node<int> * first = nullptr;
     ASSERT_EQ(0U, list::size(first));

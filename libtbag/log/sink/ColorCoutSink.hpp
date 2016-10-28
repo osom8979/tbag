@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/log/sink/CoutSink.hpp>
-#include <libtbag/tty/tces.hpp>
+#include <libtbag/tty/Tces.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

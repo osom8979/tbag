@@ -1,6 +1,6 @@
 /**
- * @file   real.hpp
- * @brief  real number utilities.
+ * @file   Real.hpp
+ * @brief  Real number utilities.
  * @author zer0
  * @date   2016-04-21
  */

@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::string;
 
-TEST(FlagsTest, splitTokens)
+TEST(FlagsTest, SplitTokens)
 {
     std::string args = "      temp                   "
                        "  --arg1=temp                "
@@ -35,7 +35,7 @@ TEST(FlagsTest, splitTokens)
     ASSERT_STREQ(                "noarg2", result[9].c_str());
 }
 
-TEST(FlagsTest, convertFlag)
+TEST(FlagsTest, ConvertFlag)
 {
     auto t1 = Flags::convertFlag("--arg1=temp");
     ASSERT_STREQ("arg1", t1.key.c_str());
@@ -50,7 +50,7 @@ TEST(FlagsTest, convertFlag)
     ASSERT_STREQ("value=temp", t3.value.c_str());
 }
 
-TEST(FlagsTest, at)
+TEST(FlagsTest, At)
 {
     Flags flags;
     flags.push(Flags::Flag("arg1", "temp1"));
@@ -65,7 +65,7 @@ TEST(FlagsTest, at)
     ASSERT_STREQ("temp2", CONST_FLAGS.at(1).value.c_str());
 }
 
-TEST(FlagsTest, parse_and_find)
+TEST(FlagsTest, Parse_Find)
 {
     std::string args = "value --arg1 --arg2=temp";
     Flags flags;

@@ -1,18 +1,18 @@
 /**
- * @file   vectorTest.cpp
- * @brief  vector header tester.
+ * @file   VectorTest.cpp
+ * @brief  Vector header tester.
  * @author zer0
  * @date   2016-08-29
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/math/vector.hpp>
-#include <libtbag/math/trigonometry.hpp>
+#include <libtbag/math/Vector.hpp>
+#include <libtbag/math/Trigonometry.hpp>
 
 using namespace libtbag;
 using namespace libtbag::math;
 
-TEST(vectorTest, getDotProduct)
+TEST(VectorTest, GetDotProduct)
 {
     Vector2<double> v1{3, 0};
     Vector2<double> v2{3, 4};
@@ -23,7 +23,7 @@ TEST(vectorTest, getDotProduct)
     ASSERT_NEAR(r1, r2, 0.001);
 }
 
-TEST(vectorTest, getCrossProduct)
+TEST(VectorTest, GetCrossProduct)
 {
     Vector3<int> v1{1, 3,  4};
     Vector3<int> v2{2, 7, -5};
@@ -34,7 +34,7 @@ TEST(vectorTest, getCrossProduct)
     ASSERT_EQ(  1, v.z);
 }
 
-TEST(vectorTest, getRelativePositionOfPointToLine)
+TEST(VectorTest, GetRelativePositionOfPointToLine)
 {
     /*
      *    |

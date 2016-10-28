@@ -30,7 +30,7 @@ TEST(ColorTest, Constructor)
     ASSERT_NE(c3, c4);
 }
 
-TEST(ColorTest, makePoint)
+TEST(ColorTest, MakeColor)
 {
     Color c1 = makeColor(4, 5, 6, 7);
     Color c2 = makeColor(4, 5, 6, 8);

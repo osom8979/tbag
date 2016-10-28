@@ -76,7 +76,7 @@ TEST(PointerTest, Constructor)
     delete i2;
 }
 
-TEST(PointerTest, cast)
+TEST(PointerTest, Cast)
 {
     PointerTestDemo * i1 = new PointerTestDemo(100);
     Pointer<void> p0((void*)i1);

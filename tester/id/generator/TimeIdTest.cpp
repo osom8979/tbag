@@ -12,7 +12,7 @@ using namespace libtbag;
 using namespace libtbag::id;
 using namespace libtbag::id::generator;
 
-TEST(TimeIdTest, genTimeId_sleep)
+TEST(TimeIdTest, GenTimeId_Sleep)
 {
     int const TEST_COUNT = 100;
     for (int i = 0; i < TEST_COUNT; ++i) {
@@ -20,7 +20,7 @@ TEST(TimeIdTest, genTimeId_sleep)
     }
 }
 
-TEST(TimeIdTest, genTimeId_nosleep)
+TEST(TimeIdTest, GenTimeId_Nosleep)
 {
     int const TEST_COUNT = 100;
     for (int i = 0; i < TEST_COUNT; ++i) {

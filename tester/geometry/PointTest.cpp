@@ -40,7 +40,7 @@ TEST(PointTest, Constructor)
     ASSERT_NE(p4, p3);
 }
 
-TEST(PointTest, makePoint)
+TEST(PointTest, MakePoint)
 {
     int       v1 =  0;
     int const v2 =  1;
@@ -76,7 +76,7 @@ TEST(PointTest, makePoint)
     REMOVE_UNUSED_VARIABLE(p4_3 == p4_4);
 }
 
-TEST(PointTest, Operators_01)
+TEST(PointTest, Operators_1)
 {
     Point       p1 = {0, 1};
     Point const p2 = {4, 5};
@@ -114,7 +114,7 @@ TEST(PointTest, Operators_01)
     ASSERT_EQ(s4, s1 + s2);
 }
 
-TEST(PointTest, Operators_02)
+TEST(PointTest, Operators_2)
 {
     Point const p1 = {1, 2};
     Size  const s1 = {3, 4};
