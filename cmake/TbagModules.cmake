@@ -5,6 +5,28 @@
 
 include (TbagUtils)
 
+## ------------------
+## Find object files.
+## ------------------
+
+#/// Find & register object files.
+#///
+#/// @param __find_dir [in] find directory.
+#/// @param __suffix   [in] file suffix.
+macro (tbag_modules__update_objects __find_dir __suffix)
+    get_filename_component (__find_dir_absolute "${__find_dir}" ABSOLUTE)
+    file (GLOB_RECURSE __find_compile_objs "${__find_dir_absolute}/*${__suffix}")
+    list (APPEND TBAG_PROJECT_OBJECTS ${__find_compile_objs})
+endmacro ()
+
+macro (tbag_modules__update_default_objects)
+    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cpp")
+endmacro ()
+
+## ----------
+## Libraries.
+## ----------
+
 macro (tbag_modules__check_boost)
     if (NOT Boost_FOUND)
         message (WARNING "Not found Boost.")
@@ -172,13 +194,13 @@ macro (tbag_modules__apply_opencv)
 endmacro ()
 
 #/// TODO: FIX THE ERROR!!
-macro (tbag_modules__apply_pch)
-    if (NOT EXISTS ${TbagProjectPCH_0})
-        message (FATAL_ERROR "Not found original header file path (parameter 01).")
+macro (tbag_modules__apply_pch __original_pch)
+    if (NOT EXISTS ${__original_pch})
+        message (FATAL_ERROR "Not found original header file path: ${__original_pch}")
     endif ()
 
     if (NOT DEFINED TbagProjectPCH_NAME)
-        get_filename_component (TbagProjectPCH_ORIGINAL_NAME "${TbagProjectPCH_0}" NAME)
+        get_filename_component (TbagProjectPCH_ORIGINAL_NAME "${__original_pch}" NAME)
         string (REPLACE "." "-" TbagProjectPCH_NAME "${TbagProjectPCH_ORIGINAL_NAME}-pch")
         set (TbagProjectPCH_COPY_PATH ${CMAKE_BINARY_DIR}/${TbagProjectPCH_ORIGINAL_NAME})
 
@@ -224,8 +246,8 @@ macro (tbag_modules__apply_pch)
 
         add_custom_command (
                 OUTPUT ${TbagProjectPCH_COPY_PATH}
-                COMMAND ${CMAKE_COMMAND} -E copy "${TbagProjectPCH_0}" "${TbagProjectPCH_COPY_PATH}"
-                DEPENDS "${TbagProjectPCH_0}"
+                COMMAND ${CMAKE_COMMAND} -E copy "${__original_pch}" "${TbagProjectPCH_COPY_PATH}"
+                DEPENDS "${__original_pch}"
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
         add_custom_command (
@@ -379,5 +401,101 @@ macro (tbag_modules__add_whole_archive __lib_name)
     else ()
         list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
     endif ()
+endmacro ()
+
+## --------------
+## Final process.
+## --------------
+
+#/// Dependencies setting.
+macro (tbag_modules__update_dependencies_property)
+    list (LENGTH TBAG_PROJECT_DEPENDENCIES __tbag_project_dependencies_length)
+    if (${__tbag_project_dependencies_length} GREATER 0)
+        add_dependencies (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_DEPENDENCIES})
+    endif ()
+endmacro ()
+
+#/// Define setting.
+macro (tbag_modules__update_definitions_property)
+    list (LENGTH TBAG_PROJECT_DEFINITIONS __project_definitions_length)
+    if (${__project_definitions_length} GREATER 0)
+        target_compile_definitions (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_DEFINITIONS})
+    endif ()
+endmacro ()
+
+#/// Include directories settings.
+macro (tbag_modules__update_include_dirs_property)
+    list (LENGTH TBAG_PROJECT_INCLUDE_DIRS __project_include_dirs_length)
+    if (${__project_include_dirs_length} GREATER 0)
+        target_include_directories (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_INCLUDE_DIRS})
+    endif ()
+endmacro ()
+
+#/// C++ compiler flags.
+macro (tbag_modules__update_cxx_flags_property)
+    list (LENGTH TBAG_PROJECT_CXXFLAGS __project_cxxflags_length)
+    if (${__project_cxxflags_length} GREATER 0)
+        if ("${CMAKE_VERSION}" VERSION_GREATER "3.0.2")
+            target_compile_options (${TBAG_PROJECT_CONST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TBAG_PROJECT_CXXFLAGS}>)
+        else ()
+            target_compile_options (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_CXXFLAGS})
+        endif ()
+    endif ()
+endmacro ()
+
+#/// Linker flags.
+macro (tbag_modules__update_linker_flags_property)
+    list (LENGTH TBAG_PROJECT_LDFLAGS __project_ldflags_length)
+    if (${__project_ldflags_length} GREATER 0)
+        target_link_libraries (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_LDFLAGS})
+    endif ()
+endmacro ()
+
+#/// Target install.
+macro (tbag_modules__update_target_install_property)
+    if (TBAG_PROJECT_FLAG_TARGET_INSTALL)
+        install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
+                 RUNTIME DESTINATION bin
+                 LIBRARY DESTINATION lib
+                 ARCHIVE DESTINATION lib)
+    endif ()
+endmacro ()
+
+macro (tbag_modules__add_target)
+    # Flag variables.
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_FLAG_TARGET_INSTALL)
+    # List variables.
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_OBJECTS)
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_DEPENDENCIES)
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_DEFINITIONS)
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_INCLUDE_DIRS)
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_CXXFLAGS)
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_LDFLAGS)
+    # Constant variables.
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_CONST_DIR_NAME)
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_CONST_TYPE)
+    tbag_debug_variable (tbag_modules__add_target TBAG_PROJECT_CONST_NAME)
+
+    # Exists objects.
+    if ("${TBAG_PROJECT_OBJECTS}" STREQUAL "")
+        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
+    endif ()
+
+    # Register object files.
+    if ("${TBAG_PROJECT_CONST_TYPE}" STREQUAL "${TBAG_PROJECT_LIBRARY_PREFIX}")
+        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
+    else ()
+        add_executable (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
+    endif ()
+endmacro ()
+
+#/// Update all of target.
+macro (tbag_modules__update_all_properties)
+    tbag_modules__update_dependencies_property   ()
+    tbag_modules__update_definitions_property    ()
+    tbag_modules__update_include_dirs_property   ()
+    tbag_modules__update_cxx_flags_property      ()
+    tbag_modules__update_linker_flags_property   ()
+    tbag_modules__update_target_install_property ()
 endmacro ()
 

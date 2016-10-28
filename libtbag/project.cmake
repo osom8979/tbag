@@ -4,10 +4,10 @@ include (TbagModules)
 
 tbag_modules__apply_default ()
 tbag_modules__install_target ()
+tbag_modules__update_default_objects ()
 
 ## TBAG EXPORT API.
-list (APPEND TBAG_PROJECT_DEFINITIONS -DTBAG_EXPORT_API
-                                      -DU_COMBINED_IMPLEMENTATION)
+list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_EXPORT_API U_COMBINED_IMPLEMENTATION)
 
 ## Thread settings.
 list (APPEND TBAG_PROJECT_LDFLAGS ${CMAKE_THREAD_LIBS_INIT})
@@ -54,4 +54,8 @@ else ()
 endif ()
 
 #tbag_modules__apply_pch (${CMAKE_SOURCE_DIR}/libtbag/config.h)
+
+## Final process.
+tbag_modules__add_target ()
+tbag_modules__update_all_properties ()
 

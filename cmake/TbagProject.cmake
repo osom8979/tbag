@@ -5,7 +5,6 @@
 
 include (TbagUtils)
 include (TbagModules)
-include (TbagObject)
 
 ## -------------------
 ## Project properties.
@@ -88,94 +87,9 @@ macro (tbag_project__set_const_property __root_dir __project_dir_name)
     tbag_project__get_name (TBAG_PROJECT_CONST_NAME "${__project_dir_name}")
 endmacro ()
 
-#/// Dependencies setting.
-macro (tbag_project__update_dependencies_property)
-    list (LENGTH TBAG_PROJECT_DEPENDENCIES __tbag_project_dependencies_length)
-    if (${__tbag_project_dependencies_length} GREATER 0)
-        add_dependencies (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_DEPENDENCIES})
-    endif ()
-endmacro ()
-
-#/// Define setting.
-macro (tbag_project__update_definitions_property)
-    list (LENGTH TBAG_PROJECT_DEFINITIONS __project_definitions_length)
-    if (${__project_definitions_length} GREATER 0)
-        target_compile_definitions (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_DEFINITIONS})
-    endif ()
-endmacro ()
-
-#/// Include directories settings.
-macro (tbag_project__update_include_dirs_property)
-    list (LENGTH TBAG_PROJECT_INCLUDE_DIRS __project_include_dirs_length)
-    if (${__project_include_dirs_length} GREATER 0)
-        target_include_directories (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_INCLUDE_DIRS})
-    endif ()
-endmacro ()
-
-#/// C++ compiler flags.
-macro (tbag_project__update_cxx_flags_property)
-    list (LENGTH TBAG_PROJECT_CXXFLAGS __project_cxxflags_length)
-    if (${__project_cxxflags_length} GREATER 0)
-        if ("${CMAKE_VERSION}" VERSION_GREATER "3.0.2")
-            target_compile_options (${TBAG_PROJECT_CONST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TBAG_PROJECT_CXXFLAGS}>)
-        else ()
-            target_compile_options (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_CXXFLAGS})
-        endif ()
-    endif ()
-endmacro ()
-
-#/// Linker flags.
-macro (tbag_project__update_linker_flags_property)
-    list (LENGTH TBAG_PROJECT_LDFLAGS __project_ldflags_length)
-    if (${__project_ldflags_length} GREATER 0)
-        target_link_libraries (${TBAG_PROJECT_CONST_NAME} PRIVATE ${TBAG_PROJECT_LDFLAGS})
-    endif ()
-endmacro ()
-
-#/// Target install.
-macro (tbag_project__update_target_install_property)
-    if (TBAG_PROJECT_FLAG_TARGET_INSTALL)
-        install (TARGETS "${TBAG_PROJECT_CONST_NAME}"
-                 RUNTIME DESTINATION bin
-                 LIBRARY DESTINATION lib
-                 ARCHIVE DESTINATION lib)
-    endif ()
-endmacro ()
-
-#/// Update all of target.
-macro (tbag_project__update_all_properties)
-    tbag_project__update_dependencies_property   ()
-    tbag_project__update_definitions_property    ()
-    tbag_project__update_include_dirs_property   ()
-    tbag_project__update_cxx_flags_property      ()
-    tbag_project__update_linker_flags_property   ()
-    tbag_project__update_target_install_property ()
-endmacro ()
-
-#/// Find & register object files.
-#///
-#/// @param __find_directory [in] find directory path.
-macro (tbag_project__update_objects __find_directory)
-    tbag_object__update (__find_compile_objs
-                         __find_compile_dependencies
-                         __find_compile_definitions
-                         __find_compile_include_dirs
-                         __find_compile_cxxflags
-                         __find_compile_ldflags
-                         "${__find_directory}")
-
-    # Result assign.
-    list (APPEND TBAG_PROJECT_OBJECTS      ${__find_compile_objs})
-    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__find_compile_dependencies})
-    list (APPEND TBAG_PROJECT_DEFINITIONS  ${__find_compile_definitions})
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${__find_compile_include_dirs})
-    list (APPEND TBAG_PROJECT_CXXFLAGS     ${__find_compile_cxxflags})
-    list (APPEND TBAG_PROJECT_LDFLAGS      ${__find_compile_ldflags})
-endmacro ()
-
-## -------------
-## Find project.
-## -------------
+## ---------------------
+## Project find & build.
+## ---------------------
 
 #/// Find project list.
 #///
@@ -211,10 +125,6 @@ function (tbag_project__find __lib_projs __exe_projs __root_dir)
     set (${__exe_projs}  ${${__exe_projs}}  PARENT_SCOPE)
 endfunction ()
 
-## --------------
-## Project build.
-## --------------
-
 #/// Build process.
 #///
 #/// @param __root_dir          [in] Find root directory (Source code directory).
@@ -229,36 +139,6 @@ macro (tbag_project__build __root_dir __project_dir_name)
     else ()
         message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_CMAKE_PATH}")
     endif ()
-
-    # Flag variables.
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_FLAG_TARGET_INSTALL)
-    # List variables.
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_OBJECTS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_DEPENDENCIES)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_DEFINITIONS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_INCLUDE_DIRS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CXXFLAGS)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_LDFLAGS)
-    # Constant variables.
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_DIR_NAME)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_TYPE)
-    tbag_debug_variable (tbag_project__build TBAG_PROJECT_CONST_NAME)
-
-    tbag_project__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}")
-
-    # Exists objects.
-    if ("${TBAG_PROJECT_OBJECTS}" STREQUAL "")
-        message (FATAL_ERROR "Not found ${TBAG_PROJECT_CONST_NAME} object files.")
-    endif ()
-
-    # Register object files.
-    if ("${TBAG_PROJECT_CONST_TYPE}" STREQUAL "${TBAG_PROJECT_LIBRARY_PREFIX}")
-        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
-    else ()
-        add_executable (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
-    endif ()
-
-    tbag_project__update_all_properties ()
 endmacro ()
 
 #/// Find & Build tbag project.
