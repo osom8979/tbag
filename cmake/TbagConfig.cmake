@@ -261,7 +261,6 @@ endmacro ()
 macro (tbag_config __path)
     # Update CMAKE_MODULE_PATH
     tbag_utils__append_find_package_path ()
-    tbag_utils__append_module_path ()
 
     # Read INFORMATION file.
     tbag_information__read_file (__tbag_config "${__path}")

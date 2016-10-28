@@ -166,6 +166,13 @@ macro (tbag_modules__apply_include_of_cuda)
     cuda_include_directories (${TBAG_PROJECT_INCLUDE_DIRS})
 endmacro ()
 
+macro (tbag_modules__build_cuda __original_files)
+    foreach (__cuda_cusor "${__original_files}")
+        cuda_compile (__cuda_object ${__cuda_cusor})
+        list (APPEND TBAG_PROJECT_OBJECTS ${__cuda_object})
+    endforeach ()
+endmacro ()
+
 macro (tbag_modules__apply_cublas)
     list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_CUBLAS_LIBRARIES})
 endmacro ()
@@ -187,6 +194,16 @@ endmacro ()
 ## ----------------
 ## Other libraries.
 ## ----------------
+
+macro (tbag_modules__check_cxx_obfuscator)
+    if (EXISTS "${TBAG_OBFUS_CONFIG_PATH}")
+        message (FATAL_ERROR "Not found ${TBAG_OBFUS_CONFIG_PATH}")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__build_cxx_obfuscator __original_files)
+    obfus_generate_cpp (TBAG_PROJECT_OBJECTS "${__original_files}" "${TBAG_OBFUS_CONFIG_PATH}")
+endmacro ()
 
 macro (tbag_modules__check_boost)
     if (NOT Boost_FOUND)
@@ -317,6 +334,19 @@ macro (tbag_modules__apply_protobuf)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         list (APPEND TBAG_PROJECT_LDFLAGS -lz)
     endif ()
+endmacro ()
+
+macro (tbag_modules__build_protobuf_cpp __original_files)
+    tbag_protobuf__generate_cpp (__proto_srcs __proto_headers "${__original_files}")
+    list (APPEND TBAG_PROJECT_OBJECTS ${__proto_srcs})
+endmacro ()
+
+macro (tbag_modules__build_protobuf_py __original_files)
+    tbag_protobuf__generate_py (__proto_srcs __proto_headers "${__original_files}")
+    #string (MD5 __proto_srcs_hash "${__proto_srcs}")
+    #set (__protobuf_python_target_name "${TBAG_PROJECT_CONST_NAME}_protobuf_python_${__proto_srcs_hash}")
+    #add_custom_target ("${__protobuf_python_target_name}" ALL DEPENDS ${__proto_srcs})
+    #list (APPEND TBAG_OBJECT_DEPENDENCIES "${__protobuf_python_target_name}")
 endmacro ()
 
 macro (tbag_modules__check_python_interpreter)
