@@ -6,7 +6,8 @@
  */
 
 #include <libtbag/database/Sqlite.hpp>
-#include <libtbag/database/sqlite3/sqlite3.h>
+
+#include <sqlite3.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

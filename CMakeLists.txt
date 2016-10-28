@@ -51,6 +51,7 @@ tbag_config__default_generate_c_header ()
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 
 ## Test subproject.
