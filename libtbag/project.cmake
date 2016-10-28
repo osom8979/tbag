@@ -1,7 +1,9 @@
 ## Tbag CMake project setting.
 
-tbag_modules__include_project (Default)
-tbag_modules__include_project (InstallTarget)
+include (TbagModules)
+
+tbag_modules__apply_default ()
+tbag_modules__install_target ()
 
 ## TBAG EXPORT API.
 list (APPEND TBAG_PROJECT_DEFINITIONS -DTBAG_EXPORT_API
@@ -28,10 +30,10 @@ list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/icu/common
                                         ${CMAKE_SOURCE_DIR}/dep/icu/i18n)
 
 ## whole-archive files.
-tbag_project__set_whole_archive ($<TARGET_FILE:lua>)
-tbag_project__set_whole_archive ($<TARGET_FILE:uv>)
-tbag_project__set_whole_archive ($<TARGET_FILE:icuuc>)
-tbag_project__set_whole_archive ($<TARGET_FILE:icui18n>)
+tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
+tbag_modules__add_whole_archive ($<TARGET_FILE:uv>)
+tbag_modules__add_whole_archive ($<TARGET_FILE:icuuc>)
+tbag_modules__add_whole_archive ($<TARGET_FILE:icui18n>)
 
 ## external libraries.
 if (WIN32)
@@ -46,5 +48,5 @@ else ()
     endif ()
 endif ()
 
-#tbag_modules__include_project (PCH ${CMAKE_SOURCE_DIR}/libtbag/config.h)
+#tbag_modules__apply_pch (${CMAKE_SOURCE_DIR}/libtbag/config.h)
 

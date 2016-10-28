@@ -1,10 +1,12 @@
 ## Tbag CMake project setting.
 
-tbag_modules__include_project (Default)
+include (TbagModules)
+
+tbag_modules__apply_default ()
 
 ## SFML settings.
 if (SFML_FOUND)
-    tbag_modules__include_project (SFML)
+    tbag_modules__apply_sfml ()
 endif ()
 
 ## libtbag library.

@@ -280,25 +280,3 @@ macro (tbag_project)
     tbag_project__find_and_build ("${PROJECT_SOURCE_DIR}")
 endmacro ()
 
-
-##########################
-### SUBPROJECT MODULES ###
-##########################
-
-macro (tbag_project__set_whole_archive __lib_name)
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION)
-        if (NOT MSVC_VERSION LESS 1900)
-            #list (APPEND TBAG_PROJECT_LDFLAGS "/WHOLEARCHIVE:${__lib_name}") ## ERROR: Auto converting '/' -> '\'
-            list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
-        else ()
-            list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
-        endif ()
-    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        list (APPEND TBAG_PROJECT_LDFLAGS -Wl,-force_load,${__lib_name})
-    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list (APPEND TBAG_PROJECT_LDFLAGS -Wl,--whole-archive ${__lib_name} -Wl,--no-whole-archive)
-    else ()
-        list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
-    endif ()
-endmacro ()
-

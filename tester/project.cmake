@@ -1,6 +1,8 @@
 ## Tbag CMake project setting.
 
-tbag_modules__include_project (Default)
+include (TbagModules)
+
+tbag_modules__apply_default ()
 
 ## gtest
 list (APPEND TBAG_PROJECT_DEPENDENCIES  gtest_main)
