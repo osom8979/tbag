@@ -30,25 +30,19 @@ NAMESPACE_LIBTBAG_OPEN
 namespace string {
 
 /**
- * BaseCommander class prototype.
+ * Commander class prototype.
  *
  * @author zer0
  * @date   2016-10-01
  */
-template <typename CharType = char>
-class BaseCommander : public Noncopyable
+class Commander : public Noncopyable
 {
 public:
-    using Value  = CharType;
-    using String = std::basic_string<Value>;
+    using Arguments  = libtbag::string::Arguments;
+    using Flags      = libtbag::string::BaseFlags<char>;
 
-    using Arguments  = libtbag::string::BaseArguments<Value>;
-    using Flags      = libtbag::string::BaseFlags<Value>;
-    using ArgsVector = std::vector<Arguments>;
-
-    using Callback = std::function<void(Arguments const &)>;
-
-    using CommandMap  = std::map<String, Callback>;
+    using Callback    = std::function<void(Arguments const &)>;
+    using CommandMap  = std::map<std::string, Callback>;
     using CommandPair = typename CommandMap::value_type;
 
 private:
@@ -56,19 +50,19 @@ private:
     CommandMap _commands;
 
 public:
-    BaseCommander(Callback const & default_callback) : _default(default_callback)
+    Commander(Callback const & default_callback) : _default(default_callback)
     { /* EMPTY. */ }
 
 public:
-    BaseCommander() = default;
-    virtual ~BaseCommander() = default;
+    Commander() = default;
+    virtual ~Commander() = default;
 
-    BaseCommander(BaseCommander const & obj) = default;
-    BaseCommander & operator =(BaseCommander const & obj) = default;
+    Commander(Commander const & obj) = default;
+    Commander & operator =(Commander const & obj) = default;
 
 #if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    BaseCommander(BaseCommander && obj) = default;
-    BaseCommander & operator =(BaseCommander && obj) = default;
+    Commander(Commander && obj) = default;
+    Commander & operator =(Commander && obj) = default;
 #endif
 
 public:
@@ -87,18 +81,18 @@ public:
         _commands.clear();
     }
 
-    bool insert(String const & command, Callback const & callback)
+    bool insert(std::string const & command, Callback const & callback)
     {
         return _commands.insert(CommandPair(command, callback)).second;
     }
 
 public:
-    ArgsVector parseArguments(String const & arguments)
+    std::vector<Arguments> parseArguments(std::string const & arguments)
     {
         Flags const FLAGS(arguments);
         std::size_t const SIZE = FLAGS.size();
 
-        ArgsVector result;
+        std::vector<Arguments> result;
 
         for (std::size_t index = 0; index < SIZE; ++index) {
             result.push_back(Arguments(FLAGS.at(index).key, FLAGS.at(index).value));
@@ -108,7 +102,7 @@ public:
     }
 
 public:
-    void request(String const & arguments)
+    void request(std::string const & arguments)
     {
         for (auto & cursor : parseArguments(arguments)) {
             onRequest(cursor);
@@ -126,9 +120,6 @@ public:
         }
     }
 };
-
-using Commander = BaseCommander<char>;
-using WideCommander = BaseCommander<wchar_t>;
 
 } // namespace string
 

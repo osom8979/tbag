@@ -61,14 +61,13 @@ public:
     {
         std::string s1;
 
-        int         v1;
-        double      v2;
+        int    v1;
+        double v2;
 
-        Arguments::IntegerPoint p1;
-        Arguments::DoublePoint  p2;
-
-        Arguments::IntegerRect  r1;
-        Arguments::DoubleRect   r2;
+        Arguments::Pointi p1;
+        Arguments::Pointd p2;
+        Arguments::Recti  r1;
+        Arguments::Rectd  r2;
     };
 };
 

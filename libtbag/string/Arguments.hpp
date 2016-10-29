@@ -34,68 +34,50 @@ namespace string {
  * @author zer0
  * @date   2016-09-23
  */
-template <typename CharType = char>
-class BaseArguments
+class Arguments
 {
 public:
-    using Value  = CharType;
-    using String = std::basic_string<Value>;
-
-    using StringVector = std::vector<String>;
-
-public:
-    static TBAG_CONSTEXPR Value const * const getDefaultDelimiter() TBAG_NOEXCEPT
-    { return CHAR_OR_WIDECHAR(Value, ","); }
-    static TBAG_CONSTEXPR Value const * const getDefaultPointDelimiter() TBAG_NOEXCEPT
-    { return CHAR_OR_WIDECHAR(Value, "x"); }
+    inline static TBAG_CONSTEXPR char const * const getDefaultDelimiter() TBAG_NOEXCEPT
+    { return ","; }
+    inline static TBAG_CONSTEXPR char const * const getDefaultPointDelimiter() TBAG_NOEXCEPT
+    { return "x"; }
 
 private:
-    String       _name;
-    StringVector _args;
-
-private:
-    String _delimiter;
-    String _point_delimiter;
+    std::string _name;
+    std::vector<std::string> _args;
+    std::string _delimiter;
+    std::string _point_delimiter;
 
 public:
-    BaseArguments() : _name(), _args(), _delimiter(getDefaultDelimiter()), _point_delimiter(getDefaultPointDelimiter())
-    { /* EMPTY. */ }
+    Arguments();
+    Arguments(std::string const & name
+            , std::string const & arguments
+            , std::string const & delimiter       = getDefaultDelimiter()
+            , std::string const & point_delimiter = getDefaultPointDelimiter()) throw(InitializeException);
+    ~Arguments();
 
-    BaseArguments(String name
-                , String arguments
-                , String delimiter       = getDefaultDelimiter()
-                , String point_delimiter = getDefaultPointDelimiter()) throw(InitializeException)
-            : _name(name), _args(), _delimiter(delimiter), _point_delimiter(point_delimiter)
-    {
-        if (parse(arguments) == false) {
-            throw InitializeException();
-        }
-    }
-
-    ~BaseArguments()
-    { /* EMPTY. */ }
-
-    BaseArguments(BaseArguments const & obj) = default;
-    BaseArguments & operator =(BaseArguments const & obj) = default;
+public:
+    Arguments(Arguments const & obj) = default;
+    Arguments & operator =(Arguments const & obj) = default;
 
 #if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    BaseArguments(BaseArguments && obj) = default;
-    BaseArguments & operator =(BaseArguments && obj) = default;
+    Arguments(Arguments && obj) = default;
+    Arguments & operator =(Arguments && obj) = default;
 #endif
 
 public:
-    inline String getName() const
+    inline std::string getName() const
     { return _name; }
-    inline String getDelimiter() const
+    inline std::string getDelimiter() const
     { return _delimiter; }
-    inline String getPointDelimiter() const
+    inline std::string getPointDelimiter() const
     { return _point_delimiter; }
 
-    inline void setName(String name)
+    inline void setName(std::string const & name)
     { _name = name; }
-    inline void setDelimiter(String delimiter)
+    inline void setDelimiter(std::string const & delimiter)
     { _delimiter = delimiter; }
-    inline void setPointDelimiter(String point_delimiter)
+    inline void setPointDelimiter(std::string const & point_delimiter)
     { _point_delimiter = point_delimiter; }
 
     inline void clear() TBAG_NOEXCEPT
@@ -105,50 +87,26 @@ public:
     inline std::size_t size() const TBAG_NOEXCEPT
     { return _args.size(); }
 
-    inline String get(std::size_t index) const
+    inline std::string get(std::size_t index) const
     { return _args.at(index); }
 
 public:
     inline void erase(std::size_t index)
     { _args.erase(_args.begin() + index); }
-    inline void erase(String argument)
+    inline void erase(std::string const & argument)
     { _args.erase(std::find(_args.begin(), _args.end(), argument)); }
 
-    inline void push(String argument)
+    inline void push(std::string const & argument)
     { _args.push_back(argument); }
     inline void pop()
     { erase(0); }
 
 public:
-    void insert(std::size_t index, String argument)
-    {
-        _args.insert(_args.begin() + index, argument);
-    }
+    void insert(std::size_t index, std::string const & argument);
 
 public:
-    bool parse(String arguments)
-    {
-        for (auto & cursor : libtbag::string::splitTokens(arguments, _delimiter)) {
-            push(cursor);
-        }
-        return true;
-    }
-
-    std::string toString()
-    {
-        if (_args.empty()) {
-            return std::string();
-        } else if (_args.size() == 1) {
-            return _args.at(0);
-        }
-
-        std::size_t const SIZE = _args.size();
-        std::string result = _args.at(0);
-        for (std::size_t index = 1; index < SIZE; ++index) {
-            result += _delimiter + _args.at(index);
-        }
-        return result;
-    }
+    bool parse(std::string const & arguments);
+    std::string toString();
 
 private:
     template <typename OutputType, typename Predicated>
@@ -166,43 +124,20 @@ private:
     }
 
 public:
-    inline bool optInteger(std::size_t index, int * output, bool check_grammar = true) const
-    {
-        return tryObtainArgument(index, output, [this, check_grammar](String const & value){
-            if (check_grammar && value.find(this->_point_delimiter) != String::npos) {
-                throw ParseException();
-            }
-            return std::stoi(value);
-        });
-    }
-
-    inline bool optDouble(std::size_t index, double * output, bool check_grammar = true) const
-    {
-        return tryObtainArgument(index, output, [this, check_grammar](String const & value){
-            if (check_grammar && value.find(this->_point_delimiter) != String::npos) {
-                throw ParseException();
-            }
-            return std::stod(value);
-        });
-    }
-
-    inline bool optString(std::size_t index, String * output) const
-    {
-        return tryObtainArgument(index, output, [](String const & value){
-            return value;
-        });
-    }
+    bool optInteger(std::size_t index, int         * output, bool check_grammar = true) const;
+    bool optDouble (std::size_t index, double      * output, bool check_grammar = true) const;
+    bool optString (std::size_t index, std::string * output) const;
 
 // ----------
 // EXTENSION.
 // ----------
 
 public:
-    using IntegerPoint = libtbag::geometry::BasePoint<int>;
-    using  DoublePoint = libtbag::geometry::BasePoint<double>;
+    using Pointi = libtbag::geometry::BasePoint<int>;
+    using Pointd = libtbag::geometry::BasePoint<double>;
 
-    using IntegerRect = libtbag::geometry::BaseRect<int>;
-    using  DoubleRect = libtbag::geometry::BaseRect<double>;
+    using Recti = libtbag::geometry::BaseRect<int>;
+    using Rectd = libtbag::geometry::BaseRect<double>;
 
 private:
     template <typename OutputType, typename Predicated>
@@ -225,51 +160,10 @@ private:
     }
 
 public:
-    inline bool optIntegerPoint(std::size_t index, IntegerPoint * output, bool check_grammar = true) const
-    {
-        return tryObtainTokens(index, output, [check_grammar](StringVector const & tokens){
-            if (check_grammar && tokens.size() != 2) {
-                throw ParseException();
-            }
-            return libtbag::geometry::makePoint(std::stoi(tokens.at(0)), std::stoi(tokens.at(1)));
-        });
-    }
-
-    inline bool optDoublePoint(std::size_t index, DoublePoint * output, bool check_grammar = true) const
-    {
-        return tryObtainTokens(index, output, [check_grammar](StringVector const & tokens){
-            if (check_grammar && tokens.size() != 2) {
-                throw ParseException();
-            }
-            return libtbag::geometry::makePoint(std::stod(tokens.at(0)), std::stod(tokens.at(1)));
-        });
-    }
-
-    inline bool optIntegerRect(std::size_t index, IntegerRect * output, bool check_grammar = true) const
-    {
-        return tryObtainTokens(index, output, [check_grammar](StringVector const & tokens){
-            if (check_grammar && tokens.size() != 4) {
-                throw ParseException();
-            }
-            return libtbag::geometry::makeRect(std::stoi(tokens.at(0))
-                                             , std::stoi(tokens.at(1))
-                                             , std::stoi(tokens.at(2))
-                                             , std::stoi(tokens.at(3)));
-        });
-    }
-
-    inline bool optDoubleRect(std::size_t index, DoubleRect * output, bool check_grammar = true) const
-    {
-        return tryObtainTokens(index, output, [check_grammar](StringVector const & tokens){
-            if (check_grammar && tokens.size() != 4) {
-                throw ParseException();
-            }
-            return libtbag::geometry::makeRect(std::stod(tokens.at(0))
-                                             , std::stod(tokens.at(1))
-                                             , std::stod(tokens.at(2))
-                                             , std::stod(tokens.at(3)));
-        });
-    }
+    bool optIntegerPoint(std::size_t index, Pointi * output, bool check_grammar = true) const;
+    bool optDoublePoint (std::size_t index, Pointd * output, bool check_grammar = true) const;
+    bool optIntegerRect (std::size_t index, Recti  * output, bool check_grammar = true) const;
+    bool optDoubleRect  (std::size_t index, Rectd  * output, bool check_grammar = true) const;
 
 private:
     template <typename Type, typename Predicated>
@@ -287,56 +181,14 @@ private:
     }
 
 public:
-    inline std::vector<String> getStrings() const
-    {
-        return _args;
-    }
-
-    inline std::vector<int> getIntegers() const
-    {
-        return getVector<int>([this](std::size_t index, int * output){
-            return this->optInteger(index, output);
-        });
-    }
-
-    inline std::vector<double> getDoubles() const
-    {
-        return getVector<double>([this](std::size_t index, double * output){
-            return this->optDouble(index, output);
-        });
-    }
-
-    inline std::vector<IntegerPoint> getIntegerPoints() const
-    {
-        return getVector<IntegerPoint>([this](std::size_t index, IntegerPoint * output){
-            return this->optIntegerPoint(index, output);
-        });
-    }
-
-    inline std::vector<DoublePoint> getDoublePoints() const
-    {
-        return getVector<DoublePoint>([this](std::size_t index, DoublePoint * output){
-            return this->optDoublePoint(index, output);
-        });
-    }
-
-    inline std::vector<IntegerRect> getIntegerRects() const
-    {
-        return getVector<IntegerRect>([this](std::size_t index, IntegerRect * output){
-            return this->optIntegerRect(index, output);
-        });
-    }
-
-    inline std::vector<DoubleRect> getDoubleRects() const
-    {
-        return getVector<DoubleRect>([this](std::size_t index, DoubleRect * output){
-            return this->optDoubleRect(index, output);
-        });
-    }
+    std::vector<std::string> getStrings      () const;
+    std::vector<int        > getIntegers     () const;
+    std::vector<double     > getDoubles      () const;
+    std::vector<Pointi     > getIntegerPoints() const;
+    std::vector<Pointd     > getDoublePoints () const;
+    std::vector<Recti      > getIntegerRects () const;
+    std::vector<Rectd      > getDoubleRects  () const;
 };
-
-using Arguments = BaseArguments<char>;
-using WideArguments = BaseArguments<wchar_t>;
 
 } // namespace string
 
