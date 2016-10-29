@@ -2,7 +2,7 @@
  * @file   Formatter.cpp
  * @brief  Formatter class implementation.
  * @author zer0
- * @date   2016-07-18
+ * @date   2016-10-29
  */
 
 #include <libtbag/log/details/Formatter.hpp>

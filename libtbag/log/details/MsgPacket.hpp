@@ -35,93 +35,96 @@ namespace log     {
 namespace details {
 
 /**
- * BaseMsgPacket class prototype.
+ * MsgPacket class prototype.
  *
  * @author zer0
  * @date   2016-07-09
  */
-template <typename CharType = char>
-class BaseMsgPacket
+class MsgPacket
 {
-public:
-    using ValueType = CharType;
-    using String    = std::basic_string<ValueType>;
-
-    static_assert(std::is_pod<ValueType>::value
-            , "Character type of BaseStrings must be a POD");
-    static_assert(std::is_same<ValueType, typename String::value_type>::value
-            , "String::value_type must be the same type as ValueType");
-
 private:
     Severity _severity;
-    String   _message;
+    std::string _message;
 
 public:
-    // @formatter:off
-    BaseMsgPacket()                                               : _severity(LogLevel::LEVEL_INFO), _message()    { }
-    BaseMsgPacket(LogLevel level)                                 : _severity(level),                _message()    { }
-    BaseMsgPacket(Severity  const & severity)                     : _severity(severity),             _message()    { }
-    BaseMsgPacket(String    const & msg)                          : _severity(LogLevel::LEVEL_INFO), _message(msg) { }
-    BaseMsgPacket(ValueType const * msg)                          : _severity(LogLevel::LEVEL_INFO), _message(msg) { }
-    BaseMsgPacket(Severity  const & severity, String const & msg) : _severity(severity),             _message(msg) { }
-    virtual ~BaseMsgPacket() { }
-    // @formatter:on
+    MsgPacket() : _severity(LogLevel::LEVEL_INFO), _message()
+    { /* EMPTY. */ }
+
+    virtual ~MsgPacket()
+    { /* EMPTY. */ }
 
 public:
-    BaseMsgPacket(BaseMsgPacket const & obj) : BaseMsgPacket()
-    { this->copy(obj); }
-    BaseMsgPacket(BaseMsgPacket && obj) : BaseMsgPacket()
-    { this->swap(obj); }
+    MsgPacket(LogLevel level) : _severity(level), _message()
+    { /* EMPTY. */ }
+
+    MsgPacket(Severity const & severity) : _severity(severity), _message()
+    { /* EMPTY. */ }
+
+    MsgPacket(std::string const & msg) : _severity(LogLevel::LEVEL_INFO), _message(msg)
+    { /* EMPTY. */ }
+
+    MsgPacket(char const * msg) : _severity(LogLevel::LEVEL_INFO), _message(msg)
+    { /* EMPTY. */ }
+
+    MsgPacket(Severity const & severity, std::string const & msg) : _severity(severity), _message(msg)
+    { /* EMPTY. */ }
 
 public:
-    BaseMsgPacket & operator =(BaseMsgPacket const & obj)
+    MsgPacket(MsgPacket const & obj) : MsgPacket()
+    { copy(obj); }
+
+    MsgPacket(MsgPacket && obj) : MsgPacket()
+    { swap(obj); }
+
+public:
+    inline MsgPacket & operator =(MsgPacket const & obj)
     {
-        return this->copy(obj);
+        return copy(obj);
     }
 
-    BaseMsgPacket & operator =(BaseMsgPacket && obj)
+    inline MsgPacket & operator =(MsgPacket && obj)
     {
-        this->swap(obj);
+        swap(obj);
         return *this;
     }
 
-    BaseMsgPacket & operator =(String const & message)
+    inline MsgPacket & operator =(std::string const & message)
     {
         _message = message;
         return *this;
     }
 
-    BaseMsgPacket & operator =(ValueType const * message)
+    inline MsgPacket & operator =(char const * message)
     {
         _message = message;
         return *this;
     }
 
 public:
-    inline operator ValueType const * () const TBAG_NOEXCEPT
+    inline operator char const * () const TBAG_NOEXCEPT
     { return _message.c_str(); }
-    inline operator String () const
+    inline operator std::string () const
     { return _message; }
 
 public:
-    BaseMsgPacket & copy(BaseMsgPacket const & obj)
+    MsgPacket & copy(MsgPacket const & obj)
     {
         if (this != &obj) {
             _severity = obj._severity;
-            _message = obj._message;
+            _message  = obj._message;
         }
         return *this;
     }
 
-    void swap(BaseMsgPacket & obj)
+    void swap(MsgPacket & obj)
     {
         if (this != &obj) {
             std::swap(_severity, obj._severity);
-            std::swap(_message, obj._message);
+            std::swap(_message , obj._message);
         }
     }
 
-    void swap(BaseMsgPacket && obj)
+    void swap(MsgPacket && obj)
     {
         if (this != &obj) {
             _severity = std::move(obj._severity);
@@ -130,9 +133,9 @@ public:
     }
 
 public:
-    inline String getString() const TBAG_NOEXCEPT
+    inline std::string getString() const TBAG_NOEXCEPT
     { return _message;          }
-    inline ValueType const * getStringPointer() const TBAG_NOEXCEPT
+    inline char const * getStringPointer() const TBAG_NOEXCEPT
     { return _message.c_str();  }
     inline std::size_t getStringSize() const TBAG_NOEXCEPT
     { return _message.size();   }
@@ -144,8 +147,8 @@ public:
 
 public:
 #define __LEFT_SHIFT_OPERATOR(type, value, append)  \
-    friend BaseMsgPacket &                          \
-    operator <<(BaseMsgPacket & msg, type value)    \
+    friend MsgPacket &                              \
+    operator <<(MsgPacket & msg, type value)        \
     {                                               \
         msg._message += append;                     \
         return msg;                                 \
@@ -155,7 +158,7 @@ public:
     __LEFT_SHIFT_OPERATOR(type, value, std::to_string(static_cast<type>(value)))
 
 public:
-    friend BaseMsgPacket & operator <<(BaseMsgPacket & msg, ValueType value)
+    friend MsgPacket & operator <<(MsgPacket & msg, char value)
     {
         msg._message.append(1, value);
         return msg;
@@ -176,13 +179,10 @@ public:
     __LEFT_SHIFT_OPERATOR_TO_STRING(long double);
 
 public:
-    __LEFT_SHIFT_OPERATOR(void *, value, std::to_string(reinterpret_cast<std::size_t>(value)));
-    __LEFT_SHIFT_OPERATOR(ValueType const *, value, value);
-    __LEFT_SHIFT_OPERATOR(String const &, value, value);
+    __LEFT_SHIFT_OPERATOR(void *, v, std::to_string(reinterpret_cast<std::size_t>(v)));
+    __LEFT_SHIFT_OPERATOR(char const *, v, v);
+    __LEFT_SHIFT_OPERATOR(std::string const &, v, v);
 };
-
-using MsgPacket     = BaseMsgPacket<char>;
-using WideMsgPacket = BaseMsgPacket<wchar_t>;
 
 } // namespace details
 } // namespace log

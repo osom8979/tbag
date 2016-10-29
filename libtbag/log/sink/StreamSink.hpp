@@ -15,11 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/log/sink/Sink.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/log/sink/Sink.hpp>
 
 #include <iostream>
-#include <type_traits>
 #include <utility>
 
 // -------------------
@@ -35,38 +34,31 @@ namespace sink {
  * @author zer0
  * @date   2016-07-10
  */
-template <typename OutputStream, typename Mutex = lock::FakeLock, typename CharType = char>
-class StreamSink : public BaseSink<Mutex, CharType>, public Noncopyable
+template <typename OutputStream, typename MutexType = lock::FakeLock>
+class StreamSink : public Sink<MutexType>, public Noncopyable
 {
 public:
-    using Parent  = BaseSink<Mutex, CharType>;
-    using Stream  = OutputStream;
-    using Message = typename Parent::Message;
-
-    static_assert(std::is_same<typename OutputStream::char_type, CharType>::value
-            , "OutputStream::char_type and CharType are not same type");
+    using Parent  = Sink<MutexType>;
+    using OStream = OutputStream;
 
 public:
-    Stream & _stream;
+    OStream & _ostream;
 
 public:
-    StreamSink(Stream & stream, bool force_flush = false)
-            : Parent(force_flush), _stream(stream)
+    StreamSink(OStream & ostream, bool force_flush = false) : Parent(force_flush), _ostream(ostream)
+    { /* EMPTY. */ }
+    virtual ~StreamSink()
+    { /* EMPTY. */ }
+
+public:
+    virtual void writeReal(std::string const & msg) override
     {
-        // EMPTY.
-    }
-
-    virtual ~StreamSink() = default;
-
-public:
-    virtual void writeReal(std::basic_string<CharType> const & msg) override
-    {
-        _stream.write(msg.c_str(), msg.size());
+        _ostream.write(msg.c_str(), msg.size());
     }
 
     virtual void flushReal() override
     {
-        _stream.flush();
+        _ostream.flush();
     }
 };
 

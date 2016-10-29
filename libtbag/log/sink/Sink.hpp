@@ -17,10 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/lock/FakeLock.hpp>
-#include <libtbag/string/Strings.hpp>
 
 #include <string>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,35 +33,32 @@ namespace sink {
  * @author zer0
  * @date   2016-07-16
  */
-template <typename CharType = char>
-class BaseSinkInterface
+class SinkInterface
 {
 public:
-    using Message = details::BaseMsgPacket<CharType>;
-    using String  = typename Message::String;
+    using MsgPacket = details::MsgPacket;
 
 public:
-    TBAG_CONSTEXPR BaseSinkInterface() = default;
-    virtual ~BaseSinkInterface() = default;
+    TBAG_CONSTEXPR SinkInterface()
+    { /* EMPTY. */ }
+    virtual ~SinkInterface()
+    { /* EMPTY. */ }
 
 public:
-    virtual void writeReal(String const & msg) = 0;
+    virtual void writeReal(std::string const & msg) = 0;
     virtual void flushReal() = 0;
 
 public:
-    virtual void write(Message const & msg) = 0;
+    virtual void write(MsgPacket const & msg) = 0;
     virtual void flush() = 0;
 
 public:
     template <typename ... Args>
-    TBAG_CONSTEXPR inline static Message makeMessage(Args && ... args) TBAG_NOEXCEPT
+    /* TBAG_CONSTEXPR */ inline static MsgPacket makeMessage(Args && ... args) TBAG_NOEXCEPT
     {
-        return Message(std::forward<Args>(args) ...);
+        return MsgPacket(std::forward<Args>(args) ...);
     }
 };
-
-using SinkInterface     = BaseSinkInterface<char>;
-using WideSinkInterface = BaseSinkInterface<wchar_t>;
 
 /**
  * Base Sink interface.
@@ -71,47 +66,42 @@ using WideSinkInterface = BaseSinkInterface<wchar_t>;
  * @author zer0
  * @date   2016-07-08
  */
-template <typename MutexType = lock::FakeLock, typename CharType = char>
-class BaseSink : public BaseSinkInterface<CharType>
+template <typename MutexType = lock::FakeLock>
+class Sink : public SinkInterface
 {
 public:
-    using Value   = CharType;
-    using Mutex   = MutexType;
-    using Parent  = BaseSinkInterface<CharType>;
-    using Message = typename Parent::Message;
+    using Mutex = MutexType;
 
 private:
     Mutex _mutex;
     bool  _force_flush;
 
 public:
-    BaseSink() : _mutex(), _force_flush(false) {}
-    BaseSink(bool force_flush) : _mutex(), _force_flush(force_flush) {}
-    virtual ~BaseSink() {}
+    Sink() : _mutex(), _force_flush(false)
+    { /* EMPTY. */ }
+    Sink(bool force_flush) : _mutex(), _force_flush(force_flush)
+    { /* EMPTY. */ }
+    virtual ~Sink()
+    { /* EMPTY. */ }
 
 public:
-    virtual void write(Message const & msg) override
+    virtual void write(MsgPacket const & msg) override
     {
-        std::lock_guard<Mutex> guard(_mutex);
-
-        this->writeReal(msg.getString() + CHAR_OR_WIDECHAR(Value, "\n"));
+        _mutex.lock();
+        writeReal(msg.getString() + "\n");
         if (_force_flush) {
-            this->flushReal();
+            flushReal();
         }
+        _mutex.unlock();
     }
 
     virtual void flush() override
     {
-        std::lock_guard<Mutex> guard(_mutex);
-        this->flushReal();
+        _mutex.lock();
+        flushReal();
+        _mutex.unlock();
     }
 };
-
-template <typename Mutex>
-using Sink = BaseSink<Mutex, char>;
-
-template <typename Mutex>
-using WideSink = BaseSink<Mutex, wchar_t>;
 
 } // namespace sink
 } // namespace log

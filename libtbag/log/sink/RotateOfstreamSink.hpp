@@ -17,7 +17,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/log/sink/OfstreamSink.hpp>
 #include <libtbag/time/Time.hpp>
-#include <libtbag/string/Strings.hpp>
 
 #include <sstream>
 
@@ -34,43 +33,41 @@ namespace sink {
  * @author zer0
  * @date   2016-07-10
  */
-template <typename Mutex = lock::FakeLock, typename CharType = char>
-class RotateOfstreamSink : public OfstreamSink<Mutex, CharType>
+template <typename MutexType = lock::FakeLock>
+class RotateOfstreamSink : public OfstreamSink<MutexType>
 {
 public:
-    using Parent = OfstreamSink<Mutex, CharType>;
-    using String = typename Parent::String;
+    using Parent = OfstreamSink<MutexType>;
 
 public:
-    RotateOfstreamSink(String const & path, bool force_flush = false)
+    RotateOfstreamSink(std::string const & path, bool force_flush = false)
             : Parent(getInsertedDateIntoFilename(path), force_flush)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
-    virtual ~RotateOfstreamSink() = default;
+    virtual ~RotateOfstreamSink()
+    { /* EMPTY. */ }
 
 public:
-    static String getNowTimeString()
+    static std::string getNowTimeString()
     {
-        std::basic_stringstream<CharType> ss;
+        std::stringstream ss;
 
         // Timestamp.
         auto tp = time::getNowSystemClock();
         tm time = {0,};
 
         if (time::getLocalTime(time::getTime(tp), &time)) {
-            ss << time::getFormatString(time::getDefaultTimestampShortFormat<CharType>(), &time);
+            ss << time::getFormatString(time::getDefaultTimestampShortFormat<char>(), &time);
         } else {
-            ss << CHAR_OR_WIDECHAR(CharType, "SINCE") << tp.time_since_epoch().count();
+            ss << "SINCE" << tp.time_since_epoch().count();
         }
 
         return ss.str();
     }
 
-    static String getInsertedDateIntoFilename(String const & path)
+    static std::string getInsertedDateIntoFilename(std::string const & path)
     {
-        return path + CHAR_OR_WIDECHAR(CharType, ".") + getNowTimeString();
+        return path + "." + getNowTimeString();
     }
 };
 

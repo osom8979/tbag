@@ -41,17 +41,13 @@ namespace details {
 class TBAG_EXPORTS Logger : public Noncopyable
 {
 public:
-    using CharType = char;
-    using SinkType = sink::BaseSinkInterface<CharType>;
-    using Message  = SinkType::Message;
+    using SinkType = sink::SinkInterface;
     using SinkPtr  = std::unique_ptr<SinkType>;
-    using String   = std::basic_string<CharType>;
-    using Format   = Formatter;
 
 private:
-    SinkPtr _sink;
-    Severity _severity;
-    Format _formatter;
+    SinkPtr   _sink;
+    Severity  _severity;
+    Formatter _formatter;
 
 public:
     Logger(SinkType * sink);
@@ -63,11 +59,11 @@ public:
     void setLogLevel(LogLevel level);
 
 public:
-    void log(Message const & msg);
+    void log(MsgPacket const & msg);
 
 public:
     template <typename ... Args>
-    void logf(LogLevel level, String const & format, Args && ... args)
+    void logf(LogLevel level, std::string const & format, Args && ... args)
     {
         this->log(SinkType::makeMessage(level
                 , _formatter.getDefaultPrefix(level) + _formatter.format(format, std::forward<Args>(args) ...)));

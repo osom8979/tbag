@@ -31,26 +31,23 @@ namespace sink {
  * @author zer0
  * @date   2016-07-17
  */
-template <typename Mutex = lock::FakeLock>
-class ColorCoutSink : public CoutSink<Mutex>
+template <typename MutexType = lock::FakeLock>
+class ColorCoutSink : public CoutSink<MutexType>
 {
 public:
-    using Parent  = CoutSink<Mutex>;
-    using String  = typename Parent::String;
-    using Message = typename Parent::Message;
+    using Parent = CoutSink<MutexType>;
 
 public:
     ColorCoutSink(bool force_flush = false) : Parent(force_flush)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
-    virtual ~ColorCoutSink() = default;
+    virtual ~ColorCoutSink()
+    { /* EMPTY. */ }
 
 public:
-    virtual void write(Message const & msg) override
+    virtual void write(details::MsgPacket const & msg) override
     {
-        String message;
+        std::string message;
 
         // Don't use 'using namespace details;'
         // 'LogLevel' ambiguous symbol (MSVC 2013 error)
@@ -73,7 +70,7 @@ public:
 
         message += msg.getString() + tces::DISPLAY_ATTRIBUTE_RESET;
 
-        Parent::write(Message(msg.getSeverity(), message));
+        Parent::write(details::MsgPacket(msg.getSeverity(), message));
     }
 };
 

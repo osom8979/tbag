@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/log/sink/StreamSink.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <iostream>
 
 // -------------------
@@ -32,22 +33,18 @@ namespace sink {
  * @author zer0
  * @date   2016-07-17
  */
-template <typename Mutex = lock::FakeLock>
-class CoutSink : public StreamSink<std::basic_ostream<char>, Mutex, char>
+template <typename MutexType = lock::FakeLock>
+class CoutSink : public StreamSink<std::ostream, MutexType>
 {
 public:
-    using Stream  = std::basic_ostream<char>;
-    using Parent  = StreamSink<Stream, Mutex, char>;
-    using String  = typename Parent::String;
-    using Message = typename Parent::Message;
+    using Parent = StreamSink<std::ostream, MutexType>;
 
 public:
     CoutSink(bool force_flush = false) : Parent(std::cout, force_flush)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY */ }
 
-    virtual ~CoutSink() = default;
+    virtual ~CoutSink()
+    { /* EMPTY */ }
 };
 
 } // namespace sink

@@ -20,7 +20,7 @@ Logger::Logger(SinkType * sink) : _sink(sink), _severity(LogLevel::LEVEL_INFO)
     // EMPTY.
 }
 
-Logger::Logger() : Logger(new ::libtbag::log::sink::NullSink<>())
+Logger::Logger() : Logger(new ::libtbag::log::sink::NullSink())
 {
     // EMPTY.
 }
@@ -40,7 +40,7 @@ void Logger::setLogLevel(LogLevel level)
     _severity = level;
 }
 
-void Logger::log(Message const & msg)
+void Logger::log(MsgPacket const & msg)
 {
     if (static_cast<bool>(_sink) && _severity.isContain(msg.getSeverity())) {
         _sink->write(msg);

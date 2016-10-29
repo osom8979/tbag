@@ -33,9 +33,9 @@ namespace details {
 class Severity;
 enum class LogLevel;
 
-std::string getMillisecFormat(std::chrono::system_clock::time_point const & time_point);
-std::string getDefaultPrefix();
-std::string getDefaultSeverityString(Severity const & severity);
+TBAG_EXPORTS std::string getMillisecFormat(std::chrono::system_clock::time_point const & time_point);
+TBAG_EXPORTS std::string getDefaultPrefix();
+TBAG_EXPORTS std::string getDefaultSeverityString(Severity const & severity);
 
 template <typename ... Args>
 inline std::string format(std::string const & format_string, Args && ... args)
@@ -49,7 +49,7 @@ inline std::string format(std::string const & format_string, Args && ... args)
  * @author zer0
  * @date   2016-07-18
  */
-class Formatter : public Noncopyable
+class TBAG_EXPORTS Formatter : public Noncopyable
 {
 public:
     TBAG_CONSTEXPR Formatter()

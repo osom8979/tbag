@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/log/sink/Sink.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/log/sink/Sink.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,27 +31,22 @@ namespace sink {
  * @author zer0
  * @date   2016-07-17
  */
-template <typename Mutex = lock::FakeLock, typename CharType = char>
-class NullSink : public BaseSink<Mutex, CharType>, public Noncopyable
+class NullSink : public Sink<lock::FakeLock>, public Noncopyable
 {
 public:
-    using Parent  = BaseSink<Mutex, CharType>;
-    using Message = typename Parent::Message;
+    using Parent = Sink<lock::FakeLock>;
 
 public:
-    NullSink() = default;
-    virtual ~NullSink() = default;
+    NullSink()
+    { /* EMPTY. */ }
+    virtual ~NullSink()
+    { /* EMPTY. */ }
 
 public:
-    virtual void writeReal(std::basic_string<CharType> const & msg) override
-    {
-        // EMPTY.
-    }
-
+    virtual void writeReal(std::string const & msg) override
+    { /* EMPTY. */ }
     virtual void flushReal() override
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 };
 
 } // namespace sink

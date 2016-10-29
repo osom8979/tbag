@@ -15,12 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/log/sink/Sink.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/log/sink/Sink.hpp>
 
 #include <fstream>
-#include <type_traits>
-#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,44 +33,37 @@ namespace sink {
  * @author zer0
  * @date   2016-07-10
  */
-template <typename Mutex = lock::FakeLock, typename CharType = char>
-class OfstreamSink : public BaseSink<Mutex, CharType>, public Noncopyable
+template <typename MutexType = lock::FakeLock>
+class OfstreamSink : public Sink<MutexType>, public Noncopyable
 {
 public:
-    using Parent  = BaseSink<Mutex, CharType>;
-    using Stream  = std::basic_ofstream<CharType>;
-    using Message = typename Parent::Message;
-    using String  = typename Parent::String;
-
-    static_assert(std::is_same<typename Stream::char_type, CharType>::value
-            , "Stream::char_type and CharType are not same type");
+    using Parent   = Sink<MutexType>;
+    using Ofstream = std::ofstream;
 
 public:
-    Stream _stream;
+    Ofstream _ofstream;
 
 public:
-    OfstreamSink(String const & path, bool force_flush = false)
-            : Parent(force_flush), _stream(path /*, std::ios_base::binary | std::ios_base::out */)
-    {
-        // EMPTY.
-    }
+    OfstreamSink(std::string const & path, bool force_flush = false)
+            : Parent(force_flush), _ofstream(path /*, std::ios_base::binary | std::ios_base::out */)
+    { /* EMPTY. */ }
 
     virtual ~OfstreamSink()
     {
-        if (_stream.is_open() == true) {
-            _stream.close();
+        if (_ofstream.is_open() == true) {
+            _ofstream.close();
         }
     }
 
 public:
-    virtual void writeReal(String const & msg) override
+    virtual void writeReal(std::string const & msg) override
     {
-        _stream.write(msg.c_str(), msg.size());
+        _ofstream.write(msg.c_str(), msg.size());
     }
 
     virtual void flushReal() override
     {
-        _stream.flush();
+        _ofstream.flush();
     }
 };
 
