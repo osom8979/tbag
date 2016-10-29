@@ -118,7 +118,7 @@ Flags::Flag Flags::convertFlag(std::string const & str)
 
 std::vector<std::string> Flags::splitTokens(std::string const & args)
 {
-    std::string trim_right_args = BaseStrings<char>::trimRight(args);
+    std::string trim_right_args = trimRight(args);
     std::size_t args_size = trim_right_args.size();
     std::size_t all_process_count     = 0U;
     std::size_t current_process_count = 0U;
@@ -135,7 +135,7 @@ std::vector<std::string> Flags::splitTokens(std::string const & args)
 
 std::string Flags::splitFirst(std::string const & args, std::size_t * process_count)
 {
-    std::string trim_left_args = BaseStrings<char>::trimLeft(args);
+    std::string trim_left_args = trimLeft(args);
     if (trim_left_args.empty()) {
         return std::string();
     }

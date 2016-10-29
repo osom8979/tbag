@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/string/Arguments.hpp>
 #include <libtbag/string/Flags.hpp>
 

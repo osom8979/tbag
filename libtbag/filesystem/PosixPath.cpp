@@ -50,7 +50,7 @@ bool PosixPath::isProhibitedFilename(std::string const & path) TBAG_NOEXCEPT
 
 std::string PosixPath::removeLastSeparator(std::string const & path)
 {
-    return Strings::removeRegex(path, getRemoveSeparatorRegex() + '$');
+    return string::removeRegex(path, getRemoveSeparatorRegex() + '$');
 }
 
 std::string PosixPath::makePreferred(std::string const & path)
@@ -60,7 +60,7 @@ std::string PosixPath::makePreferred(std::string const & path)
 
 std::string PosixPath::removeDuplicateSeparators(std::string const & path)
 {
-    return Strings::replaceRegex(path, getRemoveSeparatorRegex(), getPathSeparator());
+    return string::replaceRegex(path, getRemoveSeparatorRegex(), getPathSeparator());
 }
 
 std::string PosixPath::getNative(std::string const & path)

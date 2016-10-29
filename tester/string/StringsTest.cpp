@@ -78,7 +78,7 @@ TEST(StringsTest, SplitMatch)
     std::string match = R"(TEST[^ ]*)";
     std::string content = std::string("TEST1 TEST10 TEST");
 
-    std::vector<std::string> list = Strings::splitMatch(content, std::regex(match));
+    std::vector<std::string> list = splitMatch(content, std::regex(match));
     ASSERT_EQ(3U, list.size());
     ASSERT_STREQ("TEST1", list[0].c_str());
     ASSERT_STREQ("TEST10", list[1].c_str());
@@ -90,7 +90,7 @@ TEST(StringsTest, IsMatch)
     std::string content = "https://www.blackhole-project.com:8080/test";
     std::string match   = R"(^https?:\/\/[a-zA-Z0-9\.\-]+(:[0-9]+)?\/.*$)";
 
-    ASSERT_TRUE(Strings::isMatch(content, match));
+    ASSERT_TRUE(isMatch(content, match));
 }
 
 TEST(StringsTest, TrimLeft)
@@ -101,11 +101,11 @@ TEST(StringsTest, TrimLeft)
     std::string t4 = "T EST";
     std::string t5 = "";
 
-    ASSERT_STREQ( "TEST", Strings::trimLeft(t1).c_str());
-    ASSERT_STREQ(     "", Strings::trimLeft(t2).c_str());
-    ASSERT_STREQ(  "T  ", Strings::trimLeft(t3).c_str());
-    ASSERT_STREQ("T EST", Strings::trimLeft(t4).c_str());
-    ASSERT_STREQ(     "", Strings::trimLeft(t5).c_str());
+    ASSERT_STREQ( "TEST", trimLeft(t1).c_str());
+    ASSERT_STREQ(     "", trimLeft(t2).c_str());
+    ASSERT_STREQ(  "T  ", trimLeft(t3).c_str());
+    ASSERT_STREQ("T EST", trimLeft(t4).c_str());
+    ASSERT_STREQ(     "", trimLeft(t5).c_str());
 }
 
 TEST(StringsTest, TrimRight)
@@ -116,11 +116,11 @@ TEST(StringsTest, TrimRight)
     std::string t4 = "TES T";
     std::string t5 = "";
 
-    ASSERT_STREQ( "TEST", Strings::trimRight(t1).c_str());
-    ASSERT_STREQ(     "", Strings::trimRight(t2).c_str());
-    ASSERT_STREQ(  "  T", Strings::trimRight(t3).c_str());
-    ASSERT_STREQ("TES T", Strings::trimRight(t4).c_str());
-    ASSERT_STREQ(     "", Strings::trimRight(t5).c_str());
+    ASSERT_STREQ( "TEST", trimRight(t1).c_str());
+    ASSERT_STREQ(     "", trimRight(t2).c_str());
+    ASSERT_STREQ(  "  T", trimRight(t3).c_str());
+    ASSERT_STREQ("TES T", trimRight(t4).c_str());
+    ASSERT_STREQ(     "", trimRight(t5).c_str());
 }
 
 TEST(StringsTest, Trim)
@@ -132,11 +132,11 @@ TEST(StringsTest, Trim)
     std::string t5 = "TE ST";
     std::string t6 = "";
 
-    ASSERT_STREQ( "TEST", Strings::trim(t1).c_str());
-    ASSERT_STREQ(     "", Strings::trim(t2).c_str());
-    ASSERT_STREQ(    "T", Strings::trim(t3).c_str());
-    ASSERT_STREQ(    "T", Strings::trim(t4).c_str());
-    ASSERT_STREQ("TE ST", Strings::trim(t5).c_str());
-    ASSERT_STREQ(     "", Strings::trim(t6).c_str());
+    ASSERT_STREQ( "TEST", trim(t1).c_str());
+    ASSERT_STREQ(     "", trim(t2).c_str());
+    ASSERT_STREQ(    "T", trim(t3).c_str());
+    ASSERT_STREQ(    "T", trim(t4).c_str());
+    ASSERT_STREQ("TE ST", trim(t5).c_str());
+    ASSERT_STREQ(     "", trim(t6).c_str());
 }
 

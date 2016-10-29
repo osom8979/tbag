@@ -51,7 +51,7 @@ bool WindowsPath::isProhibitedFilename(std::string const & path)
 
 std::string WindowsPath::removeLastSeparator(std::string const & path)
 {
-    return Strings::removeRegex(path, getRemoveSeparatorRegex() + '$');
+    return string::removeRegex(path, getRemoveSeparatorRegex() + '$');
 }
 
 std::string WindowsPath::getReplaceStringOfPosix()
@@ -61,12 +61,12 @@ std::string WindowsPath::getReplaceStringOfPosix()
 
 std::string WindowsPath::makePreferred(std::string const & path)
 {
-    return Strings::replaceRegex(path, getReplaceStringOfPosix(), getPathSeparator());
+    return string::replaceRegex(path, getReplaceStringOfPosix(), getPathSeparator());
 }
 
 std::string WindowsPath::removeDuplicateSeparators(std::string const & path)
 {
-    return Strings::replaceRegex(path, getRemoveSeparatorRegex(), getPathSeparator());
+    return string::replaceRegex(path, getRemoveSeparatorRegex(), getPathSeparator());
 }
 
 std::string WindowsPath::getNative(std::string const & path)
@@ -76,7 +76,7 @@ std::string WindowsPath::getNative(std::string const & path)
 
 std::string WindowsPath::getGeneric(std::string const & path)
 {
-    return Strings::replaceRegex(getNative(path), getRemoveSeparatorRegex(), getGenericPathSeparatorString());
+    return string::replaceRegex(getNative(path), getRemoveSeparatorRegex(), getGenericPathSeparatorString());
 }
 
 std::string WindowsPath::getRootDir(std::string const & path)
