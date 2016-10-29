@@ -77,7 +77,7 @@ inline const char * const getLogString(LogLevel level) TBAG_NOEXCEPT
  * @author zer0
  * @date   2016-07-09
  */
-struct Severity
+class Severity
 {
 public:
     using String = std::basic_string<char>;
