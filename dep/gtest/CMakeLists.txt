@@ -34,6 +34,10 @@ prepend (LIB_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
         gtest-test-part.cc)
 set (MAIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest_main.cc")
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options (-Wno-unused-const-variable)
+endif ()
+
 #add_library (gtest      STATIC ${LIB_SRCS})
 add_library  (gtest_main STATIC ${LIB_SRCS} ${MAIN_SRCS})
 
