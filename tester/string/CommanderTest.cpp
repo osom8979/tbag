@@ -25,13 +25,13 @@ TEST(CommanderTest, Default)
     std::string test1_result;
     std::string test2_result;
 
-    Commander commander([&](Commander::Arguments const & args){
+    Commander commander([&](Arguments const & args){
         default_result = args.get(0);
     });
-    commander.insert("test1", [&](Commander::Arguments const & args){
+    commander.insert("test1", [&](Arguments const & args){
         test1_result = args.get(0);
     });
-    commander.insert("test2", [&](Commander::Arguments const & args){
+    commander.insert("test2", [&](Arguments const & args){
         test2_result = args.get(1);
     });
 

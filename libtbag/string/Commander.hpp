@@ -38,9 +38,6 @@ namespace string {
 class Commander : public Noncopyable
 {
 public:
-    using Arguments  = libtbag::string::Arguments;
-    using Flags      = libtbag::string::Flags;
-
     using Callback    = std::function<void(Arguments const &)>;
     using CommandMap  = std::map<std::string, Callback>;
     using CommandPair = typename CommandMap::value_type;
@@ -75,50 +72,17 @@ public:
     { _default = callback; }
 
 public:
-    void clear()
-    {
-        _default = Callback();
-        _commands.clear();
-    }
-
-    bool insert(std::string const & command, Callback const & callback)
-    {
-        return _commands.insert(CommandPair(command, callback)).second;
-    }
+    void clear();
+    bool insert(std::string const & command, Callback const & callback);
 
 public:
-    std::vector<Arguments> parseArguments(std::string const & arguments)
-    {
-        Flags const FLAGS(arguments);
-        std::size_t const SIZE = FLAGS.size();
-
-        std::vector<Arguments> result;
-
-        for (std::size_t index = 0; index < SIZE; ++index) {
-            result.push_back(Arguments(FLAGS.at(index).key, FLAGS.at(index).value));
-        }
-
-        return result;
-    }
+    std::vector<Arguments> parseArguments(std::string const & arguments);
 
 public:
-    void request(std::string const & arguments)
-    {
-        for (auto & cursor : parseArguments(arguments)) {
-            onRequest(cursor);
-        }
-    }
+    void request(std::string const & arguments);
 
 public:
-    virtual void onRequest(Arguments const & arguments)
-    {
-        auto find_itr = _commands.find(arguments.getName());
-        if (find_itr != _commands.end() && static_cast<bool>(find_itr->second)) {
-            find_itr->second(arguments);
-        } else if (static_cast<bool>(_default)) {
-            _default(arguments);
-        }
-    }
+    virtual void onRequest(Arguments const & arguments);
 };
 
 } // namespace string
