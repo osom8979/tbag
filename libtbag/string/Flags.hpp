@@ -34,56 +34,49 @@ namespace string {
  * @author zer0
  * @date   2016-05-03
  */
-template <typename CharType = char>
-class BaseFlags
+class Flags
 {
-public:
-    using Value  = CharType;
-    using String = std::basic_string<Value>;
-
 public:
     struct Flag
     {
-        String key;
-        String value;
+        std::string key;
+        std::string value;
 
-        Flag(String k = "", String v = "") : key(k), value(v)
+        Flag() : key(), value()
+        { /* EMPTY. */ }
+        Flag(std::string k) : key(k), value()
+        { /* EMPTY. */ }
+        Flag(std::string k, std::string v) : key(k), value(v)
         { /* EMPTY. */ }
     };
 
+    using FlagVector = std::vector<Flag>;
+
 public:
-    using FlagVector   = std::vector<Flag>;
-    using StringVector = std::vector<String>;
+    inline static TBAG_CONSTEXPR char const * const getDefaultPrefix() TBAG_NOEXCEPT
+    { return "--"; }
+    inline static TBAG_CONSTEXPR char const * const getDefaultDelimiter() TBAG_NOEXCEPT
+    { return "="; }
 
 private:
     FlagVector _flags;
 
 public:
-    BaseFlags(int argc, Value ** argv)
-    {
-        parse(argc, argv);
-    }
-
-    BaseFlags(String const & args, String const & prefix, String const & delimiter)
-    {
-        parse(args, prefix, delimiter);
-    }
-
-    BaseFlags(String const & args)
-    {
-        parse(args);
-    }
+    Flags() = default;
+    ~Flags() = default;
 
 public:
-    BaseFlags() = default;
-    ~BaseFlags() = default;
+    Flags(int argc, char ** argv);
+    Flags(std::string const & args, std::string const & prefix, std::string const & delimiter);
+    Flags(std::string const & args);
 
-    BaseFlags(BaseFlags const & obj) = default;
-    BaseFlags & operator =(BaseFlags const & obj) = default;
+public:
+    Flags(Flags const & obj) = default;
+    Flags & operator =(Flags const & obj) = default;
 
 #if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    BaseFlags(BaseFlags && obj) = default;
-    BaseFlags & operator =(BaseFlags && obj) = default;
+    Flags(Flags && obj) = default;
+    Flags & operator =(Flags && obj) = default;
 #endif
 
 public:
@@ -105,187 +98,41 @@ public:
     { return _flags.at(index); }
 
 public:
-    inline Flag find(typename FlagVector::const_iterator itr) const
-    {
-        if (itr == _flags.end()) {
-            return Flag();
-        }
-        return *itr;
-    }
-
-    inline Flag findWithKey(String const & key) const
-    {
-        return find(std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
-            return (flag.key == key);
-        }));
-    }
-
-    inline Flag findWithValue(String const & value) const
-    {
-        return find(std::find_if(_flags.begin(), _flags.end(), [&value](Flag const & flag) -> bool {
-            return (flag.value == value);
-        }));
-    }
+    Flag find(typename FlagVector::const_iterator itr) const;
+    Flag findWithKey(std::string const & key) const;
+    Flag findWithValue(std::string const & value) const;
 
 public:
-    inline bool existsWithKey(String const & key) const
-    {
-        return !findWithKey(key).key.empty();
-    }
-
-    inline bool existsWithValue(String const & value) const
-    {
-        return !findWithValue(value).value.empty();
-    }
+    bool existsWithKey(std::string const & key) const;
+    bool existsWithValue(std::string const & value) const;
 
 public:
-    inline StringVector getUnnamedValues() const
-    {
-        StringVector result;
-        for (auto & cursor : _flags) {
-            if (cursor.key == "" && cursor.value.empty() == false) {
-                result.push_back(cursor.value);
-            }
-        }
-        return result;
-    }
+    std::vector<std::string> getUnnamedValues() const;
 
 public:
-    void parse(int argc, Value ** argv)
-    {
-        for (int index = 0; index < argc; ++index) {
-            push(convertFlag(String(argv[index])));
-        }
-    }
-
-    void parse(String const & args, String const & prefix, String const & delimiter)
-    {
-        for (auto & cursor : splitTokens(args)) {
-            push(convertFlag(cursor, prefix, delimiter));
-        }
-    }
-
-    void parse(String const & args)
-    {
-        parse(args, getDefaultPrefix(), getDefaultDelimiter());
-    }
+    void parse(int argc, char ** argv);
+    void parse(std::string const & args, std::string const & prefix, std::string const & delimiter);
+    void parse(std::string const & args);
 
 // ---------------
 // Static methods.
 // ---------------
 
 public:
-    static Flag convertFlag(String const & str, String const & prefix, String const & delimiter)
-    {
-        if (str.substr(0, prefix.size()) == prefix) {
-            // ENABLE KEY.
-            std::size_t delimiter_pos = str.find(delimiter);
-            String key = str.substr(prefix.size(), delimiter_pos - prefix.size());
-
-            if (delimiter_pos == String::npos) {
-                // ONLY KEY.
-                return Flag(key);
-            } else {
-                // KEY & VALUE.
-                String value = str.substr(delimiter_pos + 1);
-                return Flag(key, value);
-            }
-        }
-
-        // ONLY VALUE.
-        return Flag(String(), String(str));
-    }
-
-    static Flag convertFlag(String const & str)
-    {
-        return convertFlag(str, getDefaultPrefix(), getDefaultDelimiter());
-    }
-
-    static TBAG_CONSTEXPR String getDefaultPrefix()
-    {
-        return CHAR_OR_WIDECHAR(Value, "--");
-    }
-
-    static TBAG_CONSTEXPR String getDefaultDelimiter()
-    {
-        return CHAR_OR_WIDECHAR(Value, "=");
-    }
+    static Flag convertFlag(std::string const & str, std::string const & prefix, std::string const & delimiter);
+    static Flag convertFlag(std::string const & str);
 
 public:
-    static std::vector<String> splitTokens(String const & args)
-    {
-        String trim_right_args = BaseStrings<Value>::trimRight(args);
-        std::size_t args_size = trim_right_args.size();
-        std::size_t all_process_count     = 0U;
-        std::size_t current_process_count = 0U;
-
-        std::vector<String> result;
-
-        while (all_process_count < args_size) {
-            result.push_back(splitFirst(trim_right_args.substr(all_process_count), &current_process_count));
-            all_process_count += current_process_count;
-        }
-
-        return result;
-    }
+    static std::vector<std::string> splitTokens(std::string const & args);
 
 public:
-    static TBAG_CONSTEXPR Value const        ESCAPE = '\\';
-    static TBAG_CONSTEXPR Value const DOUBLE_QUOTES = '"';
-    static TBAG_CONSTEXPR Value const SINGLE_QUOTES = '\'';
-    static TBAG_CONSTEXPR Value const  SPACE_QUOTES = ' ';
+    static TBAG_CONSTEXPR char const        ESCAPE = '\\';
+    static TBAG_CONSTEXPR char const DOUBLE_QUOTES = '"';
+    static TBAG_CONSTEXPR char const SINGLE_QUOTES = '\'';
+    static TBAG_CONSTEXPR char const  SPACE_QUOTES = ' ';
 
-    static String splitFirst(String const & args, std::size_t * process_count = nullptr)
-    {
-        String trim_left_args = BaseStrings<Value>::trimLeft(args);
-        if (trim_left_args.empty()) {
-            return String();
-        }
-
-        String result;
-
-        auto itr = trim_left_args.begin();
-
-        Value quotation_mark;
-        if (*itr == DOUBLE_QUOTES) {
-            quotation_mark = DOUBLE_QUOTES;
-        } else if (*itr == SINGLE_QUOTES) {
-            quotation_mark = SINGLE_QUOTES;
-        } else {
-            quotation_mark = SPACE_QUOTES;
-            result.push_back(*itr);
-        }
-        ++itr;
-
-        bool force_push_back = false;
-        for (; itr != trim_left_args.end(); ++itr) {
-            if (force_push_back) {
-                result.push_back(*itr);
-                force_push_back = false;
-            } else {
-                if (*itr == ESCAPE) {
-                    // Skip, escape character (\).
-                    force_push_back = true;
-                } else if (*itr == quotation_mark) {
-                    break;
-                } else {
-                    result.push_back(*itr);
-                }
-            }
-        }
-
-        if (process_count != nullptr) {
-            *process_count = (args.size() - trim_left_args.size())      // Trim size.
-                           + std::distance(trim_left_args.begin(), itr) // Size of string processing.
-                           + 1; // Last, quotation_mark size.
-        }
-
-        return result;
-    }
+    static std::string splitFirst(std::string const & args, std::size_t * process_count = nullptr);
 };
-
-using Flags = BaseFlags<char>;
-using WideFlags = BaseFlags<wchar_t>;
 
 } // namespace string
 

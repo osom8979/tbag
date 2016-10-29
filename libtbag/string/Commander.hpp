@@ -39,7 +39,7 @@ class Commander : public Noncopyable
 {
 public:
     using Arguments  = libtbag::string::Arguments;
-    using Flags      = libtbag::string::BaseFlags<char>;
+    using Flags      = libtbag::string::Flags;
 
     using Callback    = std::function<void(Arguments const &)>;
     using CommandMap  = std::map<std::string, Callback>;
