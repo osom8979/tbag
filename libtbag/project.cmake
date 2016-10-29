@@ -20,10 +20,6 @@ list (APPEND TBAG_PROJECT_DEPENDENCIES  icuuc icui18n)
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/icu/common
                                         ${CMAKE_SOURCE_DIR}/dep/icu/i18n)
 
-## dep/lua
-list (APPEND TBAG_PROJECT_DEPENDENCIES  lua)
-list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/lua/include)
-
 ## dep/sqlite3
 list (APPEND TBAG_PROJECT_DEPENDENCIES  sqlite3)
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/sqlite3)
@@ -32,12 +28,20 @@ list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/sqlite3)
 list (APPEND TBAG_PROJECT_DEPENDENCIES  uv)
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/uv/include)
 
+## dep/lua
+if (USE_LUA)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES  lua)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/lua/include)
+endif ()
+
 ## whole-archive files.
 tbag_modules__add_whole_archive ($<TARGET_FILE:icuuc>)
 tbag_modules__add_whole_archive ($<TARGET_FILE:icui18n>)
-tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
 tbag_modules__add_whole_archive ($<TARGET_FILE:sqlite3>)
 tbag_modules__add_whole_archive ($<TARGET_FILE:uv>)
+if (USE_LUA)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
+endif ()
 
 ## external libraries.
 if (WIN32)

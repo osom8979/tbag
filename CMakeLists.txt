@@ -48,11 +48,15 @@ endif ()
 tbag_config__default_generate_c_header ()
 
 ## Library subproject.
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
+
+option (USE_LUA "Don't use the LUA library." OFF)
+if (USE_LUA)
+    add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
+endif ()
 
 ## Test subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbproc)
