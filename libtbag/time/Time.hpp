@@ -37,23 +37,7 @@ namespace time {
  *   YYYY-MM-DDThh:mm:ss
  *  @endcode
  */
-TBAG_CONSTEXPR char    const * const TIMESTAMP_LONG_FORMAT      =  "%Y-%m-%dT%H:%M:%S";
-TBAG_CONSTEXPR wchar_t const * const WIDE_TIMESTAMP_LONG_FORMAT = L"%Y-%m-%dT%H:%M:%S";
-
-template <typename CharType = char>
-TBAG_CONSTEXPR CharType const * const getDefaultTimestampLongFormat() TBAG_NOEXCEPT;
-
-template <>
-inline TBAG_CONSTEXPR char const * const getDefaultTimestampLongFormat<char>() TBAG_NOEXCEPT
-{
-    return TIMESTAMP_LONG_FORMAT;
-}
-
-template <>
-inline TBAG_CONSTEXPR wchar_t const * const getDefaultTimestampLongFormat<wchar_t>() TBAG_NOEXCEPT
-{
-    return WIDE_TIMESTAMP_LONG_FORMAT;
-}
+TBAG_CONSTEXPR char const * const TIMESTAMP_LONG_FORMAT = "%Y-%m-%dT%H:%M:%S";
 
 /**
  * Short date/time format.
@@ -66,23 +50,7 @@ inline TBAG_CONSTEXPR wchar_t const * const getDefaultTimestampLongFormat<wchar_
  *   YYYYMMDDThhmmss
  *  @endcode
  */
-TBAG_CONSTEXPR char    const * const TIMESTAMP_SHORT_FORMAT      =  "%Y%m%dT%H%M%S";
-TBAG_CONSTEXPR wchar_t const * const WIDE_TIMESTAMP_SHORT_FORMAT = L"%Y%m%dT%H%M%S";
-
-template <typename CharType>
-TBAG_CONSTEXPR CharType const * const getDefaultTimestampShortFormat() TBAG_NOEXCEPT;
-
-template <>
-inline TBAG_CONSTEXPR char const * const getDefaultTimestampShortFormat<char>() TBAG_NOEXCEPT
-{
-    return TIMESTAMP_SHORT_FORMAT;
-}
-
-template <>
-inline TBAG_CONSTEXPR wchar_t const * const getDefaultTimestampShortFormat<wchar_t>() TBAG_NOEXCEPT
-{
-    return WIDE_TIMESTAMP_SHORT_FORMAT;
-}
+TBAG_CONSTEXPR char const * const TIMESTAMP_SHORT_FORMAT = "%Y%m%dT%H%M%S";
 
 /** Years since 1900 */
 TBAG_CONSTEXPR int const YEARS_SINCE = 1900;
@@ -93,26 +61,8 @@ TBAG_CONSTEXPR int const MONTHS_SINCE = 1;
 /** millisecond part of the second 0-999. */
 TBAG_EXPORTS int getMillisec(std::chrono::system_clock::time_point const & time);
 
-TBAG_EXPORTS std::string  getMillisecMbs(std::chrono::system_clock::time_point const & time);
-TBAG_EXPORTS std::wstring getMillisecWcs(std::chrono::system_clock::time_point const & time);
-
-template <typename CharType>
-void getMillisecString(std::chrono::system_clock::time_point const & time
-                     , std::basic_string<CharType> & result);
-
-template <>
-inline void getMillisecString<char>(std::chrono::system_clock::time_point const & time
-                                  , std::basic_string<char> & result)
-{
-    result = getMillisecMbs(time);
-}
-
-template <>
-inline void getMillisecString<wchar_t>(std::chrono::system_clock::time_point const & time
-                                     , std::basic_string<wchar_t> & result)
-{
-    result = getMillisecWcs(time);
-}
+TBAG_EXPORTS std::string getMillisecMbs(std::chrono::system_clock::time_point const & time);
+TBAG_EXPORTS void getMillisecString(std::chrono::system_clock::time_point const & time, std::string & result);
 
 TBAG_EXPORTS std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT;
 TBAG_EXPORTS time_t getTime(std::chrono::system_clock::time_point const & time_point) TBAG_NOEXCEPT;
@@ -122,8 +72,7 @@ TBAG_EXPORTS time_t getCurrentTime() TBAG_NOEXCEPT;
 TBAG_EXPORTS bool getGmtTime(time_t const & t, tm * output);
 TBAG_EXPORTS bool getLocalTime(time_t const & t, tm * output);
 
-TBAG_EXPORTS std::string  getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
-TBAG_EXPORTS std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size = 128);
+TBAG_EXPORTS std::string getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
 
 } // namespace time
 

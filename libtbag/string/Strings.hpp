@@ -32,9 +32,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-static TBAG_CONSTEXPR char const CHAR_SPACE  = ' ';
-static TBAG_CONSTEXPR char const CHAR_TAB    = '\t';
-static TBAG_CONSTEXPR char const CHAR_RETURN = '\n';
+TBAG_CONSTEXPR char const CHAR_SPACE  = ' ';
+TBAG_CONSTEXPR char const CHAR_TAB    = '\t';
+TBAG_CONSTEXPR char const CHAR_RETURN = '\n';
 
 template <typename T>
 TBAG_CONSTEXPR T const * charOrWidechar(char const * c, wchar_t const * w);

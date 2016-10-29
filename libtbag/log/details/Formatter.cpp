@@ -33,7 +33,7 @@ std::string getDefaultPrefix()
     tm time = {0,};
 
     if (time::getLocalTime(time::getTime(tp), &time)) {
-        ss << time::getFormatString(time::getDefaultTimestampLongFormat(), &time)
+        ss << time::getFormatString(time::TIMESTAMP_LONG_FORMAT, &time)
            << libtbag::log::details::getMillisecFormat(tp); // Milliseconds.
     } else {
         ss << "SINCE" << tp.time_since_epoch().count();

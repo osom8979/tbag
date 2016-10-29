@@ -78,6 +78,32 @@ public:
 
 } // namespace impl
 
+int getMillisec(std::chrono::system_clock::time_point const & time)
+{
+    std::chrono::system_clock::duration epoch = time.time_since_epoch();
+    epoch -= std::chrono::duration_cast<std::chrono::seconds>(epoch);
+
+    // It does not work on some platforms:
+    // return static_cast<int>(epoch / std::chrono::milliseconds(1));
+    return std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+}
+
+std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)
+{
+    std::string millisec = std::to_string(getMillisec(time));
+    switch (millisec.size()) {
+    case 2:  return std::string(  "0") + millisec;
+    case 1:  return std::string( "00") + millisec;
+    case 0:  return std::string("000") + millisec;
+    default: return millisec;
+    }
+}
+
+void getMillisecString(std::chrono::system_clock::time_point const & time, std::string & result)
+{
+    result = getMillisecMbs(time);
+}
+
 std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT
 {
     return std::chrono::system_clock::now();
@@ -114,57 +140,6 @@ std::string getFormatString(std::string const & format, tm const * t, std::size_
         return getFormatString(format, t, allocate_size * 2);
     }
     return std::string(buffer.begin(), buffer.begin() + length);
-}
-
-std::wstring getFormatString(std::wstring const & format, tm const * t, std::size_t allocate_size)
-{
-    // The expected size of the buffer.
-    std::vector<wchar_t> buffer;
-    buffer.resize(allocate_size, static_cast<wchar_t>(0x00));
-
-    std::size_t length = std::wcsftime(&buffer[0], allocate_size, format.c_str(), t);
-    if (length >= allocate_size) {
-        return getFormatString(format, t, allocate_size * 2);
-    }
-    return std::wstring(buffer.begin(), buffer.begin() + length);
-}
-
-int getMillisec(std::chrono::system_clock::time_point const & time)
-{
-    std::chrono::system_clock::duration epoch = time.time_since_epoch();
-    epoch -= std::chrono::duration_cast<std::chrono::seconds>(epoch);
-
-    // It does not work on some platforms:
-    // return static_cast<int>(epoch / std::chrono::milliseconds(1));
-
-    return std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
-}
-
-/* inline */ namespace impl {
-
-template <typename CharType
-        , typename StringType = std::basic_string<CharType> >
-static inline StringType
-getPrecisionStringForMillisec(StringType const & millisec_string)
-{
-    switch (millisec_string.size()) {
-    case 2:  return StringType() + CHAR_OR_WIDECHAR(CharType,   "0") + millisec_string;
-    case 1:  return StringType() + CHAR_OR_WIDECHAR(CharType,  "00") + millisec_string;
-    case 0:  return StringType() + CHAR_OR_WIDECHAR(CharType, "000") + millisec_string;
-    default: return millisec_string;
-    }
-}
-
-} // inline namespace impl
-
-std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)
-{
-    return impl::getPrecisionStringForMillisec<char>(std::to_string(getMillisec(time)));
-}
-
-std::wstring getMillisecWcs(std::chrono::system_clock::time_point const & time)
-{
-    return impl::getPrecisionStringForMillisec<wchar_t>(std::to_wstring(getMillisec(time)));
 }
 
 } // namespace time

@@ -57,7 +57,7 @@ public:
         tm time = {0,};
 
         if (time::getLocalTime(time::getTime(tp), &time)) {
-            ss << time::getFormatString(time::getDefaultTimestampShortFormat<char>(), &time);
+            ss << time::getFormatString(time::TIMESTAMP_SHORT_FORMAT, &time);
         } else {
             ss << "SINCE" << tp.time_since_epoch().count();
         }
