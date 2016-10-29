@@ -36,7 +36,7 @@ namespace string {
  * @author zer0
  * @date   2016-10-01
  */
-class Commander : public Noncopyable
+class TBAG_EXPORTS Commander : public Noncopyable
 {
 public:
     using Callback    = std::function<void(Arguments const &)>;

@@ -80,29 +80,29 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
  * @return
  *  Token vector.
  */
-std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
+TBAG_EXPORTS std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
 
 /**
  * Thread ID to string.
  */
-std::string convertStringWithThreadId(std::thread::id const & id);
+TBAG_EXPORTS std::string convertStringWithThreadId(std::thread::id const & id);
 
 /**
  * Regex based token.
  */
-std::vector<std::string> splitMatch(std::string const & source, std::regex const & match);
-std::vector<std::string> splitMatch(std::string const & source, std::string const & match);
+TBAG_EXPORTS std::vector<std::string> splitMatch(std::string const & source, std::regex const & match);
+TBAG_EXPORTS std::vector<std::string> splitMatch(std::string const & source, std::string const & match);
 
 // Regexp utilities.
-std::string replaceRegex(std::string const & path, std::string const & regex, std::string const & replace);
-std::string removeRegex(std::string const & path, std::string const & regex);
+TBAG_EXPORTS std::string replaceRegex(std::string const & path, std::string const & regex, std::string const & replace);
+TBAG_EXPORTS std::string removeRegex(std::string const & path, std::string const & regex);
 
-bool isMatch(std::string const & original, std::regex const & regex);
-bool isMatch(std::string const & original, std::string const & regex);
+TBAG_EXPORTS bool isMatch(std::string const & original, std::regex const & regex);
+TBAG_EXPORTS bool isMatch(std::string const & original, std::string const & regex);
 
-std::string trimLeft(std::string const & str);
-std::string trimRight(std::string const & str);
-std::string trim(std::string const & str);
+TBAG_EXPORTS std::string trimLeft(std::string const & str);
+TBAG_EXPORTS std::string trimRight(std::string const & str);
+TBAG_EXPORTS std::string trim(std::string const & str);
 
 } // namespace string
 

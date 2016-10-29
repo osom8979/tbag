@@ -34,7 +34,7 @@ namespace string {
  * @author zer0
  * @date   2016-09-23
  */
-class Arguments
+class TBAG_EXPORTS Arguments
 {
 public:
     inline static TBAG_CONSTEXPR char const * const getDefaultDelimiter() TBAG_NOEXCEPT
