@@ -17,8 +17,12 @@ tbag_modules__apply_dep_lmdb    ()
 tbag_modules__apply_dep_lzma    ()
 tbag_modules__apply_dep_sqlite3 ()
 tbag_modules__apply_dep_uv      ()
+
 if (USE_LUA)
     tbag_modules__apply_dep_lua ()
+endif ()
+if (USE_JSONCPP)
+    tbag_modules__apply_dep_jsoncpp ()
 endif ()
 
 #tbag_modules__apply_pch (${CMAKE_SOURCE_DIR}/libtbag/config.h)
