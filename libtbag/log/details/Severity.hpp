@@ -28,6 +28,7 @@ namespace log     {
 namespace details {
 
 TBAG_CONSTEXPR char const * const DEFAULT_SEVERITY [] = {
+        "OFF"           , // Hide all messages.
         "EMERGENCY"     , // System is unusable.
         "ALERT"         , // Action must be taken immediately.
         "CRITICAL"      , // Critical conditions.
@@ -36,7 +37,6 @@ TBAG_CONSTEXPR char const * const DEFAULT_SEVERITY [] = {
         "NOTICE"        , // Normal but significant condition.
         "INFORMATIONAL" , // Informational messages.
         "DEBUG"         , // Debug-level messages.
-        "OFF"           , // Hide all messages.
 };
 
 int const LOG_SEVERITY_COUNT = sizeof(DEFAULT_SEVERITY) / sizeof(DEFAULT_SEVERITY[0]);
@@ -47,15 +47,15 @@ char const * const UNKNOWN_LOG_SEVERITY_STRING = "UNKNOWN";
  */
 enum class LogLevel : int
 {
-    LEVEL_EMERGENCY = 0,
-    LEVEL_ALERT        ,
-    LEVEL_CRITICAL     ,
-    LEVEL_ERROR        ,
-    LEVEL_WARNING      ,
-    LEVEL_NOTICE       ,
-    LEVEL_INFO         ,
-    LEVEL_DEBUG        ,
-    LEVEL_OFF          ,
+    LEVEL_OFF   = 0,
+    LEVEL_EMERGENCY,
+    LEVEL_ALERT    ,
+    LEVEL_CRITICAL ,
+    LEVEL_ERROR    ,
+    LEVEL_WARNING  ,
+    LEVEL_NOTICE   ,
+    LEVEL_INFO     ,
+    LEVEL_DEBUG
 };
 
 inline const char * const getLogString(int level) TBAG_NOEXCEPT

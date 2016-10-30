@@ -14,10 +14,10 @@ using namespace libtbag::log::details;
 
 TEST(SeverityTest, Default)
 {
-    ASSERT_EQ(LOG_SEVERITY_COUNT, static_cast<int>(LogLevel::LEVEL_OFF) + 1);
+    ASSERT_EQ(LOG_SEVERITY_COUNT, static_cast<int>(LogLevel::LEVEL_DEBUG) + 1);
     ASSERT_STREQ(DEFAULT_SEVERITY[static_cast<int>(LogLevel::LEVEL_EMERGENCY)], getLogString(LogLevel::LEVEL_EMERGENCY));
     ASSERT_STREQ(UNKNOWN_LOG_SEVERITY_STRING, getLogString(-1));
-    ASSERT_STREQ(UNKNOWN_LOG_SEVERITY_STRING, getLogString(static_cast<int>(LogLevel::LEVEL_OFF) + 1));
+    ASSERT_STREQ(UNKNOWN_LOG_SEVERITY_STRING, getLogString(static_cast<int>(LogLevel::LEVEL_DEBUG) + 1));
 }
 
 TEST(SeverityTest, Severity)

@@ -32,6 +32,16 @@ TEST(LogTest, Console)
     tDLogI("CHANGE LOG LEVEL: info.");
     tDLogD("CHANGE LOG LEVEL: debug.");
 
+    log::setDefaultLevel(log::LogLevel::LEVEL_OFF);
+    tDLogE("OFF LOG: tDLogE");
+    tDLogA("OFF LOG: tDLogA");
+    tDLogC("OFF LOG: tDLogC");
+    tDLogR("OFF LOG: tDLogR");
+    tDLogW("OFF LOG: tDLogW");
+    tDLogN("OFF LOG: tDLogN");
+    tDLogI("OFF LOG: tDLogI");
+    tDLogD("OFF LOG: tDLogD");
+
     log::removeDefaultLogger();
 }
 
