@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/string/Commander.hpp>
+#include <sstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,6 +42,15 @@ void Commander::request(std::string const & arguments)
     for (auto & cursor : parseArguments(arguments)) {
         onRequest(cursor);
     }
+}
+
+void Commander::request(int argc, char ** argv)
+{
+    std::stringstream ss;
+    for (int i = 0; i < argc; ++i) {
+        ss << argv[i] << ' ';
+    }
+    request(ss.str());
 }
 
 void Commander::onRequest(Arguments const & arguments)

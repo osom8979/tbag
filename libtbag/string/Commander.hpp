@@ -81,6 +81,7 @@ public:
 
 public:
     void request(std::string const & arguments);
+    void request(int argc, char ** argv);
 
 public:
     virtual void onRequest(Arguments const & arguments);
