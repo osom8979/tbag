@@ -5,16 +5,8 @@ include (TbagModules)
 tbag_modules__apply_default ()
 tbag_modules__update_default_objects ()
 
-## gtest
-list (APPEND TBAG_PROJECT_DEPENDENCIES  gtest_main)
-list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/gtest/include)
-list (APPEND TBAG_PROJECT_LDFLAGS       gtest_main)
-
-if (CMAKE_USE_PTHREADS_INIT)
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
-    endif ()
-endif ()
+## Dependencies.
+tbag_modules__apply_dep_gtest ()
 
 ## libtbag library.
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbag)

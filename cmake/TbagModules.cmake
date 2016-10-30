@@ -191,6 +191,72 @@ macro (tbag_modules__apply_curand)
     list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_curand_LIBRARY})
 endmacro ()
 
+## --------------
+## Dep libraries.
+## --------------
+
+macro (tbag_modules__apply_dep_gtest)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES gtest_main)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/gtest/include)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:gtest_main>)
+
+    ## external libraries.
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_dep_icu)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES icuuc icui18n)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/icu/common
+                                           ${CMAKE_SOURCE_DIR}/dep/icu/i18n)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:icuuc>)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:icui18n>)
+endmacro ()
+
+macro (tbag_modules__apply_dep_lmdb)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lmdb)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lmdb)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lmdb>)
+endmacro ()
+
+macro (tbag_modules__apply_dep_lua)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lua)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lua/include)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
+endmacro ()
+
+macro (tbag_modules__apply_dep_lzma)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lzma)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lzma)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lzma>)
+endmacro ()
+
+macro (tbag_modules__apply_dep_sqlite3)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES sqlite3)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/sqlite3)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:sqlite3>)
+endmacro ()
+
+macro (tbag_modules__apply_dep_uv)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES uv)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/uv/include)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:uv>)
+
+    ## external libraries.
+    if (WIN32)
+        list (APPEND TBAG_PROJECT_LDFLAGS advapi32.lib iphlpapi.lib psapi.lib shell32.lib
+                                          user32.lib userenv.lib winmm.lib ws2_32.lib)
+    else ()
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+        if (APPLE)
+            list (APPEND TBAG_PROJECT_LDFLAGS -ldl)
+        else ()
+            list (APPEND TBAG_PROJECT_LDFLAGS -lnsl -ldl -lrt)
+        endif ()
+    endif ()
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------
