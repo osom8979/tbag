@@ -6,9 +6,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/Property.hpp>
+#include <libtbag/dom/Property.hpp>
 
 using namespace libtbag;
+using namespace libtbag::dom;
 
 class DemoProperty : public Property
 {
@@ -28,37 +29,12 @@ public:
     CREATE_PROPERTY(std::string, StringKey, "TEST");
 };
 
-class PropertyFixtureTest : public ::testing::Test
+TEST(PropertyTest, Default)
 {
-public:
     DemoProperty property;
+    property.loadOrCreate("__tbag_dom_property_test__.xml");
 
-public:
-    PropertyFixtureTest()
-    {
-        property.loadOrCreate();
-    }
-
-    ~PropertyFixtureTest()
-    {
-        // EMPTY.
-    }
-
-public:
-    virtual void SetUp() override
-    {
-        // EMPTY.
-    }
-
-    virtual void TearDown() override
-    {
-        // EMPTY.
-    }
-};
-
-TEST_F(PropertyFixtureTest, Test)
-{
-    ASSERT_EQ(   100, this->property.get_IntegerKey());
-    ASSERT_EQ("TEST", this->property.get_StringKey());
+    ASSERT_EQ(   100, property.get_IntegerKey());
+    ASSERT_EQ("TEST", property.get_StringKey());
 }
 
