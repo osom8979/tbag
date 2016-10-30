@@ -52,6 +52,7 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lzma)
 
 option (USE_LUA "Don't use the LUA library." OFF)
 if (USE_LUA)

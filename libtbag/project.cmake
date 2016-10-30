@@ -34,11 +34,16 @@ if (USE_LUA)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/lua/include)
 endif ()
 
+## dep/lzma
+list (APPEND TBAG_PROJECT_DEPENDENCIES  lzma)
+list (APPEND TBAG_PROJECT_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/dep/lzma)
+
 ## whole-archive files.
 tbag_modules__add_whole_archive ($<TARGET_FILE:icuuc>)
 tbag_modules__add_whole_archive ($<TARGET_FILE:icui18n>)
 tbag_modules__add_whole_archive ($<TARGET_FILE:sqlite3>)
 tbag_modules__add_whole_archive ($<TARGET_FILE:uv>)
+tbag_modules__add_whole_archive ($<TARGET_FILE:lzma>)
 if (USE_LUA)
     tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
 endif ()
