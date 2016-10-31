@@ -16,18 +16,28 @@ TEST(ReuseMapTest, Constructor)
     using Map = ReuseMap<int, int>;
     Map map1;
     Map map2;
-    Map map3;
+
+    map1.create(1);
+    ASSERT_EQ(1U, map1.size());
+
+    map2 = map1;
+    ASSERT_EQ(1U, map1.size());
+    ASSERT_EQ(1U, map2.size());
+}
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+TEST(ReuseMapTest, MoveConstructor)
+{
+    using Map = ReuseMap<int, int>;
+    Map map1;
+    Map map2;
 
     map1.create(1);
     map2 = std::move(map1);
     ASSERT_EQ(0U, map1.size());
     ASSERT_EQ(1U, map2.size());
-
-    map3 = map2;
-    ASSERT_EQ(0U, map1.size());
-    ASSERT_EQ(1U, map2.size());
-    ASSERT_EQ(1U, map3.size());
 }
+#endif
 
 TEST(ReuseMapTest, Default)
 {

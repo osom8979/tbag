@@ -15,18 +15,27 @@ TEST(ReuseQueueTest, Constructor)
 {
     ReuseQueue<int> q1;
     ReuseQueue<int> q2;
-    ReuseQueue<int> q3;
+
+    q1.push();
+    ASSERT_EQ(1U, q1.size());
+
+    q2 = q1;
+    ASSERT_EQ(1U, q1.size());
+    ASSERT_EQ(1U, q2.size());
+}
+
+#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
+TEST(ReuseQueueTest, MoveConstructor)
+{
+    ReuseQueue<int> q1;
+    ReuseQueue<int> q2;
 
     q1.push();
     q2 = std::move(q1);
     ASSERT_EQ(0U, q1.size());
     ASSERT_EQ(1U, q2.size());
-
-    q3 = q2;
-    ASSERT_EQ(0U, q1.size());
-    ASSERT_EQ(1U, q2.size());
-    ASSERT_EQ(1U, q3.size());
 }
+#endif
 
 TEST(ReuseQueueTest, Default)
 {

@@ -9,13 +9,20 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
 
-static void initTest()
+/** Initialize object. */
+struct InitTest
 {
-    libtbag::loop::UvEventLoop loop;
-    loop.runDefault();
-}
+    InitTest()
+    {
+        libtbag::loop::UvEventLoop loop;
+        loop.runDefault();
+    }
+
+    ~InitTest()
+    { /* EMPTY. */ }
+};
 
 #if defined(TBAG_STATIC_API)
-initTest();
+static InitTest g_init_tester;
 #endif
 
