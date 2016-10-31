@@ -47,6 +47,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_definitions (-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600 -D_GNU_SOURCE
                      -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
     add_compile_options (/wd4244) ## conversion from 'type1' to 'type2', possible loss of data.
+    add_compile_options (/wd4267) ## conversion from 'size_t' to 'type', possible loss of data.
     set (ALL_SRCS ${COMMON_SRCS} ${WIN_SRCS})
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

@@ -53,12 +53,6 @@ macro (tbag_modules__apply_default)
     list (APPEND TBAG_PROJECT_DEFINITIONS  ${__tbag_project_upper_name})
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${TBAG_PROJECT_CONST_DIR_PATH})
 
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        list (APPEND TBAG_PROJECT_LDFLAGS "/LIBPATH:\"${TBAG_PROJECT_CONST_DIR_PATH}\"")
-    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list (APPEND TBAG_PROJECT_LDFLAGS -L${TBAG_PROJECT_CONST_DIR_PATH})
-    endif ()
-
     if (UNIX AND APPLE AND IS_DIRECTORY "${THIRD_PREFIX}")
         list (APPEND TBAG_PROJECT_LDFLAGS "-Wl,-rpath,${THIRD_PREFIX}/lib"
                                           "-Wl,-rpath,${THIRD_PREFIX}/Library/Frameworks")
@@ -199,6 +193,10 @@ macro (tbag_modules__apply_dep_gtest)
     list (APPEND TBAG_PROJECT_DEPENDENCIES gtest_main)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/gtest/include)
     tbag_modules__add_whole_archive ($<TARGET_FILE:gtest_main>)
+
+    if (WIN32)
+        list (APPEND TBAG_PROJECT_DEFINITIONS GTEST_OS_WINDOWS)
+    else ()
 
     ## external libraries.
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

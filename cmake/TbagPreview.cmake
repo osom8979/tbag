@@ -26,8 +26,6 @@ function (tbag_preview__print_os)
     if (WIN32)
         if (CYGWIN)
             tbag_preview__print ("Windows OS and Cygwin.")
-        elseif (MSYS)
-            tbag_preview__print ("Windows OS and MSYS.")
         else ()
             tbag_preview__print ("Windows OS.")
         endif ()
@@ -44,11 +42,10 @@ endfunction ()
 
 #/// Print compiler information.
 function (tbag_preview__print_compiler)
-    # Compiler & IDE:
-    # CLANG GNU
-    # MINGW MSYS CYGWIN
-    # BORLAND WATCOM
-    # MSVC MSVC_IDE MSVC60 MSVC70 MSVC71 MSVC80 CMAKE_COMPILER_2005 MSVC90 MSVC10
+    ## Variables that Describe the System:
+    # APPLE BORLAND CYGWIN ENV
+    # MSVC MSVC_IDE MSVC10 MSVC11 MSVC12 MSVC60 MSVC70 MSVC71 MSVC80 MSVC90 MSVC_VERSION
+    # UNIX WIN32 XCODE_VERSION
     message (WARNING "Not implement.")
 endfunction ()
 
