@@ -27,7 +27,6 @@ function (check_include_and_define __header __define)
 endfunction ()
 
 enable_language (C)
-enable_language (CXX)
 
 
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -37,7 +36,7 @@ include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src"
 prepend (COMMON_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
         fs-poll.c inet.c threadpool.c uv-common.c version.c)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     ## Windows
     prepend (WIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/win"
             async.c core.c dl.c error.c fs-event.c fs.c getaddrinfo.c getnameinfo.c handle.c
@@ -50,13 +49,17 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options (/wd4267) ## conversion from 'size_t' to 'type', possible loss of data.
     set (ALL_SRCS ${COMMON_SRCS} ${WIN_SRCS})
 
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
     ## Unix-like systems
     prepend (UNIX_COMMON_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/unix"
             async.c core.c dl.c fs.c getaddrinfo.c getnameinfo.c loop-watcher.c loop.c pipe.c
             poll.c process.c signal.c stream.c tcp.c thread.c timer.c tty.c udp.c)
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src/unix")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu89 -pedantic -Wall -Wextra -Wno-unused-parameter")
+    add_compile_options (-std=gnu89)
+    add_compile_options (-pedantic)
+    add_compile_options (-Wall)
+    add_compile_options (-Wextra)
+    add_compile_options (-Wno-unused-parameter)
 
     include (CheckIncludeFile)
     check_include_and_define (sys/types.h HAVE_SYS_TYPES_H)

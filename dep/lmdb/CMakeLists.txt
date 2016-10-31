@@ -11,13 +11,13 @@ endif ()
 
 enable_language (C)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
-elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options (/w)
+elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
     ## -W -Wall
     ## -Wbad-function-cast -Wuninitialized
     ## -Wno-unused-parameter -Wno-format-extra-args
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+    add_compile_options (-w)
 endif ()
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})

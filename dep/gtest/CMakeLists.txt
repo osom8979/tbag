@@ -17,7 +17,6 @@ function (prepend __result __prefix)
     set (${__result} "${${__result}}" PARENT_SCOPE)
 endfunction ()
 
-enable_language (C)
 enable_language (CXX)
 
 

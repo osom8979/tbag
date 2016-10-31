@@ -18,7 +18,6 @@ function (prepend __result __prefix)
 endfunction ()
 
 enable_language (C)
-enable_language (CXX)
 
 
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}")
