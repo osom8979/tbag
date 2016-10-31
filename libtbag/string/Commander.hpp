@@ -41,7 +41,7 @@ class TBAG_EXPORTS Commander : public Noncopyable
 public:
     using Callback    = std::function<void(Arguments const &)>;
     using CommandMap  = std::map<std::string, Callback>;
-    using CommandPair = typename CommandMap::value_type;
+    using CommandPair = CommandMap::value_type;
 
 private:
     Callback   _default;

@@ -98,7 +98,7 @@ public:
     { return _flags.at(index); }
 
 public:
-    Flag find(typename FlagVector::const_iterator itr) const;
+    Flag find(FlagVector::const_iterator itr) const;
     Flag findWithKey(std::string const & key) const;
     Flag findWithValue(std::string const & value) const;
 

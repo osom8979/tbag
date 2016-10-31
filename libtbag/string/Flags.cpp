@@ -28,7 +28,7 @@ Flags::Flags(std::string const & args)
     parse(args);
 }
 
-Flags::Flag Flags::find(typename FlagVector::const_iterator itr) const
+Flags::Flag Flags::find(FlagVector::const_iterator itr) const
 {
     if (itr == _flags.end()) {
         return Flag();

@@ -33,7 +33,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819") ## code page warning.
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4595")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") ## declared deprecated warning.
-    add_definitions (_CRT_SECURE_NO_WARNINGS)
+    add_definitions (-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Setup the THIRD_PREFIX variable.
