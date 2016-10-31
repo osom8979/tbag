@@ -13,15 +13,15 @@ using namespace libtbag::time;
 
 TEST(DurationStringTest, Default)
 {
-    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, DurationString<std::chrono::nanoseconds >::value);
-    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, DurationString<std::chrono::microseconds>::value);
-    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, DurationString<std::chrono::milliseconds>::value);
-    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, DurationString<std::chrono::seconds     >::value);
-    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, DurationString<std::chrono::minutes     >::value);
-    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, DurationString<std::chrono::hours       >::value);
+    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, getDurationString<std::chrono::nanoseconds >());
+    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, getDurationString<std::chrono::microseconds>());
+    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, getDurationString<std::chrono::milliseconds>());
+    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, getDurationString<std::chrono::seconds     >());
+    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, getDurationString<std::chrono::minutes     >());
+    ASSERT_STRNE(__TBAG_DEFAULT_DURATION_STRING__, getDurationString<std::chrono::hours       >());
 
     using TestRatio    = std::ratio<10>;
     using TestDuration = std::chrono::duration<char, TestRatio>;
-    ASSERT_STREQ(__TBAG_DEFAULT_DURATION_STRING__, DurationString<TestDuration>::value);
+    ASSERT_STREQ(__TBAG_DEFAULT_DURATION_STRING__, getDurationString<TestDuration>());
 }
 

@@ -12,6 +12,9 @@ tbag_modules__apply_dep_gtest ()
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbag)
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/libtbag)
 list (APPEND TBAG_PROJECT_LDFLAGS      tbag)
+if (NOT BUILD_SHARED_LIBS)
+    list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_STATIC_API)
+endif ()
 
 ## Test project.
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbshare_copy)
