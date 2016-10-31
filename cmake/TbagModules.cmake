@@ -196,7 +196,7 @@ macro (tbag_modules__apply_dep_gtest)
 
     if (WIN32)
         list (APPEND TBAG_PROJECT_DEFINITIONS GTEST_OS_WINDOWS)
-    else ()
+    endif ()
 
     ## external libraries.
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
