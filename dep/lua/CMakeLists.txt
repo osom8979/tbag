@@ -19,7 +19,6 @@ endfunction ()
 
 enable_language (C)
 
-
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}")
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -41,5 +40,9 @@ if (UNIX)
     endif ()
 endif ()
 
-add_library (lua STATIC ${CORE_SRCS} ${LIB_SRCS})
+if (USE_SHARED_DEPS)
+    add_library (lua SHARED ${CORE_SRCS} ${LIB_SRCS})
+else ()
+    add_library (lua STATIC ${CORE_SRCS} ${LIB_SRCS})
+endif ()
 

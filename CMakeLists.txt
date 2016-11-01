@@ -60,15 +60,20 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lzma)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 
+## Lua settings.
 option (USE_LUA "Don't use the LUA library." OFF)
 if (USE_LUA)
     add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 endif ()
 
+## JsonCpp settings.
 option (USE_JSONCPP "Don't use the JsonCpp library." OFF)
 if (USE_JSONCPP)
     add_subdirectory (${CMAKE_SOURCE_DIR}/dep/jsoncpp)
 endif ()
+
+## Detail settings.
+option (USE_SHARED_DEPS "Build a deps to shared library." OFF)
 
 ## Test subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbproc)

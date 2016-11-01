@@ -190,9 +190,9 @@ endmacro ()
 ## --------------
 
 macro (tbag_modules__apply_dep_gtest)
-    list (APPEND TBAG_PROJECT_DEPENDENCIES gtest_main)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES gtest)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/gtest/include)
-    tbag_modules__add_whole_archive ($<TARGET_FILE:gtest_main>)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:gtest>)
 
     if (WIN32)
         list (APPEND TBAG_PROJECT_DEFINITIONS GTEST_OS_WINDOWS)

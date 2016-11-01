@@ -19,11 +19,10 @@ endfunction ()
 
 enable_language (CXX)
 
-
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}")
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
-prepend (LIB_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
+prepend (SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
         gtest.cc
         gtest-death-test.cc
         gtest-filepath.cc
@@ -31,7 +30,6 @@ prepend (LIB_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
         gtest-printers.cc
         gtest-test-part.cc
         gtest-test-part.cc)
-set (MAIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/gtest_main.cc")
 
 if (WIN32)
     add_definitions (-DGTEST_OS_WINDOWS)
@@ -40,6 +38,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GN
     add_compile_options (-Wno-unused-const-variable)
 endif ()
 
-#add_library (gtest      STATIC ${LIB_SRCS})
-add_library  (gtest_main STATIC ${LIB_SRCS} ${MAIN_SRCS})
+if (USE_SHARED_DEPS)
+    add_library (gtest SHARED ${SRCS})
+else ()
+    add_library (gtest STATIC ${SRCS})
+endif ()
 

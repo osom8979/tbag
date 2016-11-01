@@ -25,5 +25,10 @@ link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 set (SRCS "${CMAKE_CURRENT_SOURCE_DIR}/midl.c"
           "${CMAKE_CURRENT_SOURCE_DIR}/mdb.c")
-add_library (lmdb STATIC ${SRCS})
+
+if (USE_SHARED_DEPS)
+    add_library (lmdb SHARED ${SRCS})
+else ()
+    add_library (lmdb STATIC ${SRCS})
+endif ()
 

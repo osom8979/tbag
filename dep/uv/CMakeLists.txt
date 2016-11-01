@@ -28,7 +28,6 @@ endfunction ()
 
 enable_language (C)
 
-
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src"
                      "${CMAKE_CURRENT_SOURCE_DIR}/include"
                      "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -90,5 +89,9 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GN
     endif ()
 endif ()
 
-add_library (uv STATIC ${ALL_SRCS})
+if (USE_SHARED_DEPS)
+    add_library (uv SHARED ${ALL_SRCS})
+else ()
+    add_library (uv STATIC ${ALL_SRCS})
+endif ()
 
