@@ -8,7 +8,9 @@
 #include <libtbag/config.h>
 #include <libtbag/macro/attributes.hpp>
 #include <libtbag/macro/utils.hpp>
-#include <libtbag/loop/UvEventLoop.hpp>
+
+// Don't use libuv initialize.
+//#include <libtbag/loop/UvEventLoop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -16,9 +18,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 static bool setUp()
 {
-    libtbag::loop::UvEventLoop loop;
-    loop.runDefault();
-
     return true;
 }
 
