@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/string/fmt/format.h>
+#include <libtbag/3rd/fmt/format.h>
 
 #include <string>
 #include <utility>

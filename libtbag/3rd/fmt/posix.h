@@ -45,7 +45,7 @@
 # include <xlocale.h>  // for LC_NUMERIC_MASK on OS X
 #endif
 
-#include <libtbag/string/fmt/format.h>
+#include <libtbag/3rd/fmt/format.h>
 
 #ifndef FMT_POSIX
 # if defined(_WIN32) && !defined(__MINGW32__)

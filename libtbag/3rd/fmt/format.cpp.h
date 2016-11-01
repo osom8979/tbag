@@ -25,7 +25,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <libtbag/string/fmt/format.h>
+#include <libtbag/3rd/fmt/format.h>
 
 #include <string.h>
 

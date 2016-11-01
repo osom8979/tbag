@@ -30,7 +30,7 @@
 # define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <libtbag/string/fmt/posix.h>
+#include <libtbag/3rd/fmt/posix.h>
 
 #include <limits.h>
 #include <sys/types.h>
