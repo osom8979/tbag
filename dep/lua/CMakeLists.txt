@@ -42,6 +42,7 @@ endif ()
 
 if (USE_SHARED_DEPS)
     add_library (lua SHARED ${CORE_SRCS} ${LIB_SRCS})
+    target_compile_definitions (lua PRIVATE LUA_BUILD_AS_DLL)
 else ()
     add_library (lua STATIC ${CORE_SRCS} ${LIB_SRCS})
 endif ()

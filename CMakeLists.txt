@@ -55,21 +55,12 @@ tbag_config__default_generate_c_header ()
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lmdb)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lzma)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 
 ## Lua settings.
 option (USE_LUA "Don't use the LUA library." OFF)
 if (USE_LUA)
     add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
-endif ()
-
-## JsonCpp settings.
-option (USE_JSONCPP "Don't use the JsonCpp library." OFF)
-if (USE_JSONCPP)
-    add_subdirectory (${CMAKE_SOURCE_DIR}/dep/jsoncpp)
 endif ()
 
 ## Detail settings.
