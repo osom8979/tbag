@@ -40,6 +40,7 @@ endif ()
 
 if (USE_SHARED_DEPS)
     add_library (gtest SHARED ${SRCS})
+    target_compile_definitions (gtest PRIVATE GTEST_LINKED_AS_SHARED_LIBRARY)
 else ()
     add_library (gtest STATIC ${SRCS})
 endif ()
