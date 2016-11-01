@@ -7,11 +7,11 @@
 
 #include <libtbag/archive/Lzma.hpp>
 
-#include <libtbag/3rd/lzma/Alloc.h>
-#include <libtbag/3rd/lzma/7zFile.h>
-#include <libtbag/3rd/lzma/7zVersion.h>
-#include <libtbag/3rd/lzma/LzmaDec.h>
-#include <libtbag/3rd/lzma/LzmaEnc.h>
+#include <Alloc.h>
+#include <7zFile.h>
+#include <7zVersion.h>
+#include <LzmaDec.h>
+#include <LzmaEnc.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -221,6 +221,28 @@ macro (tbag_modules__apply_dep_icu)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_dep_jsoncpp)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES jsoncpp)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/jsoncpp)
+
+    if (USE_SHARED_DEPS)
+        list (APPEND TBAG_PROJECT_LDFLAGS jsoncpp)
+    else ()
+        tbag_modules__add_whole_archive ($<TARGET_FILE:jsoncpp>)
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_dep_lmdb)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lmdb)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lmdb)
+
+    if (USE_SHARED_DEPS)
+        list (APPEND TBAG_PROJECT_LDFLAGS lmdb)
+    else ()
+        tbag_modules__add_whole_archive ($<TARGET_FILE:lmdb>)
+    endif ()
+endmacro ()
+
 macro (tbag_modules__apply_dep_lua)
     list (APPEND TBAG_PROJECT_DEPENDENCIES lua)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lua/include)
@@ -235,6 +257,28 @@ endmacro ()
 macro (tbag_modules__apply_dep_luabridge)
     ## Header-only library.
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/luabridge)
+endmacro ()
+
+macro (tbag_modules__apply_dep_lzma)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lzma)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lzma)
+
+    if (USE_SHARED_DEPS)
+        list (APPEND TBAG_PROJECT_LDFLAGS lzma)
+    else ()
+        tbag_modules__add_whole_archive ($<TARGET_FILE:lzma>)
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_dep_sqlite3)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES sqlite3)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/sqlite3)
+
+    if (USE_SHARED_DEPS)
+        list (APPEND TBAG_PROJECT_LDFLAGS sqlite3)
+    else ()
+        tbag_modules__add_whole_archive ($<TARGET_FILE:sqlite3>)
+    endif ()
 endmacro ()
 
 macro (tbag_modules__apply_dep_uv)

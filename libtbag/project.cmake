@@ -6,17 +6,23 @@ tbag_modules__apply_default ()
 tbag_modules__update_default_objects ()
 
 ## TBAG EXPORT API.
-list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_EXPORT_API U_COMBINED_IMPLEMENTATION _7ZIP_ST)
+list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_EXPORT_API U_COMBINED_IMPLEMENTATION)
 
 ## Thread settings.
 list (APPEND TBAG_PROJECT_LDFLAGS ${CMAKE_THREAD_LIBS_INIT})
 
 ## Dependencies.
-tbag_modules__apply_dep_icu ()
-tbag_modules__apply_dep_uv ()
+tbag_modules__apply_dep_icu     ()
+tbag_modules__apply_dep_lmdb    ()
+tbag_modules__apply_dep_lzma    ()
+tbag_modules__apply_dep_sqlite3 ()
+tbag_modules__apply_dep_uv      ()
 if (USE_LUA)
     tbag_modules__apply_dep_lua ()
     tbag_modules__apply_dep_luabridge ()
+endif ()
+if (USE_JSONCPP)
+    tbag_modules__apply_dep_jsoncpp ()
 endif ()
 
 #tbag_modules__apply_pch (${CMAKE_SOURCE_DIR}/libtbag/config.h)

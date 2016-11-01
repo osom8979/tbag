@@ -16,15 +16,22 @@ if (NOT BUILD_SHARED_LIBS)
     list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_STATIC_API)
 endif ()
 
-## Dependencies.
 if (USE_SHARED_DEPS)
-    tbag_modules__apply_dep_icu ()
-    tbag_modules__apply_dep_uv ()
+    ## Dependencies.
+    tbag_modules__apply_dep_icu     ()
+    tbag_modules__apply_dep_lmdb    ()
+    tbag_modules__apply_dep_lzma    ()
+    tbag_modules__apply_dep_sqlite3 ()
+    tbag_modules__apply_dep_uv      ()
     if (USE_LUA)
         tbag_modules__apply_dep_lua ()
         tbag_modules__apply_dep_luabridge ()
     endif ()
+    if (USE_JSONCPP)
+        tbag_modules__apply_dep_jsoncpp ()
+    endif ()
 endif ()
+
 
 ## Test project.
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbshare_copy)
