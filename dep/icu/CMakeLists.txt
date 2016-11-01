@@ -47,4 +47,5 @@ target_compile_definitions (icui18n PRIVATE -DU_ATTRIBUTE_DEPRECATED=
                                             -DU_I18N_IMPLEMENTATION)
 target_include_directories (icui18n PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/common"
                                             "${CMAKE_CURRENT_SOURCE_DIR}/i18n")
+target_link_libraries (icui18n PRIVATE icuuc)
 
