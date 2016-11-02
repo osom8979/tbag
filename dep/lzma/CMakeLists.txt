@@ -25,10 +25,5 @@ link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 prepend (SRCS "${CMAKE_CURRENT_SOURCE_DIR}"
         7zFile.c 7zStream.c Alloc.c CpuArch.c LzFind.c LzmaDec.c LzmaEnc.c Sha256.c)
 add_definitions (-D_7ZIP_ST)
-
-if (USE_SHARED_DEPS)
-    add_library (lzma SHARED ${SRCS})
-else ()
-    add_library (lzma STATIC ${SRCS})
-endif ()
+add_library (lzma STATIC ${SRCS})
 

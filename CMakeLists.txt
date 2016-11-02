@@ -72,9 +72,6 @@ if (USE_JSONCPP)
     add_subdirectory (${CMAKE_SOURCE_DIR}/dep/jsoncpp)
 endif ()
 
-## Detail settings.
-option (USE_SHARED_DEPS "Build a deps to shared library." OFF)
-
 ## Test subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbproc)
 add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbshare)

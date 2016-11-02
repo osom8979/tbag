@@ -89,22 +89,18 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GN
     endif ()
 endif ()
 
-if (USE_SHARED_DEPS)
-    add_library (uv SHARED ${ALL_SRCS})
+add_library (uv STATIC ${ALL_SRCS})
 
-    ## external libraries.
-    target_compile_definitions (uv PRIVATE BUILDING_UV_SHARED)
-    if (WIN32)
-        target_link_libraries (uv PRIVATE advapi32.lib iphlpapi.lib psapi.lib shell32.lib
-                                          user32.lib userenv.lib winmm.lib ws2_32.lib)
-    elseif (UNIX)
-        if (APPLE)
-            target_link_libraries (uv PRIVATE -lpthread -ldl)
-        else ()
-            target_link_libraries (uv PRIVATE -lpthread -lnsl -ldl -lrt)
-        endif ()
-    endif ()
-else ()
-    add_library (uv STATIC ${ALL_SRCS})
-endif ()
+## If shared library & windows.
+#target_compile_definitions (uv PRIVATE BUILDING_UV_SHARED)
+#if (WIN32)
+#    target_link_libraries (uv PRIVATE advapi32.lib iphlpapi.lib psapi.lib shell32.lib
+#                                      user32.lib userenv.lib winmm.lib ws2_32.lib)
+#elseif (UNIX)
+#    if (APPLE)
+#        target_link_libraries (uv PRIVATE -lpthread -ldl)
+#    else ()
+#        target_link_libraries (uv PRIVATE -lpthread -lnsl -ldl -lrt)
+#    endif ()
+#endif ()
 

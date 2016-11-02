@@ -195,7 +195,6 @@ macro (tbag_modules__apply_dep_gtest)
     list (APPEND TBAG_PROJECT_DEPENDENCIES gtest)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/gtest/include)
 
-    ## Don't use USE_SHARED_DEPS variable.
     tbag_modules__add_whole_archive ($<TARGET_FILE:gtest>)
 
     if (WIN32)
@@ -212,46 +211,26 @@ macro (tbag_modules__apply_dep_icu)
     list (APPEND TBAG_PROJECT_DEPENDENCIES icuuc icui18n)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/icu/common
                                            ${CMAKE_SOURCE_DIR}/dep/icu/i18n)
-
-    if (USE_SHARED_DEPS)
-        list (APPEND TBAG_PROJECT_LDFLAGS icuuc icui18n)
-    else ()
-        tbag_modules__add_whole_archive ($<TARGET_FILE:icuuc>)
-        tbag_modules__add_whole_archive ($<TARGET_FILE:icui18n>)
-    endif ()
+    tbag_modules__add_whole_archive ($<TARGET_FILE:icuuc>)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:icui18n>)
 endmacro ()
 
 macro (tbag_modules__apply_dep_jsoncpp)
     list (APPEND TBAG_PROJECT_DEPENDENCIES jsoncpp)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/jsoncpp)
-
-    if (USE_SHARED_DEPS)
-        list (APPEND TBAG_PROJECT_LDFLAGS jsoncpp)
-    else ()
-        tbag_modules__add_whole_archive ($<TARGET_FILE:jsoncpp>)
-    endif ()
+    tbag_modules__add_whole_archive ($<TARGET_FILE:jsoncpp>)
 endmacro ()
 
 macro (tbag_modules__apply_dep_lmdb)
     list (APPEND TBAG_PROJECT_DEPENDENCIES lmdb)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lmdb)
-
-    if (USE_SHARED_DEPS)
-        list (APPEND TBAG_PROJECT_LDFLAGS lmdb)
-    else ()
-        tbag_modules__add_whole_archive ($<TARGET_FILE:lmdb>)
-    endif ()
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lmdb>)
 endmacro ()
 
 macro (tbag_modules__apply_dep_lua)
     list (APPEND TBAG_PROJECT_DEPENDENCIES lua)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lua/include)
-
-    if (USE_SHARED_DEPS)
-        list (APPEND TBAG_PROJECT_LDFLAGS lua)
-    else ()
-        tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
-    endif ()
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
 endmacro ()
 
 macro (tbag_modules__apply_dep_luabridge)
@@ -262,34 +241,19 @@ endmacro ()
 macro (tbag_modules__apply_dep_lzma)
     list (APPEND TBAG_PROJECT_DEPENDENCIES lzma)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lzma)
-
-    if (USE_SHARED_DEPS)
-        list (APPEND TBAG_PROJECT_LDFLAGS lzma)
-    else ()
-        tbag_modules__add_whole_archive ($<TARGET_FILE:lzma>)
-    endif ()
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lzma>)
 endmacro ()
 
 macro (tbag_modules__apply_dep_sqlite3)
     list (APPEND TBAG_PROJECT_DEPENDENCIES sqlite3)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/sqlite3)
-
-    if (USE_SHARED_DEPS)
-        list (APPEND TBAG_PROJECT_LDFLAGS sqlite3)
-    else ()
-        tbag_modules__add_whole_archive ($<TARGET_FILE:sqlite3>)
-    endif ()
+    tbag_modules__add_whole_archive ($<TARGET_FILE:sqlite3>)
 endmacro ()
 
 macro (tbag_modules__apply_dep_uv)
     list (APPEND TBAG_PROJECT_DEPENDENCIES uv)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/uv/include)
-
-    if (USE_SHARED_DEPS)
-        list (APPEND TBAG_PROJECT_LDFLAGS uv)
-    else ()
-        tbag_modules__add_whole_archive ($<TARGET_FILE:uv>)
-    endif ()
+    tbag_modules__add_whole_archive ($<TARGET_FILE:uv>)
 
     ## external libraries.
     if (WIN32)

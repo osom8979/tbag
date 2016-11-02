@@ -38,6 +38,5 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GN
     add_compile_options (-Wno-unused-const-variable)
 endif ()
 
-## Don't use USE_SHARED_DEPS variable.
 add_library (gtest STATIC ${SRCS})
 
