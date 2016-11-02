@@ -105,7 +105,7 @@ endfunction ()
 #/// @param __result [out] Output result variable.
 function (tabg_cuda__select_nvcc_arch_flags __result)
     # List of arch names
-    set (__archs_names "Fermi" "Kepler" "Maxwell" "All" "Manual")
+    set (__archs_names "Fermi" "Kepler" "Maxwell" "All" "Manual" "Local")
     set (__archs_name_default "All")
     if (NOT CMAKE_CROSSCOMPILING)
         list (APPEND __archs_names "Auto")
@@ -142,8 +142,13 @@ function (tabg_cuda__select_nvcc_arch_flags __result)
         set (__cuda_arch_bin ${TBAG_CUDA_KNOWN_GPU_ARCHS})
     elseif (${CUDA_ARCH_NAME} STREQUAL "Auto")
         tabg_cuda__find_detect_arch (__cuda_arch_bin)
-    else () # (${CUDA_ARCH_NAME} STREQUAL "Manual")
+    elseif (${CUDA_ARCH_NAME} STREQUAL "Manual")
         set (__cuda_arch_bin ${CUDA_ARCH_BIN})
+    else () # (${CUDA_ARCH_NAME} STREQUAL "Local")
+        set (__cuda_arch_bin ${CUDA_ARCH_BIN})
+        set (${__result}          "" PARENT_SCOPE)
+        set (${__result}_readable "" PARENT_SCOPE)
+        return ()
     endif ()
 
     # remove dots and convert to lists
