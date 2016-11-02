@@ -31,7 +31,7 @@ namespace archive {
  * @author zer0
  * @date   2016-10-30
  */
-class TBAG_EXPORTS Lzma : public Noncopyable
+class TBAG_API Lzma : public Noncopyable
 {
 public:
     struct LzmaPimpl;

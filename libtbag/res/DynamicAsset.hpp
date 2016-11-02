@@ -34,7 +34,7 @@ namespace res {
  * @author zer0
  * @date   2016-10-13
  */
-class TBAG_EXPORTS DynamicAsset
+class TBAG_API DynamicAsset
 {
 public:
     using Value  = char;

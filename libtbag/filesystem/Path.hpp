@@ -46,7 +46,7 @@ using BaseNativePath = PosixPath;
  * @warning
  *  Supports multibyte-string only.
  */
-class TBAG_EXPORTS Path : public BaseNativePath
+class TBAG_API Path : public BaseNativePath
 {
 public:
     using NativePath = BaseNativePath;
@@ -176,8 +176,8 @@ public:
 
     Path & operator /=(std::string const & child);
 
-    TBAG_EXPORTS friend Path operator /(Path const & path, std::string const & child);
-    TBAG_EXPORTS friend Path operator /(Path && path, std::string const & child);
+    TBAG_API friend Path operator /(Path const & path, std::string const & child);
+    TBAG_API friend Path operator /(Path && path, std::string const & child);
 
 // Casting
 public:

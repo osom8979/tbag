@@ -35,7 +35,7 @@ namespace details {
  * @author zer0
  * @date   2016-07-15
  */
-class TBAG_EXPORTS LoggerManager : SINGLETON_INHERITANCE(LoggerManager)
+class TBAG_API LoggerManager : SINGLETON_INHERITANCE(LoggerManager)
 {
 public:
     SINGLETON_RESTRICT(LoggerManager);

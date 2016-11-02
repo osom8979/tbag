@@ -35,7 +35,7 @@ class UvLock;
  * @author zer0
  * @date   2016-10-12
  */
-class TBAG_EXPORTS UvCondition : public Noncopyable
+class TBAG_API UvCondition : public Noncopyable
 {
 private:
     void * _handle;

@@ -23,7 +23,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-TBAG_EXPORTS bool formatToMemory(char * buf, int size, char const * format, ...);
+TBAG_API bool formatToMemory(char * buf, int size, char const * format, ...);
 
 } // namespace details
 } //namespace log

@@ -34,23 +34,23 @@ TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_log
 using Logger   = ::libtbag::log::details::Logger;
 using LogLevel = ::libtbag::log::details::LogLevel;
 
-TBAG_EXPORTS Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
-TBAG_EXPORTS Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
-TBAG_EXPORTS Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
+TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
+TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
 
-TBAG_EXPORTS Logger * createDefaultConsoleLogger(bool auto_flush = false);
-TBAG_EXPORTS Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
-TBAG_EXPORTS Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createDefaultConsoleLogger(bool auto_flush = false);
+TBAG_API Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
+TBAG_API Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
 
-TBAG_EXPORTS void removeLogger(std::string const & name);
-TBAG_EXPORTS void removeDefaultLogger();
+TBAG_API void removeLogger(std::string const & name);
+TBAG_API void removeDefaultLogger();
 
-TBAG_EXPORTS Logger * getLogger(std::string const & name);
-TBAG_EXPORTS Logger * getDefaultLogger();
+TBAG_API Logger * getLogger(std::string const & name);
+TBAG_API Logger * getDefaultLogger();
 
-TBAG_EXPORTS void setLevel(std::string const & name, LogLevel level);
-TBAG_EXPORTS void setLevel(std::string const & name, int level);
-TBAG_EXPORTS void setDefaultLevel(LogLevel level);
+TBAG_API void setLevel(std::string const & name, LogLevel level);
+TBAG_API void setLevel(std::string const & name, int level);
+TBAG_API void setDefaultLevel(LogLevel level);
 
 template <typename ... Args>
 inline void logging(Logger * logger, LogLevel level, std::string const & format, Args && ... args)

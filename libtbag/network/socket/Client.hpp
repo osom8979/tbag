@@ -41,7 +41,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_EXPORTS Client : public libtbag::loop::event::UvEventHandler
+class TBAG_API Client : public libtbag::loop::event::UvEventHandler
 {
 public:
     using Loop = libtbag::loop::UvEventLoop;

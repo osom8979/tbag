@@ -34,7 +34,7 @@ namespace socket  {
  * @remarks
  *  Pointer to implementation of @c uv_tcp_t.
  */
-class TBAG_EXPORTS Tcp : public Noncopyable
+class TBAG_API Tcp : public Noncopyable
 {
 public:
     using Handler = libtbag::loop::event::UvEventHandler;

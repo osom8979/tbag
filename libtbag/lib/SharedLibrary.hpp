@@ -24,9 +24,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace lib {
 
-TBAG_EXPORTS std::string getLibraryPrefix();
-TBAG_EXPORTS std::string getLibrarySuffix();
-TBAG_EXPORTS std::string getLibraryName(std::string const & name);
+TBAG_API std::string getLibraryPrefix();
+TBAG_API std::string getLibrarySuffix();
+TBAG_API std::string getLibraryName(std::string const & name);
 
 /**
  * SharedLibrary class prototype.
@@ -34,7 +34,7 @@ TBAG_EXPORTS std::string getLibraryName(std::string const & name);
  * @author zer0
  * @date   2016-04-17
  */
-class TBAG_EXPORTS SharedLibrary : public Noncopyable
+class TBAG_API SharedLibrary : public Noncopyable
 {
 public:
     using FakeLib = void;

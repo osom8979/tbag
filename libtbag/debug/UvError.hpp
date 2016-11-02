@@ -30,7 +30,7 @@ namespace debug {
  *    const char* uv_strerror(int err);
  *  @endcode
  */
-TBAG_EXPORTS std::string getUvErrorString(int uv_error_code);
+TBAG_API std::string getUvErrorString(int uv_error_code);
 
 /**
  * @remarks
@@ -39,7 +39,7 @@ TBAG_EXPORTS std::string getUvErrorString(int uv_error_code);
  *    const char* uv_err_name(int err);
  *  @endcode
  */
-TBAG_EXPORTS std::string getUvErrorName(int uv_error_code);
+TBAG_API std::string getUvErrorName(int uv_error_code);
 
 } // namespace debug
 

@@ -57,7 +57,7 @@ namespace res {
  *  }
  *  @endcode
  */
-class TBAG_EXPORTS MultiAsset
+class TBAG_API MultiAsset
 {
 public:
     using DynamicAsset = libtbag::res::DynamicAsset;

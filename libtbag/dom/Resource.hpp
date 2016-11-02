@@ -35,7 +35,7 @@ inline TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
  * @author zer0
  * @date   2016-04-12
  */
-class TBAG_EXPORTS Resource
+class TBAG_API Resource
 {
 public:
     static TBAG_CONSTEXPR char const * const getRootTagName() TBAG_NOEXCEPT

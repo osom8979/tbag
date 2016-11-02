@@ -59,20 +59,20 @@ TBAG_CONSTEXPR int const YEARS_SINCE = 1900;
 TBAG_CONSTEXPR int const MONTHS_SINCE = 1;
 
 /** millisecond part of the second 0-999. */
-TBAG_EXPORTS int getMillisec(std::chrono::system_clock::time_point const & time);
+TBAG_API int getMillisec(std::chrono::system_clock::time_point const & time);
 
-TBAG_EXPORTS std::string getMillisecMbs(std::chrono::system_clock::time_point const & time);
-TBAG_EXPORTS void getMillisecString(std::chrono::system_clock::time_point const & time, std::string & result);
+TBAG_API std::string getMillisecMbs(std::chrono::system_clock::time_point const & time);
+TBAG_API void getMillisecString(std::chrono::system_clock::time_point const & time, std::string & result);
 
-TBAG_EXPORTS std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT;
-TBAG_EXPORTS time_t getTime(std::chrono::system_clock::time_point const & time_point) TBAG_NOEXCEPT;
+TBAG_API std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT;
+TBAG_API time_t getTime(std::chrono::system_clock::time_point const & time_point) TBAG_NOEXCEPT;
 
 /** Obtain current time. */
-TBAG_EXPORTS time_t getCurrentTime() TBAG_NOEXCEPT;
-TBAG_EXPORTS bool getGmtTime(time_t const & t, tm * output);
-TBAG_EXPORTS bool getLocalTime(time_t const & t, tm * output);
+TBAG_API time_t getCurrentTime() TBAG_NOEXCEPT;
+TBAG_API bool getGmtTime(time_t const & t, tm * output);
+TBAG_API bool getLocalTime(time_t const & t, tm * output);
 
-TBAG_EXPORTS std::string getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
+TBAG_API std::string getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
 
 } // namespace time
 

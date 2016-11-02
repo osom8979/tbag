@@ -36,7 +36,7 @@ namespace animation {
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  */
-class TBAG_EXPORTS FrameInterpolator : public TimeInterpolator<std::chrono::microseconds>
+class TBAG_API FrameInterpolator : public TimeInterpolator<std::chrono::microseconds>
 {
 public:
     using Parent = TimeInterpolator<std::chrono::microseconds>;

@@ -35,7 +35,7 @@ namespace loop {
  * @remarks
  *  Use the libuv event loop.
  */
-class TBAG_EXPORTS UvEventLoop : public Noncopyable
+class TBAG_API UvEventLoop : public Noncopyable
 {
 public:
     struct LoopPimpl;

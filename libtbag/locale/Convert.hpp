@@ -45,18 +45,18 @@ struct ConvertException : public std::exception
     { return _message.c_str(); }
 };
 
-TBAG_EXPORTS std::vector<std::string> getAvailableConverterNames();
+TBAG_API std::vector<std::string> getAvailableConverterNames();
 
 /**
  * Convert from UTF-8 string.
  */
-TBAG_EXPORTS std::string convertFromUtf8(std::string const & utf8
+TBAG_API std::string convertFromUtf8(std::string const & utf8
                                        , std::string const & to_charset) throw (ConvertException);
 
 /**
  * Convert to UTF-8 string.
  */
-TBAG_EXPORTS std::string convertToUtf8(std::string const & from_string
+TBAG_API std::string convertToUtf8(std::string const & from_string
                                      , std::string const & from_charset) throw (ConvertException);
 
 } // namespace locale

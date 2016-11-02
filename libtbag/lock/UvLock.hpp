@@ -30,7 +30,7 @@ namespace lock {
  * @author zer0
  * @date   2016-10-12
  */
-class TBAG_EXPORTS UvLock : public Noncopyable
+class TBAG_API UvLock : public Noncopyable
 {
 private:
     void * _handle;

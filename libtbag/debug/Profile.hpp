@@ -35,7 +35,7 @@ namespace debug {
  * @author zer0
  * @date   2016-09-21
  */
-class TBAG_EXPORTS Profile : public Noncopyable
+class TBAG_API Profile : public Noncopyable
 {
 public:
     using TimePoint = std::chrono::system_clock::time_point;
@@ -46,7 +46,7 @@ public:
     using RepeatCallback = std::function<void(Rep average)>;
 
 public:
-    class TBAG_EXPORTS Timer : public Noncopyable
+    class TBAG_API Timer : public Noncopyable
     {
     public:
         friend class Profile;

@@ -25,7 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace id        {
 namespace generator {
 
-TBAG_EXPORTS Id genTimeId(bool sleep_wait = false);
+TBAG_API Id genTimeId(bool sleep_wait = false);
 
 } // namespace generator
 } // namespace id

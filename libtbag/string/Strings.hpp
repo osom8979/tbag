@@ -80,29 +80,29 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
  * @return
  *  Token vector.
  */
-TBAG_EXPORTS std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
+TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
 
 /**
  * Thread ID to string.
  */
-TBAG_EXPORTS std::string convertStringWithThreadId(std::thread::id const & id);
+TBAG_API std::string convertStringWithThreadId(std::thread::id const & id);
 
 /**
  * Regex based token.
  */
-TBAG_EXPORTS std::vector<std::string> splitMatch(std::string const & source, std::regex const & match);
-TBAG_EXPORTS std::vector<std::string> splitMatch(std::string const & source, std::string const & match);
+TBAG_API std::vector<std::string> splitMatch(std::string const & source, std::regex const & match);
+TBAG_API std::vector<std::string> splitMatch(std::string const & source, std::string const & match);
 
 // Regexp utilities.
-TBAG_EXPORTS std::string replaceRegex(std::string const & path, std::string const & regex, std::string const & replace);
-TBAG_EXPORTS std::string removeRegex(std::string const & path, std::string const & regex);
+TBAG_API std::string replaceRegex(std::string const & path, std::string const & regex, std::string const & replace);
+TBAG_API std::string removeRegex(std::string const & path, std::string const & regex);
 
-TBAG_EXPORTS bool isMatch(std::string const & original, std::regex const & regex);
-TBAG_EXPORTS bool isMatch(std::string const & original, std::string const & regex);
+TBAG_API bool isMatch(std::string const & original, std::regex const & regex);
+TBAG_API bool isMatch(std::string const & original, std::string const & regex);
 
-TBAG_EXPORTS std::string trimLeft(std::string const & str);
-TBAG_EXPORTS std::string trimRight(std::string const & str);
-TBAG_EXPORTS std::string trim(std::string const & str);
+TBAG_API std::string trimLeft(std::string const & str);
+TBAG_API std::string trimRight(std::string const & str);
+TBAG_API std::string trim(std::string const & str);
 
 } // namespace string
 

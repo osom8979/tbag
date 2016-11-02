@@ -38,7 +38,7 @@ namespace details {
  * @author zer0
  * @date   2016-07-15
  */
-class TBAG_EXPORTS Logger : public Noncopyable
+class TBAG_API Logger : public Noncopyable
 {
 public:
     using SinkType = sink::SinkInterface;

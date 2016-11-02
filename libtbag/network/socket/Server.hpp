@@ -40,7 +40,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_EXPORTS Server : public libtbag::loop::event::UvEventHandler
+class TBAG_API Server : public libtbag::loop::event::UvEventHandler
 {
 public:
     using Loop = libtbag::loop::UvEventLoop;

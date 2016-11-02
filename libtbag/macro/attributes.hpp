@@ -70,21 +70,21 @@
 #endif
 
 #if defined(TBAG_STATIC_API)
-# define TBAG_EXPORTS
+# define TBAG_API
 #else // defined(TBAG_STATIC_API)
 # if defined(TBAG_EXPORT_API)
 #  if defined(__OS_WINDOWS__)
-#   define TBAG_EXPORTS __declspec(dllexport)
+#   define TBAG_API __declspec(dllexport)
 #  elif defined(__COMP_GNUC__) && (__COMP_GNUC_VERSION__ >= 40000)
-#   define TBAG_EXPORTS __attribute__((visibility("default")))
+#   define TBAG_API __attribute__((visibility("default")))
 #  else
-#   define TBAG_EXPORTS
+#   define TBAG_API
 #  endif
 # else // defined(TBAG_EXPORT_API)
 #  if defined(__OS_WINDOWS__)
-#   define TBAG_EXPORTS __declspec(dllimport)
+#   define TBAG_API __declspec(dllimport)
 #  else
-#   define TBAG_EXPORTS
+#   define TBAG_API
 #  endif
 # endif // defined(TBAG_EXPORT_API)
 #endif // defined(TBAG_STATIC_API)

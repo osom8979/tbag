@@ -36,8 +36,8 @@ namespace loop { class UvEventLoop; }
 
 namespace process {
 
-TBAG_EXPORTS std::string getExecutableSuffix();
-TBAG_EXPORTS std::string getExecutableName(std::string const & name);
+TBAG_API std::string getExecutableSuffix();
+TBAG_API std::string getExecutableName(std::string const & name);
 
 /**
  * Process class prototype.
@@ -45,7 +45,7 @@ TBAG_EXPORTS std::string getExecutableName(std::string const & name);
  * @author zer0
  * @date   2016-05-17
  */
-class TBAG_EXPORTS Process : public libtbag::loop::event::UvEventHandler
+class TBAG_API Process : public libtbag::loop::event::UvEventHandler
 {
 public:
     struct ProcPimpl;

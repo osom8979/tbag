@@ -33,7 +33,7 @@ namespace lock {
  * @remarks
  *  Use the libuv.
  */
-class TBAG_EXPORTS RwLock : public Noncopyable
+class TBAG_API RwLock : public Noncopyable
 {
 private:
     void * _handle;

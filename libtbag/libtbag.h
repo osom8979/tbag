@@ -20,11 +20,11 @@
 extern "C" {
 #endif
 
-TBAG_EXPORTS int tbGetMajorVersion();
-TBAG_EXPORTS int tbGetMinorVersion();
-TBAG_EXPORTS int tbGetPatchVersion();
+TBAG_API int tbGetMajorVersion();
+TBAG_API int tbGetMinorVersion();
+TBAG_API int tbGetPatchVersion();
 
-TBAG_EXPORTS int tbInitialize();
+TBAG_API int tbInitialize();
 
 #if defined(__cplusplus)
 } /* extern "C" */

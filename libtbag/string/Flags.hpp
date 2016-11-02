@@ -34,7 +34,7 @@ namespace string {
  * @author zer0
  * @date   2016-05-03
  */
-class TBAG_EXPORTS Flags
+class TBAG_API Flags
 {
 public:
     struct Flag
