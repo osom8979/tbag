@@ -26,26 +26,6 @@ macro (tbag_modules__preview)
     message (STATUS "TBAG_PROJECT_CONST_NAME: ${TBAG_PROJECT_CONST_NAME}")
 endmacro ()
 
-## ------------------
-## Find object files.
-## ------------------
-
-#/// Find & register object files.
-#///
-#/// @param __find_dir [in] find directory.
-#/// @param __suffix   [in] file suffix.
-macro (tbag_modules__update_objects __find_dir __suffix)
-    get_filename_component (__find_dir_absolute "${__find_dir}" ABSOLUTE)
-    file (GLOB_RECURSE __find_compile_objs "${__find_dir_absolute}/*${__suffix}")
-    list (APPEND TBAG_PROJECT_OBJECTS ${__find_compile_objs})
-endmacro ()
-
-macro (tbag_modules__update_default_objects)
-    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".c")
-    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cc")
-    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cpp")
-endmacro ()
-
 ## -----------------
 ## Project settings.
 ## -----------------
@@ -169,13 +149,13 @@ macro (tbag_modules__build_cuda __original_files)
     endforeach ()
 endmacro ()
 
-macro (tbag_modules__apply_cublas)
-    list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_CUBLAS_LIBRARIES})
-endmacro ()
-
 macro (tbag_modules__apply_cuda)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CUDA_INCLUDE_DIRS})
     list (APPEND TBAG_PROJECT_LDFLAGS      ${CUDA_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__apply_cublas)
+    list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_CUBLAS_LIBRARIES})
 endmacro ()
 
 macro (tbag_modules__apply_cudnn)
@@ -517,6 +497,40 @@ endmacro ()
 macro (tbag_modules__apply_uv)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${UV_INCLUDE_DIRS})
     list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
+endmacro ()
+
+## ------------------
+## Find object files.
+## ------------------
+
+function (tbag_modules__find_files __result __find_dir __suffix)
+    set (${__result})
+
+    get_filename_component (__find_dir_absolute "${__find_dir}" ABSOLUTE)
+    file (GLOB_RECURSE ${__result} "${__find_dir_absolute}/*${__suffix}")
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
+#/// Find & register object files.
+#///
+#/// @param __find_dir [in] find directory.
+#/// @param __suffix   [in] file suffix.
+macro (tbag_modules__update_objects __find_dir __suffix)
+    tbag_modules__find_files (__find_compile_objs "${__find_dir}" "${__suffix}")
+    list (APPEND TBAG_PROJECT_OBJECTS ${__find_compile_objs})
+endmacro ()
+
+macro (tbag_modules__update_default_objects)
+    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".c")
+    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cc")
+    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cpp")
+endmacro ()
+
+macro (tbag_modules__update_cuda_objects)
+    tbag_modules__find_files (__find_cuda_objs "${TBAG_PROJECT_CONST_DIR_PATH}" ".cu")
+    tbag_modules__build_cuda (${__find_cuda_objs})
 endmacro ()
 
 ## --------------
