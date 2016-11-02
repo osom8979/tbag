@@ -1,16 +1,11 @@
 /**
- * @file   ModuleMain.cpp
- * @brief  Module entry-point.
+ * @file   libtbag.cpp
+ * @brief  libtbag entry-point implementation.
  * @author zer0
  * @date   2016-10-19
  */
 
-#include <libtbag/config.h>
-#include <libtbag/macro/attributes.hpp>
-#include <libtbag/macro/utils.hpp>
-
-// Don't use libuv initialize.
-//#include <libtbag/loop/UvEventLoop.hpp>
+#include <libtbag/libtbag.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -18,6 +13,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 static bool setUp()
 {
+    // Don't use libuv initialize.
     return true;
 }
 
@@ -30,14 +26,16 @@ static bool tearDown()
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-static void TBAG_CONSTRUCTOR
-__tbag_constructor(void)
+// -------------------
+// Module entry-point.
+// -------------------
+
+static void TBAG_CONSTRUCTOR __tbag_constructor(void)
 {
     ::libtbag::setUp();
 }
 
-static void TBAG_DESTRUCTOR
-__tbag_destructor(void)
+static void TBAG_DESTRUCTOR __tbag_destructor(void)
 {
     ::libtbag::tearDown();
 }
@@ -58,4 +56,32 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL
     return (result == true ? TRUE : FALSE);
 }
 #endif // defined(__OS_WINDOWS__)
+
+// -----------------------
+// libtbag implementation.
+// -----------------------
+
+int tbGetMajorVersion()
+{
+    return LIBTBAG_VERSION_MAJOR;
+}
+
+int tbGetMinorVersion()
+{
+    return LIBTBAG_VERSION_MINOR;
+}
+
+int tbGetPatchVersion()
+{
+    return LIBTBAG_VERSION_PATCH;
+}
+
+#include <libtbag/loop/UvEventLoop.hpp>
+
+int tbInitialize()
+{
+    libtbag::loop::UvEventLoop loop;
+    loop.runDefault();
+    return 0;
+}
 
