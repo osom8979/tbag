@@ -35,7 +35,7 @@
 // Note that we only have partial C++0x support yet.
 
 #include <stdio.h>  // for NULL
-#include <libtbag/debug/demangle/demangle.hpp>
+#include <libtbag/3rd/demangle/demangle.hpp>
 
 namespace libtbag  {
 namespace debug    {
