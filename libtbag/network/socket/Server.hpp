@@ -54,20 +54,6 @@ public:
 
 public:
     bool run(std::string const & ip, int port);
-
-//public:
-//    Server();
-//    virtual ~Server();
-//
-//public:
-//    bool runIpv4(std::string const & ip, int port);
-//
-//protected:
-//    virtual void onAlloc(void * handle, size_t suggested_size, void * buf) override;
-//    virtual void onRead(void * stream, ssize_t nread, void const * buf) override;
-//    virtual void onWrite(void * req, int status) override;
-//    virtual void onConnection(void * server, int status) override;
-
 };
 
 } // namespace socket
