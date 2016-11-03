@@ -47,21 +47,6 @@ struct Process::ProcPimpl : public libtbag::loop::event::UvHandler
 private:
     uv_process_t _process;
 
-public:
-    ProcPimpl() : UvHandler(&_process)
-    {
-        ::memset((void*)&_process, 0x00, sizeof(_process));
-    }
-
-    ~ProcPimpl()
-    {
-    }
-
-    inline uv_process_t * getNative()
-    { return &_process; }
-    inline uv_process_t const * getNative() const
-    { return &_process; }
-
 private:
     uv_process_options_t _options;
     Process::Param       _param;
@@ -71,6 +56,24 @@ private:
 private:
     int64_t _exit_status;
     int _terminate_signal;
+
+public:
+    ProcPimpl() : UvHandler(&_process)
+                , _exit_status(Process::getUnknownExitCode())
+                , _terminate_signal(Process::getUnknownTerminateSignal())
+    {
+        ::memset((void*)&_process, 0x00, sizeof(_process));
+    }
+
+    ~ProcPimpl()
+    {
+        // EMPTY.
+    }
+
+    inline uv_process_t * getNative()
+    { return &_process; }
+    inline uv_process_t const * getNative() const
+    { return &_process; }
 
 public:
     inline int64_t getExitStatus() const TBAG_NOEXCEPT
@@ -136,11 +139,9 @@ public:
 // Process implementation.
 // -----------------------
 
-Process::Process() throw(InitializeException)
+Process::Process()
         : _loop(new loop::UvEventLoop())
         , _process(new ProcPimpl())
-        , _exit_status(Process::getUnknownExitCode())
-        , _terminate_signal(Process::getUnknownTerminateSignal())
 {
     // EMPTY.
 }

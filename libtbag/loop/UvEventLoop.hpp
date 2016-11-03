@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Exception.hpp>
 
 #include <memory>
 
@@ -45,7 +44,7 @@ private:
     UniqueLoop _loop;
 
 public:
-    UvEventLoop() throw(InitializeException);
+    UvEventLoop();
     virtual ~UvEventLoop();
 
 public:

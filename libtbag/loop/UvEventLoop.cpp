@@ -7,6 +7,8 @@
 
 #include <libtbag/loop/UvEventLoop.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cassert>
 #include <mutex>
 
 #include <uv.h>
@@ -37,10 +39,7 @@ public:
     LoopPimpl()
     {
         ::memset((void*)&_loop, 0x00, sizeof(_loop));
-        int const CODE = ::uv_loop_init(&_loop);
-        if (CODE != 0) {
-            throw InitializeException(CODE);
-        }
+        assert(::uv_loop_init(&_loop) == 0);
     }
 
     ~LoopPimpl()
@@ -94,7 +93,7 @@ public:
 // UvEventLoop implementation.
 // ---------------------------
 
-UvEventLoop::UvEventLoop() throw(InitializeException) : _loop(new LoopPimpl())
+UvEventLoop::UvEventLoop() : _loop(new LoopPimpl())
 {
     // EMPTY.
 }

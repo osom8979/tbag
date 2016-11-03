@@ -1,11 +1,11 @@
 /**
- * @file   UvEventHandler.cpp
- * @brief  UvEventHandler class implementation.
+ * @file   UvHandler.cpp
+ * @brief  libuv event handling class implementation.
  * @author zer0
  * @date   2016-10-16
  */
 
-#include <libtbag/loop/event/UvEventHandler.hpp>
+#include <libtbag/loop/event/UvHandler.hpp>
 #include <libtbag/container/Pointer.hpp>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/lock/RwLock.hpp>
@@ -68,12 +68,6 @@ public:
     {
         WriteGuard guard(_rwlock);
         _handlers.erase(h);
-    }
-
-    bool exists(Handle h) const
-    {
-        ReadGuard guard(_rwlock);
-        return _handlers.find(h) != _handlers.end();
     }
 
     Event get(uv_handle_t * handle) const
@@ -148,9 +142,9 @@ TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo, void *, int, char const *, char co
 
 } // namespace uv
 
-// ------------------------------
-// UvEventHandler implementation.
-// ------------------------------
+// -------------------------
+// UvHandler implementation.
+// -------------------------
 
 UvHandler::UvHandler(void * h) : _handle(h)
 {

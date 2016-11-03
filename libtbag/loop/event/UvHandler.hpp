@@ -1,12 +1,12 @@
 /**
- * @file   UvEventHandler.hpp
- * @brief  UvEventHandler class prototype.
+ * @file   UvHandler.hpp
+ * @brief  libuv event handling class prototype.
  * @author zer0
  * @date   2016-10-16
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOOP_EVENT_UVEVENTHANDLER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOOP_EVENT_UVEVENTHANDLER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOOP_EVENT_UVHANDLER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOOP_EVENT_UVHANDLER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -94,10 +94,11 @@ TBAG_API void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char
 } // namespace uv
 
 /**
- * UvEventHandler class prototype.
+ * UvHandler class prototype.
  *
  * @author zer0
  * @date   2016-10-16
+ * @date   2016-11-03 (Rename: UvEventHandler -> UvHandler)
  */
 struct TBAG_API UvHandler : public libtbag::Noncopyable
 {
@@ -144,6 +145,7 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
+// WARNING: Don't use into the header file.
 #define TBAG_UV_EVENT_CALLBACK_ALLOC       (uv_alloc_cb)       &libtbag::loop::event::uv::onAlloc
 #define TBAG_UV_EVENT_CALLBACK_READ        (uv_read_cb)        &libtbag::loop::event::uv::onRead
 #define TBAG_UV_EVENT_CALLBACK_WRITE       (uv_write_cb)       &libtbag::loop::event::uv::onWrite
@@ -165,5 +167,5 @@ NAMESPACE_LIBTBAG_CLOSE
 #define TBAG_UV_EVENT_CALLBACK_GETADDRINFO (uv_getaddrinfo_cb) &libtbag::loop::event::uv::onGetaddrinfo
 #define TBAG_UV_EVENT_CALLBACK_GETNAMEINFO (uv_getnameinfo_cb) &libtbag::loop::event::uv::onGetnameinfo
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOOP_EVENT_UVEVENTHANDLER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOOP_EVENT_UVHANDLER_HPP__
 

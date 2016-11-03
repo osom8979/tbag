@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/loop/event/UvEventHandler.hpp>
+#include <libtbag/loop/event/UvHandler.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -16,8 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/loop/event/UvEventHandler.hpp>
-#include <libtbag/Exception.hpp>
+#include <libtbag/loop/event/UvHandler.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 #include <cstdlib>
@@ -96,12 +95,8 @@ protected:
     UniqueEventLoop _loop;
     UniqueProcPimpl _process;
 
-private:
-    int64_t _exit_status;
-    int _terminate_signal;
-
 public:
-    Process() throw(InitializeException);
+    Process();
     virtual ~Process();
 
 private:

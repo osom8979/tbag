@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
-#include <libtbag/loop/event/UvEventHandler.hpp>
+#include <libtbag/loop/event/UvHandler.hpp>
 #include <libtbag/network/socket/Tcp.hpp>
 
 #include <string>
