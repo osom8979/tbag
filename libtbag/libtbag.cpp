@@ -76,12 +76,11 @@ int tbGetPatchVersion()
     return LIBTBAG_VERSION_PATCH;
 }
 
-#include <libtbag/loop/UvEventLoop.hpp>
+#include <libtbag/util/UvUtils.hpp>
 
 int tbInitialize()
 {
-    libtbag::loop::UvEventLoop loop;
-    loop.runDefault();
+    libtbag::util::initUv();
     return 0;
 }
 
