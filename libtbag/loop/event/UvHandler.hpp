@@ -16,9 +16,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/container/Pointer.hpp>
 
 #include <cstdint>
 #include <cstdlib>
+
+#include <vector>
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
 typedef intptr_t ssize_t;
@@ -103,17 +106,19 @@ TBAG_API void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char
 struct TBAG_API UvHandler : public libtbag::Noncopyable
 {
 private:
-    void * _handle;
+    using Handle  = libtbag::container::Pointer<void>;
+    using Handles = std::vector<Handle>;
 
 public:
+    Handles _handles;
+
+public:
+    UvHandler();
     UvHandler(void * h);
     ~UvHandler();
 
 public:
-    inline void * getNative() TBAG_NOEXCEPT
-    { return _handle; }
-    inline void const * getNative() const TBAG_NOEXCEPT
-    { return _handle; }
+    void add(void * h);
 
 public:
     // formatter:off

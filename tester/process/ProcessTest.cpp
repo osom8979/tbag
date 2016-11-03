@@ -36,6 +36,7 @@ TEST(ProcessTest, StandardOutput)
 
     std::string out_result;
     std::string err_result;
+    bool is_in = false;
 
     Process process;
     Process::Param param;
@@ -54,8 +55,12 @@ TEST(ProcessTest, StandardOutput)
             err_result.assign(buffer, buffer + length);
         }
     });
+    param.setInWriteCallback([&](InStream::ErrorCode code){
+        is_in = true;
+    });
     ASSERT_TRUE(process.exe(param));
 
+    ASSERT_FALSE(is_in);
     ASSERT_EQ(0, process.getExitStatus());
     ASSERT_EQ(0, process.getTerminateSignal());
     ASSERT_EQ(TEST_STRING, out_result);
@@ -72,6 +77,7 @@ TEST(ProcessTest, StandardInput)
 
     std::string out_result;
     std::string err_result;
+    bool is_in = false;
 
     Process process;
     Process::Param param;
@@ -89,9 +95,13 @@ TEST(ProcessTest, StandardInput)
             err_result.assign(buffer, buffer + length);
         }
     });
+    param.setInWriteCallback([&](InStream::ErrorCode code){
+        is_in = true;
+    });
     param.setInput(&INPUT_STRING[0], INPUT_STRING.size());
     ASSERT_TRUE(process.exe(param));
 
+    ASSERT_TRUE(is_in);
     ASSERT_EQ(0, process.getExitStatus());
     ASSERT_EQ(0, process.getTerminateSignal());
     ASSERT_EQ(TEST_STRING, out_result);
@@ -107,6 +117,7 @@ TEST(ProcessTest, StandardError)
 
     std::string out_result;
     std::string err_result;
+    bool is_in = false;
 
     Process process;
     Process::Param param;
@@ -125,8 +136,12 @@ TEST(ProcessTest, StandardError)
             err_result.assign(buffer, buffer + length);
         }
     });
+    param.setInWriteCallback([&](InStream::ErrorCode code){
+        is_in = true;
+    });
     ASSERT_TRUE(process.exe(param));
 
+    ASSERT_FALSE(is_in);
     ASSERT_EQ(0, process.getExitStatus());
     ASSERT_EQ(0, process.getTerminateSignal());
     ASSERT_EQ(EMPTY_STRING, out_result);
@@ -148,6 +163,7 @@ TEST(ProcessTest, FileOutput)
 
     std::string out_result;
     std::string err_result;
+    bool is_in = false;
 
     Process process;
     Process::Param param;
@@ -165,9 +181,13 @@ TEST(ProcessTest, FileOutput)
             err_result.assign(buffer, buffer + length);
         }
     });
+    param.setInWriteCallback([&](InStream::ErrorCode code){
+        is_in = true;
+    });
     param.pushArggument(TEST_STRING);
     ASSERT_TRUE(process.exe(param));
 
+    ASSERT_FALSE(is_in);
     ASSERT_EQ(0, process.getExitStatus());
     ASSERT_EQ(0, process.getTerminateSignal());
     ASSERT_EQ(EMPTY_STRING, out_result);

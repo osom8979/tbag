@@ -48,6 +48,12 @@ public:
     }
 
 public:
+    inline uv_pipe_t * getPipe()
+    { return &_pipe; }
+    inline uv_pipe_t const * getPipe() const
+    { return &_pipe; }
+
+public:
     bool startRead()
     {
         return ::uv_read_start((uv_stream_t*)&_pipe, TBAG_UV_EVENT_CALLBACK_ALLOC, TBAG_UV_EVENT_CALLBACK_READ) == 0;
@@ -108,12 +114,12 @@ OutStream::~OutStream()
 
 void * OutStream::getNative()
 {
-    return _pipe->getNative();
+    return _pipe->getPipe();
 }
 
 void const * OutStream::getNative() const
 {
-    return _pipe->getNative();
+    return _pipe->getPipe();
 }
 
 bool OutStream::startRead()

@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/loop/event/UvHandler.hpp>
-#include <libtbag/container/Pointer.hpp>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/lock/RwLock.hpp>
 #include <libtbag/predef.hpp>
@@ -146,12 +145,14 @@ TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo, void *, int, char const *, char co
 // UvHandler implementation.
 // -------------------------
 
-UvHandler::UvHandler(void * h) : _handle(h)
+UvHandler::UvHandler()
 {
-    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
-    UvEventManager * em = UvEventManager::getInstance();
-    assert(em != nullptr);
-    em->add(_handle, this);
+    // EMPTY.
+}
+
+UvHandler::UvHandler(void * h)
+{
+    add(h);
 }
 
 UvHandler::~UvHandler()
@@ -159,7 +160,18 @@ UvHandler::~UvHandler()
     using UvEventManager = libtbag::loop::event::uv::UvEventManager;
     UvEventManager * em = UvEventManager::getInstance();
     assert(em != nullptr);
-    em->remove(_handle);
+    for (auto & cursor : _handles) {
+        em->remove(cursor.get());
+    }
+}
+
+void UvHandler::add(void * h)
+{
+    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
+    UvEventManager * em = UvEventManager::getInstance();
+    assert(em != nullptr);
+    em->add(h, this);
+    _handles.push_back(Handle(h));
 }
 
 } // namespace event

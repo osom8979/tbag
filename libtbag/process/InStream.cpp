@@ -37,15 +37,24 @@ private:
     uv_write_t        _write;
 
 public:
-    PipePimpl(InStream & parent) : UvHandler(&_pipe), _parent(parent)
+    PipePimpl(InStream & parent) : _parent(parent)
     {
-        ::memset(&_pipe, 0x00, sizeof(uv_pipe_t));
+        ::memset(&_pipe, 0x00, sizeof(_pipe));
+        ::memset(&_write, 0x00, sizeof(_write));
+        add(&_pipe);
+        add(&_write);
     }
 
     ~PipePimpl()
     {
         // EMPTY.
     }
+
+public:
+    inline uv_pipe_t * getPipe()
+    { return &_pipe; }
+    inline uv_pipe_t const * getPipe() const
+    { return &_pipe; }
 
 public:
     bool write(char const * buffer, std::size_t length)
@@ -106,12 +115,12 @@ InStream::~InStream()
 
 void * InStream::getNative()
 {
-    return _pipe->getNative();
+    return _pipe->getPipe();
 }
 
 void const * InStream::getNative() const
 {
-    return _pipe->getNative();
+    return _pipe->getPipe();
 }
 
 bool InStream::write(char const * buffer, std::size_t length)
