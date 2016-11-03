@@ -119,6 +119,9 @@ public:
     bool exe(Path const & exe_path);
 
 public:
+    bool write(char * buffer, std::size_t length);
+
+public:
     int64_t getExitStatus();
     int getTerminateSignal();
 };

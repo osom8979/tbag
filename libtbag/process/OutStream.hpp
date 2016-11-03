@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <memory>
@@ -31,7 +32,7 @@ namespace process {
  * @author zer0
  * @date   2016-11-03
  */
-class OutStream : public libtbag::Noncopyable
+class TBAG_API OutStream : public libtbag::Noncopyable
 {
 public:
     struct PipePimpl;

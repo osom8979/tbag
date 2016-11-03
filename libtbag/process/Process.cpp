@@ -91,6 +91,13 @@ public:
     inline int getTerminateSignal() const TBAG_NOEXCEPT
     { return _terminate_signal; }
 
+    inline OutStream & getOut()
+    { return _out; }
+    inline OutStream & getErr()
+    { return _err; }
+    inline InStream  & getIn()
+    { return _in; }
+
 public:
     bool update(Process::Param const & param)
     {
@@ -230,6 +237,11 @@ bool Process::exe(Path const & exe_path, Path const & work_dir)
 bool Process::exe(Path const & exe_path)
 {
     return exe(exe_path, Path::getWorkDir());
+}
+
+bool Process::write(char * buffer, std::size_t length)
+{
+    return _process->getIn().write(buffer, length);
 }
 
 int64_t Process::getExitStatus()

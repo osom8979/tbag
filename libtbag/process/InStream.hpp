@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/loop/event/UvHandler.hpp>
 
 #include <memory>
@@ -31,7 +32,7 @@ namespace process {
  * @author zer0
  * @date   2016-11-03
  */
-class InStream : public libtbag::Noncopyable
+class TBAG_API InStream : public libtbag::Noncopyable
 {
 public:
     struct PipePimpl;
