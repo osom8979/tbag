@@ -66,6 +66,9 @@ public:
 public:
     void * getNative();
     void const * getNative() const;
+
+public:
+    bool startRead();
 };
 
 } // namespace process

@@ -48,6 +48,11 @@ public:
     }
 
 public:
+    bool startRead()
+    {
+        return ::uv_read_start((uv_stream_t*)&_pipe, TBAG_UV_EVENT_CALLBACK_ALLOC, TBAG_UV_EVENT_CALLBACK_READ) == 0;
+    }
+
     void reallocWithStreamBuffer(std::size_t size)
     {
         if (_buffer.size() < size) {
@@ -109,6 +114,11 @@ void * OutStream::getNative()
 void const * OutStream::getNative() const
 {
     return _pipe->getNative();
+}
+
+bool OutStream::startRead()
+{
+    return _pipe->startRead();
 }
 
 } // namespace process

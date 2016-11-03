@@ -186,16 +186,7 @@ public:
 
     bool read()
     {
-        uv_pipe_t * pipe_stdout = static_cast<uv_pipe_t*>(_out.getNative());
-        uv_pipe_t * pipe_stderr = static_cast<uv_pipe_t*>(_err.getNative());
-
-        int stdout_error_code = uv_read_start((uv_stream_t*)pipe_stdout
-                                            , TBAG_UV_EVENT_CALLBACK_ALLOC
-                                            , TBAG_UV_EVENT_CALLBACK_READ);
-        int stderr_error_code = uv_read_start((uv_stream_t*)pipe_stderr
-                                            , TBAG_UV_EVENT_CALLBACK_ALLOC
-                                            , TBAG_UV_EVENT_CALLBACK_READ);
-        return (stdout_error_code == 0 && stderr_error_code == 0? true : false);
+        return _out.startRead() && _err.startRead();
     }
 
     virtual void onExit(void * process, int64_t exit_status, int term_signal) override

@@ -12,11 +12,11 @@
 using namespace libtbag;
 using namespace libtbag::process;
 
+static char const * const EXE_NAME = "tbproc";
+using Path = libtbag::filesystem::Path;
+
 TEST(ProcessTest, ExitCodeFailure)
 {
-    char const * const EXE_NAME = "tbproc";
-
-    using Path = libtbag::filesystem::Path;
     Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
 
     Process process;
@@ -25,19 +25,40 @@ TEST(ProcessTest, ExitCodeFailure)
     ASSERT_EQ(0, process.getTerminateSignal());
 }
 
-//TEST(PipeProcessTest, StandardOutput)
-//{
-//    std::string const  TEST_STRING = "TEST_OUTPUT_MESSAGE";
-//    std::string const EMPTY_STRING = "";
-//
-//    PipeProcess process;
-//    ASSERT_TRUE(runTestProgram(&process, "out", TEST_STRING));
-//
-//    ASSERT_EQ(process.getExitStatus(), 0);
-//    ASSERT_EQ(process.getTerminateSignal(), 0);
-//    ASSERT_EQ(process.getStandardOutput(), TEST_STRING);
-//    ASSERT_EQ(process.getStandardError(), EMPTY_STRING);
-//}
+TEST(ProcessTest, StandardOutput)
+{
+    Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
+
+    std::string const  TEST_STRING = "TEST_OUTPUT_MESSAGE";
+    std::string const EMPTY_STRING = "";
+
+    std::string out_result;
+    std::string err_result;
+
+    Process process;
+    Process::Param param;
+    param.setExePath(EXE_PATH);
+    param.setWorkingDir(Path::getExeDir());
+    param.pushArggument("out");
+    param.pushArggument(TEST_STRING);
+    param.setOutReadCallback([&](OutStream::ErrorCode code, char * buffer, std::size_t length){
+        if (code == OutStream::ErrorCode::SUCCESS) {
+            out_result.assign(buffer, buffer + length);
+        }
+    });
+    param.setErrReadCallback([&](OutStream::ErrorCode code, char * buffer, std::size_t length){
+        if (code == OutStream::ErrorCode::SUCCESS) {
+            err_result.assign(buffer, buffer + length);
+        }
+    });
+
+    ASSERT_TRUE(process.exe(param));
+
+    ASSERT_EQ(0, process.getExitStatus());
+    ASSERT_EQ(0, process.getTerminateSignal());
+    ASSERT_EQ(TEST_STRING, out_result);
+    ASSERT_EQ(EMPTY_STRING, err_result);
+}
 
 //TEST(PipeProcessTest, StandardInput)
 //{
