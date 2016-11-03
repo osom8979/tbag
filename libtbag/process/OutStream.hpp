@@ -40,17 +40,17 @@ public:
     using UniquePipePimpl = std::unique_ptr<PipePimpl>;
 
 public:
-    struct OnReadCallback
-    {
-        virtual void onRead(ErrorCode code, char * buffer, std::size_t length) = 0;
-    };
-
-public:
     enum class ErrorCode
     {
         ERROR = 0,
         SUCCESS,
         END_OF_FILE
+    };
+
+public:
+    struct OnReadCallback
+    {
+        virtual void onRead(ErrorCode code, char * buffer, std::size_t length) = 0;
     };
 
 private:

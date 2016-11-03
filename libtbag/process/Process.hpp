@@ -48,6 +48,7 @@ class TBAG_API Process : public libtbag::Noncopyable
 {
 public:
     struct ProcPimpl;
+    friend struct ProcPimpl;
 
 public:
     using String    = std::basic_string<char>;

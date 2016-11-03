@@ -40,16 +40,16 @@ public:
     using UniquePipePimpl = std::unique_ptr<PipePimpl>;
 
 public:
-    struct OnWriteCallback
-    {
-        virtual void onWrite(ErrorCode code) = 0;
-    };
-
-public:
     enum class ErrorCode
     {
         ERROR = 0,
         SUCCESS,
+    };
+
+public:
+    struct OnWriteCallback
+    {
+        virtual void onWrite(ErrorCode code) = 0;
     };
 
 private:
