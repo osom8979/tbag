@@ -17,6 +17,7 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <memory>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,9 +38,6 @@ public:
     friend struct PipePimpl;
 
 public:
-    using UniquePipePimpl = std::unique_ptr<PipePimpl>;
-
-public:
     enum class ErrorCode
     {
         UNKNOWN_ERROR = 0,
@@ -48,22 +46,20 @@ public:
     };
 
 public:
-    struct OnReadCallback
-    {
-        virtual void onRead(ErrorCode code, char * buffer, std::size_t length) = 0;
-    };
+    using UniquePipePimpl = std::unique_ptr<PipePimpl>;
+    using OnReadCallback = std::function<void(ErrorCode, char*, std::size_t)>;
 
 private:
     UniquePipePimpl _pipe;
-    OnReadCallback * _callback;
+    OnReadCallback _callback;
 
 public:
-    OutStream(OnReadCallback * callback);
+    OutStream(OnReadCallback const & callback);
     OutStream();
-    virtual ~OutStream();
+    ~OutStream();
 
 public:
-    inline void setOnReadCallback(OnReadCallback * callback)
+    inline void setOnReadCallback(OnReadCallback const & callback)
     { _callback = callback; }
 
 public:

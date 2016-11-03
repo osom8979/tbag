@@ -18,6 +18,8 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/loop/event/UvHandler.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/process/OutStream.hpp>
+#include <libtbag/process/InStream.hpp>
 
 #include <cstdlib>
 
@@ -25,6 +27,7 @@
 #include <vector>
 #include <limits>
 #include <memory>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -65,6 +68,10 @@ public:
         Strings args; ///< Arguments.
         Strings envs; ///< Environment variables.
 
+        OutStream::OnReadCallback out_callback;
+        OutStream::OnReadCallback err_callback;
+        InStream::OnWriteCallback in_callback;
+
         unsigned int flags = 0;
 
         inline Param & setExePath(Path const & path)
@@ -79,6 +86,13 @@ public:
 
         inline Param & setFlags(unsigned int flag)
         { flags = flag; return *this; }
+
+        inline Param & setOutReadCallback(OutStream::OnReadCallback const & callback)
+        { out_callback = callback; return *this; }
+        inline Param & setErrReadCallback(OutStream::OnReadCallback const & callback)
+        { err_callback = callback; return *this; }
+        inline Param & setInWriteCallback(InStream::OnWriteCallback const & callback)
+        { in_callback = callback; return *this; }
     };
 
 public:
@@ -97,7 +111,7 @@ protected:
 
 public:
     Process();
-    virtual ~Process();
+    ~Process();
 
 public:
     bool exe(Param const & param);

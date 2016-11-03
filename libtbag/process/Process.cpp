@@ -7,8 +7,6 @@
 
 #include <libtbag/process/Process.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
-#include <libtbag/process/OutStream.hpp>
-#include <libtbag/process/InStream.hpp>
 
 #include <cstring>
 #include <array>
@@ -144,6 +142,10 @@ public:
         uv_pipe_t * pipe_stdout = static_cast<uv_pipe_t*>(_out.getNative());
         uv_pipe_t * pipe_stderr = static_cast<uv_pipe_t*>(_err.getNative());
         uv_pipe_t * pipe_stdin  = static_cast<uv_pipe_t*>(_in.getNative());
+
+        _out.setOnReadCallback(_param.out_callback);
+        _err.setOnReadCallback(_param.err_callback);
+        _in.setOnWriteCallback(_param.in_callback);
 
         uv_pipe_init(loop, pipe_stdin , DISABLE_IPC);
         uv_pipe_init(loop, pipe_stdout, DISABLE_IPC);

@@ -80,8 +80,8 @@ public:
             code = InStream::ErrorCode::UNKNOWN_ERROR;
         }
 
-        if (_parent._callback != nullptr) {
-            _parent._callback->onWrite(code);
+        if (static_cast<bool>(_parent._callback)) {
+            _parent._callback(code);
         }
     }
 };
@@ -90,7 +90,7 @@ public:
 // InStream implementation.
 // -------------------------
 
-InStream::InStream(OnWriteCallback * callback) : _pipe(new PipePimpl(*this)), _callback(callback)
+InStream::InStream(OnWriteCallback const & callback) : _pipe(new PipePimpl(*this)), _callback(callback)
 {
     // EMPTY.
 }

@@ -76,8 +76,8 @@ public:
             code = OutStream::ErrorCode::SUCCESS;
         }
 
-        if (_parent._callback != nullptr) {
-            _parent._callback->onRead(code, &_buffer[0], static_cast<std::size_t>(nread));
+        if (static_cast<bool>(_parent._callback)) {
+            _parent._callback(code, &_buffer[0], static_cast<std::size_t>(nread));
         }
     }
 };
@@ -86,7 +86,7 @@ public:
 // OutStream implementation.
 // -------------------------
 
-OutStream::OutStream(OnReadCallback * callback) : _pipe(new PipePimpl(*this)), _callback(callback)
+OutStream::OutStream(OnReadCallback const & callback) : _pipe(new PipePimpl(*this)), _callback(callback)
 {
     // EMPTY.
 }

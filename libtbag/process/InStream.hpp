@@ -17,6 +17,7 @@
 #include <libtbag/loop/event/UvHandler.hpp>
 
 #include <memory>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,9 +38,6 @@ public:
     friend struct PipePimpl;
 
 public:
-    using UniquePipePimpl = std::unique_ptr<PipePimpl>;
-
-public:
     enum class ErrorCode
     {
         UNKNOWN_ERROR = 0,
@@ -47,22 +45,20 @@ public:
     };
 
 public:
-    struct OnWriteCallback
-    {
-        virtual void onWrite(ErrorCode code) = 0;
-    };
+    using UniquePipePimpl = std::unique_ptr<PipePimpl>;
+    using OnWriteCallback = std::function<void(ErrorCode)>;
 
 private:
     UniquePipePimpl _pipe;
-    OnWriteCallback * _callback;
+    OnWriteCallback _callback;
 
 public:
-    InStream(OnWriteCallback * callback);
+    InStream(OnWriteCallback const & callback);
     InStream();
-    virtual ~InStream();
+    ~InStream();
 
 public:
-    inline void setOnReadCallback(OnWriteCallback * callback)
+    inline void setOnWriteCallback(OnWriteCallback const & callback)
     { _callback = callback; }
 
 public:
