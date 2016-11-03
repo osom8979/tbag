@@ -21,12 +21,6 @@
 
 #include <string>
 
-#if defined(__OS_WINDOWS__)
-#include <winsock2.h>
-#else
-#include <netinet/in.h>
-#endif
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -40,17 +34,26 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_API Server //: public libtbag::loop::event::UvEventHandler
+class TBAG_API Server : public libtbag::Noncopyable
 {
 public:
-    using Loop = libtbag::loop::UvEventLoop;
+    struct SocketPimpl;
+    friend struct SocketPimpl;
+
+public:
+    using EventLoop    = libtbag::loop::UvEventLoop;
+    using UniqueSocket = std::unique_ptr<SocketPimpl>;
 
 private:
-    Loop _loop;
-    Tcp  _tcp;
+    EventLoop    _loop;
+    UniqueSocket _socket;
 
-private:
-    sockaddr_in _sockaddr;
+public:
+    Server();
+    virtual ~Server();
+
+public:
+    bool run(std::string const & ip, int port);
 
 //public:
 //    Server();

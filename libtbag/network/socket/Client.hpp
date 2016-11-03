@@ -15,18 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/macro/attributes.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
 #include <libtbag/loop/event/UvHandler.hpp>
-#include <libtbag/network/socket/Tcp.hpp>
 
 #include <string>
-
-#if defined(__OS_WINDOWS__)
-#include <winsock2.h>
-#else
-#include <netinet/in.h>
-#endif
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,25 +35,27 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_API Client // : public libtbag::loop::event::UvEventHandler
+class TBAG_API Client : public libtbag::Noncopyable
 {
 public:
-    using Loop = libtbag::loop::UvEventLoop;
+    struct SocketPimpl;
+    friend struct SocketPimpl;
+
+public:
+    using EventLoop    = libtbag::loop::UvEventLoop;
+    using UniqueSocket = std::unique_ptr<SocketPimpl>;
 
 private:
-    Loop _loop;
-    Tcp  _tcp;
+    EventLoop    _loop;
+    UniqueSocket _socket;
 
-private:
-    sockaddr_in _sockaddr;
+public:
+    Client();
+    virtual ~Client();
 
-//public:
-//    Client();
-//    virtual ~Client();
-//
-//public:
-//    bool connect(std::string const & ip, int port);
-//
+public:
+    bool run(std::string const & ip, int port);
+
 //protected:
 //    //virtual void onAlloc(void * handle, size_t suggested_size, void * buf) override;
 //    //virtual void onRead(void * stream, ssize_t nread, void const * buf) override;

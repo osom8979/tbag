@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/network/socket/Client.hpp>
+#include <cstring>
 #include <uv.h>
 
 // -------------------
@@ -15,16 +16,76 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace socket  {
 
-//Client::Client() : _tcp(this)
-//{
-//    ::memset(&_sockaddr, 0x00, sizeof(_sockaddr));
-//}
-//
-//Client::~Client()
-//{
-//    // EMPTY.
-//}
-//
+/**
+ * Pointer to implementation of @c socket.
+ *
+ * @author zer0
+ * @date   2016-11-03
+ *
+ * @remarks
+ *  Use the libuv.
+ */
+struct Client::SocketPimpl
+{
+private:
+    Client & _parent;
+
+private:
+    uv_tcp_t     _tcp;
+    uv_connect_t _connect;
+    sockaddr_in  _sockaddr;
+
+public:
+    SocketPimpl(Client & parent) : _parent(parent)
+    {
+        ::memset(&_tcp, 0x00, sizeof(_tcp));
+        ::memset(&_connect, 0x00, sizeof(_connect));
+        ::memset(&_sockaddr, 0x00, sizeof(_sockaddr));
+    }
+
+    ~SocketPimpl()
+    {
+    }
+
+public:
+    bool connect(std::string const & ip, int port)
+    {
+        uv_loop_t * loop = static_cast<uv_loop_t*>(_parent._loop.getNative());
+        if (uv_tcp_init(loop, &_tcp) != 0) {
+            return false;
+        }
+        if (uv_ip4_addr(ip.c_str(), port, &_sockaddr) != 0) {
+            return false;
+        }
+
+        if (uv_tcp_connect(&_connect, &_tcp, (sockaddr const *)&_sockaddr, TBAG_UV_EVENT_CALLBACK_CONNECT) != 0) {
+            return false;
+        }
+
+        return true;
+    }
+};
+
+// ----------------------
+// Client implementation.
+// ----------------------
+
+Client::Client() : _socket(new SocketPimpl(*this))
+{
+}
+
+Client::~Client()
+{
+}
+
+bool Client::run(std::string const & ip, int port)
+{
+    if (_socket->connect(ip, port)) {
+        return _loop.runDefault();
+    }
+    return false;
+}
+
 //bool Client::connect(std::string const & ip, int port)
 //{
 //    ::uv_tcp_init(static_cast<uv_loop_t*>(_loop.getNative()), TBAG_TCP_NATIVE_CASTING(_tcp));
@@ -43,15 +104,15 @@ namespace socket  {
 //
 //    return _loop.runDefault();
 //}
-//
+
 //void Client::onWrite(void * req, int status)
 //{
 //    uv_write_t * uv_write = static_cast<uv_write_t*>(req);
 //    uv_close((uv_handle_t*) uv_write->handle, nullptr);
 //}
-//
+
 //uv_write_t write_request;
-//
+
 //void Client::onConnect(void * req, int status)
 //{
 //    if (status < 0) {

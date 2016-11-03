@@ -7,6 +7,7 @@
 
 #include <libtbag/network/socket/Server.hpp>
 #include <cstdlib>
+#include <cstring>
 #include <uv.h>
 
 // -------------------
@@ -20,35 +21,80 @@ namespace socket  {
 // Server implementation.
 // ----------------------
 
-//Server::Server() : _tcp(this)
-//{
-//    ::memset(&_sockaddr, 0x00, sizeof(_sockaddr));
-//}
-//
-//Server::~Server()
-//{
-//    // EMPTY.
-//}
-//
-//bool Server::runIpv4(std::string const & ip, int port)
-//{
-//    unsigned int const BIND_FLAGS = 0;
-//    static int const LISTEN_QUEUE_LIMIT = 128;
-//
-//    ::uv_tcp_init(static_cast<uv_loop_t*>(_loop.getNative()), TBAG_TCP_NATIVE_CASTING(_tcp));
-//    ::uv_ip4_addr(ip.c_str(), port, &_sockaddr);
-//    ::uv_tcp_bind(TBAG_TCP_NATIVE_CASTING(_tcp), (sockaddr const *)&_sockaddr, BIND_FLAGS);
-//
-//    int code = ::uv_listen(static_cast<uv_stream_t*>(_tcp.getNative())
-//                         , LISTEN_QUEUE_LIMIT
-//                         , (uv_connection_cb)&libtbag::loop::event::uv::onConnection);
-//    if (code != 0) {
-//        return false;
-//    }
-//
-//    return _loop.runDefault();
-//}
-//
+/**
+ * Pointer to implementation of @c socket.
+ *
+ * @author zer0
+ * @date   2016-11-03
+ *
+ * @remarks
+ *  Use the libuv.
+ */
+struct Server::SocketPimpl
+{
+private:
+    Server & _parent;
+
+private:
+    uv_tcp_t    _tcp;
+    sockaddr_in _sockaddr;
+
+public:
+    SocketPimpl(Server & parent) : _parent(parent)
+    {
+        ::memset(&_tcp, 0x00, sizeof(_tcp));
+        ::memset(&_sockaddr, 0x00, sizeof(_sockaddr));
+    }
+
+    ~SocketPimpl()
+    {
+    }
+
+public:
+    bool bindAndListen(std::string const & ip, int port)
+    {
+        unsigned int const BIND_FLAGS = 0;
+        int const LISTEN_QUEUE_LIMIT = 128;
+
+        uv_loop_t * loop = static_cast<uv_loop_t*>(_parent._loop.getNative());
+        if (uv_tcp_init(loop, &_tcp) != 0) {
+            return false;
+        }
+        if (uv_ip4_addr(ip.c_str(), port, &_sockaddr) != 0) {
+            return false;
+        }
+
+        if (uv_tcp_bind(&_tcp, (sockaddr const *)&_sockaddr, BIND_FLAGS) != 0) {
+            return false;
+        }
+        if (uv_listen((uv_stream_t*)&_tcp, LISTEN_QUEUE_LIMIT, TBAG_UV_EVENT_CALLBACK_CONNECTION) != 0) {
+            return false;
+        }
+
+        return true;
+    }
+};
+
+// ----------------------
+// Server implementation.
+// ----------------------
+
+Server::Server() : _socket(new SocketPimpl(*this))
+{
+}
+
+Server::~Server()
+{
+}
+
+bool Server::run(std::string const & ip, int port)
+{
+    if (_socket->bindAndListen(ip, port)) {
+        return _loop.runDefault();
+    }
+    return false;
+}
+
 //void Server::onAlloc(void * handle, size_t suggested_size, void * buf)
 //{
 //    uv_handle_t * uv_handle = static_cast<uv_handle_t*>(handle);
@@ -57,7 +103,7 @@ namespace socket  {
 //    uv_buf->base = (char*) ::malloc(suggested_size);
 //    uv_buf->len  = suggested_size;
 //}
-//
+
 //void Server::onRead(void * stream, ssize_t nread, void const * buf)
 //{
 //    uv_stream_t * uv_client = static_cast<uv_stream_t*>(stream);
@@ -79,7 +125,7 @@ namespace socket  {
 //        free(uv_buf->base);
 //    }
 //}
-//
+
 //void Server::onWrite(void * req, int status)
 //{
 //    uv_write_t * uv_write = static_cast<uv_write_t*>(req);
@@ -89,7 +135,7 @@ namespace socket  {
 //    }
 //    free(uv_write);
 //}
-//
+
 //void Server::onConnection(void * server, int status)
 //{
 //    uv_stream_t * uv_server = static_cast<uv_stream_t*>(server);
