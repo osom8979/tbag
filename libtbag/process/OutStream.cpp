@@ -8,6 +8,7 @@
 #include <libtbag/process/OutStream.hpp>
 #include <libtbag/loop/event/UvHandler.hpp>
 
+#include <cstring>
 #include <vector>
 #include <uv.h>
 
@@ -70,7 +71,7 @@ public:
         if (nread == UV_EOF) {
             code = OutStream::ErrorCode::END_OF_FILE;
         } else if (nread < 0){
-            code = OutStream::ErrorCode::ERROR;
+            code = OutStream::ErrorCode::UNKNOWN_ERROR;
         } else {
             code = OutStream::ErrorCode::SUCCESS;
         }

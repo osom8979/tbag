@@ -7,6 +7,7 @@
 
 #include <libtbag/process/InStream.hpp>
 
+#include <cstring>
 #include <vector>
 #include <uv.h>
 
@@ -76,7 +77,7 @@ public:
         if (status == 0) {
             code = InStream::ErrorCode::SUCCESS;
         } else {
-            code = InStream::ErrorCode::ERROR;
+            code = InStream::ErrorCode::UNKNOWN_ERROR;
         }
 
         if (_parent._callback != nullptr) {

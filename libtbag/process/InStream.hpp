@@ -42,7 +42,7 @@ public:
 public:
     enum class ErrorCode
     {
-        ERROR = 0,
+        UNKNOWN_ERROR = 0,
         SUCCESS,
     };
 

@@ -21,7 +21,7 @@ static char const * const CMD_ARGUMENT_CLIENT = "client";
 
 enum class TestMode
 {
-    ERROR = 0,
+    UNKNOWN_ERROR = 0,
     TEST,
     SERVER,
     CLIENT
@@ -45,14 +45,14 @@ int main(int argc, char **argv)
             if (args.optString(0, &ip) && args.optInteger(1, &port)) {
                 mode = TestMode::SERVER;
             } else {
-                mode = TestMode::ERROR;
+                mode = TestMode::UNKNOWN_ERROR;
             }
         });
         cmd.insert(CMD_ARGUMENT_CLIENT, [&](Args const & args){
             if (args.optString(0, &ip) && args.optInteger(1, &port)) {
                 mode = TestMode::CLIENT;
             } else {
-                mode = TestMode::ERROR;
+                mode = TestMode::UNKNOWN_ERROR;
             }
         });
         cmd.request(argc, argv);
