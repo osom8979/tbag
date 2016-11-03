@@ -110,7 +110,9 @@ public:
     ~UvHandler();
 
 public:
-    inline void * getNative() const TBAG_NOEXCEPT
+    inline void * getNative() TBAG_NOEXCEPT
+    { return _handle; }
+    inline void const * getNative() const TBAG_NOEXCEPT
     { return _handle; }
 
 public:
