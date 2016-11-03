@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/loop/event/UvHandler.hpp>
 
+#include <vector>
 #include <memory>
 #include <functional>
 
@@ -67,7 +68,8 @@ public:
     void const * getNative() const;
 
 public:
-    bool write(char * buffer, std::size_t length);
+    bool write(char const * buffer, std::size_t length);
+    bool write(std::vector<char> const & buffer);
 };
 
 } // namespace process

@@ -8,7 +8,6 @@
 #include <libtbag/process/InStream.hpp>
 
 #include <cstring>
-#include <vector>
 #include <uv.h>
 
 // -------------------
@@ -49,7 +48,7 @@ public:
     }
 
 public:
-    bool write(char * buffer, std::size_t length)
+    bool write(char const * buffer, std::size_t length)
     {
         _buffer.clear();
         _buffer.assign(buffer, buffer + length);
@@ -115,9 +114,14 @@ void const * InStream::getNative() const
     return _pipe->getNative();
 }
 
-bool InStream::write(char * buffer, std::size_t length)
+bool InStream::write(char const * buffer, std::size_t length)
 {
     return _pipe->write(buffer, length);
+}
+
+bool InStream::write(std::vector<char> const & buffer)
+{
+    return write(&buffer[0], buffer.size());
 }
 
 } // namespace process

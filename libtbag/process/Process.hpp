@@ -68,6 +68,8 @@ public:
         Strings args; ///< Arguments.
         Strings envs; ///< Environment variables.
 
+        std::vector<char> input_buffer;
+
         OutStream::OnReadCallback out_callback;
         OutStream::OnReadCallback err_callback;
         InStream::OnWriteCallback in_callback;
@@ -86,6 +88,11 @@ public:
 
         inline Param & setFlags(unsigned int flag)
         { flags = flag; return *this; }
+
+        inline Param & setInput(std::vector<char> const & buffer)
+        { input_buffer = buffer; return *this; }
+        inline Param & setInput(char const * buffer, std::size_t length)
+        { input_buffer.assign(buffer, buffer + length); return *this; }
 
         inline Param & setOutReadCallback(OutStream::OnReadCallback const & callback)
         { out_callback = callback; return *this; }
@@ -119,7 +126,7 @@ public:
     bool exe(Path const & exe_path);
 
 public:
-    bool write(char * buffer, std::size_t length);
+    bool write(char const * buffer, std::size_t length);
 
 public:
     int64_t getExitStatus();

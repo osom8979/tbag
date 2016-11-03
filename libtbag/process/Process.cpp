@@ -175,18 +175,17 @@ public:
         _options.stdio = &_stdios[0];
         _options.stdio_count = STANDARD_IO_SIZE;
 
+        if (uv_spawn(loop, &_process, &_options) != 0) {
+            return false;
+        }
+        if (_param.input_buffer.empty() == false && _in.write(_param.input_buffer) == false) {
+            return false;
+        }
+        if (_out.startRead() == false || _err.startRead() == false) {
+            return false;
+        }
+
         return true;
-    }
-
-    bool spawn()
-    {
-        uv_loop_t * loop = static_cast<uv_loop_t*>(_parent._loop->getNative());
-        return ::uv_spawn(loop, &_process, &_options) == 0;
-    }
-
-    bool read()
-    {
-        return _out.startRead() && _err.startRead();
     }
 
     virtual void onExit(void * process, int64_t exit_status, int term_signal) override
@@ -214,7 +213,7 @@ Process::~Process()
 
 bool Process::exe(Param const & param)
 {
-    if (_process->update(param) && _process->spawn() && _process->read()) {
+    if (_process->update(param)) {
         return _loop->runDefault();
     }
     return false;
@@ -230,7 +229,7 @@ bool Process::exe(Path const & exe_path)
     return exe(exe_path, Path::getWorkDir());
 }
 
-bool Process::write(char * buffer, std::size_t length)
+bool Process::write(char const * buffer, std::size_t length)
 {
     return _process->getIn().write(buffer, length);
 }
