@@ -6,10 +6,15 @@
  */
 
 #include <libtbag/loop/event/UvEventHandler.hpp>
+#include <libtbag/container/Pointer.hpp>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/lock/RwLock.hpp>
 #include <libtbag/predef.hpp>
+
 #include <cassert>
+
+#include <unordered_map>
+#include <map>
 
 #include <uv.h>
 
@@ -35,12 +40,13 @@ public:
     SINGLETON_RESTRICT(UvEventManager);
 
 public:
-    using UvEventHandler = libtbag::container::Pointer<libtbag::loop::event::UvEventHandler>;
+    using Handle = libtbag::container::Pointer<void>;
+    using Event  = libtbag::container::Pointer<UvHandler>;
 
 #if defined(__OS_MACOS__) && !defined(NDEBUG)
-    using EventHandlerSet = std::set<UvEventHandler>;
+    using EventHandlerSet = std::map<Handle, Event, Handle::Less>;
 #else
-    using EventHandlerSet = std::unordered_set<UvEventHandler, UvEventHandler::Hash>;
+    using EventHandlerSet = std::unordered_map<Handle, Event, Handle::Hash, Handle::EqualTo>;
 #endif
 
     using RwLock     = libtbag::lock::RwLock;
@@ -52,33 +58,32 @@ private:
     EventHandlerSet _handlers;
 
 public:
-    void add(UvEventHandler handler)
+    void add(void * handle, UvHandler * event)
     {
         WriteGuard guard(_rwlock);
-        _handlers.insert(handler);
+        _handlers.insert(std::make_pair(Handle(handle), Event(event)));
     }
 
-    void remove(UvEventHandler handler)
+    void remove(Handle h)
     {
         WriteGuard guard(_rwlock);
-        _handlers.erase(handler);
+        _handlers.erase(h);
     }
 
-    bool exists(UvEventHandler handler) const
+    bool exists(Handle h) const
     {
         ReadGuard guard(_rwlock);
-        return _handlers.find(handler) != _handlers.end();
+        return _handlers.find(h) != _handlers.end();
     }
 
-    UvEventHandler get(uv_handle_t * handle) const
+    Event get(uv_handle_t * handle) const
     {
         ReadGuard guard(_rwlock);
-        for (auto & cursor : _handlers) {
-            if (static_cast<bool>(cursor) && cursor->exists(handle)) {
-                return cursor;
-            }
+        auto find_itr = _handlers.find(Handle(handle));
+        if (find_itr != _handlers.end()) {
+            return find_itr->second;
         }
-        return UvEventHandler();
+        return Event();
     }
 };
 
@@ -147,35 +152,20 @@ TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo, void *, int, char const *, char co
 // UvEventHandler implementation.
 // ------------------------------
 
-UvEventHandler::UvEventHandler()
+UvHandler::UvHandler(void * h) : _handle(h)
 {
     using UvEventManager = libtbag::loop::event::uv::UvEventManager;
     UvEventManager * em = UvEventManager::getInstance();
     assert(em != nullptr);
-    em->add(this);
+    em->add(_handle, this);
 }
 
-UvEventHandler::~UvEventHandler()
+UvHandler::~UvHandler()
 {
     using UvEventManager = libtbag::loop::event::uv::UvEventManager;
     UvEventManager * em = UvEventManager::getInstance();
     assert(em != nullptr);
-    em->remove(this);
-}
-
-void UvEventHandler::add(void * handle)
-{
-    _handles.insert(UvHandle(handle));
-}
-
-void UvEventHandler::remove(void * handle)
-{
-    _handles.erase(UvHandle(handle));
-}
-
-bool UvEventHandler::exists(void * handle) const
-{
-    return _handles.find(UvHandle(handle)) != _handles.end();
+    em->remove(_handle);
 }
 
 } // namespace event

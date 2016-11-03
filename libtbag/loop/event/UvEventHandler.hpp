@@ -16,14 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/container/Pointer.hpp>
 
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
-
-#include <unordered_set>
-#include <set>
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
 typedef intptr_t ssize_t;
@@ -42,7 +37,7 @@ namespace uv {
 
 /**
  * @remarks
- *  Type definition for callback passed to uv_read_start() and uv_udp_recv_start(). @n
+ *  void definition for callback passed to uv_read_start() and uv_udp_recv_start(). @n
  *  The user must fill the supplied uv_buf_t structure with whatever size,          @n
  *  as long as it's > 0. A suggested size (65536 at the moment) is provided,        @n
  *  but it doesn't need to be honored. Setting the buffer's length to 0 will        @n
@@ -104,28 +99,18 @@ TBAG_API void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char
  * @author zer0
  * @date   2016-10-16
  */
-struct TBAG_API UvEventHandler : public Noncopyable
+struct TBAG_API UvHandler : public libtbag::Noncopyable
 {
-public:
-    using UvHandle = libtbag::container::Pointer<void>;
-
-#if defined(__OS_MACOS__) && !defined(NDEBUG)
-    using UvHandleSet = std::set<UvHandle>;
-#else
-    using UvHandleSet = std::unordered_set<UvHandle, UvHandle::Hash>;
-#endif
-
 private:
-    UvHandleSet _handles;
+    void * _handle;
 
 public:
-    UvEventHandler();
-    virtual ~UvEventHandler();
+    UvHandler(void * h);
+    ~UvHandler();
 
 public:
-    void add(void * handle);
-    void remove(void * handle);
-    bool exists(void * handle) const;
+    inline void * getNative() const TBAG_NOEXCEPT
+    { return _handle; }
 
 public:
     // formatter:off
@@ -158,6 +143,27 @@ public:
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+#define TBAG_UV_EVENT_CALLBACK_ALLOC       (uv_alloc_cb)       &libtbag::loop::event::uv::onAlloc
+#define TBAG_UV_EVENT_CALLBACK_READ        (uv_read_cb)        &libtbag::loop::event::uv::onRead
+#define TBAG_UV_EVENT_CALLBACK_WRITE       (uv_write_cb)       &libtbag::loop::event::uv::onWrite
+#define TBAG_UV_EVENT_CALLBACK_CONNECT     (uv_connect_cb)     &libtbag::loop::event::uv::onConnect
+#define TBAG_UV_EVENT_CALLBACK_SHUTDOWN    (uv_shutdown_cb)    &libtbag::loop::event::uv::onShutdown
+#define TBAG_UV_EVENT_CALLBACK_CONNECTION  (uv_connection_cb)  &libtbag::loop::event::uv::onConnection
+#define TBAG_UV_EVENT_CALLBACK_CLOSE       (uv_close_cb)       &libtbag::loop::event::uv::onClose
+#define TBAG_UV_EVENT_CALLBACK_POLL        (uv_poll_cb)        &libtbag::loop::event::uv::onPoll
+#define TBAG_UV_EVENT_CALLBACK_TIMER       (uv_timer_cb)       &libtbag::loop::event::uv::onTimer
+#define TBAG_UV_EVENT_CALLBACK_ASYNC       (uv_async_cb)       &libtbag::loop::event::uv::onAsync
+#define TBAG_UV_EVENT_CALLBACK_PREPARE     (uv_prepare_cb)     &libtbag::loop::event::uv::onPrepare
+#define TBAG_UV_EVENT_CALLBACK_CHECK       (uv_check_cb)       &libtbag::loop::event::uv::onCheck
+#define TBAG_UV_EVENT_CALLBACK_IDLE        (uv_idle_cb)        &libtbag::loop::event::uv::onIdle
+#define TBAG_UV_EVENT_CALLBACK_EXIT        (uv_exit_cb)        &libtbag::loop::event::uv::onExit
+#define TBAG_UV_EVENT_CALLBACK_WALK        (uv_walk_cb)        &libtbag::loop::event::uv::onWalk
+#define TBAG_UV_EVENT_CALLBACK_FS          (uv_fs_cb)          &libtbag::loop::event::uv::onFs
+#define TBAG_UV_EVENT_CALLBACK_WORK        (uv_work_cb)        &libtbag::loop::event::uv::onWork
+#define TBAG_UV_EVENT_CALLBACK_AFTERWORK   (uv_after_work_cb)  &libtbag::loop::event::uv::onAfterWork
+#define TBAG_UV_EVENT_CALLBACK_GETADDRINFO (uv_getaddrinfo_cb) &libtbag::loop::event::uv::onGetaddrinfo
+#define TBAG_UV_EVENT_CALLBACK_GETNAMEINFO (uv_getnameinfo_cb) &libtbag::loop::event::uv::onGetnameinfo
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOOP_EVENT_UVEVENTHANDLER_HPP__
 

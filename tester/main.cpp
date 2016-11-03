@@ -62,11 +62,13 @@ int main(int argc, char **argv)
         testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
     } else if (mode == TestMode::SERVER) {
-        libtbag::network::socket::Server server;
-        return server.runIpv4(ip, port) ? 0 : 1;
+//        libtbag::network::socket::Server server;
+//        return server.runIpv4(ip, port) ? 0 : 1;
+        return 0;
     } else if (mode == TestMode::CLIENT) {
-        libtbag::network::socket::Client client;
-        return client.connect(ip, port) ? 0 : 1;
+//        libtbag::network::socket::Client client;
+//        return client.connect(ip, port) ? 0 : 1;
+        return 0;
     } else {
         std::cout << "Argument error.\n";
         return 1;

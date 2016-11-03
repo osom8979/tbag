@@ -41,7 +41,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_API Client : public libtbag::loop::event::UvEventHandler
+class TBAG_API Client // : public libtbag::loop::event::UvEventHandler
 {
 public:
     using Loop = libtbag::loop::UvEventLoop;
@@ -53,18 +53,18 @@ private:
 private:
     sockaddr_in _sockaddr;
 
-public:
-    Client();
-    virtual ~Client();
-
-public:
-    bool connect(std::string const & ip, int port);
-
-protected:
-    //virtual void onAlloc(void * handle, size_t suggested_size, void * buf) override;
-    //virtual void onRead(void * stream, ssize_t nread, void const * buf) override;
-    virtual void onWrite(void * req, int status) override;
-    virtual void onConnect(void * req, int status) override;
+//public:
+//    Client();
+//    virtual ~Client();
+//
+//public:
+//    bool connect(std::string const & ip, int port);
+//
+//protected:
+//    //virtual void onAlloc(void * handle, size_t suggested_size, void * buf) override;
+//    //virtual void onRead(void * stream, ssize_t nread, void const * buf) override;
+//    virtual void onWrite(void * req, int status) override;
+//    virtual void onConnect(void * req, int status) override;
 };
 
 } // namespace socket

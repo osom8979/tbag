@@ -83,12 +83,10 @@ struct Pointer
     inline Type const * get() const TBAG_NOEXCEPT
     { return ptr; }
 
-    /**
-     * Specialization of class template for @c libtbag::container::Pointer.
-     *
-     * @author zer0
-     * @date   2016-10-16
-     */
+    // ------------------------
+    // Specialization of class.
+    // ------------------------
+
     struct Hash
     {
         using argument_type  = Pointer;
@@ -98,6 +96,32 @@ struct Pointer
         inline result_type operator()(argument_type const & obj) const
         {
             return std::hash<hash_base_type*>()(obj.ptr);
+        }
+    };
+
+    struct EqualTo
+    {
+        using first_argument_type  = Pointer;
+        using second_argument_type = Pointer;
+        using result_type          = bool;
+
+        inline result_type operator()(first_argument_type  const & v1
+                                    , second_argument_type const & v2) const
+        {
+            return v1 == v2;
+        }
+    };
+
+    struct Less
+    {
+        using first_argument_type  = Pointer;
+        using second_argument_type = Pointer;
+        using result_type          = bool;
+
+        inline result_type operator()(first_argument_type  const & v1
+                                    , second_argument_type const & v2) const
+        {
+            return v1 < v2;
         }
     };
 };

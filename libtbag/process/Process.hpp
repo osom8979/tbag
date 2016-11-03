@@ -45,11 +45,10 @@ TBAG_API std::string getExecutableName(std::string const & name);
  * @author zer0
  * @date   2016-05-17
  */
-class TBAG_API Process : public libtbag::loop::event::UvEventHandler
+class TBAG_API Process : public libtbag::Noncopyable
 {
 public:
     struct ProcPimpl;
-    struct ProcOptionPimpl;
 
 public:
     using Value     = char;
@@ -84,9 +83,8 @@ public:
     };
 
 public:
-    using UniqueEventLoop       = std::unique_ptr<EventLoop>;
-    using UniqueProcPimpl       = std::unique_ptr<ProcPimpl>;
-    using UniqueProcOptionPimpl = std::unique_ptr<ProcOptionPimpl>;
+    using UniqueEventLoop = std::unique_ptr<EventLoop>;
+    using UniqueProcPimpl = std::unique_ptr<ProcPimpl>;
 
 public:
     inline TBAG_CONSTEXPR static int64_t getUnknownExitCode() TBAG_NOEXCEPT
@@ -95,9 +93,8 @@ public:
     { return std::numeric_limits<int>::min(); }
 
 protected:
-    UniqueEventLoop        _loop;
-    UniqueProcPimpl        _process;
-    UniqueProcOptionPimpl  _options;
+    UniqueEventLoop _loop;
+    UniqueProcPimpl _process;
 
 private:
     int64_t _exit_status;
@@ -106,12 +103,6 @@ private:
 public:
     Process() throw(InitializeException);
     virtual ~Process();
-
-public:
-    inline int64_t getExitStatus() const TBAG_NOEXCEPT
-    { return _exit_status; }
-    inline int getTerminateSignal() const TBAG_NOEXCEPT
-    { return _terminate_signal; }
 
 private:
     bool spawn();
@@ -122,7 +113,8 @@ public:
     bool exe(Path const & exe_path);
 
 public:
-    virtual void onExit(void * process, int64_t exit_status, int term_signal) override;
+    int64_t getExitStatus();
+    int getTerminateSignal();
 };
 
 } // namespace process

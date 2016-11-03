@@ -36,22 +36,22 @@ namespace socket  {
  */
 class TBAG_API Tcp : public Noncopyable
 {
-public:
-    using Handler = libtbag::loop::event::UvEventHandler;
-
-private:
-    Handler * _handler;
-    void * _tcp;
-
-public:
-    Tcp(Handler * handler);
-    ~Tcp();
-
-public:
-    inline void * getNative() TBAG_NOEXCEPT
-    { return _tcp; }
-    inline void const * getNative() const TBAG_NOEXCEPT
-    { return _tcp; }
+//public:
+//    using Handler = libtbag::loop::event::UvEventHandler;
+//
+//private:
+//    Handler * _handler;
+//    void * _tcp;
+//
+//public:
+//    Tcp(Handler * handler);
+//    ~Tcp();
+//
+//public:
+//    inline void * getNative() TBAG_NOEXCEPT
+//    { return _tcp; }
+//    inline void const * getNative() const TBAG_NOEXCEPT
+//    { return _tcp; }
 };
 
 } // namespace network
