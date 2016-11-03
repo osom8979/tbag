@@ -33,6 +33,11 @@ std::string getExecutableName(std::string const & name)
     return name + getExecutableSuffix();
 }
 
+static int const STANDARD_INPUT_FD  = 0; ///< @c stdin
+static int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
+static int const STANDARD_ERROR_FD  = 2; ///< @c stderr
+static int const STANDARD_IO_SIZE   = 3;
+
 /**
  * Pointer to implementation of @c uv_process_t.
  *
@@ -120,6 +125,9 @@ public:
         _options.env     = &_envs_ptr[0];
         _options.flags   = _param.flags;
 
+        //_options.stdio = &this->_stdios[0];
+        //_options.stdio_count = STDIO_SIZE;
+
         return true;
     }
 
@@ -151,14 +159,10 @@ Process::~Process()
     // EMPTY.
 }
 
-bool Process::spawn()
-{
-    return _process->spawn(static_cast<uv_loop_t*>(_loop->getNative()));
-}
-
 bool Process::exe(Param const & param)
 {
-    if (_process->update(param) && spawn()) {
+    uv_loop_t * loop = static_cast<uv_loop_t*>(_loop->getNative());
+    if (_process->update(param) && _process->spawn(loop)) {
         return _loop->runDefault();
     }
     return false;

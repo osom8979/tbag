@@ -50,8 +50,7 @@ public:
     struct ProcPimpl;
 
 public:
-    using Value     = char;
-    using String    = std::basic_string<Value>;
+    using String    = std::basic_string<char>;
     using Strings   = std::vector<String>;
     using EventLoop = loop::UvEventLoop;
     using Path      = filesystem::Path;
@@ -98,9 +97,6 @@ protected:
 public:
     Process();
     virtual ~Process();
-
-private:
-    bool spawn();
 
 public:
     bool exe(Param const & param);
