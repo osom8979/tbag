@@ -75,11 +75,6 @@ public:
         // EMPTY.
     }
 
-    inline uv_process_t * getNative()
-    { return &_process; }
-    inline uv_process_t const * getNative() const
-    { return &_process; }
-
 public:
     inline int64_t getExitStatus() const TBAG_NOEXCEPT
     { return _exit_status; }
