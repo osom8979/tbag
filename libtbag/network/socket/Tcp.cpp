@@ -7,10 +7,12 @@
 
 #include <libtbag/network/socket/Tcp.hpp>
 #include <libtbag/loop/event/UvHandler.hpp>
+#include <libtbag/loop/UvEventLoop.hpp>
 
 #include <cstring>
 #include <vector>
 #include <algorithm>
+
 #include <uv.h>
 
 // -------------------

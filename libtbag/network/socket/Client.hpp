@@ -15,11 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/network/socket/Tcp.hpp>
+#include <libtbag/loop/UvEventLoop.hpp>
 
 #include <string>
-#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -62,12 +61,16 @@ public:
 
 public:
     virtual void onConnect(int status) override {}
-    virtual void onConnection(int status) override {}
     virtual void onCloseTcp() override {}
     virtual void onCloseWrite() override {}
     virtual void onCloseConnect() override {}
     virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
     virtual void onWrite(WriteErrorCode code) override {}
+
+private:
+    // Don't use this callback.
+    virtual void onConnection(int status) override {}
+
 };
 
 } // namespace socket

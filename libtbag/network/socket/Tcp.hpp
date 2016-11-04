@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/loop/UvEventLoop.hpp>
 
 #include <string>
 #include <memory>
@@ -24,6 +23,9 @@
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+// Forward declaration.
+namespace loop { class UvEventLoop; }
 
 namespace network {
 namespace socket  {
@@ -86,6 +88,10 @@ public:
 public:
     void * getTcp();
     void const * getTcp() const;
+
+public:
+    inline std::size_t getId() const
+    { return reinterpret_cast<std::size_t>(getTcp()); }
 
 public:
     bool init(libtbag::loop::UvEventLoop & loop);
