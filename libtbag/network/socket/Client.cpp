@@ -17,7 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace socket  {
 
-Client::Client()
+Client::Client() : _tcp(this)
 {
     // EMPTY.
 }
@@ -64,9 +64,7 @@ bool Client::write(char const * buffer, std::size_t length)
 
 void Client::close()
 {
-    _tcp.closeWrite();
-    _tcp.closeConnect();
-    _tcp.closeTcp();
+    _tcp.close();
 }
 
 } // namespace socket

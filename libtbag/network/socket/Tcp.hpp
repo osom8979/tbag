@@ -61,9 +61,7 @@ public:
         virtual void onConnect(int status) = 0;
         virtual void onConnection(int status) = 0;
 
-        virtual void onCloseTcp() = 0;
-        virtual void onCloseWrite() = 0;
-        virtual void onCloseConnect() = 0;
+        virtual void onClose() = 0;
 
         virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) = 0;
         virtual void onWrite(WriteErrorCode code) = 0;
@@ -79,7 +77,7 @@ private:
 public:
     Tcp(Callback * callback);
     Tcp();
-    ~Tcp();
+    virtual ~Tcp();
 
 public:
     inline void setCallback(Callback * callback)
@@ -113,9 +111,7 @@ public:
     bool write(char const * buffer, std::size_t length);
 
 public:
-    void closeTcp();
-    void closeConnect();
-    void closeWrite();
+    void close();
 
 public:
     static bool isIpv4(std::string const & ip);

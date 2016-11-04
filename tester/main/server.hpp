@@ -14,12 +14,13 @@
 #endif
 
 #include <libtbag/config.h>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-int main_server(int argc, char ** argv);
+int main_server(std::string const & ip, int port);
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

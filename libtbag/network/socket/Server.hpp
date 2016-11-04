@@ -36,7 +36,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_API Server : public libtbag::network::socket::Tcp::Callback
+class TBAG_API Server : protected libtbag::network::socket::Tcp::Callback
 {
 public:
     using Tcp = libtbag::network::socket::Tcp;
@@ -44,9 +44,33 @@ public:
     using ReadErrorCode  = Tcp::ReadErrorCode;
     using WriteErrorCode = Tcp::WriteErrorCode;
 
-    using ClientKey = std::size_t;
-    using SharedClient = std::shared_ptr<Tcp>;
-    using ClientMap = std::unordered_map<ClientKey, SharedClient>;
+public:
+    class TBAG_API AcceptedClient : public    libtbag::network::socket::Tcp
+                                  , protected libtbag::network::socket::Tcp::Callback
+                                  , public    std::enable_shared_from_this<AcceptedClient>
+    {
+    private:
+        Server & _parent;
+
+    public:
+        AcceptedClient(Server & parent);
+        virtual ~AcceptedClient();
+
+    public:
+        virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override;
+        virtual void onWrite(WriteErrorCode code) override;
+        virtual void onClose() override;
+
+    private:
+        // Don't use this callback.
+        virtual void onConnection(int status) override {}
+        virtual void onConnect(int status) override {}
+    };
+
+    using ClientKey    = std::size_t;
+    using SharedClient = std::shared_ptr<AcceptedClient>;
+    using WeakClient   = std::weak_ptr<AcceptedClient>;
+    using ClientMap    = std::unordered_map<ClientKey, SharedClient>;
 
     inline static TBAG_CONSTEXPR ClientKey getErrorKey() TBAG_NOEXCEPT
     { return std::numeric_limits<ClientKey>::max(); }
@@ -60,40 +84,48 @@ private:
 
 public:
     Server();
-    ~Server();
+    virtual ~Server();
 
 public:
     bool run(std::string const & ip, int port);
     bool runIpv4(std::string const & ip, int port);
     bool runIpv6(std::string const & ip, int port);
-
-public:
-    bool read();
     void close();
 
-    // client methods.
+// client methods.
 public:
-    bool write(ClientKey id, char const * buffer, std::size_t length);
-    bool close(ClientKey id);
+    inline WeakClient at(ClientKey id)
+    {
+        auto find_itr = _clients.find(id);
+        if (find_itr != _clients.end()) {
+            return WeakClient(find_itr->second);
+        }
+        return WeakClient();
+    }
 
 protected:
     /**
      * @warning
      *  It should be used in @c onConnection callbacks.
      */
-    ClientKey accept();
+    WeakClient accept();
 
+// CLIENT EVENT.
+public:
+    virtual void onClientClose(WeakClient client) {}
+    virtual void onClientRead(WeakClient client, ReadErrorCode code, char * buffer, std::size_t length) {}
+    virtual void onClientWrite(WeakClient client, WriteErrorCode code) {}
+
+// SERVER EVENT.
 public:
     virtual void onConnection(int status) override {}
-    virtual void onCloseTcp() override {}
-    virtual void onCloseWrite() override {}
-    virtual void onCloseConnect() override {}
-    virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
-    virtual void onWrite(WriteErrorCode code) override {}
+    virtual void onClose() override {}
 
 private:
     // Don't use this callback.
     virtual void onConnect(int status) override {}
+    virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
+    virtual void onWrite(WriteErrorCode code) override {}
 };
 
 } // namespace socket

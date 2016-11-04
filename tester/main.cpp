@@ -13,6 +13,7 @@
 #include <tester/main/server.hpp>
 #include <tester/main/client.hpp>
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
@@ -62,12 +63,12 @@ int main(int argc, char **argv)
         testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
     } else if (mode == TestMode::SERVER) {
-        return libtbag::main_server(argc, argv);
+        return libtbag::main_server(ip, port);
     } else if (mode == TestMode::CLIENT) {
-        return libtbag::main_client(argc, argv);
+        return libtbag::main_client(ip, port);
     }
 
     std::cout << "Argument error.\n";
-    return 1; // ERROR!
+    return EXIT_FAILURE;
 }
 

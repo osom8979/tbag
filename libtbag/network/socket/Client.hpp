@@ -33,7 +33,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_API Client : public libtbag::network::socket::Tcp::Callback
+class TBAG_API Client : protected libtbag::network::socket::Tcp::Callback
 {
 public:
     using Tcp = libtbag::network::socket::Tcp;
@@ -61,16 +61,13 @@ public:
 
 public:
     virtual void onConnect(int status) override {}
-    virtual void onCloseTcp() override {}
-    virtual void onCloseWrite() override {}
-    virtual void onCloseConnect() override {}
+    virtual void onClose() override {}
     virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
     virtual void onWrite(WriteErrorCode code) override {}
 
 private:
     // Don't use this callback.
     virtual void onConnection(int status) override {}
-
 };
 
 } // namespace socket

@@ -18,7 +18,40 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace socket  {
 
-Server::Server()
+// --------------------------------------
+// Server::AcceptedClient implementation.
+// --------------------------------------
+
+Server::AcceptedClient::AcceptedClient(Server & parent) : Tcp(this), _parent(parent)
+{
+    // EMPTY.
+}
+
+Server::AcceptedClient::~AcceptedClient()
+{
+    // EMPTY.
+}
+
+void Server::AcceptedClient::onClose()
+{
+    _parent.onClientClose(WeakClient(shared_from_this()));
+}
+
+void Server::AcceptedClient::onRead(ReadErrorCode code, char * buffer, std::size_t length)
+{
+    _parent.onClientRead(WeakClient(shared_from_this()), code, buffer, length);
+}
+
+void Server::AcceptedClient::onWrite(WriteErrorCode code)
+{
+    _parent.onClientWrite(WeakClient(shared_from_this()), code);
+}
+
+// ----------------------
+// Server implementation.
+// ----------------------
+
+Server::Server() : _tcp(this)
 {
     // EMPTY.
 }
@@ -53,51 +86,21 @@ bool Server::runIpv6(std::string const & ip, int port)
     return false;
 }
 
-bool Server::read()
-{
-    return _tcp.read();
-}
-
-bool Server::write(ClientKey id, char const * buffer, std::size_t length)
-{
-    auto find_itr = _clients.find(id);
-    if (find_itr != _clients.end()) {
-        if (static_cast<bool>(find_itr->second)) {
-            find_itr->second->write(buffer, length);
-        }
-    }
-    return false;
-}
-
-bool Server::close(ClientKey id)
-{
-    auto find_itr = _clients.find(id);
-    if (find_itr != _clients.end()) {
-        if (static_cast<bool>(find_itr->second)) {
-            find_itr->second->closeWrite();
-            find_itr->second->closeConnect();
-            find_itr->second->closeTcp();
-        }
-        _clients.erase(find_itr);
-        return true;
-    }
-    return false;
-}
-
-Server::ClientKey Server::accept()
-{
-    SharedClient client(new Tcp());
-    if (_clients.insert(ClientMap::value_type(client->getId(), client)).second) {
-        return client->getId();
-    }
-    return getErrorKey();
-}
-
 void Server::close()
 {
-    _tcp.closeWrite();
-    _tcp.closeConnect();
-    _tcp.closeTcp();
+    _tcp.close();
+}
+
+Server::WeakClient Server::accept()
+{
+    SharedClient client(new AcceptedClient(*this));
+    client->init(_loop);
+    if (_tcp.accept(*client.get())) {
+        if (_clients.insert(ClientMap::value_type(client->getId(), client)).second) {
+            return WeakClient(client);
+        }
+    }
+    return WeakClient();
 }
 
 } // namespace socket

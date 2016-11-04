@@ -43,7 +43,6 @@ private:
 
 public:
     std::vector<char> _read_buffer;
-    uv_buf_t          _read_buffer_info;
 
 public:
     StreamPimpl(Tcp & parent) : _parent(parent)
@@ -112,24 +111,9 @@ public:
     }
 
 public:
-    void close(uv_handle_t * handle)
+    void close()
     {
-        uv_close(handle, TBAG_UV_EVENT_CALLBACK_CLOSE);
-    }
-
-    void closeTcp()
-    {
-        close((uv_handle_t*)&_tcp); // with read handle.
-    }
-
-    void closeConnect()
-    {
-        close((uv_handle_t*)&_connect);
-    }
-
-    void closeWrite()
-    {
-        close((uv_handle_t*)&_write);
+        uv_close((uv_handle_t*)&_tcp, TBAG_UV_EVENT_CALLBACK_CLOSE);
     }
 
 public:
@@ -208,13 +192,7 @@ public:
     virtual void onClose(/*uv_handle_t*/void * handle) override
     {
         if (_parent._callback != nullptr) {
-            if (handle == &_tcp) {
-                _parent._callback->onCloseTcp();
-            } else if (handle == &_connect) {
-                _parent._callback->onCloseConnect();
-            } else if (handle == &_write) {
-                _parent._callback->onCloseWrite();
-            }
+            _parent._callback->onClose();
         }
     }
 };
@@ -309,19 +287,9 @@ bool Tcp::write(char const * buffer, std::size_t length)
     return _stream->write(buffer, length);
 }
 
-void Tcp::closeTcp()
+void Tcp::close()
 {
-    return _stream->closeTcp();
-}
-
-void Tcp::closeConnect()
-{
-    return _stream->closeConnect();
-}
-
-void Tcp::closeWrite()
-{
-    return _stream->closeWrite();
+    return _stream->close();
 }
 
 bool Tcp::isIpv4(std::string const & ip)
