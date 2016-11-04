@@ -56,23 +56,21 @@ public:
 
     struct Callback
     {
-        virtual void onConnect(int status){};
-        virtual void onConnection(int status){};
+        virtual void onConnect(int status) = 0;
+        virtual void onConnection(int status) = 0;
 
-        virtual void onCloseTcp(){};
-        virtual void onCloseWrite(){};
-        virtual void onCloseConnect(){};
+        virtual void onCloseTcp() = 0;
+        virtual void onCloseWrite() = 0;
+        virtual void onCloseConnect() = 0;
 
         virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) = 0;
         virtual void onWrite(WriteErrorCode code) = 0;
     };
 
 public:
-    using EventLoop    = libtbag::loop::UvEventLoop;
     using UniqueStream = std::unique_ptr<StreamPimpl>;
 
 private:
-    EventLoop    _loop;
     UniqueStream _stream;
     Callback *   _callback;
 

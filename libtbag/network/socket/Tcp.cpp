@@ -223,14 +223,17 @@ public:
 
 Tcp::Tcp(Callback * callback) : _stream(new StreamPimpl(*this)), _callback(callback)
 {
+    // EMPTY.
 }
 
 Tcp::Tcp() : Tcp(nullptr)
 {
+    // EMPTY.
 }
 
 Tcp::~Tcp()
 {
+    // EMPTY.
 }
 
 void * Tcp::getTcp()

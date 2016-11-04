@@ -16,8 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/loop/UvEventLoop.hpp>
-#include <libtbag/loop/event/UvHandler.hpp>
+#include <libtbag/network/socket/Tcp.hpp>
 
 #include <string>
 #include <memory>
@@ -35,19 +34,17 @@ namespace socket  {
  * @author zer0
  * @date   2016-10-14
  */
-class TBAG_API Client : public libtbag::Noncopyable
+class TBAG_API Client : public libtbag::network::socket::Tcp::Callback
 {
 public:
-    struct SocketPimpl;
-    friend struct SocketPimpl;
-
-public:
-    using EventLoop    = libtbag::loop::UvEventLoop;
-    using UniqueSocket = std::unique_ptr<SocketPimpl>;
+    using Tcp = libtbag::network::socket::Tcp;
+    using EventLoop = libtbag::loop::UvEventLoop;
+    using ReadErrorCode  = Tcp::ReadErrorCode;
+    using WriteErrorCode = Tcp::WriteErrorCode;
 
 private:
-    EventLoop    _loop;
-    UniqueSocket _socket;
+    EventLoop _loop;
+    Tcp _tcp;
 
 public:
     Client();
@@ -55,6 +52,22 @@ public:
 
 public:
     bool run(std::string const & ip, int port);
+    bool runIpv4(std::string const & ip, int port);
+    bool runIpv6(std::string const & ip, int port);
+
+public:
+    bool read();
+    bool write(char const * buffer, std::size_t length);
+    void close();
+
+public:
+    virtual void onConnect(int status) override {}
+    virtual void onConnection(int status) override {}
+    virtual void onCloseTcp() override {}
+    virtual void onCloseWrite() override {}
+    virtual void onCloseConnect() override {}
+    virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
+    virtual void onWrite(WriteErrorCode code) override {}
 };
 
 } // namespace socket
