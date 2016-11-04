@@ -7,11 +7,11 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/libtbag.h>
-
 #include <libtbag/string/Commander.hpp>
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/network/socket/Server.hpp>
-#include <libtbag/network/socket/Client.hpp>
+
+#include <tester/main/server.hpp>
+#include <tester/main/client.hpp>
 
 #include <iostream>
 #include <string>
@@ -62,14 +62,12 @@ int main(int argc, char **argv)
         testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
     } else if (mode == TestMode::SERVER) {
-        libtbag::network::socket::Server server;
-        return server.run(ip, port) ? 0 : 1;
+        return libtbag::main_server(argc, argv);
     } else if (mode == TestMode::CLIENT) {
-        libtbag::network::socket::Client client;
-        return client.run(ip, port) ? 0 : 1;
-    } else {
-        std::cout << "Argument error.\n";
-        return 1;
+        return libtbag::main_client(argc, argv);
     }
+
+    std::cout << "Argument error.\n";
+    return 1; // ERROR!
 }
 
