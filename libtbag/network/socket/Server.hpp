@@ -110,6 +110,10 @@ protected:
      */
     WeakClient accept();
 
+public:
+    inline std::string getPeerName() const
+    { return _tcp.getPeerName(); }
+
 // CLIENT EVENT.
 public:
     virtual void onClientClose(WeakClient client) {}

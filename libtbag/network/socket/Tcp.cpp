@@ -132,6 +132,67 @@ public:
     }
 
 public:
+    static std::string getIpName(sockaddr_in * address)
+    {
+        char name[16] = {0,}; // e.g. 255.255.255.255
+        if (uv_ip4_name(address, name, sizeof(name)) == 0) {
+            return std::string(name);
+        }
+        return std::string();
+    }
+
+    static std::string getIpName(sockaddr_in6 * address)
+    {
+        char name[40] = {0,}; // e.g. 2001:0db8:85a3:08d3:1319:8a2e:0370:7334
+        if (uv_ip6_name(address, name, sizeof(name)) == 0) {
+            return std::string(name);
+        }
+        return std::string();
+    }
+
+    static std::string getPeerName(uv_tcp_t const * handle)
+    {
+        sockaddr addr;
+        ::memset(&addr, 0x00, sizeof(addr));
+        int length = sizeof(addr);
+
+        if (uv_tcp_getpeername(handle, &addr, &length) == 0) {
+            if (addr.sa_family == AF_INET) {
+                return getIpName((sockaddr_in*)&addr);
+            } else if (addr.sa_family == AF_INET6) {
+                return getIpName((sockaddr_in6*)&addr);
+            }
+        }
+        return std::string();
+    }
+
+    static std::string getSocketName(uv_tcp_t const * handle)
+    {
+        sockaddr addr;
+        ::memset(&addr, 0x00, sizeof(addr));
+        int length = sizeof(addr);
+
+        if (uv_tcp_getsockname(handle, &addr, &length) == 0) {
+            if (addr.sa_family == AF_INET) {
+                return getIpName((sockaddr_in*)&addr);
+            } else if (addr.sa_family == AF_INET6) {
+                return getIpName((sockaddr_in6*)&addr);
+            }
+        }
+        return std::string();
+    }
+
+    std::string getPeerName() const
+    {
+        return getPeerName(&_tcp);
+    }
+
+    std::string getSocketName() const
+    {
+        return getSocketName(&_tcp);
+    }
+
+public:
     virtual void onConnect(/*uv_connect_t*/void * req, int status) override
     {
         if (_parent._callback != nullptr) {
@@ -275,6 +336,16 @@ bool Tcp::listen()
 bool Tcp::accept(Tcp & client)
 {
     return _stream->accept((uv_tcp_t*)client.getTcp());
+}
+
+std::string Tcp::getSocketName() const
+{
+    return _stream->getSocketName();
+}
+
+std::string Tcp::getPeerName() const
+{
+    return _stream->getPeerName();
 }
 
 bool Tcp::read()

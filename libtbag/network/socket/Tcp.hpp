@@ -107,6 +107,10 @@ public:
     bool accept(Tcp & client);
 
 public:
+    std::string getSocketName() const;
+    std::string getPeerName() const;
+
+public:
     bool read();
     bool write(char const * buffer, std::size_t length);
 

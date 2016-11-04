@@ -32,10 +32,11 @@ public:
     virtual void onConnection(int status) override
     {
         std::cout.setf(std::ios_base::boolalpha);
-        std::cout << "- onConnection(" << (status == 0 ? true : false) << ")\n";
+        std::cout << "- onConnection(" << (status == 0 ? true : false) << ") \n";
 
         std::cout << "[ACCEPT]\n";
         if (SharedClient shared_client = accept().lock()) {
+            std::cout << "- accept address: " << shared_client->getSocketName() << std::endl;
             std::cout << "[READ]\n";
             shared_client->read();
         }
