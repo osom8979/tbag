@@ -66,9 +66,9 @@ public:
         _buffer_info.len  =  _buffer.size();
 
         int error_code = uv_write(
-                  &this->_write
-                , (uv_stream_t*)&this->_pipe
-                , &this->_buffer_info
+                  &_write
+                , (uv_stream_t*)&_pipe
+                , &_buffer_info
                 , 1
                 , TBAG_UV_EVENT_CALLBACK_WRITE);
 
