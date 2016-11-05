@@ -107,7 +107,7 @@ macro (tbag_protobuf__generate_cpp __sources __headers __protos)
     tbag_protobuf__generate ("${__sources}" "${__headers}" cpp "${__protos}")
 endmacro ()
 
-macro (tbag_protobuf__generate_py __sources __headers __protos)
-    tbag_protobuf__generate ("${__sources}" "${__headers}" python "${__protos}")
+macro (tbag_protobuf__generate_py __sources __protos)
+    tbag_protobuf__generate ("${__sources}" __unused_header__ python "${__protos}")
 endmacro ()
 
