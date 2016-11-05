@@ -36,7 +36,7 @@ namespace socket  {
  * @author zer0
  * @date   2016-11-04
  */
-class Tcp : public libtbag::Noncopyable
+class TBAG_API Tcp : public libtbag::Noncopyable
 {
 public:
     struct StreamPimpl;
