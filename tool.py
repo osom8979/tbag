@@ -84,7 +84,9 @@ def main():
     command, options = parseArguments(sys.argv)
     if command is None or command == CMD_HELP:
         return
-    eval('main_{}(options)'.format(command))
+    elif command == CMD_CLASS:
+        main_class(options)
 
 if __name__ == '__main__':
     main()
+

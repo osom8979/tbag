@@ -14,11 +14,14 @@
 #endif
 
 #include <${CONFIG_HEADER_PATH}>
+#include <libtbag/Noncopyable.hpp>
 // TODO: include preprocessor.
 
 // ${NAMESPACE_OPEN_COMMENT}
 ${NAMESPACE_OPEN}
 // ${NAMESPACE_OPEN_COMMENT}
+
+${NAMESPACE_BEGIN}
 
 // TODO: Forward declaration.
 
@@ -28,25 +31,17 @@ ${NAMESPACE_OPEN}
  * @author ${AUTHOR}
  * @date   ${DATE}
  */
-class ${CLASSNAME} /** : public Noncopyable */
+class ${CLASSNAME} : public Noncopyable
 {
 private:
     // TODO: Insert member variables.
 
 public:
     ${CLASSNAME}();
-    ${CLASSNAME}(${CLASSNAME} const & obj);
-    ${CLASSNAME}(${CLASSNAME} && obj);
     virtual ~${CLASSNAME}();
-
-public:
-    ${CLASSNAME} & operator =(${CLASSNAME} const & obj);
-    ${CLASSNAME} & operator =(${CLASSNAME} && obj);
-
-public:
-    ${CLASSNAME} & copy(${CLASSNAME} const & obj);
-    void swap(${CLASSNAME} & obj);
 };
+
+${NAMESPACE_END}
 
 // ${NAMESPACE_CLOSE_COMMENT}
 ${NAMESPACE_CLOSE}

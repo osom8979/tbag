@@ -11,51 +11,19 @@
 ${NAMESPACE_OPEN}
 // ${NAMESPACE_OPEN_COMMENT}
 
+${NAMESPACE_BEGIN}
+
 ${CLASSNAME}::${CLASSNAME}()
 {
-    // TODO: Insert default constructor.
-}
-
-${CLASSNAME}::${CLASSNAME}(${CLASSNAME} const & obj)
-{
-    this->copy(obj);
-}
-
-${CLASSNAME}::${CLASSNAME}(${CLASSNAME} && obj)
-{
-    this->swap(obj);
+    // EMPTY.
 }
 
 ${CLASSNAME}::~${CLASSNAME}()
 {
-    // TODO: Insert destructor.
+    // EMPTY.
 }
 
-${CLASSNAME} & ${CLASSNAME}::operator =(${CLASSNAME} const & obj)
-{
-    return this->copy(obj);
-}
-
-${CLASSNAME} & ${CLASSNAME}::operator =(${CLASSNAME} && obj)
-{
-    this->swap(obj);
-    return *this;
-}
-
-${CLASSNAME} & ${CLASSNAME}::copy(${CLASSNAME} const & obj)
-{
-    if (this != &obj) {
-        // TODO: Insert copy code.
-    }
-    return *this;
-}
-
-void ${CLASSNAME}::swap(${CLASSNAME} & obj)
-{
-    if (this != &obj) {
-        // TODO: Insert swap code.
-    }
-}
+${NAMESPACE_END}
 
 // ${NAMESPACE_CLOSE_COMMENT}
 ${NAMESPACE_CLOSE}

@@ -63,6 +63,8 @@ addGlobalString('NAMESPACE_OPEN')
 addGlobalString('NAMESPACE_CLOSE')
 addGlobalString('NAMESPACE_OPEN_COMMENT')
 addGlobalString('NAMESPACE_CLOSE_COMMENT')
+addGlobalString('NAMESPACE_BEGIN')
+addGlobalString('NAMESPACE_END')
 
 def getDate():
     today = datetime.date.today()
@@ -88,6 +90,29 @@ def getIncludeGuard(namespace, classpath, extension):
     return '__INCLUDE_' + namespace.upper() + '__' + \
         classpath.replace('/', '_').upper() + \
         extension.replace('.', '_').upper() + '__'
+
+def getMaxLength(names):
+    maxlen = 0
+    for name in names:
+        if len(name) > maxlen:
+            maxlen = len(name)
+    return maxlen
+
+def getNamespaceGuard(names):
+    maxlen = getMaxLength(names)
+    result = ''
+    for name in names:
+        more_space = maxlen - len(name)
+        result += "namespace {}{} {{\n".format(name, ' ' * more_space)
+    return result.strip()
+
+def getNamespaceBegin(classpath):
+    return getNamespaceGuard(classpath.split('/')[1:])
+
+def getNamespaceEnd(classpath):
+    dirs = classpath.split('/')[1:]
+    dirs.reverse()
+    return getNamespaceGuard(dirs)
 
 def readFile(path):
     if os.path.isfile(path):
@@ -119,6 +144,9 @@ def createDefaultDictionary(classpath):
     dic[AUTHOR]    = getpass.getuser()
     dic[DATE]      = getDate()
     dic[CLASSNAME] = dic[CLASSPATH][dic[CLASSPATH].rfind('/') + 1:]
+
+    dic[NAMESPACE_BEGIN] = getNamespaceBegin(classpath)
+    dic[NAMESPACE_END] = getNamespaceEnd(classpath)
 
     dic[HEADER_FILENAME] = dic[CLASSNAME] + dic[CPP_HEADER_EXTENSION]
     dic[SOURCE_FILENAME] = dic[CLASSNAME] + dic[CPP_SOURCE_EXTENSION]
@@ -169,3 +197,4 @@ if __name__ == '__main__':
 
     generateCppClass(sys.argv[1])
     pass
+

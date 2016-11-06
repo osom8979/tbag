@@ -1,7 +1,8 @@
 
-import genclass as GEN_CLASS
+import genclass
 
 __add__ = ['genClass']
 
 def genClass(classpath):
-    GEN_CLASS.generateCppClass(classpath)
+    genclass.generateCppClass(classpath)
+
