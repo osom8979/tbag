@@ -98,7 +98,10 @@ def getMaxLength(names):
             maxlen = len(name)
     return maxlen
 
-def getNamespaceGuard(names):
+def getNamespaceBegin(classpath):
+    names = classpath.split('/')[1:-1]
+    if len(names) == 0:
+        return ''
     maxlen = getMaxLength(names)
     result = ''
     for name in names:
@@ -106,13 +109,15 @@ def getNamespaceGuard(names):
         result += "namespace {}{} {{\n".format(name, ' ' * more_space)
     return result.strip()
 
-def getNamespaceBegin(classpath):
-    return getNamespaceGuard(classpath.split('/')[1:])
-
 def getNamespaceEnd(classpath):
-    dirs = classpath.split('/')[1:]
-    dirs.reverse()
-    return getNamespaceGuard(dirs)
+    names = classpath.split('/')[1:-1]
+    names.reverse()
+    if len(names) == 0:
+        return ''
+    result = ''
+    for name in names:
+        result += "}} // namespace {}\n".format(name)
+    return result.strip()
 
 def readFile(path):
     if os.path.isfile(path):
