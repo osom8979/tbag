@@ -277,6 +277,17 @@ macro (tbag_modules__apply_boost)
     list (APPEND TBAG_PROJECT_LDFLAGS      ${Boost_LIBRARIES})
 endmacro ()
 
+macro (tbag_modules__apply_boost_include)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+endmacro ()
+
+macro (tbag_modules__apply_boost_libs)
+    foreach (__lib_cursor ${ARGN})
+        string (TOUPPER "${__lib_cursor}" __lib_upper_name)
+        list (APPEND TBAG_PROJECT_LDFLAGS "${Boost_${__lib_upper_name}_LIBRARY}")
+    endforeach ()
+endmacro ()
+
 macro (tbag_modules__check_gflags)
     if (NOT GFlags_FOUND)
         message (WARNING "Not found Google-gflags.")
