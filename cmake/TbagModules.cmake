@@ -31,9 +31,9 @@ endmacro ()
 ## -----------------
 
 macro (tbag_modules__apply_default)
-    string (TOUPPER "${TBAG_PROJECT_CONST_NAME}" __tbag_project_upper_name)
-    list (APPEND TBAG_PROJECT_DEFINITIONS  ${__tbag_project_upper_name})
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${TBAG_PROJECT_CONST_DIR_PATH})
+    #string (TOUPPER "${TBAG_PROJECT_CONST_NAME}" __tbag_project_upper_name)
+    #list (APPEND TBAG_PROJECT_DEFINITIONS  ${__tbag_project_upper_name})
+    list  (APPEND TBAG_PROJECT_INCLUDE_DIRS ${TBAG_PROJECT_CONST_DIR_PATH})
 
     if (UNIX AND APPLE AND IS_DIRECTORY "${THIRD_PREFIX}")
         list (APPEND TBAG_PROJECT_LDFLAGS "-Wl,-rpath,${THIRD_PREFIX}/lib"
