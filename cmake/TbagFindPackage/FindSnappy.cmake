@@ -8,6 +8,10 @@
 #  Snappy_INCLUDE_DIRS
 #  Snappy_LIBRARIES
 
+if (Snappy_FOUND)
+    return ()
+endif ()
+
 set (__headers "snappy.h")
 set (__libs    "snappy")
 

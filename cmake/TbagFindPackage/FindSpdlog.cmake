@@ -8,6 +8,10 @@
 #  Spdlog_INCLUDE_DIRS
 #  Spdlog_LIBRARIES
 
+if (Spdlog_FOUND)
+    return ()
+endif ()
+
 set (__headers "spdlog/spdlog.h")
 set (__libs    "")
 

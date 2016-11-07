@@ -7,7 +7,10 @@
 #  Tbag_FOUND
 #  Tbag_INCLUDE_DIRS
 #  Tbag_LIBRARIES
-#  Tbag_IS_STATIC
+
+if (Tbag_FOUND)
+    return ()
+endif ()
 
 set (__headers "libtbag/config.h")
 set (__libs    "tbag")
@@ -19,14 +22,4 @@ endif ()
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")
-
-set (Tbag_IS_STATIC OFF)
-if (Tbag_FOUND)
-    foreach (__lib_cursor ${Tbag_LIBRARIES})
-        if (${__lib_cursor} MATCHES ".*${CMAKE_STATIC_LIBRARY_SUFFIX}$")
-            set (Tbag_IS_STATIC ON)
-            break ()
-        endif ()
-    endforeach ()
-endif ()
 

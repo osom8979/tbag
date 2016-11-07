@@ -8,6 +8,10 @@
 #  OpenBLAS_INCLUDE_DIRS
 #  OpenBLAS_LIBRARIES
 
+if (OpenBLAS_FOUND)
+    return ()
+endif ()
+
 #set (__headers "openblas_config.h")
 set  (__headers "cblas.h")
 set  (__libs    "openblas")

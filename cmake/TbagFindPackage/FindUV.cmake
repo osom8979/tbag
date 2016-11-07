@@ -8,6 +8,10 @@
 #  UV_INCLUDE_DIRS
 #  UV_LIBRARIES
 
+if (UV_FOUND)
+    return ()
+endif ()
+
 set (__headers "uv.h")
 set (__libs    "uv")
 

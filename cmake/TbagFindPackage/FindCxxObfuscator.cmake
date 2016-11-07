@@ -7,6 +7,10 @@
 #  CxxObfuscator_FOUND
 #  CxxObfuscator_COMPILER
 
+if (CxxObfuscator_FOUND)
+    return ()
+endif ()
+
 set (CxxObfuscator_SEARCH_PATHS
     "/usr/bin"
     "/usr/local/bin"

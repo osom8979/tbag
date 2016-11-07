@@ -8,6 +8,10 @@
 #  GFlags_INCLUDE_DIRS
 #  GFlags_LIBRARIES
 
+if (GFlags_FOUND)
+    return ()
+endif ()
+
 set (__headers "gflags/gflags.h")
 set (__libs    "gflags")
 

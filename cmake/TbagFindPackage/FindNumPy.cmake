@@ -5,6 +5,10 @@
 #  NumPy_INCLUDE_DIRS
 #  NumPy_VERSION
 
+if (NumPy_FOUND)
+    return ()
+endif ()
+
 if (NOT PYTHONINTERP_FOUND)
     message (WARNING "FindNumpy: Not found Python interpreter.")
 endif ()

@@ -8,6 +8,10 @@
 #  NCurses_INCLUDE_DIRS
 #  NCurses_LIBRARIES
 
+if (NCurses_FOUND)
+    return ()
+endif ()
+
 set (__headers "ncurses/curses.h")
 set (__libs    "ncurses")
 

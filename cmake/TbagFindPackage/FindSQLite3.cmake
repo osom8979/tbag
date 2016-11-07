@@ -8,6 +8,10 @@
 #  SQLite3_INCLUDE_DIRS
 #  SQLite3_LIBRARIES
 
+if (SQLite3_FOUND)
+    return ()
+endif ()
+
 set (__headers "sqlite3.h")
 set (__libs    "sqlite3")
 

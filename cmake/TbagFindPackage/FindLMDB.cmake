@@ -8,6 +8,10 @@
 #  LMDB_INCLUDE_DIRS
 #  LMDB_LIBRARIES
 
+if (LMDB_FOUND)
+    return ()
+endif ()
+
 set (__headers "lmdb.h")
 set (__libs    "lmdb")
 

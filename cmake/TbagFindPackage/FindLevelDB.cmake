@@ -8,6 +8,10 @@
 #  LevelDB_INCLUDE_DIRS
 #  LevelDB_LIBRARIES
 
+if (LevelDB_FOUND)
+    return ()
+endif ()
+
 set (__headers "leveldb/options.h")
 set (__libs    "leveldb")
 

@@ -16,6 +16,10 @@
 #    find_package (HDF5)
 #  </code>
 
+if (HDF5v2_FOUND)
+    return ()
+endif ()
+
 if ((WIN32 AND MINGW) AND NOT CYGWIN AND NOT MSYS)
     # Don't use CMAKE_STATIC_LIBRARY_PREFIX variable.
     set (__hdf5_lib_c_name  "libhdf5")

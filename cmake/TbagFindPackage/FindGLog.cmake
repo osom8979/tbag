@@ -8,6 +8,10 @@
 #  GLog_INCLUDE_DIRS
 #  GLog_LIBRARIES
 
+if (GLog_FOUND)
+    return ()
+endif ()
+
 set (__headers "glog/logging.h")
 set (__libs    "glog")
 

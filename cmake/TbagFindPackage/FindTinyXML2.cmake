@@ -8,6 +8,10 @@
 #  TinyXML2_INCLUDE_DIRS
 #  TinyXML2_LIBRARIES
 
+if (TinyXML2_FOUND)
+    return ()
+endif ()
+
 set (__headers "tinyxml2.h")
 set (__libs    "tinyxml2")
 

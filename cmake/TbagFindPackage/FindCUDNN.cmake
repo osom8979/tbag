@@ -8,6 +8,10 @@
 #  CUDNN_INCLUDE_DIRS
 #  CUDNN_LIBRARIES
 
+if (CUDNN_FOUND)
+    return ()
+endif ()
+
 set (CUDNN_ROOT_INCLUDE_PATHS "/usr/cuda/include"
                               "/usr/local/cuda/include"
                               "${CUDA_TOOLKIT_ROOT_DIR}/include"

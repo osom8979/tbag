@@ -8,6 +8,10 @@
 #  ICU_INCLUDE_DIRS
 #  ICU_LIBRARIES
 
+if (ICU_FOUND)
+    return ()
+endif ()
+
 set (__headers "unicode/utf.h")
 set (__libs    "icuuc" "icui18n" "icudata")
 
