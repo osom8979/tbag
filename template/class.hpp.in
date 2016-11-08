@@ -1,6 +1,6 @@
 /**
  * @file   ${HEADER_FILENAME}
- * @brief  ${HEADER_BRIEF}
+ * @brief  ${CLASSNAME} class prototype.
  * @author ${AUTHOR}
  * @date   ${DATE}
  */
@@ -21,12 +21,12 @@
 ${NAMESPACE_OPEN}
 // ${NAMESPACE_OPEN_COMMENT}
 
-${NAMESPACE_BEGIN}
+${NAMESPACE_LIST_BEGIN}
 
 // TODO: Forward declaration.
 
 /**
- * ${HEADER_BRIEF}
+ * ${CLASSNAME} class prototype.
  *
  * @author ${AUTHOR}
  * @date   ${DATE}
@@ -41,7 +41,7 @@ public:
     virtual ~${CLASSNAME}();
 };
 
-${NAMESPACE_END}
+${NAMESPACE_LIST_END}
 
 // ${NAMESPACE_CLOSE_COMMENT}
 ${NAMESPACE_CLOSE}

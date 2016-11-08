@@ -55,16 +55,15 @@ addGlobalString('HEADER_FILENAME')
 addGlobalString('SOURCE_FILENAME')
 addGlobalString('HEADER_FILEPATH')
 addGlobalString('SOURCE_FILEPATH')
-addGlobalString('HEADER_BRIEF')
-addGlobalString('SOURCE_BRIEF')
 addGlobalString('INCLUDE_GUARD')
 addGlobalString('INCLUDE_PAIR')
 addGlobalString('NAMESPACE_OPEN')
 addGlobalString('NAMESPACE_CLOSE')
 addGlobalString('NAMESPACE_OPEN_COMMENT')
 addGlobalString('NAMESPACE_CLOSE_COMMENT')
-addGlobalString('NAMESPACE_BEGIN')
-addGlobalString('NAMESPACE_END')
+addGlobalString('NAMESPACE_LIST_BEGIN')
+addGlobalString('NAMESPACE_LIST_END')
+addGlobalString('NAMESPACE_LIST_USING')
 
 def getDate():
     today = datetime.date.today()
@@ -98,7 +97,7 @@ def getMaxLength(names):
             maxlen = len(name)
     return maxlen
 
-def getNamespaceBegin(classpath):
+def getNamespaceListBegin(classpath):
     names = classpath.split('/')[1:-1]
     if len(names) == 0:
         return ''
@@ -109,7 +108,7 @@ def getNamespaceBegin(classpath):
         result += "namespace {}{} {{\n".format(name, ' ' * more_space)
     return result.strip()
 
-def getNamespaceEnd(classpath):
+def getNamespaceListEnd(classpath):
     names = classpath.split('/')[1:-1]
     names.reverse()
     if len(names) == 0:
@@ -117,6 +116,18 @@ def getNamespaceEnd(classpath):
     result = ''
     for name in names:
         result += "}} // namespace {}\n".format(name)
+    return result.strip()
+
+def getNamespaceListUsing(classpath):
+    names = classpath.split('/')[0:-1]
+    if len(names) == 0:
+        return ''
+    result = ''
+    append = ''
+    for name in names:
+        append += name
+        result += "using namespace {};\n".format(append)
+        append += '::'
     return result.strip()
 
 def readFile(path):
@@ -150,8 +161,9 @@ def createDefaultDictionary(classpath):
     dic[DATE]      = getDate()
     dic[CLASSNAME] = dic[CLASSPATH][dic[CLASSPATH].rfind('/') + 1:]
 
-    dic[NAMESPACE_BEGIN] = getNamespaceBegin(classpath)
-    dic[NAMESPACE_END] = getNamespaceEnd(classpath)
+    dic[NAMESPACE_LIST_BEGIN] = getNamespaceListBegin(classpath)
+    dic[NAMESPACE_LIST_END] = getNamespaceListEnd(classpath)
+    dic[NAMESPACE_LIST_USING] = getNamespaceListUsing(classpath)
 
     dic[HEADER_FILENAME] = dic[CLASSNAME] + dic[CPP_HEADER_EXTENSION]
     dic[SOURCE_FILENAME] = dic[CLASSNAME] + dic[CPP_SOURCE_EXTENSION]
@@ -162,9 +174,6 @@ def createDefaultDictionary(classpath):
     dic[SOURCE_FILEPATH] = os.path.normpath(SOURCE_DIR + '/' +
                                             dic[CLASSPATH] +
                                             dic[CPP_SOURCE_EXTENSION])
-
-    dic[HEADER_BRIEF] = dic[CLASSNAME] + ' class prototype.'
-    dic[SOURCE_BRIEF] = dic[CLASSNAME] + ' class implementation.'
 
     dic[INCLUDE_GUARD] = getIncludeGuard(dic[PROJECT_NAMESPACE],
                                          dic[CLASSPATH],

@@ -1,0 +1,18 @@
+/**
+ * @file   ${CLASSNAME}Test.cpp
+ * @brief  ${CLASSNAME} class tester.
+ * @author ${AUTHOR}
+ * @date   ${DATE}
+ */
+
+#include <gtest/gtest.h>
+#include <${INCLUDE_PAIR}>
+
+${NAMESPACE_LIST_USING}
+
+TEST(${CLASSNAME}Test, Default)
+{
+    ${CLASSNAME} object;
+    ASSERT_TRUE(true);
+}
+
