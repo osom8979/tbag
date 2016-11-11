@@ -77,7 +77,7 @@ function (tabg_cuda__find_detect_arch __result)
                 "    return 0;"
                 "}")
 
-        execute_process (COMMAND "${CUDA_NVCC_EXECUTABLE}" "--run" "${__cuda_source_file}"
+        execute_process (COMMAND "${CUDA_NVCC_EXECUTABLE}" "--run" "${__cuda_source_file}" "-ccbin" "${CMAKE_CXX_COMPILER}"
                 WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/CMakeFiles/"
                 RESULT_VARIABLE __nvcc_exit_code
                 OUTPUT_VARIABLE __nvcc_output
