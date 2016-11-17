@@ -255,6 +255,12 @@ macro (tbag_modules__apply_dep_uv)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_dep_z)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES z)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/zlib)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:z>)
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

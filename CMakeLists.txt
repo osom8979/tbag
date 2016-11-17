@@ -59,6 +59,7 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lmdb)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lzma)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/zlib)
 
 ## Lua settings.
 option (USE_LUA "Don't use the LUA library." OFF)
