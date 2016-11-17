@@ -19,7 +19,7 @@ endfunction ()
 
 function (check_include_and_define __header __define)
     check_include_file (${__header} ${__define})
-    if (DEFINED ${__define})
+    if (${__define})
         add_definitions (-D${__define}=1)
     elseif ()
         add_definitions (-D${__define}=0)
