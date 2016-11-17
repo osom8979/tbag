@@ -14,6 +14,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 // -------------------
@@ -28,7 +29,7 @@ namespace archive {
  * @author zer0
  * @date   2016-11-17
  */
-class Zip : public Noncopyable
+class TBAG_API Zip : public Noncopyable
 {
 public:
     Zip();
