@@ -63,6 +63,16 @@ bool Lzma::read(std::string const & path)
     return false;
 }
 
+Lzma::ResultCode Lzma::encode(Param const & param)
+{
+    return ResultCode::FAILURE;
+}
+
+Lzma::ResultCode Lzma::decode(Param const & param)
+{
+    return ResultCode::FAILURE;
+}
+
 } // namespace archive
 
 // --------------------

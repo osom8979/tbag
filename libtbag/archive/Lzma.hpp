@@ -34,6 +34,23 @@ namespace archive {
 class TBAG_API Lzma : public Noncopyable
 {
 public:
+    enum class ResultCode
+    {
+        UNKNOWN = 0,
+        SUCCESS,
+        FAILURE,
+    };
+
+    struct Param
+    {
+        uint8_t * input_data;
+        uint8_t * output_data;
+
+        std::size_t input_size;
+        std::size_t output_size;
+    };
+
+public:
     struct LzmaPimpl;
     using UniqueLzmaPimpl = std::unique_ptr<LzmaPimpl>;
 
@@ -47,6 +64,10 @@ public:
 public:
     bool write(std::string const & path);
     bool read(std::string const & path);
+
+public:
+    static ResultCode encode(Param const & param);
+    static ResultCode decode(Param const & param);
 };
 
 } // namespace archive
