@@ -7,6 +7,7 @@
 
 #include <libtbag/archive/Zip.hpp>
 #include <cassert>
+#include <cstring>
 #include <zlib.h>
 
 // -------------------
