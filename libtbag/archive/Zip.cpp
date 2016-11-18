@@ -107,7 +107,7 @@ Zip::ResultCode Zip::encode(Buffer & output, uint8_t const * input, std::size_t 
 
 Zip::ResultCode Zip::decode(Buffer & output, uint8_t const * input, std::size_t size)
 {
-    return coding(output, input, size);
+    return coding(output, input, size, DECODE_LEVEL);
 }
 
 } // namespace archive
