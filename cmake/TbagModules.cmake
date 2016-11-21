@@ -230,6 +230,12 @@ macro (tbag_modules__apply_dep_lzma)
     tbag_modules__add_whole_archive ($<TARGET_FILE:lzma>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_minizip)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES minizip)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/minizip)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:minizip>)
+endmacro ()
+
 macro (tbag_modules__apply_dep_sqlite3)
     list (APPEND TBAG_PROJECT_DEPENDENCIES sqlite3)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/sqlite3)
