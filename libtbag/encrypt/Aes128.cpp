@@ -8,6 +8,7 @@
 #include <libtbag/encrypt/Aes128.hpp>
 #include <libtbag/3rd/tinyaes128c/aes.h>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/Common.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -83,6 +84,17 @@ std::size_t Aes128::decrypt(Buffer & output, Key const & key, uint8_t const * in
     return coding(output, key, input, size, AES_DECODE);
 }
 
+bool Aes128::createParentDirectory(std::string const & dir)
+{
+    using Path = filesystem::Path;
+    if (Path(dir).getCanonical().getParent().isDirectory() == false) {
+        if (Path(dir).getCanonical().getParent().createDirWithRecursive() == false) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Aes128::encryptFile(std::string const & output, Key const & key, std::string const & input)
 {
     using Path = filesystem::Path;
@@ -92,10 +104,8 @@ bool Aes128::encryptFile(std::string const & output, Key const & key, std::strin
     if (output_path.exists() == true || input_path.exists() == false) {
         return false;
     }
-    if (output_path.getCanonical().getParent().isDirectory() == false) {
-        if (output_path.getCanonical().getParent().createDirWithRecursive() == false) {
-            return false;
-        }
+    if (createParentDirectory(output) == false) {
+        return false;
     }
 
     std::size_t const  INPUT_SIZE = input_path.size();
@@ -140,10 +150,8 @@ bool Aes128::decryptFile(std::string const & output, Key const & key, std::strin
     if (output_path.exists() == true || input_path.exists() == false) {
         return false;
     }
-    if (output_path.getCanonical().getParent().isDirectory() == false) {
-        if (output_path.getCanonical().getParent().createDirWithRecursive() == false) {
-            return false;
-        }
+    if (createParentDirectory(output) == false) {
+        return false;
     }
 
     std::size_t const INPUT_SIZE = input_path.size();
@@ -178,6 +186,58 @@ bool Aes128::decryptFile(std::string const & output, Key const & key, std::strin
     output_file.close();
 
     return true;
+}
+
+bool Aes128::encryptDir(std::string const & output_dir, Key const & key, std::string const & input_dir)
+{
+    using Path = filesystem::Path;
+    Path  input_path(input_dir);
+    Path output_path(output_dir);
+
+    // @formatter:off
+    if (createParentDirectory( input_dir) == false) { return false; }
+    if (createParentDirectory(output_dir) == false) { return false; }
+    // @formatter:on
+
+    bool result = true;
+
+    for (auto & cursor : libtbag::filesystem::common::scanDir(input_dir)) {
+        auto current_path = (input_path / cursor).getCanonical();
+
+        if (current_path.isRegularFile()) {
+            result &= encryptFile(output_path / cursor, key, current_path);
+        } else if (current_path.isDirectory()) {
+            result &= encryptDir(output_path / cursor, key, current_path);
+        }
+    }
+
+    return result;
+}
+
+bool Aes128::decryptDir(std::string const & output_dir, Key const & key, std::string const & input_dir)
+{
+    using Path = filesystem::Path;
+    Path  input_path(input_dir);
+    Path output_path(output_dir);
+
+    // @formatter:off
+    if (createParentDirectory( input_dir) == false) { return false; }
+    if (createParentDirectory(output_dir) == false) { return false; }
+    // @formatter:on
+
+    bool result = true;
+
+    for (auto & cursor : libtbag::filesystem::common::scanDir(input_dir)) {
+        auto current_path = (input_path / cursor).getCanonical();
+
+        if (current_path.isRegularFile()) {
+            result &= decryptFile(output_path / cursor, key, current_path);
+        } else if (current_path.isDirectory()) {
+            result &= decryptDir(output_path / cursor, key, current_path);
+        }
+    }
+
+    return result;
 }
 
 } // namespace encrypt

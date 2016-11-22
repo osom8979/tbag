@@ -154,3 +154,64 @@ TEST(Aes128Test, EncodeAndDecode_File)
     if ( DEC_PATH.exists()) {  DEC_PATH.remove(); }
 }
 
+TEST(Aes128Test, EncodeAndDecode_Dir)
+{
+    std::string const TEST_DIR     = "__tester_encrypt_aes128test_encodeanddecode_dir__";
+    std::string const TEST_ENC_DIR = "__tester_encrypt_aes128test_encodeanddecode_dir__enc__";
+    std::string const TEST_DEC_DIR = "__tester_encrypt_aes128test_encodeanddecode_dir__dec__";
+    std::string const TEST_CONTENT = "0123456789";
+
+    std::string const TEST_SUB_DIR  = "dir";
+    std::string const TEST_SUB_FILE = "file";
+
+    using Path = libtbag::filesystem::Path;
+
+    Path const TEST_PATH(TEST_DIR);
+    Path const  ENC_PATH(TEST_ENC_DIR);
+    Path const  DEC_PATH(TEST_DEC_DIR);
+
+    // @formatter:off
+    if (TEST_PATH.exists()) { TEST_PATH.removeDirWithRecursive(); }
+    if ( ENC_PATH.exists()) {  ENC_PATH.removeDirWithRecursive(); }
+    if ( DEC_PATH.exists()) {  DEC_PATH.removeDirWithRecursive(); }
+    // @formatter:on
+
+    Path const TEST_SUB_PATH(TEST_PATH / TEST_SUB_DIR);
+    TEST_SUB_PATH.getCanonical().createDirWithRecursive();
+
+    ASSERT_TRUE(TEST_SUB_PATH.isDirectory());
+    {   // Create test file.
+        std::ofstream f((TEST_SUB_PATH / TEST_SUB_FILE).getString(), std::ios_base::binary);
+        f.write(&TEST_CONTENT[0], TEST_CONTENT.size());
+        f.close();
+    }
+
+    Aes128::Key key;
+    key.fill(0x00);
+
+    ASSERT_TRUE(Aes128::encryptDir(ENC_PATH, key, TEST_PATH));
+    ASSERT_TRUE(Aes128::decryptDir(DEC_PATH, key, ENC_PATH));
+
+    Path const TEST_DEC_PATH(DEC_PATH / TEST_SUB_DIR / TEST_SUB_FILE);
+    ASSERT_TRUE(TEST_DEC_PATH.isRegularFile());
+
+    std::string result;
+
+    {   // Read result file.
+        std::size_t const DEC_FILE_SIZE = TEST_DEC_PATH.size();
+        result.resize(DEC_FILE_SIZE);
+
+        std::ifstream f(TEST_DEC_PATH.getString(), std::ios_base::binary);
+        f.read(&result[0], DEC_FILE_SIZE);
+        f.close();
+    }
+
+    ASSERT_EQ(TEST_CONTENT, result);
+
+    // @formatter:off
+    if (TEST_PATH.exists()) { TEST_PATH.removeDirWithRecursive(); }
+    if ( ENC_PATH.exists()) {  ENC_PATH.removeDirWithRecursive(); }
+    if ( DEC_PATH.exists()) {  DEC_PATH.removeDirWithRecursive(); }
+    // @formatter:on
+}
+
