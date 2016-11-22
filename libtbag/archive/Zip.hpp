@@ -43,6 +43,9 @@ public:
         FAILURE,
 
         INIT_ERROR,
+        OPEN_ERROR,
+        GO_TO_FIRST_FILE_ERROR,
+        OPEN_CURRENT_FILE_ERROR,
     };
 
     static int const DEFAULT_ENCODE_LEVEL = 6;
@@ -62,6 +65,10 @@ private:
 public:
     static ResultCode encode(Buffer & output, uint8_t const * input, std::size_t size, int level = DEFAULT_ENCODE_LEVEL);
     static ResultCode decode(Buffer & output, uint8_t const * input, std::size_t size);
+
+public:
+    static ResultCode   zip(std::string const & file, std::string const & dir);
+    static ResultCode unzip(std::string const & file, std::string const & dir);
 };
 
 } // namespace archive

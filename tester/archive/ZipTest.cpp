@@ -40,3 +40,8 @@ TEST(ZipTest, Default)
     ASSERT_EQ(TEST_BODY, result);
 }
 
+TEST(ZipTest, unzip)
+{
+    Zip::unzip("tiny.zip", "");
+}
+
