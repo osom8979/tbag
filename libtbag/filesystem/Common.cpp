@@ -58,6 +58,23 @@ std::string getExeDir()
     return path.substr(0, last_separator_index);
 }
 
+std::string getOsTempDir()
+{
+    return getRepresentationDirectory(&uv_os_tmpdir);
+}
+
+std::string createUniqueTempDir(std::string const & prefix)
+{
+    std::string const PATH_TEMPLATE = prefix + "TB_XXXXXX";
+    uv_fs_t request;
+    std::string result;
+    if (uv_fs_mkdtemp(nullptr, &request, PATH_TEMPLATE.c_str(), nullptr) == 0) {
+        result = request.path;
+    }
+    uv_fs_req_cleanup(&request);
+    return result;
+}
+
 bool checkAccessMode(std::string const & path, int mode)
 {
     uv_fs_t request;

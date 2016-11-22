@@ -109,6 +109,12 @@ TBAG_API std::string getExePath();
 /** Obtain executable file directory. */
 TBAG_API std::string getExeDir();
 
+/** Obtain OS temp directory. */
+TBAG_API std::string getOsTempDir();
+
+/** Create unique temp directory. */
+TBAG_API std::string createUniqueTempDir(std::string const & prefix);
+
 /**
  * List of access mode.
  *

@@ -26,6 +26,12 @@ TEST(CommonTest, GetPathSeparator)
 #endif
 }
 
+TEST(CommonTest, createUniqueTempDir)
+{
+    std::cout << "Create unique temp dir: " << createUniqueTempDir(getOsTempDir()) << std::endl;
+    std::cout << "Create unique temp dir: " << createUniqueTempDir(getOsTempDir()) << std::endl;
+}
+
 TEST(CommonTest, RepresentationDirectory)
 {
     using namespace std;
