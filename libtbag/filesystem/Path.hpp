@@ -216,6 +216,8 @@ public:
 
     std::vector<Path> scanDir() const;
 
+    std::size_t size() const;
+
 // Special directories.
 public:
     static Path getWorkDir();

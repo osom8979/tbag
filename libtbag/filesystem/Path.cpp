@@ -8,6 +8,8 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/Common.hpp>
 
+#include <fstream>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -426,6 +428,15 @@ std::vector<Path> Path::scanDir() const
         result.push_back(Path(_path) / path);
     }
     return result;
+}
+
+std::size_t Path::size() const
+{
+    std::ifstream f(getCanonicalString(), std::ios_base::ate | std::ios_base::binary);
+    if (f.eof() == false && f.fail() == false) {
+        return f.tellg();
+    }
+    return 0;
 }
 
 Path Path::getWorkDir()

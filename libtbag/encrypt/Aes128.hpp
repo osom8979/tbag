@@ -54,6 +54,10 @@ public:
 public:
     static std::size_t encrypt(Buffer & output, Key const & key, uint8_t const * input, std::size_t size);
     static std::size_t decrypt(Buffer & output, Key const & key, uint8_t const * input, std::size_t size);
+
+public:
+    static bool encryptFile(std::string const & output, Key const & key, std::string const & input);
+    static bool decryptFile(std::string const & output, Key const & key, std::string const & input);
 };
 
 } // namespace encrypt
