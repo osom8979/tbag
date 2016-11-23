@@ -17,8 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/animation/TimeInterpolator.hpp>
 
-#include <cmath>
-#include <cstdlib>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,10 +35,13 @@ namespace animation {
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  */
-class TBAG_API FrameInterpolator : public TimeInterpolator<std::chrono::microseconds>
+class TBAG_API FrameInterpolator : public TimeInterpolator<int>
 {
 public:
-    using Parent = TimeInterpolator<std::chrono::microseconds>;
+    using Parent = TimeInterpolator<int>;
+    using Rep    = Parent::Rep;
+
+    static_assert(std::is_integral<Rep>::value, "Rep is not integral type.");
 
 private:
     /**
@@ -47,30 +49,29 @@ private:
      *
      * @translate{ko, 연산을 시작할 기준 시간.}
      */
-    Rep _start = 0;
+    Rep _start;
 
-    /** Frames per milliseconds (FPS). */
-    int _fps = 1;
-
-    /** Total frame count. */
-    int _frame_count = 1;
+    int _fps;    ///< Frames per milliseconds (FPS).
+    int _fcount; ///< Total frame count.
 
 public:
-    FrameInterpolator() TBAG_NOEXCEPT = default;
-    virtual ~FrameInterpolator() TBAG_NOEXCEPT = default;
+    FrameInterpolator() TBAG_NOEXCEPT : _start(), _fps(1), _fcount(1)
+    { /* EMPTY. */ }
+    virtual ~FrameInterpolator() TBAG_NOEXCEPT
+    { /* EMPTY. */ }
 
 public:
     inline void setStart(Rep start) TBAG_NOEXCEPT
     { _start = start; }
     inline void setFps(int fps) TBAG_NOEXCEPT
     { _fps = fps; }
-    inline void setFrameSize(int frame_count) TBAG_NOEXCEPT
-    { _frame_count = frame_count; }
-    inline void set(Rep start, int fps, int frame_count) TBAG_NOEXCEPT
+    inline void setFrameSize(int fcount) TBAG_NOEXCEPT
+    { _fcount = fcount; }
+    inline void set(Rep start, int fps, int fcount) TBAG_NOEXCEPT
     {
-        _start = start;
-        _fps = fps;
-        _frame_count = frame_count;
+        _start  = start;
+        _fps    = fps;
+        _fcount = fcount;
     }
 
 public:
@@ -82,7 +83,7 @@ public:
      * @remarks
      *  Example code:
      *  @code{.cpp}
-     *   int frame_number = static_cast<int>(animation.getInterpolation(millisec));
+     *   int frame_number = animation.getInterpolation(millisec);
      *  @endcode
      */
     virtual Rep getInterpolation(Rep rep) TBAG_NOEXCEPT override;

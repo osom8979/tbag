@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/animation/FrameInterpolator.hpp>
+#include <cstdlib>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -13,12 +14,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-FrameInterpolator::Rep FrameInterpolator::getInterpolation(FrameInterpolator::Rep rep) TBAG_NOEXCEPT
+FrameInterpolator::Rep FrameInterpolator::getInterpolation(Rep rep) TBAG_NOEXCEPT
 {
-    if (_fps == 0 || _frame_count == 0) {
+    if (_fps == 0 || _fcount == 0) {
         return 0;
     }
-    return std::abs((rep - _start) / _fps % _frame_count /* + 0.5f */);
+    return std::abs((rep - _start) / _fps % _fcount /* + 0.5f */);
 }
 
 } // namespace animation

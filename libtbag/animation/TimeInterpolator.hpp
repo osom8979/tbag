@@ -16,9 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#include <chrono>
-#include <type_traits>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -35,19 +32,11 @@ namespace animation {
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  */
-template <typename DurationType = std::chrono::microseconds>
+template <typename RepType>
 struct TimeInterpolator
 {
-public:
-    using Duration = DurationType;
-    using Rep      = typename Duration::rep;
-    using Period   = typename Duration::period;
+    using Rep = RepType;
 
-public:
-    TBAG_CONSTEXPR TimeInterpolator() TBAG_NOEXCEPT = default;
-    virtual  ~TimeInterpolator() TBAG_NOEXCEPT = default;
-
-public:
     /**
      * Virtual function that returns an interpolated value.
      *
