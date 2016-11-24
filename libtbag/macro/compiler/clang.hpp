@@ -44,6 +44,14 @@
 # if __has_feature(cxx_deleted_functions)
 # define TBAG_HAS_DELETED_FUNCTIONS
 # endif
+
+# if !__has_feature(cxx_inline_namespaces)
+#  define TBAG_HAS_INLINE_NAMESPACES
+# endif
+
+# if __has_feature(cxx_override_control)
+#  define TBAG_HAS_FINAL
+# endif
 #endif // defined(__COMP_CLANG__)
 // FEATURE CLOSE.
 // ==============

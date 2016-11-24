@@ -70,6 +70,14 @@
 #  define TBAG_HAS_RANGE_BASED_FOR
 #  define TBAG_HAS_UNIFIED_INITIALIZATION_SYNTAX
 # endif
+
+// C++0x features in 4.7.n and later
+#if (__COMP_GNUC_VERSION__ >= 40700)
+#  define TBAG_HAS_FINAL
+#  define TBAG_HAS_TEMPLATE_ALIASES
+#  define TBAG_HAS_USER_DEFINED_LITERALS
+#  define TBAG_HAS_FIXED_LENGTH_VARIADIC_TEMPLATE_EXPANSION_PACKS
+#endif
 #endif // defined(__COMP_GNUC_CXX__)
 // FEATURE CLOSE.
 // ==============

@@ -13,9 +13,12 @@
 #pragma once
 #endif
 
-// OS.
-#include <libtbag/macro/os/windows.hpp>
+// Operating System.
+#include <libtbag/macro/os/apple.hpp>
 #include <libtbag/macro/os/cygwin.hpp>
+#include <libtbag/macro/os/linux.hpp>
+#include <libtbag/macro/os/unix.hpp>
+#include <libtbag/macro/os/windows.hpp>
 
 // Compiler.
 #include <libtbag/macro/compiler/gcc.hpp>
@@ -92,48 +95,6 @@
 # define TBAG_CONSTRUCTOR
 # define TBAG_DESTRUCTOR
 #endif // defined(TBAG_EXPORT_API)
-
-// -------------
-// CXX Features.
-// -------------
-
-#ifndef TBAG_CONSTEXPR
-# if defined(TBAG_HAS_CONSTEXPR)
-#  define TBAG_CONSTEXPR constexpr
-# else
-#  define TBAG_CONSTEXPR
-# endif
-#endif
-
-#ifndef TBAG_NOEXCEPT
-# if defined(TBAG_HAS_NOEXCEPT)
-#  define TBAG_NOEXCEPT noexcept
-#  define TBAG_NOEXCEPT_EXPR(e) noexcept(e)
-# else
-#  define TBAG_NOEXCEPT
-#  define TBAG_NOEXCEPT_EXPR(e)
-# endif
-#endif
-
-/**
- * @def TBAG_DEFAULTED_FUNCTIONS
- *
- * @warning
- * move constructors and move assignment operators example:
- * @code{.cpp}
- * #if defind(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
- *  class(class && v) TBAG_DEFAULTED_FUNCTIONS;
- *  class & operator =(class && v) TBAG_DEFAULTED_FUNCTIONS;
- * #endif
- * @endcode
- */
-#ifndef TBAG_DEFAULTED_FUNCTIONS
-# if defined(TBAG_HAS_DEFAULTED_FUNCTIONS)
-#  define TBAG_DEFAULTED_FUNCTIONS =default
-# else
-#  define TBAG_DEFAULTED_FUNCTIONS
-# endif
-#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_ATTRIBUTES_HPP__
 

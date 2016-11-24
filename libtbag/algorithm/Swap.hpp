@@ -32,13 +32,12 @@ namespace algorithm {
  *  @c std::swap is more advantageous for optimization.
  */
 template <typename T>
-inline void swapWithPod(T & a, T & b)
+inline void swapWithPod(T & a, T & b) TBAG_NOEXCEPT
 {
     static_assert(std::is_pod<T>::value, "Not POD type.");
-
-    a ^= b;
-    b ^= a;
-    a ^= b;
+    // @formatter:off
+    a ^= b; b ^= a; a ^= b;
+    // @formatter:on
 }
 
 } // namespace algorithm

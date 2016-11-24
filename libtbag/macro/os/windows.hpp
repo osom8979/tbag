@@ -50,5 +50,28 @@
 # endif
 #endif // defined(__OS_WINDOWS__)
 
+// -----------------
+// Windows platform.
+// -----------------
+
+#if defined(__MINGW32__) || defined(__MINGW64__)
+#define __PLAT_MINGW__
+#endif
+
+#if defined(__OS_WINDOWS) && \
+    (!defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP))
+#define __PLAT_WINDOWS_DESKTOP__
+#endif
+
+#if defined(__OS_WINDOWS) && \
+    defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
+#define __PLAT_WINDOWS_STORE__
+#endif
+
+#if defined(__OS_WINDOWS) && \
+    defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP)
+#define __PLAT_WINDOWS_PHONE__
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_WINDOWS_HPP__
 
