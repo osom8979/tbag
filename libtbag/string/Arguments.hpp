@@ -15,7 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Exception.hpp>
 #include <libtbag/string/Strings.hpp>
 #include <libtbag/geometry/Point.hpp>
 #include <libtbag/geometry/Rect.hpp>
@@ -28,6 +27,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+char const * const DEFAULT_ARGUMENTS_DELIMITER       = ",";
+char const * const DEFAULT_ARGUMENTS_POINT_DELIMITER = "x";
+
 /**
  * Arguments class prototype.
  *
@@ -36,15 +38,10 @@ namespace string {
  */
 class TBAG_API Arguments
 {
-public:
-    inline static TBAG_CONSTEXPR char const * const getDefaultDelimiter() TBAG_NOEXCEPT
-    { return ","; }
-    inline static TBAG_CONSTEXPR char const * const getDefaultPointDelimiter() TBAG_NOEXCEPT
-    { return "x"; }
-
 private:
     std::string _name;
     std::vector<std::string> _args;
+
     std::string _delimiter;
     std::string _point_delimiter;
 
@@ -52,8 +49,8 @@ public:
     Arguments();
     Arguments(std::string const & name
             , std::string const & arguments
-            , std::string const & delimiter       = getDefaultDelimiter()
-            , std::string const & point_delimiter = getDefaultPointDelimiter());
+            , std::string const & delimiter       = DEFAULT_ARGUMENTS_DELIMITER
+            , std::string const & point_delimiter = DEFAULT_ARGUMENTS_POINT_DELIMITER);
     ~Arguments();
 
 public:

@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/string/Arguments.hpp>
+#include <libtbag/Exception.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -17,8 +18,8 @@ namespace string {
 Arguments::Arguments()
         : _name()
         , _args()
-        , _delimiter(getDefaultDelimiter())
-        , _point_delimiter(getDefaultPointDelimiter())
+        , _delimiter(DEFAULT_ARGUMENTS_DELIMITER)
+        , _point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
 {
     // EMPTY.
 }
