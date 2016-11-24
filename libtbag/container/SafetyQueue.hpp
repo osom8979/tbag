@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Exception.hpp>
 
 #include <memory>
 #include <mutex>
@@ -44,6 +43,14 @@ public:
 
     using Mutex = MutexType;
     using Guard = std::lock_guard<Mutex>;
+
+    enum class Code
+    {
+        UNKNOWN = 0,
+        SUCCESS,
+        FAILURE,
+        EMPTY_CONTAINER,
+    };
 
 private:
     mutable Mutex _mutex;
@@ -90,35 +97,37 @@ public:
         }
     }
 
-    void popUntil(std::size_t size) throw(ContainerEmptyException)
+    Code popUntil(std::size_t size)
     {
         Guard guard(_mutex);
         while (_queue.size() > size) {
             if (_queue.empty()) {
-                throw ContainerEmptyException();
+                return Code::EMPTY_CONTAINER;
             }
             _queue.pop();
         }
+        return Code::SUCCESS;
     }
 
-    Value front() throw(ContainerEmptyException)
+    Code front(Value & result)
     {
         Guard guard(_mutex);
         if (_queue.empty() == true) {
-            throw ContainerEmptyException();
+            return Code::EMPTY_CONTAINER;
         }
-        return _queue.front();
+        result = _queue.front();
+        return Code::SUCCESS;
     }
 
-    Value frontAndPop() throw(ContainerEmptyException)
+    Code frontAndPop(Value & result)
     {
         Guard guard(_mutex);
         if (_queue.empty()) {
-            throw ContainerEmptyException();
+            return Code::EMPTY_CONTAINER;
         }
-        Value result = _queue.front();
+        result = _queue.front();
         _queue.pop();
-        return result;
+        return Code::SUCCESS;
     }
 };
 

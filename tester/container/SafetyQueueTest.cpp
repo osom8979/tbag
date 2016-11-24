@@ -16,20 +16,25 @@ using namespace libtbag::container;
 
 TEST(SafetyQueueTest, Default)
 {
-    SafetyQueue<int> queue;
+    using Queue = SafetyQueue<int>;
+    Queue queue;
+    int result = 0;
 
     queue.push(10);
     ASSERT_EQ(1U, queue.size());
-    ASSERT_EQ(10, queue.front());
+    ASSERT_EQ(Queue::Code::SUCCESS, queue.front(result));
+    ASSERT_EQ(10, result);
 
     queue.push(20);
     queue.push(30);
     ASSERT_EQ(3U, queue.size());
-    ASSERT_EQ(10, queue.front());
+    ASSERT_EQ(Queue::Code::SUCCESS, queue.front(result));
+    ASSERT_EQ(10, result);
 
     queue.pop();
     ASSERT_EQ(2U, queue.size());
-    ASSERT_EQ(20, queue.front());
+    ASSERT_EQ(Queue::Code::SUCCESS, queue.front(result));
+    ASSERT_EQ(20, result);
 
     queue.clear();
     ASSERT_EQ(0U, queue.size());
@@ -51,10 +56,14 @@ TEST(SafetyQueueTest, PopUntil)
 
 TEST(SafetyQueueTest, SpinLock)
 {
-    SafetyQueue<int, lock::SpinLock> queue;
+    using Queue = SafetyQueue<int, lock::SpinLock>;
+    Queue queue;
+    int result = 0;
+
     queue.push(10);
     ASSERT_EQ(1U, queue.size());
-    ASSERT_EQ(10, queue.frontAndPop());
+    ASSERT_EQ(Queue::Code::SUCCESS, queue.frontAndPop(result));
+    ASSERT_EQ(10, result);
     ASSERT_EQ(0U, queue.size());
 }
 
