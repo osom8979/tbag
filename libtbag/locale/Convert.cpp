@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/locale/Convert.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 
@@ -19,6 +20,42 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace locale  {
 
+/**
+ * UConverter initializer helper class.
+ *
+ * @author zer0
+ * @date   2016-11-24
+ */
+struct Converter : public Noncopyable
+{
+    UConverter * converter;
+    UErrorCode   status;
+
+    Converter(std::string const & charset) : converter(nullptr), status(U_ZERO_ERROR)
+    {
+        converter = ucnv_open(charset.c_str(), &status);
+    }
+
+    ~Converter()
+    {
+        if (converter != nullptr) {
+            ucnv_close(converter);
+        }
+    }
+
+    inline UConverter * get()
+    { return converter; }
+
+    inline UErrorCode getStatus() const
+    { return status; }
+    inline int getIntegerStatus() const
+    { return static_cast<int>(status); }
+};
+
+// --------------------
+// Main implementation.
+// --------------------
+
 std::vector<std::string> getAvailableConverterNames()
 {
     std::vector<std::string> result;
@@ -29,58 +66,58 @@ std::vector<std::string> getAvailableConverterNames()
     return result;
 }
 
-std::string convertFromUtf8(std::string const & utf8
-                          , std::string const & to_charset) throw (ConvertException)
+bool convertFromUtf8(std::string const & utf8, std::string const & to_charset, std::string & result)
 {
-    UErrorCode status = U_ZERO_ERROR;
-    UConverter * converter = ucnv_open(to_charset.c_str(), &status);
+    Converter converter(to_charset);
 
-    if (U_FAILURE(status)) {
-        throw ConvertException(u_errorName(status));
+    if (U_FAILURE(converter.getStatus())) {
+        __tbag_error_f("convertFromUtf8() error[{}] {}", converter.getIntegerStatus(), u_errorName(converter.getStatus()));
+        return false;
     }
 
-    assert(converter != nullptr);
-    status = U_ZERO_ERROR;
+    assert(converter.get() != nullptr);
 
     icu::UnicodeString unicode = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8.c_str()));
-    int32_t result_size = ucnv_fromUChars(converter, nullptr, 0, unicode.getBuffer(), unicode.length(), &status);
+    UErrorCode status = U_ZERO_ERROR;
+
+    int32_t result_size = ucnv_fromUChars(converter.get(), nullptr, 0, unicode.getBuffer(), unicode.length(), &status);
 
     if (status != U_BUFFER_OVERFLOW_ERROR) {
-        throw ConvertException(u_errorName(status));
+        __tbag_error_f("convertFromUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        return false;
     }
 
     assert(result_size > 0);
     status = U_ZERO_ERROR;
 
-    std::string result;
     result.resize(result_size);
-    result_size = ucnv_fromUChars(converter, &result[0], result.size(), unicode.getBuffer(), unicode.length(), &status);
+    result_size = ucnv_fromUChars(converter.get(), &result[0], result.size(), unicode.getBuffer(), unicode.length(), &status);
 
     if (U_FAILURE(status)) {
-        throw ConvertException(u_errorName(status));
+        __tbag_error_f("convertFromUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        return false;
     }
 
-    ucnv_close(converter);
-    return result;
+    return true;
 }
 
-std::string convertToUtf8(std::string const & from_string
-                        , std::string const & from_charset) throw (ConvertException)
+bool convertToUtf8(std::string const & from_string, std::string const & from_charset, std::string & result)
 {
-    UErrorCode status = U_ZERO_ERROR;
-    UConverter * converter = ucnv_open(from_charset.c_str(), &status);
+    Converter converter(from_charset);
 
-    if (U_FAILURE(status)) {
-        throw ConvertException(u_errorName(status));
+    if (U_FAILURE(converter.getStatus())) {
+        __tbag_error_f("convertToUtf8() error[{}] {}", converter.getIntegerStatus(), u_errorName(converter.getStatus()));
+        return false;
     }
 
-    assert(converter != nullptr);
-    status = U_ZERO_ERROR;
+    assert(converter.get() != nullptr);
 
-    int32_t result_size = ucnv_toUChars(converter, nullptr, 0, from_string.c_str(), from_string.size(), &status);
+    UErrorCode status = U_ZERO_ERROR;
+    int32_t result_size = ucnv_toUChars(converter.get(), nullptr, 0, from_string.c_str(), from_string.size(), &status);
 
     if (status != U_BUFFER_OVERFLOW_ERROR) {
-        throw ConvertException(u_errorName(status));
+        __tbag_error_f("convertToUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        return false;
     }
 
     assert(result_size > 0);
@@ -89,19 +126,18 @@ std::string convertToUtf8(std::string const & from_string
     std::vector<UChar> unicode_buffer;
     unicode_buffer.resize(result_size + 1);
     unicode_buffer.at(result_size) = '\0';
-    result_size = ucnv_toUChars(converter, &unicode_buffer[0], unicode_buffer.size(), from_string.c_str(), from_string.size(), &status);
+    result_size = ucnv_toUChars(converter.get(), &unicode_buffer[0], unicode_buffer.size(), from_string.c_str(), from_string.size(), &status);
 
     if (U_FAILURE(status)) {
-        throw ConvertException(u_errorName(status));
+        __tbag_error_f("convertToUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        return false;
     }
 
-    ucnv_close(converter);
-
     icu::UnicodeString unicode(&unicode_buffer[0]);
-    std::string result;
+    result.clear();
     unicode.toUTF8String(result);
 
-    return result;
+    return true;
 }
 
 } // namespace locale

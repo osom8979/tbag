@@ -26,38 +26,13 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace locale  {
 
-/**
- * Convert exception class.
- *
- * @author zer0
- * @date   2016-07-03
- */
-struct ConvertException : public std::exception
-{
-    std::string _message;
-
-    ConvertException(std::string const & msg) : _message(msg)
-    { /* EMPTY. */ }
-    virtual ~ConvertException()
-    { /* EMPTY. */ }
-
-    virtual const char * what() const TBAG_NOEXCEPT override
-    { return _message.c_str(); }
-};
-
 TBAG_API std::vector<std::string> getAvailableConverterNames();
 
-/**
- * Convert from UTF-8 string.
- */
-TBAG_API std::string convertFromUtf8(std::string const & utf8
-                                       , std::string const & to_charset) throw (ConvertException);
+/** Convert from UTF-8 string. */
+TBAG_API bool convertFromUtf8(std::string const & utf8, std::string const & to_charset, std::string & result);
 
-/**
- * Convert to UTF-8 string.
- */
-TBAG_API std::string convertToUtf8(std::string const & from_string
-                                     , std::string const & from_charset) throw (ConvertException);
+/** Convert to UTF-8 string. */
+TBAG_API bool convertToUtf8(std::string const & from_string, std::string const & from_charset, std::string & result);
 
 } // namespace locale
 
