@@ -47,7 +47,7 @@ namespace common {
  * @author zer0
  * @date   2016-06-05
  */
-class Object
+class TBAG_API Object
 {
 public:
     IMPLEMENT_GET_PARENT_CLASS_NAME(Object);
@@ -59,16 +59,12 @@ private:
     Id _id;
 
 public:
-    Object() TBAG_NOEXCEPT
-    {
-        _id = reinterpret_cast<Id>(this);
-    }
-
+    Object() TBAG_NOEXCEPT : _id(reinterpret_cast<Id>(this))
+    { /* EMPTY. */ }
     Object(Object const & obj) TBAG_NOEXCEPT : Object()
     { /* EMPTY. */ }
     Object(Object && obj) TBAG_NOEXCEPT : Object()
     { /* EMPTY. */ }
-
     virtual ~Object() TBAG_NOEXCEPT
     { /* EMPTY. */ }
 
