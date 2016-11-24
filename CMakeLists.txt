@@ -49,6 +49,10 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
+
+## Debugging logger settings.
+option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
+
 ## Configure settings.
 tbag_config__default_generate_c_header ()
 

@@ -11,6 +11,11 @@ list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_EXPORT_API U_COMBINED_IMPLEMENTATION)
 ## Thread settings.
 list (APPEND TBAG_PROJECT_LDFLAGS ${CMAKE_THREAD_LIBS_INIT})
 
+## Tbag debugging logger.
+if (USE_TBAG_DEBUGGING_LOGGER)
+    list (APPEND TBAG_PROJECT_DEFINITIONS ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
+endif ()
+
 ## Dependencies.
 tbag_modules__apply_dep_icu     ()
 tbag_modules__apply_dep_lmdb    ()

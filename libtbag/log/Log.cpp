@@ -127,6 +127,7 @@ DebuggingLoggerInitializer::DebuggingLoggerInitializer(LogLevel level, bool auto
 {
     createColorConsoleLogger(LOGGER_NAME, auto_flush);
     setLevel(LOGGER_NAME, level);
+    __tbag_debug_f("DEBUGGING LOGGER INIT: {}", LIBTBAG_MAIN_TITLE);
 }
 
 DebuggingLoggerInitializer::~DebuggingLoggerInitializer()

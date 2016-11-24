@@ -172,7 +172,7 @@ NAMESPACE_LIBTBAG_CLOSE
  * @warning
  *  Don't use this macros from user level developers.
  */
-#if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
+#if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG) && !defined(NDEBUG)
 # define __tbag_error(msg)         tLogW(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME,  FILE_STRING ":" LINE_STRING " " msg)
 # define __tbag_debug(msg)         tLogN(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME,  FILE_STRING ":" LINE_STRING " " msg)
 # define __tbag_error_f(msg, ...)  tLogWF(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME, FILE_STRING ":" LINE_STRING " " msg, __VA_ARGS__)

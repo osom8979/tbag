@@ -34,7 +34,7 @@ RwLock::RwLock() : _handle(new (std::nothrow) uv_rwlock_t)
     assert(_handle != nullptr);
     int error_code = ::uv_rwlock_init(cast_rwlock(_handle));
     if (error_code != 0) {
-        __tbag_error_f("RwLock::RwLock() error[{}] {}", error_code, getUvErrorName(error_code));
+        __tbag_error_f("RwLock::RwLock() error[{}] {}", error_code, debug::getUvErrorName(error_code));
     }
 }
 
