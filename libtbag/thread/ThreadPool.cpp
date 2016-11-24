@@ -6,6 +6,9 @@
  */
 
 #include <libtbag/thread/ThreadPool.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/debug/UvError.hpp>
+
 #include <uv.h>
 
 // -------------------
@@ -28,19 +31,22 @@ struct ThreadPool::ThreadPimpl
     using Callback = std::function<void(void)>;
 
     uv_thread_t thread;
-    Callback  callback;
+    Callback callback;
+    int error_code;
 
-    ThreadPimpl(Callback const & c) : callback(c)
+    ThreadPimpl(Callback const & c) : callback(c), error_code(0)
     {
-        int code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
-        if (code != 0) {
-            throw InitializeException(code);
+        error_code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
+        if (error_code != 0) {
+            __tbag_error_f("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, debug::getUvErrorName(error_code));
         }
     }
 
     ~ThreadPimpl()
     {
-        ::uv_thread_join(&thread);
+        if (error_code != 0) {
+            ::uv_thread_join(&thread);
+        }
     }
 
 private:
@@ -54,15 +60,28 @@ private:
 // ThreadPool implementation.
 // --------------------------
 
-ThreadPool::ThreadPool(std::size_t size) throw(IllegalArgumentException, InitializeException) : _exit(false)
+ThreadPool::ThreadPool(std::size_t size) : _exit(false)
 {
     if (size == 0U) {
-        throw IllegalArgumentException();
+        __tbag_error("ThreadPool::ThreadPool() IllegalArgumentException: pool size is 0.");
+        return;
     }
 
+    bool result = true;
     while (size > 0) {
-        _pool.push(SharedThread(new ThreadPimpl([this](){ this->runner(); })));
+        _pool.push(SharedThread(new (std::nothrow) ThreadPimpl([this](){ this->runner(); })));
+        if (static_cast<bool>(_pool.back()) == false || _pool.back()->error_code != 0) {
+            result = false;
+            break;
+        }
         --size;
+    }
+
+    if (result == false) {
+        while (_pool.empty() == false) {
+            _pool.pop();
+        }
+        __tbag_error("ThreadPool::ThreadPool() ThreadPimpl constructor error.");
     }
 }
 

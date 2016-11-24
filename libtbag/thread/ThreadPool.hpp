@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Exception.hpp>
 #include <libtbag/lock/UvLock.hpp>
 #include <libtbag/lock/UvCondition.hpp>
 
@@ -63,7 +62,7 @@ public:
     TaskQueue   _task;
 
 public:
-    ThreadPool(std::size_t size) throw(IllegalArgumentException, InitializeException);
+    ThreadPool(std::size_t size);
     ~ThreadPool();
 
 private:

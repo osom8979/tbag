@@ -7,6 +7,11 @@
 
 #include <libtbag/lock/UvCondition.hpp>
 #include <libtbag/lock/UvLock.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/debug/UvError.hpp>
+
+#include <cassert>
+#include <new>
 #include <uv.h>
 
 // -------------------
@@ -25,16 +30,18 @@ inline uv_cond_t * cast_uv_cond(T * v) TBAG_NOEXCEPT
 // UvCondition implementation.
 // ---------------------------
 
-UvCondition::UvCondition() throw (InitializeException) : _handle(new uv_cond_t)
+UvCondition::UvCondition() : _handle(new (std::nothrow) uv_cond_t)
 {
+    assert(_handle != nullptr);
     int error_code = ::uv_cond_init(cast_uv_cond(_handle));
     if (error_code != 0) {
-        throw InitializeException(error_code);
+        __tbag_error_f("UvCondition::UvCondition() error[{}] {}", error_code, debug::getUvErrorName(error_code));
     }
 }
 
 UvCondition::~UvCondition()
 {
+    assert(_handle != nullptr);
     ::uv_cond_destroy(cast_uv_cond(_handle));
     delete cast_uv_cond(_handle);
 }

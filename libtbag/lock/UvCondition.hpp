@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Exception.hpp>
 
 #include <cstdint>
 
@@ -41,8 +40,8 @@ private:
     void * _handle;
 
 public:
-    UvCondition() throw (InitializeException);
-    virtual ~UvCondition();
+    UvCondition();
+    ~UvCondition();
 
 public:
     inline void * getHandle() TBAG_NOEXCEPT

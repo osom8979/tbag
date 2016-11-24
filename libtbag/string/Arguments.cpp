@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/string/Arguments.hpp>
+#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,14 +26,14 @@ Arguments::Arguments()
 Arguments::Arguments(std::string const & name
                    , std::string const & arguments
                    , std::string const & delimiter
-                   , std::string const & point_delimiter) throw(InitializeException)
+                   , std::string const & point_delimiter)
         : _name(name)
         , _args()
         , _delimiter(delimiter)
         , _point_delimiter(point_delimiter)
 {
     if (parse(arguments) == false) {
-        throw InitializeException();
+        __tbag_error("Arguments::Arguments() parse error.");
     }
 }
 

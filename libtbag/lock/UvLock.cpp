@@ -6,6 +6,11 @@
  */
 
 #include <libtbag/lock/UvLock.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/debug/UvError.hpp>
+
+#include <cassert>
+#include <new>
 #include <uv.h>
 
 // -------------------
@@ -24,16 +29,18 @@ inline uv_mutex_t * cast_uv_mutex(T * v) TBAG_NOEXCEPT
 // UvLock implementation.
 // ----------------------
 
-UvLock::UvLock() throw (InitializeException) : _handle(new uv_mutex_t)
+UvLock::UvLock() : _handle(new (std::nothrow) uv_mutex_t)
 {
+    assert(_handle != nullptr);
     int error_code = ::uv_mutex_init(cast_uv_mutex(_handle));
     if (error_code != 0) {
-        throw InitializeException(error_code);
+        __tbag_error_f("UvLock::UvLock() error[{}] {}", error_code, debug::getUvErrorName(error_code));
     }
 }
 
 UvLock::~UvLock()
 {
+    assert(_handle != nullptr);
     ::uv_mutex_destroy(cast_uv_mutex(_handle));
     delete cast_uv_mutex(_handle);
 }

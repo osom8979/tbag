@@ -36,11 +36,6 @@ TEST(ThreadPoolTest, Default)
     ASSERT_EQ(TEST_NUMBER, t2);
 }
 
-TEST(ThreadPoolTest, Exception)
-{
-    ASSERT_THROW(ThreadPool(0U), IllegalArgumentException);
-}
-
 TEST(ThreadPoolTest, WaitTask)
 {
     ThreadPool pool(2U);

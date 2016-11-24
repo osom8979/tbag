@@ -53,7 +53,7 @@ public:
     Arguments(std::string const & name
             , std::string const & arguments
             , std::string const & delimiter       = getDefaultDelimiter()
-            , std::string const & point_delimiter = getDefaultPointDelimiter()) throw(InitializeException);
+            , std::string const & point_delimiter = getDefaultPointDelimiter());
     ~Arguments();
 
 public:
