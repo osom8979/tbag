@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Exception.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cstddef>
 
@@ -51,17 +51,20 @@ createNode(T && data, Node<typename remove_cr<T>::type> * node = nullptr)
 {
     typedef typename remove_cr<T>::type __remove_cr;
     typedef Node<__remove_cr> __node_type;
-    return new __node_type{std::forward<T>(data), node};
+    return new (std::nothrow) __node_type{std::forward<T>(data), node};
 }
 
 template <typename T>
-inline void releaseNode(Node<T> ** node) throw (NullPointerException)
+inline bool releaseNode(Node<T> ** node)
 {
     if (node == nullptr || (*node) == nullptr) {
-        throw NullPointerException();
+        __tbag_error("releaseNode() NullPointerException.");
+        return false;
     }
+
     delete (*node);
     (*node) = nullptr;
+    return true;
 }
 
 template <typename T>
@@ -121,9 +124,7 @@ bool eraseNext(Node<T> * node) TBAG_NOEXCEPT
     assert(node->next != nullptr);
     Node<T> * next_next_node = node->next->next;
 
-    try {
-        releaseNode(&node->next);
-    } catch (...) {
+    if (releaseNode(&node->next) == false) {
         return false;
     }
 
@@ -140,11 +141,9 @@ bool eraseNext(Node<T> * node, std::size_t index) TBAG_NOEXCEPT
 }
 
 template <typename T>
-bool isLeaf(Node<T> * node) throw (NullPointerException)
+bool isLeaf(Node<T> * node)
 {
-    if (node == nullptr) {
-        throw NullPointerException();
-    }
+    assert(node != nullptr);
     return (node->next == nullptr ? true : false);
 }
 
