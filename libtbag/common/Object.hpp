@@ -47,7 +47,7 @@ namespace common {
  * @author zer0
  * @date   2016-06-05
  */
-class TBAG_API Object
+class Object
 {
 public:
     IMPLEMENT_GET_PARENT_CLASS_NAME(Object);

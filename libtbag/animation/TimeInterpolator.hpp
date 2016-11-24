@@ -33,7 +33,7 @@ namespace animation {
  * @date   2016-05-23 (Move the tbag library)
  */
 template <typename RepType>
-struct TBAG_API TimeInterpolator
+struct TimeInterpolator
 {
     using Rep = RepType;
 
