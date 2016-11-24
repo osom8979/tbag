@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/Exception.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,7 +38,7 @@ private:
     void * _handle;
 
 public:
-    RwLock() throw (InitializeException);
+    RwLock();
     ~RwLock();
 
 public:

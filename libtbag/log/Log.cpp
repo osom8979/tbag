@@ -118,6 +118,22 @@ void setDefaultLevel(LogLevel level)
     setLevel(TBAG_DEFAULT_LOGGER_NAME, level);
 }
 
+// ------------------------------------------
+// DebuggingLoggerInitializer implementation.
+// ------------------------------------------
+
+DebuggingLoggerInitializer::DebuggingLoggerInitializer(LogLevel level, bool auto_flush)
+        : LOGGER_NAME(TBAG_DEBUGGING_LOGGER_NAME)
+{
+    createColorConsoleLogger(LOGGER_NAME, auto_flush);
+    setLevel(LOGGER_NAME, level);
+}
+
+DebuggingLoggerInitializer::~DebuggingLoggerInitializer()
+{
+    removeLogger(LOGGER_NAME);
+}
+
 } // namespace log
 
 // --------------------

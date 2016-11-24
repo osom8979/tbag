@@ -5,6 +5,9 @@ include (TbagModules)
 tbag_modules__apply_default ()
 tbag_modules__update_default_objects ()
 
+## Tbag debugging logger.
+list (APPEND TBAG_PROJECT_DEFINITIONS ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
+
 ## Dependencies.
 tbag_modules__apply_dep_gtest ()
 

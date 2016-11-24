@@ -13,7 +13,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 static bool setUp()
 {
-    // Don't use libuv initialize.
+    // [WARNING] Don't use libuv initialize.
     return true;
 }
 

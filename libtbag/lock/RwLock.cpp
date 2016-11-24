@@ -6,6 +6,11 @@
  */
 
 #include <libtbag/lock/RwLock.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/debug/UvError.hpp>
+
+#include <cassert>
+#include <new>
 #include <uv.h>
 
 // -------------------
@@ -24,16 +29,18 @@ inline uv_rwlock_t * cast_rwlock(T * v) TBAG_NOEXCEPT
 // RwLock implementation.
 // ----------------------
 
-RwLock::RwLock() throw (InitializeException) : _handle(new uv_rwlock_t)
+RwLock::RwLock() : _handle(new (std::nothrow) uv_rwlock_t)
 {
+    assert(_handle != nullptr);
     int error_code = ::uv_rwlock_init(cast_rwlock(_handle));
     if (error_code != 0) {
-        throw InitializeException(error_code);
+        __tbag_error_f("RwLock::RwLock() error[{}] {}", error_code, getUvErrorName(error_code));
     }
 }
 
 RwLock::~RwLock()
 {
+    assert(_handle != nullptr);
     ::uv_rwlock_destroy(cast_rwlock(_handle));
     delete cast_rwlock(_handle);
 }

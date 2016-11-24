@@ -9,6 +9,7 @@
 #include <libtbag/libtbag.h>
 #include <libtbag/string/Commander.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <tester/main/server.hpp>
 #include <tester/main/client.hpp>
@@ -31,6 +32,8 @@ enum class TestMode
 int main(int argc, char **argv)
 {
     tbInitialize();
+    libtbag::log::DebuggingLoggerInitializer logger;
+    __tbag_debug_f("Start tester: {}", LIBTBAG_MAIN_TITLE);
 
     using Commander = libtbag::string::Commander;
     using Args = libtbag::string::Arguments;

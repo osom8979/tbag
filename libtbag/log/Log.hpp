@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/log/details/Severity.hpp>
 #include <libtbag/log/details/Logger.hpp>
@@ -26,7 +27,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
-TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_logger__";
+char const * const TBAG_DEFAULT_LOGGER_NAME   = "__tbag_default_logger__";
+char const * const TBAG_DEBUGGING_LOGGER_NAME = "__tbag_debugging_logger__";
 
 //TBAG_CONSTEXPR bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
@@ -51,6 +53,22 @@ TBAG_API Logger * getDefaultLogger();
 TBAG_API void setLevel(std::string const & name, LogLevel level);
 TBAG_API void setLevel(std::string const & name, int level);
 TBAG_API void setDefaultLevel(LogLevel level);
+
+/**
+ * Debugging logger initializer helper class.
+ *
+ * @author zer0
+ * @date   2016-11-24
+ */
+class TBAG_API DebuggingLoggerInitializer : public Noncopyable
+{
+private:
+    std::string const LOGGER_NAME;
+
+public:
+    DebuggingLoggerInitializer(LogLevel level = LogLevel::LEVEL_DEBUG, bool auto_flush = false);
+    virtual ~DebuggingLoggerInitializer();
+};
 
 template <typename ... Args>
 inline void logging(Logger * logger, LogLevel level, std::string const & format, Args && ... args)
@@ -147,6 +165,24 @@ NAMESPACE_LIBTBAG_CLOSE
 #define tDLogNF(msg, ...)  tLogNF(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, msg, __VA_ARGS__)
 #define tDLogIF(msg, ...)  tLogIF(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, msg, __VA_ARGS__)
 #define tDLogDF(msg, ...)  tLogDF(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, msg, __VA_ARGS__)
+
+/**
+ * @def __tbag_debug
+ *
+ * @warning
+ *  Don't use this macros from user level developers.
+ */
+#if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
+# define __tbag_error(msg)         tLogW(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME,  FILE_STRING ":" LINE_STRING " " msg)
+# define __tbag_debug(msg)         tLogN(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME,  FILE_STRING ":" LINE_STRING " " msg)
+# define __tbag_error_f(msg, ...)  tLogWF(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME, FILE_STRING ":" LINE_STRING " " msg, __VA_ARGS__)
+# define __tbag_debug_f(msg, ...)  tLogNF(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME, FILE_STRING ":" LINE_STRING " " msg, __VA_ARGS__)
+#else
+# define __tbag_error(msg)
+# define __tbag_debug(msg)
+# define __tbag_error_f(msg, ...)
+# define __tbag_debug_f(msg, ...)
+#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__
 
