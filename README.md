@@ -15,14 +15,21 @@ Tea-bag is Third party extension utility project.
 - lua 5.3.3 (MIT license)
 - luabridge 1.0.2 (BSD 3-Clause License)
 - lzma 16.04 (Public Domain)
-- sqlite 3.13.0 (Public Domain): libtbag/database/sqlite3
+- minizip 1.01 (zlib license)
+- sqlite 3.13.0 (Public Domain)
 - libuv 1.9.1 (MIT license)
+- zlib 1.2.8 (zlib license)
 
 ### Inline dependencies
 
-- google-glog 0.3.4 (BSD 3-clause license): libtbag/debug/demangle
-- TinyXML2 3.0.0 (zlib license): libtbag/dom/tinyxml2
-- fmt 3.0.0 (BSD license): libtbag/string/fmt
+- demangle (google-glog) 0.3.4 (BSD 3-clause license)
+- fmt 3.0.0 (BSD license)
+- tinyaes128c f832b41 (Public Domain)
+- tinyxml2 3.0.0 (zlib license)
+
+## Programming rules.
+
+- Do not use exception expressions.
  
 ## How to compile
 
@@ -31,24 +38,26 @@ Tea-bag is Third party extension utility project.
 MSVC 12 (2013) x86_64 (with Git Bash):
 ```bash
 ## Don't use shared library in MSVC12.
-$ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -G "Visual Studio 12 2013 Win64" ..
+$ cmake -G "Visual Studio 12 2013 Win64" ..
 ```
 
-## license
+## License
 
 See the `LICENSE` file for details. In summary, tbag is licensed under the MIT license.
 
-## ascii logo
+## ASCII Logo
 
 ```
-+------------------------------------------------------------+
-| This file is part of the:                                  |
-|     ____  __    ___   ________ __ __  ______  __    ______ |
-|    / __ )/ /   /   | / ____/ //_// / / / __ \/ /   / ____/ |
-|   / __  / /   / /| |/ /   / ,<  / /_/ / / / / /   / __/    |
-|  / /_/ / /___/ ___ / /___/ /| |/ __  / /_/ / /___/ /___    |
-| /_____/_____/_/  |_\____/_/ |_/_/ /_/\____/_____/_____/    |
-|                                                   PROJECT. |
-+------------------------------------------------------------+
+*-----------*
+|~~~~~|~~~~~|
+|    _|_    |
+|   /___\   |
+|  |     |  |
+|  |#####|  |
+|  |T-BAG|  |
+|  |#####|  |
+|  '-----'  |
+|    Project|
+*-----------*
 ```
 
