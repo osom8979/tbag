@@ -6,15 +6,10 @@
  */
 
 #include <libtbag/loop/event/UvHandler.hpp>
+#include <libtbag/loop/event/UvHandlerManager.hpp>
 #include <libtbag/pattern/Singleton2.hpp>
-#include <libtbag/lock/RwLock.hpp>
-#include <libtbag/predef.hpp>
 
 #include <cassert>
-
-#include <unordered_map>
-#include <map>
-
 #include <uv.h>
 
 // -------------------
@@ -33,53 +28,8 @@ namespace uv {
  * @date   2016-05-18
  * @date   2016-10-16 (Restore this class)
  */
-class UvEventManager
-{
-public:
-    SINGLETON2_PROTOTYPE(UvEventManager);
-
-public:
-    using Handle = libtbag::container::Pointer<void>;
-    using Event  = libtbag::container::Pointer<UvHandler>;
-
-#if defined(__OS_MACOS__) && !defined(NDEBUG)
-    using EventHandlerSet = std::map<Handle, Event, Handle::Less>;
-#else
-    using EventHandlerSet = std::unordered_map<Handle, Event, Handle::Hash, Handle::EqualTo>;
-#endif
-
-    using RwLock     = libtbag::lock::RwLock;
-    using WriteGuard = libtbag::lock::WriteLockGuard;
-    using ReadGuard  = libtbag::lock::ReadLockGuard;
-
-private:
-    mutable RwLock  _rwlock;
-    EventHandlerSet _handlers;
-
-public:
-    void add(void * handle, UvHandler * event)
-    {
-        WriteGuard guard(_rwlock);
-        _handlers.insert(std::make_pair(Handle(handle), Event(event)));
-    }
-
-    void remove(Handle h)
-    {
-        WriteGuard guard(_rwlock);
-        _handlers.erase(h);
-    }
-
-    Event get(uv_handle_t * handle) const
-    {
-        ReadGuard guard(_rwlock);
-        auto find_itr = _handlers.find(Handle(handle));
-        if (find_itr != _handlers.end()) {
-            return find_itr->second;
-        }
-        return Event();
-    }
-};
-
+class UvEventManager : public UvHandlerManager
+{ SINGLETON2_PROTOTYPE(UvEventManager); };
 SINGLETON2_IMPLEMENT(UvEventManager);
 
 #ifndef TBAG_UV_EVNET_IMPLEMENT
