@@ -14,6 +14,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
+SINGLETON2_IMPLEMENT(LoggerManager);
+
 bool LoggerManager::addLogger(std::string const & name, Logger * new_logger)
 {
     return _logs.insert(LoggerPair(name, LoggerPtr(new_logger))).second;

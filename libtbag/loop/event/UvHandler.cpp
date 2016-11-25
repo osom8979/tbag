@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/loop/event/UvHandler.hpp>
-#include <libtbag/pattern/Singleton.hpp>
+#include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/lock/RwLock.hpp>
 #include <libtbag/predef.hpp>
 
@@ -33,10 +33,10 @@ namespace uv {
  * @date   2016-05-18
  * @date   2016-10-16 (Restore this class)
  */
-class UvEventManager : SINGLETON_INHERITANCE(UvEventManager)
+class UvEventManager
 {
 public:
-    SINGLETON_RESTRICT(UvEventManager);
+    SINGLETON2_PROTOTYPE(UvEventManager);
 
 public:
     using Handle = libtbag::container::Pointer<void>;
@@ -79,6 +79,8 @@ public:
         return Event();
     }
 };
+
+SINGLETON2_IMPLEMENT(UvEventManager);
 
 #ifndef TBAG_UV_EVNET_IMPLEMENT
 #define TBAG_UV_EVNET_IMPLEMENT

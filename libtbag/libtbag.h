@@ -20,11 +20,17 @@
 extern "C" {
 #endif
 
+typedef int tbBOOL;
+
+#define AB_TRUE   1
+#define AB_FALSE  0
+
 TBAG_API int tbGetMajorVersion();
 TBAG_API int tbGetMinorVersion();
 TBAG_API int tbGetPatchVersion();
 
 TBAG_API int tbInitialize();
+TBAG_API int tbRelease();
 
 #if defined(__cplusplus)
 } /* extern "C" */

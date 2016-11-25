@@ -77,10 +77,18 @@ int tbGetPatchVersion()
 }
 
 #include <libtbag/util/UvUtils.hpp>
+#include <libtbag/util/SingletonUtils.hpp>
 
 int tbInitialize()
 {
     libtbag::util::initUv();
-    return 0;
+    libtbag::util::initSingletonObjects();
+    return AB_TRUE;
+}
+
+int tbRelease()
+{
+    libtbag::util::releaseSingletonObjects();
+    return AB_TRUE;
 }
 

@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/pattern/Singleton.hpp>
+#include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/log/details/Logger.hpp>
 
 #include <unordered_map>
@@ -35,10 +35,10 @@ namespace details {
  * @author zer0
  * @date   2016-07-15
  */
-class TBAG_API LoggerManager : SINGLETON_INHERITANCE(LoggerManager)
+class TBAG_API LoggerManager
 {
 public:
-    SINGLETON_RESTRICT(LoggerManager);
+    SINGLETON2_PROTOTYPE(LoggerManager);
 
 public:
     using LoggerPtr  = std::unique_ptr<Logger>;

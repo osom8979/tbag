@@ -17,9 +17,8 @@ public:
     SINGLETON_RESTRICT(DemoSingleton);
 
 public:
-    int test() {
-        return 1;
-    }
+    inline int test() const
+    { return 1; }
 };
 
 TEST(SingletonTest, Default)
