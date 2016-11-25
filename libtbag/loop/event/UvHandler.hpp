@@ -118,10 +118,12 @@ public:
     ~UvHandler();
 
 public:
-    void add(void * h);
+    void clear();
+    bool add(void * h);
+    bool remove(void * h);
 
 public:
-    // formatter:off
+    // @formatter:off
     virtual void onAlloc       (void * handle, size_t suggested_size, void * buf){}
     virtual void onRead        (void * stream, ssize_t nread, void const * buf){}
     virtual void onWrite       (void * req, int status){}
@@ -142,7 +144,7 @@ public:
     virtual void onAfterWork   (void * req, int status){}
     virtual void onGetaddrinfo (void * req, int status, void * addr){}
     virtual void onGetnameinfo (void * req, int status, char const * hostname, char const * service){}
-    // formatter:on
+    // @formatter:on
 };
 
 } // namespace event

@@ -10,6 +10,7 @@
 #include <libtbag/pattern/Singleton2.hpp>
 
 #include <cassert>
+#include <algorithm>
 #include <uv.h>
 
 // -------------------
@@ -109,21 +110,53 @@ UvHandler::UvHandler(void * h)
 
 UvHandler::~UvHandler()
 {
-    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
-    UvEventManager * em = UvEventManager::getInstance();
-    assert(em != nullptr);
-    for (auto & cursor : _handles) {
-        em->remove(cursor.get());
-    }
+    clear();
 }
 
-void UvHandler::add(void * h)
+void UvHandler::clear()
 {
     using UvEventManager = libtbag::loop::event::uv::UvEventManager;
     UvEventManager * em = UvEventManager::getInstance();
     assert(em != nullptr);
+
+    for (auto & cursor : _handles) {
+        em->remove(cursor.get());
+    }
+    _handles.clear();
+}
+
+bool UvHandler::add(void * h)
+{
+    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
+    UvEventManager * em = UvEventManager::getInstance();
+    assert(em != nullptr);
+
+    auto find_itr = std::find(_handles.begin(), _handles.end(), Handle(h));
+    if (find_itr != _handles.end()) {
+        // Exists element error.
+        return false;
+    }
+
     em->add(h, this);
     _handles.push_back(Handle(h));
+    return true;
+}
+
+bool UvHandler::remove(void * h)
+{
+    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
+    UvEventManager * em = UvEventManager::getInstance();
+    assert(em != nullptr);
+
+    auto find_itr = std::find(_handles.begin(), _handles.end(), Handle(h));
+    if (find_itr == _handles.end()) {
+        // Not found error.
+        return false;
+    }
+
+    em->remove(h);
+    _handles.erase(find_itr);
+    return true;
 }
 
 } // namespace event
