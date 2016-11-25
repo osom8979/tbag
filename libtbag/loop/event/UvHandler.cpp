@@ -36,28 +36,28 @@ SINGLETON2_IMPLEMENT(UvEventManager);
 #ifndef TBAG_UV_EVNET_IMPLEMENT
 #define TBAG_UV_EVNET_IMPLEMENT
 
-#define TBAG_UV_EVNET_IMPLEMENT_PARAM0(name, p0)                        \
-    void name(p0 a0) {                                                  \
-        auto c = UvEventManager::getInstance()->get((uv_handle_t*)a0);  \
-        if (static_cast<bool>(c)) { c->name(a0); }                      \
+#define TBAG_UV_EVNET_IMPLEMENT_PARAM0(name, method, mgr, handle)   \
+    void name(handle h) {                                           \
+        auto c = mgr::getInstance()->get(h);                        \
+        if (static_cast<bool>(c)) { c->name(h); }                   \
     }
 
-#define TBAG_UV_EVNET_IMPLEMENT_PARAM1(name, p0, p1)                    \
-    void name(p0 a0, p1 a1) {                                           \
-        auto c = UvEventManager::getInstance()->get((uv_handle_t*)a0);  \
-        if (static_cast<bool>(c)) { c->name(a0, a1); }                  \
+#define TBAG_UV_EVNET_IMPLEMENT_PARAM1(name, method, mgr, handle, p1)   \
+    void name(handle h, p1 a1) {                                        \
+        auto c = mgr::getInstance()->get(h);                            \
+        if (static_cast<bool>(c)) { c->name(h, a1); }                   \
     }
 
-#define TBAG_UV_EVNET_IMPLEMENT_PARAM2(name, p0, p1, p2)                \
-    void name(p0 a0, p1 a1, p2 a2) {                                    \
-        auto c = UvEventManager::getInstance()->get((uv_handle_t*)a0);  \
-        if (static_cast<bool>(c)) { c->name(a0, a1, a2); }              \
+#define TBAG_UV_EVNET_IMPLEMENT_PARAM2(name, method, mgr, handle, p1, p2)   \
+    void name(handle h, p1 a1, p2 a2) {                                     \
+        auto c = mgr::getInstance()->get(h);                                \
+        if (static_cast<bool>(c)) { c->name(h, a1, a2); }                   \
     }
 
-#define TBAG_UV_EVNET_IMPLEMENT_PARAM3(name, p0, p1, p2, p3)            \
-    void name(p0 a0, p1 a1, p2 a2, p3 a3) {                             \
-        auto c = UvEventManager::getInstance()->get((uv_handle_t*)a0);  \
-        if (static_cast<bool>(c)) { c->name(a0, a1, a2, a3); }          \
+#define TBAG_UV_EVNET_IMPLEMENT_PARAM3(name, method, mgr, handle, p1, p2, p3)   \
+    void name(handle h, p1 a1, p2 a2, p3 a3) {                                  \
+        auto c = mgr::getInstance()->get(h);                                    \
+        if (static_cast<bool>(c)) { c->name(h, a1, a2, a3); }                   \
     }
 #endif // TBAG_UV_EVNET_IMPLEMENT
 
@@ -67,26 +67,26 @@ SINGLETON2_IMPLEMENT(UvEventManager);
  * @{
  */
 
-TBAG_UV_EVNET_IMPLEMENT_PARAM2(onAlloc      , void *, size_t, void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM2(onRead       , void *, ssize_t, void const *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM1(onWrite      , void *, int);
-TBAG_UV_EVNET_IMPLEMENT_PARAM1(onConnect    , void *, int);
-TBAG_UV_EVNET_IMPLEMENT_PARAM1(onShutdown   , void *, int);
-TBAG_UV_EVNET_IMPLEMENT_PARAM1(onConnection , void *, int);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onClose      , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM2(onPoll       , void *, int, int);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onTimer      , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onAsync      , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onPrepare    , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onCheck      , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onIdle       , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM2(onExit       , void *, int64_t, int);
-TBAG_UV_EVNET_IMPLEMENT_PARAM1(onWalk       , void *, void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onFs         , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM0(onWork       , void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM1(onAfterWork  , void *, int);
-TBAG_UV_EVNET_IMPLEMENT_PARAM2(onGetaddrinfo, void *, int, void *);
-TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo, void *, int, char const *, char const *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM2(onAlloc      , onAlloc      , UvEventManager, void *, size_t, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM2(onRead       , onRead       , UvEventManager, void *, ssize_t, void const *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM1(onWrite      , onWrite      , UvEventManager, void *, int);
+TBAG_UV_EVNET_IMPLEMENT_PARAM1(onConnect    , onConnect    , UvEventManager, void *, int);
+TBAG_UV_EVNET_IMPLEMENT_PARAM1(onShutdown   , onShutdown   , UvEventManager, void *, int);
+TBAG_UV_EVNET_IMPLEMENT_PARAM1(onConnection , onConnection , UvEventManager, void *, int);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onClose      , onClose      , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM2(onPoll       , onPoll       , UvEventManager, void *, int, int);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onTimer      , onTimer      , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onAsync      , onAsync      , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onPrepare    , onPrepare    , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onCheck      , onCheck      , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onIdle       , onIdle       , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM2(onExit       , onExit       , UvEventManager, void *, int64_t, int);
+TBAG_UV_EVNET_IMPLEMENT_PARAM1(onWalk       , onWalk       , UvEventManager, void *, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onFs         , onFs         , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM0(onWork       , onWork       , UvEventManager, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM1(onAfterWork  , onAfterWork  , UvEventManager, void *, int);
+TBAG_UV_EVNET_IMPLEMENT_PARAM2(onGetaddrinfo, onGetaddrinfo, UvEventManager, void *, int, void *);
+TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo, onGetnameinfo, UvEventManager, void *, int, char const *, char const *);
 
 /**
  * @}
