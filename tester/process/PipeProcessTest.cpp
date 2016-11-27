@@ -1,13 +1,14 @@
 /**
- * @file   ProcessTest.cpp
- * @brief  Process & PipeProcess class tester.
+ * @file   PipeProcessTest.cpp
+ * @brief  PipeProcess class tester.
  * @author zer0
  * @date   2016-05-19
+ * @date   2016-11-27 (Rename: PipeProcessTest -> PipeProcessTest)
  */
 
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/process/Process.hpp>
+#include <libtbag/process/PipeProcess.hpp>
 
 #include <fstream>
 
@@ -17,17 +18,17 @@ using namespace libtbag::process;
 static char const * const EXE_NAME = "tbproc";
 using Path = libtbag::filesystem::Path;
 
-TEST(ProcessTest, ExitCodeFailure)
+TEST(PipeProcessTest, ExitCodeFailure)
 {
     Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
 
-    Process process;
+    PipeProcess process;
     ASSERT_TRUE(process.exe(EXE_PATH, Path::getExeDir()));
     ASSERT_EQ(1, process.getExitStatus());
     ASSERT_EQ(0, process.getTerminateSignal());
 }
 
-TEST(ProcessTest, StandardOutput)
+TEST(PipeProcessTest, StandardOutput)
 {
     Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
 
@@ -38,8 +39,8 @@ TEST(ProcessTest, StandardOutput)
     std::string err_result;
     bool is_in = false;
 
-    Process process;
-    Process::Param param;
+    PipeProcess process;
+    PipeProcess::Param param;
 
     param.setExePath(EXE_PATH);
     param.setWorkingDir(Path::getExeDir());
@@ -67,7 +68,7 @@ TEST(ProcessTest, StandardOutput)
     ASSERT_EQ(EMPTY_STRING, err_result);
 }
 
-TEST(ProcessTest, StandardInput)
+TEST(PipeProcessTest, StandardInput)
 {
     Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
 
@@ -79,8 +80,8 @@ TEST(ProcessTest, StandardInput)
     std::string err_result;
     bool is_in = false;
 
-    Process process;
-    Process::Param param;
+    PipeProcess process;
+    PipeProcess::Param param;
 
     param.setExePath(EXE_PATH);
     param.setWorkingDir(Path::getExeDir());
@@ -108,7 +109,7 @@ TEST(ProcessTest, StandardInput)
     ASSERT_EQ(EMPTY_STRING, err_result);
 }
 
-TEST(ProcessTest, StandardError)
+TEST(PipeProcessTest, StandardError)
 {
     Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
 
@@ -119,8 +120,8 @@ TEST(ProcessTest, StandardError)
     std::string err_result;
     bool is_in = false;
 
-    Process process;
-    Process::Param param;
+    PipeProcess process;
+    PipeProcess::Param param;
 
     param.setExePath(EXE_PATH);
     param.setWorkingDir(Path::getExeDir());
@@ -148,7 +149,7 @@ TEST(ProcessTest, StandardError)
     ASSERT_EQ(TEST_STRING, err_result);
 }
 
-TEST(ProcessTest, FileOutput)
+TEST(PipeProcessTest, FileOutput)
 {
     filesystem::Path const TEST_FILE("tbproc.txt");
     if (TEST_FILE.exists()) {
@@ -165,8 +166,8 @@ TEST(ProcessTest, FileOutput)
     std::string err_result;
     bool is_in = false;
 
-    Process process;
-    Process::Param param;
+    PipeProcess process;
+    PipeProcess::Param param;
 
     param.setExePath(EXE_PATH);
     param.setWorkingDir(Path::getExeDir());

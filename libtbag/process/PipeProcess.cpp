@@ -1,11 +1,12 @@
 /**
- * @file   Process.cpp
- * @brief  Process class implementation.
+ * @file   PipeProcess.hpp
+ * @brief  PipeProcess class implementation.
  * @author zer0
- * @date   2016-10-15
+ * @date   2016-05-17
+ * @date   2016-11-27 (Rename: PipeProcess -> PipeProcess)
  */
 
-#include <libtbag/process/Process.hpp>
+#include <libtbag/process/PipeProcess.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
 
 #include <cstring>
@@ -47,15 +48,15 @@ static int const STANDARD_IO_SIZE   = 3;
  * @remarks
  *  Use the libuv.
  */
-struct Process::ProcPimpl : public libtbag::loop::event::UvHandler
+struct PipeProcess::ProcPimpl : public libtbag::loop::event::UvHandler
 {
 private:
-    Process & _parent;
+    PipeProcess & _parent;
     uv_process_t _process;
 
 private:
     uv_process_options_t _options;
-    Process::Param       _param;
+    PipeProcess::Param       _param;
     std::vector<char*>   _args_ptr;
     std::vector<char*>   _envs_ptr;
 
@@ -71,11 +72,11 @@ private:
     int _terminate_signal;
 
 public:
-    ProcPimpl(Process & parent)
+    ProcPimpl(PipeProcess & parent)
             : UvHandler(&_process)
             , _parent(parent)
-            , _exit_status(Process::getUnknownExitCode())
-            , _terminate_signal(Process::getUnknownTerminateSignal())
+            , _exit_status(PipeProcess::getUnknownExitCode())
+            , _terminate_signal(PipeProcess::getUnknownTerminateSignal())
     {
         ::memset((void*)&_process, 0x00, sizeof(_process));
     }
@@ -99,7 +100,7 @@ public:
     { return _in; }
 
 public:
-    bool update(Process::Param const & param)
+    bool update(PipeProcess::Param const & param)
     {
         _param = param;
 
@@ -196,22 +197,22 @@ public:
 };
 
 // -----------------------
-// Process implementation.
+// PipeProcess implementation.
 // -----------------------
 
-Process::Process()
+PipeProcess::PipeProcess()
         : _loop(new loop::UvEventLoop())
         , _process(new ProcPimpl(*this))
 {
     // EMPTY.
 }
 
-Process::~Process()
+PipeProcess::~PipeProcess()
 {
     // EMPTY.
 }
 
-bool Process::exe(Param const & param)
+bool PipeProcess::exe(Param const & param)
 {
     if (_process->update(param)) {
         return _loop->runDefault();
@@ -219,27 +220,27 @@ bool Process::exe(Param const & param)
     return false;
 }
 
-bool Process::exe(Path const & exe_path, Path const & work_dir)
+bool PipeProcess::exe(Path const & exe_path, Path const & work_dir)
 {
     return exe(Param().setExePath(exe_path).setWorkingDir(work_dir));
 }
 
-bool Process::exe(Path const & exe_path)
+bool PipeProcess::exe(Path const & exe_path)
 {
     return exe(exe_path, Path::getWorkDir());
 }
 
-bool Process::write(char const * buffer, std::size_t length)
+bool PipeProcess::write(char const * buffer, std::size_t length)
 {
     return _process->getIn().write(buffer, length);
 }
 
-int64_t Process::getExitStatus()
+int64_t PipeProcess::getExitStatus()
 {
     return _process->getExitStatus();
 }
 
-int Process::getTerminateSignal()
+int PipeProcess::getTerminateSignal()
 {
     return _process->getTerminateSignal();
 }

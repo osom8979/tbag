@@ -1,12 +1,13 @@
 /**
- * @file   Process.hpp
- * @brief  Process class prototype.
+ * @file   PipeProcess.hpp
+ * @brief  PipeProcess class prototype.
  * @author zer0
  * @date   2016-05-17
+ * @date   2016-11-27 (Rename: Process -> PipeProcess)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PROCESS_PROCESS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_PROCESS_PROCESS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PROCESS_PIPEPROCESS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_PROCESS_PIPEPROCESS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -42,12 +43,12 @@ TBAG_API std::string getExecutableSuffix();
 TBAG_API std::string getExecutableName(std::string const & name);
 
 /**
- * Process class prototype.
+ * PipeProcess class prototype.
  *
  * @author zer0
  * @date   2016-05-17
  */
-class TBAG_API Process : public libtbag::Noncopyable
+class TBAG_API PipeProcess : public libtbag::Noncopyable
 {
 public:
     struct ProcPimpl;
@@ -117,8 +118,8 @@ protected:
     UniqueProcPimpl _process;
 
 public:
-    Process();
-    ~Process();
+    PipeProcess();
+    ~PipeProcess();
 
 public:
     bool exe(Param const & param);
@@ -139,5 +140,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_PROCESS_PROCESS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_PROCESS_PIPEPROCESS_HPP__
 
