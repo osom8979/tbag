@@ -20,20 +20,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace process {
 
-std::string getExecutableSuffix()
-{
-#if defined(__OS_WINDOWS__)
-    return ".exe";
-#else
-    return "";
-#endif
-}
-
-std::string getExecutableName(std::string const & name)
-{
-    return name + getExecutableSuffix();
-}
-
 static int const STANDARD_INPUT_FD  = 0; ///< @c stdin
 static int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
 static int const STANDARD_ERROR_FD  = 2; ///< @c stderr
@@ -235,12 +221,12 @@ bool PipeProcess::write(char const * buffer, std::size_t length)
     return _process->getIn().write(buffer, length);
 }
 
-int64_t PipeProcess::getExitStatus()
+int64_t PipeProcess::getExitStatus() const
 {
     return _process->getExitStatus();
 }
 
-int PipeProcess::getTerminateSignal()
+int PipeProcess::getTerminateSignal() const
 {
     return _process->getTerminateSignal();
 }

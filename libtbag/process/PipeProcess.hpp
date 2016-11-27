@@ -21,6 +21,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/process/OutStream.hpp>
 #include <libtbag/process/InStream.hpp>
+#include <libtbag/process/Process.hpp>
 
 #include <cstdlib>
 
@@ -39,16 +40,13 @@ namespace loop { class UvEventLoop; }
 
 namespace process {
 
-TBAG_API std::string getExecutableSuffix();
-TBAG_API std::string getExecutableName(std::string const & name);
-
 /**
  * PipeProcess class prototype.
  *
  * @author zer0
  * @date   2016-05-17
  */
-class TBAG_API PipeProcess : public libtbag::Noncopyable
+class TBAG_API PipeProcess : public Process
 {
 public:
     struct ProcPimpl;
@@ -130,8 +128,8 @@ public:
     bool write(char const * buffer, std::size_t length);
 
 public:
-    int64_t getExitStatus();
-    int getTerminateSignal();
+    virtual int64_t getExitStatus() const override;
+    virtual int getTerminateSignal() const override;
 };
 
 } // namespace process
