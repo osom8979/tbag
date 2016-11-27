@@ -44,6 +44,10 @@ public:
     inline static TBAG_CONSTEXPR int getUnknownTerminateSignal() TBAG_NOEXCEPT
     { return std::numeric_limits<int>::min(); }
 
+private:
+    int _terminate_signal;
+    int64_t _exit_status;
+
 public:
     Process();
     ~Process();
@@ -55,6 +59,9 @@ public:
 public:
     virtual int     getTerminateSignal() const;
     virtual int64_t getExitStatus()      const;
+
+public:
+    void onExit(void * handle, int64_t exit_status, int term_signal);
 };
 
 } // namespace process
