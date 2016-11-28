@@ -80,11 +80,11 @@ public:
 // Process message map.
 // --------------------
 
-TBAG_UV_EVENT_IMPLEMENT_OPEN(__process_manager__, Process);
+TBAG_UV_EVENT_DEFAULT_IMPLEMENT_OPEN(Process);
 //{
     TBAG_UV_EVENT_EXIT(onExit);
 //}
-TBAG_UV_EVENT_IMPLEMENT_CLOSE(__process_manager__);
+TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE;
 
 // -----------------------------
 // Process class implementation.
@@ -92,12 +92,12 @@ TBAG_UV_EVENT_IMPLEMENT_CLOSE(__process_manager__);
 
 Process::Process() : _process(new ProcPimpl())
 {
-    TBAG_UV_EVENT_REGISTER(__process_manager__, _process->handle(), this);
+    TBAG_UV_EVENT_DEFAULT_REGISTER(_process->handle(), this);
 }
 
 Process::~Process()
 {
-    TBAG_UV_EVENT_UNREGISTER(__process_manager__, _process->handle());
+    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_process->handle());
 }
 
 bool Process::exe()
@@ -163,7 +163,7 @@ void Process::update()
     _envs_ptr[ENVS_SIZE + 0] = nullptr;
 
     // Update options.
-    _process->options()->exit_cb = TBAG_UV_EVENT_CALLBACK_EXIT(__process_manager__, onExit);
+    _process->options()->exit_cb = TBAG_UV_EVENT_DEFAULT_CALLBACK_EXIT(onExit);
     _process->options()->file    = _param.exe_path.c_str();
     _process->options()->cwd     = _param.work_dir.c_str();
     _process->options()->args    = &_args_ptr[0];
