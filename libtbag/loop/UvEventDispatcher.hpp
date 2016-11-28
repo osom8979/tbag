@@ -16,11 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-
 #include <libtbag/pattern/Singleton2.hpp>
-
 #include <libtbag/container/Pointer.hpp>
 #include <libtbag/lock/RwLock.hpp>
+#include <libtbag/Type.hpp>
 
 #include <unordered_map>
 #include <map>
@@ -102,21 +101,6 @@ public:
         }
         return nullptr;
     }
-
-public:
-    template <typename Manager>
-    inline static void add(Handle * handle, Receiver * receiver)
-    {
-        static_assert(std::is_base_of<Self, Manager>::value, "---");
-        Manager::getInstance()->add(handle, receiver);
-    }
-
-    template <typename Manager>
-    inline static void remove(Handle * handle, Receiver * receiver)
-    {
-        static_assert(std::is_base_of<Self, Manager>::value, "---");
-        Manager::getInstance()->remove(handle, receiver);
-    }
 };
 
 } // namespace loop
@@ -131,7 +115,7 @@ NAMESPACE_LIBTBAG_CLOSE
 
 #define TBAG_EVENT_IMPLEMENT_OPEN(manager_name, class_name) \
     class manager_name : public ::libtbag::loop::UvEventDispatcher<void, class_name> \
-    { SINGLETON2_PROTOTYPE(manager_name); private:
+    { SINGLETON2_PROTOTYPE(manager_name); public:
 #define TBAG_EVENT_IMPLEMENT_CLOSE(manager_name) \
     }; SINGLETON2_IMPLEMENT(manager_name);
 
@@ -147,6 +131,9 @@ NAMESPACE_LIBTBAG_CLOSE
 #define TBAG_EVENT_PARAM3(event, name, p1, p2, p3)   \
     static void event(void * h, p1 a1, p2 a2, p3 a3) \
     { getInstance()->get(h)->name(h, a1, a2, a3); }
+
+#define TBAG_EVENT_REGISTER(manager_name, handle, receiver) manager_name::getInstance()->add(handle, receiver)
+#define TBAG_EVENT_UNREGISTER(manager_name, handle)         manager_name::getInstance()->remove(handle)
 
 #define TBAG_EVENT_ALLOC(name)         TBAG_EVENT_PARAM2(name, name, size_t, void*)
 #define TBAG_EVENT_READ(name)          TBAG_EVENT_PARAM2(name, name, ssize_t, void const*)
