@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/UvError.hpp>
 
+#include <exception>
 #include <uv.h>
 
 // -------------------
@@ -32,21 +33,19 @@ struct ThreadPool::ThreadPimpl
 
     uv_thread_t thread;
     Callback callback;
-    int error_code;
 
-    ThreadPimpl(Callback const & c) : callback(c), error_code(0)
+    ThreadPimpl(Callback const & c) : callback(c)
     {
-        error_code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
+        int error_code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
         if (error_code != 0) {
             __tbag_error_f("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, debug::getUvErrorName(error_code));
+            throw std::bad_alloc();
         }
     }
 
     ~ThreadPimpl()
     {
-        if (error_code != 0) {
-            ::uv_thread_join(&thread);
-        }
+        ::uv_thread_join(&thread);
     }
 
 private:
@@ -62,35 +61,51 @@ private:
 
 ThreadPool::ThreadPool(std::size_t size) : _exit(false)
 {
-    if (size == 0U) {
-        __tbag_error("ThreadPool::ThreadPool() IllegalArgumentException: pool size is 0.");
-        return;
-    }
-
-    bool result = true;
-    while (size > 0) {
-        _pool.push(SharedThread(new (std::nothrow) ThreadPimpl([this](){ this->runner(); })));
-        if (static_cast<bool>(_pool.back()) == false || _pool.back()->error_code != 0) {
-            result = false;
-            break;
-        }
-        --size;
-    }
-
-    if (result == false) {
-        while (_pool.empty() == false) {
-            _pool.pop();
-        }
-        __tbag_error("ThreadPool::ThreadPool() ThreadPimpl constructor error.");
+    if (createThreads(size) == false) {
+        throw std::bad_alloc();
     }
 }
 
 ThreadPool::~ThreadPool()
 {
     exit();
-    while (_pool.empty() == false) {
-        _pool.pop();
+    clearThreads();
+}
+
+bool ThreadPool::createThreads(std::size_t size)
+{
+    bool result = true;
+
+    _mutex.lock();
+    if (size != 0U) {
+        _threads.resize(size);
+
+        for (std::size_t i = 0; i < size; ++i) {
+            _threads[i] = SharedThread(new (std::nothrow) ThreadPimpl([this](){ this->runner(); }));
+            if (static_cast<bool>(_threads[i]) == false) {
+                result = false;
+                break;
+            }
+            --size;
+        }
+
+        if (result == false) {
+            __tbag_error_f("ThreadPool::createThreads({}) ThreadPimpl constructor error.", size);
+            clearThreads();
+            _exit = true;
+        }
+        _signal.broadcast();
+    } else {
+        __tbag_error_f("ThreadPool::createThreads({}) IllegalArgumentException: pool size is 0.", size);
     }
+    _mutex.unlock();
+
+    return result;
+}
+
+void ThreadPool::clearThreads()
+{
+    _threads.clear();
 }
 
 void ThreadPool::runner()

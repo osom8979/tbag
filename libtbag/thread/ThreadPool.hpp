@@ -21,6 +21,7 @@
 
 #include <functional>
 #include <memory>
+#include <vector>
 #include <queue>
 #include <map>
 
@@ -43,7 +44,7 @@ public:
 
 public:
     using SharedThread = std::shared_ptr<ThreadPimpl>;
-    using ThreadQueue  = std::queue<SharedThread>;
+    using ThreadGroup  = std::vector<SharedThread>;
 
     using Task = std::function<void(void)>;
     using SharedTask = std::shared_ptr<Task>;
@@ -58,7 +59,7 @@ public:
     bool   _exit;
     Signal _signal;
 
-    ThreadQueue _pool;
+    ThreadGroup _threads;
     TaskQueue   _task;
 
 public:
@@ -66,6 +67,8 @@ public:
     ~ThreadPool();
 
 private:
+    bool createThreads(std::size_t size);
+    void clearThreads();
     void runner();
 
 public:
