@@ -38,6 +38,11 @@
     STATIC_ASSERT_CHECK_TRAIT1(std::is_destructible         , type)       \
     STATIC_ASSERT_CHECK_TRAIT1(std::has_virtual_destructor  , type)
 
+#ifndef STATIC_ASSERT_CHECK_IS_BASE_OF
+#define STATIC_ASSERT_CHECK_IS_BASE_OF(base, derived) \
+    static_assert(std::is_base_of<base, derived>::value, "Not Derived " #base " to " #derived)
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
