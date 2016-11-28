@@ -15,7 +15,7 @@ TEST(BasicTest, String)
 
     std::wstring const WSTRING_TEST = {'T', 'E', 'S', 'T'};
     ASSERT_STREQ(L"TEST", WSTRING_TEST.c_str());
-};
+}
 
 TEST(BasicTest, Integer)
 {
