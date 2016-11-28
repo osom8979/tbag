@@ -16,10 +16,14 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/loop/UvEventLoop.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include <limits>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,26 +43,83 @@ TBAG_API std::string getExecutableName(std::string const & name);
 class TBAG_API Process : public Noncopyable
 {
 public:
+    struct ProcPimpl;
+    friend struct ProcPimpl;
+
+public:
+    using String    = std::string;
+    using Strings   = std::vector<String>;
+    using EventLoop = loop::UvEventLoop;
+    using Path      = filesystem::Path;
+
+public:
+    struct Param
+    {
+        String exe_path; ///< Executable file path.
+        String work_dir; ///< Working directory.
+
+        Strings args; ///< Arguments.
+        Strings envs; ///< Environment variables.
+
+        unsigned int flags = 0;
+
+        inline Param & setExePath(Path const & path)
+        { exe_path = path.getCanonicalString(); return *this; }
+        inline Param & setWorkingDir(Path const & dir)
+        { work_dir = dir.getCanonicalString(); return *this; }
+
+        inline Param & pushArggument(String const & arg)
+        { args.push_back(arg); return *this; }
+        inline Param & pushEnvironment(String const & env)
+        { envs.push_back(env); return *this; }
+
+        inline Param & setFlags(unsigned int flag)
+        { flags = flag; return *this; }
+    };
+
+public:
+    using UniqueProcPimpl = std::unique_ptr<ProcPimpl>;
+
+public:
     inline static TBAG_CONSTEXPR int64_t getUnknownExitCode() TBAG_NOEXCEPT
     { return std::numeric_limits<int64_t>::min(); }
     inline static TBAG_CONSTEXPR int getUnknownTerminateSignal() TBAG_NOEXCEPT
     { return std::numeric_limits<int>::min(); }
 
-private:
-    int _terminate_signal;
+protected:
+    EventLoop _loop;
+    UniqueProcPimpl _process;
+
+protected:
+    Process::Param     _param;
+    std::vector<char*> _args_ptr;
+    std::vector<char*> _envs_ptr;
+
+protected:
     int64_t _exit_status;
+    int _terminate_signal;
 
 public:
     Process();
     ~Process();
 
 public:
-    bool exe(std::string const & exe_path, std::string const & work_dir);
-    bool exe(std::string const & exe_path);
+    inline void setParam(Process::Param const & param)
+    { _param = param; }
+
+    inline int64_t getExitStatus() const TBAG_NOEXCEPT
+    { return _exit_status; }
+    inline int getTerminateSignal() const TBAG_NOEXCEPT
+    { return _terminate_signal; }
 
 public:
-    virtual int     getTerminateSignal() const;
-    virtual int64_t getExitStatus()      const;
+    bool exe(Param const & param);
+    bool exe(Path const & exe_path, Path const & work_dir);
+    bool exe(Path const & exe_path);
+
+private:
+    void update();
+    bool spawn();
 
 public:
     void onExit(void * handle, int64_t exit_status, int term_signal);

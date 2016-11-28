@@ -128,8 +128,8 @@ public:
     bool write(char const * buffer, std::size_t length);
 
 public:
-    virtual int64_t getExitStatus() const override;
-    virtual int getTerminateSignal() const override;
+    int64_t getExitStatus() const;
+    int getTerminateSignal() const;
 };
 
 } // namespace process
