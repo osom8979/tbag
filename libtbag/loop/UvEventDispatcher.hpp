@@ -109,73 +109,74 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
+#ifndef TBAG_UV_EVENT
+#define TBAG_UV_EVENT
+
 // ----------------------------------------
 // WARNING: Don't use into the header file.
 // ----------------------------------------
 
-#define TBAG_EVENT_IMPLEMENT_OPEN(manager_name, class_name) \
+# define TBAG_UV_EVENT_IMPLEMENT_OPEN(manager_name, class_name) \
     class manager_name : public ::libtbag::loop::UvEventDispatcher<void, class_name> \
     { SINGLETON2_PROTOTYPE(manager_name); public:
-#define TBAG_EVENT_IMPLEMENT_CLOSE(manager_name) \
+# define TBAG_UV_EVENT_IMPLEMENT_CLOSE(manager_name) \
     }; SINGLETON2_IMPLEMENT(manager_name);
 
-#define TBAG_EVENT_PARAM0(event, name)  \
-    static void event(void * h)         \
-    { getInstance()->get(h)->name(h); }
-#define TBAG_EVENT_PARAM1(event, name, p1)  \
-    static void event(void * h, p1 a1)      \
-    { getInstance()->get(h)->name(h, a1); }
-#define TBAG_EVENT_PARAM2(event, name, p1, p2)  \
-    static void event(void * h, p1 a1, p2 a2)   \
-    { getInstance()->get(h)->name(h, a1, a2); }
-#define TBAG_EVENT_PARAM3(event, name, p1, p2, p3)   \
-    static void event(void * h, p1 a1, p2 a2, p3 a3) \
-    { getInstance()->get(h)->name(h, a1, a2, a3); }
+# define TBAG_UV_EVENT_PARAM0(event, name) \
+    static void event(void * h) { getInstance()->get(h)->name(h); }
+# define TBAG_UV_EVENT_PARAM1(event, name, p1) \
+    static void event(void * h, p1 a1) { getInstance()->get(h)->name(h, a1); }
+# define TBAG_UV_EVENT_PARAM2(event, name, p1, p2) \
+    static void event(void * h, p1 a1, p2 a2) { getInstance()->get(h)->name(h, a1, a2); }
+# define TBAG_UV_EVENT_PARAM3(event, name, p1, p2, p3) \
+    static void event(void * h, p1 a1, p2 a2, p3 a3) { getInstance()->get(h)->name(h, a1, a2, a3); }
 
-#define TBAG_EVENT_REGISTER(manager_name, handle, receiver) manager_name::getInstance()->add(handle, receiver)
-#define TBAG_EVENT_UNREGISTER(manager_name, handle)         manager_name::getInstance()->remove(handle)
+# define TBAG_UV_EVENT_REGISTER(manager_name, handle, receiver) manager_name::getInstance()->add(handle, receiver)
+# define TBAG_UV_EVENT_UNREGISTER(manager_name, handle)         manager_name::getInstance()->remove(handle)
 
-#define TBAG_EVENT_ALLOC(name)         TBAG_EVENT_PARAM2(name, name, size_t, void*)
-#define TBAG_EVENT_READ(name)          TBAG_EVENT_PARAM2(name, name, ssize_t, void const*)
-#define TBAG_EVENT_WRITE(name)         TBAG_EVENT_PARAM1(name, name, int)
-#define TBAG_EVENT_CONNECT(name)       TBAG_EVENT_PARAM1(name, name, int)
-#define TBAG_EVENT_SHUTDOWN(name)      TBAG_EVENT_PARAM1(name, name, int)
-#define TBAG_EVENT_CONNECTION(name)    TBAG_EVENT_PARAM1(name, name, int)
-#define TBAG_EVENT_CLOSE(name)         TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_POLL(name)          TBAG_EVENT_PARAM2(name, name, int, int)
-#define TBAG_EVENT_TIMER(name)         TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_ASYNC(name)         TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_PREPARE(name)       TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_CHECK(name)         TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_IDLE(name)          TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_EXIT(name)          TBAG_EVENT_PARAM2(name, name, int64_t, int)
-#define TBAG_EVENT_WALK(name)          TBAG_EVENT_PARAM1(name, name, void*)
-#define TBAG_EVENT_FS(name)            TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_WORK(name)          TBAG_EVENT_PARAM0(name, name)
-#define TBAG_EVENT_AFTER_WORK(name)    TBAG_EVENT_PARAM1(name, name, int)
-#define TBAG_EVENT_GETADDR_INFO(name)  TBAG_EVENT_PARAM2(name, name, int, void*)
-#define TBAG_EVENT_GETNAME_INFO(name)  TBAG_EVENT_PARAM3(name, name, int, char const*, char const*)
+# define TBAG_UV_EVENT_ALLOC(name)         TBAG_UV_EVENT_PARAM2(name, name, size_t, void*)
+# define TBAG_UV_EVENT_READ(name)          TBAG_UV_EVENT_PARAM2(name, name, ssize_t, void const*)
+# define TBAG_UV_EVENT_WRITE(name)         TBAG_UV_EVENT_PARAM1(name, name, int)
+# define TBAG_UV_EVENT_CONNECT(name)       TBAG_UV_EVENT_PARAM1(name, name, int)
+# define TBAG_UV_EVENT_SHUTDOWN(name)      TBAG_UV_EVENT_PARAM1(name, name, int)
+# define TBAG_UV_EVENT_CONNECTION(name)    TBAG_UV_EVENT_PARAM1(name, name, int)
+# define TBAG_UV_EVENT_CLOSE(name)         TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_POLL(name)          TBAG_UV_EVENT_PARAM2(name, name, int, int)
+# define TBAG_UV_EVENT_TIMER(name)         TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_ASYNC(name)         TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_PREPARE(name)       TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_CHECK(name)         TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_IDLE(name)          TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_EXIT(name)          TBAG_UV_EVENT_PARAM2(name, name, int64_t, int)
+# define TBAG_UV_EVENT_WALK(name)          TBAG_UV_EVENT_PARAM1(name, name, void*)
+# define TBAG_UV_EVENT_FS(name)            TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_WORK(name)          TBAG_UV_EVENT_PARAM0(name, name)
+# define TBAG_UV_EVENT_AFTER_WORK(name)    TBAG_UV_EVENT_PARAM1(name, name, int)
+# define TBAG_UV_EVENT_GETADDR_INFO(name)  TBAG_UV_EVENT_PARAM2(name, name, int, void*)
+# define TBAG_UV_EVENT_GETNAME_INFO(name)  TBAG_UV_EVENT_PARAM3(name, name, int, char const*, char const*)
 
-#define TBAG_EVENT_CALLBACK_ALLOC(mgr, name)        (uv_alloc_cb)       &mgr::name
-#define TBAG_EVENT_CALLBACK_READ(mgr, name)         (uv_read_cb)        &mgr::name
-#define TBAG_EVENT_CALLBACK_WRITE(mgr, name)        (uv_write_cb)       &mgr::name
-#define TBAG_EVENT_CALLBACK_CONNECT(mgr, name)      (uv_connect_cb)     &mgr::name
-#define TBAG_EVENT_CALLBACK_SHUTDOWN(mgr, name)     (uv_shutdown_cb)    &mgr::name
-#define TBAG_EVENT_CALLBACK_CONNECTION(mgr, name)   (uv_connection_cb)  &mgr::name
-#define TBAG_EVENT_CALLBACK_CLOSE(mgr, name)        (uv_close_cb)       &mgr::name
-#define TBAG_EVENT_CALLBACK_POLL(mgr, name)         (uv_poll_cb)        &mgr::name
-#define TBAG_EVENT_CALLBACK_TIMER(mgr, name)        (uv_timer_cb)       &mgr::name
-#define TBAG_EVENT_CALLBACK_ASYNC(mgr, name)        (uv_async_cb)       &mgr::name
-#define TBAG_EVENT_CALLBACK_PREPARE(mgr, name)      (uv_prepare_cb)     &mgr::name
-#define TBAG_EVENT_CALLBACK_CHECK(mgr, name)        (uv_check_cb)       &mgr::name
-#define TBAG_EVENT_CALLBACK_IDLE(mgr, name)         (uv_idle_cb)        &mgr::name
-#define TBAG_EVENT_CALLBACK_EXIT(mgr, name)         (uv_exit_cb)        &mgr::name
-#define TBAG_EVENT_CALLBACK_WALK(mgr, name)         (uv_walk_cb)        &mgr::name
-#define TBAG_EVENT_CALLBACK_FS(mgr, name)           (uv_fs_cb)          &mgr::name
-#define TBAG_EVENT_CALLBACK_WORK(mgr, name)         (uv_work_cb)        &mgr::name
-#define TBAG_EVENT_CALLBACK_AFTERWORK(mgr, name)    (uv_after_work_cb)  &mgr::name
-#define TBAG_EVENT_CALLBACK_GETADDRINFO(mgr, name)  (uv_getaddrinfo_cb) &mgr::name
-#define TBAG_EVENT_CALLBACK_GETNAMEINFO(mgr, name)  (uv_getnameinfo_cb) &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_ALLOC(mgr, name)        (uv_alloc_cb)       &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_READ(mgr, name)         (uv_read_cb)        &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_WRITE(mgr, name)        (uv_write_cb)       &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_CONNECT(mgr, name)      (uv_connect_cb)     &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_SHUTDOWN(mgr, name)     (uv_shutdown_cb)    &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_CONNECTION(mgr, name)   (uv_connection_cb)  &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_CLOSE(mgr, name)        (uv_close_cb)       &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_POLL(mgr, name)         (uv_poll_cb)        &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_TIMER(mgr, name)        (uv_timer_cb)       &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_ASYNC(mgr, name)        (uv_async_cb)       &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_PREPARE(mgr, name)      (uv_prepare_cb)     &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_CHECK(mgr, name)        (uv_check_cb)       &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_IDLE(mgr, name)         (uv_idle_cb)        &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_EXIT(mgr, name)         (uv_exit_cb)        &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_WALK(mgr, name)         (uv_walk_cb)        &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_FS(mgr, name)           (uv_fs_cb)          &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_WORK(mgr, name)         (uv_work_cb)        &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_AFTERWORK(mgr, name)    (uv_after_work_cb)  &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_GETADDRINFO(mgr, name)  (uv_getaddrinfo_cb) &mgr::name
+# define TBAG_UV_EVENT_CALLBACK_GETNAMEINFO(mgr, name)  (uv_getnameinfo_cb) &mgr::name
+
+#endif // TBAG_UV_EVENT
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOOP_UVEVENTDISPATCHER_HPP__
 

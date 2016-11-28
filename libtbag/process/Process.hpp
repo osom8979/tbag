@@ -58,8 +58,8 @@ public:
         String exe_path; ///< Executable file path.
         String work_dir; ///< Working directory.
 
-        Strings args; ///< Arguments.
-        Strings envs; ///< Environment variables.
+        Strings arguments;    ///< Arguments.
+        Strings environments; ///< Environment variables.
 
         unsigned int flags = 0;
 
@@ -69,9 +69,14 @@ public:
         { work_dir = dir.getCanonicalString(); return *this; }
 
         inline Param & pushArggument(String const & arg)
-        { args.push_back(arg); return *this; }
+        { arguments.push_back(arg); return *this; }
         inline Param & pushEnvironment(String const & env)
-        { envs.push_back(env); return *this; }
+        { environments.push_back(env); return *this; }
+
+        inline Param & setArgguments(Strings const & args)
+        { arguments = args; return *this; }
+        inline Param & setEnvironments(Strings const & envs)
+        { environments = envs; return *this; }
 
         inline Param & setFlags(unsigned int flag)
         { flags = flag; return *this; }
@@ -113,11 +118,14 @@ public:
     { return _terminate_signal; }
 
 public:
+    bool exe();
     bool exe(Param const & param);
+    bool exe(Path const & exe_path, Path const & work_dir, Strings const & args, Strings const & envs);
     bool exe(Path const & exe_path, Path const & work_dir);
     bool exe(Path const & exe_path);
 
 private:
+    void clear();
     void update();
     bool spawn();
 

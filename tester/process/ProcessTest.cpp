@@ -20,8 +20,8 @@ TEST(ProcessTest, Default)
     Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
 
     Process process;
-    //ASSERT_TRUE(process.exe(EXE_PATH, Path::getExeDir()));
-    //ASSERT_EQ(1, process.getExitStatus());
-    //ASSERT_EQ(0, process.getTerminateSignal());
+    ASSERT_TRUE(process.exe(EXE_PATH, Path::getExeDir()));
+    ASSERT_EQ(1, process.getExitStatus());
+    ASSERT_EQ(0, process.getTerminateSignal());
 }
 

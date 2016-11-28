@@ -80,11 +80,11 @@ public:
 // Process message map.
 // --------------------
 
-TBAG_EVENT_IMPLEMENT_OPEN(__process_manager__, Process);
+TBAG_UV_EVENT_IMPLEMENT_OPEN(__process_manager__, Process);
 //{
-    TBAG_EVENT_EXIT(onExit);
+    TBAG_UV_EVENT_EXIT(onExit);
 //}
-TBAG_EVENT_IMPLEMENT_CLOSE(__process_manager__);
+TBAG_UV_EVENT_IMPLEMENT_CLOSE(__process_manager__);
 
 // -----------------------------
 // Process class implementation.
@@ -92,23 +92,37 @@ TBAG_EVENT_IMPLEMENT_CLOSE(__process_manager__);
 
 Process::Process() : _process(new ProcPimpl())
 {
-    TBAG_EVENT_REGISTER(__process_manager__, _process->handle(), this);
+    TBAG_UV_EVENT_REGISTER(__process_manager__, _process->handle(), this);
 }
 
 Process::~Process()
 {
-    TBAG_EVENT_UNREGISTER(__process_manager__, _process->handle());
+    TBAG_UV_EVENT_UNREGISTER(__process_manager__, _process->handle());
+}
+
+bool Process::exe()
+{
+    clear();
+    update();
+    spawn();
+
+    return _loop.runDefault();
 }
 
 bool Process::exe(Param const & param)
 {
     setParam(param);
-    return _loop.runDefault();
+    return exe();
+}
+
+bool Process::exe(Path const & exe_path, Path const & work_dir, Strings const & args, Strings const & envs)
+{
+    return exe(Param().setExePath(exe_path).setWorkingDir(work_dir).setArgguments(args).setEnvironments(envs));
 }
 
 bool Process::exe(Path const & exe_path, Path const & work_dir)
 {
-    return exe(Param().setExePath(exe_path).setWorkingDir(work_dir));
+    return exe(exe_path, work_dir, Strings(), Strings());
 }
 
 bool Process::exe(Path const & exe_path)
@@ -116,10 +130,15 @@ bool Process::exe(Path const & exe_path)
     return exe(exe_path, Path::getWorkDir());
 }
 
+void Process::clear()
+{
+    _process->clearOptions();
+}
+
 void Process::update()
 {
-    std::size_t const ARGS_SIZE = _param.args.size();
-    std::size_t const ENVS_SIZE = _param.envs.size();
+    std::size_t const ARGS_SIZE = _param.arguments.size();
+    std::size_t const ENVS_SIZE = _param.environments.size();
 
     _args_ptr.clear();
     _envs_ptr.clear();
@@ -131,12 +150,12 @@ void Process::update()
 
     // Arguments.
     for (std::size_t index = 0; index < ARGS_SIZE; ++index) {
-        _args_ptr[index + 1] = &_param.args[index][0];
+        _args_ptr[index + 1] = &_param.arguments[index][0];
     }
 
     // Environment.
     for (std::size_t index = 0; index < ENVS_SIZE; ++index) {
-        _envs_ptr[index] = &_param.envs[index][0];
+        _envs_ptr[index] = &_param.environments[index][0];
     }
 
     // Last: NULL pointer.
@@ -144,8 +163,7 @@ void Process::update()
     _envs_ptr[ENVS_SIZE + 0] = nullptr;
 
     // Update options.
-    _process->clearOptions();
-    _process->options()->exit_cb = TBAG_EVENT_CALLBACK_EXIT(__process_manager__, onExit);
+    _process->options()->exit_cb = TBAG_UV_EVENT_CALLBACK_EXIT(__process_manager__, onExit);
     _process->options()->file    = _param.exe_path.c_str();
     _process->options()->cwd     = _param.work_dir.c_str();
     _process->options()->args    = &_args_ptr[0];
