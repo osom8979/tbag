@@ -17,7 +17,9 @@ set (__libs    "tbag")
 
 if (IS_DIRECTORY "$ENV{TBAG_HOME}")
     set (Tbag_ROOT_INCLUDE_PATHS "$ENV{TBAG_HOME}")
-    set (Tbag_ROOT_LIBRARY_PATHS "$ENV{TBAG_HOME}/build")
+    set (Tbag_ROOT_LIBRARY_PATHS "$ENV{TBAG_HOME}/build"
+                                 "$ENV{TBAG_HOME}/cmake-build-debug"
+                                 "$ENV{TBAG_HOME}/cmake-build-release")
 endif ()
 
 include (TbagSimpleFindLibrary)
