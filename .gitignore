@@ -200,7 +200,7 @@ fabric.properties
 ###############
 ### PROJECT ###
 /build
-/cmake-build-debug
+/cmake-build-*
 /3rd
 /Doxyfile
 /**/prefix.h
