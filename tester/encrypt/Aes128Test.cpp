@@ -109,9 +109,9 @@ TEST(Aes128Test, EncodeAndDecode_File)
 
     using Path = libtbag::filesystem::Path;
 
-    Path const TEST_PATH(TEST_FILENAME);
-    Path const ENC_PATH(TEST_ENC_FILENAME);
-    Path const DEC_PATH(TEST_DEC_FILENAME);
+    Path const TEST_PATH = Path(TEST_FILENAME).getCanonical();
+    Path const  ENC_PATH = Path(TEST_ENC_FILENAME).getCanonical();
+    Path const  DEC_PATH = Path(TEST_DEC_FILENAME).getCanonical();
 
     if (TEST_PATH.exists()) { TEST_PATH.remove(); }
     if ( ENC_PATH.exists()) {  ENC_PATH.remove(); }
@@ -130,10 +130,10 @@ TEST(Aes128Test, EncodeAndDecode_File)
     Aes128::Key key;
     key.fill(0x00);
 
-    ASSERT_TRUE(Aes128::encryptFile(TEST_ENC_FILENAME, key, TEST_FILENAME));
+    ASSERT_TRUE(Aes128::encryptFile(ENC_PATH, key, TEST_PATH));
     ASSERT_TRUE(ENC_PATH.isRegularFile());
 
-    ASSERT_TRUE(Aes128::decryptFile(TEST_DEC_FILENAME, key, TEST_ENC_FILENAME));
+    ASSERT_TRUE(Aes128::decryptFile(DEC_PATH, key, ENC_PATH));
     ASSERT_TRUE(DEC_PATH.isRegularFile());
 
     std::string result;
@@ -166,9 +166,9 @@ TEST(Aes128Test, EncodeAndDecode_Dir)
 
     using Path = libtbag::filesystem::Path;
 
-    Path const TEST_PATH(TEST_DIR);
-    Path const  ENC_PATH(TEST_ENC_DIR);
-    Path const  DEC_PATH(TEST_DEC_DIR);
+    Path const TEST_PATH = Path(TEST_DIR).getCanonical();
+    Path const  ENC_PATH = Path(TEST_ENC_DIR).getCanonical();
+    Path const  DEC_PATH = Path(TEST_DEC_DIR).getCanonical();
 
     // @formatter:off
     if (TEST_PATH.exists()) { TEST_PATH.removeDirWithRecursive(); }

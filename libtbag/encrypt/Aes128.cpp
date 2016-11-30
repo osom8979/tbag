@@ -87,8 +87,8 @@ std::size_t Aes128::decrypt(Buffer & output, Key const & key, uint8_t const * in
 bool Aes128::createParentDirectory(std::string const & dir)
 {
     using Path = filesystem::Path;
-    if (Path(dir).getCanonical().getParent().isDirectory() == false) {
-        if (Path(dir).getCanonical().getParent().createDirWithRecursive() == false) {
+    if (Path(dir).getParent().isDirectory() == false) {
+        if (Path(dir).getParent().createDirWithRecursive() == false) {
             return false;
         }
     }
