@@ -14,6 +14,7 @@
 #include <cstring>
 
 #include <fstream>
+#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -147,11 +148,14 @@ bool Aes128::decryptFile(std::string const & output, Key const & key, std::strin
     Path  input_path(input);
     Path output_path(output);
 
-    if (output_path.exists() == true || input_path.exists() == false) {
-        return false;
+    if (output_path.exists()) {
+        //return false;
+    }
+    if (input_path.exists() == false) {
+        //return false;
     }
     if (createParentDirectory(output) == false) {
-        return false;
+        //return false;
     }
 
     std::size_t const INPUT_SIZE = input_path.size();

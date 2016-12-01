@@ -8,6 +8,10 @@
 #include <libtbag/filesystem/Common.hpp>
 #include <uv.h>
 
+#if defined(__OS_WINDOWS__)
+#include <Windows.h>
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -170,21 +174,29 @@ std::set<std::string> scanDir(std::string const & dir_path)
 
 bool createDir(std::string const & path, int mode)
 {
+#if defined(__OS_WINDOWS__)
+    return CreateDirectoryA(&path[0], NULL) == TRUE ? true : false;
+#else
     uv_fs_t request;
     int error_code = uv_fs_mkdir(nullptr, &request, path.c_str(), mode, nullptr);
     uv_fs_req_cleanup(&request);
 
     // EXISTS DIRECTORY: (error_code == UV_EEXIST)
     return (error_code == 0 ? true : false);
+#endif
 }
 
 bool removeDir(std::string const & path)
 {
+#if defined(__OS_WINDOWS__)
+    return RemoveDirectoryA(&path[0]) == TRUE ? true : false;
+#else
     uv_fs_t request;
     int error_code = uv_fs_rmdir(nullptr, &request, path.c_str(), nullptr);
     uv_fs_req_cleanup(&request);
 
     return (error_code == 0 ? true : false);
+#endif
 }
 
 bool rename(std::string const & from, std::string const & to)

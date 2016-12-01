@@ -7,6 +7,7 @@
 
 #include <libtbag/archive/Zip.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/Common.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -156,17 +157,18 @@ Zip::ResultCode Zip::unzip(std::string const & file, std::string const & dir)
          //          << ") ORI_SIZE("  << info.uncompressed_size
          //          << ")\n";
 
-        Path const OUTPUT_NODE_PATH = Path(dir) / filename;
+        std::string const OUTPUT_NODE_PATH = dir + Path::getPathSeparator() + filename;
 
         if (info.compressed_size == 0 && info.uncompressed_size == 0) {
             // Directory.
-            OUTPUT_NODE_PATH.createDirWithRecursive();
+            //OUTPUT_NODE_PATH.createDirWithRecursive();
+            libtbag::filesystem::common::createDir(OUTPUT_NODE_PATH);
 
         } else {
             // Regular file.
 
             if (unzOpenCurrentFile(uf) == UNZ_OK) {
-                std::ofstream op(OUTPUT_NODE_PATH.getCanonicalString(), std::ios_base::binary);
+                std::ofstream op(OUTPUT_NODE_PATH, std::ios_base::binary);
                 int readsize = 0;
 
                 do {
