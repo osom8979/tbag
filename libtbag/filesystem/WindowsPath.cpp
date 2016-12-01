@@ -36,7 +36,7 @@ std::string WindowsPath::getPathSeparator()
 
 std::string WindowsPath::getGenericPathSeparatorString()
 {
-    return {common::getGenericPathSeparator()};
+    return {common::PATH_SEPARATOR_OF_GENERIC};
 }
 
 std::string WindowsPath::getRemoveSeparatorRegex()

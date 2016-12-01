@@ -35,7 +35,7 @@ std::string PosixPath::getPathSeparator()
 
 std::string PosixPath::getGenericPathSeparatorString()
 {
-    return {common::getGenericPathSeparator()};
+    return {common::PATH_SEPARATOR_OF_GENERIC};
 }
 
 std::string PosixPath::getRemoveSeparatorRegex()

@@ -18,11 +18,11 @@ using namespace libtbag::filesystem::common;
 TEST(CommonTest, GetPathSeparator)
 {
 #if defined(WIN32) || defined(_WIN32)
-    ASSERT_EQ('\\', getPathSeparator());
-    ASSERT_EQ(';', getPathSplitter());
+    ASSERT_EQ('\\', PATH_SEPARATOR);
+    ASSERT_EQ(';', PATH_SPLITTER);
 #else
-    ASSERT_EQ('/', getPathSeparator());
-    ASSERT_EQ(':', getPathSplitter());
+    ASSERT_EQ('/', PATH_SEPARATOR);
+    ASSERT_EQ(':', PATH_SPLITTER);
 #endif
 }
 

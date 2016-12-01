@@ -57,7 +57,7 @@ std::string getExeDir()
     }
 
     // Separate directory & filename.
-    std::string separator = std::string() + filesystem::common::getPathSeparator();
+    std::string separator = std::string() + PATH_SEPARATOR;
     std::size_t last_separator_index = path.rfind(separator);
     return path.substr(0, last_separator_index);
 }

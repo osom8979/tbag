@@ -65,32 +65,22 @@ std::size_t const MAX_PATH_BUFFER_SIZE = MAX_PATH_LENGTH_OF_WINDOWS_API;
 
 char const PATH_SEPARATOR_OF_WINDOWS = '\\';
 char const PATH_SEPARATOR_OF_POSIX   = '/';
+char const PATH_SEPARATOR_OF_GENERIC = PATH_SEPARATOR_OF_POSIX;
 
-inline TBAG_CONSTEXPR char const getPathSeparator() TBAG_NOEXCEPT
-{
 #if defined(__OS_WINDOWS__)
-    return PATH_SEPARATOR_OF_WINDOWS;
+char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
 #else
-    return PATH_SEPARATOR_OF_POSIX;
+char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
 #endif
-}
-
-inline TBAG_CONSTEXPR char const getGenericPathSeparator() TBAG_NOEXCEPT
-{
-    return PATH_SEPARATOR_OF_POSIX;
-}
 
 char const PATH_SPLITTER_OF_WINDOWS = ';';
 char const PATH_SPLITTER_OF_POSIX   = ':';
 
-inline TBAG_CONSTEXPR char const getPathSplitter() TBAG_NOEXCEPT
-{
 #if defined(__OS_WINDOWS__)
-    return PATH_SPLITTER_OF_WINDOWS;
+char const PATH_SPLITTER = PATH_SPLITTER_OF_WINDOWS;
 #else
-    return PATH_SPLITTER_OF_POSIX;
+char const PATH_SPLITTER = PATH_SPLITTER_OF_POSIX;
 #endif
-}
 
 using DirFunction = int (*)(char * buffer, std::size_t * size);
 
