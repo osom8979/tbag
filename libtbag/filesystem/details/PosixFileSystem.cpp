@@ -9,6 +9,16 @@
 #include <libtbag/log/Log.hpp>
 #include <cstdlib>
 
+#ifndef __CHECK_TEMP_ENV_VAR
+#define __CHECK_TEMP_ENV_VAR(name, return_label)  \
+    do {                            \
+        path = std::getenv(name);   \
+        if (path != nullptr) {      \
+            goto return_label;      \
+        }                           \
+    } while (0)
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -25,36 +35,32 @@ static char const * const TEMPDIR_ENV_NAME = "TEMPDIR";
 static char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
 static char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
 
+// No temp environment variables defined.
+#if defined(__OS_ANDROID__)
+static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
+#else
+static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
+#endif
+
 std::string getTempDir()
 {
+#if defined(__UNIX_LIKE__)
     const char * path = nullptr;
 
-#ifndef __CHECK_TEMP_ENV_VAR
-#define __CHECK_TEMP_ENV_VAR(name)  \
-    do {                            \
-        path = std::getenv(name);   \
-        if (path != nullptr) {      \
-            goto __return_path;     \
-        }                           \
-    } while (0)
-#endif
-
     // Check the TMPDIR, TMP, TEMP, and TEMPDIR environment variables in order.
-    __CHECK_TEMP_ENV_VAR(TMPDIR_ENV_NAME);
-    __CHECK_TEMP_ENV_VAR(TMP_ENV_NAME);
-    __CHECK_TEMP_ENV_VAR(TEMP_ENV_NAME);
-    __CHECK_TEMP_ENV_VAR(TEMPDIR_ENV_NAME);
-#undef __CHECK_TEMP_ENV_VAR
+    __CHECK_TEMP_ENV_VAR( TMPDIR_ENV_NAME, __return_path);
+    __CHECK_TEMP_ENV_VAR(    TMP_ENV_NAME, __return_path);
+    __CHECK_TEMP_ENV_VAR(   TEMP_ENV_NAME, __return_path);
+    __CHECK_TEMP_ENV_VAR(TEMPDIR_ENV_NAME, __return_path);
 
     // No temp environment variables defined.
-#if defined(__OS_ANDROID__)
-    path = LAST_ANDROID_TEMP_VALUE;
-#else
-    path = LAST_POSIX_TEMP_VALUE;
-#endif
-    __return_path:
+    path = LAST_TEMP_VALUE;
 
+__return_path:
     return std::string(path);
+#else
+    return std::string();
+#endif
 }
 
 std::string getWorkDir()

@@ -14,6 +14,7 @@
 #endif
 
 // Operating System.
+#include <libtbag/macro/os/android.hpp>
 #include <libtbag/macro/os/apple.hpp>
 #include <libtbag/macro/os/cygwin.hpp>
 #include <libtbag/macro/os/linux.hpp>
