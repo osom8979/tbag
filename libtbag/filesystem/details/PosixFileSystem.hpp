@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,6 +29,22 @@ namespace posix      {
 
 TBAG_API std::string getTempDir();
 TBAG_API std::string getWorkDir();
+TBAG_API std::string getHomeDir();
+TBAG_API std::string getExePath();
+TBAG_API std::string getExeDir();
+
+TBAG_API bool createDirectory(std::string const & path);
+TBAG_API bool removeDirectory(std::string const & path);
+
+TBAG_API bool rename(std::string const & from, std::string const & to);
+TBAG_API bool remove(std::string const & path);
+
+TBAG_API bool exists(std::string const & path);
+
+TBAG_API bool isDirectory(std::string const & path);
+TBAG_API bool isRegularFile(std::string const & path);
+
+TBAG_API std::vector<std::string> scanDir(std::string const & path);
 
 } // namespace posix
 } // namespace details
