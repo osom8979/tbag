@@ -7,6 +7,7 @@
 
 #include <libtbag/filesystem/details/PosixFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
+#include <cstdlib>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -16,9 +17,44 @@ namespace filesystem {
 namespace details    {
 namespace posix      {
 
+static char const * const  TMPDIR_ENV_NAME = "TMPDIR";
+static char const * const     TMP_ENV_NAME = "TMP";
+static char const * const    TEMP_ENV_NAME = "TEMP";
+static char const * const TEMPDIR_ENV_NAME = "TEMPDIR";
+
+static char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
+static char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
+
 std::string getTempDir()
 {
-    return std::string();
+    const char * path = nullptr;
+
+#ifndef __CHECK_TEMP_ENV_VAR
+#define __CHECK_TEMP_ENV_VAR(name)  \
+    do {                            \
+        path = std::getenv(name);   \
+        if (path != nullptr) {      \
+            goto __return_path;     \
+        }                           \
+    } while (0)
+#endif
+
+    // Check the TMPDIR, TMP, TEMP, and TEMPDIR environment variables in order.
+    __CHECK_TEMP_ENV_VAR(TMPDIR_ENV_NAME);
+    __CHECK_TEMP_ENV_VAR(TMP_ENV_NAME);
+    __CHECK_TEMP_ENV_VAR(TEMP_ENV_NAME);
+    __CHECK_TEMP_ENV_VAR(TEMPDIR_ENV_NAME);
+#undef __CHECK_TEMP_ENV_VAR
+
+    // No temp environment variables defined.
+#if defined(__OS_ANDROID__)
+    path = LAST_ANDROID_TEMP_VALUE;
+#else
+    path = LAST_POSIX_TEMP_VALUE;
+#endif
+    __return_path:
+
+    return std::string(path);
 }
 
 std::string getWorkDir()
