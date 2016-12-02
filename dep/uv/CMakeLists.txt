@@ -46,6 +46,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
                      -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
     add_compile_options (/wd4244) ## conversion from 'type1' to 'type2', possible loss of data.
     add_compile_options (/wd4267) ## conversion from 'size_t' to 'type', possible loss of data.
+    add_compile_options (/EHsc)   ## Exception Handling Model.
     set (ALL_SRCS ${COMMON_SRCS} ${WIN_SRCS})
 
 elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
