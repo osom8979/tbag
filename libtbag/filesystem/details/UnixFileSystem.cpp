@@ -9,6 +9,9 @@
 #include <libtbag/log/Log.hpp>
 #include <cstdlib>
 
+#if defined(__PLATFORM_UNIX_LIKE__)
+#endif
+
 #ifndef __CHECK_TEMP_ENV_VAR
 #define __CHECK_TEMP_ENV_VAR(name, return_label)  \
     do {                            \
@@ -65,62 +68,110 @@ __return_path:
 
 std::string getWorkDir()
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return std::string();
+#else
+    return std::string();
+#endif
 }
 
 std::string getHomeDir()
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return std::string();
+#else
+    return std::string();
+#endif
 }
 
 std::string getExePath()
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return std::string();
+#else
+    return std::string();
+#endif
 }
 
 std::string getExeDir()
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return std::string();
+#else
+    return std::string();
+#endif
 }
 
 bool createDirectory(std::string const & path)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return false;
+#else
+    return false;
+#endif
 }
 
 bool removeDirectory(std::string const & path)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return false;
+#else
+    return false;
+#endif
 }
 
 bool rename(std::string const & from, std::string const & to)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return false;
+#else
+    return false;
+#endif
 }
 
 bool remove(std::string const & path)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return false;
+#else
+    return false;
+#endif
 }
 
 bool exists(std::string const & path)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return false;
+#else
+    return false;
+#endif
 }
 
 bool isDirectory(std::string const & path)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return false;
+#else
+    return false;
+#endif
 }
 
 bool isRegularFile(std::string const & path)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return false;
+#else
+    return false;
+#endif
 }
 
 std::vector<std::string> scanDir(std::string const & path)
 {
+#if defined(__PLATFORM_UNIX_LIKE__)
     return std::vector<std::string>();
+#else
+    return std::vector<std::string>();
+#endif
 }
 
 } // namespace unix
