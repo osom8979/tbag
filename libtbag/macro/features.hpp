@@ -13,19 +13,8 @@
 #pragma once
 #endif
 
-// Operating System.
-#include <libtbag/macro/os/android.hpp>
-#include <libtbag/macro/os/apple.hpp>
-#include <libtbag/macro/os/cygwin.hpp>
-#include <libtbag/macro/os/linux.hpp>
-#include <libtbag/macro/os/unix.hpp>
-#include <libtbag/macro/os/windows.hpp>
-
-// Compiler.
-#include <libtbag/macro/compiler/gcc.hpp>
-#include <libtbag/macro/compiler/clang.hpp>
-#include <libtbag/macro/compiler/llvm.hpp>
-#include <libtbag/macro/compiler/msvc.hpp>
+#include <libtbag/macro/platform.hpp>
+#include <libtbag/macro/compiler.hpp>
 
 #ifndef TBAG_CONSTEXPR
 # if defined(TBAG_HAS_CONSTEXPR)

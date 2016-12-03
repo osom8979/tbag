@@ -1,12 +1,12 @@
 /**
  * @file   linux.hpp
- * @brief  linux os config.
+ * @brief  linux platform config.
  * @author zer0
  * @date   2016-11-24
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_LINUX_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_LINUX_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_LINUX_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_LINUX_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -14,8 +14,8 @@
 #endif
 
 #if defined(linux) || defined(__linux__) || defined(__linux)
-#define __OS_LINUX__
+#define __PLATFORM_LINUX__
 #endif
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_LINUX_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_LINUX_HPP__
 

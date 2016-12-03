@@ -36,7 +36,7 @@ static char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
 static char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
 
 // No temp environment variables defined.
-#if defined(__OS_ANDROID__)
+#if defined(__PLATFORM_ANDROID__)
 static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
 #else
 static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;

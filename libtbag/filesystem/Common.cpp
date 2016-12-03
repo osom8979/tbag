@@ -8,7 +8,7 @@
 #include <libtbag/filesystem/Common.hpp>
 #include <uv.h>
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 #include <Windows.h>
 #endif
 
@@ -123,7 +123,7 @@ uint64_t getStatus(std::string const & path)
 
 uint64_t getPermission(std::string const & path)
 {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
     return getStatus(path) & (S_IRUSR | S_IWUSR);
 #else
     return getStatus(path) & (S_IRWXU | S_IRWXG | S_IRWXO);
@@ -132,7 +132,7 @@ uint64_t getPermission(std::string const & path)
 
 uint64_t getFixedPermission(uint64_t mode)
 {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
     return mode & (S_IRUSR | S_IWUSR);
 #else
     return mode & (S_IRWXU | S_IRWXG | S_IRWXO);
@@ -174,7 +174,7 @@ std::set<std::string> scanDir(std::string const & dir_path)
 
 bool createDir(std::string const & path, int mode)
 {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
     return CreateDirectoryA(&path[0], NULL) == TRUE ? true : false;
 #else
     uv_fs_t request;
@@ -188,7 +188,7 @@ bool createDir(std::string const & path, int mode)
 
 bool removeDir(std::string const & path)
 {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
     return RemoveDirectoryA(&path[0]) == TRUE ? true : false;
 #else
     uv_fs_t request;

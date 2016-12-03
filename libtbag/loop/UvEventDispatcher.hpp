@@ -57,7 +57,7 @@ public:
     using Key   = Pointer<Handle>;
     using Value = Pointer<Receiver>;
 
-#if defined(__OS_MACOS__) && !defined(NDEBUG)
+#if defined(__PLATFORM_MACOS__) && !defined(NDEBUG)
     // Only debugging.
     using HandleMap = std::map<Key, Value, typename Key::Less>;
 #else

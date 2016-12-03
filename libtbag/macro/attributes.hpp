@@ -13,19 +13,8 @@
 #pragma once
 #endif
 
-// Operating System.
-#include <libtbag/macro/os/android.hpp>
-#include <libtbag/macro/os/apple.hpp>
-#include <libtbag/macro/os/cygwin.hpp>
-#include <libtbag/macro/os/linux.hpp>
-#include <libtbag/macro/os/unix.hpp>
-#include <libtbag/macro/os/windows.hpp>
-
-// Compiler.
-#include <libtbag/macro/compiler/gcc.hpp>
-#include <libtbag/macro/compiler/clang.hpp>
-#include <libtbag/macro/compiler/llvm.hpp>
-#include <libtbag/macro/compiler/msvc.hpp>
+#include <libtbag/macro/platform.hpp>
+#include <libtbag/macro/compiler.hpp>
 
 #ifndef ATTRIBUTE_FORCE_INLINE
 # if defined(__COMP_GNUC_CXX__) && (__COMP_GNUC_VERSION__ >= 30100)
@@ -74,7 +63,7 @@
 #endif
 
 #if defined(TBAG_EXPORT_API)
-# if defined(__OS_WINDOWS__)
+# if defined(__PLATFORM_WINDOWS__)
 #  define TBAG_API __declspec(dllexport)
 # elif defined(__COMP_GNUC__) && (__COMP_GNUC_VERSION__ >= 40000)
 #  define TBAG_API __attribute__((visibility("default")))
@@ -82,7 +71,7 @@
 #  define TBAG_API
 # endif
 #else // defined(TBAG_EXPORT_API)
-# if defined(__OS_WINDOWS__)
+# if defined(__PLATFORM_WINDOWS__)
 #  define TBAG_API __declspec(dllimport)
 # else
 #  define TBAG_API

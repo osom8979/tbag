@@ -18,7 +18,7 @@ namespace process {
 
 std::string getExecutableSuffix()
 {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
     return ".exe";
 #else
     return "";

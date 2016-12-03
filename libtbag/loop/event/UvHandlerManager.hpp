@@ -49,7 +49,7 @@ public:
     using Native  = Pointer<void>;
     using Handler = Pointer<UvHandler>;
 
-#if defined(__OS_MACOS__) && !defined(NDEBUG)
+#if defined(__PLATFORM_MACOS__) && !defined(NDEBUG)
     // Only debugging.
     using EventHandlerMap = std::map<Native, Handler, Native::Less>;
 #else

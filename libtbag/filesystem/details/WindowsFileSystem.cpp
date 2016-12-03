@@ -8,7 +8,7 @@
 #include <libtbag/filesystem/details/WindowsFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 #include <Windows.h>
 #endif
 
@@ -22,7 +22,7 @@ namespace windows    {
 
 std::string getTempDir()
 {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
     // The maximum possible return value is MAX_PATH+1 (261).
     DWORD const BUFFER_LENGTH = MAX_PATH + 1;
     char buffer[BUFFER_LENGTH] = { 0, };
@@ -42,7 +42,7 @@ std::string getTempDir()
 
 std::string getWorkDir()
 {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
     DWORD const BUFFER_LENGTH = MAX_PATH + 1;
     char buffer[BUFFER_LENGTH] = { 0, };
 

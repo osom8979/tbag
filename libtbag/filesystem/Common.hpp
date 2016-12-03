@@ -31,17 +31,17 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 # ifndef S_IRUSR
 #  define S_IRUSR _S_IREAD
 # endif
 # ifndef S_IWUSR
 #  define S_IWUSR _S_IWRITE
 # endif
-#endif // defined(__OS_WINDOWS__)
+#endif // defined(__PLATFORM_WINDOWS__)
 
 #ifndef __TBAG_UNDERLINE
-# if defined(__OS_WINDOWS__)
+# if defined(__PLATFORM_WINDOWS__)
 #  define __TBAG_UNDERLINE(f) _##f
 # else
 #  define __TBAG_UNDERLINE(f) f
@@ -67,7 +67,7 @@ char const PATH_SEPARATOR_OF_WINDOWS = '\\';
 char const PATH_SEPARATOR_OF_POSIX   = '/';
 char const PATH_SEPARATOR_OF_GENERIC = PATH_SEPARATOR_OF_POSIX;
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
 #else
 char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
@@ -76,7 +76,7 @@ char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
 char const PATH_SPLITTER_OF_WINDOWS = ';';
 char const PATH_SPLITTER_OF_POSIX   = ':';
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 char const PATH_SPLITTER = PATH_SPLITTER_OF_WINDOWS;
 #else
 char const PATH_SPLITTER = PATH_SPLITTER_OF_POSIX;

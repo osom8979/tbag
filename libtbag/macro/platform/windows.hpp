@@ -1,12 +1,12 @@
 /**
  * @file   windows.hpp
- * @brief  windows os config.
+ * @brief  windows platform config.
  * @author zer0
  * @date   2016-05-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_WINDOWS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_WINDOWS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_WINDOWS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_WINDOWS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -19,14 +19,14 @@
     defined(__TOS_WIN__) || \
     defined(__WIN32__) || defined(__TOS_WIN__) || \
     defined(__WINDOWS__)
-#define __OS_WINDOWS__
+#define __PLATFORM_WINDOWS__
 #endif
 
 // -------------------------
 // Windows platform version.
 // -------------------------
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 # ifndef WIN32_LEAN_AND_MEAN
 # define WIN32_LEAN_AND_MEAN
 # endif
@@ -48,30 +48,30 @@
 # ifndef _WIN32_IE
 # define _WIN32_IE 0x0700
 # endif
-#endif // defined(__OS_WINDOWS__)
+#endif // defined(__PLATFORM_WINDOWS__)
 
 // -----------------
 // Windows platform.
 // -----------------
 
 #if defined(__MINGW32__) || defined(__MINGW64__)
-#define __PLAT_MINGW__
+#define __PLATFORM_MINGW__
 #endif
 
-#if defined(__OS_WINDOWS) && \
+#if defined(__PLATFORM_WINDOWS) && \
     (!defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP))
-#define __PLAT_WINDOWS_DESKTOP__
+#define __PLATFORM_WINDOWS_DESKTOP__
 #endif
 
-#if defined(__OS_WINDOWS) && \
+#if defined(__PLATFORM_WINDOWS) && \
     defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
-#define __PLAT_WINDOWS_STORE__
+#define __PLATFORM_WINDOWS_STORE__
 #endif
 
-#if defined(__OS_WINDOWS) && \
+#if defined(__PLATFORM_WINDOWS) && \
     defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP)
-#define __PLAT_WINDOWS_PHONE__
+#define __PLATFORM_WINDOWS_PHONE__
 #endif
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_OS_WINDOWS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_WINDOWS_HPP__
 

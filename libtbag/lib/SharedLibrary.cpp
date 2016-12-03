@@ -22,7 +22,7 @@ namespace lib {
 
 std::string getLibraryPrefix()
 {
-#if defined(__OS_WINDOWS__) && !defined(__PLAT_MINGW__)
+#if defined(__PLATFORM_WINDOWS__) && !defined(__PLATFORM_MINGW__)
     return "";
 #else
     return "lib";
@@ -31,13 +31,13 @@ std::string getLibraryPrefix()
 
 std::string getLibrarySuffix()
 {
-#if defined(__OS_WINDOWS__)
-# if defined(__PLAT_MINGW__)
+#if defined(__PLATFORM_WINDOWS__)
+# if defined(__PLATFORM_MINGW__)
     return ".dll.so";
 # else
     return ".dll";
 # endif
-#elif defined(__OS_MACOS__)
+#elif defined(__PLATFORM_MACOS__)
     return ".dylib";
 #else
     return ".so";

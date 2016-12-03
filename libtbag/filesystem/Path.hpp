@@ -30,7 +30,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 using BaseNativePath = WindowsPath;
 #else
 using BaseNativePath = PosixPath;
@@ -61,7 +61,7 @@ public:
 public:
     inline static TBAG_CONSTEXPR bool isWindowsStyle() TBAG_NOEXCEPT
     {
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
         return true;
 #else
         return false;

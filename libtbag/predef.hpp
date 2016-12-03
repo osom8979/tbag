@@ -13,24 +13,9 @@
 #pragma once
 #endif
 
-// Operating System.
-#include <libtbag/macro/os/android.hpp>
-#include <libtbag/macro/os/apple.hpp>
-#include <libtbag/macro/os/cygwin.hpp>
-#include <libtbag/macro/os/linux.hpp>
-#include <libtbag/macro/os/unix.hpp>
-#include <libtbag/macro/os/windows.hpp>
-
-// Compiler.
-#include <libtbag/macro/compiler/gcc.hpp>
-#include <libtbag/macro/compiler/clang.hpp>
-#include <libtbag/macro/compiler/llvm.hpp>
-#include <libtbag/macro/compiler/msvc.hpp>
-
-// Language.
-#include <libtbag/macro/language/c.hpp>
-#include <libtbag/macro/language/cpp.hpp>
-#include <libtbag/macro/language/objc.hpp>
+#include <libtbag/macro/platform.hpp>
+#include <libtbag/macro/compiler.hpp>
+#include <libtbag/macro/language.hpp>
 
 // Common.
 #include <libtbag/macro/attributes.hpp>
