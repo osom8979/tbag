@@ -1,12 +1,12 @@
 /**
- * @file   PosixFileSystem.hpp
- * @brief  PosixFileSystem helper methods.
+ * @file   UnixFileSystem.hpp
+ * @brief  UnixFileSystem helper methods.
  * @author zer0
  * @date   2016-12-02
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_POSIXFILESYSTEM_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_POSIXFILESYSTEM_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_UNIXFILESYSTEM_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_UNIXFILESYSTEM_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,7 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-namespace posix      {
+namespace unix       {
 
 TBAG_API std::string getTempDir();
 TBAG_API std::string getWorkDir();
@@ -46,7 +46,7 @@ TBAG_API bool isRegularFile(std::string const & path);
 
 TBAG_API std::vector<std::string> scanDir(std::string const & path);
 
-} // namespace posix
+} // namespace unix
 } // namespace details
 } // namespace filesystem
 
@@ -54,5 +54,5 @@ TBAG_API std::vector<std::string> scanDir(std::string const & path);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_POSIXFILESYSTEM_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_UNIXFILESYSTEM_HPP__
 

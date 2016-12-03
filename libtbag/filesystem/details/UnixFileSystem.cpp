@@ -1,11 +1,11 @@
 /**
- * @file   PosixFileSystem.cpp
- * @brief  PosixFileSystem helper methods implementation.
+ * @file   UnixFileSystem.cpp
+ * @brief  UnixFileSystem helper methods implementation.
  * @author zer0
  * @date   2016-12-02
  */
 
-#include <libtbag/filesystem/details/PosixFileSystem.hpp>
+#include <libtbag/filesystem/details/UnixFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
 #include <cstdlib>
 
@@ -25,7 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-namespace posix      {
+namespace unix       {
 
 static char const * const  TMPDIR_ENV_NAME = "TMPDIR";
 static char const * const     TMP_ENV_NAME = "TMP";
@@ -44,7 +44,7 @@ static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
 
 std::string getTempDir()
 {
-#if defined(__UNIX_LIKE__)
+#if defined(__PLATFORM_UNIX_LIKE__)
     const char * path = nullptr;
 
     // Check the TMPDIR, TMP, TEMP, and TEMPDIR environment variables in order.
@@ -123,7 +123,7 @@ std::vector<std::string> scanDir(std::string const & path)
     return std::vector<std::string>();
 }
 
-} // namespace posix
+} // namespace unix
 } // namespace details
 } // namespace filesystem
 
