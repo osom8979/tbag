@@ -177,9 +177,7 @@ static bool checkAccessMode(std::string const & path, int mode)
     return ERROR_CODE == 0;
 }
 
-/**
- * @see <http://linux.die.net/man/2/stat>
- */
+/** @ref <http://linux.die.net/man/2/stat> */
 static uint64_t getStatus(std::string const & path)
 {
     uint64_t result = 0;
@@ -243,13 +241,25 @@ std::string getExePath()
     return uv::getRepresentationDirectory(&uv_exepath);
 }
 
+std::string getRealPath(std::string const & path)
+{
+    std::string result;
+    uv_fs_t request = {0,};
+
+    if (uv_fs_realpath(nullptr, &request, path.c_str(), nullptr) == 0) {
+        result = std::string(static_cast<char*>(request.ptr));
+    } else {
+        result = path;
+    }
+    uv_fs_req_cleanup(&request);
+    return result;
+}
+
 bool createDirectory(std::string const & path, int mode)
 {
-    uv_fs_t request;
+    uv_fs_t request = {0,};
     int const ERROR_CODE = uv_fs_mkdir(nullptr, &request, path.c_str(), mode, nullptr);
     uv_fs_req_cleanup(&request);
-
-    // EXISTS DIRECTORY: (error_code == UV_EEXIST)
     return ERROR_CODE == 0;
 }
 
@@ -258,7 +268,6 @@ bool removeDirectory(std::string const & path)
     uv_fs_t request;
     int const ERROR_CODE = uv_fs_rmdir(nullptr, &request, path.c_str(), nullptr);
     uv_fs_req_cleanup(&request);
-
     return ERROR_CODE == 0;
 }
 
@@ -267,7 +276,6 @@ bool rename(std::string const & from, std::string const & to)
     uv_fs_t request;
     int const ERROR_CODE = uv_fs_rename(nullptr, &request, from.c_str(), to.c_str(), nullptr);
     uv_fs_req_cleanup(&request);
-
     return ERROR_CODE == 0;
 }
 

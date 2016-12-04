@@ -32,6 +32,8 @@ TBAG_API std::string getWorkDir();
 TBAG_API std::string getHomeDir();
 TBAG_API std::string getExePath();
 
+TBAG_API std::string getRealPath(std::string const & path);
+
 TBAG_API bool createDirectory(std::string const & path, int mode = 0755);
 TBAG_API bool removeDirectory(std::string const & path);
 
