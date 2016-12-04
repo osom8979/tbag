@@ -6,10 +6,13 @@
  */
 
 #include <libtbag/filesystem/details/UnixFileSystem.hpp>
+#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
+
 #include <cstdlib>
 
 #if defined(__PLATFORM_UNIX_LIKE__)
+#include <unistd.h> // getcwd
 #endif
 
 #ifndef __CHECK_TEMP_ENV_VAR
@@ -69,7 +72,11 @@ __return_path:
 std::string getWorkDir()
 {
 #if defined(__PLATFORM_UNIX_LIKE__)
-    return std::string();
+    char path[MAX_PATH_LENGTH] = {0,};
+    if (getcwd(path, MAX_PATH_LENGTH) == nullptr) {
+        return std::string();
+    }
+    return std::string(path);
 #else
     return std::string();
 #endif

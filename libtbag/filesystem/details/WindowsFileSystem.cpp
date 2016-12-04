@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/details/WindowsFileSystem.hpp>
+#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(__PLATFORM_WINDOWS__)
