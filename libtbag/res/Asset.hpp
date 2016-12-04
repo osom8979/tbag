@@ -84,7 +84,7 @@ public:
     /** Obtain executable file directory path. */
     static Path getExeDirPath()
     {
-        return Path(filesystem::common::getExeDir());
+        return Path(filesystem::common::getExePath()).getParent();
     }
 };
 
@@ -97,11 +97,11 @@ public:                                                 \
     }                                                   \
     static bool create_##name() {                       \
         using namespace ::libtbag::filesystem::common;  \
-        return createDir(get_##name());                 \
+        return createDirectory(get_##name());           \
     }                                                   \
     static bool remove_##name() {                       \
         using namespace ::libtbag::filesystem::common;  \
-        return removeDir(get_##name());                 \
+        return removeDirectory(get_##name());           \
     }                                                   \
     static bool exists_##name() {                       \
         using namespace ::libtbag::filesystem::common;  \

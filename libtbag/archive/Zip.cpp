@@ -162,7 +162,7 @@ Zip::ResultCode Zip::unzip(std::string const & file, std::string const & dir)
         if (info.compressed_size == 0 && info.uncompressed_size == 0) {
             // Directory.
             //OUTPUT_NODE_PATH.createDirWithRecursive();
-            libtbag::filesystem::common::createDir(OUTPUT_NODE_PATH);
+            libtbag::filesystem::common::createDirectory(OUTPUT_NODE_PATH);
 
         } else {
             // Regular file.

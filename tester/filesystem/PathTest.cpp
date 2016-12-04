@@ -166,6 +166,5 @@ TEST(PathTest, SpecialDirectories)
     ASSERT_EQ(Path::getWorkDir().getString(), common::getWorkDir());
     ASSERT_EQ(Path::getHomeDir().getString(), common::getHomeDir());
     ASSERT_EQ(Path::getExePath().getString(), common::getExePath());
-    ASSERT_EQ(Path::getExeDir ().getString(), common::getExeDir ());
 }
 

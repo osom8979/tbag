@@ -3,18 +3,23 @@
  * @brief  UnixFileSystem helper methods implementation.
  * @author zer0
  * @date   2016-12-02
+ *
+ * @remarks
+ *  Use the libuv.
  */
 
 #include <libtbag/filesystem/details/UnixFileSystem.hpp>
 #include <libtbag/filesystem/details/CommonFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <cstdlib>
+#include <cstdio>
 
-#if defined(__PLATFORM_UNIX_LIKE__)
-#include <unistd.h> // getcwd, getuid
-#include <pwd.h>    // getpwuid
-#endif
+#include <fcntl.h>
+#include <sys/stat.h>
+
+#include <uv.h>
+
+static_assert(std::is_same<int, uv_file>::value, "int must be the same type as uv_file");
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,19 +45,179 @@ static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
 static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
 #endif
 
-// ------------------------
-// Unix specialize methods.
-// ------------------------
+// ---------------------
+// libuv helper methods.
+// ---------------------
 
-std::string getHomeDirWithGetPwUid()
-{
-#if defined(__PLATFORM_UNIX_LIKE__)
-    if (passwd * pw = getpwuid(getuid())) {
-        return std::string(pw->pw_dir);
-    }
+namespace uv {
+
+/**
+ * @defgroup __DOXYGEN_GROUP__FILE_TYPE__ List of file type.
+ * @remarks
+ *  POSIX: include <sys/stat.h> or <fcntl.h>
+ * @{
+ */
+
+static uint32_t const FILE_TYPE_S_IFMT   = S_IFMT;   ///< type of file.
+static uint32_t const FILE_TYPE_S_IFCHR  = S_IFCHR;  ///< character special.
+static uint32_t const FILE_TYPE_S_IFDIR  = S_IFDIR;  ///< directory.
+static uint32_t const FILE_TYPE_S_IFREG  = S_IFREG;  ///< regular file.
+
+#if 0
+static uint32_t const FILE_TYPE_S_IFIFO  = S_IFIFO;  ///< named pipe (fifo).
+static uint32_t const FILE_TYPE_S_IFBLK  = S_IFBLK;  ///< block special.
+static uint32_t const FILE_TYPE_S_IFLNK  = S_IFLNK;  ///< symbolic link.
+static uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK; ///< socket.
 #endif
-    return std::string();
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup __DOXYGEN_GROUP__FILE_OPEN_FLAGS__ List of file open flags.
+ * @remarks
+ *  include <fcntl.h>
+ * @{
+ */
+
+static uint32_t const FILE_OPEN_FLAG_READ_ONLY  = O_RDONLY; ///< open for reading only.
+static uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = O_WRONLY; ///< open for writing only.
+static uint32_t const FILE_OPEN_FLAG_READ_WRITE = O_RDWR;   ///< open for reading and writing.
+static uint32_t const FILE_OPEN_APPEND          = O_APPEND; ///< set append mode.
+
+static uint32_t const FILE_OPEN_CREATE          = O_CREAT;  ///< create if nonexistant.
+static uint32_t const FILE_OPEN_TRUNCATE        = O_TRUNC;  ///< truncate to zero length.
+static uint32_t const FILE_OPEN_EXISTS_ERROR    = O_EXCL;   ///< error if already exists.
+
+#if 0
+// !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+static uint32_t const FILE_OPEN_FLAG_ACCESS_ALL = O_ACCMODE;   ///< mask for above modes.
+static uint32_t const FILE_OPEN_NON_BLOCK       = O_NONBLOCK;  ///< no delay.
+static uint32_t const FILE_OPEN_SHARED_LOCK     = O_SHLOCK;    ///< open with shared file lock.
+static uint32_t const FILE_OPEN_EXCLUSIVE_LOCK  = O_EXLOCK;    ///< open with exclusive file lock.
+static uint32_t const FILE_OPEN_ASYNC           = O_ASYNC;     ///< signal pgrp when data ready.
+static uint32_t const FILE_OPEN_SYNC            = O_FSYNC;     ///< synch I/O file integrity. (source compatibility: do not use)
+static uint32_t const FILE_OPEN_NOFOLLOW        = O_NOFOLLOW;  ///< don't follow symlinks.
+#endif
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup __DOXYGEN_GROUP__FILE_MODE__ List of file mode flags.
+ * @remarks
+ *  include <fcntl.h>
+ * @{
+ */
+
+// Read, write, execute/search by owner.
+static uint32_t const FILE_MODE_OWNER_READ  = S_IRUSR;  ///< [XSI] R for owner.
+static uint32_t const FILE_MODE_OWNER_WRITE = S_IWUSR;  ///< [XSI] W for owner.
+
+#if 0
+static uint32_t const FILE_MODE_OWNER_ALL      = S_IRWXU;  ///< [XSI] RWX mask for owner.
+static uint32_t const FILE_MODE_OWNER_EXECUTE  = S_IXUSR;  ///< [XSI] X for owner.
+
+// Read, write, execute/search by group.
+static uint32_t const FILE_MODE_GROUP_ALL      = S_IRWXG;  ///< [XSI] RWX mask for group.
+static uint32_t const FILE_MODE_GROUP_READ     = S_IRGRP;  ///< [XSI] R for group.
+static uint32_t const FILE_MODE_GROUP_WRITE    = S_IWGRP;  ///< [XSI] W for group.
+static uint32_t const FILE_MODE_GROUP_EXECUTE  = S_IXGRP;  ///< [XSI] X for group.
+
+// Read, write, execute/search by others.
+static uint32_t const FILE_MODE_OTHER_ALL      = S_IRWXO;  ///< [XSI] RWX mask for other.
+static uint32_t const FILE_MODE_OTHER_READ     = S_IROTH;  ///< [XSI] R for other.
+static uint32_t const FILE_MODE_OTHER_WRITE    = S_IWOTH;  ///< [XSI] W for other.
+static uint32_t const FILE_MODE_OTHER_EXECUTE  = S_IXOTH;  ///< [XSI] X for other.
+
+static uint32_t const FILE_MODE_S_ISUID        = S_ISUID;  ///< [XSI] set user id on execution.
+static uint32_t const FILE_MODE_S_ISGID        = S_ISGID;  ///< [XSI] set group id on execution.
+static uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrcted delete.
+#endif
+
+/**
+ * @}
+ */
+
+/**
+ * List of access mode.
+ *
+ * @remarks
+ *  POSIX: include <sys/unistd.h>
+ */
+enum AccessModeTable
+{
+    ACCESS_MODE_EXISTS  = (0   ), ///< F_OK: test for existence of file.
+    ACCESS_MODE_EXECUTE = (1<<0), ///< X_OK: test for execute or search permission.
+    ACCESS_MODE_WRITE   = (1<<1), ///< W_OK: test for write permission
+    ACCESS_MODE_READ    = (1<<2), ///< R_OK: test for read permission.
+};
+
+using DirFunction = int (*)(char * buffer, std::size_t * size);
+
+/** For the libuv miscellaneous function. */
+static std::string getRepresentationDirectory(DirFunction func)
+{
+    std::size_t length = libtbag::filesystem::details::MAX_PATH_LENGTH;
+    char buffer[MAX_PATH_LENGTH] = {0,};
+
+    if (func(&buffer[0], &length) != 0) {
+        return std::string();
+    }
+    return std::string(buffer);
 }
+
+static bool checkAccessMode(std::string const & path, int mode)
+{
+    uv_fs_t request;
+    int const ERROR_CODE = uv_fs_access(nullptr, &request, path.c_str(), mode, nullptr);
+    uv_fs_req_cleanup(&request);
+    return ERROR_CODE == 0;
+}
+
+/**
+ * @see <http://linux.die.net/man/2/stat>
+ */
+static uint64_t getStatus(std::string const & path)
+{
+    uint64_t result = 0;
+    uv_fs_t  request;
+
+    int const ERROR_CODE = uv_fs_stat(nullptr, &request, path.c_str(), nullptr);
+    if (ERROR_CODE == 0 && request.result == 0) {
+        result = request.statbuf.st_mode;
+    }
+    uv_fs_req_cleanup(&request);
+
+    return result;
+}
+
+static bool checkFileType(std::string const & path, uint64_t type)
+{
+    return (getStatus(path) & FILE_TYPE_S_IFMT) == type;
+}
+
+static uint64_t getPermission(std::string const & path)
+{
+#if defined(__PLATFORM_WINDOWS__)
+    return getStatus(path) & (_S_IRUSR | _S_IWUSR);
+#else
+    return getStatus(path) & (S_IRWXU | S_IRWXG | S_IRWXO);
+#endif
+}
+
+static uint64_t getFixedPermission(uint64_t mode)
+{
+#if defined(__PLATFORM_WINDOWS__)
+    return mode & (_S_IRUSR | _S_IWUSR);
+#else
+    return mode & (S_IRWXU | S_IRWXG | S_IRWXO);
+#endif
+}
+
+} // namespace uv
 
 // -----------------
 // Common interface.
@@ -60,124 +225,103 @@ std::string getHomeDirWithGetPwUid()
 
 std::string getTempDir()
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    // Check the TMPDIR, TMP, TEMP, and TEMPDIR environment variables in order.
-    // @formatter:off
-    if (char const * p1 = std::getenv( TMPDIR_ENV_NAME)) { return std::string(p1); }
-    if (char const * p2 = std::getenv(    TMP_ENV_NAME)) { return std::string(p2); }
-    if (char const * p3 = std::getenv(   TEMP_ENV_NAME)) { return std::string(p3); }
-    if (char const * p4 = std::getenv(TEMPDIR_ENV_NAME)) { return std::string(p4); }
-    return std::string(LAST_TEMP_VALUE); // No temp environment variables defined.
-    // @formatter:on
-#else
-    return std::string();
-#endif
+    return uv::getRepresentationDirectory(&uv_os_tmpdir);
 }
 
 std::string getWorkDir()
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    char path[MAX_PATH_LENGTH] = {0,};
-    if (getcwd(path, MAX_PATH_LENGTH) != nullptr) {
-        return std::string(path);
-    }
-#endif
-    return std::string();
+    return uv::getRepresentationDirectory(&uv_cwd);
 }
 
 std::string getHomeDir()
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    // Check if the HOME environment variable is set first.
-    if (char const * path = std::getenv(HOME_ENV_NAME)) {
-        return std::string(path);
-    }
-    // HOME is not set, so call getpwuid().
-    return getHomeDirWithGetPwUid();
-#else
-    return std::string();
-#endif
+    return uv::getRepresentationDirectory(&uv_os_homedir);
 }
 
 std::string getExePath()
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return std::string();
-#else
-    return std::string();
-#endif
+    return uv::getRepresentationDirectory(&uv_exepath);
 }
 
-bool createDirectory(std::string const & path)
+bool createDirectory(std::string const & path, int mode)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return false;
-#else
-    return false;
-#endif
+    uv_fs_t request;
+    int const ERROR_CODE = uv_fs_mkdir(nullptr, &request, path.c_str(), mode, nullptr);
+    uv_fs_req_cleanup(&request);
+
+    // EXISTS DIRECTORY: (error_code == UV_EEXIST)
+    return ERROR_CODE == 0;
 }
 
 bool removeDirectory(std::string const & path)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return false;
-#else
-    return false;
-#endif
+    uv_fs_t request;
+    int const ERROR_CODE = uv_fs_rmdir(nullptr, &request, path.c_str(), nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return ERROR_CODE == 0;
 }
 
 bool rename(std::string const & from, std::string const & to)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return false;
-#else
-    return false;
-#endif
+    uv_fs_t request;
+    int const ERROR_CODE = uv_fs_rename(nullptr, &request, from.c_str(), to.c_str(), nullptr);
+    uv_fs_req_cleanup(&request);
+
+    return ERROR_CODE == 0;
 }
 
 bool remove(std::string const & path)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return false;
-#else
-    return false;
-#endif
+    return ::remove(path.c_str()) == 0;
 }
 
 bool exists(std::string const & path)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return false;
-#else
-    return false;
-#endif
+    return uv::checkAccessMode(path, uv::ACCESS_MODE_EXISTS);
 }
 
 bool isDirectory(std::string const & path)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return false;
-#else
-    return false;
-#endif
+    return uv::checkFileType(path, uv::FILE_TYPE_S_IFDIR);
 }
 
 bool isRegularFile(std::string const & path)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return false;
-#else
-    return false;
-#endif
+    return uv::checkFileType(path, uv::FILE_TYPE_S_IFREG);
+}
+
+bool isExecutable(std::string const & path)
+{
+    return uv::checkAccessMode(path, uv::ACCESS_MODE_EXECUTE);
+}
+
+bool isWritable(std::string const & path)
+{
+    return uv::checkAccessMode(path, uv::ACCESS_MODE_WRITE);
+}
+
+bool isReadable(std::string const & path)
+{
+    return uv::checkAccessMode(path, uv::ACCESS_MODE_READ);
 }
 
 std::vector<std::string> scanDir(std::string const & path)
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return std::vector<std::string>();
-#else
-    return std::vector<std::string>();
-#endif
+    std::vector<std::string> result;
+
+    uv_fs_t request;
+    uv_dirent_t dictate;
+
+    int const ELEMENT_COUNT = uv_fs_scandir(nullptr, &request, path.c_str(), 0, nullptr);
+    if (ELEMENT_COUNT > 0) {
+        while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
+            result.push_back(std::string(dictate.name));
+        }
+    }
+    uv_fs_req_cleanup(&request);
+
+    return result;
 }
 
 } // namespace unix

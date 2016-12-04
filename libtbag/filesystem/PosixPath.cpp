@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/PosixPath.hpp>
+#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 #include <libtbag/filesystem/Common.hpp>
 #include <libtbag/string/Strings.hpp>
 
@@ -30,12 +31,12 @@ PosixPath::~PosixPath()
 
 std::string PosixPath::getPathSeparator()
 {
-    return {common::PATH_SEPARATOR_OF_POSIX};
+    return {details::PATH_SEPARATOR_OF_POSIX};
 }
 
 std::string PosixPath::getGenericPathSeparatorString()
 {
-    return {common::PATH_SEPARATOR_OF_GENERIC};
+    return {details::PATH_SEPARATOR_OF_GENERIC};
 }
 
 std::string PosixPath::getRemoveSeparatorRegex()
@@ -75,7 +76,7 @@ std::string PosixPath::getGeneric(std::string const & path)
 
 std::string PosixPath::getRootDir(std::string const & path)
 {
-    if (path.size() < 1 || path[0] != common::PATH_SEPARATOR_OF_POSIX) {
+    if (path.size() < 1 || path[0] != details::PATH_SEPARATOR_OF_POSIX) {
         return std::string();
     }
     return getPathSeparator();
@@ -93,14 +94,14 @@ bool PosixPath::isRelative(std::string const & path)
 
 std::string PosixPath::getParent(std::string const & path)
 {
-    if (path.size() == 1U && path[0] == common::PATH_SEPARATOR_OF_POSIX) {
+    if (path.size() == 1U && path[0] == details::PATH_SEPARATOR_OF_POSIX) {
         return std::string(); // PARENT OF ROOT.
     }
 
     std::string temp = removeLastSeparator(path);
     std::size_t last_separator_index = temp.rfind(getPathSeparator());
 
-    if (last_separator_index == 0U && temp.size() > 1U && temp[0] == common::PATH_SEPARATOR_OF_POSIX) {
+    if (last_separator_index == 0U && temp.size() > 1U && temp[0] == details::PATH_SEPARATOR_OF_POSIX) {
         return getPathSeparator(); // ROOT DIRECTORY.
     } else if (last_separator_index == std::string::npos) {
         return std::string(); // PARENT OF ROOT (Maybe relative path).

@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <cstdlib>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,10 +24,36 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS     = 32768;
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API =   256; // MAX_PATH define in windows.
+std::size_t const MAX_PATH_LENGTH_OF_POSIX_API   =  1024; // PATH_MAX define in posix.
+
 #if defined(__PLATFORM_WINDOWS__)
-std::size_t const MAX_PATH_LENGTH =  256; // MAX_PATH define in windows.
+std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_WINDOWS_API;
 #else
-std::size_t const MAX_PATH_LENGTH = 1024; // PATH_MAX define in posix.
+std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_POSIX_API;
+#endif
+
+/** Max path buffer size. */
+std::size_t const MAX_PATH_BUFFER_SIZE = MAX_PATH_LENGTH_OF_WINDOWS_API;
+
+char const PATH_SEPARATOR_OF_WINDOWS = '\\';
+char const PATH_SEPARATOR_OF_POSIX   = '/';
+char const PATH_SEPARATOR_OF_GENERIC = PATH_SEPARATOR_OF_POSIX;
+
+#if defined(__PLATFORM_WINDOWS__)
+char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
+#else
+char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
+#endif
+
+char const PATH_SPLITTER_OF_WINDOWS = ';';
+char const PATH_SPLITTER_OF_POSIX   = ':';
+
+#if defined(__PLATFORM_WINDOWS__)
+char const PATH_SPLITTER = PATH_SPLITTER_OF_WINDOWS;
+#else
+char const PATH_SPLITTER = PATH_SPLITTER_OF_POSIX;
 #endif
 
 } // namespace details

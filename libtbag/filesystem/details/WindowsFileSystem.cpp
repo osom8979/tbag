@@ -94,7 +94,7 @@ std::string getExePath()
 #endif
 }
 
-bool createDirectory(std::string const & path)
+bool createDirectory(std::string const & path, int mode)
 {
 #if defined(__PLATFORM_WINDOWS__)
     return false;
@@ -149,6 +149,33 @@ bool isDirectory(std::string const & path)
 }
 
 bool isRegularFile(std::string const & path)
+{
+#if defined(__PLATFORM_WINDOWS__)
+    return false;
+#else
+    return false;
+#endif
+}
+
+bool isExecutable(std::string const & path)
+{
+#if defined(__PLATFORM_WINDOWS__)
+    return false;
+#else
+    return false;
+#endif
+}
+
+bool isWritable(std::string const & path)
+{
+#if defined(__PLATFORM_WINDOWS__)
+    return false;
+#else
+    return false;
+#endif
+}
+
+bool isReadable(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)
     return false;

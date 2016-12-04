@@ -329,22 +329,22 @@ std::string Path::getName() const
 
 bool Path::exists() const
 {
-    return libtbag::filesystem::common::isExistsMode(_path);
+    return libtbag::filesystem::common::exists(_path);
 }
 
 bool Path::isExecutable() const
 {
-    return libtbag::filesystem::common::isExecutableMode(_path);
+    return libtbag::filesystem::common::isExecutable(_path);
 }
 
 bool Path::isWritable() const
 {
-    return libtbag::filesystem::common::isWritableMode(_path);
+    return libtbag::filesystem::common::isWritable(_path);
 }
 
 bool Path::isReadable() const
 {
-    return libtbag::filesystem::common::isReadableMode(_path);
+    return libtbag::filesystem::common::isReadable(_path);
 }
 
 bool Path::isRegularFile() const
@@ -361,7 +361,7 @@ bool Path::createDir() const
 {
     auto parent = getParent();
     if (parent.isDirectory() && parent.isWritable() && exists() == false) {
-        return libtbag::filesystem::common::createDir(_path);
+        return libtbag::filesystem::common::createDirectory(_path);
     }
     return false;
 }
@@ -400,7 +400,7 @@ bool Path::removeFile() const
 bool Path::removeDir() const
 {
     if (isDirectory() && isWritable()) {
-        return libtbag::filesystem::common::removeDir(_path);
+        return libtbag::filesystem::common::removeDirectory(_path);
     }
     return false;
 }
@@ -456,7 +456,7 @@ Path Path::getExePath()
 
 Path Path::getExeDir()
 {
-    return Path(libtbag::filesystem::common::getExeDir());
+    return Path(libtbag::filesystem::common::getExePath()).getParent();
 }
 
 } // namespace filesystem
