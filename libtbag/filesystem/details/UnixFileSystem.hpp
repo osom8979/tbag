@@ -27,11 +27,20 @@ namespace filesystem {
 namespace details    {
 namespace unix       {
 
+// ------------------------
+// Unix specialize methods.
+// ------------------------
+
+TBAG_API std::string getHomeDirWithGetPwUid();
+
+// -----------------
+// Common interface.
+// -----------------
+
 TBAG_API std::string getTempDir();
 TBAG_API std::string getWorkDir();
 TBAG_API std::string getHomeDir();
 TBAG_API std::string getExePath();
-TBAG_API std::string getExeDir();
 
 TBAG_API bool createDirectory(std::string const & path);
 TBAG_API bool removeDirectory(std::string const & path);

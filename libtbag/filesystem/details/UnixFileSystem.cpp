@@ -12,17 +12,8 @@
 #include <cstdlib>
 
 #if defined(__PLATFORM_UNIX_LIKE__)
-#include <unistd.h> // getcwd
-#endif
-
-#ifndef __CHECK_TEMP_ENV_VAR
-#define __CHECK_TEMP_ENV_VAR(name, return_label)  \
-    do {                            \
-        path = std::getenv(name);   \
-        if (path != nullptr) {      \
-            goto return_label;      \
-        }                           \
-    } while (0)
+#include <unistd.h> // getcwd, getuid
+#include <pwd.h>    // getpwuid
 #endif
 
 // -------------------
@@ -37,6 +28,7 @@ static char const * const  TMPDIR_ENV_NAME = "TMPDIR";
 static char const * const     TMP_ENV_NAME = "TMP";
 static char const * const    TEMP_ENV_NAME = "TEMP";
 static char const * const TEMPDIR_ENV_NAME = "TEMPDIR";
+static char const * const    HOME_ENV_NAME = "HOME";
 
 static char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
 static char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
@@ -48,22 +40,35 @@ static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
 static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
 #endif
 
+// ------------------------
+// Unix specialize methods.
+// ------------------------
+
+std::string getHomeDirWithGetPwUid()
+{
+#if defined(__PLATFORM_UNIX_LIKE__)
+    if (passwd * pw = getpwuid(getuid())) {
+        return std::string(pw->pw_dir);
+    }
+#endif
+    return std::string();
+}
+
+// -----------------
+// Common interface.
+// -----------------
+
 std::string getTempDir()
 {
 #if defined(__PLATFORM_UNIX_LIKE__)
-    const char * path = nullptr;
-
     // Check the TMPDIR, TMP, TEMP, and TEMPDIR environment variables in order.
-    __CHECK_TEMP_ENV_VAR( TMPDIR_ENV_NAME, __return_path);
-    __CHECK_TEMP_ENV_VAR(    TMP_ENV_NAME, __return_path);
-    __CHECK_TEMP_ENV_VAR(   TEMP_ENV_NAME, __return_path);
-    __CHECK_TEMP_ENV_VAR(TEMPDIR_ENV_NAME, __return_path);
-
-    // No temp environment variables defined.
-    path = LAST_TEMP_VALUE;
-
-__return_path:
-    return std::string(path);
+    // @formatter:off
+    if (char const * p1 = std::getenv( TMPDIR_ENV_NAME)) { return std::string(p1); }
+    if (char const * p2 = std::getenv(    TMP_ENV_NAME)) { return std::string(p2); }
+    if (char const * p3 = std::getenv(   TEMP_ENV_NAME)) { return std::string(p3); }
+    if (char const * p4 = std::getenv(TEMPDIR_ENV_NAME)) { return std::string(p4); }
+    return std::string(LAST_TEMP_VALUE); // No temp environment variables defined.
+    // @formatter:on
 #else
     return std::string();
 #endif
@@ -73,34 +78,28 @@ std::string getWorkDir()
 {
 #if defined(__PLATFORM_UNIX_LIKE__)
     char path[MAX_PATH_LENGTH] = {0,};
-    if (getcwd(path, MAX_PATH_LENGTH) == nullptr) {
-        return std::string();
+    if (getcwd(path, MAX_PATH_LENGTH) != nullptr) {
+        return std::string(path);
     }
-    return std::string(path);
-#else
-    return std::string();
 #endif
+    return std::string();
 }
 
 std::string getHomeDir()
 {
 #if defined(__PLATFORM_UNIX_LIKE__)
-    return std::string();
+    // Check if the HOME environment variable is set first.
+    if (char const * path = std::getenv(HOME_ENV_NAME)) {
+        return std::string(path);
+    }
+    // HOME is not set, so call getpwuid().
+    return getHomeDirWithGetPwUid();
 #else
     return std::string();
 #endif
 }
 
 std::string getExePath()
-{
-#if defined(__PLATFORM_UNIX_LIKE__)
-    return std::string();
-#else
-    return std::string();
-#endif
-}
-
-std::string getExeDir()
 {
 #if defined(__PLATFORM_UNIX_LIKE__)
     return std::string();

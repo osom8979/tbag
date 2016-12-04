@@ -89,3 +89,8 @@ TEST(CommonTest, FileReadWrite)
     ASSERT_FALSE(common::isExistsMode(file_name));
 }
 
+TEST(CommonTest, printInfos)
+{
+    printInfos();
+}
+

@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <cstdio>
 
+#include <ostream>
 #include <string>
 #include <vector>
 #include <set>
@@ -276,6 +277,8 @@ TBAG_API int write(int fd, char const * buffer, std::size_t buffer_size, int64_t
  * @see <http://linux.die.net/man/2/preadv>
  */
 TBAG_API int read(int fd, char * buffer, std::size_t buffer_size, int64_t offset = -1);
+
+TBAG_API void printInfos(std::ostream * stream = nullptr);
 
 } // namespace common
 } // namespace filesystem

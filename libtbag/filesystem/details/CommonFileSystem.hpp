@@ -23,7 +23,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 std::size_t const MAX_PATH_LENGTH =  256; // MAX_PATH define in windows.
 #else
 std::size_t const MAX_PATH_LENGTH = 1024; // PATH_MAX define in posix.

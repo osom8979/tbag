@@ -94,15 +94,6 @@ std::string getExePath()
 #endif
 }
 
-std::string getExeDir()
-{
-#if defined(__PLATFORM_WINDOWS__)
-    return std::string();
-#else
-    return std::string();
-#endif
-}
-
 bool createDirectory(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)

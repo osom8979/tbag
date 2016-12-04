@@ -6,10 +6,20 @@
  */
 
 #include <libtbag/filesystem/Common.hpp>
+#include <libtbag/filesystem/details/WindowsFileSystem.hpp>
+#include <libtbag/filesystem/details/UnixFileSystem.hpp>
+
+#include <iostream>
 #include <uv.h>
 
 #if defined(__PLATFORM_WINDOWS__)
 #include <Windows.h>
+#endif
+
+#if defined(__PLATFORM_WINDOWS__)
+namespace __imp = ::libtbag::filesystem::details::windows;
+#else
+namespace __imp = ::libtbag::filesystem::details::unix;
 #endif
 
 // -------------------
@@ -259,6 +269,27 @@ int read(int fd, char * buffer, std::size_t buffer_size, int64_t offset)
     uv_fs_req_cleanup(&request);
 
     return result;
+}
+
+void printInfos(std::ostream * stream)
+{
+    if (stream == nullptr) {
+        stream = &std::cout;
+    }
+
+    (*stream) << "Filesystem information:\n";
+    if (isWindowsPlatform()) {
+        (*stream) << " * Windows Platform Filesystem.\n";
+    }
+    if (isUnixLikePlatform()) {
+        (*stream) << " * Unix-like Platform Filesystem.\n";
+        (*stream) << " * Home directory (getpwuid): " << filesystem::details::unix::getHomeDirWithGetPwUid() << std::endl;
+    }
+
+    (*stream) << " * Temp directory: " << __imp::getTempDir() << std::endl;
+    (*stream) << " * Home directory: " << __imp::getHomeDir() << std::endl;
+    (*stream) << " * Work directory: " << __imp::getWorkDir() << std::endl;
+    (*stream) << " * Exe path: "       << __imp::getExePath() << std::endl;
 }
 
 } // namespace common

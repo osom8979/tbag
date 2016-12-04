@@ -22,5 +22,33 @@
 #include <libtbag/macro/features.hpp>
 #include <libtbag/macro/utils.hpp>
 
+#include <libtbag/config.h>
+
+// -------------------
+NAMESPACE_LIBTBAG_OPEN
+// -------------------
+
+inline TBAG_CONSTEXPR bool isWindowsPlatform() TBAG_NOEXCEPT
+{
+#if defined(__PLATFORM_WINDOWS__)
+    return true;
+#else
+    return false;
+#endif
+}
+
+inline TBAG_CONSTEXPR bool isUnixLikePlatform() TBAG_NOEXCEPT
+{
+#if defined(__PLATFORM_UNIX_LIKE__)
+    return true;
+#else
+    return false;
+#endif
+}
+
+// --------------------
+NAMESPACE_LIBTBAG_CLOSE
+// --------------------
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREDEF_HPP__
 
