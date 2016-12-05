@@ -1,12 +1,13 @@
 /**
- * @file   StringsTest.cpp
- * @brief  Strings class tester.
+ * @file   StringUtilsTest.cpp
+ * @brief  String utilities tester.
  * @author zer0
  * @date   2016-04-04
+ * @date   2016-12-05 (Rename: StringsTest -> StringUtilsTest)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/string/Strings.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 using namespace libtbag;
 using namespace libtbag::string;

@@ -1,12 +1,13 @@
 /**
- * @file   Strings.hpp
- * @brief  Strings class prototype.
+ * @file   StringUtils.hpp
+ * @brief  String utilities prototype.
  * @author zer0
  * @date   2016-04-04
+ * @date   2016-12-05 (Rename: Strings -> StringUtils)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_STRINGS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_STRINGS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_STRINGUTILS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_STRINGUTILS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -110,5 +111,5 @@ TBAG_API std::string trim(std::string const & str);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_STRINGS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_STRINGUTILS_HPP__
 

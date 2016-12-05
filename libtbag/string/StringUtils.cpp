@@ -1,13 +1,12 @@
 /**
- * @file   Strings.cpp
- * @brief  Strings utilities implementation.
+ * @file   StringUtils.cpp
+ * @brief  String utilities implementation.
  * @author zer0
  * @date   2016-04-04
+ * @date   2016-12-05 (Rename: Strings -> StringUtils)
  */
 
-#include <libtbag/string/Strings.hpp>
-
-#include <libtbag/predef.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

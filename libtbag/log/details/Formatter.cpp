@@ -6,9 +6,9 @@
  */
 
 #include <libtbag/log/details/Formatter.hpp>
-#include <libtbag/string/Strings.hpp>
-#include <libtbag/time/Time.hpp>
 #include <libtbag/log/details/Severity.hpp>
+#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/time/Time.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

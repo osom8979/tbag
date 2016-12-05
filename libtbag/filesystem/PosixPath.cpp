@@ -8,7 +8,7 @@
 #include <libtbag/filesystem/PosixPath.hpp>
 #include <libtbag/filesystem/details/CommonFileSystem.hpp>
 #include <libtbag/filesystem/Common.hpp>
-#include <libtbag/string/Strings.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <algorithm>

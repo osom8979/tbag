@@ -6,8 +6,8 @@
  */
 
 #include <libtbag/time/Time.hpp>
-#include <libtbag/string/Strings.hpp>
 #include <libtbag/pattern/Singleton.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cstring>
 #include <mutex>
