@@ -160,6 +160,42 @@ static bool checkPermission(std::string const & path, DWORD permission)
 
     return bRet;
 }
+
+
+/**
+ * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364980(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+static std::string getLongPathName(std::string const & path)
+{
+    std::wstring const WCS_PATH = mbsToWcs(path);
+    BOOL result = FALSE;
+
+    if (WCS_PATH.empty()) {
+        DWORD const RESERVE_SIZE = GetLongPathNameA(&path[0], nullptr, 0);
+        std::string buffer;
+        buffer.resize(RESERVE_SIZE);
+        DWORD const COPIED_LENGTH = GetLongPathNameA(&path[0], &buffer[0], RESERVE_SIZE);
+        if (COPIED_LENGTH == 0) {
+            __tbag_error_f("GetLongPathNameA() ERROR: {}", GetLastError());
+        }
+        buffer.resize(COPIED_LENGTH);
+        return buffer;
+    } else {
+        DWORD const RESERVE_SIZE = GetLongPathNameW(&WCS_PATH[0], nullptr, 0);
+        std::wstring buffer;
+        buffer.resize(RESERVE_SIZE);
+        DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
+        if (COPIED_LENGTH == 0) {
+            __tbag_error_f("GetLongPathNameW() ERROR: {}", GetLastError());
+        }
+        buffer.resize(COPIED_LENGTH);
+        return wcsToMbs(buffer);
+    }
+}
 #endif
 
 std::string getTempDir()
@@ -272,7 +308,31 @@ std::string getExePath(std::size_t extend_buffer_size)
 std::string getRealPath(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)
-    return std::string();
+    std::wstring const WCS_PATH = mbsToWcs(path);
+
+    if (WCS_PATH.size() == 0) {
+        char ** part = { NULL };
+        DWORD const RESERVE_SIZE = GetFullPathNameA(&path[0], 0, nullptr, part);
+        std::string buffer;
+        buffer.resize(RESERVE_SIZE);
+        DWORD const COPIED_LENGTH = GetFullPathNameA(&path[0], buffer.size(), &buffer[0], part);
+        if (COPIED_LENGTH == 0) {
+            __tbag_error_f("GetFullPathNameA() ERROR: {}", GetLastError());
+        }
+        buffer.resize(COPIED_LENGTH);
+        return buffer;
+    } else {
+        wchar_t ** part = { NULL };
+        DWORD const RESERVE_SIZE = GetFullPathNameW(&WCS_PATH[0], 0, nullptr, part);
+        std::wstring buffer;
+        buffer.resize(RESERVE_SIZE);
+        DWORD const COPIED_LENGTH = GetFullPathNameW(&WCS_PATH[0], buffer.size(), &buffer[0], part);
+        if (COPIED_LENGTH == 0) {
+            __tbag_error_f("GetFullPathNameW() ERROR: {}", GetLastError());
+        }
+        buffer.resize(COPIED_LENGTH);
+        return wcsToMbs(buffer);
+    }
 #else
     return std::string();
 #endif

@@ -64,6 +64,13 @@ TBAG_API std::string getHomeDir();
  */
 TBAG_API std::string getExePath(std::size_t extend_buffer_size = MAX_PATH_LENGTH + 1);
 
+/**
+ * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364963(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
 TBAG_API std::string getRealPath(std::string const & path);
 
 /**

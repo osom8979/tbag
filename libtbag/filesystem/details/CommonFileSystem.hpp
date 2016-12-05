@@ -24,9 +24,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-std::size_t const MAX_PATH_LENGTH_OF_WINDOWS     = 32768;
-std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API =   256; // MAX_PATH define in windows.
-std::size_t const MAX_PATH_LENGTH_OF_POSIX_API   =  1024; // PATH_MAX define in posix.
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS     = 32767 + 1;
+std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API =   260 + 1; // MAX_PATH define in windows.
+std::size_t const MAX_PATH_LENGTH_OF_POSIX_API   =  1024 + 1; // PATH_MAX define in posix.
 
 #if defined(__PLATFORM_WINDOWS__)
 std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_WINDOWS_API;
