@@ -20,6 +20,14 @@
 
 #include <uv.h>
 
+#ifndef _WIN_OR_UNIX
+# if defined(__PLATFORM_WINDOWS__)
+#  define _WIN_OR_UNIX(v) _##v
+# else
+#  define _WIN_OR_UNIX(v) v
+# endif
+#endif // _WIN_OR_UNIX
+
 STATIC_ASSERT_CHECK_IS_SAME(int, uv_file);
 
 // -------------------
@@ -59,10 +67,10 @@ namespace uv {
  * @{
  */
 
-static uint32_t const FILE_TYPE_S_IFMT   = S_IFMT;   ///< type of file.
-static uint32_t const FILE_TYPE_S_IFCHR  = S_IFCHR;  ///< character special.
-static uint32_t const FILE_TYPE_S_IFDIR  = S_IFDIR;  ///< directory.
-static uint32_t const FILE_TYPE_S_IFREG  = S_IFREG;  ///< regular file.
+static uint32_t const FILE_TYPE_S_IFMT   = _WIN_OR_UNIX(S_IFMT);   ///< type of file.
+static uint32_t const FILE_TYPE_S_IFCHR  = _WIN_OR_UNIX(S_IFCHR);  ///< character special.
+static uint32_t const FILE_TYPE_S_IFDIR  = _WIN_OR_UNIX(S_IFDIR);  ///< directory.
+static uint32_t const FILE_TYPE_S_IFREG  = _WIN_OR_UNIX(S_IFREG);  ///< regular file.
 
 #if 0
 static uint32_t const FILE_TYPE_S_IFIFO  = S_IFIFO;  ///< named pipe (fifo).
@@ -82,14 +90,14 @@ static uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK; ///< socket.
  * @{
  */
 
-static uint32_t const FILE_OPEN_FLAG_READ_ONLY  = O_RDONLY; ///< open for reading only.
-static uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = O_WRONLY; ///< open for writing only.
-static uint32_t const FILE_OPEN_FLAG_READ_WRITE = O_RDWR;   ///< open for reading and writing.
-static uint32_t const FILE_OPEN_APPEND          = O_APPEND; ///< set append mode.
+static uint32_t const FILE_OPEN_FLAG_READ_ONLY  = _WIN_OR_UNIX(O_RDONLY); ///< open for reading only.
+static uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = _WIN_OR_UNIX(O_WRONLY); ///< open for writing only.
+static uint32_t const FILE_OPEN_FLAG_READ_WRITE = _WIN_OR_UNIX(O_RDWR);   ///< open for reading and writing.
+static uint32_t const FILE_OPEN_APPEND          = _WIN_OR_UNIX(O_APPEND); ///< set append mode.
 
-static uint32_t const FILE_OPEN_CREATE          = O_CREAT;  ///< create if nonexistant.
-static uint32_t const FILE_OPEN_TRUNCATE        = O_TRUNC;  ///< truncate to zero length.
-static uint32_t const FILE_OPEN_EXISTS_ERROR    = O_EXCL;   ///< error if already exists.
+static uint32_t const FILE_OPEN_CREATE          = _WIN_OR_UNIX(O_CREAT);  ///< create if nonexistant.
+static uint32_t const FILE_OPEN_TRUNCATE        = _WIN_OR_UNIX(O_TRUNC);  ///< truncate to zero length.
+static uint32_t const FILE_OPEN_EXISTS_ERROR    = _WIN_OR_UNIX(O_EXCL);   ///< error if already exists.
 
 #if 0
 // !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
@@ -114,8 +122,13 @@ static uint32_t const FILE_OPEN_NOFOLLOW        = O_NOFOLLOW;  ///< don't follow
  */
 
 // Read, write, execute/search by owner.
+#if defined(__PLATFORM_WINDOWS__)
+static uint32_t const FILE_MODE_OWNER_READ  = _S_IREAD;  ///< [XSI] R for owner.
+static uint32_t const FILE_MODE_OWNER_WRITE = _S_IWRITE; ///< [XSI] W for owner.
+#else
 static uint32_t const FILE_MODE_OWNER_READ  = S_IRUSR;  ///< [XSI] R for owner.
 static uint32_t const FILE_MODE_OWNER_WRITE = S_IWUSR;  ///< [XSI] W for owner.
+#endif
 
 #if 0
 static uint32_t const FILE_MODE_OWNER_ALL      = S_IRWXU;  ///< [XSI] RWX mask for owner.
@@ -201,7 +214,7 @@ static bool checkFileType(std::string const & path, uint64_t type)
 static uint64_t getPermission(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)
-    return getStatus(path) & (_S_IRUSR | _S_IWUSR);
+    return getStatus(path) & (FILE_MODE_OWNER_READ | FILE_MODE_OWNER_WRITE);
 #else
     return getStatus(path) & (S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
@@ -210,7 +223,7 @@ static uint64_t getPermission(std::string const & path)
 static uint64_t getFixedPermission(uint64_t mode)
 {
 #if defined(__PLATFORM_WINDOWS__)
-    return mode & (_S_IRUSR | _S_IWUSR);
+    return mode & (FILE_MODE_OWNER_READ | FILE_MODE_OWNER_WRITE);
 #else
     return mode & (S_IRWXU | S_IRWXG | S_IRWXO);
 #endif

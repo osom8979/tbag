@@ -52,7 +52,7 @@ std::string getWorkDir()
     DWORD const WRITTEN_LENGTH = GetCurrentDirectoryA(BUFFER_LENGTH, buffer);
 
     if (WRITTEN_LENGTH == 0) {
-        cerr << "GetCurrentDirectoryA() FIRST ERROR: " << GetLastError() << endl;
+        __tbag_error_f("GetCurrentDirectoryA() FIRST ERROR: {}", GetLastError());
         return std::string();
 
     } else if (WRITTEN_LENGTH > BUFFER_LENGTH) {
@@ -64,7 +64,7 @@ std::string getWorkDir()
         result[WRITTEN_LENGTH - 1] = '\0';
 
         if (GetCurrentDirectoryA(WRITTEN_LENGTH, &result[0]) == 0) {
-            cerr << "GetCurrentDirectoryA() SECOND ERROR: " << GetLastError() << endl;
+            __tbag_error_f("GetCurrentDirectoryA() SECOND ERROR: {}", GetLastError());
             return std::string();
         }
         return result;
