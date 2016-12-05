@@ -53,7 +53,7 @@ DynamicAsset::PathVector DynamicAsset::getPaths() const
 
 bool DynamicAsset::exists(String const & key) const
 {
-    return filesystem::common::isDirectory(_paths.at(key));
+    return filesystem::isDirectory(_paths.at(key));
 }
 
 bool DynamicAsset::create(String const & key) const

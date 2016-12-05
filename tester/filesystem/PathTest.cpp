@@ -109,8 +109,8 @@ TEST(PathTest, GetName)
 
 TEST(PathTest, SplitNodesWithCanonical_1)
 {
-    std::string home = common::getHomeDir();
-    std::string work = common::getWorkDir();
+    std::string home = getHomeDir();
+    std::string work = getWorkDir();
 
     char const * const TEMP1 = "~/TEMP1/TEMP2/../TEMP3/./../../TEMP4";
     char const * const TEMP2 = "TEMP2/.";
@@ -163,8 +163,8 @@ TEST(PathTest, FilesystemOperators)
 
 TEST(PathTest, SpecialDirectories)
 {
-    ASSERT_EQ(Path::getWorkDir().getString(), common::getWorkDir());
-    ASSERT_EQ(Path::getHomeDir().getString(), common::getHomeDir());
-    ASSERT_EQ(Path::getExePath().getString(), common::getExePath());
+    ASSERT_EQ(Path::getWorkDir().getString(), getWorkDir());
+    ASSERT_EQ(Path::getHomeDir().getString(), getHomeDir());
+    ASSERT_EQ(Path::getExePath().getString(), getExePath());
 }
 

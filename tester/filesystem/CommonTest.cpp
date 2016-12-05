@@ -7,15 +7,12 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/Common.hpp>
-#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 
 #include <iostream>
 #include <libtbag/debug/UvError.hpp>
 
 using namespace libtbag;
 using namespace libtbag::filesystem;
-using namespace libtbag::filesystem::common;
-using namespace libtbag::filesystem::details;
 
 TEST(CommonTest, GetPathSeparator)
 {

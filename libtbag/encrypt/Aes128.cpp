@@ -205,7 +205,7 @@ bool Aes128::encryptDir(std::string const & output_dir, Key const & key, std::st
 
     bool result = true;
 
-    for (auto & cursor : libtbag::filesystem::common::scanDir(input_dir)) {
+    for (auto & cursor : libtbag::filesystem::scanDir(input_dir)) {
         auto current_path = (input_path / cursor).getCanonical();
 
         if (current_path.isRegularFile()) {
@@ -231,7 +231,7 @@ bool Aes128::decryptDir(std::string const & output_dir, Key const & key, std::st
 
     bool result = true;
 
-    for (auto & cursor : libtbag::filesystem::common::scanDir(input_dir)) {
+    for (auto & cursor : libtbag::filesystem::scanDir(input_dir)) {
         auto current_path = (input_path / cursor).getCanonical();
 
         if (current_path.isRegularFile()) {

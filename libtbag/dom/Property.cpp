@@ -43,7 +43,7 @@ bool Property::save(std::string const & path)
 
 bool Property::loadOrCreate(std::string const & path)
 {
-    if (filesystem::common::exists(path)) {
+    if (filesystem::exists(path)) {
         return load(path);
     }
 

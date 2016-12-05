@@ -68,7 +68,7 @@ public:
     static std::vector<Path> scanDir(Path const & path)
     {
         std::vector<Path> result;
-        for (auto & cursor : filesystem::common::scanDir(path.getNativeString())) {
+        for (auto & cursor : filesystem::scanDir(path.getNativeString())) {
             result.push_back(Path(Path::append(path, cursor)));
         }
         return result;
@@ -78,38 +78,38 @@ public:
     /** Obtain HOME directory path. */
     static Path getHomeDirPath()
     {
-        return Path(filesystem::common::getHomeDir());
+        return Path(filesystem::getHomeDir());
     }
 
     /** Obtain executable file directory path. */
     static Path getExeDirPath()
     {
-        return Path(filesystem::common::getExePath()).getParent();
+        return Path(filesystem::getExePath()).getParent();
     }
 };
 
 #ifndef CREATE_ASSET_PATH
 /** Create a main directory accessor & mutator macro. */
-#define CREATE_ASSET_PATH(name, path)                   \
-public:                                                 \
-    static Path get_##name() {                          \
-        return Path(path);                              \
-    }                                                   \
-    static bool create_##name() {                       \
-        using namespace ::libtbag::filesystem::common;  \
-        return createDirectory(get_##name());           \
-    }                                                   \
-    static bool remove_##name() {                       \
-        using namespace ::libtbag::filesystem::common;  \
-        return removeDirectory(get_##name());           \
-    }                                                   \
-    static bool exists_##name() {                       \
-        using namespace ::libtbag::filesystem::common;  \
-        return isDirectory(get_##name());               \
-    }                                                   \
-    static std::vector<Path> scan_##name() {            \
-        return scanDir(get_##name());                   \
-    }                                                   \
+#define CREATE_ASSET_PATH(name, path)           \
+public:                                         \
+    static Path get_##name() {                  \
+        return Path(path);                      \
+    }                                           \
+    static bool create_##name() {               \
+        using namespace ::libtbag::filesystem;  \
+        return createDirectory(get_##name());   \
+    }                                           \
+    static bool remove_##name() {               \
+        using namespace ::libtbag::filesystem;  \
+        return removeDirectory(get_##name());   \
+    }                                           \
+    static bool exists_##name() {               \
+        using namespace ::libtbag::filesystem;  \
+        return isDirectory(get_##name());       \
+    }                                           \
+    static std::vector<Path> scan_##name() {    \
+        return scanDir(get_##name());           \
+    }                                           \
 private:
 #endif
 

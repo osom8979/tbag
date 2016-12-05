@@ -297,10 +297,10 @@ std::vector<std::string> Path::splitNodesWithCanonical() const
         itr = nodes.begin();
     } else {
         if (nodes.size() >= 1 && nodes.at(0) == "~") {
-            result = Path(common::getHomeDir()).splitNodes();
+            result = Path(getHomeDir()).splitNodes();
             itr = nodes.begin() + 1;
         } else {
-            result = Path(common::getWorkDir()).splitNodes();
+            result = Path(getWorkDir()).splitNodes();
             itr = nodes.begin();
         }
     }
@@ -329,39 +329,39 @@ std::string Path::getName() const
 
 bool Path::exists() const
 {
-    return libtbag::filesystem::common::exists(_path);
+    return libtbag::filesystem::exists(_path);
 }
 
 bool Path::isExecutable() const
 {
-    return libtbag::filesystem::common::isExecutable(_path);
+    return libtbag::filesystem::isExecutable(_path);
 }
 
 bool Path::isWritable() const
 {
-    return libtbag::filesystem::common::isWritable(_path);
+    return libtbag::filesystem::isWritable(_path);
 }
 
 bool Path::isReadable() const
 {
-    return libtbag::filesystem::common::isReadable(_path);
+    return libtbag::filesystem::isReadable(_path);
 }
 
 bool Path::isRegularFile() const
 {
-    return libtbag::filesystem::common::isRegularFile(_path);
+    return libtbag::filesystem::isRegularFile(_path);
 }
 
 bool Path::isDirectory() const
 {
-    return libtbag::filesystem::common::isDirectory(_path);
+    return libtbag::filesystem::isDirectory(_path);
 }
 
 bool Path::createDir() const
 {
     auto parent = getParent();
     if (parent.isDirectory() && parent.isWritable() && exists() == false) {
-        return libtbag::filesystem::common::createDirectory(_path);
+        return libtbag::filesystem::createDirectory(_path);
     }
     return false;
 }
@@ -392,7 +392,7 @@ bool Path::remove() const
 bool Path::removeFile() const
 {
     if (isRegularFile() && isWritable()) {
-        return libtbag::filesystem::common::remove(_path);
+        return libtbag::filesystem::remove(_path);
     }
     return false;
 }
@@ -400,7 +400,7 @@ bool Path::removeFile() const
 bool Path::removeDir() const
 {
     if (isDirectory() && isWritable()) {
-        return libtbag::filesystem::common::removeDirectory(_path);
+        return libtbag::filesystem::removeDirectory(_path);
     }
     return false;
 }
@@ -424,7 +424,7 @@ bool Path::removeDirWithRecursive() const
 std::vector<Path> Path::scanDir() const
 {
     std::vector<Path> result;
-    for (auto & path : libtbag::filesystem::common::scanDir(_path)) {
+    for (auto & path : libtbag::filesystem::scanDir(_path)) {
         result.push_back(Path(_path) / path);
     }
     return result;
@@ -441,22 +441,22 @@ std::size_t Path::size() const
 
 Path Path::getWorkDir()
 {
-    return Path(libtbag::filesystem::common::getWorkDir());
+    return Path(libtbag::filesystem::getWorkDir());
 }
 
 Path Path::getHomeDir()
 {
-    return Path(libtbag::filesystem::common::getHomeDir());
+    return Path(libtbag::filesystem::getHomeDir());
 }
 
 Path Path::getExePath()
 {
-    return Path(libtbag::filesystem::common::getExePath());
+    return Path(libtbag::filesystem::getExePath());
 }
 
 Path Path::getExeDir()
 {
-    return Path(libtbag::filesystem::common::getExePath()).getParent();
+    return Path(libtbag::filesystem::getExePath()).getParent();
 }
 
 } // namespace filesystem
