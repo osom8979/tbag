@@ -115,6 +115,51 @@ static DWORD getAttribute(std::string const & path)
         return GetFileAttributesW(&WCS_PATH[0]);
     }
 }
+
+static bool checkPermission(std::string const & path, DWORD permission)
+{
+    SECURITY_INFORMATION const SECURITY = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
+    std::wstring const WCS_PATH = mbsToWcs(path);
+
+    bool bRet = false;
+    DWORD length = 0;
+
+    if (!::GetFileSecurityW(&WCS_PATH[0], OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION
+        | DACL_SECURITY_INFORMATION, NULL, NULL, &length) && ERROR_INSUFFICIENT_BUFFER == ::GetLastError()) {
+
+        PSECURITY_DESCRIPTOR security = static_cast< PSECURITY_DESCRIPTOR >(::malloc(length));
+        if (security && ::GetFileSecurityW(&WCS_PATH[0], OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION
+            | DACL_SECURITY_INFORMATION, security, length, &length)) {
+            HANDLE hToken = NULL;
+            if (::OpenProcessToken(::GetCurrentProcess(), TOKEN_IMPERSONATE | TOKEN_QUERY |
+                TOKEN_DUPLICATE | STANDARD_RIGHTS_READ, &hToken)) {
+                HANDLE hImpersonatedToken = NULL;
+                if (::DuplicateToken(hToken, SecurityImpersonation, &hImpersonatedToken)) {
+                    GENERIC_MAPPING mapping = { 0xFFFFFFFF };
+                    PRIVILEGE_SET privileges = { 0 };
+                    DWORD grantedAccess = 0, privilegesLength = sizeof(privileges);
+                    BOOL result = FALSE;
+
+                    mapping.GenericRead = FILE_GENERIC_READ;
+                    mapping.GenericWrite = FILE_GENERIC_WRITE;
+                    mapping.GenericExecute = FILE_GENERIC_EXECUTE;
+                    mapping.GenericAll = FILE_ALL_ACCESS;
+
+                    ::MapGenericMask(&permission, &mapping);
+                    if (::AccessCheck(security, hImpersonatedToken, permission,
+                        &mapping, &privileges, &privilegesLength, &grantedAccess, &result)) {
+                        bRet = (result == TRUE);
+                    }
+                    ::CloseHandle(hImpersonatedToken);
+                }
+                ::CloseHandle(hToken);
+            }
+            ::free(security);
+        }
+    }
+
+    return bRet;
+}
 #endif
 
 std::string getTempDir()
@@ -371,7 +416,7 @@ bool isRegularFile(std::string const & path)
 bool isExecutable(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)
-    return false;
+    return checkPermission(path, GENERIC_EXECUTE);
 #else
     return false;
 #endif
@@ -380,7 +425,7 @@ bool isExecutable(std::string const & path)
 bool isWritable(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)
-    return false;
+    return checkPermission(path, GENERIC_WRITE);
 #else
     return false;
 #endif
@@ -389,7 +434,7 @@ bool isWritable(std::string const & path)
 bool isReadable(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)
-    return false;
+    return checkPermission(path, GENERIC_READ);
 #else
     return false;
 #endif
