@@ -23,6 +23,7 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
+#if defined(__PLATFORM_WINDOWS__)
 /**
  * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd319072(v=vs.85).aspx>
  *
@@ -114,6 +115,7 @@ static DWORD getAttribute(std::string const & path)
         return GetFileAttributesW(&WCS_PATH[0]);
     }
 }
+#endif
 
 std::string getTempDir()
 {
