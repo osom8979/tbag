@@ -121,7 +121,7 @@ bool removeDirectory(std::string const & path)
 #endif
 }
 
-bool rename(std::string const & from, std::string const & to)
+bool removeFile(std::string const & path)
 {
 #if defined(__PLATFORM_WINDOWS__)
     return false;
@@ -130,7 +130,7 @@ bool rename(std::string const & from, std::string const & to)
 #endif
 }
 
-bool remove(std::string const & path)
+bool rename(std::string const & from, std::string const & to)
 {
 #if defined(__PLATFORM_WINDOWS__)
     return false;

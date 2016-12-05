@@ -13,6 +13,21 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
+bool removeAll(std::string const & path)
+{
+    if (isDirectory(path)) {
+        bool result = true;
+        for (auto & cursor : scanDir(path)) {
+            if (cursor != "." && cursor != "..") {
+                result &= removeAll(path + PATH_SEPARATOR + cursor);
+            }
+        }
+        result &= removeDirectory(path);
+        return result;
+    }
+    return removeFile(path);
+}
+
 void printInfos(std::ostream * stream)
 {
     if (stream == nullptr) {
@@ -30,6 +45,7 @@ void printInfos(std::ostream * stream)
     (*stream) << " * Temp directory: " << getTempDir() << std::endl;
     (*stream) << " * Home directory: " << getHomeDir() << std::endl;
     (*stream) << " * Work directory: " << getWorkDir() << std::endl;
+    (*stream) << " * Work directory (realpath): " << getRealPath(".") << std::endl;
     (*stream) << " * Exe path: "       << getExePath() << std::endl;
 }
 

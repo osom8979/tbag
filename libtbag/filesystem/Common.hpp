@@ -42,6 +42,8 @@ namespace filesystem {
 using namespace ::libtbag::filesystem::details;
 using namespace __imp;
 
+TBAG_API bool removeAll(std::string const & path);
+
 TBAG_API void printInfos(std::ostream * stream = nullptr);
 
 } // namespace filesystem

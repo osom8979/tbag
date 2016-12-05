@@ -105,6 +105,14 @@ TBAG_API std::string trimLeft(std::string const & str);
 TBAG_API std::string trimRight(std::string const & str);
 TBAG_API std::string trim(std::string const & str);
 
+// -----------------------
+// UTF-8 STRING UTILITIES.
+// -----------------------
+
+namespace utf8 {
+
+} // namespace utf8
+
 } // namespace string
 
 // --------------------

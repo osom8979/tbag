@@ -392,7 +392,7 @@ bool Path::remove() const
 bool Path::removeFile() const
 {
     if (isRegularFile() && isWritable()) {
-        return libtbag::filesystem::remove(_path);
+        return libtbag::filesystem::removeFile(_path);
     }
     return false;
 }

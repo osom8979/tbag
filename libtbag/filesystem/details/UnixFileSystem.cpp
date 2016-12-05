@@ -272,17 +272,17 @@ bool removeDirectory(std::string const & path)
     return ERROR_CODE == 0;
 }
 
+bool removeFile(std::string const & path)
+{
+    return ::remove(path.c_str()) == 0;
+}
+
 bool rename(std::string const & from, std::string const & to)
 {
     uv_fs_t request;
     int const ERROR_CODE = uv_fs_rename(nullptr, &request, from.c_str(), to.c_str(), nullptr);
     uv_fs_req_cleanup(&request);
     return ERROR_CODE == 0;
-}
-
-bool remove(std::string const & path)
-{
-    return ::remove(path.c_str()) == 0;
 }
 
 bool exists(std::string const & path)

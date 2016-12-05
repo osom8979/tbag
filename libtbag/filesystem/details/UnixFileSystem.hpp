@@ -36,9 +36,9 @@ TBAG_API std::string getRealPath(std::string const & path);
 
 TBAG_API bool createDirectory(std::string const & path, int mode = 0755);
 TBAG_API bool removeDirectory(std::string const & path);
+TBAG_API bool removeFile(std::string const & path);
 
 TBAG_API bool rename(std::string const & from, std::string const & to);
-TBAG_API bool remove(std::string const & path);
 
 TBAG_API bool exists(std::string const & path);
 
