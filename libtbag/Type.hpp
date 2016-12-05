@@ -43,6 +43,11 @@
     static_assert(std::is_base_of<base, derived>::value, "Not Derived " #base " to " #derived)
 #endif
 
+#ifndef STATIC_ASSERT_CHECK_IS_SAME
+#define STATIC_ASSERT_CHECK_IS_SAME(type1, type2) \
+    static_assert(std::is_same<type1, type2>::value, #type1 " must be the same type as " #type2)
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

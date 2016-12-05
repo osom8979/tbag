@@ -11,6 +11,7 @@
 #include <libtbag/filesystem/details/UnixFileSystem.hpp>
 #include <libtbag/filesystem/details/CommonFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/Type.hpp>
 
 #include <cstdio>
 
@@ -19,7 +20,7 @@
 
 #include <uv.h>
 
-static_assert(std::is_same<int, uv_file>::value, "int must be the same type as uv_file");
+STATIC_ASSERT_CHECK_IS_SAME(int, uv_file);
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
