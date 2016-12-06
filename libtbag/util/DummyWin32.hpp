@@ -29,16 +29,20 @@
 # define BOOL int
 # endif
 
-# ifndef TRUE
-# define TRUE 1
+# ifndef CHAR
+# define CHAR char
 # endif
 
-# ifndef FALSE
-# define FALSE 0
+# ifndef WCHAR
+# define WCHAR wchar_t
 # endif
 
 # ifndef LPBOOL
 # define LPBOOL BOOL far *
+# endif
+
+# ifndef LONG_PTR
+# define LONG_PTR long long
 # endif
 
 # ifndef DWORD
@@ -73,8 +77,24 @@
 # define LPWSTR wchar_t far *
 # endif
 
+# ifndef PCWSTR
+# define PCWSTR wchar_t const near *
+# endif
+
 # ifndef LPCWSTR
 # define LPCWSTR wchar_t const far *
+# endif
+
+# ifndef PVOID
+# define PVOID void near *
+# endif
+
+# ifndef HRESULT
+# define HRESULT long
+# endif
+
+# ifndef LPSECURITY_ATTRIBUTES
+# define LPSECURITY_ATTRIBUTES PVOID
 # endif
 
 # ifndef SECURITY_INFORMATION
@@ -85,16 +105,24 @@
 # define PSECURITY_INFORMATION DWORD *
 # endif
 
-# ifndef PVOID
-# define PVOID void near *
-# endif
-
 # ifndef PSECURITY_DESCRIPTOR
 # define PSECURITY_DESCRIPTOR PVOID
 # endif
 
+# ifndef HWND
+# define HWND PVOID
+# endif
+
 # ifndef HANDLE
 # define HANDLE PVOID
+# endif
+
+# ifndef HINSTANCE
+# define HINSTANCE PVOID
+# endif
+
+# ifndef HMODULE
+# define HMODULE HINSTANCE
 # endif
 
 # ifndef PHANDLE
@@ -121,6 +149,22 @@
 # define _Inout_
 # endif
 
+# ifndef TRUE
+# define TRUE 1
+# endif
+
+# ifndef FALSE
+# define FALSE 0
+# endif
+
+# ifndef S_OK
+# define S_OK 0x00000000 // Operation successful.
+# endif
+
+# ifndef E_FAIL
+# define E_FAIL 0x80004005 // Unspecified failure.
+# endif
+
 # ifndef ERROR_INVALID_FUNCTION
 # define ERROR_INVALID_FUNCTION 0x01 // Incorrect function.
 # endif
@@ -137,8 +181,20 @@
 # define INVALID_SET_FILE_POINTER ((DWORD)-1)
 # endif
 
+# ifndef FILE_ATTRIBUTE_DIRECTORY
+# define FILE_ATTRIBUTE_DIRECTORY 0x00000010
+# endif
+
+# ifndef FILE_ATTRIBUTE_ARCHIVE
+# define FILE_ATTRIBUTE_ARCHIVE 0x00000020
+# endif
+
 # ifndef INVALID_FILE_ATTRIBUTES
 # define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
+# endif
+
+# ifndef INVALID_HANDLE_VALUE
+# define INVALID_HANDLE_VALUE ((HANDLE)(LONG_PTR)-1)
 # endif
 
 # ifndef CP_ACP
@@ -205,6 +261,22 @@
 # define SecurityImpersonation 2
 # endif
 
+# ifndef GENERIC_READ
+# define GENERIC_READ 0x80000000L
+# endif
+
+# ifndef GENERIC_WRITE
+# define GENERIC_WRITE 0x40000000L
+# endif
+
+# ifndef GENERIC_EXECUTE
+# define GENERIC_EXECUTE 0x20000000L
+# endif
+
+# ifndef GENERIC_ALL
+# define GENERIC_ALL 0x10000000L
+# endif
+
 # ifndef ACCESS_MASK
 # define ACCESS_MASK DWORD
 # endif
@@ -260,6 +332,22 @@
 # ifndef FILE_GENERIC_EXECUTE
 # define FILE_GENERIC_EXECUTE (STANDARD_RIGHTS_EXECUTE | FILE_READ_ATTRIBUTES | FILE_EXECUTE | SYNCHRONIZE)
 # endif
+
+# ifndef CSIDL_PROFILE
+# define CSIDL_PROFILE 0x0028 // USERPROFILE
+# endif
+
+# ifndef SUCCEEDED
+# define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
+# endif
+
+# ifndef FAILED
+# define FAILED(hr) (((HRESULT)(hr)) < 0)
+# endif
+
+# ifndef MAX_PATH
+# define MAX_PATH 260
+# endif
 #endif
 
 // -------------------
@@ -291,6 +379,29 @@ typedef struct _PRIVILEGE_SET {
     LUID_AND_ATTRIBUTES Privilege[ANYSIZE_ARRAY];
 } PRIVILEGE_SET, * PPRIVILEGE_SET;
 
+typedef struct _FILETIME {
+    DWORD dwLowDateTime;
+    DWORD dwHighDateTime;
+} FILETIME, *PFILETIME, *LPFILETIME;
+
+typedef struct _WIN32_FIND_DATAW {
+    DWORD    dwFileAttributes;
+    FILETIME ftCreationTime;
+    FILETIME ftLastAccessTime;
+    FILETIME ftLastWriteTime;
+    DWORD    nFileSizeHigh;
+    DWORD    nFileSizeLow;
+    DWORD    dwReserved0;
+    DWORD    dwReserved1;
+    WCHAR    cFileName[MAX_PATH];
+    WCHAR    cAlternateFileName[14];
+#ifdef _MAC
+    DWORD dwFileType;
+    DWORD dwCreatorType;
+    WORD  wFinderFlags;
+#endif
+} WIN32_FIND_DATAW, *PWIN32_FIND_DATAW, *LPWIN32_FIND_DATAW;
+
 /**
  * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms679360(v=vs.85).aspx>
  *
@@ -298,7 +409,7 @@ typedef struct _PRIVILEGE_SET {
  *  - WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-static DWORD GetLastError(void)
+inline DWORD GetLastError(void)
 { return ERROR_INVALID_FUNCTION; }
 
 /**
@@ -311,7 +422,7 @@ static DWORD GetLastError(void)
  *  - Header: Stringapiset.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-static int MultiByteToWideChar(_In_      UINT   CodePage,
+inline int MultiByteToWideChar(_In_      UINT   CodePage,
                                _In_      DWORD  dwFlags,
                                _In_      LPCSTR lpMultiByteStr,
                                _In_      int    cbMultiByte,
@@ -329,7 +440,7 @@ static int MultiByteToWideChar(_In_      UINT   CodePage,
  *  - Header: Stringapiset.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-static int WideCharToMultiByte(_In_      UINT    CodePage,
+inline int WideCharToMultiByte(_In_      UINT    CodePage,
                                _In_      DWORD   dwFlags,
                                _In_      LPCWSTR lpWideCharStr,
                                _In_      int     cchWideChar,
@@ -349,7 +460,7 @@ static int WideCharToMultiByte(_In_      UINT    CodePage,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-static DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
+inline DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
 { return INVALID_FILE_ATTRIBUTES; }
 
 /**
@@ -362,7 +473,7 @@ static DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-static DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
+inline DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
                               _Out_ LPWSTR  lpszLongPath,
                               _In_  DWORD   cchBuffer)
 { return 0; }
@@ -377,7 +488,7 @@ static DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-static BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
+inline BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
                              _In_      SECURITY_INFORMATION RequestedInformation,
                              _Out_opt_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
                              _In_      DWORD                nLength,
@@ -394,7 +505,7 @@ static BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-static BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
+inline BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
                              _In_  DWORD   DesiredAccess,
                              _Out_ PHANDLE TokenHandle)
 { return FALSE; }
@@ -409,7 +520,7 @@ static BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
  *  - Header: WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-static HANDLE GetCurrentProcess(void)
+inline HANDLE GetCurrentProcess(void)
 { return nullptr; }
 
 /**
@@ -422,7 +533,7 @@ static HANDLE GetCurrentProcess(void)
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-static BOOL CloseHandle(_In_ HANDLE hObject)
+inline BOOL CloseHandle(_In_ HANDLE hObject)
 { return FALSE; }
 
 /**
@@ -435,7 +546,7 @@ static BOOL CloseHandle(_In_ HANDLE hObject)
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-static BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandle,
+inline BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandle,
                            _In_  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
                            _Out_ PHANDLE                      DuplicateTokenHandle)
 { return FALSE; }
@@ -447,18 +558,18 @@ static BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandl
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-static void MapGenericMask(_Inout_ PDWORD           AccessMask,
+inline void MapGenericMask(_Inout_ PDWORD           AccessMask,
                            _In_    PGENERIC_MAPPING GenericMapping)
 { /* EMPTY. */ }
 
 /**
- * @ref https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379266(v=vs.85).aspx>
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379266(v=vs.85).aspx>
  *
  * @remarks
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-static BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
+inline BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
                         _In_      HANDLE               ClientToken,
                         _In_      DWORD                DesiredAccess,
                         _In_      PGENERIC_MAPPING     GenericMapping,
@@ -466,6 +577,235 @@ static BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
                         _Inout_   LPDWORD              PrivilegeSetLength,
                         _Out_     LPDWORD              GrantedAccess,
                         _Out_     LPBOOL               AccessStatus)
+{ return FALSE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364992(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero.
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline DWORD GetTempPathA(_In_  DWORD nBufferLength,
+                          _Out_ LPSTR lpBuffer)
+{ return 0; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364934(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero.
+ *
+ * @remarks
+ *  - Header: WinBase.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
+                           _Out_ LPSTR lpBuffer)
+{ return 0; }
+
+/**
+ * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/bb762181.aspx>
+ *
+ * @return
+ *  If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
+ *
+ * @remarks
+ *  - Header: Shlobj.h
+ *  - Library: Shell32.lib
+ */
+inline HRESULT SHGetFolderPathA(_In_  HWND   hwndOwner,
+                                _In_  int    nFolder,
+                                _In_  HANDLE hToken,
+                                _In_  DWORD  dwFlags,
+                                _Out_ LPSTR  pszPath)
+{ return E_FAIL; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms683197(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is 0 (zero).
+ *
+ * @remarks
+ *  - Header: Winbase.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline DWORD GetModuleFileNameA(_In_opt_ HMODULE hModule,
+                                _Out_    LPSTR   lpFilename,
+                                _In_     DWORD   nSize)
+{ return 0; }
+
+/**
+ * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364963(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails for any other reason, the return value is zero.
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline DWORD GetFullPathNameW(_In_  LPCWSTR  lpFileName,
+                              _In_  DWORD    nBufferLength,
+                              _Out_ LPWSTR   lpBuffer,
+                              _Out_ LPWSTR  *lpFilePart)
+{ return 0; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa363855(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero.
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline BOOL CreateDirectoryW(_In_     LPCWSTR               lpPathName,
+                             _In_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{ return FALSE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365488(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero.
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline BOOL RemoveDirectoryW(_In_ LPCWSTR lpPathName)
+{ return FALSE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa363915(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero (0).
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline BOOL DeleteFileW(_In_ LPCWSTR lpFileName)
+{ return FALSE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365239(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero.
+ *
+ * @remarks
+ *  - Header: WinBase.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline BOOL MoveFileW(_In_ LPCWSTR lpExistingFileName,
+                      _In_ LPCWSTR lpNewFileName)
+{ return FALSE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb773584(v=vs.85).aspx>
+ *
+ * @return
+ *  TRUE if the file exists; otherwise, FALSE.
+ *
+ * @remarks
+ *  - Header: Shlwapi.h
+ *  - Library: Shlwapi.lib
+ */
+inline BOOL PathFileExistsW(_In_ LPCWSTR pszPath)
+{ return FALSE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647539(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: Strsafe.h
+ */
+inline HRESULT StringCchLengthW(_In_  LPCWSTR   psz,
+                                _In_  size_t    cchMax,
+                                _Out_ size_t  * pcch)
+{ return E_FAIL; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647527(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: Strsafe.h
+ */
+inline HRESULT StringCchCopyW(_Out_ LPWSTR  pszDest,
+                              _In_  size_t  cchDest,
+                              _In_  LPCWSTR pszSrc)
+{ return E_FAIL; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647518(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: Strsafe.h
+ */
+inline HRESULT StringCchCatW(_Inout_ LPWSTR  pszDest,
+                             _In_    size_t  cchDest,
+                             _In_    LPCWSTR pszSrc)
+{ return E_FAIL; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb759938(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: Shlwapi.h
+ *  - Library: Shlwapi.lib
+ */
+inline int StrCmpW(_In_ PCWSTR psz1,
+                   _In_ PCWSTR psz2)
+{ return 0; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364418(v=vs.85).aspx>
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365200(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is INVALID_HANDLE_VALUE.
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline HANDLE FindFirstFileW(_In_  LPCWSTR            lpFileName,
+                             _Out_ LPWIN32_FIND_DATAW lpFindFileData)
+{ return INVALID_HANDLE_VALUE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364428(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero.
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline BOOL FindNextFileW(_In_  HANDLE             hFindFile,
+                          _Out_ LPWIN32_FIND_DATAW lpFindFileData)
+{ return FALSE; }
+
+/**
+ * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364413(v=vs.85).aspx>
+ *
+ * @return
+ *  If the function fails, the return value is zero.
+ *
+ * @remarks
+ *  - Header: FileAPI.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+inline BOOL FindClose(_Inout_ HANDLE hFindFile)
 { return FALSE; }
 
 } // namespace util

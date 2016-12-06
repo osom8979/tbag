@@ -125,6 +125,9 @@ static std::string getLongPathName(std::string const & path)
     return wcsToMbs(buffer);
 }
 
+/**
+ * PSECURITY_DESCRIPTOR utility class.
+ */
 struct SecurityDescriptor
 {
     PSECURITY_DESCRIPTOR sd;
@@ -207,10 +210,11 @@ static bool checkPermission(std::string const & path, DWORD permission)
 
 std::string getTempDir()
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(std::string());
+
     // The maximum possible return value is MAX_PATH+1 (261).
-    DWORD const BUFFER_LENGTH = MAX_PATH + 1;
-    char buffer[BUFFER_LENGTH] = { 0, };
+    DWORD const BUFFER_LENGTH  = MAX_PATH + 1;
+    char buffer[BUFFER_LENGTH] = {0,};
 
     DWORD const COPIED_LENGTH = GetTempPathA(BUFFER_LENGTH, buffer);
     // COPIED_LENGTH is not including the terminating null character.
@@ -220,16 +224,14 @@ std::string getTempDir()
         return std::string();
     }
     return std::string(buffer);
-#else
-    return std::string();
-#endif
 }
 
 std::string getWorkDir()
 {
-#if defined(__PLATFORM_WINDOWS__)
-    DWORD const BUFFER_LENGTH = MAX_PATH + 1;
-    char buffer[BUFFER_LENGTH] = { 0, };
+    __ASSERT_NOT_IMPLEMENT(std::string());
+
+    DWORD const BUFFER_LENGTH  = MAX_PATH + 1;
+    char buffer[BUFFER_LENGTH] = {0,};
 
     // Multithreaded applications and shared library code should not use the GetCurrentDirectory function
     // and should avoid using relative path names.
@@ -255,14 +257,12 @@ std::string getWorkDir()
     }
 
     return std::string(buffer);
-#else
-    return std::string();
-#endif
 }
 
 std::string getHomeDir()
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(std::string());
+
     // See more: Access Control.
     // https://msdn.microsoft.com/en-us/library/windows/desktop/aa374860.aspx
     //HANDLE const DEFAULT_USER_TOKEN = (HANDLE)-1;
@@ -278,14 +278,12 @@ std::string getHomeDir()
         return std::string();
     }
     return std::string(buffer);
-#else
-    return std::string();
-#endif
 }
 
 std::string getExePath(std::size_t extend_buffer_size)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(std::string());
+
     std::string buffer(extend_buffer_size, '\0');
 
     // hModule: If this parameter is NULL, GetModuleFileName retrieves the path of the executable file of the current process.
@@ -307,209 +305,144 @@ std::string getExePath(std::size_t extend_buffer_size)
     // in characters, not including the terminating null character.
     buffer.resize(COPIED_LENGTH);
     return buffer;
-#else
-    return std::string();
-#endif
 }
 
 std::string getRealPath(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(std::string());
+
     std::wstring const WCS_PATH = mbsToWcs(path);
 
-    if (WCS_PATH.size() == 0) {
-        char ** part = { NULL };
-        DWORD const RESERVE_SIZE = GetFullPathNameA(&path[0], 0, nullptr, part);
-        std::string buffer;
-        buffer.resize(RESERVE_SIZE);
-        DWORD const COPIED_LENGTH = GetFullPathNameA(&path[0], buffer.size(), &buffer[0], part);
-        if (COPIED_LENGTH == 0) {
-            __tbag_error_f("GetFullPathNameA() ERROR: {}", GetLastError());
-        }
-        buffer.resize(COPIED_LENGTH);
-        return buffer;
-    } else {
-        wchar_t ** part = { NULL };
-        DWORD const RESERVE_SIZE = GetFullPathNameW(&WCS_PATH[0], 0, nullptr, part);
-        std::wstring buffer;
-        buffer.resize(RESERVE_SIZE);
-        DWORD const COPIED_LENGTH = GetFullPathNameW(&WCS_PATH[0], buffer.size(), &buffer[0], part);
-        if (COPIED_LENGTH == 0) {
-            __tbag_error_f("GetFullPathNameW() ERROR: {}", GetLastError());
-        }
-        buffer.resize(COPIED_LENGTH);
-        return wcsToMbs(buffer);
+    if (WCS_PATH.empty()) {
+        return std::string();
     }
-#else
-    return std::string();
-#endif
+
+    wchar_t ** part = {nullptr};
+    DWORD const RESERVE_SIZE = GetFullPathNameW(&WCS_PATH[0], 0, nullptr, part);
+    std::wstring buffer;
+    buffer.resize(RESERVE_SIZE);
+
+    DWORD const COPIED_LENGTH = GetFullPathNameW(&WCS_PATH[0], buffer.size(), &buffer[0], part);
+    if (COPIED_LENGTH == 0) {
+        __tbag_error_f("GetFullPathNameW() ERROR: {}", GetLastError());
+    }
+
+    buffer.resize(COPIED_LENGTH);
+    return wcsToMbs(buffer);
 }
 
 bool createDirectory(std::string const & path, int mode)
 {
-#if defined(__PLATFORM_WINDOWS__)
-    std::wstring const WCS_PATH = mbsToWcs(path);
-    BOOL result = FALSE;
+    __ASSERT_NOT_IMPLEMENT(false);
 
-    if (WCS_PATH.size() == 0) {
-        result = CreateDirectoryA(&path[0], NULL);
-    } else {
-        result = CreateDirectoryW(&WCS_PATH[0], NULL);
+    std::wstring const WCS_PATH = mbsToWcs(path);
+    if (WCS_PATH.empty()) {
+        return false;
     }
 
-    if (result == FALSE) {
-        DWORD const ERROR_CODE = GetLastError();
-        switch (ERROR_CODE) {
-        case ERROR_ALREADY_EXISTS: // The specified directory already exists.
-        case ERROR_PATH_NOT_FOUND: // One or more intermediate directories do not exist.
-        default:
-            __tbag_error_f("CreateDirectory() ERROR: {}", ERROR_CODE);
-        }
+    if (CreateDirectoryW(&WCS_PATH[0], nullptr) == FALSE) {
+        // ERROR_ALREADY_EXISTS: // The specified directory already exists.
+        // ERROR_PATH_NOT_FOUND: // One or more intermediate directories do not exist.
+        __tbag_error_f("CreateDirectoryW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
-#else
-    return false;
-#endif
 }
 
 bool removeDirectory(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
-    std::wstring const WCS_PATH = mbsToWcs(path);
-    BOOL result = FALSE;
+    __ASSERT_NOT_IMPLEMENT(false);
 
-    if (WCS_PATH.size() == 0) {
-        result = RemoveDirectoryA(&path[0]);
-    } else {
-        result = RemoveDirectoryW(&WCS_PATH[0]);
+    std::wstring const WCS_PATH = mbsToWcs(path);
+    if (WCS_PATH.empty()) {
+        return false;
     }
 
-    if (result == FALSE) {
-        __tbag_error_f("RemoveDirectory() ERROR: {}", GetLastError());
+    if (RemoveDirectoryW(&WCS_PATH[0]) == FALSE) {
+        __tbag_error_f("RemoveDirectoryW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
-#else
-    return false;
-#endif
 }
 
 bool removeFile(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
-    std::wstring const WCS_PATH = mbsToWcs(path);
-    BOOL result = FALSE;
+    __ASSERT_NOT_IMPLEMENT(false);
 
-    if (WCS_PATH.size() == 0) {
-        result = DeleteFileA(&path[0]);
-    } else {
-        result = DeleteFileW(&WCS_PATH[0]);
+    std::wstring const WCS_PATH = mbsToWcs(path);
+    if (WCS_PATH.empty()) {
+        return false;
     }
 
-    if (result == FALSE) {
-        DWORD const ERROR_CODE = GetLastError();
-        switch (ERROR_CODE) {
-        case ERROR_FILE_NOT_FOUND:  // The system cannot find the file specified.
-        case ERROR_ACCESS_DENIED:   // Access is denied.
-        default:
-            __tbag_error_f("DeleteFile() ERROR: {}", ERROR_CODE);
-        }
+    if (DeleteFileW(&WCS_PATH[0]) == FALSE) {
+        // ERROR_FILE_NOT_FOUND: // The system cannot find the file specified.
+        // ERROR_ACCESS_DENIED:  // Access is denied.
+        __tbag_error_f("DeleteFileW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
-#else
-    return false;
-#endif
 }
 
 bool rename(std::string const & from, std::string const & to)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(false);
+
     std::wstring const WCS_FROM = mbsToWcs(from);
     std::wstring const WCS_TO   = mbsToWcs(to);
-    BOOL result = FALSE;
 
-    if (WCS_FROM.size() == 0 || WCS_TO.size() == 0) {
-        result = MoveFileA(&from[0], &to[0]);
-    } else {
-        result = MoveFileW(&WCS_FROM[0], &WCS_TO[0]);
+    if (WCS_FROM.empty() || WCS_TO.empty()) {
+        return false;
     }
 
-    if (result == FALSE) {
-        __tbag_error_f("MoveFile() ERROR: {}", GetLastError());
+    if (MoveFileW(&WCS_FROM[0], &WCS_TO[0]) == FALSE) {
+        __tbag_error_f("MoveFileW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
-#else
-    return false;
-#endif
 }
 
 bool exists(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
-    std::wstring const WCS_PATH = mbsToWcs(path);
-    if (WCS_PATH.size() == 0) {
-        return (PathFileExistsA(&path[0]) == TRUE);
-    } else {
-        return (PathFileExistsW(&WCS_PATH[0]) == TRUE);
-    }
-#else
-    return false;
-#endif
+    __ASSERT_NOT_IMPLEMENT(false);
+    return (PathFileExistsW(&mbsToWcs(path)[0]) == TRUE);
 }
 
 bool isDirectory(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(false);
     DWORD const ATTRIBUTES = getAttribute(path);
     return (ATTRIBUTES != INVALID_FILE_ATTRIBUTES && (ATTRIBUTES & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
-#else
-    return false;
-#endif
 }
 
 bool isRegularFile(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(false);
     DWORD const ATTRIBUTES = getAttribute(path);
     return (ATTRIBUTES != INVALID_FILE_ATTRIBUTES && (ATTRIBUTES & FILE_ATTRIBUTE_ARCHIVE) == FILE_ATTRIBUTE_ARCHIVE);
-#else
-    return false;
-#endif
 }
 
 bool isExecutable(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(false);
     return checkPermission(path, GENERIC_EXECUTE);
-#else
-    return false;
-#endif
 }
 
 bool isWritable(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(false);
     return checkPermission(path, GENERIC_WRITE);
-#else
-    return false;
-#endif
 }
 
 bool isReadable(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(false);
     return checkPermission(path, GENERIC_READ);
-#else
-    return false;
-#endif
 }
 
 std::vector<std::string> scanDir(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+    __ASSERT_NOT_IMPLEMENT(std::vector<std::string>());
+
     std::wstring const WCS_PATH = mbsToWcs(path);
 
     // Check that the input path plus 3 is not longer than MAX_PATH.
@@ -536,7 +469,7 @@ std::vector<std::string> scanDir(std::string const & path)
         return std::vector<std::string>();
     }
 
-    WIN32_FIND_DATAW find_data = { 0, };
+    WIN32_FIND_DATAW find_data = {0,};
     HANDLE find_handle = FindFirstFileW(scan_directory, &find_data);
 
     if (find_handle == INVALID_HANDLE_VALUE) {
@@ -566,9 +499,6 @@ std::vector<std::string> scanDir(std::string const & path)
 
     FindClose(find_handle);
     return result;
-#else
-    return std::vector<std::string>();
-#endif
 }
 
 } // namespace windows
