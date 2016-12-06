@@ -8,11 +8,17 @@
 #include <libtbag/filesystem/details/WindowsFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cstdlib>
+#include <cassert>
+
 #if defined(__PLATFORM_WINDOWS__)
-#include <Windows.h>
-#include <Shlobj.h>  // SHGetFolderPath
-#include <Shlwapi.h> // PathFileExists
-#include <Strsafe.h> // StringCchLength
+# include <Windows.h>
+# include <Shlobj.h>  // SHGetFolderPath
+# include <Shlwapi.h> // PathFileExists
+# include <Strsafe.h> // StringCchLength, etc ...
+#else
+# include <libtbag/util/DummyWin32.hpp>
+using namespace ::libtbag::util;
 #endif
 
 // -------------------
@@ -23,180 +29,151 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
-#if defined(__PLATFORM_WINDOWS__)
-/**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd319072(v=vs.85).aspx>
- *
- * @remarks
- *  - Header: Stringapiset.h (include Windows.h)
- *  - Library: Kernel32.lib
- */
+#ifndef __ASSERT_NOT_IMPLEMENT
+#define __ASSERT_NOT_IMPLEMENT(retval) \
+    do { if (isWindowsPlatform() == false) { assert(0 && "Not implement."); return retval; } } while(0)
+#endif
+
 static std::wstring mbsToWcs(std::string const & path)
 {
+    __ASSERT_NOT_IMPLEMENT(std::wstring());
+
     if (path.empty()) {
         __tbag_error("Illegal argument: path is 0 length.");
         return std::wstring();
     }
 
-    int const WRITTEN_LENGTH = MultiByteToWideChar(CP_ACP, 0, &path[0], path.size(), NULL, 0);
-    std::wstring result;
+    int const RESERVE_SIZE = MultiByteToWideChar(CP_ACP, 0, &path[0], (int)path.size(), nullptr, 0);
 
-    if (WRITTEN_LENGTH == 0) {
+    std::wstring result;
+    if (RESERVE_SIZE == 0) {
         result.resize(path.size());
     } else {
-        result.resize(WRITTEN_LENGTH + 1);
+        result.resize(static_cast<std::size_t>(RESERVE_SIZE + 1));
     }
 
-    int const WRITTEN_LENGTH2 = MultiByteToWideChar(CP_ACP, 0, &path[0], path.size(), &result[0], result.size());
-    if (WRITTEN_LENGTH2 == 0) {
-        DWORD const ERROR_CODE = GetLastError();
-        switch (ERROR_CODE) {
-        case ERROR_INSUFFICIENT_BUFFER:     // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
-        case ERROR_INVALID_FLAGS:           // The values supplied for flags were not valid.
-        case ERROR_INVALID_PARAMETER:       // Any of the parameter values was invalid.
-        case ERROR_NO_UNICODE_TRANSLATION:  // Invalid Unicode was found in a string.
-        default:
-            __tbag_error_f("MultiByteToWideChar() ERROR: {}", ERROR_CODE);
-        }
+    int const WRITTEN_LENGTH = MultiByteToWideChar(CP_ACP, 0, &path[0], (int)path.size(), &result[0], (int)result.size());
+    if (WRITTEN_LENGTH == 0) {
+        // ERROR_INSUFFICIENT_BUFFER:    // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
+        // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
+        // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
+        // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
+        __tbag_error_f("MultiByteToWideChar() ERROR: {}", GetLastError());
         return std::wstring();
     }
 
-    result.resize(WRITTEN_LENGTH2);
+    result.resize(static_cast<std::size_t>(WRITTEN_LENGTH));
     return result;
 }
 
-/**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd374130(v=vs.85).aspx>
- *
- * @remarks
- *  - Header: Stringapiset.h (include Windows.h)
- *  - Library: Kernel32.lib
- */
 static std::string wcsToMbs(std::wstring const & path)
 {
+    __ASSERT_NOT_IMPLEMENT(std::string());
+
     if (path.empty()) {
         __tbag_error("Illegal argument: path is 0 length.");
         return std::string();
     }
 
-    int const WRITTEN_LENGTH = WideCharToMultiByte(CP_ACP, 0, &path[0], path.size(), NULL, 0, NULL, NULL);
+    int const RESERVE_SIZE = WideCharToMultiByte(CP_ACP, 0, &path[0], (int)path.size(), nullptr, 0, nullptr, nullptr);
     std::string result;
 
-    if (WRITTEN_LENGTH == 0) {
+    if (RESERVE_SIZE == 0) {
         result.resize(path.size());
     } else {
-        result.resize(WRITTEN_LENGTH + 1);
+        result.resize(static_cast<std::size_t>(RESERVE_SIZE + 1));
     }
 
-    int const WRITTEN_LENGTH2 = WideCharToMultiByte(CP_ACP, 0, &path[0], path.size(), &result[0], result.size(), NULL, NULL);
-    if (WRITTEN_LENGTH2 == 0) {
-        DWORD const ERROR_CODE = GetLastError();
-        switch (ERROR_CODE) {
-        case ERROR_INSUFFICIENT_BUFFER:     // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
-        case ERROR_INVALID_FLAGS:           // The values supplied for flags were not valid.
-        case ERROR_INVALID_PARAMETER:       // Any of the parameter values was invalid.
-        case ERROR_NO_UNICODE_TRANSLATION:  // Invalid Unicode was found in a string.
-        default:
-            __tbag_error_f("WideCharToMultiByte() ERROR: {}", ERROR_CODE);
-        }
+    int const WRITTEN_LENGTH = WideCharToMultiByte(CP_ACP, 0, &path[0], (int)path.size(), &result[0], (int)result.size(), nullptr, nullptr);
+    if (WRITTEN_LENGTH == 0) {
+        // ERROR_INSUFFICIENT_BUFFER:    // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
+        // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
+        // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
+        // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
+        __tbag_error_f("WideCharToMultiByte() ERROR: {}", GetLastError());
         return std::string();
     }
 
-    result.resize(WRITTEN_LENGTH2);
+    result.resize(static_cast<std::size_t>(WRITTEN_LENGTH));
     return result;
 }
 
 static DWORD getAttribute(std::string const & path)
 {
+    __ASSERT_NOT_IMPLEMENT(INVALID_FILE_ATTRIBUTES);
+    return GetFileAttributesW(&mbsToWcs(path)[0]);
+}
+
+static std::string getLongPathName(std::string const & path)
+{
+    __ASSERT_NOT_IMPLEMENT(std::string());
+
     std::wstring const WCS_PATH = mbsToWcs(path);
-    if (WCS_PATH.size() == 0) {
-        return GetFileAttributesA(&path[0]);
-    } else {
-        return GetFileAttributesW(&WCS_PATH[0]);
+    if (WCS_PATH.empty()) {
+        return std::string();
     }
+
+    DWORD const RESERVE_SIZE = GetLongPathNameW(&WCS_PATH[0], nullptr, 0);
+    std::wstring buffer;
+    buffer.resize(RESERVE_SIZE);
+
+    DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
+    if (COPIED_LENGTH == 0) {
+        __tbag_error_f("GetLongPathNameW() ERROR: {}", GetLastError());
+    }
+    buffer.resize(COPIED_LENGTH);
+    return wcsToMbs(buffer);
 }
 
 static bool checkPermission(std::string const & path, DWORD permission)
 {
-    SECURITY_INFORMATION const SECURITY = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
+    __ASSERT_NOT_IMPLEMENT(false);
+
+    SECURITY_INFORMATION const SECURITY       = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
+    DWORD                const DESIRED_ACCESS = TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE | STANDARD_RIGHTS_READ;
+
     std::wstring const WCS_PATH = mbsToWcs(path);
 
-    bool bRet = false;
-    DWORD length = 0;
+    bool  check_result = false;
+    DWORD security_descriptor_length = 0;
 
-    if (!::GetFileSecurityW(&WCS_PATH[0], OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION
-        | DACL_SECURITY_INFORMATION, NULL, NULL, &length) && ERROR_INSUFFICIENT_BUFFER == ::GetLastError()) {
+    if (GetFileSecurityW(&WCS_PATH[0], SECURITY, nullptr, 0, &security_descriptor_length) && ERROR_INSUFFICIENT_BUFFER == GetLastError()) {
+        PSECURITY_DESCRIPTOR security_descriptor = static_cast<PSECURITY_DESCRIPTOR>(::malloc(security_descriptor_length));
 
-        PSECURITY_DESCRIPTOR security = static_cast< PSECURITY_DESCRIPTOR >(::malloc(length));
-        if (security && ::GetFileSecurityW(&WCS_PATH[0], OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION
-            | DACL_SECURITY_INFORMATION, security, length, &length)) {
-            HANDLE hToken = NULL;
-            if (::OpenProcessToken(::GetCurrentProcess(), TOKEN_IMPERSONATE | TOKEN_QUERY |
-                TOKEN_DUPLICATE | STANDARD_RIGHTS_READ, &hToken)) {
-                HANDLE hImpersonatedToken = NULL;
-                if (::DuplicateToken(hToken, SecurityImpersonation, &hImpersonatedToken)) {
-                    GENERIC_MAPPING mapping = { 0xFFFFFFFF };
-                    PRIVILEGE_SET privileges = { 0 };
-                    DWORD grantedAccess = 0, privilegesLength = sizeof(privileges);
-                    BOOL result = FALSE;
+        if (security_descriptor != nullptr && GetFileSecurityW(&WCS_PATH[0], SECURITY, security_descriptor, security_descriptor_length, &security_descriptor_length) == TRUE) {
+            HANDLE process_token = NULL;
+            if (OpenProcessToken(GetCurrentProcess(), DESIRED_ACCESS, &process_token)) {
+                HANDLE impersonated_token = NULL;
 
-                    mapping.GenericRead = FILE_GENERIC_READ;
-                    mapping.GenericWrite = FILE_GENERIC_WRITE;
+                if (DuplicateToken(process_token, SecurityImpersonation, &impersonated_token)) {
+                    GENERIC_MAPPING mapping  = {0xFFFFFFFF};
+                    PRIVILEGE_SET privileges = {0,};
+                    DWORD granted_access     = 0;
+                    DWORD privileges_length  = sizeof(privileges);
+                    BOOL  result             = FALSE;
+
+                    mapping.GenericRead    = FILE_GENERIC_READ;
+                    mapping.GenericWrite   = FILE_GENERIC_WRITE;
                     mapping.GenericExecute = FILE_GENERIC_EXECUTE;
-                    mapping.GenericAll = FILE_ALL_ACCESS;
+                    mapping.GenericAll     = FILE_ALL_ACCESS;
 
-                    ::MapGenericMask(&permission, &mapping);
-                    if (::AccessCheck(security, hImpersonatedToken, permission,
-                        &mapping, &privileges, &privilegesLength, &grantedAccess, &result)) {
-                        bRet = (result == TRUE);
+                    MapGenericMask(&permission, &mapping);
+                    if (AccessCheck(security_descriptor, impersonated_token, permission, &mapping, &privileges, &privileges_length, &granted_access, &result)) {
+                        if (result == TRUE) {
+                            check_result = true;
+                        }
                     }
-                    ::CloseHandle(hImpersonatedToken);
+
+                    CloseHandle(impersonated_token);
                 }
-                ::CloseHandle(hToken);
+                CloseHandle(process_token);
             }
-            ::free(security);
         }
+        ::free(security_descriptor);
     }
 
-    return bRet;
+    return check_result;
 }
-
-
-/**
- * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364980(v=vs.85).aspx>
- *
- * @remarks
- *  - Header: FileAPI.h (include Windows.h)
- *  - Library: Kernel32.lib
- */
-static std::string getLongPathName(std::string const & path)
-{
-    std::wstring const WCS_PATH = mbsToWcs(path);
-    BOOL result = FALSE;
-
-    if (WCS_PATH.empty()) {
-        DWORD const RESERVE_SIZE = GetLongPathNameA(&path[0], nullptr, 0);
-        std::string buffer;
-        buffer.resize(RESERVE_SIZE);
-        DWORD const COPIED_LENGTH = GetLongPathNameA(&path[0], &buffer[0], RESERVE_SIZE);
-        if (COPIED_LENGTH == 0) {
-            __tbag_error_f("GetLongPathNameA() ERROR: {}", GetLastError());
-        }
-        buffer.resize(COPIED_LENGTH);
-        return buffer;
-    } else {
-        DWORD const RESERVE_SIZE = GetLongPathNameW(&WCS_PATH[0], nullptr, 0);
-        std::wstring buffer;
-        buffer.resize(RESERVE_SIZE);
-        DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
-        if (COPIED_LENGTH == 0) {
-            __tbag_error_f("GetLongPathNameW() ERROR: {}", GetLastError());
-        }
-        buffer.resize(COPIED_LENGTH);
-        return wcsToMbs(buffer);
-    }
-}
-#endif
 
 std::string getTempDir()
 {
