@@ -125,6 +125,22 @@ static std::string getLongPathName(std::string const & path)
     return wcsToMbs(buffer);
 }
 
+struct SecurityDescriptor
+{
+    PSECURITY_DESCRIPTOR sd;
+
+    SecurityDescriptor(std::size_t size) : sd(static_cast<PSECURITY_DESCRIPTOR>(::malloc(size)))
+    { /* EMPTY. */ }
+    ~SecurityDescriptor()
+    { ::free(sd); }
+
+    PSECURITY_DESCRIPTOR get()
+    { return sd; }
+
+    inline operator bool()
+    { return sd != nullptr; }
+};
+
 static bool checkPermission(std::string const & path, DWORD permission)
 {
     __ASSERT_NOT_IMPLEMENT(false);
@@ -134,45 +150,59 @@ static bool checkPermission(std::string const & path, DWORD permission)
 
     std::wstring const WCS_PATH = mbsToWcs(path);
 
-    bool  check_result = false;
-    DWORD security_descriptor_length = 0;
-
-    if (GetFileSecurityW(&WCS_PATH[0], SECURITY, nullptr, 0, &security_descriptor_length) && ERROR_INSUFFICIENT_BUFFER == GetLastError()) {
-        PSECURITY_DESCRIPTOR security_descriptor = static_cast<PSECURITY_DESCRIPTOR>(::malloc(security_descriptor_length));
-
-        if (security_descriptor != nullptr && GetFileSecurityW(&WCS_PATH[0], SECURITY, security_descriptor, security_descriptor_length, &security_descriptor_length) == TRUE) {
-            HANDLE process_token = NULL;
-            if (OpenProcessToken(GetCurrentProcess(), DESIRED_ACCESS, &process_token)) {
-                HANDLE impersonated_token = NULL;
-
-                if (DuplicateToken(process_token, SecurityImpersonation, &impersonated_token)) {
-                    GENERIC_MAPPING mapping  = {0xFFFFFFFF};
-                    PRIVILEGE_SET privileges = {0,};
-                    DWORD granted_access     = 0;
-                    DWORD privileges_length  = sizeof(privileges);
-                    BOOL  result             = FALSE;
-
-                    mapping.GenericRead    = FILE_GENERIC_READ;
-                    mapping.GenericWrite   = FILE_GENERIC_WRITE;
-                    mapping.GenericExecute = FILE_GENERIC_EXECUTE;
-                    mapping.GenericAll     = FILE_ALL_ACCESS;
-
-                    MapGenericMask(&permission, &mapping);
-                    if (AccessCheck(security_descriptor, impersonated_token, permission, &mapping, &privileges, &privileges_length, &granted_access, &result)) {
-                        if (result == TRUE) {
-                            check_result = true;
-                        }
-                    }
-
-                    CloseHandle(impersonated_token);
-                }
-                CloseHandle(process_token);
-            }
-        }
-        ::free(security_descriptor);
+    DWORD sd_length = 0;
+    GetFileSecurityW(&WCS_PATH[0], SECURITY, nullptr, 0, &sd_length);
+    if (ERROR_INSUFFICIENT_BUFFER != GetLastError()) {
+        __tbag_error("Not ERROR_INSUFFICIENT_BUFFER error.");
+        return false;
     }
 
-    return check_result;
+    SecurityDescriptor sd(sd_length);
+    if (static_cast<bool>(sd) == false) {
+        __tbag_error("PSECURITY_DESCRIPTOR is nullptr.");
+        return false;
+    }
+    if (GetFileSecurityW(&WCS_PATH[0], SECURITY, sd.get(), sd_length, &sd_length) == FALSE) {
+        __tbag_error_f("GetFileSecurityW() ERROR: {}", GetLastError());
+        return false;
+    }
+
+    HANDLE ptoken = NULL;
+    if (OpenProcessToken(GetCurrentProcess(), DESIRED_ACCESS, &ptoken) == FALSE) {
+        __tbag_error_f("OpenProcessToken() ERROR: {}", GetLastError());
+        return false;
+    }
+
+    HANDLE impersonated_token = NULL;
+    if (DuplicateToken(ptoken, SecurityImpersonation, &impersonated_token) == FALSE) {
+        __tbag_error_f("DuplicateToken() ERROR: {}", GetLastError());
+        CloseHandle(ptoken);
+        return false;
+    }
+
+    GENERIC_MAPPING mapping  = {0xFFFFFFFF};
+    PRIVILEGE_SET privileges = {0,};
+    DWORD granted_access     = 0;
+    DWORD privileges_length  = sizeof(privileges);
+    BOOL  access_status      = FALSE;
+    bool  result             = false;
+
+    mapping.GenericRead    = FILE_GENERIC_READ;
+    mapping.GenericWrite   = FILE_GENERIC_WRITE;
+    mapping.GenericExecute = FILE_GENERIC_EXECUTE;
+    mapping.GenericAll     = FILE_ALL_ACCESS;
+
+    MapGenericMask(&permission, &mapping);
+    if (AccessCheck(sd.get(), impersonated_token, permission, &mapping, &privileges, &privileges_length, &granted_access, &access_status)) {
+        result = (access_status == TRUE ? true : false);
+    } else {
+        __tbag_error_f("AccessCheck() ERROR: {}", GetLastError());
+    }
+
+    CloseHandle(impersonated_token);
+    CloseHandle(ptoken);
+
+    return result;
 }
 
 std::string getTempDir()
