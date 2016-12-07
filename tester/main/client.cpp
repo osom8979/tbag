@@ -14,75 +14,84 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-struct EchoClientTester : public libtbag::network::socket::Client
+using namespace network;
+using namespace network::socket;
+
+/**
+ * Echo client implementation.
+ *
+ * @author zer0
+ * @date   2016-11-04
+ * @date   2016-11-07 (Refactoring this class)
+ */
+struct EchoClientTester : public Client, public Client::EventCallback
 {
-//public:
-//    inline static TBAG_CONSTEXPR char const * const getTestMessage() TBAG_NOEXCEPT
-//    { return "Test echo message."; }
-//
-//private:
-//    bool _echo_result;
-//
-//public:
-//    EchoClientTester() : _echo_result(false)
-//    { /* EMPTY. */ }
-//    virtual ~EchoClientTester()
-//    { /* EMPTY. */ }
-//
-//public:
-//    inline bool getEchoResult() const
-//    { return _echo_result; }
-//
-//public:
-//    virtual void onConnect(int status) override
-//    {
-//        std::cout.setf(std::ios_base::boolalpha);
-//        std::cout << "- onConnect(" << (status == 0 ? true : false) << ")\n";
-//
-//        std::cout << "[START READ]\n";
-//        read();
-//
-//        std::string msg = getTestMessage();
-//        std::cout << "[WRITE MESSAGE]\n";
-//        write(&msg[0], msg.size());
-//    }
-//
-//    virtual void onClose() override
-//    {
-//        std::cout << "- onClose()\n";
-//    }
-//
-//    virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override
-//    {
-//        if (code == ReadErrorCode::SUCCESS) {
-//            std::string msg;
-//            msg.assign(buffer, buffer + length);
-//            std::cout << "- onRead() success: " << msg << std::endl;
-//
-//            if (msg == std::string(getTestMessage())) {
-//                _echo_result = true;
-//            }
-//        } else if (code == ReadErrorCode::UNKNOWN_ERROR) {
-//            std::cerr << "- onRead() unknown error.\n";
-//        } else {
-//            std::cout << "- onRead() End of file.\n";
-//        }
-//
-//        std::cout << "[CLOSE]\n";
-//        close();
-//    }
-//
-//    virtual void onWrite(WriteErrorCode code) override
-//    {
-//        if (code == WriteErrorCode::UNKNOWN_ERROR) {
-//            std::cerr << "- onWrite() unknown error.\n";
-//
-//            std::cout << "[CLOSE]\n";
-//            close();
-//        } else {
-//            std::cout << "- onWrite() success.\n";
-//        }
-//    }
+public:
+    inline static TBAG_CONSTEXPR char const * const getTestMessage() TBAG_NOEXCEPT
+    { return "Test echo message."; }
+
+private:
+    bool _result;
+
+public:
+    EchoClientTester() : _result(false)
+    { /* EMPTY. */ }
+    virtual ~EchoClientTester()
+    { /* EMPTY. */ }
+
+public:
+    inline bool getResult() const TBAG_NOEXCEPT
+    { return _result; }
+
+public:
+    virtual bool onConnect(int status) override
+    {
+        std::cout.setf(std::ios_base::boolalpha);
+        std::cout << "- onConnect(" << (status == 0 ? true : false) << ")\n";
+
+        std::string msg = getTestMessage();
+        std::cout << "[WRITE MESSAGE]\n";
+        this->write(&msg[0], msg.size());
+
+        return true;
+    }
+
+    virtual void onClose() override
+    {
+        std::cout << "- onClose()\n";
+    }
+
+    virtual void onRead(Code code, char const * buffer, std::size_t size) override
+    {
+        if (code == Code::SUCCESS) {
+            std::string msg;
+            msg.assign(buffer, buffer + size);
+            std::cout << "- onRead() success: " << msg << std::endl;
+
+            if (msg == std::string(getTestMessage())) {
+                _result = true;
+            }
+        } else if (code == Code::FAILURE) {
+            std::cerr << "- onRead() unknown error.\n";
+        } else {
+            std::cout << "- onRead() End of file.\n";
+        }
+
+        std::cout << "[CLOSE]\n";
+        this->close();
+    }
+
+    virtual void onWrite(Code code) override
+    {
+        if (code == Code::FAILURE) {
+            std::cerr << "- onWrite() unknown error.\n";
+
+            std::cout << "[CLOSE]\n";
+            this->close();
+        } else {
+            std::cout << "- onWrite() success.\n";
+        }
+    }
 };
 
 int main_client(std::string const & ip, int port)
