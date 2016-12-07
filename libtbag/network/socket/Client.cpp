@@ -108,18 +108,35 @@ static bool read(uv_tcp_t * tcp)
     return true;
 }
 
-static bool write(uv_write_t * write, uv_tcp_t * tcp, char const * buffer, std::size_t length)
+static bool read(Tcp & tcp)
+{
+    return read(static_cast<uv_tcp_t*>(tcp.getNative()));
+}
+
+static bool write(uv_write_t * handle, uv_tcp_t * tcp, char const * buffer, std::size_t size)
 {
     uv_buf_t buf = {0,};
     buf.base = const_cast<char*>(buffer);
-    buf.len  = length;
+    buf.len  = size;
 
-    int const ERROR_CODE = ::uv_write(write, (uv_stream_t*)tcp, &buf, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
+    int const ERROR_CODE = ::uv_write(handle, (uv_stream_t*)tcp, &buf, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::client_details read error: {}", ERROR_CODE);
+        __tbag_error_f("socket::client_details write error: {}", ERROR_CODE);
         return false;
     }
     return true;
+}
+
+static bool write(Client::Handle & handle, Tcp & tcp, char const * buffer, std::size_t size)
+{
+    if (handle.getType() != util::UvType::WRITE) {
+        __tbag_error("socket::client_details write handle error.");
+        return false;
+    }
+
+    return write(static_cast<uv_write_t*>(handle.getNative()),
+                 static_cast<uv_tcp_t*>(tcp.getNative()),
+                 buffer, size);
 }
 
 } // namespace client_details
@@ -180,12 +197,28 @@ void Client::close()
     client_details::close(_tcp);
 }
 
+bool Client::write(char const * buffer, std::size_t size)
+{
+    return client_details::write(_write, _tcp, buffer, size);
+}
+
 void Client::onConnect(void * req, int status)
 {
+    bool is_read_start = false;
+    if (_callback != nullptr) {
+        is_read_start = _callback->onConnect(status);
+    }
+
+    if (is_read_start) {
+        client_details::read(_tcp);
+    }
 }
 
 void Client::onClose(void * handle)
 {
+    if (_callback != nullptr) {
+        _callback->onClose();
+    }
 }
 
 void Client::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
@@ -202,10 +235,29 @@ void Client::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
 
 void Client::onRead(void * stream, ssize_t nread, void const * buf)
 {
+    Code code = Code::FAILURE;
+    if (nread == UV_EOF) {
+        code = Code::END_OF_FILE;
+    } else if (nread >= 0){
+        code = Code::SUCCESS;
+    }
+
+    if (_callback != nullptr) {
+        uv_buf_t const * uv_buf = static_cast<uv_buf_t const *>(buf);
+        _callback->onRead(code, uv_buf->base, static_cast<std::size_t>(nread));
+    }
 }
 
 void Client::onWrite(void * req, int status)
 {
+    Code code = Code::FAILURE;
+    if (status == 0) {
+        code = Code::SUCCESS;
+    }
+
+    if (_callback != nullptr) {
+        _callback->onWrite(code);
+    }
 }
 
 } // namespace socket

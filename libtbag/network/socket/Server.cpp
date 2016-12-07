@@ -148,18 +148,35 @@ static bool read(uv_tcp_t * tcp)
     return true;
 }
 
-static bool write(uv_write_t * write, uv_tcp_t * tcp, char const * buffer, std::size_t length)
+static bool read(Tcp & tcp)
+{
+    return read(static_cast<uv_tcp_t*>(tcp.getNative()));
+}
+
+static bool write(uv_write_t * handle, uv_tcp_t * tcp, char const * buffer, std::size_t length)
 {
     uv_buf_t buf = {0,};
     buf.base = const_cast<char*>(buffer);
     buf.len  = length;
 
-    int const ERROR_CODE = ::uv_write(write, (uv_stream_t*)tcp, &buf, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
+    int const ERROR_CODE = ::uv_write(handle, (uv_stream_t*)tcp, &buf, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details read error: {}", ERROR_CODE);
+        __tbag_error_f("socket::server_details write error: {}", ERROR_CODE);
         return false;
     }
     return true;
+}
+
+static bool write(Server::Handle & handle, Tcp & tcp, char const * buffer, std::size_t size)
+{
+    if (handle.getType() != util::UvType::WRITE) {
+        __tbag_error("socket::server_details write handle error.");
+        return false;
+    }
+
+    return write(static_cast<uv_write_t*>(handle.getNative()),
+                 static_cast<uv_tcp_t*>(tcp.getNative()),
+                 buffer, size);
 }
 
 } // namespace server_details
@@ -208,6 +225,9 @@ bool Server::runIpv4(std::string const & address, int port)
     if (!server_details::listen(_tcp)) {
         return false;
     }
+    if (!server_details::read(_tcp)) {
+        return false;
+    }
     return _loop.runDefault();
 }
 
@@ -226,12 +246,49 @@ bool Server::runIpv6(std::string const & address, int port)
     if (!server_details::listen(_tcp)) {
         return false;
     }
+    if (!server_details::read(_tcp)) {
+        return false;
+    }
     return _loop.runDefault();
 }
 
 void Server::close()
 {
     server_details::close(_tcp);
+}
+
+void Server::closeClient(ClientKey key)
+{
+    auto find_itr = _clients.find(key);
+    if (find_itr == _clients.end()) {
+        __tbag_error("Server::closeClient() not found client key.");
+        return;
+    }
+
+    ClientValue client = find_itr->second;
+    if (static_cast<bool>(client) == false) {
+        __tbag_error("Server::closeClient() invalidate client value.");
+        return;
+    }
+
+    server_details::closeClient(*client.get());
+}
+
+bool Server::write(ClientKey key, char * buffer, std::size_t size)
+{
+    auto find_itr = _clients.find(key);
+    if (find_itr == _clients.end()) {
+        __tbag_error("Server::write() not found client key.");
+        return false;
+    }
+
+    ClientValue client = find_itr->second;
+    if (static_cast<bool>(client) == false) {
+        __tbag_error("Server::write() invalidate client value.");
+        return false;
+    }
+
+    return server_details::write(_write, *client.get(), buffer, size);
 }
 
 void Server::onConnection(void * server, int status)
@@ -241,6 +298,7 @@ void Server::onConnection(void * server, int status)
 
     bool is_accept = false;
     std::string client_address;
+
     // TODO: Obtain client address.
 
     if (_callback != nullptr) {
@@ -257,11 +315,17 @@ void Server::onConnection(void * server, int status)
 void Server::onClose(void * handle)
 {
     __tbag_debug("Server::onClose()");
+    if (_callback != nullptr) {
+        _callback->onClose();
+    }
 }
 
 void Server::onCloseClient(void * handle)
 {
     __tbag_debug_f("Server::onCloseClient({})", handle);
+    if (_callback != nullptr) {
+        _callback->onCloseClient(ClientKey(handle));
+    }
     _clients.erase(ClientKey(handle));
 }
 
@@ -279,10 +343,32 @@ void Server::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
 
 void Server::onRead(void * stream, ssize_t nread, void const * buf)
 {
+    Code code = Code::FAILURE;
+
+    if (nread == UV_EOF) {
+        code = Code::END_OF_FILE;
+    } else if (nread >= 0){
+        code = Code::SUCCESS;
+    }
+
+    if (_callback != nullptr) {
+        uv_buf_t const * uv_buf = static_cast<uv_buf_t const *>(buf);
+        ClientKey from;
+        // TODO: FIND FROM KEY.
+        _callback->onRead(from, code, uv_buf->base, static_cast<std::size_t>(nread));
+    }
 }
 
 void Server::onWrite(void * req, int status)
 {
+    Code code = Code::FAILURE;
+    if (status == 0) {
+        code = Code::SUCCESS;
+    }
+
+    if (_callback != nullptr) {
+        _callback->onWrite(ClientKey(req), code);
+    }
 }
 
 } // namespace socket

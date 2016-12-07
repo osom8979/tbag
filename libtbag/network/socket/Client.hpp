@@ -43,9 +43,19 @@ public:
     using Handle = util::UvHandle;
 
 public:
+    enum class Code
+    {
+        SUCCESS,
+        FAILURE,
+        END_OF_FILE,
+    };
+
     struct EventCallback
     {
         virtual bool onConnect(int status) = 0;
+        virtual void onClose() = 0;
+        virtual void onRead(Code code, char const * buffer, std::size_t size) = 0;
+        virtual void onWrite(Code code) = 0;
     };
 
 private:
@@ -73,6 +83,9 @@ public:
     bool runIpv4(std::string const & address, int port);
     bool runIpv6(std::string const & address, int port);
     void close();
+
+public:
+    bool write(char const * buffer, std::size_t size);
 
 public:
     void onConnect(void * req, int status);

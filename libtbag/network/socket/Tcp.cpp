@@ -25,41 +25,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace socket  {
 
-//    uv_tcp_t     _tcp;     // onRead, onAlloc (for read), onConnection (for server), onClose
-//    uv_write_t   _write;   // onWrite, onClose
-//    uv_connect_t _connect; // onConnect
-
-//    virtual void onRead(/*uv_stream_t*/void * stream, ssize_t nread, /*uv_buf_t*/void const * buf) override
-//    {
-//        Tcp::ReadErrorCode code;
-//        if (nread == UV_EOF) {
-//            code = Tcp::ReadErrorCode::END_OF_FILE;
-//        } else if (nread < 0){
-//            code = Tcp::ReadErrorCode::UNKNOWN_ERROR;
-//        } else {
-//            code = Tcp::ReadErrorCode::SUCCESS;
-//        }
-//
-//        if (_parent._callback != nullptr) {
-//            uv_buf_t const * uv_buf = static_cast<uv_buf_t const *>(buf);
-//            _parent._callback->onRead(code, uv_buf->base, static_cast<std::size_t>(nread));
-//        }
-//    }
-
-//    virtual void onWrite(/*uv_write_t*/void * req, int status) override
-//    {
-//        Tcp::WriteErrorCode code;
-//        if (status == 0) {
-//            code = Tcp::WriteErrorCode::SUCCESS;
-//        } else {
-//            code = Tcp::WriteErrorCode::UNKNOWN_ERROR;
-//        }
-//
-//        if (_parent._callback != nullptr) {
-//            _parent._callback->onWrite(code);
-//        }
-//    }
-
 // ------------------------
 // TcpPimpl implementation.
 // ------------------------
@@ -207,7 +172,7 @@ bool Tcp::isIpv4(std::string const & address)
     return true;
 }
 
-bool isIpv6(std::string const & address)
+bool Tcp::isIpv6(std::string const & address)
 {
     return !Tcp::isIpv4(address);
 }

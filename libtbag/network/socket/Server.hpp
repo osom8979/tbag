@@ -52,9 +52,22 @@ public:
     using ClientMap = std::unordered_map<ClientKey, ClientValue, ClientKey::Hash>;
 
 public:
+    enum class Code
+    {
+        SUCCESS,
+        FAILURE,
+        END_OF_FILE,
+    };
+
     struct EventCallback
     {
         virtual bool onConnection(std::string & client_address, int status) = 0;
+
+        virtual void onClose() = 0;
+        virtual void onCloseClient(ClientKey key) = 0;
+
+        virtual void onRead(ClientKey from, Code code, char * buffer, std::size_t size) = 0;
+        virtual void onWrite(ClientKey to, Code code) = 0;
     };
 
 private:
@@ -82,6 +95,10 @@ public:
     bool runIpv4(std::string const & address, int port);
     bool runIpv6(std::string const & address, int port);
     void close();
+
+public:
+    void closeClient(ClientKey key);
+    bool write(ClientKey key, char * buffer, std::size_t size);
 
 public:
     void onConnection(void * server, int status);
