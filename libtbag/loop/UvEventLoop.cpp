@@ -7,6 +7,7 @@
 
 #include <libtbag/loop/UvEventLoop.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/util/UvUtils.hpp>
 
 #include <cassert>
 #include <mutex>
@@ -39,7 +40,9 @@ public:
     LoopPimpl()
     {
         ::memset((void*)&_loop, 0x00, sizeof(_loop));
-        assert(::uv_loop_init(&_loop) == 0);
+        int const ERROR_CODE = ::uv_loop_init(&_loop);
+        REMOVE_UNUSED_VARIABLE(ERROR_CODE);
+        assert(ERROR_CODE == 0);
     }
 
     ~LoopPimpl()
@@ -71,8 +74,11 @@ public:
     /** Fully close a loop. */
     static void onClose(uv_handle_t * handle, void * arg)
     {
-        if (isClosing(handle) == false) {
+        if (isClosing(handle)) {
+            __tbag_debug_f("Closing uv handle: {}", util::getUvType(handle));
+        } else {
             // If not closing or closed.
+            __tbag_debug_f("Not closing or closed uv handle: {}", util::getUvType(handle));
             ::uv_close(handle, nullptr);
         }
     }

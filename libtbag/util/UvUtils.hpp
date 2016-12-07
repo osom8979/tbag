@@ -23,6 +23,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace util {
 
 TBAG_API void initUv();
+TBAG_API char const * getUvType(void * handle);
 
 } // namespace util
 
