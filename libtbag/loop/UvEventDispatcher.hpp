@@ -103,6 +103,29 @@ public:
     }
 };
 
+namespace __uv_example {
+void onAlloc       (/* uv_handle_t      */ void * handle, size_t suggested_size, /* uv_buf_t */ void * buf);
+void onRead        (/* uv_stream_t      */ void * stream, ssize_t nread, /* uv_buf_t */ void const * buf);
+void onWrite       (/* uv_write_t       */ void * req, int status);
+void onConnect     (/* uv_connect_t     */ void * req, int status);
+void onShutdown    (/* uv_shutdown_t    */ void * req, int status);
+void onConnection  (/* uv_stream_t      */ void * server, int status);
+void onClose       (/* uv_handle_t      */ void * handle);
+void onPoll        (/* uv_poll_t        */ void * handle, int status, int events);
+void onTimer       (/* uv_timer_t       */ void * handle);
+void onAsync       (/* uv_async_t       */ void * handle);
+void onPrepare     (/* uv_prepare_t     */ void * handle);
+void onCheck       (/* uv_check_t       */ void * handle);
+void onIdle        (/* uv_idle_t        */ void * handle);
+void onExit        (/* uv_process_t     */ void * process, int64_t exit_status, int term_signal);
+void onWalk        (/* uv_handle_t      */ void * handle, void * arg);
+void onFs          (/* uv_fs_t          */ void * req);
+void onWork        (/* uv_work_t        */ void * req);
+void onAfterWork   (/* uv_work_t        */ void * req, int status);
+void onGetaddrinfo (/* uv_getaddrinfo_t */ void * req, int status, /* struct addrinfo */ void * addr);
+void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char const * hostname, char const * service);
+} // namespace __uv_example
+
 } // namespace loop
 
 // --------------------

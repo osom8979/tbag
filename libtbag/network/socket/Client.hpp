@@ -15,10 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/socket/Tcp.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
+#include <libtbag/util/UvUtils.hpp>
+#include <libtbag/network/socket/Tcp.hpp>
 
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,43 +28,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace socket  {
-
-//class TBAG_API Client : protected libtbag::network::socket::Tcp::Callback
-//{
-//public:
-//    using Tcp = libtbag::network::socket::Tcp;
-//    using EventLoop = libtbag::loop::UvEventLoop;
-//    using ReadErrorCode  = Tcp::ReadErrorCode;
-//    using WriteErrorCode = Tcp::WriteErrorCode;
-//
-//private:
-//    EventLoop _loop;
-//    Tcp _tcp;
-//
-//public:
-//    Client();
-//    virtual ~Client();
-//
-//public:
-//    bool run(std::string const & ip, int port);
-//    bool runIpv4(std::string const & ip, int port);
-//    bool runIpv6(std::string const & ip, int port);
-//
-//public:
-//    bool read();
-//    bool write(char const * buffer, std::size_t length);
-//    void close();
-//
-//public:
-//    virtual void onConnect(int status) override {}
-//    virtual void onClose() override {}
-//    virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
-//    virtual void onWrite(WriteErrorCode code) override {}
-//
-//private:
-//    // Don't use this callback.
-//    virtual void onConnection(int status) override {}
-//};
 
 /**
  * Client class prototype.
@@ -74,11 +39,47 @@ namespace socket  {
 class TBAG_API Client : public Noncopyable
 {
 public:
+    using Loop   = loop::UvEventLoop;
+    using Handle = util::UvHandle;
+
+public:
+    struct EventCallback
+    {
+        virtual bool onConnect(int status) = 0;
+    };
+
+private:
+    Loop   _loop;
+    Tcp    _tcp;
+    Handle _connect;
+    Handle _write;
+
+private:
+    std::vector<char> _read_buffer;
+
+private:
+    EventCallback * _callback;
+
+public:
     Client();
     ~Client();
 
 public:
+    inline void setEventCallback(EventCallback * callback)
+    { _callback = callback; }
+
+public:
     bool run(std::string const & address, int port);
+    bool runIpv4(std::string const & address, int port);
+    bool runIpv6(std::string const & address, int port);
+    void close();
+
+public:
+    void onConnect(void * req, int status);
+    void onClose(void * handle);
+    void onReadBufferAlloc(void * handle, size_t suggested_size, void * buf);
+    void onRead(void * stream, ssize_t nread, void const * buf);
+    void onWrite(void * req, int status);
 };
 
 } // namespace socket

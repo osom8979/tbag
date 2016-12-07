@@ -140,6 +140,7 @@ public:
 
 public:
     bool init(libtbag::loop::UvEventLoop & loop);
+    void close();
 
 public:
     std::string getPeerName() const;
@@ -148,6 +149,10 @@ public:
 public:
     void * getNative();
     void const * getNative() const;
+
+public:
+    static bool isIpv4(std::string const & address);
+    static bool isIpv6(std::string const & address);
 };
 
 } // namespace socket
