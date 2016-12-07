@@ -120,6 +120,7 @@ namespace socket  {
  *
  * @author zer0
  * @date   2016-11-04
+ * @date   2016-11-07 (Refactoring this class)
  */
 class TBAG_API Tcp : public Noncopyable
 {
@@ -139,9 +140,17 @@ public:
 
 public:
     bool init(libtbag::loop::UvEventLoop & loop);
+
+public:
+    std::string getPeerName() const;
+    std::string getSocketName() const;
+
+public:
+    void * getNative();
+    void const * getNative() const;
 };
 
-}; // namespace socket
+} // namespace socket
 } // namespace network
 
 // --------------------

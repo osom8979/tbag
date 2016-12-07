@@ -43,20 +43,6 @@ namespace socket  {
 //    _parent.onClientWrite(WeakClient(shared_from_this()), code);
 //}
 
-//// ----------------------
-//// Server implementation.
-//// ----------------------
-
-//Server::Server() : _tcp(this)
-//{
-//    // EMPTY.
-//}
-//
-//Server::~Server()
-//{
-//    // EMPTY.
-//}
-//
 //bool Server::run(std::string const & ip, int port)
 //{
 //    if (Tcp::isIpv4(ip)) {
