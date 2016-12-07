@@ -30,109 +30,126 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace socket  {
 
+//class TBAG_API Server : protected libtbag::network::socket::Tcp::Callback
+//{
+//public:
+//    using Tcp = libtbag::network::socket::Tcp;
+//    using EventLoop = libtbag::loop::UvEventLoop;
+//    using ReadErrorCode  = Tcp::ReadErrorCode;
+//    using WriteErrorCode = Tcp::WriteErrorCode;
+//
+//public:
+//    class TBAG_API AcceptedClient : public    libtbag::network::socket::Tcp
+//                                  , protected libtbag::network::socket::Tcp::Callback
+//                                  , public    std::enable_shared_from_this<AcceptedClient>
+//    {
+//    private:
+//        Server & _parent;
+//
+//    public:
+//        AcceptedClient(Server & parent);
+//        virtual ~AcceptedClient();
+//
+//    public:
+//        virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override;
+//        virtual void onWrite(WriteErrorCode code) override;
+//        virtual void onClose() override;
+//
+//    private:
+//        // Don't use this callback.
+//        virtual void onConnection(int status) override {}
+//        virtual void onConnect(int status) override {}
+//    };
+//
+//    using ClientKey    = std::size_t;
+//    using SharedClient = std::shared_ptr<AcceptedClient>;
+//    using WeakClient   = std::weak_ptr<AcceptedClient>;
+//    using ClientMap    = std::unordered_map<ClientKey, SharedClient>;
+//
+//    inline static TBAG_CONSTEXPR ClientKey getErrorKey() TBAG_NOEXCEPT
+//    { return std::numeric_limits<ClientKey>::max(); }
+//
+//private:
+//    EventLoop _loop;
+//    Tcp _tcp;
+//
+//private:
+//    ClientMap _clients;
+//
+//public:
+//    Server();
+//    virtual ~Server();
+//
+//public:
+//    bool run(std::string const & ip, int port);
+//    bool runIpv4(std::string const & ip, int port);
+//    bool runIpv6(std::string const & ip, int port);
+//    void close();
+//
+//// client methods.
+//public:
+//    inline WeakClient at(ClientKey id)
+//    {
+//        auto find_itr = _clients.find(id);
+//        if (find_itr != _clients.end()) {
+//            return WeakClient(find_itr->second);
+//        }
+//        return WeakClient();
+//    }
+//
+//protected:
+//    /**
+//     * @warning
+//     *  It should be used in @c onConnection callbacks.
+//     */
+//    WeakClient accept();
+//
+//public:
+//    inline std::string getPeerName() const
+//    { return _tcp.getPeerName(); }
+//
+//// CLIENT EVENT.
+//public:
+//    virtual void onClientClose(WeakClient client) {}
+//    virtual void onClientRead(WeakClient client, ReadErrorCode code, char * buffer, std::size_t length) {}
+//    virtual void onClientWrite(WeakClient client, WriteErrorCode code) {}
+//
+//// SERVER EVENT.
+//public:
+//    virtual void onConnection(int status) override {}
+//    virtual void onClose() override {}
+//
+//private:
+//    // Don't use this callback.
+//    virtual void onConnect(int status) override {}
+//    virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
+//    virtual void onWrite(WriteErrorCode code) override {}
+//};
+
 /**
  * Server class prototype.
  *
  * @author zer0
  * @date   2016-10-14
+ * @date   2016-11-07 (Refactoring this class)
  */
-class TBAG_API Server : protected libtbag::network::socket::Tcp::Callback
+class TBAG_API Server : public Noncopyable
 {
 public:
-    using Tcp = libtbag::network::socket::Tcp;
-    using EventLoop = libtbag::loop::UvEventLoop;
-    using ReadErrorCode  = Tcp::ReadErrorCode;
-    using WriteErrorCode = Tcp::WriteErrorCode;
+    struct ServerPimpl;
+    friend struct ServerPimpl;
 
 public:
-    class TBAG_API AcceptedClient : public    libtbag::network::socket::Tcp
-                                  , protected libtbag::network::socket::Tcp::Callback
-                                  , public    std::enable_shared_from_this<AcceptedClient>
-    {
-    private:
-        Server & _parent;
-
-    public:
-        AcceptedClient(Server & parent);
-        virtual ~AcceptedClient();
-
-    public:
-        virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override;
-        virtual void onWrite(WriteErrorCode code) override;
-        virtual void onClose() override;
-
-    private:
-        // Don't use this callback.
-        virtual void onConnection(int status) override {}
-        virtual void onConnect(int status) override {}
-    };
-
-    using ClientKey    = std::size_t;
-    using SharedClient = std::shared_ptr<AcceptedClient>;
-    using WeakClient   = std::weak_ptr<AcceptedClient>;
-    using ClientMap    = std::unordered_map<ClientKey, SharedClient>;
-
-    inline static TBAG_CONSTEXPR ClientKey getErrorKey() TBAG_NOEXCEPT
-    { return std::numeric_limits<ClientKey>::max(); }
-
-private:
-    EventLoop _loop;
-    Tcp _tcp;
-
-private:
-    ClientMap _clients;
 
 public:
     Server();
-    virtual ~Server();
+    ~Server();
 
 public:
-    bool run(std::string const & ip, int port);
-    bool runIpv4(std::string const & ip, int port);
-    bool runIpv6(std::string const & ip, int port);
-    void close();
-
-// client methods.
-public:
-    inline WeakClient at(ClientKey id)
-    {
-        auto find_itr = _clients.find(id);
-        if (find_itr != _clients.end()) {
-            return WeakClient(find_itr->second);
-        }
-        return WeakClient();
-    }
-
-protected:
-    /**
-     * @warning
-     *  It should be used in @c onConnection callbacks.
-     */
-    WeakClient accept();
-
-public:
-    inline std::string getPeerName() const
-    { return _tcp.getPeerName(); }
-
-// CLIENT EVENT.
-public:
-    virtual void onClientClose(WeakClient client) {}
-    virtual void onClientRead(WeakClient client, ReadErrorCode code, char * buffer, std::size_t length) {}
-    virtual void onClientWrite(WeakClient client, WriteErrorCode code) {}
-
-// SERVER EVENT.
-public:
-    virtual void onConnection(int status) override {}
-    virtual void onClose() override {}
-
-private:
-    // Don't use this callback.
-    virtual void onConnect(int status) override {}
-    virtual void onRead(ReadErrorCode code, char * buffer, std::size_t length) override {}
-    virtual void onWrite(WriteErrorCode code) override {}
+    bool run(std::string const & address, int port);
 };
 
-} // namespace socket
+}; // namespace socket
 } // namespace network
 
 // --------------------
