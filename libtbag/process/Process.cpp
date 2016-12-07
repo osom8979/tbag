@@ -178,6 +178,7 @@ bool Process::spawn()
 
 void Process::onExit(void * process, int64_t exit_status, int term_signal)
 {
+    //static_cast<uv_process_t*>(process);
     _exit_status = exit_status;
     _terminate_signal = term_signal;
 }

@@ -47,8 +47,6 @@ public:
 
     ~LoopPimpl()
     {
-        ::uv_walk(&_loop, &LoopPimpl::onClose, nullptr);
-        runDefault();
         ::uv_loop_close(&_loop);
     }
 
@@ -68,6 +66,12 @@ public:
     bool runDefault()
     {
         return run(UV_RUN_DEFAULT);
+    }
+
+    bool runAllClose()
+    {
+        ::uv_walk(&_loop, &LoopPimpl::onClose, nullptr);
+        return runDefault();
     }
 
 public:
