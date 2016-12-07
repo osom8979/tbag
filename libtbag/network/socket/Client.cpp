@@ -145,12 +145,21 @@ static bool write(Client::Handle & handle, Tcp & tcp, char const * buffer, std::
 // Client implementation.
 // ----------------------
 
-Client::Client() : _connect(util::UvType::CONNECT), _write(util::UvType::WRITE)
+Client::Client(EventCallback * callback)
+        : _connect(util::UvType::CONNECT)
+        , _write(util::UvType::WRITE)
+        , _read_buffer()
+        , _callback(callback)
 {
     using namespace client_details;
     TBAG_UV_EVENT_DEFAULT_REGISTER(_tcp.getNative(), this);
     TBAG_UV_EVENT_DEFAULT_REGISTER(_connect.getNative(), this);
     TBAG_UV_EVENT_DEFAULT_REGISTER(_write.getNative(), this);
+}
+
+Client::Client() : Client(nullptr)
+{
+    // EMPTY.
 }
 
 Client::~Client()

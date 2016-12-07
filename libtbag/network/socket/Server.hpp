@@ -61,7 +61,7 @@ public:
 
     struct EventCallback
     {
-        virtual bool onConnection(std::string & client_address, int status) = 0;
+        virtual bool onConnection(std::string & peer, int status) = 0;
 
         virtual void onClose() = 0;
         virtual void onCloseClient(ClientKey key) = 0;
@@ -83,6 +83,7 @@ private:
     EventCallback * _callback;
 
 public:
+    Server(EventCallback * callback);
     Server();
     ~Server();
 
@@ -96,6 +97,10 @@ public:
     bool runIpv6(std::string const & address, int port);
     void close();
 
+private:
+    bool addClient(ClientValue tcp);
+    bool removeClient(ClientKey key);
+
 public:
     void closeClient(ClientKey key);
     bool write(ClientKey key, char * buffer, std::size_t size);
@@ -106,7 +111,7 @@ public:
     void onCloseClient(void * handle);
 
     void onReadBufferAlloc(void * handle, size_t suggested_size, void * buf);
-    void onRead(void * stream, ssize_t nread, void const * buf);
+    void onRead(void * client_stream, ssize_t nread, void const * buf);
     void onWrite(void * req, int status);
 };
 

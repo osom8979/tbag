@@ -27,13 +27,13 @@ using namespace network::socket;
 struct EchoServerTester : public Server, public Server::EventCallback
 {
 public:
-    EchoServerTester()
+    EchoServerTester() : Server(this)
     { /* EMPTY. */ }
     virtual ~EchoServerTester()
     { /* EMPTY. */ }
 
 public:
-    virtual bool onConnection(std::string & client_address, int status) override
+    virtual bool onConnection(std::string & peer, int status) override
     {
         std::cout.setf(std::ios_base::boolalpha);
         std::cout << "- onConnection(" << (status == 0 ? true : false) << ") \n";

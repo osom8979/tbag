@@ -71,6 +71,7 @@ private:
     EventCallback * _callback;
 
 public:
+    Client(EventCallback * callback);
     Client();
     ~Client();
 

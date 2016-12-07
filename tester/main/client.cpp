@@ -34,7 +34,7 @@ private:
     bool _result;
 
 public:
-    EchoClientTester() : _result(false)
+    EchoClientTester() : Client(this), _result(false)
     { /* EMPTY. */ }
     virtual ~EchoClientTester()
     { /* EMPTY. */ }

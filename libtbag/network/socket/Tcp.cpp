@@ -160,7 +160,7 @@ std::string Tcp::getSocketName() const
 bool Tcp::isIpv4(std::string const & address)
 {
     auto tokens = string::splitTokens(address, ".");
-    if (tokens.size() != 3) {
+    if (tokens.size() != 4) {
         return false;
     }
 

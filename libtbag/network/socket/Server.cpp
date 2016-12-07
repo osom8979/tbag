@@ -185,11 +185,16 @@ static bool write(Server::Handle & handle, Tcp & tcp, char const * buffer, std::
 // Server implementation.
 // ----------------------
 
-Server::Server() : _write(util::UvType::WRITE)
+Server::Server(EventCallback * callback) : _write(util::UvType::WRITE), _read_buffer(), _callback(callback)
 {
     using namespace server_details;
     TBAG_UV_EVENT_DEFAULT_REGISTER(_tcp.getNative(), this);
     TBAG_UV_EVENT_DEFAULT_REGISTER(_write.getNative(), this);
+}
+
+Server::Server() : Server(nullptr)
+{
+    // EMPTY.
 }
 
 Server::~Server()
@@ -225,9 +230,6 @@ bool Server::runIpv4(std::string const & address, int port)
     if (!server_details::listen(_tcp)) {
         return false;
     }
-    if (!server_details::read(_tcp)) {
-        return false;
-    }
     return _loop.runDefault();
 }
 
@@ -246,15 +248,31 @@ bool Server::runIpv6(std::string const & address, int port)
     if (!server_details::listen(_tcp)) {
         return false;
     }
-    if (!server_details::read(_tcp)) {
-        return false;
-    }
     return _loop.runDefault();
 }
 
 void Server::close()
 {
     server_details::close(_tcp);
+}
+
+bool Server::addClient(ClientValue client)
+{
+    using namespace server_details;
+    if (_clients.insert(ClientMap::value_type(ClientKey(client->getNative()), client)).second == false) {
+        return false;
+    }
+    __tbag_debug_f("Insert client ({})", client->getNative());
+    TBAG_UV_EVENT_DEFAULT_REGISTER(client->getNative(), this);
+    return true;
+}
+
+bool Server::removeClient(ClientKey key)
+{
+    using namespace server_details;
+    TBAG_UV_EVENT_DEFAULT_UNREGISTER(key.get());
+    __tbag_debug_f("Erase client ({})", key.get());
+    return _clients.erase(key) == 1U;
 }
 
 void Server::closeClient(ClientKey key)
@@ -296,19 +314,16 @@ void Server::onConnection(void * server, int status)
     ClientValue client(new Tcp);
     client->init(_loop);
 
-    bool is_accept = false;
-    std::string client_address;
+    server_details::accept(_tcp, *client.get());
+    std::string peer = client->getPeerName();
 
-    // TODO: Obtain client address.
+    __tbag_debug_f("Server::onConnection(): status({}), peer({})", status, peer);
 
     if (_callback != nullptr) {
-        is_accept = _callback->onConnection(client_address, status);
-    }
-
-    __tbag_debug_f("Server::onConnection: status({}), ip({})", status, client_address);
-
-    if (is_accept && server_details::accept(_tcp, *client.get())) {
-        _clients.insert(ClientMap::value_type(ClientKey(client->getNative()), client));
+        if (_callback->onConnection(peer, status)) {
+            addClient(client);
+            server_details::read(*client.get());
+        }
     }
 }
 
@@ -326,7 +341,7 @@ void Server::onCloseClient(void * handle)
     if (_callback != nullptr) {
         _callback->onCloseClient(ClientKey(handle));
     }
-    _clients.erase(ClientKey(handle));
+    removeClient(ClientKey(handle));
 }
 
 void Server::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
@@ -341,7 +356,7 @@ void Server::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
     uv_buf->len  =  _read_buffer.size();
 }
 
-void Server::onRead(void * stream, ssize_t nread, void const * buf)
+void Server::onRead(void * client_stream, ssize_t nread, void const * buf)
 {
     Code code = Code::FAILURE;
 
@@ -353,8 +368,22 @@ void Server::onRead(void * stream, ssize_t nread, void const * buf)
 
     if (_callback != nullptr) {
         uv_buf_t const * uv_buf = static_cast<uv_buf_t const *>(buf);
-        ClientKey from;
-        // TODO: FIND FROM KEY.
+        ClientKey from(client_stream);
+
+        auto find_itr = _clients.find(from);
+        if (find_itr == _clients.end()) {
+            __tbag_error_f("Server::onRead() Not found client ({})", client_stream);
+            return;
+        }
+
+        ClientValue client = find_itr->second;
+        if (static_cast<bool>(client) == false) {
+            __tbag_error_f("Server::onRead() Empty client ({})", client_stream);
+            return;
+        }
+
+        __tbag_debug_f("Server::onRead() name({})", client->getSocketName());
+
         _callback->onRead(from, code, uv_buf->base, static_cast<std::size_t>(nread));
     }
 }
