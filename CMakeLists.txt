@@ -72,12 +72,6 @@ if (USE_LUA)
     add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 endif ()
 
-## JsonCpp settings.
-option (USE_JSONCPP "Don't use the JsonCpp library." OFF)
-if (USE_JSONCPP)
-    add_subdirectory (${CMAKE_SOURCE_DIR}/dep/jsoncpp)
-endif ()
-
 ## Test subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbproc)
 add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbshare)

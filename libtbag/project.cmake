@@ -28,9 +28,6 @@ if (USE_LUA)
     tbag_modules__apply_dep_lua ()
     tbag_modules__apply_dep_luabridge ()
 endif ()
-if (USE_JSONCPP)
-    tbag_modules__apply_dep_jsoncpp ()
-endif ()
 
 if (WIN32)
     list (APPEND TBAG_PROJECT_LDFLAGS shlwapi.lib) # filesystem with windows.
