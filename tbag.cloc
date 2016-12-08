@@ -8,6 +8,8 @@ C
     filter call_regexp_common C
     filter remove_inline //.*$
     extension c
+    extension ec
+    extension pgc
 C++
     filter remove_matches ^\s*//
     filter remove_inline //.*$
@@ -16,4 +18,19 @@ C++
     extension cc
     extension cpp
     extension cxx
+    extension pcc
+C/C++ Header
+    filter remove_matches ^\s*//
+    filter call_regexp_common C
+    filter remove_inline //.*$
+    extension H
+    extension h
+    extension hh
+    extension hpp
+Python
+    filter remove_matches ^\s*#
+    filter docstring_to_C
+    filter call_regexp_common C
+    filter remove_inline #.*$
+    extension py
 
