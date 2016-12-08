@@ -34,30 +34,32 @@ int main(int argc, char **argv)
     tbInitialize();
     libtbag::log::DebuggingLoggerInitializer logger;
 
-    using Commander = libtbag::string::Commander;
-    using Args = libtbag::string::Arguments;
-    using Path = libtbag::filesystem::Path;
-
     TestMode mode = TestMode::TEST;
     std::string ip;
     int port;
 
     {   // COMMAND-LINE PARSING.
-        Commander cmd;
-        cmd.insert(CMD_ARGUMENT_SERVER, [&](Args const & args){
+        using Cmd  = libtbag::string::Commander;
+        using Path = libtbag::filesystem::Path;
+
+        auto CMD_ARGUMENT_SERVER_LAMBDA = [&](libtbag::string::Arguments const & args){
             if (args.optString(0, &ip) && args.optInteger(1, &port)) {
                 mode = TestMode::SERVER;
             } else {
                 mode = TestMode::UNKNOWN_ERROR;
             }
-        });
-        cmd.insert(CMD_ARGUMENT_CLIENT, [&](Args const & args){
+        };
+        auto CMD_ARGUMENT_CLIENT_LAMBDA = [&](libtbag::string::Arguments const & args){
             if (args.optString(0, &ip) && args.optInteger(1, &port)) {
                 mode = TestMode::CLIENT;
             } else {
                 mode = TestMode::UNKNOWN_ERROR;
             }
-        });
+        };
+
+        Cmd cmd;
+        cmd.insert(CMD_ARGUMENT_SERVER, CMD_ARGUMENT_SERVER_LAMBDA);
+        cmd.insert(CMD_ARGUMENT_CLIENT, CMD_ARGUMENT_CLIENT_LAMBDA);
         cmd.request(argc, argv);
     }
 
