@@ -52,7 +52,7 @@ public:
 
     struct EventCallback
     {
-        virtual bool onConnect(int status) = 0;
+        virtual void onConnect(int status) = 0;
         virtual void onClose() = 0;
         virtual void onRead(Code code, char const * buffer, std::size_t size) = 0;
         virtual void onWrite(Code code) = 0;
@@ -86,6 +86,7 @@ public:
     void close();
 
 public:
+    bool read();
     bool write(char const * buffer, std::size_t size);
 
 public:

@@ -26,62 +26,92 @@ using namespace network::socket;
  */
 struct EchoServerTester : public Server, public Server::EventCallback
 {
+private:
+    int _echo_count;
+
 public:
-    EchoServerTester() : Server(this)
+    EchoServerTester() : Server(this), _echo_count(5)
     { /* EMPTY. */ }
     virtual ~EchoServerTester()
     { /* EMPTY. */ }
 
 public:
-    virtual bool onConnection(std::string & peer, int status) override
+    virtual bool onConnection(ClientKey key, int status) override
     {
-        std::cout.setf(std::ios_base::boolalpha);
-        std::cout << "- onConnection(" << (status == 0 ? true : false) << ") \n";
+        std::cout << "EchoServerTester::onConnect(" << key.get() << "," << (status == 0 ? true : false) << ") ";
+        if (status != 0) {
+            std::cout << "Status error: " << status << ".\n";
+            return false;
+        }
 
-        std::cout << "[ACCEPT]\n";
-        return true;
+        ClientValue client = this->getClient(key);
+        if (static_cast<bool>(client) == false) {
+            std::cout << "Not found client key error.\n";
+            return false;
+        }
+
+        std::cout << "Client information: " << client->getSocketName() << ".\n";
+        if (this->read(key) == false) {
+            std::cout << "Read error.\n";
+            return false;
+        }
+
+        return true; // ACCEPT OK!
     }
 
     virtual void onClose() override
     {
-        std::cout << "- onClose()\n";
+        std::cout << "EchoServerTester::onClose()\n";
     }
 
     virtual void onCloseClient(ClientKey key) override
     {
-        std::cout << "- onClientClose()\n";
+        std::cout << "EchoServerTester::onCloseClient(" << key.get() << ")\n";
     }
 
     virtual void onRead(ClientKey from, Code code, char * buffer, std::size_t size) override
     {
+        std::cout << "EchoServerTester::onRead() ";
         if (code == Code::SUCCESS) {
             std::string msg;
             msg.assign(buffer, buffer + size);
+            std::cout << "Success: " << msg << std::endl;
 
-            std::cout << "- onClientRead() success: " << msg << std::endl;
-
-            std::cout << "[WRITE]\n";
+            std::cout << "[WRITE MESSAGE] " << msg << std::endl;
             this->write(from, &msg[0], msg.size());
         } else if (code == Code::END_OF_FILE) {
-            std::cout << "- onClientRead() end of file.\n";
+            std::cout << "End of file.\n";
+            this->closeClient(from);
         } else {
-            std::cout << "- onClientRead() unknown error.\n";
+            std::cout << "Failure.\n";
+            this->closeClient(from);
         }
     }
 
     virtual void onWrite(ClientKey to, Code code) override
     {
+        std::cout << "EchoServerTester::onWrite() ";
         if (code == Code::SUCCESS) {
-            std::cout << "- onClientWrite() success.\n";
-            this->closeClient(to);
+            std::cout << "Success.\n";
         } else {
-            std::cout << "- onClientWrite() unknown error.\n";
+            std::cout << "Failure.\n";
+        }
+
+        this->closeClient(to);
+
+        --_echo_count;
+        std::cout << "Echo count: " << _echo_count << "\n";
+
+        if (_echo_count <= 0) {
+            this->close();
         }
     }
 };
 
 int main_server(std::string const & ip, int port)
 {
+    std::cout.setf(std::ios_base::boolalpha);
+
     EchoServerTester server;
     if (server.run(ip, port)) {
         return EXIT_SUCCESS;

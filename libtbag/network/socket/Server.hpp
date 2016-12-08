@@ -61,11 +61,10 @@ public:
 
     struct EventCallback
     {
-        virtual bool onConnection(std::string & peer, int status) = 0;
-
         virtual void onClose() = 0;
-        virtual void onCloseClient(ClientKey key) = 0;
 
+        virtual bool onConnection(ClientKey key, int status) = 0;
+        virtual void onCloseClient(ClientKey key) = 0;
         virtual void onRead(ClientKey from, Code code, char * buffer, std::size_t size) = 0;
         virtual void onWrite(ClientKey to, Code code) = 0;
     };
@@ -98,11 +97,16 @@ public:
     void close();
 
 private:
+    bool addClient(ClientKey key, ClientValue client);
     bool addClient(ClientValue tcp);
     bool removeClient(ClientKey key);
 
 public:
+    ClientValue getClient(ClientKey key);
+
+public:
     void closeClient(ClientKey key);
+    bool read(ClientKey key);
     bool write(ClientKey key, char * buffer, std::size_t size);
 
 public:

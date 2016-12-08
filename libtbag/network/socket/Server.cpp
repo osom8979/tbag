@@ -133,7 +133,7 @@ static void closeClient(uv_tcp_t * tcp)
 
 static void closeClient(Tcp & tcp)
 {
-    close(static_cast<uv_tcp_t*>(tcp.getNative()));
+    closeClient(static_cast<uv_tcp_t*>(tcp.getNative()));
 }
 
 static bool read(uv_tcp_t * tcp)
@@ -256,40 +256,74 @@ void Server::close()
     server_details::close(_tcp);
 }
 
-bool Server::addClient(ClientValue client)
+bool Server::addClient(ClientKey key, ClientValue client)
 {
     using namespace server_details;
-    if (_clients.insert(ClientMap::value_type(ClientKey(client->getNative()), client)).second == false) {
+    if (_clients.insert(ClientMap::value_type(key, client)).second == false) {
+        __tbag_error_f("Server::addClient({}) Insert client error (size:{}).", key.get(), _clients.size());
         return false;
     }
-    __tbag_debug_f("Insert client ({})", client->getNative());
-    TBAG_UV_EVENT_DEFAULT_REGISTER(client->getNative(), this);
+
+    __tbag_debug_f("Server::addClient({}) Insert client (size:{}).", key.get(), _clients.size());
+    TBAG_UV_EVENT_DEFAULT_REGISTER(key.get(), this);
     return true;
+}
+
+bool Server::addClient(ClientValue client)
+{
+    return addClient(ClientKey(client->getNative()), client);
 }
 
 bool Server::removeClient(ClientKey key)
 {
     using namespace server_details;
     TBAG_UV_EVENT_DEFAULT_UNREGISTER(key.get());
-    __tbag_debug_f("Erase client ({})", key.get());
-    return _clients.erase(key) == 1U;
+
+    bool const ERASE_RESULT = _clients.erase(key) == 1U;
+    if (ERASE_RESULT == false) {
+        __tbag_error_f("Server::removeClient({}) Erase client error (size:{}).", key.get(), _clients.size());
+        return false;
+    }
+
+    __tbag_debug_f("Server::removeClient({}) Erase client (size:{}).", key.get(), _clients.size());
+    return true;
+}
+
+Server::ClientValue Server::getClient(ClientKey key)
+{
+    auto find_itr = _clients.find(key);
+    if (find_itr == _clients.end()) {
+        __tbag_error_f("Server::getClient({}) not found client key.", key.get());
+        return ClientValue();
+    }
+    return find_itr->second;
 }
 
 void Server::closeClient(ClientKey key)
 {
     auto find_itr = _clients.find(key);
     if (find_itr == _clients.end()) {
-        __tbag_error("Server::closeClient() not found client key.");
+        __tbag_error_f("Server::closeClient({}) not found client key.", key.get());
         return;
     }
 
     ClientValue client = find_itr->second;
     if (static_cast<bool>(client) == false) {
-        __tbag_error("Server::closeClient() invalidate client value.");
+        __tbag_error_f("Server::closeClient({}) invalidate client value.", key.get());
         return;
     }
 
     server_details::closeClient(*client.get());
+}
+
+bool Server::read(ClientKey key)
+{
+    ClientValue client = getClient(key);
+    if (static_cast<bool>(client) == false) {
+        __tbag_error_f("Server::read() not found client key ({})", key.get());
+        return false;
+    }
+    return server_details::read(*client.get());
 }
 
 bool Server::write(ClientKey key, char * buffer, std::size_t size)
@@ -312,17 +346,17 @@ bool Server::write(ClientKey key, char * buffer, std::size_t size)
 void Server::onConnection(void * server, int status)
 {
     ClientValue client(new Tcp);
+    ClientKey   key(client->getNative());
     client->init(_loop);
 
     server_details::accept(_tcp, *client.get());
-    std::string peer = client->getPeerName();
-
-    __tbag_debug_f("Server::onConnection(): status({}), peer({})", status, peer);
+    if (addClient(key, client) == false) {
+        return;
+    }
 
     if (_callback != nullptr) {
-        if (_callback->onConnection(peer, status)) {
-            addClient(client);
-            server_details::read(*client.get());
+        if (_callback->onConnection(key, status) == false) {
+            removeClient(key);
         }
     }
 }
@@ -330,6 +364,7 @@ void Server::onConnection(void * server, int status)
 void Server::onClose(void * handle)
 {
     __tbag_debug("Server::onClose()");
+
     if (_callback != nullptr) {
         _callback->onClose();
     }
@@ -338,6 +373,7 @@ void Server::onClose(void * handle)
 void Server::onCloseClient(void * handle)
 {
     __tbag_debug_f("Server::onCloseClient({})", handle);
+
     if (_callback != nullptr) {
         _callback->onCloseClient(ClientKey(handle));
     }
@@ -346,6 +382,8 @@ void Server::onCloseClient(void * handle)
 
 void Server::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
 {
+    __tbag_debug_f("Server::onReadBufferAlloc(suggested_size:{})", suggested_size);
+
     // Realloc with read buffer.
     if (_read_buffer.size() < suggested_size) {
         _read_buffer.resize(suggested_size);
@@ -358,6 +396,8 @@ void Server::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
 
 void Server::onRead(void * client_stream, ssize_t nread, void const * buf)
 {
+    __tbag_debug_f("Server::onRead({})", client_stream);
+
     Code code = Code::FAILURE;
 
     if (nread == UV_EOF) {
@@ -372,17 +412,17 @@ void Server::onRead(void * client_stream, ssize_t nread, void const * buf)
 
         auto find_itr = _clients.find(from);
         if (find_itr == _clients.end()) {
-            __tbag_error_f("Server::onRead() Not found client ({})", client_stream);
+            __tbag_error_f("Server::onRead({}) Not found client.", client_stream);
             return;
         }
 
         ClientValue client = find_itr->second;
         if (static_cast<bool>(client) == false) {
-            __tbag_error_f("Server::onRead() Empty client ({})", client_stream);
+            __tbag_error_f("Server::onRead({}) Empty client.", client_stream);
             return;
         }
 
-        __tbag_debug_f("Server::onRead() name({})", client->getSocketName());
+        __tbag_debug_f("Server::onRead() client name: {}", client->getSocketName());
 
         _callback->onRead(from, code, uv_buf->base, static_cast<std::size_t>(nread));
     }
@@ -390,13 +430,20 @@ void Server::onRead(void * client_stream, ssize_t nread, void const * buf)
 
 void Server::onWrite(void * req, int status)
 {
+    __tbag_debug("Server::onWrite()");
+
     Code code = Code::FAILURE;
     if (status == 0) {
         code = Code::SUCCESS;
     }
 
     if (_callback != nullptr) {
-        _callback->onWrite(ClientKey(req), code);
+        if (req != nullptr) {
+            uv_write_t * write_request = static_cast<uv_write_t*>(req);
+            _callback->onWrite(ClientKey(write_request->handle), code);
+        } else {
+            __tbag_error("Server::onWrite() write request is nullptr error.");
+        }
     }
 }
 

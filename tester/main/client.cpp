@@ -28,74 +28,68 @@ struct EchoClientTester : public Client, public Client::EventCallback
 {
 public:
     inline static TBAG_CONSTEXPR char const * const getTestMessage() TBAG_NOEXCEPT
-    { return "Test echo message."; }
-
-private:
-    bool _result;
+    { return "THIS_IS_TEST_ECHO_MESSAGE"; }
 
 public:
-    EchoClientTester() : Client(this), _result(false)
+    EchoClientTester() : Client(this)
     { /* EMPTY. */ }
     virtual ~EchoClientTester()
     { /* EMPTY. */ }
 
 public:
-    inline bool getResult() const TBAG_NOEXCEPT
-    { return _result; }
-
-public:
-    virtual bool onConnect(int status) override
+    virtual void onConnect(int status) override
     {
-        std::cout.setf(std::ios_base::boolalpha);
-        std::cout << "- onConnect(" << (status == 0 ? true : false) << ")\n";
+        std::cout << "EchoClientTester::onConnect(" << (status == 0 ? true : false) << ")\n";
+
+        if (status != 0) {
+            std::cout << "Status error: " << status << ".\n";
+            return;
+        }
 
         std::string msg = getTestMessage();
-        std::cout << "[WRITE MESSAGE]\n";
-        this->write(&msg[0], msg.size());
+        std::cout << "[WRITE MESSAGE] " << msg << std::endl;
 
-        return true;
+        this->read();
+        this->write(&msg[0], msg.size());
     }
 
     virtual void onClose() override
     {
-        std::cout << "- onClose()\n";
+        std::cout << "EchoClientTester::onClose()\n";
     }
 
     virtual void onRead(Code code, char const * buffer, std::size_t size) override
     {
+        std::cout << "EchoClientTester::onRead() ";
         if (code == Code::SUCCESS) {
             std::string msg;
             msg.assign(buffer, buffer + size);
-            std::cout << "- onRead() success: " << msg << std::endl;
-
-            if (msg == std::string(getTestMessage())) {
-                _result = true;
-            }
-        } else if (code == Code::FAILURE) {
-            std::cerr << "- onRead() unknown error.\n";
+            std::cout << "Success: " << msg << std::endl;
+        } else if (code == Code::END_OF_FILE) {
+            std::cout << "End of file.\n";
         } else {
-            std::cout << "- onRead() End of file.\n";
+            std::cout << "Failure.\n";
         }
 
-        std::cout << "[CLOSE]\n";
         this->close();
     }
 
     virtual void onWrite(Code code) override
     {
-        if (code == Code::FAILURE) {
-            std::cerr << "- onWrite() unknown error.\n";
-
-            std::cout << "[CLOSE]\n";
-            this->close();
+        std::cout << "EchoClientTester::onWrite() ";
+        if (code == Code::SUCCESS) {
+            std::cout << "Success.\n";
         } else {
-            std::cout << "- onWrite() success.\n";
+            std::cout << "Failure.\n";
+            this->close();
         }
     }
 };
 
 int main_client(std::string const & ip, int port)
 {
+    std::cout.setf(std::ios_base::boolalpha);
+
     EchoClientTester client;
     if (client.run(ip, port)) {
         return EXIT_SUCCESS;

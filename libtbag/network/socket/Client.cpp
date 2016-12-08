@@ -206,6 +206,11 @@ void Client::close()
     client_details::close(_tcp);
 }
 
+bool Client::read()
+{
+    return client_details::read(_tcp);
+}
+
 bool Client::write(char const * buffer, std::size_t size)
 {
     return client_details::write(_write, _tcp, buffer, size);
@@ -213,13 +218,8 @@ bool Client::write(char const * buffer, std::size_t size)
 
 void Client::onConnect(void * req, int status)
 {
-    bool is_read_start = false;
     if (_callback != nullptr) {
-        is_read_start = _callback->onConnect(status);
-    }
-
-    if (is_read_start) {
-        client_details::read(_tcp);
+        _callback->onConnect(status);
     }
 }
 
