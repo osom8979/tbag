@@ -8,7 +8,6 @@
 #include <libtbag/network/socket/Server.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/loop/UvEventDispatcher.hpp>
-#include <libtbag/debug/UvError.hpp>
 
 #include <cstdlib>
 #include <cstring>

@@ -17,6 +17,15 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
+# include <cstdint>
+typedef intptr_t ssize_t;
+# define _SSIZE_T_
+# define _SSIZE_T_DEFINED
+#endif
+
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -25,6 +34,24 @@ namespace util {
 
 TBAG_API void initUv();
 TBAG_API char const * getUvType(void * handle);
+
+/**
+ * @remarks
+ *  Same this code:
+ *  @code
+ *    const char* uv_strerror(int err);
+ *  @endcode
+ */
+TBAG_API std::string getUvErrorString(int uv_error_code);
+
+/**
+ * @remarks
+ *  Same this code:
+ *  @code
+ *    const char* uv_err_name(int err);
+ *  @endcode
+ */
+TBAG_API std::string getUvErrorName(int uv_error_code);
 
 /**
  * Table of libuv handle types.

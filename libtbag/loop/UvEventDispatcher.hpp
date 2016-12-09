@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/util/UvUtils.hpp>
 #include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/container/Pointer.hpp>
 #include <libtbag/lock/RwLock.hpp>
@@ -23,12 +24,6 @@
 
 #include <unordered_map>
 #include <map>
-
-#if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
-typedef intptr_t ssize_t;
-# define _SSIZE_T_
-# define _SSIZE_T_DEFINED
-#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

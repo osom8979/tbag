@@ -50,6 +50,16 @@ char const * getUvType(void * handle)
 #undef __CASE_TYPE_NAME_RETURN
 }
 
+std::string getUvErrorString(int uv_error_code)
+{
+    return std::string(uv_strerror(uv_error_code));
+}
+
+std::string getUvErrorName(int uv_error_code)
+{
+    return std::string(uv_err_name(uv_error_code));
+}
+
 // ------------------------
 // UvHandle implementation.
 // ------------------------
