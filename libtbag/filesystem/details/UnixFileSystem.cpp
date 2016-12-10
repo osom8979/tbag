@@ -9,7 +9,6 @@
  */
 
 #include <libtbag/filesystem/details/UnixFileSystem.hpp>
-#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Type.hpp>
 
@@ -18,6 +17,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include <unicode/unistr.h>
 #include <uv.h>
 
 #ifndef _WIN_OR_UNIX

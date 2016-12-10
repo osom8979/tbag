@@ -1,6 +1,6 @@
 /**
  * @file   CommonFileSystem.hpp
- * @brief  CommonFileSystem class prototype.
+ * @brief  Common filesystem utilities.
  * @author zer0
  * @date   2016-12-04
  */

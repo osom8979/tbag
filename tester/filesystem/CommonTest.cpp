@@ -13,6 +13,7 @@
 
 using namespace libtbag;
 using namespace libtbag::filesystem;
+using namespace libtbag::filesystem::details;
 
 TEST(CommonTest, GetPathSeparator)
 {
@@ -103,5 +104,57 @@ TEST(CommonTest, createDefaultTempDir)
     ASSERT_TRUE(isDirectory(TEMP_DIR));
     ASSERT_TRUE(removeDirectory(TEMP_DIR));
     ASSERT_FALSE(isDirectory(TEMP_DIR));
+}
+
+TEST(CommonTest, isProhibitedNameWithUtf8)
+{
+    // Don't use u8 literal.
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+    ASSERT_FALSE(windows::isProhibitedNameWithUtf8(UTF8_SOURCE));
+    ASSERT_TRUE( windows::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_WINDOWS + UTF8_NA + UTF8_DA));
+    ASSERT_TRUE( windows::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_WINDOWS + UTF8_DA));
+    ASSERT_TRUE( windows::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_WINDOWS));
+    ASSERT_TRUE( windows::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_POSIX + UTF8_NA + UTF8_DA));
+    ASSERT_TRUE( windows::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
+    ASSERT_TRUE( windows::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
+
+    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(UTF8_SOURCE));
+    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_WINDOWS + UTF8_NA + UTF8_DA));
+    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_WINDOWS + UTF8_DA));
+    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_WINDOWS));
+    ASSERT_TRUE( unix::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_POSIX + UTF8_NA + UTF8_DA));
+    ASSERT_TRUE( unix::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
+    ASSERT_TRUE( unix::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
+
+    ASSERT_FALSE(isProhibitedNameWithUtf8(UTF8_SOURCE));
+}
+
+TEST(CommonTest, removeLastSeparatorWithUtf8)
+{
+    // Don't use u8 literal.
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE         = UTF8_GA + UTF8_NA + UTF8_DA;
+    std::string const UTF8_SOURCE_WINDOWS = UTF8_SOURCE + PATH_SEPARATOR_OF_WINDOWS + PATH_SEPARATOR_OF_WINDOWS;
+    std::string const UTF8_SOURCE_POSIX   = UTF8_SOURCE + PATH_SEPARATOR_OF_POSIX   + PATH_SEPARATOR_OF_POSIX;
+    std::string const UTF8_SOURCE_WINDOWS_POSIX = UTF8_SOURCE_WINDOWS + PATH_SEPARATOR_OF_POSIX;
+    std::string const UTF8_SOURCE_POSIX_WINDOWS = UTF8_SOURCE_POSIX + PATH_SEPARATOR_OF_WINDOWS;
+
+    ASSERT_EQ(UTF8_SOURCE, windows::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS));
+    ASSERT_EQ(UTF8_SOURCE, windows::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX));
+    ASSERT_EQ(UTF8_SOURCE, windows::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS_POSIX));
+    ASSERT_EQ(UTF8_SOURCE, windows::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX_WINDOWS));
+
+    ASSERT_EQ(UTF8_SOURCE_WINDOWS      , unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS));
+    ASSERT_EQ(UTF8_SOURCE              , unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX));
+    ASSERT_EQ(UTF8_SOURCE_WINDOWS      , unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS_POSIX));
+    ASSERT_EQ(UTF8_SOURCE_POSIX_WINDOWS, unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX_WINDOWS));
+
+    ASSERT_EQ(UTF8_SOURCE, removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX));
 }
 

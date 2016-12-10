@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <cassert>
 
+#include <unicode/unistr.h>
+
 #if defined(__PLATFORM_WINDOWS__)
 # include <Windows.h>
 # include <Shlobj.h>  // SHGetFolderPath

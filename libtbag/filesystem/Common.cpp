@@ -7,12 +7,92 @@
 
 #include <libtbag/filesystem/Common.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <cassert>
+
+#include <unicode/unistr.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace filesystem {
+
+// ================
+namespace details {
+
+template <typename Predicated>
+bool isProhibitedNameWithUtf8(std::string const utf8_path, Predicated predicated)
+{
+    if (utf8_path.empty()) {
+        return true;
+    }
+
+    icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_path.c_str()));
+    int32_t const PATH_LENGTH = path.length();
+
+    for (int32_t i = 0; i < PATH_LENGTH; ++i) {
+        if (predicated(path.charAt(i))) {
+            return true;
+        }
+    }
+    return false;
+}
+
+template <typename Predicated>
+std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, Predicated predicated)
+{
+    if (utf8_path.empty()) {
+        return std::string();
+    }
+
+    icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_path.c_str()));
+    int32_t const PATH_LENGTH = path.length();
+
+    if (PATH_LENGTH <= 0) {
+        assert(PATH_LENGTH == 0);
+        return std::string();
+    }
+
+    int32_t remove_last_of = 0;
+    UChar cursor;
+    for (int32_t i = 0; i < PATH_LENGTH; ++i) {
+        cursor = path.charAt(PATH_LENGTH - i - 1);
+        if (predicated(cursor)) {
+            ++remove_last_of;
+        } else {
+            break;
+        }
+    }
+
+    std::string result;
+    path.truncate(PATH_LENGTH - remove_last_of);
+    path.toUTF8String(result);
+    return result;
+}
+
+// @formatter:off
+namespace windows {
+
+bool isProhibitedNameWithUtf8(std::string const utf8_path)
+{ return details::isProhibitedNameWithUtf8(utf8_path, windows::isProhibitedChar<UChar>); }
+
+std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
+{ return details::removeLastSeparatorWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>); }
+
+} // namespace windows
+namespace unix {
+
+bool isProhibitedNameWithUtf8(std::string const utf8_path)
+{ return details::isProhibitedNameWithUtf8(utf8_path, unix::isProhibitedChar<UChar>); }
+
+std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
+{ return details::removeLastSeparatorWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>); }
+
+} // namespace unix
+// @formatter:on
+
+} // namespace details
+// ===================
 
 static int CREATE_TEMPDIR_RETRY_COUNT = 10;
 

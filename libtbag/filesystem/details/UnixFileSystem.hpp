@@ -3,6 +3,9 @@
  * @brief  UnixFileSystem helper methods.
  * @author zer0
  * @date   2016-12-02
+ *
+ * @remarks
+ *  ISO/IEC 9945 POSIX API.
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_UNIXFILESYSTEM_HPP__
@@ -15,6 +18,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 
 #include <string>
 #include <vector>
@@ -26,6 +30,25 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 namespace unix       {
+
+/**
+ * Characters prohibited in unix filename.
+ *
+ * @remarks
+ *  - 0x00
+ *  - '/'
+ */
+template <typename CharType>
+inline bool isProhibitedChar(CharType v) TBAG_NOEXCEPT
+{
+    return v == '\0' || v == '/';
+}
+
+template <typename CharType>
+inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
+{
+    return v == PATH_SEPARATOR_OF_POSIX;
+}
 
 TBAG_API std::string getTempDir();
 TBAG_API std::string getWorkDir();
