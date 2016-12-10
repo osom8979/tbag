@@ -434,7 +434,7 @@ std::size_t Path::size() const
 {
     std::ifstream f(getCanonicalString(), std::ios_base::ate | std::ios_base::binary);
     if (f.eof() == false && f.fail() == false) {
-        return f.tellg();
+        return static_cast<std::size_t>(f.tellg()/*std::streamoff*/);
     }
     return 0;
 }

@@ -138,7 +138,7 @@ void ThreadPool::runner()
 
             if (find_task) {
                 try {
-                    if (static_cast<bool>(current_task) && static_cast<bool>(current_task.get())) {
+                    if (static_cast<bool>(current_task) && static_cast<bool>(*current_task.get())) {
                         (*current_task.get())();
                     }
                 } catch (...) {

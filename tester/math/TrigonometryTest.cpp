@@ -27,7 +27,7 @@ TEST(TrigonometryTest, Default)
 
     float opposite   = 1; // a
     float adjacent   = 1; // b
-    float hypotenuse = MATH_CONSTANT_SQRT2; // h
+    float hypotenuse = static_cast<float>(MATH_CONSTANT_SQRT2); // h
 
     ASSERT_NEAR(MATH_CONSTANT_SQRT1_2, sinA(opposite, hypotenuse), 0.0001);
     ASSERT_NEAR(MATH_CONSTANT_SQRT1_2, cosA(adjacent, hypotenuse), 0.0001);

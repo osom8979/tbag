@@ -14,8 +14,8 @@ using namespace libtbag::tmp;
 
 TEST(BitTest, Max)
 {
-    uint8_t const max_8bit_unsigned = 0x80; // 0b10000000;
-    int8_t  const max_8bit_signed   = 0x80; // 0b10000000;
+    uint8_t const max_8bit_unsigned = (int8_t)0x80; // 0b10000000;
+    int8_t  const max_8bit_signed   = (int8_t)0x80; // 0b10000000;
 
     ASSERT_EQ(max_8bit_unsigned, BitFlag<uint8_t>::max());
     ASSERT_EQ(  max_8bit_signed, BitFlag< int8_t>::max());
@@ -23,19 +23,19 @@ TEST(BitTest, Max)
 
 TEST(BitTest, FindMax_Signed)
 {
-    int8_t const test1 = 0x41; // 0b01000001;
-    int8_t const test2 = 0xC0; // 0b11000000;
-    int8_t const test3 = 0x01; // 0b00000001;
-    int8_t const test4 = 0x80; // 0b10000000;
-    int8_t const test5 = 0x09; // 0b00001001;
-    int8_t const test6 = 0x00; // 0b00000000;
+    int8_t const test1 = (int8_t)0x41; // 0b01000001;
+    int8_t const test2 = (int8_t)0xC0; // 0b11000000;
+    int8_t const test3 = (int8_t)0x01; // 0b00000001;
+    int8_t const test4 = (int8_t)0x80; // 0b10000000;
+    int8_t const test5 = (int8_t)0x09; // 0b00001001;
+    int8_t const test6 = (int8_t)0x00; // 0b00000000;
 
-    int8_t const test1_result = 0x40; // 0b01000000;
-    int8_t const test2_result = 0x80; // 0b10000000;
-    int8_t const test3_result = 0x01; // 0b00000001;
-    int8_t const test4_result = 0x80; // 0b10000000;
-    int8_t const test5_result = 0x08; // 0b00001000;
-    int8_t const test6_result = 0x00; // 0b00000000;
+    int8_t const test1_result = (int8_t)0x40; // 0b01000000;
+    int8_t const test2_result = (int8_t)0x80; // 0b10000000;
+    int8_t const test3_result = (int8_t)0x01; // 0b00000001;
+    int8_t const test4_result = (int8_t)0x80; // 0b10000000;
+    int8_t const test5_result = (int8_t)0x08; // 0b00001000;
+    int8_t const test6_result = (int8_t)0x00; // 0b00000000;
 
     ASSERT_EQ(test1_result, BitFlag<int8_t>::findHighBit(test1));
     ASSERT_EQ(test2_result, BitFlag<int8_t>::findHighBit(test2));
@@ -47,19 +47,19 @@ TEST(BitTest, FindMax_Signed)
 
 TEST(BitTest, FindMax_Unsigned)
 {
-    uint8_t const test1 = 0x41; // 0b01000001;
-    uint8_t const test2 = 0xC0; // 0b11000000;
-    uint8_t const test3 = 0x01; // 0b00000001;
-    uint8_t const test4 = 0x80; // 0b10000000;
-    uint8_t const test5 = 0x09; // 0b00001001;
-    uint8_t const test6 = 0x00; // 0b00000000;
+    uint8_t const test1 = (int8_t)0x41; // 0b01000001;
+    uint8_t const test2 = (int8_t)0xC0; // 0b11000000;
+    uint8_t const test3 = (int8_t)0x01; // 0b00000001;
+    uint8_t const test4 = (int8_t)0x80; // 0b10000000;
+    uint8_t const test5 = (int8_t)0x09; // 0b00001001;
+    uint8_t const test6 = (int8_t)0x00; // 0b00000000;
 
-    uint8_t const test1_result = 0x40; // 0b01000000;
-    uint8_t const test2_result = 0x80; // 0b10000000;
-    uint8_t const test3_result = 0x01; // 0b00000001;
-    uint8_t const test4_result = 0x80; // 0b10000000;
-    uint8_t const test5_result = 0x08; // 0b00001000;
-    uint8_t const test6_result = 0x00; // 0b00000000;
+    uint8_t const test1_result = (int8_t)0x40; // 0b01000000;
+    uint8_t const test2_result = (int8_t)0x80; // 0b10000000;
+    uint8_t const test3_result = (int8_t)0x01; // 0b00000001;
+    uint8_t const test4_result = (int8_t)0x80; // 0b10000000;
+    uint8_t const test5_result = (int8_t)0x08; // 0b00001000;
+    uint8_t const test6_result = (int8_t)0x00; // 0b00000000;
 
     ASSERT_EQ(test1_result, BitFlag<uint8_t>::findHighBit(test1));
     ASSERT_EQ(test2_result, BitFlag<uint8_t>::findHighBit(test2));

@@ -9,6 +9,7 @@
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
+#include <cassert>
 #include <cstring>
 #include <mutex>
 
@@ -80,12 +81,18 @@ public:
 
 int getMillisec(std::chrono::system_clock::time_point const & time)
 {
-    std::chrono::system_clock::duration epoch = time.time_since_epoch();
-    epoch -= std::chrono::duration_cast<std::chrono::seconds>(epoch);
+    using clock    = std::chrono::system_clock;
+    using seconds  = std::chrono::seconds;
+    using millisec = std::chrono::milliseconds;
+
+    clock::duration epoch = time.time_since_epoch();
+    epoch -= std::chrono::duration_cast<seconds>(epoch);
 
     // It does not work on some platforms:
     // return static_cast<int>(epoch / std::chrono::milliseconds(1));
-    return std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    millisec::rep const MILLISECONDS = std::chrono::duration_cast<millisec>(epoch).count();
+    assert(0 <= COMPARE_AND(MILLISECONDS) < 1000);
+    return static_cast<int>(MILLISECONDS);
 }
 
 std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)

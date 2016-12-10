@@ -42,14 +42,14 @@ int main(int argc, char **argv)
         using Cmd  = libtbag::string::Commander;
         using Path = libtbag::filesystem::Path;
 
-        auto CMD_ARGUMENT_SERVER_LAMBDA = [&](libtbag::string::Arguments const & args){
+        auto const CMD_ARGUMENT_SERVER_LAMBDA = [&](libtbag::string::Arguments const & args){
             if (args.optString(0, &ip) && args.optInteger(1, &port)) {
                 mode = TestMode::SERVER;
             } else {
                 mode = TestMode::UNKNOWN_ERROR;
             }
         };
-        auto CMD_ARGUMENT_CLIENT_LAMBDA = [&](libtbag::string::Arguments const & args){
+        auto const CMD_ARGUMENT_CLIENT_LAMBDA = [&](libtbag::string::Arguments const & args){
             if (args.optString(0, &ip) && args.optInteger(1, &port)) {
                 mode = TestMode::CLIENT;
             } else {

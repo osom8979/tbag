@@ -89,7 +89,7 @@ public:
         value2_2 = "test&title2";
         value3_2 = 100;
         value4_2 = 50;
-        value5_2 = 55.555555;
+        value5_2 = 55.555555f;
 
         xml = std::string() + "<?xml version=\"1.0\"?>" + "<resource>"
               + "<property name=\"" + attribute1 + "\">" + value1 + "</property>"
@@ -190,7 +190,7 @@ TEST_F(ResourceFixtureTest, GetValue)
     ASSERT_FLOAT_EQ(value5_2, res.getFloat(attribute5));
     ASSERT_FLOAT_EQ(0.0, res.getFloat(attribute1));
 
-    float abs_error = 0.0001;
+    float abs_error = 0.0001f;
 
     ASSERT_NEAR(value5_2, res.getFloat(attribute5), abs_error);
     ASSERT_NEAR(     0.0, res.getFloat(attribute1), abs_error);
@@ -212,7 +212,7 @@ TEST_F(ResourceFixtureTest, Get)
     ASSERT_EQ(static_cast<unsigned       int>(value3_2), res.get(attribute3, static_cast<unsigned       int>(0)));
     ASSERT_EQ(static_cast<unsigned long long>(value3_2), res.get(attribute3, static_cast<unsigned long long>(0)));
 
-    float abs_error = 0.0001;
+    float abs_error = 0.0001f;
     ASSERT_NEAR(value5_2, res.get(attribute5, static_cast<      float>(0)), abs_error);
     ASSERT_NEAR(value5_2, res.get(attribute5, static_cast<     double>(0)), abs_error);
     ASSERT_NEAR(value5_2, res.get(attribute5, static_cast<long double>(0)), abs_error);

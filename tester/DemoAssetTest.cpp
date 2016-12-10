@@ -15,15 +15,13 @@ using namespace libtbag::res;
 
 TEST(DemoAssetTest, Exists)
 {
-    DemoAsset asset;
+    std::cout << "Tester/Asset directory: " << DemoAsset::get_tester_dir() << std::endl;
+    std::cout << "Tester/Image directory: " << DemoAsset::get_tester_dir_image() << std::endl;
 
-    std::cout << "Tester/Asset directory: " << asset.get_tester_dir() << std::endl;
-    std::cout << "Tester/Image directory: " << asset.get_tester_dir_image() << std::endl;
+    ASSERT_TRUE(DemoAsset::exists_tester_dir());
+    ASSERT_TRUE(DemoAsset::exists_tester_dir_image());
 
-    ASSERT_TRUE(asset.exists_tester_dir());
-    ASSERT_TRUE(asset.exists_tester_dir_image());
-
-    auto image_list = asset.scan_tester_dir_image();
-    ASSERT_EQ(1U, image_list.size());
+    auto const IMAGE_LIST = DemoAsset::scan_tester_dir_image();
+    ASSERT_EQ(1U, IMAGE_LIST.size());
 }
 

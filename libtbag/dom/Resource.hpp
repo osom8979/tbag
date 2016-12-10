@@ -92,8 +92,8 @@ public:
         Type convert = 0;
         try {
             convert = func(find_value->second);
-        } catch (std::invalid_argument & e) {
-            // e.what();
+        } catch (...) {
+            // (std::invalid_argument & e) { e.what(); }
             return false;
         }
 

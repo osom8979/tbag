@@ -34,47 +34,45 @@ public:
 
 TEST(AssetTest, Default)
 {
-    AssetDemo demo;
+    AssetDemo::get_root_res1();
+    AssetDemo::get_root_res2();
 
-    demo.get_root_res1();
-    demo.get_root_res2();
-
-    if (demo.exists_root_res1_sub1()) {
-        demo.remove_root_res1_sub1();
+    if (AssetDemo::exists_root_res1_sub1()) {
+        AssetDemo::remove_root_res1_sub1();
     }
-    if (demo.exists_root_res1_sub2()) {
-        demo.remove_root_res1_sub2();
+    if (AssetDemo::exists_root_res1_sub2()) {
+        AssetDemo::remove_root_res1_sub2();
     }
-    if (demo.exists_root_res1()) {
-        demo.remove_root_res1();
+    if (AssetDemo::exists_root_res1()) {
+        AssetDemo::remove_root_res1();
     }
-    if (demo.exists_root_res2()) {
-        demo.remove_root_res2();
+    if (AssetDemo::exists_root_res2()) {
+        AssetDemo::remove_root_res2();
     }
 
-    ASSERT_TRUE(demo.create_root_res1());
-    ASSERT_TRUE(demo.create_root_res2());
-    ASSERT_TRUE(demo.create_root_res1_sub1());
-    ASSERT_TRUE(demo.create_root_res1_sub2());
+    ASSERT_TRUE(AssetDemo::create_root_res1());
+    ASSERT_TRUE(AssetDemo::create_root_res2());
+    ASSERT_TRUE(AssetDemo::create_root_res1_sub1());
+    ASSERT_TRUE(AssetDemo::create_root_res1_sub2());
 
-    ASSERT_TRUE(demo.exists_root_res1_sub1());
-    ASSERT_TRUE(demo.exists_root_res1_sub2());
-    ASSERT_TRUE(demo.exists_root_res1());
-    ASSERT_TRUE(demo.exists_root_res2());
+    ASSERT_TRUE(AssetDemo::exists_root_res1_sub1());
+    ASSERT_TRUE(AssetDemo::exists_root_res1_sub2());
+    ASSERT_TRUE(AssetDemo::exists_root_res1());
+    ASSERT_TRUE(AssetDemo::exists_root_res2());
 
-    auto list1 = demo.scan_root_res1();
-    auto list2 = demo.scan_root_res2();
+    auto list1 = AssetDemo::scan_root_res1();
+    auto list2 = AssetDemo::scan_root_res2();
     ASSERT_EQ(2U, list1.size());
     ASSERT_EQ(0U, list2.size());
 
-    ASSERT_TRUE(demo.remove_root_res1_sub1());
-    ASSERT_TRUE(demo.remove_root_res1_sub2());
-    ASSERT_TRUE(demo.remove_root_res1());
-    ASSERT_TRUE(demo.remove_root_res2());
+    ASSERT_TRUE(AssetDemo::remove_root_res1_sub1());
+    ASSERT_TRUE(AssetDemo::remove_root_res1_sub2());
+    ASSERT_TRUE(AssetDemo::remove_root_res1());
+    ASSERT_TRUE(AssetDemo::remove_root_res2());
 
-    ASSERT_FALSE(demo.exists_root_res1_sub1());
-    ASSERT_FALSE(demo.exists_root_res1_sub2());
-    ASSERT_FALSE(demo.exists_root_res1());
-    ASSERT_FALSE(demo.exists_root_res2());
+    ASSERT_FALSE(AssetDemo::exists_root_res1_sub1());
+    ASSERT_FALSE(AssetDemo::exists_root_res1_sub2());
+    ASSERT_FALSE(AssetDemo::exists_root_res1());
+    ASSERT_FALSE(AssetDemo::exists_root_res2());
 }
 
