@@ -99,6 +99,7 @@ TEST(CommonTest, Default)
 TEST(CommonTest, createDefaultTempDir)
 {
     std::string const TEMP_DIR = createDefaultTempDir();
+    std::cout << "Create default temp directory: " << TEMP_DIR << std::endl;
     ASSERT_TRUE(isDirectory(TEMP_DIR));
     ASSERT_TRUE(removeDirectory(TEMP_DIR));
     ASSERT_FALSE(isDirectory(TEMP_DIR));
