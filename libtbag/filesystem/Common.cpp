@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/Common.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -13,17 +14,38 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-static std::size_t CREATE_TEMPDIR_RETRY_COUNT = 65535u;
-static char const * const CREATE_TEMPDIR_TEMPLATE = "XXXXXX";
+static int CREATE_TEMPDIR_RETRY_COUNT = 10;
 
-std::string createTempDir(std::string const & prefix, std::string const & suffix)
+std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size)
 {
-    return "";
+    std::string buffer;
+    buffer.resize(unique_size);
+
+    std::string cursor;
+    for (int retry = 0; CREATE_TEMPDIR_RETRY_COUNT; ++retry) {
+        string::createRandomString(&buffer[0], buffer.size());
+        cursor = prefix + buffer + suffix;
+
+        if (isDirectory(cursor) == false && createDirectory(cursor)) {
+            return cursor;
+        }
+    }
+
+    return std::string();
 }
 
 std::string createDefaultTempDir()
 {
-    return "";
+    std::string temp_dir = getTempDir();
+    if (isDirectory(temp_dir) == false) {
+        return std::string();
+    }
+
+    if (temp_dir[temp_dir.size() - 1] != PATH_SEPARATOR) {
+        // The operations of UTF-8 and ASCII are the same.
+        temp_dir += PATH_SEPARATOR;
+    }
+    return createTempDir(temp_dir, TEMP_DIRECTORY_SUFFIX);
 }
 
 bool removeAll(std::string const & path)

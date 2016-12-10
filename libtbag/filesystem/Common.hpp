@@ -28,9 +28,9 @@
 #include <vector>
 
 #if defined(__PLATFORM_WINDOWS__)
-namespace __imp = ::libtbag::filesystem::details::windows;
+namespace __impl = ::libtbag::filesystem::details::windows;
 #else
-namespace __imp = ::libtbag::filesystem::details::unix;
+namespace __impl = ::libtbag::filesystem::details::unix;
 #endif
 
 // -------------------
@@ -40,9 +40,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 
 using namespace ::libtbag::filesystem::details;
-using namespace __imp;
+using namespace __impl;
 
-TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix);
+TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
 TBAG_API std::string createDefaultTempDir();
 
 TBAG_API bool removeAll(std::string const & path);

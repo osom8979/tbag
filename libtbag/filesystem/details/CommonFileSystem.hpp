@@ -56,6 +56,12 @@ char const PATH_SPLITTER = PATH_SPLITTER_OF_WINDOWS;
 char const PATH_SPLITTER = PATH_SPLITTER_OF_POSIX;
 #endif
 
+char const * const CURRENT_DIRECTORY_SHORTCUT =  ".";
+char const * const  PARENT_DIRECTORY_SHORTCUT = "..";
+char const * const    HOME_DIRECTORY_SHORTCUT =  "~";
+
+char const * const TEMP_DIRECTORY_SUFFIX = ".temp";
+
 } // namespace details
 } // namespace filesystem
 
