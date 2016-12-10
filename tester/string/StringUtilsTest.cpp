@@ -9,6 +9,9 @@
 #include <gtest/gtest.h>
 #include <libtbag/string/StringUtils.hpp>
 
+#include <cctype>
+#include <algorithm>
+
 using namespace libtbag;
 using namespace libtbag::string;
 
@@ -139,5 +142,19 @@ TEST(StringsTest, Trim)
     ASSERT_STREQ(    "T", trim(t4).c_str());
     ASSERT_STREQ("TE ST", trim(t5).c_str());
     ASSERT_STREQ(     "", trim(t6).c_str());
+}
+
+TEST(StringsTest, createRandomString)
+{
+    const std::size_t BUFFER_SIZE = 5;
+    const std::size_t TEST_COUNT  = 100;
+
+    std::string buffer;
+    buffer.resize(BUFFER_SIZE);
+
+    for (std::size_t i = 0; i < TEST_COUNT; ++i) {
+        ASSERT_TRUE(createRandomString(&buffer[0], BUFFER_SIZE));
+        ASSERT_TRUE(std::all_of(buffer.begin(), buffer.end(), [](char & v)->bool{return ::isdigit(v) || ::isalpha(v);}));
+    }
 }
 

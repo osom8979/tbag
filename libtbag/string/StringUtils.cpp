@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/string/StringUtils.hpp>
+#include <random>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -119,6 +120,24 @@ std::string trimRight(std::string const & str)
 std::string trim(std::string const & str)
 {
     return trimRight(trimLeft(str));
+}
+
+bool createRandomString(char * buffer, std::size_t size)
+{
+    static const char STRING_TEMPLATE[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static const std::size_t MIN = 0;
+    static const std::size_t MAX = sizeof(STRING_TEMPLATE) / sizeof(STRING_TEMPLATE[0]) - 1/*NULL CHAR*/ - 1/*SIZE TO INDEX*/;
+
+    std::random_device device;
+    std::mt19937 engine(device());
+    std::uniform_int_distribution<std::size_t> distribution(MIN, MAX);
+
+    std::size_t cursor = 0;
+    for (std::size_t i = 0; i < size; ++i) {
+        buffer[i] = STRING_TEMPLATE[distribution(engine)];
+    }
+
+    return true;
 }
 
 } // namespace string
