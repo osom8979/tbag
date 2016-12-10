@@ -65,6 +65,32 @@ TEST(StringsTest, SplitTokens)
     ASSERT_EQ(temp2, path_set[1]);
 }
 
+TEST(StringsTest, splitUtf8Tokens)
+{
+    // Don't use u8 literal.
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가.
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나.
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다.
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+    std::vector<std::string> tokens;
+
+    // 1st.
+    tokens = splitUtf8Tokens(UTF8_SOURCE, UTF8_NA);
+    ASSERT_EQ(2U, tokens.size());
+    ASSERT_EQ(UTF8_GA, tokens[0]);
+    ASSERT_EQ(UTF8_DA, tokens[1]);
+
+    // 2nd.
+    tokens = splitUtf8Tokens(UTF8_SOURCE, UTF8_GA);
+    ASSERT_EQ(1U, tokens.size());
+    ASSERT_EQ(UTF8_NA + UTF8_DA, tokens[0]);
+
+    // 3rd.
+    tokens = splitUtf8Tokens(UTF8_SOURCE, UTF8_DA);
+    ASSERT_EQ(1U, tokens.size());
+    ASSERT_EQ(UTF8_GA + UTF8_NA, tokens[0]);
+}
+
 TEST(StringsTest, ConvertStringWithFloatingPoint)
 {
     std::string result = convertStringWithFloatingPoint(10.5542, 2);

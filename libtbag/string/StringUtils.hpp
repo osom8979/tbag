@@ -83,6 +83,8 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
  */
 TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
 
+TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter);
+
 /**
  * Thread ID to string.
  */

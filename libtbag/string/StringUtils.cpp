@@ -8,6 +8,7 @@
 
 #include <libtbag/string/StringUtils.hpp>
 #include <random>
+#include <unicode/unistr.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -27,7 +28,6 @@ std::vector<std::string> splitTokens(std::string const & source, std::string con
     std::size_t start = 0;
     std::size_t end   = source.find(delimiter);
 
-
     while (end != std::string::npos) {
         token = source.substr(start, end - start);
         if (token.empty() == false) {
@@ -43,6 +43,47 @@ std::vector<std::string> splitTokens(std::string const & source, std::string con
     token = source.substr(start, end);
     if (token.empty() == false) {
         result.push_back(token);
+    }
+
+    return result;
+}
+
+std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter)
+{
+    if (utf8_source.empty() || utf8_delimiter.empty()) {
+        return std::vector<std::string>();
+    }
+
+    icu::UnicodeString source    = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_source.c_str()));
+    icu::UnicodeString delimiter = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_delimiter.c_str()));
+
+    std::vector<std::string> result;
+    icu::UnicodeString token;
+    std::string utf8_token;
+
+    int32_t const UNICODE_NPOS = -1;
+    int32_t start = 0;
+    int32_t end   = source.indexOf(delimiter);
+
+    while (end != UNICODE_NPOS) {
+        token = source.tempSubString(start, end - start);
+        if (token.isEmpty() == false) {
+            utf8_token.clear();
+            token.toUTF8String(utf8_token);
+            result.push_back(utf8_token);
+        }
+
+        // Calculate next token index.
+        start = end + delimiter.length();
+        end   = source.indexOf(delimiter, start);
+    }
+
+    // Last token.
+    token = source.tempSubString(start);
+    if (token.isEmpty() == false) {
+        utf8_token.clear();
+        token.toUTF8String(utf8_token);
+        result.push_back(utf8_token);
     }
 
     return result;

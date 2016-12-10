@@ -14,6 +14,9 @@ using namespace libtbag::locale;
 TEST(ConvertTest, Default)
 {
     // TEST STRING: "가나다"
+    // 가="\xea\xb0\x80"
+    // 나="\xeb\x82\x98"
+    // 다="\xeb\x8b\xa4"
     std::string utf8_string = "\xea\xb0\x80\xeb\x82\x98\xeb\x8b\xa4"; // Don't use u8 literal.
     std::string cp949_string = "\xb0\xa1\xb3\xaa\xb4\xd9";
 
