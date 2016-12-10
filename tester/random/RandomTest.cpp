@@ -1,14 +1,16 @@
 /**
  * @file   RandomTest.cpp
- * @brief  Random class tester.
+ * @brief  Random utilities tester.
  * @author zer0
  * @date   2016-04-07
+ * @date   2016-12-10 (Move package: libtbag -> libtbag/random)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/Random.hpp>
+#include <libtbag/random/Random.hpp>
 
 using namespace libtbag;
+using namespace libtbag::random;
 
 TEST(RandomTest, Gen)
 {
@@ -18,7 +20,7 @@ TEST(RandomTest, Gen)
     int test_count = 200;
 
     for (int i = 0; i < test_count; ++i) {
-        current = Random::gen(min, max);
+        current = random::gen(min, max);
         ASSERT_LE(min, current);
         ASSERT_GE(max, current);
     }
