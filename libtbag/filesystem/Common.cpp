@@ -13,6 +13,19 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
+static std::size_t CREATE_TEMPDIR_RETRY_COUNT = 65535u;
+static char const * const CREATE_TEMPDIR_TEMPLATE = "XXXXXX";
+
+std::string createTempDir(std::string const & prefix, std::string const & suffix)
+{
+    return "";
+}
+
+std::string createDefaultTempDir()
+{
+    return "";
+}
+
 bool removeAll(std::string const & path)
 {
     if (isDirectory(path)) {
