@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <clocale>
+#include <algorithm>
 
 #include <unicode/uloc.h>
 
@@ -33,7 +34,7 @@ char * setLocale(char * name)
     return setlocale(LC_ALL, name);
 }
 
-char * getLocaleName()
+char * getGlobalLocaleName()
 {
     // Win32: GetSystemDefaultLocaleName
     return setlocale(LC_ALL, NULL);
@@ -101,6 +102,20 @@ std::string getModifier(std::string const & name)
         return std::string();
     }
     return name.substr(i.modifier + 1);
+}
+
+// @formatter:off
+std::string getLanguage(std::locale const & locale) { return getLanguage(locale.name()); }
+std::string  getCountry(std::locale const & locale) { return  getCountry(locale.name()); }
+std::string getEncoding(std::locale const & locale) { return getEncoding(locale.name()); }
+std::string getModifier(std::locale const & locale) { return getModifier(locale.name()); }
+// @formatter:on
+
+bool isUtf8Encoding(std::locale const & locale)
+{
+    std::string encoding = getEncoding(locale.name());
+    std::transform(encoding.begin(), encoding.end(), encoding.begin(), ::tolower);
+    return (encoding == "65001" || encoding == "cp65001" || encoding == "utf8" || encoding == "utf-8");
 }
 
 namespace icu {

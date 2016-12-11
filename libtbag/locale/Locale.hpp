@@ -23,6 +23,7 @@
 #include <libtbag/predef.hpp>
 
 #include <string>
+#include <locale>
 #include <vector>
 
 // -------------------
@@ -34,7 +35,7 @@ namespace locale {
 TBAG_API char * setMinimalCLocale();
 TBAG_API char * setSystemDefaultLocale();
 TBAG_API char * setLocale(char * name);
-TBAG_API char * getLocaleName();
+TBAG_API char * getGlobalLocaleName();
 
 char const LOCALE_COUNTRY  = '_';
 char const LOCALE_ENCODING = '.';
@@ -47,11 +48,19 @@ struct LocaleNameIndex
     std::size_t modifier; ///< "@"
 };
 
-LocaleNameIndex getLocaleIndex(std::string const & name);
-std::string getLanguage(std::string const & name); // ISO-639
-std::string  getCountry(std::string const & name); // ISO-3199
-std::string getEncoding(std::string const & name);
-std::string getModifier(std::string const & name);
+TBAG_API LocaleNameIndex getLocaleIndex(std::string const & name);
+
+TBAG_API std::string getLanguage(std::string const & name);
+TBAG_API std::string  getCountry(std::string const & name);
+TBAG_API std::string getEncoding(std::string const & name);
+TBAG_API std::string getModifier(std::string const & name);
+
+TBAG_API std::string getLanguage(std::locale const & locale);
+TBAG_API std::string  getCountry(std::locale const & locale);
+TBAG_API std::string getEncoding(std::locale const & locale);
+TBAG_API std::string getModifier(std::locale const & locale);
+
+TBAG_API bool isUtf8Encoding(std::locale const & locale);
 
 namespace icu {
 TBAG_API std::string getDefaultLocaleName();
