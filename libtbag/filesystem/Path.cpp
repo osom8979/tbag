@@ -7,7 +7,10 @@
 
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/Common.hpp>
+#include <libtbag/locale/Locale.hpp>
+#include <libtbag/locale/Convert.hpp>
 
+#include <algorithm>
 #include <fstream>
 
 // -------------------
@@ -16,7 +19,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-Path::Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<std::string>::value)
+Path::Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<std::string>::value) : _path()
 {
     // EMPTY.
 }
@@ -271,11 +274,10 @@ Path::operator char const * () const
 
 std::string Path::getParentString() const
 {
-    if (isAbsoluteWithUtf8(_path)) {
+    if (isAbsolute()) {
         return removeLastNodeWithUtf8(_path);
-    } else {
-        return appendParentWithUtf8(_path);
     }
+    return appendParentWithUtf8(_path);
 }
 
 Path Path::getParent() const
@@ -300,7 +302,7 @@ std::vector<std::string> Path::splitNodesWithCanonical() const
     if (isAbsolute() == true) {
         itr = nodes.begin();
     } else {
-        if (nodes.size() >= 1 && nodes.at(0) == "~") {
+        if (nodes.size() >= 1 && nodes.at(0) == HOME_DIRECTORY_SHORTCUT) {
             result = Path(getHomeDir()).splitNodes();
             itr = nodes.begin() + 1;
         } else {
@@ -310,9 +312,9 @@ std::vector<std::string> Path::splitNodesWithCanonical() const
     }
 
     for (; itr != end; ++itr) {
-        if (*itr == ".") {
+        if (*itr == CURRENT_DIRECTORY_SHORTCUT) {
             // skip.
-        } else if (*itr == "..") {
+        } else if (*itr == PARENT_DIRECTORY_SHORTCUT) {
             result.pop_back();
         } else {
             result.push_back(*itr);
@@ -331,41 +333,54 @@ std::string Path::getName() const
     return *nodes.rbegin();
 }
 
+template <typename Predicated>
+inline auto fromUtf8(std::string const & path, Predicated predicated) -> decltype(predicated(path))
+{
+    std::locale const NATIVE_LOCALE = std::locale(locale::getGlobalLocaleName());
+    if (locale::isUtf8Encoding(NATIVE_LOCALE) == false) {
+        std::string native_path;
+        if (locale::convertFromUtf8(path, locale::getEncoding(NATIVE_LOCALE), native_path)) {
+            return predicated(native_path);
+        }
+    }
+    return predicated(path);
+}
+
 bool Path::exists() const
 {
-    return libtbag::filesystem::exists(_path);
+    return fromUtf8(_path, libtbag::filesystem::exists);
 }
 
 bool Path::isExecutable() const
 {
-    return libtbag::filesystem::isExecutable(_path);
+    return fromUtf8(_path, libtbag::filesystem::isExecutable);
 }
 
 bool Path::isWritable() const
 {
-    return libtbag::filesystem::isWritable(_path);
+    return fromUtf8(_path, libtbag::filesystem::isWritable);
 }
 
 bool Path::isReadable() const
 {
-    return libtbag::filesystem::isReadable(_path);
+    return fromUtf8(_path, libtbag::filesystem::isReadable);
 }
 
 bool Path::isRegularFile() const
 {
-    return libtbag::filesystem::isRegularFile(_path);
+    return fromUtf8(_path, libtbag::filesystem::isRegularFile);
 }
 
 bool Path::isDirectory() const
 {
-    return libtbag::filesystem::isDirectory(_path);
+    return fromUtf8(_path, libtbag::filesystem::isDirectory);
 }
 
 bool Path::createDir() const
 {
     auto parent = getParent();
     if (parent.isDirectory() && parent.isWritable() && exists() == false) {
-        return libtbag::filesystem::createDirectory(_path);
+        return fromUtf8(_path, libtbag::filesystem::createDirectory);
     }
     return false;
 }
@@ -396,7 +411,7 @@ bool Path::remove() const
 bool Path::removeFile() const
 {
     if (isRegularFile() && isWritable()) {
-        return libtbag::filesystem::removeFile(_path);
+        return fromUtf8(_path, libtbag::filesystem::removeFile);
     }
     return false;
 }
@@ -404,31 +419,20 @@ bool Path::removeFile() const
 bool Path::removeDir() const
 {
     if (isDirectory() && isWritable()) {
-        return libtbag::filesystem::removeDirectory(_path);
+        return fromUtf8(_path, libtbag::filesystem::removeDirectory);
     }
     return false;
 }
 
 bool Path::removeDirWithRecursive() const
 {
-    bool all_success = true;
-    for (auto & path : scanDir()) {
-        if (path.isDirectory()) {
-            all_success &= path.removeDirWithRecursive();
-        } else if (path.isRegularFile()) {
-            all_success &= path.removeFile();
-        } else {
-            all_success = false;
-        }
-    }
-
-    return all_success & remove();
+    return fromUtf8(_path, libtbag::filesystem::removeAll);
 }
 
 std::vector<Path> Path::scanDir() const
 {
     std::vector<Path> result;
-    for (auto & path : libtbag::filesystem::scanDir(_path)) {
+    for (auto & path : fromUtf8(_path, libtbag::filesystem::scanDir)) {
         result.push_back(Path(_path) / path);
     }
     return result;
@@ -440,27 +444,42 @@ std::size_t Path::size() const
     if (f.eof() == false && f.fail() == false) {
         return static_cast<std::size_t>(f.tellg()/*std::streamoff*/);
     }
-    return 0;
+    return 0U;
+}
+
+template <typename Predicated>
+inline auto toUtf8(Predicated predicated) -> decltype(predicated())
+{
+    std::locale const NATIVE_LOCALE = std::locale(locale::getGlobalLocaleName());
+    std::string native_path = predicated();
+
+    if (locale::isUtf8Encoding(NATIVE_LOCALE) == false) {
+        std::string utf8_path;
+        if (locale::convertToUtf8(native_path, locale::getEncoding(NATIVE_LOCALE), utf8_path)) {
+            return utf8_path;
+        }
+    }
+    return native_path;
 }
 
 Path Path::getWorkDir()
 {
-    return Path(libtbag::filesystem::getWorkDir());
+    return Path(toUtf8(libtbag::filesystem::getWorkDir));
 }
 
 Path Path::getHomeDir()
 {
-    return Path(libtbag::filesystem::getHomeDir());
+    return Path(toUtf8(libtbag::filesystem::getHomeDir));
 }
 
 Path Path::getExePath()
 {
-    return Path(libtbag::filesystem::getExePath());
+    return Path(toUtf8(libtbag::filesystem::getExePath));
 }
 
 Path Path::getExeDir()
 {
-    return Path(libtbag::filesystem::getExePath()).getParent();
+    return Path(removeLastNodeWithUtf8(toUtf8(libtbag::filesystem::getExePath)));
 }
 
 } // namespace filesystem

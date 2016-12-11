@@ -269,12 +269,17 @@ std::string getRealPath(std::string const & path)
     return result;
 }
 
-bool createDirectory(std::string const & path, int mode)
+bool createDirectoryEx(std::string const & path, int mode)
 {
     uv_fs_t request = {0,};
     int const ERROR_CODE = uv_fs_mkdir(nullptr, &request, path.c_str(), mode, nullptr);
     uv_fs_req_cleanup(&request);
     return ERROR_CODE == 0;
+}
+
+bool createDirectory(std::string const & path)
+{
+    return createDirectoryEx(path, 0755);
 }
 
 bool removeDirectory(std::string const & path)
