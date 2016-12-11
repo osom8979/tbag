@@ -48,6 +48,9 @@ TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_
 TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
 TBAG_API std::string getNativeWithUtf8(std::string const & utf8_path);
 TBAG_API std::string getGenericWithUtf8(std::string const & utf8_path);
+TBAG_API std::string getRootDirWithUtf8(std::string const & utf8_path);
+TBAG_API bool isAbsoluteWithUtf8(std::string const & utf8_path);
+TBAG_API bool isRelativeWithUtf8(std::string const & utf8_path);
 } // namespace windows
 
 namespace unix {
@@ -57,6 +60,9 @@ TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_
 TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
 TBAG_API std::string getNativeWithUtf8(std::string const & utf8_path);
 TBAG_API std::string getGenericWithUtf8(std::string const & utf8_path);
+TBAG_API std::string getRootDirWithUtf8(std::string const & utf8_path);
+TBAG_API bool isAbsoluteWithUtf8(std::string const & utf8_path);
+TBAG_API bool isRelativeWithUtf8(std::string const & utf8_path);
 } // namespace unix
 } // namespace details
 // @formatter:on

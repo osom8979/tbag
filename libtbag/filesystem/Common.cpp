@@ -10,6 +10,7 @@
 #include <cassert>
 
 #include <unicode/unistr.h>
+#include <unicode/uchar.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -124,6 +125,33 @@ std::string getNativeWithUtf8(std::string const & utf8_path)
 std::string getGenericWithUtf8(std::string const & utf8_path)
 { return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path)); }
 
+std::string getRootDirWithUtf8(std::string const & utf8_path)
+{
+    if (utf8_path.empty()) {
+        return std::string();
+    }
+
+    icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_path.c_str()));
+    int32_t const PATH_LENGTH = path.length();
+
+    if (path.length() < 2 || u_isalpha(path.charAt(0)) == false || path.charAt(1) != ':') {
+        return std::string();
+    }
+
+    icu::UnicodeString buffer = path.tempSubString(0, 2);
+    assert(buffer.length() == 2);
+
+    std::string result;
+    buffer.toUTF8String(result);
+    return result;
+}
+
+bool isAbsoluteWithUtf8(std::string const & utf8_path)
+{ return !getRootDirWithUtf8(utf8_path).empty(); }
+
+bool isRelativeWithUtf8(std::string const & utf8_path)
+{ return !isAbsoluteWithUtf8(utf8_path); }
+
 } // namespace windows
 namespace unix {
 
@@ -144,6 +172,20 @@ std::string getNativeWithUtf8(std::string const & utf8_path)
 
 std::string getGenericWithUtf8(std::string const & utf8_path)
 { return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path)); }
+
+std::string getRootDirWithUtf8(std::string const & utf8_path)
+{
+    if (utf8_path.size() < 1 || utf8_path[0] != PATH_SEPARATOR_OF_POSIX) {
+        return std::string();
+    }
+    return std::string() + PATH_SEPARATOR_OF_POSIX;
+}
+
+bool isAbsoluteWithUtf8(std::string const & utf8_path)
+{ return !getRootDirWithUtf8(utf8_path).empty(); }
+
+bool isRelativeWithUtf8(std::string const & utf8_path)
+{ return !isAbsoluteWithUtf8(utf8_path); }
 
 } // namespace unix
 // @formatter:on

@@ -201,3 +201,62 @@ TEST(CommonTest, getNativeWithUtf8)
     ASSERT_EQ(UTF8_SOURCE, getGenericWithUtf8(UTF8_SOURCE));
 }
 
+TEST(CommonTest, getRootDirWithUtf8)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+    std::string temp;
+    std::string result_windows;
+    std::string result_posix;
+
+    temp = "/" + UTF8_SOURCE;
+    result_windows = "";
+    result_posix   = "/";
+    ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_FALSE(windows::isAbsoluteWithUtf8(temp));
+    ASSERT_TRUE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_TRUE(windows::isRelativeWithUtf8(temp));
+    ASSERT_FALSE(unix::isRelativeWithUtf8(temp));
+
+    temp = "";
+    result_windows = "";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_FALSE(windows::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_TRUE(windows::isRelativeWithUtf8(temp));
+    ASSERT_TRUE(unix::isRelativeWithUtf8(temp));
+
+    temp = "D:\\" + UTF8_SOURCE + "\\";
+    result_windows = "D:";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_TRUE(windows::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(windows::isRelativeWithUtf8(temp));
+    ASSERT_TRUE(unix::isRelativeWithUtf8(temp));
+
+    temp = "z:\\";
+    result_windows = "z:";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_TRUE(windows::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(windows::isRelativeWithUtf8(temp));
+    ASSERT_TRUE(unix::isRelativeWithUtf8(temp));
+
+    temp = UTF8_SOURCE + "/";
+    ASSERT_EQ(std::string(""), windows::getRootDirWithUtf8(temp));
+    ASSERT_EQ(std::string(""), unix::getRootDirWithUtf8(temp));
+    ASSERT_EQ(std::string(""), getRootDirWithUtf8(temp));
+    ASSERT_FALSE(isAbsoluteWithUtf8(temp));
+    ASSERT_TRUE(isRelativeWithUtf8(temp));
+}
+
