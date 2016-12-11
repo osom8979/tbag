@@ -364,3 +364,66 @@ TEST(CommonTest, removeLastNodeWithUtf8_for_Unix)
     ASSERT_EQ(TEMP6, unix::removeLastNodeWithUtf8(TEMP5));
 }
 
+TEST(CommonTest, splitNodesWithUtf8)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+    std::string const TEMP = "../" + UTF8_SOURCE + "//";
+    std::string const RESULT0 = "..";
+    std::string const RESULT1 = UTF8_SOURCE;
+
+    auto nodes = splitNodesWithUtf8(TEMP);
+    ASSERT_EQ(2U, nodes.size());
+    ASSERT_EQ(RESULT0, nodes[0]);
+    ASSERT_EQ(RESULT1, nodes[1]);
+}
+
+TEST(CommonTest, splitNodesWithUtf8_for_Windows)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+
+    std::string const TEMP0   = "D:/" + UTF8_GA + "\\//\\/.///..//" + UTF8_NA + "\\/";
+    std::string const RESULT0 = "D:";
+    std::string const RESULT1 = UTF8_GA;
+    std::string const RESULT2 = ".";
+    std::string const RESULT3 = "..";
+    std::string const RESULT4 = UTF8_NA;
+
+    auto nodes = windows::splitNodesWithUtf8(TEMP0);
+    ASSERT_EQ(5U, nodes.size());
+    ASSERT_EQ(RESULT0, nodes[0]);
+    ASSERT_EQ(RESULT1, nodes[1]);
+    ASSERT_EQ(RESULT2, nodes[2]);
+    ASSERT_EQ(RESULT3, nodes[3]);
+    ASSERT_EQ(RESULT4, nodes[4]);
+}
+
+TEST(CommonTest, splitNodesWithUtf8_for_Unix)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+
+    std::string const TEMP0 = "/" + UTF8_GA + "\\//\\/.///..//" + UTF8_NA + "\\/";
+    std::string const RESULT0 = "/";
+    std::string const RESULT1 = UTF8_GA + "\\";
+    std::string const RESULT2 = "\\";
+    std::string const RESULT3 = ".";
+    std::string const RESULT4 = "..";
+    std::string const RESULT5 = UTF8_NA + "\\";
+
+    auto nodes = unix::splitNodesWithUtf8(TEMP0);
+    ASSERT_EQ(6U, nodes.size());
+    ASSERT_EQ(RESULT0, nodes[0]);
+    ASSERT_EQ(RESULT1, nodes[1]);
+    ASSERT_EQ(RESULT2, nodes[2]);
+    ASSERT_EQ(RESULT3, nodes[3]);
+    ASSERT_EQ(RESULT4, nodes[4]);
+    ASSERT_EQ(RESULT5, nodes[5]);
+}
+

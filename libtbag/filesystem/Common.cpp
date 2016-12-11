@@ -183,6 +183,15 @@ bool isRelativeWithUtf8(std::string const & utf8_path)
 std::string removeLastNodeWithUtf8(std::string const & utf8_path)
 { return details::removeLastNodeWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>); }
 
+std::string appendParentWithUtf8(std::string const & path)
+{ return path + PATH_SEPARATOR_OF_WINDOWS + PARENT_DIRECTORY_SHORTCUT; }
+
+std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
+{
+    std::string const UTF8_DELIMITER = std::string() + PATH_SEPARATOR_OF_WINDOWS;
+    return string::splitUtf8Tokens(removeDuplicateSeparatorsWithUtf8(utf8_path), UTF8_DELIMITER);
+}
+
 } // namespace windows
 namespace unix {
 
@@ -220,6 +229,24 @@ bool isRelativeWithUtf8(std::string const & utf8_path)
 
 std::string removeLastNodeWithUtf8(std::string const & utf8_path)
 { return details::removeLastNodeWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>); }
+
+std::string appendParentWithUtf8(std::string const & path)
+{ return path + PATH_SEPARATOR_OF_POSIX + PARENT_DIRECTORY_SHORTCUT; }
+
+std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
+{
+    std::string const UTF8_DELIMITER = std::string() + PATH_SEPARATOR_OF_POSIX;
+    std::string const ROOT = getRootDirWithUtf8(utf8_path);
+
+    std::vector<std::string> result;
+    result = string::splitUtf8Tokens(removeDuplicateSeparatorsWithUtf8(utf8_path), UTF8_DELIMITER);
+
+    if (!ROOT.empty()) {
+        // Force insert the POSIX root directory.
+        result.insert(result.begin(), ROOT);
+    }
+    return result;
+}
 
 } // namespace unix
 // @formatter:on
