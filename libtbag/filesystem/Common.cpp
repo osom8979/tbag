@@ -112,8 +112,17 @@ bool isProhibitedNameWithUtf8(std::string const utf8_path)
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
 { return details::removeLastSeparatorWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>); }
 
-std::string removeDuplicateSeparators(std::string const & utf8_path)
+std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path)
 { return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_WINDOWS, windows::isPathSeparatorChar<UChar>); }
+
+std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path)
+{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_GENERIC, windows::isPathSeparatorChar<UChar>); }
+
+std::string getNativeWithUtf8(std::string const & utf8_path)
+{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithUtf8(utf8_path)); }
+
+std::string getGenericWithUtf8(std::string const & utf8_path)
+{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path)); }
 
 } // namespace windows
 namespace unix {
@@ -124,8 +133,17 @@ bool isProhibitedNameWithUtf8(std::string const utf8_path)
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
 { return details::removeLastSeparatorWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>); }
 
-std::string removeDuplicateSeparators(std::string const & utf8_path)
+std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path)
 { return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_POSIX, unix::isPathSeparatorChar<UChar>); }
+
+std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path)
+{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_GENERIC, unix::isPathSeparatorChar<UChar>); }
+
+std::string getNativeWithUtf8(std::string const & utf8_path)
+{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithUtf8(utf8_path)); }
+
+std::string getGenericWithUtf8(std::string const & utf8_path)
+{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path)); }
 
 } // namespace unix
 // @formatter:on

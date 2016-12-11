@@ -158,22 +158,46 @@ TEST(CommonTest, removeLastSeparatorWithUtf8)
     ASSERT_EQ(UTF8_SOURCE, removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX));
 }
 
-TEST(CommonTest, removeDuplicateSeparators)
+TEST(CommonTest, removeDuplicateSeparatorsWithUtf8)
 {
     std::string const UTF8_GA = "\xea\xb0\x80"; // 가
     std::string const UTF8_NA = "\xeb\x82\x98"; // 나
     std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
     std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
 
-    std::string temp;
-    std::string result;
+    std::string const TEMP = "/\\////\\\\" + UTF8_SOURCE + "\\//\\/";
+    std::string const RESULT_WINDOWS = "\\" + UTF8_SOURCE + "\\";
+    std::string const RESULT_POSIX   = "/\\/\\\\" + UTF8_SOURCE + "\\/\\/";
+    std::string const RESULT_GENERIC = "/" + UTF8_SOURCE + "/";
 
-    temp   = "/\\////\\\\" + UTF8_SOURCE + "\\//\\/";
-    result = "\\"          + UTF8_SOURCE + "\\";
-    ASSERT_EQ(result, windows::removeDuplicateSeparators(temp));
+    ASSERT_EQ(RESULT_WINDOWS, windows::removeDuplicateSeparatorsWithUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, unix::removeDuplicateSeparatorsWithUtf8(TEMP));
 
-    temp   = "/\\////\\\\" + UTF8_SOURCE + "\\//\\/";
-    result = "/\\/\\\\"    + UTF8_SOURCE + "\\/\\/";
-    ASSERT_EQ(result, unix::removeDuplicateSeparators(temp));
+    ASSERT_EQ(RESULT_GENERIC, windows::removeDuplicateSeparatorsWithGenericUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, unix::removeDuplicateSeparatorsWithGenericUtf8(TEMP));
+
+    ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparatorsWithUtf8(UTF8_SOURCE));
+    ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparatorsWithGenericUtf8(UTF8_SOURCE));
+}
+
+TEST(CommonTest, getNativeWithUtf8)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+    std::string const TEMP = "/\\////\\\\" + UTF8_SOURCE + "\\//\\/";
+    std::string const RESULT_WINDOWS = "\\" + UTF8_SOURCE;
+    std::string const RESULT_POSIX   = "/\\/\\\\" + UTF8_SOURCE + "\\/\\";
+    std::string const RESULT_GENERIC = "/" + UTF8_SOURCE;
+
+    ASSERT_EQ(RESULT_WINDOWS, windows::getNativeWithUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, unix::getNativeWithUtf8(TEMP));
+
+    ASSERT_EQ(RESULT_GENERIC, windows::getGenericWithUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, unix::getGenericWithUtf8(TEMP));
+
+    ASSERT_EQ(UTF8_SOURCE, getGenericWithUtf8(UTF8_SOURCE));
 }
 

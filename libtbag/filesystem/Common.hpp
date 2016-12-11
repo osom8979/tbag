@@ -44,13 +44,19 @@ namespace details {
 namespace windows {
 TBAG_API bool isProhibitedNameWithUtf8(std::string const utf8_path);
 TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeDuplicateSeparators(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
+TBAG_API std::string getNativeWithUtf8(std::string const & utf8_path);
+TBAG_API std::string getGenericWithUtf8(std::string const & utf8_path);
 } // namespace windows
 
 namespace unix {
 TBAG_API bool isProhibitedNameWithUtf8(std::string const utf8_path);
 TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeDuplicateSeparators(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
+TBAG_API std::string getNativeWithUtf8(std::string const & utf8_path);
+TBAG_API std::string getGenericWithUtf8(std::string const & utf8_path);
 } // namespace unix
 } // namespace details
 // @formatter:on
