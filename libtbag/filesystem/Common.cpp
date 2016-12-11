@@ -20,8 +20,8 @@ namespace filesystem {
 // ================
 namespace details {
 
-template <typename Predicated>
-bool isProhibitedNameWithUtf8(std::string const utf8_path, Predicated predicated)
+template <typename Prohibited>
+bool isProhibitedNameWithUtf8(std::string const utf8_path, Prohibited checker)
 {
     if (utf8_path.empty()) {
         return true;
@@ -31,15 +31,15 @@ bool isProhibitedNameWithUtf8(std::string const utf8_path, Predicated predicated
     int32_t const PATH_LENGTH = path.length();
 
     for (int32_t i = 0; i < PATH_LENGTH; ++i) {
-        if (predicated(path.charAt(i))) {
+        if (checker(path.charAt(i))) {
             return true;
         }
     }
     return false;
 }
 
-template <typename Predicated>
-std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, Predicated predicated)
+template <typename PathSeparator>
+std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, PathSeparator checker)
 {
     if (utf8_path.empty()) {
         return std::string();
@@ -57,7 +57,7 @@ std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, Predicate
     UChar cursor;
     for (int32_t i = 0; i < PATH_LENGTH; ++i) {
         cursor = path.charAt(PATH_LENGTH - i - 1);
-        if (predicated(cursor)) {
+        if (checker(cursor)) {
             ++remove_last_of;
         } else {
             break;
@@ -70,6 +70,39 @@ std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, Predicate
     return result;
 }
 
+template <typename PathSeparator>
+std::string removeDuplicateSeparators(std::string const & utf8_path, UChar separator, PathSeparator checker)
+{
+    if (utf8_path.empty()) {
+        return std::string();
+    }
+
+    icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_path.c_str()));
+    int32_t const PATH_LENGTH = path.length();
+
+    if (PATH_LENGTH <= 0) {
+        assert(PATH_LENGTH == 0);
+        return std::string();
+    }
+
+    icu::UnicodeString buffer;
+    UChar cursor;
+    for (int32_t i = 0; i < PATH_LENGTH; ++i) {
+        cursor = path.charAt(i);
+        if (checker(cursor)) {
+            if (checker(buffer.charAt(buffer.length() - 1)) == false) {
+                buffer.append(separator);
+            }
+        } else {
+            buffer.append(cursor);
+        }
+    }
+
+    std::string result;
+    buffer.toUTF8String(result);
+    return result;
+}
+
 // @formatter:off
 namespace windows {
 
@@ -79,6 +112,9 @@ bool isProhibitedNameWithUtf8(std::string const utf8_path)
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
 { return details::removeLastSeparatorWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>); }
 
+std::string removeDuplicateSeparators(std::string const & utf8_path)
+{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_WINDOWS, windows::isPathSeparatorChar<UChar>); }
+
 } // namespace windows
 namespace unix {
 
@@ -87,6 +123,9 @@ bool isProhibitedNameWithUtf8(std::string const utf8_path)
 
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
 { return details::removeLastSeparatorWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>); }
+
+std::string removeDuplicateSeparators(std::string const & utf8_path)
+{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_POSIX, unix::isPathSeparatorChar<UChar>); }
 
 } // namespace unix
 // @formatter:on
