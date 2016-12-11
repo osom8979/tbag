@@ -78,17 +78,26 @@ int tbGetPatchVersion()
 
 #include <libtbag/util/UvUtils.hpp>
 #include <libtbag/util/SingletonUtils.hpp>
+#include <libtbag/locale/Locale.hpp>
 
-int tbInitialize()
+tbBOOL tbInitialize(tbInitParam * param)
 {
     libtbag::util::initUv();
     libtbag::util::initSingletonObjects();
+
+    if (param == NULL) {
+        libtbag::locale::setSystemDefaultLocale();
+    } else {
+        libtbag::locale::setLocale(param->localname);
+    }
+
     return AB_TRUE;
 }
 
-int tbRelease()
+tbBOOL tbRelease()
 {
     libtbag::util::releaseSingletonObjects();
+
     return AB_TRUE;
 }
 

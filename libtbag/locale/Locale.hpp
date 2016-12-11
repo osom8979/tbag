@@ -25,9 +25,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace locale {
 
-TBAG_API std::string getDefaultLocaleName();
+TBAG_API char * setMinimalCLocale();
+TBAG_API char * setSystemDefaultLocale();
+TBAG_API char * setLocale(char * name);
+TBAG_API char * getLocaleName();
 
+namespace icu {
+TBAG_API std::string getDefaultLocaleName();
 TBAG_API std::vector<std::string> getAvailableLocale();
+} // namespace icu
 
 } // namespace locale
 

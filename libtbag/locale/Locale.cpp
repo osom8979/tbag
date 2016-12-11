@@ -18,6 +18,29 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace locale {
 
+char * setMinimalCLocale()
+{
+    return setlocale(LC_ALL, "C");
+}
+
+char * setSystemDefaultLocale()
+{
+    return setlocale(LC_ALL, "");
+}
+
+char * setLocale(char * name)
+{
+    return setlocale(LC_ALL, name);
+}
+
+char * getLocaleName()
+{
+    // Win32: GetSystemDefaultLocaleName
+    return setlocale(LC_ALL, NULL);
+}
+
+namespace icu {
+
 // Gets ICU's default locale.
 std::string getDefaultLocaleName()
 {
@@ -33,6 +56,8 @@ std::vector<std::string> getAvailableLocale()
     }
     return result;
 }
+
+} // namespace icu
 
 } // namespace locale
 

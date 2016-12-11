@@ -16,21 +16,37 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#if defined(__cplusplus)
-extern "C" {
+#define AB_TRUE   1
+#define AB_FALSE  0
+
+#ifndef LOCALE_NAME_MAX_LENGTH
+#define LOCALE_NAME_MAX_LENGTH 85 // Win32 API.
+#endif
+
+#ifndef NULL
+#define NULL 0
 #endif
 
 typedef int tbBOOL;
 
-#define AB_TRUE   1
-#define AB_FALSE  0
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+/**
+ * tbag initialize paramer.
+ */
+struct tbInitParam
+{
+    char localname[LOCALE_NAME_MAX_LENGTH];
+};
 
 TBAG_API int tbGetMajorVersion();
 TBAG_API int tbGetMinorVersion();
 TBAG_API int tbGetPatchVersion();
 
-TBAG_API int tbInitialize();
-TBAG_API int tbRelease();
+TBAG_API tbBOOL tbInitialize(tbInitParam * param = NULL);
+TBAG_API tbBOOL tbRelease();
 
 #if defined(__cplusplus)
 } /* extern "C" */
