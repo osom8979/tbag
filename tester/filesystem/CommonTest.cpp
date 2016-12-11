@@ -260,3 +260,107 @@ TEST(CommonTest, getRootDirWithUtf8)
     ASSERT_TRUE(isRelativeWithUtf8(temp));
 }
 
+TEST(CommonTest, removeLastNodeWithUtf8)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+    std::string temp;
+    std::string result_windows;
+    std::string result_posix;
+
+    temp = "/" + UTF8_SOURCE;
+    result_windows = "/";
+    result_posix   = "/";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+
+    temp = UTF8_SOURCE;
+    result_windows = "";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+
+    temp = "";
+    result_windows = "";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+
+    temp = "\\" + UTF8_SOURCE + "\\";
+    result_windows = "\\";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+
+    temp = "\\";
+    result_windows = "";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+
+    temp = "/" + UTF8_SOURCE;
+    result_windows = "/";
+    result_posix   = "/";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+
+    temp = "/" + UTF8_SOURCE + "/";
+    result_windows = "/";
+    result_posix   = "/";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+
+    temp = "/";
+    result_windows = "";
+    result_posix   = "";
+    ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+}
+
+TEST(CommonTest, removeLastNodeWithUtf8_for_Windows)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+    std::string const TEMP0 = "G:/" + UTF8_SOURCE + "\\//\\/.///..//TEST\\/";
+    std::string const TEMP1 = "G:/" + UTF8_SOURCE + "\\//\\/.///..//";
+    std::string const TEMP2 = "G:/" + UTF8_SOURCE + "\\//\\/.///";
+    std::string const TEMP3 = "G:/" + UTF8_SOURCE + "\\//\\/";
+    std::string const TEMP4 = "G:/";
+    std::string const TEMP5 = "";
+
+    ASSERT_EQ(TEMP1, windows::removeLastNodeWithUtf8(TEMP0));
+    ASSERT_EQ(TEMP2, windows::removeLastNodeWithUtf8(TEMP1));
+    ASSERT_EQ(TEMP3, windows::removeLastNodeWithUtf8(TEMP2));
+    ASSERT_EQ(TEMP4, windows::removeLastNodeWithUtf8(TEMP3));
+    ASSERT_EQ(TEMP5, windows::removeLastNodeWithUtf8(TEMP4));
+}
+
+TEST(CommonTest, removeLastNodeWithUtf8_for_Unix)
+{
+    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
+    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
+    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+    std::string const TEMP0 = "/" + UTF8_SOURCE + "\\//\\/.///..//TEST\\/";
+    std::string const TEMP1 = "/" + UTF8_SOURCE + "\\//\\/.///..//";
+    std::string const TEMP2 = "/" + UTF8_SOURCE + "\\//\\/.///";
+    std::string const TEMP3 = "/" + UTF8_SOURCE + "\\//\\/";
+    std::string const TEMP4 = "/" + UTF8_SOURCE + "\\//";
+    std::string const TEMP5 = "/";
+    std::string const TEMP6 = "";
+
+    ASSERT_EQ(TEMP1, unix::removeLastNodeWithUtf8(TEMP0));
+    ASSERT_EQ(TEMP2, unix::removeLastNodeWithUtf8(TEMP1));
+    ASSERT_EQ(TEMP3, unix::removeLastNodeWithUtf8(TEMP2));
+    ASSERT_EQ(TEMP4, unix::removeLastNodeWithUtf8(TEMP3));
+    ASSERT_EQ(TEMP5, unix::removeLastNodeWithUtf8(TEMP4));
+    ASSERT_EQ(TEMP6, unix::removeLastNodeWithUtf8(TEMP5));
+}
+
