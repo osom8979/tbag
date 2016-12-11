@@ -145,7 +145,7 @@ void Path::swap(Path & obj)
 
 std::string Path::getGenericString() const
 {
-    return NativePath::getGeneric(_path);
+    return getGenericWithUtf8(_path);
 }
 
 Path Path::getGeneric() const
@@ -155,7 +155,7 @@ Path Path::getGeneric() const
 
 std::string Path::getNativeString() const
 {
-    return NativePath::getNative(_path);
+    return getNativeWithUtf8(_path);
 }
 
 Path Path::getNative() const
@@ -193,7 +193,7 @@ Path & Path::updateCanonical()
 
 std::string Path::getRootDirString() const
 {
-    return NativePath::getRootDir(_path);
+    return getRootDirWithUtf8(_path);
 }
 
 Path Path::getRootDir() const
@@ -208,20 +208,20 @@ bool Path::isRootDir() const
 
 bool Path::isAbsolute() const
 {
-    return NativePath::isAbsolute(_path);
+    return isAbsoluteWithUtf8(_path);
 }
 
 bool Path::isRelative() const
 {
-    return NativePath::isRelative(_path);
+    return isRelativeWithUtf8(_path);
 }
 
 std::string Path::append(std::string const & parent, std::string const & child)
 {
     std::string result = parent;
     // 문지열이 공백일 경우, 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다.
-    if (!parent.empty() && parent.back() != NativePath::getPathSeparator()[0]) {
-        result += NativePath::getPathSeparator();
+    if (!parent.empty() && parent.back() != PATH_SEPARATOR) {
+        result += PATH_SEPARATOR;
     }
     result += child;
     return result;
@@ -271,7 +271,11 @@ Path::operator char const * () const
 
 std::string Path::getParentString() const
 {
-    return NativePath::getParent(_path);
+    if (isAbsoluteWithUtf8(_path)) {
+        return removeLastNodeWithUtf8(_path);
+    } else {
+        return appendParentWithUtf8(_path);
+    }
 }
 
 Path Path::getParent() const
@@ -281,7 +285,7 @@ Path Path::getParent() const
 
 std::vector<std::string> Path::splitNodes() const
 {
-    return NativePath::splitNodes(_path);
+    return splitNodesWithUtf8(_path);
 }
 
 std::vector<std::string> Path::splitNodesWithCanonical() const

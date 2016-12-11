@@ -17,10 +17,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/filesystem/WindowsPath.hpp>
-#include <libtbag/filesystem/PosixPath.hpp>
+#include <libtbag/filesystem/Common.hpp>
 
 #include <string>
+#include <locale>
 #include <initializer_list>
 #include <type_traits>
 
@@ -29,12 +29,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace filesystem {
-
-#if defined(__PLATFORM_WINDOWS__)
-using BaseNativePath = WindowsPath;
-#else
-using BaseNativePath = PosixPath;
-#endif
 
 /**
  * Path class prototype.
@@ -46,11 +40,8 @@ using BaseNativePath = PosixPath;
  * @warning
  *  Supports multibyte-string only.
  */
-class TBAG_API Path : public BaseNativePath
+class TBAG_API Path
 {
-public:
-    using NativePath = BaseNativePath;
-
 public:
     /** Update Generic Format. */
     struct update_generic { /* EMPTY */ };
@@ -68,12 +59,11 @@ public:
 #endif
     }
 
-    inline static TBAG_CONSTEXPR bool isPosixStyle() TBAG_NOEXCEPT
-    {
-        return !isWindowsStyle();
-    }
+    inline static TBAG_CONSTEXPR bool isUnixStyle() TBAG_NOEXCEPT
+    { return !isWindowsStyle(); }
 
 private:
+    std::locale _locale;
     std::string _path;
 
 // Constructors.

@@ -21,7 +21,7 @@ TEST(PathTest, StyleChecker)
     ASSERT_FALSE(Path::isPosixStyle());
 #else
     ASSERT_FALSE(Path::isWindowsStyle());
-    ASSERT_TRUE(Path::isPosixStyle());
+    ASSERT_TRUE(Path::isUnixStyle());
 #endif
 }
 
