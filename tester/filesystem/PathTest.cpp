@@ -18,7 +18,7 @@ TEST(PathTest, StyleChecker)
 {
 #if defined(WIN32) || defined(_WIN32)
     ASSERT_TRUE(Path::isWindowsStyle());
-    ASSERT_FALSE(Path::isPosixStyle());
+    ASSERT_FALSE(Path::isUnixStyle());
 #else
     ASSERT_FALSE(Path::isWindowsStyle());
     ASSERT_TRUE(Path::isUnixStyle());

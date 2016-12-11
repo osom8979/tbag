@@ -282,7 +282,7 @@ std::string getHomeDir()
     return std::string(buffer);
 }
 
-std::string getExePath(std::size_t extend_buffer_size)
+std::string getExePathEx(std::size_t extend_buffer_size)
 {
     __ASSERT_NOT_IMPLEMENT(std::string());
 
@@ -299,7 +299,7 @@ std::string getExePath(std::size_t extend_buffer_size)
         // If the buffer is too small to hold the module name,
         // the string is truncated to nSize characters including the terminating null character,
         // the function returns nSize, and the function sets the last error to ERROR_INSUFFICIENT_BUFFER.
-        return getExePath(extend_buffer_size * 2);
+        return getExePathEx(extend_buffer_size * 2);
     }
 
     // If the function succeeds,
@@ -307,6 +307,11 @@ std::string getExePath(std::size_t extend_buffer_size)
     // in characters, not including the terminating null character.
     buffer.resize(COPIED_LENGTH);
     return buffer;
+}
+
+std::string getExePath()
+{
+    return getExePathEx(MAX_PATH_LENGTH + 1);
 }
 
 std::string getRealPath(std::string const & path)
@@ -333,7 +338,7 @@ std::string getRealPath(std::string const & path)
     return wcsToMbs(buffer);
 }
 
-bool createDirectory(std::string const & path, int mode)
+bool createDirectory(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
