@@ -334,7 +334,7 @@ std::string Path::getName() const
 }
 
 template <typename Predicated>
-inline auto fromUtf8(std::string const & path, Predicated predicated) -> decltype(predicated(path))
+inline bool isFromUtf8(std::string const & path, Predicated predicated)
 {
     std::locale const NATIVE_LOCALE = std::locale(locale::getGlobalLocaleName());
     if (locale::isUtf8Encoding(NATIVE_LOCALE) == false) {
@@ -348,39 +348,39 @@ inline auto fromUtf8(std::string const & path, Predicated predicated) -> decltyp
 
 bool Path::exists() const
 {
-    return fromUtf8(_path, libtbag::filesystem::exists);
+    return isFromUtf8(_path, libtbag::filesystem::exists);
 }
 
 bool Path::isExecutable() const
 {
-    return fromUtf8(_path, libtbag::filesystem::isExecutable);
+    return isFromUtf8(_path, libtbag::filesystem::isExecutable);
 }
 
 bool Path::isWritable() const
 {
-    return fromUtf8(_path, libtbag::filesystem::isWritable);
+    return isFromUtf8(_path, libtbag::filesystem::isWritable);
 }
 
 bool Path::isReadable() const
 {
-    return fromUtf8(_path, libtbag::filesystem::isReadable);
+    return isFromUtf8(_path, libtbag::filesystem::isReadable);
 }
 
 bool Path::isRegularFile() const
 {
-    return fromUtf8(_path, libtbag::filesystem::isRegularFile);
+    return isFromUtf8(_path, libtbag::filesystem::isRegularFile);
 }
 
 bool Path::isDirectory() const
 {
-    return fromUtf8(_path, libtbag::filesystem::isDirectory);
+    return isFromUtf8(_path, libtbag::filesystem::isDirectory);
 }
 
 bool Path::createDir() const
 {
     auto parent = getParent();
     if (parent.isDirectory() && parent.isWritable() && exists() == false) {
-        return fromUtf8(_path, libtbag::filesystem::createDirectory);
+        return isFromUtf8(_path, libtbag::filesystem::createDirectory);
     }
     return false;
 }
@@ -411,7 +411,7 @@ bool Path::remove() const
 bool Path::removeFile() const
 {
     if (isRegularFile() && isWritable()) {
-        return fromUtf8(_path, libtbag::filesystem::removeFile);
+        return isFromUtf8(_path, libtbag::filesystem::removeFile);
     }
     return false;
 }
@@ -419,20 +419,20 @@ bool Path::removeFile() const
 bool Path::removeDir() const
 {
     if (isDirectory() && isWritable()) {
-        return fromUtf8(_path, libtbag::filesystem::removeDirectory);
+        return isFromUtf8(_path, libtbag::filesystem::removeDirectory);
     }
     return false;
 }
 
 bool Path::removeDirWithRecursive() const
 {
-    return fromUtf8(_path, libtbag::filesystem::removeAll);
+    return isFromUtf8(_path, libtbag::filesystem::removeAll);
 }
 
 std::vector<Path> Path::scanDir() const
 {
     std::vector<Path> result;
-    for (auto & path : fromUtf8(_path, libtbag::filesystem::scanDir)) {
+    for (auto & path : libtbag::filesystem::scanDir(_path)) {
         result.push_back(Path(_path) / path);
     }
     return result;
@@ -448,7 +448,7 @@ std::size_t Path::size() const
 }
 
 template <typename Predicated>
-inline auto toUtf8(Predicated predicated) -> decltype(predicated())
+inline std::string toUtf8(Predicated predicated)
 {
     std::locale const NATIVE_LOCALE = std::locale(locale::getGlobalLocaleName());
     std::string native_path = predicated();
