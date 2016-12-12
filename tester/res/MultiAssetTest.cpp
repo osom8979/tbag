@@ -66,9 +66,10 @@ TEST(MultiAssetTest, Default)
 
     String test_filename = "__file__";
     auto test_file = (path1 / layout2 / test_filename);
-    std::ofstream ofs(test_file.getCanonicalString());
-    ofs << "__blah_blah_blah__";
-    ofs.close();
+
+    std::string const content = "__blah_blah_blah__";
+    ASSERT_EQ(content.size(), filesystem::createSimpleTextFile(test_file.getCanonicalString(), &content[0], content.size()));
+
     auto find_file = asset.findFile(layout2, test_filename);
     ASSERT_TRUE(test_file == find_file);
 

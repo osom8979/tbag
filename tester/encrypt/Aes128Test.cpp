@@ -121,11 +121,8 @@ TEST(Aes128Test, EncodeAndDecode_File)
     ASSERT_FALSE(ENC_PATH.exists());
     ASSERT_FALSE(DEC_PATH.exists());
 
-    {   // Create test file.
-        std::ofstream f(TEST_PATH.getString(), std::ios_base::binary);
-        f.write(&TEST_CONTENT[0], TEST_CONTENT.size());
-        f.close();
-    }
+    // Create test file.
+    ASSERT_EQ(TEST_CONTENT.size(), filesystem::createSimpleTextFile(TEST_PATH.getString(), &TEST_CONTENT[0], TEST_CONTENT.size()));
 
     Aes128::Key key;
     key.fill(0x00);

@@ -27,17 +27,11 @@ NAMESPACE_LIBTBAG_OPEN
  * @author zer0
  * @date   2016-06-30
  */
-class DemoAsset : public libtbag::res::Asset
+struct DemoAsset : public libtbag::res::Asset
 {
-public:
-    DemoAsset() = default;
-    ~DemoAsset() = default;
-
-public:
     static Path getTesterAssetDir()
     { return (Path(SOURCE_FILE_UTF8_PATH).getParent() / "asset"); }
 
-public:
     CREATE_ASSET_PATH(tester_dir,       getTesterAssetDir());
     CREATE_ASSET_PATH(tester_dir_image, getTesterAssetDir() / "image");
 };
