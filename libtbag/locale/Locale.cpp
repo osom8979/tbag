@@ -137,6 +137,23 @@ bool isUtf8EncodingName(std::locale const & locale)
     return isUtf8EncodingName(locale.name());
 }
 
+std::string getGlobalEncodingName()
+{
+    if (isWindowsPlatform()) {
+        return std::string("windows-") + locale::getEncoding(locale::getGlobalLocaleName());
+    }
+    return locale::getEncoding(locale::getGlobalLocaleName());
+}
+
+bool isUtf8GloablEncoding()
+{
+    return locale::isUtf8EncodingName(std::locale(locale::getGlobalLocaleName()));
+}
+
+// --------------------
+// BEGIN icu namespace.
+// --------------------
+
 namespace icu {
 
 // Gets ICU's default locale.

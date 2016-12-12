@@ -68,6 +68,9 @@ TBAG_API std::string getModifier(std::locale const & locale);
 TBAG_API bool isUtf8EncodingName(std::string const & name);
 TBAG_API bool isUtf8EncodingName(std::locale const & locale);
 
+TBAG_API std::string getGlobalEncodingName();
+TBAG_API bool isUtf8GloablEncoding();
+
 namespace icu {
 TBAG_API std::string getDefaultLocaleName();
 TBAG_API std::vector<std::string> getAvailableLocale();

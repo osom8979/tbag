@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/details/TemplateFileSystem.hpp-inl>
 #include <libtbag/filesystem/Common.hpp>
 #include <libtbag/locale/Locale.hpp>
 #include <libtbag/locale/Convert.hpp>
@@ -20,57 +21,17 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-namespace support_utf8 {
-
-inline static std::string getGlobalEncodingName()
-{
-    if (isWindowsPlatform()) {
-        return std::string("windows-") + locale::getEncoding(locale::getGlobalLocaleName());
-    }
-    return locale::getEncoding(locale::getGlobalLocaleName());
-}
-
-inline static bool isUtf8GloablEncoding()
-{
-    return locale::isUtf8EncodingName(std::locale(locale::getGlobalLocaleName()));
-}
-
-template <typename Predicated>
-inline static bool isFromUtf8(std::string const & path, Predicated predicated)
-{
-    if (isUtf8GloablEncoding() == false) {
-        std::string native_path;
-        if (locale::convertFromUtf8(path, getGlobalEncodingName(), native_path)) {
-            return predicated(native_path);
-        }
-    }
-    return predicated(path);
-}
-
-template <typename Predicated>
-inline static std::string toUtf8(Predicated predicated)
-{
-    std::string native_path = predicated();
-    if (isUtf8GloablEncoding() == false) {
-        std::string utf8_path;
-        if (locale::convertToUtf8(native_path, getGlobalEncodingName(), utf8_path)) {
-            return utf8_path;
-        }
-    }
-    return native_path;
-}
-
 inline static std::vector<std::string> scanDirFromUtf8(std::string const & path)
 {
-    if (isUtf8GloablEncoding() == false) {
+    if (locale::isUtf8GloablEncoding() == false) {
         std::string native_path;
 
-        if (locale::convertFromUtf8(path, getGlobalEncodingName(), native_path)) {
+        if (locale::convertFromUtf8(path, locale::getGlobalEncodingName(), native_path)) {
             std::vector<std::string> result;
 
             for (auto & node : libtbag::filesystem::scanDir(native_path)) {
                 std::string utf8_node;
-                if (locale::convertToUtf8(node, getGlobalEncodingName(), utf8_node)) {
+                if (locale::convertToUtf8(node, locale::getGlobalEncodingName(), utf8_node)) {
                     result.push_back(std::move(utf8_node));
                 } else {
                     result.push_back(node);
@@ -81,8 +42,6 @@ inline static std::vector<std::string> scanDirFromUtf8(std::string const & path)
 
     return libtbag::filesystem::scanDir(path);
 }
-
-} // namespace support_utf8
 
 Path::Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<std::string>::value) : _path()
 {
@@ -400,39 +359,39 @@ std::string Path::getName() const
 
 bool Path::exists() const
 {
-    return support_utf8::isFromUtf8(_path, libtbag::filesystem::exists);
+    return details::isFromUtf8Path(_path, libtbag::filesystem::exists);
 }
 
 bool Path::isExecutable() const
 {
-    return support_utf8::isFromUtf8(_path, libtbag::filesystem::isExecutable);
+    return details::isFromUtf8Path(_path, libtbag::filesystem::isExecutable);
 }
 
 bool Path::isWritable() const
 {
-    return support_utf8::isFromUtf8(_path, libtbag::filesystem::isWritable);
+    return details::isFromUtf8Path(_path, libtbag::filesystem::isWritable);
 }
 
 bool Path::isReadable() const
 {
-    return support_utf8::isFromUtf8(_path, libtbag::filesystem::isReadable);
+    return details::isFromUtf8Path(_path, libtbag::filesystem::isReadable);
 }
 
 bool Path::isRegularFile() const
 {
-    return support_utf8::isFromUtf8(_path, libtbag::filesystem::isRegularFile);
+    return details::isFromUtf8Path(_path, libtbag::filesystem::isRegularFile);
 }
 
 bool Path::isDirectory() const
 {
-    return support_utf8::isFromUtf8(_path, libtbag::filesystem::isDirectory);
+    return details::isFromUtf8Path(_path, libtbag::filesystem::isDirectory);
 }
 
 bool Path::createDir() const
 {
     auto parent = getParent();
     if (parent.isDirectory() && parent.isWritable() && exists() == false) {
-        return support_utf8::isFromUtf8(_path, libtbag::filesystem::createDirectory);
+        return details::isFromUtf8Path(_path, libtbag::filesystem::createDirectory);
     }
     return false;
 }
@@ -463,7 +422,7 @@ bool Path::remove() const
 bool Path::removeFile() const
 {
     if (isRegularFile() && isWritable()) {
-        return support_utf8::isFromUtf8(_path, libtbag::filesystem::removeFile);
+        return details::isFromUtf8Path(_path, libtbag::filesystem::removeFile);
     }
     return false;
 }
@@ -471,20 +430,20 @@ bool Path::removeFile() const
 bool Path::removeDir() const
 {
     if (isDirectory() && isWritable()) {
-        return support_utf8::isFromUtf8(_path, libtbag::filesystem::removeDirectory);
+        return details::isFromUtf8Path(_path, libtbag::filesystem::removeDirectory);
     }
     return false;
 }
 
 bool Path::removeDirWithRecursive() const
 {
-    return support_utf8::isFromUtf8(_path, libtbag::filesystem::removeAll);
+    return details::isFromUtf8Path(_path, libtbag::filesystem::removeAll);
 }
 
 std::vector<Path> Path::scanDir() const
 {
     std::vector<Path> result;
-    for (auto & path : support_utf8::scanDirFromUtf8(_path)) {
+    for (auto & path : scanDirFromUtf8(_path)) {
         result.push_back(Path(_path) / path);
     }
     return result;
@@ -493,9 +452,9 @@ std::vector<Path> Path::scanDir() const
 std::size_t Path::size() const
 {
     std::string native_path;
-    if (support_utf8::isUtf8GloablEncoding()) {
+    if (locale::isUtf8GloablEncoding()) {
         native_path = _path;
-    } else if (locale::convertToUtf8(native_path, support_utf8::getGlobalEncodingName(), native_path) == false) {
+    } else if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), native_path) == false) {
         native_path = _path;
     }
 
@@ -508,22 +467,22 @@ std::size_t Path::size() const
 
 Path Path::getWorkDir()
 {
-    return Path(support_utf8::toUtf8(libtbag::filesystem::getWorkDir));
+    return Path(details::toUtf8Path(libtbag::filesystem::getWorkDir));
 }
 
 Path Path::getHomeDir()
 {
-    return Path(support_utf8::toUtf8(libtbag::filesystem::getHomeDir));
+    return Path(details::toUtf8Path(libtbag::filesystem::getHomeDir));
 }
 
 Path Path::getExePath()
 {
-    return Path(support_utf8::toUtf8(libtbag::filesystem::getExePath));
+    return Path(details::toUtf8Path(libtbag::filesystem::getExePath));
 }
 
 Path Path::getExeDir()
 {
-    return Path(removeLastNodeWithUtf8(support_utf8::toUtf8(libtbag::filesystem::getExePath)));
+    return Path(removeLastNodeWithUtf8(details::toUtf8Path(libtbag::filesystem::getExePath)));
 }
 
 } // namespace filesystem
