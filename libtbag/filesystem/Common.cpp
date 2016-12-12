@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/filesystem/Common.hpp>
-#include <libtbag/filesystem/details/TemplateFileSystem.hpp-inl>
 #include <libtbag/string/StringUtils.hpp>
 #include <cassert>
 
@@ -18,131 +17,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace filesystem {
-
-// ================
-namespace details {
-
-// @formatter:off
-namespace windows {
-
-bool isProhibitedNameWithUtf8(std::string const & utf8_path)
-{ return details::isProhibitedNameWithUtf8(utf8_path, windows::isProhibitedChar<UChar>); }
-
-std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
-{ return details::removeLastSeparatorWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>); }
-
-std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path)
-{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_WINDOWS, windows::isPathSeparatorChar<UChar>); }
-
-std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path)
-{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_GENERIC, windows::isPathSeparatorChar<UChar>); }
-
-std::string getNativeWithUtf8(std::string const & utf8_path)
-{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithUtf8(utf8_path)); }
-
-std::string getGenericWithUtf8(std::string const & utf8_path)
-{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path)); }
-
-std::string getRootDirWithUtf8(std::string const & utf8_path)
-{
-    if (utf8_path.empty()) {
-        return std::string();
-    }
-
-    icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_path.c_str()));
-    int32_t const PATH_LENGTH = path.length();
-
-    if (path.length() < 2 || u_isalpha(path.charAt(0)) == false || path.charAt(1) != ':') {
-        return std::string();
-    }
-
-    icu::UnicodeString buffer = path.tempSubString(0, 2);
-    assert(buffer.length() == 2);
-
-    std::string result;
-    buffer.toUTF8String(result);
-    return result;
-}
-
-bool isAbsoluteWithUtf8(std::string const & utf8_path)
-{ return !getRootDirWithUtf8(utf8_path).empty(); }
-
-bool isRelativeWithUtf8(std::string const & utf8_path)
-{ return !isAbsoluteWithUtf8(utf8_path); }
-
-std::string removeLastNodeWithUtf8(std::string const & utf8_path)
-{ return details::removeLastNodeWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>); }
-
-std::string appendParentWithUtf8(std::string const & path)
-{ return path + PATH_SEPARATOR_OF_WINDOWS + PARENT_DIRECTORY_SHORTCUT; }
-
-std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
-{
-    std::string const UTF8_DELIMITER = std::string() + PATH_SEPARATOR_OF_WINDOWS;
-    return string::splitUtf8Tokens(removeDuplicateSeparatorsWithUtf8(utf8_path), UTF8_DELIMITER);
-}
-
-} // namespace windows
-namespace unix {
-
-bool isProhibitedNameWithUtf8(std::string const & utf8_path)
-{ return details::isProhibitedNameWithUtf8(utf8_path, unix::isProhibitedChar<UChar>); }
-
-std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
-{ return details::removeLastSeparatorWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>); }
-
-std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path)
-{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_POSIX, unix::isPathSeparatorChar<UChar>); }
-
-std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path)
-{ return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_GENERIC, unix::isPathSeparatorChar<UChar>); }
-
-std::string getNativeWithUtf8(std::string const & utf8_path)
-{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithUtf8(utf8_path)); }
-
-std::string getGenericWithUtf8(std::string const & utf8_path)
-{ return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path)); }
-
-std::string getRootDirWithUtf8(std::string const & utf8_path)
-{
-    if (utf8_path.size() < 1 || utf8_path[0] != PATH_SEPARATOR_OF_POSIX) {
-        return std::string();
-    }
-    return std::string() + PATH_SEPARATOR_OF_POSIX;
-}
-
-bool isAbsoluteWithUtf8(std::string const & utf8_path)
-{ return !getRootDirWithUtf8(utf8_path).empty(); }
-
-bool isRelativeWithUtf8(std::string const & utf8_path)
-{ return !isAbsoluteWithUtf8(utf8_path); }
-
-std::string removeLastNodeWithUtf8(std::string const & utf8_path)
-{ return details::removeLastNodeWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>); }
-
-std::string appendParentWithUtf8(std::string const & path)
-{ return path + PATH_SEPARATOR_OF_POSIX + PARENT_DIRECTORY_SHORTCUT; }
-
-std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
-{
-    std::string const UTF8_DELIMITER = std::string() + PATH_SEPARATOR_OF_POSIX;
-    std::string const ROOT = getRootDirWithUtf8(utf8_path);
-
-    std::vector<std::string> result;
-    result = string::splitUtf8Tokens(removeDuplicateSeparatorsWithUtf8(utf8_path), UTF8_DELIMITER);
-
-    if (!ROOT.empty()) {
-        // Force insert the POSIX root directory.
-        result.insert(result.begin(), ROOT);
-    }
-    return result;
-}
-
-} // namespace unix
-// @formatter:on
-
-} // namespace details
-// ===================
 
 static int CREATE_TEMPDIR_RETRY_COUNT = 10;
 
