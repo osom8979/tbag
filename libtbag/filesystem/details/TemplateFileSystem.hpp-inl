@@ -145,7 +145,7 @@ std::string removeLastNodeWithUtf8(std::string const & utf8_path, PathSeparator 
 template <typename Predicated>
 inline static bool isFromUtf8Path(std::string const & utf8_path, Predicated predicated)
 {
-    if (locale::isUtf8GloablEncoding() == false) {
+    if (locale::isUtf8GloablEncodingName() == false) {
         std::string native_path;
         if (locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path)) {
             return predicated(native_path);
@@ -158,7 +158,7 @@ template <typename Predicated>
 inline static std::string toUtf8Path(Predicated predicated)
 {
     std::string native_path = predicated();
-    if (locale::isUtf8GloablEncoding() == false) {
+    if (locale::isUtf8GloablEncodingName() == false) {
         std::string utf8_path;
         if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), utf8_path)) {
             return utf8_path;

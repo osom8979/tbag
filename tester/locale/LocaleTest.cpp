@@ -110,7 +110,7 @@ TEST(LocaleTest, getModifier)
 
 TEST(LocaleTest, Information)
 {
-    std::cout << "Default locale name: " << libtbag::locale::icu::getDefaultLocaleName() << std::endl;
+    std::cout << "Default locale name: " << libtbag::locale::getDefaultIcuLocaleName() << std::endl;
 
     //std::cout << "List of available locale:\n";
     //for (auto & name : getAvailableLocale()) {

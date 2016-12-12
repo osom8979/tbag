@@ -53,7 +53,7 @@ std::string getExeDir()
 
 std::string getRealPath(std::string const & utf8_path)
 {
-    if (locale::isUtf8GloablEncoding() == false) {
+    if (locale::isUtf8GloablEncodingName() == false) {
         std::string native_path;
         if (locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path)) {
             return __impl::getRealPath(native_path);
@@ -94,7 +94,7 @@ bool removeAll(std::string const & utf8_path)
 
 bool rename(std::string const & utf8_from, std::string const & utf8_to)
 {
-    if (locale::isUtf8GloablEncoding() == false) {
+    if (locale::isUtf8GloablEncodingName() == false) {
         std::string native_from;
         std::string native_to;
 
@@ -140,7 +140,7 @@ bool isReadable(std::string const & utf8_path)
 
 std::vector<std::string> scanDir(std::string const & utf8_path)
 {
-    if (locale::isUtf8GloablEncoding() == false) {
+    if (locale::isUtf8GloablEncodingName() == false) {
         std::string native_path;
 
         if (locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path)) {
@@ -165,7 +165,7 @@ std::vector<std::string> scanDir(std::string const & utf8_path)
 std::size_t getFileSize(std::string const & utf8_path)
 {
     std::string native_path;
-    if (locale::isUtf8GloablEncoding()) {
+    if (locale::isUtf8GloablEncodingName()) {
         native_path = utf8_path;
     } else {
         locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path);
@@ -181,7 +181,7 @@ std::size_t getFileSize(std::string const & utf8_path)
 std::size_t createSimpleTextFile(std::string const & utf8_path, char const * buffer, std::size_t size)
 {
     std::string native_path;
-    if (locale::isUtf8GloablEncoding()) {
+    if (locale::isUtf8GloablEncodingName()) {
         native_path = utf8_path;
     } else {
         locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path);

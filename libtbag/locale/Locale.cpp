@@ -111,6 +111,13 @@ std::string getEncoding(std::locale const & locale) { return getEncoding(locale.
 std::string getModifier(std::locale const & locale) { return getModifier(locale.name()); }
 // @formatter:on
 
+std::string getGlobalEncodingName()
+{
+    if (isWindowsPlatform()) {
+        return std::string("windows-") + getEncoding(getGlobalLocaleName());
+    }
+    return getEncoding(getGlobalLocaleName());
+}
 
 bool isUtf8EncodingName(std::string const & name)
 {
@@ -137,32 +144,21 @@ bool isUtf8EncodingName(std::locale const & locale)
     return isUtf8EncodingName(locale.name());
 }
 
-std::string getGlobalEncodingName()
+bool isUtf8GloablEncodingName()
 {
-    if (isWindowsPlatform()) {
-        return std::string("windows-") + locale::getEncoding(locale::getGlobalLocaleName());
-    }
-    return locale::getEncoding(locale::getGlobalLocaleName());
+    return isUtf8EncodingName(getGlobalEncodingName());
 }
 
-bool isUtf8GloablEncoding()
-{
-    return locale::isUtf8EncodingName(std::locale(locale::getGlobalLocaleName()));
-}
+// ----------
+// BEGIN icu.
+// ----------
 
-// --------------------
-// BEGIN icu namespace.
-// --------------------
-
-namespace icu {
-
-// Gets ICU's default locale.
-std::string getDefaultLocaleName()
+std::string getDefaultIcuLocaleName()
 {
     return uloc_getDefault();
 }
 
-std::vector<std::string> getAvailableLocale()
+std::vector<std::string> getAvailableIcuLocale()
 {
     int32_t const COUNT = uloc_countAvailable();
     std::vector<std::string> result;
@@ -171,8 +167,6 @@ std::vector<std::string> getAvailableLocale()
     }
     return result;
 }
-
-} // namespace icu
 
 } // namespace locale
 
