@@ -106,14 +106,14 @@ TEST(CommonTest, createDefaultTempDir)
     ASSERT_FALSE(isDirectory(TEMP_DIR));
 }
 
+// Don't use u8 literal.
+static std::string const UTF8_GA = "\xea\xb0\x80"; // "가"
+static std::string const UTF8_NA = "\xeb\x82\x98"; // "나"
+static std::string const UTF8_DA = "\xeb\x8b\xa4"; // "다"
+static std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
 TEST(CommonTest, isProhibitedNameWithUtf8)
 {
-    // Don't use u8 literal.
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     ASSERT_FALSE(windows::isProhibitedNameWithUtf8(UTF8_SOURCE));
     ASSERT_TRUE( windows::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_WINDOWS + UTF8_NA + UTF8_DA));
     ASSERT_TRUE( windows::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_WINDOWS + UTF8_DA));
@@ -135,11 +135,6 @@ TEST(CommonTest, isProhibitedNameWithUtf8)
 
 TEST(CommonTest, removeLastSeparatorWithUtf8)
 {
-    // Don't use u8 literal.
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE         = UTF8_GA + UTF8_NA + UTF8_DA;
     std::string const UTF8_SOURCE_WINDOWS = UTF8_SOURCE + PATH_SEPARATOR_OF_WINDOWS + PATH_SEPARATOR_OF_WINDOWS;
     std::string const UTF8_SOURCE_POSIX   = UTF8_SOURCE + PATH_SEPARATOR_OF_POSIX   + PATH_SEPARATOR_OF_POSIX;
     std::string const UTF8_SOURCE_WINDOWS_POSIX = UTF8_SOURCE_WINDOWS + PATH_SEPARATOR_OF_POSIX;
@@ -160,11 +155,6 @@ TEST(CommonTest, removeLastSeparatorWithUtf8)
 
 TEST(CommonTest, removeDuplicateSeparatorsWithUtf8)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     std::string const TEMP = "/\\////\\\\" + UTF8_SOURCE + "\\//\\/";
     std::string const RESULT_WINDOWS = "\\" + UTF8_SOURCE + "\\";
     std::string const RESULT_POSIX   = "/\\/\\\\" + UTF8_SOURCE + "\\/\\/";
@@ -182,11 +172,6 @@ TEST(CommonTest, removeDuplicateSeparatorsWithUtf8)
 
 TEST(CommonTest, getNativeWithUtf8)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     std::string const TEMP = "/\\////\\\\" + UTF8_SOURCE + "\\//\\/";
     std::string const RESULT_WINDOWS = "\\" + UTF8_SOURCE;
     std::string const RESULT_POSIX   = "/\\/\\\\" + UTF8_SOURCE + "\\/\\";
@@ -203,11 +188,6 @@ TEST(CommonTest, getNativeWithUtf8)
 
 TEST(CommonTest, getRootDirWithUtf8)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     std::string temp;
     std::string result_windows;
     std::string result_posix;
@@ -262,11 +242,6 @@ TEST(CommonTest, getRootDirWithUtf8)
 
 TEST(CommonTest, removeLastNodeWithUtf8)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     std::string temp;
     std::string result_windows;
     std::string result_posix;
@@ -322,11 +297,6 @@ TEST(CommonTest, removeLastNodeWithUtf8)
 
 TEST(CommonTest, removeLastNodeWithUtf8_for_Windows)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     std::string const TEMP0 = "G:/" + UTF8_SOURCE + "\\//\\/.///..//TEST\\/";
     std::string const TEMP1 = "G:/" + UTF8_SOURCE + "\\//\\/.///..//";
     std::string const TEMP2 = "G:/" + UTF8_SOURCE + "\\//\\/.///";
@@ -366,11 +336,6 @@ TEST(CommonTest, removeLastNodeWithUtf8_for_Unix)
 
 TEST(CommonTest, splitNodesWithUtf8)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     std::string const TEMP = "../" + UTF8_SOURCE + "//";
     std::string const RESULT0 = "..";
     std::string const RESULT1 = UTF8_SOURCE;
@@ -383,10 +348,6 @@ TEST(CommonTest, splitNodesWithUtf8)
 
 TEST(CommonTest, splitNodesWithUtf8_for_Windows)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-
     std::string const TEMP0   = "D:/" + UTF8_GA + "\\//\\/.///..//" + UTF8_NA + "\\/";
     std::string const RESULT0 = "D:";
     std::string const RESULT1 = UTF8_GA;
@@ -405,10 +366,6 @@ TEST(CommonTest, splitNodesWithUtf8_for_Windows)
 
 TEST(CommonTest, splitNodesWithUtf8_for_Unix)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-
     std::string const TEMP0 = "/" + UTF8_GA + "\\//\\/.///..//" + UTF8_NA + "\\/";
     std::string const RESULT0 = "/";
     std::string const RESULT1 = UTF8_GA + "\\";

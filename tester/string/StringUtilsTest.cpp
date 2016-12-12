@@ -68,9 +68,9 @@ TEST(StringsTest, SplitTokens)
 TEST(StringsTest, splitUtf8Tokens)
 {
     // Don't use u8 literal.
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가.
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나.
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다.
+    std::string const UTF8_GA = "\xea\xb0\x80"; // "가"
+    std::string const UTF8_NA = "\xeb\x82\x98"; // "나"
+    std::string const UTF8_DA = "\xeb\x8b\xa4"; // "다"
     std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
     std::vector<std::string> tokens;
 
