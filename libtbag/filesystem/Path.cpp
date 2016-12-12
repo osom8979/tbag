@@ -24,6 +24,9 @@ namespace support_utf8 {
 
 inline static std::string getGlobalEncodingName()
 {
+    if (isWindowsPlatform()) {
+        return std::string("windows-") + locale::getEncoding(locale::getGlobalLocaleName());
+    }
     return locale::getEncoding(locale::getGlobalLocaleName());
 }
 
