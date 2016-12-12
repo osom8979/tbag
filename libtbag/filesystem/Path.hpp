@@ -38,7 +38,7 @@ namespace filesystem {
  * @date   2016-10-14 (Change: class template -> class)
  *
  * @warning
- *  Supports multibyte-string only.
+ *  Supports UTF-8 (multibyte-string) only.
  */
 class TBAG_API Path
 {
@@ -63,8 +63,7 @@ public:
     { return !isWindowsStyle(); }
 
 private:
-    std::locale _locale;
-    std::string _path;
+    std::string _path; ///< UTF-8 string.
 
 // Constructors.
 public:
