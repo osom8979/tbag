@@ -59,7 +59,7 @@ TEST(CommonTest, Default)
     ASSERT_FALSE(exists(MOVE_FILE_PATH));
 
     ASSERT_TRUE(createDirectory(TEST_DIR));
-    ASSERT_TRUE(createSimpleTextFile(TEST_FILE_PATH, &TEST_CONTENT[0], TEST_CONTENT.size()));
+    ASSERT_EQ(TEST_CONTENT.size(), createSimpleTextFile(TEST_FILE_PATH, &TEST_CONTENT[0], TEST_CONTENT.size()));
 
     ASSERT_TRUE(exists(TEST_DIR));
     ASSERT_TRUE(exists(TEST_FILE_PATH));
