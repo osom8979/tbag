@@ -154,6 +154,8 @@ std::vector<std::string> scanDir(std::string const & utf8_path)
                     result.push_back(node);
                 }
             }
+
+            return result;
         }
     }
 
@@ -165,8 +167,8 @@ std::size_t getFileSize(std::string const & utf8_path)
     std::string native_path;
     if (locale::isUtf8GloablEncoding()) {
         native_path = utf8_path;
-    } else if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), native_path) == false) {
-        native_path = utf8_path;
+    } else {
+        locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path);
     }
 
     std::ifstream f(native_path, std::ios_base::ate | std::ios_base::binary);
@@ -181,8 +183,8 @@ std::size_t createSimpleTextFile(std::string const & utf8_path, char const * buf
     std::string native_path;
     if (locale::isUtf8GloablEncoding()) {
         native_path = utf8_path;
-    } else if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), native_path) == false) {
-        native_path = utf8_path;
+    } else {
+        locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path);
     }
 
     std::ofstream f(native_path, std::ios_base::binary);
