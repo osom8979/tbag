@@ -130,7 +130,7 @@ TEST(CommonTest, isProhibitedNameWithUtf8)
     ASSERT_TRUE( unix::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
     ASSERT_TRUE( unix::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
 
-    ASSERT_FALSE(isProhibitedNameWithUtf8(UTF8_SOURCE));
+    ASSERT_FALSE(isProhibitedName(UTF8_SOURCE));
 }
 
 TEST(CommonTest, removeLastSeparatorWithUtf8)
@@ -150,7 +150,7 @@ TEST(CommonTest, removeLastSeparatorWithUtf8)
     ASSERT_EQ(UTF8_SOURCE_WINDOWS      , unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS_POSIX));
     ASSERT_EQ(UTF8_SOURCE_POSIX_WINDOWS, unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX_WINDOWS));
 
-    ASSERT_EQ(UTF8_SOURCE, removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX));
+    ASSERT_EQ(UTF8_SOURCE, removeLastSeparator(UTF8_SOURCE_POSIX));
 }
 
 TEST(CommonTest, removeDuplicateSeparatorsWithUtf8)
@@ -166,8 +166,8 @@ TEST(CommonTest, removeDuplicateSeparatorsWithUtf8)
     ASSERT_EQ(RESULT_GENERIC, windows::removeDuplicateSeparatorsWithGenericUtf8(TEMP));
     ASSERT_EQ(RESULT_POSIX, unix::removeDuplicateSeparatorsWithGenericUtf8(TEMP));
 
-    ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparatorsWithUtf8(UTF8_SOURCE));
-    ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparatorsWithGenericUtf8(UTF8_SOURCE));
+    ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparators(UTF8_SOURCE));
+    ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparatorsWithGeneric(UTF8_SOURCE));
 }
 
 TEST(CommonTest, getNativeWithUtf8)
@@ -183,7 +183,7 @@ TEST(CommonTest, getNativeWithUtf8)
     ASSERT_EQ(RESULT_GENERIC, windows::getGenericWithUtf8(TEMP));
     ASSERT_EQ(RESULT_POSIX, unix::getGenericWithUtf8(TEMP));
 
-    ASSERT_EQ(UTF8_SOURCE, getGenericWithUtf8(UTF8_SOURCE));
+    ASSERT_EQ(UTF8_SOURCE, getGeneric(UTF8_SOURCE));
 }
 
 TEST(CommonTest, getRootDirWithUtf8)
@@ -235,9 +235,9 @@ TEST(CommonTest, getRootDirWithUtf8)
     temp = UTF8_SOURCE + "/";
     ASSERT_EQ(std::string(""), windows::getRootDirWithUtf8(temp));
     ASSERT_EQ(std::string(""), unix::getRootDirWithUtf8(temp));
-    ASSERT_EQ(std::string(""), getRootDirWithUtf8(temp));
-    ASSERT_FALSE(isAbsoluteWithUtf8(temp));
-    ASSERT_TRUE(isRelativeWithUtf8(temp));
+    ASSERT_EQ(std::string(""), getRootDir(temp));
+    ASSERT_FALSE(isAbsolute(temp));
+    ASSERT_TRUE(isRelative(temp));
 }
 
 TEST(CommonTest, removeLastNodeWithUtf8)
@@ -340,7 +340,7 @@ TEST(CommonTest, splitNodesWithUtf8)
     std::string const RESULT0 = "..";
     std::string const RESULT1 = UTF8_SOURCE;
 
-    auto nodes = splitNodesWithUtf8(TEMP);
+    auto nodes = splitNodes(TEMP);
     ASSERT_EQ(2U, nodes.size());
     ASSERT_EQ(RESULT0, nodes[0]);
     ASSERT_EQ(RESULT1, nodes[1]);

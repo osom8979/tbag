@@ -6,42 +6,12 @@
  */
 
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/filesystem/details/TemplateFileSystem.hpp-inl>
-#include <libtbag/filesystem/Common.hpp>
-#include <libtbag/locale/Locale.hpp>
-#include <libtbag/locale/Convert.hpp>
-
-#include <algorithm>
-#include <utility>
-#include <fstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace filesystem {
-
-inline static std::vector<std::string> scanDirFromUtf8(std::string const & path)
-{
-    if (locale::isUtf8GloablEncoding() == false) {
-        std::string native_path;
-
-        if (locale::convertFromUtf8(path, locale::getGlobalEncodingName(), native_path)) {
-            std::vector<std::string> result;
-
-            for (auto & node : libtbag::filesystem::scanDir(native_path)) {
-                std::string utf8_node;
-                if (locale::convertToUtf8(node, locale::getGlobalEncodingName(), utf8_node)) {
-                    result.push_back(std::move(utf8_node));
-                } else {
-                    result.push_back(node);
-                }
-            }
-        }
-    }
-
-    return libtbag::filesystem::scanDir(path);
-}
 
 Path::Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<std::string>::value) : _path()
 {
@@ -172,7 +142,7 @@ void Path::swap(Path & obj)
 
 std::string Path::getGenericString() const
 {
-    return getGenericWithUtf8(_path);
+    return filesystem::getGeneric(_path);
 }
 
 Path Path::getGeneric() const
@@ -182,7 +152,7 @@ Path Path::getGeneric() const
 
 std::string Path::getNativeString() const
 {
-    return getNativeWithUtf8(_path);
+    return filesystem::getNative(_path);
 }
 
 Path Path::getNative() const
@@ -220,7 +190,7 @@ Path & Path::updateCanonical()
 
 std::string Path::getRootDirString() const
 {
-    return getRootDirWithUtf8(_path);
+    return filesystem::getRootDir(_path);
 }
 
 Path Path::getRootDir() const
@@ -235,20 +205,20 @@ bool Path::isRootDir() const
 
 bool Path::isAbsolute() const
 {
-    return isAbsoluteWithUtf8(_path);
+    return filesystem::isAbsolute(_path);
 }
 
 bool Path::isRelative() const
 {
-    return isRelativeWithUtf8(_path);
+    return filesystem::isRelative(_path);
 }
 
 std::string Path::append(std::string const & parent, std::string const & child)
 {
     std::string result = parent;
-    // 문지열이 공백일 경우, 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다.
-    if (!parent.empty() && parent.back() != PATH_SEPARATOR) {
-        result += PATH_SEPARATOR;
+    // "문지열이 공백일 경우 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다."
+    if (!parent.empty() && parent.back() != details::PATH_SEPARATOR) {
+        result += details::PATH_SEPARATOR;
     }
     result += child;
     return result;
@@ -298,10 +268,7 @@ Path::operator char const * () const
 
 std::string Path::getParentString() const
 {
-    if (isAbsolute()) {
-        return removeLastNodeWithUtf8(_path);
-    }
-    return appendParentWithUtf8(_path);
+    return filesystem::getParent(_path);
 }
 
 Path Path::getParent() const
@@ -311,41 +278,12 @@ Path Path::getParent() const
 
 std::vector<std::string> Path::splitNodes() const
 {
-    return splitNodesWithUtf8(_path);
+    return filesystem::splitNodes(_path);
 }
 
 std::vector<std::string> Path::splitNodesWithCanonical() const
 {
-    std::vector<std::string> result;
-    std::vector<std::string> nodes = splitNodes();
-    using NodeItr = std::vector<std::string>::iterator;
-
-    NodeItr itr;
-    NodeItr end = nodes.end();
-
-    if (isAbsolute() == true) {
-        itr = nodes.begin();
-    } else {
-        if (nodes.size() >= 1 && nodes.at(0) == HOME_DIRECTORY_SHORTCUT) {
-            result = Path(getHomeDir()).splitNodes();
-            itr = nodes.begin() + 1;
-        } else {
-            result = Path(getWorkDir()).splitNodes();
-            itr = nodes.begin();
-        }
-    }
-
-    for (; itr != end; ++itr) {
-        if (*itr == CURRENT_DIRECTORY_SHORTCUT) {
-            // skip.
-        } else if (*itr == PARENT_DIRECTORY_SHORTCUT) {
-            result.pop_back();
-        } else {
-            result.push_back(*itr);
-        }
-    }
-
-    return result;
+    return filesystem::splitNodesWithCanonical(_path);
 }
 
 std::string Path::getName() const
@@ -359,41 +297,37 @@ std::string Path::getName() const
 
 bool Path::exists() const
 {
-    return details::isFromUtf8Path(_path, libtbag::filesystem::exists);
-}
-
-bool Path::isExecutable() const
-{
-    return details::isFromUtf8Path(_path, libtbag::filesystem::isExecutable);
-}
-
-bool Path::isWritable() const
-{
-    return details::isFromUtf8Path(_path, libtbag::filesystem::isWritable);
-}
-
-bool Path::isReadable() const
-{
-    return details::isFromUtf8Path(_path, libtbag::filesystem::isReadable);
+    return filesystem::exists(_path);
 }
 
 bool Path::isRegularFile() const
 {
-    return details::isFromUtf8Path(_path, libtbag::filesystem::isRegularFile);
+    return filesystem::isRegularFile(_path);
 }
 
 bool Path::isDirectory() const
 {
-    return details::isFromUtf8Path(_path, libtbag::filesystem::isDirectory);
+    return filesystem::isDirectory(_path);
+}
+
+bool Path::isExecutable() const
+{
+    return filesystem::isExecutable(_path);
+}
+
+bool Path::isWritable() const
+{
+    return filesystem::isWritable(_path);
+}
+
+bool Path::isReadable() const
+{
+    return filesystem::isReadable(_path);
 }
 
 bool Path::createDir() const
 {
-    auto parent = getParent();
-    if (parent.isDirectory() && parent.isWritable() && exists() == false) {
-        return details::isFromUtf8Path(_path, libtbag::filesystem::createDirectory);
-    }
-    return false;
+    return filesystem::createDirectory(_path);
 }
 
 bool Path::createDirWithRecursive() const
@@ -421,29 +355,23 @@ bool Path::remove() const
 
 bool Path::removeFile() const
 {
-    if (isRegularFile() && isWritable()) {
-        return details::isFromUtf8Path(_path, libtbag::filesystem::removeFile);
-    }
-    return false;
+    return filesystem::removeFile(_path);
 }
 
 bool Path::removeDir() const
 {
-    if (isDirectory() && isWritable()) {
-        return details::isFromUtf8Path(_path, libtbag::filesystem::removeDirectory);
-    }
-    return false;
+    return filesystem::removeDirectory(_path);
 }
 
 bool Path::removeDirWithRecursive() const
 {
-    return details::isFromUtf8Path(_path, libtbag::filesystem::removeAll);
+    return filesystem::removeAll(_path);
 }
 
 std::vector<Path> Path::scanDir() const
 {
     std::vector<Path> result;
-    for (auto & path : scanDirFromUtf8(_path)) {
+    for (auto & path : filesystem::scanDir(_path)) {
         result.push_back(Path(_path) / path);
     }
     return result;
@@ -451,38 +379,27 @@ std::vector<Path> Path::scanDir() const
 
 std::size_t Path::size() const
 {
-    std::string native_path;
-    if (locale::isUtf8GloablEncoding()) {
-        native_path = _path;
-    } else if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), native_path) == false) {
-        native_path = _path;
-    }
-
-    std::ifstream f(native_path, std::ios_base::ate | std::ios_base::binary);
-    if (f.eof() == false && f.fail() == false) {
-        return static_cast<std::size_t>(f.tellg()/*std::streamoff*/);
-    }
-    return 0U;
+    return filesystem::getFileSize(_path);
 }
 
 Path Path::getWorkDir()
 {
-    return Path(details::toUtf8Path(libtbag::filesystem::getWorkDir));
+    return Path(filesystem::getWorkDir());
 }
 
 Path Path::getHomeDir()
 {
-    return Path(details::toUtf8Path(libtbag::filesystem::getHomeDir));
+    return Path(filesystem::getHomeDir());
 }
 
 Path Path::getExePath()
 {
-    return Path(details::toUtf8Path(libtbag::filesystem::getExePath));
+    return Path(filesystem::getExePath());
 }
 
 Path Path::getExeDir()
 {
-    return Path(removeLastNodeWithUtf8(details::toUtf8Path(libtbag::filesystem::getExePath)));
+    return Path(filesystem::getExeDir());
 }
 
 } // namespace filesystem

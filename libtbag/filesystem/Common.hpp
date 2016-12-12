@@ -5,7 +5,7 @@
  * @date   2016-04-08
  *
  * @warning
- *  Supports multibyte-string only.
+ *  Supports UTF-8 (multibyte-string) only.
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_COMMON_HPP__
@@ -18,20 +18,15 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/filesystem/details/CommonFileSystem.hpp>
+#include <libtbag/filesystem/details/FileSystemTypes.hpp>
 #include <libtbag/filesystem/details/WindowsFileSystem.hpp>
 #include <libtbag/filesystem/details/UnixFileSystem.hpp>
+#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#if defined(__PLATFORM_WINDOWS__)
-namespace __impl = ::libtbag::filesystem::details::windows;
-#else
-namespace __impl = ::libtbag::filesystem::details::unix;
-#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,50 +34,53 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-// @formatter:off
-namespace details {
-namespace windows {
-TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
-TBAG_API std::string getNativeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string getGenericWithUtf8(std::string const & utf8_path);
-TBAG_API std::string getRootDirWithUtf8(std::string const & utf8_path);
-TBAG_API bool isAbsoluteWithUtf8(std::string const & utf8_path);
-TBAG_API bool isRelativeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeLastNodeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string appendParentWithUtf8(std::string const & path);
-TBAG_API std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path);
-} // namespace windows
+TBAG_API std::string getTempDir();
+TBAG_API std::string getWorkDir();
+TBAG_API std::string getHomeDir();
+TBAG_API std::string getExePath();
+TBAG_API std::string getExeDir();
+TBAG_API std::string getRealPath(std::string const & utf8_path);
 
-namespace unix {
-TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
-TBAG_API std::string getNativeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string getGenericWithUtf8(std::string const & utf8_path);
-TBAG_API std::string getRootDirWithUtf8(std::string const & utf8_path);
-TBAG_API bool isAbsoluteWithUtf8(std::string const & utf8_path);
-TBAG_API bool isRelativeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string removeLastNodeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string appendParentWithUtf8(std::string const & path);
-TBAG_API std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path);
-} // namespace unix
-
-} // namespace details
-// @formatter:on
-
-using namespace ::libtbag::filesystem::details;
-using namespace __impl;
-
-TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
-TBAG_API std::string createDefaultTempDir();
-
+TBAG_API bool createDirectory(std::string const & utf8_path);
+TBAG_API bool removeDirectory(std::string const & utf8_path);
+TBAG_API bool removeFile(std::string const & utf8_path);
 TBAG_API bool removeAll(std::string const & path);
+TBAG_API bool rename(std::string const & utf8_from, std::string const & utf8_to);
+TBAG_API bool exists(std::string const & utf8_path);
 
-TBAG_API void printInfos(std::ostream * stream = nullptr);
+TBAG_API bool isDirectory(std::string const & utf8_path);
+TBAG_API bool isRegularFile(std::string const & utf8_path);
+TBAG_API bool isExecutable(std::string const & utf8_path);
+TBAG_API bool isWritable(std::string const & utf8_path);
+TBAG_API bool isReadable(std::string const & utf8_path);
+
+TBAG_API std::vector<std::string> scanDir(std::string const & utf8_path);
+
+TBAG_API std::size_t getFileSize(std::string const & utf8_path);
+
+// --------------------------
+// Filesystem path operators.
+// --------------------------
+
+TBAG_API bool isProhibitedName(std::string const & utf8_path);
+
+TBAG_API std::string removeLastSeparator(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparators(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithGeneric(std::string const & utf8_path);
+
+TBAG_API std::string getNative(std::string const & utf8_path);
+TBAG_API std::string getGeneric(std::string const & utf8_path);
+TBAG_API std::string getRootDir(std::string const & utf8_path);
+TBAG_API std::string getParent(std::string const & utf8_path);
+
+TBAG_API bool isAbsolute(std::string const & utf8_path);
+TBAG_API bool isRelative(std::string const & utf8_path);
+
+TBAG_API std::string removeLastNode(std::string const & utf8_path);
+TBAG_API std::string appendParent(std::string const & utf8_path);
+
+TBAG_API std::vector<std::string> splitNodes(std::string const & utf8_path);
+TBAG_API std::vector<std::string> splitNodesWithCanonical(std::string const & utf8_path);
 
 } // namespace filesystem
 

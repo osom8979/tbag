@@ -189,12 +189,11 @@ public:
 // Filesystem operators.
 public:
     bool exists() const;
+    bool isRegularFile() const;
+    bool isDirectory() const;
     bool isExecutable() const;
     bool isWritable() const;
     bool isReadable() const;
-
-    bool isRegularFile() const;
-    bool isDirectory() const;
 
     bool createDir() const;
     bool createDirWithRecursive() const;

@@ -157,7 +157,7 @@ Zip::ResultCode Zip::unzip(std::string const & file, std::string const & dir)
          //          << ") ORI_SIZE("  << info.uncompressed_size
          //          << ")\n";
 
-        std::string const OUTPUT_NODE_PATH = dir + filesystem::PATH_SEPARATOR + filename;
+        std::string const OUTPUT_NODE_PATH = dir + filesystem::details::PATH_SEPARATOR + filename;
 
         if (info.compressed_size == 0 && info.uncompressed_size == 0) {
             // Directory.

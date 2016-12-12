@@ -410,9 +410,9 @@ std::string removeLastNodeWithUtf8(std::string const & utf8_path)
     return details::removeLastNodeWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>);
 }
 
-std::string appendParentWithUtf8(std::string const & path)
+std::string appendParentWithUtf8(std::string const & utf8_path)
 {
-    return path + PATH_SEPARATOR_OF_POSIX + PARENT_DIRECTORY_SHORTCUT;
+    return utf8_path + PATH_SEPARATOR_OF_POSIX + PARENT_DIRECTORY_SHORTCUT;
 }
 
 std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
