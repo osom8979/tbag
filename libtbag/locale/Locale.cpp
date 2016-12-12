@@ -111,11 +111,30 @@ std::string getEncoding(std::locale const & locale) { return getEncoding(locale.
 std::string getModifier(std::locale const & locale) { return getModifier(locale.name()); }
 // @formatter:on
 
-bool isUtf8Encoding(std::locale const & locale)
+
+bool isUtf8EncodingName(std::string const & name)
 {
-    std::string encoding = getEncoding(locale.name());
+    std::string encoding = getEncoding(name);
     std::transform(encoding.begin(), encoding.end(), encoding.begin(), ::tolower);
-    return (encoding == "65001" || encoding == "cp65001" || encoding == "utf8" || encoding == "utf-8");
+    return (encoding == "utf-8"             ||
+            encoding == "ibm-1208"          ||
+            encoding == "ibm-1209"          ||
+            encoding == "ibm-5304"          ||
+            encoding == "ibm-5305"          ||
+            encoding == "ibm-13496"         ||
+            encoding == "ibm-13497"         ||
+            encoding == "ibm-17592"         ||
+            encoding == "ibm-17593"         ||
+            encoding == "windows-65001"     ||
+            encoding == "cp1208"            ||
+            encoding == "x-utf_8j"          ||
+            encoding == "unicode-1-1-utf-8" ||
+            encoding == "unicode-2-0-utf-8");
+}
+
+bool isUtf8EncodingName(std::locale const & locale)
+{
+    return isUtf8EncodingName(locale.name());
 }
 
 namespace icu {

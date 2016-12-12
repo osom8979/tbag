@@ -60,7 +60,13 @@ TBAG_API std::string  getCountry(std::locale const & locale);
 TBAG_API std::string getEncoding(std::locale const & locale);
 TBAG_API std::string getModifier(std::locale const & locale);
 
-TBAG_API bool isUtf8Encoding(std::locale const & locale);
+/**
+ * Check the encoding name of UTF-8.
+ *
+ * @see http://demo.icu-project.org/icu-bin/convexp
+ */
+TBAG_API bool isUtf8EncodingName(std::string const & name);
+TBAG_API bool isUtf8EncodingName(std::locale const & locale);
 
 namespace icu {
 TBAG_API std::string getDefaultLocaleName();

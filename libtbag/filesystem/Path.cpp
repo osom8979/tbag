@@ -29,7 +29,7 @@ inline static std::string getGlobalEncodingName()
 
 inline static bool isUtf8GloablEncoding()
 {
-    return locale::isUtf8Encoding(std::locale(locale::getGlobalLocaleName()));
+    return locale::isUtf8EncodingName(std::locale(locale::getGlobalLocaleName()));
 }
 
 template <typename Predicated>

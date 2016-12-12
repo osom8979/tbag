@@ -126,7 +126,7 @@ bool convertToUtf8(std::string const & from_string, std::string const & from_cha
     std::vector<UChar> unicode_buffer;
     unicode_buffer.resize(result_size + 1);
     unicode_buffer.at(result_size) = '\0';
-    result_size = ucnv_toUChars(converter.get(), &unicode_buffer[0], unicode_buffer.size(), from_string.c_str(), from_string.size(), &status);
+    result_size = ucnv_toUChars_57(converter.get(), &unicode_buffer[0], unicode_buffer.size(), from_string.c_str(), from_string.size(), &status);
 
     if (U_FAILURE(status)) {
         __tbag_error_f("convertToUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
