@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/res/Asset.hpp>
+#include <libtbag/locale/Convert.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -34,7 +35,7 @@ public:
 
 public:
     static Path getTesterAssetDir()
-    { return (Path(__FILE__).getParent() / "asset"); }
+    { return (Path(SOURCE_FILE_UTF8_PATH).getParent() / "asset"); }
 
 public:
     CREATE_ASSET_PATH(tester_dir,       getTesterAssetDir());

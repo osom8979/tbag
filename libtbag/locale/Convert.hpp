@@ -43,5 +43,9 @@ TBAG_API std::string convertNativeToUtf8(std::string const & native);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
+#ifndef SOURCE_FILE_UTF8_PATH
+#define SOURCE_FILE_UTF8_PATH ::libtbag::locale::convertNativeToUtf8(std::string(__FILE__))
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOCALE_CONVERT_HPP__
 
