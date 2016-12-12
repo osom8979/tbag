@@ -33,20 +33,10 @@ TEST(CommonTest, printInfos)
 
 TEST(CommonTest, Default)
 {
-    auto createTestFile = [](std::string const & path) -> bool {
-        try {
-            std::ofstream f(path);
-            f << "TEST";
-            f.close();
-        } catch (...) {
-            return false;
-        }
-        return true;
-    };
-
     std::string const TEST_DIR_NAME  = "__filesystem_common_test_default";
     std::string const TEST_FILE_NAME = "test";
     std::string const MOVE_FILE_NAME = "test_move";
+    std::string const TEST_CONTENT   = "TEST";
 
     std::string const TEST_DIR = getWorkDir() + PATH_SEPARATOR + TEST_DIR_NAME;
     std::string const TEST_FILE_PATH = TEST_DIR + PATH_SEPARATOR + TEST_FILE_NAME;
@@ -69,7 +59,7 @@ TEST(CommonTest, Default)
     ASSERT_FALSE(exists(MOVE_FILE_PATH));
 
     ASSERT_TRUE(createDirectory(TEST_DIR));
-    ASSERT_TRUE(createTestFile(TEST_FILE_PATH));
+    ASSERT_TRUE(createSimpleTextFile(TEST_FILE_PATH, &TEST_CONTENT[0], TEST_CONTENT.size()));
 
     ASSERT_TRUE(exists(TEST_DIR));
     ASSERT_TRUE(exists(TEST_FILE_PATH));
@@ -313,11 +303,6 @@ TEST(CommonTest, removeLastNodeWithUtf8_for_Windows)
 
 TEST(CommonTest, removeLastNodeWithUtf8_for_Unix)
 {
-    std::string const UTF8_GA = "\xea\xb0\x80"; // 가
-    std::string const UTF8_NA = "\xeb\x82\x98"; // 나
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // 다
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
-
     std::string const TEMP0 = "/" + UTF8_SOURCE + "\\//\\/.///..//TEST\\/";
     std::string const TEMP1 = "/" + UTF8_SOURCE + "\\//\\/.///..//";
     std::string const TEMP2 = "/" + UTF8_SOURCE + "\\//\\/.///";

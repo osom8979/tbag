@@ -176,6 +176,22 @@ std::size_t getFileSize(std::string const & utf8_path)
     return 0U;
 }
 
+std::size_t createSimpleTextFile(std::string const & utf8_path, char const * buffer, std::size_t size)
+{
+    std::string native_path;
+    if (locale::isUtf8GloablEncoding()) {
+        native_path = utf8_path;
+    } else if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), native_path) == false) {
+        native_path = utf8_path;
+    }
+
+    std::ofstream f(native_path, std::ios_base::binary);
+    if (f.is_open()) {
+        return static_cast<std::size_t>(f.write(buffer, size).tellp());
+    }
+    return 0U;
+}
+
 // --------------------------
 // Filesystem path operators.
 // --------------------------

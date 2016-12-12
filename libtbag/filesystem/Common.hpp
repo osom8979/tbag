@@ -57,6 +57,7 @@ TBAG_API bool isReadable(std::string const & utf8_path);
 TBAG_API std::vector<std::string> scanDir(std::string const & utf8_path);
 
 TBAG_API std::size_t getFileSize(std::string const & utf8_path);
+TBAG_API std::size_t createSimpleTextFile(std::string const & utf8_path, char const * buffer, std::size_t size);
 
 // --------------------------
 // Filesystem path operators.
