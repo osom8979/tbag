@@ -22,7 +22,7 @@ namespace filesystem {
 namespace details {
 
 template <typename Prohibited>
-bool isProhibitedNameWithUtf8(std::string const utf8_path, Prohibited checker)
+bool isProhibitedNameWithUtf8(std::string const & utf8_path, Prohibited checker)
 {
     if (utf8_path.empty()) {
         return true;
@@ -135,7 +135,7 @@ std::string removeLastNodeWithUtf8(std::string const & utf8_path, PathSeparator 
 // @formatter:off
 namespace windows {
 
-bool isProhibitedNameWithUtf8(std::string const utf8_path)
+bool isProhibitedNameWithUtf8(std::string const & utf8_path)
 { return details::isProhibitedNameWithUtf8(utf8_path, windows::isProhibitedChar<UChar>); }
 
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
@@ -195,7 +195,7 @@ std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
 } // namespace windows
 namespace unix {
 
-bool isProhibitedNameWithUtf8(std::string const utf8_path)
+bool isProhibitedNameWithUtf8(std::string const & utf8_path)
 { return details::isProhibitedNameWithUtf8(utf8_path, unix::isProhibitedChar<UChar>); }
 
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
