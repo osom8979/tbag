@@ -14,7 +14,7 @@ using namespace libtbag::loop;
 TEST(TickLoopTest, Default)
 {
     int const RESULT_CODE = 50;
-    int const TEST_COUNT  = 10;
+    int const TEST_COUNT  = 2;
     int count = 0;
 
     TickLoop<> loop;
@@ -26,7 +26,7 @@ TEST(TickLoopTest, Default)
             ++count;
         }
     });
-    loop.setDuration(std::chrono::milliseconds(100));
+    loop.setDuration(std::chrono::milliseconds(1));
 
     ASSERT_EQ(RESULT_CODE, loop.run());
     ASSERT_EQ( TEST_COUNT, count);
