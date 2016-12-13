@@ -17,7 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/filesystem/Common.hpp>
+#include <libtbag/filesystem/Filesystem.hpp>
 
 #include <string>
 #include <locale>
@@ -203,7 +203,6 @@ public:
     bool removeDirWithRecursive() const;
 
     std::vector<Path> scanDir() const;
-
     std::size_t size() const;
 
 // Special directories.

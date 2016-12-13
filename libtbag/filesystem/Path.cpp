@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp> // TODO: REMOVE THIS INCLUDE.
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -217,8 +218,8 @@ std::string Path::append(std::string const & parent, std::string const & child)
 {
     std::string result = parent;
     // "문지열이 공백일 경우 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다."
-    if (!parent.empty() && parent.back() != details::PATH_SEPARATOR) {
-        result += details::PATH_SEPARATOR;
+    if (!parent.empty() && parent.back() != filesystem::details::PATH_SEPARATOR) {
+        result += filesystem::details::PATH_SEPARATOR;
     }
     result += child;
     return result;

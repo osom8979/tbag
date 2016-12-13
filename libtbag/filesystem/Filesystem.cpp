@@ -1,17 +1,20 @@
 /**
- * @file   Common.cpp
- * @brief  Common filesystem methods.
+ * @file   Filesystem.cpp
+ * @brief  Common filesystem method implementation.
  * @author zer0
  * @date   2016-07-06
+ * @date   2016-12-13 (Rename: Common -> Filesystem)
  */
 
-#include <libtbag/filesystem/Common.hpp>
+#include <libtbag/filesystem/Filesystem.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
+#include <libtbag/filesystem/details/WindowsFs.hpp>
+#include <libtbag/filesystem/details/UnixFs.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/locale/Locale.hpp>
 #include <libtbag/locale/Convert.hpp>
-#include <libtbag/string/StringUtils.hpp>
 
-#include <cassert>
 #include <fstream>
 
 #if defined(__PLATFORM_WINDOWS__)

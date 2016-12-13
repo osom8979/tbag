@@ -1,12 +1,16 @@
 /**
- * @file   CommonTest.cpp
- * @brief  Common class tester.
+ * @file   FilesystemTest.cpp
+ * @brief  Filesystem utilities tester.
  * @author zer0
  * @date   2016-04-08
+ * @date   2016-12-13 (Rename: CommonTest -> FilesystemTest)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/filesystem/Common.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp>
+#include <libtbag/filesystem/details/WindowsFs.hpp>
+#include <libtbag/filesystem/details/UnixFs.hpp>
+#include <libtbag/filesystem/Filesystem.hpp>
 
 #include <iostream>
 #include <fstream>

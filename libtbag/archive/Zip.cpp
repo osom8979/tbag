@@ -7,7 +7,7 @@
 
 #include <libtbag/archive/Zip.hpp>
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/filesystem/Common.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp> // TODO: REMOVE THIS INCLUDE.
 
 #include <cassert>
 #include <cstring>
