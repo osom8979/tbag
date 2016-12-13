@@ -62,6 +62,8 @@ char const * const    HOME_DIRECTORY_SHORTCUT =  "~";
 
 char const * const TEMP_DIRECTORY_SUFFIX = ".temp";
 
+int const CREATE_TEMPDIR_RETRY_COUNT = 10;
+
 } // namespace details
 } // namespace filesystem
 

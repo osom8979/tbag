@@ -72,16 +72,18 @@ TBAG_API std::string getHomeDir();
 TBAG_API std::string getExePathEx(std::size_t extend_buffer_size);
 TBAG_API std::string getExePath();
 
+TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
+TBAG_API std::string createDefaultTempDir();
+
 TBAG_API std::string getRealPath(std::string const & path);
 
 TBAG_API bool createDirectory(std::string const & path);
 TBAG_API bool removeDirectory(std::string const & path);
 TBAG_API bool removeFile(std::string const & path);
-
+TBAG_API bool removeAll(std::string const & path);
 TBAG_API bool rename(std::string const & from, std::string const & to);
 
 TBAG_API bool exists(std::string const & path);
-
 TBAG_API bool isDirectory(std::string const & path);
 TBAG_API bool isRegularFile(std::string const & path);
 

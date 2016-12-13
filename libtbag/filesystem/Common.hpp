@@ -21,7 +21,6 @@
 #include <libtbag/filesystem/details/FileSystemTypes.hpp>
 #include <libtbag/filesystem/details/WindowsFileSystem.hpp>
 #include <libtbag/filesystem/details/UnixFileSystem.hpp>
-#include <libtbag/filesystem/details/CommonFileSystem.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -39,6 +38,9 @@ TBAG_API std::string getWorkDir();
 TBAG_API std::string getHomeDir();
 TBAG_API std::string getExePath();
 TBAG_API std::string getExeDir();
+TBAG_API std::string createTempDir(std::string const & utf8_prefix, std::string const & utf8_suffix, std::size_t unique_size = 6);
+TBAG_API std::string createDefaultTempDir();
+
 TBAG_API std::string getRealPath(std::string const & utf8_path);
 
 TBAG_API bool createDirectory(std::string const & utf8_path);
@@ -82,6 +84,12 @@ TBAG_API std::string appendParent(std::string const & utf8_path);
 
 TBAG_API std::vector<std::string> splitNodes(std::string const & utf8_path);
 TBAG_API std::vector<std::string> splitNodesWithCanonical(std::string const & utf8_path);
+
+// ---------------------------------
+// Filesystem information operators.
+// ---------------------------------
+
+TBAG_API void printInfos(std::ostream * stream = nullptr);
 
 } // namespace filesystem
 

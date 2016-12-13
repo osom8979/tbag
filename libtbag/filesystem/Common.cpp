@@ -51,6 +51,34 @@ std::string getExeDir()
     return removeLastNode(details::toUtf8Path(__impl::getExePath));
 }
 
+std::string createTempDir(std::string const & utf8_prefix, std::string const & utf8_suffix, std::size_t unique_size)
+{
+    if (locale::isUtf8GloablEncodingName() == false) {
+        std::string native_prefix;
+        std::string native_suffix;
+
+        bool is_prefix = locale::convertFromUtf8(utf8_prefix, locale::getGlobalEncodingName(), native_prefix);
+        bool is_suffix = locale::convertFromUtf8(utf8_suffix, locale::getGlobalEncodingName(), native_suffix);
+
+        if (is_prefix && is_suffix) {
+            return __impl::createTempDir(native_prefix, native_suffix, unique_size);
+        }
+    }
+    return __impl::createTempDir(utf8_prefix, utf8_suffix, unique_size);
+}
+
+std::string createDefaultTempDir()
+{
+    std::string native_path = __impl::createDefaultTempDir();
+    if (locale::isUtf8GloablEncodingName() == false) {
+        std::string utf8_path;
+        if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), utf8_path)) {
+            return utf8_path;
+        }
+    }
+    return native_path;
+}
+
 std::string getRealPath(std::string const & utf8_path)
 {
     if (locale::isUtf8GloablEncodingName() == false) {
@@ -89,7 +117,7 @@ bool removeFile(std::string const & utf8_path)
 
 bool removeAll(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::removeAll);
+    return details::isFromUtf8Path(utf8_path, __impl::removeAll);
 }
 
 bool rename(std::string const & utf8_from, std::string const & utf8_to)
@@ -298,6 +326,31 @@ std::vector<std::string> splitNodesWithCanonical(std::string const & utf8_path)
     }
 
     return result;
+}
+
+// ---------------------------------
+// Filesystem information operators.
+// ---------------------------------
+
+void printInfos(std::ostream * stream)
+{
+    if (stream == nullptr) {
+        stream = &std::cout;
+    }
+
+    (*stream) << "Filesystem information:\n";
+    if (isWindowsPlatform()) {
+        (*stream) << " * Windows Platform Filesystem.\n";
+    }
+    if (isUnixLikePlatform()) {
+        (*stream) << " * Unix-like Platform Filesystem.\n";
+    }
+
+    (*stream) << " * Temp directory: " << __impl::getTempDir() << std::endl;
+    (*stream) << " * Home directory: " << __impl::getHomeDir() << std::endl;
+    (*stream) << " * Work directory: " << __impl::getWorkDir() << std::endl;
+    (*stream) << " * Work directory (realpath): " << __impl::getRealPath(".") << std::endl;
+    (*stream) << " * Exe path: "       << __impl::getExePath() << std::endl;
 }
 
 } // namespace filesystem
