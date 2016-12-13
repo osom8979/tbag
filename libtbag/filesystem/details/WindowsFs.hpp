@@ -1,15 +1,13 @@
 /**
- * @file   UnixFileSystem.hpp
- * @brief  UnixFileSystem helper methods.
+ * @file   WindowsFs.hpp
+ * @brief  Windows Filesystem helper methods.
  * @author zer0
  * @date   2016-12-02
- *
- * @remarks
- *  ISO/IEC 9945 POSIX API.
+ * @date   2016-12-13 (Rename: WindowsFileSystem -> WindowsFs)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_UNIXFILESYSTEM_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_UNIXFILESYSTEM_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_WINDOWSFS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_WINDOWSFS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -18,7 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/filesystem/details/FileSystemTypes.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp>
 
 #include <string>
 #include <vector>
@@ -29,30 +27,50 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-namespace unix       {
+namespace windows    {
 
 /**
- * Characters prohibited in unix filename.
+ * Characters prohibited in windows filename.
  *
  * @remarks
- *  - 0x00
+ *  Many operating systems prohibit the ASCII control characters (0x00-0x1F) in filenames.
+ *  - 0x00-0x1F
+ *  - '"'
+ *  - '*'
+ *  - '*'
+ *  - '<'
+ *  - '>'
+ *  - '?'
+ *  - '\\' (single backslash)
  *  - '/'
+ *  - '|'
  */
 template <typename CharType>
 inline bool isProhibitedChar(CharType v) TBAG_NOEXCEPT
 {
-    return v == '\0' || v == '/';
+    //if (0x00 <= COMPARE_AND(v) <= 0x1F) {
+    //    return true;
+    //}
+
+    switch (v) {
+    case  '*': case '<': case '>':
+    case  '?': case '/': case '|':
+    case '\\':
+        return true;
+    }
+    return false;
 }
 
 template <typename CharType>
 inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
 {
-    return v == PATH_SEPARATOR_OF_POSIX;
+    return v == PATH_SEPARATOR_OF_WINDOWS || v == PATH_SEPARATOR_OF_POSIX;
 }
 
 TBAG_API std::string getTempDir();
 TBAG_API std::string getWorkDir();
 TBAG_API std::string getHomeDir();
+TBAG_API std::string getExePathEx(std::size_t extend_buffer_size);
 TBAG_API std::string getExePath();
 
 TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
@@ -60,7 +78,6 @@ TBAG_API std::string createDefaultTempDir();
 
 TBAG_API std::string getRealPath(std::string const & path);
 
-TBAG_API bool createDirectoryEx(std::string const & path, int mode);
 TBAG_API bool createDirectory(std::string const & path);
 TBAG_API bool removeDirectory(std::string const & path);
 TBAG_API bool removeFile(std::string const & path);
@@ -94,7 +111,7 @@ TBAG_API std::string removeLastNodeWithUtf8(std::string const & utf8_path);
 TBAG_API std::string appendParentWithUtf8(std::string const & utf8_path);
 TBAG_API std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path);
 
-} // namespace unix
+} // namespace windows
 } // namespace details
 } // namespace filesystem
 
@@ -102,5 +119,5 @@ TBAG_API std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_pa
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_UNIXFILESYSTEM_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_WINDOWSFS_HPP__
 

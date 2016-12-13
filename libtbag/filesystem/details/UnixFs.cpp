@@ -1,15 +1,16 @@
 /**
- * @file   UnixFileSystem.cpp
- * @brief  UnixFileSystem helper methods implementation.
+ * @file   UnixFs.cpp
+ * @brief  Unix Filesystem helper methods implementation.
  * @author zer0
  * @date   2016-12-02
+ * @date   2016-12-13 (Rename: UnixFileSystem -> UnixFs)
  *
  * @remarks
  *  Use the libuv.
  */
 
-#include <libtbag/filesystem/details/UnixFileSystem.hpp>
-#include <libtbag/filesystem/details/TemplateFileSystem.hpp-inl>
+#include <libtbag/filesystem/details/UnixFs.hpp>
+#include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Type.hpp>

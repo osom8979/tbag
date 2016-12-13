@@ -18,9 +18,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/filesystem/details/FileSystemTypes.hpp>
-#include <libtbag/filesystem/details/WindowsFileSystem.hpp>
-#include <libtbag/filesystem/details/UnixFileSystem.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp>
+#include <libtbag/filesystem/details/WindowsFs.hpp>
+#include <libtbag/filesystem/details/UnixFs.hpp>
 
 #include <cstdlib>
 #include <iostream>

@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/filesystem/Common.hpp>
-#include <libtbag/filesystem/details/TemplateFileSystem.hpp-inl>
+#include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/locale/Locale.hpp>
 #include <libtbag/locale/Convert.hpp>
 #include <libtbag/string/StringUtils.hpp>

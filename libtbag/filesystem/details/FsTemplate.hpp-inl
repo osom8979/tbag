@@ -1,12 +1,13 @@
 /**
- * @file   TemplateFileSystem.hpp-inl
+ * @file   FsTemplate.hpp-inl
  * @brief  Template support-filesystem utilities.
  * @author zer0
  * @date   2016-12-12
+ * @date   2016-12-13 (Rename: TemplateFileSystem -> FsTemplate)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_TEMPLATEFILESYSTEM_HPP_INL__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_TEMPLATEFILESYSTEM_HPP_INL__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSTEMPLATE_HPP_INL__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSTEMPLATE_HPP_INL__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -174,5 +175,5 @@ inline static std::string toUtf8Path(Predicated predicated)
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_TEMPLATEFILESYSTEM_HPP_INL__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSTEMPLATE_HPP_INL__
 

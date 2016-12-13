@@ -1,12 +1,13 @@
 /**
- * @file   WindowsFileSystem.cpp
- * @brief  WindowsFileSystem helper methods implementation.
+ * @file   WindowsFs.cpp
+ * @brief  Windows Filesystem helper methods implementation.
  * @author zer0
  * @date   2016-12-02
+ * @date   2016-12-13 (Rename: WindowsFileSystem -> WindowsFs)
  */
 
-#include <libtbag/filesystem/details/WindowsFileSystem.hpp>
-#include <libtbag/filesystem/details/TemplateFileSystem.hpp-inl>
+#include <libtbag/filesystem/details/WindowsFs.hpp>
+#include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 

@@ -1,12 +1,13 @@
 /**
- * @file   FileSystemTypes.hpp
+ * @file   FsTypes.hpp
  * @brief  Filesystem related types.
  * @author zer0
  * @date   2016-12-04
+ * @date   2016-12-13 (Rename: FileSystemTypes -> FsTypes)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FILESYSTEMTYPES_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FILESYSTEMTYPES_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSYPES_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSYPES_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -71,5 +72,5 @@ int const CREATE_TEMPDIR_RETRY_COUNT = 10;
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FILESYSTEMTYPES_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSYPES_HPP__
 
