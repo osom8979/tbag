@@ -44,7 +44,7 @@ class TBAG_API Server : public Noncopyable
 {
 public:
     using Loop      = loop::UvEventLoop;
-    using Handle    = util::UvHandle;
+    using Handle    = util::UvNative;
 
     using ClientKey   = container::Pointer<void>;
     using ClientValue = std::shared_ptr<Tcp>;

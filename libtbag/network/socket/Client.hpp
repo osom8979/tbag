@@ -40,7 +40,7 @@ class TBAG_API Client : public Noncopyable
 {
 public:
     using Loop   = loop::UvEventLoop;
-    using Handle = util::UvHandle;
+    using Handle = util::UvNative;
 
 public:
     enum class Code

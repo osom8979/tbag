@@ -28,8 +28,7 @@ namespace debug {
     _TBAG_XX(FAILURE, Unknown error)    \
     /* locale/Convert */                                \
     _TBAG_XX(LOCALE_CONVERTER_ERROR, UConverter error)  \
-    /* -- END -- */\
-    _TBAG_XX(_, LAST)
+    /* -- END -- */
 #endif
 
 /** Native type of error code. */
