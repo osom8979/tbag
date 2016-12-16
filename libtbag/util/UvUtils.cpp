@@ -66,9 +66,8 @@ std::string getUvErrorName(int uv_error_code)
 // UvHandle implementation.
 // ------------------------
 
-UvNative::UvNative(UvType type) : TYPE(type), _native(nullptr)
+UvNative::UvNative(Type type) : TYPE(type), _native(nullptr)
 {
-
     switch (TYPE) {
 #define _TBAG_XX(name, type)                    \
     case UvType::name:                          \
@@ -87,30 +86,6 @@ UvNative::~UvNative()
         ::free(_native);
         _native = nullptr;
     }
-}
-
-// --------------------------
-// UvInStream implementation.
-// --------------------------
-
-UvInStream::UvInStream(UvType type) : UvNative(type)
-{
-}
-
-UvInStream::~UvInStream()
-{
-}
-
-// ---------------------------
-// UvOutStream implementation.
-// ---------------------------
-
-UvOutStream::UvOutStream(UvType type) : UvNative(type)
-{
-}
-
-UvOutStream::~UvOutStream()
-{
 }
 
 } // namespace util

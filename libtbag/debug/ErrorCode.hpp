@@ -58,6 +58,9 @@ inline char const * getErrorMessage(CodeType code)
 
 } // namespace debug
 
+typedef ::libtbag::debug::ErrorCode ErrorCode;
+typedef ::libtbag::debug::CodeType  ErrorCodeType;
+
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------

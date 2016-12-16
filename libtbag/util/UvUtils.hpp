@@ -112,42 +112,6 @@ enum class UvType : int
     UV_TYPE_SIZE
 };
 
-/** Table of libuv handle types. */
-enum class UvHandle : int
-{
-    _UV_HANDLE_START_NUMBER_ = -1,
-#define _TBAG_XX(name, type) name,
-#define _TBAG_NOT(name, type)
-    TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NOT, _TBAG_NOT)
-#undef _TBAG_XX
-#undef _TBAG_NOT
-    UV_HANDLE_SIZE
-};
-
-/** Table of libuv request types. */
-enum class UvRequset : int
-{
-    _UV_REQUEST_START_NUMBER_ = -1,
-#define _TBAG_XX(name, type) name,
-#define _TBAG_NOT(name, type)
-    TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NOT, _TBAG_XX, _TBAG_NOT)
-#undef _TBAG_XX
-#undef _TBAG_NOT
-    UV_REQUEST_SIZE
-};
-
-/** Table of libuv etc types. */
-enum class UvEtc : int
-{
-    _UV_ETC_START_NUMBER_ = -1,
-#define _TBAG_XX(name, type) name,
-#define _TBAG_NOT(name, type)
-    TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NOT, _TBAG_NOT, _TBAG_XX)
-#undef _TBAG_XX
-#undef _TBAG_NOT
-    UV_ETC_SIZE
-};
-
 /**
  * libuv native type utility class.
  *
@@ -156,12 +120,15 @@ enum class UvEtc : int
  */
 class TBAG_API UvNative
 {
+public:
+    using Type = UvType;
+
 private:
-    UvType const TYPE;
+    Type const TYPE;
     void * _native;
 
 public:
-    UvNative(UvType type);
+    UvNative(Type type);
     ~UvNative();
 
 public:
@@ -169,7 +136,7 @@ public:
     { return _native != nullptr; }
 
 public:
-    inline UvType getType() const TBAG_NOEXCEPT
+    inline Type getType() const TBAG_NOEXCEPT
     { return TYPE; }
 
 public:
@@ -184,33 +151,7 @@ public:
     { return static_cast<T*>(_native); }
 };
 
-/**
- * libuv input stream utility class.
- *
- * @author zer0
- * @date   2016-12-16
- */
-class TBAG_API UvInStream : public UvNative
-{
-public:
-    UvInStream(UvType type);
-    ~UvInStream();
-};
-
-/**
- * libuv output stream utility class.
- *
- * @author zer0
- * @date   2016-12-16
- */
-class TBAG_API UvOutStream : public UvNative
-{
-public:
-    UvOutStream(UvType type);
-    ~UvOutStream();
-};
-
-}; // namespace util
+} // namespace util
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
