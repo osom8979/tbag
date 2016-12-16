@@ -79,10 +79,10 @@ public:
     static void onClose(uv_handle_t * handle, void * arg)
     {
         if (isClosing(handle)) {
-            __tbag_debug_f("Closing uv handle: {}", util::getUvType(handle));
+            __tbag_debug("Closing uv handle: {}", util::getUvType(handle));
         } else {
             // If not closing or closed.
-            __tbag_debug_f("Not closing or closed uv handle: {}", util::getUvType(handle));
+            __tbag_debug("Not closing or closed uv handle: {}", util::getUvType(handle));
             ::uv_close(handle, nullptr);
         }
     }

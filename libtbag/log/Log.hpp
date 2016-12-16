@@ -54,22 +54,6 @@ TBAG_API void setLevel(std::string const & name, LogLevel level);
 TBAG_API void setLevel(std::string const & name, int level);
 TBAG_API void setDefaultLevel(LogLevel level);
 
-/**
- * Debugging logger initializer helper class.
- *
- * @author zer0
- * @date   2016-11-24
- */
-class TBAG_API DebuggingLoggerInitializer : public Noncopyable
-{
-private:
-    std::string const LOGGER_NAME;
-
-public:
-    DebuggingLoggerInitializer(LogLevel level = LogLevel::LEVEL_DEBUG, bool auto_flush = false);
-    virtual ~DebuggingLoggerInitializer();
-};
-
 template <typename ... Args>
 inline void logging(Logger * logger, LogLevel level, std::string const & format, Args && ... args)
 {
@@ -173,15 +157,13 @@ NAMESPACE_LIBTBAG_CLOSE
  *  Don't use this macros from user level developers.
  */
 #if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG) && !defined(NDEBUG)
-# define __tbag_error(msg)         tLogW(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME,  FILE_STRING ":" LINE_STRING " " msg)
-# define __tbag_debug(msg)         tLogN(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME,  FILE_STRING ":" LINE_STRING " " msg)
-# define __tbag_error_f(msg, ...)  tLogWF(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME, FILE_STRING ":" LINE_STRING " " msg, __VA_ARGS__)
-# define __tbag_debug_f(msg, ...)  tLogNF(::libtbag::log::TBAG_DEBUGGING_LOGGER_NAME, FILE_STRING ":" LINE_STRING " " msg, __VA_ARGS__)
+# include <cstdio>
+# include <libtbag/3rd/fmt/format.h>
+# define __tbag_debug(...) puts(::fmt::format("[DEBUG] " FILE_STRING ":" LINE_STRING " " __VA_ARGS__).c_str())
+# define __tbag_error(...) puts(::fmt::format("[ERROR] " FILE_STRING ":" LINE_STRING " " __VA_ARGS__).c_str())
 #else
-# define __tbag_error(msg)
-# define __tbag_debug(msg)
-# define __tbag_error_f(msg, ...)
-# define __tbag_debug_f(msg, ...)
+# define __tbag_debug(...)
+# define __tbag_error(...)
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__

@@ -47,7 +47,7 @@ static bool addr(std::string const & ip, int port, sockaddr_in * addr)
 {
     int const ERROR_CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details ipv4 addr error: {}", ERROR_CODE);
+        __tbag_error("socket::server_details ipv4 addr error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -57,7 +57,7 @@ static bool addr(std::string const & ip, int port, sockaddr_in6 * addr)
 {
     int const ERROR_CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details ipv6 addr error: {}", ERROR_CODE);
+        __tbag_error("socket::server_details ipv6 addr error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -68,7 +68,7 @@ static bool bind(uv_tcp_t * tcp, sockaddr const * address)
     unsigned int const BIND_FLAGS = 0;
     int const ERROR_CODE = ::uv_tcp_bind(tcp, address, BIND_FLAGS);
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details bind error: {}", ERROR_CODE);
+        __tbag_error("socket::server_details bind error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -89,7 +89,7 @@ static bool listen(uv_tcp_t * tcp)
     int const LISTEN_QUEUE_LIMIT = 128;
     int const ERROR_CODE = ::uv_listen((uv_stream_t*)tcp, LISTEN_QUEUE_LIMIT, TBAG_UV_EVENT_DEFAULT_CALLBACK_CONNECTION(onConnection));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details listen error: {}", ERROR_CODE);
+        __tbag_error("socket::server_details listen error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -104,7 +104,7 @@ static bool accept(uv_tcp_t * server, uv_tcp_t * client)
 {
     int const ERROR_CODE = ::uv_accept((uv_stream_t*)server, (uv_stream_t*)client);
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details accept error: {}", ERROR_CODE);
+        __tbag_error("socket::server_details accept error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -141,7 +141,7 @@ static bool read(uv_tcp_t * tcp)
                                            TBAG_UV_EVENT_DEFAULT_CALLBACK_ALLOC(onReadBufferAlloc),
                                            TBAG_UV_EVENT_DEFAULT_CALLBACK_READ(onRead));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details read error: {}", ERROR_CODE);
+        __tbag_error("socket::server_details read error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -160,7 +160,7 @@ static bool write(uv_write_t * handle, uv_tcp_t * tcp, char const * buffer, std:
 
     int const ERROR_CODE = ::uv_write(handle, (uv_stream_t*)tcp, &buf, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::server_details write error: {}", ERROR_CODE);
+        __tbag_error("socket::server_details write error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -259,11 +259,11 @@ bool Server::addClient(ClientKey key, ClientValue client)
 {
     using namespace server_details;
     if (_clients.insert(ClientMap::value_type(key, client)).second == false) {
-        __tbag_error_f("Server::addClient({}) Insert client error (size:{}).", key.get(), _clients.size());
+        __tbag_error("Server::addClient({}) Insert client error (size:{}).", key.get(), _clients.size());
         return false;
     }
 
-    __tbag_debug_f("Server::addClient({}) Insert client (size:{}).", key.get(), _clients.size());
+    __tbag_debug("Server::addClient({}) Insert client (size:{}).", key.get(), _clients.size());
     TBAG_UV_EVENT_DEFAULT_REGISTER(key.get(), this);
     return true;
 }
@@ -280,11 +280,11 @@ bool Server::removeClient(ClientKey key)
 
     bool const ERASE_RESULT = _clients.erase(key) == 1U;
     if (ERASE_RESULT == false) {
-        __tbag_error_f("Server::removeClient({}) Erase client error (size:{}).", key.get(), _clients.size());
+        __tbag_error("Server::removeClient({}) Erase client error (size:{}).", key.get(), _clients.size());
         return false;
     }
 
-    __tbag_debug_f("Server::removeClient({}) Erase client (size:{}).", key.get(), _clients.size());
+    __tbag_debug("Server::removeClient({}) Erase client (size:{}).", key.get(), _clients.size());
     return true;
 }
 
@@ -292,7 +292,7 @@ Server::ClientValue Server::getClient(ClientKey key)
 {
     auto find_itr = _clients.find(key);
     if (find_itr == _clients.end()) {
-        __tbag_error_f("Server::getClient({}) not found client key.", key.get());
+        __tbag_error("Server::getClient({}) not found client key.", key.get());
         return ClientValue();
     }
     return find_itr->second;
@@ -302,13 +302,13 @@ void Server::closeClient(ClientKey key)
 {
     auto find_itr = _clients.find(key);
     if (find_itr == _clients.end()) {
-        __tbag_error_f("Server::closeClient({}) not found client key.", key.get());
+        __tbag_error("Server::closeClient({}) not found client key.", key.get());
         return;
     }
 
     ClientValue client = find_itr->second;
     if (static_cast<bool>(client) == false) {
-        __tbag_error_f("Server::closeClient({}) invalidate client value.", key.get());
+        __tbag_error("Server::closeClient({}) invalidate client value.", key.get());
         return;
     }
 
@@ -319,7 +319,7 @@ bool Server::read(ClientKey key)
 {
     ClientValue client = getClient(key);
     if (static_cast<bool>(client) == false) {
-        __tbag_error_f("Server::read() not found client key ({})", key.get());
+        __tbag_error("Server::read() not found client key ({})", key.get());
         return false;
     }
     return server_details::read(*client.get());
@@ -371,7 +371,7 @@ void Server::onClose(void * handle)
 
 void Server::onCloseClient(void * handle)
 {
-    __tbag_debug_f("Server::onCloseClient({})", handle);
+    __tbag_debug("Server::onCloseClient({})", handle);
 
     if (_callback != nullptr) {
         _callback->onCloseClient(ClientKey(handle));
@@ -381,7 +381,7 @@ void Server::onCloseClient(void * handle)
 
 void Server::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
 {
-    __tbag_debug_f("Server::onReadBufferAlloc(suggested_size:{})", suggested_size);
+    __tbag_debug("Server::onReadBufferAlloc(suggested_size:{})", suggested_size);
 
     // Realloc with read buffer.
     if (_read_buffer.size() < suggested_size) {
@@ -395,7 +395,7 @@ void Server::onReadBufferAlloc(void * handle, size_t suggested_size, void * buf)
 
 void Server::onRead(void * client_stream, ssize_t nread, void const * buf)
 {
-    __tbag_debug_f("Server::onRead({})", client_stream);
+    __tbag_debug("Server::onRead({})", client_stream);
 
     Code code = Code::FAILURE;
 
@@ -411,17 +411,17 @@ void Server::onRead(void * client_stream, ssize_t nread, void const * buf)
 
         auto find_itr = _clients.find(from);
         if (find_itr == _clients.end()) {
-            __tbag_error_f("Server::onRead({}) Not found client.", client_stream);
+            __tbag_error("Server::onRead({}) Not found client.", client_stream);
             return;
         }
 
         ClientValue client = find_itr->second;
         if (static_cast<bool>(client) == false) {
-            __tbag_error_f("Server::onRead({}) Empty client.", client_stream);
+            __tbag_error("Server::onRead({}) Empty client.", client_stream);
             return;
         }
 
-        __tbag_debug_f("Server::onRead() client name: {}", client->getSocketName());
+        __tbag_debug("Server::onRead() client name: {}", client->getSocketName());
 
         _callback->onRead(from, code, uv_buf->base, static_cast<std::size_t>(nread));
     }

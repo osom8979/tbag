@@ -45,7 +45,7 @@ static bool addr(std::string const & ip, int port, sockaddr_in * addr)
 {
     int const ERROR_CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::client_details ipv4 addr error: {}", ERROR_CODE);
+        __tbag_error("socket::client_details ipv4 addr error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -55,7 +55,7 @@ static bool addr(std::string const & ip, int port, sockaddr_in6 * addr)
 {
     int const ERROR_CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::client_details ipv6 addr error: {}", ERROR_CODE);
+        __tbag_error("socket::client_details ipv6 addr error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -65,7 +65,7 @@ static bool connect(uv_connect_t * req, uv_tcp_t * tcp, sockaddr const * address
 {
     int const ERROR_CODE = ::uv_tcp_connect(req, tcp, address, TBAG_UV_EVENT_DEFAULT_CALLBACK_CONNECT(onConnect));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::client_details connect error: {}", ERROR_CODE);
+        __tbag_error("socket::client_details connect error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -101,7 +101,7 @@ static bool read(uv_tcp_t * tcp)
                                            TBAG_UV_EVENT_DEFAULT_CALLBACK_ALLOC(onReadBufferAlloc),
                                            TBAG_UV_EVENT_DEFAULT_CALLBACK_READ(onRead));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::client_details read error: {}", ERROR_CODE);
+        __tbag_error("socket::client_details read error: {}", ERROR_CODE);
         return false;
     }
     return true;
@@ -120,7 +120,7 @@ static bool write(uv_write_t * handle, uv_tcp_t * tcp, char const * buffer, std:
 
     int const ERROR_CODE = ::uv_write(handle, (uv_stream_t*)tcp, &buf, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
     if (ERROR_CODE != 0) {
-        __tbag_error_f("socket::client_details write error: {}", ERROR_CODE);
+        __tbag_error("socket::client_details write error: {}", ERROR_CODE);
         return false;
     }
     return true;

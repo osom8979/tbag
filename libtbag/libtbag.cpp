@@ -79,6 +79,7 @@ int tbGetPatchVersion()
 #include <libtbag/util/UvUtils.hpp>
 #include <libtbag/util/SingletonUtils.hpp>
 #include <libtbag/locale/Locale.hpp>
+#include <libtbag/log/Log.hpp>
 
 tbBOOL tbInitialize(tbInitParam * param)
 {
@@ -90,6 +91,9 @@ tbBOOL tbInitialize(tbInitParam * param)
     } else {
         libtbag::locale::setLocale(param->localname);
     }
+
+    __tbag_debug(LIBTBAG_MAIN_TITLE);
+    __tbag_debug("Global locale name: {}", libtbag::locale::getGlobalLocaleName());
 
     return AB_TRUE;
 }

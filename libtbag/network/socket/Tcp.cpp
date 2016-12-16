@@ -131,7 +131,7 @@ bool Tcp::init(libtbag::loop::UvEventLoop & loop)
 {
     int const ERROR_CODE = ::uv_tcp_init(static_cast<uv_loop_t*>(loop.getNative()), _tcp->get());
     if (ERROR_CODE != 0) {
-        __tbag_error_f("Tcp init error: {}", ERROR_CODE);
+        __tbag_error("Tcp init error: {}", ERROR_CODE);
         return false;
     }
     return true;

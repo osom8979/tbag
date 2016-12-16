@@ -63,7 +63,7 @@ static std::wstring mbsToWcs(std::string const & path)
         // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
         // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
         // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
-        __tbag_error_f("MultiByteToWideChar() ERROR: {}", GetLastError());
+        __tbag_error("MultiByteToWideChar() ERROR: {}", GetLastError());
         return std::wstring();
     }
 
@@ -95,7 +95,7 @@ static std::string wcsToMbs(std::wstring const & path)
         // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
         // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
         // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
-        __tbag_error_f("WideCharToMultiByte() ERROR: {}", GetLastError());
+        __tbag_error("WideCharToMultiByte() ERROR: {}", GetLastError());
         return std::string();
     }
 
@@ -124,7 +124,7 @@ static std::string getLongPathName(std::string const & path)
 
     DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
     if (COPIED_LENGTH == 0) {
-        __tbag_error_f("GetLongPathNameW() ERROR: {}", GetLastError());
+        __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
     }
     buffer.resize(COPIED_LENGTH);
     return wcsToMbs(buffer);
@@ -171,19 +171,19 @@ static bool checkPermission(std::string const & path, DWORD permission)
         return false;
     }
     if (GetFileSecurityW(&WCS_PATH[0], SECURITY, sd.get(), sd_length, &sd_length) == FALSE) {
-        __tbag_error_f("GetFileSecurityW() ERROR: {}", GetLastError());
+        __tbag_error("GetFileSecurityW() ERROR: {}", GetLastError());
         return false;
     }
 
     HANDLE ptoken = NULL;
     if (OpenProcessToken(GetCurrentProcess(), DESIRED_ACCESS, &ptoken) == FALSE) {
-        __tbag_error_f("OpenProcessToken() ERROR: {}", GetLastError());
+        __tbag_error("OpenProcessToken() ERROR: {}", GetLastError());
         return false;
     }
 
     HANDLE impersonated_token = NULL;
     if (DuplicateToken(ptoken, SecurityImpersonation, &impersonated_token) == FALSE) {
-        __tbag_error_f("DuplicateToken() ERROR: {}", GetLastError());
+        __tbag_error("DuplicateToken() ERROR: {}", GetLastError());
         CloseHandle(ptoken);
         return false;
     }
@@ -204,7 +204,7 @@ static bool checkPermission(std::string const & path, DWORD permission)
     if (AccessCheck(sd.get(), impersonated_token, permission, &mapping, &privileges, &privileges_length, &granted_access, &access_status)) {
         result = (access_status == TRUE ? true : false);
     } else {
-        __tbag_error_f("AccessCheck() ERROR: {}", GetLastError());
+        __tbag_error("AccessCheck() ERROR: {}", GetLastError());
     }
 
     CloseHandle(impersonated_token);
@@ -225,7 +225,7 @@ std::string getTempDir()
     // COPIED_LENGTH is not including the terminating null character.
 
     if (COPIED_LENGTH == 0) {
-        __tbag_error_f("GetTempPathA() ERROR: {}", GetLastError());
+        __tbag_error("GetTempPathA() ERROR: {}", GetLastError());
         return std::string();
     }
     return std::string(buffer);
@@ -243,7 +243,7 @@ std::string getWorkDir()
     DWORD const WRITTEN_LENGTH = GetCurrentDirectoryA(BUFFER_LENGTH, buffer);
 
     if (WRITTEN_LENGTH == 0) {
-        __tbag_error_f("GetCurrentDirectoryA() FIRST ERROR: {}", GetLastError());
+        __tbag_error("GetCurrentDirectoryA() FIRST ERROR: {}", GetLastError());
         return std::string();
 
     } else if (WRITTEN_LENGTH > BUFFER_LENGTH) {
@@ -255,7 +255,7 @@ std::string getWorkDir()
         result[WRITTEN_LENGTH - 1] = '\0';
 
         if (GetCurrentDirectoryA(WRITTEN_LENGTH, &result[0]) == 0) {
-            __tbag_error_f("GetCurrentDirectoryA() SECOND ERROR: {}", GetLastError());
+            __tbag_error("GetCurrentDirectoryA() SECOND ERROR: {}", GetLastError());
             return std::string();
         }
         return result;
@@ -279,7 +279,7 @@ std::string getHomeDir()
 
     HRESULT const RESULT = SHGetFolderPathA(NULL, CSIDL_PROFILE, USUALLY_TOKEN, 0, buffer);
     if (RESULT != S_OK) {
-        __tbag_error_f("SHGetFolderPathA() ERROR: {}", RESULT);
+        __tbag_error("SHGetFolderPathA() ERROR: {}", RESULT);
         return std::string();
     }
     return std::string(buffer);
@@ -295,7 +295,7 @@ std::string getExePathEx(std::size_t extend_buffer_size)
     DWORD const COPIED_LENGTH = GetModuleFileNameA(NULL, &buffer[0], buffer.size());
 
     if (COPIED_LENGTH == 0) {
-        __tbag_error_f("GetModuleFileNameA() ERROR: {}", GetLastError());
+        __tbag_error("GetModuleFileNameA() ERROR: {}", GetLastError());
         return std::string();
 
     } else if (COPIED_LENGTH == buffer.size() && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
@@ -367,7 +367,7 @@ std::string getRealPath(std::string const & path)
 
     DWORD const COPIED_LENGTH = GetFullPathNameW(&WCS_PATH[0], buffer.size(), &buffer[0], part);
     if (COPIED_LENGTH == 0) {
-        __tbag_error_f("GetFullPathNameW() ERROR: {}", GetLastError());
+        __tbag_error("GetFullPathNameW() ERROR: {}", GetLastError());
     }
 
     buffer.resize(COPIED_LENGTH);
@@ -386,7 +386,7 @@ bool createDirectory(std::string const & path)
     if (CreateDirectoryW(&WCS_PATH[0], nullptr) == FALSE) {
         // ERROR_ALREADY_EXISTS: // The specified directory already exists.
         // ERROR_PATH_NOT_FOUND: // One or more intermediate directories do not exist.
-        __tbag_error_f("CreateDirectoryW() ERROR: {}", GetLastError());
+        __tbag_error("CreateDirectoryW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
@@ -402,7 +402,7 @@ bool removeDirectory(std::string const & path)
     }
 
     if (RemoveDirectoryW(&WCS_PATH[0]) == FALSE) {
-        __tbag_error_f("RemoveDirectoryW() ERROR: {}", GetLastError());
+        __tbag_error("RemoveDirectoryW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
@@ -420,7 +420,7 @@ bool removeFile(std::string const & path)
     if (DeleteFileW(&WCS_PATH[0]) == FALSE) {
         // ERROR_FILE_NOT_FOUND: // The system cannot find the file specified.
         // ERROR_ACCESS_DENIED:  // Access is denied.
-        __tbag_error_f("DeleteFileW() ERROR: {}", GetLastError());
+        __tbag_error("DeleteFileW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
@@ -453,7 +453,7 @@ bool rename(std::string const & from, std::string const & to)
     }
 
     if (MoveFileW(&WCS_FROM[0], &WCS_TO[0]) == FALSE) {
-        __tbag_error_f("MoveFileW() ERROR: {}", GetLastError());
+        __tbag_error("MoveFileW() ERROR: {}", GetLastError());
         return false;
     }
     return true;
@@ -531,7 +531,7 @@ std::vector<std::string> scanDir(std::string const & path)
     HANDLE find_handle = FindFirstFileW(scan_directory, &find_data);
 
     if (find_handle == INVALID_HANDLE_VALUE) {
-        __tbag_error_f("FindFirstFileW ERROR: {}", GetLastError());
+        __tbag_error("FindFirstFileW ERROR: {}", GetLastError());
         return std::vector<std::string>();
     }
 

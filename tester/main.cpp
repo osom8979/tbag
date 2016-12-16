@@ -32,7 +32,6 @@ enum class TestMode
 int main(int argc, char **argv)
 {
     tbInitialize();
-    libtbag::log::DebuggingLoggerInitializer logger;
 
     TestMode mode = TestMode::TEST;
     std::string ip;

@@ -19,13 +19,11 @@ namespace util {
 
 void initSingletonObjects()
 {
-    __tbag_debug("Call initSingletonObjects()");
     log::details::LoggerManager::createInstance();
 }
 
 void releaseSingletonObjects()
 {
-    __tbag_debug("Call releaseSingletonObjects()");
     log::details::LoggerManager::releaseInstance();
 }
 
