@@ -16,7 +16,11 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/debug/ErrorCode.hpp>
+#include <libtbag/loop/UvEventDispatcher.hpp>
 #include <libtbag/util/UvUtils.hpp>
+
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,8 +37,28 @@ namespace stream {
 class TBAG_API UvOutStream : public util::UvNative
 {
 public:
+    using Buffer = std::vector<char>;
+
+public:
+    struct Callback
+    {
+        virtual void onRead(ErrorCode code, ssize_t nread, void const * buf) = 0;
+    };
+
+private:
+    Buffer     _buffer;
+    Callback * _callback;
+
+public:
     UvOutStream(Type type);
     ~UvOutStream();
+
+public:
+    ErrorCode read();
+
+public:
+    void onAlloc(void * handle, size_t suggested_size, void * buf);
+    void onRead(void * stream, ssize_t nread, void const * buf);
 };
 
 } // namespace stream

@@ -6,9 +6,7 @@
  */
 
 #include <libtbag/stream/UvInStream.hpp>
-#include <libtbag/loop/UvEventDispatcher.hpp>
 #include <libtbag/log/Log.hpp>
-
 #include <uv.h>
 
 // -------------------
@@ -25,7 +23,7 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_OPEN(UvInStream);
 //{
     TBAG_UV_EVENT_WRITE(onWrite);
 //}
-TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE;
+TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvInStream);
 
 // --------------------------
 // UvInStream implementation.

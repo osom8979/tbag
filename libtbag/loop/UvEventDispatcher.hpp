@@ -136,10 +136,12 @@ NAMESPACE_LIBTBAG_CLOSE
 // ----------------------------------------
 
 # define TBAG_UV_EVENT_IMPLEMENT_OPEN(manager_name, class_name) \
+    namespace __uv_event_detail_##manager_name##class_name { \
     class manager_name : public ::libtbag::loop::UvEventDispatcher<void, class_name> \
     { SINGLETON2_PROTOTYPE(manager_name); public:
-# define TBAG_UV_EVENT_IMPLEMENT_CLOSE(manager_name) \
-    }; SINGLETON2_IMPLEMENT(manager_name);
+# define TBAG_UV_EVENT_IMPLEMENT_CLOSE(manager_name, class_name) \
+    }; SINGLETON2_IMPLEMENT(manager_name); \
+    } using namespace __uv_event_detail_##manager_name##class_name;
 
 # define TBAG_UV_EVENT_PARAM0(event, name) \
     static void event(void * h) { getInstance()->get(h)->name(h); }
@@ -197,7 +199,7 @@ NAMESPACE_LIBTBAG_CLOSE
 
 # define TBAG_UV_EVENT_DEFAULT_NAME __uv_event_dispatcher_manager__
 # define TBAG_UV_EVENT_DEFAULT_IMPLEMENT_OPEN(name)         TBAG_UV_EVENT_IMPLEMENT_OPEN(TBAG_UV_EVENT_DEFAULT_NAME, name)
-# define TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE              TBAG_UV_EVENT_IMPLEMENT_CLOSE(TBAG_UV_EVENT_DEFAULT_NAME)
+# define TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(name)        TBAG_UV_EVENT_IMPLEMENT_CLOSE(TBAG_UV_EVENT_DEFAULT_NAME, name)
 # define TBAG_UV_EVENT_DEFAULT_REGISTER(handle, receiver)   TBAG_UV_EVENT_REGISTER(TBAG_UV_EVENT_DEFAULT_NAME, handle, receiver)
 # define TBAG_UV_EVENT_DEFAULT_UNREGISTER(handle)           TBAG_UV_EVENT_UNREGISTER(TBAG_UV_EVENT_DEFAULT_NAME, handle)
 # define TBAG_UV_EVENT_DEFAULT_CALLBACK_ALLOC(name)         TBAG_UV_EVENT_CALLBACK_ALLOC(TBAG_UV_EVENT_DEFAULT_NAME, name)

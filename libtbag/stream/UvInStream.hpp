@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/debug/ErrorCode.hpp>
+#include <libtbag/loop/UvEventDispatcher.hpp>
 #include <libtbag/util/UvUtils.hpp>
 
 #include <vector>
@@ -36,7 +37,6 @@ namespace stream {
 class TBAG_API UvInStream : public util::UvNative
 {
 public:
-    using Buffer   = std::vector<char>;
     using UvNative = util::UvNative;
 
 public:
@@ -46,10 +46,7 @@ public:
     };
 
 private:
-    UvNative _write;
-    Buffer   _buffer;
-
-private:
+    UvNative   _write;
     Callback * _callback;
 
 public:

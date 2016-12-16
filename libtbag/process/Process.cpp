@@ -84,7 +84,7 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_OPEN(Process);
 //{
     TBAG_UV_EVENT_EXIT(onExit);
 //}
-TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE;
+TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(Process);
 
 // -----------------------------
 // Process class implementation.

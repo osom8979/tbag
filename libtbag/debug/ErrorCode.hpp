@@ -26,8 +26,10 @@ namespace debug {
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX)   \
     _TBAG_XX(SUCCESS, No error)         \
     _TBAG_XX(FAILURE, Unknown error)    \
-    /* locale/Convert */                                \
+    /* Locale */ \
     _TBAG_XX(LOCALE_CONVERTER_ERROR, UConverter error)  \
+    /* file */ \
+    _TBAG_XX(END_OF_FILE, End of file)  \
     /* -- END -- */
 #endif
 

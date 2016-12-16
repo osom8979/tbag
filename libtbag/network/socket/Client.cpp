@@ -39,7 +39,7 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_OPEN(Client);
     TBAG_UV_EVENT_READ(onRead);
     TBAG_UV_EVENT_WRITE(onWrite);
 //}
-TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE;
+TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(Client);
 
 static bool addr(std::string const & ip, int port, sockaddr_in * addr)
 {
