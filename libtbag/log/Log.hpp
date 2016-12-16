@@ -139,8 +139,8 @@ NAMESPACE_LIBTBAG_CLOSE
 #if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG) && !defined(NDEBUG)
 # include <cstdio>
 # include <libtbag/3rd/fmt/format.h>
-# define __tbag_debug(...) puts(::fmt::format("[DEBUG] " FILE_STRING ":" LINE_STRING " " __VA_ARGS__).c_str())
-# define __tbag_error(...) puts(::fmt::format("[ERROR] " FILE_STRING ":" LINE_STRING " " __VA_ARGS__).c_str())
+# define __tbag_debug(...) ::puts(::fmt::format("[DEBUG] " FILE_STRING ":" LINE_STRING " " __VA_ARGS__).c_str())
+# define __tbag_error(...) ::puts(::fmt::format("[ERROR] " FILE_STRING ":" LINE_STRING " " __VA_ARGS__).c_str())
 #else
 # define __tbag_debug(...)
 # define __tbag_error(...)
