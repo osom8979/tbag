@@ -30,7 +30,7 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvOutStream);
 // UvOutStream implementation.
 // ---------------------------
 
-UvOutStream::UvOutStream(Type type) : util::UvNative(type)
+UvOutStream::UvOutStream(UvHandleType type) : util::UvHandle(type), _on_read_cb(nullptr)
 {
     TBAG_UV_EVENT_DEFAULT_REGISTER(this->getNative(), this);
 }
@@ -42,7 +42,7 @@ UvOutStream::~UvOutStream()
 
 ErrorCode UvOutStream::read()
 {
-    int const CODE = ::uv_read_start((uv_stream_t*)this->getNative(),
+    int const CODE = ::uv_read_start(this->castNative<uv_stream_t>(),
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_ALLOC(onAlloc),
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_READ(onRead));
     if (CODE != 0) {
@@ -74,8 +74,8 @@ void UvOutStream::onRead(void * stream, ssize_t nread, void const * buf)
         code = ErrorCode::SUCCESS;
     }
 
-    if (_callback != nullptr) {
-        _callback->onRead(code, nread, buf);
+    if (_on_read_cb != nullptr) {
+        _on_read_cb->onRead(code, nread, buf);
     }
 }
 

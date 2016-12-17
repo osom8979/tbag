@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/debug/ErrorCode.hpp>
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
 # include <cstdint>
@@ -31,27 +32,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace util {
-
-TBAG_API void initUv();
-TBAG_API char const * getUvHandleName(void * handle);
-
-/**
- * @remarks
- *  Same this code:
- *  @code
- *    const char* uv_strerror(int err);
- *  @endcode
- */
-TBAG_API std::string getUvErrorString(int uv_error_code);
-
-/**
- * @remarks
- *  Same this code:
- *  @code
- *    const char* uv_err_name(int err);
- *  @endcode
- */
-TBAG_API std::string getUvErrorName(int uv_error_code);
 
 #ifndef TBAG_UTIL_UV_HANDLE_MAP
 #define TBAG_UTIL_UV_HANDLE_MAP(_TBAG_HANDLE_XX, _TBAG_REQ_XX, _TBAG_ETC_XX) \
@@ -104,13 +84,53 @@ TBAG_API std::string getUvErrorName(int uv_error_code);
  */
 enum class UvType : int
 {
-    _UV_TYPE_START_NUMBER_ = -1,
     UNKNOWN = 0,
 #define _TBAG_XX(name, type) name,
     TBAG_UTIL_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
-    UV_TYPE_SIZE
+    SIZE
 };
+
+/**
+ * Table of libuv handle types.
+ *
+ * @author zer0
+ * @date   2016-12-17
+ */
+enum class UvHandleType : int
+{
+    UNKNOWN = 0,
+#define _TBAG_XX(name, type) name = static_cast<int>(UvType::name),
+#define _TBAG_NX(name, type)
+    TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX)
+#undef _TBAG_XX
+#undef _TBAG_NX
+    SIZE
+};
+
+TBAG_API void initUv();
+TBAG_API char const * getUvHandleName(void * handle);
+
+/**
+ * @remarks
+ *  Same this code:
+ *  @code
+ *    const char* uv_strerror(int err);
+ *  @endcode
+ */
+TBAG_API std::string getUvErrorString(int uv_error_code);
+
+/**
+ * @remarks
+ *  Same this code:
+ *  @code
+ *    const char* uv_err_name(int err);
+ *  @endcode
+ */
+TBAG_API std::string getUvErrorName(int uv_error_code);
+
+TBAG_API bool isUvHandle(UvType type);
+TBAG_API bool isUvRequest(UvType type);
 
 /**
  * libuv native type utility class.
@@ -118,7 +138,7 @@ enum class UvType : int
  * @author zer0
  * @date   2016-12-07
  */
-class TBAG_API UvNative
+class TBAG_API UvNative : public Noncopyable
 {
 public:
     using Type = UvType;
@@ -138,6 +158,10 @@ public:
 public:
     inline Type getType() const TBAG_NOEXCEPT
     { return TYPE; }
+    inline bool isHandle() const TBAG_NOEXCEPT
+    { return isUvHandle(TYPE); }
+    inline bool isRequest() const TBAG_NOEXCEPT
+    { return isUvRequest(TYPE); }
 
 public:
     inline void * getNative() TBAG_NOEXCEPT
@@ -147,8 +171,41 @@ public:
 
 public:
     template <typename T>
-    inline T * castNative() TBAG_NOEXCEPT
+    inline T * castNative() const TBAG_NOEXCEPT
     { return static_cast<T*>(_native); }
+};
+
+/**
+ * libuv handle type utility class.
+ *
+ * @author zer0
+ * @date   2016-12-17
+ */
+class TBAG_API UvHandle : public UvNative
+{
+public:
+    struct OnCloseCallback
+    {
+        virtual void onClose() = 0;
+    };
+
+private:
+    OnCloseCallback * _on_close_cb;
+
+public:
+    UvHandle(UvHandleType type);
+    ~UvHandle();
+
+public:
+    inline void setOnCloseCallback(OnCloseCallback * callback) TBAG_NOEXCEPT
+    { _on_close_cb = callback; }
+
+public:
+    bool isClosing() const TBAG_NOEXCEPT;
+    ErrorCode close();
+
+public:
+    void onClose(void * handle);
 };
 
 } // namespace util

@@ -34,28 +34,29 @@ namespace stream {
  * @author zer0
  * @date   2016-12-16
  */
-class TBAG_API UvInStream : public util::UvNative
+class TBAG_API UvInStream : public util::UvHandle
 {
 public:
+    using UvHandleType = util::UvHandleType;
     using UvNative = util::UvNative;
 
 public:
-    struct Callback
+    struct OnWriteCallback
     {
         virtual void onWrite(ErrorCode code) = 0;
     };
 
 private:
-    UvNative   _write;
-    Callback * _callback;
+    UvNative _write;
+    OnWriteCallback * _on_write_cb;
 
 public:
-    UvInStream(Type type);
+    UvInStream(UvHandleType type);
     ~UvInStream();
 
 public:
-    inline void setCallback(Callback * callback)
-    { _callback = callback; }
+    inline void setOnWriteCallback(OnWriteCallback * callback) TBAG_NOEXCEPT
+    { _on_write_cb = callback; }
 
 public:
     ErrorCode write(char const * buffer, std::size_t length);

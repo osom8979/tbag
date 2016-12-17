@@ -29,7 +29,7 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvInStream);
 // UvInStream implementation.
 // --------------------------
 
-UvInStream::UvInStream(Type type) : util::UvNative(type), _write(util::UvType::WRITE)
+UvInStream::UvInStream(UvHandleType type) : util::UvHandle(type), _write(util::UvType::WRITE), _on_write_cb(nullptr)
 {
     TBAG_UV_EVENT_DEFAULT_REGISTER(_write.getNative(), this);
 }
@@ -45,7 +45,7 @@ ErrorCode UvInStream::write(char const * buffer, std::size_t length)
     info.base = const_cast<char*>(buffer);
     info.len  = length;
 
-    int const CODE = ::uv_write((uv_write_t*)_write.getNative(), (uv_stream_t*)this->getNative(),
+    int const CODE = ::uv_write(_write.castNative<uv_write_t>(), this->castNative<uv_stream_t>(),
                                 &info, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
     if (CODE != 0) {
         __tbag_error("UvInStream::write() error[{}] {}", CODE, util::getUvErrorName(CODE));
@@ -68,8 +68,8 @@ void UvInStream::onWrite(void * request, int status)
         code = ErrorCode::FAILURE;
     }
 
-    if (_callback != nullptr) {
-        _callback->onWrite(code);
+    if (_on_write_cb != nullptr) {
+        _on_write_cb->onWrite(code);
     }
 }
 
