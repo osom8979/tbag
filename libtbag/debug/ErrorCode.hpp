@@ -29,8 +29,10 @@ namespace debug {
     _TBAG_XX(UNSUPPORTED, Unsupported operation) \
     /* Locale */ \
     _TBAG_XX(LOCALE_CONVERTER_ERROR, UConverter error)  \
-    /* file */ \
+    /* File */ \
     _TBAG_XX(END_OF_FILE, End of file)  \
+    /* Process */ \
+    _TBAG_XX(UNKNOWN_PROCESS_ID, Unknown process id) \
     /* -- END -- */
 #endif
 

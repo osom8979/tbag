@@ -6,24 +6,28 @@
  * @date   2016-10-14 (Rename project: process_test -> tbproc)
  */
 
+#include <csignal>
 #include <cstring>
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <thread>
 
 static const char * const OUTPUT_FILE_NAME = "tbproc.txt";
 
-static const char * const PARAM_NAME_OUT  = "out";
-static const char * const PARAM_NAME_ERR  = "err";
-static const char * const PARAM_NAME_FILE = "file";
+static const char * const PARAM_NAME_OUT   = "out";
+static const char * const PARAM_NAME_ERR   = "err";
+static const char * const PARAM_NAME_SLEEP = "sleep";
+static const char * const PARAM_NAME_FILE  = "file";
 
 enum class ParamType : int
 {
     UNKNOWN = 0,
     OUTPUT,
     ERROR,
+    SLEEP,
     FILE,
 };
 
@@ -33,6 +37,8 @@ ParamType getParamType(std::string const & command)
         return ParamType::OUTPUT;
     } else if (command == PARAM_NAME_ERR) {
         return ParamType::ERROR;
+    } else if (command == PARAM_NAME_SLEEP) {
+        return ParamType::SLEEP;
     } else if (command == PARAM_NAME_FILE) {
         return ParamType::FILE;
     }
@@ -80,6 +86,22 @@ void runErrorCommand(std::vector<std::string> const & args)
     }
 }
 
+static volatile std::sig_atomic_t g_signal_status;
+
+void signal_handler(int signal)
+{
+    g_signal_status = signal;
+    std::cerr << "Signal: " << signal << std::endl;
+    std::exit(signal);
+}
+
+void runSleepCommand(std::vector<std::string> const & args)
+{
+    std::cout << "Run sleep...\n";
+    std::signal(SIGKILL, signal_handler);
+    std::this_thread::sleep_for(std::chrono::minutes(1));
+}
+
 void runFileCommand(std::vector<std::string> const & args)
 {
     std::ofstream file(OUTPUT_FILE_NAME);
@@ -94,7 +116,11 @@ void runFileCommand(std::vector<std::string> const & args)
 int main(int argc, char ** argv)
 {
     if (argc < 2) {
-        std::cout << "Usage: " << argv[0] << " {out|err|file} {argument}\n";
+        std::cout << "Usage: " << argv[0] << " {"
+                  << PARAM_NAME_OUT   << "|"
+                  << PARAM_NAME_ERR   << "|"
+                  << PARAM_NAME_SLEEP << "|"
+                  << PARAM_NAME_FILE  << "} {argument}\n";
         return 1;
     }
 
@@ -103,8 +129,9 @@ int main(int argc, char ** argv)
 
     switch (type) {
     case ParamType::OUTPUT: runOutputCommand(args); break;
-    case ParamType::ERROR:  runErrorCommand(args);  break;
-    case ParamType::FILE:   runFileCommand(args);   break;
+    case ParamType::ERROR : runErrorCommand (args); break;
+    case ParamType::SLEEP : runSleepCommand (args); break;
+    case ParamType::FILE  : runFileCommand  (args); break;
     default:
         std::cout << "Unknown command.\n";
         return 1;

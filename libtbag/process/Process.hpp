@@ -27,6 +27,7 @@
 #include <vector>
 #include <limits>
 #include <memory>
+#include <future>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,6 +42,8 @@ static int const STANDARD_INPUT_FD  = 0; ///< @c stdin
 static int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
 static int const STANDARD_ERROR_FD  = 2; ///< @c stderr
 static int const STANDARD_IO_SIZE   = 3;
+
+static int const UNKNOWN_PROCESS_ID = -1;
 
 TBAG_API std::string getExecutableSuffix();
 TBAG_API std::string getExecutableName(std::string const & name);
@@ -79,8 +82,16 @@ public:
     {
         // @formatter:off
         enum class IoFlag : int { IGNORE, INHERIT, PIPE, };
-        struct IoOption { IoFlag flag; int fd; };
         // @formatter:on
+
+        struct IoOption
+        {
+            IoFlag flag = IoFlag::IGNORE;
+            int    fd   = 0;
+
+            inline void set(IoFlag f, int d)
+            { flag = f; fd = d; }
+        };
 
         String exe_path; ///< Executable file path.
         String work_dir; ///< Working directory.
@@ -95,9 +106,9 @@ public:
         bool verbatim_arg = false;
         bool detached     = false;
 
-        IoOption  in = {IoFlag::IGNORE, 0};
-        IoOption out = {IoFlag::IGNORE, 0};
-        IoOption err = {IoFlag::IGNORE, 0};
+        IoOption  in;
+        IoOption out;
+        IoOption err;
 
         Buffer in_buffer;
 
@@ -115,15 +126,15 @@ public:
         // @formatter:on
 
         // @formatter:off
-        inline Param & setStdinIgnore ()       {  in.flag = IoFlag::IGNORE;   in.fd =  0; return *this; }
-        inline Param & setStdoutIgnore()       { out.flag = IoFlag::IGNORE;  out.fd =  0; return *this; }
-        inline Param & setStderrIgnore()       { err.flag = IoFlag::IGNORE;  err.fd =  0; return *this; }
-        inline Param & setStdinPipe   ()       {  in.flag = IoFlag::PIPE;     in.fd =  0; return *this; }
-        inline Param & setStdoutPipe  ()       { out.flag = IoFlag::PIPE;    out.fd =  0; return *this; }
-        inline Param & setStderrPipe  ()       { err.flag = IoFlag::PIPE;    err.fd =  0; return *this; }
-        inline Param & setStdinFd     (int fd) {  in.flag = IoFlag::INHERIT;  in.fd = fd; return *this; }
-        inline Param & setStdoutFd    (int fd) { out.flag = IoFlag::INHERIT; out.fd = fd; return *this; }
-        inline Param & setStderrFd    (int fd) { err.flag = IoFlag::INHERIT; err.fd = fd; return *this; }
+        inline Param & setStdinIgnore ()       {  in.set(IoFlag::IGNORE ,  0); return *this; }
+        inline Param & setStdoutIgnore()       { out.set(IoFlag::IGNORE ,  0); return *this; }
+        inline Param & setStderrIgnore()       { err.set(IoFlag::IGNORE ,  0); return *this; }
+        inline Param & setStdinPipe   ()       {  in.set(IoFlag::PIPE   ,  0); return *this; }
+        inline Param & setStdoutPipe  ()       { out.set(IoFlag::PIPE   ,  0); return *this; }
+        inline Param & setStderrPipe  ()       { err.set(IoFlag::PIPE   ,  0); return *this; }
+        inline Param & setStdinFd     (int fd = STANDARD_INPUT_FD ) {  in.set(IoFlag::INHERIT, fd); return *this; }
+        inline Param & setStdoutFd    (int fd = STANDARD_OUTPUT_FD) { out.set(IoFlag::INHERIT, fd); return *this; }
+        inline Param & setStderrFd    (int fd = STANDARD_ERROR_FD ) { err.set(IoFlag::INHERIT, fd); return *this; }
         // @formatter:on
 
         // @formatter:off
@@ -203,6 +214,10 @@ public:
 
 public:
     void onExit(void * handle, int64_t exit_status, int term_signal);
+
+public:
+    inline static std::future<bool> asyncExe(Process & process, Param const & param)
+    { return std::async(std::launch::async, [&process, &param]() -> bool { return process.exe(param); }); }
 };
 
 } // namespace process

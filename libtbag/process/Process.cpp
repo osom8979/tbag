@@ -58,8 +58,11 @@ private:
 private:
     StdioArray _stdios;
 
+private:
+    int _pid; ///< spawned process id.
+
 public:
-    ProcPimpl()
+    ProcPimpl() : _pid(UNKNOWN_PROCESS_ID)
     {
         ::memset((void*)&_process, 0x00, sizeof(_process));
         ::memset((void*)&_options, 0x00, sizeof(_options));
@@ -72,6 +75,9 @@ public:
     }
 
 public:
+    inline int getSpawnedPid() const TBAG_NOEXCEPT
+    { return _pid; }
+
     inline uv_process_t * handle()
     { return &_process; }
     inline uv_process_t const * handle() const
@@ -116,6 +122,38 @@ public:
         }
     }
 
+    inline ErrorCode spawn(EventLoop & loop)
+    {
+        int const CODE = ::uv_spawn(static_cast<uv_loop_t*>(loop.getNative()), &_process, &_options);
+        if (CODE == 0) {
+            _pid = _process.pid;
+        } else {
+            _pid = UNKNOWN_PROCESS_ID;
+            __tbag_debug("Process::ProcPimpl::spawn() error[{}] {}", CODE, util::getUvErrorName(CODE));
+            return ErrorCode::FAILURE;
+        }
+        return ErrorCode::SUCCESS;
+    }
+
+    inline ErrorCode kill(int signal_number)
+    {
+        if (_pid == UNKNOWN_PROCESS_ID || _pid == 0) {
+            __tbag_debug("Process::ProcPimpl::kill({}) {}",
+                         signal_number,
+                         debug::getErrorMessage(ErrorCode::UNKNOWN_PROCESS_ID));
+            return ErrorCode::UNKNOWN_PROCESS_ID;
+        }
+
+        int const CODE = ::uv_kill(_pid, signal_number);
+        if (CODE != 0) {
+            __tbag_debug("Process::ProcPimpl::kill({}) error[{}] {}",
+                         signal_number,
+                         CODE,
+                         util::getUvErrorName(CODE));
+            return ErrorCode::FAILURE;
+        }
+        return ErrorCode::SUCCESS;
+    }
 };
 
 // --------------------
@@ -251,12 +289,7 @@ void Process::updateWithStdios()
 
 ErrorCode Process::spawn()
 {
-    int const CODE = ::uv_spawn(static_cast<uv_loop_t*>(_loop.getNative()), _process->handle(), _process->options());
-    if (CODE != 0) {
-        __tbag_debug("Process::spawn() error[{}] {}", CODE, util::getUvErrorName(CODE));
-        return ErrorCode::FAILURE;
-    }
-    return ErrorCode::SUCCESS;
+    return _process->spawn(_loop);
 }
 
 bool Process::exe()
@@ -267,12 +300,18 @@ bool Process::exe()
     updateWithStdios();
 
     // @formatter:off
-    if (_process->atStdios()[STANDARD_INPUT_FD ].flags != UV_IGNORE) { _in.write(_param.in_buffer); }
-    if (_process->atStdios()[STANDARD_OUTPUT_FD].flags != UV_IGNORE) { _out.read(); }
-    if (_process->atStdios()[STANDARD_ERROR_FD ].flags != UV_IGNORE) { _out.read(); }
+    if (_process->atStdios()[STANDARD_INPUT_FD ].flags & UV_READABLE_PIPE) { _in.write(_param.in_buffer); }
+    if (_process->atStdios()[STANDARD_OUTPUT_FD].flags & UV_WRITABLE_PIPE) { _out.read(); }
+    if (_process->atStdios()[STANDARD_ERROR_FD ].flags & UV_WRITABLE_PIPE) { _out.read(); }
     // @formatter:on
 
     spawn();
+
+    if ((_process->options()->flags & UV_PROCESS_DETACHED) == UV_PROCESS_DETACHED) {
+        // Just remember that the handle is still monitoring the child, so your program won’t exit.
+        // Use uv_unref() if you want to be more fire-and-forget.
+        ::uv_unref((uv_handle_t*)_process->handle());
+    }
 
     return _loop.runDefault();
 }
@@ -300,17 +339,12 @@ bool Process::exe(Path const & exe_path)
 
 int Process::getProcessId() const
 {
-    return _process->handle()->pid;
+    return _process->getSpawnedPid();
 }
 
 ErrorCode Process::kill(int signal_number)
 {
-    int const CODE = ::uv_process_kill(_process->handle(), signal_number);
-    if (CODE != 0) {
-        __tbag_debug("Process::kill({}) error[{}] {}", signal_number, CODE, util::getUvErrorName(CODE));
-        return ErrorCode::FAILURE;
-    }
-    return ErrorCode::SUCCESS;
+    return _process->kill(signal_number);
 }
 
 void Process::onExit(void * process, int64_t exit_status, int term_signal)
