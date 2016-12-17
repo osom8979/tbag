@@ -100,13 +100,13 @@ protected:
     std::vector<char*> _args_ptr;
     std::vector<char*> _envs_ptr;
 
-protected:
+private:
     int64_t _exit_status;
     int _terminate_signal;
 
 public:
     Process();
-    ~Process();
+    virtual ~Process();
 
 public:
     inline void setParam(Process::Param const & param)
@@ -118,7 +118,9 @@ public:
     { return _terminate_signal; }
 
 public:
-    bool exe();
+    virtual bool exe();
+
+public:
     bool exe(Param const & param);
     bool exe(Path const & exe_path, Path const & work_dir, Strings const & args, Strings const & envs);
     bool exe(Path const & exe_path, Path const & work_dir);
