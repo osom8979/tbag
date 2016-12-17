@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
@@ -59,27 +60,27 @@ public:
         String work_dir; ///< Working directory.
 
         Strings arguments;    ///< Arguments.
-        Strings environments; ///< Environment variables.
+        Strings environments; ///< Environment variables (e.g. VAR=VALUE).
 
-        unsigned int flags = 0;
+        // Changing the UID/GID is only supported on Unix.
+        uint32_t uid = 0;
+        uint32_t gid = 0;
 
-        inline Param & setExePath(Path const & path)
-        { exe_path = path.getCanonicalString(); return *this; }
-        inline Param & setWorkingDir(Path const & dir)
-        { work_dir = dir.getCanonicalString(); return *this; }
+        bool verbatim_arg = false;
+        bool detached     = false;
 
-        inline Param & pushArggument(String const & arg)
-        { arguments.push_back(arg); return *this; }
-        inline Param & pushEnvironment(String const & env)
-        { environments.push_back(env); return *this; }
-
-        inline Param & setArgguments(Strings const & args)
-        { arguments = args; return *this; }
-        inline Param & setEnvironments(Strings const & envs)
-        { environments = envs; return *this; }
-
-        inline Param & setFlags(unsigned int flag)
-        { flags = flag; return *this; }
+        // @formatter:off
+        inline Param & setExePath     (Path const & path)    { exe_path = path.getCanonicalString(); return *this; }
+        inline Param & setWorkingDir  (Path const & dir)     { work_dir = dir.getCanonicalString();  return *this; }
+        inline Param & pushArgument   (String const & arg)   { arguments.push_back(arg);    return *this; }
+        inline Param & pushEnvironment(String const & env)   { environments.push_back(env); return *this; }
+        inline Param & setArguments   (Strings const & args) { arguments    = args; return *this; }
+        inline Param & setEnvironments(Strings const & envs) { environments = envs; return *this; }
+        inline Param & setUserId      (uint32_t id)          { uid = id; return *this; }
+        inline Param & setGroupId     (uint32_t id)          { gid = id; return *this; }
+        inline Param & setVerbatimArgs(bool flag = true)     { verbatim_arg = flag; return *this; }
+        inline Param & setDetached    (bool flag = true)     { detached     = flag; return *this; }
+        // @formatter:on
     };
 
 public:
@@ -117,6 +118,11 @@ public:
     inline int getTerminateSignal() const TBAG_NOEXCEPT
     { return _terminate_signal; }
 
+private:
+    void clear();
+    void update();
+    ErrorCode spawn();
+
 public:
     virtual bool exe();
 
@@ -126,10 +132,9 @@ public:
     bool exe(Path const & exe_path, Path const & work_dir);
     bool exe(Path const & exe_path);
 
-private:
-    void clear();
-    void update();
-    bool spawn();
+public:
+    int getProcessId() const;
+    ErrorCode kill(int signal_number);
 
 public:
     void onExit(void * handle, int64_t exit_status, int term_signal);

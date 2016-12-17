@@ -18,11 +18,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace process {
 
-static int const STANDARD_INPUT_FD  = 0; ///< @c stdin
-static int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
-static int const STANDARD_ERROR_FD  = 2; ///< @c stderr
-static int const STANDARD_IO_SIZE   = 3;
-
 /**
  * Pointer to implementation of @c uv_process_t.
  *

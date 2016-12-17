@@ -8,6 +8,7 @@
 #include <libtbag/process/Process.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/loop/UvEventDispatcher.hpp>
+
 #include <uv.h>
 
 // -------------------
@@ -33,6 +34,14 @@ std::string getExecutableName(std::string const & name)
 // ------------------------------------
 // Process::Pimpl class implementation.
 // ------------------------------------
+
+// The stdio field points to an array of uv_stdio_container_t structs
+// that describe the file descriptors that will be made available to the child process.
+// The convention is that stdio[0] points to stdin, fd 1 is used for stdout, and fd 2 is stderr.
+static int const STANDARD_INPUT_FD  = 0; ///< @c stdin
+static int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
+static int const STANDARD_ERROR_FD  = 2; ///< @c stderr
+static int const STANDARD_IO_SIZE   = 3;
 
 /**
  * Pointer to implementation of @c uv_process_t.
@@ -100,36 +109,6 @@ Process::~Process()
     TBAG_UV_EVENT_DEFAULT_UNREGISTER(_process->handle());
 }
 
-bool Process::exe()
-{
-    clear();
-    update();
-    spawn();
-
-    return _loop.runDefault();
-}
-
-bool Process::exe(Param const & param)
-{
-    setParam(param);
-    return exe();
-}
-
-bool Process::exe(Path const & exe_path, Path const & work_dir, Strings const & args, Strings const & envs)
-{
-    return exe(Param().setExePath(exe_path).setWorkingDir(work_dir).setArgguments(args).setEnvironments(envs));
-}
-
-bool Process::exe(Path const & exe_path, Path const & work_dir)
-{
-    return exe(exe_path, work_dir, Strings(), Strings());
-}
-
-bool Process::exe(Path const & exe_path)
-{
-    return exe(exe_path, Path::getWorkDir());
-}
-
 void Process::clear()
 {
     _process->clearOptions();
@@ -137,6 +116,9 @@ void Process::clear()
 
 void Process::update()
 {
+    static_assert(sizeof(_param.uid) == sizeof(_process->options()->uid), "Not equal uid size type.");
+    static_assert(sizeof(_param.gid) == sizeof(_process->options()->gid), "Not equal gid size type.");
+
     std::size_t const ARGS_SIZE = _param.arguments.size();
     std::size_t const ENVS_SIZE = _param.environments.size();
 
@@ -168,12 +150,84 @@ void Process::update()
     _process->options()->cwd     = _param.work_dir.c_str();
     _process->options()->args    = &_args_ptr[0];
     _process->options()->env     = &_envs_ptr[0];
-    _process->options()->flags   = _param.flags;
+    _process->options()->flags   = 0;
+
+    // Changing the UID/GID is only supported on Unix,
+    // uv_spawn will fail on Windows with UV_ENOTSUP.
+    if (_param.uid != 0) {
+        // sets the child’s execution user ID to uv_process_options_t.uid.
+        _process->options()->flags |= UV_PROCESS_SETUID;
+        _process->options()->uid = _param.uid;
+    }
+    if (_param.gid != 0) {
+        // sets the child’s execution group ID to uv_process_options_t.gid.
+        _process->options()->flags |= UV_PROCESS_SETGID;
+        _process->options()->gid = _param.gid;
+    }
+    if (_param.verbatim_arg) {
+        // No quoting or escaping of uv_process_options_t.args is done on Windows. Ignored on Unix.
+        _process->options()->flags |= UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS;
+    }
+    if (_param.detached) {
+        // Starts the child process in a new session,
+        // which will keep running after the parent process exits.
+        _process->options()->flags |= UV_PROCESS_DETACHED;
+    }
 }
 
-bool Process::spawn()
+ErrorCode Process::spawn()
 {
-    return ::uv_spawn(static_cast<uv_loop_t*>(_loop.getNative()), _process->handle(), _process->options()) != 0;
+    int const CODE = ::uv_spawn(static_cast<uv_loop_t*>(_loop.getNative()), _process->handle(), _process->options());
+    if (CODE != 0) {
+        __tbag_debug("Process::spawn() error[{}] {}", CODE, util::getUvErrorName(CODE));
+        return ErrorCode::FAILURE;
+    }
+    return ErrorCode::SUCCESS;
+}
+
+bool Process::exe()
+{
+    clear();
+    update();
+    spawn();
+
+    return _loop.runDefault();
+}
+
+bool Process::exe(Param const & param)
+{
+    setParam(param);
+    return exe();
+}
+
+bool Process::exe(Path const & exe_path, Path const & work_dir, Strings const & args, Strings const & envs)
+{
+    return exe(Param().setExePath(exe_path).setWorkingDir(work_dir).setArguments(args).setEnvironments(envs));
+}
+
+bool Process::exe(Path const & exe_path, Path const & work_dir)
+{
+    return exe(exe_path, work_dir, Strings(), Strings());
+}
+
+bool Process::exe(Path const & exe_path)
+{
+    return exe(exe_path, Path::getWorkDir());
+}
+
+int Process::getProcessId() const
+{
+    return _process->handle()->pid;
+}
+
+ErrorCode Process::kill(int signal_number)
+{
+    int const CODE = ::uv_process_kill(_process->handle(), signal_number);
+    if (CODE != 0) {
+        __tbag_debug("Process::kill({}) error[{}] {}", signal_number, CODE, util::getUvErrorName(CODE));
+        return ErrorCode::FAILURE;
+    }
+    return ErrorCode::SUCCESS;
 }
 
 void Process::onExit(void * process, int64_t exit_status, int term_signal)
