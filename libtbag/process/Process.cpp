@@ -9,7 +9,9 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/loop/UvEventDispatcher.hpp>
 
+#include <array>
 #include <uv.h>
+#include <dep/uv/include/uv.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,14 +37,6 @@ std::string getExecutableName(std::string const & name)
 // Process::Pimpl class implementation.
 // ------------------------------------
 
-// The stdio field points to an array of uv_stdio_container_t structs
-// that describe the file descriptors that will be made available to the child process.
-// The convention is that stdio[0] points to stdin, fd 1 is used for stdout, and fd 2 is stderr.
-static int const STANDARD_INPUT_FD  = 0; ///< @c stdin
-static int const STANDARD_OUTPUT_FD = 1; ///< @c stdout
-static int const STANDARD_ERROR_FD  = 2; ///< @c stderr
-static int const STANDARD_IO_SIZE   = 3;
-
 /**
  * Pointer to implementation of @c uv_process_t.
  *
@@ -54,15 +48,22 @@ static int const STANDARD_IO_SIZE   = 3;
  */
 struct Process::ProcPimpl : public Noncopyable
 {
+public:
+    using StdioArray = std::array<uv_stdio_container_t, STANDARD_IO_SIZE>;
+
 private:
     uv_process_t         _process;
     uv_process_options_t _options;
+
+private:
+    StdioArray _stdios;
 
 public:
     ProcPimpl()
     {
         ::memset((void*)&_process, 0x00, sizeof(_process));
         ::memset((void*)&_options, 0x00, sizeof(_options));
+        ::memset((void*)_stdios.data(), 0x00, sizeof(_stdios.data()) * _stdios.size());
     }
 
     ~ProcPimpl()
@@ -81,8 +82,40 @@ public:
     inline uv_process_options_t const * options() const
     { return &_options; }
 
+    inline StdioArray & atStdios()
+    { return _stdios; }
+    inline StdioArray const & atStdios() const
+    { return _stdios; }
+
     inline void clearOptions()
     { ::memset((void*)&_options, 0x00, sizeof(_options)); }
+
+    void setStdio(uv_loop_t * loop, uv_pipe_t * pipe, int index, Param::IoOption const & option)
+    {
+        // The ipc argument is a boolean to indicate
+        // if this pipe will be used for handle passing between processes.
+        int const ENABLE_IPC  = 1;
+        int const DISABLE_IPC = 0;
+        REMOVE_UNUSED_VARIABLE(ENABLE_IPC);
+        REMOVE_UNUSED_VARIABLE(DISABLE_IPC);
+
+        ::uv_pipe_init(loop, pipe, DISABLE_IPC);
+
+        if (option.flag == Param::IoFlag::IGNORE) {
+            _stdios[index].flags = UV_IGNORE;
+        } else if (option.flag == Param::IoFlag::INHERIT) {
+            _stdios[index].flags = UV_INHERIT_FD;
+            _stdios[index].data.fd = option.fd;
+        } else if (option.flag == Param::IoFlag::PIPE) {
+            if (index == STANDARD_INPUT_FD) {
+                _stdios[index].flags = static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_READABLE_PIPE);
+            } else {
+                _stdios[index].flags = static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
+            }
+            _stdios[index].data.stream = (uv_stream_t*)pipe;
+        }
+    }
+
 };
 
 // --------------------
@@ -99,7 +132,10 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(Process);
 // Process class implementation.
 // -----------------------------
 
-Process::Process() : _process(new ProcPimpl())
+Process::Process() : _process(new ProcPimpl()),
+                     _in(util::UvHandleType::PIPE),
+                     _out(util::UvHandleType::PIPE),
+                     _err(util::UvHandleType::PIPE)
 {
     TBAG_UV_EVENT_DEFAULT_REGISTER(_process->handle(), this);
 }
@@ -116,9 +152,6 @@ void Process::clear()
 
 void Process::update()
 {
-    static_assert(sizeof(_param.uid) == sizeof(_process->options()->uid), "Not equal uid size type.");
-    static_assert(sizeof(_param.gid) == sizeof(_process->options()->gid), "Not equal gid size type.");
-
     std::size_t const ARGS_SIZE = _param.arguments.size();
     std::size_t const ENVS_SIZE = _param.environments.size();
 
@@ -150,7 +183,14 @@ void Process::update()
     _process->options()->cwd     = _param.work_dir.c_str();
     _process->options()->args    = &_args_ptr[0];
     _process->options()->env     = &_envs_ptr[0];
-    _process->options()->flags   = 0;
+}
+
+void Process::updateWithFlags()
+{
+    static_assert(sizeof(_param.uid) == sizeof(_process->options()->uid), "Not equal uid size type.");
+    static_assert(sizeof(_param.gid) == sizeof(_process->options()->gid), "Not equal gid size type.");
+
+    _process->options()->flags = 0;
 
     // Changing the UID/GID is only supported on Unix,
     // uv_spawn will fail on Windows with UV_ENOTSUP.
@@ -159,20 +199,54 @@ void Process::update()
         _process->options()->flags |= UV_PROCESS_SETUID;
         _process->options()->uid = _param.uid;
     }
+
     if (_param.gid != 0) {
         // sets the child’s execution group ID to uv_process_options_t.gid.
         _process->options()->flags |= UV_PROCESS_SETGID;
         _process->options()->gid = _param.gid;
     }
+
     if (_param.verbatim_arg) {
         // No quoting or escaping of uv_process_options_t.args is done on Windows. Ignored on Unix.
         _process->options()->flags |= UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS;
     }
+
     if (_param.detached) {
         // Starts the child process in a new session,
         // which will keep running after the parent process exits.
         _process->options()->flags |= UV_PROCESS_DETACHED;
     }
+}
+
+void Process::updateWithStdios()
+{
+    if (/**/_param.in.flag  == Param::IoFlag::IGNORE &&
+            _param.out.flag == Param::IoFlag::IGNORE &&
+            _param.err.flag == Param::IoFlag::IGNORE) {
+        _process->options()->stdio_count = 0;
+        _process->atStdios()[STANDARD_INPUT_FD ].flags = UV_IGNORE;
+        _process->atStdios()[STANDARD_OUTPUT_FD].flags = UV_IGNORE;
+        _process->atStdios()[STANDARD_ERROR_FD ].flags = UV_IGNORE;
+        return;
+    }
+
+    // The ipc argument is a boolean to indicate
+    // if this pipe will be used for handle passing between processes.
+    int const ENABLE_IPC  = 1;
+    int const DISABLE_IPC = 0;
+
+    REMOVE_UNUSED_VARIABLE(ENABLE_IPC);
+    REMOVE_UNUSED_VARIABLE(DISABLE_IPC);
+
+    _process->options()->stdio = _process->atStdios().data();
+    _process->options()->stdio_count = STANDARD_IO_SIZE;
+    if (_param.in_buffer.empty()) {
+        _process->atStdios()[STANDARD_INPUT_FD].flags = UV_IGNORE;
+    } else {
+        _process->setStdio(_loop.castNative<uv_loop_t>(), _in.castNative<uv_pipe_t>(), STANDARD_INPUT_FD, _param.in);
+    }
+    _process->setStdio(_loop.castNative<uv_loop_t>(), _out.castNative<uv_pipe_t>(), STANDARD_OUTPUT_FD, _param.out);
+    _process->setStdio(_loop.castNative<uv_loop_t>(), _err.castNative<uv_pipe_t>(), STANDARD_ERROR_FD, _param.err);
 }
 
 ErrorCode Process::spawn()
@@ -189,6 +263,15 @@ bool Process::exe()
 {
     clear();
     update();
+    updateWithFlags();
+    updateWithStdios();
+
+    // @formatter:off
+    if (_process->atStdios()[STANDARD_INPUT_FD ].flags != UV_IGNORE) { _in.write(_param.in_buffer); }
+    if (_process->atStdios()[STANDARD_OUTPUT_FD].flags != UV_IGNORE) { _out.read(); }
+    if (_process->atStdios()[STANDARD_ERROR_FD ].flags != UV_IGNORE) { _out.read(); }
+    // @formatter:on
+
     spawn();
 
     return _loop.runDefault();

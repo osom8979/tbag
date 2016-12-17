@@ -53,6 +53,11 @@ public:
 public:
     void * getNative();
     void const * getNative() const;
+
+public:
+    template <typename T>
+    inline T * castNative() TBAG_NOEXCEPT
+    { return static_cast<T*>(getNative()); }
 };
 
 } // namespace loop
