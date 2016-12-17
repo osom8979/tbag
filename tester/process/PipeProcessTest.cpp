@@ -7,17 +7,16 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/filesystem/Path.hpp>
-#include <libtbag/process/PipeProcess.hpp>
 
-#include <fstream>
-
-using namespace libtbag;
-using namespace libtbag::process;
-
-static char const * const EXE_NAME = "tbproc";
-using Path = libtbag::filesystem::Path;
-
+//#include <libtbag/filesystem/Path.hpp>
+//
+//#include <fstream>
+//
+//using namespace libtbag;
+//
+//static char const * const EXE_NAME = "tbproc";
+//using Path = libtbag::filesystem::Path;
+//
 //TEST(PipeProcessTest, ExitCodeFailure)
 //{
 //    Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
