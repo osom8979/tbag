@@ -94,7 +94,7 @@ bool isUvRequest(UvType type)
 // UvNative implementation.
 // ------------------------
 
-UvNative::UvNative(Type type) : TYPE(type), _native(nullptr)
+UvNative::UvNative(Type t) : TYPE(t), _native(nullptr)
 {
     switch (TYPE) {
 #define _TBAG_XX(name, type)                    \
@@ -104,7 +104,10 @@ UvNative::UvNative(Type type) : TYPE(type), _native(nullptr)
         break;
     TBAG_UTIL_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
-    default: _native = nullptr; break;
+    default:
+        __tbag_error("UvNative::UvNative({}) Unknown uv type.", static_cast<int>(TYPE));
+        _native = nullptr;
+        break;
     }
 }
 

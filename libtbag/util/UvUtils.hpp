@@ -86,21 +86,19 @@ typedef int UvPodType;
  */
 enum class UvType : UvPodType
 {
-    UNKNOWN = 0,
 #define _TBAG_XX(name, type) name,
     TBAG_UTIL_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
-    _SIZE_
 };
 
 // @formatter:off
 #define _TBAG_XX(name, type) name = static_cast<UvPodType>(UvType::name),
-#define _TBAG_NOT(name, type)
-enum class UvHandleType  : UvPodType { _START_NUMBER_ = -1, TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NOT, _TBAG_NOT) _SIZE_ };
-enum class UvRequsetType : UvPodType { _START_NUMBER_ = -1, TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NOT, _TBAG_XX, _TBAG_NOT) _SIZE_ };
-enum class UvEtcType     : UvPodType { _START_NUMBER_ = -1, TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NOT, _TBAG_NOT, _TBAG_XX) _SIZE_ };
+#define _TBAG_NX(name, type)
+enum class UvHandleType  : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) };
+enum class UvRequsetType : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) };
+enum class UvEtcType     : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) };
 #undef _TBAG_XX
-#undef _TBAG_NOT
+#undef _TBAG_NX
 // @formatter:on
 
 TBAG_API void initUv();
