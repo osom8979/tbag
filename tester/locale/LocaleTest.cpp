@@ -28,6 +28,17 @@ static char const * const TEST_LOCALE12 = "_US@zer0";
 static char const * const TEST_LOCALE13 = "en@zer0";
 static char const * const TEST_LOCALE14 = "@zer0";
 
+TEST(LocaleTest, getFirstGlobalLocaleName)
+{
+    ASSERT_EQ("ko_KR.UTF-8", getFirstGlobalLocaleName("ko_KR.UTF-8/ko_KR.UTF-8/C/C/C/C"));
+    ASSERT_EQ("ko_KR.UTF-8", getFirstGlobalLocaleName("ko_KR.UTF-8"));
+}
+
+TEST(LocaleTest, getDefaultEncoding)
+{
+    ASSERT_FALSE(getDefaultEncoding().empty());
+}
+
 TEST(LocaleTest, getLanguage)
 {
     ASSERT_STREQ(  "", getLanguage("").c_str());

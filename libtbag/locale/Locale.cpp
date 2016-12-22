@@ -13,6 +13,10 @@
 
 #include <unicode/uloc.h>
 
+#if defined(__PLATFORM_WINDOWS__)
+#include <Windows.h>
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -40,68 +44,88 @@ char * getGlobalLocaleName()
     return setlocale(LC_ALL, NULL);
 }
 
+std::string getFirstGlobalLocaleName(std::string const & name)
+{
+    // Example (in CLion):
+    // "ko_KR.UTF-8/ko_KR.UTF-8/C/C/C/C"
+    return name.substr(0, name.find(LOCALE_SEPARATOR));
+}
+
 LocaleNameIndex getLocaleIndex(std::string const & name)
 {
+    std::string const FIRST = getFirstGlobalLocaleName(name);
     LocaleNameIndex result;
-    result.modifier = name.rfind(LOCALE_MODIFIER);
-    result.encoding = name.rfind(LOCALE_ENCODING, result.modifier);
-    result.country  = name.rfind(LOCALE_COUNTRY, result.encoding);
+    result.modifier = FIRST.rfind(LOCALE_MODIFIER);
+    result.encoding = FIRST.rfind(LOCALE_ENCODING, result.modifier);
+    result.country  = FIRST.rfind(LOCALE_COUNTRY, result.encoding);
     return result;
 }
 
+// @formatter:off
+#if defined(__PLATFORM_WINDOWS__)
+std::string getDefaultEncoding() TBAG_NOEXCEPT { return std::to_string(::GetACP()); }
+#else
+std::string getDefaultEncoding() TBAG_NOEXCEPT { return std::string("UTF-8"); }
+#endif
+// @formatter:on
+
 std::string getLanguage(std::string const & name)
 {
-    LocaleNameIndex i = getLocaleIndex(name);
+    std::string const FIRST = getFirstGlobalLocaleName(name);
+    LocaleNameIndex i = getLocaleIndex(FIRST);
     if (i.country != std::string::npos) {
-        return name.substr(0, i.country);
+        return FIRST.substr(0, i.country);
     }
     if (i.encoding != std::string::npos) {
-        return name.substr(0, i.encoding);
+        return FIRST.substr(0, i.encoding);
     }
     if (i.modifier != std::string::npos) {
-        return name.substr(0, i.modifier);
+        return FIRST.substr(0, i.modifier);
     }
-    return name;
+    return FIRST;
 }
 
 std::string getCountry(std::string const & name)
 {
-    LocaleNameIndex i = getLocaleIndex(name);
+    std::string const FIRST = getFirstGlobalLocaleName(name);
+    LocaleNameIndex i = getLocaleIndex(FIRST);
     if (i.country == std::string::npos) {
         return std::string();
     }
 
     std::size_t const INDEX = i.country + 1;
     if (i.encoding != std::string::npos) {
-        return name.substr(INDEX, i.encoding - INDEX);
+        return FIRST.substr(INDEX, i.encoding - INDEX);
     }
     if (i.modifier != std::string::npos) {
-        return name.substr(INDEX, i.modifier - INDEX);
+        return FIRST.substr(INDEX, i.modifier - INDEX);
     }
-    return name.substr(INDEX);
+    return FIRST.substr(INDEX);
 }
 
 std::string getEncoding(std::string const & name)
 {
-    LocaleNameIndex i = getLocaleIndex(name);
+    std::string const FIRST = getFirstGlobalLocaleName(name);
+    LocaleNameIndex i = getLocaleIndex(FIRST);
     if (i.encoding == std::string::npos) {
         return std::string();
     }
 
     std::size_t const INDEX = i.encoding + 1;
     if (i.modifier != std::string::npos) {
-        return name.substr(INDEX, i.modifier - INDEX);
+        return FIRST.substr(INDEX, i.modifier - INDEX);
     }
-    return name.substr(INDEX);
+    return FIRST.substr(INDEX);
 }
 
 std::string getModifier(std::string const & name)
 {
-    LocaleNameIndex i = getLocaleIndex(name);
+    std::string const FIRST = getFirstGlobalLocaleName(name);
+    LocaleNameIndex i = getLocaleIndex(FIRST);
     if (i.modifier == std::string::npos) {
         return std::string();
     }
-    return name.substr(i.modifier + 1);
+    return FIRST.substr(i.modifier + 1);
 }
 
 // @formatter:off

@@ -36,10 +36,12 @@ TBAG_API char * setMinimalCLocale();
 TBAG_API char * setSystemDefaultLocale();
 TBAG_API char * setLocale(char * name);
 TBAG_API char * getGlobalLocaleName();
+TBAG_API std::string getFirstGlobalLocaleName(std::string const & name);
 
-char const LOCALE_COUNTRY  = '_';
-char const LOCALE_ENCODING = '.';
-char const LOCALE_MODIFIER = '@';
+char const LOCALE_COUNTRY   = '_';
+char const LOCALE_ENCODING  = '.';
+char const LOCALE_MODIFIER  = '@';
+char const LOCALE_SEPARATOR = '/';
 
 struct LocaleNameIndex
 {
@@ -49,6 +51,8 @@ struct LocaleNameIndex
 };
 
 TBAG_API LocaleNameIndex getLocaleIndex(std::string const & name);
+
+TBAG_API std::string getDefaultEncoding() TBAG_NOEXCEPT;
 
 TBAG_API std::string getLanguage(std::string const & name);
 TBAG_API std::string  getCountry(std::string const & name);
