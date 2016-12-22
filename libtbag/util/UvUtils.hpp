@@ -76,37 +76,32 @@ namespace util {
     TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX)
 #endif
 
+typedef int UvPodType;
+
 /**
  * Table of libuv types.
  *
  * @author zer0
  * @date   2016-12-07
  */
-enum class UvType : int
+enum class UvType : UvPodType
 {
     UNKNOWN = 0,
 #define _TBAG_XX(name, type) name,
     TBAG_UTIL_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
-    SIZE
+    _SIZE_
 };
 
-/**
- * Table of libuv handle types.
- *
- * @author zer0
- * @date   2016-12-17
- */
-enum class UvHandleType : int
-{
-    UNKNOWN = 0,
-#define _TBAG_XX(name, type) name = static_cast<int>(UvType::name),
-#define _TBAG_NX(name, type)
-    TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX)
+// @formatter:off
+#define _TBAG_XX(name, type) name = static_cast<UvPodType>(UvType::name),
+#define _TBAG_NOT(name, type)
+enum class UvHandleType  : UvPodType { _START_NUMBER_ = -1, TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NOT, _TBAG_NOT) _SIZE_ };
+enum class UvRequsetType : UvPodType { _START_NUMBER_ = -1, TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NOT, _TBAG_XX, _TBAG_NOT) _SIZE_ };
+enum class UvEtcType     : UvPodType { _START_NUMBER_ = -1, TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NOT, _TBAG_NOT, _TBAG_XX) _SIZE_ };
 #undef _TBAG_XX
-#undef _TBAG_NX
-    SIZE
-};
+#undef _TBAG_NOT
+// @formatter:on
 
 TBAG_API void initUv();
 TBAG_API char const * getUvHandleName(void * handle);
