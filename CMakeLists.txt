@@ -57,6 +57,7 @@ option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
 tbag_config__default_generate_c_header ()
 
 ## Library subproject.
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/flatbuffers)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lmdb)
