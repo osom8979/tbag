@@ -69,7 +69,8 @@ class CppGenerator : public BaseGenerator {
     code += "#ifndef " + include_guard + "\n";
     code += "#define " + include_guard + "\n\n";
 
-    code += "#include \"flatbuffers/flatbuffers.h\"\n\n";
+    //code += "#include \"flatbuffers/flatbuffers.h\"\n\n";
+    code += "#include <libtbag/3rd/flatbuffers/flatbuffers.h>\n\n";
 
     if (parser_.opts.include_dependence_headers) {
       int num_includes = 0;
