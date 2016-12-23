@@ -1,12 +1,12 @@
 /**
- * @file   Echo.hpp
- * @brief  Echo class prototype.
+ * @file   Chat.hpp
+ * @brief  Chat class prototype.
  * @author zer0
  * @date   2016-12-23
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_SAMPLE_ECHO_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_SAMPLE_ECHO_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_SAMPLE_CHAT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_SAMPLE_CHAT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,22 +25,21 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace sample  {
 
+// TODO: Forward declaration.
+
 /**
- * Echo server class prototype.
+ * Chatting server class prototype.
  *
  * @author zer0
- * @date   2016-11-04
- * @date   2016-11-07 (Refactoring this class)
- * @date   2016-12-23 (Move project: tester -> libtbag)
+ * @date   2016-12-23
  */
-class TBAG_API EchoServer : public socket::Server, public socket::Server::EventCallback
+class TBAG_API ChatServer : public socket::Server, public socket::Server::EventCallback
 {
 private:
-    int _count; ///< Max echo count.
 
 public:
-    EchoServer(int count = 5);
-    virtual ~EchoServer();
+    ChatServer();
+    virtual ~ChatServer();
 
 public:
     virtual bool onConnection(ClientKey key, int status) override;
@@ -51,18 +50,18 @@ public:
 };
 
 /**
- * Echo client class prototype.
+ * Chatting client class prototype.
  *
  * @author zer0
- * @date   2016-11-04
- * @date   2016-11-07 (Refactoring this class)
- * @date   2016-12-23 (Move project: tester -> libtbag)
+ * @date   2016-12-23
  */
-class TBAG_API EchoClient : public socket::Client, public socket::Client::EventCallback
+class TBAG_API ChatClient : public socket::Client, public socket::Client::EventCallback
 {
+private:
+
 public:
-    EchoClient();
-    virtual ~EchoClient();
+    ChatClient();
+    virtual ~ChatClient();
 
 public:
     virtual void onConnect(int status) override;
@@ -71,8 +70,8 @@ public:
     virtual void onWrite(Code code) override;
 };
 
-TBAG_API int runEchoServer(std::string const & ip, int port);
-TBAG_API int runEchoClient(std::string const & ip, int port);
+TBAG_API int runChatServer(std::string const & ip, int port);
+TBAG_API int runChatClient(std::string const & ip, int port);
 
 } // namespace sample
 } // namespace network
@@ -81,5 +80,5 @@ TBAG_API int runEchoClient(std::string const & ip, int port);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_SAMPLE_ECHO_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_SAMPLE_CHAT_HPP__
 

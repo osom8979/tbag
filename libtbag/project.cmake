@@ -16,6 +16,10 @@ if (USE_TBAG_DEBUGGING_LOGGER)
     list (APPEND TBAG_PROJECT_DEFINITIONS ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
 endif ()
 
+## FlatBuffers.
+tbag_modules__build_dep_flatc_cpp (libtbag_fbs "${CMAKE_SOURCE_DIR}/libtbag/network/sample/msg/chat.fbs")
+
+
 ## Dependencies.
 tbag_modules__apply_dep_icu     ()
 tbag_modules__apply_dep_lmdb    ()

@@ -1,0 +1,18 @@
+// Chatting server/client IDL.
+
+namespace libtbag.network.sample.msg;
+
+struct Version
+{
+    major:byte = 0;
+    minor:byte = 1;
+}
+
+table ChatPacket
+{
+    ver:Version;
+    msg:string;
+}
+
+root_type ChatPacket;
+

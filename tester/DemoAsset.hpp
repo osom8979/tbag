@@ -17,9 +17,6 @@
 #include <libtbag/res/Asset.hpp>
 #include <libtbag/locale/Convert.hpp>
 
-// FlatBuffers header test.
-#include <tester/asset/flatbuffers/monster_generated.h>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
