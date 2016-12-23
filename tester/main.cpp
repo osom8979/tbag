@@ -11,8 +11,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <tester/main/server.hpp>
-#include <tester/main/client.hpp>
+#include <libtbag/network/sample/Echo.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -66,9 +65,9 @@ int main(int argc, char **argv)
         testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
     } else if (mode == TestMode::SERVER) {
-        return libtbag::main_server(ip, port);
+        return libtbag::network::sample::runEchoServer(ip, port);
     } else if (mode == TestMode::CLIENT) {
-        return libtbag::main_client(ip, port);
+        return libtbag::network::sample::runEchoClient(ip, port);
     }
 
     std::cout << "Argument error.\n";
