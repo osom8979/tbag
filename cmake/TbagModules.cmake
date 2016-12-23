@@ -177,6 +177,16 @@ endmacro ()
 ## Dep libraries.
 ## --------------
 
+macro (tbag_modules__build_dep_flatc_cpp __target __fbs)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES flatc ${__target})
+
+    set (Flatc_SKIP_FOUND ON)
+    find_package (Flatc QUIET)
+    unset (Flatc_SKIP_FOUND)
+
+    flatc_generate_target2 (${__target} $<TARGET_FILE:flatc> cpp ${__fbs})
+endmacro ()
+
 macro (tbag_modules__apply_dep_gtest)
     list (APPEND TBAG_PROJECT_DEPENDENCIES gtest)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/gtest/include)

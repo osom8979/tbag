@@ -8,6 +8,9 @@ tbag_modules__update_default_objects ()
 ## Dependencies.
 tbag_modules__apply_dep_gtest ()
 
+## FlatBuffers.
+tbag_modules__build_dep_flatc_cpp (tester_fbs "${CMAKE_SOURCE_DIR}/tester/asset/flatbuffers/monster.fbs")
+
 ## libtbag library.
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbag)
 list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/libtbag)
