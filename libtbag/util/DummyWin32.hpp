@@ -403,7 +403,7 @@ typedef struct _WIN32_FIND_DATAW {
 } WIN32_FIND_DATAW, *PWIN32_FIND_DATAW, *LPWIN32_FIND_DATAW;
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms679360(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms679360(v=vs.85).aspx>
  *
  * @remarks
  *  - WinBase.h (include Windows.h)
@@ -413,7 +413,7 @@ inline DWORD GetLastError(void)
 { return ERROR_INVALID_FUNCTION; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd319072(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd319072(v=vs.85).aspx>
  *
  * @return
  *  The function returns 0 if it does not succeed.
@@ -431,7 +431,7 @@ inline int MultiByteToWideChar(_In_      UINT   CodePage,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd374130(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd374130(v=vs.85).aspx>
  *
  * @return
  *  The function returns 0 if it does not succeed.
@@ -451,7 +451,7 @@ inline int WideCharToMultiByte(_In_      UINT    CodePage,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364944(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364944(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is INVALID_FILE_ATTRIBUTES.
@@ -464,7 +464,7 @@ inline DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
 { return INVALID_FILE_ATTRIBUTES; }
 
 /**
- * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364980(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364980(v=vs.85).aspx>
  *
  * @return
  *  If the function fails for any other reason, such as if the file does not exist, the return value is zero.
@@ -479,7 +479,7 @@ inline DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa446639(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa446639(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -496,7 +496,7 @@ inline BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379295(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379295(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -511,7 +511,7 @@ inline BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms683179(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms683179(v=vs.85).aspx>
  *
  * @return
  *  The return value is a pseudo handle to the current process.
@@ -524,7 +524,7 @@ inline HANDLE GetCurrentProcess(void)
 { return nullptr; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms724211(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms724211(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -537,7 +537,7 @@ inline BOOL CloseHandle(_In_ HANDLE hObject)
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa446616(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa446616(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -552,7 +552,7 @@ inline BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandl
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379266(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379266(v=vs.85).aspx>
  *
  * @remarks
  *  - Header: Winbase.h (include Windows.h)
@@ -563,7 +563,7 @@ inline void MapGenericMask(_Inout_ PDWORD           AccessMask,
 { /* EMPTY. */ }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379266(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa379266(v=vs.85).aspx>
  *
  * @remarks
  *  - Header: Winbase.h (include Windows.h)
@@ -580,7 +580,7 @@ inline BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364992(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364992(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -594,7 +594,7 @@ inline DWORD GetTempPathA(_In_  DWORD nBufferLength,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364934(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364934(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -608,7 +608,7 @@ DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/bb762181.aspx>
+ * @see <https://msdn.microsoft.com/en-us/library/windows/desktop/bb762181.aspx>
  *
  * @return
  *  If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
@@ -625,7 +625,7 @@ inline HRESULT SHGetFolderPathA(_In_  HWND   hwndOwner,
 { return E_FAIL; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms683197(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms683197(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is 0 (zero).
@@ -640,7 +640,7 @@ inline DWORD GetModuleFileNameA(_In_opt_ HMODULE hModule,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364963(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/en-us/library/windows/desktop/aa364963(v=vs.85).aspx>
  *
  * @return
  *  If the function fails for any other reason, the return value is zero.
@@ -656,7 +656,7 @@ inline DWORD GetFullPathNameW(_In_  LPCWSTR  lpFileName,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa363855(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa363855(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -670,7 +670,7 @@ inline BOOL CreateDirectoryW(_In_     LPCWSTR               lpPathName,
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365488(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365488(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -683,7 +683,7 @@ inline BOOL RemoveDirectoryW(_In_ LPCWSTR lpPathName)
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa363915(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa363915(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero (0).
@@ -696,7 +696,7 @@ inline BOOL DeleteFileW(_In_ LPCWSTR lpFileName)
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365239(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365239(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -710,7 +710,7 @@ inline BOOL MoveFileW(_In_ LPCWSTR lpExistingFileName,
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb773584(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb773584(v=vs.85).aspx>
  *
  * @return
  *  TRUE if the file exists; otherwise, FALSE.
@@ -723,7 +723,7 @@ inline BOOL PathFileExistsW(_In_ LPCWSTR pszPath)
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647539(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647539(v=vs.85).aspx>
  *
  * @remarks
  *  - Header: Strsafe.h
@@ -734,7 +734,7 @@ inline HRESULT StringCchLengthW(_In_  LPCWSTR   psz,
 { return E_FAIL; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647527(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647527(v=vs.85).aspx>
  *
  * @remarks
  *  - Header: Strsafe.h
@@ -745,7 +745,7 @@ inline HRESULT StringCchCopyW(_Out_ LPWSTR  pszDest,
 { return E_FAIL; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647518(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647518(v=vs.85).aspx>
  *
  * @remarks
  *  - Header: Strsafe.h
@@ -756,7 +756,7 @@ inline HRESULT StringCchCatW(_Inout_ LPWSTR  pszDest,
 { return E_FAIL; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb759938(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb759938(v=vs.85).aspx>
  *
  * @remarks
  *  - Header: Shlwapi.h
@@ -767,8 +767,8 @@ inline int StrCmpW(_In_ PCWSTR psz1,
 { return 0; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364418(v=vs.85).aspx>
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365200(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364418(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365200(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is INVALID_HANDLE_VALUE.
@@ -782,7 +782,7 @@ inline HANDLE FindFirstFileW(_In_  LPCWSTR            lpFileName,
 { return INVALID_HANDLE_VALUE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364428(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364428(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
@@ -796,7 +796,7 @@ inline BOOL FindNextFileW(_In_  HANDLE             hFindFile,
 { return FALSE; }
 
 /**
- * @ref <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364413(v=vs.85).aspx>
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa364413(v=vs.85).aspx>
  *
  * @return
  *  If the function fails, the return value is zero.
