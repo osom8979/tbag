@@ -22,8 +22,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace signal  {
 
-// ================
-namespace details {
+// ===============
+namespace __impl {
 
 // #define SIGHUP     1  // hangup
 // #define SIGINT     2  // interrupt
@@ -113,8 +113,8 @@ public:
 private:
     Mutex _notify;
 
-public:
-    void notify(int signal)
+private:
+    void notifyImplement(int signal)
     {
         Guard guard(_notify);
         auto handlers = getSignalMap();
@@ -131,16 +131,22 @@ public:
             }
         }
     }
+
+public:
+    void notify(int signal)
+    {
+        notifyImplement(signal);
+    }
 };
 
 SINGLETON2_IMPLEMENT(SignalObservable);
 
-} // namespace details
-// ===================
+} // namespace __impl
+// ==================
 
-static void __signalDispatcher(int signal)
+static void __signal_dispatcher__(int signal)
 {
-    details::SignalObservable * instance = details::SignalObservable::getInstance();
+    __impl::SignalObservable * instance = __impl::SignalObservable::getInstance();
     if (instance == nullptr) {
         __tbag_error("Not found SignalObservable instance.");
         return;
@@ -151,11 +157,16 @@ static void __signalDispatcher(int signal)
 
 void registerHandler(int signal, int order, SignalHandler * handler)
 {
-    details::SignalObservable * instance = details::SignalObservable::getInstance();
+    __impl::SignalObservable * instance = __impl::SignalObservable::getInstance();
     if (instance != nullptr) {
         instance->insert(signal, order, handler);
     }
-    std::signal(signal, __signalDispatcher);
+    std::signal(signal, __signal_dispatcher__);
+}
+
+void raise(int signal)
+{
+    std::raise(signal);
 }
 
 } // namespace signal

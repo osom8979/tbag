@@ -15,9 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-
-#include <csignal>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,6 +28,7 @@ struct SignalHandler
 };
 
 TBAG_API void registerHandler(int signal, int order, SignalHandler * handler);
+TBAG_API void raise(int signal);
 
 } // namespace signal
 
