@@ -58,9 +58,10 @@ public:
     using Observer = typename ObservableInterface<Functor>::Observer;
 
 public:
-    struct ObserverLess : std::binary_function<Observer, Observer, bool>
+    struct ObserverLess : public std::binary_function<Observer, Observer, bool>
     {
-        bool operator ()(Observer const & x, Observer const & y) const {
+        bool operator ()(Observer const & x, Observer const & y) const
+        {
             return reinterpret_cast<std::size_t>(&x) < reinterpret_cast<std::size_t>(&y);
         }
     };
@@ -70,16 +71,22 @@ public:
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-private:
-    Mutex _mutex;
-    Mutex _notify;
+protected:
+    mutable Mutex _mutex;
 
-private:
+protected:
     Collection _collection;
 
 public:
     ObservableSet() { /* EMPTY. */ }
     ~ObservableSet() { /* EMPTY. */ }
+
+public:
+    inline Collection getCollection() const
+    {
+        Guard guard(_mutex);
+        return _collection;
+    }
 
 public:
     virtual bool add(Observer const & observer) override
@@ -93,17 +100,14 @@ public:
         return true;
     }
 
+protected:
+    Mutex _notify;
+
 public:
     virtual void notify() override
     {
         Guard guard(_notify);
-        //{
-        _mutex.lock();
-        Collection clone = _collection;
-        _mutex.unlock();
-        //}
-
-        for (auto & cursor : clone) {
+        for (auto & cursor : getCollection()) {
             cursor();
         }
     }
