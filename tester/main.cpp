@@ -8,7 +8,6 @@
 #include <gtest/gtest.h>
 #include <libtbag/libtbag.h>
 #include <libtbag/string/Commander.hpp>
-#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/network/sample/Echo.hpp>
@@ -23,6 +22,8 @@ static char const * const CMD_ARGUMENT_ECHO_CLIENT = "echo_client";
 static char const * const CMD_ARGUMENT_CHAT_SERVER = "chat_server";
 static char const * const CMD_ARGUMENT_CHAT_CLIENT = "chat_client";
 
+static int const DEFAULT_NETWORK_TEST_PORT = 98765;
+
 enum class TestMode
 {
     UNKNOWN_ERROR = 0,
@@ -33,6 +34,17 @@ enum class TestMode
     CHAT_CLIENT,
 };
 
+TestMode checkNetworkArgument(libtbag::string::Arguments const & args, TestMode mode, std::string & ip, int & port)
+{
+    if (args.optString(0, &ip)) {
+        if (args.optInteger(1, &port) == false) {
+            port = DEFAULT_NETWORK_TEST_PORT;
+        }
+        return mode;
+    }
+    return TestMode::UNKNOWN_ERROR;
+}
+
 int main(int argc, char **argv)
 {
     tbInitialize();
@@ -42,43 +54,19 @@ int main(int argc, char **argv)
     int port;
 
     {   // COMMAND-LINE PARSING.
-        using Cmd  = libtbag::string::Commander;
-        using Path = libtbag::filesystem::Path;
-
-        auto const CMD_ARGUMENT_ECHO_SERVER_LAMBDA = [&](libtbag::string::Arguments const & args){
-            if (args.optString(0, &ip) && args.optInteger(1, &port)) {
-                mode = TestMode::ECHO_SERVER;
-            } else {
-                mode = TestMode::UNKNOWN_ERROR;
-            }
-        };
-        auto const CMD_ARGUMENT_ECHO_CLIENT_LAMBDA = [&](libtbag::string::Arguments const & args){
-            if (args.optString(0, &ip) && args.optInteger(1, &port)) {
-                mode = TestMode::ECHO_CLIENT;
-            } else {
-                mode = TestMode::UNKNOWN_ERROR;
-            }
-        };
-        auto const CMD_ARGUMENT_CHAT_SERVER_LAMBDA = [&](libtbag::string::Arguments const & args){
-            if (args.optString(0, &ip) && args.optInteger(1, &port)) {
-                mode = TestMode::CHAT_SERVER;
-            } else {
-                mode = TestMode::UNKNOWN_ERROR;
-            }
-        };
-        auto const CMD_ARGUMENT_CHAT_CLIENT_LAMBDA = [&](libtbag::string::Arguments const & args){
-            if (args.optString(0, &ip) && args.optInteger(1, &port)) {
-                mode = TestMode::CHAT_CLIENT;
-            } else {
-                mode = TestMode::UNKNOWN_ERROR;
-            }
-        };
-
-        Cmd cmd;
-        cmd.insert(CMD_ARGUMENT_ECHO_SERVER, CMD_ARGUMENT_ECHO_SERVER_LAMBDA);
-        cmd.insert(CMD_ARGUMENT_ECHO_CLIENT, CMD_ARGUMENT_ECHO_CLIENT_LAMBDA);
-        cmd.insert(CMD_ARGUMENT_CHAT_SERVER, CMD_ARGUMENT_CHAT_SERVER_LAMBDA);
-        cmd.insert(CMD_ARGUMENT_CHAT_CLIENT, CMD_ARGUMENT_CHAT_CLIENT_LAMBDA);
+        libtbag::string::Commander cmd;
+        cmd.insert(CMD_ARGUMENT_ECHO_SERVER, [&](libtbag::string::Arguments const & args){
+            mode = checkNetworkArgument(args, TestMode::ECHO_SERVER, ip, port);
+        });
+        cmd.insert(CMD_ARGUMENT_ECHO_CLIENT, [&](libtbag::string::Arguments const & args){
+            mode = checkNetworkArgument(args, TestMode::ECHO_CLIENT, ip, port);
+        });
+        cmd.insert(CMD_ARGUMENT_CHAT_SERVER, [&](libtbag::string::Arguments const & args){
+            mode = checkNetworkArgument(args, TestMode::CHAT_SERVER, ip, port);
+        });
+        cmd.insert(CMD_ARGUMENT_CHAT_CLIENT, [&](libtbag::string::Arguments const & args){
+            mode = checkNetworkArgument(args, TestMode::CHAT_CLIENT, ip, port);
+        });
         cmd.request(argc, argv);
     }
 
