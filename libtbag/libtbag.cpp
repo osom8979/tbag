@@ -6,10 +6,72 @@
  */
 
 #include <libtbag/libtbag.h>
+#include <libtbag/util/UvUtils.hpp>
+#include <libtbag/util/SingletonUtils.hpp>
+#include <libtbag/locale/Locale.hpp>
+#include <libtbag/log/Log.hpp>
+
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+/**
+ * Initializer helper class.
+ *
+ * @author zer0
+ * @date   2016-12-24
+ */
+struct LibtbagInitializer
+{
+public:
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
+
+private:
+    static Mutex _mutex;
+    static bool  _init;
+
+public:
+    static bool init(tbInitParam * param = nullptr)
+    {
+        Guard guard(_mutex);
+        if (_init == true) {
+            __tbag_debug("It has already been initialized.");
+            return false;
+        }
+
+        libtbag::util::initUv();
+        libtbag::util::initSingletonObjects();
+
+        if (param == nullptr) {
+            libtbag::locale::setSystemDefaultLocale();
+        } else {
+            libtbag::locale::setLocale(param->localname);
+        }
+
+        __tbag_debug(LIBTBAG_MAIN_TITLE);
+        __tbag_debug("Global locale name: {}", libtbag::locale::getGlobalLocaleName());
+
+        return true;
+    }
+
+    static bool release()
+    {
+        Guard guard(_mutex);
+        if (_init == false) {
+            __tbag_debug("It has already been relased.");
+            return false;
+        }
+
+        libtbag::util::releaseSingletonObjects();
+        return true;
+    }
+};
+
+LibtbagInitializer::Mutex LibtbagInitializer::_mutex;
+bool LibtbagInitializer::_init = false;
 
 static bool setUp()
 {
@@ -76,32 +138,13 @@ int tbGetPatchVersion()
     return LIBTBAG_VERSION_PATCH;
 }
 
-#include <libtbag/util/UvUtils.hpp>
-#include <libtbag/util/SingletonUtils.hpp>
-#include <libtbag/locale/Locale.hpp>
-#include <libtbag/log/Log.hpp>
-
 tbBOOL tbInitialize(tbInitParam * param)
 {
-    libtbag::util::initUv();
-    libtbag::util::initSingletonObjects();
-
-    if (param == NULL) {
-        libtbag::locale::setSystemDefaultLocale();
-    } else {
-        libtbag::locale::setLocale(param->localname);
-    }
-
-    __tbag_debug(LIBTBAG_MAIN_TITLE);
-    __tbag_debug("Global locale name: {}", libtbag::locale::getGlobalLocaleName());
-
-    return AB_TRUE;
+    return libtbag::LibtbagInitializer::init(param) ? AB_TRUE : AB_FALSE;
 }
 
 tbBOOL tbRelease()
 {
-    libtbag::util::releaseSingletonObjects();
-
-    return AB_TRUE;
+    return libtbag::LibtbagInitializer::release() ? AB_TRUE : AB_FALSE;
 }
 
