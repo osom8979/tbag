@@ -12,6 +12,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,7 +25,7 @@ namespace sample  {
 // Chat server implementation.
 // ---------------------------
 
-ChatServer::ChatServer() : socket::Server(this)
+ChatServer::ChatServer() : socket::Server(this), _id_count(0)
 {
 }
 
@@ -34,68 +35,84 @@ ChatServer::~ChatServer()
 
 bool ChatServer::onConnection(ClientKey key, int status)
 {
-    std::cout << "ChatServer::onConnect(" << key.get() << "," << (status == 0 ? true : false) << ") ";
     if (status != 0) {
-        std::cout << "Status error: " << status << ".\n";
+        std::cout << "STATUS ERROR: " << status << std::endl;
         return false;
     }
 
     ClientValue client = this->getClient(key);
     if (static_cast<bool>(client) == false) {
-        std::cout << "Not found client key error.\n";
+        std::cout << "NOT FOUND CLIENT KEY ERROR.\n";
         return false;
     }
 
-    std::cout << "Client information: " << client->getSocketName() << ".\n";
     if (this->read(key) == false) {
-        std::cout << "Read error.\n";
+        std::cout << "READ ERROR.\n";
         return false;
     }
 
+    UserInfo user;
+    user.id = _id_count++;
+    user.ip = client->getSocketName();
+    user.name = std::to_string(user.id);
+
+    _users.insert(Users::value_type(key, user));
+    std::cout << "JOIN: " << user.name << "(" << user.ip << ")\n";
     return true; // ACCEPT OK!
 }
 
 void ChatServer::onClose()
 {
-    std::cout << "ChatServer::onClose()\n";
+    std::cout << "CLOSE THIS SERVER.\n";
 }
 
 void ChatServer::onCloseClient(ClientKey key)
 {
-    std::cout << "ChatServer::onCloseClient(" << key.get() << ")\n";
+    auto find_itr = _users.find(key);
+    if (find_itr == _users.end()) {
+        std::cout << "UNKNOWN KEY ERROR: " << key.get() << std::endl;
+        return;
+    }
+
+    std::cout << "OUT: " << find_itr->second.name << "(" << find_itr->second.ip << ")\n";
+    _users.erase(find_itr);
 }
 
 void ChatServer::onRead(ClientKey from, Code code, char * buffer, std::size_t size)
 {
-    std::cout << "ChatServer::onRead() ";
-
-    if (code == Code::SUCCESS) {
-        std::string msg;
-        msg.assign(buffer, buffer + size);
-        std::cout << "Success: " << msg << std::endl;
-
-        std::cout << "[WRITE MESSAGE] " << msg << std::endl;
-        this->write(from, &msg[0], msg.size());
-    } else if (code == Code::END_OF_FILE) {
-        std::cout << "End of file.\n";
+    if (code == Code::END_OF_FILE) {
         this->closeClient(from);
-    } else {
-        std::cout << "Failure.\n";
-        this->closeClient(from);
+        return;
+    }
+    if (code == Code::FAILURE) {
+        std::cout << "UNKNOWN READ ERROR: " << from.get() << std::endl;
+        return;
+    }
+
+    auto find_itr = _users.find(from);
+    if (find_itr == _users.end()) {
+        std::cout << "UNKNOWN READ/KEY ERROR: " << from.get() << std::endl;
+        return;
+    }
+
+    auto msg = msg::GetChatPacket(buffer);
+    std::cout << "[" << msg->name()->c_str() << "]"
+              << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
+              << msg->msg()->c_str() << std::endl;
+
+    for (auto itr = _users.begin(); itr != _users.end(); ++itr) {
+        if (itr != find_itr) {
+            this->write(itr->first, buffer, size);
+        }
     }
 }
 
 void ChatServer::onWrite(ClientKey to, Code code)
 {
-    std::cout << "ChatServer::onWrite() ";
-    if (code == Code::SUCCESS) {
-        std::cout << "Success.\n";
-    } else {
-        std::cout << "Failure.\n";
+    if (code != Code::SUCCESS) {
+        std::cout << "SEND FAILURE.\n";
+        this->closeClient(to);
     }
-
-    this->closeClient(to);
-    this->close();
 }
 
 // ---------------------------
@@ -112,51 +129,46 @@ ChatClient::~ChatClient()
 
 void ChatClient::onConnect(int status)
 {
-    std::cout << "ChatClient::onConnect(" << (status == 0 ? true : false) << ")\n";
-
     if (status != 0) {
-        std::cout << "Status error: " << status << ".\n";
+        std::cout << "STATUS ERROR: " << status << std::endl;
         return;
     }
 
-    std::string msg;
-    std::cout << "[WRITE MESSAGE] :";
-    std::cin >> msg;
-
     this->read();
-    this->write(&msg[0], msg.size());
 }
 
 void ChatClient::onClose()
 {
-    std::cout << "ChatClient::onClose()\n";
+    std::cout << "CLOSE.\n";
 }
 
 void ChatClient::onRead(Code code, char const * buffer, std::size_t size)
 {
-    std::cout << "ChatClient::onRead() ";
-
-    if (code == Code::SUCCESS) {
-        std::string msg;
-        msg.assign(buffer, buffer + size);
-        std::cout << "Success: " << msg << std::endl;
-    } else if (code == Code::END_OF_FILE) {
-        std::cout << "End of file.\n";
-    } else {
-        std::cout << "Failure.\n";
+    if (code == Code::END_OF_FILE) {
+        this->close();
+        return;
+    }
+    if (code == Code::FAILURE) {
+        std::cout << "UNKNOWN READ ERROR.\n";
+        return;
     }
 
-    this->close();
+    flatbuffers::Verifier verifier((uint8_t const *)buffer, size);
+    if (msg::VerifyChatPacketBuffer(verifier) == false) {
+        std::cout << "PARSER ERROR.\n";
+        return;
+    }
+
+    auto msg = msg::GetChatPacket(buffer);
+    std::cout << "[" << msg->name()->c_str() << "]"
+              << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
+              << msg->msg()->c_str() << std::endl;
 }
 
 void ChatClient::onWrite(Code code)
 {
-    std::cout << "ChatClient::onWrite() ";
-
-    if (code == Code::SUCCESS) {
-        std::cout << "Success.\n";
-    } else {
-        std::cout << "Failure.\n";
+    if (code != Code::SUCCESS) {
+        std::cout << "SEND FAILURE.\n";
         this->close();
     }
 }
@@ -180,11 +192,37 @@ int runChatClient(std::string const & ip, int port)
 {
     std::cout.setf(std::ios_base::boolalpha);
 
+    std::string name;
+    std::cout << "Enter the your name: ";
+    std::cin >> name;
+
+    std::mutex mutex;
+    std::atomic_bool is_exit(false);
+
     ChatClient client;
-    if (client.run(ip, port)) {
-        return EXIT_SUCCESS;
-    }
-    return EXIT_FAILURE;
+    std::thread t([&](){
+        while (true) {
+            std::string msg;
+            std::cin >> msg;
+
+            if (is_exit == false) {
+                msg::Version version = msg::Version(1, 1);
+                flatbuffers::FlatBufferBuilder builder;
+                auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(name), builder.CreateString(msg));
+                builder.Finish(packet);
+                client.write((char const *)builder.GetBufferPointer(), builder.GetSize());
+            } else {
+                break;
+            }
+        }
+    });
+
+    bool const RESULT = client.run(ip, port);
+    is_exit = true;
+
+    t.join();
+
+    return (RESULT ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 } // namespace sample

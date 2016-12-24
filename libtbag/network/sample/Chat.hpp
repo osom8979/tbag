@@ -18,6 +18,8 @@
 #include <libtbag/network/socket/Server.hpp>
 #include <libtbag/network/socket/Client.hpp>
 
+#include <map>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -35,7 +37,20 @@ namespace sample  {
  */
 class TBAG_API ChatServer : public socket::Server, public socket::Server::EventCallback
 {
+public:
+    struct UserInfo
+    {
+        int id;
+        std::string ip;
+        std::string name;
+    };
+
+public:
+    using Users = std::map<ClientKey, UserInfo>;
+
 private:
+    int _id_count;
+    Users _users;
 
 public:
     ChatServer();
