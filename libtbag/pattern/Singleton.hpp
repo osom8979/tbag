@@ -23,6 +23,7 @@
 
 #include <cstdlib>
 
+#include <functional>
 #include <atomic>
 #include <mutex>
 #include <type_traits>
@@ -81,7 +82,7 @@ class SingletonLifeManager
         , public Noncopyable
 {
 public:
-    using Observable = UnorderedObservable;
+    using Observable = ObservableSet<std::function<void(void)> >;
     using Property   = SingletonProperty<SingletonLifeManager>;
 
 private:

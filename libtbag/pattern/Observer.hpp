@@ -19,7 +19,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
-#include <functional>
 #include <set>
 #include <mutex>
 
@@ -29,15 +28,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace pattern {
 
-template <typename T>
+template <typename Functor>
 struct ObservableInterface
 {
 public:
-    using Observer = T;
+    using Observer = Functor;
 
 public:
-    ObservableInterface() = default;
-    virtual ~ObservableInterface() = default;
+    ObservableInterface() { /* EMPTY. */ }
+    ~ObservableInterface() { /* EMPTY. */ }
 
 public:
     virtual bool add(Observer const & observer) = 0;
@@ -52,11 +51,11 @@ public:
  * @date   2015-10-12 (Switch to the template class)
  * @date   2016-04-11 (Remove std::shared_ptr template class)
  */
-template <typename T = std::function<void(void)> >
-class ObservableSet : public ObservableInterface<T>, public Noncopyable
+template <typename Functor>
+class ObservableSet : public ObservableInterface<Functor>, public Noncopyable
 {
 public:
-    using Observer = typename ObservableInterface<T>::Observer;
+    using Observer = typename ObservableInterface<Functor>::Observer;
 
 public:
     struct ObserverLess : std::binary_function<Observer, Observer, bool>
@@ -68,35 +67,40 @@ public:
 
 public:
     using Collection = std::set<Observer, ObserverLess>;
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
 private:
-    std::mutex _locker;
+    Mutex _mutex;
+    Mutex _notify;
+
+private:
     Collection _collection;
 
 public:
-    ObservableSet() = default;
-    ~ObservableSet() = default;
+    ObservableSet() { /* EMPTY. */ }
+    ~ObservableSet() { /* EMPTY. */ }
 
 public:
-    virtual bool add(Observer const & observer) override {
-        std::lock_guard<std::mutex> guard(this->_locker);
+    virtual bool add(Observer const & observer) override
+    {
+        Guard guard(_mutex);
         if (_collection.size() + 1 >= _collection.max_size()) {
             return false;
         }
+
         _collection.insert(observer);
         return true;
     }
 
-private:
-    std::mutex _notify_locker;
-
 public:
-    virtual void notify() override {
-        std::lock_guard<std::mutex> guard(this->_notify_locker);
+    virtual void notify() override
+    {
+        Guard guard(_notify);
         //{
-        this->_locker.lock();
-        Collection clone = this->_collection;
-        this->_locker.unlock();
+        _mutex.lock();
+        Collection clone = _collection;
+        _mutex.unlock();
         //}
 
         for (auto & cursor : clone) {
@@ -104,12 +108,6 @@ public:
         }
     }
 };
-
-// --------------------
-// Default type define.
-// --------------------
-
-using UnorderedObservable = ObservableSet<>;
 
 } // namespace pattern
 

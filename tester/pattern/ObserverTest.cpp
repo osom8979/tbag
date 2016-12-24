@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <libtbag/pattern/Observer.hpp>
 
+#include <functional>
+
 using namespace libtbag;
 using namespace libtbag::pattern;
 
@@ -17,7 +19,9 @@ TEST(ObserverTest, UnorderedObservable)
     int test0 = 0;
     int test1 = 0;
 
-    UnorderedObservable observable;
+    using Functor = std::function<void(void)>;
+    ObservableSet<Functor> observable;
+
     observable.add([&](){
             test0 = TEST_NUMBER;
         });
