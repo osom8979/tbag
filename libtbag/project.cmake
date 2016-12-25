@@ -19,8 +19,8 @@ endif ()
 ## FlatBuffers.
 tbag_modules__build_dep_flatc_cpp (libtbag_fbs "${CMAKE_SOURCE_DIR}/libtbag/network/sample/msg/chat.fbs")
 
-
 ## Dependencies.
+tbag_modules__apply_dep_boost_include ()
 tbag_modules__apply_dep_icu     ()
 tbag_modules__apply_dep_lmdb    ()
 tbag_modules__apply_dep_lzma    ()

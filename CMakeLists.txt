@@ -107,6 +107,41 @@ include (CheckIncludeFile)
 check_include_file (sys/syscall.h  HAVE_SYS_SYSCALL_H)
 check_include_file (syscall.h      HAVE_SYSCALL_H)
 
+## Compile checker.
+include (CheckCSourceCompiles)
+include (CheckCXXSourceCompiles)
+## - ${CMAKE_REQUIRED_FLAGS}: string of compile command line flags
+## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
+## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
+## - ${CMAKE_REQUIRED_LIBRARIES}: list of libraries to link
+check_c_source_compiles ("
+    #include <cstring>
+    #include <windows.h>
+    #include \"Dbgeng.h\"
+    #pragma comment(lib, \"ole32.lib\")
+    #pragma comment(lib, \"Dbgeng.lib\")
+    int main() { CoInitializeEx(0, COINIT_MULTITHREADED); return 0; }
+    " HAVE_WINDBG)
+check_c_source_compiles ("
+    #include <dlfcn.h>
+    #include <execinfo.h>
+    int main() { void* buf[10]; ::backtrace(buf, 10); return 0; }
+    " HAVE_BACKTRACE)
+check_c_source_compiles ("
+    #include <unwind.h>
+    int main() { return 0; }
+    " HAVE_UNWIND)
+
+if (HAVE_WINDBG)
+    add_definitions (-DBOOST_STACKTRACE_USE_WINDBG)
+elseif (HAVE_BACKTRACE)
+    add_definitions (-DBOOST_STACKTRACE_USE_BACKTRACE)
+elseif (HAVE_UNWIND)
+    add_definitions (-DBOOST_STACKTRACE_USE_UNWIND)
+else ()
+    add_definitions (-DBOOST_STACKTRACE_USE_NOOP)
+endif ()
+
 set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
 set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")
 configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")

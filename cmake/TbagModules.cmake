@@ -177,6 +177,10 @@ endmacro ()
 ## Dep libraries.
 ## --------------
 
+macro (tbag_modules__apply_dep_boost_include)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/boost/include)
+endmacro ()
+
 macro (tbag_modules__build_dep_flatc_cpp __target __fbs)
     list (APPEND TBAG_PROJECT_DEPENDENCIES flatc ${__target})
 
