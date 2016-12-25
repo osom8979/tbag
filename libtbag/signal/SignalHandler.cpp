@@ -10,11 +10,14 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
-#include <csignal>
+#include <cstdlib>
 
+#include <iostream>
 #include <mutex>
 #include <memory>
 #include <map>
+
+#include <boost/stacktrace.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -56,14 +59,12 @@ namespace __impl {
 // #define SIG_DFL // The signal handler is set to default signal handler.
 // #define SIG_IGN // The signal is ignored.
 
-static int const SIGNAL_ABORT                    = SIGABRT; // abort()
-static int const SIGNAL_FLOATING_POINT_EXCEPTION = SIGFPE;  // floating point exception
-static int const SIGNAL_ILLEGAL_INSTRUCTION      = SIGILL;  // illegal instruction (not reset when caught)
-static int const SIGNAL_INTERRUPT                = SIGINT;  // interrupt
-static int const SIGNAL_SEGMENTATION_VIOLATION   = SIGSEGV; // segmentation violation
-static int const SIGNAL_TERMINATION              = SIGTERM; // software termination signal from kill
-
-/** Signal observable. */
+/**
+ * Signal observable.
+ *
+ * @author zer0
+ * @date   2016-12-24
+ */
 class SignalObservable
 {
 public:
@@ -141,23 +142,77 @@ public:
 
 SINGLETON2_IMPLEMENT(SignalObservable);
 
+/**
+ * Default signal handler.
+ *
+ * @author zer0
+ * @date   2016-12-25
+ */
+struct DefaultSignalHandler : public SignalHandler
+{
+    virtual void run(int signal) override
+    {
+        std::cerr << "Signal\n" << boost::stacktrace::stacktrace();
+        //std::abort(); // Don't use this abort.
+        std::exit(EXIT_FAILURE);
+    }
+};
+
+/**
+ * Default terminate handler.
+ *
+ * @author zer0
+ * @date   2016-12-25
+ */
+struct DefaultTerminateHandler : public SignalHandler
+{
+    virtual void run(int signal) override
+    {
+        std::cerr << "Terminate signal\n" << boost::stacktrace::stacktrace();
+        //std::abort(); // Don't use this abort.
+        std::exit(EXIT_FAILURE);
+    }
+};
+
 } // namespace __impl
 // ==================
 
 static void __signal_dispatcher__(int signal)
 {
-    __impl::SignalObservable * instance = __impl::SignalObservable::getInstance();
-    if (instance == nullptr) {
-        __tbag_error("Not found SignalObservable instance.");
-        return;
+    using Observable = __impl::SignalObservable;
+    Observable * instance = Observable::getInstance();
+    if (instance != nullptr) {
+        instance->notify(signal);
     }
-
-    instance->notify(signal);
 }
 
-void registerHandler(int signal, int order, SignalHandler * handler)
+static void __std_terminate_dispatcher__()
 {
-    __impl::SignalObservable * instance = __impl::SignalObservable::getInstance();
+    using Observable = __impl::SignalObservable;
+    Observable * instance = Observable::getInstance();
+    if (instance != nullptr) {
+        instance->notify(SIGNAL_STD_TERMINATE);
+    }
+}
+
+// -------------
+// Main methods.
+// -------------
+
+void registerStdTerminateHandler(SignalHandler * handler, int order)
+{
+    using Observable = __impl::SignalObservable;
+    Observable * instance = Observable::getInstance();
+    if (instance != nullptr) {
+        instance->insert(SIGNAL_STD_TERMINATE, order, handler);
+    }
+    std::set_terminate(__std_terminate_dispatcher__);
+}
+
+void registerHandler(int signal, SignalHandler * handler, int order)
+{
+    using Observable = __impl::SignalObservable;
+    Observable * instance = Observable::getInstance();
     if (instance != nullptr) {
         instance->insert(signal, order, handler);
     }
@@ -167,6 +222,18 @@ void registerHandler(int signal, int order, SignalHandler * handler)
 void raise(int signal)
 {
     std::raise(signal);
+}
+
+void registerDefaultStdTerminateHandler()
+{
+    registerStdTerminateHandler(new __impl::DefaultTerminateHandler, LAST_ORDER);
+}
+
+void registerDefaultHandler()
+{
+    registerHandler(SIGNAL_ABORT                 , new __impl::DefaultSignalHandler, LAST_ORDER);
+    registerHandler(SIGNAL_SEGMENTATION_VIOLATION, new __impl::DefaultSignalHandler, LAST_ORDER);
+    registerHandler(SIGNAL_TERMINATION           , new __impl::DefaultSignalHandler, LAST_ORDER);
 }
 
 } // namespace signal

@@ -42,9 +42,9 @@ TEST(SignalHandlerTest, Default)
     g_test_signal2 = 0;
     g_test_signal3 = 0;
 
-    registerHandler(SIGINT,  0, new SignalHandlerTest);
-    registerHandler(SIGTERM, 0, new SignalHandlerTest2);
-    registerHandler(SIGINT,  0, new SignalHandlerTest3);
+    registerHandler(SIGINT,  new SignalHandlerTest);
+    registerHandler(SIGTERM, new SignalHandlerTest2);
+    registerHandler(SIGINT,  new SignalHandlerTest3);
 
     signal::raise(SIGINT);
     ASSERT_EQ(SIGINT, g_test_signal);

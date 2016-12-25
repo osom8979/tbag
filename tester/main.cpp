@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/libtbag.h>
 #include <libtbag/string/Commander.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/network/sample/Echo.hpp>
@@ -48,6 +49,8 @@ TestMode checkNetworkArgument(libtbag::string::Arguments const & args, TestMode 
 int main(int argc, char **argv)
 {
     tbInitialize();
+    libtbag::signal::registerDefaultStdTerminateHandler();
+    libtbag::signal::registerDefaultHandler();
 
     TestMode mode = TestMode::TEST;
     std::string ip;
