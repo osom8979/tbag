@@ -1,6 +1,6 @@
 ## VERSION
 
-- JsonCpp 1.7.7
+- libuv 1.9.1
 
 ## LICENSE
 
