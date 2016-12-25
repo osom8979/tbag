@@ -42,8 +42,8 @@ public:
 
     typedef boost::stacktrace::const_iterator       iterator;
     typedef boost::stacktrace::const_iterator       const_iterator;
-    typedef std::reverse_iterator<iterator>         reverse_iterator;
-    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+    typedef boost::stacktrace::reverse_iterator<iterator>         reverse_iterator;
+    typedef boost::stacktrace::reverse_iterator<const_iterator>   const_reverse_iterator;
 
     /// @brief Stores the current function call sequence inside the class.
     ///

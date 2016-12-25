@@ -15,7 +15,6 @@
 #include <boost/core/demangle.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/stacktrace/detail/to_hex_array.hpp>
-#include <boost/lexical_cast/try_lexical_convert.hpp>
 
 #if defined(BOOST_STACKTRACE_USE_UNWIND)
 #include <unwind.h>
@@ -23,12 +22,11 @@
 
 #include <dlfcn.h>
 #include <execinfo.h>
+#include <signal.h>
 #include <cstdio>
-#include <csignal>
 
 #include <sys/types.h>
 #include <sys/wait.h>
-
 
 namespace boost { namespace stacktrace { namespace detail {
 
@@ -236,7 +234,9 @@ std::size_t backend::get_source_line(const void* addr) {
     res = res.substr(last + 1);
 
     std::size_t line_num = 0;
-    if (!boost::conversion::try_lexical_convert(res, line_num)) {
+    try {
+        line_num = std::stoi(res);
+    } catch (...) {
         return 0;
     }
 
