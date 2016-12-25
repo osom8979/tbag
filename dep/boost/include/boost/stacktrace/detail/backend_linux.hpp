@@ -24,6 +24,7 @@
 #include <dlfcn.h>
 #include <execinfo.h>
 #include <cstdio>
+#include <csignal>
 
 #include <sys/types.h>
 #include <sys/wait.h>

@@ -7,6 +7,7 @@
 
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/pattern/Singleton2.hpp>
+#include <libtbag/debug/StackTrace.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -16,8 +17,6 @@
 #include <mutex>
 #include <memory>
 #include <map>
-
-#include <boost/stacktrace.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -152,7 +151,7 @@ struct DefaultSignalHandler : public SignalHandler
 {
     virtual void run(int signal) override
     {
-        std::cerr << "Signal\n" << boost::stacktrace::stacktrace();
+        __tbag_debug("Signal {}:\n{}", getSignalName(signal), debug::getStackTrace());
         //std::abort(); // Don't use this abort.
         std::exit(EXIT_FAILURE);
     }
@@ -168,7 +167,7 @@ struct DefaultTerminateHandler : public SignalHandler
 {
     virtual void run(int signal) override
     {
-        std::cerr << "Terminate signal\n" << boost::stacktrace::stacktrace();
+        __tbag_debug("Terminate signal:\n{}", debug::getStackTrace());
         //std::abort(); // Don't use this abort.
         std::exit(EXIT_FAILURE);
     }
@@ -198,6 +197,16 @@ static void __std_terminate_dispatcher__()
 // -------------
 // Main methods.
 // -------------
+
+std::string getSignalName(int signal_number)
+{
+    switch (signal_number) {
+#define _TBAG_XX(name, signal, message) case name: return #signal;
+    TBAG_SIGNAL_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return std::to_string(signal_number);
+    }
+}
 
 void registerStdTerminateHandler(SignalHandler * handler, int order)
 {

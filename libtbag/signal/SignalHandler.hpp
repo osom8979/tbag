@@ -15,7 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <csignal>
+#include <string>
 #include <limits>
 
 // -------------------
@@ -24,12 +26,20 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace signal {
 
-static int const SIGNAL_ABORT                    = SIGABRT; // abort()
-static int const SIGNAL_FLOATING_POINT_EXCEPTION = SIGFPE;  // floating point exception
-static int const SIGNAL_ILLEGAL_INSTRUCTION      = SIGILL;  // illegal instruction (not reset when caught)
-static int const SIGNAL_INTERRUPT                = SIGINT;  // interrupt
-static int const SIGNAL_SEGMENTATION_VIOLATION   = SIGSEGV; // segmentation violation
-static int const SIGNAL_TERMINATION              = SIGTERM; // software termination signal from kill
+#ifndef TBAG_SIGNAL_MAP
+#define TBAG_SIGNAL_MAP(_TBAG_XX) \
+    _TBAG_XX(SIGNAL_ABORT                   , SIGABRT, "abort()") \
+    _TBAG_XX(SIGNAL_FLOATING_POINT_EXCEPTION, SIGFPE , "floating point exception") \
+    _TBAG_XX(SIGNAL_ILLEGAL_INSTRUCTION     , SIGILL , "illegal instruction (not reset when caught)") \
+    _TBAG_XX(SIGNAL_INTERRUPT               , SIGINT , "interrupt") \
+    _TBAG_XX(SIGNAL_SEGMENTATION_VIOLATION  , SIGSEGV, "segmentation violation") \
+    _TBAG_XX(SIGNAL_TERMINATION             , SIGTERM, "software termination signal from kill") \
+    /* -- END -- */
+#endif
+
+#define _TBAG_XX(name, signal, message) static int const name = signal;
+TBAG_SIGNAL_MAP(_TBAG_XX)
+#undef _TBAG_XX
 
 static int const SIGNAL_STD_TERMINATE = std::numeric_limits<int>::min(); // C++ terminate signal.
 
@@ -46,6 +56,8 @@ struct SignalHandler
 {
     virtual void run(int signal) = 0;
 };
+
+TBAG_API std::string getSignalName(int signal_number);
 
 TBAG_API void registerStdTerminateHandler(SignalHandler * handler, int order = 0);
 TBAG_API void registerHandler(int signal, SignalHandler * handler, int order = 0);
