@@ -27,21 +27,21 @@ TEST(ProcessTest, Default)
     ASSERT_EQ(0, process.getTerminateSignal());
 }
 
-//TEST(ProcessTest, asyncExe)
-//{
-//    using Path = libtbag::filesystem::Path;
-//    Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
-//
-//    Process process;
-//    Process::Param param;
-//    param.setExePath(EXE_PATH);
-//    param.setWorkingDir(Path::getExeDir());
-//
-//    auto future = Process::asyncExe(process, param);
-//    // Insert another jobs...
-//    if (future.valid()) { future.wait(); }
-//    ASSERT_TRUE(future.get());
-//}
+TEST(ProcessTest, asyncExe)
+{
+    using Path = libtbag::filesystem::Path;
+    Path const EXE_PATH = Path::getExeDir() / getExecutableName(EXE_NAME);
+
+    Process process;
+    Process::Param param;
+    param.setExePath(EXE_PATH);
+    param.setWorkingDir(Path::getExeDir());
+
+    auto future = Process::asyncExe(process, param);
+    // Insert another jobs...
+    if (future.valid()) { future.wait(); }
+    ASSERT_TRUE(future.get());
+}
 
 TEST(ProcessTest, KillSignal)
 {
