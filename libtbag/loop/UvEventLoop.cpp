@@ -47,7 +47,15 @@ public:
 
     ~LoopPimpl()
     {
-        ::uv_loop_close(&_loop);
+        //runCloseAll();
+        int const CODE = ::uv_loop_close(&_loop);
+        if (CODE != 0) {
+            if (CODE == UV_EBUSY) {
+                __tbag_error("UvEventLoop::LoopPimpl::~LoopPimpl() uv_loop is busy.");
+            } else {
+                __tbag_error("UvEventLoop::LoopPimpl::~LoopPimpl() close uv_loop error [{}]", CODE);
+            }
+        }
     }
 
 public:
@@ -68,23 +76,10 @@ public:
         return run(UV_RUN_DEFAULT);
     }
 
-    bool runAllClose()
+    bool runCloseAll()
     {
         ::uv_walk(&_loop, &LoopPimpl::onClose, nullptr);
         return runDefault();
-    }
-
-public:
-    /** Fully close a loop. */
-    static void onClose(uv_handle_t * handle, void * arg)
-    {
-        if (isClosing(handle)) {
-            __tbag_debug("Closing uv handle: {}", util::getUvHandleName(handle));
-        } else {
-            // If not closing or closed.
-            __tbag_debug("Not closing or closed uv handle: {}", util::getUvHandleName(handle));
-            ::uv_close(handle, nullptr);
-        }
     }
 
 public:
@@ -96,6 +91,22 @@ public:
         // Note: This function should only be used between
         //       "the initialization of the handle" and "the arrival of the close callback".
         return ::uv_is_closing(handle) != 0;
+    }
+
+public:
+    /** Fully close a loop. */
+    static void onClose(uv_handle_t * handle, void * arg)
+    {
+        if (util::isUvHandleType(handle) == false) {
+            return;
+        }
+        if (isClosing(handle)) {
+            return;
+        }
+
+        // If not closing or closed.
+        __tbag_debug("Not closing or closed uv handle: {}", util::getUvHandleName(handle));
+        ::uv_close(handle, nullptr);
     }
 };
 
