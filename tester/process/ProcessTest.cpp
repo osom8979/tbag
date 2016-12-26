@@ -9,6 +9,8 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/process/Process.hpp>
 
+#include <csignal>
+
 using namespace libtbag;
 using namespace libtbag::process;
 
@@ -55,7 +57,7 @@ TEST(ProcessTest, KillSignal)
     Process process;
     ASSERT_TRUE(process.exe(param));
     ASSERT_LT(0, process.getProcessId());
-    process.kill(SIGKILL);
+    process.kill(SIGTERM);
 
 #if defined(__PLATFORM_UNIX_LIKE__)
     {   // Check command:
