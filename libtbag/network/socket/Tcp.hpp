@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/util/UvUtils.hpp>
 
 #include <string>
 #include <memory>
@@ -37,33 +38,18 @@ namespace socket  {
  * @date   2016-11-04
  * @date   2016-11-07 (Refactoring this class)
  */
-class TBAG_API Tcp : public Noncopyable
+class TBAG_API Tcp : public util::UvHandle
 {
-public:
-    struct TcpPimpl;
-    friend struct TcpPimpl;
-
-public:
-    using UniqueTcp = std::unique_ptr<TcpPimpl>;
-
-private:
-    UniqueTcp _tcp;
-
 public:
     Tcp();
     ~Tcp();
 
 public:
     bool init(libtbag::loop::UvEventLoop & loop);
-    void close();
 
 public:
     std::string getPeerName() const;
     std::string getSocketName() const;
-
-public:
-    void * getNative();
-    void const * getNative() const;
 
 public:
     static bool isIpv4(std::string const & address);

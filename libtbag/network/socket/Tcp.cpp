@@ -25,101 +25,65 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace socket  {
 
-// ------------------------
-// TcpPimpl implementation.
-// ------------------------
+namespace tcp_details {
 
-/**
- * Pointer to implementation of @c uv_tcp_t.
- *
- * @author zer0
- * @date   2016-11-03
- * @date   2016-11-07 (Refactoring this class)
- *
- * @remarks
- *  Use the libuv.
- */
-struct Tcp::TcpPimpl
+static std::string getIpName(sockaddr_in * address)
 {
-    uv_tcp_t tcp;
-
-    TcpPimpl()
-    {
-        ::memset(&tcp, 0x00, sizeof(tcp));
+    char name[16] = {0,}; // e.g. 255.255.255.255
+    if (::uv_ip4_name(address, name, sizeof(name)) == 0) {
+        return std::string(name);
     }
+    return std::string();
+}
 
-    ~TcpPimpl()
-    {
-        // EMPTY.
+static std::string getIpName(sockaddr_in6 * address)
+{
+    char name[40] = {0,}; // e.g. 2001:0db8:85a3:08d3:1319:8a2e:0370:7334
+    if (::uv_ip6_name(address, name, sizeof(name)) == 0) {
+        return std::string(name);
     }
+    return std::string();
+}
 
-    inline uv_tcp_t * get() TBAG_NOEXCEPT
-    { return &tcp; }
-    inline uv_tcp_t const * get() const TBAG_NOEXCEPT
-    { return &tcp; }
+static std::string getPeerName(uv_tcp_t const * handle)
+{
+    sockaddr addr = {0,};
+    int length = sizeof(addr);
 
-    inline std::string getPeerName() const
-    { return getPeerName(&tcp); }
-    inline std::string getSocketName() const
-    { return getSocketName(&tcp); }
-
-public:
-    static std::string getIpName(sockaddr_in * address)
-    {
-        char name[16] = {0,}; // e.g. 255.255.255.255
-        if (::uv_ip4_name(address, name, sizeof(name)) == 0) {
-            return std::string(name);
+    if (::uv_tcp_getpeername(handle, &addr, &length) == 0) {
+        if (addr.sa_family == AF_INET) {
+            return getIpName((sockaddr_in*)&addr);
+        } else if (addr.sa_family == AF_INET6) {
+            return getIpName((sockaddr_in6*)&addr);
         }
-        return std::string();
     }
+    return std::string();
+}
 
-    static std::string getIpName(sockaddr_in6 * address)
-    {
-        char name[40] = {0,}; // e.g. 2001:0db8:85a3:08d3:1319:8a2e:0370:7334
-        if (::uv_ip6_name(address, name, sizeof(name)) == 0) {
-            return std::string(name);
+static std::string getSocketName(uv_tcp_t const * handle)
+{
+    sockaddr addr = {0,};
+    int length = sizeof(addr);
+
+    if (::uv_tcp_getsockname(handle, &addr, &length) == 0) {
+        if (addr.sa_family == AF_INET) {
+            return getIpName((sockaddr_in*)&addr);
+        } else if (addr.sa_family == AF_INET6) {
+            return getIpName((sockaddr_in6*)&addr);
         }
-        return std::string();
     }
+    return std::string();
+}
 
-    static std::string getPeerName(uv_tcp_t const * handle)
-    {
-        sockaddr addr = {0,};
-        int length = sizeof(addr);
-
-        if (::uv_tcp_getpeername(handle, &addr, &length) == 0) {
-            if (addr.sa_family == AF_INET) {
-                return getIpName((sockaddr_in*)&addr);
-            } else if (addr.sa_family == AF_INET6) {
-                return getIpName((sockaddr_in6*)&addr);
-            }
-        }
-        return std::string();
-    }
-
-    static std::string getSocketName(uv_tcp_t const * handle)
-    {
-        sockaddr addr = {0,};
-        int length = sizeof(addr);
-
-        if (::uv_tcp_getsockname(handle, &addr, &length) == 0) {
-            if (addr.sa_family == AF_INET) {
-                return getIpName((sockaddr_in*)&addr);
-            } else if (addr.sa_family == AF_INET6) {
-                return getIpName((sockaddr_in6*)&addr);
-            }
-        }
-        return std::string();
-    }
-};
+} // namespace tcp_details
 
 // -------------------
 // Tcp implementation.
 // -------------------
 
-Tcp::Tcp() : _tcp(new TcpPimpl())
+Tcp::Tcp() : util::UvHandle(util::UvHandleType::TCP)
 {
-    assert(_tcp != nullptr);
+    // EMPTY.
 }
 
 Tcp::~Tcp()
@@ -129,32 +93,22 @@ Tcp::~Tcp()
 
 bool Tcp::init(libtbag::loop::UvEventLoop & loop)
 {
-    int const ERROR_CODE = ::uv_tcp_init(static_cast<uv_loop_t*>(loop.getNative()), _tcp->get());
-    if (ERROR_CODE != 0) {
-        __tbag_error("Tcp init error: {}", ERROR_CODE);
+    int const CODE = ::uv_tcp_init(static_cast<uv_loop_t*>(loop.getNative()), this->castNative<uv_tcp_t>());
+    if (CODE != 0) {
+        __tbag_error("Tcp::init() error [{}]", CODE);
         return false;
     }
     return true;
 }
 
-void * Tcp::getNative()
-{
-    return _tcp->get();
-}
-
-void const * Tcp::getNative() const
-{
-    return _tcp->get();
-}
-
 std::string Tcp::getPeerName() const
 {
-    return _tcp->getPeerName();
+    return tcp_details::getPeerName(this->castNative<uv_tcp_t>());
 }
 
 std::string Tcp::getSocketName() const
 {
-    return _tcp->getSocketName();
+    return tcp_details::getSocketName(this->castNative<uv_tcp_t>());
 }
 
 bool Tcp::isIpv4(std::string const & address)
