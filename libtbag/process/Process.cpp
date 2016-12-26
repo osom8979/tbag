@@ -19,6 +19,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace process {
 
+// @formatter:off
+inline TBAG_CONSTEXPR static bool isPrintOnCloseDebugMessage() TBAG_NOEXCEPT { return true; }
+// @formatter:on
+
 std::string getExecutableSuffix()
 {
 #if defined(__PLATFORM_WINDOWS__)
@@ -129,6 +133,8 @@ public:
             _pid = _process.pid;
         } else {
             _pid = UNKNOWN_PROCESS_ID;
+            // Error code case:
+            // - EAGAIN: Resource temporarily unavailable (may be the same value as EWOULDBLOCK) (POSIX.1).
             __tbag_debug("Process::ProcPimpl::spawn() error[{}] {}", CODE, util::getUvErrorName(CODE));
             return ErrorCode::FAILURE;
         }
@@ -154,6 +160,16 @@ public:
         }
         return ErrorCode::SUCCESS;
     }
+
+    bool isClosing() const TBAG_NOEXCEPT
+    {
+        return ::uv_is_closing((uv_handle_t*)&_process) != 0;
+    }
+
+    void close(uv_close_cb close_cb)
+    {
+        ::uv_close((uv_handle_t*)&_process, close_cb);
+    }
 };
 
 // --------------------
@@ -163,6 +179,7 @@ public:
 TBAG_UV_EVENT_DEFAULT_IMPLEMENT_OPEN(Process);
 //{
     TBAG_UV_EVENT_EXIT(onExit);
+    TBAG_UV_EVENT_CLOSE(onClose);
 //}
 TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(Process);
 
@@ -180,6 +197,7 @@ Process::Process() : _process(new ProcPimpl()),
 
 Process::~Process()
 {
+    close();
     TBAG_UV_EVENT_DEFAULT_UNREGISTER(_process->handle());
 }
 
@@ -316,6 +334,24 @@ bool Process::exe()
     return _loop.runDefault();
 }
 
+void Process::close()
+{
+    close(_in);
+    close(_out);
+    close(_err);
+    if (_process->isClosing() == false) {
+        _process->close(TBAG_UV_EVENT_DEFAULT_CALLBACK_CLOSE(onClose));
+    }
+    _loop.runDefault(); // CLOSE RUNNER.
+}
+
+void Process::close(util::UvHandle & handle)
+{
+    if (handle.isInit() && handle.isClosing() == false) {
+        ::uv_close(handle.castNative<uv_handle_t>(), TBAG_UV_EVENT_DEFAULT_CALLBACK_CLOSE(onClose));
+    }
+}
+
 bool Process::exe(Param const & param)
 {
     setParam(param);
@@ -352,6 +388,13 @@ void Process::onExit(void * process, int64_t exit_status, int term_signal)
     //static_cast<uv_process_t*>(process);
     _exit_status = exit_status;
     _terminate_signal = term_signal;
+}
+
+void Process::onClose(void * handle)
+{
+    if (isPrintOnCloseDebugMessage()) {
+        __tbag_debug("Process::onClose({})", util::getUvHandleName(_process->handle()));
+    }
 }
 
 } // namespace process

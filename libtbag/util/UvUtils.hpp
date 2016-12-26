@@ -101,8 +101,8 @@ enum class UvEtcType     : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_N
 #undef _TBAG_NX
 // @formatter:on
 
-TBAG_API void initUv();
-TBAG_API char const * getUvHandleName(void * handle);
+TBAG_API char const * getUvHandleName(void const * handle);
+TBAG_API bool isUvHandleType(void const * handle);
 
 /**
  * @remarks
@@ -122,8 +122,8 @@ TBAG_API std::string getUvErrorString(int uv_error_code);
  */
 TBAG_API std::string getUvErrorName(int uv_error_code);
 
-TBAG_API bool isUvHandle(UvType type);
-TBAG_API bool isUvRequest(UvType type);
+TBAG_API bool isHandle(UvType type);
+TBAG_API bool isRequest(UvType type);
 
 /**
  * libuv native type utility class.
@@ -145,6 +145,9 @@ public:
     ~UvNative();
 
 public:
+    bool isInit() const;
+
+public:
     inline operator bool() const TBAG_NOEXCEPT
     { return _native != nullptr; }
 
@@ -152,9 +155,9 @@ public:
     inline Type getType() const TBAG_NOEXCEPT
     { return TYPE; }
     inline bool isHandle() const TBAG_NOEXCEPT
-    { return isUvHandle(TYPE); }
+    { return util::isHandle(TYPE); }
     inline bool isRequest() const TBAG_NOEXCEPT
-    { return isUvRequest(TYPE); }
+    { return util::isRequest(TYPE); }
 
 public:
     inline void * getNative() TBAG_NOEXCEPT
@@ -194,11 +197,11 @@ public:
     { _on_close_cb = callback; }
 
 public:
-    bool isClosing() const TBAG_NOEXCEPT;
-    ErrorCode close();
+    inline char const * getUvName() const TBAG_NOEXCEPT
+    { return getUvHandleName(getNative()); }
 
 public:
-    void onClose(void * handle);
+    bool isClosing() const TBAG_NOEXCEPT;
 };
 
 } // namespace util

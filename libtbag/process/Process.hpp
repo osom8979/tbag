@@ -210,6 +210,10 @@ private:
 
 public:
     bool exe();
+    void close();
+
+private:
+    void close(util::UvHandle & handle);
 
 public:
     bool exe(Param const & param);
@@ -223,6 +227,7 @@ public:
 
 public:
     void onExit(void * handle, int64_t exit_status, int term_signal);
+    void onClose(void * handle);
 
 public:
     inline static std::future<bool> asyncExe(Process & process, Param const & param)

@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/util/UvUtils.hpp>
-#include <libtbag/loop/UvEventDispatcher.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cstdlib>
@@ -20,53 +19,64 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace util {
 
-void initUv()
+static void initUv()
 {
     uv_loop_t loop = {0,};
     ::uv_loop_init(&loop);
     ::uv_loop_close(&loop);
 }
 
-char const * getUvHandleName(void * handle)
-{
-#ifndef _CASE_TYPE_NAME_RETURN
-#define _CASE_TYPE_NAME_RETURN(name) case name: return #name
+#ifndef UV_NATIVE_HANDLE_MAP
+#define UV_NATIVE_HANDLE_MAP(_TBAG_XX) \
+    _TBAG_XX(UV_UNKNOWN_HANDLE) \
+    _TBAG_XX(UV_NAMED_PIPE)     \
+    _TBAG_XX(UV_TTY)            \
+    _TBAG_XX(UV_TCP)            \
+    _TBAG_XX(UV_UDP)            \
+    _TBAG_XX(UV_PREPARE)        \
+    _TBAG_XX(UV_CHECK)          \
+    _TBAG_XX(UV_IDLE)           \
+    _TBAG_XX(UV_ASYNC)          \
+    _TBAG_XX(UV_TIMER)          \
+    _TBAG_XX(UV_PROCESS)        \
+    _TBAG_XX(UV_FS_EVENT)       \
+    _TBAG_XX(UV_POLL)           \
+    _TBAG_XX(UV_FS_POLL)        \
+    _TBAG_XX(UV_SIGNAL)         \
+    _TBAG_XX(UV_FILE)
 #endif
 
-    switch (static_cast<uv_handle_t*>(handle)->type) {
-    _CASE_TYPE_NAME_RETURN(UV_UNKNOWN_HANDLE);
-    _CASE_TYPE_NAME_RETURN(UV_NAMED_PIPE);
-    _CASE_TYPE_NAME_RETURN(UV_TTY);
-    _CASE_TYPE_NAME_RETURN(UV_TCP);
-    _CASE_TYPE_NAME_RETURN(UV_UDP);
-    _CASE_TYPE_NAME_RETURN(UV_PREPARE);
-    _CASE_TYPE_NAME_RETURN(UV_CHECK);
-    _CASE_TYPE_NAME_RETURN(UV_IDLE);
-    _CASE_TYPE_NAME_RETURN(UV_ASYNC);
-    _CASE_TYPE_NAME_RETURN(UV_TIMER);
-    _CASE_TYPE_NAME_RETURN(UV_PROCESS);
-    _CASE_TYPE_NAME_RETURN(UV_FS_EVENT);
-    _CASE_TYPE_NAME_RETURN(UV_POLL);
-    _CASE_TYPE_NAME_RETURN(UV_FS_POLL);
-    _CASE_TYPE_NAME_RETURN(UV_SIGNAL);
-    _CASE_TYPE_NAME_RETURN(UV_FILE);
-    default: return "Undefined handle type.";
+char const * getUvHandleName(void const * handle)
+{
+    switch (static_cast<uv_handle_t const *>(handle)->type) {
+#define _TBAG_XX(name) case name: return #name;
+    UV_NATIVE_HANDLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return "UNKNOWN_HANDLE";
     }
+}
 
-#undef _CASE_TYPE_NAME_RETURN
+bool isUvHandleType(void const * handle)
+{
+    switch (static_cast<uv_handle_t const *>(handle)->type) {
+#define _TBAG_XX(name) case name: return true;
+    UV_NATIVE_HANDLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return false;
+    }
 }
 
 std::string getUvErrorString(int uv_error_code)
 {
-    return std::string(uv_strerror(uv_error_code));
+    return std::string(::uv_strerror(uv_error_code));
 }
 
 std::string getUvErrorName(int uv_error_code)
 {
-    return std::string(uv_err_name(uv_error_code));
+    return std::string(::uv_err_name(uv_error_code));
 }
 
-bool isUvHandle(UvType type)
+bool isHandle(UvType type)
 {
     switch (type) {
 #define _TBAG_XX(name, type) case UvType::name: return true;
@@ -78,7 +88,7 @@ bool isUvHandle(UvType type)
     }
 }
 
-bool isUvRequest(UvType type)
+bool isRequest(UvType type)
 {
     switch (type) {
 #define _TBAG_XX(name, type) case UvType::name: return true;
@@ -119,15 +129,14 @@ UvNative::~UvNative()
     }
 }
 
+bool UvNative::isInit() const
+{
+    return castNative<uv_handle_t>()->type != UV_UNKNOWN_HANDLE /* 0 */ ? true : false;
+}
+
 // ------------------------
 // UvHandle implementation.
 // ------------------------
-
-TBAG_UV_EVENT_DEFAULT_IMPLEMENT_OPEN(UvHandle);
-//{
-    TBAG_UV_EVENT_CLOSE(onClose);
-//}
-TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvHandle);
 
 UvHandle::UvHandle(UvHandleType type) : UvNative(static_cast<UvType>(type)), _on_close_cb(nullptr)
 {
@@ -135,35 +144,17 @@ UvHandle::UvHandle(UvHandleType type) : UvNative(static_cast<UvType>(type)), _on
         __tbag_error("UvHandle::UvHandle({}) type is not handle type", static_cast<int>(type));
         throw std::bad_alloc();
     }
-    TBAG_UV_EVENT_DEFAULT_REGISTER(this->getNative(), this);
 }
 
 UvHandle::~UvHandle()
 {
-    TBAG_UV_EVENT_DEFAULT_UNREGISTER(this->getNative());
+    // EMPTY.
 }
 
 bool UvHandle::isClosing() const TBAG_NOEXCEPT
 {
     int const ENABLE = ::uv_is_closing(this->castNative<uv_handle_t>());
     return (ENABLE == 0 ? false : true);
-}
-
-ErrorCode UvHandle::close()
-{
-    if (isHandle() == false) {
-        __tbag_error("UvNative::close() Unsupported uv type: {}", static_cast<int>(this->getType()));
-        return ErrorCode::UNSUPPORTED;
-    }
-    ::uv_close(this->castNative<uv_handle_t>(), TBAG_UV_EVENT_DEFAULT_CALLBACK_CLOSE(onClose));
-    return ErrorCode::SUCCESS;
-}
-
-void UvHandle::onClose(void * handle)
-{
-    if (_on_close_cb != nullptr) {
-        _on_close_cb->onClose();
-    }
 }
 
 } // namespace util

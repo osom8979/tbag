@@ -42,7 +42,7 @@ public:
             return false;
         }
 
-        libtbag::util::initUv();
+        //libtbag::util::initUv();
         libtbag::util::initSingletonObjects();
 
         if (param == nullptr) {
