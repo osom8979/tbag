@@ -98,7 +98,7 @@ void signal_handler(int signal)
 void runSleepCommand(std::vector<std::string> const & args)
 {
     std::cout << "Run sleep...\n";
-    std::signal(SIGKILL, signal_handler);
+    std::signal(SIGTERM, signal_handler);
     std::this_thread::sleep_for(std::chrono::minutes(1));
 }
 

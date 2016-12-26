@@ -107,7 +107,7 @@ public:
 
         ::uv_pipe_init(loop, pipe, DISABLE_IPC);
 
-        if (option.flag == Param::IoFlag::IGNORE) {
+        if (option.flag == Param::IoFlag::IGNORE_IO) {
             _stdios[index].flags = UV_IGNORE;
         } else if (option.flag == Param::IoFlag::INHERIT) {
             _stdios[index].flags = UV_INHERIT_FD;
@@ -258,9 +258,9 @@ void Process::updateWithFlags()
 
 void Process::updateWithStdios()
 {
-    if (/**/_param.in.flag  == Param::IoFlag::IGNORE &&
-            _param.out.flag == Param::IoFlag::IGNORE &&
-            _param.err.flag == Param::IoFlag::IGNORE) {
+    if (/**/_param.in.flag  == Param::IoFlag::IGNORE_IO &&
+            _param.out.flag == Param::IoFlag::IGNORE_IO &&
+            _param.err.flag == Param::IoFlag::IGNORE_IO) {
         _process->options()->stdio_count = 0;
         _process->atStdios()[STANDARD_INPUT_FD ].flags = UV_IGNORE;
         _process->atStdios()[STANDARD_OUTPUT_FD].flags = UV_IGNORE;

@@ -145,7 +145,8 @@ UvHandle::~UvHandle()
 
 bool UvHandle::isClosing() const TBAG_NOEXCEPT
 {
-    return static_cast<bool>(::uv_is_closing(this->castNative<uv_handle_t>()));
+    int const ENABLE = ::uv_is_closing(this->castNative<uv_handle_t>());
+    return (ENABLE == 0 ? false : true);
 }
 
 ErrorCode UvHandle::close()

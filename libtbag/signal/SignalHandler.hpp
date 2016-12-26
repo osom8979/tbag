@@ -28,12 +28,12 @@ namespace signal {
 
 #ifndef TBAG_SIGNAL_MAP
 #define TBAG_SIGNAL_MAP(_TBAG_XX) \
-    _TBAG_XX(SIGNAL_ABORT                   , SIGABRT, "abort()") \
-    _TBAG_XX(SIGNAL_FLOATING_POINT_EXCEPTION, SIGFPE , "floating point exception") \
-    _TBAG_XX(SIGNAL_ILLEGAL_INSTRUCTION     , SIGILL , "illegal instruction (not reset when caught)") \
-    _TBAG_XX(SIGNAL_INTERRUPT               , SIGINT , "interrupt") \
-    _TBAG_XX(SIGNAL_SEGMENTATION_VIOLATION  , SIGSEGV, "segmentation violation") \
-    _TBAG_XX(SIGNAL_TERMINATION             , SIGTERM, "software termination signal from kill") \
+    _TBAG_XX(SIGNAL_INTERRUPT               , SIGINT /*  2 */, "interrupt") \
+    _TBAG_XX(SIGNAL_ILLEGAL_INSTRUCTION     , SIGILL /*  4 */, "illegal instruction (not reset when caught)") \
+    _TBAG_XX(SIGNAL_FLOATING_POINT_EXCEPTION, SIGFPE /*  8 */, "floating point exception") \
+    _TBAG_XX(SIGNAL_SEGMENTATION_VIOLATION  , SIGSEGV/* 11 */, "segmentation violation") \
+    _TBAG_XX(SIGNAL_TERMINATION             , SIGTERM/* 15 */, "software termination signal from kill") \
+    _TBAG_XX(SIGNAL_ABORT                   , SIGABRT/* ?? */, "abort()") /* Windows(22), OSX(6) */ \
     /* -- END -- */
 #endif
 

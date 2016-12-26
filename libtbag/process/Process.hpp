@@ -35,6 +35,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace process {
 
+// Platform-specific definitions for uv_spawn support.
+#if defined(__PLATFORM_WINDOWS__)
+typedef unsigned char UserIdType;
+typedef unsigned char GroupIdType;
+#else
+typedef uint32_t UserIdType;
+typedef uint32_t GroupIdType;
+#endif
+
 // The stdio field points to an array of uv_stdio_container_t structs
 // that describe the file descriptors that will be made available to the child process.
 // The convention is that stdio[0] points to stdin, fd 1 is used for stdout, and fd 2 is stderr.
@@ -81,12 +90,12 @@ public:
     struct Param
     {
         // @formatter:off
-        enum class IoFlag : int { IGNORE, INHERIT, PIPE, };
+        enum class IoFlag : int { IGNORE_IO, INHERIT, PIPE, };
         // @formatter:on
 
         struct IoOption
         {
-            IoFlag flag = IoFlag::IGNORE;
+            IoFlag flag = IoFlag::IGNORE_IO;
             int    fd   = 0;
 
             inline void set(IoFlag f, int d)
@@ -100,8 +109,8 @@ public:
         Strings environments; ///< Environment variables (e.g. VAR=VALUE).
 
         // Changing the UID/GID is only supported on Unix.
-        uint32_t uid = 0;
-        uint32_t gid = 0;
+        UserIdType  uid = 0;
+        GroupIdType gid = 0;
 
         bool verbatim_arg = false;
         bool detached     = false;
@@ -119,19 +128,19 @@ public:
         inline Param & pushEnvironment(String const & env)   { environments.push_back(env); return *this; }
         inline Param & setArguments   (Strings const & args) { arguments    = args; return *this; }
         inline Param & setEnvironments(Strings const & envs) { environments = envs; return *this; }
-        inline Param & setUserId      (uint32_t id)          { uid = id; return *this; }
-        inline Param & setGroupId     (uint32_t id)          { gid = id; return *this; }
+        inline Param & setUserId      (UserIdType  id)       { uid = id; return *this; }
+        inline Param & setGroupId     (GroupIdType id)       { gid = id; return *this; }
         inline Param & setVerbatimArgs(bool flag = true)     { verbatim_arg = flag; return *this; }
         inline Param & setDetached    (bool flag = true)     { detached     = flag; return *this; }
         // @formatter:on
 
         // @formatter:off
-        inline Param & setStdinIgnore ()       {  in.set(IoFlag::IGNORE ,  0); return *this; }
-        inline Param & setStdoutIgnore()       { out.set(IoFlag::IGNORE ,  0); return *this; }
-        inline Param & setStderrIgnore()       { err.set(IoFlag::IGNORE ,  0); return *this; }
-        inline Param & setStdinPipe   ()       {  in.set(IoFlag::PIPE   ,  0); return *this; }
-        inline Param & setStdoutPipe  ()       { out.set(IoFlag::PIPE   ,  0); return *this; }
-        inline Param & setStderrPipe  ()       { err.set(IoFlag::PIPE   ,  0); return *this; }
+        inline Param & setStdinIgnore ()       {  in.set(IoFlag::IGNORE_IO,  0); return *this; }
+        inline Param & setStdoutIgnore()       { out.set(IoFlag::IGNORE_IO,  0); return *this; }
+        inline Param & setStderrIgnore()       { err.set(IoFlag::IGNORE_IO,  0); return *this; }
+        inline Param & setStdinPipe   ()       {  in.set(IoFlag::PIPE     ,  0); return *this; }
+        inline Param & setStdoutPipe  ()       { out.set(IoFlag::PIPE     ,  0); return *this; }
+        inline Param & setStderrPipe  ()       { err.set(IoFlag::PIPE     ,  0); return *this; }
         inline Param & setStdinFd     (int fd = STANDARD_INPUT_FD ) {  in.set(IoFlag::INHERIT, fd); return *this; }
         inline Param & setStdoutFd    (int fd = STANDARD_OUTPUT_FD) { out.set(IoFlag::INHERIT, fd); return *this; }
         inline Param & setStderrFd    (int fd = STANDARD_ERROR_FD ) { err.set(IoFlag::INHERIT, fd); return *this; }
