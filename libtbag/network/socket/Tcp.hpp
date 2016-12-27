@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/util/UvUtils.hpp>
+#include <libtbag/uv/Handle.hpp>
 
 #include <string>
 #include <memory>
@@ -44,7 +44,7 @@ namespace socket  {
  * @date   2016-11-04
  * @date   2016-11-07 (Refactoring this class)
  */
-class TBAG_API Tcp : public util::UvHandle
+class TBAG_API Tcp : public uv::Handle
 {
 public:
     Tcp();

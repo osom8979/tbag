@@ -7,7 +7,7 @@
 
 #include <libtbag/thread/ThreadPool.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/util/UvUtils.hpp>
+#include <libtbag/uv/Type.hpp>
 
 #include <exception>
 #include <uv.h>
@@ -38,7 +38,7 @@ struct ThreadPool::ThreadPimpl
     {
         int error_code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
         if (error_code != 0) {
-            __tbag_error("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, util::getUvErrorName(error_code));
+            __tbag_error("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, uv::getUvErrorName(error_code));
             throw std::bad_alloc();
         }
     }

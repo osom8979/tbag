@@ -178,7 +178,7 @@ static bool write(uv_write_t * handle, uv_tcp_t * tcp, char const * buffer, std:
 
 static bool write(Server::Handle & handle, Tcp & tcp, char const * buffer, std::size_t size)
 {
-    if (handle.getType() != util::UvType::WRITE) {
+    if (handle.getType() != uv::UvType::WRITE) {
         __tbag_error("socket::server_details write handle error.");
         return false;
     }
@@ -194,7 +194,7 @@ static bool write(Server::Handle & handle, Tcp & tcp, char const * buffer, std::
 // Server implementation.
 // ----------------------
 
-Server::Server(EventCallback * callback) : _write(util::UvType::WRITE), _read_buffer(), _callback(callback)
+Server::Server(EventCallback * callback) : _write(uv::UvType::WRITE), _read_buffer(), _callback(callback)
 {
     using namespace server_details;
     TBAG_UV_EVENT_DEFAULT_REGISTER(_tcp.getNative(), this);

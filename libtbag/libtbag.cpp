@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/libtbag.h>
-#include <libtbag/util/UvUtils.hpp>
 #include <libtbag/util/SingletonUtils.hpp>
 #include <libtbag/locale/Locale.hpp>
 #include <libtbag/log/Log.hpp>
@@ -42,7 +41,6 @@ public:
             return false;
         }
 
-        //libtbag::util::initUv();
         libtbag::util::initSingletonObjects();
 
         if (param == nullptr) {

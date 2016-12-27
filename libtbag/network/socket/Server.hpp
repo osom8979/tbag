@@ -17,8 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/container/Pointer.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
-#include <libtbag/util/UvUtils.hpp>
 #include <libtbag/network/socket/Tcp.hpp>
+#include <libtbag/uv/Handle.hpp>
 
 #include <string>
 #include <vector>
@@ -44,7 +44,7 @@ class TBAG_API Server : public Noncopyable
 {
 public:
     using Loop      = loop::UvEventLoop;
-    using Handle    = util::UvNative;
+    using Handle    = uv::Native;
 
     using ClientKey   = container::Pointer<void>;
     using ClientValue = std::shared_ptr<Tcp>;
@@ -95,7 +95,7 @@ public:
     bool runIpv4(std::string const & address, int port);
     bool runIpv6(std::string const & address, int port);
     void close();
-    void close(util::UvHandle & handle);
+    void close(uv::Handle & handle);
 
 private:
     bool addClient(ClientKey key, ClientValue client);

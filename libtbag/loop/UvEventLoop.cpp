@@ -7,7 +7,7 @@
 
 #include <libtbag/loop/UvEventLoop.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/util/UvUtils.hpp>
+#include <libtbag/uv/Type.hpp>
 
 #include <cassert>
 #include <mutex>
@@ -97,7 +97,7 @@ public:
     /** Fully close a loop. */
     static void onClose(uv_handle_t * handle, void * arg)
     {
-        if (util::isUvNativeHandleType(handle) == false) {
+        if (uv::isUvNativeHandleType(handle) == false) {
             return;
         }
         if (isClosing(handle)) {
@@ -105,7 +105,7 @@ public:
         }
 
         // If not closing or closed.
-        __tbag_debug("Not closing or closed uv handle: {}", util::getUvNativeHandleName(handle));
+        __tbag_debug("Not closing or closed uv handle: {}", uv::getUvNativeHandleName(handle));
         ::uv_close(handle, nullptr);
     }
 };

@@ -128,7 +128,7 @@ static bool write(uv_write_t * handle, uv_tcp_t * tcp, char const * buffer, std:
 
 static bool write(Client::Handle & handle, Tcp & tcp, char const * buffer, std::size_t size)
 {
-    if (handle.getType() != util::UvType::WRITE) {
+    if (handle.getType() != uv::UvType::WRITE) {
         __tbag_error("socket::client_details write handle error.");
         return false;
     }
@@ -145,8 +145,8 @@ static bool write(Client::Handle & handle, Tcp & tcp, char const * buffer, std::
 // ----------------------
 
 Client::Client(EventCallback * callback)
-        : _connect(util::UvType::CONNECT)
-        , _write(util::UvType::WRITE)
+        : _connect(uv::UvType::CONNECT)
+        , _write(uv::UvType::WRITE)
         , _read_buffer()
         , _callback(callback)
 {

@@ -81,7 +81,7 @@ static std::string getSocketName(uv_tcp_t const * handle)
 // Tcp implementation.
 // -------------------
 
-Tcp::Tcp() : util::UvHandle(util::UvHandleType::TCP)
+Tcp::Tcp() : uv::Handle(uv::UvHandleType::TCP)
 {
     // EMPTY.
 }

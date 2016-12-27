@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/loop/UvEventLoop.hpp>
-#include <libtbag/util/UvUtils.hpp>
+#include <libtbag/uv/Handle.hpp>
 #include <libtbag/network/socket/Tcp.hpp>
 
 #include <string>
@@ -40,7 +40,7 @@ class TBAG_API Client : public Noncopyable
 {
 public:
     using Loop   = loop::UvEventLoop;
-    using Handle = util::UvNative;
+    using Handle = uv::Native;
 
 public:
     enum class Code

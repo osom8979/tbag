@@ -30,7 +30,7 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvOutStream);
 // UvOutStream implementation.
 // ---------------------------
 
-UvOutStream::UvOutStream(UvHandleType type) : util::UvHandle(type), _on_read_cb(nullptr)
+UvOutStream::UvOutStream(UvHandleType type) : uv::Handle(type), _on_read_cb(nullptr)
 {
     TBAG_UV_EVENT_DEFAULT_REGISTER(this->getNative(), this);
 }
@@ -46,7 +46,7 @@ ErrorCode UvOutStream::read()
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_ALLOC(onAlloc),
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_READ(onRead));
     if (CODE != 0) {
-        __tbag_error("UvOutStream::read() error[{}] {}", CODE, util::getUvErrorName(CODE));
+        __tbag_error("UvOutStream::read() error[{}] {}", CODE, uv::getUvErrorName(CODE));
         return ErrorCode::FAILURE;
     }
     return ErrorCode::SUCCESS;

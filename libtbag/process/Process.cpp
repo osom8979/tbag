@@ -135,7 +135,7 @@ public:
             _pid = UNKNOWN_PROCESS_ID;
             // Error code case:
             // - EAGAIN: Resource temporarily unavailable (may be the same value as EWOULDBLOCK) (POSIX.1).
-            __tbag_debug("Process::ProcPimpl::spawn() error[{}] {}", CODE, util::getUvErrorName(CODE));
+            __tbag_debug("Process::ProcPimpl::spawn() error[{}] {}", CODE, uv::getUvErrorName(CODE));
             return ErrorCode::FAILURE;
         }
         return ErrorCode::SUCCESS;
@@ -155,7 +155,7 @@ public:
             __tbag_debug("Process::ProcPimpl::kill({}) error[{}] {}",
                          signal_number,
                          CODE,
-                         util::getUvErrorName(CODE));
+                         uv::getUvErrorName(CODE));
             return ErrorCode::FAILURE;
         }
         return ErrorCode::SUCCESS;
@@ -188,9 +188,9 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(Process);
 // -----------------------------
 
 Process::Process() : _process(new ProcPimpl()),
-                     _in(util::UvHandleType::PIPE),
-                     _out(util::UvHandleType::PIPE),
-                     _err(util::UvHandleType::PIPE)
+                     _in(uv::UvHandleType::PIPE),
+                     _out(uv::UvHandleType::PIPE),
+                     _err(uv::UvHandleType::PIPE)
 {
     TBAG_UV_EVENT_DEFAULT_REGISTER(_process->handle(), this);
 }
@@ -345,7 +345,7 @@ void Process::close()
     _loop.runDefault(); // CLOSE RUNNER.
 }
 
-void Process::close(util::UvHandle & handle)
+void Process::close(uv::Handle & handle)
 {
     if (handle.isInit() && handle.isClosing() == false) {
         ::uv_close(handle.castNative<uv_handle_t>(), TBAG_UV_EVENT_DEFAULT_CALLBACK_CLOSE(onClose));
@@ -393,7 +393,7 @@ void Process::onExit(void * process, int64_t exit_status, int term_signal)
 void Process::onClose(void * handle)
 {
     if (isPrintOnCloseDebugMessage()) {
-        __tbag_debug("Process::onClose({})", util::getUvNativeHandleName(_process->handle()));
+        __tbag_debug("Process::onClose({})", uv::getUvNativeHandleName(_process->handle()));
     }
 }
 

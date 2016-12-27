@@ -1,12 +1,12 @@
 /**
- * @file   UvUtils.hpp
- * @brief  UvUtils class prototype.
+ * @file   Type.hpp
+ * @brief  Type class prototype.
  * @author zer0
- * @date   2016-11-03
+ * @date   2016-12-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UTIL_UVUTILS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UTIL_UVUTILS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_TYPE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UV_TYPE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,8 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/debug/ErrorCode.hpp>
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
 # include <cstdint>
@@ -31,7 +29,7 @@ typedef intptr_t ssize_t;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace util {
+namespace uv {
 
 #ifndef TBAG_UTIL_UV_HANDLE_MAP
 #define TBAG_UTIL_UV_HANDLE_MAP(_TBAG_HANDLE_XX, _TBAG_REQ_XX, _TBAG_ETC_XX) \
@@ -126,116 +124,11 @@ TBAG_API bool isHandle(UvType type);
 TBAG_API bool isRequest(UvType type);
 TBAG_API bool isEtc(UvType type);
 
-/**
- * libuv native type utility class.
- *
- * @author zer0
- * @date   2016-12-07
- */
-class TBAG_API UvNative : public Noncopyable
-{
-public:
-    using Type = UvType;
-
-private:
-    Type const TYPE;
-    void * _native;
-    void * _user;
-
-public:
-    UvNative(Type type);
-    virtual ~UvNative();
-
-public:
-    bool isInit() const;
-
-public:
-    inline operator bool() const TBAG_NOEXCEPT
-    { return _native != nullptr; }
-
-public:
-    inline Type getType() const TBAG_NOEXCEPT
-    { return TYPE; }
-    inline bool isHandle() const TBAG_NOEXCEPT
-    { return util::isHandle(TYPE); }
-    inline bool isRequest() const TBAG_NOEXCEPT
-    { return util::isRequest(TYPE); }
-
-public:
-    inline void * getNative() TBAG_NOEXCEPT
-    { return _native; }
-    inline void const * getNative() const TBAG_NOEXCEPT
-    { return _native; }
-
-public:
-    inline void setUserData(void * data) TBAG_NOEXCEPT
-    { _user = data; }
-    inline void * getUserData() TBAG_NOEXCEPT
-    { return _user; }
-    inline void const * getUserData() const TBAG_NOEXCEPT
-    { return _user; }
-
-public:
-    template <typename T>
-    inline T * castNative() const TBAG_NOEXCEPT
-    { return static_cast<T*>(_native); }
-};
-
-/**
- * libuv handle type utility class.
- *
- * @author zer0
- * @date   2016-12-17
- */
-class TBAG_API UvHandle : public UvNative
-{
-public:
-    using Parent = UvNative;
-
-public:
-    UvHandle(UvHandleType type);
-    virtual ~UvHandle();
-
-public:
-    inline char const * getName() const TBAG_NOEXCEPT
-    { return getUvNativeHandleName(getNative()); }
-
-public:
-    bool isClosing() const TBAG_NOEXCEPT;
-
-    /**
-     * @remarks
-     *  This function should only be used between the
-     *  initialization of the handle
-     *  and the arrival of the close callback.
-     */
-    void close();
-
-public:
-    /** Returns true if the handle is active, false if it’s inactive. */
-    bool isActive();
-
-    /** Reference the given handle. */
-    void ref();
-
-    /** Un-reference the given handle. */
-    void unref();
-
-    /** Returns true if the handle referenced, false otherwise. */
-    bool hasRef();
-
-    /** Returns the size of the given handle type. */
-    std::size_t getNativeSize();
-
-public:
-    virtual void onClose();
-};
-
-} // namespace util
+} // namespace uv
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UTIL_UVUTILS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_TYPE_HPP__
 
