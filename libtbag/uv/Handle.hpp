@@ -86,7 +86,7 @@ public:
     bool hasRef() const TBAG_NOEXCEPT;
 
     /** Returns the size of the given handle type. */
-    std::size_t getNativeSize() const  TBAG_NOEXCEPT;
+    std::size_t getNativeSize() const TBAG_NOEXCEPT;
 
 // Miscellaneous API functions:
 //
