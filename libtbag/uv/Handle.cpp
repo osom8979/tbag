@@ -89,6 +89,36 @@ std::size_t Handle::getNativeSize() const TBAG_NOEXCEPT
     return ::uv_handle_size(Parent::castNative<uv_handle_t>()->type);
 }
 
+// ----------------------------
+// Miscellaneous API functions.
+// ----------------------------
+
+int Handle::getSendBufferSize() const
+{
+    int OBTAIN_VALUE_OF_FLAG = 0;
+    return ::uv_send_buffer_size(Parent::castNative<uv_handle_t>(), &OBTAIN_VALUE_OF_FLAG);
+}
+
+int Handle::getRecvBufferSize() const
+{
+    int OBTAIN_VALUE_OF_FLAG = 0;
+    return ::uv_recv_buffer_size(Parent::castNative<uv_handle_t>(), &OBTAIN_VALUE_OF_FLAG);
+}
+
+void Handle::setSendBufferSize(int size)
+{
+    if (size > 0) {
+        ::uv_send_buffer_size(Parent::castNative<uv_handle_t>(), &size);
+    }
+}
+
+void Handle::setRecvBufferSize(int size)
+{
+    if (size > 0) {
+        ::uv_recv_buffer_size(Parent::castNative<uv_handle_t>(), &size);
+    }
+}
+
 void Handle::onClose()
 {
     __tbag_error("Handle::onClose({}) type is not handle type", getName());
