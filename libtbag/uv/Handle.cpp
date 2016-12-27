@@ -30,12 +30,19 @@ Handle::Handle(UvHandleType type) : Native(static_cast<UvType>(type))
         __tbag_error("Handle::Handle({}) type is not handle type", static_cast<int>(type));
         throw std::bad_alloc();
     }
-    Parent::castNative<uv_handle_t>()->data = this; // IMPORTANT!!
+    uv_handle_t * native_handle_type = Parent::castNative<uv_handle_t>();
+    assert(native_handle_type != nullptr);
+    native_handle_type->data = this; // IMPORTANT!!
 }
 
 Handle::~Handle()
 {
     // EMPTY.
+}
+
+bool Handle::isInit() const TBAG_NOEXCEPT
+{
+    return Parent::castNative<uv_handle_t>()->type != UV_UNKNOWN_HANDLE /* 0 */ ? true : false;
 }
 
 void Handle::close()

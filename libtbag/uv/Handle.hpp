@@ -61,6 +61,9 @@ public:
     { return getUvNativeHandleName(getNative()); }
 
 public:
+    bool isInit() const TBAG_NOEXCEPT;
+
+public:
     /**
      * @remarks
      *  This function should only be used between the

@@ -19,12 +19,17 @@ Native::Native(Type t) : TYPE(t), _native(nullptr), _user(nullptr)
 {
     // @formatter:off
     switch (TYPE) {
-#define _TBAG_XX(name, type) case UvType::name: _native = ::malloc(sizeof(type)); ::memset(_native, 0x00, sizeof(type)); break;
+#define _TBAG_XX(name, type)                        \
+        case UvType::name:                          \
+            _native = ::malloc(sizeof(type));       \
+            ::memset(_native, 0x00, sizeof(type));  \
+            return;
     TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
-    default: __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE)); break;
     }
     // @formatter:on
+
+    __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE));
 }
 
 Native::~Native()
@@ -33,11 +38,6 @@ Native::~Native()
         ::free(_native);
         _native = nullptr;
     }
-}
-
-bool Native::isInit() const
-{
-    return castNative<uv_handle_t>()->type != UV_UNKNOWN_HANDLE /* 0 */ ? true : false;
 }
 
 } // namespace uv

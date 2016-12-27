@@ -46,9 +46,6 @@ public:
     virtual ~Native();
 
 public:
-    bool isInit() const;
-
-public:
     inline operator bool() const TBAG_NOEXCEPT
     { return _native != nullptr; }
 
