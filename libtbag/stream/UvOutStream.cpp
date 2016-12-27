@@ -40,16 +40,16 @@ UvOutStream::~UvOutStream()
     TBAG_UV_EVENT_DEFAULT_UNREGISTER(this->getNative());
 }
 
-ErrorCode UvOutStream::read()
+Err UvOutStream::read()
 {
     int const CODE = ::uv_read_start(this->castNative<uv_stream_t>(),
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_ALLOC(onAlloc),
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_READ(onRead));
     if (CODE != 0) {
         __tbag_error("UvOutStream::read() error[{}] {}", CODE, uv::getUvErrorName(CODE));
-        return ErrorCode::FAILURE;
+        return Err::FAILURE;
     }
-    return ErrorCode::SUCCESS;
+    return Err::SUCCESS;
 }
 
 void UvOutStream::onAlloc(void * handle, size_t suggested_size, void * buf)
@@ -66,12 +66,12 @@ void UvOutStream::onAlloc(void * handle, size_t suggested_size, void * buf)
 
 void UvOutStream::onRead(void * stream, ssize_t nread, void const * buf)
 {
-    ErrorCode code = ErrorCode::FAILURE;
+    Err code = Err::FAILURE;
 
     if (nread == UV_EOF) {
-        code = ErrorCode::END_OF_FILE;
+        code = Err::END_OF_FILE;
     } else if (nread >= 0){
-        code = ErrorCode::SUCCESS;
+        code = Err::SUCCESS;
     }
 
     if (_on_read_cb != nullptr) {

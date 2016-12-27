@@ -43,7 +43,7 @@ public:
 public:
     struct OnWriteCallback
     {
-        virtual void onWrite(ErrorCode code) = 0;
+        virtual void onWrite(Err code) = 0;
     };
 
 private:
@@ -59,8 +59,8 @@ public:
     { _on_write_cb = callback; }
 
 public:
-    ErrorCode write(char const * buffer, std::size_t length);
-    ErrorCode write(std::vector<char> const & buffer);
+    Err write(char const * buffer, std::size_t length);
+    Err write(std::vector<char> const & buffer);
 
 public:
     void onWrite(void * request, int status);

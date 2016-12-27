@@ -13,8 +13,8 @@ using namespace libtbag::debug;
 
 TEST(ErrorCodeTest, Default)
 {
-    libtbag::ErrorCode code;
+    libtbag::Err code;
     ASSERT_NE(nullptr, getErrorMessage(code));
-    ASSERT_STREQ(getErrorMessage(libtbag::ErrorCode::SUCCESS), getErrorMessage(0));
+    ASSERT_STREQ(getErrorMessage(libtbag::Err::SUCCESS), getErrorMessage(0));
 }
 

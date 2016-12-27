@@ -43,7 +43,7 @@ public:
 public:
     struct OnReadCallback
     {
-        virtual void onRead(ErrorCode code, ssize_t nread, void const * buf) = 0;
+        virtual void onRead(Err code, ssize_t nread, void const * buf) = 0;
     };
 
 private:
@@ -59,7 +59,7 @@ public:
     ~UvOutStream();
 
 public:
-    ErrorCode read();
+    Err read();
 
 public:
     void onAlloc(void * handle, size_t suggested_size, void * buf);

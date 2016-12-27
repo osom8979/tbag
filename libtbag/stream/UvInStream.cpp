@@ -39,7 +39,7 @@ UvInStream::~UvInStream()
     TBAG_UV_EVENT_DEFAULT_UNREGISTER(_write.getNative());
 }
 
-ErrorCode UvInStream::write(char const * buffer, std::size_t length)
+Err UvInStream::write(char const * buffer, std::size_t length)
 {
     uv_buf_t info = {0,};
     info.base = const_cast<char*>(buffer);
@@ -49,23 +49,23 @@ ErrorCode UvInStream::write(char const * buffer, std::size_t length)
                                 &info, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
     if (CODE != 0) {
         __tbag_error("UvInStream::write() error[{}] {}", CODE, uv::getUvErrorName(CODE));
-        return ErrorCode::FAILURE;
+        return Err::FAILURE;
     }
-    return ErrorCode::SUCCESS;
+    return Err::SUCCESS;
 }
 
-ErrorCode UvInStream::write(std::vector<char> const & buffer)
+Err UvInStream::write(std::vector<char> const & buffer)
 {
     return write(&buffer[0], buffer.size());
 }
 
 void UvInStream::onWrite(void * request, int status)
 {
-    ErrorCode code;
+    Err code;
     if (status == 0) {
-        code = ErrorCode::SUCCESS;
+        code = Err::SUCCESS;
     } else {
-        code = ErrorCode::FAILURE;
+        code = Err::FAILURE;
     }
 
     if (_on_write_cb != nullptr) {

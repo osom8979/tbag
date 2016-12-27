@@ -206,7 +206,7 @@ private:
     void update();
     void updateWithFlags();
     void updateWithStdios();
-    ErrorCode spawn();
+    Err spawn();
 
 public:
     bool exe();
@@ -223,7 +223,7 @@ public:
 
 public:
     int getProcessId() const;
-    ErrorCode kill(int signal_number);
+    Err kill(int signal_number);
 
 public:
     void onExit(void * handle, int64_t exit_status, int term_signal);

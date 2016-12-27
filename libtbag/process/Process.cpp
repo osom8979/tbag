@@ -126,7 +126,7 @@ public:
         }
     }
 
-    inline ErrorCode spawn(EventLoop & loop)
+    inline Err spawn(EventLoop & loop)
     {
         int const CODE = ::uv_spawn(static_cast<uv_loop_t*>(loop.getNative()), &_process, &_options);
         if (CODE == 0) {
@@ -136,18 +136,18 @@ public:
             // Error code case:
             // - EAGAIN: Resource temporarily unavailable (may be the same value as EWOULDBLOCK) (POSIX.1).
             __tbag_debug("Process::ProcPimpl::spawn() error[{}] {}", CODE, uv::getUvErrorName(CODE));
-            return ErrorCode::FAILURE;
+            return Err::FAILURE;
         }
-        return ErrorCode::SUCCESS;
+        return Err::SUCCESS;
     }
 
-    inline ErrorCode kill(int signal_number)
+    inline Err kill(int signal_number)
     {
         if (_pid == UNKNOWN_PROCESS_ID || _pid == 0) {
             __tbag_debug("Process::ProcPimpl::kill({}) {}",
                          signal_number,
-                         debug::getErrorMessage(ErrorCode::UNKNOWN_PROCESS_ID));
-            return ErrorCode::UNKNOWN_PROCESS_ID;
+                         debug::getErrorMessage(Err::UNKNOWN_PROCESS_ID));
+            return Err::UNKNOWN_PROCESS_ID;
         }
 
         int const CODE = ::uv_kill(_pid, signal_number);
@@ -156,9 +156,9 @@ public:
                          signal_number,
                          CODE,
                          uv::getUvErrorName(CODE));
-            return ErrorCode::FAILURE;
+            return Err::FAILURE;
         }
-        return ErrorCode::SUCCESS;
+        return Err::SUCCESS;
     }
 
     bool isClosing() const TBAG_NOEXCEPT
@@ -305,7 +305,7 @@ void Process::updateWithStdios()
     _process->setStdio(_loop.castNative<uv_loop_t>(), _err.castNative<uv_pipe_t>(), STANDARD_ERROR_FD, _param.err);
 }
 
-ErrorCode Process::spawn()
+Err Process::spawn()
 {
     return _process->spawn(_loop);
 }
@@ -378,7 +378,7 @@ int Process::getProcessId() const
     return _process->getSpawnedPid();
 }
 
-ErrorCode Process::kill(int signal_number)
+Err Process::kill(int signal_number)
 {
     return _process->kill(signal_number);
 }

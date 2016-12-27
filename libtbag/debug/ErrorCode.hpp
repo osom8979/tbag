@@ -37,7 +37,7 @@ namespace debug {
 #endif
 
 /** Native type of error code. */
-typedef int CodeType;
+typedef int ErrorCodeType;
 
 /**
  * List of error code.
@@ -45,7 +45,7 @@ typedef int CodeType;
  * @author zer0
  * @date   2016-12-14
  */
-enum class ErrorCode : CodeType
+enum class ErrorCode : ErrorCodeType
 {
     _ERROR_CODE_START_NUMBER_ = -1,
 #define _TBAG_XX(name, message) name,
@@ -56,15 +56,15 @@ enum class ErrorCode : CodeType
 
 TBAG_API char const * getErrorMessage(ErrorCode code);
 
-inline char const * getErrorMessage(CodeType code)
+inline char const * getErrorMessage(ErrorCodeType code)
 {
     return getErrorMessage(static_cast<ErrorCode>(code));
 }
 
 } // namespace debug
 
-typedef ::libtbag::debug::ErrorCode ErrorCode;
-typedef ::libtbag::debug::CodeType  ErrorCodeType;
+typedef ::libtbag::debug::ErrorCodeType ErrType;
+typedef ::libtbag::debug::ErrorCode     Err;
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
