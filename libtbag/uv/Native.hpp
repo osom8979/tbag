@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/container/Pointer.hpp>
 #include <libtbag/uv/Type.hpp>
 
 // -------------------
@@ -31,14 +32,14 @@ namespace uv {
  * @date   2016-12-07
  * @date   2016-12-27 (Move package: libtbag/util -> libtbag/uv)
  */
-class TBAG_API Native : public Noncopyable
+class TBAG_API Native : protected container::Pointer<void>, public Noncopyable
 {
 public:
+    using Parent = container::Pointer<void>;
     using Type = UvType;
 
 private:
     Type const TYPE;
-    void * _native;
     void * _user;
 
 public:
@@ -46,26 +47,14 @@ public:
     virtual ~Native();
 
 public:
-    inline operator bool() const TBAG_NOEXCEPT
-    { return _native != nullptr; }
-
-public:
     inline Type getType() const TBAG_NOEXCEPT
     { return TYPE; }
-    inline bool isHandle() const TBAG_NOEXCEPT
-    { return uv::isHandle(TYPE); }
-    inline bool isRequest() const TBAG_NOEXCEPT
-    { return uv::isRequest(TYPE); }
-    inline bool isEtc() const TBAG_NOEXCEPT
-    { return uv::isEtc(TYPE); }
-    inline bool isStream() const TBAG_NOEXCEPT
-    { return uv::isStream(TYPE); }
 
 public:
     inline void * getNative() TBAG_NOEXCEPT
-    { return _native; }
+    { return Parent::ptr; }
     inline void const * getNative() const TBAG_NOEXCEPT
-    { return _native; }
+    { return Parent::ptr; }
 
 public:
     inline void setUserData(void * data) TBAG_NOEXCEPT
@@ -76,9 +65,19 @@ public:
     { return _user; }
 
 public:
+    inline bool isHandle() const TBAG_NOEXCEPT
+    { return uv::isHandle(TYPE); }
+    inline bool isRequest() const TBAG_NOEXCEPT
+    { return uv::isRequest(TYPE); }
+    inline bool isEtc() const TBAG_NOEXCEPT
+    { return uv::isEtc(TYPE); }
+    inline bool isStream() const TBAG_NOEXCEPT
+    { return uv::isStream(TYPE); }
+
+public:
     template <typename T>
     inline T * castNative() const TBAG_NOEXCEPT
-    { return static_cast<T*>(_native); }
+    { return static_cast<T*>(Parent::ptr); }
 };
 
 } // namespace uv
