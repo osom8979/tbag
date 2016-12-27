@@ -88,6 +88,7 @@ public:
 public:
     bool read();
     bool write(char const * buffer, std::size_t size);
+    bool try_write(char const * buffer, std::size_t size);
 
 public:
     void onConnect(void * req, int status);

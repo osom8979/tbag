@@ -109,6 +109,7 @@ public:
     void closeClient(ClientKey key);
     bool read(ClientKey key);
     bool write(ClientKey key, char * buffer, std::size_t size);
+    bool try_write(ClientKey key, char * buffer, std::size_t size);
 
 public:
     void onConnection(void * server, int status);

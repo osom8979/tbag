@@ -188,6 +188,27 @@ static bool write(Server::Handle & handle, Tcp & tcp, char const * buffer, std::
                  buffer, size);
 }
 
+static bool try_write(uv_tcp_t * tcp, char const * buffer, std::size_t length)
+{
+    uv_buf_t buf = {0,};
+    buf.base = const_cast<char*>(buffer);
+    buf.len  = length;
+
+    int const CODE = ::uv_try_write((uv_stream_t*)tcp, &buf, 1);
+    // > 0: number of bytes written (can be less than the supplied buffer size).
+    // < 0: negative error code (UV_EAGAIN is returned if no data can be sent immediately).
+    if (CODE < 0) {
+        __tbag_error("socket::server_details write error: {}", CODE);
+        return false;
+    }
+    return true;
+}
+
+static bool try_write(Tcp & tcp, char const * buffer, std::size_t size)
+{
+    return try_write(static_cast<uv_tcp_t*>(tcp.getNative()), buffer, size);
+}
+
 } // namespace server_details
 
 // ----------------------
@@ -352,6 +373,23 @@ bool Server::write(ClientKey key, char * buffer, std::size_t size)
     }
 
     return server_details::write(_write, *client.get(), buffer, size);
+}
+
+bool Server::try_write(ClientKey key, char * buffer, std::size_t size)
+{
+    auto find_itr = _clients.find(key);
+    if (find_itr == _clients.end()) {
+        __tbag_error("Server::try_write() not found client key.");
+        return false;
+    }
+
+    ClientValue client = find_itr->second;
+    if (static_cast<bool>(client) == false) {
+        __tbag_error("Server::try_write() invalidate client value.");
+        return false;
+    }
+
+    return server_details::try_write(*client.get(), buffer, size);
 }
 
 void Server::onConnection(void * server, int status)

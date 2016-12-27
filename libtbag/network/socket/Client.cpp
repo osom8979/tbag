@@ -138,6 +138,27 @@ static bool write(Client::Handle & handle, Tcp & tcp, char const * buffer, std::
                  buffer, size);
 }
 
+static bool try_write(uv_tcp_t * tcp, char const * buffer, std::size_t length)
+{
+    uv_buf_t buf = {0,};
+    buf.base = const_cast<char*>(buffer);
+    buf.len  = length;
+
+    int const CODE = ::uv_try_write((uv_stream_t*)tcp, &buf, 1);
+    // > 0: number of bytes written (can be less than the supplied buffer size).
+    // < 0: negative error code (UV_EAGAIN is returned if no data can be sent immediately).
+    if (CODE < 0) {
+        __tbag_error("socket::client_details write error: {}", CODE);
+        return false;
+    }
+    return true;
+}
+
+static bool try_write(Tcp & tcp, char const * buffer, std::size_t size)
+{
+    return try_write(static_cast<uv_tcp_t*>(tcp.getNative()), buffer, size);
+}
+
 } // namespace client_details
 
 // ----------------------
@@ -213,6 +234,11 @@ bool Client::read()
 bool Client::write(char const * buffer, std::size_t size)
 {
     return client_details::write(_write, _tcp, buffer, size);
+}
+
+bool Client::try_write(char const * buffer, std::size_t size)
+{
+    return client_details::try_write(_tcp, buffer, size);
 }
 
 void Client::onConnect(void * req, int status)
