@@ -125,6 +125,16 @@ static void close(Tcp & tcp)
     close(static_cast<uv_tcp_t*>(tcp.getNative()));
 }
 
+static bool isClose(uv_tcp_t const * tcp)
+{
+    return ::uv_is_closing((uv_handle_t const *)tcp) != 0;
+}
+
+static bool isClose(Tcp & tcp)
+{
+    return isClose(static_cast<uv_tcp_t*>(tcp.getNative()));
+}
+
 static void closeClient(uv_tcp_t * tcp)
 {
     ::uv_close((uv_handle_t*)tcp, TBAG_UV_EVENT_DEFAULT_CALLBACK_CLOSE(onCloseClient));
@@ -252,7 +262,9 @@ bool Server::runIpv6(std::string const & address, int port)
 
 void Server::close()
 {
-    server_details::close(_tcp);
+    if (server_details::isClose(_tcp) == false) {
+        server_details::close(_tcp);
+    }
 }
 
 bool Server::addClient(ClientKey key, ClientValue client)

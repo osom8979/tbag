@@ -95,6 +95,7 @@ public:
     bool runIpv4(std::string const & address, int port);
     bool runIpv6(std::string const & address, int port);
     void close();
+    void close(util::UvHandle & handle);
 
 private:
     bool addClient(ClientKey key, ClientValue client);
