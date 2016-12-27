@@ -101,8 +101,8 @@ enum class UvEtcType     : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_N
 #undef _TBAG_NX
 // @formatter:on
 
-TBAG_API char const * getUvHandleName(void const * handle);
-TBAG_API bool isUvHandleType(void const * handle);
+TBAG_API char const * getUvNativeHandleName(void const * handle);
+TBAG_API bool isUvNativeHandleType(void const * handle);
 
 /**
  * @remarks
@@ -124,6 +124,7 @@ TBAG_API std::string getUvErrorName(int uv_error_code);
 
 TBAG_API bool isHandle(UvType type);
 TBAG_API bool isRequest(UvType type);
+TBAG_API bool isEtc(UvType type);
 
 /**
  * libuv native type utility class.
@@ -139,10 +140,11 @@ public:
 private:
     Type const TYPE;
     void * _native;
+    void * _user;
 
 public:
     UvNative(Type type);
-    ~UvNative();
+    virtual ~UvNative();
 
 public:
     bool isInit() const;
@@ -166,6 +168,14 @@ public:
     { return _native; }
 
 public:
+    inline void setUserData(void * data) TBAG_NOEXCEPT
+    { _user = data; }
+    inline void * getUserData() TBAG_NOEXCEPT
+    { return _user; }
+    inline void const * getUserData() const TBAG_NOEXCEPT
+    { return _user; }
+
+public:
     template <typename T>
     inline T * castNative() const TBAG_NOEXCEPT
     { return static_cast<T*>(_native); }
@@ -180,28 +190,45 @@ public:
 class TBAG_API UvHandle : public UvNative
 {
 public:
-    struct OnCloseCallback
-    {
-        virtual void onClose() = 0;
-    };
-
-private:
-    OnCloseCallback * _on_close_cb;
+    using Parent = UvNative;
 
 public:
     UvHandle(UvHandleType type);
-    ~UvHandle();
+    virtual ~UvHandle();
 
 public:
-    inline void setOnCloseCallback(OnCloseCallback * callback) TBAG_NOEXCEPT
-    { _on_close_cb = callback; }
-
-public:
-    inline char const * getUvName() const TBAG_NOEXCEPT
-    { return getUvHandleName(getNative()); }
+    inline char const * getName() const TBAG_NOEXCEPT
+    { return getUvNativeHandleName(getNative()); }
 
 public:
     bool isClosing() const TBAG_NOEXCEPT;
+
+    /**
+     * @remarks
+     *  This function should only be used between the
+     *  initialization of the handle
+     *  and the arrival of the close callback.
+     */
+    void close();
+
+public:
+    /** Returns true if the handle is active, false if it’s inactive. */
+    bool isActive();
+
+    /** Reference the given handle. */
+    void ref();
+
+    /** Un-reference the given handle. */
+    void unref();
+
+    /** Returns true if the handle referenced, false otherwise. */
+    bool hasRef();
+
+    /** Returns the size of the given handle type. */
+    std::size_t getNativeSize();
+
+public:
+    virtual void onClose();
 };
 
 } // namespace util

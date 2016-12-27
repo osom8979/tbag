@@ -21,6 +21,12 @@
 #include <string>
 #include <memory>
 
+#if defined(__OS_WINDOWS__)
+#include <winsock2.h>
+#else
+#include <netinet/in.h>
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

@@ -97,7 +97,7 @@ public:
     /** Fully close a loop. */
     static void onClose(uv_handle_t * handle, void * arg)
     {
-        if (util::isUvHandleType(handle) == false) {
+        if (util::isUvNativeHandleType(handle) == false) {
             return;
         }
         if (isClosing(handle)) {
@@ -105,7 +105,7 @@ public:
         }
 
         // If not closing or closed.
-        __tbag_debug("Not closing or closed uv handle: {}", util::getUvHandleName(handle));
+        __tbag_debug("Not closing or closed uv handle: {}", util::getUvNativeHandleName(handle));
         ::uv_close(handle, nullptr);
     }
 };

@@ -393,7 +393,7 @@ void Process::onExit(void * process, int64_t exit_status, int term_signal)
 void Process::onClose(void * handle)
 {
     if (isPrintOnCloseDebugMessage()) {
-        __tbag_debug("Process::onClose({})", util::getUvHandleName(_process->handle()));
+        __tbag_debug("Process::onClose({})", util::getUvNativeHandleName(_process->handle()));
     }
 }
 
