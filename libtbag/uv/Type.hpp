@@ -31,8 +31,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uv {
 
-#ifndef TBAG_UTIL_UV_HANDLE_MAP
-#define TBAG_UTIL_UV_HANDLE_MAP(_TBAG_HANDLE_XX, _TBAG_REQ_XX, _TBAG_ETC_XX) \
+#ifndef TBAG_UV_HANDLE_MAP
+#define TBAG_UV_HANDLE_MAP(_TBAG_HANDLE_XX, _TBAG_REQ_XX, _TBAG_ETC_XX) \
     /* Handle types. */                      \
     _TBAG_HANDLE_XX(LOOP    , uv_loop_t)     \
     _TBAG_HANDLE_XX(HANDLE  , uv_handle_t)   \
@@ -69,11 +69,12 @@ namespace uv {
     /* -- END -- */
 #endif
 
-#ifndef TBAG_UTIL_UV_HANDLE_MAP_ALL
-#define TBAG_UTIL_UV_HANDLE_MAP_ALL(_TBAG_XX) \
-    TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX)
+#ifndef TBAG_UV_HANDLE_MAP_ALL
+#define TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX) \
+    TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX)
 #endif
 
+/** POD type of UvType. */
 typedef int UvPodType;
 
 /**
@@ -85,22 +86,34 @@ typedef int UvPodType;
 enum class UvType : UvPodType
 {
 #define _TBAG_XX(name, type) name,
-    TBAG_UTIL_UV_HANDLE_MAP_ALL(_TBAG_XX)
+    TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
 };
 
 // @formatter:off
 #define _TBAG_XX(name, type) name = static_cast<UvPodType>(UvType::name),
 #define _TBAG_NX(name, type)
-enum class UvHandleType  : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) };
-enum class UvRequsetType : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) };
-enum class UvEtcType     : UvPodType { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) };
+enum class UvHandleType  : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) };
+enum class UvRequsetType : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) };
+enum class UvEtcType     : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) };
 #undef _TBAG_XX
 #undef _TBAG_NX
 // @formatter:on
 
+TBAG_API bool isHandle (UvType type);
+TBAG_API bool isRequest(UvType type);
+TBAG_API bool isEtc    (UvType type);
+
+// ---------------------
+// Native handle helper.
+// ---------------------
+
 TBAG_API char const * getUvNativeHandleName(void const * handle);
 TBAG_API bool isUvNativeHandleType(void const * handle);
+
+// ------------------
+// Debugging methods.
+// ------------------
 
 /**
  * @remarks
@@ -119,10 +132,6 @@ TBAG_API std::string getUvErrorString(int uv_error_code);
  *  @endcode
  */
 TBAG_API std::string getUvErrorName(int uv_error_code);
-
-TBAG_API bool isHandle(UvType type);
-TBAG_API bool isRequest(UvType type);
-TBAG_API bool isEtc(UvType type);
 
 } // namespace uv
 

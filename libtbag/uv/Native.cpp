@@ -20,9 +20,9 @@ Native::Native(Type t) : TYPE(t), _native(nullptr), _user(nullptr)
     // @formatter:off
     switch (TYPE) {
 #define _TBAG_XX(name, type) case UvType::name: _native = ::malloc(sizeof(type)); ::memset(_native, 0x00, sizeof(type)); break;
-    TBAG_UTIL_UV_HANDLE_MAP_ALL(_TBAG_XX)
+    TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
-    default: __tbag_error("UvNative::UvNative({}) Unknown uv type.", static_cast<int>(TYPE)); break;
+    default: __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE)); break;
     }
     // @formatter:on
 }

@@ -15,6 +15,29 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uv {
 
+// @formatter:off
+#define _TBAG_XX(name, type) case UvType::name: return true;
+#define _TBAG_NX(name, type)
+bool isHandle (UvType type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) default: return false; } }
+bool isRequest(UvType type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) default: return false; } }
+bool isEtc    (UvType type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) default: return false; } }
+#undef _TBAG_XX
+#undef _TBAG_NX
+// @formatter:on
+
+// ------------------
+// Debugging methods.
+// ------------------
+
+// @formatter:off
+std::string getUvErrorString(int uv_error_code) { return std::string(::uv_strerror(uv_error_code)); }
+std::string getUvErrorName  (int uv_error_code) { return std::string(::uv_err_name(uv_error_code)); }
+// @formatter:on
+
+// ---------------------
+// Native handle helper.
+// ---------------------
+
 #ifndef UV_NATIVE_HANDLE_MAP
 #define UV_NATIVE_HANDLE_MAP(_TBAG_XX) \
     _TBAG_XX(UV_UNKNOWN_HANDLE) \
@@ -54,22 +77,6 @@ bool isUvNativeHandleType(void const * handle)
     default: return false;
     }
 }
-
-// @formatter:off
-std::string getUvErrorString(int uv_error_code) { return std::string(::uv_strerror(uv_error_code)); }
-std::string getUvErrorName  (int uv_error_code) { return std::string(::uv_err_name(uv_error_code)); }
-// @formatter:on
-
-// @formatter:off
-#define _TBAG_XX(name, type) case UvType::name: return true;
-#define _TBAG_NX(name, type)
-bool isHandle (UvType type) { switch (type) { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) default: return false; } }
-bool isRequest(UvType type) { switch (type) { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) default: return false; } }
-bool isEtc    (UvType type) { switch (type) { TBAG_UTIL_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) default: return false; } }
-#undef _TBAG_XX
-#undef _TBAG_NX
-// @formatter:on
-
 
 } // namespace uv
 

@@ -75,6 +75,31 @@ public:
     virtual void onClose();
 };
 
+#ifndef _TBAG_UV_HANDLE_EX
+#define _TBAG_UV_HANDLE_EX(type, name)                  \
+    struct name##Handle : public Handle {               \
+        name##Handle() : Handle(UvHandleType::type) { } \
+        ~name##Handle() { }                             \
+    }
+#endif
+
+_TBAG_UV_HANDLE_EX(STREAM  , Stream );
+_TBAG_UV_HANDLE_EX(TCP     , Tcp    );
+_TBAG_UV_HANDLE_EX(UDP     , Udp    );
+_TBAG_UV_HANDLE_EX(PIPE    , Pipe   );
+_TBAG_UV_HANDLE_EX(TTY     , Tty    );
+_TBAG_UV_HANDLE_EX(POLL    , Poll   );
+_TBAG_UV_HANDLE_EX(TIMER   , Timer  );
+_TBAG_UV_HANDLE_EX(PREPARE , Prepare);
+_TBAG_UV_HANDLE_EX(CHECK   , Check  );
+_TBAG_UV_HANDLE_EX(IDLE    , Idle   );
+_TBAG_UV_HANDLE_EX(ASYNC   , Async  );
+_TBAG_UV_HANDLE_EX(PROCESS , Process);
+_TBAG_UV_HANDLE_EX(FS_EVENT, FsEvent);
+_TBAG_UV_HANDLE_EX(FS_POLL , FsPoll );
+_TBAG_UV_HANDLE_EX(SIGNAL  , Signal );
+
+#undef _TBAG_UV_HANDLE_EX
 
 } // namespace uv
 
