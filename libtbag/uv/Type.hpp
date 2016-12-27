@@ -104,6 +104,14 @@ TBAG_API bool isHandle (UvType type);
 TBAG_API bool isRequest(UvType type);
 TBAG_API bool isEtc    (UvType type);
 
+/**
+ * @remarks
+ *  - uv_stream_t is a subclass of uv_handle_t.
+ *  - uv_stream is an abstract class.
+ *  - uv_stream_t is the parent class of uv_tcp_t, uv_pipe_t and uv_tty_t.
+ */
+TBAG_API bool isStream(UvType type);
+
 // ---------------------
 // Native handle helper.
 // ---------------------

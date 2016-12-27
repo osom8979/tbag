@@ -61,6 +61,8 @@ public:
     { return uv::isRequest(TYPE); }
     inline bool isEtc() const TBAG_NOEXCEPT
     { return uv::isEtc(TYPE); }
+    inline bool isStream() const TBAG_NOEXCEPT
+    { return uv::isStream(TYPE); }
 
 public:
     inline void * getNative() TBAG_NOEXCEPT

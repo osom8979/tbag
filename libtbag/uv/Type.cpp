@@ -25,6 +25,11 @@ bool isEtc    (UvType type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG
 #undef _TBAG_NX
 // @formatter:on
 
+bool isStream(UvType type)
+{
+    return (type == UvType::TCP || type == UvType::PIPE || type == UvType::TTY);
+}
+
 // ------------------
 // Debugging methods.
 // ------------------
