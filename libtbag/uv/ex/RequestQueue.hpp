@@ -78,6 +78,28 @@ public:
     void release(Request * request);
 };
 
+#ifndef _TBAG_UV_REQUEST_QUEUE_EX
+#define _TBAG_UV_REQUEST_QUEUE_EX(type, name)           \
+    struct name##Queue : public RequestQueue {          \
+        name##Queue(Handle * owner)                     \
+            : RequestQueue(UvRequestType::type, owner)  \
+        { /* EMPTY. */ }                                \
+        ~name##Queue() { /* EMPTY. */ }                 \
+    }
+#endif
+
+_TBAG_UV_REQUEST_QUEUE_EX(WRITE, Write);
+_TBAG_UV_REQUEST_QUEUE_EX(FS   , Fs   );
+_TBAG_UV_REQUEST_QUEUE_EX(WORK , Work );
+
+//_TBAG_UV_REQUEST_QUEUE_EX(UDP_SEND   , UdpSend    );
+//_TBAG_UV_REQUEST_QUEUE_EX(CONNECT    , Connect    );
+//_TBAG_UV_REQUEST_QUEUE_EX(SHUTDOWN   , Shutdown   );
+//_TBAG_UV_REQUEST_QUEUE_EX(GETADDRINFO, GetAddrInfo);
+//_TBAG_UV_REQUEST_QUEUE_EX(GETNAMEINFO, GetNameInfo);
+
+#undef _TBAG_UV_REQUEST_QUEUE_EX
+
 } // namespace ex
 } // namespace uv
 
