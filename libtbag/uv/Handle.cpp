@@ -140,9 +140,18 @@ void Handle::setRecvBufferSize(int size)
     ::uv_recv_buffer_size(Parent::castNative<uv_handle_t>(), &size);
 }
 
+// --------------
+// Event methods.
+// --------------
+
 void Handle::onClose()
 {
     __tbag_debug("Handle::onClose() called.");
+}
+
+void Handle::onWalk(void * arg)
+{
+    __tbag_debug("Handle::onWalk() called.");
 }
 
 } // namespace uv

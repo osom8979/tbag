@@ -106,8 +106,13 @@ public:
     /** Set the size of the receive buffer that the operating system uses for the socket. */
     void setRecvBufferSize(int size);
 
+// Event methods.
 public:
+    /** Close event. */
     virtual void onClose();
+
+    /** Active from the Loop class. */
+    virtual void onWalk(void * arg);
 };
 
 #ifndef _TBAG_UV_HANDLE_EX
