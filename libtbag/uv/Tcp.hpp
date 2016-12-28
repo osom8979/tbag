@@ -74,6 +74,11 @@ public:
 // Event methods.
 public:
     virtual void onConnect(Err code);
+
+// Utilities.
+public:
+    static std::string getIpName(sockaddr_in const * address);
+    static std::string getIpName(sockaddr_in6 const * address);
 };
 
 } // namespace uv
