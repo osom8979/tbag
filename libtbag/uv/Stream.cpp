@@ -138,6 +138,11 @@ Stream::~Stream()
     // EMPTY.
 }
 
+std::size_t Stream::getWriteQueueSize() const TBAG_NOEXCEPT
+{
+    return Parent::castNative<uv_stream_t>()->write_queue_size;
+}
+
 bool Stream::isReadable() const TBAG_NOEXCEPT
 {
     return ::uv_is_readable(Parent::castNative<const uv_stream_t>()) == 1;

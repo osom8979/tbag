@@ -47,6 +47,10 @@ public:
     virtual ~Stream();
 
 public:
+    /** Contains the amount of queued bytes waiting to be sent. */
+    std::size_t getWriteQueueSize() const TBAG_NOEXCEPT;
+
+public:
     /** Returns true if the stream is readable, false otherwise. */
     bool isReadable() const TBAG_NOEXCEPT;
 
@@ -98,9 +102,9 @@ public:
     }
 #endif
 
-_TBAG_UV_STREAM_EX(TCP , Tcp );
-_TBAG_UV_STREAM_EX(PIPE, Pipe);
-_TBAG_UV_STREAM_EX(TTY , Tty );
+//_TBAG_UV_STREAM_EX(TCP, Tcp );
+_TBAG_UV_STREAM_EX(PIPE , Pipe);
+_TBAG_UV_STREAM_EX(TTY  , Tty );
 
 #undef _TBAG_UV_STREAM_EX
 
