@@ -77,6 +77,7 @@ public:
 
 // Utilities.
 public:
+    static std::string getIpName(sockaddr const * address);
     static std::string getIpName(sockaddr_in const * address);
     static std::string getIpName(sockaddr_in6 const * address);
 };

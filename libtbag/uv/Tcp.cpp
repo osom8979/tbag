@@ -122,24 +122,17 @@ bool Tcp::bind(sockaddr const * address, unsigned int flags)
 std::string Tcp::getSockName()
 {
     sockaddr address = {0,};
-    int name_length = 0;
+    int length = sizeof(address);
 
     // addr must point to a valid and big enough chunk of memory,
     // struct sockaddr_storage is recommended for IPv4 and IPv6 support.
 
-    int const CODE = ::uv_tcp_getsockname(Parent::cast<uv_tcp_t>(), &address, &name_length);
+    int const CODE = ::uv_tcp_getsockname(Parent::cast<uv_tcp_t>(), &address, &length);
     if (CODE != 0) {
         __tbag_error("Tcp::getSockName() error [{}] {}", CODE, getUvErrorName(CODE));
         return std::string();
     }
-
-    if (address.sa_family == AF_INET) {
-        return getIpName((sockaddr_in const *)&address);
-    } else if (address.sa_family == AF_INET6) {
-        return getIpName((sockaddr_in6 const *)&address);
-    }
-
-    return std::string();
+    return getIpName(&address);
 }
 
 std::string Tcp::getPeerName()
@@ -155,13 +148,7 @@ std::string Tcp::getPeerName()
         __tbag_error("Tcp::getPeerName() error [{}] {}", CODE, getUvErrorName(CODE));
         return std::string();
     }
-
-    if (address.sa_family == AF_INET) {
-        return getIpName((sockaddr_in const *)&address);
-    } else if (address.sa_family == AF_INET6) {
-        return getIpName((sockaddr_in6 const *)&address);
-    }
-    return std::string();
+    return getIpName(&address);
 }
 
 bool Tcp::connect(ConnectRequest & request, sockaddr const * address)
@@ -197,6 +184,16 @@ void Tcp::onConnect(Err code)
 // ----------
 // Utilities.
 // ----------
+
+std::string Tcp::getIpName(sockaddr const * address)
+{
+    if (address->sa_family == AF_INET) {
+        return getIpName((sockaddr_in const *)&address);
+    } else if (address->sa_family == AF_INET6) {
+        return getIpName((sockaddr_in6 const *)&address);
+    }
+    return std::string();
+}
 
 std::string Tcp::getIpName(sockaddr_in const * address)
 {
