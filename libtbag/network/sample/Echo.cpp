@@ -100,7 +100,7 @@ void EchoServer::onWrite(ClientKey to, Code code)
 // Echo client implementation.
 // ---------------------------
 
-EchoClient::EchoClient(): socket::Client(this)
+EchoClient::EchoClient(Loop & loop): socket::Client(loop, this)
 {
     std::cout.setf(std::ios_base::boolalpha);
 }
@@ -110,10 +110,10 @@ EchoClient::~EchoClient()
     // EMPTY.
 }
 
-void EchoClient::onConnect(int status)
+void EchoClient::onConnect(Err code)
 {
-    if (status != 0) {
-        std::cout << "EchoClient::onConnect() Status error: " << status << ".\n";
+    if (code != Err::SUCCESS) {
+        std::cout << "EchoClient::onConnect() Status error: " << static_cast<int>(code) << ".\n";
         return;
     }
 
@@ -121,8 +121,8 @@ void EchoClient::onConnect(int status)
     std::cout << "MESSAGE: ";
     std::cin >> msg;
 
-    this->read();
-    this->write(&msg[0], msg.size());
+    startRead();
+    autoWrite(&msg[0], msg.size());
 }
 
 void EchoClient::onClose()
@@ -130,26 +130,26 @@ void EchoClient::onClose()
     std::cout << "END.\n";
 }
 
-void EchoClient::onRead(Code code, char const * buffer, std::size_t size)
+void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
 {
-    if (code == Code::SUCCESS) {
+    if (code == Err::SUCCESS) {
         std::string msg;
         msg.assign(buffer, buffer + size);
         std::cout << "Echo read: " << msg << std::endl;
-    } else if (code == Code::END_OF_FILE) {
+    } else if (code == Err::END_OF_FILE) {
         std::cout << "EchoClient::onRead() End of file.\n";
     } else {
         std::cout << "EchoClient::onRead() Failure.\n";
     }
 
-    this->close();
+    close();
 }
 
-void EchoClient::onWrite(Code code)
+void EchoClient::onWrite(Err code)
 {
-    if (code != Code::SUCCESS) {
+    if (code != Err::SUCCESS) {
         std::cout << "EchoClient::onWrite() Failure.\n";
-        this->close();
+        close();
     }
 }
 
@@ -168,8 +168,9 @@ int runEchoServer(std::string const & ip, int port)
 
 int runEchoClient(std::string const & ip, int port)
 {
-    EchoClient client;
-    if (client.run(ip, port)) {
+    uv::Loop loop;
+    EchoClient client(loop);
+    if (client.init(ip, port) && loop.run()) {
         return EXIT_SUCCESS;
     }
     return EXIT_FAILURE;

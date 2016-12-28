@@ -10,6 +10,7 @@
 #include <libtbag/uv/Loop.hpp>
 #include <libtbag/uv/Stream.hpp>
 #include <libtbag/uv/Request.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <uv.h>
 
@@ -211,6 +212,40 @@ std::string Tcp::getIpName(sockaddr_in6 const * address)
         return std::string(name);
     }
     return std::string();
+}
+
+bool Tcp::initAddress(std::string const & ip, int port, sockaddr_in * addr)
+{
+    int const CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
+    if (CODE != 0) {
+        __tbag_error("Tcp::initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
+        return false;
+    }
+    return true;
+}
+
+bool Tcp::initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
+{
+    int const CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
+    if (CODE != 0) {
+        __tbag_error("Tcp::initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
+        return false;
+    }
+    return true;
+}
+
+bool Tcp::isIpv4(std::string const & ip)
+{
+    auto tokens = string::splitTokens(ip, ".");
+    if (tokens.size() != 4) {
+        return false;
+    }
+    for (auto cursor : tokens) {
+        if (!std::all_of(cursor.begin(), cursor.end(), ::isdigit)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } // namespace uv

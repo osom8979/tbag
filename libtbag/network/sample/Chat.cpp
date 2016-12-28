@@ -119,7 +119,7 @@ void ChatServer::onWrite(ClientKey to, Code code)
 // Chat client implementation.
 // ---------------------------
 
-ChatClient::ChatClient(): socket::Client(this)
+ChatClient::ChatClient(Loop & loop): socket::Client(loop, this)
 {
 }
 
@@ -127,14 +127,13 @@ ChatClient::~ChatClient()
 {
 }
 
-void ChatClient::onConnect(int status)
+void ChatClient::onConnect(Err code)
 {
-    if (status != 0) {
-        std::cout << "STATUS ERROR: " << status << std::endl;
+    if (code != Err::SUCCESS) {
+        std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
         return;
     }
-
-    this->read();
+    startRead();
 }
 
 void ChatClient::onClose()
@@ -142,13 +141,13 @@ void ChatClient::onClose()
     std::cout << "CLOSE.\n";
 }
 
-void ChatClient::onRead(Code code, char const * buffer, std::size_t size)
+void ChatClient::onRead(Err code, char const * buffer, std::size_t size)
 {
-    if (code == Code::END_OF_FILE) {
-        this->close();
+    if (code == Err::END_OF_FILE) {
+        close();
         return;
     }
-    if (code == Code::FAILURE) {
+    if (code == Err::FAILURE) {
         std::cout << "UNKNOWN READ ERROR.\n";
         return;
     }
@@ -162,14 +161,15 @@ void ChatClient::onRead(Code code, char const * buffer, std::size_t size)
     auto msg = msg::GetChatPacket(buffer);
     std::cout << "[" << msg->name()->c_str() << "]"
               << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
-              << msg->msg()->c_str() << std::endl;
+              << msg->msg()->c_str()
+              << std::endl;
 }
 
-void ChatClient::onWrite(Code code)
+void ChatClient::onWrite(Err code)
 {
-    if (code != Code::SUCCESS) {
+    if (code != Err::SUCCESS) {
         std::cout << "SEND FAILURE.\n";
-        this->close();
+        close();
     }
 }
 
@@ -199,7 +199,8 @@ int runChatClient(std::string const & ip, int port)
     std::mutex mutex;
     std::atomic_bool is_exit(false);
 
-    ChatClient client;
+    uv::Loop loop;
+    ChatClient client(loop);
     std::thread t([&](){
         while (true) {
             std::string msg;
@@ -210,19 +211,22 @@ int runChatClient(std::string const & ip, int port)
                 flatbuffers::FlatBufferBuilder builder;
                 auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(name), builder.CreateString(msg));
                 builder.Finish(packet);
-                client.try_write((char const *)builder.GetBufferPointer(), builder.GetSize());
+                client.tryWrite((char const *)builder.GetBufferPointer(), builder.GetSize());
             } else {
                 break;
             }
         }
     });
 
-    bool const RESULT = client.run(ip, port);
+    bool result = false;
+    if (client.init(ip, port) && loop.run()) {
+        result = true;
+    }
     is_exit = true;
 
     t.join();
 
-    return (RESULT ? EXIT_SUCCESS : EXIT_FAILURE);
+    return (result ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 } // namespace sample

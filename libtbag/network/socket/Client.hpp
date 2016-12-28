@@ -15,9 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/loop/UvEventLoop.hpp>
-#include <libtbag/uv/Handle.hpp>
-#include <libtbag/network/socket/Tcp.hpp>
+#include <libtbag/debug/ErrorCode.hpp>
+#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uv/Tcp.hpp>
+#include <libtbag/uv/Request.hpp>
+#include <libtbag/uv/ex/RequestQueue.hpp>
 
 #include <string>
 #include <vector>
@@ -36,66 +38,60 @@ namespace socket  {
  * @date   2016-10-14
  * @date   2016-11-07 (Refactoring this class)
  */
-class TBAG_API Client : public Noncopyable
+class TBAG_API Client : public uv::Tcp
 {
 public:
-    using Loop   = loop::UvEventLoop;
-    using Handle = uv::Native;
+    using Parent     = uv::Tcp;
+    using BufferInfo = uv::BufferInfo;
+    using Loop       = uv::Loop;
+
+    using ConnectRequest = uv::ConnectRequest;
+    using RequestQueue   = uv::ex::RequestQueue;
+
+    using Buffer = std::vector<char>;
 
 public:
-    enum class Code
-    {
-        SUCCESS,
-        FAILURE,
-        END_OF_FILE,
-    };
-
     struct EventCallback
     {
-        virtual void onConnect(int status) = 0;
+        virtual void onConnect(Err code) = 0;
         virtual void onClose() = 0;
-        virtual void onRead(Code code, char const * buffer, std::size_t size) = 0;
-        virtual void onWrite(Code code) = 0;
+        virtual void onRead(Err code, char const * buffer, std::size_t size) = 0;
+        virtual void onWrite(Err code) = 0;
     };
 
 private:
-    Loop   _loop;
-    Tcp    _tcp;
-    Handle _connect;
-    Handle _write;
+    ConnectRequest _connector;
+    RequestQueue   _writer;
 
 private:
-    std::vector<char> _read_buffer;
+    Buffer _read_buffer;
 
 private:
     EventCallback * _callback;
 
 public:
-    Client(EventCallback * callback);
-    Client();
+    Client(Loop & loop, EventCallback * callback);
+    Client(Loop & loop);
     ~Client();
 
 public:
-    inline void setEventCallback(EventCallback * callback)
+    inline void setEventCallback(EventCallback * callback) TBAG_NOEXCEPT
     { _callback = callback; }
 
 public:
-    bool run(std::string const & address, int port);
-    bool runIpv4(std::string const & address, int port);
-    bool runIpv6(std::string const & address, int port);
-    void close();
+    bool init(std::string const & ip, int port);
+    bool initIpv4(std::string const & ip, int port);
 
 public:
-    bool read();
-    bool write(char const * buffer, std::size_t size);
-    bool try_write(char const * buffer, std::size_t size);
+    bool autoWrite(char const * buffer, std::size_t size);
 
+// Tcp Event methods.
 public:
-    void onConnect(void * req, int status);
-    void onClose(void * handle);
-    void onReadBufferAlloc(void * handle, size_t suggested_size, void * buf);
-    void onRead(void * stream, ssize_t nread, void const * buf);
-    void onWrite(void * req, int status);
+    virtual void onConnect(Err code) override;
+    virtual BufferInfo onAlloc(std::size_t suggested_size) override;
+    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void onWrite(Err code) override;
+    virtual void onClose() override;
 };
 
 } // namespace socket

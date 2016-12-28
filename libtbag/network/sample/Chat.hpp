@@ -72,17 +72,15 @@ public:
  */
 class TBAG_API ChatClient : public socket::Client, public socket::Client::EventCallback
 {
-private:
-
 public:
-    ChatClient();
+    ChatClient(Loop & loop);
     virtual ~ChatClient();
 
 public:
-    virtual void onConnect(int status) override;
+    virtual void onConnect(Err code) override;
     virtual void onClose() override;
-    virtual void onRead(Code code, char const * buffer, std::size_t size) override;
-    virtual void onWrite(Code code) override;
+    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void onWrite(Err code) override;
 };
 
 TBAG_API int runChatServer(std::string const & ip, int port);

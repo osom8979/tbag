@@ -61,14 +61,14 @@ public:
 class TBAG_API EchoClient : public socket::Client, public socket::Client::EventCallback
 {
 public:
-    EchoClient();
+    EchoClient(Loop & loop);
     virtual ~EchoClient();
 
 public:
-    virtual void onConnect(int status) override;
+    virtual void onConnect(Err code) override;
     virtual void onClose() override;
-    virtual void onRead(Code code, char const * buffer, std::size_t size) override;
-    virtual void onWrite(Code code) override;
+    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void onWrite(Err code) override;
 };
 
 TBAG_API int runEchoServer(std::string const & ip, int port);
