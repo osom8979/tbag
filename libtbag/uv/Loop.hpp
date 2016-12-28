@@ -30,6 +30,11 @@ namespace uv {
  *
  * @author zer0
  * @date   2016-12-28
+ *
+ * @remarks
+ *  The event loop is the central part of libuv’s functionality.
+ *  It takes care of polling for i/o and scheduling callbacks
+ *  to be run based on different sources of events.
  */
 class TBAG_API Loop : public Native
 {

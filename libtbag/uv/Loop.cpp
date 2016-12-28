@@ -46,9 +46,9 @@ static void __global_close_all_uv_walk_cb__(uv_handle_t * handle, void * arg)
     }
 }
 
-// ----------------------
-// Handle implementation.
-// ----------------------
+// --------------------
+// Loop implementation.
+// --------------------
 
 Loop::Loop() : Native(UvType::LOOP)
 {

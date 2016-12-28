@@ -26,7 +26,6 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
         __tbag_error("__global_uv_close_cb__() handle data is nullptr.");
         return;
     }
-
     h->onClose();
 }
 
