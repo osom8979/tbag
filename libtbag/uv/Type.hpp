@@ -100,7 +100,7 @@ enum class UvType : UvPodType
 #define _TBAG_XX(name, type) name = static_cast<UvPodType>(UvType::name),
 #define _TBAG_NX(name, type)
 enum class UvHandleType  : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) };
-enum class UvRequsetType : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) };
+enum class UvRequestType : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) };
 enum class UvEtcType     : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) };
 #undef _TBAG_XX
 #undef _TBAG_NX
