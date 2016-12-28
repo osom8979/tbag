@@ -18,6 +18,7 @@
 #include <libtbag/uv/Native.hpp>
 
 #include <cstdint>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -49,9 +50,16 @@ public:
         RUN_NOWAIT,
     };
 
+private:
+    std::thread::id _owner_thread_id;
+
 public:
     Loop();
     virtual ~Loop();
+
+public:
+    inline std::thread::id getOwnerThreadId() const TBAG_NOEXCEPT
+    { return _owner_thread_id; }
 
 private:
     void runCloseAllHandles();

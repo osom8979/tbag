@@ -76,7 +76,7 @@ bool Client::autoWrite(char const * buffer, std::size_t size)
 // Tcp Event methods.
 // ------------------
 
-void Client::onConnect(Err code)
+void Client::onConnect(ConnectRequest & request, Err code)
 {
     if (_callback != nullptr) {
         _callback->onConnect(code);
@@ -103,7 +103,7 @@ void Client::onRead(Err code, char const * buffer, std::size_t size)
     }
 }
 
-void Client::onWrite(Err code)
+void Client::onWrite(WriteRequest & request, Err code)
 {
     if (_callback != nullptr) {
         _callback->onWrite(code);

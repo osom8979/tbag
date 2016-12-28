@@ -36,7 +36,7 @@ static void __global_uv_shutdown_cb__(uv_shutdown_t * request, int status)
         __tbag_error("__global_uv_shutdown_cb__() request owner is nullptr.");
         return;
     }
-    s->onShutdown(status == 0 ? Err::SUCCESS : Err::FAILURE);
+    s->onShutdown(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 static void __global_uv_connection_cb__(uv_stream_t * server, int status)
@@ -118,7 +118,7 @@ static void __global_uv_write_cb__(uv_write_t * request, int status)
         __tbag_error("__global_uv_write_cb__() request owner is nullptr.");
         return;
     }
-    s->onWrite(status == 0 ? Err::SUCCESS : Err::FAILURE);
+    s->onWrite(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 // ----------------------
@@ -302,7 +302,7 @@ std::size_t Stream::tryWrite(char const * buffer, std::size_t size, Err * result
 // Event methods.
 // --------------
 
-void Stream::onShutdown(Err code)
+void Stream::onShutdown(ShutdownRequest & request, Err code)
 {
     __tbag_debug("Stream::onShutdown({}) called.", static_cast<int>(code));
 }
@@ -323,7 +323,7 @@ void Stream::onRead(Err code, char const * buffer, std::size_t size)
     __tbag_debug("Stream::onRead({}) called (size:{}).", static_cast<int>(code), size);
 }
 
-void Stream::onWrite(Err code)
+void Stream::onWrite(WriteRequest & request, Err code)
 {
     __tbag_debug("Stream::onWrite({}) called.", static_cast<int>(code));
 }

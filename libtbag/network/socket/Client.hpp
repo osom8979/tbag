@@ -46,6 +46,7 @@ public:
     using Loop       = uv::Loop;
 
     using ConnectRequest = uv::ConnectRequest;
+    using WriteRequest   = uv::WriteRequest;
     using RequestQueue   = uv::ex::RequestQueue;
 
     using Buffer = std::vector<char>;
@@ -87,10 +88,10 @@ public:
 
 // Tcp Event methods.
 public:
-    virtual void onConnect(Err code) override;
+    virtual void onConnect(ConnectRequest & request, Err code) override;
     virtual BufferInfo onAlloc(std::size_t suggested_size) override;
     virtual void onRead(Err code, char const * buffer, std::size_t size) override;
-    virtual void onWrite(Err code) override;
+    virtual void onWrite(WriteRequest & request, Err code) override;
     virtual void onClose() override;
 };
 

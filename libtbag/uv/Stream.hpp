@@ -87,11 +87,11 @@ public:
     std::size_t tryWrite(char const * buffer, std::size_t size, Err * result = nullptr);
 
 public:
-    virtual void onShutdown(Err code);
+    virtual void onShutdown(ShutdownRequest & request, Err code);
     virtual void onConnection(Err code);
     virtual BufferInfo onAlloc(std::size_t suggested_size);
     virtual void onRead(Err code, char const * buffer, std::size_t size);
-    virtual void onWrite(Err code);
+    virtual void onWrite(WriteRequest & request, Err code);
 };
 
 #ifndef _TBAG_UV_STREAM_EX
@@ -102,9 +102,8 @@ public:
     }
 #endif
 
-//_TBAG_UV_STREAM_EX(TCP, Tcp );
-_TBAG_UV_STREAM_EX(PIPE , Pipe);
-_TBAG_UV_STREAM_EX(TTY  , Tty );
+_TBAG_UV_STREAM_EX(PIPE, Pipe);
+_TBAG_UV_STREAM_EX(TTY , Tty );
 
 #undef _TBAG_UV_STREAM_EX
 

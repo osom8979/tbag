@@ -40,7 +40,7 @@ static void __global_uv_connect_cb__(uv_connect_t * request, int status)
         __tbag_error("__global_uv_connect_cb__() request owner is nullptr.");
         return;
     }
-    s->onConnect(status == 0 ? Err::SUCCESS : Err::FAILURE);
+    s->onConnect(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 // -------------------
@@ -177,7 +177,7 @@ bool Tcp::connect(ConnectRequest & request, sockaddr const * address)
 // Event methods.
 // --------------
 
-void Tcp::onConnect(Err code)
+void Tcp::onConnect(ConnectRequest & request, Err code)
 {
     __tbag_debug("Tcp::onConnect({}) called.", static_cast<int>(code));
 }
