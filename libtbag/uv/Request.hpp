@@ -23,6 +23,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uv {
 
+// Forward declaration.
+class Handle;
+
 /**
  * Request class prototype.
  *
@@ -34,9 +37,18 @@ class TBAG_API Request : public Native
 public:
     using Parent = Native;
 
+private:
+    Handle * _owner;
+
 public:
-    Request(UvRequsetType type);
+    Request(UvRequsetType type, Handle * owner = nullptr);
     virtual ~Request();
+
+public:
+    inline void setOwner(Handle * owner) TBAG_NOEXCEPT
+    { _owner = owner; }
+    inline Handle * getOwner() const TBAG_NOEXCEPT
+    { return _owner; }
 
 public:
     /**

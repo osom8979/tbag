@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uv {
 
-Request::Request(UvRequsetType type) : Native(static_cast<UvType>(type))
+Request::Request(UvRequsetType type, Handle * owner) : Native(static_cast<UvType>(type)), _owner(owner)
 {
     if (isRequest() == false) {
         __tbag_error("Request::Request({}) type is not request type.", static_cast<int>(type));

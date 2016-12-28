@@ -15,14 +15,24 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uv {
 
-// Global close event.
-static void __global_uv_handle_close__(uv_handle_t * native_handle)
+// --------------------
+// Global libuv events.
+// --------------------
+
+static void __global_uv_close_cb__(uv_handle_t * handle)
 {
-    Handle * handle = static_cast<Handle*>(native_handle->data);
-    if (handle != nullptr) {
-        handle->onClose();
+    Handle * h = static_cast<Handle*>(handle->data);
+    if (h == nullptr) {
+        __tbag_error("__global_uv_close_cb__() handle data is nullptr.");
+        return;
     }
+
+    h->onClose();
 }
+
+// ----------------------
+// Handle implementation.
+// ----------------------
 
 Handle::Handle(UvHandleType type) : Native(static_cast<UvType>(type))
 {
@@ -47,7 +57,7 @@ bool Handle::isInit() const TBAG_NOEXCEPT
 
 void Handle::close()
 {
-    ::uv_close(Parent::castNative<uv_handle_t>(), __global_uv_handle_close__);
+    ::uv_close(Parent::castNative<uv_handle_t>(), __global_uv_close_cb__);
 }
 
 bool Handle::isActive() const TBAG_NOEXCEPT
@@ -114,21 +124,25 @@ int Handle::getRecvBufferSize() const
 
 void Handle::setSendBufferSize(int size)
 {
-    if (size > 0) {
-        ::uv_send_buffer_size(Parent::castNative<uv_handle_t>(), &size);
+    if (size <= 0) {
+        __tbag_error("Handle::setSendBufferSize({}) size must be greater than zero.", size);
+        return;
     }
+    ::uv_send_buffer_size(Parent::castNative<uv_handle_t>(), &size);
 }
 
 void Handle::setRecvBufferSize(int size)
 {
-    if (size > 0) {
-        ::uv_recv_buffer_size(Parent::castNative<uv_handle_t>(), &size);
+    if (size <= 0) {
+        __tbag_error("Handle::setRecvBufferSize({}) size must be greater than zero.", size);
+        return;
     }
+    ::uv_recv_buffer_size(Parent::castNative<uv_handle_t>(), &size);
 }
 
 void Handle::onClose()
 {
-    __tbag_error("Handle::onClose({}) type is not handle type", getName());
+    __tbag_debug("Handle::onClose() called.");
 }
 
 } // namespace uv

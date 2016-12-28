@@ -112,6 +112,23 @@ TBAG_API bool isEtc    (UvType type);
  */
 TBAG_API bool isStream(UvType type);
 
+/**
+ * Buffer information structure.
+ *
+ * @author zer0
+ * @date   2016-12-27
+ */
+struct BufferInfo
+{
+    char * buffer;
+    std::size_t size;
+
+    // @formatter:off
+    BufferInfo(char * b, std::size_t s) : buffer(b), size(s) { /* EMPTY. */ }
+    BufferInfo() : BufferInfo(nullptr, 0) { /* EMPTY. */ }
+    // @formatter:on
+};
+
 // ---------------------
 // Native handle helper.
 // ---------------------
