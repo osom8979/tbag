@@ -17,7 +17,12 @@ if (USE_TBAG_DEBUGGING_LOGGER)
 endif ()
 
 ## FlatBuffers.
-tbag_modules__build_dep_flatc_cpp (libtbag_fbs "${CMAKE_SOURCE_DIR}/libtbag/network/sample/msg/chat.fbs")
+tbag_modules__build_dep_flatc_cpp (
+        libtbag_network_sample_msg_check_fbs
+        "${CMAKE_SOURCE_DIR}/libtbag/network/sample/msg/chat.fbs")
+tbag_modules__build_dep_flatc_cpp (
+        libtbag_network_packet_packer_fbs
+        "${CMAKE_SOURCE_DIR}/libtbag/network/packet/packer.fbs")
 
 ## Dependencies.
 tbag_modules__apply_dep_boost_include ()
