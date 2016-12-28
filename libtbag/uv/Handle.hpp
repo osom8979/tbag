@@ -58,7 +58,7 @@ public:
 
 public:
     inline char const * getName() const TBAG_NOEXCEPT
-    { return getUvNativeHandleName(getNative()); }
+    { return getUvNativeHandleName(get()); }
 
 public:
     bool isInit() const TBAG_NOEXCEPT;

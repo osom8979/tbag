@@ -140,17 +140,17 @@ Stream::~Stream()
 
 std::size_t Stream::getWriteQueueSize() const TBAG_NOEXCEPT
 {
-    return Parent::castNative<uv_stream_t>()->write_queue_size;
+    return Parent::cast<uv_stream_t>()->write_queue_size;
 }
 
 bool Stream::isReadable() const TBAG_NOEXCEPT
 {
-    return ::uv_is_readable(Parent::castNative<const uv_stream_t>()) == 1;
+    return ::uv_is_readable(Parent::cast<const uv_stream_t>()) == 1;
 }
 
 bool Stream::isWritable() const TBAG_NOEXCEPT
 {
-    return ::uv_is_writable(Parent::castNative<const uv_stream_t>()) == 1;
+    return ::uv_is_writable(Parent::cast<const uv_stream_t>()) == 1;
 }
 
 bool Stream::shutdown(ShutdownRequest & request)
@@ -162,8 +162,8 @@ bool Stream::shutdown(ShutdownRequest & request)
     // req should be an uninitialized shutdown request struct.
     // The cb is called after shutdown is complete.
 
-    int const CODE = ::uv_shutdown(request.castNative<uv_shutdown_t>(),
-                                   Parent::castNative<uv_stream_t>(),
+    int const CODE = ::uv_shutdown(request.cast<uv_shutdown_t>(),
+                                   Parent::cast<uv_stream_t>(),
                                    __global_uv_shutdown_cb__);
     if (CODE != 0) {
         __tbag_error("Stream::shutdown() error [{}] {}", CODE, getUvErrorName(CODE));
@@ -176,7 +176,7 @@ bool Stream::listen(int backlog)
 {
     // backlog indicates the number of connections the kernel might queue, same as listen(2).
     // When a new incoming connection is received the uv_connection_cb callback is called.
-    int const CODE = ::uv_listen(Parent::castNative<uv_stream_t>(), backlog, __global_uv_connection_cb__);
+    int const CODE = ::uv_listen(Parent::cast<uv_stream_t>(), backlog, __global_uv_connection_cb__);
     if (CODE != 0) {
         // EADDRINUSE: The other socket is using the same port.
         // EBADF: Bad socket descriptor
@@ -199,7 +199,7 @@ bool Stream::accept(Stream & client)
     // will complete successfully the first time. If you attempt to use it more than once,
     // it may fail. It is suggested to only call this function once per uv_connection_cb call.
 
-    int const CODE = ::uv_accept(Parent::castNative<uv_stream_t>(), client.castNative<uv_stream_t>());
+    int const CODE = ::uv_accept(Parent::cast<uv_stream_t>(), client.cast<uv_stream_t>());
     if (CODE != 0) {
         __tbag_error("Stream::accept() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -212,7 +212,7 @@ bool Stream::startRead()
     // The uv_read_cb callback will be made several times until
     // there is no more data to read or uv_read_stop() is called.
 
-    int const CODE = ::uv_read_start(Parent::castNative<uv_stream_t>(), __global_uv_alloc_cb__, __global_uv_read_cb__);
+    int const CODE = ::uv_read_start(Parent::cast<uv_stream_t>(), __global_uv_alloc_cb__, __global_uv_read_cb__);
     if (CODE != 0) {
         __tbag_error("Stream::startRead() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -225,7 +225,7 @@ bool Stream::stopRead()
     // The uv_read_cb callback will no longer be called.
     // This function is idempotent and may be safely called on a stopped stream.
 
-    int const CODE = ::uv_read_stop(Parent::castNative<uv_stream_t>());
+    int const CODE = ::uv_read_stop(Parent::cast<uv_stream_t>());
     if (CODE != 0) {
         __tbag_error("Stream::startRead() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -244,8 +244,8 @@ bool Stream::write(WriteRequest & request, BufferInfo * infos, std::size_t infos
         uv_infos[i].len  = (infos + i)->size;
     }
 
-    int const CODE = ::uv_write(request.castNative<uv_write_t>(),
-                                Parent::castNative<uv_stream_t>(),
+    int const CODE = ::uv_write(request.cast<uv_write_t>(),
+                                Parent::cast<uv_stream_t>(),
                                 &uv_infos[0],
                                 uv_infos.size(),
                                 __global_uv_write_cb__);
@@ -279,7 +279,7 @@ std::size_t Stream::tryWrite(BufferInfo * infos, std::size_t infos_size, Err * r
     }
 
     // @formatter:off
-    int const WRITE_RESULT = ::uv_try_write(Parent::castNative<uv_stream_t>(), &uv_infos[0], uv_infos.size());
+    int const WRITE_RESULT = ::uv_try_write(Parent::cast<uv_stream_t>(), &uv_infos[0], uv_infos.size());
     if (WRITE_RESULT <= 0) {
         if (result != nullptr) { *result = Err::FAILURE; }
         __tbag_error("Stream::tryWrite() error [{}] {}", WRITE_RESULT, getUvErrorName(WRITE_RESULT));

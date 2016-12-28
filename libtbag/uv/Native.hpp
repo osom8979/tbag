@@ -32,7 +32,7 @@ namespace uv {
  * @date   2016-12-07
  * @date   2016-12-27 (Move package: libtbag/util -> libtbag/uv)
  */
-class TBAG_API Native : protected container::Pointer<void>, public Noncopyable
+class TBAG_API Native : public container::Pointer<void>, public Noncopyable
 {
 public:
     using Parent = container::Pointer<void>;
@@ -51,12 +51,6 @@ public:
     { return TYPE; }
 
 public:
-    inline void * getNative() TBAG_NOEXCEPT
-    { return Parent::ptr; }
-    inline void const * getNative() const TBAG_NOEXCEPT
-    { return Parent::ptr; }
-
-public:
     inline void setUserData(void * data) TBAG_NOEXCEPT
     { _user = data; }
     inline void * getUserData() TBAG_NOEXCEPT
@@ -73,11 +67,6 @@ public:
     { return uv::isEtc(TYPE); }
     inline bool isStream() const TBAG_NOEXCEPT
     { return uv::isStream(TYPE); }
-
-public:
-    template <typename T>
-    inline T * castNative() const TBAG_NOEXCEPT
-    { return static_cast<T*>(Parent::ptr); }
 };
 
 } // namespace uv

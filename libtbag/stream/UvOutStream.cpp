@@ -32,17 +32,17 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvOutStream);
 
 UvOutStream::UvOutStream(UvHandleType type) : uv::Handle(type), _on_read_cb(nullptr)
 {
-    TBAG_UV_EVENT_DEFAULT_REGISTER(this->getNative(), this);
+    TBAG_UV_EVENT_DEFAULT_REGISTER(this->get(), this);
 }
 
 UvOutStream::~UvOutStream()
 {
-    TBAG_UV_EVENT_DEFAULT_UNREGISTER(this->getNative());
+    TBAG_UV_EVENT_DEFAULT_UNREGISTER(this->get());
 }
 
 Err UvOutStream::read()
 {
-    int const CODE = ::uv_read_start(this->castNative<uv_stream_t>(),
+    int const CODE = ::uv_read_start(this->cast<uv_stream_t>(),
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_ALLOC(onAlloc),
                                      TBAG_UV_EVENT_DEFAULT_CALLBACK_READ(onRead));
     if (CODE != 0) {

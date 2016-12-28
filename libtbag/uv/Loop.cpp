@@ -53,7 +53,7 @@ static void __global_close_all_uv_walk_cb__(uv_handle_t * handle, void * arg)
 Loop::Loop() : Native(UvType::LOOP)
 {
     // Initializes the given uv_loop_t structure.
-    int const CODE = ::uv_loop_init(Parent::castNative<uv_loop_t>());
+    int const CODE = ::uv_loop_init(Parent::cast<uv_loop_t>());
     if (CODE != 0) {
         __tbag_error("Loop::Loop() error [{}] {}", CODE, getUvErrorName(CODE));
         throw std::bad_alloc();
@@ -62,7 +62,7 @@ Loop::Loop() : Native(UvType::LOOP)
     // Space for user-defined arbitrary data. libuv does not use this field.
     // libuv does, however, initialize it to NULL in uv_loop_init(),
     // and it poisons the value (on debug builds) on uv_loop_close().
-    uv_loop_t * loop = Parent::castNative<uv_loop_t>();
+    uv_loop_t * loop = Parent::cast<uv_loop_t>();
     assert(loop != nullptr);
     loop->data = this; // IMPORTANT!!
 }
@@ -74,11 +74,11 @@ Loop::~Loop()
     // Call this function only when the loop has finished executing
     // and all open handles and requests have been closed, or it will return UV_EBUSY.
     // After this function returns, the user can free the memory allocated for the loop.
-    int code = ::uv_loop_close(Parent::castNative<uv_loop_t>());
+    int code = ::uv_loop_close(Parent::cast<uv_loop_t>());
     if (code == UV_EBUSY) {
         if (isAlive()) { stop(); }
         runCloseAllHandles();
-        code = ::uv_loop_close(Parent::castNative<uv_loop_t>()); // RE-TRY.
+        code = ::uv_loop_close(Parent::cast<uv_loop_t>()); // RE-TRY.
     }
 
     if (code != 0) {
@@ -88,7 +88,7 @@ Loop::~Loop()
 
 void Loop::runCloseAllHandles()
 {
-    ::uv_walk(Parent::castNative<uv_loop_t>(), __global_close_all_uv_walk_cb__, nullptr);
+    ::uv_walk(Parent::cast<uv_loop_t>(), __global_close_all_uv_walk_cb__, nullptr);
     run(RunMode::RUN_DEFAULT);
 }
 
@@ -108,7 +108,7 @@ bool Loop::run(RunMode mode)
     // - UV_RUN_ONCE: Poll for i/o once. Note that this function blocks if there are no pending callbacks. Returns zero when done (no active handles or requests left), or non-zero if more callbacks are expected (meaning you should run the event loop again sometime in the future).
     // - UV_RUN_NOWAIT: Poll for i/o once but don’t block if there are no pending callbacks. Returns zero if done (no active handles or requests left), or non-zero if more callbacks are expected (meaning you should run the event loop again sometime in the future).
 
-    int const CODE = ::uv_run(Parent::castNative<uv_loop_t>(), uv_mode);
+    int const CODE = ::uv_run(Parent::cast<uv_loop_t>(), uv_mode);
     if (CODE != 0) {
         __tbag_error("Loop::run() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -119,7 +119,7 @@ bool Loop::run(RunMode mode)
 bool Loop::isAlive() const
 {
     // Non-zero is alive.
-    return ::uv_loop_alive(Parent::castNative<uv_loop_t>()) != 0;
+    return ::uv_loop_alive(Parent::cast<uv_loop_t>()) != 0;
 }
 
 void Loop::stop()
@@ -127,12 +127,12 @@ void Loop::stop()
     // Stop the event loop, causing uv_run() to end as soon as possible.
     // This will happen not sooner than the next loop iteration.
     // If this function was called before blocking for i/o, the loop won’t block for i/o on this iteration.
-    ::uv_stop(Parent::castNative<uv_loop_t>());
+    ::uv_stop(Parent::cast<uv_loop_t>());
 }
 
 int Loop::getPollTimeoutMilliseconds() const
 {
-    return ::uv_backend_timeout(Parent::castNative<uv_loop_t>());
+    return ::uv_backend_timeout(Parent::cast<uv_loop_t>());
 }
 
 uint64_t Loop::getNowMilliseconds() const
@@ -143,7 +143,7 @@ uint64_t Loop::getNowMilliseconds() const
     //
     // The timestamp increases monotonically from some arbitrary point in time.
     // Don’t make assumptions about the starting point, you will only get disappointed.
-    return ::uv_now(Parent::castNative<uv_loop_t>());
+    return ::uv_now(Parent::cast<uv_loop_t>());
 }
 
 uint64_t Loop::getNowNanoseconds() const
@@ -168,12 +168,12 @@ void Loop::updateTime()
     // callbacks that block the event loop for longer periods of
     // time, where "longer" is somewhat subjective but probably
     // on the order of a millisecond or more.
-    ::uv_update_time(Parent::castNative<uv_loop_t>());
+    ::uv_update_time(Parent::cast<uv_loop_t>());
 }
 
 void Loop::walk(void * arg)
 {
-    ::uv_walk(Parent::castNative<uv_loop_t>(), __global_uv_walk_cb__, arg);
+    ::uv_walk(Parent::cast<uv_loop_t>(), __global_uv_walk_cb__, arg);
 }
 
 // --------------
@@ -199,12 +199,12 @@ void Loop::onWalk(void * native_handle, void * arg)
 
 void Loop::printAllHandles(FILE * stream)
 {
-    uv_print_all_handles(Parent::castNative<uv_loop_t>(), stream);
+    uv_print_all_handles(Parent::cast<uv_loop_t>(), stream);
 }
 
 void Loop::printActiveHandles(FILE * stream)
 {
-    uv_print_active_handles(Parent::castNative<uv_loop_t>(), stream);
+    uv_print_active_handles(Parent::cast<uv_loop_t>(), stream);
 }
 
 std::size_t Loop::getNativeSize() TBAG_NOEXCEPT

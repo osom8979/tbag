@@ -73,15 +73,15 @@ static bool connect(uv_connect_t * req, uv_tcp_t * tcp, sockaddr const * address
 
 static bool connect(Client::Handle & req, Tcp & tcp, sockaddr_in const * address)
 {
-    return connect(static_cast<uv_connect_t*>(req.getNative()),
-                   static_cast<uv_tcp_t*>(tcp.getNative()),
+    return connect(static_cast<uv_connect_t*>(req.get()),
+                   static_cast<uv_tcp_t*>(tcp.get()),
                    (sockaddr const *)address);
 }
 
 static bool connect(Client::Handle & req, Tcp & tcp, sockaddr_in6 const * address)
 {
-    return connect(static_cast<uv_connect_t*>(req.getNative()),
-                   static_cast<uv_tcp_t*>(tcp.getNative()),
+    return connect(static_cast<uv_connect_t*>(req.get()),
+                   static_cast<uv_tcp_t*>(tcp.get()),
                    (sockaddr const *)address);
 }
 
@@ -92,7 +92,7 @@ static void close(uv_tcp_t * tcp)
 
 static void close(Tcp & tcp)
 {
-    close(static_cast<uv_tcp_t*>(tcp.getNative()));
+    close(static_cast<uv_tcp_t*>(tcp.get()));
 }
 
 static bool read(uv_tcp_t * tcp)
@@ -109,7 +109,7 @@ static bool read(uv_tcp_t * tcp)
 
 static bool read(Tcp & tcp)
 {
-    return read(static_cast<uv_tcp_t*>(tcp.getNative()));
+    return read(static_cast<uv_tcp_t*>(tcp.get()));
 }
 
 static bool write(uv_write_t * handle, uv_tcp_t * tcp, char const * buffer, std::size_t size)
@@ -133,8 +133,8 @@ static bool write(Client::Handle & handle, Tcp & tcp, char const * buffer, std::
         return false;
     }
 
-    return write(static_cast<uv_write_t*>(handle.getNative()),
-                 static_cast<uv_tcp_t*>(tcp.getNative()),
+    return write(static_cast<uv_write_t*>(handle.get()),
+                 static_cast<uv_tcp_t*>(tcp.get()),
                  buffer, size);
 }
 
@@ -156,7 +156,7 @@ static bool try_write(uv_tcp_t * tcp, char const * buffer, std::size_t length)
 
 static bool try_write(Tcp & tcp, char const * buffer, std::size_t size)
 {
-    return try_write(static_cast<uv_tcp_t*>(tcp.getNative()), buffer, size);
+    return try_write(static_cast<uv_tcp_t*>(tcp.get()), buffer, size);
 }
 
 } // namespace client_details
@@ -172,9 +172,9 @@ Client::Client(EventCallback * callback)
         , _callback(callback)
 {
     using namespace client_details;
-    TBAG_UV_EVENT_DEFAULT_REGISTER(_tcp.getNative(), this);
-    TBAG_UV_EVENT_DEFAULT_REGISTER(_connect.getNative(), this);
-    TBAG_UV_EVENT_DEFAULT_REGISTER(_write.getNative(), this);
+    TBAG_UV_EVENT_DEFAULT_REGISTER(_tcp.get(), this);
+    TBAG_UV_EVENT_DEFAULT_REGISTER(_connect.get(), this);
+    TBAG_UV_EVENT_DEFAULT_REGISTER(_write.get(), this);
 }
 
 Client::Client() : Client(nullptr)
@@ -185,9 +185,9 @@ Client::Client() : Client(nullptr)
 Client::~Client()
 {
     using namespace client_details;
-    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_write.getNative());
-    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_connect.getNative());
-    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_tcp.getNative());
+    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_write.get());
+    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_connect.get());
+    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_tcp.get());
 }
 
 bool Client::run(std::string const & address, int port)

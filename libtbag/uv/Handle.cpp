@@ -39,7 +39,7 @@ Handle::Handle(UvHandleType type) : Native(static_cast<UvType>(type))
         __tbag_error("Handle::Handle({}) type is not handle type", static_cast<int>(type));
         throw std::bad_alloc();
     }
-    uv_handle_t * native_handle_type = Parent::castNative<uv_handle_t>();
+    uv_handle_t * native_handle_type = Parent::cast<uv_handle_t>();
     assert(native_handle_type != nullptr);
     native_handle_type->data = this; // IMPORTANT!!
 }
@@ -51,12 +51,12 @@ Handle::~Handle()
 
 bool Handle::isInit() const TBAG_NOEXCEPT
 {
-    return Parent::castNative<uv_handle_t>()->type != UV_UNKNOWN_HANDLE /* 0 */ ? true : false;
+    return Parent::cast<uv_handle_t>()->type != UV_UNKNOWN_HANDLE /* 0 */ ? true : false;
 }
 
 void Handle::close()
 {
-    ::uv_close(Parent::castNative<uv_handle_t>(), __global_uv_close_cb__);
+    ::uv_close(Parent::cast<uv_handle_t>(), __global_uv_close_cb__);
 }
 
 bool Handle::isActive() const TBAG_NOEXCEPT
@@ -75,34 +75,34 @@ bool Handle::isActive() const TBAG_NOEXCEPT
      * then it’s active from the moment that function is called.
      * Likewise, uv_foo_stop() deactivates the handle again.
      */
-    return ::uv_is_active(Parent::castNative<uv_handle_t>());
+    return ::uv_is_active(Parent::cast<uv_handle_t>());
 }
 
 bool Handle::isClosing() const TBAG_NOEXCEPT
 {
-    int const ENABLE = ::uv_is_closing(this->castNative<uv_handle_t>());
+    int const ENABLE = ::uv_is_closing(this->cast<uv_handle_t>());
     return (ENABLE == 0 ? false : true);
 }
 
 void Handle::ref() TBAG_NOEXCEPT
 {
-    ::uv_ref(Parent::castNative<uv_handle_t>());
+    ::uv_ref(Parent::cast<uv_handle_t>());
 }
 
 void Handle::unref() TBAG_NOEXCEPT
 {
-    ::uv_unref(Parent::castNative<uv_handle_t>());
+    ::uv_unref(Parent::cast<uv_handle_t>());
 }
 
 bool Handle::hasRef() const TBAG_NOEXCEPT
 {
     // Returns non-zero if the handle referenced, zero otherwise.
-    return ::uv_has_ref(Parent::castNative<uv_handle_t>()) != 0;
+    return ::uv_has_ref(Parent::cast<uv_handle_t>()) != 0;
 }
 
 std::size_t Handle::getNativeSize() const TBAG_NOEXCEPT
 {
-    return ::uv_handle_size(Parent::castNative<uv_handle_t>()->type);
+    return ::uv_handle_size(Parent::cast<uv_handle_t>()->type);
 }
 
 // ----------------------------
@@ -112,13 +112,13 @@ std::size_t Handle::getNativeSize() const TBAG_NOEXCEPT
 int Handle::getSendBufferSize() const
 {
     int OBTAIN_VALUE_OF_FLAG = 0;
-    return ::uv_send_buffer_size(Parent::castNative<uv_handle_t>(), &OBTAIN_VALUE_OF_FLAG);
+    return ::uv_send_buffer_size(Parent::cast<uv_handle_t>(), &OBTAIN_VALUE_OF_FLAG);
 }
 
 int Handle::getRecvBufferSize() const
 {
     int OBTAIN_VALUE_OF_FLAG = 0;
-    return ::uv_recv_buffer_size(Parent::castNative<uv_handle_t>(), &OBTAIN_VALUE_OF_FLAG);
+    return ::uv_recv_buffer_size(Parent::cast<uv_handle_t>(), &OBTAIN_VALUE_OF_FLAG);
 }
 
 void Handle::setSendBufferSize(int size)
@@ -127,7 +127,7 @@ void Handle::setSendBufferSize(int size)
         __tbag_error("Handle::setSendBufferSize({}) size must be greater than zero.", size);
         return;
     }
-    ::uv_send_buffer_size(Parent::castNative<uv_handle_t>(), &size);
+    ::uv_send_buffer_size(Parent::cast<uv_handle_t>(), &size);
 }
 
 void Handle::setRecvBufferSize(int size)
@@ -136,7 +136,7 @@ void Handle::setRecvBufferSize(int size)
         __tbag_error("Handle::setRecvBufferSize({}) size must be greater than zero.", size);
         return;
     }
-    ::uv_recv_buffer_size(Parent::castNative<uv_handle_t>(), &size);
+    ::uv_recv_buffer_size(Parent::cast<uv_handle_t>(), &size);
 }
 
 // --------------

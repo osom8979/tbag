@@ -21,7 +21,7 @@ Request::Request(UvRequsetType type, Handle * owner) : Native(static_cast<UvType
         __tbag_error("Request::Request({}) type is not request type.", static_cast<int>(type));
         throw std::bad_alloc();
     }
-    Parent::castNative<uv_req_t>()->data = this; // IMPORTANT!!
+    Parent::cast<uv_req_t>()->data = this; // IMPORTANT!!
 }
 
 Request::~Request()
@@ -43,7 +43,7 @@ bool Request::cancel()
     //  - A uv_fs_t request has its req->result field set to UV_ECANCELED.
     //  - A uv_work_t, uv_getaddrinfo_t or c:type:uv_getnameinfo_t request
     //    has its callback invoked with status == UV_ECANCELED.
-    int const CODE = ::uv_cancel(Parent::castNative<uv_req_t>());
+    int const CODE = ::uv_cancel(Parent::cast<uv_req_t>());
     if (CODE != 0) {
         __tbag_error("Request::cancel() error [{}].", CODE);
         return false;
@@ -53,7 +53,7 @@ bool Request::cancel()
 
 std::size_t Request::getNativeSize() const TBAG_NOEXCEPT
 {
-    return ::uv_req_size(Parent::castNative<uv_req_t>()->type);
+    return ::uv_req_size(Parent::cast<uv_req_t>()->type);
 }
 
 } // namespace uv

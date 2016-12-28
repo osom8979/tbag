@@ -93,7 +93,7 @@ Tcp::~Tcp()
 
 bool Tcp::init(libtbag::loop::UvEventLoop & loop)
 {
-    int const CODE = ::uv_tcp_init(static_cast<uv_loop_t*>(loop.getNative()), this->castNative<uv_tcp_t>());
+    int const CODE = ::uv_tcp_init(static_cast<uv_loop_t*>(loop.getNative()), this->cast<uv_tcp_t>());
     if (CODE != 0) {
         __tbag_error("Tcp::init() error [{}]", CODE);
         return false;
@@ -103,12 +103,12 @@ bool Tcp::init(libtbag::loop::UvEventLoop & loop)
 
 std::string Tcp::getPeerName() const
 {
-    return tcp_details::getPeerName(this->castNative<uv_tcp_t>());
+    return tcp_details::getPeerName(this->cast<uv_tcp_t>());
 }
 
 std::string Tcp::getSocketName() const
 {
-    return tcp_details::getSocketName(this->castNative<uv_tcp_t>());
+    return tcp_details::getSocketName(this->cast<uv_tcp_t>());
 }
 
 bool Tcp::isIpv4(std::string const & address)

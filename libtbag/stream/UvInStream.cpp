@@ -31,12 +31,12 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvInStream);
 
 UvInStream::UvInStream(UvHandleType type) : uv::Handle(type), _write(uv::UvType::WRITE), _on_write_cb(nullptr)
 {
-    TBAG_UV_EVENT_DEFAULT_REGISTER(_write.getNative(), this);
+    TBAG_UV_EVENT_DEFAULT_REGISTER(_write.get(), this);
 }
 
 UvInStream::~UvInStream()
 {
-    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_write.getNative());
+    TBAG_UV_EVENT_DEFAULT_UNREGISTER(_write.get());
 }
 
 Err UvInStream::write(char const * buffer, std::size_t length)
@@ -45,7 +45,7 @@ Err UvInStream::write(char const * buffer, std::size_t length)
     info.base = const_cast<char*>(buffer);
     info.len  = length;
 
-    int const CODE = ::uv_write(_write.castNative<uv_write_t>(), this->castNative<uv_stream_t>(),
+    int const CODE = ::uv_write(_write.cast<uv_write_t>(), this->cast<uv_stream_t>(),
                                 &info, 1, TBAG_UV_EVENT_DEFAULT_CALLBACK_WRITE(onWrite));
     if (CODE != 0) {
         __tbag_error("UvInStream::write() error[{}] {}", CODE, uv::getUvErrorName(CODE));

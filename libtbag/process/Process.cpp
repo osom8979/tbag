@@ -299,10 +299,10 @@ void Process::updateWithStdios()
     if (_param.in_buffer.empty()) {
         _process->atStdios()[STANDARD_INPUT_FD].flags = UV_IGNORE;
     } else {
-        _process->setStdio(_loop.castNative<uv_loop_t>(), _in.castNative<uv_pipe_t>(), STANDARD_INPUT_FD, _param.in);
+        _process->setStdio(_loop.castNative<uv_loop_t>(), _in.cast<uv_pipe_t>(), STANDARD_INPUT_FD, _param.in);
     }
-    _process->setStdio(_loop.castNative<uv_loop_t>(), _out.castNative<uv_pipe_t>(), STANDARD_OUTPUT_FD, _param.out);
-    _process->setStdio(_loop.castNative<uv_loop_t>(), _err.castNative<uv_pipe_t>(), STANDARD_ERROR_FD, _param.err);
+    _process->setStdio(_loop.castNative<uv_loop_t>(), _out.cast<uv_pipe_t>(), STANDARD_OUTPUT_FD, _param.out);
+    _process->setStdio(_loop.castNative<uv_loop_t>(), _err.cast<uv_pipe_t>(), STANDARD_ERROR_FD, _param.err);
 }
 
 Err Process::spawn()
@@ -348,7 +348,7 @@ void Process::close()
 void Process::close(uv::Handle & handle)
 {
     if (handle.isInit() && handle.isClosing() == false) {
-        ::uv_close(handle.castNative<uv_handle_t>(), TBAG_UV_EVENT_DEFAULT_CALLBACK_CLOSE(onClose));
+        ::uv_close(handle.cast<uv_handle_t>(), TBAG_UV_EVENT_DEFAULT_CALLBACK_CLOSE(onClose));
     }
 }
 

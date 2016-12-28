@@ -49,7 +49,7 @@ static void __global_uv_connect_cb__(uv_connect_t * request, int status)
 Tcp::Tcp(Loop & loop) : Stream(UvHandleType::TCP)
 {
     // Initialize the handle. No socket is created as of yet.
-    int const CODE = ::uv_tcp_init(loop.castNative<uv_loop_t>(), Parent::castNative<uv_tcp_t>());
+    int const CODE = ::uv_tcp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tcp_t>());
     if (CODE != 0) {
         __tbag_error("Tcp::Tcp() error [{}] {}", CODE, getUvErrorName(CODE));
         throw std::bad_alloc();
@@ -63,7 +63,7 @@ Tcp::~Tcp()
 
 bool Tcp::setNodelay(bool enable)
 {
-    int const CODE = ::uv_tcp_nodelay(Parent::castNative<uv_tcp_t>(), enable ? 1 : 0);
+    int const CODE = ::uv_tcp_nodelay(Parent::cast<uv_tcp_t>(), enable ? 1 : 0);
     if (CODE != 0) {
         __tbag_error("Tcp::setNodelay() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -74,7 +74,7 @@ bool Tcp::setNodelay(bool enable)
 bool Tcp::keepAlive(bool enable, unsigned int delay)
 {
     // delay is the initial delay in seconds, ignored when enable is zero.
-    int const CODE = ::uv_tcp_keepalive(Parent::castNative<uv_tcp_t>(), enable ? 1 : 0, delay);
+    int const CODE = ::uv_tcp_keepalive(Parent::cast<uv_tcp_t>(), enable ? 1 : 0, delay);
     if (CODE != 0) {
         __tbag_error("Tcp::keepAlive() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -92,7 +92,7 @@ bool Tcp::acceptsSimultaneous(int enable)
     // connections (which is why it is enabled by default) but may lead to uneven
     // load distribution in multi-process setups.
 
-    int const CODE = ::uv_tcp_simultaneous_accepts(Parent::castNative<uv_tcp_t>(), enable ? 1 : 0);
+    int const CODE = ::uv_tcp_simultaneous_accepts(Parent::cast<uv_tcp_t>(), enable ? 1 : 0);
     if (CODE != 0) {
         __tbag_error("Tcp::acceptsSimultaneous() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -111,7 +111,7 @@ bool Tcp::bind(sockaddr const * address, unsigned int flags)
     // flags can contain UV_TCP_IPV6ONLY, in which case dual-stack support
     // is disabled and only IPv6 is used.
 
-    int const CODE = ::uv_tcp_bind(Parent::castNative<uv_tcp_t>(), address, flags);
+    int const CODE = ::uv_tcp_bind(Parent::cast<uv_tcp_t>(), address, flags);
     if (CODE != 0) {
         __tbag_error("Tcp::bind() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -127,7 +127,7 @@ std::string Tcp::getSockName()
     // addr must point to a valid and big enough chunk of memory,
     // struct sockaddr_storage is recommended for IPv4 and IPv6 support.
 
-    int const CODE = ::uv_tcp_getsockname(Parent::castNative<uv_tcp_t>(), &address, &name_length);
+    int const CODE = ::uv_tcp_getsockname(Parent::cast<uv_tcp_t>(), &address, &name_length);
     if (CODE != 0) {
         __tbag_error("Tcp::getSockName() error [{}] {}", CODE, getUvErrorName(CODE));
         return std::string();
@@ -145,7 +145,7 @@ std::string Tcp::getPeerName()
     // addr must point to a valid and big enough chunk of memory,
     // struct sockaddr_storage is recommended for IPv4 and IPv6 support.
 
-    int const CODE = ::uv_tcp_getpeername(Parent::castNative<uv_tcp_t>(), &address, &name_length);
+    int const CODE = ::uv_tcp_getpeername(Parent::cast<uv_tcp_t>(), &address, &name_length);
     if (CODE != 0) {
         __tbag_error("Tcp::getPeerName() error [{}] {}", CODE, getUvErrorName(CODE));
         return std::string();
@@ -165,8 +165,8 @@ bool Tcp::connect(ConnectRequest & request, sockaddr const * address)
     // The callback is made when the connection has been established
     // or when a connection error happened.
 
-    int const CODE = ::uv_tcp_connect(request.castNative<uv_connect_t>(),
-                                      Parent::castNative<uv_tcp_t>(),
+    int const CODE = ::uv_tcp_connect(request.cast<uv_connect_t>(),
+                                      Parent::cast<uv_tcp_t>(),
                                       address,
                                       __global_uv_connect_cb__);
     if (CODE != 0) {

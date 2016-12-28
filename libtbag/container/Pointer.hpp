@@ -75,7 +75,7 @@ struct Pointer
     { return ptr; }
 
     template <typename CastType>
-    inline CastType * cast() TBAG_NOEXCEPT
+    inline CastType * cast() const TBAG_NOEXCEPT
     { return static_cast<CastType*>(ptr); }
 
     inline Type * get() TBAG_NOEXCEPT
