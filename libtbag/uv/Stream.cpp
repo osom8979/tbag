@@ -233,7 +233,7 @@ bool Stream::stopRead()
     return true;
 }
 
-bool Stream::write(WriteRequest & request, BufferInfo * infos, std::size_t infos_size)
+bool Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
 {
     request.setOwner(this); // IMPORTANT!!
 
@@ -258,13 +258,13 @@ bool Stream::write(WriteRequest & request, BufferInfo * infos, std::size_t infos
 
 bool Stream::write(WriteRequest & request, char const * buffer, std::size_t size)
 {
-    BufferInfo info;
+    binf info;
     info.buffer = const_cast<char*>(buffer);
     info.size   = size;
     return write(request, &info, 1U);
 }
 
-std::size_t Stream::tryWrite(BufferInfo * infos, std::size_t infos_size, Err * result)
+std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, Err * result)
 {
     // Same as uv_write(), but won’t queue a write request if it can’t be completed immediately.
     // Will return either:
@@ -292,7 +292,7 @@ std::size_t Stream::tryWrite(BufferInfo * infos, std::size_t infos_size, Err * r
 
 std::size_t Stream::tryWrite(char const * buffer, std::size_t size, Err * result)
 {
-    BufferInfo info;
+    binf info;
     info.buffer = const_cast<char*>(buffer);
     info.size   = size;
     return tryWrite(&info, 1U, result);
@@ -312,10 +312,10 @@ void Stream::onConnection(Err code)
     __tbag_debug("Stream::onConnection({}) called.", static_cast<int>(code));
 }
 
-BufferInfo Stream::onAlloc(std::size_t suggested_size)
+binf Stream::onAlloc(std::size_t suggested_size)
 {
     __tbag_debug("Stream::onAlloc() called (suggested_size:{}).", suggested_size);
-    return BufferInfo((char*)::malloc(suggested_size), suggested_size);
+    return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
 void Stream::onRead(Err code, char const * buffer, std::size_t size)

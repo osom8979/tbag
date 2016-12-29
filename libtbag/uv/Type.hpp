@@ -135,6 +135,9 @@ struct BufferInfo
     // @formatter:on
 };
 
+/** Short name of BufferInfo type. */
+typedef BufferInfo binf;
+
 // ---------------------
 // Native handle helper.
 // ---------------------

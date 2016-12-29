@@ -74,7 +74,7 @@ public:
     bool stopRead();
 
     /** Write data to stream. Buffers are written in order. */
-    bool write(WriteRequest & request, BufferInfo * infos, std::size_t infos_size);
+    bool write(WriteRequest & request, binf * infos, std::size_t infos_size);
     bool write(WriteRequest & request, char const * buffer, std::size_t size);
 
     /**
@@ -83,13 +83,13 @@ public:
      * @return
      *  Number of bytes written.
      */
-    std::size_t tryWrite(BufferInfo * infos, std::size_t infos_size, Err * result = nullptr);
+    std::size_t tryWrite(binf * infos, std::size_t infos_size, Err * result = nullptr);
     std::size_t tryWrite(char const * buffer, std::size_t size, Err * result = nullptr);
 
 public:
     virtual void onShutdown(ShutdownRequest & request, Err code);
     virtual void onConnection(Err code);
-    virtual BufferInfo onAlloc(std::size_t suggested_size);
+    virtual binf onAlloc(std::size_t suggested_size);
     virtual void onRead(Err code, char const * buffer, std::size_t size);
     virtual void onWrite(WriteRequest & request, Err code);
 };
