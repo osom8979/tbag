@@ -84,10 +84,34 @@ public:
     { return tcp.tryWrite(infos, infos_size, result); }
     inline std::size_t write(Tcp & tcp, char const * buffer, std::size_t size, Err * result)
     { return tcp.tryWrite(buffer, size, result); }
+
+    inline std::size_t write(binf * infos, std::size_t infos_size, Err * result = nullptr)
+    { return write(_tcp, infos, infos_size, result); }
+    inline std::size_t write(char const * buffer, std::size_t size, Err * result = nullptr)
+    { return write(_tcp, buffer, size, result); }
     // @formatter:on
 
 public:
     virtual bool run(std::string const & ip, int port) = 0;
+};
+
+/**
+ * TcpLoop extension class prototype.
+ *
+ * @author zer0
+ * @date   2016-12-29
+ */
+class TBAG_API TcpLoopEx : public TcpLoop
+{
+public:
+    Buffer _read_buffer;
+
+public:
+    TcpLoopEx();
+    virtual ~TcpLoopEx();
+
+public:
+    virtual binf onAlloc(std::size_t suggested_size) override;
 };
 
 } // namespace network

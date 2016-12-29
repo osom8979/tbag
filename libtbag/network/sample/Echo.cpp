@@ -18,6 +18,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace sample  {
 
+static char const * const TEST_ECHO_MESSAGE = "__TEST_ECHO_MESSAGE__";
+
 // ---------------------------
 // Echo server implementation.
 // ---------------------------
@@ -100,7 +102,7 @@ void EchoServer::onWrite(ClientKey to, Code code)
 // Echo client implementation.
 // ---------------------------
 
-EchoClient::EchoClient(Loop & loop): socket::Client(loop, this)
+EchoClient::EchoClient()
 {
     std::cout.setf(std::ios_base::boolalpha);
 }
@@ -110,24 +112,17 @@ EchoClient::~EchoClient()
     // EMPTY.
 }
 
-void EchoClient::onConnect(Err code)
+void EchoClient::onConnect(ConnectRequest & request, Err code)
 {
     if (code != Err::SUCCESS) {
         std::cout << "EchoClient::onConnect() Status error: " << static_cast<int>(code) << ".\n";
         return;
     }
 
-    std::string msg;
-    std::cout << "MESSAGE: ";
-    std::cin >> msg;
-
     startRead();
-    autoWrite(&msg[0], msg.size());
-}
 
-void EchoClient::onClose()
-{
-    std::cout << "END.\n";
+    std::string msg = TEST_ECHO_MESSAGE;
+    write(&msg[0], msg.size());
 }
 
 void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
@@ -145,12 +140,17 @@ void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
     close();
 }
 
-void EchoClient::onWrite(Err code)
+void EchoClient::onWrite(WriteRequest & request, Err code)
 {
     if (code != Err::SUCCESS) {
         std::cout << "EchoClient::onWrite() Failure.\n";
         close();
     }
+}
+
+void EchoClient::onClose()
+{
+    std::cout << "END.\n";
 }
 
 // -------------
@@ -168,12 +168,8 @@ int runEchoServer(std::string const & ip, int port)
 
 int runEchoClient(std::string const & ip, int port)
 {
-    uv::Loop loop;
-    EchoClient client(loop);
-    if (client.init(ip, port) && loop.run()) {
-        return EXIT_SUCCESS;
-    }
-    return EXIT_FAILURE;
+    EchoClient client;
+    return client.run(ip, port);
 }
 
 } // namespace sample

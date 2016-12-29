@@ -65,6 +65,8 @@ private:
     void runCloseAllHandles();
 
 public:
+    bool close();
+
     /** This function runs the event loop. */
     bool run(RunMode mode = RunMode::RUN_DEFAULT);
 

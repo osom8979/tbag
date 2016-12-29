@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/socket/Server.hpp>
-#include <libtbag/network/socket/Client.hpp>
+#include <libtbag/network/TcpClient.hpp>
 
 #include <map>
 
@@ -70,17 +70,17 @@ public:
  * @author zer0
  * @date   2016-12-23
  */
-class TBAG_API ChatClient : public socket::Client, public socket::Client::EventCallback
+class TBAG_API ChatClient : public TcpClient
 {
 public:
-    ChatClient(Loop & loop);
+    ChatClient();
     virtual ~ChatClient();
 
 public:
-    virtual void onConnect(Err code) override;
-    virtual void onClose() override;
+    virtual void onConnect(ConnectRequest & request, Err code) override;
     virtual void onRead(Err code, char const * buffer, std::size_t size) override;
-    virtual void onWrite(Err code) override;
+    virtual void onWrite(WriteRequest & request, Err code) override;
+    virtual void onClose() override;
 };
 
 TBAG_API int runChatServer(std::string const & ip, int port);

@@ -74,15 +74,12 @@ Loop::~Loop()
     // Call this function only when the loop has finished executing
     // and all open handles and requests have been closed, or it will return UV_EBUSY.
     // After this function returns, the user can free the memory allocated for the loop.
-    int code = ::uv_loop_close(Parent::cast<uv_loop_t>());
-    if (code == UV_EBUSY) {
-        if (isAlive()) { stop(); }
-        runCloseAllHandles();
-        code = ::uv_loop_close(Parent::cast<uv_loop_t>()); // RE-TRY.
-    }
-
-    if (code != 0) {
-        __tbag_error("Loop::~Loop() error [{}] {}", code, getUvErrorName(code));
+    if (close() == false) {
+        if (isAlive()) {
+            stop();
+        }
+        // runCloseAllHandles();
+        close(); // RE-TRY.
     }
 }
 
@@ -90,6 +87,25 @@ void Loop::runCloseAllHandles()
 {
     ::uv_walk(Parent::cast<uv_loop_t>(), __global_close_all_uv_walk_cb__, nullptr);
     run(RunMode::RUN_DEFAULT);
+}
+
+bool Loop::close()
+{
+    // Releases all internal loop resources.
+    //
+    // Call this function only when the loop has finished executing
+    // and all open handles and requests have been closed, or it will return UV_EBUSY.
+    // After this function returns, the user can free the memory allocated for the loop.
+    int const CODE = ::uv_loop_close(Parent::cast<uv_loop_t>());
+    if (CODE != 0) {
+        if (CODE == UV_EBUSY) {
+            __tbag_error("Loop::close() loop is busy.");
+        } else {
+            __tbag_error("Loop::close() error [{}] {}", CODE, getUvErrorName(CODE));
+        }
+        return false;
+    }
+    return true;
 }
 
 bool Loop::run(RunMode mode)

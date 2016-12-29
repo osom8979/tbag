@@ -119,7 +119,7 @@ void ChatServer::onWrite(ClientKey to, Code code)
 // Chat client implementation.
 // ---------------------------
 
-ChatClient::ChatClient(Loop & loop): socket::Client(loop, this)
+ChatClient::ChatClient()
 {
 }
 
@@ -127,18 +127,13 @@ ChatClient::~ChatClient()
 {
 }
 
-void ChatClient::onConnect(Err code)
+void ChatClient::onConnect(ConnectRequest & request, Err code)
 {
     if (code != Err::SUCCESS) {
         std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
         return;
     }
     startRead();
-}
-
-void ChatClient::onClose()
-{
-    std::cout << "CLOSE.\n";
 }
 
 void ChatClient::onRead(Err code, char const * buffer, std::size_t size)
@@ -165,12 +160,17 @@ void ChatClient::onRead(Err code, char const * buffer, std::size_t size)
               << std::endl;
 }
 
-void ChatClient::onWrite(Err code)
+void ChatClient::onWrite(WriteRequest & request, Err code)
 {
     if (code != Err::SUCCESS) {
         std::cout << "SEND FAILURE.\n";
         close();
     }
+}
+
+void ChatClient::onClose()
+{
+    std::cout << "CLOSE.\n";
 }
 
 // -------------
@@ -199,8 +199,7 @@ int runChatClient(std::string const & ip, int port)
     std::mutex mutex;
     std::atomic_bool is_exit(false);
 
-    uv::Loop loop;
-    ChatClient client(loop);
+    ChatClient client;
     std::thread t([&](){
         while (true) {
             std::string msg;
@@ -211,19 +210,15 @@ int runChatClient(std::string const & ip, int port)
                 flatbuffers::FlatBufferBuilder builder;
                 auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(name), builder.CreateString(msg));
                 builder.Finish(packet);
-                client.tryWrite((char const *)builder.GetBufferPointer(), builder.GetSize());
+                client.write((char const *)builder.GetBufferPointer(), builder.GetSize());
             } else {
                 break;
             }
         }
     });
+    bool result = client.run(ip, port);
 
-    bool result = false;
-    if (client.init(ip, port) && loop.run()) {
-        result = true;
-    }
     is_exit = true;
-
     t.join();
 
     return (result ? EXIT_SUCCESS : EXIT_FAILURE);

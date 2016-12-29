@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/socket/Server.hpp>
-#include <libtbag/network/socket/Client.hpp>
+#include <libtbag/network/TcpClient.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -58,17 +58,17 @@ public:
  * @date   2016-11-07 (Refactoring this class)
  * @date   2016-12-23 (Move project: tester -> libtbag)
  */
-class TBAG_API EchoClient : public socket::Client, public socket::Client::EventCallback
+class TBAG_API EchoClient : public TcpClient
 {
 public:
-    EchoClient(Loop & loop);
+    EchoClient();
     virtual ~EchoClient();
 
 public:
-    virtual void onConnect(Err code) override;
-    virtual void onClose() override;
+    virtual void onConnect(ConnectRequest & request, Err code) override;
     virtual void onRead(Err code, char const * buffer, std::size_t size) override;
-    virtual void onWrite(Err code) override;
+    virtual void onWrite(WriteRequest & request, Err code) override;
+    virtual void onClose() override;
 };
 
 TBAG_API int runEchoServer(std::string const & ip, int port);

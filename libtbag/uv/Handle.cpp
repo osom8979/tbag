@@ -46,7 +46,9 @@ Handle::Handle(UvHandleType type) : Native(static_cast<UvType>(type))
 
 Handle::~Handle()
 {
-    // EMPTY.
+    //if (isInit() && isClosing() == false) {
+    //    close();
+    //}
 }
 
 bool Handle::isInit() const TBAG_NOEXCEPT

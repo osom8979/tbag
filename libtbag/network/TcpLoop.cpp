@@ -14,6 +14,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
+// -----------------------
+// TcpLoop implementation.
+// -----------------------
+
 TcpLoop::TcpLoop() : _loop(), _tcp(_loop, this)
 {
     // EMPTY.
@@ -22,6 +26,33 @@ TcpLoop::TcpLoop() : _loop(), _tcp(_loop, this)
 TcpLoop::~TcpLoop()
 {
     // EMPTY.
+}
+
+// -------------------------
+// TcpLoopEx implementation.
+// -------------------------
+
+TcpLoopEx::TcpLoopEx()
+{
+    // EMPTY.
+}
+
+TcpLoopEx::~TcpLoopEx()
+{
+    // EMPTY.
+}
+
+TcpLoopEx::binf TcpLoopEx::onAlloc(std::size_t suggested_size)
+{
+    // Realloc with read buffer.
+    if (_read_buffer.size() < suggested_size) {
+        _read_buffer.resize(suggested_size);
+    }
+
+    binf info;
+    info.buffer = &_read_buffer[0];
+    info.size   =  _read_buffer.size();
+    return info;
 }
 
 } // namespace network
