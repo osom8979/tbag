@@ -43,7 +43,7 @@ public:
         // Event of Stream.
         virtual void onShutdown(ShutdownRequest & request, Err code)         { /* EMPTY. */ }
         virtual void onConnection(Err code)                                  { /* EMPTY. */ }
-        virtual binf onAlloc(std::size_t suggested_size)                     { /* EMPTY. */ }
+        virtual binf onAlloc(std::size_t suggested_size)                     { return binf(); }
         virtual void onRead(Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
         virtual void onWrite(WriteRequest & request, Err code)               { /* EMPTY. */ }
 
