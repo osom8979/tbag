@@ -17,7 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uv {
 namespace ex {
 
-RequestQueue::RequestQueue(UvRequestType type, Handle * owner) : _type(type), _owner(owner)
+RequestQueue::RequestQueue(UvRequestType type) : _type(type)
 {
     // EMPTY.
 }
@@ -42,12 +42,12 @@ RequestQueue::WeakRequest RequestQueue::find(Request * request) const
     return WeakRequest(find_itr->second);
 }
 
-RequestQueue::WeakRequest RequestQueue::create()
+RequestQueue::WeakRequest RequestQueue::create(Handle * owner)
 {
     Guard guard(_mutex);
 
     if (_prepare.empty()) {
-        Request * request = new Request(_type, _owner);
+        Request * request = new Request(_type, owner);
         auto insert_itr = _active.insert(ActiveMap::value_type(RequestKey(request), SharedRequest(request)));
         if (insert_itr.second == false) {
             __tbag_error("RequestQueue::create() insert request error.");
@@ -59,6 +59,8 @@ RequestQueue::WeakRequest RequestQueue::create()
     // Find prepare queue.
     auto prepare = _prepare.front();
     _prepare.pop();
+    prepare->setOwner(owner);
+    _active.insert(ActiveMap::value_type(RequestKey(prepare.get()), prepare));
     return WeakRequest(prepare);
 }
 

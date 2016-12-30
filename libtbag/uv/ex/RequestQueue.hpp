@@ -57,7 +57,6 @@ public:
 
 private:
     UvRequestType _type;
-    Handle * _owner;
 
 private:
     PrepareQueue _prepare;
@@ -67,24 +66,24 @@ private:
     mutable Mutex _mutex;
 
 public:
-    RequestQueue(UvRequestType type, Handle * owner);
+    RequestQueue(UvRequestType type);
     virtual ~RequestQueue();
 
 public:
     WeakRequest find(Request * request) const;
 
 public:
-    WeakRequest create();
+    WeakRequest create(Handle * owner);
     void release(Request * request);
 };
 
 #ifndef _TBAG_UV_REQUEST_QUEUE_EX
-#define _TBAG_UV_REQUEST_QUEUE_EX(type, name)           \
-    struct name##Queue : public RequestQueue {          \
-        name##Queue(Handle * owner)                     \
-            : RequestQueue(UvRequestType::type, owner)  \
-        { /* EMPTY. */ }                                \
-        ~name##Queue() { /* EMPTY. */ }                 \
+#define _TBAG_UV_REQUEST_QUEUE_EX(type, name)       \
+    struct name##Queue : public RequestQueue {      \
+        name##Queue()                               \
+                : RequestQueue(UvRequestType::type) \
+        { /* EMPTY. */ }                            \
+        ~name##Queue() { /* EMPTY. */ }             \
     }
 #endif
 
