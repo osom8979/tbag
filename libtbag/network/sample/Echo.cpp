@@ -24,7 +24,7 @@ static char const * const TEST_ECHO_MESSAGE = "__TEST_ECHO_MESSAGE__";
 // Echo server implementation.
 // ---------------------------
 
-EchoServer::EchoServer(int count) : socket::Server(this), _count(count)
+EchoServer::EchoServer(int count) : _count(count)
 {
     std::cout.setf(std::ios_base::boolalpha);
 }
@@ -34,26 +34,24 @@ EchoServer::~EchoServer()
     // EMPTY.
 }
 
-bool EchoServer::onConnection(ClientKey key, int status)
+void EchoServer::onConnection(Err code)
 {
-    if (status != 0) {
-        std::cout << "EchoServer::onConnection() Status error: " << status << ".\n";
-        return false;
+    if (code != Err::SUCCESS) {
+        std::cout << "EchoServer::onConnection() Status error: " << static_cast<int>(code) << ".\n";
+        return;
     }
 
-    ClientValue client = this->getClient(key);
-    if (static_cast<bool>(client) == false) {
+    auto client = createAcceptedClient();
+    if (auto shared = client.lock()) {
+        std::cout << "CLIENT CONNECTION: " << shared->getSockName() << std::endl;
+
+        if (shared->startRead() == false) {
+            std::cout << "Start read error.\n";
+            eraseClient(*shared);
+        }
+    } else {
         std::cout << "Not found client key error.\n";
-        return false;
     }
-
-    std::cout << "CLIENT CONNECTION: " << client->getSocketName() << std::endl;
-    if (this->read(key) == false) {
-        std::cout << "Start read error.\n";
-        return false;
-    }
-
-    return true; // ACCEPT OK!
 }
 
 void EchoServer::onClose()
@@ -61,34 +59,33 @@ void EchoServer::onClose()
     std::cout << "SERVER END.\n";
 }
 
-void EchoServer::onCloseClient(ClientKey key)
+void EchoServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)
 {
-    std::cout << "CLIENT " << key.get() << "END.\n";
-}
+    if (code == Err::SUCCESS) {
 
-void EchoServer::onRead(ClientKey from, Code code, char * buffer, std::size_t size)
-{
-    if (code == Code::SUCCESS) {
         std::string msg;
         msg.assign(buffer, buffer + size);
         std::cout << "Read message: " << msg << std::endl;
-        this->write(from, &msg[0], msg.size());
-    } else if (code == Code::END_OF_FILE) {
+
+        client.tryWrite(&msg[0], msg.size());
+
+    } else if (code == Err::END_OF_FILE) {
         std::cout << "EchoServer::onRead() End of file.\n";
-        this->closeClient(from);
+        client.close();
+
     } else {
         std::cout << "EchoServer::onRead() Failure.\n";
-        this->closeClient(from);
+        client.close();
     }
 }
 
-void EchoServer::onWrite(ClientKey to, Code code)
+void EchoServer::onClientWrite(Client & client, WriteRequest & request, Err code)
 {
-    if (code != Code::SUCCESS) {
+    if (code != Err::SUCCESS) {
         std::cout << "EchoServer::onWrite() Failure.\n";
     }
 
-    this->closeClient(to);
+    client.close();
 
     --_count;
     std::cout << "ECHO COUNT: " << _count << "\n";
@@ -96,6 +93,11 @@ void EchoServer::onWrite(ClientKey to, Code code)
     if (_count <= 0) {
         this->close();
     }
+}
+
+void EchoServer::onClientClose(Client & client)
+{
+    std::cout << "CLIENT " << (void*)&client << "END.\n";
 }
 
 // ---------------------------
@@ -159,17 +161,12 @@ void EchoClient::onClose()
 
 int runEchoServer(std::string const & ip, int port)
 {
-    EchoServer server;
-    if (server.run(ip, port)) {
-        return EXIT_SUCCESS;
-    }
-    return EXIT_FAILURE;
+    return EchoServer().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 int runEchoClient(std::string const & ip, int port)
 {
-    EchoClient client;
-    return client.run(ip, port);
+    return EchoClient().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 } // namespace sample

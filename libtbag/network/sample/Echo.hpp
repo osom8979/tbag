@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/socket/Server.hpp>
 #include <libtbag/network/TcpClient.hpp>
+#include <libtbag/network/TcpServer.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,7 +33,7 @@ namespace sample  {
  * @date   2016-11-07 (Refactoring this class)
  * @date   2016-12-23 (Move project: tester -> libtbag)
  */
-class TBAG_API EchoServer : public socket::Server, public socket::Server::EventCallback
+class TBAG_API EchoServer : public TcpServer
 {
 private:
     int _count; ///< Max echo count.
@@ -43,11 +43,13 @@ public:
     virtual ~EchoServer();
 
 public:
-    virtual bool onConnection(ClientKey key, int status) override;
+    virtual void onConnection(Err code) override;
     virtual void onClose() override;
-    virtual void onCloseClient(ClientKey key) override;
-    virtual void onRead(ClientKey from, Code code, char * buffer, std::size_t size) override;
-    virtual void onWrite(ClientKey to, Code code) override;
+
+public:
+    virtual void onClientRead(Client & client, Err code, char const * buffer, std::size_t size) override;
+    virtual void onClientWrite(Client & client, WriteRequest & request, Err code) override;
+    virtual void onClientClose(Client & client) override;
 };
 
 /**

@@ -62,8 +62,7 @@ public:
     /** Bind the handle to an address and port. */
     bool bind(sockaddr const * address, unsigned int flags = 0);
 
-    /** Get the current address to which the handle is bound. */
-    std::string getSockName();
+    /** Get the current address to which the handle is bound. */ std::string getSockName();
 
     /** Get the address of the peer connected to the handle. */
     std::string getPeerName();
@@ -77,7 +76,7 @@ public:
 
 // Utilities.
 public:
-    static std::string getIpName(sockaddr const * address);
+    static std::string getIpName(sockaddr const * address); // Don't use this method [IP RESULT BUG].
     static std::string getIpName(sockaddr_in const * address);
     static std::string getIpName(sockaddr_in6 const * address);
 

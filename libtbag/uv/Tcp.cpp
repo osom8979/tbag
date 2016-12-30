@@ -133,7 +133,13 @@ std::string Tcp::getSockName()
         __tbag_error("Tcp::getSockName() error [{}] {}", CODE, getUvErrorName(CODE));
         return std::string();
     }
-    return getIpName(&address);
+
+    if (address.sa_family == AF_INET) {
+        return getIpName((sockaddr_in const *)&address);
+    } else if (address.sa_family == AF_INET6) {
+        return getIpName((sockaddr_in6 const *)&address);
+    }
+    return std::string();
 }
 
 std::string Tcp::getPeerName()
@@ -149,7 +155,13 @@ std::string Tcp::getPeerName()
         __tbag_error("Tcp::getPeerName() error [{}] {}", CODE, getUvErrorName(CODE));
         return std::string();
     }
-    return getIpName(&address);
+
+    if (address.sa_family == AF_INET) {
+        return getIpName((sockaddr_in const *)&address);
+    } else if (address.sa_family == AF_INET6) {
+        return getIpName((sockaddr_in6 const *)&address);
+    }
+    return std::string();
 }
 
 bool Tcp::connect(ConnectRequest & request, sockaddr const * address)
