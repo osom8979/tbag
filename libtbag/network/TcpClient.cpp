@@ -44,7 +44,7 @@ bool TcpClient::initIpv4(std::string const & ip, int port)
 
 bool TcpClient::run(std::string const & ip, int port)
 {
-    if (Tcp::isIpv4(ip) && initIpv4(ip, port)) {
+    if (uv::Tcp::isIpv4(ip) && initIpv4(ip, port)) {
         return _loop.run();
     }
     return false;

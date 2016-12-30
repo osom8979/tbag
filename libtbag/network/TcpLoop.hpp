@@ -45,9 +45,10 @@ class TBAG_API TcpLoop : public uv::ex::CallableTcp::Callback
 public:
     using binf = uv::binf;
     using Loop = uv::Loop;
-    using Tcp  = uv::ex::CallableTcp;
 
-    using Callback = Tcp::Callback;
+    using CallableTcp = uv::ex::CallableTcp;
+    using Callback    = CallableTcp::Callback;
+    using SharedTcp   = std::shared_ptr<CallableTcp>;
 
     using ShutdownRequest = uv::ShutdownRequest;
     using ConnectRequest  = uv::ConnectRequest;
@@ -57,8 +58,8 @@ public:
     using Buffer = std::vector<char>;
 
 public:
-    Loop _loop;
-    Tcp  _tcp;
+    Loop      _loop;
+    SharedTcp _tcp;
 
 public:
     TcpLoop();
@@ -66,29 +67,29 @@ public:
 
 public:
     // @formatter:off
-    inline Loop & atLoop() TBAG_NOEXCEPT { return _loop; }
-    inline Tcp  & atTcp () TBAG_NOEXCEPT { return _tcp;  }
+    inline Loop        & atLoop() TBAG_NOEXCEPT { return _loop; }
+    inline CallableTcp & atTcp () TBAG_NOEXCEPT { return *_tcp;  }
     // @formatter:on
 
 public:
-    inline void close() { return _tcp.close(); }
+    inline void close() { return _tcp->close(); }
 
     // @formatter:off
-    inline bool startRead() { return _tcp.startRead(); }
-    inline bool stopRead () { return _tcp.stopRead (); }
+    inline bool startRead() { return _tcp->startRead(); }
+    inline bool stopRead () { return _tcp->stopRead (); }
     // @formatter:on
 
 public:
     // @formatter:off
-    inline std::size_t write(Tcp & tcp, binf * infos, std::size_t infos_size, Err * result)
+    inline std::size_t write(CallableTcp & tcp, binf * infos, std::size_t infos_size, Err * result)
     { return tcp.tryWrite(infos, infos_size, result); }
-    inline std::size_t write(Tcp & tcp, char const * buffer, std::size_t size, Err * result)
+    inline std::size_t write(CallableTcp & tcp, char const * buffer, std::size_t size, Err * result)
     { return tcp.tryWrite(buffer, size, result); }
 
     inline std::size_t write(binf * infos, std::size_t infos_size, Err * result = nullptr)
-    { return write(_tcp, infos, infos_size, result); }
+    { return write(*_tcp, infos, infos_size, result); }
     inline std::size_t write(char const * buffer, std::size_t size, Err * result = nullptr)
-    { return write(_tcp, buffer, size, result); }
+    { return write(*_tcp, buffer, size, result); }
     // @formatter:on
 
 public:

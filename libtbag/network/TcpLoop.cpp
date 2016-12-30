@@ -8,6 +8,8 @@
 #include <libtbag/network/TcpLoop.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cassert>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -18,9 +20,14 @@ namespace network {
 // TcpLoop implementation.
 // -----------------------
 
-TcpLoop::TcpLoop() : _loop(), _tcp(_loop, this)
+TcpLoop::TcpLoop() : _loop(), _tcp()
 {
-    // EMPTY.
+    auto weak = _loop.insertChildHandle(new uv::ex::CallableTcp(_loop, this));
+    if (weak.expired()) {
+        std::bad_alloc();
+    }
+    _tcp = std::static_pointer_cast<CallableTcp, uv::Handle>(weak.lock());
+    assert(static_cast<bool>(_tcp));
 }
 
 TcpLoop::~TcpLoop()
