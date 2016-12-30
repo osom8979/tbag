@@ -67,8 +67,7 @@ void EchoServer::onClientRead(Client & client, Err code, char const * buffer, st
         msg.assign(buffer, buffer + size);
         std::cout << "Read message: " << msg << std::endl;
 
-        client.tryWrite(&msg[0], msg.size());
-
+        client.write(obtainWriteRequest(client), &msg[0], msg.size());
     } else if (code == Err::END_OF_FILE) {
         std::cout << "EchoServer::onRead() End of file.\n";
         client.close();

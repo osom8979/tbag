@@ -19,7 +19,6 @@
 #include <libtbag/container/Pointer.hpp>
 
 #include <unordered_map>
-#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,14 +35,18 @@ namespace network {
 class TBAG_API TcpServer : public TcpLoop
 {
 public:
-    using CallableTcp = uv::ex::CallableTcp;
+    using Parent = TcpLoop;
 
-    using Buffer = std::vector<char>;
-    using binf   = uv::binf;
+    using CallableTcp  = Parent::CallableTcp;
+    using WriteRequest = Parent::WriteRequest;
+    using WriteQueue   = Parent::WriteQueue;
+
+    using Buffer = Parent::Buffer;
+    using binf   = Parent::binf;
 
 public:
     /** Client class prototype. */
-    struct Client : public CallableTcp, public CallableTcp::Callback
+    struct Client : public CallableTcp, public CallableTcp::Callback, public std::enable_shared_from_this<Client>
     {
         TcpServer & server;
         Buffer read_buffer;
@@ -56,6 +59,7 @@ public:
         virtual void onWrite(WriteRequest & request, Err code) override;
         virtual void onClose() override;
     };
+    friend struct Client;
 
 public:
     using SharedClient = std::shared_ptr<Client>;
@@ -64,7 +68,8 @@ public:
     using ClientMap    = std::unordered_map<ClientKey, SharedClient, ClientKey::Hash, ClientKey::EqualTo>;
 
 private:
-    ClientMap _clients;
+    ClientMap  _clients;
+    WriteQueue _writers;
 
 public:
     TcpServer();
@@ -77,6 +82,9 @@ protected:
 
 protected:
     WeakClient createAcceptedClient();
+
+public:
+    WriteRequest & obtainWriteRequest(Client & tcp);
 
 public:
     bool initIpv4(std::string const & ip, int port);

@@ -81,6 +81,11 @@ public:
 
 public:
     // @formatter:off
+    inline bool asyncWrite(CallableTcp & tcp, WriteRequest & req, binf * infos, std::size_t infos_size)
+    { return tcp.write(req, infos, infos_size); }
+    inline bool asyncWrite(CallableTcp & tcp, WriteRequest & req, char const * buffer, std::size_t size)
+    { return tcp.write(req, buffer, size); }
+
     inline std::size_t write(CallableTcp & tcp, binf * infos, std::size_t infos_size, Err * result)
     { return tcp.tryWrite(infos, infos_size, result); }
     inline std::size_t write(CallableTcp & tcp, char const * buffer, std::size_t size, Err * result)

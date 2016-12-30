@@ -26,12 +26,15 @@ void TcpServer::Client::onRead(Err code, char const * buffer, std::size_t size)
 
 void TcpServer::Client::onWrite(WriteRequest & request, Err code)
 {
+    server._writers.release(&request);
     server.onClientWrite(*this, request, code);
 }
 
 void TcpServer::Client::onClose()
 {
     server.onClientClose(*this);
+    auto const SAFETY_SHARED = shared_from_this();
+    server.eraseClient(*this);
 }
 
 // -------------------------
@@ -70,6 +73,13 @@ TcpServer::WeakClient TcpServer::createAcceptedClient()
         return WeakClient(client);
     }
     return WeakClient();
+}
+
+TcpServer::WriteRequest & TcpServer::obtainWriteRequest(Client & tcp)
+{
+    auto weak = _writers.create(&tcp);
+    assert(weak.expired() == false);
+    return *static_cast<WriteRequest*>(weak.lock().get());
 }
 
 bool TcpServer::initIpv4(std::string const & ip, int port)
@@ -130,7 +140,6 @@ void TcpServer::onClientWrite(Client & client, WriteRequest & request, Err code)
 
 void TcpServer::onClientClose(Client & client)
 {
-    eraseClient(client);
     __tbag_debug("TcpServer::onClientClose({}) erase client (size:{})", (void*)&client, _clients.size());
 }
 
