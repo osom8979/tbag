@@ -56,6 +56,9 @@ public:
     Handle(UvHandleType type);
     virtual ~Handle();
 
+private:
+    void checkedClose();
+
 public:
     inline char const * getName() const TBAG_NOEXCEPT
     { return getUvNativeHandleName(get()); }
