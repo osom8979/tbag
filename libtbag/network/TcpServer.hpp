@@ -54,6 +54,9 @@ public:
         Client(TcpServer & s) : CallableTcp(s.atLoop(), this), server(s) { /* EMPTY. */ }
         ~Client() { /* EMPTY. */ }
 
+        bool asyncWrite(binf * infos, std::size_t infos_size);
+        bool asyncWrite(char const * buffer, std::size_t size);
+
         virtual binf onAlloc(std::size_t suggested_size) override;
         virtual void onRead(Err code, char const * buffer, std::size_t size) override;
         virtual void onWrite(WriteRequest & request, Err code) override;

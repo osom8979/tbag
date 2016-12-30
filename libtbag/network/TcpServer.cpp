@@ -14,6 +14,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
+bool TcpServer::Client::asyncWrite(binf * infos, std::size_t infos_size)
+{
+    return write(server.obtainWriteRequest(*this), infos, infos_size);
+}
+
+bool TcpServer::Client::asyncWrite(char const * buffer, std::size_t size)
+{
+    return write(server.obtainWriteRequest(*this), buffer, size);
+}
+
 TcpServer::binf TcpServer::Client::onAlloc(std::size_t suggested_size)
 {
     return server.onClientAlloc(*this, suggested_size);
