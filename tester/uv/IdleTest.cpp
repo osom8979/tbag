@@ -28,8 +28,8 @@ struct IdleTest : public Idle
     virtual void onIdle() override
     {
         g_is_idle = true;
-        this->stop();
-        this->close();
+        stop();
+        //close(); // Don't use this method in tester.
     }
 
     virtual void onClose() override
@@ -40,10 +40,10 @@ struct IdleTest : public Idle
 
 TEST(IdleTest, Default)
 {
-    Loop loop;
     {
-        IdleTest idle(loop);
-        idle.start();
+        Loop loop;
+        auto weak = loop.insertChildHandle(new IdleTest(loop));
+        static_cast<IdleTest*>(weak.lock().get())->start();
         loop.run();
     }
 
