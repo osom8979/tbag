@@ -60,7 +60,7 @@ public:
     bool acceptsSimultaneous(int enable = true);
 
     /** Bind the handle to an address and port. */
-    bool bind(sockaddr const * address, unsigned int flags);
+    bool bind(sockaddr const * address, unsigned int flags = 0);
 
     /** Get the current address to which the handle is bound. */
     std::string getSockName();
