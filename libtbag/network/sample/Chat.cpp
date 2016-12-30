@@ -7,10 +7,11 @@
 
 #include <libtbag/network/sample/Chat.hpp>
 #include <libtbag/log/Log.hpp>
-
 #include <libtbag/network/sample/msg/chat_generated.h>
 
 #include <cstdlib>
+#include <cassert>
+
 #include <iostream>
 #include <thread>
 
@@ -25,7 +26,7 @@ namespace sample  {
 // Chat server implementation.
 // ---------------------------
 
-ChatServer::ChatServer() : socket::Server(this), _id_count(0)
+ChatServer::ChatServer() : _id_count(0)
 {
 }
 
@@ -33,32 +34,32 @@ ChatServer::~ChatServer()
 {
 }
 
-bool ChatServer::onConnection(ClientKey key, int status)
+void ChatServer::onConnection(Err code)
 {
-    if (status != 0) {
-        std::cout << "STATUS ERROR: " << status << std::endl;
-        return false;
+    if (code != Err::SUCCESS) {
+        std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
+        return;
     }
 
-    ClientValue client = this->getClient(key);
-    if (static_cast<bool>(client) == false) {
-        std::cout << "NOT FOUND CLIENT KEY ERROR.\n";
-        return false;
+    auto client = createAcceptedClient();
+    if (auto shared = client.lock()) {
+        std::cout << "CLIENT CONNECTION: " << shared->getSockName() << std::endl;
+
+        UserInfo * user = new UserInfo;
+        user->id = _id_count++;
+        user->ip = shared->getSockName();
+        user->name = std::to_string(user->id);
+        shared->setUserData(user);
+
+        std::cout << "JOIN: " << user->name << "(" << user->ip << ")\n";
+
+        if (shared->startRead() == false) {
+            std::cout << "Start read error.\n";
+            eraseClient(*shared);
+        }
+    } else {
+        std::cout << "Not found client key error.\n";
     }
-
-    if (this->read(key) == false) {
-        std::cout << "READ ERROR.\n";
-        return false;
-    }
-
-    UserInfo user;
-    user.id = _id_count++;
-    user.ip = client->getSocketName();
-    user.name = std::to_string(user.id);
-
-    _users.insert(Users::value_type(key, user));
-    std::cout << "JOIN: " << user.name << "(" << user.ip << ")\n";
-    return true; // ACCEPT OK!
 }
 
 void ChatServer::onClose()
@@ -66,32 +67,14 @@ void ChatServer::onClose()
     std::cout << "CLOSE THIS SERVER.\n";
 }
 
-void ChatServer::onCloseClient(ClientKey key)
+void ChatServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)
 {
-    auto find_itr = _users.find(key);
-    if (find_itr == _users.end()) {
-        std::cout << "UNKNOWN KEY ERROR: " << key.get() << std::endl;
+    if (code == Err::END_OF_FILE) {
+        client.close();
         return;
     }
-
-    std::cout << "OUT: " << find_itr->second.name << "(" << find_itr->second.ip << ")\n";
-    _users.erase(find_itr);
-}
-
-void ChatServer::onRead(ClientKey from, Code code, char * buffer, std::size_t size)
-{
-    if (code == Code::END_OF_FILE) {
-        this->closeClient(from);
-        return;
-    }
-    if (code == Code::FAILURE) {
-        std::cout << "UNKNOWN READ ERROR: " << from.get() << std::endl;
-        return;
-    }
-
-    auto find_itr = _users.find(from);
-    if (find_itr == _users.end()) {
-        std::cout << "UNKNOWN READ/KEY ERROR: " << from.get() << std::endl;
+    if (code == Err::FAILURE) {
+        std::cout << "UNKNOWN READ ERROR: " << (void*)&client << std::endl;
         return;
     }
 
@@ -100,19 +83,33 @@ void ChatServer::onRead(ClientKey from, Code code, char * buffer, std::size_t si
               << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
               << msg->msg()->c_str() << std::endl;
 
-    for (auto itr = _users.begin(); itr != _users.end(); ++itr) {
-        if (itr != find_itr) {
-            this->write(itr->first, buffer, size);
+    for (auto & cursor : _clients) {
+        if (cursor.second.get() != &client) {
+            cursor.second->asyncWrite(buffer, size);
         }
     }
 }
 
-void ChatServer::onWrite(ClientKey to, Code code)
+void ChatServer::onClientWrite(Client & client, WriteRequest & request, Err code)
 {
-    if (code != Code::SUCCESS) {
+    if (code != Err::SUCCESS) {
         std::cout << "SEND FAILURE.\n";
-        this->closeClient(to);
+        client.close();
     }
+}
+
+void ChatServer::onClientClose(Client & client)
+{
+    UserInfo * user = static_cast<UserInfo*>(client.getUserData());
+    if (user == nullptr) {
+        std::cout << "Not found user info.\n";
+        return;
+    }
+
+    assert(user != nullptr);
+    std::cout << "OUT: " << user->name << "(" << user->ip << ")\n";
+    delete user;
+    client.setUserData(nullptr);
 }
 
 // ---------------------------

@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/socket/Server.hpp>
 #include <libtbag/network/TcpClient.hpp>
+#include <libtbag/network/TcpServer.hpp>
 
 #include <map>
 
@@ -27,15 +27,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace sample  {
 
-// TODO: Forward declaration.
-
 /**
  * Chatting server class prototype.
  *
  * @author zer0
  * @date   2016-12-23
  */
-class TBAG_API ChatServer : public socket::Server, public socket::Server::EventCallback
+class TBAG_API ChatServer : public TcpServer
 {
 public:
     struct UserInfo
@@ -45,23 +43,21 @@ public:
         std::string name;
     };
 
-public:
-    using Users = std::map<ClientKey, UserInfo>;
-
 private:
     int _id_count;
-    Users _users;
 
 public:
     ChatServer();
     virtual ~ChatServer();
 
 public:
-    virtual bool onConnection(ClientKey key, int status) override;
+    virtual void onConnection(Err code) override;
     virtual void onClose() override;
-    virtual void onCloseClient(ClientKey key) override;
-    virtual void onRead(ClientKey from, Code code, char * buffer, std::size_t size) override;
-    virtual void onWrite(ClientKey to, Code code) override;
+
+public:
+    virtual void onClientRead(Client & client, Err code, char const * buffer, std::size_t size) override;
+    virtual void onClientWrite(Client & client, WriteRequest & request, Err code) override;
+    virtual void onClientClose(Client & client) override;
 };
 
 /**

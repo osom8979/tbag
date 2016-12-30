@@ -70,7 +70,7 @@ public:
     using ClientKey    = container::Pointer<Client>;
     using ClientMap    = std::unordered_map<ClientKey, SharedClient, ClientKey::Hash, ClientKey::EqualTo>;
 
-private:
+protected:
     ClientMap  _clients;
     WriteQueue _writers;
 
