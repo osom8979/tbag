@@ -40,10 +40,12 @@ Handle * createHandle(Loop & loop, UvHandleType type)
     //case UvHandleType::FS_EVENT: return new FsEvent(loop);
     //case UvHandleType::FS_POLL : return new FsPoll (loop);
     //case UvHandleType::SIGNAL  : return new Signal (loop);
+    default:
+        __tbag_error("createHandle() Unsupported handle type [{}].", static_cast<int>(type));
+        break;
     }
     // @formatter:on
 
-    __tbag_error("createHandle() Unsupported handle type [{}].", static_cast<int>(type));
     return nullptr;
 }
 

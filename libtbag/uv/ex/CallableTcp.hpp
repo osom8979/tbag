@@ -65,6 +65,10 @@ public:
     // @formatter:on
 
 public:
+    inline void setCallback(Callback * callback) TBAG_NOEXCEPT
+    { _cb = callback; }
+
+public:
     // @formatter:off
     virtual void onConnect(ConnectRequest & request, Err code) override
     { if (_cb != nullptr) { _cb->onConnect(request, code); } }
