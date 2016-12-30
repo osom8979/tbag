@@ -8,6 +8,7 @@
 #include <libtbag/uv/Loop.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uv/Handle.hpp>
+#include <libtbag/uv/ex/HandleFactory.hpp>
 
 #include <cassert>
 #include <uv.h>
@@ -69,24 +70,55 @@ Loop::Loop() : Native(UvType::LOOP)
 
 Loop::~Loop()
 {
-    // Releases all internal loop resources.
-    //
-    // Call this function only when the loop has finished executing
-    // and all open handles and requests have been closed, or it will return UV_EBUSY.
-    // After this function returns, the user can free the memory allocated for the loop.
     if (close() == false) {
+        runCloseAllHandles();
+
         if (isAlive()) {
             stop();
         }
-        // runCloseAllHandles();
-        close(); // RE-TRY.
+
+        // RE-TRY.
+        if (close() == false) {
+            __tbag_error("Loop::~Loop() error.");
+        }
     }
 }
 
 void Loop::runCloseAllHandles()
 {
+#if 0 // Don't use walk callback.
     ::uv_walk(Parent::cast<uv_loop_t>(), __global_close_all_uv_walk_cb__, nullptr);
-    run(RunMode::RUN_DEFAULT);
+#else
+    for (auto & cursor : _handles) {
+        if (static_cast<bool>(cursor) && cursor->isInit() && cursor->isClosing() == false) {
+            cursor->close();
+        }
+    }
+#endif
+    if (isRunning() == false) {
+        run(RunMode::RUN_DEFAULT);
+    }
+}
+
+Loop::WeakHandle Loop::createChildHandle(UvHandleType type)
+{
+    return insertChildHandle(ex::createHandle(*this, type));
+}
+
+Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
+{
+    if (handle != nullptr) {
+        auto itr = _handles.insert(SharedHandle(handle));
+        if (itr.second) {
+            return WeakHandle(*(itr.first));
+        }
+    }
+    return WeakHandle();
+}
+
+void Loop::eraseChildHandle(WeakHandle handle)
+{
+    _handles.erase(handle.lock());
 }
 
 bool Loop::close()
@@ -96,16 +128,7 @@ bool Loop::close()
     // Call this function only when the loop has finished executing
     // and all open handles and requests have been closed, or it will return UV_EBUSY.
     // After this function returns, the user can free the memory allocated for the loop.
-    int const CODE = ::uv_loop_close(Parent::cast<uv_loop_t>());
-    if (CODE != 0) {
-        if (CODE == UV_EBUSY) {
-            __tbag_error("Loop::close() loop is busy.");
-        } else {
-            __tbag_error("Loop::close() error [{}] {}", CODE, getUvErrorName(CODE));
-        }
-        return false;
-    }
-    return true;
+    return ::uv_loop_close(Parent::cast<uv_loop_t>()) == 0;
 }
 
 bool Loop::run(RunMode mode)
@@ -121,6 +144,7 @@ bool Loop::run(RunMode mode)
 
     // Update owner thread id.
     _owner_thread_id = std::this_thread::get_id();
+    _running = true;
 
     // It will act differently depending on the specified mode:
     // - UV_RUN_DEFAULT: Runs the event loop until there are no more active and referenced handles or requests. Returns non-zero if uv_stop() was called and there are still active handles or requests. Returns zero in all other cases.
@@ -128,6 +152,8 @@ bool Loop::run(RunMode mode)
     // - UV_RUN_NOWAIT: Poll for i/o once but don’t block if there are no pending callbacks. Returns zero if done (no active handles or requests left), or non-zero if more callbacks are expected (meaning you should run the event loop again sometime in the future).
 
     int const CODE = ::uv_run(Parent::cast<uv_loop_t>(), uv_mode);
+    _running = false;
+
     if (CODE != 0) {
         __tbag_error("Loop::run() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;

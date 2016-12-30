@@ -18,6 +18,10 @@
 #include <libtbag/uv/Native.hpp>
 
 #include <cstdint>
+
+#include <memory>
+#include <atomic>
+#include <set>
 #include <thread>
 
 // -------------------
@@ -25,6 +29,9 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace uv {
+
+// Forward declaration.
+struct Handle;
 
 /**
  * Loop class prototype.
@@ -41,6 +48,17 @@ class TBAG_API Loop : public Native
 {
 public:
     using Parent = Native;
+    using SharedHandle = std::shared_ptr<Handle>;
+    using WeakHandle   = std::weak_ptr<Handle>;
+    using HandleSet    = std::set<SharedHandle>;
+
+    using ThreadId     = std::thread::id;
+    using AtomicBool   = std::atomic_bool;
+
+    using iterator               = typename HandleSet::iterator;
+    using const_iterator         = typename HandleSet::const_iterator;
+    using reverse_iterator       = typename HandleSet::reverse_iterator;
+    using const_reverse_iterator = typename HandleSet::const_reverse_iterator;
 
 public:
     enum class RunMode
@@ -51,7 +69,11 @@ public:
     };
 
 private:
-    std::thread::id _owner_thread_id;
+    ThreadId   _owner_thread_id;
+    AtomicBool _running;
+
+private:
+    HandleSet  _handles;
 
 public:
     Loop();
@@ -60,9 +82,48 @@ public:
 public:
     inline std::thread::id getOwnerThreadId() const TBAG_NOEXCEPT
     { return _owner_thread_id; }
+    inline bool isRunning() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_running.load()))
+    { return _running.load(); }
 
 private:
+    /** @warning Don't use this method of user level developers. */
     void runCloseAllHandles();
+
+public:
+    WeakHandle createChildHandle(UvHandleType type);
+    WeakHandle insertChildHandle(Handle * handle);
+    void eraseChildHandle(WeakHandle handle);
+
+// By-pass methods.
+public:
+
+#ifndef TBAG_UV_LOOP_BY_PASS_METHOD
+#define TBAG_UV_LOOP_BY_PASS_METHOD(retval, name, qualifier) \
+    inline retval name() qualifier TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_handles.name())) { return _handles.name(); }
+#define EMPTY_QUALIFIER
+#endif
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator, begin, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator, begin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator,   end, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,   end, const)
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator, rbegin, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, rbegin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator,   rend, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   rend, const)
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,  cbegin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,    cend, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, crbegin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   crend, const)
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(bool, empty, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, size, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, max_size, const)
+
+#undef EMPTY_QUALIFIER
+#undef TBAG_UV_LOOP_BY_PASS_METHOD
 
 public:
     bool close();
