@@ -151,7 +151,6 @@ private:
     void runCloseAllHandles();
 
 public:
-    WeakHandle createChildHandle(UvHandleType type);
     WeakHandle insertChildHandle(Handle   * handle);
     bool       eraseChildHandle (WeakHandle handle);
 

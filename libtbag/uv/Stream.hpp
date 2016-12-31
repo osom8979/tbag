@@ -94,19 +94,6 @@ public:
     virtual void onWrite(WriteRequest & request, Err code);
 };
 
-#ifndef _TBAG_UV_STREAM_EX
-#define _TBAG_UV_STREAM_EX(type, name)                  \
-    struct name##Stream : public Stream {               \
-        name##Stream() : Stream(UvHandleType::type) { } \
-        ~name##Stream() { }                             \
-    }
-#endif
-
-_TBAG_UV_STREAM_EX(PIPE, Pipe);
-_TBAG_UV_STREAM_EX(TTY , Tty );
-
-#undef _TBAG_UV_STREAM_EX
-
 } // namespace uv
 
 // --------------------

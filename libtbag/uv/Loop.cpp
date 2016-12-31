@@ -8,7 +8,6 @@
 #include <libtbag/uv/Loop.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uv/Handle.hpp>
-#include <libtbag/uv/ex/HandleFactory.hpp>
 
 #include <cassert>
 #include <uv.h>
@@ -245,11 +244,6 @@ void Loop::runCloseAllHandles()
     if (isRunning() == false) {
         run(RunMode::RUN_DEFAULT);
     }
-}
-
-Loop::WeakHandle Loop::createChildHandle(UvHandleType type)
-{
-    return insertChildHandle(ex::createHandle(*this, type));
 }
 
 Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
