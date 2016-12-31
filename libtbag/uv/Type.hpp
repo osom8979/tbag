@@ -27,9 +27,10 @@ typedef intptr_t ssize_t;
 #include <string>
 
 #if defined(__OS_WINDOWS__)
-#include <winsock2.h>
+# include <winsock2.h>
+# include <Windows.h>
 #else
-#include <netinet/in.h>
+# include <netinet/in.h>
 #endif
 
 // -------------------
@@ -37,6 +38,16 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace uv {
+
+#if defined(__OS_WINDOWS__)
+using File   = int;
+using OsSock = SOCKET;
+using OsFd   = HANDLE;
+#else
+using File   = int;
+using OsSock = int;
+using OsFd   = int;
+#endif
 
 #ifndef TBAG_UV_HANDLE_MAP
 #define TBAG_UV_HANDLE_MAP(_TBAG_HANDLE_XX, _TBAG_REQ_XX, _TBAG_ETC_XX) \
