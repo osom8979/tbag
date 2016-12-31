@@ -39,14 +39,6 @@ static void __global_uv_walk_cb__(uv_handle_t * handle, void * arg)
     loop->onWalk(handle, arg);
 }
 
-static void __global_close_all_uv_walk_cb__(uv_handle_t * handle, void * arg)
-{
-    Handle * h = static_cast<Handle*>(handle->data);
-    if (h != nullptr && h->isInit() && h->isClosing() == false) {
-        h->close();
-    }
-}
-
 // --------------------
 // Loop implementation.
 // --------------------
@@ -86,15 +78,12 @@ Loop::~Loop()
 
 void Loop::runCloseAllHandles()
 {
-#if 0 // Don't use walk callback.
-    ::uv_walk(Parent::cast<uv_loop_t>(), __global_close_all_uv_walk_cb__, nullptr);
-#else
     for (auto & cursor : _handles) {
         if (static_cast<bool>(cursor) && cursor->isInit() && cursor->isClosing() == false) {
             cursor->close();
         }
     }
-#endif
+
     if (isRunning() == false) {
         run(RunMode::RUN_DEFAULT);
     }
@@ -242,15 +231,19 @@ void Loop::onWalk(void * native_handle, void * arg)
 // Debugging.
 // ----------
 
-void Loop::printAllHandles(FILE * stream)
+void Loop::printAllHandles(FILE * file)
 {
-    uv_print_all_handles(Parent::cast<uv_loop_t>(), stream);
+    ::uv_print_all_handles(Parent::cast<uv_loop_t>(), file);
 }
 
-void Loop::printActiveHandles(FILE * stream)
+void Loop::printActiveHandles(FILE * file)
 {
-    uv_print_active_handles(Parent::cast<uv_loop_t>(), stream);
+    ::uv_print_active_handles(Parent::cast<uv_loop_t>(), file);
 }
+
+// ---------------
+// Static methods.
+// ---------------
 
 std::size_t Loop::getNativeSize() TBAG_NOEXCEPT
 {

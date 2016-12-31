@@ -159,10 +159,10 @@ public:
 // Debugging.
 public:
     /** Prints all handles associated with the given loop to the given stream. */
-    void printAllHandles(FILE * stream);
+    void printAllHandles(FILE * file);
 
     /** This is the same as uv_print_all_handles() except only active handles are printed. */
-    void printActiveHandles(FILE * stream);
+    void printActiveHandles(FILE * file);
 
 public:
     /** Returns the size of the uv_loop_t structure. */
