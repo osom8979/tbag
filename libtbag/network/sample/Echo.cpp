@@ -24,7 +24,7 @@ static char const * const TEST_ECHO_MESSAGE = "__TEST_ECHO_MESSAGE__";
 // Echo server implementation.
 // ---------------------------
 
-EchoServer::EchoServer(int count) : _count(count)
+EchoServer::EchoServer(int count) : _write_count(3), _echo_count(_write_count * 5)
 {
     std::cout.setf(std::ios_base::boolalpha);
 }
@@ -66,8 +66,9 @@ void EchoServer::onClientRead(Client & client, Err code, char const * buffer, st
         msg.assign(buffer, buffer + size);
         std::cout << "Read message: " << msg << std::endl;
 
-        client.asyncWrite(&msg[0], msg.size());
-
+        for (int count = 0; count < _write_count; ++count) {
+            client.asyncWrite(&msg[0], msg.size());
+        }
     } else if (code == Err::END_OF_FILE) {
         std::cout << "EchoServer::onRead() End of file.\n";
         client.close();
@@ -84,12 +85,14 @@ void EchoServer::onClientWrite(Client & client, WriteRequest & request, Err code
         std::cout << "EchoServer::onWrite() Failure.\n";
     }
 
-    client.close();
+    if (_writers.getActiveEmpty()) {
+        client.close();
+    }
 
-    --_count;
-    std::cout << "ECHO COUNT: " << _count << "\n";
+    --_echo_count;
+    std::cout << "ECHO COUNT: " << _echo_count << "\n";
 
-    if (_count <= 0) {
+    if (_echo_count <= 0) {
         this->close();
     }
 }

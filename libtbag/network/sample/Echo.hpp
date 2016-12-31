@@ -36,7 +36,8 @@ namespace sample  {
 class TBAG_API EchoServer : public TcpServer
 {
 private:
-    int _count; ///< Max echo count.
+    int _write_count; ///< Write count.
+    int  _echo_count; ///< Max echo count.
 
 public:
     EchoServer(int count = 5);
