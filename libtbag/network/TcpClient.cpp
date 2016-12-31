@@ -26,16 +26,17 @@ TcpClient::~TcpClient()
 
 bool TcpClient::initIpv4(std::string const & ip, int port)
 {
-    if (atTcp().isInit() == false) {
+    Tcp & TCP = atTcp();
+    if (TCP.isInit() == false) {
         return false;
     }
 
     sockaddr_in addr;
-    if (atTcp().initAddress(ip, port, &addr) == false) {
+    if (TCP.initAddress(ip, port, &addr) == false) {
         return false;
     }
 
-    if (atTcp().connect(_connector, (sockaddr const *)&addr) == false) {
+    if (TCP.connect(_connector, (sockaddr const *)&addr) == false) {
         return false;
     }
 
@@ -72,7 +73,6 @@ TcpClient::binf TcpClient::onAlloc(std::size_t suggested_size)
     info.size   =  _read_buffer.size();
     return info;
 }
-
 
 } // namespace network
 

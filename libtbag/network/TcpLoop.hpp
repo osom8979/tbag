@@ -73,7 +73,6 @@ public:
     virtual ~BaseTcpLoop()
     { /* EMPTY. */ }
 
-
 public:
     // @formatter:off
     inline Loop        & atLoop() TBAG_NOEXCEPT { return _loop; }
