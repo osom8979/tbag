@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/uv/Native.hpp>
+#include <libtbag/Type.hpp>
 
 #include <cstdint>
 
@@ -31,7 +32,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uv {
 
 // Forward declaration.
-struct Handle;
+class Handle;
 
 /**
  * BaseLoop class prototype.
@@ -187,6 +188,18 @@ public:
 
     inline void clear()
     { _handles.clear(); }
+
+public:
+    // @formatter:off
+    template <typename HandleType, typename ... Args>
+    inline std::shared_ptr<typename remove_cr<HandleType>::type> createAndInsertChildHandle(Loop & loop, Args ... args)
+    {
+        typedef typename remove_cr<HandleType>::type ResultHandleType;
+        HandleType * handle = new HandleType(loop, std::forward<Args>(args) ...);
+        auto shared = insertChildHandle(handle).lock();
+        return std::static_pointer_cast<ResultHandleType, Handle>(shared);
+    }
+    // @formatter:on
 };
 
 } // namespace uv
