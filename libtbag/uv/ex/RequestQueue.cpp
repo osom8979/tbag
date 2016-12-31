@@ -24,6 +24,11 @@ RequestQueue::RequestQueue(UvRequestType type) : _type(type)
 
 RequestQueue::~RequestQueue()
 {
+    clear();
+}
+
+void RequestQueue::clear()
+{
     Guard guard(_mutex);
     while (_prepare.empty() == false) {
         _prepare.pop();
@@ -31,15 +36,29 @@ RequestQueue::~RequestQueue()
     _active.clear();
 }
 
-RequestQueue::WeakRequest RequestQueue::find(Request * request) const
+RequestQueue::WeakRequest RequestQueue::find(RequestKey request) const
 {
     Guard guard(_mutex);
-
-    auto find_itr = _active.find(RequestKey(request));
-    if (find_itr == _active.end()) {
+    auto itr = _active.find(request);
+    if (itr == _active.end()) {
         return WeakRequest();
     }
-    return WeakRequest(find_itr->second);
+    return WeakRequest(itr->second);
+}
+
+RequestQueue::WeakRequest RequestQueue::find(Request * request) const
+{
+    return find(RequestKey(request));
+}
+
+RequestQueue::WeakRequest RequestQueue::find(SharedRequest request) const
+{
+    return find(request.get());
+}
+
+RequestQueue::WeakRequest RequestQueue::find(WeakRequest request) const
+{
+    return find(request.lock());
 }
 
 RequestQueue::WeakRequest RequestQueue::create(Handle * owner)
@@ -57,24 +76,42 @@ RequestQueue::WeakRequest RequestQueue::create(Handle * owner)
     }
 
     // Find prepare queue.
-    auto prepare = _prepare.front();
+    SharedRequest prepare = _prepare.front();
     _prepare.pop();
     prepare->setOwner(owner);
+
     _active.insert(ActiveMap::value_type(RequestKey(prepare.get()), prepare));
     return WeakRequest(prepare);
 }
 
-void RequestQueue::release(Request * request)
+RequestQueue::WeakRequest RequestQueue::create(Handle & owner)
+{
+    return create(&owner);
+}
+
+void RequestQueue::release(RequestKey request)
 {
     Guard guard(_mutex);
-
-    auto find_itr = _active.find(RequestKey(request));
-    if (find_itr == _active.end()) {
-        return;
+    auto itr = _active.find(request);
+    if (itr != _active.end()) {
+        _prepare.push(itr->second);
+        _active.erase(itr);
     }
+}
 
-    _prepare.push(find_itr->second);
-    _active.erase(find_itr);
+void RequestQueue::release(Request * request)
+{
+    release(RequestKey(request));
+}
+
+void RequestQueue::release(SharedRequest request)
+{
+    release(request.get());
+}
+
+void RequestQueue::release(WeakRequest request)
+{
+    release(request.lock());
 }
 
 } // namespace ex

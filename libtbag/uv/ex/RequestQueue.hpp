@@ -70,11 +70,34 @@ public:
     virtual ~RequestQueue();
 
 public:
-    WeakRequest find(Request * request) const;
+    inline bool getPrepareEmpty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_prepare.empty()))
+    { Guard g(_mutex); return _prepare.empty(); }
+    inline bool getActiveEmpty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.empty()))
+    { Guard g(_mutex); return _active.empty(); }
+
+    inline std::size_t getPrepareSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_prepare.size()))
+    { Guard g(_mutex); return _prepare.size(); }
+    inline std::size_t getActiveSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.size()))
+    { Guard g(_mutex); return _active.size(); }
+
+public:
+    void clear();
+
+public:
+    WeakRequest find(RequestKey    request) const;
+    WeakRequest find(Request     * request) const;
+    WeakRequest find(SharedRequest request) const;
+    WeakRequest find(WeakRequest   request) const;
 
 public:
     WeakRequest create(Handle * owner);
-    void release(Request * request);
+    WeakRequest create(Handle & owner);
+
+public:
+    void release(RequestKey    request);
+    void release(Request     * request);
+    void release(SharedRequest request);
+    void release(WeakRequest   request);
 };
 
 #ifndef _TBAG_UV_REQUEST_QUEUE_EX
