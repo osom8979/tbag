@@ -22,44 +22,13 @@ namespace network {
 
 TcpLoop::TcpLoop() : _loop(), _tcp()
 {
-    auto weak = _loop.insertChildHandle(new uv::ex::CallableTcp(_loop, this));
-    if (weak.expired()) {
-        std::bad_alloc();
-    }
-    _tcp = std::static_pointer_cast<CallableTcp, uv::Handle>(weak.lock());
+    _tcp = _loop.createAndInsertChildHandle<CallableTcp>(_loop, this);
     assert(static_cast<bool>(_tcp));
 }
 
 TcpLoop::~TcpLoop()
 {
     // EMPTY.
-}
-
-// -------------------------
-// TcpLoopEx implementation.
-// -------------------------
-
-TcpLoopEx::TcpLoopEx()
-{
-    // EMPTY.
-}
-
-TcpLoopEx::~TcpLoopEx()
-{
-    // EMPTY.
-}
-
-TcpLoopEx::binf TcpLoopEx::onAlloc(std::size_t suggested_size)
-{
-    // Realloc with read buffer.
-    if (_read_buffer.size() < suggested_size) {
-        _read_buffer.resize(suggested_size);
-    }
-
-    binf info;
-    info.buffer = &_read_buffer[0];
-    info.size   =  _read_buffer.size();
-    return info;
 }
 
 } // namespace network

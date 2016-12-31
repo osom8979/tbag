@@ -123,7 +123,7 @@ void EchoClient::onConnect(ConnectRequest & request, Err code)
     startRead();
 
     std::string msg = TEST_ECHO_MESSAGE;
-    write(&msg[0], msg.size());
+    tryWrite(&msg[0], msg.size());
 }
 
 void EchoClient::onRead(Err code, char const * buffer, std::size_t size)

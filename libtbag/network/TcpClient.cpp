@@ -50,6 +50,20 @@ bool TcpClient::run(std::string const & ip, int port)
     return false;
 }
 
+TcpClient::binf TcpClient::onAlloc(std::size_t suggested_size)
+{
+    // Realloc with read buffer.
+    if (_read_buffer.size() < suggested_size) {
+        _read_buffer.resize(suggested_size);
+    }
+
+    binf info;
+    info.buffer = &_read_buffer[0];
+    info.size   =  _read_buffer.size();
+    return info;
+}
+
+
 } // namespace network
 
 // --------------------

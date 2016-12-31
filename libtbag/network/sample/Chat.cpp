@@ -207,7 +207,7 @@ int runChatClient(std::string const & ip, int port)
                 flatbuffers::FlatBufferBuilder builder;
                 auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(name), builder.CreateString(msg));
                 builder.Finish(packet);
-                client.write((char const *)builder.GetBufferPointer(), builder.GetSize());
+                client.tryWrite((char const *)builder.GetBufferPointer(), builder.GetSize());
             } else {
                 break;
             }

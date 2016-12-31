@@ -29,10 +29,11 @@ namespace network {
  * @author zer0
  * @date   2016-12-29
  */
-class TBAG_API TcpClient : public TcpLoopEx
+class TBAG_API TcpClient : public TcpLoop
 {
 private:
     ConnectRequest _connector;
+    Buffer _read_buffer;
 
 public:
     TcpClient();
@@ -43,6 +44,9 @@ public:
 
 public:
     virtual bool run(std::string const & ip, int port) override;
+
+public:
+    virtual binf onAlloc(std::size_t suggested_size) override;
 };
 
 } // namespace network

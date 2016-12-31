@@ -68,7 +68,7 @@ public:
 public:
     // @formatter:off
     inline Loop        & atLoop() TBAG_NOEXCEPT { return _loop; }
-    inline CallableTcp & atTcp () TBAG_NOEXCEPT { return *_tcp;  }
+    inline CallableTcp & atTcp () TBAG_NOEXCEPT { return *_tcp; }
     // @formatter:on
 
 public:
@@ -86,38 +86,19 @@ public:
     inline bool asyncWrite(CallableTcp & tcp, WriteRequest & req, char const * buffer, std::size_t size)
     { return tcp.write(req, buffer, size); }
 
-    inline std::size_t write(CallableTcp & tcp, binf * infos, std::size_t infos_size, Err * result)
+    inline std::size_t tryWrite(CallableTcp & tcp, binf * infos, std::size_t infos_size, Err * result)
     { return tcp.tryWrite(infos, infos_size, result); }
-    inline std::size_t write(CallableTcp & tcp, char const * buffer, std::size_t size, Err * result)
+    inline std::size_t tryWrite(CallableTcp & tcp, char const * buffer, std::size_t size, Err * result)
     { return tcp.tryWrite(buffer, size, result); }
 
-    inline std::size_t write(binf * infos, std::size_t infos_size, Err * result = nullptr)
-    { return write(*_tcp, infos, infos_size, result); }
-    inline std::size_t write(char const * buffer, std::size_t size, Err * result = nullptr)
-    { return write(*_tcp, buffer, size, result); }
+    inline std::size_t tryWrite(binf * infos, std::size_t infos_size, Err * result = nullptr)
+    { return tryWrite(*_tcp, infos, infos_size, result); }
+    inline std::size_t tryWrite(char const * buffer, std::size_t size, Err * result = nullptr)
+    { return tryWrite(*_tcp, buffer, size, result); }
     // @formatter:on
 
 public:
     virtual bool run(std::string const & ip, int port) = 0;
-};
-
-/**
- * TcpLoop extension class prototype.
- *
- * @author zer0
- * @date   2016-12-29
- */
-class TBAG_API TcpLoopEx : public TcpLoop
-{
-public:
-    Buffer _read_buffer;
-
-public:
-    TcpLoopEx();
-    virtual ~TcpLoopEx();
-
-public:
-    virtual binf onAlloc(std::size_t suggested_size) override;
 };
 
 } // namespace network
