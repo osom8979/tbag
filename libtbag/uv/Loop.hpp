@@ -1,6 +1,6 @@
 /**
  * @file   Loop.hpp
- * @brief  Loop class prototype.
+ * @brief  BaseLoop & Loop class prototype.
  * @author zer0
  * @date   2016-12-28
  */
@@ -34,7 +34,7 @@ namespace uv {
 struct Handle;
 
 /**
- * Loop class prototype.
+ * BaseLoop class prototype.
  *
  * @author zer0
  * @date   2016-12-28
@@ -44,21 +44,12 @@ struct Handle;
  *  It takes care of polling for i/o and scheduling callbacks
  *  to be run based on different sources of events.
  */
-class TBAG_API Loop : public Native
+class TBAG_API BaseLoop : public Native
 {
 public:
-    using Parent = Native;
-    using SharedHandle = std::shared_ptr<Handle>;
-    using WeakHandle   = std::weak_ptr<Handle>;
-    using HandleSet    = std::set<SharedHandle>;
-
-    using ThreadId     = std::thread::id;
-    using AtomicBool   = std::atomic_bool;
-
-    using iterator               = typename HandleSet::iterator;
-    using const_iterator         = typename HandleSet::const_iterator;
-    using reverse_iterator       = typename HandleSet::reverse_iterator;
-    using const_reverse_iterator = typename HandleSet::const_reverse_iterator;
+    using Parent     = Native;
+    using ThreadId   = std::thread::id;
+    using AtomicBool = std::atomic_bool;
 
 public:
     enum class RunMode
@@ -72,12 +63,9 @@ private:
     ThreadId   _owner_thread_id;
     AtomicBool _running;
 
-private:
-    HandleSet  _handles;
-
 public:
-    Loop();
-    virtual ~Loop();
+    BaseLoop();
+    virtual ~BaseLoop();
 
 public:
     inline std::thread::id getOwnerThreadId() const TBAG_NOEXCEPT
@@ -85,47 +73,8 @@ public:
     inline bool isRunning() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_running.load()))
     { return _running.load(); }
 
-private:
-    /** @warning Don't use this method of user level developers. */
-    void runCloseAllHandles();
-
 public:
-    WeakHandle createChildHandle(UvHandleType type);
-    WeakHandle insertChildHandle(Handle * handle);
-    void eraseChildHandle(WeakHandle handle);
-
-// By-pass methods.
-public:
-
-#ifndef TBAG_UV_LOOP_BY_PASS_METHOD
-#define TBAG_UV_LOOP_BY_PASS_METHOD(retval, name, qualifier) \
-    inline retval name() qualifier TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_handles.name())) { return _handles.name(); }
-#define EMPTY_QUALIFIER
-#endif
-
-    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator, begin, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator, begin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator,   end, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,   end, const)
-
-    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator, rbegin, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, rbegin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator,   rend, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   rend, const)
-
-    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,  cbegin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,    cend, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, crbegin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   crend, const)
-
-    TBAG_UV_LOOP_BY_PASS_METHOD(bool, empty, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, size, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, max_size, const)
-
-#undef EMPTY_QUALIFIER
-#undef TBAG_UV_LOOP_BY_PASS_METHOD
-
-public:
+    /** Releases all internal loop resources. */
     bool close();
 
     /** This function runs the event loop. */
@@ -167,6 +116,74 @@ public:
 public:
     /** Returns the size of the uv_loop_t structure. */
     static std::size_t getNativeSize() TBAG_NOEXCEPT;
+};
+
+/**
+ * Loop class prototype.
+ *
+ * @author zer0
+ * @date   2016-12-31
+ */
+class TBAG_API Loop : public BaseLoop
+{
+public:
+    using Parent = BaseLoop;
+
+    using SharedHandle = std::shared_ptr<Handle>;
+    using WeakHandle   = std::weak_ptr<Handle>;
+    using HandleSet    = std::set<SharedHandle>;
+
+    using iterator               = typename HandleSet::iterator;
+    using const_iterator         = typename HandleSet::const_iterator;
+    using reverse_iterator       = typename HandleSet::reverse_iterator;
+    using const_reverse_iterator = typename HandleSet::const_reverse_iterator;
+
+private:
+    HandleSet _handles;
+
+public:
+    Loop();
+    virtual ~Loop();
+
+private:
+    /** @warning Don't use this method of user level developers. */
+    void runCloseAllHandles();
+
+public:
+    WeakHandle createChildHandle(UvHandleType type);
+    WeakHandle insertChildHandle(Handle * handle);
+    void eraseChildHandle(WeakHandle handle);
+
+// By-pass methods.
+public:
+
+#ifndef TBAG_UV_LOOP_BY_PASS_METHOD
+#define TBAG_UV_LOOP_BY_PASS_METHOD(retval, name, qualifier) \
+    inline retval name() qualifier TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_handles.name())) { return _handles.name(); }
+#define EMPTY_QUALIFIER
+#endif
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator, begin, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator, begin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator,   end, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,   end, const)
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator, rbegin, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, rbegin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator,   rend, EMPTY_QUALIFIER)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   rend, const)
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,  cbegin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,    cend, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, crbegin, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   crend, const)
+
+    TBAG_UV_LOOP_BY_PASS_METHOD(bool, empty, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, size, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, max_size, const)
+
+#undef EMPTY_QUALIFIER
+#undef TBAG_UV_LOOP_BY_PASS_METHOD
 };
 
 } // namespace uv
