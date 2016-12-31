@@ -7,6 +7,7 @@
 
 #include <libtbag/network/sample/Chat.hpp>
 #include <libtbag/log/Log.hpp>
+
 #include <libtbag/network/sample/msg/chat_generated.h>
 
 #include <cstdlib>
@@ -28,10 +29,12 @@ namespace sample  {
 
 ChatServer::ChatServer() : _id_count(0)
 {
+    std::cout.setf(std::ios_base::boolalpha);
 }
 
 ChatServer::~ChatServer()
 {
+    // EMPTY.
 }
 
 void ChatServer::onConnection(Err code)
@@ -78,6 +81,12 @@ void ChatServer::onClientRead(Client & client, Err code, char const * buffer, st
         return;
     }
 
+    flatbuffers::Verifier verifier((uint8_t const *)buffer, size);
+    if (msg::VerifyChatPacketBuffer(verifier) == false) {
+        std::cout << "PARSER ERROR.\n";
+        return;
+    }
+
     auto msg = msg::GetChatPacket(buffer);
     std::cout << "[" << msg->name()->c_str() << "]"
               << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
@@ -116,12 +125,16 @@ void ChatServer::onClientClose(Client & client)
 // Chat client implementation.
 // ---------------------------
 
-ChatClient::ChatClient()
+ChatClient::ChatClient(std::string const & name)
 {
+    std::cout.setf(std::ios_base::boolalpha);
+    auto weak = atLoop().insertChildHandle(new AsyncChatInput(atLoop(), *this, name));
+    _input = std::static_pointer_cast<AsyncChatInput, uv::Handle>(weak.lock());
 }
 
 ChatClient::~ChatClient()
 {
+    // EMPTY.
 }
 
 void ChatClient::onConnect(ConnectRequest & request, Err code)
@@ -168,6 +181,68 @@ void ChatClient::onWrite(WriteRequest & request, Err code)
 void ChatClient::onClose()
 {
     std::cout << "CLOSE.\n";
+    _input->close();
+}
+
+// ------------------------------
+// AsyncChatInput implementation.
+// ------------------------------
+
+AsyncChatInput::AsyncChatInput(uv::Loop & loop, ChatClient & client, std::string const & name)
+        : uv::Tty(loop, DefaultIo::FILE_STDIN), _client(client), _name(name)
+{
+    setMode(TtyMode::TTY_NORMAL);
+    startRead();
+}
+
+AsyncChatInput::~AsyncChatInput()
+{
+    stopRead();
+    resetMode();
+}
+
+uv::binf AsyncChatInput::onAlloc(std::size_t suggested_size)
+{
+    // Realloc with read buffer.
+    if (_read_buffer.size() < suggested_size) {
+        _read_buffer.resize(suggested_size);
+        _last_buffer.resize(suggested_size);
+    }
+
+    uv::binf info;
+    info.buffer = &_read_buffer[0];
+    info.size   =  _read_buffer.size();
+    return info;
+}
+
+void AsyncChatInput::onRead(Err code, char const * buffer, std::size_t size)
+{
+    std::cout << "onRead(): ";
+    for (std::size_t index = 0; index < size; ++index) {
+        std::cout << buffer[index];
+
+        if (buffer[index] == '\n') {
+            std::string msg(&_last_buffer[0], _last_index);
+            onReadLine(msg);
+            _last_index = 0;
+        } else {
+            _last_buffer[_last_index] = buffer[index];
+            ++_last_index;
+        }
+    }
+}
+
+void AsyncChatInput::onReadLine(std::string const & msg)
+{
+    msg::Version version = msg::Version(1, 1);
+    flatbuffers::FlatBufferBuilder builder;
+    auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(_name), builder.CreateString(msg));
+    builder.Finish(packet);
+
+    if (_client.asyncWrite((char const *)builder.GetBufferPointer(), builder.GetSize()) == false) {
+        std::cout << "onReadLine() result error.\n";
+        return;
+    }
 }
 
 // -------------
@@ -176,49 +251,16 @@ void ChatClient::onClose()
 
 int runChatServer(std::string const & ip, int port)
 {
-    std::cout.setf(std::ios_base::boolalpha);
-
-    ChatServer server;
-    if (server.run(ip, port)) {
-        return EXIT_SUCCESS;
-    }
-    return EXIT_FAILURE;
+    return ChatServer().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 int runChatClient(std::string const & ip, int port)
 {
-    std::cout.setf(std::ios_base::boolalpha);
-
     std::string name;
     std::cout << "Enter the your name: ";
     std::cin >> name;
 
-    std::mutex mutex;
-    std::atomic_bool is_exit(false);
-
-    ChatClient client;
-    std::thread t([&](){
-        while (true) {
-            std::string msg;
-            std::cin >> msg;
-
-            if (is_exit == false) {
-                msg::Version version = msg::Version(1, 1);
-                flatbuffers::FlatBufferBuilder builder;
-                auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(name), builder.CreateString(msg));
-                builder.Finish(packet);
-                client.tryWrite((char const *)builder.GetBufferPointer(), builder.GetSize());
-            } else {
-                break;
-            }
-        }
-    });
-    bool result = client.run(ip, port);
-
-    is_exit = true;
-    t.join();
-
-    return (result ? EXIT_SUCCESS : EXIT_FAILURE);
+    return ChatClient(name).run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 } // namespace sample
