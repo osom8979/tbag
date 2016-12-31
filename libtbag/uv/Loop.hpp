@@ -151,8 +151,8 @@ private:
 
 public:
     WeakHandle createChildHandle(UvHandleType type);
-    WeakHandle insertChildHandle(Handle * handle);
-    void eraseChildHandle(WeakHandle handle);
+    WeakHandle insertChildHandle(Handle   * handle);
+    bool       eraseChildHandle (WeakHandle handle);
 
 // By-pass methods.
 public:
@@ -184,6 +184,9 @@ public:
 
 #undef EMPTY_QUALIFIER
 #undef TBAG_UV_LOOP_BY_PASS_METHOD
+
+    inline void clear()
+    { _handles.clear(); }
 };
 
 } // namespace uv

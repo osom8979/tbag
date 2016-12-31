@@ -263,9 +263,9 @@ Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
     return WeakHandle();
 }
 
-void Loop::eraseChildHandle(WeakHandle handle)
+bool Loop::eraseChildHandle(WeakHandle handle)
 {
-    _handles.erase(handle.lock());
+    return _handles.erase(handle.lock()) == 1;
 }
 
 } // namespace uv
