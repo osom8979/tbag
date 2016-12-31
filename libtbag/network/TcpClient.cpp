@@ -42,6 +42,16 @@ bool TcpClient::initIpv4(std::string const & ip, int port)
     return true;
 }
 
+bool TcpClient::asyncWrite(binf * infos, std::size_t infos_size)
+{
+    return Parent::asyncWrite(atTcp(), obtainWriteRequest(atTcp()), infos, infos_size);
+}
+
+bool TcpClient::asyncWrite(char const * buffer, std::size_t size)
+{
+    return Parent::asyncWrite(atTcp(), obtainWriteRequest(atTcp()), buffer, size);
+}
+
 bool TcpClient::run(std::string const & ip, int port)
 {
     if (uv::Tcp::isIpv4(ip) && initIpv4(ip, port)) {

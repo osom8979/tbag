@@ -31,6 +31,9 @@ namespace network {
  */
 class TBAG_API TcpClient : public TcpLoop
 {
+public:
+    using Parent = TcpLoop;
+
 private:
     ConnectRequest _connector;
     Buffer _read_buffer;
@@ -41,6 +44,10 @@ public:
 
 public:
     bool initIpv4(std::string const & ip, int port);
+
+public:
+    bool asyncWrite(binf * infos, std::size_t infos_size);
+    bool asyncWrite(char const * buffer, std::size_t size);
 
 public:
     virtual bool run(std::string const & ip, int port) override;

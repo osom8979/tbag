@@ -71,8 +71,7 @@ public:
     using ClientMap    = std::unordered_map<ClientKey, SharedClient, ClientKey::Hash, ClientKey::EqualTo>;
 
 protected:
-    ClientMap  _clients;
-    WriteQueue _writers;
+    ClientMap _clients;
 
 public:
     TcpServer();
@@ -85,10 +84,6 @@ protected:
 
 protected:
     WeakClient createAcceptedClient();
-
-public:
-    WriteRequest & obtainWriteRequest(Client & tcp);
-    void releaseWriteRequest(WriteRequest & request);
 
 public:
     bool initIpv4(std::string const & ip, int port);

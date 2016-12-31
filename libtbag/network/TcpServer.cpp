@@ -85,18 +85,6 @@ TcpServer::WeakClient TcpServer::createAcceptedClient()
     return WeakClient();
 }
 
-TcpServer::WriteRequest & TcpServer::obtainWriteRequest(Client & tcp)
-{
-    auto weak = _writers.create(tcp);
-    assert(weak.expired() == false);
-    return *static_cast<WriteRequest*>(weak.lock().get());
-}
-
-void TcpServer::releaseWriteRequest(WriteRequest & request)
-{
-    _writers.release(static_cast<uv::Request*>(&request));
-}
-
 bool TcpServer::initIpv4(std::string const & ip, int port)
 {
     CallableTcp & TCP = atTcp();
