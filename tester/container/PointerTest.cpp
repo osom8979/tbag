@@ -82,6 +82,11 @@ TEST(PointerTest, Cast)
     Pointer<void> p0((void*)i1);
 
     ASSERT_EQ(100, p0.cast<PointerTestDemo>()->value);
+    ASSERT_EQ(100, p0.forceCast<PointerTestDemo>()->value);
+
+    Pointer<PointerTestDemo> p1 = p0.to<PointerTestDemo>();
+    ASSERT_EQ(100, (*p1).value);
+    ASSERT_EQ(100, p1->value);
 
     delete i1;
 }

@@ -15,8 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
+
 #include <functional>
 #include <algorithm>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,7 +36,10 @@ namespace container {
 template <typename T>
 struct Pointer
 {
-    using Type = T;
+    using Type           = typename libtbag::remove_cr<T>::type;
+    using Reference      = typename std::add_lvalue_reference<Type>::type;
+    using ConstReference = const Reference;
+
     Type * ptr = nullptr;
 
     TBAG_CONSTEXPR Pointer(Type * p) TBAG_NOEXCEPT : ptr(p)
@@ -66,22 +72,47 @@ struct Pointer
     inline bool operator >(Pointer const & obj) const TBAG_NOEXCEPT
     { return ptr > obj.ptr; }
 
-    inline operator bool() const TBAG_NOEXCEPT
+    inline explicit operator bool() const TBAG_NOEXCEPT
     { return ptr != nullptr; }
+
+    inline Reference operator *() TBAG_NOEXCEPT
+    { return *ptr; }
+    inline ConstReference operator *() const TBAG_NOEXCEPT
+    { return *ptr; }
 
     inline Type * operator ->() TBAG_NOEXCEPT
     { return ptr; }
     inline Type const * operator ->() const TBAG_NOEXCEPT
     { return ptr; }
 
-    template <typename CastType>
-    inline CastType * cast() const TBAG_NOEXCEPT
-    { return static_cast<CastType*>(ptr); }
-
     inline Type * get() TBAG_NOEXCEPT
     { return ptr; }
     inline Type const * get() const TBAG_NOEXCEPT
     { return ptr; }
+
+    template <typename CastType>
+    inline Pointer<CastType> to() TBAG_NOEXCEPT
+    { return Pointer<CastType>(cast<CastType>()); }
+
+    // @formatter:off
+    template <typename CastType>
+    inline typename std::enable_if<
+            std::is_convertible<
+                    typename std::conditional<
+                            std::is_same<Type, void>::value,
+                            CastType*, Type*
+                    >::type,
+                    CastType*
+            >::value,
+            CastType*
+    >::type
+    cast() const TBAG_NOEXCEPT
+    { return static_cast<CastType*>(ptr); }
+    // @formatter:on
+
+    template <typename CastType>
+    inline CastType * forceCast() const TBAG_NOEXCEPT
+    { return (CastType*)(ptr); }
 
     // ------------------------
     // Specialization of class.
@@ -94,9 +125,7 @@ struct Pointer
         using result_type    = std::size_t;
 
         inline result_type operator()(argument_type const & obj) const
-        {
-            return std::hash<hash_base_type*>()(obj.ptr);
-        }
+        { return std::hash<hash_base_type*>()(obj.ptr); }
     };
 
     struct EqualTo
@@ -107,9 +136,7 @@ struct Pointer
 
         inline result_type operator()(first_argument_type  const & v1
                                     , second_argument_type const & v2) const
-        {
-            return v1 == v2;
-        }
+        { return v1 == v2; }
     };
 
     struct Less
@@ -120,9 +147,7 @@ struct Pointer
 
         inline result_type operator()(first_argument_type  const & v1
                                     , second_argument_type const & v2) const
-        {
-            return v1 < v2;
-        }
+        { return v1 < v2; }
     };
 };
 
