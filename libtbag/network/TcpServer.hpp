@@ -88,6 +88,7 @@ protected:
 
 public:
     WriteRequest & obtainWriteRequest(Client & tcp);
+    void releaseWriteRequest(WriteRequest & request);
 
 public:
     bool initIpv4(std::string const & ip, int port);
@@ -98,7 +99,7 @@ public:
 // Extension event methods.
 public:
     virtual binf onClientAlloc(Client & client, std::size_t suggested_size);
-    virtual void onClientRead(Client & client, Err code, char const * buffer, std::size_t size);
+    virtual void onClientRead (Client & client, Err code, char const * buffer, std::size_t size);
     virtual void onClientWrite(Client & client, WriteRequest & request, Err code);
     virtual void onClientClose(Client & client);
 };

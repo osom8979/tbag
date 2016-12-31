@@ -36,8 +36,8 @@ void TcpServer::Client::onRead(Err code, char const * buffer, std::size_t size)
 
 void TcpServer::Client::onWrite(WriteRequest & request, Err code)
 {
-    server._writers.release(&request);
     server.onClientWrite(*this, request, code);
+    server.releaseWriteRequest(request);
 }
 
 void TcpServer::Client::onClose()
@@ -87,27 +87,33 @@ TcpServer::WeakClient TcpServer::createAcceptedClient()
 
 TcpServer::WriteRequest & TcpServer::obtainWriteRequest(Client & tcp)
 {
-    auto weak = _writers.create(&tcp);
+    auto weak = _writers.create(tcp);
     assert(weak.expired() == false);
     return *static_cast<WriteRequest*>(weak.lock().get());
 }
 
+void TcpServer::releaseWriteRequest(WriteRequest & request)
+{
+    _writers.release(static_cast<uv::Request*>(&request));
+}
+
 bool TcpServer::initIpv4(std::string const & ip, int port)
 {
-    if (atTcp().isInit() == false) {
+    CallableTcp & TCP = atTcp();
+    if (TCP.isInit() == false) {
         return false;
     }
 
     sockaddr_in addr;
-    if (atTcp().initAddress(ip, port, &addr) == false) {
+    if (TCP.initAddress(ip, port, &addr) == false) {
         return false;
     }
 
-    if (atTcp().bind((sockaddr const *)&addr) == false) {
+    if (TCP.bind((sockaddr const *)&addr) == false) {
         return false;
     }
 
-    if (atTcp().listen() == false) {
+    if (TCP.listen() == false) {
         return false;
     }
 

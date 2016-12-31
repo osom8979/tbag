@@ -96,7 +96,7 @@ void EchoServer::onClientWrite(Client & client, WriteRequest & request, Err code
 
 void EchoServer::onClientClose(Client & client)
 {
-    std::cout << "CLIENT " << (void*)&client << "END.\n";
+    std::cout << "CLIENT " << (void*)&client << " END.\n";
 }
 
 // ---------------------------
