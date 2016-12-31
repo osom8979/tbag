@@ -36,18 +36,18 @@ class TBAG_API Native : public container::Pointer<void>, public Noncopyable
 {
 public:
     using Parent = container::Pointer<void>;
-    using Type = UvType;
 
 private:
-    Type const TYPE;
+    UvType const TYPE;
     void * _user;
 
 public:
-    Native(Type type);
+    explicit Native(UvType type);
+    explicit Native(UvPodType type);
     virtual ~Native();
 
 public:
-    inline Type getType() const TBAG_NOEXCEPT
+    inline UvType getType() const TBAG_NOEXCEPT
     { return TYPE; }
 
 public:

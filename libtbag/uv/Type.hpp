@@ -91,9 +91,11 @@ typedef int UvPodType;
  */
 enum class UvType : UvPodType
 {
+    __START_NUMBER__ = -1,
 #define _TBAG_XX(name, type) name,
     TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
+    __SIZE__
 };
 
 // @formatter:off

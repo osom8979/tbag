@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uv {
 
-Native::Native(Type t) : TYPE(t), _user(nullptr)
+Native::Native(UvType t) : TYPE(t), _user(nullptr)
 {
     // @formatter:off
     switch (TYPE) {
@@ -26,10 +26,16 @@ Native::Native(Type t) : TYPE(t), _user(nullptr)
             return;
     TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
+    default: break;
     }
     // @formatter:on
 
-    __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE));
+    __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<UvPodType>(TYPE));
+}
+
+Native::Native(UvPodType type) : Native(static_cast<UvType>(type))
+{
+    // EMPTY.
 }
 
 Native::~Native()
