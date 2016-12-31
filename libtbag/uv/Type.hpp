@@ -23,6 +23,7 @@ typedef intptr_t ssize_t;
 # define _SSIZE_T_DEFINED
 #endif
 
+#include <cstdlib>
 #include <string>
 
 #if defined(__OS_WINDOWS__)
@@ -107,6 +108,17 @@ enum class UvEtcType     : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _T
 #undef _TBAG_XX
 #undef _TBAG_NX
 // @formatter:on
+
+#if defined(_UINTPTR_T)
+using AddressType = std::uintptr_t;
+#else
+using AddressType = std::size_t;
+#endif
+AddressType const DEBUG_UV_DELETED_ADDRESS_VALUE = static_cast<AddressType>(-1);
+
+template <typename T>
+inline bool isDeletedAddress(T const * value) TBAG_NOEXCEPT
+{ return DEBUG_UV_DELETED_ADDRESS_VALUE == reinterpret_cast<AddressType>(value); }
 
 TBAG_API bool isHandle (UvType type);
 TBAG_API bool isRequest(UvType type);

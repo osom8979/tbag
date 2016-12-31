@@ -56,9 +56,6 @@ public:
     Handle(UvHandleType type);
     virtual ~Handle();
 
-private:
-    void checkedClose();
-
 public:
     inline char const * getName() const TBAG_NOEXCEPT
     { return getUvNativeHandleName(get()); }
@@ -74,6 +71,9 @@ public:
      *  and the arrival of the close callback.
      */
     void close();
+
+    /** Request handle to be closed. */
+    void tryClose();
 
 public:
     /** Returns true if the handle is active, false if it’s inactive. */

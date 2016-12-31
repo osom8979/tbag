@@ -23,10 +23,12 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
 {
     Handle * h = static_cast<Handle*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_close_cb__() handle data is nullptr.");
-        return;
+        __tbag_error("__global_uv_close_cb__() handle.data is nullptr.");
+    } else if (isDeletedAddress(h)) {
+        __tbag_error("__global_uv_close_cb__() handle.data is deleted.");
+    } else {
+        h->onClose();
     }
-    h->onClose();
 }
 
 // ----------------------
@@ -39,56 +41,64 @@ Handle::Handle(UvHandleType type) : Native(static_cast<UvType>(type))
         __tbag_error("Handle::Handle({}) type is not handle type", static_cast<int>(type));
         throw std::bad_alloc();
     }
-    uv_handle_t * native_handle_type = Parent::cast<uv_handle_t>();
-    assert(native_handle_type != nullptr);
-    native_handle_type->data = this; // IMPORTANT!!
+
+    uv_handle_t * native = Parent::cast<uv_handle_t>();
+    assert(native != nullptr);
+    native->data = this; // IMPORTANT!!
 }
 
 Handle::~Handle()
 {
-    // checkedClose();
-}
-
-void Handle::checkedClose()
-{
     if (isInit() && isClosing() == false) {
-        close();
+        tryClose();
     }
 }
 
 bool Handle::isInit() const TBAG_NOEXCEPT
 {
-    return Parent::cast<uv_handle_t>()->type != UV_UNKNOWN_HANDLE /* 0 */ ? true : false;
+    return Parent::cast<uv_handle_t>()->type != UV_UNKNOWN_HANDLE/*0*/;
 }
 
 void Handle::close()
 {
+    // Request handle to be closed. close_cb will be called asynchronously after this call.
+    // This MUST be called on each handle before memory is released.
+    //
+    // Handles that wrap file descriptors are closed immediately but close_cb will still be
+    // deferred to the next iteration of the event loop.
+    // It gives you a chance to free up any resources associated with the handle.
+    //
+    // In-progress requests, like uv_connect_t or uv_write_t, are cancelled and have their
+    // callbacks called asynchronously with status=UV_ECANCELED.
     ::uv_close(Parent::cast<uv_handle_t>(), __global_uv_close_cb__);
+}
+
+void Handle::tryClose()
+{
+    ::uv_close(Parent::cast<uv_handle_t>(), nullptr);
 }
 
 bool Handle::isActive() const TBAG_NOEXCEPT
 {
-    /* What “active” means depends on the type of handle:
-     *
-     * - A uv_async_t handle is always active and cannot be deactivated,
-     *   except by closing it with uv_close().
-     * - A uv_pipe_t, uv_tcp_t, uv_udp_t, etc. handle (basically any handle that deals with i/o)
-     *   is active when it is doing something that involves i/o,
-     *   like reading, writing, connecting, accepting new connections, etc.
-     * - A uv_check_t, uv_idle_t, uv_timer_t, etc. handle is active
-     *   when it has been started with a call to uv_check_start(), uv_idle_start(), etc.
-     *
-     * Rule of thumb: if a handle of type uv_foo_t has a uv_foo_start() function,
-     * then it’s active from the moment that function is called.
-     * Likewise, uv_foo_stop() deactivates the handle again.
-     */
+    // What "active" means depends on the type of handle:
+    //
+    // - A uv_async_t handle is always active and cannot be deactivated,
+    //   except by closing it with uv_close().
+    // - A uv_pipe_t, uv_tcp_t, uv_udp_t, etc. handle (basically any handle that deals with i/o)
+    //   is active when it is doing something that involves i/o,
+    //   like reading, writing, connecting, accepting new connections, etc.
+    // - A uv_check_t, uv_idle_t, uv_timer_t, etc. handle is active
+    //   when it has been started with a call to uv_check_start(), uv_idle_start(), etc.
+    //
+    // Rule of thumb: if a handle of type uv_foo_t has a uv_foo_start() function,
+    // then it’s active from the moment that function is called.
+    // Likewise, uv_foo_stop() deactivates the handle again.
     return ::uv_is_active(Parent::cast<uv_handle_t>());
 }
 
 bool Handle::isClosing() const TBAG_NOEXCEPT
 {
-    int const ENABLE = ::uv_is_closing(this->cast<uv_handle_t>());
-    return (ENABLE == 0 ? false : true);
+    return ::uv_is_closing(this->cast<uv_handle_t>()) != 0;
 }
 
 void Handle::ref() TBAG_NOEXCEPT
