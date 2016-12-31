@@ -66,6 +66,9 @@ public:
 
     /** Gets the current Window size. On success it returns 0. */
     bool getWinSize(int * width, int * height);
+
+public:
+    static bool guessHandle(uv::File fd);
 };
 
 } // namespace uv

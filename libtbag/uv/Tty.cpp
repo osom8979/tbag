@@ -49,6 +49,10 @@ Tty::Tty(Loop & loop, uv::File fd, bool readable) : Stream(UvHandleType::TTY)
         __tbag_error("Tty::Tty() error [{}] {}", CODE, getUvErrorName(CODE));
         throw std::bad_alloc();
     }
+
+    if (guessHandle(fd) == false) {
+        __tbag_error("Tty::Tty() Not UV_TTY handle error.");
+    }
 }
 
 Tty::Tty(Loop & loop, DefaultIo fd) : Stream(UvHandleType::TTY)
@@ -68,6 +72,10 @@ Tty::Tty(Loop & loop, DefaultIo fd) : Stream(UvHandleType::TTY)
     if (CODE != 0) {
         __tbag_error("Tty::Tty() error [{}] {}", CODE, getUvErrorName(CODE));
         throw std::bad_alloc();
+    }
+
+    if (guessHandle(native_fd) == false) {
+        __tbag_error("Tty::Tty() Not UV_TTY handle error.");
     }
 }
 
@@ -122,6 +130,15 @@ bool Tty::getWinSize(int * width, int * height)
         return false;
     }
     return true;
+}
+
+bool Tty::guessHandle(uv::File fd)
+{
+    // Used to detect what type of stream should be used with a given file descriptor.
+    // Usually this will be used during initialization to guess the type of the stdio streams.
+    //
+    // For isatty(3) equivalent functionality use this function and test for UV_TTY.
+    return ::uv_guess_handle(fd) == UV_TTY;
 }
 
 } // namespace uv
