@@ -187,6 +187,11 @@ void BaseLoop::onWalk(void * native_handle, void * arg)
 
 void BaseLoop::printAllHandles(FILE * file)
 {
+    // The format is [flags] handle-type handle-address. For flags:
+    //
+    // - R is printed for a handle that is referenced
+    // - A is printed for a handle that is active
+    // - I is printed for a handle that is internal
     ::uv_print_all_handles(Parent::cast<uv_loop_t>(), file);
 }
 

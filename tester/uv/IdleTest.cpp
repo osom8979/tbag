@@ -9,6 +9,7 @@
 #include <libtbag/uv/Loop.hpp>
 #include <libtbag/uv/Idle.hpp>
 
+#include <cstdio>
 #include <memory>
 
 using namespace libtbag;
@@ -16,6 +17,8 @@ using namespace libtbag::uv;
 
 static bool g_is_idle;
 static bool g_is_close;
+
+TBAG_CONSTEXPR static bool const USE_DEBUGGING = false;
 
 struct IdleTest : public Idle
 {
@@ -45,6 +48,12 @@ TEST(IdleTest, Default)
         auto weak = loop.insertChildHandle(new IdleTest(loop));
         static_cast<IdleTest*>(weak.lock().get())->start();
         loop.run();
+
+        if (USE_DEBUGGING) { // ONLY DEBUGGING.
+            weak.lock()->close();
+            loop.run();
+            loop.printAllHandles(stdout);
+        }
     }
 
     ASSERT_TRUE(g_is_idle);
