@@ -52,6 +52,7 @@ public:
     using Parent = Handle;
 
 public:
+    Idle();
     Idle(Loop & loop);
     virtual ~Idle();
 
@@ -60,6 +61,9 @@ public:
     { return isActive(); }
 
 public:
+    /** Initialize the handle. */
+    bool init(Loop & loop);
+
     /** Start the handle with the given callback. */
     bool start();
 

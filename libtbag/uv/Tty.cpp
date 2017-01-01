@@ -17,13 +17,40 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uv {
 
-Tty::Tty(Loop & loop, uv::File fd, bool readable) : Stream(UvHandleType::TTY)
+Tty::Tty() : Stream(UvHandleType::TTY)
 {
-    // Initialize a new TTY stream with the given file descriptor. Usually the file descriptor will be:
-    // - 0 = stdin
-    // - 1 = stdout
-    // - 2 = stderr
-    //
+    // EMPTY.
+}
+
+Tty::Tty(Loop & loop, uv::File fd, bool readable) : Tty()
+{
+    if (init(loop, fd, readable) != 0) {
+        throw std::bad_alloc();
+    }
+
+    if (guessHandle(fd) == false) {
+        __tbag_error("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
+    }
+}
+
+Tty::Tty(Loop & loop, GeneralFile fd) : Tty()
+{
+    if (init(loop, fd) != 0) {
+        throw std::bad_alloc();
+    }
+
+    if (guessHandle(fd) == false) {
+        __tbag_error("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
+    }
+}
+
+Tty::~Tty()
+{
+    // EMPTY.
+}
+
+bool Tty::init(Loop & loop, uv::File fd, bool readable)
+{
     // readable, specifies if you plan on calling uv_read_start() with this stream.
     // stdin is readable, stdout is not.
     //
@@ -46,42 +73,15 @@ Tty::Tty(Loop & loop, uv::File fd, bool readable) : Stream(UvHandleType::TTY)
 
     int const CODE = ::uv_tty_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tty_t>(), fd, readable ? 1 : 0);
     if (CODE != 0) {
-        __tbag_error("Tty::Tty() error [{}] {}", CODE, getUvErrorName(CODE));
-        throw std::bad_alloc();
+        __tbag_error("Tty::init() error [{}] {}", CODE, getUvErrorName(CODE));
+        return false;
     }
-
-    if (guessHandle(fd) == false) {
-        __tbag_error("Tty::Tty() Not UV_TTY handle error.");
-    }
+    return true;
 }
 
-Tty::Tty(Loop & loop, DefaultIo fd) : Stream(UvHandleType::TTY)
+bool Tty::init(Loop & loop, GeneralFile fd)
 {
-    uv_file native_fd;
-    bool    readable;
-
-    // @formatter:off
-    switch (fd) {
-    case DefaultIo::FILE_STDIN : native_fd = 0; readable =  true; break;
-    case DefaultIo::FILE_STDOUT: native_fd = 1; readable = false; break;
-    case DefaultIo::FILE_STDERR: native_fd = 2; readable = false; break;
-    }
-    // @formatter:on
-
-    int const CODE = ::uv_tty_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tty_t>(), native_fd, readable ? 1 : 0);
-    if (CODE != 0) {
-        __tbag_error("Tty::Tty() error [{}] {}", CODE, getUvErrorName(CODE));
-        throw std::bad_alloc();
-    }
-
-    if (guessHandle(native_fd) == false) {
-        __tbag_error("Tty::Tty() Not UV_TTY handle error.");
-    }
-}
-
-Tty::~Tty()
-{
-    // EMPTY.
+    return init(loop, toFile(fd), fd == GeneralFile::FILE_STDIN);
 }
 
 bool Tty::setMode(TtyMode mode)
@@ -132,6 +132,17 @@ bool Tty::getWinSize(int * width, int * height)
     return true;
 }
 
+uv::File Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (fd) {
+    case GeneralFile::FILE_STDIN : return 0;
+    case GeneralFile::FILE_STDOUT: return 1;
+    case GeneralFile::FILE_STDERR: return 2;
+    }
+    // @formatter:on
+}
+
 bool Tty::guessHandle(uv::File fd)
 {
     // Used to detect what type of stream should be used with a given file descriptor.
@@ -139,6 +150,11 @@ bool Tty::guessHandle(uv::File fd)
     //
     // For isatty(3) equivalent functionality use this function and test for UV_TTY.
     return ::uv_guess_handle(fd) == UV_TTY;
+}
+
+bool Tty::guessHandle(GeneralFile fd)
+{
+    return guessHandle(toFile(fd));
 }
 
 } // namespace uv

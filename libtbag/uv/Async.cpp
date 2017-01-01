@@ -35,11 +35,14 @@ static void __global_uv_async_cb__(uv_async_t * handle)
 // Async implementation.
 // ---------------------
 
-Async::Async(Loop & loop) : Handle(UvHandleType::ASYNC)
+Async::Async() : Handle(UvHandleType::ASYNC)
 {
-    int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
-    if (CODE != 0) {
-        __tbag_error("Async::Async() error [{}] {}", CODE, getUvErrorName(CODE));
+    // EMPTY.
+}
+
+Async::Async(Loop & loop) : Async()
+{
+    if (init(loop) == false) {
         throw std::bad_alloc();
     }
 }
@@ -47,6 +50,16 @@ Async::Async(Loop & loop) : Handle(UvHandleType::ASYNC)
 Async::~Async()
 {
     // EMPTY.
+}
+
+bool Async::init(Loop & loop)
+{
+    int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
+    if (CODE != 0) {
+        __tbag_error("Async::Async() error [{}] {}", CODE, getUvErrorName(CODE));
+        return false;
+    }
+    return true;
 }
 
 bool Async::send()

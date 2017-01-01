@@ -47,13 +47,22 @@ public:
     using Parent = Handle;
 
 public:
+    Async();
+
+    /**
+     * @warning
+     *  it immediately starts the handle.
+     */
+    Async(Loop & loop);
+    virtual ~Async();
+
+public:
     /**
      * @warning
      *  Unlike other handle initialization functions, @n
      *  it immediately starts the handle.
      */
-    Async(Loop & loop);
-    virtual ~Async();
+    bool init(Loop & loop);
 
 public:
     /**

@@ -58,6 +58,8 @@ private:
 
 public:
     // @formatter:off
+    CallableTcp() : Tcp(), _cb(nullptr)
+    { /* EMPTY. */ }
     CallableTcp(Loop & l, Callback * c = nullptr) : Tcp(l), _cb(c)
     { /* EMPTY. */ }
     ~CallableTcp()

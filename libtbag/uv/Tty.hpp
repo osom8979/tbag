@@ -45,7 +45,7 @@ public:
         TTY_IO      // Binary-safe I/O mode for IPC (Unix-only).
     };
 
-    enum class DefaultIo : uv::File
+    enum class GeneralFile : uv::File
     {
         FILE_STDIN  = 0,
         FILE_STDOUT = 1,
@@ -53,11 +53,16 @@ public:
     };
 
 public:
+    Tty();
     Tty(Loop & loop, uv::File fd, bool readable);
-    Tty(Loop & loop, DefaultIo fd);
+    Tty(Loop & loop, GeneralFile fd);
     virtual ~Tty();
 
 public:
+    /** Initialize a new TTY stream with the given file descriptor. */
+    bool init(Loop & loop, uv::File fd, bool readable);
+    bool init(Loop & loop, GeneralFile fd);
+
     /** Set the TTY using the specified terminal mode. */
     bool setMode(TtyMode mode);
 
@@ -68,7 +73,11 @@ public:
     bool getWinSize(int * width, int * height);
 
 public:
+    static uv::File toFile(GeneralFile fd) TBAG_NOEXCEPT;
+
+    /** Used to detect what type of stream should be used with a given file descriptor. */
     static bool guessHandle(uv::File fd);
+    static bool guessHandle(GeneralFile fd);
 };
 
 } // namespace uv

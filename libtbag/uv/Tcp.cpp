@@ -47,12 +47,14 @@ static void __global_uv_connect_cb__(uv_connect_t * request, int status)
 // Tcp implementation.
 // -------------------
 
-Tcp::Tcp(Loop & loop) : Stream(UvHandleType::TCP)
+Tcp::Tcp() : Stream(UvHandleType::TCP)
 {
-    // Initialize the handle. No socket is created as of yet.
-    int const CODE = ::uv_tcp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tcp_t>());
-    if (CODE != 0) {
-        __tbag_error("Tcp::Tcp() error [{}] {}", CODE, getUvErrorName(CODE));
+    // EMPTY.
+}
+
+Tcp::Tcp(Loop & loop) : Tcp()
+{
+    if (init(loop) == false) {
         throw std::bad_alloc();
     }
 }
@@ -60,6 +62,16 @@ Tcp::Tcp(Loop & loop) : Stream(UvHandleType::TCP)
 Tcp::~Tcp()
 {
     // EMPTY.
+}
+
+bool Tcp::init(Loop & loop)
+{
+    int const CODE = ::uv_tcp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tcp_t>());
+    if (CODE != 0) {
+        __tbag_error("Tcp::init() error [{}] {}", CODE, getUvErrorName(CODE));
+        return false;
+    }
+    return true;
 }
 
 bool Tcp::setNodelay(bool enable)

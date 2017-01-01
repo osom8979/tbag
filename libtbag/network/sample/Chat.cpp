@@ -189,7 +189,7 @@ void ChatClient::onClose()
 // ------------------------------
 
 AsyncChatInput::AsyncChatInput(uv::Loop & loop, ChatClient & client, std::string const & name)
-        : uv::Tty(loop, DefaultIo::FILE_STDIN), _client(client), _name(name)
+        : uv::Tty(loop, GeneralFile::FILE_STDIN), _client(client), _name(name)
 {
     setMode(TtyMode::TTY_NORMAL);
     startRead();

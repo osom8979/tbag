@@ -42,6 +42,7 @@ public:
     using Parent = Stream;
 
 public:
+    Tcp();
     Tcp(Loop & loop);
     virtual ~Tcp();
 
@@ -50,6 +51,9 @@ public:
     { return isActive(); }
 
 public:
+    /** Initialize the handle. No socket is created as of yet. */
+    bool init(Loop & loop);
+
     /** Enable TCP_NODELAY, which disables Nagle's algorithm. */
     bool setNodelay(bool enable = true);
 

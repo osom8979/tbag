@@ -35,11 +35,14 @@ static void __global_uv_idle_cb__(uv_idle_t * handle)
 // Idle implementation.
 // --------------------
 
-Idle::Idle(Loop & loop) : Handle(UvHandleType::IDLE)
+Idle::Idle() : Handle(UvHandleType::IDLE)
 {
-    int const CODE = ::uv_idle_init(loop.cast<uv_loop_t>(), Parent::cast<uv_idle_t>());
-    if (CODE != 0) {
-        __tbag_error("Idle::Idle() error [{}] {}", CODE, getUvErrorName(CODE));
+    // EMPTY.
+}
+
+Idle::Idle(Loop & loop) : Idle()
+{
+    if (init(loop) == false) {
         throw std::bad_alloc();
     }
 }
@@ -47,6 +50,16 @@ Idle::Idle(Loop & loop) : Handle(UvHandleType::IDLE)
 Idle::~Idle()
 {
     // EMPTY.
+}
+
+bool Idle::init(Loop & loop)
+{
+    int const CODE = ::uv_idle_init(loop.cast<uv_loop_t>(), Parent::cast<uv_idle_t>());
+    if (CODE != 0) {
+        __tbag_error("Idle::init() error [{}] {}", CODE, getUvErrorName(CODE));
+        return false;
+    }
+    return true;
 }
 
 bool Idle::start()
