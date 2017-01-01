@@ -29,7 +29,7 @@ TcpLoop::~TcpLoop()
 
 TcpLoop::WriteRequest & TcpLoop::obtainWriteRequest(Tcp & tcp)
 {
-    auto weak = _writers.create(tcp);
+    auto weak = _writers.create(&tcp);
     assert(weak.expired() == false);
     return *static_cast<WriteRequest*>(weak.lock().get());
 }

@@ -84,20 +84,20 @@ public:
     void clear();
 
 public:
-    WeakRequest find(RequestKey    request) const;
-    WeakRequest find(Request     * request) const;
-    WeakRequest find(SharedRequest request) const;
-    WeakRequest find(WeakRequest   request) const;
-
-public:
+    WeakRequest find(RequestKey request) const;
     WeakRequest create(Handle * owner);
-    WeakRequest create(Handle & owner);
+    void release(RequestKey request);
 
 public:
-    void release(RequestKey    request);
-    void release(Request     * request);
-    void release(SharedRequest request);
-    void release(WeakRequest   request);
+    // @formatter:off
+    WeakRequest find(Request     * request) const { return find(RequestKey(request)); }
+    WeakRequest find(SharedRequest request) const { return find(request.get());       }
+    WeakRequest find(WeakRequest   request) const { return find(request.lock());      }
+
+    void release(Request     * request) { release(RequestKey(request)); }
+    void release(SharedRequest request) { release(request.get());       }
+    void release(WeakRequest   request) { release(request.lock());      }
+    // @formatter:on
 };
 
 #ifndef _TBAG_UV_REQUEST_QUEUE_EX

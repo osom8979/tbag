@@ -46,21 +46,6 @@ RequestQueue::WeakRequest RequestQueue::find(RequestKey request) const
     return WeakRequest(itr->second);
 }
 
-RequestQueue::WeakRequest RequestQueue::find(Request * request) const
-{
-    return find(RequestKey(request));
-}
-
-RequestQueue::WeakRequest RequestQueue::find(SharedRequest request) const
-{
-    return find(request.get());
-}
-
-RequestQueue::WeakRequest RequestQueue::find(WeakRequest request) const
-{
-    return find(request.lock());
-}
-
 RequestQueue::WeakRequest RequestQueue::create(Handle * owner)
 {
     Guard guard(_mutex);
@@ -84,11 +69,6 @@ RequestQueue::WeakRequest RequestQueue::create(Handle * owner)
     return WeakRequest(prepare);
 }
 
-RequestQueue::WeakRequest RequestQueue::create(Handle & owner)
-{
-    return create(&owner);
-}
-
 void RequestQueue::release(RequestKey request)
 {
     Guard guard(_mutex);
@@ -97,21 +77,6 @@ void RequestQueue::release(RequestKey request)
         _prepare.push(itr->second);
         _active.erase(itr);
     }
-}
-
-void RequestQueue::release(Request * request)
-{
-    release(RequestKey(request));
-}
-
-void RequestQueue::release(SharedRequest request)
-{
-    release(request.get());
-}
-
-void RequestQueue::release(WeakRequest request)
-{
-    release(request.lock());
 }
 
 } // namespace ex
