@@ -1,12 +1,12 @@
 /**
- * @file   DatagramTcp.hpp
- * @brief  DatagramTcp class prototype.
+ * @file   DatagramAdapter.hpp
+ * @brief  DatagramAdapter class prototype.
  * @author zer0
  * @date   2017-01-02
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMTCP_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMTCP_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMADAPTER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMADAPTER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -32,12 +32,12 @@ namespace network {
 class CommonTcp;
 
 /**
- * DatagramTcp class prototype.
+ * DatagramAdapter class prototype.
  *
  * @author zer0
  * @date   2017-01-02
  */
-class TBAG_API DatagramTcp : public Noncopyable
+class TBAG_API DatagramAdapter : public Noncopyable
 {
 public:
     using CircularBuffer = container::CircularBuffer<char>;
@@ -68,8 +68,8 @@ private:
     Callback * _callback;
 
 public:
-    DatagramTcp(Callback * callback = nullptr);
-    virtual ~DatagramTcp();
+    DatagramAdapter(Callback * callback = nullptr);
+    virtual ~DatagramAdapter();
 
 public:
     binf writeDatagram(char const * buffer, std::size_t size);
@@ -92,5 +92,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMTCP_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMADAPTER_HPP__
 

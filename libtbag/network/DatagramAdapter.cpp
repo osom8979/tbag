@@ -1,11 +1,11 @@
 /**
- * @file   DatagramTcp.cpp
- * @brief  DatagramTcp class implementation.
+ * @file   DatagramAdapter.cpp
+ * @brief  DatagramAdapter class implementation.
  * @author zer0
  * @date   2017-01-02
  */
 
-#include <libtbag/network/DatagramTcp.hpp>
+#include <libtbag/network/DatagramAdapter.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/CommonTcp.hpp>
 
@@ -22,17 +22,17 @@ namespace network {
 static std::size_t const NO_NEXT_READ_SIZE    = std::numeric_limits<std::size_t>::max();
 static std::size_t const DATAGRAM_HEADER_SIZE = sizeof(uint32_t);
 
-DatagramTcp::DatagramTcp(Callback * callback) : _write_size(0), _next_read_size(NO_NEXT_READ_SIZE), _callback(callback)
+DatagramAdapter::DatagramAdapter(Callback * callback) : _write_size(0), _next_read_size(NO_NEXT_READ_SIZE), _callback(callback)
 {
     // EMPTY.
 }
 
-DatagramTcp::~DatagramTcp()
+DatagramAdapter::~DatagramAdapter()
 {
     // EMPTY.
 }
 
-DatagramTcp::binf DatagramTcp::writeDatagram(char const * buffer, std::size_t size)
+DatagramAdapter::binf DatagramAdapter::writeDatagram(char const * buffer, std::size_t size)
 {
     // Realloc with read buffer.
     if (_write_buffer.size() < size) {
@@ -51,7 +51,7 @@ DatagramTcp::binf DatagramTcp::writeDatagram(char const * buffer, std::size_t si
     return result;
 }
 
-std::size_t DatagramTcp::readNextDatagramSize()
+std::size_t DatagramAdapter::readNextDatagramSize()
 {
     // Section 01: Exists next_read_size.
     if (_next_read_size != NO_NEXT_READ_SIZE) {
@@ -71,18 +71,18 @@ std::size_t DatagramTcp::readNextDatagramSize()
     return _next_read_size;
 }
 
-void DatagramTcp::clearNextDatagramSize()
+void DatagramAdapter::clearNextDatagramSize()
 {
     _next_read_size = NO_NEXT_READ_SIZE;
 }
 
-DatagramTcp::WriteRequest * DatagramTcp::asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size)
+DatagramAdapter::WriteRequest * DatagramAdapter::asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size)
 {
     binf buffer_info = writeDatagram(buffer, size);
     return tcp.asyncWrite(&buffer_info, 1);
 }
 
-std::size_t DatagramTcp::tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result)
+std::size_t DatagramAdapter::tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result)
 {
     binf buffer_info = writeDatagram(buffer, size);
     return tcp.tryWrite(&buffer_info, 1);
@@ -92,12 +92,12 @@ std::size_t DatagramTcp::tryWrite(CommonTcp & tcp, char const * buffer, std::siz
 // Event by-pass methods.
 // ----------------------
 
-void DatagramTcp::bypassOnAlloc(std::size_t suggested_size)
+void DatagramAdapter::bypassOnAlloc(std::size_t suggested_size)
 {
     _data_buffer.resize(suggested_size * 2);
 }
 
-void DatagramTcp::bypassOnRead(Err code, char const * buffer, std::size_t size)
+void DatagramAdapter::bypassOnRead(Err code, char const * buffer, std::size_t size)
 {
     if (code != Err::SUCCESS) {
         if (_callback != nullptr) {
