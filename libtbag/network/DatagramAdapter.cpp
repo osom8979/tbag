@@ -22,7 +22,7 @@ namespace network {
 static std::size_t const NO_NEXT_READ_SIZE    = std::numeric_limits<std::size_t>::max();
 static std::size_t const DATAGRAM_HEADER_SIZE = sizeof(uint32_t);
 
-DatagramAdapter::DatagramAdapter(Callback * callback) : _write_size(0), _next_read_size(NO_NEXT_READ_SIZE), _callback(callback)
+DatagramAdapter::DatagramAdapter() : _write_size(0), _next_read_size(NO_NEXT_READ_SIZE)
 {
     // EMPTY.
 }
@@ -92,48 +92,44 @@ std::size_t DatagramAdapter::tryWrite(CommonTcp & tcp, char const * buffer, std:
 // Event by-pass methods.
 // ----------------------
 
-DatagramAdapter::binf DatagramAdapter::bypassOnAlloc(Buffer & buffer, std::size_t suggested_size)
+void DatagramAdapter::alloc(std::size_t suggested_size)
 {
     _data_buffer.resize(suggested_size * 2);
-    return uv::defaultOnAlloc(buffer, suggested_size);
 }
 
-void DatagramAdapter::bypassOnRead(Err code, char const * buffer, std::size_t size)
+void DatagramAdapter::push(char const * buffer, std::size_t size)
 {
-    if (code != Err::SUCCESS) {
-        if (_callback != nullptr) {
-            _callback->onDatagramRead(code, buffer, size); // ERROR CASE.
-        }
-        return;
-    }
-
     _data_buffer.push(buffer, size);
+}
 
-    while (true) {
-        std::size_t const READ_SIZE = readNextDatagramSize();
-        if (READ_SIZE == NO_NEXT_READ_SIZE) {
-            break;
-        }
-
-        if (_data_buffer.size() >= READ_SIZE) {
-            // Realloc with read buffer.
-            if (_read_buffer.size() < READ_SIZE) {
-                _read_buffer.resize(READ_SIZE);
-            }
-
-            std::size_t real_read_size = _data_buffer.pop(&_read_buffer[0], READ_SIZE);
-            if (real_read_size != READ_SIZE) {
-                code = Err::READ_ERROR;
-            }
-
-            if (_callback != nullptr) {
-                _callback->onDatagramRead(code, &_read_buffer[0], real_read_size);
-            }
-            clearNextDatagramSize();
-        } else {
-            break;
-        }
+bool DatagramAdapter::next(binf * result)
+{
+    std::size_t const READ_SIZE = readNextDatagramSize();
+    if (READ_SIZE == NO_NEXT_READ_SIZE) {
+        return false;
     }
+
+    if (_data_buffer.size() < READ_SIZE) {
+        return false;
+    }
+
+    // Realloc with read buffer.
+    if (_read_buffer.size() < READ_SIZE) {
+        _read_buffer.resize(READ_SIZE);
+    }
+
+    std::size_t real_read_size = _data_buffer.pop(&_read_buffer[0], READ_SIZE);
+    if (real_read_size != READ_SIZE) {
+        return false;
+    }
+
+    if (result != nullptr) {
+        result->buffer = &_read_buffer[0];
+        result->size   = real_read_size;
+    }
+
+    clearNextDatagramSize();
+    return true;
 }
 
 } // namespace network

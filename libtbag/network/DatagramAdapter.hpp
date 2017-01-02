@@ -47,12 +47,6 @@ public:
     using WriteRequest = uv::WriteRequest;
     using binf         = uv::binf;
 
-public:
-    struct Callback
-    {
-        virtual void onDatagramRead(Err code, char const * buffer, std::size_t size) = 0;
-    };
-
 private:
     Buffer _write_buffer;
     Size   _write_size;
@@ -64,11 +58,8 @@ private:
 private:
     CircularBuffer _data_buffer;
 
-private:
-    Callback * _callback;
-
 public:
-    DatagramAdapter(Callback * callback = nullptr);
+    DatagramAdapter();
     virtual ~DatagramAdapter();
 
 public:
@@ -82,8 +73,9 @@ public:
 
 // Event by-pass methods.
 public:
-    binf bypassOnAlloc(Buffer & buffer, std::size_t suggested_size);
-    void bypassOnRead(Err code, char const * buffer, std::size_t size);
+    void alloc(std::size_t suggested_size);
+    void push(char const * buffer, std::size_t size);
+    bool next(binf * result);
 };
 
 } // namespace network
