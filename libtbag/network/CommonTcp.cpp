@@ -8,6 +8,7 @@
 #include <libtbag/network/CommonTcp.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uv/Request.hpp>
+#include <libtbag/uv/Loop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,6 +27,11 @@ CommonTcp::CommonTcp(SharedTcp tcp) : _tcp(tcp)
 }
 
 CommonTcp::CommonTcp(CallableTcp * tcp) : _tcp(tcp)
+{
+    // EMPTY.
+}
+
+CommonTcp::CommonTcp(uv::Loop & loop) : _tcp(new CallableTcp(loop, this))
 {
     // EMPTY.
 }

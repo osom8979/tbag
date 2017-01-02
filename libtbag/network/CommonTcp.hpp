@@ -31,6 +31,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
+// Forward declaration.
+class Loop;
+
 /**
  * CommonTcp class prototype.
  *
@@ -48,7 +51,8 @@ public:
     using Parent = Callback;
 
 public:
-    using binf           = uv::binf;
+    using binf = uv::binf;
+    using Loop = uv::Loop;
     using ConnectRequest = uv::ConnectRequest;
     using WriteRequest   = uv::WriteRequest;
     using WriteQueue     = uv::ex::WriteQueue;
@@ -66,6 +70,7 @@ public:
     CommonTcp();
     CommonTcp(SharedTcp tcp);
     CommonTcp(CallableTcp * tcp);
+    CommonTcp(uv::Loop & loop);
     virtual ~CommonTcp();
 
 public:
