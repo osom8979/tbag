@@ -189,6 +189,10 @@ public:
     { return _buffer[index]; }
 
 public:
+    inline void resize(std::size_t size)
+    { _buffer.resize(size); } // WARNING!!!
+
+public:
     inline bool empty() const TBAG_NOEXCEPT
     { return _index.empty(); }
     inline std::size_t size() const TBAG_NOEXCEPT

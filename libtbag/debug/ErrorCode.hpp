@@ -28,6 +28,7 @@ namespace debug {
     _TBAG_XX(     FAILURE, Unknown error)         \
     _TBAG_XX( UNSUPPORTED, Unsupported operation) \
     _TBAG_XX(NULL_POINTER, Nullpointer exception) \
+    _TBAG_XX(  READ_ERROR, Data read error)  \
     /* Locale */ \
     _TBAG_XX(LOCALE_CONVERTER_ERROR, UConverter error)  \
     /* File */ \
