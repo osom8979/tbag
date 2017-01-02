@@ -235,13 +235,15 @@ Loop::~Loop()
 
 void Loop::runCloseAllHandles()
 {
+    bool is_close = false;
     for (auto & cursor : _handles) {
         if (static_cast<bool>(cursor) && cursor->isInit() && cursor->isClosing() == false) {
             cursor->close();
+            is_close = true;
         }
     }
 
-    if (isRunning() == false) {
+    if (is_close && isRunning() == false) {
         run(RunMode::RUN_DEFAULT);
     }
 }
