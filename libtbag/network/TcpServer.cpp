@@ -112,16 +112,7 @@ bool TcpServer::run(std::string const & ip, int port)
 
 TcpServer::binf TcpServer::onClientAlloc(Client & client, std::size_t suggested_size)
 {
-    // return ((CommonTcp&)client).onAlloc(suggested_size); // Don't use this code.
-
-    if (client._read_buffer.size() < suggested_size) {
-        client._read_buffer.resize(suggested_size);
-    }
-
-    binf info;
-    info.buffer = &client._read_buffer[0];
-    info.size   =  client._read_buffer.size();
-    return info;
+    return uv::defaultOnAlloc(client.atReadBuffer(), suggested_size);
 }
 
 void TcpServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)

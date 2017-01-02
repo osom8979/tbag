@@ -103,15 +103,7 @@ std::size_t CommonTcp::tryWrite(char const * buffer, std::size_t size, Err * res
 
 CommonTcp::binf CommonTcp::onAlloc(std::size_t suggested_size)
 {
-    // Realloc with read buffer.
-    if (_read_buffer.size() < suggested_size) {
-        _read_buffer.resize(suggested_size);
-    }
-
-    binf info;
-    info.buffer = &_read_buffer[0];
-    info.size   =  _read_buffer.size();
-    return info;
+    return uv::defaultOnAlloc(atReadBuffer(), suggested_size);
 }
 
 } // namespace network

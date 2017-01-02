@@ -83,6 +83,18 @@ bool isUvNativeHandleType(void const * handle)
     }
 }
 
+binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_size)
+{
+    if (buffer.size() < suggested_size) {
+        buffer.resize(suggested_size);
+    }
+
+    binf info;
+    info.buffer = &buffer[0];
+    info.size   =  buffer.size();
+    return info;
+}
+
 } // namespace uv
 
 // --------------------

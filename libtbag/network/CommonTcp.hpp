@@ -53,6 +53,7 @@ public:
 public:
     using binf = uv::binf;
     using Loop = uv::Loop;
+
     using ConnectRequest = uv::ConnectRequest;
     using WriteRequest   = uv::WriteRequest;
     using WriteQueue     = uv::ex::WriteQueue;
@@ -79,6 +80,8 @@ public:
     inline SharedTcp const & atTcp() const TBAG_NOEXCEPT { return _tcp; }
     inline void setTcp(SharedTcp     tcp) { _tcp = tcp;      }
     inline void setTcp(CallableTcp * tcp) { _tcp.reset(tcp); }
+    inline Buffer       & atReadBuffer()       TBAG_NOEXCEPT { return _read_buffer; }
+    inline Buffer const & atReadBuffer() const TBAG_NOEXCEPT { return _read_buffer; }
     // @formatter:on
 
 public:
@@ -95,7 +98,8 @@ public:
     inline std::string getPeerName() { return _tcp->getPeerName(); }
 
     inline void setUserData(void * data) TBAG_NOEXCEPT { _tcp->setUserData(data); }
-    inline void * getUserData() TBAG_NOEXCEPT { return _tcp->getUserData(); }
+
+    inline void       * getUserData()       TBAG_NOEXCEPT { return _tcp->getUserData(); }
     inline void const * getUserData() const TBAG_NOEXCEPT { return _tcp->getUserData(); }
     // @formatter:on
 

@@ -25,6 +25,7 @@ typedef intptr_t ssize_t;
 
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 #if defined(__OS_WINDOWS__)
 # include <winsock2.h>
@@ -127,22 +128,6 @@ using AddressType = std::size_t;
 #endif
 AddressType const DEBUG_UV_DELETED_ADDRESS_VALUE = static_cast<AddressType>(-1);
 
-template <typename T>
-inline bool isDeletedAddress(T const * value) TBAG_NOEXCEPT
-{ return DEBUG_UV_DELETED_ADDRESS_VALUE == reinterpret_cast<AddressType>(value); }
-
-TBAG_API bool isHandle (UvType type);
-TBAG_API bool isRequest(UvType type);
-TBAG_API bool isEtc    (UvType type);
-
-/**
- * @remarks
- *  - uv_stream_t is a subclass of uv_handle_t.
- *  - uv_stream is an abstract class.
- *  - uv_stream_t is the parent class of uv_tcp_t, uv_pipe_t and uv_tty_t.
- */
-TBAG_API bool isStream(UvType type);
-
 /**
  * Buffer information structure.
  *
@@ -163,12 +148,21 @@ struct BufferInfo
 /** Short name of BufferInfo type. */
 typedef BufferInfo binf;
 
-// ---------------------
-// Native handle helper.
-// ---------------------
+template <typename T>
+inline bool isDeletedAddress(T const * value) TBAG_NOEXCEPT
+{ return DEBUG_UV_DELETED_ADDRESS_VALUE == reinterpret_cast<AddressType>(value); }
 
-TBAG_API char const * getUvNativeHandleName(void const * handle);
-TBAG_API bool isUvNativeHandleType(void const * handle);
+TBAG_API bool isHandle (UvType type);
+TBAG_API bool isRequest(UvType type);
+TBAG_API bool isEtc    (UvType type);
+
+/**
+ * @remarks
+ *  - uv_stream_t is a subclass of uv_handle_t.
+ *  - uv_stream is an abstract class.
+ *  - uv_stream_t is the parent class of uv_tcp_t, uv_pipe_t and uv_tty_t.
+ */
+TBAG_API bool isStream(UvType type);
 
 // ------------------
 // Debugging methods.
@@ -191,6 +185,15 @@ TBAG_API std::string getUvErrorString(int uv_error_code);
  *  @endcode
  */
 TBAG_API std::string getUvErrorName(int uv_error_code);
+
+// ---------------------
+// Native handle helper.
+// ---------------------
+
+TBAG_API char const * getUvNativeHandleName(void const * handle);
+TBAG_API bool isUvNativeHandleType(void const * handle);
+
+TBAG_API binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_size);
 
 } // namespace uv
 

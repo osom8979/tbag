@@ -82,7 +82,7 @@ public:
 
 // Event by-pass methods.
 public:
-    void bypassOnAlloc(std::size_t suggested_size);
+    binf bypassOnAlloc(Buffer & buffer, std::size_t suggested_size);
     void bypassOnRead(Err code, char const * buffer, std::size_t size);
 };
 

@@ -92,9 +92,10 @@ std::size_t DatagramAdapter::tryWrite(CommonTcp & tcp, char const * buffer, std:
 // Event by-pass methods.
 // ----------------------
 
-void DatagramAdapter::bypassOnAlloc(std::size_t suggested_size)
+DatagramAdapter::binf DatagramAdapter::bypassOnAlloc(Buffer & buffer, std::size_t suggested_size)
 {
     _data_buffer.resize(suggested_size * 2);
+    return uv::defaultOnAlloc(buffer, suggested_size);
 }
 
 void DatagramAdapter::bypassOnRead(Err code, char const * buffer, std::size_t size)
