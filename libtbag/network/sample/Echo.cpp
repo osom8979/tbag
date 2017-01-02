@@ -24,7 +24,7 @@ static char const * const TEST_ECHO_MESSAGE = "__TEST_ECHO_MESSAGE__";
 // Echo server implementation.
 // ---------------------------
 
-EchoServer::EchoServer(int count) : _write_count(3), _echo_count(_write_count * 5)
+EchoServer::EchoServer(int count) : _write_count(count), _echo_count(count * 5)
 {
     std::cout.setf(std::ios_base::boolalpha);
 }
@@ -45,6 +45,8 @@ void EchoServer::onConnection(Err code)
     if (auto shared = client.lock()) {
         std::cout << "CLIENT CONNECTION: " << shared->getSockName() << std::endl;
 
+        shared->setUserData(new DatagramAdapter());
+
         if (shared->startRead() == false) {
             std::cout << "Start read error.\n";
             eraseClient(*shared);
@@ -59,15 +61,30 @@ void EchoServer::onClose()
     std::cout << "SERVER END.\n";
 }
 
+EchoServer::binf EchoServer::onClientAlloc(Client & client, std::size_t suggested_size)
+{
+    DatagramAdapter * adapter = static_cast<DatagramAdapter*>(client.getUserData());
+    if (adapter != nullptr) {
+        adapter->alloc(suggested_size);
+    }
+    return uv::defaultOnAlloc(client.atReadBuffer(), suggested_size);
+}
+
 void EchoServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)
 {
-    if (code == Err::SUCCESS) {
-        std::string msg;
-        msg.assign(buffer, buffer + size);
-        std::cout << "Read message: " << msg << std::endl;
+    DatagramAdapter * adapter = static_cast<DatagramAdapter*>(client.getUserData());
+    if (code == Err::SUCCESS && adapter != nullptr) {
+        adapter->push(buffer, size);
 
-        for (int count = 0; count < _write_count; ++count) {
-            client.asyncWrite(&msg[0], msg.size());
+        binf info;
+        while (adapter->next(&info)) {
+            std::string msg;
+            msg.assign(info.buffer, info.buffer + info.size);
+            std::cout << "Read message: " << msg << std::endl;
+
+            for (int i = 0; i < _write_count; ++i) {
+                adapter->asyncWrite(client, info.buffer, info.size);
+            }
         }
     } else if (code == Err::END_OF_FILE) {
         std::cout << "EchoServer::onRead() End of file.\n";
@@ -88,14 +105,23 @@ void EchoServer::onClientWrite(Client & client, WriteRequest & request, Err code
     --_echo_count;
     std::cout << "ECHO COUNT: " << _echo_count << "\n";
 
+    if ((_echo_count % _write_count) == 0) {
+        client.close();
+    }
+
     if (_echo_count <= 0) {
-        this->close();
+        close();
     }
 }
 
 void EchoServer::onClientClose(Client & client)
 {
     std::cout << "CLIENT " << (void*)&client << " END.\n";
+    DatagramAdapter * adapter = static_cast<DatagramAdapter*>(client.getUserData());
+    if (adapter != nullptr) {
+        delete adapter;
+        client.setUserData(nullptr);
+    }
 }
 
 // ---------------------------
@@ -112,6 +138,12 @@ EchoClient::~EchoClient()
     // EMPTY.
 }
 
+EchoClient::binf EchoClient::onAlloc(std::size_t suggested_size)
+{
+    _datagram.alloc(suggested_size);
+    return uv::defaultOnAlloc(atReadBuffer(), suggested_size);
+}
+
 void EchoClient::onConnect(ConnectRequest & request, Err code)
 {
     if (code != Err::SUCCESS) {
@@ -122,22 +154,28 @@ void EchoClient::onConnect(ConnectRequest & request, Err code)
     startRead();
 
     std::string msg = TEST_ECHO_MESSAGE;
-    asyncWrite(&msg[0], msg.size());
+    _datagram.asyncWrite(*this, &msg[0], msg.size());
 }
 
 void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
 {
     if (code == Err::SUCCESS) {
-        std::string msg;
-        msg.assign(buffer, buffer + size);
-        std::cout << "Echo read: " << msg << std::endl;
+        _datagram.push(buffer, size);
+
+        binf info;
+        while (_datagram.next(&info)) {
+            std::string msg;
+            msg.assign(info.buffer, info.buffer + info.size);
+            std::cout << "Echo read: " << msg << std::endl;
+        }
     } else if (code == Err::END_OF_FILE) {
         std::cout << "EchoClient::onRead() End of file.\n";
+        close();
+
     } else {
         std::cout << "EchoClient::onRead() Failure.\n";
+        close();
     }
-
-    close();
 }
 
 void EchoClient::onWrite(WriteRequest & request, Err code)

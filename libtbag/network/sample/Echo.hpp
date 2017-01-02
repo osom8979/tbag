@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/network/TcpClient.hpp>
 #include <libtbag/network/TcpServer.hpp>
+#include <libtbag/network/DatagramAdapter.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,7 +41,7 @@ private:
     int  _echo_count; ///< Max echo count.
 
 public:
-    EchoServer(int count = 5);
+    EchoServer(int count = 3);
     virtual ~EchoServer();
 
 public:
@@ -48,6 +49,7 @@ public:
     virtual void onClose() override;
 
 public:
+    virtual binf onClientAlloc(Client & client, std::size_t suggested_size) override;
     virtual void onClientRead(Client & client, Err code, char const * buffer, std::size_t size) override;
     virtual void onClientWrite(Client & client, WriteRequest & request, Err code) override;
     virtual void onClientClose(Client & client) override;
@@ -63,11 +65,15 @@ public:
  */
 class TBAG_API EchoClient : public TcpClient
 {
+private:
+    DatagramAdapter _datagram;
+
 public:
     EchoClient();
     virtual ~EchoClient();
 
 public:
+    virtual binf onAlloc(std::size_t suggested_size) override;
     virtual void onConnect(ConnectRequest & request, Err code) override;
     virtual void onRead(Err code, char const * buffer, std::size_t size) override;
     virtual void onWrite(WriteRequest & request, Err code) override;
