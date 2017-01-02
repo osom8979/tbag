@@ -55,10 +55,10 @@ public:
 
     using Buffer = std::vector<char>;
 
-private:
+protected:
     SharedTcp _tcp;
 
-private:
+protected:
     Buffer _read_buffer;
     WriteQueue _writers;
 
@@ -70,8 +70,8 @@ public:
 
 public:
     // @formatter:off
-    inline CallableTcp       & atTcp()       TBAG_NOEXCEPT { return *_tcp; }
-    inline CallableTcp const & atTcp() const TBAG_NOEXCEPT { return *_tcp; }
+    inline SharedTcp       & atTcp()       TBAG_NOEXCEPT { return _tcp; }
+    inline SharedTcp const & atTcp() const TBAG_NOEXCEPT { return _tcp; }
     inline void setTcp(SharedTcp     tcp) { _tcp = tcp;      }
     inline void setTcp(CallableTcp * tcp) { _tcp.reset(tcp); }
     // @formatter:on
@@ -82,11 +82,16 @@ public:
 
 public:
     // @formatter:off
-    inline void        close      () { return _tcp->close      (); }
-    inline bool        startRead  () { return _tcp->startRead  (); }
-    inline bool        stopRead   () { return _tcp->stopRead   (); }
+    inline void close    () { return _tcp->close      (); }
+    inline bool startRead() { return _tcp->startRead  (); }
+    inline bool stopRead () { return _tcp->stopRead   (); }
+
     inline std::string getSockName() { return _tcp->getSockName(); }
     inline std::string getPeerName() { return _tcp->getPeerName(); }
+
+    inline void setUserData(void * data) TBAG_NOEXCEPT { _tcp->setUserData(data); }
+    inline void * getUserData() TBAG_NOEXCEPT { return _tcp->getUserData(); }
+    inline void const * getUserData() const TBAG_NOEXCEPT { return _tcp->getUserData(); }
     // @formatter:on
 
 public:

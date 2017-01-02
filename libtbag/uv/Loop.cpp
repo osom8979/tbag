@@ -246,15 +246,18 @@ void Loop::runCloseAllHandles()
     }
 }
 
-Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
+Loop::WeakHandle Loop::insertChildHandle(SharedHandle handle)
 {
-    if (handle != nullptr) {
-        auto itr = _handles.insert(SharedHandle(handle));
-        if (itr.second) {
-            return WeakHandle(*(itr.first));
-        }
+    auto itr = _handles.insert(handle);
+    if (itr.second) {
+        return WeakHandle(*(itr.first));
     }
     return WeakHandle();
+}
+
+Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
+{
+    return insertChildHandle(SharedHandle(handle));
 }
 
 bool Loop::eraseChildHandle(WeakHandle handle)
