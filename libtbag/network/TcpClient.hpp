@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/TcpLoop.hpp>
+#include <libtbag/uv/Request.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,7 +37,6 @@ public:
 
 private:
     ConnectRequest _connector;
-    Buffer _read_buffer;
 
 public:
     TcpClient();
@@ -46,14 +46,7 @@ public:
     bool initIpv4(std::string const & ip, int port);
 
 public:
-    bool asyncWrite(binf * infos, std::size_t infos_size);
-    bool asyncWrite(char const * buffer, std::size_t size);
-
-public:
     virtual bool run(std::string const & ip, int port) override;
-
-public:
-    virtual binf onAlloc(std::size_t suggested_size) override;
 };
 
 } // namespace network

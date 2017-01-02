@@ -14,16 +14,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
-bool TcpServer::Client::asyncWrite(binf * infos, std::size_t infos_size)
-{
-    return write(server.obtainWriteRequest(*this), infos, infos_size);
-}
-
-bool TcpServer::Client::asyncWrite(char const * buffer, std::size_t size)
-{
-    return write(server.obtainWriteRequest(*this), buffer, size);
-}
-
 TcpServer::binf TcpServer::Client::onAlloc(std::size_t suggested_size)
 {
     return server.onClientAlloc(*this, suggested_size);
@@ -37,7 +27,7 @@ void TcpServer::Client::onRead(Err code, char const * buffer, std::size_t size)
 void TcpServer::Client::onWrite(WriteRequest & request, Err code)
 {
     server.onClientWrite(*this, request, code);
-    server.releaseWriteRequest(request);
+    releaseWriteRequest(&request);
 }
 
 void TcpServer::Client::onClose()
@@ -79,7 +69,7 @@ void TcpServer::eraseClient(Client & client)
 TcpServer::WeakClient TcpServer::createAcceptedClient()
 {
     auto client = createClient();
-    if (atTcp().accept(*client) && insertClient(client)) {
+    if (atTcp()->accept(*client->atTcp()) && insertClient(client)) {
         return WeakClient(client);
     }
     return WeakClient();
@@ -87,21 +77,21 @@ TcpServer::WeakClient TcpServer::createAcceptedClient()
 
 bool TcpServer::initIpv4(std::string const & ip, int port)
 {
-    CallableTcp & TCP = atTcp();
-    if (TCP.isInit() == false) {
+    auto & TCP = atTcp();
+    if (TCP->isInit() == false) {
         return false;
     }
 
     sockaddr_in addr;
-    if (TCP.initAddress(ip, port, &addr) == false) {
+    if (TCP->initAddress(ip, port, &addr) == false) {
         return false;
     }
 
-    if (TCP.bind((sockaddr const *)&addr) == false) {
+    if (TCP->bind((sockaddr const *)&addr) == false) {
         return false;
     }
 
-    if (TCP.listen() == false) {
+    if (TCP->listen() == false) {
         return false;
     }
 
@@ -122,13 +112,15 @@ bool TcpServer::run(std::string const & ip, int port)
 
 TcpServer::binf TcpServer::onClientAlloc(Client & client, std::size_t suggested_size)
 {
-    if (client.read_buffer.size() < suggested_size) {
-        client.read_buffer.resize(suggested_size);
+    // return ((CommonTcp&)client).onAlloc(suggested_size); // Don't use this code.
+
+    if (client._read_buffer.size() < suggested_size) {
+        client._read_buffer.resize(suggested_size);
     }
 
     binf info;
-    info.buffer = &client.read_buffer[0];
-    info.size   =  client.read_buffer.size();
+    info.buffer = &client._read_buffer[0];
+    info.size   =  client._read_buffer.size();
     return info;
 }
 

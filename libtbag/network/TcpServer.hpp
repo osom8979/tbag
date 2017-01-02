@@ -35,7 +35,7 @@ namespace network {
 class TBAG_API TcpServer : public TcpLoop
 {
 public:
-    using Parent = TcpLoop;
+    using Parent = CommonTcp;
 
     using CallableTcp  = Parent::CallableTcp;
     using WriteRequest = Parent::WriteRequest;
@@ -46,23 +46,20 @@ public:
 
 public:
     /** Client class prototype. */
-    struct Client : public CallableTcp, public CallableTcp::Callback, public std::enable_shared_from_this<Client>
+    struct Client : public CommonTcp, public std::enable_shared_from_this<Client>
     {
+        friend class TcpServer;
+
         TcpServer & server;
-        Buffer read_buffer;
 
-        Client(TcpServer & s) : CallableTcp(s.atLoop(), this), server(s) { /* EMPTY. */ }
+        Client(TcpServer & s) : CommonTcp(s.atLoop()), server(s) { /* EMPTY. */ }
         ~Client() { /* EMPTY. */ }
-
-        bool asyncWrite(binf * infos, std::size_t infos_size);
-        bool asyncWrite(char const * buffer, std::size_t size);
 
         virtual binf onAlloc(std::size_t suggested_size) override;
         virtual void onRead(Err code, char const * buffer, std::size_t size) override;
         virtual void onWrite(WriteRequest & request, Err code) override;
         virtual void onClose() override;
     };
-    friend struct Client;
 
 public:
     using SharedClient = std::shared_ptr<Client>;

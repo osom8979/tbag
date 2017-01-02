@@ -85,10 +85,6 @@ void EchoServer::onClientWrite(Client & client, WriteRequest & request, Err code
         std::cout << "EchoServer::onWrite() Failure.\n";
     }
 
-    if (_writers.getActiveEmpty()) {
-        client.close();
-    }
-
     --_echo_count;
     std::cout << "ECHO COUNT: " << _echo_count << "\n";
 

@@ -26,31 +26,21 @@ TcpClient::~TcpClient()
 
 bool TcpClient::initIpv4(std::string const & ip, int port)
 {
-    Tcp & TCP = atTcp();
-    if (TCP.isInit() == false) {
+    auto & TCP = atTcp();
+    if (TCP->isInit() == false) {
         return false;
     }
 
     sockaddr_in addr;
-    if (TCP.initAddress(ip, port, &addr) == false) {
+    if (TCP->initAddress(ip, port, &addr) == false) {
         return false;
     }
 
-    if (TCP.connect(_connector, (sockaddr const *)&addr) == false) {
+    if (TCP->connect(_connector, (sockaddr const *)&addr) == false) {
         return false;
     }
 
     return true;
-}
-
-bool TcpClient::asyncWrite(binf * infos, std::size_t infos_size)
-{
-    return Parent::asyncWrite(atTcp(), obtainWriteRequest(atTcp()), infos, infos_size);
-}
-
-bool TcpClient::asyncWrite(char const * buffer, std::size_t size)
-{
-    return Parent::asyncWrite(atTcp(), obtainWriteRequest(atTcp()), buffer, size);
 }
 
 bool TcpClient::run(std::string const & ip, int port)
@@ -59,19 +49,6 @@ bool TcpClient::run(std::string const & ip, int port)
         return _loop.run();
     }
     return false;
-}
-
-TcpClient::binf TcpClient::onAlloc(std::size_t suggested_size)
-{
-    // Realloc with read buffer.
-    if (_read_buffer.size() < suggested_size) {
-        _read_buffer.resize(suggested_size);
-    }
-
-    binf info;
-    info.buffer = &_read_buffer[0];
-    info.size   =  _read_buffer.size();
-    return info;
 }
 
 } // namespace network
