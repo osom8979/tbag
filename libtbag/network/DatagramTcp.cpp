@@ -7,6 +7,7 @@
 
 #include <libtbag/network/DatagramTcp.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/network/CommonTcp.hpp>
 
 #include <cstdlib>
 #include <cstdint>
@@ -18,20 +19,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
-static std::size_t const NO_NEXT_READ_SIZE     = std::numeric_limits<std::size_t>::max();
-static std::size_t const DATAGRAM_CONTENT_SIZE = sizeof(uint32_t);
+static std::size_t const NO_NEXT_READ_SIZE    = std::numeric_limits<std::size_t>::max();
+static std::size_t const DATAGRAM_HEADER_SIZE = sizeof(uint32_t);
 
-DatagramTcp::DatagramTcp() : CommonTcp(), _write_size(0), _next_read_size(NO_NEXT_READ_SIZE)
-{
-    // EMPTY.
-}
-
-DatagramTcp::DatagramTcp(SharedTcp tcp) : CommonTcp(tcp), _write_size(0), _next_read_size(NO_NEXT_READ_SIZE)
-{
-    // EMPTY.
-}
-
-DatagramTcp::DatagramTcp(CallableTcp * tcp) : CommonTcp(tcp), _write_size(0), _next_read_size(NO_NEXT_READ_SIZE)
+DatagramTcp::DatagramTcp(Callback * callback) : _write_size(0), _next_read_size(NO_NEXT_READ_SIZE), _callback(callback)
 {
     // EMPTY.
 }
@@ -41,18 +32,23 @@ DatagramTcp::~DatagramTcp()
     // EMPTY.
 }
 
-void DatagramTcp::writeDatagram(char const * buffer, std::size_t size)
+DatagramTcp::binf DatagramTcp::writeDatagram(char const * buffer, std::size_t size)
 {
     // Realloc with read buffer.
     if (_write_buffer.size() < size) {
-        _write_buffer.resize(DATAGRAM_CONTENT_SIZE + size);
+        _write_buffer.resize(DATAGRAM_HEADER_SIZE + size);
     }
 
     uint32_t host_byte_size    = (uint32_t)size;
     uint32_t network_byte_size = htonl(host_byte_size);
 
-    ::memcpy(&_write_buffer[0], (char*)&network_byte_size, DATAGRAM_CONTENT_SIZE);
-    ::memcpy(&_write_buffer[DATAGRAM_CONTENT_SIZE], buffer, size);
+    ::memcpy(&_write_buffer[0], (char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
+    ::memcpy(&_write_buffer[DATAGRAM_HEADER_SIZE], buffer, size);
+
+    binf result;
+    result.buffer = &_write_buffer[0];
+    result.size = size + DATAGRAM_HEADER_SIZE;
+    return result;
 }
 
 std::size_t DatagramTcp::readNextDatagramSize()
@@ -63,13 +59,13 @@ std::size_t DatagramTcp::readNextDatagramSize()
     }
 
     // Section 02: Find the next_read_size in buffer.
-    if (_data_buffer.size() < DATAGRAM_CONTENT_SIZE) {
+    if (_data_buffer.size() < DATAGRAM_HEADER_SIZE) {
         return NO_NEXT_READ_SIZE;
     }
 
     // Section 03: Update next_read_size.
     uint32_t network_byte_size = 0;
-    _data_buffer.pop((char*)&network_byte_size, DATAGRAM_CONTENT_SIZE);
+    _data_buffer.pop((char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
     _next_read_size = ntohl(network_byte_size);
 
     return _next_read_size;
@@ -80,32 +76,33 @@ void DatagramTcp::clearNextDatagramSize()
     _next_read_size = NO_NEXT_READ_SIZE;
 }
 
-DatagramTcp::WriteRequest * DatagramTcp::asyncWriteDatagram(char const * buffer, std::size_t size)
+DatagramTcp::WriteRequest * DatagramTcp::asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size)
 {
-    writeDatagram(buffer, size);
-    return Parent::asyncWrite(&_write_buffer[0], size + DATAGRAM_CONTENT_SIZE);
+    binf buffer_info = writeDatagram(buffer, size);
+    return tcp.asyncWrite(&buffer_info, 1);
 }
 
-std::size_t DatagramTcp::tryWriteDatagram(char const * buffer, std::size_t size, Err * result)
+std::size_t DatagramTcp::tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result)
 {
-    writeDatagram(buffer, size);
-    return Parent::tryWrite(&_write_buffer[0], size + DATAGRAM_CONTENT_SIZE);
+    binf buffer_info = writeDatagram(buffer, size);
+    return tcp.tryWrite(&buffer_info, 1);
 }
 
-// --------------
-// Event methods.
-// --------------
+// ----------------------
+// Event by-pass methods.
+// ----------------------
 
-DatagramTcp::binf DatagramTcp::onAlloc(std::size_t suggested_size)
+void DatagramTcp::bypassOnAlloc(std::size_t suggested_size)
 {
     _data_buffer.resize(suggested_size * 2);
-    return Parent::onAlloc(suggested_size);
 }
 
-void DatagramTcp::onRead(Err code, char const * buffer, std::size_t size)
+void DatagramTcp::bypassOnRead(Err code, char const * buffer, std::size_t size)
 {
     if (code != Err::SUCCESS) {
-        onDatagramRead(code, buffer, size); // ERROR CASE.
+        if (_callback != nullptr) {
+            _callback->onDatagramRead(code, buffer, size); // ERROR CASE.
+        }
         return;
     }
 
@@ -119,26 +116,23 @@ void DatagramTcp::onRead(Err code, char const * buffer, std::size_t size)
 
         if (_data_buffer.size() >= READ_SIZE) {
             // Realloc with read buffer.
-            if (_temp_buffer.size() < READ_SIZE) {
-                _temp_buffer.resize(READ_SIZE);
+            if (_read_buffer.size() < READ_SIZE) {
+                _read_buffer.resize(READ_SIZE);
             }
 
-            std::size_t real_read_size = _data_buffer.pop(&_temp_buffer[0], READ_SIZE);
+            std::size_t real_read_size = _data_buffer.pop(&_read_buffer[0], READ_SIZE);
             if (real_read_size != READ_SIZE) {
                 code = Err::READ_ERROR;
             }
 
-            onDatagramRead(code, &_temp_buffer[0], real_read_size);
+            if (_callback != nullptr) {
+                _callback->onDatagramRead(code, &_read_buffer[0], real_read_size);
+            }
             clearNextDatagramSize();
         } else {
             break;
         }
     }
-}
-
-void DatagramTcp::onDatagramRead(Err code, char const * buffer, std::size_t size)
-{
-    // EMPTY.
 }
 
 } // namespace network

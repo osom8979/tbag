@@ -15,8 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/CommonTcp.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/container/CircularBuffer.hpp>
+#include <libtbag/uv/Request.hpp>
+
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,53 +28,62 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
+// Forward declaration.
+class CommonTcp;
+
 /**
  * DatagramTcp class prototype.
  *
  * @author zer0
  * @date   2017-01-02
  */
-class TBAG_API DatagramTcp : public CommonTcp
+class TBAG_API DatagramTcp : public Noncopyable
 {
 public:
-    using Parent = CommonTcp;
+    using CircularBuffer = container::CircularBuffer<char>;
+    using Buffer = std::vector<char>;
+    using Size   = std::size_t;
+
+    using WriteRequest = uv::WriteRequest;
+    using binf         = uv::binf;
 
 public:
-    using CircularBuffer = container::CircularBuffer<char>;
+    struct Callback
+    {
+        virtual void onDatagramRead(Err code, char const * buffer, std::size_t size) = 0;
+    };
 
 private:
-    Buffer      _write_buffer;
-    std::size_t _write_size;
+    Buffer _write_buffer;
+    Size   _write_size;
 
 private:
-    Buffer      _temp_buffer;
-    std::size_t _next_read_size;
+    Buffer _read_buffer;
+    Size   _next_read_size;
 
 private:
     CircularBuffer _data_buffer;
 
+private:
+    Callback * _callback;
+
 public:
-    DatagramTcp();
-    DatagramTcp(SharedTcp tcp);
-    DatagramTcp(CallableTcp * tcp);
+    DatagramTcp(Callback * callback = nullptr);
     virtual ~DatagramTcp();
 
 public:
-    void writeDatagram(char const * buffer, std::size_t size);
+    binf writeDatagram(char const * buffer, std::size_t size);
     std::size_t readNextDatagramSize();
     void clearNextDatagramSize();
 
 public:
-    WriteRequest * asyncWriteDatagram(char const * buffer, std::size_t size);
-    std::size_t tryWriteDatagram(char const * buffer, std::size_t size, Err * result = nullptr);
+    WriteRequest * asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size);
+    std::size_t tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result = nullptr);
 
-// Event methods.
+// Event by-pass methods.
 public:
-    virtual binf onAlloc(std::size_t suggested_size) override;
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
-
-public:
-    virtual void onDatagramRead(Err code, char const * buffer, std::size_t size);
+    void bypassOnAlloc(std::size_t suggested_size);
+    void bypassOnRead(Err code, char const * buffer, std::size_t size);
 };
 
 } // namespace network
