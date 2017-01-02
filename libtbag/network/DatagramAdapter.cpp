@@ -94,7 +94,7 @@ std::size_t DatagramAdapter::tryWrite(CommonTcp & tcp, char const * buffer, std:
 
 void DatagramAdapter::alloc(std::size_t suggested_size)
 {
-    _data_buffer.resize(suggested_size * 2);
+    _data_buffer.resize(suggested_size);
 }
 
 void DatagramAdapter::push(char const * buffer, std::size_t size)
