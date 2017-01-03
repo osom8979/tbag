@@ -7,7 +7,7 @@
 
 #include <libtbag/lock/UvLock.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Type.hpp>
+#include <libtbag/uv/UvCommon.hpp>
 
 #include <cassert>
 #include <new>

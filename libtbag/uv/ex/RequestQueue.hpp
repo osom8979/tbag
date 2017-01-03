@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Pointer.hpp>
-#include <libtbag/uv/Type.hpp>
+#include <libtbag/uv/UvCommon.hpp>
 
 #include <mutex>
 #include <memory>

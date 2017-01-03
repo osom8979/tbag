@@ -1,11 +1,12 @@
 /**
- * @file   Type.cpp
- * @brief  Type class implementation.
+ * @file   UvBase.cpp
+ * @brief  UvBase class implementation.
  * @author zer0
  * @date   2016-12-27
+ * @date   2016-01-03 (Rename: Type -> UvCommon)
  */
 
-#include <libtbag/uv/Type.hpp>
+#include <libtbag/uv/UvCommon.hpp>
 #include <libtbag/log/Log.hpp>
 #include <uv.h>
 

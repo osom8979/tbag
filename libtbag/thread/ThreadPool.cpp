@@ -7,7 +7,7 @@
 
 #include <libtbag/thread/ThreadPool.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Type.hpp>
+#include <libtbag/uv/UvCommon.hpp>
 
 #include <exception>
 #include <uv.h>

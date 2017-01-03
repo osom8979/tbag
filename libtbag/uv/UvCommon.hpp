@@ -1,12 +1,13 @@
 /**
- * @file   Type.hpp
- * @brief  Type class prototype.
+ * @file   UvCommon.hpp
+ * @brief  UvCommon class prototype.
  * @author zer0
  * @date   2016-12-27
+ * @date   2016-01-03 (Rename: Type -> UvCommon)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_TYPE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_TYPE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_UVCOMMON_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UV_UVCOMMON_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -201,5 +202,5 @@ TBAG_API binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_s
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_TYPE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_UVCOMMON_HPP__
 
