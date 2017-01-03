@@ -3,7 +3,7 @@
  * @brief  UvCommon class prototype.
  * @author zer0
  * @date   2016-12-27
- * @date   2016-01-03 (Rename: Type -> UvCommon)
+ * @date   2017-01-03 (Rename: Type -> UvCommon)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_UVCOMMON_HPP__

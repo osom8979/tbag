@@ -4,7 +4,7 @@
  * @author zer0
  * @date   2016-12-29
  * @date   2016-12-31 (Craete BaseTcpLoop)
- * @date   2016-01-02 (Remove BaseTcpLoop)
+ * @date   2017-01-02 (Remove BaseTcpLoop)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCPLOOP_HPP__
