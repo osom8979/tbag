@@ -97,8 +97,8 @@ struct Pointer
     // @formatter:off
     template <typename CastType>
     inline typename std::enable_if<
-            std::is_convertible<
-                    typename std::conditional<
+            std::is_convertible< // void types can not use std::is_convertible.
+                    typename std::conditional< // Do not choose void type.
                             std::is_same<Type, void>::value,
                             CastType*, Type*
                     >::type,
