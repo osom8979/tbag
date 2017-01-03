@@ -141,3 +141,15 @@ function (flatc_generate_target2 __target __flatc __type __fbs)
     add_custom_target (${__target} SOURCES ${__fbs_result})
 endfunction ()
 
+function (flatc_generate_target3 __target __type __fbs)
+    flatc_generate_target2 (${__target} ${Flatc_COMPILER} ${__type} ${__fbs})
+endfunction ()
+
+function (flatc_generate_target3_cpp __target __fbs)
+    flatc_generate_target2 (${__target} ${Flatc_COMPILER} cpp ${__fbs})
+endfunction ()
+
+function (flatc_generate_target3_js __target __fbs)
+    flatc_generate_target2 (${__target} ${Flatc_COMPILER} js ${__fbs})
+endfunction ()
+
