@@ -160,3 +160,14 @@ macro (tbag_project)
     tbag_project__find_and_build ("${PROJECT_SOURCE_DIR}")
 endmacro ()
 
+#/// run tbag project.
+#///
+#/// @param __root_project_name [in] Root project name.
+macro (tbag_project2 __root_project_name)
+    tbag_project ()
+
+    project (${__root_project_name})
+    tbag_project__find (__libs __exes "${__root_dir}")
+    add_custom_target (${__root_project_name} DEPENDS ${__libs} ${__exes})
+endmacro ()
+
