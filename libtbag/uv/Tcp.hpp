@@ -25,7 +25,7 @@ namespace uv {
 
 // Forward declaration.
 class Loop;
-class ConnectRequest;
+struct ConnectRequest;
 
 /**
  * Tcp class prototype.
