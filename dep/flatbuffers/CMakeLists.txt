@@ -19,7 +19,7 @@ link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Werror -Wextra")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Werror -Wextra -stdlib=libc++")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Werror -Wextra")
 endif ()
@@ -45,7 +45,14 @@ set (FLATC_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_cpp.cpp"
 add_executable (flatc ${FLATC_SRCS})
 target_link_libraries (flatc PRIVATE flatbuffers)
 
+## Output result.
+set (OUTPUT_FLATC_PATH "${CMAKE_BINARY_DIR}/libtbag_flatc")
+add_custom_command (TARGET flatc
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:flatc> "${OUTPUT_FLATC_PATH}"
+                    COMMENT "POST_BUILD of flatc: copy target.")
+
 ## flathash
-set(FLATHASH_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/flathash.cpp")
+set (FLATHASH_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/flathash.cpp")
 add_executable (flathash ${FLATHASH_SRCS})
 

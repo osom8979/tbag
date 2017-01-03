@@ -23,7 +23,7 @@ if (NOT Flatc_SKIP_FOUND)
             "$ENV{Flatc_ROOT}/bin")
 
     find_program (Flatc_COMPILER
-            NAMES "flatc"
+            NAMES "flatc" "libtbag_flatc"
             PATHS ${Flatc_SEARCH_PATHS})
 
     set (LOOKED_FOR Flatc_COMPILER)
