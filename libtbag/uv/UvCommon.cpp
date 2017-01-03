@@ -1,6 +1,6 @@
 /**
- * @file   UvBase.cpp
- * @brief  UvBase class implementation.
+ * @file   UvCommon.cpp
+ * @brief  UvCommon class implementation.
  * @author zer0
  * @date   2016-12-27
  * @date   2016-01-03 (Rename: Type -> UvCommon)
