@@ -66,6 +66,20 @@ void TcpServer::eraseClient(Client & client)
     _clients.erase(ClientKey(&client));
 }
 
+TcpServer::ClientKey TcpServer::getClientKey(Client & client) const
+{
+    return ClientKey(&client);
+}
+
+TcpServer::WeakClient TcpServer::getWeakClient(ClientKey & client)
+{
+    auto itr = _clients.find(client);
+    if (itr == _clients.end()) {
+        return WeakClient();
+    }
+    return WeakClient(itr->second);
+}
+
 TcpServer::WeakClient TcpServer::createAcceptedClient()
 {
     auto client = createClient();

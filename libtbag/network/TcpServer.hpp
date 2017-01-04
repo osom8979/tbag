@@ -79,6 +79,10 @@ protected:
     bool insertClient(SharedClient const & client);
     void eraseClient(Client & client);
 
+public:
+    ClientKey getClientKey(Client & client) const;
+    WeakClient getWeakClient(ClientKey & client);
+
 protected:
     WeakClient createAcceptedClient();
 
