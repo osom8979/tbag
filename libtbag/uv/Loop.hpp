@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/uv/Native.hpp>
+#include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/Type.hpp>
 
 #include <cstdint>
@@ -44,6 +45,9 @@ class Handle;
  *  The event loop is the central part of libuv’s functionality.
  *  It takes care of polling for i/o and scheduling callbacks
  *  to be run based on different sources of events.
+ *
+ * @warning
+ *  This class is used only in Loop class.
  */
 class TBAG_API BaseLoop : public Native
 {
@@ -64,7 +68,7 @@ private:
     ThreadId   _owner_thread_id;
     AtomicBool _running;
 
-public:
+protected: // IMPORTANT!!
     BaseLoop();
     virtual ~BaseLoop();
 
@@ -76,7 +80,7 @@ public:
 
 public:
     /** Releases all internal loop resources. */
-    bool close();
+    bool close(Err * result = nullptr);
 
     /** This function runs the event loop. */
     bool run(RunMode mode = RunMode::RUN_DEFAULT);
@@ -146,6 +150,10 @@ public:
     Loop();
     virtual ~Loop();
 
+public:
+    /** @return close handle count. */
+    std::size_t closeAllHandles();
+
 private:
     /** @warning Don't use this method of user level developers. */
     void runCloseAllHandles();
@@ -186,8 +194,9 @@ public:
 #undef EMPTY_QUALIFIER
 #undef TBAG_UV_LOOP_BY_PASS_METHOD
 
-    inline void clear()
-    { _handles.clear(); }
+public:
+    /** @warning This function should be avoided. */
+    void clear(bool force_clear = false);
 
 public:
     // @formatter:off

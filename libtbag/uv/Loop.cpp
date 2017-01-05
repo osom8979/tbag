@@ -63,14 +63,31 @@ BaseLoop::~BaseLoop()
     // EMPTY.
 }
 
-bool BaseLoop::close()
+bool BaseLoop::close(Err * result)
 {
     // Releases all internal loop resources.
     //
     // Call this function only when the loop has finished executing
     // and all open handles and requests have been closed, or it will return UV_EBUSY.
     // After this function returns, the user can free the memory allocated for the loop.
-    return ::uv_loop_close(Parent::cast<uv_loop_t>()) == 0;
+    int const CODE = ::uv_loop_close(Parent::cast<uv_loop_t>());
+    if (CODE != 0) {
+        if (result != nullptr) {
+            if (CODE == UV_EBUSY) {
+                *result = Err::BUSY_ERROR;
+            } else {
+                *result = Err::FAILURE;
+            }
+        } else {
+            __tbag_error("BaseLoop:close() error [{}] {}", CODE, getUvErrorName(CODE));
+        }
+        return false;
+    }
+
+    if (result != nullptr) {
+        *result = Err::SUCCESS;
+    }
+    return true;
 }
 
 bool BaseLoop::run(RunMode mode)
@@ -219,7 +236,8 @@ Loop::Loop()
 
 Loop::~Loop()
 {
-    if (close() == false) {
+    Err code;
+    if (close(&code) == false) {
         runCloseAllHandles();
 
         if (isAlive()) {
@@ -227,23 +245,29 @@ Loop::~Loop()
         }
 
         // RE-TRY.
-        if (close() == false) {
+        if (close(&code) == false) {
             __tbag_error("BaseLoop::~BaseLoop() error.");
         }
     }
 }
 
-void Loop::runCloseAllHandles()
+std::size_t Loop::closeAllHandles()
 {
-    bool is_close = false;
+    std::size_t close_count = 0;
+
     for (auto & cursor : _handles) {
         if (static_cast<bool>(cursor) && cursor->isInit() && cursor->isClosing() == false) {
             cursor->close();
-            is_close = true;
+            ++close_count;
         }
     }
 
-    if (is_close && isRunning() == false) {
+    return close_count;
+}
+
+void Loop::runCloseAllHandles()
+{
+    if (closeAllHandles() > 0 && isRunning() == false) {
         run(RunMode::RUN_DEFAULT);
     }
 }
@@ -265,6 +289,28 @@ Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
 bool Loop::eraseChildHandle(WeakHandle handle)
 {
     return _handles.erase(handle.lock()) == 1;
+}
+
+void Loop::clear(bool force_clear)
+{
+    runCloseAllHandles();
+
+    if (force_clear) {
+        _handles.clear();
+    } else {
+        HandleSet closed_handles;
+        for (auto & cursor : _handles) {
+            // Find closed handles.
+            if (static_cast<bool>(cursor) && cursor->isInit() && cursor->isClosing()) {
+                closed_handles.insert(cursor);
+            }
+        }
+
+        for (auto & erase_handle : closed_handles) {
+            _handles.erase(erase_handle);
+        }
+        closed_handles.clear();
+    }
 }
 
 } // namespace uv

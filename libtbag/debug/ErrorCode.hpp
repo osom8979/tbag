@@ -23,12 +23,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace debug {
 
 #ifndef TBAG_ERROR_INFO_MAP
-#define TBAG_ERROR_INFO_MAP(_TBAG_XX)             \
-    _TBAG_XX(     SUCCESS, No error)              \
-    _TBAG_XX(     FAILURE, Unknown error)         \
-    _TBAG_XX( UNSUPPORTED, Unsupported operation) \
-    _TBAG_XX(NULL_POINTER, Nullpointer exception) \
-    _TBAG_XX(  READ_ERROR, Data read error)  \
+#define TBAG_ERROR_INFO_MAP(_TBAG_XX)               \
+    _TBAG_XX(     SUCCESS, No error)                \
+    _TBAG_XX(     FAILURE, Unknown error)           \
+    _TBAG_XX( UNSUPPORTED, Unsupported operation)   \
+    _TBAG_XX(NULL_POINTER, Nullpointer exception)   \
+    _TBAG_XX(  READ_ERROR, Data read error)         \
+    _TBAG_XX(  BUSY_ERROR, Busy error)              \
     /* Locale */ \
     _TBAG_XX(LOCALE_CONVERTER_ERROR, UConverter error)  \
     /* File */ \
