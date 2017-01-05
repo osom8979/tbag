@@ -37,7 +37,7 @@ namespace container {
  * @date   2016-12-29
  */
 template <typename ValueType>
-class CircularBuffer : public Noncopyable
+class CircularBuffer
 {
 public:
     TBAG_CONSTEXPR static std::size_t const CIRCULAR_BUFFER_DEFAULT_SIZE = 1024;
@@ -55,31 +55,44 @@ public:
      */
     struct Indexer
     {
-        Buffer & buffer;
+        Buffer    * b; ///< Buffer point.
         std::size_t r; ///< Read index.
         std::size_t s; ///< Written size.
 
-        Indexer(Buffer & buf) : buffer(buf), r(0), s(0)
+        // @formatter:off
+        Indexer() : b(nullptr), r(0), s(0)
+        { /* EMPTY. */ }
+        Indexer(Buffer * buffer, std::size_t read_index = 0, std::size_t size = 0) : b(buffer), r(read_index), s(size)
         { /* EMPTY. */ }
 
-        inline bool       empty() const TBAG_NOEXCEPT { return s == 0;        }
-        inline std::size_t size() const TBAG_NOEXCEPT { return s;             }
-        inline std::size_t  max() const TBAG_NOEXCEPT { return buffer.size(); }
-        inline std::size_t free() const TBAG_NOEXCEPT { return max() - s;     }
+        Indexer(Indexer const & obj) : b(obj.b), r(obj.r), s(obj.s)
+        { /* EMPTY. */ }
+        Indexer(Indexer && obj)
+        { swap(std::move(obj)); }
+
+        ~Indexer()
+        { /* EMPTY. */ }
+
+        Indexer & operator =(Indexer const & obj)
+        { copy(obj); return *this; }
+        Indexer & operator =(Indexer && obj)
+        { swap(obj); return *this; }
+
+        void copy(Indexer const & obj)
+        { if (this != &obj) { b = obj.b; r = obj.r; s = obj.s; } }
+        void swap(Indexer && obj)
+        { if (this != &obj) { std::swap(b, obj.b); std::swap(r, obj.r); std::swap(s, obj.s); } }
+
+        inline bool       empty() const TBAG_NOEXCEPT { return s == 0;         }
+        inline std::size_t size() const TBAG_NOEXCEPT { return s;              }
+        inline std::size_t  max() const TBAG_NOEXCEPT { return b->size(); }
+        inline std::size_t free() const TBAG_NOEXCEPT { return max() - s;      }
 
         inline std::size_t last() const
-        {
-            assert(max() > 0);
-            return (r + s) % max();
-        }
-
+        { assert(max() > 0); return (r + s) % max(); }
         inline void next()
-        {
-            // @formatter:off
-            if (r + 1 == max()) { r = 0; }
-            else                { ++r;   }
-            // @formatter:on
-        }
+        { if (r + 1 == max()) { r = 0; } else { ++r; } }
+        // @formatter:on
     };
 
 public:
@@ -169,12 +182,28 @@ private:
     Indexer _index;
 
 public:
-    CircularBuffer(std::size_t size) : _buffer(size), _index(_buffer)
+    CircularBuffer(std::size_t size) : _buffer(size), _index(&_buffer)
     { /* EMPTY. */ }
     CircularBuffer() : CircularBuffer(CIRCULAR_BUFFER_DEFAULT_SIZE)
     { /* EMPTY. */ }
+
+    CircularBuffer(CircularBuffer const & cb) : _buffer(cb._buffer), _index(cb._index)
+    { /* EMPTY. */ }
+    CircularBuffer(CircularBuffer && cb)
+    { swap(std::move(cb)); }
+
     ~CircularBuffer()
     { /* EMPTY. */ }
+
+public:
+    CircularBuffer & operator =(CircularBuffer const & cb) { copy(cb); return *this; }
+    CircularBuffer & operator =(CircularBuffer      && cb) { swap(cb); return *this; }
+
+public:
+    void copy(CircularBuffer const & cb)
+    { if (this != &cb) { _buffer = cb._buffer; _index  = cb._index; } }
+    void swap(CircularBuffer && cb)
+    { if (this != &cb) { _buffer.swap(cb._buffer); _index.swap(cb._index); } }
 
 public:
     inline Buffer & atBuffer() TBAG_NOEXCEPT
@@ -261,26 +290,27 @@ public:
         return index;
     }
 
-//public:
-//    void appendCapacity(std::size_t size)
-//    {
-//        std::size_t const REQUEST_SIZE = _buffer.size() + size;
-//
-//        if (_index.r == _index.w) {
-//            _buffer.resize(REQUEST_SIZE);
-//
-//        } else if (_index.r < _index.w) {
-//            Buffer new_buffer(REQUEST_SIZE, Value());
-//            std::copy(_buffer.begin() + _index.r, _buffer.begin() + _index.w, new_buffer.begin() + _index.r);
-//            _buffer.swap(new_buffer);
-//
-//        } else /* if (_index.r > _index.w) */ {
-//            Buffer new_buffer(REQUEST_SIZE, Value());
-//            std::copy(_buffer.begin() + _index.r, _buffer.end()   + _index.w, new_buffer.begin() + _index.r);
-//            std::copy(_buffer.begin()           , _buffer.begin() + _index.w, new_buffer.begin() + _buffer.size());
-//            _buffer.swap(new_buffer);
-//        }
-//    }
+public:
+    void extendCapacity(std::size_t more_size)
+    {
+        std::size_t const REQUEST_SIZE = _buffer.size() + more_size;
+        Buffer new_buffer(REQUEST_SIZE, Value());
+
+        if (_index.r <= _index.last()) {
+            _buffer.resize(REQUEST_SIZE);
+
+        } else /* if (_index.r > _index.last()) */ {
+            std::size_t const BEGIN_END_DISTANCE = std::distance(_buffer.begin() + _index.r, _buffer.end());
+
+            Buffer new_buffer(REQUEST_SIZE, Value());
+            std::copy(_buffer.begin() + _index.r, _buffer.end(), new_buffer.begin());
+            std::copy(_buffer.begin(), _buffer.begin() + _index.last(), new_buffer.begin() + BEGIN_END_DISTANCE);
+
+            _buffer.swap(new_buffer);
+            _index.b = &_buffer;
+            _index.r = 0;
+        }
+    }
 };
 
 } // namespace container
