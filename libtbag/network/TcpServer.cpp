@@ -71,7 +71,7 @@ TcpServer::ClientKey TcpServer::getClientKey(Client & client) const
     return ClientKey(&client);
 }
 
-TcpServer::WeakClient TcpServer::getWeakClient(ClientKey & client)
+TcpServer::WeakClient TcpServer::getWeakClient(ClientKey const & client)
 {
     auto itr = _clients.find(client);
     if (itr == _clients.end()) {

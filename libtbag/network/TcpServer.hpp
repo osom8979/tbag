@@ -81,7 +81,7 @@ protected:
 
 public:
     ClientKey getClientKey(Client & client) const;
-    WeakClient getWeakClient(ClientKey & client);
+    WeakClient getWeakClient(ClientKey const & client);
 
 protected:
     WeakClient createAcceptedClient();

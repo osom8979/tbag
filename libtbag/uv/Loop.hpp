@@ -201,7 +201,7 @@ public:
 public:
     // @formatter:off
     template <typename HandleType, typename ... Args>
-    inline std::shared_ptr<typename remove_cr<HandleType>::type> createAndInsertChildHandle(Loop & loop, Args ... args)
+    inline std::shared_ptr<typename remove_cr<HandleType>::type> createAndInsertChildHandle(Loop & loop, Args && ... args)
     {
         typedef typename remove_cr<HandleType>::type ResultHandleType;
         HandleType * handle = new HandleType(loop, std::forward<Args>(args) ...);
