@@ -20,16 +20,46 @@ namespace network {
 TcpLoop::TcpLoop() : _loop()
 {
     Parent::setTcp(_loop.newHandle<CallableTcp>(_loop, this));
-    _async_close      = _loop.newHandle<AsyncHelper>(*this, AsyncHelper::ActionType::CLOSE);
-    _async_start_read = _loop.newHandle<AsyncHelper>(*this, AsyncHelper::ActionType::START_READ);
-    _async_stop_read  = _loop.newHandle<AsyncHelper>(*this, AsyncHelper::ActionType::STOP_READ);
 }
 
 TcpLoop::~TcpLoop()
 {
-    _async_close.reset();
-    _async_start_read.reset();
-    _async_stop_read.reset();
+    // EMPTY.
+}
+
+void TcpLoop::safeAsync(AsyncHelper::ActionType type)
+{
+    auto shared = _loop.newHandle<AsyncHelper>(*this, type);
+    if (static_cast<bool>(shared)) {
+        shared->send();
+    }
+}
+
+void TcpLoop::safeClose()
+{
+    if (isEqualOwnerThreadId()) {
+        atTcp()->close();
+    } else {
+        safeAsync(AsyncHelper::ActionType::CLOSE);
+    }
+}
+
+void TcpLoop::safeStartRead()
+{
+    if (isEqualOwnerThreadId()) {
+        atTcp()->close();
+    } else {
+        safeAsync(AsyncHelper::ActionType::START_READ);
+    }
+}
+
+void TcpLoop::safeStopRead()
+{
+    if (isEqualOwnerThreadId()) {
+        atTcp()->close();
+    } else {
+        safeAsync(AsyncHelper::ActionType::STOP_READ);
+    }
 }
 
 } // namespace network

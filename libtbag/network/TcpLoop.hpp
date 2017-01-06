@@ -64,6 +64,7 @@ public:
             case ActionType::START_READ: loop.atTcp()->startRead(); break;
             case ActionType::STOP_READ:  loop.atTcp()->stopRead();  break;
             }
+            close();
         }
 
         virtual void onClose() override
@@ -78,11 +79,6 @@ public:
 private:
     uv::Loop _loop;
 
-private:
-    SharedAsyncHelper _async_close;
-    SharedAsyncHelper _async_start_read;
-    SharedAsyncHelper _async_stop_read;
-
 public:
     TcpLoop();
     virtual ~TcpLoop();
@@ -94,9 +90,16 @@ public:
     // @formatter:on
 
 public:
-    inline void safeClose    () { _async_close->send();      }
-    inline void safeStartRead() { _async_start_read->send(); }
-    inline void safeStopRead () { _async_stop_read->send();  }
+    inline bool isEqualOwnerThreadId() const
+    { return atLoop().getOwnerThreadId() == std::this_thread::get_id(); }
+
+private:
+    void safeAsync(AsyncHelper::ActionType type);
+
+public:
+    void safeClose    ();
+    void safeStartRead();
+    void safeStopRead ();
 
 public:
     virtual bool run(std::string const & ip, int port) = 0;
