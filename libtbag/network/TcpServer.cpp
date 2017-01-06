@@ -115,7 +115,7 @@ bool TcpServer::initIpv4(std::string const & ip, int port)
 bool TcpServer::run(std::string const & ip, int port)
 {
     if (uv::Tcp::isIpv4(ip) && initIpv4(ip, port)) {
-        return _loop.run();
+        return atLoop().run();
     }
     return false;
 }

@@ -22,6 +22,8 @@
 #include <libtbag/uv/Async.hpp>
 #include <libtbag/uv/Tcp.hpp>
 
+#include <memory>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -40,7 +42,46 @@ public:
     using Parent = CommonTcp;
 
 public:
+    struct AsyncHelper : public libtbag::uv::Async
+    {
+        enum class ActionType
+        {
+            CLOSE,
+            START_READ,
+            STOP_READ,
+        };
+
+        TcpLoop & loop;
+        ActionType const ACTION;
+
+        AsyncHelper(TcpLoop & l, ActionType a) : loop(l), ACTION(a)
+        { libtbag::uv::Async::init(loop.atLoop()); }
+
+        virtual void onAsync() override
+        {
+            switch (ACTION) {
+            case ActionType::CLOSE:      loop.atTcp()->close();     break;
+            case ActionType::START_READ: loop.atTcp()->startRead(); break;
+            case ActionType::STOP_READ:  loop.atTcp()->stopRead();  break;
+            }
+        }
+
+        virtual void onClose() override
+        {
+            loop.atLoop().eraseChildHandle(this);
+        }
+    };
+
+public:
+    using SharedAsyncHelper = std::shared_ptr<AsyncHelper>;
+
+private:
     uv::Loop _loop;
+
+private:
+    SharedAsyncHelper _async_close;
+    SharedAsyncHelper _async_start_read;
+    SharedAsyncHelper _async_stop_read;
 
 public:
     TcpLoop();
@@ -53,44 +94,9 @@ public:
     // @formatter:on
 
 public:
-    struct AsyncTcpHelper : public libtbag::uv::Async
-    {
-        enum class ActionType
-        {
-            CLOSE,
-            START_READ,
-            STOP_READ,
-        };
-
-        TcpLoop & loop;
-        ActionType const ACTION;
-
-        AsyncTcpHelper(TcpLoop & l, ActionType a) : loop(l), ACTION(a)
-        { libtbag::uv::Async::init(loop.atLoop()); }
-
-        virtual void onAsync() override
-        {
-            switch (ACTION) {
-            case ActionType::CLOSE:      loop.atTcp()->close();     break;
-            case ActionType::START_READ: loop.atTcp()->startRead(); break;
-            case ActionType::STOP_READ:  loop.atTcp()->stopRead();  break;
-            }
-            close();
-        }
-
-        virtual void onClose() override
-        {
-            loop.atLoop().eraseChildHandle(this);
-        }
-    };
-
-private:
-    void asyncAction(AsyncTcpHelper::ActionType type);
-
-public:
-    void asyncClose    ();
-    void asyncStartRead();
-    void asyncStopRead ();
+    inline void safeClose    () { _async_close->send();      }
+    inline void safeStartRead() { _async_start_read->send(); }
+    inline void safeStopRead () { _async_stop_read->send();  }
 
 public:
     virtual bool run(std::string const & ip, int port) = 0;
