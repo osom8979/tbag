@@ -36,10 +36,8 @@ TEST(AsyncTest, Default)
 {
     {
         Loop loop;
-        // auto async = loop.newHandle<AsyncTest>(loop);
-        auto shared = loop.insertChildHandle(new AsyncTest(loop)).lock();
-        AsyncTest * handle = static_cast<AsyncTest*>(shared.get());
-        handle->send();
+        auto async = loop.newHandle<AsyncTest>(loop);
+        async->send();
         loop.run();
     }
 

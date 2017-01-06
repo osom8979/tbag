@@ -234,6 +234,10 @@ void AsyncChatInput::onRead(Err code, char const * buffer, std::size_t size)
 
 void AsyncChatInput::onReadLine(std::string const & msg)
 {
+    if (msg == "exit") {
+        _client.asyncClose();
+    }
+
     msg::Version version = msg::Version(1, 1);
     flatbuffers::FlatBufferBuilder builder;
     auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(_name), builder.CreateString(msg));

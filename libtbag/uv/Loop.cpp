@@ -272,6 +272,16 @@ void Loop::runCloseAllHandles()
     }
 }
 
+Loop::WeakHandle Loop::findChildHandle(Handle * handle)
+{
+    for (auto & cursor : _handles) {
+        if (cursor.get() == handle) {
+            return WeakHandle(cursor);
+        }
+    }
+    return WeakHandle();
+}
+
 Loop::WeakHandle Loop::insertChildHandle(SharedHandle handle)
 {
     auto itr = _handles.insert(handle);
@@ -289,6 +299,15 @@ Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
 bool Loop::eraseChildHandle(WeakHandle handle)
 {
     return _handles.erase(handle.lock()) == 1;
+}
+
+bool Loop::eraseChildHandle(Handle * handle)
+{
+    auto weak = findChildHandle(handle);
+    if (auto shared = weak.lock()) {
+        return eraseChildHandle(weak);
+    }
+    return false;
 }
 
 void Loop::clear(bool force_clear)

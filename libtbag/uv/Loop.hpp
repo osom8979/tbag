@@ -159,9 +159,11 @@ private:
     void runCloseAllHandles();
 
 public:
+    WeakHandle findChildHandle  (Handle     * handle);
     WeakHandle insertChildHandle(SharedHandle handle);
     WeakHandle insertChildHandle(Handle     * handle);
     bool       eraseChildHandle (WeakHandle   handle);
+    bool       eraseChildHandle (Handle     * handle);
 
 // By-pass methods.
 public:
@@ -199,16 +201,15 @@ public:
     void clear(bool force_clear = false);
 
 public:
-    // @formatter:off
+    /** Create(new) & insert handle. */
     template <typename HandleType, typename ... Args>
-    inline std::shared_ptr<typename remove_cr<HandleType>::type> createAndInsertChildHandle(Loop & loop, Args && ... args)
+    inline std::shared_ptr<typename remove_cr<HandleType>::type> newHandle(Args && ... args)
     {
         typedef typename remove_cr<HandleType>::type ResultHandleType;
-        HandleType * handle = new HandleType(loop, std::forward<Args>(args) ...);
+        HandleType * handle = new HandleType(std::forward<Args>(args) ...);
         auto shared = insertChildHandle(handle).lock();
         return std::static_pointer_cast<ResultHandleType, Handle>(shared);
     }
-    // @formatter:on
 };
 
 } // namespace uv

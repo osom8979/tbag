@@ -19,6 +19,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/network/CommonTcp.hpp>
 #include <libtbag/uv/Loop.hpp>
+#include <libtbag/uv/Async.hpp>
+#include <libtbag/uv/Tcp.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -49,6 +51,46 @@ public:
     inline uv::Loop       & atLoop()       TBAG_NOEXCEPT { return _loop; }
     inline uv::Loop const & atLoop() const TBAG_NOEXCEPT { return _loop; }
     // @formatter:on
+
+public:
+    struct AsyncTcpHelper : public libtbag::uv::Async
+    {
+        enum class ActionType
+        {
+            CLOSE,
+            START_READ,
+            STOP_READ,
+        };
+
+        TcpLoop & loop;
+        ActionType const ACTION;
+
+        AsyncTcpHelper(TcpLoop & l, ActionType a) : loop(l), ACTION(a)
+        { libtbag::uv::Async::init(loop.atLoop()); }
+
+        virtual void onAsync() override
+        {
+            switch (ACTION) {
+            case ActionType::CLOSE:      loop.atTcp()->close();     break;
+            case ActionType::START_READ: loop.atTcp()->startRead(); break;
+            case ActionType::STOP_READ:  loop.atTcp()->stopRead();  break;
+            }
+            close();
+        }
+
+        virtual void onClose() override
+        {
+            loop.atLoop().eraseChildHandle(this);
+        }
+    };
+
+private:
+    void asyncAction(AsyncTcpHelper::ActionType type);
+
+public:
+    void asyncClose    ();
+    void asyncStartRead();
+    void asyncStopRead ();
 
 public:
     virtual bool run(std::string const & ip, int port) = 0;
