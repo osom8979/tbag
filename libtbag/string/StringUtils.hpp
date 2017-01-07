@@ -91,6 +91,13 @@ TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_sourc
 TBAG_API std::string convertStringWithThreadId(std::thread::id const & id);
 
 /**
+ * Byte array to HEX string.
+ */
+TBAG_API char convertHalfByteToHexChar(uint8_t half_byte);
+TBAG_API std::string convertByteToHexString(uint8_t hex);
+TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix = "0x");
+
+/**
  * Regex based token.
  */
 TBAG_API std::vector<std::string> splitMatch(std::string const & source, std::regex const & match);

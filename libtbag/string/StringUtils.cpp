@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/string/StringUtils.hpp>
+#include <cassert>
 #include <random>
 #include <unicode/unistr.h>
 
@@ -94,6 +95,59 @@ std::string convertStringWithThreadId(std::thread::id const & id)
     std::stringstream ss;
     ss << id;
     return ss.str();
+}
+
+char convertHalfByteToHexChar(uint8_t half_byte)
+{
+    static uint8_t const HALF_BYTE_FILTER = 0x0F;
+    switch (half_byte & HALF_BYTE_FILTER) {
+    case 0x0: return '0';
+    case 0x1: return '1';
+    case 0x2: return '2';
+    case 0x3: return '3';
+    case 0x4: return '4';
+    case 0x5: return '5';
+    case 0x6: return '6';
+    case 0x7: return '7';
+    case 0x8: return '8';
+    case 0x9: return '9';
+    case 0xA: return 'A';
+    case 0xB: return 'B';
+    case 0xC: return 'C';
+    case 0xD: return 'D';
+    case 0xE: return 'E';
+    case 0xF: return 'F';
+    default:  assert(0 && "Inaccessible case."); return '\0';
+    }
+}
+
+std::string convertByteToHexString(uint8_t hex)
+{
+    char result[3] = {0,};
+    result[0] = convertHalfByteToHexChar(hex >> 1);
+    result[1] = convertHalfByteToHexChar(hex);
+    result[2] = '\0';
+    return std::string(result);
+}
+
+std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix)
+{
+    std::size_t const SIZE = bytes.size();
+    if (SIZE == 0) {
+        return std::string();
+    }
+
+    std::string result;
+    std::size_t i = 0;
+    while (true) {
+        result += (prefix + convertByteToHexString(bytes[i]));
+        if ((++i) < SIZE) {
+            result += ' ';
+        } else {
+            break;
+        }
+    }
+    return result;
 }
 
 std::vector<std::string> splitMatch(std::string const & source, std::regex const & match)
