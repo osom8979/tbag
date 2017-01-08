@@ -47,7 +47,7 @@ void TcpLoop::safeClose()
 void TcpLoop::safeStartRead()
 {
     if (isEqualOwnerThreadId()) {
-        atTcp()->close();
+        atTcp()->startRead();
     } else {
         safeAsync(AsyncHelper::ActionType::START_READ);
     }
@@ -56,10 +56,23 @@ void TcpLoop::safeStartRead()
 void TcpLoop::safeStopRead()
 {
     if (isEqualOwnerThreadId()) {
-        atTcp()->close();
+        atTcp()->stopRead();
     } else {
         safeAsync(AsyncHelper::ActionType::STOP_READ);
     }
+}
+
+bool TcpLoop::safeWrite(char const * buffer, std::size_t size)
+{
+//    if (isEqualOwnerThreadId()) {
+//        return asyncWrite(buffer, size) != nullptr;
+//    } else {
+        auto shared = _loop.newHandle<AsyncWriteHelper>(*this, buffer, size);
+        if (static_cast<bool>(shared)) {
+            shared->send();
+        }
+        return true;
+//    }
 }
 
 } // namespace network

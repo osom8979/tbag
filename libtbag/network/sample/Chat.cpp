@@ -243,7 +243,7 @@ void AsyncChatInput::onReadLine(std::string const & msg)
     auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(_name), builder.CreateString(msg));
     builder.Finish(packet);
 
-    if (_client.asyncWrite((char const *)builder.GetBufferPointer(), builder.GetSize()) == nullptr) {
+    if (_client.safeWrite((char const *)builder.GetBufferPointer(), builder.GetSize()) == false) {
         std::cout << "onReadLine() result error.\n";
         return;
     }

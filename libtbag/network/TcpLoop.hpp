@@ -40,9 +40,10 @@ class TBAG_API TcpLoop : public CommonTcp
 {
 public:
     using Parent = CommonTcp;
+    using Async  = libtbag::uv::Async;
 
 public:
-    struct AsyncHelper : public libtbag::uv::Async
+    struct AsyncHelper : public Async
     {
         enum class ActionType
         {
@@ -55,7 +56,7 @@ public:
         ActionType const ACTION;
 
         AsyncHelper(TcpLoop & l, ActionType a) : loop(l), ACTION(a)
-        { libtbag::uv::Async::init(loop.atLoop()); }
+        { Async::init(loop.atLoop()); }
 
         virtual void onAsync() override
         {
@@ -74,7 +75,29 @@ public:
     };
 
 public:
-    using SharedAsyncHelper = std::shared_ptr<AsyncHelper>;
+    struct AsyncWriteHelper : public Async
+    {
+        TcpLoop & loop;
+        Buffer buffer;
+
+        AsyncWriteHelper(TcpLoop & l, char const * b, std::size_t s) : loop(l), buffer(b, b + s)
+        { Async::init(loop.atLoop()); }
+
+        virtual void onAsync() override
+        {
+            loop.asyncWrite(&buffer[0], buffer.size());
+            close();
+        }
+
+        virtual void onClose() override
+        {
+            loop.atLoop().eraseChildHandle(this);
+        }
+    };
+
+public:
+    using SharedAsyncHelper      = std::shared_ptr<AsyncHelper>;
+    using SharedAsyncWriteHelper = std::shared_ptr<AsyncWriteHelper>;
 
 private:
     uv::Loop _loop;
@@ -100,6 +123,9 @@ public:
     void safeClose    ();
     void safeStartRead();
     void safeStopRead ();
+
+public:
+    bool safeWrite(char const * buffer, std::size_t size);
 
 public:
     virtual bool run(std::string const & ip, int port) = 0;
