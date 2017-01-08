@@ -197,11 +197,13 @@ void EchoClient::onClose()
 
 int runEchoServer(std::string const & ip, int port)
 {
+    std::cout << "Start echo server: " << ip << " (" << port << ")\n";
     return EchoServer().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 int runEchoClient(std::string const & ip, int port)
 {
+    std::cout << "Start echo client: " << ip << " (" << port << ")\n";
     return EchoClient().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 

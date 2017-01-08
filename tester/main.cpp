@@ -18,12 +18,14 @@
 #include <iostream>
 #include <string>
 
-static char const * const CMD_ARGUMENT_ECHO_SERVER = "echo_server";
-static char const * const CMD_ARGUMENT_ECHO_CLIENT = "echo_client";
-static char const * const CMD_ARGUMENT_CHAT_SERVER = "chat_server";
-static char const * const CMD_ARGUMENT_CHAT_CLIENT = "chat_client";
+static char const * const CMD_ARGUMENT_ECHO_SERVER = "es"; ///< Echo Server.
+static char const * const CMD_ARGUMENT_ECHO_CLIENT = "ec"; ///< Echo Client.
+static char const * const CMD_ARGUMENT_CHAT_SERVER = "cs"; ///< Chatting Server.
+static char const * const CMD_ARGUMENT_CHAT_CLIENT = "cc"; ///< Chatting Client.
 
-static int const DEFAULT_NETWORK_TEST_PORT = 98765;
+static char const * const DEFAULT_NETWORK_TEST_SERVER_IP = "0.0.0.0";
+static char const * const DEFAULT_NETWORK_TEST_CLIENT_IP = "127.0.0.1";
+static  int const         DEFAULT_NETWORK_TEST_PORT = 98765;
 
 enum class TestMode
 {
@@ -35,15 +37,15 @@ enum class TestMode
     CHAT_CLIENT,
 };
 
-TestMode checkNetworkArgument(libtbag::string::Arguments const & args, TestMode mode, std::string & ip, int & port)
+bool checkNetworkArgument(libtbag::string::Arguments const & args, std::string & ip, int & port)
 {
     if (args.optString(0, &ip)) {
         if (args.optInteger(1, &port) == false) {
             port = DEFAULT_NETWORK_TEST_PORT;
         }
-        return mode;
+        return true;
     }
-    return TestMode::UNKNOWN_ERROR;
+    return false;
 }
 
 int main(int argc, char **argv)
@@ -59,16 +61,32 @@ int main(int argc, char **argv)
     {   // COMMAND-LINE PARSING.
         libtbag::string::Commander cmd;
         cmd.insert(CMD_ARGUMENT_ECHO_SERVER, [&](libtbag::string::Arguments const & args){
-            mode = checkNetworkArgument(args, TestMode::ECHO_SERVER, ip, port);
+            if (checkNetworkArgument(args, ip, port) == false) {
+                ip   = DEFAULT_NETWORK_TEST_SERVER_IP;
+                port = DEFAULT_NETWORK_TEST_PORT;
+            }
+            mode = TestMode::ECHO_SERVER;
         });
         cmd.insert(CMD_ARGUMENT_ECHO_CLIENT, [&](libtbag::string::Arguments const & args){
-            mode = checkNetworkArgument(args, TestMode::ECHO_CLIENT, ip, port);
+            if (checkNetworkArgument(args, ip, port) == false) {
+                ip   = DEFAULT_NETWORK_TEST_CLIENT_IP;
+                port = DEFAULT_NETWORK_TEST_PORT;
+            }
+            mode = TestMode::ECHO_CLIENT;
         });
         cmd.insert(CMD_ARGUMENT_CHAT_SERVER, [&](libtbag::string::Arguments const & args){
-            mode = checkNetworkArgument(args, TestMode::CHAT_SERVER, ip, port);
+            if (checkNetworkArgument(args, ip, port) == false) {
+                ip   = DEFAULT_NETWORK_TEST_SERVER_IP;
+                port = DEFAULT_NETWORK_TEST_PORT;
+            }
+            mode = TestMode::CHAT_SERVER;
         });
         cmd.insert(CMD_ARGUMENT_CHAT_CLIENT, [&](libtbag::string::Arguments const & args){
-            mode = checkNetworkArgument(args, TestMode::CHAT_CLIENT, ip, port);
+            if (checkNetworkArgument(args, ip, port) == false) {
+                ip   = DEFAULT_NETWORK_TEST_CLIENT_IP;
+                port = DEFAULT_NETWORK_TEST_PORT;
+            }
+            mode = TestMode::CHAT_CLIENT;
         });
         cmd.request(argc, argv);
     }

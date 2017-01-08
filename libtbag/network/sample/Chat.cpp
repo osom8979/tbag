@@ -255,6 +255,7 @@ void AsyncChatInput::onReadLine(std::string const & msg)
 
 int runChatServer(std::string const & ip, int port)
 {
+    std::cout << "Start chatting server: " << ip << " (" << port << ")\n";
     return ChatServer().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
@@ -264,6 +265,7 @@ int runChatClient(std::string const & ip, int port)
     std::cout << "Enter the your name: ";
     std::cin >> name;
 
+    std::cout << "Start chatting client: " << ip << " (" << port << ")\n";
     return ChatClient(name).run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
