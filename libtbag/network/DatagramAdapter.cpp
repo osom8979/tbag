@@ -83,6 +83,19 @@ DatagramAdapter::WriteRequest * DatagramAdapter::safeWrite(TcpLoop & tcp, char c
     return tcp.safeWrite(buffer_info.buffer, buffer_info.size);
 }
 
+DatagramAdapter::WriteRequest * DatagramAdapter::safeWrite(TcpLoop & loop, CommonTcp & tcp, char const * buffer, std::size_t size)
+{
+    binf buffer_info = writeDatagram(buffer, size);
+
+    if (loop.isEqualOwnerThreadId()) {
+        return loop.asyncWrite(buffer_info.buffer, buffer_info.size);
+    } else {
+        WriteRequest * request = loop.obtainWriteRequest();
+        loop.atLoop().newHandle<TcpLoop::AsyncWriteHelper>(loop, request, buffer_info.buffer, buffer_info.size);
+        return request;
+    }
+}
+
 DatagramAdapter::WriteRequest * DatagramAdapter::asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size)
 {
     binf buffer_info = writeDatagram(buffer, size);

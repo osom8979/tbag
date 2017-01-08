@@ -70,6 +70,9 @@ public:
 
 public:
     WriteRequest * safeWrite(TcpLoop & tcp, char const * buffer, std::size_t size);
+    WriteRequest * safeWrite(TcpLoop & loop, CommonTcp & tcp, char const * buffer, std::size_t size);
+
+public:
     WriteRequest * asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size);
     std::size_t tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result = nullptr);
 
