@@ -8,6 +8,7 @@
 #include <libtbag/network/DatagramAdapter.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/CommonTcp.hpp>
+#include <libtbag/network/TcpLoop.hpp>
 
 #include <cstdlib>
 #include <cstdint>
@@ -74,6 +75,12 @@ std::size_t DatagramAdapter::readNextDatagramSize()
 void DatagramAdapter::clearNextDatagramSize()
 {
     _next_read_size = NO_NEXT_READ_SIZE;
+}
+
+DatagramAdapter::WriteRequest * DatagramAdapter::safeWrite(TcpLoop & tcp, char const * buffer, std::size_t size)
+{
+    binf buffer_info = writeDatagram(buffer, size);
+    return tcp.safeWrite(buffer_info.buffer, buffer_info.size);
 }
 
 DatagramAdapter::WriteRequest * DatagramAdapter::asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size)

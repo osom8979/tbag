@@ -56,7 +56,10 @@ public:
         ActionType const ACTION;
 
         AsyncHelper(TcpLoop & l, ActionType a) : loop(l), ACTION(a)
-        { Async::init(loop.atLoop()); }
+        {
+            Async::init(loop.atLoop());
+            send();
+        }
 
         virtual void onAsync() override
         {
@@ -79,13 +82,22 @@ public:
     {
         TcpLoop & loop;
         Buffer buffer;
+        WriteRequest * request;
 
-        AsyncWriteHelper(TcpLoop & l, char const * b, std::size_t s) : loop(l), buffer(b, b + s)
-        { Async::init(loop.atLoop()); }
+        bool is_writing;
+
+        AsyncWriteHelper(TcpLoop & l, WriteRequest * r, char const * b, std::size_t s)
+                : loop(l), request(r), buffer(b, b + s), is_writing(false)
+        {
+            Async::init(loop.atLoop());
+            send();
+        }
 
         virtual void onAsync() override
         {
-            loop.asyncWrite(&buffer[0], buffer.size());
+            if (request != nullptr) {
+                is_writing = loop.atTcp()->write(*request, &buffer[0], buffer.size());
+            }
             close();
         }
 
@@ -125,7 +137,7 @@ public:
     void safeStopRead ();
 
 public:
-    bool safeWrite(char const * buffer, std::size_t size);
+    WriteRequest * safeWrite(char const * buffer, std::size_t size);
 
 public:
     virtual bool run(std::string const & ip, int port) = 0;

@@ -30,6 +30,7 @@ namespace network {
 
 // Forward declaration.
 class CommonTcp;
+class TcpLoop;
 
 /**
  * DatagramAdapter class prototype.
@@ -68,6 +69,7 @@ public:
     void clearNextDatagramSize();
 
 public:
+    WriteRequest * safeWrite(TcpLoop & tcp, char const * buffer, std::size_t size);
     WriteRequest * asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size);
     std::size_t tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result = nullptr);
 
