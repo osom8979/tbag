@@ -35,7 +35,7 @@ Tty::Tty(Loop & loop, uv::File fd, bool readable) : Tty()
 
 Tty::Tty(Loop & loop, GeneralFile fd) : Tty()
 {
-    if (init(loop, fd) != 0) {
+    if (init(loop, fd) == false) {
         throw std::bad_alloc();
     }
 

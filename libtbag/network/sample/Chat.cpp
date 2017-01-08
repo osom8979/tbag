@@ -128,8 +128,8 @@ void ChatServer::onClientClose(Client & client)
 ChatClient::ChatClient(std::string const & name)
 {
     std::cout.setf(std::ios_base::boolalpha);
-    auto weak = atLoop().insertChildHandle(new AsyncChatInput(atLoop(), *this, name));
-    _input = std::static_pointer_cast<AsyncChatInput, uv::Handle>(weak.lock());
+    auto shared = atLoop().newHandle<AsyncChatInput>(atLoop(), *this, name);
+    _input = std::static_pointer_cast<AsyncChatInput, uv::Handle>(shared);
 }
 
 ChatClient::~ChatClient()
@@ -256,6 +256,7 @@ void AsyncChatInput::onReadLine(std::string const & msg)
 int runChatServer(std::string const & ip, int port)
 {
     std::cout << "Start chatting server: " << ip << " (" << port << ")\n";
+
     return ChatServer().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
