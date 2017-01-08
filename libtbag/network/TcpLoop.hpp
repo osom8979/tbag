@@ -81,9 +81,8 @@ public:
     struct AsyncWriteHelper : public Async
     {
         TcpLoop & loop;
-        Buffer buffer;
         WriteRequest * request;
-
+        Buffer buffer;
         bool is_writing;
 
         AsyncWriteHelper(TcpLoop & l, WriteRequest * r, char const * b, std::size_t s)
