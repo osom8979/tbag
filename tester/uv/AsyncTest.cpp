@@ -9,39 +9,60 @@
 #include <libtbag/uv/Loop.hpp>
 #include <libtbag/uv/Async.hpp>
 
+#include <atomic>
+
 using namespace libtbag;
 using namespace libtbag::uv;
 
-static bool g_is_async = false;
-static bool g_is_close = false;
-
-struct AsyncTest : public Async 
+struct AsyncTest : public Async
 {
-    AsyncTest(Loop & loop) : Async(loop)
+    int max_async_count;
+    int async_count;
+    int close_count;
+
+    AsyncTest(Loop & loop, int count) : Async(loop), max_async_count(count), async_count(0), close_count(0)
     { /* EMPTY. */ }
 
     virtual void onAsync() override
     {
-        g_is_async = true;
-        close();
+        ++async_count;
+
+        if (async_count >= max_async_count) {
+            close();
+        } else {
+            send();
+        }
     }
 
     virtual void onClose() override
     {
-        g_is_close = true;
+        ++close_count;
     }
 };
 
 TEST(AsyncTest, Default)
 {
-    {
-        Loop loop;
-        auto async = loop.newHandle<AsyncTest>(loop);
-        async->send();
-        loop.run();
-    }
+    int const TEST_COUNT = 5;
 
-    ASSERT_TRUE(g_is_async);
-    ASSERT_TRUE(g_is_close);
+    std::shared_ptr<AsyncTest> async;
+    std::shared_ptr<Loop> loop;
+
+    loop.reset(new Loop());
+    async = loop->newHandle<AsyncTest>(*loop, TEST_COUNT);
+
+    ASSERT_EQ(1, loop->size());
+    ASSERT_TRUE(static_cast<bool>(async));
+
+    async->send();
+    loop->run();
+
+    ASSERT_EQ(1, loop->size());
+    loop->clear();
+    ASSERT_EQ(0, loop->size());
+
+    ASSERT_TRUE(static_cast<bool>(async));
+    ASSERT_TRUE(async->isClosing());
+    ASSERT_EQ(TEST_COUNT, async->async_count);
+    ASSERT_EQ(1, async->close_count);
 }
 
