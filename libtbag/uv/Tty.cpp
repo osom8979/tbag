@@ -24,7 +24,7 @@ Tty::Tty() : Stream(UvHandleType::TTY)
 
 Tty::Tty(Loop & loop, uv::File fd, bool readable) : Tty()
 {
-    if (init(loop, fd, readable) != 0) {
+    if (init(loop, fd, readable) == false) {
         throw std::bad_alloc();
     }
 
