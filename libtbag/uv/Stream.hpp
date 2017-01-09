@@ -58,6 +58,10 @@ public:
     bool isWritable() const TBAG_NOEXCEPT;
 
 public:
+    /** Enable or disable blocking mode for a stream. */
+    bool setBlocking(bool enable = true);
+
+public:
     /** Shutdown the outgoing (write) side of a duplex stream. */
     bool shutdown(ShutdownRequest & request);
 

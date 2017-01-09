@@ -154,6 +154,32 @@ bool Stream::isWritable() const TBAG_NOEXCEPT
     return ::uv_is_writable(Parent::cast<const uv_stream_t>()) == 1;
 }
 
+bool Stream::setBlocking(bool enable)
+{
+    // When blocking mode is enabled all writes complete synchronously.
+    // The interface remains unchanged otherwise,
+    // e.g. completion or failure of the operation will still
+    // be reported through a callback which is made asynchronously.
+    //
+    // Warning:
+    // Relying too much on this API is not recommended.
+    // It is likely to change significantly in the future.
+    // Currently only works on Windows for uv_pipe_t handles.
+    // On UNIX platforms, all uv_stream_t handles are supported.
+    //
+    // Also libuv currently makes no ordering guarantee when the blocking mode
+    // is changed after write requests have already been submitted.
+    // Therefore it is recommended to set the blocking mode immediately
+    // after opening or creating the stream.
+
+    int const CODE = ::uv_stream_set_blocking(Parent::cast<uv_stream_t>(), enable ? 1 : 0);
+    if (CODE != 0) {
+        __tbag_error("Stream::setBlocking() error [{}] {}", CODE, getUvErrorName(CODE));
+        return false;
+    }
+    return true;
+}
+
 bool Stream::shutdown(ShutdownRequest & request)
 {
     request.setOwner(this); // IMPORTANT!!
