@@ -39,9 +39,10 @@ class TBAG_API EchoServer : public TcpServer
 private:
     int _write_count; ///< Write count.
     int  _echo_count; ///< Max echo count.
+    bool    _massive; ///< Enable/Disable massive data.
 
 public:
-    EchoServer(int count = 3);
+    EchoServer(int count = 3, bool massive = false);
     virtual ~EchoServer();
 
 public:
@@ -67,6 +68,10 @@ class TBAG_API EchoClient : public TcpClient
 {
 private:
     DatagramAdapter _datagram;
+    int _read_count;
+
+private:
+    int _debugging_count;
 
 public:
     EchoClient();
