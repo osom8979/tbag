@@ -62,7 +62,7 @@ public:
     { /* EMPTY. */ }
     CallableTcp(Loop & l, Callback * c = nullptr) : Tcp(l), _cb(c)
     { /* EMPTY. */ }
-    ~CallableTcp()
+    virtual ~CallableTcp()
     { /* EMPTY. */ }
     // @formatter:on
 
