@@ -119,7 +119,7 @@ void DatagramAdapter::alloc(std::size_t suggested_size)
 
 void DatagramAdapter::push(char const * buffer, std::size_t size)
 {
-    _data_buffer.push(buffer, size);
+    _data_buffer.extendPush(buffer, size);
 }
 
 bool DatagramAdapter::next(binf * result)

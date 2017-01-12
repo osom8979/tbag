@@ -23,6 +23,8 @@ namespace sample  {
 
 static char const * const TEST_ECHO_MESSAGE  = "__TEST_ECHO_MESSAGE__";
 static  std::size_t const PRINT_MINIMUM_SIZE = 32;
+static  std::size_t const MASSIVE_SIZE       = 500 * 500 * 3;
+static         char const MASSIVE_VALUE      = static_cast<char>(0x0F);
 
 static TBAG_CONSTEXPR bool isTestMassiveMessage() TBAG_NOEXCEPT
 {
@@ -76,7 +78,7 @@ void EchoServer::onClose()
 
 EchoServer::binf EchoServer::onClientAlloc(Client & client, std::size_t suggested_size)
 {
-    suggested_size = 500 * 500 * 3 * 2;
+    suggested_size = MASSIVE_SIZE * 2;
     DatagramAdapter * adapter = static_cast<DatagramAdapter*>(client.getUserData());
     if (adapter != nullptr) {
         adapter->alloc(suggested_size);
@@ -103,7 +105,6 @@ void EchoServer::onClientRead(Client & client, Err code, char const * buffer, st
 
             if (_massive) {
                 // CREATE MASSIVE DATA.
-                std::size_t const MASSIVE_SIZE = 500 * 500 * 3;
                 Buffer const MASSIVE_BUFFER(MASSIVE_SIZE, static_cast<char>(0x0F));
                 for (int i = 0; i < _write_count; ++i) {
                     adapter->asyncWrite(client, &MASSIVE_BUFFER[0], MASSIVE_BUFFER.size());
@@ -168,7 +169,7 @@ EchoClient::~EchoClient()
 
 EchoClient::binf EchoClient::onAlloc(std::size_t suggested_size)
 {
-    suggested_size = 500 * 500 * 3 * 2;
+    suggested_size = MASSIVE_SIZE * 10;
     _datagram.alloc(suggested_size);
     return uv::defaultOnAlloc(atReadBuffer(), suggested_size);
 }
@@ -189,8 +190,10 @@ void EchoClient::onConnect(ConnectRequest & request, Err code)
 void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
 {
     if (code == Err::SUCCESS) {
-        std::cout << "EchoClient::onRead() Success(" << _read_count++ << ") size(" << size << ").\n";
+        std::cout << "EchoClient::onRead() Success(" << _read_count++ << ") size(" << size << ")";
         _datagram.push(buffer, size);
+
+        std::cout << " - Datagram buffer size(" << _datagram.atDataBuffer().size() << ") free(" << _datagram.atDataBuffer().free() << ")";
 
         ++_debugging_count;
 
@@ -202,13 +205,14 @@ void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
                 std::cout << " - Echo read: " << msg << std::endl;
             } else {
                 std::cout << " - Echo read size(" << info.size << ")\n";
+                assert((info.size == MASSIVE_SIZE) && "DatagramAdapter binf.size error!!\n");
             }
 
             _debugging_count = 0;
         }
 
         if (_debugging_count >= 10) {
-            std::cout << "WHY !?!?\n";
+            assert(false && "DatagramAdapter bug!!\n");
         }
 
     } else if (code == Err::END_OF_FILE) {

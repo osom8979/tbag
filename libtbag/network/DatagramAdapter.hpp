@@ -69,6 +69,10 @@ public:
     void clearNextDatagramSize();
 
 public:
+    inline CircularBuffer & atDataBuffer() TBAG_NOEXCEPT
+    { return _data_buffer; }
+
+public:
     WriteRequest * safeWrite(TcpLoop & tcp, char const * buffer, std::size_t size);
     WriteRequest * safeWrite(TcpLoop & loop, CommonTcp & tcp, char const * buffer, std::size_t size);
 
