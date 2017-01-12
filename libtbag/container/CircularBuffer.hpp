@@ -57,7 +57,7 @@ public:
     {
         Buffer    * b; ///< Buffer point.
         std::size_t r; ///< Read index.
-        std::size_t s; ///< Written size.
+        std::size_t s; ///< Written Size.
 
         // @formatter:off
         Indexer() : b(nullptr), r(0), s(0)
@@ -226,6 +226,10 @@ public:
     { return _index.empty(); }
     inline std::size_t size() const TBAG_NOEXCEPT
     { return _index.size(); }
+    inline std::size_t max() const TBAG_NOEXCEPT
+    { return _index.max(); }
+    inline std::size_t free() const TBAG_NOEXCEPT
+    { return max() - size(); }
 
 public:
     inline Indexer getIndex() const TBAG_NOEXCEPT
@@ -291,10 +295,19 @@ public:
     }
 
 public:
+    std::size_t extendPush(Value const * buffer, std::size_t size)
+    {
+        if (free() < size) {
+            extendCapacity(size - free());
+        }
+        assert(free() >= size);
+        return push(buffer, size);
+    }
+
+public:
     void extendCapacity(std::size_t more_size)
     {
         std::size_t const REQUEST_SIZE = _buffer.size() + more_size;
-        Buffer new_buffer(REQUEST_SIZE, Value());
 
         if (_index.r <= _index.last()) {
             _buffer.resize(REQUEST_SIZE);
