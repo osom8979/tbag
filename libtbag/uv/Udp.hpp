@@ -96,9 +96,11 @@ public:
 
     /** Send data over the UDP socket. */
     bool send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr);
+    bool send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
     /** Same as send(), but won't queue a send request if it can't be completed immediately. */
     std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result = nullptr);
+    std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result = nullptr);
 
     /** Prepare for receiving data. */
     bool startRecv();

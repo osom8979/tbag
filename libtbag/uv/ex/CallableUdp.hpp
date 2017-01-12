@@ -70,11 +70,11 @@ public:
 
 public:
     // @formatter:off
-    virtual void onSend(UdpSendRequest & request, Err code)
+    virtual void onSend(UdpSendRequest & request, Err code) override
     { if (_cb != nullptr) { _cb->onSend(request, code); } }
-    virtual binf onAlloc(std::size_t suggested_size)
+    virtual binf onAlloc(std::size_t suggested_size) override
     { if (_cb != nullptr) { return _cb->onAlloc(suggested_size); } return binf(); }
-    virtual void onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
+    virtual void onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags) override
     { if (_cb != nullptr) { _cb->onRead(code, buffer, size, addr, flags); } }
 
     virtual void onClose() override

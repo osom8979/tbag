@@ -349,6 +349,14 @@ bool Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, s
     return true;
 }
 
+bool Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
+{
+    binf info;
+    info.buffer = const_cast<char*>(buffer);
+    info.size   = size;
+    return send(request, &info, 1U, addr);
+}
+
 std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result)
 {
     // Same as uv_udp_send(), but won't queue a send request if it can't be completed immediately.
@@ -373,6 +381,14 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
     if (result != nullptr) { *result = Err::SUCCESS; }
     return static_cast<std::size_t>(WRITE_RESULT);
     // @formatter:on
+}
+
+std::size_t Udp::trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result)
+{
+    binf info;
+    info.buffer = const_cast<char*>(buffer);
+    info.size   = size;
+    return trySend(&info, 1U, addr, result);
 }
 
 bool Udp::startRecv()
