@@ -53,7 +53,7 @@ static void __global_uv_connection_cb__(uv_stream_t * server, int status)
     s->onConnection(status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
-static void __global_uv_alloc_cb__(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf)
+static void __global_uv_stream_alloc_cb__(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf)
 {
     // Type definition for callback passed to uv_read_start() and uv_udp_recv_start().
     // The user must allocate memory and fill the supplied uv_buf_t structure.
@@ -66,7 +66,7 @@ static void __global_uv_alloc_cb__(uv_handle_t * handle, size_t suggested_size, 
 
     Stream * s = static_cast<Stream*>(handle->data);
     if (s == nullptr) {
-        __tbag_error("__global_uv_alloc_cb__() handle data is nullptr.");
+        __tbag_error("__global_uv_stream_alloc_cb__() handle data is nullptr.");
         return;
     }
 
@@ -239,7 +239,7 @@ bool Stream::startRead()
     // The uv_read_cb callback will be made several times until
     // there is no more data to read or uv_read_stop() is called.
 
-    int const CODE = ::uv_read_start(Parent::cast<uv_stream_t>(), __global_uv_alloc_cb__, __global_uv_read_cb__);
+    int const CODE = ::uv_read_start(Parent::cast<uv_stream_t>(), __global_uv_stream_alloc_cb__, __global_uv_read_cb__);
     if (CODE != 0) {
         __tbag_error("Stream::startRead() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
