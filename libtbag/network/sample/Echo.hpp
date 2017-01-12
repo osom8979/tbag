@@ -80,8 +80,12 @@ public:
     virtual void onClose() override;
 };
 
-TBAG_API int runEchoServer(std::string const & ip, int port);
-TBAG_API int runEchoClient(std::string const & ip, int port);
+char const * const TEST_ECHO_SERVER_ADDRESS =   "0.0.0.0";
+char const * const TEST_ECHO_CLIENT_ADDRESS = "127.0.0.1";
+int          const TEST_ECHO_PORT           =        9999;
+
+TBAG_API int runEchoServer(std::string const & ip = TEST_ECHO_SERVER_ADDRESS, int port = TEST_ECHO_PORT);
+TBAG_API int runEchoClient(std::string const & ip = TEST_ECHO_CLIENT_ADDRESS, int port = TEST_ECHO_PORT);
 
 } // namespace sample
 } // namespace network

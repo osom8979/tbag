@@ -124,8 +124,12 @@ public:
     virtual void onReadLine(std::string const & msg);
 };
 
-TBAG_API int runChatServer(std::string const & ip, int port);
-TBAG_API int runChatClient(std::string const & ip, int port);
+char const * const TEST_CHAT_SERVER_ADDRESS =   "0.0.0.0";
+char const * const TEST_CHAT_CLIENT_ADDRESS = "127.0.0.1";
+int          const TEST_CHAT_PORT           =        9999;
+
+TBAG_API int runChatServer(std::string const & ip = TEST_CHAT_SERVER_ADDRESS, int port = TEST_CHAT_PORT);
+TBAG_API int runChatClient(std::string const & ip = TEST_CHAT_CLIENT_ADDRESS, int port = TEST_CHAT_PORT);
 
 } // namespace sample
 } // namespace network
