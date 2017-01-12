@@ -28,6 +28,10 @@ namespace uv {
 // Forward declaration.
 class Loop;
 
+unsigned int const UDP_FLAG_IPV6ONLY  = 0x01;
+unsigned int const UDP_FLAG_PARTIAL   = 0x02;
+unsigned int const UDP_FLAG_REUSEADDR = 0x04;
+
 /**
  * Udp class prototype.
  *
@@ -44,7 +48,7 @@ public:
     enum class Membership
     {
         LEAVE_GROUP = 0,
-        JOIN_GROUP
+        JOIN_GROUP,
     };
 
 public:
@@ -76,7 +80,7 @@ public:
     bool setMembership(char const * multicast_addr, char const * interface_addr, Membership membership);
 
     /** Set IP multicast loop flag. */
-    bool setMulticastLoop(int on);
+    bool setMulticastLoop(bool on);
 
     /** Set the multicast ttl. */
     bool setMulticastTtl(int ttl);
@@ -85,7 +89,7 @@ public:
     bool setMulticastInterface(char const * interface_addr);
 
     /** Set broadcast on or off. */
-    bool setBroadcast(int on);
+    bool setBroadcast(bool on);
 
     /** Set the time to live. */
     bool setTtl(int ttl);
@@ -105,7 +109,7 @@ public:
 public:
     virtual void onSend(UdpSendRequest & request, Err code);
     virtual binf onAlloc(std::size_t suggested_size);
-    virtual void onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned flags);
+    virtual void onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
 };
 
 } // namespace uv

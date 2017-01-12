@@ -62,7 +62,11 @@ static void __global_uv_udp_alloc_cb__(uv_handle_t * handle, size_t suggested_si
     buf->len  = result_buffer.size;
 }
 
-static void __global_uv_udp_recv_cb__(uv_udp_t * handle, ssize_t nread, uv_buf_t const * buf, sockaddr const * addr, unsigned flags)
+static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
+                                      ssize_t          nread,
+                                      uv_buf_t const * buf,
+                                      sockaddr const * addr,
+                                      unsigned int     flags)
 {
     // Type definition for callback passed to uv_udp_recv_start(),
     // which is called when the endpoint receives data.
@@ -226,7 +230,7 @@ bool Udp::setMembership(char const * multicast_addr, char const * interface_addr
     return true;
 }
 
-bool Udp::setMulticastLoop(int on)
+bool Udp::setMulticastLoop(bool on)
 {
     // Makes multicast packets loop back to local sockets.
     //
@@ -236,7 +240,7 @@ bool Udp::setMulticastLoop(int on)
     // Returns:
     //  0 on success, or an error code < 0 on failure.
 
-    int const CODE = ::uv_udp_set_multicast_loop(Parent::cast<uv_udp_t>(), on);
+    int const CODE = ::uv_udp_set_multicast_loop(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
     if (CODE != 0) {
         __tbag_debug("Udp::setMulticastLoop() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -276,7 +280,7 @@ bool Udp::setMulticastInterface(char const * interface_addr)
     return true;
 }
 
-bool Udp::setBroadcast(int on)
+bool Udp::setBroadcast(bool on)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -284,7 +288,7 @@ bool Udp::setBroadcast(int on)
     // Returns:
     //  0 on success, or an error code < 0 on failure.
 
-    int const CODE = ::uv_udp_set_broadcast(Parent::cast<uv_udp_t>(), on);
+    int const CODE = ::uv_udp_set_broadcast(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
     if (CODE != 0) {
         __tbag_debug("Udp::setBroadcast() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
@@ -420,7 +424,7 @@ binf Udp::onAlloc(std::size_t suggested_size)
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
-void Udp::onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned flags)
+void Udp::onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
 {
     __tbag_debug("Udp::onRead({}) called (size:{}).", static_cast<int>(code), size);
 }
