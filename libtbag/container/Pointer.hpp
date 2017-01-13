@@ -36,7 +36,7 @@ namespace container {
 template <typename T>
 struct Pointer
 {
-    using Type           = typename libtbag::remove_cr<T>::type;
+    using Type           = T;
     using Reference      = typename std::add_lvalue_reference<Type>::type;
     using ConstReference = const Reference;
 
