@@ -194,3 +194,38 @@ TEST(CircularBufferTest, PushAndPop3)
     ASSERT_EQ('C', read[2]);
 }
 
+TEST(CircularBufferTest, extendCapacity)
+{
+    TestBuffer buf(4);
+    ASSERT_EQ(4, buf.push("ABCD", 4));
+    ASSERT_EQ(4, buf.size());
+    ASSERT_EQ(4, buf.max());
+    ASSERT_EQ(0, buf.free());
+    ASSERT_EQ('A', buf[0]);
+    ASSERT_EQ('B', buf[1]);
+    ASSERT_EQ('C', buf[2]);
+    ASSERT_EQ('D', buf[3]);
+
+    buf.extendCapacity(4);
+    ASSERT_EQ(4, buf.size());
+    ASSERT_EQ(8, buf.max());
+    ASSERT_EQ(4, buf.free());
+    ASSERT_EQ('A', buf[0]);
+    ASSERT_EQ('B', buf[1]);
+    ASSERT_EQ('C', buf[2]);
+    ASSERT_EQ('D', buf[3]);
+
+    ASSERT_EQ(4, buf.push("EFGH", 4));
+    ASSERT_EQ(8, buf.size());
+    ASSERT_EQ(8, buf.max());
+    ASSERT_EQ(0, buf.free());
+    ASSERT_EQ('A', buf[0]);
+    ASSERT_EQ('B', buf[1]);
+    ASSERT_EQ('C', buf[2]);
+    ASSERT_EQ('D', buf[3]);
+    ASSERT_EQ('E', buf[4]);
+    ASSERT_EQ('F', buf[5]);
+    ASSERT_EQ('G', buf[6]);
+    ASSERT_EQ('H', buf[7]);
+}
+

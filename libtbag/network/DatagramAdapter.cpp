@@ -114,7 +114,9 @@ std::size_t DatagramAdapter::tryWrite(CommonTcp & tcp, char const * buffer, std:
 
 void DatagramAdapter::alloc(std::size_t suggested_size)
 {
-    _data_buffer.resize(suggested_size);
+    if (_data_buffer.max() < suggested_size) {
+        _data_buffer.extendCapacity(suggested_size - _data_buffer.max());
+    }
 }
 
 void DatagramAdapter::push(char const * buffer, std::size_t size)

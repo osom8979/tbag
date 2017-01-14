@@ -78,7 +78,7 @@ void EchoServer::onClose()
 
 EchoServer::binf EchoServer::onClientAlloc(Client & client, std::size_t suggested_size)
 {
-    suggested_size = MASSIVE_SIZE * 2;
+    suggested_size = MASSIVE_SIZE;
     DatagramAdapter * adapter = static_cast<DatagramAdapter*>(client.getUserData());
     if (adapter != nullptr) {
         adapter->alloc(suggested_size);
@@ -169,7 +169,7 @@ EchoClient::~EchoClient()
 
 EchoClient::binf EchoClient::onAlloc(std::size_t suggested_size)
 {
-    suggested_size = MASSIVE_SIZE * 10;
+    suggested_size = MASSIVE_SIZE;
     _datagram.alloc(suggested_size);
     return uv::defaultOnAlloc(atReadBuffer(), suggested_size);
 }
