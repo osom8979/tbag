@@ -25,7 +25,7 @@ TEST(LoopTest, Default)
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
 
-    loop.clear();
+    loop.forceClear();
 
     ASSERT_TRUE(loop.empty());
     ASSERT_EQ(0, loop.size());

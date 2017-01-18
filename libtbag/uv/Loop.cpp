@@ -315,26 +315,10 @@ bool Loop::eraseChildHandle(Handle * handle)
     return false;
 }
 
-void Loop::clear(bool force_clear)
+void Loop::forceClear()
 {
     runCloseAllHandles();
-
-    if (force_clear) {
-        _handles.clear();
-    } else {
-        HandleSet closed_handles;
-        for (auto & cursor : _handles) {
-            // Find closed handles.
-            if (static_cast<bool>(cursor) && cursor->isInit() && cursor->isClosing()) {
-                closed_handles.insert(cursor);
-            }
-        }
-
-        for (auto & erase_handle : closed_handles) {
-            _handles.erase(erase_handle);
-        }
-        closed_handles.clear();
-    }
+    _handles.clear();
 }
 
 void Loop::onClosing(Handle * handle)

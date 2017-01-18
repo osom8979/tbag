@@ -198,7 +198,7 @@ public:
 
 public:
     /** @warning This function should be avoided. */
-    void clear(bool force_clear = false);
+    void forceClear();
 
 public:
     virtual void onClosing(Handle * handle);
