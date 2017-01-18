@@ -159,11 +159,11 @@ private:
     void runCloseAllHandles();
 
 public:
-    WeakHandle findChildHandle  (Handle     * handle);
+    WeakHandle   findChildHandle(Handle     * handle);
     WeakHandle insertChildHandle(SharedHandle handle);
     WeakHandle insertChildHandle(Handle     * handle);
-    bool       eraseChildHandle (WeakHandle   handle);
-    bool       eraseChildHandle (Handle     * handle);
+    bool        eraseChildHandle(WeakHandle   handle);
+    bool        eraseChildHandle(Handle     * handle);
 
 // By-pass methods.
 public:
