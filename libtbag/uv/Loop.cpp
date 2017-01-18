@@ -34,6 +34,7 @@ static void __global_uv_walk_cb__(uv_handle_t * handle, void * arg)
         __tbag_error("__global_uv_walk_cb__() handle.loop.data is nullptr.");
         return;
     }
+
     loop->onWalk(handle, arg);
 }
 
@@ -41,12 +42,12 @@ static void __global_uv_walk_cb__(uv_handle_t * handle, void * arg)
 // BaseLoop implementation.
 // ------------------------
 
-BaseLoop::BaseLoop() : Native(UvType::LOOP)
+BaseLoop::BaseLoop() : Native(UvType::LOOP), _running(false)
 {
     // Initializes the given uv_loop_t structure.
     int const CODE = ::uv_loop_init(Parent::cast<uv_loop_t>());
     if (CODE != 0) {
-        __tbag_error("BaseLoop::BaseLoop() error [{}] {}", CODE, getUvErrorName(CODE));
+        __tbag_debug("BaseLoop::BaseLoop() error [{}] {}", CODE, getUvErrorName(CODE));
         throw std::bad_alloc();
     }
 
@@ -79,7 +80,7 @@ bool BaseLoop::close(Err * result)
                 *result = Err::FAILURE;
             }
         } else {
-            __tbag_error("BaseLoop:close() error [{}] {}", CODE, getUvErrorName(CODE));
+            __tbag_debug("BaseLoop:close() error [{}] {}", CODE, getUvErrorName(CODE));
         }
         return false;
     }
@@ -92,6 +93,11 @@ bool BaseLoop::close(Err * result)
 
 bool BaseLoop::run(RunMode mode)
 {
+    if (_running.load() == true) {
+        __tbag_error("BaseLoop::run() duplicated calls.");
+        return false;
+    }
+
     uv_run_mode uv_mode = UV_RUN_DEFAULT;
     // @formatter:off
     switch (mode) {
@@ -103,15 +109,14 @@ bool BaseLoop::run(RunMode mode)
 
     // Update owner thread id.
     _owner_thread_id = std::this_thread::get_id();
-    _running = true;
 
     // It will act differently depending on the specified mode:
     // - UV_RUN_DEFAULT: Runs the event loop until there are no more active and referenced handles or requests. Returns non-zero if uv_stop() was called and there are still active handles or requests. Returns zero in all other cases.
     // - UV_RUN_ONCE: Poll for i/o once. Note that this function blocks if there are no pending callbacks. Returns zero when done (no active handles or requests left), or non-zero if more callbacks are expected (meaning you should run the event loop again sometime in the future).
     // - UV_RUN_NOWAIT: Poll for i/o once but don’t block if there are no pending callbacks. Returns zero if done (no active handles or requests left), or non-zero if more callbacks are expected (meaning you should run the event loop again sometime in the future).
-
+    _running.store(true);
     int const CODE = ::uv_run(Parent::cast<uv_loop_t>(), uv_mode);
-    _running = false;
+    _running.store(false);
 
     if (CODE != 0) {
         __tbag_error("BaseLoop::run() error [{}] {}", CODE, getUvErrorName(CODE));
@@ -237,16 +242,16 @@ Loop::Loop()
 Loop::~Loop()
 {
     Err code;
-    if (close(&code) == false) {
+    if (Parent::close(&code) == false) {
         runCloseAllHandles();
 
-        if (isAlive()) {
+        if (Parent::isAlive()) {
             stop();
         }
 
         // RE-TRY.
-        if (close(&code) == false) {
-            __tbag_error("BaseLoop::~BaseLoop() error.");
+        if (Parent::close(&code) == false) {
+            __tbag_error("Loop::~Loop() error [{}] {}", static_cast<ErrType>(code), debug::getErrorMessage(code));
         }
     }
 }
@@ -255,9 +260,9 @@ std::size_t Loop::closeAllHandles()
 {
     std::size_t close_count = 0;
 
-    for (auto & cursor : _handles) {
-        if (static_cast<bool>(cursor) && cursor->isInit() && cursor->isClosing() == false) {
-            cursor->close();
+    for (auto & handle : _handles) {
+        if (static_cast<bool>(handle) && handle->isInit() && handle->isClosing() == false) {
+            handle->close();
             ++close_count;
         }
     }
@@ -329,6 +334,18 @@ void Loop::clear(bool force_clear)
             _handles.erase(erase_handle);
         }
         closed_handles.clear();
+    }
+}
+
+void Loop::onClosing(Handle * handle)
+{
+    // EMPTY.
+}
+
+void Loop::onClosed(Handle * handle)
+{
+    if (eraseChildHandle(handle) == false) {
+        __tbag_error("Loop::onClosed() erase child handle error.");
     }
 }
 

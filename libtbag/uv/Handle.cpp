@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/uv/Handle.hpp>
+#include <libtbag/uv/Loop.hpp>
 #include <libtbag/log/Log.hpp>
 #include <uv.h>
 
@@ -27,7 +28,16 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
     } else if (isDeletedAddress(h)) {
         __tbag_error("__global_uv_close_cb__() handle.data is deleted.");
     } else {
+        Loop * loop = nullptr;
+        if (handle->loop != nullptr) {
+            loop = static_cast<Loop*>(handle->loop->data);
+        }
+
+        // @formatter:off
+        if (loop != nullptr) { loop->onClosing(h); }
         h->onClose();
+        if (loop != nullptr) { loop->onClosed(h);  }
+        // @formatter:on
     }
 }
 

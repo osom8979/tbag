@@ -189,8 +189,8 @@ public:
     TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, crbegin, const)
     TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   crend, const)
 
-    TBAG_UV_LOOP_BY_PASS_METHOD(bool, empty, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, size, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(       bool,    empty, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t,     size, const)
     TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, max_size, const)
 
 #undef EMPTY_QUALIFIER
@@ -199,6 +199,10 @@ public:
 public:
     /** @warning This function should be avoided. */
     void clear(bool force_clear = false);
+
+public:
+    virtual void onClosing(Handle * handle);
+    virtual void onClosed(Handle * handle);
 
 public:
     /** Create(new) & insert handle. */

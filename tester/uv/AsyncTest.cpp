@@ -56,8 +56,6 @@ TEST(AsyncTest, Default)
     async->send();
     loop->run();
 
-    ASSERT_EQ(1, loop->size());
-    loop->clear();
     ASSERT_EQ(0, loop->size());
 
     ASSERT_TRUE(static_cast<bool>(async));
