@@ -291,8 +291,11 @@ Loop::WeakHandle Loop::insertChildHandle(SharedHandle handle)
 {
     auto itr = _handles.insert(handle);
     if (itr.second) {
+        __tbag_debug("Loop::insertChildHandle(@{}) success.", static_cast<void*>(handle.get()));
         return WeakHandle(*(itr.first));
     }
+
+    __tbag_error("Loop::insertChildHandle(@{}) failure.", static_cast<void*>(handle.get()));
     return WeakHandle();
 }
 
@@ -303,7 +306,14 @@ Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
 
 bool Loop::eraseChildHandle(WeakHandle handle)
 {
-    return _handles.erase(handle.lock()) == 1;
+    auto shared = handle.lock();
+    if (_handles.erase(shared) == 1) {
+        __tbag_debug("Loop::eraseChildHandle(@{}) success.", static_cast<void*>(shared.get()));
+        return true;
+    }
+
+    __tbag_error("Loop::eraseChildHandle(@{}) failure.", static_cast<void*>(shared.get()));
+    return false;
 }
 
 bool Loop::eraseChildHandle(Handle * handle)
@@ -312,6 +322,8 @@ bool Loop::eraseChildHandle(Handle * handle)
     if (auto shared = weak.lock()) {
         return eraseChildHandle(weak);
     }
+
+    __tbag_error("Loop::eraseChildHandle(@{}) not found handle.", static_cast<void*>(handle));
     return false;
 }
 
@@ -328,9 +340,7 @@ void Loop::onClosing(Handle * handle)
 
 void Loop::onClosed(Handle * handle)
 {
-    if (eraseChildHandle(handle) == false) {
-        __tbag_error("Loop::onClosed() erase child handle error.");
-    }
+    // EMPTY.
 }
 
 } // namespace uv
