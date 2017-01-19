@@ -66,7 +66,7 @@ static void __global_uv_stream_alloc_cb__(uv_handle_t * handle, size_t suggested
 
     Stream * s = static_cast<Stream*>(handle->data);
     if (s == nullptr) {
-        __tbag_error("__global_uv_stream_alloc_cb__() handle data is nullptr.");
+        __tbag_error("__global_uv_stream_alloc_cb__() handle.data is nullptr.");
         return;
     }
 
@@ -87,19 +87,22 @@ static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t 
 
     Stream * s = static_cast<Stream*>(stream->data);
     if (s == nullptr) {
-        __tbag_error("__global_uv_read_cb__() stream data is nullptr.");
+        __tbag_error("__global_uv_read_cb__() stream.data is nullptr.");
         return;
     }
 
     Err code;
     if (nread == UV_EOF) {
         code = Err::END_OF_FILE;
+    } else if (nread == UV_ECONNRESET){
+        code = Err::CONNECTION_RESET;
     } else if (nread >= 0){
         code = Err::SUCCESS;
     } else {
-        __tbag_error("__global_uv_read_cb__() error [{}] {}.", nread, getUvErrorName(nread));
+        __tbag_debug("__global_uv_read_cb__() error [{}] {}.", nread, getUvErrorName(nread));
         code = Err::FAILURE;
     }
+
     s->onRead(code, buf->base, static_cast<std::size_t>(nread));
 }
 

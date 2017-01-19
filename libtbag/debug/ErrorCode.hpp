@@ -34,6 +34,8 @@ namespace debug {
     _TBAG_XX(LOCALE_CONVERTER_ERROR, UConverter error)  \
     /* File */ \
     _TBAG_XX(END_OF_FILE, End of file)  \
+    /* Network */ \
+    _TBAG_XX(CONNECTION_RESET, A connection was forcibly closed by a peer) \
     /* Process */ \
     _TBAG_XX(UNKNOWN_PROCESS_ID, Unknown process id) \
     /* -- END -- */
