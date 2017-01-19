@@ -10,6 +10,7 @@
 #include <libtbag/uv/Async.hpp>
 
 #include <atomic>
+#include <thread>
 
 using namespace libtbag;
 using namespace libtbag::uv;
@@ -62,5 +63,70 @@ TEST(AsyncTest, Default)
     ASSERT_TRUE(async->isClosing());
     ASSERT_EQ(TEST_COUNT, async->async_count);
     ASSERT_EQ(1, async->close_count);
+}
+
+struct AsyncThreadTest : public Async
+{
+    std::atomic_int async_count;
+    std::atomic_int close_count;
+
+    std::atomic_bool close_flag;
+
+    AsyncThreadTest(Loop & loop) : Async(loop), async_count(0), close_count(0), close_flag(false)
+    { /* EMPTY. */ }
+
+    virtual void onAsync() override
+    {
+        if (close_flag) {
+            close();
+        } else {
+            ++async_count;
+        }
+    }
+
+    virtual void onClose() override
+    {
+        ++close_count;
+    }
+};
+
+TEST(AsyncTest, Thread)
+{
+    std::shared_ptr<AsyncThreadTest> async;
+    std::shared_ptr<Loop> loop;
+
+    loop.reset(new Loop());
+    async = loop->newHandle<AsyncThreadTest>(*loop);
+
+    ASSERT_EQ(1, loop->size());
+    ASSERT_TRUE(static_cast<bool>(async));
+
+    std::thread thread = std::thread([&loop](){
+        loop->run();
+    });
+
+    ASSERT_TRUE(async->send());
+    while (async->async_count.load() == 0) { /* BUSY WAIT. */ }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    ASSERT_EQ(1, async->async_count);
+    ASSERT_EQ(0, async->close_count);
+
+    ASSERT_TRUE(async->send());
+    while (async->async_count.load() == 1) { /* BUSY WAIT. */ }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    ASSERT_EQ(2, async->async_count);
+    ASSERT_EQ(0, async->close_count);
+
+    async->close_flag = true;
+    ASSERT_TRUE(async->send());
+    while (async->close_count.load() == 0) { /* BUSY WAIT. */ }
+    ASSERT_EQ(2, async->async_count);
+    ASSERT_EQ(1, async->close_count);
+
+    thread.join();
+
+    ASSERT_EQ(0, loop->size());
+    ASSERT_TRUE(static_cast<bool>(async));
+    ASSERT_TRUE(async->isClosing());
 }
 
