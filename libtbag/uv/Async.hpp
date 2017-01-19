@@ -17,6 +17,9 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/uv/Handle.hpp>
+#include <libtbag/container/SafetyQueue.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,10 +31,11 @@ namespace uv {
 class Loop;
 
 /**
- * Async class prototype.
+ * BaseAsync class prototype.
  *
  * @author zer0
  * @date   2016-12-28
+ * @date   2017-01-19 (Rename: Async -> BaseAsync)
  *
  * @remarks
  *  Async handles allow the user to "wakeup" @n
@@ -41,20 +45,22 @@ class Loop;
  *  A uv_async_t handle is always active and cannot be deactivated, @n
  *  except by closing it with uv_close().
  */
-class TBAG_API Async : public Handle
+class TBAG_API BaseAsync : public Handle
 {
 public:
     using Parent = Handle;
 
 public:
-    Async();
+    BaseAsync();
 
     /**
      * @warning
      *  it immediately starts the handle.
      */
-    Async(Loop & loop);
-    virtual ~Async();
+    BaseAsync(Loop & loop);
+
+public:
+    virtual ~BaseAsync();
 
 public:
     /**
@@ -87,6 +93,63 @@ public:
 // Event methods.
 public:
     virtual void onAsync();
+};
+
+/**
+ * Async class prototype.
+ *
+ * @author zer0
+ * @date   2017-01-19
+ */
+class TBAG_API Async : public BaseAsync
+{
+public:
+    using Parent = BaseAsync;
+
+public:
+    struct Job
+    {
+        virtual void run(Async & handle) = 0;
+    };
+
+public:
+    using SharedJob = std::shared_ptr<Job>;
+    using JobQueue  = container::SafetyQueue<SharedJob>;
+
+private:
+    JobQueue _jobs;
+    std::atomic_bool _continuous_deququ;
+
+public:
+    Async();
+    Async(Loop & loop);
+    virtual ~Async();
+
+public:
+    inline void setContinuousDeququ(bool flag = true) TBAG_NOEXCEPT
+    { _continuous_deququ = flag; }
+
+    inline std::size_t size() const
+    { return _jobs.size(); }
+
+public:
+    void clear();
+    void push(SharedJob job);
+    bool sendJob(SharedJob job);
+
+public:
+    virtual void onAsync();
+
+public:
+    /** Create(new) & push job. */
+    template <typename JobType, typename ... Args>
+    inline std::shared_ptr<typename remove_cr<JobType>::type> newJob(Args && ... args)
+    {
+        typedef typename remove_cr<JobType>::type ResultJobType;
+        SharedJob shared = SharedJob(new JobType(std::forward<Args>(args) ...));
+        push(shared);
+        return std::static_pointer_cast<ResultJobType, Job>(shared);
+    }
 };
 
 } // namespace uv

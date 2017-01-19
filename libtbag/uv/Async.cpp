@@ -23,7 +23,7 @@ namespace uv {
 
 static void __global_uv_async_cb__(uv_async_t * handle)
 {
-    Async * async = static_cast<Async*>(handle->data);
+    BaseAsync * async = static_cast<BaseAsync*>(handle->data);
     if (async == nullptr) {
         __tbag_error("__global_uv_async_cb__() handle data is nullptr.");
         return;
@@ -31,42 +31,42 @@ static void __global_uv_async_cb__(uv_async_t * handle)
     async->onAsync();
 }
 
-// ---------------------
-// Async implementation.
-// ---------------------
+// -------------------------
+// BaseAsync implementation.
+// -------------------------
 
-Async::Async() : Handle(UvHandleType::ASYNC)
+BaseAsync::BaseAsync() : Handle(UvHandleType::ASYNC)
 {
     // EMPTY.
 }
 
-Async::Async(Loop & loop) : Async()
+BaseAsync::BaseAsync(Loop & loop) : BaseAsync()
 {
     if (init(loop) == false) {
         throw std::bad_alloc();
     }
 }
 
-Async::~Async()
+BaseAsync::~BaseAsync()
 {
     // EMPTY.
 }
 
-bool Async::init(Loop & loop)
+bool BaseAsync::init(Loop & loop)
 {
     int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
     if (CODE != 0) {
-        __tbag_error("Async::Async() error [{}] {}", CODE, getUvErrorName(CODE));
+        __tbag_error("BaseAsync::BaseAsync() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
     }
     return true;
 }
 
-bool Async::send()
+bool BaseAsync::send()
 {
     int const CODE = ::uv_async_send(Parent::cast<uv_async_t>());
     if (CODE != 0) {
-        __tbag_error("Async::send() error [{}] {}", CODE, getUvErrorName(CODE));
+        __tbag_error("BaseAsync::send() error [{}] {}", CODE, getUvErrorName(CODE));
         return false;
     }
     return true;
@@ -76,9 +76,57 @@ bool Async::send()
 // Event methods.
 // --------------
 
+void BaseAsync::onAsync()
+{
+    // EMPTY.
+}
+
+// ---------------------
+// Async implementation.
+// ---------------------
+
+Async::Async() : BaseAsync(), _continuous_deququ(false)
+{
+    // EMPTY.
+}
+
+Async::Async(Loop & loop) : BaseAsync(loop), _continuous_deququ(false)
+{
+    // EMPTY.
+}
+
+Async::~Async()
+{
+    clear();
+}
+
+void Async::clear()
+{
+    _jobs.clear();
+}
+
+void Async::push(SharedJob job)
+{
+    _jobs.push(job);
+}
+
+bool Async::sendJob(SharedJob job)
+{
+    _jobs.push(job);
+    return Parent::send();
+}
+
 void Async::onAsync()
 {
-    __tbag_debug("Async::onAsync() called.");
+    SharedJob job;
+    do {
+        auto code = _jobs.frontAndPop(job);
+        if (code == JobQueue::Code::EMPTY_CONTAINER) {
+            break;
+        } else if (code == JobQueue::Code::SUCCESS && static_cast<bool>(job)) {
+            job->run(*this);
+        }
+    } while (_continuous_deququ.load());
 }
 
 } // namespace uv
