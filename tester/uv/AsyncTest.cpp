@@ -139,7 +139,7 @@ struct AsyncJobTest : public Async::Job
         // EMPTY.
     }
 
-    virtual void run(Async & handle)
+    virtual void run(Async * handle)
     {
         ++async_count;
     }

@@ -127,7 +127,7 @@ void Async::onAsync()
     SharedJob job;
     while (_jobs.frontAndPop(job) == JobQueue::Code::SUCCESS) {
         if (static_cast<bool>(job)) {
-            job->run(*this);
+            job->run(this);
         }
         job.reset();
     }

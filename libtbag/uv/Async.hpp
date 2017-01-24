@@ -110,7 +110,7 @@ public:
 public:
     struct Job
     {
-        virtual void run(Async & handle) = 0;
+        virtual void run(Async * handle) = 0;
     };
 
 public:
