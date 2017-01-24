@@ -20,6 +20,7 @@
 #include <libtbag/container/SafetyQueue.hpp>
 
 #include <memory>
+#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -118,7 +119,7 @@ public:
 
 private:
     JobQueue _jobs;
-    std::atomic_bool _continuous_deququ;
+    std::atomic_bool _exit;
 
 public:
     Async();
@@ -126,16 +127,18 @@ public:
     virtual ~Async();
 
 public:
-    inline void setContinuousDeququ(bool flag = true) TBAG_NOEXCEPT
-    { _continuous_deququ = flag; }
-
-    inline std::size_t size() const
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_jobs.empty()))
+    { return _jobs.empty(); }
+    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_jobs.size()))
     { return _jobs.size(); }
 
 public:
-    void clear();
-    void push(SharedJob job);
-    bool sendJob(SharedJob job);
+    void safeClear();
+    void safePush(SharedJob job);
+    bool safeSendJob(SharedJob job);
+
+public:
+    bool safeClose();
 
 public:
     virtual void onAsync();
@@ -143,11 +146,11 @@ public:
 public:
     /** Create(new) & push job. */
     template <typename JobType, typename ... Args>
-    inline std::shared_ptr<typename remove_cr<JobType>::type> newJob(Args && ... args)
+    inline std::shared_ptr<typename remove_cr<JobType>::type> safeNewJob(Args && ... args)
     {
         typedef typename remove_cr<JobType>::type ResultJobType;
         SharedJob shared = SharedJob(new JobType(std::forward<Args>(args) ...));
-        push(shared);
+        safePush(shared);
         return std::static_pointer_cast<ResultJobType, Job>(shared);
     }
 };

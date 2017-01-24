@@ -133,9 +133,8 @@ TEST(AsyncTest, Thread)
 struct AsyncJobTest : public Async::Job
 {
     std::atomic_int async_count;
-    std::atomic_bool close_flag;
 
-    AsyncJobTest(bool close = false) : async_count(0), close_flag(close)
+    AsyncJobTest() : async_count(0)
     {
         // EMPTY.
     }
@@ -143,9 +142,6 @@ struct AsyncJobTest : public Async::Job
     virtual void run(Async & handle)
     {
         ++async_count;
-        if (close_flag) {
-            handle.close();
-        }
     }
 };
 
@@ -164,7 +160,7 @@ TEST(AsyncTest, newJob)
         loop->run();
     });
 
-    auto shared = async->newJob<AsyncJobTest>();
+    auto shared = async->safeNewJob<AsyncJobTest>();
     ASSERT_EQ(1, async->size());
     ASSERT_TRUE(async->send());
     while (shared->async_count.load() == 0) { /* BUSY WAIT. */ }
@@ -172,13 +168,14 @@ TEST(AsyncTest, newJob)
     ASSERT_EQ(0, async->size());
 
     shared.reset();
-    shared = async->newJob<AsyncJobTest>(true);
+    shared = async->safeNewJob<AsyncJobTest>();
     ASSERT_EQ(1, async->size());
     ASSERT_TRUE(async->send());
     while (shared->async_count.load() == 0) { /* BUSY WAIT. */ }
     ASSERT_EQ(1, shared->async_count);
     ASSERT_EQ(0, async->size());
 
+    ASSERT_TRUE(async->safeClose());
     thread.join();
 
     ASSERT_EQ(0, loop->size());

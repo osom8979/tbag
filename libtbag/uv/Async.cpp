@@ -85,48 +85,56 @@ void BaseAsync::onAsync()
 // Async implementation.
 // ---------------------
 
-Async::Async() : BaseAsync(), _continuous_deququ(false)
+Async::Async() : BaseAsync(), _exit(false)
 {
     // EMPTY.
 }
 
-Async::Async(Loop & loop) : BaseAsync(loop), _continuous_deququ(false)
+Async::Async(Loop & loop) : BaseAsync(loop), _exit(false)
 {
     // EMPTY.
 }
 
 Async::~Async()
 {
-    clear();
+    safeClear();
 }
 
-void Async::clear()
+void Async::safeClear()
 {
     _jobs.clear();
 }
 
-void Async::push(SharedJob job)
+void Async::safePush(SharedJob job)
 {
     _jobs.push(job);
 }
 
-bool Async::sendJob(SharedJob job)
+bool Async::safeSendJob(SharedJob job)
 {
     _jobs.push(job);
+    return Parent::send();
+}
+
+bool Async::safeClose()
+{
+    _exit.store(true);
     return Parent::send();
 }
 
 void Async::onAsync()
 {
     SharedJob job;
-    do {
-        auto code = _jobs.frontAndPop(job);
-        if (code == JobQueue::Code::EMPTY_CONTAINER) {
-            break;
-        } else if (code == JobQueue::Code::SUCCESS && static_cast<bool>(job)) {
+    while (_jobs.frontAndPop(job) == JobQueue::Code::SUCCESS) {
+        if (static_cast<bool>(job)) {
             job->run(*this);
         }
-    } while (_continuous_deququ.load());
+        job.reset();
+    }
+
+    if (_exit) {
+        close();
+    }
 }
 
 } // namespace uv
