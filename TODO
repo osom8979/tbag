@@ -1,0 +1,28 @@
+
+################
+## TO DO LIST ##
+################
+
+[ ] Remove boost-stacktrace.
+[ ] Refactoring log package.
+[ ] Create MemoryPool.
+[ ] Deprecated macro.
+[ ] Force inline macro.
+[ ] XPM format.
+[ ] SVG format.
+[ ] Image container.
+[ ] Matrix container.
+[ ] tbag-uvpp package.
+[ ] rstl package.
+[ ] Refactoring network package.
+[ ] dep/http-parser.
+[ ] dep/libsimdpp.
+[ ] dep/cap'n-proto.
+[ ] dep/LibreSSL.
+[ ] lua engine.
+[ ] python helper.
+[ ] OpenCL/CUDA backend.
+[ ] Machine learning.
+[ ] Remove 3rd/tinyaes128c
+[ ] Low level IO.
+
