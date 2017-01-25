@@ -16,7 +16,7 @@
 #include <${CONFIG_HEADER_PATH}>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// TODO: include preprocessor.
+// Include preprocessor.
 
 // ${NAMESPACE_OPEN_COMMENT}
 ${NAMESPACE_OPEN}
@@ -24,7 +24,7 @@ ${NAMESPACE_OPEN}
 
 ${NAMESPACE_LIST_BEGIN}
 
-// TODO: Forward declaration.
+// Forward declaration.
 
 /**
  * ${CLASSNAME} class prototype.
@@ -35,7 +35,7 @@ ${NAMESPACE_LIST_BEGIN}
 class TBAG_API ${CLASSNAME} : public Noncopyable
 {
 private:
-    // TODO: Insert member variables.
+    // Insert member variables.
 
 public:
     ${CLASSNAME}();
