@@ -18,9 +18,15 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/container/CircularBuffer.hpp>
-#include <libtbag/uv/Request.hpp>
+#include <libtbag/container/ReuseQueue.hpp>
+#include <libtbag/uv/UvCommon.hpp>
 
+#include <cstdlib>
+#include <cstdint>
+
+#include <limits>
 #include <vector>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,30 +34,89 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
-// Forward declaration.
-class CommonTcp;
-class TcpLoop;
-
 /**
- * DatagramAdapter class prototype.
+ * Datagram interface.
  *
  * @author zer0
- * @date   2017-01-02
+ * @date   2017-01-24
  */
-class TBAG_API DatagramAdapter : public Noncopyable
+struct DatagramInterface
 {
-public:
+    using binf = uv::binf;
+    using Size = std::size_t;
+
+    using Buffer         = std::vector<char>;
+    using SharedBuffer   = std::shared_ptr<Buffer>;
+    using SharedBuffers  = container::ReuseQueue<SharedBuffer>;
     using CircularBuffer = container::CircularBuffer<char>;
-    using Buffer = std::vector<char>;
-    using Size   = std::size_t;
 
-    using WriteRequest = uv::WriteRequest;
-    using binf         = uv::binf;
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
+    TBAG_CONSTEXPR static Size const NO_NEXT_READ_SIZE    = std::numeric_limits<Size>::max();
+    TBAG_CONSTEXPR static Size const DATAGRAM_HEADER_SIZE = sizeof(uint32_t);
+
+    inline static uint32_t toHost(uint32_t network) { return ntohl(network); }
+    inline static uint32_t toNetwork(uint32_t host) { return htonl(host);    }
+};
+
+/**
+ * DatagramWrite class prototype.
+ *
+ * @author zer0
+ * @date   2017-01-24
+ */
+class TBAG_API DatagramWrite : public DatagramInterface, public Noncopyable
+{
 private:
-    Buffer _write_buffer;
-    Size   _write_size;
+    SharedBuffers _writers;
+    mutable Mutex _writers_mutex;
 
+public:
+    DatagramWrite();
+    virtual ~DatagramWrite();
+
+public:
+    bool pushWriteBuffer(char const * buffer, Size size);
+
+public:
+    template <typename Predicated>
+    bool popWriteBuffer(Predicated predicated)
+    {
+        Guard guard(_writers_mutex);
+
+        SharedBuffer * shared = _writers.front();
+        if (shared == nullptr || static_cast<bool>(shared) == false) {
+            return false;
+        }
+
+        Buffer & cursor = *(shared->get());
+
+        binf info;
+        info.buffer = &cursor[0];
+        info.size   = cursor.size();
+
+        predicated(info);
+
+        _writers.pop();
+        return true;
+    }
+
+public:
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.empty()))
+    { Guard g(_writers_mutex); return _writers.empty(); }
+    inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.size()))
+    { Guard g(_writers_mutex); return _writers.size();  }
+};
+
+/**
+ * DatagramRead class prototype.
+ *
+ * @author zer0
+ * @date   2017-01-24
+ */
+class TBAG_API DatagramRead : public DatagramInterface, public Noncopyable
+{
 private:
     Buffer _read_buffer;
     Size   _next_read_size;
@@ -59,32 +124,40 @@ private:
 private:
     CircularBuffer _data_buffer;
 
-public:
-    DatagramAdapter();
-    virtual ~DatagramAdapter();
+private:
+    mutable Mutex _read_mutex;
 
 public:
-    binf writeDatagram(char const * buffer, std::size_t size);
-    std::size_t readNextDatagramSize();
-    void clearNextDatagramSize();
+    DatagramRead();
+    virtual ~DatagramRead();
 
 public:
-    inline CircularBuffer & atDataBuffer() TBAG_NOEXCEPT
-    { return _data_buffer; }
+    // @formatter:off
+    inline CircularBuffer       & atDataBuffer()       TBAG_NOEXCEPT { Guard g(_read_mutex); return _data_buffer; }
+    inline CircularBuffer const & atDataBuffer() const TBAG_NOEXCEPT { Guard g(_read_mutex); return _data_buffer; }
+    // @formatter:on
 
-public:
-    WriteRequest * safeWrite(TcpLoop & tcp, char const * buffer, std::size_t size);
-    WriteRequest * safeWrite(TcpLoop & loop, CommonTcp & tcp, char const * buffer, std::size_t size);
-
-public:
-    WriteRequest * asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size);
-    std::size_t tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result = nullptr);
+private:
+    Size readNextDatagramSize();
 
 // Event by-pass methods.
 public:
-    void alloc(std::size_t suggested_size);
-    void push(char const * buffer, std::size_t size);
+    void alloc(Size suggested_size);
+    void push(char const * buffer, Size size);
     bool next(binf * result);
+};
+
+/**
+ * DatagramAdapter class prototype.
+ *
+ * @author zer0
+ * @date   2017-01-02
+ */
+class TBAG_API DatagramAdapter : public DatagramWrite, public DatagramRead
+{
+public:
+    DatagramAdapter();
+    virtual ~DatagramAdapter();
 };
 
 } // namespace network

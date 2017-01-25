@@ -107,11 +107,25 @@ void EchoServer::onClientRead(Client & client, Err code, char const * buffer, st
                 // CREATE MASSIVE DATA.
                 Buffer const MASSIVE_BUFFER(MASSIVE_SIZE, static_cast<char>(0x0F));
                 for (int i = 0; i < _write_count; ++i) {
-                    adapter->asyncWrite(client, &MASSIVE_BUFFER[0], MASSIVE_BUFFER.size());
+                    //adapter->asyncWrite(client, &MASSIVE_BUFFER[0], MASSIVE_BUFFER.size());
+                    binf buffer_info[2];
+                    uint32_t byte_size = DatagramAdapter::toNetwork(MASSIVE_BUFFER.size());
+                    buffer_info[0].buffer = (char*)&byte_size;
+                    buffer_info[0].size   = sizeof(byte_size);
+                    buffer_info[1].buffer = (char*)&MASSIVE_BUFFER[0];
+                    buffer_info[1].size   = MASSIVE_BUFFER.size();
+                    client.asyncWrite(buffer_info, 2);
                 }
             } else {
                 for (int i = 0; i < _write_count; ++i) {
-                    adapter->asyncWrite(client, info.buffer, info.size);
+                    //adapter->asyncWrite(client, info.buffer, info.size);
+                    binf buffer_info[2];
+                    uint32_t byte_size = DatagramAdapter::toNetwork(info.size);
+                    buffer_info[0].buffer = (char*)&byte_size;
+                    buffer_info[0].size   = sizeof(byte_size);
+                    buffer_info[1].buffer = info.buffer;
+                    buffer_info[1].size   = info.size;
+                    client.asyncWrite(buffer_info, 2);
                 }
             }
         }
@@ -184,7 +198,14 @@ void EchoClient::onConnect(ConnectRequest & request, Err code)
     startRead();
 
     std::string msg = TEST_ECHO_MESSAGE;
-    _datagram.asyncWrite(*this, &msg[0], msg.size());
+
+    binf buffer_info[2];
+    uint32_t byte_size = DatagramAdapter::toNetwork(msg.size());
+    buffer_info[0].buffer = (char*)&byte_size;
+    buffer_info[0].size   = sizeof(byte_size);
+    buffer_info[1].buffer = &msg[0];
+    buffer_info[1].size   = msg.size();
+    this->asyncWrite(buffer_info, 2);
 }
 
 void EchoClient::onRead(Err code, char const * buffer, std::size_t size)

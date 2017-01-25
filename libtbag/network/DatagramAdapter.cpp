@@ -7,12 +7,6 @@
 
 #include <libtbag/network/DatagramAdapter.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/CommonTcp.hpp>
-#include <libtbag/network/TcpLoop.hpp>
-
-#include <cstdlib>
-#include <cstdint>
-#include <limits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -20,40 +14,62 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
-static std::size_t const NO_NEXT_READ_SIZE    = std::numeric_limits<std::size_t>::max();
-static std::size_t const DATAGRAM_HEADER_SIZE = sizeof(uint32_t);
+// -----------------------------
+// DatagramWrite implementation.
+// -----------------------------
 
-DatagramAdapter::DatagramAdapter() : _write_size(0), _next_read_size(NO_NEXT_READ_SIZE)
+DatagramWrite::DatagramWrite()
 {
     // EMPTY.
 }
 
-DatagramAdapter::~DatagramAdapter()
+DatagramWrite::~DatagramWrite()
 {
     // EMPTY.
 }
 
-DatagramAdapter::binf DatagramAdapter::writeDatagram(char const * buffer, std::size_t size)
+bool DatagramWrite::pushWriteBuffer(char const * buffer, Size size)
 {
-    // Realloc with read buffer.
-    if (_write_buffer.size() < size) {
-        _write_buffer.resize(DATAGRAM_HEADER_SIZE + size);
+    Guard guard(_writers_mutex);
+
+    SharedBuffer * shared = _writers.push();
+    if (shared == nullptr || static_cast<bool>(shared) == false) {
+        return false;
     }
 
-    uint32_t host_byte_size    = (uint32_t)size;
-    uint32_t network_byte_size = htonl(host_byte_size);
+    Buffer & cursor = *(shared->get());
 
-    ::memcpy(&_write_buffer[0], (char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
-    ::memcpy(&_write_buffer[DATAGRAM_HEADER_SIZE], buffer, size);
+    // Realloc with read buffer.
+    if (cursor.size() < size) {
+        cursor.resize(DATAGRAM_HEADER_SIZE + size);
+    }
 
-    binf result;
-    result.buffer = &_write_buffer[0];
-    result.size = size + DATAGRAM_HEADER_SIZE;
-    return result;
+    uint32_t network_byte_size = toNetwork((uint32_t)size/* Host byte size. */);
+
+    ::memcpy(&cursor[0], (char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
+    ::memcpy(&cursor[DATAGRAM_HEADER_SIZE], buffer, size);
+
+    return true;
 }
 
-std::size_t DatagramAdapter::readNextDatagramSize()
+// ----------------------------
+// DatagramRead implementation.
+// ----------------------------
+
+DatagramRead::DatagramRead() : _next_read_size(NO_NEXT_READ_SIZE)
 {
+    // EMPTY.
+}
+
+DatagramRead::~DatagramRead()
+{
+    // EMPTY.
+}
+
+DatagramRead::Size DatagramRead::readNextDatagramSize()
+{
+    // WARNING: Don't use the read_mutex.
+
     // Section 01: Exists next_read_size.
     if (_next_read_size != NO_NEXT_READ_SIZE) {
         return _next_read_size;
@@ -67,66 +83,33 @@ std::size_t DatagramAdapter::readNextDatagramSize()
     // Section 03: Update next_read_size.
     uint32_t network_byte_size = 0;
     _data_buffer.pop((char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
-    _next_read_size = ntohl(network_byte_size);
+    _next_read_size = toHost(network_byte_size);
 
     return _next_read_size;
-}
-
-void DatagramAdapter::clearNextDatagramSize()
-{
-    _next_read_size = NO_NEXT_READ_SIZE;
-}
-
-DatagramAdapter::WriteRequest * DatagramAdapter::safeWrite(TcpLoop & tcp, char const * buffer, std::size_t size)
-{
-    binf buffer_info = writeDatagram(buffer, size);
-    return tcp.safeWrite(buffer_info.buffer, buffer_info.size);
-}
-
-DatagramAdapter::WriteRequest * DatagramAdapter::safeWrite(TcpLoop & loop, CommonTcp & tcp, char const * buffer, std::size_t size)
-{
-    binf buffer_info = writeDatagram(buffer, size);
-
-    if (loop.isEqualOwnerThreadId()) {
-        return loop.asyncWrite(buffer_info.buffer, buffer_info.size);
-    } else {
-        WriteRequest * request = loop.obtainWriteRequest();
-        loop.atLoop().newHandle<TcpLoop::AsyncWriteHelper>(loop, request, buffer_info.buffer, buffer_info.size);
-        return request;
-    }
-}
-
-DatagramAdapter::WriteRequest * DatagramAdapter::asyncWrite(CommonTcp & tcp, char const * buffer, std::size_t size)
-{
-    binf buffer_info = writeDatagram(buffer, size);
-    return tcp.asyncWrite(&buffer_info, 1);
-}
-
-std::size_t DatagramAdapter::tryWrite(CommonTcp & tcp, char const * buffer, std::size_t size, Err * result)
-{
-    binf buffer_info = writeDatagram(buffer, size);
-    return tcp.tryWrite(&buffer_info, 1);
 }
 
 // ----------------------
 // Event by-pass methods.
 // ----------------------
 
-void DatagramAdapter::alloc(std::size_t suggested_size)
+void DatagramRead::alloc(Size suggested_size)
 {
+    Guard guard(_read_mutex);
     if (_data_buffer.max() < suggested_size) {
         _data_buffer.extendCapacity(suggested_size - _data_buffer.max());
     }
 }
 
-void DatagramAdapter::push(char const * buffer, std::size_t size)
+void DatagramRead::push(char const * buffer, Size size)
 {
+    Guard guard(_read_mutex);
     _data_buffer.extendPush(buffer, size);
 }
 
-bool DatagramAdapter::next(binf * result)
+bool DatagramRead::next(binf * result)
 {
-    std::size_t const READ_SIZE = readNextDatagramSize();
+    Guard guard(_read_mutex);
+    Size const READ_SIZE = readNextDatagramSize();
     if (READ_SIZE == NO_NEXT_READ_SIZE) {
         return false;
     }
@@ -140,7 +123,7 @@ bool DatagramAdapter::next(binf * result)
         _read_buffer.resize(READ_SIZE);
     }
 
-    std::size_t real_read_size = _data_buffer.pop(&_read_buffer[0], READ_SIZE);
+    Size real_read_size = _data_buffer.pop(&_read_buffer[0], READ_SIZE);
     if (real_read_size != READ_SIZE) {
         return false;
     }
@@ -150,8 +133,24 @@ bool DatagramAdapter::next(binf * result)
         result->size   = real_read_size;
     }
 
-    clearNextDatagramSize();
+    // Clear next datagram size.
+    _next_read_size = NO_NEXT_READ_SIZE;
+
     return true;
+}
+
+// -------------------------------
+// DatagramAdapter implementation.
+// -------------------------------
+
+DatagramAdapter::DatagramAdapter()
+{
+    // EMPTY.
+}
+
+DatagramAdapter::~DatagramAdapter()
+{
+    // EMPTY.
 }
 
 } // namespace network
