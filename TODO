@@ -10,7 +10,7 @@
 [ ] Force inline macro.
 [ ] XPM format.
 [ ] SVG format.
-[ ] Image container.
+[ ] Image container (like cv::Mat).
 [ ] Matrix container.
 [ ] tbag-uvpp package.
 [ ] rstl package.
@@ -25,4 +25,5 @@
 [ ] Machine learning.
 [ ] Remove 3rd/tinyaes128c
 [ ] Low level IO.
+[ ] Checksum.
 
