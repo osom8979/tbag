@@ -17,7 +17,7 @@ namespace debug {
 char const * getErrorMessage(ErrorCode code)
 {
     switch (code) {
-#define _TBAG_XX(name, message) case ErrorCode::name: return #message;
+#define _TBAG_XX(name, message) case ErrorCode::name: return message;
     TBAG_ERROR_INFO_MAP(_TBAG_XX)
 #undef _TBAG_XX
     default: return "Unknown error code.";

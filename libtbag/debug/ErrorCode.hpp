@@ -23,21 +23,21 @@ NAMESPACE_LIBTBAG_OPEN
 namespace debug {
 
 #ifndef TBAG_ERROR_INFO_MAP
-#define TBAG_ERROR_INFO_MAP(_TBAG_XX)               \
-    _TBAG_XX(     SUCCESS, No error)                \
-    _TBAG_XX(     FAILURE, Unknown error)           \
-    _TBAG_XX( UNSUPPORTED, Unsupported operation)   \
-    _TBAG_XX(NULL_POINTER, Nullpointer exception)   \
-    _TBAG_XX(  READ_ERROR, Data read error)         \
-    _TBAG_XX(  BUSY_ERROR, Busy error)              \
+#define TBAG_ERROR_INFO_MAP(_TBAG_XX)                 \
+    _TBAG_XX(     SUCCESS, "No error"               ) \
+    _TBAG_XX(     FAILURE, "Unknown error"          ) \
+    _TBAG_XX( UNSUPPORTED, "Unsupported operation"  ) \
+    _TBAG_XX(NULL_POINTER, "Nullpointer exception"  ) \
+    _TBAG_XX(  READ_ERROR, "Data read error"        ) \
+    _TBAG_XX(  BUSY_ERROR, "Busy error"             ) \
     /* Locale */ \
-    _TBAG_XX(LOCALE_CONVERTER_ERROR, UConverter error)  \
+    _TBAG_XX(LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* File */ \
-    _TBAG_XX(END_OF_FILE, End of file)  \
+    _TBAG_XX(END_OF_FILE, "End of file")  \
     /* Network */ \
-    _TBAG_XX(CONNECTION_RESET, A connection was forcibly closed by a peer) \
+    _TBAG_XX(CONNECTION_RESET, "A connection was forcibly closed by a peer") \
     /* Process */ \
-    _TBAG_XX(UNKNOWN_PROCESS_ID, Unknown process id) \
+    _TBAG_XX(UNKNOWN_PROCESS_ID, "Unknown process id") \
     /* -- END -- */
 #endif
 
