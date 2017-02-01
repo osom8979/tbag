@@ -53,22 +53,19 @@ public:
     { return TYPE; }
 
 public:
-    inline void setUserData(void * data) TBAG_NOEXCEPT
-    { _user = data; }
-    inline void * getUserData() TBAG_NOEXCEPT
-    { return _user; }
-    inline void const * getUserData() const TBAG_NOEXCEPT
-    { return _user; }
+    // @formatter:off
+    inline void         setUserData(void * data) TBAG_NOEXCEPT { _user = data; }
+    inline void       * getUserData()            TBAG_NOEXCEPT { return _user; }
+    inline void const * getUserData()      const TBAG_NOEXCEPT { return _user; }
+    // @formatter:on
 
 public:
-    inline bool isHandle() const TBAG_NOEXCEPT
-    { return uvpp::isHandle(TYPE); }
-    inline bool isRequest() const TBAG_NOEXCEPT
-    { return uvpp::isRequest(TYPE); }
-    inline bool isEtc() const TBAG_NOEXCEPT
-    { return uvpp::isEtc(TYPE); }
-    inline bool isStream() const TBAG_NOEXCEPT
-    { return uvpp::isStream(TYPE); }
+    // @formatter:off
+    inline bool isHandle () const TBAG_NOEXCEPT { return uvpp::isHandle (TYPE); }
+    inline bool isRequest() const TBAG_NOEXCEPT { return uvpp::isRequest(TYPE); }
+    inline bool isEtc    () const TBAG_NOEXCEPT { return uvpp::isEtc    (TYPE); }
+    inline bool isStream () const TBAG_NOEXCEPT { return uvpp::isStream (TYPE); }
+    // @formatter:on
 };
 
 } // namespace uvpp
