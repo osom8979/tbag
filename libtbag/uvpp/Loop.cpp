@@ -5,9 +5,9 @@
  * @date   2016-12-28
  */
 
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Handle.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 
 #include <cassert>
 #include <uv.h>
@@ -16,7 +16,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -343,7 +343,7 @@ void Loop::onClosed(Handle * handle)
     // EMPTY.
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

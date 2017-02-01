@@ -7,8 +7,8 @@
 
 #include <libtbag/network/CommonTcp.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Request.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Request.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,7 +31,7 @@ CommonTcp::CommonTcp(CallableTcp * tcp) : _tcp(tcp)
     // EMPTY.
 }
 
-CommonTcp::CommonTcp(uv::Loop & loop) : _tcp(new CallableTcp(loop, this))
+CommonTcp::CommonTcp(uvpp::Loop & loop) : _tcp(new CallableTcp(loop, this))
 {
     // EMPTY.
 }
@@ -48,7 +48,7 @@ CommonTcp::WriteRequest * CommonTcp::obtainWriteRequest()
 
 void CommonTcp::releaseWriteRequest(WriteRequest * request)
 {
-    _writers.release(static_cast<uv::Request*>(request));
+    _writers.release(static_cast<uvpp::Request*>(request));
 }
 
 CommonTcp::WriteRequest * CommonTcp::asyncWrite(binf * infos, std::size_t infos_size)
@@ -103,7 +103,7 @@ std::size_t CommonTcp::tryWrite(char const * buffer, std::size_t size, Err * res
 
 CommonTcp::binf CommonTcp::onAlloc(std::size_t suggested_size)
 {
-    return uv::defaultOnAlloc(atReadBuffer(), suggested_size);
+    return uvpp::defaultOnAlloc(atReadBuffer(), suggested_size);
 }
 
 } // namespace network

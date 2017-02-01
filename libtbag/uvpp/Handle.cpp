@@ -5,8 +5,8 @@
  * @date   2016-12-27
  */
 
-#include <libtbag/uv/Handle.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Handle.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/log/Log.hpp>
 #include <uv.h>
 
@@ -14,7 +14,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -186,7 +186,7 @@ void Handle::onWalk(void * arg)
     __tbag_debug("Handle::onWalk() called.");
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

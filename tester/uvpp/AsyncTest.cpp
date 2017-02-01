@@ -6,14 +6,14 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/uv/Loop.hpp>
-#include <libtbag/uv/Async.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Async.hpp>
 
 #include <atomic>
 #include <thread>
 
 using namespace libtbag;
-using namespace libtbag::uv;
+using namespace libtbag::uvpp;
 
 struct AsyncTest : public Async
 {

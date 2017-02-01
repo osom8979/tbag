@@ -18,9 +18,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/CommonTcp.hpp>
-#include <libtbag/uv/Loop.hpp>
-#include <libtbag/uv/Async.hpp>
-#include <libtbag/uv/Tcp.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Async.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
 
 #include <memory>
 
@@ -40,7 +40,7 @@ class TBAG_API TcpLoop : public CommonTcp
 {
 public:
     using Parent = CommonTcp;
-    using Async  = libtbag::uv::Async;
+    using Async  = libtbag::uvpp::Async;
 
 public:
     struct AsyncHelper : public Async
@@ -111,7 +111,7 @@ public:
     using SharedAsyncWriteHelper = std::shared_ptr<AsyncWriteHelper>;
 
 private:
-    uv::Loop _loop;
+    uvpp::Loop _loop;
 
 public:
     TcpLoop();
@@ -119,8 +119,8 @@ public:
 
 public:
     // @formatter:off
-    inline uv::Loop       & atLoop()       TBAG_NOEXCEPT { return _loop; }
-    inline uv::Loop const & atLoop() const TBAG_NOEXCEPT { return _loop; }
+    inline uvpp::Loop       & atLoop()       TBAG_NOEXCEPT { return _loop; }
+    inline uvpp::Loop const & atLoop() const TBAG_NOEXCEPT { return _loop; }
     // @formatter:on
 
 public:

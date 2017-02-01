@@ -83,7 +83,7 @@ EchoServer::binf EchoServer::onClientAlloc(Client & client, std::size_t suggeste
     if (adapter != nullptr) {
         adapter->alloc(suggested_size);
     }
-    return uv::defaultOnAlloc(client.atReadBuffer(), suggested_size);
+    return uvpp::defaultOnAlloc(client.atReadBuffer(), suggested_size);
 }
 
 void EchoServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)
@@ -185,7 +185,7 @@ EchoClient::binf EchoClient::onAlloc(std::size_t suggested_size)
 {
     suggested_size = MASSIVE_SIZE;
     _datagram.alloc(suggested_size);
-    return uv::defaultOnAlloc(atReadBuffer(), suggested_size);
+    return uvpp::defaultOnAlloc(atReadBuffer(), suggested_size);
 }
 
 void EchoClient::onConnect(ConnectRequest & request, Err code)

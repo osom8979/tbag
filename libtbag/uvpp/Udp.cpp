@@ -5,9 +5,9 @@
  * @date   2017-01-11
  */
 
-#include <libtbag/uv/Udp.hpp>
+#include <libtbag/uvpp/Udp.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <uv.h>
 
@@ -15,7 +15,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -445,7 +445,7 @@ void Udp::onRead(Err code, char const * buffer, std::size_t size, sockaddr const
     __tbag_debug("Udp::onRead({}) called (size:{}).", static_cast<int>(code), size);
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

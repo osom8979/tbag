@@ -5,8 +5,8 @@
  * @date   2016-12-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_REQUEST_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_REQUEST_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_REQUEST_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_REQUEST_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,13 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uv/Native.hpp>
+#include <libtbag/uvpp/Native.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Handle;
@@ -82,11 +82,11 @@ _TBAG_UV_REQUEST_EX(GETNAMEINFO, GetNameInfo);
 
 #undef _TBAG_UV_REQUEST_EX
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_REQUEST_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_REQUEST_HPP__
 

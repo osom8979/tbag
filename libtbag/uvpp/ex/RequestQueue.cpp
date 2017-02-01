@@ -5,17 +5,17 @@
  * @date   2016-12-28
  */
 
-#include <libtbag/uv/ex/RequestQueue.hpp>
+#include <libtbag/uvpp/ex/RequestQueue.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Request.hpp>
-#include <libtbag/uv/Handle.hpp>
+#include <libtbag/uvpp/Request.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
-namespace ex {
+namespace uvpp {
+namespace ex   {
 
 RequestQueue::RequestQueue(UvRequestType type) : _type(type)
 {
@@ -80,7 +80,7 @@ void RequestQueue::release(RequestKey request)
 }
 
 } // namespace ex
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

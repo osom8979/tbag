@@ -213,7 +213,7 @@ public:
     void close();
 
 private:
-    void close(uv::Handle & handle);
+    void close(uvpp::Handle & handle);
 
 public:
     bool exe(Param const & param);

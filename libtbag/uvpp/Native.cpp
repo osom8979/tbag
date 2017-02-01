@@ -5,7 +5,7 @@
  * @date   2016-12-27
  */
 
-#include <libtbag/uv/Native.hpp>
+#include <libtbag/uvpp/Native.hpp>
 #include <libtbag/log/Log.hpp>
 #include <uv.h>
 
@@ -13,7 +13,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 Native::Native(UvType t) : TYPE(t), _user(nullptr)
 {
@@ -46,7 +46,7 @@ Native::~Native()
     }
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

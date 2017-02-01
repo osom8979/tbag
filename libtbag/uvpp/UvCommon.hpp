@@ -6,8 +6,8 @@
  * @date   2017-01-03 (Rename: Type -> UvCommon)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_UVCOMMON_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_UVCOMMON_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_UVCOMMON_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_UVCOMMON_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -39,7 +39,7 @@ typedef intptr_t ssize_t;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 #if defined(__OS_WINDOWS__)
 using File   = int;
@@ -291,11 +291,11 @@ TBAG_API bool isUvNativeHandleType(void const * handle);
 
 TBAG_API binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_size);
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_UVCOMMON_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_UVCOMMON_HPP__
 

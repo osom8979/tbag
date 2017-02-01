@@ -5,8 +5,8 @@
  * @date   2016-12-31
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_TTY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_TTY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TTY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TTY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,13 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uv/Stream.hpp>
+#include <libtbag/uvpp/Stream.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Loop;
@@ -45,7 +45,7 @@ public:
         TTY_IO      // Binary-safe I/O mode for IPC (Unix-only).
     };
 
-    enum class GeneralFile : uv::File
+    enum class GeneralFile : uvpp::File
     {
         FILE_STDIN  = 0,
         FILE_STDOUT = 1,
@@ -54,13 +54,13 @@ public:
 
 public:
     Tty();
-    Tty(Loop & loop, uv::File fd, bool readable);
+    Tty(Loop & loop, uvpp::File fd, bool readable);
     Tty(Loop & loop, GeneralFile fd);
     virtual ~Tty();
 
 public:
     /** Initialize a new TTY stream with the given file descriptor. */
-    bool init(Loop & loop, uv::File fd, bool readable);
+    bool init(Loop & loop, uvpp::File fd, bool readable);
     bool init(Loop & loop, GeneralFile fd);
 
     /** Set the TTY using the specified terminal mode. */
@@ -73,18 +73,18 @@ public:
     bool getWinSize(int * width, int * height);
 
 public:
-    static uv::File toFile(GeneralFile fd) TBAG_NOEXCEPT;
+    static uvpp::File toFile(GeneralFile fd) TBAG_NOEXCEPT;
 
     /** Used to detect what type of stream should be used with a given file descriptor. */
-    static bool guessHandle(uv::File fd);
+    static bool guessHandle(uvpp::File fd);
     static bool guessHandle(GeneralFile fd);
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_TTY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TTY_HPP__
 

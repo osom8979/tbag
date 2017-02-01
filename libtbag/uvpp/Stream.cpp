@@ -5,16 +5,16 @@
  * @date   2016-12-27
  */
 
-#include <libtbag/uv/Stream.hpp>
+#include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Request.hpp>
+#include <libtbag/uvpp/Request.hpp>
 #include <uv.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -358,7 +358,7 @@ void Stream::onWrite(WriteRequest & request, Err code)
     __tbag_debug("Stream::onWrite({}) called.", static_cast<int>(code));
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

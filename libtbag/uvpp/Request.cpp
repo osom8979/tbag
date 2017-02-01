@@ -5,7 +5,7 @@
  * @date   2016-12-27
  */
 
-#include <libtbag/uv/Request.hpp>
+#include <libtbag/uvpp/Request.hpp>
 #include <libtbag/log/Log.hpp>
 #include <uv.h>
 
@@ -13,7 +13,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 Request::Request(UvRequestType type, Handle * owner) : Native(static_cast<UvType>(type)), _owner(owner)
 {
@@ -56,7 +56,7 @@ std::size_t Request::getNativeSize() const TBAG_NOEXCEPT
     return ::uv_req_size(Parent::cast<uv_req_t>()->type);
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

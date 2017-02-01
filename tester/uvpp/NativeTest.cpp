@@ -6,10 +6,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/uv/Native.hpp>
+#include <libtbag/uvpp/Native.hpp>
 
 using namespace libtbag;
-using namespace libtbag::uv;
+using namespace libtbag::uvpp;
 
 TEST(NativeTest, TypeSupport)
 {

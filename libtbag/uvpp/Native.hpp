@@ -5,8 +5,8 @@
  * @date   2016-12-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_NATIVE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_NATIVE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_NATIVE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_NATIVE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,13 +17,13 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Pointer.hpp>
-#include <libtbag/uv/UvCommon.hpp>
+#include <libtbag/uvpp/UvCommon.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 /**
  * libuv native type utility class.
@@ -60,20 +60,20 @@ public:
 
 public:
     inline bool isHandle() const TBAG_NOEXCEPT
-    { return uv::isHandle(TYPE); }
+    { return uvpp::isHandle(TYPE); }
     inline bool isRequest() const TBAG_NOEXCEPT
-    { return uv::isRequest(TYPE); }
+    { return uvpp::isRequest(TYPE); }
     inline bool isEtc() const TBAG_NOEXCEPT
-    { return uv::isEtc(TYPE); }
+    { return uvpp::isEtc(TYPE); }
     inline bool isStream() const TBAG_NOEXCEPT
-    { return uv::isStream(TYPE); }
+    { return uvpp::isStream(TYPE); }
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_NATIVE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_NATIVE_HPP__
 

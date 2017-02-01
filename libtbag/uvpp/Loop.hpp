@@ -5,8 +5,8 @@
  * @date   2016-12-28
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_LOOP_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_LOOP_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_LOOP_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_LOOP_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uv/Native.hpp>
+#include <libtbag/uvpp/Native.hpp>
 #include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/Type.hpp>
 
@@ -30,7 +30,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Handle;
@@ -216,11 +216,11 @@ public:
     }
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_LOOP_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_LOOP_HPP__
 

@@ -18,8 +18,8 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <libtbag/debug/ErrorCode.hpp>
-#include <libtbag/uv/ex/CallableTcp.hpp>
-#include <libtbag/uv/ex/RequestQueue.hpp>
+#include <libtbag/uvpp/ex/CallableTcp.hpp>
+#include <libtbag/uvpp/ex/RequestQueue.hpp>
 
 #include <string>
 #include <vector>
@@ -40,10 +40,10 @@ class Loop;
  * @author zer0
  * @date   2017-01-02
  */
-class TBAG_API CommonTcp : public uv::ex::CallableTcp::Callback
+class TBAG_API CommonTcp : public uvpp::ex::CallableTcp::Callback
 {
 public:
-    using CallableTcp = uv::ex::CallableTcp;
+    using CallableTcp = uvpp::ex::CallableTcp;
     using Callback    = CallableTcp::Callback;
     using SharedTcp   = std::shared_ptr<CallableTcp>;
 
@@ -51,12 +51,12 @@ public:
     using Parent = Callback;
 
 public:
-    using binf = uv::binf;
-    using Loop = uv::Loop;
+    using binf = uvpp::binf;
+    using Loop = uvpp::Loop;
 
-    using ConnectRequest = uv::ConnectRequest;
-    using WriteRequest   = uv::WriteRequest;
-    using WriteQueue     = uv::ex::WriteQueue;
+    using ConnectRequest = uvpp::ConnectRequest;
+    using WriteRequest   = uvpp::WriteRequest;
+    using WriteQueue     = uvpp::ex::WriteQueue;
 
     using Buffer = std::vector<char>;
 
@@ -71,7 +71,7 @@ public:
     CommonTcp();
     CommonTcp(SharedTcp tcp);
     CommonTcp(CallableTcp * tcp);
-    CommonTcp(uv::Loop & loop);
+    CommonTcp(uvpp::Loop & loop);
     virtual ~CommonTcp();
 
 public:

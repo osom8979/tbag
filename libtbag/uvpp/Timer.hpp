@@ -5,8 +5,8 @@
  * @date   2017-01-08
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_TIMER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_TIMER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TIMER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TIMER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uv/Stream.hpp>
+#include <libtbag/uvpp/Stream.hpp>
 
 #include <cstdint>
 
@@ -23,7 +23,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Loop;
@@ -67,11 +67,11 @@ public:
     virtual void onTimer();
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_TIMER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TIMER_HPP__
 

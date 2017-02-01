@@ -20,7 +20,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace loop  {
 namespace event {
 
-namespace uv {
+namespace uvpp {
 
 /**
  * UvEventManager class prototype.
@@ -92,7 +92,7 @@ TBAG_UV_EVNET_IMPLEMENT_PARAM3(onGetnameinfo, onGetnameinfo, UvEventManager, voi
  * @}
  */
 
-} // namespace uv
+} // namespace uvpp
 
 // -------------------------
 // UvHandler implementation.
@@ -115,7 +115,7 @@ UvHandler::~UvHandler()
 
 void UvHandler::clear()
 {
-    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
+    using UvEventManager = libtbag::loop::event::uvpp::UvEventManager;
     UvEventManager * em = UvEventManager::getInstance();
     assert(em != nullptr);
 
@@ -127,7 +127,7 @@ void UvHandler::clear()
 
 bool UvHandler::add(void * h)
 {
-    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
+    using UvEventManager = libtbag::loop::event::uvpp::UvEventManager;
     UvEventManager * em = UvEventManager::getInstance();
     assert(em != nullptr);
 
@@ -144,7 +144,7 @@ bool UvHandler::add(void * h)
 
 bool UvHandler::remove(void * h)
 {
-    using UvEventManager = libtbag::loop::event::uv::UvEventManager;
+    using UvEventManager = libtbag::loop::event::uvpp::UvEventManager;
     UvEventManager * em = UvEventManager::getInstance();
     assert(em != nullptr);
 

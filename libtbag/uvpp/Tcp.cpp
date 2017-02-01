@@ -5,11 +5,11 @@
  * @date   2016-12-28
  */
 
-#include <libtbag/uv/Tcp.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Loop.hpp>
-#include <libtbag/uv/Stream.hpp>
-#include <libtbag/uv/Request.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Stream.hpp>
+#include <libtbag/uvpp/Request.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <uv.h>
@@ -18,7 +18,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -272,7 +272,7 @@ bool Tcp::isIpv4(std::string const & ip)
     return true;
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

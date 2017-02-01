@@ -36,7 +36,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace loop  {
 namespace event {
 
-namespace uv {
+namespace uvpp {
 
 /**
  * @remarks
@@ -94,7 +94,7 @@ TBAG_API void onAfterWork   (/* uv_work_t        */ void * req, int status);
 TBAG_API void onGetaddrinfo (/* uv_getaddrinfo_t */ void * req, int status, /* struct addrinfo */ void * addr);
 TBAG_API void onGetnameinfo (/* uv_getnameinfo_t */ void * req, int status, char const * hostname, char const * service);
 
-} // namespace uv
+} // namespace uvpp
 
 /**
  * UvHandler class prototype.

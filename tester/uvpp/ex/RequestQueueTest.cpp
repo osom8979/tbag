@@ -6,12 +6,12 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/uv/ex/RequestQueue.hpp>
-#include <libtbag/uv/Handle.hpp>
+#include <libtbag/uvpp/ex/RequestQueue.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 
 using namespace libtbag;
-using namespace libtbag::uv;
-using namespace libtbag::uv::ex;
+using namespace libtbag::uvpp;
+using namespace libtbag::uvpp::ex;
 
 TEST(RequestQueueTest, Default)
 {

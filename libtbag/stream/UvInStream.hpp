@@ -18,7 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/loop/UvEventDispatcher.hpp>
-#include <libtbag/uv/Handle.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 
 #include <vector>
 
@@ -34,11 +34,11 @@ namespace stream {
  * @author zer0
  * @date   2016-12-16
  */
-class TBAG_API UvInStream : public uv::Handle
+class TBAG_API UvInStream : public uvpp::Handle
 {
 public:
-    using UvHandleType = uv::UvHandleType;
-    using UvNative = uv::Native;
+    using UvHandleType = uvpp::UvHandleType;
+    using UvNative = uvpp::Native;
 
 public:
     struct OnWriteCallback

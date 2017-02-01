@@ -19,7 +19,7 @@
 #include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/container/CircularBuffer.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
-#include <libtbag/uv/UvCommon.hpp>
+#include <libtbag/uvpp/UvCommon.hpp>
 
 #include <cstdlib>
 #include <cstdint>
@@ -42,7 +42,7 @@ namespace network {
  */
 struct DatagramInterface
 {
-    using binf = uv::binf;
+    using binf = uvpp::binf;
     using Size = std::size_t;
 
     using Buffer         = std::vector<char>;

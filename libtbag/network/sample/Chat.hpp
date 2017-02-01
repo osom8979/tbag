@@ -17,8 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/network/TcpClient.hpp>
 #include <libtbag/network/TcpServer.hpp>
-#include <libtbag/uv/Tty.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Tty.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <map>
 #include <memory>
@@ -98,7 +98,7 @@ public:
  * @author zer0
  * @date   2016-12-31
  */
-class TBAG_API AsyncChatInput : public uv::Tty
+class TBAG_API AsyncChatInput : public uvpp::Tty
 {
 public:
     using Buffer = std::vector<char>;
@@ -113,11 +113,11 @@ private:
     std::string _name;
 
 public:
-    AsyncChatInput(uv::Loop & loop, ChatClient & client, std::string const & name);
+    AsyncChatInput(uvpp::Loop & loop, ChatClient & client, std::string const & name);
     ~AsyncChatInput();
 
 public:
-    virtual uv::binf onAlloc(std::size_t suggested_size) override;
+    virtual uvpp::binf onAlloc(std::size_t suggested_size) override;
     virtual void onRead(Err code, char const * buffer, std::size_t size) override;
 
 public:

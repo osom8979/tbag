@@ -5,8 +5,8 @@
  * @date   2016-12-28
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_ASYNC_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_ASYNC_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_ASYNC_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_ASYNC_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/uv/Handle.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 #include <libtbag/container/SafetyQueue.hpp>
 
 #include <memory>
@@ -26,7 +26,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Loop;
@@ -155,11 +155,11 @@ public:
     }
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_ASYNC_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_ASYNC_HPP__
 

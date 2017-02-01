@@ -5,9 +5,9 @@
  * @date   2017-01-08
  */
 
-#include <libtbag/uv/Timer.hpp>
+#include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <uv.h>
 
@@ -15,7 +15,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -133,7 +133,7 @@ void Timer::onTimer()
     __tbag_debug("Timer::onTimer() called.");
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

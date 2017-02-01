@@ -61,7 +61,7 @@ static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
 // libuv helper methods.
 // ---------------------
 
-namespace uv {
+namespace uvpp {
 
 /**
  * @defgroup __DOXYGEN_GROUP__FILE_TYPE__ List of file type.
@@ -232,7 +232,7 @@ static uint64_t getFixedPermission(uint64_t mode)
 #endif
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // -----------------
 // Common interface.
@@ -240,22 +240,22 @@ static uint64_t getFixedPermission(uint64_t mode)
 
 std::string getTempDir()
 {
-    return uv::getRepresentationDirectory(&uv_os_tmpdir);
+    return uvpp::getRepresentationDirectory(&uv_os_tmpdir);
 }
 
 std::string getWorkDir()
 {
-    return uv::getRepresentationDirectory(&uv_cwd);
+    return uvpp::getRepresentationDirectory(&uv_cwd);
 }
 
 std::string getHomeDir()
 {
-    return uv::getRepresentationDirectory(&uv_os_homedir);
+    return uvpp::getRepresentationDirectory(&uv_os_homedir);
 }
 
 std::string getExePath()
 {
-    return uv::getRepresentationDirectory(&uv_exepath);
+    return uvpp::getRepresentationDirectory(&uv_exepath);
 }
 
 std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size)
@@ -355,32 +355,32 @@ bool rename(std::string const & from, std::string const & to)
 
 bool exists(std::string const & path)
 {
-    return uv::checkAccessMode(path, uv::ACCESS_MODE_EXISTS);
+    return uvpp::checkAccessMode(path, uvpp::ACCESS_MODE_EXISTS);
 }
 
 bool isDirectory(std::string const & path)
 {
-    return uv::checkFileType(path, uv::FILE_TYPE_S_IFDIR);
+    return uvpp::checkFileType(path, uvpp::FILE_TYPE_S_IFDIR);
 }
 
 bool isRegularFile(std::string const & path)
 {
-    return uv::checkFileType(path, uv::FILE_TYPE_S_IFREG);
+    return uvpp::checkFileType(path, uvpp::FILE_TYPE_S_IFREG);
 }
 
 bool isExecutable(std::string const & path)
 {
-    return uv::checkAccessMode(path, uv::ACCESS_MODE_EXECUTE);
+    return uvpp::checkAccessMode(path, uvpp::ACCESS_MODE_EXECUTE);
 }
 
 bool isWritable(std::string const & path)
 {
-    return uv::checkAccessMode(path, uv::ACCESS_MODE_WRITE);
+    return uvpp::checkAccessMode(path, uvpp::ACCESS_MODE_WRITE);
 }
 
 bool isReadable(std::string const & path)
 {
-    return uv::checkAccessMode(path, uv::ACCESS_MODE_READ);
+    return uvpp::checkAccessMode(path, uvpp::ACCESS_MODE_READ);
 }
 
 std::vector<std::string> scanDir(std::string const & path)

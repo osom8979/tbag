@@ -114,7 +114,7 @@ bool TcpServer::initIpv4(std::string const & ip, int port)
 
 bool TcpServer::run(std::string const & ip, int port)
 {
-    if (uv::Tcp::isIpv4(ip) && initIpv4(ip, port)) {
+    if (uvpp::Tcp::isIpv4(ip) && initIpv4(ip, port)) {
         return atLoop().run();
     }
     return false;
@@ -126,7 +126,7 @@ bool TcpServer::run(std::string const & ip, int port)
 
 TcpServer::binf TcpServer::onClientAlloc(Client & client, std::size_t suggested_size)
 {
-    return uv::defaultOnAlloc(client.atReadBuffer(), suggested_size);
+    return uvpp::defaultOnAlloc(client.atReadBuffer(), suggested_size);
 }
 
 void TcpServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)

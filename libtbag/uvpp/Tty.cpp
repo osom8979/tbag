@@ -5,9 +5,9 @@
  * @date   2016-12-31
  */
 
-#include <libtbag/uv/Tty.hpp>
+#include <libtbag/uvpp/Tty.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <uv.h>
 
@@ -15,14 +15,14 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 Tty::Tty() : Stream(UvHandleType::TTY)
 {
     // EMPTY.
 }
 
-Tty::Tty(Loop & loop, uv::File fd, bool readable) : Tty()
+Tty::Tty(Loop & loop, uvpp::File fd, bool readable) : Tty()
 {
     if (init(loop, fd, readable) == false) {
         throw std::bad_alloc();
@@ -49,7 +49,7 @@ Tty::~Tty()
     // EMPTY.
 }
 
-bool Tty::init(Loop & loop, uv::File fd, bool readable)
+bool Tty::init(Loop & loop, uvpp::File fd, bool readable)
 {
     // readable, specifies if you plan on calling uv_read_start() with this stream.
     // stdin is readable, stdout is not.
@@ -132,7 +132,7 @@ bool Tty::getWinSize(int * width, int * height)
     return true;
 }
 
-uv::File Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
+uvpp::File Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (fd) {
@@ -143,7 +143,7 @@ uv::File Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
     // @formatter:on
 }
 
-bool Tty::guessHandle(uv::File fd)
+bool Tty::guessHandle(uvpp::File fd)
 {
     // Used to detect what type of stream should be used with a given file descriptor.
     // Usually this will be used during initialization to guess the type of the stdio streams.
@@ -157,7 +157,7 @@ bool Tty::guessHandle(GeneralFile fd)
     return guessHandle(toFile(fd));
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

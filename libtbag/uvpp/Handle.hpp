@@ -7,8 +7,8 @@
  * @see <http://docs.libuv.org/en/v1.x/handle.html>
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_HANDLE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_HANDLE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_HANDLE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_HANDLE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,13 +17,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uv/Native.hpp>
+#include <libtbag/uvpp/Native.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 /**
  * libuv handle type utility class.
@@ -118,11 +118,11 @@ public:
     virtual void onWalk(void * arg);
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_HANDLE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_HANDLE_HPP__
 

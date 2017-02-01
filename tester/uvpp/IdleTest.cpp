@@ -6,14 +6,14 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/uv/Loop.hpp>
-#include <libtbag/uv/Idle.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Idle.hpp>
 
 #include <cstdio>
 #include <memory>
 
 using namespace libtbag;
-using namespace libtbag::uv;
+using namespace libtbag::uvpp;
 
 static bool g_is_idle;
 static bool g_is_close;

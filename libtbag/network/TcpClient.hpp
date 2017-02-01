@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/TcpLoop.hpp>
-#include <libtbag/uv/Request.hpp>
+#include <libtbag/uvpp/Request.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

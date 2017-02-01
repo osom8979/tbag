@@ -5,8 +5,8 @@
  * @date   2017-01-11
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_UDP_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_UDP_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_UDP_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_UDP_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,14 +16,14 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/debug/ErrorCode.hpp>
-#include <libtbag/uv/Handle.hpp>
-#include <libtbag/uv/Request.hpp>
+#include <libtbag/uvpp/Handle.hpp>
+#include <libtbag/uvpp/Request.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Loop;
@@ -114,11 +114,11 @@ public:
     virtual void onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_UDP_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_UDP_HPP__
 

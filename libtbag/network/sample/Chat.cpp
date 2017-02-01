@@ -129,7 +129,7 @@ ChatClient::ChatClient(std::string const & name)
 {
     std::cout.setf(std::ios_base::boolalpha);
     auto shared = atLoop().newHandle<AsyncChatInput>(atLoop(), *this, name);
-    _input = std::static_pointer_cast<AsyncChatInput, uv::Handle>(shared);
+    _input = std::static_pointer_cast<AsyncChatInput, uvpp::Handle>(shared);
 }
 
 ChatClient::~ChatClient()
@@ -188,8 +188,8 @@ void ChatClient::onClose()
 // AsyncChatInput implementation.
 // ------------------------------
 
-AsyncChatInput::AsyncChatInput(uv::Loop & loop, ChatClient & client, std::string const & name)
-        : uv::Tty(loop, GeneralFile::FILE_STDIN), _client(client), _name(name)
+AsyncChatInput::AsyncChatInput(uvpp::Loop & loop, ChatClient & client, std::string const & name)
+        : uvpp::Tty(loop, GeneralFile::FILE_STDIN), _client(client), _name(name)
 {
     setMode(TtyMode::TTY_NORMAL);
     startRead();
@@ -201,7 +201,7 @@ AsyncChatInput::~AsyncChatInput()
     resetMode();
 }
 
-uv::binf AsyncChatInput::onAlloc(std::size_t suggested_size)
+uvpp::binf AsyncChatInput::onAlloc(std::size_t suggested_size)
 {
     // Realloc with read buffer.
     if (_read_buffer.size() < suggested_size) {
@@ -209,7 +209,7 @@ uv::binf AsyncChatInput::onAlloc(std::size_t suggested_size)
         _last_buffer.resize(suggested_size);
     }
 
-    uv::binf info;
+    uvpp::binf info;
     info.buffer = &_read_buffer[0];
     info.size   =  _read_buffer.size();
     return info;

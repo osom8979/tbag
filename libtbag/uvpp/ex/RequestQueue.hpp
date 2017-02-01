@@ -5,8 +5,8 @@
  * @date   2016-12-28
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_EX_REQUESTQUEUE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_EX_REQUESTQUEUE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_REQUESTQUEUE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_REQUESTQUEUE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Pointer.hpp>
-#include <libtbag/uv/UvCommon.hpp>
+#include <libtbag/uvpp/UvCommon.hpp>
 
 #include <mutex>
 #include <memory>
@@ -28,7 +28,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Handle;
@@ -123,11 +123,11 @@ _TBAG_UV_REQUEST_QUEUE_EX(UDP_SEND, UdpSend);
 #undef _TBAG_UV_REQUEST_QUEUE_EX
 
 } // namespace ex
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_EX_REQUESTQUEUE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_REQUESTQUEUE_HPP__
 

@@ -5,9 +5,9 @@
  * @date   2016-12-28
  */
 
-#include <libtbag/uv/Idle.hpp>
+#include <libtbag/uvpp/Idle.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <uv.h>
 
@@ -15,7 +15,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -91,7 +91,7 @@ void Idle::onIdle()
     __tbag_debug("Idle::onIdle() called.");
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

@@ -6,7 +6,7 @@
  * @date   2017-01-03 (Rename: Type -> UvCommon)
  */
 
-#include <libtbag/uv/UvCommon.hpp>
+#include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/log/Log.hpp>
 #include <uv.h>
 
@@ -14,7 +14,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // @formatter:off
 #define _TBAG_XX(name, type) case UvType::name: return true;
@@ -96,7 +96,7 @@ binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_size)
     return info;
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

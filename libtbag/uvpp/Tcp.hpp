@@ -5,8 +5,8 @@
  * @date   2016-12-28
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UV_TCP_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UV_TCP_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TCP_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TCP_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,13 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uv/Stream.hpp>
+#include <libtbag/uvpp/Stream.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // Forward declaration.
 class Loop;
@@ -91,11 +91,11 @@ public:
     static bool isIpv4(std::string const & ip);
 };
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UV_TCP_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_TCP_HPP__
 

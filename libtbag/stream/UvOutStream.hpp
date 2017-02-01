@@ -18,7 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/loop/UvEventDispatcher.hpp>
-#include <libtbag/uv/Handle.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 
 #include <vector>
 
@@ -34,10 +34,10 @@ namespace stream {
  * @author zer0
  * @date   2016-12-16
  */
-class TBAG_API UvOutStream : public uv::Handle
+class TBAG_API UvOutStream : public uvpp::Handle
 {
 public:
-    using UvHandleType = uv::UvHandleType;
+    using UvHandleType = uvpp::UvHandleType;
     using Buffer = std::vector<char>;
 
 public:

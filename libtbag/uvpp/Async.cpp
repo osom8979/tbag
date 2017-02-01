@@ -5,9 +5,9 @@
  * @date   2016-12-28
  */
 
-#include <libtbag/uv/Async.hpp>
+#include <libtbag/uvpp/Async.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uv/Loop.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <uv.h>
 
@@ -15,7 +15,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace uv {
+namespace uvpp {
 
 // --------------------
 // Global libuv events.
@@ -137,7 +137,7 @@ void Async::onAsync()
     }
 }
 
-} // namespace uv
+} // namespace uvpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
