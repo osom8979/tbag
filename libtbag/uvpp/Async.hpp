@@ -146,10 +146,10 @@ public:
 public:
     /** Create(new) & push job. */
     template <typename JobType, typename ... Args>
-    inline std::shared_ptr<typename remove_cr<JobType>::type> safeNewJob(Args && ... args)
+    inline std::shared_ptr<typename remove_cr<JobType>::type> safeNewPush(Args && ... args)
     {
         typedef typename remove_cr<JobType>::type ResultJobType;
-        SharedJob shared = SharedJob(new JobType(std::forward<Args>(args) ...));
+        SharedJob shared = SharedJob(new (std::nothrow) JobType(std::forward<Args>(args) ...));
         safePush(shared);
         return std::static_pointer_cast<ResultJobType, Job>(shared);
     }
