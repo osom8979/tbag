@@ -28,6 +28,20 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
+inline TBAG_CONSTEXPR bool isReleaseMode() TBAG_NOEXCEPT
+{
+#if defined(NDEBUG)
+    return true;
+#else
+    return false;
+#endif
+}
+
+inline TBAG_CONSTEXPR bool isDebugMode() TBAG_NOEXCEPT
+{
+    return !isReleaseMode();
+}
+
 inline TBAG_CONSTEXPR bool isWindowsPlatform() TBAG_NOEXCEPT
 {
 #if defined(__PLATFORM_WINDOWS__)
