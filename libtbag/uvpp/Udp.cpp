@@ -147,7 +147,7 @@ bool Udp::init(Loop & loop)
     return true;
 }
 
-bool Udp::open(OsSock sock)
+bool Udp::open(usock sock)
 {
     // Unix only: The only requirement of the sock argument is that it follows
     // the datagram contract (works in unconnected mode, supports sendmsg()/recvmsg(), etc).

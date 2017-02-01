@@ -43,13 +43,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 
 #if defined(__OS_WINDOWS__)
-using File   = int;
-using OsSock = SOCKET;
-using OsFd   = HANDLE;
+using ufile = int;
+using usock = SOCKET;
+using ufd   = HANDLE;
 #else
-using File   = int;
-using OsSock = int;
-using OsFd   = int;
+using ufile = int;
+using usock = int;
+using ufd   = int;
 #endif
 
 #ifndef TBAG_UV_HANDLE_MAP

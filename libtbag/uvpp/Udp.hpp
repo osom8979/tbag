@@ -69,7 +69,7 @@ public:
     bool init(Loop & loop);
 
     /** Opens an existing file descriptor or Windows SOCKET as a UDP handle. */
-    bool open(OsSock sock);
+    bool open(usock sock);
 
     /** Bind the UDP handle to an IP address and port. */
     bool bind(sockaddr const * addr, unsigned int flags);

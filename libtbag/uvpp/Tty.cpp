@@ -23,7 +23,7 @@ Tty::Tty() : Stream(UvHandleType::TTY)
     // EMPTY.
 }
 
-Tty::Tty(Loop & loop, uvpp::File fd, bool readable) : Tty()
+Tty::Tty(Loop & loop, ufile fd, bool readable) : Tty()
 {
     if (init(loop, fd, readable) == false) {
         throw std::bad_alloc();
@@ -50,7 +50,7 @@ Tty::~Tty()
     // EMPTY.
 }
 
-bool Tty::init(Loop & loop, uvpp::File fd, bool readable)
+bool Tty::init(Loop & loop, ufile fd, bool readable)
 {
     // readable, specifies if you plan on calling uv_read_start() with this stream.
     // stdin is readable, stdout is not.
@@ -133,7 +133,7 @@ bool Tty::getWinSize(int * width, int * height)
     return true;
 }
 
-uvpp::File Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
+ufile Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (fd) {
@@ -144,7 +144,7 @@ uvpp::File Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
     // @formatter:on
 }
 
-bool Tty::guessHandle(uvpp::File fd)
+bool Tty::guessHandle(ufile fd)
 {
     // Used to detect what type of stream should be used with a given file descriptor.
     // Usually this will be used during initialization to guess the type of the stdio streams.
