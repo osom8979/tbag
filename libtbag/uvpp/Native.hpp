@@ -3,6 +3,7 @@
  * @brief  Native class prototype.
  * @author zer0
  * @date   2016-12-27
+ * @date   2017-02-01 (Move package: libtbag/uv -> libtbag/uvpp)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_NATIVE_HPP__
@@ -31,6 +32,7 @@ namespace uvpp {
  * @author zer0
  * @date   2016-12-07
  * @date   2016-12-27 (Move package: libtbag/util -> libtbag/uv)
+ * @date   2017-02-01 (Move package: libtbag/uv -> libtbag/uvpp)
  */
 class TBAG_API Native : public container::Pointer<void>, public Noncopyable
 {

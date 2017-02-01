@@ -3,6 +3,7 @@
  * @brief  Timer class implementation.
  * @author zer0
  * @date   2017-01-08
+ * @date   2017-02-01 (Move package: libtbag/uv -> libtbag/uvpp)
  */
 
 #include <libtbag/uvpp/Timer.hpp>
