@@ -169,6 +169,24 @@ TBAG_API bool isStream(UvType type);
 // Debugging methods.
 // ------------------
 
+/**
+ * @remarks
+ *  Same this code:
+ *  @code
+ *    const char* uv_strerror(int err);
+ *  @endcode
+ */
+TBAG_API std::string getUvErrorString(int uv_error_code);
+
+/**
+ * @remarks
+ *  Same this code:
+ *  @code
+ *    const char* uv_err_name(int err);
+ *  @endcode
+ */
+TBAG_API std::string getUvErrorName(int uv_error_code);
+
 #ifndef TBAG_UV_ERROR_MAP
 #define TBAG_UV_ERROR_MAP(_TBAG_XX) \
     _TBAG_XX(_E2BIG           , "Argument list too long"                ) \
@@ -255,32 +273,22 @@ TBAG_API bool isStream(UvType type);
  * @author zer0
  * @date   2017-01-30
  */
-enum class UvErr : int
+enum class ErrorCode : int
 {
     __START_NUMBER__ = -1,
-#define _TBAG_XX(name, type) UVPP##name,
+    UVPP_SUCCESS = 0,
+#define _TBAG_XX(name, msg) UVPP##name,
     TBAG_UV_ERROR_MAP(_TBAG_XX)
 #undef _TBAG_XX
     __SIZE__
 };
 
-/**
- * @remarks
- *  Same this code:
- *  @code
- *    const char* uv_strerror(int err);
- *  @endcode
- */
-TBAG_API std::string getUvErrorString(int uv_error_code);
+/** Short name of ErrorCode type. */
+typedef ErrorCode uerr;
 
-/**
- * @remarks
- *  Same this code:
- *  @code
- *    const char* uv_err_name(int err);
- *  @endcode
- */
-TBAG_API std::string getUvErrorName(int uv_error_code);
+TBAG_API uerr getUvppErrorCode(int uv_error_code);
+TBAG_API std::string getErrorName(uerr err);
+TBAG_API std::string getErrorDetail(uerr err);
 
 // ---------------------
 // Native handle helper.

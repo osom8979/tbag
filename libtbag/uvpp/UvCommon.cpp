@@ -7,7 +7,6 @@
  */
 
 #include <libtbag/uvpp/UvCommon.hpp>
-#include <libtbag/log/Log.hpp>
 #include <uv.h>
 
 // -------------------
@@ -39,6 +38,45 @@ bool isStream(UvType type)
 std::string getUvErrorString(int uv_error_code) { return std::string(::uv_strerror(uv_error_code)); }
 std::string getUvErrorName  (int uv_error_code) { return std::string(::uv_err_name(uv_error_code)); }
 // @formatter:on
+
+uerr getUvppErrorCode(int uv_error_code)
+{
+    // @formatter:off
+    switch (uv_error_code) {
+    case 0: return uerr::UVPP_SUCCESS;
+#define _TBAG_XX(name, msg) case UV##name: return uerr::UVPP##name;
+    TBAG_UV_ERROR_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return uerr::UVPP_UNKNOWN;
+    }
+    // @formatter:on
+}
+
+std::string getErrorName(ErrorCode err)
+{
+    // @formatter:off
+    switch (err) {
+    case uerr::UVPP_SUCCESS: return std::string("UVPP_SUCCESS");
+#define _TBAG_XX(name, msg) case uerr::UVPP##name: return std::string("UVPP"#name);
+    TBAG_UV_ERROR_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return std::string("UVPP_UNKNOWN");
+    }
+    // @formatter:on
+}
+
+std::string getErrorDetail(ErrorCode err)
+{
+    // @formatter:off
+    switch (err) {
+    case uerr::UVPP_SUCCESS: return std::string("No error");
+#define _TBAG_XX(name, msg) case uerr::UVPP##name: return std::string(msg);
+    TBAG_UV_ERROR_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return std::string("Unknown error");
+    }
+    // @formatter:on
+}
 
 // ---------------------
 // Native handle helper.
