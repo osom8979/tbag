@@ -26,10 +26,12 @@ static void __global_uv_timer_cb__(uv_timer_t * handle)
 {
     Timer * t = static_cast<Timer*>(handle->data);
     if (t == nullptr) {
-        __tbag_error("__global_uv_timer_cb__() handle data is nullptr.");
-        return;
+        __tbag_error("__global_uv_timer_cb__() handle.data is nullptr.");
+    } else if (isDeletedAddress(t)) {
+        __tbag_error("__global_uv_timer_cb__() handle.data is deleted.");
+    } else {
+        t->onTimer();
     }
-    t->onTimer();
 }
 
 // ---------------------
@@ -43,7 +45,7 @@ Timer::Timer() : Stream(uhandle::TIMER)
 
 Timer::Timer(Loop & loop) : Timer()
 {
-    if (init(loop) == false) {
+    if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -53,17 +55,13 @@ Timer::~Timer()
     // EMPTY.
 }
 
-bool Timer::init(Loop & loop)
+uerr Timer::init(Loop & loop)
 {
     int const CODE = ::uv_timer_init(loop.cast<uv_loop_t>(), Parent::cast<uv_timer_t>());
-    if (CODE != 0) {
-        __tbag_error("Timer::init() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Timer, init, CODE);
 }
 
-bool Timer::start(uint64_t timeout, uint64_t repeat)
+uerr Timer::start(uint64_t timeout, uint64_t repeat)
 {
     // If timeout is zero, the callback fires on the next event loop iteration.
     // If repeat is non-zero, the callback fires first after timeout milliseconds
@@ -74,32 +72,20 @@ bool Timer::start(uint64_t timeout, uint64_t repeat)
     // See uv_update_time() for more information.
 
     int const CODE = ::uv_timer_start(Parent::cast<uv_timer_t>(), __global_uv_timer_cb__, timeout, repeat);
-    if (CODE != 0) {
-        __tbag_error("Timer::start() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Timer, start, CODE);
 }
 
-bool Timer::stop()
+uerr Timer::stop()
 {
     int const CODE = ::uv_timer_stop(Parent::cast<uv_timer_t>());
-    if (CODE != 0) {
-        __tbag_error("Timer::stop() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Timer, stop, CODE);
 }
 
-bool Timer::again()
+uerr Timer::again()
 {
     // If the timer has never been started before it returns UV_EINVAL.
     int const CODE = ::uv_timer_again(Parent::cast<uv_timer_t>());
-    if (CODE != 0) {
-        __tbag_error("Timer::again() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Timer, again, CODE);
 }
 
 void Timer::setRepeat(uint64_t repeat)
