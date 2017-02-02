@@ -70,7 +70,7 @@ public:
      *  Unlike other handle initialization functions, @n
      *  it immediately starts the handle.
      */
-    bool init(Loop & loop);
+    uerr init(Loop & loop);
 
 public:
     /**
@@ -90,7 +90,7 @@ public:
      *   the callback was called, it will be called again.
      *  </pre>
      */
-    bool send();
+    uerr send();
 
 // Event methods.
 public:
@@ -136,10 +136,8 @@ public:
 public:
     void safeClear();
     void safePush(SharedJob job);
-    bool safeSendJob(SharedJob job);
-
-public:
-    bool safeClose();
+    uerr safeSendJob(SharedJob job);
+    uerr safeClose();
 
 public:
     virtual void onAsync();

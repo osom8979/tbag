@@ -26,10 +26,12 @@ static void __global_uv_async_cb__(uv_async_t * handle)
 {
     BaseAsync * async = static_cast<BaseAsync*>(handle->data);
     if (async == nullptr) {
-        __tbag_error("__global_uv_async_cb__() handle data is nullptr.");
-        return;
+        __tbag_error("__global_uv_async_cb__() handle.data is nullptr.");
+    } else if (isDeletedAddress(async)) {
+        __tbag_error("__global_uv_async_cb__() handle.data is deleted.");
+    } else {
+        async->onAsync();
     }
-    async->onAsync();
 }
 
 // -------------------------
@@ -43,7 +45,7 @@ BaseAsync::BaseAsync() : Handle(uhandle::ASYNC)
 
 BaseAsync::BaseAsync(Loop & loop) : BaseAsync()
 {
-    if (init(loop) == false) {
+    if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -53,24 +55,16 @@ BaseAsync::~BaseAsync()
     // EMPTY.
 }
 
-bool BaseAsync::init(Loop & loop)
+uerr BaseAsync::init(Loop & loop)
 {
     int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
-    if (CODE != 0) {
-        __tbag_error("BaseAsync::BaseAsync() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(BaseAsync, init, CODE);
 }
 
-bool BaseAsync::send()
+uerr BaseAsync::send()
 {
     int const CODE = ::uv_async_send(Parent::cast<uv_async_t>());
-    if (CODE != 0) {
-        __tbag_error("BaseAsync::send() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(BaseAsync, send, CODE);
 }
 
 // --------------
@@ -79,7 +73,7 @@ bool BaseAsync::send()
 
 void BaseAsync::onAsync()
 {
-    // EMPTY.
+    __tbag_debug("BaseAsync::onAsync() called.");
 }
 
 // ---------------------
@@ -111,13 +105,13 @@ void Async::safePush(SharedJob job)
     _jobs.push(job);
 }
 
-bool Async::safeSendJob(SharedJob job)
+uerr Async::safeSendJob(SharedJob job)
 {
     _jobs.push(job);
     return Parent::send();
 }
 
-bool Async::safeClose()
+uerr Async::safeClose()
 {
     _exit.store(true);
     return Parent::send();

@@ -303,6 +303,21 @@ TBAG_API bool isUvNativeHandleType(void const * handle);
 
 TBAG_API binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_size);
 
+// -------------
+// Macro helper.
+// -------------
+
+#ifndef TBAG_UERR_DEFAULT_RETURN
+#define TBAG_UERR_DEFAULT_RETURN(class_name, method_name, code)         \
+    if (code != 0) {                                                    \
+        __tbag_error(#class_name "::" #method_name "() error [{}] {}",  \
+                code,                                                   \
+                ::libtbag::uvpp::getUvErrorName(code));                 \
+        return ::libtbag::uvpp::getUvppErrorCode(code);                 \
+    }                                                                   \
+    return ::libtbag::uvpp::ErrorCode::UVPP_SUCCESS;
+#endif
+
 } // namespace uvpp
 
 // --------------------
