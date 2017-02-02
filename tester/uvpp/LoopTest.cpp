@@ -19,8 +19,8 @@ TEST(LoopTest, Default)
     ASSERT_TRUE(loop.empty());
     ASSERT_EQ(0, loop.size());
 
-    auto w1 = loop.insertChildHandle(new Idle(loop));
-    auto w2 = loop.insertChildHandle(new Idle(loop));
+    auto s1 = loop.newHandle<Idle>(loop);
+    auto s2 = loop.newHandle<Idle>(loop);
 
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());

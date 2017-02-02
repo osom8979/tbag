@@ -45,12 +45,12 @@ TEST(IdleTest, Default)
 {
     {
         Loop loop;
-        auto weak = loop.insertChildHandle(new IdleTest(loop));
-        static_cast<IdleTest*>(weak.lock().get())->start();
+        auto shared = loop.newHandle<IdleTest>(loop);
+        static_cast<IdleTest*>(shared.get())->start();
         loop.run();
 
         if (USE_DEBUGGING) { // ONLY DEBUGGING.
-            weak.lock()->close();
+            shared->close();
             loop.run();
             loop.printAllHandles(stdout);
         }

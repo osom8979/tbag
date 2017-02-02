@@ -24,7 +24,7 @@
 
 #include <memory>
 #include <atomic>
-#include <set>
+#include <unordered_map>
 #include <thread>
 
 // -------------------
@@ -81,10 +81,10 @@ public:
 
 public:
     /** Releases all internal loop resources. */
-    bool close(Err * result = nullptr);
+    uerr close();
 
     /** This function runs the event loop. */
-    bool run(RunMode mode = RunMode::RUN_DEFAULT);
+    uerr run(RunMode mode = RunMode::RUN_DEFAULT);
 
     /** Returns true if there are active handles or request in the loop. */
     bool isAlive() const;
@@ -135,17 +135,21 @@ class TBAG_API Loop : public BaseLoop
 public:
     using Parent = BaseLoop;
 
+    using NativeHandle = container::Pointer<void>;
     using SharedHandle = std::shared_ptr<Handle>;
     using WeakHandle   = std::weak_ptr<Handle>;
-    using HandleSet    = std::set<SharedHandle>;
 
-    using iterator               = typename HandleSet::iterator;
-    using const_iterator         = typename HandleSet::const_iterator;
-    using reverse_iterator       = typename HandleSet::reverse_iterator;
-    using const_reverse_iterator = typename HandleSet::const_reverse_iterator;
+    using HandleMap = std::unordered_map<
+            NativeHandle,
+            SharedHandle,
+            typename NativeHandle::Hash,
+            typename NativeHandle::EqualTo>;
+
+    using iterator       = typename HandleMap::iterator;
+    using const_iterator = typename HandleMap::const_iterator;
 
 private:
-    HandleSet _handles;
+    HandleMap _handles;
 
 public:
     Loop();
@@ -159,12 +163,13 @@ private:
     /** @warning Don't use this method of user level developers. */
     void runCloseAllHandles();
 
-public:
-    WeakHandle   findChildHandle(Handle     * handle);
-    WeakHandle insertChildHandle(SharedHandle handle);
-    WeakHandle insertChildHandle(Handle     * handle);
-    bool        eraseChildHandle(WeakHandle   handle);
-    bool        eraseChildHandle(Handle     * handle);
+// @formatter:off
+private: WeakHandle findChildHandle(void * native_handle);
+public : WeakHandle findChildHandle(Handle & h);
+private: bool eraseChildHandle(void * native_handle);
+public : bool eraseChildHandle(Handle & h);
+public : WeakHandle insertChildHandle(SharedHandle h);
+// @formatter:on
 
 // By-pass methods.
 public:
@@ -172,35 +177,29 @@ public:
 #ifndef TBAG_UV_LOOP_BY_PASS_METHOD
 #define TBAG_UV_LOOP_BY_PASS_METHOD(retval, name, qualifier) \
     inline retval name() qualifier TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_handles.name())) { return _handles.name(); }
-#define EMPTY_QUALIFIER
+#define TBAG_EMPTY_QUALIFIER
 #endif
 
-    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator, begin, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator, begin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator,   end, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,   end, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator, begin, TBAG_EMPTY_QUALIFIER);
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator, begin, const);
+    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator,   end, TBAG_EMPTY_QUALIFIER);
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,   end, const);
 
-    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator, rbegin, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, rbegin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(      reverse_iterator,   rend, EMPTY_QUALIFIER)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   rend, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,  cbegin, const);
+    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,    cend, const);
 
-    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,  cbegin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(        const_iterator,    cend, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator, crbegin, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_reverse_iterator,   crend, const)
+    TBAG_UV_LOOP_BY_PASS_METHOD(       bool,    empty, const);
+    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t,     size, const);
+    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, max_size, const);
 
-    TBAG_UV_LOOP_BY_PASS_METHOD(       bool,    empty, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t,     size, const)
-    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, max_size, const)
-
-#undef EMPTY_QUALIFIER
+#undef TBAG_EMPTY_QUALIFIER
 #undef TBAG_UV_LOOP_BY_PASS_METHOD
 
 public:
     /** @warning This function should be avoided. */
     void forceClear();
 
+// Event methods.
 public:
     virtual void onClosing(Handle * handle);
     virtual void onClosed(Handle * handle);
@@ -211,9 +210,8 @@ public:
     inline std::shared_ptr<typename remove_cr<HandleType>::type> newHandle(Args && ... args)
     {
         typedef typename remove_cr<HandleType>::type ResultHandleType;
-        HandleType * handle = new HandleType(std::forward<Args>(args) ...);
-        auto shared = insertChildHandle(handle).lock();
-        return std::static_pointer_cast<ResultHandleType, Handle>(shared);
+        SharedHandle shared(new (std::nothrow) HandleType(std::forward<Args>(args) ...));
+        return std::static_pointer_cast<ResultHandleType, Handle>(insertChildHandle(shared).lock());
     }
 };
 

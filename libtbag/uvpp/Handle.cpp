@@ -41,7 +41,7 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
         // @formatter:off
         if (loop != nullptr) { loop->onClosing(h); }
         h->onClose();
-        if (loop != nullptr) { loop->onClosed(h); loop->eraseChildHandle(h); }
+        if (loop != nullptr) { loop->onClosed(h); loop->eraseChildHandle(*h); }
         // @formatter:on
 
         UNUSED_PARAM(h); // Do not call this handle any more.

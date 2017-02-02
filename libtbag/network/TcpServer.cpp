@@ -115,7 +115,7 @@ bool TcpServer::initIpv4(std::string const & ip, int port)
 bool TcpServer::run(std::string const & ip, int port)
 {
     if (uvpp::Tcp::isIpv4(ip) && initIpv4(ip, port)) {
-        return atLoop().run();
+        return atLoop().run() == uvpp::uerr::UVPP_SUCCESS;
     }
     return false;
 }

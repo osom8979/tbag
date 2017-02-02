@@ -27,16 +27,18 @@ static void __global_uv_walk_cb__(uv_handle_t * handle, void * arg)
 {
     if (handle->loop == nullptr) {
         __tbag_error("__global_uv_walk_cb__() handle.loop is nullptr.");
-        return;
+    } else if (isDeletedAddress(handle->loop)) {
+        __tbag_error("__global_uv_walk_cb__() handle.loop is deleted.");
+    } else {
+        BaseLoop * loop = static_cast<BaseLoop*>(handle->loop->data);
+        if (loop == nullptr) {
+            __tbag_error("__global_uv_walk_cb__() handle.loop.data is nullptr.");
+        } else if (isDeletedAddress(loop)) {
+            __tbag_error("__global_uv_walk_cb__() handle.loop.data is deleted.");
+        } else {
+            loop->onWalk(handle, arg);
+        }
     }
-
-    BaseLoop * loop = static_cast<BaseLoop*>(handle->loop->data);
-    if (loop == nullptr) {
-        __tbag_error("__global_uv_walk_cb__() handle.loop.data is nullptr.");
-        return;
-    }
-
-    loop->onWalk(handle, arg);
 }
 
 // ------------------------
@@ -65,7 +67,7 @@ BaseLoop::~BaseLoop()
     // EMPTY.
 }
 
-bool BaseLoop::close(Err * result)
+uerr BaseLoop::close()
 {
     // Releases all internal loop resources.
     //
@@ -73,30 +75,14 @@ bool BaseLoop::close(Err * result)
     // and all open handles and requests have been closed, or it will return UV_EBUSY.
     // After this function returns, the user can free the memory allocated for the loop.
     int const CODE = ::uv_loop_close(Parent::cast<uv_loop_t>());
-    if (CODE != 0) {
-        if (result != nullptr) {
-            if (CODE == UV_EBUSY) {
-                *result = Err::BUSY_ERROR;
-            } else {
-                *result = Err::FAILURE;
-            }
-        } else {
-            __tbag_debug("BaseLoop:close() error [{}] {}", CODE, getUvErrorName(CODE));
-        }
-        return false;
-    }
-
-    if (result != nullptr) {
-        *result = Err::SUCCESS;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(BaseLoop, close, CODE);
 }
 
-bool BaseLoop::run(RunMode mode)
+uerr BaseLoop::run(RunMode mode)
 {
     if (_running.load() == true) {
-        __tbag_error("BaseLoop::run() duplicated calls.");
-        return false;
+        __tbag_error("BaseLoop::run() already working");
+        return uerr::UVPP_EALREADY;
     }
 
     uv_run_mode uv_mode = UV_RUN_DEFAULT;
@@ -119,11 +105,7 @@ bool BaseLoop::run(RunMode mode)
     int const CODE = ::uv_run(Parent::cast<uv_loop_t>(), uv_mode);
     _running.store(false);
 
-    if (CODE != 0) {
-        __tbag_error("BaseLoop::run() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(BaseLoop, run, CODE);
 }
 
 bool BaseLoop::isAlive() const
@@ -193,13 +175,18 @@ void BaseLoop::walk(void * arg)
 void BaseLoop::onWalk(void * native_handle, void * arg)
 {
     if (native_handle == nullptr) {
-        __tbag_error("BaseLoop::onWalk() handle is nullptr.");
-        return;
-    }
-
-    Handle * handle = static_cast<Handle*>(static_cast<uv_handle_t*>(native_handle)->data);
-    if (handle != nullptr) {
-        handle->onWalk(arg);
+        __tbag_error("BaseLoop::onWalk() native_handle is nullptr.");
+    } else if (isDeletedAddress(native_handle)) {
+        __tbag_error("BaseLoop::onWalk() native_handle is deleted.");
+    } else {
+        Handle * handle = static_cast<Handle*>(static_cast<uv_handle_t*>(native_handle)->data);
+        if (handle == nullptr) {
+            __tbag_error("BaseLoop::onWalk() handle is nullptr.");
+        } else if (isDeletedAddress(handle)) {
+            __tbag_error("BaseLoop::onWalk() handle is deleted.");
+        } else {
+            handle->onWalk(arg);
+        }
     }
 }
 
@@ -242,8 +229,7 @@ Loop::Loop()
 
 Loop::~Loop()
 {
-    Err code;
-    if (Parent::close(&code) == false) {
+    if (Parent::close() != uerr::UVPP_SUCCESS) {
         runCloseAllHandles();
 
         if (Parent::isAlive()) {
@@ -251,8 +237,8 @@ Loop::~Loop()
         }
 
         // RE-TRY.
-        if (Parent::close(&code) == false) {
-            __tbag_error("Loop::~Loop() error [{}] {}", static_cast<ErrType>(code), debug::getErrorMessage(code));
+        if (Parent::close() != uerr::UVPP_SUCCESS) {
+            __tbag_error("Loop::~Loop() error.");
         }
     }
 }
@@ -261,9 +247,9 @@ std::size_t Loop::closeAllHandles()
 {
     std::size_t close_count = 0;
 
-    for (auto & handle : _handles) {
-        if (static_cast<bool>(handle) && handle->isInit() && handle->isClosing() == false) {
-            handle->close();
+    for (auto & cursor : _handles) {
+        if (static_cast<bool>(cursor.second) && cursor.second->isInit() && cursor.second->isClosing() == false) {
+            cursor.second->close();
             ++close_count;
         }
     }
@@ -278,54 +264,40 @@ void Loop::runCloseAllHandles()
     }
 }
 
-Loop::WeakHandle Loop::findChildHandle(Handle * handle)
+Loop::WeakHandle Loop::findChildHandle(void * native_handle)
 {
-    for (auto & cursor : _handles) {
-        if (cursor.get() == handle) {
-            return WeakHandle(cursor);
-        }
+    auto itr = _handles.find(NativeHandle(native_handle));
+    if (itr == _handles.end()) {
+        return WeakHandle();
     }
-    return WeakHandle();
+    return WeakHandle(itr->second);
 }
 
-Loop::WeakHandle Loop::insertChildHandle(SharedHandle handle)
+Loop::WeakHandle Loop::findChildHandle(Handle & h)
 {
-    auto itr = _handles.insert(handle);
+    return findChildHandle(h.get());
+}
+
+bool Loop::eraseChildHandle(void * native_handle)
+{
+    return _handles.erase(NativeHandle(native_handle)) == 1U;
+}
+
+bool Loop::eraseChildHandle(Handle & h)
+{
+    return eraseChildHandle(h.get());
+}
+
+Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
+{
+    auto itr = _handles.insert(HandleMap::value_type(NativeHandle(h->get()), h));
     if (itr.second) {
-        __tbag_debug("Loop::insertChildHandle(@{}) success.", static_cast<void*>(handle.get()));
-        return WeakHandle(*(itr.first));
+        __tbag_debug("Loop::insertChildHandle(@{}) success.", static_cast<void*>(h.get()));
+        return WeakHandle(itr.first->second);
     }
 
-    __tbag_error("Loop::insertChildHandle(@{}) failure.", static_cast<void*>(handle.get()));
+    __tbag_debug("Loop::insertChildHandle(@{}) failure.", static_cast<void*>(h.get()));
     return WeakHandle();
-}
-
-Loop::WeakHandle Loop::insertChildHandle(Handle * handle)
-{
-    return insertChildHandle(SharedHandle(handle));
-}
-
-bool Loop::eraseChildHandle(WeakHandle handle)
-{
-    auto shared = handle.lock();
-    if (_handles.erase(shared) == 1) {
-        __tbag_debug("Loop::eraseChildHandle(@{}) success.", static_cast<void*>(shared.get()));
-        return true;
-    }
-
-    __tbag_error("Loop::eraseChildHandle(@{}) failure.", static_cast<void*>(shared.get()));
-    return false;
-}
-
-bool Loop::eraseChildHandle(Handle * handle)
-{
-    auto weak = findChildHandle(handle);
-    if (auto shared = weak.lock()) {
-        return eraseChildHandle(weak);
-    }
-
-    __tbag_error("Loop::eraseChildHandle(@{}) not found handle.", static_cast<void*>(handle));
-    return false;
 }
 
 void Loop::forceClear()
@@ -333,6 +305,10 @@ void Loop::forceClear()
     runCloseAllHandles();
     _handles.clear();
 }
+
+// --------------
+// Event methods.
+// --------------
 
 void Loop::onClosing(Handle * handle)
 {

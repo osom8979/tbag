@@ -73,7 +73,7 @@ public:
 
         virtual void onClose() override
         {
-            loop.atLoop().eraseChildHandle(this);
+            loop.atLoop().eraseChildHandle(*this);
         }
     };
 
@@ -102,7 +102,7 @@ public:
 
         virtual void onClose() override
         {
-            loop.atLoop().eraseChildHandle(this);
+            loop.atLoop().eraseChildHandle(*this);
         }
     };
 
