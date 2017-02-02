@@ -95,16 +95,13 @@ using ufd   = int;
     TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX)
 #endif
 
-/** POD type of UvType. */
-typedef int UvPodType;
-
 /**
  * Table of libuv types.
  *
  * @author zer0
  * @date   2016-12-07
  */
-enum class UvType : UvPodType
+enum class UvType : int
 {
     __START_NUMBER__ = -1,
 #define _TBAG_XX(name, type) name,
@@ -114,11 +111,11 @@ enum class UvType : UvPodType
 };
 
 // @formatter:off
-#define _TBAG_XX(name, type) name = static_cast<UvPodType>(UvType::name),
+#define _TBAG_XX(name, type) name = static_cast<int>(UvType::name),
 #define _TBAG_NX(name, type)
-enum class UvHandleType  : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) };
-enum class UvRequestType : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) };
-enum class UvEtcType     : UvPodType { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) };
+enum class UvHandleType  : int { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) };
+enum class UvRequestType : int { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) };
+enum class UvEtcType     : int { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) };
 #undef _TBAG_XX
 #undef _TBAG_NX
 // @formatter:on

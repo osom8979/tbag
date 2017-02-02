@@ -28,13 +28,13 @@ Native::Native(UvType t) : TYPE(t), _user(nullptr)
     TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     default:
-        __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<UvPodType>(TYPE));
+        __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE));
         return;
     }
     // @formatter:on
 }
 
-Native::Native(UvPodType type) : Native(static_cast<UvType>(type))
+Native::Native(int type) : Native(static_cast<UvType>(type))
 {
     // EMPTY.
 }

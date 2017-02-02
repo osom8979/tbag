@@ -13,19 +13,19 @@ using namespace libtbag::uvpp;
 
 TEST(NativeTest, TypeSupport)
 {
-    UvPodType const START = static_cast<UvPodType>(UvType::__START_NUMBER__);
-    UvPodType const SIZE  = static_cast<UvPodType>(UvType::__SIZE__);
+    int const START = static_cast<int>(UvType::__START_NUMBER__);
+    int const SIZE  = static_cast<int>(UvType::__SIZE__);
 
     ASSERT_EQ(0, START + 1);
 
     int user_data = 100;
-    for (UvPodType index = 0; index < SIZE; ++index) {
+    for (int index = 0; index < SIZE; ++index) {
         Native native(index);
 
         ASSERT_NE(nullptr, native.get());
         ASSERT_TRUE(static_cast<bool>(native));
-        ASSERT_LT(START, static_cast<UvPodType>(native.getType()));
-        ASSERT_GT(SIZE, static_cast<UvPodType>(native.getType()));
+        ASSERT_LT(START, static_cast<int>(native.getType()));
+        ASSERT_GT(SIZE, static_cast<int>(native.getType()));
 
         native.setUserData(&user_data);
         ASSERT_EQ(&user_data, native.getUserData());

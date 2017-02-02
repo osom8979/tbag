@@ -45,7 +45,7 @@ private:
 
 public:
     explicit Native(UvType type);
-    explicit Native(UvPodType type);
+    explicit Native(int type);
     virtual ~Native();
 
 public:
