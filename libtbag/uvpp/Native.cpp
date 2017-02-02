@@ -24,6 +24,7 @@ Native::Native(UvType t) : TYPE(t), _user(nullptr)
         case UvType::name:                      \
             ptr = ::malloc(sizeof(type));       \
             ::memset(ptr, 0x00, sizeof(type));  \
+            return;
     TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     default:

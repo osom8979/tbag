@@ -32,6 +32,7 @@ namespace uvpp {
  * @author zer0
  * @date   2016-12-17
  * @date   2016-12-27 (Move package: libtbag/util -> libtbag/uv)
+ * @date   2017-02-01 (Move package: libtbag/uv -> libtbag/uvpp)
  *
  * @remarks
  *  Reference counting: @n
