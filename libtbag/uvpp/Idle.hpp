@@ -63,13 +63,13 @@ public:
 
 public:
     /** Initialize the handle. */
-    bool init(Loop & loop);
+    uerr init(Loop & loop);
 
     /** Start the handle with the given callback. */
-    bool start();
+    uerr start();
 
     /** Stop the handle, the callback will no longer be called. */
-    bool stop();
+    uerr stop();
 
 // Event methods.
 public:

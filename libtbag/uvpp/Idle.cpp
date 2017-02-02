@@ -26,10 +26,12 @@ static void __global_uv_idle_cb__(uv_idle_t * handle)
 {
     Idle * h = static_cast<Idle*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_idle_cb__() handle data is nullptr.");
-        return;
+        __tbag_error("__global_uv_idle_cb__() handle.data is nullptr.");
+    } else if (isDeletedAddress(h)) {
+        __tbag_error("__global_uv_idle_cb__() handle.data is deleted.");
+    } else {
+        h->onIdle();
     }
-    h->onIdle();
 }
 
 // --------------------
@@ -43,7 +45,7 @@ Idle::Idle() : Handle(uhandle::IDLE)
 
 Idle::Idle(Loop & loop) : Idle()
 {
-    if (init(loop) == false) {
+    if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -53,34 +55,22 @@ Idle::~Idle()
     // EMPTY.
 }
 
-bool Idle::init(Loop & loop)
+uerr Idle::init(Loop & loop)
 {
     int const CODE = ::uv_idle_init(loop.cast<uv_loop_t>(), Parent::cast<uv_idle_t>());
-    if (CODE != 0) {
-        __tbag_error("Idle::init() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Idle, init, CODE);
 }
 
-bool Idle::start()
+uerr Idle::start()
 {
     int const CODE = ::uv_idle_start(Parent::cast<uv_idle_t>(), __global_uv_idle_cb__);
-    if (CODE != 0) {
-        __tbag_error("Idle::start() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Idle, start, CODE);
 }
 
-bool Idle::stop()
+uerr Idle::stop()
 {
     int const CODE = ::uv_idle_stop(Parent::cast<uv_idle_t>());
-    if (CODE != 0) {
-        __tbag_error("Idle::start() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Idle, stop, CODE);
 }
 
 // --------------
