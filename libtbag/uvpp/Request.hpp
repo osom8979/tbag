@@ -58,17 +58,18 @@ public:
      * @remarks
      *  Fails if the request is executing or has finished executing.
      */
-    bool cancel();
+    uerr cancel();
 
     /** Returns the size of the given request type. */
     std::size_t getNativeSize() const TBAG_NOEXCEPT;
 };
 
 #ifndef _TBAG_UV_REQUEST_EX
-#define _TBAG_UV_REQUEST_EX(type, name)                   \
-    struct name##Request : public Request {               \
-        name##Request() : Request(ureq::type) { } \
-        ~name##Request() { }                              \
+#define _TBAG_UV_REQUEST_EX(type, name)         \
+    struct name##Request : public Request {     \
+        name##Request(Handle * owner = nullptr) \
+            : Request(ureq::type, owner) { }    \
+        ~name##Request() { }                    \
     }
 #endif
 

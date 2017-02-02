@@ -30,7 +30,7 @@ Request::~Request()
     // EMPTY.
 }
 
-bool Request::cancel()
+uerr Request::cancel()
 {
     // Returns 0 on success, or an error code < 0 on failure.
     //
@@ -45,11 +45,7 @@ bool Request::cancel()
     //  - A uv_work_t, uv_getaddrinfo_t or c:type:uv_getnameinfo_t request
     //    has its callback invoked with status == UV_ECANCELED.
     int const CODE = ::uv_cancel(Parent::cast<uv_req_t>());
-    if (CODE != 0) {
-        __tbag_error("Request::cancel() error [{}].", CODE);
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Request, cancel, CODE);
 }
 
 std::size_t Request::getNativeSize() const TBAG_NOEXCEPT
