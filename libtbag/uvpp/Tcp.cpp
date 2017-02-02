@@ -32,16 +32,19 @@ static void __global_uv_connect_cb__(uv_connect_t * request, int status)
 
     ConnectRequest * req = static_cast<ConnectRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_connect_cb__() request data is nullptr.");
-        return;
+        __tbag_error("__global_uv_connect_cb__() request.data is nullptr.");
+    } else if (isDeletedAddress(req)) {
+        __tbag_error("__global_uv_connect_cb__() request.data is deleted.");
+    } else {
+        Tcp * s = static_cast<Tcp*>(req->getOwner());
+        if (s == nullptr) {
+            __tbag_error("__global_uv_connect_cb__() request.data.owner is nullptr.");
+        } else if (isDeletedAddress(s)) {
+            __tbag_error("__global_uv_connect_cb__() request.data.owner is deleted.");
+        } else {
+            s->onConnect(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
+        }
     }
-
-    Tcp * s = static_cast<Tcp*>(req->getOwner());
-    if (s == nullptr) {
-        __tbag_error("__global_uv_connect_cb__() request owner is nullptr.");
-        return;
-    }
-    s->onConnect(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 // -------------------
@@ -55,7 +58,7 @@ Tcp::Tcp() : Stream(uhandle::TCP)
 
 Tcp::Tcp(Loop & loop) : Tcp()
 {
-    if (init(loop) == false) {
+    if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -65,38 +68,26 @@ Tcp::~Tcp()
     // EMPTY.
 }
 
-bool Tcp::init(Loop & loop)
+uerr Tcp::init(Loop & loop)
 {
     int const CODE = ::uv_tcp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tcp_t>());
-    if (CODE != 0) {
-        __tbag_error("Tcp::init() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tcp, init, CODE);
 }
 
-bool Tcp::setNodelay(bool enable)
+uerr Tcp::setNodelay(bool enable)
 {
     int const CODE = ::uv_tcp_nodelay(Parent::cast<uv_tcp_t>(), enable ? 1 : 0);
-    if (CODE != 0) {
-        __tbag_error("Tcp::setNodelay() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tcp, setNodelay, CODE);
 }
 
-bool Tcp::keepAlive(bool enable, unsigned int delay)
+uerr Tcp::keepAlive(bool enable, unsigned int delay)
 {
     // delay is the initial delay in seconds, ignored when enable is zero.
     int const CODE = ::uv_tcp_keepalive(Parent::cast<uv_tcp_t>(), enable ? 1 : 0, delay);
-    if (CODE != 0) {
-        __tbag_error("Tcp::keepAlive() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tcp, keepAlive, CODE);
 }
 
-bool Tcp::acceptsSimultaneous(int enable)
+uerr Tcp::acceptsSimultaneous(int enable)
 {
     // Enable/Disable simultaneous asynchronous accept requests that
     // are queued by the operating system when listening for new TCP connections.
@@ -107,14 +98,10 @@ bool Tcp::acceptsSimultaneous(int enable)
     // load distribution in multi-process setups.
 
     int const CODE = ::uv_tcp_simultaneous_accepts(Parent::cast<uv_tcp_t>(), enable ? 1 : 0);
-    if (CODE != 0) {
-        __tbag_error("Tcp::acceptsSimultaneous() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tcp, acceptsSimultaneous, CODE);
 }
 
-bool Tcp::bind(sockaddr const * address, unsigned int flags)
+uerr Tcp::bind(sockaddr const * address, unsigned int flags)
 {
     // addr should point to an initialized struct sockaddr_in or struct sockaddr_in6.
     // When the port is already taken, you can expect to see an UV_EADDRINUSE error
@@ -126,11 +113,7 @@ bool Tcp::bind(sockaddr const * address, unsigned int flags)
     // is disabled and only IPv6 is used.
 
     int const CODE = ::uv_tcp_bind(Parent::cast<uv_tcp_t>(), address, flags);
-    if (CODE != 0) {
-        __tbag_error("Tcp::bind() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tcp, bind, CODE);
 }
 
 std::string Tcp::getSockName()
@@ -177,7 +160,7 @@ std::string Tcp::getPeerName()
     return std::string();
 }
 
-bool Tcp::connect(ConnectRequest & request, sockaddr const * address)
+uerr Tcp::connect(ConnectRequest & request, sockaddr const * address)
 {
     request.setOwner(this); // IMPORTANT!!
 
@@ -191,11 +174,7 @@ bool Tcp::connect(ConnectRequest & request, sockaddr const * address)
                                       Parent::cast<uv_tcp_t>(),
                                       address,
                                       __global_uv_connect_cb__);
-    if (CODE != 0) {
-        __tbag_error("Tcp::connect() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tcp, connect, CODE);
 }
 
 // --------------
@@ -239,24 +218,24 @@ std::string Tcp::getIpName(sockaddr_in6 const * address)
     return std::string();
 }
 
-bool Tcp::initAddress(std::string const & ip, int port, sockaddr_in * addr)
+uerr Tcp::initAddress(std::string const & ip, int port, sockaddr_in * addr)
 {
     int const CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
         __tbag_error("Tcp::initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
-        return false;
+        return ::libtbag::uvpp::getUvppErrorCode(CODE);
     }
-    return true;
+    return uerr::UVPP_SUCCESS;
 }
 
-bool Tcp::initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
+uerr Tcp::initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
 {
     int const CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
         __tbag_error("Tcp::initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
-        return false;
+        return ::libtbag::uvpp::getUvppErrorCode(CODE);
     }
-    return true;
+    return uerr::UVPP_SUCCESS;
 }
 
 bool Tcp::isIpv4(std::string const & ip)

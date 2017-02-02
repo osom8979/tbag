@@ -53,19 +53,19 @@ public:
 
 public:
     /** Initialize the handle. No socket is created as of yet. */
-    bool init(Loop & loop);
+    uerr init(Loop & loop);
 
     /** Enable TCP_NODELAY, which disables Nagle's algorithm. */
-    bool setNodelay(bool enable = true);
+    uerr setNodelay(bool enable = true);
 
     /** Enable/Disable TCP keep-alive. */
-    bool keepAlive(bool enable, unsigned int delay);
+    uerr keepAlive(bool enable, unsigned int delay);
 
     /** Enable/Disable simultaneous asynchronous accept requests. */
-    bool acceptsSimultaneous(int enable = true);
+    uerr acceptsSimultaneous(int enable = true);
 
     /** Bind the handle to an address and port. */
-    bool bind(sockaddr const * address, unsigned int flags = 0);
+    uerr bind(sockaddr const * address, unsigned int flags = 0);
 
     /** Get the current address to which the handle is bound. */
     std::string getSockName();
@@ -74,7 +74,7 @@ public:
     std::string getPeerName();
 
     /** Establish an IPv4 or IPv6 TCP connection. */
-    bool connect(ConnectRequest & request, sockaddr const * address);
+    uerr connect(ConnectRequest & request, sockaddr const * address);
 
 // Event methods.
 public:
@@ -86,8 +86,8 @@ public:
     static std::string getIpName(sockaddr_in  const * address);
     static std::string getIpName(sockaddr_in6 const * address);
 
-    static bool initAddress(std::string const & ip, int port, sockaddr_in * addr);
-    static bool initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
+    static uerr initAddress(std::string const & ip, int port, sockaddr_in * addr);
+    static uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
 
     static bool isIpv4(std::string const & ip);
 };

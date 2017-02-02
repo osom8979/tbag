@@ -97,11 +97,11 @@ bool TcpServer::initIpv4(std::string const & ip, int port)
     }
 
     sockaddr_in addr;
-    if (TCP->initAddress(ip, port, &addr) == false) {
+    if (TCP->initAddress(ip, port, &addr) != uvpp::uerr::UVPP_SUCCESS) {
         return false;
     }
 
-    if (TCP->bind((sockaddr const *)&addr) == false) {
+    if (TCP->bind((sockaddr const *)&addr) != uvpp::uerr::UVPP_SUCCESS) {
         return false;
     }
 
