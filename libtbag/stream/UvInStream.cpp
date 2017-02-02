@@ -29,7 +29,7 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(UvInStream);
 // UvInStream implementation.
 // --------------------------
 
-UvInStream::UvInStream(UvHandleType type) : uvpp::Handle(type), _write(uvpp::UvType::WRITE), _on_write_cb(nullptr)
+UvInStream::UvInStream(UvHandleType type) : uvpp::Handle(type), _write(uvpp::utype::WRITE), _on_write_cb(nullptr)
 {
     TBAG_UV_EVENT_DEFAULT_REGISTER(_write.get(), this);
 }

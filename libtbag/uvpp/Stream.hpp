@@ -44,7 +44,7 @@ public:
     using Parent = Handle;
 
 public:
-    Stream(UvHandleType type);
+    Stream(uhandle type);
     virtual ~Stream();
 
 public:

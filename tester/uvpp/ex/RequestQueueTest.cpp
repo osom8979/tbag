@@ -15,7 +15,7 @@ using namespace libtbag::uvpp::ex;
 
 TEST(RequestQueueTest, Default)
 {
-    Handle handle(UvHandleType::IDLE);
+    Handle handle(uhandle::IDLE);
     WriteQueue req;
 
     ASSERT_TRUE(req.getPrepareEmpty());

@@ -188,9 +188,9 @@ TBAG_UV_EVENT_DEFAULT_IMPLEMENT_CLOSE(Process);
 // -----------------------------
 
 Process::Process() : _process(new ProcPimpl()),
-                     _in(uvpp::UvHandleType::PIPE),
-                     _out(uvpp::UvHandleType::PIPE),
-                     _err(uvpp::UvHandleType::PIPE)
+                     _in(uvpp::uhandle::PIPE),
+                     _out(uvpp::uhandle::PIPE),
+                     _err(uvpp::uhandle::PIPE)
 {
     TBAG_UV_EVENT_DEFAULT_REGISTER(_process->handle(), this);
 }

@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 namespace ex   {
 
-RequestQueue::RequestQueue(UvRequestType type) : _type(type)
+RequestQueue::RequestQueue(ureq type) : _type(type)
 {
     // EMPTY.
 }

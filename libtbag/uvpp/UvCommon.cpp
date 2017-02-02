@@ -19,16 +19,16 @@ namespace uvpp {
 // @formatter:off
 #define _TBAG_XX(name, type) case UvType::name: return true;
 #define _TBAG_NX(name, type)
-bool isHandle (UvType type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) default: return false; } }
-bool isRequest(UvType type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) default: return false; } }
-bool isEtc    (UvType type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) default: return false; } }
+bool isHandle (utype type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) default: return false; } }
+bool isRequest(utype type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX) default: return false; } }
+bool isEtc    (utype type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) default: return false; } }
 #undef _TBAG_XX
 #undef _TBAG_NX
 // @formatter:on
 
-bool isStream(UvType type)
+bool isStream(utype type)
 {
-    return (type == UvType::TCP || type == UvType::PIPE || type == UvType::TTY);
+    return (type == utype::TCP || type == utype::PIPE || type == utype::TTY);
 }
 
 // ------------------

@@ -37,7 +37,7 @@ namespace stream {
 class TBAG_API UvInStream : public uvpp::Handle
 {
 public:
-    using UvHandleType = uvpp::UvHandleType;
+    using UvHandleType = uvpp::uhandle;
     using UvNative = uvpp::Native;
 
 public:

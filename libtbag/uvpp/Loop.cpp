@@ -43,7 +43,7 @@ static void __global_uv_walk_cb__(uv_handle_t * handle, void * arg)
 // BaseLoop implementation.
 // ------------------------
 
-BaseLoop::BaseLoop() : Native(UvType::LOOP), _running(false)
+BaseLoop::BaseLoop() : Native(utype::LOOP), _running(false)
 {
     // Initializes the given uv_loop_t structure.
     int const CODE = ::uv_loop_init(Parent::cast<uv_loop_t>());

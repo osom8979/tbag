@@ -16,7 +16,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
-Native::Native(UvType t) : TYPE(t), _user(nullptr)
+Native::Native(utype t) : TYPE(t), _user(nullptr)
 {
     // @formatter:off
     switch (TYPE) {
@@ -34,7 +34,7 @@ Native::Native(UvType t) : TYPE(t), _user(nullptr)
     // @formatter:on
 }
 
-Native::Native(int type) : Native(static_cast<UvType>(type))
+Native::Native(int type) : Native(static_cast<utype>(type))
 {
     // EMPTY.
 }

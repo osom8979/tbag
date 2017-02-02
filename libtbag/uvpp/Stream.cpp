@@ -130,7 +130,7 @@ static void __global_uv_write_cb__(uv_write_t * request, int status)
 // Stream implementation.
 // ----------------------
 
-Stream::Stream(UvHandleType type) : Handle(type)
+Stream::Stream(uhandle type) : Handle(type)
 {
     if (isStream() == false) {
         __tbag_error("Stream::Stream({}) type is not stream type", static_cast<int>(type));

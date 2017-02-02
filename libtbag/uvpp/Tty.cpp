@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
-Tty::Tty() : Stream(UvHandleType::TTY)
+Tty::Tty() : Stream(uhandle::TTY)
 {
     // EMPTY.
 }

@@ -16,7 +16,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
-Request::Request(UvRequestType type, Handle * owner) : Native(static_cast<UvType>(type)), _owner(owner)
+Request::Request(ureq type, Handle * owner) : Native(static_cast<utype>(type)), _owner(owner)
 {
     if (isRequest() == false) {
         __tbag_error("Request::Request({}) type is not request type.", static_cast<int>(type));

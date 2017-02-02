@@ -52,7 +52,7 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
 // Handle implementation.
 // ----------------------
 
-Handle::Handle(UvHandleType type) : Native(static_cast<UvType>(type))
+Handle::Handle(uhandle type) : Native(static_cast<utype>(type))
 {
     if (isHandle() == false) {
         __tbag_error("Handle::Handle({}) type is not handle type", static_cast<int>(type));

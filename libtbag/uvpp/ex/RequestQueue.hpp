@@ -57,7 +57,7 @@ public:
     using Guard = std::lock_guard<Mutex>;
 
 private:
-    UvRequestType _type;
+    ureq _type;
 
 private:
     PrepareQueue _prepare;
@@ -67,7 +67,7 @@ private:
     mutable Mutex _mutex;
 
 public:
-    RequestQueue(UvRequestType type);
+    RequestQueue(ureq type);
     virtual ~RequestQueue();
 
 public:
@@ -105,7 +105,7 @@ public:
 #define _TBAG_UV_REQUEST_QUEUE_EX(type, name)       \
     struct name##Queue : public RequestQueue {      \
         name##Queue()                               \
-                : RequestQueue(UvRequestType::type) \
+                : RequestQueue(ureq::type) \
         { /* EMPTY. */ }                            \
         ~name##Queue() { /* EMPTY. */ }             \
     }

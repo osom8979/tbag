@@ -40,16 +40,16 @@ public:
     using Parent = container::Pointer<void>;
 
 private:
-    UvType const TYPE;
+    utype const TYPE;
     void * _user;
 
 public:
-    explicit Native(UvType type);
+    explicit Native(utype type);
     explicit Native(int type);
     virtual ~Native();
 
 public:
-    inline UvType getType() const TBAG_NOEXCEPT
+    inline utype getType() const TBAG_NOEXCEPT
     { return TYPE; }
 
 public:

@@ -37,7 +37,7 @@ namespace stream {
 class TBAG_API UvOutStream : public uvpp::Handle
 {
 public:
-    using UvHandleType = uvpp::UvHandleType;
+    using UvHandleType = uvpp::uhandle;
     using Buffer = std::vector<char>;
 
 public:

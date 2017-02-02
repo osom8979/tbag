@@ -36,7 +36,7 @@ static void __global_uv_timer_cb__(uv_timer_t * handle)
 // Timer implementation.
 // ---------------------
 
-Timer::Timer() : Stream(UvHandleType::TIMER)
+Timer::Timer() : Stream(uhandle::TIMER)
 {
     // EMPTY.
 }

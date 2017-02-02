@@ -13,8 +13,8 @@ using namespace libtbag::uvpp;
 
 TEST(NativeTest, TypeSupport)
 {
-    int const START = static_cast<int>(UvType::__START_NUMBER__);
-    int const SIZE  = static_cast<int>(UvType::__SIZE__);
+    int const START = static_cast<int>(utype::__START_NUMBER__);
+    int const SIZE  = static_cast<int>(utype::__SIZE__);
 
     ASSERT_EQ(0, START + 1);
 

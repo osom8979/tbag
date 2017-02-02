@@ -42,7 +42,7 @@ private:
     Handle * _owner;
 
 public:
-    Request(UvRequestType type, Handle * owner = nullptr);
+    Request(ureq type, Handle * owner = nullptr);
     virtual ~Request();
 
 public:
@@ -67,7 +67,7 @@ public:
 #ifndef _TBAG_UV_REQUEST_EX
 #define _TBAG_UV_REQUEST_EX(type, name)                   \
     struct name##Request : public Request {               \
-        name##Request() : Request(UvRequestType::type) { } \
+        name##Request() : Request(ureq::type) { } \
         ~name##Request() { }                              \
     }
 #endif

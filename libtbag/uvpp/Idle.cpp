@@ -36,7 +36,7 @@ static void __global_uv_idle_cb__(uv_idle_t * handle)
 // Idle implementation.
 // --------------------
 
-Idle::Idle() : Handle(UvHandleType::IDLE)
+Idle::Idle() : Handle(uhandle::IDLE)
 {
     // EMPTY.
 }

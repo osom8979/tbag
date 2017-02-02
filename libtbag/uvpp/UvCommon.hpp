@@ -120,6 +120,12 @@ enum class UvEtcType     : int { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX
 #undef _TBAG_NX
 // @formatter:on
 
+/** Short name of uv types. */
+typedef UvType        utype;
+typedef UvHandleType  uhandle;
+typedef UvRequestType ureq;
+typedef UvEtcType     uetc;
+
 #if defined(_UINTPTR_T)
 using AddressType = std::uintptr_t;
 #else
@@ -151,9 +157,9 @@ template <typename T>
 inline bool isDeletedAddress(T const * value) TBAG_NOEXCEPT
 { return DEBUG_UV_DELETED_ADDRESS_VALUE == reinterpret_cast<AddressType>(value); }
 
-TBAG_API bool isHandle (UvType type);
-TBAG_API bool isRequest(UvType type);
-TBAG_API bool isEtc    (UvType type);
+TBAG_API bool isHandle (utype type);
+TBAG_API bool isRequest(utype type);
+TBAG_API bool isEtc    (utype type);
 
 /**
  * @remarks
@@ -161,7 +167,7 @@ TBAG_API bool isEtc    (UvType type);
  *  - uv_stream is an abstract class.
  *  - uv_stream_t is the parent class of uv_tcp_t, uv_pipe_t and uv_tty_t.
  */
-TBAG_API bool isStream(UvType type);
+TBAG_API bool isStream(utype type);
 
 // ------------------
 // Debugging methods.

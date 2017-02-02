@@ -55,7 +55,7 @@ public:
     using Parent = Native;
 
 public:
-    Handle(UvHandleType type);
+    Handle(uhandle type);
     virtual ~Handle();
 
 public:

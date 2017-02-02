@@ -48,7 +48,7 @@ static void __global_uv_connect_cb__(uv_connect_t * request, int status)
 // Tcp implementation.
 // -------------------
 
-Tcp::Tcp() : Stream(UvHandleType::TCP)
+Tcp::Tcp() : Stream(uhandle::TCP)
 {
     // EMPTY.
 }

@@ -108,7 +108,7 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
 // Stream implementation.
 // ----------------------
 
-Udp::Udp() : Handle(UvHandleType::UDP)
+Udp::Udp() : Handle(uhandle::UDP)
 {
     // EMPTY.
 }
