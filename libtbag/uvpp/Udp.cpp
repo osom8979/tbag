@@ -30,15 +30,18 @@ static void __global_uv_udp_send_cb__(uv_udp_send_t * request, int status)
     UdpSendRequest * req = static_cast<UdpSendRequest*>(request->data);
     if (req == nullptr) {
         __tbag_error("__global_uv_udp_send_cb__() request.data is nullptr.");
-        return;
+    } else if (isDeletedAddress(req)) {
+        __tbag_error("__global_uv_udp_send_cb__() request.data is deleted.");
+    } else {
+        Udp * s = static_cast<Udp*>(req->getOwner());
+        if (s == nullptr) {
+            __tbag_error("__global_uv_udp_send_cb__() request.data.owner is nullptr.");
+        } else if (isDeletedAddress(s)) {
+            __tbag_error("__global_uv_udp_send_cb__() request.data.owner is deleted.");
+        } else {
+            s->onSend(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
+        }
     }
-
-    Udp * s = static_cast<Udp*>(req->getOwner());
-    if (s == nullptr) {
-        __tbag_error("__global_uv_udp_send_cb__() request.owner is nullptr.");
-        return;
-    }
-    s->onSend(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 static void __global_uv_udp_alloc_cb__(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf)
@@ -55,12 +58,13 @@ static void __global_uv_udp_alloc_cb__(uv_handle_t * handle, size_t suggested_si
     Udp * u = static_cast<Udp*>(handle->data);
     if (u == nullptr) {
         __tbag_error("__global_uv_udp_alloc_cb__() handle.data is nullptr.");
-        return;
+    } else if (isDeletedAddress(u)) {
+        __tbag_error("__global_uv_udp_alloc_cb__() handle.data is deleted.");
+    } else {
+        auto result_buffer = u->onAlloc(suggested_size);
+        buf->base = result_buffer.buffer;
+        buf->len  = result_buffer.size;
     }
-
-    auto result_buffer = u->onAlloc(suggested_size);
-    buf->base = result_buffer.buffer;
-    buf->len  = result_buffer.size;
 }
 
 static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
@@ -89,19 +93,20 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
     Udp * u = static_cast<Udp*>(handle->data);
     if (u == nullptr) {
         __tbag_error("__global_uv_udp_recv_cb__() handle.data is nullptr.");
-        return;
-    }
-
-    Err code;
-    if (nread == UV_EOF) {
-        code = Err::END_OF_FILE;
-    } else if (nread >= 0){
-        code = Err::SUCCESS;
+    } else if (isDeletedAddress(u)) {
+        __tbag_error("__global_uv_udp_recv_cb__() handle.data is deleted.");
     } else {
-        __tbag_error("__global_uv_udp_recv_cb__() error [{}] {}.", nread, getUvErrorName(nread));
-        code = Err::FAILURE;
+        Err code;
+        if (nread == UV_EOF) {
+            code = Err::END_OF_FILE;
+        } else if (nread >= 0){
+            code = Err::SUCCESS;
+        } else {
+            __tbag_error("__global_uv_udp_recv_cb__() error [{}] {}.", nread, getUvErrorName(nread));
+            code = Err::FAILURE;
+        }
+        u->onRead(code, buf->base, static_cast<std::size_t>(nread), addr, flags);
     }
-    u->onRead(code, buf->base, static_cast<std::size_t>(nread), addr, flags);
 }
 
 // ----------------------
@@ -115,7 +120,7 @@ Udp::Udp() : Handle(uhandle::UDP)
 
 Udp::Udp(Loop & loop) : Udp()
 {
-    if (init(loop) == false) {
+    if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -136,18 +141,14 @@ std::size_t Udp::getSendQueueCount() const TBAG_NOEXCEPT
     return Parent::cast<uv_udp_t>()->send_queue_count;
 }
 
-bool Udp::init(Loop & loop)
+uerr Udp::init(Loop & loop)
 {
     // The actual socket is created lazily. Returns 0 on success.
     int const CODE = ::uv_udp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_udp_t>());
-    if (CODE != 0) {
-        __tbag_debug("Udp::init() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, init, CODE);
 }
 
-bool Udp::open(usock sock)
+uerr Udp::open(usock sock)
 {
     // Unix only: The only requirement of the sock argument is that it follows
     // the datagram contract (works in unconnected mode, supports sendmsg()/recvmsg(), etc).
@@ -160,14 +161,10 @@ bool Udp::open(usock sock)
     // but it's required that it represents a valid datagram socket.
 
     int const CODE  = ::uv_udp_open(Parent::cast<uv_udp_t>(), static_cast<uv_os_sock_t>(sock));
-    if (CODE != 0) {
-        __tbag_debug("Udp::open() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, open, CODE);
 }
 
-bool Udp::bind(sockaddr const * addr, unsigned int flags)
+uerr Udp::bind(sockaddr const * addr, unsigned int flags)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -179,14 +176,10 @@ bool Udp::bind(sockaddr const * addr, unsigned int flags)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_bind(Parent::cast<uv_udp_t>(), addr, flags);
-    if (CODE != 0) {
-        __tbag_debug("Udp::bind() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, bind, CODE);
 }
 
-bool Udp::getSockName(sockaddr * name, int * namelen)
+uerr Udp::getSockName(sockaddr * name, int * namelen)
 {
     // Parameters:
     //  handle  - UDP handle. Should have been initialized with uv_udp_init() and bound.
@@ -198,14 +191,10 @@ bool Udp::getSockName(sockaddr * name, int * namelen)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_getsockname(Parent::cast<uv_udp_t>(), name, namelen);
-    if (CODE != 0) {
-        __tbag_debug("Udp::getSockName() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, getSockName, CODE);
 }
 
-bool Udp::setMembership(char const * multicast_addr, char const * interface_addr, Membership membership)
+uerr Udp::setMembership(char const * multicast_addr, char const * interface_addr, Membership membership)
 {
     uv_membership native_membership;
     if (membership == Membership::LEAVE_GROUP) {
@@ -224,14 +213,10 @@ bool Udp::setMembership(char const * multicast_addr, char const * interface_addr
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_membership(Parent::cast<uv_udp_t>(), multicast_addr, interface_addr, native_membership);
-    if (CODE != 0) {
-        __tbag_debug("Udp::getSockName() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, setMembership, CODE);
 }
 
-bool Udp::setMulticastLoop(bool on)
+uerr Udp::setMulticastLoop(bool on)
 {
     // Makes multicast packets loop back to local sockets.
     //
@@ -242,14 +227,10 @@ bool Udp::setMulticastLoop(bool on)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_loop(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
-    if (CODE != 0) {
-        __tbag_debug("Udp::setMulticastLoop() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, setMulticastLoop, CODE);
 }
 
-bool Udp::setMulticastTtl(int ttl)
+uerr Udp::setMulticastTtl(int ttl)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -258,14 +239,10 @@ bool Udp::setMulticastTtl(int ttl)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_ttl(Parent::cast<uv_udp_t>(), ttl);
-    if (CODE != 0) {
-        __tbag_debug("Udp::setMulticastTtl() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, setMulticastTtl, CODE);
 }
 
-bool Udp::setMulticastInterface(char const * interface_addr)
+uerr Udp::setMulticastInterface(char const * interface_addr)
 {
     // Parameters:
     //  handle         - UDP handle. Should have been initialized with uv_udp_init().
@@ -274,14 +251,10 @@ bool Udp::setMulticastInterface(char const * interface_addr)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_interface(Parent::cast<uv_udp_t>(), interface_addr);
-    if (CODE != 0) {
-        __tbag_debug("Udp::setMulticastInterface() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, setMulticastInterface, CODE);
 }
 
-bool Udp::setBroadcast(bool on)
+uerr Udp::setBroadcast(bool on)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -290,14 +263,10 @@ bool Udp::setBroadcast(bool on)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_broadcast(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
-    if (CODE != 0) {
-        __tbag_debug("Udp::setBroadcast() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, setBroadcast, CODE);
 }
 
-bool Udp::setTtl(int ttl)
+uerr Udp::setTtl(int ttl)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -306,14 +275,10 @@ bool Udp::setTtl(int ttl)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_ttl(Parent::cast<uv_udp_t>(), ttl);
-    if (CODE != 0) {
-        __tbag_debug("Udp::setTtl() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, setTtl, CODE);
 }
 
-bool Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
+uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
 {
     request.setOwner(this); // IMPORTANT!!
 
@@ -343,14 +308,10 @@ bool Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, s
                                    uv_infos.size(),
                                    addr,
                                    __global_uv_udp_send_cb__);
-    if (CODE != 0) {
-        __tbag_debug("Udp::send() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, send, CODE);
 }
 
-bool Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
+uerr Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
@@ -392,7 +353,7 @@ std::size_t Udp::trySend(char const * buffer, std::size_t size, sockaddr const *
     return trySend(&info, 1U, addr, result);
 }
 
-bool Udp::startRecv()
+uerr Udp::startRecv()
 {
     // If the socket has not previously been bound with uv_udp_bind()
     // it is bound to 0.0.0.0 (the "all interfaces" IPv4 address) and a random port number.
@@ -405,25 +366,17 @@ bool Udp::startRecv()
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_recv_start(Parent::cast<uv_udp_t>(), __global_uv_udp_alloc_cb__, __global_uv_udp_recv_cb__);
-    if (CODE != 0) {
-        __tbag_debug("Udp::startRecv() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, startRecv, CODE);
 }
 
-bool Udp::stopRecv()
+uerr Udp::stopRecv()
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
     // Returns:
     //  0 on success, or an error code < 0 on failure.
     int const CODE = ::uv_udp_recv_stop(Parent::cast<uv_udp_t>());
-    if (CODE != 0) {
-        __tbag_debug("Udp::stopRecv() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Udp, stopRecv, CODE);
 }
 
 // --------------

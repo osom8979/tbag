@@ -66,48 +66,48 @@ public:
 
 public:
     // Initialize a new UDP handle. */
-    bool init(Loop & loop);
+    uerr init(Loop & loop);
 
     /** Opens an existing file descriptor or Windows SOCKET as a UDP handle. */
-    bool open(usock sock);
+    uerr open(usock sock);
 
     /** Bind the UDP handle to an IP address and port. */
-    bool bind(sockaddr const * addr, unsigned int flags);
+    uerr bind(sockaddr const * addr, unsigned int flags);
 
     /** Get the local IP and port of the UDP handle. */
-    bool getSockName(sockaddr * name, int * namelen);
+    uerr getSockName(sockaddr * name, int * namelen);
 
     /** Set membership for a multicast address. */
-    bool setMembership(char const * multicast_addr, char const * interface_addr, Membership membership);
+    uerr setMembership(char const * multicast_addr, char const * interface_addr, Membership membership);
 
     /** Set IP multicast loop flag. */
-    bool setMulticastLoop(bool on);
+    uerr setMulticastLoop(bool on);
 
     /** Set the multicast ttl. */
-    bool setMulticastTtl(int ttl);
+    uerr setMulticastTtl(int ttl);
 
     /** Set the multicast interface to send or receive data on. */
-    bool setMulticastInterface(char const * interface_addr);
+    uerr setMulticastInterface(char const * interface_addr);
 
     /** Set broadcast on or off. */
-    bool setBroadcast(bool on);
+    uerr setBroadcast(bool on);
 
     /** Set the time to live. */
-    bool setTtl(int ttl);
+    uerr setTtl(int ttl);
 
     /** Send data over the UDP socket. */
-    bool send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr);
-    bool send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
+    uerr send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr);
+    uerr send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
     /** Same as send(), but won't queue a send request if it can't be completed immediately. */
     std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result = nullptr);
     std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result = nullptr);
 
     /** Prepare for receiving data. */
-    bool startRecv();
+    uerr startRecv();
 
     /** Stop listening for incoming datagrams. */
-    bool stopRecv();
+    uerr stopRecv();
 
 public:
     virtual void onSend(UdpSendRequest & request, Err code);
