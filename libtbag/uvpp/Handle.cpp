@@ -110,7 +110,7 @@ bool Handle::isActive() const TBAG_NOEXCEPT
     // Rule of thumb: if a handle of type uv_foo_t has a uv_foo_start() function,
     // then it’s active from the moment that function is called.
     // Likewise, uv_foo_stop() deactivates the handle again.
-    return ::uv_is_active(Parent::cast<uv_handle_t>());
+    return ::uv_is_active(Parent::cast<uv_handle_t>()) != 0;
 }
 
 bool Handle::isClosing() const TBAG_NOEXCEPT
@@ -179,12 +179,12 @@ void Handle::setRecvBufferSize(int size)
 
 void Handle::onClose()
 {
-    __tbag_debug("Handle::onClose() called.");
+    __tbag_debug("Handle::onClose() @{} called.", static_cast<void*>(this));
 }
 
 void Handle::onWalk(void * arg)
 {
-    __tbag_debug("Handle::onWalk() called.");
+    __tbag_debug("Handle::onWalk() @{} called.", static_cast<void*>(this));
 }
 
 } // namespace uvpp
