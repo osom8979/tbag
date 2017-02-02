@@ -25,7 +25,7 @@ Tty::Tty() : Stream(uhandle::TTY)
 
 Tty::Tty(Loop & loop, ufile fd, bool readable) : Tty()
 {
-    if (init(loop, fd, readable) == false) {
+    if (init(loop, fd, readable) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 
@@ -36,7 +36,7 @@ Tty::Tty(Loop & loop, ufile fd, bool readable) : Tty()
 
 Tty::Tty(Loop & loop, GeneralFile fd) : Tty()
 {
-    if (init(loop, fd) == false) {
+    if (init(loop, fd) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 
@@ -50,7 +50,7 @@ Tty::~Tty()
     // EMPTY.
 }
 
-bool Tty::init(Loop & loop, ufile fd, bool readable)
+uerr Tty::init(Loop & loop, ufile fd, bool readable)
 {
     // readable, specifies if you plan on calling uv_read_start() with this stream.
     // stdin is readable, stdout is not.
@@ -73,19 +73,15 @@ bool Tty::init(Loop & loop, ufile fd, bool readable)
     // that refers to a file returns UV_EINVAL on UNIX.
 
     int const CODE = ::uv_tty_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tty_t>(), fd, readable ? 1 : 0);
-    if (CODE != 0) {
-        __tbag_error("Tty::init() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tty, init, CODE);
 }
 
-bool Tty::init(Loop & loop, GeneralFile fd)
+uerr Tty::init(Loop & loop, GeneralFile fd)
 {
     return init(loop, toFile(fd), fd == GeneralFile::FILE_STDIN);
 }
 
-bool Tty::setMode(TtyMode mode)
+uerr Tty::setMode(TtyMode mode)
 {
     uv_tty_mode_t uv_mode = UV_TTY_MODE_NORMAL;
     // @formatter:off
@@ -101,14 +97,10 @@ bool Tty::setMode(TtyMode mode)
     //
     // Set the TTY using the specified terminal mode.
     int const CODE = ::uv_tty_set_mode(Parent::cast<uv_tty_t>(), uv_mode);
-    if (CODE != 0) {
-        __tbag_error("Tty::setMode() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tty, setMode, CODE);
 }
 
-bool Tty::resetMode()
+uerr Tty::resetMode()
 {
     // To be called when the program exits.
     // Resets TTY settings to default values for the next process to take over.
@@ -116,21 +108,13 @@ bool Tty::resetMode()
     // This function is async signal-safe on Unix platforms but can fail
     // with error code UV_EBUSY if you call it when execution is inside uv_tty_set_mode().
     int const CODE = ::uv_tty_reset_mode();
-    if (CODE != 0) {
-        __tbag_error("Tty::resetMode() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tty, resetMode, CODE);
 }
 
-bool Tty::getWinSize(int * width, int * height)
+uerr Tty::getWinSize(int * width, int * height)
 {
     int const CODE = ::uv_tty_get_winsize(Parent::cast<uv_tty_t>(), width, height);
-    if (CODE != 0) {
-        __tbag_error("Tty::getWinSize() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Tty, getWinSize, CODE);
 }
 
 ufile Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
