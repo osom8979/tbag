@@ -52,6 +52,7 @@ public:
 
 public:
     using binf = uvpp::binf;
+    using uerr = uvpp::uerr;
     using Loop = uvpp::Loop;
 
     using ConnectRequest = uvpp::ConnectRequest;
@@ -91,8 +92,8 @@ public:
 public:
     // @formatter:off
     inline void close    () { return _tcp->close    (); }
-    inline bool startRead() { return _tcp->startRead(); }
-    inline bool stopRead () { return _tcp->stopRead (); }
+    inline uerr startRead() { return _tcp->startRead(); }
+    inline uerr stopRead () { return _tcp->stopRead (); }
 
     inline std::string getSockName() { return _tcp->getSockName(); }
     inline std::string getPeerName() { return _tcp->getPeerName(); }

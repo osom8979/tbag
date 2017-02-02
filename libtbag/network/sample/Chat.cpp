@@ -56,7 +56,7 @@ void ChatServer::onConnection(Err code)
 
         std::cout << "JOIN: " << user->name << "(" << user->ip << ")\n";
 
-        if (shared->startRead() == false) {
+        if (shared->startRead() != uerr::UVPP_SUCCESS) {
             std::cout << "Start read error.\n";
             eraseClient(*shared);
         }

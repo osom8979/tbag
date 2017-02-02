@@ -83,7 +83,7 @@ TcpServer::WeakClient TcpServer::getWeakClient(ClientKey const & client)
 TcpServer::WeakClient TcpServer::createAcceptedClient()
 {
     auto client = createClient();
-    if (atTcp()->accept(*client->atTcp()) && insertClient(client)) {
+    if (atTcp()->accept(*client->atTcp()) == uerr::UVPP_SUCCESS && insertClient(client)) {
         return WeakClient(client);
     }
     return WeakClient();
@@ -105,7 +105,7 @@ bool TcpServer::initIpv4(std::string const & ip, int port)
         return false;
     }
 
-    if (TCP->listen() == false) {
+    if (TCP->listen() != uerr::UVPP_SUCCESS) {
         return false;
     }
 

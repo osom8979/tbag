@@ -62,7 +62,7 @@ void EchoServer::onConnection(Err code)
 
         shared->setUserData(new DatagramAdapter());
 
-        if (shared->startRead() == false) {
+        if (shared->startRead() != uerr::UVPP_SUCCESS) {
             std::cout << "Start read error.\n";
             eraseClient(*shared);
         }

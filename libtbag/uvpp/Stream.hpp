@@ -60,27 +60,27 @@ public:
 
 public:
     /** Enable or disable blocking mode for a stream. */
-    bool setBlocking(bool enable = true);
+    uerr setBlocking(bool enable = true);
 
 public:
     /** Shutdown the outgoing (write) side of a duplex stream. */
-    bool shutdown(ShutdownRequest & request);
+    uerr shutdown(ShutdownRequest & request);
 
     /** Start listening for incoming connections. */
-    bool listen(int backlog = BACKLOG_LIMIT);
+    uerr listen(int backlog = BACKLOG_LIMIT);
 
     /** This call is used in conjunction with uv_listen() to accept incoming connections. */
-    bool accept(Stream & client);
+    uerr accept(Stream & client);
 
     /** Read data from an incoming stream. */
-    bool startRead();
+    uerr startRead();
 
     /** Stop reading data from the stream. */
-    bool stopRead();
+    uerr stopRead();
 
     /** Write data to stream. Buffers are written in order. */
-    bool write(WriteRequest & request, binf * infos, std::size_t infos_size);
-    bool write(WriteRequest & request, char const * buffer, std::size_t size);
+    uerr write(WriteRequest & request, binf * infos, std::size_t infos_size);
+    uerr write(WriteRequest & request, char const * buffer, std::size_t size);
 
     /**
      * Same as uv_write(), but won’t queue a write request if it can’t be completed immediately.

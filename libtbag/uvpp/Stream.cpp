@@ -28,16 +28,19 @@ static void __global_uv_shutdown_cb__(uv_shutdown_t * request, int status)
 
     ShutdownRequest * req = static_cast<ShutdownRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_shutdown_cb__() request data is nullptr.");
-        return;
+        __tbag_error("__global_uv_shutdown_cb__() request.data is nullptr.");
+    } else if (isDeletedAddress(req)) {
+        __tbag_error("__global_uv_shutdown_cb__() request.data is deleted.");
+    } else {
+        Stream * s = static_cast<Stream*>(req->getOwner());
+        if (s == nullptr) {
+            __tbag_error("__global_uv_shutdown_cb__() request.data.owner is nullptr.");
+        } else if (isDeletedAddress(s)) {
+            __tbag_error("__global_uv_shutdown_cb__() request.data.owner is deleted.");
+        } else {
+            s->onShutdown(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
+        }
     }
-
-    Stream * s = static_cast<Stream*>(req->getOwner());
-    if (s == nullptr) {
-        __tbag_error("__global_uv_shutdown_cb__() request owner is nullptr.");
-        return;
-    }
-    s->onShutdown(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 static void __global_uv_connection_cb__(uv_stream_t * server, int status)
@@ -48,10 +51,12 @@ static void __global_uv_connection_cb__(uv_stream_t * server, int status)
 
     Stream * s = static_cast<Stream*>(server->data);
     if (s == nullptr) {
-        __tbag_error("__global_uv_connection_cb__() server data is nullptr.");
-        return;
+        __tbag_error("__global_uv_connection_cb__() server.data is nullptr.");
+    } else if (isDeletedAddress(s)) {
+        __tbag_error("__global_uv_connection_cb__() server.data is deleted.");
+    } else {
+        s->onConnection(status == 0 ? Err::SUCCESS : Err::FAILURE);
     }
-    s->onConnection(status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 static void __global_uv_stream_alloc_cb__(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf)
@@ -68,12 +73,13 @@ static void __global_uv_stream_alloc_cb__(uv_handle_t * handle, size_t suggested
     Stream * s = static_cast<Stream*>(handle->data);
     if (s == nullptr) {
         __tbag_error("__global_uv_stream_alloc_cb__() handle.data is nullptr.");
-        return;
+    } else if (isDeletedAddress(s)) {
+        __tbag_error("__global_uv_stream_alloc_cb__() handle.data is deleted.");
+    } else {
+        auto result_buffer = s->onAlloc(suggested_size);
+        buf->base = result_buffer.buffer;
+        buf->len  = result_buffer.size;
     }
-
-    auto result_buffer = s->onAlloc(suggested_size);
-    buf->base = result_buffer.buffer;
-    buf->len  = result_buffer.size;
 }
 
 static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t const * buf)
@@ -89,22 +95,23 @@ static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t 
     Stream * s = static_cast<Stream*>(stream->data);
     if (s == nullptr) {
         __tbag_error("__global_uv_read_cb__() stream.data is nullptr.");
-        return;
-    }
-
-    Err code;
-    if (nread == UV_EOF) {
-        code = Err::END_OF_FILE;
-    } else if (nread == UV_ECONNRESET){
-        code = Err::CONNECTION_RESET;
-    } else if (nread >= 0){
-        code = Err::SUCCESS;
+    } else if (isDeletedAddress(s)) {
+        __tbag_error("__global_uv_read_cb__() stream.data is deleted.");
     } else {
-        __tbag_debug("__global_uv_read_cb__() error [{}] {}.", nread, getUvErrorName(nread));
-        code = Err::FAILURE;
-    }
+        Err code;
+        if (nread == UV_EOF) {
+            code = Err::END_OF_FILE;
+        } else if (nread == UV_ECONNRESET){
+            code = Err::CONNECTION_RESET;
+        } else if (nread >= 0){
+            code = Err::SUCCESS;
+        } else {
+            __tbag_debug("__global_uv_read_cb__() error [{}] {}.", nread, getUvErrorName(nread));
+            code = Err::FAILURE;
+        }
 
-    s->onRead(code, buf->base, static_cast<std::size_t>(nread));
+        s->onRead(code, buf->base, static_cast<std::size_t>(nread));
+    }
 }
 
 static void __global_uv_write_cb__(uv_write_t * request, int status)
@@ -114,16 +121,19 @@ static void __global_uv_write_cb__(uv_write_t * request, int status)
 
     WriteRequest * req = static_cast<WriteRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_write_cb__() request data is nullptr.");
-        return;
+        __tbag_error("__global_uv_write_cb__() request.data is nullptr.");
+    } else if (isDeletedAddress(req)) {
+        __tbag_error("__global_uv_write_cb__() request.data is deleted.");
+    } else {
+        Stream * s = static_cast<Stream*>(req->getOwner());
+        if (s == nullptr) {
+            __tbag_error("__global_uv_write_cb__() request.data.owner is nullptr.");
+        } else if (s == nullptr) {
+            __tbag_error("__global_uv_write_cb__() request.data.owner is deleted.");
+        } else {
+            s->onWrite(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
+        }
     }
-
-    Stream * s = static_cast<Stream*>(req->getOwner());
-    if (s == nullptr) {
-        __tbag_error("__global_uv_write_cb__() request owner is nullptr.");
-        return;
-    }
-    s->onWrite(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
 }
 
 // ----------------------
@@ -158,7 +168,7 @@ bool Stream::isWritable() const TBAG_NOEXCEPT
     return ::uv_is_writable(Parent::cast<const uv_stream_t>()) == 1;
 }
 
-bool Stream::setBlocking(bool enable)
+uerr Stream::setBlocking(bool enable)
 {
     // When blocking mode is enabled all writes complete synchronously.
     // The interface remains unchanged otherwise,
@@ -177,14 +187,10 @@ bool Stream::setBlocking(bool enable)
     // after opening or creating the stream.
 
     int const CODE = ::uv_stream_set_blocking(Parent::cast<uv_stream_t>(), enable ? 1 : 0);
-    if (CODE != 0) {
-        __tbag_error("Stream::setBlocking() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Stream, setBlocking, CODE);
 }
 
-bool Stream::shutdown(ShutdownRequest & request)
+uerr Stream::shutdown(ShutdownRequest & request)
 {
     request.setOwner(this); // IMPORTANT!!
 
@@ -196,30 +202,23 @@ bool Stream::shutdown(ShutdownRequest & request)
     int const CODE = ::uv_shutdown(request.cast<uv_shutdown_t>(),
                                    Parent::cast<uv_stream_t>(),
                                    __global_uv_shutdown_cb__);
-    if (CODE != 0) {
-        __tbag_error("Stream::shutdown() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Stream, shutdown, CODE);
 }
 
-bool Stream::listen(int backlog)
+uerr Stream::listen(int backlog)
 {
     // backlog indicates the number of connections the kernel might queue, same as listen(2).
     // When a new incoming connection is received the uv_connection_cb callback is called.
     int const CODE = ::uv_listen(Parent::cast<uv_stream_t>(), backlog, __global_uv_connection_cb__);
-    if (CODE != 0) {
-        // EADDRINUSE: The other socket is using the same port.
-        // EBADF: Bad socket descriptor
-        // EOPNOTSUP: Unsupported listen operator.
-        // ENOTSOCK: It is not a socket.
-        __tbag_error("Stream::listen() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+
+    // EADDRINUSE: The other socket is using the same port.
+    // EBADF: Bad socket descriptor
+    // EOPNOTSUP: Unsupported listen operator.
+    // ENOTSOCK: It is not a socket.
+    TBAG_UERR_DEFAULT_RETURN(Stream, listen, CODE);
 }
 
-bool Stream::accept(Stream & client)
+uerr Stream::accept(Stream & client)
 {
     // This call is used in conjunction with uv_listen() to accept incoming connections.
     // Call this function after receiving a uv_connection_cb to accept the connection.
@@ -231,40 +230,28 @@ bool Stream::accept(Stream & client)
     // it may fail. It is suggested to only call this function once per uv_connection_cb call.
 
     int const CODE = ::uv_accept(Parent::cast<uv_stream_t>(), client.cast<uv_stream_t>());
-    if (CODE != 0) {
-        __tbag_error("Stream::accept() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Stream, accept, CODE);
 }
 
-bool Stream::startRead()
+uerr Stream::startRead()
 {
     // The uv_read_cb callback will be made several times until
     // there is no more data to read or uv_read_stop() is called.
 
     int const CODE = ::uv_read_start(Parent::cast<uv_stream_t>(), __global_uv_stream_alloc_cb__, __global_uv_read_cb__);
-    if (CODE != 0) {
-        __tbag_error("Stream::startRead() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Stream, startRead, CODE);
 }
 
-bool Stream::stopRead()
+uerr Stream::stopRead()
 {
     // The uv_read_cb callback will no longer be called.
     // This function is idempotent and may be safely called on a stopped stream.
 
     int const CODE = ::uv_read_stop(Parent::cast<uv_stream_t>());
-    if (CODE != 0) {
-        __tbag_error("Stream::startRead() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Stream, stopRead, CODE);
 }
 
-bool Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
+uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
 {
     request.setOwner(this); // IMPORTANT!!
 
@@ -280,14 +267,10 @@ bool Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
                                 &uv_infos[0],
                                 uv_infos.size(),
                                 __global_uv_write_cb__);
-    if (CODE != 0) {
-        __tbag_error("Stream::write() error [{}] {}", CODE, getUvErrorName(CODE));
-        return false;
-    }
-    return true;
+    TBAG_UERR_DEFAULT_RETURN(Stream, write, CODE);
 }
 
-bool Stream::write(WriteRequest & request, char const * buffer, std::size_t size)
+uerr Stream::write(WriteRequest & request, char const * buffer, std::size_t size)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);

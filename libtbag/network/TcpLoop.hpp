@@ -95,7 +95,7 @@ public:
         virtual void onAsync() override
         {
             if (request != nullptr) {
-                is_writing = loop.atTcp()->write(*request, &buffer[0], buffer.size());
+                is_writing = loop.atTcp()->write(*request, &buffer[0], buffer.size()) == uerr::UVPP_SUCCESS;
             }
             close();
         }

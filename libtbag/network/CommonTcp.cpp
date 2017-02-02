@@ -56,7 +56,7 @@ CommonTcp::WriteRequest * CommonTcp::asyncWrite(binf * infos, std::size_t infos_
     if (static_cast<bool>(_tcp)) {
         WriteRequest * request = obtainWriteRequest();
         if (request != nullptr) {
-            if (_tcp->write(*request, infos, infos_size)) {
+            if (_tcp->write(*request, infos, infos_size) == uerr::UVPP_SUCCESS) {
                 return request;
             }
         }
@@ -69,7 +69,7 @@ CommonTcp::WriteRequest * CommonTcp::asyncWrite(char const * buffer, std::size_t
     if (static_cast<bool>(_tcp)) {
         WriteRequest * request = obtainWriteRequest();
         if (request != nullptr) {
-            if (_tcp->write(*request, buffer, size)) {
+            if (_tcp->write(*request, buffer, size) == uerr::UVPP_SUCCESS) {
                 return request;
             }
         }
