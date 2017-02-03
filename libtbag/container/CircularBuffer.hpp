@@ -78,8 +78,8 @@ public:
         Size    read_index;
         Size    max_size;
 
-        Iterator(pointer buf, Size pos, Size index, Size max) TBAG_NOEXCEPT
-                : buffer(buf), position(pos), read_index(index), max_size(max)
+        Iterator(pointer buf, Size pos, Size index, Size capacity) TBAG_NOEXCEPT
+                : buffer(buf), position(pos), read_index(index), max_size(capacity)
         { /* EMPTY. */ }
         Iterator(Iterator const & itr) TBAG_NOEXCEPT
                 : buffer(itr.buffer), position(itr.position), read_index(itr.read_index), max_size(itr.max_size)
@@ -135,7 +135,7 @@ public:
 
 private:
     Buffer _buffer;
-    Size   _buffer_size; ///< [PERFORMANCE ISSUES] Don't use the <code>_buffer.size()</code> method.
+    Size   _capacity; ///< [PERFORMANCE ISSUES] Don't use the <code>_buffer.size()</code> method.
     Size   _read_index;
     Size   _written_size;
 
@@ -146,7 +146,7 @@ private:
 public:
     CircularBuffer(Size size = CIRCULAR_BUFFER_DEFAULT_SIZE)
             TBAG_NOEXCEPT_EXPR(buffer_is_nothrow_constructible)
-            : _buffer(size), _buffer_size(_buffer.size()), _read_index(0), _written_size(0)
+            : _buffer(size), _capacity(_buffer.size()), _read_index(0), _written_size(0)
     { /* EMPTY. */ }
 
     ~CircularBuffer()
@@ -158,7 +158,7 @@ public:
     {
         if (this != &obj) {
             _buffer       = obj._buffer;
-            _buffer_size  = obj._buffer_size;
+            _capacity     = obj._capacity;
             _read_index   = obj._read_index;
             _written_size = obj._written_size;
         }
@@ -169,7 +169,7 @@ public:
     {
         if (this != &obj) {
             _buffer       = std::move(obj._buffer);
-            _buffer_size  = obj._buffer_size;
+            _capacity     = obj._capacity;
             _read_index   = obj._read_index;
             _written_size = obj._written_size;
 
@@ -189,7 +189,7 @@ public:
     {
         if (this != &obj) {
             _buffer       = std::move(obj._buffer);
-            _buffer_size  = obj._buffer_size;
+            _capacity     = obj._capacity;
             _read_index   = obj._read_index;
             _written_size = obj._written_size;
 
@@ -203,7 +203,7 @@ public:
     {
         if (this != &obj) {
             _buffer       = obj._buffer;
-            _buffer_size  = obj._buffer_size;
+            _capacity     = obj._capacity;
             _read_index   = obj._read_index;
             _written_size = obj._written_size;
         }
@@ -215,7 +215,7 @@ public:
     {
         if (this != &obj) {
             _buffer.swap(obj._buffer);
-            std::swap(_buffer_size , obj._buffer_size );
+            std::swap(_capacity    , obj._capacity    );
             std::swap(_read_index  , obj._read_index  );
             std::swap(_written_size, obj._written_size);
         }
@@ -237,29 +237,29 @@ public:
     void clear()
     {
         _buffer.clear();
-        _buffer_size  = 0;
+        _capacity     = 0;
         _read_index   = 0;
         _written_size = 0;
     }
 
 public:
     // @formatter:off
-    inline bool empty() const TBAG_NOEXCEPT { return _written_size == 0; }
-    inline Size  size() const TBAG_NOEXCEPT { return _written_size;      }
-    inline Size start() const TBAG_NOEXCEPT { return _read_index;        }
-    inline Size   max() const TBAG_NOEXCEPT { return _buffer_size;       }
+    inline bool    empty() const TBAG_NOEXCEPT { return _written_size == 0; }
+    inline Size     size() const TBAG_NOEXCEPT { return _written_size;      }
+    inline Size    start() const TBAG_NOEXCEPT { return _read_index;        }
+    inline Size capacity() const TBAG_NOEXCEPT { return _capacity;          }
     // @formatter:on
 
     inline Size free() const TBAG_NOEXCEPT
     {
-        return _buffer_size/*max()*/ - _written_size/*size()*/;
+        return _capacity - _written_size;
     }
 
     inline Size last() const TBAG_NOEXCEPT
     {
-        Size const OFFSET = (_read_index/*start()*/ + _written_size/*size()*/);
-        assert(OFFSET < _buffer_size/*max()*/ * 2);
-        return OFFSET >= _buffer_size/*max()*/ ? OFFSET - _buffer_size/*max()*/ : OFFSET;
+        Size const OFFSET = (_read_index + _written_size);
+        assert(OFFSET < _capacity * 2);
+        return OFFSET >= _capacity ? OFFSET - _capacity : OFFSET;
     }
 
 private:
@@ -272,15 +272,15 @@ private:
 
     inline Size next(Size index) TBAG_NOEXCEPT
     {
-        return (index + 1 == max() ? 0 : index + 1);
+        return (index + 1 == capacity() ? 0 : index + 1);
     }
 
 public:
     // @formatter:off
-    inline       iterator  begin()       { return       iterator(&_buffer[0], start(),      0, max()); }
-    inline       iterator  end  ()       { return       iterator(&_buffer[0],  last(), size(), max()); }
-    inline const_iterator cbegin() const { return const_iterator(&_buffer[0], start(),      0, max()); }
-    inline const_iterator cend  () const { return const_iterator(&_buffer[0],  last(), size(), max()); }
+    inline       iterator  begin()       { return       iterator(&_buffer[0], start(),      0, capacity()); }
+    inline       iterator  end  ()       { return       iterator(&_buffer[0],  last(), size(), capacity()); }
+    inline const_iterator cbegin() const { return const_iterator(&_buffer[0], start(),      0, capacity()); }
+    inline const_iterator cend  () const { return const_iterator(&_buffer[0],  last(), size(), capacity()); }
     // @formatter:on
 
 public:
@@ -295,7 +295,7 @@ public:
             // @formatter:off
             // Call it only once in current loop-cycle.
             temp_last = last();
-            temp_max  = max();
+            temp_max  = capacity();
             // @formatter:on
 
             if (_written_size + 1 > temp_max) {
@@ -342,17 +342,7 @@ public:
 
         assert(EXTEND_SIZE > ORIGINAL_SIZE);
         CircularBuffer newbie(EXTEND_SIZE);
-
-#if 0 // debugging std::copy.
-        auto __result = newbie._buffer.begin();
-        auto __first = begin();
-        auto __last  = end();
-        for (; __first != __last; ++__first, (void) ++__result)
-            *__result = *__first;
-        auto itr = __result;
-#else
         auto itr = std::copy(begin(), end(), newbie._buffer.begin());
-#endif
 
         newbie._read_index   = 0;
         newbie._written_size = std::distance(newbie._buffer.begin(), itr);

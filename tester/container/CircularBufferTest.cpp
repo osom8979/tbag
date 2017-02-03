@@ -50,7 +50,7 @@ TEST(CircularBufferTest, PushAndPop1)
     ASSERT_FALSE(buf.empty());
     ASSERT_EQ(2, buf.size());
     ASSERT_EQ(0, buf.start());
-    ASSERT_EQ(5, buf.max());
+    ASSERT_EQ(5, buf.capacity());
     ASSERT_EQ(3, buf.free());
     ASSERT_EQ(2, buf.last());
     ASSERT_EQ('A', buf[0]);
@@ -60,7 +60,7 @@ TEST(CircularBufferTest, PushAndPop1)
     ASSERT_TRUE(buf.empty());
     ASSERT_EQ(0, buf.size());
     ASSERT_EQ(2, buf.start());
-    ASSERT_EQ(5, buf.max());
+    ASSERT_EQ(5, buf.capacity());
     ASSERT_EQ(5, buf.free());
     ASSERT_EQ(2, buf.last());
     ASSERT_EQ('A', read[0]);
@@ -70,7 +70,7 @@ TEST(CircularBufferTest, PushAndPop1)
     ASSERT_FALSE(buf.empty());
     ASSERT_EQ(4, buf.size());
     ASSERT_EQ(2, buf.start());
-    ASSERT_EQ(5, buf.max());
+    ASSERT_EQ(5, buf.capacity());
     ASSERT_EQ(1, buf.free());
     ASSERT_EQ(1, buf.last());
     ASSERT_EQ('C', buf[2]);
@@ -82,7 +82,7 @@ TEST(CircularBufferTest, PushAndPop1)
     ASSERT_TRUE(buf.empty());
     ASSERT_EQ(0, buf.size());
     ASSERT_EQ(1, buf.start());
-    ASSERT_EQ(5, buf.max());
+    ASSERT_EQ(5, buf.capacity());
     ASSERT_EQ(5, buf.free());
     ASSERT_EQ(1, buf.last());
     ASSERT_EQ('C', read[0]);
@@ -103,7 +103,7 @@ TEST(CircularBufferTest, PushAndPop2)
     ASSERT_FALSE(buf.empty());
     ASSERT_EQ(3, buf.size());
     ASSERT_EQ(0, buf.start());
-    ASSERT_EQ(3, buf.max());
+    ASSERT_EQ(3, buf.capacity());
     ASSERT_EQ(0, buf.free());
     ASSERT_EQ(0, buf.last());
     ASSERT_EQ('A', buf[0]);
@@ -114,7 +114,7 @@ TEST(CircularBufferTest, PushAndPop2)
     ASSERT_TRUE(buf.empty());
     ASSERT_EQ(0, buf.size());
     ASSERT_EQ(0, buf.start());
-    ASSERT_EQ(3, buf.max());
+    ASSERT_EQ(3, buf.capacity());
     ASSERT_EQ(3, buf.free());
     ASSERT_EQ(0, buf.last());
     ASSERT_EQ('A', read[0]);
@@ -125,7 +125,7 @@ TEST(CircularBufferTest, PushAndPop2)
     ASSERT_FALSE(buf.empty());
     ASSERT_EQ(2, buf.size());
     ASSERT_EQ(0, buf.start());
-    ASSERT_EQ(3, buf.max());
+    ASSERT_EQ(3, buf.capacity());
     ASSERT_EQ(1, buf.free());
     ASSERT_EQ(2, buf.last());
     ASSERT_EQ('E', buf[0]);
@@ -135,7 +135,7 @@ TEST(CircularBufferTest, PushAndPop2)
     ASSERT_TRUE(buf.empty());
     ASSERT_EQ(0, buf.size());
     ASSERT_EQ(2, buf.start());
-    ASSERT_EQ(3, buf.max());
+    ASSERT_EQ(3, buf.capacity());
     ASSERT_EQ(3, buf.free());
     ASSERT_EQ(2, buf.last());
     ASSERT_EQ('E', read[0]);
@@ -145,7 +145,7 @@ TEST(CircularBufferTest, PushAndPop2)
     ASSERT_FALSE(buf.empty());
     ASSERT_EQ(2, buf.size());
     ASSERT_EQ(2, buf.start());
-    ASSERT_EQ(3, buf.max());
+    ASSERT_EQ(3, buf.capacity());
     ASSERT_EQ(1, buf.free());
     ASSERT_EQ(1, buf.last());
     ASSERT_EQ('G', buf[2]);
@@ -155,7 +155,7 @@ TEST(CircularBufferTest, PushAndPop2)
     ASSERT_TRUE(buf.empty());
     ASSERT_EQ(0, buf.size());
     ASSERT_EQ(1, buf.start());
-    ASSERT_EQ(3, buf.max());
+    ASSERT_EQ(3, buf.capacity());
     ASSERT_EQ(3, buf.free());
     ASSERT_EQ(1, buf.last());
     ASSERT_EQ('G', read[0]);
@@ -176,7 +176,7 @@ TEST(CircularBufferTest, PushAndPop3)
     ASSERT_FALSE(buf.empty());
     ASSERT_EQ(3, buf.size());
     ASSERT_EQ(0, buf.start());
-    ASSERT_EQ(3, buf.max());
+    ASSERT_EQ(3, buf.capacity());
     ASSERT_EQ(0, buf.free());
     ASSERT_EQ(0, buf.last());
 
@@ -199,7 +199,7 @@ TEST(CircularBufferTest, extendCapacity)
     TestBuffer buf(4);
     ASSERT_EQ(4, buf.push("ABCD", 4));
     ASSERT_EQ(4, buf.size());
-    ASSERT_EQ(4, buf.max());
+    ASSERT_EQ(4, buf.capacity());
     ASSERT_EQ(0, buf.free());
     ASSERT_EQ('A', buf[0]);
     ASSERT_EQ('B', buf[1]);
@@ -208,7 +208,7 @@ TEST(CircularBufferTest, extendCapacity)
 
     buf.extendCapacity(4);
     ASSERT_EQ(4, buf.size());
-    ASSERT_EQ(8, buf.max());
+    ASSERT_EQ(8, buf.capacity());
     ASSERT_EQ(4, buf.free());
     ASSERT_EQ('A', buf[0]);
     ASSERT_EQ('B', buf[1]);
@@ -217,7 +217,7 @@ TEST(CircularBufferTest, extendCapacity)
 
     ASSERT_EQ(4, buf.push("EFGH", 4));
     ASSERT_EQ(8, buf.size());
-    ASSERT_EQ(8, buf.max());
+    ASSERT_EQ(8, buf.capacity());
     ASSERT_EQ(0, buf.free());
     ASSERT_EQ('A', buf[0]);
     ASSERT_EQ('B', buf[1]);

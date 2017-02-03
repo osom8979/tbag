@@ -95,8 +95,8 @@ DatagramRead::Size DatagramRead::readNextDatagramSize()
 void DatagramRead::alloc(Size suggested_size)
 {
     Guard guard(_read_mutex);
-    if (_data_buffer.max() < suggested_size) {
-        _data_buffer.extendCapacity(suggested_size - _data_buffer.max());
+    if (_data_buffer.capacity() < suggested_size) {
+        _data_buffer.extendCapacity(suggested_size - _data_buffer.capacity());
     }
 }
 
