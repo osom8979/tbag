@@ -62,6 +62,26 @@
 # endif
 #endif
 
+#ifndef TBAG_PUSH_MACRO
+# if defined(__COMP_GNUC_CXX__)
+#  define TBAG_PUSH_MACRO(name) _Pragma("push_macro(\"" #name "\")")
+# elif defined(__COMP_MSVC__)
+#  define TBAG_PUSH_MACRO(name) __pragma(push_macro("\"" #name "\""))
+# else
+#  define TBAG_PUSH_MACRO(name)
+# endif
+#endif
+
+#ifndef TBAG_POP_MACRO
+# if defined(__COMP_GNUC_CXX__)
+#  define TBAG_POP_MACRO(name) _Pragma("pop_macro(\"" #name "\")")
+# elif defined(__COMP_MSVC__)
+#  define TBAG_POP_MACRO(name) __pragma(pop_macro("\"" #name "\""))
+# else
+#  define TBAG_POP_MACRO(name)
+# endif
+#endif
+
 #if defined(TBAG_EXPORT_API)
 # if defined(__PLATFORM_WINDOWS__)
 #  define TBAG_API __declspec(dllexport)
