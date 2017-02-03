@@ -32,13 +32,18 @@ namespace container {
  *
  * @author zer0
  * @date   2016-10-16
+ *
+ * @warning
+ *  Don't implement <code>operator*()</code> methods. @n
+ *  <i>(<code>void&</code> can not be used)</i>
  */
 template <typename T>
 struct Pointer
 {
-    using Type           = T;
-    using Reference      = typename std::add_lvalue_reference<Type>::type;
-    using ConstReference = const Reference;
+    using Type = T;
+
+    // Don't use this type.
+    //using Reference = typename std::add_lvalue_reference<Type>::type;
 
     Type * ptr = nullptr;
 
@@ -74,11 +79,6 @@ struct Pointer
 
     inline explicit operator bool() const TBAG_NOEXCEPT
     { return ptr != nullptr; }
-
-    inline Reference operator *() TBAG_NOEXCEPT
-    { return *ptr; }
-    inline ConstReference operator *() const TBAG_NOEXCEPT
-    { return *ptr; }
 
     inline Type * operator ->() TBAG_NOEXCEPT
     { return ptr; }

@@ -85,7 +85,6 @@ TEST(PointerTest, Cast)
     ASSERT_EQ(100, p0.forceCast<PointerTestDemo>()->value);
 
     Pointer<PointerTestDemo> p1 = p0.to<PointerTestDemo>();
-    ASSERT_EQ(100, (*p1).value);
     ASSERT_EQ(100, p1->value);
 
     delete i1;
