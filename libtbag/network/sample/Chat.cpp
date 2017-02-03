@@ -8,7 +8,18 @@
 #include <libtbag/network/sample/Chat.hpp>
 #include <libtbag/log/Log.hpp>
 
+#if defined(min)
+TBAG_PUSH_MACRO(min);
+#undef min
+#define __RESTORE_MIN__
+#endif
+
 #include <libtbag/network/sample/msg/chat_generated.h>
+
+#if defined(__RESTORE_MIN__)
+TBAG_POP_MACRO(min);
+#undef __RESTORE_MIN__
+#endif
 
 #include <cstdlib>
 #include <cassert>

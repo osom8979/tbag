@@ -157,11 +157,22 @@ public:
 public:
     using UniqueProcPimpl = std::unique_ptr<ProcPimpl>;
 
+#if defined(min)
+TBAG_PUSH_MACRO(min);
+#undef min
+#define __RESTORE_MIN__
+#endif
+
 public:
     inline static TBAG_CONSTEXPR int64_t getUnknownExitCode() TBAG_NOEXCEPT
     { return std::numeric_limits<int64_t>::min(); }
     inline static TBAG_CONSTEXPR int getUnknownTerminateSignal() TBAG_NOEXCEPT
     { return std::numeric_limits<int>::min(); }
+
+#if defined(__RESTORE_MIN__)
+TBAG_POP_MACRO(min);
+#undef __RESTORE_MIN__
+#endif
 
 protected:
     EventLoop _loop;
