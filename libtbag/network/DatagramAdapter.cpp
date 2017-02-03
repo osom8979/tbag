@@ -7,12 +7,29 @@
 
 #include <libtbag/network/DatagramAdapter.hpp>
 #include <libtbag/log/Log.hpp>
+#include <limits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
+
+#if defined(max)
+TBAG_PUSH_MACRO(max);
+#undef max
+#define __RESTORE_MAX__
+#endif
+
+TBAG_CONSTEXPR static DatagramInterface::Size const NO_NEXT_READ_SIZE
+        = std::numeric_limits<DatagramInterface::Size>::max();
+TBAG_CONSTEXPR static DatagramInterface::Size const DATAGRAM_HEADER_SIZE
+        = sizeof(uint32_t);
+
+#if defined(__RESTORE_MAX__)
+TBAG_POP_MACRO(max);
+#undef __RESTORE_MAX__
+#endif
 
 // -----------------------------
 // DatagramWrite implementation.

@@ -53,9 +53,6 @@ struct DatagramInterface
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-    TBAG_CONSTEXPR static Size const NO_NEXT_READ_SIZE    = std::numeric_limits<Size>::max();
-    TBAG_CONSTEXPR static Size const DATAGRAM_HEADER_SIZE = sizeof(uint32_t);
-
     inline static uint32_t toHost(uint32_t network) { return ntohl(network); }
     inline static uint32_t toNetwork(uint32_t host) { return htonl(host);    }
 };
