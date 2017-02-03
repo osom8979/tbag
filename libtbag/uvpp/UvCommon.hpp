@@ -29,7 +29,7 @@ typedef intptr_t ssize_t;
 #include <string>
 #include <vector>
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 # include <winsock2.h>
 # include <Windows.h>
 #else
@@ -42,7 +42,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
-#if defined(__OS_WINDOWS__)
+#if defined(__PLATFORM_WINDOWS__)
 using ufile = int;
 using usock = SOCKET;
 using ufd   = HANDLE;
