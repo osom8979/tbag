@@ -8,19 +8,6 @@
 #include <libtbag/network/sample/Chat.hpp>
 #include <libtbag/log/Log.hpp>
 
-#if defined(min)
-TBAG_PUSH_MACRO(min);
-#undef min
-#define __RESTORE_MIN__
-#endif
-
-#include <libtbag/network/sample/msg/chat_generated.h>
-
-#if defined(__RESTORE_MIN__)
-TBAG_POP_MACRO(min);
-#undef __RESTORE_MIN__
-#endif
-
 #include <cstdlib>
 #include <cassert>
 
@@ -38,227 +25,227 @@ namespace sample  {
 // Chat server implementation.
 // ---------------------------
 
-ChatServer::ChatServer() : _id_count(0)
-{
-    std::cout.setf(std::ios_base::boolalpha);
-}
-
-ChatServer::~ChatServer()
-{
-    // EMPTY.
-}
-
-void ChatServer::onConnection(uerr code)
-{
-    if (code != uerr::UVPP_SUCCESS) {
-        std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
-        return;
-    }
-
-    auto client = createAcceptedClient();
-    if (auto shared = client.lock()) {
-        std::cout << "CLIENT CONNECTION: " << shared->getSockName() << std::endl;
-
-        UserInfo * user = new UserInfo;
-        user->id = _id_count++;
-        user->ip = shared->getSockName();
-        user->name = std::to_string(user->id);
-        shared->setUserData(user);
-
-        std::cout << "JOIN: " << user->name << "(" << user->ip << ")\n";
-
-        if (shared->startRead() != uerr::UVPP_SUCCESS) {
-            std::cout << "Start read error.\n";
-            eraseClient(*shared);
-        }
-    } else {
-        std::cout << "Not found client key error.\n";
-    }
-}
-
-void ChatServer::onClose()
-{
-    std::cout << "CLOSE THIS SERVER.\n";
-}
-
-void ChatServer::onClientRead(Client & client, uerr code, char const * buffer, std::size_t size)
-{
-    if (code == uerr::UVPP_EOF) {
-        client.close();
-        return;
-    }
-    if (code != uerr::UVPP_SUCCESS) {
-        std::cout << "UNKNOWN READ ERROR: " << (void*)&client << std::endl;
-        return;
-    }
-
-    flatbuffers::Verifier verifier((uint8_t const *)buffer, size);
-    if (msg::VerifyChatPacketBuffer(verifier) == false) {
-        std::cout << "PARSER ERROR.\n";
-        return;
-    }
-
-    auto msg = msg::GetChatPacket(buffer);
-    std::cout << "[" << msg->name()->c_str() << "]"
-              << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
-              << msg->msg()->c_str() << std::endl;
-
-    for (auto & cursor : _clients) {
-        if (cursor.second.get() != &client) {
-            cursor.second->asyncWrite(buffer, size);
-        }
-    }
-}
-
-void ChatServer::onClientWrite(Client & client, WriteRequest & request, uerr code)
-{
-    if (code != uerr::UVPP_SUCCESS) {
-        std::cout << "SEND FAILURE.\n";
-        client.close();
-    }
-}
-
-void ChatServer::onClientClose(Client & client)
-{
-    UserInfo * user = static_cast<UserInfo*>(client.getUserData());
-    if (user == nullptr) {
-        std::cout << "Not found user info.\n";
-        return;
-    }
-
-    assert(user != nullptr);
-    std::cout << "OUT: " << user->name << "(" << user->ip << ")\n";
-    delete user;
-    client.setUserData(nullptr);
-}
-
-// ---------------------------
-// Chat client implementation.
-// ---------------------------
-
-ChatClient::ChatClient(std::string const & name)
-{
-    std::cout.setf(std::ios_base::boolalpha);
-    auto shared = atLoop().newHandle<AsyncChatInput>(atLoop(), *this, name);
-    _input = std::static_pointer_cast<AsyncChatInput, uvpp::Handle>(shared);
-}
-
-ChatClient::~ChatClient()
-{
-    // EMPTY.
-}
-
-void ChatClient::onConnect(ConnectRequest & request, uerr code)
-{
-    if (code != uerr::UVPP_SUCCESS) {
-        std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
-        return;
-    }
-    startRead();
-}
-
-void ChatClient::onRead(uerr code, char const * buffer, std::size_t size)
-{
-    if (code == uerr::UVPP_EOF) {
-        close();
-        return;
-    }
-    if (code != uerr::UVPP_SUCCESS) {
-        std::cout << "UNKNOWN READ ERROR.\n";
-        return;
-    }
-
-    flatbuffers::Verifier verifier((uint8_t const *)buffer, size);
-    if (msg::VerifyChatPacketBuffer(verifier) == false) {
-        std::cout << "PARSER ERROR.\n";
-        return;
-    }
-
-    auto msg = msg::GetChatPacket(buffer);
-    std::cout << "[" << msg->name()->c_str() << "]"
-              << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
-              << msg->msg()->c_str()
-              << std::endl;
-}
-
-void ChatClient::onWrite(WriteRequest & request, uerr code)
-{
-    if (code != uerr::UVPP_SUCCESS) {
-        std::cout << "SEND FAILURE.\n";
-        close();
-    }
-}
-
-void ChatClient::onClose()
-{
-    std::cout << "CLOSE.\n";
-    _input->close();
-}
-
-// ------------------------------
-// AsyncChatInput implementation.
-// ------------------------------
-
-AsyncChatInput::AsyncChatInput(uvpp::Loop & loop, ChatClient & client, std::string const & name)
-        : uvpp::Tty(loop, GeneralFile::FILE_STDIN), _client(client), _name(name)
-{
-    setMode(TtyMode::TTY_NORMAL);
-    startRead();
-}
-
-AsyncChatInput::~AsyncChatInput()
-{
-    stopRead();
-    resetMode();
-}
-
-uvpp::binf AsyncChatInput::onAlloc(std::size_t suggested_size)
-{
-    // Realloc with read buffer.
-    if (_read_buffer.size() < suggested_size) {
-        _read_buffer.resize(suggested_size);
-        _last_buffer.resize(suggested_size);
-    }
-
-    uvpp::binf info;
-    info.buffer = &_read_buffer[0];
-    info.size   =  _read_buffer.size();
-    return info;
-}
-
-void AsyncChatInput::onRead(uerr code, char const * buffer, std::size_t size)
-{
-    std::cout << "onRead(): ";
-    for (std::size_t index = 0; index < size; ++index) {
-        std::cout << buffer[index];
-
-        if (buffer[index] == '\n') {
-            std::string msg(&_last_buffer[0], _last_index);
-            onReadLine(msg);
-            _last_index = 0;
-        } else {
-            _last_buffer[_last_index] = buffer[index];
-            ++_last_index;
-        }
-    }
-}
-
-void AsyncChatInput::onReadLine(std::string const & msg)
-{
-    if (msg == "exit") {
-        _client.safeClose();
-    }
-
-    msg::Version version = msg::Version(1, 1);
-    flatbuffers::FlatBufferBuilder builder;
-    auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(_name), builder.CreateString(msg));
-    builder.Finish(packet);
-
-    if (_client.safeWrite((char const *)builder.GetBufferPointer(), builder.GetSize()) == nullptr) {
-        std::cout << "onReadLine() write error.\n";
-        return;
-    }
-}
+//ChatServer::ChatServer() : _id_count(0)
+//{
+//    std::cout.setf(std::ios_base::boolalpha);
+//}
+//
+//ChatServer::~ChatServer()
+//{
+//    // EMPTY.
+//}
+//
+//void ChatServer::onConnection(uerr code)
+//{
+//    if (code != uerr::UVPP_SUCCESS) {
+//        std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
+//        return;
+//    }
+//
+//    auto client = createAcceptedClient();
+//    if (auto shared = client.lock()) {
+//        std::cout << "CLIENT CONNECTION: " << shared->getSockName() << std::endl;
+//
+//        UserInfo * user = new UserInfo;
+//        user->id = _id_count++;
+//        user->ip = shared->getSockName();
+//        user->name = std::to_string(user->id);
+//        shared->setUserData(user);
+//
+//        std::cout << "JOIN: " << user->name << "(" << user->ip << ")\n";
+//
+//        if (shared->startRead() != uerr::UVPP_SUCCESS) {
+//            std::cout << "Start read error.\n";
+//            eraseClient(*shared);
+//        }
+//    } else {
+//        std::cout << "Not found client key error.\n";
+//    }
+//}
+//
+//void ChatServer::onClose()
+//{
+//    std::cout << "CLOSE THIS SERVER.\n";
+//}
+//
+//void ChatServer::onClientRead(Client & client, uerr code, char const * buffer, std::size_t size)
+//{
+//    if (code == uerr::UVPP_EOF) {
+//        client.close();
+//        return;
+//    }
+//    if (code != uerr::UVPP_SUCCESS) {
+//        std::cout << "UNKNOWN READ ERROR: " << (void*)&client << std::endl;
+//        return;
+//    }
+//
+//    flatbuffers::Verifier verifier((uint8_t const *)buffer, size);
+//    if (msg::VerifyChatPacketBuffer(verifier) == false) {
+//        std::cout << "PARSER ERROR.\n";
+//        return;
+//    }
+//
+//    auto msg = msg::GetChatPacket(buffer);
+//    std::cout << "[" << msg->name()->c_str() << "]"
+//              << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
+//              << msg->msg()->c_str() << std::endl;
+//
+//    for (auto & cursor : _clients) {
+//        if (cursor.second.get() != &client) {
+//            cursor.second->asyncWrite(buffer, size);
+//        }
+//    }
+//}
+//
+//void ChatServer::onClientWrite(Client & client, WriteRequest & request, uerr code)
+//{
+//    if (code != uerr::UVPP_SUCCESS) {
+//        std::cout << "SEND FAILURE.\n";
+//        client.close();
+//    }
+//}
+//
+//void ChatServer::onClientClose(Client & client)
+//{
+//    UserInfo * user = static_cast<UserInfo*>(client.getUserData());
+//    if (user == nullptr) {
+//        std::cout << "Not found user info.\n";
+//        return;
+//    }
+//
+//    assert(user != nullptr);
+//    std::cout << "OUT: " << user->name << "(" << user->ip << ")\n";
+//    delete user;
+//    client.setUserData(nullptr);
+//}
+//
+//// ---------------------------
+//// Chat client implementation.
+//// ---------------------------
+//
+//ChatClient::ChatClient(std::string const & name)
+//{
+//    std::cout.setf(std::ios_base::boolalpha);
+//    auto shared = atLoop().newHandle<AsyncChatInput>(atLoop(), *this, name);
+//    _input = std::static_pointer_cast<AsyncChatInput, uvpp::Handle>(shared);
+//}
+//
+//ChatClient::~ChatClient()
+//{
+//    // EMPTY.
+//}
+//
+//void ChatClient::onConnect(ConnectRequest & request, uerr code)
+//{
+//    if (code != uerr::UVPP_SUCCESS) {
+//        std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
+//        return;
+//    }
+//    startRead();
+//}
+//
+//void ChatClient::onRead(uerr code, char const * buffer, std::size_t size)
+//{
+//    if (code == uerr::UVPP_EOF) {
+//        close();
+//        return;
+//    }
+//    if (code != uerr::UVPP_SUCCESS) {
+//        std::cout << "UNKNOWN READ ERROR.\n";
+//        return;
+//    }
+//
+//    flatbuffers::Verifier verifier((uint8_t const *)buffer, size);
+//    if (msg::VerifyChatPacketBuffer(verifier) == false) {
+//        std::cout << "PARSER ERROR.\n";
+//        return;
+//    }
+//
+//    auto msg = msg::GetChatPacket(buffer);
+//    std::cout << "[" << msg->name()->c_str() << "]"
+//              << "(" << (int)msg->ver()->major() << "." << (int)msg->ver()->minor() << ")"
+//              << msg->msg()->c_str()
+//              << std::endl;
+//}
+//
+//void ChatClient::onWrite(WriteRequest & request, uerr code)
+//{
+//    if (code != uerr::UVPP_SUCCESS) {
+//        std::cout << "SEND FAILURE.\n";
+//        close();
+//    }
+//}
+//
+//void ChatClient::onClose()
+//{
+//    std::cout << "CLOSE.\n";
+//    _input->close();
+//}
+//
+//// ------------------------------
+//// AsyncChatInput implementation.
+//// ------------------------------
+//
+//AsyncChatInput::AsyncChatInput(uvpp::Loop & loop, ChatClient & client, std::string const & name)
+//        : uvpp::Tty(loop, GeneralFile::FILE_STDIN), _client(client), _name(name)
+//{
+//    setMode(TtyMode::TTY_NORMAL);
+//    startRead();
+//}
+//
+//AsyncChatInput::~AsyncChatInput()
+//{
+//    stopRead();
+//    resetMode();
+//}
+//
+//uvpp::binf AsyncChatInput::onAlloc(std::size_t suggested_size)
+//{
+//    // Realloc with read buffer.
+//    if (_read_buffer.size() < suggested_size) {
+//        _read_buffer.resize(suggested_size);
+//        _last_buffer.resize(suggested_size);
+//    }
+//
+//    uvpp::binf info;
+//    info.buffer = &_read_buffer[0];
+//    info.size   =  _read_buffer.size();
+//    return info;
+//}
+//
+//void AsyncChatInput::onRead(uerr code, char const * buffer, std::size_t size)
+//{
+//    std::cout << "onRead(): ";
+//    for (std::size_t index = 0; index < size; ++index) {
+//        std::cout << buffer[index];
+//
+//        if (buffer[index] == '\n') {
+//            std::string msg(&_last_buffer[0], _last_index);
+//            onReadLine(msg);
+//            _last_index = 0;
+//        } else {
+//            _last_buffer[_last_index] = buffer[index];
+//            ++_last_index;
+//        }
+//    }
+//}
+//
+//void AsyncChatInput::onReadLine(std::string const & msg)
+//{
+//    if (msg == "exit") {
+//        _client.safeClose();
+//    }
+//
+//    msg::Version version = msg::Version(1, 1);
+//    flatbuffers::FlatBufferBuilder builder;
+//    auto packet = msg::CreateChatPacket(builder, &version, builder.CreateString(_name), builder.CreateString(msg));
+//    builder.Finish(packet);
+//
+//    if (_client.safeWrite((char const *)builder.GetBufferPointer(), builder.GetSize()) == nullptr) {
+//        std::cout << "onReadLine() write error.\n";
+//        return;
+//    }
+//}
 
 // -------------
 // Main methods.
@@ -267,8 +254,8 @@ void AsyncChatInput::onReadLine(std::string const & msg)
 int runChatServer(std::string const & ip, int port)
 {
     std::cout << "Start chatting server: " << ip << " (" << port << ")\n";
-
-    return ChatServer().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
+    //return ChatServer().run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
+    return EXIT_FAILURE;
 }
 
 int runChatClient(std::string const & ip, int port)
@@ -278,7 +265,8 @@ int runChatClient(std::string const & ip, int port)
     std::cin >> name;
 
     std::cout << "Start chatting client: " << ip << " (" << port << ")\n";
-    return ChatClient(name).run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
+    //return ChatClient(name).run(ip, port) ? EXIT_FAILURE : EXIT_SUCCESS;
+    return EXIT_FAILURE;
 }
 
 } // namespace sample
