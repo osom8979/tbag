@@ -37,9 +37,9 @@ ChatServer::~ChatServer()
     // EMPTY.
 }
 
-void ChatServer::onConnection(Err code)
+void ChatServer::onConnection(uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
         return;
     }
@@ -70,13 +70,13 @@ void ChatServer::onClose()
     std::cout << "CLOSE THIS SERVER.\n";
 }
 
-void ChatServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)
+void ChatServer::onClientRead(Client & client, uerr code, char const * buffer, std::size_t size)
 {
-    if (code == Err::END_OF_FILE) {
+    if (code == uerr::UVPP_EOF) {
         client.close();
         return;
     }
-    if (code == Err::FAILURE) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "UNKNOWN READ ERROR: " << (void*)&client << std::endl;
         return;
     }
@@ -99,9 +99,9 @@ void ChatServer::onClientRead(Client & client, Err code, char const * buffer, st
     }
 }
 
-void ChatServer::onClientWrite(Client & client, WriteRequest & request, Err code)
+void ChatServer::onClientWrite(Client & client, WriteRequest & request, uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "SEND FAILURE.\n";
         client.close();
     }
@@ -137,22 +137,22 @@ ChatClient::~ChatClient()
     // EMPTY.
 }
 
-void ChatClient::onConnect(ConnectRequest & request, Err code)
+void ChatClient::onConnect(ConnectRequest & request, uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "STATUS ERROR: " << static_cast<int>(code) << std::endl;
         return;
     }
     startRead();
 }
 
-void ChatClient::onRead(Err code, char const * buffer, std::size_t size)
+void ChatClient::onRead(uerr code, char const * buffer, std::size_t size)
 {
-    if (code == Err::END_OF_FILE) {
+    if (code == uerr::UVPP_EOF) {
         close();
         return;
     }
-    if (code == Err::FAILURE) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "UNKNOWN READ ERROR.\n";
         return;
     }
@@ -170,9 +170,9 @@ void ChatClient::onRead(Err code, char const * buffer, std::size_t size)
               << std::endl;
 }
 
-void ChatClient::onWrite(WriteRequest & request, Err code)
+void ChatClient::onWrite(WriteRequest & request, uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "SEND FAILURE.\n";
         close();
     }
@@ -215,7 +215,7 @@ uvpp::binf AsyncChatInput::onAlloc(std::size_t suggested_size)
     return info;
 }
 
-void AsyncChatInput::onRead(Err code, char const * buffer, std::size_t size)
+void AsyncChatInput::onRead(uerr code, char const * buffer, std::size_t size)
 {
     std::cout << "onRead(): ";
     for (std::size_t index = 0; index < size; ++index) {

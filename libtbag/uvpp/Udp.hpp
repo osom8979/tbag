@@ -100,8 +100,8 @@ public:
     uerr send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
     /** Same as send(), but won't queue a send request if it can't be completed immediately. */
-    std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result = nullptr);
-    std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result = nullptr);
+    std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, uerr * result = nullptr);
+    std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, uerr * result = nullptr);
 
     /** Prepare for receiving data. */
     uerr startRecv();
@@ -110,9 +110,9 @@ public:
     uerr stopRecv();
 
 public:
-    virtual void onSend(UdpSendRequest & request, Err code);
+    virtual void onSend(UdpSendRequest & request, uerr code);
     virtual binf onAlloc(std::size_t suggested_size);
-    virtual void onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
+    virtual void onRead(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
 };
 
 } // namespace uvpp

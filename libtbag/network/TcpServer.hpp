@@ -35,7 +35,7 @@ namespace network {
 class TBAG_API TcpServer : public TcpLoop
 {
 public:
-    using Parent = CommonTcp;
+    using Parent = TcpLoop;
 
     using CallableTcp  = Parent::CallableTcp;
     using WriteRequest = Parent::WriteRequest;
@@ -43,6 +43,7 @@ public:
 
     using Buffer = Parent::Buffer;
     using binf   = Parent::binf;
+    using uerr   = Parent::uerr;
 
 public:
     /** Client class prototype. */
@@ -56,8 +57,8 @@ public:
         ~Client() { /* EMPTY. */ }
 
         virtual binf onAlloc(std::size_t suggested_size) override;
-        virtual void onRead(Err code, char const * buffer, std::size_t size) override;
-        virtual void onWrite(WriteRequest & request, Err code) override;
+        virtual void onRead(uerr code, char const * buffer, std::size_t size) override;
+        virtual void onWrite(WriteRequest & request, uerr code) override;
         virtual void onClose() override;
     };
 
@@ -95,8 +96,8 @@ public:
 // Extension event methods.
 public:
     virtual binf onClientAlloc(Client & client, std::size_t suggested_size);
-    virtual void onClientRead (Client & client, Err code, char const * buffer, std::size_t size);
-    virtual void onClientWrite(Client & client, WriteRequest & request, Err code);
+    virtual void onClientRead (Client & client, uerr code, char const * buffer, std::size_t size);
+    virtual void onClientWrite(Client & client, WriteRequest & request, uerr code);
     virtual void onClientClose(Client & client);
 };
 

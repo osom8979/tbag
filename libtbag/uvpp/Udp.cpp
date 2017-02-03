@@ -39,7 +39,7 @@ static void __global_uv_udp_send_cb__(uv_udp_send_t * request, int status)
         } else if (isDeletedAddress(s)) {
             __tbag_error("__global_uv_udp_send_cb__() request.data.owner is deleted.");
         } else {
-            s->onSend(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
+            s->onSend(*req, getUerr(status));
         }
     }
 }
@@ -96,15 +96,13 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
     } else if (isDeletedAddress(u)) {
         __tbag_error("__global_uv_udp_recv_cb__() handle.data is deleted.");
     } else {
-        Err code;
-        if (nread == UV_EOF) {
-            code = Err::END_OF_FILE;
-        } else if (nread >= 0){
-            code = Err::SUCCESS;
+        uerr code;
+        if (nread >= 0){
+            code = uerr::UVPP_SUCCESS;
         } else {
-            __tbag_error("__global_uv_udp_recv_cb__() error [{}] {}.", nread, getUvErrorName(nread));
-            code = Err::FAILURE;
+            code = getUerr(static_cast<int>(nread));
         }
+
         u->onRead(code, buf->base, static_cast<std::size_t>(nread), addr, flags);
     }
 }
@@ -145,7 +143,7 @@ uerr Udp::init(Loop & loop)
 {
     // The actual socket is created lazily. Returns 0 on success.
     int const CODE = ::uv_udp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_udp_t>());
-    TBAG_UERR_DEFAULT_RETURN(Udp, init, CODE);
+    return getUerr2("Udp::init()", CODE);
 }
 
 uerr Udp::open(usock sock)
@@ -161,7 +159,7 @@ uerr Udp::open(usock sock)
     // but it's required that it represents a valid datagram socket.
 
     int const CODE  = ::uv_udp_open(Parent::cast<uv_udp_t>(), static_cast<uv_os_sock_t>(sock));
-    TBAG_UERR_DEFAULT_RETURN(Udp, open, CODE);
+    return getUerr2("Udp::open()", CODE);
 }
 
 uerr Udp::bind(sockaddr const * addr, unsigned int flags)
@@ -176,7 +174,7 @@ uerr Udp::bind(sockaddr const * addr, unsigned int flags)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_bind(Parent::cast<uv_udp_t>(), addr, flags);
-    TBAG_UERR_DEFAULT_RETURN(Udp, bind, CODE);
+    return getUerr2("Udp::bind()", CODE);
 }
 
 uerr Udp::getSockName(sockaddr * name, int * namelen)
@@ -191,7 +189,7 @@ uerr Udp::getSockName(sockaddr * name, int * namelen)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_getsockname(Parent::cast<uv_udp_t>(), name, namelen);
-    TBAG_UERR_DEFAULT_RETURN(Udp, getSockName, CODE);
+    return getUerr2("Udp::getSockName()", CODE);
 }
 
 uerr Udp::setMembership(char const * multicast_addr, char const * interface_addr, Membership membership)
@@ -199,7 +197,7 @@ uerr Udp::setMembership(char const * multicast_addr, char const * interface_addr
     uv_membership native_membership;
     if (membership == Membership::LEAVE_GROUP) {
         native_membership = UV_LEAVE_GROUP;
-    } else if (membership == Membership::JOIN_GROUP) {
+    } else /*if (membership == Membership::JOIN_GROUP)*/ {
         native_membership = UV_JOIN_GROUP;
     }
 
@@ -213,7 +211,7 @@ uerr Udp::setMembership(char const * multicast_addr, char const * interface_addr
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_membership(Parent::cast<uv_udp_t>(), multicast_addr, interface_addr, native_membership);
-    TBAG_UERR_DEFAULT_RETURN(Udp, setMembership, CODE);
+    return getUerr2("Udp::setMembership()", CODE);
 }
 
 uerr Udp::setMulticastLoop(bool on)
@@ -227,7 +225,7 @@ uerr Udp::setMulticastLoop(bool on)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_loop(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
-    TBAG_UERR_DEFAULT_RETURN(Udp, setMulticastLoop, CODE);
+    return getUerr2("Udp::setMulticastLoop()", CODE);
 }
 
 uerr Udp::setMulticastTtl(int ttl)
@@ -239,7 +237,7 @@ uerr Udp::setMulticastTtl(int ttl)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_ttl(Parent::cast<uv_udp_t>(), ttl);
-    TBAG_UERR_DEFAULT_RETURN(Udp, setMulticastTtl, CODE);
+    return getUerr2("Udp::setMulticastTtl()", CODE);
 }
 
 uerr Udp::setMulticastInterface(char const * interface_addr)
@@ -251,7 +249,7 @@ uerr Udp::setMulticastInterface(char const * interface_addr)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_interface(Parent::cast<uv_udp_t>(), interface_addr);
-    TBAG_UERR_DEFAULT_RETURN(Udp, setMulticastInterface, CODE);
+    return getUerr2("Udp::setMulticastInterface()", CODE);
 }
 
 uerr Udp::setBroadcast(bool on)
@@ -263,7 +261,7 @@ uerr Udp::setBroadcast(bool on)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_broadcast(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
-    TBAG_UERR_DEFAULT_RETURN(Udp, setBroadcast, CODE);
+    return getUerr2("Udp::setBroadcast()", CODE);
 }
 
 uerr Udp::setTtl(int ttl)
@@ -275,11 +273,18 @@ uerr Udp::setTtl(int ttl)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_ttl(Parent::cast<uv_udp_t>(), ttl);
-    TBAG_UERR_DEFAULT_RETURN(Udp, setTtl, CODE);
+    return getUerr2("Udp::setTtl()", CODE);
 }
 
 uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
 {
+    using SizeType = unsigned int;
+
+    if (infos_size > std::numeric_limits<SizeType>::max()) {
+        __tbag_error("Udp::send() buffer info size too large.");
+        return uerr::UVPP_ILLARGS;
+    }
+
     request.setOwner(this); // IMPORTANT!!
 
     std::vector<uv_buf_t> uv_infos;
@@ -305,10 +310,10 @@ uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, s
     int const CODE = ::uv_udp_send(request.cast<uv_udp_send_t>(),
                                    Parent::cast<uv_udp_t>(),
                                    &uv_infos[0],
-                                   uv_infos.size(),
+                                   static_cast<SizeType>(uv_infos.size()),
                                    addr,
                                    __global_uv_udp_send_cb__);
-    TBAG_UERR_DEFAULT_RETURN(Udp, send, CODE);
+    return getUerr2("Udp::send()", CODE);
 }
 
 uerr Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
@@ -319,8 +324,18 @@ uerr Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, 
     return send(request, &info, 1U, addr);
 }
 
-std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result)
+std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, uerr * result)
 {
+    using SizeType = unsigned int;
+
+    if (infos_size > std::numeric_limits<SizeType>::max()) {
+        __tbag_error("Udp::trySend() buffer info size too large.");
+        if (result != nullptr) {
+            *result = uerr::UVPP_ILLARGS;
+        }
+        return 0U;
+    }
+
     // Same as uv_udp_send(), but won't queue a send request if it can't be completed immediately.
     // Returns:
     //  >= 0: number of bytes sent (it matches the given buffer size).
@@ -333,19 +348,19 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
         uv_infos[i].len  = (infos + i)->size;
     }
 
-    // @formatter:off
-    int const WRITE_RESULT = ::uv_udp_try_send(Parent::cast<uv_udp_t>(), &uv_infos[0], uv_infos.size(), addr);
-    if (WRITE_RESULT <= 0) {
-        if (result != nullptr) { *result = Err::FAILURE; }
-        __tbag_error("Udp::trySend() error [{}] {}", WRITE_RESULT, getUvErrorName(WRITE_RESULT));
-        return 0U;
+    int  const WRITE_SIZE = ::uv_udp_try_send(Parent::cast<uv_udp_t>(),
+                                              &uv_infos[0],
+                                              static_cast<SizeType>(uv_infos.size()),
+                                              addr);
+    uerr const ERROR_CODE = getUerr2("Udp::trySend()", WRITE_SIZE);
+
+    if (result != nullptr) {
+        *result = ERROR_CODE;
     }
-    if (result != nullptr) { *result = Err::SUCCESS; }
-    return static_cast<std::size_t>(WRITE_RESULT);
-    // @formatter:on
+    return static_cast<std::size_t>(WRITE_SIZE);
 }
 
-std::size_t Udp::trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result)
+std::size_t Udp::trySend(char const * buffer, std::size_t size, sockaddr const * addr, uerr * result)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
@@ -366,7 +381,7 @@ uerr Udp::startRecv()
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_recv_start(Parent::cast<uv_udp_t>(), __global_uv_udp_alloc_cb__, __global_uv_udp_recv_cb__);
-    TBAG_UERR_DEFAULT_RETURN(Udp, startRecv, CODE);
+    return getUerr2("Udp::startRecv()", CODE);
 }
 
 uerr Udp::stopRecv()
@@ -376,16 +391,16 @@ uerr Udp::stopRecv()
     // Returns:
     //  0 on success, or an error code < 0 on failure.
     int const CODE = ::uv_udp_recv_stop(Parent::cast<uv_udp_t>());
-    TBAG_UERR_DEFAULT_RETURN(Udp, stopRecv, CODE);
+    return getUerr2("Udp::stopRecv()", CODE);
 }
 
 // --------------
 // Event methods.
 // --------------
 
-void Udp::onSend(UdpSendRequest & request, Err code)
+void Udp::onSend(UdpSendRequest & request, uerr code)
 {
-    __tbag_debug("Udp::onSend({}) called.", static_cast<int>(code));
+    __tbag_debug("Udp::onSend({}) called.", getErrorName(code));
 }
 
 binf Udp::onAlloc(std::size_t suggested_size)
@@ -394,9 +409,9 @@ binf Udp::onAlloc(std::size_t suggested_size)
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
-void Udp::onRead(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
+void Udp::onRead(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
 {
-    __tbag_debug("Udp::onRead({}) called (size:{}).", static_cast<int>(code), size);
+    __tbag_debug("Udp::onRead({}) called (size:{}).", getErrorName(code), size);
 }
 
 } // namespace uvpp

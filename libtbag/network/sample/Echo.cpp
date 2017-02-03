@@ -49,9 +49,9 @@ EchoServer::~EchoServer()
     // EMPTY.
 }
 
-void EchoServer::onConnection(Err code)
+void EchoServer::onConnection(uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "EchoServer::onConnection() Status error: " << static_cast<int>(code) << ".\n";
         return;
     }
@@ -86,10 +86,10 @@ EchoServer::binf EchoServer::onClientAlloc(Client & client, std::size_t suggeste
     return uvpp::defaultOnAlloc(client.atReadBuffer(), suggested_size);
 }
 
-void EchoServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)
+void EchoServer::onClientRead(Client & client, uerr code, char const * buffer, std::size_t size)
 {
     DatagramAdapter * adapter = static_cast<DatagramAdapter*>(client.getUserData());
-    if (code == Err::SUCCESS && adapter != nullptr) {
+    if (code == uerr::UVPP_SUCCESS && adapter != nullptr) {
         std::cout << "EchoServer::onClientRead() Success size(" << size << ").\n";
         adapter->push(buffer, size);
 
@@ -129,7 +129,7 @@ void EchoServer::onClientRead(Client & client, Err code, char const * buffer, st
                 }
             }
         }
-    } else if (code == Err::END_OF_FILE) {
+    } else if (code == uerr::UVPP_EOF) {
         std::cout << "EchoServer::onRead() End of file.\n";
         client.close();
 
@@ -139,9 +139,9 @@ void EchoServer::onClientRead(Client & client, Err code, char const * buffer, st
     }
 }
 
-void EchoServer::onClientWrite(Client & client, WriteRequest & request, Err code)
+void EchoServer::onClientWrite(Client & client, WriteRequest & request, uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "EchoServer::onWrite() Failure.\n";
     }
 
@@ -188,9 +188,9 @@ EchoClient::binf EchoClient::onAlloc(std::size_t suggested_size)
     return uvpp::defaultOnAlloc(atReadBuffer(), suggested_size);
 }
 
-void EchoClient::onConnect(ConnectRequest & request, Err code)
+void EchoClient::onConnect(ConnectRequest & request, uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "EchoClient::onConnect() Status error: " << static_cast<int>(code) << ".\n";
         return;
     }
@@ -208,9 +208,9 @@ void EchoClient::onConnect(ConnectRequest & request, Err code)
     this->asyncWrite(buffer_info, 2);
 }
 
-void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
+void EchoClient::onRead(uerr code, char const * buffer, std::size_t size)
 {
-    if (code == Err::SUCCESS) {
+    if (code == uerr::UVPP_SUCCESS) {
         std::cout << "EchoClient::onRead() Success(" << _read_count++ << ") size(" << size << ")";
         _datagram.push(buffer, size);
 
@@ -236,7 +236,7 @@ void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
             assert(false && "DatagramAdapter bug!!\n");
         }
 
-    } else if (code == Err::END_OF_FILE) {
+    } else if (code == uerr::UVPP_EOF) {
         std::cout << "EchoClient::onRead() End of file.\n";
         close();
 
@@ -246,9 +246,9 @@ void EchoClient::onRead(Err code, char const * buffer, std::size_t size)
     }
 }
 
-void EchoClient::onWrite(WriteRequest & request, Err code)
+void EchoClient::onWrite(WriteRequest & request, uerr code)
 {
-    if (code != Err::SUCCESS) {
+    if (code != uerr::UVPP_SUCCESS) {
         std::cout << "EchoClient::onWrite() Failure.\n";
         close();
     }

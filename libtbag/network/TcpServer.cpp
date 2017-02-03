@@ -19,12 +19,12 @@ TcpServer::binf TcpServer::Client::onAlloc(std::size_t suggested_size)
     return server.onClientAlloc(*this, suggested_size);
 }
 
-void TcpServer::Client::onRead(Err code, char const * buffer, std::size_t size)
+void TcpServer::Client::onRead(uerr code, char const * buffer, std::size_t size)
 {
     server.onClientRead(*this, code, buffer, size);
 }
 
-void TcpServer::Client::onWrite(WriteRequest & request, Err code)
+void TcpServer::Client::onWrite(WriteRequest & request, uerr code)
 {
     server.onClientWrite(*this, request, code);
     releaseWriteRequest(&request);
@@ -129,12 +129,12 @@ TcpServer::binf TcpServer::onClientAlloc(Client & client, std::size_t suggested_
     return uvpp::defaultOnAlloc(client.atReadBuffer(), suggested_size);
 }
 
-void TcpServer::onClientRead(Client & client, Err code, char const * buffer, std::size_t size)
+void TcpServer::onClientRead(Client & client, uerr code, char const * buffer, std::size_t size)
 {
     __tbag_debug("TcpServer::onClientRead({}) size({}), result code({})", (void*)&client, size, static_cast<int>(code));
 }
 
-void TcpServer::onClientWrite(Client & client, WriteRequest & request, Err code)
+void TcpServer::onClientWrite(Client & client, WriteRequest & request, uerr code)
 {
     __tbag_debug("TcpServer::onClientWrite({}) result code: {}", (void*)&client, static_cast<int>(code));
 }

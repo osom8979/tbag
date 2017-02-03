@@ -39,14 +39,14 @@ public:
     struct Callback
     {
         // Event of Tcp.
-        virtual void onConnect(ConnectRequest & request, Err code) { /* EMPTY. */ }
+        virtual void onConnect(ConnectRequest & request, uerr code) { /* EMPTY. */ }
 
         // Event of Stream.
-        virtual void onShutdown(ShutdownRequest & request, Err code)         { /* EMPTY. */ }
-        virtual void onConnection(Err code)                                  { /* EMPTY. */ }
-        virtual binf onAlloc(std::size_t suggested_size)                     { return binf(); }
-        virtual void onRead(Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
-        virtual void onWrite(WriteRequest & request, Err code)               { /* EMPTY. */ }
+        virtual void onShutdown(ShutdownRequest & request, uerr code)         { /* EMPTY. */ }
+        virtual void onConnection(uerr code)                                  { /* EMPTY. */ }
+        virtual binf onAlloc(std::size_t suggested_size)                      { return binf(); }
+        virtual void onRead(uerr code, char const * buffer, std::size_t size) { /* EMPTY. */ }
+        virtual void onWrite(WriteRequest & request, uerr code)               { /* EMPTY. */ }
 
         // Event of Handle.
         virtual void onClose()          { /* EMPTY. */ }
@@ -73,18 +73,18 @@ public:
 
 public:
     // @formatter:off
-    virtual void onConnect(ConnectRequest & request, Err code) override
+    virtual void onConnect(ConnectRequest & request, uerr code) override
     { if (_cb != nullptr) { _cb->onConnect(request, code); } }
 
-    virtual void onShutdown(ShutdownRequest & request, Err code) override
+    virtual void onShutdown(ShutdownRequest & request, uerr code) override
     { if (_cb != nullptr) { _cb->onShutdown(request, code); } }
-    virtual void onConnection(Err code) override
+    virtual void onConnection(uerr code) override
     { if (_cb != nullptr) { _cb->onConnection(code); } }
     virtual binf onAlloc(std::size_t suggested_size) override
     { if (_cb != nullptr) { return _cb->onAlloc(suggested_size); } return binf(); }
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override
+    virtual void onRead(uerr code, char const * buffer, std::size_t size) override
     { if (_cb != nullptr) { _cb->onRead(code, buffer, size); } }
-    virtual void onWrite(WriteRequest & request, Err code) override
+    virtual void onWrite(WriteRequest & request, uerr code) override
     { if (_cb != nullptr) { _cb->onWrite(request, code); } }
 
     virtual void onClose() override

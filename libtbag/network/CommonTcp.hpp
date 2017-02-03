@@ -108,8 +108,8 @@ public:
     WriteRequest * asyncWrite(binf * infos, std::size_t infos_size);
     WriteRequest * asyncWrite(char const * buffer, std::size_t size);
 
-    std::size_t tryWrite(binf * infos, std::size_t infos_size, Err * result = nullptr);
-    std::size_t tryWrite(char const * buffer, std::size_t size, Err * result = nullptr);
+    std::size_t tryWrite(binf * infos, std::size_t infos_size, uerr * result = nullptr);
+    std::size_t tryWrite(char const * buffer, std::size_t size, uerr * result = nullptr);
 
 public:
     virtual binf onAlloc(std::size_t suggested_size) override;

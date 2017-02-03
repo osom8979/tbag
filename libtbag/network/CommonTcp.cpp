@@ -77,26 +77,26 @@ CommonTcp::WriteRequest * CommonTcp::asyncWrite(char const * buffer, std::size_t
     return nullptr;
 }
 
-std::size_t CommonTcp::tryWrite(binf * infos, std::size_t infos_size, Err * result)
+std::size_t CommonTcp::tryWrite(binf * infos, std::size_t infos_size, uerr * result)
 {
     if (static_cast<bool>(_tcp)) {
         return _tcp->tryWrite(infos, infos_size, result);
     }
 
     if (result != nullptr) {
-        *result = Err::NULL_POINTER;
+        *result = uerr::UVPP_NULLPTR;
     }
     return 0U;
 }
 
-std::size_t CommonTcp::tryWrite(char const * buffer, std::size_t size, Err * result)
+std::size_t CommonTcp::tryWrite(char const * buffer, std::size_t size, uerr * result)
 {
     if (static_cast<bool>(_tcp)) {
         return _tcp->tryWrite(buffer, size, result);
     }
 
     if (result != nullptr) {
-        *result = Err::NULL_POINTER;
+        *result = uerr::UVPP_NULLPTR;
     }
     return 0U;
 }

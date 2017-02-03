@@ -46,13 +46,13 @@ public:
     virtual ~EchoServer();
 
 public:
-    virtual void onConnection(Err code) override;
+    virtual void onConnection(uerr code) override;
     virtual void onClose() override;
 
 public:
     virtual binf onClientAlloc(Client & client, std::size_t suggested_size) override;
-    virtual void onClientRead(Client & client, Err code, char const * buffer, std::size_t size) override;
-    virtual void onClientWrite(Client & client, WriteRequest & request, Err code) override;
+    virtual void onClientRead(Client & client, uerr code, char const * buffer, std::size_t size) override;
+    virtual void onClientWrite(Client & client, WriteRequest & request, uerr code) override;
     virtual void onClientClose(Client & client) override;
 };
 
@@ -79,9 +79,9 @@ public:
 
 public:
     virtual binf onAlloc(std::size_t suggested_size) override;
-    virtual void onConnect(ConnectRequest & request, Err code) override;
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
-    virtual void onWrite(WriteRequest & request, Err code) override;
+    virtual void onConnect(ConnectRequest & request, uerr code) override;
+    virtual void onRead(uerr code, char const * buffer, std::size_t size) override;
+    virtual void onWrite(WriteRequest & request, uerr code) override;
     virtual void onClose() override;
 };
 

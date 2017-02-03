@@ -38,7 +38,7 @@ static void __global_uv_shutdown_cb__(uv_shutdown_t * request, int status)
         } else if (isDeletedAddress(s)) {
             __tbag_error("__global_uv_shutdown_cb__() request.data.owner is deleted.");
         } else {
-            s->onShutdown(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
+            s->onShutdown(*req, getUerr(status));
         }
     }
 }
@@ -55,7 +55,7 @@ static void __global_uv_connection_cb__(uv_stream_t * server, int status)
     } else if (isDeletedAddress(s)) {
         __tbag_error("__global_uv_connection_cb__() server.data is deleted.");
     } else {
-        s->onConnection(status == 0 ? Err::SUCCESS : Err::FAILURE);
+        s->onConnection(getUerr(status));
     }
 }
 
@@ -98,16 +98,11 @@ static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t 
     } else if (isDeletedAddress(s)) {
         __tbag_error("__global_uv_read_cb__() stream.data is deleted.");
     } else {
-        Err code;
-        if (nread == UV_EOF) {
-            code = Err::END_OF_FILE;
-        } else if (nread == UV_ECONNRESET){
-            code = Err::CONNECTION_RESET;
-        } else if (nread >= 0){
-            code = Err::SUCCESS;
+        uerr code;
+        if (nread >= 0){
+            code = uerr::UVPP_SUCCESS;
         } else {
-            __tbag_debug("__global_uv_read_cb__() error [{}] {}.", nread, getUvErrorName(nread));
-            code = Err::FAILURE;
+            code = getUerr(static_cast<int>(nread));
         }
 
         s->onRead(code, buf->base, static_cast<std::size_t>(nread));
@@ -128,10 +123,10 @@ static void __global_uv_write_cb__(uv_write_t * request, int status)
         Stream * s = static_cast<Stream*>(req->getOwner());
         if (s == nullptr) {
             __tbag_error("__global_uv_write_cb__() request.data.owner is nullptr.");
-        } else if (s == nullptr) {
+        } else if (isDeletedAddress(s)) {
             __tbag_error("__global_uv_write_cb__() request.data.owner is deleted.");
         } else {
-            s->onWrite(*req, status == 0 ? Err::SUCCESS : Err::FAILURE);
+            s->onWrite(*req, getUerr(status));
         }
     }
 }
@@ -187,7 +182,7 @@ uerr Stream::setBlocking(bool enable)
     // after opening or creating the stream.
 
     int const CODE = ::uv_stream_set_blocking(Parent::cast<uv_stream_t>(), enable ? 1 : 0);
-    TBAG_UERR_DEFAULT_RETURN(Stream, setBlocking, CODE);
+    return getUerr2("Stream::setBlocking()", CODE);
 }
 
 uerr Stream::shutdown(ShutdownRequest & request)
@@ -202,20 +197,22 @@ uerr Stream::shutdown(ShutdownRequest & request)
     int const CODE = ::uv_shutdown(request.cast<uv_shutdown_t>(),
                                    Parent::cast<uv_stream_t>(),
                                    __global_uv_shutdown_cb__);
-    TBAG_UERR_DEFAULT_RETURN(Stream, shutdown, CODE);
+    return getUerr2("Stream::shutdown()", CODE);
 }
 
 uerr Stream::listen(int backlog)
 {
     // backlog indicates the number of connections the kernel might queue, same as listen(2).
     // When a new incoming connection is received the uv_connection_cb callback is called.
-    int const CODE = ::uv_listen(Parent::cast<uv_stream_t>(), backlog, __global_uv_connection_cb__);
+    //
+    // Error code:
+    //  - EADDRINUSE: The other socket is using the same port.
+    //  - EBADF: Bad socket descriptor
+    //  - EOPNOTSUP: Unsupported listen operator.
+    //  - ENOTSOCK: It is not a socket.
 
-    // EADDRINUSE: The other socket is using the same port.
-    // EBADF: Bad socket descriptor
-    // EOPNOTSUP: Unsupported listen operator.
-    // ENOTSOCK: It is not a socket.
-    TBAG_UERR_DEFAULT_RETURN(Stream, listen, CODE);
+    int const CODE = ::uv_listen(Parent::cast<uv_stream_t>(), backlog, __global_uv_connection_cb__);
+    return getUerr2("Stream::listen()", CODE);
 }
 
 uerr Stream::accept(Stream & client)
@@ -230,7 +227,7 @@ uerr Stream::accept(Stream & client)
     // it may fail. It is suggested to only call this function once per uv_connection_cb call.
 
     int const CODE = ::uv_accept(Parent::cast<uv_stream_t>(), client.cast<uv_stream_t>());
-    TBAG_UERR_DEFAULT_RETURN(Stream, accept, CODE);
+    return getUerr2("Stream::accept()", CODE);
 }
 
 uerr Stream::startRead()
@@ -238,8 +235,10 @@ uerr Stream::startRead()
     // The uv_read_cb callback will be made several times until
     // there is no more data to read or uv_read_stop() is called.
 
-    int const CODE = ::uv_read_start(Parent::cast<uv_stream_t>(), __global_uv_stream_alloc_cb__, __global_uv_read_cb__);
-    TBAG_UERR_DEFAULT_RETURN(Stream, startRead, CODE);
+    int const CODE = ::uv_read_start(Parent::cast<uv_stream_t>(),
+                                     __global_uv_stream_alloc_cb__,
+                                     __global_uv_read_cb__);
+    return getUerr2("Stream::startRead()", CODE);
 }
 
 uerr Stream::stopRead()
@@ -248,11 +247,18 @@ uerr Stream::stopRead()
     // This function is idempotent and may be safely called on a stopped stream.
 
     int const CODE = ::uv_read_stop(Parent::cast<uv_stream_t>());
-    TBAG_UERR_DEFAULT_RETURN(Stream, stopRead, CODE);
+    return getUerr2("Stream::stopRead()", CODE);
 }
 
 uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
 {
+    using SizeType = unsigned int;
+
+    if (infos_size > std::numeric_limits<SizeType>::max()) {
+        __tbag_error("Stream::write() buffer info size too large.");
+        return uerr::UVPP_ILLARGS;
+    }
+
     request.setOwner(this); // IMPORTANT!!
 
     std::vector<uv_buf_t> uv_infos;
@@ -265,9 +271,9 @@ uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
     int const CODE = ::uv_write(request.cast<uv_write_t>(),
                                 Parent::cast<uv_stream_t>(),
                                 &uv_infos[0],
-                                uv_infos.size(),
+                                static_cast<SizeType>(uv_infos.size()),
                                 __global_uv_write_cb__);
-    TBAG_UERR_DEFAULT_RETURN(Stream, write, CODE);
+    return getUerr2("Stream::write()", CODE);
 }
 
 uerr Stream::write(WriteRequest & request, char const * buffer, std::size_t size)
@@ -278,12 +284,17 @@ uerr Stream::write(WriteRequest & request, char const * buffer, std::size_t size
     return write(request, &info, 1U);
 }
 
-std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, Err * result)
+std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, uerr * result)
 {
-    // Same as uv_write(), but won’t queue a write request if it can’t be completed immediately.
-    // Will return either:
-    // > 0: number of bytes written (can be less than the supplied buffer size).
-    // < 0: negative error code (UV_EAGAIN is returned if no data can be sent immediately).
+    using SizeType = unsigned int;
+
+    if (infos_size > std::numeric_limits<SizeType>::max()) {
+        __tbag_error("Stream::tryWrite() buffer info size too large.");
+        if (result != nullptr) {
+            *result = uerr::UVPP_ILLARGS;
+        }
+        return 0U;
+    }
 
     std::vector<uv_buf_t> uv_infos;
     uv_infos.resize(infos_size);
@@ -292,19 +303,22 @@ std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, Err * result)
         uv_infos[i].len  = (infos + i)->size;
     }
 
-    // @formatter:off
-    int const WRITE_RESULT = ::uv_try_write(Parent::cast<uv_stream_t>(), &uv_infos[0], uv_infos.size());
-    if (WRITE_RESULT <= 0) {
-        if (result != nullptr) { *result = Err::FAILURE; }
-        __tbag_error("Stream::tryWrite() error [{}] {}", WRITE_RESULT, getUvErrorName(WRITE_RESULT));
-        return 0U;
+    // Same as uv_write(), but won’t queue a write request if it can’t be completed immediately.
+    // Will return either:
+    //  > 0: number of bytes written (can be less than the supplied buffer size).
+    //  < 0: negative error code (UV_EAGAIN is returned if no data can be sent immediately).
+    int  const WRITE_SIZE = ::uv_try_write(Parent::cast<uv_stream_t>(),
+                                           &uv_infos[0],
+                                           static_cast<SizeType>(uv_infos.size()));
+    uerr const ERROR_CODE = getUerr2("Stream::tryWrite()", WRITE_SIZE);
+
+    if (result != nullptr) {
+        *result = ERROR_CODE;
     }
-    if (result != nullptr) { *result = Err::SUCCESS; }
-    return static_cast<std::size_t>(WRITE_RESULT);
-    // @formatter:on
+    return static_cast<std::size_t>(WRITE_SIZE);
 }
 
-std::size_t Stream::tryWrite(char const * buffer, std::size_t size, Err * result)
+std::size_t Stream::tryWrite(char const * buffer, std::size_t size, uerr * result)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
@@ -316,14 +330,14 @@ std::size_t Stream::tryWrite(char const * buffer, std::size_t size, Err * result
 // Event methods.
 // --------------
 
-void Stream::onShutdown(ShutdownRequest & request, Err code)
+void Stream::onShutdown(ShutdownRequest & request, uerr code)
 {
-    __tbag_debug("Stream::onShutdown({}) called.", static_cast<int>(code));
+    __tbag_debug("Stream::onShutdown({}) called.", getErrorName(code));
 }
 
-void Stream::onConnection(Err code)
+void Stream::onConnection(uerr code)
 {
-    __tbag_debug("Stream::onConnection({}) called.", static_cast<int>(code));
+    __tbag_debug("Stream::onConnection({}) called.", getErrorName(code));
 }
 
 binf Stream::onAlloc(std::size_t suggested_size)
@@ -332,14 +346,14 @@ binf Stream::onAlloc(std::size_t suggested_size)
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
-void Stream::onRead(Err code, char const * buffer, std::size_t size)
+void Stream::onRead(uerr code, char const * buffer, std::size_t size)
 {
-    __tbag_debug("Stream::onRead({}) called (size:{}).", static_cast<int>(code), size);
+    __tbag_debug("Stream::onRead({}) called (size:{}).", getErrorName(code), size);
 }
 
-void Stream::onWrite(WriteRequest & request, Err code)
+void Stream::onWrite(WriteRequest & request, uerr code)
 {
-    __tbag_debug("Stream::onWrite({}) called.", static_cast<int>(code));
+    __tbag_debug("Stream::onWrite({}) called.", getErrorName(code));
 }
 
 } // namespace uvpp

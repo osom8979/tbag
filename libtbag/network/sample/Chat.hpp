@@ -55,12 +55,12 @@ public:
     virtual ~ChatServer();
 
 public:
-    virtual void onConnection(Err code) override;
+    virtual void onConnection(uerr code) override;
     virtual void onClose() override;
 
 public:
-    virtual void onClientRead(Client & client, Err code, char const * buffer, std::size_t size) override;
-    virtual void onClientWrite(Client & client, WriteRequest & request, Err code) override;
+    virtual void onClientRead(Client & client, uerr code, char const * buffer, std::size_t size) override;
+    virtual void onClientWrite(Client & client, WriteRequest & request, uerr code) override;
     virtual void onClientClose(Client & client) override;
 };
 
@@ -86,9 +86,9 @@ public:
     virtual ~ChatClient();
 
 public:
-    virtual void onConnect(ConnectRequest & request, Err code) override;
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
-    virtual void onWrite(WriteRequest & request, Err code) override;
+    virtual void onConnect(ConnectRequest & request, uerr code) override;
+    virtual void onRead(uerr code, char const * buffer, std::size_t size) override;
+    virtual void onWrite(WriteRequest & request, uerr code) override;
     virtual void onClose() override;
 };
 
@@ -102,6 +102,7 @@ class TBAG_API AsyncChatInput : public uvpp::Tty
 {
 public:
     using Buffer = std::vector<char>;
+    using uerr   = uvpp::uerr;
 
 private:
     ChatClient & _client;
@@ -118,7 +119,7 @@ public:
 
 public:
     virtual uvpp::binf onAlloc(std::size_t suggested_size) override;
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void onRead(uerr code, char const * buffer, std::size_t size) override;
 
 public:
     virtual void onReadLine(std::string const & msg);

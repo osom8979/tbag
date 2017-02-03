@@ -88,15 +88,15 @@ public:
      * @return
      *  Number of bytes written.
      */
-    std::size_t tryWrite(binf * infos, std::size_t infos_size, Err * result = nullptr);
-    std::size_t tryWrite(char const * buffer, std::size_t size, Err * result = nullptr);
+    std::size_t tryWrite(binf * infos, std::size_t infos_size, uerr * result = nullptr);
+    std::size_t tryWrite(char const * buffer, std::size_t size, uerr * result = nullptr);
 
 public:
-    virtual void onShutdown(ShutdownRequest & request, Err code);
-    virtual void onConnection(Err code);
+    virtual void onShutdown(ShutdownRequest & request, uerr code);
+    virtual void onConnection(uerr code);
     virtual binf onAlloc(std::size_t suggested_size);
-    virtual void onRead(Err code, char const * buffer, std::size_t size);
-    virtual void onWrite(WriteRequest & request, Err code);
+    virtual void onRead(uerr code, char const * buffer, std::size_t size);
+    virtual void onWrite(WriteRequest & request, uerr code);
 };
 
 } // namespace uvpp

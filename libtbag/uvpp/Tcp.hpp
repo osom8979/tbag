@@ -78,7 +78,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onConnect(ConnectRequest & request, Err code);
+    virtual void onConnect(ConnectRequest & request, uerr code);
 
 // Utilities.
 public:

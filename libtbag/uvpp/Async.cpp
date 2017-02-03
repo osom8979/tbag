@@ -58,13 +58,13 @@ BaseAsync::~BaseAsync()
 uerr BaseAsync::init(Loop & loop)
 {
     int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
-    TBAG_UERR_DEFAULT_RETURN(BaseAsync, init, CODE);
+    return getUerr2("BaseAsync::init()", CODE);
 }
 
 uerr BaseAsync::send()
 {
     int const CODE = ::uv_async_send(Parent::cast<uv_async_t>());
-    TBAG_UERR_DEFAULT_RETURN(BaseAsync, send, CODE);
+    return getUerr2("BaseAsync::send()", CODE);
 }
 
 // --------------
