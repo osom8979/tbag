@@ -25,7 +25,7 @@ Tea-bag is Third party extension utility project.
 ### Inline dependencies (libtbag/3rd)
 
 - demangle (google-glog) 0.3.4 (BSD 3-clause license)
-- fmt 3.0.0 (BSD license)
+- fmt 3.0.1 (BSD license)
 - jsoncpp 1.7.7 (MIT license)
 - tinyaes128c f832b41 (Public Domain)
 - tinyxml2 3.0.0 (zlib license)
