@@ -9,6 +9,7 @@
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Request.hpp>
+
 #include <uv.h>
 
 // -------------------
@@ -252,9 +253,7 @@ uerr Stream::stopRead()
 
 uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
 {
-    using SizeType = unsigned int;
-
-    if (infos_size > std::numeric_limits<SizeType>::max()) {
+    if (infos_size > getBufferInfoSizeMax()) {
         __tbag_error("Stream::write() buffer info size too large.");
         return uerr::UVPP_ILLARGS;
     }
@@ -271,7 +270,7 @@ uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
     int const CODE = ::uv_write(request.cast<uv_write_t>(),
                                 Parent::cast<uv_stream_t>(),
                                 &uv_infos[0],
-                                static_cast<SizeType>(uv_infos.size()),
+                                static_cast<unsigned int>(uv_infos.size()),
                                 __global_uv_write_cb__);
     return getUerr2("Stream::write()", CODE);
 }
@@ -286,9 +285,7 @@ uerr Stream::write(WriteRequest & request, char const * buffer, std::size_t size
 
 std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, uerr * result)
 {
-    using SizeType = unsigned int;
-
-    if (infos_size > std::numeric_limits<SizeType>::max()) {
+    if (infos_size > getBufferInfoSizeMax()) {
         __tbag_error("Stream::tryWrite() buffer info size too large.");
         if (result != nullptr) {
             *result = uerr::UVPP_ILLARGS;
@@ -309,7 +306,7 @@ std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, uerr * result
     //  < 0: negative error code (UV_EAGAIN is returned if no data can be sent immediately).
     int  const WRITE_SIZE = ::uv_try_write(Parent::cast<uv_stream_t>(),
                                            &uv_infos[0],
-                                           static_cast<SizeType>(uv_infos.size()));
+                                           static_cast<unsigned int>(uv_infos.size()));
     uerr const ERROR_CODE = getUerr2("Stream::tryWrite()", WRITE_SIZE);
 
     if (result != nullptr) {

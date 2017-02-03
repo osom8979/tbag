@@ -28,6 +28,7 @@ typedef intptr_t ssize_t;
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <limits>
 
 #if defined(__PLATFORM_WINDOWS__)
 # include <winsock2.h>
@@ -152,6 +153,21 @@ struct BufferInfo
 
 /** Short name of BufferInfo type. */
 typedef BufferInfo binf;
+
+TBAG_CONSTEXPR static unsigned int getBufferInfoSizeMax() TBAG_NOEXCEPT
+{
+#if defined(max)
+    TBAG_PUSH_MACRO(max);
+#undef max
+#define __RESTORE_MAX__
+#endif
+    return std::numeric_limits<unsigned int>::max();
+#if defined(__RESTORE_MAX__)
+    TBAG_POP_MACRO(max);
+#undef __RESTORE_MAX__
+#endif
+}
+
 
 template <typename T>
 inline bool isDeletedAddress(T const * value) TBAG_NOEXCEPT

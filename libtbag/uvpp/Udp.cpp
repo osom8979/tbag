@@ -278,9 +278,7 @@ uerr Udp::setTtl(int ttl)
 
 uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
 {
-    using SizeType = unsigned int;
-
-    if (infos_size > std::numeric_limits<SizeType>::max()) {
+    if (infos_size > getBufferInfoSizeMax()) {
         __tbag_error("Udp::send() buffer info size too large.");
         return uerr::UVPP_ILLARGS;
     }
@@ -310,7 +308,7 @@ uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, s
     int const CODE = ::uv_udp_send(request.cast<uv_udp_send_t>(),
                                    Parent::cast<uv_udp_t>(),
                                    &uv_infos[0],
-                                   static_cast<SizeType>(uv_infos.size()),
+                                   static_cast<unsigned int>(uv_infos.size()),
                                    addr,
                                    __global_uv_udp_send_cb__);
     return getUerr2("Udp::send()", CODE);
@@ -326,9 +324,7 @@ uerr Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, 
 
 std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, uerr * result)
 {
-    using SizeType = unsigned int;
-
-    if (infos_size > std::numeric_limits<SizeType>::max()) {
+    if (infos_size > getBufferInfoSizeMax()) {
         __tbag_error("Udp::trySend() buffer info size too large.");
         if (result != nullptr) {
             *result = uerr::UVPP_ILLARGS;
@@ -350,7 +346,7 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
 
     int  const WRITE_SIZE = ::uv_udp_try_send(Parent::cast<uv_udp_t>(),
                                               &uv_infos[0],
-                                              static_cast<SizeType>(uv_infos.size()),
+                                              static_cast<unsigned int>(uv_infos.size()),
                                               addr);
     uerr const ERROR_CODE = getUerr2("Udp::trySend()", WRITE_SIZE);
 
