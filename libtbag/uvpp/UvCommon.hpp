@@ -32,6 +32,7 @@ typedef intptr_t ssize_t;
 
 #if defined(__PLATFORM_WINDOWS__)
 # include <winsock2.h>
+# include <WS2tcpip.h> // sockaddr_in6
 # include <Windows.h>
 #else
 # include <netinet/in.h>
