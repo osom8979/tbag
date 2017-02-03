@@ -32,11 +32,11 @@ namespace ex {
  * @author zer0
  * @date   2016-12-29
  */
-class CallableTcp : public Tcp
+class TBAG_API CallableTcp : public Tcp
 {
 public:
     // @formatter:off
-    struct Callback
+    struct TBAG_API Callback
     {
         // Event of Tcp.
         virtual void onConnect(ConnectRequest & request, uerr code) { /* EMPTY. */ }
