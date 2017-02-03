@@ -64,11 +64,11 @@ public:
     std::size_t size() const TBAG_NOEXCEPT;
 
 public:
-    template <typename ...Args>
-    std::thread * createThread(Args ... args)
+    template <typename ... Args>
+    std::thread * createThread(Args && ... args)
     {
-        std::thread * create_thread = new (std::nothrow) std::thread(args...);
-        this->addThread(create_thread);
+        std::thread * create_thread = new (std::nothrow) std::thread(std::forward<Args>(args) ...);
+        addThread(create_thread);
         return create_thread;
     }
 };
