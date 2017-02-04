@@ -89,6 +89,8 @@ using ufd   = int;
     _TBAG_ETC_XX(INTERFACE_ADDRESS, uv_interface_address_t) \
     _TBAG_ETC_XX(DIRENT           , uv_dirent_t)            \
     _TBAG_ETC_XX(PASSWD           , uv_passwd_t)            \
+    _TBAG_ETC_XX(STDIO_CONTAINER  , uv_stdio_container_t)   \
+    _TBAG_ETC_XX(PROCESS_OPTIONS  , uv_process_options_t)   \
     /* -- END -- */
 #endif
 
