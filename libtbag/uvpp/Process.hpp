@@ -17,6 +17,9 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/uvpp/Handle.hpp>
 
+#include <string>
+#include <vector>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -25,6 +28,7 @@ namespace uvpp {
 
 // Forward declaration.
 class Loop;
+class Stream;
 
 /**
  * Process class prototype.
@@ -42,37 +46,85 @@ public:
     using Parent = Handle;
 
 public:
+    // The stdio field points to an array of uv_stdio_container_t structs
+    // that describe the file descriptors that will be made available to the child process.
+    // The convention is that stdio[0] points to stdin, fd 1 is used for stdout, and fd 2 is stderr.
+    TBAG_CONSTEXPR static int const STANDARD_INPUT_FD  =  0; ///< @c stdin
+    TBAG_CONSTEXPR static int const STANDARD_OUTPUT_FD =  1; ///< @c stdout
+    TBAG_CONSTEXPR static int const STANDARD_ERROR_FD  =  2; ///< @c stderr
+    TBAG_CONSTEXPR static int const STANDARD_IO_SIZE   =  3;
+    TBAG_CONSTEXPR static int const UNKNOWN_PROCESS_ID = -1;
+
+public:
     /**
-     * Process options prototype.
+     * Stdio container prototype.
      *
      * @author zer0
      * @date   2017-02-04
      *
      * @remarks
-     *  Options for spawning the process - passed to uv_spawn().
+     *  Container for each stdio handle or fd passed to a child process.
      */
-    class TBAG_API Options
+    struct StdioContainer
     {
-    public:
-        Options();
-        virtual ~Options();
+        enum class Type
+        {
+            STDIO_CONTAINER_STREAM,
+            STDIO_CONTAINER_FD,
+        } type;
 
-    public:
-        Options(Options const & obj);
-        Options(Options && obj);
+        Stream * stream;
+        int fd;
 
-    public:
-        Options & operator =(Options const & obj);
-        Options & operator =(Options && obj);
-
-    public:
-        friend void swap(Options & obj1, Options & obj2);
+        bool create_pipe;
+        bool inherit_fd;
+        bool inherit_stream;
+        bool readable_pipe;
+        bool writable_pipe;
     };
+
+    /**
+     * Options for spawning the process.
+     *
+     * @author zer0
+     * @date   2017-02-04
+     */
+    struct Options
+    {
+        using String  = std::string;
+        using Strings = std::vector<String>;
+        using Stdios  = std::vector<StdioContainer>;
+
+        String file; ///< Executable file path.
+        String cwd;  ///< Working directory.
+
+        Strings args; ///< Arguments.
+        Strings envs; ///< Environment variables (e.g. VAR=VALUE).
+
+        Stdios stdios;
+
+        // Changing the UID/GID is only supported on Unix.
+        uuser  uid;
+        ugroup gid;
+
+        bool setuid; ///< Set the child process' user id.
+        bool setgid; ///< Set the child process' group id.
+        bool detached;
+        bool verbatim_args;
+        bool hide;
+    };
+
+private:
+    Options _options;
 
 public:
     Process();
     Process(Loop & loop, Options const & options);
     virtual ~Process();
+
+public:
+    /** The PID of the spawned process. It’s set after calling uv_spawn(). */
+    int getPid() const;
 
 public:
     /** Initializes the process handle and starts the process. */

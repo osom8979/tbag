@@ -8,7 +8,7 @@
 #include <libtbag/uvpp/Process.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-
+#include <libtbag/uvpp/Stream.hpp>
 #include <uv.h>
 
 // -------------------
@@ -16,6 +16,9 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace uvpp {
+
+using CharPtrs = std::vector<char*>;
+using Stdios = std::vector<uv_stdio_container_t>;
 
 // --------------------
 // Global libuv events.
@@ -25,57 +28,128 @@ static void __global_uv_exit_cb__(uv_process_t * handle, int64_t exit_status, in
 {
     // Type definition for callback passed in uv_process_options_t
     // which will indicate the exit status and the signal that caused the process to terminate, if any.
+    Process * p = static_cast<Process*>(handle->data);
+    if (p == nullptr) {
+        __tbag_error("__global_uv_exit_cb__() handle.data is nullptr.");
+    } else if (isDeletedAddress(p)) {
+        __tbag_error("__global_uv_exit_cb__() handle.data is deleted.");
+    } else {
+        p->onExit(exit_status, term_signal);
+    }
 }
 
 /* inline */ namespace impl {
 
-static bool convertOptionsToNative(Process::Options const & options, uv_process_options_t & native)
+static bool updateOptions(Process::Options & options,
+                          CharPtrs & args,
+                          CharPtrs & envs,
+                          Stdios & stdios,
+                          uv_process_options_t & native)
 {
-    return false;
+    std::size_t const ARGS_SIZE = options.args.size();
+    std::size_t const ENVS_SIZE = options.envs.size();
+
+    args.clear();
+    envs.clear();
+    args.resize(ARGS_SIZE + 2); // [EXE_PATH], [...], [NULL]
+    envs.resize(ENVS_SIZE + 1); // [...], [NULL]
+
+    // First: exe file path.
+    args[0] = &options.file[0];
+
+    // Argument pointers.
+    for (std::size_t index = 0; index < ARGS_SIZE; ++index) {
+        args[index + 1] = &options.args[index][0];
+    }
+
+    // Environment pointers.
+    for (std::size_t index = 0; index < ENVS_SIZE; ++index) {
+        envs[index] = &options.envs[index][0];
+    }
+
+    // Last: NULL pointer.
+    args[ARGS_SIZE + 1] = nullptr;
+    envs[ENVS_SIZE + 0] = nullptr;
+
+    native.exit_cb = __global_uv_exit_cb__;
+
+    // Path pointing to the program to be executed.
+    native.file = options.file.c_str();
+    // If non-null this represents a directory the subprocess should execute
+    // in. Stands for current working directory.
+    native.cwd  = options.cwd.c_str();
+
+    // Command line arguments. args[0] should be the path to the program. On
+    // Windows this uses CreateProcess which concatenates the arguments into a
+    // string this can cause some strange errors. See the
+    // UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS flag on uv_process_flags.
+    native.args = &args[0];
+    // This will be set as the environ variable in the subprocess. If this is
+    // NULL then the parents environ will be used.
+    native.env  = &envs[0];
+
+    static_assert(sizeof(native.uid) == sizeof(options.uid), "Not equal uid size type.");
+    static_assert(sizeof(native.gid) == sizeof(options.gid), "Not equal gid size type.");
+
+    // Libuv can change the child process user/group id. This happens only when
+    // the appropriate bits are set in the flags fields.
+    // Note: This is not supported on Windows, uv_spawn() will fail and set the error to UV_ENOTSUP.
+    native.uid = options.uid;
+    native.gid = options.gid;
+
+    // Various flags that control how uv_spawn() behaves. See the definition of
+    // 'enum uv_process_flags' below.
+    native.flags = 0;
+    native.flags |= (options.setuid ? UV_PROCESS_SETUID : 0);
+    native.flags |= (options.setgid ? UV_PROCESS_SETGID : 0);
+    // Do not wrap any arguments in quotes, or perform any other escaping, when
+    // converting the argument list into a command line string. This option is
+    // only meaningful on Windows systems. On Unix it is silently ignored.
+    native.flags |= (options.verbatim_args ? UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS : 0);
+    // Spawn the child process in a detached state - this will make it a process
+    // group leader, and will effectively enable the child to keep running after
+    // the parent exits. Note that the child process will still keep the
+    // parent's event loop alive unless the parent process calls uv_unref() on
+    // the child's process handle.
+    native.flags |= (options.detached ? UV_PROCESS_DETACHED : 0);
+    // Hide the subprocess console window that would normally be created. This
+    // option is only meaningful on Windows systems. On Unix it is silently
+    // ignored.
+    native.flags |= (options.hide ? UV_PROCESS_WINDOWS_HIDE : 0);
+
+    std::size_t const STDIOS_SIZE = options.stdios.size();
+    native.stdio_count = static_cast<int>(options.stdios.size());
+
+    stdios.clear();
+    stdios.resize(STDIOS_SIZE);
+
+    // The 'stdio' field points to an array of uv_stdio_container_t structs that
+    // describe the file descriptors that will be made available to the child
+    // process. The convention is that stdio[0] points to stdin, fd 1 is used for
+    // stdout, and fd 2 is stderr.
+    //
+    // Note: that on windows file descriptors greater than 2 are available to the
+    // child process only if the child processes uses the MSVCRT runtime.
+    for (std::size_t index = 0; index < STDIOS_SIZE; ++index) {
+        Process::StdioContainer & stdio = options.stdios[index];
+        stdios[index].flags = static_cast<uv_stdio_flags>(UV_IGNORE);
+        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.create_pipe    ? UV_CREATE_PIPE    : 0));
+        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.inherit_fd     ? UV_INHERIT_FD     : 0));
+        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.inherit_stream ? UV_INHERIT_STREAM : 0));
+        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.readable_pipe  ? UV_READABLE_PIPE  : 0));
+        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.writable_pipe  ? UV_WRITABLE_PIPE  : 0));
+
+        if (stdio.type == Process::StdioContainer::Type::STDIO_CONTAINER_STREAM && stdio.stream != nullptr) {
+            stdios[index].data.stream = stdio.stream->cast<uv_stream_t>();
+        } else /*if (stdio.type == Process::StdioContainer::Type::STDIO_CONTAINER_FD)*/ {
+            stdios[index].data.fd = stdio.fd;
+        }
+    }
+
+    return true;
 }
 
 } // namespace impl
-
-// --------------------------------
-// Process::Options implementation.
-// --------------------------------
-
-Process::Options::Options()
-{
-}
-
-Process::Options::~Options()
-{
-}
-
-Process::Options::Options(Options const & obj)
-{
-}
-
-Process::Options::Options(Options && obj)
-{
-}
-
-Process::Options & Process::Options::operator =(Options const & obj)
-{
-    if (this != & obj) {
-    }
-    return *this;
-}
-
-Process::Options & Process::Options::operator =(Options && obj)
-{
-    if (this != & obj) {
-    }
-    return *this;
-}
-
-void swap(Process::Options & obj1, Process::Options & obj2)
-{
-    Process::Options temp = obj1;
-    obj1 = obj2;
-    obj2 = temp;
-}
 
 // -----------------------
 // Process implementation.
@@ -98,10 +172,21 @@ Process::~Process()
     // EMPTY.
 }
 
+int Process::getPid() const
+{
+    return Parent::cast<uv_process_t>()->pid;
+}
+
 uerr Process::spawn(Loop & loop, Options const & options)
 {
+    _options = options; // IMPORTANT!!
+
     uv_process_options_t uv_options = {0,};
-    if (impl::convertOptionsToNative(options, uv_options) == false) {
+    CharPtrs args;
+    CharPtrs envs;
+    Stdios stdios;
+
+    if (impl::updateOptions(_options, args, envs, stdios, uv_options) == false) {
         __tbag_error("Process::spawn() options error.");
         return uerr::UVPP_ILLARGS;
     }

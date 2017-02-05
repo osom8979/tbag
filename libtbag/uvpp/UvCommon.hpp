@@ -44,14 +44,19 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
+// Platform-specific definitions for libuv support.
 #if defined(__PLATFORM_WINDOWS__)
-using ufile = int;
-using usock = SOCKET;
-using ufd   = HANDLE;
+using ufile  = int;
+using usock  = SOCKET;
+using ufd    = HANDLE;
+using uuser  = unsigned char;
+using ugroup = unsigned char;
 #else
-using ufile = int;
-using usock = int;
-using ufd   = int;
+using ufile  = int;
+using usock  = int;
+using ufd    = int;
+using uuser  = uint32_t;
+using ugroup = uint32_t;
 #endif
 
 #ifndef TBAG_UV_HANDLE_MAP
