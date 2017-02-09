@@ -19,8 +19,14 @@ if (NOT Flatc_SKIP_FOUND)
             "/usr/local/bin"
             "${Flatc_ROOT}"
             "${Flatc_ROOT}/bin"
+            "${Flatc_ROOT}/cmake-build-debug"
+            "${Flatc_ROOT}/cmake-build-release"
+            "${Flatc_ROOT}/build"
             "$ENV{Flatc_ROOT}"
-            "$ENV{Flatc_ROOT}/bin")
+            "$ENV{Flatc_ROOT}/bin"
+            "$ENV{Flatc_ROOT}/cmake-build-debug"
+            "$ENV{Flatc_ROOT}/cmake-build-release"
+            "$ENV{Flatc_ROOT}/build")
 
     find_program (Flatc_COMPILER
             NAMES "flatc" "libtbag_flatc"
