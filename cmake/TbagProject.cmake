@@ -55,8 +55,11 @@ endfunction ()
 
 #/// Clear project properties.
 macro (tbag_project__clear_property)
-    # Flag variables.
-    set (TBAG_PROJECT_FLAG_TARGET_INSTALL OFF)
+    if (BUILD_SHARED_LIBS)
+        set (TBAG_PROJECT_LIB_TYPE SHARED)
+    else ()
+        set (TBAG_PROJECT_LIB_TYPE STATIC)
+    endif ()
 
     # List variables.
     set (TBAG_PROJECT_OBJECTS)

@@ -10,6 +10,9 @@ include (TbagUtils)
 ## -----------
 
 macro (tbag_modules__preview)
+    # Flag variables.
+    message (STATUS "TBAG_PROJECT_LIB_TYPE: ${TBAG_PROJECT_LIB_TYPE}")
+
     # List variables.
     message (STATUS "TBAG_PROJECT_OBJECTS: ${TBAG_PROJECT_OBJECTS}")
     message (STATUS "TBAG_PROJECT_DEPENDENCIES: ${TBAG_PROJECT_DEPENDENCIES}")
@@ -126,6 +129,18 @@ macro (tbag_modules__add_whole_archive __lib_name)
     else ()
         list (APPEND TBAG_PROJECT_LDFLAGS ${__lib_name})
     endif ()
+endmacro ()
+
+macro (tbag_modules__apply_shared_library)
+    set (TBAG_PROJECT_LIB_TYPE SHARED)
+endmacro ()
+
+macro (tbag_modules__apply_static_library)
+    set (TBAG_PROJECT_LIB_TYPE STATIC)
+endmacro ()
+
+macro (tbag_modules__apply_module_library)
+    set (TBAG_PROJECT_LIB_TYPE MODULE)
 endmacro ()
 
 ## -----
@@ -645,7 +660,7 @@ macro (tbag_modules__add_target)
 
     # Register object files.
     if ("${TBAG_PROJECT_CONST_TYPE}" STREQUAL "${TBAG_PROJECT_LIBRARY_PREFIX}")
-        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
+        add_library (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_LIB_TYPE} ${TBAG_PROJECT_OBJECTS})
     else ()
         add_executable (${TBAG_PROJECT_CONST_NAME} ${TBAG_PROJECT_OBJECTS})
     endif ()
