@@ -54,6 +54,12 @@ bool DatagramWrite::pushWriteBuffer(char const * buffer, Size size)
         return false;
     }
 
+    if ((*shared).get() == nullptr) {
+        shared->reset(new (std::nothrow) Buffer(size));
+        if ((*shared).get() == nullptr) {
+            return false;
+        }
+    }
     Buffer & cursor = *(shared->get());
 
     // Realloc with read buffer.
