@@ -29,7 +29,7 @@ endif ()
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (CMAKE_C_COMPILER_ID STREQUAL MSVC)
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4146") ## unary minus operator applied to unsigned type, result still unsigned.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244") ## conversion from 'type1' to 'type2', possible loss of data.
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251") ## class 'type' needs to have dll-interface to be used by clients of class 'type2'.
@@ -39,7 +39,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819") ## code page warning.
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") ## declared deprecated warning.
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-endif()
+elseif (CMAKE_C_COMPILER_ID STREQUAL Clang)
+    # EMPTY.
+elseif (CMAKE_C_COMPILER_ID STREQUAL GNU)
+    # EMPTY.
+endif ()
 
 # Setup the THIRD_PREFIX variable.
 string (REPLACE "\\" "/" __tparty_home_path "$ENV{TPARTY_HOME}/local")
