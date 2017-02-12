@@ -90,6 +90,7 @@ public:
     static uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
 
     static bool isIpv4(std::string const & ip);
+    static bool isIpv6(std::string const & ip);
 };
 
 } // namespace uvpp

@@ -88,12 +88,7 @@ public:
         }
 
         Buffer & cursor = *(shared->get());
-
-        binf info;
-        info.buffer = &cursor[0];
-        info.size   = cursor.size();
-
-        predicated(info);
+        predicated(&cursor[0], cursor.size());
 
         _writers.pop();
         return true;

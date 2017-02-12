@@ -218,10 +218,11 @@ TBAG_API std::string getUvErrorName(int uv_error_code);
 #ifndef TBAG_UV_ERROR_MAP
 #define TBAG_UV_ERROR_MAP(_TBAG_UVPP_XX, _TBAG_UV_XX) \
     /* uvpp error codes. */                           \
-    _TBAG_UVPP_XX(_SUCCESS, "No error"         )      \
-    _TBAG_UVPP_XX(_ILLARGS, "Illegal arguments")      \
+    _TBAG_UVPP_XX(_SUCCESS, "No error"              ) \
+    _TBAG_UVPP_XX(_ILLARGS, "Illegal arguments"     ) \
     _TBAG_UVPP_XX(_NULLPTR, "Null pointer exception") \
-    /* uv error codes. */                                                 \
+    _TBAG_UVPP_XX(_NREADY , "Not ready"             ) \
+    /* uv error codes. */                                                    \
     _TBAG_UV_XX(_E2BIG           , "Argument list too long"                ) \
     _TBAG_UV_XX(_EACCES          , "Permission denied"                     ) \
     _TBAG_UV_XX(_EADDRINUSE      , "Address already in use"                ) \

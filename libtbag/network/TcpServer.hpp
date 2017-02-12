@@ -15,10 +15,20 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/TcpLoop.hpp>
-#include <libtbag/container/Pointer.hpp>
+#include <libtbag/Noncopyable.hpp>
 
-#include <unordered_map>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Async.hpp>
+#include <libtbag/uvpp/Request.hpp>
+
+#include <libtbag/network/DatagramAdapter.hpp>
+
+#include <string>
+#include <vector>
+#include <memory>
+#include <mutex>
+#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,29 +42,58 @@ namespace network {
  * @author zer0
  * @date   2016-12-30
  */
-class TBAG_API TcpServer : public TcpLoop
+class TBAG_API TcpServer : public Noncopyable
 {
 public:
-    using Parent = TcpLoop;
+    using binf = uvpp::binf;
+    using uerr = uvpp::uerr;
 
-    using CallableTcp  = Parent::CallableTcp;
-    using WriteRequest = Parent::WriteRequest;
-    using WriteQueue   = Parent::WriteQueue;
+    using Loop  = uvpp::Loop;
+    using Tcp   = uvpp::Tcp;
+    using Async = uvpp::Async;
+    using Job   = Async::Job;
+    using WriteRequest = uvpp::WriteRequest;
 
-    using Buffer = Parent::Buffer;
-    using binf   = Parent::binf;
-    using uerr   = Parent::uerr;
+    using Buffer = std::vector<char>;
+
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
 public:
-    /** Client class prototype. */
-    struct Client : public CommonTcp, public std::enable_shared_from_this<Client>
+    /** Server class prototype. */
+    struct Server : public Tcp
     {
         friend class TcpServer;
 
-        TcpServer & server;
+        TcpServer * parent;
 
-        Client(TcpServer & s) : CommonTcp(s.atLoop()), server(s) { /* EMPTY. */ }
-        ~Client() { /* EMPTY. */ }
+        Server(Loop & loop, TcpServer * server);
+        virtual ~Server();
+
+        virtual void onConnection(uerr code) override;
+        virtual void onClose() override;
+    };
+
+    /** Client class prototype. */
+    struct Client : public Tcp
+    {
+        friend class TcpServer;
+
+        TcpServer * parent;
+
+        std::atomic_bool write_ready;
+        WriteRequest write_req;
+
+        Buffer buffer;
+        DatagramRead datagram;
+
+        Client(Loop & loop, TcpServer * server);
+        virtual ~Client();
+
+        inline bool isReady() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(write_ready.load()))
+        { return write_ready.load(); }
+
+        uerr write(char const * buffer, std::size_t size);
 
         virtual binf onAlloc(std::size_t suggested_size) override;
         virtual void onRead(uerr code, char const * buffer, std::size_t size) override;
@@ -63,37 +102,65 @@ public:
     };
 
 public:
+    using SharedServer = std::shared_ptr<Server>;
     using SharedClient = std::shared_ptr<Client>;
-    using WeakClient   = std::weak_ptr<Client>;
-    using ClientKey    = container::Pointer<Client>;
-    using ClientMap    = std::unordered_map<ClientKey, SharedClient, ClientKey::Hash, ClientKey::EqualTo>;
+    using SharedAsync  = std::shared_ptr<Async>;
 
-protected:
-    ClientMap _clients;
+    using WeakServer = std::weak_ptr<Server>;
+    using WeakClient = std::weak_ptr<Client>;
+    using WeakAsync  = std::weak_ptr<Async>;
+
+public:
+    struct WriteJob : public Job
+    {
+        WeakClient client;
+        Buffer buffer;
+        Mutex  mutex;
+        uerr   result;
+
+        WriteJob(WeakClient c, char const * data, std::size_t size);
+        virtual ~WriteJob();
+
+        virtual void run(Async * handle) override;
+    };
+
+private:
+    Loop _loop;
+
+private:
+    SharedServer _server;
+    SharedAsync  _async;
 
 public:
     TcpServer();
-    virtual ~TcpServer();
-
-protected:
-    SharedClient createClient();
-    bool insertClient(SharedClient const & client);
-    void eraseClient(Client & client);
+    ~TcpServer();
 
 public:
-    ClientKey getClientKey(Client & client) const;
-    WeakClient getWeakClient(ClientKey const & client);
+    inline Loop       & atLoop()       TBAG_NOEXCEPT { return _loop; }
+    inline Loop const & atLoop() const TBAG_NOEXCEPT { return _loop; }
+
+    inline WeakServer getWeakServer() { return _server; }
+    inline WeakAsync  getWeakAsync () { return _async;  }
 
 protected:
-    WeakClient createAcceptedClient();
+    WeakClient acceptedNewClient();
 
 public:
     bool initIpv4(std::string const & ip, int port);
+    bool initIpv6(std::string const & ip, int port);
+    bool init(std::string const & ip, int port);
 
 public:
-    virtual bool run(std::string const & ip, int port) override;
+    bool run();
 
-// Extension event methods.
+public:
+    bool asyncClose();
+    bool asyncWrite(Client & client, char const * buffer, std::size_t size);
+
+public:
+    virtual void onConnection(uerr code);
+    virtual void onClose();
+
 public:
     virtual binf onClientAlloc(Client & client, std::size_t suggested_size);
     virtual void onClientRead (Client & client, uerr code, char const * buffer, std::size_t size);

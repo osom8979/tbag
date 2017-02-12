@@ -242,6 +242,11 @@ bool Tcp::isIpv4(std::string const & ip)
     return true;
 }
 
+bool Tcp::isIpv6(std::string const & ip)
+{
+    return false;
+}
+
 } // namespace uvpp
 
 // --------------------
