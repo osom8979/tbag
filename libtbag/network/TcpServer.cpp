@@ -222,9 +222,9 @@ bool TcpServer::asyncWrite(Client & client, char const * buffer, std::size_t siz
     return false;
 }
 
-// ------------------------
-// Extension event methods.
-// ------------------------
+// --------------
+// Event methods.
+// --------------
 
 void TcpServer::onConnection(uerr code)
 {
