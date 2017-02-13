@@ -24,33 +24,6 @@ TcpClient::~TcpClient()
     // EMPTY.
 }
 
-bool TcpClient::initIpv4(std::string const & ip, int port)
-{
-    auto & TCP = atTcp();
-    if (TCP->isInit() == false) {
-        return false;
-    }
-
-    sockaddr_in addr;
-    if (TCP->initAddress(ip, port, &addr) != uvpp::uerr::UVPP_SUCCESS) {
-        return false;
-    }
-
-    if (TCP->connect(_connector, (sockaddr const *)&addr) != uvpp::uerr::UVPP_SUCCESS) {
-        return false;
-    }
-
-    return true;
-}
-
-bool TcpClient::run(std::string const & ip, int port)
-{
-    if (uvpp::Tcp::isIpv4(ip) && initIpv4(ip, port)) {
-        return atLoop().run() == uvpp::uerr::UVPP_SUCCESS;
-    }
-    return false;
-}
-
 } // namespace network
 
 // --------------------

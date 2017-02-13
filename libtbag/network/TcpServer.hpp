@@ -114,6 +114,7 @@ public:
     struct WriteJob : public Job
     {
         WeakClient client;
+
         Buffer buffer;
         Mutex  mutex;
         uerr   result;

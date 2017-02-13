@@ -15,8 +15,19 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/TcpLoop.hpp>
+
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Async.hpp>
 #include <libtbag/uvpp/Request.hpp>
+
+#include <libtbag/network/DatagramAdapter.hpp>
+
+#include <string>
+#include <vector>
+#include <memory>
+#include <mutex>
+#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,10 +41,24 @@ namespace network {
  * @author zer0
  * @date   2016-12-29
  */
-class TBAG_API TcpClient : public TcpLoop
+class TBAG_API TcpClient : public Noncopyable
 {
 public:
-    using Parent = TcpLoop;
+    using binf = uvpp::binf;
+    using uerr = uvpp::uerr;
+
+    using Loop  = uvpp::Loop;
+    using Tcp   = uvpp::Tcp;
+    using Async = uvpp::Async;
+    using Job   = Async::Job;
+
+    using ConnectRequest = uvpp::ConnectRequest;
+    using WriteRequest   = uvpp::WriteRequest;
+
+    using Buffer = std::vector<char>;
+
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
 private:
     ConnectRequest _connector;
@@ -41,12 +66,6 @@ private:
 public:
     TcpClient();
     virtual ~TcpClient();
-
-public:
-    bool initIpv4(std::string const & ip, int port);
-
-public:
-    virtual bool run(std::string const & ip, int port) override;
 };
 
 } // namespace network
