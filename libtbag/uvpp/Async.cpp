@@ -80,41 +80,29 @@ void BaseAsync::onAsync()
 // Async implementation.
 // ---------------------
 
-Async::Async() : BaseAsync(), _exit(false)
+Async::Async() : BaseAsync()
 {
     // EMPTY.
 }
 
-Async::Async(Loop & loop) : BaseAsync(loop), _exit(false)
+Async::Async(Loop & loop) : BaseAsync(loop)
 {
     // EMPTY.
 }
 
 Async::~Async()
 {
-    safeClear();
+    // EMPTY.
 }
 
-void Async::safeClear()
+void Async::clearJob()
 {
     _jobs.clear();
 }
 
-void Async::safePush(SharedJob job)
+void Async::pushJob(SharedJob job)
 {
     _jobs.push(job);
-}
-
-uerr Async::safeSendJob(SharedJob job)
-{
-    _jobs.push(job);
-    return Parent::send();
-}
-
-uerr Async::safeClose()
-{
-    _exit.store(true);
-    return Parent::send();
 }
 
 void Async::onAsync()
@@ -125,10 +113,6 @@ void Async::onAsync()
             job->run(this);
         }
         job.reset();
-    }
-
-    if (_exit) {
-        close();
     }
 }
 

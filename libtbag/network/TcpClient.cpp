@@ -179,7 +179,7 @@ bool TcpClient::asyncWrite(char const * buffer, std::size_t size)
         return _client->write(buffer, size) == uerr::UVPP_SUCCESS;
     } else if (static_cast<bool>(_async)) {
         WeakClient weak = std::static_pointer_cast<Client>(_loop.findChildHandle(*_client).lock());
-        auto shared = _async->safeNewPush<WriteJob>(weak, buffer, size);
+        auto shared = _async->newPushJob<WriteJob>(weak, buffer, size);
         return static_cast<bool>(shared);
     }
     return false;

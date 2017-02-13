@@ -114,13 +114,20 @@ public:
         virtual void run(Async * handle) = 0;
     };
 
+    struct TBAG_API CloseJob : public Job
+    {
+        virtual void run(Async * handle) override
+        {
+            handle->close();
+        }
+    };
+
 public:
     using SharedJob = std::shared_ptr<Job>;
     using JobQueue  = container::SafetyQueue<SharedJob>;
 
 private:
     JobQueue _jobs;
-    std::atomic_bool _exit;
 
 public:
     Async();
@@ -134,22 +141,20 @@ public:
     { return _jobs.size(); }
 
 public:
-    void safeClear();
-    void safePush(SharedJob job);
-    uerr safeSendJob(SharedJob job);
-    uerr safeClose();
+    void clearJob();
+    void pushJob(SharedJob job);
 
 public:
-    virtual void onAsync();
+    virtual void onAsync() override;
 
 public:
     /** Create(new) & push job. */
     template <typename JobType, typename ... Args>
-    inline std::shared_ptr<typename remove_cr<JobType>::type> safeNewPush(Args && ... args)
+    inline std::shared_ptr<typename remove_cr<JobType>::type> newPushJob(Args && ... args)
     {
         typedef typename remove_cr<JobType>::type ResultJobType;
         SharedJob shared = SharedJob(new (std::nothrow) JobType(std::forward<Args>(args) ...));
-        safePush(shared);
+        pushJob(shared);
         return std::static_pointer_cast<ResultJobType, Job>(shared);
     }
 };
