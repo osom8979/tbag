@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <cassert>
 #include <memory>
 #include <utility>
 #include <type_traits>
@@ -53,8 +54,9 @@ struct Allocator
 {
 public:
     using value_type = Type;
+
     using pointer       = typename std::add_pointer<value_type>::type;
-    using const_pointer = typename std::add_const<pointer>::type*;
+    using const_pointer = typename std::add_const<pointer>::type;
 
     using reference       = typename std::add_lvalue_reference<value_type>::type;
     using const_reference = typename std::add_const<reference>::type;
@@ -75,7 +77,9 @@ public:
     ~Allocator() { /* EMPTY. */ }
 
 public:
-    template <typename Up> Allocator(Allocator<Up> const & ) TBAG_NOEXCEPT { /* EMPTY. */ }
+    template <typename Up>
+    Allocator(Allocator<Up> const & obj) TBAG_NOEXCEPT
+    { /* EMPTY. */ }
 
 public:
     /** obtains the address of an object. */
@@ -92,30 +96,34 @@ public:
 
 public:
     /** allocates uninitialized storage. */
-    pointer allocate(size_type size, Allocator<void>::const_pointer hint = 0)
+    pointer allocate(size_type size, void const * hint = 0)
     {
+        assert(size > 0);
         return static_cast<pointer>(::libtbag::memory::allocate(size * sizeof(value_type)));
     }
 
     /** deallocates storage. */
     void deallocate(pointer ptr, size_type allocated_size) TBAG_NOEXCEPT
     {
+        assert(ptr != nullptr);
         ::libtbag::memory::deallocate((void*)ptr);
     }
 
 public:
     /** constructs an object in allocated storage. */
     template <typename U, typename ... Args>
-    void construct(U * p, Args && ... args)
+    void construct(U * ptr, Args && ... args)
     {
-        ::new ((void*)p) U(std::forward<Args>(args) ...);
+        assert(ptr != nullptr);
+        ::new ((void*)ptr) U(std::forward<Args>(args) ...);
     }
 
     /** destructs an object in allocated storage. */
     template <class U>
-    void destroy(U * p)
+    void destroy(U * ptr)
     {
-        p->~U();
+        assert(ptr != nullptr);
+        ptr->~U();
     }
 };
 

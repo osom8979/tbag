@@ -24,8 +24,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace memory {
 
-// TODO: Forward declaration.
-
 /**
  * DefaultPool class prototype.
  *
@@ -34,9 +32,6 @@ namespace memory {
  */
 class TBAG_API DefaultPool : public Noncopyable
 {
-private:
-    // TODO: Insert member variables.
-
 public:
     DefaultPool();
     virtual ~DefaultPool();
