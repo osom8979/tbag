@@ -166,10 +166,17 @@ void ChatTty::onRead(uerr code, char const * buffer, std::size_t size)
 
 void ChatTty::onReadLine(std::string const & msg)
 {
-    char const * const EXIT_COMMAND = "exit";
+    char const * const   EXIT_COMMAND = "exit";
+    char const * const THREAD_COMMAND = "thread";
 
     if (msg == EXIT_COMMAND) {
         _client.asyncClose();
+        return;
+    } else if (msg == THREAD_COMMAND) {
+        std::thread([&, msg](){
+            std::cout << "ChatTty::onReadLine() write thread.\n";
+            _client.asyncWrite(&msg[0], msg.size());
+        }).detach();
         return;
     }
 
