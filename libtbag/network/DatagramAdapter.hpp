@@ -43,7 +43,7 @@ namespace network {
 struct DatagramInterface
 {
     using binf = uvpp::binf;
-    using Size = uint64_t;
+    using Size = uint32_t;
 
     using Buffer         = std::vector<char>;
     using SharedBuffer   = std::shared_ptr<Buffer>;
@@ -71,15 +71,15 @@ struct DatagramInterface
     inline static uint16_t toHost(uint16_t network) { return ntohs (network); }
     inline static  int32_t toHost( int32_t network) { return ntohl (network); }
     inline static uint32_t toHost(uint32_t network) { return ntohl (network); }
-    inline static  int64_t toHost( int64_t network) { return ntohll(network); }
-    inline static uint64_t toHost(uint64_t network) { return ntohll(network); }
+    //inline static  int64_t toHost( int64_t network) { return ntohll(network); }
+    //inline static uint64_t toHost(uint64_t network) { return ntohll(network); }
 
     inline static  int16_t toNetwork( int16_t host) { return htons (host); }
     inline static uint16_t toNetwork(uint16_t host) { return htons (host); }
     inline static  int32_t toNetwork( int32_t host) { return htonl (host); }
     inline static uint32_t toNetwork(uint32_t host) { return htonl (host); }
-    inline static  int64_t toNetwork( int64_t host) { return htonll(host); }
-    inline static uint64_t toNetwork(uint64_t host) { return htonll(host); }
+    //inline static  int64_t toNetwork( int64_t host) { return htonll(host); }
+    //inline static uint64_t toNetwork(uint64_t host) { return htonll(host); }
 };
 
 /**
