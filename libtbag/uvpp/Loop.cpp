@@ -290,7 +290,7 @@ bool Loop::eraseChildHandle(void * native_handle)
         return true;
     }
 
-    __tbag_debug("Loop::eraseChildHandle(@{}[{}]) failure.", HANDLE_ADDRESS, HANDLE_NAME);
+    __tbag_error("Loop::eraseChildHandle(@{}[{}]) failure.", HANDLE_ADDRESS, HANDLE_NAME);
     return false;
 #else
     return _handles.erase(NativeHandle(native_handle)) == 1U;
@@ -310,7 +310,7 @@ Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
         return WeakHandle(itr.first->second);
     }
 
-    __tbag_debug("Loop::insertChildHandle(@{}[{}]) failure.", static_cast<void*>(h.get()), h->getName());
+    __tbag_error("Loop::insertChildHandle(@{}[{}]) failure.", static_cast<void*>(h.get()), h->getName());
     return WeakHandle();
 }
 

@@ -58,7 +58,9 @@ void ChatServer::onClientReadDatagram(ClientTcp & client, uerr code, char const 
     std::cout << "ChatServer::onClientReadDatagram() read message: " << msg << std::endl;
 
     foreachClient([&](ClientTcp & tcp){
-        this->asyncWriteClient(tcp, buffer, size);
+        if (&client != &tcp) {
+            this->asyncWriteClient(tcp, buffer, size);
+        }
     });
 }
 
