@@ -280,7 +280,21 @@ Loop::WeakHandle Loop::findChildHandle(Handle & h)
 
 bool Loop::eraseChildHandle(void * native_handle)
 {
+#if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG) && !defined(NDEBUG)
+    WeakHandle weak = findChildHandle(native_handle);
+    void const * HANDLE_ADDRESS   = weak.lock().get();
+    std::string const HANDLE_NAME = weak.lock()->getName();
+
+    if (_handles.erase(NativeHandle(native_handle)) == 1U) {
+        __tbag_debug("Loop::eraseChildHandle(@{}[{}]) success.", HANDLE_ADDRESS, HANDLE_NAME);
+        return true;
+    }
+
+    __tbag_debug("Loop::eraseChildHandle(@{}[{}]) failure.", HANDLE_ADDRESS, HANDLE_NAME);
+    return false;
+#else
     return _handles.erase(NativeHandle(native_handle)) == 1U;
+#endif
 }
 
 bool Loop::eraseChildHandle(Handle & h)
@@ -292,11 +306,11 @@ Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
 {
     auto itr = _handles.insert(HandleMap::value_type(NativeHandle(h->get()), h));
     if (itr.second) {
-        __tbag_debug("Loop::insertChildHandle(@{}) success.", static_cast<void*>(h.get()));
+        __tbag_debug("Loop::insertChildHandle(@{}[{}]) success.", static_cast<void*>(h.get()), h->getName());
         return WeakHandle(itr.first->second);
     }
 
-    __tbag_debug("Loop::insertChildHandle(@{}) failure.", static_cast<void*>(h.get()));
+    __tbag_debug("Loop::insertChildHandle(@{}[{}]) failure.", static_cast<void*>(h.get()), h->getName());
     return WeakHandle();
 }
 
