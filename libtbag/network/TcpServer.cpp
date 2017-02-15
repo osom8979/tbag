@@ -92,6 +92,11 @@ bool TcpServer::run()
     return _loop.run() == uerr::UVPP_SUCCESS;
 }
 
+bool TcpServer::run(std::string const & ip, int port)
+{
+    return init(ip, port) && run();
+}
+
 bool TcpServer::asyncClose()
 {
     Guard guard(_async_mutex);

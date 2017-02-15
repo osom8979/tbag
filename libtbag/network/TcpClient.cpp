@@ -69,6 +69,11 @@ bool TcpClient::run()
     return _loop.run() == uerr::UVPP_SUCCESS;
 }
 
+bool TcpClient::run(std::string const & ip, int port)
+{
+    return init(ip, port) && run();
+}
+
 bool TcpClient::asyncClose()
 {
     Guard guard(_async_mutex);
@@ -207,6 +212,7 @@ void TcpClient::onClientAsyncWrite(uerr code)
 void TcpClient::onClientClose()
 {
     __tbag_debug("TcpClient::onClientClose()");
+    _async->close();
 }
 
 } // namespace network

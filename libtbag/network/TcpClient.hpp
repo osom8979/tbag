@@ -19,6 +19,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/network/BaseTcp.hpp>
 
+#include <string>
 #include <mutex>
 
 // -------------------
@@ -68,6 +69,7 @@ public:
 
 public:
     bool run();
+    bool run(std::string const & ip, int port);
 
 public:
     bool asyncClose();
