@@ -18,7 +18,7 @@ using namespace libtbag::uvpp;
 static bool g_is_idle;
 static bool g_is_close;
 
-TBAG_CONSTEXPR static bool const USE_DEBUGGING = false;
+TBAG_CONSTEXPR static bool const USE_DEBUGGING = true;
 
 struct IdleTest : public Idle
 {

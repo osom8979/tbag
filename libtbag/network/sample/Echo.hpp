@@ -46,6 +46,10 @@ private:
     int _count; ///< Max echo count.
 
 public:
+    inline int getCount() const TBAG_NOEXCEPT
+    { return _count; }
+
+public:
     EchoServer(int count);
     virtual ~EchoServer();
 
@@ -72,6 +76,10 @@ private:
 public:
     EchoClient(int count);
     virtual ~EchoClient();
+
+public:
+    inline int getCount() const TBAG_NOEXCEPT
+    { return _count; }
 
 public:
     virtual void onClientConnect(ConnectRequest & request, uerr code) override;
