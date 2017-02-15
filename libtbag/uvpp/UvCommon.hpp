@@ -221,7 +221,9 @@ TBAG_API std::string getUvErrorName(int uv_error_code);
     _TBAG_UVPP_XX(_SUCCESS, "No error"              ) \
     _TBAG_UVPP_XX(_ILLARGS, "Illegal arguments"     ) \
     _TBAG_UVPP_XX(_NULLPTR, "Null pointer exception") \
+    _TBAG_UVPP_XX(_EQUEUE , "Empty queue"           ) \
     _TBAG_UVPP_XX(_NREADY , "Not ready"             ) \
+    _TBAG_UVPP_XX(_UNSUPOP, "Unsupported operation" ) \
     /* uv error codes. */                                                    \
     _TBAG_UV_XX(_E2BIG           , "Argument list too long"                ) \
     _TBAG_UV_XX(_EACCES          , "Permission denied"                     ) \
