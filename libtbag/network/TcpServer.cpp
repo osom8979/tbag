@@ -3,12 +3,12 @@
  * @brief  TcpServer class implementation.
  * @author zer0
  * @date   2016-12-30
+ * @date   2017-02-15 (Apply BasicTcp class)
  */
 
 #include <libtbag/network/TcpServer.hpp>
 #include <libtbag/log/Log.hpp>
 #include <cassert>
-#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -92,7 +92,37 @@ bool TcpServer::run()
     return _loop.run() == uerr::UVPP_SUCCESS;
 }
 
-bool TcpServer::asyncClose(ClientTcp & client)
+bool TcpServer::asyncClose()
+{
+    Guard guard(_async_mutex);
+
+    auto itr = _loop.begin();
+    auto end = _loop.end();
+
+    if (std::this_thread::get_id() == _loop.getOwnerThreadId()) {
+        for (; itr != end; ++itr) {
+            if (static_cast<bool>(itr->second)) {
+                itr->second->close();
+            }
+        }
+        return true;
+    }
+
+    for (; itr != end; ++itr) {
+        if (static_cast<bool>(itr->second) && itr->second->getType() == uvpp::utype::TCP) {
+            WeakClient weak = std::static_pointer_cast<ClientTcp>(itr->second);
+            _async->newPushJob<CloseJob>(weak);
+        }
+    }
+
+    auto close_async_shared = _async->newPushJob<CloseSelfJob>();
+    if (static_cast<bool>(close_async_shared)) {
+        return _async->send() == uerr::UVPP_SUCCESS;
+    }
+    return false;
+}
+
+bool TcpServer::asyncCloseClient(ClientTcp & client)
 {
     Guard guard(_async_mutex);
     if (std::this_thread::get_id() == _loop.getOwnerThreadId()) {
@@ -111,7 +141,7 @@ bool TcpServer::asyncClose(ClientTcp & client)
     return false;
 }
 
-bool TcpServer::asyncWrite(ClientTcp & client, char const * buffer, std::size_t size)
+bool TcpServer::asyncWriteClient(ClientTcp & client, char const * buffer, std::size_t size)
 {
     Guard guard(_async_mutex);
     client.pushWriteBuffer(buffer, size);
@@ -233,6 +263,7 @@ void TcpServer::onClientWrite(ClientTcp & client, WriteRequest & request, uerr c
 void TcpServer::onClientReadEof(ClientTcp & client, uerr code, char const * buffer, std::size_t size)
 {
     __tbag_debug("TcpServer::onClientReadEof({}) result code({})", (void*)&client, static_cast<int>(code));
+    client.close();
 }
 
 void TcpServer::onClientReadDatagram(ClientTcp & client, uerr code, char const * buffer, std::size_t size)
@@ -243,6 +274,7 @@ void TcpServer::onClientReadDatagram(ClientTcp & client, uerr code, char const *
 void TcpServer::onClientReadError(ClientTcp & client, uerr code, char const * buffer, std::size_t size)
 {
     __tbag_debug("TcpServer::onClientReadError({}) result code({})", (void*)&client, static_cast<int>(code));
+    client.close();
 }
 
 void TcpServer::onClientAsyncWrite(ClientTcp & client, uerr code)

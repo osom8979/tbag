@@ -3,6 +3,7 @@
  * @brief  TcpServer class prototype.
  * @author zer0
  * @date   2016-12-30
+ * @date   2017-02-15 (Apply BasicTcp class)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCPSERVER_HPP__
@@ -18,7 +19,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/network/BaseTcp.hpp>
 
-#include <string>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,6 +32,7 @@ namespace network {
  *
  * @author zer0
  * @date   2016-12-30
+ * @date   2017-02-15 (Apply BasicTcp class)
  */
 class TBAG_API TcpServer : public TcpCallback
 {
@@ -71,8 +73,9 @@ public:
     bool run();
 
 public:
-    bool asyncClose(ClientTcp & client);
-    bool asyncWrite(ClientTcp & client, char const * buffer, std::size_t size);
+    bool asyncClose();
+    bool asyncCloseClient(ClientTcp & client);
+    bool asyncWriteClient(ClientTcp & client, char const * buffer, std::size_t size);
 
 private:
     virtual void onConnection(BaseTcp & tcp, uerr code) override;

@@ -3,10 +3,12 @@
  * @brief  TcpClient class implementation.
  * @author zer0
  * @date   2016-12-29
+ * @date   2017-02-15 (Apply BasicTcp class)
  */
 
 #include <libtbag/network/TcpClient.hpp>
 #include <libtbag/log/Log.hpp>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -14,106 +16,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
-// ----------------------
-// Client implementation.
-// ----------------------
-
-TcpClient::Client::Client(Loop & loop, TcpClient * client) : Tcp(loop), parent(client)
-{
-    write_ready.store(true);
-}
-
-TcpClient::Client::~Client()
-{
-    // EMPTY.
-}
-
-TcpClient::uerr TcpClient::Client::write(char const * buffer, std::size_t size)
-{
-    bool IS_READY = true;
-    if (write_ready.compare_exchange_weak(IS_READY, false)) {
-        return Tcp::write(write_req, buffer, size);
-    }
-    return uerr::UVPP_NREADY;
-}
-
-void TcpClient::Client::onConnect(ConnectRequest & request, uerr code)
-{
-    if (parent != nullptr) {
-        parent->onConnect(request, code);
-    }
-}
-
-TcpClient::binf TcpClient::Client::onAlloc(std::size_t suggested_size)
-{
-    if (parent != nullptr) {
-        return parent->onAlloc(suggested_size);
-    }
-    return binf();
-}
-
-void TcpClient::Client::onRead(uerr code, char const * buffer, std::size_t size)
-{
-    if (parent != nullptr) {
-        parent->onRead(code, buffer, size);
-    }
-}
-
-void TcpClient::Client::onWrite(WriteRequest & request, uerr code)
-{
-    if (parent != nullptr) {
-        parent->onWrite(request, code);
-    }
-    assert(write_ready.load() == false);
-    write_ready.store(true);
-}
-
-void TcpClient::Client::onClose()
-{
-    if (parent != nullptr) {
-        parent->onClose();
-    }
-}
-
-// ------------------------
-// WriteJob implementation.
-// ------------------------
-
-TcpClient::WriteJob::WriteJob(WeakClient c, char const * data, std::size_t size) : client(c)
-{
-    DatagramInterface::Size const DATAGRAM_HEADER_SIZE = sizeof(uint32_t);
-
-    Guard guard(mutex);
-    buffer.resize(DATAGRAM_HEADER_SIZE + size);
-    uint32_t    host_byte_size = static_cast<uint32_t>(size);
-    uint32_t network_byte_size = DatagramInterface::toNetwork(host_byte_size);
-    ::memcpy(&buffer[0], (char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
-    ::memcpy(&buffer[DATAGRAM_HEADER_SIZE], data, size);
-}
-
-TcpClient::WriteJob::~WriteJob()
-{
-    // EMPTY.
-}
-
-void TcpClient::WriteJob::run(Async * handle)
-{
-    if (auto shared = client.lock()) {
-        mutex.lock();
-        result = shared->write(&buffer[0], buffer.size());
-        mutex.unlock();
-    } else {
-        result = uerr::UVPP_NULLPTR;
-    }
-}
-
-// -------------------------
-// TcpClient implementation.
-// -------------------------
-
 TcpClient::TcpClient()
 {
-    _client = _loop.newHandle<Client>(_loop, this);
+    _client = _loop.newHandle<ClientTcp>(_loop, this);
     _async  = _loop.newHandle<Async >(_loop);
 }
 
@@ -137,11 +42,7 @@ bool TcpClient::initIpv4(std::string const & ip, int port)
         return false;
     }
 
-    if (_client->bind((sockaddr const *)&addr) != uvpp::uerr::UVPP_SUCCESS) {
-        return false;
-    }
-
-    if (_client->listen() != uerr::UVPP_SUCCESS) {
+    if (_client->connect((sockaddr const *)&addr) != uvpp::uerr::UVPP_SUCCESS) {
         return false;
     }
 
@@ -170,51 +71,142 @@ bool TcpClient::run()
 
 bool TcpClient::asyncClose()
 {
+    Guard guard(_async_mutex);
+    if (std::this_thread::get_id() == _loop.getOwnerThreadId()) {
+        _client->close();
+        return true;
+    }
+
+    WeakClient weak = std::static_pointer_cast<ClientTcp>(_loop.findChildHandle(*_client).lock());
+    if (weak.expired()) {
+        return false;
+    }
+
+    auto close_client_shared = _async->newPushJob<CloseJob>(weak);
+    auto close_async_shared  = _async->newPushJob<CloseSelfJob>();
+
+    if (static_cast<bool>(close_client_shared) && static_cast<bool>(close_async_shared)) {
+        return _async->send() == uerr::UVPP_SUCCESS;
+    }
     return false;
 }
 
 bool TcpClient::asyncWrite(char const * buffer, std::size_t size)
 {
+    Guard guard(_async_mutex);
+
+    _client->pushWriteBuffer(buffer, size);
     if (std::this_thread::get_id() == _loop.getOwnerThreadId()) {
-        return _client->write(buffer, size) == uerr::UVPP_SUCCESS;
-    } else if (static_cast<bool>(_async)) {
-        WeakClient weak = std::static_pointer_cast<Client>(_loop.findChildHandle(*_client).lock());
-        auto shared = _async->newPushJob<WriteJob>(weak, buffer, size);
-        return static_cast<bool>(shared);
+        return _client->writeWithPushedBuffer() == uerr::UVPP_SUCCESS;
+    }
+
+    WeakClient weak = std::static_pointer_cast<ClientTcp>(_loop.findChildHandle(*_client).lock());
+    if (weak.expired()) {
+        return false;
+    }
+
+    if (auto shared = _async->newPushJob<WriteJob>(weak)) {
+        return _async->send() == uerr::UVPP_SUCCESS;
     }
     return false;
+}
+
+// -----------------
+// Callback methods.
+// -----------------
+
+void TcpClient::onConnect(BaseTcp & tcp, ConnectRequest & request, uerr code)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    return onClientConnect(request, code);
+}
+
+TcpClient::binf TcpClient::onAlloc(BaseTcp & tcp, std::size_t suggested_size)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    return onClientAlloc(suggested_size);
+}
+
+void TcpClient::onWrite(BaseTcp & tcp, WriteRequest & request, uerr code)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    onClientWrite(request, code);
+}
+
+void TcpClient::onClose(BaseTcp & tcp)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    onClientClose();
+}
+
+void TcpClient::onReadEof(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    onClientReadEof(code, buffer, size);
+}
+
+void TcpClient::onReadDatagram(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    onClientReadDatagram(code, buffer, size);
+}
+
+void TcpClient::onReadError(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    onClientReadError(code, buffer, size);
+}
+
+void TcpClient::onAsyncWrite(BaseTcp & tcp, uerr code)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    onClientAsyncWrite(code);
 }
 
 // --------------
 // Event methods.
 // --------------
 
-void TcpClient::onConnect(ConnectRequest & request, uerr code)
+void TcpClient::onClientConnect(ConnectRequest & request, uerr code)
 {
-    __tbag_debug("TcpClient::onConnect() result code({})", static_cast<int>(code));
+    __tbag_debug("TcpClient::onClientConnect() result code({})", static_cast<int>(code));
 }
 
-TcpClient::binf TcpClient::onAlloc(std::size_t suggested_size)
+TcpClient::binf TcpClient::onClientAlloc(std::size_t suggested_size)
 {
-    if (static_cast<bool>(_client)) {
-        return uvpp::defaultOnAlloc(_client->buffer, suggested_size);
-    }
-    return binf();
+    return uvpp::defaultOnAlloc(_client->atReadBuffer(), suggested_size);
 }
 
-void TcpClient::onRead(uerr code, char const * buffer, std::size_t size)
+void TcpClient::onClientWrite(WriteRequest & request, uerr code)
 {
-    __tbag_debug("TcpClient::onRead() result code({})", static_cast<int>(code));
+    __tbag_debug("TcpClient::onClientWrite() result code({})", static_cast<int>(code));
 }
 
-void TcpClient::onWrite(WriteRequest & request, uerr code)
+void TcpClient::onClientReadEof(uerr code, char const * buffer, std::size_t size)
 {
-    __tbag_debug("TcpClient::onWrite() result code({})", static_cast<int>(code));
+    __tbag_debug("TcpClient::onClientReadEof() result code({})", static_cast<int>(code));
+    _client->close();
 }
 
-void TcpClient::onClose()
+void TcpClient::onClientReadDatagram(uerr code, char const * buffer, std::size_t size)
 {
-    __tbag_debug("TcpClient::onClose()");
+    __tbag_debug("TcpClient::onClientReadDatagram() result code({})", static_cast<int>(code));
+}
+
+void TcpClient::onClientReadError(uerr code, char const * buffer, std::size_t size)
+{
+    __tbag_debug("TcpClient::onClientReadError() result code({})", static_cast<int>(code));
+    _client->close();
+}
+
+void TcpClient::onClientAsyncWrite(uerr code)
+{
+    __tbag_debug("TcpClient::onClientAsyncWrite() result code({})", static_cast<int>(code));
+}
+
+void TcpClient::onClientClose()
+{
+    __tbag_debug("TcpClient::onClientClose()");
 }
 
 } // namespace network

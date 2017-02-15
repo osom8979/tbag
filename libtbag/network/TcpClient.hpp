@@ -3,6 +3,7 @@
  * @brief  TcpClient class prototype.
  * @author zer0
  * @date   2016-12-29
+ * @date   2017-02-15 (Apply BasicTcp class)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCPCLIENT_HPP__
@@ -15,19 +16,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/network/BaseTcp.hpp>
 
-#include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/uvpp/Async.hpp>
-#include <libtbag/uvpp/Request.hpp>
-
-#include <libtbag/network/DatagramAdapter.hpp>
-
-#include <string>
-#include <vector>
-#include <memory>
 #include <mutex>
-#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,79 +32,13 @@ namespace network {
  *
  * @author zer0
  * @date   2016-12-29
+ * @date   2017-02-15 (Apply BasicTcp class)
  */
-class TBAG_API TcpClient : public Noncopyable
+class TBAG_API TcpClient : public TcpCallback
 {
 public:
-    using binf = uvpp::binf;
-    using uerr = uvpp::uerr;
-
-    using Loop  = uvpp::Loop;
-    using Tcp   = uvpp::Tcp;
-    using Async = uvpp::Async;
-    using Job   = Async::Job;
-
-    using ConnectRequest = uvpp::ConnectRequest;
-    using WriteRequest   = uvpp::WriteRequest;
-
-    using Buffer = std::vector<char>;
-
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
-
-public:
-    /** Client class prototype. */
-    struct Client : public Tcp
-    {
-        friend class TcpClient;
-
-        TcpClient * parent;
-
-        std::atomic_bool write_ready;
-        WriteRequest write_req;
-
-        Buffer buffer;
-        DatagramRead datagram;
-
-        Client(Loop & loop, TcpClient * client);
-        virtual ~Client();
-
-        inline bool isReady() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(write_ready.load()))
-        { return write_ready.load(); }
-
-        uerr write(char const * buffer, std::size_t size);
-
-        virtual void onConnect(ConnectRequest & request, uerr code) override;
-        virtual binf onAlloc(std::size_t suggested_size) override;
-        virtual void onRead (uerr code, char const * buffer, std::size_t size) override;
-        virtual void onWrite(WriteRequest & request, uerr code) override;
-        virtual void onClose() override;
-    };
-
-public:
-    using SharedClient = std::shared_ptr<Client>;
-    using SharedAsync  = std::shared_ptr<Async>;
-
-    using WeakClient = std::weak_ptr<Client>;
-    using WeakAsync  = std::weak_ptr<Async>;
-
-public:
-    struct WriteJob : public Job
-    {
-        WeakClient client;
-
-        Buffer buffer;
-        Mutex  mutex;
-        uerr   result;
-
-        WriteJob(WeakClient c, char const * data, std::size_t size);
-        virtual ~WriteJob();
-
-        virtual void run(Async * handle) override;
-    };
-
-private:
-    ConnectRequest _connector;
 
 private:
     Loop _loop;
@@ -120,6 +46,9 @@ private:
 private:
     SharedClient _client;
     SharedAsync  _async;
+
+private:
+    Mutex _async_mutex;
 
 public:
     TcpClient();
@@ -129,7 +58,7 @@ public:
     inline Loop       & atLoop()       TBAG_NOEXCEPT { return _loop; }
     inline Loop const & atLoop() const TBAG_NOEXCEPT { return _loop; }
 
-    inline WeakClient getWeakServer() { return _client; }
+    inline WeakClient getWeakClient() { return _client; }
     inline WeakAsync  getWeakAsync () { return _async;  }
 
 public:
@@ -144,12 +73,32 @@ public:
     bool asyncClose();
     bool asyncWrite(char const * buffer, std::size_t size);
 
+private:
+    virtual void onConnect(BaseTcp & tcp, ConnectRequest & request, uerr code) override;
+
+    virtual binf onAlloc(BaseTcp & tcp, std::size_t suggested_size) override;
+    virtual void onWrite(BaseTcp & tcp, WriteRequest & request, uerr code) override;
+    virtual void onClose(BaseTcp & tcp) override;
+
+    virtual void onReadEof     (BaseTcp & tcp, uerr code, char const * buffer, std::size_t size) override;
+    virtual void onReadDatagram(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size) override;
+    virtual void onReadError   (BaseTcp & tcp, uerr code, char const * buffer, std::size_t size) override;
+
+    virtual void onAsyncWrite(BaseTcp & tcp, uerr code) override;
+
 public:
-    virtual void onConnect(ConnectRequest & request, uerr code);
-    virtual binf onAlloc(std::size_t suggested_size);
-    virtual void onRead (uerr code, char const * buffer, std::size_t size);
-    virtual void onWrite(WriteRequest & request, uerr code);
-    virtual void onClose();
+    virtual void onClientConnect(ConnectRequest & request, uerr code);
+
+    virtual binf onClientAlloc(std::size_t suggested_size);
+    virtual void onClientWrite(WriteRequest & request, uerr code);
+
+    virtual void onClientReadEof     (uerr code, char const * buffer, std::size_t size);
+    virtual void onClientReadDatagram(uerr code, char const * buffer, std::size_t size);
+    virtual void onClientReadError   (uerr code, char const * buffer, std::size_t size);
+
+    virtual void onClientAsyncWrite(uerr code);
+
+    virtual void onClientClose();
 };
 
 } // namespace network
