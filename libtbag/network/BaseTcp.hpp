@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <atomic>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,6 +43,8 @@ enum class CsType
 
 // Forward declaration.
 struct TcpCallback;
+class  ServerTcp;
+class  ClientTcp;
 
 /**
  * BaseTcp class prototype.
@@ -83,9 +86,22 @@ struct TBAG_API TcpCallback
     using binf = uvpp::binf;
     using uerr = uvpp::uerr;
 
+    using Loop  = uvpp::Loop;
+    using Tcp   = uvpp::Tcp;
+    using Async = uvpp::Async;
+    using Job   = Async::Job;
+
     using ConnectRequest  = uvpp::ConnectRequest;
     using ShutdownRequest = uvpp::ShutdownRequest;
     using WriteRequest    = uvpp::WriteRequest;
+
+    using SharedServer = std::shared_ptr<ServerTcp>;
+    using SharedClient = std::shared_ptr<ClientTcp>;
+    using SharedAsync  = std::shared_ptr<Async>;
+
+    using WeakServer = std::weak_ptr<ServerTcp>;
+    using WeakClient = std::weak_ptr<ClientTcp>;
+    using WeakAsync  = std::weak_ptr<Async>;
 
     // Event of Tcp.
     virtual void onConnect(BaseTcp & tcp, ConnectRequest & request, uerr code) { /* EMPTY. */ }
@@ -153,6 +169,9 @@ public:
 public:
     inline bool isReady() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_write_ready.load()))
     { return _write_ready.load(); }
+
+    inline Buffer       & atReadBuffer()       TBAG_NOEXCEPT { return _read_buffer; }
+    inline Buffer const & atReadBuffer() const TBAG_NOEXCEPT { return _read_buffer; }
 
 public:
     uerr connect(sockaddr const * address);
