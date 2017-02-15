@@ -43,7 +43,7 @@ namespace network {
 struct DatagramInterface
 {
     using binf = uvpp::binf;
-    using Size = std::size_t;
+    using Size = uint64_t;
 
     using Buffer         = std::vector<char>;
     using SharedBuffer   = std::shared_ptr<Buffer>;
@@ -53,8 +53,33 @@ struct DatagramInterface
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-    inline static uint32_t toHost(uint32_t network) { return ntohl(network); }
-    inline static uint32_t toNetwork(uint32_t host) { return htonl(host);    }
+#if defined(max)
+    TBAG_PUSH_MACRO(max);
+#undef max
+#define __RESTORE_MAX__
+#endif
+
+    TBAG_CONSTEXPR static Size const    NO_NEXT_READ_SIZE = std::numeric_limits<Size>::max();
+    TBAG_CONSTEXPR static Size const DATAGRAM_HEADER_SIZE = sizeof(Size);
+
+#if defined(__RESTORE_MAX__)
+    TBAG_POP_MACRO(max);
+#undef __RESTORE_MAX__
+#endif
+
+    inline static  int16_t toHost( int16_t network) { return ntohs (network); }
+    inline static uint16_t toHost(uint16_t network) { return ntohs (network); }
+    inline static  int32_t toHost( int32_t network) { return ntohl (network); }
+    inline static uint32_t toHost(uint32_t network) { return ntohl (network); }
+    inline static  int64_t toHost( int64_t network) { return ntohll(network); }
+    inline static uint64_t toHost(uint64_t network) { return ntohll(network); }
+
+    inline static  int16_t toNetwork( int16_t host) { return htons (host); }
+    inline static uint16_t toNetwork(uint16_t host) { return htons (host); }
+    inline static  int32_t toNetwork( int32_t host) { return htonl (host); }
+    inline static uint32_t toNetwork(uint32_t host) { return htonl (host); }
+    inline static  int64_t toNetwork( int64_t host) { return htonll(host); }
+    inline static uint64_t toNetwork(uint64_t host) { return htonll(host); }
 };
 
 /**
@@ -72,6 +97,12 @@ private:
 public:
     DatagramWrite();
     virtual ~DatagramWrite();
+
+public:
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.empty()))
+    { Guard g(_writers_mutex); return _writers.empty(); }
+    inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.size()))
+    { Guard g(_writers_mutex); return _writers.size();  }
 
 public:
     bool pushWriteBuffer(char const * buffer, Size size);
@@ -95,10 +126,7 @@ public:
     }
 
 public:
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.empty()))
-    { Guard g(_writers_mutex); return _writers.empty(); }
-    inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.size()))
-    { Guard g(_writers_mutex); return _writers.size();  }
+    static Size parseBufferSize(char const * buffer, Size size);
 };
 
 /**

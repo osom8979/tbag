@@ -7,29 +7,12 @@
 
 #include <libtbag/network/DatagramAdapter.hpp>
 #include <libtbag/log/Log.hpp>
-#include <limits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-
-#if defined(max)
-TBAG_PUSH_MACRO(max);
-#undef max
-#define __RESTORE_MAX__
-#endif
-
-TBAG_CONSTEXPR static DatagramInterface::Size const NO_NEXT_READ_SIZE
-        = std::numeric_limits<DatagramInterface::Size>::max();
-TBAG_CONSTEXPR static DatagramInterface::Size const DATAGRAM_HEADER_SIZE
-        = sizeof(uint32_t);
-
-#if defined(__RESTORE_MAX__)
-TBAG_POP_MACRO(max);
-#undef __RESTORE_MAX__
-#endif
 
 // -----------------------------
 // DatagramWrite implementation.
@@ -60,19 +43,26 @@ bool DatagramWrite::pushWriteBuffer(char const * buffer, Size size)
             return false;
         }
     }
+
     Buffer & cursor = *(shared->get());
+    cursor.resize(DATAGRAM_HEADER_SIZE + size);
 
-    // Realloc with read buffer.
-    if (cursor.size() < DATAGRAM_HEADER_SIZE + size) {
-        cursor.resize(DATAGRAM_HEADER_SIZE + size);
-    }
-
-    uint32_t network_byte_size = toNetwork((uint32_t)size/* Host byte size. */);
-
-    ::memcpy(&cursor[0], (char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
+    Size const NETWORK_BYTE_SIZE = toNetwork(static_cast<Size>(size));
+    ::memcpy(&cursor[0], (char const *)&NETWORK_BYTE_SIZE, DATAGRAM_HEADER_SIZE);
     ::memcpy(&cursor[DATAGRAM_HEADER_SIZE], buffer, size);
 
     return true;
+}
+
+DatagramWrite::Size DatagramWrite::parseBufferSize(char const * buffer, Size size)
+{
+    if (size < DATAGRAM_HEADER_SIZE) {
+        return NO_NEXT_READ_SIZE;
+    }
+
+    Size network_byte_size = 0;
+    ::memcpy((char*)&network_byte_size, buffer, DATAGRAM_HEADER_SIZE);
+    return toHost(network_byte_size);
 }
 
 // ----------------------------
@@ -104,7 +94,7 @@ DatagramRead::Size DatagramRead::readNextDatagramSize()
     }
 
     // Section 03: Update next_read_size.
-    uint32_t network_byte_size = 0;
+    Size network_byte_size = 0;
     _data_buffer.pop((char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
     _next_read_size = toHost(network_byte_size);
 
