@@ -79,11 +79,36 @@ public:
     bool asyncCloseClient(ClientTcp & client);
     bool asyncWriteClient(ClientTcp & client, char const * buffer, std::size_t size);
 
+public:
+    template <typename Predicated>
+    void foreachClient(Predicated predicated)
+    {
+        auto END = _loop.end();
+        for (auto itr = _loop.begin(); itr != END; ++itr) {
+            auto shared_handle = itr->second;
+            if (static_cast<bool>(shared_handle) == false) {
+                continue;
+            }
+
+            if (shared_handle->getType() != uvpp::utype::TCP) {
+                continue;
+            }
+
+            std::shared_ptr<BaseTcp> tcp = std::static_pointer_cast<BaseTcp>(shared_handle);
+            if (tcp->getCsType() != CsType::CLIENT) {
+                continue;
+            }
+
+            predicated(*std::static_pointer_cast<ClientTcp>(tcp));
+        }
+    }
+
 private:
     virtual void onConnection(BaseTcp & tcp, uerr code) override;
 
     virtual binf onAlloc(BaseTcp & tcp, std::size_t suggested_size) override;
     virtual void onWrite(BaseTcp & tcp, WriteRequest & request, uerr code) override;
+    virtual bool onRead(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size) override;
     virtual void onClose(BaseTcp & tcp) override;
 
     virtual void onReadEof     (BaseTcp & tcp, uerr code, char const * buffer, std::size_t size) override;
@@ -97,6 +122,7 @@ public:
 
     virtual binf onClientAlloc(ClientTcp & client, std::size_t suggested_size);
     virtual void onClientWrite(ClientTcp & client, WriteRequest & request, uerr code);
+    virtual bool onClientRead(ClientTcp & client, uerr code, char const * buffer, std::size_t size);
 
     virtual void onClientReadEof     (ClientTcp & client, uerr code, char const * buffer, std::size_t size);
     virtual void onClientReadDatagram(ClientTcp & client, uerr code, char const * buffer, std::size_t size);

@@ -80,6 +80,7 @@ private:
 
     virtual binf onAlloc(BaseTcp & tcp, std::size_t suggested_size) override;
     virtual void onWrite(BaseTcp & tcp, WriteRequest & request, uerr code) override;
+    virtual bool onRead(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size) override;
     virtual void onClose(BaseTcp & tcp) override;
 
     virtual void onReadEof     (BaseTcp & tcp, uerr code, char const * buffer, std::size_t size) override;
@@ -93,6 +94,7 @@ public:
 
     virtual binf onClientAlloc(std::size_t suggested_size);
     virtual void onClientWrite(WriteRequest & request, uerr code);
+    virtual bool onClientRead(uerr code, char const * buffer, std::size_t size);
 
     virtual void onClientReadEof     (uerr code, char const * buffer, std::size_t size);
     virtual void onClientReadDatagram(uerr code, char const * buffer, std::size_t size);

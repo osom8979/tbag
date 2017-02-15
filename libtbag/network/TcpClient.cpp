@@ -98,8 +98,11 @@ bool TcpClient::asyncClose()
 
 bool TcpClient::asyncWrite(char const * buffer, std::size_t size)
 {
-    Guard guard(_async_mutex);
+    if (buffer == nullptr || size == 0) {
+        return false;
+    }
 
+    Guard guard(_async_mutex);
     _client->pushWriteBuffer(buffer, size);
     if (std::this_thread::get_id() == _loop.getOwnerThreadId()) {
         return _client->writeWithPushedBuffer() == uerr::UVPP_SUCCESS;
@@ -136,6 +139,12 @@ void TcpClient::onWrite(BaseTcp & tcp, WriteRequest & request, uerr code)
 {
     assert(tcp.getCsType() == CsType::CLIENT);
     onClientWrite(request, code);
+}
+
+bool TcpClient::onRead(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size)
+{
+    assert(tcp.getCsType() == CsType::CLIENT);
+    return onClientRead(code, buffer, size);
 }
 
 void TcpClient::onClose(BaseTcp & tcp)
@@ -185,6 +194,12 @@ TcpClient::binf TcpClient::onClientAlloc(std::size_t suggested_size)
 void TcpClient::onClientWrite(WriteRequest & request, uerr code)
 {
     __tbag_debug("TcpClient::onClientWrite() result code({})", static_cast<int>(code));
+}
+
+bool TcpClient::onClientRead(uerr code, char const * buffer, std::size_t size)
+{
+    __tbag_debug("TcpClient::onClientRead() result code({})", static_cast<int>(code));
+    return false;
 }
 
 void TcpClient::onClientReadEof(uerr code, char const * buffer, std::size_t size)

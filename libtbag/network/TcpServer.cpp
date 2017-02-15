@@ -202,6 +202,15 @@ void TcpServer::onWrite(BaseTcp & tcp, WriteRequest & request, uerr code)
     }
 }
 
+bool TcpServer::onRead(BaseTcp & tcp, uerr code, char const * buffer, std::size_t size)
+{
+    if (tcp.getCsType() == CsType::CLIENT) {
+        ClientTcp & client = static_cast<ClientTcp&>(tcp);
+        return onClientRead(client, code, buffer, size);
+    }
+    return false;
+}
+
 void TcpServer::onClose(BaseTcp & tcp)
 {
     if (tcp.getCsType() == CsType::SERVER) {
@@ -263,6 +272,12 @@ TcpServer::binf TcpServer::onClientAlloc(ClientTcp & client, std::size_t suggest
 void TcpServer::onClientWrite(ClientTcp & client, WriteRequest & request, uerr code)
 {
     __tbag_debug("TcpServer::onClientWrite({}) result code({})", (void*)&client, static_cast<int>(code));
+}
+
+bool TcpServer::onClientRead(ClientTcp & client, uerr code, char const * buffer, std::size_t size)
+{
+    __tbag_debug("TcpServer::onClientRead({}) result code({})", (void*)&client, static_cast<int>(code));
+    return false;
 }
 
 void TcpServer::onClientReadEof(ClientTcp & client, uerr code, char const * buffer, std::size_t size)
