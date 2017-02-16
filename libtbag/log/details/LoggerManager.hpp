@@ -38,7 +38,7 @@ namespace details {
  * @remarks
  *  - Fix the C2280 error in MSVC14: Requires inheritance Noncopyable class.
  */
-class TBAG_API LoggerManager : public Noncopyable
+class TBAG_API LoggerManager : public pattern::Singleton2<LoggerManager>
 {
 public:
     SINGLETON2_PROTOTYPE(LoggerManager);

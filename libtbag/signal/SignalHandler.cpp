@@ -64,7 +64,7 @@ namespace __impl {
  * @author zer0
  * @date   2016-12-24
  */
-class SignalObservable
+class /*NO EXPORT API*/ SignalObservable : public pattern::Singleton2<SignalObservable>
 {
 public:
     SINGLETON2_PROTOTYPE(SignalObservable);
@@ -138,8 +138,6 @@ public:
         notifyImplement(signal);
     }
 };
-
-SINGLETON2_IMPLEMENT(SignalObservable);
 
 /**
  * Default signal handler.
