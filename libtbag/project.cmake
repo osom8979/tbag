@@ -25,10 +25,7 @@ tbag_modules__apply_dep_minizip () ## And apply_dep_z
 tbag_modules__apply_dep_sqlite3 ()
 tbag_modules__apply_dep_uv      ()
 tbag_modules__apply_dep_z       ()
-if (USE_LUA)
-    tbag_modules__apply_dep_lua ()
-    tbag_modules__apply_dep_luabridge ()
-endif ()
+tbag_modules__apply_dep_lua     ()
 
 if (WIN32)
     list (APPEND TBAG_PROJECT_LDFLAGS shlwapi.lib) # filesystem with windows.

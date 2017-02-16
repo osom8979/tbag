@@ -70,16 +70,11 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/minizip)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/zlib)
-
-## Lua settings.
-option (USE_LUA "Don't use the LUA library." OFF)
-if (USE_LUA)
-    add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
-endif ()
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 
 ## Test subproject.
-add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbproc)
-add_subdirectory (${CMAKE_SOURCE_DIR}/test/tbshare)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/test/tbproc)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/test/tbshare)
 
 ## Thread settings.
 tbag_config__find_thread ()
