@@ -173,6 +173,9 @@ public:
     inline Buffer       & atReadBuffer()       TBAG_NOEXCEPT { return _read_buffer; }
     inline Buffer const & atReadBuffer() const TBAG_NOEXCEPT { return _read_buffer; }
 
+    inline Datagram       & atDatagram()       TBAG_NOEXCEPT { return _datagram; }
+    inline Datagram const & atDatagram() const TBAG_NOEXCEPT { return _datagram; }
+
 public:
     uerr connect(sockaddr const * address);
     uerr write(char const * buffer, std::size_t size);
