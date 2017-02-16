@@ -166,6 +166,11 @@ bool TcpServer::asyncWriteClient(ClientTcp & client, char const * buffer, std::s
     return false;
 }
 
+TcpServer::WeakClient TcpServer::getClient(ClientTcp & client)
+{
+    return std::static_pointer_cast<ClientTcp>(_loop.findChildHandle(client).lock());
+}
+
 // -----------------
 // Callback methods.
 // -----------------

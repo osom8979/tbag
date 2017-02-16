@@ -80,6 +80,9 @@ public:
     bool asyncWriteClient(ClientTcp & client, char const * buffer, std::size_t size);
 
 public:
+    WeakClient getClient(ClientTcp & client);
+
+public:
     template <typename Predicated>
     void foreachClient(Predicated predicated)
     {
