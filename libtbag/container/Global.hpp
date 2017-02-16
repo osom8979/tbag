@@ -20,6 +20,7 @@
 #include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/container/Pointer.hpp>
 
+#include <memory>
 #include <unordered_map>
 
 // -------------------
