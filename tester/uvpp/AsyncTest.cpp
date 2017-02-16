@@ -161,8 +161,6 @@ TEST(AsyncTest, newJob)
     });
 
     auto shared = async->newPushJob<AsyncJobTest>();
-    async->send();
-
     ASSERT_TRUE(static_cast<bool>(shared));
     ASSERT_EQ(1, async->size());
 
@@ -175,10 +173,8 @@ TEST(AsyncTest, newJob)
     ASSERT_FALSE(static_cast<bool>(shared));
 
     shared = async->newPushJob<AsyncJobTest>();
-    async->send();
-
     ASSERT_TRUE(static_cast<bool>(shared));
-    ASSERT_EQ(1, async->size()); // Travis CI Test error point: Actual 0
+    ASSERT_EQ(1, async->size());
 
     ASSERT_EQ(uerr::UVPP_SUCCESS, async->send());
     while (shared->async_count.load() == 0) { /* BUSY WAIT. */ }
