@@ -18,6 +18,8 @@
 #include <iostream>
 #include <string>
 
+static char const * const DEFAULT_GTEST_FILTER = "-NetworkTest.*";
+
 static char const * const CMD_ARGUMENT_ECHO_SERVER = "es"; ///< Echo Server.
 static char const * const CMD_ARGUMENT_ECHO_CLIENT = "ec"; ///< Echo Client.
 static char const * const CMD_ARGUMENT_CHAT_SERVER = "cs"; ///< Chatting Server.
@@ -25,7 +27,7 @@ static char const * const CMD_ARGUMENT_CHAT_CLIENT = "cc"; ///< Chatting Client.
 
 static char const * const DEFAULT_NETWORK_TEST_SERVER_IP = "0.0.0.0";
 static char const * const DEFAULT_NETWORK_TEST_CLIENT_IP = "127.0.0.1";
-static  int const         DEFAULT_NETWORK_TEST_PORT = 98765;
+static  int const         DEFAULT_NETWORK_TEST_PORT      = 20000;
 
 enum class TestMode
 {
@@ -93,6 +95,7 @@ int main(int argc, char **argv)
 
     switch (mode) {
     case TestMode::TEST:
+        testing::GTEST_FLAG(filter) = DEFAULT_GTEST_FILTER;
         testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
 

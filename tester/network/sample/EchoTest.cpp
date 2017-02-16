@@ -3,6 +3,9 @@
  * @brief  Echo class tester.
  * @author zer0
  * @date   2017-02-15
+ *
+ * @warning
+ *  <code>test_case_name</code> prefix is <code>NetworkTest</code>.
  */
 
 #include <gtest/gtest.h>
@@ -14,7 +17,7 @@ using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::sample;
 
-TEST(EchoTest, Default)
+TEST(NetworkTest, EchoCs)
 {
     EchoServer server(ECHO_COUNT);
     EchoClient client(ECHO_COUNT);
