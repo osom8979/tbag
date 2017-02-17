@@ -35,7 +35,7 @@ namespace pattern {
  * @date   2017-02-16
  */
 template <typename T>
-struct Singleton2 : public Noncopyable
+class Singleton2 : public Noncopyable
 {
 public:
     using BaseType = T;
