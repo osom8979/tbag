@@ -159,8 +159,8 @@ getCrossProduct(Vector3<T> const & v1, Vector3<T> const & v2)
  * @param p1    [in] Point 1 of line.
  * @param check [in] Check point.
  *
- * @return If a positive number, the left side of the vector. @n
- *         if a negative number, the right side of the vector. @n
+ * @return If a positive number, the right side of the vector. @n
+ *         if a negative number, the left side of the vector. @n
  *         if 0 is on the line.
  *
  * @remarks
