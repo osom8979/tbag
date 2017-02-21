@@ -48,7 +48,7 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
     geometry::BasePoint<int> p1{1, 1};
     geometry::BasePoint<int> p2{5, 1};
     geometry::BasePoint<int> p3{3, 2};
-    ASSERT_LT(0, getRelativePositionOfPointToLine(p1, p2, p3));
+    ASSERT_LT(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 
     /*
      *    |
@@ -62,7 +62,7 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
     p1 = geometry::makePoint(1, 2);
     p2 = geometry::makePoint(5, 2);
     p3 = geometry::makePoint(3, 1);
-    ASSERT_GT(0, getRelativePositionOfPointToLine(p1, p2, p3));
+    ASSERT_GT(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 
     /*
      *    |       p2
@@ -74,6 +74,6 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
     p1 = geometry::makePoint(1, 1);
     p2 = geometry::makePoint(5, 1);
     p3 = geometry::makePoint(3, 1);
-    ASSERT_EQ(0, getRelativePositionOfPointToLine(p1, p2, p3));
+    ASSERT_EQ(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 }
 
