@@ -178,8 +178,22 @@ inline Point getIntersectionWithTwoLinearEquation(LinearEquation<T> const & e1, 
     return result;
 }
 
+/**
+ * Check if it is included in the range.
+ */
+template <typename T>
+inline bool isContains(T const & p1, T const & p2, T const & check)
+{
+    T const MIN = std::min(p1, p2);
+    T const MAX = std::max(p1, p2);
+    return (MIN <= COMPARE_AND(check) <= MAX);
+}
+
+/**
+ * Check if it is included in the range.
+ */
 template <typename T, typename Point = geometry::BasePoint<T> >
-bool isContains(Point const & p1, Point const & p2, Point const & check)
+inline bool isContains2d(Point const & p1, Point const & p2, Point const & check)
 {
     T const X_MIN = std::min(p1.x, p2.x);
     T const X_MAX = std::max(p1.x, p2.x);
@@ -189,6 +203,12 @@ bool isContains(Point const & p1, Point const & p2, Point const & check)
             Y_MIN <= COMPARE_AND(check.y) <= Y_MAX);
 }
 
+/**
+ *
+ * @remarks
+ *  Equations of the form <code>x = a</code> are impossible. @n
+ *  These equations are calculated separately.
+ */
 template <typename T, typename Point = geometry::BasePoint<T> >
 bool isCross(Point const & p11, Point const & p12, Point const & p21, Point const & p22, Point & cross)
 {
@@ -198,7 +218,7 @@ bool isCross(Point const & p11, Point const & p12, Point const & p21, Point cons
 
         if (isParallelWithTwoLinearEquation<T>(e1, e2) == false) {
             cross = getIntersectionWithTwoLinearEquation<T, Point>(e1, e2);
-            return isContains<T, Point>(p11, p12, cross) && isContains<T, Point>(p21, p22, cross);
+            return isContains2d<T, Point>(p11, p12, cross) && isContains2d<T, Point>(p21, p22, cross);
         } else {
             return false;
         }
@@ -206,12 +226,12 @@ bool isCross(Point const & p11, Point const & p12, Point const & p21, Point cons
     } else if (p11.x != p12.x && p21.x == p22.x) {
         LinearEquation<T> e1 = getLinearEquationWithTwoPoint<T, Point>(p11, p12);
         Point cross = Point(p21.x, getY<T>(e1, p21.x));
-        return isContains<T, Point>(p11, p12, cross);
+        return isContains<T>(p21.y, p22.y, cross.y) && isContains2d<T, Point>(p11, p12, cross);
 
     } else if (p11.x == p12.x && p21.x != p22.x) {
         LinearEquation<T> e2 = getLinearEquationWithTwoPoint<T, Point>(p21, p22);
         Point cross = Point(p11.x, getY<T>(e2, p11.x));
-        return isContains<T, Point>(p21, p22, cross);
+        return isContains<T>(p11.y, p12.y, cross.y) && isContains2d<T, Point>(p21, p22, cross);
     }
 
     return false;
