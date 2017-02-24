@@ -16,7 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uvpp/Stream.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 
 #include <cstdint>
 
@@ -35,10 +35,10 @@ class Loop;
  * @author zer0
  * @date   2017-01-08
  */
-class TBAG_API Timer : public Stream
+class TBAG_API Timer : public Handle
 {
 public:
-    using Parent = Stream;
+    using Parent = Handle;
 
 public:
     Timer();
