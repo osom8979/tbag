@@ -51,7 +51,7 @@ struct BasePoint
 template <typename T>
 struct BaseSize
 {
-    T w, h;
+    T width, height;
 };
 
 // ------------
@@ -107,8 +107,8 @@ template <typename T>
 inline BasePoint<T> &
 operator +=(BasePoint<T> & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    p.x += s.w;
-    p.y += s.h;
+    p.x += s.width;
+    p.y += s.height;
     return p;
 }
 
@@ -116,8 +116,8 @@ template <typename T>
 inline BasePoint<T> &
 operator -=(BasePoint<T> & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    p.x -= s.w;
-    p.y -= s.h;
+    p.x -= s.width;
+    p.y -= s.height;
     return p;
 }
 
@@ -125,14 +125,14 @@ template <typename T>
 inline BasePoint<T>
 operator +(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    return BasePoint<T>{p.x + s.w, p.y + s.h};
+    return BasePoint<T>{p.x + s.width, p.y + s.height};
 }
 
 template <typename T>
 inline BasePoint<T>
 operator -(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    return BasePoint<T>{p.x - s.w, p.y - s.h};
+    return BasePoint<T>{p.x - s.width, p.y - s.height};
 }
 
 // -----------------------------------
@@ -143,8 +143,8 @@ template <typename T>
 inline BaseSize<T> &
 operator +=(BaseSize<T> & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
-    s1.w += s2.w;
-    s1.h += s2.h;
+    s1.width += s2.width;
+    s1.height += s2.height;
     return s1;
 }
 
@@ -152,8 +152,8 @@ template <typename T>
 inline BaseSize<T> &
 operator -=(BaseSize<T> & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
-    s1.w -= s2.w;
-    s1.h -= s2.h;
+    s1.width -= s2.width;
+    s1.height -= s2.height;
     return s1;
 }
 
@@ -161,14 +161,14 @@ template <typename T>
 inline BaseSize<T>
 operator +(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
-    return BaseSize<T>{s1.w + s2.w, s1.h + s2.h};
+    return BaseSize<T>{s1.width + s2.width, s1.height + s2.height};
 }
 
 template <typename T>
 inline BaseSize<T>
 operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
-    return BaseSize<T>{s1.w - s2.w, s1.h - s2.h};
+    return BaseSize<T>{s1.width - s2.width, s1.height - s2.height};
 }
 
 /**
@@ -218,7 +218,7 @@ template <typename T>
 inline bool
 operator ==(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
 {
-    if (s1.w != s2.w || s1.h != s2.h) {
+    if (s1.width != s2.width || s1.height != s2.height) {
         return false;
     }
     return true;
@@ -257,8 +257,8 @@ std::string toString(BaseSize<T> const & size)
 {
     std::stringstream ss;
     ss << __SIZE_PREFIX_CHAR << __POINT_STREAM_BRACE_OPEN
-       << size.w << __POINT_STREAM_VALUE_SEPARATOR
-       << size.h << __POINT_STREAM_BRACE_CLOSE;
+       << size.width  << __POINT_STREAM_VALUE_SEPARATOR
+       << size.height << __POINT_STREAM_BRACE_CLOSE;
     return ss.str();
 }
 

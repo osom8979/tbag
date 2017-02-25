@@ -44,7 +44,8 @@ namespace geometry {
 template <typename T>
 struct BaseRect
 {
-    T x, y, w, h;
+    T x, y;
+    T width, height;
 };
 
 // ------------
@@ -66,7 +67,7 @@ template <typename T>
 inline bool
 operator ==(BaseRect<T> const & r1, BaseRect<T> const & r2) TBAG_NOEXCEPT
 {
-    return r1.x == r2.x && r1.y == r2.y && r1.w == r2.w && r1.h == r2.h;
+    return r1.x == r2.x && r1.y == r2.y && r1.width == r2.width && r1.height == r2.height;
 }
 
 template <typename T>
@@ -98,8 +99,8 @@ template <typename T>
 inline BaseRect<T> &
 operator +=(BaseRect<T> & r, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    r.w += s.w;
-    r.h += s.h;
+    r.width  += s.width;
+    r.height += s.height;
     return r;
 }
 
@@ -107,8 +108,8 @@ template <typename T>
 inline BaseRect<T> &
 operator -=(BaseRect<T> & r, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    r.w -= s.w;
-    r.h -= s.h;
+    r.width  -= s.width;
+    r.height -= s.height;
     return r;
 }
 
@@ -118,8 +119,8 @@ operator &=(BaseRect<T> & r1, BaseRect<T> const & r2) TBAG_NOEXCEPT
 {
     T x1 = std::max(r1.x, r2.x);
     T y1 = std::max(r1.y, r2.y);
-    r1.w = std::min(r1.x + r1.w, r2.x + r2.w) - x1;
-    r1.h = std::min(r1.y + r1.h, r2.y + r2.h) - y1;
+    r1.width  = std::min(r1.x + r1.width , r2.x + r2.width ) - x1;
+    r1.height = std::min(r1.y + r1.height, r2.y + r2.height) - y1;
     r1.x = x1;
     r1.y = y1;
     return r1;
@@ -131,8 +132,8 @@ operator |=(BaseRect<T> & r1, BaseRect<T> const & r2) TBAG_NOEXCEPT
 {
     T x1 = std::min(r1.x, r2.x);
     T y1 = std::min(r1.y, r2.y);
-    r1.w = std::max(r1.x + r1.w, r2.x + r2.w) - x1;
-    r1.h = std::max(r1.y + r1.h, r2.y + r2.h) - y1;
+    r1.width  = std::max(r1.x + r1.width , r2.x + r2.width ) - x1;
+    r1.height = std::max(r1.y + r1.height, r2.y + r2.height) - y1;
     r1.x = x1;
     r1.y = y1;
     return r1;
@@ -142,28 +143,28 @@ template <typename T>
 inline BaseRect<T>
 operator +(BaseRect<T> const & r, BasePoint<T> const & p) TBAG_NOEXCEPT
 {
-    return BaseRect<T>{r.x + p.x, r.y + p.y, r.w, r.h};
+    return BaseRect<T>{r.x + p.x, r.y + p.y, r.width, r.height};
 }
 
 template <typename T>
 inline BaseRect<T>
 operator -(BaseRect<T> const & r, BasePoint<T> const & p) TBAG_NOEXCEPT
 {
-    return BaseRect<T>{r.x - p.x, r.y - p.y, r.w, r.h};
+    return BaseRect<T>{r.x - p.x, r.y - p.y, r.width, r.height};
 }
 
 template <typename T>
 inline BaseRect<T>
 operator +(BaseRect<T> const & r, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    return BaseRect<T>{r.x, r.y, r.w + s.w, r.h + s.h};
+    return BaseRect<T>{r.x, r.y, r.width + s.width, r.height + s.height};
 }
 
 template <typename T>
 inline BaseRect<T>
 operator -(BaseRect<T> const & r, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
-    return BaseRect<T>{r.x, r.y, r.w - s.w, r.h - s.h};
+    return BaseRect<T>{r.x, r.y, r.width - s.width, r.height - s.height};
 }
 
 template <typename T>
@@ -188,11 +189,11 @@ operator |(BaseRect<T> const & r1, BaseRect<T> const & r2) TBAG_NOEXCEPT
 
 template <typename T1, typename T2 = T1, typename T3 = T1, typename T4 = T1>
 TBAG_CONSTEXPR BaseRect<typename remove_cr<T1>::type>
-makeRect(T1 && x, T2 && y, T3 && w, T4 && h) TBAG_NOEXCEPT
+makeRect(T1 && x, T2 && y, T3 && width, T4 && height) TBAG_NOEXCEPT
 {
     typedef typename remove_cr<T1>::type __remove_cr;
     typedef BaseRect<__remove_cr> __rect_type;
-    return __rect_type{std::forward<T1>(x), std::forward<T2>(y), std::forward<T3>(w), std::forward<T4>(h)};
+    return __rect_type{std::forward<T1>(x), std::forward<T2>(y), std::forward<T3>(width), std::forward<T4>(height)};
 }
 
 template <typename T>
@@ -201,7 +202,7 @@ makeRect(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 {
     typedef typename remove_cr<T>::type __remove_cr;
     typedef BaseRect<__remove_cr> __rect_type;
-    return __rect_type{p.x, p.y, s.w, s.h};
+    return __rect_type{p.x, p.y, s.width, s.height};
 }
 
 template <typename T>
@@ -215,14 +216,14 @@ template <typename T>
 inline BaseSize<typename remove_cr<T>::type>
 getSize(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return BaseSize<typename remove_cr<T>::type>{r.w, r.h};
+    return BaseSize<typename remove_cr<T>::type>{r.width, r.height};
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getArea(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return r.w * r.h;
+    return r.width * r.height;
 }
 
 // ------------------
@@ -233,56 +234,56 @@ template <typename T>
 inline typename remove_cr<T>::type
 getLeftTopX(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::min(r.x, r.x + r.w);
+    return std::min(r.x, r.x + r.width);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getLeftTopY(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::min(r.y, r.y + r.h);
+    return std::min(r.y, r.y + r.height);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightTopX(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::max(r.x, r.x + r.w);
+    return std::max(r.x, r.x + r.width);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightTopY(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::min(r.y, r.y + r.h);
+    return std::min(r.y, r.y + r.height);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getLeftBottomX(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::min(r.x, r.x + r.w);
+    return std::min(r.x, r.x + r.width);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getLeftBottomY(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::max(r.y, r.y + r.h);
+    return std::max(r.y, r.y + r.height);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightBottomX(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::max(r.x, r.x + r.w);
+    return std::max(r.x, r.x + r.width);
 }
 
 template <typename T>
 inline typename remove_cr<T>::type
 getRightBottomY(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
-    return std::max(r.y, r.y + r.h);
+    return std::max(r.y, r.y + r.height);
 }
 
 template <typename T>
@@ -325,8 +326,8 @@ template <typename T>
 inline bool
 checkInside(BaseRect<T> const & base, T const & x, T const & y) TBAG_NOEXCEPT
 {
-    if (/* * */base.x <= COMPARE_AND(x) <= (base.x + base.w)
-            && base.y <= COMPARE_AND(y) <= (base.y + base.h)) {
+    if (/* * */base.x <= COMPARE_AND(x) <= (base.x + base.width)
+            && base.y <= COMPARE_AND(y) <= (base.y + base.height)) {
         return true;
     }
     return false;
@@ -356,8 +357,8 @@ clipRect(BaseRect<T> const & r1, BaseRect<T> const & r2, BaseRect<T> * clip = nu
         if (clip != nullptr) {
             clip->x = lt_x;
             clip->y = lt_y;
-            clip->w = rb_x - lt_x;
-            clip->h = rb_y - lt_y;
+            clip->width  = rb_x - lt_x;
+            clip->height = rb_y - lt_y;
         }
         return true;
     }
@@ -380,8 +381,8 @@ std::string toString(BaseRect<T> const & rect)
     ss << __RECT_PREFIX_CHAR << __RECT_STREAM_BRACE_OPEN
        << rect.x << __RECT_STREAM_VALUE_SEPARATOR
        << rect.y << __RECT_STREAM_VALUE_SEPARATOR
-       << rect.w << __RECT_STREAM_VALUE_SEPARATOR
-       << rect.h << __RECT_STREAM_BRACE_CLOSE;
+       << rect.width  << __RECT_STREAM_VALUE_SEPARATOR
+       << rect.height << __RECT_STREAM_BRACE_CLOSE;
     return ss.str();
 }
 

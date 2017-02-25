@@ -25,23 +25,23 @@ TEST(RectTest, Constructor)
 
     ASSERT_EQ(1, r1.x);
     ASSERT_EQ(2, r1.y);
-    ASSERT_EQ(3, r1.w);
-    ASSERT_EQ(4, r1.h);
+    ASSERT_EQ(3, r1.width);
+    ASSERT_EQ(4, r1.height);
 
     ASSERT_EQ(1, r2.x);
     ASSERT_EQ(2, r2.y);
-    ASSERT_EQ(3, r2.w);
-    ASSERT_EQ(4, r2.h);
+    ASSERT_EQ(3, r2.width);
+    ASSERT_EQ(4, r2.height);
 
     ASSERT_EQ(1, r3.x);
     ASSERT_EQ(2, r3.y);
-    ASSERT_EQ(3, r3.w);
-    ASSERT_EQ(4, r3.h);
+    ASSERT_EQ(3, r3.width);
+    ASSERT_EQ(4, r3.height);
 
     ASSERT_EQ(5, r4.x);
     ASSERT_EQ(6, r4.y);
-    ASSERT_EQ(7, r4.w);
-    ASSERT_EQ(8, r4.h);
+    ASSERT_EQ(7, r4.width);
+    ASSERT_EQ(8, r4.height);
 
     ASSERT_EQ(r1, r2);
     ASSERT_EQ(r2, r3);
@@ -97,8 +97,8 @@ TEST(RectTest, Utility)
 {
     Point p = {10, 20};
     Size  s = {30, 40};
-    Rect  r = {p.x, p.y, s.w, s.h};
-    int   a = s.w * s.h;
+    Rect  r = {p.x, p.y, s.width, s.height};
+    int   a = s.width * s.height;
 
     ASSERT_EQ(p, getPoint(r));
     ASSERT_EQ(s, getSize (r));
@@ -207,14 +207,14 @@ TEST(RectTest, String)
 //
 //    ASSERT_EQ(1, r1.load().x);
 //    ASSERT_EQ(2, r1.load().y);
-//    ASSERT_EQ(3, r1.load().w);
-//    ASSERT_EQ(4, r1.load().h);
+//    ASSERT_EQ(3, r1.load().width);
+//    ASSERT_EQ(4, r1.load().height);
 //
 //    Rect r2 = r1;
 //
 //    ASSERT_EQ(1, r2.x);
 //    ASSERT_EQ(2, r2.y);
-//    ASSERT_EQ(3, r2.w);
-//    ASSERT_EQ(4, r2.h);
+//    ASSERT_EQ(3, r2.width);
+//    ASSERT_EQ(4, r2.height);
 //}
 
