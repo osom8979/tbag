@@ -60,7 +60,7 @@ before_build:
   - echo Running cmake...
   - mkdir c:\Project\tbag-build
   - cd "%TBAG_BUILD%"
-  - cmake -G "Visual Studio 15 2017 Win64" "%TBAG_BUILD%"
+  - cmake -G "Visual Studio 15 2017 Win64" "%TBAG_HOME%"
 
 #---------------------------------#
 #       tests configuration       #
