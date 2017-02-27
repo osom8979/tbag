@@ -49,7 +49,7 @@ environment:
 platform: x64
 
 # build Configuration, i.e. Debug, Release, etc.
-configuration: Release
+configuration: Debug
 
 build:
   parallel: true            # enable MSBuild parallel builds
@@ -60,16 +60,11 @@ before_build:
   - echo Running cmake...
   - mkdir c:\Project\tbag-build
   - cd "%TBAG_BUILD%"
-  - cmake -G "Visual Studio 15 2017 Win64" "%TBAG_HOME%"
+  - cmake -G "Visual Studio 14 2015 Win64" "%TBAG_HOME%"
 
 #---------------------------------#
 #       tests configuration       #
 #---------------------------------#
-
-# scripts to run before tests
-before_test:
-  - echo script1
-  - ps: Write-Host "script1"
 
 # to run your custom scripts instead of automatic tests
 test_script:
