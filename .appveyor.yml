@@ -51,10 +51,6 @@ platform: x64
 # build Configuration, i.e. Debug, Release, etc.
 configuration: Debug
 
-build:
-  parallel: true            # enable MSBuild parallel builds
-  project: tea-bag.sln      # path to Visual Studio solution or project
-
 # scripts to run before build
 before_build:
   - cmd: echo Running cmake...
@@ -62,6 +58,11 @@ before_build:
   - cmd: cd "%TBAG_BUILD%"
   - cmd: if "%platform%" == "Win32" cmake -G "Visual Studio 14 2015"       -DCMAKE_BUILD_TYPE=Debug "%TBAG_HOME%"
   - cmd: if "%platform%" == "x64"   cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug "%TBAG_HOME%"
+
+# to run your custom scripts instead of automatic MSBuild
+build_script:
+  - cmd: cd "%TBAG_BUILD%"
+  - cmd: msbuild tea-bag.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 #---------------------------------#
 #       tests configuration       #
