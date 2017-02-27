@@ -40,7 +40,7 @@ namespace network {
  * @author zer0
  * @date   2017-01-24
  */
-struct DatagramInterface
+struct TBAG_API DatagramInterface
 {
     using binf = uvpp::binf;
     using Size = uint32_t;

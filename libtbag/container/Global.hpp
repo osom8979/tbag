@@ -35,7 +35,7 @@ namespace container {
  * @author zer0
  * @date   2017-02-16
  */
-class TBAG_API Global : public pattern::Singleton2<Global>
+class Global : public pattern::Singleton2<Global>
 {
 public:
     SINGLETON2_PROTOTYPE(Global);

@@ -54,7 +54,7 @@ TEST(ZipTest, ImageTest)
 
     std::random_device device;
     std::mt19937 engine(device());
-    std::uniform_int_distribution<uint8_t> distribution(0x00, 0xFF);
+    std::uniform_int_distribution<int> distribution(0x00, 0xFF);
 
     std::vector<uint8_t> input;
     input.resize(total);
