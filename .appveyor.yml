@@ -39,7 +39,7 @@ clone_folder: c:\Project\tbag
 # environment variables
 environment:
   TBAG_HOME: c:\Project\tbag
-  TBAG_BUILD: c:\Project\tbag-build
+  TBAG_BUILD: c:\Project\tbag\build
 
 #---------------------------------#
 #       build configuration       #
@@ -57,12 +57,11 @@ build:
 
 # scripts to run before build
 before_build:
-  - echo Running cmake...
-  - mkdir c:\Project\tbag-build
-  - cd "%TBAG_BUILD%"
-  - cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug "%TBAG_HOME%"
-  - echo %CD%
-  - dir
+  - cmd: echo Running cmake...
+  - cmd: mkdir "%TBAG_BUILD%"
+  - cmd: cd "%TBAG_BUILD%"
+  - cmd: if "%platform%" == "Win32" cmake -G "Visual Studio 14 2015"       -DCMAKE_BUILD_TYPE=Debug "%TBAG_HOME%"
+  - cmd: if "%platform%" == "x64"   cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug "%TBAG_HOME%"
 
 #---------------------------------#
 #       tests configuration       #
@@ -70,8 +69,9 @@ before_build:
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - echo Running test...
-  - "%TBAG_BUILD%\\tester.exe"
+  - cmd: echo Running test...
+  - cmd: cd "%TBAG_BUILD%"
+  - cmd: "%TBAG_BUILD%\\tester.exe"
 
 #---------------------------------#
 #         notifications           #
