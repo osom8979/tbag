@@ -603,7 +603,7 @@ inline DWORD GetTempPathA(_In_  DWORD nBufferLength,
  *  - Header: WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
+inline DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
                            _Out_ LPSTR lpBuffer)
 { return 0; }
 
