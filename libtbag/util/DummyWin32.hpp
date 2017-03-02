@@ -25,110 +25,6 @@
 # define near
 # endif
 
-# ifndef BOOL
-# define BOOL int
-# endif
-
-# ifndef CHAR
-# define CHAR char
-# endif
-
-# ifndef WCHAR
-# define WCHAR wchar_t
-# endif
-
-# ifndef LPBOOL
-# define LPBOOL BOOL far *
-# endif
-
-# ifndef LONG_PTR
-# define LONG_PTR long long
-# endif
-
-# ifndef DWORD
-# define DWORD unsigned long
-# endif
-
-# ifndef PDWORD
-# define PDWORD DWORD near *
-# endif
-
-# ifndef LPDWORD
-# define LPDWORD DWORD far *
-# endif
-
-# ifndef UINT
-# define UINT unsigned int
-# endif
-
-# ifndef LONG
-# define LONG long
-# endif
-
-# ifndef LPSTR
-# define LPSTR char far *
-# endif
-
-# ifndef LPCSTR
-# define LPCSTR char const far *
-# endif
-
-# ifndef LPWSTR
-# define LPWSTR wchar_t far *
-# endif
-
-# ifndef PCWSTR
-# define PCWSTR wchar_t const near *
-# endif
-
-# ifndef LPCWSTR
-# define LPCWSTR wchar_t const far *
-# endif
-
-# ifndef PVOID
-# define PVOID void near *
-# endif
-
-# ifndef HRESULT
-# define HRESULT long
-# endif
-
-# ifndef LPSECURITY_ATTRIBUTES
-# define LPSECURITY_ATTRIBUTES PVOID
-# endif
-
-# ifndef SECURITY_INFORMATION
-# define SECURITY_INFORMATION DWORD
-# endif
-
-# ifndef PSECURITY_INFORMATION
-# define PSECURITY_INFORMATION DWORD *
-# endif
-
-# ifndef PSECURITY_DESCRIPTOR
-# define PSECURITY_DESCRIPTOR PVOID
-# endif
-
-# ifndef HWND
-# define HWND PVOID
-# endif
-
-# ifndef HANDLE
-# define HANDLE PVOID
-# endif
-
-# ifndef HINSTANCE
-# define HINSTANCE PVOID
-# endif
-
-# ifndef HMODULE
-# define HMODULE HINSTANCE
-# endif
-
-# ifndef PHANDLE
-# define PHANDLE HANDLE *
-# endif
-
 # ifndef _In_
 # define _In_
 # endif
@@ -155,6 +51,131 @@
 
 # ifndef FALSE
 # define FALSE 0
+# endif
+
+# ifndef BOOL
+# define BOOL int
+# endif
+
+# ifndef CHAR
+# define CHAR char
+# endif
+
+# ifndef WCHAR
+# define WCHAR wchar_t
+# endif
+
+# ifndef UINT
+# define UINT unsigned int
+# endif
+
+# ifndef LONG
+# define LONG long
+# endif
+
+# ifndef DWORD
+# define DWORD unsigned long
+# endif
+
+# ifndef PBOOL
+# define PBOOL BOOL near *
+# endif
+
+# ifndef LPBOOL
+# define LPBOOL BOOL far *
+# endif
+
+# ifndef PDWORD
+# define PDWORD DWORD near *
+# endif
+
+# ifndef LPDWORD
+# define LPDWORD DWORD far *
+# endif
+
+# ifndef PSTR
+# define PSTR char near *
+# endif
+
+# ifndef LPSTR
+# define LPSTR char far *
+# endif
+
+# ifndef PCSTR
+# define PCSTR char const near *
+# endif
+
+# ifndef LPCSTR
+# define LPCSTR char const far *
+# endif
+
+# ifndef PWSTR
+# define PWSTR wchar_t near *
+# endif
+
+# ifndef LPWSTR
+# define LPWSTR wchar_t far *
+# endif
+
+# ifndef PCWSTR
+# define PCWSTR wchar_t const near *
+# endif
+
+# ifndef LPCWSTR
+# define LPCWSTR wchar_t const far *
+# endif
+
+# ifndef PVOID
+# define PVOID void near *
+# endif
+
+# ifndef LPVOID
+# define LPVOID void far *
+# endif
+
+# ifndef LONG_PTR
+# define LONG_PTR long long
+# endif
+
+# ifndef HRESULT
+# define HRESULT long
+# endif
+
+# ifndef HWND
+# define HWND PVOID
+# endif
+
+# ifndef HANDLE
+# define HANDLE PVOID
+# endif
+
+# ifndef HINSTANCE
+# define HINSTANCE PVOID
+# endif
+
+# ifndef HMODULE
+# define HMODULE HINSTANCE
+# endif
+
+# ifndef PHANDLE
+# define PHANDLE HANDLE *
+# endif
+
+
+# ifndef LPSECURITY_ATTRIBUTES
+# define LPSECURITY_ATTRIBUTES PVOID
+# endif
+
+# ifndef SECURITY_INFORMATION
+# define SECURITY_INFORMATION DWORD
+# endif
+
+# ifndef PSECURITY_INFORMATION
+# define PSECURITY_INFORMATION DWORD *
+# endif
+
+# ifndef PSECURITY_DESCRIPTOR
+# define PSECURITY_DESCRIPTOR PVOID
 # endif
 
 # ifndef S_OK
