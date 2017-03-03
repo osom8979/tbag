@@ -1,6 +1,8 @@
 # TBAG
 
-[![Build Status](https://travis-ci.org/osom8979/tbag.svg?branch=master)](https://travis-ci.org/osom8979/tbag)
+[![TravisCI Build Status](https://travis-ci.org/osom8979/tbag.svg?branch=master)](https://travis-ci.org/osom8979/tbag)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/osom8979/tbag?branch=master&svg=true)](https://ci.appveyor.com/project/osom8979/tbag)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Introduction
 
