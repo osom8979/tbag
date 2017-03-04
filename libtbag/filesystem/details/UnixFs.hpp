@@ -51,11 +51,6 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
     return v == PATH_SEPARATOR_OF_POSIX;
 }
 
-TBAG_API std::string getTempDir();
-TBAG_API std::string getWorkDir();
-TBAG_API std::string getHomeDir();
-TBAG_API std::string getExePath();
-
 TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
 TBAG_API std::string createDefaultTempDir();
 

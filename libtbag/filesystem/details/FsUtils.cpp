@@ -33,9 +33,9 @@ using DirFunction = int (*)(char * buffer, std::size_t * size);
 /** For the libuv miscellaneous function. */
 static std::string getRepresentationDirectory(DirFunction func)
 {
-    std::size_t length = libtbag::filesystem::details::MAX_PATH_LENGTH;
-    std::size_t const BUFFER_LENGTH = MAX_PATH_LENGTH + 1;
-    char buffer[BUFFER_LENGTH] = {0,};
+    std::size_t const BUFFER_SIZE = MAX_PATH_LENGTH + 1;
+    std::size_t length = MAX_PATH_LENGTH;
+    char buffer[BUFFER_SIZE] = {0,};
 
     if (func(&buffer[0], &length) != 0) {
         return std::string();
@@ -46,28 +46,40 @@ static std::string getRepresentationDirectory(DirFunction func)
 // ------------------
 } // namespace __impl
 // ------------------
-//
-std::string getUvTempDir()
+
+// -----------
+namespace uv {
+// -----------
+
+std::string getTempDir()
 {
     return __impl::getRepresentationDirectory(&uv_os_tmpdir);
 }
 
-std::string getUvWorkDir()
+std::string getWorkDir()
 {
     return __impl::getRepresentationDirectory(&uv_cwd);
 }
 
-std::string getUvHomeDir()
+std::string getHomeDir()
 {
     return __impl::getRepresentationDirectory(&uv_os_homedir);
 }
 
-std::string getUvExePath()
+std::string getExePath()
 {
     return __impl::getRepresentationDirectory(&uv_exepath);
 }
 
-std::string getWindowsTempDir()
+// --------------
+} // namespace uv
+// --------------
+
+// ----------------
+namespace windows {
+// ----------------
+
+std::string getTempDir()
 {
     TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
@@ -85,7 +97,7 @@ std::string getWindowsTempDir()
     return std::string(buffer);
 }
 
-std::string getWindowsWorkDir()
+std::string getWorkDir()
 {
     TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
@@ -118,7 +130,7 @@ std::string getWindowsWorkDir()
     return std::string(buffer);
 }
 
-std::string getWindowsHomeDir()
+std::string getHomeDir()
 {
     TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
@@ -139,7 +151,7 @@ std::string getWindowsHomeDir()
     return std::string(buffer);
 }
 
-std::string getWindowsExePathEx(std::size_t extend_buffer_size)
+std::string getExePathEx(std::size_t extend_buffer_size)
 {
     TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
@@ -156,7 +168,7 @@ std::string getWindowsExePathEx(std::size_t extend_buffer_size)
         // If the buffer is too small to hold the module name,
         // the string is truncated to nSize characters including the terminating null character,
         // the function returns nSize, and the function sets the last error to ERROR_INSUFFICIENT_BUFFER.
-        return getWindowsExePathEx(extend_buffer_size * 2);
+        return getExePathEx(extend_buffer_size * 2);
     }
 
     // If the function succeeds,
@@ -166,10 +178,14 @@ std::string getWindowsExePathEx(std::size_t extend_buffer_size)
     return buffer;
 }
 
-std::string getWindowsExePath()
+std::string getExePath()
 {
-    return getWindowsExePathEx(MAX_PATH_LENGTH + 1);
+    return getExePathEx(MAX_PATH_LENGTH + 1);
 }
+
+// -------------------
+} // namespace windows
+// -------------------
 
 } // namespace details
 } // namespace filesystem

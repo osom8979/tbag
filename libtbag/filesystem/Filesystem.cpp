@@ -9,6 +9,7 @@
 #include <libtbag/filesystem/Filesystem.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
+#include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -29,29 +30,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-std::string getTempDir()
-{
-    return details::toUtf8Path(__impl::getTempDir);
-}
-
-std::string getWorkDir()
-{
-    return details::toUtf8Path(__impl::getWorkDir);
-}
-
-std::string getHomeDir()
-{
-    return details::toUtf8Path(__impl::getHomeDir);
-}
-
-std::string getExePath()
-{
-    return details::toUtf8Path(__impl::getExePath);
-}
-
 std::string getExeDir()
 {
-    return removeLastNode(details::toUtf8Path(__impl::getExePath));
+    return removeLastNode(details::toUtf8Path(details::getExePath));
 }
 
 std::string createTempDir(std::string const & utf8_prefix, std::string const & utf8_suffix, std::size_t unique_size)
@@ -310,10 +291,10 @@ std::vector<std::string> splitNodesWithCanonical(std::string const & utf8_path)
         itr = nodes.begin();
     } else {
         if (nodes.size() >= 1 && nodes.at(0) == details::HOME_DIRECTORY_SHORTCUT) {
-            result = splitNodes(getHomeDir());
+            result = splitNodes(details::getHomeDir());
             itr = nodes.begin() + 1;
         } else {
-            result = splitNodes(getWorkDir());
+            result = splitNodes(details::getWorkDir());
             itr = nodes.begin();
         }
     }
@@ -349,11 +330,11 @@ void printInfos(std::ostream * stream)
         (*stream) << " * Unix-like Platform Filesystem.\n";
     }
 
-    (*stream) << " * Temp directory: " << __impl::getTempDir() << std::endl;
-    (*stream) << " * Home directory: " << __impl::getHomeDir() << std::endl;
-    (*stream) << " * Work directory: " << __impl::getWorkDir() << std::endl;
+    (*stream) << " * Temp directory: " << details::getTempDir() << std::endl;
+    (*stream) << " * Home directory: " << details::getHomeDir() << std::endl;
+    (*stream) << " * Work directory: " << details::getWorkDir() << std::endl;
     (*stream) << " * Work directory (realpath): " << __impl::getRealPath(".") << std::endl;
-    (*stream) << " * Exe path: "       << __impl::getExePath() << std::endl;
+    (*stream) << " * Exe path: "       << details::getExePath() << std::endl;
 }
 
 } // namespace filesystem

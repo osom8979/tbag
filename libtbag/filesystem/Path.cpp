@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/filesystem/details/FsTypes.hpp> // TODO: REMOVE THIS INCLUDE.
+#include <libtbag/filesystem/details/FsUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -385,17 +385,17 @@ std::size_t Path::size() const
 
 Path Path::getWorkDir()
 {
-    return Path(filesystem::getWorkDir());
+    return Path(details::getWorkDir());
 }
 
 Path Path::getHomeDir()
 {
-    return Path(filesystem::getHomeDir());
+    return Path(details::getHomeDir());
 }
 
 Path Path::getExePath()
 {
-    return Path(filesystem::getExePath());
+    return Path(details::getExePath());
 }
 
 Path Path::getExeDir()

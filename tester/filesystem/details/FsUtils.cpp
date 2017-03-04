@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 
+#include <string>
 #include <iostream>
 
 using namespace libtbag;
@@ -24,17 +25,13 @@ TEST(FsUtilsTest, Default)
 
     if (::libtbag::isWindowsPlatform()) {
         back_end = "Windows back-end";
-        temp = getWindowsTempDir();
-        work = getWindowsWorkDir();
-        home = getWindowsHomeDir();
-        exe  = getWindowsExePath();
     } else {
         back_end = "Uv back-end";
-        temp = getUvTempDir();
-        work = getUvWorkDir();
-        home = getUvHomeDir();
-        exe  = getUvExePath();
-    }                
+    }
+    temp = getTempDir();
+    work = getWorkDir();
+    home = getHomeDir();
+    exe  = getExePath();
 
     std::cout << "FsUtils: " << back_end << " back-end.\n"
               << "TempDir: " << temp << std::endl

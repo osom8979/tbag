@@ -11,6 +11,7 @@
 
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
+#include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Type.hpp>
@@ -172,20 +173,6 @@ enum AccessModeTable
     ACCESS_MODE_READ    = (1<<2), ///< R_OK: test for read permission.
 };
 
-using DirFunction = int (*)(char * buffer, std::size_t * size);
-
-/** For the libuv miscellaneous function. */
-static std::string getRepresentationDirectory(DirFunction func)
-{
-    std::size_t length = libtbag::filesystem::details::MAX_PATH_LENGTH;
-    char buffer[MAX_PATH_LENGTH] = {0,};
-
-    if (func(&buffer[0], &length) != 0) {
-        return std::string();
-    }
-    return std::string(buffer);
-}
-
 static bool checkAccessMode(std::string const & path, int mode)
 {
     uv_fs_t request;
@@ -238,26 +225,6 @@ static uint64_t getFixedPermission(uint64_t mode)
 // Common interface.
 // -----------------
 
-std::string getTempDir()
-{
-    return uvpp::getRepresentationDirectory(&uv_os_tmpdir);
-}
-
-std::string getWorkDir()
-{
-    return uvpp::getRepresentationDirectory(&uv_cwd);
-}
-
-std::string getHomeDir()
-{
-    return uvpp::getRepresentationDirectory(&uv_os_homedir);
-}
-
-std::string getExePath()
-{
-    return uvpp::getRepresentationDirectory(&uv_exepath);
-}
-
 std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size)
 {
     std::string buffer;
@@ -278,7 +245,7 @@ std::string createTempDir(std::string const & prefix, std::string const & suffix
 
 std::string createDefaultTempDir()
 {
-    std::string temp_dir = getTempDir();
+    std::string temp_dir = details::getTempDir();
     if (isDirectory(temp_dir) == false) {
         return std::string();
     }

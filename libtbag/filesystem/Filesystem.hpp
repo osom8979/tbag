@@ -31,10 +31,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-TBAG_API std::string getTempDir();
-TBAG_API std::string getWorkDir();
-TBAG_API std::string getHomeDir();
-TBAG_API std::string getExePath();
 TBAG_API std::string getExeDir();
 TBAG_API std::string createTempDir(std::string const & utf8_prefix, std::string const & utf8_suffix, std::size_t unique_size = 6);
 TBAG_API std::string createDefaultTempDir();

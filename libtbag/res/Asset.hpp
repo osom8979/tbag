@@ -18,6 +18,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/Filesystem.hpp>
+#include <libtbag/filesystem/details/FsUtils.hpp>
 
 #include <string>
 #include <vector>
@@ -78,13 +79,13 @@ public:
     /** Obtain HOME directory path. */
     static Path getHomeDirPath()
     {
-        return Path(filesystem::getHomeDir());
+        return Path::getHomeDir();
     }
 
     /** Obtain executable file directory path. */
     static Path getExeDirPath()
     {
-        return Path(filesystem::getExePath()).getParent();
+        return Path::getExeDir();
     }
 };
 

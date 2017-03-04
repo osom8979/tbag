@@ -29,6 +29,13 @@
     } while(0)
 #endif // TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT
 
+#if defined(__PLATFORM_WINDOWS__)
+# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::windows
+#else
+# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::uv
+#endif
+
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -36,16 +43,25 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-TBAG_API std::string getUvTempDir();
-TBAG_API std::string getUvWorkDir();
-TBAG_API std::string getUvHomeDir();
-TBAG_API std::string getUvExePath();
+namespace uv {
+TBAG_API std::string getTempDir();
+TBAG_API std::string getWorkDir();
+TBAG_API std::string getHomeDir();
+TBAG_API std::string getExePath();
+} // namespace uv
 
-TBAG_API std::string getWindowsTempDir();
-TBAG_API std::string getWindowsWorkDir();
-TBAG_API std::string getWindowsHomeDir();
-TBAG_API std::string getWindowsExePathEx(std::size_t extend_buffer_size);
-TBAG_API std::string getWindowsExePath();
+namespace windows {
+TBAG_API std::string getTempDir();
+TBAG_API std::string getWorkDir();
+TBAG_API std::string getHomeDir();
+TBAG_API std::string getExePathEx(std::size_t extend_buffer_size);
+TBAG_API std::string getExePath();
+} // namespace windows
+
+inline std::string getTempDir() { return TBAG_FS_PLATFORM_NAMESPACE::getTempDir(); }
+inline std::string getWorkDir() { return TBAG_FS_PLATFORM_NAMESPACE::getWorkDir(); }
+inline std::string getHomeDir() { return TBAG_FS_PLATFORM_NAMESPACE::getHomeDir(); }
+inline std::string getExePath() { return TBAG_FS_PLATFORM_NAMESPACE::getExePath(); }
 
 } // namespace details
 } // namespace filesystem
