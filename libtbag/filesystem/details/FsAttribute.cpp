@@ -15,6 +15,7 @@
 
 #if defined(__PLATFORM_WINDOWS__)
 # include <Windows.h>
+# include <Shlwapi.h> // PathFileExists
 #else
 # include <libtbag/proxy/windows/Dummy.hpp>
 using namespace ::libtbag::proxy::windows;
