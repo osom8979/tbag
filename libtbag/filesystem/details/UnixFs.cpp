@@ -40,20 +40,6 @@ namespace unix       {
 // libuv helper methods.
 // ---------------------
 
-std::string getRealPath(std::string const & path)
-{
-    std::string result;
-    uv_fs_t request = {0,};
-
-    if (uv_fs_realpath(nullptr, &request, path.c_str(), nullptr) == 0) {
-        result = std::string(static_cast<char*>(request.ptr));
-    } else {
-        result = path;
-    }
-    uv_fs_req_cleanup(&request);
-    return result;
-}
-
 bool removeDirectory(std::string const & path)
 {
     uv_fs_t request;

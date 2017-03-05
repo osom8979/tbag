@@ -29,8 +29,6 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
-TBAG_API std::string getRealPath(std::string const & path);
-
 TBAG_API bool removeDirectory(std::string const & path);
 TBAG_API bool removeFile(std::string const & path);
 TBAG_API bool removeAll(std::string const & path);

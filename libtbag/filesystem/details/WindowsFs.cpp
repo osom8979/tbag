@@ -43,30 +43,6 @@ namespace windows    {
     do { if (isWindowsPlatform() == false) { assert(0 && "Not implement."); return retval; } } while(0)
 #endif
 
-std::string getRealPath(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(std::string());
-
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
-
-    if (WCS_PATH.empty()) {
-        return std::string();
-    }
-
-    wchar_t ** part = {nullptr};
-    DWORD const RESERVE_SIZE = GetFullPathNameW(&WCS_PATH[0], 0, nullptr, part);
-    std::wstring buffer;
-    buffer.resize(RESERVE_SIZE);
-
-    DWORD const COPIED_LENGTH = GetFullPathNameW(&WCS_PATH[0], buffer.size(), &buffer[0], part);
-    if (COPIED_LENGTH == 0) {
-        __tbag_error("GetFullPathNameW() ERROR: {}", GetLastError());
-    }
-
-    buffer.resize(COPIED_LENGTH);
-    return proxy::windows::wcsToMbsWithAcp(buffer);
-}
-
 bool removeDirectory(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);

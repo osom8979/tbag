@@ -12,6 +12,7 @@
 #include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/FsCreate.hpp>
+#include <libtbag/filesystem/details/FsReal.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -70,10 +71,10 @@ std::string getRealPath(std::string const & utf8_path)
     if (locale::isUtf8GloablEncodingName() == false) {
         std::string native_path;
         if (locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path)) {
-            return __impl::getRealPath(native_path);
+            return details::getRealPath(native_path);
         }
     }
-    return __impl::getRealPath(utf8_path);
+    return details::getRealPath(utf8_path);
 }
 
 bool createDirectory(std::string const & utf8_path)
@@ -335,7 +336,7 @@ void printInfos(std::ostream * stream)
     (*stream) << " * Temp directory: " << details::getTempDir() << std::endl;
     (*stream) << " * Home directory: " << details::getHomeDir() << std::endl;
     (*stream) << " * Work directory: " << details::getWorkDir() << std::endl;
-    (*stream) << " * Work directory (realpath): " << __impl::getRealPath(".") << std::endl;
+    (*stream) << " * Work directory (realpath): " << details::getRealPath(".") << std::endl;
     (*stream) << " * Exe path: "       << details::getExePath() << std::endl;
 }
 
