@@ -18,8 +18,6 @@
 #include <libtbag/filesystem/details/FsRename.hpp>
 #include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/filesystem/details/FsRemove.hpp>
-#include <libtbag/filesystem/details/WindowsFs.hpp>
-#include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/locale/Locale.hpp>
 #include <libtbag/locale/Convert.hpp>
