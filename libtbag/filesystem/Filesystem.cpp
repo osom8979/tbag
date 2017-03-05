@@ -10,6 +10,7 @@
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
+#include <libtbag/filesystem/details/FsNode.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/FsCreate.hpp>
@@ -24,12 +25,6 @@
 #include <libtbag/locale/Convert.hpp>
 
 #include <fstream>
-
-#if defined(__PLATFORM_WINDOWS__)
-namespace __impl = ::libtbag::filesystem::details::windows;
-#else
-namespace __impl = ::libtbag::filesystem::details::unix;
-#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -239,17 +234,17 @@ std::string removeDuplicateSeparatorsWithGeneric(std::string const & utf8_path)
 
 std::string getNative(std::string const & utf8_path)
 {
-    return __impl::getNativeWithUtf8(utf8_path);
+    return details::getNativeWithUtf8(utf8_path);
 }
 
 std::string getGeneric(std::string const & utf8_path)
 {
-    return __impl::getGenericWithUtf8(utf8_path);
+    return details::getGenericWithUtf8(utf8_path);
 }
 
 std::string getRootDir(std::string const & utf8_path)
 {
-    return __impl::getRootDirWithUtf8(utf8_path);
+    return details::getRootDirWithUtf8(utf8_path);
 }
 
 std::string getParent(std::string const & utf8_path)
@@ -262,12 +257,12 @@ std::string getParent(std::string const & utf8_path)
 
 bool isAbsolute(std::string const & utf8_path)
 {
-    return __impl::isAbsoluteWithUtf8(utf8_path);
+    return details::isAbsoluteWithUtf8(utf8_path);
 }
 
 bool isRelative(std::string const & utf8_path)
 {
-    return __impl::isRelativeWithUtf8(utf8_path);
+    return details::isRelativeWithUtf8(utf8_path);
 }
 
 std::string removeLastNode(std::string const & utf8_path)
@@ -277,12 +272,12 @@ std::string removeLastNode(std::string const & utf8_path)
 
 std::string appendParent(std::string const & utf8_path)
 {
-    return __impl::appendParentWithUtf8(utf8_path);
+    return details::appendParentWithUtf8(utf8_path);
 }
 
 std::vector<std::string> splitNodes(std::string const & utf8_path)
 {
-    return __impl::splitNodesWithUtf8(utf8_path);
+    return details::splitNodesWithUtf8(utf8_path);
 }
 
 std::vector<std::string> splitNodesWithCanonical(std::string const & utf8_path)
@@ -294,7 +289,7 @@ std::vector<std::string> splitNodesWithCanonical(std::string const & utf8_path)
     NodeItr itr;
     NodeItr end = nodes.end();
 
-    if (__impl::isAbsoluteWithUtf8(utf8_path) == true) {
+    if (details::isAbsoluteWithUtf8(utf8_path) == true) {
         itr = nodes.begin();
     } else {
         if (nodes.size() >= 1 && nodes.at(0) == details::HOME_DIRECTORY_SHORTCUT) {

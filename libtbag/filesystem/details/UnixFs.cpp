@@ -37,54 +37,6 @@ namespace filesystem {
 namespace details    {
 namespace unix       {
 
-std::string getNativeWithUtf8(std::string const & utf8_path)
-{
-    return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithUtf8(utf8_path));
-}
-
-std::string getGenericWithUtf8(std::string const & utf8_path)
-{
-    return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path));
-}
-
-std::string getRootDirWithUtf8(std::string const & utf8_path)
-{
-    if (utf8_path.size() < 1 || utf8_path[0] != PATH_SEPARATOR_OF_POSIX) {
-        return std::string();
-    }
-    return std::string() + PATH_SEPARATOR_OF_POSIX;
-}
-
-bool isAbsoluteWithUtf8(std::string const & utf8_path)
-{
-    return !getRootDirWithUtf8(utf8_path).empty();
-}
-
-bool isRelativeWithUtf8(std::string const & utf8_path)
-{
-    return !isAbsoluteWithUtf8(utf8_path);
-}
-
-std::string appendParentWithUtf8(std::string const & utf8_path)
-{
-    return utf8_path + PATH_SEPARATOR_OF_POSIX + PARENT_DIRECTORY_SHORTCUT;
-}
-
-std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
-{
-    std::string const UTF8_DELIMITER = std::string() + PATH_SEPARATOR_OF_POSIX;
-    std::string const ROOT = getRootDirWithUtf8(utf8_path);
-
-    std::vector<std::string> result;
-    result = string::splitUtf8Tokens(removeDuplicateSeparatorsWithUtf8(utf8_path), UTF8_DELIMITER);
-
-    if (!ROOT.empty()) {
-        // Force insert the POSIX root directory.
-        result.insert(result.begin(), ROOT);
-    }
-    return result;
-}
-
 } // namespace unix
 } // namespace details
 } // namespace filesystem

@@ -39,58 +39,6 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
-std::string getNativeWithUtf8(std::string const & utf8_path)
-{
-    return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithUtf8(utf8_path));
-}
-
-std::string getGenericWithUtf8(std::string const & utf8_path)
-{
-    return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithGenericUtf8(utf8_path));
-}
-
-std::string getRootDirWithUtf8(std::string const & utf8_path)
-{
-    if (utf8_path.empty()) {
-        return std::string();
-    }
-
-    icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_path.c_str()));
-    int32_t const PATH_LENGTH = path.length();
-
-    if (path.length() < 2 || u_isalpha(path.charAt(0)) == false || path.charAt(1) != ':') {
-        return std::string();
-    }
-
-    icu::UnicodeString buffer = path.tempSubString(0, 2);
-    assert(buffer.length() == 2);
-
-    std::string result;
-    buffer.toUTF8String(result);
-    return result;
-}
-
-bool isAbsoluteWithUtf8(std::string const & utf8_path)
-{
-    return !getRootDirWithUtf8(utf8_path).empty();
-}
-
-bool isRelativeWithUtf8(std::string const & utf8_path)
-{
-    return !isAbsoluteWithUtf8(utf8_path);
-}
-
-std::string appendParentWithUtf8(std::string const & utf8_path)
-{
-    return utf8_path + PATH_SEPARATOR_OF_WINDOWS + PARENT_DIRECTORY_SHORTCUT;
-}
-
-std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path)
-{
-    std::string const UTF8_DELIMITER = std::string() + PATH_SEPARATOR_OF_WINDOWS;
-    return string::splitUtf8Tokens(removeDuplicateSeparatorsWithUtf8(utf8_path), UTF8_DELIMITER);
-}
-
 } // namespace windows
 } // namespace details
 } // namespace filesystem

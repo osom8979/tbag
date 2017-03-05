@@ -29,14 +29,6 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
-TBAG_API std::string getNativeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string getGenericWithUtf8(std::string const & utf8_path);
-TBAG_API std::string getRootDirWithUtf8(std::string const & utf8_path);
-TBAG_API bool isAbsoluteWithUtf8(std::string const & utf8_path);
-TBAG_API bool isRelativeWithUtf8(std::string const & utf8_path);
-TBAG_API std::string appendParentWithUtf8(std::string const & utf8_path);
-TBAG_API std::vector<std::string> splitNodesWithUtf8(std::string const & utf8_path);
-
 } // namespace windows
 } // namespace details
 } // namespace filesystem

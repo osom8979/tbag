@@ -10,8 +10,7 @@
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
-#include <libtbag/filesystem/details/WindowsFs.hpp>
-#include <libtbag/filesystem/details/UnixFs.hpp>
+#include <libtbag/filesystem/details/FsNode.hpp>
 #include <libtbag/filesystem/Filesystem.hpp>
 
 #include <iostream>
@@ -174,10 +173,10 @@ TEST(CommonTest, getNativeWithUtf8)
     std::string const RESULT_GENERIC = "/" + UTF8_SOURCE;
 
     ASSERT_EQ(RESULT_WINDOWS, windows::getNativeWithUtf8(TEMP));
-    ASSERT_EQ(RESULT_POSIX, unix::getNativeWithUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, uv::getNativeWithUtf8(TEMP));
 
     ASSERT_EQ(RESULT_GENERIC, windows::getGenericWithUtf8(TEMP));
-    ASSERT_EQ(RESULT_POSIX, unix::getGenericWithUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, uv::getGenericWithUtf8(TEMP));
 
     ASSERT_EQ(UTF8_SOURCE, getGeneric(UTF8_SOURCE));
 }
@@ -192,45 +191,45 @@ TEST(CommonTest, getRootDirWithUtf8)
     result_windows = "";
     result_posix   = "/";
     ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
-    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , uv::getRootDirWithUtf8(temp));
     ASSERT_FALSE(windows::isAbsoluteWithUtf8(temp));
-    ASSERT_TRUE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_TRUE(uv::isAbsoluteWithUtf8(temp));
     ASSERT_TRUE(windows::isRelativeWithUtf8(temp));
-    ASSERT_FALSE(unix::isRelativeWithUtf8(temp));
+    ASSERT_FALSE(uv::isRelativeWithUtf8(temp));
 
     temp = "";
     result_windows = "";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
-    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , uv::getRootDirWithUtf8(temp));
     ASSERT_FALSE(windows::isAbsoluteWithUtf8(temp));
-    ASSERT_FALSE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(uv::isAbsoluteWithUtf8(temp));
     ASSERT_TRUE(windows::isRelativeWithUtf8(temp));
-    ASSERT_TRUE(unix::isRelativeWithUtf8(temp));
+    ASSERT_TRUE(uv::isRelativeWithUtf8(temp));
 
     temp = "D:\\" + UTF8_SOURCE + "\\";
     result_windows = "D:";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
-    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , uv::getRootDirWithUtf8(temp));
     ASSERT_TRUE(windows::isAbsoluteWithUtf8(temp));
-    ASSERT_FALSE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(uv::isAbsoluteWithUtf8(temp));
     ASSERT_FALSE(windows::isRelativeWithUtf8(temp));
-    ASSERT_TRUE(unix::isRelativeWithUtf8(temp));
+    ASSERT_TRUE(uv::isRelativeWithUtf8(temp));
 
     temp = "z:\\";
     result_windows = "z:";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::getRootDirWithUtf8(temp));
-    ASSERT_EQ(result_posix  , unix::getRootDirWithUtf8(temp));
+    ASSERT_EQ(result_posix  , uv::getRootDirWithUtf8(temp));
     ASSERT_TRUE(windows::isAbsoluteWithUtf8(temp));
-    ASSERT_FALSE(unix::isAbsoluteWithUtf8(temp));
+    ASSERT_FALSE(uv::isAbsoluteWithUtf8(temp));
     ASSERT_FALSE(windows::isRelativeWithUtf8(temp));
-    ASSERT_TRUE(unix::isRelativeWithUtf8(temp));
+    ASSERT_TRUE(uv::isRelativeWithUtf8(temp));
 
     temp = UTF8_SOURCE + "/";
     ASSERT_EQ(std::string(""), windows::getRootDirWithUtf8(temp));
-    ASSERT_EQ(std::string(""), unix::getRootDirWithUtf8(temp));
+    ASSERT_EQ(std::string(""), uv::getRootDirWithUtf8(temp));
     ASSERT_EQ(std::string(""), getRootDir(temp));
     ASSERT_FALSE(isAbsolute(temp));
     ASSERT_TRUE(isRelative(temp));
@@ -365,7 +364,7 @@ TEST(CommonTest, splitNodesWithUtf8_for_Unix)
     std::string const RESULT4 = "..";
     std::string const RESULT5 = UTF8_NA + "\\";
 
-    auto nodes = unix::splitNodesWithUtf8(TEMP0);
+    auto nodes = uv::splitNodesWithUtf8(TEMP0);
     ASSERT_EQ(6U, nodes.size());
     ASSERT_EQ(RESULT0, nodes[0]);
     ASSERT_EQ(RESULT1, nodes[1]);
