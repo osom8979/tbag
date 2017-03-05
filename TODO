@@ -3,7 +3,8 @@
 ## TO DO LIST ##
 ################
 
-[ ] Refactoring filesystem package.
+[x] Refactoring filesystem package.
+[ ] Fix the uvpp::Async error.
 [ ] Refactoring locale package.
 [ ] Create DateTime class.
 [ ] Refactoring log package.

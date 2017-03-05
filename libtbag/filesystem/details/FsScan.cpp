@@ -119,7 +119,6 @@ std::vector<std::string> scanDir(std::string const & path)
     return result;
 }
 
-
 // -------------------
 } // namespace windows
 // -------------------
