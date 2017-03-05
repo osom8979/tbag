@@ -12,6 +12,7 @@
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/filesystem/details/FsCheck.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Type.hpp>
@@ -374,22 +375,22 @@ std::vector<std::string> scanDir(std::string const & path)
 
 bool isProhibitedNameWithUtf8(std::string const & utf8_path)
 {
-    return details::isProhibitedNameWithUtf8(utf8_path, unix::isProhibitedChar<UChar>);
+    return details::isProhibitedNameWithUtf8(utf8_path, uv::isProhibitedChar<UChar>);
 }
 
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
 {
-    return details::removeLastSeparatorWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>);
+    return details::removeLastSeparatorWithUtf8(utf8_path, uv::isPathSeparatorChar<UChar>);
 }
 
 std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path)
 {
-    return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_POSIX, unix::isPathSeparatorChar<UChar>);
+    return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_POSIX, uv::isPathSeparatorChar<UChar>);
 }
 
 std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path)
 {
-    return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_GENERIC, unix::isPathSeparatorChar<UChar>);
+    return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_GENERIC, uv::isPathSeparatorChar<UChar>);
 }
 
 std::string getNativeWithUtf8(std::string const & utf8_path)
@@ -422,7 +423,7 @@ bool isRelativeWithUtf8(std::string const & utf8_path)
 
 std::string removeLastNodeWithUtf8(std::string const & utf8_path)
 {
-    return details::removeLastNodeWithUtf8(utf8_path, unix::isPathSeparatorChar<UChar>);
+    return details::removeLastNodeWithUtf8(utf8_path, uv::isPathSeparatorChar<UChar>);
 }
 
 std::string appendParentWithUtf8(std::string const & utf8_path)

@@ -18,6 +18,12 @@
 #include <libtbag/predef.hpp>
 #include <cstdlib>
 
+#if defined(__PLATFORM_WINDOWS__)
+# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::windows
+#else
+# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::uv
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -64,6 +70,18 @@ char const * const    HOME_DIRECTORY_SHORTCUT =  "~";
 char const * const TEMP_DIRECTORY_SUFFIX = ".temp";
 
 int const CREATE_TEMPDIR_RETRY_COUNT = 10;
+
+/**
+ * Obtain the back-end string of filesystem.
+ */
+inline char const * const getFsBackend() TBAG_NOEXCEPT
+{
+#if defined(__PLATFORM_WINDOWS__)
+    return "Windows";
+#else
+    return "Uv";
+#endif
+}
 
 } // namespace details
 } // namespace filesystem

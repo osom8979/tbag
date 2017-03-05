@@ -24,9 +24,9 @@ TEST(FsUtilsTest, Default)
     std::string exe;
 
     if (::libtbag::isWindowsPlatform()) {
-        back_end = "Windows back-end";
+        back_end = "Windows";
     } else {
-        back_end = "Uv back-end";
+        back_end = "Uv";
     }
     temp = getTempDir();
     work = getWorkDir();

@@ -32,25 +32,6 @@ namespace filesystem {
 namespace details    {
 namespace unix       {
 
-/**
- * Characters prohibited in unix filename.
- *
- * @remarks
- *  - 0x00
- *  - '/'
- */
-template <typename CharType>
-inline bool isProhibitedChar(CharType v) TBAG_NOEXCEPT
-{
-    return v == '\0' || v == '/';
-}
-
-template <typename CharType>
-inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
-{
-    return v == PATH_SEPARATOR_OF_POSIX;
-}
-
 TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
 TBAG_API std::string createDefaultTempDir();
 

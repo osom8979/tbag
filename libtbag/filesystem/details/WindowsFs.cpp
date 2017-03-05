@@ -9,6 +9,7 @@
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/filesystem/details/FsCheck.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 

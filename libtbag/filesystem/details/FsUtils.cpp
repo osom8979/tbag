@@ -12,6 +12,7 @@
 
 #if defined(__PLATFORM_WINDOWS__)
 # include <Windows.h>
+# include <Shlobj.h>  // SHGetFolderPath
 #else
 # include <libtbag/util/DummyWin32.hpp>
 using namespace ::libtbag::util;

@@ -29,13 +29,6 @@
     } while(0)
 #endif // TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT
 
-#if defined(__PLATFORM_WINDOWS__)
-# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::windows
-#else
-# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::uv
-#endif
-
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

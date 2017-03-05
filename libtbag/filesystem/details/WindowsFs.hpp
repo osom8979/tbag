@@ -29,44 +29,6 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
-/**
- * Characters prohibited in windows filename.
- *
- * @remarks
- *  Many operating systems prohibit the ASCII control characters (0x00-0x1F) in filenames.
- *  - 0x00-0x1F
- *  - '"'
- *  - '*'
- *  - '*'
- *  - '<'
- *  - '>'
- *  - '?'
- *  - '\\' (single backslash)
- *  - '/'
- *  - '|'
- */
-template <typename CharType>
-inline bool isProhibitedChar(CharType v) TBAG_NOEXCEPT
-{
-    //if (0x00 <= COMPARE_AND(v) <= 0x1F) {
-    //    return true;
-    //}
-
-    switch (v) {
-    case  '*': case '<': case '>':
-    case  '?': case '/': case '|':
-    case '\\':
-        return true;
-    }
-    return false;
-}
-
-template <typename CharType>
-inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
-{
-    return v == PATH_SEPARATOR_OF_WINDOWS || v == PATH_SEPARATOR_OF_POSIX;
-}
-
 TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
 TBAG_API std::string createDefaultTempDir();
 
