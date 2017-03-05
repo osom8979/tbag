@@ -3,10 +3,13 @@
 ## TO DO LIST ##
 ################
 
+[ ] Refactoring filesystem package.
+[ ] Refactoring locale package.
+[ ] Create DateTime class.
+[ ] Refactoring log package.
 [ ] Deprecated macro.
 [ ] Force inline macro.
 [ ] Low level IO.
-[ ] Refactoring log package.
 [ ] Remove boost-stacktrace.
 [ ] Create core dump.
 [ ] Create MemoryPool.
