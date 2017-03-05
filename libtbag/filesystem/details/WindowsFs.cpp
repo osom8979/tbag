@@ -25,6 +25,7 @@
 # include <Strsafe.h> // StringCchLength, etc ...
 #else
 # include <libtbag/proxy/windows/Dummy.hpp>
+# include <libtbag/proxy/windows/String.hpp>
 using namespace ::libtbag::proxy::windows;
 #endif
 
@@ -41,81 +42,17 @@ namespace windows    {
     do { if (isWindowsPlatform() == false) { assert(0 && "Not implement."); return retval; } } while(0)
 #endif
 
-static std::wstring mbsToWcs(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(std::wstring());
-
-    if (path.empty()) {
-        __tbag_error("Illegal argument: path is 0 length.");
-        return std::wstring();
-    }
-
-    int const RESERVE_SIZE = MultiByteToWideChar(CP_ACP, 0, &path[0], (int)path.size(), nullptr, 0);
-
-    std::wstring result;
-    if (RESERVE_SIZE == 0) {
-        result.resize(path.size());
-    } else {
-        result.resize(static_cast<std::size_t>(RESERVE_SIZE + 1));
-    }
-
-    int const WRITTEN_LENGTH = MultiByteToWideChar(CP_ACP, 0, &path[0], (int)path.size(), &result[0], (int)result.size());
-    if (WRITTEN_LENGTH == 0) {
-        // ERROR_INSUFFICIENT_BUFFER:    // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
-        // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
-        // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
-        // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
-        __tbag_error("MultiByteToWideChar() ERROR: {}", GetLastError());
-        return std::wstring();
-    }
-
-    result.resize(static_cast<std::size_t>(WRITTEN_LENGTH));
-    return result;
-}
-
-static std::string wcsToMbs(std::wstring const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(std::string());
-
-    if (path.empty()) {
-        __tbag_error("Illegal argument: path is 0 length.");
-        return std::string();
-    }
-
-    int const RESERVE_SIZE = WideCharToMultiByte(CP_ACP, 0, &path[0], (int)path.size(), nullptr, 0, nullptr, nullptr);
-    std::string result;
-
-    if (RESERVE_SIZE == 0) {
-        result.resize(path.size());
-    } else {
-        result.resize(static_cast<std::size_t>(RESERVE_SIZE + 1));
-    }
-
-    int const WRITTEN_LENGTH = WideCharToMultiByte(CP_ACP, 0, &path[0], (int)path.size(), &result[0], (int)result.size(), nullptr, nullptr);
-    if (WRITTEN_LENGTH == 0) {
-        // ERROR_INSUFFICIENT_BUFFER:    // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
-        // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
-        // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
-        // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
-        __tbag_error("WideCharToMultiByte() ERROR: {}", GetLastError());
-        return std::string();
-    }
-
-    result.resize(static_cast<std::size_t>(WRITTEN_LENGTH));
-    return result;
-}
-
 static DWORD getAttribute(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(INVALID_FILE_ATTRIBUTES);
-    return GetFileAttributesW(&mbsToWcs(path)[0]);
+    return GetFileAttributesW(&mbsToWcsWithAcp(path)[0]);
 }
 
 static std::string getLongPathName(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = mbsToWcs(path);
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return std::string();
     }
@@ -129,7 +66,7 @@ static std::string getLongPathName(std::string const & path)
         __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
     }
     buffer.resize(COPIED_LENGTH);
-    return wcsToMbs(buffer);
+    return wcsToMbsWithAcp(buffer);
 }
 
 /**
@@ -158,7 +95,7 @@ static bool checkPermission(std::string const & path, DWORD permission)
     SECURITY_INFORMATION const SECURITY       = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
     DWORD                const DESIRED_ACCESS = TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE | STANDARD_RIGHTS_READ;
 
-    std::wstring const WCS_PATH = mbsToWcs(path);
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
 
     DWORD sd_length = 0;
     GetFileSecurityW(&WCS_PATH[0], SECURITY, nullptr, 0, &sd_length);
@@ -252,7 +189,7 @@ std::string getRealPath(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = mbsToWcs(path);
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
 
     if (WCS_PATH.empty()) {
         return std::string();
@@ -269,14 +206,14 @@ std::string getRealPath(std::string const & path)
     }
 
     buffer.resize(COPIED_LENGTH);
-    return wcsToMbs(buffer);
+    return wcsToMbsWithAcp(buffer);
 }
 
 bool createDirectory(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = mbsToWcs(path);
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -294,7 +231,7 @@ bool removeDirectory(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = mbsToWcs(path);
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -310,7 +247,7 @@ bool removeFile(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = mbsToWcs(path);
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -343,8 +280,8 @@ bool rename(std::string const & from, std::string const & to)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_FROM = mbsToWcs(from);
-    std::wstring const WCS_TO   = mbsToWcs(to);
+    std::wstring const WCS_FROM = mbsToWcsWithAcp(from);
+    std::wstring const WCS_TO   = mbsToWcsWithAcp(to);
 
     if (WCS_FROM.empty() || WCS_TO.empty()) {
         return false;
@@ -360,7 +297,7 @@ bool rename(std::string const & from, std::string const & to)
 bool exists(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
-    return (PathFileExistsW(&mbsToWcs(path)[0]) == TRUE);
+    return (PathFileExistsW(&mbsToWcsWithAcp(path)[0]) == TRUE);
 }
 
 bool isDirectory(std::string const & path)
@@ -399,7 +336,7 @@ std::vector<std::string> scanDir(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(std::vector<std::string>());
 
-    std::wstring const WCS_PATH = mbsToWcs(path);
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
 
     // Check that the input path plus 3 is not longer than MAX_PATH.
     // Three characters are for the "\*" plus NULL appended below.
@@ -449,7 +386,7 @@ std::vector<std::string> scanDir(std::string const & path)
         //    static_cast<int64_t>(file_size.QuadPart);
         //  @endcode
         if (StrCmpW(L".", find_data.cFileName) != 0 && StrCmpW(L"..", find_data.cFileName) != 0) {
-            result.push_back(wcsToMbs(find_data.cFileName));
+            result.push_back(wcsToMbsWithAcp(find_data.cFileName));
         }
     } while (FindNextFileW(find_handle, &find_data) == TRUE);
 
