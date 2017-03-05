@@ -14,6 +14,7 @@
 #include <libtbag/filesystem/details/FsCreate.hpp>
 #include <libtbag/filesystem/details/FsReal.hpp>
 #include <libtbag/filesystem/details/FsRename.hpp>
+#include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -162,7 +163,7 @@ std::vector<std::string> scanDir(std::string const & utf8_path)
         if (locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path)) {
             std::vector<std::string> result;
 
-            for (auto & node : __impl::scanDir(native_path)) {
+            for (auto & node : details::scanDir(native_path)) {
                 std::string utf8_node;
                 if (locale::convertToUtf8(node, locale::getGlobalEncodingName(), utf8_node)) {
                     result.push_back(std::move(utf8_node));
@@ -175,7 +176,7 @@ std::vector<std::string> scanDir(std::string const & utf8_path)
         }
     }
 
-    return __impl::scanDir(utf8_path);
+    return details::scanDir(utf8_path);
 }
 
 std::size_t getFileSize(std::string const & utf8_path)

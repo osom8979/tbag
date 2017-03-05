@@ -33,8 +33,6 @@ TBAG_API bool removeDirectory(std::string const & path);
 TBAG_API bool removeFile(std::string const & path);
 TBAG_API bool removeAll(std::string const & path);
 
-TBAG_API std::vector<std::string> scanDir(std::string const & path);
-
 // --------------------------
 // Filesystem path operators.
 // --------------------------

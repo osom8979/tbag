@@ -14,6 +14,7 @@
 #include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/FsCheck.hpp>
 #include <libtbag/filesystem/details/FsAttribute.hpp>
+#include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Type.hpp>
@@ -66,24 +67,6 @@ bool removeAll(std::string const & path)
         return result;
     }
     return removeFile(path);
-}
-
-std::vector<std::string> scanDir(std::string const & path)
-{
-    std::vector<std::string> result;
-
-    uv_fs_t request;
-    uv_dirent_t dictate;
-
-    int const ELEMENT_COUNT = uv_fs_scandir(nullptr, &request, path.c_str(), 0, nullptr);
-    if (ELEMENT_COUNT > 0) {
-        while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
-            result.push_back(std::string(dictate.name));
-        }
-    }
-    uv_fs_req_cleanup(&request);
-
-    return result;
 }
 
 // --------------------------
