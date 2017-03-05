@@ -12,6 +12,7 @@
 
 #if defined(__PLATFORM_WINDOWS__)
 # include <Windows.h>
+# include <Shlwapi.h> // StrCmp
 # include <Strsafe.h> // StringCchLength, etc ...
 #else
 # include <libtbag/proxy/windows/Dummy.hpp>
