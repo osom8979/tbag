@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/filesystem/details/FsCheck.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/filesystem/Filesystem.hpp>
@@ -117,13 +118,13 @@ TEST(CommonTest, isProhibitedNameWithUtf8)
     ASSERT_TRUE( windows::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
     ASSERT_TRUE( windows::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
 
-    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(UTF8_SOURCE));
-    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_WINDOWS + UTF8_NA + UTF8_DA));
-    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_WINDOWS + UTF8_DA));
-    ASSERT_FALSE(unix::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_WINDOWS));
-    ASSERT_TRUE( unix::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_POSIX + UTF8_NA + UTF8_DA));
-    ASSERT_TRUE( unix::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
-    ASSERT_TRUE( unix::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
+    ASSERT_FALSE(uv::isProhibitedNameWithUtf8(UTF8_SOURCE));
+    ASSERT_FALSE(uv::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_WINDOWS + UTF8_NA + UTF8_DA));
+    ASSERT_FALSE(uv::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_WINDOWS + UTF8_DA));
+    ASSERT_FALSE(uv::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_WINDOWS));
+    ASSERT_TRUE( uv::isProhibitedNameWithUtf8(PATH_SEPARATOR_OF_POSIX + UTF8_NA + UTF8_DA));
+    ASSERT_TRUE( uv::isProhibitedNameWithUtf8(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
+    ASSERT_TRUE( uv::isProhibitedNameWithUtf8(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
 
     ASSERT_FALSE(isProhibitedName(UTF8_SOURCE));
 }

@@ -32,24 +32,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-template <typename Prohibited>
-bool isProhibitedNameWithUtf8(std::string const & utf8_path, Prohibited checker)
-{
-    if (utf8_path.empty()) {
-        return true;
-    }
-
-    icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_path.c_str()));
-    int32_t const PATH_LENGTH = path.length();
-
-    for (int32_t i = 0; i < PATH_LENGTH; ++i) {
-        if (checker(path.charAt(i))) {
-            return true;
-        }
-    }
-    return false;
-}
-
 template <typename Predicated>
 void removeLast(icu::UnicodeString & unicode, Predicated checker, bool check_result = true)
 {

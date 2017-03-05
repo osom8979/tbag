@@ -39,41 +39,6 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
-#ifndef __ASSERT_NOT_IMPLEMENT
-#define __ASSERT_NOT_IMPLEMENT(retval) \
-    do { if (isWindowsPlatform() == false) { assert(0 && "Not implement."); return retval; } } while(0)
-#endif
-
-static std::string getLongPathName(std::string const & path)
-{
-    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
-
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
-    if (WCS_PATH.empty()) {
-        return std::string();
-    }
-
-    DWORD const RESERVE_SIZE = GetLongPathNameW(&WCS_PATH[0], nullptr, 0);
-    std::wstring buffer;
-    buffer.resize(RESERVE_SIZE);
-
-    DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
-    if (COPIED_LENGTH == 0) {
-        __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
-    }
-    buffer.resize(COPIED_LENGTH);
-    return proxy::windows::wcsToMbsWithAcp(buffer);
-}
-
-// --------------------------
-// Filesystem path operators.
-// --------------------------
-
-bool isProhibitedNameWithUtf8(std::string const & utf8_path)
-{
-    return details::isProhibitedNameWithUtf8(utf8_path, windows::isProhibitedChar<UChar>);
-}
-
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
 {
     return details::removeLastSeparatorWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>);

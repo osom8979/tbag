@@ -32,6 +32,7 @@ TBAG_API std::string getRealPath(std::string const & path);
 
 namespace windows {
 TBAG_API std::string getRealPath(std::string const & path);
+TBAG_API std::string getLongPathName(std::string const & path);
 } // namespace windows
 
 inline std::string getRealPath(std::string const & path)

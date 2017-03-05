@@ -75,6 +75,27 @@ std::string getRealPath(std::string const & path)
     return proxy::windows::wcsToMbsWithAcp(buffer);
 }
 
+std::string getLongPathName(std::string const & path)
+{
+    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
+
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
+    if (WCS_PATH.empty()) {
+        return std::string();
+    }
+
+    DWORD const RESERVE_SIZE = GetLongPathNameW(&WCS_PATH[0], nullptr, 0);
+    std::wstring buffer;
+    buffer.resize(RESERVE_SIZE);
+
+    DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
+    if (COPIED_LENGTH == 0) {
+        __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
+    }
+    buffer.resize(COPIED_LENGTH);
+    return proxy::windows::wcsToMbsWithAcp(buffer);
+}
+
 // -------------------
 } // namespace windows
 // -------------------

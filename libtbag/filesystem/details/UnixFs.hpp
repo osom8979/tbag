@@ -32,7 +32,6 @@ namespace filesystem {
 namespace details    {
 namespace unix       {
 
-TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
 TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
 TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);
 TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);

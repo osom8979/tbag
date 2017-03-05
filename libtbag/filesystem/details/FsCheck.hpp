@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -48,6 +50,8 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
 {
     return v == PATH_SEPARATOR_OF_POSIX;
 }
+
+TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
 
 // --------------
 } // namespace uv
@@ -97,6 +101,8 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
     return v == PATH_SEPARATOR_OF_WINDOWS || v == PATH_SEPARATOR_OF_POSIX;
 }
 
+TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
+
 // -------------------
 } // namespace windows
 // -------------------
@@ -111,6 +117,11 @@ template <typename CharType>
 inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
 {
     return TBAG_FS_PLATFORM_NAMESPACE::isPathSeparatorChar<CharType>(v);
+}
+
+inline bool isProhibitedNameWithUtf8(std::string const & utf8_path)
+{
+    return TBAG_FS_PLATFORM_NAMESPACE::isProhibitedNameWithUtf8(utf8_path);
 }
 
 } // namespace details

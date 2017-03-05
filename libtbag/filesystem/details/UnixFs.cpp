@@ -37,15 +37,6 @@ namespace filesystem {
 namespace details    {
 namespace unix       {
 
-// --------------------------
-// Filesystem path operators.
-// --------------------------
-
-bool isProhibitedNameWithUtf8(std::string const & utf8_path)
-{
-    return details::isProhibitedNameWithUtf8(utf8_path, uv::isProhibitedChar<UChar>);
-}
-
 std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
 {
     return details::removeLastSeparatorWithUtf8(utf8_path, uv::isPathSeparatorChar<UChar>);

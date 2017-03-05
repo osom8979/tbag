@@ -9,6 +9,7 @@
 #include <libtbag/filesystem/Filesystem.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
+#include <libtbag/filesystem/details/FsCheck.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/FsCreate.hpp>
@@ -218,7 +219,7 @@ std::size_t createSimpleTextFile(std::string const & utf8_path, char const * buf
 
 bool isProhibitedName(std::string const & utf8_path)
 {
-    return __impl::isProhibitedNameWithUtf8(utf8_path);
+    return details::isProhibitedNameWithUtf8(utf8_path);
 }
 
 std::string removeLastSeparator(std::string const & utf8_path)
