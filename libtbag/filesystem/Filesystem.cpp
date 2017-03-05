@@ -15,6 +15,7 @@
 #include <libtbag/filesystem/details/FsReal.hpp>
 #include <libtbag/filesystem/details/FsRename.hpp>
 #include <libtbag/filesystem/details/FsScan.hpp>
+#include <libtbag/filesystem/details/FsRemove.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -91,7 +92,7 @@ bool createDirectory(std::string const & utf8_path)
 bool removeDirectory(std::string const & utf8_path)
 {
     if (isDirectory(utf8_path)) {
-        return details::isFromUtf8Path(utf8_path, __impl::removeDirectory);
+        return details::isFromUtf8Path(utf8_path, details::removeDirectory);
     }
     return false;
 }
@@ -99,14 +100,14 @@ bool removeDirectory(std::string const & utf8_path)
 bool removeFile(std::string const & utf8_path)
 {
     if (isRegularFile(utf8_path)) {
-        return details::isFromUtf8Path(utf8_path, __impl::removeFile);
+        return details::isFromUtf8Path(utf8_path, details::removeFile);
     }
     return false;
 }
 
 bool removeAll(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, __impl::removeAll);
+    return details::isFromUtf8Path(utf8_path, details::removeAll);
 }
 
 bool rename(std::string const & utf8_from, std::string const & utf8_to)

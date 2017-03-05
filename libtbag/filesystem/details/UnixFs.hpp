@@ -32,14 +32,6 @@ namespace filesystem {
 namespace details    {
 namespace unix       {
 
-TBAG_API bool removeDirectory(std::string const & path);
-TBAG_API bool removeFile(std::string const & path);
-TBAG_API bool removeAll(std::string const & path);
-
-// --------------------------
-// Filesystem path operators.
-// --------------------------
-
 TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
 TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
 TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);

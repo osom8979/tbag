@@ -44,55 +44,6 @@ namespace windows    {
     do { if (isWindowsPlatform() == false) { assert(0 && "Not implement."); return retval; } } while(0)
 #endif
 
-bool removeDirectory(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
-    if (WCS_PATH.empty()) {
-        return false;
-    }
-
-    if (RemoveDirectoryW(&WCS_PATH[0]) == FALSE) {
-        __tbag_error("RemoveDirectoryW() ERROR: {}", GetLastError());
-        return false;
-    }
-    return true;
-}
-
-bool removeFile(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
-    if (WCS_PATH.empty()) {
-        return false;
-    }
-
-    if (DeleteFileW(&WCS_PATH[0]) == FALSE) {
-        // ERROR_FILE_NOT_FOUND: // The system cannot find the file specified.
-        // ERROR_ACCESS_DENIED:  // Access is denied.
-        __tbag_error("DeleteFileW() ERROR: {}", GetLastError());
-        return false;
-    }
-    return true;
-}
-
-bool removeAll(std::string const & path)
-{
-    if (isDirectory(path)) {
-        bool result = true;
-        for (auto & cursor : scanDir(path)) {
-            if (cursor != CURRENT_DIRECTORY_SHORTCUT && cursor != PARENT_DIRECTORY_SHORTCUT) {
-                result &= removeAll(path + PATH_SEPARATOR_OF_WINDOWS + cursor);
-            }
-        }
-        result &= removeDirectory(path);
-        return result;
-    }
-    return removeFile(path);
-}
-
 static std::string getLongPathName(std::string const & path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
