@@ -43,39 +43,6 @@ namespace windows    {
     do { if (isWindowsPlatform() == false) { assert(0 && "Not implement."); return retval; } } while(0)
 #endif
 
-std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size)
-{
-    std::string buffer;
-    buffer.resize(unique_size);
-
-    std::string cursor;
-    for (int retry = 0; CREATE_TEMPDIR_RETRY_COUNT; ++retry) {
-        string::createRandomString(&buffer[0], buffer.size());
-        cursor = prefix + buffer + suffix;
-
-        if (isDirectory(cursor) == false && createDirectory(cursor)) {
-            return cursor;
-        }
-    }
-
-    return std::string();
-}
-
-std::string createDefaultTempDir()
-{
-    std::string temp_dir = details::getTempDir();
-    if (isDirectory(temp_dir) == false) {
-        return std::string();
-    }
-
-    char const LAST_CHAR = temp_dir[temp_dir.size() - 1];
-    if (LAST_CHAR != PATH_SEPARATOR_OF_WINDOWS || LAST_CHAR != PATH_SEPARATOR_OF_POSIX) {
-        // The operations of UTF-8 and ASCII are the same.
-        temp_dir += PATH_SEPARATOR_OF_WINDOWS;
-    }
-    return createTempDir(temp_dir, TEMP_DIRECTORY_SUFFIX);
-}
-
 std::string getRealPath(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(std::string());
@@ -98,24 +65,6 @@ std::string getRealPath(std::string const & path)
 
     buffer.resize(COPIED_LENGTH);
     return proxy::windows::wcsToMbsWithAcp(buffer);
-}
-
-bool createDirectory(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
-    if (WCS_PATH.empty()) {
-        return false;
-    }
-
-    if (CreateDirectoryW(&WCS_PATH[0], nullptr) == FALSE) {
-        // ERROR_ALREADY_EXISTS: // The specified directory already exists.
-        // ERROR_PATH_NOT_FOUND: // One or more intermediate directories do not exist.
-        __tbag_error("CreateDirectoryW() ERROR: {}", GetLastError());
-        return false;
-    }
-    return true;
 }
 
 bool removeDirectory(std::string const & path)

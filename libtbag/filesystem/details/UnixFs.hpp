@@ -32,13 +32,8 @@ namespace filesystem {
 namespace details    {
 namespace unix       {
 
-TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
-TBAG_API std::string createDefaultTempDir();
-
 TBAG_API std::string getRealPath(std::string const & path);
 
-TBAG_API bool createDirectoryEx(std::string const & path, int mode);
-TBAG_API bool createDirectory(std::string const & path);
 TBAG_API bool removeDirectory(std::string const & path);
 TBAG_API bool removeFile(std::string const & path);
 TBAG_API bool removeAll(std::string const & path);

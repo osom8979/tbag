@@ -24,7 +24,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
+// -----------
 namespace uv {
+// -----------
 
 /**
  * Characters prohibited in unix filename.
@@ -47,9 +49,13 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
     return v == PATH_SEPARATOR_OF_POSIX;
 }
 
+// --------------
 } // namespace uv
+// --------------
 
+// ----------------
 namespace windows {
+// ----------------
 
 /**
  * Characters prohibited in windows filename.
@@ -91,7 +97,9 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
     return v == PATH_SEPARATOR_OF_WINDOWS || v == PATH_SEPARATOR_OF_POSIX;
 }
 
+// -------------------
 } // namespace windows
+// -------------------
 
 template <typename CharType>
 inline bool isProhibitedChar(CharType v) TBAG_NOEXCEPT

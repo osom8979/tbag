@@ -11,6 +11,7 @@
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/FsAttribute.hpp>
+#include <libtbag/filesystem/details/FsCreate.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -46,15 +47,15 @@ std::string createTempDir(std::string const & utf8_prefix, std::string const & u
         bool is_suffix = locale::convertFromUtf8(utf8_suffix, locale::getGlobalEncodingName(), native_suffix);
 
         if (is_prefix && is_suffix) {
-            return __impl::createTempDir(native_prefix, native_suffix, unique_size);
+            return details::createTempDir(native_prefix, native_suffix, unique_size);
         }
     }
-    return __impl::createTempDir(utf8_prefix, utf8_suffix, unique_size);
+    return details::createTempDir(utf8_prefix, utf8_suffix, unique_size);
 }
 
 std::string createDefaultTempDir()
 {
-    std::string native_path = __impl::createDefaultTempDir();
+    std::string native_path = details::createDefaultTempDir();
     if (locale::isUtf8GloablEncodingName() == false) {
         std::string utf8_path;
         if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), utf8_path)) {
@@ -79,7 +80,7 @@ bool createDirectory(std::string const & utf8_path)
 {
     std::string const PARENT = getParent(utf8_path);
     if (isDirectory(PARENT) && isWritable(PARENT) && exists(utf8_path) == false) {
-        return details::isFromUtf8Path(utf8_path, __impl::createDirectory);
+        return details::isFromUtf8Path(utf8_path, details::createDirectory);
     }
     return false;
 }
