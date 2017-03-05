@@ -19,16 +19,6 @@
 
 #include <string>
 
-#ifndef TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT
-#define TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(retval)    \
-    do {                                                \
-        if (::libtbag::isWindowsPlatform() == false) {  \
-            assert(0 && "Not implement.");              \
-            return retval;                              \
-        }                                               \
-    } while(0)
-#endif // TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

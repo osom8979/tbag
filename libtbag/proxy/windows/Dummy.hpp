@@ -1,12 +1,12 @@
 /**
- * @file   DummyWin32.hpp
- * @brief  DummyWin32 class prototype.
+ * @file   Dummy.hpp
+ * @brief  Dummy class prototype.
  * @author zer0
- * @date   2016-12-06
+ * @date   2017-03-05
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UTIL_DUMMYWIN32_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UTIL_DUMMYWIN32_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PROXY_WINDOWS_DUMMY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_PROXY_WINDOWS_DUMMY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -160,7 +160,6 @@
 # ifndef PHANDLE
 # define PHANDLE HANDLE *
 # endif
-
 
 # ifndef LPSECURITY_ATTRIBUTES
 # define LPSECURITY_ATTRIBUTES PVOID
@@ -375,7 +374,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace util {
+namespace proxy   {
+namespace windows {
 
 typedef struct _GENERIC_MAPPING {
     ACCESS_MASK GenericRead;    ///< Specifies an access mask defining read access to an object.
@@ -625,7 +625,7 @@ inline DWORD GetTempPathA(_In_  DWORD nBufferLength,
  *  - Library: Kernel32.lib
  */
 inline DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
-                           _Out_ LPSTR lpBuffer)
+                                  _Out_ LPSTR lpBuffer)
 { return 0; }
 
 /**
@@ -829,11 +829,12 @@ inline BOOL FindNextFileW(_In_  HANDLE             hFindFile,
 inline BOOL FindClose(_Inout_ HANDLE hFindFile)
 { return FALSE; }
 
-} // namespace util
+} // namespace windows
+} // namespace proxy
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UTIL_DUMMYWIN32_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_PROXY_WINDOWS_DUMMY_HPP__
 

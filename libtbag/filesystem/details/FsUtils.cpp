@@ -14,8 +14,8 @@
 # include <Windows.h>
 # include <Shlobj.h>  // SHGetFolderPath
 #else
-# include <libtbag/util/DummyWin32.hpp>
-using namespace ::libtbag::util;
+# include <libtbag/proxy/windows/Dummy.hpp>
+using namespace ::libtbag::proxy::windows;
 #endif
 
 // -------------------
@@ -82,7 +82,7 @@ namespace windows {
 
 std::string getTempDir()
 {
-    TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
+    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
     // The maximum possible return value is MAX_PATH+1 (261).
     DWORD const BUFFER_LENGTH  = MAX_PATH + 1;
@@ -100,7 +100,7 @@ std::string getTempDir()
 
 std::string getWorkDir()
 {
-    TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
+    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
     DWORD const BUFFER_LENGTH  = MAX_PATH + 1;
     char buffer[BUFFER_LENGTH] = {0,};
@@ -133,7 +133,7 @@ std::string getWorkDir()
 
 std::string getHomeDir()
 {
-    TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
+    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
     // See more: Access Control.
     // https://msdn.microsoft.com/en-us/library/windows/desktop/aa374860.aspx
@@ -154,7 +154,7 @@ std::string getHomeDir()
 
 std::string getExePathEx(std::size_t extend_buffer_size)
 {
-    TBAG_FS_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
+    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
     std::string buffer(extend_buffer_size, '\0');
 

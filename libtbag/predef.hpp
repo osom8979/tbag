@@ -64,5 +64,15 @@ inline TBAG_CONSTEXPR bool isUnixLikePlatform() TBAG_NOEXCEPT
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
+#ifndef TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT
+#define TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(retval)       \
+    do {                                                \
+        if (::libtbag::isWindowsPlatform() == false) {  \
+            assert(0 && "Not implement.");              \
+            return retval;                              \
+        }                                               \
+    } while(0)
+#endif // TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREDEF_HPP__
 

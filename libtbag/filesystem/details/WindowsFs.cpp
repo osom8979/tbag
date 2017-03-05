@@ -24,8 +24,8 @@
 # include <Shlwapi.h> // PathFileExists
 # include <Strsafe.h> // StringCchLength, etc ...
 #else
-# include <libtbag/util/DummyWin32.hpp>
-using namespace ::libtbag::util;
+# include <libtbag/proxy/windows/Dummy.hpp>
+using namespace ::libtbag::proxy::windows;
 #endif
 
 // -------------------
