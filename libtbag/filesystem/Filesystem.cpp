@@ -8,7 +8,6 @@
 
 #include <libtbag/filesystem/Filesystem.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
-#include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
 #include <libtbag/filesystem/details/FsNode.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
@@ -30,9 +29,42 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
+// ---------------
+namespace __impl {
+// ---------------
+
+template <typename Predicated>
+inline static bool isFromUtf8Path(std::string const & utf8_path, Predicated predicated)
+{
+    if (locale::isUtf8GloablEncodingName() == false) {
+        std::string native_path;
+        if (locale::convertFromUtf8(utf8_path, locale::getGlobalEncodingName(), native_path)) {
+            return predicated(native_path);
+        }
+    }
+    return predicated(utf8_path);
+}
+
+template <typename Predicated>
+inline static std::string toUtf8Path(Predicated predicated)
+{
+    std::string native_path = predicated();
+    if (locale::isUtf8GloablEncodingName() == false) {
+        std::string utf8_path;
+        if (locale::convertToUtf8(native_path, locale::getGlobalEncodingName(), utf8_path)) {
+            return utf8_path;
+        }
+    }
+    return native_path;
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
 std::string getExeDir()
 {
-    return removeLastNode(details::toUtf8Path(details::getExePath));
+    return removeLastNode(__impl::toUtf8Path(details::getExePath));
 }
 
 std::string createTempDir(std::string const & utf8_prefix, std::string const & utf8_suffix, std::size_t unique_size)
@@ -78,7 +110,7 @@ bool createDirectory(std::string const & utf8_path)
 {
     std::string const PARENT = getParent(utf8_path);
     if (isDirectory(PARENT) && isWritable(PARENT) && exists(utf8_path) == false) {
-        return details::isFromUtf8Path(utf8_path, details::createDirectory);
+        return __impl::isFromUtf8Path(utf8_path, details::createDirectory);
     }
     return false;
 }
@@ -86,7 +118,7 @@ bool createDirectory(std::string const & utf8_path)
 bool removeDirectory(std::string const & utf8_path)
 {
     if (isDirectory(utf8_path)) {
-        return details::isFromUtf8Path(utf8_path, details::removeDirectory);
+        return __impl::isFromUtf8Path(utf8_path, details::removeDirectory);
     }
     return false;
 }
@@ -94,14 +126,14 @@ bool removeDirectory(std::string const & utf8_path)
 bool removeFile(std::string const & utf8_path)
 {
     if (isRegularFile(utf8_path)) {
-        return details::isFromUtf8Path(utf8_path, details::removeFile);
+        return __impl::isFromUtf8Path(utf8_path, details::removeFile);
     }
     return false;
 }
 
 bool removeAll(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::removeAll);
+    return __impl::isFromUtf8Path(utf8_path, details::removeAll);
 }
 
 bool rename(std::string const & utf8_from, std::string const & utf8_to)
@@ -122,32 +154,32 @@ bool rename(std::string const & utf8_from, std::string const & utf8_to)
 
 bool exists(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::exists);
+    return __impl::isFromUtf8Path(utf8_path, details::exists);
 }
 
 bool isDirectory(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::isDirectory);
+    return __impl::isFromUtf8Path(utf8_path, details::isDirectory);
 }
 
 bool isRegularFile(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::isRegularFile);
+    return __impl::isFromUtf8Path(utf8_path, details::isRegularFile);
 }
 
 bool isExecutable(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::isExecutable);
+    return __impl::isFromUtf8Path(utf8_path, details::isExecutable);
 }
 
 bool isWritable(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::isWritable);
+    return __impl::isFromUtf8Path(utf8_path, details::isWritable);
 }
 
 bool isReadable(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, details::isReadable);
+    return __impl::isFromUtf8Path(utf8_path, details::isReadable);
 }
 
 std::vector<std::string> scanDir(std::string const & utf8_path)

@@ -25,7 +25,7 @@ namespace __impl {
 // ---------------
 
 template <typename Predicated>
-void removeLast(icu::UnicodeString & unicode, Predicated checker, bool check_result = true)
+inline static void removeLast(icu::UnicodeString & unicode, Predicated checker, bool check_result = true)
 {
     int32_t const LENGTH = unicode.length();
     int32_t remove_last_of = 0;
@@ -40,7 +40,7 @@ void removeLast(icu::UnicodeString & unicode, Predicated checker, bool check_res
 }
 
 template <typename PathSeparator>
-std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, PathSeparator checker)
+inline static std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, PathSeparator checker)
 {
     if (utf8_path.empty()) {
         return std::string();
@@ -62,7 +62,7 @@ std::string removeLastSeparatorWithUtf8(std::string const & utf8_path, PathSepar
 }
 
 template <typename PathSeparator>
-std::string removeDuplicateSeparators(std::string const & utf8_path, UChar separator, PathSeparator checker)
+inline static std::string removeDuplicateSeparators(std::string const & utf8_path, UChar separator, PathSeparator checker)
 {
     if (utf8_path.empty()) {
         return std::string();
@@ -95,7 +95,7 @@ std::string removeDuplicateSeparators(std::string const & utf8_path, UChar separ
 }
 
 template <typename PathSeparator>
-std::string removeLastNodeWithUtf8(std::string const & utf8_path, PathSeparator checker)
+inline static std::string removeLastNodeWithUtf8(std::string const & utf8_path, PathSeparator checker)
 {
     if (utf8_path.empty()) {
         return std::string();

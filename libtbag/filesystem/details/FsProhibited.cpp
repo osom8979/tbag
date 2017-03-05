@@ -23,7 +23,7 @@ namespace __impl {
 // ---------------
 
 template <typename Prohibited>
-bool isProhibitedNameWithUtf8(std::string const & utf8_path, Prohibited checker)
+inline static bool isProhibitedNameWithUtf8(std::string const & utf8_path, Prohibited checker)
 {
     if (utf8_path.empty()) {
         return true;
