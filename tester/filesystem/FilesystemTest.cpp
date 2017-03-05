@@ -141,10 +141,10 @@ TEST(CommonTest, removeLastSeparatorWithUtf8)
     ASSERT_EQ(UTF8_SOURCE, windows::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS_POSIX));
     ASSERT_EQ(UTF8_SOURCE, windows::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX_WINDOWS));
 
-    ASSERT_EQ(UTF8_SOURCE_WINDOWS      , unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS));
-    ASSERT_EQ(UTF8_SOURCE              , unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX));
-    ASSERT_EQ(UTF8_SOURCE_WINDOWS      , unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS_POSIX));
-    ASSERT_EQ(UTF8_SOURCE_POSIX_WINDOWS, unix::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX_WINDOWS));
+    ASSERT_EQ(UTF8_SOURCE_WINDOWS      , uv::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS));
+    ASSERT_EQ(UTF8_SOURCE              , uv::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX));
+    ASSERT_EQ(UTF8_SOURCE_WINDOWS      , uv::removeLastSeparatorWithUtf8(UTF8_SOURCE_WINDOWS_POSIX));
+    ASSERT_EQ(UTF8_SOURCE_POSIX_WINDOWS, uv::removeLastSeparatorWithUtf8(UTF8_SOURCE_POSIX_WINDOWS));
 
     ASSERT_EQ(UTF8_SOURCE, removeLastSeparator(UTF8_SOURCE_POSIX));
 }
@@ -157,10 +157,10 @@ TEST(CommonTest, removeDuplicateSeparatorsWithUtf8)
     std::string const RESULT_GENERIC = "/" + UTF8_SOURCE + "/";
 
     ASSERT_EQ(RESULT_WINDOWS, windows::removeDuplicateSeparatorsWithUtf8(TEMP));
-    ASSERT_EQ(RESULT_POSIX, unix::removeDuplicateSeparatorsWithUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, uv::removeDuplicateSeparatorsWithUtf8(TEMP));
 
     ASSERT_EQ(RESULT_GENERIC, windows::removeDuplicateSeparatorsWithGenericUtf8(TEMP));
-    ASSERT_EQ(RESULT_POSIX, unix::removeDuplicateSeparatorsWithGenericUtf8(TEMP));
+    ASSERT_EQ(RESULT_POSIX, uv::removeDuplicateSeparatorsWithGenericUtf8(TEMP));
 
     ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparators(UTF8_SOURCE));
     ASSERT_EQ(UTF8_SOURCE, removeDuplicateSeparatorsWithGeneric(UTF8_SOURCE));
@@ -246,49 +246,49 @@ TEST(CommonTest, removeLastNodeWithUtf8)
     result_windows = "/";
     result_posix   = "/";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 
     temp = UTF8_SOURCE;
     result_windows = "";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 
     temp = "";
     result_windows = "";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 
     temp = "\\" + UTF8_SOURCE + "\\";
     result_windows = "\\";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 
     temp = "\\";
     result_windows = "";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 
     temp = "/" + UTF8_SOURCE;
     result_windows = "/";
     result_posix   = "/";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 
     temp = "/" + UTF8_SOURCE + "/";
     result_windows = "/";
     result_posix   = "/";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 
     temp = "/";
     result_windows = "";
     result_posix   = "";
     ASSERT_EQ(result_windows, windows::removeLastNodeWithUtf8(temp));
-    ASSERT_EQ(result_posix  ,    unix::removeLastNodeWithUtf8(temp));
+    ASSERT_EQ(result_posix  ,      uv::removeLastNodeWithUtf8(temp));
 }
 
 TEST(CommonTest, removeLastNodeWithUtf8_for_Windows)
@@ -317,12 +317,12 @@ TEST(CommonTest, removeLastNodeWithUtf8_for_Unix)
     std::string const TEMP5 = "/";
     std::string const TEMP6 = "";
 
-    ASSERT_EQ(TEMP1, unix::removeLastNodeWithUtf8(TEMP0));
-    ASSERT_EQ(TEMP2, unix::removeLastNodeWithUtf8(TEMP1));
-    ASSERT_EQ(TEMP3, unix::removeLastNodeWithUtf8(TEMP2));
-    ASSERT_EQ(TEMP4, unix::removeLastNodeWithUtf8(TEMP3));
-    ASSERT_EQ(TEMP5, unix::removeLastNodeWithUtf8(TEMP4));
-    ASSERT_EQ(TEMP6, unix::removeLastNodeWithUtf8(TEMP5));
+    ASSERT_EQ(TEMP1, uv::removeLastNodeWithUtf8(TEMP0));
+    ASSERT_EQ(TEMP2, uv::removeLastNodeWithUtf8(TEMP1));
+    ASSERT_EQ(TEMP3, uv::removeLastNodeWithUtf8(TEMP2));
+    ASSERT_EQ(TEMP4, uv::removeLastNodeWithUtf8(TEMP3));
+    ASSERT_EQ(TEMP5, uv::removeLastNodeWithUtf8(TEMP4));
+    ASSERT_EQ(TEMP6, uv::removeLastNodeWithUtf8(TEMP5));
 }
 
 TEST(CommonTest, splitNodesWithUtf8)

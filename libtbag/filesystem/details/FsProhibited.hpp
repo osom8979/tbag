@@ -52,6 +52,10 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
 }
 
 TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
+TBAG_API std::string removeLastNodeWithUtf8(std::string const & utf8_path);
 
 // --------------
 } // namespace uv
@@ -102,6 +106,10 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
 }
 
 TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeLastSeparatorWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path);
+TBAG_API std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path);
+TBAG_API std::string removeLastNodeWithUtf8(std::string const & utf8_path);
 
 // -------------------
 } // namespace windows
@@ -122,6 +130,26 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
 inline bool isProhibitedNameWithUtf8(std::string const & utf8_path)
 {
     return TBAG_FS_PLATFORM_NAMESPACE::isProhibitedNameWithUtf8(utf8_path);
+}
+
+inline std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
+{
+    return TBAG_FS_PLATFORM_NAMESPACE::removeLastSeparatorWithUtf8(utf8_path);
+}
+
+inline std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path)
+{
+    return TBAG_FS_PLATFORM_NAMESPACE::removeDuplicateSeparatorsWithUtf8(utf8_path);
+}
+
+inline std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path)
+{
+    return TBAG_FS_PLATFORM_NAMESPACE::removeDuplicateSeparatorsWithGenericUtf8(utf8_path);
+}
+
+inline std::string removeLastNodeWithUtf8(std::string const & utf8_path)
+{
+    return TBAG_FS_PLATFORM_NAMESPACE::removeLastNodeWithUtf8(utf8_path);
 }
 
 } // namespace details

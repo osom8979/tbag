@@ -224,17 +224,17 @@ bool isProhibitedName(std::string const & utf8_path)
 
 std::string removeLastSeparator(std::string const & utf8_path)
 {
-    return __impl::removeLastSeparatorWithUtf8(utf8_path);
+    return details::removeLastSeparatorWithUtf8(utf8_path);
 }
 
 std::string removeDuplicateSeparators(std::string const & utf8_path)
 {
-    return __impl::removeDuplicateSeparatorsWithUtf8(utf8_path);
+    return details::removeDuplicateSeparatorsWithUtf8(utf8_path);
 }
 
 std::string removeDuplicateSeparatorsWithGeneric(std::string const & utf8_path)
 {
-    return __impl::removeDuplicateSeparatorsWithGenericUtf8(utf8_path);
+    return details::removeDuplicateSeparatorsWithGenericUtf8(utf8_path);
 }
 
 std::string getNative(std::string const & utf8_path)
@@ -272,7 +272,7 @@ bool isRelative(std::string const & utf8_path)
 
 std::string removeLastNode(std::string const & utf8_path)
 {
-    return __impl::removeLastNodeWithUtf8(utf8_path);
+    return details::removeLastNodeWithUtf8(utf8_path);
 }
 
 std::string appendParent(std::string const & utf8_path)

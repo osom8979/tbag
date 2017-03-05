@@ -39,21 +39,6 @@ namespace filesystem {
 namespace details    {
 namespace windows    {
 
-std::string removeLastSeparatorWithUtf8(std::string const & utf8_path)
-{
-    return details::removeLastSeparatorWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>);
-}
-
-std::string removeDuplicateSeparatorsWithUtf8(std::string const & utf8_path)
-{
-    return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_WINDOWS, windows::isPathSeparatorChar<UChar>);
-}
-
-std::string removeDuplicateSeparatorsWithGenericUtf8(std::string const & utf8_path)
-{
-    return details::removeDuplicateSeparators(utf8_path, PATH_SEPARATOR_OF_GENERIC, windows::isPathSeparatorChar<UChar>);
-}
-
 std::string getNativeWithUtf8(std::string const & utf8_path)
 {
     return removeLastSeparatorWithUtf8(removeDuplicateSeparatorsWithUtf8(utf8_path));
@@ -93,11 +78,6 @@ bool isAbsoluteWithUtf8(std::string const & utf8_path)
 bool isRelativeWithUtf8(std::string const & utf8_path)
 {
     return !isAbsoluteWithUtf8(utf8_path);
-}
-
-std::string removeLastNodeWithUtf8(std::string const & utf8_path)
-{
-    return details::removeLastNodeWithUtf8(utf8_path, windows::isPathSeparatorChar<UChar>);
 }
 
 std::string appendParentWithUtf8(std::string const & utf8_path)
