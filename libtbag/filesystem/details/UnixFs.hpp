@@ -44,14 +44,6 @@ TBAG_API bool removeFile(std::string const & path);
 TBAG_API bool removeAll(std::string const & path);
 TBAG_API bool rename(std::string const & from, std::string const & to);
 
-TBAG_API bool exists(std::string const & path);
-TBAG_API bool isDirectory(std::string const & path);
-TBAG_API bool isRegularFile(std::string const & path);
-
-TBAG_API bool isExecutable(std::string const & path);
-TBAG_API bool isWritable(std::string const & path);
-TBAG_API bool isReadable(std::string const & path);
-
 TBAG_API std::vector<std::string> scanDir(std::string const & path);
 
 // --------------------------

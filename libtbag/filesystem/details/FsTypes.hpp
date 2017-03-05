@@ -71,6 +71,22 @@ char const * const TEMP_DIRECTORY_SUFFIX = ".temp";
 
 int const CREATE_TEMPDIR_RETRY_COUNT = 10;
 
+static char const * const  TMPDIR_ENV_NAME = "TMPDIR";
+static char const * const     TMP_ENV_NAME = "TMP";
+static char const * const    TEMP_ENV_NAME = "TEMP";
+static char const * const TEMPDIR_ENV_NAME = "TEMPDIR";
+static char const * const    HOME_ENV_NAME = "HOME";
+
+static char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
+static char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
+
+// No temp environment variables defined.
+#if defined(__PLATFORM_ANDROID__)
+static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
+#else
+static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
+#endif
+
 /**
  * Obtain the back-end string of filesystem.
  */

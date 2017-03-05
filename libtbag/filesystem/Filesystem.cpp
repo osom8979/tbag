@@ -10,6 +10,7 @@
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -122,32 +123,32 @@ bool rename(std::string const & utf8_from, std::string const & utf8_to)
 
 bool exists(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, __impl::exists);
+    return details::isFromUtf8Path(utf8_path, details::exists);
 }
 
 bool isDirectory(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, __impl::isDirectory);
+    return details::isFromUtf8Path(utf8_path, details::isDirectory);
 }
 
 bool isRegularFile(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, __impl::isRegularFile);
+    return details::isFromUtf8Path(utf8_path, details::isRegularFile);
 }
 
 bool isExecutable(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, __impl::isExecutable);
+    return details::isFromUtf8Path(utf8_path, details::isExecutable);
 }
 
 bool isWritable(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, __impl::isWritable);
+    return details::isFromUtf8Path(utf8_path, details::isWritable);
 }
 
 bool isReadable(std::string const & utf8_path)
 {
-    return details::isFromUtf8Path(utf8_path, __impl::isReadable);
+    return details::isFromUtf8Path(utf8_path, details::isReadable);
 }
 
 std::vector<std::string> scanDir(std::string const & utf8_path)

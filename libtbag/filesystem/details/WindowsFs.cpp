@@ -10,6 +10,7 @@
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 #include <libtbag/filesystem/details/FsCheck.hpp>
+#include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -41,116 +42,6 @@ namespace windows    {
 #define __ASSERT_NOT_IMPLEMENT(retval) \
     do { if (isWindowsPlatform() == false) { assert(0 && "Not implement."); return retval; } } while(0)
 #endif
-
-static DWORD getAttribute(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(INVALID_FILE_ATTRIBUTES);
-    return GetFileAttributesW(&mbsToWcsWithAcp(path)[0]);
-}
-
-static std::string getLongPathName(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(std::string());
-
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
-    if (WCS_PATH.empty()) {
-        return std::string();
-    }
-
-    DWORD const RESERVE_SIZE = GetLongPathNameW(&WCS_PATH[0], nullptr, 0);
-    std::wstring buffer;
-    buffer.resize(RESERVE_SIZE);
-
-    DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
-    if (COPIED_LENGTH == 0) {
-        __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
-    }
-    buffer.resize(COPIED_LENGTH);
-    return wcsToMbsWithAcp(buffer);
-}
-
-/**
- * PSECURITY_DESCRIPTOR utility class.
- */
-struct SecurityDescriptor
-{
-    PSECURITY_DESCRIPTOR sd;
-
-    SecurityDescriptor(std::size_t size) : sd(static_cast<PSECURITY_DESCRIPTOR>(::malloc(size)))
-    { /* EMPTY. */ }
-    ~SecurityDescriptor()
-    { ::free(sd); }
-
-    PSECURITY_DESCRIPTOR get()
-    { return sd; }
-
-    inline operator bool()
-    { return sd != nullptr; }
-};
-
-static bool checkPermission(std::string const & path, DWORD permission)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-
-    SECURITY_INFORMATION const SECURITY       = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
-    DWORD                const DESIRED_ACCESS = TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE | STANDARD_RIGHTS_READ;
-
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
-
-    DWORD sd_length = 0;
-    GetFileSecurityW(&WCS_PATH[0], SECURITY, nullptr, 0, &sd_length);
-    if (ERROR_INSUFFICIENT_BUFFER != GetLastError()) {
-        __tbag_error("Not ERROR_INSUFFICIENT_BUFFER error.");
-        return false;
-    }
-
-    SecurityDescriptor sd(sd_length);
-    if (static_cast<bool>(sd) == false) {
-        __tbag_error("PSECURITY_DESCRIPTOR is nullptr.");
-        return false;
-    }
-    if (GetFileSecurityW(&WCS_PATH[0], SECURITY, sd.get(), sd_length, &sd_length) == FALSE) {
-        __tbag_error("GetFileSecurityW() ERROR: {}", GetLastError());
-        return false;
-    }
-
-    HANDLE ptoken = NULL;
-    if (OpenProcessToken(GetCurrentProcess(), DESIRED_ACCESS, &ptoken) == FALSE) {
-        __tbag_error("OpenProcessToken() ERROR: {}", GetLastError());
-        return false;
-    }
-
-    HANDLE impersonated_token = NULL;
-    if (DuplicateToken(ptoken, SecurityImpersonation, &impersonated_token) == FALSE) {
-        __tbag_error("DuplicateToken() ERROR: {}", GetLastError());
-        CloseHandle(ptoken);
-        return false;
-    }
-
-    GENERIC_MAPPING mapping  = {0xFFFFFFFF};
-    PRIVILEGE_SET privileges = {0,};
-    DWORD granted_access     = 0;
-    DWORD privileges_length  = sizeof(privileges);
-    BOOL  access_status      = FALSE;
-    bool  result             = false;
-
-    mapping.GenericRead    = FILE_GENERIC_READ;
-    mapping.GenericWrite   = FILE_GENERIC_WRITE;
-    mapping.GenericExecute = FILE_GENERIC_EXECUTE;
-    mapping.GenericAll     = FILE_ALL_ACCESS;
-
-    MapGenericMask(&permission, &mapping);
-    if (AccessCheck(sd.get(), impersonated_token, permission, &mapping, &privileges, &privileges_length, &granted_access, &access_status)) {
-        result = (access_status == TRUE ? true : false);
-    } else {
-        __tbag_error("AccessCheck() ERROR: {}", GetLastError());
-    }
-
-    CloseHandle(impersonated_token);
-    CloseHandle(ptoken);
-
-    return result;
-}
 
 std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size)
 {
@@ -294,43 +185,27 @@ bool rename(std::string const & from, std::string const & to)
     return true;
 }
 
-bool exists(std::string const & path)
+static std::string getLongPathName(std::string const & path)
 {
-    __ASSERT_NOT_IMPLEMENT(false);
-    return (PathFileExistsW(&mbsToWcsWithAcp(path)[0]) == TRUE);
+    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
+
+    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    if (WCS_PATH.empty()) {
+        return std::string();
+    }
+
+    DWORD const RESERVE_SIZE = GetLongPathNameW(&WCS_PATH[0], nullptr, 0);
+    std::wstring buffer;
+    buffer.resize(RESERVE_SIZE);
+
+    DWORD const COPIED_LENGTH = GetLongPathNameW(&WCS_PATH[0], &buffer[0], RESERVE_SIZE);
+    if (COPIED_LENGTH == 0) {
+        __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
+    }
+    buffer.resize(COPIED_LENGTH);
+    return wcsToMbsWithAcp(buffer);
 }
 
-bool isDirectory(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-    DWORD const ATTRIBUTES = getAttribute(path);
-    return (ATTRIBUTES != INVALID_FILE_ATTRIBUTES && (ATTRIBUTES & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
-}
-
-bool isRegularFile(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-    DWORD const ATTRIBUTES = getAttribute(path);
-    return (ATTRIBUTES != INVALID_FILE_ATTRIBUTES && (ATTRIBUTES & FILE_ATTRIBUTE_ARCHIVE) == FILE_ATTRIBUTE_ARCHIVE);
-}
-
-bool isExecutable(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-    return checkPermission(path, GENERIC_EXECUTE);
-}
-
-bool isWritable(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-    return checkPermission(path, GENERIC_WRITE);
-}
-
-bool isReadable(std::string const & path)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-    return checkPermission(path, GENERIC_READ);
-}
 
 std::vector<std::string> scanDir(std::string const & path)
 {
