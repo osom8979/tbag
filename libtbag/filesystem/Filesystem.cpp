@@ -13,6 +13,7 @@
 #include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/FsCreate.hpp>
 #include <libtbag/filesystem/details/FsReal.hpp>
+#include <libtbag/filesystem/details/FsRename.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -117,10 +118,10 @@ bool rename(std::string const & utf8_from, std::string const & utf8_to)
         bool is_to   = locale::convertFromUtf8(utf8_to  , locale::getGlobalEncodingName(), native_to);
 
         if (is_from && is_to) {
-            return __impl::rename(native_from, native_to);
+            return details::rename(native_from, native_to);
         }
     }
-    return __impl::rename(utf8_from, utf8_to);
+    return details::rename(utf8_from, utf8_to);
 }
 
 bool exists(std::string const & utf8_path)

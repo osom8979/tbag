@@ -92,24 +92,6 @@ bool removeAll(std::string const & path)
     return removeFile(path);
 }
 
-bool rename(std::string const & from, std::string const & to)
-{
-    __ASSERT_NOT_IMPLEMENT(false);
-
-    std::wstring const WCS_FROM = proxy::windows::mbsToWcsWithAcp(from);
-    std::wstring const WCS_TO   = proxy::windows::mbsToWcsWithAcp(to);
-
-    if (WCS_FROM.empty() || WCS_TO.empty()) {
-        return false;
-    }
-
-    if (MoveFileW(&WCS_FROM[0], &WCS_TO[0]) == FALSE) {
-        __tbag_error("MoveFileW() ERROR: {}", GetLastError());
-        return false;
-    }
-    return true;
-}
-
 static std::string getLongPathName(std::string const & path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
