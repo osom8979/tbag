@@ -26,9 +26,9 @@
 # include <Strsafe.h> // StringCchLength, etc ...
 #else
 # include <libtbag/proxy/windows/Dummy.hpp>
-# include <libtbag/proxy/windows/String.hpp>
 using namespace ::libtbag::proxy::windows;
 #endif
+#include <libtbag/proxy/windows/String.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -80,7 +80,7 @@ std::string getRealPath(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
 
     if (WCS_PATH.empty()) {
         return std::string();
@@ -97,14 +97,14 @@ std::string getRealPath(std::string const & path)
     }
 
     buffer.resize(COPIED_LENGTH);
-    return wcsToMbsWithAcp(buffer);
+    return proxy::windows::wcsToMbsWithAcp(buffer);
 }
 
 bool createDirectory(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -122,7 +122,7 @@ bool removeDirectory(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -138,7 +138,7 @@ bool removeFile(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -171,8 +171,8 @@ bool rename(std::string const & from, std::string const & to)
 {
     __ASSERT_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_FROM = mbsToWcsWithAcp(from);
-    std::wstring const WCS_TO   = mbsToWcsWithAcp(to);
+    std::wstring const WCS_FROM = proxy::windows::mbsToWcsWithAcp(from);
+    std::wstring const WCS_TO   = proxy::windows::mbsToWcsWithAcp(to);
 
     if (WCS_FROM.empty() || WCS_TO.empty()) {
         return false;
@@ -189,7 +189,7 @@ static std::string getLongPathName(std::string const & path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
     if (WCS_PATH.empty()) {
         return std::string();
     }
@@ -203,7 +203,7 @@ static std::string getLongPathName(std::string const & path)
         __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
     }
     buffer.resize(COPIED_LENGTH);
-    return wcsToMbsWithAcp(buffer);
+    return proxy::windows::wcsToMbsWithAcp(buffer);
 }
 
 
@@ -211,7 +211,7 @@ std::vector<std::string> scanDir(std::string const & path)
 {
     __ASSERT_NOT_IMPLEMENT(std::vector<std::string>());
 
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
 
     // Check that the input path plus 3 is not longer than MAX_PATH.
     // Three characters are for the "\*" plus NULL appended below.
@@ -261,7 +261,7 @@ std::vector<std::string> scanDir(std::string const & path)
         //    static_cast<int64_t>(file_size.QuadPart);
         //  @endcode
         if (StrCmpW(L".", find_data.cFileName) != 0 && StrCmpW(L"..", find_data.cFileName) != 0) {
-            result.push_back(wcsToMbsWithAcp(find_data.cFileName));
+            result.push_back(proxy::windows::wcsToMbsWithAcp(find_data.cFileName));
         }
     } while (FindNextFileW(find_handle, &find_data) == TRUE);
 

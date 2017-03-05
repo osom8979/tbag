@@ -8,15 +8,18 @@
 #include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <fcntl.h>
+#include <sys/stat.h>
+
 #include <uv.h>
 
 #if defined(__PLATFORM_WINDOWS__)
 # include <Windows.h>
 #else
 # include <libtbag/proxy/windows/Dummy.hpp>
-# include <libtbag/proxy/windows/String.hpp>
 using namespace ::libtbag::proxy::windows;
 #endif
+#include <libtbag/proxy/windows/String.hpp>
 
 #ifndef _WIN_OR_UNIX
 # if defined(__PLATFORM_WINDOWS__)
@@ -245,7 +248,7 @@ namespace __impl {
 static DWORD getAttribute(std::string const & path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(INVALID_FILE_ATTRIBUTES);
-    return GetFileAttributesW(&mbsToWcsWithAcp(path)[0]);
+    return GetFileAttributesW(&proxy::windows::mbsToWcsWithAcp(path)[0]);
 }
 
 /**
@@ -274,7 +277,7 @@ static bool checkPermission(std::string const & path, DWORD permission)
     SECURITY_INFORMATION const SECURITY       = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
     DWORD                const DESIRED_ACCESS = TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE | STANDARD_RIGHTS_READ;
 
-    std::wstring const WCS_PATH = mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
 
     DWORD sd_length = 0;
     GetFileSecurityW(&WCS_PATH[0], SECURITY, nullptr, 0, &sd_length);
@@ -338,7 +341,7 @@ static bool checkPermission(std::string const & path, DWORD permission)
 bool exists(std::string const & path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(false);
-    return (PathFileExistsW(&mbsToWcsWithAcp(path)[0]) == TRUE);
+    return (PathFileExistsW(&proxy::windows::mbsToWcsWithAcp(path)[0]) == TRUE);
 }
 
 bool isDirectory(std::string const & path)
