@@ -1,12 +1,12 @@
 /**
- * @file   FsCheckTest.cpp
- * @brief  FsCheck tester.
+ * @file   FsProhibitedTest.cpp
+ * @brief  FsProhibited tester.
  * @author zer0
  * @date   2017-03-05
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/filesystem/details/FsCheck.hpp>
+#include <libtbag/filesystem/details/FsProhibited.hpp>
 
 #include <limits>
 
@@ -14,13 +14,13 @@ using namespace libtbag;
 using namespace libtbag::filesystem;
 using namespace libtbag::filesystem::details;
 
-TEST(FsCheckTest, Default)
+TEST(FsProhibitedTest, Default)
 {
     ASSERT_TRUE(isProhibitedChar('/'));
     ASSERT_TRUE(isPathSeparatorChar('/'));
 }
 
-TEST(FsCheckTest, UvProhibited)
+TEST(FsProhibitedTest, UvProhibited)
 {
     char min = std::numeric_limits<char>::min();
     char max = std::numeric_limits<char>::max();
@@ -37,7 +37,7 @@ TEST(FsCheckTest, UvProhibited)
     }
 }
 
-TEST(FsCheckTest, UvPathSeparator)
+TEST(FsProhibitedTest, UvPathSeparator)
 {
     char min = std::numeric_limits<char>::min();
     char max = std::numeric_limits<char>::max();

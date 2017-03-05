@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
-#include <libtbag/filesystem/details/FsCheck.hpp>
+#include <libtbag/filesystem/details/FsProhibited.hpp>
 #include <libtbag/filesystem/details/WindowsFs.hpp>
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/filesystem/Filesystem.hpp>

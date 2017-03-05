@@ -1,12 +1,12 @@
 /**
- * @file   FsCheck.hpp
- * @brief  FsCheck class prototype.
+ * @file   FsProhibited.hpp
+ * @brief  FsProhibited class prototype.
  * @author zer0
  * @date   2017-03-05
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSCHECK_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSCHECK_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSPROHIBITED_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSPROHIBITED_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -131,5 +131,5 @@ inline bool isProhibitedNameWithUtf8(std::string const & utf8_path)
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSCHECK_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSPROHIBITED_HPP__
 

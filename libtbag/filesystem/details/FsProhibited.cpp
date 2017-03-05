@@ -1,11 +1,11 @@
 /**
- * @file   FsCheck.cpp
- * @brief  FsCheck class implementation.
+ * @file   FsProhibited.cpp
+ * @brief  FsProhibited class implementation.
  * @author zer0
  * @date   2017-03-05
  */
 
-#include <libtbag/filesystem/details/FsCheck.hpp>
+#include <libtbag/filesystem/details/FsProhibited.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <unicode/unistr.h>

@@ -12,7 +12,7 @@
 #include <libtbag/filesystem/details/UnixFs.hpp>
 #include <libtbag/filesystem/details/FsTemplate.hpp-inl>
 #include <libtbag/filesystem/details/FsUtils.hpp>
-#include <libtbag/filesystem/details/FsCheck.hpp>
+#include <libtbag/filesystem/details/FsProhibited.hpp>
 #include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/string/StringUtils.hpp>
