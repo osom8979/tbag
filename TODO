@@ -6,6 +6,8 @@
 [x] Refactoring filesystem package.
 [ ] Fix the uvpp::Async error.
 [ ] Refactoring locale package.
+[ ] Create Android build script.
+[ ] Update clang-format.
 [ ] Create DateTime class.
 [ ] Refactoring log package.
 [ ] Deprecated macro.
