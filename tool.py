@@ -27,10 +27,12 @@ CONFIG_COMMAND = 'cmake -L -P' + CONFIG_CMAKE_PATH
 
 CMD_HELP  = 'help'
 CMD_CLASS = 'class'
+CMD_TEST  = 'test'
 
 CMD_MAP = {
     CMD_HELP  : 'Show this help message and exit.',
     CMD_CLASS : 'Generate default c++ source/header files.',
+    CMD_TEST  : 'Generate default gtest tester file.',
 }
 
 CMD_MESSAGE = "\nCommand list:\n"
@@ -80,12 +82,20 @@ def main_class(options):
         exit(1)
     tools.genClass(sys.argv[1])
 
+def main_test(options):
+    if len(sys.argv) <= 1:
+        print "Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_TEST)
+        exit(1)
+    tools.genTest(sys.argv[1])
+
 def main():
     command, options = parseArguments(sys.argv)
     if command is None or command == CMD_HELP:
         return
     elif command == CMD_CLASS:
         main_class(options)
+    elif command == CMD_TEST:
+        main_test(options)
 
 if __name__ == '__main__':
     main()
