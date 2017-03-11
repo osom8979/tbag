@@ -1,5 +1,5 @@
 /**
- * @file   main.cpp
+ * @file   tester.cpp
  * @brief  Tester project entry-point.
  * @author zer0
  * @date   2016-11-01
