@@ -123,9 +123,9 @@ TEST(LocaleTest, Information)
 {
     std::cout << "Default locale name: " << libtbag::locale::getDefaultIcuLocaleName() << std::endl;
 
-    //std::cout << "List of available locale:\n";
-    //for (auto & name : getAvailableLocale()) {
-    //    std::cout << " - " << name << std::endl;
-    //}
+    std::cout << "List of available locale: " << libtbag::locale::getAvailableIcuLocaleCount() << std::endl;
+    for (auto & name : libtbag::locale::getAvailableIcuLocale()) {
+        std::cout << " - " << name << std::endl;
+    }
 }
 

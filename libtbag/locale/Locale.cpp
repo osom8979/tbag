@@ -23,6 +23,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace locale {
 
+TBAG_CONSTEXPR static int const LOCALE_ALL      = 0;
+TBAG_CONSTEXPR static int const LOCALE_COLLATE  = 1;
+TBAG_CONSTEXPR static int const LOCALE_CTYPE    = 2;
+TBAG_CONSTEXPR static int const LOCALE_MONETARY = 3;
+TBAG_CONSTEXPR static int const LOCALE_NUMERIC  = 4;
+TBAG_CONSTEXPR static int const LOCALE_TIME     = 5;
+TBAG_CONSTEXPR static int const LOCALE_MESSAGES = 6;
+
 char * setMinimalCLocale()
 {
     return setlocale(LC_ALL, "C");
@@ -180,6 +188,39 @@ bool isUtf8GloablEncodingName()
 std::string getDefaultIcuLocaleName()
 {
     return uloc_getDefault();
+}
+
+std::string getDefaultIcuCountry()
+{
+    // Retrieves the ISO Country Code.
+    //return uloc_getCountry();
+    return "";
+}
+
+std::string getDefaultIcuLanguage()
+{
+    // Retrieves the ISO Language.
+    //return uloc_getLanguage();
+    return "";
+}
+
+std::string getDefaultIcuDisplayCountry()
+{
+    // Shows the name of the country suitable for displaying information to the user.
+    //return uloc_getDisplayCountry();
+    return "";
+}
+
+std::string getDefaultIcuDisplayLanguage()
+{
+    // Shows the name of the language suitable for displaying to the user.
+    //return uloc_getDisplayLanguage();
+    return "";
+}
+
+int32_t getAvailableIcuLocaleCount()
+{
+    return uloc_countAvailable();
 }
 
 std::vector<std::string> getAvailableIcuLocale()

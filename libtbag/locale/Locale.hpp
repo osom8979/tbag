@@ -77,6 +77,12 @@ TBAG_API bool isUtf8GloablEncodingName();
 
 /** Gets ICU's default locale. */
 TBAG_API std::string getDefaultIcuLocaleName();
+TBAG_API std::string getDefaultIcuCountry();
+TBAG_API std::string getDefaultIcuLanguage();
+TBAG_API std::string getDefaultIcuDisplayCountry();
+TBAG_API std::string getDefaultIcuDisplayLanguage();
+
+TBAG_API int32_t getAvailableIcuLocaleCount();
 TBAG_API std::vector<std::string> getAvailableIcuLocale();
 
 } // namespace locale
