@@ -23,9 +23,10 @@
 [ ] rstl package.
 [ ] Refactoring network package.
 [ ] dep/http-parser.
+[ ] dep/WebSocket++
 [ ] dep/libsimdpp.
 [ ] dep/cap'n-proto.
-[ ] dep/LibreSSL.
+[ ] dep/LibreSSL (or OpenSSL).
 [ ] dep/webp
 [ ] dep/imagezero
 [ ] lua engine.
@@ -34,4 +35,5 @@
 [ ] Machine learning.
 [ ] Remove 3rd/tinyaes128c
 [ ] Checksum.
+[ ] Key store.
 
