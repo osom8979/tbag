@@ -2,17 +2,18 @@
  * @file   LcList.cpp
  * @brief  LcList class implementation.
  * @author zer0
- * @date   2017-03-11
+ * @date   2017-03-15
  */
 
-#include <libtbag/locale/LcList.hpp>
+#include <libtbag/locale/details/LcList.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace locale {
+namespace locale  {
+namespace details {
 
 // ---------------
 namespace __impl {
@@ -246,6 +247,7 @@ std::vector<std::string> getAllLocale()
     return result;
 }
 
+} // namespace details
 } // namespace locale
 
 // --------------------
