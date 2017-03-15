@@ -52,6 +52,7 @@ addGlobalString('DATE')
 addGlobalString('CLASSNAME')
 addGlobalString('HEADER_FILENAME')
 addGlobalString('SOURCE_FILENAME')
+addGlobalString('TEST_SUFFIX')
 addGlobalString('TEST_FILENAME')
 addGlobalString('HEADER_FILEPATH')
 addGlobalString('SOURCE_FILEPATH')
@@ -166,9 +167,11 @@ def createDefaultDictionary(classpath):
     dic[NAMESPACE_LIST_END]   = getNamespaceListEnd(classpath)
     dic[NAMESPACE_LIST_USING] = getNamespaceListUsing(classpath)
 
+    dic[TEST_SUFFIX] = 'Test'
+
     dic[HEADER_FILENAME] = dic[CLASSNAME] + dic[CPP_HEADER_EXTENSION]
     dic[SOURCE_FILENAME] = dic[CLASSNAME] + dic[CPP_SOURCE_EXTENSION]
-    dic[TEST_FILENAME]   = dic[CLASSNAME] + dic[CPP_SOURCE_EXTENSION]
+    dic[TEST_FILENAME]   = dic[CLASSNAME] + dic[TEST_SUFFIX] + dic[CPP_SOURCE_EXTENSION]
 
     dic[HEADER_FILEPATH] = os.path.normpath(SOURCE_DIR + '/' +
                                             dic[CLASSPATH] +
@@ -177,7 +180,7 @@ def createDefaultDictionary(classpath):
                                             dic[CLASSPATH] +
                                             dic[CPP_SOURCE_EXTENSION])
     dic[TEST_FILEPATH]   = os.path.normpath(TEST_DIR + '/' +
-                                            dic[CLASSPATH] +
+                                            dic[CLASSPATH] + dic[TEST_SUFFIX] +
                                             dic[CPP_SOURCE_EXTENSION])
 
     dic[INCLUDE_GUARD] = getIncludeGuard(dic[PROJECT_NAMESPACE],
