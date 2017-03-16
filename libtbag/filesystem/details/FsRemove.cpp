@@ -35,7 +35,7 @@ bool removeDirectory(std::string const & acp_path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(acp_path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcs(acp_path);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -51,7 +51,25 @@ bool removeFile(std::string const & acp_path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(acp_path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcs(acp_path);
+    if (WCS_PATH.empty()) {
+        return false;
+    }
+
+    if (DeleteFileW(&WCS_PATH[0]) == FALSE) {
+        // ERROR_FILE_NOT_FOUND: // The system cannot find the file specified.
+        // ERROR_ACCESS_DENIED:  // Access is denied.
+        __tbag_error("DeleteFileW() ERROR: {}", GetLastError());
+        return false;
+    }
+    return true;
+}
+
+bool removeFileWithUtf8(std::string const & utf8_path)
+{
+    TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(false);
+
+    std::wstring const WCS_PATH = locale::windows::mbsToWcs(utf8_path, locale::windows::CODE_PAGE_UTF8);
     if (WCS_PATH.empty()) {
         return false;
     }
@@ -94,7 +112,11 @@ bool removeDirectory(std::string const & path)
 
 bool removeFile(std::string const & path)
 {
+#if defined(__PLATFORM_WINDOWS__)
+    return windows::removeFileWithUtf8(path);
+#else
     return ::remove(path.c_str()) == 0;
+#endif
 }
 
 bool removeAll(std::string const & path)

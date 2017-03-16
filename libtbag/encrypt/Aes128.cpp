@@ -89,7 +89,7 @@ bool Aes128::createParentDirectory(std::string const & dir)
 {
     using Path = filesystem::Path;
     if (Path(dir).getParent().isDirectory() == false) {
-        if (Path(dir).getParent().createDirWithRecursive() == false) {
+        if (Path(dir).getParent().createDir() == false) {
             return false;
         }
     }
@@ -109,8 +109,9 @@ bool Aes128::encryptFile(std::string const & output, Key const & key, std::strin
         return false;
     }
 
-    std::size_t const  INPUT_SIZE = input_path.size();
-    std::size_t const REMOVE_SIZE = predictSize(input_path.size()) - INPUT_SIZE;
+    // TODO: Refactoring this code:
+    std::size_t const  INPUT_SIZE = 0; // input_path.size();
+    std::size_t const REMOVE_SIZE = 0; // predictSize(input_path.size()) - INPUT_SIZE;
 
     assert(REMOVE_SIZE >= 0);
     assert(REMOVE_SIZE <  KEY_SIZE);
@@ -158,7 +159,8 @@ bool Aes128::decryptFile(std::string const & output, Key const & key, std::strin
         //return false;
     }
 
-    std::size_t const INPUT_SIZE = input_path.size();
+    // TODO: Refactoring this code:
+    std::size_t const INPUT_SIZE = 0; // input_path.size();
 
     Buffer  input_buffer;
     Buffer output_buffer;

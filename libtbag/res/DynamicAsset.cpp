@@ -17,7 +17,7 @@ bool DynamicAsset::init()
 {
     bool all_success = true;
     for (auto & path : _paths) {
-        all_success &= path.second.createDirWithRecursive();
+        all_success &= path.second.createDir();
     }
     return all_success;
 }
@@ -62,7 +62,7 @@ bool DynamicAsset::create(String const & key) const
 
 bool DynamicAsset::remove(String const & key) const
 {
-    return _paths.at(key).removeDir();
+    return _paths.at(key).remove();
 }
 
 DynamicAsset::PathVector DynamicAsset::scan(String const & key) const

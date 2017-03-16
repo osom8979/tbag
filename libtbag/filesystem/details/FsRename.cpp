@@ -33,8 +33,8 @@ bool rename(std::string const & acp_path_from, std::string const & acp_path_to)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_FROM = locale::windows::mbsToWcsWithAcp(acp_path_from);
-    std::wstring const WCS_TO   = locale::windows::mbsToWcsWithAcp(acp_path_to);
+    std::wstring const WCS_FROM = locale::windows::mbsToWcs(acp_path_from);
+    std::wstring const WCS_TO   = locale::windows::mbsToWcs(acp_path_to);
 
     if (WCS_FROM.empty() || WCS_TO.empty()) {
         return false;

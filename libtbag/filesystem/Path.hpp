@@ -16,6 +16,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/predef.hpp>
 
 #include <string>
@@ -47,19 +48,6 @@ public:
 
     /** Update Canonical Format. */
     struct update_canonical { /* EMPTY */ };
-
-public:
-    TBAG_CONSTEXPR inline static bool isWindowsStyle() TBAG_NOEXCEPT
-    {
-#if defined(__PLATFORM_WINDOWS__)
-        return true;
-#else
-        return false;
-#endif
-    }
-
-    TBAG_CONSTEXPR inline static bool isUnixStyle() TBAG_NOEXCEPT
-    { return !isWindowsStyle(); }
 
 private:
     std::string _path; ///< UTF-8 string.
@@ -183,34 +171,60 @@ public:
     std::vector<std::string> splitNodesWithCanonical() const;
 
 public:
+    /** Filename except path. */
     std::string getName() const;
 
 // Filesystem operators.
 public:
     bool exists() const;
+
+public:
     bool isRegularFile() const;
     bool isDirectory() const;
+
+public:
     bool isExecutable() const;
     bool isWritable() const;
     bool isReadable() const;
 
-    bool createDir() const;
-    bool createDirWithRecursive() const;
-    bool remove() const;
-    bool removeFile() const;
-    bool removeDir() const;
-    bool removeDirWithRecursive() const;
-
-    std::vector<Path> scanDir() const;
-    std::size_t size() const;
-
-// Special directories.
 public:
-    static Path getWorkDir();
-    static Path getHomeDir();
-    static Path getExePath();
-    static Path getExeDir();
+    /**
+     * Create directory.
+     *
+     * @remarks
+     *  If the parent node does not exist, it is created together.
+     */
+    bool createDir() const;
+
+    /** Remove directory or file. */
+    bool remove() const;
+
+    /** Remove all child nodes. */
+    bool removeAll() const;
+
+public:
+    using DirentType = details::DirentType;
+
+public:
+    TBAG_CONSTEXPR static DirentType const DIRENT_UNKNOWN = details::DIRENT_UNKNOWN;
+    TBAG_CONSTEXPR static DirentType const DIRENT_FILE    = details::DIRENT_FILE;
+    TBAG_CONSTEXPR static DirentType const DIRENT_DIR     = details::DIRENT_DIR;
+    TBAG_CONSTEXPR static DirentType const DIRENT_LINK    = details::DIRENT_LINK;
+    TBAG_CONSTEXPR static DirentType const DIRENT_FIFO    = details::DIRENT_FIFO;
+    TBAG_CONSTEXPR static DirentType const DIRENT_SOCKET  = details::DIRENT_SOCKET;
+    TBAG_CONSTEXPR static DirentType const DIRENT_CHAR    = details::DIRENT_CHAR;
+    TBAG_CONSTEXPR static DirentType const DIRENT_BLOCK   = details::DIRENT_BLOCK;
+    TBAG_CONSTEXPR static DirentType const DIRENT_ALL     = details::DIRENT_ALL;
+
+public:
+    /** Scan for child nodes. */
+    std::vector<Path> scanDir(DirentType type = DIRENT_ALL) const;
 };
+
+TBAG_API Path getWorkDir();
+TBAG_API Path getHomeDir();
+TBAG_API Path getExePath();
+TBAG_API Path getExeDir();
 
 } // namespace filesystem
 

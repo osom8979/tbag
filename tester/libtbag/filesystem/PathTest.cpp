@@ -11,17 +11,6 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(PathTest, StyleChecker)
-{
-#if defined(WIN32) || defined(_WIN32)
-    ASSERT_TRUE(Path::isWindowsStyle());
-    ASSERT_FALSE(Path::isUnixStyle());
-#else
-    ASSERT_FALSE(Path::isWindowsStyle());
-    ASSERT_TRUE(Path::isUnixStyle());
-#endif
-}
-
 TEST(PathTest, Constructors_1)
 {
     char const * const TEMP = "TEMP";
@@ -106,8 +95,8 @@ TEST(PathTest, GetName)
 
 TEST(PathTest, SplitNodesWithCanonical_1)
 {
-    std::string home = Path::getHomeDir().getString();
-    std::string work = Path::getWorkDir().getString();
+    std::string home = getHomeDir().getString();
+    std::string work = getWorkDir().getString();
 
     char const * const TEMP1 = "~/TEMP1/TEMP2/../TEMP3/./../../TEMP4";
     char const * const TEMP2 = "TEMP2/.";
@@ -138,10 +127,10 @@ TEST(PathTest, SplitNodesWithCanonical_2)
 TEST(PathTest, FilesystemOperators)
 {
     char const * const FILENAME = "__path_test.dir/filesystem_operators.dir";
-    Path path = Path::getExeDir() / FILENAME;
+    Path path = getExeDir() / FILENAME;
 
     ASSERT_FALSE(path.createDir());
-    ASSERT_TRUE(path.createDirWithRecursive());
+    ASSERT_TRUE(path.createDir());
 
     ASSERT_TRUE(path.exists());
     ASSERT_TRUE(path.isExecutable());
@@ -150,18 +139,18 @@ TEST(PathTest, FilesystemOperators)
 
     ASSERT_FALSE(path.isRegularFile());
     ASSERT_TRUE(path.isDirectory());
-    ASSERT_FALSE(path.removeFile());
+    ASSERT_FALSE(path.remove());
 
-    ASSERT_FALSE(path.getParent().removeDir());
-    ASSERT_TRUE(path.getParent().removeDirWithRecursive());
+    ASSERT_FALSE(path.getParent().remove());
+    ASSERT_TRUE(path.getParent().removeAll());
 
     ASSERT_EQ(0U, path.scanDir().size());
 }
 
 TEST(PathTest, SpecialDirectories)
 {
-    ASSERT_FALSE(Path::getWorkDir().getString().empty());
-    ASSERT_FALSE(Path::getHomeDir().getString().empty());
-    ASSERT_FALSE(Path::getExePath().getString().empty());
+    ASSERT_FALSE(getWorkDir().getString().empty());
+    ASSERT_FALSE(getHomeDir().getString().empty());
+    ASSERT_FALSE(getExePath().getString().empty());
 }
 

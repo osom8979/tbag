@@ -35,7 +35,7 @@ std::vector<std::string> scanDir(std::string const & path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::vector<std::string>());
 
-    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcs(path);
 
     // Check that the input path plus 3 is not longer than MAX_PATH.
     // Three characters are for the "\*" plus NULL appended below.
@@ -85,7 +85,7 @@ std::vector<std::string> scanDir(std::string const & path)
         //    static_cast<int64_t>(file_size.QuadPart);
         //  @endcode
         if (StrCmpW(L".", find_data.cFileName) != 0 && StrCmpW(L"..", find_data.cFileName) != 0) {
-            result.push_back(locale::windows::wcsToMbsWithAcp(find_data.cFileName));
+            result.push_back(locale::windows::wcsToMbs(find_data.cFileName));
         }
     } while (FindNextFileW(find_handle, &find_data) == TRUE);
 
@@ -97,7 +97,31 @@ std::vector<std::string> scanDir(std::string const & path)
 } // namespace windows
 // -------------------
 
-std::vector<std::string> scanDir(std::string const & path)
+// ---------------
+namespace __impl {
+// ---------------
+
+static inline bool isDirentType(DirentType type, uv_dirent_type_t uv_type)
+{
+    // @formatter:off
+    if (type & DIRENT_UNKNOWN && uv_type == UV_DIRENT_UNKNOWN) { return true; }
+    if (type & DIRENT_FILE    && uv_type == UV_DIRENT_FILE   ) { return true; }
+    if (type & DIRENT_DIR     && uv_type == UV_DIRENT_DIR    ) { return true; }
+    if (type & DIRENT_LINK    && uv_type == UV_DIRENT_LINK   ) { return true; }
+    if (type & DIRENT_FIFO    && uv_type == UV_DIRENT_FIFO   ) { return true; }
+    if (type & DIRENT_SOCKET  && uv_type == UV_DIRENT_SOCKET ) { return true; }
+    if (type & DIRENT_CHAR    && uv_type == UV_DIRENT_CHAR   ) { return true; }
+    if (type & DIRENT_BLOCK   && uv_type == UV_DIRENT_BLOCK  ) { return true; }
+    // @formatter:on
+
+    return false;
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
+std::vector<std::string> scanDir(std::string const & path, DirentType type)
 {
     std::vector<std::string> result;
 
@@ -107,7 +131,9 @@ std::vector<std::string> scanDir(std::string const & path)
     int const ELEMENT_COUNT = uv_fs_scandir(nullptr, &request, path.c_str(), 0, nullptr);
     if (ELEMENT_COUNT > 0) {
         while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
-            result.push_back(std::string(dictate.name));
+            if (__impl::isDirentType(type, dictate.type)) {
+                result.push_back(std::string(dictate.name));
+            }
         }
     }
     uv_fs_req_cleanup(&request);

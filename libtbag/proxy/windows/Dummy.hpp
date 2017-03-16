@@ -221,6 +221,10 @@
 # define CP_ACP 0 // default to ANSI code page
 # endif
 
+# ifndef CP_UTF8
+# define CP_UTF8 65001 // UTF-8.
+# endif
+
 # ifndef OWNER_SECURITY_INFORMATION
 # define OWNER_SECURITY_INFORMATION 0x00000001L
 # endif

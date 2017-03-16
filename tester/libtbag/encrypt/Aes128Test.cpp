@@ -139,7 +139,8 @@ TEST(Aes128Test, EncodeAndDecode_File)
     std::string result;
 
     {   // Read result file.
-        std::size_t const DEC_FILE_SIZE = DEC_PATH.size();
+        // TODO: Refactoring this code:
+        std::size_t const DEC_FILE_SIZE = 0; //DEC_PATH.size();
         result.resize(DEC_FILE_SIZE);
 
         std::ifstream f(DEC_PATH.getString(), std::ios_base::binary);
@@ -171,13 +172,13 @@ TEST(Aes128Test, EncodeAndDecode_Dir)
     Path const  DEC_PATH = Path(TEST_DEC_DIR).getCanonical();
 
     // @formatter:off
-    if (TEST_PATH.exists()) { TEST_PATH.removeDirWithRecursive(); }
-    if ( ENC_PATH.exists()) {  ENC_PATH.removeDirWithRecursive(); }
-    if ( DEC_PATH.exists()) {  DEC_PATH.removeDirWithRecursive(); }
+    if (TEST_PATH.exists()) { TEST_PATH.removeAll(); }
+    if ( ENC_PATH.exists()) {  ENC_PATH.removeAll(); }
+    if ( DEC_PATH.exists()) {  DEC_PATH.removeAll(); }
     // @formatter:on
 
     Path const TEST_SUB_PATH(TEST_PATH / TEST_SUB_DIR);
-    TEST_SUB_PATH.getCanonical().createDirWithRecursive();
+    TEST_SUB_PATH.getCanonical().createDir();
 
     ASSERT_TRUE(TEST_SUB_PATH.isDirectory());
     {   // Create test file.
@@ -198,7 +199,8 @@ TEST(Aes128Test, EncodeAndDecode_Dir)
     std::string result;
 
     {   // Read result file.
-        std::size_t const DEC_FILE_SIZE = TEST_DEC_PATH.size();
+        // TODO: Refactoring this code:
+        std::size_t const DEC_FILE_SIZE = 0; // TEST_DEC_PATH.size();
         result.resize(DEC_FILE_SIZE);
 
         std::ifstream f(TEST_DEC_PATH.getString(), std::ios_base::binary);
@@ -209,9 +211,9 @@ TEST(Aes128Test, EncodeAndDecode_Dir)
     ASSERT_EQ(TEST_CONTENT, result);
 
     // @formatter:off
-    if (TEST_PATH.exists()) { TEST_PATH.removeDirWithRecursive(); }
-    if ( ENC_PATH.exists()) {  ENC_PATH.removeDirWithRecursive(); }
-    if ( DEC_PATH.exists()) {  DEC_PATH.removeDirWithRecursive(); }
+    if (TEST_PATH.exists()) { TEST_PATH.removeAll(); }
+    if ( ENC_PATH.exists()) {  ENC_PATH.removeAll(); }
+    if ( DEC_PATH.exists()) {  DEC_PATH.removeAll(); }
     // @formatter:on
 }
 

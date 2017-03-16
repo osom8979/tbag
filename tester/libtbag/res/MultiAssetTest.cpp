@@ -18,12 +18,12 @@ TEST(MultiAssetTest, Default)
     using Path   = MultiAsset::Path;
     using String = MultiAsset::String;
 
-    Path path1 = Path::getExeDir() / "__multiasset_test_01.dir";
-    Path path2 = Path::getExeDir() / "__multiasset_test_02.dir";
+    Path path1 = filesystem::getExeDir() / "__multiasset_test_01.dir";
+    Path path2 = filesystem::getExeDir() / "__multiasset_test_02.dir";
 
     // @formatter:off
-    if (path1.exists()) { path1.removeDirWithRecursive(); }
-    if (path2.exists()) { path2.removeDirWithRecursive(); }
+    if (path1.exists()) { path1.removeAll(); }
+    if (path2.exists()) { path2.removeAll(); }
     // @formatter:on
 
     String layout1 = "layout1.dir";
@@ -76,7 +76,7 @@ TEST(MultiAssetTest, Default)
     auto find_file = asset.findFile(layout2, test_filename);
     ASSERT_TRUE(test_file == find_file);
 
-    ASSERT_TRUE(path1.removeDirWithRecursive());
-    ASSERT_TRUE(path2.removeDirWithRecursive());
+    ASSERT_TRUE(path1.removeAll());
+    ASSERT_TRUE(path2.removeAll());
 }
 

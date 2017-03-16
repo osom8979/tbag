@@ -33,7 +33,7 @@ std::string getRealPath(std::string const & acp_path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(acp_path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcs(acp_path);
 
     if (WCS_PATH.empty()) {
         return std::string();
@@ -50,14 +50,14 @@ std::string getRealPath(std::string const & acp_path)
     }
 
     buffer.resize(COPIED_LENGTH);
-    return locale::windows::wcsToMbsWithAcp(buffer);
+    return locale::windows::wcsToMbs(buffer);
 }
 
 std::string getLongPathName(std::string const & acp_path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(acp_path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcs(acp_path);
     if (WCS_PATH.empty()) {
         return std::string();
     }
@@ -71,7 +71,7 @@ std::string getLongPathName(std::string const & acp_path)
         __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
     }
     buffer.resize(COPIED_LENGTH);
-    return locale::windows::wcsToMbsWithAcp(buffer);
+    return locale::windows::wcsToMbs(buffer);
 }
 
 // -------------------

@@ -33,13 +33,18 @@ namespace locale  {
 namespace windows {
 // ----------------
 
+#if defined(__PLATFORM_WINDOWS__)
+static_assert(CP_ACP  == CODE_PAGE_ANSI, "Mismatched CP_ACP constants.");
+static_assert(CP_UTF8 == CODE_PAGE_UTF8, "Mismatched CP_UTF8 constants.");
+#endif
+
 /**
  * Multi-Byte-String -> Wide-Char-String.
  *
  * @remarks
  *  ACP: The system default Windows ANSI code page.
  */
-std::wstring mbsToWcsWithAcp(std::string const & path)
+std::wstring mbsToWcs(std::string const & path, unsigned int code_page)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::wstring());
 
@@ -48,7 +53,7 @@ std::wstring mbsToWcsWithAcp(std::string const & path)
         return std::wstring();
     }
 
-    int const RESERVE_SIZE = MultiByteToWideChar(CP_ACP, 0, &path[0], (int)path.size(), nullptr, 0);
+    int const RESERVE_SIZE = MultiByteToWideChar(code_page, 0, &path[0], (int)path.size(), nullptr, 0);
 
     std::wstring result;
     if (RESERVE_SIZE == 0) {
@@ -57,7 +62,7 @@ std::wstring mbsToWcsWithAcp(std::string const & path)
         result.resize(static_cast<std::size_t>(RESERVE_SIZE + 1));
     }
 
-    int const WRITTEN_LENGTH = MultiByteToWideChar(CP_ACP, 0, &path[0], (int)path.size(), &result[0], (int)result.size());
+    int const WRITTEN_LENGTH = MultiByteToWideChar(code_page, 0, &path[0], (int)path.size(), &result[0], (int)result.size());
     if (WRITTEN_LENGTH == 0) {
         // ERROR_INSUFFICIENT_BUFFER:    // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
         // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
@@ -77,7 +82,7 @@ std::wstring mbsToWcsWithAcp(std::string const & path)
  * @remarks
  *  ACP: The system default Windows ANSI code page.
  */
-std::string wcsToMbsWithAcp(std::wstring const & path)
+std::string wcsToMbs(std::wstring const & path, unsigned int code_page)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
@@ -86,7 +91,7 @@ std::string wcsToMbsWithAcp(std::wstring const & path)
         return std::string();
     }
 
-    int const RESERVE_SIZE = WideCharToMultiByte(CP_ACP, 0, &path[0], (int)path.size(), nullptr, 0, nullptr, nullptr);
+    int const RESERVE_SIZE = WideCharToMultiByte(code_page, 0, &path[0], (int)path.size(), nullptr, 0, nullptr, nullptr);
     std::string result;
 
     if (RESERVE_SIZE == 0) {
@@ -95,7 +100,7 @@ std::string wcsToMbsWithAcp(std::wstring const & path)
         result.resize(static_cast<std::size_t>(RESERVE_SIZE + 1));
     }
 
-    int const WRITTEN_LENGTH = WideCharToMultiByte(CP_ACP, 0, &path[0], (int)path.size(), &result[0], (int)result.size(), nullptr, nullptr);
+    int const WRITTEN_LENGTH = WideCharToMultiByte(code_page, 0, &path[0], (int)path.size(), &result[0], (int)result.size(), nullptr, nullptr);
     if (WRITTEN_LENGTH == 0) {
         // ERROR_INSUFFICIENT_BUFFER:    // A supplied buffer size was not large enough, or it was incorrectly set to NULL.
         // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.

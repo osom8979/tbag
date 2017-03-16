@@ -36,7 +36,7 @@ bool createDirectory(std::string const & acp_path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(false);
 
-    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(acp_path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcs(acp_path);
     if (WCS_PATH.empty()) {
         return false;
     }

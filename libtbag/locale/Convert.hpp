@@ -27,8 +27,10 @@ NAMESPACE_LIBTBAG_OPEN
 namespace locale  {
 
 namespace windows {
-TBAG_API std::wstring mbsToWcsWithAcp(std::string const & str);
-TBAG_API std::string wcsToMbsWithAcp(std::wstring const & str);
+TBAG_CONSTEXPR unsigned int CODE_PAGE_ANSI = 0;
+TBAG_CONSTEXPR unsigned int CODE_PAGE_UTF8 = 65001;
+TBAG_API std::wstring mbsToWcs(std::string  const & str, unsigned int code_page = CODE_PAGE_ANSI);
+TBAG_API std::string  wcsToMbs(std::wstring const & str, unsigned int code_page = CODE_PAGE_ANSI);
 } // namespace windows
 
 TBAG_API std::vector<std::string> getAvailableConverterNames();

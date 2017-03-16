@@ -337,18 +337,16 @@ bool Path::isReadable() const
 
 bool Path::createDir() const
 {
-    return details::createDirectory(_path);
-}
+    if (details::createDirectory(_path)) {
+        return true;
+    }
 
-bool Path::createDirWithRecursive() const
-{
-    // @formatter:off
-    if (createDir()) { return  true; }
-    if (isRootDir()) { return false; }
-    // @formatter:on
+    if (isRootDir()) {
+        return false;
+    }
 
-    if (getParent().createDirWithRecursive()) {
-        return createDir();
+    if (getParent().createDir()) {
+        return details::createDirectory(_path);
     }
     return false;
 }
@@ -356,58 +354,43 @@ bool Path::createDirWithRecursive() const
 bool Path::remove() const
 {
     if (isDirectory()) {
-        return removeDir();
+        return details::removeDirectory(_path);
     } else if (isRegularFile()) {
-        return removeFile();
+        return details::removeFile(_path);
     }
     return false;
 }
 
-bool Path::removeFile() const
-{
-    return details::removeFile(_path);
-}
-
-bool Path::removeDir() const
-{
-    return details::removeDirectory(_path);
-}
-
-bool Path::removeDirWithRecursive() const
+bool Path::removeAll() const
 {
     return details::removeAll(_path);
 }
 
-std::vector<Path> Path::scanDir() const
+std::vector<Path> Path::scanDir(DirentType type) const
 {
     std::vector<Path> result;
-    for (auto & path : details::scanDir(_path)) {
+    for (auto & path : details::scanDir(_path, type)) {
         result.push_back(Path(_path) / path);
     }
     return result;
 }
 
-std::size_t Path::size() const
-{
-    return 0L;
-}
-
-Path Path::getWorkDir()
+Path getWorkDir()
 {
     return Path(details::getWorkDir());
 }
 
-Path Path::getHomeDir()
+Path getHomeDir()
 {
     return Path(details::getHomeDir());
 }
 
-Path Path::getExePath()
+Path getExePath()
 {
     return Path(details::getExePath());
 }
 
-Path Path::getExeDir()
+Path getExeDir()
 {
     return Path(details::removeLastNode(details::getExePath()));
 }

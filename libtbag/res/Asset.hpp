@@ -78,13 +78,13 @@ public:
     /** Obtain HOME directory path. */
     static Path getHomeDirPath()
     {
-        return Path::getHomeDir();
+        return filesystem::getHomeDir();
     }
 
     /** Obtain executable file directory path. */
     static Path getExeDirPath()
     {
-        return Path::getExeDir();
+        return filesystem::getExeDir();
     }
 };
 
@@ -101,7 +101,7 @@ public:                                         \
     }                                           \
     static bool remove_##name() {               \
         using namespace ::libtbag::filesystem;  \
-        return Path(get_##name()).removeDir();  \
+        return Path(get_##name()).remove();     \
     }                                           \
     static bool exists_##name() {               \
         using namespace ::libtbag::filesystem;  \
