@@ -16,8 +16,8 @@
 #endif
 
 #include <libtbag/config.h>
-#include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/predef.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp>
 
 #include <string>
 #include <vector>
@@ -152,6 +152,7 @@ public:
 
     Path & operator /=(std::string const & child);
 
+public:
     TBAG_API friend Path operator /(Path const & path, std::string const & child);
     TBAG_API friend Path operator /(Path && path, std::string const & child);
 
@@ -174,18 +175,25 @@ public:
     /** Filename except path. */
     std::string getName() const;
 
+public:
+    using TimeSpec  = details::TimeSpec;
+    using FileState = details::FileState;
+
+public:
+    FileState getState() const;
+
 // Filesystem operators.
 public:
     bool exists() const;
 
 public:
-    bool isRegularFile() const;
-    bool isDirectory() const;
-
-public:
     bool isExecutable() const;
     bool isWritable() const;
     bool isReadable() const;
+
+public:
+    bool isRegularFile() const;
+    bool isDirectory() const;
 
 public:
     /**

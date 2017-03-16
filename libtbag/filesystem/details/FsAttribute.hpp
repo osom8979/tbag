@@ -35,12 +35,23 @@ TBAG_API bool isWritable   (std::string const & acp_path);
 TBAG_API bool isReadable   (std::string const & acp_path);
 } // namespace windows
 
-TBAG_API bool exists       (std::string const & path);
+TBAG_API bool checkAccessMode(std::string const & path, int mode);
+
+TBAG_API bool getState(std::string const & path, FileState * state = nullptr);
+
+TBAG_API uint64_t getMode(std::string const & path);
+TBAG_API uint64_t getPermission(std::string const & path);
+TBAG_API uint64_t getFixedPermission(uint64_t mode);
+
+TBAG_API bool checkFileType(std::string const & path, uint64_t type);
+
+TBAG_API bool exists      (std::string const & path);
+TBAG_API bool isExecutable(std::string const & path);
+TBAG_API bool isWritable  (std::string const & path);
+TBAG_API bool isReadable  (std::string const & path);
+
 TBAG_API bool isDirectory  (std::string const & path);
 TBAG_API bool isRegularFile(std::string const & path);
-TBAG_API bool isExecutable (std::string const & path);
-TBAG_API bool isWritable   (std::string const & path);
-TBAG_API bool isReadable   (std::string const & path);
 
 } // namespace details
 } // namespace filesystem

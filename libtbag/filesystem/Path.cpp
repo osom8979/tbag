@@ -16,6 +16,7 @@
 #include <libtbag/filesystem/details/FsRename.hpp>
 #include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -305,19 +306,18 @@ std::string Path::getName() const
     return *nodes.rbegin();
 }
 
+Path::FileState Path::getState() const
+{
+    FileState state = {0};
+    if (details::getState(_path, &state) == false) {
+        __tbag_error("Path::getState() result error.");
+    }
+    return state;
+}
+
 bool Path::exists() const
 {
     return details::exists(_path);
-}
-
-bool Path::isRegularFile() const
-{
-    return details::isRegularFile(_path);
-}
-
-bool Path::isDirectory() const
-{
-    return details::isDirectory(_path);
 }
 
 bool Path::isExecutable() const
@@ -333,6 +333,16 @@ bool Path::isWritable() const
 bool Path::isReadable() const
 {
     return details::isReadable(_path);
+}
+
+bool Path::isRegularFile() const
+{
+    return details::isRegularFile(_path);
+}
+
+bool Path::isDirectory() const
+{
+    return details::isDirectory(_path);
 }
 
 bool Path::createDir() const

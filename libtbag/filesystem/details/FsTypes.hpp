@@ -16,6 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <cstdlib>
 
 #if defined(__PLATFORM_WINDOWS__)
@@ -87,17 +88,62 @@ static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
 static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
 #endif
 
-/**
- * Obtain the back-end string of filesystem.
- */
-inline char const * const getFsBackend() TBAG_NOEXCEPT
+using DirentType = int;
+
+TBAG_CONSTEXPR DirentType const DIRENT_UNKNOWN = 0x01;
+TBAG_CONSTEXPR DirentType const DIRENT_FILE    = 0x02;
+TBAG_CONSTEXPR DirentType const DIRENT_DIR     = 0x04;
+TBAG_CONSTEXPR DirentType const DIRENT_LINK    = 0x08;
+TBAG_CONSTEXPR DirentType const DIRENT_FIFO    = 0x10;
+TBAG_CONSTEXPR DirentType const DIRENT_SOCKET  = 0x20;
+TBAG_CONSTEXPR DirentType const DIRENT_CHAR    = 0x40;
+TBAG_CONSTEXPR DirentType const DIRENT_BLOCK   = 0x80;
+
+TBAG_CONSTEXPR DirentType const DIRENT_ALL = DIRENT_UNKNOWN | DIRENT_FILE | DIRENT_DIR | DIRENT_LINK |
+                                             DIRENT_FIFO | DIRENT_SOCKET | DIRENT_CHAR | DIRENT_BLOCK;
+
+/** Portable @c timespec structure. */
+struct TimeSpec
 {
-#if defined(__PLATFORM_WINDOWS__)
-    return "Windows";
-#else
-    return "Uv";
-#endif
-}
+    long sec;
+    long nsec;
+};
+
+/** Portable @c stat structure. */
+struct FileState
+{
+    uint64_t dev;
+    uint64_t mode;
+    uint64_t nlink;
+    uint64_t uid;
+    uint64_t gid;
+    uint64_t rdev;
+    uint64_t ino;
+    uint64_t size;
+    uint64_t blksize;
+    uint64_t blocks;
+    uint64_t flags;
+    uint64_t gen;
+
+    TimeSpec atim;
+    TimeSpec mtim;
+    TimeSpec ctim;
+    TimeSpec birthtim;
+};
+
+/**
+ * List of access mode.
+ *
+ * @remarks
+ *  POSIX: include <sys/unistd.h>
+ */
+enum AccessModeTable
+{
+    ACCESS_MODE_EXISTS  = (0   ), ///< F_OK: test for existence of file.
+    ACCESS_MODE_EXECUTE = (1<<0), ///< X_OK: test for execute or search permission.
+    ACCESS_MODE_WRITE   = (1<<1), ///< W_OK: test for write permission
+    ACCESS_MODE_READ    = (1<<2), ///< R_OK: test for read permission.
+};
 
 } // namespace details
 } // namespace filesystem
