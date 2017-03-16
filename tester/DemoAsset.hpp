@@ -30,7 +30,7 @@ NAMESPACE_LIBTBAG_OPEN
 struct DemoAsset : public libtbag::res::Asset
 {
     static Path getTesterAssetDir()
-    { return (Path(SOURCE_FILE_UTF8_PATH).getParent() / "asset"); }
+    { return (Path(__FILE__).getParent() / "asset"); }
 
     CREATE_ASSET_PATH(tester_dir,       getTesterAssetDir());
     CREATE_ASSET_PATH(tester_dir_image, getTesterAssetDir() / "image");

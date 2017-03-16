@@ -66,15 +66,13 @@ public:
 
 #ifndef CREATE_PROPERTY
 /** Create a property accessor & mutator macro. */
-#define CREATE_PROPERTY(type, name, default_value)                          \
-    public:                                                                 \
-        type get_##name() const {                                           \
-            return getResource().get(std::string(#name)       \
-                                   , static_cast<type>(default_value));     \
-        }                                                                   \
-        void set_##name(type const & value = default_value) {               \
-            getResource().set(std::string(#name)              \
-                            , static_cast<type>(value));                    \
+#define CREATE_PROPERTY(type, name, default_value)                                          \
+    public:                                                                                 \
+        type get_##name() const {                                                           \
+            return getResource().get(std::string(#name), static_cast<type>(default_value)); \
+        }                                                                                   \
+        void set_##name(type const & value = default_value) {                               \
+            getResource().set(std::string(#name), static_cast<type>(value));                \
         }
 #endif
 

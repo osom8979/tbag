@@ -6,6 +6,15 @@
  */
 
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/details/FsAttribute.hpp>
+#include <libtbag/filesystem/details/FsCanonical.hpp>
+#include <libtbag/filesystem/details/FsCreate.hpp>
+#include <libtbag/filesystem/details/FsNode.hpp>
+#include <libtbag/filesystem/details/FsProhibited.hpp>
+#include <libtbag/filesystem/details/FsReal.hpp>
+#include <libtbag/filesystem/details/FsRemove.hpp>
+#include <libtbag/filesystem/details/FsRename.hpp>
+#include <libtbag/filesystem/details/FsScan.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 
 // -------------------
@@ -143,7 +152,7 @@ void Path::swap(Path & obj)
 
 std::string Path::getGenericString() const
 {
-    return filesystem::getGeneric(_path);
+    return details::getGeneric(_path);
 }
 
 Path Path::getGeneric() const
@@ -153,7 +162,7 @@ Path Path::getGeneric() const
 
 std::string Path::getNativeString() const
 {
-    return filesystem::getNative(_path);
+    return details::getNative(_path);
 }
 
 Path Path::getNative() const
@@ -191,7 +200,7 @@ Path & Path::updateCanonical()
 
 std::string Path::getRootDirString() const
 {
-    return filesystem::getRootDir(_path);
+    return details::getRootDir(_path);
 }
 
 Path Path::getRootDir() const
@@ -206,20 +215,20 @@ bool Path::isRootDir() const
 
 bool Path::isAbsolute() const
 {
-    return filesystem::isAbsolute(_path);
+    return details::isAbsolute(_path);
 }
 
 bool Path::isRelative() const
 {
-    return filesystem::isRelative(_path);
+    return details::isRelative(_path);
 }
 
 std::string Path::append(std::string const & parent, std::string const & child)
 {
     std::string result = parent;
-    // "문지열이 공백일 경우 경로 분리자를 삽입하면 루트가 되는 현상을 방지한다."
-    if (!parent.empty() && parent.back() != filesystem::details::PATH_SEPARATOR) {
-        result += filesystem::details::PATH_SEPARATOR;
+    // "문지열이 공백일 경우 경로 분리자를 삽입하면 루트(Root)가 되는 현상을 방지한다."
+    if (!parent.empty() && parent.back() != details::PATH_SEPARATOR) {
+        result += details::PATH_SEPARATOR;
     }
     result += child;
     return result;
@@ -269,7 +278,7 @@ Path::operator char const * () const
 
 std::string Path::getParentString() const
 {
-    return filesystem::getParent(_path);
+    return details::getParent(_path);
 }
 
 Path Path::getParent() const
@@ -279,12 +288,12 @@ Path Path::getParent() const
 
 std::vector<std::string> Path::splitNodes() const
 {
-    return filesystem::splitNodes(_path);
+    return details::splitNodes(_path);
 }
 
 std::vector<std::string> Path::splitNodesWithCanonical() const
 {
-    return filesystem::splitNodesWithCanonical(_path);
+    return details::splitNodesWithCanonical(_path);
 }
 
 std::string Path::getName() const
@@ -298,37 +307,37 @@ std::string Path::getName() const
 
 bool Path::exists() const
 {
-    return filesystem::exists(_path);
+    return details::exists(_path);
 }
 
 bool Path::isRegularFile() const
 {
-    return filesystem::isRegularFile(_path);
+    return details::isRegularFile(_path);
 }
 
 bool Path::isDirectory() const
 {
-    return filesystem::isDirectory(_path);
+    return details::isDirectory(_path);
 }
 
 bool Path::isExecutable() const
 {
-    return filesystem::isExecutable(_path);
+    return details::isExecutable(_path);
 }
 
 bool Path::isWritable() const
 {
-    return filesystem::isWritable(_path);
+    return details::isWritable(_path);
 }
 
 bool Path::isReadable() const
 {
-    return filesystem::isReadable(_path);
+    return details::isReadable(_path);
 }
 
 bool Path::createDir() const
 {
-    return filesystem::createDirectory(_path);
+    return details::createDirectory(_path);
 }
 
 bool Path::createDirWithRecursive() const
@@ -356,23 +365,23 @@ bool Path::remove() const
 
 bool Path::removeFile() const
 {
-    return filesystem::removeFile(_path);
+    return details::removeFile(_path);
 }
 
 bool Path::removeDir() const
 {
-    return filesystem::removeDirectory(_path);
+    return details::removeDirectory(_path);
 }
 
 bool Path::removeDirWithRecursive() const
 {
-    return filesystem::removeAll(_path);
+    return details::removeAll(_path);
 }
 
 std::vector<Path> Path::scanDir() const
 {
     std::vector<Path> result;
-    for (auto & path : filesystem::scanDir(_path)) {
+    for (auto & path : details::scanDir(_path)) {
         result.push_back(Path(_path) / path);
     }
     return result;
@@ -380,7 +389,7 @@ std::vector<Path> Path::scanDir() const
 
 std::size_t Path::size() const
 {
-    return filesystem::getFileSize(_path);
+    return 0L;
 }
 
 Path Path::getWorkDir()
@@ -400,7 +409,7 @@ Path Path::getExePath()
 
 Path Path::getExeDir()
 {
-    return Path(filesystem::getExeDir());
+    return Path(details::removeLastNode(details::getExePath()));
 }
 
 } // namespace filesystem

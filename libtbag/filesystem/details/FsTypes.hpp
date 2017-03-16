@@ -21,7 +21,7 @@
 #if defined(__PLATFORM_WINDOWS__)
 # define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::windows
 #else
-# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::uv
+# define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::unix
 #endif
 
 // -------------------

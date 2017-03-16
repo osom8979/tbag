@@ -17,10 +17,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/filesystem/Filesystem.hpp>
 
 #include <string>
-#include <locale>
+#include <vector>
 #include <initializer_list>
 #include <type_traits>
 
@@ -50,7 +49,7 @@ public:
     struct update_canonical { /* EMPTY */ };
 
 public:
-    inline static TBAG_CONSTEXPR bool isWindowsStyle() TBAG_NOEXCEPT
+    TBAG_CONSTEXPR inline static bool isWindowsStyle() TBAG_NOEXCEPT
     {
 #if defined(__PLATFORM_WINDOWS__)
         return true;
@@ -59,7 +58,7 @@ public:
 #endif
     }
 
-    inline static TBAG_CONSTEXPR bool isUnixStyle() TBAG_NOEXCEPT
+    TBAG_CONSTEXPR inline static bool isUnixStyle() TBAG_NOEXCEPT
     { return !isWindowsStyle(); }
 
 private:

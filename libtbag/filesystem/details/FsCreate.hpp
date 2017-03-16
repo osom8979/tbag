@@ -26,33 +26,16 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-namespace uv {
-TBAG_API bool createDirectoryEx(std::string const & path, int mode);
-TBAG_API bool createDirectory(std::string const & path);
-TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
-TBAG_API std::string createDefaultTempDir();
-} // namespace uv
-
 namespace windows {
-TBAG_API bool createDirectory(std::string const & path);
+TBAG_API bool createDirectory(std::string const & acp_path);
 TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
 TBAG_API std::string createDefaultTempDir();
 } // namespace windows
 
-inline bool createDirectory(std::string const & path)
-{
-    return TBAG_FS_PLATFORM_NAMESPACE::createDirectory(path);
-}
-
-inline std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6)
-{
-    return TBAG_FS_PLATFORM_NAMESPACE::createTempDir(prefix, suffix, unique_size);
-}
-
-inline std::string createDefaultTempDir()
-{
-    return TBAG_FS_PLATFORM_NAMESPACE::createDefaultTempDir();
-}
+TBAG_API bool createDirectoryEx(std::string const & path, int mode);
+TBAG_API bool createDirectory(std::string const & path);
+TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
+TBAG_API std::string createDefaultTempDir();
 
 } // namespace details
 } // namespace filesystem

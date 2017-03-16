@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/details/FsScan.hpp>
+#include <libtbag/locale/Convert.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <uv.h>
@@ -18,7 +19,6 @@
 # include <libtbag/proxy/windows/Dummy.hpp>
 using namespace ::libtbag::proxy::windows;
 #endif
-#include <libtbag/proxy/windows/String.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,32 +26,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-
-// -----------
-namespace uv {
-// -----------
-
-std::vector<std::string> scanDir(std::string const & path)
-{
-    std::vector<std::string> result;
-
-    uv_fs_t request;
-    uv_dirent_t dictate;
-
-    int const ELEMENT_COUNT = uv_fs_scandir(nullptr, &request, path.c_str(), 0, nullptr);
-    if (ELEMENT_COUNT > 0) {
-        while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
-            result.push_back(std::string(dictate.name));
-        }
-    }
-    uv_fs_req_cleanup(&request);
-
-    return result;
-}
-
-// --------------
-} // namespace uv
-// --------------
 
 // ----------------
 namespace windows {
@@ -61,7 +35,7 @@ std::vector<std::string> scanDir(std::string const & path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::vector<std::string>());
 
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(path);
 
     // Check that the input path plus 3 is not longer than MAX_PATH.
     // Three characters are for the "\*" plus NULL appended below.
@@ -111,7 +85,7 @@ std::vector<std::string> scanDir(std::string const & path)
         //    static_cast<int64_t>(file_size.QuadPart);
         //  @endcode
         if (StrCmpW(L".", find_data.cFileName) != 0 && StrCmpW(L"..", find_data.cFileName) != 0) {
-            result.push_back(proxy::windows::wcsToMbsWithAcp(find_data.cFileName));
+            result.push_back(locale::windows::wcsToMbsWithAcp(find_data.cFileName));
         }
     } while (FindNextFileW(find_handle, &find_data) == TRUE);
 
@@ -122,6 +96,24 @@ std::vector<std::string> scanDir(std::string const & path)
 // -------------------
 } // namespace windows
 // -------------------
+
+std::vector<std::string> scanDir(std::string const & path)
+{
+    std::vector<std::string> result;
+
+    uv_fs_t request;
+    uv_dirent_t dictate;
+
+    int const ELEMENT_COUNT = uv_fs_scandir(nullptr, &request, path.c_str(), 0, nullptr);
+    if (ELEMENT_COUNT > 0) {
+        while (UV_EOF != uv_fs_scandir_next(&request, &dictate)) {
+            result.push_back(std::string(dictate.name));
+        }
+    }
+    uv_fs_req_cleanup(&request);
+
+    return result;
+}
 
 } // namespace details
 } // namespace filesystem

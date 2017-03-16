@@ -122,7 +122,10 @@ TEST(Aes128Test, EncodeAndDecode_File)
     ASSERT_FALSE(DEC_PATH.exists());
 
     // Create test file.
+#if 0
+    // TODO: Refactoring this code:
     ASSERT_EQ(TEST_CONTENT.size(), filesystem::createSimpleTextFile(TEST_PATH.getString(), &TEST_CONTENT[0], TEST_CONTENT.size()));
+#endif
 
     Aes128::Key key;
     key.fill(0x00);

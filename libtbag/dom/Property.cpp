@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/dom/Property.hpp>
-#include <libtbag/filesystem/Filesystem.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -43,7 +43,7 @@ bool Property::save(std::string const & path)
 
 bool Property::loadOrCreate(std::string const & path)
 {
-    if (filesystem::exists(path)) {
+    if (filesystem::Path(path).exists()) {
         return load(path);
     }
 

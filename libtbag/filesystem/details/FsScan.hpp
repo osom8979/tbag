@@ -27,18 +27,11 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-namespace uv {
-TBAG_API std::vector<std::string> scanDir(std::string const & path);
-} // namespace uv
-
 namespace windows {
 TBAG_API std::vector<std::string> scanDir(std::string const & path);
 } // namespace windows
 
-inline std::vector<std::string> scanDir(std::string const & path)
-{
-    return TBAG_FS_PLATFORM_NAMESPACE::scanDir(path);
-}
+TBAG_API std::vector<std::string> scanDir(std::string const & path);
 
 } // namespace details
 } // namespace filesystem

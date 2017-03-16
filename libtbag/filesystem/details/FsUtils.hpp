@@ -26,13 +26,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-namespace uv {
-TBAG_API std::string getTempDir();
-TBAG_API std::string getWorkDir();
-TBAG_API std::string getHomeDir();
-TBAG_API std::string getExePath();
-} // namespace uv
-
 namespace windows {
 TBAG_API std::string getTempDir();
 TBAG_API std::string getWorkDir();
@@ -41,10 +34,10 @@ TBAG_API std::string getExePathEx(std::size_t extend_buffer_size);
 TBAG_API std::string getExePath();
 } // namespace windows
 
-inline std::string getTempDir() { return TBAG_FS_PLATFORM_NAMESPACE::getTempDir(); }
-inline std::string getWorkDir() { return TBAG_FS_PLATFORM_NAMESPACE::getWorkDir(); }
-inline std::string getHomeDir() { return TBAG_FS_PLATFORM_NAMESPACE::getHomeDir(); }
-inline std::string getExePath() { return TBAG_FS_PLATFORM_NAMESPACE::getExePath(); }
+TBAG_API std::string getTempDir();
+TBAG_API std::string getWorkDir();
+TBAG_API std::string getHomeDir();
+TBAG_API std::string getExePath();
 
 } // namespace details
 } // namespace filesystem

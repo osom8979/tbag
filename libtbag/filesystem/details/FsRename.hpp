@@ -26,18 +26,11 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-namespace uv {
-TBAG_API bool rename(std::string const & from, std::string const & to);
-} // namespace uv
-
 namespace windows {
-TBAG_API bool rename(std::string const & from, std::string const & to);
+TBAG_API bool rename(std::string const & acp_path_from, std::string const & acp_path_to);
 } // namespace windows
 
-inline bool rename(std::string const & from, std::string const & to)
-{
-    return TBAG_FS_PLATFORM_NAMESPACE::rename(from, to);
-}
+TBAG_API bool rename(std::string const & from, std::string const & to);
 
 } // namespace details
 } // namespace filesystem

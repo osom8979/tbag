@@ -20,36 +20,36 @@ TEST(FsProhibitedTest, Default)
     ASSERT_TRUE(isPathSeparatorChar('/'));
 }
 
-TEST(FsProhibitedTest, UvProhibited)
+TEST(FsProhibitedTest, UnixProhibited)
 {
     char min = std::numeric_limits<char>::min();
     char max = std::numeric_limits<char>::max();
 
-    ASSERT_FALSE(uv::isProhibitedChar(min));
-    ASSERT_FALSE(uv::isProhibitedChar(max));
+    ASSERT_FALSE(unix::isProhibitedChar(min));
+    ASSERT_FALSE(unix::isProhibitedChar(max));
 
     for (char i = min + 1; i < max; ++i) {
         if (i == '\0' || i == '/') {
-            ASSERT_TRUE(uv::isProhibitedChar(i));
+            ASSERT_TRUE(unix::isProhibitedChar(i));
         } else {
-            ASSERT_FALSE(uv::isProhibitedChar(i));
+            ASSERT_FALSE(unix::isProhibitedChar(i));
         }
     }
 }
 
-TEST(FsProhibitedTest, UvPathSeparator)
+TEST(FsProhibitedTest, UnixPathSeparator)
 {
     char min = std::numeric_limits<char>::min();
     char max = std::numeric_limits<char>::max();
 
-    ASSERT_FALSE(uv::isPathSeparatorChar(min));
-    ASSERT_FALSE(uv::isPathSeparatorChar(max));
+    ASSERT_FALSE(unix::isPathSeparatorChar(min));
+    ASSERT_FALSE(unix::isPathSeparatorChar(max));
 
     for (char i = min + 1; i < max; ++i) {
         if (i == '/') {
-            ASSERT_TRUE(uv::isPathSeparatorChar(i));
+            ASSERT_TRUE(unix::isPathSeparatorChar(i));
         } else {
-            ASSERT_FALSE(uv::isPathSeparatorChar(i));
+            ASSERT_FALSE(unix::isPathSeparatorChar(i));
         }
     }
 }

@@ -26,14 +26,14 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-// -----------
-namespace uv {
-// -----------
+// -------------
+namespace unix {
+// -------------
 
 /**
  * Characters prohibited in unix filename.
  *
- * @translate{ko, Uv(Unix)에서 금지된(Prohibited) 문자를 확인한다.}
+ * @translate{ko, Unix에서 금지된(Prohibited) 문자를 확인한다.}
  *
  * @remarks
  *  - 0x00
@@ -51,11 +51,11 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
     return v == PATH_SEPARATOR_OF_POSIX;
 }
 
-TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
+TBAG_API bool isProhibitedName(std::string const & utf8_path);
 
-// --------------
-} // namespace uv
-// --------------
+// ----------------
+} // namespace unix
+// ----------------
 
 // ----------------
 namespace windows {
@@ -101,11 +101,11 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
     return v == PATH_SEPARATOR_OF_WINDOWS || v == PATH_SEPARATOR_OF_POSIX;
 }
 
-TBAG_API bool isProhibitedNameWithUtf8(std::string const & utf8_path);
+TBAG_API bool isProhibitedName(std::string const & utf8_path);
 
-// -------------------
-} // namespace windows
-// -------------------
+// ------------------
+}// namespace windows
+// ------------------
 
 template <typename CharType>
 inline bool isProhibitedChar(CharType v) TBAG_NOEXCEPT
@@ -119,9 +119,9 @@ inline bool isPathSeparatorChar(CharType v) TBAG_NOEXCEPT
     return TBAG_FS_PLATFORM_NAMESPACE::isPathSeparatorChar<CharType>(v);
 }
 
-inline bool isProhibitedNameWithUtf8(std::string const & utf8_path)
+inline bool isProhibitedName(std::string const & utf8_path)
 {
-    return TBAG_FS_PLATFORM_NAMESPACE::isProhibitedNameWithUtf8(utf8_path);
+    return TBAG_FS_PLATFORM_NAMESPACE::isProhibitedName(utf8_path);
 }
 
 } // namespace details

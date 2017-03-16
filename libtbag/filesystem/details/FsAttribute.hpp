@@ -26,30 +26,21 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-namespace uv {
-TBAG_API bool exists       (std::string const & path);
-TBAG_API bool isDirectory  (std::string const & path);
-TBAG_API bool isRegularFile(std::string const & path);
-TBAG_API bool isExecutable (std::string const & path);
-TBAG_API bool isWritable   (std::string const & path);
-TBAG_API bool isReadable   (std::string const & path);
-} // namespace uv
-
 namespace windows {
-TBAG_API bool exists       (std::string const & path);
-TBAG_API bool isDirectory  (std::string const & path);
-TBAG_API bool isRegularFile(std::string const & path);
-TBAG_API bool isExecutable (std::string const & path);
-TBAG_API bool isWritable   (std::string const & path);
-TBAG_API bool isReadable   (std::string const & path);
+TBAG_API bool exists       (std::string const & acp_path);
+TBAG_API bool isDirectory  (std::string const & acp_path);
+TBAG_API bool isRegularFile(std::string const & acp_path);
+TBAG_API bool isExecutable (std::string const & acp_path);
+TBAG_API bool isWritable   (std::string const & acp_path);
+TBAG_API bool isReadable   (std::string const & acp_path);
 } // namespace windows
 
-inline bool exists       (std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::exists       (path); }
-inline bool isDirectory  (std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::isDirectory  (path); }
-inline bool isRegularFile(std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::isRegularFile(path); }
-inline bool isExecutable (std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::isExecutable (path); }
-inline bool isWritable   (std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::isWritable   (path); }
-inline bool isReadable   (std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::isReadable   (path); }
+TBAG_API bool exists       (std::string const & path);
+TBAG_API bool isDirectory  (std::string const & path);
+TBAG_API bool isRegularFile(std::string const & path);
+TBAG_API bool isExecutable (std::string const & path);
+TBAG_API bool isWritable   (std::string const & path);
+TBAG_API bool isReadable   (std::string const & path);
 
 } // namespace details
 } // namespace filesystem

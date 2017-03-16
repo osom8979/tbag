@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/filesystem/details/FsReal.hpp>
+#include <libtbag/locale/Convert.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <uv.h>
@@ -16,7 +17,6 @@
 # include <libtbag/proxy/windows/Dummy.hpp>
 using namespace ::libtbag::proxy::windows;
 #endif
-#include <libtbag/proxy/windows/String.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,37 +25,15 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-// -----------
-namespace uv {
-// -----------
-
-std::string getRealPath(std::string const & path)
-{
-    std::string result;
-    uv_fs_t request = {0,};
-
-    if (uv_fs_realpath(nullptr, &request, path.c_str(), nullptr) == 0) {
-        result = std::string(static_cast<char*>(request.ptr));
-    } else {
-        result = path;
-    }
-    uv_fs_req_cleanup(&request);
-    return result;
-}
-
-// --------------
-} // namespace uv
-// --------------
-
 // ----------------
 namespace windows {
 // ----------------
 
-std::string getRealPath(std::string const & path)
+std::string getRealPath(std::string const & acp_path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(acp_path);
 
     if (WCS_PATH.empty()) {
         return std::string();
@@ -72,14 +50,14 @@ std::string getRealPath(std::string const & path)
     }
 
     buffer.resize(COPIED_LENGTH);
-    return proxy::windows::wcsToMbsWithAcp(buffer);
+    return locale::windows::wcsToMbsWithAcp(buffer);
 }
 
-std::string getLongPathName(std::string const & path)
+std::string getLongPathName(std::string const & acp_path)
 {
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
-    std::wstring const WCS_PATH = proxy::windows::mbsToWcsWithAcp(path);
+    std::wstring const WCS_PATH = locale::windows::mbsToWcsWithAcp(acp_path);
     if (WCS_PATH.empty()) {
         return std::string();
     }
@@ -93,12 +71,26 @@ std::string getLongPathName(std::string const & path)
         __tbag_error("GetLongPathNameW() ERROR: {}", GetLastError());
     }
     buffer.resize(COPIED_LENGTH);
-    return proxy::windows::wcsToMbsWithAcp(buffer);
+    return locale::windows::wcsToMbsWithAcp(buffer);
 }
 
 // -------------------
 } // namespace windows
 // -------------------
+
+std::string getRealPath(std::string const & path)
+{
+    std::string result;
+    uv_fs_t request = {0,};
+
+    if (uv_fs_realpath(nullptr, &request, path.c_str(), nullptr) == 0) {
+        result = std::string(static_cast<char*>(request.ptr));
+    } else {
+        result = path;
+    }
+    uv_fs_req_cleanup(&request);
+    return result;
+}
 
 } // namespace details
 } // namespace filesystem

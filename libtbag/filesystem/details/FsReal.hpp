@@ -26,19 +26,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-namespace uv {
-TBAG_API std::string getRealPath(std::string const & path);
-} // namespace uv
-
 namespace windows {
-TBAG_API std::string getRealPath(std::string const & path);
-TBAG_API std::string getLongPathName(std::string const & path);
+TBAG_API std::string getRealPath(std::string const & acp_path);
+TBAG_API std::string getLongPathName(std::string const & acp_path);
 } // namespace windows
 
-inline std::string getRealPath(std::string const & path)
-{
-    return TBAG_FS_PLATFORM_NAMESPACE::getRealPath(path);
-}
+TBAG_API std::string getRealPath(std::string const & path);
 
 } // namespace details
 } // namespace filesystem

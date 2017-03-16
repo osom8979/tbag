@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/res/DynamicAsset.hpp>
-#include <libtbag/filesystem/Filesystem.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -53,7 +52,7 @@ DynamicAsset::PathVector DynamicAsset::getPaths() const
 
 bool DynamicAsset::exists(String const & key) const
 {
-    return filesystem::isDirectory(_paths.at(key));
+    return _paths.at(key).isDirectory();
 }
 
 bool DynamicAsset::create(String const & key) const

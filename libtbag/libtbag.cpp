@@ -43,14 +43,8 @@ public:
 
         libtbag::util::initSingletonObjects();
 
-        if (param == nullptr) {
-            libtbag::locale::setSystemDefaultLocale();
-        } else {
-            libtbag::locale::setLocale(param->localname);
-        }
-
         __tbag_debug(LIBTBAG_MAIN_TITLE);
-        __tbag_debug("Global locale name: {}", libtbag::locale::getGlobalLocaleName());
+        __tbag_debug("Default locale name: {}", libtbag::locale::getDefaultIcuLocaleName());
 
         return true;
     }

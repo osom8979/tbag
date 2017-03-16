@@ -23,7 +23,7 @@ namespace __impl {
 // ---------------
 
 template <typename Prohibited>
-inline static bool isProhibitedNameWithUtf8(std::string const & utf8_path, Prohibited checker)
+inline static bool isProhibitedName(std::string const & utf8_path, Prohibited checker)
 {
     if (utf8_path.empty()) {
         return true;
@@ -44,26 +44,26 @@ inline static bool isProhibitedNameWithUtf8(std::string const & utf8_path, Prohi
 } // namespace __impl
 // ------------------
 
-// -----------
-namespace uv {
-// -----------
+// -------------
+namespace unix {
+// -------------
 
-bool isProhibitedNameWithUtf8(std::string const & utf8_path)
+bool isProhibitedName(std::string const & utf8_path)
 {
-    return __impl::isProhibitedNameWithUtf8(utf8_path, uv::isProhibitedChar<UChar>);
+    return __impl::isProhibitedName(utf8_path, unix::isProhibitedChar<UChar>);
 }
 
-// --------------
-} // namespace uv
-// --------------
+// ----------------
+} // namespace unix
+// ----------------
 
 // ----------------
 namespace windows {
 // ----------------
 
-bool isProhibitedNameWithUtf8(std::string const & utf8_path)
+bool isProhibitedName(std::string const & utf8_path)
 {
-    return __impl::isProhibitedNameWithUtf8(utf8_path, windows::isProhibitedChar<UChar>);
+    return __impl::isProhibitedName(utf8_path, windows::isProhibitedChar<UChar>);
 }
 
 // -------------------

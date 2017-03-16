@@ -26,21 +26,15 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-namespace uv {
-TBAG_API bool removeDirectory(std::string const & path);
-TBAG_API bool removeFile(std::string const & path);
-TBAG_API bool removeAll(std::string const & path);
-} // namespace uv
-
 namespace windows {
-TBAG_API bool removeDirectory(std::string const & path);
-TBAG_API bool removeFile(std::string const & path);
-TBAG_API bool removeAll(std::string const & path);
+TBAG_API bool removeDirectory(std::string const & acp_path);
+TBAG_API bool removeFile(std::string const & acp_path);
+TBAG_API bool removeAll(std::string const & acp_path);
 } // namespace windows
 
-inline bool removeDirectory(std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::removeDirectory(path); }
-inline bool removeFile     (std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::removeFile(path);      }
-inline bool removeAll      (std::string const & path) { return TBAG_FS_PLATFORM_NAMESPACE::removeAll(path);       }
+TBAG_API bool removeDirectory(std::string const & path);
+TBAG_API bool removeFile(std::string const & path);
+TBAG_API bool removeAll(std::string const & path);
 
 } // namespace details
 } // namespace filesystem

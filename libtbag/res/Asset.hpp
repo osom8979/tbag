@@ -17,7 +17,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/filesystem/Filesystem.hpp>
 #include <libtbag/filesystem/details/FsUtils.hpp>
 
 #include <string>
@@ -69,7 +68,7 @@ public:
     static std::vector<Path> scanDir(Path const & path)
     {
         std::vector<Path> result;
-        for (auto & cursor : filesystem::scanDir(path.getNativeString())) {
+        for (auto & cursor : path.scanDir()) {
             result.push_back(Path(Path::append(path, cursor)));
         }
         return result;
@@ -98,18 +97,18 @@ public:                                         \
     }                                           \
     static bool create_##name() {               \
         using namespace ::libtbag::filesystem;  \
-        return createDirectory(get_##name());   \
+        return Path(get_##name()).createDir();  \
     }                                           \
     static bool remove_##name() {               \
         using namespace ::libtbag::filesystem;  \
-        return removeDirectory(get_##name());   \
+        return Path(get_##name()).removeDir();  \
     }                                           \
     static bool exists_##name() {               \
         using namespace ::libtbag::filesystem;  \
-        return isDirectory(get_##name());       \
+        return Path(get_##name()).isDirectory();\
     }                                           \
     static std::vector<Path> scan_##name() {    \
-        return scanDir(get_##name());           \
+        return Path(get_##name()).scanDir();    \
     }                                           \
 private:
 #endif

@@ -48,34 +48,6 @@ static std::string getRepresentationDirectory(DirFunction func)
 } // namespace __impl
 // ------------------
 
-// -----------
-namespace uv {
-// -----------
-
-std::string getTempDir()
-{
-    return __impl::getRepresentationDirectory(&uv_os_tmpdir);
-}
-
-std::string getWorkDir()
-{
-    return __impl::getRepresentationDirectory(&uv_cwd);
-}
-
-std::string getHomeDir()
-{
-    return __impl::getRepresentationDirectory(&uv_os_homedir);
-}
-
-std::string getExePath()
-{
-    return __impl::getRepresentationDirectory(&uv_exepath);
-}
-
-// --------------
-} // namespace uv
-// --------------
-
 // ----------------
 namespace windows {
 // ----------------
@@ -187,6 +159,26 @@ std::string getExePath()
 // -------------------
 } // namespace windows
 // -------------------
+
+std::string getTempDir()
+{
+    return __impl::getRepresentationDirectory(&uv_os_tmpdir);
+}
+
+std::string getWorkDir()
+{
+    return __impl::getRepresentationDirectory(&uv_cwd);
+}
+
+std::string getHomeDir()
+{
+    return __impl::getRepresentationDirectory(&uv_os_homedir);
+}
+
+std::string getExePath()
+{
+    return __impl::getRepresentationDirectory(&uv_exepath);
+}
 
 } // namespace details
 } // namespace filesystem
