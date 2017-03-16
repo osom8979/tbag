@@ -28,104 +28,88 @@ static char const * const TEST_LOCALE12 = "_US@zer0";
 static char const * const TEST_LOCALE13 = "en@zer0";
 static char const * const TEST_LOCALE14 = "@zer0";
 
-TEST(LocaleTest, getFirstGlobalLocaleName)
-{
-    ASSERT_EQ("ko_KR.UTF-8", getFirstGlobalLocaleName("ko_KR.UTF-8/ko_KR.UTF-8/C/C/C/C"));
-    ASSERT_EQ("ko_KR.UTF-8", getFirstGlobalLocaleName("ko_KR.UTF-8"));
-}
-
-TEST(LocaleTest, getDefaultEncoding)
-{
-    ASSERT_FALSE(getDefaultEncoding().empty());
-}
-
-TEST(LocaleTest, getLanguage)
-{
-    ASSERT_STREQ(  "", getLanguage("").c_str());
-    ASSERT_STREQ("de", getLanguage(TEST_LOCALE0).c_str());
-    ASSERT_STREQ("zh", getLanguage(TEST_LOCALE1).c_str());
-    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE2).c_str());
-    ASSERT_STREQ("ko", getLanguage(TEST_LOCALE3).c_str());
-    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE4).c_str());
-    ASSERT_STREQ("ko", getLanguage(TEST_LOCALE5).c_str());
-    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE6).c_str());
-    ASSERT_STREQ("en", getLanguage(TEST_LOCALE7).c_str());
-    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE8).c_str());
-    ASSERT_STREQ("en", getLanguage(TEST_LOCALE9).c_str());
-    ASSERT_STREQ("en", getLanguage(TEST_LOCALE10).c_str());
-    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE11).c_str());
-    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE12).c_str());
-    ASSERT_STREQ("en", getLanguage(TEST_LOCALE13).c_str());
-    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE14).c_str());
-}
-
-TEST(LocaleTest, getCountry)
-{
-    ASSERT_STREQ(  "", getCountry("").c_str());
-    ASSERT_STREQ(  "", getCountry(TEST_LOCALE0).c_str());
-    ASSERT_STREQ("CN", getCountry(TEST_LOCALE1).c_str());
-    ASSERT_STREQ("CN", getCountry(TEST_LOCALE2).c_str());
-    ASSERT_STREQ("KR", getCountry(TEST_LOCALE3).c_str());
-    ASSERT_STREQ("KR", getCountry(TEST_LOCALE4).c_str());
-    ASSERT_STREQ(  "", getCountry(TEST_LOCALE5).c_str());
-    ASSERT_STREQ(  "", getCountry(TEST_LOCALE6).c_str());
-    ASSERT_STREQ("US", getCountry(TEST_LOCALE7).c_str());
-    ASSERT_STREQ("US", getCountry(TEST_LOCALE8).c_str());
-    ASSERT_STREQ(  "", getCountry(TEST_LOCALE9).c_str());
-    ASSERT_STREQ("US", getCountry(TEST_LOCALE10).c_str());
-    ASSERT_STREQ(  "", getCountry(TEST_LOCALE11).c_str());
-    ASSERT_STREQ("US", getCountry(TEST_LOCALE12).c_str());
-    ASSERT_STREQ(  "", getCountry(TEST_LOCALE13).c_str());
-    ASSERT_STREQ(  "", getCountry(TEST_LOCALE14).c_str());
-}
-
-TEST(LocaleTest, getEncoding)
-{
-    ASSERT_STREQ(     "", getEncoding("").c_str());
-    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE0).c_str());
-    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE1).c_str());
-    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE2).c_str());
-    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE3).c_str());
-    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE4).c_str());
-    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE5).c_str());
-    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE6).c_str());
-    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE7).c_str());
-    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE8).c_str());
-    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE9).c_str());
-    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE10).c_str());
-    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE11).c_str());
-    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE12).c_str());
-    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE13).c_str());
-    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE14).c_str());
-}
-
-TEST(LocaleTest, getModifier)
-{
-    ASSERT_STREQ(    "", getModifier("").c_str());
-    ASSERT_STREQ(    "", getModifier(TEST_LOCALE0).c_str());
-    ASSERT_STREQ(    "", getModifier(TEST_LOCALE1).c_str());
-    ASSERT_STREQ(    "", getModifier(TEST_LOCALE2).c_str());
-    ASSERT_STREQ(    "", getModifier(TEST_LOCALE3).c_str());
-    ASSERT_STREQ(    "", getModifier(TEST_LOCALE4).c_str());
-    ASSERT_STREQ(    "", getModifier(TEST_LOCALE5).c_str());
-    ASSERT_STREQ(    "", getModifier(TEST_LOCALE6).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE7).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE8).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE9).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE10).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE11).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE12).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE13).c_str());
-    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE14).c_str());
-}
+//TEST(LocaleTest, getLanguage)
+//{
+//    ASSERT_STREQ(  "", getLanguage("").c_str());
+//    ASSERT_STREQ("de", getLanguage(TEST_LOCALE0).c_str());
+//    ASSERT_STREQ("zh", getLanguage(TEST_LOCALE1).c_str());
+//    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE2).c_str());
+//    ASSERT_STREQ("ko", getLanguage(TEST_LOCALE3).c_str());
+//    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE4).c_str());
+//    ASSERT_STREQ("ko", getLanguage(TEST_LOCALE5).c_str());
+//    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE6).c_str());
+//    ASSERT_STREQ("en", getLanguage(TEST_LOCALE7).c_str());
+//    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE8).c_str());
+//    ASSERT_STREQ("en", getLanguage(TEST_LOCALE9).c_str());
+//    ASSERT_STREQ("en", getLanguage(TEST_LOCALE10).c_str());
+//    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE11).c_str());
+//    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE12).c_str());
+//    ASSERT_STREQ("en", getLanguage(TEST_LOCALE13).c_str());
+//    ASSERT_STREQ(  "", getLanguage(TEST_LOCALE14).c_str());
+//}
+//
+//TEST(LocaleTest, getCountry)
+//{
+//    ASSERT_STREQ(  "", getCountry("").c_str());
+//    ASSERT_STREQ(  "", getCountry(TEST_LOCALE0).c_str());
+//    ASSERT_STREQ("CN", getCountry(TEST_LOCALE1).c_str());
+//    ASSERT_STREQ("CN", getCountry(TEST_LOCALE2).c_str());
+//    ASSERT_STREQ("KR", getCountry(TEST_LOCALE3).c_str());
+//    ASSERT_STREQ("KR", getCountry(TEST_LOCALE4).c_str());
+//    ASSERT_STREQ(  "", getCountry(TEST_LOCALE5).c_str());
+//    ASSERT_STREQ(  "", getCountry(TEST_LOCALE6).c_str());
+//    ASSERT_STREQ("US", getCountry(TEST_LOCALE7).c_str());
+//    ASSERT_STREQ("US", getCountry(TEST_LOCALE8).c_str());
+//    ASSERT_STREQ(  "", getCountry(TEST_LOCALE9).c_str());
+//    ASSERT_STREQ("US", getCountry(TEST_LOCALE10).c_str());
+//    ASSERT_STREQ(  "", getCountry(TEST_LOCALE11).c_str());
+//    ASSERT_STREQ("US", getCountry(TEST_LOCALE12).c_str());
+//    ASSERT_STREQ(  "", getCountry(TEST_LOCALE13).c_str());
+//    ASSERT_STREQ(  "", getCountry(TEST_LOCALE14).c_str());
+//}
+//
+//TEST(LocaleTest, getEncoding)
+//{
+//    ASSERT_STREQ(     "", getEncoding("").c_str());
+//    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE0).c_str());
+//    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE1).c_str());
+//    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE2).c_str());
+//    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE3).c_str());
+//    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE4).c_str());
+//    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE5).c_str());
+//    ASSERT_STREQ("cp949", getEncoding(TEST_LOCALE6).c_str());
+//    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE7).c_str());
+//    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE8).c_str());
+//    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE9).c_str());
+//    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE10).c_str());
+//    ASSERT_STREQ("UTF-8", getEncoding(TEST_LOCALE11).c_str());
+//    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE12).c_str());
+//    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE13).c_str());
+//    ASSERT_STREQ(     "", getEncoding(TEST_LOCALE14).c_str());
+//}
+//
+//TEST(LocaleTest, getModifier)
+//{
+//    ASSERT_STREQ(    "", getModifier("").c_str());
+//    ASSERT_STREQ(    "", getModifier(TEST_LOCALE0).c_str());
+//    ASSERT_STREQ(    "", getModifier(TEST_LOCALE1).c_str());
+//    ASSERT_STREQ(    "", getModifier(TEST_LOCALE2).c_str());
+//    ASSERT_STREQ(    "", getModifier(TEST_LOCALE3).c_str());
+//    ASSERT_STREQ(    "", getModifier(TEST_LOCALE4).c_str());
+//    ASSERT_STREQ(    "", getModifier(TEST_LOCALE5).c_str());
+//    ASSERT_STREQ(    "", getModifier(TEST_LOCALE6).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE7).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE8).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE9).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE10).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE11).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE12).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE13).c_str());
+//    ASSERT_STREQ("zer0", getModifier(TEST_LOCALE14).c_str());
+//}
 
 TEST(LocaleTest, Information)
 {
-    std::cout << "Default locale name: " << libtbag::locale::getDefaultIcuLocaleName() << std::endl;
-
-    std::cout << "List of available locale: " << libtbag::locale::getAvailableIcuLocaleCount() << std::endl;
-    for (auto & name : libtbag::locale::getAvailableIcuLocale()) {
-        std::cout << " - " << name << std::endl;
-    }
+    std::cout << "Default locale name: " << getDefaultIcuLocaleName() << std::endl;
 }
 

@@ -141,32 +141,6 @@ bool convertToUtf8(std::string const & from_string, std::string const & from_cha
     return true;
 }
 
-std::string convertUtf8ToNative(std::string const & utf8)
-{
-    std::string const ENCODING = getGlobalEncodingName();
-    if (isUtf8EncodingName(ENCODING)) {
-        return utf8;
-    }
-    std::string native;
-    if (convertFromUtf8(utf8, ENCODING, native)) {
-        return native;
-    }
-    return std::string();
-}
-
-std::string convertNativeToUtf8(std::string const & native)
-{
-    std::string const ENCODING = getGlobalEncodingName();
-    if (isUtf8EncodingName(ENCODING)) {
-        return native;
-    }
-    std::string utf8;
-    if (convertToUtf8(native, ENCODING, utf8)) {
-        return utf8;
-    }
-    return std::string();
-}
-
 } // namespace locale
 
 // --------------------

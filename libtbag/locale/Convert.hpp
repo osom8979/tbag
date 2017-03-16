@@ -34,9 +34,6 @@ TBAG_API bool convertFromUtf8(std::string const & utf8, std::string const & to_c
 /** Convert to UTF-8 string. */
 TBAG_API bool convertToUtf8(std::string const & from_string, std::string const & from_charset, std::string & result);
 
-TBAG_API std::string convertUtf8ToNative(std::string const & utf8);
-TBAG_API std::string convertNativeToUtf8(std::string const & native);
-
 } // namespace locale
 
 // --------------------
