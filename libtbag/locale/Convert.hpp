@@ -26,7 +26,17 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace locale  {
 
+namespace windows {
+TBAG_API std::wstring mbsToWcsWithAcp(std::string const & str);
+TBAG_API std::string wcsToMbsWithAcp(std::wstring const & str);
+} // namespace windows
+
 TBAG_API std::vector<std::string> getAvailableConverterNames();
+
+/**
+ * Obtain the charset name of windows platform.
+ */
+TBAG_API std::string getWindowsCharsetName(int code_page);
 
 /** Convert from UTF-8 string. */
 TBAG_API bool convertFromUtf8(std::string const & utf8, std::string const & to_charset, std::string & result);
