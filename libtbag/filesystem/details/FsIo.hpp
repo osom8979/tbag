@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
-#include <libtbag/uvpp/UvCommon.hpp>
 
 #include <string>
 
@@ -26,9 +25,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-
-using ufile = uvpp::ufile;
-using binf  = uvpp::binf;
 
 TBAG_API ufile open(std::string const & path, int flags = FILE_OPEN_CREATE | FILE_OPEN_FLAG_READ_WRITE, int mode = 0664);
 TBAG_API bool close(ufile file);

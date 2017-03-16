@@ -218,6 +218,19 @@ bool getState(std::string const & path, FileState * state)
     return ERROR_CODE == 0 && request.result == 0;
 }
 
+bool getStateWithFile(ufile file, FileState * state)
+{
+    uv_fs_t request;
+
+    int const ERROR_CODE = uv_fs_fstat(nullptr, &request, file, nullptr);
+    if (state != nullptr && ERROR_CODE == 0 && request.result == 0) {
+        *state = __impl::toFileState(request.statbuf);
+    }
+    uv_fs_req_cleanup(&request);
+
+    return ERROR_CODE == 0 && request.result == 0;
+}
+
 bool checkAccessMode(std::string const & path, int mode)
 {
     uv_fs_t request;

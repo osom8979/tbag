@@ -38,6 +38,7 @@ TBAG_API bool isReadable   (std::string const & acp_path);
 TBAG_API bool checkAccessMode(std::string const & path, int mode);
 
 TBAG_API bool getState(std::string const & path, FileState * state = nullptr);
+TBAG_API bool getStateWithFile(ufile file, FileState * state = nullptr);
 
 TBAG_API uint64_t getMode(std::string const & path);
 TBAG_API uint64_t getPermission(std::string const & path);
