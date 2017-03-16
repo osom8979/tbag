@@ -36,6 +36,9 @@ TBAG_API bool close(ufile file);
 TBAG_API int  read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
 TBAG_API int write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
 
+TBAG_API int  read2(ufile file, char const * buffer, std::size_t size, int64_t offset);
+TBAG_API int write2(ufile file, char const * buffer, std::size_t size, int64_t offset);
+
 } // namespace details
 } // namespace filesystem
 

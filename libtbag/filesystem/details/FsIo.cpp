@@ -59,11 +59,35 @@ int write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset
     }
 
     uv_fs_t req = {0,};
-    int const READ_SIZE = uv_fs_write(nullptr, &req, file,
+    int const WRITE_SIZE = uv_fs_write(nullptr, &req, file,
                                      &uv_infos[0], static_cast<unsigned int>(uv_infos.size()),
                                      offset, nullptr);
     uv_fs_req_cleanup(&req);
+    return WRITE_SIZE;
+}
+
+int read2(ufile file, char const * buffer, std::size_t size, int64_t offset)
+{
+    uv_buf_t buf;
+    buf.base = (char*)buffer;
+    buf.len  = size;
+
+    uv_fs_t req = {0,};
+    int const READ_SIZE = uv_fs_read(nullptr, &req, file, &buf, 1U, offset, nullptr);
+    uv_fs_req_cleanup(&req);
     return READ_SIZE;
+}
+
+int write2(ufile file, char const * buffer, std::size_t size, int64_t offset)
+{
+    uv_buf_t buf;
+    buf.base = (char*)buffer;
+    buf.len  = size;
+
+    uv_fs_t req = {0,};
+    int const WRITE_SIZE = uv_fs_write(nullptr, &req, file, &buf, 1U, offset, nullptr);
+    uv_fs_req_cleanup(&req);
+    return WRITE_SIZE;
 }
 
 } // namespace details
