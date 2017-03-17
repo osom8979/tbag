@@ -19,6 +19,7 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 
 #include <cstdlib>
+#include <cstdint>
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -117,11 +118,18 @@ TBAG_CONSTEXPR DirentType const DIRENT_ALL = DIRENT_UNKNOWN | DIRENT_FILE | DIRE
 using ufile = uvpp::ufile;
 using binf  = uvpp::binf;
 
-/** Portable @c timespec structure. */
+/**
+ * Portable @c timespec structure.
+ *
+ * @remarks
+ *  Structure holding an interval broken down into seconds and nanoseconds.
+ *
+ * @see <http://en.cppreference.com/w/c/chrono/timespec>
+ */
 struct TimeSpec
 {
-    long sec;
-    long nsec;
+    long sec;   ///< whole seconds (valid values are >= 0)
+    long nsec;  ///< nanoseconds (valid values are [0, 999999999])
 };
 
 /** Portable @c stat structure. */
@@ -210,9 +218,60 @@ static uint32_t const FILE_OPEN_SYNC            = O_FSYNC;     ///< synch I/O fi
 static uint32_t const FILE_OPEN_NOFOLLOW        = O_NOFOLLOW;  ///< don't follow symlinks.
 #endif
 
+static uint32_t const FILE_OPEN_DEFAULT = FILE_OPEN_CREATE | FILE_OPEN_FLAG_READ_WRITE;
+
 /**
  * @}
  */
+
+/**
+ * file open flags.
+ *
+ * @author zer0
+ * @date   2017-03-17
+ */
+struct FileOpenFlags
+{
+public:
+    uint32_t flags;
+
+public:
+    TBAG_CONSTEXPR FileOpenFlags() TBAG_NOEXCEPT : flags(FILE_OPEN_DEFAULT)
+    { /* EMPTY. */ }
+    TBAG_CONSTEXPR FileOpenFlags(uint32_t flag) TBAG_NOEXCEPT : flags(flag)
+    { /* EMPTY. */ }
+    ~FileOpenFlags()
+    { /* EMPTY. */ }
+
+public:
+    inline FileOpenFlags & clear() TBAG_NOEXCEPT
+    {
+        flags = 0;
+        return *this;
+    }
+
+public:
+    // @formatter:off
+    inline FileOpenFlags & rdonly(bool flag) TBAG_NOEXCEPT { return set(FILE_OPEN_FLAG_READ_ONLY , flag); }
+    inline FileOpenFlags & wronly(bool flag) TBAG_NOEXCEPT { return set(FILE_OPEN_FLAG_WRITE_ONLY, flag); }
+    inline FileOpenFlags & rdwr  (bool flag) TBAG_NOEXCEPT { return set(FILE_OPEN_FLAG_READ_WRITE, flag); }
+    inline FileOpenFlags & append(bool flag) TBAG_NOEXCEPT { return set(FILE_OPEN_APPEND         , flag); }
+    inline FileOpenFlags & creat (bool flag) TBAG_NOEXCEPT { return set(FILE_OPEN_CREATE         , flag); }
+    inline FileOpenFlags & trunc (bool flag) TBAG_NOEXCEPT { return set(FILE_OPEN_TRUNCATE       , flag); }
+    inline FileOpenFlags & excl  (bool flag) TBAG_NOEXCEPT { return set(FILE_OPEN_EXISTS_ERROR   , flag); }
+    // @formatter:on
+
+private:
+    inline FileOpenFlags & set(uint32_t value, bool flag) TBAG_NOEXCEPT
+    {
+        if (flag) {
+            flags |= value;
+        } else {
+            flags &= ~value;
+        }
+        return *this;
+    }
+};
 
 /**
  * @defgroup __DOXYGEN_GROUP__FILE_MODE__ List of file mode flags.

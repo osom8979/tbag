@@ -7,6 +7,7 @@
 
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/filesystem/details/FsAttribute.hpp>
+#include <libtbag/filesystem/details/FsIo.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -20,9 +21,9 @@ File::File() : _file(0)
     // EMPTY.
 }
 
-File::File(std::string const & path) : _file(0)
+File::File(std::string const & path, Flags flags, int mode)
 {
-    open(path);
+    open(path, flags, mode);
 }
 
 File::~File()
@@ -30,12 +31,14 @@ File::~File()
     close();
 }
 
-bool File::open(std::string const & path, int flags, int mode)
+bool File::open(std::string const & path, Flags flags, int mode)
 {
-    _file = details::open(path, flags, mode);
+    _file = details::open(path, flags.flags, mode);
     if (_file > 0) {
         return true;
     }
+
+    __tbag_error("File::open({}) error.", path);
     return false;
 }
 
