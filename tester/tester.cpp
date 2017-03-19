@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/libtbag.h>
 #include <libtbag/string/Commander.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
@@ -55,6 +56,9 @@ int main(int argc, char **argv)
     tbInitialize();
     libtbag::signal::registerDefaultStdTerminateHandler();
     libtbag::signal::registerDefaultHandler();
+
+    libtbag::DemoAsset asset;
+    asset.create_temp_dir();
 
     TestMode mode = TestMode::TEST;
     std::string ip;

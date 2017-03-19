@@ -17,27 +17,10 @@ using namespace libtbag::filesystem::details;
 
 TEST(FsUtilsTest, Default)
 {
-    std::string back_end;
-    std::string temp;
-    std::string work;
-    std::string home;
-    std::string exe;
-
-    if (::libtbag::isWindowsPlatform()) {
-        back_end = "Windows";
-    } else {
-        back_end = "Uv";
-    }
-    temp = getTempDir();
-    work = getWorkDir();
-    home = getHomeDir();
-    exe  = getExePath();
-
-    std::cout << "FsUtils: " << back_end << " back-end.\n"
-              << "TempDir: " << temp << std::endl
-              << "WorkDir: " << work << std::endl
-              << "HomeDir: " << home << std::endl
-              << "ExePath: " << exe  << std::endl;
+    std::cout << "TempDir: " << getTempDir() << std::endl
+              << "WorkDir: " << getWorkDir() << std::endl
+              << "HomeDir: " << getHomeDir() << std::endl
+              << "ExePath: " << getExePath() << std::endl;
 }
 
 
