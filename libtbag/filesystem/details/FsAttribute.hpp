@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
-
 #include <string>
 
 // -------------------
@@ -25,15 +24,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-
-namespace windows {
-TBAG_API bool exists       (std::string const & acp_path);
-TBAG_API bool isDirectory  (std::string const & acp_path);
-TBAG_API bool isRegularFile(std::string const & acp_path);
-TBAG_API bool isExecutable (std::string const & acp_path);
-TBAG_API bool isWritable   (std::string const & acp_path);
-TBAG_API bool isReadable   (std::string const & acp_path);
-} // namespace windows
 
 TBAG_API bool checkAccessMode(std::string const & path, int mode);
 
