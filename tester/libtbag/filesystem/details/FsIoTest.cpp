@@ -13,15 +13,11 @@ using namespace libtbag;
 using namespace libtbag::filesystem;
 using namespace libtbag::filesystem::details;
 
-static char const * const FsIoTestDirName = "FsIoTest";
-
 TEST(FsIoTest, Default)
 {
-    auto TEST_DIR = DemoAsset().get_temp_dir() / (std::string(FsIoTestDirName) + std::string("_Default"));
-    TEST_DIR.createDir();
-    ASSERT_TRUE(TEST_DIR.isDirectory());
+    TBAG_CREATE_TESTER_TEMP_DIR;
 
-    auto TEST_FILE = TEST_DIR / std::string("test.txt");
+    auto TEST_FILE = TBAG_GET_TESTER_TEMP_DIR / std::string("test.txt");
     namespace fs = ::libtbag::filesystem::details;
 
     // Create test file.
@@ -73,11 +69,5 @@ TEST(FsIoTest, Default)
 
     // Close file.
     ASSERT_TRUE(fs::close(f));
-
-    // Remove file/dir.
-    ASSERT_TRUE(TEST_FILE.remove());
-    ASSERT_FALSE(TEST_FILE.exists());
-    ASSERT_TRUE(TEST_DIR.remove());
-    ASSERT_FALSE(TEST_DIR.exists());
 }
 
