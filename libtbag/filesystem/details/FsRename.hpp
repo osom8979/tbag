@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
-
 #include <string>
 
 // -------------------
@@ -25,10 +24,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-
-namespace windows {
-TBAG_API bool rename(std::string const & acp_path_from, std::string const & acp_path_to);
-} // namespace windows
 
 TBAG_API bool rename(std::string const & from, std::string const & to);
 

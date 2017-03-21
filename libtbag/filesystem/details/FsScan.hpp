@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
-
 #include <string>
 #include <vector>
 
@@ -26,10 +25,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
-
-namespace windows {
-TBAG_API std::vector<std::string> scanDir(std::string const & path);
-} // namespace windows
 
 TBAG_API std::vector<std::string> scanDir(std::string const & path, DirentType type = DIRENT_ALL);
 

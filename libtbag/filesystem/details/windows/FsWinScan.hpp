@@ -1,12 +1,12 @@
 /**
- * @file   FsReal.hpp
- * @brief  FsReal class prototype.
+ * @file   FsWinScan.hpp
+ * @brief  FsWinScan class prototype.
  * @author zer0
- * @date   2017-03-05
+ * @date   2017-03-21
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSREAL_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSREAL_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_WINDOWS_FSWINSCAN_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_WINDOWS_FSWINSCAN_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,9 +25,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
+namespace windows    {
 
-TBAG_API std::string getRealPath(std::string const & path);
+TBAG_API std::vector<std::string> scanDir(std::string const & path);
 
+} // namespace windows
 } // namespace details
 } // namespace filesystem
 
@@ -34,5 +37,5 @@ TBAG_API std::string getRealPath(std::string const & path);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSREAL_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_WINDOWS_FSWINSCAN_HPP__
 
