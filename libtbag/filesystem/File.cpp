@@ -6,8 +6,7 @@
  */
 
 #include <libtbag/filesystem/File.hpp>
-#include <libtbag/filesystem/details/FsAttribute.hpp>
-#include <libtbag/filesystem/details/FsIo.hpp>
+#include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------

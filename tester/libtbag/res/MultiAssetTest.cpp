@@ -18,8 +18,8 @@ TEST(MultiAssetTest, Default)
     using Path   = MultiAsset::Path;
     using String = MultiAsset::String;
 
-    Path path1 = filesystem::getExeDir() / "__multiasset_test_01.dir";
-    Path path2 = filesystem::getExeDir() / "__multiasset_test_02.dir";
+    Path path1 = Path::getExeDir() / "__multiasset_test_01.dir";
+    Path path2 = Path::getExeDir() / "__multiasset_test_02.dir";
 
     // @formatter:off
     if (path1.exists()) { path1.removeAll(); }

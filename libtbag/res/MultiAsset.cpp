@@ -110,7 +110,7 @@ MultiAsset MultiAsset::createDefault()
     for (int i = 0; i < LAYOUT_NAMES_SIZE; ++i) {
         layouts.push_back(LAYOUT_NAMES[i]);
     }
-    return create({filesystem::getExeDir(), filesystem::getHomeDir()}, layouts);
+    return create({Path::getExeDir(), Path::getHomeDir()}, layouts);
 }
 
 } // namespace res

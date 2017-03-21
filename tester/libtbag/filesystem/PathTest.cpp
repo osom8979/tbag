@@ -95,8 +95,8 @@ TEST(PathTest, GetName)
 
 TEST(PathTest, SplitNodesWithCanonical_1)
 {
-    std::string home = getHomeDir().getString();
-    std::string work = getWorkDir().getString();
+    std::string home = Path::getHomeDir().getString();
+    std::string work = Path::getWorkDir().getString();
 
     char const * const TEMP1 = "~/TEMP1/TEMP2/../TEMP3/./../../TEMP4";
     char const * const TEMP2 = "TEMP2/.";
@@ -127,7 +127,7 @@ TEST(PathTest, SplitNodesWithCanonical_2)
 TEST(PathTest, FilesystemOperators)
 {
     char const * const FILENAME = "__path_test.dir/filesystem_operators.dir";
-    Path path = getExeDir() / FILENAME;
+    Path path = Path::getExeDir() / FILENAME;
 
     ASSERT_FALSE(path.createDir());
     ASSERT_TRUE(path.createDir());
@@ -149,8 +149,8 @@ TEST(PathTest, FilesystemOperators)
 
 TEST(PathTest, SpecialDirectories)
 {
-    ASSERT_FALSE(getWorkDir().getString().empty());
-    ASSERT_FALSE(getHomeDir().getString().empty());
-    ASSERT_FALSE(getExePath().getString().empty());
+    ASSERT_FALSE(Path::getWorkDir().getString().empty());
+    ASSERT_FALSE(Path::getHomeDir().getString().empty());
+    ASSERT_FALSE(Path::getExePath().getString().empty());
 }
 

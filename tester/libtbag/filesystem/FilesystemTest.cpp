@@ -8,16 +8,10 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/filesystem/details/FsTypes.hpp>
-#include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/FsCanonical.hpp>
-#include <libtbag/filesystem/details/FsCreate.hpp>
 #include <libtbag/filesystem/details/FsNode.hpp>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
-#include <libtbag/filesystem/details/FsReal.hpp>
-#include <libtbag/filesystem/details/FsRemove.hpp>
-#include <libtbag/filesystem/details/FsRename.hpp>
-#include <libtbag/filesystem/details/FsScan.hpp>
-#include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/filesystem/details/FsCommon.hpp>
 
 #include <iostream>
 #include <fstream>

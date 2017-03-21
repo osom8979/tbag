@@ -6,16 +6,10 @@
  */
 
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/filesystem/details/FsCanonical.hpp>
-#include <libtbag/filesystem/details/FsCreate.hpp>
 #include <libtbag/filesystem/details/FsNode.hpp>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
-#include <libtbag/filesystem/details/FsReal.hpp>
-#include <libtbag/filesystem/details/FsRemove.hpp>
-#include <libtbag/filesystem/details/FsRename.hpp>
-#include <libtbag/filesystem/details/FsScan.hpp>
-#include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -385,22 +379,22 @@ std::vector<Path> Path::scanDir(DirentType type) const
     return result;
 }
 
-Path getWorkDir()
+Path Path::getWorkDir()
 {
     return Path(details::getWorkDir());
 }
 
-Path getHomeDir()
+Path Path::getHomeDir()
 {
     return Path(details::getHomeDir());
 }
 
-Path getExePath()
+Path Path::getExePath()
 {
     return Path(details::getExePath());
 }
 
-Path getExeDir()
+Path Path::getExeDir()
 {
     return Path(details::removeLastNode(details::getExePath()));
 }

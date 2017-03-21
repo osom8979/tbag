@@ -227,12 +227,13 @@ public:
 public:
     /** Scan for child nodes. */
     std::vector<Path> scanDir(DirentType type = DIRENT_ALL) const;
-};
 
-TBAG_API Path getWorkDir();
-TBAG_API Path getHomeDir();
-TBAG_API Path getExePath();
-TBAG_API Path getExeDir();
+public:
+    static Path getWorkDir();
+    static Path getHomeDir();
+    static Path getExePath();
+    static Path getExeDir();
+};
 
 } // namespace filesystem
 

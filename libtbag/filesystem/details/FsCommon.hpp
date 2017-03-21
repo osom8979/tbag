@@ -1,12 +1,12 @@
 /**
- * @file   FsAttribute.hpp
- * @brief  FsAttribute class prototype.
+ * @file   FsCommon.hpp
+ * @brief  FsCommon class prototype.
  * @author zer0
- * @date   2017-03-05
+ * @date   2017-03-21
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSATTRIBUTE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSATTRIBUTE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSCOMMON_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSCOMMON_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,7 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
+
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,6 +26,23 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 namespace details    {
+
+TBAG_API std::string getTempDir();
+TBAG_API std::string getWorkDir();
+TBAG_API std::string getHomeDir();
+TBAG_API std::string getExePath();
+
+TBAG_API bool createDirectoryEx(std::string const & path, int mode);
+TBAG_API bool createDirectory(std::string const & path);
+
+TBAG_API std::string createTempDir(std::string const & prefix, std::string const & suffix, std::size_t unique_size = 6);
+TBAG_API std::string createDefaultTempDir();
+
+TBAG_API bool removeDirectory(std::string const & path);
+TBAG_API bool removeFile(std::string const & path);
+TBAG_API bool removeAll(std::string const & path);
+
+TBAG_API bool rename(std::string const & from, std::string const & to);
 
 /**
  * set file mode creation mask.
@@ -61,6 +80,19 @@ TBAG_API bool isReadable  (std::string const & path);
 TBAG_API bool isDirectory  (std::string const & path);
 TBAG_API bool isRegularFile(std::string const & path);
 
+TBAG_API std::string getRealPath(std::string const & path);
+
+TBAG_API std::vector<std::string> scanDir(std::string const & path, DirentType type = DIRENT_ALL);
+
+TBAG_API ufile open(std::string const & path, int flags = FILE_OPEN_CREATE | FILE_OPEN_FLAG_READ_WRITE, int mode = 0664);
+TBAG_API bool close(ufile file);
+
+TBAG_API int  read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
+TBAG_API int write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
+
+TBAG_API int  read2(ufile file, char const * buffer, std::size_t size, int64_t offset);
+TBAG_API int write2(ufile file, char const * buffer, std::size_t size, int64_t offset);
+
 } // namespace details
 } // namespace filesystem
 
@@ -68,5 +100,5 @@ TBAG_API bool isRegularFile(std::string const & path);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSATTRIBUTE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSCOMMON_HPP__
 

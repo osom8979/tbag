@@ -17,7 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/filesystem/details/FsUtils.hpp>
+#include <libtbag/filesystem/details/FsCommon.hpp>
 
 #include <string>
 #include <vector>
@@ -78,13 +78,13 @@ public:
     /** Obtain HOME directory path. */
     static Path getHomeDirPath()
     {
-        return filesystem::getHomeDir();
+        return Path::getHomeDir();
     }
 
     /** Obtain executable file directory path. */
     static Path getExeDirPath()
     {
-        return filesystem::getExeDir();
+        return Path::getExeDir();
     }
 };
 

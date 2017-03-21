@@ -16,7 +16,7 @@ TEST(DynamicAssetTest, Default)
     char const * const KEY = "KEY";
     using Path = DynamicAsset::Path;
     DynamicAsset asset;
-    Path path = filesystem::getExeDir() / "dynamic_asset";
+    Path path = Path::getExeDir() / "dynamic_asset";
 
     ASSERT_TRUE(asset.addPath(KEY, path));
     ASSERT_TRUE(asset.init());
