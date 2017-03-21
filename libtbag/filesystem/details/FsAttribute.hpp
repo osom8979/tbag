@@ -25,10 +25,27 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
+/**
+ * set file mode creation mask.
+ *
+ * @return
+ *  This system call always succeeds and the previous value of the mask is returned.
+ *
+ * @see <https://linux.die.net/man/2/umask>
+ */
+TBAG_API int setUserMask(int mode);
+
 TBAG_API bool checkAccessMode(std::string const & path, int mode);
 
+/**
+ * @see <http://linux.die.net/man/2/stat>
+ */
 TBAG_API bool getState(std::string const & path, FileState * state = nullptr);
 TBAG_API bool getStateWithFile(ufile file, FileState * state = nullptr);
+TBAG_API bool getStateWithLink(std::string const & path, FileState * state = nullptr);
+
+TBAG_API bool setMode(std::string const & path, int mode);
+TBAG_API bool setModeWithFile(ufile file, int mode);
 
 TBAG_API uint64_t getMode(std::string const & path);
 TBAG_API uint64_t getPermission(std::string const & path);

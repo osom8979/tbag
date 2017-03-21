@@ -15,9 +15,9 @@ using namespace libtbag::filesystem::details;
 
 TEST(FsIoTest, rw1)
 {
-    TBAG_CREATE_TESTER_TEMP_DIR;
+    TBAG_TESTER_TEMP_DIR(true, true);
 
-    auto TEST_FILE = TBAG_GET_TESTER_TEMP_DIR / "test.txt";
+    auto TEST_FILE = TBAG_TESTER_TEMP_DIR_GET() / "test";
     namespace fs = ::libtbag::filesystem::details;
 
     // Create test file.
@@ -57,9 +57,9 @@ TEST(FsIoTest, rw1)
 
 TEST(FsIoTest, rw2)
 {
-    TBAG_CREATE_TESTER_TEMP_DIR;
+    TBAG_TESTER_TEMP_DIR(true, true);
 
-    auto TEST_FILE = TBAG_GET_TESTER_TEMP_DIR / "test.txt";
+    auto TEST_FILE = TBAG_TESTER_TEMP_DIR_GET() / "test";
     namespace fs = ::libtbag::filesystem::details;
 
     // Create test file.

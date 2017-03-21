@@ -202,7 +202,7 @@ public:
      * @remarks
      *  If the parent node does not exist, it is created together.
      */
-    bool createDir() const;
+    bool createDir(int mode = 0755) const;
 
     /** Remove directory or file. */
     bool remove() const;

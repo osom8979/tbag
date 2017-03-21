@@ -90,26 +90,26 @@ public:
 
 #ifndef CREATE_ASSET_PATH
 /** Create a main directory accessor & mutator macro. */
-#define CREATE_ASSET_PATH(name, path)           \
-public:                                         \
-    static Path get_##name() {                  \
-        return Path(path);                      \
-    }                                           \
-    static bool create_##name() {               \
-        using namespace ::libtbag::filesystem;  \
-        return Path(get_##name()).createDir();  \
-    }                                           \
-    static bool remove_##name() {               \
-        using namespace ::libtbag::filesystem;  \
-        return Path(get_##name()).remove();     \
-    }                                           \
-    static bool exists_##name() {               \
-        using namespace ::libtbag::filesystem;  \
-        return Path(get_##name()).isDirectory();\
-    }                                           \
-    static std::vector<Path> scan_##name() {    \
-        return Path(get_##name()).scanDir();    \
-    }                                           \
+#define CREATE_ASSET_PATH(name, path)               \
+public:                                             \
+    static Path get_##name() {                      \
+        return Path(path);                          \
+    }                                               \
+    static bool create_##name(int mode = 0755) {    \
+        using namespace ::libtbag::filesystem;      \
+        return Path(get_##name()).createDir(mode);  \
+    }                                               \
+    static bool remove_##name() {                   \
+        using namespace ::libtbag::filesystem;      \
+        return Path(get_##name()).remove();         \
+    }                                               \
+    static bool exists_##name() {                   \
+        using namespace ::libtbag::filesystem;      \
+        return Path(get_##name()).isDirectory();    \
+    }                                               \
+    static std::vector<Path> scan_##name() {        \
+        return Path(get_##name()).scanDir();        \
+    }                                               \
 private:
 #endif
 

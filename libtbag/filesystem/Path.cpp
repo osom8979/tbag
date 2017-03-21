@@ -345,9 +345,9 @@ bool Path::isDirectory() const
     return details::isDirectory(_path);
 }
 
-bool Path::createDir() const
+bool Path::createDir(int mode) const
 {
-    if (details::createDirectory(_path)) {
+    if (details::createDirectoryEx(_path, mode)) {
         return true;
     }
 
@@ -355,8 +355,8 @@ bool Path::createDir() const
         return false;
     }
 
-    if (getParent().createDir()) {
-        return details::createDirectory(_path);
+    if (getParent().createDir(mode)) {
+        return details::createDirectoryEx(_path, mode);
     }
     return false;
 }

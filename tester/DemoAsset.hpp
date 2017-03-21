@@ -50,11 +50,13 @@ struct TempDir
 {
     using Path = libtbag::res::Asset::Path;
 
+    bool remove;
     Path dir;
 
-    TempDir(std::string const & case_name, std::string const & name, bool is_create = true)
+    TempDir(std::string const & case_name, std::string const & name, bool is_create = true, bool is_remove = true)
+            : remove(is_remove)
     {
-        dir = DemoAsset().get_temp_dir() / (case_name + name);
+        dir = DemoAsset().get_temp_dir() / (case_name + std::string("-") + name);
         if (is_create) {
             dir.createDir();
         }
@@ -62,7 +64,9 @@ struct TempDir
 
     ~TempDir()
     {
-        dir.removeAll();
+        if (remove) {
+            dir.removeAll();
+        }
     }
 
     inline Path getDir() const
@@ -75,14 +79,18 @@ struct TempDir
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#ifndef TBAG_CREATE_TESTER_TEMP_DIR
-#define TBAG_CREATE_TESTER_TEMP_DIR \
-    auto __temp_dir__ = ::libtbag::TempDir(this->test_info_->test_case_name(), this->test_info_->name()); \
-    ASSERT_TRUE(__temp_dir__.getDir().isDirectory());
+#ifndef TABG_TESTER_TEMP_DIR_NAME
+#define TABG_TESTER_TEMP_DIR_NAME __tbag_tester_temp_dir__
 #endif
 
-#ifndef TBAG_GET_TESTER_TEMP_DIR
-#define TBAG_GET_TESTER_TEMP_DIR __temp_dir__.getDir()
+#ifndef TBAG_TESTER_TEMP_DIR
+#define TBAG_TESTER_TEMP_DIR(create, remove) \
+    auto TABG_TESTER_TEMP_DIR_NAME = ::libtbag::TempDir(test_info_->test_case_name(), test_info_->name(), create, remove); \
+    ASSERT_TRUE(TABG_TESTER_TEMP_DIR_NAME.getDir().isDirectory());
+#endif
+
+#ifndef TBAG_TESTER_TEMP_DIR_GET
+#define TBAG_TESTER_TEMP_DIR_GET() TABG_TESTER_TEMP_DIR_NAME.getDir()
 #endif
 
 #endif // __INCLUDE_LIBTBAG__TESTER_DEMOASSET_HPP__

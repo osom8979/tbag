@@ -8,6 +8,11 @@
 #include <libtbag/filesystem/details/FsAttribute.hpp>
 #include <libtbag/log/Log.hpp>
 
+#if !defined(__PLATFORM_WINDOWS__)
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+
 #include <uv.h>
 
 // -------------------
@@ -48,35 +53,38 @@ static FileState toFileState(uv_stat_t uv_stat)
     return fs;
 }
 
+template <typename Predicated, typename Param>
+static bool getState(Predicated predicated, Param param, FileState * state)
+{
+    uv_fs_t request;
+    int const ERROR_CODE = predicated(nullptr, &request, param, nullptr);
+    if (state != nullptr && ERROR_CODE == 0 && request.result == 0) {
+        *state = toFileState(request.statbuf);
+    }
+    uv_fs_req_cleanup(&request);
+    return ERROR_CODE == 0 && request.result == 0;
+}
+
+template <typename Predicated, typename Param>
+static bool setMode(Predicated predicated, Param param, int mode)
+{
+    uv_fs_t request;
+    int const ERROR_CODE = predicated(nullptr, &request, param, mode, nullptr);
+    uv_fs_req_cleanup(&request);
+    return ERROR_CODE == 0;
+}
+
 // ------------------
 } // namespace __impl
 // ------------------
 
-/** @ref <http://linux.die.net/man/2/stat> */
-bool getState(std::string const & path, FileState * state)
+int setUserMask(int mode)
 {
-    uv_fs_t request;
-
-    int const ERROR_CODE = uv_fs_stat(nullptr, &request, path.c_str(), nullptr);
-    if (state != nullptr && ERROR_CODE == 0 && request.result == 0) {
-        *state = __impl::toFileState(request.statbuf);
-    }
-    uv_fs_req_cleanup(&request);
-
-    return ERROR_CODE == 0 && request.result == 0;
-}
-
-bool getStateWithFile(ufile file, FileState * state)
-{
-    uv_fs_t request;
-
-    int const ERROR_CODE = uv_fs_fstat(nullptr, &request, file, nullptr);
-    if (state != nullptr && ERROR_CODE == 0 && request.result == 0) {
-        *state = __impl::toFileState(request.statbuf);
-    }
-    uv_fs_req_cleanup(&request);
-
-    return ERROR_CODE == 0 && request.result == 0;
+#if defined(__PLATFORM_WINDOWS__)
+    return 0;
+#else
+    return static_cast<int>(::umask(static_cast<mode_t>(mode)));
+#endif
 }
 
 bool checkAccessMode(std::string const & path, int mode)
@@ -85,6 +93,31 @@ bool checkAccessMode(std::string const & path, int mode)
     int const ERROR_CODE = uv_fs_access(nullptr, &request, path.c_str(), mode, nullptr);
     uv_fs_req_cleanup(&request);
     return ERROR_CODE == 0;
+}
+
+bool getState(std::string const & path, FileState * state)
+{
+    return __impl::getState(::uv_fs_stat, path.c_str(), state);
+}
+
+bool getStateWithFile(ufile file, FileState * state)
+{
+    return __impl::getState(::uv_fs_fstat, file, state);
+}
+
+bool getStateWithLink(std::string const & path, FileState * state)
+{
+    return __impl::getState(::uv_fs_lstat, path.c_str(), state);
+}
+
+bool setMode(std::string const & path, int mode)
+{
+    return __impl::setMode(::uv_fs_chmod, path.c_str(), mode);
+}
+
+bool setModeWithFile(ufile file, int mode)
+{
+    return __impl::setMode(::uv_fs_fchmod, file, mode);
 }
 
 uint64_t getMode(std::string const & path)
