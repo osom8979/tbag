@@ -121,6 +121,8 @@ TBAG_API int setUserMask(int mode);
 /**
  * Check real user's permissions for a file.
  *
+ * @param[in] path
+ *  File path string.
  * @param[in] mode
  *  See the @c AccessModeTable enumeration.
  *
