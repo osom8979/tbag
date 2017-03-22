@@ -113,11 +113,29 @@ static bool setMode(Predicated predicated, Param param, int mode)
 
 std::string getTempDir()
 {
+    // On Windows, uv_os_tmpdir() uses GetTempPathW().
+    //
+    // On all other operating systems, uv_os_tmpdir() uses the first environment variable found
+    // in the ordered list TMPDIR, TMP, TEMP, and TEMPDIR.
+    // If none of these are found, the path "/tmp" is used, or, on Android, "/data/local/tmp" is used.
+    // The temp directory is stored in buffer.
+    // When uv_os_tmpdir() is called, size indicates the maximum size of buffer.
+    // On success size is set to the string length of buffer (which does not include the terminating null).
+    // On UV_ENOBUFS failure size is set to the required length for buffer, including the null byte.
     return __impl::getRepresentationDirectory(&uv_os_tmpdir);
 }
 
 std::string getWorkDir()
 {
+    // If the current working directory is too large to fit in buffer,
+    // this function returns UV_ENOBUFS, and sets size to the required length, including the null terminator.
+    //
+    // Changed in version 1.1.0:
+    //  - On Unix the path no longer ends in a slash.
+    //
+    // Changed in version 1.9.0:
+    //  - the returned length includes the terminating null byte on UV_ENOBUFS,
+    //     and the buffer is null terminated on success.
     return __impl::getRepresentationDirectory(&uv_cwd);
 }
 

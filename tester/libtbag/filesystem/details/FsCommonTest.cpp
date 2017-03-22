@@ -64,11 +64,27 @@ TEST(FsCommonTest, CreateDirectory)
         ASSERT_TRUE(createDirectoryEx(path, mode));
         ASSERT_EQ(mode, static_cast<int>(getMode(path) & MAX_MODE));
 
-        ASSERT_TRUE(setMode(path, 0700));
+        ASSERT_TRUE(setMode(path, 0700)); // Permission to remove directory.
         ASSERT_TRUE(removeDirectory(path));
     }
 
     setUserMask(PREV_MASK);
+}
+
+TEST(FsCommonTest, CreateTemp)
+{
+    std::string const TEMP = createDefaultTempDir();
+
+    ASSERT_FALSE(TEMP.empty());
+    ASSERT_TRUE(exists(TEMP));
+    ASSERT_TRUE(isDirectory(TEMP));
+
+    ASSERT_TRUE(isWritable(TEMP));
+    ASSERT_TRUE(isReadable(TEMP));
+    ASSERT_TRUE(isExecutable(TEMP));
+
+    ASSERT_TRUE(removeDirectory(TEMP));
+    ASSERT_FALSE(exists(TEMP));
 }
 
 TEST(FsCommonTest, ReadWrite1)

@@ -27,7 +27,17 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
+/**
+ * Gets the temp directory.
+ *
+ * @warning
+ *  This method is not thread safe.
+ */
 TBAG_API std::string getTempDir();
+
+/**
+ * Gets the current working directory.
+ */
 TBAG_API std::string getWorkDir();
 
 /**
@@ -37,6 +47,10 @@ TBAG_API std::string getWorkDir();
  *  This method is not thread safe.
  */
 TBAG_API std::string getHomeDir();
+
+/**
+ * Gets the executable path.
+ */
 TBAG_API std::string getExePath();
 
 TBAG_API bool createDirectoryEx(std::string const & path, int mode);
