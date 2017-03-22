@@ -1,6 +1,6 @@
 ## VERSION
 
-- MiniZip 1.01
+- MiniZip 1.1
 
 ## LICENSE
 

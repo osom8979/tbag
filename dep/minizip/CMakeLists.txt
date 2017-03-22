@@ -19,15 +19,15 @@ endfunction ()
 
 enable_language (C)
 
-set (ZLIB_DEP_DIR "${CMAKE_SOURCE_DIR}/dep/zlib")
-include_directories (${CMAKE_CURRENT_SOURCE_DIR} "${ZLIB_DEP_DIR}")
-link_directories (${CMAKE_CURRENT_SOURCE_DIR} "${ZLIB_DEP_DIR}")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options (-w)
 endif ()
 
-prepend (SRCS "${CMAKE_CURRENT_SOURCE_DIR}"
-        ioapi.c unzip.c zip.c)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${zlib_EXT_INCLUDE_DIR})
+
+prepend (SRCS "${CMAKE_CURRENT_SOURCE_DIR}" ioapi.c unzip.c zip.c)
 add_library (minizip STATIC ${SRCS})
-target_link_libraries (minizip PRIVATE z)
+
+add_dependencies (minizip zlib)
+target_link_libraries (minizip PRIVATE ${zlib_EXT_STATIC_LIB})
 
