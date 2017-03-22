@@ -3,6 +3,8 @@
  * @brief  FsProhibited class prototype.
  * @author zer0
  * @date   2017-03-05
+ *
+ * @translate{ko, @c 금지된(Prohibited) 문자와 관련된 연산을 정의한다.}
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_FSPROHIBITED_HPP__

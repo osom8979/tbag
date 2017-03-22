@@ -343,6 +343,30 @@ std::string getRealPath(std::string const & path)
     return result;
 }
 
+bool link(std::string const & path, std::string const & new_path)
+{
+    uv_fs_t request = {0,};
+    int const ERROR_CODE = uv_fs_link(nullptr, &request, path.c_str(), new_path.c_str(), nullptr);
+    uv_fs_req_cleanup(&request);
+    return ERROR_CODE == 0;
+}
+
+bool symlink(std::string const & path, std::string const & new_path, int flags)
+{
+    uv_fs_t request = {0,};
+    int const ERROR_CODE = uv_fs_symlink(nullptr, &request, path.c_str(), new_path.c_str(), flags, nullptr);
+    uv_fs_req_cleanup(&request);
+    return ERROR_CODE == 0;
+}
+
+bool unlink(std::string const & path)
+{
+    uv_fs_t request = {0,};
+    int const ERROR_CODE = uv_fs_unlink(nullptr, &request, path.c_str(), nullptr);
+    uv_fs_req_cleanup(&request);
+    return ERROR_CODE == 0;
+}
+
 std::vector<std::string> scanDir(std::string const & path, DirentType type)
 {
     std::vector<std::string> result;

@@ -82,6 +82,15 @@ TBAG_API bool isRegularFile(std::string const & path);
 
 TBAG_API std::string getRealPath(std::string const & path);
 
+/** @see <https://linux.die.net/man/2/link> */
+TBAG_API bool link(std::string const & path, std::string const & new_path);
+
+/** @see <https://linux.die.net/man/2/symlink> */
+TBAG_API bool symlink(std::string const & path, std::string const & new_path, int flags);
+
+/** @see <https://linux.die.net/man/2/unlink> */
+TBAG_API bool unlink(std::string const & path);
+
 TBAG_API std::vector<std::string> scanDir(std::string const & path, DirentType type = DIRENT_ALL);
 
 TBAG_API ufile open(std::string const & path, int flags = FILE_OPEN_CREATE | FILE_OPEN_FLAG_READ_WRITE, int mode = 0664);
