@@ -6,12 +6,13 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
-TEST(PathTest, Constructors_1)
+TEST(PathTest, Constructors1)
 {
     char const * const TEMP = "TEMP";
 
@@ -36,7 +37,7 @@ TEST(PathTest, Constructors_1)
     ASSERT_STREQ(TEMP, p6.getString().c_str());
 }
 
-TEST(PathTest, Constructors_2)
+TEST(PathTest, Constructors2)
 {
     std::vector<std::string> nodes;
     nodes.push_back("1");
@@ -93,7 +94,7 @@ TEST(PathTest, GetName)
     ASSERT_STREQ("", path2.getName().c_str());
 }
 
-TEST(PathTest, SplitNodesWithCanonical_1)
+TEST(PathTest, SplitNodes_Canonical1)
 {
     std::string home = Path::getHomeDir().getString();
     std::string work = Path::getWorkDir().getString();
@@ -111,9 +112,9 @@ TEST(PathTest, SplitNodesWithCanonical_1)
     ASSERT_EQ(Path(work + "/TEMP2").getGenericString(), path2.getGenericString());
 }
 
-TEST(PathTest, SplitNodesWithCanonical_2)
+TEST(PathTest, SplitNodes_Canonical2)
 {
-#if defined(WIN32) || defined(_WIN32)
+#if defined(__PLATFORM_WINDOWS__)
     char const * const TEMP = "/TEMP";
 #else
     char const * const TEMP = "C:\\TEMP";
@@ -124,33 +125,11 @@ TEST(PathTest, SplitNodesWithCanonical_2)
     ASSERT_STREQ(TEMP, temp.getString().c_str());
 }
 
-TEST(PathTest, FilesystemOperators)
-{
-    char const * const FILENAME = "__path_test.dir/filesystem_operators.dir";
-    Path path = Path::getExeDir() / FILENAME;
-
-    ASSERT_FALSE(path.createDir());
-    ASSERT_TRUE(path.createDir());
-
-    ASSERT_TRUE(path.exists());
-    ASSERT_TRUE(path.isExecutable());
-    ASSERT_TRUE(path.isWritable());
-    ASSERT_TRUE(path.isReadable());
-
-    ASSERT_FALSE(path.isRegularFile());
-    ASSERT_TRUE(path.isDirectory());
-    ASSERT_FALSE(path.remove());
-
-    ASSERT_FALSE(path.getParent().remove());
-    ASSERT_TRUE(path.getParent().removeAll());
-
-    ASSERT_EQ(0U, path.scanDir().size());
-}
-
 TEST(PathTest, SpecialDirectories)
 {
     ASSERT_FALSE(Path::getWorkDir().getString().empty());
     ASSERT_FALSE(Path::getHomeDir().getString().empty());
     ASSERT_FALSE(Path::getExePath().getString().empty());
+    ASSERT_FALSE(Path::getExeDir ().getString().empty());
 }
 
