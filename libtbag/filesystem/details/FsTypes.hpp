@@ -175,7 +175,7 @@ enum AccessModeTable
  * @{
  */
 
-static uint32_t const FILE_TYPE_S_IFMT   = _WIN_OR_POSIX(S_IFMT);   ///< type of file.
+static uint32_t const FILE_TYPE_S_IFMT   = _WIN_OR_POSIX(S_IFMT);   ///< type of file mask.
 static uint32_t const FILE_TYPE_S_IFCHR  = _WIN_OR_POSIX(S_IFCHR);  ///< character special.
 static uint32_t const FILE_TYPE_S_IFDIR  = _WIN_OR_POSIX(S_IFDIR);  ///< directory.
 static uint32_t const FILE_TYPE_S_IFREG  = _WIN_OR_POSIX(S_IFREG);  ///< regular file.

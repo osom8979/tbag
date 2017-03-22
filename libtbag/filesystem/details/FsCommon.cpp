@@ -259,6 +259,27 @@ bool checkAccessMode(std::string const & path, int mode)
     return ERROR_CODE == 0;
 }
 
+bool exists(std::string const & path)
+{
+    return checkAccessMode(path, ACCESS_MODE_EXISTS);
+}
+
+bool isExecutable(std::string const & path)
+{
+    return checkAccessMode(path, ACCESS_MODE_EXECUTE);
+}
+
+bool isWritable(std::string const & path)
+{
+    return checkAccessMode(path, ACCESS_MODE_WRITE);
+}
+
+bool isReadable(std::string const & path)
+{
+    return checkAccessMode(path, ACCESS_MODE_READ);
+}
+
+
 bool getState(std::string const & path, FileState * state)
 {
     return __impl::getState(::uv_fs_stat, path.c_str(), state);
@@ -272,16 +293,6 @@ bool getStateWithFile(ufile file, FileState * state)
 bool getStateWithLink(std::string const & path, FileState * state)
 {
     return __impl::getState(::uv_fs_lstat, path.c_str(), state);
-}
-
-bool setMode(std::string const & path, int mode)
-{
-    return __impl::setMode(::uv_fs_chmod, path.c_str(), mode);
-}
-
-bool setModeWithFile(ufile file, int mode)
-{
-    return __impl::setMode(::uv_fs_fchmod, file, mode);
 }
 
 uint64_t getMode(std::string const & path)
@@ -320,29 +331,19 @@ uint64_t getFixedPermission(uint64_t mode)
 #endif
 }
 
+bool setMode(std::string const & path, int mode)
+{
+    return __impl::setMode(::uv_fs_chmod, path.c_str(), mode);
+}
+
+bool setModeWithFile(ufile file, int mode)
+{
+    return __impl::setMode(::uv_fs_fchmod, file, mode);
+}
+
 bool checkFileType(std::string const & path, uint64_t type)
 {
     return (getMode(path) & FILE_TYPE_S_IFMT) == type;
-}
-
-bool exists(std::string const & path)
-{
-    return checkAccessMode(path, ACCESS_MODE_EXISTS);
-}
-
-bool isExecutable(std::string const & path)
-{
-    return checkAccessMode(path, ACCESS_MODE_EXECUTE);
-}
-
-bool isWritable(std::string const & path)
-{
-    return checkAccessMode(path, ACCESS_MODE_WRITE);
-}
-
-bool isReadable(std::string const & path)
-{
-    return checkAccessMode(path, ACCESS_MODE_READ);
 }
 
 bool isDirectory(std::string const & path)
@@ -357,6 +358,24 @@ bool isRegularFile(std::string const & path)
 
 std::string getRealPath(std::string const & path)
 {
+    // Equivalent to realpath(3) on Unix.
+    // Windows uses GetFinalPathNameByHandle.
+    //
+    // Warning:
+    //  This function has certain platform specific caveats that were discovered when used in Node.
+    //   - macOS and other BSDs:
+    //      this function will fail with UV_ELOOP if more than 32 symlinks are found while resolving the given path.
+    //      This limit is hardcoded and cannot be sidestepped.
+    //   - Windows:
+    //      while this function works in the common case, there are a number of corner cases where it doesn't:
+    //       - Paths in ramdisk volumes created by tools which sidestep the Volume Manager (such as ImDisk) cannot be resolved.
+    //       - Inconsistent casing when using drive letters.
+    //       - Resolved path bypasses subst’d drives.
+    //
+    // While this function can still be used, it’s not recommended if scenarios such as the above need to be supported.
+    //
+    // Note:
+    //  This function is not implemented on Windows XP and Windows Server 2003. On these systems, UV_ENOSYS is returned.
     std::string result;
     uv_fs_t request = {0,};
 
@@ -395,6 +414,16 @@ bool unlink(std::string const & path)
 
 std::vector<std::string> scanDir(std::string const & path, DirentType type)
 {
+    // Equivalent to scandir(3), with a slightly different API.
+    //
+    // Once the callback for the request is called, the user can use uv_fs_scandir_next()
+    // to get ent populated with the next directory entry data.
+    // When there are no more entries UV_EOF will be returned.
+    //
+    // Note:
+    //  On Linux, getting the type of an entry is only supported by some filesystems
+    //  (btrfs, ext2, ext3 and ext4 at the time of this writing), check the getdents(2) man page.
+
     std::vector<std::string> result;
 
     uv_fs_t request;
@@ -446,6 +475,18 @@ int read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset)
     return READ_SIZE;
 }
 
+int read2(ufile file, char const * buffer, std::size_t size, int64_t offset)
+{
+    uv_buf_t buf;
+    buf.base = (char*)buffer;
+    buf.len  = size;
+
+    uv_fs_t req = {0,};
+    int const READ_SIZE = uv_fs_read(nullptr, &req, file, &buf, 1U, offset, nullptr);
+    uv_fs_req_cleanup(&req);
+    return READ_SIZE;
+}
+
 int write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset)
 {
     std::vector<uv_buf_t> uv_infos;
@@ -461,18 +502,6 @@ int write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset
                                        offset, nullptr);
     uv_fs_req_cleanup(&req);
     return WRITE_SIZE;
-}
-
-int read2(ufile file, char const * buffer, std::size_t size, int64_t offset)
-{
-    uv_buf_t buf;
-    buf.base = (char*)buffer;
-    buf.len  = size;
-
-    uv_fs_t req = {0,};
-    int const READ_SIZE = uv_fs_read(nullptr, &req, file, &buf, 1U, offset, nullptr);
-    uv_fs_req_cleanup(&req);
-    return READ_SIZE;
 }
 
 int write2(ufile file, char const * buffer, std::size_t size, int64_t offset)

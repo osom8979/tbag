@@ -87,6 +87,25 @@ TEST(FsCommonTest, CreateTemp)
     ASSERT_FALSE(exists(TEMP));
 }
 
+TEST(FsCommonTest, Rename)
+{
+    TBAG_TESTER_TEMP_DIR(true, true);
+
+    auto TEST_FROM = TBAG_TESTER_TEMP_DIR_GET() / "from";
+    auto TEST_TO   = TBAG_TESTER_TEMP_DIR_GET() / "to";
+    namespace fs = ::libtbag::filesystem::details;
+
+    ASSERT_TRUE(createDirectory(TEST_FROM));
+
+    ASSERT_TRUE(exists(TEST_FROM));
+    ASSERT_FALSE(exists(TEST_TO));
+
+    ASSERT_TRUE(fs::rename(TEST_FROM, TEST_TO));
+
+    ASSERT_FALSE(exists(TEST_FROM));
+    ASSERT_TRUE(exists(TEST_TO));
+}
+
 TEST(FsCommonTest, ReadWrite1)
 {
     TBAG_TESTER_TEMP_DIR(true, true);
@@ -127,6 +146,14 @@ TEST(FsCommonTest, ReadWrite1)
 
     // Close file.
     ASSERT_TRUE(fs::close(f));
+
+    // Remove file.
+    ASSERT_TRUE(exists(TEST_FILE));
+    ASSERT_TRUE(isRegularFile(TEST_FILE));
+    ASSERT_TRUE(removeFile(TEST_FILE));
+
+    ASSERT_FALSE(exists(TEST_FILE));
+    ASSERT_FALSE(isRegularFile(TEST_FILE));
 }
 
 TEST(FsCommonTest, ReadWrite2)
@@ -155,6 +182,14 @@ TEST(FsCommonTest, ReadWrite2)
 
     // Close file.
     ASSERT_TRUE(fs::close(f));
+
+    // Remove file.
+    ASSERT_TRUE(exists(TEST_FILE));
+    ASSERT_TRUE(isRegularFile(TEST_FILE));
+    ASSERT_TRUE(removeFile(TEST_FILE));
+
+    ASSERT_FALSE(exists(TEST_FILE));
+    ASSERT_FALSE(isRegularFile(TEST_FILE));
 }
 
 
