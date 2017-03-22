@@ -60,6 +60,9 @@ option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
 ## Configure settings.
 tbag_config__default_generate_c_header ()
 
+## External project.
+include (${CMAKE_SOURCE_DIR}/external/External.cmake)
+
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
@@ -68,7 +71,6 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lzma)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/minizip)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/zlib)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 
 ## Test subproject.
