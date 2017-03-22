@@ -306,6 +306,14 @@ macro (tbag_modules__apply_ext_z)
     tbag_modules__add_whole_archive (${zlib_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_ressl)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ressl)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${ressl_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${ressl_crypto_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${ressl_ssl_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${ressl_tls_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

@@ -50,4 +50,45 @@ else ()
             LOG_INSTALL   1)
 endif ()
 
+##############
+## LIBRESSL ##
+##############
+
+set (ressl_EXT_SOURCE_DIR        "${CMAKE_SOURCE_DIR}/external/ressl")
+set (ressl_EXT_INCLUDE_DIR       "${EXT_INSTALL_DIR}/include")
+set (ressl_crypto_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}crypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (ressl_ssl_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}ssl${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (ressl_tls_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}tls${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (ressl_EXT_LIBRARIES         "${ressl_crypto_EXT_STATIC_LIB}"
+                                 "${ressl_ssl_EXT_STATIC_LIB}"
+                                 "${ressl_tls_EXT_STATIC_LIB}")
+
+if (EXISTS "${ressl_crypto_EXT_STATIC_LIB}" AND EXISTS "${ressl_ssl_EXT_STATIC_LIB}" AND EXISTS "${ressl_EXT_LIBRARIES}")
+    add_custom_target (ressl)
+    message (STATUS "Skip external/ressl_crypto (Exists: ${ressl_crypto_EXT_STATIC_LIB})")
+    message (STATUS "Skip external/ressl_ssl (Exists: ${ressl_ssl_EXT_STATIC_LIB})")
+    message (STATUS "Skip external/ressl_tls (Exists: ${ressl_EXT_LIBRARIES})")
+else ()
+    message (STATUS "Add external/ressl")
+    ExternalProject_Add (ressl
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Download step--------------
+            #URL "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.5.1.tar.gz"
+            #URL_MD5 "1ff612428af67c0acdd61f8079c43555"
+            #--Configure step-------------
+            SOURCE_DIR "${ressl_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output logging-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+endif ()
 
