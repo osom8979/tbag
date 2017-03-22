@@ -17,9 +17,24 @@
 #include <libtbag/res/Asset.hpp>
 #include <libtbag/locale/Convert.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
+
+// ------------------
+namespace test_data {
+// ------------------
+
+std::string const UTF8_GA = "\xea\xb0\x80"; // "가"
+std::string const UTF8_NA = "\xeb\x82\x98"; // "나"
+std::string const UTF8_DA = "\xeb\x8b\xa4"; // "다"
+std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
+
+// ---------------------
+} // namespace test_data
+// ---------------------
 
 /**
  * DemoAsset class prototype.

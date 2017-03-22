@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
 
 #include <limits>
@@ -13,6 +14,7 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 using namespace libtbag::filesystem::details;
+using namespace libtbag::test_data;
 
 TEST(FsProhibitedTest, Default)
 {
@@ -52,5 +54,34 @@ TEST(FsProhibitedTest, UnixPathSeparator)
             ASSERT_FALSE(unix::isPathSeparatorChar(i));
         }
     }
+}
+
+TEST(FsProhibitedTest, IsProhibitedName)
+{
+    ASSERT_FALSE(windows::isProhibitedName(UTF8_SOURCE));
+    ASSERT_FALSE(unix::isProhibitedName(UTF8_SOURCE));
+    ASSERT_FALSE(isProhibitedName(UTF8_SOURCE));
+}
+
+TEST(FsProhibitedTest, IsProhibitedName_Windows)
+{
+    ASSERT_TRUE(windows::isProhibitedName(PATH_SEPARATOR_OF_WINDOWS + UTF8_NA + UTF8_DA));
+    ASSERT_TRUE(windows::isProhibitedName(UTF8_GA + PATH_SEPARATOR_OF_WINDOWS + UTF8_DA));
+    ASSERT_TRUE(windows::isProhibitedName(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_WINDOWS));
+
+    ASSERT_TRUE(windows::isProhibitedName(PATH_SEPARATOR_OF_POSIX + UTF8_NA + UTF8_DA));
+    ASSERT_TRUE(windows::isProhibitedName(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
+    ASSERT_TRUE(windows::isProhibitedName(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
+}
+
+TEST(FsProhibitedTest, IsProhibitedName_Unix)
+{
+    ASSERT_FALSE(unix::isProhibitedName(PATH_SEPARATOR_OF_WINDOWS + UTF8_NA + UTF8_DA));
+    ASSERT_FALSE(unix::isProhibitedName(UTF8_GA + PATH_SEPARATOR_OF_WINDOWS + UTF8_DA));
+    ASSERT_FALSE(unix::isProhibitedName(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_WINDOWS));
+
+    ASSERT_TRUE(unix::isProhibitedName(PATH_SEPARATOR_OF_POSIX + UTF8_NA + UTF8_DA));
+    ASSERT_TRUE(unix::isProhibitedName(UTF8_GA + PATH_SEPARATOR_OF_POSIX + UTF8_DA));
+    ASSERT_TRUE(unix::isProhibitedName(UTF8_GA + UTF8_NA + PATH_SEPARATOR_OF_POSIX));
 }
 
