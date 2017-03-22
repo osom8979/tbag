@@ -138,10 +138,10 @@ Zip::ResultCode Zip::unzip(std::string const & file, std::string const & dir)
         return ResultCode::GO_TO_FIRST_FILE_ERROR;
     }
 
-    std::size_t const MAX_PATH    = 256;
-    std::size_t const MAX_COMMENT = 256;
+    std::size_t const MAX_PATH_LENGTH = 256;
+    std::size_t const MAX_COMMENT     = 256;
 
-    char filename[MAX_PATH] = {0,};
+    char filename[MAX_PATH_LENGTH] = {0,};
     char  comment[MAX_COMMENT] = {0,};
 
     std::size_t const INPUT_BUFFER = 2048;
@@ -150,7 +150,7 @@ Zip::ResultCode Zip::unzip(std::string const & file, std::string const & dir)
     unz_file_info info;
 
     do {
-        unzGetCurrentFileInfo(uf, &info, filename, MAX_PATH, nullptr, 0, comment, MAX_COMMENT);
+        unzGetCurrentFileInfo(uf, &info, filename, MAX_PATH_LENGTH, nullptr, 0, comment, MAX_COMMENT);
 
          //std::cout << "NAME("        << filename
          //          << ") COMP_SIZE(" << info.compressed_size
