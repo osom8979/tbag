@@ -123,6 +123,14 @@ std::string getWorkDir()
 
 std::string getHomeDir()
 {
+    // On Windows, uv_os_homedir() first checks the USERPROFILE environment variable using GetEnvironmentVariableW().
+    // If USERPROFILE is not set, GetUserProfileDirectoryW() is called.
+    //
+    // On all other operating systems, uv_os_homedir() first checks the HOME environment variable using getenv(3).
+    // If HOME is not set, getpwuid_r(3) is called. The user's home directory is stored in buffer.
+    // When uv_os_homedir() is called, size indicates the maximum size of buffer.
+    // On success size is set to the string length of buffer.
+    // On UV_ENOBUFS failure size is set to the required length for buffer, including the null byte.
     return __impl::getRepresentationDirectory(&uv_os_homedir);
 }
 

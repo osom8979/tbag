@@ -29,6 +29,13 @@ namespace details    {
 
 TBAG_API std::string getTempDir();
 TBAG_API std::string getWorkDir();
+
+/**
+ * Gets the current user's home directory.
+ *
+ * @warning
+ *  This method is not thread safe.
+ */
 TBAG_API std::string getHomeDir();
 TBAG_API std::string getExePath();
 

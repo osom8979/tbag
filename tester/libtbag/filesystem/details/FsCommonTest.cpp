@@ -18,13 +18,37 @@ using namespace libtbag::filesystem::details;
 
 TEST(FsCommonTest, Utils)
 {
-    std::cout << "TempDir: " << getTempDir() << std::endl
-              << "WorkDir: " << getWorkDir() << std::endl
-              << "HomeDir: " << getHomeDir() << std::endl
-              << "ExePath: " << getExePath() << std::endl;
+    std::string const TEMP = getTempDir();
+    std::string const WORK = getWorkDir();
+    std::string const HOME = getHomeDir();
+    std::string const EXE  = getExePath();
+
+    std::cout << "TempDir: " << TEMP << std::endl
+              << "WorkDir: " << WORK << std::endl
+              << "HomeDir: " << HOME << std::endl
+              << "ExePath: " << EXE  << std::endl;
+
+    ASSERT_FALSE(TEMP.empty());
+    ASSERT_FALSE(WORK.empty());
+    ASSERT_FALSE(HOME.empty());
+    ASSERT_FALSE( EXE.empty());
+
+    ASSERT_TRUE(exists(TEMP));
+    ASSERT_TRUE(exists(WORK));
+    ASSERT_TRUE(exists(HOME));
+    ASSERT_TRUE(exists( EXE));
+
+    ASSERT_TRUE(isDirectory(TEMP));
+    ASSERT_TRUE(isDirectory(WORK));
+    ASSERT_TRUE(isDirectory(HOME));
+    ASSERT_TRUE(isRegularFile(EXE));
+
+    ASSERT_TRUE(isWritable(TEMP));
+    ASSERT_TRUE(isReadable(TEMP));
+    ASSERT_TRUE(isExecutable(TEMP));
 }
 
-TEST(FsCommonTest, Create)
+TEST(FsCommonTest, CreateDirectory)
 {
     TBAG_TESTER_TEMP_DIR(true, true);
 
@@ -47,8 +71,7 @@ TEST(FsCommonTest, Create)
     setUserMask(PREV_MASK);
 }
 
-
-TEST(FsCommonTest, rw1)
+TEST(FsCommonTest, ReadWrite1)
 {
     TBAG_TESTER_TEMP_DIR(true, true);
 
@@ -90,7 +113,7 @@ TEST(FsCommonTest, rw1)
     ASSERT_TRUE(fs::close(f));
 }
 
-TEST(FsCommonTest, rw2)
+TEST(FsCommonTest, ReadWrite2)
 {
     TBAG_TESTER_TEMP_DIR(true, true);
 
