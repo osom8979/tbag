@@ -3,6 +3,12 @@
  * @brief  FsWinCommon class prototype.
  * @author zer0
  * @date   2017-03-21
+ *
+ * @remarks
+ *  Specializations of Windows Platform.
+ *
+ * @warning
+ *  MBS(MultiByte String) is used unless otherwise noted.
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_DETAILS_WINDOWS_FSWINCOMMON_HPP__
