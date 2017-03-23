@@ -192,6 +192,10 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+#####################
+### Visual Studio ###
+*.sym
+
 ###############
 ### Doxygen ###
 .html
