@@ -1,8 +1,0 @@
-## VERSION
-
-- Tiny-AES128-C f832b4188e5482c60378bdc5cd4c731450c7bd12
-
-## LICENSE
-
-- Public Domain
-
