@@ -8,6 +8,7 @@
 #include <libtbag/libtbag.h>
 #include <libtbag/util/SingletonUtils.hpp>
 #include <libtbag/locale/Locale.hpp>
+#include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <mutex>
@@ -41,6 +42,7 @@ public:
             return false;
         }
 
+        libtbag::uvpp::initialize();
         libtbag::util::initSingletonObjects();
 
         __tbag_debug(LIBTBAG_MAIN_TITLE);
@@ -58,6 +60,8 @@ public:
         }
 
         libtbag::util::releaseSingletonObjects();
+        libtbag::uvpp::release();
+
         return true;
     }
 };
@@ -67,7 +71,6 @@ bool LibtbagInitializer::_init = false;
 
 static bool setUp()
 {
-    // [WARNING] Don't use libuv initialize.
     return true;
 }
 

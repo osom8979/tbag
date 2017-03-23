@@ -17,6 +17,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
+void initialize()
+{
+    ::uv_default_loop();
+}
+
+void release()
+{
+    ::uv_loop_close(::uv_default_loop());
+}
+
 // @formatter:off
 #define _TBAG_XX(name, type) case UvType::name: return true;
 #define _TBAG_NX(name, type)

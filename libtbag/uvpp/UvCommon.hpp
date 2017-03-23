@@ -44,6 +44,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
+TBAG_API void initialize();
+TBAG_API void release();
+
 // Platform-specific definitions for libuv support.
 #if defined(__PLATFORM_WINDOWS__)
 using ufile  = int;
