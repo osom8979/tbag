@@ -21,16 +21,15 @@ Tea-bag is Third party extension utility project.
 - demangle (google-glog) 0.3.4 (BSD 3-clause license)
 - fmt 3.0.1 (BSD license)
 - jsoncpp 1.7.7 (MIT license)
-- tinyaes128c f832b41 (Public Domain)
 - tinyxml2 3.0.0 (zlib license)
 
 ### External projects
 - zlib-1.2.11 (zlib license)
+- libressl-2.5.1 (Dual license; OpenSSL & SSLeay)
 
 ### Deprecated
 - boost 1.62.0 (Boost Software License, Version 1.0)
 - boost.stacktrace 41ed839 (Boost Software License, Version 1.0)
-- luabridge 1.0.2 (BSD 3-Clause License)
 
 ## Programming rules.
 
@@ -44,6 +43,11 @@ MSVC 12 (2013) x86_64 (with Git Bash):
 ```bash
 ## Don't use shared library in MSVC12.
 $ cmake -G "Visual Studio 12 2013 Win64" ..
+```
+
+### Without LibReSSL
+```bash
+$ cmake -DWITH_RESSL=OFF ..
 ```
 
 ## License
