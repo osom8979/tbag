@@ -6,28 +6,26 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/res/MultiAsset.hpp>
-
-#include <fstream>
+#include <libtbag/filesystem/File.hpp>
 
 using namespace libtbag;
 using namespace libtbag::res;
 
 TEST(MultiAssetTest, Default)
 {
+    TBAG_TESTER_TEMP_DIR(true, true);
+
     using Path   = MultiAsset::Path;
     using String = MultiAsset::String;
 
-    Path path1 = Path::getExeDir() / "__multiasset_test_01.dir";
-    Path path2 = Path::getExeDir() / "__multiasset_test_02.dir";
+    auto path1 = TBAG_TESTER_TEMP_DIR_GET() / std::string("test1");
+    auto path2 = TBAG_TESTER_TEMP_DIR_GET() / std::string("test2");
+    namespace fs = ::libtbag::filesystem;
 
-    // @formatter:off
-    if (path1.exists()) { path1.removeAll(); }
-    if (path2.exists()) { path2.removeAll(); }
-    // @formatter:on
-
-    String layout1 = "layout1.dir";
-    String layout2 = "layout2.dir";
+    String layout1 = "layout1";
+    String layout2 = "layout2";
 
     MultiAsset asset = MultiAsset::create({path1, path2}, {layout1, layout2});
 
@@ -64,17 +62,18 @@ TEST(MultiAssetTest, Default)
     auto find_path = asset.findWriteableDir(layout2);
     ASSERT_TRUE(test_path == find_path);
 
-    String test_filename = "__file__";
-    auto test_file = (path1 / layout2 / test_filename);
+    String filename = "file";
+    auto file_path = path1 / layout2 / filename;
 
     std::string const content = "__blah_blah_blah__";
-#if 0
-    // TODO: Refactoring this code:
-    ASSERT_EQ(content.size(), filesystem::createSimpleTextFile(test_file.getCanonicalString(), &content[0], content.size()));
-#endif
+    fs::File file;
+    ASSERT_TRUE(file.open(file_path.getString()));
+    int write_size = file.write2(content.c_str(), content.size(), 0);
+    file.close();
+    ASSERT_EQ(content.size(), static_cast<std::size_t>(write_size));
 
-    auto find_file = asset.findFile(layout2, test_filename);
-    ASSERT_TRUE(test_file == find_file);
+    auto find_file = asset.findFile(layout2, filename);
+    ASSERT_TRUE(file_path == find_file);
 
     ASSERT_TRUE(path1.removeAll());
     ASSERT_TRUE(path2.removeAll());

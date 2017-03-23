@@ -86,16 +86,14 @@ private:
     AssetMap _assets;
 
 public:
-    MultiAsset() = default;
-    ~MultiAsset() = default;
+    MultiAsset();
+    MultiAsset(MultiAsset const & obj);
+    MultiAsset(MultiAsset && obj);
+    ~MultiAsset();
 
-    MultiAsset(MultiAsset const & obj) = default;
-    MultiAsset & operator =(MultiAsset const & obj) = default;
-
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    MultiAsset(MultiAsset && obj) = default;
-    MultiAsset & operator =(MultiAsset && obj) = default;
-#endif
+public:
+    MultiAsset & operator =(MultiAsset const & obj);
+    MultiAsset & operator =(MultiAsset && obj);
 
 public:
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.empty()))

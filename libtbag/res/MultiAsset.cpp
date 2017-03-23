@@ -9,6 +9,7 @@
 #include <libtbag/string/StringUtils.hpp>
 
 #include <sstream>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,6 +33,43 @@ MultiAsset::Value const * const MultiAsset::LAYOUT_NAMES[] = {
 
 std::size_t const MultiAsset::LAYOUT_NAMES_SIZE =
         sizeof(MultiAsset::LAYOUT_NAMES) / sizeof(MultiAsset::LAYOUT_NAMES[0]);
+
+MultiAsset::MultiAsset()
+{
+    // EMPTY.
+}
+
+MultiAsset::MultiAsset(MultiAsset const & obj)
+{
+    (*this) = obj;
+}
+
+MultiAsset::MultiAsset(MultiAsset && obj)
+{
+    (*this) = std::move(obj);
+}
+
+MultiAsset::~MultiAsset()
+{
+    // EMPTY.
+}
+
+MultiAsset & MultiAsset::operator =(MultiAsset const & obj)
+{
+    if (this != &obj) {
+        _assets.clear();
+        _assets.insert(obj._assets.begin(), obj._assets.end());
+    }
+    return *this;
+}
+
+MultiAsset & MultiAsset::operator =(MultiAsset && obj)
+{
+    if (this != &obj) {
+        _assets.swap(obj._assets);
+    }
+    return *this;
+}
 
 bool MultiAsset::add(String const & name, DynamicAsset const & asset)
 {

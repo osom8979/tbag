@@ -55,16 +55,14 @@ private:
     PathMap _paths; ///< Parent directories.
 
 public:
-    DynamicAsset() = default;
-    ~DynamicAsset() = default;
+    DynamicAsset();
+    DynamicAsset(DynamicAsset const & obj);
+    DynamicAsset(DynamicAsset && obj);
+    ~DynamicAsset();
 
-    DynamicAsset(DynamicAsset const & obj) = default;
-    DynamicAsset & operator =(DynamicAsset const & obj) = default;
-
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    DynamicAsset(DynamicAsset && obj) = default;
-    DynamicAsset & operator =(DynamicAsset && obj) = default;
-#endif
+public:
+    DynamicAsset & operator =(DynamicAsset const & obj);
+    DynamicAsset & operator =(DynamicAsset && obj);
 
 public:
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.empty()))

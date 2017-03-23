@@ -45,11 +45,11 @@ private:
 
 public:
     File();
-    File(std::string const & path, Flags flags, int mode = 0664);
+    File(std::string const & path, Flags flags = Flags(), int mode = 0664);
     ~File();
 
 public:
-    bool open(std::string const & path, Flags flags, int mode = 0664);
+    bool open(std::string const & path, Flags flags = Flags(), int mode = 0664);
     bool close();
 
 public:

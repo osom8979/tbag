@@ -6,12 +6,50 @@
  */
 
 #include <libtbag/res/DynamicAsset.hpp>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace res {
+
+DynamicAsset::DynamicAsset()
+{
+    // EMPTY.
+}
+
+DynamicAsset::DynamicAsset(DynamicAsset const & obj)
+{
+    (*this) = obj;
+}
+
+DynamicAsset::DynamicAsset(DynamicAsset && obj)
+{
+    (*this) = std::move(obj);
+}
+
+DynamicAsset::~DynamicAsset()
+{
+    // EMPTY.
+}
+
+DynamicAsset & DynamicAsset::operator =(DynamicAsset const & obj)
+{
+    if (this != &obj) {
+        _paths.clear();
+        _paths.insert(obj._paths.begin(), obj._paths.end());
+    }
+    return *this;
+}
+
+DynamicAsset & DynamicAsset::operator =(DynamicAsset && obj)
+{
+    if (this != &obj) {
+        _paths.swap(obj._paths);
+    }
+    return *this;
+}
 
 bool DynamicAsset::init()
 {

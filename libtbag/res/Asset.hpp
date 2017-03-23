@@ -53,16 +53,18 @@ public:
             , "Value must be the same type as String::value_type");
 
 public:
-    Asset() = default;
-    ~Asset() = default;
+    // @formatter:off
+    TBAG_CONSTEXPR Asset() { /* EMPTY. */ }
+    Asset(Asset const & obj) { /* EMPTY. */ }
+    Asset(Asset && obj) { /* EMPTY. */ }
+    ~Asset() { /* EMPTY. */ }
+    // @formatter:on
 
-    Asset(Asset const & obj) = default;
-    Asset & operator =(Asset const & obj) = default;
-
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    Asset(Asset && obj) = default;
-    Asset & operator =(Asset && obj) = default;
-#endif
+public:
+    // @formatter:off
+    inline Asset & operator =(Asset const & obj) { return *this; }
+    inline Asset & operator =(Asset && obj) { return *this; }
+    // @formatter:on
 
 public:
     static std::vector<Path> scanDir(Path const & path)
@@ -76,16 +78,12 @@ public:
 
 public:
     /** Obtain HOME directory path. */
-    static Path getHomeDirPath()
-    {
-        return Path::getHomeDir();
-    }
+    inline static Path getHomeDirPath()
+    { return Path::getHomeDir(); }
 
     /** Obtain executable file directory path. */
-    static Path getExeDirPath()
-    {
-        return Path::getExeDir();
-    }
+    inline static Path getExeDirPath()
+    { return Path::getExeDir(); }
 };
 
 #ifndef CREATE_ASSET_PATH
