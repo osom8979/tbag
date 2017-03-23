@@ -17,8 +17,9 @@ if (USE_TBAG_DEBUGGING_LOGGER)
 endif ()
 
 ## External.
-tbag_modules__apply_ext_z()
+tbag_modules__apply_ext_z    ()
 tbag_modules__apply_ext_ressl()
+tbag_modules__apply_ext_capnp()
 
 ## Dependencies.
 tbag_modules__apply_dep_boost_include ()

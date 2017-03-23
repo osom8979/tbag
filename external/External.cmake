@@ -62,6 +62,46 @@ else ()
             LOG_INSTALL   1)
 endif ()
 
+###############
+## CAPNPROTO ##
+###############
+
+set (capnp_EXT_SOURCE_DIR    "${CMAKE_SOURCE_DIR}/external/capnproto/c++")
+set (capnp_EXT_INCLUDE_DIR   "${EXT_INSTALL_DIR}/include")
+set (capnp_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (capnp_kj_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (capnp_EXT_LIBRARIES     "${capnp_EXT_STATIC_LIB}")
+
+if (EXISTS "${capnp_EXT_STATIC_LIB}" AND EXISTS "${capnp_kj_EXT_STATIC_LIB}")
+    add_custom_target (capnp)
+    message (STATUS "Skip external/capnp (Exists: ${capnp_EXT_STATIC_LIB})")
+    message (STATUS "Skip external/kj (Exists: ${capnp_kj_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/capnp")
+    ExternalProject_Add (capnp
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Download step--------------
+            #URL "https://codeload.github.com/sandstorm-io/capnproto/tar.gz/v0.5.3"
+            #URL_MD5 "909bd13ad6b8bc840ac78ab8f5bcb0a4"
+            #--Configure step-------------
+            SOURCE_DIR "${capnp_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DBUILD_TESTING=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output logging-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+endif ()
+
+
 ##############
 ## LIBRESSL ##
 ##############

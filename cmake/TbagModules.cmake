@@ -314,6 +314,13 @@ macro (tbag_modules__apply_ext_ressl)
     tbag_modules__add_whole_archive (${ressl_tls_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_capnp)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES capnp)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${capnp_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${capnp_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${capnp_kj_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------
