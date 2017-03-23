@@ -25,7 +25,7 @@ set (ressl_tls_EXT_STATIC_LIB_NAME z)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set (ressl_tls_EXT_STATIC_LIB_NAME zlibstatic)
-    if (CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
+    if (NOT CMAKE_BUILD_TYPE_LOWER STREQUAL "release")
         set (ressl_tls_EXT_DEBUG_NAME d)
     endif ()
 endif ()
@@ -91,8 +91,8 @@ else ()
             SOURCE_DIR "${ressl_EXT_SOURCE_DIR}"
             CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
                        "-DBUILD_SHARED_LIBS=OFF"
-                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
-                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       #"-DCMAKE_C_FLAGS=${EXT_C_FLAGS}" ## [WARNING] Don't use this flag.
+                       #"-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}" ## [WARNING] Don't use this flag.
                        "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
             #--Output logging-------------
