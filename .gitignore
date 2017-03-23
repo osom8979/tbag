@@ -195,6 +195,7 @@ fabric.properties
 #####################
 ### Visual Studio ###
 *.sym
+*.def
 
 ###############
 ### Doxygen ###

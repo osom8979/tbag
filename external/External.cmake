@@ -5,6 +5,8 @@ include (ExternalProject)
 set (EXT_PREFIX_DIR  "${CMAKE_BINARY_DIR}/external/prefix")
 set (EXT_INSTALL_DIR "${CMAKE_BINARY_DIR}/external/local")
 
+string (TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set (EXT_CXX_FLAGS)
     set (EXT_C_FLAGS)
@@ -18,9 +20,19 @@ endif ()
 ## ZLIB ##
 ##########
 
+set (ressl_tls_EXT_DEBUG_NAME)
+set (ressl_tls_EXT_STATIC_LIB_NAME z)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set (ressl_tls_EXT_STATIC_LIB_NAME zlibstatic)
+    if (CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
+        set (ressl_tls_EXT_DEBUG_NAME d)
+    endif ()
+endif ()
+
 set (zlib_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/zlib")
 set (zlib_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
-set (zlib_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}z${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (zlib_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${ressl_tls_EXT_STATIC_LIB_NAME}${ressl_tls_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (zlib_EXT_LIBRARIES   "${zlib_EXT_STATIC_LIB}")
 
 if (EXISTS "${zlib_EXT_STATIC_LIB}")
