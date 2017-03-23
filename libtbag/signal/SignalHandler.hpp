@@ -17,8 +17,8 @@
 #include <libtbag/predef.hpp>
 
 #include <csignal>
+#include <climits>
 #include <string>
-#include <limits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,20 +41,11 @@ namespace signal {
 TBAG_SIGNAL_MAP(_TBAG_XX)
 #undef _TBAG_XX
 
-#if defined(max)
-TBAG_PUSH_MACRO(max);
-#undef max
-#define __RESTORE_MAX__
-#endif
-
-TBAG_CONSTEXPR int const SIGNAL_STD_TERMINATE = std::numeric_limits<int>::min(); // C++ terminate signal.
-TBAG_CONSTEXPR int const FIRST_ORDER = std::numeric_limits<int>::max();
-TBAG_CONSTEXPR int const LAST_ORDER  = std::numeric_limits<int>::min();
-
-#if defined(__RESTORE_MAX__)
-TBAG_POP_MACRO(max);
-#undef __RESTORE_MAX__
-#endif
+// Don't use the std::numeric_limits class.
+// Avoid collisions of min & max symbol in MSVC.
+TBAG_CONSTEXPR int const SIGNAL_STD_TERMINATE = INT_MAX; // C++ terminate signal.
+TBAG_CONSTEXPR int const FIRST_ORDER = INT_MAX;
+TBAG_CONSTEXPR int const LAST_ORDER  = INT_MIN;
 
 /**
  * Signal handler interface.

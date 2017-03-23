@@ -9,7 +9,7 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
 
-#include <limits>
+#include <climits>
 
 using namespace libtbag;
 using namespace libtbag::filesystem;
@@ -24,8 +24,10 @@ TEST(FsProhibitedTest, Default)
 
 TEST(FsProhibitedTest, UnixProhibited)
 {
-    char min = std::numeric_limits<char>::min();
-    char max = std::numeric_limits<char>::max();
+    // Don't use the std::numeric_limits class.
+    // Avoid collisions of min & max symbol in MSVC.
+    char const min = CHAR_MIN;
+    char const max = CHAR_MAX;
 
     ASSERT_FALSE(unix::isProhibitedChar(min));
     ASSERT_FALSE(unix::isProhibitedChar(max));
@@ -41,8 +43,10 @@ TEST(FsProhibitedTest, UnixProhibited)
 
 TEST(FsProhibitedTest, UnixPathSeparator)
 {
-    char min = std::numeric_limits<char>::min();
-    char max = std::numeric_limits<char>::max();
+    // Don't use the std::numeric_limits class.
+    // Avoid collisions of min & max symbol in MSVC.
+    char const min = CHAR_MIN;
+    char const max = CHAR_MAX;
 
     ASSERT_FALSE(unix::isPathSeparatorChar(min));
     ASSERT_FALSE(unix::isPathSeparatorChar(max));
