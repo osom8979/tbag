@@ -2,6 +2,24 @@
 
 include (ExternalProject)
 
+#/// Check exists libraries.
+#///
+#/// @param __result  [out] value name of output result.
+#/// @param __libs    [in]  Libraries.
+function (exists_libraries __result __libs)
+    set (${__result} ON)
+
+    foreach (__lib_cursor ${__libs})
+        if (NOT EXISTS "${__lib_cursor}")
+            set (${__result} OFF)
+            break ()
+        endif ()
+    endforeach ()
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
 set (EXT_PREFIX_DIR  "${CMAKE_BINARY_DIR}/external/prefix")
 set (EXT_INSTALL_DIR "${CMAKE_BINARY_DIR}/external/local")
 
@@ -15,27 +33,27 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL
     set (EXT_C_FLAGS   "-w -fPIC")
 endif ()
 
-
 ##########
 ## ZLIB ##
 ##########
 
-set (ressl_tls_EXT_DEBUG_NAME)
-set (ressl_tls_EXT_STATIC_LIB_NAME z)
+set (zlib_EXT_DEBUG_NAME)
+set (zlib_EXT_STATIC_LIB_NAME z)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set (ressl_tls_EXT_STATIC_LIB_NAME zlibstatic)
+    set (zlib_EXT_STATIC_LIB_NAME zlibstatic)
     if (NOT CMAKE_BUILD_TYPE_LOWER STREQUAL "release")
-        set (ressl_tls_EXT_DEBUG_NAME d)
+        set (zlib_EXT_DEBUG_NAME d)
     endif ()
 endif ()
 
 set (zlib_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/zlib")
 set (zlib_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
-set (zlib_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${ressl_tls_EXT_STATIC_LIB_NAME}${ressl_tls_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (zlib_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlib_EXT_STATIC_LIB_NAME}${zlib_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (zlib_EXT_LIBRARIES   "${zlib_EXT_STATIC_LIB}")
+exists_libraries (zlib_EXT_EXISTS "${zlib_EXT_LIBRARIES}")
 
-if (EXISTS "${zlib_EXT_STATIC_LIB}")
+if (zlib_EXT_EXISTS)
     add_custom_target (zlib)
     message (STATUS "Skip external/zlib (Exists: ${zlib_EXT_STATIC_LIB})")
 else ()
@@ -71,8 +89,9 @@ set (capnp_EXT_INCLUDE_DIR   "${EXT_INSTALL_DIR}/include")
 set (capnp_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (capnp_kj_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (capnp_EXT_LIBRARIES     "${capnp_EXT_STATIC_LIB}")
+exists_libraries (capnp_EXT_EXISTS "${capnp_EXT_LIBRARIES}")
 
-if (EXISTS "${capnp_EXT_STATIC_LIB}" AND EXISTS "${capnp_kj_EXT_STATIC_LIB}")
+if (capnp_EXT_EXISTS)
     add_custom_target (capnp)
     message (STATUS "Skip external/capnp (Exists: ${capnp_EXT_STATIC_LIB})")
     message (STATUS "Skip external/kj (Exists: ${capnp_kj_EXT_STATIC_LIB})")
@@ -102,7 +121,6 @@ else ()
             LOG_INSTALL   1)
 endif ()
 
-
 ##############
 ## LIBRESSL ##
 ##############
@@ -115,12 +133,13 @@ set (ressl_tls_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_
 set (ressl_EXT_LIBRARIES         "${ressl_crypto_EXT_STATIC_LIB}"
                                  "${ressl_ssl_EXT_STATIC_LIB}"
                                  "${ressl_tls_EXT_STATIC_LIB}")
+exists_libraries (ressl_EXT_EXISTS "${ressl_EXT_LIBRARIES}")
 
-if (EXISTS "${ressl_crypto_EXT_STATIC_LIB}" AND EXISTS "${ressl_ssl_EXT_STATIC_LIB}" AND EXISTS "${ressl_EXT_LIBRARIES}")
+if (ressl_EXT_EXISTS)
     add_custom_target (ressl)
     message (STATUS "Skip external/ressl_crypto (Exists: ${ressl_crypto_EXT_STATIC_LIB})")
     message (STATUS "Skip external/ressl_ssl (Exists: ${ressl_ssl_EXT_STATIC_LIB})")
-    message (STATUS "Skip external/ressl_tls (Exists: ${ressl_EXT_LIBRARIES})")
+    message (STATUS "Skip external/ressl_tls (Exists: ${ressl_tls_EXT_STATIC_LIB})")
 else ()
     message (STATUS "Add external/ressl")
     ExternalProject_Add (ressl
