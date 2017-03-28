@@ -202,6 +202,11 @@ fabric.properties
 .html
 .latex
 
+###################
+### Cap'n Proto ###
+*.capnp.c++
+*.capnp.h
+
 ###############
 ### PROJECT ###
 /build

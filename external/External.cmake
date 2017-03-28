@@ -86,6 +86,7 @@ endif ()
 
 set (capnp_EXT_SOURCE_DIR    "${CMAKE_SOURCE_DIR}/external/capnproto/c++")
 set (capnp_EXT_INCLUDE_DIR   "${EXT_INSTALL_DIR}/include")
+set (capnp_COMPILER_BIN      "${EXT_INSTALL_DIR}/bin/capnp")
 set (capnp_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (capnp_kj_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (capnp_EXT_LIBRARIES     "${capnp_EXT_STATIC_LIB}")

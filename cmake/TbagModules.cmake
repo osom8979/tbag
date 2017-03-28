@@ -321,6 +321,16 @@ macro (tbag_modules__apply_ext_capnp)
     tbag_modules__add_whole_archive (${capnp_kj_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__build_ext_capnp_cpp __target __capnps)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES capnp ${__target})
+
+    set (Capnp_SKIP_FOUND ON)
+    find_package (Capnp QUIET)
+    unset (Capnp_SKIP_FOUND)
+
+    capnp_generate_target2 (${__target} ${capnp_COMPILER_BIN} c++ ${__capnps})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------
