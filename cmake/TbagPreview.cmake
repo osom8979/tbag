@@ -58,6 +58,9 @@ function (tbag_preview)
     tbag_preview__print_os ()
     tbag_preview__print ("")
 
+    tbag_preview__print_variable (CMAKE_GENERATOR)
+    tbag_preview__print ("")
+
     tbag_preview__print_variable (CMAKE_HOST_SYSTEM_NAME)
     tbag_preview__print_variable (CMAKE_HOST_SYSTEM_VERSION)
     tbag_preview__print_variable (CMAKE_HOST_SYSTEM_PROCESSOR)
