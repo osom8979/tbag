@@ -33,6 +33,13 @@ endmacro ()
 ## Project settings.
 ## -----------------
 
+macro (tbag_modules__apply_simple)
+    tbag_modules__apply_default ()
+    tbag_modules__update_default_objects ()
+    tbag_modules__add_target ()
+    tbag_modules__update_all_properties ()
+endmacro ()
+
 macro (tbag_modules__apply_default)
     #string (TOUPPER "${TBAG_PROJECT_CONST_NAME}" __tbag_project_upper_name)
     #list (APPEND TBAG_PROJECT_DEFINITIONS  ${__tbag_project_upper_name})
@@ -42,6 +49,18 @@ macro (tbag_modules__apply_default)
         list (APPEND TBAG_PROJECT_LDFLAGS "-Wl,-rpath,${THIRD_PREFIX}/lib"
                                           "-Wl,-rpath,${THIRD_PREFIX}/Library/Frameworks")
     endif ()
+endmacro ()
+
+macro (tbag_modules__apply_name __name)
+    set (TBAG_PROJECT_CONST_NAME ${__name})
+endmacro ()
+
+macro (tbag_modules__apply_lib)
+    set (TBAG_PROJECT_CONST_NAME ${TBAG_PROJECT_LIBRARY_PREFIX})
+endmacro ()
+
+macro (tbag_modules__apply_exe)
+    set (TBAG_PROJECT_CONST_NAME ${TBAG_PROJECT_EXECUTABLE_PREFIX})
 endmacro ()
 
 macro (tbag_modules__apply_pch __original_pch)
