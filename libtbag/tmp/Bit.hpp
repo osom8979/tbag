@@ -35,7 +35,7 @@ struct BitFlagImplement<BaseType, true>
 
     static TBAG_CONSTEXPR BaseType max() TBAG_NOEXCEPT
     {
-        return std::numeric_limits<BaseType>::max() ^ (std::numeric_limits<BaseType>::max() >> 1);
+        return std::numeric_limits<BaseType>::max() ^ (BaseType)(std::numeric_limits<BaseType>::max() >> 1);
     }
 };
 
@@ -46,7 +46,7 @@ struct BitFlagImplement<BaseType, false>
 
     static TBAG_CONSTEXPR BaseType max() TBAG_NOEXCEPT
     {
-        return (std::numeric_limits<BaseType>::max() + 1);
+        return (BaseType)(std::numeric_limits<BaseType>::max() + 1);
     }
 };
 
