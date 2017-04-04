@@ -3,11 +3,18 @@
 #/// @author zer0
 #/// @date   2016-06-01
 
+set (TBAG_PREVIEW_FILE "${CMAKE_BINARY_DIR}/Preview.txt" CACHE STRING "Preview file path.")
+option (TBAG_SAVE_PREVIEW_FILE "Save preview file?" TRUE)
+
 #/// Print information.
 #///
 #/// @param ... [in] message arguments.
 function (tbag_preview__print)
-    message ("## " ${ARGN})
+    set (__msg "## " ${ARGN})
+    message (${__msg})
+    if (TBAG_SAVE_PREVIEW_FILE)
+        file (APPEND "${TBAG_PREVIEW_FILE}" ${__msg} "\n")
+    endif ()
 endfunction ()
 
 #/// Print variable.
@@ -15,6 +22,24 @@ endfunction ()
 #/// @param __value [in] value name.
 function (tbag_preview__print_variable __value)
     tbag_preview__print ("${__value}: " ${${__value}})
+endfunction ()
+
+#/// Print variable with list.
+#///
+#/// @param __value [in] value name.
+function (tbag_preview__print_variable_list __value)
+    set (__list_string)
+    set (__list_index 0)
+
+    foreach (__list_cursor ${${__value}})
+        if (__list_index GREATER 0)
+            set (__list_string "${__list_string}, ")
+        endif ()
+        set (__list_string "${__list_string}${__list_cursor}")
+        math (EXPR __list_index "${__list_index} + 1")
+    endforeach ()
+
+    tbag_preview__print ("${__value}: ${__list_string}")
 endfunction ()
 
 #/// Print os information.
@@ -51,6 +76,10 @@ endfunction ()
 
 #/// Preview information.
 function (tbag_preview)
+    if (TBAG_SAVE_PREVIEW_FILE)
+        file (REMOVE "${TBAG_PREVIEW_FILE}")
+    endif ()
+
     message ("")
     tbag_preview__print ("#################### PREVIEW ####################")
     tbag_preview__print ("")
@@ -136,6 +165,18 @@ function (tbag_preview)
     #tbag_preview__print_variable (CMAKE_CXX_FLAGS_MINSIZEREL_INIT)
     #tbag_preview__print_variable (CMAKE_CXX_FLAGS_RELEASE_INIT)
     #tbag_preview__print_variable (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INITT)
+
+    get_property (TBAG_FIND_SUBPROJECT_STATIC_LIBS GLOBAL PROPERTY GLOBAL_TBAG_FIND_SUBPROJECT_STATIC_LIBS)
+    get_property (TBAG_FIND_SUBPROJECT_SHARED_LIBS GLOBAL PROPERTY GLOBAL_TBAG_FIND_SUBPROJECT_SHARED_LIBS)
+    get_property (TBAG_FIND_SUBPROJECT_MODULE_LIBS GLOBAL PROPERTY GLOBAL_TBAG_FIND_SUBPROJECT_MODULE_LIBS)
+    get_property (TBAG_FIND_SUBPROJECT_EXES        GLOBAL PROPERTY GLOBAL_TBAG_FIND_SUBPROJECT_EXES)
+
+    tbag_preview__print_variable_list (TBAG_FIND_SUBPROJECT_STATIC_LIBS)
+    tbag_preview__print_variable_list (TBAG_FIND_SUBPROJECT_SHARED_LIBS)
+    tbag_preview__print_variable_list (TBAG_FIND_SUBPROJECT_MODULE_LIBS)
+    tbag_preview__print_variable_list (TBAG_FIND_SUBPROJECT_EXES)
+
+    tbag_preview__print ("")
 
     if (TBAG_DEBUG_TAG)
         tbag_preview__print ("ENABLE TBAG_DEBUG_TAG: ${TBAG_DEBUG_TAG}")

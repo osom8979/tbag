@@ -16,10 +16,15 @@ set (__headers "libtbag/config.h")
 set (__libs    "tbag")
 
 if (IS_DIRECTORY "$ENV{TBAG_HOME}")
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+        set (__build_type_lower debug)
+    else ()
+        string (TOLOWER ${CMAKE_BUILD_TYPE} __build_type_lower)
+    endif ()
+
     set (Tbag_ROOT_INCLUDE_PATHS "$ENV{TBAG_HOME}")
     set (Tbag_ROOT_LIBRARY_PATHS "$ENV{TBAG_HOME}/build"
-                                 "$ENV{TBAG_HOME}/cmake-build-debug"
-                                 "$ENV{TBAG_HOME}/cmake-build-release")
+                                 "$ENV{TBAG_HOME}/cmake-build-${__build_type_lower}")
 endif ()
 
 include (TbagSimpleFindLibrary)

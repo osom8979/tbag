@@ -172,9 +172,6 @@ endmacro ()
 function (tbag_project__find_and_build __root_dir)
     tbag_project__find (__libs __exes "${__root_dir}")
 
-    message ("** Find library project: ${__libs}")
-    message ("** Find executable project: ${__exes}")
-
     foreach (__project_cursor ${__libs} ${__exes})
         tbag_project__build ("${__root_dir}" "${__project_cursor}")
     endforeach ()
