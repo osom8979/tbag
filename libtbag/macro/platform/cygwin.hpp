@@ -14,7 +14,7 @@
 #endif
 
 #if defined(__CYGWIN__)
-#define __PLATFORM_CYGWIN__
+#define TBAG_PLATFORM_CYGWIN
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_CYGWIN_HPP__

@@ -14,8 +14,8 @@
 #endif
 
 #if defined(__OBJC__)
-# define __LANG_OBJC__
-# define __LANG_OBJC_VERSION__  0
+# define TBAG_LANG_OBJC
+# define TBAG_LANG_OBJC_VERSION  0
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_LANGUAGE_OBJC_HPP__

@@ -16,56 +16,56 @@
 #include <libtbag/macro/platform.hpp>
 #include <libtbag/macro/compiler.hpp>
 
-#ifndef ATTRIBUTE_FORCE_INLINE
-# if defined(__COMP_GNUC_CXX__) && (__COMP_GNUC_VERSION__ >= 30100)
-#  define ATTRIBUTE_FORCE_INLINE __attribute__((always_inline)) inline
-# elif defined(__COMP_MSVC__)
-#  define ATTRIBUTE_FORCE_INLINE __forceinline
+#ifndef TBAG_ATTRIBUTE_FORCE_INLINE
+# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 30100)
+#  define TBAG_ATTRIBUTE_FORCE_INLINE __attribute__((always_inline)) inline
+# elif defined(TBAG_COMP_MSVC)
+#  define TBAG_ATTRIBUTE_FORCE_INLINE __forceinline
 # else
-#  define ATTRIBUTE_FORCE_INLINE inline
+#  define TBAG_ATTRIBUTE_FORCE_INLINE inline
 # endif
 #endif
 
-#ifndef ATTRIBUTE_DEPRECATED
-# if defined(__COMP_GNUC_CXX__) && (__COMP_GNUC_VERSION__ >= 30100)
-#  define ATTRIBUTE_DEPRECATED __attribute__((deprecated))
-# elif defined(__COMP_MSVC__)
-#  define ATTRIBUTE_DEPRECATED __declspec(deprecated)
+#ifndef TBAG_ATTRIBUTE_DEPRECATED
+# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 30100)
+#  define TBAG_ATTRIBUTE_DEPRECATED __attribute__((deprecated))
+# elif defined(TBAG_COMP_MSVC)
+#  define TBAG_ATTRIBUTE_DEPRECATED __declspec(deprecated)
 # else
-#  define ATTRIBUTE_DEPRECATED
+#  define TBAG_ATTRIBUTE_DEPRECATED
 # endif
 #endif
 
-#ifndef ATTRIBUTE_NORETURN
-# if defined(__COMP_GNUC_CXX__) && (__COMP_GNUC_VERSION__ >= 20500)
-#  define ATTRIBUTE_NORETURN __attribute__((noreturn))
+#ifndef TBAG_ATTRIBUTE_NORETURN
+# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 20500)
+#  define TBAG_ATTRIBUTE_NORETURN __attribute__((noreturn))
 # else
-#  define ATTRIBUTE_NORETURN
+#  define TBAG_ATTRIBUTE_NORETURN
 # endif
 #endif
 
-#ifndef ATTRIBUTE_NO_WARNING_DEPRECATED
-# if defined(__COMP_GNUC_CXX__) && (__COMP_GNUC_VERSION__ >= 40600)
-#  define ATTRIBUTE_NO_WARNING_DEPRECATED(code)                     \
+#ifndef TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED
+# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 40600)
+#  define TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED(code)                     \
     _Pragma("GCC diagnostic push")                                  \
     _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
     code;                                                           \
     _Pragma("GCC diagnostic pop")
-# elif defined(__COMP_MSVC__)
-#  define ATTRIBUTE_NO_WARNING_DEPRECATED(code) \
+# elif defined(TBAG_COMP_MSVC)
+#  define TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED(code) \
     __pragma(warning(push))                     \
     __pragma(warning(disable : 4996))           \
     code;                                       \
     __pragma(warning(pop))
 # else
-#  define ATTRIBUTE_NO_WARNING_DEPRECATED(code)
+#  define TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED(code)
 # endif
 #endif
 
 #ifndef TBAG_PUSH_MACRO
-# if defined(__COMP_GNUC_CXX__)
+# if defined(TBAG_COMP_GNUC_CXX)
 #  define TBAG_PUSH_MACRO(name) _Pragma("push_macro(\"" #name "\")")
-# elif defined(__COMP_MSVC__)
+# elif defined(TBAG_COMP_MSVC)
 #  define TBAG_PUSH_MACRO(name) __pragma(push_macro("\"" #name "\""))
 # else
 #  define TBAG_PUSH_MACRO(name)
@@ -73,9 +73,9 @@
 #endif
 
 #ifndef TBAG_POP_MACRO
-# if defined(__COMP_GNUC_CXX__)
+# if defined(TBAG_COMP_GNUC_CXX)
 #  define TBAG_POP_MACRO(name) _Pragma("pop_macro(\"" #name "\")")
-# elif defined(__COMP_MSVC__)
+# elif defined(TBAG_COMP_MSVC)
 #  define TBAG_POP_MACRO(name) __pragma(pop_macro("\"" #name "\""))
 # else
 #  define TBAG_POP_MACRO(name)
@@ -83,22 +83,22 @@
 #endif
 
 #if defined(TBAG_EXPORT_API)
-# if defined(__PLATFORM_WINDOWS__)
+# if defined(TBAG_PLATFORM_WINDOWS)
 #  define TBAG_API __declspec(dllexport)
-# elif defined(__COMP_GNUC__) && (__COMP_GNUC_VERSION__ >= 40000)
+# elif defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 40000)
 #  define TBAG_API __attribute__((visibility("default")))
 # else
 #  define TBAG_API
 # endif
 #else // defined(TBAG_EXPORT_API)
-# if defined(__PLATFORM_WINDOWS__)
+# if defined(TBAG_PLATFORM_WINDOWS)
 #  define TBAG_API __declspec(dllimport)
 # else
 #  define TBAG_API
 # endif
 #endif // defined(TBAG_EXPORT_API)
 
-#if defined(TBAG_EXPORT_API) && defined(__COMP_GNUC__)
+#if defined(TBAG_EXPORT_API) && defined(TBAG_COMP_GNUC)
 # define TBAG_CONSTRUCTOR __attribute__((constructor))
 # define TBAG_DESTRUCTOR  __attribute__((destructor))
 #else // defined(TBAG_EXPORT_API)

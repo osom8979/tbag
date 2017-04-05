@@ -44,7 +44,7 @@ inline TBAG_CONSTEXPR bool isDebugMode() TBAG_NOEXCEPT
 
 inline TBAG_CONSTEXPR bool isWindowsPlatform() TBAG_NOEXCEPT
 {
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
     return true;
 #else
     return false;
@@ -53,7 +53,7 @@ inline TBAG_CONSTEXPR bool isWindowsPlatform() TBAG_NOEXCEPT
 
 inline TBAG_CONSTEXPR bool isUnixLikePlatform() TBAG_NOEXCEPT
 {
-#if defined(__PLATFORM_UNIX_LIKE__)
+#if defined(TBAG_PLATFORM_UNIX_LIKE)
     return true;
 #else
     return false;

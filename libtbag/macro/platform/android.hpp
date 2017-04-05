@@ -14,7 +14,7 @@
 #endif
 
 #if defined(__ANDROID__)
-#define __PLATFORM_ANDROID__
+#define TBAG_PLATFORM_ANDROID
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_ANDROID_HPP__

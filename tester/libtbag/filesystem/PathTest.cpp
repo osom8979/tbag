@@ -114,7 +114,7 @@ TEST(PathTest, SplitNodes_Canonical1)
 
 TEST(PathTest, SplitNodes_Canonical2)
 {
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
     char const * const TEMP = "/TEMP";
 #else
     char const * const TEMP = "C:\\TEMP";

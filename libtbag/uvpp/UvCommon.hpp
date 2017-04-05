@@ -30,7 +30,7 @@ typedef intptr_t ssize_t;
 #include <vector>
 #include <limits>
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 # include <winsock2.h>
 # include <WS2tcpip.h> // sockaddr_in6
 # include <Windows.h>
@@ -48,7 +48,7 @@ TBAG_API void initialize();
 TBAG_API void release();
 
 // Platform-specific definitions for libuv support.
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 using ufile  = int;
 using usock  = SOCKET;
 using ufd    = HANDLE;

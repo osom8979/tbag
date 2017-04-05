@@ -19,14 +19,14 @@
     defined(__TOS_WIN__) || \
     defined(__WIN32__) || defined(__TOS_WIN__) || \
     defined(__WINDOWS__)
-#define __PLATFORM_WINDOWS__
+#define TBAG_PLATFORM_WINDOWS
 #endif
 
 // -------------------------
 // Windows platform version.
 // -------------------------
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 # ifndef WIN32_LEAN_AND_MEAN
 # define WIN32_LEAN_AND_MEAN
 # endif
@@ -48,29 +48,29 @@
 # ifndef _WIN32_IE
 # define _WIN32_IE 0x0700
 # endif
-#endif // defined(__PLATFORM_WINDOWS__)
+#endif // defined(TBAG_PLATFORM_WINDOWS)
 
 // -----------------
 // Windows platform.
 // -----------------
 
 #if defined(__MINGW32__) || defined(__MINGW64__)
-#define __PLATFORM_MINGW__
+#define TBAG_PLATFORM_MINGW
 #endif
 
 #if defined(__PLATFORM_WINDOWS) && \
     (!defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP))
-#define __PLATFORM_WINDOWS_DESKTOP__
+#define TBAG_PLATFORM_WINDOWS_DESKTOP
 #endif
 
 #if defined(__PLATFORM_WINDOWS) && \
     defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
-#define __PLATFORM_WINDOWS_STORE__
+#define TBAG_PLATFORM_WINDOWS_STORE
 #endif
 
 #if defined(__PLATFORM_WINDOWS) && \
     defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP)
-#define __PLATFORM_WINDOWS_PHONE__
+#define TBAG_PLATFORM_WINDOWS_PHONE
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_WINDOWS_HPP__

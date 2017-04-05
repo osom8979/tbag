@@ -10,7 +10,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
-#if !defined(__PLATFORM_WINDOWS__)
+#if !defined(TBAG_PLATFORM_WINDOWS)
 # include <sys/types.h>
 # include <sys/stat.h>
 #endif
@@ -212,7 +212,7 @@ bool removeDirectory(std::string const & path)
 
 bool removeFile(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
     return windows::removeFileWithUtf8(path);
 #else
     return ::remove(path.c_str()) == 0;
@@ -244,7 +244,7 @@ bool rename(std::string const & from, std::string const & to)
 
 int setUserMask(int mode)
 {
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
     return 0;
 #else
     return static_cast<int>(::umask(static_cast<mode_t>(mode)));
@@ -315,7 +315,7 @@ std::size_t getSize(std::string const & path)
 
 uint64_t getPermission(std::string const & path)
 {
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
     return getMode(path) & (FILE_MODE_OWNER_READ | FILE_MODE_OWNER_WRITE);
 #else
     return getMode(path) & (S_IRWXU | S_IRWXG | S_IRWXO);
@@ -324,7 +324,7 @@ uint64_t getPermission(std::string const & path)
 
 uint64_t getFixedPermission(uint64_t mode)
 {
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
     return mode & (FILE_MODE_OWNER_READ | FILE_MODE_OWNER_WRITE);
 #else
     return mode & (S_IRWXU | S_IRWXG | S_IRWXO);

@@ -97,7 +97,7 @@ static void TBAG_DESTRUCTOR __tbag_destructor(void)
     ::libtbag::tearDown();
 }
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 #include <windows.h>
 BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL
                   , _In_ DWORD     fdwReason
@@ -112,7 +112,7 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL
     }
     return (result == true ? TRUE : FALSE);
 }
-#endif // defined(__PLATFORM_WINDOWS__)
+#endif // defined(TBAG_PLATFORM_WINDOWS)
 
 // -----------------------
 // libtbag implementation.

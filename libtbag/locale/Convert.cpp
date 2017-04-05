@@ -16,7 +16,7 @@
 #include <unicode/udat.h>
 #include <unicode/udata.h>
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 # include <Windows.h>
 #else
 # include <libtbag/proxy/windows/Dummy.hpp>
@@ -33,7 +33,7 @@ namespace locale  {
 namespace windows {
 // ----------------
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 static_assert(CP_ACP  == CODE_PAGE_ANSI, "Mismatched CP_ACP constants.");
 static_assert(CP_UTF8 == CODE_PAGE_UTF8, "Mismatched CP_UTF8 constants.");
 #endif

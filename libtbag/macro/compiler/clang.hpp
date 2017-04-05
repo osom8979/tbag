@@ -14,21 +14,21 @@
 #endif
 
 #if defined(__clang__)
-#define __COMP_CLANG__
+#define TBAG_COMP_CLANG
 #endif
 
-#if defined(__COMP_CLANG__)
-#define __COMP_CLANG_VERSION__          \
+#if defined(TBAG_COMP_CLANG)
+#define TBAG_COMP_CLANG_VERSION         \
     ( (__clang_major__      * 10000 )   \
     + (__clang_minor__      * 100   )   \
     + (__clang_patchlevel__ * 1     ) )
 #else
-#define __COMP_CLANG_VERSION__ 0
+#define TBAG_COMP_CLANG_VERSION 0
 #endif
 
 // =============
 // FEATURE OPEN.
-#if defined(__COMP_CLANG__)
+#if defined(TBAG_COMP_CLANG)
 # if __has_feature(cxx_constexpr)
 # define TBAG_HAS_CONSTEXPR
 # endif
@@ -52,7 +52,7 @@
 # if __has_feature(cxx_override_control)
 #  define TBAG_HAS_FINAL
 # endif
-#endif // defined(__COMP_CLANG__)
+#endif // defined(TBAG_COMP_CLANG)
 // FEATURE CLOSE.
 // ==============
 

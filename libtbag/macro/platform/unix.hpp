@@ -15,7 +15,7 @@
 
 #if defined(unix) || defined(__unix) || defined(__unix__) || \
     defined(_XOPEN_SOURCE) || defined(_POSIX_SOURCE)
-#define __PLATFORM_UNIX__
+#define TBAG_PLATFORM_UNIX
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_UNIX_HPP__

@@ -10,7 +10,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 # include <Windows.h>
 # include <Shlwapi.h> // StrCmp, PathFileExists
 # include <Shlobj.h>  // SHGetFolderPath

@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#if !defined(__PLATFORM_WINDOWS__)
+#if !defined(TBAG_PLATFORM_WINDOWS)
 # ifndef far
 # define far
 # endif

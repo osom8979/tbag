@@ -15,12 +15,12 @@
 
 #if (defined(__APPLE__) && defined(__MACH__))
 # if defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
-#  define __PLATFORM_IOS__
+#  define TBAG_PLATFORM_IOS
 # else
-#  define __PLATFORM_MACOS__
+#  define TBAG_PLATFORM_MACOS
 # endif
 #elif defined(macintosh) || defined(Macintosh)
-# define __PLATFORM_MACOS__
+# define TBAG_PLATFORM_MACOS
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_APPLE_HPP__

@@ -20,9 +20,9 @@
 #include <libtbag/macro/platform/unix.hpp>
 #include <libtbag/macro/platform/windows.hpp>
 
-#ifndef __PLATFORM_UNIX_LIKE__
-# if !defined(__PLATFORM_WINDOWS__)
-#  define __PLATFORM_UNIX_LIKE__
+#ifndef TBAG_PLATFORM_UNIX_LIKE
+# if !defined(TBAG_PLATFORM_WINDOWS)
+#  define TBAG_PLATFORM_UNIX_LIKE
 # endif
 #endif
 

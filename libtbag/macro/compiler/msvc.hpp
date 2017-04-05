@@ -14,7 +14,7 @@
 #endif
 
 #if defined(_MSC_VER)
-#define __COMP_MSVC__
+#define TBAG_COMP_MSVC
 #endif
 
 //  1.0            _MSC_VER ==  800
@@ -36,14 +36,14 @@
 // 14.0 (2015)     _MSC_VER == 1900 && _MSC_FULL_VER == ?????????
 
 #if defined(_MSC_VER)
-# define __COMP_MSVC_VERSION__ _MSC_VER
+# define TBAG_COMP_MSVC_VERSION _MSC_VER
 #else
-# define __COMP_MSVC_VERSION__ 0
+# define TBAG_COMP_MSVC_VERSION 0
 #endif
 
 // =============
 // FEATURE OPEN.
-#if defined(__COMP_MSVC__)
+#if defined(TBAG_COMP_MSVC)
 // C++11 features supported by VC++ 12 (aka 2013).
 # if (_MSC_FULL_VER >= 180020827)
 #  define TBAG_HAS_DEFAULTED_FUNCTIONS
@@ -83,10 +83,10 @@
 #  define TBAG_HAS_DIGIT_SEPARATORS
 # endif
 
-# if (__COMP_MSVC_VERSION__ >= 1900)
+# if (TBAG_COMP_MSVC_VERSION >= 1900)
 #  define TBAG_HAS_CONSTEXPR // Unknown _MSC_FULL_VER
 # endif
-#endif // defined(__COMP_MSVC__)
+#endif // defined(TBAG_COMP_MSVC)
 // FEATURE CLOSE.
 // ==============
 

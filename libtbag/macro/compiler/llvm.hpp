@@ -14,7 +14,7 @@
 #endif
 
 #if defined(__llvm__)
-#define __COMP_LLVM__
+#define TBAG_COMP_LLVM
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_COMPILER_LLVM_HPP__

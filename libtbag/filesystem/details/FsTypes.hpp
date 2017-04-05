@@ -25,14 +25,14 @@
 #include <sys/stat.h>
 
 #ifndef _WIN_OR_POSIX
-# if defined(__PLATFORM_WINDOWS__)
+# if defined(TBAG_PLATFORM_WINDOWS)
 #  define _WIN_OR_POSIX(v) _##v
 # else
 #  define _WIN_OR_POSIX(v) v
 # endif
 #endif // _WIN_OR_POSIX
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 # define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::windows
 #else
 # define TBAG_FS_PLATFORM_NAMESPACE ::libtbag::filesystem::details::unix
@@ -49,7 +49,7 @@ std::size_t const MAX_PATH_LENGTH_OF_WINDOWS     = 32767;
 std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API =   260; // MAX_PATH define in windows.
 std::size_t const MAX_PATH_LENGTH_OF_POSIX_API   =  1024; // PATH_MAX define in posix.
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_WINDOWS_API;
 #else
 std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_POSIX_API;
@@ -62,7 +62,7 @@ char const PATH_SEPARATOR_OF_WINDOWS = '\\';
 char const PATH_SEPARATOR_OF_POSIX   = '/';
 char const PATH_SEPARATOR_OF_GENERIC = PATH_SEPARATOR_OF_POSIX;
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
 #else
 char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
@@ -71,7 +71,7 @@ char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
 char const PATH_SPLITTER_OF_WINDOWS = ';';
 char const PATH_SPLITTER_OF_POSIX   = ':';
 
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 char const PATH_SPLITTER = PATH_SPLITTER_OF_WINDOWS;
 #else
 char const PATH_SPLITTER = PATH_SPLITTER_OF_POSIX;
@@ -95,7 +95,7 @@ static char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
 static char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
 
 // No temp environment variables defined.
-#if defined(__PLATFORM_ANDROID__)
+#if defined(TBAG_PLATFORM_ANDROID)
 static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
 #else
 static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
@@ -281,7 +281,7 @@ private:
  */
 
 // Read, write, execute/search by owner.
-#if defined(__PLATFORM_WINDOWS__)
+#if defined(TBAG_PLATFORM_WINDOWS)
 static uint32_t const FILE_MODE_OWNER_READ  = _S_IREAD;  ///< [XSI] R for owner.
 static uint32_t const FILE_MODE_OWNER_WRITE = _S_IWRITE; ///< [XSI] W for owner.
 #else

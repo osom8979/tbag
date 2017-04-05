@@ -14,7 +14,7 @@
 #endif
 
 #if defined(linux) || defined(__linux__) || defined(__linux)
-#define __PLATFORM_LINUX__
+#define TBAG_PLATFORM_LINUX
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_PLATFORM_LINUX_HPP__

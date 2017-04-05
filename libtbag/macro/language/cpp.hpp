@@ -14,21 +14,21 @@
 #endif
 
 #if defined(__cplusplus)
-# define __LANG_STDCPP__
+# define TBAG_LANG_STDCPP
 # if (__cplusplus > 0)
-#  define __LANG_STDCPP_VERSION__  __cplusplus
+#  define TBAG_LANG_STDCPP_VERSION  __cplusplus
 # else
-#  define __LANG_STDCPP_VERSION__  0
+#  define TBAG_LANG_STDCPP_VERSION  0
 # endif
 #endif
 
-#if defined(__LANG_STDCPP_VERSION__)
-# if   (__LANG_STDCPP_VERSION__ == 201402L)
+#if defined(TBAG_LANG_STDCPP_VERSION)
+# if   (TBAG_LANG_STDCPP_VERSION == 201402L)
 #  define __LANG_STDCPP_14__
-# elif (__LANG_STDCPP_VERSION__ == 201103L)
+# elif (TBAG_LANG_STDCPP_VERSION == 201103L)
 #  define __LANG_STDCPP_11__
 # endif
-#endif // defined(__LANG_STDCPP_VERSION__)
+#endif // defined(TBAG_LANG_STDCPP_VERSION)
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_LANGUAGE_CPP_HPP__
 

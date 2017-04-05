@@ -14,19 +14,19 @@
 #endif
 
 #if defined(__GNUC__)
-#define __COMP_GNUC__
+#define TBAG_COMP_GNUC
 # if defined(__cplusplus)
-#  define __COMP_GNUC_CXX__
+#  define TBAG_COMP_GNUC_CXX
 # endif
 #endif
 
-#if defined(__COMP_GNUC__)
-#define __COMP_GNUC_VERSION__           \
+#if defined(TBAG_COMP_GNUC)
+#define TBAG_COMP_GNUC_VERSION          \
     ( (__GNUC__            * 10000 )    \
     + (__GNUC_MINOR__      * 100   )    \
     + (__GNUC_PATCHLEVEL__ * 1     ) )
 #else
-#define __COMP_GNUC_VERSION__ 0
+#define TBAG_COMP_GNUC_VERSION 0
 #endif
 
 /**
@@ -42,8 +42,8 @@
  *  @endcode
  */
 #if defined(CHECK_GNUC_CXX_REGEX)
-# if defined(__COMP_GNUC_CXX__) && !defined(__clang__)
-#  if (__COMP_GNUC_VERSION__ < 40900)
+# if defined(TBAG_COMP_GNUC_CXX) && !defined(__clang__)
+#  if (TBAG_COMP_GNUC_VERSION < 40900)
 #   error "Not supported regex."
 #  endif
 # endif
@@ -51,9 +51,9 @@
 
 // =============
 // FEATURE OPEN.
-#if defined(__COMP_GNUC_CXX__)
+#if defined(TBAG_COMP_GNUC_CXX)
 // C++0x features in 4.4.n and later
-# if (__COMP_GNUC_VERSION__ >= 40400)
+# if (TBAG_COMP_GNUC_VERSION >= 40400)
 #  define TBAG_HAS_AUTO_DECLARATIONS
 #  define TBAG_HAS_AUTO_MULTIDECLARATIONS
 #  define TBAG_HAS_CHAR16_T
@@ -63,7 +63,7 @@
 # endif
 
 // C++0x features in 4.6.n and later
-# if (__COMP_GNUC_VERSION__ >= 40600)
+# if (TBAG_COMP_GNUC_VERSION >= 40600)
 #  define TBAG_HAS_CONSTEXPR
 #  define TBAG_HAS_NOEXCEPT
 #  define TBAG_HAS_NULLPTR
@@ -72,13 +72,13 @@
 # endif
 
 // C++0x features in 4.7.n and later
-#if (__COMP_GNUC_VERSION__ >= 40700)
+#if (TBAG_COMP_GNUC_VERSION >= 40700)
 #  define TBAG_HAS_FINAL
 #  define TBAG_HAS_TEMPLATE_ALIASES
 #  define TBAG_HAS_USER_DEFINED_LITERALS
 #  define TBAG_HAS_FIXED_LENGTH_VARIADIC_TEMPLATE_EXPANSION_PACKS
 #endif
-#endif // defined(__COMP_GNUC_CXX__)
+#endif // defined(TBAG_COMP_GNUC_CXX)
 // FEATURE CLOSE.
 // ==============
 

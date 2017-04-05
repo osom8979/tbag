@@ -14,11 +14,11 @@
 #endif
 
 #if defined(__STDC__)
-# define __LANG_STDC__
+# define TBAG_LANG_STDC
 # if (__STDC_VERSION__ > 0)
-#  define __LANG_STDC_VERSION__  __STDC_VERSION__
+#  define TBAG_LANG_STDC_VERSION  __STDC_VERSION__
 # else
-#  define __LANG_STDC_VERSION__  0
+#  define TBAG_LANG_STDC_VERSION  0
 # endif
 #endif
 
