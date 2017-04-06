@@ -369,6 +369,71 @@ function (tbag_config__generate_c_header __output_path)
         "\n")
 endfunction ()
 
+#/// Write Export API C header file.
+#///
+#/// @param __name        [in] Project name.
+#/// @param __prefix      [in] Prefix of APIs.
+#/// @param __output_path [in] Output header file path.
+#/// @param __more_body   [in] More c header code.
+function (tbag_config__generate_export_api_c_header __name __prefix __output_path __more_body)
+    set (__prefix_export_api "${__prefix}_EXPORT_API")
+    set (__prefix_api        "${__prefix}_API")
+
+    file (WRITE ${__output_path} ""
+            "\n#ifndef __INCLUDE_${__name}__${__prefix}_EXPORT_API_H__"
+            "\n#define __INCLUDE_${__name}__${__prefix}_EXPORT_API_H__"
+            "\n"
+            "\n#if defined(__GNUC__)"
+            "\n#define __${__prefix}_GNUC_FULLVERSION \\"
+            "\n    ( (__GNUC__            * 10000) \\"
+            "\n    + (__GNUC_MINOR__      *   100) \\"
+            "\n    + (__GNUC_PATCHLEVEL__ *     1) )"
+            "\n#else"
+            "\n#define __${__prefix}_GNUC_FULLVERSION 0"
+            "\n#endif"
+            "\n"
+            "\n#if defined(WIN32) || defined(_WIN32) || \\"
+            "\n    defined(WIN64) || defined(_WIN64) || \\"
+            "\n    defined(WINCE) || defined(_WINCE) || \\"
+            "\n    defined(__TOS_WIN__) || \\"
+            "\n    defined(__WIN32__) || defined(__TOS_WIN__) || \\"
+            "\n    defined(__WINDOWS__)"
+            "\n#define __${__prefix}_PLATFORM_WINDOWS"
+            "\n#endif"
+            "\n"
+            "\n#if defined(${__prefix_export_api})"
+            "\n# if defined(__${__prefix}_PLATFORM_WINDOWS)"
+            "\n#  define ${__prefix_api} __declspec(dllexport)"
+            "\n# elif __${__prefix}_GNUC_FULLVERSION >= 40000"
+            "\n#  define ${__prefix_api} __attribute__((visibility(\"default\")))"
+            "\n# else"
+            "\n#  define ${__prefix_api}"
+            "\n# endif"
+            "\n#else // defined(${__prefix_export_api})"
+            "\n# if defined(__${__prefix}_PLATFORM_WINDOWS)"
+            "\n#  define ${__prefix_api} __declspec(dllimport)"
+            "\n# else"
+            "\n#  define ${__prefix_api}"
+            "\n# endif"
+            "\n#endif // defined(${__prefix_export_api})"
+            "\n"
+            "\n#if defined(__cplusplus)"
+            "\nextern \"C\" {"
+            "\n#endif"
+            "\n"
+            "\n${__more_body}"
+            "\n"
+            "\n#if defined(__cplusplus)"
+            "\n} /* extern \"C\" */"
+            "\n#endif"
+            "\n"
+            "\n#endif /* __INCLUDE_${__name}__${__prefix}_EXPORT_API_H__ */"
+            "\n")
+
+    message (STATUS "[${__name}/${__prefix}] Export API macro: ${__prefix_export_api}")
+    message (STATUS "[${__name}/${__prefix}] API macro: ${__prefix_api}")
+endfunction ()
+
 macro (tbag_config__default_generate_c_header)
     tbag_utils__exists_define_or_die (MAIN_NAME)
     tbag_config__generate_c_header ("${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config.h")
