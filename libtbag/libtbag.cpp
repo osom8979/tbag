@@ -55,7 +55,7 @@ public:
     {
         Guard guard(_mutex);
         if (_init == false) {
-            __tbag_debug("It has already been relased.");
+            __tbag_debug("It has already been release.");
             return false;
         }
 
