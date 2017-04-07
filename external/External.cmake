@@ -20,10 +20,17 @@ function (exists_libraries __result __libs)
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 
-set (EXT_PREFIX_DIR  "${CMAKE_BINARY_DIR}/external/prefix")
-set (EXT_INSTALL_DIR "${CMAKE_BINARY_DIR}/external/local")
-
 string (TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
+
+if (CMAKE_BUILD_TYPE_LOWER STREQUAL "")
+    set (_EXT_BUILD_TYPE Debug)
+else ()
+    set (_EXT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+endif ()
+
+set (EXT_BUILD_TYPE  "${_EXT_BUILD_TYPE}"                   CACHE STRING "External build type.")
+set (EXT_PREFIX_DIR  "${CMAKE_BINARY_DIR}/external/prefix"  CACHE STRING "External build prefix.")
+set (EXT_INSTALL_DIR "${CMAKE_BINARY_DIR}/external/local"   CACHE STRING "External install prefix.")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set (EXT_CXX_FLAGS)
@@ -69,7 +76,7 @@ else ()
                        "-DBUILD_SHARED_LIBS=OFF"
                        "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
-                       "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
             #--Output logging-------------
             LOG_DOWNLOAD  1
@@ -111,7 +118,7 @@ else ()
                        "-DCAPNP_LITE=ON"
                        "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
-                       "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
             #--Output logging-------------
             LOG_DOWNLOAD  1
@@ -154,7 +161,7 @@ else ()
                        "-DBUILD_SHARED_LIBS=OFF"
                        #"-DCMAKE_C_FLAGS=${EXT_C_FLAGS}" ## [WARNING] Don't use this flag.
                        #"-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}" ## [WARNING] Don't use this flag.
-                       "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
             #--Output logging-------------
             LOG_DOWNLOAD  1
