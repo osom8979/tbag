@@ -143,3 +143,10 @@ tbBOOL tbRelease()
     return libtbag::LibtbagInitializer::release() ? AB_TRUE : AB_FALSE;
 }
 
+int tbPotMain(int argc, char ** argv, char ** envs)
+{
+    tbInitialize();
+    tbRelease();
+    return EXIT_SUCCESS;
+}
+

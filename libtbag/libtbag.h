@@ -48,6 +48,8 @@ TBAG_API int tbGetPatchVersion();
 TBAG_API tbBOOL tbInitialize(tbInitParam * param = NULL);
 TBAG_API tbBOOL tbRelease();
 
+TBAG_API int tbPotMain(int argc, char ** argv, char ** envs = NULL);
+
 #if defined(__cplusplus)
 } /* extern "C" */
 #endif
