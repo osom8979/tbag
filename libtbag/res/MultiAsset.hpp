@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/res/DynamicAsset.hpp>
+#include <libtbag/res/Asset.hpp>
 
 #include <string>
 #include <map>
@@ -82,7 +83,10 @@ public:
 
 public:
     bool add(String const & key, DynamicAsset const & asset);
+
+public:
     DynamicAsset & at(String const & key);
+    DynamicAsset const & at(String const & key) const;
 
 public:
     /** Obtain the list of key. */
@@ -90,29 +94,12 @@ public:
 
 public:
     /** Initialize all assets. */
-    bool init();
+    bool initAll();
 
 public:
     static MultiAsset create(PathVector const & paths, StringVector const & layouts);
+    static StringVector getDefaultLayout();
 };
-
-TBAG_CONSTEXPR char const * const DEFAULT_ASSET_LAYOUT[] = {
-        "assets",
-        "db"    ,
-        "dom"   ,
-        "config",
-        "image" ,
-        "log"   ,
-        "map"   ,
-        "plugin",
-        "save"  ,
-        "script",
-        "sprite",
-        "string",
-        "temp"  ,
-};
-TBAG_CONSTEXPR std::size_t const DEFAULT_ASSET_LAYOUT_SIZE =
-        sizeof(DEFAULT_ASSET_LAYOUT) / sizeof(DEFAULT_ASSET_LAYOUT[0]);
 
 } // namespace res
 

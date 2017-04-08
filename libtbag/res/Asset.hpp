@@ -57,7 +57,7 @@ public:
     TBAG_CONSTEXPR Asset() { /* EMPTY. */ }
     Asset(Asset const & obj) { /* EMPTY. */ }
     Asset(Asset && obj) { /* EMPTY. */ }
-    ~Asset() { /* EMPTY. */ }
+    virtual ~Asset() { /* EMPTY. */ }
     // @formatter:on
 
 public:
@@ -79,11 +79,33 @@ public:
 public:
     /** Obtain HOME directory path. */
     inline static Path getHomeDirPath()
-    { return Path::getHomeDir(); }
+    {
+        return Path::getHomeDir();
+    }
 
     /** Obtain executable file directory path. */
     inline static Path getExeDirPath()
-    { return Path::getExeDir(); }
+    {
+        return Path::getExeDir();
+    }
+
+public:
+    virtual String getGlobalName() const
+    {
+        return String(LIBTBAG_TITLE_STRING);
+    }
+
+    Path getGlobalDirPath() const
+    {
+#if defined(TBAG_PLATFORM_WINDOWS)
+        Path const PARENT("C:\\Program Files");
+#elif defined(TBAG_PLATFORM_MACOS)
+        Path const PARENT("/var");
+#else
+        Path const PARENT("/var");
+#endif
+        return PARENT / getGlobalName();
+    }
 };
 
 #ifndef CREATE_ASSET_PATH
@@ -99,7 +121,7 @@ public:                                             \
     }                                               \
     static bool remove_##name() {                   \
         using namespace ::libtbag::filesystem;      \
-        return Path(get_##name()).remove();         \
+        return Path(get_##name()).removeAll();      \
     }                                               \
     static bool exists_##name() {                   \
         using namespace ::libtbag::filesystem;      \

@@ -15,6 +15,26 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace res {
 
+TBAG_CONSTEXPR static char const * const DEFAULT_ASSET_LAYOUT[] = {
+        ".",
+        "assets",
+        "db"    ,
+        "dom"   ,
+        "config",
+        "image" ,
+        "log"   ,
+        "map"   ,
+        "plugin",
+        "save"  ,
+        "script",
+        "sprite",
+        "string",
+        "temp"  ,
+};
+
+TBAG_CONSTEXPR static std::size_t const DEFAULT_ASSET_LAYOUT_SIZE =
+        sizeof(DEFAULT_ASSET_LAYOUT) / sizeof(DEFAULT_ASSET_LAYOUT[0]);
+
 MultiAsset::MultiAsset()
 {
     // EMPTY.
@@ -62,13 +82,9 @@ MultiAsset::DynamicAsset & MultiAsset::at(String const & name)
     return _assets.at(name);
 }
 
-bool MultiAsset::init()
+MultiAsset::DynamicAsset const & MultiAsset::at(String const & name) const
 {
-    bool all_success = true;
-    for (auto & asset : _assets) {
-        all_success &= asset.second.init();
-    }
-    return all_success;
+    return _assets.at(name);
 }
 
 MultiAsset::StringVector MultiAsset::getKeys() const
@@ -80,6 +96,15 @@ MultiAsset::StringVector MultiAsset::getKeys() const
     return result;
 }
 
+bool MultiAsset::initAll()
+{
+    bool all_success = true;
+    for (auto & asset : _assets) {
+        all_success &= asset.second.init();
+    }
+    return all_success;
+}
+
 MultiAsset MultiAsset::create(PathVector const & paths, StringVector const & layouts)
 {
     MultiAsset result;
@@ -89,6 +114,15 @@ MultiAsset MultiAsset::create(PathVector const & paths, StringVector const & lay
             asset.add(layout, (path / layout));
         }
         result.add(path.getName(), asset);
+    }
+    return result;
+}
+
+MultiAsset::StringVector MultiAsset::getDefaultLayout()
+{
+    StringVector result;
+    for (int i = 0; i < DEFAULT_ASSET_LAYOUT_SIZE; ++i) {
+        result.push_back(std::string(DEFAULT_ASSET_LAYOUT[i]));
     }
     return result;
 }

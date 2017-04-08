@@ -32,7 +32,7 @@ TEST(MultiAssetTest, Default)
     namespace fs = ::libtbag::filesystem;
 
     MultiAsset asset = MultiAsset::create({path1, path2}, {layout1, layout2});
-    ASSERT_TRUE(asset.init());
+    ASSERT_TRUE(asset.initAll());
 
     auto keys = asset.getKeys();
     ASSERT_EQ(key1, keys.at(0));
