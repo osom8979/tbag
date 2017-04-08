@@ -7,8 +7,6 @@
 
 #include <libtbag/res/MultiAsset.hpp>
 #include <libtbag/string/StringUtils.hpp>
-
-#include <sstream>
 #include <utility>
 
 // -------------------
@@ -16,23 +14,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace res {
-
-MultiAsset::Value const * const MultiAsset::LAYOUT_NAMES[] = {
-          CHAR_OR_WIDECHAR(MultiAsset::Value, "data"  )
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "db"    )
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "dom"   )
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "config")
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "image" )
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "log"   )
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "map"   )
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "plugin")
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "save"  )
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "script")
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "sprite")
-        , CHAR_OR_WIDECHAR(MultiAsset::Value, "temp"  )};
-
-std::size_t const MultiAsset::LAYOUT_NAMES_SIZE =
-        sizeof(MultiAsset::LAYOUT_NAMES) / sizeof(MultiAsset::LAYOUT_NAMES[0]);
 
 MultiAsset::MultiAsset()
 {
@@ -66,7 +47,7 @@ MultiAsset & MultiAsset::operator =(MultiAsset const & obj)
 MultiAsset & MultiAsset::operator =(MultiAsset && obj)
 {
     if (this != &obj) {
-        _assets.swap(obj._assets);
+        _assets = std::move(obj._assets);
     }
     return *this;
 }
@@ -76,33 +57,21 @@ bool MultiAsset::add(String const & name, DynamicAsset const & asset)
     return _assets.insert(AssetMapPair(name, asset)).second;
 }
 
-bool MultiAsset::add(String && name, DynamicAsset && asset)
-{
-    return _assets.insert(std::make_pair(std::move(name), std::move(asset))).second;
-}
-
-bool MultiAsset::add(String const & name, PathVector const & paths)
-{
-    std::size_t const SIZE = paths.size();
-    std::basic_stringstream<Value> ss;
-
-    DynamicAsset asset;
-
-    for (std::size_t index = 0; index < SIZE; ++index) {
-        ss.clear();
-        ss << index;
-        asset.addPath(ss.str(), paths[index]);
-    }
-
-    return add(String(name), std::move(asset));
-}
-
-MultiAsset::DynamicAsset MultiAsset::getAsset(String const & name) const
+MultiAsset::DynamicAsset MultiAsset::at(String const & name)
 {
     return _assets.at(name);
 }
 
-MultiAsset::StringVector MultiAsset::getNames() const
+bool MultiAsset::init()
+{
+    bool all_success = true;
+    for (auto & asset : _assets) {
+        all_success &= asset.second.init();
+    }
+    return all_success;
+}
+
+MultiAsset::StringVector MultiAsset::getKeys() const
 {
     StringVector result;
     for (auto & asset : _assets) {
@@ -111,44 +80,17 @@ MultiAsset::StringVector MultiAsset::getNames() const
     return result;
 }
 
-MultiAsset::Path MultiAsset::findWriteableDir(String const & name) const
-{
-    auto find_itr = _assets.find(name);
-    if (find_itr != _assets.end()) {
-        return find_itr->second.findWriteableDir();
-    }
-    return Path();
-}
-
-MultiAsset::Path MultiAsset::findFile(String const & name, String const & filename) const
-{
-    auto find_itr = _assets.find(name);
-    if (find_itr != _assets.end()) {
-        return find_itr->second.findFile(filename);
-    }
-    return Path();
-}
-
 MultiAsset MultiAsset::create(PathVector const & paths, StringVector const & layouts)
 {
-    MultiAsset asset;
-    for (auto & layout : layouts) {
-        PathVector sub;
-        for (auto & path : paths) {
-            sub.push_back(path / layout);
+    MultiAsset result;
+    for (auto & path : paths) {
+        DynamicAsset asset;
+        for (auto & layout : layouts) {
+            asset.set(layout, (path / layout));
         }
-        asset.add(layout, sub);
+        result.add(path.getName(), asset);
     }
-    return asset;
-}
-
-MultiAsset MultiAsset::createDefault()
-{
-    StringVector layouts;
-    for (int i = 0; i < LAYOUT_NAMES_SIZE; ++i) {
-        layouts.push_back(LAYOUT_NAMES[i]);
-    }
-    return create({Path::getExeDir(), Path::getHomeDir()}, layouts);
+    return result;
 }
 
 } // namespace res

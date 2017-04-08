@@ -17,65 +17,34 @@ TEST(MultiAssetTest, Default)
 {
     TBAG_TESTER_TEMP_DIR(true, true);
 
-    using Path   = MultiAsset::Path;
-    using String = MultiAsset::String;
+    using Path    = MultiAsset::Path;
+    using String  = MultiAsset::String;
+    using DyAsset = MultiAsset::DynamicAsset;
 
-    auto path1 = TBAG_TESTER_TEMP_DIR_GET() / std::string("test1");
-    auto path2 = TBAG_TESTER_TEMP_DIR_GET() / std::string("test2");
+    std::string key1 = "KEY1";
+    std::string key2 = "KEY2";
+
+    std::string layout1 = "LAYOUT1";
+    std::string layout2 = "LAYOUT2";
+
+    auto path1 = TBAG_TESTER_TEMP_DIR_GET() / key1;
+    auto path2 = TBAG_TESTER_TEMP_DIR_GET() / key2;
     namespace fs = ::libtbag::filesystem;
 
-    String layout1 = "layout1";
-    String layout2 = "layout2";
-
     MultiAsset asset = MultiAsset::create({path1, path2}, {layout1, layout2});
+    ASSERT_TRUE(asset.init());
 
-    auto names = asset.getNames();
-    ASSERT_EQ(layout1, names.at(0));
-    ASSERT_EQ(layout2, names.at(1));
+    auto keys = asset.getKeys();
+    ASSERT_EQ(key1, keys.at(0));
+    ASSERT_EQ(key2, keys.at(1));
 
-    auto asset1 = asset.getAsset(layout1);
-    auto asset2 = asset.getAsset(layout2);
+    auto asset1 = asset.at(key1);
+    auto asset2 = asset.at(key2);
 
     auto asset1_keys = asset1.getKeys();
     auto asset2_keys = asset2.getKeys();
 
     ASSERT_TRUE(asset1.init());
     ASSERT_TRUE(asset2.init());
-
-    ASSERT_EQ(2U, asset1_keys.size());
-    ASSERT_EQ(2U, asset2_keys.size());
-
-    auto asset1_name1 = asset1.getPath(asset1_keys.at(0)).getName();
-    auto asset1_name2 = asset1.getPath(asset1_keys.at(1)).getName();
-    auto asset2_name1 = asset2.getPath(asset2_keys.at(0)).getName();
-    auto asset2_name2 = asset2.getPath(asset2_keys.at(1)).getName();
-
-    ASSERT_EQ(layout1, asset1_name1);
-    ASSERT_EQ(layout1, asset1_name2);
-    ASSERT_EQ(layout2, asset2_name1);
-    ASSERT_EQ(layout2, asset2_name2);
-
-    ASSERT_TRUE(asset1.getPath(asset1_keys.at(0)).isDirectory());
-    ASSERT_TRUE(asset1.getPath(asset1_keys.at(1)).isDirectory());
-
-    auto test_path = (path1 / layout2);
-    auto find_path = asset.findWriteableDir(layout2);
-    ASSERT_TRUE(test_path == find_path);
-
-    String filename = "file";
-    auto file_path = path1 / layout2 / filename;
-
-    std::string const content = "__blah_blah_blah__";
-    fs::File file;
-    ASSERT_TRUE(file.open(file_path.getString()));
-    int write_size = file.write2(content.c_str(), content.size(), 0);
-    file.close();
-    ASSERT_EQ(content.size(), static_cast<std::size_t>(write_size));
-
-    auto find_file = asset.findFile(layout2, filename);
-    ASSERT_TRUE(file_path == find_file);
-
-    ASSERT_TRUE(path1.removeAll());
-    ASSERT_TRUE(path2.removeAll());
 }
 

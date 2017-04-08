@@ -65,31 +65,36 @@ public:
     DynamicAsset & operator =(DynamicAsset && obj);
 
 public:
+    // @formatter:off
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.empty()))
     { return _paths.empty(); }
     inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.size()))
     { return _paths.size(); }
     inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.clear()))
     { _paths.clear(); }
+    // @formatter:on
 
 public:
     bool init();
 
 public:
-    bool addPath(String const & key, Path const & path);
-    Path getPath(String const & key) const;
+    bool set(String const & key, Path const & path);
+    Path get(String const & key) const;
+
+public:
+    /** Obtain the list of key. */
     StringVector getKeys() const;
+
+    /** Obtain the list of path. */
     PathVector getPaths() const;
 
 public:
     bool exists(String const & key) const;
-    bool create(String const & key) const;
-    bool remove(String const & key) const;
-    PathVector scan(String const & key) const;
+    bool createDir(String const & key) const;
+    bool removeAll(String const & key) const;
 
 public:
-    Path findWriteableDir() const;
-    Path findFile(String const & filename) const;
+    PathVector scan(String const & key) const;
 };
 
 } // namespace res

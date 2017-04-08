@@ -33,29 +33,7 @@ namespace res {
  * @date   2016-10-14
  *
  * @remarks
- *  - Directory structure:
- *  @code
- *   + path1
- *     - layout1
- *     - layout2
- *     - layout3
- *   + path2
- *     - layout1
- *     - layout2
- *     - layout3
- *   + path3
- *     - layout1
- *     - layout2
- *     - layout3
- *  @endcode
- *  - Data structure:
- *  @code
- *  MultiAsset{
- *     layout1: DynamicAsset{0:path1/layout1, 1:path2/layout1, 2:path3/layout1}
- *    ,layout2: DynamicAsset{0:path1/layout2, 1:path2/layout2, 2:path3/layout2}
- *    ,layout3: DynamicAsset{0:path1/layout3, 1:path2/layout3, 2:path3/layout3}
- *  }
- *  @endcode
+ *  Map of @c DynamicAsset classes.
  */
 class TBAG_API MultiAsset
 {
@@ -79,9 +57,6 @@ public:
     static_assert(std::is_same<Value, typename String::value_type>::value
             , "Value must be the same type as String::value_type");
 
-    static Value const * const LAYOUT_NAMES[];
-    static std::size_t const LAYOUT_NAMES_SIZE;
-
 private:
     AssetMap _assets;
 
@@ -96,31 +71,48 @@ public:
     MultiAsset & operator =(MultiAsset && obj);
 
 public:
+    // @formatter:off
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.empty()))
     { return _assets.empty(); }
     inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.size()))
     { return _assets.size(); }
     inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.clear()))
     { _assets.clear(); }
+    // @formatter:on
 
 public:
-    bool add(String const & name, DynamicAsset const & asset);
-    bool add(String && name, DynamicAsset && asset);
-    bool add(String const & name, PathVector const & paths);
+    bool add(String const & key, DynamicAsset const & asset);
+    DynamicAsset at(String const & key);
 
 public:
-    DynamicAsset getAsset(String const & name) const;
-    StringVector getNames() const;
+    /** Obtain the list of key. */
+    StringVector getKeys() const;
 
 public:
-    Path findWriteableDir(String const & name) const;
-    Path findFile(String const & name, String const & filename) const;
+    /** Initialize all assets. */
+    bool init();
 
 public:
     static MultiAsset create(PathVector const & paths, StringVector const & layouts);
-    static MultiAsset createDefault();
 };
 
+TBAG_CONSTEXPR char const * const DEFAULT_ASSET_LAYOUT[] = {
+        "assets",
+        "db"    ,
+        "dom"   ,
+        "config",
+        "image" ,
+        "log"   ,
+        "map"   ,
+        "plugin",
+        "save"  ,
+        "script",
+        "sprite",
+        "string",
+        "temp"  ,
+};
+TBAG_CONSTEXPR std::size_t const DEFAULT_ASSET_LAYOUT_SIZE =
+        sizeof(DEFAULT_ASSET_LAYOUT) / sizeof(DEFAULT_ASSET_LAYOUT[0]);
 
 } // namespace res
 

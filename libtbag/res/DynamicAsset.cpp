@@ -55,17 +55,21 @@ bool DynamicAsset::init()
 {
     bool all_success = true;
     for (auto & path : _paths) {
-        all_success &= path.second.createDir();
+        if (path.second.exists() == false) {
+            all_success &= path.second.createDir();
+        } else if (path.second.isDirectory() == false) {
+            all_success = false;
+        }
     }
     return all_success;
 }
 
-bool DynamicAsset::addPath(String const & key, Path const & path)
+bool DynamicAsset::set(String const & key, Path const & path)
 {
     return _paths.insert(PathMap::value_type(key, path)).second;
 }
 
-DynamicAsset::Path DynamicAsset::getPath(String const & key) const
+DynamicAsset::Path DynamicAsset::get(String const & key) const
 {
     return _paths.at(key);
 }
@@ -90,43 +94,22 @@ DynamicAsset::PathVector DynamicAsset::getPaths() const
 
 bool DynamicAsset::exists(String const & key) const
 {
-    return _paths.at(key).isDirectory();
+    return _paths.at(key).exists();
 }
 
-bool DynamicAsset::create(String const & key) const
+bool DynamicAsset::createDir(String const & key) const
 {
     return _paths.at(key).createDir();
 }
 
-bool DynamicAsset::remove(String const & key) const
+bool DynamicAsset::removeAll(String const & key) const
 {
-    return _paths.at(key).remove();
+    return _paths.at(key).removeAll();
 }
 
 DynamicAsset::PathVector DynamicAsset::scan(String const & key) const
 {
     return _paths.at(key).scanDir();
-}
-
-DynamicAsset::Path DynamicAsset::findWriteableDir() const
-{
-    for (auto & path : _paths) {
-        if (path.second.isDirectory() && path.second.isWritable()) {
-            return path.second;
-        }
-    }
-    return Path();
-}
-
-DynamicAsset::Path DynamicAsset::findFile(String const & filename) const
-{
-    for (auto & path : _paths) {
-        auto file_path = path.second / filename;
-        if (file_path.exists()) {
-            return file_path;
-        }
-    }
-    return Path();
 }
 
 } // namespace res
