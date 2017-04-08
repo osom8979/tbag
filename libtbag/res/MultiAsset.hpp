@@ -82,7 +82,7 @@ public:
 
 public:
     bool add(String const & key, DynamicAsset const & asset);
-    DynamicAsset at(String const & key);
+    DynamicAsset & at(String const & key);
 
 public:
     /** Obtain the list of key. */

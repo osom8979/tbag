@@ -57,7 +57,7 @@ bool MultiAsset::add(String const & name, DynamicAsset const & asset)
     return _assets.insert(AssetMapPair(name, asset)).second;
 }
 
-MultiAsset::DynamicAsset MultiAsset::at(String const & name)
+MultiAsset::DynamicAsset & MultiAsset::at(String const & name)
 {
     return _assets.at(name);
 }
