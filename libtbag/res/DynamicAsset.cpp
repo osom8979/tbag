@@ -64,7 +64,7 @@ bool DynamicAsset::init()
     return all_success;
 }
 
-bool DynamicAsset::set(String const & key, Path const & path)
+bool DynamicAsset::add(String const & key, Path const & path)
 {
     return _paths.insert(PathMap::value_type(key, path)).second;
 }

@@ -13,8 +13,8 @@ using namespace libtbag::math;
 
 TEST(AverageTest, Default)
 {
-    float average = static_cast<float>(10 + 20 + 30 + 40 + 50) / 5.0;
-    float prev_average = static_cast<float>(10 + 20 + 30 + 40) / 4.0;
-    ASSERT_EQ(average, averageStep(prev_average, 50.0f, 5));
+    double average = static_cast<double>(10 + 20 + 30 + 40 + 50) / 5.0;
+    double prev_average = static_cast<double>(10 + 20 + 30 + 40) / 4.0;
+    ASSERT_EQ(average, averageStep(prev_average, 50.0, 5));
 }
 

@@ -60,9 +60,9 @@ namespace math {
 template <typename Base, typename Result = Base, typename Integer = int>
 Result averageStep(Base prev_average, Base current, Integer n)
 {
-    Result alpha = (static_cast<Result>(n) - static_cast<Result>(1)) / static_cast<Result>(n);
-    return (alpha * static_cast<Result>(prev_average)) +
-            ((static_cast<Result>(1) - alpha) * static_cast<Result>(current));
+    Result const ALPHA = (static_cast<Result>(n) - static_cast<Result>(1)) / static_cast<Result>(n);
+    return (ALPHA * static_cast<Result>(prev_average)) +
+            ((static_cast<Result>(1) - ALPHA) * static_cast<Result>(current));
 }
 
 } // namespace math

@@ -78,7 +78,7 @@ public:
     bool init();
 
 public:
-    bool set(String const & key, Path const & path);
+    bool add(String const & key, Path const & path);
     Path get(String const & key) const;
 
 public:

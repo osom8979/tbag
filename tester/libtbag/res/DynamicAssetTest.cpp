@@ -21,7 +21,7 @@ TEST(DynamicAssetTest, Default)
     DynamicAsset asset;
     Path path = TBAG_TESTER_TEMP_DIR_GET() / "dynamic_asset";
 
-    ASSERT_TRUE(asset.set(KEY, path));
+    ASSERT_TRUE(asset.add(KEY, path));
     ASSERT_TRUE(asset.init());
 
     ASSERT_TRUE(asset.get(KEY).isDirectory());

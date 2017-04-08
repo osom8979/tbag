@@ -86,7 +86,7 @@ MultiAsset MultiAsset::create(PathVector const & paths, StringVector const & lay
     for (auto & path : paths) {
         DynamicAsset asset;
         for (auto & layout : layouts) {
-            asset.set(layout, (path / layout));
+            asset.add(layout, (path / layout));
         }
         result.add(path.getName(), asset);
     }
