@@ -430,8 +430,8 @@ function (tbag_config__generate_export_api_c_header __name __prefix __output_pat
             "\n#endif /* __INCLUDE_${__name}__${__prefix}_EXPORT_API_H__ */"
             "\n")
 
-    message (STATUS "[${__name}/${__prefix}] Export API macro: ${__prefix_export_api}")
-    message (STATUS "[${__name}/${__prefix}] API macro: ${__prefix_api}")
+    #message (STATUS "[${__name}/${__prefix}] Export API macro: ${__prefix_export_api}")
+    #message (STATUS "[${__name}/${__prefix}] API macro: ${__prefix_api}")
 endfunction ()
 
 macro (tbag_config__default_generate_c_header)

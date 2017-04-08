@@ -54,18 +54,18 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     endif ()
 endif ()
 
-set (zlib_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/zlib")
-set (zlib_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
-set (zlib_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlib_EXT_STATIC_LIB_NAME}${zlib_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (zlib_EXT_LIBRARIES   "${zlib_EXT_STATIC_LIB}")
+set (zlib_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/zlib")
+set (zlib_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (zlib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlib_EXT_STATIC_LIB_NAME}${zlib_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (zlib_EXT_LIBRARIES    "${zlib_EXT_STATIC_LIB}")
+set (zlib_EXT_DEPENDENCIES  ${zlib_EXT_LIBRARIES})
 exists_libraries (zlib_EXT_EXISTS "${zlib_EXT_LIBRARIES}")
 
 if (zlib_EXT_EXISTS)
-    add_custom_target (zlib)
     message (STATUS "Skip external/zlib (Exists: ${zlib_EXT_STATIC_LIB})")
 else ()
     message (STATUS "Add external/zlib")
-    ExternalProject_Add (zlib
+    ExternalProject_Add (zlib_ext
             PREFIX "${EXT_PREFIX_DIR}"
             #--Download step--------------
             #URL "http://www.zlib.net/zlib-1.2.11.tar.gz"
@@ -85,7 +85,10 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
+    list (APPEND zlib_EXT_DEPENDENCIES zlib_ext)
 endif ()
+
+add_custom_target (zlib DEPENDS ${zlib_EXT_DEPENDENCIES})
 
 ###############
 ## CAPNPROTO ##
@@ -97,15 +100,15 @@ set (capnp_COMPILER_BIN      "${EXT_INSTALL_DIR}/bin/capnp")
 set (capnp_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (capnp_kj_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (capnp_EXT_LIBRARIES     "${capnp_EXT_STATIC_LIB}")
+set (capnp_EXT_DEPENDENCIES   ${capnp_EXT_LIBRARIES})
 exists_libraries (capnp_EXT_EXISTS "${capnp_EXT_LIBRARIES}")
 
 if (capnp_EXT_EXISTS)
-    add_custom_target (capnp)
     message (STATUS "Skip external/capnp (Exists: ${capnp_EXT_STATIC_LIB})")
     message (STATUS "Skip external/kj (Exists: ${capnp_kj_EXT_STATIC_LIB})")
 else ()
     message (STATUS "Add external/capnp")
-    ExternalProject_Add (capnp
+    ExternalProject_Add (capnp_ext
             PREFIX "${EXT_PREFIX_DIR}"
             #--Download step--------------
             #URL "https://codeload.github.com/sandstorm-io/capnproto/tar.gz/v0.5.3"
@@ -127,7 +130,10 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
+    list (APPEND capnp_EXT_DEPENDENCIES capnp_ext)
 endif ()
+
+add_custom_target (capnp DEPENDS ${capnp_EXT_DEPENDENCIES})
 
 ##############
 ## LIBRESSL ##
@@ -141,16 +147,16 @@ set (ressl_tls_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_
 set (ressl_EXT_LIBRARIES         "${ressl_crypto_EXT_STATIC_LIB}"
                                  "${ressl_ssl_EXT_STATIC_LIB}"
                                  "${ressl_tls_EXT_STATIC_LIB}")
+set (ressl_EXT_DEPENDENCIES       ${ressl_EXT_LIBRARIES})
 exists_libraries (ressl_EXT_EXISTS "${ressl_EXT_LIBRARIES}")
 
 if (ressl_EXT_EXISTS)
-    add_custom_target (ressl)
     message (STATUS "Skip external/ressl_crypto (Exists: ${ressl_crypto_EXT_STATIC_LIB})")
     message (STATUS "Skip external/ressl_ssl (Exists: ${ressl_ssl_EXT_STATIC_LIB})")
     message (STATUS "Skip external/ressl_tls (Exists: ${ressl_tls_EXT_STATIC_LIB})")
 else ()
     message (STATUS "Add external/ressl")
-    ExternalProject_Add (ressl
+    ExternalProject_Add (ressl_ext
             PREFIX "${EXT_PREFIX_DIR}"
             #--Download step--------------
             #URL "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.5.1.tar.gz"
@@ -170,5 +176,8 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
+    list (APPEND ressl_EXT_DEPENDENCIES ressl_ext)
 endif ()
+
+add_custom_target (ressl DEPENDS ${ressl_EXT_DEPENDENCIES})
 
