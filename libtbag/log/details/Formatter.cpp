@@ -59,11 +59,6 @@ std::string Formatter::getDefaultPrefix(Severity const & severity) const
     return libtbag::log::details::getDefaultPrefix() + libtbag::log::details::getDefaultSeverityString(severity);
 }
 
-std::string Formatter::getDefaultPrefix(LogLevel level) const
-{
-    return getDefaultPrefix(Severity(level));
-}
-
 } // namespace details
 } // namespace log
 

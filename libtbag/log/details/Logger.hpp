@@ -56,14 +56,13 @@ public:
 
 public:
     void setSeverity(Severity const & severity);
-    void setLogLevel(LogLevel level);
 
 public:
     void log(MsgPacket const & msg);
 
 public:
     template <typename ... Args>
-    void logf(LogLevel level, std::string const & format, Args && ... args)
+    void logf(Severity level, std::string const & format, Args && ... args)
     {
         this->log(SinkType::makeMessage(level
                 , _formatter.getDefaultPrefix(level) + _formatter.format(format, std::forward<Args>(args) ...)));

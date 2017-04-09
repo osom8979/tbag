@@ -100,20 +100,15 @@ Logger * getDefaultLogger()
     return getLogger(TBAG_DEFAULT_LOGGER_NAME);
 }
 
-void setLevel(std::string const & name, LogLevel level)
+void setLevel(std::string const & name, Severity level)
 {
     Logger * logger = getLogger(name);
     if (logger != nullptr) {
-        logger->setLogLevel(level);
+        logger->setSeverity(level);
     }
 }
 
-void setLevel(std::string const & name, int level)
-{
-    setLevel(name, static_cast<LogLevel>(level));
-}
-
-void setDefaultLevel(LogLevel level)
+void setDefaultLevel(Severity level)
 {
     setLevel(TBAG_DEFAULT_LOGGER_NAME, level);
 }

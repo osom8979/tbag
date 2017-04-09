@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-Logger::Logger(SinkType * sink) : _sink(sink), _severity(LogLevel::LEVEL_INFO)
+Logger::Logger(SinkType * sink) : _sink(sink), _severity(INFORMATIONAL_SEVERITY)
 {
     // EMPTY.
 }
@@ -33,11 +33,6 @@ Logger::~Logger()
 void Logger::setSeverity(Severity const & severity)
 {
     _severity = severity;
-}
-
-void Logger::setLogLevel(LogLevel level)
-{
-    _severity = level;
 }
 
 void Logger::log(MsgPacket const & msg)

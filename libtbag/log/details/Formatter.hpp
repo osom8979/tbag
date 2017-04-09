@@ -31,7 +31,6 @@ namespace details {
 
 // Forward declaration.
 class Severity;
-enum class LogLevel;
 
 TBAG_API std::string getMillisecFormat(std::chrono::system_clock::time_point const & time_point);
 TBAG_API std::string getDefaultPrefix();
@@ -59,7 +58,6 @@ public:
 
 public:
     std::string getDefaultPrefix(Severity const & severity) const;
-    std::string getDefaultPrefix(LogLevel level) const;
 
 public:
     template <typename ... Args>

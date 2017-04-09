@@ -47,27 +47,29 @@ public:
 public:
     virtual void write(details::MsgPacket const & msg) override
     {
-        std::string message;
+        using namespace ::libtbag::log::details;
 
-        // Don't use 'using namespace details;'
-        // 'LogLevel' ambiguous symbol (MSVC 2013 error)
-        // Fix the 'details::LogLevel'
-        switch (msg.getSeverity().level) {
-        case static_cast<int>(details::LogLevel::LEVEL_EMERGENCY):
+        std::string message;
+        Severity level = msg.getSeverity();
+
+        if (level <= EMERGENCY_SEVERITY) {
             message = tces::DISPLAY_ATTRIBUTE_BG_RED;
             message += tces::DISPLAY_ATTRIBUTE_FG_CYAN;
-            break;
-
-        case static_cast<int>(details::LogLevel::LEVEL_ALERT   ): message = tces::DISPLAY_ATTRIBUTE_FG_RED;    break;
-        case static_cast<int>(details::LogLevel::LEVEL_CRITICAL): message = tces::DISPLAY_ATTRIBUTE_FG_RED;    break;
-        case static_cast<int>(details::LogLevel::LEVEL_ERROR   ): message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW; break;
-        case static_cast<int>(details::LogLevel::LEVEL_WARNING ): message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW; break;
-        case static_cast<int>(details::LogLevel::LEVEL_NOTICE  ): message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;  break;
-        case static_cast<int>(details::LogLevel::LEVEL_INFO    ): message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;  break;
-        case static_cast<int>(details::LogLevel::LEVEL_DEBUG   ): message = tces::DISPLAY_ATTRIBUTE_FG_BLUE;   break;
-        case static_cast<int>(details::LogLevel::LEVEL_OFF     ): default: break;
+        } else if (level <= ALERT_SEVERITY) {
+            message = tces::DISPLAY_ATTRIBUTE_FG_RED;
+        } else if (level <= CRITICAL_SEVERITY) {
+            message = tces::DISPLAY_ATTRIBUTE_FG_RED;
+        } else if (level <= ERROR_SEVERITY) {
+            message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
+        } else if (level <= WARNING_SEVERITY) {
+            message = tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
+        } else if (level <= NOTICE_SEVERITY) {
+            message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;
+        } else if (level <= INFORMATIONAL_SEVERITY) {
+            message = tces::DISPLAY_ATTRIBUTE_FG_GREEN;
+        } else if (level <= DEBUG_SEVERITY) {
+            message = tces::DISPLAY_ATTRIBUTE_FG_BLUE;
         }
-
         message += msg.getString() + tces::DISPLAY_ATTRIBUTE_RESET;
 
         Parent::write(details::MsgPacket(msg.getSeverity(), message));

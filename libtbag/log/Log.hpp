@@ -34,7 +34,17 @@ char const * const TBAG_DEBUGGING_LOGGER_NAME = "__tbag_debugging_logger__";
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
 
 using Logger   = ::libtbag::log::details::Logger;
-using LogLevel = ::libtbag::log::details::LogLevel;
+using Severity = ::libtbag::log::details::Severity;
+
+Severity const       OFF_LEVEL = ::libtbag::log::details::OFF_SEVERITY;
+Severity const EMERGENCY_LEVEL = ::libtbag::log::details::EMERGENCY_SEVERITY;
+Severity const     ALERT_LEVEL = ::libtbag::log::details::ALERT_SEVERITY;
+Severity const  CRITICAL_LEVEL = ::libtbag::log::details::CRITICAL_SEVERITY;
+Severity const     ERROR_LEVEL = ::libtbag::log::details::ERROR_SEVERITY;
+Severity const   WARNING_LEVEL = ::libtbag::log::details::WARNING_SEVERITY;
+Severity const    NOTICE_LEVEL = ::libtbag::log::details::NOTICE_SEVERITY;
+Severity const      INFO_LEVEL = ::libtbag::log::details::INFORMATIONAL_SEVERITY;
+Severity const     DEBUG_LEVEL = ::libtbag::log::details::DEBUG_SEVERITY;
 
 TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
 TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
@@ -50,12 +60,11 @@ TBAG_API void removeDefaultLogger();
 TBAG_API Logger * getLogger(std::string const & name);
 TBAG_API Logger * getDefaultLogger();
 
-TBAG_API void setLevel(std::string const & name, LogLevel level);
-TBAG_API void setLevel(std::string const & name, int level);
-TBAG_API void setDefaultLevel(LogLevel level);
+TBAG_API void setLevel(std::string const & name, Severity level);
+TBAG_API void setDefaultLevel(Severity level);
 
 template <typename ... Args>
-inline void logging(Logger * logger, LogLevel level, std::string const & format, Args && ... args)
+inline void logging(Logger * logger, Severity level, std::string const & format, Args && ... args)
 {
     if (logger) {
         logger->logf(level, format, std::forward<Args>(args) ...);
@@ -64,21 +73,29 @@ inline void logging(Logger * logger, LogLevel level, std::string const & format,
 
 // @formatter:off
 template <typename ... Args>
-inline void emergency(Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_EMERGENCY, format, std::forward<Args>(args) ...); }
+inline void emergency(Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, EMERGENCY_LEVEL, format, std::forward<Args>(args) ...); }
 template <typename ... Args>
-inline void alert    (Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_ALERT    , format, std::forward<Args>(args) ...); }
+inline void alert    (Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, ALERT_LEVEL, format, std::forward<Args>(args) ...); }
 template <typename ... Args>
-inline void critical (Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_CRITICAL , format, std::forward<Args>(args) ...); }
+inline void critical (Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, CRITICAL_LEVEL, format, std::forward<Args>(args) ...); }
 template <typename ... Args>
-inline void error    (Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_ERROR    , format, std::forward<Args>(args) ...); }
+inline void error    (Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, ERROR_LEVEL, format, std::forward<Args>(args) ...); }
 template <typename ... Args>
-inline void warning  (Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_WARNING  , format, std::forward<Args>(args) ...); }
+inline void warning  (Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, WARNING_LEVEL, format, std::forward<Args>(args) ...); }
 template <typename ... Args>
-inline void notice   (Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_NOTICE   , format, std::forward<Args>(args) ...); }
+inline void notice   (Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, NOTICE_LEVEL, format, std::forward<Args>(args) ...); }
 template <typename ... Args>
-inline void info     (Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_INFO     , format, std::forward<Args>(args) ...); }
+inline void info     (Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, INFO_LEVEL, format, std::forward<Args>(args) ...); }
 template <typename ... Args>
-inline void debug    (Logger * logger, std::string const & format, Args && ... args) { logging(logger, LogLevel::LEVEL_DEBUG    , format, std::forward<Args>(args) ...); }
+inline void debug    (Logger * logger, std::string const & format, Args && ... args)
+{ logging(logger, DEBUG_LEVEL, format, std::forward<Args>(args) ...); }
 // @formatter:on
 
 // @formatter:off
@@ -112,14 +129,14 @@ NAMESPACE_LIBTBAG_CLOSE
 # define tLog(name, level, ...)  ::libtbag::log::logging(::libtbag::log::getLogger(name), level, __VA_ARGS__)
 #endif
 
-#define tLogM(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_EMERGENCY, __VA_ARGS__)
-#define tLogA(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_ALERT    , __VA_ARGS__)
-#define tLogC(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_CRITICAL , __VA_ARGS__)
-#define tLogE(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_ERROR    , __VA_ARGS__)
-#define tLogW(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_WARNING  , __VA_ARGS__)
-#define tLogN(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_NOTICE   , __VA_ARGS__)
-#define tLogI(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_INFO     , __VA_ARGS__)
-#define tLogD(name, ...)  tLog(name, ::libtbag::log::LogLevel::LEVEL_DEBUG    , __VA_ARGS__)
+#define tLogM(name, ...)  tLog(name, ::libtbag::log::EMERGENCY_LEVEL, __VA_ARGS__)
+#define tLogA(name, ...)  tLog(name, ::libtbag::log::ALERT_LEVEL    , __VA_ARGS__)
+#define tLogC(name, ...)  tLog(name, ::libtbag::log::CRITICAL_LEVEL , __VA_ARGS__)
+#define tLogE(name, ...)  tLog(name, ::libtbag::log::ERROR_LEVEL    , __VA_ARGS__)
+#define tLogW(name, ...)  tLog(name, ::libtbag::log::WARNING_LEVEL  , __VA_ARGS__)
+#define tLogN(name, ...)  tLog(name, ::libtbag::log::NOTICE_LEVEL   , __VA_ARGS__)
+#define tLogI(name, ...)  tLog(name, ::libtbag::log::INFO_LEVEL     , __VA_ARGS__)
+#define tLogD(name, ...)  tLog(name, ::libtbag::log::DEBUG_LEVEL    , __VA_ARGS__)
 
 #define tDLogM(...)  tLogM(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
 #define tDLogA(...)  tLogA(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)

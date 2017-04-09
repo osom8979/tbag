@@ -47,23 +47,20 @@ private:
     std::string _message;
 
 public:
-    MsgPacket() : _severity(LogLevel::LEVEL_INFO), _message()
+    MsgPacket() : _severity(INFORMATIONAL_SEVERITY), _message()
     { /* EMPTY. */ }
 
     virtual ~MsgPacket()
     { /* EMPTY. */ }
 
 public:
-    MsgPacket(LogLevel level) : _severity(level), _message()
-    { /* EMPTY. */ }
-
     MsgPacket(Severity const & severity) : _severity(severity), _message()
     { /* EMPTY. */ }
 
-    MsgPacket(std::string const & msg) : _severity(LogLevel::LEVEL_INFO), _message(msg)
+    MsgPacket(std::string const & msg) : _severity(INFORMATIONAL_SEVERITY), _message(msg)
     { /* EMPTY. */ }
 
-    MsgPacket(char const * msg) : _severity(LogLevel::LEVEL_INFO), _message(msg)
+    MsgPacket(char const * msg) : _severity(INFORMATIONAL_SEVERITY), _message(msg)
     { /* EMPTY. */ }
 
     MsgPacket(Severity const & severity, std::string const & msg) : _severity(severity), _message(msg)
@@ -146,23 +143,22 @@ public:
     { _message.clear();         }
 
 public:
-#define __LEFT_SHIFT_OPERATOR(type, value, append)  \
-    friend MsgPacket &                              \
-    operator <<(MsgPacket & msg, type value)        \
-    {                                               \
-        msg._message += append;                     \
-        return msg;                                 \
-    }
-
-#define __LEFT_SHIFT_OPERATOR_TO_STRING(type) \
-    __LEFT_SHIFT_OPERATOR(type, value, std::to_string(static_cast<type>(value)))
-
-public:
     friend MsgPacket & operator <<(MsgPacket & msg, char value)
     {
         msg._message.append(1, value);
         return msg;
     }
+
+#ifndef __LEFT_SHIFT_OPERATOR
+#define __LEFT_SHIFT_OPERATOR(type, value, append)              \
+    friend MsgPacket & operator <<(MsgPacket & msg, type value) \
+    { msg._message += append; return msg; }
+#endif
+
+#ifndef __LEFT_SHIFT_OPERATOR_TO_STRING
+#define __LEFT_SHIFT_OPERATOR_TO_STRING(type) \
+    __LEFT_SHIFT_OPERATOR(type, value, std::to_string(static_cast<type>(value)))
+#endif
 
 public:
     __LEFT_SHIFT_OPERATOR_TO_STRING(short);
@@ -182,6 +178,9 @@ public:
     __LEFT_SHIFT_OPERATOR(void *, v, std::to_string(reinterpret_cast<std::size_t>(v)));
     __LEFT_SHIFT_OPERATOR(char const *, v, v);
     __LEFT_SHIFT_OPERATOR(std::string const &, v, v);
+
+#undef __LEFT_SHIFT_OPERATOR_TO_STRING
+#undef __LEFT_SHIFT_OPERATOR
 };
 
 } // namespace details

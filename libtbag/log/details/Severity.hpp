@@ -27,50 +27,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-TBAG_CONSTEXPR char const * const DEFAULT_SEVERITY [] = {
-        "OFF"           , // Hide all messages.
-        "EMERGENCY"     , // System is unusable.
-        "ALERT"         , // Action must be taken immediately.
-        "CRITICAL"      , // Critical conditions.
-        "ERROR"         , // Error conditions.
-        "WARNING"       , // Warning conditions.
-        "NOTICE"        , // Normal but significant condition.
-        "INFORMATIONAL" , // Informational messages.
-        "DEBUG"         , // Debug-level messages.
-};
-
-int const LOG_SEVERITY_COUNT = sizeof(DEFAULT_SEVERITY) / sizeof(DEFAULT_SEVERITY[0]);
-char const * const UNKNOWN_LOG_SEVERITY_STRING = "UNKNOWN";
-
-/**
- * Logging level.
- */
-enum class LogLevel : int
-{
-    LEVEL_OFF   = 0,
-    LEVEL_EMERGENCY,
-    LEVEL_ALERT    ,
-    LEVEL_CRITICAL ,
-    LEVEL_ERROR    ,
-    LEVEL_WARNING  ,
-    LEVEL_NOTICE   ,
-    LEVEL_INFO     ,
-    LEVEL_DEBUG
-};
-
-inline const char * const getLogString(int level) TBAG_NOEXCEPT
-{
-    if (0 <= COMPARE_AND(level) < LOG_SEVERITY_COUNT) {
-        return DEFAULT_SEVERITY[level];
-    }
-    return UNKNOWN_LOG_SEVERITY_STRING;
-}
-
-inline const char * const getLogString(LogLevel level) TBAG_NOEXCEPT
-{
-    return getLogString(static_cast<int>(level));
-}
-
 /**
  * Severity class prototype.
  *
@@ -80,31 +36,22 @@ inline const char * const getLogString(LogLevel level) TBAG_NOEXCEPT
 class Severity
 {
 public:
-    using String = std::basic_string<char>;
+    char const * text;
+    int level;
 
 public:
-    int    level;
-    String text;
+    // @formatter:off
+    Severity() : text(), level()
+    { /* EMPTY */ }
+    Severity(char const * t, int l) : text(t), level(l)
+    { /* EMPTY */ }
+    Severity(Severity const & obj) : text(obj.text), level(obj.level)
+    { /* EMPTY */ }
+    ~Severity()
+    { /* EMPTY */ }
+    // @formatter:on
 
 public:
-    Severity() : level(), text()
-    { /* EMPTY */ }
-    Severity(LogLevel log_level) : level(static_cast<int>(log_level)), text(getLogString(static_cast<int>(log_level)))
-    { /* EMPTY */ }
-
-    Severity(Severity const & obj) : level(obj.level), text(obj.text)
-    { /* EMPTY */ }
-    Severity(Severity && obj) : level(obj.level), text(std::move(obj.text))
-    { /* EMPTY */ }
-
-public:
-    Severity & operator =(LogLevel log_level)
-    {
-        level = static_cast<int>(log_level);
-        text  = getLogString(static_cast<int>(log_level));
-        return *this;
-    }
-
     Severity & operator =(Severity const & obj)
     {
         if (this != &obj) {
@@ -114,22 +61,13 @@ public:
         return *this;
     }
 
-    Severity & operator =(Severity && obj)
-    {
-        if (this != &obj) {
-            std::swap(level, obj.level);
-            std::swap(text , obj.text );
-        }
-        return *this;
-    }
-
 public:
+    // @formatter:off
     inline operator int() const TBAG_NOEXCEPT
     { return level; }
-    inline operator String() const TBAG_NOEXCEPT
-    { return text; }
+    inline operator std::string() const TBAG_NOEXCEPT
+    { return std::string(text); }
 
-public:
     inline bool operator ==(Severity const & obj) const TBAG_NOEXCEPT
     { return level == obj.level; }
     inline bool operator !=(Severity const & obj) const TBAG_NOEXCEPT
@@ -147,7 +85,18 @@ public:
 
     inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
     { return level >= obj.level; }
+    // @formatter:on
 };
+
+Severity const           OFF_SEVERITY("OFF"      ,   0); // Hide all messages.
+Severity const     EMERGENCY_SEVERITY("EMERGENCY", 100); // System is unusable.
+Severity const         ALERT_SEVERITY("ALERT"    , 200); // Action must be taken immediately.
+Severity const      CRITICAL_SEVERITY("CRITICAL" , 300); // Critical conditions.
+Severity const         ERROR_SEVERITY("ERROR"    , 400); // Error conditions.
+Severity const       WARNING_SEVERITY("WARNING"  , 500); // Warning conditions.
+Severity const        NOTICE_SEVERITY("NOTICE"   , 600); // Normal but significant condition.
+Severity const INFORMATIONAL_SEVERITY("INFO"     , 700); // Informational messages.
+Severity const         DEBUG_SEVERITY("DEBUG"    , 800); // Debug-level messages.
 
 } // namespace details
 } // namespace log
