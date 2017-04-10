@@ -62,7 +62,8 @@ public:
 
 public:
     template <typename ReturnType, typename ... Arg>
-    ReturnType call(std::string const & name, Arg ... args) {
+    ReturnType call(std::string const & name, Arg ... args)
+    {
         typedef ReturnType (*Signature) (Arg ...);
         Signature func = (Signature) symbol(name.c_str());
         if (func != nullptr) {
@@ -72,7 +73,8 @@ public:
     }
 
     template <typename ... Arg>
-    void callVoid(std::string const & name, Arg ... args) {
+    void callVoid(std::string const & name, Arg ... args)
+    {
         typedef void (*Signature) (Arg ...);
         Signature func = (Signature) symbol(name.c_str());
         if (func != nullptr) {

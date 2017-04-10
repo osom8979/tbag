@@ -175,6 +175,9 @@ public:
     /** Filename except path. */
     std::string getName() const;
 
+    /** File extension name except path. */
+    std::string getExtensionName() const;
+
 public:
     using TimeSpec  = details::TimeSpec;
     using FileState = details::FileState;

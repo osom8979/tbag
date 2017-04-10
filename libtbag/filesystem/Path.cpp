@@ -300,6 +300,16 @@ std::string Path::getName() const
     return *nodes.rbegin();
 }
 
+std::string Path::getExtensionName() const
+{
+    std::string name = getName();
+    std::size_t pos = name.find(".");
+    if (pos != std::string::npos) {
+        return name.substr(pos);
+    }
+    return std::string();
+}
+
 Path::FileState Path::getState() const
 {
     FileState state = {0};

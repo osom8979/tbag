@@ -85,13 +85,26 @@ TEST(PathTest, AssignOperators)
 
 TEST(PathTest, GetName)
 {
-    char const * const TEMP = "/1/2/3/4/5.test";
-
-    Path const path1(TEMP);
+    Path const path1("/1/2/3/4/5.test");
     ASSERT_STREQ("5.test", path1.getName().c_str());
 
     Path const path2("");
     ASSERT_STREQ("", path2.getName().c_str());
+
+    Path const path3("/1/2/3/4.dir/5.test.ext");
+    ASSERT_STREQ("5.test.ext", path3.getName().c_str());
+}
+
+TEST(PathTest, getExtensionName)
+{
+    Path const path1("/1/2/3/4.dir/5.test.ext");
+    ASSERT_STREQ(".test.ext", path1.getExtensionName().c_str());
+
+    Path const path2("");
+    ASSERT_STREQ("", path2.getExtensionName().c_str());
+
+    Path const path3("/1/2/3/4.dir/5_test_ext");
+    ASSERT_STREQ("", path3.getExtensionName().c_str());
 }
 
 TEST(PathTest, SplitNodes_Canonical1)
