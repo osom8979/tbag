@@ -61,7 +61,7 @@ inline uv_lib_t * uv_lib_cast(T * object)
 
 SharedLibrary::SharedLibrary() : _open(false), _lib(new uv_lib_t)
 {
-    memset(_lib, 0x00, sizeof(uv_lib_t));
+    ::memset(_lib, 0x00, sizeof(uv_lib_t));
 }
 
 SharedLibrary::SharedLibrary(std::string const & path) : SharedLibrary()
@@ -79,14 +79,14 @@ SharedLibrary::~SharedLibrary()
 
 bool SharedLibrary::open(std::string const & path)
 {
-    _open = (uv_dlopen(path.c_str(), uv_lib_cast(_lib)) == 0);
+    _open = (::uv_dlopen(path.c_str(), uv_lib_cast(_lib)) == 0);
     return _open;
 }
 
 void SharedLibrary::close()
 {
-    if (_open == true) {
-        uv_dlclose(uv_lib_cast(_lib));
+    if (_open) {
+        ::uv_dlclose(uv_lib_cast(_lib));
         _open = false;
     }
 }
@@ -95,7 +95,7 @@ void * SharedLibrary::symbol(std::string const & name)
 {
     if (_open == true) {
         void * result = nullptr;
-        if (uv_dlsym(uv_lib_cast(_lib), name.c_str(), &result) == 0) {
+        if (::uv_dlsym(uv_lib_cast(_lib), name.c_str(), &result) == 0) {
             return result;
         }
     }

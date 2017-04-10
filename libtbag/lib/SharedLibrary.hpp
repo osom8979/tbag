@@ -57,6 +57,10 @@ public:
     std::string getError() const;
 
 public:
+    inline bool isOpen() const TBAG_NOEXCEPT
+    { return _open; }
+
+public:
     template <typename ReturnType, typename ... Arg>
     ReturnType call(std::string const & name, Arg ... args) {
         typedef ReturnType (*Signature) (Arg ...);
