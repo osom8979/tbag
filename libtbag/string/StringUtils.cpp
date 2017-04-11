@@ -124,13 +124,13 @@ char convertHalfByteToHexChar(uint8_t half_byte)
 std::string convertByteToHexString(uint8_t hex)
 {
     char result[3] = {0,};
-    result[0] = convertHalfByteToHexChar(hex >> 1);
+    result[0] = convertHalfByteToHexChar(hex >> 4);
     result[1] = convertHalfByteToHexChar(hex);
     result[2] = '\0';
     return std::string(result);
 }
 
-std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix)
+std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix, std::string const & separator)
 {
     std::size_t const SIZE = bytes.size();
     if (SIZE == 0) {
@@ -142,7 +142,7 @@ std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std:
     while (true) {
         result += (prefix + convertByteToHexString(bytes[i]));
         if ((++i) < SIZE) {
-            result += ' ';
+            result += separator;
         } else {
             break;
         }

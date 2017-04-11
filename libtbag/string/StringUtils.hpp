@@ -95,7 +95,7 @@ TBAG_API std::string convertStringWithThreadId(std::thread::id const & id);
  */
 TBAG_API char convertHalfByteToHexChar(uint8_t half_byte);
 TBAG_API std::string convertByteToHexString(uint8_t hex);
-TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix = "0x");
+TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix = "0x", std::string const & separator = "");
 
 /**
  * Regex based token.
