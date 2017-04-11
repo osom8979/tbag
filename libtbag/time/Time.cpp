@@ -6,12 +6,15 @@
  */
 
 #include <libtbag/time/Time.hpp>
-#include <libtbag/pattern/Singleton.hpp>
+#include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/string/StringUtils.hpp>
+
+#include <libtbag/3rd/date/date.h>
 
 #include <cassert>
 #include <cstring>
 #include <mutex>
+#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,10 +35,10 @@ namespace time {
  * @remarks
  *  This class is the solution of the data race conditions.
  */
-class SafetyTimeGetter : SINGLETON_INHERITANCE(SafetyTimeGetter)
+class SafetyTimeGetter : public ::libtbag::pattern::Singleton2<SafetyTimeGetter>
 {
 public:
-    SINGLETON_RESTRICT(SafetyTimeGetter);
+    SINGLETON2_PROTOTYPE(SafetyTimeGetter);
 
 public:
     using Mutex = std::mutex;
@@ -75,9 +78,105 @@ public:
             }
         });
     }
+
+public:
+};
+
+/**
+ * @author zer0
+ * @date   2017-04-11
+ */
+class LocalTimeDiff : public ::libtbag::pattern::Singleton2<LocalTimeDiff>
+{
+public:
+    friend class ::libtbag::pattern::Singleton2<LocalTimeDiff>;
+
+private:
+    std::chrono::system_clock::duration _local_diff;
+    std::atomic_bool _update_local_diff;
+
+protected:
+    LocalTimeDiff() : _local_diff(0)
+    {
+        _update_local_diff = false;
+    }
+
+public:
+    ~LocalTimeDiff()
+    {
+        // EMPTY.
+    }
+
+private:
+    bool updateLocalDiff()
+    {
+        time_t time = getCurrentTime();
+
+        struct tm   gmt_time = {0,};
+        struct tm local_time = {0,};
+
+        bool is_gmt   = impl::SafetyTimeGetter::getInstance()->getGmtTime(time, &gmt_time);
+        bool is_local = impl::SafetyTimeGetter::getInstance()->getLocalTime(time, &local_time);
+
+        if (is_gmt == false || is_local == false) {
+            return false;
+        }
+
+        auto   gmt_time_point = std::chrono::system_clock::from_time_t(mktime(  &gmt_time));
+        auto local_time_point = std::chrono::system_clock::from_time_t(mktime(&local_time));
+
+        _local_diff = (local_time_point - gmt_time_point);
+        _update_local_diff = true;
+
+        return true;
+    }
+
+public:
+    std::chrono::system_clock::duration getLocalDiff()
+    {
+        if (_update_local_diff == false) {
+            updateLocalDiff();
+        }
+        return _local_diff;
+    }
 };
 
 } // namespace impl
+
+int getYear(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<int>(date::year_month_day(date::floor<date::days>(time)).year());
+}
+
+int getMonth(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<unsigned>(date::year_month_day(date::floor<date::days>(time)).month());
+}
+
+int getDay(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<unsigned>(date::year_month_day(date::floor<date::days>(time)).day());
+}
+
+int getHours(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).hours().count());
+}
+
+int getMinutes(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).minutes().count());
+}
+
+int getSeconds(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).seconds().count());
+}
+
+int getSubSeconds(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).subseconds().count());
+}
 
 int getMillisec(std::chrono::system_clock::time_point const & time)
 {
@@ -93,6 +192,25 @@ int getMillisec(std::chrono::system_clock::time_point const & time)
     millisec::rep const MILLISECONDS = std::chrono::duration_cast<millisec>(epoch).count();
     assert(0 <= COMPARE_AND(MILLISECONDS) < 1000);
     return static_cast<int>(MILLISECONDS);
+}
+
+int getMicrosec(std::chrono::system_clock::time_point const & time)
+{
+    using clock    = std::chrono::system_clock;
+    using millisec = std::chrono::milliseconds;
+    using microsec = std::chrono::microseconds;
+
+    clock::duration epoch = time.time_since_epoch();
+    epoch -= std::chrono::duration_cast<millisec>(epoch);
+
+    microsec::rep const MICROSECONDS = std::chrono::duration_cast<microsec>(epoch).count();
+    assert(0 <= COMPARE_AND(MICROSECONDS) < 1000);
+    return static_cast<int>(MICROSECONDS);
+}
+
+int getDays(std::chrono::system_clock::time_point const & time)
+{
+    return date::floor<date::days>(time).time_since_epoch().count();
 }
 
 std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)
@@ -136,6 +254,11 @@ bool getLocalTime(time_t const & t, tm * output)
     return impl::SafetyTimeGetter::getInstance()->getLocalTime(t, output);
 }
 
+std::chrono::system_clock::duration getCurrentLocalDuration()
+{
+    return impl::LocalTimeDiff::getInstance()->getLocalDiff();
+}
+
 std::string getFormatString(std::string const & format, tm const * t, std::size_t allocate_size)
 {
     // The expected size of the buffer.
@@ -147,6 +270,17 @@ std::string getFormatString(std::string const & format, tm const * t, std::size_
         return getFormatString(format, t, allocate_size * 2);
     }
     return std::string(buffer.begin(), buffer.begin() + length);
+}
+
+std::string getLocalTimeZoneAbbreviation()
+{
+    struct tm local_time = {0,};
+    if (getLocalTime(getCurrentTime(), &local_time)) {
+        if (local_time.tm_zone != nullptr) {
+            return std::string(local_time.tm_zone);
+        }
+    }
+    return std::string();
 }
 
 } // namespace time

@@ -58,8 +58,21 @@ TBAG_CONSTEXPR int const YEARS_SINCE = 1900;
 /** Months since january: 0-11 */
 TBAG_CONSTEXPR int const MONTHS_SINCE = 1;
 
-/** millisecond part of the second 0-999. */
+TBAG_API int getYear(std::chrono::system_clock::time_point const & time);
+TBAG_API int getMonth(std::chrono::system_clock::time_point const & time);
+TBAG_API int getDay(std::chrono::system_clock::time_point const & time);
+TBAG_API int getHours(std::chrono::system_clock::time_point const & time);
+TBAG_API int getMinutes(std::chrono::system_clock::time_point const & time);
+TBAG_API int getSeconds(std::chrono::system_clock::time_point const & time);
+TBAG_API int getSubSeconds(std::chrono::system_clock::time_point const & time);
+
+/** milliseconds part of the seconds 0-999. */
 TBAG_API int getMillisec(std::chrono::system_clock::time_point const & time);
+
+/** microseconds part of the milliseconds 0-999. */
+TBAG_API int getMicrosec(std::chrono::system_clock::time_point const & time);
+
+TBAG_API int getDays(std::chrono::system_clock::time_point const & time);
 
 TBAG_API std::string getMillisecMbs(std::chrono::system_clock::time_point const & time);
 TBAG_API void getMillisecString(std::chrono::system_clock::time_point const & time, std::string & result);
@@ -72,7 +85,12 @@ TBAG_API time_t getCurrentTime() TBAG_NOEXCEPT;
 TBAG_API bool getGmtTime(time_t const & t, tm * output);
 TBAG_API bool getLocalTime(time_t const & t, tm * output);
 
+TBAG_API std::chrono::system_clock::duration getCurrentLocalDuration();
+
 TBAG_API std::string getFormatString(std::string  const & format, tm const * t, std::size_t allocate_size = 128);
+
+/** Timezone abbreviation. */
+TBAG_API std::string getLocalTimeZoneAbbreviation();
 
 } // namespace time
 
