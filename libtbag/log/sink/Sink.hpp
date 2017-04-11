@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/log/details/Severity.hpp>
 #include <libtbag/log/details/MsgPacket.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
@@ -37,6 +38,7 @@ class SinkInterface
 {
 public:
     using MsgPacket = details::MsgPacket;
+    using Severity  = details::Severity;
 
 public:
     TBAG_CONSTEXPR SinkInterface()
