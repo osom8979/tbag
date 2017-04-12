@@ -227,6 +227,12 @@ public:
     std::string toLocalShortString() const;
 
 public:
+    bool fromString(std::string const & format, std::string const & time_string);
+
+public:
+    static std::string getLongTimeString(int y, int m, int d, int hour, int min, int sec, int milli = 0, int micro = 0);
+
+public:
     inline static TimePoint now()
     {
         return TimePoint(now_time());

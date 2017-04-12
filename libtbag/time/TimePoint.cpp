@@ -12,9 +12,10 @@
 #include <libtbag/3rd/date/date.h>
 
 #include <ctime>
+
+#include <array>
 #include <sstream>
 #include <iostream>
-#include <array>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -154,9 +155,11 @@ void TimePoint::setLocalDiff()
 
 void TimePoint::setAll(int y, int m, int d, int hour, int min, int sec, int milli, int micro)
 {
-    _system_tp = date::sys_days(date::year(y) / m / d)
-                 + std::chrono::hours(hour) + std::chrono::minutes(min) + std::chrono::seconds(sec)
-                 + std::chrono::milliseconds(milli) + std::chrono::microseconds(micro);
+    if (fromString(TIMESTAMP_LONG_FORMAT, getLongTimeString(y, m, d, hour, min, sec, milli, micro)) == false) {
+        _system_tp = date::sys_days(date::year(y) / m / d)
+                     + std::chrono::hours(hour) + std::chrono::minutes(min) + std::chrono::seconds(sec)
+                     + std::chrono::milliseconds(milli) + std::chrono::microseconds(micro);
+    }
 }
 
 TimePoint::Microsec TimePoint::getTimeSinceEpoch() const
@@ -243,6 +246,28 @@ std::string TimePoint::toLocalLongString() const
 std::string TimePoint::toLocalShortString() const
 {
     return toLocalString(TIMESTAMP_SHORT_FORMAT);
+}
+
+bool TimePoint::fromString(std::string const & format, std::string const & time_string)
+{
+    std::istringstream in(time_string);
+    std::chrono::system_clock::time_point tp;
+    date::from_stream(in, format.c_str(), tp);
+
+    if (in.bad() || in.eof()) {
+        return false;
+    }
+
+    _system_tp = tp;
+    return true;
+}
+
+std::string TimePoint::getLongTimeString(int y, int m, int d, int hour, int min, int sec, int milli, int micro)
+{
+    std::array<char, 32> buffer;
+    double sec_all = (double)sec + ((double)milli / 1000.0) + ((double)micro / (1000.0 * 1000.0));
+    int const WRITE_SIZE = sprintf(buffer.data(), "%04d-%02d-%02dT%02d:%02d:%.6f", y, m, d, hour, min, sec_all);
+    return std::string(buffer.begin(), buffer.begin() + WRITE_SIZE);
 }
 
 } // namespace time

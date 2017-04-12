@@ -145,6 +145,40 @@ public:
     }
 };
 
+/**
+ * @warning
+ *  Epoch time은 UTC 이전(1970/01/01T00:00:00)일 경우 음수로 표현된다. @n
+ *  이 경우 정상적인 계산이 이루어지지 않는다. @n
+ *  이 현상을 해결하기 위해 Date(날짜)의 기준을 1970년 이후로 맞춰주면 된다.
+ */
+template <typename Cut, typename Destination, typename Clock, typename ClockDuration>
+typename Destination::rep getTimeFloor(std::chrono::time_point<Clock, ClockDuration> const & time)
+{
+    static_assert(std::ratio_less_equal<typename Cut::period, std::chrono::hours::period>::value,
+                  "Unsupported Cut type.");
+    static_assert(std::ratio_less<typename Destination::period, typename Cut::period>::value,
+                  "Destination must be less than Cut.");
+
+    using TimePoint = std::chrono::time_point<Clock, ClockDuration>;
+
+    ClockDuration epoch_time = time.time_since_epoch();
+    if (epoch_time.count() < 0) {
+        auto DAYS_OF_EPOCH = date::floor<date::days>(date::years(1970));
+        auto days = date::floor<date::days>(time);
+
+        epoch_time += (DAYS_OF_EPOCH - days.time_since_epoch());
+        assert(epoch_time.count() >= 0);
+    }
+
+    epoch_time -= std::chrono::duration_cast<Cut>(epoch_time);
+    assert(epoch_time.count() >= 0);
+
+    // [WARNING] It does not work on some platforms:
+    // return static_cast<int>(result / std::chrono::milliseconds(1));
+
+    return std::abs(std::chrono::duration_cast<Destination>(epoch_time).count());
+}
+
 } // namespace impl
 
 int getYear(std::chrono::system_clock::time_point const & time)
@@ -182,44 +216,10 @@ int getSubSeconds(std::chrono::system_clock::time_point const & time)
     return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).subseconds().count());
 }
 
-/**
- * @warning
- *  Epoch time은 UTC 이전(1970/01/01T00:00:00)일 경우 음수로 표현된다. @n
- *  이 경우 정상적인 계산이 이루어지지 않는다. @n
- *  이 현상을 해결하기 위해 Date(날짜)의 기준을 1970년 이후로 맞춰주면 된다.
- */
-template <typename Cut, typename Destination, typename Clock, typename ClockDuration>
-typename Destination::rep getTimeFloor(std::chrono::time_point<Clock, ClockDuration> const & time)
-{
-    static_assert(std::ratio_less_equal<typename Cut::period, std::chrono::hours::period>::value,
-                  "Unsupported Cut type.");
-    static_assert(std::ratio_less<typename Destination::period, typename Cut::period>::value,
-                  "Destination must be less than Cut.");
-
-    using TimePoint = std::chrono::time_point<Clock, ClockDuration>;
-
-    ClockDuration epoch_time = time.time_since_epoch();
-    if (epoch_time.count() < 0) {
-        auto DAYS_OF_EPOCH = date::floor<date::days>(date::years(1970));
-        auto days = date::floor<date::days>(time);
-
-        epoch_time += (DAYS_OF_EPOCH - days.time_since_epoch());
-        assert(epoch_time.count() >= 0);
-    }
-
-    epoch_time -= std::chrono::duration_cast<Cut>(epoch_time);
-    assert(epoch_time.count() >= 0);
-
-    // [WARNING] It does not work on some platforms:
-    // return static_cast<int>(result / std::chrono::milliseconds(1));
-
-    return std::abs(std::chrono::duration_cast<Destination>(epoch_time).count());
-}
-
 int getMillisec(std::chrono::system_clock::time_point const & time)
 {
     using namespace std::chrono;
-    auto const RESULT = getTimeFloor<seconds, milliseconds>(time);
+    auto const RESULT = impl::getTimeFloor<seconds, milliseconds>(time);
     assert(0 <= COMPARE_AND(RESULT) < 1000);
     return static_cast<int>(RESULT);
 }
@@ -227,7 +227,7 @@ int getMillisec(std::chrono::system_clock::time_point const & time)
 int getMicrosec(std::chrono::system_clock::time_point const & time)
 {
     using namespace std::chrono;
-    auto const RESULT = getTimeFloor<milliseconds, microseconds>(time);
+    auto const RESULT = impl::getTimeFloor<milliseconds, microseconds>(time);
     assert(0 <= COMPARE_AND(RESULT) < 1000);
     return static_cast<int>(RESULT);
 }
