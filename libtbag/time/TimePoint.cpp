@@ -266,7 +266,7 @@ std::string TimePoint::getLongTimeString(int y, int m, int d, int hour, int min,
 {
     std::array<char, 32> buffer;
     double sec_all = (double)sec + ((double)milli / 1000.0) + ((double)micro / (1000.0 * 1000.0));
-    int const WRITE_SIZE = sprintf(buffer.data(), "%04d-%02d-%02dT%02d:%02d:%.6f", y, m, d, hour, min, sec_all);
+    int const WRITE_SIZE = sprintf(buffer.data(), "%04d-%02d-%02dT%02d:%02d:%f", y, m, d, hour, min, sec_all);
     return std::string(buffer.begin(), buffer.begin() + WRITE_SIZE);
 }
 
