@@ -245,20 +245,6 @@ std::string TimePoint::toLocalShortString() const
     return toLocalString(TIMESTAMP_SHORT_FORMAT);
 }
 
-bool TimePoint::fromString(std::string const & format, std::string const & time_string)
-{
-    std::istringstream in(time_string);
-    std::chrono::system_clock::time_point tp;
-    in >> date::parse(format, tp);
-
-    if (in.bad() || in.eof()) {
-        return false;
-    }
-
-    _system_tp = tp;
-    return true;
-}
-
 } // namespace time
 
 // --------------------

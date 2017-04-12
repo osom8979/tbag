@@ -62,7 +62,7 @@ private:
 
 public:
     TimePoint();
-    TimePoint(now_time const & UNUSED_PARAM(flag));
+    explicit TimePoint(now_time const & UNUSED_PARAM(flag));
     TimePoint(SystemTp const & time_point);
     TimePoint(SystemTp const & time_point, Microsec const & local_diff);
     TimePoint(Rep microseconds);
@@ -225,9 +225,6 @@ public:
     std::string toLocalString(std::string const & format) const;
     std::string toLocalLongString() const;
     std::string toLocalShortString() const;
-
-public:
-    bool fromString(std::string const & format, std::string const & time_string);
 
 public:
     inline static TimePoint now()

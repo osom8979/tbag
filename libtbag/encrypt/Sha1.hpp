@@ -30,8 +30,8 @@ TBAG_CONSTEXPR int const SHA1_OUTPUT_BYTE = (SHA1_OUTPUT_BIT / 8);
 
 using Sha1Hash = std::array<unsigned char, SHA1_OUTPUT_BYTE>;
 
-bool encryptSha1(std::string const & input, Sha1Hash & output);
-bool encryptSha1(std::string const & input, std::string & output);
+TBAG_API bool encryptSha1(std::string const & input, Sha1Hash & output);
+TBAG_API bool encryptSha1(std::string const & input, std::string & output);
 
 } // namespace encrypt
 

@@ -22,10 +22,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace encrypt {
 
-TBAG_CONSTEXPR static char const BASE64_PADDING_CHAR = '=';
-
 std::size_t getDecodeLength(std::string const & base64)
 {
+    char const BASE64_PADDING_CHAR = '=';
+
     if (base64.size() < 2) {
         return 0;
     }

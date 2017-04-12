@@ -24,10 +24,10 @@ NAMESPACE_LIBTBAG_OPEN
 namespace encrypt {
 
 /** Calculates the length of a decoded string. */
-std::size_t getDecodeLength(std::string const & input);
+TBAG_API std::size_t getDecodeLength(std::string const & input);
 
-bool encodeBase64(std::string const & input, std::string & output);
-bool decodeBase64(std::string const & input, std::string & output);
+TBAG_API bool encodeBase64(std::string const & input, std::string & output);
+TBAG_API bool decodeBase64(std::string const & input, std::string & output);
 
 } // namespace encrypt
 
