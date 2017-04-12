@@ -30,7 +30,7 @@ TEST(MsgPacketTest, Operator)
 
     int test = 0;
     packet << &test;
-    ASSERT_LT(0U, std::stoul(packet.getStringPointer()));
+    ASSERT_LT(0U, std::stoull(std::string(packet.getStringPointer())));
     packet.clearString();
 }
 
