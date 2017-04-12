@@ -279,7 +279,6 @@ bool isReadable(std::string const & path)
     return checkAccessMode(path, ACCESS_MODE_READ);
 }
 
-
 bool getState(std::string const & path, FileState * state)
 {
     return __impl::getState(::uv_fs_stat, path.c_str(), state);

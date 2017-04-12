@@ -55,6 +55,13 @@ TEST(FsCommonTest, CreateDirectory)
     auto const TEST_DIR = TBAG_TESTER_TEMP_DIR_GET() / std::string("test");
     namespace fs = ::libtbag::filesystem::details;
 
+    ASSERT_TRUE(createDirectory(TEST_DIR));
+    ASSERT_TRUE(exists(TEST_DIR));
+    ASSERT_TRUE(isDirectory(TEST_DIR));
+    ASSERT_TRUE(removeDirectory(TEST_DIR));
+
+#if !defined(TBAG_PLATFORM_WINDOWS)
+    // Mode is not implemented on Windows.
     int const MIN_MODE = 0000;
     int const MAX_MODE = 0777;
     int const PREV_MASK = setUserMask(0);
@@ -67,8 +74,8 @@ TEST(FsCommonTest, CreateDirectory)
         ASSERT_TRUE(setMode(path, 0700)); // Permission to remove directory.
         ASSERT_TRUE(removeDirectory(path));
     }
-
     setUserMask(PREV_MASK);
+#endif
 }
 
 TEST(FsCommonTest, CreateTemp)
