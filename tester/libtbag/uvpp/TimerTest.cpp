@@ -10,6 +10,7 @@
 #include <libtbag/uvpp/Timer.hpp>
 
 #include <memory>
+#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::uvpp;
@@ -30,11 +31,14 @@ struct TimerTest : public Timer
 
 TEST(TimerTest, Default)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "This test is skipped on the Windows platform.\n";
+#else
     Loop looper;
     std::shared_ptr<TimerTest> timer(new (std::nothrow) TimerTest(looper));
     timer->start(0, 1/*millisec*/);
     looper.run();
-
     ASSERT_EQ(1, timer->counter);
+#endif
 }
 

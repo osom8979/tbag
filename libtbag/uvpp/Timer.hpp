@@ -50,7 +50,7 @@ public:
     uerr init(Loop & loop);
 
     /** Start the timer. timeout and repeat are in milliseconds. */
-    uerr start(uint64_t timeout, uint64_t repeat);
+    uerr start(uint64_t timeout, uint64_t repeat = 0);
 
     /** Stop the timer, the callback will not be called anymore. */
     uerr stop();
