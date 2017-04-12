@@ -17,8 +17,8 @@ if (NOT BUILD_SHARED_LIBS)
 endif ()
 
 ## Test project.
-list (APPEND TBAG_PROJECT_DEPENDENCIES tbshare_copy)
-list (APPEND TBAG_PROJECT_DEPENDENCIES tbproc_copy)
+list (APPEND TBAG_PROJECT_DEPENDENCIES tbshare)
+list (APPEND TBAG_PROJECT_DEPENDENCIES tbproc)
 
 ## Final process.
 tbag_modules__add_target ()

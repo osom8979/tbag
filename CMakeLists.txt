@@ -73,10 +73,6 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 
-## Test subproject.
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/test/tbproc)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/test/tbshare)
-
 ## Thread settings.
 tbag_config__find_thread ()
 
