@@ -15,10 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-
 #include <string>
-#include <numeric>
-#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -65,23 +62,23 @@ public:
     // @formatter:off
     inline operator int() const TBAG_NOEXCEPT
     { return level; }
-    inline operator std::string() const TBAG_NOEXCEPT
-    { return std::string(text); }
+    inline operator char const *() const TBAG_NOEXCEPT
+    { return text; }
 
-    inline bool operator ==(Severity const & obj) const TBAG_NOEXCEPT
-    { return level == obj.level; }
-    inline bool operator !=(Severity const & obj) const TBAG_NOEXCEPT
-    { return level != obj.level; }
+    inline friend bool operator ==(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
+    { return lh.level == rh.level; }
+    inline friend bool operator !=(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
+    { return lh.level != rh.level; }
 
-    inline bool operator <(Severity const & obj) const TBAG_NOEXCEPT
-    { return level < obj.level; }
-    inline bool operator >(Severity const & obj) const TBAG_NOEXCEPT
-    { return level > obj.level; }
+    inline friend bool operator <(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
+    { return lh.level < rh.level; }
+    inline friend bool operator >(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
+    { return lh.level > rh.level; }
 
-    inline bool operator <=(Severity const & obj) const TBAG_NOEXCEPT
-    { return level <= obj.level; }
-    inline bool operator >=(Severity const & obj) const TBAG_NOEXCEPT
-    { return level >= obj.level; }
+    inline friend bool operator <=(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
+    { return lh.level <= rh.level; }
+    inline friend bool operator >=(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
+    { return lh.level >= rh.level; }
 
     inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
     { return level >= obj.level; }
