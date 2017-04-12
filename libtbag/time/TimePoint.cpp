@@ -23,38 +23,35 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace time {
 
-TimePoint::TimePoint() : _system_tp(Microsec(0)), _local_diff(0)
+TimePoint::TimePoint() : _system_tp(Duration(0)), _local_diff(0)
 {
     // EMPTY.
 }
 
 TimePoint::TimePoint(now_time const & UNUSED_PARAM(flag))
 {
-    using namespace std::chrono;
-    _system_tp  = SystemClock::now();
-    _local_diff = duration_cast<Microsec>(getCurrentLocalDuration());
+    setNow();
+    setLocalDiff();
 }
 
 TimePoint::TimePoint(SystemTp const & time_point) : _system_tp(time_point)
 {
-    using namespace std::chrono;
-    _local_diff = duration_cast<Microsec>(getCurrentLocalDuration());
+    setLocalDiff();
 }
 
-TimePoint::TimePoint(SystemTp const & time_point, Microsec const & local_diff)
+TimePoint::TimePoint(SystemTp const & time_point, Duration const & local_diff)
         : _system_tp(time_point), _local_diff(local_diff)
 {
     // EMPTY.
 }
 
-TimePoint::TimePoint(Rep microseconds) : _system_tp(Microsec(microseconds))
+TimePoint::TimePoint(Rep rep) : _system_tp(Duration(rep))
 {
-    using namespace std::chrono;
-    _local_diff = duration_cast<Microsec>(getCurrentLocalDuration());
+    setLocalDiff();
 }
 
-TimePoint::TimePoint(Rep microseconds, Rep local_diff)
-        : _system_tp(Microsec(microseconds)), _local_diff(local_diff)
+TimePoint::TimePoint(Rep rep, Rep local_diff)
+        : _system_tp(Duration(rep)), _local_diff(local_diff)
 {
     // EMPTY.
 }
@@ -62,8 +59,7 @@ TimePoint::TimePoint(Rep microseconds, Rep local_diff)
 TimePoint::TimePoint(int y, int m, int d, int hour, int min, int sec, int milli, int micro)
 {
     setAll(y, m, d, hour, min, sec, milli, micro);
-    using namespace std::chrono;
-    _local_diff = duration_cast<Microsec>(getCurrentLocalDuration());
+    setLocalDiff();
 }
 
 TimePoint::TimePoint(TimePoint const & obj)
@@ -87,15 +83,15 @@ TimePoint & TimePoint::operator =(SystemTp const & time_point)
     return *this;
 }
 
-TimePoint & TimePoint::operator =(Microsec const & microseconds)
+TimePoint & TimePoint::operator =(Duration const & dur)
 {
-    _system_tp = SystemTp(microseconds);
+    _system_tp = SystemTp(dur);
     return *this;
 }
 
-TimePoint & TimePoint::operator =(Rep microseconds)
+TimePoint & TimePoint::operator =(Rep rep)
 {
-    _system_tp = SystemTp(Microsec(microseconds));
+    _system_tp = SystemTp(Duration(rep));
     return *this;
 }
 
@@ -122,56 +118,58 @@ void TimePoint::setTimePoint(SystemTp const & time_point)
     _system_tp = time_point;
 }
 
-void TimePoint::setTimePoint(Microsec const & microseconds)
+void TimePoint::setTimePoint(Duration const & dur)
 {
-    _system_tp = SystemTp(microseconds);
+    _system_tp = SystemTp(dur);
 }
 
-void TimePoint::setTimePoint(Rep microseconds)
+void TimePoint::setTimePoint(Rep rep)
 {
-    _system_tp = SystemTp(Microsec(microseconds));
+    _system_tp = SystemTp(Duration(rep));
 }
 
-void TimePoint::setLocalDiff(Microsec const & microseconds)
+void TimePoint::setLocalDiff(Duration const & dur)
 {
-    _local_diff = microseconds;
+    _local_diff = dur;
 }
 
-void TimePoint::setLocalDiff(Rep microseconds)
+void TimePoint::setLocalDiff(Rep rep)
 {
-    _local_diff = Microsec(microseconds);
+    _local_diff = Duration(rep);
 }
 
 void TimePoint::setNow()
 {
+    using namespace std::chrono;
     _system_tp = SystemClock::now();
 }
 
 void TimePoint::setLocalDiff()
 {
     using namespace std::chrono;
-    _local_diff = duration_cast<Microsec>(getCurrentLocalDuration());
+    _local_diff = duration_cast<Duration>(getCurrentLocalDuration());
 }
 
 void TimePoint::setAll(int y, int m, int d, int hour, int min, int sec, int milli, int micro)
 {
-    if (fromString(TIMESTAMP_LONG_FORMAT, getLongTimeString(y, m, d, hour, min, sec, milli, micro)) == false) {
-        _system_tp = date::sys_days(date::year(y) / m / d)
-                     + std::chrono::hours(hour) + std::chrono::minutes(min) + std::chrono::seconds(sec)
-                     + std::chrono::milliseconds(milli) + std::chrono::microseconds(micro);
-    }
+    using namespace date;
+    using namespace std::chrono;
+    auto sys_date = date::sys_days(date::year(y) / m / d);
+    auto sys_time = std::chrono::hours(hour) + std::chrono::minutes(min) + std::chrono::seconds(sec);
+    auto subsec = std::chrono::milliseconds(milli) + std::chrono::microseconds(micro);
+    _system_tp = sys_date + sys_time + subsec;
 }
 
-TimePoint::Microsec TimePoint::getTimeSinceEpoch() const
+TimePoint::Duration TimePoint::getTimeSinceEpoch() const
 {
     using namespace std::chrono;
-    return duration_cast<Microsec>(getTimePoint().time_since_epoch());
+    return duration_cast<Duration>(getTimePoint().time_since_epoch());
 }
 
-TimePoint::Microsec TimePoint::getLocalTimeSinceEpoch() const
+TimePoint::Duration TimePoint::getLocalTimeSinceEpoch() const
 {
     using namespace std::chrono;
-    return duration_cast<Microsec>(getLocalTimePoint().time_since_epoch());
+    return duration_cast<Duration>(getLocalTimePoint().time_since_epoch());
 }
 
 TimePoint::Rep TimePoint::getRepTimeSinceEpoch() const
@@ -248,24 +246,12 @@ std::string TimePoint::toLocalShortString() const
     return toLocalString(TIMESTAMP_SHORT_FORMAT);
 }
 
-bool TimePoint::fromString(std::string const & format, std::string const & time_string)
-{
-    std::istringstream in(time_string);
-    std::chrono::system_clock::time_point tp;
-    date::from_stream(in, format.c_str(), tp);
-
-    if (in.bad() || in.eof()) {
-        return false;
-    }
-
-    _system_tp = tp;
-    return true;
-}
-
 std::string TimePoint::getLongTimeString(int y, int m, int d, int hour, int min, int sec, int milli, int micro)
 {
     std::array<char, 32> buffer;
-    double sec_all = (double)sec + ((double)milli / 1000.0) + ((double)micro / (1000.0 * 1000.0));
+    double sec_all = (double)sec
+                     + ((double)milli / 1000.0)
+                     + ((double)micro / (1000.0 * 1000.0));
     int const WRITE_SIZE = sprintf(buffer.data(), "%04d-%02d-%02dT%02d:%02d:%f", y, m, d, hour, min, sec_all);
     return std::string(buffer.begin(), buffer.begin() + WRITE_SIZE);
 }

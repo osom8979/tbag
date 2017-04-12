@@ -50,23 +50,23 @@ public:
     using SystemClock = std::chrono::system_clock;
     using SystemTp    = typename SystemClock::time_point;
 
-    using Microsec = std::chrono::microseconds;
-    using Rep      = typename Microsec::rep;
+    using Duration = std::chrono::microseconds;
+    using Rep      = typename Duration::rep;
 
 public:
     struct now_time { /* EMPTY. */ };
 
 private:
     SystemTp _system_tp;
-    Microsec _local_diff;
+    Duration _local_diff;
 
 public:
     TimePoint();
     explicit TimePoint(now_time const & UNUSED_PARAM(flag));
     TimePoint(SystemTp const & time_point);
-    TimePoint(SystemTp const & time_point, Microsec const & local_diff);
-    TimePoint(Rep microseconds);
-    TimePoint(Rep microseconds, Rep local_diff);
+    TimePoint(SystemTp const & time_point, Duration const & local_diff);
+    TimePoint(Rep rep);
+    TimePoint(Rep rep, Rep local_diff);
     TimePoint(int y, int m, int d, int hour, int min, int sec, int milli = 0, int micro = 0);
     TimePoint(TimePoint const & obj);
     TimePoint(TimePoint && obj);
@@ -74,8 +74,8 @@ public:
 
 public:
     TimePoint & operator =(SystemTp const & time_point);
-    TimePoint & operator =(Microsec const & microseconds);
-    TimePoint & operator =(Rep microseconds);
+    TimePoint & operator =(Duration const & dur);
+    TimePoint & operator =(Rep rep);
     TimePoint & operator =(TimePoint const & obj);
     TimePoint & operator =(TimePoint && obj);
 
@@ -97,55 +97,55 @@ public:
     { return lh._system_tp >= rh._system_tp; }
     // @formatter:on
 
-    inline TimePoint & operator +=(Microsec const & microsec)
+    inline TimePoint & operator +=(Duration const & dur)
     {
-        _system_tp += microsec;
+        _system_tp += dur;
         return *this;
     }
 
-    inline TimePoint & operator -=(Microsec const & microsec)
+    inline TimePoint & operator -=(Duration const & dur)
     {
-        _system_tp -= microsec;
+        _system_tp -= dur;
         return *this;
     }
 
-    inline TimePoint & operator +=(Rep microsec)
+    inline TimePoint & operator +=(Rep rep)
     {
-        _system_tp += Microsec(microsec);
+        _system_tp += Duration(rep);
         return *this;
     }
 
-    inline TimePoint & operator -=(Rep microsec)
+    inline TimePoint & operator -=(Rep rep)
     {
-        _system_tp -= Microsec(microsec);
+        _system_tp -= Duration(rep);
         return *this;
     }
 
-    inline friend TimePoint operator +(TimePoint const & lh, Microsec const & microsec)
+    inline friend TimePoint operator +(TimePoint const & lh, Duration const & dur)
     {
         TimePoint tp = lh;
-        tp += microsec;
+        tp += dur;
         return tp;
     }
 
-    inline friend TimePoint operator -(TimePoint const & lh, Microsec const & microsec)
+    inline friend TimePoint operator -(TimePoint const & lh, Duration const & dur)
     {
         TimePoint tp = lh;
-        tp -= microsec;
+        tp -= dur;
         return tp;
     }
 
-    inline friend TimePoint operator +(TimePoint const & lh, Rep microsec)
+    inline friend TimePoint operator +(TimePoint const & lh, Rep rep)
     {
         TimePoint tp = lh;
-        tp += microsec;
+        tp += rep;
         return tp;
     }
 
-    inline friend TimePoint operator -(TimePoint const & lh, Rep microsec)
+    inline friend TimePoint operator -(TimePoint const & lh, Rep rep)
     {
         TimePoint tp = lh;
-        tp -= microsec;
+        tp -= rep;
         return tp;
     }
 
@@ -157,18 +157,20 @@ public:
 
 public:
     void setTimePoint(SystemTp const & time_point);
-    void setTimePoint(Microsec const & microseconds);
-    void setTimePoint(Rep microseconds);
+    void setTimePoint(Duration const & dur);
+    void setTimePoint(Rep rep);
 
-    void setLocalDiff(Microsec const & microseconds);
-    void setLocalDiff(Rep microseconds);
+    void setLocalDiff(Duration const & dur);
+    void setLocalDiff(Rep rep);
 
 public:
     void setNow();
     void setLocalDiff();
 
 public:
-    void setAll(int y, int m, int d, int hour = 0, int min = 0, int sec = 0, int milli = 0, int micro = 0);
+    void setAll(int y, int m, int d,
+                int hour = 0, int min = 0, int sec = 0,
+                int milli = 0, int micro = 0);
 
 public:
     // @formatter:off
@@ -176,7 +178,7 @@ public:
     { return _system_tp; }
     inline SystemTp getLocalTimePoint() const
     { return _system_tp + _local_diff; }
-    inline Microsec getLocalDiff() const
+    inline Duration getLocalDiff() const
     { return _local_diff; }
     // @formatter:on
 
@@ -186,8 +188,8 @@ public:
      * @remarks
      *  Elapsed time since UTC (1970/01/01T00:00:00).
      */
-    Microsec getTimeSinceEpoch() const;
-    Microsec getLocalTimeSinceEpoch() const;
+    Duration getTimeSinceEpoch() const;
+    Duration getLocalTimeSinceEpoch() const;
 
     Rep getRepTimeSinceEpoch() const;
     Rep getLocalRepTimeSinceEpoch() const;
@@ -227,10 +229,9 @@ public:
     std::string toLocalShortString() const;
 
 public:
-    bool fromString(std::string const & format, std::string const & time_string);
-
-public:
-    static std::string getLongTimeString(int y, int m, int d, int hour, int min, int sec, int milli = 0, int micro = 0);
+    static std::string getLongTimeString(int y, int m, int d,
+                                         int hour, int min, int sec,
+                                         int milli = 0, int micro = 0);
 
 public:
     inline static TimePoint now()

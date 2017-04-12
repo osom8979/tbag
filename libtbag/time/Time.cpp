@@ -232,6 +232,14 @@ int getMicrosec(std::chrono::system_clock::time_point const & time)
     return static_cast<int>(RESULT);
 }
 
+int getNanosec(std::chrono::system_clock::time_point const & time)
+{
+    using namespace std::chrono;
+    auto const RESULT = impl::getTimeFloor<microseconds, nanoseconds>(time);
+    assert(0 <= COMPARE_AND(RESULT) < 1000);
+    return static_cast<int>(RESULT);
+}
+
 int getDays(std::chrono::system_clock::time_point const & time)
 {
     return date::floor<date::days>(time).time_since_epoch().count();

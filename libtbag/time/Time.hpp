@@ -68,9 +68,8 @@ TBAG_API int getSubSeconds(std::chrono::system_clock::time_point const & time);
 
 /** milliseconds part of the seconds 0-999. */
 TBAG_API int getMillisec(std::chrono::system_clock::time_point const & time);
-
-/** microseconds part of the milliseconds 0-999. */
 TBAG_API int getMicrosec(std::chrono::system_clock::time_point const & time);
+TBAG_API int getNanosec(std::chrono::system_clock::time_point const & time);
 
 TBAG_API int getDays(std::chrono::system_clock::time_point const & time);
 
