@@ -47,11 +47,15 @@ namespace time {
 class TBAG_API TimePoint
 {
 public:
-    using SystemClock = std::chrono::system_clock;
-    using SystemTp    = typename SystemClock::time_point;
+    using SystemClock    = std::chrono::system_clock;
+    using SystemTp       = typename SystemClock::time_point;
+    using SystemDuration = typename SystemClock::duration;
 
-    using Duration = std::chrono::microseconds;
+    using Duration = std::chrono::nanoseconds;
     using Rep      = typename Duration::rep;
+
+    using Microsec = std::chrono::microseconds;
+    using MicroRep = typename Microsec::rep;
 
 public:
     struct now_time { /* EMPTY. */ };
@@ -67,7 +71,7 @@ public:
     TimePoint(SystemTp const & time_point, Duration const & local_diff);
     TimePoint(Rep rep);
     TimePoint(Rep rep, Rep local_diff);
-    TimePoint(int y, int m, int d, int hour, int min, int sec, int milli = 0, int micro = 0);
+    TimePoint(int y, int m, int d, int hour, int min, int sec, int milli = 0, int micro = 0, int nano = 0);
     TimePoint(TimePoint const & obj);
     TimePoint(TimePoint && obj);
     ~TimePoint();
@@ -99,25 +103,29 @@ public:
 
     inline TimePoint & operator +=(Duration const & dur)
     {
-        _system_tp += dur;
+        using namespace std::chrono;
+        _system_tp += duration_cast<SystemDuration>(dur);
         return *this;
     }
 
     inline TimePoint & operator -=(Duration const & dur)
     {
-        _system_tp -= dur;
+        using namespace std::chrono;
+        _system_tp -= duration_cast<SystemDuration>(dur);
         return *this;
     }
 
     inline TimePoint & operator +=(Rep rep)
     {
-        _system_tp += Duration(rep);
+        using namespace std::chrono;
+        _system_tp += duration_cast<SystemDuration>(Duration(rep));
         return *this;
     }
 
     inline TimePoint & operator -=(Rep rep)
     {
-        _system_tp -= Duration(rep);
+        using namespace std::chrono;
+        _system_tp -= duration_cast<SystemDuration>(Duration(rep));
         return *this;
     }
 
@@ -168,16 +176,16 @@ public:
     void setLocalDiff();
 
 public:
-    void setAll(int y, int m, int d,
+    void setAll(int y = 1970, int m = 1, int d = 1,
                 int hour = 0, int min = 0, int sec = 0,
-                int milli = 0, int micro = 0);
+                int milli = 0, int micro = 0, int nano = 0);
 
 public:
     // @formatter:off
     inline SystemTp getTimePoint() const
     { return _system_tp; }
     inline SystemTp getLocalTimePoint() const
-    { return _system_tp + _local_diff; }
+    { return _system_tp + std::chrono::duration_cast<SystemDuration>(_local_diff); }
     inline Duration getLocalDiff() const
     { return _local_diff; }
     // @formatter:on
@@ -194,6 +202,9 @@ public:
     Rep getRepTimeSinceEpoch() const;
     Rep getLocalRepTimeSinceEpoch() const;
 
+    MicroRep getMicrosecTimeSinceEpoch() const;
+    MicroRep getLocalMicrosecTimeSinceEpoch() const;
+
 public:
     // @formatter:off
     int year    () const;
@@ -204,6 +215,7 @@ public:
     int seconds () const;
     int millisec() const;
     int microsec() const;
+    int nanosec () const;
 
     int lyear    () const;
     int lmonth   () const;
@@ -213,6 +225,7 @@ public:
     int lseconds () const;
     int lmillisec() const;
     int lmicrosec() const;
+    int lnanosec () const;
     // @formatter:on
 
 public:
@@ -231,7 +244,7 @@ public:
 public:
     static std::string getLongTimeString(int y, int m, int d,
                                          int hour, int min, int sec,
-                                         int milli = 0, int micro = 0);
+                                         int milli = 0, int micro = 0, int nano = 0);
 
 public:
     inline static TimePoint now()
