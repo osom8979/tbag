@@ -2,11 +2,11 @@
  * @file   Logger.hpp
  * @brief  Logger class prototype.
  * @author zer0
- * @date   2016-07-15
+ * @date   2017-04-13
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_MGR_LOGGER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_MGR_LOGGER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -29,8 +29,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace log     {
-namespace details {
+namespace log {
+namespace mgr {
 
 /**
  * Logger class prototype.
@@ -41,8 +41,11 @@ namespace details {
 class TBAG_API Logger : public Noncopyable
 {
 public:
-    using SinkType = sink::SinkInterface;
-    using SinkPtr  = std::unique_ptr<SinkType>;
+    using SinkType  = sink::SinkInterface;
+    using SinkPtr   = std::unique_ptr<SinkType>;
+    using Severity  = details::Severity;
+    using Formatter = details::Formatter;
+    using MsgPacket = details::MsgPacket;
 
 private:
     SinkPtr   _sink;
@@ -69,12 +72,12 @@ public:
     }
 };
 
-} // namespace details
+} // namespace mgr
 } // namespace log
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_MGR_LOGGER_HPP__
 

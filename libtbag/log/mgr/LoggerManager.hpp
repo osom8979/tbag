@@ -2,11 +2,11 @@
  * @file   LoggerManager.hpp
  * @brief  LoggerManager class prototype.
  * @author zer0
- * @date   2016-07-15
+ * @date   2017-04-13
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGERMANAGER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGERMANAGER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_MGR_LOGGERMANAGER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_MGR_LOGGERMANAGER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,19 +15,21 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/pattern/Singleton2.hpp>
-#include <libtbag/log/details/Logger.hpp>
+#include <libtbag/log/mgr/Logger.hpp>
 
 #include <unordered_map>
 #include <memory>
 #include <string>
 
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace log     {
-namespace details {
+namespace log {
+namespace mgr {
 
 /**
  * LoggerManager class prototype.
@@ -58,12 +60,12 @@ public:
     Logger * getLoggerPtr(std::string const & name);
 };
 
-} // namespace details
+} // namespace mgr
 } // namespace log
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_LOGGERMANAGER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_MGR_LOGGERMANAGER_HPP__
 

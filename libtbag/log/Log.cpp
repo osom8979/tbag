@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/log/Log.hpp>
-#include <libtbag/log/details/LoggerManager.hpp>
+#include <libtbag/log/mgr/LoggerManager.hpp>
 #include <libtbag/log/sink/CoutSink.hpp>
 #include <libtbag/log/sink/ColorCoutSink.hpp>
 #include <libtbag/log/sink/RotateOfstreamSink.hpp>
@@ -19,7 +19,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
-using LoggerManager = ::libtbag::log::details::LoggerManager;
+using LoggerManager = ::libtbag::log::mgr::LoggerManager;
 
 Logger * createConsoleLogger(std::string const & name, bool auto_flush)
 {

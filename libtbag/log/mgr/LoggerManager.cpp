@@ -2,17 +2,18 @@
  * @file   LoggerManager.cpp
  * @brief  LoggerManager class implementation.
  * @author zer0
- * @date   2016-07-15
+ * @date   2017-04-13
  */
 
-#include <libtbag/log/details/LoggerManager.hpp>
+#include <libtbag/log/mgr/LoggerManager.hpp>
+#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace log     {
-namespace details {
+namespace log {
+namespace mgr {
 
 bool LoggerManager::addLogger(std::string const & name, Logger * new_logger)
 {
@@ -34,7 +35,7 @@ Logger * LoggerManager::getLoggerPtr(std::string const & name)
     return _logs.at(name).get();
 }
 
-} // namespace details
+} // namespace mgr
 } // namespace log
 
 // --------------------

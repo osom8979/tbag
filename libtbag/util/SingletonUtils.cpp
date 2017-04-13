@@ -9,7 +9,7 @@
 #include <libtbag/log/Log.hpp>
 
 // Singleton classes.
-#include <libtbag/log/details/LoggerManager.hpp>
+#include <libtbag/log/mgr/LoggerManager.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -19,12 +19,12 @@ namespace util {
 
 void initSingletonObjects()
 {
-    log::details::LoggerManager::createInstance();
+    log::mgr::LoggerManager::createInstance();
 }
 
 void releaseSingletonObjects()
 {
-    log::details::LoggerManager::releaseInstance();
+    log::mgr::LoggerManager::releaseInstance();
 }
 
 } // namespace util

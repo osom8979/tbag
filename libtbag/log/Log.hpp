@@ -19,7 +19,7 @@
 
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/log/details/Severity.hpp>
-#include <libtbag/log/details/Logger.hpp>
+#include <libtbag/log/mgr/Logger.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,7 +33,7 @@ char const * const TBAG_DEBUGGING_LOGGER_NAME = "__tbag_debugging_logger__";
 //TBAG_CONSTEXPR bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
 
-using Logger   = ::libtbag::log::details::Logger;
+using Logger   = ::libtbag::log::mgr::Logger;
 using Severity = ::libtbag::log::details::Severity;
 
 Severity const       OFF_LEVEL = ::libtbag::log::details::OFF_SEVERITY;

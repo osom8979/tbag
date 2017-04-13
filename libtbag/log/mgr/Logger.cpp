@@ -2,20 +2,21 @@
  * @file   Logger.cpp
  * @brief  Logger class implementation.
  * @author zer0
- * @date   2016-07-15
+ * @date   2017-04-13
  */
 
-#include <libtbag/log/details/Logger.hpp>
+#include <libtbag/log/mgr/Logger.hpp>
+#include <libtbag/log/Log.hpp>
 #include <libtbag/log/sink/NullSink.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace log     {
-namespace details {
+namespace log {
+namespace mgr {
 
-Logger::Logger(SinkType * sink) : _sink(sink), _severity(INFORMATIONAL_SEVERITY)
+Logger::Logger(SinkType * sink) : _sink(sink), _severity(details::INFORMATIONAL_SEVERITY)
 {
     // EMPTY.
 }
@@ -42,7 +43,7 @@ void Logger::log(MsgPacket const & msg)
     }
 }
 
-} // namespace details
+} // namespace mgr
 } // namespace log
 
 // --------------------
