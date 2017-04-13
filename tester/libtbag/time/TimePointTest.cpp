@@ -119,7 +119,7 @@ TEST(TimePointTest, DateTime)
     ASSERT_EQ(  99, tp1.microsec());
 
     TimePoint tp3 = TimePoint::now();
-    TimePoint tp4(tp3.year(), tp3.month(), tp3.day(), tp3.hours(), tp3.minutes(), tp3.seconds(), tp3.millisec(), tp3.microsec());
+    TimePoint tp4(tp3.year(), tp3.month(), tp3.day(), tp3.hours(), tp3.minutes(), tp3.seconds(), tp3.millisec(), tp3.microsec(), tp3.nanosec());
 
     std::cout << "TP3 Long String: " << tp3.toLongString() << std::endl;
     std::cout << "TP4 Long String: " << tp4.toLongString() << std::endl;
