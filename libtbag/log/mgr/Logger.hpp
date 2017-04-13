@@ -18,6 +18,8 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/sink/Sink.hpp>
+#include <libtbag/log/msg/PacketGenerator.hpp>
+#include <libtbag/log/msg/MsgPacket.hpp>
 
 #include <libtbag/3rd/fmt/format.h>
 
@@ -41,18 +43,24 @@ namespace mgr {
 class TBAG_API Logger : public Noncopyable
 {
 public:
+    using MsgPacket = msg::MsgPacket;
+    using Generator = msg::PacketGenerator;
+    using MakeType  = Generator::MakeType;
+
     using SinkType  = sink::SinkInterface;
     using SinkPtr   = std::unique_ptr<SinkType>;
+
     using Severity  = level::Severity;
     using String    = std::string;
 
 private:
-    SinkPtr  _sink;
-    Severity _severity;
+    SinkPtr   _sink;
+    Generator _generator;
+    Severity  _severity;
 
 public:
     Logger();
-    Logger(SinkType * sink);
+    Logger(SinkType * sink, MakeType type = MakeType::DEFAULT);
     ~Logger();
 
 public:
@@ -61,6 +69,11 @@ public:
     { _severity = severity; }
     inline Severity getSeverity() const TBAG_NOEXCEPT
     { return _severity; }
+
+    inline void setType(Generator::MakeType type) TBAG_NOEXCEPT
+    { _generator.setType(type); }
+    inline Generator::MakeType getType() const TBAG_NOEXCEPT
+    { return _generator.getType(); }
     // @formatter:on
 
 public:

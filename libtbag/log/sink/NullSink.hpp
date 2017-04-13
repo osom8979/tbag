@@ -36,7 +36,7 @@ public:
     using Parent = Sink<lock::FakeLock>;
 
 public:
-    NullSink()
+    NullSink(bool force_flush = false) : Parent(force_flush)
     { /* EMPTY. */ }
     virtual ~NullSink()
     { /* EMPTY. */ }

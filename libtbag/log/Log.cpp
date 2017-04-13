@@ -36,7 +36,7 @@ Logger * createColorConsoleLogger(std::string const & name, bool auto_flush)
 {
     try {
         using namespace ::libtbag::log::sink;
-        Logger * logger = new Logger(new CoutSink<std::mutex>(auto_flush));
+        Logger * logger = new Logger(new CoutSink<std::mutex>(auto_flush), Logger::MakeType::DEFAULT_COLOR);
         LoggerManager::getInstance()->addLogger(name, logger);
         return logger;
     } catch (...) {

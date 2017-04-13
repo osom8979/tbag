@@ -36,16 +36,13 @@ template <typename MutexType = lock::FakeLock>
 class CoutSink : public Sink<MutexType>
 {
 public:
-    using Parent    = Sink<MutexType>;
-    using Severity  = typename Parent::Severity;
-    using MsgPacket = typename Parent::MsgPacket;
-    using String    = typename Parent::String;
-    using Mutex     = typename Parent::Mutex;
+    using Parent = Sink<MutexType>;
+    using String = typename Parent::String;
+    using Mutex  = typename Parent::Mutex;
 
 public:
     CoutSink(bool force_flush = false) : Parent(force_flush)
     { /* EMPTY. */ }
-
     virtual ~CoutSink()
     { /* EMPTY. */ }
 

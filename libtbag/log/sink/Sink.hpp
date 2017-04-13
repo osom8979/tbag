@@ -15,8 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/log/level/Severity.hpp>
-#include <libtbag/log/msg/MsgPacket.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
 #include <string>
@@ -30,11 +28,7 @@ namespace sink {
 
 struct SinkInterface
 {
-    using Severity  = level::Severity;
-    using MsgPacket = msg::MsgPacket;
-    using String    = std::string;
-
-    virtual MsgPacket makePacket(Severity const & severity, String const & message) const = 0;
+    using String = std::string;
 
     virtual void safeWrite(String const & message) = 0;
     virtual void safeFlush() = 0;
@@ -53,10 +47,8 @@ template <typename MutexType = lock::FakeLock>
 class Sink : public SinkInterface, public Noncopyable
 {
 public:
-    using Severity  = SinkInterface::Severity;
-    using MsgPacket = SinkInterface::MsgPacket;
-    using String    = SinkInterface::String;
-    using Mutex     = MutexType;
+    using String = SinkInterface::String;
+    using Mutex  = MutexType;
 
 public:
     TBAG_CONSTEXPR static char const * const WINDOWS_NEW_LINE = "\r\n";
@@ -84,14 +76,6 @@ public:
     // @formatter:on
 
 public:
-    virtual MsgPacket makePacket(Severity const & severity, String const & message) const override
-    {
-        MsgPacket packet;
-        packet.setSeverity(severity);
-        packet.setMessage(message);
-        return packet;
-    }
-
     virtual void safeWrite(String const & message) override
     {
         _mutex.lock();
