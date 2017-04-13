@@ -49,6 +49,10 @@ public:
     ~File();
 
 public:
+    inline bool isOpen() const TBAG_NOEXCEPT
+    { return _file != 0; }
+
+public:
     bool open(std::string const & path, Flags flags = Flags(), int mode = 0664);
     bool close();
 
