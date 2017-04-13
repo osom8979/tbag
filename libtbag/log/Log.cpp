@@ -11,6 +11,7 @@
 #include <libtbag/log/sink/RotateFileSink.hpp>
 
 #include <mutex>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -19,44 +20,43 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 
 using LoggerManager = ::libtbag::log::mgr::LoggerManager;
+using MakeType      = ::libtbag::log::msg::PacketGenerator::MakeType;
 
-Logger * createConsoleLogger(std::string const & name, bool auto_flush)
+namespace impl {
+
+template <typename SinkType, typename ... Args>
+Logger * createLogger(std::string const & name, MakeType type, Args && ... args)
 {
     try {
-        using namespace ::libtbag::log::sink;
-        Logger * logger = new Logger(new CoutSink<std::mutex>(auto_flush));
-        LoggerManager::getInstance()->addLogger(name, logger);
-        return logger;
+        auto * sink = new SinkType(std::forward<Args>(args) ...);
+        auto * log  = new mgr::Logger(sink, type);
+        if (LoggerManager::getInstance()->addLogger(name, log)) {
+            return log;
+        }
     } catch (...) {
         // EMPTY.
     }
     return nullptr;
+}
+
+} // namespace impl {
+
+Logger * createConsoleLogger(std::string const & name, bool auto_flush)
+{
+    using SinkType = sink::CoutSink<std::mutex>;
+    return impl::createLogger<SinkType>(name, MakeType::DEFAULT, auto_flush);
 }
 
 Logger * createColorConsoleLogger(std::string const & name, bool auto_flush)
 {
-    try {
-        using namespace ::libtbag::log::sink;
-        Logger * logger = new Logger(new CoutSink<std::mutex>(auto_flush), Logger::MakeType::DEFAULT_COLOR);
-        LoggerManager::getInstance()->addLogger(name, logger);
-        return logger;
-    } catch (...) {
-        // EMPTY.
-    }
-    return nullptr;
+    using SinkType = sink::CoutSink<std::mutex>;
+    return impl::createLogger<SinkType>(name, MakeType::DEFAULT_COLOR, auto_flush);
 }
 
 Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush)
 {
-    try {
-        using namespace ::libtbag::log::sink;
-        Logger * logger = new Logger(new RotateFileSink<std::mutex>(path, auto_flush));
-        LoggerManager::getInstance()->addLogger(name, logger);
-        return logger;
-    } catch (...) {
-        // EMPTY.
-    }
-    return nullptr;
+    using SinkType = sink::RotateFileSink<std::mutex>;
+    return impl::createLogger<SinkType>(name, MakeType::DEFAULT, path, auto_flush);
 }
 
 Logger * createDefaultConsoleLogger(bool auto_flush)
@@ -74,14 +74,14 @@ Logger * createDefaultFileLogger(std::string const & path, bool auto_flush)
     return createFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, auto_flush);
 }
 
-void removeLogger(std::string const & name)
+bool removeLogger(std::string const & name)
 {
-    LoggerManager::getInstance()->removeLogger(name);
+    return LoggerManager::getInstance()->removeLogger(name);
 }
 
-void removeDefaultLogger()
+bool removeDefaultLogger()
 {
-    removeLogger(TBAG_DEFAULT_LOGGER_NAME);
+    return removeLogger(TBAG_DEFAULT_LOGGER_NAME);
 }
 
 Logger * getLogger(std::string const & name)

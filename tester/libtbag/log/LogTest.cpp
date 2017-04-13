@@ -16,7 +16,7 @@ using namespace libtbag;
 TEST(LogTest, Console)
 {
     log::createDefaultColorConsoleLogger();
-    log::setDefaultLevel(log::NOTICE_LEVEL);
+    log::setDefaultLevel(log::NOTICE_SEVERITY);
 
     tDLogM("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "emergency", 0.1, 'T');
     tDLogA("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "alert", 0.1, 'T');
@@ -28,11 +28,11 @@ TEST(LogTest, Console)
     tDLogI("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "info", 0.1, 'T');
     tDLogD("LogTest: {0}, {1}, {0}, {2}, {3}", 100, "debug", 0.1, 'T');
 
-    log::setDefaultLevel(log::DEBUG_LEVEL);
+    log::setDefaultLevel(log::DEBUG_SEVERITY);
     tDLogI("CHANGE LOG LEVEL: info.");
     tDLogD("CHANGE LOG LEVEL: debug.");
 
-    log::setDefaultLevel(log::OFF_LEVEL);
+    log::setDefaultLevel(log::OFF_SEVERITY);
     tDLogM("OFF LOG: tDLogE");
     tDLogA("OFF LOG: tDLogA");
     tDLogC("OFF LOG: tDLogC");
@@ -48,7 +48,7 @@ TEST(LogTest, Console)
 TEST(LogTest, File)
 {
     log::createDefaultFileLogger("__log_test_file");
-    log::setDefaultLevel(log::WARNING_LEVEL);
+    log::setDefaultLevel(log::WARNING_SEVERITY);
 
     tDLogM("LogTest: emergency");
     tDLogA("LogTest: alert");

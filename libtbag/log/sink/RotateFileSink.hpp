@@ -25,8 +25,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log  {
 namespace sink {
 
-// Forward declaration.
-
 /**
  * RotateFileSink class prototype.
  *
