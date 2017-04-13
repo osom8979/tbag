@@ -16,21 +16,21 @@ using namespace libtbag::log::msg;
 
 TEST(MsgPacketTest, Operator)
 {
-//    MsgPacket packet;
-//
-//    packet << 100 << 'c';
-//    ASSERT_STREQ("100c", packet.getStringPointer());
-//    packet.clearString();
-//
-//    packet << "TEST";
-//    ASSERT_STREQ("TEST", packet.getStringPointer());
-//    packet << std::string("TEMP");
-//    ASSERT_STREQ("TESTTEMP", packet.getStringPointer());
-//    packet.clearString();
-//
-//    int test = 0;
-//    packet << &test;
-//    ASSERT_LT(0U, std::stoull(std::string(packet.getStringPointer())));
-//    packet.clearString();
+    MsgPacket packet;
+
+    packet << 100 << 'c';
+    ASSERT_STREQ("100c", packet.c_str());
+    packet.clear();
+
+    packet << "TEST";
+    ASSERT_STREQ("TEST", packet.c_str());
+    packet << std::string("TEMP");
+    ASSERT_STREQ("TESTTEMP", packet.c_str());
+    packet.clear();
+
+    int test = 0;
+    packet << &test;
+    ASSERT_LT(0U, std::stoull(std::string(packet.c_str())));
+    packet.clear();
 }
 
