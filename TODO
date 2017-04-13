@@ -8,7 +8,7 @@
 [ ] Refactoring locale package.
 [ ] Create Android build script.
 [ ] Update clang-format.
-[ ] Create DateTime class.
+[x] Create TimePoint class.
 [ ] Refactoring log package.
 [ ] Deprecated macro.
 [ ] Force inline macro.
@@ -25,15 +25,16 @@
 [ ] dep/http-parser.
 [ ] dep/WebSocket++
 [ ] dep/libsimdpp.
-[ ] dep/cap'n-proto.
-[ ] dep/LibreSSL (or OpenSSL).
+[x] external/cap'n-proto
+[x] external/LibreSSL (or OpenSSL).
+[x] external/zlib
 [ ] dep/webp
 [ ] dep/imagezero
 [ ] lua engine.
 [ ] python helper.
 [ ] OpenCL/CUDA backend.
 [ ] Machine learning.
-[ ] Remove 3rd/tinyaes128c
+[x] Remove 3rd/tinyaes128c
 [ ] Checksum.
 [ ] Key store.
 
