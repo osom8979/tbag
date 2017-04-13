@@ -1,12 +1,12 @@
 /**
  * @file   Raw.cpp
- * @brief  Raw logging methods implementation.
+ * @brief  Raw class implementation.
  * @author zer0
- * @date   2016-07-09
+ * @date   2017-04-13
  */
 
-#include <libtbag/log/details/Raw.hpp>
-#include <libtbag/macro/utils.hpp>
+#include <libtbag/io/Raw.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cstdarg>
 #include <cstdio>
@@ -28,8 +28,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace log     {
-namespace details {
+namespace io {
 
 bool formatToMemory(char * buf, int size, char const * format, ...)
 {
@@ -45,8 +44,7 @@ bool formatToMemory(char * buf, int size, char const * format, ...)
     return false;
 }
 
-} // namespace details
-} //namespace log
+} // namespace io
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

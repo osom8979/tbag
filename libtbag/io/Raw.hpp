@@ -1,12 +1,12 @@
 /**
  * @file   Raw.hpp
- * @brief  Raw logging methods prototype.
+ * @brief  Raw class prototype.
  * @author zer0
- * @date   2016-07-09
+ * @date   2017-04-13
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_RAW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_RAW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_IO_RAW_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_IO_RAW_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -20,17 +20,15 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace log     {
-namespace details {
+namespace io {
 
 TBAG_API bool formatToMemory(char * buf, int size, char const * format, ...);
 
-} // namespace details
-} //namespace log
+} // namespace io
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_RAW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_IO_RAW_HPP__
 

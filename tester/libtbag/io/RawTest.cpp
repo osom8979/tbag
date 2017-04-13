@@ -1,16 +1,15 @@
 /**
  * @file   RawTest.cpp
- * @brief  Raw logging tester.
+ * @brief  Raw class tester.
  * @author zer0
- * @date   2016-07-09
+ * @date   2017-04-13
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/log/details/Raw.hpp>
+#include <libtbag/io/Raw.hpp>
 
 using namespace libtbag;
-using namespace libtbag::log;
-using namespace libtbag::log::details;
+using namespace libtbag::io;
 
 TEST(RawTest, Format)
 {
