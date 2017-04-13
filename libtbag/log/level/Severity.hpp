@@ -3,10 +3,11 @@
  * @brief  Severity class prototype.
  * @author zer0
  * @date   2016-07-09
+ * @date   2017-04-13 (Move namespace: log/details -> log/level)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_SEVERITY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_SEVERITY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_LEVEL_SEVERITY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_LEVEL_SEVERITY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,14 +16,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <string>
+#include <algorithm>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace log     {
-namespace details {
+namespace log   {
+namespace level {
 
 /**
  * Severity class prototype.
@@ -38,18 +39,18 @@ public:
 
 public:
     // @formatter:off
-    Severity() : text(), level()
+    Severity() TBAG_NOEXCEPT : text(), level()
     { /* EMPTY */ }
-    Severity(char const * t, int l) : text(t), level(l)
+    Severity(char const * t, int l) TBAG_NOEXCEPT : text(t), level(l)
     { /* EMPTY */ }
-    Severity(Severity const & obj) : text(obj.text), level(obj.level)
+    Severity(Severity const & obj) TBAG_NOEXCEPT : text(obj.text), level(obj.level)
     { /* EMPTY */ }
-    ~Severity()
+    ~Severity() TBAG_NOEXCEPT
     { /* EMPTY */ }
     // @formatter:on
 
 public:
-    Severity & operator =(Severity const & obj)
+    Severity & operator =(Severity const & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
             level = obj.level;
@@ -83,6 +84,14 @@ public:
     inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
     { return level >= obj.level; }
     // @formatter:on
+
+    inline friend void swap(Severity & lh, Severity & rh) TBAG_NOEXCEPT
+    {
+        if (&lh != &rh) {
+            std::swap(lh.text, rh.text);
+            std::swap(lh.level, rh.level);
+        }
+    }
 };
 
 Severity const           OFF_SEVERITY("OFF"      ,   0); // Hide all messages.
@@ -95,12 +104,12 @@ Severity const        NOTICE_SEVERITY("NOTICE"   , 600); // Normal but significa
 Severity const INFORMATIONAL_SEVERITY("INFO"     , 700); // Informational messages.
 Severity const         DEBUG_SEVERITY("DEBUG"    , 800); // Debug-level messages.
 
-} // namespace details
+} // namespace level
 } // namespace log
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_SEVERITY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_LEVEL_SEVERITY_HPP__
 

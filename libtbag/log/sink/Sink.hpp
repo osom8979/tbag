@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/log/details/Severity.hpp>
-#include <libtbag/log/details/MsgPacket.hpp>
+#include <libtbag/log/level/Severity.hpp>
+#include <libtbag/log/msg/MsgPacket.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
 #include <string>
@@ -28,38 +28,19 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log  {
 namespace sink {
 
-/**
- * Sink interface.
- *
- * @author zer0
- * @date   2016-07-16
- */
-class SinkInterface
+struct SinkInterface
 {
-public:
-    using MsgPacket = details::MsgPacket;
-    using Severity  = details::Severity;
+    using Severity  = level::Severity;
+    using MsgPacket = msg::MsgPacket;
+    using String    = std::string;
 
-public:
-    TBAG_CONSTEXPR SinkInterface()
-    { /* EMPTY. */ }
-    virtual ~SinkInterface()
-    { /* EMPTY. */ }
+    virtual MsgPacket makePacket(Severity const & severity, String const & message) const = 0;
 
-public:
-    virtual void writeReal(std::string const & msg) = 0;
-    virtual void flushReal() = 0;
+    virtual void safeWrite(String const & message) = 0;
+    virtual void safeFlush() = 0;
 
-public:
-    virtual void write(MsgPacket const & msg) = 0;
+    virtual void write(String const & message) = 0;
     virtual void flush() = 0;
-
-public:
-    template <typename ... Args>
-    /* TBAG_CONSTEXPR */ inline static MsgPacket makeMessage(Args && ... args) TBAG_NOEXCEPT
-    {
-        return MsgPacket(std::forward<Args>(args) ...);
-    }
 };
 
 /**
@@ -69,38 +50,62 @@ public:
  * @date   2016-07-08
  */
 template <typename MutexType = lock::FakeLock>
-class Sink : public SinkInterface
+class Sink : public SinkInterface, public Noncopyable
 {
 public:
-    using Mutex = MutexType;
-
-private:
-    Mutex _mutex;
-    bool  _force_flush;
+    using Severity  = SinkInterface::Severity;
+    using MsgPacket = SinkInterface::MsgPacket;
+    using String    = SinkInterface::String;
+    using Mutex     = MutexType;
 
 public:
-    Sink() : _mutex(), _force_flush(false)
+    TBAG_CONSTEXPR static char const * const WINDOWS_NEW_LINE = "\r\n";
+    TBAG_CONSTEXPR static char const * const    UNIX_NEW_LINE = "\n";
+
+private:
+    Mutex  _mutex;
+    bool   _force_flush;
+    String _endl;
+
+public:
+    Sink() : _mutex(), _force_flush(false), _endl(UNIX_NEW_LINE)
     { /* EMPTY. */ }
-    Sink(bool force_flush) : _mutex(), _force_flush(force_flush)
+    Sink(bool force_flush) : _mutex(), _force_flush(force_flush), _endl(UNIX_NEW_LINE)
     { /* EMPTY. */ }
     virtual ~Sink()
     { /* EMPTY. */ }
 
 public:
-    virtual void write(MsgPacket const & msg) override
+    // @formatter:off
+    inline void setNewLineForUnixStyle()
+    { _endl = UNIX_NEW_LINE; }
+    inline void setNewLineForWindowsStyle()
+    { _endl = WINDOWS_NEW_LINE; }
+    // @formatter:on
+
+public:
+    virtual MsgPacket makePacket(Severity const & severity, String const & message) const override
+    {
+        MsgPacket packet;
+        packet.setSeverity(severity);
+        packet.setMessage(message);
+        return packet;
+    }
+
+    virtual void safeWrite(String const & message) override
     {
         _mutex.lock();
-        writeReal(msg.getString() + "\n");
+        this->write(message + _endl);
         if (_force_flush) {
-            flushReal();
+            this->flush();
         }
         _mutex.unlock();
     }
 
-    virtual void flush() override
+    virtual void safeFlush() override
     {
         _mutex.lock();
-        flushReal();
+        this->flush();
         _mutex.unlock();
     }
 };

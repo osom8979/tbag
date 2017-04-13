@@ -6,11 +6,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/log/details/Severity.hpp>
+#include <libtbag/log/level/Severity.hpp>
 
 using namespace libtbag;
 using namespace libtbag::log;
-using namespace libtbag::log::details;
+using namespace libtbag::log::level;
 
 TEST(SeverityTest, Severity)
 {

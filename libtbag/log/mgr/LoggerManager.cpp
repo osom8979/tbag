@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/log/mgr/LoggerManager.hpp>
-#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

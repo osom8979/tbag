@@ -159,8 +159,10 @@ public:
 
     inline friend void swap(TimePoint & lh, TimePoint & rh)
     {
-        std::swap(lh._system_tp , rh._system_tp );
-        std::swap(lh._local_diff, rh._local_diff);
+        if (&lh != &rh) {
+            std::swap(lh._system_tp , rh._system_tp );
+            std::swap(lh._local_diff, rh._local_diff);
+        }
     }
 
 public:

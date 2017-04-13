@@ -16,10 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/log/details/MsgPacket.hpp>
-#include <libtbag/log/details/Severity.hpp>
+#include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/sink/Sink.hpp>
-#include <libtbag/log/details/Formatter.hpp>
+
+#include <libtbag/3rd/fmt/format.h>
 
 #include <string>
 #include <memory>
@@ -43,32 +43,35 @@ class TBAG_API Logger : public Noncopyable
 public:
     using SinkType  = sink::SinkInterface;
     using SinkPtr   = std::unique_ptr<SinkType>;
-    using Severity  = details::Severity;
-    using Formatter = details::Formatter;
-    using MsgPacket = details::MsgPacket;
+    using Severity  = level::Severity;
+    using String    = std::string;
 
 private:
-    SinkPtr   _sink;
-    Severity  _severity;
-    Formatter _formatter;
+    SinkPtr  _sink;
+    Severity _severity;
 
 public:
-    Logger(SinkType * sink);
     Logger();
-    virtual ~Logger();
+    Logger(SinkType * sink);
+    ~Logger();
 
 public:
-    void setSeverity(Severity const & severity);
+    // @formatter:off
+    inline void setSeverity(Severity const & severity) TBAG_NOEXCEPT
+    { _severity = severity; }
+    inline Severity getSeverity() const TBAG_NOEXCEPT
+    { return _severity; }
+    // @formatter:on
 
 public:
-    void log(MsgPacket const & msg);
+    void write(Severity const & severity, String const & message);
+    void flush();
 
 public:
     template <typename ... Args>
-    void logf(Severity level, std::string const & format, Args && ... args)
+    void logf(Severity const & severity, std::string const & format, Args && ... args)
     {
-        this->log(SinkType::makeMessage(level
-                , _formatter.getDefaultPrefix(level) + _formatter.format(format, std::forward<Args>(args) ...)));
+        this->write(severity, ::fmt::format(format, std::forward<Args>(args) ...));
     }
 };
 

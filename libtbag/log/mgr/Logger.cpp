@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/log/mgr/Logger.hpp>
-#include <libtbag/log/Log.hpp>
 #include <libtbag/log/sink/NullSink.hpp>
 
 // -------------------
@@ -16,12 +15,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 namespace mgr {
 
-Logger::Logger(SinkType * sink) : _sink(sink), _severity(details::INFORMATIONAL_SEVERITY)
+Logger::Logger() : _sink(new ::libtbag::log::sink::NullSink()), _severity(level::INFORMATIONAL_SEVERITY)
 {
     // EMPTY.
 }
 
-Logger::Logger() : Logger(new ::libtbag::log::sink::NullSink())
+Logger::Logger(SinkType * sink) : _sink(sink), _severity(level::INFORMATIONAL_SEVERITY)
 {
     // EMPTY.
 }
@@ -31,15 +30,20 @@ Logger::~Logger()
     // EMPTY.
 }
 
-void Logger::setSeverity(Severity const & severity)
+void Logger::write(Severity const & severity, String const & message)
 {
-    _severity = severity;
+    if (static_cast<bool>(_sink)) {
+        auto packet = _sink->makePacket(severity, message);
+        if (_severity.isContain(packet.getSeverity())) {
+            _sink->safeWrite(packet.toString());
+        }
+    }
 }
 
-void Logger::log(MsgPacket const & msg)
+void Logger::flush()
 {
-    if (static_cast<bool>(_sink) && _severity.isContain(msg.getSeverity())) {
-        _sink->write(msg);
+    if (static_cast<bool>(_sink)) {
+        _sink->safeFlush();
     }
 }
 

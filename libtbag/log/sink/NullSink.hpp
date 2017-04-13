@@ -15,7 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/log/sink/Sink.hpp>
 
 // -------------------
@@ -31,7 +30,7 @@ namespace sink {
  * @author zer0
  * @date   2016-07-17
  */
-class NullSink : public Sink<lock::FakeLock>, public Noncopyable
+class NullSink : public Sink<lock::FakeLock>
 {
 public:
     using Parent = Sink<lock::FakeLock>;
@@ -42,10 +41,10 @@ public:
     virtual ~NullSink()
     { /* EMPTY. */ }
 
-public:
-    virtual void writeReal(std::string const & msg) override
+protected:
+    virtual void write(String const & msg) override
     { /* EMPTY. */ }
-    virtual void flushReal() override
+    virtual void flush() override
     { /* EMPTY. */ }
 };
 

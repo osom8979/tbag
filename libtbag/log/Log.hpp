@@ -18,7 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <libtbag/pattern/Singleton.hpp>
-#include <libtbag/log/details/Severity.hpp>
+#include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/mgr/Logger.hpp>
 
 // -------------------
@@ -34,17 +34,17 @@ char const * const TBAG_DEBUGGING_LOGGER_NAME = "__tbag_debugging_logger__";
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
 
 using Logger   = ::libtbag::log::mgr::Logger;
-using Severity = ::libtbag::log::details::Severity;
+using Severity = ::libtbag::log::level::Severity;
 
-Severity const       OFF_LEVEL = ::libtbag::log::details::OFF_SEVERITY;
-Severity const EMERGENCY_LEVEL = ::libtbag::log::details::EMERGENCY_SEVERITY;
-Severity const     ALERT_LEVEL = ::libtbag::log::details::ALERT_SEVERITY;
-Severity const  CRITICAL_LEVEL = ::libtbag::log::details::CRITICAL_SEVERITY;
-Severity const     ERROR_LEVEL = ::libtbag::log::details::ERROR_SEVERITY;
-Severity const   WARNING_LEVEL = ::libtbag::log::details::WARNING_SEVERITY;
-Severity const    NOTICE_LEVEL = ::libtbag::log::details::NOTICE_SEVERITY;
-Severity const      INFO_LEVEL = ::libtbag::log::details::INFORMATIONAL_SEVERITY;
-Severity const     DEBUG_LEVEL = ::libtbag::log::details::DEBUG_SEVERITY;
+Severity const       OFF_LEVEL = ::libtbag::log::level::OFF_SEVERITY;
+Severity const EMERGENCY_LEVEL = ::libtbag::log::level::EMERGENCY_SEVERITY;
+Severity const     ALERT_LEVEL = ::libtbag::log::level::ALERT_SEVERITY;
+Severity const  CRITICAL_LEVEL = ::libtbag::log::level::CRITICAL_SEVERITY;
+Severity const     ERROR_LEVEL = ::libtbag::log::level::ERROR_SEVERITY;
+Severity const   WARNING_LEVEL = ::libtbag::log::level::WARNING_SEVERITY;
+Severity const    NOTICE_LEVEL = ::libtbag::log::level::NOTICE_SEVERITY;
+Severity const      INFO_LEVEL = ::libtbag::log::level::INFORMATIONAL_SEVERITY;
+Severity const     DEBUG_LEVEL = ::libtbag::log::level::DEBUG_SEVERITY;
 
 TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
 TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
