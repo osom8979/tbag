@@ -8,7 +8,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/log/mgr/LoggerManager.hpp>
 #include <libtbag/log/sink/CoutSink.hpp>
-#include <libtbag/log/sink/FileSink.hpp>
+#include <libtbag/log/sink/RotateFileSink.hpp>
 
 #include <mutex>
 
@@ -50,7 +50,7 @@ Logger * createFileLogger(std::string const & name, std::string const & path, bo
 {
     try {
         using namespace ::libtbag::log::sink;
-        Logger * logger = new Logger(new FileSink<std::mutex>(path, auto_flush));
+        Logger * logger = new Logger(new RotateFileSink<std::mutex>(path, auto_flush));
         LoggerManager::getInstance()->addLogger(name, logger);
         return logger;
     } catch (...) {
