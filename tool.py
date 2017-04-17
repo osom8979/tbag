@@ -36,11 +36,11 @@ CMD_MAP = {
 }
 
 CMD_MESSAGE = "\nCommand list:\n"
-for key, val in CMD_MAP.iteritems():
+for key, val in CMD_MAP.items():
     CMD_MESSAGE += '{}\t{}\n'.format(key, val)
 
 def printCommandHelp():
-    print CMD_MESSAGE
+    print(CMD_MESSAGE)
 
 def getEnvironmentPath():
     return SCRIPT_PATH
@@ -78,13 +78,13 @@ def parseArguments(argv, print_help=True):
 
 def main_class(options):
     if len(sys.argv) <= 1:
-        print "Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_CLASS)
+        print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_CLASS))
         exit(1)
     tools.genClass(sys.argv[1])
 
 def main_test(options):
     if len(sys.argv) <= 1:
-        print "Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_TEST)
+        print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_TEST))
         exit(1)
     tools.genTest(sys.argv[1])
 

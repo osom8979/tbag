@@ -1,6 +1,6 @@
 
-import genclass
-import gentest
+from .genclass import *
+from .gentest import *
 
 __add__ = ['genClass', 'genTest']
 

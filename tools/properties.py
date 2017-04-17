@@ -24,8 +24,8 @@ def getProjectName():
     result = ''
     output = subprocess.check_output(['cat', CONFIG_CMAKE])
 
-    for line in output.splitlines():
-        if re.match(r'^NAME.*=.*$', line):
+    for line in output.decode('utf-8').splitlines():
+        if re.match('^NAME.*=.*$', line):
             result = line[line.find('=')+1:]
             break
 
@@ -40,7 +40,7 @@ HEADER_EXTENSION = '.hpp'
 SOURCE_EXTENSION = '.cpp'
 
 def addGlobalString(name):
-    exec "global {0}; {0} = '{0}'".format(name)
+    exec("global {0}; {0} = '{0}'".format(name))
 
 addGlobalString('PROJECT_NAMESPACE')
 addGlobalString('CONFIG_HEADER_PATH')
@@ -148,7 +148,7 @@ def saveFile(path, content):
 
 def replaceContent(content, dic):
     for key in dic:
-        content = content.replace('${' + key + '}', dic[key])
+        content = content.replace(('${' + key + '}').encode(), dic[key].encode())
     return content
 
 def createDefaultDictionary(classpath):
