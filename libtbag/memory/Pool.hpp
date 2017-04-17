@@ -34,7 +34,7 @@ struct Pool : public PoolInterface
     virtual void * allocate(std::size_t allocate_size, void const * hint) override
     {
         assert(allocate_size > 0);
-        ::libtbag::memory::allocate(allocate_size);
+        return ::libtbag::memory::allocate(allocate_size);
     }
 
     virtual void deallocate(void * pointer, std::size_t allocated_size) override

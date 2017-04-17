@@ -43,14 +43,8 @@ inline void deallocate(void * ptr)
     ::operator delete(ptr);
 }
 
-/**
- * Allocator interface class template prototype.
- *
- * @author zer0
- * @date   2017-01-04
- */
 template <typename Type>
-struct Allocator
+struct BaseAllocator
 {
 public:
     using value_type = Type;
@@ -65,23 +59,6 @@ public:
     using difference_type = std::ptrdiff_t;
 
 public:
-    /** Rebind proxy class template. */
-    template <typename Up>
-    struct rebind
-    {
-        typedef Allocator<Up> other;
-    };
-
-public:
-    TBAG_CONSTEXPR Allocator() TBAG_NOEXCEPT { /* EMPTY. */ }
-    ~Allocator() { /* EMPTY. */ }
-
-public:
-    template <typename Up>
-    Allocator(Allocator<Up> const & obj) TBAG_NOEXCEPT
-    { /* EMPTY. */ }
-
-public:
     /** obtains the address of an object. */
     const_pointer address(const_reference val) const TBAG_NOEXCEPT
     {
@@ -94,22 +71,6 @@ public:
         return std::numeric_limits<size_type>::max() / sizeof(value_type);
     }
 
-public:
-    /** allocates uninitialized storage. */
-    pointer allocate(size_type size, void const * hint = 0)
-    {
-        assert(size > 0);
-        return static_cast<pointer>(::libtbag::memory::allocate(size * sizeof(value_type)));
-    }
-
-    /** deallocates storage. */
-    void deallocate(pointer ptr, size_type allocated_size) TBAG_NOEXCEPT
-    {
-        assert(ptr != nullptr);
-        ::libtbag::memory::deallocate((void*)ptr);
-    }
-
-public:
     /** constructs an object in allocated storage. */
     template <typename U, typename ... Args>
     void construct(U * ptr, Args && ... args)
@@ -124,6 +85,62 @@ public:
     {
         assert(ptr != nullptr);
         ptr->~U();
+    }
+};
+
+#ifndef TBAG_BASE_ALLOCATOR_TYPES
+#define TBAG_BASE_ALLOCATOR_TYPES(self, value, parent_allocator) \
+    public: \
+        using value_type      = value; \
+        using self_type       = self<value_type>; \
+        using parent_type     = parent_allocator<value_type>; \
+        using pointer         = typename parent_type::pointer; \
+        using const_pointer   = typename parent_type::const_pointer; \
+        using reference       = typename parent_type::reference; \
+        using const_reference = typename parent_type::const_reference; \
+        using size_type       = typename parent_type::size_type; \
+        using difference_type = typename parent_type::difference_type; \
+    public: \
+        template <typename Up> struct rebind { typedef self<Up> other; }; \
+    private:
+#endif
+
+/**
+ * Allocator interface class template prototype.
+ *
+ * @author zer0
+ * @date   2017-01-04
+ */
+template <typename Type>
+struct Allocator : public BaseAllocator<Type>
+{
+public:
+    TBAG_BASE_ALLOCATOR_TYPES(Allocator, Type, BaseAllocator);
+
+public:
+    TBAG_CONSTEXPR Allocator() TBAG_NOEXCEPT
+    { /* EMPTY. */ }
+
+    template <typename Up>
+    Allocator(Allocator<Up> const & obj) TBAG_NOEXCEPT
+    { /* EMPTY. */ }
+
+    ~Allocator()
+    { /* EMPTY. */ }
+
+public:
+    /** allocates uninitialized storage. */
+    pointer allocate(size_type size, void const * hint = 0)
+    {
+        assert(size > 0);
+        return static_cast<pointer>(::libtbag::memory::allocate(size * sizeof(value_type)));
+    }
+
+    /** deallocates storage. */
+    void deallocate(pointer ptr, size_type allocated_size)
+    {
+        assert(ptr != nullptr);
+        ::libtbag::memory::deallocate((void*)ptr);
     }
 };
 
