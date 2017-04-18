@@ -31,6 +31,11 @@ tbag_modules__apply_dep_sqlite3 ()
 tbag_modules__apply_dep_uv      ()
 tbag_modules__apply_dep_lua     ()
 
+if (OpenCL_FOUND)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenCL_LIBRARY})
+endif ()
+
 if (WIN32)
     list (APPEND TBAG_PROJECT_LDFLAGS shlwapi.lib) # filesystem with windows.
 endif ()

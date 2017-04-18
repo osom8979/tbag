@@ -78,6 +78,15 @@ tbag_config__find_thread ()
 
 ## SFML settings.
 tbag_config__set_library_option (USE_SFML TbagSFML SFML_FOUND)
+if (SFML_FOUND)
+    message (STATUS "Found SFML: %{SFML_system_LIBRARY}")
+endif ()
+
+## OpenCL settings.
+tbag_config__set_library_option (USE_OPENCL OpenCL OpenCL_FOUND)
+if (OpenCL_FOUND)
+    message (STATUS "Found OpenCL: ${OpenCL_LIBRARY}")
+endif ()
 
 ## Doxygen settings.
 tbag_config__set_library_prefix (Doxygen_ROOT)
