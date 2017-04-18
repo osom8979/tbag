@@ -251,6 +251,18 @@ macro (tbag_config__find_thread)
     endif ()
 endmacro ()
 
+#/// Find thread package.
+#///
+#/// @param ... [in] message arguments.
+macro (tbag_config__use_ccache)
+    find_program (CCACHE_FOUND ccache)
+    if (CCACHE_FOUND)
+        message (STATUS "Found ccache: ${CCACHE_FOUND}")
+        set_property (GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_FOUND})
+        set_property (GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_FOUND})
+    endif ()
+endmacro ()
+
 ## -----------
 ## ALL IN ONE.
 ## -----------

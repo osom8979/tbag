@@ -53,11 +53,11 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
-
 ## Debugging logger settings.
 option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
 
 ## Configure settings.
+tbag_config__use_ccache ()
 tbag_config__default_generate_c_header ()
 
 ## External project.
@@ -78,9 +78,6 @@ tbag_config__find_thread ()
 
 ## SFML settings.
 tbag_config__set_library_option (USE_SFML TbagSFML SFML_FOUND)
-if (SFML_FOUND)
-    message (STATUS "Found SFML: %{SFML_system_LIBRARY}")
-endif ()
 
 ## OpenCL settings.
 tbag_config__set_library_option (USE_OPENCL OpenCL OpenCL_FOUND)
