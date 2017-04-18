@@ -4,14 +4,14 @@
 ################
 
 [x] Refactoring filesystem package.
-[ ] Fix the uvpp::Async error.
+[ ] uvpp::Async helper class.
 [ ] Refactoring locale package.
 [ ] Create Android build script.
 [ ] Update clang-format.
 [x] Create TimePoint class.
-[ ] Refactoring log package.
-[ ] Deprecated macro.
-[ ] Force inline macro.
+[x] Refactoring log package.
+[x] Deprecated macro.
+[x] Force inline macro.
 [ ] Low level IO.
 [ ] Remove boost-stacktrace.
 [ ] Create core dump.
@@ -22,17 +22,17 @@
 [ ] tbag-uvpp package.
 [ ] rstl package.
 [ ] Refactoring network package.
-[ ] dep/http-parser.
-[ ] dep/WebSocket++
-[ ] dep/libsimdpp.
+[x] dep/http-parser.
+[x] dep/WebSocket++
+[x] dep/libsimdpp.
 [x] external/cap'n-proto
 [x] external/LibreSSL (or OpenSSL).
 [x] external/zlib
-[ ] dep/webp
+[ ] external/webp
 [ ] dep/imagezero
-[ ] lua engine.
 [ ] python helper.
-[ ] OpenCL/CUDA backend.
+[x] OpenCL backend.
+[ ] CUDA backend.
 [ ] Machine learning.
 [x] Remove 3rd/tinyaes128c
 [ ] Checksum.
