@@ -28,11 +28,13 @@ CONFIG_COMMAND = 'cmake -L -P' + CONFIG_CMAKE_PATH
 CMD_HELP  = 'help'
 CMD_CLASS = 'class'
 CMD_TEST  = 'test'
+CMD_UUID  = 'uuid'
 
 CMD_MAP = {
     CMD_HELP  : 'Show this help message and exit.',
     CMD_CLASS : 'Generate default c++ source/header files.',
     CMD_TEST  : 'Generate default gtest tester file.',
+    CMD_UUID  : 'Make a random UUID.',
 }
 
 CMD_MESSAGE = "\nCommand list:\n"
@@ -88,6 +90,10 @@ def main_test(options):
         exit(1)
     tools.genTest(sys.argv[1])
 
+def main_uuid(options):
+    import uuid
+    print(uuid.uuid4())
+
 def main():
     command, options = parseArguments(sys.argv)
     if command is None or command == CMD_HELP:
@@ -96,6 +102,8 @@ def main():
         main_class(options)
     elif command == CMD_TEST:
         main_test(options)
+    elif command == CMD_UUID:
+        main_uuid(options)
 
 if __name__ == '__main__':
     main()
