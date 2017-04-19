@@ -55,6 +55,7 @@ Severity const     DEBUG_SEVERITY = ::libtbag::log::level::DEBUG_SEVERITY;
 TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
 TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
 TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
 
 TBAG_API Logger * createDefaultConsoleLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultColorConsoleLogger(bool auto_flush = false);

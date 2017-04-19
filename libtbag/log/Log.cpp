@@ -55,6 +55,12 @@ Logger * createColorConsoleLogger(std::string const & name, bool auto_flush)
 
 Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush)
 {
+    using SinkType = sink::FileSink<std::mutex>;
+    return impl::createLogger<SinkType>(name, MakeType::DEFAULT, path, auto_flush);
+}
+
+Logger * createRotateFileLogger(std::string const & name, std::string const & path, bool auto_flush)
+{
     using SinkType = sink::RotateFileSink<std::mutex>;
     return impl::createLogger<SinkType>(name, MakeType::DEFAULT, path, auto_flush);
 }
