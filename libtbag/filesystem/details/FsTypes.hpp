@@ -16,6 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/bitwise/BitFlags.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 
 #include <cstdlib>
@@ -233,12 +234,15 @@ static uint32_t const FILE_OPEN_DEFAULT = FILE_OPEN_CREATE | FILE_OPEN_FLAG_READ
 struct FileOpenFlags
 {
 public:
-    uint32_t flags;
+    using Value = uint32_t;
+
+public:
+    Value flags;
 
 public:
     TBAG_CONSTEXPR FileOpenFlags() TBAG_NOEXCEPT : flags(FILE_OPEN_DEFAULT)
     { /* EMPTY. */ }
-    TBAG_CONSTEXPR FileOpenFlags(uint32_t flag) TBAG_NOEXCEPT : flags(flag)
+    TBAG_CONSTEXPR FileOpenFlags(Value flag) TBAG_NOEXCEPT : flags(flag)
     { /* EMPTY. */ }
     ~FileOpenFlags()
     { /* EMPTY. */ }
@@ -262,13 +266,9 @@ public:
     // @formatter:on
 
 private:
-    inline FileOpenFlags & set(uint32_t value, bool flag) TBAG_NOEXCEPT
+    inline FileOpenFlags & set(Value value, bool flag) TBAG_NOEXCEPT
     {
-        if (flag) {
-            flags |= value;
-        } else {
-            flags &= ~value;
-        }
+        flags = bitwise::setFlag<Value>(flags, value, flag);
         return *this;
     }
 };
