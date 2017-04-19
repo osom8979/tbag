@@ -31,7 +31,9 @@ prepend (LIB_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
         lauxlib.c lbaselib.c lbitlib.c lcorolib.c ldblib.c liolib.c
         lmathlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c loadlib.c linit.c)
 
-if (UNIX)
+if (WIN32)
+    add_definitions (-DLUA_BUILD_AS_DLL)
+elseif (UNIX)
     if (APPLE)
         add_definitions (-DLUA_USE_MACOSX)
         #target_link_libraries (lua -lreadline)
