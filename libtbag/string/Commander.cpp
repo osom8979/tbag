@@ -14,6 +14,49 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+Commander::Commander() : _default(nullptr)
+{
+    // EMPTY.
+}
+
+Commander::Commander(Callback const & default_callback) : _default(default_callback)
+{
+    // EMPTY.
+}
+
+Commander::Commander(Commander const & obj)
+{
+    (*this) = obj;
+}
+
+Commander::Commander(Commander && obj)
+{
+    (*this) = std::move(obj);
+}
+
+Commander::~Commander()
+{
+    // EMPTY.
+}
+
+Commander & Commander::operator =(Commander const & obj)
+{
+    if (this != &obj) {
+        _default = obj._default;
+        _commands = obj._commands;
+    }
+    return *this;
+}
+
+Commander & Commander::operator =(Commander && obj)
+{
+    if (this != &obj) {
+        _default.swap(obj._default);
+        _commands.swap(obj._commands);
+    }
+    return *this;
+}
+
 void Commander::clear()
 {
     _default = Callback();

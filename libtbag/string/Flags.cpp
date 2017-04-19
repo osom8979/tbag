@@ -13,6 +13,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+Flags::Flags()
+{
+    // EMPTY.
+}
+
 Flags::Flags(int argc, char ** argv)
 {
     parse(argc, argv);
@@ -26,6 +31,37 @@ Flags::Flags(std::string const & args, std::string const & prefix, std::string c
 Flags::Flags(std::string const & args)
 {
     parse(args);
+}
+
+Flags::Flags(Flags const & obj)
+{
+    (*this) = obj;
+}
+
+Flags::Flags(Flags && obj)
+{
+    (*this) = std::move(obj);
+}
+
+Flags::~Flags()
+{
+    // EMPTY.
+}
+
+Flags & Flags::operator =(Flags const & obj)
+{
+    if (this != &obj) {
+        _flags = obj._flags;
+    }
+    return *this;
+}
+
+Flags & Flags::operator =(Flags && obj)
+{
+    if (this != &obj) {
+        _flags.swap(obj._flags);
+    }
+    return *this;
 }
 
 Flags::Flag Flags::find(FlagVector::const_iterator itr) const

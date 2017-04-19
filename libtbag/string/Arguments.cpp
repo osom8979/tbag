@@ -38,9 +38,41 @@ Arguments::Arguments(std::string const & name
     }
 }
 
+Arguments::Arguments(Arguments const & obj)
+{
+    (*this) = obj;
+}
+
+Arguments::Arguments(Arguments && obj)
+{
+    (*this) = std::move(obj);
+}
+
 Arguments::~Arguments()
 {
     // EMPTY.
+}
+
+Arguments & Arguments::operator =(Arguments const & obj)
+{
+    if (this != &obj) {
+        _name = obj._name;
+        _args = obj._args;
+        _delimiter = obj._delimiter;
+        _point_delimiter = obj._point_delimiter;
+    }
+    return *this;
+}
+
+Arguments & Arguments::operator =(Arguments && obj)
+{
+    if (this != &obj) {
+        _name.swap(obj._name);
+        _args.swap(obj._args);
+        _delimiter.swap(obj._delimiter);
+        _point_delimiter.swap(obj._point_delimiter);
+    }
+    return *this;
 }
 
 void Arguments::insert(std::size_t index, std::string const & argument)

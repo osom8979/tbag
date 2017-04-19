@@ -51,16 +51,14 @@ public:
             , std::string const & arguments
             , std::string const & delimiter       = DEFAULT_ARGUMENTS_DELIMITER
             , std::string const & point_delimiter = DEFAULT_ARGUMENTS_POINT_DELIMITER);
+
+    Arguments(Arguments const & obj);
+    Arguments(Arguments && obj);
     ~Arguments();
 
 public:
-    Arguments(Arguments const & obj) = default;
-    Arguments & operator =(Arguments const & obj) = default;
-
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    Arguments(Arguments && obj) = default;
-    Arguments & operator =(Arguments && obj) = default;
-#endif
+    Arguments & operator =(Arguments const & obj);
+    Arguments & operator =(Arguments && obj);
 
 public:
     inline std::string getName() const

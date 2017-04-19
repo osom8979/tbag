@@ -62,22 +62,20 @@ private:
     FlagVector _flags;
 
 public:
-    Flags() = default;
-    ~Flags() = default;
+    Flags();
 
-public:
     Flags(int argc, char ** argv);
     Flags(std::string const & args, std::string const & prefix, std::string const & delimiter);
     Flags(std::string const & args);
 
-public:
-    Flags(Flags const & obj) = default;
-    Flags & operator =(Flags const & obj) = default;
+    Flags(Flags const & obj);
+    Flags(Flags && obj);
 
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    Flags(Flags && obj) = default;
-    Flags & operator =(Flags && obj) = default;
-#endif
+    ~Flags();
+
+public:
+    Flags & operator =(Flags const & obj);
+    Flags & operator =(Flags && obj);
 
 public:
     inline void clear() TBAG_NOEXCEPT

@@ -48,20 +48,15 @@ private:
     CommandMap _commands;
 
 public:
-    Commander(Callback const & default_callback) : _default(default_callback)
-    { /* EMPTY. */ }
+    Commander();
+    Commander(Callback const & default_callback);
+    Commander(Commander const & obj);
+    Commander(Commander && obj);
+    virtual ~Commander();
 
 public:
-    Commander() = default;
-    virtual ~Commander() = default;
-
-    Commander(Commander const & obj) = default;
-    Commander & operator =(Commander const & obj) = default;
-
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    Commander(Commander && obj) = default;
-    Commander & operator =(Commander && obj) = default;
-#endif
+    Commander & operator =(Commander const & obj);
+    Commander & operator =(Commander && obj);
 
 public:
     inline bool empty() const TBAG_NOEXCEPT
