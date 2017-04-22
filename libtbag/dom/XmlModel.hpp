@@ -55,20 +55,25 @@ public:
     };
 
 public:
-    struct Interface
+    struct NodeInterface
     {
+        using Document = XmlModel::Document;
+        using Element  = XmlModel::Element;
+        using Node     = XmlModel::Node;
+        using String   = XmlModel::String;
+
         virtual String name() const = 0;
 
-        virtual void teardown() = 0;
         virtual void setup() = 0;
+        virtual void teardown() = 0;
 
-        virtual void load(Element const & doc) = 0;
-        virtual void save(Element & doc) const = 0;
+        virtual void load(Element const & element) = 0;
+        virtual void save(Element & element) const = 0;
     };
 
 public:
-    using SharedModel = std::shared_ptr<Interface>;
-    using WeakModel   = std::weak_ptr<Interface>;
+    using SharedModel = std::shared_ptr<NodeInterface>;
+    using WeakModel   = std::weak_ptr<NodeInterface>;
     using ModelMap    = std::map<String, SharedModel>;
     using ModelPair   = ModelMap::value_type;
 
@@ -90,7 +95,7 @@ public:
     { _models.clear(); }
     inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_models.size()))
     { return _models.size(); }
-    inline Size empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_models.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_models.empty()))
     { return _models.empty(); }
 
 public:

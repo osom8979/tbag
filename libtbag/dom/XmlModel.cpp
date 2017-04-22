@@ -18,6 +18,10 @@ namespace dom {
 TBAG_CONSTEXPR char const * const DEFAULT_ROOT_NAME = "root";
 TBAG_CONSTEXPR char const * const DEFAULT_FILE_NAME = "config.xml";
 
+// ------------------------
+// XmlModel implementation.
+// ------------------------
+
 XmlModel::XmlModel()
 {
     // EMPTY.
@@ -230,7 +234,7 @@ bool XmlModel::loadOrDefaultSave(Path const & path)
         return false;
     }
 
-    clear();
+    teardown();
     setup();
 
     return save(path);
