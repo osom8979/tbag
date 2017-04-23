@@ -116,6 +116,9 @@ TBAG_API std::string trim(std::string const & str);
 
 TBAG_API bool createRandomString(char * buffer, std::size_t size);
 
+TBAG_API std::string lower(std::string const & str);
+TBAG_API std::string upper(std::string const & str);
+
 // -----------------------
 // UTF-8 STRING UTILITIES.
 // -----------------------

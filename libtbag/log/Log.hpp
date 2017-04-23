@@ -24,9 +24,11 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#include <libtbag/3rd/tinyxml2/tinyxml2.h>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/mgr/Logger.hpp>
+#include <libtbag/log/msg/PacketGenerator.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -34,13 +36,40 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
-TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME = "__tbag_default_logger__";
+TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME  = "__tbag_default_logger__";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_NODE_NAME = "tbag.logger";
+
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_NAME        = "name";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SINK        = "sink";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_DESTINATION = "destination";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_MULTITHREAD = "multithread";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_MUTEX       = "mutex";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_GENERATOR   = "generator";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SEVERITY    = "severity";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
+
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_COUT = "cout";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_FILE = "file";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_ROTATE_FILE = "rotate_file";
+
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_ON  = "on";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_OFF = "off";
+
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_ON  = "on";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_OFF = "off";
+
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT = "default";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT_COLOR = "default_color";
+
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_ON  = "on";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_OFF = "off";
 
 //TBAG_CONSTEXPR bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
 
 using Severity = ::libtbag::log::level::Severity;
 using Logger   = ::libtbag::log::mgr::Logger;
+using MakeType = ::libtbag::log::msg::PacketGenerator::MakeType;
 
 Severity const       OFF_SEVERITY = ::libtbag::log::level::OFF_SEVERITY;
 Severity const EMERGENCY_SEVERITY = ::libtbag::log::level::EMERGENCY_SEVERITY;
@@ -56,6 +85,26 @@ TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush 
 TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
 TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
 TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
+
+TBAG_API bool parseAutoFlush(std::string const & flush_name);
+TBAG_API bool parseMultiThread(std::string const & multithread_name);
+TBAG_API bool parseMutexThread(std::string const & mutex_name);
+
+TBAG_API Severity parseSeverity(std::string const & severity_name);
+TBAG_API MakeType parseGeneratorType(std::string const & generator_name);
+
+TBAG_API Logger * createLogger(std::string const & name,
+                               std::string const & sink,
+                               std::string const & destination,
+                               std::string const & multithread,
+                               std::string const & mutex,
+                               std::string const & generator,
+                               std::string const & severity,
+                               std::string const & flush);
+
+TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);
+TBAG_API int createLoggerWithXmlString(std::string const & xml);
+TBAG_API int createLoggerWithXmlElement(tinyxml2::XMLElement * element);
 
 TBAG_API Logger * createDefaultConsoleLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultColorConsoleLogger(bool auto_flush = false);

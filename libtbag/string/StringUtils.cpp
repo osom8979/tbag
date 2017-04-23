@@ -7,8 +7,13 @@
  */
 
 #include <libtbag/string/StringUtils.hpp>
+
+#include <cctype>
 #include <cassert>
+
+#include <algorithm>
 #include <random>
+
 #include <unicode/unistr.h>
 
 // -------------------
@@ -233,6 +238,34 @@ bool createRandomString(char * buffer, std::size_t size)
     }
 
     return true;
+}
+
+std::string lower(std::string const & str)
+{
+    std::string result;
+
+    auto itr = str.begin();
+    auto end = str.end();
+    auto out = result.begin();
+
+    for (; itr != end; ++itr, ++out) {
+        *out = static_cast<char>(std::tolower(*itr));
+    }
+    return result;
+}
+
+std::string upper(std::string const & str)
+{
+    std::string result;
+
+    auto itr = str.begin();
+    auto end = str.end();
+    auto out = result.begin();
+
+    for (; itr != end; ++itr, ++out) {
+        *out = static_cast<char>(std::toupper(*itr));
+    }
+    return result;
 }
 
 } // namespace string
