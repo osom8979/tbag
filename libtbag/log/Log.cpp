@@ -41,34 +41,65 @@ Logger * createLogger(std::string const & name, MakeType type, Args && ... args)
 
 } // namespace impl {
 
-Logger * createConsoleLogger(std::string const & name, bool auto_flush)
-{
-    using SinkType = sink::CoutSink<std::mutex>;
-    return impl::createLogger<SinkType>(name, MakeType::DEFAULT, auto_flush);
-}
-
 Logger * createColorConsoleLogger(std::string const & name, bool auto_flush)
 {
-    using SinkType = sink::CoutSink<std::mutex>;
-    return impl::createLogger<SinkType>(name, MakeType::DEFAULT_COLOR, auto_flush);
+    return createConsoleLogger(name, MakeType::DEFAULT_COLOR, false, auto_flush);
+}
+
+Logger * createConsoleLogger(std::string const & name, bool auto_flush)
+{
+    return createConsoleLogger(name, MakeType::DEFAULT, false, auto_flush);
+}
+
+Logger * createConsoleLogger(std::string const & name, MakeType type, bool mutex, bool auto_flush)
+{
+    if (mutex) {
+        return impl::createLogger<sink::CoutSink<std::mutex> >(name, type, auto_flush);
+    } else {
+        return impl::createLogger<sink::CoutSink<lock::FakeLock> >(name, type, auto_flush);
+    }
 }
 
 Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush)
 {
-    using SinkType = sink::FileSink<std::mutex>;
-    return impl::createLogger<SinkType>(name, MakeType::DEFAULT, path, auto_flush);
+    return createFileLogger(name, path, MakeType::DEFAULT, false, auto_flush);
+}
+
+Logger * createFileLogger(std::string const & name,
+                          std::string const & path,
+                          MakeType type,
+                          bool mutex,
+                          bool auto_flush)
+{
+    if (mutex) {
+        return impl::createLogger<sink::FileSink<std::mutex> >(name, type, path, auto_flush);
+    } else {
+        return impl::createLogger<sink::FileSink<lock::FakeLock> >(name, type, path, auto_flush);
+    }
 }
 
 Logger * createRotateFileLogger(std::string const & name, std::string const & path, bool auto_flush)
 {
-    using SinkType = sink::RotateFileSink<std::mutex>;
-    return impl::createLogger<SinkType>(name, MakeType::DEFAULT, path, auto_flush);
+    return createRotateFileLogger(name, path, MakeType::DEFAULT, false, auto_flush);
 }
 
-bool parseAutoFlush(std::string const & flush_name)
+Logger * createRotateFileLogger(std::string const & name,
+                                std::string const & path,
+                                MakeType type,
+                                bool mutex,
+                                bool auto_flush)
+{
+    if (mutex) {
+        return impl::createLogger<sink::RotateFileSink<std::mutex> >(name, type, path, auto_flush);
+    } else {
+        return impl::createLogger<sink::RotateFileSink<lock::FakeLock> >(name, type, path, auto_flush);
+    }
+}
+
+bool parseAutoFlush(std::string const & flush_value)
 {
     // @formatter:off
-    std::string const VALUE = string::lower(flush_name);
+    std::string const VALUE = string::lower(flush_value);
     if (VALUE == TBAG_LOGGER_AUTO_FLUSH_ON) {
         return true;
     }
@@ -76,10 +107,10 @@ bool parseAutoFlush(std::string const & flush_name)
     // @formatter:on
 }
 
-bool parseMultiThread(std::string const & multithread_name)
+bool parseMultiThread(std::string const & multithread_value)
 {
     // @formatter:off
-    std::string const VALUE = string::lower(multithread_name);
+    std::string const VALUE = string::lower(multithread_value);
     if (VALUE == TBAG_LOGGER_MULTITHREAD_ON) {
         return true;
     }
@@ -87,10 +118,10 @@ bool parseMultiThread(std::string const & multithread_name)
     // @formatter:on
 }
 
-bool parseMutexThread(std::string const & mutex_name)
+bool parseMutexThread(std::string const & mutex_value)
 {
     // @formatter:off
-    std::string const VALUE = string::lower(mutex_name);
+    std::string const VALUE = string::lower(mutex_value);
     if (VALUE == TBAG_LOGGER_MUTEX_ON) {
         return true;
     }
@@ -98,27 +129,27 @@ bool parseMutexThread(std::string const & mutex_name)
     // @formatter:on
 }
 
-Severity parseSeverity(std::string const & severity_name)
+Severity parseSeverity(std::string const & severity_value)
 {
     // @formatter:off
-    std::string const NAME = string::upper(severity_name);
-    if (NAME == EMERGENCY_SEVERITY.text) { return EMERGENCY_SEVERITY; }
-    if (NAME ==     ALERT_SEVERITY.text) { return     ALERT_SEVERITY; }
-    if (NAME ==  CRITICAL_SEVERITY.text) { return  CRITICAL_SEVERITY; }
-    if (NAME ==     ERROR_SEVERITY.text) { return     ERROR_SEVERITY; }
-    if (NAME ==   WARNING_SEVERITY.text) { return   WARNING_SEVERITY; }
-    if (NAME ==    NOTICE_SEVERITY.text) { return    NOTICE_SEVERITY; }
-    if (NAME ==      INFO_SEVERITY.text) { return      INFO_SEVERITY; }
-    if (NAME ==     DEBUG_SEVERITY.text) { return     DEBUG_SEVERITY; }
+    std::string const VALUE = string::upper(severity_value);
+    if (VALUE == EMERGENCY_SEVERITY.text) { return EMERGENCY_SEVERITY; }
+    if (VALUE ==     ALERT_SEVERITY.text) { return     ALERT_SEVERITY; }
+    if (VALUE ==  CRITICAL_SEVERITY.text) { return  CRITICAL_SEVERITY; }
+    if (VALUE ==     ERROR_SEVERITY.text) { return     ERROR_SEVERITY; }
+    if (VALUE ==   WARNING_SEVERITY.text) { return   WARNING_SEVERITY; }
+    if (VALUE ==    NOTICE_SEVERITY.text) { return    NOTICE_SEVERITY; }
+    if (VALUE ==      INFO_SEVERITY.text) { return      INFO_SEVERITY; }
+    if (VALUE ==     DEBUG_SEVERITY.text) { return     DEBUG_SEVERITY; }
     return OFF_SEVERITY;
     // @formatter:on
 }
 
-MakeType parseGeneratorType(std::string const & generator_name)
+MakeType parseGeneratorType(std::string const & generator_value)
 {
     // @formatter:off
-    std::string const NAME = string::lower(generator_name);
-    if (NAME == TBAG_LOGGER_GENERATOR_DEFAULT_COLOR) {
+    std::string const VALUE = string::lower(generator_value);
+    if (VALUE == TBAG_LOGGER_GENERATOR_DEFAULT_COLOR) {
         return MakeType::DEFAULT_COLOR;
     }
     return MakeType::DEFAULT;
@@ -126,47 +157,32 @@ MakeType parseGeneratorType(std::string const & generator_name)
 }
 
 Logger * createLogger(std::string const & name,
-                      std::string const & lower_sink,
-                      std::string const & destination,
-                      std::string const & multithread,
-                      std::string const & mutex,
-                      std::string const & lower_generator,
-                      std::string const & lower_severity,
-                      std::string const & lower_flush)
+                      std::string const & sink_value,
+                      std::string const & destination_value,
+                      std::string const & multithread_value,
+                      std::string const & mutex_value,
+                      std::string const & generator_value,
+                      std::string const & severity_value,
+                      std::string const & flush_value)
 {
     if (name.empty()) {
         return nullptr;
     }
 
-    bool auto_flush     = parseAutoFlush(lower_flush);
-    bool is_multithread = parseMultiThread(multithread);
-    bool is_mutex       = parseMutexThread(mutex);
+    bool auto_flush     = parseAutoFlush(flush_value);
+    bool is_multithread = parseMultiThread(multithread_value);
+    bool is_mutex       = parseMutexThread(mutex_value);
 
-    Severity severity   = parseSeverity(lower_severity);
-    MakeType generator  = parseGeneratorType(lower_generator);
+    Severity severity   = parseSeverity(severity_value);
+    MakeType generator  = parseGeneratorType(generator_value);
 
-    sink::SinkInterface * sink = nullptr;
-    mgr::Logger * logger = nullptr;
-
-    try {
-        if (lower_sink == TBAG_LOGGER_SINK_COUT) {
-            sink = new sink::CoutSink<std::mutex>(auto_flush);
-        } else if (lower_sink == TBAG_LOGGER_SINK_FILE) {
-            sink = new sink::FileSink<std::mutex>(destination, auto_flush);
-        } else if (lower_sink == TBAG_LOGGER_SINK_ROTATE_FILE) {
-            sink = new sink::RotateFileSink<std::mutex>(destination, auto_flush);
-        } else {
-            return nullptr;
-        }
-        logger = new mgr::Logger(sink, generator);
-    } catch (...) {
-        // @formatter:off
-        if (  sink) { delete   sink; }
-        if (logger) { delete logger; }
-        return nullptr;
-        // @formatter:on
+    if (sink_value == TBAG_LOGGER_SINK_COUT) {
+        return createConsoleLogger(name, generator, is_mutex, auto_flush);
+    } else if (sink_value == TBAG_LOGGER_SINK_FILE) {
+        return createFileLogger(name, destination_value, generator, is_mutex, auto_flush);
+    } else if (sink_value == TBAG_LOGGER_SINK_ROTATE_FILE) {
+        return createRotateFileLogger(name, destination_value, generator, is_mutex, auto_flush);
     }
-
     return nullptr;
 }
 

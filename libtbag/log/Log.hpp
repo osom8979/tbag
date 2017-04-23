@@ -81,25 +81,41 @@ Severity const    NOTICE_SEVERITY = ::libtbag::log::level::NOTICE_SEVERITY;
 Severity const      INFO_SEVERITY = ::libtbag::log::level::INFORMATIONAL_SEVERITY;
 Severity const     DEBUG_SEVERITY = ::libtbag::log::level::DEBUG_SEVERITY;
 
-TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
 TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
-TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
-TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
+TBAG_API Logger * createConsoleLogger(std::string const & name,
+                                      MakeType type = MakeType::DEFAULT,
+                                      bool mutex = true,
+                                      bool auto_flush = false);
 
-TBAG_API bool parseAutoFlush(std::string const & flush_name);
-TBAG_API bool parseMultiThread(std::string const & multithread_name);
-TBAG_API bool parseMutexThread(std::string const & mutex_name);
-TBAG_API Severity parseSeverity(std::string const & severity_name);
-TBAG_API MakeType parseGeneratorType(std::string const & generator_name);
+TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createFileLogger(std::string const & name,
+                                   std::string const & path,
+                                   MakeType type = MakeType::DEFAULT,
+                                   bool mutex = true,
+                                   bool auto_flush = false);
+
+TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createRotateFileLogger(std::string const & name,
+                                         std::string const & path,
+                                         MakeType type = MakeType::DEFAULT,
+                                         bool mutex = true,
+                                         bool auto_flush = false);
+
+TBAG_API bool parseAutoFlush(std::string const & flush_value);
+TBAG_API bool parseMultiThread(std::string const & multithread_value);
+TBAG_API bool parseMutexThread(std::string const & mutex_value);
+TBAG_API Severity parseSeverity(std::string const & severity_value);
+TBAG_API MakeType parseGeneratorType(std::string const & generator_value);
 
 TBAG_API Logger * createLogger(std::string const & name,
-                               std::string const & sink,
-                               std::string const & destination,
-                               std::string const & multithread,
-                               std::string const & mutex,
-                               std::string const & generator,
-                               std::string const & severity,
-                               std::string const & flush);
+                               std::string const & sink_value,
+                               std::string const & destination_value,
+                               std::string const & multithread_value,
+                               std::string const & mutex_value,
+                               std::string const & generator_value,
+                               std::string const & severity_value,
+                               std::string const & flush_value);
 
 TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);
 TBAG_API int createLoggerWithXmlString(std::string const & xml);
