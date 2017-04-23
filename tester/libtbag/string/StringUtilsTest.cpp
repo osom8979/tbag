@@ -184,3 +184,9 @@ TEST(StringsTest, createRandomString)
     }
 }
 
+TEST(StringsTest, TranslateCase)
+{
+    ASSERT_EQ(std::string("abcdefg1234"), string::lower("abcdEFG1234"));
+    ASSERT_EQ(std::string("ABCDEFG1234"), string::upper("abcdEFG1234"));
+}
+

@@ -68,8 +68,8 @@ Logger * createRotateFileLogger(std::string const & name, std::string const & pa
 bool parseAutoFlush(std::string const & flush_name)
 {
     // @formatter:off
-    std::string const NAME = string::upper(flush_name);
-    if (NAME == TBAG_LOGGER_AUTO_FLUSH_ON) {
+    std::string const VALUE = string::lower(flush_name);
+    if (VALUE == TBAG_LOGGER_AUTO_FLUSH_ON) {
         return true;
     }
     return false;
@@ -79,8 +79,8 @@ bool parseAutoFlush(std::string const & flush_name)
 bool parseMultiThread(std::string const & multithread_name)
 {
     // @formatter:off
-    std::string const NAME = string::upper(multithread_name);
-    if (NAME == TBAG_LOGGER_MULTITHREAD_ON) {
+    std::string const VALUE = string::lower(multithread_name);
+    if (VALUE == TBAG_LOGGER_MULTITHREAD_ON) {
         return true;
     }
     return false;
@@ -90,8 +90,8 @@ bool parseMultiThread(std::string const & multithread_name)
 bool parseMutexThread(std::string const & mutex_name)
 {
     // @formatter:off
-    std::string const NAME = string::upper(mutex_name);
-    if (NAME == TBAG_LOGGER_MUTEX_ON) {
+    std::string const VALUE = string::lower(mutex_name);
+    if (VALUE == TBAG_LOGGER_MUTEX_ON) {
         return true;
     }
     return false;
@@ -117,7 +117,7 @@ Severity parseSeverity(std::string const & severity_name)
 MakeType parseGeneratorType(std::string const & generator_name)
 {
     // @formatter:off
-    std::string const NAME = string::upper(generator_name);
+    std::string const NAME = string::lower(generator_name);
     if (NAME == TBAG_LOGGER_GENERATOR_DEFAULT_COLOR) {
         return MakeType::DEFAULT_COLOR;
     }
@@ -140,7 +140,7 @@ Logger * createLogger(std::string const & name,
 
     bool auto_flush     = parseAutoFlush(lower_flush);
     bool is_multithread = parseMultiThread(multithread);
-    bool is_mutex       = parseMultiThread(mutex);
+    bool is_mutex       = parseMutexThread(mutex);
 
     Severity severity   = parseSeverity(lower_severity);
     MakeType generator  = parseGeneratorType(lower_generator);
@@ -158,7 +158,6 @@ Logger * createLogger(std::string const & name,
         } else {
             return nullptr;
         }
-
         logger = new mgr::Logger(sink, generator);
     } catch (...) {
         // @formatter:off

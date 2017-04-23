@@ -30,6 +30,9 @@ struct SinkInterface
 {
     using String = std::string;
 
+    SinkInterface() { /* EMPTY. */ }
+    virtual ~SinkInterface() { /* EMPTY. */ }
+
     virtual void safeWrite(String const & message) = 0;
     virtual void safeFlush() = 0;
 

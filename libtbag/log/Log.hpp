@@ -48,21 +48,21 @@ TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_GENERATOR   = "generat
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SEVERITY    = "severity";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
 
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_COUT = "cout";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_FILE = "file";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_ROTATE_FILE = "rotate_file";
-
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_ON  = "on";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_OFF = "off";
 
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_ON  = "on";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_OFF = "off";
 
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_ON  = "on";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_OFF = "off";
+
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT = "default";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT_COLOR = "default_color";
 
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_ON  = "on";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_OFF = "off";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_COUT = "cout";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_FILE = "file";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_ROTATE_FILE = "rotate_file";
 
 //TBAG_CONSTEXPR bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
@@ -89,7 +89,6 @@ TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string c
 TBAG_API bool parseAutoFlush(std::string const & flush_name);
 TBAG_API bool parseMultiThread(std::string const & multithread_name);
 TBAG_API bool parseMutexThread(std::string const & mutex_name);
-
 TBAG_API Severity parseSeverity(std::string const & severity_name);
 TBAG_API MakeType parseGeneratorType(std::string const & generator_name);
 

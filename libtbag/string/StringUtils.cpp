@@ -243,28 +243,16 @@ bool createRandomString(char * buffer, std::size_t size)
 std::string lower(std::string const & str)
 {
     std::string result;
-
-    auto itr = str.begin();
-    auto end = str.end();
-    auto out = result.begin();
-
-    for (; itr != end; ++itr, ++out) {
-        *out = static_cast<char>(std::tolower(*itr));
-    }
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), ::tolower);
     return result;
 }
 
 std::string upper(std::string const & str)
 {
     std::string result;
-
-    auto itr = str.begin();
-    auto end = str.end();
-    auto out = result.begin();
-
-    for (; itr != end; ++itr, ++out) {
-        *out = static_cast<char>(std::toupper(*itr));
-    }
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), ::toupper);
     return result;
 }
 

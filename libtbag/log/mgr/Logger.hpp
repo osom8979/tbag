@@ -61,7 +61,7 @@ private:
 public:
     Logger();
     Logger(SinkType * sink, MakeType type = MakeType::DEFAULT);
-    ~Logger();
+    virtual ~Logger();
 
 public:
     // @formatter:off
