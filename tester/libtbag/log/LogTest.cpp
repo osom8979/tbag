@@ -98,8 +98,47 @@ TEST(LogTest, Parse)
     ASSERT_EQ(    DEBUG_SEVERITY, parseSeverity(DEBUG_SEVERITY.text));
     ASSERT_EQ(      OFF_SEVERITY, parseSeverity(""));
 
-    ASSERT_EQ(MakeType::DEFAULT, parseGeneratorType(TBAG_LOGGER_GENERATOR_DEFAULT));
-    ASSERT_EQ(MakeType::DEFAULT_COLOR, parseGeneratorType(TBAG_LOGGER_GENERATOR_DEFAULT_COLOR));
-    ASSERT_EQ(MakeType::DEFAULT, parseGeneratorType(""));
+    ASSERT_TRUE(MakeType::DEFAULT == parseGeneratorType(TBAG_LOGGER_GENERATOR_DEFAULT));
+    ASSERT_TRUE(MakeType::DEFAULT_COLOR == parseGeneratorType(TBAG_LOGGER_GENERATOR_DEFAULT_COLOR));
+    ASSERT_TRUE(MakeType::DEFAULT == parseGeneratorType(""));
+}
+
+TBAG_CONSTEXPR static char const * const TBAG_TEST_LOG_XML = R"XML(
+<tbag-logger>
+    <name>test-logger-cout</name>
+    <sink>cout</sink>
+    <destination></destination>
+    <multithread>false</multithread>
+    <mutex>true</mutex>
+    <generator>default_color</generator>
+    <severity>debug</severity>
+    <auto_flush>false</auto_flush>
+</tbag-logger>
+<tbag-logger>
+    <name>test-logger-file</name>
+    <sink>file</sink>
+    <destination>tbag-logger-test.log</destination>
+    <multithread>false</multithread>
+    <mutex>true</mutex>
+    <generator>default</generator>
+    <severity>debug</severity>
+    <auto_flush>false</auto_flush>
+</tbag-logger>
+)XML";
+
+TEST(LogTest, XmlString)
+{
+    char const * const COUT_LOGGER = "test-logger-cout";
+    char const * const FILE_LOGGER = "test-logger-file";
+
+    ASSERT_EQ(2, createLoggerWithXmlString(TBAG_TEST_LOG_XML));
+    auto * cout_logger = getLogger(COUT_LOGGER);
+    auto * file_logger = getLogger(FILE_LOGGER);
+
+    ASSERT_NE(nullptr, cout_logger);
+    ASSERT_NE(nullptr, file_logger);
+
+    ASSERT_TRUE(removeLogger(COUT_LOGGER));
+    ASSERT_TRUE(removeLogger(FILE_LOGGER));
 }
 

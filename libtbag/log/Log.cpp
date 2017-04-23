@@ -206,7 +206,7 @@ int createLoggerWithXmlString(std::string const & xml)
 
 int createLoggerWithXmlElement(tinyxml2::XMLElement * element)
 {
-    if (element == nullptr || element->Name() != TBAG_LOGGER_XML_NODE_NAME) {
+    if (element == nullptr || string::lower(element->Name()) != TBAG_LOGGER_XML_NODE_NAME) {
         return 0;
     }
 
@@ -214,7 +214,7 @@ int createLoggerWithXmlElement(tinyxml2::XMLElement * element)
     auto * name_element = element->FirstChildElement(TBAG_LOGGER_XML_ELEMENT_NAME);
 
     auto toString = [](tinyxml2::XMLElement * element) -> std::string {
-        if (element) {
+        if (element != nullptr && element->GetText() != nullptr) {
             return std::string(element->GetText());
         }
         return std::string();

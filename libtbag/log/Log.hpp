@@ -37,7 +37,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 
 TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME  = "__tbag_default_logger__";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_NODE_NAME = "tbag.logger";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_NODE_NAME = "tbag-logger";
 
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_NAME        = "name";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SINK        = "sink";
@@ -48,14 +48,14 @@ TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_GENERATOR   = "generat
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SEVERITY    = "severity";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
 
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_ON  = "on";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_OFF = "off";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_ON  = "true";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_OFF = "false";
 
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_ON  = "on";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_OFF = "off";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_ON  = "true";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_OFF = "false";
 
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_ON  = "on";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_OFF = "off";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_ON  = "true";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_OFF = "false";
 
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT = "default";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT_COLOR = "default_color";
