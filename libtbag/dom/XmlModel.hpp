@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/3rd/tinyxml2/tinyxml2.h>
+#include <libtbag/Type.hpp>
 
 #include <map>
 #include <string>
@@ -109,6 +110,7 @@ public:
     template <typename Up>
     Up * getPointer()
     {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(NodeInterface, Up);
         if (auto shared = get(Up().name()).lock()) {
             return static_cast<Up*>(shared.get());
         }
