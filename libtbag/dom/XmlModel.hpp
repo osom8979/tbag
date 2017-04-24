@@ -106,6 +106,16 @@ public:
     WeakModel get(String const & name);
 
 public:
+    template <typename Up>
+    Up * getPointer()
+    {
+        if (auto shared = get(Up().name()).lock()) {
+            return static_cast<Up*>(shared.get());
+        }
+        return nullptr;
+    }
+
+public:
     virtual String getRootName() const;
     virtual String getFileName() const;
 
