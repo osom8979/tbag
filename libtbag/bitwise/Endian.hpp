@@ -24,15 +24,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace bitwise {
 
- int16_t toHost( int16_t network) TBAG_NOEXCEPT;
-uint16_t toHost(uint16_t network) TBAG_NOEXCEPT;
- int32_t toHost( int32_t network) TBAG_NOEXCEPT;
-uint32_t toHost(uint32_t network) TBAG_NOEXCEPT;
+TBAG_API  int16_t toHost( int16_t network) TBAG_NOEXCEPT;
+TBAG_API uint16_t toHost(uint16_t network) TBAG_NOEXCEPT;
+TBAG_API  int32_t toHost( int32_t network) TBAG_NOEXCEPT;
+TBAG_API uint32_t toHost(uint32_t network) TBAG_NOEXCEPT;
 
- int16_t toNetwork( int16_t host) TBAG_NOEXCEPT;
-uint16_t toNetwork(uint16_t host) TBAG_NOEXCEPT;
- int32_t toNetwork( int32_t host) TBAG_NOEXCEPT;
-uint32_t toNetwork(uint32_t host) TBAG_NOEXCEPT;
+TBAG_API  int16_t toNetwork( int16_t host) TBAG_NOEXCEPT;
+TBAG_API uint16_t toNetwork(uint16_t host) TBAG_NOEXCEPT;
+TBAG_API  int32_t toNetwork( int32_t host) TBAG_NOEXCEPT;
+TBAG_API uint32_t toNetwork(uint32_t host) TBAG_NOEXCEPT;
 
 } // namespace bitwise
 
