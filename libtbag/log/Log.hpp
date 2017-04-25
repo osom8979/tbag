@@ -119,7 +119,17 @@ TBAG_API Logger * createLogger(std::string const & name,
 
 TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);
 TBAG_API int createLoggerWithXmlString(std::string const & xml);
-TBAG_API int createLoggerWithXmlElement(tinyxml2::XMLElement * element);
+TBAG_API int createLoggerWithParentXmlElement(tinyxml2::XMLElement const * parent);
+TBAG_API int createLoggerWithXmlElement(tinyxml2::XMLElement const * element);
+TBAG_API bool saveLoggerWithXmlElement(tinyxml2::XMLElement * parent,
+                                       std::string const & name,
+                                       std::string const & sink_value,
+                                       std::string const & destination_value,
+                                       std::string const & multithread_value,
+                                       std::string const & mutex_value,
+                                       std::string const & generator_value,
+                                       std::string const & severity_value,
+                                       std::string const & flush_value);
 
 TBAG_API Logger * createDefaultConsoleLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultColorConsoleLogger(bool auto_flush = false);

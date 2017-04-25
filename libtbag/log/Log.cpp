@@ -204,7 +204,12 @@ int createLoggerWithXmlString(std::string const & xml)
     return createLoggerWithXmlElement(doc.FirstChildElement(TBAG_LOGGER_XML_NODE_NAME));
 }
 
-int createLoggerWithXmlElement(tinyxml2::XMLElement * element)
+int createLoggerWithParentXmlElement(tinyxml2::XMLElement const * parent)
+{
+    return createLoggerWithXmlElement(parent->FirstChildElement(TBAG_LOGGER_XML_NODE_NAME));
+}
+
+int createLoggerWithXmlElement(tinyxml2::XMLElement const * element)
 {
     if (element == nullptr || string::lower(element->Name()) != TBAG_LOGGER_XML_NODE_NAME) {
         return 0;
@@ -213,7 +218,7 @@ int createLoggerWithXmlElement(tinyxml2::XMLElement * element)
     // Create logger
     auto * name_element = element->FirstChildElement(TBAG_LOGGER_XML_ELEMENT_NAME);
 
-    auto toString = [](tinyxml2::XMLElement * element) -> std::string {
+    auto toString = [](tinyxml2::XMLElement const * element) -> std::string {
         if (element != nullptr && element->GetText() != nullptr) {
             return std::string(element->GetText());
         }
@@ -247,6 +252,49 @@ int createLoggerWithXmlElement(tinyxml2::XMLElement * element)
         return createLoggerWithXmlElement(next) + (is_create ? 1 : 0);
     }
     return (is_create ? 1 : 0);
+}
+
+bool saveLoggerWithXmlElement(tinyxml2::XMLElement * parent,
+                              std::string const & name,
+                              std::string const & sink_value,
+                              std::string const & destination_value,
+                              std::string const & multithread_value,
+                              std::string const & mutex_value,
+                              std::string const & generator_value,
+                              std::string const & severity_value,
+                              std::string const & flush_value)
+{
+    auto * doc = parent->GetDocument();
+    auto *    tbag_log_element = doc->NewElement(TBAG_LOGGER_XML_NODE_NAME);
+    auto *        name_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_NAME);
+    auto *        sink_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_SINK);
+    auto * destination_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_DESTINATION);
+    auto * multithread_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_MULTITHREAD);
+    auto *       mutex_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_MUTEX);
+    auto *   generator_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_GENERATOR);
+    auto *    severity_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_SEVERITY);
+    auto *  auto_flush_element = doc->NewElement(TBAG_LOGGER_XML_ELEMENT_AUTO_FLUSH);
+
+           name_element->SetText(name.c_str());
+           sink_element->SetText(sink_value.c_str());
+    destination_element->SetText(destination_value.c_str());
+    multithread_element->SetText(multithread_value.c_str());
+          mutex_element->SetText(mutex_value.c_str());
+      generator_element->SetText(generator_value.c_str());
+       severity_element->SetText(severity_value.c_str());
+     auto_flush_element->SetText(flush_value.c_str());
+
+    tbag_log_element->InsertEndChild(name_element);
+    tbag_log_element->InsertEndChild(sink_element);
+    tbag_log_element->InsertEndChild(destination_element);
+    tbag_log_element->InsertEndChild(multithread_element);
+    tbag_log_element->InsertEndChild(mutex_element);
+    tbag_log_element->InsertEndChild(generator_element);
+    tbag_log_element->InsertEndChild(severity_element);
+    tbag_log_element->InsertEndChild(auto_flush_element);
+    parent->InsertEndChild(tbag_log_element);
+
+    return true;
 }
 
 Logger * createDefaultConsoleLogger(bool auto_flush)
