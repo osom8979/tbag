@@ -169,21 +169,26 @@ Logger * createLogger(std::string const & name,
         return nullptr;
     }
 
-    bool auto_flush     = parseAutoFlush(flush_value);
-    bool is_multithread = parseMultiThread(multithread_value);
-    bool is_mutex       = parseMutexThread(mutex_value);
+    bool const AUTO_FLUSH     = parseAutoFlush(flush_value);
+    bool const IS_MULTITHREAD = parseMultiThread(multithread_value);
+    bool const IS_MUTEX       = parseMutexThread(mutex_value);
 
-    Severity severity   = parseSeverity(severity_value);
-    MakeType generator  = parseGeneratorType(generator_value);
+    Severity const SEVERITY   = parseSeverity(severity_value);
+    MakeType const GENERATOR  = parseGeneratorType(generator_value);
 
+    Logger * logger = nullptr;
     if (sink_value == TBAG_LOGGER_SINK_COUT) {
-        return createConsoleLogger(name, generator, is_mutex, auto_flush);
+        logger = createConsoleLogger(name, GENERATOR, IS_MUTEX, AUTO_FLUSH);
     } else if (sink_value == TBAG_LOGGER_SINK_FILE) {
-        return createFileLogger(name, destination_value, generator, is_mutex, auto_flush);
+        logger = createFileLogger(name, destination_value, GENERATOR, IS_MUTEX, AUTO_FLUSH);
     } else if (sink_value == TBAG_LOGGER_SINK_ROTATE_FILE) {
-        return createRotateFileLogger(name, destination_value, generator, is_mutex, auto_flush);
+        logger = createRotateFileLogger(name, destination_value, GENERATOR, IS_MUTEX, AUTO_FLUSH);
+    } else {
+        return nullptr;
     }
-    return nullptr;
+
+    logger->setSeverity(SEVERITY);
+    return logger;
 }
 
 int createLoggerWithXmlConfigPath(std::string const & path)

@@ -18,6 +18,7 @@
 #include <libtbag/lock/FakeLock.hpp>
 
 #include <string>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -63,6 +64,10 @@ private:
     String _endl;
 
 public:
+    TBAG_CONSTEXPR inline bool isLocking() const TBAG_NOEXCEPT
+    { return std::is_same<MutexType, lock::FakeLock>::value; }
+
+public:
     Sink() : _mutex(), _force_flush(false), _endl(UNIX_NEW_LINE)
     { /* EMPTY. */ }
     Sink(bool force_flush) : _mutex(), _force_flush(force_flush), _endl(UNIX_NEW_LINE)
@@ -76,6 +81,10 @@ public:
     { _endl = UNIX_NEW_LINE; }
     inline void setNewLineForWindowsStyle()
     { _endl = WINDOWS_NEW_LINE; }
+    inline String getNewLine() const
+    { return _endl; }
+    inline bool isForceFlush() const TBAG_NOEXCEPT
+    { return _force_flush; }
     // @formatter:on
 
 public:

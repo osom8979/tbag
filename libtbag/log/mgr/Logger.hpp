@@ -72,8 +72,11 @@ public:
 
     inline void setType(Generator::MakeType type) TBAG_NOEXCEPT
     { _generator.setType(type); }
-    inline Generator::MakeType getType() const TBAG_NOEXCEPT
+    inline Generator::MakeType getGeneratorMakeType() const TBAG_NOEXCEPT
     { return _generator.getType(); }
+
+    inline SinkType const * getSink() const TBAG_NOEXCEPT
+    { return _sink.get(); }
     // @formatter:on
 
 public:

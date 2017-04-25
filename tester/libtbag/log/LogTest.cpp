@@ -119,10 +119,10 @@ TBAG_CONSTEXPR static char const * const TBAG_TEST_LOG_XML = R"XML(
     <sink>file</sink>
     <destination>tbag-logger-test.log</destination>
     <multithread>false</multithread>
-    <mutex>true</mutex>
+    <mutex>false</mutex>
     <generator>default</generator>
-    <severity>debug</severity>
-    <auto_flush>false</auto_flush>
+    <severity>critical</severity>
+    <auto_flush>true</auto_flush>
 </tbag-logger>
 )XML";
 
@@ -137,6 +137,18 @@ TEST(LogTest, XmlString)
 
     ASSERT_NE(nullptr, cout_logger);
     ASSERT_NE(nullptr, file_logger);
+
+    auto * unknown_logger = getLogger("");
+    ASSERT_EQ(nullptr, unknown_logger);
+
+    ASSERT_EQ(DEBUG_SEVERITY, cout_logger->getSeverity());
+    ASSERT_EQ(CRITICAL_SEVERITY, file_logger->getSeverity());
+
+    ASSERT_TRUE(Logger::Generator::MakeType::DEFAULT_COLOR == cout_logger->getGeneratorMakeType());
+    ASSERT_TRUE(Logger::Generator::MakeType::DEFAULT == file_logger->getGeneratorMakeType());
+
+    ASSERT_NE(nullptr, cout_logger->getSink());
+    ASSERT_NE(nullptr, file_logger->getSink());
 
     ASSERT_TRUE(removeLogger(COUT_LOGGER));
     ASSERT_TRUE(removeLogger(FILE_LOGGER));
