@@ -133,6 +133,18 @@ XmlModel::Path XmlModel::findExistsFilePathOfNearest() const
     // @formatter:on
 }
 
+XmlModel::Path XmlModel::findWritablePathOfNearest() const
+{
+    // @formatter:off
+    Path result;
+    if (result = getFilePath(Scope::WORK  ), result.getParent().isWritable()) { return result; }
+    if (result = getFilePath(Scope::EXE   ), result.getParent().isWritable()) { return result; }
+    if (result = getFilePath(Scope::HOME  ), result.getParent().isWritable()) { return result; }
+    if (result = getFilePath(Scope::GLOBAL), result.getParent().isWritable()) { return result; }
+    return Path();
+    // @formatter:on
+}
+
 void XmlModel::teardown()
 {
     for (auto & cursor : _models) {
@@ -149,7 +161,7 @@ void XmlModel::setup()
 
 bool XmlModel::save() const
 {
-    return save(findExistsFilePathOfNearest());
+    return save(findWritablePathOfNearest());
 }
 
 bool XmlModel::save(Scope scope) const

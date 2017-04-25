@@ -49,10 +49,10 @@ public:
 public:
     enum class Scope
     {
-        WORK,
-        EXE,
-        HOME,
-        GLOBAL,
+        WORK,   ///< First step.
+        EXE,    ///< Second step.
+        HOME,   ///< Third step.
+        GLOBAL, ///< Fourth step.
     };
 
 public:
@@ -129,6 +129,7 @@ public:
 public:
     Path getFilePath(Scope scope) const;
     Path findExistsFilePathOfNearest() const;
+    Path findWritablePathOfNearest() const;
 
 public:
     void teardown();
