@@ -89,6 +89,14 @@ public:
     bool operator ==(std::string const & path);
 
 public:
+    // @formatter:off
+    inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_path.clear()))
+    { _path.clear(); }
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_path.empty()))
+    { return _path.empty(); }
+    // @formatter:on
+
+public:
     Path & copy(Path const & obj);
     void swap(Path && obj);
     void swap(Path & obj);

@@ -224,7 +224,11 @@ bool XmlModel::load(Path const & path)
 
 bool XmlModel::loadOrDefaultSave()
 {
-    return loadOrDefaultSave(findExistsFilePathOfNearest());
+    Path path = findExistsFilePathOfNearest();
+    if (path.empty()) {
+        path = findWritablePathOfNearest();
+    }
+    return loadOrDefaultSave(path);
 }
 
 bool XmlModel::loadOrDefaultSave(Scope scope)
