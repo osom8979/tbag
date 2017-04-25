@@ -36,8 +36,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
-TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME  = "__tbag_default_logger__";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_NODE_NAME = "tbag-logger";
+TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME   = "__tbag_default_logger__";
+TBAG_CONSTEXPR char const * const TBAG_LOGGERS_XML_NODE_NAME = "tbag-loggers";
+TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_NODE_NAME  = "tbag-logger";
 
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_NAME        = "name";
 TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SINK        = "sink";
