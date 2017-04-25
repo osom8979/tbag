@@ -22,15 +22,21 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace bitwise {
 
-template <typename ValueType>
-ValueType setFlag(ValueType source, ValueType value, bool flag = true) TBAG_NOEXCEPT
+template <typename T>
+inline T setFlag(T original, T flag, bool enable = true) TBAG_NOEXCEPT
 {
-    if (flag) {
-        source |= value;
+    if (enable) {
+        original |= flag;
     } else {
-        source &= ~value;
+        original &= (~flag);
     }
-    return source;
+    return original;
+}
+
+template <typename T>
+inline bool checkFlag(T original, T flag) TBAG_NOEXCEPT
+{
+    return (original & flag) == flag;
 }
 
 } // namespace bitwise

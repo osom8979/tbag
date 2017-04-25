@@ -1,0 +1,44 @@
+/**
+ * @file   Endian.hpp
+ * @brief  Endian class prototype.
+ * @author zer0
+ * @date   2017-04-25
+ */
+
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_BITWISE_ENDIAN_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_BITWISE_ENDIAN_HPP__
+
+// MS compatible compilers support #pragma once
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#pragma once
+#endif
+
+#include <libtbag/config.h>
+#include <libtbag/predef.hpp>
+
+#include <cstdint>
+
+// -------------------
+NAMESPACE_LIBTBAG_OPEN
+// -------------------
+
+namespace bitwise {
+
+ int16_t toHost( int16_t network) TBAG_NOEXCEPT;
+uint16_t toHost(uint16_t network) TBAG_NOEXCEPT;
+ int32_t toHost( int32_t network) TBAG_NOEXCEPT;
+uint32_t toHost(uint32_t network) TBAG_NOEXCEPT;
+
+ int16_t toNetwork( int16_t host) TBAG_NOEXCEPT;
+uint16_t toNetwork(uint16_t host) TBAG_NOEXCEPT;
+ int32_t toNetwork( int32_t host) TBAG_NOEXCEPT;
+uint32_t toNetwork(uint32_t host) TBAG_NOEXCEPT;
+
+} // namespace bitwise
+
+// --------------------
+NAMESPACE_LIBTBAG_CLOSE
+// --------------------
+
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_BITWISE_ENDIAN_HPP__
+
