@@ -29,6 +29,7 @@
 #include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/mgr/Logger.hpp>
 #include <libtbag/log/msg/PacketGenerator.hpp>
+#include <libtbag/log/node/LogXmlNode.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,33 +38,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 
 TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME   = "__tbag_default_logger__";
-TBAG_CONSTEXPR char const * const TBAG_LOGGERS_XML_NODE_NAME = "tbag-loggers";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_NODE_NAME  = "tbag-logger";
-
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_NAME        = "name";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SINK        = "sink";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_DESTINATION = "destination";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_MULTITHREAD = "multithread";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_MUTEX       = "mutex";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_GENERATOR   = "generator";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_SEVERITY    = "severity";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
-
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_ON  = "true";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MULTITHREAD_OFF = "false";
-
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_ON  = "true";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_MUTEX_OFF = "false";
-
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_ON  = "true";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_AUTO_FLUSH_OFF = "false";
-
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT = "default";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_GENERATOR_DEFAULT_COLOR = "default_color";
-
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_COUT = "cout";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_FILE = "file";
-TBAG_CONSTEXPR char const * const TBAG_LOGGER_SINK_ROTATE_FILE = "rotate_file";
 
 //TBAG_CONSTEXPR bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
@@ -103,38 +77,10 @@ TBAG_API Logger * createRotateFileLogger(std::string const & name,
                                          bool mutex = true,
                                          bool auto_flush = false);
 
-TBAG_API bool parseAutoFlush(std::string const & flush_value);
-TBAG_API bool parseMultiThread(std::string const & multithread_value);
-TBAG_API bool parseMutexThread(std::string const & mutex_value);
-TBAG_API Severity parseSeverity(std::string const & severity_value);
-TBAG_API MakeType parseGeneratorType(std::string const & generator_value);
-
-TBAG_API Logger * createLogger(std::string const & name,
-                               std::string const & sink_value,
-                               std::string const & destination_value,
-                               std::string const & multithread_value,
-                               std::string const & mutex_value,
-                               std::string const & generator_value,
-                               std::string const & severity_value,
-                               std::string const & flush_value);
-
-TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);
-TBAG_API int createLoggerWithXmlString(std::string const & xml);
-TBAG_API int createLoggerWithParentXmlElement(tinyxml2::XMLElement const * parent);
-TBAG_API int createLoggerWithXmlElement(tinyxml2::XMLElement const * element);
-TBAG_API bool saveLoggerWithXmlElement(tinyxml2::XMLElement * parent,
-                                       std::string const & name,
-                                       std::string const & sink_value,
-                                       std::string const & destination_value,
-                                       std::string const & multithread_value,
-                                       std::string const & mutex_value,
-                                       std::string const & generator_value,
-                                       std::string const & severity_value,
-                                       std::string const & flush_value);
-
 TBAG_API Logger * createDefaultConsoleLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createDefaultRotateFileLogger(std::string const & path, bool auto_flush = false);
 
 TBAG_API bool removeLogger(std::string const & name);
 TBAG_API bool removeDefaultLogger();
