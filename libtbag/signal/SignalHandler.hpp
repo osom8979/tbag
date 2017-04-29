@@ -29,6 +29,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace signal {
 
+// ==================
+namespace __impl {
+/** @warning Don't use this method from user level developers. */
+TBAG_API void createInstance();
+TBAG_API void releaseInstance();
+} // namespace __impl
+// ==================
+
 #ifndef TBAG_SIGNAL_MAP
 #define TBAG_SIGNAL_MAP(_TBAG_XX) \
     _TBAG_XX(SIGNAL_INTERRUPT               , SIGINT /*  2 */, "interrupt") \

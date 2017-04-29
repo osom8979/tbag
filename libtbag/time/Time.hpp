@@ -26,6 +26,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace time {
 
+// ==================
+namespace __impl {
+/** @warning Don't use this method from user level developers. */
+TBAG_API void createInstance();
+TBAG_API void releaseInstance();
+} // namespace __impl
+// ==================
+
 /**
  * Long date/time format.
  *

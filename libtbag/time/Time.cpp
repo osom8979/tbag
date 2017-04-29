@@ -26,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace time {
 
-/* inline */ namespace impl {
+/* inline */ namespace __impl {
 
 /**
  * SafetyTimeGetter class prototype & implementation.
@@ -119,8 +119,8 @@ private:
         struct tm   gmt_time = {0,};
         struct tm local_time = {0,};
 
-        bool is_gmt   = impl::SafetyTimeGetter::getInstance()->getGmtTime(time, &gmt_time);
-        bool is_local = impl::SafetyTimeGetter::getInstance()->getLocalTime(time, &local_time);
+        bool is_gmt   = __impl::SafetyTimeGetter::getInstance()->getGmtTime(time, &gmt_time);
+        bool is_local = __impl::SafetyTimeGetter::getInstance()->getLocalTime(time, &local_time);
 
         if (is_gmt == false || is_local == false) {
             return false;
@@ -179,7 +179,19 @@ typename Destination::rep getTimeFloor(std::chrono::time_point<Clock, ClockDurat
     return std::abs(std::chrono::duration_cast<Destination>(epoch_time).count());
 }
 
-} // namespace impl
+void createInstance()
+{
+    LocalTimeDiff::createInstance();
+    SafetyTimeGetter::createInstance();
+}
+
+void releaseInstance()
+{
+    SafetyTimeGetter::releaseInstance();
+    LocalTimeDiff::releaseInstance();
+}
+
+} // namespace __impl
 
 int getYear(std::chrono::system_clock::time_point const & time)
 {
@@ -219,7 +231,7 @@ int getSubSeconds(std::chrono::system_clock::time_point const & time)
 int getMillisec(std::chrono::system_clock::time_point const & time)
 {
     using namespace std::chrono;
-    auto const RESULT = impl::getTimeFloor<seconds, milliseconds>(time);
+    auto const RESULT = __impl::getTimeFloor<seconds, milliseconds>(time);
     assert(0 <= COMPARE_AND(RESULT) < 1000);
     return static_cast<int>(RESULT);
 }
@@ -227,7 +239,7 @@ int getMillisec(std::chrono::system_clock::time_point const & time)
 int getMicrosec(std::chrono::system_clock::time_point const & time)
 {
     using namespace std::chrono;
-    auto const RESULT = impl::getTimeFloor<milliseconds, microseconds>(time);
+    auto const RESULT = __impl::getTimeFloor<milliseconds, microseconds>(time);
     assert(0 <= COMPARE_AND(RESULT) < 1000);
     return static_cast<int>(RESULT);
 }
@@ -235,7 +247,7 @@ int getMicrosec(std::chrono::system_clock::time_point const & time)
 int getNanosec(std::chrono::system_clock::time_point const & time)
 {
     using namespace std::chrono;
-    auto const RESULT = impl::getTimeFloor<microseconds, nanoseconds>(time);
+    auto const RESULT = __impl::getTimeFloor<microseconds, nanoseconds>(time);
     assert(0 <= COMPARE_AND(RESULT) < 1000);
     return static_cast<int>(RESULT);
 }
@@ -278,17 +290,17 @@ time_t getCurrentTime() TBAG_NOEXCEPT
 
 bool getGmtTime(time_t const & t, tm * output)
 {
-    return impl::SafetyTimeGetter::getInstance()->getGmtTime(t, output);
+    return __impl::SafetyTimeGetter::getInstance()->getGmtTime(t, output);
 }
 
 bool getLocalTime(time_t const & t, tm * output)
 {
-    return impl::SafetyTimeGetter::getInstance()->getLocalTime(t, output);
+    return __impl::SafetyTimeGetter::getInstance()->getLocalTime(t, output);
 }
 
 std::chrono::system_clock::duration getCurrentLocalDuration()
 {
-    return impl::LocalTimeDiff::getInstance()->getLocalDiff();
+    return __impl::LocalTimeDiff::getInstance()->getLocalDiff();
 }
 
 std::string getFormatString(std::string const & format, tm const * t, std::size_t allocate_size)

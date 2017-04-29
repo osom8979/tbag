@@ -25,7 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace signal  {
 
 // ===============
-namespace __impl {
+/* inline */ namespace __impl {
 
 // #define SIGHUP     1  // hangup
 // #define SIGINT     2  // interrupt
@@ -173,6 +173,16 @@ _TBAG_DEFAULT_SIGNAL_HANDLER(DefaultTerminateHandler,          "Terminate signal
 
 #undef _TBAG_DEFAULT_SIGNAL_HANDLER
 #undef _TBAG_FORCE_FAILURE_EXIT
+
+void createInstance()
+{
+    SignalObservable::createInstance();
+}
+
+void releaseInstance()
+{
+    SignalObservable::releaseInstance();
+}
 
 } // namespace __impl
 // ==================
