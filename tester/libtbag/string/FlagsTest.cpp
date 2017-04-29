@@ -103,3 +103,45 @@ TEST(FlagsTest, Parse_Find)
     ASSERT_STREQ("temp", flag4.value.c_str());
 }
 
+TEST(FlagsTest, Remove)
+{
+    std::string args = "value /arg1 /arg2&arg1";
+    Flags flags;
+    flags.parse(args, "/", "&");
+
+    ASSERT_EQ(3U, flags.size());
+    ASSERT_FALSE(flags.remove("Unknown"));
+    ASSERT_FALSE(flags.remove(3));
+
+    ASSERT_TRUE(flags.remove("arg1"));
+    ASSERT_EQ(2U, flags.size());
+
+    ASSERT_TRUE(flags.remove(0));
+    ASSERT_EQ(1U, flags.size());
+
+    ASSERT_TRUE(flags.remove("arg2"));
+    ASSERT_EQ(0U, flags.size());
+}
+
+TEST(FlagsTest, Argv)
+{
+    std::string args = "value --arg1 --arg2=arg1";
+    Flags flags;
+    flags.parse(args);
+
+    auto argv_obj = flags.getArgv();
+    ASSERT_EQ(3, argv_obj.argc());
+    ASSERT_STREQ(      "value", *(argv_obj.argv() + 0));
+    ASSERT_STREQ(     "--arg1", *(argv_obj.argv() + 1));
+    ASSERT_STREQ("--arg2=arg1", *(argv_obj.argv() + 2));
+
+    Flags flags2(argv_obj.argc(), argv_obj.argv());
+    ASSERT_EQ(3U, flags.size());
+    ASSERT_STREQ(     "", flags2.at(0).key.c_str());
+    ASSERT_STREQ("value", flags2.at(0).value.c_str());
+    ASSERT_STREQ( "arg1", flags2.at(1).key.c_str());
+    ASSERT_STREQ(     "", flags2.at(1).value.c_str());
+    ASSERT_STREQ( "arg2", flags2.at(2).key.c_str());
+    ASSERT_STREQ( "arg1", flags2.at(2).value.c_str());
+}
+

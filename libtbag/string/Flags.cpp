@@ -86,6 +86,25 @@ Flags::Flag Flags::findWithValue(std::string const & value) const
     }));
 }
 
+bool Flags::remove(std::size_t index)
+{
+    if (index < _flags.size()) {
+        _flags.erase(_flags.cbegin() + index);
+        return true;
+    }
+    return false;
+}
+
+bool Flags::remove(std::string const & key)
+{
+    auto itr = std::find_if(_flags.cbegin(), _flags.cend(), [key](Flag const & f) -> bool { return f.key == key; });
+    if (itr != _flags.end()) {
+        _flags.erase(itr);
+        return true;
+    }
+    return false;
+}
+
 bool Flags::existsWithKey(std::string const & key) const
 {
     return !findWithKey(key).key.empty();
@@ -123,7 +142,26 @@ void Flags::parse(std::string const & args, std::string const & prefix, std::str
 
 void Flags::parse(std::string const & args)
 {
-    parse(args, getDefaultPrefix(), getDefaultDelimiter());
+    parse(args, DEFAULT_PREFIX, DEFAULT_DELIMITER);
+}
+
+Flags::Argv Flags::getArgv(std::string const & prefix, std::string const & delimiter) const
+{
+    std::size_t const SIZE = _flags.size();
+
+    Argv argv;
+    argv._strings.resize(SIZE);
+    argv._arguments.resize(SIZE);
+    for (std::size_t i = 0; i < SIZE; ++i) {
+        argv._strings[i] = convertString(_flags[i], prefix, delimiter);
+        argv._arguments[i] = &argv._strings[i][0];
+    }
+    return argv;
+}
+
+Flags::Argv Flags::getArgv() const
+{
+    return getArgv(DEFAULT_PREFIX, DEFAULT_DELIMITER);
 }
 
 Flags::Flag Flags::convertFlag(std::string const & str, std::string const & prefix, std::string const & delimiter)
@@ -149,7 +187,23 @@ Flags::Flag Flags::convertFlag(std::string const & str, std::string const & pref
 
 Flags::Flag Flags::convertFlag(std::string const & str)
 {
-    return convertFlag(str, getDefaultPrefix(), getDefaultDelimiter());
+    return convertFlag(str, DEFAULT_PREFIX, DEFAULT_DELIMITER);
+}
+
+std::string Flags::convertString(Flag const & flag, std::string const & prefix, std::string const & delimiter)
+{
+    if (flag.key.empty()) {
+        return flag.value;
+    }
+    if (flag.value.empty()) {
+        return prefix + flag.key;
+    }
+    return prefix + flag.key + delimiter + flag.value;
+}
+
+std::string Flags::convertString(Flag const & flag)
+{
+    return convertString(flag, DEFAULT_PREFIX, DEFAULT_DELIMITER);
 }
 
 std::vector<std::string> Flags::splitTokens(std::string const & args)
