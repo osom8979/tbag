@@ -8,6 +8,7 @@
 #include <libtbag/log/node/LogXmlNode.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -22,7 +23,10 @@ namespace node {
 
 LogXmlNode::LogXmlNode()
 {
-    // EMPTY.
+    _envs.push(EnvFlag(ENVS_EXE_PATH, filesystem::Path::getExePath()));
+    _envs.push(EnvFlag(ENVS_EXE_DIR , filesystem::Path::getExeDir()));
+    _envs.push(EnvFlag(ENVS_WORK_DIR, filesystem::Path::getWorkDir()));
+    _envs.push(EnvFlag(ENVS_HOME_DIR, filesystem::Path::getHomeDir()));
 }
 
 LogXmlNode::~LogXmlNode()
@@ -297,17 +301,24 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfoVector const & infos)
 
 LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info)
 {
+    return createLogger(info, Environments());
+}
+
+LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments const & envs)
+{
     if (info.name.empty()) {
         return nullptr;
     }
+
+    String const DEST = envs.convert(info.destination);
 
     Logger * logger = nullptr;
     if (info.sink == SINK_COUT) {
         logger = createConsoleLogger(info.name, info.generator, info.mutex, info.auto_flush);
     } else if (info.sink == SINK_FILE) {
-        logger = createFileLogger(info.name, info.destination, info.generator, info.mutex, info.auto_flush);
+        logger = createFileLogger(info.name, DEST, info.generator, info.mutex, info.auto_flush);
     } else if (info.sink == SINK_ROTATE_FILE) {
-        logger = createRotateFileLogger(info.name, info.destination, info.generator, info.mutex, info.auto_flush);
+        logger = createRotateFileLogger(info.name, DEST, info.generator, info.mutex, info.auto_flush);
     } else {
         return nullptr;
     }

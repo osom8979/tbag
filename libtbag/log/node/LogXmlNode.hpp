@@ -19,6 +19,7 @@
 #include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/msg/PacketGenerator.hpp>
 #include <libtbag/log/mgr/Logger.hpp>
+#include <libtbag/string/Environments.hpp>
 
 #include <vector>
 
@@ -41,8 +42,12 @@ public:
     using Severity = log::level::Severity;
     using MakeType = log::msg::PacketGenerator::MakeType;
     using Logger   = log::mgr::Logger;
+
     using Element  = dom::XmlModel::Element;
     using String   = dom::XmlModel::NodeInterface::String;
+
+    using Environments = string::Environments;
+    using EnvFlag      = Environments::Flag;
 
 public:
     STATIC_ASSERT_CHECK_IS_SAME(String, std::string);
@@ -60,6 +65,7 @@ public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY    = "severity";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
 
+public:
     TBAG_CONSTEXPR static char const * const AUTO_FLUSH_ON  = "true";
     TBAG_CONSTEXPR static char const * const AUTO_FLUSH_OFF = "false";
 
@@ -75,6 +81,12 @@ public:
     TBAG_CONSTEXPR static char const * const SINK_COUT = "cout";
     TBAG_CONSTEXPR static char const * const SINK_FILE = "file";
     TBAG_CONSTEXPR static char const * const SINK_ROTATE_FILE = "rotate_file";
+
+public:
+    TBAG_CONSTEXPR static char const * const ENVS_EXE_PATH = "EXE_PATH";
+    TBAG_CONSTEXPR static char const * const ENVS_EXE_DIR  = "EXE_DIR";
+    TBAG_CONSTEXPR static char const * const ENVS_WORK_DIR = "WORK_DIR";
+    TBAG_CONSTEXPR static char const * const ENVS_HOME_DIR = "HOME_DIR";
 
 public:
     struct LogInfo
@@ -93,6 +105,7 @@ public:
 
 private:
     LogInfoVector _infos;
+    Environments  _envs;
 
 public:
     LogXmlNode();
@@ -149,6 +162,7 @@ public:
 
 public:
     static Logger * createLogger(LogInfo const & info);
+    static Logger * createLogger(LogInfo const & info, Environments const & envs);
 };
 
 TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);
