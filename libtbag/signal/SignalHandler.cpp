@@ -139,37 +139,40 @@ public:
     }
 };
 
-/**
- * Default signal handler.
- *
- * @author zer0
- * @date   2016-12-25
- */
-struct DefaultSignalHandler : public SignalHandler
-{
-    virtual void run(int signal) override
-    {
-        __tbag_debug("Signal {}:\n{}", getSignalName(signal), debug::getStackTrace());
-        //std::abort(); // Don't use this abort.
-        std::exit(EXIT_FAILURE);
-    }
-};
+#ifndef _TBAG_FORCE_FAILURE_EXIT
+#define _TBAG_FORCE_FAILURE_EXIT(code) \
+    /* // Don't use this abort. */     \
+    /* // std::abort() */              \
+    /* // std::exit(code) */           \
+    std::_Exit(code)
+#endif
 
-/**
- * Default terminate handler.
- *
- * @author zer0
- * @date   2016-12-25
- */
-struct DefaultTerminateHandler : public SignalHandler
-{
-    virtual void run(int signal) override
-    {
-        __tbag_debug("Terminate signal:\n{}", debug::getStackTrace());
-        //std::abort(); // Don't use this abort.
-        std::exit(EXIT_FAILURE);
-    }
-};
+#ifndef _TBAG_DEFAULT_SIGNAL_HANDLER
+#define _TBAG_DEFAULT_SIGNAL_HANDLER(cls, msg)                      \
+    struct cls : public ::libtbag::signal::SignalHandler {          \
+        std::string _logger;                                        \
+        cls(std::string const & logger = "") : _logger(logger) { }  \
+        virtual ~cls() { }                                          \
+        virtual void run(int signal) override {                     \
+            auto sname  = ::libtbag::signal::getSignalName(signal); \
+            auto strace = ::libtbag::debug::getStackTrace();        \
+            if (_logger.empty()) {                                  \
+                __tbag_debug("{} ({}):\n{}", msg, sname, strace);   \
+            } else {                                                \
+                tLogA(_logger, "{} ({}):\n{}", msg, sname, strace); \
+            }                                                       \
+            _TBAG_FORCE_FAILURE_EXIT(EXIT_FAILURE);                 \
+        }                                                           \
+    };
+#endif
+
+_TBAG_DEFAULT_SIGNAL_HANDLER(DefaultSignalHandler   ,                    "Signal.");
+_TBAG_DEFAULT_SIGNAL_HANDLER(DefaultAbortHandler    ,              "Abort signal.");
+_TBAG_DEFAULT_SIGNAL_HANDLER(DefaultSegFaultHandler , "Segmentation fault signal.");
+_TBAG_DEFAULT_SIGNAL_HANDLER(DefaultTerminateHandler,          "Terminate signal.");
+
+#undef _TBAG_DEFAULT_SIGNAL_HANDLER
+#undef _TBAG_FORCE_FAILURE_EXIT
 
 } // namespace __impl
 // ==================
@@ -226,21 +229,21 @@ void registerHandler(int signal, SignalHandler * handler, int order)
     std::signal(signal, __signal_dispatcher__);
 }
 
-void raise(int signal)
+void registerDefaultStdTerminateHandler(std::string const & logger_name)
 {
-    std::raise(signal);
+    registerStdTerminateHandler(new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);
 }
 
-void registerDefaultStdTerminateHandler()
+void registerDefaultHandler(std::string const & logger_name)
 {
-    registerStdTerminateHandler(new __impl::DefaultTerminateHandler, LAST_ORDER);
+    registerHandler(SIGNAL_ABORT                 , new __impl::DefaultAbortHandler    (logger_name), LAST_ORDER);
+    registerHandler(SIGNAL_SEGMENTATION_VIOLATION, new __impl::DefaultSegFaultHandler (logger_name), LAST_ORDER);
+    registerHandler(SIGNAL_TERMINATION           , new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);
 }
 
-void registerDefaultHandler()
+SignalHandler * createDefaultSignalHandler(std::string const & logger_name)
 {
-    registerHandler(SIGNAL_ABORT                 , new __impl::DefaultSignalHandler, LAST_ORDER);
-    registerHandler(SIGNAL_SEGMENTATION_VIOLATION, new __impl::DefaultSignalHandler, LAST_ORDER);
-    registerHandler(SIGNAL_TERMINATION           , new __impl::DefaultSignalHandler, LAST_ORDER);
+    return new __impl::DefaultSignalHandler(logger_name);
 }
 
 } // namespace signal

@@ -18,7 +18,10 @@
 
 #include <csignal>
 #include <climits>
+#include <cstdlib>
+
 #include <string>
+#include <exception>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -62,10 +65,22 @@ TBAG_API std::string getSignalName(int signal_number);
 
 TBAG_API void registerStdTerminateHandler(SignalHandler * handler, int order = 0);
 TBAG_API void registerHandler(int signal, SignalHandler * handler, int order = 0);
-TBAG_API void raise(int signal);
 
-TBAG_API void registerDefaultStdTerminateHandler();
-TBAG_API void registerDefaultHandler();
+TBAG_API void registerDefaultStdTerminateHandler(std::string const & logger_name = "");
+TBAG_API void registerDefaultHandler(std::string const & logger_name = "");
+
+TBAG_API SignalHandler * createDefaultSignalHandler(std::string const & logger_name = "");
+
+// @formatter:off
+inline int raise(int signal)
+{ return std::raise(signal); }
+inline void terminate() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(std::terminate()))
+{ std::terminate(); }
+inline void exit(int code)
+{ std::exit(code); }
+inline void exitForce(int code)
+{ std::_Exit(code); }
+// @formatter:on
 
 } // namespace signal
 
