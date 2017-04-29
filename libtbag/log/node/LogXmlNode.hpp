@@ -153,8 +153,8 @@ public:
 
 TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);
 TBAG_API int createLoggerWithXmlString(std::string const & xml);
-TBAG_API int createLoggerWithParentXmlElement(tinyxml2::XMLElement const & parent);
-TBAG_API int createLoggerWithXmlElement(tinyxml2::XMLElement const & element);
+TBAG_API int createLoggerWithXmlElement(tinyxml2::XMLElement const & parent);
+TBAG_API int createLoggerWithXmlLoggerElement(tinyxml2::XMLElement const & element);
 
 } // namespace node
 } // namespace log

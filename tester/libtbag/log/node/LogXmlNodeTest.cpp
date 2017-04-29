@@ -13,7 +13,7 @@ using namespace libtbag;
 using namespace libtbag::log;
 using namespace libtbag::log::node;
 
-TEST(LogTest, Parse)
+TEST(LogXmlNodeTest, Parse)
 {
     ASSERT_TRUE(LogXmlNode::parseAutoFlush(LogXmlNode::AUTO_FLUSH_ON));
     ASSERT_FALSE(LogXmlNode::parseAutoFlush(LogXmlNode::AUTO_FLUSH_OFF));
@@ -54,29 +54,31 @@ TEST(LogTest, Parse)
 }
 
 TBAG_CONSTEXPR static char const * const TEST_TLOG_XML_STRING = R"XML(
-<logger>
-    <name>test-logger-cout</name>
-    <sink>cout</sink>
-    <destination></destination>
-    <multithread>false</multithread>
-    <mutex>true</mutex>
-    <generator>default_color</generator>
-    <severity>debug</severity>
-    <auto_flush>false</auto_flush>
-</logger>
-<logger>
-    <name>test-logger-file</name>
-    <sink>file</sink>
-    <destination>tbag-logger-test.log</destination>
-    <multithread>false</multithread>
-    <mutex>false</mutex>
-    <generator>default</generator>
-    <severity>critical</severity>
-    <auto_flush>true</auto_flush>
-</logger>
+<tlog>
+    <logger>
+        <name>test-logger-cout</name>
+        <sink>cout</sink>
+        <destination></destination>
+        <multithread>false</multithread>
+        <mutex>true</mutex>
+        <generator>default_color</generator>
+        <severity>debug</severity>
+        <auto_flush>false</auto_flush>
+    </logger>
+    <logger>
+        <name>test-logger-file</name>
+        <sink>file</sink>
+        <destination>tbag-logger-test.log</destination>
+        <multithread>false</multithread>
+        <mutex>false</mutex>
+        <generator>default</generator>
+        <severity>critical</severity>
+        <auto_flush>true</auto_flush>
+    </logger>
+</tlog>
 )XML";
 
-TEST(LogTest, XmlString)
+TEST(LogXmlNodeTest, XmlString)
 {
     char const * const COUT_LOGGER = "test-logger-cout";
     char const * const FILE_LOGGER = "test-logger-file";

@@ -326,7 +326,12 @@ int createLoggerWithXmlConfigPath(std::string const & path)
     if (doc.LoadFile(path.c_str()) != tinyxml2::XML_NO_ERROR) {
         return false;
     }
-    return createLoggerWithXmlElement(*doc.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGER_NAME));
+
+    auto * element = doc.FirstChildElement(LogXmlNode::XML_ELEMENT_TLOG_NAME);
+    if (element == nullptr) {
+        return 0;
+    }
+    return createLoggerWithXmlLoggerElement(*element);
 }
 
 int createLoggerWithXmlString(std::string const & xml)
@@ -335,28 +340,34 @@ int createLoggerWithXmlString(std::string const & xml)
     if (doc.Parse(xml.c_str(), xml.size()) != tinyxml2::XML_NO_ERROR) {
         return false;
     }
-    return createLoggerWithXmlElement(*doc.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGER_NAME));
-}
 
-int createLoggerWithParentXmlElement(tinyxml2::XMLElement const & parent)
-{
-    return createLoggerWithXmlElement(*parent.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGER_NAME));
-}
-
-int createLoggerWithXmlElement(tinyxml2::XMLElement const & element)
-{
-    if (string::lower(element.Name()) != LogXmlNode::XML_ELEMENT_LOGGER_NAME) {
+    auto * element = doc.FirstChildElement(LogXmlNode::XML_ELEMENT_TLOG_NAME);
+    if (element == nullptr) {
         return 0;
     }
+    return createLoggerWithXmlLoggerElement(*element);
+}
 
-    bool const IS_CREATE = LogXmlNode::createLogger(LogXmlNode::getLogInfo(element)) != nullptr;
-
-    // Next STEP.
-    auto * next = element.NextSiblingElement();
-    if (next) {
-        return createLoggerWithXmlElement(*next) + (IS_CREATE ? 1 : 0);
+int createLoggerWithXmlElement(tinyxml2::XMLElement const & parent)
+{
+    auto * element = parent.FirstChildElement(LogXmlNode::XML_ELEMENT_TLOG_NAME);
+    if (element == nullptr) {
+        return 0;
     }
-    return (IS_CREATE ? 1 : 0);
+    return createLoggerWithXmlLoggerElement(*element);
+}
+
+int createLoggerWithXmlLoggerElement(tinyxml2::XMLElement const & element)
+{
+    int result = 0;
+    auto * cursor = element.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGER_NAME);
+    while (cursor != nullptr) {
+        if (LogXmlNode::createLogger(LogXmlNode::getLogInfo(*cursor)) != nullptr) {
+            ++result;
+        }
+        cursor = cursor->NextSiblingElement();
+    }
+    return result;
 }
 
 } // namespace node
