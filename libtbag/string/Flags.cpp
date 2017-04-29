@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/string/Flags.hpp>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -115,7 +116,7 @@ bool Flags::existsWithValue(std::string const & value) const
     return !findWithValue(value).value.empty();
 }
 
-std::vector<std::string> Flags::getUnnamedValues() const
+Flags::StringVector Flags::getUnnamedValues() const
 {
     std::vector<std::string> result;
     for (auto & cursor : _flags) {
@@ -126,42 +127,63 @@ std::vector<std::string> Flags::getUnnamedValues() const
     return result;
 }
 
-void Flags::parse(int argc, char ** argv)
+bool Flags::parse(int argc, char ** argv)
+{
+    return parse(argc, argv, DEFAULT_PREFIX, DEFAULT_DELIMITER);
+}
+
+bool Flags::parse(int argc, char ** argv, std::string const & prefix, std::string const & delimiter)
 {
     for (int index = 0; index < argc; ++index) {
-        push(convertFlag(std::string(argv[index])));
+        push(convertFlag(std::string(argv[index]), prefix, delimiter));
     }
+    return true;
 }
 
-void Flags::parse(std::string const & args, std::string const & prefix, std::string const & delimiter)
+bool Flags::parse(std::string const & args)
 {
-    for (auto & cursor : splitTokens(args)) {
+    return parse(args, DEFAULT_PREFIX, DEFAULT_DELIMITER);
+}
+
+bool Flags::parse(std::string const & args, std::string const & prefix, std::string const & delimiter)
+{
+    return parse(splitTokens(args), prefix, delimiter);
+}
+
+bool Flags::parse(StringVector const & args, std::string const & prefix, std::string const & delimiter)
+{
+    for (auto & cursor : args) {
         push(convertFlag(cursor, prefix, delimiter));
     }
+    return true;
 }
 
-void Flags::parse(std::string const & args)
+Flags::Argv Flags::getArgv(std::string const & prefix, std::string const & delimiter, bool last_null) const
 {
-    parse(args, DEFAULT_PREFIX, DEFAULT_DELIMITER);
-}
-
-Flags::Argv Flags::getArgv(std::string const & prefix, std::string const & delimiter) const
-{
-    std::size_t const SIZE = _flags.size();
+    std::size_t size = _flags.size();
+    if (last_null) {
+        ++size;
+    }
 
     Argv argv;
-    argv._strings.resize(SIZE);
-    argv._arguments.resize(SIZE);
-    for (std::size_t i = 0; i < SIZE; ++i) {
-        argv._strings[i] = convertString(_flags[i], prefix, delimiter);
+    argv._strings.resize(size);
+    argv._arguments.resize(size);
+
+    for (std::size_t i = 0; i < size; ++i) {
+        argv._strings  [i] = convertString(_flags[i], prefix, delimiter);
         argv._arguments[i] = &argv._strings[i][0];
+    }
+
+    if (last_null) {
+        assert(size >= 1);
+        argv._arguments[size - 1] = nullptr;
     }
     return argv;
 }
 
-Flags::Argv Flags::getArgv() const
+Flags::Argv Flags::getArgv(bool last_null) const
 {
-    return getArgv(DEFAULT_PREFIX, DEFAULT_DELIMITER);
+    return getArgv(DEFAULT_PREFIX, DEFAULT_DELIMITER, last_null);
 }
 
 Flags::Flag Flags::convertFlag(std::string const & str, std::string const & prefix, std::string const & delimiter)

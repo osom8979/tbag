@@ -110,9 +110,9 @@ public:
     { _flags.push_back(flag); }
 
 public:
-    inline Flag & at(int index)
+    inline Flag & at(std::size_t index)
     { return _flags.at(index); }
-    inline Flag const & at(int index) const
+    inline Flag const & at(std::size_t index) const
     { return _flags.at(index); }
 
 public:
@@ -129,16 +129,18 @@ public:
     bool existsWithValue(std::string const & value) const;
 
 public:
-    std::vector<std::string> getUnnamedValues() const;
+    StringVector getUnnamedValues() const;
 
 public:
-    void parse(int argc, char ** argv);
-    void parse(std::string const & args, std::string const & prefix, std::string const & delimiter);
-    void parse(std::string const & args);
+    bool parse(int argc, char ** argv);
+    bool parse(int argc, char ** argv, std::string const & prefix, std::string const & delimiter);
+    bool parse(std::string const & args);
+    bool parse(std::string const & args, std::string const & prefix, std::string const & delimiter);
+    bool parse(StringVector const & args, std::string const & prefix, std::string const & delimiter);
 
 public:
-    Argv getArgv(std::string const & prefix, std::string const & delimiter) const;
-    Argv getArgv() const;
+    Argv getArgv(std::string const & prefix, std::string const & delimiter, bool last_null = false) const;
+    Argv getArgv(bool last_null = false) const;
 
 // ---------------
 // Static methods.

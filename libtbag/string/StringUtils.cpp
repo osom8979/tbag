@@ -175,14 +175,14 @@ std::vector<std::string> splitMatch(std::string const & source, std::string cons
     return splitMatch(source, std::regex(match));
 }
 
-std::string replaceRegex(std::string const & path, std::string const & regex, std::string const & replace)
+std::string replaceRegex(std::string const & source, std::string const & regex, std::string const & replace)
 {
-    return std::regex_replace(path, std::regex(regex), replace);
+    return std::regex_replace(source, std::regex(regex), replace);
 }
 
-std::string removeRegex(std::string const & path, std::string const & regex)
+std::string removeRegex(std::string const & source, std::string const & regex)
 {
-    return replaceRegex(path, regex, std::string());
+    return replaceRegex(source, regex, std::string());
 }
 
 bool isMatch(std::string const & original, std::regex const & regex)

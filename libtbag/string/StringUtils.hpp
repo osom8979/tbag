@@ -104,8 +104,8 @@ TBAG_API std::vector<std::string> splitMatch(std::string const & source, std::re
 TBAG_API std::vector<std::string> splitMatch(std::string const & source, std::string const & match);
 
 // Regexp utilities.
-TBAG_API std::string replaceRegex(std::string const & path, std::string const & regex, std::string const & replace);
-TBAG_API std::string removeRegex(std::string const & path, std::string const & regex);
+TBAG_API std::string replaceRegex(std::string const & source, std::string const & regex, std::string const & replace);
+TBAG_API std::string removeRegex(std::string const & source, std::string const & regex);
 
 TBAG_API bool isMatch(std::string const & original, std::regex const & regex);
 TBAG_API bool isMatch(std::string const & original, std::string const & regex);
