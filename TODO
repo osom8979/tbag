@@ -37,4 +37,4 @@
 [x] Remove 3rd/tinyaes128c
 [ ] Checksum.
 [ ] Key store.
-
+[ ] Apply rmalloc.
