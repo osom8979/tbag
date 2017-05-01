@@ -129,6 +129,14 @@ public:
         _queue.pop();
         return Code::SUCCESS;
     }
+
+public:
+    template <typename Predicated>
+    inline void safeRun(Predicated predicated)
+    {
+        Guard guard(_mutex);
+        predicated(_queue);
+    }
 };
 
 } // namespace container

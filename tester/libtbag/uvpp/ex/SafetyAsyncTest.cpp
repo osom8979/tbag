@@ -14,7 +14,7 @@ using namespace libtbag::uvpp::ex;
 
 TEST(SafetyAsyncTest, Default)
 {
-    SafetyAsync object;
+    //SafetyAsync object;
     ASSERT_TRUE(true);
 }
 
