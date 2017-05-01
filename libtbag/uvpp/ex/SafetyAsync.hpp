@@ -57,6 +57,10 @@ public:
 
         Func job;
 
+        template <typename ... Args>
+        FunctionalJob(Args && ... args) : job(std::forward<Args>(args) ...)
+        { /* EMPTY. */ }
+
         virtual void run(SafetyAsync * handle) override
         {
             if (static_cast<bool>(job)) {
@@ -83,11 +87,14 @@ public:
     };
 
 public:
+    using SharedInspector = std::shared_ptr<MistakeInspector>;
+
     using SharedJob = std::shared_ptr<Job>;
     using JobQueue  = container::SafetyQueue<SharedJob>;
 
+
 private:
-    MistakeInspector _inspector;
+    SharedInspector _inspector;
     JobQueue _jobs;
 
 public:
@@ -116,6 +123,15 @@ public:
     {
         typedef typename remove_cr<JobType>::type ResultJobType;
         SharedJob shared = SharedJob(new (std::nothrow) JobType(std::forward<Args>(args) ...));
+        pushJob(shared);
+        return std::static_pointer_cast<ResultJobType, Job>(shared);
+    }
+
+    template <typename ... Args>
+    inline std::shared_ptr<FunctionalJob> newPushFunc(Args && ... args)
+    {
+        typedef FunctionalJob ResultJobType;
+        SharedJob shared = SharedJob(new (std::nothrow) FunctionalJob(std::forward<Args>(args) ...));
         pushJob(shared);
         return std::static_pointer_cast<ResultJobType, Job>(shared);
     }

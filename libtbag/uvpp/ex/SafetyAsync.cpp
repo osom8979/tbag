@@ -67,8 +67,9 @@ void SafetyAsync::MistakeInspector::onIdle()
 // SafetyAsync implementation.
 // ---------------------------
 
-SafetyAsync::SafetyAsync(Loop & loop) : BaseAsync(loop), _inspector(loop, *this)
+SafetyAsync::SafetyAsync(Loop & loop) : BaseAsync(loop), _inspector(nullptr)
 {
+    _inspector = loop.newHandle<MistakeInspector>(loop, *this);
     // EMPTY.
 }
 
@@ -96,7 +97,7 @@ uerr SafetyAsync::pushCloseJob()
 
 void SafetyAsync::onAsync()
 {
-    if (_inspector.isClosing()) {
+    if (_inspector && _inspector->isClosing()) {
         return;
     }
 
@@ -112,8 +113,8 @@ void SafetyAsync::onAsync()
 void SafetyAsync::onClose()
 {
     _jobs.clear();
-    if (_inspector.isActive()) {
-        _inspector.close();
+    if (_inspector && _inspector->isActive()) {
+        _inspector->close();
     }
 }
 
