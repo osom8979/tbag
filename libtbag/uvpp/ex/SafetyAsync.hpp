@@ -84,6 +84,7 @@ public:
 
     public:
         virtual void onIdle() override;
+        virtual void onClose() override;
     };
 
 public:

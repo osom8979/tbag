@@ -63,6 +63,11 @@ void SafetyAsync::MistakeInspector::onIdle()
     }
 }
 
+void SafetyAsync::MistakeInspector::onClose()
+{
+    __tbag_debug("SafetyAsync::MistakeInspector::onClose() called.");
+}
+
 // ---------------------------
 // SafetyAsync implementation.
 // ---------------------------
@@ -70,6 +75,7 @@ void SafetyAsync::MistakeInspector::onIdle()
 SafetyAsync::SafetyAsync(Loop & loop) : BaseAsync(loop), _inspector(nullptr)
 {
     _inspector = loop.newHandle<MistakeInspector>(loop, *this);
+    _inspector->start();
     // EMPTY.
 }
 
@@ -114,8 +120,11 @@ void SafetyAsync::onClose()
 {
     _jobs.clear();
     if (_inspector && _inspector->isActive()) {
+        _inspector->stop();
         _inspector->close();
     }
+
+    __tbag_debug("SafetyAsync::onClose() called.");
 }
 
 } // namespace ex
