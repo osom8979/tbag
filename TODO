@@ -4,7 +4,7 @@
 ################
 
 [x] Refactoring filesystem package.
-[ ] uvpp::Async helper class.
+[x] uvpp::Async helper class.
 [ ] Refactoring locale package.
 [ ] Create Android build script.
 [ ] Update clang-format.
@@ -38,3 +38,4 @@
 [ ] Checksum.
 [ ] Key store.
 [ ] Apply rmalloc.
+
