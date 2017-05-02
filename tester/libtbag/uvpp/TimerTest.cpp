@@ -26,19 +26,20 @@ struct TimerTest : public Timer
     {
         ++counter;
         stop();
+        close();
     }
 };
 
 TEST(TimerTest, Default)
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
-    std::cout << "This test is skipped on the Windows platform.\n";
-#else
-    Loop looper;
-    std::shared_ptr<TimerTest> timer(new (std::nothrow) TimerTest(looper));
+    std::shared_ptr<TimerTest> timer;
+    std::shared_ptr<Loop> loop;
+
+    loop.reset(new Loop());
+    timer = loop->newHandle<TimerTest>(*loop);
+
     timer->start(0, 1/*millisec*/);
-    looper.run();
+    loop->run();
     ASSERT_EQ(1, timer->counter);
-#endif
 }
 

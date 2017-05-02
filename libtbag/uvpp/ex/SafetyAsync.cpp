@@ -51,7 +51,7 @@ SafetyAsync::MistakeInspector::~MistakeInspector()
 void SafetyAsync::MistakeInspector::onIdle()
 {
     if (_async.isClosing()) {
-        __tbag_error("SafetyAsync::MistakeInspector::onIdle() async is closing.");
+        __tbag_debug("SafetyAsync::MistakeInspector::onIdle() async is closing.");
     } else {
         _async._jobs.safeRun([&](JobQueue::Queue & queue){
             if (queue.empty() == false) {
