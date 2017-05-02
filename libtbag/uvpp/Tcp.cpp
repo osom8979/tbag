@@ -25,22 +25,22 @@ namespace uvpp {
 // Global libuv events.
 // --------------------
 
-static void __global_uv_connect_cb__(uv_connect_t * request, int status)
+static void __global_uv_tcp_connect_cb__(uv_connect_t * request, int status)
 {
     // Callback called after a connection started by uv_connect() is done.
     // status will be 0 in case of success, < 0 otherwise.
 
     ConnectRequest * req = static_cast<ConnectRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_connect_cb__() request.data is nullptr.");
+        __tbag_error("__global_uv_tcp_connect_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(req)) {
-        __tbag_error("__global_uv_connect_cb__() request.data is deleted.");
+        __tbag_error("__global_uv_tcp_connect_cb__() request.data is deleted.");
     } else {
         Tcp * s = static_cast<Tcp*>(req->getOwner());
         if (s == nullptr) {
-            __tbag_error("__global_uv_connect_cb__() request.data.owner is nullptr.");
+            __tbag_error("__global_uv_tcp_connect_cb__() request.data.owner is nullptr.");
         } else if (isDeletedAddress(s)) {
-            __tbag_error("__global_uv_connect_cb__() request.data.owner is deleted.");
+            __tbag_error("__global_uv_tcp_connect_cb__() request.data.owner is deleted.");
         } else {
             s->onConnect(*req, getUerr(status));
         }
@@ -163,7 +163,7 @@ uerr Tcp::connect(ConnectRequest & request, sockaddr const * address)
     int const CODE = ::uv_tcp_connect(request.cast<uv_connect_t>(),
                                       Parent::cast<uv_tcp_t>(),
                                       address,
-                                      __global_uv_connect_cb__);
+                                      __global_uv_tcp_connect_cb__);
     return getUerr2("Tcp::connect()", CODE);
 }
 
