@@ -33,9 +33,9 @@ static void __global_uv_check_cb__(uv_check_t * handle)
     }
 }
 
-// --------------------
+// ---------------------
 // Check implementation.
-// --------------------
+// ---------------------
 
 Check::Check() : Handle(uhandle::CHECK)
 {

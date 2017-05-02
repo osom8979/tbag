@@ -33,9 +33,9 @@ static void __global_uv_prepare_cb__(uv_prepare_t * handle)
     }
 }
 
-// --------------------
-// Idle implementation.
-// --------------------
+// -----------------------
+// Prepare implementation.
+// -----------------------
 
 Prepare::Prepare() : Handle(uhandle::PREPARE)
 {
