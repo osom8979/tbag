@@ -89,13 +89,13 @@ void SafetyAsync::clearJob()
     _jobs.clear();
 }
 
-uerr SafetyAsync::pushJob(SharedJob job)
+uerr SafetyAsync::sendJob(SharedJob job)
 {
     _jobs.push(job);
     return send();
 }
 
-uerr SafetyAsync::pushCloseJob()
+uerr SafetyAsync::sendCloseJob()
 {
     _jobs.push(SharedJob(new (std::nothrow) __impl::CloseJob));
     return send();

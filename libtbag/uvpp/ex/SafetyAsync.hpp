@@ -38,6 +38,9 @@ namespace ex   {
  *
  * @author zer0
  * @date   2017-05-01
+ *
+ * @remarks
+ *  An Async handle that guarantees a call.
  */
 class TBAG_API SafetyAsync : public BaseAsync
 {
@@ -110,31 +113,28 @@ public:
 
 public:
     void clearJob();
-    uerr pushJob(SharedJob job);
-    uerr pushCloseJob();
+    uerr sendJob(SharedJob job);
+    uerr sendCloseJob();
 
 public:
     virtual void onAsync() override;
     virtual void onClose() override;
 
 public:
-    /** Create(new) & push job. */
+    /** Create(new) & push & send job. */
     template <typename JobType, typename ... Args>
-    inline std::shared_ptr<typename remove_cr<JobType>::type> newPushJob(Args && ... args)
+    inline std::shared_ptr<typename remove_cr<JobType>::type> newSendJob(Args && ... args)
     {
         typedef typename remove_cr<JobType>::type ResultJobType;
         SharedJob shared = SharedJob(new (std::nothrow) JobType(std::forward<Args>(args) ...));
-        pushJob(shared);
+        sendJob(shared);
         return std::static_pointer_cast<ResultJobType, Job>(shared);
     }
 
     template <typename ... Args>
-    inline std::shared_ptr<FunctionalJob> newPushFunc(Args && ... args)
+    inline std::shared_ptr<FunctionalJob> newSendFunc(Args && ... args)
     {
-        typedef FunctionalJob ResultJobType;
-        SharedJob shared = SharedJob(new (std::nothrow) FunctionalJob(std::forward<Args>(args) ...));
-        pushJob(shared);
-        return std::static_pointer_cast<ResultJobType, Job>(shared);
+        return newSendJob<FunctionalJob>(std::forward<Args>(args) ...);
     }
 };
 

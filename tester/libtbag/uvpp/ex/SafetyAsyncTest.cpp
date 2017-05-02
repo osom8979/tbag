@@ -35,7 +35,7 @@ TEST(SafetyAsyncTest, Default)
 
     int const TEST_COUNT = 1000;
     for (int i = 0; i < TEST_COUNT; ++i) {
-        auto shared = async->newPushFunc([&counter](SafetyAsync * async){
+        auto shared = async->newSendFunc([&counter](SafetyAsync * async){
             counter++;
         });
         ASSERT_TRUE(static_cast<bool>(shared));
@@ -46,7 +46,7 @@ TEST(SafetyAsyncTest, Default)
     }
     ASSERT_EQ(0, async->size());
 
-    async->pushCloseJob();
+    async->sendCloseJob();
     thread.join();
 
     ASSERT_EQ(0, loop->size());
