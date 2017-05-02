@@ -7,6 +7,7 @@
 
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/filesystem/details/windows/FsWinCommon.hpp>
+#include <libtbag/filesystem/details/UvFs-inl.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -57,33 +58,6 @@ inline static bool isDirentType(DirentType type, uv_dirent_type_t uv_type)
     // @formatter:on
 
     return false;
-}
-
-static TimeSpec toTimeSpec(uv_timespec_t uv_time)
-{
-    return TimeSpec{uv_time.tv_sec, uv_time.tv_nsec};
-}
-
-static FileState toFileState(uv_stat_t uv_stat)
-{
-    FileState fs;
-    fs.dev      = uv_stat.st_dev;
-    fs.mode     = uv_stat.st_mode;
-    fs.nlink    = uv_stat.st_nlink;
-    fs.uid      = uv_stat.st_uid;
-    fs.gid      = uv_stat.st_gid;
-    fs.rdev     = uv_stat.st_rdev;
-    fs.ino      = uv_stat.st_ino;
-    fs.size     = uv_stat.st_size;
-    fs.blksize  = uv_stat.st_blksize;
-    fs.blocks   = uv_stat.st_blocks;
-    fs.flags    = uv_stat.st_flags;
-    fs.gen      = uv_stat.st_gen;
-    fs.atim     = toTimeSpec(uv_stat.st_atim);
-    fs.mtim     = toTimeSpec(uv_stat.st_mtim);
-    fs.ctim     = toTimeSpec(uv_stat.st_ctim);
-    fs.birthtim = toTimeSpec(uv_stat.st_birthtim);
-    return fs;
 }
 
 template <typename Predicated, typename Param>
