@@ -179,7 +179,6 @@ TBAG_CONSTEXPR static unsigned int getBufferInfoSizeMax() TBAG_NOEXCEPT
 #endif
 }
 
-
 template <typename T>
 inline bool isDeletedAddress(T const * value) TBAG_NOEXCEPT
 { return DEBUG_UV_DELETED_ADDRESS_VALUE == reinterpret_cast<AddressType>(value); }
