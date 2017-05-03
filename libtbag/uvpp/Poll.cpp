@@ -61,7 +61,7 @@ Poll::~Poll()
     // EMPTY.
 }
 
-uerr Poll::init(Loop & loop, ufd fd)
+uerr Poll::init(Loop & loop, int fd)
 {
     int const CODE = ::uv_poll_init(loop.cast<uv_loop_t>(), Parent::cast<uv_poll_t>(), fd);
     return getUerr2("Poll::init()", CODE);

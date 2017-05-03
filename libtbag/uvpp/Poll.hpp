@@ -68,9 +68,9 @@ public:
     // @formatter:off
     struct init_fd
     {
-        ufd fd;
-        init_fd(ufd f) : fd(f) { /* EMPTY. */ }
-        init_fd & operator = (ufd f) { fd = f; return *this; }
+        int fd;
+        init_fd(int f) : fd(f) { /* EMPTY. */ }
+        init_fd & operator = (int f) { fd = f; return *this; }
     };
     struct init_sock
     {
@@ -99,7 +99,7 @@ public:
      * @warning
      *  Changed in version 1.2.2: the file descriptor is set to non-blocking mode.
      */
-    uerr init(Loop & loop, ufd fd);
+    uerr init(Loop & loop, int fd);
 
     /**
      * Initialize the handle using a socket descriptor.
