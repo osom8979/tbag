@@ -42,6 +42,11 @@ public:
     using Callback    = std::function<void(Arguments const &)>;
     using CommandMap  = std::map<std::string, Callback>;
     using CommandPair = CommandMap::value_type;
+    using ArgsVector  = std::vector<Arguments>;
+
+public:
+    TBAG_CONSTEXPR static char const * const DEFAULT_PREFIX = "--";
+    TBAG_CONSTEXPR static char const * const DEFAULT_DELIMITER = "=";
 
 private:
     Callback   _default;
@@ -72,11 +77,20 @@ public:
     bool insert(std::string const & command, Callback const & callback);
 
 public:
-    std::vector<Arguments> parseArguments(std::string const & arguments);
+    ArgsVector parseArguments(Flags const & flags);
+    ArgsVector parseArguments(std::string const & arguments,
+                                          std::string const & prefix = DEFAULT_PREFIX,
+                                          std::string const & delimiter = DEFAULT_DELIMITER);
 
 public:
-    void request(std::string const & arguments);
-    void request(int argc, char ** argv);
+    void request(ArgsVector const & args_vector);
+    void request(Flags const & flags);
+    void request(std::string const & arguments,
+                 std::string const & prefix = DEFAULT_PREFIX,
+                 std::string const & delimiter = DEFAULT_DELIMITER);
+    void request(int argc, char ** argv,
+                 std::string const & prefix = DEFAULT_PREFIX,
+                 std::string const & delimiter = DEFAULT_DELIMITER);
 
 public:
     virtual void onRequest(Arguments const & arguments);

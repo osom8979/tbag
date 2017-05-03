@@ -68,32 +68,51 @@ bool Commander::insert(std::string const & command, Callback const & callback)
     return _commands.insert(CommandPair(command, callback)).second;
 }
 
-std::vector<Arguments> Commander::parseArguments(std::string const & arguments)
+Commander::ArgsVector Commander::parseArguments(Flags const & flags)
 {
-    Flags       const FLAGS = Flags(arguments);
-    std::size_t const SIZE  = FLAGS.size();
-
+    std::size_t const SIZE = flags.size();
     std::vector<Arguments> result;
     for (std::size_t index = 0; index < SIZE; ++index) {
-        result.push_back(Arguments(FLAGS.at(index).key, FLAGS.at(index).value));
+        result.push_back(Arguments(flags.at(index).key, flags.at(index).value));
     }
     return result;
 }
 
-void Commander::request(std::string const & arguments)
+Commander::ArgsVector Commander::parseArguments(std::string const & arguments,
+                                                std::string const & prefix,
+                                                std::string const & delimiter)
 {
-    for (auto & cursor : parseArguments(arguments)) {
+    return parseArguments(Flags(arguments, prefix, delimiter));
+}
+
+void Commander::request(ArgsVector const & args_vector)
+{
+    for (auto & cursor : args_vector) {
         onRequest(cursor);
     }
 }
 
-void Commander::request(int argc, char ** argv)
+void Commander::request(Flags const & flags)
+{
+    request(parseArguments(flags));
+}
+
+void Commander::request(std::string const & arguments,
+                        std::string const & prefix,
+                        std::string const & delimiter)
+{
+    request(parseArguments(arguments, prefix, delimiter));
+}
+
+void Commander::request(int argc, char ** argv,
+                        std::string const & prefix,
+                        std::string const & delimiter)
 {
     std::stringstream ss;
     for (int i = 0; i < argc; ++i) {
         ss << argv[i] << ' ';
     }
-    request(ss.str());
+    request(ss.str(), prefix, delimiter);
 }
 
 void Commander::onRequest(Arguments const & arguments)
