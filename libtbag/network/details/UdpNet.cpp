@@ -7,6 +7,7 @@
 
 #include <libtbag/network/details/UdpNet.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,14 +16,40 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-UdpNet::UdpNet()
+using Loop = uvpp::Loop;
+
+// ----------------------------
+// UdpNetClient implementation.
+// ----------------------------
+
+UdpNetClient::UdpNetClient(Loop & loop) : Client(loop)
 {
-    // EMPTY.
 }
 
-UdpNet::~UdpNet()
+UdpNetClient::~UdpNetClient()
 {
-    // EMPTY.
+}
+
+UdpNetClient::Type UdpNetClient::getType() const
+{
+    return Type::UDP;
+}
+
+// ----------------------------
+// UdpNetServer implementation.
+// ----------------------------
+
+UdpNetServer::UdpNetServer(Loop & loop) : Server(loop)
+{
+}
+
+UdpNetServer::~UdpNetServer()
+{
+}
+
+UdpNetServer::Type UdpNetServer::getType() const
+{
+    return Type::UDP;
 }
 
 } // namespace details

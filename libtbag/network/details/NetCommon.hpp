@@ -32,20 +32,26 @@ enum class NetType
     POLL,
 };
 
-struct ClientInterface
+struct NetInterface
 {
     using uerr = uvpp::uerr;
     using binf = uvpp::binf;
+
+    using Type = NetType;
     using Size = std::size_t;
 
     // ACCESSOR.
-    virtual int getType() = 0;
+    virtual Type getType() const = 0;
 
     // OPERATORS.
     virtual uerr start() = 0;
     virtual uerr  stop() = 0;
     virtual uerr close() = 0;
+};
 
+struct ClientInterface : public NetInterface
+{
+    // OPERATORS.
     virtual uerr  syncWrite(char const * buffer, Size size, Size * wsize = nullptr) = 0;
     virtual uerr asyncWrite(char const * buffer, Size size, Size * wsize = nullptr) = 0;
     virtual uerr   tryWrite(char const * buffer, Size size, Size * wsize = nullptr) = 0;
@@ -59,19 +65,9 @@ struct ClientInterface
     virtual void onAsync  (int type, uerr code) = 0;
 };
 
-struct ServerInterface
+struct ServerInterface : public NetInterface
 {
-    using uerr = uvpp::uerr;
-    using binf = uvpp::binf;
-    using Size = std::size_t;
-
-    // ACCESSOR.
-    virtual int getType() = 0;
-
-    // OPERATORS.
-    virtual uerr start() = 0;
-    virtual uerr  stop() = 0;
-    virtual uerr close() = 0;
+    using ClientInterface = details::ClientInterface;
 
     // EVENT METHODS.
     virtual void onClose() = 0;

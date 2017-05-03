@@ -7,6 +7,7 @@
 
 #include <libtbag/network/details/PipeNet.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,14 +16,40 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-PipeNet::PipeNet()
+using Loop = uvpp::Loop;
+
+// -----------------------------
+// PipeNetClient implementation.
+// -----------------------------
+
+PipeNetClient::PipeNetClient(Loop & loop) : Client(loop)
 {
-    // EMPTY.
 }
 
-PipeNet::~PipeNet()
+PipeNetClient::~PipeNetClient()
 {
-    // EMPTY.
+}
+
+PipeNetClient::Type PipeNetClient::getType() const
+{
+    return Type::PIPE;
+}
+
+// -----------------------------
+// PipeNetServer implementation.
+// -----------------------------
+
+PipeNetServer::PipeNetServer(Loop & loop) : Server(loop)
+{
+}
+
+PipeNetServer::~PipeNetServer()
+{
+}
+
+PipeNetServer::Type PipeNetServer::getType() const
+{
+    return Type::PIPE;
 }
 
 } // namespace details

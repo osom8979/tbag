@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/network/Client.hpp>
+#include <libtbag/network/Server.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,22 +25,42 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-// Forward declaration.
-
 /**
- * PipeNet class prototype.
+ * PipeNet client class prototype.
  *
  * @author zer0
  * @date   2017-05-03
  */
-class TBAG_API PipeNet : public Noncopyable
+class TBAG_API PipeNetClient : public Client
 {
 private:
     // Insert member variables.
 
 public:
-    PipeNet();
-    virtual ~PipeNet();
+    PipeNetClient(Loop & loop);
+    virtual ~PipeNetClient();
+
+public:
+    virtual Type getType() const override;
+};
+
+/**
+ * PipeNet server class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-03
+ */
+class TBAG_API PipeNetServer : public Server
+{
+private:
+    // Insert member variables.
+
+public:
+    PipeNetServer(Loop & loop);
+    virtual ~PipeNetServer();
+
+public:
+    virtual Type getType() const override;
 };
 
 } // namespace details

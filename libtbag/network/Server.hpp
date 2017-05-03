@@ -50,6 +50,31 @@ public:
     virtual ~Server();
 
 public:
+    // @formatter:off
+    virtual uerr start() override { return uerr::UVPP_ENOSYS; }
+    virtual uerr  stop() override { return uerr::UVPP_ENOSYS; }
+    virtual uerr close() override { return uerr::UVPP_ENOSYS; }
+    // @formatter:on
+
+public:
+    // @formatter:off
+    virtual void onClose() override
+    { /* EMPTY. */ }
+    virtual void onClientConnect(ClientInterface * client, uerr code) override
+    { /* EMPTY. */ }
+    virtual binf onClientAlloc(ClientInterface * client, Size suggested_size) override
+    { return binf(); }
+    virtual void onClientWrite(ClientInterface * client, uerr code) override
+    { /* EMPTY. */ }
+    virtual void onClientRead(ClientInterface * client, uerr code, char const * buffer, Size size) override
+    { /* EMPTY. */ }
+    virtual void onClientClose(ClientInterface * client) override
+    { /* EMPTY. */ }
+    virtual void onClientAsync(ClientInterface * client, int type, uerr code) override
+    { /* EMPTY. */ }
+    // @formatter:on
+
+public:
     static SharedServer create(Loop & loop, NetType type);
 };
 

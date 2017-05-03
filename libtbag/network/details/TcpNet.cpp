@@ -7,6 +7,7 @@
 
 #include <libtbag/network/details/TcpNet.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,14 +16,40 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-TcpNet::TcpNet()
+using Loop = uvpp::Loop;
+
+// ----------------------------
+// TcpNetClient implementation.
+// ----------------------------
+
+TcpNetClient::TcpNetClient(Loop & loop) : Client(loop)
 {
-    // EMPTY.
 }
 
-TcpNet::~TcpNet()
+TcpNetClient::~TcpNetClient()
 {
-    // EMPTY.
+}
+
+TcpNetClient::Type TcpNetClient::getType() const
+{
+    return Type::TCP;
+}
+
+// ----------------------------
+// TcpNetServer implementation.
+// ----------------------------
+
+TcpNetServer::TcpNetServer(Loop & loop) : Server(loop)
+{
+}
+
+TcpNetServer::~TcpNetServer()
+{
+}
+
+TcpNetServer::Type TcpNetServer::getType() const
+{
+    return Type::TCP;
 }
 
 } // namespace details

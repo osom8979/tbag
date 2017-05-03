@@ -7,6 +7,7 @@
 
 #include <libtbag/network/details/PollNet.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,14 +16,40 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-PollNet::PollNet()
+using Loop = uvpp::Loop;
+
+// -----------------------------
+// PollNetClient implementation.
+// -----------------------------
+
+PollNetClient::PollNetClient(Loop & loop) : Client(loop)
 {
-    // EMPTY.
 }
 
-PollNet::~PollNet()
+PollNetClient::~PollNetClient()
 {
-    // EMPTY.
+}
+
+PollNetClient::Type PollNetClient::getType() const
+{
+    return Type::POLL;
+}
+
+// -----------------------------
+// PollNetServer implementation.
+// -----------------------------
+
+PollNetServer::PollNetServer(Loop & loop) : Server(loop)
+{
+}
+
+PollNetServer::~PollNetServer()
+{
+}
+
+PollNetServer::Type PollNetServer::getType() const
+{
+    return Type::POLL;
 }
 
 } // namespace details

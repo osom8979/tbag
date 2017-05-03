@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/network/Client.hpp>
+#include <libtbag/network/Server.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,22 +25,42 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-// Forward declaration.
-
 /**
- * UdpNet class prototype.
+ * UdpNet client class prototype.
  *
  * @author zer0
  * @date   2017-05-03
  */
-class TBAG_API UdpNet : public Noncopyable
+class TBAG_API UdpNetClient : public Client
 {
 private:
     // Insert member variables.
 
 public:
-    UdpNet();
-    virtual ~UdpNet();
+    UdpNetClient(Loop & loop);
+    virtual ~UdpNetClient();
+
+public:
+    virtual Type getType() const override;
+};
+
+/**
+ * UdpNet server class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-03
+ */
+class TBAG_API UdpNetServer : public Server
+{
+private:
+    // Insert member variables.
+
+public:
+    UdpNetServer(Loop & loop);
+    virtual ~UdpNetServer();
+
+public:
+    virtual Type getType() const override;
 };
 
 } // namespace details
