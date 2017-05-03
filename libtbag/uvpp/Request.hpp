@@ -79,8 +79,6 @@ _TBAG_UV_REQUEST_EX(SHUTDOWN   , Shutdown   );
 _TBAG_UV_REQUEST_EX(UDP_SEND   , UdpSend    );
 _TBAG_UV_REQUEST_EX(FS         , Fs         );
 _TBAG_UV_REQUEST_EX(WORK       , Work       );
-_TBAG_UV_REQUEST_EX(GETADDRINFO, GetAddrInfo);
-_TBAG_UV_REQUEST_EX(GETNAMEINFO, GetNameInfo);
 
 #undef _TBAG_UV_REQUEST_EX
 

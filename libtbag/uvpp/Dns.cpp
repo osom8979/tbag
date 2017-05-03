@@ -1,0 +1,180 @@
+/**
+ * @file   Dns.cpp
+ * @brief  Dns class implementation.
+ * @author zer0
+ * @date   2017-05-03
+ */
+
+#include <libtbag/uvpp/Dns.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+
+#include <uv.h>
+
+// -------------------
+NAMESPACE_LIBTBAG_OPEN
+// -------------------
+
+namespace uvpp {
+
+// --------------------
+// Global libuv events.
+// --------------------
+
+static void __global_uv_getaddrinfo_cb__(uv_getaddrinfo_t * req, int status, struct addrinfo * res)
+{
+    // Callback which will be called with the getaddrinfo request result once complete.
+    // In case it was cancelled, status will have a value of UV_ECANCELED.
+
+    DnsAddrInfo * r = static_cast<DnsAddrInfo*>(req->data);
+    if (r == nullptr) {
+        __tbag_error("__global_uv_getaddrinfo_cb__() request.data is nullptr.");
+    } else if (isDeletedAddress(r)) {
+        __tbag_error("__global_uv_getaddrinfo_cb__() request.data is deleted.");
+    } else {
+        r->onGetAddrInfo(status, res);
+    }
+}
+
+static void __global_uv_getnameinfo_cb__(uv_getnameinfo_t * req, int status, char const * hostname, char const * service)
+{
+    // Callback which will be called with the getnameinfo request result once complete.
+    // In case it was cancelled, status will have a value of UV_ECANCELED.
+
+    DnsNameInfo * r = static_cast<DnsNameInfo*>(req->data);
+    if (r == nullptr) {
+        __tbag_error("__global_uv_getnameinfo_cb__() request.data is nullptr.");
+    } else if (isDeletedAddress(r)) {
+        __tbag_error("__global_uv_getnameinfo_cb__() request.data is deleted.");
+    } else {
+        std::string hostname_str;
+        std::string service_str;
+        if (hostname != nullptr) {
+            hostname_str.assign(hostname);
+        }
+        if (service != nullptr) {
+            service_str.assign(service);
+        }
+        r->onGetNameInfo(status, hostname_str, service_str);
+    }
+}
+
+// ---------------------------
+// DnsAddrInfo implementation.
+// ---------------------------
+
+DnsAddrInfo::DnsAddrInfo() : Request(ureq::GETADDRINFO, nullptr)
+{
+    // EMPTY.
+}
+
+DnsAddrInfo::~DnsAddrInfo()
+{
+    // EMPTY.
+}
+
+Loop const * DnsAddrInfo::getLoop() const
+{
+    uv_loop_t * l = Parent::cast<uv_getaddrinfo_t>()->loop;
+    if (l == nullptr) {
+        return nullptr;
+    } else if (isDeletedAddress(l)) {
+        return nullptr;
+    }
+    return static_cast<Loop*>(l->data);
+}
+
+addrinfo const * DnsAddrInfo::getAddrInfo() const
+{
+    // Must be freed by the user with uv_freeaddrinfo().
+    return Parent::cast<uv_getaddrinfo_t>()->addrinfo;
+}
+
+uerr DnsAddrInfo::getAddrInfo(Loop & loop,
+                              std::string const & node,
+                              std::string const & service,
+                              struct addrinfo const * hints)
+{
+    // Either node or service may be NULL but not both.
+    //
+    // hints is a pointer to a struct addrinfo with additional address type constraints, or NULL.
+    // Consult man -s 3 getaddrinfo for more details.
+    //
+    // Returns 0 on success or an error code < 0 on failure.
+    // If successful, the callback will get called sometime in the future with the lookup result, which is either:
+    //  - status == 0, the res argument points to a valid struct addrinfo, or
+    //  - status < 0, the res argument is NULL. See the UV_EAI_* constants.
+    //
+    // Call uv_freeaddrinfo() to free the addrinfo structure.
+    //
+    // Changed in version 1.3.0:
+    // the callback parameter is now allowed to be NULL, in which case the request will run synchronously.
+
+    int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
+                                      __global_uv_getaddrinfo_cb__, node.c_str(), service.c_str(), hints);
+    return getUerr2("DnsAddrInfo::getAddrInfo([ASYNC])", CODE);
+}
+
+uerr DnsAddrInfo::getAddrInfo(std::string const & node, std::string const & service, struct addrinfo const * hints)
+{
+    int const CODE = ::uv_getaddrinfo(nullptr, Parent::cast<uv_getaddrinfo_t>(),
+                                      nullptr, node.c_str(), service.c_str(), hints);
+    return getUerr2("DnsAddrInfo::getAddrInfo([SYNC])", CODE);
+}
+
+void DnsAddrInfo::freeAddrInfo(struct addrinfo * ai)
+{
+    ::uv_freeaddrinfo(ai);
+}
+
+void DnsAddrInfo::onGetAddrInfo(int status, struct addrinfo * res)
+{
+    __tbag_debug("DnsAddrInfo::onGetAddrInfo({}) called.", status);
+}
+
+// ---------------------------
+// DnsNameInfo implementation.
+// ---------------------------
+
+DnsNameInfo::DnsNameInfo() : Request(ureq::GETNAMEINFO, nullptr)
+{
+    // EMPTY.
+}
+
+DnsNameInfo::~DnsNameInfo()
+{
+    // EMPTY.
+}
+
+uerr DnsNameInfo::getNameInfo(Loop & loop, struct sockaddr const * addr, int flags)
+{
+    // Returns 0 on success or an error code < 0 on failure.
+    // If successful, the callback will get called sometime in the future with the lookup result.
+    // Consult man -s 3 getnameinfo for more details.
+    //
+    // Changed in version 1.3.0:
+    // the callback parameter is now allowed to be NULL, in which case the request will run synchronously.
+
+    int const CODE = ::uv_getnameinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getnameinfo_t>(),
+                                      __global_uv_getnameinfo_cb__, addr, flags);
+    return getUerr2("DnsNameInfo::getNameInfo([ASYNC])", CODE);
+}
+
+uerr DnsNameInfo::getNameInfo(struct sockaddr const * addr, int flags)
+{
+    int const CODE = ::uv_getnameinfo(nullptr, Parent::cast<uv_getnameinfo_t>(),
+                                      nullptr, addr, flags);
+    return getUerr2("DnsNameInfo::getNameInfo([SYNC])", CODE);
+}
+
+void DnsNameInfo::onGetNameInfo(int status, std::string const & hostname, std::string const & service)
+{
+    __tbag_debug("DnsNameInfo::onGetNameInfo({}, {}, {}) called.", status, hostname, service);
+}
+
+} // namespace uvpp
+
+// --------------------
+NAMESPACE_LIBTBAG_CLOSE
+// --------------------
+

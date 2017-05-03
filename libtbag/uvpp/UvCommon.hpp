@@ -32,10 +32,11 @@ typedef intptr_t ssize_t;
 
 #if defined(TBAG_PLATFORM_WINDOWS)
 # include <winsock2.h>
-# include <WS2tcpip.h> // sockaddr_in6
+# include <WS2tcpip.h> // sockaddr_in6, addrinfo
 # include <Windows.h>
 #else
 # include <netinet/in.h>
+# include <netdb.h> // addrinfo
 #endif
 
 // -------------------
