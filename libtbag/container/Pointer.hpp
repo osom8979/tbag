@@ -49,10 +49,7 @@ struct Pointer
 
     TBAG_CONSTEXPR Pointer(Type * p) TBAG_NOEXCEPT : ptr(p)
     { /* EMPTY. */ }
-
-    inline Pointer() TBAG_NOEXCEPT : ptr(nullptr)
-    { /* EMPTY. */ }
-    inline ~Pointer()
+    Pointer() TBAG_NOEXCEPT : ptr(nullptr)
     { /* EMPTY. */ }
 
     inline Pointer(Pointer const & obj) TBAG_NOEXCEPT
