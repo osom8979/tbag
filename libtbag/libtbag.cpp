@@ -71,11 +71,13 @@ bool LibtbagInitializer::_init = false;
 
 static bool setUp()
 {
+    __tbag_debug("libtbag/setUp()");
     return true;
 }
 
 static bool tearDown()
 {
+    __tbag_debug("libtbag/tearDown()");
     return true;
 }
 
