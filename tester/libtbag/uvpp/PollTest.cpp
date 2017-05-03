@@ -13,6 +13,5 @@ using namespace libtbag::uvpp;
 
 TEST(PollTest, Default)
 {
-    Poll object;
 }
 

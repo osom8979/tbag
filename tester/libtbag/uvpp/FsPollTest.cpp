@@ -13,6 +13,5 @@ using namespace libtbag::uvpp;
 
 TEST(FsPollTest, Default)
 {
-    FsPoll object;
 }
 

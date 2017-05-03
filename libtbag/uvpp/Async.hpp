@@ -50,9 +50,12 @@ class Loop;
 class TBAG_API BaseAsync : public Handle
 {
 public:
-    using Parent = Handle;
+    friend class Loop;
 
 public:
+    using Parent = Handle;
+
+protected:
     BaseAsync();
 
     /**

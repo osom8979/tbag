@@ -40,11 +40,16 @@ struct ConnectRequest;
 class TBAG_API Tcp : public Stream
 {
 public:
-    using Parent = Stream;
+    friend class Loop;
 
 public:
+    using Parent = Stream;
+
+protected:
     Tcp();
     Tcp(Loop & loop);
+
+public:
     virtual ~Tcp();
 
 public:

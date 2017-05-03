@@ -38,11 +38,16 @@ class Loop;
 class TBAG_API Check : public Handle
 {
 public:
-    using Parent = Handle;
+    friend class Loop;
 
 public:
+    using Parent = Handle;
+
+protected:
     Check();
     Check(Loop & loop);
+
+public:
     virtual ~Check();
 
 public:

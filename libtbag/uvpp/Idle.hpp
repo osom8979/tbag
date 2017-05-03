@@ -50,11 +50,16 @@ class Loop;
 class TBAG_API Idle : public Handle
 {
 public:
-    using Parent = Handle;
+    friend class Loop;
 
 public:
+    using Parent = Handle;
+
+protected:
     Idle();
     Idle(Loop & loop);
+
+public:
     virtual ~Idle();
 
 public:

@@ -45,6 +45,9 @@ namespace ex   {
 class TBAG_API SafetyAsync : public BaseAsync
 {
 public:
+    friend class uvpp::Loop;
+
+public:
     using Parent = BaseAsync;
 
 public:
@@ -101,8 +104,10 @@ private:
     SharedInspector _inspector;
     JobQueue _jobs;
 
-public:
+protected:
     SafetyAsync(Loop & loop);
+
+public:
     virtual ~SafetyAsync();
 
 public:

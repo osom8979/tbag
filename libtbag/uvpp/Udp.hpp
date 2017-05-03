@@ -42,6 +42,9 @@ unsigned int const UDP_FLAG_REUSEADDR = 0x04;
 class TBAG_API Udp : public Handle
 {
 public:
+    friend class Loop;
+
+public:
     using Parent = Handle;
 
 public:
@@ -52,9 +55,11 @@ public:
         JOIN_GROUP,
     };
 
-public:
+protected:
     Udp();
     Udp(Loop & loop);
+
+public:
     virtual ~Udp();
 
 public:

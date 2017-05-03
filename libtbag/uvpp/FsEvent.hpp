@@ -50,6 +50,9 @@ class Loop;
 class TBAG_API FsEvent : public Handle
 {
 public:
+    friend class Loop;
+
+public:
     using Parent = Handle;
 
     /** Flags that can be passed to uv_fs_event_start() to control its behavior. */
@@ -88,9 +91,11 @@ public:
      */
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_RECURSIVE = 4;
 
-public:
+protected:
     FsEvent();
     FsEvent(Loop & loop);
+
+public:
     virtual ~FsEvent();
 
 public:

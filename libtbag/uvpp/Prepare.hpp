@@ -38,11 +38,16 @@ class Loop;
 class TBAG_API Prepare : public Handle
 {
 public:
-    using Parent = Handle;
+    friend class Loop;
 
 public:
+    using Parent = Handle;
+
+protected:
     Prepare();
     Prepare(Loop & loop);
+
+public:
     virtual ~Prepare();
 
 public:

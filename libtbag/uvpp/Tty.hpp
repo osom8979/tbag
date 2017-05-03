@@ -36,6 +36,9 @@ class Loop;
 class TBAG_API Tty : public Stream
 {
 public:
+    friend class Loop;
+
+public:
     using Parent = Stream;
 
 public:
@@ -53,10 +56,12 @@ public:
         FILE_STDERR = 2,
     };
 
-public:
+protected:
     Tty();
     Tty(Loop & loop, ufile fd, bool readable);
     Tty(Loop & loop, GeneralFile fd);
+
+public:
     virtual ~Tty();
 
 public:
