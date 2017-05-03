@@ -77,7 +77,7 @@ struct ModelNode : public XmlModel::NodeInterface
 
 TEST(XmlModelTest, Default)
 {
-    TBAG_TESTER_TEMP_DIR(true, true);
+    tttDir(true, true);
 
     std::string const CASE_NAME = test_info_->test_case_name();
     XmlModel model;
@@ -89,7 +89,7 @@ TEST(XmlModelTest, Default)
     auto * node = static_cast<ModelNode*>(shared.get());
     ASSERT_NE(nullptr, node);
 
-    auto const CONFIG_PATH = TBAG_TESTER_TEMP_DIR_GET() / model.getFileName();
+    auto const CONFIG_PATH = tttDirGet() / model.getFileName();
     namespace fs = ::libtbag::filesystem::details;
 
     ASSERT_EQ(0, node->call_setup);

@@ -14,12 +14,12 @@ using namespace libtbag::res;
 
 TEST(DynamicAssetTest, Default)
 {
-    TBAG_TESTER_TEMP_DIR(true, true);
+    tttDir(true, true);
 
     char const * const KEY = "KEY";
     using Path = DynamicAsset::Path;
     DynamicAsset asset;
-    Path path = TBAG_TESTER_TEMP_DIR_GET() / "dynamic_asset";
+    Path path = tttDirGet() / "dynamic_asset";
 
     ASSERT_TRUE(asset.add(KEY, path));
     ASSERT_TRUE(asset.init());

@@ -50,9 +50,9 @@ TEST(FsCommonTest, Utils)
 
 TEST(FsCommonTest, CreateDirectory)
 {
-    TBAG_TESTER_TEMP_DIR(true, true);
+    tttDir(true, true);
 
-    auto const TEST_DIR = TBAG_TESTER_TEMP_DIR_GET() / std::string("test");
+    auto const TEST_DIR = tttDirGet() / std::string("test");
     namespace fs = ::libtbag::filesystem::details;
 
     ASSERT_TRUE(createDirectory(TEST_DIR));
@@ -96,10 +96,10 @@ TEST(FsCommonTest, CreateTemp)
 
 TEST(FsCommonTest, Rename)
 {
-    TBAG_TESTER_TEMP_DIR(true, true);
+    tttDir(true, true);
 
-    auto TEST_FROM = TBAG_TESTER_TEMP_DIR_GET() / "from";
-    auto TEST_TO   = TBAG_TESTER_TEMP_DIR_GET() / "to";
+    auto TEST_FROM = tttDirGet() / "from";
+    auto TEST_TO   = tttDirGet() / "to";
     namespace fs = ::libtbag::filesystem::details;
 
     ASSERT_TRUE(createDirectory(TEST_FROM));
@@ -115,9 +115,9 @@ TEST(FsCommonTest, Rename)
 
 TEST(FsCommonTest, ReadWrite1)
 {
-    TBAG_TESTER_TEMP_DIR(true, true);
+    tttDir(true, true);
 
-    auto TEST_FILE = TBAG_TESTER_TEMP_DIR_GET() / "test";
+    auto TEST_FILE = tttDirGet() / "test";
     namespace fs = ::libtbag::filesystem::details;
 
     // Create test file.
@@ -165,9 +165,9 @@ TEST(FsCommonTest, ReadWrite1)
 
 TEST(FsCommonTest, ReadWrite2)
 {
-    TBAG_TESTER_TEMP_DIR(true, true);
+    tttDir(true, true);
 
-    auto TEST_FILE = TBAG_TESTER_TEMP_DIR_GET() / "test";
+    auto TEST_FILE = tttDirGet() / "test";
     namespace fs = ::libtbag::filesystem::details;
 
     // Create test file.

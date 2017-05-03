@@ -15,7 +15,7 @@ using namespace libtbag::res;
 
 TEST(MultiAssetTest, Default)
 {
-    TBAG_TESTER_TEMP_DIR(true, true);
+    tttDir(true, true);
 
     using Path    = MultiAsset::Path;
     using String  = MultiAsset::String;
@@ -27,8 +27,8 @@ TEST(MultiAssetTest, Default)
     std::string layout1 = "LAYOUT1";
     std::string layout2 = "LAYOUT2";
 
-    auto path1 = TBAG_TESTER_TEMP_DIR_GET() / key1;
-    auto path2 = TBAG_TESTER_TEMP_DIR_GET() / key2;
+    auto path1 = tttDirGet() / key1;
+    auto path2 = tttDirGet() / key2;
     namespace fs = ::libtbag::filesystem;
 
     MultiAsset asset = MultiAsset::create({path1, path2}, {layout1, layout2});
