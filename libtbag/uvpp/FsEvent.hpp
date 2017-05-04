@@ -55,16 +55,16 @@ public:
 public:
     using Parent = Handle;
 
-    /** Flags that can be passed to uv_fs_event_start() to control its behavior. */
-    using EventFlag = unsigned int;
-
 public:
     /** Event types that uv_fs_event_t handles monitor. */
-    enum class Event : int
-    {
-        UV_RENAME = 1,
-        UV_CHANGE = 2
-    };
+    using Event = int;
+
+    TBAG_CONSTEXPR static Event const EVENT_RENAME = 1;
+    TBAG_CONSTEXPR static Event const EVENT_CHANGE = 2;
+
+public:
+    /** Flags that can be passed to uv_fs_event_start() to control its behavior. */
+    using EventFlag = unsigned int;
 
     /**
      * By default, if the fs event watcher is given a directory name, we will
@@ -91,6 +91,9 @@ public:
      */
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_RECURSIVE = 4;
 
+    /** Default event flags. */
+    TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_DEFAULT = 0;
+
 protected:
     FsEvent();
     FsEvent(Loop & loop);
@@ -109,7 +112,7 @@ public:
      * @warning
      *  Currently the only supported flag is UV_FS_EVENT_RECURSIVE and only on OSX and Windows.
      */
-    uerr start(char const * path, EventFlag flags);
+    uerr start(char const * path, EventFlag flags = EVENT_FLAG_DEFAULT);
 
     /** Stop the handle, the callback will no longer be called. */
     uerr stop();
@@ -117,9 +120,12 @@ public:
     /** Get the path being monitored by the handle. */
     std::string getPath();
 
+public:
+    static Event getEvent(int native_events) TBAG_NOEXCEPT;
+
 // Event methods.
 public:
-    void onFsEvent(const char * filename, int events, int status);
+    virtual void onFsEvent(const char * filename, Event events, uerr status);
 };
 
 } // namespace uvpp

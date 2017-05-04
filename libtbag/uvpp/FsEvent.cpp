@@ -33,7 +33,7 @@ static void __global_uv_fs_event_cb__(uv_fs_event_t * handle, const char * filen
     } else if (isDeletedAddress(h)) {
         __tbag_error("__global_uv_fs_event_cb__() handle.data is deleted.");
     } else {
-        h->onFsEvent(filename, events, status);
+        h->onFsEvent(filename, FsEvent::getEvent(events), getUerr(status));
     }
 }
 
@@ -100,13 +100,21 @@ std::string FsEvent::getPath()
     return std::string(name, name + size);
 }
 
+FsEvent::Event FsEvent::getEvent(int native_events) TBAG_NOEXCEPT
+{
+    return static_cast<FsEvent::Event>(native_events);
+}
+
 // --------------
 // Event methods.
 // --------------
 
-void FsEvent::onFsEvent(const char * filename, int events, int status)
+void FsEvent::onFsEvent(const char * filename, Event events, uerr status)
 {
-    __tbag_debug("FsEvent::onFsEvent({}, {}, {}) called.", filename, events, status);
+    __tbag_debug("FsEvent::onFsEvent({}, {}, {}) called.",
+                 filename,
+                 static_cast<int>(events),
+                 static_cast<int>(status));
 }
 
 } // namespace uvpp
