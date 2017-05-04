@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -24,12 +26,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-TBAG_CONSTEXPR char const * const TBAG_ANY_IPV4        = "0.0.0.0";
-TBAG_CONSTEXPR char const * const TBAG_ANY_SUBNET_MASK = "0.0.0.0";
+TBAG_CONSTEXPR char const * const ANY_IPV4        = "0.0.0.0";
+TBAG_CONSTEXPR char const * const ANY_SUBNET_MASK = "0.0.0.0";
 
-TBAG_CONSTEXPR char const * const TBAG_LOOPBACK_NAME = "localhost";
-TBAG_CONSTEXPR char const * const TBAG_LOOPBACK_IPV4 = "127.0.0.1";
-TBAG_CONSTEXPR char const * const TBAG_LOOPBACK_IPV6 = "::1";
+TBAG_CONSTEXPR char const * const LOOPBACK_NAME = "localhost";
+TBAG_CONSTEXPR char const * const LOOPBACK_IPV4 = "127.0.0.1";
+TBAG_CONSTEXPR char const * const LOOPBACK_IPV6 = "::1";
 
 enum class NetType
 {
@@ -86,6 +88,9 @@ struct ServerInterface : public NetInterface
     virtual void onClientClose  (ClientInterface * client) = 0;
     virtual void onClientAsync  (ClientInterface * client, int type, uerr code) = 0;
 };
+
+TBAG_API bool isIpv4(std::string const & ip);
+TBAG_API bool isIpv6(std::string const & ip);
 
 } // namespace details
 } // namespace network

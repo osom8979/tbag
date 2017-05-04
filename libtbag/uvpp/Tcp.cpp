@@ -12,6 +12,7 @@
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 
 #include <uv.h>
 
@@ -230,21 +231,12 @@ uerr Tcp::initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
 
 bool Tcp::isIpv4(std::string const & ip)
 {
-    auto tokens = string::splitTokens(ip, ".");
-    if (tokens.size() != 4) {
-        return false;
-    }
-    for (auto cursor : tokens) {
-        if (!std::all_of(cursor.begin(), cursor.end(), ::isdigit)) {
-            return false;
-        }
-    }
-    return true;
+    return network::details::isIpv4(ip);
 }
 
 bool Tcp::isIpv6(std::string const & ip)
 {
-    return false;
+    return network::details::isIpv6(ip);
 }
 
 } // namespace uvpp
