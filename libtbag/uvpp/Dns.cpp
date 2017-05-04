@@ -70,30 +70,46 @@ DnsAddrInfo::DnsAddrInfo() : Request(ureq::GETADDRINFO, nullptr)
 
 DnsAddrInfo::~DnsAddrInfo()
 {
-    // EMPTY.
+    freeAddrInfo();
 }
 
 Loop const * DnsAddrInfo::getLoop() const
 {
-    uv_loop_t * l = Parent::cast<uv_getaddrinfo_t>()->loop;
+    uv_getaddrinfo_t * native = Parent::cast<uv_getaddrinfo_t>();
+    if (native == nullptr) {
+        return nullptr;
+    } else if (isDeletedAddress(native)) {
+        return nullptr;
+    }
+
+    uv_loop_t * l = native->loop;
     if (l == nullptr) {
         return nullptr;
     } else if (isDeletedAddress(l)) {
         return nullptr;
     }
+
     return static_cast<Loop*>(l->data);
 }
 
 addrinfo const * DnsAddrInfo::getAddrInfo() const
 {
     // Must be freed by the user with uv_freeaddrinfo().
-    return Parent::cast<uv_getaddrinfo_t>()->addrinfo;
+
+    uv_getaddrinfo_t * native = Parent::cast<uv_getaddrinfo_t>();
+    if (native == nullptr) {
+        return nullptr;
+    } else if (isDeletedAddress(native)) {
+        return nullptr;
+    }
+
+    return native->addrinfo;
 }
 
-uerr DnsAddrInfo::getAddrInfo(Loop & loop,
-                              std::string const & node,
-                              std::string const & service,
-                              struct addrinfo const * hints)
+uerr DnsAddrInfo::requestAddrInfo(Loop & loop,
+                                std::string const & node,
+                                std::string const & service,
+                                struct addrinfo const * hints)
 {
     // Either node or service may be NULL but not both.
     //
@@ -115,11 +131,13 @@ uerr DnsAddrInfo::getAddrInfo(Loop & loop,
     return getUerr2("DnsAddrInfo::getAddrInfo([ASYNC])", CODE);
 }
 
-uerr DnsAddrInfo::getAddrInfo(std::string const & node, std::string const & service, struct addrinfo const * hints)
+void DnsAddrInfo::freeAddrInfo()
 {
-    int const CODE = ::uv_getaddrinfo(nullptr, Parent::cast<uv_getaddrinfo_t>(),
-                                      nullptr, node.c_str(), service.c_str(), hints);
-    return getUerr2("DnsAddrInfo::getAddrInfo([SYNC])", CODE);
+    struct addrinfo * ai = Parent::cast<uv_getaddrinfo_t>()->addrinfo;
+    if (ai != nullptr) {
+        freeAddrInfo(ai);
+        Parent::cast<uv_getaddrinfo_t>()->addrinfo = nullptr;
+    }
 }
 
 void DnsAddrInfo::freeAddrInfo(struct addrinfo * ai)
@@ -146,7 +164,48 @@ DnsNameInfo::~DnsNameInfo()
     // EMPTY.
 }
 
-uerr DnsNameInfo::getNameInfo(Loop & loop, struct sockaddr const * addr, int flags)
+Loop const * DnsNameInfo::getLoop() const
+{
+    uv_getnameinfo_t * native = Parent::cast<uv_getnameinfo_t>();
+    if (native == nullptr) {
+        return nullptr;
+    } else if (isDeletedAddress(native)) {
+        return nullptr;
+    }
+
+    uv_loop_t * l = native->loop;
+    if (l == nullptr) {
+        return nullptr;
+    } else if (isDeletedAddress(l)) {
+        return nullptr;
+    }
+
+    return static_cast<Loop*>(l->data);
+}
+
+std::string DnsNameInfo::getHost() const
+{
+    uv_getnameinfo_t * native = Parent::cast<uv_getnameinfo_t>();
+    if (native == nullptr) {
+        return std::string();
+    } else if (isDeletedAddress(native)) {
+        return std::string();
+    }
+    return std::string(native->host);
+}
+
+std::string DnsNameInfo::getService() const
+{
+    uv_getnameinfo_t * native = Parent::cast<uv_getnameinfo_t>();
+    if (native == nullptr) {
+        return std::string();
+    } else if (isDeletedAddress(native)) {
+        return std::string();
+    }
+    return std::string(native->service);
+}
+
+uerr DnsNameInfo::requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags)
 {
     // Returns 0 on success or an error code < 0 on failure.
     // If successful, the callback will get called sometime in the future with the lookup result.
@@ -158,13 +217,6 @@ uerr DnsNameInfo::getNameInfo(Loop & loop, struct sockaddr const * addr, int fla
     int const CODE = ::uv_getnameinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getnameinfo_t>(),
                                       __global_uv_getnameinfo_cb__, addr, flags);
     return getUerr2("DnsNameInfo::getNameInfo([ASYNC])", CODE);
-}
-
-uerr DnsNameInfo::getNameInfo(struct sockaddr const * addr, int flags)
-{
-    int const CODE = ::uv_getnameinfo(nullptr, Parent::cast<uv_getnameinfo_t>(),
-                                      nullptr, addr, flags);
-    return getUerr2("DnsNameInfo::getNameInfo([SYNC])", CODE);
 }
 
 void DnsNameInfo::onGetNameInfo(int status, std::string const & hostname, std::string const & service)

@@ -54,11 +54,25 @@ public:
     addrinfo const * getAddrInfo() const;
 
 public:
-    /** Asynchronous getaddrinfo(3). */
-    uerr getAddrInfo(Loop & loop, std::string const & node, std::string const & service, struct addrinfo const * hints);
+    /**
+     * Asynchronous getaddrinfo(3).
+     *
+     * @param[in] loop
+     *      Loop object.
+     * @param[in] node
+     *      DNS name or IP address (e.g. "www.example.com")
+     * @param[in] service
+     *      Service name or Port number. (e.g. "http")
+     * @param[in] hints
+     *      Hint of address information.
+     */
+    uerr requestAddrInfo(Loop & loop,
+                         std::string const & node,
+                         std::string const & service,
+                         struct addrinfo const * hints);
 
-    /** Synchronous getaddrinfo(3). */
-    uerr getAddrInfo(std::string const & node, std::string const & service, struct addrinfo const * hints);
+    /** Free the struct addrinfo. */
+    void freeAddrInfo();
 
 public:
     /** Free the struct addrinfo. Passing NULL is allowed and is a no-op. */
@@ -85,11 +99,18 @@ public:
     virtual ~DnsNameInfo();
 
 public:
-    /** Asynchronous getnameinfo(3). */
-    uerr getNameInfo(Loop & loop, struct sockaddr const * addr, int flags);
+    /** Loop that started this getnameinfo request and where completion will be reported. */
+    Loop const * getLoop() const;
 
-    /** Synchronous getnameinfo(3). */
-    uerr getNameInfo(struct sockaddr const * addr, int flags);
+    /** Char array containing the resulting host. */
+    std::string getHost() const;
+
+    /** Char array containing the resulting service. */
+    std::string getService() const;
+
+public:
+    /** Asynchronous getnameinfo(3). */
+    uerr requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags);
 
 // Event methods.
 public:
