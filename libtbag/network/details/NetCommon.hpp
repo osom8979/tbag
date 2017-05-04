@@ -24,6 +24,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
+TBAG_CONSTEXPR char const * const TBAG_ANY_IPV4        = "0.0.0.0";
+TBAG_CONSTEXPR char const * const TBAG_ANY_SUBNET_MASK = "0.0.0.0";
+
+TBAG_CONSTEXPR char const * const TBAG_LOOPBACK_NAME = "localhost";
+TBAG_CONSTEXPR char const * const TBAG_LOOPBACK_IPV4 = "127.0.0.1";
+TBAG_CONSTEXPR char const * const TBAG_LOOPBACK_IPV6 = "::1";
+
 enum class NetType
 {
     TCP,
