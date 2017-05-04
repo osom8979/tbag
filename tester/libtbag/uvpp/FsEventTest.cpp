@@ -13,7 +13,6 @@
 
 #include <thread>
 #include <string>
-#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::uvpp;
@@ -61,7 +60,8 @@ TEST(FsEventTest, Default)
     std::thread thread = std::thread([&loop](){
         loop.run();
     });
-    ASSERT_EQ(4, f.write2("TEMP", 4, 0));
+    int const WRITE_SIZE = 4;
+    ASSERT_EQ(WRITE_SIZE, f.write2("TEMP", WRITE_SIZE, 0));
     ASSERT_TRUE(f.close());
 
     thread.join();

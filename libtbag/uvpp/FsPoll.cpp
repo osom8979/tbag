@@ -48,7 +48,7 @@ static void __global_uv_fs_poll_cb__(uv_fs_poll_t * handle, int status, uv_stat_
             prev_state = toFileState(*prev);
             curr_state = toFileState(*curr);
         }
-        h->onFsPoll(status, prev_state, curr_state);
+        h->onFsPoll(getUerr(status), prev_state, curr_state);
     }
 }
 
@@ -125,9 +125,9 @@ std::string FsPoll::getPath()
 // Event methods.
 // --------------
 
-void FsPoll::onFsPoll(int status, FileState const & prev, FileState const & curr)
+void FsPoll::onFsPoll(uerr status, FileState const & prev, FileState const & curr)
 {
-    __tbag_debug("FsPoll::onFsPoll({}) called.", status);
+    __tbag_debug("FsPoll::onFsPoll({}) called.", getErrorName(status));
 }
 
 } // namespace uvpp

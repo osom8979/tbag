@@ -62,7 +62,7 @@ public:
     uerr init(Loop & loop);
 
     /** Check the file at path for changes every interval milliseconds. */
-    uerr start(char const * path, unsigned int interval);
+    uerr start(char const * path, unsigned int interval = 1000);
 
     /** Stop the handle, the callback will no longer be called. */
     uerr stop();
@@ -72,7 +72,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onFsPoll(int status, FileState const & prev, FileState const & curr);
+    virtual void onFsPoll(uerr status, FileState const & prev, FileState const & curr);
 };
 
 } // namespace uvpp

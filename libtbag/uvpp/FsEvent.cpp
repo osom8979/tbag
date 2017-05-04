@@ -112,9 +112,7 @@ FsEvent::Event FsEvent::getEvent(int native_events) TBAG_NOEXCEPT
 void FsEvent::onFsEvent(const char * filename, Event events, uerr status)
 {
     __tbag_debug("FsEvent::onFsEvent({}, {}, {}) called.",
-                 filename,
-                 static_cast<int>(events),
-                 static_cast<int>(status));
+                 filename, static_cast<int>(events), getErrorName(status));
 }
 
 } // namespace uvpp
