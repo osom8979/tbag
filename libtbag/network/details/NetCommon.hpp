@@ -39,6 +39,7 @@ TBAG_CONSTEXPR int const OS_RANDOMLY_ASSIGNS_PORT = 0;
 
 enum class NetType
 {
+    UNKNOWN,
     TCP,
     UDP,
     PIPE,
@@ -49,47 +50,52 @@ struct NetInterface
     using uerr = uvpp::uerr;
     using binf = uvpp::binf;
 
-    using Type = NetType;
-    using Size = std::size_t;
+    using Type   = NetType;
+    using Size   = std::size_t;
+    using String = std::string;
 
-    // ACCESSOR.
-    virtual Type getType() const = 0;
+    // @formatter:off
+    virtual Type getType() const { return Type::UNKNOWN; }
 
-    // OPERATORS.
-    virtual uerr start() = 0;
-    virtual uerr  stop() = 0;
-    virtual uerr close() = 0;
+    virtual uerr init(String const & arg1, int arg2)
+    { return uerr::UVPP_ENOSYS; }
+
+    virtual uerr start() { return uerr::UVPP_ENOSYS; }
+    virtual uerr  stop() { return uerr::UVPP_ENOSYS; }
+    virtual uerr close() { return uerr::UVPP_ENOSYS; }
+    // @formatter:on
 };
 
 struct ClientInterface : public NetInterface
 {
-    // OPERATORS.
-    virtual uerr  syncWrite(char const * buffer, Size * size) = 0;
-    virtual uerr asyncWrite(char const * buffer, Size * size) = 0;
-    virtual uerr   tryWrite(char const * buffer, Size * size) = 0;
+    // @formatter:off
+    virtual uerr  syncWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
+    virtual uerr asyncWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
+    virtual uerr   tryWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
 
-    // EVENT METHODS.
-    virtual void onConnect(uerr code) = 0;
-    virtual binf onAlloc  (Size suggested_size) = 0;
-    virtual void onWrite  (uerr code) = 0;
-    virtual void onRead   (uerr code, char const * buffer, Size size) = 0;
-    virtual void onClose  () = 0;
-    virtual void onAsync  (int type, uerr code) = 0;
+    virtual void onConnect(uerr code)                                 { /* EMPTY. */ }
+    virtual binf onAlloc  (Size suggested_size)                       { return binf(); }
+    virtual void onWrite  (uerr code)                                 { /* EMPTY. */ }
+    virtual void onRead   (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
+    virtual void onClose  ()                                          { /* EMPTY. */ }
+    virtual void onAsync  (int type, uerr code)                       { /* EMPTY. */ }
+    // @formatter:on
 };
 
 struct ServerInterface : public NetInterface
 {
-    using ClientInterface = details::ClientInterface;
+    using NodeInter = details::ClientInterface;
 
-    // EVENT METHODS.
-    virtual void onClose() = 0;
+    // @formatter:off
+    virtual void onClose() { /* EMPTY. */ }
 
-    virtual void onClientConnect(ClientInterface * client, uerr code) = 0;
-    virtual binf onClientAlloc  (ClientInterface * client, Size suggested_size) = 0;
-    virtual void onClientWrite  (ClientInterface * client, uerr code) = 0;
-    virtual void onClientRead   (ClientInterface * client, uerr code, char const * buffer, Size size) = 0;
-    virtual void onClientClose  (ClientInterface * client) = 0;
-    virtual void onClientAsync  (ClientInterface * client, int type, uerr code) = 0;
+    virtual void onClientConnect(NodeInter * node, uerr code)                                 { /* EMPTY. */ }
+    virtual binf onClientAlloc  (NodeInter * node, Size suggested_size)                       { return binf(); }
+    virtual void onClientWrite  (NodeInter * node, uerr code)                                 { /* EMPTY. */ }
+    virtual void onClientRead   (NodeInter * node, uerr code, char const * buffer, Size size) { /* EMPTY. */ }
+    virtual void onClientClose  (NodeInter * node)                                            { /* EMPTY. */ }
+    virtual void onClientAsync  (NodeInter * node, int type, uerr code)                       { /* EMPTY. */ }
+    // @formatter:on
 };
 
 TBAG_API bool isIpv4(std::string const & ip);
