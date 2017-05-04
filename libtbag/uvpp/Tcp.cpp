@@ -177,6 +177,112 @@ void Tcp::onConnect(ConnectRequest & request, uerr code)
     __tbag_debug("Tcp::onConnect({}) called.", getErrorName(code));
 }
 
+// ----------------
+// Utility methods.
+// ----------------
+
+bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
+{
+    if (tcp.isInit() == false) {
+        __tbag_error("initCommonServerSock() tcp is not initialized.");
+        return false;
+    }
+
+    uerr const BIND_CODE = tcp.bind(addr);
+    if (BIND_CODE != uvpp::uerr::UVPP_SUCCESS) {
+        __tbag_error("initCommonServerSock() tcp bind {} error.", getErrorName(BIND_CODE));
+        return false;
+    }
+
+    uerr const LISTEN_CODE = tcp.listen();
+    if (LISTEN_CODE != uerr::UVPP_SUCCESS) {
+        __tbag_error("initCommonServerSock() tcp listen {} error.", getErrorName(LISTEN_CODE));
+        return false;
+    }
+    return true;
+}
+
+bool initCommonServerIpv4(Tcp & tcp, std::string const & ip, int port)
+{
+    sockaddr_in addr;
+    uerr const CODE = initAddress(ip, port, &addr);
+    if (CODE != uvpp::uerr::UVPP_SUCCESS) {
+        __tbag_error("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
+        return false;
+    }
+    return initCommonServerSock(tcp, (sockaddr const *)&addr);
+}
+
+bool initCommonServerIpv6(Tcp & tcp, std::string const & ip, int port)
+{
+    sockaddr_in6 addr;
+    uerr const CODE = initAddress(ip, port, &addr);
+    if (CODE != uvpp::uerr::UVPP_SUCCESS) {
+        __tbag_error("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
+        return false;
+    }
+    return initCommonServerSock(tcp, (sockaddr const *)&addr);
+}
+
+bool initCommonServer(Tcp & tcp, std::string const & ip, int port)
+{
+    using namespace libtbag::network::details;
+    if (isIpv4(ip)) {
+        return initCommonServerIpv4(tcp, ip, port);
+    } else if (isIpv6(ip)) {
+        return initCommonServerIpv6(tcp, ip, port);
+    }
+    return false;
+}
+
+bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr)
+{
+    if (tcp.isInit() == false) {
+        __tbag_error("initCommonClientSock() tcp is not initialized.");
+        return false;
+    }
+
+    uerr const CODE = tcp.connect(request, addr);
+    if (CODE != uvpp::uerr::UVPP_SUCCESS) {
+        __tbag_error("initCommonServerSock() tcp connect {} error.", getErrorName(CODE));
+        return false;
+    }
+    return true;
+}
+
+bool initCommonClientIpv4(Tcp & tcp, ConnectRequest & request, std::string const & ip, int port)
+{
+    sockaddr_in addr;
+    uerr const CODE = initAddress(ip, port, &addr);
+    if (CODE != uvpp::uerr::UVPP_SUCCESS) {
+        __tbag_error("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
+        return false;
+    }
+    return initCommonClientSock(tcp, request, (sockaddr const *)&addr);
+}
+
+bool initCommonClientIpv6(Tcp & tcp, ConnectRequest & request, std::string const & ip, int port)
+{
+    sockaddr_in6 addr;
+    uerr const CODE = initAddress(ip, port, &addr);
+    if (CODE != uvpp::uerr::UVPP_SUCCESS) {
+        __tbag_error("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
+        return false;
+    }
+    return initCommonClientSock(tcp, request, (sockaddr const *)&addr);
+}
+
+bool initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & ip, int port)
+{
+    using namespace libtbag::network::details;
+    if (isIpv4(ip)) {
+        return initCommonClientIpv4(tcp, request, ip, port);
+    } else if (isIpv6(ip)) {
+        return initCommonClientIpv6(tcp, request, ip, port);
+    }
+    return false;
+}
+
 } // namespace uvpp
 
 // --------------------
