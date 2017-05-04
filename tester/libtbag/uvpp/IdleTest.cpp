@@ -45,12 +45,13 @@ TEST(IdleTest, Default)
 {
     {
         Loop loop;
-        auto shared = loop.newHandle<IdleTest>(loop);
-        static_cast<IdleTest*>(shared.get())->start();
+        auto idle = loop.newHandle<IdleTest>(loop);
+        idle->start();
+
         loop.run();
 
         if (USE_DEBUGGING) { // ONLY DEBUGGING.
-            shared->close();
+            idle->close();
             loop.run();
             loop.printAllHandles(stdout);
         }
