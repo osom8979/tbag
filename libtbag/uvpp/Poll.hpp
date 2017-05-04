@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/uvpp/Handle.hpp>
+#include <libtbag/bitwise/BitFlags.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -115,14 +116,24 @@ public:
     uerr initSocket(Loop & loop, usock sock);
 
     /** Starts polling the file descriptor. */
-    uerr start(EventType events);
+    uerr start(EventType events = EVENT_RW);
 
     /** Stop polling the file descriptor, the callback will no longer be called. */
     uerr stop();
 
+public:
+    // @formatter:off
+    inline static bool isEventReadable(EventType event) TBAG_NOEXCEPT
+    { return bitwise::checkFlag(event, EVENT_READABLE); }
+    inline static bool isEventWritable(EventType event) TBAG_NOEXCEPT
+    { return bitwise::checkFlag(event, EVENT_WRITABLE); }
+    inline static bool isEventDisconnect(EventType event) TBAG_NOEXCEPT
+    { return bitwise::checkFlag(event, EVENT_DISCONNECT); }
+    // @formatter:on
+
 // Event methods.
 public:
-    virtual void onPoll(int status, EventType events);
+    virtual void onPoll(uerr status, EventType events);
 };
 
 } // namespace uvpp

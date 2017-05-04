@@ -29,7 +29,7 @@ static void __global_uv_pool_cb__(uv_poll_t * handle, int status, int events)
     } else if (isDeletedAddress(h)) {
         __tbag_error("__global_uv_pool_cb__() handle.data is deleted.");
     } else {
-        h->onPoll(status, static_cast<Poll::EventType>(events));
+        h->onPoll(getUerr(status), static_cast<Poll::EventType>(events));
     }
 }
 
@@ -106,9 +106,9 @@ uerr Poll::stop()
     return getUerr2("Poll::stop()", CODE);
 }
 
-void Poll::onPoll(int status, EventType events)
+void Poll::onPoll(uerr status, EventType events)
 {
-    __tbag_debug("Poll::onPoll({}, {}) called.", status, static_cast<int>(events));
+    __tbag_debug("Poll::onPoll({}, {}) called.", getErrorName(status), static_cast<int>(events));
 }
 
 } // namespace uvpp

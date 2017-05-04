@@ -52,6 +52,9 @@ public:
     inline bool isOpen() const TBAG_NOEXCEPT
     { return _file != 0; }
 
+    inline ufile getFd() const TBAG_NOEXCEPT
+    { return _file; }
+
 public:
     bool open(std::string const & path, Flags flags = Flags(), int mode = 0664);
     bool close();
