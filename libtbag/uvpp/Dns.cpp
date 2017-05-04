@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
+#include <cassert>
 #include <uv.h>
 
 // -------------------
@@ -73,23 +74,18 @@ DnsAddrInfo::~DnsAddrInfo()
     freeAddrInfo();
 }
 
+Loop * DnsAddrInfo::getLoop()
+{
+    uv_loop_t * loop = Parent::cast<uv_getaddrinfo_t>()->loop;
+    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    return static_cast<Loop*>(loop->data);
+}
+
 Loop const * DnsAddrInfo::getLoop() const
 {
-    uv_getaddrinfo_t * native = Parent::cast<uv_getaddrinfo_t>();
-    if (native == nullptr) {
-        return nullptr;
-    } else if (isDeletedAddress(native)) {
-        return nullptr;
-    }
-
-    uv_loop_t * l = native->loop;
-    if (l == nullptr) {
-        return nullptr;
-    } else if (isDeletedAddress(l)) {
-        return nullptr;
-    }
-
-    return static_cast<Loop*>(l->data);
+    uv_loop_t * loop = Parent::cast<uv_getaddrinfo_t>()->loop;
+    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    return static_cast<Loop*>(loop->data);
 }
 
 addrinfo const * DnsAddrInfo::getAddrInfo() const
@@ -164,23 +160,18 @@ DnsNameInfo::~DnsNameInfo()
     // EMPTY.
 }
 
+Loop * DnsNameInfo::getLoop()
+{
+    uv_loop_t * loop = Parent::cast<uv_getnameinfo_t>()->loop;
+    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    return static_cast<Loop*>(loop->data);
+}
+
 Loop const * DnsNameInfo::getLoop() const
 {
-    uv_getnameinfo_t * native = Parent::cast<uv_getnameinfo_t>();
-    if (native == nullptr) {
-        return nullptr;
-    } else if (isDeletedAddress(native)) {
-        return nullptr;
-    }
-
-    uv_loop_t * l = native->loop;
-    if (l == nullptr) {
-        return nullptr;
-    } else if (isDeletedAddress(l)) {
-        return nullptr;
-    }
-
-    return static_cast<Loop*>(l->data);
+    uv_loop_t * loop = Parent::cast<uv_getnameinfo_t>()->loop;
+    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    return static_cast<Loop*>(loop->data);
 }
 
 std::string DnsNameInfo::getHost() const

@@ -48,6 +48,7 @@ public:
 
 public:
     /** Loop that started this getaddrinfo request and where completion will be reported. */
+    Loop * getLoop();
     Loop const * getLoop() const;
 
     /** Pointer to a struct addrinfo containing the result. */
@@ -100,6 +101,7 @@ public:
 
 public:
     /** Loop that started this getnameinfo request and where completion will be reported. */
+    Loop * getLoop();
     Loop const * getLoop() const;
 
     /** Char array containing the resulting host. */

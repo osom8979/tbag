@@ -9,6 +9,8 @@
 #include <libtbag/uvpp/Handle.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cassert>
 #include <uv.h>
 
 // -------------------
@@ -74,6 +76,20 @@ Handle::~Handle()
 bool Handle::isInit() const TBAG_NOEXCEPT
 {
     return Parent::cast<uv_handle_t>()->type != UV_UNKNOWN_HANDLE/*0*/;
+}
+
+Loop * Handle::getLoop()
+{
+    uv_loop_t * loop = Parent::cast<uv_handle_t>()->loop;
+    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    return static_cast<Loop*>(loop->data);
+}
+
+Loop const * Handle::getLoop() const
+{
+    uv_loop_t * loop = Parent::cast<uv_handle_t>()->loop;
+    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    return static_cast<Loop*>(loop->data);
 }
 
 void Handle::close()

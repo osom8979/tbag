@@ -54,9 +54,9 @@ Pipe::Pipe() : Stream(uhandle::PIPE)
     // EMPTY.
 }
 
-Pipe::Pipe(Loop & loop, int ipc) : Pipe()
+Pipe::Pipe(Loop & loop, bool is_ipc) : Pipe()
 {
-    if (init(loop, ipc) != uerr::UVPP_SUCCESS) {
+    if (init(loop, is_ipc) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -66,12 +66,12 @@ Pipe::~Pipe()
     // EMPTY.
 }
 
-uerr Pipe::init(Loop & loop, int ipc)
+uerr Pipe::init(Loop & loop, bool is_ipc)
 {
     // The ipc argument is a boolean to indicate
     // if this pipe will be used for handle passing between processes.
 
-    int const CODE = ::uv_pipe_init(loop.cast<uv_loop_t>(), Parent::cast<uv_pipe_t>(), ipc);
+    int const CODE = ::uv_pipe_init(loop.cast<uv_loop_t>(), Parent::cast<uv_pipe_t>(), (is_ipc ? 1 : 0));
     return getUerr2("Pipe::init()", CODE);
 }
 
@@ -97,6 +97,8 @@ uerr Pipe::bind(char const * name)
 
 void Pipe::connect(ConnectRequest & request, char const * name)
 {
+    request.setOwner(this); // IMPORTANT!!
+
     // Note:
     // Paths on Unix get truncated to sizeof(sockaddr_un.sun_path) bytes,
     // typically between 92 and 108 bytes.

@@ -48,14 +48,14 @@ public:
 
 protected:
     Pipe();
-    Pipe(Loop & loop, int ipc);
+    Pipe(Loop & loop, bool is_ipc = false);
 
 public:
     virtual ~Pipe();
 
 public:
     /** Initialize a pipe handle. */
-    uerr init(Loop & loop, int ipc);
+    uerr init(Loop & loop, bool is_ipc = false);
 
     /**
      * Open an existing file descriptor or HANDLE as a pipe.

@@ -26,6 +26,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
+// Forward declaration.
+class Loop;
+
 /**
  * libuv handle type utility class.
  *
@@ -61,6 +64,10 @@ public:
 public:
     inline char const * getName() const TBAG_NOEXCEPT
     { return getUvNativeHandleName(get()); }
+
+    /** Pointer to the uv_loop_t where the handle is running on. */
+    Loop * getLoop();
+    Loop const * getLoop() const;
 
 public:
     bool isInit() const TBAG_NOEXCEPT;
