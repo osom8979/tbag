@@ -38,7 +38,6 @@ enum class NetType
     TCP,
     UDP,
     PIPE,
-    POLL,
 };
 
 struct NetInterface
@@ -61,9 +60,9 @@ struct NetInterface
 struct ClientInterface : public NetInterface
 {
     // OPERATORS.
-    virtual uerr  syncWrite(char const * buffer, Size size, Size * wsize = nullptr) = 0;
-    virtual uerr asyncWrite(char const * buffer, Size size, Size * wsize = nullptr) = 0;
-    virtual uerr   tryWrite(char const * buffer, Size size, Size * wsize = nullptr) = 0;
+    virtual uerr  syncWrite(char const * buffer, Size * size) = 0;
+    virtual uerr asyncWrite(char const * buffer, Size * size) = 0;
+    virtual uerr   tryWrite(char const * buffer, Size * size) = 0;
 
     // EVENT METHODS.
     virtual void onConnect(uerr code) = 0;

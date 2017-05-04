@@ -58,24 +58,19 @@ public:
 
 public:
     // @formatter:off
-    virtual uerr  syncWrite(char const * buffer, Size size, Size * wsize = nullptr) override
-    { return uerr::UVPP_ENOSYS; }
-    virtual uerr asyncWrite(char const * buffer, Size size, Size * wsize = nullptr) override
-    { return uerr::UVPP_ENOSYS; }
-    virtual uerr   tryWrite(char const * buffer, Size size, Size * wsize = nullptr) override
-    { return uerr::UVPP_ENOSYS; }
-    virtual void onConnect(uerr code) override
-    { /* EMPTY. */ }
-    virtual binf onAlloc(Size suggested_size) override
-    { return binf(); }
-    virtual void onWrite(uerr code) override
-    { /* EMPTY. */ }
-    virtual void onRead(uerr code, char const * buffer, Size size) override
-    { /* EMPTY. */ }
-    virtual void onClose() override
-    { /* EMPTY. */ }
-    virtual void onAsync(int type, uerr code) override
-    { /* EMPTY. */ }
+    virtual uerr  syncWrite(char const * buffer, Size * size) override { return uerr::UVPP_ENOSYS; }
+    virtual uerr asyncWrite(char const * buffer, Size * size) override { return uerr::UVPP_ENOSYS; }
+    virtual uerr   tryWrite(char const * buffer, Size * size) override { return uerr::UVPP_ENOSYS; }
+    // @formatter:on
+
+public:
+    // @formatter:off
+    virtual void onConnect(uerr code) override { /* EMPTY. */ }
+    virtual binf onAlloc(Size suggested_size) override { return binf(); }
+    virtual void onWrite(uerr code) override { /* EMPTY. */ }
+    virtual void onRead(uerr code, char const * buffer, Size size) override { /* EMPTY. */ }
+    virtual void onClose() override { /* EMPTY. */ }
+    virtual void onAsync(int type, uerr code) override { /* EMPTY. */ }
     // @formatter:on
 
 public:

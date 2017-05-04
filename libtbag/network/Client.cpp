@@ -9,7 +9,6 @@
 #include <libtbag/network/details/TcpNet.hpp>
 #include <libtbag/network/details/UdpNet.hpp>
 #include <libtbag/network/details/PipeNet.hpp>
-#include <libtbag/network/details/PollNet.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -36,7 +35,6 @@ Client::SharedClient Client::create(Loop & loop, NetType type)
     case NetType::TCP:  return SharedClient(new (std::nothrow) details::TcpNetClient(loop));
     case NetType::UDP:  return SharedClient(new (std::nothrow) details::UdpNetClient(loop));
     case NetType::PIPE: return SharedClient(new (std::nothrow) details::PipeNetClient(loop));
-    case NetType::POLL: return SharedClient(new (std::nothrow) details::PollNetClient(loop));
     default:            return SharedClient();
     }
     // @formatter:on

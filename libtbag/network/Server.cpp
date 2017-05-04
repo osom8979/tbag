@@ -9,7 +9,6 @@
 #include <libtbag/network/details/TcpNet.hpp>
 #include <libtbag/network/details/UdpNet.hpp>
 #include <libtbag/network/details/PipeNet.hpp>
-#include <libtbag/network/details/PollNet.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -36,7 +35,6 @@ Server::SharedServer Server::create(Loop & loop, NetType type)
     case NetType::TCP:  return SharedServer(new (std::nothrow) details::TcpNetServer(loop));
     case NetType::UDP:  return SharedServer(new (std::nothrow) details::UdpNetServer(loop));
     case NetType::PIPE: return SharedServer(new (std::nothrow) details::PipeNetServer(loop));
-    case NetType::POLL: return SharedServer(new (std::nothrow) details::PollNetServer(loop));
     default:            return SharedServer();
     }
     // @formatter:on
