@@ -22,7 +22,7 @@ TEST(DnsTest, DnsAddrInfo)
 
     DnsAddrInfo addr;
     addrinfo hints = {0,};
-    hints.ai_family   = AF_INET;   // AF_INET/AF_INET6/AF_UNSPEC
+    hints.ai_family   = AF_INET;     // AF_INET/AF_INET6/AF_UNSPEC
     hints.ai_socktype = SOCK_STREAM; // SOCK_STREAM/SOCK_DGRAM/SOCK_RAW
     hints.ai_flags    = AI_PASSIVE;  // Fill in my IP for me.
     ASSERT_EQ(uerr::UVPP_SUCCESS, addr.requestAddrInfo(loop, "localhost", "", &hints));
@@ -31,7 +31,7 @@ TEST(DnsTest, DnsAddrInfo)
     ASSERT_NE(nullptr, addr.getAddrInfo());
 
     for (struct addrinfo * info = addr.getAddrInfo()->ai_next; info != nullptr; info = info->ai_next) {
-        ASSERT_TRUE(string::isMatch(Tcp::getIpName(info->ai_addr), "127\\.0\\.0\\.[0-9]{1,3}"));
+        ASSERT_TRUE(string::isMatch(getIpName(info->ai_addr), "127\\.0\\.0\\.[0-9]{1,3}"));
     }
 }
 
@@ -40,7 +40,7 @@ TEST(DnsTest, DnsNameInfo)
     Loop loop;
     DnsNameInfo name;
     struct sockaddr_in addr = {0,};
-    ASSERT_EQ(uerr::UVPP_SUCCESS, Tcp::initAddress("127.0.0.1", 0, &addr));
+    ASSERT_EQ(uerr::UVPP_SUCCESS, initAddress("127.0.0.1", 0, &addr));
     ASSERT_EQ(uerr::UVPP_SUCCESS, name.requestNameInfo(loop, (sockaddr*)&addr, 0));
 
     ASSERT_EQ(uerr::UVPP_SUCCESS, loop.run());

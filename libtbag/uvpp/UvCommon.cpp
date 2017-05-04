@@ -155,6 +155,58 @@ binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_size)
     return info;
 }
 
+// --------
+// Network.
+// --------
+
+std::string getIpName(sockaddr const * address)
+{
+    if (address->sa_family == AF_INET) {
+        return getIpName(reinterpret_cast<sockaddr_in const *>(address));
+    } else if (address->sa_family == AF_INET6) {
+        return getIpName(reinterpret_cast<sockaddr_in6 const *>(address));
+    }
+    return std::string();
+}
+
+std::string getIpName(sockaddr_in const * address)
+{
+    char name[16] = {0,}; // e.g. 255.255.255.255
+    if (::uv_ip4_name(address, name, sizeof(name)) == 0) {
+        return std::string(name);
+    }
+    return std::string();
+}
+
+std::string getIpName(sockaddr_in6 const * address)
+{
+    char name[40] = {0,}; // e.g. 2001:0db8:85a3:08d3:1319:8a2e:0370:7334
+    if (::uv_ip6_name(address, name, sizeof(name)) == 0) {
+        return std::string(name);
+    }
+    return std::string();
+}
+
+uerr initAddress(std::string const & ip, int port, sockaddr_in * addr)
+{
+    int const CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
+    if (CODE != 0) {
+        __tbag_error("initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
+        return ::libtbag::uvpp::getUerr(CODE);
+    }
+    return uerr::UVPP_SUCCESS;
+}
+
+uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
+{
+    int const CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
+    if (CODE != 0) {
+        __tbag_error("initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
+        return ::libtbag::uvpp::getUerr(CODE);
+    }
+    return uerr::UVPP_SUCCESS;
+}
+
 } // namespace uvpp
 
 // --------------------

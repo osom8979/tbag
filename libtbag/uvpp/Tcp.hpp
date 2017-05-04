@@ -84,18 +84,6 @@ public:
 // Event methods.
 public:
     virtual void onConnect(ConnectRequest & request, uerr code);
-
-// Utilities.
-public:
-    static std::string getIpName(sockaddr     const * address); // Don't use this method [IP RESULT BUG].
-    static std::string getIpName(sockaddr_in  const * address);
-    static std::string getIpName(sockaddr_in6 const * address);
-
-    static uerr initAddress(std::string const & ip, int port, sockaddr_in * addr);
-    static uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
-
-    static bool isIpv4(std::string const & ip);
-    static bool isIpv6(std::string const & ip);
 };
 
 } // namespace uvpp

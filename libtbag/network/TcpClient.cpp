@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/network/TcpClient.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/log/Log.hpp>
 #include <cassert>
 
@@ -38,7 +39,7 @@ bool TcpClient::initIpv4(std::string const & ip, int port)
     }
 
     sockaddr_in addr;
-    if (_client->initAddress(ip, port, &addr) != uvpp::uerr::UVPP_SUCCESS) {
+    if (uvpp::initAddress(ip, port, &addr) != uvpp::uerr::UVPP_SUCCESS) {
         return false;
     }
 
@@ -56,9 +57,9 @@ bool TcpClient::initIpv6(std::string const & ip, int port)
 
 bool TcpClient::init(std::string const & ip, int port)
 {
-    if (Tcp::isIpv4(ip)) {
+    if (details::isIpv4(ip)) {
         return initIpv4(ip, port);
-    } else if (Tcp::isIpv6(ip)) {
+    } else if (details::isIpv6(ip)) {
         return initIpv6(ip, port);
     }
     return false;

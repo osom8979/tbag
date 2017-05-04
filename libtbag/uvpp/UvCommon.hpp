@@ -339,6 +339,17 @@ TBAG_API bool isUvNativeHandleType(void const * handle);
 
 TBAG_API binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_size);
 
+// --------
+// Network.
+// --------
+
+TBAG_API std::string getIpName(sockaddr     const * address);
+TBAG_API std::string getIpName(sockaddr_in  const * address);
+TBAG_API std::string getIpName(sockaddr_in6 const * address);
+
+TBAG_API uerr initAddress(std::string const & ip, int port, sockaddr_in * addr);
+TBAG_API uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
+
 } // namespace uvpp
 
 // --------------------
