@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/network/Server.hpp>
-#include <libtbag/network/details/TcpNetServer.hpp>
+#include <libtbag/network/details/TcpServer.hpp>
 #include <libtbag/network/details/UdpNet.hpp>
 #include <libtbag/network/details/PipeNet.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -22,7 +22,7 @@ Server::SharedServer Server::create(Loop & loop, Type type)
 {
     // @formatter:off
     switch (type) {
-    case Type::TCP:  return SharedServer(new (std::nothrow) details::TcpNetServer(loop));
+    case Type::TCP:  return SharedServer(new (std::nothrow) details::TcpServer(loop));
     case Type::UDP:  return SharedServer(new (std::nothrow) details::UdpNetServer(loop));
     case Type::PIPE: return SharedServer(new (std::nothrow) details::PipeNetServer(loop));
     default:         return SharedServer();

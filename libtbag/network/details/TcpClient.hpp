@@ -1,12 +1,12 @@
 /**
- * @file   TcpNetClient.hpp
- * @brief  TcpNetClient class prototype.
+ * @file   TcpClient.hpp
+ * @brief  TcpClient class prototype.
  * @author zer0
- * @date   2017-05-05
+ * @date   2017-05-06
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPNETCLIENT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPNETCLIENT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPCLIENT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPCLIENT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,16 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/Client.hpp>
-
-#include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/uvpp/Timer.hpp>
-#include <libtbag/uvpp/ex/SafetyAsync.hpp>
-#include <libtbag/uvpp/Request.hpp>
-
-#include <memory>
-#include <vector>
-#include <string>
+#include <libtbag/network/details/NetCommon.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,31 +26,29 @@ namespace network {
 namespace details {
 
 // Forward declaration.
-class ClientImpl;
-class TcpNetClient;
+class TcpRealClient;
+class TcpClient;
 
 /**
- * ClientImpl class prototype.
+ * TcpRealClient class prototype.
  *
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API ClientImpl : public uvpp::Tcp, public details::NetCommon
+class TBAG_API TcpRealClient : public details::NetCommon, public uvpp::Tcp
 {
 public:
-    friend class TcpNetClient;
+    friend class TcpClient;
 
 private:
-    TcpNetClient & _parent;
-
+    TcpClient    & _parent;
     ConnectRequest _connect_req;
     WriteRequest   _write_req;
-
-    Buffer _buffer;
+    Buffer         _buffer;
 
 public:
-    ClientImpl(Loop & loop, TcpNetClient & parent);
-    virtual ~ClientImpl();
+    TcpRealClient(Loop & loop, TcpClient & parent);
+    virtual ~TcpRealClient();
 
 public:
     virtual void onConnect(ConnectRequest & request, uerr code) override;
@@ -70,19 +59,20 @@ public:
 };
 
 /**
- * TcpNetClient class prototype.
+ * TcpClient class prototype.
  *
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API TcpNetClient : public Client
+class TBAG_API TcpClient : public Client
 {
 public:
-    TcpNetClient(Loop & loop);
-    virtual ~TcpNetClient();
+    TcpClient(Loop & loop);
+    virtual ~TcpClient();
 
 public:
-    virtual Type getType() const override;
+    virtual Type getType() const
+    { return Type::TCP; }
 };
 
 } // namespace details
@@ -92,5 +82,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPNETCLIENT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPCLIENT_HPP__
 

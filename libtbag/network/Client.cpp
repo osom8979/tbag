@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/network/Client.hpp>
-#include <libtbag/network/details/TcpNetClient.hpp>
+#include <libtbag/network/details/TcpClient.hpp>
 #include <libtbag/network/details/UdpNet.hpp>
 #include <libtbag/network/details/PipeNet.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -22,7 +22,7 @@ Client::SharedClient Client::create(Loop & loop, Type type)
 {
     // @formatter:off
     switch (type) {
-    case Type::TCP:  return SharedClient(new (std::nothrow) details::TcpNetClient(loop));
+    case Type::TCP:  return SharedClient(new (std::nothrow) details::TcpClient(loop));
     case Type::UDP:  return SharedClient(new (std::nothrow) details::UdpNetClient(loop));
     case Type::PIPE: return SharedClient(new (std::nothrow) details::PipeNetClient(loop));
     default:         return SharedClient();
