@@ -33,15 +33,33 @@ namespace network {
  * @author zer0
  * @date   2017-05-02
  */
-class TBAG_API Client : public details::ClientInterface, public Noncopyable
+struct Client : public details::NetCommon
 {
-protected:
-    Client(Loop & loop);
-public:
-    virtual ~Client();
+    using SharedClient = std::shared_ptr<Client>;
 
-public:
-    static std::shared_ptr<Client> create(Loop & loop, Type type);
+    // @formatter:off
+    virtual Type getType() const = 0;
+
+    virtual uerr init(String const & arg1, int arg2)
+    { return uerr::UVPP_ENOSYS; }
+
+    virtual uerr  start() { return uerr::UVPP_ENOSYS; }
+    virtual uerr   stop() { return uerr::UVPP_ENOSYS; }
+    virtual uerr  close() { return uerr::UVPP_ENOSYS; }
+    virtual uerr cancel() { return uerr::UVPP_ENOSYS; }
+
+    virtual uerr  syncWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
+    virtual uerr asyncWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
+    virtual uerr   tryWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
+
+    virtual void onConnect(uerr code) { /* EMPTY. */ }
+    virtual void onWrite  (uerr code) { /* EMPTY. */ }
+    virtual void onRead   (uerr code, char const * buffer,
+                           Size size) { /* EMPTY. */ }
+    virtual void onClose  ()          { /* EMPTY. */ }
+    // @formatter:on
+
+    static SharedClient create(Loop & loop, Type type);
 };
 
 } // namespace network

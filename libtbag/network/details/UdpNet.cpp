@@ -22,7 +22,7 @@ using Loop = uvpp::Loop;
 // UdpNetClient implementation.
 // ----------------------------
 
-UdpNetClient::UdpNetClient(Loop & loop) : Client(loop)
+UdpNetClient::UdpNetClient(Loop & loop)
 {
 }
 
@@ -39,7 +39,7 @@ UdpNetClient::Type UdpNetClient::getType() const
 // UdpNetServer implementation.
 // ----------------------------
 
-UdpNetServer::UdpNetServer(Loop & loop) : Server(loop)
+UdpNetServer::UdpNetServer(Loop & loop)
 {
 }
 

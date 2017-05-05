@@ -18,19 +18,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
-Server::Server(Loop & loop)
+Server::SharedServer Server::create(Loop & loop, Type type)
 {
-    // EMPTY.
-}
-
-Server::~Server()
-{
-    // EMPTY.
-}
-
-std::shared_ptr<Server> Server::create(Loop & loop, Type type)
-{
-    using SharedServer = std::shared_ptr<Server>;
     // @formatter:off
     switch (type) {
     case Type::TCP:  return SharedServer(new (std::nothrow) details::TcpNetServer(loop));

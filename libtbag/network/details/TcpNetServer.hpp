@@ -45,7 +45,7 @@ class TcpNetServer;
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API ServerImpl : public uvpp::Tcp, public details::NetTypes
+class TBAG_API ServerImpl : public uvpp::Tcp, public details::NetCommon
 {
 public:
     friend class TcpNetClient;
@@ -68,7 +68,7 @@ public:
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API NodeImpl : public uvpp::Tcp, public details::NetTypes
+class TBAG_API NodeImpl : public uvpp::Tcp, public details::NetCommon
 {
 public:
     friend class TcpNetClient;

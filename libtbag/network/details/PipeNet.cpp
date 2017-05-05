@@ -22,7 +22,7 @@ using Loop = uvpp::Loop;
 // PipeNetClient implementation.
 // -----------------------------
 
-PipeNetClient::PipeNetClient(Loop & loop) : Client(loop)
+PipeNetClient::PipeNetClient(Loop & loop)
 {
 }
 
@@ -39,7 +39,7 @@ PipeNetClient::Type PipeNetClient::getType() const
 // PipeNetServer implementation.
 // -----------------------------
 
-PipeNetServer::PipeNetServer(Loop & loop) : Server(loop)
+PipeNetServer::PipeNetServer(Loop & loop)
 {
 }
 

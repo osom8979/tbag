@@ -19,7 +19,7 @@ namespace details {
 // TcpNetClient implementation.
 // ----------------------------
 
-TcpNetClient::TcpNetClient(Loop & loop) : Client(loop)
+TcpNetClient::TcpNetClient(Loop & loop)
 {
     // EMPTY.
 }

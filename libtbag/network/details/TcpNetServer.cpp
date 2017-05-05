@@ -19,7 +19,7 @@ namespace details {
 // TcpNetServer implementation.
 // ----------------------------
 
-TcpNetServer::TcpNetServer(Loop & loop) : Server(loop)
+TcpNetServer::TcpNetServer(Loop & loop)
 {
     // EMPTY.
 }

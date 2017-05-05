@@ -44,7 +44,7 @@ class TcpNetClient;
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API ClientImpl : public uvpp::Tcp, public details::NetTypes
+class TBAG_API ClientImpl : public uvpp::Tcp, public details::NetCommon
 {
 public:
     friend class TcpNetClient;

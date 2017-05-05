@@ -18,19 +18,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 
-Client::Client(Loop & loop)
+Client::SharedClient Client::create(Loop & loop, Type type)
 {
-    // EMPTY.
-}
-
-Client::~Client()
-{
-    // EMPTY.
-}
-
-std::shared_ptr<Client> Client::create(Loop & loop, Type type)
-{
-    using SharedClient = std::shared_ptr<Client>;
     // @formatter:off
     switch (type) {
     case Type::TCP:  return SharedClient(new (std::nothrow) details::TcpNetClient(loop));
