@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/network/Client.hpp>
-#include <libtbag/network/details/TcpNet.hpp>
+#include <libtbag/network/details/TcpNetClient.hpp>
 #include <libtbag/network/details/UdpNet.hpp>
 #include <libtbag/network/details/PipeNet.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -28,14 +28,15 @@ Client::~Client()
     // EMPTY.
 }
 
-Client::SharedClient Client::create(Loop & loop, NetType type)
+std::shared_ptr<Client> Client::create(Loop & loop, Type type)
 {
+    using SharedClient = std::shared_ptr<Client>;
     // @formatter:off
     switch (type) {
-    case NetType::TCP:  return SharedClient(new (std::nothrow) details::TcpNetClient(loop));
-    case NetType::UDP:  return SharedClient(new (std::nothrow) details::UdpNetClient(loop));
-    case NetType::PIPE: return SharedClient(new (std::nothrow) details::PipeNetClient(loop));
-    default:            return SharedClient();
+    case Type::TCP:  return SharedClient(new (std::nothrow) details::TcpNetClient(loop));
+    case Type::UDP:  return SharedClient(new (std::nothrow) details::UdpNetClient(loop));
+    case Type::PIPE: return SharedClient(new (std::nothrow) details::PipeNetClient(loop));
+    default:         return SharedClient();
     }
     // @formatter:on
 }

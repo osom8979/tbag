@@ -15,7 +15,17 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Timer.hpp>
+#include <libtbag/uvpp/ex/SafetyAsync.hpp>
+#include <libtbag/uvpp/Request.hpp>
+
+#include <memory>
+#include <vector>
+#include <string>
 
 #include <string>
 
@@ -45,7 +55,7 @@ enum class NetType
     PIPE,
 };
 
-struct NetInterface
+struct NetTypes
 {
     using uerr = uvpp::uerr;
     using binf = uvpp::binf;
@@ -54,6 +64,19 @@ struct NetInterface
     using Size   = std::size_t;
     using String = std::string;
 
+    using Loop           = uvpp::Loop;
+    using Timer          = uvpp::Timer;
+    using SafetyAsync    = uvpp::ex::SafetyAsync;
+    using SafetyAsyncJob = SafetyAsync::Job;
+
+    using ConnectRequest = uvpp::ConnectRequest;
+    using WriteRequest   = uvpp::WriteRequest;
+
+    using Buffer = std::vector<char>;
+};
+
+struct NetInterface : public NetTypes
+{
     // @formatter:off
     virtual Type getType() const { return Type::UNKNOWN; }
 

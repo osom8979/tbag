@@ -1,13 +1,12 @@
 /**
- * @file   TcpNet.cpp
- * @brief  TcpNet class implementation.
+ * @file   TcpNetServer.cpp
+ * @brief  TcpNetServer class implementation.
  * @author zer0
- * @date   2017-05-03
+ * @date   2017-05-05
  */
 
-#include <libtbag/network/details/TcpNet.hpp>
+#include <libtbag/network/details/TcpNetServer.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -16,35 +15,18 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
-using Loop = uvpp::Loop;
-
-// ----------------------------
-// TcpNetClient implementation.
-// ----------------------------
-
-TcpNetClient::TcpNetClient(Loop & loop) : Client(loop)
-{
-}
-
-TcpNetClient::~TcpNetClient()
-{
-}
-
-TcpNetClient::Type TcpNetClient::getType() const
-{
-    return Type::TCP;
-}
-
 // ----------------------------
 // TcpNetServer implementation.
 // ----------------------------
 
 TcpNetServer::TcpNetServer(Loop & loop) : Server(loop)
 {
+    // EMPTY.
 }
 
 TcpNetServer::~TcpNetServer()
 {
+    // EMPTY.
 }
 
 TcpNetServer::Type TcpNetServer::getType() const

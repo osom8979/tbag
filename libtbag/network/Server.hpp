@@ -37,20 +37,13 @@ namespace network {
  */
 class TBAG_API Server : public details::ServerInterface, public Noncopyable
 {
-public:
-    using Loop    = uvpp::Loop;
-    using NetType = details::NetType;
-
-    using SharedServer = std::shared_ptr<Server>;
-    using WeakServer   = std::weak_ptr<Server>;
-
 protected:
     Server(Loop & loop);
 public:
     virtual ~Server();
 
 public:
-    static SharedServer create(Loop & loop, NetType type);
+    static std::shared_ptr<Server> create(Loop & loop, Type type);
 };
 
 } // namespace network

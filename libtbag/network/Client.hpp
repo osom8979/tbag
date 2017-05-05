@@ -17,15 +17,13 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
-
-// Forward declaration.
-namespace uvpp { class Loop; }
 
 namespace network {
 
@@ -37,20 +35,13 @@ namespace network {
  */
 class TBAG_API Client : public details::ClientInterface, public Noncopyable
 {
-public:
-    using Loop    = uvpp::Loop;
-    using NetType = details::NetType;
-
-    using SharedClient = std::shared_ptr<Client>;
-    using WeakClient   = std::weak_ptr<Client>;
-
 protected:
     Client(Loop & loop);
 public:
     virtual ~Client();
 
 public:
-    static SharedClient create(Loop & loop, NetType type);
+    static std::shared_ptr<Client> create(Loop & loop, Type type);
 };
 
 } // namespace network
