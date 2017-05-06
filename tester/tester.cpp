@@ -16,7 +16,7 @@
 #include <iostream>
 #include <string>
 
-static char const * const DEFAULT_GTEST_FILTER = "-NetworkTest.*";
+static char const * const DEFAULT_GTEST_FILTER = "-Network*Test.*";
 
 static char const * const DEFAULT_NETWORK_TEST_SERVER_IP = "0.0.0.0";
 static char const * const DEFAULT_NETWORK_TEST_CLIENT_IP = "127.0.0.1";
