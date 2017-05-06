@@ -18,6 +18,9 @@
 #include <libtbag/network/Client.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 
+#include <memory>
+#include <chrono>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -37,18 +40,22 @@ class TcpClient;
  */
 class TBAG_API TcpRealClient : public details::NetCommon, public uvpp::Tcp
 {
-public:
-    friend class TcpClient;
+private:
+    TcpClient & _parent;
 
 private:
-    TcpClient    & _parent;
     ConnectRequest _connect_req;
     WriteRequest   _write_req;
-    Buffer         _buffer;
+
+private:
+    Buffer _buffer;
 
 public:
     TcpRealClient(Loop & loop, TcpClient & parent);
     virtual ~TcpRealClient();
+
+public:
+    bool init(String const & ip, int port);
 
 public:
     virtual void onConnect(ConnectRequest & request, uerr code) override;
@@ -67,12 +74,43 @@ public:
 class TBAG_API TcpClient : public Client
 {
 public:
+    friend class TcpRealClient;
+
+public:
+    using SharedClient = std::shared_ptr<TcpRealClient>;
+    using   WeakClient =   std::weak_ptr<TcpRealClient>;
+
+private:
+    SharedClient   _client;
+    SharedAsync    _async;
+    SharedClose    _close;
+    SharedShutdown _shutdown;
+
+public:
     TcpClient(Loop & loop);
     virtual ~TcpClient();
 
 public:
-    virtual Type getType() const
+    virtual Type getType() const override
     { return Type::TCP; }
+
+public:
+    virtual bool init(String const & ip, int port = 0, int timeout = 0) override;
+
+public:
+    virtual bool  start() override;
+    virtual bool   stop() override;
+    virtual bool  close() override;
+    virtual bool cancel() override;
+
+public:
+    virtual bool  syncWrite(char const * buffer, Size * size) override;
+    virtual bool asyncWrite(char const * buffer, Size * size) override;
+    virtual bool   tryWrite(char const * buffer, Size * size) override;
+
+private:
+    void startTimeoutToClose(std::chrono::milliseconds const & millisec);
+    void removeTimeoutToClose();
 };
 
 } // namespace details

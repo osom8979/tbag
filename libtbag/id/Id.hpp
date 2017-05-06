@@ -25,6 +25,8 @@ namespace id {
 
 typedef std::size_t Id;
 
+TBAG_CONSTEXPR Id const UNKNOWN_ID = 0;
+
 } // namespace id
 
 // --------------------

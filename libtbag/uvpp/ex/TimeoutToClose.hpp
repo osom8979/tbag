@@ -44,7 +44,7 @@ private:
     AtomicBool _auto_close;
 
 public:
-    TimeoutToClose(Loop & loop, Handle * handle, uint64_t timeout, bool auto_close = true);
+    TimeoutToClose(Loop & loop, Handle * handle, bool auto_close = true);
     virtual ~TimeoutToClose();
 
 public:

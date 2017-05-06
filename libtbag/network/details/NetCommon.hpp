@@ -20,13 +20,17 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
 #include <libtbag/uvpp/Timer.hpp>
-#include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/Request.hpp>
+
+#include <libtbag/uvpp/ex/SafetyAsync.hpp>
+#include <libtbag/uvpp/ex/TimeoutToClose.hpp>
+#include <libtbag/uvpp/ex/TimeoutToShutdown.hpp>
+#include <libtbag/uvpp/ex/WriteJob.hpp>
+
+#include <libtbag/id/Id.hpp>
 
 #include <memory>
 #include <vector>
-#include <string>
-
 #include <string>
 
 // -------------------
@@ -57,6 +61,8 @@ enum class NetType
 
 struct NetCommon
 {
+    using Id = id::Id;
+
     using uerr = uvpp::uerr;
     using binf = uvpp::binf;
 
@@ -66,13 +72,27 @@ struct NetCommon
 
     using Loop  = uvpp::Loop;
     using Timer = uvpp::Timer;
-    using Async = uvpp::ex::SafetyAsync;
-    using Job   = Async::Job;
+
+    using SafetyAsync = uvpp::ex::SafetyAsync;
+    using AsyncJob    = SafetyAsync::Job;
+    using WriteJob    = uvpp::ex::WriteJob;
+
+    using TimeoutToClose    = uvpp::ex::TimeoutToClose;
+    using TimeoutToShutdown = uvpp::ex::TimeoutToShutdown;
 
     using ConnectRequest = uvpp::ConnectRequest;
     using WriteRequest   = uvpp::WriteRequest;
 
     using Buffer = std::vector<char>;
+
+    using SharedClose = std::shared_ptr<TimeoutToClose>;
+    using   WeakClose =   std::weak_ptr<TimeoutToClose>;
+
+    using SharedShutdown = std::shared_ptr<TimeoutToShutdown>;
+    using   WeakShutdown =   std::weak_ptr<TimeoutToShutdown>;
+
+    using SharedAsync = std::shared_ptr<SafetyAsync>;
+    using   WeakAsync =   std::weak_ptr<SafetyAsync>;
 };
 
 TBAG_API bool isIpv4(std::string const & ip);

@@ -32,31 +32,32 @@ namespace network {
  */
 struct Server : public details::NetCommon
 {
-    struct NodeInterface
+    struct NodeInterface : public details::NetCommon
     {
         // @formatter:off
-        virtual uerr  start() { return uerr::UVPP_ENOSYS; }
-        virtual uerr   stop() { return uerr::UVPP_ENOSYS; }
-        virtual uerr  close() { return uerr::UVPP_ENOSYS; }
-        virtual uerr cancel() { return uerr::UVPP_ENOSYS; }
+        virtual Id getId() const { return id::UNKNOWN_ID; }
 
-        virtual uerr  syncWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
-        virtual uerr asyncWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
-        virtual uerr   tryWrite(char const * buffer, Size * size) { return uerr::UVPP_ENOSYS; }
+        virtual bool  start() { return false; }
+        virtual bool   stop() { return false; }
+        virtual bool  close() { return false; }
+        virtual bool cancel() { return false; }
+
+        virtual bool  syncWrite(char const * buffer, Size * size) { return false; }
+        virtual bool asyncWrite(char const * buffer, Size * size) { return false; }
+        virtual bool   tryWrite(char const * buffer, Size * size) { return false; }
         // @formatter:on
     };
 
     using SharedServer = std::shared_ptr<Server>;
 
     // @formatter:off
-    virtual Type getType() const = 0;
+    virtual Type getType() const
+    { return Type::UNKNOWN; }
 
-    virtual uerr init(String const & arg1, int arg2)
-    { return uerr::UVPP_ENOSYS; }
-
-    virtual uerr start() { return uerr::UVPP_ENOSYS; }
-    virtual uerr  stop() { return uerr::UVPP_ENOSYS; }
-    virtual uerr close() { return uerr::UVPP_ENOSYS; }
+    virtual bool init(String const & destination, int port = 0, int timeout = 0)
+    { return false; }
+    virtual bool close()
+    { return false; }
 
     virtual void onClientConnect(NodeInterface * node, uerr code) { /* EMPTY. */ }
     virtual void onClientWrite  (NodeInterface * node, uerr code) { /* EMPTY. */ }
@@ -66,6 +67,7 @@ struct Server : public details::NetCommon
     virtual void onServerClose  ()                                { /* EMPTY. */ }
     // @formatter:on
 
+public:
     static SharedServer create(Loop & loop, Type type);
 };
 

@@ -16,7 +16,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 namespace ex   {
 
-TimeoutToClose::TimeoutToClose(Loop & loop, Handle * handle, uint64_t timeout, bool auto_close) : Timer(loop), _handle(handle)
+TimeoutToClose::TimeoutToClose(Loop & loop, Handle * handle, bool auto_close) : Timer(loop), _handle(handle)
 {
     _cancel.store(false);
     _auto_close.store(auto_close);
