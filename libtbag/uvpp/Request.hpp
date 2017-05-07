@@ -73,12 +73,12 @@ public:
     }
 #endif
 
-_TBAG_UV_REQUEST_EX(CONNECT    , Connect    );
-_TBAG_UV_REQUEST_EX(WRITE      , Write      );
-_TBAG_UV_REQUEST_EX(SHUTDOWN   , Shutdown   );
-_TBAG_UV_REQUEST_EX(UDP_SEND   , UdpSend    );
-_TBAG_UV_REQUEST_EX(FS         , Fs         );
-_TBAG_UV_REQUEST_EX(WORK       , Work       );
+_TBAG_UV_REQUEST_EX(CONNECT , Connect );
+_TBAG_UV_REQUEST_EX(WRITE   , Write   );
+_TBAG_UV_REQUEST_EX(SHUTDOWN, Shutdown);
+_TBAG_UV_REQUEST_EX(UDP_SEND, UdpSend );
+_TBAG_UV_REQUEST_EX(FS      , Fs      );
+_TBAG_UV_REQUEST_EX(WORK    , Work    );
 
 #undef _TBAG_UV_REQUEST_EX
 

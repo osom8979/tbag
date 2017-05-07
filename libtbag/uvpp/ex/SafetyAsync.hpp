@@ -31,7 +31,7 @@ namespace uvpp {
 // Forward declaration.
 class Loop;
 
-namespace ex   {
+namespace ex {
 
 /**
  * SafetyAsync class prototype.
@@ -98,7 +98,6 @@ public:
 
     using SharedJob = std::shared_ptr<Job>;
     using JobQueue  = container::SafetyQueue<SharedJob>;
-
 
 private:
     SharedInspector _inspector;
