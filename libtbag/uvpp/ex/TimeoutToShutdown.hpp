@@ -53,18 +53,22 @@ public:
 public:
     inline bool isCancel() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_cancel.load()))
     { return _cancel.load(); }
-    inline void cancel() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_cancel.store(true)))
-    { _cancel.store(true); }
+    inline void cancel(bool flag = true) TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_cancel.store(true)))
+    { _cancel.store(flag); }
 
     inline bool isAutoClose() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_auto_close.load()))
     { return _auto_close.load(); }
-    inline void setAutoClose(bool flag) TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_auto_close.store(true)))
+    inline void setAutoClose(bool flag = true) TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_auto_close.store(true)))
     { _auto_close.store(flag); }
 
     inline ShutdownRequest & atRequest() TBAG_NOEXCEPT
     { return _request; }
     inline ShutdownRequest const & atRequest() const TBAG_NOEXCEPT
     { return _request; }
+
+public:
+    /** Start the timer. timeout and repeat are in milliseconds. */
+    uerr start(uint64_t timeout);
 
 public:
     virtual void onTimer() override;

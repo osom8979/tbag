@@ -22,7 +22,7 @@
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
 
-#include <libtbag/uvpp/ex/SafetyAsync.hpp>
+#include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
 #include <libtbag/uvpp/ex/TimeoutToClose.hpp>
 #include <libtbag/uvpp/ex/TimeoutToShutdown.hpp>
 #include <libtbag/uvpp/ex/WriteJob.hpp>
@@ -32,6 +32,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <chrono>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -73,17 +74,23 @@ struct NetCommon
     using Loop  = uvpp::Loop;
     using Timer = uvpp::Timer;
 
-    using SafetyAsync = uvpp::ex::SafetyAsync;
-    using AsyncJob    = SafetyAsync::Job;
-    using WriteJob    = uvpp::ex::WriteJob;
+    using SafetyAsync      = uvpp::ex::SafetyAsync;
+    using SafetyWriteAsync = uvpp::ex::SafetyWriteAsync;
+
+    using AsyncJob = SafetyWriteAsync::Job;
+    using WriteJob = uvpp::ex::WriteJob;
 
     using TimeoutToClose    = uvpp::ex::TimeoutToClose;
     using TimeoutToShutdown = uvpp::ex::TimeoutToShutdown;
 
-    using ConnectRequest = uvpp::ConnectRequest;
-    using WriteRequest   = uvpp::WriteRequest;
+    using ShutdownRequest = uvpp::ShutdownRequest;
+    using ConnectRequest  = uvpp::ConnectRequest;
+    using WriteRequest    = uvpp::WriteRequest;
 
     using Buffer = std::vector<char>;
+
+    using seconds      = std::chrono::seconds;
+    using milliseconds = std::chrono::milliseconds;
 
     using SharedClose = std::shared_ptr<TimeoutToClose>;
     using   WeakClose =   std::weak_ptr<TimeoutToClose>;
@@ -91,8 +98,8 @@ struct NetCommon
     using SharedShutdown = std::shared_ptr<TimeoutToShutdown>;
     using   WeakShutdown =   std::weak_ptr<TimeoutToShutdown>;
 
-    using SharedAsync = std::shared_ptr<SafetyAsync>;
-    using   WeakAsync =   std::weak_ptr<SafetyAsync>;
+    using SharedAsync = std::shared_ptr<SafetyWriteAsync>;
+    using   WeakAsync =   std::weak_ptr<SafetyWriteAsync>;
 };
 
 TBAG_API bool isIpv4(std::string const & ip);

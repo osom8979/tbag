@@ -33,9 +33,13 @@ bool TcpRealClient::init(String const & ip, int port)
     return uvpp::initCommonClient(*this, _connect_req, ip, port);
 }
 
+void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
+{
+}
+
 void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
 {
-    _parent.removeTimeoutToClose();
+    _parent.cancelTimeoutToClose();
 }
 
 void TcpRealClient::onWrite(WriteRequest & request, uerr code)
@@ -65,7 +69,7 @@ void TcpRealClient::onClose()
 TcpClient::TcpClient(Loop & loop)
 {
     _client   = loop.newHandle<TcpRealClient>(loop, *this);
-    _async    = loop.newHandle<SafetyAsync>(loop);
+    _async    = loop.newHandle<SafetyWriteAsync>(loop);
     _close    = loop.newHandle<TimeoutToClose>(loop, _client.get(), false);
     _shutdown = loop.newHandle<TimeoutToShutdown>(loop, _client.get(), false);
     assert(static_cast<bool>(_client));
@@ -111,18 +115,9 @@ bool TcpClient::cancel()
     return false;
 }
 
-bool TcpClient::syncWrite(char const * buffer, Size * size)
+bool TcpClient::write(char const * buffer, Size size, uint64_t millisec)
 {
-    return false;
-}
-
-bool TcpClient::asyncWrite(char const * buffer, Size * size)
-{
-    return false;
-}
-
-bool TcpClient::tryWrite(char const * buffer, Size * size)
-{
+    _async->asyncWrite(SafetyWriteAsync::WeakStream(_client), buffer, size);
     return false;
 }
 
@@ -135,14 +130,24 @@ bool TcpClient::init(String const & ip, int port, int timeout)
     return false;
 }
 
+void TcpClient::startTimeoutToShutdown(milliseconds const & millisec)
+{
+    _shutdown->start(static_cast<uint64_t>(millisec.count()));
+}
+
+void TcpClient::cancelTimeoutToShutdown()
+{
+    _shutdown->cancel();
+}
+
 void TcpClient::startTimeoutToClose(std::chrono::milliseconds const & millisec)
 {
     _close->start(static_cast<uint64_t>(millisec.count()));
 }
 
-void TcpClient::removeTimeoutToClose()
+void TcpClient::cancelTimeoutToClose()
 {
-    _close->close();
+    _close->cancel();
 }
 
 } // namespace details

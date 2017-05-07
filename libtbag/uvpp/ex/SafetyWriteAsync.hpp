@@ -78,6 +78,7 @@ public:
     using AtomicState = std::atomic<WriteState>;
     using AtomicError = std::atomic<uerr>;
 
+public:
     struct TBAG_API WriterInterface : public SafetyAsync::Job
     {
         Id const id;

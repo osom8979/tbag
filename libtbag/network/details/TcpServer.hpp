@@ -43,6 +43,7 @@ class TBAG_API TcpRealNode : public Server::NodeInterface, public uvpp::Tcp
 {
 private:
     TcpServer & _parent;
+    SharedShutdown _shutdown;
 
 private:
     Id _id;
@@ -60,9 +61,7 @@ public:
     virtual bool  close() override;
     virtual bool cancel() override;
 
-    virtual bool  syncWrite(char const * buffer, Size * size) override;
-    virtual bool asyncWrite(char const * buffer, Size * size) override;
-    virtual bool   tryWrite(char const * buffer, Size * size) override;
+    virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) override;
 
 public:
     virtual void onWrite(WriteRequest & request, uerr code) override;

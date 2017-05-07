@@ -46,9 +46,7 @@ struct Client : public details::NetCommon
     virtual bool  close() { return false; }
     virtual bool cancel() { return false; }
 
-    virtual bool  syncWrite(char const * buffer, Size * size) { return false; }
-    virtual bool asyncWrite(char const * buffer, Size * size) { return false; }
-    virtual bool   tryWrite(char const * buffer, Size * size) { return false; }
+    virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) { return false; }
 
     virtual void onConnect(uerr code) { /* EMPTY. */ }
     virtual void onWrite  (uerr code) { /* EMPTY. */ }

@@ -25,12 +25,13 @@ namespace details {
 TcpRealNode::TcpRealNode(Loop & loop, TcpServer & parent)
         : Tcp(loop), _parent(parent), _id(id::generator::genTimeId())
 {
-    // EMPTY.
+    _shutdown = loop.newHandle<TimeoutToShutdown>(loop, this, false);
+    assert(static_cast<bool>(_shutdown));
 }
 
 TcpRealNode::~TcpRealNode()
 {
-    // EMPTY.
+    _shutdown.reset();
 }
 
 void TcpRealNode::onWrite(WriteRequest & request, uerr code)
@@ -79,17 +80,7 @@ bool TcpRealNode::cancel()
     return false;
 }
 
-bool TcpRealNode::syncWrite(char const * buffer, Size * size)
-{
-    return false;
-}
-
-bool TcpRealNode::asyncWrite(char const * buffer, Size * size)
-{
-    return false;
-}
-
-bool TcpRealNode::tryWrite(char const * buffer, Size * size)
+bool TcpRealNode::write(char const * buffer, Size size, uint64_t millisec)
 {
     return false;
 }
@@ -136,7 +127,7 @@ void TcpRealServer::onClose()
 TcpServer::TcpServer(Loop & loop)
 {
     _server = loop.newHandle<TcpRealServer>(loop, *this);
-    _async  = loop.newHandle<SafetyAsync>(loop);
+    _async  = loop.newHandle<SafetyWriteAsync>(loop);
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_async));
 }

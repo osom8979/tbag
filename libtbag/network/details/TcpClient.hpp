@@ -19,6 +19,7 @@
 #include <libtbag/network/details/NetCommon.hpp>
 
 #include <memory>
+#include <atomic>
 #include <chrono>
 
 // -------------------
@@ -40,12 +41,14 @@ class TcpClient;
  */
 class TBAG_API TcpRealClient : public details::NetCommon, public uvpp::Tcp
 {
+public:
+    using AtomicBool = std::atomic_bool;
+
 private:
     TcpClient & _parent;
 
 private:
     ConnectRequest _connect_req;
-    WriteRequest   _write_req;
 
 private:
     Buffer _buffer;
@@ -55,9 +58,16 @@ public:
     virtual ~TcpRealClient();
 
 public:
+    // @formatter:off
+    inline ConnectRequest       & atConnectReq()       TBAG_NOEXCEPT { return _connect_req; }
+    inline ConnectRequest const & atConnectReq() const TBAG_NOEXCEPT { return _connect_req; }
+    // @formatter:on
+
+public:
     bool init(String const & ip, int port);
 
 public:
+    virtual void onShutdown(ShutdownRequest & request, uerr code) override;
     virtual void onConnect(ConnectRequest & request, uerr code) override;
     virtual void onWrite(WriteRequest & request, uerr code) override;
     virtual binf onAlloc(std::size_t suggested_size) override;
@@ -104,13 +114,15 @@ public:
     virtual bool cancel() override;
 
 public:
-    virtual bool  syncWrite(char const * buffer, Size * size) override;
-    virtual bool asyncWrite(char const * buffer, Size * size) override;
-    virtual bool   tryWrite(char const * buffer, Size * size) override;
+    virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) override;
 
 private:
-    void startTimeoutToClose(std::chrono::milliseconds const & millisec);
-    void removeTimeoutToClose();
+    void startTimeoutToShutdown(milliseconds const & millisec);
+    void cancelTimeoutToShutdown();
+
+private:
+    void startTimeoutToClose(milliseconds const & millisec);
+    void cancelTimeoutToClose();
 };
 
 } // namespace details
