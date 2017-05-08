@@ -55,6 +55,13 @@ TEST(FsPollTest, Default)
     std::thread thread = std::thread([&loop](){
         loop.run();
     });
+
+    busyWaitForAlive(loop);
+
+    while (fs->isActive() == false) {
+        // BUSY WAIT.
+    }
+
     int const WRITE_SIZE = 4;
     ASSERT_EQ(WRITE_SIZE, f.write2("TEMP", WRITE_SIZE, 0));
     ASSERT_TRUE(f.close());

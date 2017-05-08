@@ -26,6 +26,7 @@ struct TcpServerTest : public TcpServer
 
     virtual void onConnection(uerr code) override
     {
+        accept();
         std::cout << "TcpServerTest::onConnection(" << uvpp::getErrorName(code) << ")\n";
     }
 

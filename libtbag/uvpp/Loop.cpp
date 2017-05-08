@@ -334,6 +334,17 @@ void Loop::onClosed(Handle * handle)
     // EMPTY.
 }
 
+// ----------
+// Utilities.
+// ----------
+
+void busyWaitForAlive(Loop & loop)
+{
+    while (loop.isRunning() == false || loop.isAlive() == false) {
+        // BUSY WAIT!
+    }
+}
+
 } // namespace uvpp
 
 // --------------------

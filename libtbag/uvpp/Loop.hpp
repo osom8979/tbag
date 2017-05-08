@@ -219,6 +219,12 @@ public:
     }
 };
 
+// ----------
+// Utilities.
+// ----------
+
+TBAG_API void busyWaitForAlive(Loop & loop);
+
 } // namespace uvpp
 
 // --------------------
