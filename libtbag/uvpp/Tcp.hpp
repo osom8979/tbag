@@ -73,10 +73,16 @@ public:
     uerr bind(sockaddr const * address, unsigned int flags = 0);
 
     /** Get the current address to which the handle is bound. */
-    std::string getSockName();
+    uerr getSockName(struct sockaddr * name, int * namelen);
 
     /** Get the address of the peer connected to the handle. */
-    std::string getPeerName();
+    uerr getPeerName(struct sockaddr * name, int * namelen);
+
+    std::string getSockIp();
+    std::string getPeerIp();
+
+    int getSockPort();
+    int getPeerPort();
 
     /** Establish an IPv4 or IPv6 TCP connection. */
     uerr connect(ConnectRequest & request, sockaddr const * address);

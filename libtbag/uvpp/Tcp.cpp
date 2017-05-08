@@ -14,6 +14,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 
+#include <cstdint>
 #include <uv.h>
 
 // -------------------
@@ -117,38 +118,71 @@ uerr Tcp::bind(sockaddr const * address, unsigned int flags)
     return getUerr2("Tcp::bind()", CODE);
 }
 
-std::string Tcp::getSockName()
+uerr Tcp::getSockName(struct sockaddr * name, int * namelen)
 {
-    sockaddr address = {0,};
-    int length = sizeof(address);
-
     // addr must point to a valid and big enough chunk of memory,
     // struct sockaddr_storage is recommended for IPv4 and IPv6 support.
 
-    int const CODE = ::uv_tcp_getsockname(Parent::cast<uv_tcp_t>(), &address, &length);
-    if (CODE != 0) {
-        __tbag_error("Tcp::getSockName() error [{}] {}", CODE, getUvErrorName(CODE));
-        return std::string();
-    }
-
-    return getIpName(&address);
+    int const CODE = ::uv_tcp_getsockname(Parent::cast<uv_tcp_t>(), name, namelen);
+    return getUerr2("Tcp::getSockName()", CODE);
 }
 
-std::string Tcp::getPeerName()
+uerr Tcp::getPeerName(struct sockaddr * name, int * namelen)
 {
-    sockaddr address = {0,};
-    int length = sizeof(address);
-
     // addr must point to a valid and big enough chunk of memory,
     // struct sockaddr_storage is recommended for IPv4 and IPv6 support.
 
-    int const CODE = ::uv_tcp_getpeername(Parent::cast<uv_tcp_t>(), &address, &length);
-    if (CODE != 0) {
-        __tbag_error("Tcp::getPeerName() error [{}] {}", CODE, getUvErrorName(CODE));
+    int const CODE = ::uv_tcp_getpeername(Parent::cast<uv_tcp_t>(), name, namelen);
+    return getUerr2("Tcp::getPeerName()", CODE);
+}
+
+std::string Tcp::getSockIp()
+{
+    uint8_t buffer[SOCKADDR_MAX_BYTE_SIZE] = {0,};
+    sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
+    int length = SOCKADDR_MAX_BYTE_SIZE;
+
+    if (getSockName(address, &length) != uerr::UVPP_SUCCESS) {
         return std::string();
     }
+    return getIpName(address);
+}
 
-    return getIpName(&address);
+std::string Tcp::getPeerIp()
+{
+    uint8_t buffer[SOCKADDR_MAX_BYTE_SIZE] = {0,};
+    sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
+    int length = SOCKADDR_MAX_BYTE_SIZE;
+
+    if (getPeerName(address, &length) != uerr::UVPP_SUCCESS) {
+        return std::string();
+    }
+    return getIpName(address);
+}
+
+
+int Tcp::getSockPort()
+{
+    uint8_t buffer[SOCKADDR_MAX_BYTE_SIZE] = {0,};
+    sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
+    int length = SOCKADDR_MAX_BYTE_SIZE;
+
+    if (getSockName(address, &length) != uerr::UVPP_SUCCESS) {
+        return UNKNOWN_PORT_NUMBER;
+    }
+    return getPortNumber(address);
+}
+
+int Tcp::getPeerPort()
+{
+    uint8_t buffer[SOCKADDR_MAX_BYTE_SIZE] = {0,};
+    sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
+    int length = SOCKADDR_MAX_BYTE_SIZE;
+
+    if (getPeerName(address, &length) != uerr::UVPP_SUCCESS) {
+        return UNKNOWN_PORT_NUMBER;
+    }
+    return getPortNumber(address);
 }
 
 uerr Tcp::connect(ConnectRequest & request, sockaddr const * address)

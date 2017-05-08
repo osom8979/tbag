@@ -187,6 +187,15 @@ std::string getIpName(sockaddr_in6 const * address)
     return std::string();
 }
 
+int getPortNumber(sockaddr const * address)
+{
+    switch (address->sa_family) {
+    case AF_INET:  return ntohs(((struct sockaddr_in const *)address)->sin_port);
+    case AF_INET6: return ntohs(((struct sockaddr_in6 const *)address)->sin6_port);
+    default:       return UNKNOWN_PORT_NUMBER;
+    }
+}
+
 uerr initAddress(std::string const & ip, int port, sockaddr_in * addr)
 {
     int const CODE = ::uv_ip4_addr(ip.c_str(), port, addr);

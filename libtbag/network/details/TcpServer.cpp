@@ -80,9 +80,13 @@ void TcpRealServer::onConnection(uerr code)
         uerr const CODE = _parent._server->accept(*shared);
         if (CODE == uerr::UVPP_SUCCESS) {
             if (_parent.onClientConnect(node.get(), code)) {
-                __tbag_debug("TcpRealServer::onConnection() client connect (Sock:{}/Peer:{}).", shared->getSockName(), shared->getPeerName());
+                __tbag_debug("TcpRealServer::onConnection() client connect (Sock:{}[{}]/Peer:{}[{}]).",
+                             shared->getSockIp(), shared->getSockPort(),
+                             shared->getPeerIp(), shared->getPeerPort());
             } else {
-                __tbag_error("TcpRealServer::onConnection() Accept denied (Sock:{}/Peer:{}).", shared->getSockName(), shared->getPeerName());
+                __tbag_error("TcpRealServer::onConnection() Accept denied (Sock:{}[{}]/Peer:{}[{}]).",
+                             shared->getSockIp(), shared->getSockPort(),
+                             shared->getPeerIp(), shared->getPeerPort());
             }
         } else {
             __tbag_error("TcpRealServer::onConnection() {} error.", uvpp::getErrorName(CODE));

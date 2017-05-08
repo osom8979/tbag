@@ -20,8 +20,8 @@ TEST(NetworkTcpTest, Timeout)
     uvpp::Loop loop_server;
     uvpp::Loop loop_client;
 
-    auto server = Server::create(loop_server, Client::Type::TCP);
-    auto client = Client::create(loop_client, Client::Type::TCP);
+    TcpServer server(loop_server);
+    TcpServer client(loop_client);
 
 //    server->init("192.168.255.0", 9999);
 //    client->init("192.168.255.0", 9999, 1000);

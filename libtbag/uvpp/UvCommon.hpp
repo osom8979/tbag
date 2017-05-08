@@ -347,6 +347,21 @@ TBAG_API std::string getIpName(sockaddr     const * address);
 TBAG_API std::string getIpName(sockaddr_in  const * address);
 TBAG_API std::string getIpName(sockaddr_in6 const * address);
 
+TBAG_CONSTEXPR const int UNKNOWN_PORT_NUMBER = (-1);
+
+/**
+ * @var SOCKADDR_MAX_BYTE_SIZE
+ *
+ * Longest possible addresses.
+ */
+#if defined(SOCK_MAXADDRLEN)
+TBAG_CONSTEXPR const int SOCKADDR_MAX_BYTE_SIZE = SOCK_MAXADDRLEN;
+#else
+TBAG_CONSTEXPR const int SOCKADDR_MAX_BYTE_SIZE = 255;
+#endif
+
+TBAG_API int getPortNumber(sockaddr const * address);
+
 TBAG_API uerr initAddress(std::string const & ip, int port, sockaddr_in * addr);
 TBAG_API uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
 
