@@ -47,12 +47,6 @@ UvSemaphore::~UvSemaphore()
     delete cast_uv_sem(_handle);
 }
 
-void UvSemaphore::post()
-{
-    assert(_handle != nullptr);
-    ::uv_sem_post(cast_uv_sem(_handle));
-}
-
 void UvSemaphore::wait()
 {
     assert(_handle != nullptr);
@@ -63,6 +57,12 @@ bool UvSemaphore::tryWait()
 {
     assert(_handle != nullptr);
     return ::uv_sem_trywait(cast_uv_sem(_handle)) == 0;
+}
+
+void UvSemaphore::post()
+{
+    assert(_handle != nullptr);
+    ::uv_sem_post(cast_uv_sem(_handle));
 }
 
 } // namespace lock

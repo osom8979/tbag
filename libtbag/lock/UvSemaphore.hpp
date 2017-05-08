@@ -39,9 +39,21 @@ public:
     ~UvSemaphore();
 
 public:
-    void post();
+    inline void * getHandle() TBAG_NOEXCEPT
+    { return _handle; }
+
+public:
     void wait();
     bool tryWait();
+    void post();
+
+// Alias methods.
+public:
+    // @formatter:off
+    inline void lock   () { wait(); }
+    inline bool tryLock() { return tryWait(); }
+    inline void unlock () { post(); }
+    // @formatter:on
 };
 
 } // namespace lock
