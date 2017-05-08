@@ -70,6 +70,9 @@ public:
     Loop const * getLoop() const;
 
 public:
+    void eraseFromLoop();
+
+public:
     bool isInit() const TBAG_NOEXCEPT;
 
 public:

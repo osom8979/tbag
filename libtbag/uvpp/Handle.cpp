@@ -13,6 +13,8 @@
 #include <cassert>
 #include <uv.h>
 
+//#define DISABLE_SAFETY_ERASE_HANDLE
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -71,6 +73,21 @@ Handle::~Handle()
     if (isInit() && isClosing() == false) {
         tryClose();
     }
+
+#if !defined(DISABLE_SAFETY_ERASE_HANDLE)
+    eraseFromLoop();
+#endif
+}
+
+void Handle::eraseFromLoop()
+{
+    Loop * loop = getLoop();
+    if (loop != nullptr && isDeletedAddress(loop) == false) {
+        auto weak = loop->findChildHandle(*this);
+        if (weak.expired() == false) {
+            loop->eraseChildHandle(*this);
+        }
+    }
 }
 
 bool Handle::isInit() const TBAG_NOEXCEPT
@@ -81,14 +98,18 @@ bool Handle::isInit() const TBAG_NOEXCEPT
 Loop * Handle::getLoop()
 {
     uv_loop_t * loop = Parent::cast<uv_handle_t>()->loop;
-    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    if (loop == nullptr || isDeletedAddress(loop)) {
+        return nullptr;
+    }
     return static_cast<Loop*>(loop->data);
 }
 
 Loop const * Handle::getLoop() const
 {
     uv_loop_t * loop = Parent::cast<uv_handle_t>()->loop;
-    assert(loop != nullptr && isDeletedAddress(loop) == false);
+    if (loop == nullptr || isDeletedAddress(loop)) {
+        return nullptr;
+    }
     return static_cast<Loop*>(loop->data);
 }
 
