@@ -66,6 +66,7 @@ void TcpRealClient::onRead(uerr code, char const * buffer, std::size_t size)
 void TcpRealClient::onClose()
 {
     _parent.onClose();
+    _parent.close();
 }
 
 // -------------------------
@@ -95,7 +96,8 @@ TcpClient::~TcpClient()
 
 void TcpClient::startTimeoutToShutdown(milliseconds const & millisec)
 {
-    _shutdown->start(static_cast<uint64_t>(millisec.count()));
+    uerr const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
+    __tbag_debug("TcpClient::startTimeoutToShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
 void TcpClient::cancelTimeoutToShutdown()
@@ -105,7 +107,8 @@ void TcpClient::cancelTimeoutToShutdown()
 
 void TcpClient::startTimeoutToClose(milliseconds const & millisec)
 {
-    _close->start(static_cast<uint64_t>(millisec.count()));
+    uerr const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
+    __tbag_debug("TcpClient::startTimeoutToClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
 void TcpClient::cancelTimeoutToClose()
@@ -156,13 +159,22 @@ bool TcpClient::close()
     Guard guard(_mutex);
 
     _close->stop();
-    _close->close();
+    if (_close->isClosing() == false) {
+        _close->close();
+    }
 
     _shutdown->stop();
-    _shutdown->close();
+    if (_shutdown->isClosing() == false) {
+        _shutdown->close();
+    }
 
-    _client->close();
-    _async->close();
+    if (_client->isClosing() == false) {
+        _client->close();
+    }
+
+    if (_async->isClosing() == false) {
+        _async->close();
+    }
 
     _last_writer.reset();
     return true;

@@ -76,6 +76,7 @@ void TcpRealServer::onConnection(uerr code)
 void TcpRealServer::onClose()
 {
     _parent.onServerClose();
+    _parent.close();
 }
 
 // -------------------------
@@ -155,8 +156,12 @@ bool TcpServer::close()
             }
         });
 
-        _server->close();
-        _async->close();
+        if (_server->isClosing() == false) {
+            _server->close();
+        }
+        if (_async->isClosing() == false) {
+            _async->close();
+        }
         return true;
     };
 
