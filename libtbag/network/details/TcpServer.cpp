@@ -34,11 +34,6 @@ TcpRealNode::~TcpRealNode()
     // EMPTY.
 }
 
-void TcpRealNode::onConnect(uerr code)
-{
-    _parent.onClientConnect(this, code);
-}
-
 void TcpRealNode::onWrite(uerr code)
 {
     _parent.onClientWrite(this, code);
@@ -75,25 +70,7 @@ bool TcpRealServer::init(String const & ip, int port)
 
 void TcpRealServer::onConnection(uerr code)
 {
-    auto node = _parent.insertNewNode();
-    if (auto shared = node->getClient().lock()) {
-        uerr const CODE = _parent._server->accept(*shared);
-        if (CODE == uerr::UVPP_SUCCESS) {
-            if (_parent.onClientConnect(node.get(), code)) {
-                __tbag_debug("TcpRealServer::onConnection() client connect (Sock:{}[{}]/Peer:{}[{}]).",
-                             shared->getSockIp(), shared->getSockPort(),
-                             shared->getPeerIp(), shared->getPeerPort());
-            } else {
-                __tbag_error("TcpRealServer::onConnection() Accept denied (Sock:{}[{}]/Peer:{}[{}]).",
-                             shared->getSockIp(), shared->getSockPort(),
-                             shared->getPeerIp(), shared->getPeerPort());
-            }
-        } else {
-            __tbag_error("TcpRealServer::onConnection() {} error.", uvpp::getErrorName(CODE));
-        }
-    } else {
-        __tbag_error("TcpRealServer::onConnection() node is nullptr.");
-    }
+    _parent.onConnection(code);
 }
 
 void TcpRealServer::onClose()
@@ -119,7 +96,7 @@ TcpServer::~TcpServer()
     _async.reset();
 }
 
-TcpServer::SharedNode TcpServer::insertNewNode()
+TcpServer::SharedNode TcpServer::createNode()
 {
     Loop * loop = _server->getLoop();
     assert(loop != nullptr);
@@ -128,11 +105,13 @@ TcpServer::SharedNode TcpServer::insertNewNode()
     if (static_cast<bool>(node) == false) {
         return SharedNode();
     }
-
-    Guard guard(_node_mutex);
-    bool const INSERT_RESULT = _nodes.insert(NodePair(node->getId(), node)).second;
-    assert(INSERT_RESULT);
     return node;
+}
+
+bool TcpServer::insertNode(SharedNode node)
+{
+    Guard guard(_node_mutex);
+    return _nodes.insert(NodePair(node->getId(), node)).second;
 }
 
 bool TcpServer::removeNode(NodeKey key)
@@ -144,6 +123,27 @@ bool TcpServer::removeNode(NodeKey key)
 bool TcpServer::init(String const & ip, int port)
 {
     return _server->init(ip, port);
+}
+
+TcpServer::NodeInterface * TcpServer::accept()
+{
+    auto node = createNode();
+    if (auto shared = node->getClient().lock()) {
+        uerr const CODE = _server->accept(*shared);
+        if (CODE == uerr::UVPP_SUCCESS) {
+            __tbag_debug("TcpServer::accept() client connect Sock({}:{})/Peer({}:{})",
+                         shared->getSockIp(), shared->getSockPort(),
+                         shared->getPeerIp(), shared->getPeerPort());
+            bool const INSERT_RESULT = insertNode(node);
+            assert(INSERT_RESULT);
+            return node.get();
+        } else {
+            __tbag_error("TcpServer::accept() {} error.", uvpp::getErrorName(CODE));
+        }
+    } else {
+        __tbag_error("TcpServer::accept() node is nullptr.");
+    }
+    return nullptr;
 }
 
 bool TcpServer::close()

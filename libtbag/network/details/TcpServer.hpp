@@ -53,10 +53,9 @@ public:
     virtual ~TcpRealNode();
 
 public:
-    virtual void onConnect(uerr code) override;
-    virtual void onWrite  (uerr code) override;
-    virtual void onRead   (uerr code, char const * buffer, Size size) override;
-    virtual void onClose  () override;
+    virtual void onWrite(uerr code) override;
+    virtual void onRead (uerr code, char const * buffer, Size size) override;
+    virtual void onClose() override;
 };
 
 /**
@@ -128,7 +127,8 @@ public:
     { Guard g(_node_mutex); return _nodes.size(); }
 
 private:
-    SharedNode insertNewNode();
+    SharedNode createNode();
+    bool insertNode(SharedNode node);
     bool removeNode(NodeKey key);
 
 public:
@@ -160,6 +160,8 @@ public:
      *  init -> bind -> listen.
      */
     virtual bool init(String const & ip, int port) override;
+
+    virtual NodeInterface * accept() override;
 
     /** This operation is async. */
     virtual bool close() override;

@@ -43,15 +43,23 @@ struct Server : public details::NetCommon
 
     virtual bool init(String const & destination, int port = 0)
     { return false; }
+
+    virtual NodeInterface * accept()
+    { return nullptr; }
+
     virtual bool close()
     { return false; }
 
-    virtual bool onClientConnect(NodeInterface * node, uerr code) { return true; }
-    virtual void onClientWrite  (NodeInterface * node, uerr code) { /* EMPTY. */ }
-    virtual void onClientRead   (NodeInterface * node, uerr code,
-                                 char const * buffer, Size size)  { /* EMPTY. */ }
-    virtual void onClientClose  (NodeInterface * node)            { /* EMPTY. */ }
-    virtual void onServerClose  ()                                { /* EMPTY. */ }
+    virtual void onConnection(uerr code)
+    { /* EMPTY. */ }
+    virtual void onClientWrite(NodeInterface * node, uerr code)
+    { /* EMPTY. */ }
+    virtual void onClientRead(NodeInterface * node, uerr code, char const * buffer, Size size)
+    { /* EMPTY. */ }
+    virtual void onClientClose(NodeInterface * node)
+    { /* EMPTY. */ }
+    virtual void onServerClose()
+    { /* EMPTY. */ }
     // @formatter:on
 };
 

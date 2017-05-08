@@ -24,10 +24,9 @@ struct TcpServerTest : public TcpServer
         // EMPTY.
     }
 
-    virtual bool onClientConnect(NodeInterface * node, uerr code) override
+    virtual void onConnection(uerr code) override
     {
-        std::cout << "TcpServerTest::onClientConnect(" << uvpp::getErrorName(code) << ")\n";
-        return true;
+        std::cout << "TcpServerTest::onConnection(" << uvpp::getErrorName(code) << ")\n";
     }
 
     virtual void onClientWrite(NodeInterface * node, uerr code) override
