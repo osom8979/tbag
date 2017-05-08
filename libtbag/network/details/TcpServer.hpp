@@ -21,6 +21,7 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -165,6 +166,55 @@ public:
 
     /** This operation is async. */
     virtual bool close() override;
+};
+
+/**
+ * FunctionalTcpServer class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-08
+ */
+struct FunctionalTcpServer : public TcpServer
+{
+    // @formatter:off
+    using uerr = NetCommon::uerr;
+    using Size = NetCommon::Size;
+    using NodeInterface = Server::NodeInterface;
+
+    using OnConnection  = std::function<void(uerr)>;
+    using OnClientWrite = std::function<void(NodeInterface *, uerr)>;
+    using OnClientRead  = std::function<void(NodeInterface *, uerr, char const *, Size)>;
+    using OnClientClose = std::function<void(NodeInterface *)>;
+    using OnServerClose = std::function<void(void)>;
+
+    OnConnection  connection_cb;
+    OnClientWrite client_write_cb;
+    OnClientRead  client_read_cb;
+    OnClientClose client_close_cb;
+    OnServerClose server_close_cb;
+
+    FunctionalTcpServer(Loop & loop) : TcpServer(loop)
+    { /* EMPTY */ }
+    virtual ~FunctionalTcpServer()
+    { /* EMPTY */ }
+
+    inline void setOnConnection (OnConnection  const & cb) { connection_cb   = cb; }
+    inline void setOnClientWrite(OnClientWrite const & cb) { client_write_cb = cb; }
+    inline void setOnClientRead (OnClientRead  const & cb) { client_read_cb  = cb; }
+    inline void setOnClientClose(OnClientClose const & cb) { client_close_cb = cb; }
+    inline void setOnServerClose(OnServerClose const & cb) { server_close_cb = cb; }
+
+    virtual void onConnection(uerr code) override
+    { if (connection_cb) { connection_cb(code); } }
+    virtual void onClientWrite(NodeInterface * node, uerr code) override
+    { if (client_write_cb) { client_write_cb(node, code); } }
+    virtual void onClientRead(NodeInterface * node, uerr code, char const * buffer, Size size) override
+    { if (client_read_cb) { client_read_cb(node, code, buffer, size); } }
+    virtual void onClientClose(NodeInterface * node) override
+    { if (client_close_cb) { client_close_cb(node); } }
+    virtual void onServerClose() override
+    { if (server_close_cb) { server_close_cb(); } }
+    // @formatter:on
 };
 
 } // namespace details

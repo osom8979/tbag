@@ -22,6 +22,7 @@
 #include <atomic>
 #include <chrono>
 #include <mutex>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -143,6 +144,49 @@ public:
 public:
     virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) override;
     virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) override;
+};
+
+/**
+ * FunctionalTcpClient class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-08
+ */
+struct FunctionalTcpClient : public TcpClient
+{
+    // @formatter:off
+    using uerr = NetCommon::uerr;
+    using Size = NetCommon::Size;
+
+    using OnConnect = std::function<void(uerr)>;
+    using OnWrite   = std::function<void(uerr)>;
+    using OnRead    = std::function<void(uerr, char const *, Size)>;
+    using OnClose   = std::function<void()>;
+
+    OnConnect connect_cb;
+    OnWrite   write_cb;
+    OnRead    read_cb;
+    OnClose   close_cb;
+
+    FunctionalTcpClient(Loop & loop) : TcpClient(loop)
+    { /* EMPTY */ }
+    virtual ~FunctionalTcpClient()
+    { /* EMPTY */ }
+
+    inline void setOnConnect(OnConnect const & cb) { connect_cb = cb; }
+    inline void setOnWrite  (OnWrite   const & cb) { write_cb   = cb; }
+    inline void setOnRead   (OnRead    const & cb) { read_cb    = cb; }
+    inline void setOnClose  (OnClose   const & cb) { close_cb   = cb; }
+
+    virtual void onConnect(uerr code) override
+    { if (connect_cb) { connect_cb(code); } }
+    virtual void onWrite(uerr code) override
+    { if (write_cb) { write_cb(code); } }
+    virtual void onRead(uerr code, char const * buffer, Size size) override
+    { if (read_cb) { read_cb(code, buffer, size); } }
+    virtual void onClose() override
+    { if (close_cb) { close_cb(); } }
+    // @formatter:on
 };
 
 } // namespace details
