@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/id/Id.hpp>
 #include <libtbag/Type.hpp>
 
 #include <functional>
@@ -40,6 +41,7 @@ namespace container {
 template <typename T>
 struct Pointer
 {
+    using Id = id::Id;
     using Type = T;
 
     // Don't use this type.
@@ -90,6 +92,9 @@ struct Pointer
     template <typename CastType>
     inline Pointer<CastType> to() TBAG_NOEXCEPT
     { return Pointer<CastType>(cast<CastType>()); }
+
+    inline Id id() const TBAG_NOEXCEPT
+    { return reinterpret_cast<Id>(ptr); }
 
     // @formatter:off
     template <typename CastType>

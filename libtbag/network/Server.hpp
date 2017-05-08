@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
-#include <memory>
+#include <libtbag/network/Client.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,33 +32,21 @@ namespace network {
  */
 struct Server : public details::NetCommon
 {
-    struct NodeInterface : public details::NetCommon
-    {
-        // @formatter:off
-        virtual Id getId() const { return id::UNKNOWN_ID; }
-
-        virtual bool  start() { return false; }
-        virtual bool   stop() { return false; }
-        virtual bool  close() { return false; }
-        virtual bool cancel() { return false; }
-
-        virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) { return false; }
-        virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) { return false; }
-        // @formatter:on
-    };
-
-    using SharedServer = std::shared_ptr<Server>;
+    using NodeInterface = Client;
+    using SharedServer  = std::shared_ptr<Server>;
 
     // @formatter:off
     virtual Type getType() const
     { return Type::UNKNOWN; }
+    virtual Id getId() const
+    { return id::UNKNOWN_ID; }
 
-    virtual bool init(String const & destination, int port = 0, int timeout = 0)
+    virtual bool init(String const & destination, int port = 0)
     { return false; }
     virtual bool close()
     { return false; }
 
-    virtual void onClientConnect(NodeInterface * node, uerr code) { /* EMPTY. */ }
+    virtual bool onClientConnect(NodeInterface * node, uerr code) { return true; }
     virtual void onClientWrite  (NodeInterface * node, uerr code) { /* EMPTY. */ }
     virtual void onClientRead   (NodeInterface * node, uerr code,
                                  char const * buffer, Size size)  { /* EMPTY. */ }

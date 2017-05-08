@@ -128,6 +128,8 @@ private:
 public:
     virtual Type getType() const override
     { return Type::TCP; }
+    virtual Id getId() const override
+    { return _client->id(); }
 
 public:
     virtual bool init(String const & ip, int port = 0, uint64_t millisec = 0) override;

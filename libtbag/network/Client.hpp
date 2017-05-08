@@ -37,6 +37,8 @@ struct Client : public details::NetCommon
     // @formatter:off
     virtual Type getType() const
     { return Type::UNKNOWN; }
+    virtual Id getId() const
+    { return id::UNKNOWN_ID; }
 
     virtual bool init(String const & destination, int port = 0, uint64_t millisec = 0)
     { return false; }
@@ -51,8 +53,7 @@ struct Client : public details::NetCommon
 
     virtual void onConnect(uerr code) { /* EMPTY. */ }
     virtual void onWrite  (uerr code) { /* EMPTY. */ }
-    virtual void onRead   (uerr code, char const * buffer,
-                           Size size) { /* EMPTY. */ }
+    virtual void onRead   (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
     virtual void onClose  ()          { /* EMPTY. */ }
     // @formatter:on
 

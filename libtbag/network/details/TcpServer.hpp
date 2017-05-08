@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/network/Server.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/network/details/TcpClient.hpp>
 
 #include <mutex>
 #include <unordered_map>
@@ -39,14 +40,12 @@ class TcpServer;
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API TcpRealNode : public Server::NodeInterface, public uvpp::Tcp
+class TBAG_API TcpRealNode : public TcpClient
 {
 private:
     TcpServer & _parent;
-    SharedShutdown _shutdown;
 
 private:
-    Id _id;
     Buffer _buffer;
 
 public:
@@ -54,21 +53,10 @@ public:
     virtual ~TcpRealNode();
 
 public:
-    virtual Id getId() const override;
-
-    virtual bool  start() override;
-    virtual bool   stop() override;
-    virtual bool  close() override;
-    virtual bool cancel() override;
-
-    virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) override;
-    virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) override;
-
-public:
-    virtual void onWrite(WriteRequest & request, uerr code) override;
-    virtual binf onAlloc(std::size_t suggested_size) override;
-    virtual void onRead(uerr code, char const * buffer, std::size_t size) override;
-    virtual void onClose() override;
+    virtual void onConnect(uerr code) override;
+    virtual void onWrite  (uerr code) override;
+    virtual void onRead   (uerr code, char const * buffer, Size size) override;
+    virtual void onClose  () override;
 };
 
 /**
@@ -139,10 +127,6 @@ public:
     inline Size sizeNode() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.size()))
     { Guard g(_node_mutex); return _nodes.size(); }
 
-public:
-    SharedNode getNode(NodeKey key);
-    SharedNode getNode(NodeKey key) const;
-
 private:
     SharedNode insertNewNode();
     bool removeNode(NodeKey key);
@@ -160,6 +144,8 @@ public:
 public:
     virtual Type getType() const override
     { return Type::TCP; }
+    virtual Id getId() const override
+    { return _server->id(); }
 
 public:
     /**
@@ -169,13 +155,11 @@ public:
      *      Ip address.
      * @param[in] port
      *      Port number.
-     * @param[in] timeout
-     *      Unused.
      *
      * @remarks
      *  init -> bind -> listen.
      */
-    virtual bool init(String const & ip, int port, int unused = -1) override;
+    virtual bool init(String const & ip, int port) override;
 
     /** This operation is async. */
     virtual bool close() override;
