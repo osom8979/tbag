@@ -53,9 +53,6 @@ struct Server : public details::NetCommon
     virtual void onClientClose  (NodeInterface * node)            { /* EMPTY. */ }
     virtual void onServerClose  ()                                { /* EMPTY. */ }
     // @formatter:on
-
-public:
-    static SharedServer create(Loop & loop, Type type);
 };
 
 } // namespace network

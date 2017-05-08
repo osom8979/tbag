@@ -56,8 +56,6 @@ struct Client : public details::NetCommon
     virtual void onRead   (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
     virtual void onClose  ()          { /* EMPTY. */ }
     // @formatter:on
-
-    static SharedClient create(Loop & loop, Type type);
 };
 
 } // namespace network
