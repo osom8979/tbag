@@ -17,95 +17,80 @@ using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::details;
 
-struct TcpServerTest : public TcpServer
+TEST(NetworkTcpTest, ClientTimeout)
 {
-    TcpServerTest(Loop & loop) : TcpServer(loop)
-    {
-        // EMPTY.
+    using namespace uvpp;
+    Loop loop;
+    FunctionalTcpClient client(loop);
+
+    if (client.init("8.8.8.8", 9999, 50) == false) {
+        std::cout << "Network unreachable.\n";
+        return;
     }
 
-    virtual void onConnection(uerr code) override
-    {
-        accept();
-        std::cout << "TcpServerTest::onConnection(" << uvpp::getErrorName(code) << ")\n";
-    }
+    int connect = 0;
+    int close = 0;
+    uerr result = uerr::UVPP_UNKNOWN;
 
-    virtual void onClientWrite(NodeInterface * node, uerr code) override
-    {
-        std::cout << "TcpServerTest::onClientWrite(" << uvpp::getErrorName(code) << ")\n";
-    }
-
-    virtual void onClientRead(NodeInterface * node, uerr code, char const * buffer, Size size) override
-    {
-        std::cout << "TcpServerTest::onClientRead(" << uvpp::getErrorName(code) << ")\n";
-    }
-
-    virtual void onClientClose(NodeInterface * node) override
-    {
-        std::cout << "TcpServerTest::onClientClose()\n";
-    }
-
-    virtual void onServerClose() override
-    {
-        std::cout << "TcpServerTest::onServerClose()\n";
-    }
-};
-
-struct TcpClientTest : public TcpClient
-{
-    TcpClientTest(Loop & loop) : TcpClient(loop)
-    {
-        // EMPTY.
-    }
-
-    virtual void onConnect(uerr code) override
-    {
-        std::cout << "TcpClientTest::onConnect(" << uvpp::getErrorName(code) << ")\n";
-    }
-
-    virtual void onWrite(uerr code) override
-    {
-        std::cout << "TcpClientTest::onWrite(" << uvpp::getErrorName(code) << ")\n";
-    }
-
-    virtual void onRead(uerr code, char const * buffer, Size size) override
-    {
-        std::cout << "TcpClientTest::onRead(" << uvpp::getErrorName(code) << ")\n";
-    }
-
-    virtual void onClose() override
-    {
-        std::cout << "TcpClientTest::onClose()\n";
-    }
-};
-
-TEST(NetworkTcpTest, Timeout)
-{
-    uvpp::Loop loop_server;
-    uvpp::Loop loop_client;
-
-    TcpServerTest server(loop_server);
-    TcpClientTest client(loop_client);
-
-    int const TEST_PORT_NUMBER = 18000;
-
-    server.init(ANY_IPV4, TEST_PORT_NUMBER);
-    client.init(LOOPBACK_IPV4, TEST_PORT_NUMBER, 1000);
-
-    uvpp::uerr result_server;
-    uvpp::uerr result_client;
-
-    std::thread thread_server([&](){
-        result_server = loop_server.run();
+    client.setOnConnect([&](uerr code){
+        connect++;
     });
-    std::thread thread_client([&](){
-        result_client = loop_client.run();
+    client.setOnClose([&](){
+        close++;
     });
 
-    thread_server.join();
-    thread_client.join();
+    std::thread thread([&](){
+        result = loop.run();
+    });
 
-    ASSERT_EQ(uvpp::uerr::UVPP_SUCCESS, result_server);
-    ASSERT_EQ(uvpp::uerr::UVPP_SUCCESS, result_client);
+    thread.join();
+
+    ASSERT_EQ(uerr::UVPP_SUCCESS, result);
+    ASSERT_EQ(0, connect);
+    ASSERT_EQ(1, close);
+}
+
+TEST(NetworkTcpTest, Connection)
+{
+//    using namespace uvpp;
+//    Loop loop_server;
+//    Loop loop_client;
+//
+//    FunctionalTcpServer server(loop_server);
+//    FunctionalTcpClient client(loop_client);
+//
+//    server.setOnConnection([&](uerr code){
+//        std::cout << "server/onConnection()\n";
+//        while (true) {
+//            // waiting.
+//        }
+//    });
+//    client.setOnConnect([&](uerr code){
+//        std::cout << "client/onConnect()\n";
+//    });
+//    client.setOnClose([&](){
+//        std::cout << "client/onClose()\n";
+//    });
+//
+//    int const TEST_PORT_NUMBER = 18000;
+//
+//    server.init(ANY_IPV4, TEST_PORT_NUMBER);
+//    client.init(LOOPBACK_IPV4, TEST_PORT_NUMBER, 10);
+//
+//    uerr result_server;
+//    uerr result_client;
+//
+//    std::thread thread_server([&](){
+//        result_server = loop_server.run();
+//    });
+//    std::thread thread_client([&](){
+//        result_client = loop_client.run();
+//    });
+//
+//    thread_server.join();
+//    thread_client.join();
+//
+//    ASSERT_EQ(uerr::UVPP_SUCCESS, result_server);
+//    ASSERT_EQ(uerr::UVPP_SUCCESS, result_client);
 }
 

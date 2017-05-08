@@ -39,8 +39,15 @@ uerr TimeoutToClose::start(uint64_t timeout)
 
 void TimeoutToClose::onTimer()
 {
-    if (_cancel.load() == false && _handle != nullptr) {
-        _handle->close();
+    if (_handle != nullptr) {
+        if (_cancel.load() == false) {
+            __tbag_debug("TimeoutToClose::onTimer() close.");
+            _handle->close();
+        } else {
+            __tbag_debug("TimeoutToClose::onTimer() cancel.");
+        }
+    } else {
+        __tbag_error("TimeoutToClose::onTimer() handle is nullptr.");
     }
 
     if (_auto_close.load()) {
