@@ -80,6 +80,11 @@ bool TcpRealNode::cancel()
     return false;
 }
 
+bool TcpRealNode::write(binf const * buffer, Size size, uint64_t millisec)
+{
+    return false;
+}
+
 bool TcpRealNode::write(char const * buffer, Size size, uint64_t millisec)
 {
     return false;

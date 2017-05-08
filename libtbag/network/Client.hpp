@@ -38,7 +38,7 @@ struct Client : public details::NetCommon
     virtual Type getType() const
     { return Type::UNKNOWN; }
 
-    virtual bool init(String const & destination, int port = 0, int timeout = 0)
+    virtual bool init(String const & destination, int port = 0, uint64_t millisec = 0)
     { return false; }
 
     virtual bool  start() { return false; }
@@ -46,6 +46,7 @@ struct Client : public details::NetCommon
     virtual bool  close() { return false; }
     virtual bool cancel() { return false; }
 
+    virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) { return false; }
     virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) { return false; }
 
     virtual void onConnect(uerr code) { /* EMPTY. */ }

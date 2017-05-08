@@ -156,6 +156,10 @@ public:
     virtual ~Loop();
 
 public:
+    inline bool isAliveAndThisThread() const
+    { return isRunning() && isAlive() && getOwnerThreadId() == std::this_thread::get_id(); }
+
+public:
     /** @return close handle count. */
     std::size_t closeAllHandles();
 

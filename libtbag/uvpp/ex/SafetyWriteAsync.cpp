@@ -42,7 +42,7 @@ bool SafetyWriteAsync::WriterInterface::cancel()
 // StreamWriter implementation.
 // ----------------------------
 
-void SafetyWriteAsync::StreamWriter::run(SafetyAsync * handle)
+void SafetyWriteAsync::StreamWriter::run(SafetyAsync * UNUSED_PARAM(handle))
 {
     WriteState EXCHANGE = WriteState::WRITE;
     if (state.compare_exchange_strong(EXCHANGE, WriteState::READY)) {
@@ -60,7 +60,7 @@ void SafetyWriteAsync::StreamWriter::run(SafetyAsync * handle)
 // UdpWriter implementation.
 // -------------------------
 
-void SafetyWriteAsync::UdpWriter::run(SafetyAsync * handle)
+void SafetyWriteAsync::UdpWriter::run(SafetyAsync * UNUSED_PARAM(handle))
 {
     WriteState EXCHANGE = WriteState::WRITE;
     if (state.compare_exchange_strong(EXCHANGE, WriteState::READY)) {
@@ -88,7 +88,7 @@ SafetyWriteAsync::~SafetyWriteAsync()
     // EMPTY.
 }
 
-bool SafetyWriteAsync::updateWriterInfo(WriterInterface * writer, binf * infos, std::size_t size)
+bool SafetyWriteAsync::updateWriterInfo(WriterInterface * writer, binf const * infos, std::size_t size)
 {
     assert(writer != nullptr);
     assert(infos != nullptr);
@@ -101,7 +101,7 @@ bool SafetyWriteAsync::updateWriterInfo(WriterInterface * writer, binf * infos, 
     assert(writer->bufs.size() == size);
 
     for (std::size_t i = 0; i < size; ++i) {
-        binf * info = (infos + i);
+        binf const * info = (infos + i);
         writer->infos[i].buffer = info->buffer;
         writer->infos[i].size   = info->size;
         writer->bufs[i].assign(info->buffer, info->buffer + info->size);
@@ -110,7 +110,7 @@ bool SafetyWriteAsync::updateWriterInfo(WriterInterface * writer, binf * infos, 
     return true;
 }
 
-SafetyWriteAsync::SharedWriter SafetyWriteAsync::asyncWrite(WeakStream stream, binf * infos, std::size_t size)
+SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(WeakStream stream, binf const * infos, std::size_t size)
 {
     StreamWriter * writer = new (std::nothrow) StreamWriter;
     assert(writer != nullptr);
@@ -122,17 +122,17 @@ SafetyWriteAsync::SharedWriter SafetyWriteAsync::asyncWrite(WeakStream stream, b
     return SharedWriter();
 }
 
-SafetyWriteAsync::SharedWriter SafetyWriteAsync::asyncWrite(WeakStream stream, char const * buffer, std::size_t size)
+SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(WeakStream stream, char const * buffer, std::size_t size)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
     info.size   = size;
-    return asyncWrite(stream, &info, 1U);
+    return createWrite(stream, &info, 1U);
 }
 
-SafetyWriteAsync::SharedWriter SafetyWriteAsync::asyncWrite(
+SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(
         WeakUdp udp,
-        binf * infos,
+        binf const * infos,
         std::size_t size,
         sockaddr const * addr)
 {
@@ -153,7 +153,7 @@ SafetyWriteAsync::SharedWriter SafetyWriteAsync::asyncWrite(
     return SharedWriter();
 }
 
-SafetyWriteAsync::SharedWriter SafetyWriteAsync::asyncWrite(
+SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(
         WeakUdp udp,
         char const * buffer,
         std::size_t size,
@@ -162,7 +162,12 @@ SafetyWriteAsync::SharedWriter SafetyWriteAsync::asyncWrite(
     binf info;
     info.buffer = const_cast<char*>(buffer);
     info.size   = size;
-    return asyncWrite(udp, &info, 1U, addr);
+    return createWrite(udp, &info, 1U, addr);
+}
+
+bool SafetyWriteAsync::asyncWrite(SharedWriter writer)
+{
+    return sendJob(writer) == uerr::UVPP_SUCCESS;
 }
 
 } // namespace ex

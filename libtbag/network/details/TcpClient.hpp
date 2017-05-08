@@ -21,6 +21,7 @@
 #include <memory>
 #include <atomic>
 #include <chrono>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -96,16 +97,40 @@ private:
     SharedClose    _close;
     SharedShutdown _shutdown;
 
+private:
+    SafetyWriteAsync::SharedWriter _last_writer;
+    mutable Mutex _mutex;
+
 public:
     TcpClient(Loop & loop);
     virtual ~TcpClient();
+
+public:
+    // @formatter:off
+    inline WeakClient   getClient  () { Guard g(_mutex); return WeakClient  (_client);   }
+    inline WeakAsync    getAsync   () { Guard g(_mutex); return WeakAsync   (_async);    }
+    inline WeakClose    getClose   () { Guard g(_mutex); return WeakClose   (_close);    }
+    inline WeakShutdown getShutdown() { Guard g(_mutex); return WeakShutdown(_shutdown); }
+    // @formatter:on
+
+    inline bool isWriting() const
+    { Guard g(_mutex); return static_cast<bool>(_last_writer) == false; }
+
+private:
+    void startTimeoutToShutdown(milliseconds const & millisec);
+    void cancelTimeoutToShutdown();
+    void startTimeoutToClose(milliseconds const & millisec);
+    void cancelTimeoutToClose();
+
+private:
+    bool write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec);
 
 public:
     virtual Type getType() const override
     { return Type::TCP; }
 
 public:
-    virtual bool init(String const & ip, int port = 0, int timeout = 0) override;
+    virtual bool init(String const & ip, int port = 0, uint64_t millisec = 0) override;
 
 public:
     virtual bool  start() override;
@@ -114,15 +139,8 @@ public:
     virtual bool cancel() override;
 
 public:
+    virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) override;
     virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) override;
-
-private:
-    void startTimeoutToShutdown(milliseconds const & millisec);
-    void cancelTimeoutToShutdown();
-
-private:
-    void startTimeoutToClose(milliseconds const & millisec);
-    void cancelTimeoutToClose();
 };
 
 } // namespace details

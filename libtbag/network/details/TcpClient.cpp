@@ -22,10 +22,12 @@ namespace details {
 
 TcpRealClient::TcpRealClient(Loop & loop, TcpClient & parent) : Tcp(loop), _parent(parent)
 {
+    // EMPTY.
 }
 
 TcpRealClient::~TcpRealClient()
 {
+    // EMPTY.
 }
 
 bool TcpRealClient::init(String const & ip, int port)
@@ -35,6 +37,8 @@ bool TcpRealClient::init(String const & ip, int port)
 
 void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
 {
+    _parent.cancelTimeoutToShutdown();
+    _parent._last_writer.reset();
 }
 
 void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
@@ -44,7 +48,9 @@ void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
 
 void TcpRealClient::onWrite(WriteRequest & request, uerr code)
 {
+    _parent.cancelTimeoutToShutdown();
     _parent.onWrite(code);
+    _parent._last_writer.reset();
 }
 
 TcpRealClient::binf TcpRealClient::onAlloc(std::size_t suggested_size)
@@ -84,50 +90,7 @@ TcpClient::~TcpClient()
     _async.reset();
     _close.reset();
     _shutdown.reset();
-}
-
-bool TcpClient::start()
-{
-    return _client->startRead() == uerr::UVPP_SUCCESS;
-}
-
-bool TcpClient::stop()
-{
-    return _client->stopRead() == uerr::UVPP_SUCCESS;
-}
-
-bool TcpClient::close()
-{
-    _close->stop();
-    _close->close();
-
-    _shutdown->stop();
-    _shutdown->close();
-
-    _client->close();
-    _async->close();
-
-    return true;
-}
-
-bool TcpClient::cancel()
-{
-    return false;
-}
-
-bool TcpClient::write(char const * buffer, Size size, uint64_t millisec)
-{
-    _async->asyncWrite(SafetyWriteAsync::WeakStream(_client), buffer, size);
-    return false;
-}
-
-bool TcpClient::init(String const & ip, int port, int timeout)
-{
-    if (static_cast<bool>(_client) && _client->init(ip, port)) {
-        startTimeoutToClose(std::chrono::milliseconds(timeout));
-        return true;
-    }
-    return false;
+    _last_writer.reset();
 }
 
 void TcpClient::startTimeoutToShutdown(milliseconds const & millisec)
@@ -140,7 +103,7 @@ void TcpClient::cancelTimeoutToShutdown()
     _shutdown->cancel();
 }
 
-void TcpClient::startTimeoutToClose(std::chrono::milliseconds const & millisec)
+void TcpClient::startTimeoutToClose(milliseconds const & millisec)
 {
     _close->start(static_cast<uint64_t>(millisec.count()));
 }
@@ -148,6 +111,86 @@ void TcpClient::startTimeoutToClose(std::chrono::milliseconds const & millisec)
 void TcpClient::cancelTimeoutToClose()
 {
     _close->cancel();
+}
+
+bool TcpClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
+{
+    Loop * loop = _client->getLoop();
+    assert(loop != nullptr);
+
+    if (millisec >= 1U) {
+        startTimeoutToShutdown(milliseconds(millisec));
+    }
+
+    if (loop->isAliveAndThisThread()) {
+        _last_writer = writer;
+        _last_writer->run(nullptr);
+    }
+    return _async->asyncWrite(writer);
+}
+
+bool TcpClient::init(String const & ip, int port, uint64_t millisec)
+{
+    Guard guard(_mutex);
+    if (static_cast<bool>(_client) && _client->init(ip, port)) {
+        startTimeoutToClose(milliseconds(millisec));
+        return true;
+    }
+    return false;
+}
+
+bool TcpClient::start()
+{
+    Guard guard(_mutex);
+    return _client->startRead() == uerr::UVPP_SUCCESS;
+}
+
+bool TcpClient::stop()
+{
+    Guard guard(_mutex);
+    return _client->stopRead() == uerr::UVPP_SUCCESS;
+}
+
+bool TcpClient::close()
+{
+    Guard guard(_mutex);
+
+    _close->stop();
+    _close->close();
+
+    _shutdown->stop();
+    _shutdown->close();
+
+    _client->close();
+    _async->close();
+
+    _last_writer.reset();
+    return true;
+}
+
+bool TcpClient::cancel()
+{
+    Guard guard(_mutex);
+    startTimeoutToShutdown(milliseconds(0));
+    return true;
+}
+
+bool TcpClient::write(binf const * buffer, Size size, uint64_t millisec)
+{
+    Guard guard(_mutex);
+    if (static_cast<bool>(_last_writer) == false) {
+        return false; // BUSY.
+    }
+    return write(_async->createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
+}
+
+bool TcpClient::write(char const * buffer, Size size, uint64_t millisec)
+{
+    Guard guard(_mutex);
+    if (static_cast<bool>(_last_writer) == false) {
+        return false; // BUSY.
+    }
+    return write(_async->createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
 }
 
 } // namespace details

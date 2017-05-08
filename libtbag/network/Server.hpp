@@ -42,6 +42,7 @@ struct Server : public details::NetCommon
         virtual bool  close() { return false; }
         virtual bool cancel() { return false; }
 
+        virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) { return false; }
         virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) { return false; }
         // @formatter:on
     };

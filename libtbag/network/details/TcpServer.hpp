@@ -61,6 +61,7 @@ public:
     virtual bool  close() override;
     virtual bool cancel() override;
 
+    virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) override;
     virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) override;
 
 public:

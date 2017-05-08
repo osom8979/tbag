@@ -33,6 +33,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -91,6 +92,9 @@ struct NetCommon
 
     using seconds      = std::chrono::seconds;
     using milliseconds = std::chrono::milliseconds;
+
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
     using SharedClose = std::shared_ptr<TimeoutToClose>;
     using   WeakClose =   std::weak_ptr<TimeoutToClose>;
