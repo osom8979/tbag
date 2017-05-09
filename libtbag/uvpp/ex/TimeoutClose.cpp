@@ -41,10 +41,11 @@ void TimeoutClose::onTimer()
 {
     if (_handle != nullptr) {
         if (_cancel.load() == false) {
-            __tbag_debug("TimeoutClose::onTimer() close.");
+            __tbag_debug("TimeoutClose::onTimer() request close handle(@{}[{}]).",
+                         static_cast<void*>(_handle), _handle->getName());
             _handle->close();
         } else {
-            __tbag_debug("TimeoutClose::onTimer() cancel.");
+            __tbag_debug("TimeoutClose::onTimer() request cancel.");
         }
     } else {
         __tbag_error("TimeoutClose::onTimer() handle is nullptr.");

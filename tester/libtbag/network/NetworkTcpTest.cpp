@@ -30,9 +30,12 @@ TEST(NetworkTcpTest, ClientTimeout)
 
     int connect = 0;
     int close = 0;
+
+    uerr connect_result = uerr::UVPP_UNKNOWN;
     uerr result = uerr::UVPP_UNKNOWN;
 
     client.setOnConnect([&](uerr code){
+        connect_result = code;
         connect++;
     });
     client.setOnClose([&](){
@@ -45,8 +48,9 @@ TEST(NetworkTcpTest, ClientTimeout)
 
     thread.join();
 
+    ASSERT_EQ(uerr::UVPP_ECANCELED, connect_result);
     ASSERT_EQ(uerr::UVPP_SUCCESS, result);
-    ASSERT_EQ(0, connect);
+    ASSERT_EQ(1, connect);
     ASSERT_EQ(1, close);
 }
 

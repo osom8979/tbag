@@ -37,6 +37,8 @@ bool TcpRealClient::init(String const & ip, int port)
 
 void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
 {
+    __tbag_debug("TcpRealClient::onConnect({})", uvpp::getErrorName(code));
+
     {   // Update parent state.
         Guard guard(_parent._mutex);
         _parent.cancelTimeoutClose();
@@ -47,6 +49,8 @@ void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
 
 void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
 {
+    __tbag_debug("TcpRealClient::onShutdown({})", uvpp::getErrorName(code));
+
     {   // Update parent state.
         Guard guard(_parent._mutex);
         _parent.cancelTimeoutShutdown();
@@ -58,6 +62,8 @@ void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
 
 void TcpRealClient::onWrite(WriteRequest & request, uerr code)
 {
+    __tbag_debug("TcpRealClient::onWrite({})", uvpp::getErrorName(code));
+
     {   // Update parent state.
         Guard guard(_parent._mutex);
         _parent.cancelTimeoutShutdown();
@@ -74,11 +80,13 @@ TcpRealClient::binf TcpRealClient::onAlloc(std::size_t suggested_size)
 
 void TcpRealClient::onRead(uerr code, char const * buffer, std::size_t size)
 {
+    __tbag_debug("TcpRealClient::onRead({})", uvpp::getErrorName(code));
     _parent.onRead(code, buffer, size);
 }
 
 void TcpRealClient::onClose()
 {
+    __tbag_debug("TcpRealClient::onClose()");
     _parent.onClose();
 
     {   // Update parent state.
