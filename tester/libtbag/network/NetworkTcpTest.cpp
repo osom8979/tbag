@@ -57,16 +57,8 @@ TEST(NetworkTcpTest, ClientTimeout)
     ASSERT_EQ(1, close);
 }
 
-TEST(NetworkTcpTest, WriteTimeout)
-{
-    using namespace uvpp;
-    Loop loop;
-    FunctionalTcpClient client(loop);
-}
-
 TEST(NetworkTcpTest, MultiEcho)
 {
-    // Disable logging.
     log::SeverityGuard guard;
 
     using namespace uvpp;
@@ -95,10 +87,8 @@ TEST(NetworkTcpTest, MultiEcho)
             }
         }
     });
-    server.setOnClientRead([&](FunctionalTcpServer::WeakClient node,
-                               uerr code,
-                               char const * buffer,
-                               FunctionalTcpServer::Size size){
+    server.setOnClientRead([&](FunctionalTcpServer::WeakClient node, uerr code,
+                               char const * buffer, FunctionalTcpServer::Size size){
         if (code == uerr::UVPP_SUCCESS) {
             if (auto shared = node.lock()) {
                 if (shared->stop()) {
