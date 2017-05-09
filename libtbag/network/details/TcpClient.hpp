@@ -69,8 +69,8 @@ public:
     bool init(String const & ip, int port);
 
 public:
-    virtual void onShutdown(ShutdownRequest & request, uerr code) override;
     virtual void onConnect(ConnectRequest & request, uerr code) override;
+    virtual void onShutdown(ShutdownRequest & request, uerr code) override;
     virtual void onWrite(WriteRequest & request, uerr code) override;
     virtual binf onAlloc(std::size_t suggested_size) override;
     virtual void onRead(uerr code, char const * buffer, std::size_t size) override;
@@ -115,16 +115,20 @@ public:
     // @formatter:on
 
     inline bool isWriting() const
-    { Guard g(_mutex); return static_cast<bool>(_last_writer) == false; }
+    { Guard g(_mutex); return static_cast<bool>(_last_writer); }
 
 private:
-    void startTimeoutToShutdown(milliseconds const & millisec);
-    void cancelTimeoutToShutdown();
-    void startTimeoutToClose(milliseconds const & millisec);
-    void cancelTimeoutToClose();
+    void startTimeoutShutdown(milliseconds const & millisec);
+    void startTimeoutClose(milliseconds const & millisec);
+
+    void cancelTimeoutShutdown();
+    void cancelTimeoutClose();
 
 private:
     bool write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec);
+
+private:
+    void closeAll();
 
 public:
     virtual Type getType() const override
@@ -138,8 +142,8 @@ public:
 public:
     virtual bool  start() override;
     virtual bool   stop() override;
-    virtual bool  close() override;
-    virtual bool cancel() override;
+    virtual void  close() override;
+    virtual void cancel() override;
 
 public:
     virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) override;
@@ -158,28 +162,33 @@ struct FunctionalTcpClient : public TcpClient
     using uerr = NetCommon::uerr;
     using Size = NetCommon::Size;
 
-    using OnConnect = std::function<void(uerr)>;
-    using OnWrite   = std::function<void(uerr)>;
-    using OnRead    = std::function<void(uerr, char const *, Size)>;
-    using OnClose   = std::function<void()>;
+    using OnConnect  = std::function<void(uerr)>;
+    using OnShutdown = std::function<void(uerr)>;
+    using OnWrite    = std::function<void(uerr)>;
+    using OnRead     = std::function<void(uerr, char const *, Size)>;
+    using OnClose    = std::function<void()>;
 
-    OnConnect connect_cb;
-    OnWrite   write_cb;
-    OnRead    read_cb;
-    OnClose   close_cb;
+    OnConnect  connect_cb;
+    OnShutdown shutdown_cb;
+    OnWrite    write_cb;
+    OnRead     read_cb;
+    OnClose    close_cb;
 
     FunctionalTcpClient(Loop & loop) : TcpClient(loop)
     { /* EMPTY */ }
     virtual ~FunctionalTcpClient()
     { /* EMPTY */ }
 
-    inline void setOnConnect(OnConnect const & cb) { connect_cb = cb; }
-    inline void setOnWrite  (OnWrite   const & cb) { write_cb   = cb; }
-    inline void setOnRead   (OnRead    const & cb) { read_cb    = cb; }
-    inline void setOnClose  (OnClose   const & cb) { close_cb   = cb; }
+    inline void setOnConnect (OnConnect  const & cb) { connect_cb  = cb; }
+    inline void setOnShutdown(OnShutdown const & cb) { shutdown_cb = cb; }
+    inline void setOnWrite   (OnWrite    const & cb) { write_cb    = cb; }
+    inline void setOnRead    (OnRead     const & cb) { read_cb     = cb; }
+    inline void setOnClose   (OnClose    const & cb) { close_cb    = cb; }
 
     virtual void onConnect(uerr code) override
     { if (connect_cb) { connect_cb(code); } }
+    virtual void onShutdown(uerr code) override
+    { if (shutdown_cb) { shutdown_cb(code); } }
     virtual void onWrite(uerr code) override
     { if (write_cb) { write_cb(code); } }
     virtual void onRead(uerr code, char const * buffer, Size size) override

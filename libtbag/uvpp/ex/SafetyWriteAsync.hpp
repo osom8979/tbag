@@ -135,15 +135,15 @@ public:
     virtual ~SafetyWriteAsync();
 
 private:
-    bool updateWriterInfo(WriterInterface * writer, binf const * infos, std::size_t size);
+    static bool updateWriterInfo(WriterInterface * writer, binf const * infos, std::size_t size);
 
 public:
-    SharedWriter createWrite(WeakStream stream, binf const * infos, std::size_t size);
-    SharedWriter createWrite(WeakStream stream, char const * buffer, std::size_t size);
+    static SharedWriter createWrite(WeakStream stream, binf const * infos, std::size_t size);
+    static SharedWriter createWrite(WeakStream stream, char const * buffer, std::size_t size);
 
 public:
-    SharedWriter createWrite(WeakUdp udp, binf const * infos, std::size_t size, sockaddr const * addr);
-    SharedWriter createWrite(WeakUdp udp, char const * buffer, std::size_t size, sockaddr const * addr);
+    static SharedWriter createWrite(WeakUdp udp, binf const * infos, std::size_t size, sockaddr const * addr);
+    static SharedWriter createWrite(WeakUdp udp, char const * buffer, std::size_t size, sockaddr const * addr);
 
 public:
     bool asyncWrite(SharedWriter writer);

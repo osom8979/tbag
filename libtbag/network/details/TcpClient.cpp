@@ -35,22 +35,36 @@ bool TcpRealClient::init(String const & ip, int port)
     return uvpp::initCommonClient(*this, _connect_req, ip, port);
 }
 
-void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
-{
-    _parent.cancelTimeoutToShutdown();
-    _parent._last_writer.reset();
-}
-
 void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
 {
-    _parent.cancelTimeoutToClose();
+    {   // Update parent state.
+        Guard guard(_parent._mutex);
+        _parent.cancelTimeoutClose();
+    }
+
+    _parent.onConnect(code);
+}
+
+void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
+{
+    {   // Update parent state.
+        Guard guard(_parent._mutex);
+        _parent.cancelTimeoutShutdown();
+        _parent._last_writer.reset();
+    }
+
+    _parent.onShutdown(code);
 }
 
 void TcpRealClient::onWrite(WriteRequest & request, uerr code)
 {
-    _parent.cancelTimeoutToShutdown();
+    {   // Update parent state.
+        Guard guard(_parent._mutex);
+        _parent.cancelTimeoutShutdown();
+        _parent._last_writer.reset();
+    }
+
     _parent.onWrite(code);
-    _parent._last_writer.reset();
 }
 
 TcpRealClient::binf TcpRealClient::onAlloc(std::size_t suggested_size)
@@ -66,7 +80,11 @@ void TcpRealClient::onRead(uerr code, char const * buffer, std::size_t size)
 void TcpRealClient::onClose()
 {
     _parent.onClose();
-    _parent.close();
+
+    {   // Update parent state.
+        Guard guard(_parent._mutex);
+        _parent.closeAll();
+    }
 }
 
 // -------------------------
@@ -94,69 +112,70 @@ TcpClient::~TcpClient()
     _last_writer.reset();
 }
 
-void TcpClient::startTimeoutToShutdown(milliseconds const & millisec)
+void TcpClient::startTimeoutShutdown(milliseconds const & millisec)
 {
+    assert(static_cast<bool>(_shutdown));
     uerr const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
-    __tbag_debug("TcpClient::startTimeoutToShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+    __tbag_debug("TcpClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
-void TcpClient::cancelTimeoutToShutdown()
+void TcpClient::startTimeoutClose(milliseconds const & millisec)
 {
-    _shutdown->cancel();
-}
-
-void TcpClient::startTimeoutToClose(milliseconds const & millisec)
-{
+    assert(static_cast<bool>(_close));
     uerr const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
-    __tbag_debug("TcpClient::startTimeoutToClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+    __tbag_debug("TcpClient::startTimeoutClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
-void TcpClient::cancelTimeoutToClose()
+void TcpClient::cancelTimeoutShutdown()
 {
+    assert(static_cast<bool>(_shutdown));
+    _shutdown->cancel();
+    __tbag_debug("TcpClient::cancelTimeoutShutdown().");
+}
+
+void TcpClient::cancelTimeoutClose()
+{
+    assert(static_cast<bool>(_close));
     _close->cancel();
+    __tbag_debug("TcpClient::cancelTimeoutClose().");
 }
 
 bool TcpClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
 {
+    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_async));
+
+    if (static_cast<bool>(_last_writer)) {
+        __tbag_debug("TcpClient::write() busy state.");
+        return false;
+    }
+
     Loop * loop = _client->getLoop();
     assert(loop != nullptr);
 
     if (millisec >= 1U) {
-        startTimeoutToShutdown(milliseconds(millisec));
+        startTimeoutShutdown(milliseconds(millisec));
     }
 
     if (loop->isAliveAndThisThread()) {
         _last_writer = writer;
         _last_writer->run(nullptr);
+    } else {
+        _last_writer = writer;
+        if (_async->asyncWrite(writer) == false) {
+            _last_writer.reset();
+        }
     }
-    return _async->asyncWrite(writer);
+
+    return true;
 }
 
-bool TcpClient::init(String const & ip, int port, uint64_t millisec)
+void TcpClient::closeAll()
 {
-    Guard guard(_mutex);
-    if (static_cast<bool>(_client) && _client->init(ip, port)) {
-        startTimeoutToClose(milliseconds(millisec));
-        return true;
-    }
-    return false;
-}
-
-bool TcpClient::start()
-{
-    Guard guard(_mutex);
-    return _client->startRead() == uerr::UVPP_SUCCESS;
-}
-
-bool TcpClient::stop()
-{
-    Guard guard(_mutex);
-    return _client->stopRead() == uerr::UVPP_SUCCESS;
-}
-
-bool TcpClient::close()
-{
-    Guard guard(_mutex);
+    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_async));
+    assert(static_cast<bool>(_close));
+    assert(static_cast<bool>(_shutdown));
 
     _close->stop();
     if (_close->isClosing() == false) {
@@ -177,32 +196,89 @@ bool TcpClient::close()
     }
 
     _last_writer.reset();
-    return true;
 }
 
-bool TcpClient::cancel()
+bool TcpClient::init(String const & ip, int port, uint64_t millisec)
 {
+    assert(static_cast<bool>(_client));
     Guard guard(_mutex);
-    startTimeoutToShutdown(milliseconds(0));
-    return true;
+    if (static_cast<bool>(_client) && _client->init(ip, port)) {
+        if (millisec >= 1U) {
+            startTimeoutClose(milliseconds(millisec));
+        }
+        return true;
+    }
+    return false;
+}
+
+bool TcpClient::start()
+{
+    assert(static_cast<bool>(_client));
+    Guard guard(_mutex);
+    return _client->startRead() == uerr::UVPP_SUCCESS;
+}
+
+bool TcpClient::stop()
+{
+    assert(static_cast<bool>(_client));
+    Guard guard(_mutex);
+    return _client->stopRead() == uerr::UVPP_SUCCESS;
+}
+
+void TcpClient::close()
+{
+    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_async));
+
+    Loop * loop = _client->getLoop();
+    assert(loop != nullptr);
+
+    if (loop->isAliveAndThisThread()) {
+        __tbag_debug("TcpServer::close() sync request.");
+        Guard guard(_mutex);
+        closeAll();
+    } else {
+        __tbag_debug("TcpServer::close() async request.");
+        _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
+            Guard guard(_mutex);
+            closeAll();
+        });
+    }
+}
+
+void TcpClient::cancel()
+{
+    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_async));
+
+    Loop * loop = _client->getLoop();
+    assert(loop != nullptr);
+
+    if (loop->isAliveAndThisThread()) {
+        __tbag_debug("TcpServer::cancel() sync request.");
+        Guard guard(_mutex);
+        startTimeoutShutdown(milliseconds(0U));
+    } else {
+        __tbag_debug("TcpServer::cancel() async request.");
+        _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
+            Guard guard(_mutex);
+            startTimeoutShutdown(milliseconds(0U));
+        });
+    }
 }
 
 bool TcpClient::write(binf const * buffer, Size size, uint64_t millisec)
 {
+    assert(static_cast<bool>(_client));
     Guard guard(_mutex);
-    if (static_cast<bool>(_last_writer) == false) {
-        return false; // BUSY.
-    }
-    return write(_async->createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
+    return write(SafetyWriteAsync::createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
 }
 
 bool TcpClient::write(char const * buffer, Size size, uint64_t millisec)
 {
+    assert(static_cast<bool>(_client));
     Guard guard(_mutex);
-    if (static_cast<bool>(_last_writer) == false) {
-        return false; // BUSY.
-    }
-    return write(_async->createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
+    return write(SafetyWriteAsync::createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
 }
 
 } // namespace details

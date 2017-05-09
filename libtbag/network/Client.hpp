@@ -43,16 +43,17 @@ struct Client : public details::NetCommon
 
     virtual bool  start() { return false; }
     virtual bool   stop() { return false; }
-    virtual bool  close() { return false; }
-    virtual bool cancel() { return false; }
+    virtual void  close() { /* EMPTY. */  }
+    virtual void cancel() { /* EMPTY. */  }
 
     virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) { return false; }
     virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) { return false; }
 
-    virtual void onConnect(uerr code) { /* EMPTY. */ }
-    virtual void onWrite  (uerr code) { /* EMPTY. */ }
-    virtual void onRead   (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
-    virtual void onClose  ()          { /* EMPTY. */ }
+    virtual void onConnect (uerr code) { /* EMPTY. */ }
+    virtual void onShutdown(uerr code) { /* EMPTY. */ }
+    virtual void onWrite   (uerr code) { /* EMPTY. */ }
+    virtual void onRead    (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
+    virtual void onClose   ()          { /* EMPTY. */ }
     // @formatter:on
 };
 

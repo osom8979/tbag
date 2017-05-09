@@ -93,12 +93,11 @@ public:
     using Guard = std::lock_guard<Mutex>;
 
 private:
+    mutable Mutex _mutex;
+
     SharedServer _server;
     SharedAsync  _async;
-
-private:
-    mutable Mutex _client_mutex;
-    ClientMap _clients;
+    ClientMap    _clients;
 
 public:
     TcpServer(Loop & loop);
@@ -106,12 +105,14 @@ public:
 
 public:
     inline bool emptyClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.empty()))
-    { Guard g(_client_mutex); return _clients.empty(); }
+    { Guard g(_mutex); return _clients.empty(); }
     inline Size sizeClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.size()))
-    { Guard g(_client_mutex); return _clients.size(); }
+    { Guard g(_mutex); return _clients.size(); }
 
 private:
-    SharedClient createClient();
+    static SharedClient createClient(Loop & loop);
+
+private:
     bool insertClient(SharedClient node);
     bool removeClient(ClientKey key);
 
@@ -122,7 +123,7 @@ public:
     template <typename Predicated>
     void foreach(Predicated predicated)
     {
-        Guard guard(_client_mutex);
+        Guard guard(_mutex);
         for (auto & cursor : _clients) {
             predicated(cursor);
         }

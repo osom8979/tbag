@@ -48,7 +48,11 @@ void TcpRealServer::onConnection(uerr code)
 void TcpRealServer::onClose()
 {
     _parent.onServerClose();
-    _parent.closeAll();
+
+    {   // Update parent state.
+        Guard guard(_parent._mutex);
+        _parent.closeAll();
+    }
 }
 
 // -------------------------
@@ -69,34 +73,28 @@ TcpServer::~TcpServer()
     _async.reset();
 }
 
-TcpServer::SharedClient TcpServer::createClient()
+TcpServer::SharedClient TcpServer::createClient(Loop & loop)
 {
-    Loop * loop = _server->getLoop();
-    assert(loop != nullptr);
-
-    SharedClient client(new (std::nothrow) TcpClient(*loop));
-    if (static_cast<bool>(client) == false) {
-        return SharedClient();
+    SharedClient client(new (std::nothrow) TcpClient(loop));
+    if (static_cast<bool>(client)) {
+        return client;
     }
-    return client;
+    return SharedClient();
 }
 
 bool TcpServer::insertClient(SharedClient client)
 {
-    Guard guard(_client_mutex);
     return _clients.insert(ClientPair(client->getId(), client)).second;
 }
 
 bool TcpServer::removeClient(ClientKey key)
 {
-    Guard guard(_client_mutex);
     return _clients.erase(key) == 1U;
 }
 
 void TcpServer::closeAll()
 {
     {   // Close all clients.
-        Guard guard(_client_mutex);
         for (auto & cursor : _clients) {
             if (static_cast<bool>(cursor.second)) {
                 cursor.second->close();
@@ -119,6 +117,7 @@ void TcpServer::closeAll()
 bool TcpServer::init(String const & ip, int port)
 {
     assert(static_cast<bool>(_server));
+    Guard guard(_mutex);
     return _server->init(ip, port);
 }
 
@@ -130,7 +129,11 @@ TcpServer::WeakClient TcpServer::accept()
         return WeakClient();
     }
 
-    auto client = std::static_pointer_cast<TcpClient, Client>(createClient());
+    Loop * loop = _server->getLoop();
+    assert(loop != nullptr);
+
+    Guard guard(_mutex);
+    auto client = std::static_pointer_cast<TcpClient, Client>(TcpServer::createClient(*loop));
     if (auto shared = client->getClient().lock()) {
         uerr const CODE = _server->accept(*shared);
         if (CODE == uerr::UVPP_SUCCESS) {
@@ -152,16 +155,19 @@ TcpServer::WeakClient TcpServer::accept()
 void TcpServer::close()
 {
     assert(static_cast<bool>(_server));
+    assert(static_cast<bool>(_async));
 
     Loop * loop = _server->getLoop();
     assert(loop != nullptr);
 
     if (loop->isAliveAndThisThread()) {
         __tbag_debug("TcpServer::close() sync request.");
+        Guard guard(_mutex);
         closeAll();
     } else {
         __tbag_debug("TcpServer::close() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
+            Guard guard(_mutex);
             closeAll();
         });
     }
