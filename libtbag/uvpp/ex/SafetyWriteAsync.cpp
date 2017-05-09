@@ -34,8 +34,8 @@ SafetyWriteAsync::WriterInterface::~WriterInterface()
 
 bool SafetyWriteAsync::WriterInterface::cancel()
 {
-    WriteState EXCHANGE = WriteState::CANCEL;
-    return state.compare_exchange_strong(EXCHANGE, WriteState::READY);
+    WriteState EXPECTED = WriteState::READY;
+    return state.compare_exchange_weak(EXPECTED, WriteState::CANCEL);
 }
 
 // ----------------------------
@@ -44,8 +44,8 @@ bool SafetyWriteAsync::WriterInterface::cancel()
 
 void SafetyWriteAsync::StreamWriter::run(SafetyAsync * UNUSED_PARAM(handle))
 {
-    WriteState EXCHANGE = WriteState::WRITE;
-    if (state.compare_exchange_strong(EXCHANGE, WriteState::READY)) {
+    WriteState EXPECTED = WriteState::READY;
+    if (state.compare_exchange_weak(EXPECTED, WriteState::WRITE)) {
         if (auto shared = stream.lock()) {
             result = shared->write(req, infos.data(), infos.size());
         } else {
@@ -62,8 +62,8 @@ void SafetyWriteAsync::StreamWriter::run(SafetyAsync * UNUSED_PARAM(handle))
 
 void SafetyWriteAsync::UdpWriter::run(SafetyAsync * UNUSED_PARAM(handle))
 {
-    WriteState EXCHANGE = WriteState::WRITE;
-    if (state.compare_exchange_strong(EXCHANGE, WriteState::READY)) {
+    WriteState EXPECTED = WriteState::READY;
+    if (state.compare_exchange_weak(EXPECTED, WriteState::WRITE)) {
         if (auto shared = udp.lock()) {
             result = shared->send(req, infos.data(), infos.size(), addr.get());
         } else {

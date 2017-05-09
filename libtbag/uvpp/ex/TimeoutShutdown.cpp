@@ -30,11 +30,8 @@ TimeoutShutdown::~TimeoutShutdown()
 
 uerr TimeoutShutdown::start(uint64_t timeout)
 {
-    bool EXCHANGE = true;
-    if (_cancel.compare_exchange_weak(EXCHANGE, false)) {
-        return Timer::start(timeout);
-    }
-    return uerr::UVPP_EBUSY;
+    _cancel.store(false);
+    return Timer::start(timeout);
 }
 
 void TimeoutShutdown::onTimer()

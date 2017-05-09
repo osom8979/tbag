@@ -30,18 +30,15 @@ TimeoutClose::~TimeoutClose()
 
 uerr TimeoutClose::start(uint64_t timeout)
 {
-    bool EXCHANGE = true;
-    if (_cancel.compare_exchange_weak(EXCHANGE, false)) {
-        return Timer::start(timeout);
-    }
-    return uerr::UVPP_EBUSY;
+    _cancel.store(false);
+    return Timer::start(timeout);
 }
 
 void TimeoutClose::onTimer()
 {
     if (_handle != nullptr) {
         if (_cancel.load() == false) {
-            __tbag_debug("TimeoutClose::onTimer() request close handle(@{}[{}]).",
+            __tbag_debug("TimeoutClose::onTimer() request handle(@{}[{}]) close.",
                          static_cast<void*>(_handle), _handle->getName());
             _handle->close();
         } else {

@@ -131,18 +131,28 @@ public:
     virtual ~TcpServer();
 
 public:
+    // @formatter:off
+    inline WeakServer getServer() { Guard g(_mutex); return WeakServer(_server); }
+    inline WeakAsync  getAsync () { Guard g(_mutex); return WeakAsync (_async);  }
+    // @formatter:on
+
+public:
+    // @formatter:off
     inline bool emptyClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.empty()))
     { Guard g(_mutex); return _clients.empty(); }
     inline Size sizeClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.size()))
     { Guard g(_mutex); return _clients.size(); }
+    // @formatter:on
 
 public:
+    // @formatter:off
     inline void lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.lock()))
     { _mutex.lock(); }
     inline void unlock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.unlock()))
     { _mutex.unlock(); }
     inline bool try_lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.try_lock()))
     { return _mutex.try_lock(); }
+    // @formatter:on
 
 private:
     static SharedClient createClient(Loop & loop, TcpServer & server);

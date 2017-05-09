@@ -137,14 +137,18 @@ void TcpClient::startTimeoutClose(milliseconds const & millisec)
 void TcpClient::cancelTimeoutShutdown()
 {
     assert(static_cast<bool>(_shutdown));
-    _shutdown->cancel();
+    if (_shutdown->isActive()) {
+        _shutdown->cancel();
+    }
     __tbag_debug("TcpClient::cancelTimeoutShutdown().");
 }
 
 void TcpClient::cancelTimeoutClose()
 {
     assert(static_cast<bool>(_close));
-    _close->cancel();
+    if (_close->isActive()) {
+        _close->cancel();
+    }
     __tbag_debug("TcpClient::cancelTimeoutClose().");
 }
 

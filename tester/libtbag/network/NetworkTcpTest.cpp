@@ -11,6 +11,8 @@
 #include <libtbag/network/details/TcpClient.hpp>
 
 #include <thread>
+#include <memory>
+#include <vector>
 #include <iostream>
 
 using namespace libtbag;
@@ -54,47 +56,141 @@ TEST(NetworkTcpTest, ClientTimeout)
     ASSERT_EQ(1, close);
 }
 
-TEST(NetworkTcpTest, Connection)
+TEST(NetworkTcpTest, MultiEcho)
 {
-//    using namespace uvpp;
-//    Loop loop_server;
-//    Loop loop_client;
-//
-//    FunctionalTcpServer server(loop_server);
-//    FunctionalTcpClient client(loop_client);
-//
-//    server.setOnConnection([&](uerr code){
-//        std::cout << "server/onConnection()\n";
-//        while (true) {
-//            // waiting.
-//        }
-//    });
-//    client.setOnConnect([&](uerr code){
-//        std::cout << "client/onConnect()\n";
-//    });
-//    client.setOnClose([&](){
-//        std::cout << "client/onClose()\n";
-//    });
-//
-//    int const TEST_PORT_NUMBER = 18000;
-//
-//    server.init(ANY_IPV4, TEST_PORT_NUMBER);
-//    client.init(LOOPBACK_IPV4, TEST_PORT_NUMBER, 10);
-//
-//    uerr result_server;
-//    uerr result_client;
-//
-//    std::thread thread_server([&](){
-//        result_server = loop_server.run();
-//    });
-//    std::thread thread_client([&](){
-//        result_client = loop_client.run();
-//    });
-//
-//    thread_server.join();
-//    thread_client.join();
-//
-//    ASSERT_EQ(uerr::UVPP_SUCCESS, result_server);
-//    ASSERT_EQ(uerr::UVPP_SUCCESS, result_client);
+    using namespace uvpp;
+
+    std::size_t const CLIENT_SIZE  = 100;
+    std::string const ECHO_MESSAGE = "ECHO MESSAGE";
+
+    Loop loop_server;
+    FunctionalTcpServer server(loop_server);
+
+    int server_connection   = 0;
+    int server_client_read  = 0;
+    int server_client_write = 0;
+    int server_client_close = 0;
+    int server_close        = 0;
+    uerr server_result = uerr::UVPP_UNKNOWN;
+
+    server.setOnConnection([&](uerr code){
+        if (auto shared = server.accept().lock()) {
+            if (shared->start()) {
+                server_connection++;
+            }
+        }
+    });
+    server.setOnClientRead([&](FunctionalTcpServer::WeakClient node,
+                               uerr code,
+                               char const * buffer,
+                               FunctionalTcpServer::Size size){
+        if (code == uerr::UVPP_SUCCESS) {
+            if (auto shared = node.lock()) {
+                if (shared->stop()) {
+                    server_client_read++;
+                    shared->write(buffer, size);
+                }
+            }
+        }
+    });
+    server.setOnClientWrite([&](FunctionalTcpServer::WeakClient node, uerr code){
+        if (code == uerr::UVPP_SUCCESS) {
+            if (auto shared = node.lock()) {
+                server_client_write++;
+                shared->close();
+            }
+        }
+    });
+    server.setOnClientClose([&](FunctionalTcpServer::WeakClient node){
+        if (auto shared = node.lock()) {
+            server_client_close++;
+        }
+        if (server_client_close >= CLIENT_SIZE) {
+            server.close();
+        }
+    });
+    server.setOnServerClose([&](){
+        server_close++;
+    });
+    server.init(details::ANY_IPV4, 0);
+    int const SERVER_PORT = server.getServer().lock()->getSockPort();
+
+    std::cout << "Server port number: " << SERVER_PORT << std::endl;
+
+    std::thread thread_server([&](){
+        server_result = loop_server.run();
+    });
+
+    // ---------------
+    // CLIENT PROCESS.
+
+    using SharedLoop = std::shared_ptr<Loop>;
+    using LoopVector = std::vector<SharedLoop>;
+
+    using SharedFuncClient = std::shared_ptr<FunctionalTcpClient>;
+    using ClientVector = std::vector<SharedFuncClient>;
+
+    using ThreadVector = std::vector<std::thread>;
+
+    std::vector<uerr> connect_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
+    std::vector<uerr>   write_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
+    std::vector<uerr>    read_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
+    std::vector<uerr>   close_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
+    std::vector<uerr>    loop_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
+
+    ThreadVector cthreads(CLIENT_SIZE);
+    LoopVector     cloops(CLIENT_SIZE);
+    ClientVector  clients(CLIENT_SIZE);
+
+    std::size_t i = 0;
+
+    for (i = 0; i < CLIENT_SIZE; ++i) {
+        cloops.at(i).reset(new Loop());
+        clients.at(i).reset(new FunctionalTcpClient(*(cloops.at(i))));
+        clients.at(i)->setOnConnect([&, i](uerr code){
+            if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size())) {
+                connect_result.at(i) = code;
+            }
+        });
+        clients.at(i)->setOnWrite([&, i](uerr code){
+            if (clients.at(i)->start()) {
+                write_result.at(i) = code;
+            }
+        });
+        clients.at(i)->setOnRead([&, i](uerr code, char const * buffer, TcpClient::Size size){
+            if (clients.at(i)->stop()) {
+                read_result.at(i) = code;
+                clients.at(i)->close();
+            }
+        });
+        clients.at(i)->setOnClose([&, i](){
+            close_result.at(i) = uerr::UVPP_SUCCESS;
+        });
+        clients.at(i)->init(details::LOOPBACK_IPV4, SERVER_PORT);
+
+        cthreads.at(i) = std::thread([&, i](){
+            loop_result.at(i) = cloops.at(i)->run();
+        });
+    }
+
+    for (i = 0; i < CLIENT_SIZE; ++i) {
+        cthreads.at(i).join();
+    }
+    thread_server.join();
+
+    for (i = 0; i < CLIENT_SIZE; ++i) {
+        ASSERT_EQ(uerr::UVPP_SUCCESS, connect_result.at(i));
+        ASSERT_EQ(uerr::UVPP_SUCCESS,   write_result.at(i));
+        ASSERT_EQ(uerr::UVPP_SUCCESS,    read_result.at(i));
+        ASSERT_EQ(uerr::UVPP_SUCCESS,   close_result.at(i));
+        ASSERT_EQ(uerr::UVPP_SUCCESS,    loop_result.at(i));
+    }
+
+    ASSERT_EQ(uerr::UVPP_SUCCESS, server_result);
+    ASSERT_EQ(CLIENT_SIZE, server_connection  );
+    ASSERT_EQ(CLIENT_SIZE, server_client_read );
+    ASSERT_EQ(CLIENT_SIZE, server_client_write);
+    ASSERT_EQ(CLIENT_SIZE, server_client_close);
+    ASSERT_EQ(1, server_close);
 }
 
