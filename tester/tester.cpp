@@ -42,6 +42,10 @@ bool checkNetworkArgument(libtbag::string::Arguments const & args, std::string &
 int main(int argc, char **argv)
 {
     tbInitialize();
+
+    libtbag::log::createDefaultColorConsoleLogger();
+    libtbag::log::setDefaultSeverity(libtbag::log::DEBUG_SEVERITY);
+
     libtbag::signal::registerDefaultStdTerminateHandler();
     libtbag::signal::registerDefaultHandler();
 

@@ -38,14 +38,14 @@ void TimeoutClose::onTimer()
 {
     if (_handle != nullptr) {
         if (_cancel.load() == false) {
-            __tbag_debug("TimeoutClose::onTimer() request handle(@{}[{}]) close.",
+            tDLogD("TimeoutClose::onTimer() request handle(@{}[{}]) close.",
                          static_cast<void*>(_handle), _handle->getName());
             _handle->close();
         } else {
-            __tbag_debug("TimeoutClose::onTimer() request cancel.");
+            tDLogD("TimeoutClose::onTimer() request cancel.");
         }
     } else {
-        __tbag_error("TimeoutClose::onTimer() handle is nullptr.");
+        tDLogE("TimeoutClose::onTimer() handle is nullptr.");
     }
 
     if (_auto_close.load()) {

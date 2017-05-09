@@ -69,7 +69,7 @@ uerr getUerr(int uv_error_code)
 uerr getUerr2(char const * prefix, int uv_error_code)
 {
     if (uv_error_code != 0) {
-        __tbag_error("{} error [{}] {}", prefix, uv_error_code, getUvErrorName(uv_error_code));
+        tDLogE("{} error [{}] {}", prefix, uv_error_code, getUvErrorName(uv_error_code));
         return getUerr(uv_error_code);
     }
     return uerr::UVPP_SUCCESS;
@@ -200,7 +200,7 @@ uerr initAddress(std::string const & ip, int port, sockaddr_in * addr)
 {
     int const CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
-        __tbag_error("initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
+        tDLogE("initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
         return ::libtbag::uvpp::getUerr(CODE);
     }
     return uerr::UVPP_SUCCESS;
@@ -210,7 +210,7 @@ uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
 {
     int const CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
-        __tbag_error("initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
+        tDLogE("initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
         return ::libtbag::uvpp::getUerr(CODE);
     }
     return uerr::UVPP_SUCCESS;

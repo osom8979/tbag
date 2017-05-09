@@ -34,15 +34,15 @@ static void __global_uv_tcp_connect_cb__(uv_connect_t * request, int status)
 
     ConnectRequest * req = static_cast<ConnectRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_tcp_connect_cb__() request.data is nullptr.");
+        tDLogE("__global_uv_tcp_connect_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(req)) {
-        __tbag_error("__global_uv_tcp_connect_cb__() request.data is deleted.");
+        tDLogE("__global_uv_tcp_connect_cb__() request.data is deleted.");
     } else {
         Tcp * s = static_cast<Tcp*>(req->getOwner());
         if (s == nullptr) {
-            __tbag_error("__global_uv_tcp_connect_cb__() request.data.owner is nullptr.");
+            tDLogE("__global_uv_tcp_connect_cb__() request.data.owner is nullptr.");
         } else if (isDeletedAddress(s)) {
-            __tbag_error("__global_uv_tcp_connect_cb__() request.data.owner is deleted.");
+            tDLogE("__global_uv_tcp_connect_cb__() request.data.owner is deleted.");
         } else {
             s->onConnect(*req, getUerr(status));
         }
@@ -208,7 +208,7 @@ uerr Tcp::connect(ConnectRequest & request, sockaddr const * address)
 
 void Tcp::onConnect(ConnectRequest & request, uerr code)
 {
-    __tbag_debug("Tcp::onConnect({}) called.", getErrorName(code));
+    tDLogD("Tcp::onConnect({}) called.", getErrorName(code));
 }
 
 // ----------------
@@ -218,19 +218,19 @@ void Tcp::onConnect(ConnectRequest & request, uerr code)
 bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
 {
     if (tcp.isInit() == false) {
-        __tbag_error("initCommonServerSock() tcp is not initialized.");
+        tDLogE("initCommonServerSock() tcp is not initialized.");
         return false;
     }
 
     uerr const BIND_CODE = tcp.bind(addr);
     if (BIND_CODE != uvpp::uerr::UVPP_SUCCESS) {
-        __tbag_error("initCommonServerSock() tcp bind {} error.", getErrorName(BIND_CODE));
+        tDLogE("initCommonServerSock() tcp bind {} error.", getErrorName(BIND_CODE));
         return false;
     }
 
     uerr const LISTEN_CODE = tcp.listen();
     if (LISTEN_CODE != uerr::UVPP_SUCCESS) {
-        __tbag_error("initCommonServerSock() tcp listen {} error.", getErrorName(LISTEN_CODE));
+        tDLogE("initCommonServerSock() tcp listen {} error.", getErrorName(LISTEN_CODE));
         return false;
     }
     return true;
@@ -241,7 +241,7 @@ bool initCommonServerIpv4(Tcp & tcp, std::string const & ip, int port)
     sockaddr_in addr;
     uerr const CODE = initAddress(ip, port, &addr);
     if (CODE != uvpp::uerr::UVPP_SUCCESS) {
-        __tbag_error("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
         return false;
     }
     return initCommonServerSock(tcp, (sockaddr const *)&addr);
@@ -252,7 +252,7 @@ bool initCommonServerIpv6(Tcp & tcp, std::string const & ip, int port)
     sockaddr_in6 addr;
     uerr const CODE = initAddress(ip, port, &addr);
     if (CODE != uvpp::uerr::UVPP_SUCCESS) {
-        __tbag_error("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
         return false;
     }
     return initCommonServerSock(tcp, (sockaddr const *)&addr);
@@ -272,13 +272,13 @@ bool initCommonServer(Tcp & tcp, std::string const & ip, int port)
 bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr)
 {
     if (tcp.isInit() == false) {
-        __tbag_error("initCommonClientSock() tcp is not initialized.");
+        tDLogE("initCommonClientSock() tcp is not initialized.");
         return false;
     }
 
     uerr const CODE = tcp.connect(request, addr);
     if (CODE != uvpp::uerr::UVPP_SUCCESS) {
-        __tbag_error("initCommonServerSock() tcp connect {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerSock() tcp connect {} error.", getErrorName(CODE));
         return false;
     }
     return true;
@@ -289,7 +289,7 @@ bool initCommonClientIpv4(Tcp & tcp, ConnectRequest & request, std::string const
     sockaddr_in addr;
     uerr const CODE = initAddress(ip, port, &addr);
     if (CODE != uvpp::uerr::UVPP_SUCCESS) {
-        __tbag_error("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
         return false;
     }
     return initCommonClientSock(tcp, request, (sockaddr const *)&addr);
@@ -300,7 +300,7 @@ bool initCommonClientIpv6(Tcp & tcp, ConnectRequest & request, std::string const
     sockaddr_in6 addr;
     uerr const CODE = initAddress(ip, port, &addr);
     if (CODE != uvpp::uerr::UVPP_SUCCESS) {
-        __tbag_error("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
         return false;
     }
     return initCommonClientSock(tcp, request, (sockaddr const *)&addr);

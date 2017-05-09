@@ -25,9 +25,9 @@ static void __global_uv_prepare_cb__(uv_prepare_t * handle)
 {
     Prepare * h = static_cast<Prepare*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_prepare_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_prepare_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_prepare_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_prepare_cb__() handle.data is deleted.");
     } else {
         h->onPrepare();
     }
@@ -74,7 +74,7 @@ uerr Prepare::stop()
 
 void Prepare::onPrepare()
 {
-    __tbag_debug("Prepare::onPrepare() called.");
+    tDLogD("Prepare::onPrepare() called.");
 }
 
 } // namespace uvpp

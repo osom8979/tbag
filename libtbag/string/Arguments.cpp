@@ -34,7 +34,7 @@ Arguments::Arguments(std::string const & name
         , _point_delimiter(point_delimiter)
 {
     if (parse(arguments) == false) {
-        __tbag_error("Arguments::Arguments() parse error.");
+        tDLogE("Arguments::Arguments() parse error.");
     }
 }
 

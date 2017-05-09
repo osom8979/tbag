@@ -88,8 +88,11 @@ TBAG_API bool removeDefaultLogger();
 TBAG_API Logger * getLogger(std::string const & name);
 TBAG_API Logger * getDefaultLogger();
 
-TBAG_API void setLevel(std::string const & name, Severity level);
-TBAG_API void setDefaultLevel(Severity level);
+TBAG_API void setSeverity(std::string const & name, Severity level);
+TBAG_API void setDefaultSeverity(Severity level);
+
+TBAG_API Severity getSeverity(std::string const & name);
+TBAG_API Severity getDefaultSeverity();
 
 template <typename ... Args>
 inline void logging(Logger * logger, Severity level, std::string const & format, Args && ... args)
@@ -184,7 +187,7 @@ NAMESPACE_LIBTBAG_CLOSE
 #define tDLogD(...)  tLogD(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
 
 /**
- * @def __tbag_debug
+ * @def tDLogD
  *
  * @warning
  *  Don't use this macros from user level developers.

@@ -26,9 +26,9 @@ static void __global_uv_timer_cb__(uv_timer_t * handle)
 {
     Timer * t = static_cast<Timer*>(handle->data);
     if (t == nullptr) {
-        __tbag_error("__global_uv_timer_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_timer_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(t)) {
-        __tbag_error("__global_uv_timer_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_timer_cb__() handle.data is deleted.");
     } else {
         t->onTimer();
     }
@@ -117,7 +117,7 @@ uint64_t Timer::getRepeat()
 
 void Timer::onTimer()
 {
-    __tbag_debug("Timer::onTimer() called.");
+    tDLogD("Timer::onTimer() called.");
 }
 
 } // namespace uvpp

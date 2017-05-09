@@ -120,7 +120,7 @@ private:
         auto handlers = getSignalMap();
         auto find_orders = handlers.find(signal);
         if (find_orders == handlers.end()) {
-            __tbag_debug("Not found [{}] signal handlers.", signal);
+            tDLogD("Not found [{}] signal handlers.", signal);
             return;
         }
 
@@ -157,7 +157,7 @@ public:
             auto sname  = ::libtbag::signal::getSignalName(signal); \
             auto strace = ::libtbag::debug::getStackTrace();        \
             if (_logger.empty()) {                                  \
-                __tbag_debug("{} ({}):\n{}", msg, sname, strace);   \
+                tDLogD("{} ({}):\n{}", msg, sname, strace);   \
             } else {                                                \
                 tLogA(_logger, "{} ({}):\n{}", msg, sname, strace); \
             }                                                       \

@@ -38,7 +38,7 @@ struct ThreadPool::ThreadPimpl
     {
         int error_code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
         if (error_code != 0) {
-            __tbag_error("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, uvpp::getUvErrorName(error_code));
+            tDLogE("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, uvpp::getUvErrorName(error_code));
             throw std::bad_alloc();
         }
     }
@@ -90,13 +90,13 @@ bool ThreadPool::createThreads(std::size_t size)
         }
 
         if (result == false) {
-            __tbag_error("ThreadPool::createThreads({}) ThreadPimpl constructor error.", size);
+            tDLogE("ThreadPool::createThreads({}) ThreadPimpl constructor error.", size);
             clearThreads();
             _exit = true;
         }
         _signal.broadcast();
     } else {
-        __tbag_error("ThreadPool::createThreads({}) IllegalArgumentException: pool size is 0.", size);
+        tDLogE("ThreadPool::createThreads({}) IllegalArgumentException: pool size is 0.", size);
     }
     _mutex.unlock();
 

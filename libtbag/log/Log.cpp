@@ -141,7 +141,7 @@ Logger * getDefaultLogger()
     return getLogger(TBAG_DEFAULT_LOGGER_NAME);
 }
 
-void setLevel(std::string const & name, Severity level)
+void setSeverity(std::string const & name, Severity level)
 {
     Logger * logger = getLogger(name);
     if (logger != nullptr) {
@@ -149,9 +149,23 @@ void setLevel(std::string const & name, Severity level)
     }
 }
 
-void setDefaultLevel(Severity level)
+void setDefaultSeverity(Severity level)
 {
-    setLevel(TBAG_DEFAULT_LOGGER_NAME, level);
+    setSeverity(TBAG_DEFAULT_LOGGER_NAME, level);
+}
+
+Severity getSeverity(std::string const & name)
+{
+    Logger * logger = getLogger(name);
+    if (logger != nullptr) {
+        return logger->getSeverity();
+    }
+    return OFF_SEVERITY;
+}
+
+Severity getDefaultSeverity()
+{
+    return getSeverity(TBAG_DEFAULT_LOGGER_NAME);
 }
 
 } // namespace log

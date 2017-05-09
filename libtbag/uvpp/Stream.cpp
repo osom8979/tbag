@@ -29,15 +29,15 @@ static void __global_uv_shutdown_cb__(uv_shutdown_t * request, int status)
 
     ShutdownRequest * req = static_cast<ShutdownRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_shutdown_cb__() request.data is nullptr.");
+        tDLogE("__global_uv_shutdown_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(req)) {
-        __tbag_error("__global_uv_shutdown_cb__() request.data is deleted.");
+        tDLogE("__global_uv_shutdown_cb__() request.data is deleted.");
     } else {
         Stream * s = static_cast<Stream*>(req->getOwner());
         if (s == nullptr) {
-            __tbag_error("__global_uv_shutdown_cb__() request.data.owner is nullptr.");
+            tDLogE("__global_uv_shutdown_cb__() request.data.owner is nullptr.");
         } else if (isDeletedAddress(s)) {
-            __tbag_error("__global_uv_shutdown_cb__() request.data.owner is deleted.");
+            tDLogE("__global_uv_shutdown_cb__() request.data.owner is deleted.");
         } else {
             s->onShutdown(*req, getUerr(status));
         }
@@ -52,9 +52,9 @@ static void __global_uv_connection_cb__(uv_stream_t * server, int status)
 
     Stream * s = static_cast<Stream*>(server->data);
     if (s == nullptr) {
-        __tbag_error("__global_uv_connection_cb__() server.data is nullptr.");
+        tDLogE("__global_uv_connection_cb__() server.data is nullptr.");
     } else if (isDeletedAddress(s)) {
-        __tbag_error("__global_uv_connection_cb__() server.data is deleted.");
+        tDLogE("__global_uv_connection_cb__() server.data is deleted.");
     } else {
         s->onConnection(getUerr(status));
     }
@@ -73,9 +73,9 @@ static void __global_uv_stream_alloc_cb__(uv_handle_t * handle, size_t suggested
 
     Stream * s = static_cast<Stream*>(handle->data);
     if (s == nullptr) {
-        __tbag_error("__global_uv_stream_alloc_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_stream_alloc_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(s)) {
-        __tbag_error("__global_uv_stream_alloc_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_stream_alloc_cb__() handle.data is deleted.");
     } else {
         auto result_buffer = s->onAlloc(suggested_size);
         buf->base = result_buffer.buffer;
@@ -95,9 +95,9 @@ static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t 
 
     Stream * s = static_cast<Stream*>(stream->data);
     if (s == nullptr) {
-        __tbag_error("__global_uv_read_cb__() stream.data is nullptr.");
+        tDLogE("__global_uv_read_cb__() stream.data is nullptr.");
     } else if (isDeletedAddress(s)) {
-        __tbag_error("__global_uv_read_cb__() stream.data is deleted.");
+        tDLogE("__global_uv_read_cb__() stream.data is deleted.");
     } else {
         uerr code;
         if (nread >= 0){
@@ -117,15 +117,15 @@ static void __global_uv_write_cb__(uv_write_t * request, int status)
 
     WriteRequest * req = static_cast<WriteRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_write_cb__() request.data is nullptr.");
+        tDLogE("__global_uv_write_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(req)) {
-        __tbag_error("__global_uv_write_cb__() request.data is deleted.");
+        tDLogE("__global_uv_write_cb__() request.data is deleted.");
     } else {
         Stream * s = static_cast<Stream*>(req->getOwner());
         if (s == nullptr) {
-            __tbag_error("__global_uv_write_cb__() request.data.owner is nullptr.");
+            tDLogE("__global_uv_write_cb__() request.data.owner is nullptr.");
         } else if (isDeletedAddress(s)) {
-            __tbag_error("__global_uv_write_cb__() request.data.owner is deleted.");
+            tDLogE("__global_uv_write_cb__() request.data.owner is deleted.");
         } else {
             s->onWrite(*req, getUerr(status));
         }
@@ -139,7 +139,7 @@ static void __global_uv_write_cb__(uv_write_t * request, int status)
 Stream::Stream(uhandle type) : Handle(type)
 {
     if (isStream() == false) {
-        __tbag_error("Stream::Stream({}) type is not stream type", static_cast<int>(type));
+        tDLogE("Stream::Stream({}) type is not stream type", static_cast<int>(type));
         throw std::bad_alloc();
     }
 }
@@ -254,7 +254,7 @@ uerr Stream::stopRead()
 uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
 {
     if (infos_size > getBufferInfoSizeMax()) {
-        __tbag_error("Stream::write() buffer info size too large.");
+        tDLogE("Stream::write() buffer info size too large.");
         return uerr::UVPP_ILLARGS;
     }
 
@@ -286,7 +286,7 @@ uerr Stream::write(WriteRequest & request, char const * buffer, std::size_t size
 std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, uerr * result)
 {
     if (infos_size > getBufferInfoSizeMax()) {
-        __tbag_error("Stream::tryWrite() buffer info size too large.");
+        tDLogE("Stream::tryWrite() buffer info size too large.");
         if (result != nullptr) {
             *result = uerr::UVPP_ILLARGS;
         }
@@ -329,28 +329,28 @@ std::size_t Stream::tryWrite(char const * buffer, std::size_t size, uerr * resul
 
 void Stream::onShutdown(ShutdownRequest & request, uerr code)
 {
-    __tbag_debug("Stream::onShutdown({}) called.", getErrorName(code));
+    tDLogD("Stream::onShutdown({}) called.", getErrorName(code));
 }
 
 void Stream::onConnection(uerr code)
 {
-    __tbag_debug("Stream::onConnection({}) called.", getErrorName(code));
+    tDLogD("Stream::onConnection({}) called.", getErrorName(code));
 }
 
 binf Stream::onAlloc(std::size_t suggested_size)
 {
-    __tbag_debug("Stream::onAlloc() called (suggested_size:{}).", suggested_size);
+    tDLogD("Stream::onAlloc() called (suggested_size:{}).", suggested_size);
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
 void Stream::onRead(uerr code, char const * buffer, std::size_t size)
 {
-    __tbag_debug("Stream::onRead({}) called (size:{}).", getErrorName(code), size);
+    tDLogD("Stream::onRead({}) called (size:{}).", getErrorName(code), size);
 }
 
 void Stream::onWrite(WriteRequest & request, uerr code)
 {
-    __tbag_debug("Stream::onWrite({}) called.", getErrorName(code));
+    tDLogD("Stream::onWrite({}) called.", getErrorName(code));
 }
 
 } // namespace uvpp

@@ -30,15 +30,15 @@ static void __global_uv_pipe_connect_cb__(uv_connect_t * request, int status)
 
     ConnectRequest * req = static_cast<ConnectRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_pipe_connect_cb__() request.data is nullptr.");
+        tDLogE("__global_uv_pipe_connect_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(req)) {
-        __tbag_error("__global_uv_pipe_connect_cb__() request.data is deleted.");
+        tDLogE("__global_uv_pipe_connect_cb__() request.data is deleted.");
     } else {
         Pipe * p = static_cast<Pipe*>(req->getOwner());
         if (p == nullptr) {
-            __tbag_error("__global_uv_pipe_connect_cb__() request.data.owner is nullptr.");
+            tDLogE("__global_uv_pipe_connect_cb__() request.data.owner is nullptr.");
         } else if (isDeletedAddress(p)) {
-            __tbag_error("__global_uv_pipe_connect_cb__() request.data.owner is deleted.");
+            tDLogE("__global_uv_pipe_connect_cb__() request.data.owner is deleted.");
         } else {
             p->onConnect(*req, getUerr(status));
         }
@@ -171,7 +171,7 @@ int Pipe::getPendingType()
 
 void Pipe::onConnect(ConnectRequest & request, uerr code)
 {
-    __tbag_debug("Pipe::onConnect({}) called.", getErrorName(code));
+    tDLogD("Pipe::onConnect({}) called.", getErrorName(code));
 }
 
 } // namespace uvpp

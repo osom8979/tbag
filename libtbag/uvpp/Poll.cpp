@@ -25,9 +25,9 @@ static void __global_uv_pool_cb__(uv_poll_t * handle, int status, int events)
 {
     Poll * h = static_cast<Poll*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_pool_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_pool_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_pool_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_pool_cb__() handle.data is deleted.");
     } else {
         h->onPoll(getUerr(status), static_cast<Poll::EventType>(events));
     }
@@ -108,7 +108,7 @@ uerr Poll::stop()
 
 void Poll::onPoll(uerr status, EventType events)
 {
-    __tbag_debug("Poll::onPoll({}, {}) called.", getErrorName(status), static_cast<int>(events));
+    tDLogD("Poll::onPoll({}, {}) called.", getErrorName(status), static_cast<int>(events));
 }
 
 } // namespace uvpp

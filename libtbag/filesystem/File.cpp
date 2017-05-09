@@ -37,7 +37,7 @@ bool File::open(std::string const & path, Flags flags, int mode)
         return true;
     }
 
-    __tbag_error("File::open({}) error.", path);
+    tDLogE("File::open({}) error.", path);
     return false;
 }
 
@@ -75,7 +75,7 @@ File::FileState File::getState() const
 {
     FileState state = {0};
     if (details::getStateWithFile(_file, &state) == false) {
-        __tbag_error("File::getState() result error.");
+        tDLogE("File::getState() result error.");
     }
     return state;
 }

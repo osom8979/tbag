@@ -37,9 +37,9 @@ static void __global_uv_fs_poll_cb__(uv_fs_poll_t * handle, int status, uv_stat_
 
     FsPoll * h = static_cast<FsPoll*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_fs_poll_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_fs_poll_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_fs_poll_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_fs_poll_cb__() handle.data is deleted.");
     } else {
         using namespace filesystem::details;
         FileState prev_state = {0,};
@@ -127,7 +127,7 @@ std::string FsPoll::getPath()
 
 void FsPoll::onFsPoll(uerr status, FileState const & prev, FileState const & curr)
 {
-    __tbag_debug("FsPoll::onFsPoll({}) called.", getErrorName(status));
+    tDLogD("FsPoll::onFsPoll({}) called.", getErrorName(status));
 }
 
 } // namespace uvpp

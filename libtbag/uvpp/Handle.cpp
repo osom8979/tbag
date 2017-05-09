@@ -29,15 +29,15 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
 {
     Handle * h = static_cast<Handle*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_close_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_close_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_close_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_close_cb__() handle.data is deleted.");
     } else {
         Loop * loop = nullptr;
         if (handle->loop == nullptr) {
-            __tbag_error("__global_uv_close_cb__() handle.loop is nullptr.");
+            tDLogE("__global_uv_close_cb__() handle.loop is nullptr.");
         } else if (isDeletedAddress(handle->loop)) {
-            __tbag_error("__global_uv_close_cb__() handle.loop is deleted.");
+            tDLogE("__global_uv_close_cb__() handle.loop is deleted.");
         } else {
             loop = static_cast<Loop*>(handle->loop->data);
         }
@@ -59,7 +59,7 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
 Handle::Handle(uhandle type) : Native(static_cast<utype>(type))
 {
     if (isHandle() == false) {
-        __tbag_error("Handle::Handle({}) type is not handle type", static_cast<int>(type));
+        tDLogE("Handle::Handle({}) type is not handle type", static_cast<int>(type));
         throw std::bad_alloc();
     }
 
@@ -195,7 +195,7 @@ int Handle::getRecvBufferSize() const
 void Handle::setSendBufferSize(int size)
 {
     if (size <= 0) {
-        __tbag_error("Handle::setSendBufferSize({}) size must be greater than zero.", size);
+        tDLogE("Handle::setSendBufferSize({}) size must be greater than zero.", size);
         return;
     }
     ::uv_send_buffer_size(Parent::cast<uv_handle_t>(), &size);
@@ -204,7 +204,7 @@ void Handle::setSendBufferSize(int size)
 void Handle::setRecvBufferSize(int size)
 {
     if (size <= 0) {
-        __tbag_error("Handle::setRecvBufferSize({}) size must be greater than zero.", size);
+        tDLogE("Handle::setRecvBufferSize({}) size must be greater than zero.", size);
         return;
     }
     ::uv_recv_buffer_size(Parent::cast<uv_handle_t>(), &size);
@@ -216,12 +216,12 @@ void Handle::setRecvBufferSize(int size)
 
 void Handle::onClose()
 {
-    __tbag_debug("Handle::onClose() @{} called.", static_cast<void*>(this));
+    tDLogD("Handle::onClose() @{} called.", static_cast<void*>(this));
 }
 
 void Handle::onWalk(void * arg)
 {
-    __tbag_debug("Handle::onWalk() @{} called.", static_cast<void*>(this));
+    tDLogD("Handle::onWalk() @{} called.", static_cast<void*>(this));
 }
 
 } // namespace uvpp

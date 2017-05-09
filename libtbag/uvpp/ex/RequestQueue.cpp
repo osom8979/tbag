@@ -55,7 +55,7 @@ RequestQueue::WeakRequest RequestQueue::create(Handle * owner)
         Request * request = new Request(_type, owner);
         auto insert_itr = _active.insert(ActiveMap::value_type(RequestKey(request), SharedRequest(request)));
         if (insert_itr.second == false) {
-            __tbag_error("RequestQueue::create() insert request error.");
+            tDLogE("RequestQueue::create() insert request error.");
             return WeakRequest();
         }
         return WeakRequest(insert_itr.first->second);

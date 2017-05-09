@@ -58,7 +58,7 @@ template <typename T>
 inline bool releaseNode(Node<T> ** node)
 {
     if (node == nullptr || (*node) == nullptr) {
-        __tbag_error("releaseNode() NullPointerException.");
+        tDLogE("releaseNode() NullPointerException.");
         return false;
     }
 

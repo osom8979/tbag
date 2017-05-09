@@ -34,6 +34,12 @@ private:
     static bool  _init;
 
 public:
+    inline static bool isInit()
+    {
+        Guard guard(_mutex);
+        return _init;
+    }
+
     static bool init(tbInitParam * param = nullptr)
     {
         Guard guard(_mutex);
@@ -48,6 +54,7 @@ public:
         __tbag_debug(LIBTBAG_MAIN_TITLE);
         __tbag_debug("Default locale name: {}", libtbag::locale::getDefaultIcuLocaleName());
 
+        _init = true;
         return true;
     }
 
@@ -62,6 +69,7 @@ public:
         libtbag::util::releaseSingletonObjects();
         libtbag::uvpp::release();
 
+        _init = false;
         return true;
     }
 };
@@ -137,11 +145,19 @@ int tbGetPatchVersion()
 
 tbBOOL tbInitialize(tbInitParam * param)
 {
+    if (libtbag::LibtbagInitializer::isInit()) {
+        __tbag_debug("It has already been initialized.");
+        return AB_TRUE;
+    }
     return libtbag::LibtbagInitializer::init(param) ? AB_TRUE : AB_FALSE;
 }
 
 tbBOOL tbRelease()
 {
+    if (libtbag::LibtbagInitializer::isInit() == false) {
+        __tbag_debug("It has already been release.");
+        return AB_TRUE;
+    }
     return libtbag::LibtbagInitializer::release() ? AB_TRUE : AB_FALSE;
 }
 

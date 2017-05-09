@@ -26,9 +26,9 @@ static void __global_uv_async_cb__(uv_async_t * handle)
 {
     BaseAsync * async = static_cast<BaseAsync*>(handle->data);
     if (async == nullptr) {
-        __tbag_error("__global_uv_async_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_async_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(async)) {
-        __tbag_error("__global_uv_async_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_async_cb__() handle.data is deleted.");
     } else {
         async->onAsync();
     }
@@ -73,7 +73,7 @@ uerr BaseAsync::send()
 
 void BaseAsync::onAsync()
 {
-    __tbag_debug("BaseAsync::onAsync() called.");
+    tDLogD("BaseAsync::onAsync() called.");
 }
 
 // ---------------------

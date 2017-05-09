@@ -29,15 +29,15 @@ static void __global_uv_udp_send_cb__(uv_udp_send_t * request, int status)
 
     UdpSendRequest * req = static_cast<UdpSendRequest*>(request->data);
     if (req == nullptr) {
-        __tbag_error("__global_uv_udp_send_cb__() request.data is nullptr.");
+        tDLogE("__global_uv_udp_send_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(req)) {
-        __tbag_error("__global_uv_udp_send_cb__() request.data is deleted.");
+        tDLogE("__global_uv_udp_send_cb__() request.data is deleted.");
     } else {
         Udp * s = static_cast<Udp*>(req->getOwner());
         if (s == nullptr) {
-            __tbag_error("__global_uv_udp_send_cb__() request.data.owner is nullptr.");
+            tDLogE("__global_uv_udp_send_cb__() request.data.owner is nullptr.");
         } else if (isDeletedAddress(s)) {
-            __tbag_error("__global_uv_udp_send_cb__() request.data.owner is deleted.");
+            tDLogE("__global_uv_udp_send_cb__() request.data.owner is deleted.");
         } else {
             s->onSend(*req, getUerr(status));
         }
@@ -57,9 +57,9 @@ static void __global_uv_udp_alloc_cb__(uv_handle_t * handle, size_t suggested_si
 
     Udp * u = static_cast<Udp*>(handle->data);
     if (u == nullptr) {
-        __tbag_error("__global_uv_udp_alloc_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_udp_alloc_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(u)) {
-        __tbag_error("__global_uv_udp_alloc_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_udp_alloc_cb__() handle.data is deleted.");
     } else {
         auto result_buffer = u->onAlloc(suggested_size);
         buf->base = result_buffer.buffer;
@@ -92,9 +92,9 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
 
     Udp * u = static_cast<Udp*>(handle->data);
     if (u == nullptr) {
-        __tbag_error("__global_uv_udp_recv_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_udp_recv_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(u)) {
-        __tbag_error("__global_uv_udp_recv_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_udp_recv_cb__() handle.data is deleted.");
     } else {
         uerr code;
         if (nread >= 0){
@@ -279,7 +279,7 @@ uerr Udp::setTtl(int ttl)
 uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
 {
     if (infos_size > getBufferInfoSizeMax()) {
-        __tbag_error("Udp::send() buffer info size too large.");
+        tDLogE("Udp::send() buffer info size too large.");
         return uerr::UVPP_ILLARGS;
     }
 
@@ -325,7 +325,7 @@ uerr Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, 
 std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, uerr * result)
 {
     if (infos_size > getBufferInfoSizeMax()) {
-        __tbag_error("Udp::trySend() buffer info size too large.");
+        tDLogE("Udp::trySend() buffer info size too large.");
         if (result != nullptr) {
             *result = uerr::UVPP_ILLARGS;
         }
@@ -396,18 +396,18 @@ uerr Udp::stopRecv()
 
 void Udp::onSend(UdpSendRequest & request, uerr code)
 {
-    __tbag_debug("Udp::onSend({}) called.", getErrorName(code));
+    tDLogD("Udp::onSend({}) called.", getErrorName(code));
 }
 
 binf Udp::onAlloc(std::size_t suggested_size)
 {
-    __tbag_debug("Udp::onAlloc() called (suggested_size:{}).", suggested_size);
+    tDLogD("Udp::onAlloc() called (suggested_size:{}).", suggested_size);
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
 void Udp::onRead(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
 {
-    __tbag_debug("Udp::onRead({}) called (size:{}).", getErrorName(code), size);
+    tDLogD("Udp::onRead({}) called (size:{}).", getErrorName(code), size);
 }
 
 } // namespace uvpp

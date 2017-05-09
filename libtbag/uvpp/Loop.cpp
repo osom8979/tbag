@@ -26,15 +26,15 @@ namespace uvpp {
 static void __global_uv_walk_cb__(uv_handle_t * handle, void * arg)
 {
     if (handle->loop == nullptr) {
-        __tbag_error("__global_uv_walk_cb__() handle.loop is nullptr.");
+        tDLogE("__global_uv_walk_cb__() handle.loop is nullptr.");
     } else if (isDeletedAddress(handle->loop)) {
-        __tbag_error("__global_uv_walk_cb__() handle.loop is deleted.");
+        tDLogE("__global_uv_walk_cb__() handle.loop is deleted.");
     } else {
         BaseLoop * loop = static_cast<BaseLoop*>(handle->loop->data);
         if (loop == nullptr) {
-            __tbag_error("__global_uv_walk_cb__() handle.loop.data is nullptr.");
+            tDLogE("__global_uv_walk_cb__() handle.loop.data is nullptr.");
         } else if (isDeletedAddress(loop)) {
-            __tbag_error("__global_uv_walk_cb__() handle.loop.data is deleted.");
+            tDLogE("__global_uv_walk_cb__() handle.loop.data is deleted.");
         } else {
             loop->onWalk(handle, arg);
         }
@@ -50,7 +50,7 @@ BaseLoop::BaseLoop() : Native(utype::LOOP), _running(false)
     // Initializes the given uv_loop_t structure.
     int const CODE = ::uv_loop_init(Parent::cast<uv_loop_t>());
     if (CODE != 0) {
-        __tbag_debug("BaseLoop::BaseLoop() error [{}] {}", CODE, getUvErrorName(CODE));
+        tDLogD("BaseLoop::BaseLoop() error [{}] {}", CODE, getUvErrorName(CODE));
         throw std::bad_alloc();
     }
 
@@ -81,7 +81,7 @@ uerr BaseLoop::close()
 uerr BaseLoop::run(RunMode mode)
 {
     if (_running.load()) {
-        __tbag_error("BaseLoop::run() already working");
+        tDLogE("BaseLoop::run() already working");
         return uerr::UVPP_EALREADY;
     }
 
@@ -175,15 +175,15 @@ void BaseLoop::walk(void * arg)
 void BaseLoop::onWalk(void * native_handle, void * arg)
 {
     if (native_handle == nullptr) {
-        __tbag_error("BaseLoop::onWalk() native_handle is nullptr.");
+        tDLogE("BaseLoop::onWalk() native_handle is nullptr.");
     } else if (isDeletedAddress(native_handle)) {
-        __tbag_error("BaseLoop::onWalk() native_handle is deleted.");
+        tDLogE("BaseLoop::onWalk() native_handle is deleted.");
     } else {
         Handle * handle = static_cast<Handle*>(static_cast<uv_handle_t*>(native_handle)->data);
         if (handle == nullptr) {
-            __tbag_error("BaseLoop::onWalk() handle is nullptr.");
+            tDLogE("BaseLoop::onWalk() handle is nullptr.");
         } else if (isDeletedAddress(handle)) {
-            __tbag_error("BaseLoop::onWalk() handle is deleted.");
+            tDLogE("BaseLoop::onWalk() handle is deleted.");
         } else {
             handle->onWalk(arg);
         }
@@ -238,7 +238,7 @@ Loop::~Loop()
 
         // RE-TRY.
         if (Parent::close() != uerr::UVPP_SUCCESS) {
-            __tbag_error("Loop::~Loop() error.");
+            tDLogE("Loop::~Loop() error.");
         }
     }
 }
@@ -286,11 +286,11 @@ bool Loop::eraseChildHandle(void * native_handle)
     std::string const HANDLE_NAME = weak.lock()->getName();
 
     if (_handles.erase(NativeHandle(native_handle)) == 1U) {
-        __tbag_debug("Loop::eraseChildHandle(@{}[{}]) success.", HANDLE_ADDRESS, HANDLE_NAME);
+        tDLogD("Loop::eraseChildHandle(@{}[{}]) success.", HANDLE_ADDRESS, HANDLE_NAME);
         return true;
     }
 
-    __tbag_error("Loop::eraseChildHandle(@{}[{}]) failure.", HANDLE_ADDRESS, HANDLE_NAME);
+    tDLogE("Loop::eraseChildHandle(@{}[{}]) failure.", HANDLE_ADDRESS, HANDLE_NAME);
     return false;
 #else
     return _handles.erase(NativeHandle(native_handle)) == 1U;
@@ -306,11 +306,11 @@ Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
 {
     auto itr = _handles.insert(HandleMap::value_type(NativeHandle(h->get()), h));
     if (itr.second) {
-        __tbag_debug("Loop::insertChildHandle(@{}[{}]) success.", static_cast<void*>(h.get()), h->getName());
+        tDLogD("Loop::insertChildHandle(@{}[{}]) success.", static_cast<void*>(h.get()), h->getName());
         return WeakHandle(itr.first->second);
     }
 
-    __tbag_error("Loop::insertChildHandle(@{}[{}]) failure.", static_cast<void*>(h.get()), h->getName());
+    tDLogE("Loop::insertChildHandle(@{}[{}]) failure.", static_cast<void*>(h.get()), h->getName());
     return WeakHandle();
 }
 

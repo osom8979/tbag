@@ -30,7 +30,7 @@ Tty::Tty(Loop & loop, ufile fd, bool readable) : Tty()
     }
 
     if (guessHandle(fd) == false) {
-        __tbag_error("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
+        tDLogE("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
     }
 }
 
@@ -41,7 +41,7 @@ Tty::Tty(Loop & loop, GeneralFile fd) : Tty()
     }
 
     if (guessHandle(fd) == false) {
-        __tbag_error("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
+        tDLogE("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
     }
 }
 

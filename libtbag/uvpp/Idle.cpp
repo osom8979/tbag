@@ -26,9 +26,9 @@ static void __global_uv_idle_cb__(uv_idle_t * handle)
 {
     Idle * h = static_cast<Idle*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_idle_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_idle_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_idle_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_idle_cb__() handle.data is deleted.");
     } else {
         h->onIdle();
     }
@@ -79,7 +79,7 @@ uerr Idle::stop()
 
 void Idle::onIdle()
 {
-    __tbag_debug("Idle::onIdle() called.");
+    tDLogD("Idle::onIdle() called.");
 }
 
 } // namespace uvpp

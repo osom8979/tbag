@@ -28,7 +28,7 @@ Native::Native(utype t) : TYPE(t), _user(nullptr)
     TBAG_UV_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     default:
-        __tbag_error("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE));
+        tDLogE("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE));
         return;
     }
     // @formatter:on

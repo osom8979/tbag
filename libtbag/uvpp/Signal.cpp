@@ -25,9 +25,9 @@ static void __global_uv_signal_cb__(uv_signal_t * handle, int signum)
 {
     Signal * h = static_cast<Signal*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_signal_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_signal_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_signal_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_signal_cb__() handle.data is deleted.");
     } else {
         h->onSignal(signum);
     }
@@ -92,7 +92,7 @@ uerr Signal::stop()
 
 void Signal::onSignal(int signum)
 {
-    __tbag_debug("Signal::onSignal({}) called.", signum);
+    tDLogD("Signal::onSignal({}) called.", signum);
 }
 
 } // namespace uvpp

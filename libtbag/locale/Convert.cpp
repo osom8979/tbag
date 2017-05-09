@@ -49,7 +49,7 @@ std::wstring mbsToWcs(std::string const & path, unsigned int code_page)
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::wstring());
 
     if (path.empty()) {
-        __tbag_error("Illegal argument: path is 0 length.");
+        tDLogE("Illegal argument: path is 0 length.");
         return std::wstring();
     }
 
@@ -68,7 +68,7 @@ std::wstring mbsToWcs(std::string const & path, unsigned int code_page)
         // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
         // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
         // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
-        __tbag_error("MultiByteToWideChar() ERROR: {}", GetLastError());
+        tDLogE("MultiByteToWideChar() ERROR: {}", GetLastError());
         return std::wstring();
     }
 
@@ -87,7 +87,7 @@ std::string wcsToMbs(std::wstring const & path, unsigned int code_page)
     TBAG_ASSERT_WINDOWS_NOT_IMPLEMENT(std::string());
 
     if (path.empty()) {
-        __tbag_error("Illegal argument: path is 0 length.");
+        tDLogE("Illegal argument: path is 0 length.");
         return std::string();
     }
 
@@ -106,7 +106,7 @@ std::string wcsToMbs(std::wstring const & path, unsigned int code_page)
         // ERROR_INVALID_FLAGS:          // The values supplied for flags were not valid.
         // ERROR_INVALID_PARAMETER:      // Any of the parameter values was invalid.
         // ERROR_NO_UNICODE_TRANSLATION: // Invalid Unicode was found in a string.
-        __tbag_error("WideCharToMultiByte() ERROR: {}", GetLastError());
+        tDLogE("WideCharToMultiByte() ERROR: {}", GetLastError());
         return std::string();
     }
 
@@ -174,7 +174,7 @@ bool convertFromUtf8(std::string const & utf8, std::string const & to_charset, s
     Converter converter(to_charset);
 
     if (U_FAILURE(converter.getStatus())) {
-        //__tbag_error("convertFromUtf8() error[{}] {}", converter.getIntegerStatus(), u_errorName(converter.getStatus()));
+        //tDLogE("convertFromUtf8() error[{}] {}", converter.getIntegerStatus(), u_errorName(converter.getStatus()));
         return false;
     }
 
@@ -186,7 +186,7 @@ bool convertFromUtf8(std::string const & utf8, std::string const & to_charset, s
     int32_t result_size = ucnv_fromUChars(converter.get(), nullptr, 0, unicode.getBuffer(), unicode.length(), &status);
 
     if (status != U_BUFFER_OVERFLOW_ERROR) {
-        //__tbag_error("convertFromUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        //tDLogE("convertFromUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
         return false;
     }
 
@@ -197,7 +197,7 @@ bool convertFromUtf8(std::string const & utf8, std::string const & to_charset, s
     result_size = ucnv_fromUChars(converter.get(), &result[0], result.size(), unicode.getBuffer(), unicode.length(), &status);
 
     if (U_FAILURE(status)) {
-        //__tbag_error("convertFromUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        //tDLogE("convertFromUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
         return false;
     }
 
@@ -209,7 +209,7 @@ bool convertToUtf8(std::string const & from_string, std::string const & from_cha
     Converter converter(from_charset);
 
     if (U_FAILURE(converter.getStatus())) {
-        //__tbag_error("convertToUtf8() error[{}] {}", converter.getIntegerStatus(), u_errorName(converter.getStatus()));
+        //tDLogE("convertToUtf8() error[{}] {}", converter.getIntegerStatus(), u_errorName(converter.getStatus()));
         return false;
     }
 
@@ -219,7 +219,7 @@ bool convertToUtf8(std::string const & from_string, std::string const & from_cha
     int32_t result_size = ucnv_toUChars(converter.get(), nullptr, 0, from_string.c_str(), from_string.size(), &status);
 
     if (status != U_BUFFER_OVERFLOW_ERROR) {
-        //__tbag_error("convertToUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        //tDLogE("convertToUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
         return false;
     }
 
@@ -232,7 +232,7 @@ bool convertToUtf8(std::string const & from_string, std::string const & from_cha
     result_size = ucnv_toUChars_57(converter.get(), &unicode_buffer[0], unicode_buffer.size(), from_string.c_str(), from_string.size(), &status);
 
     if (U_FAILURE(status)) {
-        //__tbag_error("convertToUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
+        //tDLogE("convertToUtf8() error[{}] {}", static_cast<int>(status), u_errorName(status));
         return false;
     }
 

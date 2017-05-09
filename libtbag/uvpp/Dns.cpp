@@ -29,9 +29,9 @@ static void __global_uv_getaddrinfo_cb__(uv_getaddrinfo_t * req, int status, str
 
     DnsAddrInfo * r = static_cast<DnsAddrInfo*>(req->data);
     if (r == nullptr) {
-        __tbag_error("__global_uv_getaddrinfo_cb__() request.data is nullptr.");
+        tDLogE("__global_uv_getaddrinfo_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(r)) {
-        __tbag_error("__global_uv_getaddrinfo_cb__() request.data is deleted.");
+        tDLogE("__global_uv_getaddrinfo_cb__() request.data is deleted.");
     } else {
         r->onGetAddrInfo(status, res);
     }
@@ -44,9 +44,9 @@ static void __global_uv_getnameinfo_cb__(uv_getnameinfo_t * req, int status, cha
 
     DnsNameInfo * r = static_cast<DnsNameInfo*>(req->data);
     if (r == nullptr) {
-        __tbag_error("__global_uv_getnameinfo_cb__() request.data is nullptr.");
+        tDLogE("__global_uv_getnameinfo_cb__() request.data is nullptr.");
     } else if (isDeletedAddress(r)) {
-        __tbag_error("__global_uv_getnameinfo_cb__() request.data is deleted.");
+        tDLogE("__global_uv_getnameinfo_cb__() request.data is deleted.");
     } else {
         std::string hostname_str;
         std::string service_str;
@@ -143,7 +143,7 @@ void DnsAddrInfo::freeAddrInfo(struct addrinfo * ai)
 
 void DnsAddrInfo::onGetAddrInfo(int status, struct addrinfo * res)
 {
-    __tbag_debug("DnsAddrInfo::onGetAddrInfo({}) called.", status);
+    tDLogD("DnsAddrInfo::onGetAddrInfo({}) called.", status);
 }
 
 // ---------------------------
@@ -212,7 +212,7 @@ uerr DnsNameInfo::requestNameInfo(Loop & loop, struct sockaddr const * addr, int
 
 void DnsNameInfo::onGetNameInfo(int status, std::string const & hostname, std::string const & service)
 {
-    __tbag_debug("DnsNameInfo::onGetNameInfo({}, {}, {}) called.", status, hostname, service);
+    tDLogD("DnsNameInfo::onGetNameInfo({}, {}, {}) called.", status, hostname, service);
 }
 
 } // namespace uvpp

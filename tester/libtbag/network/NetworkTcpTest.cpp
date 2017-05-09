@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <libtbag/log/Log.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/details/TcpServer.hpp>
 #include <libtbag/network/details/TcpClient.hpp>
@@ -58,10 +59,18 @@ TEST(NetworkTcpTest, ClientTimeout)
 
 TEST(NetworkTcpTest, MultiEcho)
 {
+    // Disable logging.
+    auto const SAVE_SEVERITY = libtbag::log::getDefaultSeverity();
+    libtbag::log::setDefaultSeverity(libtbag::log::OFF_SEVERITY);
+
     using namespace uvpp;
 
     std::size_t const CLIENT_SIZE  = 100;
     std::string const ECHO_MESSAGE = "ECHO MESSAGE";
+
+    // ---------------
+    // SERVER PROCESS.
+    // ---------------
 
     Loop loop_server;
     FunctionalTcpServer server(loop_server);
@@ -123,6 +132,7 @@ TEST(NetworkTcpTest, MultiEcho)
 
     // ---------------
     // CLIENT PROCESS.
+    // ---------------
 
     using SharedLoop = std::shared_ptr<Loop>;
     using LoopVector = std::vector<SharedLoop>;
@@ -192,5 +202,7 @@ TEST(NetworkTcpTest, MultiEcho)
     ASSERT_EQ(CLIENT_SIZE, server_client_write);
     ASSERT_EQ(CLIENT_SIZE, server_client_close);
     ASSERT_EQ(1, server_close);
+
+    libtbag::log::setDefaultSeverity(SAVE_SEVERITY);
 }
 

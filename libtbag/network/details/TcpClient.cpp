@@ -37,7 +37,7 @@ bool TcpRealClient::init(String const & ip, int port)
 
 void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
 {
-    __tbag_debug("TcpRealClient::onConnect({})", uvpp::getErrorName(code));
+    tDLogD("TcpRealClient::onConnect({})", uvpp::getErrorName(code));
 
     {   // Update parent state.
         Guard guard(_parent._mutex);
@@ -49,7 +49,7 @@ void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
 
 void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
 {
-    __tbag_debug("TcpRealClient::onShutdown({})", uvpp::getErrorName(code));
+    tDLogD("TcpRealClient::onShutdown({})", uvpp::getErrorName(code));
 
     {   // Update parent state.
         Guard guard(_parent._mutex);
@@ -62,7 +62,7 @@ void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
 
 void TcpRealClient::onWrite(WriteRequest & request, uerr code)
 {
-    __tbag_debug("TcpRealClient::onWrite({})", uvpp::getErrorName(code));
+    tDLogD("TcpRealClient::onWrite({})", uvpp::getErrorName(code));
 
     {   // Update parent state.
         Guard guard(_parent._mutex);
@@ -80,13 +80,13 @@ TcpRealClient::binf TcpRealClient::onAlloc(std::size_t suggested_size)
 
 void TcpRealClient::onRead(uerr code, char const * buffer, std::size_t size)
 {
-    __tbag_debug("TcpRealClient::onRead({})", uvpp::getErrorName(code));
+    tDLogD("TcpRealClient::onRead({})", uvpp::getErrorName(code));
     _parent.onRead(code, buffer, size);
 }
 
 void TcpRealClient::onClose()
 {
-    __tbag_debug("TcpRealClient::onClose()");
+    tDLogD("TcpRealClient::onClose()");
     _parent.onClose();
 
     {   // Update parent state.
@@ -124,14 +124,14 @@ void TcpClient::startTimeoutShutdown(milliseconds const & millisec)
 {
     assert(static_cast<bool>(_shutdown));
     uerr const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
-    __tbag_debug("TcpClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+    tDLogD("TcpClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
 void TcpClient::startTimeoutClose(milliseconds const & millisec)
 {
     assert(static_cast<bool>(_close));
     uerr const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
-    __tbag_debug("TcpClient::startTimeoutClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+    tDLogD("TcpClient::startTimeoutClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
 void TcpClient::cancelTimeoutShutdown()
@@ -140,7 +140,7 @@ void TcpClient::cancelTimeoutShutdown()
     if (_shutdown->isActive()) {
         _shutdown->cancel();
     }
-    __tbag_debug("TcpClient::cancelTimeoutShutdown().");
+    tDLogD("TcpClient::cancelTimeoutShutdown().");
 }
 
 void TcpClient::cancelTimeoutClose()
@@ -149,7 +149,7 @@ void TcpClient::cancelTimeoutClose()
     if (_close->isActive()) {
         _close->cancel();
     }
-    __tbag_debug("TcpClient::cancelTimeoutClose().");
+    tDLogD("TcpClient::cancelTimeoutClose().");
 }
 
 bool TcpClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
@@ -158,7 +158,7 @@ bool TcpClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
     assert(static_cast<bool>(_async));
 
     if (static_cast<bool>(_last_writer)) {
-        __tbag_debug("TcpClient::write() busy state.");
+        tDLogD("TcpClient::write() busy state.");
         return false;
     }
 
@@ -246,11 +246,11 @@ void TcpClient::close()
     assert(loop != nullptr);
 
     if (loop->isAliveAndThisThread()) {
-        __tbag_debug("TcpServer::close() sync request.");
+        tDLogD("TcpServer::close() sync request.");
         Guard guard(_mutex);
         closeAll();
     } else {
-        __tbag_debug("TcpServer::close() async request.");
+        tDLogD("TcpServer::close() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
             Guard guard(_mutex);
             closeAll();
@@ -267,11 +267,11 @@ void TcpClient::cancel()
     assert(loop != nullptr);
 
     if (loop->isAliveAndThisThread()) {
-        __tbag_debug("TcpServer::cancel() sync request.");
+        tDLogD("TcpServer::cancel() sync request.");
         Guard guard(_mutex);
         startTimeoutShutdown(milliseconds(0U));
     } else {
-        __tbag_debug("TcpServer::cancel() async request.");
+        tDLogD("TcpServer::cancel() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
             Guard guard(_mutex);
             startTimeoutShutdown(milliseconds(0U));

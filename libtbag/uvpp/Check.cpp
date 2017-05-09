@@ -25,9 +25,9 @@ static void __global_uv_check_cb__(uv_check_t * handle)
 {
     Check * h = static_cast<Check*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_check_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_check_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_check_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_check_cb__() handle.data is deleted.");
     } else {
         h->onCheck();
     }
@@ -78,7 +78,7 @@ uerr Check::stop()
 
 void Check::onCheck()
 {
-    __tbag_debug("Check::onCheck() called.");
+    tDLogD("Check::onCheck() called.");
 }
 
 } // namespace uvpp

@@ -314,7 +314,7 @@ Path::FileState Path::getState() const
 {
     FileState state = {0};
     if (details::getState(_path, &state) == false) {
-        __tbag_error("Path::getState() result error.");
+        tDLogE("Path::getState() result error.");
     }
     return state;
 }

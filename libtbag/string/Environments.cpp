@@ -126,7 +126,7 @@ bool Environments::parse(char ** envs, std::string const & delimiter)
 {
     std::size_t const SIZE = getEnvsSize(envs);
     if (SIZE > static_cast<std::size_t>(INT32_MAX)) {
-        __tbag_debug("[WARNING] envs size({}) is too big.", SIZE);
+        tDLogD("[WARNING] envs size({}) is too big.", SIZE);
     }
     return _flags.parse(static_cast<int>(SIZE), envs, DEFAULT_ENVIRONMENTS_FLAGS_PREFIX, delimiter);
 }

@@ -204,7 +204,7 @@ TcpServer::WeakClient TcpServer::accept()
 {
     assert(static_cast<bool>(_server));
     if (_server->isOnConnection() == false) {
-        __tbag_error("TcpServer::accept() server is not a connection state.");
+        tDLogE("TcpServer::accept() server is not a connection state.");
         return WeakClient();
     }
 
@@ -213,17 +213,17 @@ TcpServer::WeakClient TcpServer::accept()
     if (auto shared = client->getClient().lock()) {
         uerr const CODE = _server->accept(*shared);
         if (CODE == uerr::UVPP_SUCCESS) {
-            __tbag_debug("TcpServer::accept() client connect Sock({}:{})/Peer({}:{})",
+            tDLogD("TcpServer::accept() client connect Sock({}:{})/Peer({}:{})",
                          shared->getSockIp(), shared->getSockPort(),
                          shared->getPeerIp(), shared->getPeerPort());
             bool const INSERT_RESULT = insertClient(client);
             assert(INSERT_RESULT);
             return WeakClient(client);
         } else {
-            __tbag_error("TcpServer::accept() {} error.", uvpp::getErrorName(CODE));
+            tDLogE("TcpServer::accept() {} error.", uvpp::getErrorName(CODE));
         }
     } else {
-        __tbag_error("TcpServer::accept() client is nullptr.");
+        tDLogE("TcpServer::accept() client is nullptr.");
     }
     return WeakClient();
 }
@@ -237,11 +237,11 @@ void TcpServer::close()
     assert(loop != nullptr);
 
     if (loop->isAliveAndThisThread()) {
-        __tbag_debug("TcpServer::close() sync request.");
+        tDLogD("TcpServer::close() sync request.");
         Guard guard(_mutex);
         closeAll();
     } else {
-        __tbag_debug("TcpServer::close() async request.");
+        tDLogD("TcpServer::close() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
             Guard guard(_mutex);
             closeAll();

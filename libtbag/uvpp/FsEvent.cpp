@@ -29,9 +29,9 @@ static void __global_uv_fs_event_cb__(uv_fs_event_t * handle, const char * filen
 
     FsEvent * h = static_cast<FsEvent*>(handle->data);
     if (h == nullptr) {
-        __tbag_error("__global_uv_fs_event_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_fs_event_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(h)) {
-        __tbag_error("__global_uv_fs_event_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_fs_event_cb__() handle.data is deleted.");
     } else {
         h->onFsEvent(filename, FsEvent::getEvent(events), getUerr(status));
     }
@@ -111,7 +111,7 @@ FsEvent::Event FsEvent::getEvent(int native_events) TBAG_NOEXCEPT
 
 void FsEvent::onFsEvent(const char * filename, Event events, uerr status)
 {
-    __tbag_debug("FsEvent::onFsEvent({}, {}, {}) called.",
+    tDLogD("FsEvent::onFsEvent({}, {}, {}) called.",
                  filename, static_cast<int>(events), getErrorName(status));
 }
 

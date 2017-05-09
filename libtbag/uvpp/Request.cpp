@@ -19,7 +19,7 @@ namespace uvpp {
 Request::Request(ureq type, Handle * owner) : Native(static_cast<utype>(type)), _owner(owner)
 {
     if (isRequest() == false) {
-        __tbag_error("Request::Request({}) type is not request type.", static_cast<int>(type));
+        tDLogE("Request::Request({}) type is not request type.", static_cast<int>(type));
         throw std::bad_alloc();
     }
     Parent::cast<uv_req_t>()->data = this; // IMPORTANT!!

@@ -30,9 +30,9 @@ static void __global_uv_exit_cb__(uv_process_t * handle, int64_t exit_status, in
     // which will indicate the exit status and the signal that caused the process to terminate, if any.
     Process * p = static_cast<Process*>(handle->data);
     if (p == nullptr) {
-        __tbag_error("__global_uv_exit_cb__() handle.data is nullptr.");
+        tDLogE("__global_uv_exit_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(p)) {
-        __tbag_error("__global_uv_exit_cb__() handle.data is deleted.");
+        tDLogE("__global_uv_exit_cb__() handle.data is deleted.");
     } else {
         p->onExit(exit_status, term_signal);
     }
@@ -187,7 +187,7 @@ uerr Process::spawn(Loop & loop, Options const & options)
     Stdios stdios;
 
     if (impl::updateOptions(_options, args, envs, stdios, uv_options) == false) {
-        __tbag_error("Process::spawn() options error.");
+        tDLogE("Process::spawn() options error.");
         return uerr::UVPP_ILLARGS;
     }
 
@@ -215,7 +215,7 @@ uerr Process::processKill(int signum)
 
 void Process::onExit(int64_t exit_status, int term_signal)
 {
-    __tbag_debug("Process::onExit({}, {}) called.", exit_status, term_signal);
+    tDLogD("Process::onExit({}, {}) called.", exit_status, term_signal);
 }
 
 // ---------------

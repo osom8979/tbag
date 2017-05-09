@@ -333,10 +333,10 @@ public:
         Size const EXTEND_SIZE   = ORIGINAL_SIZE + more_size;
 
         if (EXTEND_SIZE == ORIGINAL_SIZE) {
-            __tbag_error("Size must be greater than 0.");
+            tDLogE("Size must be greater than 0.");
             return false;
         } else if (EXTEND_SIZE >= _buffer.max_size()) {
-            __tbag_error("Too large size: {}", EXTEND_SIZE);
+            tDLogE("Too large size: {}", EXTEND_SIZE);
             return false;
         }
 

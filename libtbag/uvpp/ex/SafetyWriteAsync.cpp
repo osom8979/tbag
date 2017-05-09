@@ -49,10 +49,10 @@ void SafetyWriteAsync::StreamWriter::run(SafetyAsync * UNUSED_PARAM(handle))
         if (auto shared = stream.lock()) {
             result = shared->write(req, infos.data(), infos.size());
         } else {
-            __tbag_error("SafetyWriteAsync::StreamWriter::run() Stream is nullptr.");
+            tDLogE("SafetyWriteAsync::StreamWriter::run() Stream is nullptr.");
         }
     } else {
-        __tbag_debug("SafetyWriteAsync::StreamWriter::run() Not ready state.");
+        tDLogD("SafetyWriteAsync::StreamWriter::run() Not ready state.");
     }
 }
 
@@ -67,10 +67,10 @@ void SafetyWriteAsync::UdpWriter::run(SafetyAsync * UNUSED_PARAM(handle))
         if (auto shared = udp.lock()) {
             result = shared->send(req, infos.data(), infos.size(), addr.get());
         } else {
-            __tbag_error("SafetyWriteAsync::UdpWriter::run() Stream is nullptr.");
+            tDLogE("SafetyWriteAsync::UdpWriter::run() Stream is nullptr.");
         }
     } else {
-        __tbag_debug("SafetyWriteAsync::UdpWriter::run() Not ready state.");
+        tDLogD("SafetyWriteAsync::UdpWriter::run() Not ready state.");
     }
 }
 
