@@ -22,7 +22,6 @@
 #include <mutex>
 #include <atomic>
 #include <unordered_map>
-#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

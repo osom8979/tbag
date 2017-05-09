@@ -22,7 +22,6 @@
 #include <atomic>
 #include <chrono>
 #include <mutex>
-#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

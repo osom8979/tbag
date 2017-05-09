@@ -19,6 +19,8 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Udp.hpp>
+#include <libtbag/uvpp/Pipe.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
 
