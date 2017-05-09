@@ -1,11 +1,11 @@
 /**
- * @file   TimeoutToClose.cpp
- * @brief  TimeoutToClose class implementation.
+ * @file   TimeoutClose.cpp
+ * @brief  TimeoutClose class implementation.
  * @author zer0
- * @date   2017-05-05
+ * @date   2017-05-09
  */
 
-#include <libtbag/uvpp/ex/TimeoutToClose.hpp>
+#include <libtbag/uvpp/ex/TimeoutClose.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -16,19 +16,19 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 namespace ex   {
 
-TimeoutToClose::TimeoutToClose(Loop & loop, Handle * handle, bool auto_close)
+TimeoutClose::TimeoutClose(Loop & loop, Handle * handle, bool auto_close)
         : Timer(loop), _handle(handle)
 {
     _cancel.store(true);
     _auto_close.store(auto_close);
 }
 
-TimeoutToClose::~TimeoutToClose()
+TimeoutClose::~TimeoutClose()
 {
     // EMPTY.
 }
 
-uerr TimeoutToClose::start(uint64_t timeout)
+uerr TimeoutClose::start(uint64_t timeout)
 {
     bool EXCHANGE = true;
     if (_cancel.compare_exchange_weak(EXCHANGE, false)) {
@@ -37,17 +37,17 @@ uerr TimeoutToClose::start(uint64_t timeout)
     return uerr::UVPP_EBUSY;
 }
 
-void TimeoutToClose::onTimer()
+void TimeoutClose::onTimer()
 {
     if (_handle != nullptr) {
         if (_cancel.load() == false) {
-            __tbag_debug("TimeoutToClose::onTimer() close.");
+            __tbag_debug("TimeoutClose::onTimer() close.");
             _handle->close();
         } else {
-            __tbag_debug("TimeoutToClose::onTimer() cancel.");
+            __tbag_debug("TimeoutClose::onTimer() cancel.");
         }
     } else {
-        __tbag_error("TimeoutToClose::onTimer() handle is nullptr.");
+        __tbag_error("TimeoutClose::onTimer() handle is nullptr.");
     }
 
     if (_auto_close.load()) {
@@ -56,7 +56,7 @@ void TimeoutToClose::onTimer()
     }
 }
 
-void TimeoutToClose::onClose()
+void TimeoutClose::onClose()
 {
     // EMPTY.
 }

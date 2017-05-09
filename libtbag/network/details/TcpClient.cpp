@@ -77,8 +77,8 @@ TcpClient::TcpClient(Loop & loop)
 {
     _client   = loop.newHandle<TcpRealClient>(loop, *this);
     _async    = loop.newHandle<SafetyWriteAsync>(loop);
-    _close    = loop.newHandle<TimeoutToClose>(loop, _client.get(), false);
-    _shutdown = loop.newHandle<TimeoutToShutdown>(loop, _client.get(), false);
+    _close    = loop.newHandle<TimeoutClose>(loop, _client.get(), false);
+    _shutdown = loop.newHandle<TimeoutShutdown>(loop, _client.get(), false);
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_async));
     assert(static_cast<bool>(_close));

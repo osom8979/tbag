@@ -1,11 +1,11 @@
 /**
- * @file   TimeoutToShutdown.cpp
- * @brief  TimeoutToShutdown class implementation.
+ * @file   TimeoutShutdown.cpp
+ * @brief  TimeoutShutdown class implementation.
  * @author zer0
- * @date   2017-05-05
+ * @date   2017-05-09
  */
 
-#include <libtbag/uvpp/ex/TimeoutToShutdown.hpp>
+#include <libtbag/uvpp/ex/TimeoutShutdown.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -16,19 +16,19 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 namespace ex   {
 
-TimeoutToShutdown::TimeoutToShutdown(Loop & loop, Stream * stream, bool auto_close)
+TimeoutShutdown::TimeoutShutdown(Loop & loop, Stream * stream, bool auto_close)
         : Timer(loop), _stream(stream)
 {
     _cancel.store(true);
     _auto_close.store(auto_close);
 }
 
-TimeoutToShutdown::~TimeoutToShutdown()
+TimeoutShutdown::~TimeoutShutdown()
 {
     // EMPTY.
 }
 
-uerr TimeoutToShutdown::start(uint64_t timeout)
+uerr TimeoutShutdown::start(uint64_t timeout)
 {
     bool EXCHANGE = true;
     if (_cancel.compare_exchange_weak(EXCHANGE, false)) {
@@ -37,7 +37,7 @@ uerr TimeoutToShutdown::start(uint64_t timeout)
     return uerr::UVPP_EBUSY;
 }
 
-void TimeoutToShutdown::onTimer()
+void TimeoutShutdown::onTimer()
 {
     if (_cancel.load() == false && _stream != nullptr) {
         _stream->shutdown(_request);
@@ -49,7 +49,7 @@ void TimeoutToShutdown::onTimer()
     }
 }
 
-void TimeoutToShutdown::onClose()
+void TimeoutShutdown::onClose()
 {
     // EMPTY.
 }

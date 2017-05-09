@@ -23,8 +23,8 @@
 #include <libtbag/uvpp/Request.hpp>
 
 #include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
-#include <libtbag/uvpp/ex/TimeoutToClose.hpp>
-#include <libtbag/uvpp/ex/TimeoutToShutdown.hpp>
+#include <libtbag/uvpp/ex/TimeoutClose.hpp>
+#include <libtbag/uvpp/ex/TimeoutShutdown.hpp>
 #include <libtbag/uvpp/ex/WriteJob.hpp>
 
 #include <libtbag/id/Id.hpp>
@@ -81,9 +81,6 @@ struct NetCommon
     using AsyncJob = SafetyWriteAsync::Job;
     using WriteJob = uvpp::ex::WriteJob;
 
-    using TimeoutToClose    = uvpp::ex::TimeoutToClose;
-    using TimeoutToShutdown = uvpp::ex::TimeoutToShutdown;
-
     using ShutdownRequest = uvpp::ShutdownRequest;
     using ConnectRequest  = uvpp::ConnectRequest;
     using WriteRequest    = uvpp::WriteRequest;
@@ -96,11 +93,14 @@ struct NetCommon
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-    using SharedClose = std::shared_ptr<TimeoutToClose>;
-    using   WeakClose =   std::weak_ptr<TimeoutToClose>;
+    using TimeoutClose    = uvpp::ex::TimeoutClose;
+    using TimeoutShutdown = uvpp::ex::TimeoutShutdown;
 
-    using SharedShutdown = std::shared_ptr<TimeoutToShutdown>;
-    using   WeakShutdown =   std::weak_ptr<TimeoutToShutdown>;
+    using SharedClose = std::shared_ptr<TimeoutClose>;
+    using   WeakClose =   std::weak_ptr<TimeoutClose>;
+
+    using SharedShutdown = std::shared_ptr<TimeoutShutdown>;
+    using   WeakShutdown =   std::weak_ptr<TimeoutShutdown>;
 
     using SharedAsync = std::shared_ptr<SafetyWriteAsync>;
     using   WeakAsync =   std::weak_ptr<SafetyWriteAsync>;

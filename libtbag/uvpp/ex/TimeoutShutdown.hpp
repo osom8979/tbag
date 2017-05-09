@@ -1,12 +1,12 @@
 /**
- * @file   TimeoutToShutdown.hpp
- * @brief  TimeoutToShutdown class prototype.
+ * @file   TimeoutShutdown.hpp
+ * @brief  TimeoutShutdown class prototype.
  * @author zer0
- * @date   2017-05-05
+ * @date   2017-05-09
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_TIMEOUTTOSHUTDOWN_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_TIMEOUTTOSHUTDOWN_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_TIMEOUTSHUTDOWN_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_TIMEOUTSHUTDOWN_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -26,15 +26,19 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace uvpp {
+
+// Forward declaration.
+class Loop;
+
 namespace ex   {
 
 /**
- * TimeoutToShutdown class prototype.
+ * TimeoutShutdown class prototype.
  *
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API TimeoutToShutdown : public Timer
+class TBAG_API TimeoutShutdown : public Timer
 {
 public:
     using AtomicBool = std::atomic_bool;
@@ -47,8 +51,8 @@ public:
     AtomicBool _auto_close;
 
 public:
-    TimeoutToShutdown(Loop & loop, Stream * stream, bool auto_close = true);
-    virtual ~TimeoutToShutdown();
+    TimeoutShutdown(Loop & loop, Stream * stream, bool auto_close = true);
+    virtual ~TimeoutShutdown();
 
 public:
     inline bool isCancel() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_cancel.load()))
@@ -82,5 +86,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_TIMEOUTTOSHUTDOWN_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_TIMEOUTSHUTDOWN_HPP__
 
