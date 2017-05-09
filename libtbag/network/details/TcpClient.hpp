@@ -177,13 +177,19 @@ struct FunctionalTcpClient : public TcpClient
     using OnShutdown = std::function<void(uerr)>;
     using OnWrite    = std::function<void(uerr)>;
     using OnRead     = std::function<void(uerr, char const *, Size)>;
-    using OnClose    = std::function<void()>;
+    using OnClose    = std::function<void(void)>;
+
+    using OnUserDataAlloc   = std::function<void*(void)>;
+    using OnUserDataDealloc = std::function<void(void*)>;
 
     OnConnect  connect_cb;
     OnShutdown shutdown_cb;
     OnWrite    write_cb;
     OnRead     read_cb;
     OnClose    close_cb;
+
+    OnUserDataAlloc   userdata_alloc_cb;
+    OnUserDataDealloc userdata_dealloc_cb;
 
     FunctionalTcpClient(Loop & loop) : TcpClient(loop)
     { /* EMPTY */ }
@@ -196,6 +202,9 @@ struct FunctionalTcpClient : public TcpClient
     inline void setOnRead    (OnRead     const & cb) { read_cb     = cb; }
     inline void setOnClose   (OnClose    const & cb) { close_cb    = cb; }
 
+    inline void setOnUserDataAlloc  (OnUserDataAlloc   const & cb) { userdata_alloc_cb   = cb; }
+    inline void setOnUserDataDealloc(OnUserDataDealloc const & cb) { userdata_dealloc_cb = cb; }
+
     virtual void onConnect(uerr code) override
     { if (connect_cb) { connect_cb(code); } }
     virtual void onShutdown(uerr code) override
@@ -206,6 +215,11 @@ struct FunctionalTcpClient : public TcpClient
     { if (read_cb) { read_cb(code, buffer, size); } }
     virtual void onClose() override
     { if (close_cb) { close_cb(); } }
+
+    virtual void * onUserDataAlloc() override
+    { if (userdata_alloc_cb) { return userdata_alloc_cb(); } return nullptr; }
+    virtual void onUserDataDealloc(void * data) override
+    { if (userdata_dealloc_cb) { userdata_dealloc_cb(data); } }
     // @formatter:on
 };
 

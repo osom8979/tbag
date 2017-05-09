@@ -64,6 +64,15 @@ struct Server : public details::NetCommon
     { /* EMPTY. */ }
     virtual void onServerClose()
     { /* EMPTY. */ }
+
+    virtual void * onUserDataAlloc()
+    { return nullptr; }
+    virtual void onUserDataDealloc(void * data)
+    { /* EMPTY. */ }
+    virtual void * onClientUserDataAlloc(WeakClient node)
+    { return nullptr; }
+    virtual void onClientUserDataDealloc(WeakClient node, void * data)
+    { /* EMPTY. */ }
     // @formatter:on
 };
 

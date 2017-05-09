@@ -54,11 +54,18 @@ public:
     TcpClientNode(Loop & loop, TcpServer & parent);
     virtual ~TcpClientNode();
 
+private:
+    Server::WeakClient getWeakClient();
+
 public:
     virtual void onShutdown(uerr code) override;
     virtual void onWrite   (uerr code) override;
     virtual void onRead    (uerr code, char const * buffer, Size size) override;
     virtual void onClose   () override;
+
+public:
+    virtual void * onUserDataAlloc() override;
+    virtual void onUserDataDealloc(void * data) override;
 };
 
 /**
@@ -245,12 +252,22 @@ struct FunctionalTcpServer : public TcpServer
     using OnClientClose    = std::function<void(WeakClient)>;
     using OnServerClose    = std::function<void(void)>;
 
+    using OnUserDataAlloc         = std::function<void*(void)>;
+    using OnUserDataDealloc       = std::function<void(void*)>;
+    using OnClientUserDataAlloc   = std::function<void*(WeakClient)>;
+    using OnClientUserDataDealloc = std::function<void(WeakClient, void*)>;
+
     OnConnection     connection_cb;
     OnClientShutdown client_shutdown_cb;
     OnClientWrite    client_write_cb;
     OnClientRead     client_read_cb;
     OnClientClose    client_close_cb;
     OnServerClose    server_close_cb;
+
+    OnUserDataAlloc         userdata_alloc_cb;
+    OnUserDataDealloc       userdata_dealloc_cb;
+    OnClientUserDataAlloc   client_userdata_alloc_cb;
+    OnClientUserDataDealloc client_userdata_dealloc_cb;
 
     FunctionalTcpServer(Loop & loop) : TcpServer(loop)
     { /* EMPTY */ }
@@ -264,6 +281,11 @@ struct FunctionalTcpServer : public TcpServer
     inline void setOnClientClose   (OnClientClose    const & cb) { client_close_cb    = cb; }
     inline void setOnServerClose   (OnServerClose    const & cb) { server_close_cb    = cb; }
 
+    inline void setOnUserDataAlloc        (OnUserDataAlloc         const & cb) { userdata_alloc_cb          = cb; }
+    inline void setOnUserDataDealloc      (OnUserDataDealloc       const & cb) { userdata_dealloc_cb        = cb; }
+    inline void setOnClientUserDataAlloc  (OnClientUserDataAlloc   const & cb) { client_userdata_alloc_cb   = cb; }
+    inline void setOnClientUserDataDealloc(OnClientUserDataDealloc const & cb) { client_userdata_dealloc_cb = cb; }
+
     virtual void onConnection(uerr code) override
     { if (connection_cb) { connection_cb(code); } }
     virtual void onClientShutdown(WeakClient node, uerr code) override
@@ -276,6 +298,15 @@ struct FunctionalTcpServer : public TcpServer
     { if (client_close_cb) { client_close_cb(node); } }
     virtual void onServerClose() override
     { if (server_close_cb) { server_close_cb(); } }
+
+    virtual void * onUserDataAlloc() override
+    { if (userdata_alloc_cb) { return userdata_alloc_cb(); } return nullptr; }
+    virtual void onUserDataDealloc(void * data) override
+    { if (userdata_dealloc_cb) { userdata_dealloc_cb(data); } }
+    virtual void * onClientUserDataAlloc(WeakClient node) override
+    { if (client_userdata_alloc_cb) { return client_userdata_alloc_cb(node); } return nullptr; }
+    virtual void onClientUserDataDealloc(WeakClient node, void * data) override
+    { if (client_userdata_dealloc_cb) { client_userdata_dealloc_cb(node, data); } }
     // @formatter:on
 };
 

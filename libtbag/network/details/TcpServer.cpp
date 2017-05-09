@@ -34,40 +34,40 @@ TcpClientNode::~TcpClientNode()
     // EMPTY.
 }
 
+Server::WeakClient TcpClientNode::getWeakClient()
+{
+    Guard guard(_parent._mutex);
+    return _parent.getWeakClient(getId());
+}
+
 void TcpClientNode::onShutdown(uerr code)
 {
-    _parent._mutex.lock();
-    auto weak = _parent.getWeakClient(getId());
-    _parent._mutex.unlock();
-
-    _parent.onClientShutdown(weak, code);
+    _parent.onClientShutdown(getWeakClient(), code);
 }
 
 void TcpClientNode::onWrite(uerr code)
 {
-    _parent._mutex.lock();
-    auto weak = _parent.getWeakClient(getId());
-    _parent._mutex.unlock();
-
-    _parent.onClientWrite(weak, code);
+    _parent.onClientWrite(getWeakClient(), code);
 }
 
 void TcpClientNode::onRead(uerr code, char const * buffer, Size size)
 {
-    _parent._mutex.lock();
-    auto weak = _parent.getWeakClient(getId());
-    _parent._mutex.unlock();
-
-    _parent.onClientRead(weak, code, buffer, size);
+    _parent.onClientRead(getWeakClient(), code, buffer, size);
 }
 
 void TcpClientNode::onClose()
 {
-    _parent._mutex.lock();
-    auto weak = _parent.getWeakClient(getId());
-    _parent._mutex.unlock();
+    _parent.onClientClose(getWeakClient());
+}
 
-    _parent.onClientClose(weak);
+void * TcpClientNode::onUserDataAlloc()
+{
+    return _parent.onClientUserDataAlloc(getWeakClient());
+}
+
+void TcpClientNode::onUserDataDealloc(void * data)
+{
+    _parent.onClientUserDataDealloc(getWeakClient(), data);
 }
 
 // -----------------------------
@@ -77,11 +77,12 @@ void TcpClientNode::onClose()
 TcpRealServer::TcpRealServer(Loop & loop, TcpServer & parent) : Tcp(loop), _parent(parent)
 {
     _on_connection.store(false);
+    setUserData(_parent.onUserDataAlloc());
 }
 
 TcpRealServer::~TcpRealServer()
 {
-    // EMPTY.
+    _parent.onUserDataDealloc(getUserData());
 }
 
 bool TcpRealServer::init(String const & ip, int port)

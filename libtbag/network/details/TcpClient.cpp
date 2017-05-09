@@ -22,12 +22,12 @@ namespace details {
 
 TcpRealClient::TcpRealClient(Loop & loop, TcpClient & parent) : Tcp(loop), _parent(parent)
 {
-    // EMPTY.
+    setUserData(_parent.onUserDataAlloc());
 }
 
 TcpRealClient::~TcpRealClient()
 {
-    // EMPTY.
+    _parent.onUserDataDealloc(getUserData());
 }
 
 bool TcpRealClient::init(String const & ip, int port)

@@ -54,6 +54,9 @@ struct Client : public details::NetCommon
     virtual void onWrite   (uerr code) { /* EMPTY. */ }
     virtual void onRead    (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
     virtual void onClose   ()          { /* EMPTY. */ }
+
+    virtual void * onUserDataAlloc  ()            { return nullptr; }
+    virtual void   onUserDataDealloc(void * data) { /* EMPTY. */    }
     // @formatter:on
 };
 
