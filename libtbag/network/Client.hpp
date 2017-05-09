@@ -32,8 +32,6 @@ namespace network {
  */
 struct Client : public details::NetCommon
 {
-    using SharedClient = std::shared_ptr<Client>;
-
     // @formatter:off
     virtual Type getType() const
     { return Type::UNKNOWN; }

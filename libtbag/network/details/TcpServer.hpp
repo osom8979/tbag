@@ -20,6 +20,7 @@
 #include <libtbag/network/details/TcpClient.hpp>
 
 #include <mutex>
+#include <atomic>
 #include <unordered_map>
 #include <functional>
 
@@ -31,33 +32,8 @@ namespace network {
 namespace details {
 
 // Forward declaration.
-class TcpRealNode;
 class TcpRealServer;
 class TcpServer;
-
-/**
- * TcpRealNode class prototype.
- *
- * @author zer0
- * @date   2017-05-05
- */
-class TBAG_API TcpRealNode : public TcpClient
-{
-private:
-    TcpServer & _parent;
-
-private:
-    Buffer _buffer;
-
-public:
-    TcpRealNode(Loop & loop, TcpServer & parent);
-    virtual ~TcpRealNode();
-
-public:
-    virtual void onWrite(uerr code) override;
-    virtual void onRead (uerr code, char const * buffer, Size size) override;
-    virtual void onClose() override;
-};
 
 /**
  * TcpRealServer class prototype.
@@ -67,8 +43,18 @@ public:
  */
 class TBAG_API TcpRealServer : public details::NetCommon, public uvpp::Tcp
 {
+public:
+    using AtomicBool = std::atomic_bool;
+
 private:
     TcpServer & _parent;
+
+private:
+    AtomicBool _on_connection;
+
+public:
+    inline bool isOnConnection() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_on_connection.load()))
+    { return _on_connection.load(); }
 
 public:
     TcpRealServer(Loop & loop, TcpServer & parent);
@@ -97,13 +83,10 @@ public:
     using SharedServer = std::shared_ptr<TcpRealServer>;
     using   WeakServer =   std::weak_ptr<TcpRealServer>;
 
-    using SharedNode = std::shared_ptr<TcpRealNode>;
-    using   WeakNode =   std::weak_ptr<TcpRealNode>;
-
 public:
-    using NodeKey  = Id;
-    using NodeMap  = std::unordered_map<NodeKey, SharedNode>;
-    using NodePair = NodeMap::value_type;
+    using ClientKey  = Id;
+    using ClientMap  = std::unordered_map<ClientKey, SharedClient>;
+    using ClientPair = ClientMap::value_type;
 
 public:
     using Mutex = std::mutex;
@@ -114,37 +97,43 @@ private:
     SharedAsync  _async;
 
 private:
-    mutable Mutex _node_mutex;
-    NodeMap _nodes;
+    mutable Mutex _client_mutex;
+    ClientMap _clients;
 
 public:
     TcpServer(Loop & loop);
     virtual ~TcpServer();
 
 public:
-    inline bool emptyNode() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.empty()))
-    { Guard g(_node_mutex); return _nodes.empty(); }
-    inline Size sizeNode() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.size()))
-    { Guard g(_node_mutex); return _nodes.size(); }
+    inline bool emptyClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.empty()))
+    { Guard g(_client_mutex); return _clients.empty(); }
+    inline Size sizeClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.size()))
+    { Guard g(_client_mutex); return _clients.size(); }
 
 private:
-    SharedNode createNode();
-    bool insertNode(SharedNode node);
-    bool removeNode(NodeKey key);
+    SharedClient createClient();
+    bool insertClient(SharedClient node);
+    bool removeClient(ClientKey key);
+
+private:
+    void closeAll();
 
 public:
     template <typename Predicated>
     void foreach(Predicated predicated)
     {
-        Guard guard(_node_mutex);
-        for (auto & cursor : _nodes) {
+        Guard guard(_client_mutex);
+        for (auto & cursor : _clients) {
             predicated(cursor);
         }
     }
 
 public:
+    /** Obtain the TCP Network type. */
     virtual Type getType() const override
     { return Type::TCP; }
+
+    /** Obtain the Tcp(server) handle id. */
     virtual Id getId() const override
     { return _server->id(); }
 
@@ -153,19 +142,30 @@ public:
      * Initialize this method.
      *
      * @param[in] ip
-     *      Ip address.
+     *      IPv4 or IPv6 address.
      * @param[in] port
      *      Port number.
      *
      * @remarks
-     *  init -> bind -> listen.
+     *  init() -> bind() -> listen().
      */
     virtual bool init(String const & ip, int port) override;
 
-    virtual NodeInterface * accept() override;
+    /**
+     * Accept client.
+     *
+     * @warning
+     *  This operation can only used with the onConnection() method.
+     */
+    virtual WeakClient accept() override;
 
-    /** This operation is async. */
-    virtual bool close() override;
+    /**
+     * Safety close() operation.
+     *
+     * @remarks
+     *  Select sync/async operations automatically according to Thread ID.
+     */
+    virtual void close() override;
 };
 
 /**
@@ -179,12 +179,12 @@ struct FunctionalTcpServer : public TcpServer
     // @formatter:off
     using uerr = NetCommon::uerr;
     using Size = NetCommon::Size;
-    using NodeInterface = Server::NodeInterface;
+    using WeakClient = Server::WeakClient;
 
     using OnConnection  = std::function<void(uerr)>;
-    using OnClientWrite = std::function<void(NodeInterface *, uerr)>;
-    using OnClientRead  = std::function<void(NodeInterface *, uerr, char const *, Size)>;
-    using OnClientClose = std::function<void(NodeInterface *)>;
+    using OnClientWrite = std::function<void(WeakClient, uerr)>;
+    using OnClientRead  = std::function<void(WeakClient, uerr, char const *, Size)>;
+    using OnClientClose = std::function<void(WeakClient)>;
     using OnServerClose = std::function<void(void)>;
 
     OnConnection  connection_cb;
@@ -206,11 +206,11 @@ struct FunctionalTcpServer : public TcpServer
 
     virtual void onConnection(uerr code) override
     { if (connection_cb) { connection_cb(code); } }
-    virtual void onClientWrite(NodeInterface * node, uerr code) override
+    virtual void onClientWrite(WeakClient node, uerr code) override
     { if (client_write_cb) { client_write_cb(node, code); } }
-    virtual void onClientRead(NodeInterface * node, uerr code, char const * buffer, Size size) override
+    virtual void onClientRead(WeakClient node, uerr code, char const * buffer, Size size) override
     { if (client_read_cb) { client_read_cb(node, code, buffer, size); } }
-    virtual void onClientClose(NodeInterface * node) override
+    virtual void onClientClose(WeakClient node) override
     { if (client_close_cb) { client_close_cb(node); } }
     virtual void onServerClose() override
     { if (server_close_cb) { server_close_cb(); } }

@@ -18,6 +18,8 @@
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/Client.hpp>
 
+#include <memory>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -32,8 +34,8 @@ namespace network {
  */
 struct Server : public details::NetCommon
 {
-    using NodeInterface = Client;
-    using SharedServer  = std::shared_ptr<Server>;
+    using SharedClient = std::shared_ptr<Client>;
+    using   WeakClient =   std::weak_ptr<Client>;
 
     // @formatter:off
     virtual Type getType() const
@@ -44,19 +46,19 @@ struct Server : public details::NetCommon
     virtual bool init(String const & destination, int port = 0)
     { return false; }
 
-    virtual NodeInterface * accept()
-    { return nullptr; }
+    virtual WeakClient accept()
+    { return WeakClient(); }
 
-    virtual bool close()
-    { return false; }
+    virtual void close()
+    { /* EMPTY. */ }
 
     virtual void onConnection(uerr code)
     { /* EMPTY. */ }
-    virtual void onClientWrite(NodeInterface * node, uerr code)
+    virtual void onClientWrite(WeakClient node, uerr code)
     { /* EMPTY. */ }
-    virtual void onClientRead(NodeInterface * node, uerr code, char const * buffer, Size size)
+    virtual void onClientRead(WeakClient node, uerr code, char const * buffer, Size size)
     { /* EMPTY. */ }
-    virtual void onClientClose(NodeInterface * node)
+    virtual void onClientClose(WeakClient node)
     { /* EMPTY. */ }
     virtual void onServerClose()
     { /* EMPTY. */ }
