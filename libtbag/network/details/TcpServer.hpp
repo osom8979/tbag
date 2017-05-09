@@ -233,82 +233,12 @@ public:
 };
 
 /**
- * FunctionalTcpServer class prototype.
+ * FunctionalTcpServer typedef.
  *
  * @author zer0
  * @date   2017-05-08
  */
-struct FunctionalTcpServer : public TcpServer
-{
-    // @formatter:off
-    using uerr = NetCommon::uerr;
-    using Size = NetCommon::Size;
-    using WeakClient = Server::WeakClient;
-
-    using OnConnection     = std::function<void(uerr)>;
-    using OnClientShutdown = std::function<void(WeakClient, uerr)>;
-    using OnClientWrite    = std::function<void(WeakClient, uerr)>;
-    using OnClientRead     = std::function<void(WeakClient, uerr, char const *, Size)>;
-    using OnClientClose    = std::function<void(WeakClient)>;
-    using OnServerClose    = std::function<void(void)>;
-
-    using OnUserDataAlloc         = std::function<void*(void)>;
-    using OnUserDataDealloc       = std::function<void(void*)>;
-    using OnClientUserDataAlloc   = std::function<void*(WeakClient)>;
-    using OnClientUserDataDealloc = std::function<void(WeakClient, void*)>;
-
-    OnConnection     connection_cb;
-    OnClientShutdown client_shutdown_cb;
-    OnClientWrite    client_write_cb;
-    OnClientRead     client_read_cb;
-    OnClientClose    client_close_cb;
-    OnServerClose    server_close_cb;
-
-    OnUserDataAlloc         userdata_alloc_cb;
-    OnUserDataDealloc       userdata_dealloc_cb;
-    OnClientUserDataAlloc   client_userdata_alloc_cb;
-    OnClientUserDataDealloc client_userdata_dealloc_cb;
-
-    FunctionalTcpServer(Loop & loop) : TcpServer(loop)
-    { /* EMPTY */ }
-    virtual ~FunctionalTcpServer()
-    { /* EMPTY */ }
-
-    inline void setOnConnection    (OnConnection     const & cb) { connection_cb      = cb; }
-    inline void setOnClientShutdown(OnClientShutdown const & cb) { client_shutdown_cb = cb; }
-    inline void setOnClientWrite   (OnClientWrite    const & cb) { client_write_cb    = cb; }
-    inline void setOnClientRead    (OnClientRead     const & cb) { client_read_cb     = cb; }
-    inline void setOnClientClose   (OnClientClose    const & cb) { client_close_cb    = cb; }
-    inline void setOnServerClose   (OnServerClose    const & cb) { server_close_cb    = cb; }
-
-    inline void setOnUserDataAlloc        (OnUserDataAlloc         const & cb) { userdata_alloc_cb          = cb; }
-    inline void setOnUserDataDealloc      (OnUserDataDealloc       const & cb) { userdata_dealloc_cb        = cb; }
-    inline void setOnClientUserDataAlloc  (OnClientUserDataAlloc   const & cb) { client_userdata_alloc_cb   = cb; }
-    inline void setOnClientUserDataDealloc(OnClientUserDataDealloc const & cb) { client_userdata_dealloc_cb = cb; }
-
-    virtual void onConnection(uerr code) override
-    { if (connection_cb) { connection_cb(code); } }
-    virtual void onClientShutdown(WeakClient node, uerr code) override
-    { if (client_shutdown_cb) { client_shutdown_cb(node, code); } }
-    virtual void onClientWrite(WeakClient node, uerr code) override
-    { if (client_write_cb) { client_write_cb(node, code); } }
-    virtual void onClientRead(WeakClient node, uerr code, char const * buffer, Size size) override
-    { if (client_read_cb) { client_read_cb(node, code, buffer, size); } }
-    virtual void onClientClose(WeakClient node) override
-    { if (client_close_cb) { client_close_cb(node); } }
-    virtual void onServerClose() override
-    { if (server_close_cb) { server_close_cb(); } }
-
-    virtual void * onUserDataAlloc() override
-    { if (userdata_alloc_cb) { return userdata_alloc_cb(); } return nullptr; }
-    virtual void onUserDataDealloc(void * data) override
-    { if (userdata_dealloc_cb) { userdata_dealloc_cb(data); } }
-    virtual void * onClientUserDataAlloc(WeakClient node) override
-    { if (client_userdata_alloc_cb) { return client_userdata_alloc_cb(node); } return nullptr; }
-    virtual void onClientUserDataDealloc(WeakClient node, void * data) override
-    { if (client_userdata_dealloc_cb) { client_userdata_dealloc_cb(node, data); } }
-    // @formatter:on
-};
+using FunctionalTcpServer = FunctionalServer<TcpServer>;
 
 } // namespace details
 } // namespace network

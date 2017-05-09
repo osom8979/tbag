@@ -162,66 +162,12 @@ public:
 };
 
 /**
- * FunctionalTcpClient class prototype.
+ * FunctionalTcpClient typedef.
  *
  * @author zer0
  * @date   2017-05-08
  */
-struct FunctionalTcpClient : public TcpClient
-{
-    // @formatter:off
-    using uerr = NetCommon::uerr;
-    using Size = NetCommon::Size;
-
-    using OnConnect  = std::function<void(uerr)>;
-    using OnShutdown = std::function<void(uerr)>;
-    using OnWrite    = std::function<void(uerr)>;
-    using OnRead     = std::function<void(uerr, char const *, Size)>;
-    using OnClose    = std::function<void(void)>;
-
-    using OnUserDataAlloc   = std::function<void*(void)>;
-    using OnUserDataDealloc = std::function<void(void*)>;
-
-    OnConnect  connect_cb;
-    OnShutdown shutdown_cb;
-    OnWrite    write_cb;
-    OnRead     read_cb;
-    OnClose    close_cb;
-
-    OnUserDataAlloc   userdata_alloc_cb;
-    OnUserDataDealloc userdata_dealloc_cb;
-
-    FunctionalTcpClient(Loop & loop) : TcpClient(loop)
-    { /* EMPTY */ }
-    virtual ~FunctionalTcpClient()
-    { /* EMPTY */ }
-
-    inline void setOnConnect (OnConnect  const & cb) { connect_cb  = cb; }
-    inline void setOnShutdown(OnShutdown const & cb) { shutdown_cb = cb; }
-    inline void setOnWrite   (OnWrite    const & cb) { write_cb    = cb; }
-    inline void setOnRead    (OnRead     const & cb) { read_cb     = cb; }
-    inline void setOnClose   (OnClose    const & cb) { close_cb    = cb; }
-
-    inline void setOnUserDataAlloc  (OnUserDataAlloc   const & cb) { userdata_alloc_cb   = cb; }
-    inline void setOnUserDataDealloc(OnUserDataDealloc const & cb) { userdata_dealloc_cb = cb; }
-
-    virtual void onConnect(uerr code) override
-    { if (connect_cb) { connect_cb(code); } }
-    virtual void onShutdown(uerr code) override
-    { if (shutdown_cb) { shutdown_cb(code); } }
-    virtual void onWrite(uerr code) override
-    { if (write_cb) { write_cb(code); } }
-    virtual void onRead(uerr code, char const * buffer, Size size) override
-    { if (read_cb) { read_cb(code, buffer, size); } }
-    virtual void onClose() override
-    { if (close_cb) { close_cb(); } }
-
-    virtual void * onUserDataAlloc() override
-    { if (userdata_alloc_cb) { return userdata_alloc_cb(); } return nullptr; }
-    virtual void onUserDataDealloc(void * data) override
-    { if (userdata_dealloc_cb) { userdata_dealloc_cb(data); } }
-    // @formatter:on
-};
+using FunctionalTcpClient = FunctionalClient<TcpClient>;
 
 } // namespace details
 } // namespace network
