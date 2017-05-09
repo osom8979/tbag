@@ -117,6 +117,14 @@ public:
     inline bool isWriting() const
     { Guard g(_mutex); return static_cast<bool>(_last_writer); }
 
+public:
+    inline void lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.lock()))
+    { _mutex.lock(); }
+    inline void unlock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.unlock()))
+    { _mutex.unlock(); }
+    inline bool try_lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.try_lock()))
+    { return _mutex.try_lock(); }
+
 private:
     void startTimeoutShutdown(milliseconds const & millisec);
     void startTimeoutClose(milliseconds const & millisec);
@@ -131,8 +139,11 @@ private:
     void closeAll();
 
 public:
+    /** Obtain the TCP Network type. */
     virtual Type getType() const override
     { return Type::TCP; }
+
+    /** Obtain the Tcp(client) handle id. */
     virtual Id getId() const override
     { return _client->id(); }
 

@@ -54,6 +54,8 @@ struct Server : public details::NetCommon
 
     virtual void onConnection(uerr code)
     { /* EMPTY. */ }
+    virtual void onClientShutdown(WeakClient node, uerr code)
+    { /* EMPTY. */ }
     virtual void onClientWrite(WeakClient node, uerr code)
     { /* EMPTY. */ }
     virtual void onClientRead(WeakClient node, uerr code, char const * buffer, Size size)

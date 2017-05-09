@@ -32,8 +32,34 @@ namespace network {
 namespace details {
 
 // Forward declaration.
+class TcpClientNode;
 class TcpRealServer;
 class TcpServer;
+
+/**
+ * TcpClientNode class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-05
+ */
+class TBAG_API TcpClientNode : public TcpClient
+{
+private:
+    TcpServer & _parent;
+
+private:
+    Buffer _buffer;
+
+public:
+    TcpClientNode(Loop & loop, TcpServer & parent);
+    virtual ~TcpClientNode();
+
+public:
+    virtual void onShutdown(uerr code) override;
+    virtual void onWrite   (uerr code) override;
+    virtual void onRead    (uerr code, char const * buffer, Size size) override;
+    virtual void onClose   () override;
+};
 
 /**
  * TcpRealServer class prototype.
@@ -77,6 +103,7 @@ public:
 class TBAG_API TcpServer : public Server
 {
 public:
+    friend class TcpClientNode;
     friend class TcpRealServer;
 
 public:
@@ -109,10 +136,22 @@ public:
     inline Size sizeClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.size()))
     { Guard g(_mutex); return _clients.size(); }
 
-private:
-    static SharedClient createClient(Loop & loop);
+public:
+    inline void lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.lock()))
+    { _mutex.lock(); }
+    inline void unlock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.unlock()))
+    { _mutex.unlock(); }
+    inline bool try_lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.try_lock()))
+    { return _mutex.try_lock(); }
 
 private:
+    static SharedClient createClient(Loop & loop, TcpServer & server);
+    SharedClient createClient();
+
+private:
+    SharedClient getSharedClient(ClientKey key);
+    WeakClient getWeakClient(ClientKey key);
+
     bool insertClient(SharedClient node);
     bool removeClient(ClientKey key);
 
@@ -127,6 +166,13 @@ public:
         for (auto & cursor : _clients) {
             predicated(cursor);
         }
+    }
+
+    template <typename Predicated>
+    void updateClients(Predicated predicated)
+    {
+        Guard guard(_mutex);
+        predicated(_clients);
     }
 
 public:
@@ -182,31 +228,36 @@ struct FunctionalTcpServer : public TcpServer
     using Size = NetCommon::Size;
     using WeakClient = Server::WeakClient;
 
-    using OnConnection  = std::function<void(uerr)>;
-    using OnClientWrite = std::function<void(WeakClient, uerr)>;
-    using OnClientRead  = std::function<void(WeakClient, uerr, char const *, Size)>;
-    using OnClientClose = std::function<void(WeakClient)>;
-    using OnServerClose = std::function<void(void)>;
+    using OnConnection     = std::function<void(uerr)>;
+    using OnClientShutdown = std::function<void(WeakClient, uerr)>;
+    using OnClientWrite    = std::function<void(WeakClient, uerr)>;
+    using OnClientRead     = std::function<void(WeakClient, uerr, char const *, Size)>;
+    using OnClientClose    = std::function<void(WeakClient)>;
+    using OnServerClose    = std::function<void(void)>;
 
-    OnConnection  connection_cb;
-    OnClientWrite client_write_cb;
-    OnClientRead  client_read_cb;
-    OnClientClose client_close_cb;
-    OnServerClose server_close_cb;
+    OnConnection     connection_cb;
+    OnClientShutdown client_shutdown_cb;
+    OnClientWrite    client_write_cb;
+    OnClientRead     client_read_cb;
+    OnClientClose    client_close_cb;
+    OnServerClose    server_close_cb;
 
     FunctionalTcpServer(Loop & loop) : TcpServer(loop)
     { /* EMPTY */ }
     virtual ~FunctionalTcpServer()
     { /* EMPTY */ }
 
-    inline void setOnConnection (OnConnection  const & cb) { connection_cb   = cb; }
-    inline void setOnClientWrite(OnClientWrite const & cb) { client_write_cb = cb; }
-    inline void setOnClientRead (OnClientRead  const & cb) { client_read_cb  = cb; }
-    inline void setOnClientClose(OnClientClose const & cb) { client_close_cb = cb; }
-    inline void setOnServerClose(OnServerClose const & cb) { server_close_cb = cb; }
+    inline void setOnConnection    (OnConnection     const & cb) { connection_cb      = cb; }
+    inline void setOnClientShutdown(OnClientShutdown const & cb) { client_shutdown_cb = cb; }
+    inline void setOnClientWrite   (OnClientWrite    const & cb) { client_write_cb    = cb; }
+    inline void setOnClientRead    (OnClientRead     const & cb) { client_read_cb     = cb; }
+    inline void setOnClientClose   (OnClientClose    const & cb) { client_close_cb    = cb; }
+    inline void setOnServerClose   (OnServerClose    const & cb) { server_close_cb    = cb; }
 
     virtual void onConnection(uerr code) override
     { if (connection_cb) { connection_cb(code); } }
+    virtual void onClientShutdown(WeakClient node, uerr code) override
+    { if (client_shutdown_cb) { client_shutdown_cb(node, code); } }
     virtual void onClientWrite(WeakClient node, uerr code) override
     { if (client_write_cb) { client_write_cb(node, code); } }
     virtual void onClientRead(WeakClient node, uerr code, char const * buffer, Size size) override

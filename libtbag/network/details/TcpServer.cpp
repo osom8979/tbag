@@ -19,6 +19,57 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace details {
 
+// ---------------------------
+// TcpRealNode implementation.
+// ---------------------------
+
+TcpClientNode::TcpClientNode(Loop & loop, TcpServer & parent)
+        : TcpClient(loop), _parent(parent)
+{
+    // EMPTY.
+}
+
+TcpClientNode::~TcpClientNode()
+{
+    // EMPTY.
+}
+
+void TcpClientNode::onShutdown(uerr code)
+{
+    _parent._mutex.lock();
+    auto weak = _parent.getWeakClient(getId());
+    _parent._mutex.unlock();
+
+    _parent.onClientShutdown(weak, code);
+}
+
+void TcpClientNode::onWrite(uerr code)
+{
+    _parent._mutex.lock();
+    auto weak = _parent.getWeakClient(getId());
+    _parent._mutex.unlock();
+
+    _parent.onClientWrite(weak, code);
+}
+
+void TcpClientNode::onRead(uerr code, char const * buffer, Size size)
+{
+    _parent._mutex.lock();
+    auto weak = _parent.getWeakClient(getId());
+    _parent._mutex.unlock();
+
+    _parent.onClientRead(weak, code, buffer, size);
+}
+
+void TcpClientNode::onClose()
+{
+    _parent._mutex.lock();
+    auto weak = _parent.getWeakClient(getId());
+    _parent._mutex.unlock();
+
+    _parent.onClientClose(weak);
+}
+
 // -----------------------------
 // TcpRealServer implementation.
 // -----------------------------
@@ -73,13 +124,41 @@ TcpServer::~TcpServer()
     _async.reset();
 }
 
-TcpServer::SharedClient TcpServer::createClient(Loop & loop)
+TcpServer::SharedClient TcpServer::createClient(Loop & loop, TcpServer & server)
 {
-    SharedClient client(new (std::nothrow) TcpClient(loop));
+    SharedClient client(new (std::nothrow) TcpClientNode(loop, server));
     if (static_cast<bool>(client)) {
         return client;
     }
     return SharedClient();
+}
+
+TcpServer::SharedClient TcpServer::createClient()
+{
+    assert(static_cast<bool>(_server));
+
+    Loop * loop = _server->getLoop();
+    assert(loop != nullptr);
+
+    return createClient(*loop, *this);
+}
+
+TcpServer::SharedClient TcpServer::getSharedClient(ClientKey key)
+{
+    auto itr = _clients.find(key);
+    if (itr != _clients.end()) {
+        return itr->second;
+    }
+    return SharedClient();
+}
+
+TcpServer::WeakClient TcpServer::getWeakClient(ClientKey key)
+{
+    auto itr = _clients.find(key);
+    if (itr != _clients.end()) {
+        return WeakClient(itr->second);
+    }
+    return WeakClient();
 }
 
 bool TcpServer::insertClient(SharedClient client)
@@ -129,11 +208,8 @@ TcpServer::WeakClient TcpServer::accept()
         return WeakClient();
     }
 
-    Loop * loop = _server->getLoop();
-    assert(loop != nullptr);
-
     Guard guard(_mutex);
-    auto client = std::static_pointer_cast<TcpClient, Client>(TcpServer::createClient(*loop));
+    auto client = std::static_pointer_cast<TcpClient, Client>(createClient());
     if (auto shared = client->getClient().lock()) {
         uerr const CODE = _server->accept(*shared);
         if (CODE == uerr::UVPP_SUCCESS) {
