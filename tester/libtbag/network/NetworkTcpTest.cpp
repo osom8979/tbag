@@ -57,11 +57,17 @@ TEST(NetworkTcpTest, ClientTimeout)
     ASSERT_EQ(1, close);
 }
 
+TEST(NetworkTcpTest, WriteTimeout)
+{
+    using namespace uvpp;
+    Loop loop;
+    FunctionalTcpClient client(loop);
+}
+
 TEST(NetworkTcpTest, MultiEcho)
 {
     // Disable logging.
-    auto const SAVE_SEVERITY = libtbag::log::getDefaultSeverity();
-    libtbag::log::setDefaultSeverity(libtbag::log::OFF_SEVERITY);
+    log::SeverityGuard guard;
 
     using namespace uvpp;
 
@@ -202,7 +208,5 @@ TEST(NetworkTcpTest, MultiEcho)
     ASSERT_EQ(CLIENT_SIZE, server_client_write);
     ASSERT_EQ(CLIENT_SIZE, server_client_close);
     ASSERT_EQ(1, server_close);
-
-    libtbag::log::setDefaultSeverity(SAVE_SEVERITY);
 }
 

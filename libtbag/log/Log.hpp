@@ -94,6 +94,32 @@ TBAG_API void setDefaultSeverity(Severity level);
 TBAG_API Severity getSeverity(std::string const & name);
 TBAG_API Severity getDefaultSeverity();
 
+/**
+ * SeverityGuard class.
+ *
+ * @author zer0
+ * @date   2017-05-09
+ */
+class TBAG_API SeverityGuard : public Noncopyable
+{
+private:
+    std::string _name;
+    Severity _save;
+
+public:
+    SeverityGuard(std::string const & name = TBAG_DEFAULT_LOGGER_NAME,
+                  Severity const & severity = OFF_SEVERITY)
+            : _name(name), _save(getSeverity(_name))
+    {
+        setSeverity(_name, severity);
+    }
+
+    ~SeverityGuard()
+    {
+        setSeverity(_name, _save);
+    }
+};
+
 template <typename ... Args>
 inline void logging(Logger * logger, Severity level, std::string const & format, Args && ... args)
 {
