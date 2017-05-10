@@ -2,11 +2,11 @@
  * @file   TcpServer.hpp
  * @brief  TcpServer class prototype.
  * @author zer0
- * @date   2017-05-06
+ * @date   2017-05-10
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPSERVER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPSERVER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCP_TCPSERVER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCP_TCPSERVER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,8 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/Server.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/network/details/TcpClient.hpp>
+#include <libtbag/network/tcp/TcpClient.hpp>
 
 #include <mutex>
 #include <atomic>
@@ -28,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-namespace details {
+namespace tcp     {
 
 // Forward declaration.
 class TcpClientNode;
@@ -239,12 +238,12 @@ public:
  */
 using FunctionalTcpServer = FunctionalServer<TcpServer>;
 
-} // namespace details
+} // namespace tcp
 } // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPSERVER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCP_TCPSERVER_HPP__
 

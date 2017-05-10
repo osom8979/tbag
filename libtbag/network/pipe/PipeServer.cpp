@@ -2,10 +2,10 @@
  * @file   PipeServer.cpp
  * @brief  PipeServer class implementation.
  * @author zer0
- * @date   2017-05-09
+ * @date   2017-05-10
  */
 
-#include <libtbag/network/details/PipeServer.hpp>
+#include <libtbag/network/pipe/PipeServer.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/id/generator/TimeId.hpp>
 #include <libtbag/log/Log.hpp>
@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-namespace details {
+namespace pipe    {
 
 // ---------------------------
 // PipeRealNode implementation.
@@ -261,7 +261,7 @@ void PipeServer::close()
     }
 }
 
-} // namespace details
+} // namespace pipe
 } // namespace network
 
 // --------------------

@@ -1,11 +1,12 @@
 /**
- * @file   TcpClient.cpp
- * @brief  TcpClient class implementation.
+ * @file   PipeClient.cpp
+ * @brief  PipeClient class implementation.
  * @author zer0
- * @date   2017-05-06
+ * @date   2017-05-10
  */
 
-#include <libtbag/network/details/TcpClient.hpp>
+#include <libtbag/network/pipe/PipeClient.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 #include <cassert>
 
@@ -14,30 +15,35 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-namespace details {
+namespace pipe    {
 
 // -----------------------------
-// TcpRealClient implementation.
+// PipeRealClient implementation.
 // -----------------------------
 
-TcpRealClient::TcpRealClient(Loop & loop, TcpClient & parent) : Tcp(loop), _parent(parent)
+PipeRealClient::PipeRealClient(Loop & loop, PipeClient & parent) : Pipe(loop), _parent(parent)
 {
     setUserData(_parent.onUserDataAlloc());
 }
 
-TcpRealClient::~TcpRealClient()
+PipeRealClient::~PipeRealClient()
 {
     _parent.onUserDataDealloc(getUserData());
 }
 
-bool TcpRealClient::init(String const & ip, int port)
+bool PipeRealClient::init(String const & path, int UNUSED_PARAM(unused))
 {
-    return uvpp::initCommonClient(*this, _connect_req, ip, port);
+    if (filesystem::Path(path).exists() == false) {
+        return false;
+    }
+
+    connect(_connect_req, path.c_str());
+    return true;
 }
 
-void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
+void PipeRealClient::onConnect(ConnectRequest & request, uerr code)
 {
-    tDLogD("TcpRealClient::onConnect({})", uvpp::getErrorName(code));
+    tDLogD("PipeRealClient::onConnect({})", uvpp::getErrorName(code));
 
     {   // Update parent state.
         Guard guard(_parent._mutex);
@@ -47,9 +53,9 @@ void TcpRealClient::onConnect(ConnectRequest & request, uerr code)
     _parent.onConnect(code);
 }
 
-void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
+void PipeRealClient::onShutdown(ShutdownRequest & request, uerr code)
 {
-    tDLogD("TcpRealClient::onShutdown({})", uvpp::getErrorName(code));
+    tDLogD("PipeRealClient::onShutdown({})", uvpp::getErrorName(code));
 
     {   // Update parent state.
         Guard guard(_parent._mutex);
@@ -60,9 +66,9 @@ void TcpRealClient::onShutdown(ShutdownRequest & request, uerr code)
     _parent.onShutdown(code);
 }
 
-void TcpRealClient::onWrite(WriteRequest & request, uerr code)
+void PipeRealClient::onWrite(WriteRequest & request, uerr code)
 {
-    tDLogD("TcpRealClient::onWrite({})", uvpp::getErrorName(code));
+    tDLogD("PipeRealClient::onWrite({})", uvpp::getErrorName(code));
 
     {   // Update parent state.
         Guard guard(_parent._mutex);
@@ -73,20 +79,20 @@ void TcpRealClient::onWrite(WriteRequest & request, uerr code)
     _parent.onWrite(code);
 }
 
-TcpRealClient::binf TcpRealClient::onAlloc(std::size_t suggested_size)
+PipeRealClient::binf PipeRealClient::onAlloc(std::size_t suggested_size)
 {
     return uvpp::defaultOnAlloc(_buffer, suggested_size);
 }
 
-void TcpRealClient::onRead(uerr code, char const * buffer, std::size_t size)
+void PipeRealClient::onRead(uerr code, char const * buffer, std::size_t size)
 {
-    tDLogD("TcpRealClient::onRead({})", uvpp::getErrorName(code));
+    tDLogD("PipeRealClient::onRead({})", uvpp::getErrorName(code));
     _parent.onRead(code, buffer, size);
 }
 
-void TcpRealClient::onClose()
+void PipeRealClient::onClose()
 {
-    tDLogD("TcpRealClient::onClose()");
+    tDLogD("PipeRealClient::onClose()");
     _parent.onClose();
 
     {   // Update parent state.
@@ -96,12 +102,12 @@ void TcpRealClient::onClose()
 }
 
 // -------------------------
-// TcpClient implementation.
+// PipeClient implementation.
 // -------------------------
 
-TcpClient::TcpClient(Loop & loop)
+PipeClient::PipeClient(Loop & loop)
 {
-    _client   = loop.newHandle<TcpRealClient>(loop, *this);
+    _client   = loop.newHandle<PipeRealClient>(loop, *this);
     _async    = loop.newHandle<SafetyWriteAsync>(loop);
     _close    = loop.newHandle<TimeoutClose>(loop, _client.get(), false);
     _shutdown = loop.newHandle<TimeoutShutdown>(loop, _client.get(), false);
@@ -111,7 +117,7 @@ TcpClient::TcpClient(Loop & loop)
     assert(static_cast<bool>(_shutdown));
 }
 
-TcpClient::~TcpClient()
+PipeClient::~PipeClient()
 {
     _client.reset();
     _async.reset();
@@ -120,45 +126,45 @@ TcpClient::~TcpClient()
     _last_writer.reset();
 }
 
-void TcpClient::startTimeoutShutdown(Milliseconds const & millisec)
+void PipeClient::startTimeoutShutdown(Milliseconds const & millisec)
 {
     assert(static_cast<bool>(_shutdown));
     uerr const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
-    tDLogD("TcpClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+    tDLogD("PipeClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
-void TcpClient::startTimeoutClose(Milliseconds const & millisec)
+void PipeClient::startTimeoutClose(Milliseconds const & millisec)
 {
     assert(static_cast<bool>(_close));
     uerr const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
-    tDLogD("TcpClient::startTimeoutClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+    tDLogD("PipeClient::startTimeoutClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
-void TcpClient::cancelTimeoutShutdown()
+void PipeClient::cancelTimeoutShutdown()
 {
     assert(static_cast<bool>(_shutdown));
     if (_shutdown->isActive()) {
         _shutdown->cancel();
     }
-    tDLogD("TcpClient::cancelTimeoutShutdown().");
+    tDLogD("PipeClient::cancelTimeoutShutdown().");
 }
 
-void TcpClient::cancelTimeoutClose()
+void PipeClient::cancelTimeoutClose()
 {
     assert(static_cast<bool>(_close));
     if (_close->isActive()) {
         _close->cancel();
     }
-    tDLogD("TcpClient::cancelTimeoutClose().");
+    tDLogD("PipeClient::cancelTimeoutClose().");
 }
 
-bool TcpClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
+bool PipeClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_async));
 
     if (static_cast<bool>(_last_writer)) {
-        tDLogD("TcpClient::write() busy state.");
+        tDLogD("PipeClient::write() busy state.");
         return false;
     }
 
@@ -182,7 +188,7 @@ bool TcpClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
     return true;
 }
 
-void TcpClient::closeAll()
+void PipeClient::closeAll()
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_async));
@@ -210,11 +216,11 @@ void TcpClient::closeAll()
     _last_writer.reset();
 }
 
-bool TcpClient::init(String const & ip, int port, uint64_t millisec)
+bool PipeClient::init(String const & path, int unused, uint64_t millisec)
 {
     assert(static_cast<bool>(_client));
     Guard guard(_mutex);
-    if (static_cast<bool>(_client) && _client->init(ip, port)) {
+    if (static_cast<bool>(_client) && _client->init(path)) {
         if (millisec >= 1U) {
             startTimeoutClose(Milliseconds(millisec));
         }
@@ -223,21 +229,21 @@ bool TcpClient::init(String const & ip, int port, uint64_t millisec)
     return false;
 }
 
-bool TcpClient::start()
+bool PipeClient::start()
 {
     assert(static_cast<bool>(_client));
     Guard guard(_mutex);
     return _client->startRead() == uerr::UVPP_SUCCESS;
 }
 
-bool TcpClient::stop()
+bool PipeClient::stop()
 {
     assert(static_cast<bool>(_client));
     Guard guard(_mutex);
     return _client->stopRead() == uerr::UVPP_SUCCESS;
 }
 
-void TcpClient::close()
+void PipeClient::close()
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_async));
@@ -246,11 +252,11 @@ void TcpClient::close()
     assert(loop != nullptr);
 
     if (loop->isAliveAndThisThread()) {
-        tDLogD("TcpServer::close() sync request.");
+        tDLogD("PipeServer::close() sync request.");
         Guard guard(_mutex);
         closeAll();
     } else {
-        tDLogD("TcpServer::close() async request.");
+        tDLogD("PipeServer::close() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
             Guard guard(_mutex);
             closeAll();
@@ -258,7 +264,7 @@ void TcpClient::close()
     }
 }
 
-void TcpClient::cancel()
+void PipeClient::cancel()
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_async));
@@ -267,11 +273,11 @@ void TcpClient::cancel()
     assert(loop != nullptr);
 
     if (loop->isAliveAndThisThread()) {
-        tDLogD("TcpServer::cancel() sync request.");
+        tDLogD("PipeServer::cancel() sync request.");
         Guard guard(_mutex);
         startTimeoutShutdown(Milliseconds(0U));
     } else {
-        tDLogD("TcpServer::cancel() async request.");
+        tDLogD("PipeServer::cancel() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
             Guard guard(_mutex);
             startTimeoutShutdown(Milliseconds(0U));
@@ -279,21 +285,21 @@ void TcpClient::cancel()
     }
 }
 
-bool TcpClient::write(binf const * buffer, Size size, uint64_t millisec)
+bool PipeClient::write(binf const * buffer, Size size, uint64_t millisec)
 {
     assert(static_cast<bool>(_client));
     Guard guard(_mutex);
     return write(SafetyWriteAsync::createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
 }
 
-bool TcpClient::write(char const * buffer, Size size, uint64_t millisec)
+bool PipeClient::write(char const * buffer, Size size, uint64_t millisec)
 {
     assert(static_cast<bool>(_client));
     Guard guard(_mutex);
     return write(SafetyWriteAsync::createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
 }
 
-} // namespace details
+} // namespace pipe
 } // namespace network
 
 // --------------------

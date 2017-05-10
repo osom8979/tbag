@@ -7,9 +7,8 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/network/details/TcpServer.hpp>
-#include <libtbag/network/details/TcpClient.hpp>
+#include <libtbag/network/tcp/TcpServer.hpp>
+#include <libtbag/network/tcp/TcpClient.hpp>
 
 #include <thread>
 #include <memory>
@@ -19,6 +18,7 @@
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::details;
+using namespace libtbag::network::tcp;
 
 TEST(NetworkTcpTest, ClientTimeout)
 {

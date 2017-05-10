@@ -8,9 +8,8 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/network/details/PipeServer.hpp>
-#include <libtbag/network/details/PipeClient.hpp>
+#include <libtbag/network/pipe/PipeServer.hpp>
+#include <libtbag/network/pipe/PipeClient.hpp>
 
 #include <thread>
 #include <memory>
@@ -20,6 +19,7 @@
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::details;
+using namespace libtbag::network::pipe;
 
 TEST(NetworkPipeTest, MultiEcho)
 {

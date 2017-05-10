@@ -2,10 +2,10 @@
  * @file   TcpServer.cpp
  * @brief  TcpServer class implementation.
  * @author zer0
- * @date   2017-05-06
+ * @date   2017-05-10
  */
 
-#include <libtbag/network/details/TcpServer.hpp>
+#include <libtbag/network/tcp/TcpServer.hpp>
 #include <libtbag/id/generator/TimeId.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -17,7 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-namespace details {
+namespace tcp     {
 
 // ---------------------------
 // TcpRealNode implementation.
@@ -215,8 +215,8 @@ TcpServer::WeakClient TcpServer::accept()
         uerr const CODE = _server->accept(*shared);
         if (CODE == uerr::UVPP_SUCCESS) {
             tDLogD("TcpServer::accept() client connect Sock({}:{})/Peer({}:{})",
-                         shared->getSockIp(), shared->getSockPort(),
-                         shared->getPeerIp(), shared->getPeerPort());
+                   shared->getSockIp(), shared->getSockPort(),
+                   shared->getPeerIp(), shared->getPeerPort());
             bool const INSERT_RESULT = insertClient(client);
             assert(INSERT_RESULT);
             return WeakClient(client);
@@ -250,7 +250,7 @@ void TcpServer::close()
     }
 }
 
-} // namespace details
+} // namespace tcp
 } // namespace network
 
 // --------------------

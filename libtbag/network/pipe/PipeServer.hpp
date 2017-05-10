@@ -2,11 +2,11 @@
  * @file   PipeServer.hpp
  * @brief  PipeServer class prototype.
  * @author zer0
- * @date   2017-05-09
+ * @date   2017-05-10
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_PIPESERVER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_PIPESERVER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_PIPE_PIPESERVER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_PIPE_PIPESERVER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,8 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/Server.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/network/details/PipeClient.hpp>
+#include <libtbag/network/pipe/PipeClient.hpp>
 
 #include <mutex>
 #include <atomic>
@@ -28,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-namespace details {
+namespace pipe    {
 
 // Forward declaration.
 class PipeClientNode;
@@ -239,12 +238,12 @@ public:
  */
 using FunctionalPipeServer = FunctionalServer<PipeServer>;
 
-} // namespace details
+} // namespace pipe
 } // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_PIPESERVER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_PIPE_PIPESERVER_HPP__
 

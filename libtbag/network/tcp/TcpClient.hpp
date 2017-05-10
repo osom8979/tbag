@@ -2,11 +2,11 @@
  * @file   TcpClient.hpp
  * @brief  TcpClient class prototype.
  * @author zer0
- * @date   2017-05-06
+ * @date   2017-05-10
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPCLIENT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPCLIENT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCP_TCPCLIENT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCP_TCPCLIENT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/Client.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
 
 #include <memory>
 #include <atomic>
@@ -28,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-namespace details {
+namespace tcp     {
 
 // Forward declaration.
 class TcpRealClient;
@@ -188,12 +187,12 @@ public:
  */
 using FunctionalTcpClient = FunctionalClient<TcpClient>;
 
-} // namespace details
+} // namespace tcp
 } // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_TCPCLIENT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_TCP_TCPCLIENT_HPP__
 
