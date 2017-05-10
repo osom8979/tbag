@@ -83,8 +83,9 @@ struct NetCommon
 
     using Id = uvpp::Handle::Id;
 
-    using SafetyAsync      = uvpp::ex::SafetyAsync;
-    using SafetyWriteAsync = uvpp::ex::SafetyWriteAsync;
+    using SafetyAsync        = uvpp::ex::SafetyAsync;
+    using SafetyWriteAsync   = uvpp::ex::SafetyWriteAsync;
+    using SharedSafetyWriter = SafetyWriteAsync::SharedWriter;
 
     using AsyncJob = SafetyAsync::Job;
     using WriteJob = uvpp::ex::WriteJob;
@@ -112,19 +113,6 @@ struct NetCommon
 
     using SharedSafetyWriteAsync = std::shared_ptr<SafetyWriteAsync>;
     using   WeakSafetyWriteAsync =   std::weak_ptr<SafetyWriteAsync>;
-};
-
-/**
- * Network backend interface.
- *
- * @author zer0
- * @date   2017-05-10
- */
-struct NetBackendInterface
-{
-    using String = std::string;
-
-    virtual bool init(String const & destination, int port) = 0;
 };
 
 TBAG_API bool isIpv4(std::string const & ip);
