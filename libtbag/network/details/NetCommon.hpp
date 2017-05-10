@@ -63,6 +63,12 @@ enum class NetType
     PIPE,
 };
 
+/**
+ * Common types for the network package.
+ *
+ * @author zer0
+ * @date   2017-05-03
+ */
 struct NetCommon
 {
     using uerr = uvpp::uerr;
@@ -106,6 +112,19 @@ struct NetCommon
 
     using SharedSafetyWriteAsync = std::shared_ptr<SafetyWriteAsync>;
     using   WeakSafetyWriteAsync =   std::weak_ptr<SafetyWriteAsync>;
+};
+
+/**
+ * Network backend interface.
+ *
+ * @author zer0
+ * @date   2017-05-10
+ */
+struct NetBackendInterface
+{
+    using String = std::string;
+
+    virtual bool init(String const & destination, int port) = 0;
 };
 
 TBAG_API bool isIpv4(std::string const & ip);
