@@ -15,6 +15,8 @@
 #include <vector>
 #include <iostream>
 
+#define DISABLE_IDLE_SERVER
+
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::details;
@@ -111,7 +113,9 @@ TEST(NetworkTcpTest, MultiEcho)
             server_client_close++;
         }
         if (server_client_close >= CLIENT_SIZE) {
+#if defined(DISABLE_IDLE_SERVER)
             server.close();
+#endif
         }
     });
     server.setOnServerClose([&](){
