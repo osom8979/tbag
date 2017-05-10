@@ -49,6 +49,11 @@ public:
     }
 
 public:
+    virtual Type getType() const override
+    {
+        return Type::PIPE;
+    }
+
     virtual bool realInitialize(ClientBackend & backend, String const & destination, int port) override
     {
         if (filesystem::Path(destination).exists() == false) {

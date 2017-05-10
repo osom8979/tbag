@@ -15,12 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/Server.hpp>
+#include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/tcp/TcpClient.hpp>
-
-#include <mutex>
-#include <atomic>
-#include <unordered_map>
+#include <libtbag/uvpp/Tcp.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -29,205 +26,38 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace tcp     {
 
-// Forward declaration.
-class TcpClientNode;
-class TcpRealServer;
-class TcpServer;
-
-/**
- * TcpClientNode class prototype.
- *
- * @author zer0
- * @date   2017-05-05
- */
-class TBAG_API TcpClientNode : public TcpClient
-{
-private:
-    TcpServer & _parent;
-
-private:
-    Buffer _buffer;
-
-public:
-    TcpClientNode(Loop & loop, TcpServer & parent);
-    virtual ~TcpClientNode();
-
-private:
-    Server::WeakClient getWeakClient();
-
-public:
-    virtual void onShutdown(uerr code) override;
-    virtual void onWrite   (uerr code) override;
-    virtual void onRead    (uerr code, char const * buffer, Size size) override;
-    virtual void onClose   () override;
-
-public:
-    virtual void * onUserDataAlloc() override;
-    virtual void onUserDataDealloc(void * data) override;
-};
-
-/**
- * TcpRealServer class prototype.
- *
- * @author zer0
- * @date   2017-05-05
- */
-class TBAG_API TcpRealServer : public details::NetCommon, public uvpp::Tcp
-{
-public:
-    using AtomicBool = std::atomic_bool;
-
-private:
-    TcpServer & _parent;
-
-private:
-    AtomicBool _on_connection;
-
-public:
-    inline bool isOnConnection() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_on_connection.load()))
-    { return _on_connection.load(); }
-
-public:
-    TcpRealServer(Loop & loop, TcpServer & parent);
-    virtual ~TcpRealServer();
-
-public:
-    bool init(String const & ip, int port);
-
-public:
-    virtual void onConnection(uerr code) override;
-    virtual void onClose() override;
-};
-
 /**
  * TcpServer class prototype.
  *
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API TcpServer : public Server
+class TBAG_API TcpServer : public stream::StreamServer<uvpp::Tcp, TcpClient>
 {
 public:
-    friend class TcpClientNode;
-    friend class TcpRealServer;
+    using Parent = stream::StreamServer<uvpp::Tcp, TcpClient>;
 
 public:
-    using SharedServer = std::shared_ptr<TcpRealServer>;
-    using   WeakServer =   std::weak_ptr<TcpRealServer>;
-
-public:
-    using ClientKey  = Id;
-    using ClientMap  = std::unordered_map<ClientKey, SharedClient>;
-    using ClientPair = ClientMap::value_type;
-
-public:
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
-
-private:
-    mutable Mutex _mutex;
-
-    SharedServer _server;
-    ClientMap    _clients;
-    SharedSafetyWriteAsync _async;
-
-public:
-    TcpServer(Loop & loop);
-    virtual ~TcpServer();
-
-public:
-    // @formatter:off
-    inline WeakServer getServer() { Guard g(_mutex); return WeakServer(_server); }
-    inline SharedSafetyWriteAsync  getAsync () { Guard g(_mutex); return SharedSafetyWriteAsync (_async);  }
-    // @formatter:on
-
-public:
-    // @formatter:off
-    inline bool emptyClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.empty()))
-    { Guard g(_mutex); return _clients.empty(); }
-    inline Size sizeClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.size()))
-    { Guard g(_mutex); return _clients.size(); }
-    // @formatter:on
-
-public:
-    // @formatter:off
-    inline void lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.lock()))
-    { _mutex.lock(); }
-    inline void unlock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.unlock()))
-    { _mutex.unlock(); }
-    inline bool try_lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.try_lock()))
-    { return _mutex.try_lock(); }
-    // @formatter:on
-
-private:
-    static SharedClient createClient(Loop & loop, TcpServer & server);
-    SharedClient createClient();
-
-private:
-    SharedClient getSharedClient(ClientKey key);
-    WeakClient getWeakClient(ClientKey key);
-
-    bool insertClient(SharedClient node);
-    bool removeClient(ClientKey key);
-
-private:
-    void closeAll();
-
-public:
-    template <typename Predicated>
-    void foreach(Predicated predicated)
+    TcpServer(Loop & loop) : Parent(loop)
     {
-        Guard guard(_mutex);
-        for (auto & cursor : _clients) {
-            predicated(cursor);
-        }
+        // EMPTY.
     }
 
-    template <typename Predicated>
-    void updateClients(Predicated predicated)
+    virtual ~TcpServer()
     {
-        Guard guard(_mutex);
-        predicated(_clients);
+        // EMPTY.
     }
 
 public:
-    /** Obtain the TCP Network type. */
     virtual Type getType() const override
-    { return Type::TCP; }
+    {
+        return Type::TCP;
+    }
 
-    /** Obtain the Tcp(server) handle id. */
-    virtual Id getId() const override
-    { return _server->id(); }
-
-public:
-    /**
-     * Initialize this method.
-     *
-     * @param[in] ip
-     *      IPv4 or IPv6 address.
-     * @param[in] port
-     *      Port number.
-     *
-     * @remarks
-     *  init() -> bind() -> listen().
-     */
-    virtual bool init(String const & ip, int port) override;
-
-    /**
-     * Accept client.
-     *
-     * @warning
-     *  This operation can only used with the onConnection() method.
-     */
-    virtual WeakClient accept() override;
-
-    /**
-     * Safety close() operation.
-     *
-     * @remarks
-     *  Select sync/async operations automatically according to Thread ID.
-     */
-    virtual void close() override;
+    virtual bool realInitialize(ServerBackend & backend, String const & ip, int port) override
+    {
+        return uvpp::initCommonServer(backend, ip, port);
+    }
 };
 
 /**

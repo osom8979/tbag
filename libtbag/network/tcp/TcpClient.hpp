@@ -48,6 +48,11 @@ public:
     }
 
 public:
+    virtual Type getType() const override
+    {
+        return Type::TCP;
+    }
+
     virtual bool realInitialize(ClientBackend & backend, String const & ip, int port) override
     {
         return uvpp::initCommonClient(backend, backend.atConnectReq(), ip, port);
