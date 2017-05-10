@@ -129,7 +129,7 @@ private:
     mutable Mutex _mutex;
 
     SharedServer _server;
-    SharedAsync  _async;
+    SharedSafetyWriteAsync  _async;
     ClientMap    _clients;
 
 public:
@@ -139,7 +139,7 @@ public:
 public:
     // @formatter:off
     inline WeakServer getServer() { Guard g(_mutex); return WeakServer(_server); }
-    inline WeakAsync  getAsync () { Guard g(_mutex); return WeakAsync (_async);  }
+    inline SharedSafetyWriteAsync  getAsync () { Guard g(_mutex); return SharedSafetyWriteAsync (_async);  }
     // @formatter:on
 
 public:

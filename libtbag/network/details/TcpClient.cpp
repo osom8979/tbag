@@ -120,14 +120,14 @@ TcpClient::~TcpClient()
     _last_writer.reset();
 }
 
-void TcpClient::startTimeoutShutdown(milliseconds const & millisec)
+void TcpClient::startTimeoutShutdown(Milliseconds const & millisec)
 {
     assert(static_cast<bool>(_shutdown));
     uerr const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
     tDLogD("TcpClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
-void TcpClient::startTimeoutClose(milliseconds const & millisec)
+void TcpClient::startTimeoutClose(Milliseconds const & millisec)
 {
     assert(static_cast<bool>(_close));
     uerr const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
@@ -166,7 +166,7 @@ bool TcpClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
     assert(loop != nullptr);
 
     if (millisec >= 1U) {
-        startTimeoutShutdown(milliseconds(millisec));
+        startTimeoutShutdown(Milliseconds(millisec));
     }
 
     if (loop->isAliveAndThisThread()) {
@@ -216,7 +216,7 @@ bool TcpClient::init(String const & ip, int port, uint64_t millisec)
     Guard guard(_mutex);
     if (static_cast<bool>(_client) && _client->init(ip, port)) {
         if (millisec >= 1U) {
-            startTimeoutClose(milliseconds(millisec));
+            startTimeoutClose(Milliseconds(millisec));
         }
         return true;
     }
@@ -269,12 +269,12 @@ void TcpClient::cancel()
     if (loop->isAliveAndThisThread()) {
         tDLogD("TcpServer::cancel() sync request.");
         Guard guard(_mutex);
-        startTimeoutShutdown(milliseconds(0U));
+        startTimeoutShutdown(Milliseconds(0U));
     } else {
         tDLogD("TcpServer::cancel() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
             Guard guard(_mutex);
-            startTimeoutShutdown(milliseconds(0U));
+            startTimeoutShutdown(Milliseconds(0U));
         });
     }
 }

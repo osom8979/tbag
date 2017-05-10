@@ -126,14 +126,14 @@ PipeClient::~PipeClient()
     _last_writer.reset();
 }
 
-void PipeClient::startTimeoutShutdown(milliseconds const & millisec)
+void PipeClient::startTimeoutShutdown(Milliseconds const & millisec)
 {
     assert(static_cast<bool>(_shutdown));
     uerr const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
     tDLogD("PipeClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
 }
 
-void PipeClient::startTimeoutClose(milliseconds const & millisec)
+void PipeClient::startTimeoutClose(Milliseconds const & millisec)
 {
     assert(static_cast<bool>(_close));
     uerr const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
@@ -172,7 +172,7 @@ bool PipeClient::write(SafetyWriteAsync::SharedWriter writer, uint64_t millisec)
     assert(loop != nullptr);
 
     if (millisec >= 1U) {
-        startTimeoutShutdown(milliseconds(millisec));
+        startTimeoutShutdown(Milliseconds(millisec));
     }
 
     if (loop->isAliveAndThisThread()) {
@@ -222,7 +222,7 @@ bool PipeClient::init(String const & path, int unused, uint64_t millisec)
     Guard guard(_mutex);
     if (static_cast<bool>(_client) && _client->init(path)) {
         if (millisec >= 1U) {
-            startTimeoutClose(milliseconds(millisec));
+            startTimeoutClose(Milliseconds(millisec));
         }
         return true;
     }
@@ -275,12 +275,12 @@ void PipeClient::cancel()
     if (loop->isAliveAndThisThread()) {
         tDLogD("PipeServer::cancel() sync request.");
         Guard guard(_mutex);
-        startTimeoutShutdown(milliseconds(0U));
+        startTimeoutShutdown(Milliseconds(0U));
     } else {
         tDLogD("PipeServer::cancel() async request.");
         _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
             Guard guard(_mutex);
-            startTimeoutShutdown(milliseconds(0U));
+            startTimeoutShutdown(Milliseconds(0U));
         });
     }
 }

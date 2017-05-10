@@ -92,10 +92,10 @@ public:
     using   WeakClient =   std::weak_ptr<PipeRealClient>;
 
 private:
-    SharedClient   _client;
-    SharedAsync    _async;
-    SharedClose    _close;
-    SharedShutdown _shutdown;
+    SharedClient           _client;
+    SharedSafetyWriteAsync _async;
+    SharedTimeoutClose     _close;
+    SharedTimeoutShutdown  _shutdown;
 
 private:
     SafetyWriteAsync::SharedWriter _last_writer;
@@ -106,15 +106,35 @@ public:
     virtual ~PipeClient();
 
 public:
-    // @formatter:off
-    inline WeakClient   getClient  () { Guard g(_mutex); return WeakClient  (_client);   }
-    inline WeakAsync    getAsync   () { Guard g(_mutex); return WeakAsync   (_async);    }
-    inline WeakClose    getClose   () { Guard g(_mutex); return WeakClose   (_close);    }
-    inline WeakShutdown getShutdown() { Guard g(_mutex); return WeakShutdown(_shutdown); }
-    // @formatter:on
+    inline WeakClient getClient()
+    {
+        Guard g(_mutex);
+        return WeakClient(_client);
+    }
+
+    inline WeakSafetyWriteAsync getAsync()
+    {
+        Guard g(_mutex);
+        return WeakSafetyWriteAsync(_async);
+    }
+
+    inline WeakTimeoutClose getClose()
+    {
+        Guard g(_mutex);
+        return WeakTimeoutClose(_close);
+    }
+
+    inline WeakTimeoutShutdown getShutdown()
+    {
+        Guard g(_mutex);
+        return WeakTimeoutShutdown(_shutdown);
+    }
 
     inline bool isWriting() const
-    { Guard g(_mutex); return static_cast<bool>(_last_writer); }
+    {
+        Guard g(_mutex);
+        return static_cast<bool>(_last_writer);
+    }
 
 public:
     inline void lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.lock()))
@@ -125,8 +145,8 @@ public:
     { return _mutex.try_lock(); }
 
 private:
-    void startTimeoutShutdown(milliseconds const & millisec);
-    void startTimeoutClose(milliseconds const & millisec);
+    void startTimeoutShutdown(Milliseconds const & millisec);
+    void startTimeoutClose(Milliseconds const & millisec);
 
     void cancelTimeoutShutdown();
     void cancelTimeoutClose();

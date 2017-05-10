@@ -65,8 +65,6 @@ enum class NetType
 
 struct NetCommon
 {
-    using Id = id::Id;
-
     using uerr = uvpp::uerr;
     using binf = uvpp::binf;
 
@@ -77,10 +75,12 @@ struct NetCommon
     using Loop  = uvpp::Loop;
     using Timer = uvpp::Timer;
 
+    using Id = uvpp::Handle::Id;
+
     using SafetyAsync      = uvpp::ex::SafetyAsync;
     using SafetyWriteAsync = uvpp::ex::SafetyWriteAsync;
 
-    using AsyncJob = SafetyWriteAsync::Job;
+    using AsyncJob = SafetyAsync::Job;
     using WriteJob = uvpp::ex::WriteJob;
 
     using ShutdownRequest = uvpp::ShutdownRequest;
@@ -89,8 +89,8 @@ struct NetCommon
 
     using Buffer = std::vector<char>;
 
-    using seconds      = std::chrono::seconds;
-    using milliseconds = std::chrono::milliseconds;
+    using Seconds      = std::chrono::seconds;
+    using Milliseconds = std::chrono::milliseconds;
 
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
@@ -98,14 +98,14 @@ struct NetCommon
     using TimeoutClose    = uvpp::ex::TimeoutClose;
     using TimeoutShutdown = uvpp::ex::TimeoutShutdown;
 
-    using SharedClose = std::shared_ptr<TimeoutClose>;
-    using   WeakClose =   std::weak_ptr<TimeoutClose>;
+    using SharedTimeoutClose = std::shared_ptr<TimeoutClose>;
+    using   WeakTimeoutClose =   std::weak_ptr<TimeoutClose>;
 
-    using SharedShutdown = std::shared_ptr<TimeoutShutdown>;
-    using   WeakShutdown =   std::weak_ptr<TimeoutShutdown>;
+    using SharedTimeoutShutdown = std::shared_ptr<TimeoutShutdown>;
+    using   WeakTimeoutShutdown =   std::weak_ptr<TimeoutShutdown>;
 
-    using SharedAsync = std::shared_ptr<SafetyWriteAsync>;
-    using   WeakAsync =   std::weak_ptr<SafetyWriteAsync>;
+    using SharedSafetyWriteAsync = std::shared_ptr<SafetyWriteAsync>;
+    using   WeakSafetyWriteAsync =   std::weak_ptr<SafetyWriteAsync>;
 };
 
 TBAG_API bool isIpv4(std::string const & ip);
