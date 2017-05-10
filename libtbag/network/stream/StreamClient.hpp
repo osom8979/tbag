@@ -402,6 +402,21 @@ public:
     }
 
 public:
+    virtual void const * getUserData() const override
+    {
+        assert(static_cast<bool>(_client));
+        return _client->getUserData();
+    }
+
+    template <typename Predicated>
+    void updateUserData(Predicated predicated)
+    {
+        assert(static_cast<bool>(_client));
+        Guard guard(_mutex);
+        predicated(_client->getUserData());
+    }
+
+public:
     virtual bool realInitialize(ClientBackend & backend, String const & destination, int port) = 0;
 };
 

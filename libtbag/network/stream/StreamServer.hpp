@@ -268,6 +268,23 @@ private:
         return _clients.erase(key) == 1U;
     }
 
+public:
+    template <typename Predicated>
+    void foreach(Predicated predicated)
+    {
+        Guard guard(_mutex);
+        for (auto & cursor : _clients) {
+            predicated(cursor);
+        }
+    }
+
+    template <typename Predicated>
+    void updateClients(Predicated predicated)
+    {
+        Guard guard(_mutex);
+        predicated(_clients);
+    }
+
 private:
     void closeAll()
     {
@@ -367,24 +384,22 @@ public:
     }
 
 public:
-    virtual bool realInitialize(ServerBackend & backend, String const & destination, int port) = 0;
+    virtual void const * getUserData() const override
+    {
+        assert(static_cast<bool>(_server));
+        return _server->getUserData();
+    }
+
+    template <typename Predicated>
+    void updateUserData(Predicated predicated)
+    {
+        assert(static_cast<bool>(_server));
+        Guard guard(_mutex);
+        predicated(_server->getUserData());
+    }
 
 public:
-    template <typename Predicated>
-    void foreach(Predicated predicated)
-    {
-        Guard guard(_mutex);
-        for (auto & cursor : _clients) {
-            predicated(cursor);
-        }
-    }
-
-    template <typename Predicated>
-    void updateClients(Predicated predicated)
-    {
-        Guard guard(_mutex);
-        predicated(_clients);
-    }
+    virtual bool realInitialize(ServerBackend & backend, String const & destination, int port) = 0;
 };
 
 } // namespace stream

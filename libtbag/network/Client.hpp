@@ -39,30 +39,35 @@ namespace network {
 struct Client : public details::NetCommon
 {
     // @formatter:off
-    virtual Type getType() const
-    { return Type::UNKNOWN; }
-    virtual Id getId() const
-    { return id::UNKNOWN_ID; }
+    virtual Type getType() const = 0;
+    virtual Id getId() const = 0;
 
-    virtual bool init(String const & destination, int port = 0, uint64_t millisec = 0)
-    { return false; }
+    virtual bool init(String const & destination, int port = 0, uint64_t millisec = 0) = 0;
 
-    virtual bool  start() { return false; }
-    virtual bool   stop() { return false; }
-    virtual void  close() { /* EMPTY. */  }
-    virtual void cancel() { /* EMPTY. */  }
+    virtual bool  start() = 0;
+    virtual bool   stop() = 0;
+    virtual void  close() = 0;
+    virtual void cancel() = 0;
 
-    virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) { return false; }
-    virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) { return false; }
+    virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) = 0;
+    virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) = 0;
 
+    virtual void const * getUserData() const = 0;
+    // @formatter:on
+
+    // ---------------
+    // Event callback.
+    // ---------------
+
+    // @formatter:off
     virtual void onConnect (uerr code) { /* EMPTY. */ }
     virtual void onShutdown(uerr code) { /* EMPTY. */ }
     virtual void onWrite   (uerr code) { /* EMPTY. */ }
     virtual void onRead    (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
     virtual void onClose   ()          { /* EMPTY. */ }
 
-    virtual void * onUserDataAlloc  ()            { return nullptr; }
-    virtual void   onUserDataDealloc(void * data) { /* EMPTY. */    }
+    virtual void * onUserDataAlloc() { return nullptr; }
+    virtual void   onUserDataDealloc(void * data) { /* EMPTY. */ }
     // @formatter:on
 };
 

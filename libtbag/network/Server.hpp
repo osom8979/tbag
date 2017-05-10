@@ -43,41 +43,32 @@ struct Server : public details::NetCommon
     using   WeakClient =   std::weak_ptr<Client>;
 
     // @formatter:off
-    virtual Type getType() const
-    { return Type::UNKNOWN; }
-    virtual Id getId() const
-    { return id::UNKNOWN_ID; }
+    virtual Type getType() const = 0;
+    virtual Id getId() const = 0;
 
-    virtual bool init(String const & destination, int port = 0)
-    { return false; }
+    virtual bool init(String const & destination, int port = 0) = 0;
+    virtual WeakClient accept() = 0;
+    virtual void close() = 0;
 
-    virtual WeakClient accept()
-    { return WeakClient(); }
+    virtual void const * getUserData() const = 0;
+    // @formatter:on
 
-    virtual void close()
-    { /* EMPTY. */ }
+    // ---------------
+    // Event callback.
+    // ---------------
 
-    virtual void onConnection(uerr code)
-    { /* EMPTY. */ }
-    virtual void onClientShutdown(WeakClient node, uerr code)
-    { /* EMPTY. */ }
-    virtual void onClientWrite(WeakClient node, uerr code)
-    { /* EMPTY. */ }
-    virtual void onClientRead(WeakClient node, uerr code, char const * buffer, Size size)
-    { /* EMPTY. */ }
-    virtual void onClientClose(WeakClient node)
-    { /* EMPTY. */ }
-    virtual void onServerClose()
-    { /* EMPTY. */ }
+    // @formatter:off
+    virtual void onConnection    (uerr code)       { /* EMPTY. */ }
+    virtual void onClientShutdown(WeakClient node, uerr code) { /* EMPTY. */ }
+    virtual void onClientWrite   (WeakClient node, uerr code) { /* EMPTY. */ }
+    virtual void onClientRead    (WeakClient node, uerr code, char const * buffer, Size size) { /* EMPTY. */ }
+    virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
+    virtual void onServerClose   ()                { /* EMPTY. */ }
 
-    virtual void * onUserDataAlloc()
-    { return nullptr; }
-    virtual void onUserDataDealloc(void * data)
-    { /* EMPTY. */ }
-    virtual void * onClientUserDataAlloc(WeakClient node)
-    { return nullptr; }
-    virtual void onClientUserDataDealloc(WeakClient node, void * data)
-    { /* EMPTY. */ }
+    virtual void * onUserDataAlloc() { return nullptr; }
+    virtual void   onUserDataDealloc(void * data) { /* EMPTY. */ }
+    virtual void * onClientUserDataAlloc(WeakClient node) { return nullptr; }
+    virtual void   onClientUserDataDealloc(WeakClient node, void * data) { /* EMPTY. */ }
     // @formatter:on
 };
 
