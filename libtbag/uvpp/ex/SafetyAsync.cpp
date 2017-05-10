@@ -54,7 +54,12 @@ void SafetyAsync::MistakeInspector::onIdle()
         tDLogD("SafetyAsync::MistakeInspector::onIdle() async is closing.");
     } else {
         _async._jobs.safeRun([&](JobQueue::Queue & queue){
-            if (queue.empty() == false) {
+            if (queue.empty()) {
+                if (_async._inspector->isClosing() == false && _async._inspector->isActive()) {
+                    tDLogD("SafetyAsync::MistakeInspector::onIdle() stop inspector!");
+                    _async._inspector->stop();
+                }
+            } else {
                 if (_async.send() != uerr::UVPP_SUCCESS) {
                     tDLogE("SafetyAsync::MistakeInspector::onIdle() send error.");
                 }
@@ -75,8 +80,8 @@ void SafetyAsync::MistakeInspector::onClose()
 SafetyAsync::SafetyAsync(Loop & loop) : BaseAsync(loop), _inspector(nullptr)
 {
     _inspector = loop.newHandle<MistakeInspector>(loop, *this);
+    assert(_inspector->isActive() == false);
     _inspector->start();
-    // EMPTY.
 }
 
 SafetyAsync::~SafetyAsync()
@@ -91,22 +96,23 @@ void SafetyAsync::clearJob()
 
 uerr SafetyAsync::sendJob(SharedJob job)
 {
-    _jobs.push(job);
+    _jobs.safeRun([&](JobQueue::Queue & queue){
+        queue.push(job);
+        if (_inspector->isActive() == false) {
+            tDLogD("SafetyAsync::sendJob() start inspector.");
+            _inspector->start();
+        }
+    });
     return send();
 }
 
 uerr SafetyAsync::sendCloseJob()
 {
-    _jobs.push(SharedJob(new (std::nothrow) __impl::CloseJob));
-    return send();
+    return sendJob(SharedJob(new (std::nothrow) __impl::CloseJob));
 }
 
 void SafetyAsync::onAsync()
 {
-    if (_inspector && _inspector->isClosing()) {
-        return;
-    }
-
     SharedJob job;
     if (_jobs.frontAndPop(job) == JobQueue::Code::SUCCESS) {
         if (static_cast<bool>(job)) {
@@ -119,10 +125,10 @@ void SafetyAsync::onAsync()
 void SafetyAsync::onClose()
 {
     _jobs.clear();
-    if (_inspector && _inspector->isActive()) {
+    if (_inspector->isActive()) {
         _inspector->stop();
-        _inspector->close();
     }
+    _inspector->close();
 
     tDLogD("SafetyAsync::onClose() called.");
 }
