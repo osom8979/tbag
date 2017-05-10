@@ -96,6 +96,15 @@ public:
     virtual void onConnect(ConnectRequest & request, uerr code);
 };
 
+// ----------------
+// Utility methods.
+// ----------------
+
+// @formatter:off
+TBAG_API bool initPipeServer(Pipe & pipe, std::string const & path);
+TBAG_API bool initPipeClient(Pipe & pipe, ConnectRequest & request, std::string const & path);
+// @formatter:on
+
 } // namespace uvpp
 
 // --------------------

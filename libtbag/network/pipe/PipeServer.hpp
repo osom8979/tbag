@@ -54,21 +54,9 @@ public:
         return Type::PIPE;
     }
 
-    virtual bool realInitialize(ServerBackend & backend, String const & destination, int port) override
+    virtual bool realInitialize(ServerBackend & backend, String const & destination, int UNUSED_PARAM(port)) override
     {
-        uerr const BIND_CODE = backend.bind(destination.c_str());
-        if (BIND_CODE != uerr::UVPP_SUCCESS) {
-            tDLogE("PipeServer::init() pipe bind {} error.", getErrorName(BIND_CODE));
-            return false;
-        }
-
-        uerr const LISTEN_CODE = backend.listen();
-        if (LISTEN_CODE != uerr::UVPP_SUCCESS) {
-            tDLogE("PipeServer::init() pipe listen {} error.", getErrorName(LISTEN_CODE));
-            return false;
-        }
-
-        return true;
+        return uvpp::initPipeServer(backend, destination);
     }
 };
 

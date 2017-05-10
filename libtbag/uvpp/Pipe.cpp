@@ -10,6 +10,7 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp> // MAX_PATH_LENGTH
+#include <libtbag/filesystem/Path.hpp>
 
 #include <uv.h>
 
@@ -172,6 +173,38 @@ int Pipe::getPendingType()
 void Pipe::onConnect(ConnectRequest & request, uerr code)
 {
     tDLogD("Pipe::onConnect({}) called.", getErrorName(code));
+}
+
+// ----------------
+// Utility methods.
+// ----------------
+
+bool initPipeServer(Pipe & pipe, std::string const & path)
+{
+    uerr const BIND_CODE = pipe.bind(path.c_str());
+    if (BIND_CODE != uerr::UVPP_SUCCESS) {
+        tDLogE("initPipeServer() pipe bind {} error.", getErrorName(BIND_CODE));
+        return false;
+    }
+
+    uerr const LISTEN_CODE = pipe.listen();
+    if (LISTEN_CODE != uerr::UVPP_SUCCESS) {
+        tDLogE("initPipeServer() pipe listen {} error.", getErrorName(LISTEN_CODE));
+        return false;
+    }
+
+    return true;
+}
+
+bool initPipeClient(Pipe & pipe, ConnectRequest & request, std::string const & path)
+{
+    if (filesystem::Path(path).exists() == false) {
+        tDLogE("initPipeClient() not exists error: {}.", path);
+        return false;
+    }
+
+    pipe.connect(request, path.c_str());
+    return true;
 }
 
 } // namespace uvpp

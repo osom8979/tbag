@@ -54,14 +54,9 @@ public:
         return Type::PIPE;
     }
 
-    virtual bool realInitialize(ClientBackend & backend, String const & destination, int port) override
+    virtual bool realInitialize(ClientBackend & backend, String const & destination, int UNUSED_PARAM(port)) override
     {
-        if (filesystem::Path(destination).exists() == false) {
-            return false;
-        }
-
-        backend.connect(backend.atConnectReq(), destination.c_str());
-        return true;
+        return uvpp::initPipeClient(backend, backend.atConnectReq(), destination);
     }
 };
 
