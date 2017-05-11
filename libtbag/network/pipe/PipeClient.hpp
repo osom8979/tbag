@@ -39,25 +39,17 @@ public:
 
 public:
     PipeClient(Loop & loop) : Parent(loop)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
     virtual ~PipeClient()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
 public:
     virtual Type getType() const override
-    {
-        return Type::PIPE;
-    }
+    { return Type::PIPE; }
 
     virtual bool realInitialize(ClientBackend & backend, String const & destination, int UNUSED_PARAM(port)) override
-    {
-        return uvpp::initPipeClient(backend, backend.atConnectReq(), destination);
-    }
+    { return uvpp::initPipeClient(backend, backend.atConnectReq(), destination); }
 };
 
 /**

@@ -39,25 +39,17 @@ public:
 
 public:
     TcpServer(Loop & loop) : Parent(loop)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
     virtual ~TcpServer()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
 public:
     virtual Type getType() const override
-    {
-        return Type::TCP;
-    }
+    { return Type::TCP; }
 
     virtual bool realInitialize(ServerBackend & backend, String const & ip, int port) override
-    {
-        return uvpp::initCommonServer(backend, ip, port);
-    }
+    { return uvpp::initCommonServer(backend, ip, port); }
 };
 
 /**

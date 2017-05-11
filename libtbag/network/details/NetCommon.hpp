@@ -55,11 +55,10 @@ TBAG_CONSTEXPR char const * const LOOPBACK_IPV6 = "::1";
 
 TBAG_CONSTEXPR int const OS_RANDOMLY_ASSIGNS_PORT = 0;
 
-enum class NetType
+enum class StreamType
 {
     UNKNOWN,
     TCP,
-    UDP,
     PIPE,
 };
 
@@ -74,7 +73,7 @@ struct NetCommon
     using uerr = uvpp::uerr;
     using binf = uvpp::binf;
 
-    using Type   = NetType;
+    using Type   = StreamType;
     using Size   = std::size_t;
     using String = std::string;
 

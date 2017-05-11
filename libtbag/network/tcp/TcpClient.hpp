@@ -38,25 +38,17 @@ public:
 
 public:
     TcpClient(Loop & loop) : Parent(loop)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
     virtual ~TcpClient()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
 public:
     virtual Type getType() const override
-    {
-        return Type::TCP;
-    }
+    { return Type::TCP; }
 
     virtual bool realInitialize(ClientBackend & backend, String const & ip, int port) override
-    {
-        return uvpp::initCommonClient(backend, backend.atConnectReq(), ip, port);
-    }
+    { return uvpp::initCommonClient(backend, backend.atConnectReq(), ip, port); }
 };
 
 /**

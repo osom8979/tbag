@@ -117,7 +117,7 @@ public:
 public:
     virtual void onSend(UdpSendRequest & request, uerr code);
     virtual binf onAlloc(std::size_t suggested_size);
-    virtual void onRead(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
+    virtual void onRecv(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
 };
 
 } // namespace uvpp

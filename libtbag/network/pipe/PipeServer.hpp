@@ -39,25 +39,17 @@ public:
 
 public:
     PipeServer(Loop & loop) : Parent(loop)
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
     virtual ~PipeServer()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
 public:
     virtual Type getType() const override
-    {
-        return Type::PIPE;
-    }
+    { return Type::PIPE; }
 
     virtual bool realInitialize(ServerBackend & backend, String const & destination, int UNUSED_PARAM(port)) override
-    {
-        return uvpp::initPipeServer(backend, destination);
-    }
+    { return uvpp::initPipeServer(backend, destination); }
 };
 
 /**

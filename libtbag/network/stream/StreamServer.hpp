@@ -325,6 +325,33 @@ public:
     }
 
     /**
+     * Safety close() operation.
+     *
+     * @remarks
+     *  Select sync/async operations automatically according to Thread ID.
+     */
+    virtual void close() override
+    {
+        assert(static_cast<bool>(_server));
+        assert(static_cast<bool>(_async));
+
+        Loop * loop = _server->getLoop();
+        assert(loop != nullptr);
+
+        if (loop->isAliveAndThisThread()) {
+            tDLogD("StreamServer::close() sync request.");
+            Guard guard(_mutex);
+            closeAll();
+        } else {
+            tDLogD("StreamServer::close() async request.");
+            _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
+                Guard guard(_mutex);
+                closeAll();
+            });
+        }
+    }
+
+    /**
      * Accept client.
      *
      * @warning
@@ -354,33 +381,6 @@ public:
             tDLogE("StreamServer::accept() client is nullptr.");
         }
         return WeakClient();
-    }
-
-    /**
-     * Safety close() operation.
-     *
-     * @remarks
-     *  Select sync/async operations automatically according to Thread ID.
-     */
-    virtual void close() override
-    {
-        assert(static_cast<bool>(_server));
-        assert(static_cast<bool>(_async));
-
-        Loop * loop = _server->getLoop();
-        assert(loop != nullptr);
-
-        if (loop->isAliveAndThisThread()) {
-            tDLogD("StreamServer::close() sync request.");
-            Guard guard(_mutex);
-            closeAll();
-        } else {
-            tDLogD("StreamServer::close() async request.");
-            _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
-                Guard guard(_mutex);
-                closeAll();
-            });
-        }
     }
 
 public:

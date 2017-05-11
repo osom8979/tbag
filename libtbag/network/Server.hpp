@@ -47,8 +47,9 @@ struct Server : public details::NetCommon
     virtual Id getId() const = 0;
 
     virtual bool init(String const & destination, int port = 0) = 0;
-    virtual WeakClient accept() = 0;
     virtual void close() = 0;
+
+    virtual WeakClient accept() = 0;
 
     virtual void const * getUserData() const = 0;
     // @formatter:on

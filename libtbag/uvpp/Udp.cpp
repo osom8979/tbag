@@ -103,7 +103,7 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
             code = getUerr(static_cast<int>(nread));
         }
 
-        u->onRead(code, buf->base, static_cast<std::size_t>(nread), addr, flags);
+        u->onRecv(code, buf->base, static_cast<std::size_t>(nread), addr, flags);
     }
 }
 
@@ -405,9 +405,9 @@ binf Udp::onAlloc(std::size_t suggested_size)
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
-void Udp::onRead(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
+void Udp::onRecv(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
 {
-    tDLogD("Udp::onRead({}) called (size:{}).", getErrorName(code), size);
+    tDLogD("Udp::onRecv({}) called (size:{}).", getErrorName(code), size);
 }
 
 } // namespace uvpp
