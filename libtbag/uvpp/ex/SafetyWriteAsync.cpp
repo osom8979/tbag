@@ -116,10 +116,12 @@ SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(WeakStream stream, 
     assert(writer != nullptr);
     writer->stream = stream;
 
-    if (updateWriterInfo(writer, infos, size)) {
-        return SharedWriter(writer);
+    if (updateWriterInfo(writer, infos, size) == false) {
+        delete writer;
+        writer = nullptr;
+        return SharedWriter();
     }
-    return SharedWriter();
+    return SharedWriter(writer);
 }
 
 SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(WeakStream stream, char const * buffer, std::size_t size)
@@ -147,10 +149,12 @@ SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(
     }
     writer->udp = udp;
 
-    if (updateWriterInfo(writer, infos, size)) {
-        return SharedWriter(writer);
+    if (updateWriterInfo(writer, infos, size) == false) {
+        delete writer;
+        writer = nullptr;
+        return SharedWriter();
     }
-    return SharedWriter();
+    return SharedWriter(writer);
 }
 
 SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(

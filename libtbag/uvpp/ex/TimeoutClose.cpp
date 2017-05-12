@@ -49,8 +49,12 @@ void TimeoutClose::onTimer()
     }
 
     if (_auto_close.load()) {
-        stop();
-        close();
+        if (isActive()) {
+            stop();
+        }
+        if (isClosing() == false) {
+            close();
+        }
     }
 }
 

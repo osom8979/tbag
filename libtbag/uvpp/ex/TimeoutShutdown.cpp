@@ -36,13 +36,25 @@ uerr TimeoutShutdown::start(uint64_t timeout)
 
 void TimeoutShutdown::onTimer()
 {
-    if (_cancel.load() == false && _stream != nullptr) {
-        _stream->shutdown(_request);
+    if (_stream != nullptr) {
+        if (_cancel.load() == false) {
+            tDLogD("TimeoutShutdown::onTimer() request stream(@{}[{}]) shutdown.",
+                   static_cast<void*>(_stream), _stream->getName());
+            _stream->shutdown(_request);
+        } else {
+            tDLogD("TimeoutShutdown::onTimer() request cancel.");
+        }
+    } else {
+        tDLogE("TimeoutShutdown::onTimer() stream is nullptr.");
     }
 
     if (_auto_close.load()) {
-        stop();
-        close();
+        if (isActive()) {
+            stop();
+        }
+        if (isClosing() == false) {
+            close();
+        }
     }
 }
 
