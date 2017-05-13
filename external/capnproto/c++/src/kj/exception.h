@@ -107,6 +107,19 @@ public:
   // is expected that contexts will be added in reverse order as the exception passes up the
   // callback stack.
 
+  KJ_NOINLINE void extendTrace(uint ignoreCount);
+  // Append the current stack trace to the exception's trace, ignoring the first `ignoreCount`
+  // frames (see `getStackTrace()` for discussion of `ignoreCount`).
+
+  KJ_NOINLINE void truncateCommonTrace();
+  // Remove the part of the stack trace which the exception shares with the caller of this method.
+  // This is used by the async library to remove the async infrastructure from the stack trace
+  // before replacing it with the async trace.
+
+  void addTrace(void* ptr);
+  // Append the given pointer to the backtrace, if it is not already full. This is used by the
+  // async library to trace through the promise chain that led to the exception.
+
 private:
   String ownFile;
   const char* file;
@@ -114,7 +127,7 @@ private:
   Type type;
   String description;
   Maybe<Own<Context>> context;
-  void* trace[16];
+  void* trace[32];
   uint traceCount;
 
   friend class ExceptionImpl;
@@ -124,6 +137,20 @@ StringPtr KJ_STRINGIFY(Exception::Type type);
 String KJ_STRINGIFY(const Exception& e);
 
 // =======================================================================================
+
+enum class LogSeverity {
+  INFO,      // Information describing what the code is up to, which users may request to see
+             // with a flag like `--verbose`.  Does not indicate a problem.  Not printed by
+             // default; you must call setLogLevel(INFO) to enable.
+  WARNING,   // A problem was detected but execution can continue with correct output.
+  ERROR,     // Something is wrong, but execution can continue with garbage output.
+  FATAL,     // Something went wrong, and execution cannot continue.
+  DBG        // Temporary debug logging.  See KJ_DBG.
+
+  // Make sure to update the stringifier if you add a new severity level.
+};
+
+StringPtr KJ_STRINGIFY(LogSeverity severity);
 
 class ExceptionCallback {
   // If you don't like C++ exceptions, you may implement and register an ExceptionCallback in order
@@ -159,12 +186,35 @@ public:
   // The global default implementation throws an exception unless the library was compiled with
   // -fno-exceptions, in which case it logs an error and returns.
 
-  virtual void logMessage(const char* file, int line, int contextDepth, String&& text);
-  // Called when something wants to log some debug text.  The text always ends in a newline if
-  // it is non-empty.  `contextDepth` indicates how many levels of context the message passed
-  // through; it may make sense to indent the message accordingly.
+  virtual void logMessage(LogSeverity severity, const char* file, int line, int contextDepth,
+                          String&& text);
+  // Called when something wants to log some debug text.  `contextDepth` indicates how many levels
+  // of context the message passed through; it may make sense to indent the message accordingly.
   //
   // The global default implementation writes the text to stderr.
+
+  enum class StackTraceMode {
+    FULL,
+    // Stringifying a stack trace will attempt to determine source file and line numbers. This may
+    // be expensive. For example, on Linux, this shells out to `addr2line`.
+    //
+    // This is the default in debug builds.
+
+    ADDRESS_ONLY,
+    // Stringifying a stack trace will only generate a list of code addresses.
+    //
+    // This is the default in release builds.
+
+    NONE
+    // Generating a stack trace will always return an empty array.
+    //
+    // This avoids ever unwinding the stack. On Windows in particular, the stack unwinding library
+    // has been observed to be pretty slow, so exception-heavy code might benefit significantly
+    // from this setting. (But exceptions should be rare...)
+  };
+
+  virtual StackTraceMode stackTraceMode();
+  // Returns the current preferred stack trace mode.
 
 protected:
   ExceptionCallback& next;
@@ -179,12 +229,12 @@ private:
 ExceptionCallback& getExceptionCallback();
 // Returns the current exception callback.
 
-KJ_NORETURN(void throwFatalException(kj::Exception&& exception));
+KJ_NOINLINE KJ_NORETURN(void throwFatalException(kj::Exception&& exception, uint ignoreCount = 0));
 // Invoke the exception callback to throw the given fatal exception.  If the exception callback
 // returns, abort.
 
-void throwRecoverableException(kj::Exception&& exception);
-// Invoke the exception acllback to throw the given recoverable exception.  If the exception
+KJ_NOINLINE void throwRecoverableException(kj::Exception&& exception, uint ignoreCount = 0);
+// Invoke the exception callback to throw the given recoverable exception.  If the exception
 // callback returns, return normally.
 
 // =======================================================================================
@@ -276,6 +326,37 @@ void UnwindDetector::catchExceptionsIfUnwinding(Func&& func) const {
   ::kj::UnwindDetector KJ_UNIQUE_NAME(_kjUnwindDetector); \
   KJ_DEFER(if (KJ_UNIQUE_NAME(_kjUnwindDetector).isUnwinding()) { code; })
 // Runs `code` if the current scope is exited due to an exception.
+
+// =======================================================================================
+
+KJ_NOINLINE ArrayPtr<void* const> getStackTrace(ArrayPtr<void*> space, uint ignoreCount);
+// Attempt to get the current stack trace, returning a list of pointers to instructions. The
+// returned array is a slice of `space`. Provide a larger `space` to get a deeper stack trace.
+// If the platform doesn't support stack traces, returns an empty array.
+//
+// `ignoreCount` items will be truncated from the front of the trace. This is useful for chopping
+// off a prefix of the trace that is uninteresting to the developer because it's just locations
+// inside the debug infrastructure that is requesting the trace. Be careful to mark functions as
+// KJ_NOINLINE if you intend to count them in `ignoreCount`. Note that, unfortunately, the
+// ignored entries will still waste space in the `space` array (and the returned array's `begin()`
+// is never exactly equal to `space.begin()` due to this effect, even if `ignoreCount` is zero
+// since `getStackTrace()` needs to ignore its own internal frames).
+
+String stringifyStackTrace(ArrayPtr<void* const>);
+// Convert the stack trace to a string with file names and line numbers. This may involve executing
+// suprocesses.
+
+String getStackTrace();
+// Get a stack trace right now and stringify it. Useful for debugging.
+
+void printStackTraceOnCrash();
+// Registers signal handlers on common "crash" signals like SIGSEGV that will (attempt to) print
+// a stack trace. You should call this as early as possible on program startup. Programs using
+// KJ_MAIN get this automatically.
+
+kj::StringPtr trimSourceFilename(kj::StringPtr filename);
+// Given a source code file name, trim off noisy prefixes like "src/" or
+// "/ekam-provider/canonical/".
 
 }  // namespace kj
 

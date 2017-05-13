@@ -2,14 +2,16 @@
 
 set -euo pipefail
 
-if (grep -r KJ_DBG c++/src | egrep -v '/debug(-test)?[.]'); then
-  echo '*** Error:  There are instances of KJ_DBG in the code.' >&2
-  exit 1
-fi
+if [ "$1" != "package" ]; then
+  if (grep -r KJ_DBG c++/src | egrep -v '/debug(-test)?[.]' | grep -v 'See KJ_DBG\.$'); then
+    echo '*** Error:  There are instances of KJ_DBG in the code.' >&2
+    exit 1
+  fi
 
-if (egrep -r 'TODO\((now|soon)\)' *); then
-  echo '*** Error:  There are release-blocking TODOs in the code.' >&2
-  exit 1
+  if (egrep -r 'TODO\((now|soon)\)' *); then
+    echo '*** Error:  There are release-blocking TODOs in the code.' >&2
+    exit 1
+  fi
 fi
 
 doit() {
@@ -37,6 +39,7 @@ update_version() {
 
   local OLD_REGEX=${OLD//./[.]}
   doit sed -i -e "s/$OLD_REGEX/$NEW/g" c++/configure.ac
+  doit sed -i -e "s/set(VERSION.*)/set(VERSION $NEW)/g" c++/CMakeLists.txt
 
   local NEW_NOTAG=${NEW%%-*}
   declare -a NEW_ARR=(${NEW_NOTAG//./ })
@@ -60,23 +63,30 @@ build_packages() {
   echo "========================================================================="
   echo "Building C++ package..."
   echo "========================================================================="
+
+  # make dist tarball and move into ..
   cd c++
-  doit ./setup-autotools.sh | tr = -
   doit autoreconf -i
   doit ./configure
   doit make -j6 distcheck
-  doit make dist-zip
   doit mv capnproto-c++-$VERSION.tar.gz ..
-  doit mv capnproto-c++-$VERSION.zip ../capnproto-c++-win32-$VERSION.zip
   doit make distclean
+
+  # build windows executables
   doit ./configure --host=i686-w64-mingw32 --with-external-capnp \
       --disable-shared CXXFLAGS='-static-libgcc -static-libstdc++'
   doit make -j6 capnp.exe capnpc-c++.exe capnpc-capnp.exe
   doit i686-w64-mingw32-strip capnp.exe capnpc-c++.exe capnpc-capnp.exe
   doit mkdir capnproto-tools-win32-$VERSION
   doit mv capnp.exe capnpc-c++.exe capnpc-capnp.exe capnproto-tools-win32-$VERSION
-  doit zip -r ../capnproto-c++-win32-$VERSION.zip capnproto-tools-win32-$VERSION
   doit make maintainer-clean
+
+  # repack dist tarball and win32 tools into win32 zip, with DOS line endings
+  doit tar zxf ../capnproto-c++-$VERSION.tar.gz
+  find capnproto-c++-$VERSION -name '*.c++' -o -name '*.h' -o -name '*.capnp' -o -name '*.md' -o -name '*.txt' | grep -v testdata | doit xargs unix2dos
+  doit zip -r ../capnproto-c++-win32-$VERSION.zip capnproto-c++-$VERSION capnproto-tools-win32-$VERSION
+
+  rm -rf capnproto-c++-$VERSION capnproto-tools-win32-$VERSION
   cd ..
 }
 
@@ -109,8 +119,8 @@ done_banner() {
   case "$YESNO" in
     y | Y )
       doit git push origin $PUSH
-      doit gcutil push fe capnproto-c++-$VERSION.tar.gz capnproto-c++-win32-$VERSION.zip \
-          /var/www/capnproto.org
+      doit gce-ss copy-files capnproto-c++-$VERSION.tar.gz capnproto-c++-win32-$VERSION.zip \
+          fe:/var/www/capnproto.org
 
       if [ "$FINAL" = yes ]; then
         echo "========================================================================="
@@ -309,6 +319,12 @@ case "${1-}:$BRANCH" in
       doit git tag v$OLD_VERSION
       done_banner $OLD_VERSION "v$OLD_VERSION release-$OLD_VERSION" no
     fi
+    ;;
+
+  # ======================================================================================
+  package:* )
+    echo "Just building a package."
+    build_packages $(get_version '.*')
     ;;
 
   # ======================================================================================

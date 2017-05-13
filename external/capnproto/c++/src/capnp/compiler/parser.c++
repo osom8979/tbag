@@ -23,7 +23,9 @@
 #include "md5.h"
 #include <capnp/dynamic.h>
 #include <kj/debug.h>
+#if !_MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -170,11 +172,17 @@ void parseFile(List<Statement>::Reader statements, ParsedFile::Builder result,
   }
 
   if (fileDecl.getId().which() != Declaration::Id::UID) {
+    // We didn't see an ID. Generate one randomly for now.
     uint64_t id = generateRandomId();
     fileDecl.getId().initUid().setValue(id);
-    errorReporter.addError(0, 0,
-        kj::str("File does not declare an ID.  I've generated one for you.  Add this line to your "
-                "file: @0x", kj::hex(id), ";"));
+
+    // Don't report missing ID if there was a parse error, because quite often the parse error
+    // prevents us from parsing the ID even though it is actually there.
+    if (!errorReporter.hadErrors()) {
+      errorReporter.addError(0, 0,
+          kj::str("File does not declare an ID.  I've generated one for you.  Add this line to "
+                  "your file: @0x", kj::hex(id), ";"));
+    }
   }
 
   auto declsBuilder = fileDecl.initNestedDecls(decls.size());
@@ -406,7 +414,7 @@ static Declaration::Builder initMemberDecl(
 }
 
 template <typename BuilderType>
-void initLocation(kj::parse::Span<List<Token>::Reader::Iterator> location,
+void initLocation(kj::parse::Span<typename List<Token>::Reader::Iterator> location,
                   BuilderType builder) {
   if (location.begin() < location.end()) {
     builder.setStartByte(location.begin()->getStartByte());
@@ -552,6 +560,15 @@ CapnpParser::CapnpParser(Orphanage orphanageParam, ErrorReporter& errorReporterP
                     filename.copyTo(builder.initImport());
                     return result;
                   }),
+              p::transformWithLocation(p::sequence(keyword("embed"), stringLiteral),
+                  [this](kj::parse::Span<List<Token>::Reader::Iterator> location,
+                         Located<Text::Reader>&& filename) -> Orphan<Expression> {
+                    auto result = orphanage.newOrphan<Expression>();
+                    auto builder = result.get();
+                    initLocation(location, builder);
+                    filename.copyTo(builder.initEmbed());
+                    return result;
+                  }),
               p::transformWithLocation(p::sequence(op("."), identifier),
                   [this](kj::parse::Span<List<Token>::Reader::Iterator> location,
                          Located<Text::Reader>&& name) -> Orphan<Expression> {
@@ -588,7 +605,7 @@ CapnpParser::CapnpParser(Orphanage orphanageParam, ErrorReporter& errorReporterP
                     builder.initApplication().adoptParams(kj::mv(params.value));
                     return result;
                   })))),
-      [this](Orphan<Expression>&& base, kj::Array<Orphan<Expression>>&& suffixes)
+      [](Orphan<Expression>&& base, kj::Array<Orphan<Expression>>&& suffixes)
           -> Orphan<Expression> {
         // Apply all the suffixes to the base expression.
         uint startByte = base.getReader().getStartByte();
@@ -762,7 +779,7 @@ CapnpParser::CapnpParser(Orphanage orphanageParam, ErrorReporter& errorReporterP
   // Parse an ordinal followed by an optional colon, or no ordinal but require a colon.
   auto& ordinalOrColon = arena.copy(p::oneOf(
       p::transform(p::sequence(parsers.ordinal, p::optional(op("!")), p::optional(op(":"))),
-          [this](Orphan<LocatedInteger>&& ordinal,
+          [](Orphan<LocatedInteger>&& ordinal,
                  kj::Maybe<kj::Tuple<>> exclamation,
                  kj::Maybe<kj::Tuple<>> colon)
                    -> kj::Tuple<kj::Maybe<Orphan<LocatedInteger>>, bool, bool> {
@@ -955,7 +972,7 @@ CapnpParser::CapnpParser(Orphanage orphanageParam, ErrorReporter& errorReporterP
   auto& annotationTarget = arena.copy(p::oneOf(
       identifier,
       p::transformWithLocation(op("*"),
-          [this](kj::parse::Span<List<Token>::Reader::Iterator> location) {
+          [](kj::parse::Span<List<Token>::Reader::Iterator> location) {
             // Hacky...
             return Located<Text::Reader>("*",
                 location.begin()->getStartByte(),

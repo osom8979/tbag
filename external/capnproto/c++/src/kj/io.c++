@@ -24,9 +24,15 @@
 #include "miniposix.h"
 #include <algorithm>
 #include <errno.h>
-#include <limits.h>
 
-#if !_WIN32
+#if _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX 1
+#endif
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "windows-sanity.h"
+#else
 #include <sys/uio.h>
 #endif
 
@@ -128,7 +134,7 @@ void BufferedInputStreamWrapper::skip(size_t bytes) {
     } else {
       // Forward large skip to the underlying stream.
       bufferAvailable = nullptr;
-      inner.skip(bytes - bufferAvailable.size());
+      inner.skip(bytes);
     }
   }
 }
@@ -223,6 +229,7 @@ ArrayPtr<byte> ArrayOutputStream::getWriteBuffer() {
 void ArrayOutputStream::write(const void* src, size_t size) {
   if (src == fillPos) {
     // Oh goody, the caller wrote directly into our buffer.
+    KJ_REQUIRE(size <= array.end() - fillPos);
     fillPos += size;
   } else {
     KJ_REQUIRE(size <= (size_t)(array.end() - fillPos),
@@ -230,6 +237,45 @@ void ArrayOutputStream::write(const void* src, size_t size) {
     memcpy(fillPos, src, size);
     fillPos += size;
   }
+}
+
+// -------------------------------------------------------------------
+
+VectorOutputStream::VectorOutputStream(size_t initialCapacity)
+    : vector(heapArray<byte>(initialCapacity)), fillPos(vector.begin()) {}
+VectorOutputStream::~VectorOutputStream() noexcept(false) {}
+
+ArrayPtr<byte> VectorOutputStream::getWriteBuffer() {
+  // Grow if needed.
+  if (fillPos == vector.end()) {
+    grow(vector.size() + 1);
+  }
+
+  return arrayPtr(fillPos, vector.end());
+}
+
+void VectorOutputStream::write(const void* src, size_t size) {
+  if (src == fillPos) {
+    // Oh goody, the caller wrote directly into our buffer.
+    KJ_REQUIRE(size <= vector.end() - fillPos);
+    fillPos += size;
+  } else {
+    if (vector.end() - fillPos < size) {
+      grow(fillPos - vector.begin() + size);
+    }
+
+    memcpy(fillPos, src, size);
+    fillPos += size;
+  }
+}
+
+void VectorOutputStream::grow(size_t minSize) {
+  size_t newSize = vector.size() * 2;
+  while (newSize < minSize) newSize *= 2;
+  auto newVector = heapArray<byte>(newSize);
+  memcpy(newVector.begin(), vector.begin(), fillPos - vector.begin());
+  fillPos = fillPos - vector.begin() + newVector.begin();
+  vector = kj::mv(newVector);
 }
 
 // =======================================================================================
@@ -283,22 +329,15 @@ void FdOutputStream::write(const void* buffer, size_t size) {
 void FdOutputStream::write(ArrayPtr<const ArrayPtr<const byte>> pieces) {
 #if _WIN32
   // Windows has no reasonable writev(). It has WriteFileGather, but this call has the unreasonable
-  // restriction that each segment must be page-aligned. So, fall back to write().
+  // restriction that each segment must be page-aligned. So, fall back to the default implementation
 
-  for (auto piece: pieces) {
-    write(piece.begin(), piece.size());
-  }
+  OutputStream::write(pieces);
 
 #else
-  // Apparently, there is a maximum number of iovecs allowed per call.  I don't understand why.
-  // Also, most platforms define IOV_MAX but Linux defines only UIO_MAXIOV.  Unfortunately, Solaris
-  // defines a constant UIO_MAXIOV with a different meaning, so we check for IOV_MAX first.
-#if !defined(IOV_MAX) && defined(UIO_MAXIOV)
-#define IOV_MAX UIO_MAXIOV
-#endif
-  while (pieces.size() > IOV_MAX) {
-    write(pieces.slice(0, IOV_MAX));
-    pieces = pieces.slice(IOV_MAX, pieces.size());
+  const size_t iovmax = miniposix::iovMax(pieces.size());
+  while (pieces.size() > iovmax) {
+    write(pieces.slice(0, iovmax));
+    pieces = pieces.slice(iovmax, pieces.size());
   }
 
   KJ_STACK_ARRAY(struct iovec, iov, pieces.size(), 16, 128);
@@ -338,5 +377,50 @@ void FdOutputStream::write(ArrayPtr<const ArrayPtr<const byte>> pieces) {
   }
 #endif
 }
+
+// =======================================================================================
+
+#if _WIN32
+
+AutoCloseHandle::~AutoCloseHandle() noexcept(false) {
+  if (handle != (void*)-1) {
+    KJ_WIN32(CloseHandle(handle));
+  }
+}
+
+HandleInputStream::~HandleInputStream() noexcept(false) {}
+
+size_t HandleInputStream::tryRead(void* buffer, size_t minBytes, size_t maxBytes) {
+  byte* pos = reinterpret_cast<byte*>(buffer);
+  byte* min = pos + minBytes;
+  byte* max = pos + maxBytes;
+
+  while (pos < min) {
+    DWORD n;
+    KJ_WIN32(ReadFile(handle, pos, kj::min(max - pos, DWORD(kj::maxValue)), &n, nullptr));
+    if (n == 0) {
+      break;
+    }
+    pos += n;
+  }
+
+  return pos - reinterpret_cast<byte*>(buffer);
+}
+
+HandleOutputStream::~HandleOutputStream() noexcept(false) {}
+
+void HandleOutputStream::write(const void* buffer, size_t size) {
+  const char* pos = reinterpret_cast<const char*>(buffer);
+
+  while (size > 0) {
+    DWORD n;
+    KJ_WIN32(WriteFile(handle, pos, kj::min(size, DWORD(kj::maxValue)), &n, nullptr));
+    KJ_ASSERT(n > 0, "write() returned zero.");
+    pos += n;
+    size -= n;
+  }
+}
+
+#endif  // _WIN32
 
 }  // namespace kj

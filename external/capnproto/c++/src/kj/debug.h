@@ -136,8 +136,8 @@ namespace kj {
 #define KJ_EXPAND(X) X
 
 #define KJ_LOG(severity, ...) \
-  if (!::kj::_::Debug::shouldLog(::kj::_::Debug::Severity::severity)) {} else \
-    ::kj::_::Debug::log(__FILE__, __LINE__, ::kj::_::Debug::Severity::severity, \
+  if (!::kj::_::Debug::shouldLog(::kj::LogSeverity::severity)) {} else \
+    ::kj::_::Debug::log(__FILE__, __LINE__, ::kj::LogSeverity::severity, \
                         "" #__VA_ARGS__, __VA_ARGS__)
 
 #define KJ_DBG(...) KJ_EXPAND(KJ_LOG(DBG, __VA_ARGS__))
@@ -165,27 +165,48 @@ namespace kj {
   for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
            errorNumber, code, "" #__VA_ARGS__, __VA_ARGS__);; f.fatal())
 
+#if _WIN32
+
+#define KJ_WIN32(call, ...) \
+  if (::kj::_::Debug::isWin32Success(call)) {} else \
+    for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
+             ::kj::_::Debug::getWin32Error(), #call, "" #__VA_ARGS__, __VA_ARGS__);; f.fatal())
+
+#define KJ_WINSOCK(call, ...) \
+  if ((call) != SOCKET_ERROR) {} else \
+    for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
+             ::kj::_::Debug::getWin32Error(), #call, "" #__VA_ARGS__, __VA_ARGS__);; f.fatal())
+
+#define KJ_FAIL_WIN32(code, errorNumber, ...) \
+  for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
+           ::kj::_::Debug::Win32Error(errorNumber), code, "" #__VA_ARGS__, __VA_ARGS__);; f.fatal())
+
+#endif
+
 #define KJ_UNIMPLEMENTED(...) \
   for (::kj::_::Debug::Fault f(__FILE__, __LINE__, ::kj::Exception::Type::UNIMPLEMENTED, \
                                nullptr, "" #__VA_ARGS__, __VA_ARGS__);; f.fatal())
 
+// TODO(msvc):  MSVC mis-deduces `ContextImpl<decltype(func)>` as `ContextImpl<int>` in some edge
+// cases, such as inside nested lambdas inside member functions. Wrapping the type in
+// `decltype(instance<...>())` helps it deduce the context function's type correctly.
 #define KJ_CONTEXT(...) \
   auto KJ_UNIQUE_NAME(_kjContextFunc) = [&]() -> ::kj::_::Debug::Context::Value { \
         return ::kj::_::Debug::Context::Value(__FILE__, __LINE__, \
             ::kj::_::Debug::makeDescription("" #__VA_ARGS__, __VA_ARGS__)); \
       }; \
-  ::kj::_::Debug::ContextImpl<decltype(KJ_UNIQUE_NAME(_kjContextFunc))> \
+  decltype(::kj::instance<::kj::_::Debug::ContextImpl<decltype(KJ_UNIQUE_NAME(_kjContextFunc))>>()) \
       KJ_UNIQUE_NAME(_kjContext)(KJ_UNIQUE_NAME(_kjContextFunc))
 
 #define KJ_REQUIRE_NONNULL(value, ...) \
-  (*({ \
+  (*[&] { \
     auto _kj_result = ::kj::_::readMaybe(value); \
     if (KJ_UNLIKELY(!_kj_result)) { \
       ::kj::_::Debug::Fault(__FILE__, __LINE__, ::kj::Exception::Type::FAILED, \
                             #value " != nullptr", "" #__VA_ARGS__, __VA_ARGS__).fatal(); \
     } \
-    kj::mv(_kj_result); \
-  }))
+    return _kj_result; \
+  }())
 
 #define KJ_EXCEPTION(type, ...) \
   ::kj::Exception(::kj::Exception::Type::type, __FILE__, __LINE__, \
@@ -194,9 +215,9 @@ namespace kj {
 #else
 
 #define KJ_LOG(severity, ...) \
-  if (!::kj::_::Debug::shouldLog(::kj::_::Debug::Severity::severity)) {} else \
-    ::kj::_::Debug::log(__FILE__, __LINE__, ::kj::_::Debug::Severity::severity, \
-                        #__VA_ARGS__, __VA_ARGS__)
+  if (!::kj::_::Debug::shouldLog(::kj::LogSeverity::severity)) {} else \
+    ::kj::_::Debug::log(__FILE__, __LINE__, ::kj::LogSeverity::severity, \
+                        #__VA_ARGS__, ##__VA_ARGS__)
 
 #define KJ_DBG(...) KJ_LOG(DBG, ##__VA_ARGS__)
 
@@ -222,6 +243,24 @@ namespace kj {
 #define KJ_FAIL_SYSCALL(code, errorNumber, ...) \
   for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
            errorNumber, code, #__VA_ARGS__, ##__VA_ARGS__);; f.fatal())
+
+#if _WIN32
+
+#define KJ_WIN32(call, ...) \
+  if (::kj::_::Debug::isWin32Success(call)) {} else \
+    for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
+             ::kj::_::Debug::getWin32Error(), #call, #__VA_ARGS__, ##__VA_ARGS__);; f.fatal())
+
+#define KJ_WINSOCK(call, ...) \
+  if ((call) != SOCKET_ERROR) {} else \
+    for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
+             ::kj::_::Debug::getWin32Error(), #call, #__VA_ARGS__, ##__VA_ARGS__);; f.fatal())
+
+#define KJ_FAIL_WIN32(code, errorNumber, ...) \
+  for (::kj::_::Debug::Fault f(__FILE__, __LINE__, \
+           ::kj::_::Debug::Win32Error(errorNumber), code, #__VA_ARGS__, ##__VA_ARGS__);; f.fatal())
+
+#endif
 
 #define KJ_UNIMPLEMENTED(...) \
   for (::kj::_::Debug::Fault f(__FILE__, __LINE__, ::kj::Exception::Type::UNIMPLEMENTED, \
@@ -251,6 +290,25 @@ namespace kj {
 
 #endif
 
+#define KJ_SYSCALL_HANDLE_ERRORS(call) \
+  if (int _kjSyscallError = ::kj::_::Debug::syscallError([&](){return (call);}, false)) \
+    switch (int error = _kjSyscallError)
+// Like KJ_SYSCALL, but doesn't throw. Instead, the block after the macro is a switch block on the
+// error. Additionally, the int value `error` is defined within the block. So you can do:
+//
+//     KJ_SYSCALL_HANDLE_ERRORS(foo()) {
+//       case ENOENT:
+//         handleNoSuchFile();
+//         break;
+//       case EEXIST:
+//         handleExists();
+//         break;
+//       default:
+//         KJ_FAIL_SYSCALL("foo()", error);
+//     } else {
+//       handleSuccessCase();
+//     }
+
 #define KJ_ASSERT KJ_REQUIRE
 #define KJ_FAIL_ASSERT KJ_FAIL_REQUIRE
 #define KJ_ASSERT_NONNULL KJ_REQUIRE_NONNULL
@@ -258,7 +316,7 @@ namespace kj {
 // That is, if the assert ever fails, it indicates that the immediate surrounding code is broken.
 
 #ifdef KJ_DEBUG
-#define KJ_DLOG LOG
+#define KJ_DLOG KJ_LOG
 #define KJ_DASSERT KJ_ASSERT
 #define KJ_DREQUIRE KJ_REQUIRE
 #else
@@ -273,45 +331,44 @@ class Debug {
 public:
   Debug() = delete;
 
-  enum class Severity {
-    INFO,      // Information describing what the code is up to, which users may request to see
-               // with a flag like `--verbose`.  Does not indicate a problem.  Not printed by
-               // default; you must call setLogLevel(INFO) to enable.
-    WARNING,   // A problem was detected but execution can continue with correct output.
-    ERROR,     // Something is wrong, but execution can continue with garbage output.
-    FATAL,     // Something went wrong, and execution cannot continue.
-    DBG        // Temporary debug logging.  See KJ_DBG.
+  typedef LogSeverity Severity;  // backwards-compatibility
 
-    // Make sure to update the stringifier if you add a new severity level.
+#if _WIN32
+  struct Win32Error {
+    // Hack for overloading purposes.
+    uint number;
+    inline explicit Win32Error(uint number): number(number) {}
   };
+#endif
 
-  static inline bool shouldLog(Severity severity) { return severity >= minSeverity; }
+  static inline bool shouldLog(LogSeverity severity) { return severity >= minSeverity; }
   // Returns whether messages of the given severity should be logged.
 
-  static inline void setLogLevel(Severity severity) { minSeverity = severity; }
+  static inline void setLogLevel(LogSeverity severity) { minSeverity = severity; }
   // Set the minimum message severity which will be logged.
   //
   // TODO(someday):  Expose publicly.
 
   template <typename... Params>
-  static void log(const char* file, int line, Severity severity, const char* macroArgs,
+  static void log(const char* file, int line, LogSeverity severity, const char* macroArgs,
                   Params&&... params);
 
   class Fault {
   public:
-    template <typename... Params>
-    Fault(const char* file, int line, Exception::Type type,
-          const char* condition, const char* macroArgs, Params&&... params);
-    template <typename... Params>
-    Fault(const char* file, int line, int osErrorNumber,
+    template <typename Code, typename... Params>
+    Fault(const char* file, int line, Code code,
           const char* condition, const char* macroArgs, Params&&... params);
     Fault(const char* file, int line, Exception::Type type,
           const char* condition, const char* macroArgs);
     Fault(const char* file, int line, int osErrorNumber,
           const char* condition, const char* macroArgs);
+#if _WIN32
+    Fault(const char* file, int line, Win32Error osErrorNumber,
+          const char* condition, const char* macroArgs);
+#endif
     ~Fault() noexcept(false);
 
-    KJ_NORETURN(void fatal());
+    KJ_NOINLINE KJ_NORETURN(void fatal());
     // Throw the exception.
 
   private:
@@ -319,6 +376,10 @@ public:
               const char* condition, const char* macroArgs, ArrayPtr<String> argValues);
     void init(const char* file, int line, int osErrorNumber,
               const char* condition, const char* macroArgs, ArrayPtr<String> argValues);
+#if _WIN32
+    void init(const char* file, int line, Win32Error osErrorNumber,
+              const char* condition, const char* macroArgs, ArrayPtr<String> argValues);
+#endif
 
     Exception* exception;
   };
@@ -335,6 +396,14 @@ public:
 
   template <typename Call>
   static SyscallResult syscall(Call&& call, bool nonblocking);
+  template <typename Call>
+  static int syscallError(Call&& call, bool nonblocking);
+
+#if _WIN32
+  static bool isWin32Success(int boolean);
+  static bool isWin32Success(void* handle);
+  static Win32Error getWin32Error();
+#endif
 
   class Context: public ExceptionCallback {
   public:
@@ -355,7 +424,8 @@ public:
 
     virtual void onRecoverableException(Exception&& exception) override;
     virtual void onFatalException(Exception&& exception) override;
-    virtual void logMessage(const char* file, int line, int contextDepth, String&& text) override;
+    virtual void logMessage(LogSeverity severity, const char* file, int line, int contextDepth,
+                            String&& text) override;
 
   private:
     bool logged;
@@ -381,9 +451,9 @@ public:
   static String makeDescription(const char* macroArgs, Params&&... params);
 
 private:
-  static Severity minSeverity;
+  static LogSeverity minSeverity;
 
-  static void logInternal(const char* file, int line, Severity severity, const char* macroArgs,
+  static void logInternal(const char* file, int line, LogSeverity severity, const char* macroArgs,
                           ArrayPtr<String> argValues);
   static String makeDescriptionInternal(const char* macroArgs, ArrayPtr<String> argValues);
 
@@ -391,35 +461,24 @@ private:
   // Get the error code of the last error (e.g. from errno).  Returns -1 on EINTR.
 };
 
-ArrayPtr<const char> KJ_STRINGIFY(Debug::Severity severity);
-
 template <typename... Params>
-void Debug::log(const char* file, int line, Severity severity, const char* macroArgs,
+void Debug::log(const char* file, int line, LogSeverity severity, const char* macroArgs,
                 Params&&... params) {
   String argValues[sizeof...(Params)] = {str(params)...};
   logInternal(file, line, severity, macroArgs, arrayPtr(argValues, sizeof...(Params)));
 }
 
 template <>
-inline void Debug::log<>(const char* file, int line, Severity severity, const char* macroArgs) {
+inline void Debug::log<>(const char* file, int line, LogSeverity severity, const char* macroArgs) {
   logInternal(file, line, severity, macroArgs, nullptr);
 }
 
-template <typename... Params>
-Debug::Fault::Fault(const char* file, int line, Exception::Type type,
+template <typename Code, typename... Params>
+Debug::Fault::Fault(const char* file, int line, Code code,
                     const char* condition, const char* macroArgs, Params&&... params)
     : exception(nullptr) {
   String argValues[sizeof...(Params)] = {str(params)...};
-  init(file, line, type, condition, macroArgs,
-       arrayPtr(argValues, sizeof...(Params)));
-}
-
-template <typename... Params>
-Debug::Fault::Fault(const char* file, int line, int osErrorNumber,
-                    const char* condition, const char* macroArgs, Params&&... params)
-    : exception(nullptr) {
-  String argValues[sizeof...(Params)] = {str(params)...};
-  init(file, line, osErrorNumber, condition, macroArgs,
+  init(file, line, code, condition, macroArgs,
        arrayPtr(argValues, sizeof...(Params)));
 }
 
@@ -435,6 +494,22 @@ inline Debug::Fault::Fault(const char* file, int line, kj::Exception::Type type,
   init(file, line, type, condition, macroArgs, nullptr);
 }
 
+#if _WIN32
+inline Debug::Fault::Fault(const char* file, int line, Win32Error osErrorNumber,
+                           const char* condition, const char* macroArgs)
+    : exception(nullptr) {
+  init(file, line, osErrorNumber, condition, macroArgs, nullptr);
+}
+
+inline bool Debug::isWin32Success(int boolean) {
+  return boolean;
+}
+inline bool Debug::isWin32Success(void* handle) {
+  // Assume null and INVALID_HANDLE_VALUE mean failure.
+  return handle != nullptr && handle != (void*)-1;
+}
+#endif
+
 template <typename Call>
 Debug::SyscallResult Debug::syscall(Call&& call, bool nonblocking) {
   while (call() < 0) {
@@ -447,6 +522,20 @@ Debug::SyscallResult Debug::syscall(Call&& call, bool nonblocking) {
     }
   }
   return SyscallResult(0);
+}
+
+template <typename Call>
+int Debug::syscallError(Call&& call, bool nonblocking) {
+  while (call() < 0) {
+    int errorNum = getOsErrorNumber(nonblocking);
+    // getOsErrorNumber() returns -1 to indicate EINTR.
+    // Also, if nonblocking is true, then it returns 0 on EAGAIN, which will then be treated as a
+    // non-error.
+    if (errorNum != -1) {
+      return errorNum;
+    }
+  }
+  return 0;
 }
 
 template <typename... Params>

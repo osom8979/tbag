@@ -21,13 +21,14 @@
 
 #include "debug.h"
 #include "exception.h"
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 #include <string>
 #include <stdio.h>
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
 #include <exception>
+#include <stdlib.h>
 
 #include "miniposix.h"
 
@@ -95,16 +96,7 @@ public:
 
       // Get exit status.
       int status;
-      do {
-        if (waitpid(child, &status, 0) < 0) {
-          if (errno == EINTR) {
-            continue;
-          } else {
-            ADD_FAILURE() << "waidpid: " << strerror(errno);
-            return false;
-          }
-        }
-      } while (false);
+      KJ_SYSCALL(waitpid(child, &status, 0));
 
       EXPECT_TRUE(WIFEXITED(status));
       EXPECT_EQ(74, WEXITSTATUS(status));
@@ -173,9 +165,10 @@ public:
 #endif
   }
 
-  void logMessage(const char* file, int line, int contextDepth, String&& text) override {
+  void logMessage(LogSeverity severity, const char* file, int line, int contextDepth,
+                  String&& text) override {
     this->text += "log message: ";
-    text = str(file, ":", line, ":+", contextDepth, ": ", mv(text));
+    text = str(file, ":", line, ":+", contextDepth, ": ", severity, ": ", mv(text));
     this->text.append(text.begin(), text.end());
   }
 };
@@ -183,10 +176,15 @@ public:
 #if KJ_NO_EXCEPTIONS
 #define EXPECT_FATAL(code) if (mockCallback.forkForDeathTest()) { code; abort(); }
 #else
-#define EXPECT_FATAL(code) EXPECT_THROW(code, MockException);
+#define EXPECT_FATAL(code) \
+  try { code; KJ_FAIL_EXPECT("expected exception"); } \
+  catch (MockException e) {} \
+  catch (...) { KJ_FAIL_EXPECT("wrong exception"); }
 #endif
 
 std::string fileLine(std::string file, int line) {
+  file = trimSourceFilename(file.c_str()).cStr();
+
   file += ':';
   char buffer[32];
   sprintf(buffer, "%d", line);
@@ -271,7 +269,7 @@ TEST(Debug, Exception) {
   int line = __LINE__; Exception exception = KJ_EXCEPTION(DISCONNECTED, "foo", i);
 
   EXPECT_EQ(Exception::Type::DISCONNECTED, exception.getType());
-  EXPECT_STREQ(__FILE__, exception.getFile());
+  EXPECT_TRUE(kj::StringPtr(__FILE__).endsWith(exception.getFile()));
   EXPECT_EQ(line, exception.getLine());
   EXPECT_EQ("foo; i = 123", exception.getDescription());
 }

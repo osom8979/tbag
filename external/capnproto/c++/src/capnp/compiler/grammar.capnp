@@ -71,6 +71,9 @@ struct Expression {
     import @16 :LocatedText;
     # An import directive.
 
+    embed @17 :LocatedText;
+    # An embed directive.
+
     list @6 :List(Expression);
     # Bracketed list; members are never named.
 
@@ -226,6 +229,9 @@ struct Declaration {
     builtinList @54 :Void $builtinParams([(name = "Element")]);
     builtinObject @55 :Void;  # only for "renamed to AnyPointer" error message
     builtinAnyPointer @56 :Void;
+    builtinAnyStruct @58 :Void;
+    builtinAnyList @59 :Void;
+    builtinCapability @60 :Void;
   }
 
   annotation builtinParams @0x94099c3f9eb32d6b (field) :List(BrandParameter);

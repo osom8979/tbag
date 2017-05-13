@@ -22,7 +22,7 @@
 #ifndef CAPNP_RPC_TWOPARTY_H_
 #define CAPNP_RPC_TWOPARTY_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -54,9 +54,12 @@ class TwoPartyVatNetwork: public TwoPartyVatNetworkBase,
 public:
   TwoPartyVatNetwork(kj::AsyncIoStream& stream, rpc::twoparty::Side side,
                      ReaderOptions receiveOptions = ReaderOptions());
+  KJ_DISALLOW_COPY(TwoPartyVatNetwork);
 
   kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }
   // Returns a promise that resolves when the peer disconnects.
+
+  rpc::twoparty::Side getSide() { return side; }
 
   // implements VatNetwork -----------------------------------------------------
 
@@ -70,6 +73,7 @@ private:
 
   kj::AsyncIoStream& stream;
   rpc::twoparty::Side side;
+  MallocMessageBuilder peerVatId;
   ReaderOptions receiveOptions;
   bool accepted = false;
 
@@ -84,10 +88,11 @@ private:
   kj::ForkedPromise<void> disconnectPromise = nullptr;
 
   class FulfillerDisposer: public kj::Disposer {
-    // Hack:  TwoPartyVatNetwork is both a VatNetwork and a VatNetwork::Connection.  Whet the RPC
+    // Hack:  TwoPartyVatNetwork is both a VatNetwork and a VatNetwork::Connection.  When the RPC
     //   system detects (or initiates) a disconnection, it drops its reference to the Connection.
-    //   When all references have been dropped, then we want onDrained() to fire.  So we hand out
-    //   Own<Connection>s with this disposer attached, so that we can detect when they are dropped.
+    //   When all references have been dropped, then we want disconnectPromise to be fulfilled.
+    //   So we hand out Own<Connection>s with this disposer attached, so that we can detect when
+    //   they are dropped.
 
   public:
     mutable kj::Own<kj::PromiseFulfiller<void>> fulfiller;
@@ -98,13 +103,56 @@ private:
   FulfillerDisposer disconnectFulfiller;
 
   kj::Own<TwoPartyVatNetworkBase::Connection> asConnection();
-  // Returns a pointer to this with the disposer set to drainedFulfiller.
+  // Returns a pointer to this with the disposer set to disconnectFulfiller.
 
   // implements Connection -----------------------------------------------------
 
+  rpc::twoparty::VatId::Reader getPeerVatId() override;
   kj::Own<OutgoingRpcMessage> newOutgoingMessage(uint firstSegmentWordSize) override;
   kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> receiveIncomingMessage() override;
   kj::Promise<void> shutdown() override;
+};
+
+class TwoPartyServer: private kj::TaskSet::ErrorHandler {
+  // Convenience class which implements a simple server which accepts connections on a listener
+  // socket and serices them as two-party connections.
+
+public:
+  explicit TwoPartyServer(Capability::Client bootstrapInterface);
+
+  void accept(kj::Own<kj::AsyncIoStream>&& connection);
+  // Accepts the connection for servicing.
+
+  kj::Promise<void> listen(kj::ConnectionReceiver& listener);
+  // Listens for connections on the given listener. The returned promise never resolves unless an
+  // exception is thrown while trying to accept. You may discard the returned promise to cancel
+  // listening.
+
+private:
+  Capability::Client bootstrapInterface;
+  kj::TaskSet tasks;
+
+  struct AcceptedConnection;
+
+  void taskFailed(kj::Exception&& exception) override;
+};
+
+class TwoPartyClient {
+  // Convenience class which implements a simple client.
+
+public:
+  explicit TwoPartyClient(kj::AsyncIoStream& connection);
+  TwoPartyClient(kj::AsyncIoStream& connection, Capability::Client bootstrapInterface,
+                 rpc::twoparty::Side side = rpc::twoparty::Side::CLIENT);
+
+  Capability::Client bootstrap();
+  // Get the server's bootstrap interface.
+
+  inline kj::Promise<void> onDisconnect() { return network.onDisconnect(); }
+
+private:
+  TwoPartyVatNetwork network;
+  RpcSystem<rpc::twoparty::VatId> rpcSystem;
 };
 
 }  // namespace capnp

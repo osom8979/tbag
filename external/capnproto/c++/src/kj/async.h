@@ -29,7 +29,6 @@
 #include "async-prelude.h"
 #include "exception.h"
 #include "refcount.h"
-#include "tuple.h"
 
 namespace kj {
 
@@ -194,6 +193,16 @@ public:
   // actual I/O.  To solve this, use `kj::evalLater()` to yield control; this way, all other events
   // in the queue will get a chance to run before your callback is executed.
 
+  Promise<void> ignoreResult() KJ_WARN_UNUSED_RESULT { return then([](T&&) {}); }
+  // Convenience method to convert the promise to a void promise by ignoring the return value.
+  //
+  // You must still wait on the returned promise if you want the task to execute.
+
+  template <typename ErrorFunc>
+  Promise<T> catch_(ErrorFunc&& errorHandler) KJ_WARN_UNUSED_RESULT;
+  // Equivalent to `.then(identityFunc, errorHandler)`, where `identifyFunc` is a function that
+  // just returns its input.
+
   T wait(WaitScope& waitScope);
   // Run the event loop until the promise is fulfilled, then return its result.  If the promise
   // is rejected, throw an exception.
@@ -231,6 +240,12 @@ public:
   // `T` must be copy-constructable for this to work.  Or, in the special case where `T` is
   // `Own<U>`, `U` must have a method `Own<U> addRef()` which returns a new reference to the same
   // (or an equivalent) object (probably implemented via reference counting).
+
+  _::SplitTuplePromise<T> split();
+  // Split a promise for a tuple into a tuple of promises.
+  //
+  // E.g. if you have `Promise<kj::Tuple<T, U>>`, `split()` returns
+  // `kj::Tuple<Promise<T>, Promise<U>>`.
 
   Promise<T> exclusiveJoin(Promise<T>&& other) KJ_WARN_UNUSED_RESULT;
   // Return a new promise that resolves when either the original promise resolves or `other`
@@ -327,7 +342,7 @@ constexpr _::NeverDone NEVER_DONE = _::NeverDone();
 // forever (useful for servers).
 
 template <typename Func>
-PromiseForResult<Func, void> evalLater(Func&& func);
+PromiseForResult<Func, void> evalLater(Func&& func) KJ_WARN_UNUSED_RESULT;
 // Schedule for the given zero-parameter function to be executed in the event loop at some
 // point in the near future.  Returns a Promise for its result -- or, if `func()` itself returns
 // a promise, `evalLater()` returns a Promise for the result of resolving that promise.
@@ -343,6 +358,12 @@ PromiseForResult<Func, void> evalLater(Func&& func);
 //
 // If you schedule several evaluations with `evalLater` during the same callback, they are
 // guaranteed to be executed in order.
+
+template <typename Func>
+PromiseForResult<Func, void> evalNow(Func&& func) KJ_WARN_UNUSED_RESULT;
+// Run `func()` and return a promise for its result. `func()` executes before `evalNow()` returns.
+// If `func()` throws an exception, the exception is caught and wrapped in a promise -- this is the
+// main reason why `evalNow()` is useful.
 
 template <typename T>
 Promise<Array<T>> joinPromises(Array<Promise<T>>&& promises);
@@ -586,7 +607,7 @@ class EventLoop {
   //       return 0;
   //     }
   //
-  // Most applications that do I/O will prefer to use `setupIoEventLoop()` from `async-io.h` rather
+  // Most applications that do I/O will prefer to use `setupAsyncIo()` from `async-io.h` rather
   // than allocate an `EventLoop` directly.
 
 public:

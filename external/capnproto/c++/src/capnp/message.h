@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Sandstorm Development Group, Inc. and contributors
+// Copyright (c) 2013-2016 Sandstorm Development Group, Inc. and contributors
 // Licensed under the MIT License:
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,6 +22,7 @@
 #include <kj/common.h>
 #include <kj/memory.h>
 #include <kj/mutex.h>
+#include <kj/debug.h>
 #include "common.h"
 #include "layout.h"
 #include "any.h"
@@ -29,7 +30,7 @@
 #ifndef CAPNP_MESSAGE_H_
 #define CAPNP_MESSAGE_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -102,10 +103,8 @@ public:
   virtual ~MessageReader() noexcept(false);
 
   virtual kj::ArrayPtr<const word> getSegment(uint id) = 0;
-  // Gets the segment with the given ID, or returns null if no such segment exists.
-  //
-  // Normally getSegment() will only be called once for each segment ID.  Subclasses can call
-  // reset() to clear the segment table and start over with new segments.
+  // Gets the segment with the given ID, or returns null if no such segment exists. This method
+  // will be called at most once for each segment ID.
 
   inline const ReaderOptions& getOptions();
   // Get the options passed to the constructor.
@@ -120,17 +119,8 @@ public:
   // RootType in this case must be DynamicStruct, and you must #include <capnp/dynamic.h> to
   // use this.
 
-#if !CAPNP_LITE
-  void initCapTable(kj::Array<kj::Maybe<kj::Own<ClientHook>>> capTable);
-  // Sets the table of capabilities embedded in this message.  Capability pointers found in the
-  // message content contain indexes into this table.  You must call this before attempting to
-  // read any capability pointers (interface pointers) from the message.  The table is not passed
-  // to the constructor because often (as in the RPC system) the cap table is actually constructed
-  // based on a list read from the message itself.
-  //
-  // You must link against libcapnp-rpc to call this method (the rest of MessageBuilder is in
-  // regular libcapnp).
-#endif  // !CAPNP_LITE
+  bool isCanonical();
+  // Returns whether the message encoded in the reader is in canonical form.
 
 private:
   ReaderOptions options;
@@ -232,18 +222,13 @@ public:
   kj::ArrayPtr<const kj::ArrayPtr<const word>> getSegmentsForOutput();
   // Get the raw data that makes up the message.
 
-#if !CAPNP_LITE
-  kj::ArrayPtr<kj::Maybe<kj::Own<ClientHook>>> getCapTable();
-  // Get the table of capabilities (interface pointers) that have been added to this message.
-  // When you later parse this message, you must call `initCapTable()` on the `MessageReader` and
-  // give it an equivalent set of capabilities, otherwise cap pointers in the message will be
-  // unusable.
-#endif  // !CAPNP_LITE
-
   Orphanage getOrphanage();
 
+  bool isCanonical();
+  // Check whether the message builder is in canonical form
+
 private:
-  void* arenaSpace[20];
+  void* arenaSpace[22];
   // Space in which we can construct a BuilderArena.  We don't use BuilderArena directly here
   // because we don't want clients to have to #include arena.h, which itself includes a bunch of
   // big STL headers.  We don't use a pointer to a BuilderArena because that would require an
@@ -292,6 +277,27 @@ void copyToUnchecked(Reader&& reader, kj::ArrayPtr<word> uncheckedBuffer);
 // Copy the content of the given reader into the given buffer, such that it can safely be passed to
 // readMessageUnchecked().  The buffer's size must be exactly reader.totalSizeInWords() + 1,
 // otherwise an exception will be thrown.  The buffer must be zero'd before calling.
+
+template <typename RootType>
+typename RootType::Reader readDataStruct(kj::ArrayPtr<const word> data);
+// Interprets the given data as a single, data-only struct. Only primitive fields (booleans,
+// numbers, and enums) will be readable; all pointers will be null. This is useful if you want
+// to use Cap'n Proto as a language/platform-neutral way to pack some bits.
+//
+// The input is a word array rather than a byte array to enforce alignment. If you have a byte
+// array which you know is word-aligned (or if your platform supports unaligned reads and you don't
+// mind the performance penalty), then you can use `reinterpret_cast` to convert a byte array into
+// a word array:
+//
+//     kj::arrayPtr(reinterpret_cast<const word*>(bytes.begin()),
+//                  reinterpret_cast<const word*>(bytes.end()))
+
+template <typename BuilderType>
+typename kj::ArrayPtr<const word> writeDataStruct(BuilderType builder);
+// Given a struct builder, get the underlying data section as a word array, suitable for passing
+// to `readDataStruct()`.
+//
+// Note that you may call `.toBytes()` on the returned value to convert to `ArrayPtr<const byte>`.
 
 template <typename Type>
 static typename Type::Reader defaultValue();
@@ -472,6 +478,29 @@ void copyToUnchecked(Reader&& reader, kj::ArrayPtr<word> uncheckedBuffer) {
   FlatMessageBuilder builder(uncheckedBuffer);
   builder.setRoot(kj::fwd<Reader>(reader));
   builder.requireFilled();
+}
+
+template <typename RootType>
+typename RootType::Reader readDataStruct(kj::ArrayPtr<const word> data) {
+  return typename RootType::Reader(_::StructReader(data));
+}
+
+template <typename BuilderType>
+typename kj::ArrayPtr<const word> writeDataStruct(BuilderType builder) {
+  auto bytes = _::PointerHelpers<FromBuilder<BuilderType>>::getInternalBuilder(kj::mv(builder))
+      .getDataSectionAsBlob();
+  return kj::arrayPtr(reinterpret_cast<word*>(bytes.begin()),
+                      reinterpret_cast<word*>(bytes.end()));
+}
+
+template <typename Type>
+static typename Type::Reader defaultValue() {
+  return typename Type::Reader(_::StructReader());
+}
+
+template <typename T>
+kj::Array<word> canonicalize(T&& reader) {
+    return _::PointerHelpers<FromReader<T>>::getInternalReader(reader).canonicalize();
 }
 
 }  // namespace capnp

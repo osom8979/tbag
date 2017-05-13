@@ -23,9 +23,10 @@
 #include <capnp/test-import2.capnp.h>
 #include "message.h"
 #include <kj/debug.h>
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 #include "test-util.h"
 #include "schema-lite.h"
+#include "serialize-packed.h"
 
 namespace capnp {
 namespace _ {  // private
@@ -152,15 +153,8 @@ struct UnionState {
   }
 };
 
-std::ostream& operator<<(std::ostream& os, const UnionState& us) {
-  os << "UnionState({";
-
-  for (uint i = 0; i < 4; i++) {
-    if (i > 0) os << ", ";
-    os << us.discriminants[i];
-  }
-
-  return os << "}, " << us.dataOffset << ")";
+kj::String KJ_STRINGIFY(const UnionState& us) {
+  return kj::str("UnionState({", kj::strArray(us.discriminants, ", "), "}, ", us.dataOffset, ")");
 }
 
 template <typename StructType, typename Func>
@@ -523,6 +517,99 @@ TEST(Encoding, SmallStructLists) {
   }
 }
 
+TEST(Encoding, SetListToEmpty) {
+  // Test initializing list fields from various ways of constructing zero-sized lists.
+  // At one point this would often fail because the lists would have ElementSize::VOID which is
+  // incompatible with other list sizes.
+
+#define ALL_LIST_TYPES(MACRO) \
+  MACRO(Void, Void) \
+  MACRO(Bool, bool) \
+  MACRO(UInt8, uint8_t) \
+  MACRO(UInt16, uint16_t) \
+  MACRO(UInt32, uint32_t) \
+  MACRO(UInt64, uint64_t) \
+  MACRO(Int8, int8_t) \
+  MACRO(Int16, int16_t) \
+  MACRO(Int32, int32_t) \
+  MACRO(Int64, int64_t) \
+  MACRO(Float32, float) \
+  MACRO(Float64, double) \
+  MACRO(Text, Text) \
+  MACRO(Data, Data) \
+  MACRO(Struct, TestAllTypes)
+
+#define SET_FROM_READER_ACCESSOR(name, type) \
+  root.set##name##List(reader.get##name##List());
+
+#define SET_FROM_BUILDER_ACCESSOR(name, type) \
+  root.set##name##List(root.get##name##List());
+
+#define SET_FROM_READER_CONSTRUCTOR(name, type) \
+  root.set##name##List(List<type>::Reader());
+
+#define SET_FROM_BUILDER_CONSTRUCTOR(name, type) \
+  root.set##name##List(List<type>::Builder());
+
+#define CHECK_EMPTY_NONNULL(name, type) \
+  EXPECT_TRUE(root.has##name##List()); \
+  EXPECT_EQ(0, root.get##name##List().size());
+
+  {
+    MallocMessageBuilder builder;
+    auto root = builder.initRoot<test::TestAllTypes>();
+    auto reader = root.asReader();
+    ALL_LIST_TYPES(SET_FROM_READER_ACCESSOR)
+    ALL_LIST_TYPES(CHECK_EMPTY_NONNULL)
+  }
+
+  {
+    MallocMessageBuilder builder;
+    auto root = builder.initRoot<test::TestAllTypes>();
+    ALL_LIST_TYPES(SET_FROM_BUILDER_ACCESSOR)
+    ALL_LIST_TYPES(CHECK_EMPTY_NONNULL)
+  }
+
+  {
+    MallocMessageBuilder builder;
+    auto root = builder.initRoot<test::TestAllTypes>();
+    ALL_LIST_TYPES(SET_FROM_READER_CONSTRUCTOR)
+    ALL_LIST_TYPES(CHECK_EMPTY_NONNULL)
+  }
+
+  {
+    MallocMessageBuilder builder;
+    auto root = builder.initRoot<test::TestAllTypes>();
+    ALL_LIST_TYPES(SET_FROM_BUILDER_CONSTRUCTOR)
+    ALL_LIST_TYPES(CHECK_EMPTY_NONNULL)
+  }
+
+#undef SET_FROM_READER_ACCESSOR
+#undef SET_FROM_BUILDER_ACCESSOR
+#undef SET_FROM_READER_CONSTRUCTOR
+#undef SET_FROM_BUILDER_CONSTRUCTOR
+#undef CHECK_EMPTY_NONNULL
+}
+
+#if CAPNP_EXPENSIVE_TESTS
+TEST(Encoding, LongList) {
+  // This test allocates 512MB of contiguous memory and takes several seconds, so we usually don't
+  // run it. It is run before release, though.
+
+  MallocMessageBuilder builder;
+
+  auto root = builder.initRoot<TestAllTypes>();
+  uint length = 1 << 27;
+  auto list = root.initUInt64List(length);
+  for (uint ii = 0; ii < length; ++ii) {
+    list.set(ii, ii);
+  }
+  for (uint ii = 0; ii < length; ++ii) {
+    ASSERT_EQ(list[ii], ii);
+  }
+}
+#endif
+
 // =======================================================================================
 
 TEST(Encoding, ListUpgrade) {
@@ -565,7 +652,7 @@ TEST(Encoding, ListUpgrade) {
 #endif
     });
 
-    EXPECT_TRUE(e != nullptr) << "Should have thrown an exception.";
+    KJ_EXPECT(e != nullptr, "Should have thrown an exception.");
   }
 
   {
@@ -673,7 +760,7 @@ TEST(Encoding, BitListUpgrade) {
 #endif
     });
 
-    EXPECT_TRUE(e != nullptr) << "Should have thrown an exception.";
+    KJ_EXPECT(e != nullptr, "Should have thrown an exception.");
   }
 
   auto reader = root.asReader();
@@ -686,7 +773,7 @@ TEST(Encoding, BitListUpgrade) {
 #endif
     });
 
-    EXPECT_TRUE(e != nullptr) << "Should have thrown an exception.";
+    KJ_EXPECT(e != nullptr, "Should have thrown an exception.");
   }
 }
 
@@ -1235,6 +1322,22 @@ TEST(Encoding, UpgradeListInBuilder) {
   EXPECT_NONFATAL_FAILURE(root.getAnyPointerField().getAs<List<Text>>());
 }
 
+TEST(Encoding, UpgradeUnion) {
+  // This tests for a specific case that was broken originally.
+  MallocMessageBuilder builder;
+
+  {
+    auto root = builder.getRoot<test::TestOldUnionVersion>();
+    root.setB(123);
+  }
+
+  {
+    auto root = builder.getRoot<test::TestNewUnionVersion>();
+    ASSERT_TRUE(root.isB())
+    EXPECT_EQ(123, root.getB());
+  }
+}
+
 // =======================================================================================
 // Tests of generated code, not really of the encoding.
 // TODO(cleanup):  Move to a different test?
@@ -1556,6 +1659,16 @@ TEST(Encoding, Constants) {
   checkList(*test::TestConstants::ENUM_LIST_CONST, {TestEnum::FOO, TestEnum::GARPLY});
 }
 
+TEST(Encoding, AnyPointerConstants) {
+  auto reader = test::ANY_POINTER_CONSTANTS.get();
+
+  EXPECT_EQ("baz", reader.getAnyKindAsStruct().getAs<TestAllTypes>().getTextField());
+  EXPECT_EQ("baz", reader.getAnyStructAsStruct().as<TestAllTypes>().getTextField());
+
+  EXPECT_EQ(111111111, reader.getAnyKindAsList().getAs<List<int32_t>>()[0]);
+  EXPECT_EQ(111111111, reader.getAnyListAsList().as<List<int32_t>>()[0]);
+}
+
 TEST(Encoding, GlobalConstants) {
   EXPECT_EQ(12345u, test::GLOBAL_INT);
   EXPECT_EQ("foobar", test::GLOBAL_TEXT.get());
@@ -1573,6 +1686,30 @@ TEST(Encoding, GlobalConstants) {
     EXPECT_EQ("structlist 1", listReader[0].getTextField());
     EXPECT_EQ("structlist 2", listReader[1].getTextField());
     EXPECT_EQ("structlist 3", listReader[2].getTextField());
+  }
+}
+
+TEST(Encoding, Embeds) {
+  {
+    kj::ArrayInputStream input(test::EMBEDDED_DATA);
+    PackedMessageReader reader(input);
+    checkTestMessage(reader.getRoot<TestAllTypes>());
+  }
+
+#if !CAPNP_LITE
+
+  {
+    MallocMessageBuilder builder;
+    auto root = builder.getRoot<TestAllTypes>();
+    initTestMessage(root);
+    kj::StringPtr text = test::EMBEDDED_TEXT;
+    EXPECT_EQ(kj::str(root, text.endsWith("\r\n") ? "\r\n" : "\n"), text);
+  }
+
+#endif // CAPNP_LITE
+
+  {
+    checkTestMessage(test::EMBEDDED_STRUCT);
   }
 }
 
@@ -1694,8 +1831,40 @@ TEST(Encoding, Generics) {
   initTestMessage(root.initBasic().initFoo());
   checkTestMessage(reader.getBasic().getFoo());
 
+  {
+    auto typed = root.getBasic();
+    test::TestGenerics<>::Reader generic = typed.asGeneric<>();
+    checkTestMessage(generic.getFoo().getAs<TestAllTypes>());
+    test::TestGenerics<TestAllTypes>::Reader halfGeneric = typed.asGeneric<TestAllTypes>();
+    checkTestMessage(halfGeneric.getFoo());
+  }
+
+  {
+    auto typed = root.getBasic().asReader();
+    test::TestGenerics<>::Reader generic = typed.asGeneric<>();
+    checkTestMessage(generic.getFoo().getAs<TestAllTypes>());
+    test::TestGenerics<TestAllTypes>::Reader halfGeneric = typed.asGeneric<TestAllTypes>();
+    checkTestMessage(halfGeneric.getFoo());
+  }
+
   initTestMessage(root.initInner().initFoo());
   checkTestMessage(reader.getInner().getFoo());
+
+  {
+    auto typed = root.getInner();
+    test::TestGenerics<>::Inner::Reader generic = typed.asTestGenericsGeneric<>();
+    checkTestMessage(generic.getFoo().getAs<TestAllTypes>());
+    test::TestGenerics<TestAllTypes>::Inner::Reader halfGeneric = typed.asTestGenericsGeneric<TestAllTypes>();
+    checkTestMessage(halfGeneric.getFoo());
+  }
+
+  {
+    auto typed = root.getInner().asReader();
+    test::TestGenerics<>::Inner::Reader generic = typed.asTestGenericsGeneric<>();
+    checkTestMessage(generic.getFoo().getAs<TestAllTypes>());
+    test::TestGenerics<TestAllTypes>::Inner::Reader halfGeneric = typed.asTestGenericsGeneric<TestAllTypes>();
+    checkTestMessage(halfGeneric.getFoo());
+  }
 
   root.initInner2().setBaz("foo");
   EXPECT_EQ("foo", reader.getInner2().getBaz());
@@ -1725,6 +1894,39 @@ TEST(Encoding, GenericDefaults) {
   EXPECT_EQ("text", reader.getDefaultWrapper2().getValue().getValue().getFoo());
   EXPECT_EQ(321, reader.getDefaultWrapper2().getValue()
       .getValue().getRev().getFoo().getInt16Field());
+}
+
+TEST(Encoding, UnionInGenerics) {
+  MallocMessageBuilder message;
+  auto builder = message.initRoot<test::TestGenerics<>>();
+  auto reader = builder.asReader();
+
+  //just call the methods to verify that generated code compiles
+  reader.which();
+  builder.which();
+
+  reader.isUv();
+  builder.isUv();
+  reader.getUv();
+  builder.getUv();
+  builder.setUv();
+
+  builder.initUg();
+
+  reader.isUg();
+  builder.isUg();
+  reader.getUg();
+  builder.getUg();
+  builder.initUg();
+}
+
+TEST(Encoding, DefaultListBuilder) {
+  // At one point, this wouldn't compile.
+
+  List<int>::Builder(nullptr);
+  List<TestAllTypes>::Builder(nullptr);
+  List<List<int>>::Builder(nullptr);
+  List<Text>::Builder(nullptr);
 }
 
 }  // namespace

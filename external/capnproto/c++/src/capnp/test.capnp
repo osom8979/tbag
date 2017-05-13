@@ -165,6 +165,12 @@ struct TestAnyPointer {
   # in the struct.
 }
 
+struct TestAnyOthers {
+  anyStructField @0 :AnyStruct;
+  anyListField @1 :AnyList;
+  capabilityField @2 :Capability;
+}
+
 struct TestOutOfOrder {
   foo @3 :Text;
   bar @2 :Text;
@@ -472,6 +478,23 @@ struct TestNewVersion {
   new2 @4 :Text = "baz";
 }
 
+struct TestOldUnionVersion {
+  union {
+    a @0 :Void;
+    b @1 :UInt64;
+  }
+}
+
+struct TestNewUnionVersion {
+  union {
+    a :union {
+      a0 @0 :Void;
+      a1 @2 :UInt64;
+    }
+    b @1 :UInt64;
+  }
+}
+
 struct TestStructUnion {
   un @0! :union {
     struct @1 :SomeStruct;
@@ -507,6 +530,13 @@ struct TestGenerics(Foo, Bar) {
   foo @0 :Foo;
   rev @1 :TestGenerics(Bar, Foo);
 
+  union {
+    uv @2:Void;
+    ug :group {
+      ugfoo @3:Int32;
+    }
+  }
+
   struct Inner {
     foo @0 :Foo;
     bar @1 :Bar;
@@ -523,6 +553,11 @@ struct TestGenerics(Foo, Bar) {
       bar @1 :Bar;
       baz @2 :Baz;
       qux @3 :Qux;
+
+      interface DeepNestInterface(Quux) {
+        # At one time this failed to compile.
+        call @0 () -> ();
+      }
     }
   }
 
@@ -562,6 +597,15 @@ interface TestImplicitMethodParams {
 
 interface TestImplicitMethodParamsInGeneric(V) {
   call @0 [T, U] (foo :T, bar :U) -> TestGenerics(T, U);
+}
+
+struct TestGenericsUnion(Foo, Bar) {
+  # At one point this failed to compile.
+
+  union {
+    foo @0 :Foo;
+    bar @1 :Bar;
+  }
 }
 
 struct TestUseGenerics $TestGenerics(Text, Data).ann("foo") {
@@ -700,6 +744,27 @@ const derivedConstant :TestAllTypes = (
 const genericConstant :TestGenerics(TestAllTypes, Text) =
     (foo = (int16Field = 123), rev = (foo = "text", rev = (foo = (int16Field = 321))));
 
+const embeddedData :Data = embed "testdata/packed";
+const embeddedText :Text = embed "testdata/short.txt";
+const embeddedStruct :TestAllTypes = embed "testdata/binary";
+
+const nonAsciiText :Text = "♫ é ✓";
+
+struct TestAnyPointerConstants {
+  anyKindAsStruct @0 :AnyPointer;
+  anyStructAsStruct @1 :AnyStruct;
+  anyKindAsList @2 :AnyPointer;
+  anyListAsList @3 :AnyList;
+
+}
+
+const anyPointerConstants :TestAnyPointerConstants = (
+  anyKindAsStruct = TestConstants.structConst,
+  anyStructAsStruct = TestConstants.structConst,
+  anyKindAsList = TestConstants.int32ListConst,
+  anyListAsList = TestConstants.int32ListConst,
+);
+
 interface TestInterface {
   foo @0 (i :UInt32, j :Bool) -> (x :Text);
   bar @1 () -> ();
@@ -717,9 +782,13 @@ interface TestExtends2 extends(TestExtends) {}
 interface TestPipeline {
   getCap @0 (n: UInt32, inCap :TestInterface) -> (s: Text, outBox :Box);
   testPointers @1 (cap :TestInterface, obj :AnyPointer, list :List(TestInterface)) -> ();
+  getAnyCap @2 (n: UInt32, inCap :Capability) -> (s: Text, outBox :AnyBox);
 
   struct Box {
     cap @0 :TestInterface;
+  }
+  struct AnyBox {
+    cap @0 :Capability;
   }
 }
 
@@ -775,9 +844,46 @@ interface TestMoreStuff extends(TestCallOrder) {
 
   methodWithDefaults @8 (a :Text, b :UInt32 = 123, c :Text = "foo") -> (d :Text, e :Text = "bar");
 
+  methodWithNullDefault @12 (a :Text, b :TestInterface = null);
+
   getHandle @9 () -> (handle :TestHandle);
   # Get a new handle. Tests have an out-of-band way to check the current number of live handles, so
   # this can be used to test garbage collection.
+
+  getNull @10 () -> (nullCap :TestMoreStuff);
+  # Always returns a null capability.
+
+  getEnormousString @11 () -> (str :Text);
+  # Attempts to return an 100MB string. Should always fail.
+}
+
+interface TestMembrane {
+  makeThing @0 () -> (thing :Thing);
+  callPassThrough @1 (thing :Thing, tailCall :Bool) -> Result;
+  callIntercept @2 (thing :Thing, tailCall :Bool) -> Result;
+  loopback @3 (thing :Thing) -> (thing :Thing);
+
+  interface Thing {
+    passThrough @0 () -> Result;
+    intercept @1 () -> Result;
+  }
+
+  struct Result {
+    text @0 :Text;
+  }
+}
+
+struct TestContainMembrane {
+  cap @0 :TestMembrane.Thing;
+  list @1 :List(TestMembrane.Thing);
+}
+
+struct TestTransferCap {
+  list @0 :List(Element);
+  struct Element {
+    text @0 :Text;
+    cap @1 :TestInterface;
+  }
 }
 
 interface TestKeywordMethods {
@@ -785,6 +891,10 @@ interface TestKeywordMethods {
   class @1 ();
   void @2 ();
   return @3 ();
+}
+
+interface TestAuthenticatedBootstrap(VatId) {
+  getCallerId @0 () -> (caller :VatId);
 }
 
 struct TestSturdyRef {

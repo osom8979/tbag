@@ -20,10 +20,10 @@
 // THE SOFTWARE.
 
 #include "array.h"
-#include <gtest/gtest.h>
 #include "debug.h"
 #include <string>
 #include <list>
+#include <kj/compat/gtest.h>
 
 namespace kj {
 namespace {
@@ -331,6 +331,51 @@ TEST(Array, Map) {
   StringPtr foo = "abcd";
   Array<char> bar = KJ_MAP(c, foo) -> char { return c + 1; };
   EXPECT_STREQ("bcde", str(bar).cStr());
+}
+
+TEST(Array, MapRawArray) {
+  uint foo[4] = {1, 2, 3, 4};
+  Array<uint> bar = KJ_MAP(i, foo) -> uint { return i * i; };
+  ASSERT_EQ(4, bar.size());
+  EXPECT_EQ(1, bar[0]);
+  EXPECT_EQ(4, bar[1]);
+  EXPECT_EQ(9, bar[2]);
+  EXPECT_EQ(16, bar[3]);
+}
+
+TEST(Array, ReleaseAsBytesOrChars) {
+  {
+    Array<char> chars = kj::heapArray<char>("foo", 3);
+    Array<byte> bytes = chars.releaseAsBytes();
+    EXPECT_TRUE(chars == nullptr);
+    ASSERT_EQ(3, bytes.size());
+    EXPECT_EQ('f', bytes[0]);
+    EXPECT_EQ('o', bytes[1]);
+    EXPECT_EQ('o', bytes[2]);
+
+    chars = bytes.releaseAsChars();
+    EXPECT_TRUE(bytes == nullptr);
+    ASSERT_EQ(3, chars.size());
+    EXPECT_EQ('f', chars[0]);
+    EXPECT_EQ('o', chars[1]);
+    EXPECT_EQ('o', chars[2]);
+  }
+  {
+    Array<const char> chars = kj::heapArray<char>("foo", 3);
+    Array<const byte> bytes = chars.releaseAsBytes();
+    EXPECT_TRUE(chars == nullptr);
+    ASSERT_EQ(3, bytes.size());
+    EXPECT_EQ('f', bytes[0]);
+    EXPECT_EQ('o', bytes[1]);
+    EXPECT_EQ('o', bytes[2]);
+
+    chars = bytes.releaseAsChars();
+    EXPECT_TRUE(bytes == nullptr);
+    ASSERT_EQ(3, chars.size());
+    EXPECT_EQ('f', chars[0]);
+    EXPECT_EQ('o', chars[1]);
+    EXPECT_EQ('o', chars[2]);
+  }
 }
 
 }  // namespace

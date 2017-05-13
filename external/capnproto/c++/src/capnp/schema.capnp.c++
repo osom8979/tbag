@@ -2141,7 +2141,7 @@ const ::capnp::_::RawSchema s_ed8bca69f7fb0cbf = {
   2, 2, i_ed8bca69f7fb0cbf, nullptr, nullptr, { &s_ed8bca69f7fb0cbf, nullptr, nullptr, 0, 0, nullptr }
 };
 #endif  // !CAPNP_LITE
-static const ::capnp::_::AlignedData<53> b_c2573fe8a23e49f1 = {
+static const ::capnp::_::AlignedData<46> b_c2573fe8a23e49f1 = {
   {   0,   0,   0,   0,   5,   0,   6,   0,
     241,  73,  62, 162, 232,  63,  87, 194,
      24,   0,   0,   0,   1,   0,   3,   0,
@@ -2161,35 +2161,28 @@ static const ::capnp::_::AlignedData<53> b_c2573fe8a23e49f1 = {
     101, 114,   0,   0,   0,   0,   0,   0,
      12,   0,   0,   0,   3,   0,   4,   0,
       0,   0, 255, 255,   0,   0,   0,   0,
-      0,   0,   1,   0,  18,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
+      1,   0,   0,   0,   0,   0,   0,   0,
+     86,  54,  89, 254, 121,  95,  59, 142,
      69,   0,   0,   0, 114,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
-     68,   0,   0,   0,   3,   0,   1,   0,
-     80,   0,   0,   0,   2,   0,   1,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
       1,   0, 254, 255,   0,   0,   0,   0,
       1,   0,   0,   0,   0,   0,   0,   0,
     133,  74,  97, 244,  36, 247, 209, 157,
-     77,   0,   0,   0,  82,   0,   0,   0,
+     49,   0,   0,   0,  82,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
       2,   0, 253, 255,   0,   0,   0,   0,
       1,   0,   0,   0,   0,   0,   0,   0,
     116, 226,  86,  12,  18, 201, 239, 186,
-     57,   0,   0,   0, 194,   0,   0,   0,
+     29,   0,   0,   0, 194,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
     117, 110,  99, 111, 110, 115, 116, 114,
      97, 105, 110, 101, 100,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
     112,  97, 114,  97, 109, 101, 116, 101,
     114,   0,   0,   0,   0,   0,   0,   0,
     105, 109, 112, 108, 105,  99, 105, 116,
@@ -2199,6 +2192,7 @@ static const ::capnp::_::AlignedData<53> b_c2573fe8a23e49f1 = {
 ::capnp::word const* const bp_c2573fe8a23e49f1 = b_c2573fe8a23e49f1.words;
 #if !CAPNP_LITE
 static const ::capnp::_::RawSchema* const d_c2573fe8a23e49f1[] = {
+  &s_8e3b5f79fe593656,
   &s_9dd1f724f4614a85,
   &s_baefc9120c56e274,
   &s_d07378ede1f9cc60,
@@ -2206,8 +2200,103 @@ static const ::capnp::_::RawSchema* const d_c2573fe8a23e49f1[] = {
 static const uint16_t m_c2573fe8a23e49f1[] = {2, 1, 0};
 static const uint16_t i_c2573fe8a23e49f1[] = {0, 1, 2};
 const ::capnp::_::RawSchema s_c2573fe8a23e49f1 = {
-  0xc2573fe8a23e49f1, b_c2573fe8a23e49f1.words, 53, d_c2573fe8a23e49f1, m_c2573fe8a23e49f1,
-  3, 3, i_c2573fe8a23e49f1, nullptr, nullptr, { &s_c2573fe8a23e49f1, nullptr, nullptr, 0, 0, nullptr }
+  0xc2573fe8a23e49f1, b_c2573fe8a23e49f1.words, 46, d_c2573fe8a23e49f1, m_c2573fe8a23e49f1,
+  4, 3, i_c2573fe8a23e49f1, nullptr, nullptr, { &s_c2573fe8a23e49f1, nullptr, nullptr, 0, 0, nullptr }
+};
+#endif  // !CAPNP_LITE
+static const ::capnp::_::AlignedData<81> b_8e3b5f79fe593656 = {
+  {   0,   0,   0,   0,   5,   0,   6,   0,
+     86,  54,  89, 254, 121,  95,  59, 142,
+     35,   0,   0,   0,   1,   0,   3,   0,
+    241,  73,  62, 162, 232,  63,  87, 194,
+      1,   0,   7,   0,   1,   0,   4,   0,
+      5,   0,   0,   0,   0,   0,   0,   0,
+     21,   0,   0,   0, 138,   1,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     37,   0,   0,   0, 231,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     99,  97, 112, 110, 112,  47, 115,  99,
+    104, 101, 109,  97,  46,  99,  97, 112,
+    110, 112,  58,  84, 121, 112, 101,  46,
+     97, 110, 121,  80, 111, 105, 110, 116,
+    101, 114,  46, 117, 110,  99, 111, 110,
+    115, 116, 114,  97, 105, 110, 101, 100,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     16,   0,   0,   0,   3,   0,   4,   0,
+      0,   0, 255, 255,   0,   0,   0,   0,
+      0,   0,   1,   0,  18,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     97,   0,   0,   0,  66,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     92,   0,   0,   0,   3,   0,   1,   0,
+    104,   0,   0,   0,   2,   0,   1,   0,
+      1,   0, 254, 255,   0,   0,   0,   0,
+      0,   0,   1,   0,  25,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    101,   0,   0,   0,  58,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     96,   0,   0,   0,   3,   0,   1,   0,
+    108,   0,   0,   0,   2,   0,   1,   0,
+      2,   0, 253, 255,   0,   0,   0,   0,
+      0,   0,   1,   0,  26,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    105,   0,   0,   0,  42,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    100,   0,   0,   0,   3,   0,   1,   0,
+    112,   0,   0,   0,   2,   0,   1,   0,
+      3,   0, 252, 255,   0,   0,   0,   0,
+      0,   0,   1,   0,  27,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    109,   0,   0,   0,  90,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    108,   0,   0,   0,   3,   0,   1,   0,
+    120,   0,   0,   0,   2,   0,   1,   0,
+     97, 110, 121,  75, 105, 110, 100,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    115, 116, 114, 117,  99, 116,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    108, 105, 115, 116,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     99,  97, 112,  97,  98, 105, 108, 105,
+    116, 121,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0, }
+};
+::capnp::word const* const bp_8e3b5f79fe593656 = b_8e3b5f79fe593656.words;
+#if !CAPNP_LITE
+static const ::capnp::_::RawSchema* const d_8e3b5f79fe593656[] = {
+  &s_c2573fe8a23e49f1,
+};
+static const uint16_t m_8e3b5f79fe593656[] = {0, 3, 2, 1};
+static const uint16_t i_8e3b5f79fe593656[] = {0, 1, 2, 3};
+const ::capnp::_::RawSchema s_8e3b5f79fe593656 = {
+  0x8e3b5f79fe593656, b_8e3b5f79fe593656.words, 81, d_8e3b5f79fe593656, m_8e3b5f79fe593656,
+  1, 4, i_8e3b5f79fe593656, nullptr, nullptr, { &s_8e3b5f79fe593656, nullptr, nullptr, 0, 0, nullptr }
 };
 #endif  // !CAPNP_LITE
 static const ::capnp::_::AlignedData<50> b_9dd1f724f4614a85 = {
@@ -2985,17 +3074,91 @@ const ::capnp::_::RawSchema s_d1958f7dba521926 = {
 };
 #endif  // !CAPNP_LITE
 CAPNP_DEFINE_ENUM(ElementSize_d1958f7dba521926, d1958f7dba521926);
-static const ::capnp::_::AlignedData<62> b_bfc546f6210ad7ce = {
+static const ::capnp::_::AlignedData<63> b_d85d305b7d839963 = {
+  {   0,   0,   0,   0,   5,   0,   6,   0,
+     99, 153, 131, 125,  91,  48,  93, 216,
+     19,   0,   0,   0,   1,   0,   1,   0,
+    217, 114,  76,  98,   9, 197,  63, 169,
+      0,   0,   7,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     21,   0,   0,   0,   2,   1,   0,   0,
+     33,   0,   0,   0,   7,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     29,   0,   0,   0, 175,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     99,  97, 112, 110, 112,  47, 115,  99,
+    104, 101, 109,  97,  46,  99,  97, 112,
+    110, 112,  58,  67,  97, 112, 110, 112,
+     86, 101, 114, 115, 105, 111, 110,   0,
+      0,   0,   0,   0,   1,   0,   1,   0,
+     12,   0,   0,   0,   3,   0,   4,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   1,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     69,   0,   0,   0,  50,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     64,   0,   0,   0,   3,   0,   1,   0,
+     76,   0,   0,   0,   2,   0,   1,   0,
+      1,   0,   0,   0,   2,   0,   0,   0,
+      0,   0,   1,   0,   1,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     73,   0,   0,   0,  50,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     68,   0,   0,   0,   3,   0,   1,   0,
+     80,   0,   0,   0,   2,   0,   1,   0,
+      2,   0,   0,   0,   3,   0,   0,   0,
+      0,   0,   1,   0,   2,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     77,   0,   0,   0,  50,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     72,   0,   0,   0,   3,   0,   1,   0,
+     84,   0,   0,   0,   2,   0,   1,   0,
+    109,  97, 106, 111, 114,   0,   0,   0,
+      7,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      7,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    109, 105, 110, 111, 114,   0,   0,   0,
+      6,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      6,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    109, 105,  99, 114, 111,   0,   0,   0,
+      6,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      6,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0, }
+};
+::capnp::word const* const bp_d85d305b7d839963 = b_d85d305b7d839963.words;
+#if !CAPNP_LITE
+static const uint16_t m_d85d305b7d839963[] = {0, 2, 1};
+static const uint16_t i_d85d305b7d839963[] = {0, 1, 2};
+const ::capnp::_::RawSchema s_d85d305b7d839963 = {
+  0xd85d305b7d839963, b_d85d305b7d839963.words, 63, nullptr, m_d85d305b7d839963,
+  0, 3, i_d85d305b7d839963, nullptr, nullptr, { &s_d85d305b7d839963, nullptr, nullptr, 0, 0, nullptr }
+};
+#endif  // !CAPNP_LITE
+static const ::capnp::_::AlignedData<78> b_bfc546f6210ad7ce = {
   {   0,   0,   0,   0,   5,   0,   6,   0,
     206, 215,  10,  33, 246,  70, 197, 191,
      19,   0,   0,   0,   1,   0,   0,   0,
     217, 114,  76,  98,   9, 197,  63, 169,
-      2,   0,   7,   0,   0,   0,   0,   0,
+      3,   0,   7,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
      21,   0,   0,   0,  66,   1,   0,   0,
      37,   0,   0,   0,  23,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
-     49,   0,   0,   0, 119,   0,   0,   0,
+     49,   0,   0,   0, 175,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
      99,  97, 112, 110, 112,  47, 115,  99,
@@ -3008,21 +3171,28 @@ static const ::capnp::_::AlignedData<62> b_bfc546f6210ad7ce = {
       1,   0,   0,   0, 114,   0,   0,   0,
      82, 101, 113, 117, 101, 115, 116, 101,
     100,  70, 105, 108, 101,   0,   0,   0,
-      8,   0,   0,   0,   3,   0,   4,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
+     12,   0,   0,   0,   3,   0,   4,   0,
+      1,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   1,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
-     41,   0,   0,   0,  50,   0,   0,   0,
+     69,   0,   0,   0,  50,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
-     36,   0,   0,   0,   3,   0,   1,   0,
-     64,   0,   0,   0,   2,   0,   1,   0,
-      1,   0,   0,   0,   1,   0,   0,   0,
+     64,   0,   0,   0,   3,   0,   1,   0,
+     92,   0,   0,   0,   2,   0,   1,   0,
+      2,   0,   0,   0,   1,   0,   0,   0,
       0,   0,   1,   0,   1,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
-     61,   0,   0,   0, 122,   0,   0,   0,
+     89,   0,   0,   0, 122,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
-     60,   0,   0,   0,   3,   0,   1,   0,
-     88,   0,   0,   0,   2,   0,   1,   0,
+     88,   0,   0,   0,   3,   0,   1,   0,
+    116,   0,   0,   0,   2,   0,   1,   0,
+      0,   0,   0,   0,   2,   0,   0,   0,
+      0,   0,   1,   0,   2,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    113,   0,   0,   0, 106,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+    112,   0,   0,   0,   3,   0,   1,   0,
+    124,   0,   0,   0,   2,   0,   1,   0,
     110, 111, 100, 101, 115,   0,   0,   0,
      14,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
@@ -3047,19 +3217,29 @@ static const ::capnp::_::AlignedData<62> b_bfc546f6210ad7ce = {
       0,   0,   0,   0,   0,   0,   0,   0,
      14,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     99,  97, 112, 110, 112,  86, 101, 114,
+    115, 105, 111, 110,   0,   0,   0,   0,
+     16,   0,   0,   0,   0,   0,   0,   0,
+     99, 153, 131, 125,  91,  48,  93, 216,
+      0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
+     16,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0,   0,   0,   0,   0, }
 };
 ::capnp::word const* const bp_bfc546f6210ad7ce = b_bfc546f6210ad7ce.words;
 #if !CAPNP_LITE
 static const ::capnp::_::RawSchema* const d_bfc546f6210ad7ce[] = {
   &s_cfea0eb02e810062,
+  &s_d85d305b7d839963,
   &s_e682ab4cf923a417,
 };
-static const uint16_t m_bfc546f6210ad7ce[] = {0, 1};
-static const uint16_t i_bfc546f6210ad7ce[] = {0, 1};
+static const uint16_t m_bfc546f6210ad7ce[] = {2, 0, 1};
+static const uint16_t i_bfc546f6210ad7ce[] = {0, 1, 2};
 const ::capnp::_::RawSchema s_bfc546f6210ad7ce = {
-  0xbfc546f6210ad7ce, b_bfc546f6210ad7ce.words, 62, d_bfc546f6210ad7ce, m_bfc546f6210ad7ce,
-  2, 2, i_bfc546f6210ad7ce, nullptr, nullptr, { &s_bfc546f6210ad7ce, nullptr, nullptr, 0, 0, nullptr }
+  0xbfc546f6210ad7ce, b_bfc546f6210ad7ce.words, 78, d_bfc546f6210ad7ce, m_bfc546f6210ad7ce,
+  3, 3, i_bfc546f6210ad7ce, nullptr, nullptr, { &s_bfc546f6210ad7ce, nullptr, nullptr, 0, 0, nullptr }
 };
 #endif  // !CAPNP_LITE
 static const ::capnp::_::AlignedData<74> b_cfea0eb02e810062 = {
@@ -3222,347 +3402,270 @@ namespace capnp {
 namespace schema {
 
 // Node
-#ifndef _MSC_VER
 constexpr uint16_t Node::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Node::Parameter
-#ifndef _MSC_VER
 constexpr uint16_t Node::Parameter::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::Parameter::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::Parameter::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::Parameter::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::Parameter::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Node::NestedNode
-#ifndef _MSC_VER
 constexpr uint16_t Node::NestedNode::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::NestedNode::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::NestedNode::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::NestedNode::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::NestedNode::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Node::Struct
-#ifndef _MSC_VER
 constexpr uint16_t Node::Struct::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::Struct::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::Struct::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::Struct::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::Struct::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Node::Enum
-#ifndef _MSC_VER
 constexpr uint16_t Node::Enum::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::Enum::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::Enum::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::Enum::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::Enum::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Node::Interface
-#ifndef _MSC_VER
 constexpr uint16_t Node::Interface::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::Interface::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::Interface::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::Interface::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::Interface::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Node::Const
-#ifndef _MSC_VER
 constexpr uint16_t Node::Const::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::Const::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::Const::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::Const::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::Const::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Node::Annotation
-#ifndef _MSC_VER
 constexpr uint16_t Node::Annotation::_capnpPrivate::dataWordSize;
 constexpr uint16_t Node::Annotation::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Node::Annotation::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Node::Annotation::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Node::Annotation::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Field
-#ifndef _MSC_VER
 constexpr uint16_t Field::_capnpPrivate::dataWordSize;
 constexpr uint16_t Field::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Field::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Field::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Field::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 #ifndef _MSC_VER
 constexpr  ::uint16_t Field::NO_DISCRIMINANT;
 #endif
 // Field::Slot
-#ifndef _MSC_VER
 constexpr uint16_t Field::Slot::_capnpPrivate::dataWordSize;
 constexpr uint16_t Field::Slot::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Field::Slot::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Field::Slot::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Field::Slot::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Field::Group
-#ifndef _MSC_VER
 constexpr uint16_t Field::Group::_capnpPrivate::dataWordSize;
 constexpr uint16_t Field::Group::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Field::Group::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Field::Group::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Field::Group::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Field::Ordinal
-#ifndef _MSC_VER
 constexpr uint16_t Field::Ordinal::_capnpPrivate::dataWordSize;
 constexpr uint16_t Field::Ordinal::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Field::Ordinal::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Field::Ordinal::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Field::Ordinal::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Enumerant
-#ifndef _MSC_VER
 constexpr uint16_t Enumerant::_capnpPrivate::dataWordSize;
 constexpr uint16_t Enumerant::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Enumerant::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Enumerant::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Enumerant::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Superclass
-#ifndef _MSC_VER
 constexpr uint16_t Superclass::_capnpPrivate::dataWordSize;
 constexpr uint16_t Superclass::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Superclass::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Superclass::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Superclass::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Method
-#ifndef _MSC_VER
 constexpr uint16_t Method::_capnpPrivate::dataWordSize;
 constexpr uint16_t Method::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Method::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Method::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Method::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Type
-#ifndef _MSC_VER
 constexpr uint16_t Type::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Type::List
-#ifndef _MSC_VER
 constexpr uint16_t Type::List::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::List::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::List::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::List::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::List::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Type::Enum
-#ifndef _MSC_VER
 constexpr uint16_t Type::Enum::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::Enum::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::Enum::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::Enum::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::Enum::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Type::Struct
-#ifndef _MSC_VER
 constexpr uint16_t Type::Struct::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::Struct::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::Struct::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::Struct::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::Struct::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Type::Interface
-#ifndef _MSC_VER
 constexpr uint16_t Type::Interface::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::Interface::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::Interface::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::Interface::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::Interface::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Type::AnyPointer
-#ifndef _MSC_VER
 constexpr uint16_t Type::AnyPointer::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::AnyPointer::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::AnyPointer::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::AnyPointer::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::AnyPointer::_capnpPrivate::brand;
+#endif  // !CAPNP_LITE
+
+// Type::AnyPointer::Unconstrained
+constexpr uint16_t Type::AnyPointer::Unconstrained::_capnpPrivate::dataWordSize;
+constexpr uint16_t Type::AnyPointer::Unconstrained::_capnpPrivate::pointerCount;
+#if !CAPNP_LITE
+constexpr ::capnp::Kind Type::AnyPointer::Unconstrained::_capnpPrivate::kind;
+constexpr ::capnp::_::RawSchema const* Type::AnyPointer::Unconstrained::_capnpPrivate::schema;
 #endif  // !CAPNP_LITE
 
 // Type::AnyPointer::Parameter
-#ifndef _MSC_VER
 constexpr uint16_t Type::AnyPointer::Parameter::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::AnyPointer::Parameter::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::AnyPointer::Parameter::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::AnyPointer::Parameter::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::AnyPointer::Parameter::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Type::AnyPointer::ImplicitMethodParameter
-#ifndef _MSC_VER
 constexpr uint16_t Type::AnyPointer::ImplicitMethodParameter::_capnpPrivate::dataWordSize;
 constexpr uint16_t Type::AnyPointer::ImplicitMethodParameter::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Type::AnyPointer::ImplicitMethodParameter::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Type::AnyPointer::ImplicitMethodParameter::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Type::AnyPointer::ImplicitMethodParameter::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Brand
-#ifndef _MSC_VER
 constexpr uint16_t Brand::_capnpPrivate::dataWordSize;
 constexpr uint16_t Brand::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Brand::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Brand::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Brand::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Brand::Scope
-#ifndef _MSC_VER
 constexpr uint16_t Brand::Scope::_capnpPrivate::dataWordSize;
 constexpr uint16_t Brand::Scope::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Brand::Scope::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Brand::Scope::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Brand::Scope::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Brand::Binding
-#ifndef _MSC_VER
 constexpr uint16_t Brand::Binding::_capnpPrivate::dataWordSize;
 constexpr uint16_t Brand::Binding::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Brand::Binding::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Brand::Binding::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Brand::Binding::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Value
-#ifndef _MSC_VER
 constexpr uint16_t Value::_capnpPrivate::dataWordSize;
 constexpr uint16_t Value::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Value::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Value::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Value::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // Annotation
-#ifndef _MSC_VER
 constexpr uint16_t Annotation::_capnpPrivate::dataWordSize;
 constexpr uint16_t Annotation::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind Annotation::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* Annotation::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* Annotation::_capnpPrivate::brand;
+#endif  // !CAPNP_LITE
+
+// CapnpVersion
+constexpr uint16_t CapnpVersion::_capnpPrivate::dataWordSize;
+constexpr uint16_t CapnpVersion::_capnpPrivate::pointerCount;
+#if !CAPNP_LITE
+constexpr ::capnp::Kind CapnpVersion::_capnpPrivate::kind;
+constexpr ::capnp::_::RawSchema const* CapnpVersion::_capnpPrivate::schema;
 #endif  // !CAPNP_LITE
 
 // CodeGeneratorRequest
-#ifndef _MSC_VER
 constexpr uint16_t CodeGeneratorRequest::_capnpPrivate::dataWordSize;
 constexpr uint16_t CodeGeneratorRequest::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind CodeGeneratorRequest::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* CodeGeneratorRequest::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* CodeGeneratorRequest::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // CodeGeneratorRequest::RequestedFile
-#ifndef _MSC_VER
 constexpr uint16_t CodeGeneratorRequest::RequestedFile::_capnpPrivate::dataWordSize;
 constexpr uint16_t CodeGeneratorRequest::RequestedFile::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind CodeGeneratorRequest::RequestedFile::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* CodeGeneratorRequest::RequestedFile::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* CodeGeneratorRequest::RequestedFile::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 // CodeGeneratorRequest::RequestedFile::Import
-#ifndef _MSC_VER
 constexpr uint16_t CodeGeneratorRequest::RequestedFile::Import::_capnpPrivate::dataWordSize;
 constexpr uint16_t CodeGeneratorRequest::RequestedFile::Import::_capnpPrivate::pointerCount;
-#endif
 #if !CAPNP_LITE
 constexpr ::capnp::Kind CodeGeneratorRequest::RequestedFile::Import::_capnpPrivate::kind;
 constexpr ::capnp::_::RawSchema const* CodeGeneratorRequest::RequestedFile::Import::_capnpPrivate::schema;
-constexpr ::capnp::_::RawBrandedSchema const* CodeGeneratorRequest::RequestedFile::Import::_capnpPrivate::brand;
 #endif  // !CAPNP_LITE
 
 

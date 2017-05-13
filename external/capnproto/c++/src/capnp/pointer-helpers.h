@@ -22,7 +22,7 @@
 #ifndef CAPNP_POINTER_HELPERS_H_
 #define CAPNP_POINTER_HELPERS_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -47,6 +47,9 @@ struct PointerHelpers<T, Kind::STRUCT> {
   }
   static inline void set(PointerBuilder builder, typename T::Reader value) {
     builder.setStruct(value._reader);
+  }
+  static inline void setCanonical(PointerBuilder builder, typename T::Reader value) {
+    builder.setStruct(value._reader, true);
   }
   static inline typename T::Builder init(PointerBuilder builder) {
     return typename T::Builder(builder.initStruct(structSize<T>()));
@@ -78,6 +81,9 @@ struct PointerHelpers<List<T>, Kind::LIST> {
   static inline void set(PointerBuilder builder, typename List<T>::Reader value) {
     builder.setList(value.reader);
   }
+  static inline void setCanonical(PointerBuilder builder, typename List<T>::Reader value) {
+    builder.setList(value.reader, true);
+  }
   static void set(PointerBuilder builder, kj::ArrayPtr<const ReaderFor<T>> value) {
     auto l = init(builder, value.size());
     uint i = 0;
@@ -107,18 +113,21 @@ struct PointerHelpers<T, Kind::BLOB> {
   static inline typename T::Reader get(PointerReader reader,
                                        const void* defaultValue = nullptr,
                                        uint defaultBytes = 0) {
-    return reader.getBlob<T>(defaultValue, defaultBytes * BYTES);
+    return reader.getBlob<T>(defaultValue, bounded(defaultBytes) * BYTES);
   }
   static inline typename T::Builder get(PointerBuilder builder,
                                         const void* defaultValue = nullptr,
                                         uint defaultBytes = 0) {
-    return builder.getBlob<T>(defaultValue, defaultBytes * BYTES);
+    return builder.getBlob<T>(defaultValue, bounded(defaultBytes) * BYTES);
   }
   static inline void set(PointerBuilder builder, typename T::Reader value) {
     builder.setBlob<T>(value);
   }
+  static inline void setCanonical(PointerBuilder builder, typename T::Reader value) {
+    builder.setBlob<T>(value);
+  }
   static inline typename T::Builder init(PointerBuilder builder, uint size) {
-    return builder.initBlob<T>(size * BYTES);
+    return builder.initBlob<T>(bounded(size) * BYTES);
   }
   static inline void adopt(PointerBuilder builder, Orphan<T>&& value) {
     builder.adopt(kj::mv(value.builder));

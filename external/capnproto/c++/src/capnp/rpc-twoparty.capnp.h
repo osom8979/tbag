@@ -6,7 +6,7 @@
 
 #include <capnp/generated-header-support.h>
 
-#if CAPNP_VERSION != 5003
+#if CAPNP_VERSION != 6000
 #error "Version mismatch between generated code and library headers.  You must use the same version of the Cap'n Proto compiler and library."
 #endif
 
@@ -46,7 +46,7 @@ struct VatId {
   struct _capnpPrivate {
     CAPNP_DECLARE_STRUCT_HEADER(d20b909fee733a8e, 1, 0)
     #if !CAPNP_LITE
-    static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
 };
@@ -61,7 +61,7 @@ struct ProvisionId {
   struct _capnpPrivate {
     CAPNP_DECLARE_STRUCT_HEADER(b88d09a9c5f39817, 1, 0)
     #if !CAPNP_LITE
-    static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
 };
@@ -76,7 +76,7 @@ struct RecipientId {
   struct _capnpPrivate {
     CAPNP_DECLARE_STRUCT_HEADER(89f389b6fd4082c1, 0, 0)
     #if !CAPNP_LITE
-    static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
 };
@@ -91,7 +91,7 @@ struct ThirdPartyCapId {
   struct _capnpPrivate {
     CAPNP_DECLARE_STRUCT_HEADER(b47f4979672cb59d, 0, 0)
     #if !CAPNP_LITE
-    static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
 };
@@ -106,7 +106,7 @@ struct JoinKeyPart {
   struct _capnpPrivate {
     CAPNP_DECLARE_STRUCT_HEADER(95b29059097fca83, 1, 0)
     #if !CAPNP_LITE
-    static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
 };
@@ -121,7 +121,7 @@ struct JoinResult {
   struct _capnpPrivate {
     CAPNP_DECLARE_STRUCT_HEADER(9d263a3630b7ebee, 1, 1)
     #if !CAPNP_LITE
-    static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
 };
@@ -141,7 +141,7 @@ public:
 
 #if !CAPNP_LITE
   inline ::kj::StringTree toString() const {
-    return ::capnp::_::structString(_reader, *_capnpPrivate::brand);
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
   }
 #endif  // !CAPNP_LITE
 
@@ -217,7 +217,7 @@ public:
 
 #if !CAPNP_LITE
   inline ::kj::StringTree toString() const {
-    return ::capnp::_::structString(_reader, *_capnpPrivate::brand);
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
   }
 #endif  // !CAPNP_LITE
 
@@ -293,7 +293,7 @@ public:
 
 #if !CAPNP_LITE
   inline ::kj::StringTree toString() const {
-    return ::capnp::_::structString(_reader, *_capnpPrivate::brand);
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
   }
 #endif  // !CAPNP_LITE
 
@@ -364,7 +364,7 @@ public:
 
 #if !CAPNP_LITE
   inline ::kj::StringTree toString() const {
-    return ::capnp::_::structString(_reader, *_capnpPrivate::brand);
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
   }
 #endif  // !CAPNP_LITE
 
@@ -435,7 +435,7 @@ public:
 
 #if !CAPNP_LITE
   inline ::kj::StringTree toString() const {
-    return ::capnp::_::structString(_reader, *_capnpPrivate::brand);
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
   }
 #endif  // !CAPNP_LITE
 
@@ -521,7 +521,7 @@ public:
 
 #if !CAPNP_LITE
   inline ::kj::StringTree toString() const {
-    return ::capnp::_::structString(_reader, *_capnpPrivate::brand);
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
   }
 #endif  // !CAPNP_LITE
 
@@ -600,119 +600,121 @@ private:
 
 inline  ::capnp::rpc::twoparty::Side VatId::Reader::getSide() const {
   return _reader.getDataField< ::capnp::rpc::twoparty::Side>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 
 inline  ::capnp::rpc::twoparty::Side VatId::Builder::getSide() {
   return _builder.getDataField< ::capnp::rpc::twoparty::Side>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 inline void VatId::Builder::setSide( ::capnp::rpc::twoparty::Side value) {
   _builder.setDataField< ::capnp::rpc::twoparty::Side>(
-      0 * ::capnp::ELEMENTS, value);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint32_t ProvisionId::Reader::getJoinId() const {
   return _reader.getDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 
 inline  ::uint32_t ProvisionId::Builder::getJoinId() {
   return _builder.getDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 inline void ProvisionId::Builder::setJoinId( ::uint32_t value) {
   _builder.setDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS, value);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint32_t JoinKeyPart::Reader::getJoinId() const {
   return _reader.getDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 
 inline  ::uint32_t JoinKeyPart::Builder::getJoinId() {
   return _builder.getDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 inline void JoinKeyPart::Builder::setJoinId( ::uint32_t value) {
   _builder.setDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS, value);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint16_t JoinKeyPart::Reader::getPartCount() const {
   return _reader.getDataField< ::uint16_t>(
-      2 * ::capnp::ELEMENTS);
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
 }
 
 inline  ::uint16_t JoinKeyPart::Builder::getPartCount() {
   return _builder.getDataField< ::uint16_t>(
-      2 * ::capnp::ELEMENTS);
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
 }
 inline void JoinKeyPart::Builder::setPartCount( ::uint16_t value) {
   _builder.setDataField< ::uint16_t>(
-      2 * ::capnp::ELEMENTS, value);
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint16_t JoinKeyPart::Reader::getPartNum() const {
   return _reader.getDataField< ::uint16_t>(
-      3 * ::capnp::ELEMENTS);
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
 }
 
 inline  ::uint16_t JoinKeyPart::Builder::getPartNum() {
   return _builder.getDataField< ::uint16_t>(
-      3 * ::capnp::ELEMENTS);
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
 }
 inline void JoinKeyPart::Builder::setPartNum( ::uint16_t value) {
   _builder.setDataField< ::uint16_t>(
-      3 * ::capnp::ELEMENTS, value);
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint32_t JoinResult::Reader::getJoinId() const {
   return _reader.getDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 
 inline  ::uint32_t JoinResult::Builder::getJoinId() {
   return _builder.getDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 inline void JoinResult::Builder::setJoinId( ::uint32_t value) {
   _builder.setDataField< ::uint32_t>(
-      0 * ::capnp::ELEMENTS, value);
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
 }
 
 inline bool JoinResult::Reader::getSucceeded() const {
   return _reader.getDataField<bool>(
-      32 * ::capnp::ELEMENTS);
+      ::capnp::bounded<32>() * ::capnp::ELEMENTS);
 }
 
 inline bool JoinResult::Builder::getSucceeded() {
   return _builder.getDataField<bool>(
-      32 * ::capnp::ELEMENTS);
+      ::capnp::bounded<32>() * ::capnp::ELEMENTS);
 }
 inline void JoinResult::Builder::setSucceeded(bool value) {
   _builder.setDataField<bool>(
-      32 * ::capnp::ELEMENTS, value);
+      ::capnp::bounded<32>() * ::capnp::ELEMENTS, value);
 }
 
 inline bool JoinResult::Reader::hasCap() const {
-  return !_reader.getPointerField(0 * ::capnp::POINTERS).isNull();
+  return !_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
 }
 inline bool JoinResult::Builder::hasCap() {
-  return !_builder.getPointerField(0 * ::capnp::POINTERS).isNull();
+  return !_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
 }
 inline ::capnp::AnyPointer::Reader JoinResult::Reader::getCap() const {
-  return ::capnp::AnyPointer::Reader(
-      _reader.getPointerField(0 * ::capnp::POINTERS));
+  return ::capnp::AnyPointer::Reader(_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
 }
 inline ::capnp::AnyPointer::Builder JoinResult::Builder::getCap() {
-  return ::capnp::AnyPointer::Builder(
-      _builder.getPointerField(0 * ::capnp::POINTERS));
+  return ::capnp::AnyPointer::Builder(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
 }
 inline ::capnp::AnyPointer::Builder JoinResult::Builder::initCap() {
-  auto result = ::capnp::AnyPointer::Builder(
-      _builder.getPointerField(0 * ::capnp::POINTERS));
+  auto result = ::capnp::AnyPointer::Builder(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
   result.clear();
   return result;
 }

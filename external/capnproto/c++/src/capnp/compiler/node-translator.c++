@@ -21,13 +21,19 @@
 
 #include "node-translator.h"
 #include "parser.h"      // only for generateGroupId()
+#include <capnp/serialize.h>
 #include <kj/debug.h>
 #include <kj/arena.h>
 #include <set>
 #include <map>
+#include <stdlib.h>
 
 namespace capnp {
 namespace compiler {
+
+bool shouldDetectIssue344() {
+  return getenv("CAPNP_IGNORE_ISSUE_344") == nullptr;
+}
 
 class NodeTranslator::StructLayout {
   // Massive, disgusting class which implements the layout algorithm, which decides the offset
@@ -97,7 +103,7 @@ public:
     }
 
     void addHolesAtEnd(UIntType lgSize, UIntType offset,
-                       UIntType limitLgSize = sizeof(holes) / sizeof(holes[0])) {
+                       UIntType limitLgSize = sizeof(HoleSet::holes) / sizeof(HoleSet::holes[0])) {
       // Add new holes of progressively larger sizes in the range [lgSize, limitLgSize) starting
       // from the given offset.  The idea is that you just allocated an lgSize-sized field from
       // an limitLgSize-sized space, such as a newly-added word on the end of the data segment.
@@ -264,7 +270,7 @@ public:
     }
   };
 
-  struct Group: public StructOrGroup {
+  struct Group final: public StructOrGroup {
   public:
     class DataLocationUsage {
     public:
@@ -361,7 +367,7 @@ public:
           }
         } else {
           uint newSize = kj::max(lgSizeUsed, lgSize) + 1;
-          if (tryExpandUsage(group, location, newSize)) {
+          if (tryExpandUsage(group, location, newSize, true)) {
             uint result = KJ_ASSERT_NONNULL(holes.tryAllocate(lgSize));
             uint locationOffset = location.offset << (location.lgSize - lgSize);
             return locationOffset + result;
@@ -375,7 +381,7 @@ public:
                      uint oldLgSize, uint oldOffset, uint expansionFactor) {
         if (oldOffset == 0 && lgSizeUsed == oldLgSize) {
           // This location contains exactly the requested data, so just expand the whole thing.
-          return tryExpandUsage(group, location, oldLgSize + expansionFactor);
+          return tryExpandUsage(group, location, oldLgSize + expansionFactor, false);
         } else {
           // This location contains the requested data plus other stuff.  Therefore the data cannot
           // possibly expand past the end of the space we've already marked used without either
@@ -398,7 +404,8 @@ public:
       // HoleSet are relative to the beginning of this particular data location, not the beginning
       // of the struct.
 
-      bool tryExpandUsage(Group& group, Union::DataLocation& location, uint desiredUsage) {
+      bool tryExpandUsage(Group& group, Union::DataLocation& location, uint desiredUsage,
+                          bool newHoles) {
         if (desiredUsage > location.lgSize) {
           // Need to expand the underlying slot.
           if (!location.tryExpandTo(group.parent, desiredUsage)) {
@@ -407,7 +414,20 @@ public:
         }
 
         // Underlying slot is big enough, so expand our size and update holes.
-        holes.addHolesAtEnd(lgSizeUsed, 1, desiredUsage);
+        if (newHoles) {
+          holes.addHolesAtEnd(lgSizeUsed, 1, desiredUsage);
+        } else if (shouldDetectIssue344()) {
+          // Unfortunately, Cap'n Proto 0.5.x and below would always call addHolesAtEnd(), which
+          // was the wrong thing to do when called from tryExpand(), which itself is only called
+          // in cases involving unions nested in other unions. The bug could lead to multiple
+          // fields in a group incorrectly being assigned overlapping offsets. Although the bug
+          // is now fixed by adding the `newHoles` parameter, this silently breaks
+          // backwards-compatibilty with affected schemas. Therefore, for now, we throw an
+          // exception to alert developers of the problem.
+          //
+          // TODO(cleanup): Once sufficient time has elapsed, remove this assert.
+          KJ_FAIL_ASSERT("Bad news: Cap'n Proto 0.5.x and previous contained a bug which would cause this schema to be compiled incorrectly. Please see: https://github.com/sandstorm-io/capnproto/issues/344");
+        }
         lgSizeUsed = desiredUsage;
         return true;
       }
@@ -427,15 +447,25 @@ public:
     inline Group(Union& parent): parent(parent) {}
     KJ_DISALLOW_COPY(Group);
 
-    void addVoid() override {
+    void addMember() {
       if (!hasMembers) {
         hasMembers = true;
         parent.newGroupAddingFirstMember();
       }
     }
 
+    void addVoid() override {
+      addMember();
+
+      // Make sure that if this is a member of a union which is in turn a member of another union,
+      // that we let the outer union know that a field is being added, even though it is a
+      // zero-size field. This is important because the union needs to allocate its discriminant
+      // just before its second member is added.
+      parent.parent.addVoid();
+    }
+
     uint addData(uint lgSize) override {
-      addVoid();
+      addMember();
 
       uint bestSize = kj::maxValue;
       kj::Maybe<uint> bestLocation = nullptr;
@@ -476,7 +506,7 @@ public:
     }
 
     uint addPointer() override {
-      addVoid();
+      addMember();
 
       if (parentPointerLocationUsage < parent.pointerLocations.size()) {
         return parent.pointerLocations[parentPointerLocationUsage++];
@@ -487,10 +517,25 @@ public:
     }
 
     bool tryExpandData(uint oldLgSize, uint oldOffset, uint expansionFactor) override {
+      bool mustFail = false;
       if (oldLgSize + expansionFactor > 6 ||
           (oldOffset & ((1 << expansionFactor) - 1)) != 0) {
         // Expansion is not possible because the new size is too large or the offset is not
         // properly-aligned.
+
+        // Unfortunately, Cap'n Proto 0.5.x and prior forgot to "return false" here, instead
+        // continuing to execute the rest of the method. In most cases, the method failed later
+        // on, causing no harm. But, in cases where the method later succeeded, it probably
+        // led to bogus layouts. We cannot simply add the return statement now as this would
+        // silently break backwards-compatibility with affected schemas. Instead, we detect the
+        // problem and throw an exception.
+        //
+        // TODO(cleanup): Once sufficient time has elapsed, switch to "return false;" here.
+        if (shouldDetectIssue344()) {
+          mustFail = true;
+        } else {
+          return false;
+        }
       }
 
       for (uint i = 0; i < parentDataLocationUsage.size(); i++) {
@@ -504,7 +549,12 @@ public:
           uint localOldOffset = oldOffset - (location.offset << (location.lgSize - oldLgSize));
 
           // Try to expand.
-          return usage.tryExpand(*this, location, oldLgSize, localOldOffset, expansionFactor);
+          bool result = usage.tryExpand(
+              *this, location, oldLgSize, localOldOffset, expansionFactor);
+          if (mustFail && result) {
+            KJ_FAIL_ASSERT("Bad news: Cap'n Proto 0.5.x and previous contained a bug which would cause this schema to be compiled incorrectly. Please see: https://github.com/sandstorm-io/capnproto/issues/344");
+          }
+          return result;
         }
       }
 
@@ -604,12 +654,12 @@ private:
 
 class NodeTranslator::BrandScope: public kj::Refcounted {
   // Tracks the brand parameter bindings affecting the current scope. For example, if we are
-  // interpreting the type expression "Foo(Text).Bar", we would start with the curernt scopes
+  // interpreting the type expression "Foo(Text).Bar", we would start with the current scopes
   // BrandScope, create a new child BrandScope representing "Foo", add the "(Text)" parameter
   // bindings to it, then create a further child scope for "Bar". Thus the BrandScope for Bar
   // knows that Foo's parameter list has been bound to "(Text)".
   //
-  // TODO(cleaup): This is too complicated to live here. We should refactor this class and
+  // TODO(cleanup): This is too complicated to live here. We should refactor this class and
   //   BrandedDecl out into their own file, independent of NodeTranslator.
 
 public:
@@ -827,7 +877,7 @@ kj::Maybe<NodeTranslator::BrandedDecl> NodeTranslator::BrandedDecl::applyParams(
     return nullptr;
   } else {
     return brand->setParams(kj::mv(params), body.get<Resolver::ResolvedDecl>().kind, subSource)
-        .map([&](kj::Own<BrandScope>& scope) {
+        .map([&](kj::Own<BrandScope>&& scope) {
       BrandedDecl result = *this;
       result.brand = kj::mv(scope);
       result.source = subSource;
@@ -948,7 +998,16 @@ bool NodeTranslator::BrandedDecl::compileAsType(
             "inconvenience, and thanks for being an early adopter.  :)");
         // no break
       case Declaration::BUILTIN_ANY_POINTER:
-        target.initAnyPointer().setUnconstrained();
+        target.initAnyPointer().initUnconstrained().setAnyKind();
+        return true;
+      case Declaration::BUILTIN_ANY_STRUCT:
+        target.initAnyPointer().initUnconstrained().setStruct();
+        return true;
+      case Declaration::BUILTIN_ANY_LIST:
+        target.initAnyPointer().initUnconstrained().setList();
+        return true;
+      case Declaration::BUILTIN_CAPABILITY:
+        target.initAnyPointer().initUnconstrained().setCapability();
         return true;
 
       case Declaration::FILE:
@@ -1196,6 +1255,7 @@ kj::Maybe<NodeTranslator::BrandedDecl> NodeTranslator::BrandScope::compileDeclEx
     case Expression::BINARY:
     case Expression::LIST:
     case Expression::TUPLE:
+    case Expression::EMBED:
       errorReporter.addErrorOn(source, "Expected name.");
       return nullptr;
 
@@ -1237,7 +1297,7 @@ kj::Maybe<NodeTranslator::BrandedDecl> NodeTranslator::BrandScope::compileDeclEx
     case Expression::IMPORT: {
       auto filename = source.getImport();
       KJ_IF_MAYBE(decl, resolver.resolveImport(filename.getValue())) {
-        // Import is always a root scopee, so create a fresh BrandScope.
+        // Import is always a root scope, so create a fresh BrandScope.
         return BrandedDecl(*decl, kj::refcounted<BrandScope>(
             errorReporter, decl->id, decl->genericParamCount, *decl->resolver), source);
       } else {
@@ -1409,6 +1469,22 @@ void NodeTranslator::compileNode(Declaration::Reader decl, schema::Node::Builder
   builder.adoptAnnotations(compileAnnotationApplications(decl.getAnnotations(), targetsFlagName));
 }
 
+static kj::StringPtr getExpressionTargetName(Expression::Reader exp) {
+  kj::StringPtr targetName;
+  switch (exp.which()) {
+    case Expression::ABSOLUTE_NAME:
+      return exp.getAbsoluteName().getValue();
+    case Expression::RELATIVE_NAME:
+      return exp.getRelativeName().getValue();
+    case Expression::APPLICATION:
+      return getExpressionTargetName(exp.getApplication().getFunction());
+    case Expression::MEMBER:
+      return exp.getMember().getName().getValue();
+    default:
+      return nullptr;
+  }
+}
+
 void NodeTranslator::DuplicateNameDetector::check(
     List<Declaration>::Reader nestedDecls, Declaration::Which parentKind) {
   for (auto decl: nestedDecls) {
@@ -1431,7 +1507,25 @@ void NodeTranslator::DuplicateNameDetector::check(
       }
 
       switch (decl.which()) {
-        case Declaration::USING:
+        case Declaration::USING: {
+          kj::StringPtr targetName = getExpressionTargetName(decl.getUsing().getTarget());
+          if (targetName.size() > 0 && targetName[0] >= 'a' && targetName[0] <= 'z') {
+            // Target starts with lower-case letter, so alias should too.
+            if (nameText.size() > 0 && (nameText[0] < 'a' || nameText[0] > 'z')) {
+              errorReporter.addErrorOn(name,
+                  "Non-type names must begin with a lower-case letter.");
+            }
+          } else {
+            // Target starts with capital or is not named (probably, an import). Require
+            // capitalization.
+            if (nameText.size() > 0 && (nameText[0] < 'A' || nameText[0] > 'Z')) {
+              errorReporter.addErrorOn(name,
+                  "Type names must begin with a capital letter.");
+            }
+          }
+          break;
+        }
+
         case Declaration::ENUM:
         case Declaration::STRUCT:
         case Declaration::INTERFACE:
@@ -1991,6 +2085,10 @@ private:
     for (auto& entry: membersByOrdinal) {
       MemberInfo& member = *entry.second;
 
+      // Make sure the exceptions added relating to
+      // https://github.com/sandstorm-io/capnproto/issues/344 identify the affected field.
+      KJ_CONTEXT(member.name);
+
       if (member.declId.isOrdinal()) {
         dupDetector.check(member.declId.getOrdinal());
       }
@@ -2004,8 +2102,28 @@ private:
           auto typeBuilder = slot.initType();
           if (translator.compileType(member.fieldType, typeBuilder, implicitMethodParams)) {
             if (member.hasDefaultValue) {
-              translator.compileBootstrapValue(member.fieldDefaultValue,
-                                               typeBuilder, slot.initDefaultValue());
+              if (member.isParam &&
+                  member.fieldDefaultValue.isRelativeName() &&
+                  member.fieldDefaultValue.getRelativeName().getValue() == "null") {
+                // special case: parameter set null
+                switch (typeBuilder.which()) {
+                  case schema::Type::TEXT:
+                  case schema::Type::DATA:
+                  case schema::Type::LIST:
+                  case schema::Type::STRUCT:
+                  case schema::Type::INTERFACE:
+                  case schema::Type::ANY_POINTER:
+                    break;
+                  default:
+                    errorReporter.addErrorOn(member.fieldDefaultValue.getRelativeName(),
+                        "Only pointer parameters can declare their default as 'null'.");
+                    break;
+                }
+                translator.compileDefaultDefaultValue(typeBuilder, slot.initDefaultValue());
+              } else {
+                translator.compileBootstrapValue(member.fieldDefaultValue,
+                                                 typeBuilder, slot.initDefaultValue());
+              }
               slot.setHadExplicitDefault(true);
             } else {
               translator.compileDefaultDefaultValue(typeBuilder, slot.initDefaultValue());
@@ -2216,7 +2334,7 @@ template <typename InitBrandFunc>
 uint64_t NodeTranslator::compileParamList(
     kj::StringPtr methodName, uint16_t ordinal, bool isResults,
     Declaration::ParamList::Reader paramList,
-    List<Declaration::BrandParameter>::Reader implicitParams,
+    typename List<Declaration::BrandParameter>::Reader implicitParams,
     InitBrandFunc&& initBrand) {
   switch (paramList.which()) {
     case Declaration::ParamList::NAMED_LIST: {
@@ -2369,6 +2487,8 @@ static kj::StringTree expressionStringTree(Expression::Reader exp) {
       return kj::strTree('.', exp.getAbsoluteName().getValue());
     case Expression::IMPORT:
       return kj::strTree("import ", stringLiteral(exp.getImport().getValue()));
+    case Expression::EMBED:
+      return kj::strTree("embed ", stringLiteral(exp.getEmbed().getValue()));
 
     case Expression::LIST: {
       auto list = exp.getList();
@@ -2492,6 +2612,10 @@ void NodeTranslator::compileValue(Expression::Reader source, schema::Type::Reade
 
     kj::Maybe<DynamicValue::Reader> resolveConstant(Expression::Reader name) override {
       return translator.readConstant(name, isBootstrap);
+    }
+
+    kj::Maybe<kj::Array<const byte>> readEmbed(LocatedText::Reader filename) override {
+      return translator.readEmbed(filename);
     }
 
   private:
@@ -2622,6 +2746,15 @@ kj::Maybe<Orphan<DynamicValue>> ValueTranslator::compileValue(Expression::Reader
         if (result.getReader().as<DynamicList>().getSchema() == type.asList()) {
           return kj::mv(result);
         }
+      } else if (type.isAnyPointer()) {
+        switch (type.whichAnyPointerKind()) {
+          case schema::Type::AnyPointer::Unconstrained::ANY_KIND:
+          case schema::Type::AnyPointer::Unconstrained::LIST:
+            return kj::mv(result);
+          case schema::Type::AnyPointer::Unconstrained::STRUCT:
+          case schema::Type::AnyPointer::Unconstrained::CAPABILITY:
+            break;
+        }
       }
       break;
 
@@ -2637,6 +2770,15 @@ kj::Maybe<Orphan<DynamicValue>> ValueTranslator::compileValue(Expression::Reader
       if (type.isStruct()) {
         if (result.getReader().as<DynamicStruct>().getSchema() == type.asStruct()) {
           return kj::mv(result);
+        }
+      } else if (type.isAnyPointer()) {
+        switch (type.whichAnyPointerKind()) {
+          case schema::Type::AnyPointer::Unconstrained::ANY_KIND:
+          case schema::Type::AnyPointer::Unconstrained::STRUCT:
+            return kj::mv(result);
+          case schema::Type::AnyPointer::Unconstrained::LIST:
+          case schema::Type::AnyPointer::Unconstrained::CAPABILITY:
+            break;
         }
       }
       break;
@@ -2693,6 +2835,62 @@ Orphan<DynamicValue> ValueTranslator::compileValueInner(Expression::Reader src, 
     case Expression::MEMBER:
       KJ_IF_MAYBE(constValue, resolver.resolveConstant(src)) {
         return orphanage.newOrphanCopy(*constValue);
+      } else {
+        return nullptr;
+      }
+
+    case Expression::EMBED:
+      KJ_IF_MAYBE(data, resolver.readEmbed(src.getEmbed())) {
+        switch (type.which()) {
+          case schema::Type::TEXT: {
+            // Sadly, we need to make a copy to add the NUL terminator.
+            auto text = orphanage.newOrphan<Text>(data->size());
+            memcpy(text.get().begin(), data->begin(), data->size());
+            return kj::mv(text);
+          }
+          case schema::Type::DATA:
+            // TODO(perf): It would arguably be neat to use orphanage.referenceExternalData(),
+            //   since typically the data is mmap()ed and this would avoid forcing a large file
+            //   to become memory-resident. However, we'd have to figure out who should own the
+            //   Array<byte>. Also, we'd have to deal with the possibility of misaligned data --
+            //   though arguably in that case we know it's not mmap()ed so whatever. One more
+            //   thing: it would be neat to be able to reference text blobs this way too, if only
+            //   we could rely on the assumption that as long as the data doesn't end on a page
+            //   boundary, it will be zero-padded, thus giving us our NUL terminator (4095/4096 of
+            //   the time), but this seems to require documenting constraints on the underlying
+            //   file-reading interfaces. Hm.
+            return orphanage.newOrphanCopy(Data::Reader(*data));
+          case schema::Type::STRUCT: {
+            // We will almost certainly
+            if (data->size() % sizeof(word) != 0) {
+              errorReporter.addErrorOn(src,
+                  "Embedded file is not a valid Cap'n Proto message.");
+              return nullptr;
+            }
+            kj::Array<word> copy;
+            kj::ArrayPtr<const word> words;
+            if (reinterpret_cast<uintptr_t>(data->begin()) % sizeof(void*) == 0) {
+              // Hooray, data is aligned.
+              words = kj::ArrayPtr<const word>(
+                  reinterpret_cast<const word*>(data->begin()),
+                  data->size() / sizeof(word));
+            } else {
+              // Ugh, data not aligned. Make a copy.
+              copy = kj::heapArray<word>(data->size() / sizeof(word));
+              memcpy(copy.begin(), data->begin(), data->size());
+              words = copy;
+            }
+            ReaderOptions options;
+            options.traversalLimitInWords = kj::maxValue;
+            options.nestingLimit = kj::maxValue;
+            FlatArrayMessageReader reader(words, options);
+            return orphanage.newOrphanCopy(reader.getRoot<DynamicStruct>(type.asStruct()));
+          }
+          default:
+            errorReporter.addErrorOn(src,
+                "Embeds can only be used when Text, Data, or a struct is expected.");
+            return nullptr;
+        }
       } else {
         return nullptr;
       }
@@ -2926,6 +3124,16 @@ kj::Maybe<DynamicValue::Reader> NodeTranslator::readConstant(
   }
 
   return constValue;
+}
+
+kj::Maybe<kj::Array<const byte>> NodeTranslator::readEmbed(LocatedText::Reader filename) {
+  KJ_IF_MAYBE(data, resolver.readEmbed(filename.getValue())) {
+    return kj::mv(*data);
+  } else {
+    errorReporter.addErrorOn(filename,
+        kj::str("Couldn't read file for embed: ", filename.getValue()));
+    return nullptr;
+  }
 }
 
 Orphan<List<schema::Annotation>> NodeTranslator::compileAnnotationApplications(

@@ -49,7 +49,7 @@ new version of a well-supported compiler. The minimum versions are:
 
 * GCC 4.8
 * Clang 3.3
-* Visual C++ 2015 (lite mode only)
+* Visual C++ 2015
 
 If your system's default compiler is older that the above, you will need to install a newer
 compiler and set the `CXX` environment variable before trying to build Cap'n Proto. For example,
@@ -64,12 +64,13 @@ as well as on Windows. We test every Cap'n Proto release on the following platfo
 * Linux
 * Mac OS X
 * Windows - Cygwin
-* Windows - MinGW-w64 (lite mode and compiler binary only)
-* Windows - Visual C++ (lite mode only)
+* Windows - MinGW-w64
+* Windows - Visual C++
 
-**Windows users:** As of Visual Studio 2015, Visual C++ still does not support enough of C++11 to
-compile Cap'n Proto's reflection or RPC APIs. "Cap'n Proto Lite" omits these features from the
-library, giving you only the core serialization based on generated code.
+**Windows users:** Cap'n Proto requires Visual Studio 2015 Update 3 or newer. All runtime features
+of Cap'n Proto -- including serialization and RPC -- are now supported. (It is still not possible to
+compile the code generator tool, capnp.exe, using Visual Studio; however, a precompiled copy built
+with MinGW is provided in the release zip for your convenience.)
 
 **Mac OS X users:** You must use at least Xcode 5 with the Xcode command-line
 tools (Xcode menu > Preferences > Downloads).  Alternatively, the command-line tools
@@ -83,9 +84,9 @@ package from [Apple](https://developer.apple.com/downloads/) or compiler builds 
 
 You may download and install the release version of Cap'n Proto like so:
 
-<pre><code>curl -O <a href="https://capnproto.org/capnproto-c++-0.5.3.tar.gz">https://capnproto.org/capnproto-c++-0.5.3.tar.gz</a>
-tar zxf capnproto-c++-0.5.3.tar.gz
-cd capnproto-c++-0.5.3
+<pre><code>curl -O <a href="https://capnproto.org/capnproto-c++-0.6.0.tar.gz">https://capnproto.org/capnproto-c++-0.6.0.tar.gz</a>
+tar zxf capnproto-c++-0.6.0.tar.gz
+cd capnproto-c++-0.6.0
 ./configure
 make -j6 check
 sudo make install</code></pre>
@@ -108,13 +109,10 @@ Note: These packages are not maintained by us and are sometimes not up to date w
 If you download directly from Git, you will need to have the GNU autotools --
 [autoconf](http://www.gnu.org/software/autoconf/),
 [automake](http://www.gnu.org/software/automake/), and
-[libtool](http://www.gnu.org/software/libtool/) -- installed.  You will also need Subversion
-installed (in addition to Git) in order to fetch the Google Test sources (done by
-`setup-autotools.sh`).
+[libtool](http://www.gnu.org/software/libtool/) -- installed.
 
     git clone https://github.com/sandstorm-io/capnproto.git
     cd capnproto/c++
-    ./setup-autotools.sh
     autoreconf -i
     ./configure
     make -j6 check
@@ -126,9 +124,9 @@ installed (in addition to Git) in order to fetch the Google Test sources (done b
 
 1. Download Cap'n Proto Win32 build:
 
-   <pre><a href="https://capnproto.org/capnproto-c++-win32-0.5.3.zip">https://capnproto.org/capnproto-c++-win32-0.5.3.zip</a></pre>
+   <pre><a href="https://capnproto.org/capnproto-c++-win32-0.6.0.zip">https://capnproto.org/capnproto-c++-win32-0.6.0.zip</a></pre>
 
-2. Find `capnp.exe`, `capnpc-c++.exe`, and `capnpc-capnp.exe` under `capnproto-tools-win32-0.5.3` in
+2. Find `capnp.exe`, `capnpc-c++.exe`, and `capnpc-capnp.exe` under `capnproto-tools-win32-0.6.0` in
    the zip and copy them somewhere.
 
 If you don't care about C++ support, you can stop here. The compiler exe can be used with plugins
@@ -136,16 +134,18 @@ provided by projects implementing Cap'n Proto in other languages.
 
 If you want to use Cap'n Proto in C++ with Visual Studio, do the following:
 
-1. Install [CMake](http://www.cmake.org/) version 3.1 or later.
+1. Make sure that you are using Visual Studio 2015 or newer, with all updates installed. Cap'n
+   Proto uses C++11 language features that did not work in previous versions of Visual Studio,
+   and the updates include many bug fixes that Cap'n Proto requires.
 
-2. Use CMake to generate Visual Studio project files under `capnproto-c++-0.5.3` in the zip file.
-   You will need to enable the CMake project options `CAPNP_LITE` and `EXTERNAL_CAPNP`.
+2. Install [CMake](http://www.cmake.org/) version 3.1 or later.
+
+3. Use CMake to generate Visual Studio project files under `capnproto-c++-0.6.0` in the zip file.
    You can use the CMake UI for this or run this shell command:
 
-       cmake -G "Visual Studio 14 2015" -DCAPNP_LITE=1 -DEXTERNAL_CAPNP=1
+       cmake -G "Visual Studio 14 2015"
 
-    If the `capnp.exe` and `capnpc-c++.exe` tools are not on your `PATH`, then `CAPNP_EXECUTABLE`
-    and `CAPNPC_CXX_EXECUTABLE` will need to be set to their respective locations.
+    (For VS2017, you can use "Visual Studio 15 2017" as the generator name.)
 
 3. Open the "Cap'n Proto" solution in Visual Studio.
 
@@ -154,29 +154,18 @@ If you want to use Cap'n Proto in C++ with Visual Studio, do the following:
 
 5. Build the solution (`ALL_BUILD`).
 
-6. Build the `INSTALL` project to copy the compiled libraries and header files into `CMAKE_INSTALL_PREFIX`.
+6. Build the `INSTALL` project to copy the compiled libraries, tools, and header files into
+   `CMAKE_INSTALL_PREFIX`.
 
    Alternatively, find the compiled `.lib` files in the build directory under
    `src/{capnp,kj}/{Debug,Release}` and place them somewhere where your project can link against them.
    Also add the `src` directory to your search path for `#include`s, or copy all the headers to your
    project's include directory.
 
-7. Add `#define CAPNP_LITE 1` to either your project's precompiled/shared header or compiler options.
+Cap'n Proto can also be built with MinGW or Cygwin, using the Unix/autotools build instructions.
 
 **From Git**
 
-If you download directly from Git, you'll need to compile the Cap'n Proto tools (the `.exe`s) using
-MinGW-w64. This is easiest to do in Cygwin or on Linux. For example, on Debian or Ubuntu, you can
-install MinGW like so:
+The C++ sources are located under `c++` directory in the git repository. The build instructions are
+otherwise the same as for the release zip.
 
-    sudo apt-get install mingw-w64
-
-You'll first need to install Cap'n Proto on the host system (using the Unix installation
-instructions, above). Then, do:
-
-    make distclean
-    ./configure --host=i686-w64-mingw32 --with-external-capnp \
-      --disable-shared CXXFLAGS='-static-libgcc -static-libstdc++'
-    make -j6 capnp.exe capnpc-c++.exe capnpc-capnp.exe
-
-Now that you have the `exe`s, you can proceed with the usual Windows compilation instructions.

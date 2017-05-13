@@ -24,6 +24,7 @@
 
 #if _WIN32
 #include <windows.h>
+#include "windows-sanity.h"
 #else
 #include <pthread.h>
 #include <signal.h>
@@ -33,17 +34,24 @@ namespace kj {
 
 #if _WIN32
 
-Thread::Thread(Function<void()> func): func(kj::mv(func)) {
-  threadHandle = CreateThread(nullptr, 0, &runThread, this, 0, nullptr);
-  KJ_ASSERT(threadHandle != nullptr, "CreateThread failed.");
+Thread::Thread(Function<void()> func): state(new ThreadState { kj::mv(func), nullptr, 2 }) {
+  threadHandle = CreateThread(nullptr, 0, &runThread, state, 0, nullptr);
+  if (threadHandle == nullptr) {
+    state->unref();
+    KJ_FAIL_ASSERT("CreateThread failed.");
+  }
 }
 
 Thread::~Thread() noexcept(false) {
   if (!detached) {
+    KJ_DEFER(state->unref());
+
     KJ_ASSERT(WaitForSingleObject(threadHandle, INFINITE) != WAIT_FAILED);
 
-    KJ_IF_MAYBE(e, exception) {
-      kj::throwRecoverableException(kj::mv(*e));
+    KJ_IF_MAYBE(e, state->exception) {
+      Exception ecopy = kj::mv(*e);
+      state->exception = nullptr;  // don't complain of uncaught exception when deleting
+      kj::throwRecoverableException(kj::mv(ecopy));
     }
   }
 }
@@ -54,37 +62,43 @@ void Thread::detach() {
 }
 
 DWORD Thread::runThread(void* ptr) {
-  Thread* thread = reinterpret_cast<Thread*>(ptr);
+  ThreadState* state = reinterpret_cast<ThreadState*>(ptr);
   KJ_IF_MAYBE(exception, kj::runCatchingExceptions([&]() {
-    thread->func();
+    state->func();
   })) {
-    thread->exception = kj::mv(*exception);
+    state->exception = kj::mv(*exception);
   }
+  state->unref();
   return 0;
 }
 
 #else  // _WIN32
 
-Thread::Thread(Function<void()> func): func(kj::mv(func)) {
+Thread::Thread(Function<void()> func): state(new ThreadState { kj::mv(func), nullptr, 2 }) {
   static_assert(sizeof(threadId) >= sizeof(pthread_t),
                 "pthread_t is larger than a long long on your platform.  Please port.");
 
   int pthreadResult = pthread_create(reinterpret_cast<pthread_t*>(&threadId),
-                                     nullptr, &runThread, this);
+                                     nullptr, &runThread, state);
   if (pthreadResult != 0) {
+    state->unref();
     KJ_FAIL_SYSCALL("pthread_create", pthreadResult);
   }
 }
 
 Thread::~Thread() noexcept(false) {
   if (!detached) {
+    KJ_DEFER(state->unref());
+
     int pthreadResult = pthread_join(*reinterpret_cast<pthread_t*>(&threadId), nullptr);
     if (pthreadResult != 0) {
       KJ_FAIL_SYSCALL("pthread_join", pthreadResult) { break; }
     }
 
-    KJ_IF_MAYBE(e, exception) {
-      kj::throwRecoverableException(kj::mv(*e));
+    KJ_IF_MAYBE(e, state->exception) {
+      Exception ecopy = kj::mv(*e);
+      state->exception = nullptr;  // don't complain of uncaught exception when deleting
+      kj::throwRecoverableException(kj::mv(ecopy));
     }
   }
 }
@@ -102,18 +116,36 @@ void Thread::detach() {
     KJ_FAIL_SYSCALL("pthread_detach", pthreadResult) { break; }
   }
   detached = true;
+  state->unref();
 }
 
 void* Thread::runThread(void* ptr) {
-  Thread* thread = reinterpret_cast<Thread*>(ptr);
+  ThreadState* state = reinterpret_cast<ThreadState*>(ptr);
   KJ_IF_MAYBE(exception, kj::runCatchingExceptions([&]() {
-    thread->func();
+    state->func();
   })) {
-    thread->exception = kj::mv(*exception);
+    state->exception = kj::mv(*exception);
   }
+  state->unref();
   return nullptr;
 }
 
 #endif  // _WIN32, else
+
+void Thread::ThreadState::unref() {
+#if _MSC_VER
+  if (_InterlockedDecrement(&refcount) == 0) {
+#else
+  if (__atomic_sub_fetch(&refcount, 1, __ATOMIC_RELEASE) == 0) {
+    __atomic_thread_fence(__ATOMIC_ACQUIRE);
+#endif
+
+    KJ_IF_MAYBE(e, exception) {
+      KJ_LOG(ERROR, "uncaught exception thrown by detached thread", *e);
+    }
+
+    delete this;
+  }
+}
 
 }  // namespace kj

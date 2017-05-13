@@ -107,11 +107,15 @@ public:
     return CharGroup_(~bits[0], ~bits[1], ~bits[2], ~bits[3]);
   }
 
+  constexpr inline bool contains(unsigned char c) const {
+    return (bits[c / 64] & (1ll << (c % 64))) != 0;
+  }
+
   template <typename Input>
   Maybe<char> operator()(Input& input) const {
     if (input.atEnd()) return nullptr;
     unsigned char c = input.current();
-    if ((bits[c / 64] & (1ll << (c % 64))) != 0) {
+    if (contains(c)) {
       input.next();
       return c;
     } else {
@@ -148,6 +152,13 @@ constexpr inline CharGroup_ charRange(char first, char last) {
   return CharGroup_().orRange(first, last);
 }
 
+#if _MSC_VER
+#define anyOfChars(chars) CharGroup_().orAny(chars)
+// TODO(msvc): MSVC ICEs on the proper definition of `anyOfChars()`, which in turn prevents us from
+//   building the compiler or schema parser. We don't know why this happens, but Harris found that
+//   this horrible, horrible hack makes things work. This is awful, but it's better than nothing.
+//   Hopefully, MSVC will get fixed soon and we'll be able to remove this.
+#else
 constexpr inline CharGroup_ anyOfChars(const char* chars) {
   // Returns a parser that accepts any of the characters in the given string (which should usually
   // be a literal).  The returned parser is of the same type as returned by `charRange()` -- see
@@ -155,6 +166,7 @@ constexpr inline CharGroup_ anyOfChars(const char* chars) {
 
   return CharGroup_().orAny(chars);
 }
+#endif
 
 // =======================================================================================
 

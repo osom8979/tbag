@@ -22,7 +22,7 @@
 #include "dynamic.h"
 #include "message.h"
 #include <kj/debug.h>
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 #include "test-util.h"
 
 namespace capnp {
@@ -158,6 +158,37 @@ TEST(DynamicApi, AnyPointers) {
     checkList<uint32_t>(root.getAnyPointerField().getAs<DynamicList>(
         Schema::from<List<uint32_t>>()), {123u, 456u, 789u, 123456789u});
   }
+
+  // Setting an AnyPointer to various types should work.
+  toDynamic(root).set("anyPointerField", capnp::Text::Reader("foo"));
+  EXPECT_EQ("foo", root.getAnyPointerField().getAs<Text>());
+
+  {
+    auto orphan = builder.getOrphanage().newOrphan<TestAllTypes>();
+    initTestMessage(orphan.get());
+    toDynamic(root).set("anyPointerField", orphan.getReader());
+    checkTestMessage(root.getAnyPointerField().getAs<TestAllTypes>());
+
+    toDynamic(root).adopt("anyPointerField", kj::mv(orphan));
+    checkTestMessage(root.getAnyPointerField().getAs<TestAllTypes>());
+  }
+
+  {
+    auto lorphan = builder.getOrphanage().newOrphan<List<uint32_t>>(3);
+    lorphan.get().set(0, 12);
+    lorphan.get().set(1, 34);
+    lorphan.get().set(2, 56);
+    toDynamic(root).set("anyPointerField", lorphan.getReader());
+    auto l = root.getAnyPointerField().getAs<List<uint32_t>>();
+    ASSERT_EQ(3, l.size());
+    EXPECT_EQ(12, l[0]);
+    EXPECT_EQ(34, l[1]);
+    EXPECT_EQ(56, l[2]);
+  }
+
+  // Just compile this one.
+  toDynamic(root).set("anyPointerField", Capability::Client(nullptr));
+  root.getAnyPointerField().getAs<Capability>();
 }
 
 TEST(DynamicApi, DynamicAnyPointers) {
@@ -222,11 +253,20 @@ TEST(DynamicApi, DynamicAnyPointers) {
   }
 }
 
+TEST(DynamicApi, DynamicAnyStructs) {
+  MallocMessageBuilder builder;
+  auto root = builder.initRoot<DynamicStruct>(Schema::from<TestAllTypes>());
+
+  root.as<AnyStruct>().as<TestAllTypes>().setInt8Field(123);
+  EXPECT_EQ(root.get("int8Field").as<int8_t>(), 123);
+  EXPECT_EQ(root.asReader().as<AnyStruct>().as<TestAllTypes>().getInt8Field(), 123);
+}
+
 #define EXPECT_MAYBE_EQ(name, exp, expected, actual) \
   KJ_IF_MAYBE(name, exp) { \
     EXPECT_EQ(expected, actual); \
   } else { \
-    FAIL() << "Maybe was empty."; \
+    KJ_FAIL_EXPECT("Maybe was empty."); \
   }
 
 TEST(DynamicApi, UnionsRead) {

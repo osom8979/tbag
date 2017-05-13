@@ -20,9 +20,10 @@
 // THE SOFTWARE.
 
 #include "common.h"
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 #include <kj/string.h>
 #include <kj/debug.h>
+#include <capnp/test.capnp.h>
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -59,6 +60,28 @@ struct ExampleInterface {
 
 static_assert(_::Kind_<ExampleStruct>::kind == Kind::STRUCT, "Kind SFINAE failed.");
 static_assert(_::Kind_<ExampleInterface>::kind == Kind::INTERFACE, "Kind SFINAE failed.");
+
+// Test FromAnay<>
+template <typename T, typename U>
+struct EqualTypes_ { static constexpr bool value = false; };
+
+template <typename T>
+struct EqualTypes_<T, T> { static constexpr bool value = true; };
+
+template <typename T, typename U>
+inline constexpr bool equalTypes() { return EqualTypes_<T, U>::value; }
+
+using capnproto_test::capnp::test::TestAllTypes;
+using capnproto_test::capnp::test::TestInterface;
+
+static_assert(equalTypes<FromAny<int>, int>(), "");
+static_assert(equalTypes<FromAny<TestAllTypes::Reader>, TestAllTypes>(), "");
+static_assert(equalTypes<FromAny<TestAllTypes::Builder>, TestAllTypes>(), "");
+#if !CAPNP_LITE
+static_assert(equalTypes<FromAny<TestAllTypes::Pipeline>, TestAllTypes>(), "");
+static_assert(equalTypes<FromAny<TestInterface::Client>, TestInterface>(), "");
+static_assert(equalTypes<FromAny<kj::Own<TestInterface::Server>>, TestInterface>(), "");
+#endif
 
 }  // namespace
 }  // namespace capnp

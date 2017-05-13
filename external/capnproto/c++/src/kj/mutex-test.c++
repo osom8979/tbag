@@ -22,10 +22,12 @@
 #include "mutex.h"
 #include "debug.h"
 #include "thread.h"
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 
 #if _WIN32
+#define NOGDI  // NOGDI is needed to make EXPECT_EQ(123u, *lock) compile for some reason
 #include <windows.h>
+#undef NOGDI
 #else
 #include <pthread.h>
 #include <unistd.h>
@@ -38,20 +40,6 @@ namespace {
 inline void delay() { Sleep(10); }
 #else
 inline void delay() { usleep(10000); }
-#endif
-
-#if KJ_NO_EXCEPTIONS
-#undef EXPECT_ANY_THROW
-#define EXPECT_ANY_THROW(code) EXPECT_DEATH(code, ".")
-#define EXPECT_NONFATAL_FAILURE(code) code
-#else
-#define EXPECT_NONFATAL_FAILURE EXPECT_ANY_THROW
-#endif
-
-#ifdef KJ_DEBUG
-#define EXPECT_DEBUG_ANY_THROW EXPECT_ANY_THROW
-#else
-#define EXPECT_DEBUG_ANY_THROW(EXP)
 #endif
 
 TEST(Mutex, MutexGuarded) {

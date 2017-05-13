@@ -19,6 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !_WIN32
+
 #include "async-unix.h"
 #include "debug.h"
 #include "threadlocal.h"
@@ -26,7 +28,6 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <limits>
-#include <set>
 #include <chrono>
 #include <pthread.h>
 
@@ -44,62 +45,9 @@ namespace kj {
 // =======================================================================================
 // Timer code common to multiple implementations
 
-struct UnixEventPort::TimerSet {
-  struct TimerBefore {
-    bool operator()(TimerPromiseAdapter* lhs, TimerPromiseAdapter* rhs);
-  };
-  using Timers = std::multiset<TimerPromiseAdapter*, TimerBefore>;
-  Timers timers;
-};
-
-class UnixEventPort::TimerPromiseAdapter {
-public:
-  TimerPromiseAdapter(PromiseFulfiller<void>& fulfiller, UnixEventPort& port, TimePoint time)
-      : time(time), fulfiller(fulfiller), port(port) {
-    pos = port.timers->timers.insert(this);
-  }
-
-  ~TimerPromiseAdapter() {
-    if (pos != port.timers->timers.end()) {
-      port.timers->timers.erase(pos);
-    }
-  }
-
-  void fulfill() {
-    fulfiller.fulfill();
-    port.timers->timers.erase(pos);
-    pos = port.timers->timers.end();
-  }
-
-  const TimePoint time;
-  PromiseFulfiller<void>& fulfiller;
-  UnixEventPort& port;
-  TimerSet::Timers::const_iterator pos;
-};
-
-bool UnixEventPort::TimerSet::TimerBefore::operator()(
-    TimerPromiseAdapter* lhs, TimerPromiseAdapter* rhs) {
-  return lhs->time < rhs->time;
-}
-
-Promise<void> UnixEventPort::atSteadyTime(TimePoint time) {
-  return newAdaptedPromise<void, TimerPromiseAdapter>(*this, time);
-}
-
-TimePoint UnixEventPort::currentSteadyTime() {
+TimePoint UnixEventPort::readClock() {
   return origin<TimePoint>() + std::chrono::duration_cast<std::chrono::nanoseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count() * NANOSECONDS;
-}
-
-void UnixEventPort::processTimers() {
-  frozenSteadyTime = currentSteadyTime();
-  for (;;) {
-    auto front = timers->timers.begin();
-    if (front == timers->timers.end() || (*front)->time > frozenSteadyTime) {
-      break;
-    }
-    (*front)->fulfill();
-  }
 }
 
 // =======================================================================================
@@ -148,7 +96,7 @@ void registerSignalHandler(int signum) {
 void registerReservedSignal() {
   registerSignalHandler(reservedSignal);
 
-  // We also disable SIGPIPE because users of UnixEventLoop almost certainly don't want it.
+  // We also disable SIGPIPE because users of UnixEventPort almost certainly don't want it.
   while (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
     int error = errno;
     if (error != EINTR) {
@@ -247,8 +195,7 @@ void UnixEventPort::gotSignal(const siginfo_t& siginfo) {
 // epoll FdObserver implementation
 
 UnixEventPort::UnixEventPort()
-    : timers(kj::heap<TimerSet>()),
-      frozenSteadyTime(currentSteadyTime()),
+    : timerImpl(readClock()),
       epollFd(-1),
       signalFd(-1),
       eventFd(-1) {
@@ -288,6 +235,9 @@ UnixEventPort::FdObserver::FdObserver(UnixEventPort& eventPort, int fd, uint fla
   if (flags & OBSERVE_WRITE) {
     event.events |= EPOLLOUT;
   }
+  if (flags & OBSERVE_URGENT) {
+    event.events |= EPOLLPRI;
+  }
   event.events |= EPOLLET;  // Set edge-triggered mode.
 
   event.data.ptr = this;
@@ -296,7 +246,7 @@ UnixEventPort::FdObserver::FdObserver(UnixEventPort& eventPort, int fd, uint fla
 }
 
 UnixEventPort::FdObserver::~FdObserver() noexcept(false) {
-  KJ_SYSCALL(epoll_ctl(eventPort.epollFd, EPOLL_CTL_DEL, fd, nullptr));
+  KJ_SYSCALL(epoll_ctl(eventPort.epollFd, EPOLL_CTL_DEL, fd, nullptr)) { break; }
 }
 
 void UnixEventPort::FdObserver::fire(short events) {
@@ -320,6 +270,13 @@ void UnixEventPort::FdObserver::fire(short events) {
       writeFulfiller = nullptr;
     }
   }
+
+  if (events & EPOLLPRI) {
+    KJ_IF_MAYBE(f, urgentFulfiller) {
+      f->get()->fulfill();
+      urgentFulfiller = nullptr;
+    }
+  }
 }
 
 Promise<void> UnixEventPort::FdObserver::whenBecomesReadable() {
@@ -338,28 +295,20 @@ Promise<void> UnixEventPort::FdObserver::whenBecomesWritable() {
   return kj::mv(paf.promise);
 }
 
+Promise<void> UnixEventPort::FdObserver::whenUrgentDataAvailable() {
+  KJ_REQUIRE(flags & OBSERVE_URGENT,
+      "FdObserver was not set to observe availability of urgent data.");
+
+  auto paf = newPromiseAndFulfiller<void>();
+  urgentFulfiller = kj::mv(paf.fulfiller);
+  return kj::mv(paf.promise);
+}
+
 bool UnixEventPort::wait() {
-  // epoll_wait()'s timeout is an `int` count of milliseconds, so truncate to that.
-  // Also, make sure that we aren't within a millisecond of overflowing a `Duration` since that
-  // will break the math below.
-  constexpr Duration MAX_TIMEOUT =
-      min(int(maxValue) * MILLISECONDS, Duration(maxValue) - MILLISECONDS);
-
-  int epollTimeout = -1;
-  auto timer = timers->timers.begin();
-  if (timer != timers->timers.end()) {
-    Duration timeout = (*timer)->time - currentSteadyTime();
-    if (timeout < 0 * SECONDS) {
-      epollTimeout = 0;
-    } else if (timeout < MAX_TIMEOUT) {
-      // Round up to the next millisecond
-      epollTimeout = (timeout + 1 * MILLISECONDS - unit<Duration>()) / MILLISECONDS;
-    } else {
-      epollTimeout = MAX_TIMEOUT / MILLISECONDS;
-    }
-  }
-
-  return doEpollWait(epollTimeout);
+  return doEpollWait(
+      timerImpl.timeoutToNextEvent(readClock(), MILLISECONDS, int(maxValue))
+          .map([](uint64_t t) -> int { return t; })
+          .orDefault(-1));
 }
 
 bool UnixEventPort::poll() {
@@ -458,7 +407,14 @@ static siginfo_t toRegularSiginfo(const struct signalfd_siginfo& siginfo) {
         // we write the pointer, we'll end up with the right value for the int? Presumably the
         // two fields of signalfd_siginfo are actually extracted from one of these unions
         // originally, so actually contain redundant data? Better write some tests...
-        result.si_ptr = reinterpret_cast<void*>(static_cast<uintptr_t>(siginfo.ssi_ptr));
+        //
+        // Making matters even stranger, siginfo.ssi_ptr is 64-bit even on 32-bit systems, and
+        // it appears that instead of doing the obvious thing by casting the pointer value to
+        // 64 bits, the kernel actually memcpy()s the 32-bit value into the 64-bit space. As
+        // a result, on big-endian 32-bit systems, the original pointer value ends up in the
+        // *upper* 32 bits of siginfo.ssi_ptr, which is totally weird. We play along and use
+        // a memcpy() on our end too, to get the right result on all platforms.
+        memcpy(&result.si_ptr, &siginfo.ssi_ptr, sizeof(result.si_ptr));
         break;
 
       case SI_TIMER:
@@ -526,7 +482,7 @@ bool UnixEventPort::doEpollWait(int timeout) {
     }
   }
 
-  processTimers();
+  timerImpl.advanceTo(readClock());
 
   return woken;
 }
@@ -540,8 +496,7 @@ bool UnixEventPort::doEpollWait(int timeout) {
 #endif
 
 UnixEventPort::UnixEventPort()
-    : timers(kj::heap<TimerSet>()),
-      frozenSteadyTime(currentSteadyTime()) {
+    : timerImpl(readClock()) {
   static_assert(sizeof(threadId) >= sizeof(pthread_t),
                 "pthread_t is larger than a long long on your platform.  Please port.");
   *reinterpret_cast<pthread_t*>(&threadId) = pthread_self();
@@ -590,7 +545,14 @@ void UnixEventPort::FdObserver::fire(short events) {
     }
   }
 
-  if (readFulfiller == nullptr && writeFulfiller == nullptr) {
+  if (events & POLLPRI) {
+    KJ_IF_MAYBE(f, urgentFulfiller) {
+      f->get()->fulfill();
+      urgentFulfiller = nullptr;
+    }
+  }
+
+  if (readFulfiller == nullptr && writeFulfiller == nullptr && urgentFulfiller == nullptr) {
     // Remove from list.
     if (next == nullptr) {
       eventPort.observersTail = prev;
@@ -605,7 +567,8 @@ void UnixEventPort::FdObserver::fire(short events) {
 
 short UnixEventPort::FdObserver::getEventMask() {
   return (readFulfiller == nullptr ? 0 : (POLLIN | POLLRDHUP)) |
-         (writeFulfiller == nullptr ? 0 : POLLOUT);
+         (writeFulfiller == nullptr ? 0 : POLLOUT) |
+         (urgentFulfiller == nullptr ? 0 : POLLPRI);
 }
 
 Promise<void> UnixEventPort::FdObserver::whenBecomesReadable() {
@@ -635,6 +598,22 @@ Promise<void> UnixEventPort::FdObserver::whenBecomesWritable() {
 
   auto paf = newPromiseAndFulfiller<void>();
   writeFulfiller = kj::mv(paf.fulfiller);
+  return kj::mv(paf.promise);
+}
+
+Promise<void> UnixEventPort::FdObserver::whenUrgentDataAvailable() {
+  KJ_REQUIRE(flags & OBSERVE_URGENT,
+      "FdObserver was not set to observe availability of urgent data.");
+
+  if (prev == nullptr) {
+    KJ_DASSERT(next == nullptr);
+    prev = eventPort.observersTail;
+    *prev = this;
+    eventPort.observersTail = &next;
+  }
+
+  auto paf = newPromiseAndFulfiller<void>();
+  urgentFulfiller = kj::mv(paf.fulfiller);
   return kj::mv(paf.promise);
 }
 
@@ -719,33 +698,17 @@ bool UnixEventPort::wait() {
   threadCapture = &capture;
   sigprocmask(SIG_UNBLOCK, &newMask, &origMask);
 
-  // poll()'s timeout is an `int` count of milliseconds, so truncate to that.
-  // Also, make sure that we aren't within a millisecond of overflowing a `Duration` since that
-  // will break the math below.
-  constexpr Duration MAX_TIMEOUT =
-      min(int(maxValue) * MILLISECONDS, Duration(maxValue) - MILLISECONDS);
-
-  int pollTimeout = -1;
-  auto timer = timers->timers.begin();
-  if (timer != timers->timers.end()) {
-    Duration timeout = (*timer)->time - currentSteadyTime();
-    if (timeout < 0 * SECONDS) {
-      pollTimeout = 0;
-    } else if (timeout < MAX_TIMEOUT) {
-      // Round up to the next millisecond
-      pollTimeout = (timeout + 1 * MILLISECONDS - unit<Duration>()) / MILLISECONDS;
-    } else {
-      pollTimeout = MAX_TIMEOUT / MILLISECONDS;
-    }
-  }
-  pollContext.run(pollTimeout);
+  pollContext.run(
+      timerImpl.timeoutToNextEvent(readClock(), MILLISECONDS, int(maxValue))
+          .map([](uint64_t t) -> int { return t; })
+          .orDefault(-1));
 
   sigprocmask(SIG_SETMASK, &origMask, nullptr);
   threadCapture = nullptr;
 
   // Queue events.
   pollContext.processResults();
-  processTimers();
+  timerImpl.advanceTo(readClock());
 
   return false;
 }
@@ -807,7 +770,7 @@ bool UnixEventPort::poll() {
     pollContext.run(0);
     pollContext.processResults();
   }
-  processTimers();
+  timerImpl.advanceTo(readClock());
 
   return woken;
 }
@@ -822,3 +785,5 @@ void UnixEventPort::wake() const {
 #endif  // KJ_USE_EPOLL, else
 
 }  // namespace kj
+
+#endif  // !_WIN32

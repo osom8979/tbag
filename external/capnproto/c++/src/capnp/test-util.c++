@@ -21,7 +21,7 @@
 
 #include "test-util.h"
 #include <kj/debug.h>
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 
 namespace capnp {
 namespace _ {  // private
@@ -943,7 +943,30 @@ kj::Promise<void> TestPipelineImpl::getCap(GetCapContext context) {
   request.setJ(true);
 
   return request.send().then(
-      [this,context](Response<test::TestInterface::FooResults>&& response) mutable {
+      [this,KJ_CPCAP(context)](Response<test::TestInterface::FooResults>&& response) mutable {
+        EXPECT_EQ("foo", response.getX());
+
+        auto result = context.getResults();
+        result.setS("bar");
+        result.initOutBox().setCap(kj::heap<TestExtendsImpl>(callCount));
+      });
+}
+
+kj::Promise<void> TestPipelineImpl::getAnyCap(GetAnyCapContext context) {
+  ++callCount;
+
+  auto params = context.getParams();
+  EXPECT_EQ(234, params.getN());
+
+  auto cap = params.getInCap();
+  context.releaseParams();
+
+  auto request = cap.castAs<test::TestInterface>().fooRequest();
+  request.setI(123);
+  request.setJ(true);
+
+  return request.send().then(
+      [this,KJ_CPCAP(context)](Response<test::TestInterface::FooResults>&& response) mutable {
         EXPECT_EQ("foo", response.getX());
 
         auto result = context.getResults();
@@ -1005,7 +1028,7 @@ kj::Promise<void> TestMoreStuffImpl::callFoo(CallFooContext context) {
   request.setJ(true);
 
   return request.send().then(
-      [context](Response<test::TestInterface::FooResults>&& response) mutable {
+      [KJ_CPCAP(context)](Response<test::TestInterface::FooResults>&& response) mutable {
         EXPECT_EQ("foo", response.getX());
         context.getResults().setS("bar");
       });
@@ -1017,13 +1040,13 @@ kj::Promise<void> TestMoreStuffImpl::callFooWhenResolved(CallFooWhenResolvedCont
   auto params = context.getParams();
   auto cap = params.getCap();
 
-  return cap.whenResolved().then([cap,context]() mutable {
+  return cap.whenResolved().then([KJ_CPCAP(cap),KJ_CPCAP(context)]() mutable {
     auto request = cap.fooRequest();
     request.setI(123);
     request.setJ(true);
 
     return request.send().then(
-        [context](Response<test::TestInterface::FooResults>&& response) mutable {
+        [KJ_CPCAP(context)](Response<test::TestInterface::FooResults>&& response) mutable {
           EXPECT_EQ("foo", response.getX());
           context.getResults().setS("bar");
         });
@@ -1059,7 +1082,7 @@ kj::Promise<void> TestMoreStuffImpl::callHeld(CallHeldContext context) {
   request.setJ(true);
 
   return request.send().then(
-      [context](Response<test::TestInterface::FooResults>&& response) mutable {
+      [KJ_CPCAP(context)](Response<test::TestInterface::FooResults>&& response) mutable {
         EXPECT_EQ("foo", response.getX());
         context.getResults().setS("bar");
       });
@@ -1092,7 +1115,7 @@ kj::Promise<void> TestMoreStuffImpl::loop(uint depth, test::TestInterface::Clien
     ADD_FAILURE() << "Looped too long, giving up.";
     return kj::READY_NOW;
   } else {
-    return kj::evalLater([=]() mutable {
+    return kj::evalLater([this,depth,KJ_CPCAP(cap),KJ_CPCAP(context)]() mutable {
       return loop(depth + 1, cap, context);
     });
   }
@@ -1109,6 +1132,15 @@ private:
 
 kj::Promise<void> TestMoreStuffImpl::getHandle(GetHandleContext context) {
   context.getResults().setHandle(kj::heap<HandleImpl>(handleCount));
+  return kj::READY_NOW;
+}
+
+kj::Promise<void> TestMoreStuffImpl::getNull(GetNullContext context) {
+  return kj::READY_NOW;
+}
+
+kj::Promise<void> TestMoreStuffImpl::getEnormousString(GetEnormousStringContext context) {
+  context.getResults().initStr(100000000);  // 100MB
   return kj::READY_NOW;
 }
 

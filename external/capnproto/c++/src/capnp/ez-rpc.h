@@ -22,7 +22,7 @@
 #ifndef CAPNP_EZ_RPC_H_
 #define CAPNP_EZ_RPC_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -90,7 +90,7 @@ class EzRpcClient {
   // Some of these restrictions will probably be lifted in future versions, but some things will
   // always require using the low-level interfaces directly.  If you are interested in working
   // at a lower level, start by looking at these interfaces:
-  // - `kj::startAsyncIo()` in `kj/async-io.h`.
+  // - `kj::setupAsyncIo()` in `kj/async-io.h`.
   // - `RpcSystem` in `capnp/rpc.h`.
   // - `TwoPartyVatNetwork` in `capnp/rpc-twoparty.h`.
 

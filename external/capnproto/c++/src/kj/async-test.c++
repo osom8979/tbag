@@ -21,10 +21,17 @@
 
 #include "async.h"
 #include "debug.h"
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 
 namespace kj {
 namespace {
+
+#if !_MSC_VER
+// TODO(msvc): GetFunctorStartAddress is not supported on MSVC currently, so skip the test.
+TEST(Async, GetFunctorStartAddress) {
+  EXPECT_TRUE(nullptr != _::GetFunctorStartAddress<>::apply([](){return 0;}));
+}
+#endif
 
 TEST(Async, EvalVoid) {
   EventLoop loop;
@@ -163,7 +170,7 @@ TEST(Async, Chain) {
   Promise<int> promise2 = evalLater([&]() -> int { return 321; });
 
   auto promise3 = promise.then([&](int i) {
-    return promise2.then([&loop,i](int j) {
+    return promise2.then([i](int j) {
       return i + j;
     });
   });
@@ -285,6 +292,24 @@ TEST(Async, DeepChain4) {
   promise.wait(waitScope);
 }
 
+TEST(Async, IgnoreResult) {
+  EventLoop loop;
+  WaitScope waitScope(loop);
+
+  bool done = false;
+
+  Promise<void> promise = Promise<int>(123).then([&](int i) {
+    done = true;
+    return i + 321;
+  }).ignoreResult();
+
+  EXPECT_FALSE(done);
+
+  promise.wait(waitScope);
+
+  EXPECT_TRUE(done);
+}
+
 TEST(Async, SeparateFulfiller) {
   EventLoop loop;
   WaitScope waitScope(loop);
@@ -334,11 +359,6 @@ TEST(Async, SeparateFulfillerChained) {
 
   EXPECT_EQ(123, pair.promise.wait(waitScope));
 }
-
-#if KJ_NO_EXCEPTIONS
-#undef EXPECT_ANY_THROW
-#define EXPECT_ANY_THROW(code) EXPECT_DEATH(code, ".")
-#endif
 
 TEST(Async, SeparateFulfillerDiscarded) {
   EventLoop loop;
@@ -470,6 +490,21 @@ TEST(Async, ForkRef) {
   EXPECT_EQ(789, branch2.wait(waitScope));
 }
 
+TEST(Async, Split) {
+  EventLoop loop;
+  WaitScope waitScope(loop);
+
+  Promise<Tuple<int, String, Promise<int>>> promise = evalLater([&]() {
+    return kj::tuple(123, str("foo"), Promise<int>(321));
+  });
+
+  Tuple<Promise<int>, Promise<String>, Promise<int>> split = promise.split();
+
+  EXPECT_EQ(123, get<0>(split).wait(waitScope));
+  EXPECT_EQ("foo", get<1>(split).wait(waitScope));
+  EXPECT_EQ(321, get<2>(split).wait(waitScope));
+}
+
 TEST(Async, ExclusiveJoin) {
   {
     EventLoop loop;
@@ -574,7 +609,7 @@ TEST(Async, TaskSet) {
   }));
 
   (void)evalLater([&]() {
-    ADD_FAILURE() << "Promise without waiter shouldn't execute.";
+    KJ_FAIL_EXPECT("Promise without waiter shouldn't execute.");
   });
 
   evalLater([&]() {
@@ -643,7 +678,7 @@ TEST(Async, Detach) {
   bool ran2 = false;
   bool ran3 = false;
 
-  evalLater([&]() { ran1 = true; });
+  (void)evalLater([&]() { ran1 = true; });  // let returned promise be destroyed (canceled)
   evalLater([&]() { ran2 = true; }).detach([](kj::Exception&&) { ADD_FAILURE(); });
   evalLater([]() { KJ_FAIL_ASSERT("foo"){break;} }).detach([&](kj::Exception&& e) { ran3 = true; });
 

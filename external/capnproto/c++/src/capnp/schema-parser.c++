@@ -31,7 +31,7 @@
 #include <kj/vector.h>
 #include <kj/debug.h>
 #include <kj/io.h>
-#include <unistd.h>
+#include <kj/miniposix.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -105,6 +105,14 @@ public:
   kj::Maybe<Module&> importRelative(kj::StringPtr importPath) override {
     KJ_IF_MAYBE(importedFile, file->import(importPath)) {
       return parser.getModuleImpl(kj::mv(*importedFile));
+    } else {
+      return nullptr;
+    }
+  }
+
+  kj::Maybe<kj::Array<const byte>> embedRelative(kj::StringPtr embedPath) override {
+    KJ_IF_MAYBE(importedFile, file->import(embedPath)) {
+      return importedFile->get()->readContent().releaseAsBytes();
     } else {
       return nullptr;
     }
@@ -234,7 +242,7 @@ protected:
   }
 };
 
-constexpr MmapDisposer mmapDisposer = MmapDisposer();
+KJ_CONSTEXPR(static const) MmapDisposer mmapDisposer = MmapDisposer();
 
 static char* canonicalizePath(char* path) {
   // Taken from some old C code of mine.
@@ -392,7 +400,7 @@ kj::Array<const char> SchemaFile::DiskFileReader::read(kj::StringPtr path) const
 
     char buffer[4096];
     for (;;) {
-      ssize_t n;
+      kj::miniposix::ssize_t n;
       KJ_SYSCALL(n = ::read(fd, buffer, sizeof(buffer)));
       if (n == 0) break;
       data.addAll(buffer, buffer + n);

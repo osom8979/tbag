@@ -23,13 +23,24 @@
 #include "layout.h"
 #include "message.h"
 #include "arena.h"
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 
 #if CAPNP_DEBUG_TYPES
 namespace kj {
   template <typename T, typename U>
-  std::ostream& operator<<(std::ostream& os, kj::Quantity<T, U> value) {
-    return os << (value / kj::unit<kj::Quantity<T, U>>());
+  String KJ_STRINGIFY(kj::Quantity<T, U> value) {
+    return kj::str(unboundAs<uint64_t>(value / kj::unit<kj::Quantity<T, U>>()));
+  }
+
+  // Hack: Allow direct comparisons and multiplications so that we don't have to rewrite the code
+  //   below.
+  template <uint64_t maxN, typename T>
+  inline constexpr Bounded<65535, T> operator*(uint a, Bounded<maxN, T> b) {
+    return assumeBits<16>(a * unbound(b));
+  }
+  template <uint b>
+  inline constexpr Bounded<65535, uint> operator*(uint a, BoundedConst<b>) {
+    return assumeBits<16>(a * b);
   }
 }
 #endif
@@ -282,7 +293,7 @@ TEST(WireFormat, StructRoundTrip_OneSegment) {
   SegmentBuilder* segment = allocation.segment;
   word* rootLocation = allocation.words;
 
-  StructBuilder builder = PointerBuilder::getRoot(segment, rootLocation)
+  StructBuilder builder = PointerBuilder::getRoot(segment, nullptr, rootLocation)
       .initStruct(StructSize(2 * WORDS, 4 * POINTERS));
   setupStruct(builder);
 
@@ -309,7 +320,8 @@ TEST(WireFormat, StructRoundTrip_OneSegment) {
   checkStruct(builder);
   checkStruct(builder.asReader());
   checkStruct(PointerReader::getRootUnchecked(segment->getStartPtr()).getStruct(nullptr));
-  checkStruct(PointerReader::getRoot(segment, segment->getStartPtr(), 4).getStruct(nullptr));
+  checkStruct(PointerReader::getRoot(segment, nullptr, segment->getStartPtr(), 4)
+      .getStruct(nullptr));
 }
 
 TEST(WireFormat, StructRoundTrip_OneSegmentPerAllocation) {
@@ -319,7 +331,7 @@ TEST(WireFormat, StructRoundTrip_OneSegmentPerAllocation) {
   SegmentBuilder* segment = allocation.segment;
   word* rootLocation = allocation.words;
 
-  StructBuilder builder = PointerBuilder::getRoot(segment, rootLocation)
+  StructBuilder builder = PointerBuilder::getRoot(segment, nullptr, rootLocation)
       .initStruct(StructSize(2 * WORDS, 4 * POINTERS));
   setupStruct(builder);
 
@@ -347,7 +359,8 @@ TEST(WireFormat, StructRoundTrip_OneSegmentPerAllocation) {
 
   checkStruct(builder);
   checkStruct(builder.asReader());
-  checkStruct(PointerReader::getRoot(segment, segment->getStartPtr(), 4).getStruct(nullptr));
+  checkStruct(PointerReader::getRoot(segment, nullptr, segment->getStartPtr(), 4)
+      .getStruct(nullptr));
 }
 
 TEST(WireFormat, StructRoundTrip_MultipleSegmentsWithMultipleAllocations) {
@@ -357,7 +370,7 @@ TEST(WireFormat, StructRoundTrip_MultipleSegmentsWithMultipleAllocations) {
   SegmentBuilder* segment = allocation.segment;
   word* rootLocation = allocation.words;
 
-  StructBuilder builder = PointerBuilder::getRoot(segment, rootLocation)
+  StructBuilder builder = PointerBuilder::getRoot(segment, nullptr, rootLocation)
       .initStruct(StructSize(2 * WORDS, 4 * POINTERS));
   setupStruct(builder);
 
@@ -376,7 +389,8 @@ TEST(WireFormat, StructRoundTrip_MultipleSegmentsWithMultipleAllocations) {
 
   checkStruct(builder);
   checkStruct(builder.asReader());
-  checkStruct(PointerReader::getRoot(segment, segment->getStartPtr(), 4).getStruct(nullptr));
+  checkStruct(PointerReader::getRoot(segment, nullptr, segment->getStartPtr(), 4)
+      .getStruct(nullptr));
 }
 
 inline bool isNan(float f) { return f != f; }

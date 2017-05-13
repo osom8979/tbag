@@ -22,7 +22,7 @@
 #ifndef CAPNP_COMPILER_COMPILER_H_
 #define CAPNP_COMPILER_COMPILER_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -47,9 +47,12 @@ public:
   // Find another module, relative to this one.  Importing the same logical module twice should
   // produce the exact same object, comparable by identity.  These objects are owned by some
   // outside pool that outlives the Compiler instance.
+
+  virtual kj::Maybe<kj::Array<const byte>> embedRelative(kj::StringPtr embedPath) = 0;
+  // Read and return the content of a file specified using `embed`.
 };
 
-class Compiler: private SchemaLoader::LazyLoadCallback {
+class Compiler final: private SchemaLoader::LazyLoadCallback {
   // Cross-links separate modules (schema files) and translates them into schema nodes.
   //
   // This class is thread-safe, hence all its methods are const.

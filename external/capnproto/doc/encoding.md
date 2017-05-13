@@ -108,7 +108,7 @@ Fields are positioned within the struct according to an algorithm with the follo
 * The position of each field depends only on its definition and the definitions of lower-numbered
   fields, never on the definitions of higher-numbered fields.  This ensures backwards-compatibility
   when new fields are added.
-* Due to alignment reqirements, fields in the data section may be separated by padding.  However,
+* Due to alignment requirements, fields in the data section may be separated by padding.  However,
   later-numbered fields may be positioned into the padding left between earlier-numbered fields.
   Because of this, a struct will never contain more than 63 bits of padding.  Since objects are
   rounded up to a whole number of words anyway, padding never ends up wasting space.
@@ -165,7 +165,7 @@ A struct list must always be written using C = 7. However, a list of any element
 C = 1, i.e. 1-bit) may be *decoded* as a struct list, with each element being interpreted as being
 a prefix of the struct data. For instance, a list of 2-byte values (C = 3) can be decoded as a
 struct list where each struct has 2 bytes in their "data" section (and an empty pointer section). A
-list of pointer values (C = 6) can be decoded as a struct list where each sturct has a pointer
+list of pointer values (C = 6) can be decoded as a struct list where each struct has a pointer
 section with one pointer (and an empty data section). The purpose of this rule is to make it
 possible to upgrade a list of primitives to a list of structs, as described under the
 [protocol evolution rules](language.html#evolving-your-protocol).
@@ -356,7 +356,7 @@ A canonical Cap'n Proto message must adhere to the following rules:
 
 Note that Cap'n Proto 0.5 introduced the rule that struct lists must always be encoded using
 C = 7 in the [list pointer](#lists). Prior versions of Cap'n Proto allowed struct lists to be
-encoded using any element size, so that small structs could be compacted to take less that a word
+encoded using any element size, so that small structs could be compacted to take less than a word
 per element, and many encoders in fact implemented this. Unfortunately, this "optimization" made
 canonicalization impossible without knowing the schema, which is a significant obstacle. Therefore,
 the rules have been changed in 0.5, but data written by previous versions may not be possible to

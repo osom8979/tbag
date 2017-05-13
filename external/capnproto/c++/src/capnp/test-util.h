@@ -22,51 +22,49 @@
 #ifndef CAPNP_TEST_UTIL_H_
 #define CAPNP_TEST_UTIL_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
 #include <capnp/test.capnp.h>
 #include <iostream>
 #include "blob.h"
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
 
 #if !CAPNP_LITE
 #include "dynamic.h"
 #endif  // !CAPNP_LITE
 
-#if KJ_NO_EXCEPTIONS
-#undef EXPECT_ANY_THROW
-#define EXPECT_ANY_THROW(code) EXPECT_DEATH(code, ".")
-#endif
-
-#define EXPECT_NONFATAL_FAILURE(code) \
-  EXPECT_TRUE(kj::runCatchingExceptions([&]() { code; }) != nullptr);
-
-#ifdef KJ_DEBUG
-#define EXPECT_DEBUG_ANY_THROW EXPECT_ANY_THROW
-#else
-#define EXPECT_DEBUG_ANY_THROW(EXP)
-#endif
+// TODO(cleanup): Auto-generate stringification functions for union discriminants.
+namespace capnproto_test {
+namespace capnp {
+namespace test {
+inline kj::String KJ_STRINGIFY(TestUnion::Union0::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+inline kj::String KJ_STRINGIFY(TestUnion::Union1::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+inline kj::String KJ_STRINGIFY(TestUnion::Union2::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+inline kj::String KJ_STRINGIFY(TestUnion::Union3::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+inline kj::String KJ_STRINGIFY(TestUnnamedUnion::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+inline kj::String KJ_STRINGIFY(TestGroups::Groups::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+inline kj::String KJ_STRINGIFY(TestInterleavedGroups::Group1::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+}  // namespace test
+}  // namespace capnp
+}  // namespace capnproto_test
 
 namespace capnp {
-
-inline std::ostream& operator<<(std::ostream& os, const Data::Reader& value) {
-  return os.write(value.asChars().begin(), value.asChars().size());
-}
-inline std::ostream& operator<<(std::ostream& os, const Data::Builder& value) {
-  return os.write(value.asChars().begin(), value.asChars().size());
-}
-inline std::ostream& operator<<(std::ostream& os, const Text::Reader& value) {
-  return os.write(value.begin(), value.size());
-}
-inline std::ostream& operator<<(std::ostream& os, const Text::Builder& value) {
-  return os.write(value.begin(), value.size());
-}
-inline std::ostream& operator<<(std::ostream& os, Void) {
-  return os << "void";
-}
-
 namespace _ {  // private
 
 inline Data::Reader data(const char* str) {
@@ -215,6 +213,7 @@ public:
   TestPipelineImpl(int& callCount);
 
   kj::Promise<void> getCap(GetCapContext context) override;
+  kj::Promise<void> getAnyCap(GetAnyCapContext context) override;
 
 private:
   int& callCount;
@@ -271,6 +270,10 @@ public:
   kj::Promise<void> expectCancel(ExpectCancelContext context) override;
 
   kj::Promise<void> getHandle(GetHandleContext context) override;
+
+  kj::Promise<void> getNull(GetNullContext context) override;
+
+  kj::Promise<void> getEnormousString(GetEnormousStringContext context) override;
 
 private:
   int& callCount;

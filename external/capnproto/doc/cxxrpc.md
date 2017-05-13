@@ -154,6 +154,26 @@ callbacks simply won't be executed.  If you need explicit notification when a pr
 you can use its `attach()` method to attach an object with a destructor -- the destructor will be
 called when the promise either completes or is canceled.
 
+### Lazy Execution
+
+Callbacks registered with `.then()` which aren't themselves asynchronous (i.e. they return a value,
+not a promise) by default won't execute unless the result is actually used -- they are executed
+"lazily". This allows the runtime to optimize by combining a series of .then() callbacks into one.
+
+To force a `.then()` callback to execute as soon as its input is available, do one of the
+following:
+
+* Add it to a `kj::TaskSet` -- this is usually the best choice. You can cancel all tasks in the set
+  by destroying the `TaskSet`.
+* `.wait()` on it -- but this only works in a top-level wait scope, typically your program's main
+  function.
+* Call `.eagerlyEvaluate()` on it. This returns a new `Promise`. You can cancel the task by
+  destroying this `Promise` (without otherwise consuming it).
+* `.detach()` it. **WARNING:** `.detach()` is dangerous because there is no way to cancel a promise
+  once it has been detached. This can make it impossible to safely tear down the execution
+  environment, e.g. if the callback has captured references to other objects. It is therefore
+  recommended to avoid `.detach()` except in carefully-controlled circumstances.
+
 ### Other Features
 
 KJ supports a number of primitive operations that can be performed on promises.  The complete API
@@ -300,7 +320,7 @@ the shared memory segment.  Hence, the method implementation cannot just create 
 class DirectoryImpl final: public Directory::Server {
 public:
   kj::Promise<void> open(OpenContext context) override {
-    auto iter = files.find(context.getRequest().getName());
+    auto iter = files.find(context.getParams().getName());
 
     // Throw an exception if not found.
     KJ_REQUIRE(iter != files.end(), "File not found.");

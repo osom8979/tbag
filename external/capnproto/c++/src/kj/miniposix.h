@@ -19,8 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef KJ_PORTABLE_FD_H_
-#define KJ_PORTABLE_FD_H_
+#ifndef KJ_MINIPOSIX_H_
+#define KJ_MINIPOSIX_H_
 
 // This header provides a small subset of the POSIX API which also happens to be available on
 // Windows under slightly-different names.
@@ -32,12 +32,20 @@
 #if _WIN32
 #include <io.h>
 #include <direct.h>
+#include <fcntl.h>  // _O_BINARY
+#else
+#include <limits.h>
+#include <errno.h>
 #endif
 
 #if !_WIN32 || __MINGW32__
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#endif
+
+#if !_WIN32
+#include <sys/uio.h>
 #endif
 
 namespace kj {
@@ -57,6 +65,17 @@ inline ssize_t write(int fd, const void* buffer, size_t size) {
 inline int close(int fd) {
   return ::_close(fd);
 }
+
+#ifndef F_OK
+#define F_OK 0  // access() existence test
+#endif
+
+#ifndef S_ISREG
+#define S_ISREG(mode) (((mode) & S_IFMT) ==  S_IFREG)  // stat() regular file test
+#endif
+#ifndef S_ISDIR
+#define S_ISDIR(mode) (((mode) & S_IFMT) ==  S_IFDIR)  // stat() directory test
+#endif
 
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
@@ -82,7 +101,7 @@ using ::close;
 // We're on Windows, including MinGW. pipe() and mkdir() are non-standard even on MinGW.
 
 inline int pipe(int fds[2]) {
-  return ::_pipe(fds, 4096, false);
+  return ::_pipe(fds, 8192, _O_BINARY);
 }
 inline int mkdir(const char* path, int mode) {
   return ::_mkdir(path);
@@ -94,9 +113,40 @@ inline int mkdir(const char* path, int mode) {
 using ::pipe;
 using ::mkdir;
 
+inline size_t iovMax(size_t count) {
+  // Apparently, there is a maximum number of iovecs allowed per call.  I don't understand why.
+  // Most platforms define IOV_MAX but Linux defines only UIO_MAXIOV and others, like Hurd,
+  // define neither.
+  //
+  // On platforms where both IOV_MAX and UIO_MAXIOV are undefined, we poke sysconf(_SC_IOV_MAX),
+  // then try to fall back to the POSIX-mandated minimum of _XOPEN_IOV_MAX if that fails.
+  //
+  // http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/limits.h.html#tag_13_23_03_01
+
+#if defined(IOV_MAX)
+  // Solaris (and others?)
+  return IOV_MAX;
+#elif defined(UIO_MAXIOV)
+  // Linux
+  return UIO_MAXIOV;
+#else
+  // POSIX mystery meat
+
+  long iovmax;
+
+  errno = 0;
+  if ((iovmax = sysconf(_SC_IOV_MAX)) == -1) {
+    // assume iovmax == -1 && errno == 0 means "unbounded"
+    return errno ? _XOPEN_IOV_MAX : count;
+  } else {
+    return (size_t) iovmax;
+  }
+#endif
+}
+
 #endif
 
 }  // namespace miniposix
 }  // namespace kj
 
-#endif  // KJ_WIN32_FD_H_
+#endif  // KJ_MINIPOSIX_H_

@@ -22,7 +22,7 @@
 #ifndef CAPNP_SCHEMA_H_
 #define CAPNP_SCHEMA_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -179,7 +179,10 @@ private:
   friend class Type;
   friend kj::StringTree _::structString(
       _::StructReader reader, const _::RawBrandedSchema& schema);
+  friend kj::String _::enumString(uint16_t value, const _::RawBrandedSchema& schema);
 };
+
+kj::StringPtr KJ_STRINGIFY(const Schema& schema);
 
 class Schema::BrandArgumentList {
   // A list of generic parameter bindings for parameters of some particular type. Note that since
@@ -284,8 +287,8 @@ public:
   // value pointer itself can be treated as the root of an unchecked message -- if you know where
   // to find it, which is what this method helps you with.
   //
-  // For blobs, returns the offset of the begging of the blob's content within the first segment of
-  // the struct's schema.
+  // For blobs, returns the offset of the beginning of the blob's content within the first segment
+  // of the struct's schema.
   //
   // This is primarily useful for code generators.  The C++ code generator, for example, embeds
   // the entire schema as a raw word array within the generated code.  Of course, to implement
@@ -310,6 +313,8 @@ private:
 
   friend class StructSchema;
 };
+
+kj::StringPtr KJ_STRINGIFY(const StructSchema::Field& field);
 
 class StructSchema::FieldList {
 public:
@@ -588,6 +593,7 @@ public:
   inline Type(EnumSchema schema);
   inline Type(InterfaceSchema schema);
   inline Type(ListSchema schema);
+  inline Type(schema::Type::AnyPointer::Unconstrained::Which anyPointerKind);
   inline Type(BrandParameter param);
   inline Type(ImplicitParameter param);
 
@@ -609,6 +615,9 @@ public:
   kj::Maybe<ImplicitParameter> getImplicitParameter() const;
   // Only callable if which() returns ANY_POINTER. Returns null if the type is just a regular
   // AnyPointer and not a parameter. "Implicit parameters" refer to type parameters on methods.
+
+  inline schema::Type::AnyPointer::Unconstrained::Which whichAnyPointerKind() const;
+  // Only callable if which() returns ANY_POINTER.
 
   inline bool isVoid() const;
   inline bool isBool() const;
@@ -633,6 +642,8 @@ public:
   bool operator==(const Type& other) const;
   inline bool operator!=(const Type& other) const { return !(*this == other); }
 
+  size_t hashCode() const;
+
   inline Type wrapInList(uint depth = 1) const;
   // Return the Type formed by wrapping this type in List() `depth` times.
 
@@ -647,10 +658,15 @@ private:
   // If true, this refers to an implicit method parameter. baseType must be ANY_POINTER, scopeId
   // must be zero, and paramIndex indicates the parameter index.
 
-  uint16_t paramIndex;
-  // If baseType is ANY_POINTER but this Type actually refers to a type parameter, this is the
-  // index of the parameter among the parameters at its scope, and `scopeId` below is the type ID
-  // of the scope where the parameter was defined.
+  union {
+    uint16_t paramIndex;
+    // If baseType is ANY_POINTER but this Type actually refers to a type parameter, this is the
+    // index of the parameter among the parameters at its scope, and `scopeId` below is the type ID
+    // of the scope where the parameter was defined.
+
+    schema::Type::AnyPointer::Unconstrained::Which anyPointerKind;
+    // If scopeId is zero and isImplicitParam is false.
+  };
 
   union {
     const _::RawBrandedSchema* schema;  // if type is struct, enum, interface...
@@ -664,7 +680,7 @@ private:
 
   void requireUsableAs(Type expected) const;
 
-  friend class ListSchema;
+  friend class ListSchema;  // only for requireUsableAs()
 };
 
 // -------------------------------------------------------------------
@@ -840,6 +856,7 @@ inline Type::Type(schema::Type::Which primitive)
               primitive != schema::Type::LIST);
   if (primitive == schema::Type::ANY_POINTER) {
     scopeId = 0;
+    anyPointerKind = schema::Type::AnyPointer::Unconstrained::ANY_KIND;
   } else {
     schema = nullptr;
   }
@@ -859,6 +876,9 @@ inline Type::Type(InterfaceSchema schema)
     : baseType(schema::Type::INTERFACE), listDepth(0), schema(schema.raw) {}
 inline Type::Type(ListSchema schema)
     : Type(schema.getElementType()) { ++listDepth; }
+inline Type::Type(schema::Type::AnyPointer::Unconstrained::Which anyPointerKind)
+    : baseType(schema::Type::ANY_POINTER), listDepth(0), isImplicitParam(false),
+      anyPointerKind(anyPointerKind), scopeId(0) {}
 inline Type::Type(BrandParameter param)
     : baseType(schema::Type::ANY_POINTER), listDepth(0), isImplicitParam(false),
       paramIndex(param.index), scopeId(param.scopeId) {}
@@ -868,6 +888,12 @@ inline Type::Type(ImplicitParameter param)
 
 inline schema::Type::Which Type::which() const {
   return listDepth > 0 ? schema::Type::LIST : baseType;
+}
+
+inline schema::Type::AnyPointer::Unconstrained::Which Type::whichAnyPointerKind() const {
+  KJ_IREQUIRE(baseType == schema::Type::ANY_POINTER);
+  return !isImplicitParam && scopeId == 0 ? anyPointerKind
+      : schema::Type::AnyPointer::Unconstrained::ANY_KIND;
 }
 
 template <typename T>

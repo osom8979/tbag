@@ -1,6 +1,6 @@
 ## Process this file with autoconf to produce configure.
 
-AC_INIT([Capn Proto],[0.5.3],[capnproto@googlegroups.com],[capnproto-c++])
+AC_INIT([Capn Proto],[0.6.0],[capnproto@googlegroups.com],[capnproto-c++])
 
 AC_CONFIG_SRCDIR([src/capnp/layout.c++])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -57,14 +57,15 @@ AS_CASE("${host_os}", *mingw*, [
     PTHREAD_CFLAGS="-mthreads"
     PTHREAD_LIBS=""
     PTHREAD_CC=""
+    ASYNC_LIBS="-lws2_32"
     AC_SUBST(PTHREAD_LIBS)
     AC_SUBST(PTHREAD_CFLAGS)
     AC_SUBST(PTHREAD_CC)
-
-    # Disable pthreads when configuring gtest.
-    ac_configure_args="$ac_configure_args --without-pthreads"
+    AC_SUBST(ASYNC_LIBS)
   ], *, [
     ACX_PTHREAD
+    ASYNC_LIBS=""
+    AC_SUBST(ASYNC_LIBS)
   ])
 
 LT_INIT
@@ -104,11 +105,5 @@ AC_SUBST([STDLIB_FLAG])
 LIBS="$PTHREAD_LIBS $LIBS"
 CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 
-# AX_CXX_COMPILE_STDCXX_11 may have modified CXX, and we need gtest to use these modifications as
-# well (especially -stdlib).  Note that this may cause ac_configure_args to contain CXX= twice, but
-# the latter one should override the former.
-ac_configure_args="$ac_configure_args 'CXX=$CXX'"
-AC_CONFIG_SUBDIRS([gtest])
-
-AC_CONFIG_FILES([Makefile capnp.pc capnp-rpc.pc])
+AC_CONFIG_FILES([Makefile capnp.pc capnp-rpc.pc capnp-json.pc kj.pc kj-async.pc])
 AC_OUTPUT

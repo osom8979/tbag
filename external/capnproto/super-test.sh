@@ -9,8 +9,13 @@ doit() {
 
 QUICK=
 
+PARALLEL=$(nproc 2>/dev/null || echo 1)
+
 while [ $# -gt 0 ]; do
   case "$1" in
+    -j* )
+      PARALLEL=${1#-j}
+      ;;
     test )
       ;;  # nothing
     quick )
@@ -19,7 +24,7 @@ while [ $# -gt 0 ]; do
     caffeinate )
       # Re-run preventing sleep.
       shift
-      exec caffeinate $0 $@
+      exec caffeinate -ims $0 $@
       ;;
     tmpdir )
       # Clone to a temp directory.
@@ -43,9 +48,6 @@ while [ $# -gt 0 ]; do
         rm -rf $DIR
       fi
       git clone . $DIR
-      if [ -e c++/gtest ]; then
-        cp -r c++/gtest $DIR/c++/gtest
-      fi
       cd $DIR
       exec ./super-test.sh "$@"
       ;;
@@ -63,8 +65,15 @@ while [ $# -gt 0 ]; do
       ssh $HOST '(chmod -fR +w tmp-test-capnp || true) && rm -rf tmp-test-capnp && mkdir tmp-test-capnp && git init tmp-test-capnp'
       git push ssh://$HOST/~/tmp-test-capnp "$BRANCH:test"
       ssh $HOST "cd tmp-test-capnp && git checkout test"
-      scp -qr c++/gtest $HOST:~/tmp-test-capnp/c++/gtest
       exec ssh $HOST "cd tmp-test-capnp && ./super-test.sh $@ && cd .. && rm -rf tmp-test-capnp"
+      ;;
+    compiler )
+      if [ "$#" -lt 2 ]; then
+        echo "usage: $0 compiler CXX_NAME" >&2
+        exit 1
+      fi
+      export CXX="$2"
+      shift
       ;;
     clang )
       export CXX=clang++
@@ -86,24 +95,24 @@ while [ $# -gt 0 ]; do
       CROSS_HOST=$2
 
       cd c++
-      test -e gtest || doit ./setup-autotools.sh | tr = -
       test -e configure || doit autoreconf -i
       test ! -e Makefile || (echo "ERROR: Directory unclean!" >&2 && false)
+
+      export WINEPATH='Z:\usr\'"$CROSS_HOST"'\lib;Z:\usr\lib\gcc\'"$CROSS_HOST"'\6.3-win32;Z:'"$PWD"'\.libs'
+
       doit ./configure --host="$CROSS_HOST" --disable-shared CXXFLAGS='-static-libgcc -static-libstdc++'
-      doit make -j6 capnp.exe capnpc-c++.exe
 
-      cp capnp.exe capnp-mingw.exe
-      cp capnpc-c++.exe capnpc-c++-mingw.exe
-
-      doit make distclean
-      doit ./configure --host="$CROSS_HOST" --with-external-capnp --disable-shared --disable-reflection CXXFLAGS='-static-libgcc -static-libstdc++' CAPNP=./capnp-mingw.exe CAPNPC_CXX=./capnpc-c++-mingw.exe
-
-      doit make -j6 check
+      doit make -j$PARALLEL check
       doit make distclean
       rm -f *-mingw.exe
       exit 0
       ;;
     android )
+      # To install Android SDK:
+      # - Download command-line tools: https://developer.android.com/studio/index.html#command-tools
+      # - Run $SDK_HOME/tools/bin/sdkmanager platform-tools 'platforms;android-25' 'system-images;android-25;google_apis;armeabi-v7a' emulator 'build-tools;25.0.2' ndk-bundle
+      # - Run $SDK_HOME/tools/bin/avdmanager create avd -n capnp -k 'system-images;android-25;google_apis;armeabi-v7a' -b google_apis/armeabi-v7a
+      # - Run $SDK_HOME/ndk-bundle/build/tools/make_standalone_toolchain.py --arch arm --api 24 --install-dir $TOOLCHAIN_HOME
       if [ "$#" -ne 4 ]; then
         echo "usage: $0 android SDK_HOME TOOLCHAIN_HOME CROSS_HOST" >&2
         exit 1
@@ -113,11 +122,10 @@ while [ $# -gt 0 ]; do
       CROSS_HOST=$4
 
       cd c++
-      test -e gtest || doit ./setup-autotools.sh | tr = -
       test -e configure || doit autoreconf -i
       test ! -e Makefile || (echo "ERROR: Directory unclean!" >&2 && false)
       doit ./configure --disable-shared
-      doit make -j6 capnp capnpc-c++
+      doit make -j$PARALLEL capnp capnpc-c++
 
       cp capnp capnp-host
       cp capnpc-c++ capnpc-c++-host
@@ -126,17 +134,21 @@ while [ $# -gt 0 ]; do
       doit make distclean
       doit ./configure --host="$CROSS_HOST" --with-external-capnp --disable-shared CXXFLAGS='-pie -fPIE' CAPNP=./capnp-host CAPNPC_CXX=./capnpc-c++-host
 
-      doit make -j6
-      doit make -j6 capnp-test
+      doit make -j$PARALLEL
+      doit make -j$PARALLEL capnp-test
 
       echo "Starting emulator..."
       trap 'kill $(jobs -p)' EXIT
-      $SDK_HOME/tools/emulator -avd n6 -no-window &
-      $SDK_HOME/platform-tools/adb wait-for-device
+      # TODO(someday): Speed up with KVM? Then maybe we won't have to skip fuzz tests?
+      $SDK_HOME/emulator/emulator -avd capnp -no-window &
+      $SDK_HOME/platform-tools/adb 'wait-for-device'
       echo "Waiting for localhost to be resolvable..."
-      $SDK_HOME/platform-tools/adb shell 'while ! ping -c 1 localhost > /dev/null 2>&1; do sleep 1; done'
-      doit $SDK_HOME/platform-tools/adb push capnp-test /data/capnp-test
-      doit $SDK_HOME/platform-tools/adb shell 'cd /data && /data/capnp-test && echo ANDROID_""TESTS_PASSED' | tee android-test.log
+      doit $SDK_HOME/platform-tools/adb shell 'while ! ping -c 1 localhost > /dev/null 2>&1; do sleep 1; done'
+      # TODO(cleanup): With 'adb shell' I find I cannot put files anywhere, so I'm using 'su' a
+      #   lot here. There is probably a better way.
+      doit $SDK_HOME/platform-tools/adb shell 'su 0 tee /data/capnp-test > /dev/null' < capnp-test
+      doit $SDK_HOME/platform-tools/adb shell 'su 0 chmod a+rx /data/capnp-test'
+      doit $SDK_HOME/platform-tools/adb shell 'cd /data && CAPNP_SKIP_FUZZ_TEST=1 su 0 /data/capnp-test && echo ANDROID_""TESTS_PASSED' | tee android-test.log
       grep -q ANDROID_TESTS_PASSED android-test.log
 
       doit make distclean
@@ -149,7 +161,7 @@ while [ $# -gt 0 ]; do
       mkdir cmake-build
       cd cmake-build
       doit cmake -G "Unix Makefiles" ..
-      doit make -j6 check
+      doit make -j$PARALLEL check
       exit 0
       ;;
     exotic )
@@ -164,7 +176,7 @@ while [ $# -gt 0 ]; do
       echo "========================================================================="
       echo "Android"
       echo "========================================================================="
-      "$0" android /home/kenton/android/android-sdk-linux /home/kenton/android/android-16 arm-linux-androideabi
+      "$0" android /home/kenton/android-sdk-linux /home/kenton/android-24 arm-linux-androideabi
       echo "========================================================================="
       echo "CMake"
       echo "========================================================================="
@@ -210,8 +222,8 @@ done
 # because GCC warns about code that I know is OK.  Disable sign-compare because I've fixed more
 # sign-compare warnings than probably all other warnings combined and I've never seen it flag a
 # real problem. Disable unused parameters because it's stupidly noisy and never a real problem.
-# Disable missing-field-initializers because unfortuntaley gtest contains a warning of this class.
-export CXXFLAGS="-O2 -DDEBUG -Wall -Wextra -Werror -Wno-strict-aliasing -Wno-sign-compare -Wno-unused-parameter -Wno-missing-field-initializers"
+# Enable expensive release-gating tests.
+export CXXFLAGS="-O2 -DDEBUG -Wall -Wextra -Werror -Wno-strict-aliasing -Wno-sign-compare -Wno-unused-parameter -DCAPNP_EXPENSIVE_TESTS=1"
 
 STAGING=$PWD/tmp-staging
 
@@ -234,26 +246,26 @@ echo "========================================================================="
 # Apple now aliases gcc to clang, so probe to find out what compiler we're really using.
 if (${CXX:-g++} -dM -E -x c++ /dev/null 2>&1 | grep -q '__clang__'); then
   IS_CLANG=yes
+  DISABLE_OPTIMIZATION_IF_GCC=
 else
   IS_CLANG=no
+  DISABLE_OPTIMIZATION_IF_GCC=-O0
 fi
 
 if [ $IS_CLANG = yes ]; then
-  # There's an unused private field in gtest, which Clang dislikes.
-  #
-  # Also, don't fail out on this ridiculous "argument unused during compilation" warning.
-  export CXXFLAGS="$CXXFLAGS -Wno-unused-private-field -Wno-error=unused-command-line-argument"
+  # Don't fail out on this ridiculous "argument unused during compilation" warning.
+  export CXXFLAGS="$CXXFLAGS -Wno-error=unused-command-line-argument"
 else
   # GCC emits uninitialized warnings all over and they seem bogus. We use valgrind to test for
-  # uninitialized memory usage later on.
-  CXXFLAGS="$CXXFLAGS -Wno-maybe-uninitialized"
+  # uninitialized memory usage later on. GCC 4 also emits strange bogus warnings with
+  # -Wstrict-overflow, so we disable it.
+  CXXFLAGS="$CXXFLAGS -Wno-maybe-uninitialized -Wno-strict-overflow"
 fi
 
 cd c++
-doit ./setup-autotools.sh | tr = -
 doit autoreconf -i
 doit ./configure --prefix="$STAGING"
-doit make -j6 check
+doit make -j$PARALLEL check
 
 if [ $IS_CLANG = no ]; then
   # Verify that generated code compiles with pedantic warnings.  Make sure to treat capnp headers
@@ -309,7 +321,7 @@ echo "========================================================================="
 doit make distclean
 doit ./configure --prefix="$STAGING" --disable-shared \
     --with-external-capnp CAPNP=$STAGING/bin/capnp
-doit make -j6 check
+doit make -j$PARALLEL check
 
 echo "========================================================================="
 echo "Testing --disable-reflection"
@@ -318,7 +330,7 @@ echo "========================================================================="
 doit make distclean
 doit ./configure --prefix="$STAGING" --disable-shared --disable-reflection \
     --with-external-capnp CAPNP=$STAGING/bin/capnp
-doit make -j6 check
+doit make -j$PARALLEL check
 doit make distclean
 
 # Test 32-bit build now while we have $STAGING available for cross-compiling.
@@ -333,8 +345,8 @@ if [ "x`uname -m`" = "xx86_64" ]; then
     # Build as if we are cross-compiling, using the capnp we installed to $STAGING.
     doit ./configure --prefix="$STAGING" --disable-shared --host=i686-pc-cygwin \
         --with-external-capnp CAPNP=$STAGING/bin/capnp
-    doit make -j6
-    doit make -j6 capnp-test.exe
+    doit make -j$PARALLEL
+    doit make -j$PARALLEL capnp-test.exe
 
     # Expect a cygwin32 sshd to be listening at localhost port 2222, and use it
     # to run the tests.
@@ -345,7 +357,7 @@ if [ "x`uname -m`" = "xx86_64" ]; then
 
   elif [ "x${CXX:-g++}" != "xg++-4.8" ]; then
     doit ./configure CXX="${CXX:-g++} -m32" --disable-shared
-    doit make -j6 check
+    doit make -j$PARALLEL check
     doit make distclean
   fi
 fi
@@ -361,7 +373,7 @@ echo "========================================================================="
 echo "Testing c++ dist"
 echo "========================================================================="
 
-doit make -j6 distcheck
+doit make -j$PARALLEL distcheck
 doit make distclean
 rm capnproto-*.tar.gz
 
@@ -371,7 +383,7 @@ if [ "x`uname`" = xLinux ]; then
   echo "========================================================================="
 
   doit ./configure --disable-shared CXXFLAGS="$CXXFLAGS -DKJ_USE_FUTEX=0 -DKJ_USE_EPOLL=0"
-  doit make -j6 check
+  doit make -j$PARALLEL check
   doit make distclean
 fi
 
@@ -379,14 +391,19 @@ echo "========================================================================="
 echo "Testing with -fno-rtti and -fno-exceptions"
 echo "========================================================================="
 
+# GCC miscompiles capnpc-c++ when -fno-exceptions and -O2 are specified together. The
+# miscompilation happens in one specific inlined call site of Array::dispose(), but this method
+# is inlined in hundreds of other places without issue, so I have no idea how to narrow down the
+# bug. Clang works fine. So, for now, we disable optimizations on GCC for -fno-exceptions tests.
+
 doit ./configure --disable-shared CXXFLAGS="$CXXFLAGS -fno-rtti"
-doit make -j6 check
+doit make -j$PARALLEL check
 doit make distclean
-doit ./configure --disable-shared CXXFLAGS="$CXXFLAGS -fno-exceptions"
-doit make -j6 check
+doit ./configure --disable-shared CXXFLAGS="$CXXFLAGS -fno-exceptions $DISABLE_OPTIMIZATION_IF_GCC"
+doit make -j$PARALLEL check
 doit make distclean
-doit ./configure --disable-shared CXXFLAGS="$CXXFLAGS -fno-rtti -fno-exceptions"
-doit make -j6 check
+doit ./configure --disable-shared CXXFLAGS="$CXXFLAGS -fno-rtti -fno-exceptions $DISABLE_OPTIMIZATION_IF_GCC"
+doit make -j$PARALLEL check
 
 # Valgrind is currently "experimental and mostly broken" on OSX and fails to run the full test
 # suite, but I have it installed because it did manage to help me track down a bug or two.  Anyway,
@@ -399,9 +416,12 @@ if [ "x`uname`" != xDarwin ] && which valgrind > /dev/null; then
   echo "========================================================================="
 
   doit ./configure --disable-shared CXXFLAGS="-g"
-  doit make -j6
-  doit make -j6 capnp-test
-  doit valgrind --leak-check=full --track-fds=yes --error-exitcode=1 ./capnp-test
+  doit make -j$PARALLEL
+  doit make -j$PARALLEL capnp-test
+  # Running the fuzz tests under Valgrind is a great thing to do -- but it takes
+  # some 40 minutes. So, it needs to be done as a separate step of the release
+  # process, perhaps along with the AFL tests.
+  CAPNP_SKIP_FUZZ_TEST=1 doit valgrind --leak-check=full --track-fds=yes --error-exitcode=1 ./capnp-test
 fi
 
 doit make maintainer-clean

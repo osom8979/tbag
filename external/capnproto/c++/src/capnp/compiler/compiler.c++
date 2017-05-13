@@ -51,7 +51,7 @@ private:
   bool initialized = false;
 };
 
-class Compiler::Node: public NodeTranslator::Resolver {
+class Compiler::Node final: public NodeTranslator::Resolver {
   // Passes through four states:
   // - Stub:  On initial construction, the Node is just a placeholder object.  Its ID has been
   //     determined, and it is placed in its parent's member table as well as the compiler's
@@ -99,6 +99,7 @@ public:
       uint64_t id, schema::Brand::Reader brand) override;
   kj::Maybe<schema::Node::Reader> resolveFinalSchema(uint64_t id) override;
   kj::Maybe<ResolvedDecl> resolveImport(kj::StringPtr name) override;
+  kj::Maybe<kj::Array<const byte>> readEmbed(kj::StringPtr name) override;
   kj::Maybe<Type> resolveBootstrapType(schema::Type::Reader type, Schema scope) override;
 
 private:
@@ -232,6 +233,7 @@ public:
   kj::StringPtr getSourceName() { return parserModule.getSourceName(); }
 
   kj::Maybe<CompiledModule&> importRelative(kj::StringPtr importPath);
+  kj::Maybe<kj::Array<const byte>> embedRelative(kj::StringPtr importPath);
 
   Orphan<List<schema::CodeGeneratorRequest::RequestedFile::Import>>
       getFileImportTable(Orphanage orphanage);
@@ -318,11 +320,12 @@ private:
   kj::Arena nodeArena;
   // Arena used to allocate nodes and other permanent objects.
 
-  Workspace workspace;
-  // The temporary workspace.
-
   std::unordered_map<Module*, kj::Own<CompiledModule>> modules;
   // Map of parser modules to compiler modules.
+
+  Workspace workspace;
+  // The temporary workspace. This field must be declared after `modules` because objects
+  // allocated in the workspace may hold references to the compiled modules in `modules`.
 
   std::unordered_map<uint64_t, Node*> nodesById;
   // Map of nodes by ID.
@@ -678,6 +681,11 @@ void Compiler::Node::traverse(uint eagerness, std::unordered_map<Node*, uint>& s
       for (auto& child: content->orderedNestedNodes) {
         child->traverse(eagerness, seen, finalLoader);
       }
+
+      // Also traverse `using` declarations.
+      for (auto& child: content->aliases) {
+        child.second->compile();
+      }
     }
   }
 }
@@ -932,6 +940,10 @@ Compiler::Node::resolveImport(kj::StringPtr name) {
   }
 }
 
+kj::Maybe<kj::Array<const byte>> Compiler::Node::readEmbed(kj::StringPtr name) {
+  return module->embedRelative(name);
+}
+
 kj::Maybe<Type> Compiler::Node::resolveBootstrapType(schema::Type::Reader type, Schema scope) {
   // TODO(someday): Arguably should return null if the type or its dependencies are placeholders.
 
@@ -963,6 +975,10 @@ kj::Maybe<Compiler::CompiledModule&> Compiler::CompiledModule::importRelative(
       });
 }
 
+kj::Maybe<kj::Array<const byte>> Compiler::CompiledModule::embedRelative(kj::StringPtr embedPath) {
+  return parserModule.embedRelative(embedPath);
+}
+
 static void findImports(Expression::Reader exp, std::set<kj::StringPtr>& output) {
   switch (exp.which()) {
     case Expression::UNKNOWN:
@@ -973,6 +989,7 @@ static void findImports(Expression::Reader exp, std::set<kj::StringPtr>& output)
     case Expression::BINARY:
     case Expression::RELATIVE_NAME:
     case Expression::ABSOLUTE_NAME:
+    case Expression::EMBED:
       break;
 
     case Expression::IMPORT:
@@ -1068,6 +1085,11 @@ static void findImports(Declaration::Reader decl, std::set<kj::StringPtr>& outpu
 
 Orphan<List<schema::CodeGeneratorRequest::RequestedFile::Import>>
     Compiler::CompiledModule::getFileImportTable(Orphanage orphanage) {
+  // Build a table of imports for CodeGeneratorRequest.RequestedFile.imports. Note that we only
+  // care about type imports, not constant value imports, since constant values (including default
+  // values) are already embedded in full in the schema. In other words, we only need the imports
+  // that would need to be #included in the generated code.
+
   std::set<kj::StringPtr> importNames;
   findImports(content.getReader().getRoot(), importNames);
 

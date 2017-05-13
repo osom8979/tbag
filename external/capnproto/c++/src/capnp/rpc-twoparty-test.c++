@@ -22,10 +22,18 @@
 #include "rpc-twoparty.h"
 #include "test-util.h"
 #include <capnp/rpc.capnp.h>
-#include <kj/async-unix.h>
 #include <kj/debug.h>
 #include <kj/thread.h>
-#include <gtest/gtest.h>
+#include <kj/compat/gtest.h>
+
+// TODO(cleanup): Auto-generate stringification functions for union discriminants.
+namespace capnp {
+namespace rpc {
+inline kj::String KJ_STRINGIFY(Message::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+}  // namespace rpc
+}  // namespace capnp
 
 namespace capnp {
 namespace _ {
@@ -297,6 +305,116 @@ TEST(TwoPartyNetwork, Abort) {
   EXPECT_EQ(rpc::Message::ABORT, reply->getBody().getAs<rpc::Message>().which());
 
   EXPECT_TRUE(conn->receiveIncomingMessage().wait(ioContext.waitScope) == nullptr);
+}
+
+TEST(TwoPartyNetwork, ConvenienceClasses) {
+  auto ioContext = kj::setupAsyncIo();
+
+  int callCount = 0;
+  TwoPartyServer server(kj::heap<TestInterfaceImpl>(callCount));
+
+  auto address = ioContext.provider->getNetwork()
+      .parseAddress("127.0.0.1").wait(ioContext.waitScope);
+
+  auto listener = address->listen();
+  auto listenPromise = server.listen(*listener);
+
+  address = ioContext.provider->getNetwork()
+      .parseAddress("127.0.0.1", listener->getPort()).wait(ioContext.waitScope);
+
+  auto connection = address->connect().wait(ioContext.waitScope);
+  TwoPartyClient client(*connection);
+  auto cap = client.bootstrap().castAs<test::TestInterface>();
+
+  auto request = cap.fooRequest();
+  request.setI(123);
+  request.setJ(true);
+  EXPECT_EQ(0, callCount);
+  auto response = request.send().wait(ioContext.waitScope);
+  EXPECT_EQ("foo", response.getX());
+  EXPECT_EQ(1, callCount);
+}
+
+TEST(TwoPartyNetwork, HugeMessage) {
+  auto ioContext = kj::setupAsyncIo();
+  int callCount = 0;
+  int handleCount = 0;
+
+  auto serverThread = runServer(*ioContext.provider, callCount, handleCount);
+  TwoPartyVatNetwork network(*serverThread.pipe, rpc::twoparty::Side::CLIENT);
+  auto rpcClient = makeRpcClient(network);
+
+  auto client = getPersistentCap(rpcClient, rpc::twoparty::Side::SERVER,
+      test::TestSturdyRefObjectId::Tag::TEST_MORE_STUFF).castAs<test::TestMoreStuff>();
+
+  // Oversized request fails.
+  {
+    auto req = client.methodWithDefaultsRequest();
+    req.initA(100000000);  // 100 MB
+
+    KJ_EXPECT_THROW_RECOVERABLE_MESSAGE("larger than the single-message size limit",
+        req.send().ignoreResult().wait(ioContext.waitScope));
+  }
+
+  // Oversized response fails.
+  KJ_EXPECT_THROW_RECOVERABLE_MESSAGE("larger than the single-message size limit",
+      client.getEnormousStringRequest().send().ignoreResult().wait(ioContext.waitScope));
+
+  // Connection is still up.
+  {
+    auto req = client.getCallSequenceRequest();
+    req.setExpected(0);
+    KJ_EXPECT(req.send().wait(ioContext.waitScope).getN() == 0);
+  }
+}
+
+class TestAuthenticatedBootstrapImpl final
+    : public test::TestAuthenticatedBootstrap<rpc::twoparty::VatId>::Server {
+public:
+  TestAuthenticatedBootstrapImpl(rpc::twoparty::VatId::Reader clientId) {
+    this->clientId.setRoot(clientId);
+  }
+
+protected:
+  kj::Promise<void> getCallerId(GetCallerIdContext context) override {
+    context.getResults().setCaller(clientId.getRoot<rpc::twoparty::VatId>());
+    return kj::READY_NOW;
+  }
+
+private:
+  MallocMessageBuilder clientId;
+};
+
+class TestBootstrapFactory: public BootstrapFactory<rpc::twoparty::VatId> {
+public:
+  Capability::Client createFor(rpc::twoparty::VatId::Reader clientId) {
+    called = true;
+    EXPECT_EQ(rpc::twoparty::Side::CLIENT, clientId.getSide());
+    return kj::heap<TestAuthenticatedBootstrapImpl>(clientId);
+  }
+
+  bool called = false;
+};
+
+kj::AsyncIoProvider::PipeThread runAuthenticatingServer(
+    kj::AsyncIoProvider& ioProvider, BootstrapFactory<rpc::twoparty::VatId>& bootstrapFactory) {
+  return ioProvider.newPipeThread([&bootstrapFactory](
+      kj::AsyncIoProvider& ioProvider, kj::AsyncIoStream& stream, kj::WaitScope& waitScope) {
+    TwoPartyVatNetwork network(stream, rpc::twoparty::Side::SERVER);
+    auto server = makeRpcServer(network, bootstrapFactory);
+    network.onDisconnect().wait(waitScope);
+  });
+}
+
+TEST(TwoPartyNetwork, BootstrapFactory) {
+  auto ioContext = kj::setupAsyncIo();
+  TestBootstrapFactory bootstrapFactory;
+  auto serverThread = runAuthenticatingServer(*ioContext.provider, bootstrapFactory);
+  TwoPartyClient client(*serverThread.pipe);
+  auto resp = client.bootstrap().castAs<test::TestAuthenticatedBootstrap<rpc::twoparty::VatId>>()
+      .getCallerIdRequest().send().wait(ioContext.waitScope);
+  EXPECT_EQ(rpc::twoparty::Side::CLIENT, resp.getCaller().getSide());
+  EXPECT_TRUE(bootstrapFactory.called);
 }
 
 }  // namespace

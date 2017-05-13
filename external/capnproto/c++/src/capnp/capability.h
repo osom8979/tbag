@@ -22,7 +22,7 @@
 #ifndef CAPNP_CAPABILITY_H_
 #define CAPNP_CAPABILITY_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -31,6 +31,8 @@
 #endif
 
 #include <kj/async.h>
+#include <kj/vector.h>
+#include "raw-schema.h"
 #include "any.h"
 #include "pointer-helpers.h"
 
@@ -61,10 +63,10 @@ public:
   RemotePromise& operator=(RemotePromise&& other) = default;
 };
 
+class LocalClient;
 namespace _ { // private
-struct RawSchema;
-struct RawBrandedSchema;
 extern const RawSchema NULL_INTERFACE_SCHEMA;  // defined in schema.c++
+class CapabilityServerSetBase;
 }  // namespace _ (private)
 
 struct Capability {
@@ -80,15 +82,14 @@ struct Capability {
     static constexpr Kind kind = Kind::INTERFACE;
     static constexpr _::RawSchema const* schema = &_::NULL_INTERFACE_SCHEMA;
 
-    static const _::RawBrandedSchema* const brand;
-    // Can't quite declare this one inline without including generated-header-support.h. Avoiding
-    // for now by declaring out-of-line.
-    // TODO(cleanup): Split RawSchema stuff into its own header that can be included here, or
-    //   something.
+    static const _::RawBrandedSchema* brand() {
+      return &_::NULL_INTERFACE_SCHEMA.defaultBrand;
+    }
   };
 };
 
 // =======================================================================================
+// Capability clients
 
 class RequestHook;
 class ResponseHook;
@@ -101,14 +102,15 @@ class Request: public Params::Builder {
   // structure with a method send() that actually sends it.
   //
   // Given a Cap'n Proto method `foo(a :A, b :B): C`, the generated client interface will have
-  // a method `Request<FooParams, C> startFoo()` (as well as a convenience method
+  // a method `Request<FooParams, C> fooRequest()` (as well as a convenience method
   // `RemotePromise<C> foo(A::Reader a, B::Reader b)`).
 
 public:
   inline Request(typename Params::Builder builder, kj::Own<RequestHook>&& hook)
       : Params::Builder(builder), hook(kj::mv(hook)) {}
+  inline Request(decltype(nullptr)): Params::Builder(nullptr) {}
 
-  RemotePromise<Results> send();
+  RemotePromise<Results> send() KJ_WARN_UNUSED_RESULT;
   // Send the call and return a promise for the results.
 
 private:
@@ -135,12 +137,16 @@ private:
 
   template <typename, typename>
   friend class Request;
+  friend class ResponseHook;
 };
 
 class Capability::Client {
   // Base type for capability clients.
 
 public:
+  typedef Capability Reads;
+  typedef Capability Calls;
+
   Client(decltype(nullptr));
   // If you need to declare a Client before you have anything to assign to it (perhaps because
   // the assignment is going to occur in an if/else scope), you can start by initializing it to
@@ -220,10 +226,12 @@ private:
   friend struct DynamicList;
   template <typename, Kind>
   friend struct List;
+  friend class _::CapabilityServerSetBase;
+  friend class ClientHook;
 };
 
 // =======================================================================================
-// Local capabilities
+// Capability servers
 
 class CallContextHook;
 
@@ -288,7 +296,7 @@ public:
   //
   // Keep in mind that asynchronous cancellation cannot occur while the method is synchronously
   // executing on a local thread.  The method must perform an asynchronous operation or call
-  // `EventLoop::current().runLater()` to yield control.
+  // `EventLoop::current().evalLater()` to yield control.
   //
   // Note:  You might think that we should offer `onCancel()` and/or `isCanceled()` methods that
   // provide notification when the caller cancels the request without forcefully killing off the
@@ -313,6 +321,8 @@ class Capability::Server {
   // dispatchCall().
 
 public:
+  typedef Capability Serves;
+
   virtual kj::Promise<void> dispatchCall(uint64_t interfaceId, uint16_t methodId,
                                          CallContext<AnyPointer, AnyPointer> context) = 0;
   // Call the given method.  `params` is the input struct, and should be released as soon as it
@@ -323,6 +333,17 @@ public:
   //   a proxy.
 
 protected:
+  inline Capability::Client thisCap();
+  // Get a capability pointing to this object, much like the `this` keyword.
+  //
+  // The effect of this method is undefined if:
+  // - No capability client has been created pointing to this object. (This is always the case in
+  //   the server's constructor.)
+  // - The capability client pointing at this object has been destroyed. (This is always the case
+  //   in the server's destructor.)
+  // - Multiple capability clients have been created around the same server (possible if the server
+  //   is refcounted, which is not recommended since the client itself provides refcounting).
+
   template <typename Params, typename Results>
   CallContext<Params, Results> internalGetTypedContext(
       CallContext<AnyPointer, AnyPointer> typeless);
@@ -332,6 +353,107 @@ protected:
                                           uint64_t typeId, uint16_t methodId);
   kj::Promise<void> internalUnimplemented(const char* interfaceName, const char* methodName,
                                           uint64_t typeId, uint16_t methodId);
+
+private:
+  ClientHook* thisHook = nullptr;
+  friend class LocalClient;
+};
+
+// =======================================================================================
+
+class ReaderCapabilityTable: private _::CapTableReader {
+  // Class which imbues Readers with the ability to read capabilities.
+  //
+  // In Cap'n Proto format, the encoding of a capability pointer is simply an integer index into
+  // an external table. Since these pointers fundamentally point outside the message, a
+  // MessageReader by default has no idea what they point at, and therefore reading capabilities
+  // from such a reader will throw exceptions.
+  //
+  // In order to be able to read capabilities, you must first attach a capability table, using
+  // this class. By "imbuing" a Reader, you get a new Reader which will interpret capability
+  // pointers by treating them as indexes into the ReaderCapabilityTable.
+  //
+  // Note that when using Cap'n Proto's RPC system, this is handled automatically.
+
+public:
+  explicit ReaderCapabilityTable(kj::Array<kj::Maybe<kj::Own<ClientHook>>> table);
+  KJ_DISALLOW_COPY(ReaderCapabilityTable);
+
+  template <typename T>
+  T imbue(T reader);
+  // Return a reader equivalent to `reader` except that when reading capability-valued fields,
+  // the capabilities are looked up in this table.
+
+private:
+  kj::Array<kj::Maybe<kj::Own<ClientHook>>> table;
+
+  kj::Maybe<kj::Own<ClientHook>> extractCap(uint index) override;
+};
+
+class BuilderCapabilityTable: private _::CapTableBuilder {
+  // Class which imbues Builders with the ability to read and write capabilities.
+  //
+  // This is much like ReaderCapabilityTable, except for builders. The table starts out empty,
+  // but capabilities can be added to it over time.
+
+public:
+  BuilderCapabilityTable();
+  KJ_DISALLOW_COPY(BuilderCapabilityTable);
+
+  inline kj::ArrayPtr<kj::Maybe<kj::Own<ClientHook>>> getTable() { return table; }
+
+  template <typename T>
+  T imbue(T builder);
+  // Return a builder equivalent to `builder` except that when reading capability-valued fields,
+  // the capabilities are looked up in this table.
+
+private:
+  kj::Vector<kj::Maybe<kj::Own<ClientHook>>> table;
+
+  kj::Maybe<kj::Own<ClientHook>> extractCap(uint index) override;
+  uint injectCap(kj::Own<ClientHook>&& cap) override;
+  void dropCap(uint index) override;
+};
+
+// =======================================================================================
+
+namespace _ {  // private
+
+class CapabilityServerSetBase {
+public:
+  Capability::Client addInternal(kj::Own<Capability::Server>&& server, void* ptr);
+  kj::Promise<void*> getLocalServerInternal(Capability::Client& client);
+};
+
+}  // namespace _ (private)
+
+template <typename T>
+class CapabilityServerSet: private _::CapabilityServerSetBase {
+  // Allows a server to recognize its own capabilities when passed back to it, and obtain the
+  // underlying Server objects associated with them.
+  //
+  // All objects in the set must have the same interface type T. The objects may implement various
+  // interfaces derived from T (and in fact T can be `capnp::Capability` to accept all objects),
+  // but note that if you compile with RTTI disabled then you will not be able to down-cast through
+  // virtual inheritance, and all inheritance between server interfaces is virtual. So, with RTTI
+  // disabled, you will likely need to set T to be the most-derived Cap'n Proto interface type,
+  // and you server class will need to be directly derived from that, so that you can use
+  // static_cast (or kj::downcast) to cast to it after calling getLocalServer(). (If you compile
+  // with RTTI, then you can freely dynamic_cast and ignore this issue!)
+
+public:
+  CapabilityServerSet() = default;
+  KJ_DISALLOW_COPY(CapabilityServerSet);
+
+  typename T::Client add(kj::Own<typename T::Server>&& server);
+  // Create a new capability Client for the given Server and also add this server to the set.
+
+  kj::Promise<kj::Maybe<typename T::Server&>> getLocalServer(typename T::Client& client);
+  // Given a Client pointing to a server previously passed to add(), return the corresponding
+  // Server. This returns a promise because if the input client is itself a promise, this must
+  // wait for it to resolve. Keep in mind that the server will be deleted when all clients are
+  // gone, so the caller should make sure to keep the client alive (hence why this method only
+  // accepts an lvalue input).
 };
 
 // =======================================================================================
@@ -365,6 +487,11 @@ class ResponseHook {
 public:
   virtual ~ResponseHook() noexcept(false);
   // Just here to make sure the type is dynamic.
+
+  template <typename T>
+  inline static kj::Own<ResponseHook> from(Response<T>&& response) {
+    return kj::mv(response.hook);
+  }
 };
 
 // class PipelineHook is declared in any.h because it is needed there.
@@ -387,17 +514,17 @@ public:
                                       kj::Own<CallContextHook>&& context) = 0;
   // Call the object, but the caller controls allocation of the request/response objects.  If the
   // callee insists on allocating these objects itself, it must make a copy.  This version is used
-  // when calls come in over the network via an RPC system.  During the call, the context object
-  // may be used from any thread so long as it is only used from one thread at a time.  Note that
-  // even if the returned `Promise<void>` is discarded, the call may continue executing if any
-  // pipelined calls are waiting for it; the call is only truly done when the CallContextHook is
-  // destroyed.
+  // when calls come in over the network via an RPC system.  Note that even if the returned
+  // `Promise<void>` is discarded, the call may continue executing if any pipelined calls are
+  // waiting for it.
   //
   // Since the caller of this method chooses the CallContext implementation, it is the caller's
   // responsibility to ensure that the returned promise is not canceled unless allowed via
   // the context's `allowCancellation()`.
   //
-  // The call must not begin synchronously, as the caller may hold arbitrary mutexes.
+  // The call must not begin synchronously; the callee must arrange for the call to begin in a
+  // later turn of the event loop. Otherwise, application code may call back and affect the
+  // callee's state in an unexpected way.
 
   virtual kj::Maybe<ClientHook&> getResolved() = 0;
   // If this ClientHook is a promise that has already resolved, returns the inner, resolved version
@@ -421,6 +548,20 @@ public:
   // Returns a void* that identifies who made this client.  This can be used by an RPC adapter to
   // discover when a capability it needs to marshal is one that it created in the first place, and
   // therefore it can transfer the capability without proxying.
+
+  static const uint NULL_CAPABILITY_BRAND;
+  // Value is irrelevant; used for pointer.
+
+  inline bool isNull() { return getBrand() == &NULL_CAPABILITY_BRAND; }
+  // Returns true if the capability was created as a result of assigning a Client to null or by
+  // reading a null pointer out of a Cap'n Proto message.
+
+  virtual void* getLocalServer(_::CapabilityServerSetBase& capServerSet);
+  // If this is a local capability created through `capServerSet`, return the underlying Server.
+  // Otherwise, return nullptr. Default implementation (which everyone except LocalClient should
+  // use) always returns nullptr.
+
+  static kj::Own<ClientHook> from(Capability::Client client) { return kj::mv(client.hook); }
 };
 
 class CallContextHook {
@@ -450,6 +591,10 @@ kj::Own<ClientHook> newLocalPromiseClient(kj::Promise<kj::Own<ClientHook>>&& pro
 // Returns a ClientHook that queues up calls until `promise` resolves, then forwards them to
 // the new client.  This hook's `getResolved()` and `whenMoreResolved()` methods will reflect the
 // redirection to the eventual replacement client.
+
+kj::Own<PipelineHook> newLocalPromisePipeline(kj::Promise<kj::Own<PipelineHook>>&& promise);
+// Returns a PipelineHook that queues up calls until `promise` resolves, then forwards them to
+// the new pipeline.
 
 kj::Own<ClientHook> newBrokenCap(kj::StringPtr reason);
 kj::Own<ClientHook> newBrokenCap(kj::Exception&& reason);
@@ -505,10 +650,11 @@ struct List<T, Kind::INTERFACE> {
     Reader() = default;
     inline explicit Reader(_::ListReader reader): reader(reader) {}
 
-    inline uint size() const { return reader.size() / ELEMENTS; }
+    inline uint size() const { return unbound(reader.size() / ELEMENTS); }
     inline typename T::Client operator[](uint index) const {
       KJ_IREQUIRE(index < size());
-      return typename T::Client(reader.getPointerElement(index * ELEMENTS).getCapability());
+      return typename T::Client(reader.getPointerElement(
+          bounded(index) * ELEMENTS).getCapability());
     }
 
     typedef _::IndexingIterator<const Reader, typename T::Client> Iterator;
@@ -534,25 +680,26 @@ struct List<T, Kind::INTERFACE> {
     inline Builder(decltype(nullptr)) {}
     inline explicit Builder(_::ListBuilder builder): builder(builder) {}
 
-    inline operator Reader() { return Reader(builder.asReader()); }
-    inline Reader asReader() { return Reader(builder.asReader()); }
+    inline operator Reader() const { return Reader(builder.asReader()); }
+    inline Reader asReader() const { return Reader(builder.asReader()); }
 
-    inline uint size() const { return builder.size() / ELEMENTS; }
+    inline uint size() const { return unbound(builder.size() / ELEMENTS); }
     inline typename T::Client operator[](uint index) {
       KJ_IREQUIRE(index < size());
-      return typename T::Client(builder.getPointerElement(index * ELEMENTS).getCapability());
+      return typename T::Client(builder.getPointerElement(
+          bounded(index) * ELEMENTS).getCapability());
     }
     inline void set(uint index, typename T::Client value) {
       KJ_IREQUIRE(index < size());
-      builder.getPointerElement(index * ELEMENTS).setCapability(kj::mv(value.hook));
+      builder.getPointerElement(bounded(index) * ELEMENTS).setCapability(kj::mv(value.hook));
     }
     inline void adopt(uint index, Orphan<T>&& value) {
       KJ_IREQUIRE(index < size());
-      builder.getPointerElement(index * ELEMENTS).adopt(kj::mv(value));
+      builder.getPointerElement(bounded(index) * ELEMENTS).adopt(kj::mv(value));
     }
     inline Orphan<T> disown(uint index) {
       KJ_IREQUIRE(index < size());
-      return Orphan<T>(builder.getPointerElement(index * ELEMENTS).disown());
+      return Orphan<T>(builder.getPointerElement(bounded(index) * ELEMENTS).disown());
     }
 
     typedef _::IndexingIterator<Builder, typename T::Client> Iterator;
@@ -568,7 +715,7 @@ struct List<T, Kind::INTERFACE> {
 
 private:
   inline static _::ListBuilder initPointer(_::PointerBuilder builder, uint size) {
-    return builder.initList(ElementSize::POINTER, size * ELEMENTS);
+    return builder.initList(ElementSize::POINTER, bounded(size) * ELEMENTS);
   }
   inline static _::ListBuilder getFromPointer(_::PointerBuilder builder, const word* defaultValue) {
     return builder.getList(ElementSize::POINTER, defaultValue);
@@ -590,6 +737,7 @@ private:
 template <typename Params, typename Results>
 RemotePromise<Results> Request<Params, Results>::send() {
   auto typelessPromise = hook->send();
+  hook = nullptr;  // prevent reuse
 
   // Convert the Promise to return the correct response type.
   // Explicitly upcast to kj::Promise to make clear that calling .then() doesn't invalidate the
@@ -688,6 +836,48 @@ CallContext<Params, Results> Capability::Server::internalGetTypedContext(
     CallContext<AnyPointer, AnyPointer> typeless) {
   return CallContext<Params, Results>(*typeless.hook);
 }
+
+Capability::Client Capability::Server::thisCap() {
+  return Client(thisHook->addRef());
+}
+
+template <typename T>
+T ReaderCapabilityTable::imbue(T reader) {
+  return T(_::PointerHelpers<FromReader<T>>::getInternalReader(reader).imbue(this));
+}
+
+template <typename T>
+T BuilderCapabilityTable::imbue(T builder) {
+  return T(_::PointerHelpers<FromBuilder<T>>::getInternalBuilder(kj::mv(builder)).imbue(this));
+}
+
+template <typename T>
+typename T::Client CapabilityServerSet<T>::add(kj::Own<typename T::Server>&& server) {
+  void* ptr = reinterpret_cast<void*>(server.get());
+  // Clang insists that `castAs` is a template-dependent member and therefore we need the
+  // `template` keyword here, but AFAICT this is wrong: addImpl() is not a template.
+  return addInternal(kj::mv(server), ptr).template castAs<T>();
+}
+
+template <typename T>
+kj::Promise<kj::Maybe<typename T::Server&>> CapabilityServerSet<T>::getLocalServer(
+    typename T::Client& client) {
+  return getLocalServerInternal(client)
+      .then([](void* server) -> kj::Maybe<typename T::Server&> {
+    if (server == nullptr) {
+      return nullptr;
+    } else {
+      return *reinterpret_cast<typename T::Server*>(server);
+    }
+  });
+}
+
+template <typename T>
+struct Orphanage::GetInnerReader<T, Kind::INTERFACE> {
+  static inline kj::Own<ClientHook> apply(typename T::Client t) {
+    return ClientHook::from(kj::mv(t));
+  }
+};
 
 }  // namespace capnp
 

@@ -58,7 +58,8 @@ public:
     if (amount == 0 || canPrintAllInline(items, kind)) {
       return kj::StringTree(kj::mv(items), ", ");
     } else {
-      char delim[amount * 2 + 3];
+      KJ_STACK_ARRAY(char, delimArrayPtr, amount * 2 + 3, 32, 256);
+      auto delim = delimArrayPtr.begin();
       delim[0] = ',';
       delim[1] = '\n';
       memset(delim + 2, ' ', amount * 2);
@@ -283,6 +284,15 @@ namespace _ {  // private
 
 kj::StringTree structString(StructReader reader, const RawBrandedSchema& schema) {
   return stringify(DynamicStruct::Reader(Schema(&schema).asStruct(), reader));
+}
+
+kj::String enumString(uint16_t value, const RawBrandedSchema& schema) {
+  auto enumerants = Schema(&schema).asEnum().getEnumerants();
+  if (value < enumerants.size()) {
+    return kj::heapString(enumerants[value].getProto().getName());
+  } else {
+    return kj::str(value);
+  }
 }
 
 }  // namespace _ (private)

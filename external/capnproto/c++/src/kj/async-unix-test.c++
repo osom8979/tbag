@@ -19,6 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !_WIN32
+
 #include "async-unix.h"
 #include "thread.h"
 #include "debug.h"
@@ -26,12 +28,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
-#include <gtest/gtest.h>
+#include <netinet/in.h>
+#include <kj/compat/gtest.h>
 #include <pthread.h>
 #include <algorithm>
 
 namespace kj {
+namespace {
 
 inline void delay() { usleep(10000); }
 
@@ -42,18 +47,21 @@ inline void delay() { usleep(10000); }
 #define EXPECT_SI_CODE(a,b)
 #endif
 
-class AsyncUnixTest: public testing::Test {
-public:
-  static void SetUpTestCase() {
+void captureSignals() {
+  static bool captured = false;
+  if (!captured) {
+    captured = true;
+
     // We use SIGIO and SIGURG as our test signals because they're two signals that we can be
     // reasonably confident won't otherwise be delivered to any KJ or Cap'n Proto test.  We can't
     // use SIGUSR1 because it is reserved by UnixEventPort and SIGUSR2 is used by Valgrind on OSX.
     UnixEventPort::captureSignal(SIGURG);
     UnixEventPort::captureSignal(SIGIO);
   }
-};
+}
 
-TEST_F(AsyncUnixTest, Signals) {
+TEST(AsyncUnixTest, Signals) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -65,15 +73,20 @@ TEST_F(AsyncUnixTest, Signals) {
   EXPECT_SI_CODE(SI_USER, info.si_code);
 }
 
-#if defined(SIGRTMIN) && !__BIONIC__
-TEST_F(AsyncUnixTest, SignalWithValue) {
+#if defined(SIGRTMIN) && !__BIONIC__ && !(__linux__ && __mips__)
+TEST(AsyncUnixTest, SignalWithValue) {
   // This tests that if we use sigqueue() to attach a value to the signal, that value is received
   // correctly.  Note that this only works on platforms that support real-time signals -- even
   // though the signal we're sending is SIGURG, the sigqueue() system call is introduced by RT
   // signals.  Hence this test won't run on e.g. Mac OSX.
   //
   // Also, Android's bionic does not appear to support sigqueue() even though the kernel does.
+  //
+  // Also, this test fails on Linux on mipsel. si_value comes back as zero. No one with a mips
+  // machine wants to debug the problem but they demand a patch fixing it, so we disable the test.
+  // Sad. https://github.com/sandstorm-io/capnproto/issues/204
 
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -89,14 +102,19 @@ TEST_F(AsyncUnixTest, SignalWithValue) {
   EXPECT_EQ(123, info.si_value.sival_int);
 }
 
-TEST_F(AsyncUnixTest, SignalWithPointerValue) {
+TEST(AsyncUnixTest, SignalWithPointerValue) {
   // This tests that if we use sigqueue() to attach a value to the signal, that value is received
   // correctly.  Note that this only works on platforms that support real-time signals -- even
   // though the signal we're sending is SIGURG, the sigqueue() system call is introduced by RT
   // signals.  Hence this test won't run on e.g. Mac OSX.
   //
   // Also, Android's bionic does not appear to support sigqueue() even though the kernel does.
+  //
+  // Also, this test fails on Linux on mipsel. si_value comes back as zero. No one with a mips
+  // machine wants to debug the problem but they demand a patch fixing it, so we disable the test.
+  // Sad. https://github.com/sandstorm-io/capnproto/issues/204
 
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -113,15 +131,16 @@ TEST_F(AsyncUnixTest, SignalWithPointerValue) {
 }
 #endif
 
-TEST_F(AsyncUnixTest, SignalsMultiListen) {
+TEST(AsyncUnixTest, SignalsMultiListen) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
 
   port.onSignal(SIGIO).then([](siginfo_t&&) {
-    ADD_FAILURE() << "Received wrong signal.";
+    KJ_FAIL_EXPECT("Received wrong signal.");
   }).detach([](kj::Exception&& exception) {
-    ADD_FAILURE() << kj::str(exception).cStr();
+    KJ_FAIL_EXPECT(exception);
   });
 
   kill(getpid(), SIGURG);
@@ -136,7 +155,8 @@ TEST_F(AsyncUnixTest, SignalsMultiListen) {
 // deliver SIGIO, if you reverse the order of the waits).  Since this doesn't occur on any other
 // platform I'm assuming it's a Cygwin bug.
 
-TEST_F(AsyncUnixTest, SignalsMultiReceive) {
+TEST(AsyncUnixTest, SignalsMultiReceive) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -155,7 +175,8 @@ TEST_F(AsyncUnixTest, SignalsMultiReceive) {
 
 #endif  // !__CYGWIN32__
 
-TEST_F(AsyncUnixTest, SignalsAsync) {
+TEST(AsyncUnixTest, SignalsAsync) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -179,9 +200,10 @@ TEST_F(AsyncUnixTest, SignalsAsync) {
 // deliver SIGIO, if you reverse the order of the waits).  Since this doesn't occur on any other
 // platform I'm assuming it's a Cygwin bug.
 
-TEST_F(AsyncUnixTest, SignalsNoWait) {
+TEST(AsyncUnixTest, SignalsNoWait) {
   // Verify that UnixEventPort::poll() correctly receives pending signals.
 
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -192,12 +214,12 @@ TEST_F(AsyncUnixTest, SignalsNoWait) {
     receivedSigurg = true;
     EXPECT_EQ(SIGURG, info.si_signo);
     EXPECT_SI_CODE(SI_USER, info.si_code);
-  }).detach([](Exception&& e) { ADD_FAILURE() << str(e).cStr(); });
+  }).detach([](Exception&& e) { KJ_FAIL_EXPECT(e); });
   port.onSignal(SIGIO).then([&](siginfo_t&& info) {
     receivedSigio = true;
     EXPECT_EQ(SIGIO, info.si_signo);
     EXPECT_SI_CODE(SI_USER, info.si_code);
-  }).detach([](Exception&& e) { ADD_FAILURE() << str(e).cStr(); });
+  }).detach([](Exception&& e) { KJ_FAIL_EXPECT(e); });
 
   kill(getpid(), SIGURG);
   kill(getpid(), SIGIO);
@@ -223,7 +245,8 @@ TEST_F(AsyncUnixTest, SignalsNoWait) {
 
 #endif  // !__CYGWIN32__
 
-TEST_F(AsyncUnixTest, ReadObserver) {
+TEST(AsyncUnixTest, ReadObserver) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -255,7 +278,8 @@ TEST_F(AsyncUnixTest, ReadObserver) {
 #endif
 }
 
-TEST_F(AsyncUnixTest, ReadObserverMultiListen) {
+TEST(AsyncUnixTest, ReadObserverMultiListen) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -284,7 +308,8 @@ TEST_F(AsyncUnixTest, ReadObserverMultiListen) {
   observer.whenBecomesReadable().wait(waitScope);
 }
 
-TEST_F(AsyncUnixTest, ReadObserverMultiReceive) {
+TEST(AsyncUnixTest, ReadObserverMultiReceive) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -311,7 +336,8 @@ TEST_F(AsyncUnixTest, ReadObserverMultiReceive) {
   promise2.wait(waitScope);
 }
 
-TEST_F(AsyncUnixTest, ReadObserverAsync) {
+TEST(AsyncUnixTest, ReadObserverAsync) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -332,9 +358,10 @@ TEST_F(AsyncUnixTest, ReadObserverAsync) {
   observer.whenBecomesReadable().wait(waitScope);
 }
 
-TEST_F(AsyncUnixTest, ReadObserverNoWait) {
+TEST(AsyncUnixTest, ReadObserverNoWait) {
   // Verify that UnixEventPort::poll() correctly receives pending FD events.
 
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -385,7 +412,8 @@ static void setNonblocking(int fd) {
   }
 }
 
-TEST_F(AsyncUnixTest, WriteObserver) {
+TEST(AsyncUnixTest, WriteObserver) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -394,6 +422,7 @@ TEST_F(AsyncUnixTest, WriteObserver) {
   KJ_SYSCALL(pipe(pipefds));
   kj::AutoCloseFd infd(pipefds[0]), outfd(pipefds[1]);
   setNonblocking(outfd);
+  setNonblocking(infd);
 
   UnixEventPort::FdObserver observer(port, outfd, UnixEventPort::FdObserver::OBSERVE_WRITE);
 
@@ -413,8 +442,14 @@ TEST_F(AsyncUnixTest, WriteObserver) {
 
   EXPECT_FALSE(writable);
 
+  // Empty the read end so that the write end becomes writable. Note that Linux implements a
+  // high watermark / low watermark heuristic which means that only reading one byte is not
+  // sufficient. The amount we have to read is in fact architecture-dependent -- it appears to be
+  // 1 page. To be safe, we read everything.
   char buffer[4096];
-  KJ_SYSCALL(read(infd, &buffer, sizeof(buffer)));
+  do {
+    KJ_NONBLOCKING_SYSCALL(n = read(infd, &buffer, sizeof(buffer)));
+  } while (n > 0);
 
   loop.run();
   port.poll();
@@ -423,19 +458,102 @@ TEST_F(AsyncUnixTest, WriteObserver) {
   EXPECT_TRUE(writable);
 }
 
-TEST_F(AsyncUnixTest, SteadyTimers) {
+#if !__APPLE__
+// Disabled on macOS due to https://github.com/sandstorm-io/capnproto/issues/374.
+TEST(AsyncUnixTest, UrgentObserver) {
+  // Verify that FdObserver correctly detects availability of out-of-band data.
+  // Availability of out-of-band data is implementation-specific.
+  // Linux's and OS X's TCP/IP stack supports out-of-band messages for TCP sockets, which is used
+  // for this test.
+
+  UnixEventPort port;
+  EventLoop loop(port);
+  WaitScope waitScope(loop);
+  int tmpFd;
+  char c;
+
+  // Spawn a TCP server
+  KJ_SYSCALL(tmpFd = socket(AF_INET, SOCK_STREAM, 0));
+  kj::AutoCloseFd serverFd(tmpFd);
+  sockaddr_in saddr;
+  memset(&saddr, 0, sizeof(saddr));
+  saddr.sin_family = AF_INET;
+  saddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  KJ_SYSCALL(bind(serverFd, reinterpret_cast<sockaddr*>(&saddr), sizeof(saddr)));
+  socklen_t saddrLen = sizeof(saddr);
+  KJ_SYSCALL(getsockname(serverFd, reinterpret_cast<sockaddr*>(&saddr), &saddrLen));
+  KJ_SYSCALL(listen(serverFd, 1));
+
+  // Accept one connection, send in-band and OOB byte, wait for a quit message
+  Thread thread([&]() {
+    int tmpFd;
+    char c;
+
+    sockaddr_in caddr;
+    socklen_t caddrLen = sizeof(caddr);
+    KJ_SYSCALL(tmpFd = accept(serverFd, reinterpret_cast<sockaddr*>(&caddr), &caddrLen));
+    kj::AutoCloseFd clientFd(tmpFd);
+    delay();
+
+    // Workaround: OS X won't signal POLLPRI without POLLIN. Also enqueue some in-band data.
+    c = 'i';
+    KJ_SYSCALL(send(clientFd, &c, 1, 0));
+    c = 'o';
+    KJ_SYSCALL(send(clientFd, &c, 1, MSG_OOB));
+
+    KJ_SYSCALL(recv(clientFd, &c, 1, 0));
+    EXPECT_EQ('q', c);
+  });
+  KJ_DEFER({ shutdown(serverFd, SHUT_RDWR); serverFd = nullptr; });
+
+  KJ_SYSCALL(tmpFd = socket(AF_INET, SOCK_STREAM, 0));
+  kj::AutoCloseFd clientFd(tmpFd);
+  KJ_SYSCALL(connect(clientFd, reinterpret_cast<sockaddr*>(&saddr), saddrLen));
+
+  UnixEventPort::FdObserver observer(port, clientFd,
+      UnixEventPort::FdObserver::OBSERVE_READ | UnixEventPort::FdObserver::OBSERVE_URGENT);
+
+  observer.whenUrgentDataAvailable().wait(waitScope);
+
+#if __CYGWIN__
+  // On Cygwin, reading the urgent byte first causes the subsequent regular read to block until
+  // such a time as the connection closes -- and then the byte is successfully returned. This
+  // seems to be a cygwin bug.
+  KJ_SYSCALL(recv(clientFd, &c, 1, 0));
+  EXPECT_EQ('i', c);
+  KJ_SYSCALL(recv(clientFd, &c, 1, MSG_OOB));
+  EXPECT_EQ('o', c);
+#else
+  // Attempt to read the urgent byte prior to reading the in-band byte.
+  KJ_SYSCALL(recv(clientFd, &c, 1, MSG_OOB));
+  EXPECT_EQ('o', c);
+  KJ_SYSCALL(recv(clientFd, &c, 1, 0));
+  EXPECT_EQ('i', c);
+#endif
+
+  // Allow server thread to let its clientFd go out of scope.
+  c = 'q';
+  KJ_SYSCALL(send(clientFd, &c, 1, 0));
+  KJ_SYSCALL(shutdown(clientFd, SHUT_RDWR));
+}
+#endif
+
+TEST(AsyncUnixTest, SteadyTimers) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
 
-  auto start = port.steadyTime();
+  auto& timer = port.getTimer();
+
+  auto start = timer.now();
   kj::Vector<TimePoint> expected;
   kj::Vector<TimePoint> actual;
 
   auto addTimer = [&](Duration delay) {
     expected.add(max(start + delay, start));
-    port.atSteadyTime(start + delay).then([&]() {
-      actual.add(port.steadyTime());
+    timer.atTime(start + delay).then([&]() {
+      actual.add(timer.now());
     }).detach([](Exception&& e) { ADD_FAILURE() << str(e).cStr(); });
   };
 
@@ -446,16 +564,17 @@ TEST_F(AsyncUnixTest, SteadyTimers) {
   addTimer(-10 * MILLISECONDS);
 
   std::sort(expected.begin(), expected.end());
-  port.atSteadyTime(expected.back() + MILLISECONDS).wait(waitScope);
+  timer.atTime(expected.back() + MILLISECONDS).wait(waitScope);
 
   ASSERT_EQ(expected.size(), actual.size());
   for (int i = 0; i < expected.size(); ++i) {
-    EXPECT_LE(expected[i], actual[i]) << "Actual time for timer " << i << " is "
-        << ((expected[i] - actual[i]) / NANOSECONDS) << " ns too early.";
+    KJ_EXPECT(expected[i] <= actual[i], "Actual time for timer i is too early.",
+              i, ((expected[i] - actual[i]) / NANOSECONDS));
   }
 }
 
-TEST_F(AsyncUnixTest, Wake) {
+TEST(AsyncUnixTest, Wake) {
+  captureSignals();
   UnixEventPort port;
   EventLoop loop(port);
   WaitScope waitScope(loop);
@@ -469,7 +588,7 @@ TEST_F(AsyncUnixTest, Wake) {
   EXPECT_TRUE(port.wait());
 
   {
-    auto promise = port.atSteadyTime(port.steadyTime());
+    auto promise = port.getTimer().atTime(port.getTimer().now());
     EXPECT_FALSE(port.wait());
   }
 
@@ -483,4 +602,7 @@ TEST_F(AsyncUnixTest, Wake) {
   EXPECT_TRUE(port.wait());
 }
 
+}  // namespace
 }  // namespace kj
+
+#endif  // !_WIN32

@@ -4,35 +4,6 @@ ACLOCAL_AMFLAGS = -I m4
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-# Always include gtest in distributions.
-DIST_SUBDIRS = $(subdirs)
-
-# Build gtest before we build Cap'n Proto tests.  We don't add gtest to SUBDIRS
-# because then "make check" would also build and run all of gtest's own tests,
-# which takes a lot of time and is generally not useful to us.  Also, we don't
-# want "make install" to recurse into gtest since we don't want to overwrite
-# the installed version of gtest if there is one (and, actually, gtest doesn't
-# even support "make install" anyway).  So we define a rule such that it will
-# only be built when needed.
-gtest/lib/libgtest.la:
-	@echo "Making lib/libgtest.a lib/libgtest_main.a in gtest"
-	@cd gtest && $(MAKE) $(AM_MAKEFLAGS) lib/libgtest.la lib/libgtest_main.la
-
-gtest/lib/libgtest_main.la: gtest/lib/libgtest.la
-	@:
-
-# We would like to clean gtest when "make clean" is invoked.  But we have to
-# be careful because clean-local is also invoked during "make distclean", but
-# "make distclean" already recurses into gtest because it's listed among the
-# DIST_SUBDIRS.  distclean will delete gtest/Makefile, so if we then try to
-# cd to the directory again and "make clean" it will fail.  So, check that the
-# Makefile exists before recursing.
-clean-local:
-	@if test -e gtest/Makefile; then \
-	  echo "Making clean in gtest"; \
-	  cd gtest && $(MAKE) $(AM_MAKEFLAGS) clean; \
-	fi
-
 # When running distcheck, verify that we've included all the files needed by
 # the cmake build.
 distcheck-hook:
@@ -58,8 +29,12 @@ EXTRA_DIST =                                                                 \
   src/capnp/testdata/segmented                                               \
   src/capnp/testdata/packed                                                  \
   src/capnp/testdata/pretty.txt                                              \
+  src/capnp/testdata/lists.binary                                            \
+  src/capnp/testdata/packedflat                                              \
   CMakeLists.txt                                                             \
   cmake/FindCapnProto.cmake                                                  \
+  cmake/CapnProtoConfig.cmake.in                                             \
+  cmake/CapnProtoMacros.cmake                                                \
   src/CMakeLists.txt                                                         \
   src/kj/CMakeLists.txt                                                      \
   src/capnp/CMakeLists.txt
@@ -103,7 +78,8 @@ public_capnpc_inputs =                                         \
   src/capnp/schema.capnp                                       \
   src/capnp/rpc.capnp                                          \
   src/capnp/rpc-twoparty.capnp                                 \
-  src/capnp/persistent.capnp
+  src/capnp/persistent.capnp                                   \
+  src/capnp/compat/json.capnp
 
 capnpc_inputs =                                                \
   $(public_capnpc_inputs)                                      \
@@ -121,20 +97,27 @@ capnpc_outputs =                                               \
   src/capnp/rpc-twoparty.capnp.h                               \
   src/capnp/persistent.capnp.c++                               \
   src/capnp/persistent.capnp.h                                 \
+  src/capnp/compat/json.capnp.h                                \
+  src/capnp/compat/json.capnp.c++                              \
   src/capnp/compiler/lexer.capnp.c++                           \
   src/capnp/compiler/lexer.capnp.h                             \
   src/capnp/compiler/grammar.capnp.c++                         \
   src/capnp/compiler/grammar.capnp.h
 
 includecapnpdir = $(includedir)/capnp
+includecapnpcompatdir = $(includecapnpdir)/compat
 includekjdir = $(includedir)/kj
 includekjparsedir = $(includekjdir)/parse
 includekjstddir = $(includekjdir)/std
+includekjcompatdir = $(includekjdir)/compat
 
 dist_includecapnp_DATA = $(public_capnpc_inputs)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = capnp.pc capnp-rpc.pc
+pkgconfig_DATA = capnp.pc capnp-rpc.pc kj.pc kj-async.pc
+
+noinst_HEADERS = \
+  src/kj/miniposix.h
 
 includekj_HEADERS =                                            \
   src/kj/common.h                                              \
@@ -148,7 +131,6 @@ includekj_HEADERS =                                            \
   src/kj/exception.h                                           \
   src/kj/debug.h                                               \
   src/kj/arena.h                                               \
-  src/kj/miniposix.h                                           \
   src/kj/io.h                                                  \
   src/kj/tuple.h                                               \
   src/kj/one-of.h                                              \
@@ -161,8 +143,10 @@ includekj_HEADERS =                                            \
   src/kj/async-inl.h                                           \
   src/kj/time.h                                                \
   src/kj/async-unix.h                                          \
+  src/kj/async-win32.h                                         \
   src/kj/async-io.h                                            \
   src/kj/main.h                                                \
+  src/kj/test.h                                                \
   src/kj/windows-sanity.h
 
 includekjparse_HEADERS =                                       \
@@ -171,6 +155,10 @@ includekjparse_HEADERS =                                       \
 
 includekjstd_HEADERS =                                         \
   src/kj/std/iostream.h
+
+includekjcompat_HEADERS =                                      \
+  src/kj/compat/gtest.h                                        \
+  src/kj/compat/http.h
 
 includecapnp_HEADERS =                                         \
   src/capnp/c++.capnp.h                                        \
@@ -183,6 +171,7 @@ includecapnp_HEADERS =                                         \
   src/capnp/any.h                                              \
   src/capnp/message.h                                          \
   src/capnp/capability.h                                       \
+  src/capnp/membrane.h                                         \
   src/capnp/schema.capnp.h                                     \
   src/capnp/schema-lite.h                                      \
   src/capnp/schema.h                                           \
@@ -193,8 +182,10 @@ includecapnp_HEADERS =                                         \
   src/capnp/serialize.h                                        \
   src/capnp/serialize-async.h                                  \
   src/capnp/serialize-packed.h                                 \
+  src/capnp/serialize-text.h                                   \
   src/capnp/pointer-helpers.h                                  \
   src/capnp/generated-header-support.h                         \
+  src/capnp/raw-schema.h                                       \
   src/capnp/rpc-prelude.h                                      \
   src/capnp/rpc.h                                              \
   src/capnp/rpc-twoparty.h                                     \
@@ -203,15 +194,19 @@ includecapnp_HEADERS =                                         \
   src/capnp/persistent.capnp.h                                 \
   src/capnp/ez-rpc.h
 
+includecapnpcompat_HEADERS =                                   \
+  src/capnp/compat/json.h                                      \
+  src/capnp/compat/json.capnp.h
+
 if LITE_MODE
-lib_LTLIBRARIES = libkj.la libcapnp.la
+lib_LTLIBRARIES = libkj.la libkj-test.la libcapnp.la
 else
-lib_LTLIBRARIES = libkj.la libkj-async.la libcapnp.la libcapnp-rpc.la libcapnpc.la
+lib_LTLIBRARIES = libkj.la libkj-test.la libkj-async.la libkj-http.la libcapnp.la libcapnp-rpc.la libcapnp-json.la libcapnpc.la
 endif
 
 # Don't include security release in soname -- we want to replace old binaries
 # in this case.
-SO_VERSION = $(shell echo $(VERSION) | sed -re 's/^([0-9]+[.][0-9]+[.][0-9]+)([.][0-9]+)?(-.*)?$$/\1\3/g')
+SO_VERSION = $(shell echo $(VERSION) | sed -e 's/^\([0-9]*[.][0-9]*[.][0-9]*\)\([.][0-9]*\)*\(-.*\)*$$/\1\3/g')
 
 libkj_la_LIBADD = $(PTHREAD_LIBS)
 libkj_la_LDFLAGS = -release $(SO_VERSION) -no-undefined
@@ -229,17 +224,30 @@ libkj_la_SOURCES=                                              \
   src/kj/io.c++                                                \
   src/kj/mutex.c++                                             \
   src/kj/thread.c++                                            \
+  src/kj/test-helpers.c++                                      \
   src/kj/main.c++                                              \
   src/kj/parse/char.c++
 
+libkj_test_la_LIBADD = libkj.la $(PTHREAD_LIBS)
+libkj_test_la_LDFLAGS = -release $(VERSION) -no-undefined
+libkj_test_la_SOURCES = src/kj/test.c++
+
 if !LITE_MODE
-libkj_async_la_LIBADD = libkj.la $(PTHREAD_LIBS)
+libkj_async_la_LIBADD = libkj.la $(ASYNC_LIBS) $(PTHREAD_LIBS)
 libkj_async_la_LDFLAGS = -release $(SO_VERSION) -no-undefined
 libkj_async_la_SOURCES=                                        \
   src/kj/async.c++                                             \
   src/kj/async-unix.c++                                        \
+  src/kj/async-win32.c++                                       \
   src/kj/async-io.c++                                          \
+  src/kj/async-io-unix.c++                                     \
+  src/kj/async-io-win32.c++                                    \
   src/kj/time.c++
+
+libkj_http_la_LIBADD = libkj-async.la libkj.la $(ASYNC_LIBS) $(PTHREAD_LIBS)
+libkj_http_la_LDFLAGS = -release $(SO_VERSION) -no-undefined
+libkj_http_la_SOURCES=                                         \
+  src/kj/compat/http.c++
 endif !LITE_MODE
 
 if !LITE_MODE
@@ -268,11 +276,12 @@ libcapnp_la_SOURCES=                                           \
 
 if !LITE_MODE
 
-libcapnp_rpc_la_LIBADD = libcapnp.la libkj-async.la libkj.la $(PTHREAD_LIBS)
+libcapnp_rpc_la_LIBADD = libcapnp.la libkj-async.la libkj.la $(ASYNC_LIBS) $(PTHREAD_LIBS)
 libcapnp_rpc_la_LDFLAGS = -release $(SO_VERSION) -no-undefined
 libcapnp_rpc_la_SOURCES=                                       \
   src/capnp/serialize-async.c++                                \
   src/capnp/capability.c++                                     \
+  src/capnp/membrane.c++                                       \
   src/capnp/dynamic-capability.c++                             \
   src/capnp/rpc.c++                                            \
   src/capnp/rpc.capnp.c++                                      \
@@ -280,6 +289,12 @@ libcapnp_rpc_la_SOURCES=                                       \
   src/capnp/rpc-twoparty.capnp.c++                             \
   src/capnp/persistent.capnp.c++                               \
   src/capnp/ez-rpc.c++
+
+libcapnp_json_la_LIBADD = libcapnp.la libkj.la $(PTHREAD_LIBS)
+libcapnp_json_la_LDFLAGS = -release $(SO_VERSION) -no-undefined
+libcapnp_json_la_SOURCES=                                      \
+  src/capnp/compat/json.c++                                    \
+  src/capnp/compat/json.capnp.c++
 
 libcapnpc_la_LIBADD = libcapnp.la libkj.la $(PTHREAD_LIBS)
 libcapnpc_la_LDFLAGS = -release $(SO_VERSION) -no-undefined
@@ -300,7 +315,8 @@ libcapnpc_la_SOURCES=                                          \
   src/capnp/compiler/node-translator.c++                       \
   src/capnp/compiler/compiler.h                                \
   src/capnp/compiler/compiler.c++                              \
-  src/capnp/schema-parser.c++
+  src/capnp/schema-parser.c++                                  \
+  src/capnp/serialize-text.c++
 
 bin_PROGRAMS = capnp capnpc-capnp capnpc-c++
 
@@ -374,40 +390,60 @@ $(test_capnpc_outputs): test_capnpc_middleman
 
 BUILT_SOURCES = $(test_capnpc_outputs)
 
+check_LIBRARIES = libcapnp-test.a
+libcapnp_test_a_SOURCES =                                      \
+  src/capnp/test-util.c++                                      \
+  src/capnp/test-util.h
+nodist_libcapnp_test_a_SOURCES = $(test_capnpc_outputs)
+
 if LITE_MODE
 
 check_PROGRAMS = capnp-test
 compiler_tests =
-capnp_test_LDADD = gtest/lib/libgtest.la gtest/lib/libgtest_main.la \
-                   libcapnp.la libkj.la
+capnp_test_LDADD = libcapnp-test.a libcapnp.la libkj-test.la libkj.la
 
 else !LITE_MODE
 
-check_PROGRAMS = capnp-test capnp-evolution-test
+check_PROGRAMS = capnp-test capnp-evolution-test capnp-afl-testcase
 heavy_tests =                                                  \
   src/kj/async-test.c++                                        \
   src/kj/async-unix-test.c++                                   \
+  src/kj/async-win32-test.c++                                  \
   src/kj/async-io-test.c++                                     \
   src/kj/parse/common-test.c++                                 \
   src/kj/parse/char-test.c++                                   \
   src/kj/std/iostream-test.c++                                 \
+  src/kj/compat/http-test.c++                                  \
+  src/capnp/canonicalize-test.c++                              \
   src/capnp/capability-test.c++                                \
+  src/capnp/membrane-test.c++                                  \
   src/capnp/schema-test.c++                                    \
   src/capnp/schema-loader-test.c++                             \
+  src/capnp/schema-parser-test.c++                             \
   src/capnp/dynamic-test.c++                                   \
   src/capnp/stringify-test.c++                                 \
   src/capnp/serialize-async-test.c++                           \
+  src/capnp/serialize-text-test.c++                            \
   src/capnp/rpc-test.c++                                       \
   src/capnp/rpc-twoparty-test.c++                              \
   src/capnp/ez-rpc-test.c++                                    \
+  src/capnp/compat/json-test.c++                               \
   src/capnp/compiler/lexer-test.c++                            \
   src/capnp/compiler/md5-test.c++
-capnp_test_LDADD = gtest/lib/libgtest.la gtest/lib/libgtest_main.la \
-                   libcapnpc.la libcapnp-rpc.la libcapnp.la libkj-async.la libkj.la
+capnp_test_LDADD =                                             \
+  libcapnp-test.a                                              \
+  libcapnpc.la                                                 \
+  libcapnp-rpc.la                                              \
+  libcapnp-json.la                                             \
+  libcapnp.la                                                  \
+  libkj-http.la                                                \
+  libkj-async.la                                               \
+  libkj-test.la                                                \
+  libkj.la
 
 endif !LITE_MODE
 
-capnp_test_CPPFLAGS = -Wno-deprecated-declarations -Igtest/include -I$(srcdir)/gtest/include
+capnp_test_CPPFLAGS = -Wno-deprecated-declarations
 capnp_test_SOURCES =                                           \
   src/kj/common-test.c++                                       \
   src/kj/memory-test.c++                                       \
@@ -426,6 +462,7 @@ capnp_test_SOURCES =                                           \
   src/kj/mutex-test.c++                                        \
   src/kj/threadlocal-test.c++                                  \
   src/kj/threadlocal-pthread-test.c++                          \
+  src/kj/test-test.c++                                         \
   src/capnp/common-test.c++                                    \
   src/capnp/blob-test.c++                                      \
   src/capnp/endian-test.c++                                    \
@@ -438,14 +475,15 @@ capnp_test_SOURCES =                                           \
   src/capnp/orphan-test.c++                                    \
   src/capnp/serialize-test.c++                                 \
   src/capnp/serialize-packed-test.c++                          \
-  src/capnp/test-util.c++                                      \
-  src/capnp/test-util.h                                        \
+  src/capnp/fuzz-test.c++                                      \
   $(heavy_tests)
-nodist_capnp_test_SOURCES = $(test_capnpc_outputs)
 
 if !LITE_MODE
 capnp_evolution_test_LDADD = libcapnpc.la libcapnp.la libkj.la
 capnp_evolution_test_SOURCES = src/capnp/compiler/evolution-test.c++
+
+capnp_afl_testcase_LDADD = libcapnp-test.a libcapnp-rpc.la libcapnp.la libkj.la libkj-async.la
+capnp_afl_testcase_SOURCES = src/capnp/afl-testcase.c++
 endif !LITE_MODE
 
 if LITE_MODE

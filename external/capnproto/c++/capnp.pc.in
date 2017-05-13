@@ -6,6 +6,7 @@ includedir=@includedir@
 Name: Cap'n Proto
 Description: Insanely fast serialization system
 Version: @VERSION@
-Libs: -L${libdir} -lcapnp -lkj @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @STDLIB_FLAG@
+Libs: -L${libdir} -lcapnp @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @STDLIB_FLAG@
 Libs.private: @LIBS@
+Requires: kj = @VERSION@
 Cflags: -I${includedir} @PTHREAD_CFLAGS@ @STDLIB_FLAG@ @CAPNP_LITE_FLAG@

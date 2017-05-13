@@ -22,17 +22,20 @@
 #include "main.h"
 #include "debug.h"
 #include "arena.h"
+#include "miniposix.h"
 #include <map>
 #include <set>
 #include <stdlib.h>
-#include <unistd.h>
 #include <errno.h>
 #include <limits.h>
 
 #if _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX 1
+#endif
 #include <windows.h>
-#include <io.h>
-#include <fcntl.h>
+#include "windows-sanity.h"
 #else
 #include <sys/uio.h>
 #endif
@@ -43,7 +46,9 @@ namespace kj {
 
 TopLevelProcessContext::TopLevelProcessContext(StringPtr programName)
     : programName(programName),
-      cleanShutdown(getenv("KJ_CLEAN_SHUTDOWN") != nullptr) {}
+      cleanShutdown(getenv("KJ_CLEAN_SHUTDOWN") != nullptr) {
+  printStackTraceOnCrash();
+}
 
 StringPtr TopLevelProcessContext::getProgramName() {
   return programName;

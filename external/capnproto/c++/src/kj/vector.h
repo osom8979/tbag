@@ -95,11 +95,26 @@ public:
 
   inline void resize(size_t size) {
     if (size > builder.capacity()) grow(size);
-    while (builder.size() < size) {
-      builder.add(T());
-    }
-    while (builder.size() > size) {
+    builder.resize(size);
+  }
+
+  inline void operator=(decltype(nullptr)) {
+    builder = nullptr;
+  }
+
+  inline void clear() {
+    while (builder.size() > 0) {
       builder.removeLast();
+    }
+  }
+
+  inline void truncate(size_t size) {
+    builder.truncate(size);
+  }
+
+  inline void reserve(size_t size) {
+    if (size > builder.capacity()) {
+      setCapacity(size);
     }
   }
 
@@ -110,14 +125,19 @@ private:
     setCapacity(kj::max(minCapacity, capacity() == 0 ? 4 : capacity() * 2));
   }
   void setCapacity(size_t newSize) {
-    ArrayBuilder<T> newBuilder = heapArrayBuilder<T>(newSize);
-    size_t moveCount = kj::min(newSize, builder.size());
-    for (size_t i = 0; i < moveCount; i++) {
-      newBuilder.add(kj::mv(builder[i]));
+    if (builder.size() > newSize) {
+      builder.truncate(newSize);
     }
+    ArrayBuilder<T> newBuilder = heapArrayBuilder<T>(newSize);
+    newBuilder.addAll(kj::mv(builder));
     builder = kj::mv(newBuilder);
   }
 };
+
+template <typename T>
+inline auto KJ_STRINGIFY(const Vector<T>& v) -> decltype(toCharSequence(v.asPtr())) {
+  return toCharSequence(v.asPtr());
+}
 
 }  // namespace kj
 

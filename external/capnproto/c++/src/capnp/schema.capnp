@@ -319,8 +319,18 @@ struct Type {
     }
 
     anyPointer :union {
-      unconstrained @18 :Void;
-      # A regular AnyPointer.
+      unconstrained :union {
+        # A regular AnyPointer.
+        #
+        # The name "unconstrained" means as opposed to constraining it to match a type parameter.
+        # In retrospect this name is probably a poor choice given that it may still be constrained
+        # to be a struct, list, or capability.
+
+        anyKind @18 :Void;       # truly AnyPointer
+        struct @25 :Void;        # AnyStruct
+        list @26 :Void;          # AnyList
+        capability @27 :Void;    # Capability
+      }
 
       parameter :group {
         # This is actually a reference to a type parameter defined within this scope.
@@ -439,7 +449,21 @@ enum ElementSize {
   inlineComposite @7;
 }
 
+struct CapnpVersion {
+  major @0 :UInt16;
+  minor @1 :UInt8;
+  micro @2 :UInt8;
+}
+
 struct CodeGeneratorRequest {
+  capnpVersion @2 :CapnpVersion;
+  # Version of the `capnp` executable. Generally, code generators should ignore this, but the code
+  # generators that ship with `capnp` itself will print a warning if this mismatches since that
+  # probably indicates something is misconfigured.
+  #
+  # The first version of 'capnp' to set this was 0.6.0. So, if it's missing, the compiler version
+  # is older than that.
+
   nodes @0 :List(Node);
   # All nodes parsed by the compiler, including for the files on the command line and their
   # imports.

@@ -33,6 +33,76 @@ namespace kj {
 // Warns that sprintf() is buffer-overrunny. We know that, it's cool.
 #endif
 
+namespace {
+bool isHex(const char *s) {
+  if (*s == '-') s++;
+  return s[0] == '0' && (s[1] == 'x' || s[1] == 'X');
+}
+
+long long parseSigned(const StringPtr& s, long long min, long long max) {
+  KJ_REQUIRE(s != nullptr, "String does not contain valid number", s) { return 0; }
+  char *endPtr;
+  errno = 0;
+  auto value = strtoll(s.begin(), &endPtr, isHex(s.cStr()) ? 16 : 10);
+  KJ_REQUIRE(endPtr == s.end(), "String does not contain valid number", s) { return 0; }
+  KJ_REQUIRE(errno != ERANGE, "Value out-of-range", s) { return 0; }
+  KJ_REQUIRE(value >= min && value <= max, "Value out-of-range", value, min, max) { return 0; }
+  return value;
+}
+
+unsigned long long parseUnsigned(const StringPtr& s, unsigned long long max) {
+  KJ_REQUIRE(s != nullptr, "String does not contain valid number", s) { return 0; }
+  char *endPtr;
+  errno = 0;
+  auto value = strtoull(s.begin(), &endPtr, isHex(s.cStr()) ? 16 : 10);
+  KJ_REQUIRE(endPtr == s.end(), "String does not contain valid number", s) { return 0; }
+  KJ_REQUIRE(errno != ERANGE, "Value out-of-range", s) { return 0; }
+  KJ_REQUIRE(value <= max, "Value out-of-range", value, max) { return 0; }
+  //strtoull("-1") does not fail with ERANGE
+  KJ_REQUIRE(s[0] != '-', "Value out-of-range", s) { return 0; }
+  return value;
+}
+
+template <typename T>
+T parseInteger(const StringPtr& s) {
+  if (static_cast<T>(minValue) < 0) {
+    long long min = static_cast<T>(minValue);
+    long long max = static_cast<T>(maxValue);
+    return static_cast<T>(parseSigned(s, min, max));
+  } else {
+    unsigned long long max = static_cast<T>(maxValue);
+    return static_cast<T>(parseUnsigned(s, max));
+  }
+}
+
+double parseDouble(const StringPtr& s) {
+  KJ_REQUIRE(s != nullptr, "String does not contain valid number", s) { return 0; }
+  char *endPtr;
+  errno = 0;
+  auto value = strtod(s.begin(), &endPtr);
+  KJ_REQUIRE(endPtr == s.end(), "String does not contain valid floating number", s) { return 0; }
+  return value;
+}
+
+} // namespace
+
+#define PARSE_AS_INTEGER(T) \
+    template <> T StringPtr::parseAs<T>() const { return parseInteger<T>(*this); }
+PARSE_AS_INTEGER(char);
+PARSE_AS_INTEGER(signed char);
+PARSE_AS_INTEGER(unsigned char);
+PARSE_AS_INTEGER(short);
+PARSE_AS_INTEGER(unsigned short);
+PARSE_AS_INTEGER(int);
+PARSE_AS_INTEGER(unsigned int);
+PARSE_AS_INTEGER(long);
+PARSE_AS_INTEGER(unsigned long);
+PARSE_AS_INTEGER(long long);
+PARSE_AS_INTEGER(unsigned long long);
+#undef PARSE_AS_INTEGER
+template <> double StringPtr::parseAs<double>() const { return parseDouble(*this); }
+template <> float StringPtr::parseAs<float>() const { return parseDouble(*this); }
+
 String heapString(size_t size) {
   char* buffer = _::HeapArrayDisposer::allocate<char>(size + 1);
   buffer[size] = '\0';
@@ -62,6 +132,10 @@ HEXIFY_INT(unsigned long long, "%llx");
 #undef HEXIFY_INT
 
 namespace _ {  // private
+
+StringPtr Stringifier::operator*(decltype(nullptr)) const {
+  return "nullptr";
+}
 
 StringPtr Stringifier::operator*(bool b) const {
   return b ? StringPtr("true") : StringPtr("false");
@@ -220,12 +294,24 @@ void RemoveE0(char* buffer) {
   // Remove redundant leading 0's after an e, e.g. 1e012. Seems to appear on
   // Windows.
 
-  for (;;) {
-    buffer = strstr(buffer, "e0");
-    if (buffer == NULL || buffer[2] < '0' || buffer[2] > '9') {
-      return;
-    }
-    memmove(buffer + 1, buffer + 2, strlen(buffer + 2) + 1);
+  // Find and skip 'e'.
+  char* ptr = strchr(buffer, 'e');
+  if (ptr == nullptr) return;
+  ++ptr;
+
+  // Skip '-'.
+  if (*ptr == '-') ++ptr;
+
+  // Skip '0's.
+  char* ptr2 = ptr;
+  while (*ptr2 == '0') ++ptr2;
+
+  // If we went past the last digit, back up one.
+  if (*ptr2 < '0' || *ptr2 > '9') --ptr2;
+
+  // Move bytes backwards.
+  if (ptr2 > ptr) {
+    memmove(ptr, ptr2, strlen(ptr2) + 1);
   }
 }
 #endif
@@ -248,7 +334,7 @@ char* DoubleToBuffer(double value, char* buffer) {
     return buffer;
   }
 
-  int snprintf_result =
+  int snprintf_result KJ_UNUSED =
     snprintf(buffer, kDoubleToBufferSize, "%.*g", DBL_DIG, value);
 
   // The snprintf should never overflow because the buffer is significantly
@@ -263,7 +349,7 @@ char* DoubleToBuffer(double value, char* buffer) {
   // truncated to a double.
   volatile double parsed_value = strtod(buffer, NULL);
   if (parsed_value != value) {
-    int snprintf_result2 =
+    int snprintf_result2 KJ_UNUSED =
       snprintf(buffer, kDoubleToBufferSize, "%.*g", DBL_DIG+2, value);
 
     // Should never overflow; see above.
@@ -307,7 +393,7 @@ char* FloatToBuffer(float value, char* buffer) {
     return buffer;
   }
 
-  int snprintf_result =
+  int snprintf_result KJ_UNUSED =
     snprintf(buffer, kFloatToBufferSize, "%.*g", FLT_DIG, value);
 
   // The snprintf should never overflow because the buffer is significantly
@@ -316,7 +402,7 @@ char* FloatToBuffer(float value, char* buffer) {
 
   float parsed_value;
   if (!safe_strtof(buffer, &parsed_value) || parsed_value != value) {
-    int snprintf_result2 =
+    int snprintf_result2 KJ_UNUSED =
       snprintf(buffer, kFloatToBufferSize, "%.*g", FLT_DIG+2, value);
 
     // Should never overflow; see above.
@@ -325,6 +411,9 @@ char* FloatToBuffer(float value, char* buffer) {
 
   DelocalizeRadix(buffer);
   RemovePlus(buffer);
+#if _WIN32
+  RemoveE0(buffer);
+#endif // _WIN32
   return buffer;
 }
 

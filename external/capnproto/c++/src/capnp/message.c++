@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Sandstorm Development Group, Inc. and contributors
+// Copyright (c) 2013-2016 Sandstorm Development Group, Inc. and contributors
 // Licensed under the MIT License:
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,12 +32,57 @@
 
 namespace capnp {
 
+namespace {
+
+class DummyCapTableReader: public _::CapTableReader {
+public:
+#if !CAPNP_LITE
+  kj::Maybe<kj::Own<ClientHook>> extractCap(uint index) override {
+    return nullptr;
+  }
+#endif
+};
+static KJ_CONSTEXPR(const) DummyCapTableReader dummyCapTableReader = DummyCapTableReader();
+
+}  // namespace
+
 MessageReader::MessageReader(ReaderOptions options): options(options), allocatedArena(false) {}
 MessageReader::~MessageReader() noexcept(false) {
   if (allocatedArena) {
     arena()->~ReaderArena();
   }
 }
+
+bool MessageReader::isCanonical() {
+  if (!allocatedArena) {
+    static_assert(sizeof(_::ReaderArena) <= sizeof(arenaSpace),
+        "arenaSpace is too small to hold a ReaderArena.  Please increase it.  This will break "
+        "ABI compatibility.");
+    new(arena()) _::ReaderArena(this);
+    allocatedArena = true;
+  }
+
+  _::SegmentReader *segment = arena()->tryGetSegment(_::SegmentId(0));
+
+  if (segment == NULL) {
+    // The message has no segments
+    return false;
+  }
+
+  if (arena()->tryGetSegment(_::SegmentId(1))) {
+    // The message has more than one segment
+    return false;
+  }
+
+  const word* readHead = segment->getStartPtr() + 1;
+  bool rootIsCanonical = _::PointerReader::getRoot(segment, nullptr,
+                                                   segment->getStartPtr(),
+                                                   this->getOptions().nestingLimit)
+                                                  .isCanonical(&readHead);
+  bool allWordsConsumed = segment->getOffsetTo(readHead) == segment->getSize();
+  return rootIsCanonical && allWordsConsumed;
+}
+
 
 AnyPointer::Reader MessageReader::getRootInternal() {
   if (!allocatedArena) {
@@ -50,13 +95,15 @@ AnyPointer::Reader MessageReader::getRootInternal() {
 
   _::SegmentReader* segment = arena()->tryGetSegment(_::SegmentId(0));
   KJ_REQUIRE(segment != nullptr &&
-             segment->containsInterval(segment->getStartPtr(), segment->getStartPtr() + 1),
+             segment->checkObject(segment->getStartPtr(), ONE * WORDS),
              "Message did not contain a root pointer.") {
     return AnyPointer::Reader();
   }
 
+  // const_cast here is safe because dummyCapTableReader has no state.
   return AnyPointer::Reader(_::PointerReader::getRoot(
-      segment, segment->getStartPtr(), options.nestingLimit));
+      segment, const_cast<DummyCapTableReader*>(&dummyCapTableReader),
+      segment->getStartPtr(), options.nestingLimit));
 }
 
 // -------------------------------------------------------------------
@@ -88,7 +135,7 @@ _::SegmentBuilder* MessageBuilder::getRootSegment() {
 
     KJ_ASSERT(allocation.segment->getSegmentId() == _::SegmentId(0),
         "First allocated word of new arena was not in segment ID 0.");
-    KJ_ASSERT(allocation.words == allocation.segment->getPtrUnchecked(0 * WORDS),
+    KJ_ASSERT(allocation.words == allocation.segment->getPtrUnchecked(ZERO * WORDS),
         "First allocated word of new arena was not the first word in its segment.");
     return allocation.segment;
   }
@@ -97,7 +144,7 @@ _::SegmentBuilder* MessageBuilder::getRootSegment() {
 AnyPointer::Builder MessageBuilder::getRootInternal() {
   _::SegmentBuilder* rootSegment = getRootSegment();
   return AnyPointer::Builder(_::PointerBuilder::getRoot(
-      rootSegment, rootSegment->getPtrUnchecked(0 * WORDS)));
+      rootSegment, arena()->getLocalCapTable(), rootSegment->getPtrUnchecked(ZERO * WORDS)));
 }
 
 kj::ArrayPtr<const kj::ArrayPtr<const word>> MessageBuilder::getSegmentsForOutput() {
@@ -108,22 +155,30 @@ kj::ArrayPtr<const kj::ArrayPtr<const word>> MessageBuilder::getSegmentsForOutpu
   }
 }
 
-#if !CAPNP_LITE
-kj::ArrayPtr<kj::Maybe<kj::Own<ClientHook>>> MessageBuilder::getCapTable() {
-  if (allocatedArena) {
-    return arena()->getCapTable();
-  } else {
-    return nullptr;
-  }
-}
-#endif  // !CAPNP_LITE
-
 Orphanage MessageBuilder::getOrphanage() {
   // We must ensure that the arena and root pointer have been allocated before the Orphanage
   // can be used.
   if (!allocatedArena) getRootSegment();
 
-  return Orphanage(arena());
+  return Orphanage(arena(), arena()->getLocalCapTable());
+}
+
+bool MessageBuilder::isCanonical() {
+  _::SegmentReader *segment = getRootSegment();
+
+  if (segment == NULL) {
+    // The message has no segments
+    return false;
+  }
+
+  if (arena()->tryGetSegment(_::SegmentId(1))) {
+    // The message has more than one segment
+    return false;
+  }
+
+  const word* readHead = segment->getStartPtr() + 1;
+  return _::PointerReader::getRoot(segment, nullptr, segment->getStartPtr(), kj::maxValue)
+                                  .isCanonical(&readHead);
 }
 
 // =======================================================================================
@@ -187,6 +242,11 @@ MallocMessageBuilder::~MallocMessageBuilder() noexcept(false) {
 }
 
 kj::ArrayPtr<word> MallocMessageBuilder::allocateSegment(uint minimumSize) {
+  KJ_REQUIRE(bounded(minimumSize) * WORDS <= MAX_SEGMENT_WORDS,
+      "MallocMessageBuilder asked to allocate segment above maximum serializable size.");
+  KJ_ASSERT(bounded(nextSize) * WORDS <= MAX_SEGMENT_WORDS,
+      "MallocMessageBuilder nextSize out of bounds.");
+
   if (!returnedFirstSegment && !ownFirstSegment) {
     kj::ArrayPtr<word> result = kj::arrayPtr(reinterpret_cast<word*>(firstSegment), nextSize);
     if (result.size() >= minimumSize) {
@@ -222,7 +282,12 @@ kj::ArrayPtr<word> MallocMessageBuilder::allocateSegment(uint minimumSize) {
       moreSegments = mv(newSegments);
     }
     segments->segments.push_back(result);
-    if (allocationStrategy == AllocationStrategy::GROW_HEURISTICALLY) nextSize += size;
+    if (allocationStrategy == AllocationStrategy::GROW_HEURISTICALLY) {
+      // set nextSize = min(nextSize+size, MAX_SEGMENT_WORDS)
+      // while protecting against possible overflow of (nextSize+size)
+      nextSize = (size <= unbound(MAX_SEGMENT_WORDS / WORDS) - nextSize)
+          ? nextSize + size : unbound(MAX_SEGMENT_WORDS / WORDS);
+    }
   }
 
   return kj::arrayPtr(reinterpret_cast<word*>(result), size);

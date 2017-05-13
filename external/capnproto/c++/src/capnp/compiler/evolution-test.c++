@@ -37,7 +37,7 @@
 #include <time.h>
 #include <kj/main.h>
 #include <kj/io.h>
-#include <unistd.h>
+#include <kj/miniposix.h>
 
 namespace capnp {
 namespace compiler {
@@ -429,6 +429,7 @@ static ChangeInfo fieldChangeType(Declaration::Builder decl, uint& nextOrdinal,
 
       case Expression::ABSOLUTE_NAME:
       case Expression::IMPORT:
+      case Expression::EMBED:
       case Expression::APPLICATION:
       case Expression::MEMBER:
         KJ_FAIL_ASSERT("Unexpected expression type.");
@@ -643,6 +644,9 @@ public:
     return orphanage.newOrphanCopy(content);
   }
   kj::Maybe<Module&> importRelative(kj::StringPtr importPath) override {
+    return nullptr;
+  }
+  kj::Maybe<kj::Array<const byte>> embedRelative(kj::StringPtr embedPath) override {
     return nullptr;
   }
 
@@ -864,6 +868,22 @@ public:
   }
 
   kj::MainBuilder::Validity run() {
+    // https://github.com/sandstorm-io/capnproto/issues/344 describes an obscure bug in the layout
+    // algorithm, the fix for which breaks backwards-compatibility for any schema triggering the
+    // bug. In order to avoid silently breaking protocols, we are temporarily throwing an exception
+    // in cases where this bug would have occurred, so that people can decide what to do.
+    // However, the evolution test can occasionally trigger the bug (depending on the random path
+    // it takes). Rather than try to avoid it, we disable the exception-throwing, because the bug
+    // is actually fixed, and the exception is only there to raise awareness of the compatibility
+    // concerns.
+    //
+    // On Linux, seed 1467142714 (for example) will trigger the exception (without this env var).
+#if defined(__MINGW32__) || defined(_MSC_VER)
+    putenv("CAPNP_IGNORE_ISSUE_344=1");
+#else
+    setenv("CAPNP_IGNORE_ISSUE_344", "1", true);
+#endif
+
     srand(seed);
 
     {

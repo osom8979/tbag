@@ -54,10 +54,7 @@ public:
   // attempt a non-blocking read or may just return zero.  To force a read, use a non-zero minBytes.
   // To detect EOF without throwing an exception, use tryRead().
   //
-  // Cap'n Proto never asks for more bytes than it knows are part of the message.  Therefore, if
-  // the InputStream happens to know that the stream will never reach maxBytes -- even if it has
-  // reached minBytes -- it should throw an exception to avoid wasting time processing an incomplete
-  // message.  If it can't even reach minBytes, it MUST throw an exception, as the caller is not
+  // If the InputStream can't produce minBytes, it MUST throw an exception, as the caller is not
   // expected to understand how to deal with partial reads.
 
   virtual size_t tryRead(void* buffer, size_t minBytes, size_t maxBytes) = 0;
@@ -222,6 +219,28 @@ private:
   byte* fillPos;
 };
 
+class VectorOutputStream: public BufferedOutputStream {
+public:
+  explicit VectorOutputStream(size_t initialCapacity = 4096);
+  KJ_DISALLOW_COPY(VectorOutputStream);
+  ~VectorOutputStream() noexcept(false);
+
+  ArrayPtr<byte> getArray() {
+    // Get the portion of the array which has been filled in.
+    return arrayPtr(vector.begin(), fillPos);
+  }
+
+  // implements BufferedInputStream ----------------------------------
+  ArrayPtr<byte> getWriteBuffer() override;
+  void write(const void* buffer, size_t size) override;
+
+private:
+  Array<byte> vector;
+  byte* fillPos;
+
+  void grow(size_t minSize);
+};
+
 // =======================================================================================
 // File descriptor I/O
 
@@ -257,6 +276,10 @@ public:
   inline operator int() const { return fd; }
   inline int get() const { return fd; }
 
+  operator bool() const = delete;
+  // Deleting this operator prevents accidental use in boolean contexts, which
+  // the int conversion operator above would otherwise allow.
+
   inline bool operator==(decltype(nullptr)) { return fd < 0; }
   inline bool operator!=(decltype(nullptr)) { return fd >= 0; }
 
@@ -264,6 +287,11 @@ private:
   int fd;
   UnwindDetector unwindDetector;
 };
+
+inline auto KJ_STRINGIFY(const AutoCloseFd& fd)
+    -> decltype(kj::toCharSequence(implicitCast<int>(fd))) {
+  return kj::toCharSequence(implicitCast<int>(fd));
+}
 
 class FdInputStream: public InputStream {
   // An InputStream wrapping a file descriptor.
@@ -275,6 +303,8 @@ public:
   ~FdInputStream() noexcept(false);
 
   size_t tryRead(void* buffer, size_t minBytes, size_t maxBytes) override;
+
+  inline int getFd() const { return fd; }
 
 private:
   int fd;
@@ -293,10 +323,96 @@ public:
   void write(const void* buffer, size_t size) override;
   void write(ArrayPtr<const ArrayPtr<const byte>> pieces) override;
 
+  inline int getFd() const { return fd; }
+
 private:
   int fd;
   AutoCloseFd autoclose;
 };
+
+// =======================================================================================
+// Win32 Handle I/O
+
+#ifdef _WIN32
+
+class AutoCloseHandle {
+  // A wrapper around a Win32 HANDLE which automatically closes the handle when destroyed.
+  // The wrapper supports move construction for transferring ownership of the handle.  If
+  // CloseHandle() returns an error, the destructor throws an exception, UNLESS the destructor is
+  // being called during unwind from another exception, in which case the close error is ignored.
+  //
+  // If your code is not exception-safe, you should not use AutoCloseHandle.  In this case you will
+  // have to call close() yourself and handle errors appropriately.
+
+public:
+  inline AutoCloseHandle(): handle((void*)-1) {}
+  inline AutoCloseHandle(decltype(nullptr)): handle((void*)-1) {}
+  inline explicit AutoCloseHandle(void* handle): handle(handle) {}
+  inline AutoCloseHandle(AutoCloseHandle&& other) noexcept: handle(other.handle) {
+    other.handle = (void*)-1;
+  }
+  KJ_DISALLOW_COPY(AutoCloseHandle);
+  ~AutoCloseHandle() noexcept(false);
+
+  inline AutoCloseHandle& operator=(AutoCloseHandle&& other) {
+    AutoCloseHandle old(kj::mv(*this));
+    handle = other.handle;
+    other.handle = (void*)-1;
+    return *this;
+  }
+
+  inline AutoCloseHandle& operator=(decltype(nullptr)) {
+    AutoCloseHandle old(kj::mv(*this));
+    return *this;
+  }
+
+  inline operator void*() const { return handle; }
+  inline void* get() const { return handle; }
+
+  operator bool() const = delete;
+  // Deleting this operator prevents accidental use in boolean contexts, which
+  // the void* conversion operator above would otherwise allow.
+
+  inline bool operator==(decltype(nullptr)) { return handle != (void*)-1; }
+  inline bool operator!=(decltype(nullptr)) { return handle == (void*)-1; }
+
+private:
+  void* handle;  // -1 (aka INVALID_HANDLE_VALUE) if not valid.
+};
+
+class HandleInputStream: public InputStream {
+  // An InputStream wrapping a Win32 HANDLE.
+
+public:
+  explicit HandleInputStream(void* handle): handle(handle) {}
+  explicit HandleInputStream(AutoCloseHandle handle): handle(handle), autoclose(mv(handle)) {}
+  KJ_DISALLOW_COPY(HandleInputStream);
+  ~HandleInputStream() noexcept(false);
+
+  size_t tryRead(void* buffer, size_t minBytes, size_t maxBytes) override;
+
+private:
+  void* handle;
+  AutoCloseHandle autoclose;
+};
+
+class HandleOutputStream: public OutputStream {
+  // An OutputStream wrapping a Win32 HANDLE.
+
+public:
+  explicit HandleOutputStream(void* handle): handle(handle) {}
+  explicit HandleOutputStream(AutoCloseHandle handle): handle(handle), autoclose(mv(handle)) {}
+  KJ_DISALLOW_COPY(HandleOutputStream);
+  ~HandleOutputStream() noexcept(false);
+
+  void write(const void* buffer, size_t size) override;
+
+private:
+  void* handle;
+  AutoCloseHandle autoclose;
+};
+
+#endif  // _WIN32
 
 }  // namespace kj
 
