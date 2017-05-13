@@ -2936,7 +2936,7 @@ private:
           "#ifndef CAPNP_INCLUDED_", kj::hex(node.getId()), "_\n",
           "#define CAPNP_INCLUDED_", kj::hex(node.getId()), "_\n"
           "\n"
-          "#include <capnp/generated-header-support.h>\n",
+          "#include <libtbag/3rd/capnp/generated-header-support.h>\n",
           hasInterfaces ? kj::strTree(
             "#if !CAPNP_LITE\n"
             "#include <capnp/capability.h>\n"
