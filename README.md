@@ -24,8 +24,9 @@ Tea-bag is Third party extension utility project.
 - tinyxml2 3.0.0 (zlib license)
 
 ### External projects
-- zlib-1.2.11 (zlib license)
-- libressl-2.5.1 (Dual license; OpenSSL & SSLeay)
+- capn-proto 0.6.0 (MIT license)
+- libressl 2.5.1 (Dual license; OpenSSL & SSLeay)
+- zlib 1.2.11 (zlib license)
 
 ### Deprecated
 - boost 1.62.0 (Boost Software License, Version 1.0)
