@@ -21,6 +21,7 @@
 #include <libtbag/container/Pointer.hpp>
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 // -------------------
