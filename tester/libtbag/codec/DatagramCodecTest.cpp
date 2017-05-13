@@ -1,17 +1,18 @@
 /**
- * @file   DatagramAdapterTest.cpp
- * @brief  DatagramAdapter class tester.
+ * @file   DatagramCodecTest.cpp
+ * @brief  DatagramCodec class tester.
  * @author zer0
  * @date   2016-01-18
+ * @date   2017-05-13 (Rename: DatagramAdapterTest -> DatagramCodecTest)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/DatagramAdapter.hpp>
+#include <libtbag/codec/DatagramCodec.hpp>
 
 using namespace libtbag;
-using namespace libtbag::network;
+using namespace libtbag::codec;
 
-TEST(DatagramAdapterTest, DatagramInterface)
+TEST(DatagramCodecTest, DatagramInterface)
 {
      int16_t const HOST_S16 = 10;
     uint16_t const HOST_U16 = 11;
@@ -28,22 +29,22 @@ TEST(DatagramAdapterTest, DatagramInterface)
     //ASSERT_EQ(HOST_U64, DatagramInterface::toHost(DatagramInterface::toNetwork(HOST_U64)));
 }
 
-TEST(DatagramAdapterTest, DatagramWrite_01)
+TEST(DatagramCodecTest, DatagramEncoder)
 {
     std::string const STEP_01 = "123456789123456789123456789123456789";
     std::string const STEP_02 = "asdf";
     std::string const STEP_03 = "asdf";
 
-    DatagramWrite::Size const HEADER_SIZE = DatagramWrite::DATAGRAM_HEADER_SIZE;
+    DatagramEncoder::Size const HEADER_SIZE = DatagramEncoder::DATAGRAM_HEADER_SIZE;
 
-    DatagramWrite datagram;
+    DatagramEncoder datagram;
     std::string   temp;
 
     datagram.pushWriteBuffer(&STEP_01[0], STEP_01.size());
     datagram.popWriteBuffer([&](char const * buffer, std::size_t size){
         temp.clear();
         temp.assign(buffer + HEADER_SIZE, buffer + size);
-        ASSERT_EQ(STEP_01.size(), DatagramWrite::parseBufferSize(buffer, size));
+        ASSERT_EQ(STEP_01.size(), DatagramEncoder::parseBufferSize(buffer, size));
         ASSERT_EQ(STEP_01, temp);
     });
 
@@ -51,7 +52,7 @@ TEST(DatagramAdapterTest, DatagramWrite_01)
     datagram.popWriteBuffer([&](char const * buffer, std::size_t size){
         temp.clear();
         temp.assign(buffer + HEADER_SIZE, buffer + size);
-        ASSERT_EQ(STEP_02.size(), DatagramWrite::parseBufferSize(buffer, size));
+        ASSERT_EQ(STEP_02.size(), DatagramEncoder::parseBufferSize(buffer, size));
         ASSERT_EQ(STEP_02, temp);
     });
 
@@ -59,19 +60,19 @@ TEST(DatagramAdapterTest, DatagramWrite_01)
     datagram.popWriteBuffer([&](char const * buffer, std::size_t size){
         temp.clear();
         temp.assign(buffer + HEADER_SIZE, buffer + size);
-        ASSERT_EQ(STEP_03.size(), DatagramWrite::parseBufferSize(buffer, size));
+        ASSERT_EQ(STEP_03.size(), DatagramEncoder::parseBufferSize(buffer, size));
         ASSERT_EQ(STEP_03, temp);
     });
 }
 
-TEST(DatagramAdapterTest, DatagramAdapter)
+TEST(DatagramCodecTest, DatagramCodec)
 {
     std::string const STEP_01 = "123456789123456789123456789123456789";
     std::string const STEP_02 = "asdf";
     std::string const STEP_03 = "qwer";
 
-    DatagramAdapter datagram;
-    std::string     temp;
+    DatagramCodec datagram;
+    std::string   temp;
 
     datagram.pushWriteBuffer(&STEP_01[0], STEP_01.size());
     datagram.pushWriteBuffer(&STEP_02[0], STEP_02.size());
@@ -87,7 +88,7 @@ TEST(DatagramAdapterTest, DatagramAdapter)
         datagram.push(buffer, size);
     });
 
-    DatagramAdapter::binf info;
+    DatagramCodec::binf info;
 
     ASSERT_TRUE(datagram.next(&info));
     temp.clear();

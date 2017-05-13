@@ -1,34 +1,35 @@
 /**
- * @file   DatagramAdapter.cpp
- * @brief  DatagramAdapter class implementation.
+ * @file   DatagramCodec.cpp
+ * @brief  DatagramCodec class implementation.
  * @author zer0
  * @date   2017-01-02
+ * @date   2017-05-13 (Rename: DatagramAdapter -> DatagramCodec)
  */
 
-#include <libtbag/network/DatagramAdapter.hpp>
+#include <libtbag/codec/DatagramCodec.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
+namespace codec {
 
-// -----------------------------
-// DatagramWrite implementation.
-// -----------------------------
+// -------------------------------
+// DatagramEncoder implementation.
+// -------------------------------
 
-DatagramWrite::DatagramWrite()
+DatagramEncoder::DatagramEncoder()
 {
     // EMPTY.
 }
 
-DatagramWrite::~DatagramWrite()
+DatagramEncoder::~DatagramEncoder()
 {
     // EMPTY.
 }
 
-bool DatagramWrite::pushWriteBuffer(char const * buffer, Size size)
+bool DatagramEncoder::pushWriteBuffer(char const * buffer, Size size)
 {
     Guard guard(_writers_mutex);
 
@@ -54,7 +55,7 @@ bool DatagramWrite::pushWriteBuffer(char const * buffer, Size size)
     return true;
 }
 
-DatagramWrite::Size DatagramWrite::parseBufferSize(char const * buffer, Size size)
+DatagramEncoder::Size DatagramEncoder::parseBufferSize(char const * buffer, Size size)
 {
     if (size < DATAGRAM_HEADER_SIZE) {
         return NO_NEXT_READ_SIZE;
@@ -65,21 +66,21 @@ DatagramWrite::Size DatagramWrite::parseBufferSize(char const * buffer, Size siz
     return toHost(network_byte_size);
 }
 
-// ----------------------------
-// DatagramRead implementation.
-// ----------------------------
+// -------------------------------
+// DatagramDecoder implementation.
+// -------------------------------
 
-DatagramRead::DatagramRead() : _next_read_size(NO_NEXT_READ_SIZE)
+DatagramDecoder::DatagramDecoder() : _next_read_size(NO_NEXT_READ_SIZE)
 {
     // EMPTY.
 }
 
-DatagramRead::~DatagramRead()
+DatagramDecoder::~DatagramDecoder()
 {
     // EMPTY.
 }
 
-DatagramRead::Size DatagramRead::readNextDatagramSize()
+DatagramDecoder::Size DatagramDecoder::readNextDatagramSize()
 {
     // WARNING: Don't use the read_mutex.
 
@@ -105,7 +106,7 @@ DatagramRead::Size DatagramRead::readNextDatagramSize()
 // Event by-pass methods.
 // ----------------------
 
-void DatagramRead::alloc(Size suggested_size)
+void DatagramDecoder::alloc(Size suggested_size)
 {
     Guard guard(_read_mutex);
     if (_data_buffer.capacity() < suggested_size) {
@@ -113,13 +114,13 @@ void DatagramRead::alloc(Size suggested_size)
     }
 }
 
-void DatagramRead::push(char const * buffer, Size size)
+void DatagramDecoder::push(char const * buffer, Size size)
 {
     Guard guard(_read_mutex);
     _data_buffer.extendPush(buffer, size);
 }
 
-bool DatagramRead::next(binf * result)
+bool DatagramDecoder::next(binf * result)
 {
     Guard guard(_read_mutex);
     Size const READ_SIZE = readNextDatagramSize();
@@ -156,17 +157,17 @@ bool DatagramRead::next(binf * result)
 // DatagramAdapter implementation.
 // -------------------------------
 
-DatagramAdapter::DatagramAdapter()
+DatagramCodec::DatagramCodec()
 {
     // EMPTY.
 }
 
-DatagramAdapter::~DatagramAdapter()
+DatagramCodec::~DatagramCodec()
 {
     // EMPTY.
 }
 
-} // namespace network
+} // namespace codec
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

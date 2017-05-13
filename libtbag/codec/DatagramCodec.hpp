@@ -1,12 +1,13 @@
 /**
- * @file   DatagramAdapter.hpp
- * @brief  DatagramAdapter class prototype.
+ * @file   DatagramCodec.hpp
+ * @brief  DatagramCodec class prototype.
  * @author zer0
  * @date   2017-01-02
+ * @date   2017-05-13 (Rename: DatagramAdapter -> DatagramCodec)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMADAPTER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMADAPTER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CODEC_DATAGRAMCODEC_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_CODEC_DATAGRAMCODEC_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,6 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/container/CircularBuffer.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
@@ -32,7 +34,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
+namespace codec {
 
 /**
  * Datagram interface.
@@ -83,20 +85,21 @@ struct TBAG_API DatagramInterface
 };
 
 /**
- * DatagramWrite class prototype.
+ * DatagramEncoder class prototype.
  *
  * @author zer0
  * @date   2017-01-24
+ * @date   2017-05-13 (Rename: DatagramWrite -> DatagramEncoder)
  */
-class TBAG_API DatagramWrite : public DatagramInterface, public Noncopyable
+class TBAG_API DatagramEncoder : public DatagramInterface, public Noncopyable
 {
 private:
     SharedBuffers _writers;
     mutable Mutex _writers_mutex;
 
 public:
-    DatagramWrite();
-    virtual ~DatagramWrite();
+    DatagramEncoder();
+    virtual ~DatagramEncoder();
 
 public:
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.empty()))
@@ -130,12 +133,13 @@ public:
 };
 
 /**
- * DatagramRead class prototype.
+ * DatagramDecoder class prototype.
  *
  * @author zer0
  * @date   2017-01-24
+ * @date   2017-05-13 (Rename: DatagramRead -> DatagramDecoder)
  */
-class TBAG_API DatagramRead : public DatagramInterface, public Noncopyable
+class TBAG_API DatagramDecoder : public DatagramInterface, public Noncopyable
 {
 private:
     Buffer _read_buffer;
@@ -148,8 +152,8 @@ private:
     mutable Mutex _read_mutex;
 
 public:
-    DatagramRead();
-    virtual ~DatagramRead();
+    DatagramDecoder();
+    virtual ~DatagramDecoder();
 
 public:
     // @formatter:off
@@ -168,23 +172,24 @@ public:
 };
 
 /**
- * DatagramAdapter class prototype.
+ * DatagramCodec class prototype.
  *
  * @author zer0
  * @date   2017-01-02
+ * @date   2017-05-13 (Rename: DatagramAdapter -> DatagramCodec)
  */
-class TBAG_API DatagramAdapter : public DatagramWrite, public DatagramRead
+class TBAG_API DatagramCodec : public DatagramEncoder, public DatagramDecoder
 {
 public:
-    DatagramAdapter();
-    virtual ~DatagramAdapter();
+    DatagramCodec();
+    virtual ~DatagramCodec();
 };
 
-} // namespace network
+} // namespace codec
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DATAGRAMADAPTER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_CODEC_DATAGRAMCODEC_HPP__
 
