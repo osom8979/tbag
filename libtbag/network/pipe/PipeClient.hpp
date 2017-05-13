@@ -32,7 +32,7 @@ namespace pipe    {
  * @author zer0
  * @date   2017-05-09
  */
-class TBAG_API PipeClient : public stream::StreamClient<uvpp::Pipe>
+class PipeClient : public stream::StreamClient<uvpp::Pipe>
 {
 public:
     using Parent = stream::StreamClient<uvpp::Pipe>;

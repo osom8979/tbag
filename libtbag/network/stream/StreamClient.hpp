@@ -37,7 +37,7 @@ namespace stream  {
  * @date   2017-05-10
  */
 template <typename BaseStreamType>
-class TBAG_API StreamClient : public Client
+class StreamClient : public Client
 {
 public:
     using BaseStream = BaseStreamType;
@@ -53,7 +53,7 @@ public:
      * @remarks
      *  Currently uvpp::Tcp & uvpp::Pipe is supported.
      */
-    struct TBAG_API ClientBackend : public details::NetCommon, public BaseStream
+    struct ClientBackend : public details::NetCommon, public BaseStream
     {
     private:
         StreamClient * _parent;

@@ -40,7 +40,7 @@ namespace stream  {
  * @date   2017-05-10
  */
 template <typename BaseStreamType, typename BaseStreamClientType>
-class TBAG_API StreamServer : public Server
+class StreamServer : public Server
 {
 public:
     using BaseStream       = BaseStreamType;
@@ -56,7 +56,7 @@ public:
      * @author zer0
      * @date   2017-05-10
      */
-    class TBAG_API ClientNode : public BaseStreamClient
+    class ClientNode : public BaseStreamClient
     {
     private:
         StreamServer * _parent;
@@ -125,7 +125,7 @@ public:
      * @author zer0
      * @date   2017-05-10
      */
-    class TBAG_API ServerBackend : public details::NetCommon, public BaseStream
+    class ServerBackend : public details::NetCommon, public BaseStream
     {
     public:
         using AtomicBool = std::atomic_bool;

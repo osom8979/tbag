@@ -31,7 +31,7 @@ namespace tcp     {
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API TcpClient : public stream::StreamClient<uvpp::Tcp>
+class TcpClient : public stream::StreamClient<uvpp::Tcp>
 {
 public:
     using Parent = stream::StreamClient<uvpp::Tcp>;
