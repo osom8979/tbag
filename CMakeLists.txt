@@ -85,6 +85,10 @@ if (OpenCL_FOUND)
     message (STATUS "Found OpenCL: ${OpenCL_LIBRARY}")
 endif ()
 
+## Cap'n-Proto
+set (Capnp_ROOT ${CMAKE_BINARY_DIR}/external/local)
+find_package (Capnp)
+
 ## Doxygen settings.
 tbag_config__set_library_prefix (Doxygen_ROOT)
 tbag_config__set_library_option (USE_DOXYGEN Doxygen DOXYGEN_FOUND)

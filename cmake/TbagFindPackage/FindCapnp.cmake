@@ -80,7 +80,7 @@ function (capnp_generate __result __capnp __output_dir __type __capnps)
 
     # Select capnp type.
     if ("${__type}" STREQUAL "c++")
-        set (__output_extension ".h")
+        set (__output_extension ".c++")
     else ()
         message (FATAL_ERROR "Unknown CapnProto type: ${__type}")
     endif ()
