@@ -39,6 +39,7 @@ class Thread {
 
 public:
   explicit Thread(Function<void()> func);
+  KJ_DISALLOW_COPY(Thread);
 
   ~Thread() noexcept(false);
 
@@ -51,13 +52,22 @@ public:
   // Don't join the thread in ~Thread().
 
 private:
-  Function<void()> func;
+  struct ThreadState {
+    Function<void()> func;
+    kj::Maybe<kj::Exception> exception;
+
+    unsigned int refcount;
+    // Owned by the parent thread and the child thread.
+
+    void unref();
+  };
+  ThreadState* state;
+
 #if _WIN32
   void* threadHandle;
 #else
   unsigned long long threadId;  // actually pthread_t
 #endif
-  kj::Maybe<kj::Exception> exception;
   bool detached = false;
 
 #if _WIN32

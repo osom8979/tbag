@@ -153,7 +153,6 @@ class Tuple {
   // The actual Tuple class (used for tuples of size other than 1).
 
 public:
-  Tuple() = default;
   template <typename... U>
   constexpr inline Tuple(Tuple<U...>&& other): impl(kj::mv(other)) {}
   template <typename... U>
@@ -350,6 +349,15 @@ inline auto apply(Func&& func, Params&&... params)
   // Apply a function to some arguments, expanding tuples into separate arguments.
   return _::expandAndApply(kj::fwd<Func>(func), kj::fwd<Params>(params)...);
 }
+
+template <typename T> struct TupleSize_ { static constexpr size_t size = 1; };
+template <typename... T> struct TupleSize_<_::Tuple<T...>> {
+  static constexpr size_t size = sizeof...(T);
+};
+
+template <typename T>
+constexpr size_t tupleSize() { return TupleSize_<T>::size; }
+// Returns size of the tuple T.
 
 }  // namespace kj
 

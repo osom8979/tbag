@@ -26,26 +26,26 @@
 #ifndef CAPNP_COMMON_H_
 #define CAPNP_COMMON_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
-#include <libtbag/3rd/kj/units.h>
 #include <inttypes.h>
+#include <libtbag/3rd/kj/string.h>
+#include <libtbag/3rd/kj/memory.h>
+
+#if CAPNP_DEBUG_TYPES
+#include <libtbag/3rd/kj/units.h>
+#endif
 
 namespace capnp {
 
 #define CAPNP_VERSION_MAJOR 0
-#define CAPNP_VERSION_MINOR 5
-#define CAPNP_VERSION_MICRO 3
+#define CAPNP_VERSION_MINOR 6
+#define CAPNP_VERSION_MICRO 0
 
 #define CAPNP_VERSION \
   (CAPNP_VERSION_MAJOR * 1000000 + CAPNP_VERSION_MINOR * 1000 + CAPNP_VERSION_MICRO)
-
-#ifdef _MSC_VER
-#define CAPNP_LITE 1
-// MSVC only supports "lite" mode for now, due to missing C++11 features.
-#endif
 
 #ifndef CAPNP_LITE
 #define CAPNP_LITE 0
@@ -61,11 +61,10 @@ struct Void {
   inline constexpr bool operator!=(Void other) const { return false; }
 };
 
-static KJ_CONSTEXPR(const) Void VOID = Void();
+static constexpr Void VOID = Void();
 // Constant value for `Void`,  which is an empty struct.
 
-template <typename T>
-inline T& operator<<(T& os, Void) { return os << "void"; }
+inline kj::StringPtr KJ_STRINGIFY(Void) { return "void"; }
 
 struct Text;
 struct Data;
@@ -84,6 +83,13 @@ enum class Kind: uint8_t {
   // special handling. This includes types like AnyPointer, Dynamic*, etc.
 };
 
+enum class Style: uint8_t {
+  PRIMITIVE,
+  POINTER,      // other than struct
+  STRUCT,
+  CAPABILITY
+};
+
 enum class ElementSize: uint8_t {
   // Size of a list element.
 
@@ -99,6 +105,17 @@ enum class ElementSize: uint8_t {
   INLINE_COMPOSITE = 7
 };
 
+enum class PointerType {
+  // Various wire types a pointer field can take
+
+  NULL_,
+  // Should be NULL, but that's #defined in stddef.h
+
+  STRUCT,
+  LIST,
+  CAPABILITY
+};
+
 namespace schemas {
 
 template <typename T>
@@ -108,18 +125,7 @@ struct EnumInfo;
 
 namespace _ {  // private
 
-template <typename T, typename = typename T::_capnpPrivate::IsStruct> uint8_t kindSfinae(int);
-template <typename T, typename = typename T::_capnpPrivate::IsInterface> uint16_t kindSfinae(int);
-template <typename T, typename = typename schemas::EnumInfo<T>::IsEnum> uint32_t kindSfinae(int);
-template <typename T> uint64_t kindSfinae(...);
-
-template <typename T>
-struct MsvcWorkaround {
-  // TODO(msvc): Remove this once MSVC supports expression SFINAE.
-  enum { value = sizeof(kindSfinae<T>(0)) };
-};
-
-template <typename T, size_t s = MsvcWorkaround<T>::value> struct Kind_;
+template <typename T, typename = void> struct Kind_;
 
 template <> struct Kind_<Void> { static constexpr Kind kind = Kind::PRIMITIVE; };
 template <> struct Kind_<bool> { static constexpr Kind kind = Kind::PRIMITIVE; };
@@ -136,18 +142,17 @@ template <> struct Kind_<double> { static constexpr Kind kind = Kind::PRIMITIVE;
 template <> struct Kind_<Text> { static constexpr Kind kind = Kind::BLOB; };
 template <> struct Kind_<Data> { static constexpr Kind kind = Kind::BLOB; };
 
-template <typename T> struct Kind_<T, sizeof(uint8_t)> { static constexpr Kind kind = Kind::STRUCT; };
-template <typename T> struct Kind_<T, sizeof(uint16_t)> { static constexpr Kind kind = Kind::INTERFACE; };
-template <typename T> struct Kind_<T, sizeof(uint32_t)> { static constexpr Kind kind = Kind::ENUM; };
+template <typename T> struct Kind_<T, kj::VoidSfinae<typename T::_capnpPrivate::IsStruct>> {
+  static constexpr Kind kind = Kind::STRUCT;
+};
+template <typename T> struct Kind_<T, kj::VoidSfinae<typename T::_capnpPrivate::IsInterface>> {
+  static constexpr Kind kind = Kind::INTERFACE;
+};
+template <typename T> struct Kind_<T, kj::VoidSfinae<typename schemas::EnumInfo<T>::IsEnum>> {
+  static constexpr Kind kind = Kind::ENUM;
+};
 
 }  // namespace _ (private)
-
-#if CAPNP_LITE
-
-#define CAPNP_KIND(T) ::capnp::_::Kind_<T>::kind
-// Avoid constexpr methods in lite mode (MSVC is bad at constexpr).
-
-#else  // CAPNP_LITE
 
 template <typename T, Kind k = _::Kind_<T>::kind>
 inline constexpr Kind kind() {
@@ -156,8 +161,22 @@ inline constexpr Kind kind() {
   return k;
 }
 
+#if CAPNP_LITE
+
+#define CAPNP_KIND(T) ::capnp::_::Kind_<T>::kind
+// Avoid constexpr methods in lite mode (MSVC is bad at constexpr).
+
+#else  // CAPNP_LITE
+
 #define CAPNP_KIND(T) ::capnp::kind<T>()
 // Use this macro rather than kind<T>() in any code which must work in lite mode.
+
+template <typename T, Kind k = kind<T>()>
+inline constexpr Style style() {
+  return k == Kind::PRIMITIVE || k == Kind::ENUM ? Style::PRIMITIVE
+       : k == Kind::STRUCT ? Style::STRUCT
+       : k == Kind::INTERFACE ? Style::CAPABILITY : Style::POINTER;
+}
 
 #endif  // CAPNP_LITE, else
 
@@ -180,7 +199,7 @@ template <typename T> struct ListElementType_<List<T>> { typedef T Type; };
 template <typename T> using ListElementType = typename ListElementType_<T>::Type;
 
 namespace _ {  // private
-template <typename T, Kind k> struct Kind_<List<T, k>, sizeof(uint64_t)> {
+template <typename T, Kind k> struct Kind_<List<T, k>> {
   static constexpr Kind kind = Kind::LIST;
 };
 }  // namespace _ (private)
@@ -228,6 +247,51 @@ using FromClient = typename kj::Decay<T>::Calls;
 template <typename T>
 using FromServer = typename kj::Decay<T>::Serves;
 // FromBuilder<MyType::Server> = MyType (for any Cap'n Proto interface type).
+
+template <typename T, typename = void>
+struct FromAny_;
+
+template <typename T>
+struct FromAny_<T, kj::VoidSfinae<FromReader<T>>> {
+  using Type = FromReader<T>;
+};
+
+template <typename T>
+struct FromAny_<T, kj::VoidSfinae<FromBuilder<T>>> {
+  using Type = FromBuilder<T>;
+};
+
+template <typename T>
+struct FromAny_<T, kj::VoidSfinae<FromPipeline<T>>> {
+  using Type = FromPipeline<T>;
+};
+
+// Note that T::Client is covered by FromReader
+
+template <typename T>
+struct FromAny_<kj::Own<T>, kj::VoidSfinae<FromServer<T>>> {
+  using Type = FromServer<T>;
+};
+
+template <typename T>
+struct FromAny_<T,
+    kj::EnableIf<_::Kind_<T>::kind == Kind::PRIMITIVE || _::Kind_<T>::kind == Kind::ENUM>> {
+  // TODO(msvc): Ideally the EnableIf condition would be `style<T>() == Style::PRIMITIVE`, but MSVC
+  // cannot yet use style<T>() in this constexpr context.
+
+  using Type = kj::Decay<T>;
+};
+
+template <typename T>
+using FromAny = typename FromAny_<T>::Type;
+// Given any Cap'n Proto value type as an input, return the Cap'n Proto base type. That is:
+//
+//     Foo::Reader -> Foo
+//     Foo::Builder -> Foo
+//     Foo::Pipeline -> Foo
+//     Foo::Client -> Foo
+//     Own<Foo::Server> -> Foo
+//     uint32_t -> uint32_t
 
 namespace _ {  // private
 
@@ -284,137 +348,371 @@ static_assert(sizeof(word) == 8, "uint64_t is not 8 bytes?");
 
 namespace _ { class BitLabel; class ElementLabel; struct WirePointer; }
 
-typedef kj::Quantity<uint, _::BitLabel> BitCount;
-typedef kj::Quantity<uint8_t, _::BitLabel> BitCount8;
-typedef kj::Quantity<uint16_t, _::BitLabel> BitCount16;
-typedef kj::Quantity<uint32_t, _::BitLabel> BitCount32;
-typedef kj::Quantity<uint64_t, _::BitLabel> BitCount64;
+template <uint width, typename T = uint>
+using BitCountN = kj::Quantity<kj::Bounded<kj::maxValueForBits<width>(), T>, _::BitLabel>;
+template <uint width, typename T = uint>
+using ByteCountN = kj::Quantity<kj::Bounded<kj::maxValueForBits<width>(), T>, byte>;
+template <uint width, typename T = uint>
+using WordCountN = kj::Quantity<kj::Bounded<kj::maxValueForBits<width>(), T>, word>;
+template <uint width, typename T = uint>
+using ElementCountN = kj::Quantity<kj::Bounded<kj::maxValueForBits<width>(), T>, _::ElementLabel>;
+template <uint width, typename T = uint>
+using WirePointerCountN = kj::Quantity<kj::Bounded<kj::maxValueForBits<width>(), T>, _::WirePointer>;
 
-typedef kj::Quantity<uint, byte> ByteCount;
-typedef kj::Quantity<uint8_t, byte> ByteCount8;
-typedef kj::Quantity<uint16_t, byte> ByteCount16;
-typedef kj::Quantity<uint32_t, byte> ByteCount32;
-typedef kj::Quantity<uint64_t, byte> ByteCount64;
+typedef BitCountN<8, uint8_t> BitCount8;
+typedef BitCountN<16, uint16_t> BitCount16;
+typedef BitCountN<32, uint32_t> BitCount32;
+typedef BitCountN<64, uint64_t> BitCount64;
+typedef BitCountN<sizeof(uint) * 8, uint> BitCount;
 
-typedef kj::Quantity<uint, word> WordCount;
-typedef kj::Quantity<uint8_t, word> WordCount8;
-typedef kj::Quantity<uint16_t, word> WordCount16;
-typedef kj::Quantity<uint32_t, word> WordCount32;
-typedef kj::Quantity<uint64_t, word> WordCount64;
+typedef ByteCountN<8, uint8_t> ByteCount8;
+typedef ByteCountN<16, uint16_t> ByteCount16;
+typedef ByteCountN<32, uint32_t> ByteCount32;
+typedef ByteCountN<64, uint64_t> ByteCount64;
+typedef ByteCountN<sizeof(uint) * 8, uint> ByteCount;
 
-typedef kj::Quantity<uint, _::ElementLabel> ElementCount;
-typedef kj::Quantity<uint8_t, _::ElementLabel> ElementCount8;
-typedef kj::Quantity<uint16_t, _::ElementLabel> ElementCount16;
-typedef kj::Quantity<uint32_t, _::ElementLabel> ElementCount32;
-typedef kj::Quantity<uint64_t, _::ElementLabel> ElementCount64;
+typedef WordCountN<8, uint8_t> WordCount8;
+typedef WordCountN<16, uint16_t> WordCount16;
+typedef WordCountN<32, uint32_t> WordCount32;
+typedef WordCountN<64, uint64_t> WordCount64;
+typedef WordCountN<sizeof(uint) * 8, uint> WordCount;
 
-typedef kj::Quantity<uint, _::WirePointer> WirePointerCount;
-typedef kj::Quantity<uint8_t, _::WirePointer> WirePointerCount8;
-typedef kj::Quantity<uint16_t, _::WirePointer> WirePointerCount16;
-typedef kj::Quantity<uint32_t, _::WirePointer> WirePointerCount32;
-typedef kj::Quantity<uint64_t, _::WirePointer> WirePointerCount64;
+typedef ElementCountN<8, uint8_t> ElementCount8;
+typedef ElementCountN<16, uint16_t> ElementCount16;
+typedef ElementCountN<32, uint32_t> ElementCount32;
+typedef ElementCountN<64, uint64_t> ElementCount64;
+typedef ElementCountN<sizeof(uint) * 8, uint> ElementCount;
+
+typedef WirePointerCountN<8, uint8_t> WirePointerCount8;
+typedef WirePointerCountN<16, uint16_t> WirePointerCount16;
+typedef WirePointerCountN<32, uint32_t> WirePointerCount32;
+typedef WirePointerCountN<64, uint64_t> WirePointerCount64;
+typedef WirePointerCountN<sizeof(uint) * 8, uint> WirePointerCount;
+
+template <uint width>
+using BitsPerElementN = decltype(BitCountN<width>() / ElementCountN<width>());
+template <uint width>
+using BytesPerElementN = decltype(ByteCountN<width>() / ElementCountN<width>());
+template <uint width>
+using WordsPerElementN = decltype(WordCountN<width>() / ElementCountN<width>());
+template <uint width>
+using PointersPerElementN = decltype(WirePointerCountN<width>() / ElementCountN<width>());
+
+using kj::bounded;
+using kj::unbound;
+using kj::unboundAs;
+using kj::unboundMax;
+using kj::unboundMaxBits;
+using kj::assertMax;
+using kj::assertMaxBits;
+using kj::upgradeBound;
+using kj::ThrowOverflow;
+using kj::assumeBits;
+using kj::assumeMax;
+using kj::subtractChecked;
+using kj::trySubtract;
 
 template <typename T, typename U>
 inline constexpr U* operator+(U* ptr, kj::Quantity<T, U> offset) {
-  return ptr + offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr + unbound(offset / kj::unit<kj::Quantity<T, U>>());
 }
 template <typename T, typename U>
 inline constexpr const U* operator+(const U* ptr, kj::Quantity<T, U> offset) {
-  return ptr + offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr + unbound(offset / kj::unit<kj::Quantity<T, U>>());
 }
 template <typename T, typename U>
 inline constexpr U* operator+=(U*& ptr, kj::Quantity<T, U> offset) {
-  return ptr = ptr + offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr = ptr + unbound(offset / kj::unit<kj::Quantity<T, U>>());
 }
 template <typename T, typename U>
 inline constexpr const U* operator+=(const U*& ptr, kj::Quantity<T, U> offset) {
-  return ptr = ptr + offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr = ptr + unbound(offset / kj::unit<kj::Quantity<T, U>>());
 }
 
 template <typename T, typename U>
 inline constexpr U* operator-(U* ptr, kj::Quantity<T, U> offset) {
-  return ptr - offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr - unbound(offset / kj::unit<kj::Quantity<T, U>>());
 }
 template <typename T, typename U>
 inline constexpr const U* operator-(const U* ptr, kj::Quantity<T, U> offset) {
-  return ptr - offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr - unbound(offset / kj::unit<kj::Quantity<T, U>>());
 }
 template <typename T, typename U>
 inline constexpr U* operator-=(U*& ptr, kj::Quantity<T, U> offset) {
-  return ptr = ptr - offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr = ptr - unbound(offset / kj::unit<kj::Quantity<T, U>>());
 }
 template <typename T, typename U>
 inline constexpr const U* operator-=(const U*& ptr, kj::Quantity<T, U> offset) {
-  return ptr = ptr - offset / kj::unit<kj::Quantity<T, U>>();
+  return ptr = ptr - unbound(offset / kj::unit<kj::Quantity<T, U>>());
+}
+
+constexpr auto BITS = kj::unit<BitCountN<1>>();
+constexpr auto BYTES = kj::unit<ByteCountN<1>>();
+constexpr auto WORDS = kj::unit<WordCountN<1>>();
+constexpr auto ELEMENTS = kj::unit<ElementCountN<1>>();
+constexpr auto POINTERS = kj::unit<WirePointerCountN<1>>();
+
+constexpr auto ZERO = kj::bounded<0>();
+constexpr auto ONE = kj::bounded<1>();
+
+// GCC 4.7 actually gives unused warnings on these constants in opt mode...
+constexpr auto BITS_PER_BYTE KJ_UNUSED = bounded<8>() * BITS / BYTES;
+constexpr auto BITS_PER_WORD KJ_UNUSED = bounded<64>() * BITS / WORDS;
+constexpr auto BYTES_PER_WORD KJ_UNUSED = bounded<8>() * BYTES / WORDS;
+
+constexpr auto BITS_PER_POINTER KJ_UNUSED = bounded<64>() * BITS / POINTERS;
+constexpr auto BYTES_PER_POINTER KJ_UNUSED = bounded<8>() * BYTES / POINTERS;
+constexpr auto WORDS_PER_POINTER KJ_UNUSED = ONE * WORDS / POINTERS;
+
+constexpr auto POINTER_SIZE_IN_WORDS = ONE * POINTERS * WORDS_PER_POINTER;
+
+constexpr uint SEGMENT_WORD_COUNT_BITS = 29;      // Number of words in a segment.
+constexpr uint LIST_ELEMENT_COUNT_BITS = 29;      // Number of elements in a list.
+constexpr uint STRUCT_DATA_WORD_COUNT_BITS = 16;  // Number of words in a Struct data section.
+constexpr uint STRUCT_POINTER_COUNT_BITS = 16;    // Number of pointers in a Struct pointer section.
+constexpr uint BLOB_SIZE_BITS = 29;               // Number of bytes in a blob.
+
+typedef WordCountN<SEGMENT_WORD_COUNT_BITS> SegmentWordCount;
+typedef ElementCountN<LIST_ELEMENT_COUNT_BITS> ListElementCount;
+typedef WordCountN<STRUCT_DATA_WORD_COUNT_BITS, uint16_t> StructDataWordCount;
+typedef WirePointerCountN<STRUCT_POINTER_COUNT_BITS, uint16_t> StructPointerCount;
+typedef ByteCountN<BLOB_SIZE_BITS> BlobSize;
+
+constexpr auto MAX_SEGMENT_WORDS =
+    bounded<kj::maxValueForBits<SEGMENT_WORD_COUNT_BITS>()>() * WORDS;
+constexpr auto MAX_LIST_ELEMENTS =
+    bounded<kj::maxValueForBits<LIST_ELEMENT_COUNT_BITS>()>() * ELEMENTS;
+constexpr auto MAX_STUCT_DATA_WORDS =
+    bounded<kj::maxValueForBits<STRUCT_DATA_WORD_COUNT_BITS>()>() * WORDS;
+constexpr auto MAX_STRUCT_POINTER_COUNT =
+    bounded<kj::maxValueForBits<STRUCT_POINTER_COUNT_BITS>()>() * POINTERS;
+
+using StructDataBitCount = decltype(WordCountN<STRUCT_POINTER_COUNT_BITS>() * BITS_PER_WORD);
+// Number of bits in a Struct data segment (should come out to BitCountN<22>).
+
+using StructDataOffset = decltype(StructDataBitCount() * (ONE * ELEMENTS / BITS));
+using StructPointerOffset = StructPointerCount;
+// Type of a field offset.
+
+inline StructDataOffset assumeDataOffset(uint32_t offset) {
+  return assumeMax(MAX_STUCT_DATA_WORDS * BITS_PER_WORD * (ONE * ELEMENTS / BITS),
+                   bounded(offset) * ELEMENTS);
+}
+
+inline StructPointerOffset assumePointerOffset(uint32_t offset) {
+  return assumeMax(MAX_STRUCT_POINTER_COUNT, bounded(offset) * POINTERS);
+}
+
+constexpr uint MAX_TEXT_SIZE = kj::maxValueForBits<BLOB_SIZE_BITS>() - 1;
+typedef kj::Quantity<kj::Bounded<MAX_TEXT_SIZE, uint>, byte> TextSize;
+// Not including NUL terminator.
+
+template <typename T>
+inline KJ_CONSTEXPR() decltype(bounded<sizeof(T)>() * BYTES / ELEMENTS) bytesPerElement() {
+  return bounded<sizeof(T)>() * BYTES / ELEMENTS;
+}
+
+template <typename T>
+inline KJ_CONSTEXPR() decltype(bounded<sizeof(T) * 8>() * BITS / ELEMENTS) bitsPerElement() {
+  return bounded<sizeof(T) * 8>() * BITS / ELEMENTS;
+}
+
+template <typename T, uint maxN>
+inline constexpr kj::Quantity<kj::Bounded<maxN, size_t>, T>
+intervalLength(const T* a, const T* b, kj::Quantity<kj::BoundedConst<maxN>, T>) {
+  return kj::assumeMax<maxN>(b - a) * kj::unit<kj::Quantity<kj::BoundedConst<1u>, T>>();
+}
+
+template <typename T, typename U>
+inline constexpr kj::ArrayPtr<const U> arrayPtr(const U* ptr, kj::Quantity<T, U> size) {
+  return kj::ArrayPtr<const U>(ptr, unbound(size / kj::unit<kj::Quantity<T, U>>()));
+}
+template <typename T, typename U>
+inline constexpr kj::ArrayPtr<U> arrayPtr(U* ptr, kj::Quantity<T, U> size) {
+  return kj::ArrayPtr<U>(ptr, unbound(size / kj::unit<kj::Quantity<T, U>>()));
 }
 
 #else
 
-typedef uint BitCount;
-typedef uint8_t BitCount8;
-typedef uint16_t BitCount16;
-typedef uint32_t BitCount32;
-typedef uint64_t BitCount64;
+template <uint width, typename T = uint>
+using BitCountN = T;
+template <uint width, typename T = uint>
+using ByteCountN = T;
+template <uint width, typename T = uint>
+using WordCountN = T;
+template <uint width, typename T = uint>
+using ElementCountN = T;
+template <uint width, typename T = uint>
+using WirePointerCountN = T;
 
-typedef uint ByteCount;
-typedef uint8_t ByteCount8;
-typedef uint16_t ByteCount16;
-typedef uint32_t ByteCount32;
-typedef uint64_t ByteCount64;
 
-typedef uint WordCount;
-typedef uint8_t WordCount8;
-typedef uint16_t WordCount16;
-typedef uint32_t WordCount32;
-typedef uint64_t WordCount64;
+// XXX
+typedef BitCountN<8, uint8_t> BitCount8;
+typedef BitCountN<16, uint16_t> BitCount16;
+typedef BitCountN<32, uint32_t> BitCount32;
+typedef BitCountN<64, uint64_t> BitCount64;
+typedef BitCountN<sizeof(uint) * 8, uint> BitCount;
 
-typedef uint ElementCount;
-typedef uint8_t ElementCount8;
-typedef uint16_t ElementCount16;
-typedef uint32_t ElementCount32;
-typedef uint64_t ElementCount64;
+typedef ByteCountN<8, uint8_t> ByteCount8;
+typedef ByteCountN<16, uint16_t> ByteCount16;
+typedef ByteCountN<32, uint32_t> ByteCount32;
+typedef ByteCountN<64, uint64_t> ByteCount64;
+typedef ByteCountN<sizeof(uint) * 8, uint> ByteCount;
 
-typedef uint WirePointerCount;
-typedef uint8_t WirePointerCount8;
-typedef uint16_t WirePointerCount16;
-typedef uint32_t WirePointerCount32;
-typedef uint64_t WirePointerCount64;
+typedef WordCountN<8, uint8_t> WordCount8;
+typedef WordCountN<16, uint16_t> WordCount16;
+typedef WordCountN<32, uint32_t> WordCount32;
+typedef WordCountN<64, uint64_t> WordCount64;
+typedef WordCountN<sizeof(uint) * 8, uint> WordCount;
 
-#endif
+typedef ElementCountN<8, uint8_t> ElementCount8;
+typedef ElementCountN<16, uint16_t> ElementCount16;
+typedef ElementCountN<32, uint32_t> ElementCount32;
+typedef ElementCountN<64, uint64_t> ElementCount64;
+typedef ElementCountN<sizeof(uint) * 8, uint> ElementCount;
 
-constexpr BitCount BITS = kj::unit<BitCount>();
-constexpr ByteCount BYTES = kj::unit<ByteCount>();
-constexpr WordCount WORDS = kj::unit<WordCount>();
-constexpr ElementCount ELEMENTS = kj::unit<ElementCount>();
-constexpr WirePointerCount POINTERS = kj::unit<WirePointerCount>();
+typedef WirePointerCountN<8, uint8_t> WirePointerCount8;
+typedef WirePointerCountN<16, uint16_t> WirePointerCount16;
+typedef WirePointerCountN<32, uint32_t> WirePointerCount32;
+typedef WirePointerCountN<64, uint64_t> WirePointerCount64;
+typedef WirePointerCountN<sizeof(uint) * 8, uint> WirePointerCount;
+
+template <uint width>
+using BitsPerElementN = decltype(BitCountN<width>() / ElementCountN<width>());
+template <uint width>
+using BytesPerElementN = decltype(ByteCountN<width>() / ElementCountN<width>());
+template <uint width>
+using WordsPerElementN = decltype(WordCountN<width>() / ElementCountN<width>());
+template <uint width>
+using PointersPerElementN = decltype(WirePointerCountN<width>() / ElementCountN<width>());
+
+using kj::ThrowOverflow;
+// YYY
+
+template <uint i> inline constexpr uint bounded() { return i; }
+template <typename T> inline constexpr T bounded(T i) { return i; }
+template <typename T> inline constexpr T unbound(T i) { return i; }
+
+template <typename T, typename U> inline constexpr T unboundAs(U i) { return i; }
+
+template <uint64_t requestedMax, typename T> inline constexpr uint unboundMax(T i) { return i; }
+template <uint bits, typename T> inline constexpr uint unboundMaxBits(T i) { return i; }
+
+template <uint newMax, typename T, typename ErrorFunc>
+inline T assertMax(T value, ErrorFunc&& func) {
+  if (KJ_UNLIKELY(value > newMax)) func();
+  return value;
+}
+
+template <typename T, typename ErrorFunc>
+inline T assertMax(uint newMax, T value, ErrorFunc&& func) {
+  if (KJ_UNLIKELY(value > newMax)) func();
+  return value;
+}
+
+template <uint bits, typename T, typename ErrorFunc = ThrowOverflow>
+inline T assertMaxBits(T value, ErrorFunc&& func = ErrorFunc()) {
+  if (KJ_UNLIKELY(value > kj::maxValueForBits<bits>())) func();
+  return value;
+}
+
+template <typename T, typename ErrorFunc = ThrowOverflow>
+inline T assertMaxBits(uint bits, T value, ErrorFunc&& func = ErrorFunc()) {
+  if (KJ_UNLIKELY(value > (1ull << bits) - 1)) func();
+  return value;
+}
+
+template <typename T, typename U> inline constexpr T upgradeBound(U i) { return i; }
+
+template <uint bits, typename T> inline constexpr T assumeBits(T i) { return i; }
+template <uint64_t max, typename T> inline constexpr T assumeMax(T i) { return i; }
+
+template <typename T, typename U, typename ErrorFunc = ThrowOverflow>
+inline auto subtractChecked(T a, U b, ErrorFunc&& errorFunc = ErrorFunc())
+    -> decltype(a - b) {
+  if (b > a) errorFunc();
+  return a - b;
+}
+
+template <typename T, typename U>
+inline auto trySubtract(T a, U b) -> kj::Maybe<decltype(a - b)> {
+  if (b > a) {
+    return nullptr;
+  } else {
+    return a - b;
+  }
+}
+
+constexpr uint BITS = 1;
+constexpr uint BYTES = 1;
+constexpr uint WORDS = 1;
+constexpr uint ELEMENTS = 1;
+constexpr uint POINTERS = 1;
+
+constexpr uint ZERO = 0;
+constexpr uint ONE = 1;
 
 // GCC 4.7 actually gives unused warnings on these constants in opt mode...
-constexpr auto BITS_PER_BYTE KJ_UNUSED = 8 * BITS / BYTES;
-constexpr auto BITS_PER_WORD KJ_UNUSED = 64 * BITS / WORDS;
-constexpr auto BYTES_PER_WORD KJ_UNUSED = 8 * BYTES / WORDS;
+constexpr uint BITS_PER_BYTE KJ_UNUSED = 8;
+constexpr uint BITS_PER_WORD KJ_UNUSED = 64;
+constexpr uint BYTES_PER_WORD KJ_UNUSED = 8;
 
-constexpr auto BITS_PER_POINTER KJ_UNUSED = 64 * BITS / POINTERS;
-constexpr auto BYTES_PER_POINTER KJ_UNUSED = 8 * BYTES / POINTERS;
-constexpr auto WORDS_PER_POINTER KJ_UNUSED = 1 * WORDS / POINTERS;
+constexpr uint BITS_PER_POINTER KJ_UNUSED = 64;
+constexpr uint BYTES_PER_POINTER KJ_UNUSED = 8;
+constexpr uint WORDS_PER_POINTER KJ_UNUSED = 1;
 
-constexpr WordCount POINTER_SIZE_IN_WORDS = 1 * POINTERS * WORDS_PER_POINTER;
+// XXX
+constexpr uint POINTER_SIZE_IN_WORDS = ONE * POINTERS * WORDS_PER_POINTER;
+
+constexpr uint SEGMENT_WORD_COUNT_BITS = 29;      // Number of words in a segment.
+constexpr uint LIST_ELEMENT_COUNT_BITS = 29;      // Number of elements in a list.
+constexpr uint STRUCT_DATA_WORD_COUNT_BITS = 16;  // Number of words in a Struct data section.
+constexpr uint STRUCT_POINTER_COUNT_BITS = 16;    // Number of pointers in a Struct pointer section.
+constexpr uint BLOB_SIZE_BITS = 29;               // Number of bytes in a blob.
+
+typedef WordCountN<SEGMENT_WORD_COUNT_BITS> SegmentWordCount;
+typedef ElementCountN<LIST_ELEMENT_COUNT_BITS> ListElementCount;
+typedef WordCountN<STRUCT_DATA_WORD_COUNT_BITS, uint16_t> StructDataWordCount;
+typedef WirePointerCountN<STRUCT_POINTER_COUNT_BITS, uint16_t> StructPointerCount;
+typedef ByteCountN<BLOB_SIZE_BITS> BlobSize;
+// YYY
+
+constexpr auto MAX_SEGMENT_WORDS = kj::maxValueForBits<SEGMENT_WORD_COUNT_BITS>();
+constexpr auto MAX_LIST_ELEMENTS = kj::maxValueForBits<LIST_ELEMENT_COUNT_BITS>();
+constexpr auto MAX_STUCT_DATA_WORDS = kj::maxValueForBits<STRUCT_DATA_WORD_COUNT_BITS>();
+constexpr auto MAX_STRUCT_POINTER_COUNT = kj::maxValueForBits<STRUCT_POINTER_COUNT_BITS>();
+
+typedef uint StructDataBitCount;
+typedef uint StructDataOffset;
+typedef uint StructPointerOffset;
+
+inline StructDataOffset assumeDataOffset(uint32_t offset) { return offset; }
+inline StructPointerOffset assumePointerOffset(uint32_t offset) { return offset; }
+
+constexpr uint MAX_TEXT_SIZE = kj::maxValueForBits<BLOB_SIZE_BITS>() - 1;
+typedef uint TextSize;
 
 template <typename T>
-inline KJ_CONSTEXPR() decltype(BYTES / ELEMENTS) bytesPerElement() {
-  return sizeof(T) * BYTES / ELEMENTS;
-}
+inline KJ_CONSTEXPR() size_t bytesPerElement() { return sizeof(T); }
 
 template <typename T>
-inline KJ_CONSTEXPR() decltype(BITS / ELEMENTS) bitsPerElement() {
-  return sizeof(T) * 8 * BITS / ELEMENTS;
+inline KJ_CONSTEXPR() size_t bitsPerElement() { return sizeof(T) * 8; }
+
+template <typename T>
+inline constexpr ptrdiff_t intervalLength(const T* a, const T* b, uint) {
+  return b - a;
 }
 
-inline constexpr ByteCount intervalLength(const byte* a, const byte* b) {
-  return uint(b - a) * BYTES;
+template <typename T, typename U>
+inline constexpr kj::ArrayPtr<const U> arrayPtr(const U* ptr, T size) {
+  return kj::arrayPtr(ptr, size);
 }
-inline constexpr WordCount intervalLength(const word* a, const word* b) {
-  return uint(b - a) * WORDS;
+template <typename T, typename U>
+inline constexpr kj::ArrayPtr<U> arrayPtr(U* ptr, T size) {
+  return kj::arrayPtr(ptr, size);
 }
+
+#endif
 
 }  // namespace capnp
 

@@ -22,7 +22,7 @@
 #ifndef CAPNP_ANY_H_
 #define CAPNP_ANY_H_
 
-#if defined(__GNUC__) && !CAPNP_HEADER_WARNINGS
+#if defined(__GNUC__) && !defined(CAPNP_HEADER_WARNINGS)
 #pragma GCC system_header
 #endif
 
@@ -74,6 +74,14 @@ template <> struct Kind_<AnyList> { static constexpr Kind kind = Kind::OTHER; };
 // =======================================================================================
 // AnyPointer!
 
+enum class Equality {
+  NOT_EQUAL,
+  EQUAL,
+  UNKNOWN_CONTAINS_CAPS
+};
+
+kj::StringPtr KJ_STRINGIFY(Equality res);
+
 struct AnyPointer {
   // Reader/Builder for the `AnyPointer` field type, i.e. a pointer that can point to an arbitrary
   // object.
@@ -90,12 +98,17 @@ struct AnyPointer {
     inline MessageSize targetSize() const;
     // Get the total size of the target object and all its children.
 
-    inline bool isNull() const;
-    inline bool isStruct() {
-      return reader.isStruct();
-    }
-    inline bool isList() {
-      return reader.isList();
+    inline PointerType getPointerType() const;
+
+    inline bool isNull() const { return getPointerType() == PointerType::NULL_; }
+    inline bool isStruct() const { return getPointerType() == PointerType::STRUCT; }
+    inline bool isList() const { return getPointerType() == PointerType::LIST; }
+    inline bool isCapability() const { return getPointerType() == PointerType::CAPABILITY; }
+
+    Equality equals(AnyPointer::Reader right);
+    bool operator==(AnyPointer::Reader right);
+    inline bool operator!=(AnyPointer::Reader right) {
+      return !(*this == right);
     }
 
     template <typename T>
@@ -125,6 +138,7 @@ struct AnyPointer {
     friend struct AnyPointer;
     friend class Orphanage;
     friend class CapReaderContext;
+    friend struct _::PointerHelpers<AnyPointer>;
   };
 
   class Builder {
@@ -138,12 +152,21 @@ struct AnyPointer {
     inline MessageSize targetSize() const;
     // Get the total size of the target object and all its children.
 
-    inline bool isNull();
-    inline bool isStruct() {
-      return builder.isStruct();
+    inline PointerType getPointerType();
+
+    inline bool isNull() { return getPointerType() == PointerType::NULL_; }
+    inline bool isStruct() { return getPointerType() == PointerType::STRUCT; }
+    inline bool isList() { return getPointerType() == PointerType::LIST; }
+    inline bool isCapability() { return getPointerType() == PointerType::CAPABILITY; }
+
+    inline Equality equals(AnyPointer::Reader right) {
+      return asReader().equals(right);
     }
-    inline bool isList() {
-      return builder.isList();
+    inline bool operator==(AnyPointer::Reader right) {
+      return asReader() == right;
+    }
+    inline bool operator!=(AnyPointer::Reader right) {
+      return !(*this == right);
     }
 
     inline void clear();
@@ -185,9 +208,9 @@ struct AnyPointer {
     // Note: Does not accept INLINE_COMPOSITE for elementSize.
 
     inline List<AnyStruct>::Builder initAsListOfAnyStruct(
-        uint dataWordCount, uint pointerCount, uint elementCount);
+        uint16_t dataWordCount, uint16_t pointerCount, uint elementCount);
 
-    inline AnyStruct::Builder initAsAnyStruct(uint dataWordCount, uint pointerCount);
+    inline AnyStruct::Builder initAsAnyStruct(uint16_t dataWordCount, uint16_t pointerCount);
 
     template <typename T>
     inline void setAs(ReaderFor<T> value);
@@ -198,8 +221,13 @@ struct AnyPointer {
     inline void setAs(std::initializer_list<ReaderFor<ListElementType<T>>> list);
     // Valid for T = List<?>.
 
+    template <typename T>
+    inline void setCanonicalAs(ReaderFor<T> value);
+
     inline void set(Reader value) { builder.copyFrom(value.reader); }
     // Set to a copy of another AnyPointer.
+
+    inline void setCanonical(Reader value) { builder.copyFrom(value.reader, true); }
 
     template <typename T>
     inline void adopt(Orphan<T>&& orphan);
@@ -232,6 +260,7 @@ struct AnyPointer {
     _::PointerBuilder builder;
     friend class Orphanage;
     friend class CapBuilderContext;
+    friend struct _::PointerHelpers<AnyPointer>;
   };
 
 #if !CAPNP_LITE
@@ -268,6 +297,7 @@ struct AnyPointer {
 
     friend class LocalClient;
     friend class PipelineHook;
+    friend class AnyStruct::Pipeline;
   };
 #endif  // !CAPNP_LITE
 };
@@ -280,6 +310,9 @@ public:
   Orphan() = default;
   KJ_DISALLOW_COPY(Orphan);
   Orphan(Orphan&&) = default;
+  inline Orphan(_::OrphanBuilder&& builder)
+      : builder(kj::mv(builder)) {}
+
   Orphan& operator=(Orphan&&) = default;
 
   template <typename T>
@@ -325,9 +358,6 @@ public:
 private:
   _::OrphanBuilder builder;
 
-  inline Orphan(_::OrphanBuilder&& builder)
-      : builder(kj::mv(builder)) {}
-
   template <typename, Kind>
   friend struct _::PointerHelpers;
   friend class Orphanage;
@@ -365,13 +395,13 @@ struct List<AnyPointer, Kind::OTHER> {
   public:
     typedef List<AnyPointer> Reads;
 
-    Reader() = default;
+    inline Reader(): reader(ElementSize::POINTER) {}
     inline explicit Reader(_::ListReader reader): reader(reader) {}
 
-    inline uint size() const { return reader.size() / ELEMENTS; }
+    inline uint size() const { return unbound(reader.size() / ELEMENTS); }
     inline AnyPointer::Reader operator[](uint index) const {
       KJ_IREQUIRE(index < size());
-      return AnyPointer::Reader(reader.getPointerElement(index * ELEMENTS));
+      return AnyPointer::Reader(reader.getPointerElement(bounded(index) * ELEMENTS));
     }
 
     typedef _::IndexingIterator<const Reader, typename AnyPointer::Reader> Iterator;
@@ -394,16 +424,16 @@ struct List<AnyPointer, Kind::OTHER> {
     typedef List<AnyPointer> Builds;
 
     Builder() = delete;
-    inline Builder(decltype(nullptr)) {}
+    inline Builder(decltype(nullptr)): builder(ElementSize::POINTER) {}
     inline explicit Builder(_::ListBuilder builder): builder(builder) {}
 
-    inline operator Reader() { return Reader(builder.asReader()); }
-    inline Reader asReader() { return Reader(builder.asReader()); }
+    inline operator Reader() const { return Reader(builder.asReader()); }
+    inline Reader asReader() const { return Reader(builder.asReader()); }
 
-    inline uint size() const { return builder.size() / ELEMENTS; }
+    inline uint size() const { return unbound(builder.size() / ELEMENTS); }
     inline AnyPointer::Builder operator[](uint index) {
       KJ_IREQUIRE(index < size());
-      return AnyPointer::Builder(builder.getPointerElement(index * ELEMENTS));
+      return AnyPointer::Builder(builder.getPointerElement(bounded(index) * ELEMENTS));
     }
 
     typedef _::IndexingIterator<Builder, typename AnyPointer::Builder> Iterator;
@@ -422,34 +452,49 @@ struct List<AnyPointer, Kind::OTHER> {
 
 class AnyStruct::Reader {
 public:
+  typedef AnyStruct Reads;
+
   Reader() = default;
   inline Reader(_::StructReader reader): _reader(reader) {}
 
-#if !_MSC_VER  // TODO(msvc): MSVC ICEs on this. Try restoring when compiler improves.
   template <typename T, typename = kj::EnableIf<CAPNP_KIND(FromReader<T>) == Kind::STRUCT>>
   inline Reader(T&& value)
       : _reader(_::PointerHelpers<FromReader<T>>::getInternalReader(kj::fwd<T>(value))) {}
-#endif
 
-  Data::Reader getDataSection() {
+  kj::ArrayPtr<const byte> getDataSection() {
     return _reader.getDataSectionAsBlob();
   }
   List<AnyPointer>::Reader getPointerSection() {
     return List<AnyPointer>::Reader(_reader.getPointerSectionAsList());
   }
 
+  kj::Array<word> canonicalize() {
+    return _reader.canonicalize();
+  }
+
+  Equality equals(AnyStruct::Reader right);
+  bool operator==(AnyStruct::Reader right);
+  inline bool operator!=(AnyStruct::Reader right) {
+    return !(*this == right);
+  }
+
   template <typename T>
-  ReaderFor<T> as();
-  // T must be a struct type.
+  ReaderFor<T> as() const {
+    // T must be a struct type.
+    return typename T::Reader(_reader);
+  }
 private:
   _::StructReader _reader;
 
   template <typename, Kind>
   friend struct _::PointerHelpers;
+  friend class Orphanage;
 };
 
 class AnyStruct::Builder {
 public:
+  typedef AnyStruct Builds;
+
   inline Builder(decltype(nullptr)) {}
   inline Builder(_::StructBuilder builder): _builder(builder) {}
 
@@ -459,15 +504,31 @@ public:
       : _builder(_::PointerHelpers<FromBuilder<T>>::getInternalBuilder(kj::fwd<T>(value))) {}
 #endif
 
-  inline Data::Builder getDataSection() {
+  inline kj::ArrayPtr<byte> getDataSection() {
     return _builder.getDataSectionAsBlob();
   }
   List<AnyPointer>::Builder getPointerSection() {
     return List<AnyPointer>::Builder(_builder.getPointerSectionAsList());
   }
 
+  inline Equality equals(AnyStruct::Reader right) {
+    return asReader().equals(right);
+  }
+  inline bool operator==(AnyStruct::Reader right) {
+    return asReader() == right;
+  }
+  inline bool operator!=(AnyStruct::Reader right) {
+    return !(*this == right);
+  }
+
   inline operator Reader() const { return Reader(_builder.asReader()); }
   inline Reader asReader() const { return Reader(_builder.asReader()); }
+
+  template <typename T>
+  BuilderFor<T> as() {
+    // T must be a struct type.
+    return typename T::Builder(_builder);
+  }
 private:
   _::StructBuilder _builder;
   friend class Orphanage;
@@ -477,20 +538,21 @@ private:
 #if !CAPNP_LITE
 class AnyStruct::Pipeline {
 public:
-  Pipeline getPointerField(uint16_t pointerIndex);
-  // Return a new Promise representing a sub-object of the result.  `pointerIndex` is the index
-  // of the sub-object within the pointer section of the result (the result must be a struct).
-  //
-  // TODO(perf):  On GCC 4.8 / Clang 3.3, use rvalue qualifiers to avoid the need for copies.
-  //   Also make `ops` into a Vector to optimize this.
+  inline Pipeline(decltype(nullptr)): typeless(nullptr) {}
+  inline explicit Pipeline(AnyPointer::Pipeline&& typeless)
+      : typeless(kj::mv(typeless)) {}
+
+  inline AnyPointer::Pipeline getPointerField(uint16_t pointerIndex) {
+    // Return a new Promise representing a sub-object of the result.  `pointerIndex` is the index
+    // of the sub-object within the pointer section of the result (the result must be a struct).
+    //
+    // TODO(perf):  On GCC 4.8 / Clang 3.3, use rvalue qualifiers to avoid the need for copies.
+    //   Also make `ops` into a Vector to optimize this.
+    return typeless.getPointerField(pointerIndex);
+  }
 
 private:
-  kj::Own<PipelineHook> hook;
-  kj::Array<PipelineOp> ops;
-
-  inline Pipeline(kj::Own<PipelineHook>&& hook, kj::Array<PipelineOp>&& ops)
-      : hook(kj::mv(hook)), ops(kj::mv(ops)) {}
-
+  AnyPointer::Pipeline typeless;
 };
 #endif  // !CAPNP_LITE
 
@@ -498,13 +560,13 @@ class List<AnyStruct, Kind::OTHER>::Reader {
 public:
   typedef List<AnyStruct> Reads;
 
-  Reader() = default;
+  inline Reader(): reader(ElementSize::INLINE_COMPOSITE) {}
   inline explicit Reader(_::ListReader reader): reader(reader) {}
 
-  inline uint size() const { return reader.size() / ELEMENTS; }
+  inline uint size() const { return unbound(reader.size() / ELEMENTS); }
   inline AnyStruct::Reader operator[](uint index) const {
     KJ_IREQUIRE(index < size());
-    return AnyStruct::Reader(reader.getStructElement(index * ELEMENTS));
+    return AnyStruct::Reader(reader.getStructElement(bounded(index) * ELEMENTS));
   }
 
   typedef _::IndexingIterator<const Reader, typename AnyStruct::Reader> Iterator;
@@ -522,22 +584,21 @@ private:
   friend struct ToDynamic_;
 };
 
-
 class List<AnyStruct, Kind::OTHER>::Builder {
 public:
   typedef List<AnyStruct> Builds;
 
   Builder() = delete;
-  inline Builder(decltype(nullptr)) {}
+  inline Builder(decltype(nullptr)): builder(ElementSize::INLINE_COMPOSITE) {}
   inline explicit Builder(_::ListBuilder builder): builder(builder) {}
 
-  inline operator Reader() { return Reader(builder.asReader()); }
-  inline Reader asReader() { return Reader(builder.asReader()); }
+  inline operator Reader() const { return Reader(builder.asReader()); }
+  inline Reader asReader() const { return Reader(builder.asReader()); }
 
-  inline uint size() const { return builder.size() / ELEMENTS; }
+  inline uint size() const { return unbound(builder.size() / ELEMENTS); }
   inline AnyStruct::Builder operator[](uint index) {
     KJ_IREQUIRE(index < size());
-    return AnyStruct::Builder(builder.getStructElement(index * ELEMENTS));
+    return AnyStruct::Builder(builder.getStructElement(bounded(index) * ELEMENTS));
   }
 
   typedef _::IndexingIterator<Builder, typename AnyStruct::Builder> Iterator;
@@ -555,7 +616,9 @@ private:
 
 class AnyList::Reader {
 public:
-  Reader() = default;
+  typedef AnyList Reads;
+
+  inline Reader(): _reader(ElementSize::VOID) {}
   inline Reader(_::ListReader reader): _reader(reader) {}
 
 #if !_MSC_VER  // TODO(msvc): MSVC ICEs on this. Try restoring when compiler improves.
@@ -565,7 +628,15 @@ public:
 #endif
 
   inline ElementSize getElementSize() { return _reader.getElementSize(); }
-  inline uint size() { return _reader.size() / ELEMENTS; }
+  inline uint size() { return unbound(_reader.size() / ELEMENTS); }
+
+  inline kj::ArrayPtr<const byte> getRawBytes() { return _reader.asRawBytes(); }
+
+  Equality equals(AnyList::Reader right);
+  bool operator==(AnyList::Reader right);
+  inline bool operator!=(AnyList::Reader right) {
+    return !(*this == right);
+  }
 
   template <typename T> ReaderFor<T> as() {
     // T must be List<U>.
@@ -576,11 +647,14 @@ private:
 
   template <typename, Kind>
   friend struct _::PointerHelpers;
+  friend class Orphanage;
 };
 
 class AnyList::Builder {
 public:
-  inline Builder(decltype(nullptr)) {}
+  typedef AnyList Builds;
+
+  inline Builder(decltype(nullptr)): _builder(ElementSize::VOID) {}
   inline Builder(_::ListBuilder builder): _builder(builder) {}
 
 #if !_MSC_VER  // TODO(msvc): MSVC ICEs on this. Try restoring when compiler improves.
@@ -590,7 +664,15 @@ public:
 #endif
 
   inline ElementSize getElementSize() { return _builder.getElementSize(); }
-  inline uint size() { return _builder.size() / ELEMENTS; }
+  inline uint size() { return unbound(_builder.size() / ELEMENTS); }
+
+  Equality equals(AnyList::Reader right);
+  inline bool operator==(AnyList::Reader right) {
+    return asReader() == right;
+  }
+  inline bool operator!=(AnyList::Reader right) {
+    return !(*this == right);
+  }
 
   template <typename T> BuilderFor<T> as() {
     // T must be List<U>.
@@ -602,6 +684,8 @@ public:
 
 private:
   _::ListBuilder _builder;
+
+  friend class Orphanage;
 };
 
 // =======================================================================================
@@ -659,8 +743,8 @@ inline MessageSize AnyPointer::Reader::targetSize() const {
   return reader.targetSize().asPublic();
 }
 
-inline bool AnyPointer::Reader::isNull() const {
-  return reader.isNull();
+inline PointerType AnyPointer::Reader::getPointerType() const {
+  return reader.getPointerType();
 }
 
 template <typename T>
@@ -672,8 +756,8 @@ inline MessageSize AnyPointer::Builder::targetSize() const {
   return asReader().targetSize();
 }
 
-inline bool AnyPointer::Builder::isNull() {
-  return builder.isNull();
+inline PointerType AnyPointer::Builder::getPointerType() {
+  return builder.getPointerType();
 }
 
 inline void AnyPointer::Builder::clear() {
@@ -697,23 +781,31 @@ inline BuilderFor<T> AnyPointer::Builder::initAs(uint elementCount) {
 
 inline AnyList::Builder AnyPointer::Builder::initAsAnyList(
     ElementSize elementSize, uint elementCount) {
-  return AnyList::Builder(builder.initList(elementSize, elementCount * ELEMENTS));
+  return AnyList::Builder(builder.initList(elementSize, bounded(elementCount) * ELEMENTS));
 }
 
 inline List<AnyStruct>::Builder AnyPointer::Builder::initAsListOfAnyStruct(
-    uint dataWordCount, uint pointerCount, uint elementCount) {
-  return List<AnyStruct>::Builder(builder.initStructList(elementCount * ELEMENTS,
-      _::StructSize(dataWordCount * WORDS, pointerCount * POINTERS)));
+    uint16_t dataWordCount, uint16_t pointerCount, uint elementCount) {
+  return List<AnyStruct>::Builder(builder.initStructList(bounded(elementCount) * ELEMENTS,
+      _::StructSize(bounded(dataWordCount) * WORDS,
+                    bounded(pointerCount) * POINTERS)));
 }
 
-inline AnyStruct::Builder AnyPointer::Builder::initAsAnyStruct(uint dataWordCount, uint pointerCount) {
+inline AnyStruct::Builder AnyPointer::Builder::initAsAnyStruct(
+    uint16_t dataWordCount, uint16_t pointerCount) {
   return AnyStruct::Builder(builder.initStruct(
-      _::StructSize(dataWordCount * WORDS, pointerCount * POINTERS)));
+      _::StructSize(bounded(dataWordCount) * WORDS,
+                    bounded(pointerCount) * POINTERS)));
 }
 
 template <typename T>
 inline void AnyPointer::Builder::setAs(ReaderFor<T> value) {
   return _::PointerHelpers<T>::set(builder, value);
+}
+
+template <typename T>
+inline void AnyPointer::Builder::setCanonicalAs(ReaderFor<T> value) {
+  return _::PointerHelpers<T>::setCanonical(builder, value);
 }
 
 template <typename T>
@@ -752,6 +844,34 @@ template <>
 struct Orphanage::GetInnerBuilder<AnyPointer, Kind::OTHER> {
   static inline _::PointerBuilder apply(AnyPointer::Builder& t) {
     return t.builder;
+  }
+};
+
+template <>
+struct Orphanage::GetInnerReader<AnyStruct, Kind::OTHER> {
+  static inline _::StructReader apply(const AnyStruct::Reader& t) {
+    return t._reader;
+  }
+};
+
+template <>
+struct Orphanage::GetInnerBuilder<AnyStruct, Kind::OTHER> {
+  static inline _::StructBuilder apply(AnyStruct::Builder& t) {
+    return t._builder;
+  }
+};
+
+template <>
+struct Orphanage::GetInnerReader<AnyList, Kind::OTHER> {
+  static inline _::ListReader apply(const AnyList::Reader& t) {
+    return t._reader;
+  }
+};
+
+template <>
+struct Orphanage::GetInnerBuilder<AnyList, Kind::OTHER> {
+  static inline _::ListBuilder apply(AnyList::Builder& t) {
+    return t._builder;
   }
 };
 
@@ -825,6 +945,12 @@ struct PointerHelpers<AnyPointer, Kind::OTHER> {
   static inline Orphan<AnyPointer> disown(PointerBuilder builder) {
     return Orphan<AnyPointer>(builder.disown());
   }
+  static inline _::PointerReader getInternalReader(const AnyPointer::Reader& reader) {
+    return reader.reader;
+  }
+  static inline _::PointerBuilder getInternalBuilder(AnyPointer::Builder&& builder) {
+    return builder.builder;
+  }
 };
 
 template <>
@@ -837,15 +963,23 @@ struct PointerHelpers<AnyStruct, Kind::OTHER> {
       PointerBuilder builder, const word* defaultValue = nullptr) {
     // TODO(someday): Allow specifying the size somehow?
     return AnyStruct::Builder(builder.getStruct(
-        _::StructSize(0 * WORDS, 0 * POINTERS), defaultValue));
+        _::StructSize(ZERO * WORDS, ZERO * POINTERS), defaultValue));
   }
   static inline void set(PointerBuilder builder, AnyStruct::Reader value) {
     builder.setStruct(value._reader);
   }
   static inline AnyStruct::Builder init(
-      PointerBuilder builder, uint dataWordCount, uint pointerCount) {
+      PointerBuilder builder, uint16_t dataWordCount, uint16_t pointerCount) {
     return AnyStruct::Builder(builder.initStruct(
-        StructSize(dataWordCount * WORDS, pointerCount * POINTERS)));
+        StructSize(bounded(dataWordCount) * WORDS,
+                   bounded(pointerCount) * POINTERS)));
+  }
+
+  static void adopt(PointerBuilder builder, Orphan<AnyStruct>&& value) {
+    builder.adopt(kj::mv(value.builder));
+  }
+  static Orphan<AnyStruct> disown(PointerBuilder builder) {
+    return Orphan<AnyStruct>(builder.disown());
   }
 };
 
@@ -864,12 +998,48 @@ struct PointerHelpers<AnyList, Kind::OTHER> {
   }
   static inline AnyList::Builder init(
       PointerBuilder builder, ElementSize elementSize, uint elementCount) {
-    return AnyList::Builder(builder.initList(elementSize, elementCount * ELEMENTS));
+    return AnyList::Builder(builder.initList(
+        elementSize, bounded(elementCount) * ELEMENTS));
   }
   static inline AnyList::Builder init(
-      PointerBuilder builder, uint dataWordCount, uint pointerCount, uint elementCount) {
+      PointerBuilder builder, uint16_t dataWordCount, uint16_t pointerCount, uint elementCount) {
     return AnyList::Builder(builder.initStructList(
-        elementCount * ELEMENTS, StructSize(dataWordCount * WORDS, pointerCount * POINTERS)));
+        bounded(elementCount) * ELEMENTS,
+        StructSize(bounded(dataWordCount) * WORDS,
+                   bounded(pointerCount) * POINTERS)));
+  }
+
+  static void adopt(PointerBuilder builder, Orphan<AnyList>&& value) {
+    builder.adopt(kj::mv(value.builder));
+  }
+  static Orphan<AnyList> disown(PointerBuilder builder) {
+    return Orphan<AnyList>(builder.disown());
+  }
+};
+
+template <>
+struct OrphanGetImpl<AnyStruct, Kind::OTHER> {
+  static inline AnyStruct::Builder apply(_::OrphanBuilder& builder) {
+    return AnyStruct::Builder(builder.asStruct(_::StructSize(ZERO * WORDS, ZERO * POINTERS)));
+  }
+  static inline AnyStruct::Reader applyReader(const _::OrphanBuilder& builder) {
+    return AnyStruct::Reader(builder.asStructReader(_::StructSize(ZERO * WORDS, ZERO * POINTERS)));
+  }
+  static inline void truncateListOf(_::OrphanBuilder& builder, ElementCount size) {
+    builder.truncate(size, _::StructSize(ZERO * WORDS, ZERO * POINTERS));
+  }
+};
+
+template <>
+struct OrphanGetImpl<AnyList, Kind::OTHER> {
+  static inline AnyList::Builder apply(_::OrphanBuilder& builder) {
+    return AnyList::Builder(builder.asListAnySize());
+  }
+  static inline AnyList::Reader applyReader(const _::OrphanBuilder& builder) {
+    return AnyList::Reader(builder.asListReaderAnySize());
+  }
+  static inline void truncateListOf(_::OrphanBuilder& builder, ElementCount size) {
+    builder.truncate(size, ElementSize::POINTER);
   }
 };
 

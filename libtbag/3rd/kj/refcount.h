@@ -31,7 +31,7 @@
 namespace kj {
 
 class Refcounted: private Disposer {
-  // Subclass this to create a class that contains an atomic reference count.  Then, use
+  // Subclass this to create a class that contains a reference count. Then, use
   // `kj::refcounted<T>()` to allocate a new refcounted pointer.
   //
   // Do NOT use this lightly.  Refcounting is a crutch.  Good designs should strive to make object
@@ -43,7 +43,7 @@ class Refcounted: private Disposer {
   // manipulated only in one thread, because atomic (thread-safe) refcounting is surprisingly slow.
   //
   // In general, abstract classes should _not_ subclass this.  The concrete class at the bottom
-  // of the heirarchy should be the one to decide how it implements refcounting.  Interfaces should
+  // of the hierarchy should be the one to decide how it implements refcounting.  Interfaces should
   // expose only an `addRef()` method that returns `Own<InterfaceType>`.  There are two reasons for
   // this rule:
   // 1. Interfaces would need to virtually inherit Refcounted, otherwise two refcounted interfaces
@@ -58,6 +58,10 @@ class Refcounted: private Disposer {
 
 public:
   virtual ~Refcounted() noexcept(false);
+
+  inline bool isShared() const { return refcount > 1; }
+  // Check if there are multiple references to this object. This is sometimes useful for deciding
+  // whether it's safe to modify the object vs. make a copy.
 
 private:
   mutable uint refcount = 0;

@@ -63,9 +63,6 @@
 #elif defined(_MSC_VER)
   #if _MSC_VER < 1900
     #error "You need Visual Studio 2015 or better to compile this code."
-  #elif !CAPNP_LITE
-    // TODO(cleanup): This is KJ, but we're talking about Cap'n Proto.
-    #error "As of this writing, Cap'n Proto only supports Visual C++ in 'lite mode'; please #define CAPNP_LITE"
   #endif
 #else
   #warning "I don't recognize your compiler.  As of this writing, Clang and GCC are the only "\
@@ -76,6 +73,21 @@
 
 #include <stddef.h>
 #include <initializer_list>
+
+#if __linux__ && __cplusplus > 201200L
+// Hack around stdlib bug with C++14 that exists on some Linux systems.
+// Apparently in this mode the C library decides not to define gets() but the C++ library still
+// tries to import it into the std namespace. This bug has been fixed at the source but is still
+// widely present in the wild e.g. on Ubuntu 14.04.
+#undef _GLIBCXX_HAVE_GETS
+#endif
+
+#if defined(_MSC_VER)
+#ifndef NOMINMAX
+#define NOMINMAX 1
+#endif
+#include <intrin.h>  // __popcnt
+#endif
 
 // =======================================================================================
 
@@ -137,15 +149,21 @@ typedef unsigned char byte;
 #endif
 
 #if defined(KJ_DEBUG) || __NO_INLINE__
-#define KJ_ALWAYS_INLINE(prototype) inline prototype
+#define KJ_ALWAYS_INLINE(...) inline __VA_ARGS__
 // Don't force inline in debug mode.
 #else
 #if defined(_MSC_VER)
-#define KJ_ALWAYS_INLINE(prototype) __forceinline prototype
+#define KJ_ALWAYS_INLINE(...) __forceinline __VA_ARGS__
 #else
-#define KJ_ALWAYS_INLINE(prototype) inline prototype __attribute__((always_inline))
+#define KJ_ALWAYS_INLINE(...) inline __VA_ARGS__ __attribute__((always_inline))
 #endif
 // Force a function to always be inlined.  Apply only to the prototype, not to the definition.
+#endif
+
+#if defined(_MSC_VER)
+#define KJ_NOINLINE __declspec(noinline)
+#else
+#define KJ_NOINLINE __attribute__((noinline))
 #endif
 
 #if defined(_MSC_VER)
@@ -172,11 +190,15 @@ typedef unsigned char byte;
 #if __clang__
 #define KJ_DEPRECATED(reason) \
     __attribute__((deprecated(reason)))
+#define KJ_UNAVAILABLE(reason) \
+    __attribute__((unavailable(reason)))
 #elif __GNUC__
 #define KJ_DEPRECATED(reason) \
     __attribute__((deprecated))
+#define KJ_UNAVAILABLE(reason)
 #else
 #define KJ_DEPRECATED(reason)
+#define KJ_UNAVAILABLE(reason)
 // TODO(msvc): Again, here, MSVC prefers a prefix, __declspec(deprecated).
 #endif
 
@@ -318,6 +340,10 @@ template <bool b> using EnableIf = typename EnableIf_<b>::Type;
 //     template <typename T, typename = EnableIf<isValid<T>()>
 //     void func(T&& t);
 
+template <typename...> struct VoidSfinae_ { using Type = void; };
+template <typename... Ts> using VoidSfinae = typename VoidSfinae_<Ts...>::Type;
+// Note: VoidSfinae is std::void_t from C++17.
+
 template <typename T>
 T instance() noexcept;
 // Like std::declval, but doesn't transform T into an rvalue reference.  If you want that, specify
@@ -340,16 +366,41 @@ struct DisallowConstCopy {
   // type that contains or inherits from a type that disallows const copies will also automatically
   // disallow const copies.  Hey, cool, that's exactly what we want.
 
+#if CAPNP_DEBUG_TYPES
+  // Alas! Declaring a defaulted non-const copy constructor tickles a bug which causes GCC and
+  // Clang to disagree on ABI, using different calling conventions to pass this type, leading to
+  // immediate segfaults. See:
+  //     https://bugs.llvm.org/show_bug.cgi?id=23764
+  //     https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58074
+  //
+  // Because of this, we can't use this technique. We guard it by CAPNP_DEBUG_TYPES so that it
+  // still applies to the Cap'n Proto developers during internal testing.
+
   DisallowConstCopy() = default;
-  DisallowConstCopy(DisallowConstCopy&);
+  DisallowConstCopy(DisallowConstCopy&) = default;
   DisallowConstCopy(DisallowConstCopy&&) = default;
-  DisallowConstCopy& operator=(DisallowConstCopy&);
+  DisallowConstCopy& operator=(DisallowConstCopy&) = default;
   DisallowConstCopy& operator=(DisallowConstCopy&&) = default;
+#endif
 };
 
-// Apparently these cannot be defaulted inside the class due to some obscure C++ rule.
-inline DisallowConstCopy::DisallowConstCopy(DisallowConstCopy&) = default;
-inline DisallowConstCopy& DisallowConstCopy::operator=(DisallowConstCopy&) = default;
+#if _MSC_VER
+
+#define KJ_CPCAP(obj) obj=::kj::cp(obj)
+// TODO(msvc): MSVC refuses to invoke non-const versions of copy constructors in by-value lambda
+// captures. Wrap your captured object in this macro to force the compiler to perform a copy.
+// Example:
+//
+//   struct Foo: DisallowConstCopy {};
+//   Foo foo;
+//   auto lambda = [KJ_CPCAP(foo)] {};
+
+#else
+
+#define KJ_CPCAP(obj) obj
+// Clang and gcc both already perform copy capturing correctly with non-const copy constructors.
+
+#endif
 
 template <typename T>
 struct DisallowConstCopyIfNotConst: public DisallowConstCopy {
@@ -415,27 +466,30 @@ constexpr bool canConvert() {
   return sizeof(CanConvert_<U>::sfinae(instance<T>())) == sizeof(int);
 }
 
-#if __clang__
+#if __GNUC__ && !__clang__ && __GNUC__ < 5
 template <typename T>
 constexpr bool canMemcpy() {
   // Returns true if T can be copied using memcpy instead of using the copy constructor or
   // assignment operator.
 
-  // Clang unhelpfully defines __has_trivial_{copy,assign}(T) to be true if the copy constructor /
-  // assign operator are deleted, on the basis that a strict reading of the definition of "trivial"
-  // according to the standard says that deleted functions are in fact trivial.  Meanwhile Clang
-  // provides these admittedly-better intrinsics, but GCC does not.
-  return __is_trivially_constructible(T, const T&) && __is_trivially_assignable(T, const T&);
+  // GCC 4 does not have __is_trivially_constructible and friends, and there doesn't seem to be
+  // any reliable alternative. __has_trivial_copy() and __has_trivial_assign() return the right
+  // thing at one point but later on they changed such that a deleted copy constructor was
+  // considered "trivial" (apparently technically correct, though useless). So, on GCC 4 we give up
+  // and assume we can't memcpy() at all, and must explicitly copy-construct everything.
+  return false;
 }
+#define KJ_ASSERT_CAN_MEMCPY(T)
 #else
 template <typename T>
 constexpr bool canMemcpy() {
   // Returns true if T can be copied using memcpy instead of using the copy constructor or
   // assignment operator.
 
-  // GCC defines these to mean what we want them to mean.
-  return __has_trivial_copy(T) && __has_trivial_assign(T);
+  return __is_trivially_constructible(T, const T&) && __is_trivially_assignable(T, const T&);
 }
+#define KJ_ASSERT_CAN_MEMCPY(T) \
+  static_assert(kj::canMemcpy<T>(), "this code expects this type to be memcpy()-able");
 #endif
 
 // =======================================================================================
@@ -453,30 +507,22 @@ template<typename T> constexpr T cp(T& t) noexcept { return t; }
 template<typename T> constexpr T cp(const T& t) noexcept { return t; }
 // Useful to force a copy, particularly to pass into a function that expects T&&.
 
-template <typename T, typename U, bool takeT> struct MinType_;
-template <typename T, typename U> struct MinType_<T, U, true> { typedef T Type; };
-template <typename T, typename U> struct MinType_<T, U, false> { typedef U Type; };
+template <typename T, typename U, bool takeT, bool uOK = true> struct ChooseType_;
+template <typename T, typename U> struct ChooseType_<T, U, true, true> { typedef T Type; };
+template <typename T, typename U> struct ChooseType_<T, U, true, false> { typedef T Type; };
+template <typename T, typename U> struct ChooseType_<T, U, false, true> { typedef U Type; };
 
 template <typename T, typename U>
-using MinType = typename MinType_<T, U, sizeof(T) <= sizeof(U)>::Type;
-// Resolves to the smaller of the two input types.
+using WiderType = typename ChooseType_<T, U, sizeof(T) >= sizeof(U)>::Type;
 
 template <typename T, typename U>
-inline KJ_CONSTEXPR() auto min(T&& a, U&& b) -> MinType<Decay<T>, Decay<U>> {
-  return a < b ? MinType<Decay<T>, Decay<U>>(a) : MinType<Decay<T>, Decay<U>>(b);
+inline constexpr auto min(T&& a, U&& b) -> WiderType<Decay<T>, Decay<U>> {
+  return a < b ? WiderType<Decay<T>, Decay<U>>(a) : WiderType<Decay<T>, Decay<U>>(b);
 }
 
-template <typename T, typename U, bool takeT> struct MaxType_;
-template <typename T, typename U> struct MaxType_<T, U, true> { typedef T Type; };
-template <typename T, typename U> struct MaxType_<T, U, false> { typedef U Type; };
-
 template <typename T, typename U>
-using MaxType = typename MaxType_<T, U, sizeof(T) >= sizeof(U)>::Type;
-// Resolves to the larger of the two input types.
-
-template <typename T, typename U>
-inline KJ_CONSTEXPR() auto max(T&& a, U&& b) -> MaxType<Decay<T>, Decay<U>> {
-  return a > b ? MaxType<Decay<T>, Decay<U>>(a) : MaxType<Decay<T>, Decay<U>>(b);
+inline constexpr auto max(T&& a, U&& b) -> WiderType<Decay<T>, Decay<U>> {
+  return a > b ? WiderType<Decay<T>, Decay<U>>(a) : WiderType<Decay<T>, Decay<U>>(b);
 }
 
 template <typename T, size_t s>
@@ -560,6 +606,26 @@ static KJ_CONSTEXPR(const) MinValue_ minValue = MinValue_();
 //
 // `char` is not supported, but `signed char` and `unsigned char` are.
 
+template <typename T>
+inline bool operator==(T t, MaxValue_) { return t == Decay<T>(maxValue); }
+template <typename T>
+inline bool operator==(T t, MinValue_) { return t == Decay<T>(minValue); }
+
+template <uint bits>
+inline constexpr unsigned long long maxValueForBits() {
+  // Get the maximum integer representable in the given number of bits.
+
+  // 1ull << 64 is unfortunately undefined.
+  return (bits == 64 ? 0 : (1ull << bits)) - 1;
+}
+
+struct ThrowOverflow {
+  // Functor which throws an exception complaining about integer overflow. Usually this is used
+  // with the interfaces in units.h, but is defined here because Cap'n Proto wants to avoid
+  // including units.h when not using CAPNP_DEBUG_TYPES.
+  void operator()() const;
+};
+
 #if __GNUC__
 inline constexpr float inf() { return __builtin_huge_valf(); }
 inline constexpr float nan() { return __builtin_nanf(""); }
@@ -584,6 +650,18 @@ float nan();
 #error "Not sure how to support your compiler."
 #endif
 
+inline constexpr bool isNaN(float f) { return f != f; }
+inline constexpr bool isNaN(double f) { return f != f; }
+
+inline int popCount(unsigned int x) {
+#if defined(_MSC_VER)
+  return __popcnt(x);
+  // Note: __popcnt returns unsigned int, but the value is clearly guaranteed to fit into an int
+#else
+  return __builtin_popcount(x);
+#endif
+}
+
 // =======================================================================================
 // Useful fake containers
 
@@ -591,6 +669,7 @@ template <typename T>
 class Range {
 public:
   inline constexpr Range(const T& begin, const T& end): begin_(begin), end_(end) {}
+  inline explicit constexpr Range(const T& end): begin_(0), end_(end) {}
 
   class Iterator {
   public:
@@ -630,6 +709,11 @@ private:
   T end_;
 };
 
+template <typename T, typename U>
+inline constexpr Range<WiderType<Decay<T>, Decay<U>>> range(T begin, U end) {
+  return Range<WiderType<Decay<T>, Decay<U>>>(begin, end);
+}
+
 template <typename T>
 inline constexpr Range<Decay<T>> range(T begin, T end) { return Range<Decay<T>>(begin, end); }
 // Returns a fake iterable container containing all values of T from `begin` (inclusive) to `end`
@@ -637,6 +721,14 @@ inline constexpr Range<Decay<T>> range(T begin, T end) { return Range<Decay<T>>(
 //
 //     // Prints 1, 2, 3, 4, 5, 6, 7, 8, 9.
 //     for (int i: kj::range(1, 10)) { print(i); }
+
+template <typename T>
+inline constexpr Range<Decay<T>> zeroTo(T end) { return Range<Decay<T>>(end); }
+// Returns a fake iterable container containing all values of T from zero (inclusive) to `end`
+// (exclusive).  Example:
+//
+//     // Prints 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.
+//     for (int i: kj::zeroTo(10)) { print(i); }
 
 template <typename T>
 inline constexpr Range<size_t> indices(T&& container) {
@@ -685,6 +777,7 @@ public:
   inline Iterator end() const { return Iterator(value, count); }
 
   inline size_t size() const { return count; }
+  inline const T& operator[](ptrdiff_t) const { return value; }
 
 private:
   T value;
@@ -784,18 +877,39 @@ public:
       ctor(value, other.value);
     }
   }
-  inline ~NullableValue() noexcept(noexcept(instance<T&>().~T())) {
+  inline ~NullableValue()
+#if _MSC_VER
+      // TODO(msvc): MSVC has a hard time with noexcept specifier expressions that are more complex
+      //   than `true` or `false`. We had a workaround for VS2015, but VS2017 regressed.
+      noexcept(false)
+#else
+      noexcept(noexcept(instance<T&>().~T()))
+#endif
+  {
     if (isSet) {
       dtor(value);
     }
   }
 
-  inline T& operator*() { return value; }
-  inline const T& operator*() const { return value; }
+  inline T& operator*() & { return value; }
+  inline const T& operator*() const & { return value; }
+  inline T&& operator*() && { return kj::mv(value); }
+  inline const T&& operator*() const && { return kj::mv(value); }
   inline T* operator->() { return &value; }
   inline const T* operator->() const { return &value; }
   inline operator T*() { return isSet ? &value : nullptr; }
   inline operator const T*() const { return isSet ? &value : nullptr; }
+
+  template <typename... Params>
+  inline T& emplace(Params&&... params) {
+    if (isSet) {
+      isSet = false;
+      dtor(value);
+    }
+    ctor(value, kj::fwd<Params>(params)...);
+    isSet = true;
+    return value;
+  }
 
 private:  // internal interface used by friends only
   inline NullableValue() noexcept: isSet(false) {}
@@ -947,17 +1061,26 @@ public:
   template <typename U>
   Maybe(Maybe<U>&& other) noexcept(noexcept(T(instance<U&&>()))) {
     KJ_IF_MAYBE(val, kj::mv(other)) {
-      ptr = *val;
+      ptr.emplace(kj::mv(*val));
     }
   }
   template <typename U>
   Maybe(const Maybe<U>& other) {
     KJ_IF_MAYBE(val, other) {
-      ptr = *val;
+      ptr.emplace(*val);
     }
   }
 
   Maybe(decltype(nullptr)) noexcept: ptr(nullptr) {}
+
+  template <typename... Params>
+  inline T& emplace(Params&&... params) {
+    // Replace this Maybe's content with a new value constructed by passing the given parametrs to
+    // T's constructor. This can be used to initialize a Maybe without copying or even moving a T.
+    // Returns a reference to the newly-constructed value.
+
+    return ptr.emplace(kj::fwd<Params>(params)...);
+  }
 
   inline Maybe& operator=(Maybe&& other) { ptr = kj::mv(other.ptr); return *this; }
   inline Maybe& operator=(Maybe& other) { ptr = other.ptr; return *this; }
@@ -982,7 +1105,7 @@ public:
   }
 
   template <typename Func>
-  auto map(Func&& f) -> Maybe<decltype(f(instance<T&>()))> {
+  auto map(Func&& f) & -> Maybe<decltype(f(instance<T&>()))> {
     if (ptr == nullptr) {
       return nullptr;
     } else {
@@ -991,7 +1114,7 @@ public:
   }
 
   template <typename Func>
-  auto map(Func&& f) const -> Maybe<decltype(f(instance<const T&>()))> {
+  auto map(Func&& f) const & -> Maybe<decltype(f(instance<const T&>()))> {
     if (ptr == nullptr) {
       return nullptr;
     } else {
@@ -999,8 +1122,23 @@ public:
     }
   }
 
-  // TODO(someday):  Once it's safe to require GCC 4.8, use ref qualifiers to provide a version of
-  //   map() that uses move semantics if *this is an rvalue.
+  template <typename Func>
+  auto map(Func&& f) && -> Maybe<decltype(f(instance<T&&>()))> {
+    if (ptr == nullptr) {
+      return nullptr;
+    } else {
+      return f(kj::mv(*ptr));
+    }
+  }
+
+  template <typename Func>
+  auto map(Func&& f) const && -> Maybe<decltype(f(instance<const T&&>()))> {
+    if (ptr == nullptr) {
+      return nullptr;
+    } else {
+      return f(kj::mv(*ptr));
+    }
+  }
 
 private:
   _::NullableValue<T> ptr;
@@ -1227,7 +1365,7 @@ namespace _ {  // private
 template <typename Func>
 class Deferred {
 public:
-  inline Deferred(Func func): func(func), canceled(false) {}
+  inline Deferred(Func&& func): func(kj::fwd<Func>(func)), canceled(false) {}
   inline ~Deferred() noexcept(false) { if (!canceled) func(); }
   KJ_DISALLOW_COPY(Deferred);
 
@@ -1243,15 +1381,15 @@ private:
 }  // namespace _ (private)
 
 template <typename Func>
-_::Deferred<Decay<Func>> defer(Func&& func) {
+_::Deferred<Func> defer(Func&& func) {
   // Returns an object which will invoke the given functor in its destructor.  The object is not
   // copyable but is movable with the semantics you'd expect.  Since the return type is private,
   // you need to assign to an `auto` variable.
   //
   // The KJ_DEFER macro provides slightly more convenient syntax for the common case where you
-  // want some code to run at function exit.
+  // want some code to run at current scope exit.
 
-  return _::Deferred<Decay<Func>>(kj::fwd<Func>(func));
+  return _::Deferred<Func>(kj::fwd<Func>(func));
 }
 
 #define KJ_DEFER(code) auto KJ_UNIQUE_NAME(_kjDefer) = ::kj::defer([&](){code;})

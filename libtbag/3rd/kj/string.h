@@ -39,7 +39,7 @@ class StringTree;   // string-tree.h
 
 // Our STL string SFINAE trick does not work with GCC 4.7, but it works with Clang and GCC 4.8, so
 // we'll just preprocess it out if not supported.
-#if __clang__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+#if __clang__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8) || _MSC_VER
 #define KJ_COMPILER_SUPPORTS_STL_STRING_INTEROP 1
 #endif
 
@@ -112,6 +112,14 @@ public:
   inline Maybe<size_t> findFirst(char c) const;
   inline Maybe<size_t> findLast(char c) const;
 
+  template <typename T>
+  T parseAs() const;
+  // Parse string as template number type.
+  // Integer numbers prefixed by "0x" and "0X" are parsed in base 16 (like strtoi with base 0).
+  // Integer numbers prefixed by "0" are parsed in base 10 (unlike strtoi with base 0).
+  // Overflowed integer numbers throw exception.
+  // Overflowed floating numbers return inf.
+
 private:
   inline StringPtr(ArrayPtr<const char> content): content(content) {}
 
@@ -120,6 +128,20 @@ private:
 
 inline bool operator==(const char* a, const StringPtr& b) { return b == a; }
 inline bool operator!=(const char* a, const StringPtr& b) { return b != a; }
+
+template <> char StringPtr::parseAs<char>() const;
+template <> signed char StringPtr::parseAs<signed char>() const;
+template <> unsigned char StringPtr::parseAs<unsigned char>() const;
+template <> short StringPtr::parseAs<short>() const;
+template <> unsigned short StringPtr::parseAs<unsigned short>() const;
+template <> int StringPtr::parseAs<int>() const;
+template <> unsigned StringPtr::parseAs<unsigned>() const;
+template <> long StringPtr::parseAs<long>() const;
+template <> unsigned long StringPtr::parseAs<unsigned long>() const;
+template <> long long StringPtr::parseAs<long long>() const;
+template <> unsigned long long StringPtr::parseAs<unsigned long long>() const;
+template <> float StringPtr::parseAs<float>() const;
+template <> double StringPtr::parseAs<double>() const;
 
 // =======================================================================================
 // String -- A NUL-terminated Array<char> containing UTF-8 text.
@@ -147,6 +169,10 @@ public:
   inline ArrayPtr<byte> asBytes() { return asArray().asBytes(); }
   inline ArrayPtr<const byte> asBytes() const { return asArray().asBytes(); }
   // Result does not include NUL terminator.
+
+  inline Array<char> releaseArray() { return kj::mv(content); }
+  // Disowns the backing array (which includes the NUL terminator) and returns it. The String value
+  // is clobbered (as if moved away).
 
   inline const char* cStr() const;
 
@@ -181,6 +207,10 @@ public:
 
   inline Maybe<size_t> findFirst(char c) const { return StringPtr(*this).findFirst(c); }
   inline Maybe<size_t> findLast(char c) const { return StringPtr(*this).findLast(c); }
+
+  template <typename T>
+  T parseAs() const { return StringPtr(*this).parseAs<T>(); }
+  // Parse as number
 
 private:
   Array<char> content;
@@ -260,10 +290,13 @@ struct Stringifier {
   // anything.
 
   inline ArrayPtr<const char> operator*(ArrayPtr<const char> s) const { return s; }
+  inline ArrayPtr<const char> operator*(ArrayPtr<char> s) const { return s; }
   inline ArrayPtr<const char> operator*(const Array<const char>& s) const { return s; }
   inline ArrayPtr<const char> operator*(const Array<char>& s) const { return s; }
   template<size_t n>
   inline ArrayPtr<const char> operator*(const CappedArray<char, n>& s) const { return s; }
+  template<size_t n>
+  inline ArrayPtr<const char> operator*(const FixedArray<char, n>& s) const { return s; }
   inline ArrayPtr<const char> operator*(const char* s) const { return arrayPtr(s, strlen(s)); }
   inline ArrayPtr<const char> operator*(const String& s) const { return s.asArray(); }
   inline ArrayPtr<const char> operator*(const StringPtr& s) const { return s.asArray(); }
@@ -277,6 +310,7 @@ struct Stringifier {
     return result;
   }
 
+  StringPtr operator*(decltype(nullptr)) const;
   StringPtr operator*(bool b) const;
 
   CappedArray<char, 5> operator*(signed char i) const;
@@ -343,9 +377,9 @@ inline String str(String&& s) { return mv(s); }
 template <typename T>
 String strArray(T&& arr, const char* delim) {
   size_t delimLen = strlen(delim);
-  KJ_STACK_ARRAY(decltype(_::STR * arr[0]), pieces, arr.size(), 8, 32);
+  KJ_STACK_ARRAY(decltype(_::STR * arr[0]), pieces, kj::size(arr), 8, 32);
   size_t size = 0;
-  for (size_t i = 0; i < arr.size(); i++) {
+  for (size_t i = 0; i < kj::size(arr); i++) {
     if (i > 0) size += delimLen;
     pieces[i] = _::STR * arr[i];
     size += pieces[i].size();
@@ -353,7 +387,7 @@ String strArray(T&& arr, const char* delim) {
 
   String result = heapString(size);
   char* pos = result.begin();
-  for (size_t i = 0; i < arr.size(); i++) {
+  for (size_t i = 0; i < kj::size(arr); i++) {
     if (i > 0) {
       memcpy(pos, delim, delimLen);
       pos += delimLen;
