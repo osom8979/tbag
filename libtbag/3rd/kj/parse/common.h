@@ -40,11 +40,11 @@
 #pragma GCC system_header
 #endif
 
-#include "../common.h"
-#include "../memory.h"
-#include "../array.h"
-#include "../tuple.h"
-#include "../vector.h"
+#include <libtbag/3rd/kj/common.h>
+#include <libtbag/3rd/kj/memory.h>
+#include <libtbag/3rd/kj/array.h>
+#include <libtbag/3rd/kj/tuple.h>
+#include <libtbag/3rd/kj/vector.h>
 
 namespace kj {
 namespace parse {

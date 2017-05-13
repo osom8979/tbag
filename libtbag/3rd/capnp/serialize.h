@@ -45,8 +45,8 @@
 #pragma GCC system_header
 #endif
 
-#include "message.h"
-#include <kj/io.h>
+#include <libtbag/3rd/capnp/message.h>
+#include <libtbag/3rd/kj/io.h>
 
 namespace capnp {
 

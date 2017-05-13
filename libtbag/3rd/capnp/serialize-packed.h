@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "serialize.h"
+#include <libtbag/3rd/capnp/serialize.h>
 
 namespace capnp {
 

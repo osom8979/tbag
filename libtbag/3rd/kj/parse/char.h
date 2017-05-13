@@ -29,8 +29,8 @@
 #pragma GCC system_header
 #endif
 
-#include "common.h"
-#include "../string.h"
+#include <libtbag/3rd/kj/common.h>
+#include <libtbag/3rd/kj/string.h>
 #include <inttypes.h>
 
 namespace kj {

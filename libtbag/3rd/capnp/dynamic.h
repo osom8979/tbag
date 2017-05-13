@@ -37,11 +37,11 @@
 #pragma GCC system_header
 #endif
 
-#include "schema.h"
-#include "layout.h"
-#include "message.h"
-#include "any.h"
-#include "capability.h"
+#include <libtbag/3rd/capnp/schema.h>
+#include <libtbag/3rd/capnp/layout.h>
+#include <libtbag/3rd/capnp/message.h>
+#include <libtbag/3rd/capnp/any.h>
+#include <libtbag/3rd/capnp/capability.h>
 
 namespace capnp {
 

@@ -26,9 +26,9 @@
 #pragma GCC system_header
 #endif
 
-#include "schema.h"
-#include <kj/memory.h>
-#include <kj/mutex.h>
+#include <libtbag/3rd/capnp/schema.h>
+#include <libtbag/3rd/kj/memory.h>
+#include <libtbag/3rd/kj/mutex.h>
 
 namespace capnp {
 

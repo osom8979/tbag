@@ -45,10 +45,10 @@
 // pointers.  Since KJ only ever needs to store pointers, not values, we avoid the question of
 // whether these values' destructors need to be run, and we avoid the need for heap allocation.
 
-#include "common.h"
+#include <libtbag/3rd/kj/common.h>
 
 #if !defined(KJ_USE_PTHREAD_THREADLOCAL) && defined(__APPLE__)
-#include "TargetConditionals.h"
+#include <libtbag/3rd/kj/TargetConditionals.h>
 #if TARGET_OS_IPHONE
 // iOS apparently does not support __thread (nor C++11 thread_local).
 #define KJ_USE_PTHREAD_TLS 1

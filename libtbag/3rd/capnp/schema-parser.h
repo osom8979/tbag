@@ -26,8 +26,8 @@
 #pragma GCC system_header
 #endif
 
-#include "schema-loader.h"
-#include <kj/string.h>
+#include <libtbag/3rd/capnp/schema-loader.h>
+#include <libtbag/3rd/kj/string.h>
 
 namespace capnp {
 

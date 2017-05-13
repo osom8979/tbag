@@ -26,8 +26,8 @@
 #pragma GCC system_header
 #endif
 
-#include <capnp/schema.capnp.h>
-#include "message.h"
+#include <libtbag/3rd/capnp/schema.capnp.h>
+#include <libtbag/3rd/capnp/message.h>
 
 namespace capnp {
 

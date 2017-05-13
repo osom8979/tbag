@@ -26,8 +26,8 @@
 #pragma GCC system_header
 #endif
 
-#include "dynamic.h"
-#include <kj/string-tree.h>
+#include <libtbag/3rd/capnp/dynamic.h>
+#include <libtbag/3rd/kj/string-tree.h>
 
 namespace capnp {
 

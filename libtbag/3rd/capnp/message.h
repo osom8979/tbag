@@ -19,12 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <kj/common.h>
-#include <kj/memory.h>
-#include <kj/mutex.h>
-#include "common.h"
-#include "layout.h"
-#include "any.h"
+#include <libtbag/3rd/kj/common.h>
+#include <libtbag/3rd/kj/memory.h>
+#include <libtbag/3rd/kj/mutex.h>
+#include <libtbag/3rd/capnp/common.h>
+#include <libtbag/3rd/capnp/layout.h>
+#include <libtbag/3rd/capnp/any.h>
 
 #ifndef CAPNP_MESSAGE_H_
 #define CAPNP_MESSAGE_H_

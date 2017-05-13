@@ -26,8 +26,8 @@
 #pragma GCC system_header
 #endif
 
-#include <kj/async-io.h>
-#include "message.h"
+#include <libtbag/3rd/kj/async-io.h>
+#include <libtbag/3rd/capnp/message.h>
 
 namespace capnp {
 

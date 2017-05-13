@@ -26,9 +26,9 @@
 #pragma GCC system_header
 #endif
 
-#include <kj/common.h>
-#include <kj/string.h>
-#include "common.h"
+#include <libtbag/3rd/kj/common.h>
+#include <libtbag/3rd/kj/string.h>
+#include <libtbag/3rd/capnp/common.h>
 #include <string.h>
 
 namespace capnp {

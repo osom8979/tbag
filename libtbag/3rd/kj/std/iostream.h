@@ -31,7 +31,7 @@
 #endif
 
 #include <iostream>
-#include "../io.h"
+#include <libtbag/3rd/kj/io.h>
 
 namespace kj {
 namespace std {

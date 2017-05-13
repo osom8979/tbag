@@ -26,8 +26,8 @@
 #pragma GCC system_header
 #endif
 
-#include "layout.h"
-#include "list.h"
+#include <libtbag/3rd/capnp/layout.h>
+#include <libtbag/3rd/capnp/list.h>
 
 namespace capnp {
 namespace _ {  // private

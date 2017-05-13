@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "array.h"
+#include <libtbag/3rd/kj/array.h>
 
 namespace kj {
 

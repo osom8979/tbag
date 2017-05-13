@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "memory.h"
+#include <libtbag/3rd/kj/memory.h>
 
 #ifndef KJ_REFCOUNT_H_
 #define KJ_REFCOUNT_H_

@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "layout.h"
+#include <libtbag/3rd/capnp/layout.h>
 
 namespace capnp {
 

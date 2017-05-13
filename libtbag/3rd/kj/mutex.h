@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "memory.h"
+#include <libtbag/3rd/kj/memory.h>
 #include <inttypes.h>
 
 #if __linux__ && !defined(KJ_USE_FUTEX)

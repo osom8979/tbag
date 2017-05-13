@@ -26,9 +26,9 @@
 #pragma GCC system_header
 #endif
 
-#include "memory.h"
-#include "array.h"
-#include "string.h"
+#include <libtbag/3rd/kj/memory.h>
+#include <libtbag/3rd/kj/array.h>
+#include <libtbag/3rd/kj/string.h>
 
 namespace kj {
 

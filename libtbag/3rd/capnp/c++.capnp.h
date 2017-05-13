@@ -4,7 +4,7 @@
 #ifndef CAPNP_INCLUDED_bdf87d7bb8304e81_
 #define CAPNP_INCLUDED_bdf87d7bb8304e81_
 
-#include <capnp/generated-header-support.h>
+#include <libtbag/3rd/capnp/generated-header-support.h>
 
 #if CAPNP_VERSION != 5003
 #error "Version mismatch between generated code and library headers.  You must use the same version of the Cap'n Proto compiler and library."

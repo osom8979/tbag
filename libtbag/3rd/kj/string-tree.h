@@ -26,7 +26,7 @@
 #pragma GCC system_header
 #endif
 
-#include "string.h"
+#include <libtbag/3rd/kj/string.h>
 
 namespace kj {
 

@@ -26,8 +26,8 @@
 #pragma GCC system_header
 #endif
 
-#include "layout.h"
-#include "orphan.h"
+#include <libtbag/3rd/capnp/layout.h>
+#include <libtbag/3rd/capnp/orphan.h>
 #include <initializer_list>
 #ifdef KJ_STD_COMPAT
 #include <iterator>

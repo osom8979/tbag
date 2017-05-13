@@ -26,10 +26,10 @@
 #pragma GCC system_header
 #endif
 
-#include "layout.h"
-#include "pointer-helpers.h"
-#include "orphan.h"
-#include "list.h"
+#include <libtbag/3rd/capnp/layout.h>
+#include <libtbag/3rd/capnp/pointer-helpers.h>
+#include <libtbag/3rd/capnp/orphan.h>
+#include <libtbag/3rd/capnp/list.h>
 
 namespace capnp {
 

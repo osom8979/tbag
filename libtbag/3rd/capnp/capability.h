@@ -30,9 +30,9 @@
 #error "RPC APIs, including this header, are not available in lite mode."
 #endif
 
-#include <kj/async.h>
-#include "any.h"
-#include "pointer-helpers.h"
+#include <libtbag/3rd/kj/async.h>
+#include <libtbag/3rd/capnp/any.h>
+#include <libtbag/3rd/capnp/pointer-helpers.h>
 
 namespace capnp {
 

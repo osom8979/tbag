@@ -33,11 +33,11 @@
 #pragma GCC system_header
 #endif
 
-#include <kj/common.h>
-#include <kj/memory.h>
-#include "common.h"
-#include "blob.h"
-#include "endian.h"
+#include <libtbag/3rd/kj/common.h>
+#include <libtbag/3rd/kj/memory.h>
+#include <libtbag/3rd/capnp/common.h>
+#include <libtbag/3rd/capnp/blob.h>
+#include <libtbag/3rd/capnp/endian.h>
 
 #if __mips__ && !defined(CAPNP_CANONICALIZE_NAN)
 #define CAPNP_CANONICALIZE_NAN 1

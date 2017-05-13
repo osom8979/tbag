@@ -26,10 +26,10 @@
 #pragma GCC system_header
 #endif
 
-#include "array.h"
-#include "string.h"
-#include "vector.h"
-#include "function.h"
+#include <libtbag/3rd/kj/array.h>
+#include <libtbag/3rd/kj/string.h>
+#include <libtbag/3rd/kj/vector.h>
+#include <libtbag/3rd/kj/function.h>
 
 namespace kj {
 
