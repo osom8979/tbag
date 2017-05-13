@@ -11,72 +11,51 @@
 using namespace libtbag;
 using namespace libtbag::container;
 
-struct TestObject1 : public Global::Object
+struct TestObject
 {
     int data;
 
-    TestObject1(int value) : data(value)
+    TestObject(int value) : data(value)
     { /* EMPTY. */ }
-
-    virtual int type() override
-    { return 1; }
-};
-
-struct TestObject2 : public Global::Object
-{
-    int data;
-
-    TestObject2(int value) : data(value)
-    { /* EMPTY. */ }
-
-    virtual int type() override
-    { return 2; }
 };
 
 TEST(GlobalTest, Default)
 {
     Global::createInstance();
+    Global * global = Global::getInstance();
 
-    Global * instance = Global::getInstance();
-    ASSERT_NE(nullptr, instance);
-    ASSERT_TRUE(instance->empty());
-    ASSERT_EQ(0, instance->size());
+    ASSERT_NE(nullptr, global);
+    ASSERT_TRUE(global->empty());
+    ASSERT_EQ(0, global->size());
 
-    auto shared1 = instance->newObject<TestObject1>(10);
-    auto shared2 = instance->newObject<TestObject2>(20);
+    char const * KEY1 = "1";
+    char const * KEY2 = "2";
+    auto shared1 = global->insertNewObject<TestObject>(KEY1, 10);
+    auto shared2 = global->insertNewObject<TestObject>(KEY2, 20);
 
-    Global::Object & obj1 = *shared1;
-    Global::Object & obj2 = *shared2;
+    ASSERT_EQ(2, global->size());
+    ASSERT_FALSE(global->empty());
+    ASSERT_GT(global->max_size(), global->size());
 
-    ASSERT_EQ(2, instance->size());
-    ASSERT_FALSE(instance->empty());
-    ASSERT_GT(instance->max_size(), instance->size());
-
-    auto itr = instance->begin();
-    auto end = instance->end();
+    auto itr = global->begin();
+    auto end = global->end();
     ASSERT_NE(itr, end);
     ++itr;
     ++itr;
     ASSERT_EQ(itr, end);
 
-    auto shared1_1 = instance->find(obj1).lock();
-    auto shared2_1 = instance->find(obj2).lock();
+    auto shared1_1 = global->find<TestObject>(KEY1).lock();
+    auto shared2_1 = global->find<TestObject>(KEY2).lock();
 
-    ASSERT_EQ(1, shared1_1->type());
-    ASSERT_EQ(2, shared2_1->type());
+    ASSERT_EQ(10, shared1_1->data);
+    ASSERT_EQ(20, shared2_1->data);
 
-    auto shared1_2 = instance->find<TestObject1>(obj1).lock();
-    auto shared2_2 = instance->find<TestObject2>(obj2).lock();
+    ASSERT_TRUE(global->erase(KEY1));
+    ASSERT_EQ(1, global->size());
 
-    ASSERT_EQ(10, shared1_2->data);
-    ASSERT_EQ(20, shared2_2->data);
-
-    ASSERT_TRUE(instance->erase(obj2));
-    ASSERT_EQ(1, instance->size());
-
-    instance->clear();
-    ASSERT_TRUE(instance->empty());
-    ASSERT_EQ(0, instance->size());
+    global->clear();
+    ASSERT_TRUE(global->empty());
+    ASSERT_EQ(0, global->size());
 
     Global::releaseInstance();
 }
