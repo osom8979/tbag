@@ -334,7 +334,7 @@ macro (tbag_modules__apply_ext_ressl)
 endmacro ()
 
 macro (tbag_modules__apply_ext_capnp)
-    list (APPEND TBAG_PROJECT_DEPENDENCIES capnp)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES capnpc)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${capnp_EXT_INCLUDE_DIR})
     tbag_modules__add_whole_archive (${capnp_EXT_STATIC_LIB})
     tbag_modules__add_whole_archive (${capnp_kj_EXT_STATIC_LIB})
@@ -347,9 +347,9 @@ macro (tbag_modules__build_ext_capnp_cpp __target __capnp)
 
     get_filename_component (__capnp_output_dir ${__capnp} DIRECTORY)
     capnp_generate (__capnp_result "${capnp_COMPILER_BIN}" "${__capnp_output_dir}" c++ "${__capnp}")
-    add_custom_target (${__target} SOURCES "${__capnp_result}")
+    add_custom_target (${__target} DEPENDS capnpc SOURCES "${__capnp_result}")
 
-    list (APPEND TBAG_PROJECT_DEPENDENCIES capnp ${__target})
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
     list (APPEND TBAG_PROJECT_OBJECTS ${__capnp_result})
 
     unset (__capnp_output_dir)

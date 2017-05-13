@@ -86,7 +86,7 @@ if (OpenCL_FOUND)
 endif ()
 
 ## Cap'n-Proto
-set (Capnp_ROOT ${CMAKE_BINARY_DIR}/external/local)
+set (Capnp_ROOT ${CMAKE_BINARY_DIR})
 find_package (Capnp)
 
 ## Doxygen settings.

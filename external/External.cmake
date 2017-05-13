@@ -94,16 +94,25 @@ add_custom_target (zlib DEPENDS ${zlib_EXT_DEPENDENCIES})
 ## CAPNPROTO ##
 ###############
 
-set (capnp_EXT_SOURCE_DIR    "${CMAKE_SOURCE_DIR}/external/capnproto/c++")
-set (capnp_EXT_INCLUDE_DIR   "${EXT_INSTALL_DIR}/include")
-set (capnp_COMPILER_BIN      "${EXT_INSTALL_DIR}/bin/capnp")
-set (capnp_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (capnp_kj_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (capnp_EXT_LIBRARIES     "${capnp_EXT_STATIC_LIB}")
-set (capnp_EXT_DEPENDENCIES   ${capnp_EXT_LIBRARIES})
+set (capnp_EXT_SOURCE_DIR          "${CMAKE_SOURCE_DIR}/external/capnproto/c++")
+set (capnp_EXT_INCLUDE_DIR         "${EXT_INSTALL_DIR}/include")
+set (capnp_COMPILER_BIN            "${EXT_INSTALL_DIR}/bin/capnp${CMAKE_EXECUTABLE_SUFFIX}")
+set (capnp_COMPILER_CPP_BIN        "${EXT_INSTALL_DIR}/bin/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
+set (capnp_COMPILER_CAPNP_BIN      "${EXT_INSTALL_DIR}/bin/capnpc-capnp${CMAKE_EXECUTABLE_SUFFIX}")
+set (capnp_COMPILER_COPY_BIN       "${CMAKE_BINARY_DIR}/tbag-capnp${CMAKE_EXECUTABLE_SUFFIX}")
+set (capnp_COMPILER_COPY_CPP_BIN   "${CMAKE_BINARY_DIR}/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
+set (capnp_COMPILER_COPY_CAPNP_BIN "${CMAKE_BINARY_DIR}/capnpc-capnp${CMAKE_EXECUTABLE_SUFFIX}")
+set (capnp_EXT_STATIC_LIB          "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (capnp_kj_EXT_STATIC_LIB       "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (capnp_EXT_LIBRARIES           "${capnp_EXT_STATIC_LIB}" "${capnp_kj_EXT_STATIC_LIB}")
+set (capnp_EXT_DEPENDENCIES        ${capnp_EXT_LIBRARIES}
+                                   "${capnp_COMPILER_COPY_BIN}"
+                                   "${capnp_COMPILER_COPY_CPP_BIN}"
+                                   "${capnp_COMPILER_COPY_CAPNP_BIN}")
 exists_libraries (capnp_EXT_EXISTS "${capnp_EXT_LIBRARIES}")
 
 if (capnp_EXT_EXISTS)
+    message (STATUS "Skip external/tbag-capnp (Exists: ${capnp_COMPILER_COPY_BIN})")
     message (STATUS "Skip external/capnp (Exists: ${capnp_EXT_STATIC_LIB})")
     message (STATUS "Skip external/kj (Exists: ${capnp_kj_EXT_STATIC_LIB})")
 else ()
@@ -130,10 +139,19 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
-    list (APPEND capnp_EXT_DEPENDENCIES capnp_ext)
+
+    add_custom_command (
+            OUTPUT  "${capnp_COMPILER_COPY_BIN}"
+                    "${capnp_COMPILER_COPY_CPP_BIN}"
+                    "${capnp_COMPILER_COPY_CAPNP_BIN}"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${capnp_COMPILER_BIN}"       "${capnp_COMPILER_COPY_BIN}"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${capnp_COMPILER_CPP_BIN}"   "${capnp_COMPILER_COPY_CPP_BIN}"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${capnp_COMPILER_CAPNP_BIN}" "${capnp_COMPILER_COPY_CAPNP_BIN}"
+            DEPENDS capnp_ext
+            COMMENT "Copy CapnProto compiler")
 endif ()
 
-add_custom_target (capnp DEPENDS ${capnp_EXT_DEPENDENCIES})
+add_custom_target (capnpc DEPENDS ${capnp_EXT_DEPENDENCIES})
 
 ##############
 ## LIBRESSL ##
