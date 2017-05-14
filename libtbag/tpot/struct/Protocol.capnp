@@ -23,15 +23,17 @@ struct TimeDetail {
 ## ------------
 
 struct Header {
-    request @0 : UInt64;
+    request @0 : UInt64 = 0;
 }
 
 struct Packet {
     header @0 : Header;
-
-    union {
+    body : union {
         unemployed @1 : Void;
         version    @2 : Version;
+        command    @3 : Command;
+        script     @4 : Script;
+        error      @5 : Error;
     }
 }
 
@@ -40,6 +42,30 @@ struct Packet {
 ## ------------
 
 struct Version {
-    request @0 : UInt64;
+    major @0 : UInt16;
+    minor @1 : UInt16;
+    patch @2 : UInt16;
+}
+
+struct Command {
+    exec @0 : Text;
+    cwd  @1 : Text;
+    args @2 : List(Text);
+    envs @3 : List(Env);
+}
+
+struct Env {
+    key   @0 : Text;
+    value @1 : Text;
+}
+
+struct Script {
+    mime @0 : Text;
+    body @1 : Text;
+}
+
+struct Error {
+    id  @0 : UInt32;
+    msg @1 : Text;
 }
 
