@@ -200,9 +200,13 @@ struct PipeServerTest : public Pipe
 
 TEST(PipeTest, Default)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    char const * const PATH = "\\\\.\\pipe\\PIPE_TEST";
+#else
     char const * const TEST_FILENAME = "echo.sock";
     tttDir(true, true);
     auto const PATH = tttDirGet() / TEST_FILENAME;
+#endif
 
     Loop server;
     auto server_pipe = server.newHandle<PipeServerTest>(server);

@@ -92,6 +92,16 @@ uerr Pipe::bind(char const * name)
     // Paths on Unix get truncated to sizeof(sockaddr_un.sun_path) bytes,
     // typically between 92 and 108 bytes.
 
+    // Note (Windows):
+    // https://msdn.microsoft.com/ko-kr/library/windows/desktop/aa365150(v=vs.85).aspx
+    // The unique pipe name. This string must have the following form:
+    // <code>
+    //  \\.\pipe\pipename
+    // </code>
+    // The pipename part of the name can include any character other than a backslash,
+    // including numbers and special characters. The entire pipe name string can be up to 256 characters long.
+    // Pipe names are not case sensitive.
+
     int const CODE = ::uv_pipe_bind(Parent::cast<uv_pipe_t>(), name);
     return getUerr2("Pipe::bind()", CODE);
 }
