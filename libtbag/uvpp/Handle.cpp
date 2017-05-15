@@ -13,7 +13,7 @@
 #include <cassert>
 #include <uv.h>
 
-//#define DISABLE_SAFETY_ERASE_HANDLE
+#define DISABLE_SAFETY_ERASE_HANDLE
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
