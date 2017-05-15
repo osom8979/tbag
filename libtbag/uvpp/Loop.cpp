@@ -266,6 +266,10 @@ void Loop::runCloseAllHandles()
 
 Loop::WeakHandle Loop::findChildHandle(void * native_handle)
 {
+    if (_handles.empty()) {
+        return WeakHandle();
+    }
+
     auto itr = _handles.find(NativeHandle(native_handle));
     if (itr == _handles.end()) {
         return WeakHandle();
@@ -282,8 +286,13 @@ bool Loop::eraseChildHandle(void * native_handle)
 {
 #if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG) && !defined(NDEBUG)
     WeakHandle weak = findChildHandle(native_handle);
-    void const * HANDLE_ADDRESS   = weak.lock().get();
-    std::string const HANDLE_NAME = weak.lock()->getName();
+    SharedHandle shared = weak.lock();
+    if (static_cast<bool>(shared) == false) {
+        return false;
+    }
+
+    void const * HANDLE_ADDRESS   = shared.get();
+    std::string const HANDLE_NAME = shared->getName();
 
     if (_handles.erase(NativeHandle(native_handle)) == 1U) {
         tDLogD("Loop::eraseChildHandle(@{}[{}]) success.", HANDLE_ADDRESS, HANDLE_NAME);
