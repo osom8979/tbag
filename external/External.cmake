@@ -109,7 +109,7 @@ set (capnp_EXT_DEPENDENCIES        ${capnp_EXT_LIBRARIES}
                                    "${capnp_COMPILER_COPY_BIN}"
                                    "${capnp_COMPILER_COPY_CPP_BIN}"
                                    "${capnp_COMPILER_COPY_CAPNP_BIN}")
-exists_libraries (capnp_EXT_EXISTS "${capnp_EXT_LIBRARIES}")
+exists_libraries (capnp_EXT_EXISTS "${capnp_EXT_DEPENDENCIES}")
 
 if (capnp_EXT_EXISTS)
     message (STATUS "Skip external/tbag-capnp (Exists: ${capnp_COMPILER_COPY_BIN})")
