@@ -71,9 +71,8 @@ public:
         std::string body;
     };
 
-    struct Error
+    struct Message
     {
-        uint32_t id;
         std::string msg;
     };
 
@@ -83,7 +82,7 @@ public:
         VERSION,
         COMMAND,
         SCRIPT,
-        ERROR,
+        MESSAGE,
     };
 
     enum class Code : int
@@ -102,7 +101,7 @@ public:
     Code build(Header const & header, Version const & body, Buffer & buffer);
     Code build(Header const & header, Command const & body, Buffer & buffer);
     Code build(Header const & header, Script  const & body, Buffer & buffer);
-    Code build(Header const & header, Error   const & body, Buffer & buffer);
+    Code build(Header const & header, Message const & body, Buffer & buffer);
 
 public:
     Code parse(Buffer const & buffer, Header & header, Type & type);
@@ -111,7 +110,7 @@ public:
     Code parse(Buffer const & buffer, Version & body);
     Code parse(Buffer const & buffer, Command & body);
     Code parse(Buffer const & buffer, Script  & body);
-    Code parse(Buffer const & buffer, Error   & body);
+    Code parse(Buffer const & buffer, Message & body);
 };
 
 } // namespace tpot

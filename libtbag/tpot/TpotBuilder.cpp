@@ -5,14 +5,14 @@
  * @date   2017-05-14
  */
 
-#include <libtbag/tpot/TpotBuilder.hpp>
-#include <libtbag/log/Log.hpp>
-
 // Cap'n-proto result.
+#include <libtbag/3rd/kj/string.h>
 #include <libtbag/3rd/capnp/message.h>
 #include <libtbag/3rd/capnp/serialize-packed.h>
-#include <libtbag/3rd/kj/string.h>
 #include <libtbag/tpot/struct/Protocol.capnp.h>
+
+#include <libtbag/tpot/TpotBuilder.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <iostream>
 #include <cassert>
@@ -130,7 +130,7 @@ TpotBuilder::Code TpotBuilder::build(Header const & header, Script const & body,
     return Code::SUCCESS;
 }
 
-TpotBuilder::Code TpotBuilder::build(Header const & header, Error const & body, Buffer & buffer)
+TpotBuilder::Code TpotBuilder::build(Header const & header, Message const & body, Buffer & buffer)
 {
     capnp::MallocMessageBuilder builder;
     Packet::Builder packet = builder.initRoot<Packet>();
@@ -138,8 +138,7 @@ TpotBuilder::Code TpotBuilder::build(Header const & header, Error const & body, 
     auto h = packet.getHeader();
     __impl::setHeader(h, header);
 
-    auto err = packet.getBody().initError();
-    err.setId(body.id);
+    auto err = packet.getBody().initMessage();
     err.setMsg(body.msg.c_str());
 
     kj::VectorOutputStream output;
@@ -167,7 +166,7 @@ TpotBuilder::Code TpotBuilder::parse(Buffer const & buffer, Header & header, Typ
     case ::Packet::Body::Which::VERSION:    type = Type::VERSION;    break;
     case ::Packet::Body::Which::COMMAND:    type = Type::COMMAND;    break;
     case ::Packet::Body::Which::SCRIPT:     type = Type::SCRIPT;     break;
-    case ::Packet::Body::Which::ERROR:      type = Type::ERROR;      break;
+    case ::Packet::Body::Which::MESSAGE:    type = Type::MESSAGE;    break;
     }
     return Code::SUCCESS;
 }
@@ -223,15 +222,14 @@ TpotBuilder::Code TpotBuilder::parse(Buffer const & buffer, Script & body)
     return Code::SUCCESS;
 }
 
-TpotBuilder::Code TpotBuilder::parse(Buffer const & buffer, Error & body)
+TpotBuilder::Code TpotBuilder::parse(Buffer const & buffer, Message & body)
 {
     kj::ArrayPtr<char const> ptr(buffer.data(), buffer.size());
     kj::ArrayInputStream input(ptr.asBytes());
     capnp::PackedMessageReader reader(input);
 
     Packet::Reader packet = reader.getRoot<Packet>();
-    auto err = packet.getBody().getError();
-    body.id  = err.getId();
+    auto err = packet.getBody().getMessage();
     body.msg = err.getMsg();
     return Code::SUCCESS;
 }

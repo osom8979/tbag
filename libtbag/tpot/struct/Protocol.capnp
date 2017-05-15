@@ -33,7 +33,7 @@ struct Packet {
         version    @2 : Version;
         command    @3 : Command;
         script     @4 : Script;
-        error      @5 : Error;
+        message    @5 : Message;
     }
 }
 
@@ -64,8 +64,7 @@ struct Script {
     body @1 : Text;
 }
 
-struct Error {
-    id  @0 : UInt32;
-    msg @1 : Text;
+struct Message {
+    msg @0 : Text;
 }
 

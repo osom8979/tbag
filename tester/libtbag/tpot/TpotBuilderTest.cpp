@@ -110,24 +110,21 @@ TEST(TpotBuilderTest, Script)
     ASSERT_STREQ(BODY_TEST, read_script.body.c_str());
 }
 
-TEST(TpotBuilderTest, Error)
+TEST(TpotBuilderTest, Message)
 {
-    uint32_t const ID_TEST = 99;
-    char const * ERROR_TEST = "test error string;";
+    char const * MESSAGE_TEST = "test message string;";
 
     TpotBuilder builder;
-    TpotBuilder::Buffer buffer;
-    TpotBuilder::Header header;
-    TpotBuilder::Error error;
+    TpotBuilder::Buffer  buffer;
+    TpotBuilder::Header  header;
+    TpotBuilder::Message message;
     header.request = 0;
-    error.id  = ID_TEST;
-    error.msg = ERROR_TEST;
-    ASSERT_TRUE(builder.build(header, error, buffer) == TpotBuilder::Code::SUCCESS);
+    message.msg = MESSAGE_TEST;
+    ASSERT_TRUE(builder.build(header, message, buffer) == TpotBuilder::Code::SUCCESS);
     ASSERT_LT(0, buffer.size());
 
-    TpotBuilder::Error read_error;
-    ASSERT_TRUE(builder.parse(buffer, read_error) == TpotBuilder::Code::SUCCESS);
-    ASSERT_EQ(ID_TEST, read_error.id);
-    ASSERT_STREQ(ERROR_TEST, read_error.msg.c_str());
+    TpotBuilder::Message read_message;
+    ASSERT_TRUE(builder.parse(buffer, read_message) == TpotBuilder::Code::SUCCESS);
+    ASSERT_STREQ(MESSAGE_TEST, read_message.msg.c_str());
 }
 
