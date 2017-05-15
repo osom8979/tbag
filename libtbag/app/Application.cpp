@@ -51,16 +51,48 @@ Application::WeakProperty Application::getProperty()
     return Global::getInstance()->find<Property>(PROPERTY_NAME);
 }
 
+int Application::getArgc()
+{
+    if (auto shared = getProperty().lock()) {
+        return shared->argc;
+    }
+    assert(false && "Expired properties.");
+    return 0;
+}
+
+char ** Application::getArgv()
+{
+    if (auto shared = getProperty().lock()) {
+        return shared->argv;
+    }
+    assert(false && "Expired properties.");
+    return nullptr;
+}
+
+char ** Application::getEnvs()
+{
+    if (auto shared = getProperty().lock()) {
+        return shared->envs;
+    }
+    assert(false && "Expired properties.");
+    return nullptr;
+}
+
 void Application::setExitCode(int code)
 {
-    assert(static_cast<bool>(_property));
-    _property->exit_code = code;
+    if (auto shared = getProperty().lock()) {
+        shared->exit_code = code;
+    }
+    assert(false && "Expired properties.");
 }
 
 int Application::getExitCode()
 {
-    assert(static_cast<bool>(_property));
-    return _property->exit_code;
+    if (auto shared = getProperty().lock()) {
+        return shared->exit_code;
+    }
+    assert(false && "Expired properties.");
+    return EXIT_FAILURE;
 }
 
 int Application::run()

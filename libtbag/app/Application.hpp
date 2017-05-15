@@ -65,8 +65,13 @@ public:
     static WeakProperty getProperty();
 
 public:
-    void setExitCode(int code);
-    int  getExitCode();
+    static int getArgc();
+    static char ** getArgv();
+    static char ** getEnvs();
+
+public:
+    static void setExitCode(int code);
+    static int getExitCode();
 
 public:
     int run();
