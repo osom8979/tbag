@@ -335,7 +335,7 @@ endmacro ()
 
 macro (tbag_modules__apply_ext_capnp)
     list (APPEND TBAG_PROJECT_DEPENDENCIES capnpc)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${capnp_EXT_INCLUDE_DIR})
+    #list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${capnp_EXT_INCLUDE_DIR}) # Don't use include directory.
     tbag_modules__add_whole_archive (${capnp_EXT_STATIC_LIB})
     tbag_modules__add_whole_archive (${capnp_kj_EXT_STATIC_LIB})
 endmacro ()
