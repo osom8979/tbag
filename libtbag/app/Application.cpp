@@ -26,6 +26,10 @@ Application::Application(int argc, char ** argv, char ** envs)
 {
     tbInitialize();
     _property = Global::getInstance()->insertNewObject<Property>(PROPERTY_NAME);
+    assert(static_cast<bool>(_property));
+    _property->argc = argc;
+    _property->argv = argv;
+    _property->envs = envs;
 }
 
 Application::Application(int argc, char ** argv) : Application(argc, argv, nullptr)
