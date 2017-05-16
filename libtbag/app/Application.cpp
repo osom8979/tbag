@@ -26,7 +26,6 @@ Application::Application(int argc, char ** argv, char ** envs)
 {
     tbInitialize();
     _property = Global::getInstance()->insertNewObject<Property>(PROPERTY_NAME);
-    onCreate();
 }
 
 Application::Application(int argc, char ** argv) : Application(argc, argv, nullptr)
@@ -41,7 +40,6 @@ Application::Application() : Application(0, nullptr)
 
 Application::~Application()
 {
-    onDestroy();
     _property.reset();
     tbRelease();
 }
@@ -97,7 +95,10 @@ int Application::getExitCode()
 
 int Application::run()
 {
+    onCreate();
     onRunning();
+    onDestroy();
+
     assert(static_cast<bool>(_property));
     return _property->exit_code;
 }
