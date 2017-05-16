@@ -45,7 +45,7 @@ XmlModel::~XmlModel()
 XmlModel & XmlModel::operator =(XmlModel const & obj)
 {
     if (this != &obj) {
-        _models = obj._models;
+        _nodes = obj._nodes;
     }
     return *this;
 }
@@ -53,31 +53,31 @@ XmlModel & XmlModel::operator =(XmlModel const & obj)
 XmlModel & XmlModel::operator =(XmlModel && obj)
 {
     if (this != &obj) {
-        _models.swap(obj._models);
+        _nodes.swap(obj._nodes);
     }
     return *this;
 }
 
-bool XmlModel::add(SharedModel model)
+bool XmlModel::add(SharedNode model)
 {
     if (static_cast<bool>(model) == false) {
         return false;
     }
-    return _models.insert(ModelPair(model->name(), model)).second;
+    return _nodes.insert(NodePair(model->name(), model)).second;
 }
 
 bool XmlModel::remove(String const & name)
 {
-    return _models.erase(name) == 1U;
+    return _nodes.erase(name) == 1U;
 }
 
-XmlModel::WeakModel XmlModel::get(String const & name)
+XmlModel::WeakNode XmlModel::get(String const & name)
 {
-    auto itr = _models.find(name);
-    if (itr == _models.end()) {
-        return WeakModel();
+    auto itr = _nodes.find(name);
+    if (itr == _nodes.end()) {
+        return WeakNode();
     }
-    return WeakModel(itr->second);
+    return WeakNode(itr->second);
 }
 
 XmlModel::String XmlModel::getRootName() const
@@ -147,14 +147,14 @@ XmlModel::Path XmlModel::findWritablePathOfNearest() const
 
 void XmlModel::teardown()
 {
-    for (auto & cursor : _models) {
+    for (auto & cursor : _nodes) {
         cursor.second->teardown();
     }
 }
 
 void XmlModel::setup()
 {
-    for (auto & cursor : _models) {
+    for (auto & cursor : _nodes) {
         cursor.second->setup();
     }
 }
@@ -173,7 +173,7 @@ bool XmlModel::save(Path const & path) const
 {
     Document doc;
     Node * root = doc.NewElement(getRootName().c_str());
-    for (auto & cursor : _models) {
+    for (auto & cursor : _nodes) {
         auto name = cursor.second->name();
         if (name.empty() == false) {
             Element * element = doc.NewElement(name.c_str());
@@ -210,7 +210,7 @@ bool XmlModel::load(Path const & path)
         return false;
     }
 
-    for (auto & cursor : _models) {
+    for (auto & cursor : _nodes) {
         auto name = cursor.second->name();
         if (name.empty() == false) {
             Element const * element = root->FirstChildElement(name.c_str());

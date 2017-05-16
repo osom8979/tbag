@@ -73,13 +73,13 @@ public:
     };
 
 public:
-    using SharedModel = std::shared_ptr<NodeInterface>;
-    using WeakModel   = std::weak_ptr<NodeInterface>;
-    using ModelMap    = std::map<String, SharedModel>;
-    using ModelPair   = ModelMap::value_type;
+    using SharedNode = std::shared_ptr<NodeInterface>;
+    using WeakNode   = std::weak_ptr<NodeInterface>;
+    using NodeMap    = std::map<String, SharedNode>;
+    using NodePair   = NodeMap::value_type;
 
 private:
-    ModelMap _models;
+    NodeMap _nodes;
 
 public:
     XmlModel();
@@ -92,19 +92,19 @@ public:
     XmlModel & operator =(XmlModel && obj);
 
 public:
-    inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_models.clear()))
-    { _models.clear(); }
-    inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_models.size()))
-    { return _models.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_models.empty()))
-    { return _models.empty(); }
+    inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.clear()))
+    { _nodes.clear(); }
+    inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.size()))
+    { return _nodes.size(); }
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.empty()))
+    { return _nodes.empty(); }
 
 public:
-    bool add(SharedModel model);
+    bool add(SharedNode model);
     bool remove(String const & name);
 
 public:
-    WeakModel get(String const & name);
+    WeakNode get(String const & name);
 
 public:
     template <typename Up>

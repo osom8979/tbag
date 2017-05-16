@@ -59,6 +59,17 @@ void LogXmlNode::save(Element & element) const
     saveLogInfo(element, _infos);
 }
 
+int LogXmlNode::createLoggers()
+{
+    int count = 0;
+    for (auto & info : _infos) {
+        if (LogXmlNode::createLogger(info, _envs) != nullptr) {
+            ++count;
+        }
+    }
+    return count;
+}
+
 // ---------------
 // Static methods.
 // ---------------
@@ -179,9 +190,9 @@ LogXmlNode::LogInfo LogXmlNode::getLogInfo(Element const & element)
 
 LogXmlNode::LogInfoVector LogXmlNode::loadLogInfo(Element const & parent)
 {
-    if (string::lower(parent.Name()) != XML_ELEMENT_TLOG_NAME) {
-        return LogInfoVector();
-    }
+    //if (string::lower(parent.Name()) != XML_ELEMENT_TLOG_NAME) {
+    //    return LogInfoVector();
+    //}
 
     LogInfoVector result;
     Element const * cursor = parent.FirstChildElement(XML_ELEMENT_LOGGER_NAME);

@@ -6,8 +6,10 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/log/node/LogXmlNode.hpp>
+#include <libtbag/dom/XmlModel.hpp>
 
 using namespace libtbag;
 using namespace libtbag::log;
@@ -104,5 +106,72 @@ TEST(LogXmlNodeTest, XmlString)
 
     ASSERT_TRUE(removeLogger(COUT_LOGGER));
     ASSERT_TRUE(removeLogger(FILE_LOGGER));
+}
+
+struct LogXmlNodeTest : public LogXmlNode
+{
+    TBAG_CONSTEXPR static char const * const ENV_TEST_DIR  = "TEST_DIR";
+    TBAG_CONSTEXPR static char const * const TEST_LOG_NAME = "LogXmlNodeTest";
+
+    LogXmlNodeTest()
+    {
+        // EMPTY.
+    }
+
+    LogXmlNodeTest(String const & test_dir)
+    {
+        atEnvs().push(LogXmlNode::EnvFlag(ENV_TEST_DIR, test_dir));
+    }
+
+    virtual String name() const override
+    {
+        return TEST_LOG_NAME;
+    }
+
+    virtual void setup() override
+    {
+        atInfos().clear();
+        atInfos().push_back(getLogInfo(
+                TEST_LOG_NAME, "file", "${TEST_DIR}/test.log",
+                "true", "false", "false", "info", "default"));
+    }
+};
+
+TEST(LogXmlNodeTest, Default)
+{
+    tttDir(true, true);
+    auto const CONFIG_PATH  = tttDirGet() / "config.xml";
+    auto const LOGFILE_PATH = tttDirGet() / "test.log";
+
+    {   // Create xml file.
+        using namespace libtbag::dom;
+        XmlModel model;
+        model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDirGet().getString())));
+        model.setup();
+        ASSERT_TRUE(model.save(CONFIG_PATH));
+    }
+    ASSERT_TRUE(CONFIG_PATH.exists());
+
+    // Read xml file.
+    using namespace libtbag::dom;
+    XmlModel model;
+    model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDirGet().getString())));
+    ASSERT_TRUE(model.load(CONFIG_PATH));
+
+    LogXmlNodeTest * node = model.getPointer<LogXmlNodeTest>();
+    ASSERT_NE(nullptr, node);
+    ASSERT_EQ(1, node->atInfos().size());
+    ASSERT_STREQ(LogXmlNodeTest::TEST_LOG_NAME, node->atInfos()[0].name.c_str());
+
+    ASSERT_EQ(nullptr, log::getLogger(LogXmlNodeTest::TEST_LOG_NAME));
+    ASSERT_EQ(1, node->createLoggers());
+    ASSERT_NE(nullptr, log::getLogger(LogXmlNodeTest::TEST_LOG_NAME));
+
+    ASSERT_EQ(0, LOGFILE_PATH.getState().size);
+    tLogD(LogXmlNodeTest::TEST_LOG_NAME, "Default");
+    ASSERT_EQ(0, LOGFILE_PATH.getState().size);
+
+    tLogI(LogXmlNodeTest::TEST_LOG_NAME, "Default");
+    ASSERT_LT(0, LOGFILE_PATH.getState().size);
 }
 

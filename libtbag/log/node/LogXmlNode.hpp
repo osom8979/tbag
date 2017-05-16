@@ -129,6 +129,9 @@ protected:
     virtual void save(Element & element) const override;
 
 public:
+    int createLoggers();
+
+public:
     // @formatter:off
     static bool     parseAutoFlush    (String const & value);
     static bool     parseMultiThread  (String const & value);

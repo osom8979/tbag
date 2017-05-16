@@ -81,7 +81,7 @@ TEST(XmlModelTest, Default)
 
     std::string const CASE_NAME = test_info_->test_case_name();
     XmlModel model;
-    ASSERT_TRUE(model.add(XmlModel::SharedModel(new ModelNode(CASE_NAME))));
+    ASSERT_TRUE(model.add(XmlModel::SharedNode(new ModelNode(CASE_NAME))));
 
     auto weak = model.get(CASE_NAME);
     ASSERT_FALSE(weak.expired());
