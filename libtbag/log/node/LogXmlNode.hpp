@@ -111,6 +111,14 @@ public:
     LogXmlNode();
     virtual ~LogXmlNode();
 
+public:
+    // @formatter:off
+    inline LogInfoVector       & atInfos()       TBAG_NOEXCEPT { return _infos; }
+    inline LogInfoVector const & atInfos() const TBAG_NOEXCEPT { return _infos; }
+    inline Environments        & atEnvs ()       TBAG_NOEXCEPT { return _envs;  }
+    inline Environments  const & atEnvs () const TBAG_NOEXCEPT { return _envs;  }
+    // @formatter:on
+
 protected:
     virtual String name() const override;
 
