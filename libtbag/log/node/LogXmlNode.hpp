@@ -49,6 +49,8 @@ public:
     using Environments = string::Environments;
     using EnvFlag      = Environments::Flag;
 
+    using StringVector = std::vector<String>;
+
 public:
     STATIC_ASSERT_CHECK_IS_SAME(String, std::string);
 
@@ -129,7 +131,22 @@ protected:
     virtual void save(Element & element) const override;
 
 public:
+    /**
+     * Create loggers.
+     *
+     * @return The number of created loggers.
+     */
     int createLoggers();
+
+    /**
+     * Remove loggers.
+     *
+     * @return The number of deleted loggers.
+     */
+    int removeLoggers();
+
+public:
+    StringVector getNames() const;
 
 public:
     // @formatter:off

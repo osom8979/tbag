@@ -70,6 +70,26 @@ int LogXmlNode::createLoggers()
     return count;
 }
 
+int LogXmlNode::removeLoggers()
+{
+    int count = 0;
+    for (auto & info : _infos) {
+        if (info.name.empty() == false && removeLogger(info.name)) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+LogXmlNode::StringVector LogXmlNode::getNames() const
+{
+    StringVector names;
+    for (auto & info : _infos) {
+        names.push_back(info.name);
+    }
+    return names;
+}
+
 // ---------------
 // Static methods.
 // ---------------
