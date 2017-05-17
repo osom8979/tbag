@@ -1,6 +1,6 @@
 /**
- * @file   NetworkPipeTestTest.cpp
- * @brief  NetworkPipeTest class tester.
+ * @file   NetworkPipeTest.cpp
+ * @brief  Pipe network tester.
  * @author zer0
  * @date   2017-05-09
  */

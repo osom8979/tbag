@@ -1,6 +1,6 @@
 /**
  * @file   NetworkTcpTest.cpp
- * @brief  NetworkTcp class tester.
+ * @brief  Tcp network tester.
  * @author zer0
  * @date   2017-05-06
  */
