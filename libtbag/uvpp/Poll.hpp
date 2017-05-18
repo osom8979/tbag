@@ -104,7 +104,7 @@ public:
      * @warning
      *  Changed in version 1.2.2: the file descriptor is set to non-blocking mode.
      */
-    uerr init(Loop & loop, int fd);
+    Err init(Loop & loop, int fd);
 
     /**
      * Initialize the handle using a socket descriptor.
@@ -112,13 +112,13 @@ public:
      * @warning
      *  Changed in version 1.2.2: the socket is set to non-blocking mode.
      */
-    uerr initSocket(Loop & loop, usock sock);
+    Err initSocket(Loop & loop, usock sock);
 
     /** Starts polling the file descriptor. */
-    uerr start(EventType events = EVENT_RW);
+    Err start(EventType events = EVENT_RW);
 
     /** Stop polling the file descriptor, the callback will no longer be called. */
-    uerr stop();
+    Err stop();
 
 public:
     // @formatter:off
@@ -132,7 +132,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onPoll(uerr status, EventType events);
+    virtual void onPoll(Err status, EventType events);
 };
 
 } // namespace uvpp

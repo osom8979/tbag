@@ -28,7 +28,7 @@ TimeoutShutdown::~TimeoutShutdown()
     // EMPTY.
 }
 
-uerr TimeoutShutdown::start(uint64_t timeout)
+Err TimeoutShutdown::start(uint64_t timeout)
 {
     _cancel.store(false);
     return Timer::start(timeout);

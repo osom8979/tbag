@@ -34,7 +34,7 @@ UvLock::UvLock() : _handle(new (std::nothrow) uv_mutex_t)
     assert(_handle != nullptr);
     int error_code = ::uv_mutex_init(cast_uv_mutex(_handle));
     if (error_code != 0) {
-        tDLogE("UvLock::UvLock() error[{}] {}", error_code, uvpp::getUvErrorName(error_code));
+        tDLogE("UvLock::UvLock() error[{}] {}", error_code, getUvErrorName(error_code));
     }
 }
 

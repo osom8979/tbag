@@ -39,7 +39,7 @@ static void __global_uv_check_cb__(uv_check_t * handle)
 
 Check::Check(Loop & loop) : Handle(uhandle::CHECK)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -49,19 +49,19 @@ Check::~Check()
     // EMPTY.
 }
 
-uerr Check::init(Loop & loop)
+Err Check::init(Loop & loop)
 {
     int const CODE = ::uv_check_init(loop.cast<uv_loop_t>(), Parent::cast<uv_check_t>());
     return getUerr2("Check::init()", CODE);
 }
 
-uerr Check::start()
+Err Check::start()
 {
     int const CODE = ::uv_check_start(Parent::cast<uv_check_t>(), __global_uv_check_cb__);
     return getUerr2("Check::start()", CODE);
 }
 
-uerr Check::stop()
+Err Check::stop()
 {
     int const CODE = ::uv_check_stop(Parent::cast<uv_check_t>());
     return getUerr2("Check::stop()", CODE);

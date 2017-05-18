@@ -51,13 +51,13 @@ public:
 
 public:
     /** Initialize the handle. */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
     /** Start the handle with the given callback. */
-    uerr start();
+    Err start();
 
     /** Stop the handle, the callback will no longer be called. */
-    uerr stop();
+    Err stop();
 
 // Event methods.
 public:

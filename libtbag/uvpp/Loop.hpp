@@ -16,9 +16,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/uvpp/Native.hpp>
-#include <libtbag/debug/ErrorCode.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/uvpp/Native.hpp>
 
 #include <cstdint>
 
@@ -81,10 +82,10 @@ public:
 
 public:
     /** Releases all internal loop resources. */
-    uerr close();
+    Err close();
 
     /** This function runs the event loop. */
-    uerr run(RunMode mode = RunMode::RUN_DEFAULT);
+    Err run(RunMode mode = RunMode::RUN_DEFAULT);
 
     /** Returns true if there are active handles or request in the loop. */
     bool isAlive() const;

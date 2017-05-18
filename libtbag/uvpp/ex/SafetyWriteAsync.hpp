@@ -76,7 +76,7 @@ public:
     };
 
     using AtomicState = std::atomic<WriteState>;
-    using AtomicError = std::atomic<uerr>;
+    using AtomicError = std::atomic<Err>;
 
 public:
     struct TBAG_API WriterInterface : public SafetyAsync::Job
@@ -96,7 +96,7 @@ public:
         { return id; }
         inline WriteState getState() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(state.load()))
         { return state.load(); }
-        inline uerr getWriteError() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(result.load()))
+        inline Err getWriteError() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(result.load()))
         { return result.load(); }
 
         bool cancel();

@@ -39,14 +39,14 @@ static void __global_uv_pool_cb__(uv_poll_t * handle, int status, int events)
 
 Poll::Poll(Loop & loop, init_fd fd) : Handle(uhandle::POLL)
 {
-    if (init(loop, fd.fd) != uerr::UVPP_SUCCESS) {
+    if (init(loop, fd.fd) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
 
 Poll::Poll(Loop & loop, init_sock sock) : Handle(uhandle::POLL)
 {
-    if (initSocket(loop, sock.sock) != uerr::UVPP_SUCCESS) {
+    if (initSocket(loop, sock.sock) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -56,13 +56,13 @@ Poll::~Poll()
     // EMPTY.
 }
 
-uerr Poll::init(Loop & loop, int fd)
+Err Poll::init(Loop & loop, int fd)
 {
     int const CODE = ::uv_poll_init(loop.cast<uv_loop_t>(), Parent::cast<uv_poll_t>(), fd);
     return getUerr2("Poll::init()", CODE);
 }
 
-uerr Poll::initSocket(Loop & loop, usock sock)
+Err Poll::initSocket(Loop & loop, usock sock)
 {
     // On Unix this is identical to uv_poll_init().
     // On windows it takes a SOCKET handle.
@@ -70,7 +70,7 @@ uerr Poll::initSocket(Loop & loop, usock sock)
     return getUerr2("Poll::initSocket()", CODE);
 }
 
-uerr Poll::start(EventType events)
+Err Poll::start(EventType events)
 {
     //  events is a bitmask consisting made up of UV_READABLE, UV_WRITABLE and UV_DISCONNECT.
     //  As soon as an event is detected the callback will be called with status set to 0,
@@ -95,13 +95,13 @@ uerr Poll::start(EventType events)
     return getUerr2("Poll::start()", CODE);
 }
 
-uerr Poll::stop()
+Err Poll::stop()
 {
     int const CODE = ::uv_poll_stop(Parent::cast<uv_poll_t>());
     return getUerr2("Poll::stop()", CODE);
 }
 
-void Poll::onPoll(uerr status, EventType events)
+void Poll::onPoll(Err status, EventType events)
 {
     tDLogD("Poll::onPoll({}, {}) called.", getErrorName(status), static_cast<int>(events));
 }

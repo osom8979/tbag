@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -80,10 +81,10 @@ public:
         // @formatter:on
 
     public:
-        virtual void onConnect(ConnectRequest & request, uerr code) override
+        virtual void onConnect(ConnectRequest & request, Err code) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onConnect({})", uvpp::getErrorName(code));
+            tDLogD("ClientBackend::onConnect({})", getErrorName(code));
 
             _parent->_mutex.lock();
             _parent->cancelTimeoutClose();
@@ -92,10 +93,10 @@ public:
             _parent->onConnect(code);
         }
 
-        virtual void onShutdown(ShutdownRequest & request, uerr code) override
+        virtual void onShutdown(ShutdownRequest & request, Err code) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onShutdown({})", uvpp::getErrorName(code));
+            tDLogD("ClientBackend::onShutdown({})", getErrorName(code));
 
             _parent->_mutex.lock();
             _parent->cancelTimeoutShutdown();
@@ -105,10 +106,10 @@ public:
             _parent->onShutdown(code);
         }
 
-        virtual void onWrite(WriteRequest & request, uerr code) override
+        virtual void onWrite(WriteRequest & request, Err code) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onWrite({})", uvpp::getErrorName(code));
+            tDLogD("ClientBackend::onWrite({})", getErrorName(code));
 
             _parent->_mutex.lock();
             _parent->cancelTimeoutShutdown();
@@ -123,10 +124,10 @@ public:
             return uvpp::defaultOnAlloc(_buffer, suggested_size);
         }
 
-        virtual void onRead(uerr code, char const * buffer, std::size_t size) override
+        virtual void onRead(Err code, char const * buffer, std::size_t size) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onRead({})", uvpp::getErrorName(code));
+            tDLogD("ClientBackend::onRead({})", getErrorName(code));
 
             _parent->onRead(code, buffer, size);
         }
@@ -201,15 +202,15 @@ private:
     void startTimeoutShutdown(Milliseconds const & millisec)
     {
         assert(static_cast<bool>(_shutdown));
-        uerr const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
-        tDLogD("StreamClient::startTimeoutShutdown({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+        Err const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
+        tDLogD("StreamClient::startTimeoutShutdown({}) result code: {}", millisec.count(), getErrorName(CODE));
     }
 
     void startTimeoutClose(Milliseconds const & millisec)
     {
         assert(static_cast<bool>(_close));
-        uerr const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
-        tDLogD("StreamClient::startTimeoutClose({}) result code: {}", millisec.count(), uvpp::getErrorName(CODE));
+        Err const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
+        tDLogD("StreamClient::startTimeoutClose({}) result code: {}", millisec.count(), getErrorName(CODE));
     }
 
     void cancelTimeoutShutdown()
@@ -329,9 +330,9 @@ public:
         assert(static_cast<bool>(_client));
         Guard guard(_mutex);
 
-        uerr const CODE = _client->startRead();
-        tDLogD("StreamClient::start() result code: {}", uvpp::getErrorName(CODE));
-        return CODE == uerr::UVPP_SUCCESS;
+        Err const CODE = _client->startRead();
+        tDLogD("StreamClient::start() result code: {}", getErrorName(CODE));
+        return CODE == Err::E_SUCCESS;
     }
 
     virtual bool stop() override
@@ -339,9 +340,9 @@ public:
         assert(static_cast<bool>(_client));
         Guard guard(_mutex);
 
-        uerr const CODE = _client->stopRead();
-        tDLogD("StreamClient::stop() result code: {}", uvpp::getErrorName(CODE));
-        return CODE == uerr::UVPP_SUCCESS;
+        Err const CODE = _client->stopRead();
+        tDLogD("StreamClient::stop() result code: {}", getErrorName(CODE));
+        return CODE == Err::E_SUCCESS;
     }
 
     virtual void close() override

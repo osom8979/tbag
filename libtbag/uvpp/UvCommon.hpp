@@ -17,6 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
 # include <cstdint>
@@ -196,140 +197,6 @@ TBAG_API bool isEtc    (utype type);
  */
 TBAG_API bool isStream(utype type);
 
-// ------------------
-// Debugging methods.
-// ------------------
-
-/**
- * @remarks
- *  Same this code:
- *  @code
- *    const char* uv_strerror(int err);
- *  @endcode
- */
-TBAG_API std::string getUvErrorString(int uv_error_code);
-
-/**
- * @remarks
- *  Same this code:
- *  @code
- *    const char* uv_err_name(int err);
- *  @endcode
- */
-TBAG_API std::string getUvErrorName(int uv_error_code);
-
-#ifndef TBAG_UV_ERROR_MAP
-#define TBAG_UV_ERROR_MAP(_TBAG_UVPP_XX, _TBAG_UV_XX) \
-    /* uvpp error codes. */                           \
-    _TBAG_UVPP_XX(_SUCCESS, "No error"              ) \
-    _TBAG_UVPP_XX(_ILLARGS, "Illegal arguments"     ) \
-    _TBAG_UVPP_XX(_NULLPTR, "Null pointer exception") \
-    _TBAG_UVPP_XX(_EQUEUE , "Empty queue"           ) \
-    _TBAG_UVPP_XX(_NREADY , "Not ready"             ) \
-    _TBAG_UVPP_XX(_UNSUPOP, "Unsupported operation" ) \
-    /* uv error codes. */                                                    \
-    _TBAG_UV_XX(_E2BIG           , "Argument list too long"                ) \
-    _TBAG_UV_XX(_EACCES          , "Permission denied"                     ) \
-    _TBAG_UV_XX(_EADDRINUSE      , "Address already in use"                ) \
-    _TBAG_UV_XX(_EADDRNOTAVAIL   , "Address not available"                 ) \
-    _TBAG_UV_XX(_EAFNOSUPPORT    , "Address family not supported"          ) \
-    _TBAG_UV_XX(_EAGAIN          , "Resource temporarily unavailable"      ) \
-    _TBAG_UV_XX(_EAI_ADDRFAMILY  , "Address family not supported"          ) \
-    _TBAG_UV_XX(_EAI_AGAIN       , "Temporary failure"                     ) \
-    _TBAG_UV_XX(_EAI_BADFLAGS    , "Bad ai_flags value"                    ) \
-    _TBAG_UV_XX(_EAI_BADHINTS    , "Invalid value for hints"               ) \
-    _TBAG_UV_XX(_EAI_CANCELED    , "Request canceled"                      ) \
-    _TBAG_UV_XX(_EAI_FAIL        , "Permanent failure"                     ) \
-    _TBAG_UV_XX(_EAI_FAMILY      , "Ai_family not supported"               ) \
-    _TBAG_UV_XX(_EAI_MEMORY      , "Out of memory"                         ) \
-    _TBAG_UV_XX(_EAI_NODATA      , "No address"                            ) \
-    _TBAG_UV_XX(_EAI_NONAME      , "Unknown node or service"               ) \
-    _TBAG_UV_XX(_EAI_OVERFLOW    , "Argument buffer overflow"              ) \
-    _TBAG_UV_XX(_EAI_PROTOCOL    , "Resolved protocol is unknown"          ) \
-    _TBAG_UV_XX(_EAI_SERVICE     , "Service not available for socket type" ) \
-    _TBAG_UV_XX(_EAI_SOCKTYPE    , "Socket type not supported"             ) \
-    _TBAG_UV_XX(_EALREADY        , "Connection already in progress"        ) \
-    _TBAG_UV_XX(_EBADF           , "Bad file descriptor"                   ) \
-    _TBAG_UV_XX(_EBUSY           , "Resource busy or locked"               ) \
-    _TBAG_UV_XX(_ECANCELED       , "Operation canceled"                    ) \
-    _TBAG_UV_XX(_ECHARSET        , "Invalid Unicode character"             ) \
-    _TBAG_UV_XX(_ECONNABORTED    , "Software caused connection abort"      ) \
-    _TBAG_UV_XX(_ECONNREFUSED    , "Connection refused"                    ) \
-    _TBAG_UV_XX(_ECONNRESET      , "Connection reset by peer"              ) \
-    _TBAG_UV_XX(_EDESTADDRREQ    , "Destination address required"          ) \
-    _TBAG_UV_XX(_EEXIST          , "File already exists"                   ) \
-    _TBAG_UV_XX(_EFAULT          , "Bad address in system call argument"   ) \
-    _TBAG_UV_XX(_EFBIG           , "File too large"                        ) \
-    _TBAG_UV_XX(_EHOSTUNREACH    , "Host is unreachable"                   ) \
-    _TBAG_UV_XX(_EINTR           , "Interrupted system call"               ) \
-    _TBAG_UV_XX(_EINVAL          , "Invalid argument"                      ) \
-    _TBAG_UV_XX(_EIO             , "I/O error"                             ) \
-    _TBAG_UV_XX(_EISCONN         , "Socket is already connected"           ) \
-    _TBAG_UV_XX(_EISDIR          , "Illegal operation on a directory"      ) \
-    _TBAG_UV_XX(_ELOOP           , "Too many symbolic links encountered"   ) \
-    _TBAG_UV_XX(_EMFILE          , "Too many open files"                   ) \
-    _TBAG_UV_XX(_EMSGSIZE        , "Message too long"                      ) \
-    _TBAG_UV_XX(_ENAMETOOLONG    , "Name too long"                         ) \
-    _TBAG_UV_XX(_ENETDOWN        , "Network is down"                       ) \
-    _TBAG_UV_XX(_ENETUNREACH     , "Network is unreachable"                ) \
-    _TBAG_UV_XX(_ENFILE          , "File table overflow"                   ) \
-    _TBAG_UV_XX(_ENOBUFS         , "No buffer space available"             ) \
-    _TBAG_UV_XX(_ENODEV          , "No such device"                        ) \
-    _TBAG_UV_XX(_ENOENT          , "No such file or directory"             ) \
-    _TBAG_UV_XX(_ENOMEM          , "Not enough memory"                     ) \
-    _TBAG_UV_XX(_ENONET          , "Machine is not on the network"         ) \
-    _TBAG_UV_XX(_ENOPROTOOPT     , "Protocol not available"                ) \
-    _TBAG_UV_XX(_ENOSPC          , "No space left on device"               ) \
-    _TBAG_UV_XX(_ENOSYS          , "Function not implemented"              ) \
-    _TBAG_UV_XX(_ENOTCONN        , "Socket is not connected"               ) \
-    _TBAG_UV_XX(_ENOTDIR         , "Not a directory"                       ) \
-    _TBAG_UV_XX(_ENOTEMPTY       , "Directory not empty"                   ) \
-    _TBAG_UV_XX(_ENOTSOCK        , "Socket operation on non-socket"        ) \
-    _TBAG_UV_XX(_ENOTSUP         , "Operation not supported on socket"     ) \
-    _TBAG_UV_XX(_EPERM           , "Operation not permitted"               ) \
-    _TBAG_UV_XX(_EPIPE           , "Broken pipe"                           ) \
-    _TBAG_UV_XX(_EPROTO          , "Protocol error"                        ) \
-    _TBAG_UV_XX(_EPROTONOSUPPORT , "Protocol not supported"                ) \
-    _TBAG_UV_XX(_EPROTOTYPE      , "Protocol wrong type for socket"        ) \
-    _TBAG_UV_XX(_ERANGE          , "Result too large"                      ) \
-    _TBAG_UV_XX(_EROFS           , "Read-only file system"                 ) \
-    _TBAG_UV_XX(_ESHUTDOWN       , "Cannot send after transport endpoint shutdown") \
-    _TBAG_UV_XX(_ESPIPE          , "Invalid seek"                          ) \
-    _TBAG_UV_XX(_ESRCH           , "No such process"                       ) \
-    _TBAG_UV_XX(_ETIMEDOUT       , "Connection timed out"                  ) \
-    _TBAG_UV_XX(_ETXTBSY         , "Text file is busy"                     ) \
-    _TBAG_UV_XX(_EXDEV           , "Cross-device link not permitted"       ) \
-    _TBAG_UV_XX(_UNKNOWN         , "Unknown error"                         ) \
-    _TBAG_UV_XX(_EOF             , "End of file"                           ) \
-    _TBAG_UV_XX(_ENXIO           , "No such device or address"             ) \
-    _TBAG_UV_XX(_EMLINK          , "Too many links"                        ) \
-    /* -- END -- */
-#endif
-
-/**
- * Table of libuv error codes.
- *
- * @author zer0
- * @date   2017-01-30
- */
-enum class ErrorCode : int
-{
-    __START_NUMBER__ = -1,
-#define _TBAG_XX(name, msg) UVPP##name,
-    TBAG_UV_ERROR_MAP(_TBAG_XX, _TBAG_XX)
-#undef _TBAG_XX
-    __SIZE__
-};
-
-/** Short name of ErrorCode type. */
-typedef ErrorCode uerr;
-
-TBAG_API uerr getUerr(int uv_error_code);
-TBAG_API uerr getUerr2(char const * prefix, int uv_error_code);
-
-TBAG_API std::string getErrorName(uerr err);
-TBAG_API std::string getErrorDetail(uerr err);
-
 // ---------------------
 // Native handle helper.
 // ---------------------
@@ -362,8 +229,8 @@ TBAG_CONSTEXPR const int SOCKADDR_MAX_BYTE_SIZE = 255;
 
 TBAG_API int getPortNumber(sockaddr const * address);
 
-TBAG_API uerr initAddress(std::string const & ip, int port, sockaddr_in * addr);
-TBAG_API uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
+TBAG_API Err initAddress(std::string const & ip, int port, sockaddr_in * addr);
+TBAG_API Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
 
 } // namespace uvpp
 

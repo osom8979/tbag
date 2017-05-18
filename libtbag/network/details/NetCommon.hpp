@@ -70,9 +70,7 @@ enum class StreamType
  */
 struct NetCommon
 {
-    using uerr = uvpp::uerr;
-    using binf = uvpp::binf;
-
+    using binf   = uvpp::binf;
     using Type   = StreamType;
     using Size   = std::size_t;
     using String = std::string;

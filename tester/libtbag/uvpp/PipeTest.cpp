@@ -43,21 +43,21 @@ struct PipeClientTest : public Pipe
         Pipe::connect(connect_req, name);
     }
 
-    virtual void onConnect(ConnectRequest & request, uerr code) override
+    virtual void onConnect(ConnectRequest & request, Err code) override
     {
         assert(step1 == 0);
         assert(step2 == 0);
         assert(step3 == 0);
         assert(step4 == 0);
 
-        if (startRead() == uerr::UVPP_SUCCESS) {
-            if (write(write_req, PIPE_WRITE_TEST_MSG, strlen(PIPE_WRITE_TEST_MSG)) == uerr::UVPP_SUCCESS) {
+        if (startRead() == Err::E_SUCCESS) {
+            if (write(write_req, PIPE_WRITE_TEST_MSG, strlen(PIPE_WRITE_TEST_MSG)) == Err::E_SUCCESS) {
                 ++step1;
             }
         }
     }
 
-    virtual void onWrite(WriteRequest & request, uerr code) override
+    virtual void onWrite(WriteRequest & request, Err code) override
     {
         assert(step1 == 1);
         assert(step2 == 0);
@@ -71,14 +71,14 @@ struct PipeClientTest : public Pipe
         return defaultOnAlloc(buffer, suggested_size);
     }
 
-    virtual void onRead(uerr code, char const * buffer, std::size_t size) override
+    virtual void onRead(Err code, char const * buffer, std::size_t size) override
     {
         assert(step1 == 1);
         assert(step2 == 1);
         assert(step3 == 0);
         assert(step4 == 0);
 
-        if (code == uerr::UVPP_SUCCESS) {
+        if (code == Err::E_SUCCESS) {
             std::string const ECHO_MESSAGE(buffer, buffer + size);
             if (ECHO_MESSAGE == std::string(PIPE_WRITE_TEST_MSG)) {
                 ++step3;
@@ -115,7 +115,7 @@ struct PipeServerTest : public Pipe
             return defaultOnAlloc(buffer, suggested_size);
         }
 
-        virtual void onRead(uerr code, char const * buffer, std::size_t size) override
+        virtual void onRead(Err code, char const * buffer, std::size_t size) override
         {
             assert(server.step1 == 1);
             assert(server.step2 == 0);
@@ -123,16 +123,16 @@ struct PipeServerTest : public Pipe
             assert(server.step4 == 0);
             assert(server.step5 == 0);
 
-            if (code == uerr::UVPP_SUCCESS) {
+            if (code == Err::E_SUCCESS) {
                 if (std::string(buffer, buffer + size) == std::string(PIPE_WRITE_TEST_MSG)) {
-                    if (write(write_req, buffer, size) == uerr::UVPP_SUCCESS) {
+                    if (write(write_req, buffer, size) == Err::E_SUCCESS) {
                         ++server.step2;
                     }
                 }
             }
         }
 
-        virtual void onWrite(WriteRequest & request, uerr code) override
+        virtual void onWrite(WriteRequest & request, Err code) override
         {
             assert(server.step1 == 1);
             assert(server.step2 == 1);
@@ -171,7 +171,7 @@ struct PipeServerTest : public Pipe
     PipeServerTest(Loop & loop) : Pipe(loop)
     { /* EMPTY. */ }
 
-    virtual void onConnection(uerr code) override
+    virtual void onConnection(Err code) override
     {
         assert(step1 == 0);
         assert(step2 == 0);
@@ -180,8 +180,8 @@ struct PipeServerTest : public Pipe
         assert(step5 == 0);
 
         auto client = getLoop()->newHandle<Client>(*getLoop(), *this);
-        if (accept(*client.get()) == uerr::UVPP_SUCCESS) {
-            if (client->startRead() == uerr::UVPP_SUCCESS) {
+        if (accept(*client.get()) == Err::E_SUCCESS) {
+            if (client->startRead() == Err::E_SUCCESS) {
                 ++step1;
             }
         }
@@ -210,8 +210,8 @@ TEST(PipeTest, Default)
 
     Loop server;
     auto server_pipe = server.newHandle<PipeServerTest>(server);
-    ASSERT_EQ(uerr::UVPP_SUCCESS, server_pipe->bind(PATH));
-    ASSERT_EQ(uerr::UVPP_SUCCESS, server_pipe->listen());
+    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH));
+    ASSERT_EQ(Err::E_SUCCESS, server_pipe->listen());
 
     std::thread thread1 = std::thread([&](){
         server.run();

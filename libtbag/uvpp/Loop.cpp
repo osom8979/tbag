@@ -67,7 +67,7 @@ BaseLoop::~BaseLoop()
     // EMPTY.
 }
 
-uerr BaseLoop::close()
+Err BaseLoop::close()
 {
     // Releases all internal loop resources.
     //
@@ -78,11 +78,11 @@ uerr BaseLoop::close()
     return getUerr2("BaseLoop::close()", CODE);
 }
 
-uerr BaseLoop::run(RunMode mode)
+Err BaseLoop::run(RunMode mode)
 {
     if (_running.load()) {
         tDLogE("BaseLoop::run() already working");
-        return uerr::UVPP_EALREADY;
+        return Err::E_EALREADY;
     }
 
     uv_run_mode uv_mode = UV_RUN_DEFAULT;
@@ -229,7 +229,7 @@ Loop::Loop()
 
 Loop::~Loop()
 {
-    if (Parent::close() != uerr::UVPP_SUCCESS) {
+    if (Parent::close() != Err::E_SUCCESS) {
         runCloseAllHandles();
 
         if (Parent::isAlive()) {
@@ -237,7 +237,7 @@ Loop::~Loop()
         }
 
         // RE-TRY.
-        if (Parent::close() != uerr::UVPP_SUCCESS) {
+        if (Parent::close() != Err::E_SUCCESS) {
             tDLogE("Loop::~Loop() error.");
         }
     }

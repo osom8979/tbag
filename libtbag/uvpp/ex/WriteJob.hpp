@@ -51,7 +51,7 @@ private:
     AtomicBool _cancel;
     AtomicBool _complete;
 
-    uerr _result;
+    Err _result;
 
 public:
     WriteJob(Stream * stream, WriteRequest * request, WriteBuffer buffer);
@@ -65,7 +65,7 @@ public:
     inline bool isComplete() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_complete.load()))
     { return _complete.load(); }
 
-    inline uerr getWriteResult() const TBAG_NOEXCEPT
+    inline Err getWriteResult() const TBAG_NOEXCEPT
     { return _result; }
 
 public:

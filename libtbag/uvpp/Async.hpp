@@ -71,7 +71,7 @@ public:
      *  Unlike other handle initialization functions, @n
      *  it immediately starts the handle.
      */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
 public:
     /**
@@ -91,7 +91,7 @@ public:
      *   the callback was called, it will be called again.
      *  </pre>
      */
-    uerr send();
+    Err send();
 
 // Event methods.
 public:

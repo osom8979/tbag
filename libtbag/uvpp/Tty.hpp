@@ -65,17 +65,17 @@ public:
 
 public:
     /** Initialize a new TTY stream with the given file descriptor. */
-    uerr init(Loop & loop, ufile fd, bool readable);
-    uerr init(Loop & loop, GeneralFile fd);
+    Err init(Loop & loop, ufile fd, bool readable);
+    Err init(Loop & loop, GeneralFile fd);
 
     /** Set the TTY using the specified terminal mode. */
-    uerr setMode(TtyMode mode);
+    Err setMode(TtyMode mode);
 
     /** To be called when the program exits. Resets TTY settings to default values for the next process to take over. */
-    uerr resetMode();
+    Err resetMode();
 
     /** Gets the current Window size. On success it returns 0. */
-    uerr getWinSize(int * width, int * height);
+    Err getWinSize(int * width, int * height);
 
 public:
     static ufile toFile(GeneralFile fd) TBAG_NOEXCEPT;

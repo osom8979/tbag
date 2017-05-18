@@ -132,10 +132,10 @@ public:
 
 public:
     /** Initializes the process handle and starts the process. */
-    uerr spawn(Loop & loop, Options const & options);
+    Err spawn(Loop & loop, Options const & options);
 
     /** Sends the specified signal to the given process handle. */
-    uerr processKill(int signum);
+    Err processKill(int signum);
 
 public:
     virtual void onExit(int64_t exit_status, int term_signal);
@@ -145,7 +145,7 @@ public:
     static void disableStdioInheritance();
 
     /** Sends the specified signal to the given PID. */
-    static uerr kill(int pid, int signum);
+    static Err kill(int pid, int signum);
 };
 
 } // namespace uvpp

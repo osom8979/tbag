@@ -105,20 +105,20 @@ TEST(AsyncTest, Thread)
         loop->run();
     });
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, async->send());
+    ASSERT_EQ(Err::E_SUCCESS, async->send());
     while (async->async_count.load() == 0) { /* BUSY WAIT. */ }
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     ASSERT_EQ(1, async->async_count);
     ASSERT_EQ(0, async->close_count);
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, async->send());
+    ASSERT_EQ(Err::E_SUCCESS, async->send());
     while (async->async_count.load() == 1) { /* BUSY WAIT. */ }
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     ASSERT_EQ(2, async->async_count);
     ASSERT_EQ(0, async->close_count);
 
     async->close_flag = true;
-    ASSERT_EQ(uerr::UVPP_SUCCESS, async->send());
+    ASSERT_EQ(Err::E_SUCCESS, async->send());
     while (async->close_count.load() == 0) { /* BUSY WAIT. */ }
     ASSERT_EQ(2, async->async_count);
     ASSERT_EQ(1, async->close_count);
@@ -164,7 +164,7 @@ TEST(AsyncTest, newJob)
     ASSERT_TRUE(static_cast<bool>(shared));
     ASSERT_EQ(1, async->size());
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, async->send());
+    ASSERT_EQ(Err::E_SUCCESS, async->send());
     while (shared->async_count.load() == 0) { /* BUSY WAIT. */ }
     ASSERT_EQ(1, shared->async_count);
     ASSERT_EQ(0, async->size());
@@ -176,7 +176,7 @@ TEST(AsyncTest, newJob)
     ASSERT_TRUE(static_cast<bool>(shared));
     ASSERT_EQ(1, async->size());
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, async->send());
+    ASSERT_EQ(Err::E_SUCCESS, async->send());
     while (shared->async_count.load() == 0) { /* BUSY WAIT. */ }
     ASSERT_EQ(1, shared->async_count);
     ASSERT_EQ(0, async->size());

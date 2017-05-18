@@ -8,6 +8,7 @@
 #include <libtbag/lock/UvSemaphore.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/Err.hpp>
 
 #include <cassert>
 #include <exception>
@@ -35,7 +36,7 @@ UvSemaphore::UvSemaphore(unsigned int value) : _handle(new (std::nothrow) uv_sem
 {
     assert(_handle != nullptr);
     int const CODE = ::uv_sem_init(cast_uv_sem(_handle), value);
-    if (uvpp::getUerr2("UvSemaphore::UvSemaphore()", CODE) != uvpp::uerr::UVPP_SUCCESS) {
+    if (getUerr2("UvSemaphore::UvSemaphore()", CODE) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }

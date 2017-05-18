@@ -51,16 +51,16 @@ public:
 
 public:
     /** Initialize the handle. */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
     /** Start the timer. timeout and repeat are in milliseconds. */
-    uerr start(uint64_t timeout, uint64_t repeat = 0);
+    Err start(uint64_t timeout, uint64_t repeat = 0);
 
     /** Stop the timer, the callback will not be called anymore. */
-    uerr stop();
+    Err stop();
 
     /** Stop the timer, and if it is repeating restart it using the repeat value as the timeout. */
-    uerr again();
+    Err again();
 
     /** Set the repeat interval value in milliseconds. */
     void setRepeat(uint64_t repeat);

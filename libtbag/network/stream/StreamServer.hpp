@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -81,19 +82,19 @@ public:
         }
 
     public:
-        virtual void onShutdown(uerr code) override
+        virtual void onShutdown(Err code) override
         {
             assert(_parent != nullptr);
             _parent->onClientShutdown(getWeakClient(), code);
         }
 
-        virtual void onWrite(uerr code) override
+        virtual void onWrite(Err code) override
         {
             assert(_parent != nullptr);
             _parent->onClientWrite(getWeakClient(), code);
         }
 
-        virtual void onRead(uerr code, char const * buffer, Size size) override
+        virtual void onRead(Err code, char const * buffer, Size size) override
         {
             assert(_parent != nullptr);
             _parent->onClientRead(getWeakClient(), code, buffer, size);
@@ -153,7 +154,7 @@ public:
         }
 
     public:
-        virtual void onConnection(uerr code) override
+        virtual void onConnection(Err code) override
         {
             assert(_parent != nullptr);
 
@@ -368,14 +369,14 @@ public:
         Guard guard(_mutex);
         auto client = std::static_pointer_cast<BaseStreamClient, Client>(createClient());
         if (auto shared = client->getClient().lock()) {
-            uerr const CODE = _server->accept(*shared);
-            if (CODE == uerr::UVPP_SUCCESS) {
+            Err const CODE = _server->accept(*shared);
+            if (CODE == Err::E_SUCCESS) {
                 tDLogD("StreamServer::accept() client connect.");
                 bool const INSERT_RESULT = insertClient(client);
                 assert(INSERT_RESULT);
                 return WeakClient(client);
             } else {
-                tDLogE("StreamServer::accept() {} error.", uvpp::getErrorName(CODE));
+                tDLogE("StreamServer::accept() {} error.", getErrorName(CODE));
             }
         } else {
             tDLogE("StreamServer::accept() client is nullptr.");

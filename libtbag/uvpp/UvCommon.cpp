@@ -42,63 +42,6 @@ bool isStream(utype type)
     return (type == utype::TCP || type == utype::PIPE || type == utype::TTY);
 }
 
-// ------------------
-// Debugging methods.
-// ------------------
-
-// @formatter:off
-std::string getUvErrorString(int uv_error_code) { return std::string(::uv_strerror(uv_error_code)); }
-std::string getUvErrorName  (int uv_error_code) { return std::string(::uv_err_name(uv_error_code)); }
-// @formatter:on
-
-uerr getUerr(int uv_error_code)
-{
-    // @formatter:off
-    switch (uv_error_code) {
-    case 0: return uerr::UVPP_SUCCESS;
-#define _TBAG_ERASE_XX(name, msg)
-#define _TBAG_XX(name, msg) case UV##name: return uerr::UVPP##name;
-    TBAG_UV_ERROR_MAP(_TBAG_ERASE_XX, _TBAG_XX)
-#undef _TBAG_ERASE_XX
-#undef _TBAG_XX
-    default: return uerr::UVPP_UNKNOWN;
-    }
-    // @formatter:on
-}
-
-uerr getUerr2(char const * prefix, int uv_error_code)
-{
-    if (uv_error_code != 0) {
-        tDLogE("{} error [{}] {}", prefix, uv_error_code, getUvErrorName(uv_error_code));
-        return getUerr(uv_error_code);
-    }
-    return uerr::UVPP_SUCCESS;
-}
-
-std::string getErrorName(ErrorCode err)
-{
-    // @formatter:off
-    switch (err) {
-#define _TBAG_XX(name, msg) case uerr::UVPP##name: return std::string("UVPP"#name);
-    TBAG_UV_ERROR_MAP(_TBAG_XX, _TBAG_XX)
-#undef _TBAG_XX
-    default: return std::string("UVPP_UNKNOWN");
-    }
-    // @formatter:on
-}
-
-std::string getErrorDetail(ErrorCode err)
-{
-    // @formatter:off
-    switch (err) {
-#define _TBAG_XX(name, msg) case uerr::UVPP##name: return std::string(msg);
-    TBAG_UV_ERROR_MAP(_TBAG_XX, _TBAG_XX)
-#undef _TBAG_XX
-    default: return std::string("Unknown error");
-    }
-    // @formatter:on
-}
-
 // ---------------------
 // Native handle helper.
 // ---------------------
@@ -196,24 +139,24 @@ int getPortNumber(sockaddr const * address)
     }
 }
 
-uerr initAddress(std::string const & ip, int port, sockaddr_in * addr)
+Err initAddress(std::string const & ip, int port, sockaddr_in * addr)
 {
     int const CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
         tDLogE("initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
-        return ::libtbag::uvpp::getUerr(CODE);
+        return getUerr(CODE);
     }
-    return uerr::UVPP_SUCCESS;
+    return Err::E_SUCCESS;
 }
 
-uerr initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
+Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
 {
     int const CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
         tDLogE("initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
-        return ::libtbag::uvpp::getUerr(CODE);
+        return getUerr(CODE);
     }
-    return uerr::UVPP_SUCCESS;
+    return Err::E_SUCCESS;
 }
 
 } // namespace uvpp

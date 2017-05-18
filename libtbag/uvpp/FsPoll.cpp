@@ -58,7 +58,7 @@ static void __global_uv_fs_poll_cb__(uv_fs_poll_t * handle, int status, uv_stat_
 
 FsPoll::FsPoll(Loop & loop) : Handle(uhandle::FS_POLL)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -68,13 +68,13 @@ FsPoll::~FsPoll()
     // EMPTY.
 }
 
-uerr FsPoll::init(Loop & loop)
+Err FsPoll::init(Loop & loop)
 {
     int const CODE = ::uv_fs_poll_init(loop.cast<uv_loop_t>(), Parent::cast<uv_fs_poll_t>());
     return getUerr2("FsPoll::init()", CODE);
 }
 
-uerr FsPoll::start(char const * path, unsigned int interval)
+Err FsPoll::start(char const * path, unsigned int interval)
 {
     // Note:
     // For maximum portability, use multi-second intervals.
@@ -84,7 +84,7 @@ uerr FsPoll::start(char const * path, unsigned int interval)
     return getUerr2("FsPoll::start()", CODE);
 }
 
-uerr FsPoll::stop()
+Err FsPoll::stop()
 {
     int const CODE = ::uv_fs_poll_stop(Parent::cast<uv_fs_poll_t>());
     return getUerr2("FsPoll::stop()", CODE);
@@ -110,7 +110,7 @@ std::string FsPoll::getPath()
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_fs_poll_getpath(Parent::cast<uv_fs_poll_t>(), name, &size);
-    if (getUerr2("FsPoll::getPath()", CODE) != uerr::UVPP_SUCCESS) {
+    if (getUerr2("FsPoll::getPath()", CODE) != Err::E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -120,7 +120,7 @@ std::string FsPoll::getPath()
 // Event methods.
 // --------------
 
-void FsPoll::onFsPoll(uerr status, FileState const & prev, FileState const & curr)
+void FsPoll::onFsPoll(Err status, FileState const & prev, FileState const & curr)
 {
     tDLogD("FsPoll::onFsPoll({}) called.", getErrorName(status));
 }

@@ -34,7 +34,7 @@ UvBarrier::UvBarrier(int count) : COUNT(count), _handle(new (std::nothrow) uv_ba
     assert(_handle != nullptr);
     int error_code = ::uv_barrier_init(cast_uv_barrier(_handle), COUNT);
     if (error_code != 0) {
-        tDLogE("UvBarrier::UvBarrier() error[{}] {}", error_code, uvpp::getUvErrorName(error_code));
+        tDLogE("UvBarrier::UvBarrier() error[{}] {}", error_code, getUvErrorName(error_code));
     }
 }
 

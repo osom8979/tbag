@@ -102,7 +102,7 @@ public:
 
 public:
     /** Initialize the handle. */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
     /**
      * Start the handle with the given callback, which will watch the specified path for changes.
@@ -111,10 +111,10 @@ public:
      * @warning
      *  Currently the only supported flag is UV_FS_EVENT_RECURSIVE and only on OSX and Windows.
      */
-    uerr start(char const * path, EventFlag flags = EVENT_FLAG_DEFAULT);
+    Err start(char const * path, EventFlag flags = EVENT_FLAG_DEFAULT);
 
     /** Stop the handle, the callback will no longer be called. */
-    uerr stop();
+    Err stop();
 
     /** Get the path being monitored by the handle. */
     std::string getPath();
@@ -124,7 +124,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onFsEvent(const char * filename, Event events, uerr status);
+    virtual void onFsEvent(const char * filename, Event events, Err status);
 };
 
 } // namespace uvpp

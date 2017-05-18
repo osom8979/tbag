@@ -67,7 +67,7 @@ public:
      * @param[in] hints
      *      Hint of address information.
      */
-    uerr requestAddrInfo(Loop & loop,
+    Err requestAddrInfo(Loop & loop,
                          std::string const & node,
                          std::string const & service,
                          struct addrinfo const * hints);
@@ -112,7 +112,7 @@ public:
 
 public:
     /** Asynchronous getnameinfo(3). */
-    uerr requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags);
+    Err requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags);
 
 // Event methods.
 public:

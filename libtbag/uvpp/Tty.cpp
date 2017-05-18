@@ -20,7 +20,7 @@ namespace uvpp {
 
 Tty::Tty(Loop & loop, ufile fd, bool readable) : Stream(uhandle::TTY)
 {
-    if (init(loop, fd, readable) != uerr::UVPP_SUCCESS) {
+    if (init(loop, fd, readable) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 
@@ -31,7 +31,7 @@ Tty::Tty(Loop & loop, ufile fd, bool readable) : Stream(uhandle::TTY)
 
 Tty::Tty(Loop & loop, GeneralFile fd) : Stream(uhandle::TTY)
 {
-    if (init(loop, fd) != uerr::UVPP_SUCCESS) {
+    if (init(loop, fd) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 
@@ -45,7 +45,7 @@ Tty::~Tty()
     // EMPTY.
 }
 
-uerr Tty::init(Loop & loop, ufile fd, bool readable)
+Err Tty::init(Loop & loop, ufile fd, bool readable)
 {
     // readable, specifies if you plan on calling uv_read_start() with this stream.
     // stdin is readable, stdout is not.
@@ -71,12 +71,12 @@ uerr Tty::init(Loop & loop, ufile fd, bool readable)
     return getUerr2("Tty::init()", CODE);
 }
 
-uerr Tty::init(Loop & loop, GeneralFile fd)
+Err Tty::init(Loop & loop, GeneralFile fd)
 {
     return init(loop, toFile(fd), fd == GeneralFile::FILE_STDIN);
 }
 
-uerr Tty::setMode(TtyMode mode)
+Err Tty::setMode(TtyMode mode)
 {
     uv_tty_mode_t uv_mode = UV_TTY_MODE_NORMAL;
     // @formatter:off
@@ -95,7 +95,7 @@ uerr Tty::setMode(TtyMode mode)
     return getUerr2("Tty::setMode()", CODE);
 }
 
-uerr Tty::resetMode()
+Err Tty::resetMode()
 {
     // To be called when the program exits.
     // Resets TTY settings to default values for the next process to take over.
@@ -106,7 +106,7 @@ uerr Tty::resetMode()
     return getUerr2("Tty::resetMode()", CODE);
 }
 
-uerr Tty::getWinSize(int * width, int * height)
+Err Tty::getWinSize(int * width, int * height)
 {
     int const CODE = ::uv_tty_get_winsize(Parent::cast<uv_tty_t>(), width, height);
     return getUerr2("Tty::getWinSize()", CODE);

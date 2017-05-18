@@ -52,7 +52,7 @@ static void __global_uv_pipe_connect_cb__(uv_connect_t * request, int status)
 
 Pipe::Pipe(Loop & loop, bool is_ipc) : Stream(uhandle::PIPE)
 {
-    if (init(loop, is_ipc) != uerr::UVPP_SUCCESS) {
+    if (init(loop, is_ipc) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -62,7 +62,7 @@ Pipe::~Pipe()
     // EMPTY.
 }
 
-uerr Pipe::init(Loop & loop, bool is_ipc)
+Err Pipe::init(Loop & loop, bool is_ipc)
 {
     // The ipc argument is a boolean to indicate
     // if this pipe will be used for handle passing between processes.
@@ -71,7 +71,7 @@ uerr Pipe::init(Loop & loop, bool is_ipc)
     return getUerr2("Pipe::init()", CODE);
 }
 
-uerr Pipe::open(ufile file)
+Err Pipe::open(ufile file)
 {
     // Note:
     // The passed file descriptor or HANDLE is not checked for its type,
@@ -81,7 +81,7 @@ uerr Pipe::open(ufile file)
     return getUerr2("Pipe::open()", CODE);
 }
 
-uerr Pipe::bind(char const * name)
+Err Pipe::bind(char const * name)
 {
     // Note:
     // Paths on Unix get truncated to sizeof(sockaddr_un.sun_path) bytes,
@@ -126,7 +126,7 @@ std::string Pipe::getSockName() const
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_pipe_getsockname(Parent::cast<uv_pipe_t>(), name, &size);
-    if (getUerr2("Pipe::getSockName()", CODE) != uerr::UVPP_SUCCESS) {
+    if (getUerr2("Pipe::getSockName()", CODE) != Err::E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -145,7 +145,7 @@ std::string Pipe::getPeerName() const
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_pipe_getpeername(Parent::cast<uv_pipe_t>(), name, &size);
-    if (getUerr2("Pipe::getPeerName()", CODE) != uerr::UVPP_SUCCESS) {
+    if (getUerr2("Pipe::getPeerName()", CODE) != Err::E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -175,7 +175,7 @@ int Pipe::getPendingType()
 // Event methods.
 // --------------
 
-void Pipe::onConnect(ConnectRequest & request, uerr code)
+void Pipe::onConnect(ConnectRequest & request, Err code)
 {
     tDLogD("Pipe::onConnect({}) called.", getErrorName(code));
 }
@@ -186,14 +186,14 @@ void Pipe::onConnect(ConnectRequest & request, uerr code)
 
 bool initPipeServer(Pipe & pipe, std::string const & path)
 {
-    uerr const BIND_CODE = pipe.bind(path.c_str());
-    if (BIND_CODE != uerr::UVPP_SUCCESS) {
+    Err const BIND_CODE = pipe.bind(path.c_str());
+    if (BIND_CODE != Err::E_SUCCESS) {
         tDLogE("initPipeServer() pipe bind {} error.", getErrorName(BIND_CODE));
         return false;
     }
 
-    uerr const LISTEN_CODE = pipe.listen();
-    if (LISTEN_CODE != uerr::UVPP_SUCCESS) {
+    Err const LISTEN_CODE = pipe.listen();
+    if (LISTEN_CODE != Err::E_SUCCESS) {
         tDLogE("initPipeServer() pipe listen {} error.", getErrorName(LISTEN_CODE));
         return false;
     }

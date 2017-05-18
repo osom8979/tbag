@@ -96,9 +96,9 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
     } else if (isDeletedAddress(u)) {
         tDLogE("__global_uv_udp_recv_cb__() handle.data is deleted.");
     } else {
-        uerr code;
+        Err code;
         if (nread >= 0){
-            code = uerr::UVPP_SUCCESS;
+            code = Err::E_SUCCESS;
         } else {
             code = getUerr(static_cast<int>(nread));
         }
@@ -113,7 +113,7 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
 
 Udp::Udp(Loop & loop) : Handle(uhandle::UDP)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -134,14 +134,14 @@ std::size_t Udp::getSendQueueCount() const TBAG_NOEXCEPT
     return Parent::cast<uv_udp_t>()->send_queue_count;
 }
 
-uerr Udp::init(Loop & loop)
+Err Udp::init(Loop & loop)
 {
     // The actual socket is created lazily. Returns 0 on success.
     int const CODE = ::uv_udp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_udp_t>());
     return getUerr2("Udp::init()", CODE);
 }
 
-uerr Udp::open(usock sock)
+Err Udp::open(usock sock)
 {
     // Unix only: The only requirement of the sock argument is that it follows
     // the datagram contract (works in unconnected mode, supports sendmsg()/recvmsg(), etc).
@@ -157,7 +157,7 @@ uerr Udp::open(usock sock)
     return getUerr2("Udp::open()", CODE);
 }
 
-uerr Udp::bind(sockaddr const * addr, unsigned int flags)
+Err Udp::bind(sockaddr const * addr, unsigned int flags)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -172,7 +172,7 @@ uerr Udp::bind(sockaddr const * addr, unsigned int flags)
     return getUerr2("Udp::bind()", CODE);
 }
 
-uerr Udp::getSockName(sockaddr * name, int * namelen)
+Err Udp::getSockName(sockaddr * name, int * namelen)
 {
     // Parameters:
     //  handle  - UDP handle. Should have been initialized with uv_udp_init() and bound.
@@ -187,7 +187,7 @@ uerr Udp::getSockName(sockaddr * name, int * namelen)
     return getUerr2("Udp::getSockName()", CODE);
 }
 
-uerr Udp::setMembership(char const * multicast_addr, char const * interface_addr, Membership membership)
+Err Udp::setMembership(char const * multicast_addr, char const * interface_addr, Membership membership)
 {
     uv_membership native_membership;
     if (membership == Membership::LEAVE_GROUP) {
@@ -209,7 +209,7 @@ uerr Udp::setMembership(char const * multicast_addr, char const * interface_addr
     return getUerr2("Udp::setMembership()", CODE);
 }
 
-uerr Udp::setMulticastLoop(bool on)
+Err Udp::setMulticastLoop(bool on)
 {
     // Makes multicast packets loop back to local sockets.
     //
@@ -223,7 +223,7 @@ uerr Udp::setMulticastLoop(bool on)
     return getUerr2("Udp::setMulticastLoop()", CODE);
 }
 
-uerr Udp::setMulticastTtl(int ttl)
+Err Udp::setMulticastTtl(int ttl)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -235,7 +235,7 @@ uerr Udp::setMulticastTtl(int ttl)
     return getUerr2("Udp::setMulticastTtl()", CODE);
 }
 
-uerr Udp::setMulticastInterface(char const * interface_addr)
+Err Udp::setMulticastInterface(char const * interface_addr)
 {
     // Parameters:
     //  handle         - UDP handle. Should have been initialized with uv_udp_init().
@@ -247,7 +247,7 @@ uerr Udp::setMulticastInterface(char const * interface_addr)
     return getUerr2("Udp::setMulticastInterface()", CODE);
 }
 
-uerr Udp::setBroadcast(bool on)
+Err Udp::setBroadcast(bool on)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -259,7 +259,7 @@ uerr Udp::setBroadcast(bool on)
     return getUerr2("Udp::setBroadcast()", CODE);
 }
 
-uerr Udp::setTtl(int ttl)
+Err Udp::setTtl(int ttl)
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -271,11 +271,11 @@ uerr Udp::setTtl(int ttl)
     return getUerr2("Udp::setTtl()", CODE);
 }
 
-uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
+Err Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Udp::send() buffer info size too large.");
-        return uerr::UVPP_ILLARGS;
+        return Err::E_ILLARGS;
     }
 
     request.setOwner(this); // IMPORTANT!!
@@ -309,7 +309,7 @@ uerr Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, s
     return getUerr2("Udp::send()", CODE);
 }
 
-uerr Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
+Err Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
@@ -317,12 +317,12 @@ uerr Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, 
     return send(request, &info, 1U, addr);
 }
 
-std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, uerr * result)
+std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result)
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Udp::trySend() buffer info size too large.");
         if (result != nullptr) {
-            *result = uerr::UVPP_ILLARGS;
+            *result = Err::E_ILLARGS;
         }
         return 0U;
     }
@@ -343,7 +343,7 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
                                               &uv_infos[0],
                                               static_cast<unsigned int>(uv_infos.size()),
                                               addr);
-    uerr const ERROR_CODE = getUerr2("Udp::trySend()", WRITE_SIZE);
+    Err const ERROR_CODE = getUerr2("Udp::trySend()", WRITE_SIZE);
 
     if (result != nullptr) {
         *result = ERROR_CODE;
@@ -351,7 +351,7 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
     return static_cast<std::size_t>(WRITE_SIZE);
 }
 
-std::size_t Udp::trySend(char const * buffer, std::size_t size, sockaddr const * addr, uerr * result)
+std::size_t Udp::trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
@@ -359,7 +359,7 @@ std::size_t Udp::trySend(char const * buffer, std::size_t size, sockaddr const *
     return trySend(&info, 1U, addr, result);
 }
 
-uerr Udp::startRecv()
+Err Udp::startRecv()
 {
     // If the socket has not previously been bound with uv_udp_bind()
     // it is bound to 0.0.0.0 (the "all interfaces" IPv4 address) and a random port number.
@@ -375,7 +375,7 @@ uerr Udp::startRecv()
     return getUerr2("Udp::startRecv()", CODE);
 }
 
-uerr Udp::stopRecv()
+Err Udp::stopRecv()
 {
     // Parameters:
     //  handle - UDP handle. Should have been initialized with uv_udp_init().
@@ -389,7 +389,7 @@ uerr Udp::stopRecv()
 // Event methods.
 // --------------
 
-void Udp::onSend(UdpSendRequest & request, uerr code)
+void Udp::onSend(UdpSendRequest & request, Err code)
 {
     tDLogD("Udp::onSend({}) called.", getErrorName(code));
 }
@@ -400,7 +400,7 @@ binf Udp::onAlloc(std::size_t suggested_size)
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
-void Udp::onRecv(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
+void Udp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
 {
     tDLogD("Udp::onRecv({}) called (size:{}).", getErrorName(code), size);
 }

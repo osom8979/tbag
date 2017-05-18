@@ -117,8 +117,8 @@ public:
 
 public:
     void clearJob();
-    uerr sendJob(SharedJob job);
-    uerr sendCloseJob();
+    Err sendJob(SharedJob job);
+    Err sendCloseJob();
 
 public:
     virtual void onAsync() override;

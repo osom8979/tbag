@@ -16,7 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/debug/ErrorCode.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/uvpp/Handle.hpp>
 
 // -------------------
@@ -60,27 +60,27 @@ public:
 
 public:
     /** Enable or disable blocking mode for a stream. */
-    uerr setBlocking(bool enable = true);
+    Err setBlocking(bool enable = true);
 
 public:
     /** Shutdown the outgoing (write) side of a duplex stream. */
-    uerr shutdown(ShutdownRequest & request);
+    Err shutdown(ShutdownRequest & request);
 
     /** Start listening for incoming connections. */
-    uerr listen(int backlog = BACKLOG_LIMIT);
+    Err listen(int backlog = BACKLOG_LIMIT);
 
     /** This call is used in conjunction with uv_listen() to accept incoming connections. */
-    uerr accept(Stream & client);
+    Err accept(Stream & client);
 
     /** Read data from an incoming stream. */
-    uerr startRead();
+    Err startRead();
 
     /** Stop reading data from the stream. */
-    uerr stopRead();
+    Err stopRead();
 
     /** Write data to stream. Buffers are written in order. */
-    uerr write(WriteRequest & request, binf * infos, std::size_t infos_size);
-    uerr write(WriteRequest & request, char const * buffer, std::size_t size);
+    Err write(WriteRequest & request, binf * infos, std::size_t infos_size);
+    Err write(WriteRequest & request, char const * buffer, std::size_t size);
 
     /**
      * Same as uv_write(), but won’t queue a write request if it can’t be completed immediately.
@@ -88,15 +88,15 @@ public:
      * @return
      *  Number of bytes written.
      */
-    std::size_t tryWrite(binf * infos, std::size_t infos_size, uerr * result = nullptr);
-    std::size_t tryWrite(char const * buffer, std::size_t size, uerr * result = nullptr);
+    std::size_t tryWrite(binf * infos, std::size_t infos_size, Err * result = nullptr);
+    std::size_t tryWrite(char const * buffer, std::size_t size, Err * result = nullptr);
 
 public:
-    virtual void onShutdown(ShutdownRequest & request, uerr code);
-    virtual void onConnection(uerr code);
+    virtual void onShutdown(ShutdownRequest & request, Err code);
+    virtual void onConnection(Err code);
     virtual binf onAlloc(std::size_t suggested_size);
-    virtual void onRead(uerr code, char const * buffer, std::size_t size);
-    virtual void onWrite(WriteRequest & request, uerr code);
+    virtual void onRead(Err code, char const * buffer, std::size_t size);
+    virtual void onWrite(WriteRequest & request, Err code);
 };
 
 } // namespace uvpp

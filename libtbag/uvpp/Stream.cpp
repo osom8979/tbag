@@ -99,9 +99,9 @@ static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t 
     } else if (isDeletedAddress(s)) {
         tDLogE("__global_uv_read_cb__() stream.data is deleted.");
     } else {
-        uerr code;
+        Err code;
         if (nread >= 0){
-            code = uerr::UVPP_SUCCESS;
+            code = Err::E_SUCCESS;
         } else {
             code = getUerr(static_cast<int>(nread));
         }
@@ -164,7 +164,7 @@ bool Stream::isWritable() const TBAG_NOEXCEPT
     return ::uv_is_writable(Parent::cast<const uv_stream_t>()) == 1;
 }
 
-uerr Stream::setBlocking(bool enable)
+Err Stream::setBlocking(bool enable)
 {
     // When blocking mode is enabled all writes complete synchronously.
     // The interface remains unchanged otherwise,
@@ -186,7 +186,7 @@ uerr Stream::setBlocking(bool enable)
     return getUerr2("Stream::setBlocking()", CODE);
 }
 
-uerr Stream::shutdown(ShutdownRequest & request)
+Err Stream::shutdown(ShutdownRequest & request)
 {
     request.setOwner(this); // IMPORTANT!!
 
@@ -201,7 +201,7 @@ uerr Stream::shutdown(ShutdownRequest & request)
     return getUerr2("Stream::shutdown()", CODE);
 }
 
-uerr Stream::listen(int backlog)
+Err Stream::listen(int backlog)
 {
     // backlog indicates the number of connections the kernel might queue, same as listen(2).
     // When a new incoming connection is received the uv_connection_cb callback is called.
@@ -216,7 +216,7 @@ uerr Stream::listen(int backlog)
     return getUerr2("Stream::listen()", CODE);
 }
 
-uerr Stream::accept(Stream & client)
+Err Stream::accept(Stream & client)
 {
     // This call is used in conjunction with uv_listen() to accept incoming connections.
     // Call this function after receiving a uv_connection_cb to accept the connection.
@@ -231,7 +231,7 @@ uerr Stream::accept(Stream & client)
     return getUerr2("Stream::accept()", CODE);
 }
 
-uerr Stream::startRead()
+Err Stream::startRead()
 {
     // The uv_read_cb callback will be made several times until
     // there is no more data to read or uv_read_stop() is called.
@@ -242,7 +242,7 @@ uerr Stream::startRead()
     return getUerr2("Stream::startRead()", CODE);
 }
 
-uerr Stream::stopRead()
+Err Stream::stopRead()
 {
     // The uv_read_cb callback will no longer be called.
     // This function is idempotent and may be safely called on a stopped stream.
@@ -251,11 +251,11 @@ uerr Stream::stopRead()
     return getUerr2("Stream::stopRead()", CODE);
 }
 
-uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
+Err Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Stream::write() buffer info size too large.");
-        return uerr::UVPP_ILLARGS;
+        return Err::E_ILLARGS;
     }
 
     request.setOwner(this); // IMPORTANT!!
@@ -275,7 +275,7 @@ uerr Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
     return getUerr2("Stream::write()", CODE);
 }
 
-uerr Stream::write(WriteRequest & request, char const * buffer, std::size_t size)
+Err Stream::write(WriteRequest & request, char const * buffer, std::size_t size)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
@@ -283,12 +283,12 @@ uerr Stream::write(WriteRequest & request, char const * buffer, std::size_t size
     return write(request, &info, 1U);
 }
 
-std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, uerr * result)
+std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, Err * result)
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Stream::tryWrite() buffer info size too large.");
         if (result != nullptr) {
-            *result = uerr::UVPP_ILLARGS;
+            *result = Err::E_ILLARGS;
         }
         return 0U;
     }
@@ -307,7 +307,7 @@ std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, uerr * result
     int  const WRITE_SIZE = ::uv_try_write(Parent::cast<uv_stream_t>(),
                                            &uv_infos[0],
                                            static_cast<unsigned int>(uv_infos.size()));
-    uerr const ERROR_CODE = getUerr2("Stream::tryWrite()", WRITE_SIZE);
+    Err const ERROR_CODE = getUerr2("Stream::tryWrite()", WRITE_SIZE);
 
     if (result != nullptr) {
         *result = ERROR_CODE;
@@ -315,7 +315,7 @@ std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, uerr * result
     return static_cast<std::size_t>(WRITE_SIZE);
 }
 
-std::size_t Stream::tryWrite(char const * buffer, std::size_t size, uerr * result)
+std::size_t Stream::tryWrite(char const * buffer, std::size_t size, Err * result)
 {
     binf info;
     info.buffer = const_cast<char*>(buffer);
@@ -327,12 +327,12 @@ std::size_t Stream::tryWrite(char const * buffer, std::size_t size, uerr * resul
 // Event methods.
 // --------------
 
-void Stream::onShutdown(ShutdownRequest & request, uerr code)
+void Stream::onShutdown(ShutdownRequest & request, Err code)
 {
     tDLogD("Stream::onShutdown({}) called.", getErrorName(code));
 }
 
-void Stream::onConnection(uerr code)
+void Stream::onConnection(Err code)
 {
     tDLogD("Stream::onConnection({}) called.", getErrorName(code));
 }
@@ -343,12 +343,12 @@ binf Stream::onAlloc(std::size_t suggested_size)
     return binf((char*)::malloc(suggested_size), suggested_size);
 }
 
-void Stream::onRead(uerr code, char const * buffer, std::size_t size)
+void Stream::onRead(Err code, char const * buffer, std::size_t size)
 {
     tDLogD("Stream::onRead({}) called (size:{}).", getErrorName(code), size);
 }
 
-void Stream::onWrite(WriteRequest & request, uerr code)
+void Stream::onWrite(WriteRequest & request, Err code)
 {
     tDLogD("Stream::onWrite({}) called.", getErrorName(code));
 }

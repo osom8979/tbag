@@ -38,7 +38,7 @@ struct ThreadPool::ThreadPimpl
     {
         int error_code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
         if (error_code != 0) {
-            tDLogE("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, uvpp::getUvErrorName(error_code));
+            tDLogE("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, getUvErrorName(error_code));
             throw std::bad_alloc();
         }
     }

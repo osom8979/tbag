@@ -17,8 +17,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/Err.hpp>
 
-#include <libtbag/debug/ErrorCode.hpp>
 #include <libtbag/container/CircularBuffer.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>

@@ -40,7 +40,7 @@ static void __global_uv_idle_cb__(uv_idle_t * handle)
 
 Idle::Idle(Loop & loop) : Handle(uhandle::IDLE)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -50,19 +50,19 @@ Idle::~Idle()
     // EMPTY.
 }
 
-uerr Idle::init(Loop & loop)
+Err Idle::init(Loop & loop)
 {
     int const CODE = ::uv_idle_init(loop.cast<uv_loop_t>(), Parent::cast<uv_idle_t>());
     return getUerr2("Idle::init()", CODE);
 }
 
-uerr Idle::start()
+Err Idle::start()
 {
     int const CODE = ::uv_idle_start(Parent::cast<uv_idle_t>(), __global_uv_idle_cb__);
     return getUerr2("Idle::start()", CODE);
 }
 
-uerr Idle::stop()
+Err Idle::stop()
 {
     int const CODE = ::uv_idle_stop(Parent::cast<uv_idle_t>());
     return getUerr2("Idle::stop()", CODE);

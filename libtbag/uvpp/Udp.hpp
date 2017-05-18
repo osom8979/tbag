@@ -16,7 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/debug/ErrorCode.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/uvpp/Handle.hpp>
 #include <libtbag/uvpp/Request.hpp>
 
@@ -70,53 +70,53 @@ public:
 
 public:
     // Initialize a new UDP handle. */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
     /** Opens an existing file descriptor or Windows SOCKET as a UDP handle. */
-    uerr open(usock sock);
+    Err open(usock sock);
 
     /** Bind the UDP handle to an IP address and port. */
-    uerr bind(sockaddr const * addr, unsigned int flags);
+    Err bind(sockaddr const * addr, unsigned int flags);
 
     /** Get the local IP and port of the UDP handle. */
-    uerr getSockName(sockaddr * name, int * namelen);
+    Err getSockName(sockaddr * name, int * namelen);
 
     /** Set membership for a multicast address. */
-    uerr setMembership(char const * multicast_addr, char const * interface_addr, Membership membership);
+    Err setMembership(char const * multicast_addr, char const * interface_addr, Membership membership);
 
     /** Set IP multicast loop flag. */
-    uerr setMulticastLoop(bool on);
+    Err setMulticastLoop(bool on);
 
     /** Set the multicast ttl. */
-    uerr setMulticastTtl(int ttl);
+    Err setMulticastTtl(int ttl);
 
     /** Set the multicast interface to send or receive data on. */
-    uerr setMulticastInterface(char const * interface_addr);
+    Err setMulticastInterface(char const * interface_addr);
 
     /** Set broadcast on or off. */
-    uerr setBroadcast(bool on);
+    Err setBroadcast(bool on);
 
     /** Set the time to live. */
-    uerr setTtl(int ttl);
+    Err setTtl(int ttl);
 
     /** Send data over the UDP socket. */
-    uerr send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr);
-    uerr send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
+    Err send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr);
+    Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
     /** Same as send(), but won't queue a send request if it can't be completed immediately. */
-    std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, uerr * result = nullptr);
-    std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, uerr * result = nullptr);
+    std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result = nullptr);
+    std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result = nullptr);
 
     /** Prepare for receiving data. */
-    uerr startRecv();
+    Err startRecv();
 
     /** Stop listening for incoming datagrams. */
-    uerr stopRecv();
+    Err stopRecv();
 
 public:
-    virtual void onSend(UdpSendRequest & request, uerr code);
+    virtual void onSend(UdpSendRequest & request, Err code);
     virtual binf onAlloc(std::size_t suggested_size);
-    virtual void onRecv(uerr code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
+    virtual void onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
 };
 
 } // namespace uvpp

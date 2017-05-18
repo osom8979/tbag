@@ -157,7 +157,7 @@ static bool updateOptions(Process::Options & options,
 
 Process::Process(Loop & loop, Options const & options) : Handle(uhandle::PROCESS)
 {
-    if (spawn(loop, options) != uerr::UVPP_SUCCESS) {
+    if (spawn(loop, options) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -172,7 +172,7 @@ int Process::getPid() const
     return Parent::cast<uv_process_t>()->pid;
 }
 
-uerr Process::spawn(Loop & loop, Options const & options)
+Err Process::spawn(Loop & loop, Options const & options)
 {
     _options = options; // IMPORTANT!!
 
@@ -183,7 +183,7 @@ uerr Process::spawn(Loop & loop, Options const & options)
 
     if (impl::updateOptions(_options, args, envs, stdios, uv_options) == false) {
         tDLogE("Process::spawn() options error.");
-        return uerr::UVPP_ILLARGS;
+        return Err::E_ILLARGS;
     }
 
     // If the process is successfully spawned, this function will return 0.
@@ -197,7 +197,7 @@ uerr Process::spawn(Loop & loop, Options const & options)
     return getUerr2("Process::spawn()", CODE);
 }
 
-uerr Process::processKill(int signum)
+Err Process::processKill(int signum)
 {
     // uv_signal_t - Signal handle for signal support, specially on Windows.
     int const CODE = ::uv_process_kill(Parent::cast<uv_process_t>(), signum);
@@ -231,7 +231,7 @@ void Process::disableStdioInheritance()
     ::uv_disable_stdio_inheritance();
 }
 
-uerr Process::kill(int pid, int signum)
+Err Process::kill(int pid, int signum)
 {
     // uv_signal_t - Signal handle for signal support, specially on Windows.
     int const CODE = ::uv_kill(pid, signum);

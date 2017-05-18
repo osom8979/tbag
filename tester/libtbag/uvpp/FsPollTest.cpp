@@ -27,7 +27,7 @@ struct FsPollTest : public FsPoll
     FsPollTest(Loop & loop) : FsPoll(loop), counter(0)
     { /* EMPTY. */ }
 
-    virtual void onFsPoll(uerr status, FileState const & prev, FileState const & curr) override
+    virtual void onFsPoll(Err status, FileState const & prev, FileState const & curr) override
     {
         ++counter;
         size = static_cast<int>(curr.size - prev.size);
@@ -50,7 +50,7 @@ TEST(FsPollTest, Default)
     ASSERT_TRUE(f.open(path));
     ASSERT_TRUE(f.isOpen());
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, fs->start(path, 10));
+    ASSERT_EQ(Err::E_SUCCESS, fs->start(path, 10));
 
     std::thread thread = std::thread([&loop](){
         loop.run();

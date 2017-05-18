@@ -58,20 +58,20 @@ public:
 
 public:
     /** Initialize the handle. */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
     /** Check the file at path for changes every interval milliseconds. */
-    uerr start(char const * path, unsigned int interval = 1000);
+    Err start(char const * path, unsigned int interval = 1000);
 
     /** Stop the handle, the callback will no longer be called. */
-    uerr stop();
+    Err stop();
 
     /** Get the path being monitored by the handle. */
     std::string getPath();
 
 // Event methods.
 public:
-    virtual void onFsPoll(uerr status, FileState const & prev, FileState const & curr);
+    virtual void onFsPoll(Err status, FileState const & prev, FileState const & curr);
 };
 
 } // namespace uvpp

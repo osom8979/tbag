@@ -45,18 +45,18 @@ TEST(NetworkPipeTest, MultiEcho)
     int server_client_write = 0;
     int server_client_close = 0;
     int server_close        = 0;
-    uerr server_result = uerr::UVPP_UNKNOWN;
+    Err server_result = Err::E_UNKNOWN;
 
-    server.setOnConnection([&](uerr code){
+    server.setOnConnection([&](Err code){
         if (auto shared = server.accept().lock()) {
             if (shared->start()) {
                 server_connection++;
             }
         }
     });
-    server.setOnClientRead([&](FunctionalPipeServer::WeakClient node, uerr code,
+    server.setOnClientRead([&](FunctionalPipeServer::WeakClient node, Err code,
                                char const * buffer, FunctionalPipeServer::Size size){
-        if (code == uerr::UVPP_SUCCESS) {
+        if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
                 if (shared->stop()) {
                     server_client_read++;
@@ -65,8 +65,8 @@ TEST(NetworkPipeTest, MultiEcho)
             }
         }
     });
-    server.setOnClientWrite([&](FunctionalPipeServer::WeakClient node, uerr code){
-        if (code == uerr::UVPP_SUCCESS) {
+    server.setOnClientWrite([&](FunctionalPipeServer::WeakClient node, Err code){
+        if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
                 server_client_write++;
                 shared->close();
@@ -102,11 +102,11 @@ TEST(NetworkPipeTest, MultiEcho)
 
     using ThreadVector = std::vector<std::thread>;
 
-    std::vector<uerr> connect_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
-    std::vector<uerr>   write_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
-    std::vector<uerr>    read_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
-    std::vector<uerr>   close_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
-    std::vector<uerr>    loop_result(CLIENT_SIZE, uerr::UVPP_UNKNOWN);
+    std::vector<Err> connect_result(CLIENT_SIZE, Err::E_UNKNOWN);
+    std::vector<Err>   write_result(CLIENT_SIZE, Err::E_UNKNOWN);
+    std::vector<Err>    read_result(CLIENT_SIZE, Err::E_UNKNOWN);
+    std::vector<Err>   close_result(CLIENT_SIZE, Err::E_UNKNOWN);
+    std::vector<Err>    loop_result(CLIENT_SIZE, Err::E_UNKNOWN);
 
     ThreadVector cthreads(CLIENT_SIZE);
     LoopVector     cloops(CLIENT_SIZE);
@@ -117,24 +117,24 @@ TEST(NetworkPipeTest, MultiEcho)
     for (i = 0; i < CLIENT_SIZE; ++i) {
         cloops.at(i).reset(new Loop());
         clients.at(i).reset(new FunctionalPipeClient(*(cloops.at(i))));
-        clients.at(i)->setOnConnect([&, i](uerr code){
+        clients.at(i)->setOnConnect([&, i](Err code){
             if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size())) {
                 connect_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnWrite([&, i](uerr code){
+        clients.at(i)->setOnWrite([&, i](Err code){
             if (clients.at(i)->start()) {
                 write_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnRead([&, i](uerr code, char const * buffer, PipeClient::Size size){
+        clients.at(i)->setOnRead([&, i](Err code, char const * buffer, PipeClient::Size size){
             if (clients.at(i)->stop()) {
                 read_result.at(i) = code;
                 clients.at(i)->close();
             }
         });
         clients.at(i)->setOnClose([&, i](){
-            close_result.at(i) = uerr::UVPP_SUCCESS;
+            close_result.at(i) = Err::E_SUCCESS;
         });
         clients.at(i)->init(path);
 
@@ -149,14 +149,14 @@ TEST(NetworkPipeTest, MultiEcho)
     thread_server.join();
 
     for (i = 0; i < CLIENT_SIZE; ++i) {
-        ASSERT_EQ(uerr::UVPP_SUCCESS, connect_result.at(i));
-        ASSERT_EQ(uerr::UVPP_SUCCESS,   write_result.at(i));
-        ASSERT_EQ(uerr::UVPP_SUCCESS,    read_result.at(i));
-        ASSERT_EQ(uerr::UVPP_SUCCESS,   close_result.at(i));
-        ASSERT_EQ(uerr::UVPP_SUCCESS,    loop_result.at(i));
+        ASSERT_EQ(Err::E_SUCCESS, connect_result.at(i));
+        ASSERT_EQ(Err::E_SUCCESS,   write_result.at(i));
+        ASSERT_EQ(Err::E_SUCCESS,    read_result.at(i));
+        ASSERT_EQ(Err::E_SUCCESS,   close_result.at(i));
+        ASSERT_EQ(Err::E_SUCCESS,    loop_result.at(i));
     }
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, server_result);
+    ASSERT_EQ(Err::E_SUCCESS, server_result);
     ASSERT_EQ(CLIENT_SIZE, server_connection  );
     ASSERT_EQ(CLIENT_SIZE, server_client_read );
     ASSERT_EQ(CLIENT_SIZE, server_client_write);

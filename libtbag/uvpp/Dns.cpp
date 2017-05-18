@@ -102,7 +102,7 @@ addrinfo const * DnsAddrInfo::getAddrInfo() const
     return native->addrinfo;
 }
 
-uerr DnsAddrInfo::requestAddrInfo(Loop & loop,
+Err DnsAddrInfo::requestAddrInfo(Loop & loop,
                                 std::string const & node,
                                 std::string const & service,
                                 struct addrinfo const * hints)
@@ -196,7 +196,7 @@ std::string DnsNameInfo::getService() const
     return std::string(native->service);
 }
 
-uerr DnsNameInfo::requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags)
+Err DnsNameInfo::requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags)
 {
     // Returns 0 on success or an error code < 0 on failure.
     // If successful, the callback will get called sometime in the future with the lookup result.

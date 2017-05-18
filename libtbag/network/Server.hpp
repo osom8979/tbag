@@ -15,9 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
+
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/Client.hpp>
-#include <libtbag/Type.hpp>
 
 #include <functional>
 #include <memory>
@@ -59,10 +61,10 @@ struct Server : public details::NetCommon
     // ---------------
 
     // @formatter:off
-    virtual void onConnection    (uerr code)       { /* EMPTY. */ }
-    virtual void onClientShutdown(WeakClient node, uerr code) { /* EMPTY. */ }
-    virtual void onClientWrite   (WeakClient node, uerr code) { /* EMPTY. */ }
-    virtual void onClientRead    (WeakClient node, uerr code, char const * buffer, Size size) { /* EMPTY. */ }
+    virtual void onConnection    (Err code)       { /* EMPTY. */ }
+    virtual void onClientShutdown(WeakClient node, Err code) { /* EMPTY. */ }
+    virtual void onClientWrite   (WeakClient node, Err code) { /* EMPTY. */ }
+    virtual void onClientRead    (WeakClient node, Err code, char const * buffer, Size size) { /* EMPTY. */ }
     virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
     virtual void onServerClose   ()                { /* EMPTY. */ }
 
@@ -88,14 +90,13 @@ struct FunctionalServer : public BaseType
     STATIC_ASSERT_CHECK_IS_BASE_OF(Server, Parent);
 
     using Loop = uvpp::Loop;
-    using uerr = details::NetCommon::uerr;
     using Size = details::NetCommon::Size;
     using WeakClient = Server::WeakClient;
 
-    using OnConnection     = std::function<void(uerr)>;
-    using OnClientShutdown = std::function<void(WeakClient, uerr)>;
-    using OnClientWrite    = std::function<void(WeakClient, uerr)>;
-    using OnClientRead     = std::function<void(WeakClient, uerr, char const *, Size)>;
+    using OnConnection     = std::function<void(Err)>;
+    using OnClientShutdown = std::function<void(WeakClient, Err)>;
+    using OnClientWrite    = std::function<void(WeakClient, Err)>;
+    using OnClientRead     = std::function<void(WeakClient, Err, char const *, Size)>;
     using OnClientClose    = std::function<void(WeakClient)>;
     using OnServerClose    = std::function<void(void)>;
 
@@ -133,13 +134,13 @@ struct FunctionalServer : public BaseType
     inline void setOnClientUserDataAlloc  (OnClientUserDataAlloc   const & cb) { client_userdata_alloc_cb   = cb; }
     inline void setOnClientUserDataDealloc(OnClientUserDataDealloc const & cb) { client_userdata_dealloc_cb = cb; }
 
-    virtual void onConnection(uerr code) override
+    virtual void onConnection(Err code) override
     { if (connection_cb) { connection_cb(code); } }
-    virtual void onClientShutdown(WeakClient node, uerr code) override
+    virtual void onClientShutdown(WeakClient node, Err code) override
     { if (client_shutdown_cb) { client_shutdown_cb(node, code); } }
-    virtual void onClientWrite(WeakClient node, uerr code) override
+    virtual void onClientWrite(WeakClient node, Err code) override
     { if (client_write_cb) { client_write_cb(node, code); } }
-    virtual void onClientRead(WeakClient node, uerr code, char const * buffer, Size size) override
+    virtual void onClientRead(WeakClient node, Err code, char const * buffer, Size size) override
     { if (client_read_cb) { client_read_cb(node, code, buffer, size); } }
     virtual void onClientClose(WeakClient node) override
     { if (client_close_cb) { client_close_cb(node); } }

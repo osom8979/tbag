@@ -24,7 +24,7 @@ namespace ex   {
 SafetyWriteAsync::WriterInterface::WriterInterface() : id(id::generator::genTimeId())
 {
     state.store(WriteState::READY);
-    result.store(uerr::UVPP_UNKNOWN);
+    result.store(Err::E_UNKNOWN);
 }
 
 SafetyWriteAsync::WriterInterface::~WriterInterface()
@@ -171,7 +171,7 @@ SafetyWriteAsync::SharedWriter SafetyWriteAsync::createWrite(
 
 bool SafetyWriteAsync::asyncWrite(SharedWriter writer)
 {
-    return sendJob(writer) == uerr::UVPP_SUCCESS;
+    return sendJob(writer) == Err::E_SUCCESS;
 }
 
 } // namespace ex

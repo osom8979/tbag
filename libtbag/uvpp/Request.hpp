@@ -58,7 +58,7 @@ public:
      * @remarks
      *  Fails if the request is executing or has finished executing.
      */
-    uerr cancel();
+    Err cancel();
 
     /** Returns the size of the given request type. */
     std::size_t getNativeSize() const TBAG_NOEXCEPT;

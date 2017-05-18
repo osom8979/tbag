@@ -60,7 +60,7 @@ void SafetyAsync::MistakeInspector::onIdle()
                     _async._inspector->stop();
                 }
             } else {
-                if (_async.send() != uerr::UVPP_SUCCESS) {
+                if (_async.send() != Err::E_SUCCESS) {
                     tDLogE("SafetyAsync::MistakeInspector::onIdle() send error.");
                 }
             }
@@ -94,7 +94,7 @@ void SafetyAsync::clearJob()
     _jobs.clear();
 }
 
-uerr SafetyAsync::sendJob(SharedJob job)
+Err SafetyAsync::sendJob(SharedJob job)
 {
     _jobs.safeRun([&](JobQueue::Queue & queue){
         queue.push(job);
@@ -106,7 +106,7 @@ uerr SafetyAsync::sendJob(SharedJob job)
     return send();
 }
 
-uerr SafetyAsync::sendCloseJob()
+Err SafetyAsync::sendCloseJob()
 {
     return sendJob(SharedJob(new (std::nothrow) __impl::CloseJob));
 }

@@ -15,8 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/network/details/NetCommon.hpp>
 
 #include <functional>
 #include <memory>
@@ -60,10 +62,10 @@ struct Client : public details::NetCommon
     // ---------------
 
     // @formatter:off
-    virtual void onConnect (uerr code) { /* EMPTY. */ }
-    virtual void onShutdown(uerr code) { /* EMPTY. */ }
-    virtual void onWrite   (uerr code) { /* EMPTY. */ }
-    virtual void onRead    (uerr code, char const * buffer, Size size) { /* EMPTY. */ }
+    virtual void onConnect (Err code) { /* EMPTY. */ }
+    virtual void onShutdown(Err code) { /* EMPTY. */ }
+    virtual void onWrite   (Err code) { /* EMPTY. */ }
+    virtual void onRead    (Err code, char const * buffer, Size size) { /* EMPTY. */ }
     virtual void onClose   ()          { /* EMPTY. */ }
 
     virtual void * onUserDataAlloc() { return nullptr; }
@@ -86,13 +88,12 @@ struct FunctionalClient : public BaseType
     STATIC_ASSERT_CHECK_IS_BASE_OF(Client, Parent);
 
     using Loop = uvpp::Loop;
-    using uerr = details::NetCommon::uerr;
     using Size = details::NetCommon::Size;
 
-    using OnConnect  = std::function<void(uerr)>;
-    using OnShutdown = std::function<void(uerr)>;
-    using OnWrite    = std::function<void(uerr)>;
-    using OnRead     = std::function<void(uerr, char const *, Size)>;
+    using OnConnect  = std::function<void(Err)>;
+    using OnShutdown = std::function<void(Err)>;
+    using OnWrite    = std::function<void(Err)>;
+    using OnRead     = std::function<void(Err, char const *, Size)>;
     using OnClose    = std::function<void(void)>;
 
     using OnUserDataAlloc   = std::function<void*(void)>;
@@ -121,13 +122,13 @@ struct FunctionalClient : public BaseType
     inline void setOnUserDataAlloc  (OnUserDataAlloc   const & cb) { userdata_alloc_cb   = cb; }
     inline void setOnUserDataDealloc(OnUserDataDealloc const & cb) { userdata_dealloc_cb = cb; }
 
-    virtual void onConnect(uerr code) override
+    virtual void onConnect(Err code) override
     { if (connect_cb) { connect_cb(code); } }
-    virtual void onShutdown(uerr code) override
+    virtual void onShutdown(Err code) override
     { if (shutdown_cb) { shutdown_cb(code); } }
-    virtual void onWrite(uerr code) override
+    virtual void onWrite(Err code) override
     { if (write_cb) { write_cb(code); } }
-    virtual void onRead(uerr code, char const * buffer, Size size) override
+    virtual void onRead(Err code, char const * buffer, Size size) override
     { if (read_cb) { read_cb(code, buffer, size); } }
     virtual void onClose() override
     { if (close_cb) { close_cb(); } }

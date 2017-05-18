@@ -54,7 +54,7 @@ public:
 
 public:
     /** Initialize a pipe handle. */
-    uerr init(Loop & loop, bool is_ipc = false);
+    Err init(Loop & loop, bool is_ipc = false);
 
     /**
      * Open an existing file descriptor or HANDLE as a pipe.
@@ -62,10 +62,10 @@ public:
      * @warning
      *  Changed in version 1.2.1: the file descriptor is set to non-blocking mode.
      */
-    uerr open(ufile file);
+    Err open(ufile file);
 
     /** Bind the pipe to a file path (Unix) or a name (Windows). */
-    uerr bind(char const * name);
+    Err bind(char const * name);
 
     /** Connect to the Unix domain socket or the named pipe. */
     void connect(ConnectRequest & request, char const * name);
@@ -92,7 +92,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onConnect(ConnectRequest & request, uerr code);
+    virtual void onConnect(ConnectRequest & request, Err code);
 };
 
 // ----------------

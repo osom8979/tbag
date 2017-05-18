@@ -40,7 +40,7 @@ static void __global_uv_async_cb__(uv_async_t * handle)
 
 BaseAsync::BaseAsync(Loop & loop) : Handle(uhandle::ASYNC)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -50,13 +50,13 @@ BaseAsync::~BaseAsync()
     // EMPTY.
 }
 
-uerr BaseAsync::init(Loop & loop)
+Err BaseAsync::init(Loop & loop)
 {
     int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
     return getUerr2("BaseAsync::init()", CODE);
 }
 
-uerr BaseAsync::send()
+Err BaseAsync::send()
 {
     int const CODE = ::uv_async_send(Parent::cast<uv_async_t>());
     return getUerr2("BaseAsync::send()", CODE);

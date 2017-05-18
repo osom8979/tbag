@@ -57,25 +57,25 @@ public:
 
 public:
     /** Initialize the handle. No socket is created as of yet. */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
     /** Enable TCP_NODELAY, which disables Nagle's algorithm. */
-    uerr setNodelay(bool enable = true);
+    Err setNodelay(bool enable = true);
 
     /** Enable/Disable TCP keep-alive. */
-    uerr keepAlive(bool enable, unsigned int delay);
+    Err keepAlive(bool enable, unsigned int delay);
 
     /** Enable/Disable simultaneous asynchronous accept requests. */
-    uerr acceptsSimultaneous(int enable = true);
+    Err acceptsSimultaneous(int enable = true);
 
     /** Bind the handle to an address and port. */
-    uerr bind(sockaddr const * address, unsigned int flags = 0);
+    Err bind(sockaddr const * address, unsigned int flags = 0);
 
     /** Get the current address to which the handle is bound. */
-    uerr getSockName(struct sockaddr * name, int * namelen);
+    Err getSockName(struct sockaddr * name, int * namelen);
 
     /** Get the address of the peer connected to the handle. */
-    uerr getPeerName(struct sockaddr * name, int * namelen);
+    Err getPeerName(struct sockaddr * name, int * namelen);
 
     std::string getSockIp();
     std::string getPeerIp();
@@ -84,11 +84,11 @@ public:
     int getPeerPort();
 
     /** Establish an IPv4 or IPv6 TCP connection. */
-    uerr connect(ConnectRequest & request, sockaddr const * address);
+    Err connect(ConnectRequest & request, sockaddr const * address);
 
 // Event methods.
 public:
-    virtual void onConnect(ConnectRequest & request, uerr code);
+    virtual void onConnect(ConnectRequest & request, Err code);
 };
 
 // ----------------

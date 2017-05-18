@@ -35,7 +35,7 @@ UvCondition::UvCondition() : _handle(new (std::nothrow) uv_cond_t)
     assert(_handle != nullptr);
     int error_code = ::uv_cond_init(cast_uv_cond(_handle));
     if (error_code != 0) {
-        tDLogE("UvCondition::UvCondition() error[{}] {}", error_code, uvpp::getUvErrorName(error_code));
+        tDLogE("UvCondition::UvCondition() error[{}] {}", error_code, getUvErrorName(error_code));
     }
 }
 

@@ -25,12 +25,12 @@ struct FsEventTest : public FsEvent
 
     str   last_filename;
     Event last_events;
-    uerr  last_status;
+    Err  last_status;
 
     FsEventTest(Loop & loop) : FsEvent(loop), counter(0)
     { /* EMPTY. */ }
 
-    virtual void onFsEvent(const char * filename, Event events, uerr status) override
+    virtual void onFsEvent(const char * filename, Event events, Err status) override
     {
         ++counter;
         last_filename = filename;
@@ -55,7 +55,7 @@ TEST(FsEventTest, Default)
     ASSERT_TRUE(f.open(path));
     ASSERT_TRUE(f.isOpen());
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, fs->start(path));
+    ASSERT_EQ(Err::E_SUCCESS, fs->start(path));
 
     std::thread thread = std::thread([&loop](){
         loop.run();
@@ -68,6 +68,6 @@ TEST(FsEventTest, Default)
     ASSERT_EQ(1, fs->counter);
     ASSERT_STREQ(TEST_FILENAME, fs->last_filename.c_str());
     ASSERT_LT(0, fs->last_events);
-    ASSERT_EQ(uerr::UVPP_SUCCESS, fs->last_status);
+    ASSERT_EQ(Err::E_SUCCESS, fs->last_status);
 }
 

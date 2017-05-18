@@ -39,7 +39,7 @@ static void __global_uv_prepare_cb__(uv_prepare_t * handle)
 
 Prepare::Prepare(Loop & loop) : Handle(uhandle::PREPARE)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -49,19 +49,19 @@ Prepare::~Prepare()
     // EMPTY.
 }
 
-uerr Prepare::init(Loop & loop)
+Err Prepare::init(Loop & loop)
 {
     int const CODE = ::uv_prepare_init(loop.cast<uv_loop_t>(), Parent::cast<uv_prepare_t>());
     return getUerr2("Prepare::init()", CODE);
 }
 
-uerr Prepare::start()
+Err Prepare::start()
 {
     int const CODE = ::uv_prepare_start(Parent::cast<uv_prepare_t>(), __global_uv_prepare_cb__);
     return getUerr2("Prepare::start()", CODE);
 }
 
-uerr Prepare::stop()
+Err Prepare::stop()
 {
     int const CODE = ::uv_prepare_stop(Parent::cast<uv_prepare_t>());
     return getUerr2("Prepare::stop()", CODE);

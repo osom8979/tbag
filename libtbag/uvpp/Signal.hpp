@@ -80,16 +80,16 @@ public:
 
 public:
     /** Initialize the handle. */
-    uerr init(Loop & loop);
+    Err init(Loop & loop);
 
     /** Start the handle with the given callback, watching for the given signal. */
-    uerr start(int signum);
+    Err start(int signum);
 
     /** Same functionality as uv_signal_start() but the signal handler is reset the moment the signal is received. */
-    uerr startOneshot(int signum);
+    Err startOneshot(int signum);
 
     /** Stop the handle, the callback will no longer be called. */
-    uerr stop();
+    Err stop();
 
 // Event methods.
 public:

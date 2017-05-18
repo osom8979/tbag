@@ -72,7 +72,7 @@ public:
 
 public:
     /** Start the timer. timeout and repeat are in milliseconds. */
-    uerr start(uint64_t timeout);
+    Err start(uint64_t timeout);
 
 public:
     virtual void onTimer() override;

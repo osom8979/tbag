@@ -43,7 +43,7 @@ static void __global_uv_fs_event_cb__(uv_fs_event_t * handle, const char * filen
 
 FsEvent::FsEvent(Loop & loop) : Handle(uhandle::FS_EVENT)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -53,19 +53,19 @@ FsEvent::~FsEvent()
     // EMPTY.
 }
 
-uerr FsEvent::init(Loop & loop)
+Err FsEvent::init(Loop & loop)
 {
     int const CODE = ::uv_fs_event_init(loop.cast<uv_loop_t>(), Parent::cast<uv_fs_event_t>());
     return getUerr2("FsEvent::init()", CODE);
 }
 
-uerr FsEvent::start(char const * path, EventFlag flags)
+Err FsEvent::start(char const * path, EventFlag flags)
 {
     int const CODE = ::uv_fs_event_start(Parent::cast<uv_fs_event_t>(), __global_uv_fs_event_cb__, path, static_cast<unsigned int>(flags));
     return getUerr2("FsEvent::start()", CODE);
 }
 
-uerr FsEvent::stop()
+Err FsEvent::stop()
 {
     int const CODE = ::uv_fs_event_stop(Parent::cast<uv_fs_event_t>());
     return getUerr2("FsEvent::stop()", CODE);
@@ -89,7 +89,7 @@ std::string FsEvent::getPath()
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_fs_event_getpath(Parent::cast<uv_fs_event_t>(), name, &size);
-    if (getUerr2("FsEvent::getPath()", CODE) != uerr::UVPP_SUCCESS) {
+    if (getUerr2("FsEvent::getPath()", CODE) != Err::E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -104,7 +104,7 @@ FsEvent::Event FsEvent::getEvent(int native_events) TBAG_NOEXCEPT
 // Event methods.
 // --------------
 
-void FsEvent::onFsEvent(const char * filename, Event events, uerr status)
+void FsEvent::onFsEvent(const char * filename, Event events, Err status)
 {
     tDLogD("FsEvent::onFsEvent({}, {}, {}) called.",
                  filename, static_cast<int>(events), getErrorName(status));

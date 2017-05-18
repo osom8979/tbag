@@ -39,7 +39,7 @@ static void __global_uv_signal_cb__(uv_signal_t * handle, int signum)
 
 Signal::Signal(Loop & loop) : Handle(uhandle::SIGNAL)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -54,28 +54,28 @@ int Signal::getSignalNumber() const TBAG_NOEXCEPT
     return Parent::cast<uv_signal_t>()->signum;
 }
 
-uerr Signal::init(Loop & loop)
+Err Signal::init(Loop & loop)
 {
     int const CODE = ::uv_signal_init(loop.cast<uv_loop_t>(), Parent::cast<uv_signal_t>());
     return getUerr2("Signal::init()", CODE);
 }
 
-uerr Signal::start(int signum)
+Err Signal::start(int signum)
 {
     int const CODE = ::uv_signal_start(Parent::cast<uv_signal_t>(), __global_uv_signal_cb__, signum);
     return getUerr2("Signal::start()", CODE);
 }
 
-uerr Signal::startOneshot(int signum)
+Err Signal::startOneshot(int signum)
 {
     // New in version 1.12.0.
     //int const CODE = ::uv_signal_start_oneshot(Parent::cast<uv_signal_t>(), __global_uv_signal_cb__, signum);
     //return getUerr2("Signal::startOneshot()", CODE);
 
-    return uerr::UVPP_ENOSYS;
+    return Err::E_ENOSYS;
 }
 
-uerr Signal::stop()
+Err Signal::stop()
 {
     int const CODE = ::uv_signal_stop(Parent::cast<uv_signal_t>());
     return getUerr2("Signal::stop()", CODE);

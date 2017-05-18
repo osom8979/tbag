@@ -27,7 +27,7 @@ struct PollTest : public Poll
     PollTest(Loop & loop, int fd) : Poll(loop, init_fd(fd)), counter(0)
     { /* EMPTY. */ }
 
-    virtual void onPoll(uerr status, EventType events) override
+    virtual void onPoll(Err status, EventType events) override
     {
         ++counter;
         stop();
@@ -51,7 +51,7 @@ TEST(PollTest, Default)
     Loop loop;
     auto fs = loop.newHandle<PollTest>(loop, static_cast<int>(f.getFd()));
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, fs->start());
+    ASSERT_EQ(Err::E_SUCCESS, fs->start());
 
     std::thread thread = std::thread([&loop](){
         loop.run();

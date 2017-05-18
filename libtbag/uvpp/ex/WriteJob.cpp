@@ -20,7 +20,7 @@ WriteJob::WriteJob(Stream * stream, WriteRequest * request, WriteBuffer buffer)
 {
     _cancel.store(false);
     _complete.store(false);
-    _result = uerr::UVPP_UNKNOWN;
+    _result = Err::E_UNKNOWN;
 }
 
 WriteJob::~WriteJob()

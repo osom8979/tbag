@@ -25,9 +25,9 @@ TEST(DnsTest, DnsAddrInfo)
     hints.ai_family   = AF_INET;     // AF_INET/AF_INET6/AF_UNSPEC
     hints.ai_socktype = SOCK_STREAM; // SOCK_STREAM/SOCK_DGRAM/SOCK_RAW
     hints.ai_flags    = AI_PASSIVE;  // Fill in my IP for me.
-    ASSERT_EQ(uerr::UVPP_SUCCESS, addr.requestAddrInfo(loop, "localhost", "", &hints));
+    ASSERT_EQ(Err::E_SUCCESS, addr.requestAddrInfo(loop, "localhost", "", &hints));
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, loop.run());
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_NE(nullptr, addr.getAddrInfo());
 
     for (struct addrinfo * info = addr.getAddrInfo()->ai_next; info != nullptr; info = info->ai_next) {
@@ -40,10 +40,10 @@ TEST(DnsTest, DnsNameInfo)
     Loop loop;
     DnsNameInfo name;
     struct sockaddr_in addr = {0,};
-    ASSERT_EQ(uerr::UVPP_SUCCESS, initAddress("127.0.0.1", 0, &addr));
-    ASSERT_EQ(uerr::UVPP_SUCCESS, name.requestNameInfo(loop, (sockaddr*)&addr, 0));
+    ASSERT_EQ(Err::E_SUCCESS, initAddress("127.0.0.1", 0, &addr));
+    ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfo(loop, (sockaddr*)&addr, 0));
 
-    ASSERT_EQ(uerr::UVPP_SUCCESS, loop.run());
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_FALSE(name.getHost().empty()); // localhost/HostName/ETC ...
     std::cout << "Host name: " << name.getHost() << std::endl;
 }

@@ -30,7 +30,7 @@ Request::~Request()
     // EMPTY.
 }
 
-uerr Request::cancel()
+Err Request::cancel()
 {
     // Returns 0 on success, or an error code < 0 on failure.
     //

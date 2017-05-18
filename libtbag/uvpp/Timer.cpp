@@ -40,7 +40,7 @@ static void __global_uv_timer_cb__(uv_timer_t * handle)
 
 Timer::Timer(Loop & loop) : Handle(uhandle::TIMER)
 {
-    if (init(loop) != uerr::UVPP_SUCCESS) {
+    if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -50,13 +50,13 @@ Timer::~Timer()
     // EMPTY.
 }
 
-uerr Timer::init(Loop & loop)
+Err Timer::init(Loop & loop)
 {
     int const CODE = ::uv_timer_init(loop.cast<uv_loop_t>(), Parent::cast<uv_timer_t>());
     return getUerr2("Timer::init()", CODE);
 }
 
-uerr Timer::start(uint64_t timeout, uint64_t repeat)
+Err Timer::start(uint64_t timeout, uint64_t repeat)
 {
     // If timeout is zero, the callback fires on the next event loop iteration.
     // If repeat is non-zero, the callback fires first after timeout milliseconds
@@ -70,13 +70,13 @@ uerr Timer::start(uint64_t timeout, uint64_t repeat)
     return getUerr2("Timer::start()", CODE);
 }
 
-uerr Timer::stop()
+Err Timer::stop()
 {
     int const CODE = ::uv_timer_stop(Parent::cast<uv_timer_t>());
     return getUerr2("Timer::stop()", CODE);
 }
 
-uerr Timer::again()
+Err Timer::again()
 {
     // If the timer has never been started before it returns UV_EINVAL.
     int const CODE = ::uv_timer_again(Parent::cast<uv_timer_t>());
