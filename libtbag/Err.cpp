@@ -14,24 +14,27 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-// @formatter:off
-std::string getUvErrorString(int uv_error_code) { return std::string(::uv_strerror(uv_error_code)); }
-std::string getUvErrorName  (int uv_error_code) { return std::string(::uv_err_name(uv_error_code)); }
-// @formatter:on
-
-char const * getErrorMessage(Err code) TBAG_NOEXCEPT
+char const * getErrName(Err code) TBAG_NOEXCEPT
 {
     switch (code) {
-#define _TBAG_XX(name, message) case Err::E##name: return message;
-#define _TBAG_UV_XX(name, message)
+#define _TBAG_XX(name, message) case Err::E##name: return "E"#name;
     TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
-#undef _TBAG_UV_XX
 #undef _TBAG_XX
-    default: return "Unknown error code.";
+    default: return "E_UNKNOWN";
     }
 }
 
-Err getUerr(int uv_error_code)
+char const * getErrDetail(Err code) TBAG_NOEXCEPT
+{
+    switch (code) {
+#define _TBAG_XX(name, message) case Err::E##name: return message;
+    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
+#undef _TBAG_XX
+    default: return "Unknown error.";
+    }
+}
+
+Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (uv_error_code) {
@@ -46,37 +49,27 @@ Err getUerr(int uv_error_code)
     // @formatter:on
 }
 
-Err getUerr2(char const * prefix, int uv_error_code)
+Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_code)
 {
     if (uv_error_code != 0) {
         tDLogE("{} error [{}] {}", prefix, uv_error_code, getUvErrorName(uv_error_code));
-        return getUerr(uv_error_code);
+        return convertUvErrorToErr(uv_error_code);
     }
     return Err::E_SUCCESS;
 }
 
-std::string getErrorName(Err err)
+// ----------------
+// libuv debugging.
+// ----------------
+
+char const * getUvErrorDetail(int uv_error_code)
 {
-    // @formatter:off
-    switch (err) {
-#define _TBAG_XX(name, msg) case Err::E##name: return std::string("E"#name);
-    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
-#undef _TBAG_XX
-    default: return std::string("E_UNKNOWN");
-    }
-    // @formatter:on
+    return ::uv_strerror(uv_error_code);
 }
 
-std::string getErrorDetail(Err err)
+char const * getUvErrorName(int uv_error_code)
 {
-    // @formatter:off
-    switch (err) {
-#define _TBAG_XX(name, msg) case Err::E##name: return std::string(msg);
-    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
-#undef _TBAG_XX
-    default: return std::string("Unknown error");
-    }
-    // @formatter:on
+    return ::uv_err_name(uv_error_code);
 }
 
 // --------------------

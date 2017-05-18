@@ -53,19 +53,19 @@ Idle::~Idle()
 Err Idle::init(Loop & loop)
 {
     int const CODE = ::uv_idle_init(loop.cast<uv_loop_t>(), Parent::cast<uv_idle_t>());
-    return getUerr2("Idle::init()", CODE);
+    return convertUvErrorToErrWithLogging("Idle::init()", CODE);
 }
 
 Err Idle::start()
 {
     int const CODE = ::uv_idle_start(Parent::cast<uv_idle_t>(), __global_uv_idle_cb__);
-    return getUerr2("Idle::start()", CODE);
+    return convertUvErrorToErrWithLogging("Idle::start()", CODE);
 }
 
 Err Idle::stop()
 {
     int const CODE = ::uv_idle_stop(Parent::cast<uv_idle_t>());
-    return getUerr2("Idle::stop()", CODE);
+    return convertUvErrorToErrWithLogging("Idle::stop()", CODE);
 }
 
 // --------------

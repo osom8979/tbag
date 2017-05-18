@@ -39,7 +39,7 @@ static void __global_uv_shutdown_cb__(uv_shutdown_t * request, int status)
         } else if (isDeletedAddress(s)) {
             tDLogE("__global_uv_shutdown_cb__() request.data.owner is deleted.");
         } else {
-            s->onShutdown(*req, getUerr(status));
+            s->onShutdown(*req, convertUvErrorToErr(status));
         }
     }
 }
@@ -56,7 +56,7 @@ static void __global_uv_connection_cb__(uv_stream_t * server, int status)
     } else if (isDeletedAddress(s)) {
         tDLogE("__global_uv_connection_cb__() server.data is deleted.");
     } else {
-        s->onConnection(getUerr(status));
+        s->onConnection(convertUvErrorToErr(status));
     }
 }
 
@@ -103,7 +103,7 @@ static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t 
         if (nread >= 0){
             code = Err::E_SUCCESS;
         } else {
-            code = getUerr(static_cast<int>(nread));
+            code = convertUvErrorToErr(static_cast<int>(nread));
         }
 
         s->onRead(code, buf->base, static_cast<std::size_t>(nread));
@@ -127,7 +127,7 @@ static void __global_uv_write_cb__(uv_write_t * request, int status)
         } else if (isDeletedAddress(s)) {
             tDLogE("__global_uv_write_cb__() request.data.owner is deleted.");
         } else {
-            s->onWrite(*req, getUerr(status));
+            s->onWrite(*req, convertUvErrorToErr(status));
         }
     }
 }
@@ -183,7 +183,7 @@ Err Stream::setBlocking(bool enable)
     // after opening or creating the stream.
 
     int const CODE = ::uv_stream_set_blocking(Parent::cast<uv_stream_t>(), enable ? 1 : 0);
-    return getUerr2("Stream::setBlocking()", CODE);
+    return convertUvErrorToErrWithLogging("Stream::setBlocking()", CODE);
 }
 
 Err Stream::shutdown(ShutdownRequest & request)
@@ -198,7 +198,7 @@ Err Stream::shutdown(ShutdownRequest & request)
     int const CODE = ::uv_shutdown(request.cast<uv_shutdown_t>(),
                                    Parent::cast<uv_stream_t>(),
                                    __global_uv_shutdown_cb__);
-    return getUerr2("Stream::shutdown()", CODE);
+    return convertUvErrorToErrWithLogging("Stream::shutdown()", CODE);
 }
 
 Err Stream::listen(int backlog)
@@ -213,7 +213,7 @@ Err Stream::listen(int backlog)
     //  - ENOTSOCK: It is not a socket.
 
     int const CODE = ::uv_listen(Parent::cast<uv_stream_t>(), backlog, __global_uv_connection_cb__);
-    return getUerr2("Stream::listen()", CODE);
+    return convertUvErrorToErrWithLogging("Stream::listen()", CODE);
 }
 
 Err Stream::accept(Stream & client)
@@ -228,7 +228,7 @@ Err Stream::accept(Stream & client)
     // it may fail. It is suggested to only call this function once per uv_connection_cb call.
 
     int const CODE = ::uv_accept(Parent::cast<uv_stream_t>(), client.cast<uv_stream_t>());
-    return getUerr2("Stream::accept()", CODE);
+    return convertUvErrorToErrWithLogging("Stream::accept()", CODE);
 }
 
 Err Stream::startRead()
@@ -239,7 +239,7 @@ Err Stream::startRead()
     int const CODE = ::uv_read_start(Parent::cast<uv_stream_t>(),
                                      __global_uv_stream_alloc_cb__,
                                      __global_uv_read_cb__);
-    return getUerr2("Stream::startRead()", CODE);
+    return convertUvErrorToErrWithLogging("Stream::startRead()", CODE);
 }
 
 Err Stream::stopRead()
@@ -248,7 +248,7 @@ Err Stream::stopRead()
     // This function is idempotent and may be safely called on a stopped stream.
 
     int const CODE = ::uv_read_stop(Parent::cast<uv_stream_t>());
-    return getUerr2("Stream::stopRead()", CODE);
+    return convertUvErrorToErrWithLogging("Stream::stopRead()", CODE);
 }
 
 Err Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
@@ -272,7 +272,7 @@ Err Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
                                 &uv_infos[0],
                                 static_cast<unsigned int>(uv_infos.size()),
                                 __global_uv_write_cb__);
-    return getUerr2("Stream::write()", CODE);
+    return convertUvErrorToErrWithLogging("Stream::write()", CODE);
 }
 
 Err Stream::write(WriteRequest & request, char const * buffer, std::size_t size)
@@ -307,7 +307,7 @@ std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, Err * result)
     int  const WRITE_SIZE = ::uv_try_write(Parent::cast<uv_stream_t>(),
                                            &uv_infos[0],
                                            static_cast<unsigned int>(uv_infos.size()));
-    Err const ERROR_CODE = getUerr2("Stream::tryWrite()", WRITE_SIZE);
+    Err const ERROR_CODE = convertUvErrorToErrWithLogging("Stream::tryWrite()", WRITE_SIZE);
 
     if (result != nullptr) {
         *result = ERROR_CODE;
@@ -329,12 +329,12 @@ std::size_t Stream::tryWrite(char const * buffer, std::size_t size, Err * result
 
 void Stream::onShutdown(ShutdownRequest & request, Err code)
 {
-    tDLogD("Stream::onShutdown({}) called.", getErrorName(code));
+    tDLogD("Stream::onShutdown({}) called.", getErrName(code));
 }
 
 void Stream::onConnection(Err code)
 {
-    tDLogD("Stream::onConnection({}) called.", getErrorName(code));
+    tDLogD("Stream::onConnection({}) called.", getErrName(code));
 }
 
 binf Stream::onAlloc(std::size_t suggested_size)
@@ -345,12 +345,12 @@ binf Stream::onAlloc(std::size_t suggested_size)
 
 void Stream::onRead(Err code, char const * buffer, std::size_t size)
 {
-    tDLogD("Stream::onRead({}) called (size:{}).", getErrorName(code), size);
+    tDLogD("Stream::onRead({}) called (size:{}).", getErrName(code), size);
 }
 
 void Stream::onWrite(WriteRequest & request, Err code)
 {
-    tDLogD("Stream::onWrite({}) called.", getErrorName(code));
+    tDLogD("Stream::onWrite({}) called.", getErrName(code));
 }
 
 } // namespace uvpp

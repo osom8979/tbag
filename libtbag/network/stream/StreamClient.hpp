@@ -84,7 +84,7 @@ public:
         virtual void onConnect(ConnectRequest & request, Err code) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onConnect({})", getErrorName(code));
+            tDLogD("ClientBackend::onConnect({})", getErrName(code));
 
             _parent->_mutex.lock();
             _parent->cancelTimeoutClose();
@@ -96,7 +96,7 @@ public:
         virtual void onShutdown(ShutdownRequest & request, Err code) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onShutdown({})", getErrorName(code));
+            tDLogD("ClientBackend::onShutdown({})", getErrName(code));
 
             _parent->_mutex.lock();
             _parent->cancelTimeoutShutdown();
@@ -109,7 +109,7 @@ public:
         virtual void onWrite(WriteRequest & request, Err code) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onWrite({})", getErrorName(code));
+            tDLogD("ClientBackend::onWrite({})", getErrName(code));
 
             _parent->_mutex.lock();
             _parent->cancelTimeoutShutdown();
@@ -127,7 +127,7 @@ public:
         virtual void onRead(Err code, char const * buffer, std::size_t size) override
         {
             assert(_parent != nullptr);
-            tDLogD("ClientBackend::onRead({})", getErrorName(code));
+            tDLogD("ClientBackend::onRead({})", getErrName(code));
 
             _parent->onRead(code, buffer, size);
         }
@@ -203,14 +203,14 @@ private:
     {
         assert(static_cast<bool>(_shutdown));
         Err const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
-        tDLogD("StreamClient::startTimeoutShutdown({}) result code: {}", millisec.count(), getErrorName(CODE));
+        tDLogD("StreamClient::startTimeoutShutdown({}) result code: {}", millisec.count(), getErrName(CODE));
     }
 
     void startTimeoutClose(Milliseconds const & millisec)
     {
         assert(static_cast<bool>(_close));
         Err const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
-        tDLogD("StreamClient::startTimeoutClose({}) result code: {}", millisec.count(), getErrorName(CODE));
+        tDLogD("StreamClient::startTimeoutClose({}) result code: {}", millisec.count(), getErrName(CODE));
     }
 
     void cancelTimeoutShutdown()
@@ -331,7 +331,7 @@ public:
         Guard guard(_mutex);
 
         Err const CODE = _client->startRead();
-        tDLogD("StreamClient::start() result code: {}", getErrorName(CODE));
+        tDLogD("StreamClient::start() result code: {}", getErrName(CODE));
         return CODE == Err::E_SUCCESS;
     }
 
@@ -341,7 +341,7 @@ public:
         Guard guard(_mutex);
 
         Err const CODE = _client->stopRead();
-        tDLogD("StreamClient::stop() result code: {}", getErrorName(CODE));
+        tDLogD("StreamClient::stop() result code: {}", getErrName(CODE));
         return CODE == Err::E_SUCCESS;
     }
 

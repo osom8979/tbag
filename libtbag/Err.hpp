@@ -16,7 +16,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -133,6 +132,17 @@ enum class Err : int
     __SIZE__
 };
 
+TBAG_API char const * getErrName(Err code) TBAG_NOEXCEPT;
+TBAG_API char const * getErrDetail(Err code) TBAG_NOEXCEPT;
+
+/** Short name of ErrorCode type. */
+TBAG_API Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT;
+TBAG_API Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_code);
+
+// ----------------
+// libuv debugging.
+// ----------------
+
 /**
  * @remarks
  *  Same this code:
@@ -140,7 +150,7 @@ enum class Err : int
  *    const char* uv_strerror(int err);
  *  @endcode
  */
-TBAG_API std::string getUvErrorString(int uv_error_code);
+TBAG_API char const * getUvErrorDetail(int uv_error_code);
 
 /**
  * @remarks
@@ -149,21 +159,7 @@ TBAG_API std::string getUvErrorString(int uv_error_code);
  *    const char* uv_err_name(int err);
  *  @endcode
  */
-TBAG_API std::string getUvErrorName(int uv_error_code);
-
-TBAG_API char const * getErrorMessage(Err code) TBAG_NOEXCEPT;
-
-inline char const * getErrorMessage(int code) TBAG_NOEXCEPT
-{
-    return getErrorMessage(static_cast<Err>(code));
-}
-
-/** Short name of ErrorCode type. */
-TBAG_API Err getUerr(int uv_error_code);
-TBAG_API Err getUerr2(char const * prefix, int uv_error_code);
-
-TBAG_API std::string getErrorName(Err err);
-TBAG_API std::string getErrorDetail(Err err);
+TBAG_API char const * getUvErrorName(int uv_error_code);
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

@@ -53,13 +53,13 @@ BaseAsync::~BaseAsync()
 Err BaseAsync::init(Loop & loop)
 {
     int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
-    return getUerr2("BaseAsync::init()", CODE);
+    return convertUvErrorToErrWithLogging("BaseAsync::init()", CODE);
 }
 
 Err BaseAsync::send()
 {
     int const CODE = ::uv_async_send(Parent::cast<uv_async_t>());
-    return getUerr2("BaseAsync::send()", CODE);
+    return convertUvErrorToErrWithLogging("BaseAsync::send()", CODE);
 }
 
 // --------------

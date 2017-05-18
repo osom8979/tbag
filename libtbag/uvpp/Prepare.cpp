@@ -52,19 +52,19 @@ Prepare::~Prepare()
 Err Prepare::init(Loop & loop)
 {
     int const CODE = ::uv_prepare_init(loop.cast<uv_loop_t>(), Parent::cast<uv_prepare_t>());
-    return getUerr2("Prepare::init()", CODE);
+    return convertUvErrorToErrWithLogging("Prepare::init()", CODE);
 }
 
 Err Prepare::start()
 {
     int const CODE = ::uv_prepare_start(Parent::cast<uv_prepare_t>(), __global_uv_prepare_cb__);
-    return getUerr2("Prepare::start()", CODE);
+    return convertUvErrorToErrWithLogging("Prepare::start()", CODE);
 }
 
 Err Prepare::stop()
 {
     int const CODE = ::uv_prepare_stop(Parent::cast<uv_prepare_t>());
-    return getUerr2("Prepare::stop()", CODE);
+    return convertUvErrorToErrWithLogging("Prepare::stop()", CODE);
 }
 
 void Prepare::onPrepare()

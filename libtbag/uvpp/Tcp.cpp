@@ -44,7 +44,7 @@ static void __global_uv_tcp_connect_cb__(uv_connect_t * request, int status)
         } else if (isDeletedAddress(s)) {
             tDLogE("__global_uv_tcp_connect_cb__() request.data.owner is deleted.");
         } else {
-            s->onConnect(*req, getUerr(status));
+            s->onConnect(*req, convertUvErrorToErr(status));
         }
     }
 }
@@ -68,20 +68,20 @@ Tcp::~Tcp()
 Err Tcp::init(Loop & loop)
 {
     int const CODE = ::uv_tcp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tcp_t>());
-    return getUerr2("Tcp::init()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::init()", CODE);
 }
 
 Err Tcp::setNodelay(bool enable)
 {
     int const CODE = ::uv_tcp_nodelay(Parent::cast<uv_tcp_t>(), enable ? 1 : 0);
-    return getUerr2("Tcp::setNodelay()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::setNodelay()", CODE);
 }
 
 Err Tcp::keepAlive(bool enable, unsigned int delay)
 {
     // delay is the initial delay in seconds, ignored when enable is zero.
     int const CODE = ::uv_tcp_keepalive(Parent::cast<uv_tcp_t>(), enable ? 1 : 0, delay);
-    return getUerr2("Tcp::keepAlive()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::keepAlive()", CODE);
 }
 
 Err Tcp::acceptsSimultaneous(int enable)
@@ -95,7 +95,7 @@ Err Tcp::acceptsSimultaneous(int enable)
     // load distribution in multi-process setups.
 
     int const CODE = ::uv_tcp_simultaneous_accepts(Parent::cast<uv_tcp_t>(), enable ? 1 : 0);
-    return getUerr2("Tcp::acceptsSimultaneous()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::acceptsSimultaneous()", CODE);
 }
 
 Err Tcp::bind(sockaddr const * address, unsigned int flags)
@@ -110,7 +110,7 @@ Err Tcp::bind(sockaddr const * address, unsigned int flags)
     // is disabled and only IPv6 is used.
 
     int const CODE = ::uv_tcp_bind(Parent::cast<uv_tcp_t>(), address, flags);
-    return getUerr2("Tcp::bind()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::bind()", CODE);
 }
 
 Err Tcp::getSockName(struct sockaddr * name, int * namelen)
@@ -119,7 +119,7 @@ Err Tcp::getSockName(struct sockaddr * name, int * namelen)
     // struct sockaddr_storage is recommended for IPv4 and IPv6 support.
 
     int const CODE = ::uv_tcp_getsockname(Parent::cast<uv_tcp_t>(), name, namelen);
-    return getUerr2("Tcp::getSockName()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::getSockName()", CODE);
 }
 
 Err Tcp::getPeerName(struct sockaddr * name, int * namelen)
@@ -128,7 +128,7 @@ Err Tcp::getPeerName(struct sockaddr * name, int * namelen)
     // struct sockaddr_storage is recommended for IPv4 and IPv6 support.
 
     int const CODE = ::uv_tcp_getpeername(Parent::cast<uv_tcp_t>(), name, namelen);
-    return getUerr2("Tcp::getPeerName()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::getPeerName()", CODE);
 }
 
 std::string Tcp::getSockIp()
@@ -194,7 +194,7 @@ Err Tcp::connect(ConnectRequest & request, sockaddr const * address)
                                       Parent::cast<uv_tcp_t>(),
                                       address,
                                       __global_uv_tcp_connect_cb__);
-    return getUerr2("Tcp::connect()", CODE);
+    return convertUvErrorToErrWithLogging("Tcp::connect()", CODE);
 }
 
 // --------------
@@ -203,7 +203,7 @@ Err Tcp::connect(ConnectRequest & request, sockaddr const * address)
 
 void Tcp::onConnect(ConnectRequest & request, Err code)
 {
-    tDLogD("Tcp::onConnect({}) called.", getErrorName(code));
+    tDLogD("Tcp::onConnect({}) called.", getErrName(code));
 }
 
 // ----------------
@@ -219,13 +219,13 @@ bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
 
     Err const BIND_CODE = tcp.bind(addr);
     if (BIND_CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerSock() tcp bind {} error.", getErrorName(BIND_CODE));
+        tDLogE("initCommonServerSock() tcp bind {} error.", getErrName(BIND_CODE));
         return false;
     }
 
     Err const LISTEN_CODE = tcp.listen();
     if (LISTEN_CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerSock() tcp listen {} error.", getErrorName(LISTEN_CODE));
+        tDLogE("initCommonServerSock() tcp listen {} error.", getErrName(LISTEN_CODE));
         return false;
     }
     return true;
@@ -236,7 +236,7 @@ bool initCommonServerIpv4(Tcp & tcp, std::string const & ip, int port)
     sockaddr_in addr;
     Err const CODE = initAddress(ip, port, &addr);
     if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrName(CODE));
         return false;
     }
     return initCommonServerSock(tcp, (sockaddr const *)&addr);
@@ -247,7 +247,7 @@ bool initCommonServerIpv6(Tcp & tcp, std::string const & ip, int port)
     sockaddr_in6 addr;
     Err const CODE = initAddress(ip, port, &addr);
     if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrName(CODE));
         return false;
     }
     return initCommonServerSock(tcp, (sockaddr const *)&addr);
@@ -273,7 +273,7 @@ bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr c
 
     Err const CODE = tcp.connect(request, addr);
     if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerSock() tcp connect {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerSock() tcp connect {} error.", getErrName(CODE));
         return false;
     }
     return true;
@@ -284,7 +284,7 @@ bool initCommonClientIpv4(Tcp & tcp, ConnectRequest & request, std::string const
     sockaddr_in addr;
     Err const CODE = initAddress(ip, port, &addr);
     if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrName(CODE));
         return false;
     }
     return initCommonClientSock(tcp, request, (sockaddr const *)&addr);
@@ -295,7 +295,7 @@ bool initCommonClientIpv6(Tcp & tcp, ConnectRequest & request, std::string const
     sockaddr_in6 addr;
     Err const CODE = initAddress(ip, port, &addr);
     if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrorName(CODE));
+        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrName(CODE));
         return false;
     }
     return initCommonClientSock(tcp, request, (sockaddr const *)&addr);

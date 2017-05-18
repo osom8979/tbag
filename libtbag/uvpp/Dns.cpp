@@ -124,7 +124,7 @@ Err DnsAddrInfo::requestAddrInfo(Loop & loop,
 
     int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
                                       __global_uv_getaddrinfo_cb__, node.c_str(), service.c_str(), hints);
-    return getUerr2("DnsAddrInfo::getAddrInfo([ASYNC])", CODE);
+    return convertUvErrorToErrWithLogging("DnsAddrInfo::getAddrInfo([ASYNC])", CODE);
 }
 
 void DnsAddrInfo::freeAddrInfo()
@@ -207,7 +207,7 @@ Err DnsNameInfo::requestNameInfo(Loop & loop, struct sockaddr const * addr, int 
 
     int const CODE = ::uv_getnameinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getnameinfo_t>(),
                                       __global_uv_getnameinfo_cb__, addr, flags);
-    return getUerr2("DnsNameInfo::getNameInfo([ASYNC])", CODE);
+    return convertUvErrorToErrWithLogging("DnsNameInfo::getNameInfo([ASYNC])", CODE);
 }
 
 void DnsNameInfo::onGetNameInfo(int status, std::string const & hostname, std::string const & service)

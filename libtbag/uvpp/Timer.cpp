@@ -53,7 +53,7 @@ Timer::~Timer()
 Err Timer::init(Loop & loop)
 {
     int const CODE = ::uv_timer_init(loop.cast<uv_loop_t>(), Parent::cast<uv_timer_t>());
-    return getUerr2("Timer::init()", CODE);
+    return convertUvErrorToErrWithLogging("Timer::init()", CODE);
 }
 
 Err Timer::start(uint64_t timeout, uint64_t repeat)
@@ -67,20 +67,20 @@ Err Timer::start(uint64_t timeout, uint64_t repeat)
     // See uv_update_time() for more information.
 
     int const CODE = ::uv_timer_start(Parent::cast<uv_timer_t>(), __global_uv_timer_cb__, timeout, repeat);
-    return getUerr2("Timer::start()", CODE);
+    return convertUvErrorToErrWithLogging("Timer::start()", CODE);
 }
 
 Err Timer::stop()
 {
     int const CODE = ::uv_timer_stop(Parent::cast<uv_timer_t>());
-    return getUerr2("Timer::stop()", CODE);
+    return convertUvErrorToErrWithLogging("Timer::stop()", CODE);
 }
 
 Err Timer::again()
 {
     // If the timer has never been started before it returns UV_EINVAL.
     int const CODE = ::uv_timer_again(Parent::cast<uv_timer_t>());
-    return getUerr2("Timer::again()", CODE);
+    return convertUvErrorToErrWithLogging("Timer::again()", CODE);
 }
 
 void Timer::setRepeat(uint64_t repeat)

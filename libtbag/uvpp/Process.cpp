@@ -194,14 +194,14 @@ Err Process::spawn(Loop & loop, Options const & options)
     // not having permissions to use the setuid or setgid specified,
     // or not having enough memory to allocate for the new process.
     int const CODE = ::uv_spawn(loop.cast<uv_loop_t>(), Parent::cast<uv_process_t>(), &uv_options);
-    return getUerr2("Process::spawn()", CODE);
+    return convertUvErrorToErrWithLogging("Process::spawn()", CODE);
 }
 
 Err Process::processKill(int signum)
 {
     // uv_signal_t - Signal handle for signal support, specially on Windows.
     int const CODE = ::uv_process_kill(Parent::cast<uv_process_t>(), signum);
-    return getUerr2("Process::processKill()", CODE);
+    return convertUvErrorToErrWithLogging("Process::processKill()", CODE);
 }
 
 // --------------
@@ -235,7 +235,7 @@ Err Process::kill(int pid, int signum)
 {
     // uv_signal_t - Signal handle for signal support, specially on Windows.
     int const CODE = ::uv_kill(pid, signum);
-    return getUerr2("Process::kill()", CODE);
+    return convertUvErrorToErrWithLogging("Process::kill()", CODE);
 }
 
 } // namespace uvpp

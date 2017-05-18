@@ -52,19 +52,19 @@ Check::~Check()
 Err Check::init(Loop & loop)
 {
     int const CODE = ::uv_check_init(loop.cast<uv_loop_t>(), Parent::cast<uv_check_t>());
-    return getUerr2("Check::init()", CODE);
+    return convertUvErrorToErrWithLogging("Check::init()", CODE);
 }
 
 Err Check::start()
 {
     int const CODE = ::uv_check_start(Parent::cast<uv_check_t>(), __global_uv_check_cb__);
-    return getUerr2("Check::start()", CODE);
+    return convertUvErrorToErrWithLogging("Check::start()", CODE);
 }
 
 Err Check::stop()
 {
     int const CODE = ::uv_check_stop(Parent::cast<uv_check_t>());
-    return getUerr2("Check::stop()", CODE);
+    return convertUvErrorToErrWithLogging("Check::stop()", CODE);
 }
 
 // --------------

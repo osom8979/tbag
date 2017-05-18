@@ -33,7 +33,7 @@ static void __global_uv_fs_event_cb__(uv_fs_event_t * handle, const char * filen
     } else if (isDeletedAddress(h)) {
         tDLogE("__global_uv_fs_event_cb__() handle.data is deleted.");
     } else {
-        h->onFsEvent(filename, FsEvent::getEvent(events), getUerr(status));
+        h->onFsEvent(filename, FsEvent::getEvent(events), convertUvErrorToErr(status));
     }
 }
 
@@ -56,19 +56,19 @@ FsEvent::~FsEvent()
 Err FsEvent::init(Loop & loop)
 {
     int const CODE = ::uv_fs_event_init(loop.cast<uv_loop_t>(), Parent::cast<uv_fs_event_t>());
-    return getUerr2("FsEvent::init()", CODE);
+    return convertUvErrorToErrWithLogging("FsEvent::init()", CODE);
 }
 
 Err FsEvent::start(char const * path, EventFlag flags)
 {
     int const CODE = ::uv_fs_event_start(Parent::cast<uv_fs_event_t>(), __global_uv_fs_event_cb__, path, static_cast<unsigned int>(flags));
-    return getUerr2("FsEvent::start()", CODE);
+    return convertUvErrorToErrWithLogging("FsEvent::start()", CODE);
 }
 
 Err FsEvent::stop()
 {
     int const CODE = ::uv_fs_event_stop(Parent::cast<uv_fs_event_t>());
-    return getUerr2("FsEvent::stop()", CODE);
+    return convertUvErrorToErrWithLogging("FsEvent::stop()", CODE);
 }
 
 std::string FsEvent::getPath()
@@ -89,7 +89,7 @@ std::string FsEvent::getPath()
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_fs_event_getpath(Parent::cast<uv_fs_event_t>(), name, &size);
-    if (getUerr2("FsEvent::getPath()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("FsEvent::getPath()", CODE) != Err::E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -107,7 +107,7 @@ FsEvent::Event FsEvent::getEvent(int native_events) TBAG_NOEXCEPT
 void FsEvent::onFsEvent(const char * filename, Event events, Err status)
 {
     tDLogD("FsEvent::onFsEvent({}, {}, {}) called.",
-                 filename, static_cast<int>(events), getErrorName(status));
+                 filename, static_cast<int>(events), getErrName(status));
 }
 
 } // namespace uvpp

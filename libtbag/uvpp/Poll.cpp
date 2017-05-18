@@ -29,7 +29,7 @@ static void __global_uv_pool_cb__(uv_poll_t * handle, int status, int events)
     } else if (isDeletedAddress(h)) {
         tDLogE("__global_uv_pool_cb__() handle.data is deleted.");
     } else {
-        h->onPoll(getUerr(status), static_cast<Poll::EventType>(events));
+        h->onPoll(convertUvErrorToErr(status), static_cast<Poll::EventType>(events));
     }
 }
 
@@ -59,7 +59,7 @@ Poll::~Poll()
 Err Poll::init(Loop & loop, int fd)
 {
     int const CODE = ::uv_poll_init(loop.cast<uv_loop_t>(), Parent::cast<uv_poll_t>(), fd);
-    return getUerr2("Poll::init()", CODE);
+    return convertUvErrorToErrWithLogging("Poll::init()", CODE);
 }
 
 Err Poll::initSocket(Loop & loop, usock sock)
@@ -67,7 +67,7 @@ Err Poll::initSocket(Loop & loop, usock sock)
     // On Unix this is identical to uv_poll_init().
     // On windows it takes a SOCKET handle.
     int const CODE = ::uv_poll_init_socket(loop.cast<uv_loop_t>(), Parent::cast<uv_poll_t>(), sock);
-    return getUerr2("Poll::initSocket()", CODE);
+    return convertUvErrorToErrWithLogging("Poll::initSocket()", CODE);
 }
 
 Err Poll::start(EventType events)
@@ -92,18 +92,18 @@ Err Poll::start(EventType events)
     //
     //  Changed in version 1.9.0: Added the UV_DISCONNECT event.
     int const CODE = ::uv_poll_start(Parent::cast<uv_poll_t>(), static_cast<int>(events), __global_uv_pool_cb__);
-    return getUerr2("Poll::start()", CODE);
+    return convertUvErrorToErrWithLogging("Poll::start()", CODE);
 }
 
 Err Poll::stop()
 {
     int const CODE = ::uv_poll_stop(Parent::cast<uv_poll_t>());
-    return getUerr2("Poll::stop()", CODE);
+    return convertUvErrorToErrWithLogging("Poll::stop()", CODE);
 }
 
 void Poll::onPoll(Err status, EventType events)
 {
-    tDLogD("Poll::onPoll({}, {}) called.", getErrorName(status), static_cast<int>(events));
+    tDLogD("Poll::onPoll({}, {}) called.", getErrName(status), static_cast<int>(events));
 }
 
 } // namespace uvpp

@@ -39,7 +39,7 @@ static void __global_uv_udp_send_cb__(uv_udp_send_t * request, int status)
         } else if (isDeletedAddress(s)) {
             tDLogE("__global_uv_udp_send_cb__() request.data.owner is deleted.");
         } else {
-            s->onSend(*req, getUerr(status));
+            s->onSend(*req, convertUvErrorToErr(status));
         }
     }
 }
@@ -100,7 +100,7 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
         if (nread >= 0){
             code = Err::E_SUCCESS;
         } else {
-            code = getUerr(static_cast<int>(nread));
+            code = convertUvErrorToErr(static_cast<int>(nread));
         }
 
         u->onRecv(code, buf->base, static_cast<std::size_t>(nread), addr, flags);
@@ -138,7 +138,7 @@ Err Udp::init(Loop & loop)
 {
     // The actual socket is created lazily. Returns 0 on success.
     int const CODE = ::uv_udp_init(loop.cast<uv_loop_t>(), Parent::cast<uv_udp_t>());
-    return getUerr2("Udp::init()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::init()", CODE);
 }
 
 Err Udp::open(usock sock)
@@ -154,7 +154,7 @@ Err Udp::open(usock sock)
     // but it's required that it represents a valid datagram socket.
 
     int const CODE  = ::uv_udp_open(Parent::cast<uv_udp_t>(), static_cast<uv_os_sock_t>(sock));
-    return getUerr2("Udp::open()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::open()", CODE);
 }
 
 Err Udp::bind(sockaddr const * addr, unsigned int flags)
@@ -169,7 +169,7 @@ Err Udp::bind(sockaddr const * addr, unsigned int flags)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_bind(Parent::cast<uv_udp_t>(), addr, flags);
-    return getUerr2("Udp::bind()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::bind()", CODE);
 }
 
 Err Udp::getSockName(sockaddr * name, int * namelen)
@@ -184,7 +184,7 @@ Err Udp::getSockName(sockaddr * name, int * namelen)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_getsockname(Parent::cast<uv_udp_t>(), name, namelen);
-    return getUerr2("Udp::getSockName()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::getSockName()", CODE);
 }
 
 Err Udp::setMembership(char const * multicast_addr, char const * interface_addr, Membership membership)
@@ -206,7 +206,7 @@ Err Udp::setMembership(char const * multicast_addr, char const * interface_addr,
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_membership(Parent::cast<uv_udp_t>(), multicast_addr, interface_addr, native_membership);
-    return getUerr2("Udp::setMembership()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::setMembership()", CODE);
 }
 
 Err Udp::setMulticastLoop(bool on)
@@ -220,7 +220,7 @@ Err Udp::setMulticastLoop(bool on)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_loop(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
-    return getUerr2("Udp::setMulticastLoop()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::setMulticastLoop()", CODE);
 }
 
 Err Udp::setMulticastTtl(int ttl)
@@ -232,7 +232,7 @@ Err Udp::setMulticastTtl(int ttl)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_ttl(Parent::cast<uv_udp_t>(), ttl);
-    return getUerr2("Udp::setMulticastTtl()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::setMulticastTtl()", CODE);
 }
 
 Err Udp::setMulticastInterface(char const * interface_addr)
@@ -244,7 +244,7 @@ Err Udp::setMulticastInterface(char const * interface_addr)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_multicast_interface(Parent::cast<uv_udp_t>(), interface_addr);
-    return getUerr2("Udp::setMulticastInterface()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::setMulticastInterface()", CODE);
 }
 
 Err Udp::setBroadcast(bool on)
@@ -256,7 +256,7 @@ Err Udp::setBroadcast(bool on)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_broadcast(Parent::cast<uv_udp_t>(), (on ? 1 : 0));
-    return getUerr2("Udp::setBroadcast()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::setBroadcast()", CODE);
 }
 
 Err Udp::setTtl(int ttl)
@@ -268,7 +268,7 @@ Err Udp::setTtl(int ttl)
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_set_ttl(Parent::cast<uv_udp_t>(), ttl);
-    return getUerr2("Udp::setTtl()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::setTtl()", CODE);
 }
 
 Err Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
@@ -306,7 +306,7 @@ Err Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, so
                                    static_cast<unsigned int>(uv_infos.size()),
                                    addr,
                                    __global_uv_udp_send_cb__);
-    return getUerr2("Udp::send()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::send()", CODE);
 }
 
 Err Udp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
@@ -343,7 +343,7 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
                                               &uv_infos[0],
                                               static_cast<unsigned int>(uv_infos.size()),
                                               addr);
-    Err const ERROR_CODE = getUerr2("Udp::trySend()", WRITE_SIZE);
+    Err const ERROR_CODE = convertUvErrorToErrWithLogging("Udp::trySend()", WRITE_SIZE);
 
     if (result != nullptr) {
         *result = ERROR_CODE;
@@ -372,7 +372,7 @@ Err Udp::startRecv()
     //  0 on success, or an error code < 0 on failure.
 
     int const CODE = ::uv_udp_recv_start(Parent::cast<uv_udp_t>(), __global_uv_udp_alloc_cb__, __global_uv_udp_recv_cb__);
-    return getUerr2("Udp::startRecv()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::startRecv()", CODE);
 }
 
 Err Udp::stopRecv()
@@ -382,7 +382,7 @@ Err Udp::stopRecv()
     // Returns:
     //  0 on success, or an error code < 0 on failure.
     int const CODE = ::uv_udp_recv_stop(Parent::cast<uv_udp_t>());
-    return getUerr2("Udp::stopRecv()", CODE);
+    return convertUvErrorToErrWithLogging("Udp::stopRecv()", CODE);
 }
 
 // --------------
@@ -391,7 +391,7 @@ Err Udp::stopRecv()
 
 void Udp::onSend(UdpSendRequest & request, Err code)
 {
-    tDLogD("Udp::onSend({}) called.", getErrorName(code));
+    tDLogD("Udp::onSend({}) called.", getErrName(code));
 }
 
 binf Udp::onAlloc(std::size_t suggested_size)
@@ -402,7 +402,7 @@ binf Udp::onAlloc(std::size_t suggested_size)
 
 void Udp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
 {
-    tDLogD("Udp::onRecv({}) called (size:{}).", getErrorName(code), size);
+    tDLogD("Udp::onRecv({}) called (size:{}).", getErrName(code), size);
 }
 
 } // namespace uvpp

@@ -376,7 +376,7 @@ public:
                 assert(INSERT_RESULT);
                 return WeakClient(client);
             } else {
-                tDLogE("StreamServer::accept() {} error.", getErrorName(CODE));
+                tDLogE("StreamServer::accept() {} error.", getErrName(CODE));
             }
         } else {
             tDLogE("StreamServer::accept() client is nullptr.");

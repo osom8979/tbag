@@ -13,10 +13,10 @@
 
 using namespace libtbag;
 
-TEST(ErrorCodeTest, Default)
+TEST(ErrTest, Default)
 {
-    libtbag::Err code = static_cast<libtbag::Err>(std::numeric_limits<int>::max());
-    ASSERT_NE(nullptr, getErrorMessage(code));
-    ASSERT_STREQ(getErrorMessage(libtbag::Err::E_SUCCESS), getErrorMessage(0));
+    Err code = static_cast<Err>(std::numeric_limits<int>::max());
+    ASSERT_NE(nullptr, getErrName(code));
+    ASSERT_NE(nullptr, getErrDetail(code));
 }
 

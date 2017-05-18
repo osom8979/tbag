@@ -57,20 +57,20 @@ int Signal::getSignalNumber() const TBAG_NOEXCEPT
 Err Signal::init(Loop & loop)
 {
     int const CODE = ::uv_signal_init(loop.cast<uv_loop_t>(), Parent::cast<uv_signal_t>());
-    return getUerr2("Signal::init()", CODE);
+    return convertUvErrorToErrWithLogging("Signal::init()", CODE);
 }
 
 Err Signal::start(int signum)
 {
     int const CODE = ::uv_signal_start(Parent::cast<uv_signal_t>(), __global_uv_signal_cb__, signum);
-    return getUerr2("Signal::start()", CODE);
+    return convertUvErrorToErrWithLogging("Signal::start()", CODE);
 }
 
 Err Signal::startOneshot(int signum)
 {
     // New in version 1.12.0.
     //int const CODE = ::uv_signal_start_oneshot(Parent::cast<uv_signal_t>(), __global_uv_signal_cb__, signum);
-    //return getUerr2("Signal::startOneshot()", CODE);
+    //return convertUvErrorToErrWithLogging("Signal::startOneshot()", CODE);
 
     return Err::E_ENOSYS;
 }
@@ -78,7 +78,7 @@ Err Signal::startOneshot(int signum)
 Err Signal::stop()
 {
     int const CODE = ::uv_signal_stop(Parent::cast<uv_signal_t>());
-    return getUerr2("Signal::stop()", CODE);
+    return convertUvErrorToErrWithLogging("Signal::stop()", CODE);
 }
 
 // --------------

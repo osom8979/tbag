@@ -144,7 +144,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in * addr)
     int const CODE = ::uv_ip4_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
         tDLogE("initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
-        return getUerr(CODE);
+        return convertUvErrorToErr(CODE);
     }
     return Err::E_SUCCESS;
 }
@@ -154,7 +154,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
     int const CODE = ::uv_ip6_addr(ip.c_str(), port, addr);
     if (CODE != 0) {
         tDLogE("initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
-        return getUerr(CODE);
+        return convertUvErrorToErr(CODE);
     }
     return Err::E_SUCCESS;
 }

@@ -48,7 +48,7 @@ static void __global_uv_fs_poll_cb__(uv_fs_poll_t * handle, int status, uv_stat_
             prev_state = toFileState(*prev);
             curr_state = toFileState(*curr);
         }
-        h->onFsPoll(getUerr(status), prev_state, curr_state);
+        h->onFsPoll(convertUvErrorToErr(status), prev_state, curr_state);
     }
 }
 
@@ -71,7 +71,7 @@ FsPoll::~FsPoll()
 Err FsPoll::init(Loop & loop)
 {
     int const CODE = ::uv_fs_poll_init(loop.cast<uv_loop_t>(), Parent::cast<uv_fs_poll_t>());
-    return getUerr2("FsPoll::init()", CODE);
+    return convertUvErrorToErrWithLogging("FsPoll::init()", CODE);
 }
 
 Err FsPoll::start(char const * path, unsigned int interval)
@@ -81,13 +81,13 @@ Err FsPoll::start(char const * path, unsigned int interval)
     // Sub-second intervals will not detect all changes on many file systems.
 
     int const CODE = ::uv_fs_poll_start(Parent::cast<uv_fs_poll_t>(), __global_uv_fs_poll_cb__, path, interval);
-    return getUerr2("FsPoll::start()", CODE);
+    return convertUvErrorToErrWithLogging("FsPoll::start()", CODE);
 }
 
 Err FsPoll::stop()
 {
     int const CODE = ::uv_fs_poll_stop(Parent::cast<uv_fs_poll_t>());
-    return getUerr2("FsPoll::stop()", CODE);
+    return convertUvErrorToErrWithLogging("FsPoll::stop()", CODE);
 }
 
 std::string FsPoll::getPath()
@@ -110,7 +110,7 @@ std::string FsPoll::getPath()
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_fs_poll_getpath(Parent::cast<uv_fs_poll_t>(), name, &size);
-    if (getUerr2("FsPoll::getPath()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("FsPoll::getPath()", CODE) != Err::E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -122,7 +122,7 @@ std::string FsPoll::getPath()
 
 void FsPoll::onFsPoll(Err status, FileState const & prev, FileState const & curr)
 {
-    tDLogD("FsPoll::onFsPoll({}) called.", getErrorName(status));
+    tDLogD("FsPoll::onFsPoll({}) called.", getErrName(status));
 }
 
 } // namespace uvpp

@@ -68,7 +68,7 @@ Err Tty::init(Loop & loop, ufile fd, bool readable)
     // that refers to a file returns UV_EINVAL on UNIX.
 
     int const CODE = ::uv_tty_init(loop.cast<uv_loop_t>(), Parent::cast<uv_tty_t>(), fd, readable ? 1 : 0);
-    return getUerr2("Tty::init()", CODE);
+    return convertUvErrorToErrWithLogging("Tty::init()", CODE);
 }
 
 Err Tty::init(Loop & loop, GeneralFile fd)
@@ -92,7 +92,7 @@ Err Tty::setMode(TtyMode mode)
     //
     // Set the TTY using the specified terminal mode.
     int const CODE = ::uv_tty_set_mode(Parent::cast<uv_tty_t>(), uv_mode);
-    return getUerr2("Tty::setMode()", CODE);
+    return convertUvErrorToErrWithLogging("Tty::setMode()", CODE);
 }
 
 Err Tty::resetMode()
@@ -103,13 +103,13 @@ Err Tty::resetMode()
     // This function is async signal-safe on Unix platforms but can fail
     // with error code UV_EBUSY if you call it when execution is inside uv_tty_set_mode().
     int const CODE = ::uv_tty_reset_mode();
-    return getUerr2("Tty::resetMode()", CODE);
+    return convertUvErrorToErrWithLogging("Tty::resetMode()", CODE);
 }
 
 Err Tty::getWinSize(int * width, int * height)
 {
     int const CODE = ::uv_tty_get_winsize(Parent::cast<uv_tty_t>(), width, height);
-    return getUerr2("Tty::getWinSize()", CODE);
+    return convertUvErrorToErrWithLogging("Tty::getWinSize()", CODE);
 }
 
 ufile Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT

@@ -75,7 +75,7 @@ Err BaseLoop::close()
     // and all open handles and requests have been closed, or it will return UV_EBUSY.
     // After this function returns, the user can free the memory allocated for the loop.
     int const CODE = ::uv_loop_close(Parent::cast<uv_loop_t>());
-    return getUerr2("BaseLoop::close()", CODE);
+    return convertUvErrorToErrWithLogging("BaseLoop::close()", CODE);
 }
 
 Err BaseLoop::run(RunMode mode)
@@ -105,7 +105,7 @@ Err BaseLoop::run(RunMode mode)
     int const CODE = ::uv_run(Parent::cast<uv_loop_t>(), uv_mode);
     _running.store(false);
 
-    return getUerr2("BaseLoop::run()", CODE);
+    return convertUvErrorToErrWithLogging("BaseLoop::run()", CODE);
 }
 
 bool BaseLoop::isAlive() const
