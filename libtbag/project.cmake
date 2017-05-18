@@ -26,6 +26,7 @@ tbag_modules__apply_ext_capnp()
 
 ## Dependencies.
 tbag_modules__apply_dep_boost_include ()
+tbag_modules__apply_dep_http_parser ()
 tbag_modules__apply_dep_icu     ()
 tbag_modules__apply_dep_lmdb    ()
 tbag_modules__apply_dep_lzma    ()

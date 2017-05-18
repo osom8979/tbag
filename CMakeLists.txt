@@ -65,6 +65,7 @@ include (${CMAKE_SOURCE_DIR}/external/External.cmake)
 
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/http-parser)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lmdb)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lzma)
