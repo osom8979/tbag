@@ -91,7 +91,6 @@ public:
     TBAG_CONSTEXPR static EventType const EVENT_RW = (EVENT_READABLE | EVENT_WRITABLE);
 
 protected:
-    Poll();
     explicit Poll(Loop & loop, init_fd fd);
     explicit Poll(Loop & loop, init_sock sock);
 

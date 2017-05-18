@@ -155,12 +155,7 @@ static bool updateOptions(Process::Options & options,
 // Process implementation.
 // -----------------------
 
-Process::Process() : Handle(uhandle::IDLE)
-{
-    // EMPTY.
-}
-
-Process::Process(Loop & loop, Options const & options) : Process()
+Process::Process(Loop & loop, Options const & options) : Handle(uhandle::PROCESS)
 {
     if (spawn(loop, options) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

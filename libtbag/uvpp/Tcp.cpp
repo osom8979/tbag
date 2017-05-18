@@ -53,12 +53,7 @@ static void __global_uv_tcp_connect_cb__(uv_connect_t * request, int status)
 // Tcp implementation.
 // -------------------
 
-Tcp::Tcp() : Stream(uhandle::TCP)
-{
-    // EMPTY.
-}
-
-Tcp::Tcp(Loop & loop) : Tcp()
+Tcp::Tcp(Loop & loop) : Stream(uhandle::TCP)
 {
     if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

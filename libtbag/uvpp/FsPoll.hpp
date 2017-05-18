@@ -51,7 +51,6 @@ public:
     using TimeSpec  = filesystem::details::TimeSpec;
 
 protected:
-    FsPoll();
     FsPoll(Loop & loop);
 
 public:

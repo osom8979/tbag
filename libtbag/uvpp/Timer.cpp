@@ -38,12 +38,7 @@ static void __global_uv_timer_cb__(uv_timer_t * handle)
 // Timer implementation.
 // ---------------------
 
-Timer::Timer() : Handle(uhandle::TIMER)
-{
-    // EMPTY.
-}
-
-Timer::Timer(Loop & loop) : Timer()
+Timer::Timer(Loop & loop) : Handle(uhandle::TIMER)
 {
     if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

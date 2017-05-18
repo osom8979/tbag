@@ -69,7 +69,6 @@ public:
     using Parent = Handle;
 
 protected:
-    Signal();
     Signal(Loop & loop);
 
 public:

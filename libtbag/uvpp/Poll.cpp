@@ -37,19 +37,14 @@ static void __global_uv_pool_cb__(uv_poll_t * handle, int status, int events)
 // Poll implementation.
 // --------------------
 
-Poll::Poll() : Handle(uhandle::POLL)
-{
-    // EMPTY.
-}
-
-Poll::Poll(Loop & loop, init_fd fd) : Poll()
+Poll::Poll(Loop & loop, init_fd fd) : Handle(uhandle::POLL)
 {
     if (init(loop, fd.fd) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
     }
 }
 
-Poll::Poll(Loop & loop, init_sock sock) : Poll()
+Poll::Poll(Loop & loop, init_sock sock) : Handle(uhandle::POLL)
 {
     if (initSocket(loop, sock.sock) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

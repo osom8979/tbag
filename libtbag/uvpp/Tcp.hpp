@@ -46,7 +46,6 @@ public:
     using Parent = Stream;
 
 protected:
-    Tcp();
     Tcp(Loop & loop);
 
 public:

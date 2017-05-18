@@ -38,12 +38,7 @@ static void __global_uv_idle_cb__(uv_idle_t * handle)
 // Idle implementation.
 // --------------------
 
-Idle::Idle() : Handle(uhandle::IDLE)
-{
-    // EMPTY.
-}
-
-Idle::Idle(Loop & loop) : Idle()
+Idle::Idle(Loop & loop) : Handle(uhandle::IDLE)
 {
     if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

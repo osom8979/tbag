@@ -44,7 +44,6 @@ public:
     using Parent = Handle;
 
 protected:
-    Timer();
     Timer(Loop & loop);
 
 public:

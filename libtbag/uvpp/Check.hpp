@@ -44,7 +44,6 @@ public:
     using Parent = Handle;
 
 protected:
-    Check();
     Check(Loop & loop);
 
 public:

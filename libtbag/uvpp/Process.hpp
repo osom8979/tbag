@@ -121,7 +121,6 @@ private:
     Options _options;
 
 protected:
-    Process();
     Process(Loop & loop, Options const & options);
 
 public:

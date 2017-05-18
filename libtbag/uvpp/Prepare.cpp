@@ -37,12 +37,7 @@ static void __global_uv_prepare_cb__(uv_prepare_t * handle)
 // Prepare implementation.
 // -----------------------
 
-Prepare::Prepare() : Handle(uhandle::PREPARE)
-{
-    // EMPTY.
-}
-
-Prepare::Prepare(Loop & loop) : Prepare()
+Prepare::Prepare(Loop & loop) : Handle(uhandle::PREPARE)
 {
     if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

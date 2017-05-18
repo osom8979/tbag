@@ -56,7 +56,6 @@ public:
     using Parent = Handle;
 
 protected:
-    Idle();
     Idle(Loop & loop);
 
 public:

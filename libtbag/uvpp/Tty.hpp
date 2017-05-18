@@ -57,7 +57,6 @@ public:
     };
 
 protected:
-    Tty();
     Tty(Loop & loop, ufile fd, bool readable);
     Tty(Loop & loop, GeneralFile fd);
 

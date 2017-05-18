@@ -44,7 +44,6 @@ public:
     using Parent = Handle;
 
 protected:
-    Prepare();
     Prepare(Loop & loop);
 
 public:

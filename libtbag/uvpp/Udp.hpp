@@ -56,7 +56,6 @@ public:
     };
 
 protected:
-    Udp();
     Udp(Loop & loop);
 
 public:

@@ -56,12 +56,7 @@ static void __global_uv_fs_poll_cb__(uv_fs_poll_t * handle, int status, uv_stat_
 // FsPoll implementation.
 // ----------------------
 
-FsPoll::FsPoll() : Handle(uhandle::FS_POLL)
-{
-    // EMPTY.
-}
-
-FsPoll::FsPoll(Loop & loop) : FsPoll()
+FsPoll::FsPoll(Loop & loop) : Handle(uhandle::FS_POLL)
 {
     if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

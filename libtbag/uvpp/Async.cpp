@@ -38,12 +38,7 @@ static void __global_uv_async_cb__(uv_async_t * handle)
 // BaseAsync implementation.
 // -------------------------
 
-BaseAsync::BaseAsync() : Handle(uhandle::ASYNC)
-{
-    // EMPTY.
-}
-
-BaseAsync::BaseAsync(Loop & loop) : BaseAsync()
+BaseAsync::BaseAsync(Loop & loop) : Handle(uhandle::ASYNC)
 {
     if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
@@ -79,11 +74,6 @@ void BaseAsync::onAsync()
 // ---------------------
 // Async implementation.
 // ---------------------
-
-Async::Async() : BaseAsync()
-{
-    // EMPTY.
-}
 
 Async::Async(Loop & loop) : BaseAsync(loop)
 {

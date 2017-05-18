@@ -56,8 +56,6 @@ public:
     using Parent = Handle;
 
 protected:
-    BaseAsync();
-
     /**
      * @warning
      *  it immediately starts the handle.
@@ -133,7 +131,6 @@ private:
     JobQueue _jobs;
 
 public:
-    Async();
     Async(Loop & loop);
     virtual ~Async();
 

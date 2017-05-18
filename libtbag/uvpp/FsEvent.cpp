@@ -41,12 +41,7 @@ static void __global_uv_fs_event_cb__(uv_fs_event_t * handle, const char * filen
 // FsEvent implementation.
 // -----------------------
 
-FsEvent::FsEvent() : Handle(uhandle::FS_EVENT)
-{
-    // EMPTY.
-}
-
-FsEvent::FsEvent(Loop & loop) : FsEvent()
+FsEvent::FsEvent(Loop & loop) : Handle(uhandle::FS_EVENT)
 {
     if (init(loop) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();

@@ -47,7 +47,6 @@ public:
     using Parent = Stream;
 
 protected:
-    Pipe();
     Pipe(Loop & loop, bool is_ipc = false);
 
 public:

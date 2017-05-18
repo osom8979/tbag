@@ -95,7 +95,6 @@ public:
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_DEFAULT = 0;
 
 protected:
-    FsEvent();
     FsEvent(Loop & loop);
 
 public:

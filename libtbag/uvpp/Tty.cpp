@@ -18,12 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
-Tty::Tty() : Stream(uhandle::TTY)
-{
-    // EMPTY.
-}
-
-Tty::Tty(Loop & loop, ufile fd, bool readable) : Tty()
+Tty::Tty(Loop & loop, ufile fd, bool readable) : Stream(uhandle::TTY)
 {
     if (init(loop, fd, readable) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
@@ -34,7 +29,7 @@ Tty::Tty(Loop & loop, ufile fd, bool readable) : Tty()
     }
 }
 
-Tty::Tty(Loop & loop, GeneralFile fd) : Tty()
+Tty::Tty(Loop & loop, GeneralFile fd) : Stream(uhandle::TTY)
 {
     if (init(loop, fd) != uerr::UVPP_SUCCESS) {
         throw std::bad_alloc();
