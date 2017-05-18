@@ -49,7 +49,7 @@ public:
         }
 
         libtbag::uvpp::initialize();
-        libtbag::util::initSingletonObjects();
+        libtbag::util::createSingletonObjects();
 
         __tbag_debug(LIBTBAG_MAIN_TITLE);
         __tbag_debug("Default locale name: {}", libtbag::locale::getDefaultIcuLocaleName());

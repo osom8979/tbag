@@ -22,7 +22,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace util {
 
-TBAG_API void initSingletonObjects();
+TBAG_API void  createSingletonObjects();
 TBAG_API void releaseSingletonObjects();
 
 } // namespace util
