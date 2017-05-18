@@ -16,12 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/uvpp/Handle.hpp>
-#include <libtbag/container/SafetyQueue.hpp>
-
-#include <memory>
-#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,6 +33,7 @@ class Loop;
  * @author zer0
  * @date   2016-12-28
  * @date   2017-01-19 (Rename: Async -> BaseAsync)
+ * @date   2017-05-18 (Rename: BaseAsync -> Async)
  *
  * @remarks
  *  Async handles allow the user to "wakeup" @n
@@ -47,7 +43,7 @@ class Loop;
  *  A uv_async_t handle is always active and cannot be deactivated, @n
  *  except by closing it with uv_close().
  */
-class TBAG_API BaseAsync : public Handle
+class TBAG_API Async : public Handle
 {
 public:
     friend class Loop;
@@ -60,10 +56,10 @@ protected:
      * @warning
      *  it immediately starts the handle.
      */
-    BaseAsync(Loop & loop);
+    Async(Loop & loop);
 
 public:
-    virtual ~BaseAsync();
+    virtual ~Async();
 
 public:
     /**
@@ -96,67 +92,6 @@ public:
 // Event methods.
 public:
     virtual void onAsync();
-};
-
-/**
- * Async class prototype.
- *
- * @author zer0
- * @date   2017-01-19
- */
-class TBAG_API Async : public BaseAsync
-{
-public:
-    using Parent = BaseAsync;
-
-public:
-    struct Job
-    {
-        virtual void run(Async * handle) = 0;
-    };
-
-    struct TBAG_API CloseJob : public Job
-    {
-        virtual void run(Async * handle) override
-        {
-            handle->close();
-        }
-    };
-
-public:
-    using SharedJob = std::shared_ptr<Job>;
-    using JobQueue  = container::SafetyQueue<SharedJob>;
-
-private:
-    JobQueue _jobs;
-
-public:
-    Async(Loop & loop);
-    virtual ~Async();
-
-public:
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_jobs.empty()))
-    { return _jobs.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_jobs.size()))
-    { return _jobs.size(); }
-
-public:
-    void clearJob();
-    void pushJob(SharedJob job);
-
-public:
-    virtual void onAsync() override;
-
-public:
-    /** Create(new) & push job. */
-    template <typename JobType, typename ... Args>
-    inline std::shared_ptr<typename remove_cr<JobType>::type> newPushJob(Args && ... args)
-    {
-        typedef typename remove_cr<JobType>::type ResultJobType;
-        SharedJob shared = SharedJob(new (std::nothrow) JobType(std::forward<Args>(args) ...));
-        pushJob(shared);
-        return std::static_pointer_cast<ResultJobType, Job>(shared);
-    }
 };
 
 } // namespace uvpp

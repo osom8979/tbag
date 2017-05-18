@@ -42,13 +42,13 @@ namespace ex {
  * @remarks
  *  An Async handle that guarantees a call.
  */
-class TBAG_API SafetyAsync : public BaseAsync
+class TBAG_API SafetyAsync : public Async
 {
 public:
     friend class uvpp::Loop;
 
 public:
-    using Parent = BaseAsync;
+    using Parent = Async;
 
 public:
     struct Job

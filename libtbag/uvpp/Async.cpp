@@ -24,7 +24,7 @@ namespace uvpp {
 
 static void __global_uv_async_cb__(uv_async_t * handle)
 {
-    BaseAsync * async = static_cast<BaseAsync*>(handle->data);
+    Async * async = static_cast<Async*>(handle->data);
     if (async == nullptr) {
         tDLogE("__global_uv_async_cb__() handle.data is nullptr.");
     } else if (isDeletedAddress(async)) {
@@ -35,49 +35,14 @@ static void __global_uv_async_cb__(uv_async_t * handle)
 }
 
 // -------------------------
-// BaseAsync implementation.
+// Async implementation.
 // -------------------------
 
-BaseAsync::BaseAsync(Loop & loop) : Handle(uhandle::ASYNC)
+Async::Async(Loop & loop) : Handle(uhandle::ASYNC)
 {
     if (init(loop) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
-}
-
-BaseAsync::~BaseAsync()
-{
-    // EMPTY.
-}
-
-Err BaseAsync::init(Loop & loop)
-{
-    int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
-    return convertUvErrorToErrWithLogging("BaseAsync::init()", CODE);
-}
-
-Err BaseAsync::send()
-{
-    int const CODE = ::uv_async_send(Parent::cast<uv_async_t>());
-    return convertUvErrorToErrWithLogging("BaseAsync::send()", CODE);
-}
-
-// --------------
-// Event methods.
-// --------------
-
-void BaseAsync::onAsync()
-{
-    tDLogD("BaseAsync::onAsync() called.");
-}
-
-// ---------------------
-// Async implementation.
-// ---------------------
-
-Async::Async(Loop & loop) : BaseAsync(loop)
-{
-    // EMPTY.
 }
 
 Async::~Async()
@@ -85,25 +50,25 @@ Async::~Async()
     // EMPTY.
 }
 
-void Async::clearJob()
+Err Async::init(Loop & loop)
 {
-    _jobs.clear();
+    int const CODE = ::uv_async_init(loop.cast<uv_loop_t>(), Parent::cast<uv_async_t>(), __global_uv_async_cb__);
+    return convertUvErrorToErrWithLogging("Async::init()", CODE);
 }
 
-void Async::pushJob(SharedJob job)
+Err Async::send()
 {
-    _jobs.push(job);
+    int const CODE = ::uv_async_send(Parent::cast<uv_async_t>());
+    return convertUvErrorToErrWithLogging("Async::send()", CODE);
 }
+
+// --------------
+// Event methods.
+// --------------
 
 void Async::onAsync()
 {
-    SharedJob job;
-    while (_jobs.frontAndPop(job) == JobQueue::Code::SUCCESS) {
-        if (static_cast<bool>(job)) {
-            job->run(this);
-        }
-        job.reset();
-    }
+    tDLogD("Async::onAsync() called.");
 }
 
 } // namespace uvpp

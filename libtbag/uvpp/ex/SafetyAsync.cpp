@@ -77,7 +77,7 @@ void SafetyAsync::MistakeInspector::onClose()
 // SafetyAsync implementation.
 // ---------------------------
 
-SafetyAsync::SafetyAsync(Loop & loop) : BaseAsync(loop), _inspector(nullptr)
+SafetyAsync::SafetyAsync(Loop & loop) : Async(loop), _inspector(nullptr)
 {
     _inspector = loop.newHandle<MistakeInspector>(loop, *this);
     assert(_inspector->isActive() == false);
