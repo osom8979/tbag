@@ -87,7 +87,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onGetAddrInfo(int status, struct addrinfo * res);
+    virtual void onGetAddrInfo(Err code, struct addrinfo * res);
 };
 
 /**
@@ -125,7 +125,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onGetNameInfo(int status, std::string const & hostname, std::string const & service);
+    virtual void onGetNameInfo(Err code, std::string const & hostname, std::string const & service);
 };
 
 } // namespace uvpp

@@ -28,6 +28,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ILLARGS, "Illegal arguments"     ) \
     _TBAG_XX(_NULLPTR, "Null pointer exception") \
     _TBAG_XX(_EQUEUE , "Empty queue"           ) \
+    _TBAG_XX(_EBUFFER, "Empty buffer"          ) \
     _TBAG_XX(_NREADY , "Not ready"             ) \
     _TBAG_XX(_UNSUPOP, "Unsupported operation" ) \
     _TBAG_XX(_RDERR  , "Unknown Read error"    ) \

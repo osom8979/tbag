@@ -53,7 +53,7 @@ public:
 
 public:
     /**
-     * Cancel a pending request.
+     * Cancel a <strong>pending</strong> request.
      *
      * @remarks
      *  Fails if the request is executing or has finished executing.

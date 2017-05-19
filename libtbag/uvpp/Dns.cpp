@@ -33,7 +33,7 @@ static void __global_uv_getaddrinfo_cb__(uv_getaddrinfo_t * req, int status, str
     } else if (isDeletedAddress(r)) {
         tDLogE("__global_uv_getaddrinfo_cb__() request.data is deleted.");
     } else {
-        r->onGetAddrInfo(status, res);
+        r->onGetAddrInfo(convertUvErrorToErr(status), res);
     }
 }
 
@@ -56,7 +56,7 @@ static void __global_uv_getnameinfo_cb__(uv_getnameinfo_t * req, int status, cha
         if (service != nullptr) {
             service_str.assign(service);
         }
-        r->onGetNameInfo(status, hostname_str, service_str);
+        r->onGetNameInfo(convertUvErrorToErr(status), hostname_str, service_str);
     }
 }
 
@@ -157,9 +157,9 @@ void DnsAddrInfo::freeAddrInfo(struct addrinfo * ai)
     ::uv_freeaddrinfo(ai);
 }
 
-void DnsAddrInfo::onGetAddrInfo(int status, struct addrinfo * res)
+void DnsAddrInfo::onGetAddrInfo(Err code, struct addrinfo * res)
 {
-    tDLogD("DnsAddrInfo::onGetAddrInfo({}) called.", status);
+    tDLogD("DnsAddrInfo::onGetAddrInfo({}) called.", getErrName(code));
 }
 
 // ---------------------------
@@ -233,9 +233,9 @@ Err DnsNameInfo::requestNameInfoWithSync(Loop & loop, struct sockaddr const * ad
     return convertUvErrorToErrWithLogging("DnsNameInfo::requestNameInfoWithSync()", CODE);
 }
 
-void DnsNameInfo::onGetNameInfo(int status, std::string const & hostname, std::string const & service)
+void DnsNameInfo::onGetNameInfo(Err code, std::string const & hostname, std::string const & service)
 {
-    tDLogD("DnsNameInfo::onGetNameInfo({}, {}, {}) called.", status, hostname, service);
+    tDLogD("DnsNameInfo::onGetNameInfo({}, {}, {}) called.", getErrName(code), hostname, service);
 }
 
 } // namespace uvpp
