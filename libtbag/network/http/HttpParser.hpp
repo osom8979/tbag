@@ -63,16 +63,6 @@ private:
     String    _url;
     String    _body;
 
-private:
-    struct Cache
-    {
-        String field;
-        String value;
-    };
-
-private:
-    Cache _cache;
-
 public:
     HttpParser(Type type = Type::BOTH);
     virtual ~HttpParser();

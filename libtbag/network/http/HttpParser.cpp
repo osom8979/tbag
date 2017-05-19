@@ -51,6 +51,29 @@ public:
     http_parser_url url;
     http_parser_settings settings;
 
+private:
+    struct Cache
+    {
+        String field;
+        String value;
+    };
+
+private:
+    Cache _cache;
+
+public:
+    void clearCache()
+    {
+        _cache.field.clear();
+        _cache.value.clear();
+    }
+
+public:
+    inline Cache & atCache()
+    {
+        return _cache;
+    }
+
 public:
     HttpParserImpl(HttpParser * p) : parent(p)
     {
@@ -106,13 +129,13 @@ public:
     bool parseUrl(char const * buffer, Size length, bool is_connect)
     {
         // Parse a URL; return nonzero on failure.
-        return ::http_parser_parse_url(buffer, length, (is_connect != 0 ? true : false), &url) != 0;
+        return ::http_parser_parse_url(buffer, length, (is_connect ? 1 : 0), &url) == 0;
     }
 
     void pause(bool paused)
     {
         // Pause or un-pause the parser; a nonzero value pauses.
-        ::http_parser_pause(&parser, (paused != 0 ? true : false));
+        ::http_parser_pause(&parser, (paused ? 1 : 0));
     }
 
     bool bodyIsFinal() const TBAG_NOEXCEPT
@@ -169,6 +192,8 @@ int __global_http_on_message_begin__(http_parser * parser)
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->parent->clear();
     return impl->parent->onMessageBegin();
 }
 
@@ -178,6 +203,8 @@ int __global_http_on_url__(http_parser * parser, const char * at, HttpParser::Si
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->parent->setUrl(HttpParser::String(at, at + length));
     return impl->parent->onUrl(at, length);
 }
 
@@ -187,6 +214,8 @@ int __global_http_on_status__(http_parser * parser, const char * at, HttpParser:
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->parent->setStatus(HttpParser::String(at, at + length));
     return impl->parent->onStatus(at, length);
 }
 
@@ -196,6 +225,8 @@ int __global_http_on_header_field__(http_parser * parser, const char * at, HttpP
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->atCache().field = HttpParser::String(at, at + length);
     return impl->parent->onHeaderField(at, length);
 }
 
@@ -205,6 +236,12 @@ int __global_http_on_header_value__(http_parser * parser, const char * at, HttpP
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->atCache().value = HttpParser::String(at, at + length);
+    if (impl->atCache().field.empty() == false) {
+        impl->parent->setHeader(impl->atCache().field, impl->atCache().value);
+    }
+    impl->clearCache();
     return impl->parent->onHeaderValue(at, length);
 }
 
@@ -223,6 +260,8 @@ int __global_http_on_body__(http_parser * parser, const char * at, HttpParser::S
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->parent->setBody(HttpParser::String(at, at + length));
     return impl->parent->onBody(at, length);
 }
 
@@ -271,18 +310,16 @@ HttpParser::~HttpParser()
 
 void HttpParser::clear()
 {
+    _parser->clearCache();
     _headers.clear();
     _url.clear();
     _body.clear();
     _status.clear();
-
-    clearCache();
 }
 
 void HttpParser::clearCache()
 {
-    _cache.field.clear();
-    _cache.value.clear();
+    _parser->clearCache();
 }
 
 HttpParser::String HttpParser::getHeader(String const & field) const
@@ -383,35 +420,26 @@ bool HttpParser::bodyIsFinal() const TBAG_NOEXCEPT
 
 int HttpParser::onMessageBegin()
 {
-    clear();
     return 0;
 }
 
 int HttpParser::onUrl(const char * at, Size length)
 {
-    _url.assign(at, at + length);
     return 0;
 }
 
 int HttpParser::onStatus(const char * at, Size length)
 {
-    _status.assign(at, at + length);
     return 0;
 }
 
 int HttpParser::onHeaderField(const char * at, Size length)
 {
-    _cache.field = std::string(at, at + length);
     return 0;
 }
 
 int HttpParser::onHeaderValue(const char * at, Size length)
 {
-    _cache.value = std::string(at, at + length);
-    if (_cache.field.empty() == false) {
-        _headers.insert(HeaderPair(_cache.field, _cache.value));
-    }
-    clearCache();
     return 0;
 }
 
@@ -422,7 +450,6 @@ int HttpParser::onHeadersComplete()
 
 int HttpParser::onBody(const char * at, Size length)
 {
-    _body.assign(at, at + length);
     return 0;
 }
 

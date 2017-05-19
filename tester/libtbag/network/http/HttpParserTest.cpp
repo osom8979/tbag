@@ -8,8 +8,6 @@
 #include <gtest/gtest.h>
 #include <libtbag/network/http/HttpParser.hpp>
 
-#include <iostream>
-
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
@@ -37,11 +35,11 @@ TEST(HttpParserTest, Request)
 
     ASSERT_EQ(1, http.getHttpMajor());
     ASSERT_EQ(1, http.getHttpMinor());
+    ASSERT_EQ(10U, http.getHeaderSize());
     ASSERT_STREQ("github.com", http.getHeader("Host").c_str());
     ASSERT_STREQ("POST", http.getMethodName().c_str());
     ASSERT_STREQ("/joyent/http-parser", http.getUrl().c_str());
-
-    std::cout << "Body:" << http.getBody() << std::endl;
+    ASSERT_LT(0, http.getBody().size());
 }
 
 TEST(HttpParserTest, Response)
@@ -69,8 +67,8 @@ TEST(HttpParserTest, Response)
 
     ASSERT_EQ(1, http.getHttpMajor());
     ASSERT_EQ(1, http.getHttpMinor());
+    ASSERT_EQ(8U, http.getHeaderSize());
     ASSERT_EQ(301, http.getStatusCode());
-
-    std::cout << "Body:" << http.getBody() << std::endl;
+    ASSERT_LT(0, http.getBody().size());
 }
 
