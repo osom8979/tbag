@@ -55,7 +55,6 @@ private:
     struct Cache
     {
         String field;
-        String value;
     };
 
 private:
@@ -65,7 +64,6 @@ public:
     void clearCache()
     {
         _cache.field.clear();
-        _cache.value.clear();
     }
 
 public:
@@ -204,8 +202,9 @@ int __global_http_on_url__(http_parser * parser, const char * at, HttpParser::Si
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    impl->parent->setUrl(HttpParser::String(at, at + length));
-    return impl->parent->onUrl(at, length);
+    HttpParser::String const TEMP(at, at + length);
+    impl->parent->setUrl(TEMP);
+    return impl->parent->onUrl(TEMP);
 }
 
 int __global_http_on_status__(http_parser * parser, const char * at, HttpParser::Size length)
@@ -215,8 +214,9 @@ int __global_http_on_status__(http_parser * parser, const char * at, HttpParser:
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    impl->parent->setStatus(HttpParser::String(at, at + length));
-    return impl->parent->onStatus(at, length);
+    HttpParser::String const TEMP(at, at + length);
+    impl->parent->setStatus(TEMP);
+    return impl->parent->onStatus(TEMP);
 }
 
 int __global_http_on_header_field__(http_parser * parser, const char * at, HttpParser::Size length)
@@ -226,8 +226,9 @@ int __global_http_on_header_field__(http_parser * parser, const char * at, HttpP
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    impl->atCache().field = HttpParser::String(at, at + length);
-    return impl->parent->onHeaderField(at, length);
+    HttpParser::String const TEMP(at, at + length);
+    impl->atCache().field = TEMP;
+    return impl->parent->onHeaderField(TEMP);
 }
 
 int __global_http_on_header_value__(http_parser * parser, const char * at, HttpParser::Size length)
@@ -237,12 +238,12 @@ int __global_http_on_header_value__(http_parser * parser, const char * at, HttpP
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    impl->atCache().value = HttpParser::String(at, at + length);
+    HttpParser::String const TEMP(at, at + length);
     if (impl->atCache().field.empty() == false) {
-        impl->parent->setHeader(impl->atCache().field, impl->atCache().value);
+        impl->parent->setHeader(impl->atCache().field, TEMP);
     }
     impl->clearCache();
-    return impl->parent->onHeaderValue(at, length);
+    return impl->parent->onHeaderValue(TEMP);
 }
 
 int __global_http_on_headers_complete__(http_parser * parser)
@@ -261,8 +262,9 @@ int __global_http_on_body__(http_parser * parser, const char * at, HttpParser::S
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    impl->parent->setBody(HttpParser::String(at, at + length));
-    return impl->parent->onBody(at, length);
+    HttpParser::String const TEMP(at, at + length);
+    impl->parent->setBody(TEMP);
+    return impl->parent->onBody(TEMP);
 }
 
 int __global_http_on_message_complete__(http_parser * parser)
@@ -412,60 +414,6 @@ void HttpParser::pause(bool is_paused)
 bool HttpParser::bodyIsFinal() const TBAG_NOEXCEPT
 {
     return _parser->bodyIsFinal();
-}
-
-// --------------
-// Event methods.
-// --------------
-
-int HttpParser::onMessageBegin()
-{
-    return 0;
-}
-
-int HttpParser::onUrl(const char * at, Size length)
-{
-    return 0;
-}
-
-int HttpParser::onStatus(const char * at, Size length)
-{
-    return 0;
-}
-
-int HttpParser::onHeaderField(const char * at, Size length)
-{
-    return 0;
-}
-
-int HttpParser::onHeaderValue(const char * at, Size length)
-{
-    return 0;
-}
-
-int HttpParser::onHeadersComplete()
-{
-    return 0;
-}
-
-int HttpParser::onBody(const char * at, Size length)
-{
-    return 0;
-}
-
-int HttpParser::onMessageComplete()
-{
-    return 0;
-}
-
-int HttpParser::onChunkHeader()
-{
-    return 0;
-}
-
-int HttpParser::onChunkComplete()
-{
-    return 0;
 }
 
 } // namespace http

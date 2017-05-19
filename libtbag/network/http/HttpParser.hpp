@@ -120,16 +120,16 @@ public:
 
 // Event methods.
 public:
-    virtual int onMessageBegin();
-    virtual int onUrl(const char * at, Size length);
-    virtual int onStatus(const char * at, Size length);
-    virtual int onHeaderField(const char * at, Size length);
-    virtual int onHeaderValue(const char * at, Size length);
-    virtual int onHeadersComplete();
-    virtual int onBody(const char * at, Size length);
-    virtual int onMessageComplete();
-    virtual int onChunkHeader();
-    virtual int onChunkComplete();
+    virtual int onMessageBegin    () { return 0; }
+    virtual int onUrl             (String const & at) { return 0; }
+    virtual int onStatus          (String const & at) { return 0; }
+    virtual int onHeaderField     (String const & at) { return 0; }
+    virtual int onHeaderValue     (String const & at) { return 0; }
+    virtual int onHeadersComplete () { return 0; }
+    virtual int onBody            (String const & at) { return 0; }
+    virtual int onMessageComplete () { return 0; }
+    virtual int onChunkHeader     () { return 0; }
+    virtual int onChunkComplete   () { return 0; }
 };
 
 } // namespace http
