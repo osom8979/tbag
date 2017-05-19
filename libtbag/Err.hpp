@@ -24,14 +24,16 @@ NAMESPACE_LIBTBAG_OPEN
 #ifndef TBAG_ERROR_INFO_MAP
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX) \
     /* Common error codes. */ \
-    _TBAG_XX(_SUCCESS, "No error"              ) \
-    _TBAG_XX(_ILLARGS, "Illegal arguments"     ) \
-    _TBAG_XX(_NULLPTR, "Null pointer exception") \
-    _TBAG_XX(_EQUEUE , "Empty queue"           ) \
-    _TBAG_XX(_EBUFFER, "Empty buffer"          ) \
-    _TBAG_XX(_NREADY , "Not ready"             ) \
-    _TBAG_XX(_UNSUPOP, "Unsupported operation" ) \
-    _TBAG_XX(_RDERR  , "Unknown Read error"    ) \
+    _TBAG_XX(_SUCCESS , "No error"              ) \
+    _TBAG_XX(_ILLARGS , "Illegal arguments"     ) \
+    _TBAG_XX(_NULLPTR , "Null pointer exception") \
+    _TBAG_XX(_EQUEUE  , "Empty queue"           ) \
+    _TBAG_XX(_EBUFFER , "Empty buffer"          ) \
+    _TBAG_XX(_NREADY  , "Not ready"             ) \
+    _TBAG_XX(_UNSUPOP , "Unsupported operation" ) \
+    _TBAG_XX(_RDERR   , "Unknown Read error"    ) \
+    _TBAG_XX(_WRERR   , "Unknown Write error"   ) \
+    _TBAG_XX(_SHUTDOWN, "Shutdown error"        ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
