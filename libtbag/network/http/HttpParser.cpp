@@ -11,6 +11,8 @@
 #include <http_parser.h>
 #include <cassert>
 
+#define DISABLE_HTTP_PARSER_VERBOSE_LOG
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -273,6 +275,8 @@ int __global_http_on_message_complete__(http_parser * parser)
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->parent->setComplete(true);
     return impl->parent->onMessageComplete();
 }
 
@@ -317,6 +321,7 @@ void HttpParser::clear()
     _url.clear();
     _body.clear();
     _status.clear();
+    _message_complete = false;
 }
 
 void HttpParser::clearCache()
@@ -414,6 +419,76 @@ void HttpParser::pause(bool is_paused)
 bool HttpParser::bodyIsFinal() const TBAG_NOEXCEPT
 {
     return _parser->bodyIsFinal();
+}
+
+// --------------
+// Event methods.
+// --------------
+
+#ifndef DISABLE_HTTP_PARSER_VERBOSE_LOG
+#define hp_tDLogD(...) tDLogD(__VA_ARGS__)
+#else
+#define hp_tDLogD(...)
+#endif
+
+int HttpParser::onMessageBegin()
+{
+    hp_tDLogD("HttpParser::onMessageBegin()");
+    return 0;
+}
+
+int HttpParser::onUrl(String const & at)
+{
+    hp_tDLogD("HttpParser::onUrl({})", at);
+    return 0;
+}
+
+int HttpParser::onStatus(String const & at)
+{
+    hp_tDLogD("HttpParser::onStatus({})", at);
+    return 0;
+}
+
+int HttpParser::onHeaderField(String const & at)
+{
+    hp_tDLogD("HttpParser::onHeaderField({})", at);
+    return 0;
+}
+
+int HttpParser::onHeaderValue(String const & at)
+{
+    hp_tDLogD("HttpParser::onHeaderValue({})", at);
+    return 0;
+}
+
+int HttpParser::onHeadersComplete()
+{
+    hp_tDLogD("HttpParser::onHeadersComplete()");
+    return 0;
+}
+
+int HttpParser::onBody(String const & at)
+{
+    hp_tDLogD("HttpParser::onBody({})", at);
+    return 0;
+}
+
+int HttpParser::onMessageComplete()
+{
+    hp_tDLogD("HttpParser::onMessageComplete()");
+    return 0;
+}
+
+int HttpParser::onChunkHeader()
+{
+    hp_tDLogD("HttpParser::onChunkHeader()");
+    return 0;
+}
+
+int HttpParser::onChunkComplete()
+{
+    hp_tDLogD("HttpParser::onChunkComplete()");
+    return 0;
 }
 
 } // namespace http

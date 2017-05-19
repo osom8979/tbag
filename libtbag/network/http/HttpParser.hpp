@@ -63,6 +63,9 @@ private:
     String    _url;
     String    _body;
 
+private:
+    bool _message_complete;
+
 public:
     HttpParser(Type type = Type::BOTH);
     virtual ~HttpParser();
@@ -72,6 +75,8 @@ public:
     inline Type getType() const TBAG_NOEXCEPT { return TYPE; }
     inline Size getHeaderSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_headers.size())) { return _headers.size(); }
     inline bool isHeaderEmpty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_headers.empty())) { return _headers.empty(); }
+    inline bool isComplete() const TBAG_NOEXCEPT { return _message_complete; }
+    inline void setComplete(bool flag = true) TBAG_NOEXCEPT { _message_complete = flag; }
     inline String getStatus() const { return _status; }
     inline String getUrl() const { return _url; }
     inline String getBody() const { return _body; }
@@ -114,22 +119,18 @@ public:
     void pause(bool is_paused = true);
     bool bodyIsFinal() const TBAG_NOEXCEPT;
 
-public:
-    inline bool isComplete() const TBAG_NOEXCEPT
-    { return bodyIsFinal(); }
-
 // Event methods.
 public:
-    virtual int onMessageBegin    () { return 0; }
-    virtual int onUrl             (String const & at) { return 0; }
-    virtual int onStatus          (String const & at) { return 0; }
-    virtual int onHeaderField     (String const & at) { return 0; }
-    virtual int onHeaderValue     (String const & at) { return 0; }
-    virtual int onHeadersComplete () { return 0; }
-    virtual int onBody            (String const & at) { return 0; }
-    virtual int onMessageComplete () { return 0; }
-    virtual int onChunkHeader     () { return 0; }
-    virtual int onChunkComplete   () { return 0; }
+    virtual int onMessageBegin    ();
+    virtual int onUrl             (String const & at);
+    virtual int onStatus          (String const & at);
+    virtual int onHeaderField     (String const & at);
+    virtual int onHeaderValue     (String const & at);
+    virtual int onHeadersComplete ();
+    virtual int onBody            (String const & at);
+    virtual int onMessageComplete ();
+    virtual int onChunkHeader     ();
+    virtual int onChunkComplete   ();
 };
 
 } // namespace http
