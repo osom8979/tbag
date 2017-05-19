@@ -34,9 +34,9 @@ static void __global_uv_async_cb__(uv_async_t * handle)
     }
 }
 
-// -------------------------
+// ---------------------
 // Async implementation.
-// -------------------------
+// ---------------------
 
 Async::Async(Loop & loop) : Handle(uhandle::ASYNC)
 {
