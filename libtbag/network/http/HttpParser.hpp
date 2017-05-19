@@ -83,6 +83,7 @@ public:
     inline void setStatus(String const & status) { _status = status; }
     inline void setUrl(String const & url) { _url = url; }
     inline void setBody(String const & body) { _body = body; }
+    inline void appendBody(String const & body) { _body += body; }
     // @formatter:on
 
 public:

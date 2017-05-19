@@ -265,7 +265,7 @@ int __global_http_on_body__(http_parser * parser, const char * at, HttpParser::S
     assert(impl->parent != nullptr);
 
     HttpParser::String const TEMP(at, at + length);
-    impl->parent->setBody(TEMP);
+    impl->parent->appendBody(TEMP);
     return impl->parent->onBody(TEMP);
 }
 
