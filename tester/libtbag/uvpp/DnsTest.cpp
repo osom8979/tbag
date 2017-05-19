@@ -9,7 +9,7 @@
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 
 #include <iostream>
 
@@ -18,33 +18,45 @@ using namespace libtbag::uvpp;
 
 TEST(DnsTest, DnsAddrInfo)
 {
+    char const * TEST_DOMAIN_NAME = "localhost";
     Loop loop;
 
+    //addrinfo hints = {0,};
+    //hints.ai_family   = AF_INET;     // AF_INET/AF_INET6/AF_UNSPEC
+    //hints.ai_socktype = SOCK_STREAM; // SOCK_STREAM/SOCK_DGRAM/SOCK_RAW
+    //hints.ai_flags    = AI_PASSIVE;  // Fill in my IP for me.
+
     DnsAddrInfo addr;
-    addrinfo hints = {0,};
-    hints.ai_family   = AF_INET;     // AF_INET/AF_INET6/AF_UNSPEC
-    hints.ai_socktype = SOCK_STREAM; // SOCK_STREAM/SOCK_DGRAM/SOCK_RAW
-    hints.ai_flags    = AI_PASSIVE;  // Fill in my IP for me.
-    ASSERT_EQ(Err::E_SUCCESS, addr.requestAddrInfo(loop, "localhost", "", &hints));
+    ASSERT_EQ(Err::E_SUCCESS, addr.requestAddrInfo(loop, TEST_DOMAIN_NAME));
 
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_NE(nullptr, addr.getAddrInfo());
 
-    for (struct addrinfo * info = addr.getAddrInfo()->ai_next; info != nullptr; info = info->ai_next) {
-        ASSERT_TRUE(string::isMatch(getIpName(info->ai_addr), "127\\.0\\.0\\.[0-9]{1,3}"));
+    ASSERT_LT(0, addr.getAddrInfo()->ai_addrlen);
+    struct addrinfo * info = addr.getAddrInfo()->ai_next;
+    ASSERT_NE(nullptr, info);
+
+    for (; info != nullptr; info = info->ai_next) {
+        std::string ip = getIpName(info->ai_addr);
+        std::cout << "Domain: " << TEST_DOMAIN_NAME << " -> Ip: " << ip << std::endl;
+
+        using namespace libtbag::network::details;
+        ASSERT_TRUE(isIpv4(ip) || isIpv6(ip));
     }
 }
 
 TEST(DnsTest, DnsNameInfo)
 {
+    char const * TEST_IP_NAME = "127.0.0.1";
+
     Loop loop;
     DnsNameInfo name;
     struct sockaddr_in addr = {0,};
-    ASSERT_EQ(Err::E_SUCCESS, initAddress("127.0.0.1", 0, &addr));
+    ASSERT_EQ(Err::E_SUCCESS, initAddress(TEST_IP_NAME, 0, &addr));
     ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfo(loop, (sockaddr*)&addr, 0));
 
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_FALSE(name.getHost().empty()); // localhost/HostName/ETC ...
-    std::cout << "Host name: " << name.getHost() << std::endl;
+    std::cout << "Ip: " << TEST_IP_NAME << " -> Domain: " << name.getHost() << std::endl;
 }
 

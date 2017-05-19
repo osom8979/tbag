@@ -103,7 +103,7 @@ addrinfo const * DnsAddrInfo::getAddrInfo() const
 }
 
 Err DnsAddrInfo::requestAddrInfo(Loop & loop,
-                                std::string const & node,
+                                std::string const & hostname,
                                 std::string const & service,
                                 struct addrinfo const * hints)
 {
@@ -122,9 +122,25 @@ Err DnsAddrInfo::requestAddrInfo(Loop & loop,
     // Changed in version 1.3.0:
     // the callback parameter is now allowed to be NULL, in which case the request will run synchronously.
 
+    char const * real_hostname = hostname.c_str();
+    char const * real_service  = service.empty() ? nullptr : service.c_str();
+
     int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
-                                      __global_uv_getaddrinfo_cb__, node.c_str(), service.c_str(), hints);
-    return convertUvErrorToErrWithLogging("DnsAddrInfo::getAddrInfo([ASYNC])", CODE);
+                                      __global_uv_getaddrinfo_cb__, real_hostname, real_service, hints);
+    return convertUvErrorToErrWithLogging("DnsAddrInfo::requestAddrInfo()", CODE);
+}
+
+Err DnsAddrInfo::requestAddrInfoWithSync(Loop & loop,
+                                         std::string const & hostname,
+                                         std::string const & service,
+                                         struct addrinfo const * hints)
+{
+    char const * real_hostname = hostname.c_str();
+    char const * real_service  = service.empty() ? nullptr : service.c_str();
+
+    int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
+                                      nullptr, real_hostname, real_service, hints);
+    return convertUvErrorToErrWithLogging("DnsAddrInfo::requestAddrInfoWithSync()", CODE);
 }
 
 void DnsAddrInfo::freeAddrInfo()
@@ -207,7 +223,14 @@ Err DnsNameInfo::requestNameInfo(Loop & loop, struct sockaddr const * addr, int 
 
     int const CODE = ::uv_getnameinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getnameinfo_t>(),
                                       __global_uv_getnameinfo_cb__, addr, flags);
-    return convertUvErrorToErrWithLogging("DnsNameInfo::getNameInfo([ASYNC])", CODE);
+    return convertUvErrorToErrWithLogging("DnsNameInfo::requestNameInfo()", CODE);
+}
+
+Err DnsNameInfo::requestNameInfoWithSync(Loop & loop, struct sockaddr const * addr, int flags)
+{
+    int const CODE = ::uv_getnameinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getnameinfo_t>(),
+                                      nullptr, addr, flags);
+    return convertUvErrorToErrWithLogging("DnsNameInfo::requestNameInfoWithSync()", CODE);
 }
 
 void DnsNameInfo::onGetNameInfo(int status, std::string const & hostname, std::string const & service)

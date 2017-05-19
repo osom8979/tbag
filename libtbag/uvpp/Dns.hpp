@@ -68,9 +68,15 @@ public:
      *      Hint of address information.
      */
     Err requestAddrInfo(Loop & loop,
-                         std::string const & node,
-                         std::string const & service,
-                         struct addrinfo const * hints);
+                         std::string const & hostname,
+                         std::string const & service = "",
+                         struct addrinfo const * hints = nullptr);
+
+    /** Synchronous getaddrinfo(3). */
+    Err requestAddrInfoWithSync(Loop & loop,
+                                std::string const & hostname,
+                                std::string const & service = "",
+                                struct addrinfo const * hints = nullptr);
 
     /** Free the struct addrinfo. */
     void freeAddrInfo();
@@ -113,6 +119,9 @@ public:
 public:
     /** Asynchronous getnameinfo(3). */
     Err requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags);
+
+    /** Synchronous getnameinfo(3). */
+    Err requestNameInfoWithSync(Loop & loop, struct sockaddr const * addr, int flags);
 
 // Event methods.
 public:
