@@ -266,7 +266,12 @@ bool initCommonClientName(Tcp & tcp, ConnectRequest & request, std::string const
     sockaddr * sa = info->ai_addr;
     assert(sa != nullptr);
 
-    return initCommonClientSock(tcp, request, sa);
+    if (sa->sa_family == AF_INET) {
+        return initCommonClientIpv4(tcp, request, getIpName(reinterpret_cast<sockaddr_in const *>(sa)), port);
+    } else if (sa->sa_family == AF_INET6) {
+        return initCommonClientIpv6(tcp, request, getIpName(reinterpret_cast<sockaddr_in6 const *>(sa)), port);
+    }
+    return false;
 }
 
 bool initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
