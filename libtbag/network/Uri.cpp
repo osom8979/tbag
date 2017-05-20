@@ -47,6 +47,14 @@ Uri::~Uri()
 Uri & Uri::operator =(Uri const & obj)
 {
     if (this != &obj) {
+        _uri      = obj._uri     ;
+        _schema   = obj._schema  ;
+        _host     = obj._host    ;
+        _port     = obj._port    ;
+        _path     = obj._path    ;
+        _query    = obj._query   ;
+        _fragment = obj._fragment;
+        _userinfo = obj._userinfo;
     }
     return *this;
 }
@@ -54,8 +62,44 @@ Uri & Uri::operator =(Uri const & obj)
 Uri & Uri::operator =(Uri && obj)
 {
     if (this != &obj) {
+        swap(obj);
     }
     return *this;
+}
+
+void Uri::swap(Uri & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _uri     .swap(obj._uri     );
+        _schema  .swap(obj._schema  );
+        _host    .swap(obj._host    );
+        _port    .swap(obj._port    );
+        _path    .swap(obj._path    );
+        _query   .swap(obj._query   );
+        _fragment.swap(obj._fragment);
+        _userinfo.swap(obj._userinfo);
+    }
+}
+
+int Uri::getPortNumber() const
+{
+    try {
+        return std::stoi(getPort());
+    } catch (...) {
+        return 0;
+    }
+}
+
+void Uri::clear()
+{
+    _uri     .clear();
+    _schema  .clear();
+    _host    .clear();
+    _port    .clear();
+    _path    .clear();
+    _query   .clear();
+    _fragment.clear();
+    _userinfo.clear();
 }
 
 bool Uri::parse(String const & uri, bool is_connect)
@@ -89,15 +133,6 @@ bool Uri::parse(String const & uri, bool is_connect)
     updateField(UF_FRAGMENT, _fragment);
     updateField(UF_USERINFO, _userinfo);
     return true;
-}
-
-int Uri::getPortNumber() const
-{
-    try {
-        return std::stoi(getPort());
-    } catch (...) {
-        return 0;
-    }
 }
 
 // ---------------

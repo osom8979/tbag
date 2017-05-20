@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <cstdint>
+#include <algorithm>
 #include <string>
 
 // -------------------
@@ -55,6 +56,17 @@ public:
 
         inline bool operator ==(FieldInfo const & obj) const TBAG_NOEXCEPT
         { return offset == obj.offset && length == obj.length && enable == obj.enable; }
+        inline bool operator !=(FieldInfo const & obj) const TBAG_NOEXCEPT
+        { return !((*this).operator==(obj)); }
+
+        void swap(FieldInfo & obj) TBAG_NOEXCEPT
+        {
+            if (this != &obj) {
+                std::swap(offset, obj.offset);
+                std::swap(length, obj.length);
+                std::swap(enable, obj.enable);
+            }
+        }
     };
 
 private:
@@ -81,7 +93,7 @@ public:
     Uri & operator =(Uri && obj);
 
 public:
-    bool parse(String const & uri, bool is_connect = false);
+    void swap(Uri & obj) TBAG_NOEXCEPT;
 
 public:
     inline FieldInfo getSchemaInfo  () const TBAG_NOEXCEPT { return _schema  ; }
@@ -112,6 +124,10 @@ public:
 
 public:
     int getPortNumber() const;
+
+public:
+    void clear();
+    bool parse(String const & uri, bool is_connect = false);
 
 // Static methods.
 public:
