@@ -68,7 +68,13 @@ private:
 
 public:
     HttpParser(Type type = Type::BOTH);
+    HttpParser(HttpParser const & obj);
+    HttpParser(HttpParser && obj);
     virtual ~HttpParser();
+
+public:
+    HttpParser & operator = (HttpParser const & obj);
+    HttpParser & operator = (HttpParser && obj);
 
 public:
     // @formatter:off

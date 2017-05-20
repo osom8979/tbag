@@ -10,6 +10,8 @@
 
 #include <http_parser.h>
 #include <cassert>
+#include <algorithm>
+#include <utility>
 
 #define DISABLE_HTTP_PARSER_VERBOSE_LOG
 
@@ -309,9 +311,43 @@ HttpParser::HttpParser(Type type) : TYPE(type), _parser(new HttpParserImpl(this)
     assert(static_cast<bool>(_parser));
 }
 
+HttpParser::HttpParser(HttpParser const & obj) : TYPE(obj.TYPE)
+{
+    (*this) = obj;
+}
+
+HttpParser::HttpParser(HttpParser && obj) : TYPE(obj.TYPE)
+{
+    (*this) = std::move(obj);
+}
+
 HttpParser::~HttpParser()
 {
     // EMPTY.
+}
+
+HttpParser & HttpParser::operator = (HttpParser const & obj)
+{
+    if (this != &obj) {
+        _headers = obj._headers;
+        _status  = obj._status;
+        _url     = obj._url;
+        _body    = obj._body;
+        _message_complete = obj._message_complete;
+    }
+    return *this;
+}
+
+HttpParser & HttpParser::operator = (HttpParser && obj)
+{
+    if (this != &obj) {
+        _headers.swap(obj._headers);
+        _status .swap(obj._status );
+        _url    .swap(obj._url    );
+        _body   .swap(obj._body   );
+        std::swap(_message_complete, obj._message_complete);
+    }
+    return *this;
 }
 
 void HttpParser::clear()
