@@ -60,7 +60,7 @@ public:
      *
      * @param[in] loop
      *      Loop object.
-     * @param[in] node
+     * @param[in] hostname
      *      DNS name or IP address (e.g. "www.example.com")
      * @param[in] service
      *      Service name or Port number. (e.g. "http")
