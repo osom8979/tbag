@@ -85,6 +85,17 @@ struct TBAG_API HttpBuilder
         return *this;
     }
 
+// Alias methods.
+public:
+    inline HttpBuilder & setVersion(int maj, int min)
+    { major = maj; minor = min; return *this; }
+
+    inline HttpBuilder & setStatus(int val)
+    { return setStatus(std::to_string(val)); }
+
+    inline HttpBuilder & setHeader(String const & key, String const & val)
+    { return insertHeader(key, val); }
+
 public:
     String buildRequest();
     String buildResponse();
