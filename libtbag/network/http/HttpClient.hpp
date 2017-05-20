@@ -144,6 +144,11 @@ public:
 using TcpHttpClient  = HttpClient<tcp::TcpClient>;
 using PipeHttpClient = HttpClient<pipe::PipeClient>;
 
+// Forward declaration.
+class Uri;
+
+Err requestWithSync(Uri const & uri, uint64_t timeout, HttpParser & result);
+
 } // namespace http
 } // namespace network
 
