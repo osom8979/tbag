@@ -49,7 +49,7 @@ HttpBuilder & HttpBuilder::operator =(HttpBuilder const & obj)
         headers = obj.headers;
         body    = obj.body   ;
         method  = obj.method ;
-        uri     = obj.uri    ;
+        url     = obj.url    ;
         reason  = obj.reason ;
         status  = obj.status ;
     }
@@ -70,7 +70,7 @@ void HttpBuilder::swap(HttpBuilder & obj)
     headers.swap(obj.headers);
     body   .swap(obj.body   );
     method .swap(obj.method );
-    uri    .swap(obj.uri    );
+    url    .swap(obj.url    );
     reason .swap(obj.reason );
     std::swap(status, obj.status);
 }
@@ -81,34 +81,27 @@ void HttpBuilder::clear()
     headers.clear();
     body   .clear();
     method .clear();
-    uri    .clear();
+    url    .clear();
     reason .clear();
     status = 0;
 }
 
 HttpBuilder::String HttpBuilder::request() const
 {
-    return buildRequest(method, uri.getPath(), headers, body, version.major, version.minor);
+    return buildRequest(method, url, headers, body, version);
 }
 
 HttpBuilder::String HttpBuilder::response() const
 {
-    return buildResponse(getStatus(), reason, headers, body, version.major, version.minor);
+    return buildResponse(getStatus(), reason, headers, body, version);
 }
 
-HttpBuilder::String HttpBuilder::buildVersionString(int major, int minor)
-{
-    std::stringstream ss;
-    ss << HTTP << "/" << major << "." << minor;
-    return ss.str();
-}
-
-HttpBuilder::String HttpBuilder::buildRequest(String const & method, String const & uri,
+HttpBuilder::String HttpBuilder::buildRequest(String const & method, String const & url,
                                               HeaderMap const & headers, String const & body,
-                                              int major, int minor)
+                                              HttpVersion const & version)
 {
-    std::stringstream ss;
-    ss << method << SP << uri << SP << buildVersionString(major, minor) << CRLF;
+    StringStream ss;
+    ss << method << SP << url << SP << version.toString() << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }
@@ -118,10 +111,10 @@ HttpBuilder::String HttpBuilder::buildRequest(String const & method, String cons
 
 HttpBuilder::String HttpBuilder::buildResponse(String const & status, String const & reason,
                                                HeaderMap const & headers, String const & body,
-                                               int major, int minor)
+                                               HttpVersion const & version)
 {
     std::stringstream ss;
-    ss << buildVersionString(major, minor) << SP << status << SP << reason << CRLF;
+    ss << version.toString() << SP << status << SP << reason << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }

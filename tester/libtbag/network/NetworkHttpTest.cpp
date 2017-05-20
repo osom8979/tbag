@@ -30,7 +30,7 @@ TEST(NetworkHttpTest, TcpHttpClient)
         return;
     }
 
-    auto builder = HttpBuilder(1, 1).setMethod("GET").setUri("/")
+    auto builder = HttpBuilder(1, 1).setMethod("GET").setUrl("/")
             .setHeader("Host", "osom8979.github.io")
             .setHeader("User-Agent", "curl/7.51.0")
             .setHeader("Accept", "*/*");
@@ -38,7 +38,7 @@ TEST(NetworkHttpTest, TcpHttpClient)
     http.setup(builder, [&](Err code, HttpParser const & response){
         result = code;
         status = response.getStatusCode();
-        std::cout << response.getBody() << std::endl;
+        std::cout << response.body << std::endl;
     }, TcpHttpClient::Millisec(10000));
 
     ASSERT_EQ(Err::E_SUCCESS, loop.run());

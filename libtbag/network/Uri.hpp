@@ -129,6 +129,14 @@ public:
     void clear();
     bool parse(String const & uri, bool is_connect = false);
 
+// Alias methods.
+public:
+    inline bool set(String const & uri, bool is_connect = false)
+    { return parse(uri, is_connect); }
+
+    inline String get() const
+    { return _uri; }
+
 // Static methods.
 public:
     static String getFieldString(String const & original, FieldInfo const & info);

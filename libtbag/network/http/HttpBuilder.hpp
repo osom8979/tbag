@@ -24,10 +24,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-TBAG_CONSTEXPR char const * const HTTP = "HTTP";
-TBAG_CONSTEXPR char const * const   SP = " ";
-TBAG_CONSTEXPR char const * const CRLF = "\r\n";
-
 /**
  * HttpBuilder class prototype.
  *
@@ -60,7 +56,7 @@ public:
     inline HttpBuilder & setHeaders(HeaderMap const & val) { headers = val;  return *this; }
     inline HttpBuilder & setBody   (String    const & val) { body    = val;  return *this; }
     inline HttpBuilder & setMethod (String    const & val) { method  = val;  return *this; }
-    inline HttpBuilder & setUri    (String    const & val) { uri     = val;  return *this; }
+    inline HttpBuilder & setUrl    (String    const & val) { url     = val;  return *this; }
     inline HttpBuilder & setReason (String    const & val) { reason  = val;  return *this; }
     // @formatter:on
 
@@ -81,13 +77,12 @@ public:
     String response() const;
 
 public:
-    static String buildVersionString(int major = 1, int minor = 1);
-    static String buildRequest(String const & method, String const & uri,
+    static String buildRequest(String const & method, String const & url,
                                HeaderMap const & headers, String const & body,
-                               int major = 1, int minor = 1);
+                               HttpVersion const & version);
     static String buildResponse(String const & status, String const & reason,
                                 HeaderMap const & headers, String const & body,
-                                int major = 1, int minor = 1);
+                                HttpVersion const & version);
 };
 
 } // namespace http

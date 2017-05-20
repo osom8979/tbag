@@ -207,7 +207,7 @@ int __global_http_on_url__(http_parser * parser, const char * at, HttpParser::Si
     assert(impl->parent != nullptr);
 
     HttpParser::String const TEMP(at, at + length);
-    impl->parent->setUrl(TEMP);
+    impl->parent->url = TEMP;
     return impl->parent->onUrl(TEMP);
 }
 
@@ -244,7 +244,7 @@ int __global_http_on_header_value__(http_parser * parser, const char * at, HttpP
 
     HttpParser::String const TEMP(at, at + length);
     if (impl->atCache().field.empty() == false) {
-        impl->parent->setHeader(impl->atCache().field, TEMP);
+        impl->parent->insertHeader(impl->atCache().field, TEMP);
     }
     impl->clearCache();
     return impl->parent->onHeaderValue(TEMP);
@@ -326,25 +326,37 @@ HttpParser::~HttpParser()
     // EMPTY.
 }
 
-HttpParser & HttpParser::operator = (HttpParser const & obj)
+HttpParser & HttpParser::operator =(HttpParser const & obj)
 {
     if (this != &obj) {
-        _headers = obj._headers;
-        _status  = obj._status;
-        _url     = obj._url;
-        _body    = obj._body;
+        version = obj.version;
+        headers = obj.headers;
+        body    = obj.body;
+
+        method = obj.method;
+        url    = obj.url;
+
+        status = obj.status;
+        reason = obj.reason;
+
         _message_complete = obj._message_complete;
     }
     return *this;
 }
 
-HttpParser & HttpParser::operator = (HttpParser && obj)
+HttpParser & HttpParser::operator =(HttpParser && obj)
 {
     if (this != &obj) {
-        _headers.swap(obj._headers);
-        _status .swap(obj._status );
-        _url    .swap(obj._url    );
-        _body   .swap(obj._body   );
+        version.swap(obj.version);
+        headers.swap(obj.headers);
+        body   .swap(obj.body   );
+
+        method.swap(obj.method);
+        url   .swap(obj.url   );
+
+        std::swap(status, obj.status);
+        reason.swap(obj.reason);
+
         std::swap(_message_complete, obj._message_complete);
     }
     return *this;
@@ -353,35 +365,23 @@ HttpParser & HttpParser::operator = (HttpParser && obj)
 void HttpParser::clear()
 {
     _parser->clearCache();
-    _headers.clear();
-    _url.clear();
-    _body.clear();
-    _status.clear();
+
+    version.clear();
+    headers.clear();
+    body.clear();
+
+    method.clear();
+    url.clear();
+
+    status = 0;
+    reason.clear();
+
     _message_complete = false;
 }
 
 void HttpParser::clearCache()
 {
     _parser->clearCache();
-}
-
-HttpParser::String HttpParser::getHeader(String const & field) const
-{
-    auto itr = _headers.find(field);
-    if (itr != _headers.end()) {
-        return itr->second;
-    }
-    return String();
-}
-
-bool HttpParser::setHeader(String const & field, String const & value)
-{
-    return _headers.insert(HeaderPair(field, value)).second;
-}
-
-bool HttpParser::eraseHeader(String const & field)
-{
-    return _headers.erase(field) == 1U;
 }
 
 int HttpParser::getHttpMajor() const TBAG_NOEXCEPT
