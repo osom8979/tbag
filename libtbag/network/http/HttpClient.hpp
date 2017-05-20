@@ -91,7 +91,7 @@ public:
     virtual void onConnect(Err code) override
     {
         if (code == Err::E_SUCCESS) {
-            auto buffer = _request.buildRequest();
+            auto buffer = _request.request();
             if (this->write(buffer.data(), buffer.size(), _timeout.count()) == false) {
                 _callback(Err::E_WRERR, _response);
                 this->close();

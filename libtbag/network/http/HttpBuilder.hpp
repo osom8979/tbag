@@ -15,9 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-
-#include <string>
-#include <map>
+#include <libtbag/network/http/HttpProperty.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,84 +34,61 @@ TBAG_CONSTEXPR char const * const CRLF = "\r\n";
  * @author zer0
  * @date   2017-05-19
  */
-struct TBAG_API HttpBuilder
+class TBAG_API HttpBuilder : public HttpProperty
 {
-    using String = std::string;
-    using Size   = std::size_t;
-
-    using HeaderMap = std::map<String, String>;
-    using HeaderPair = HeaderMap::value_type;
-
-    int major;
-    int minor;
-
-    HeaderMap headers;
-    String    body;
-
-    String method; ///< Request only.
-    String    uri; ///< Request only.
-
-    String status; ///< Response only.
-    String reason; ///< Response only.
-
+public:
     HttpBuilder();
-    HttpBuilder(int http_major, int http_minor);
+    HttpBuilder(int maj, int min);
+    HttpBuilder(HttpBuilder const & obj);
+    HttpBuilder(HttpBuilder && obj);
     ~HttpBuilder();
 
-    HttpBuilder & clear();
+public:
+    HttpBuilder & operator =(HttpBuilder const & obj);
+    HttpBuilder & operator =(HttpBuilder && obj);
 
+public:
+    void swap(HttpBuilder & obj);
+    void clear();
+
+public:
     // @formatter:off
-    inline HttpBuilder & setMajor  (int val) { major = val; return *this; }
-    inline HttpBuilder & setMinor  (int val) { minor = val; return *this; }
-    inline HttpBuilder & setHeaders(HeaderMap const & val) { headers = val; return *this; }
-    inline HttpBuilder & setBody   (String    const & val) { body    = val; return *this; }
-    inline HttpBuilder & setMethod (String    const & val) { method  = val; return *this; }
-    inline HttpBuilder & setUri    (String    const & val) { uri     = val; return *this; }
-    inline HttpBuilder & setStatus (String    const & val) { status  = val; return *this; }
-    inline HttpBuilder & setReason (String    const & val) { reason  = val; return *this; }
+    inline HttpBuilder & setMajor(int val) { version.major = val; return *this; }
+    inline HttpBuilder & setMinor(int val) { version.minor = val; return *this; }
+    inline HttpBuilder & setVersion(int maj, int min) { version.set(maj, min); return *this; }
+
+    inline HttpBuilder & setHeaders(HeaderMap const & val) { headers = val;  return *this; }
+    inline HttpBuilder & setBody   (String    const & val) { body    = val;  return *this; }
+    inline HttpBuilder & setMethod (String    const & val) { method  = val;  return *this; }
+    inline HttpBuilder & setUri    (String    const & val) { uri     = val;  return *this; }
+    inline HttpBuilder & setReason (String    const & val) { reason  = val;  return *this; }
     // @formatter:on
 
-    inline HttpBuilder & insertHeader(String const & key, String const & val)
+    inline HttpBuilder & setStatus (int val)
     {
-        headers.insert(HeaderPair(key, val));
+        status = val;
         return *this;
     }
-
-    inline HttpBuilder & eraseHeader(String const & key)
-    {
-        headers.erase(key);
-        return *this;
-    }
-
-// Alias methods.
-public:
-    inline HttpBuilder & setVersion(int maj, int min)
-    { major = maj; minor = min; return *this; }
-
-    inline HttpBuilder & setStatus(int val)
-    { return setStatus(std::to_string(val)); }
 
     inline HttpBuilder & setHeader(String const & key, String const & val)
-    { return insertHeader(key, val); }
+    {
+        insertHeader(key, val);
+        return *this;
+    }
 
 public:
-    String buildRequest();
-    String buildResponse();
+    String request() const;
+    String response() const;
 
 public:
     static String buildVersionString(int major = 1, int minor = 1);
-    static String buildRequest(String const & method,
-                               String const & uri,
-                               HeaderMap const & headers,
-                               String const & body,
+    static String buildRequest(String const & method, String const & uri,
+                               HeaderMap const & headers, String const & body,
                                int major = 1, int minor = 1);
-    static String buildResponse(String const & status,
-                                String const & reason,
-                                HeaderMap const & headers,
-                                String const & body,
+    static String buildResponse(String const & status, String const & reason,
+                                HeaderMap const & headers, String const & body,
                                 int major = 1, int minor = 1);
 };
-
 
 } // namespace http
 } // namespace network

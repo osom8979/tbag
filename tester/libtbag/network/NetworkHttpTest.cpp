@@ -31,9 +31,9 @@ TEST(NetworkHttpTest, TcpHttpClient)
     }
 
     auto builder = HttpBuilder(1, 1).setMethod("GET").setUri("/")
-            .insertHeader("Host", "osom8979.github.io")
-            .insertHeader("User-Agent", "curl/7.51.0")
-            .insertHeader("Accept", "*/*");
+            .setHeader("Host", "osom8979.github.io")
+            .setHeader("User-Agent", "curl/7.51.0")
+            .setHeader("Accept", "*/*");
 
     http.setup(builder, [&](Err code, HttpParser const & response){
         result = code;
