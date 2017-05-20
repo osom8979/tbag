@@ -17,6 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/uvpp/Stream.hpp>
+#include <libtbag/network/Uri.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -101,6 +102,7 @@ TBAG_API bool initCommonClientIpv4(Tcp & tcp, ConnectRequest & request, std::str
 TBAG_API bool initCommonClientIpv6(Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
 TBAG_API bool initCommonClientName(Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
 TBAG_API bool initCommonClient    (Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
+TBAG_API bool initCommonClient    (Tcp & tcp, ConnectRequest & request, network::Uri const & uri);
 
 TBAG_API bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr);
 TBAG_API bool initCommonServerIpv4(Tcp & tcp, std::string const & ip, int port);

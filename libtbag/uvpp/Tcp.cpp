@@ -258,7 +258,9 @@ bool initCommonClientName(Tcp & tcp, ConnectRequest & request, std::string const
 
     addrinfo const * info = addr.getAddrInfo();
     assert(info != nullptr);
-    assert(info->ai_addrlen >= 1);
+    if (info->ai_addrlen == 0) {
+        return false;
+    }
 
     addrinfo * next = addr.getAddrInfo()->ai_next;
     assert(next != nullptr);
@@ -267,9 +269,11 @@ bool initCommonClientName(Tcp & tcp, ConnectRequest & request, std::string const
     assert(sa != nullptr);
 
     if (sa->sa_family == AF_INET) {
-        return initCommonClientIpv4(tcp, request, getIpName(reinterpret_cast<sockaddr_in const *>(sa)), port);
+        sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
+        return initCommonClientIpv4(tcp, request, getIpName(ipv4_sa), port);
     } else if (sa->sa_family == AF_INET6) {
-        return initCommonClientIpv6(tcp, request, getIpName(reinterpret_cast<sockaddr_in6 const *>(sa)), port);
+        sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
+        return initCommonClientIpv6(tcp, request, getIpName(ipv6_sa), port);
     }
     return false;
 }
@@ -283,6 +287,55 @@ bool initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & h
         return initCommonClientIpv6(tcp, request, host, port);
     }
     return initCommonClientName(tcp, request, host, port);
+}
+
+bool initCommonClient(Tcp & tcp, ConnectRequest & request, network::Uri const & uri)
+{
+    if (uri.isHost() == false) {
+        tDLogE("initCommonClient() Unknown host from uri: {}.", uri.get());
+        return false;
+    }
+    if (uri.isPort()) {
+        return initCommonClientName(tcp, request, uri.getHost(), uri.getPortNumber());
+    }
+
+    if (uri.isSchema() == false) {
+        tDLogE("initCommonClient() Unknown schema from uri: {}.", uri.get());
+        return false;
+    }
+
+    std::string const SERVICE = uri.getSchema();
+    std::string const HOST    = uri.getHost();
+
+    assert(SERVICE.empty() == false);
+    assert(HOST.empty() == false);
+
+    Loop loop;
+    DnsAddrInfo addr;
+    if (addr.requestAddrInfoWithSync(loop, HOST, SERVICE) != Err::E_SUCCESS) {
+        return false;
+    }
+
+    addrinfo const * info = addr.getAddrInfo();
+    assert(info != nullptr);
+    if (info->ai_addrlen == 0) {
+        return false;
+    }
+
+    addrinfo * next = addr.getAddrInfo()->ai_next;
+    assert(next != nullptr);
+
+    sockaddr * sa = info->ai_addr;
+    assert(sa != nullptr);
+
+    if (sa->sa_family == AF_INET) {
+        sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
+        return initCommonClientIpv4(tcp, request, getIpName(ipv4_sa), ipv4_sa->sin_port);
+    } else if (sa->sa_family == AF_INET6) {
+        sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
+        return initCommonClientIpv6(tcp, request, getIpName(ipv6_sa), ipv6_sa->sin6_port);
+    }
+    return false;
 }
 
 // -----------------------
