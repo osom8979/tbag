@@ -27,7 +27,7 @@ TEST(DnsTest, DnsAddrInfo)
     //hints.ai_flags    = AI_PASSIVE;  // Fill in my IP for me.
 
     DnsAddrInfo addr;
-    ASSERT_EQ(Err::E_SUCCESS, addr.requestAddrInfo(loop, TEST_DOMAIN_NAME));
+    ASSERT_EQ(Err::E_SUCCESS, addr.requestAddrInfo(loop, TEST_DOMAIN_NAME, "http"));
 
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_NE(nullptr, addr.getAddrInfo());
@@ -42,6 +42,7 @@ TEST(DnsTest, DnsAddrInfo)
 
         using namespace libtbag::network::details;
         ASSERT_TRUE(isIpv4(ip) || isIpv6(ip));
+        ASSERT_EQ(80, getPortNumber(info->ai_addr));
     }
 }
 
