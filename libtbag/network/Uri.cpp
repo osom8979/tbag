@@ -12,7 +12,6 @@
 #include <http_parser.h>
 #include <cassert>
 #include <utility>
-#include <dep/http-parser/http_parser.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -92,9 +91,22 @@ bool Uri::parse(String const & uri, bool is_connect)
     return true;
 }
 
+int Uri::getPortNumber() const
+{
+    try {
+        return std::stoi(getPort());
+    } catch (...) {
+        return 0;
+    }
+}
+
+// ---------------
+// Static methods.
+// ---------------
+
 Uri::String Uri::getFieldString(String const & original, FieldInfo const & info)
 {
-    return original.substr(info.offset, info.offset + info.length);
+    return original.substr(info.offset, info.length);
 }
 
 } // namespace network

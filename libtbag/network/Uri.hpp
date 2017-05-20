@@ -93,6 +93,15 @@ public:
     inline FieldInfo getUserinfoInfo() const TBAG_NOEXCEPT { return _userinfo; }
 
 public:
+    inline bool isSchema  () const TBAG_NOEXCEPT { return _schema  .enable; }
+    inline bool isHost    () const TBAG_NOEXCEPT { return _host    .enable; }
+    inline bool isPort    () const TBAG_NOEXCEPT { return _port    .enable; }
+    inline bool isPath    () const TBAG_NOEXCEPT { return _path    .enable; }
+    inline bool isQuery   () const TBAG_NOEXCEPT { return _query   .enable; }
+    inline bool isFragment() const TBAG_NOEXCEPT { return _fragment.enable; }
+    inline bool isUserinfo() const TBAG_NOEXCEPT { return _userinfo.enable; }
+
+public:
     String getSchema  () const { return getFieldString(_uri, _schema  ); }
     String getHost    () const { return getFieldString(_uri, _host    ); }
     String getPort    () const { return getFieldString(_uri, _port    ); }
@@ -101,6 +110,10 @@ public:
     String getFragment() const { return getFieldString(_uri, _fragment); }
     String getUserinfo() const { return getFieldString(_uri, _userinfo); }
 
+public:
+    int getPortNumber() const;
+
+// Static methods.
 public:
     static String getFieldString(String const & original, FieldInfo const & info);
 };

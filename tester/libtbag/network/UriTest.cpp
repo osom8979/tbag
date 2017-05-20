@@ -32,5 +32,23 @@ TEST(UriTest, Default)
     ASSERT_EQ(RESULT_QUERY   , uri.getQueryInfo   ());
     ASSERT_EQ(RESULT_FRAGMENT, uri.getFragmentInfo());
     ASSERT_EQ(RESULT_USERINFO, uri.getUserinfoInfo());
+
+    ASSERT_TRUE(uri.isSchema  ());
+    ASSERT_TRUE(uri.isHost    ());
+    ASSERT_TRUE(uri.isPort    ());
+    ASSERT_TRUE(uri.isPath    ());
+    ASSERT_TRUE(uri.isQuery   ());
+    ASSERT_TRUE(uri.isFragment());
+    ASSERT_TRUE(uri.isUserinfo());
+
+    ASSERT_STREQ("http"        , uri.getSchema  ().c_str());
+    ASSERT_STREQ("host.com"    , uri.getHost    ().c_str());
+    ASSERT_STREQ("8080"        , uri.getPort    ().c_str());
+    ASSERT_STREQ("/p/a/t/h"    , uri.getPath    ().c_str());
+    ASSERT_STREQ("query=string", uri.getQuery   ().c_str());
+    ASSERT_STREQ("hash"        , uri.getFragment().c_str());
+    ASSERT_STREQ("a:b"         , uri.getUserinfo().c_str());
+
+    ASSERT_EQ(8080, uri.getPortNumber());
 }
 
