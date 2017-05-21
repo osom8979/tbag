@@ -15,12 +15,15 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
+
 #include <libtbag/network/tcp/TcpClient.hpp>
 #include <libtbag/network/pipe/PipeClient.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
+#include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/Type.hpp>
 
 #include <functional>
 #include <chrono>
@@ -50,8 +53,11 @@ public:
     using String   = HttpParser::String;
     using Size     = HttpParser::Size;
     using Buffer   = std::vector<char>;
-    using Millisec = std::chrono::milliseconds;
-    using Seconds  = std::chrono::seconds;
+
+    using SystemClock = std::chrono::system_clock;
+    using TimePoint   = SystemClock::time_point;
+    using Millisec    = std::chrono::milliseconds;
+    using Seconds     = std::chrono::seconds;
 
     using OnResponse = std::function<void(Err, HttpParser const &)>;
 
@@ -61,8 +67,9 @@ private:
 
 private:
     Buffer     _buffer;
-    OnResponse _callback;
+    OnResponse _response_cb;
     Millisec   _timeout;
+    TimePoint  _start_time;
 
 public:
     HttpClient(Loop & loop) : Parent(loop), _request(), _response(HttpParser::Type::RESPONSE)
@@ -79,11 +86,12 @@ public:
     // @formatter:on
 
 public:
-    void setup(HttpBuilder const request, OnResponse const & callback, Millisec const & timeout = Millisec(0))
+    void setup(HttpBuilder const & request, OnResponse const & response_cb, Millisec const & timeout = Millisec(0))
     {
-        _request  = request;
-        _callback = callback;
-        _timeout  = timeout;
+        _request     = request;
+        _response_cb = response_cb;
+        _timeout     = timeout;
+        _start_time  = SystemClock::now();
     }
 
 // TcpClient callback.
@@ -91,20 +99,23 @@ public:
     virtual void onConnect(Err code) override
     {
         if (code == Err::E_SUCCESS) {
+            using namespace std::chrono;
+
             auto buffer = _request.request();
-            if (this->write(buffer.data(), buffer.size(), _timeout.count()) == false) {
-                _callback(Err::E_WRERR, _response);
+            Millisec left_time = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
+            if (this->write(buffer.data(), buffer.size(), left_time.count()) == false) {
+                _response_cb(Err::E_WRERR, _response);
                 this->close();
             }
         } else {
-            _callback(code, _response);
+            _response_cb(code, _response);
             this->close();
         }
     }
 
     virtual void onShutdown(Err code) override
     {
-        _callback(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _response);
+        _response_cb(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _response);
         this->close();
     }
 
@@ -113,7 +124,7 @@ public:
         if (code == Err::E_SUCCESS) {
             this->start();
         } else {
-            _callback(code, _response);
+            _response_cb(code, _response);
             this->close();
         }
     }
@@ -122,19 +133,19 @@ public:
     {
         if (code == Err::E_EOF) {
             _response.execute(buffer, size);
-            _callback(Err::E_SUCCESS, _response);
+            _response_cb(Err::E_SUCCESS, _response);
 
             this->stop();
             this->close();
         } else if (code == Err::E_SUCCESS) {
             _response.execute(buffer, size);
             if (_response.isComplete()) {
-                _callback(Err::E_SUCCESS, _response);
+                _response_cb(Err::E_SUCCESS, _response);
                 this->stop();
                 this->close();
             }
         } else {
-            _callback(code, _response);
+            _response_cb(code, _response);
             this->stop();
             this->close();
         }
@@ -144,10 +155,9 @@ public:
 using TcpHttpClient  = HttpClient<tcp::TcpClient>;
 using PipeHttpClient = HttpClient<pipe::PipeClient>;
 
-// Forward declaration.
-class Uri;
-
-Err requestWithSync(Uri const & uri, uint64_t timeout, HttpParser & result);
+Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeout, HttpResponse & result);
+Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result);
+Err requestWithSync(std::string const & uri, uint64_t timeout, HttpResponse & result);
 
 } // namespace http
 } // namespace network

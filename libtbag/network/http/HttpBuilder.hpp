@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
 
 // -------------------

@@ -33,6 +33,19 @@ TBAG_CONSTEXPR char const * const HTTP = "HTTP";
 TBAG_CONSTEXPR char const * const   SP = " ";
 TBAG_CONSTEXPR char const * const CRLF = "\r\n";
 
+TBAG_CONSTEXPR char const * const METHOD_DELETE = "DELETE";
+TBAG_CONSTEXPR char const * const METHOD_GET    = "GET";
+TBAG_CONSTEXPR char const * const METHOD_HEAD   = "HEAD";
+TBAG_CONSTEXPR char const * const METHOD_POST   = "POST";
+TBAG_CONSTEXPR char const * const METHOD_PUT    = "PUT";
+
+TBAG_CONSTEXPR char const * const HEADER_HOST       = "Host";
+TBAG_CONSTEXPR char const * const HEADER_USER_AGENT = "User-Agent";
+TBAG_CONSTEXPR char const * const HEADER_ACCEPT     = "Accept";
+
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT     = "*/*";
+
 struct HttpVersion
 {
     using BaseChar     = char;
@@ -62,6 +75,11 @@ struct HttpVersion
             swap(obj);
         }
         return *this;
+    }
+
+    inline friend bool operator ==(HttpVersion const & lh, HttpVersion const & rh) TBAG_NOEXCEPT
+    {
+        return lh.major == rh.major && lh.minor == rh.minor;
     }
 
     inline void set(int maj, int min) TBAG_NOEXCEPT
@@ -119,6 +137,9 @@ struct HttpCommon
 
     inline bool eraseHeader(String const & key)
     { return headers.erase(key) == 1U; }
+
+    inline bool existsHeader(String const & key) const
+    { return headers.find(key) != headers.end(); }
 
     String getHeader(String const & key) const
     {
