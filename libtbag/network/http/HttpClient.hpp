@@ -43,7 +43,7 @@ namespace http    {
  * @date   2017-05-19
  */
 template <typename ClientType>
-class TBAG_API HttpClient : public ClientType
+class HttpClient : public ClientType
 {
 public:
     using Parent = ClientType;
@@ -62,8 +62,8 @@ public:
     using OnResponse = std::function<void(Err, HttpParser const &)>;
 
 private:
-    HttpBuilder _request;
-    HttpParser  _response;
+    HttpBuilder _builder;
+    HttpParser  _parser;
 
 private:
     Buffer     _buffer;
@@ -72,23 +72,25 @@ private:
     TimePoint  _start_time;
 
 public:
-    HttpClient(Loop & loop) : Parent(loop), _request(), _response(HttpParser::Type::RESPONSE)
+    HttpClient(Loop & loop) : Parent(loop), _builder(), _parser(HttpParser::Type::RESPONSE)
     { /* EMPTY. */ }
     virtual ~HttpClient()
     { /* EMPTY. */ }
 
 public:
     // @formatter:off
-    inline HttpBuilder       & atRequest ()       TBAG_NOEXCEPT { return  _request; }
-    inline HttpBuilder const & atRequest () const TBAG_NOEXCEPT { return  _request; }
-    inline HttpParser        & atResponse()       TBAG_NOEXCEPT { return _response; }
-    inline HttpParser  const & atResponse() const TBAG_NOEXCEPT { return _response; }
+    inline HttpBuilder       & atBuilder()       TBAG_NOEXCEPT { return _builder; }
+    inline HttpBuilder const & atBuilder() const TBAG_NOEXCEPT { return _builder; }
+    inline HttpParser        & atParser ()       TBAG_NOEXCEPT { return _parser;  }
+    inline HttpParser  const & atParser () const TBAG_NOEXCEPT { return _parser;  }
     // @formatter:on
 
 public:
-    void setup(HttpBuilder const & request, OnResponse const & response_cb, Millisec const & timeout = Millisec(0))
+    void setup(HttpBuilder const & request,
+               OnResponse const & response_cb,
+               Millisec const & timeout = Millisec(0))
     {
-        _request     = request;
+        _builder     = request;
         _response_cb = response_cb;
         _timeout     = timeout;
         _start_time  = SystemClock::now();
@@ -101,21 +103,21 @@ public:
         if (code == Err::E_SUCCESS) {
             using namespace std::chrono;
 
-            auto buffer = _request.request();
+            auto buffer = _builder.request();
             Millisec left_time = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
             if (this->write(buffer.data(), buffer.size(), left_time.count()) == false) {
-                _response_cb(Err::E_WRERR, _response);
+                _response_cb(Err::E_WRERR, _parser);
                 this->close();
             }
         } else {
-            _response_cb(code, _response);
+            _response_cb(code, _parser);
             this->close();
         }
     }
 
     virtual void onShutdown(Err code) override
     {
-        _response_cb(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _response);
+        _response_cb(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _parser);
         this->close();
     }
 
@@ -124,7 +126,7 @@ public:
         if (code == Err::E_SUCCESS) {
             this->start();
         } else {
-            _response_cb(code, _response);
+            _response_cb(code, _parser);
             this->close();
         }
     }
@@ -132,20 +134,21 @@ public:
     virtual void onRead(Err code, char const * buffer, Size size) override
     {
         if (code == Err::E_EOF) {
-            _response.execute(buffer, size);
-            _response_cb(Err::E_SUCCESS, _response);
+            _parser.execute(buffer, size);
+            _response_cb(Err::E_SUCCESS, _parser);
 
             this->stop();
             this->close();
         } else if (code == Err::E_SUCCESS) {
-            _response.execute(buffer, size);
-            if (_response.isComplete()) {
-                _response_cb(Err::E_SUCCESS, _response);
+            _parser.execute(buffer, size);
+            if (_parser.isComplete()) {
+                _response_cb(Err::E_SUCCESS, _parser);
+
                 this->stop();
                 this->close();
             }
         } else {
-            _response_cb(code, _response);
+            _response_cb(code, _parser);
             this->stop();
             this->close();
         }
@@ -155,9 +158,9 @@ public:
 using TcpHttpClient  = HttpClient<tcp::TcpClient>;
 using PipeHttpClient = HttpClient<pipe::PipeClient>;
 
-Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeout, HttpResponse & result);
-Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result);
-Err requestWithSync(std::string const & uri, uint64_t timeout, HttpResponse & result);
+TBAG_API Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeout, HttpResponse & result);
+TBAG_API Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result);
+TBAG_API Err requestWithSync(std::string const & uri, uint64_t timeout, HttpResponse & result);
 
 } // namespace http
 } // namespace network
