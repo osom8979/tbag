@@ -33,17 +33,24 @@ TEST(DnsTest, DnsAddrInfo)
     ASSERT_NE(nullptr, addr.getAddrInfo());
 
     ASSERT_LT(0, addr.getAddrInfo()->ai_addrlen);
-    struct addrinfo * info = addr.getAddrInfo()->ai_next;
+    struct addrinfo const * info = addr.getAddrInfo();
     ASSERT_NE(nullptr, info);
 
     for (; info != nullptr; info = info->ai_next) {
         std::string ip = getIpName(info->ai_addr);
-        std::cout << "Domain: " << TEST_DOMAIN_NAME << " -> Ip: " << ip << std::endl;
+        std::cout << "Domain: "  << TEST_DOMAIN_NAME  << " -> " << "Ip(" << ip << "), "
+                  << "Protocol(" << info->ai_protocol << "), "
+                  << "Socktype(" << info->ai_socktype << "), "
+                  << "Family("   << info->ai_family   << "), "
+                  << "Flags("    << info->ai_flags    << ")\n";
 
         using namespace libtbag::network::details;
         ASSERT_TRUE(isIpv4(ip) || isIpv6(ip));
         ASSERT_EQ(80, getPortNumber(info->ai_addr));
     }
+
+    std::cout << "Find first IPv4: " << getIpName(addr.findFirstIPv4()) << std::endl;
+    std::cout << "Find first IPv6: " << getIpName(addr.findFirstIPv6()) << std::endl;
 }
 
 TEST(DnsTest, DnsNameInfo)

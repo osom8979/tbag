@@ -102,6 +102,59 @@ addrinfo const * DnsAddrInfo::getAddrInfo() const
     return native->addrinfo;
 }
 
+int DnsAddrInfo::getAddrInfoSize() const
+{
+    addrinfo const * addr = getAddrInfo();
+    if (addr == nullptr) {
+        return 0;
+    }
+    return static_cast<int>(addr->ai_addrlen);
+}
+
+sockaddr const * DnsAddrInfo::findSockAddr(FindFlag flag) const
+{
+    struct addrinfo const * info = getAddrInfo();
+    for (; info != nullptr; info = info->ai_next) {
+        assert(info != nullptr);
+
+        sockaddr * sa = info->ai_addr;
+        assert(sa != nullptr);
+
+        if (flag == FindFlag::JUST_FIRST) {
+            return sa;
+        } else if (flag == FindFlag::MOST_IPV4) {
+            if (sa->sa_family == AF_INET) {
+                return sa;
+            }
+        } else if (flag == FindFlag::MOST_IPV6) {
+            if (sa->sa_family == AF_INET6) {
+                return sa;
+            }
+        } else {
+            tDLogE("DnsAddrInfo::findSockAddr() Unknown flag type: {}", static_cast<int>(flag));
+            return nullptr; // Unknown flags.
+        }
+    }
+
+    // Not found.
+    return nullptr;
+}
+
+sockaddr const * DnsAddrInfo::findFirst() const
+{
+    return findSockAddr(FindFlag::JUST_FIRST);
+}
+
+sockaddr_in const * DnsAddrInfo::findFirstIPv4() const
+{
+    return reinterpret_cast<sockaddr_in const *>(findSockAddr(FindFlag::MOST_IPV4));
+}
+
+sockaddr_in6 const * DnsAddrInfo::findFirstIPv6() const
+{
+    return reinterpret_cast<sockaddr_in6 const *>(findSockAddr(FindFlag::MOST_IPV6));
+}
+
 Err DnsAddrInfo::requestAddrInfo(Loop & loop,
                                 std::string const & hostname,
                                 std::string const & service,

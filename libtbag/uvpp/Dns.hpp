@@ -54,6 +54,23 @@ public:
     /** Pointer to a struct addrinfo containing the result. */
     addrinfo const * getAddrInfo() const;
 
+// Advanced methods.
+public:
+    /** Size of addrinfo. */
+    int getAddrInfoSize() const;
+
+    enum class FindFlag
+    {
+        JUST_FIRST,
+        MOST_IPV4,
+        MOST_IPV6,
+    };
+
+    sockaddr const * findSockAddr(FindFlag flag) const;
+    sockaddr const * findFirst() const;
+    sockaddr_in  const * findFirstIPv4() const;
+    sockaddr_in6 const * findFirstIPv6() const;
+
 public:
     /**
      * Asynchronous getaddrinfo(3).
