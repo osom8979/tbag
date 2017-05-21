@@ -36,7 +36,8 @@ namespace network {
 class TBAG_API Uri
 {
 public:
-    using String = std::string;
+    using BaseChar = char;
+    using String   = std::basic_string<BaseChar>;
 
 public:
     struct FieldInfo
@@ -84,14 +85,23 @@ private:
 
 public:
     Uri();
-    Uri(String const & uri);
+    explicit Uri(BaseChar const * uri, bool is_connect = false);
+    explicit Uri(String const & uri, bool is_connect = false);
     Uri(Uri const & obj);
     Uri(Uri && obj);
     ~Uri();
 
 public:
+    Uri & operator =(BaseChar const * uri);
+    Uri & operator =(String const & uri);
+
     Uri & operator =(Uri const & obj);
     Uri & operator =(Uri && obj);
+
+// Casting
+public:
+    operator String() const;
+    operator BaseChar const *() const;
 
 public:
     void swap(Uri & obj) TBAG_NOEXCEPT;
@@ -125,6 +135,7 @@ public:
 
 public:
     int getPortNumber() const;
+    String getRequestPath() const;
 
 public:
     void clear();
@@ -145,7 +156,7 @@ public:
         MOST_IPV6,
     };
 
-    Err requestAddrInfo(String & host, int & port, AddrFlags flags = AddrFlags::MOST_IPV4);
+    Err requestAddrInfo(String & host, int & port, AddrFlags flags = AddrFlags::MOST_IPV4) const;
 
 // Static methods.
 public:

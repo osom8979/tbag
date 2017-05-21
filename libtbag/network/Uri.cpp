@@ -27,9 +27,14 @@ Uri::Uri()
     // EMPTY.
 }
 
-Uri::Uri(String const & uri)
+Uri::Uri(BaseChar const * uri, bool is_connect)
 {
-    parse(uri);
+    parse(String(uri), is_connect);
+}
+
+Uri::Uri(String const & uri, bool is_connect)
+{
+    parse(uri, is_connect);
 }
 
 Uri::Uri(Uri const & obj)
@@ -45,6 +50,18 @@ Uri::Uri(Uri && obj)
 Uri::~Uri()
 {
     // EMPTY.
+}
+
+Uri & Uri::operator =(BaseChar const * uri)
+{
+    parse(String(uri));
+    return *this;
+}
+
+Uri & Uri::operator =(String const & uri)
+{
+    parse(uri);
+    return *this;
 }
 
 Uri & Uri::operator =(Uri const & obj)
@@ -70,6 +87,16 @@ Uri & Uri::operator =(Uri && obj)
     return *this;
 }
 
+Uri::operator String() const
+{
+    return _uri;
+}
+
+Uri::operator BaseChar const * () const
+{
+    return _uri.c_str();
+}
+
 void Uri::swap(Uri & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
@@ -91,6 +118,24 @@ int Uri::getPortNumber() const
     } catch (...) {
         return 0;
     }
+}
+
+Uri::String Uri::getRequestPath() const
+{
+    String result = getPath();
+    if (isQuery()) {
+        result.push_back('?');
+        result.append(getQuery());
+    }
+    if (isFragment()) {
+        result.push_back('#');
+        result.append(getFragment());
+    }
+
+    if (result.empty()) {
+        result.push_back('/');
+    }
+    return result;
 }
 
 void Uri::clear()
@@ -142,7 +187,7 @@ bool Uri::parse(String const & uri, bool is_connect)
     return true;
 }
 
-Err Uri::requestAddrInfo(String & host, int & port, AddrFlags flags)
+Err Uri::requestAddrInfo(String & host, int & port, AddrFlags flags) const
 {
     if (isHost() == false) {
         tDLogE("Uri::requestAddrInfo() Unknown host: {}.", _uri);
