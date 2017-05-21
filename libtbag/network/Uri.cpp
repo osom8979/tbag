@@ -7,6 +7,9 @@
 
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/bitwise/BitFlags.hpp>
+#include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <http_parser.h>
@@ -119,7 +122,11 @@ bool Uri::parse(String const & uri, bool is_connect)
 
     auto updateField = [&](http_parser_url_fields field, FieldInfo & info){
         if (bitwise::checkFlag<uint16_t>(parser.field_set, field)) {
-            info.set(parser.field_data[field].off, parser.field_data[field].len, true);
+            bool enable = true;
+            if (parser.field_data[field].off == 0 && parser.field_data[field].len == 0) {
+                enable = false;
+            }
+            info.set(parser.field_data[field].off, parser.field_data[field].len, enable);
         } else {
             info.clear();
         }
@@ -133,6 +140,57 @@ bool Uri::parse(String const & uri, bool is_connect)
     updateField(UF_FRAGMENT, _fragment);
     updateField(UF_USERINFO, _userinfo);
     return true;
+}
+
+Err Uri::requestAddrInfo(String & host, int & port, AddrFlags flags)
+{
+    if (isHost() == false) {
+        tDLogE("Uri::requestAddrInfo() Unknown host: {}.", _uri);
+        return Err::E_ISTATE;
+    }
+
+    if (isPort() == false && isSchema() == false) {
+        tDLogE("Uri::requestAddrInfo() Unknown schema or port: {}.", _uri);
+        return Err::E_ISTATE;
+    }
+
+    String const HOST    = getHost();
+    String const SERVICE = isSchema() ? getSchema() : String();
+
+    assert(HOST.empty() == false);
+
+    uvpp::Loop loop;
+    uvpp::DnsAddrInfo addr;
+
+    Err const REQUEST_RESULT = addr.requestAddrInfoWithSync(loop, HOST, SERVICE);
+    if (REQUEST_RESULT != Err::E_SUCCESS) {
+        return REQUEST_RESULT;
+    }
+
+    uvpp::DnsAddrInfo::FindFlag find_flag;
+    if (flags == AddrFlags::MOST_IPV6) {
+        find_flag = uvpp::DnsAddrInfo::FindFlag::MOST_IPV6;
+    } else {
+        find_flag = uvpp::DnsAddrInfo::FindFlag::MOST_IPV4;
+    }
+
+    auto * info = addr.findSockAddr(find_flag);
+    if (info == nullptr) {
+        info = addr.findFirst();
+        if (info == nullptr) {
+            return Err::E_ENFOUND;
+        }
+    }
+
+    host = uvpp::getIpName(info);
+    if (isPort()) {
+        port = getPortNumber();
+    } else {
+        assert(SERVICE.empty() == false);
+        port = uvpp::getPortNumber(info);
+    }
+
+    return Err::E_SUCCESS;
 }
 
 // ---------------

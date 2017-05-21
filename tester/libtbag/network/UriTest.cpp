@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/network/Uri.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 
 using namespace libtbag;
 using namespace libtbag::network;
@@ -50,5 +51,23 @@ TEST(UriTest, Default)
     ASSERT_STREQ("a:b"         , uri.getUserinfo().c_str());
 
     ASSERT_EQ(8080, uri.getPortNumber());
+}
+
+TEST(UriTest, AddrInfo)
+{
+    std::string host;
+    int port;
+
+    Uri uri1("http://localhost:8080/");
+    ASSERT_EQ(Err::E_SUCCESS, uri1.requestAddrInfo(host, port));
+
+    ASSERT_TRUE(details::isIpv4(host) || details::isIpv6(host));
+    ASSERT_EQ(8080, port);
+
+    Uri uri2("http://localhost/");
+    ASSERT_EQ(Err::E_SUCCESS, uri2.requestAddrInfo(host, port));
+
+    ASSERT_TRUE(details::isIpv4(host) || details::isIpv6(host));
+    ASSERT_EQ(80, port);
 }
 

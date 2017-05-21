@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 
 #include <cstdint>
 #include <algorithm>
@@ -136,6 +137,15 @@ public:
 
     inline String get() const
     { return _uri; }
+
+public:
+    enum class AddrFlags
+    {
+        MOST_IPV4,
+        MOST_IPV6,
+    };
+
+    Err requestAddrInfo(String & host, int & port, AddrFlags flags = AddrFlags::MOST_IPV4);
 
 // Static methods.
 public:
