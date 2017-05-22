@@ -22,6 +22,7 @@
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/network/Server.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
+#include <libtbag/network/stream/StreamServerNode.hpp>
 
 #include <cassert>
 #include <atomic>
@@ -50,66 +51,7 @@ public:
     STATIC_ASSERT_CHECK_IS_BASE_OF(uvpp::Stream, BaseStream);
 
 public:
-    /**
-     * ClientNode class prototype.
-     *
-     * @author zer0
-     * @date   2017-05-10
-     */
-    class ClientNode : public BaseStreamClient
-    {
-    private:
-        StreamServer * _parent;
-
-    public:
-        ClientNode(Loop & loop, StreamServer * parent) : BaseStreamClient(loop), _parent(parent)
-        {
-            // EMPTY.
-        }
-
-        virtual ~ClientNode()
-        {
-            // EMPTY.
-        }
-
-    private:
-        WeakClient getWeakClient()
-        {
-            assert(_parent != nullptr);
-            Guard guard(_parent->_mutex);
-            return _parent->getWeakClient(this->getId());
-        }
-
-    public:
-        virtual void onShutdown(Err code) override
-        {
-            assert(_parent != nullptr);
-            _parent->onClientShutdown(getWeakClient(), code);
-        }
-
-        virtual void onWrite(Err code) override
-        {
-            assert(_parent != nullptr);
-            _parent->onClientWrite(getWeakClient(), code);
-        }
-
-        virtual void onRead(Err code, char const * buffer, Size size) override
-        {
-            assert(_parent != nullptr);
-            _parent->onClientRead(getWeakClient(), code, buffer, size);
-        }
-
-        virtual void onClose() override
-        {
-            assert(_parent != nullptr);
-            _parent->onClientClose(getWeakClient());
-
-            void * user_data = this->getUserData();
-            if (user_data) {
-                _parent->onClientUserDataDealloc(getWeakClient(), user_data);
-            }
-        }
-    };
+    using ClientNode = StreamServerNode<BaseStreamClient>;
 
     /**
      * ServerBackend class prototype.
@@ -243,11 +185,6 @@ private:
         return SharedClient();
     }
 
-    WeakClient getWeakClient(ClientKey key)
-    {
-        return WeakClient(getSharedClient(key));
-    }
-
     bool insertClient(SharedClient client)
     {
         return _clients.insert(ClientPair(client->getId(), client)).second;
@@ -375,6 +312,12 @@ public:
         }
         return WeakClient();
     }
+
+    virtual WeakClient getClient(Id id) override
+    {
+        return WeakClient(getSharedClient(id));
+    }
+
 
 public:
     virtual bool realInitialize(ServerBackend & backend, String const & destination, int port) = 0;

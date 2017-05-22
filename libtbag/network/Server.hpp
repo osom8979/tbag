@@ -52,6 +52,7 @@ struct Server : public details::NetCommon
     virtual void close() = 0;
 
     virtual WeakClient accept() = 0;
+    virtual WeakClient getClient(Id id) = 0;
     // @formatter:on
 
     // ---------------
