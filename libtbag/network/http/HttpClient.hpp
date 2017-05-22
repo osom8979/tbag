@@ -66,7 +66,6 @@ private:
     HttpParser  _parser;
 
 private:
-    Buffer     _buffer;
     OnResponse _response_cb;
     Millisec   _timeout;
     TimePoint  _start_time;
