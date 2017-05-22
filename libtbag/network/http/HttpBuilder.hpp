@@ -50,8 +50,8 @@ public:
 
 public:
     // @formatter:off
-    inline HttpBuilder & setMajor(int val) { version.major = val; return *this; }
-    inline HttpBuilder & setMinor(int val) { version.minor = val; return *this; }
+    inline HttpBuilder & setMajor(int val) { version.major_number = val; return *this; }
+    inline HttpBuilder & setMinor(int val) { version.minor_number = val; return *this; }
     inline HttpBuilder & setVersion(int maj, int min) { version.set(maj, min); return *this; }
 
     inline HttpBuilder & setHeaders(HeaderMap const & val) { headers = val;  return *this; }

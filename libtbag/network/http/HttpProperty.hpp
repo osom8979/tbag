@@ -52,19 +52,19 @@ struct HttpVersion
     using String       = std::basic_string<BaseChar>;
     using StringStream = std::basic_stringstream<BaseChar>;
 
-    int major;
-    int minor;
+    int major_number;
+    int minor_number;
 
-    HttpVersion() : major(1), minor(1)
+    HttpVersion() : major_number(1), minor_number(1)
     { /* EMPTY. */ }
-    HttpVersion(int maj, int min) : major(maj), minor(min)
+    HttpVersion(int maj, int min) : major_number(maj), minor_number(min)
     { /* EMPTY. */ }
 
     inline HttpVersion & operator =(HttpVersion const & obj)
     {
         if (this != &obj) {
-            major = obj.major;
-            minor = obj.minor;
+            major_number = obj.major_number;
+            minor_number = obj.minor_number;
         }
         return *this;
     }
@@ -79,33 +79,33 @@ struct HttpVersion
 
     inline friend bool operator ==(HttpVersion const & lh, HttpVersion const & rh) TBAG_NOEXCEPT
     {
-        return lh.major == rh.major && lh.minor == rh.minor;
+        return lh.major_number == rh.major_number && lh.minor_number == rh.minor_number;
     }
 
     inline void set(int maj, int min) TBAG_NOEXCEPT
     {
-        major = maj;
-        minor = min;
+        major_number = maj;
+        minor_number = min;
     }
 
     inline void clear() TBAG_NOEXCEPT
     {
-        major = 0;
-        minor = 0;
+        major_number = 0;
+        minor_number = 0;
     }
 
     inline void swap(HttpVersion & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
-            std::swap(major, obj.minor);
-            std::swap(major, obj.minor);
+            std::swap(major_number, obj.minor_number);
+            std::swap(major_number, obj.minor_number);
         }
     }
 
     String toString() const
     {
         StringStream ss;
-        ss << HTTP << '/' << major << '.' << minor;
+        ss << HTTP << '/' << major_number << '.' << minor_number;
         return ss.str();
     }
 };
@@ -125,7 +125,7 @@ struct HttpCommon
     String      body;
 
     HttpCommon() { /* EMPTY. */ }
-    HttpCommon(int major, int minor) : version(major, minor) { /* EMPTY. */ }
+    HttpCommon(int maj, int min) : version(maj, min) { /* EMPTY. */ }
 
     inline Size getHeadersSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(headers.size()))
     { return headers.size(); }
