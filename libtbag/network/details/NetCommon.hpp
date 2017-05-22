@@ -37,6 +37,8 @@
 #include <chrono>
 #include <mutex>
 
+#include <type_traits>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -55,11 +57,26 @@ TBAG_CONSTEXPR char const * const LOOPBACK_IPV6 = "::1";
 
 TBAG_CONSTEXPR int const OS_RANDOMLY_ASSIGNS_PORT = 0;
 
-enum class StreamType
+enum class StreamType : int
 {
     UNKNOWN,
     TCP,
     PIPE,
+};
+
+template <typename T> struct IsNetworkType : public std::false_type
+{
+    TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::UNKNOWN;
+};
+
+template <> struct IsNetworkType<uvpp::Tcp> : public std::true_type
+{
+    TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::TCP;
+};
+
+template <> struct IsNetworkType<uvpp::Pipe> : public std::true_type
+{
+    TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::PIPE;
 };
 
 /**

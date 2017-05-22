@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/Client.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -47,16 +48,26 @@ template <typename BaseType>
 class StreamClientBackend : public BaseType
 {
 public:
-    using Parent  = BaseType;
-    using Loop    = uvpp::Loop;
-    using binf    = uvpp::binf;
-    using Buffer  = std::vector<char>;
+    using StreamType = details::StreamType;
+    using Parent     = BaseType;
+    using Loop       = uvpp::Loop;
+    using binf       = uvpp::binf;
+    using Buffer     = std::vector<char>;
 
     using ConnectRequest  = uvpp::ConnectRequest;
     using ShutdownRequest = uvpp::ShutdownRequest;
     using WriteRequest    = uvpp::WriteRequest;
 
 public:
+    TBAG_CONSTEXPR static StreamType getStreamType() TBAG_NOEXCEPT
+    {
+        return details::IsNetworkType<BaseType>::STREAM_TYPE;
+    }
+
+public:
+    static_assert(getStreamType() != StreamType::UNKNOWN,
+                  "The BaseType must be uvpp::Tcp or uvpp::Pipe.");
+
     STATIC_ASSERT_CHECK_IS_BASE_OF(uvpp::Stream, Parent);
 
 private:

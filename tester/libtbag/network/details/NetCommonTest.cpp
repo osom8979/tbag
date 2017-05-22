@@ -7,10 +7,22 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/uvpp/Udp.hpp>
 
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::details;
+
+TEST(NetCommonTest, IsNetworkType)
+{
+    ASSERT_TRUE(IsNetworkType<uvpp::Tcp>::value);
+    ASSERT_TRUE(IsNetworkType<uvpp::Pipe>::value);
+    ASSERT_FALSE(IsNetworkType<int>::value);
+
+    ASSERT_TRUE(StreamType::TCP == IsNetworkType<uvpp::Tcp>::STREAM_TYPE);
+    ASSERT_TRUE(StreamType::PIPE == IsNetworkType<uvpp::Pipe>::STREAM_TYPE);
+    ASSERT_TRUE(StreamType::UNKNOWN == IsNetworkType<uvpp::Udp>::STREAM_TYPE);
+}
 
 TEST(NetCommonTest, Ipv4)
 {
