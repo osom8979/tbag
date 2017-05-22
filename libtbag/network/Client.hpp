@@ -40,7 +40,6 @@ namespace network {
  */
 struct Client : public details::NetCommon
 {
-    // @formatter:off
     virtual Type getType() const = 0;
     virtual Id getId() const = 0;
 
@@ -55,7 +54,12 @@ struct Client : public details::NetCommon
     virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) = 0;
 
     virtual void * getUserData() = 0;
-    // @formatter:on
+
+    virtual void runBackendConnect(Err code) = 0;
+    virtual void runBackendShutdown(Err code) = 0;
+    virtual void runBackendWrite(Err code) = 0;
+    virtual void runBackendRead(Err code, char const * buffer, Size size) = 0;
+    virtual void runBackendClose() = 0;
 
     // ---------------
     // Event callback.

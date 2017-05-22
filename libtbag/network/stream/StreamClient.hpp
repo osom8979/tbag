@@ -21,6 +21,7 @@
 
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/network/Client.hpp>
+#include <libtbag/network/stream/StreamClientBackend.hpp>
 
 #include <cassert>
 
@@ -45,103 +46,7 @@ public:
     STATIC_ASSERT_CHECK_IS_BASE_OF(uvpp::Stream, BaseStream);
 
 public:
-    /**
-     * Backend of real stream class.
-     *
-     * @author zer0
-     * @date   2017-05-10
-     *
-     * @remarks
-     *  Currently uvpp::Tcp & uvpp::Pipe is supported.
-     */
-    struct ClientBackend : public details::NetCommon, public BaseStream
-    {
-    private:
-        StreamClient * _parent;
-        ConnectRequest _connect_req;
-        Buffer         _buffer;
-
-    public:
-        ClientBackend(Loop & loop, StreamClient * parent) : BaseStream(loop), _parent(parent)
-        {
-            assert(_parent != nullptr);
-        }
-
-        virtual ~ClientBackend()
-        {
-            assert(_parent != nullptr);
-        }
-
-    public:
-        // @formatter:off
-        inline ConnectRequest       & atConnectReq()       TBAG_NOEXCEPT { return _connect_req; }
-        inline ConnectRequest const & atConnectReq() const TBAG_NOEXCEPT { return _connect_req; }
-        // @formatter:on
-
-    public:
-        virtual void onConnect(ConnectRequest & request, Err code) override
-        {
-            assert(_parent != nullptr);
-            tDLogD("ClientBackend::onConnect({})", getErrName(code));
-
-            _parent->_mutex.lock();
-            _parent->cancelTimeoutClose();
-            _parent->_mutex.unlock();
-
-            _parent->onConnect(code);
-        }
-
-        virtual void onShutdown(ShutdownRequest & request, Err code) override
-        {
-            assert(_parent != nullptr);
-            tDLogD("ClientBackend::onShutdown({})", getErrName(code));
-
-            _parent->_mutex.lock();
-            _parent->cancelTimeoutShutdown();
-            _parent->_last_writer.reset();
-            _parent->_mutex.unlock();
-
-            _parent->onShutdown(code);
-        }
-
-        virtual void onWrite(WriteRequest & request, Err code) override
-        {
-            assert(_parent != nullptr);
-            tDLogD("ClientBackend::onWrite({})", getErrName(code));
-
-            _parent->_mutex.lock();
-            _parent->cancelTimeoutShutdown();
-            _parent->_last_writer.reset();
-            _parent->_mutex.unlock();
-
-            _parent->onWrite(code);
-        }
-
-        virtual binf onAlloc(std::size_t suggested_size) override
-        {
-            return uvpp::defaultOnAlloc(_buffer, suggested_size);
-        }
-
-        virtual void onRead(Err code, char const * buffer, std::size_t size) override
-        {
-            assert(_parent != nullptr);
-            tDLogD("ClientBackend::onRead({})", getErrName(code));
-
-            _parent->onRead(code, buffer, size);
-        }
-
-        virtual void onClose() override
-        {
-            assert(_parent != nullptr);
-            tDLogD("ClientBackend::onClose()");
-
-            _parent->onClose();
-
-            _parent->_mutex.lock();
-            _parent->closeAll();
-            _parent->_mutex.unlock();
-        }
-    };
+    using ClientBackend = StreamClientBackend<BaseStream>;
 
 public:
     using SharedClientBackend = std::shared_ptr<ClientBackend>;
@@ -191,9 +96,9 @@ public:
     inline bool isWriting() const
     { Guard g(_mutex); return static_cast<bool>(_last_writer); }
 
-    inline void     lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(    _mutex.lock())) {   _mutex.lock(); }
-    inline void   unlock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(  _mutex.unlock())) { _mutex.unlock(); }
-    inline bool try_lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.try_lock())) { return _mutex.try_lock(); }
+    virtual void     lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(    _mutex.lock())) {   _mutex.lock(); }
+    virtual void   unlock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(  _mutex.unlock())) { _mutex.unlock(); }
+    virtual bool try_lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.try_lock())) { return _mutex.try_lock(); }
     // @formatter:on
 
 private:
@@ -413,6 +318,50 @@ public:
         assert(static_cast<bool>(_client));
         Guard guard(_mutex);
         predicated(_client->getUserData());
+    }
+
+public:
+    virtual void runBackendConnect(Err code) override
+    {
+        _mutex.lock();
+        cancelTimeoutClose();
+        _mutex.unlock();
+
+        onConnect(code);
+    }
+
+    virtual void runBackendShutdown(Err code) override
+    {
+        _mutex.lock();
+        cancelTimeoutShutdown();
+        _last_writer.reset();
+        _mutex.unlock();
+
+        onShutdown(code);
+    }
+
+    virtual void runBackendWrite(Err code) override
+    {
+        _mutex.lock();
+        cancelTimeoutShutdown();
+        _last_writer.reset();
+        _mutex.unlock();
+
+        onWrite(code);
+    }
+
+    virtual void runBackendRead(Err code, char const * buffer, Size size) override
+    {
+        onRead(code, buffer, size);
+    }
+
+    virtual void runBackendClose() override
+    {
+        onClose();
+
+        _mutex.lock();
+        closeAll();
+        _mutex.unlock();
     }
 
 public:
