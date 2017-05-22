@@ -65,13 +65,11 @@ public:
         ClientBackend(Loop & loop, StreamClient * parent) : BaseStream(loop), _parent(parent)
         {
             assert(_parent != nullptr);
-            this->setUserData(_parent->onUserDataAlloc());
         }
 
         virtual ~ClientBackend()
         {
             assert(_parent != nullptr);
-            _parent->onUserDataDealloc(this->getUserData());
         }
 
     public:
@@ -403,7 +401,7 @@ public:
     }
 
 public:
-    virtual void const * getUserData() const override
+    virtual void * getUserData() override
     {
         assert(static_cast<bool>(_client));
         return _client->getUserData();

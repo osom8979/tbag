@@ -34,7 +34,7 @@ TEST(NetworkTcpTest, ClientTimeout)
     }
 
     int connect = 0;
-    int close = 0;
+    int close   = 0;
 
     Err connect_result = Err::E_UNKNOWN;
     Err result = Err::E_UNKNOWN;
@@ -75,11 +75,13 @@ TEST(NetworkTcpTest, MultiEcho)
     Loop loop_server;
     FunctionalTcpServer server(loop_server);
 
-    int server_connection   = 0;
-    int server_client_read  = 0;
-    int server_client_write = 0;
-    int server_client_close = 0;
-    int server_close        = 0;
+    int server_connection    = 0;
+    int server_client_read   = 0;
+    int server_client_write  = 0;
+    int server_client_close  = 0;
+    int server_close         = 0;
+    int server_udata_alloc   = 0;
+    int server_udata_dealloc = 0;
     Err server_result = Err::E_UNKNOWN;
 
     server.setOnConnection([&](Err code){
@@ -121,6 +123,16 @@ TEST(NetworkTcpTest, MultiEcho)
     server.setOnServerClose([&](){
         server_close++;
     });
+
+    server.setOnClientUserDataAlloc([&](FunctionalTcpServer::WeakClient node) -> void *{
+        server_udata_alloc++;
+        return new int (100);
+    });
+    server.setOnClientUserDataDealloc([&](FunctionalTcpServer::WeakClient node, void * data){
+        server_udata_dealloc++;
+        delete static_cast<int*>(data);
+    });
+
     server.init(details::ANY_IPV4, 0);
     int const SERVER_PORT = server.getServer().lock()->getSockPort();
 
@@ -197,10 +209,12 @@ TEST(NetworkTcpTest, MultiEcho)
     }
 
     ASSERT_EQ(Err::E_SUCCESS, server_result);
-    ASSERT_EQ(CLIENT_SIZE, server_connection  );
-    ASSERT_EQ(CLIENT_SIZE, server_client_read );
-    ASSERT_EQ(CLIENT_SIZE, server_client_write);
-    ASSERT_EQ(CLIENT_SIZE, server_client_close);
+    ASSERT_EQ(CLIENT_SIZE, server_connection   );
+    ASSERT_EQ(CLIENT_SIZE, server_client_read  );
+    ASSERT_EQ(CLIENT_SIZE, server_client_write );
+    ASSERT_EQ(CLIENT_SIZE, server_client_close );
+    ASSERT_EQ(CLIENT_SIZE, server_udata_alloc  );
+    ASSERT_EQ(CLIENT_SIZE, server_udata_dealloc);
     ASSERT_EQ(1, server_close);
 }
 

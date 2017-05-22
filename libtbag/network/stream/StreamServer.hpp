@@ -104,19 +104,11 @@ public:
         {
             assert(_parent != nullptr);
             _parent->onClientClose(getWeakClient());
-        }
 
-    public:
-        virtual void * onUserDataAlloc() override
-        {
-            assert(_parent != nullptr);
-            return _parent->onClientUserDataAlloc(getWeakClient());
-        }
-
-        virtual void onUserDataDealloc(void * data) override
-        {
-            assert(_parent != nullptr);
-            _parent->onClientUserDataDealloc(getWeakClient(), data);
+            void * user_data = this->getUserData();
+            if (user_data) {
+                _parent->onClientUserDataDealloc(getWeakClient(), user_data);
+            }
         }
     };
 
@@ -144,13 +136,11 @@ public:
         {
             assert(_parent != nullptr);
             _on_connection.store(false);
-            this->setUserData(_parent->onUserDataAlloc());
         }
 
         virtual ~ServerBackend()
         {
             assert(_parent != nullptr);
-            _parent->onUserDataDealloc(this->getUserData());
         }
 
     public:
@@ -374,7 +364,10 @@ public:
                 tDLogD("StreamServer::accept() client connect.");
                 bool const INSERT_RESULT = insertClient(client);
                 assert(INSERT_RESULT);
-                return WeakClient(client);
+
+                auto weak_client = WeakClient(client);
+                shared->setUserData(this->onClientUserDataAlloc(weak_client));
+                return weak_client;
             } else {
                 tDLogE("StreamServer::accept() {} error.", getErrName(CODE));
             }
@@ -382,21 +375,6 @@ public:
             tDLogE("StreamServer::accept() client is nullptr.");
         }
         return WeakClient();
-    }
-
-public:
-    virtual void const * getUserData() const override
-    {
-        assert(static_cast<bool>(_server));
-        return _server->getUserData();
-    }
-
-    template <typename Predicated>
-    void updateUserData(Predicated predicated)
-    {
-        assert(static_cast<bool>(_server));
-        Guard guard(_mutex);
-        predicated(_server->getUserData());
     }
 
 public:

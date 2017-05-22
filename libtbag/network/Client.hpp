@@ -54,7 +54,7 @@ struct Client : public details::NetCommon
     virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) = 0;
     virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) = 0;
 
-    virtual void const * getUserData() const = 0;
+    virtual void * getUserData() = 0;
     // @formatter:on
 
     // ---------------
@@ -67,9 +67,6 @@ struct Client : public details::NetCommon
     virtual void onWrite   (Err code) { /* EMPTY. */ }
     virtual void onRead    (Err code, char const * buffer, Size size) { /* EMPTY. */ }
     virtual void onClose   ()          { /* EMPTY. */ }
-
-    virtual void * onUserDataAlloc() { return nullptr; }
-    virtual void   onUserDataDealloc(void * data) { /* EMPTY. */ }
     // @formatter:on
 };
 
@@ -96,17 +93,11 @@ struct FunctionalClient : public BaseType
     using OnRead     = std::function<void(Err, char const *, Size)>;
     using OnClose    = std::function<void(void)>;
 
-    using OnUserDataAlloc   = std::function<void*(void)>;
-    using OnUserDataDealloc = std::function<void(void*)>;
-
     OnConnect  connect_cb;
     OnShutdown shutdown_cb;
     OnWrite    write_cb;
     OnRead     read_cb;
     OnClose    close_cb;
-
-    OnUserDataAlloc   userdata_alloc_cb;
-    OnUserDataDealloc userdata_dealloc_cb;
 
     FunctionalClient(Loop & loop) : Parent(loop)
     { /* EMPTY */ }
@@ -119,9 +110,6 @@ struct FunctionalClient : public BaseType
     inline void setOnRead    (OnRead     const & cb) { read_cb     = cb; }
     inline void setOnClose   (OnClose    const & cb) { close_cb    = cb; }
 
-    inline void setOnUserDataAlloc  (OnUserDataAlloc   const & cb) { userdata_alloc_cb   = cb; }
-    inline void setOnUserDataDealloc(OnUserDataDealloc const & cb) { userdata_dealloc_cb = cb; }
-
     virtual void onConnect(Err code) override
     { if (connect_cb) { connect_cb(code); } }
     virtual void onShutdown(Err code) override
@@ -132,11 +120,6 @@ struct FunctionalClient : public BaseType
     { if (read_cb) { read_cb(code, buffer, size); } }
     virtual void onClose() override
     { if (close_cb) { close_cb(); } }
-
-    virtual void * onUserDataAlloc() override
-    { if (userdata_alloc_cb) { return userdata_alloc_cb(); } return nullptr; }
-    virtual void onUserDataDealloc(void * data) override
-    { if (userdata_dealloc_cb) { userdata_dealloc_cb(data); } }
     // @formatter:on
 };
 
