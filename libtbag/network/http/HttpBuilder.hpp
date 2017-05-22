@@ -77,6 +77,9 @@ public:
     String request() const;
     String response() const;
 
+    String requestDefault() const;
+    String responseDefault() const;
+
 public:
     static String buildRequest(String const & method, String const & url,
                                HeaderMap const & headers, String const & body,

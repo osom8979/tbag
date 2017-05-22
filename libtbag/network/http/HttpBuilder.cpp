@@ -96,6 +96,26 @@ HttpBuilder::String HttpBuilder::response() const
     return buildResponse(getStatus(), reason, headers, body, version);
 }
 
+HttpBuilder::String HttpBuilder::requestDefault() const
+{
+    return buildRequest(method, url, headers, body, version);
+}
+
+HttpBuilder::String HttpBuilder::responseDefault() const
+{
+    HeaderMap resl_headers = headers;
+    if (resl_headers.find(HEADER_SERVER) == resl_headers.end()) {
+        resl_headers.insert(HeaderPair(HEADER_SERVER, HEADER_DEFAULT_SERVER));
+    }
+    if (resl_headers.find(HEADER_CONTENT_TYPE) == resl_headers.end()) {
+        resl_headers.insert(HeaderPair(HEADER_CONTENT_TYPE, HEADER_DEFAULT_CONTENT_TYPE));
+    }
+    if (resl_headers.find(HEADER_CONTENT_LENGTH) == resl_headers.end()) {
+        resl_headers.insert(HeaderPair(HEADER_CONTENT_LENGTH, std::to_string(body.size())));
+    }
+    return buildResponse(getStatus(), reason, resl_headers, body, version);
+}
+
 HttpBuilder::String HttpBuilder::buildRequest(String const & method, String const & url,
                                               HeaderMap const & headers, String const & body,
                                               HttpVersion const & version)
