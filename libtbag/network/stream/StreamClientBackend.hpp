@@ -58,17 +58,13 @@ public:
     using ShutdownRequest = uvpp::ShutdownRequest;
     using WriteRequest    = uvpp::WriteRequest;
 
-public:
     TBAG_CONSTEXPR static StreamType getStreamType() TBAG_NOEXCEPT
     {
         return details::IsNetworkType<BaseType>::STREAM_TYPE;
     }
 
-public:
     static_assert(getStreamType() != StreamType::UNKNOWN,
                   "The BaseType must be uvpp::Tcp or uvpp::Pipe.");
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(uvpp::Stream, Parent);
 
 private:
     Client * _parent;

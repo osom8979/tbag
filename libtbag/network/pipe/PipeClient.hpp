@@ -32,24 +32,10 @@ namespace pipe    {
  * @author zer0
  * @date   2017-05-09
  */
-class PipeClient : public stream::StreamClient<uvpp::Pipe>
+struct PipeClient : public stream::StreamClient
 {
-public:
-    using Parent = stream::StreamClient<uvpp::Pipe>;
-
-public:
-    PipeClient(Loop & loop) : Parent(loop)
+    PipeClient(Loop & loop) : stream::StreamClient(loop, StreamType::PIPE)
     { /* EMPTY. */ }
-
-    virtual ~PipeClient()
-    { /* EMPTY. */ }
-
-public:
-    virtual Type getType() const override
-    { return Type::PIPE; }
-
-    virtual bool realInitialize(ClientBackend & backend, String const & destination, int UNUSED_PARAM(port)) override
-    { return uvpp::initPipeClient(backend, backend.atConnectReq(), destination); }
 };
 
 /**

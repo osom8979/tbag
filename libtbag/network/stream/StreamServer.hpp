@@ -48,7 +48,6 @@ public:
     using BaseStreamClient = BaseStreamClientType;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(uvpp::Stream, BaseStream);
-    STATIC_ASSERT_CHECK_IS_BASE_OF(StreamClient<BaseStream>, BaseStreamClient);
 
 public:
     /**

@@ -16,14 +16,19 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/Type.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/id/Id.hpp>
 
-#include <libtbag/uvpp/Stream.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/Client.hpp>
-#include <libtbag/network/stream/StreamClientBackend.hpp>
 
-#include <cassert>
+#include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
+#include <libtbag/uvpp/ex/TimeoutClose.hpp>
+#include <libtbag/uvpp/ex/TimeoutShutdown.hpp>
+
+#include <string>
+#include <memory>
+#include <mutex>
+#include <chrono>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,19 +43,44 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-10
  */
-template <typename BaseStreamType>
 class StreamClient : public Client
 {
 public:
-    using BaseStream = BaseStreamType;
-    STATIC_ASSERT_CHECK_IS_BASE_OF(uvpp::Stream, BaseStream);
+    using StreamType = details::StreamType;
+    using Loop       = uvpp::Loop;
+    using Stream     = uvpp::Stream;
+    using binf       = uvpp::binf;
 
 public:
-    using ClientBackend = StreamClientBackend<BaseStream>;
+    using SharedClientBackend = std::shared_ptr<Stream>;
+    using   WeakClientBackend =   std::weak_ptr<Stream>;
 
 public:
-    using SharedClientBackend = std::shared_ptr<ClientBackend>;
-    using   WeakClientBackend =   std::weak_ptr<ClientBackend>;
+    using SafetyWriteAsync  = uvpp::ex::SafetyWriteAsync;
+    using TimeoutClose      = uvpp::ex::TimeoutClose;
+    using TimeoutShutdown   = uvpp::ex::TimeoutShutdown;
+
+    using SharedSafetyWriter = SafetyWriteAsync::SharedWriter;
+
+    using SharedTimeoutClose     = std::shared_ptr<TimeoutClose>;
+    using SharedTimeoutShutdown  = std::shared_ptr<TimeoutShutdown>;
+    using SharedSafetyWriteAsync = std::shared_ptr<SafetyWriteAsync>;
+
+    using WeakTimeoutClose     = std::weak_ptr<TimeoutClose>;
+    using WeakTimeoutShutdown  = std::weak_ptr<TimeoutShutdown>;
+    using WeakSafetyWriteAsync = std::weak_ptr<SafetyWriteAsync>;
+
+public:
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
+
+    using Seconds      = std::chrono::seconds;
+    using Milliseconds = std::chrono::milliseconds;
+
+    using Id = id::Id;
+
+private:
+    StreamType const STREAM_TYPE;
 
 private:
     SharedClientBackend    _client;
@@ -58,314 +88,64 @@ private:
     SharedTimeoutClose     _close;
     SharedTimeoutShutdown  _shutdown;
 
+public:
     SharedSafetyWriter _last_writer;
     mutable Mutex _mutex;
 
 public:
-    StreamClient(Loop & loop)
-    {
-        bool const IS_AUTO_CLOSE = false;
-
-        _client   = loop.newHandle<ClientBackend>(loop, this);
-        _async    = loop.newHandle<SafetyWriteAsync>(loop);
-        _close    = loop.newHandle<TimeoutClose>(loop, _client.get(), IS_AUTO_CLOSE);
-        _shutdown = loop.newHandle<TimeoutShutdown>(loop, _client.get(), IS_AUTO_CLOSE);
-
-        assert(static_cast<bool>(_client));
-        assert(static_cast<bool>(_async));
-        assert(static_cast<bool>(_close));
-        assert(static_cast<bool>(_shutdown));
-    }
-
-    virtual ~StreamClient()
-    {
-        _client.reset();
-        _async.reset();
-        _close.reset();
-        _shutdown.reset();
-        _last_writer.reset();
-    }
+    StreamClient(Loop & loop, StreamType type);
+    virtual ~StreamClient();
 
 public:
-    // @formatter:off
-    inline WeakClientBackend     getClient() { Guard g(_mutex); return WeakClientBackend   (_client);   }
-    inline WeakSafetyWriteAsync   getAsync() { Guard g(_mutex); return WeakSafetyWriteAsync(_async);    }
-    inline WeakTimeoutClose       getClose() { Guard g(_mutex); return WeakTimeoutClose    (_close);    }
-    inline WeakTimeoutShutdown getShutdown() { Guard g(_mutex); return WeakTimeoutShutdown (_shutdown); }
+    WeakClientBackend    getClient();
+    WeakSafetyWriteAsync getAsync();
+    WeakTimeoutClose     getClose();
+    WeakTimeoutShutdown  getShutdown();
 
-    inline bool isWriting() const
-    { Guard g(_mutex); return static_cast<bool>(_last_writer); }
-
-    virtual void     lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(    _mutex.lock())) {   _mutex.lock(); }
-    virtual void   unlock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(  _mutex.unlock())) { _mutex.unlock(); }
-    virtual bool try_lock() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_mutex.try_lock())) { return _mutex.try_lock(); }
-    // @formatter:on
+    bool isWriting() const;
 
 private:
-    void startTimeoutShutdown(Milliseconds const & millisec)
-    {
-        assert(static_cast<bool>(_shutdown));
-        Err const CODE = _shutdown->start(static_cast<uint64_t>(millisec.count()));
-        tDLogD("StreamClient::startTimeoutShutdown({}) result code: {}", millisec.count(), getErrName(CODE));
-    }
-
-    void startTimeoutClose(Milliseconds const & millisec)
-    {
-        assert(static_cast<bool>(_close));
-        Err const CODE = _close->start(static_cast<uint64_t>(millisec.count()));
-        tDLogD("StreamClient::startTimeoutClose({}) result code: {}", millisec.count(), getErrName(CODE));
-    }
-
-    void cancelTimeoutShutdown()
-    {
-        assert(static_cast<bool>(_shutdown));
-        if (_shutdown->isActive()) {
-            _shutdown->cancel();
-            _shutdown->stop();
-        }
-        tDLogD("StreamClient::cancelTimeoutShutdown()");
-    }
-
-    void cancelTimeoutClose()
-    {
-        assert(static_cast<bool>(_close));
-        if (_close->isActive()) {
-            _close->cancel();
-            _close->stop();
-        }
-        tDLogD("StreamClient::cancelTimeoutClose()");
-    }
-
-private:
-    bool write(SharedSafetyWriter writer, uint64_t millisec)
-    {
-        assert(static_cast<bool>(_client));
-        assert(static_cast<bool>(_async));
-
-        if (static_cast<bool>(writer) == false) {
-            tDLogD("StreamClient::write() writer is nullptr.");
-            return false;
-        }
-
-        if (static_cast<bool>(_last_writer)) {
-            tDLogD("StreamClient::write() busy state.");
-            return false;
-        }
-
-        Loop * loop = _client->getLoop();
-        assert(loop != nullptr);
-
-        if (millisec >= 1U) {
-            startTimeoutShutdown(Milliseconds(millisec));
-        }
-
-        if (loop->isAliveAndThisThread()) {
-            _last_writer = writer;
-            _last_writer->run(nullptr);
-        } else {
-            _last_writer = writer;
-            if (_async->asyncWrite(writer) == false) {
-                _last_writer.reset();
-            }
-        }
-
-        return true;
-    }
-
-private:
-    void closeAll()
-    {
-        assert(static_cast<bool>(_close));
-        if (_close->isActive()) {
-            _close->cancel();
-            _close->stop();
-        }
-        if (_close->isClosing() == false) {
-            _close->close();
-        }
-
-        assert(static_cast<bool>(_shutdown));
-        if (_shutdown->isActive()) {
-            _shutdown->cancel();
-            _shutdown->stop();
-        }
-        if (_shutdown->isClosing() == false) {
-            _shutdown->close();
-        }
-
-        assert(static_cast<bool>(_client));
-        if (_client->isClosing() == false) {
-            _client->close();
-        }
-
-        assert(static_cast<bool>(_async));
-        if (_async->isClosing() == false) {
-            _async->close();
-        }
-
-        _last_writer.reset();
-    }
+    void startTimeoutShutdown(Milliseconds const & millisec);
+    void startTimeoutClose(Milliseconds const & millisec);
+    void cancelTimeoutShutdown();
+    void cancelTimeoutClose();
+    bool write(SharedSafetyWriter writer, uint64_t millisec);
+    void closeAll();
 
 public:
     /** Obtain the Client handle id. */
-    virtual Id getId() const override
-    {
-        return _client->id();
-    }
+    virtual Id getId() const override;
 
 public:
-    virtual bool init(String const & destination, int port = 0, uint64_t millisec = 0) override
-    {
-        assert(static_cast<bool>(_client));
-        Guard guard(_mutex);
-        if (static_cast<bool>(_client) && realInitialize(*_client, destination, port)) {
-            if (millisec >= 1U) {
-                startTimeoutClose(Milliseconds(millisec));
-            }
-            return true;
-        }
-        return false;
-    }
+    virtual bool init(std::string const & destination, int port = 0, uint64_t millisec = 0) override;
 
 public:
-    virtual bool start() override
-    {
-        assert(static_cast<bool>(_client));
-        Guard guard(_mutex);
-
-        Err const CODE = _client->startRead();
-        tDLogD("StreamClient::start() result code: {}", getErrName(CODE));
-        return CODE == Err::E_SUCCESS;
-    }
-
-    virtual bool stop() override
-    {
-        assert(static_cast<bool>(_client));
-        Guard guard(_mutex);
-
-        Err const CODE = _client->stopRead();
-        tDLogD("StreamClient::stop() result code: {}", getErrName(CODE));
-        return CODE == Err::E_SUCCESS;
-    }
-
-    virtual void close() override
-    {
-        assert(static_cast<bool>(_client));
-        assert(static_cast<bool>(_async));
-
-        Loop * loop = _client->getLoop();
-        assert(loop != nullptr);
-
-        if (loop->isAliveAndThisThread()) {
-            tDLogD("StreamClient::close() sync request.");
-            Guard guard(_mutex);
-            closeAll();
-        } else {
-            tDLogD("StreamClient::close() async request.");
-            _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
-                Guard guard(_mutex);
-                closeAll();
-            });
-        }
-    }
-
-    virtual void cancel() override
-    {
-        assert(static_cast<bool>(_client));
-        assert(static_cast<bool>(_async));
-
-        Loop * loop = _client->getLoop();
-        assert(loop != nullptr);
-
-        if (loop->isAliveAndThisThread()) {
-            tDLogD("StreamClient::cancel() sync request.");
-            Guard guard(_mutex);
-            startTimeoutShutdown(Milliseconds(0U));
-        } else {
-            tDLogD("StreamClient::cancel() async request.");
-            _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
-                Guard guard(_mutex);
-                startTimeoutShutdown(Milliseconds(0U));
-            });
-        }
-    }
+    virtual bool  start() override;
+    virtual bool   stop() override;
+    virtual void  close() override;
+    virtual void cancel() override;
 
 public:
-    virtual bool write(binf const * buffer, Size size, uint64_t millisec = 0) override
-    {
-        assert(static_cast<bool>(_client));
-        Guard guard(_mutex);
-        return write(SafetyWriteAsync::createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
-    }
-
-    virtual bool write(char const * buffer, Size size, uint64_t millisec = 0) override
-    {
-        assert(static_cast<bool>(_client));
-        Guard guard(_mutex);
-        return write(SafetyWriteAsync::createWrite(SafetyWriteAsync::WeakStream(_client), buffer, size), millisec);
-    }
+    virtual bool write(binf const * buffer, std::size_t size, uint64_t millisec = 0) override;
+    virtual bool write(char const * buffer, std::size_t size, uint64_t millisec = 0) override;
 
 public:
-    virtual void * getUserData() override
-    {
-        assert(static_cast<bool>(_client));
-        return _client->getUserData();
-    }
+    virtual void * getUserData() override;
 
+public:
     template <typename Predicated>
     void updateUserData(Predicated predicated)
     {
-        assert(static_cast<bool>(_client));
         Guard guard(_mutex);
         predicated(_client->getUserData());
     }
 
 public:
-    virtual void runBackendConnect(Err code) override
-    {
-        _mutex.lock();
-        cancelTimeoutClose();
-        _mutex.unlock();
-
-        onConnect(code);
-    }
-
-    virtual void runBackendShutdown(Err code) override
-    {
-        _mutex.lock();
-        cancelTimeoutShutdown();
-        _last_writer.reset();
-        _mutex.unlock();
-
-        onShutdown(code);
-    }
-
-    virtual void runBackendWrite(Err code) override
-    {
-        _mutex.lock();
-        cancelTimeoutShutdown();
-        _last_writer.reset();
-        _mutex.unlock();
-
-        onWrite(code);
-    }
-
-    virtual void runBackendRead(Err code, char const * buffer, Size size) override
-    {
-        onRead(code, buffer, size);
-    }
-
-    virtual void runBackendClose() override
-    {
-        onClose();
-
-        _mutex.lock();
-        closeAll();
-        _mutex.unlock();
-    }
-
-public:
-    virtual bool realInitialize(ClientBackend & backend, String const & destination, int port) = 0;
+    virtual void runBackendConnect(Err code) override;
+    virtual void runBackendShutdown(Err code) override;
+    virtual void runBackendWrite(Err code) override;
+    virtual void runBackendRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void runBackendClose() override;
 };
 
 } // namespace stream

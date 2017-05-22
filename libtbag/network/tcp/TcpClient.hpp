@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
-#include <libtbag/uvpp/Tcp.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,24 +30,10 @@ namespace tcp     {
  * @author zer0
  * @date   2017-05-05
  */
-class TcpClient : public stream::StreamClient<uvpp::Tcp>
+struct TcpClient : public stream::StreamClient
 {
-public:
-    using Parent = stream::StreamClient<uvpp::Tcp>;
-
-public:
-    TcpClient(Loop & loop) : Parent(loop)
+    TcpClient(Loop & loop) : stream::StreamClient(loop, StreamType::TCP)
     { /* EMPTY. */ }
-
-    virtual ~TcpClient()
-    { /* EMPTY. */ }
-
-public:
-    virtual Type getType() const override
-    { return Type::TCP; }
-
-    virtual bool realInitialize(ClientBackend & backend, String const & ip, int port) override
-    { return uvpp::initCommonClient(backend, backend.atConnectReq(), ip, port); }
 };
 
 /**

@@ -40,7 +40,6 @@ namespace network {
  */
 struct Client : public details::NetCommon
 {
-    virtual Type getType() const = 0;
     virtual Id getId() const = 0;
 
     virtual bool init(String const & destination, int port = 0, uint64_t millisec = 0) = 0;
