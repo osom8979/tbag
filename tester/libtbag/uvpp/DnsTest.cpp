@@ -36,6 +36,9 @@ TEST(DnsTest, DnsAddrInfo)
     struct addrinfo const * info = addr.getAddrInfo();
     ASSERT_NE(nullptr, info);
 
+    bool exists_ipv4 = false;
+    bool exists_ipv6 = false;
+
     for (; info != nullptr; info = info->ai_next) {
         std::string ip = getIpName(info->ai_addr);
         std::cout << "Domain: "  << TEST_DOMAIN_NAME  << " -> " << "Ip(" << ip << "), "
@@ -44,13 +47,35 @@ TEST(DnsTest, DnsAddrInfo)
                   << "Family("   << info->ai_family   << "), "
                   << "Flags("    << info->ai_flags    << ")\n";
 
+        if (info->ai_family == AF_INET) {
+            exists_ipv4 = true;
+        } else if (info->ai_family == AF_INET6) {
+            exists_ipv6 = true;
+        }
+
         using namespace libtbag::network::details;
         ASSERT_TRUE(isIpv4(ip) || isIpv6(ip));
         ASSERT_EQ(80, getPortNumber(info->ai_addr));
     }
 
-    std::cout << "Find first IPv4: " << getIpName(addr.findFirstIPv4()) << std::endl;
-    std::cout << "Find first IPv6: " << getIpName(addr.findFirstIPv6()) << std::endl;
+    auto * ipv4_addr = addr.findFirstIPv4();
+    auto * ipv6_addr = addr.findFirstIPv6();
+
+    if (exists_ipv4) {
+        ASSERT_NE(nullptr, ipv4_addr);
+        std::cout << "Found first IPv4: " << getIpName(ipv4_addr) << std::endl;
+    } else {
+        ASSERT_EQ(nullptr, ipv4_addr);
+        std::cout << "Not found IPv4.\n";
+    }
+
+    if (exists_ipv6) {
+        ASSERT_NE(nullptr, ipv6_addr);
+        std::cout << "Found first IPv6: " << getIpName(ipv6_addr) << std::endl;
+    } else {
+        ASSERT_EQ(nullptr, ipv6_addr);
+        std::cout << "Not found IPv6.\n";
+    }
 }
 
 TEST(DnsTest, DnsNameInfo)
