@@ -23,8 +23,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace id {
 
+/** Common ID type. */
 typedef std::size_t Id;
 
+/** Unknown ID. */
 TBAG_CONSTEXPR Id const UNKNOWN_ID = 0;
 
 } // namespace id

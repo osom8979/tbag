@@ -119,6 +119,8 @@ struct ClientInterface
  */
 struct ServerInterface
 {
+    using Id = id::Id;
+
     using SharedClient = std::shared_ptr<ClientInterface>;
     using   WeakClient =   std::weak_ptr<ClientInterface>;
 

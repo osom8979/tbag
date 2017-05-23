@@ -18,7 +18,6 @@
 #include <libtbag/network/Uri.hpp>
 
 #include <algorithm>
-#include <sstream>
 #include <string>
 #include <map>
 
@@ -39,21 +38,33 @@ TBAG_CONSTEXPR char const * const METHOD_HEAD   = "HEAD";
 TBAG_CONSTEXPR char const * const METHOD_POST   = "POST";
 TBAG_CONSTEXPR char const * const METHOD_PUT    = "PUT";
 
-// Request
+/**
+ * @defgroup __DOXYGEN_GROUP__HTTP_REQUEST_HEADER__ List of http request headers.
+ * @{
+ */
 TBAG_CONSTEXPR char const * const HEADER_HOST       = "Host";
 TBAG_CONSTEXPR char const * const HEADER_USER_AGENT = "User-Agent";
 TBAG_CONSTEXPR char const * const HEADER_ACCEPT     = "Accept";
 
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT     = "*/*";
+/**
+ * @}
+ */
 
-// Response
+/**
+ * @defgroup __DOXYGEN_GROUP__HTTP_RESPONSE_HEADER__ List of http response headers.
+ * @{
+ */
 TBAG_CONSTEXPR char const * const HEADER_SERVER         = "Server";
 TBAG_CONSTEXPR char const * const HEADER_CONTENT_TYPE   = "Content-Type";
 TBAG_CONSTEXPR char const * const HEADER_CONTENT_LENGTH = "Content-Length";
 
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_SERVER       = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_CONTENT_TYPE = "text/html; charset=utf-8";
+/**
+ * @}
+ */
 
 struct HttpVersionProperty
 {

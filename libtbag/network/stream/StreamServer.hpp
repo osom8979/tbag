@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/id/Id.hpp>
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>

@@ -52,12 +52,6 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-/** Common ID type. */
-typedef std::size_t Id;
-
-/** Unknown ID. */
-Id const UNKNOWN_ID = 0;
-
 // ----------------
 // Transformations.
 // ----------------
