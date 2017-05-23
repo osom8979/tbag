@@ -21,14 +21,14 @@
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/Server.hpp>
 
+#include <cassert>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
 namespace stream  {
-
-// Forward declaration.
 
 /**
  * StreamServerBackend class prototype.

@@ -44,16 +44,14 @@ struct Server : public details::NetCommon
     using SharedClient = std::shared_ptr<Client>;
     using   WeakClient =   std::weak_ptr<Client>;
 
-    // @formatter:off
-    virtual Type getType() const = 0;
-    virtual Id getId() const = 0;
-
-    virtual bool init(String const & destination, int port = 0) = 0;
+    virtual bool init(std::string const & destination, int port = 0) = 0;
     virtual void close() = 0;
 
     virtual WeakClient accept() = 0;
     virtual WeakClient getClient(Id id) = 0;
-    // @formatter:on
+
+    virtual char const * getDestination() const = 0;
+    virtual int getPort() const = 0;
 
     virtual void runBackendConnection(Err code) = 0;
     virtual void runBackendClose() = 0;
@@ -66,7 +64,7 @@ struct Server : public details::NetCommon
     virtual void onConnection    (Err code)       { /* EMPTY. */ }
     virtual void onClientShutdown(WeakClient node, Err code) { /* EMPTY. */ }
     virtual void onClientWrite   (WeakClient node, Err code) { /* EMPTY. */ }
-    virtual void onClientRead    (WeakClient node, Err code, char const * buffer, Size size) { /* EMPTY. */ }
+    virtual void onClientRead    (WeakClient node, Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
     virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
     virtual void onServerClose   ()                { /* EMPTY. */ }
 

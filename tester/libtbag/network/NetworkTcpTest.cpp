@@ -134,7 +134,7 @@ TEST(NetworkTcpTest, MultiEcho)
     });
 
     server.init(details::ANY_IPV4, 0);
-    int const SERVER_PORT = server.getServer().lock()->getSockPort();
+    int const SERVER_PORT = server.getPort();
 
     std::cout << "Server port number: " << SERVER_PORT << std::endl;
 

@@ -38,7 +38,7 @@ TEST(NetworkHttpTest, TcpHttpServer)
     int on_close   = 0;
 
     server.init(details::ANY_IPV4, 0);
-    int const SERVER_PORT = server.getServer().lock()->getSockPort();
+    int const SERVER_PORT = server.getPort();
 
     std::string request_url = "http://localhost:";
     request_url += std::to_string(SERVER_PORT);

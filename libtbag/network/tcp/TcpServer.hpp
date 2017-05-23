@@ -32,24 +32,10 @@ namespace tcp     {
  * @author zer0
  * @date   2017-05-05
  */
-class TcpServer : public stream::StreamServer<uvpp::Tcp, TcpClient>
+struct TcpServer : public stream::StreamServer
 {
-public:
-    using Parent = stream::StreamServer<uvpp::Tcp, TcpClient>;
-
-public:
-    TcpServer(Loop & loop) : Parent(loop)
+    TcpServer(Loop & loop) : stream::StreamServer(loop, StreamType::TCP)
     { /* EMPTY. */ }
-
-    virtual ~TcpServer()
-    { /* EMPTY. */ }
-
-public:
-    virtual Type getType() const override
-    { return Type::TCP; }
-
-    virtual bool realInitialize(ServerBackend & backend, String const & ip, int port) override
-    { return uvpp::initCommonServer(backend, ip, port); }
 };
 
 /**
