@@ -38,7 +38,7 @@ TEST(NetworkDnsTest, Sync)
         ip_list.push_back(CURRENT_IP);
     }
 
-    ASSERT_GE(1U, ip_list.size());
+    ASSERT_LE(1U, ip_list.size());
     for (auto & ip : ip_list) {
         DnsNameInfo name;
         struct sockaddr_in addr = {0,};
