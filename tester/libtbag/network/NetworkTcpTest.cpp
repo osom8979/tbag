@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/tcp/TcpServer.hpp>
-#include <libtbag/network/tcp/TcpClient.hpp>
+#include <libtbag/network/stream/StreamServer.hpp>
+#include <libtbag/network/stream/StreamClient.hpp>
 
 #include <thread>
 #include <memory>
@@ -20,7 +20,7 @@
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::details;
-using namespace libtbag::network::tcp;
+using namespace libtbag::network::stream;
 
 TEST(NetworkTcpTest, ClientTimeout)
 {
@@ -92,7 +92,7 @@ TEST(NetworkTcpTest, MultiEcho)
         }
     });
     server.setOnClientRead([&](FunctionalTcpServer::WeakClient node, Err code,
-                               char const * buffer, FunctionalTcpServer::Size size){
+                               char const * buffer, std::size_t size){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
                 if (shared->stop()) {
@@ -179,7 +179,7 @@ TEST(NetworkTcpTest, MultiEcho)
                 write_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnRead([&, i](Err code, char const * buffer, TcpClient::Size size){
+        clients.at(i)->setOnRead([&, i](Err code, char const * buffer, std::size_t size){
             if (clients.at(i)->stop()) {
                 read_result.at(i) = code;
                 clients.at(i)->close();

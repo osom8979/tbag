@@ -8,8 +8,8 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/pipe/PipeServer.hpp>
-#include <libtbag/network/pipe/PipeClient.hpp>
+#include <libtbag/network/stream/StreamClient.hpp>
+#include <libtbag/network/stream/StreamServer.hpp>
 
 #include <thread>
 #include <memory>
@@ -19,7 +19,7 @@
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::details;
-using namespace libtbag::network::pipe;
+using namespace libtbag::network::stream;
 
 TEST(NetworkPipeTest, MultiEcho)
 {
@@ -55,7 +55,7 @@ TEST(NetworkPipeTest, MultiEcho)
         }
     });
     server.setOnClientRead([&](FunctionalPipeServer::WeakClient node, Err code,
-                               char const * buffer, FunctionalPipeServer::Size size){
+                               char const * buffer, std::size_t size){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
                 if (shared->stop()) {
@@ -127,7 +127,7 @@ TEST(NetworkPipeTest, MultiEcho)
                 write_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnRead([&, i](Err code, char const * buffer, PipeClient::Size size){
+        clients.at(i)->setOnRead([&, i](Err code, char const * buffer, std::size_t size){
             if (clients.at(i)->stop()) {
                 read_result.at(i) = code;
                 clients.at(i)->close();

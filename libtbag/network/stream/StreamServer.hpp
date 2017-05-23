@@ -21,14 +21,7 @@
 #include <libtbag/network/Server.hpp>
 #include <libtbag/uvpp/Stream.hpp>
 
-//#include <libtbag/log/Log.hpp>
-//#include <libtbag/network/stream/StreamClient.hpp>
-//#include <libtbag/network/stream/StreamServerNode.hpp>
-//#include <libtbag/network/stream/StreamServerBackend.hpp>
-
-//#include <cassert>
-//#include <unordered_map>
-
+#include <unordered_map>
 #include <string>
 #include <atomic>
 #include <mutex>
@@ -57,6 +50,9 @@ public:
     using   WeakClient = Server::WeakClient;
 
 public:
+    using SafetyAsync      = uvpp::ex::SafetyAsync;
+    using SafetyWriteAsync = uvpp::ex::SafetyWriteAsync;
+
     using SharedServerBackend = std::shared_ptr<Stream>;
     using   WeakServerBackend =   std::weak_ptr<Stream>;
 
@@ -170,6 +166,33 @@ public:
         predicated(_clients);
     }
 };
+
+/**
+ * TcpServer class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-05
+ */
+struct TcpServer : public stream::StreamServer
+{
+    TcpServer(Loop & loop) : stream::StreamServer(loop, StreamType::TCP)
+    { /* EMPTY. */ }
+};
+
+/**
+ * PipeServer class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-09
+ */
+struct PipeServer : public stream::StreamServer
+{
+    PipeServer(Loop & loop) : stream::StreamServer(loop, StreamType::PIPE)
+    { /* EMPTY. */ }
+};
+
+using FunctionalTcpServer  = FunctionalServer<TcpServer>;
+using FunctionalPipeServer = FunctionalServer<PipeServer>;
 
 } // namespace stream
 } // namespace network

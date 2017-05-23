@@ -19,8 +19,7 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <libtbag/network/tcp/TcpServer.hpp>
-#include <libtbag/network/pipe/PipeServer.hpp>
+#include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/Uri.hpp>
@@ -199,8 +198,8 @@ public:
     }
 };
 
-using TcpHttpServer  = HttpServer<tcp::TcpServer>;
-using PipeHttpServer = HttpServer<pipe::PipeServer>;
+using TcpHttpServer  = HttpServer<stream::TcpServer>;
+using PipeHttpServer = HttpServer<stream::PipeServer>;
 
 } // namespace http
 } // namespace network

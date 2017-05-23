@@ -56,6 +56,7 @@ public:
     using   WeakClientBackend =   std::weak_ptr<Stream>;
 
 public:
+    using SafetyAsync       = uvpp::ex::SafetyAsync;
     using SafetyWriteAsync  = uvpp::ex::SafetyWriteAsync;
     using TimeoutClose      = uvpp::ex::TimeoutClose;
     using TimeoutShutdown   = uvpp::ex::TimeoutShutdown;
@@ -147,6 +148,33 @@ public:
     virtual void runBackendRead(Err code, char const * buffer, std::size_t size) override;
     virtual void runBackendClose() override;
 };
+
+/**
+ * TcpClient class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-05
+ */
+struct TcpClient : public stream::StreamClient
+{
+    TcpClient(Loop & loop) : stream::StreamClient(loop, StreamType::TCP)
+    { /* EMPTY. */ }
+};
+
+/**
+ * PipeClient class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-09
+ */
+struct PipeClient : public stream::StreamClient
+{
+    PipeClient(Loop & loop) : stream::StreamClient(loop, StreamType::PIPE)
+    { /* EMPTY. */ }
+};
+
+using FunctionalTcpClient  = FunctionalClient<TcpClient>;
+using FunctionalPipeClient = FunctionalClient<PipeClient>;
 
 } // namespace stream
 } // namespace network

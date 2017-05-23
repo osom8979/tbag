@@ -18,8 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/network/tcp/TcpClient.hpp>
-#include <libtbag/network/pipe/PipeClient.hpp>
+#include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/Uri.hpp>
@@ -154,8 +153,8 @@ public:
     }
 };
 
-using TcpHttpClient  = HttpClient<tcp::TcpClient>;
-using PipeHttpClient = HttpClient<pipe::PipeClient>;
+using TcpHttpClient  = HttpClient<stream::TcpClient>;
+using PipeHttpClient = HttpClient<stream::PipeClient>;
 
 TBAG_API Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeout, HttpResponse & result);
 TBAG_API Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result);
