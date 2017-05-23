@@ -19,7 +19,7 @@
 #include <libtbag/id/Id.hpp>
 
 #include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/network/Client.hpp>
+#include <libtbag/network/details/FunctionalNet.hpp>
 
 #include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
 #include <libtbag/uvpp/ex/TimeoutClose.hpp>
@@ -173,8 +173,8 @@ struct PipeClient : public stream::StreamClient
     { /* EMPTY. */ }
 };
 
-using FunctionalTcpClient  = FunctionalClient<TcpClient>;
-using FunctionalPipeClient = FunctionalClient<PipeClient>;
+using FunctionalTcpClient  = details::FunctionalClient<TcpClient>;
+using FunctionalPipeClient = details::FunctionalClient<PipeClient>;
 
 } // namespace stream
 } // namespace network

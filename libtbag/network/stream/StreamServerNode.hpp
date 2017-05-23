@@ -20,7 +20,6 @@
 
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
-#include <libtbag/network/Server.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 // -------------------

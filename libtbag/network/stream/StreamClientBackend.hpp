@@ -19,7 +19,6 @@
 #include <libtbag/Type.hpp>
 
 #include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/network/Client.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Request.hpp>

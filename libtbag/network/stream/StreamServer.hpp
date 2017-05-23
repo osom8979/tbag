@@ -18,9 +18,9 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/network/Server.hpp>
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
+#include <libtbag/network/details/FunctionalNet.hpp>
 
 #include <unordered_map>
 #include <string>
@@ -195,8 +195,8 @@ struct PipeServer : public stream::StreamServer
     { /* EMPTY. */ }
 };
 
-using FunctionalTcpServer  = FunctionalServer<TcpServer>;
-using FunctionalPipeServer = FunctionalServer<PipeServer>;
+using FunctionalTcpServer  = details::FunctionalServer<TcpServer>;
+using FunctionalPipeServer = details::FunctionalServer<PipeServer>;
 
 } // namespace stream
 } // namespace network

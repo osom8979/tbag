@@ -16,9 +16,11 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <libtbag/id/Id.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
 #include <libtbag/uvpp/Pipe.hpp>
 
+#include <cstdint>
 #include <type_traits>
 #include <memory>
 
