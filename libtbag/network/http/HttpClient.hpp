@@ -41,7 +41,7 @@ namespace http    {
  * @author zer0
  * @date   2017-05-19
  */
-class HttpClient : public stream::StreamClient
+class TBAG_API HttpClient : public stream::StreamClient
 {
 public:
     using StreamType = details::StreamType;

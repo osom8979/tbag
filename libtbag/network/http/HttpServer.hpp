@@ -40,7 +40,7 @@ namespace http    {
  * @author zer0
  * @date   2017-05-22
  */
-class HttpServer : public stream::StreamServer
+class TBAG_API HttpServer : public stream::StreamServer
 {
 public:
     using StreamType = details::StreamType;

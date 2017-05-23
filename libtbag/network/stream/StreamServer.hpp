@@ -41,7 +41,7 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-10
  */
-class StreamServer : public details::ServerInterface
+class TBAG_API StreamServer : public details::ServerInterface
 {
 public:
     using StreamType      = details::StreamType;
