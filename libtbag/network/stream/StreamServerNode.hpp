@@ -18,11 +18,10 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/network/Client.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/Server.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-
-#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,73 +36,29 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-23
  */
-template <typename BaseType>
-class StreamServerNode : public BaseType
+class StreamServerNode : public StreamClient
 {
 public:
-    using Parent = BaseType;
-    STATIC_ASSERT_CHECK_IS_BASE_OF(Client, Parent);
-
-public:
     using WeakClient = Server::WeakClient;
+    using StreamType = details::StreamType;
     using Loop       = uvpp::Loop;
 
 public:
     Server * _parent;
 
 public:
-    StreamServerNode(Loop & loop, Server * parent) : Parent(loop), _parent(parent)
-    {
-        // EMPTY.
-    }
-
-    virtual ~StreamServerNode()
-    {
-        // EMPTY.
-    }
+    StreamServerNode(Loop & loop, StreamType type, Server * parent);
+    virtual ~StreamServerNode();
 
 private:
-    WeakClient getWeakClient()
-    {
-        assert(_parent != nullptr);
-        return _parent->getClient(this->getId());
-    }
+    WeakClient getWeakClient();
 
 public:
-    virtual void onConnect(Err code) override
-    {
-        // EMPTY.
-    }
-
-    virtual void onShutdown(Err code) override
-    {
-        assert(_parent != nullptr);
-        _parent->onClientShutdown(getWeakClient(), code);
-    }
-
-    virtual void onWrite(Err code) override
-    {
-        assert(_parent != nullptr);
-        _parent->onClientWrite(getWeakClient(), code);
-    }
-
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override
-    {
-        assert(_parent != nullptr);
-        _parent->onClientRead(getWeakClient(), code, buffer, size);
-    }
-
-    virtual void onClose() override
-    {
-        assert(_parent != nullptr);
-        _parent->onClientClose(getWeakClient());
-
-        // Deallocate user data.
-        void * user_data = this->getUserData();
-        if (user_data) {
-            _parent->onClientUserDataDealloc(getWeakClient(), user_data);
-        }
-    }
+    virtual void onConnect(Err code) override;
+    virtual void onShutdown(Err code) override;
+    virtual void onWrite(Err code) override;
+    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void onClose() override;
 };
 
 } // namespace stream
