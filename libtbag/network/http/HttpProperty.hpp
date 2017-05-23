@@ -48,9 +48,7 @@ TBAG_CONSTEXPR char const * const HEADER_ACCEPT     = "Accept";
 
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT     = "*/*";
-/**
- * @}
- */
+/** @} */
 
 /**
  * @defgroup __DOXYGEN_GROUP__HTTP_RESPONSE_HEADER__ List of http response headers.
@@ -62,19 +60,42 @@ TBAG_CONSTEXPR char const * const HEADER_CONTENT_LENGTH = "Content-Length";
 
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_SERVER       = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_CONTENT_TYPE = "text/html; charset=utf-8";
-/**
- * @}
- */
+/** @} */
 
+/**
+ * Http version structure.
+ *
+ * @author zer0
+ * @date   2017-05-20
+ */
 struct HttpVersionProperty
 {
     int maj;
     int min;
 
-    inline void setVersion(int maj, int min)
+    inline void setVersion(int maj, int min) TBAG_NOEXCEPT
     { this->maj = maj; this->min = min; }
+
+    inline void setMajor(int val) TBAG_NOEXCEPT
+    { maj = val; }
+    inline void setMinor(int val) TBAG_NOEXCEPT
+    { min = val; }
+
+    inline int getMajor() const TBAG_NOEXCEPT
+    { return maj; }
+    inline int getMinor() const TBAG_NOEXCEPT
+    { return min; }
+
+    inline friend bool operator ==(HttpVersionProperty & lh, HttpVersionProperty & rh) TBAG_NOEXCEPT
+    { return lh.maj == rh.maj && lh.min == rh.min; }
 };
 
+/**
+ * Http header & body structure.
+ *
+ * @author zer0
+ * @date   2017-05-20
+ */
 struct HttpCommonProperty
 {
     using HeaderMap  = std::map<std::string, std::string>;
@@ -105,21 +126,34 @@ struct HttpCommonProperty
     { body.append(content); }
 };
 
+/**
+ * Http request structure.
+ *
+ * @author zer0
+ * @date   2017-05-20
+ */
 struct HttpRequestProperty
 {
     std::string method;
     std::string url;
+
+    inline Uri getUri() const
+    { return Uri(url); }
 };
 
+/**
+ * Http response structure.
+ *
+ * @author zer0
+ * @date   2017-05-20
+ */
 struct HttpResponseProperty
 {
     int status;
     std::string reason;
 
     inline std::string getStatus() const
-    {
-        return std::to_string(status);
-    }
+    { return std::to_string(status); }
 
     void setStatus(std::string const & str)
     {
