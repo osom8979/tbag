@@ -69,7 +69,7 @@ void HttpClient::onWrite(Err code)
     }
 }
 
-void HttpClient::onRead(Err code, char const * buffer, Size size)
+void HttpClient::onRead(Err code, char const * buffer, std::size_t size)
 {
     if (code == Err::E_EOF) {
         _parser.execute(buffer, size);

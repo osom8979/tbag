@@ -49,8 +49,6 @@ public:
 
 public:
     using Loop   = uvpp::Loop;
-    using String = HttpParser::String;
-    using Size   = HttpParser::Size;
     using Buffer = std::vector<char>;
 
     using SystemClock = std::chrono::system_clock;
@@ -88,7 +86,7 @@ public:
     virtual void onConnect(Err code) override;
     virtual void onShutdown(Err code) override;
     virtual void onWrite(Err code) override;
-    virtual void onRead(Err code, char const * buffer, Size size) override;
+    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
 };
 
 // ----------

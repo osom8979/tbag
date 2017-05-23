@@ -57,10 +57,6 @@ TBAG_CONSTEXPR char const * const HEADER_DEFAULT_CONTENT_TYPE = "text/html; char
 
 struct HttpVersion
 {
-    using BaseChar     = char;
-    using String       = std::basic_string<BaseChar>;
-    using StringStream = std::basic_stringstream<BaseChar>;
-
     int major_number;
     int minor_number;
 
@@ -111,9 +107,9 @@ struct HttpVersion
         }
     }
 
-    String toString() const
+    std::string toString() const
     {
-        StringStream ss;
+        std::stringstream ss;
         ss << HTTP << '/' << major_number << '.' << minor_number;
         return ss.str();
     }
@@ -121,65 +117,60 @@ struct HttpVersion
 
 struct HttpCommon
 {
-    using Size         = std::size_t;
-    using BaseChar     = char;
-    using String       = std::basic_string<BaseChar>;
-    using StringStream = std::basic_stringstream<BaseChar>;
-
-    using HeaderMap = std::map<String, String>;
+    using HeaderMap = std::map<std::string, std::string>;
     using HeaderPair = HeaderMap::value_type;
 
     HttpVersion version;
     HeaderMap   headers;
-    String      body;
+    std::string body;
 
     HttpCommon() { /* EMPTY. */ }
     HttpCommon(int maj, int min) : version(maj, min) { /* EMPTY. */ }
 
-    inline Size getHeadersSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(headers.size()))
+    inline std::size_t getHeaderSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(headers.size()))
     { return headers.size(); }
     inline bool isHeadersEmpty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(headers.empty()))
     { return headers.empty(); }
 
-    inline bool insertHeader(String const & key, String const & val)
+    inline bool insertHeader(std::string const & key, std::string const & val)
     { return headers.insert(HeaderPair(key, val)).second; }
 
-    inline bool eraseHeader(String const & key)
+    inline bool eraseHeader(std::string const & key)
     { return headers.erase(key) == 1U; }
 
-    inline bool existsHeader(String const & key) const
+    inline bool existsHeader(std::string const & key) const
     { return headers.find(key) != headers.end(); }
 
-    String getHeader(String const & key) const
+    std::string getHeader(std::string const & key) const
     {
         auto itr = headers.find(key);
         if (itr != headers.end()) {
             return itr->second;
         }
-        return String();
+        return std::string();
     }
 
-    inline void appendBody(String const & content)
+    inline void appendBody(std::string const & content)
     { body.append(content); }
 };
 
 struct HttpRequest : public virtual HttpCommon
 {
-    String method;
-    String url;
+    std::string method;
+    std::string url;
 };
 
 struct HttpResponse : public virtual HttpCommon
 {
     int    status;
-    String reason;
+    std::string reason;
 
-    inline String getStatus() const
+    inline std::string getStatus() const
     {
         return std::to_string(status);
     }
 
-    inline void setStatus(String const & str)
+    inline void setStatus(std::string const & str)
     {
         try {
             status = std::stoi(str);

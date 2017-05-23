@@ -90,26 +90,26 @@ public:
     bool isUpgrade() const TBAG_NOEXCEPT;
 
 public:
-    String getMethodName() const;
-    String getErrnoName() const;
-    String getErrnoDescription() const;
+    std::string getMethodName() const;
+    std::string getErrnoName() const;
+    std::string getErrnoDescription() const;
 
 public:
-    Size execute(char const * data, Size length);
+    std::size_t execute(char const * data, std::size_t length);
     bool shouldKeepAlive() const;
-    bool parseUrl(char const * buffer, Size length, bool is_connect = true);
+    bool parseUrl(char const * buffer, std::size_t length, bool is_connect = true);
     void pause(bool is_paused = true);
     bool bodyIsFinal() const TBAG_NOEXCEPT;
 
 // Event methods.
 public:
     virtual int onMessageBegin    ();
-    virtual int onUrl             (String const & at);
-    virtual int onStatus          (String const & at);
-    virtual int onHeaderField     (String const & at);
-    virtual int onHeaderValue     (String const & at);
+    virtual int onUrl             (std::string const & at);
+    virtual int onStatus          (std::string const & at);
+    virtual int onHeaderField     (std::string const & at);
+    virtual int onHeaderValue     (std::string const & at);
     virtual int onHeadersComplete ();
-    virtual int onBody            (String const & at);
+    virtual int onBody            (std::string const & at);
     virtual int onMessageComplete ();
     virtual int onChunkHeader     ();
     virtual int onChunkComplete   ();

@@ -86,22 +86,22 @@ void HttpBuilder::clear()
     status = 0;
 }
 
-HttpBuilder::String HttpBuilder::request() const
+std::string HttpBuilder::request() const
 {
     return buildRequest(method, url, headers, body, version);
 }
 
-HttpBuilder::String HttpBuilder::response() const
+std::string HttpBuilder::response() const
 {
     return buildResponse(getStatus(), reason, headers, body, version);
 }
 
-HttpBuilder::String HttpBuilder::requestDefault() const
+std::string HttpBuilder::requestDefault() const
 {
     return buildRequest(method, url, headers, body, version);
 }
 
-HttpBuilder::String HttpBuilder::responseDefault() const
+std::string HttpBuilder::responseDefault() const
 {
     HeaderMap resl_headers = headers;
     if (resl_headers.find(HEADER_SERVER) == resl_headers.end()) {
@@ -116,11 +116,11 @@ HttpBuilder::String HttpBuilder::responseDefault() const
     return buildResponse(getStatus(), reason, resl_headers, body, version);
 }
 
-HttpBuilder::String HttpBuilder::buildRequest(String const & method, String const & url,
-                                              HeaderMap const & headers, String const & body,
-                                              HttpVersion const & version)
+std::string HttpBuilder::buildRequest(std::string const & method, std::string const & url,
+                                      HeaderMap const & headers, std::string const & body,
+                                      HttpVersion const & version)
 {
-    StringStream ss;
+    std::stringstream ss;
     ss << method << SP << url << SP << version.toString() << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
@@ -129,9 +129,9 @@ HttpBuilder::String HttpBuilder::buildRequest(String const & method, String cons
     return ss.str();
 }
 
-HttpBuilder::String HttpBuilder::buildResponse(String const & status, String const & reason,
-                                               HeaderMap const & headers, String const & body,
-                                               HttpVersion const & version)
+std::string HttpBuilder::buildResponse(std::string const & status, std::string const & reason,
+                                       HeaderMap const & headers, std::string const & body,
+                                       HttpVersion const & version)
 {
     std::stringstream ss;
     ss << version.toString() << SP << status << SP << reason << CRLF;

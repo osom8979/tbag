@@ -55,10 +55,10 @@ public:
     inline HttpBuilder & setVersion(int maj, int min) { version.set(maj, min); return *this; }
 
     inline HttpBuilder & setHeaders(HeaderMap const & val) { headers = val;  return *this; }
-    inline HttpBuilder & setBody   (String    const & val) { body    = val;  return *this; }
-    inline HttpBuilder & setMethod (String    const & val) { method  = val;  return *this; }
-    inline HttpBuilder & setUrl    (String    const & val) { url     = val;  return *this; }
-    inline HttpBuilder & setReason (String    const & val) { reason  = val;  return *this; }
+    inline HttpBuilder & setBody   (std::string    const & val) { body    = val;  return *this; }
+    inline HttpBuilder & setMethod (std::string    const & val) { method  = val;  return *this; }
+    inline HttpBuilder & setUrl    (std::string    const & val) { url     = val;  return *this; }
+    inline HttpBuilder & setReason (std::string    const & val) { reason  = val;  return *this; }
     // @formatter:on
 
     inline HttpBuilder & setStatus (int val)
@@ -67,25 +67,25 @@ public:
         return *this;
     }
 
-    inline HttpBuilder & setHeader(String const & key, String const & val)
+    inline HttpBuilder & setHeader(std::string const & key, std::string const & val)
     {
         insertHeader(key, val);
         return *this;
     }
 
 public:
-    String request() const;
-    String response() const;
+    std::string request() const;
+    std::string response() const;
 
-    String requestDefault() const;
-    String responseDefault() const;
+    std::string requestDefault() const;
+    std::string responseDefault() const;
 
 public:
-    static String buildRequest(String const & method, String const & url,
-                               HeaderMap const & headers, String const & body,
+    static std::string buildRequest(std::string const & method, std::string const & url,
+                               HeaderMap const & headers, std::string const & body,
                                HttpVersion const & version);
-    static String buildResponse(String const & status, String const & reason,
-                                HeaderMap const & headers, String const & body,
+    static std::string buildResponse(std::string const & status, std::string const & reason,
+                                HeaderMap const & headers, std::string const & body,
                                 HttpVersion const & version);
 };
 
