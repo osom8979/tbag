@@ -189,7 +189,7 @@ StreamClient::Id StreamClient::getId() const
     return _client->id();
 }
 
-bool StreamClient::init(std::string const & destination, int port, uint64_t millisec)
+bool StreamClient::init(char const * destination, int port, uint64_t millisec)
 {
     using TcpBackend = StreamClientBackend<uvpp::Tcp>;
     using PipeBackend = StreamClientBackend<uvpp::Pipe>;

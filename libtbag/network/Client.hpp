@@ -21,6 +21,7 @@
 #include <libtbag/id/Id.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 
 #include <cstdint>
 #include <string>
@@ -33,48 +34,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 
 /**
- * Client class prototype.
- *
- * @author zer0
- * @date   2017-05-02
- */
-struct Client
-{
-    using binf = uvpp::binf;
-    using Id   = id::Id;
-
-    virtual Id getId() const = 0;
-
-    virtual bool init(std::string const & destination, int port = 0, uint64_t millisec = 0) = 0;
-
-    virtual bool  start() = 0;
-    virtual bool   stop() = 0;
-    virtual void  close() = 0;
-    virtual void cancel() = 0;
-
-    virtual bool write(binf const * buffer, std::size_t size, uint64_t millisec = 0) = 0;
-    virtual bool write(char const * buffer, std::size_t size, uint64_t millisec = 0) = 0;
-
-    virtual void * getUserData() = 0;
-
-    virtual void runBackendConnect(Err code) = 0;
-    virtual void runBackendShutdown(Err code) = 0;
-    virtual void runBackendWrite(Err code) = 0;
-    virtual void runBackendRead(Err code, char const * buffer, std::size_t size) = 0;
-    virtual void runBackendClose() = 0;
-
-    // ---------------
-    // Event callback.
-    // ---------------
-
-    virtual void onConnect(Err code) { /* EMPTY. */ }
-    virtual void onShutdown(Err code) { /* EMPTY. */ }
-    virtual void onWrite(Err code) { /* EMPTY. */ }
-    virtual void onRead(Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onClose() { /* EMPTY. */ }
-};
-
-/**
  * FunctionalClient class prototype.
  *
  * @author zer0
@@ -85,9 +44,9 @@ struct FunctionalClient : public BaseType
 {
     // @formatter:off
     using Parent = BaseType;
-    using Loop = uvpp::Loop;
+    using Loop   = uvpp::Loop;
 
-    STATIC_ASSERT_CHECK_IS_BASE_OF(Client, Parent);
+    STATIC_ASSERT_CHECK_IS_BASE_OF(details::ClientInterface, Parent);
 
     using OnConnect  = std::function<void(Err)>;
     using OnShutdown = std::function<void(Err)>;

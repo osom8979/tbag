@@ -43,7 +43,7 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-10
  */
-class StreamClient : public Client
+class StreamClient : public details::ClientInterface
 {
 public:
     using StreamType = details::StreamType;
@@ -118,7 +118,7 @@ public:
     virtual Id getId() const override;
 
 public:
-    virtual bool init(std::string const & destination, int port = 0, uint64_t millisec = 0) override;
+    virtual bool init(char const * destination, int port = 0, uint64_t millisec = 0) override;
 
 public:
     virtual bool  start() override;

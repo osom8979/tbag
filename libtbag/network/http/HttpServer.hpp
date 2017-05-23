@@ -19,6 +19,7 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
@@ -47,14 +48,17 @@ class HttpServer : public ServerType
 public:
     using Parent = ServerType;
 
-public:
-    using Loop     = uvpp::Loop;
-    using String   = HttpParser::String;
-    using Size     = HttpParser::Size;
-    using Buffer   = std::vector<char>;
+    using ClientInterface = details::ClientInterface;
+    using ServerInterface = details::ServerInterface;
 
-    using SharedClient = Server::SharedClient;
-    using   WeakClient = Server::WeakClient;
+public:
+    using Loop    = uvpp::Loop;
+    using String  = HttpParser::String;
+    using Size    = HttpParser::Size;
+    using Buffer  = std::vector<char>;
+
+    using SharedClient = ServerInterface::SharedClient;
+    using   WeakClient = ServerInterface::WeakClient;
 
     using SystemClock = std::chrono::system_clock;
     using TimePoint   = SystemClock::time_point;

@@ -33,45 +33,6 @@ namespace uvpp { class Loop; }
 
 namespace network {
 
-/**
- * Server class prototype.
- *
- * @author zer0
- * @date   2017-05-02
- */
-struct Server
-{
-    using SharedClient = std::shared_ptr<Client>;
-    using   WeakClient =   std::weak_ptr<Client>;
-
-    virtual bool init(std::string const & destination, int port = 0) = 0;
-    virtual void close() = 0;
-
-    virtual WeakClient accept() = 0;
-    virtual WeakClient getClient(Id id) = 0;
-
-    virtual char const * getDestination() const = 0;
-    virtual int getPort() const = 0;
-
-    virtual void runBackendConnection(Err code) = 0;
-    virtual void runBackendClose() = 0;
-
-    // ---------------
-    // Event callback.
-    // ---------------
-
-    // @formatter:off
-    virtual void onConnection    (Err code)       { /* EMPTY. */ }
-    virtual void onClientShutdown(WeakClient node, Err code) { /* EMPTY. */ }
-    virtual void onClientWrite   (WeakClient node, Err code) { /* EMPTY. */ }
-    virtual void onClientRead    (WeakClient node, Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
-    virtual void onServerClose   ()                { /* EMPTY. */ }
-
-    virtual void * onClientUserDataAlloc(WeakClient node) { return nullptr; }
-    virtual void   onClientUserDataDealloc(WeakClient node, void * data) { /* EMPTY. */ }
-    // @formatter:on
-};
 
 /**
  * FunctionalServer class prototype.
@@ -86,10 +47,10 @@ struct FunctionalServer : public BaseType
     using Parent = BaseType;
     using Loop   = uvpp::Loop;
 
-    using SharedClient = Server::SharedClient;
-    using   WeakClient = Server::WeakClient;
+    using SharedClient = details::ServerInterface::SharedClient;
+    using   WeakClient = details::ServerInterface::WeakClient;
 
-    STATIC_ASSERT_CHECK_IS_BASE_OF(Server, Parent);
+    STATIC_ASSERT_CHECK_IS_BASE_OF(details::ServerInterface, Parent);
 
     using OnConnection     = std::function<void(Err)>;
     using OnClientShutdown = std::function<void(WeakClient, Err)>;

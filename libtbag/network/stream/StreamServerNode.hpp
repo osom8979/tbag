@@ -39,15 +39,17 @@ namespace stream  {
 class StreamServerNode : public StreamClient
 {
 public:
-    using WeakClient = Server::WeakClient;
-    using StreamType = details::StreamType;
+    using StreamType      = details::StreamType;
+    using ServerInterface = details::ServerInterface;
+
+    using WeakClient = ServerInterface::WeakClient;
     using Loop       = uvpp::Loop;
 
 public:
-    Server * _parent;
+    ServerInterface * _parent;
 
 public:
-    StreamServerNode(Loop & loop, StreamType type, Server * parent);
+    StreamServerNode(Loop & loop, StreamType type, ServerInterface * parent);
     virtual ~StreamServerNode();
 
 private:

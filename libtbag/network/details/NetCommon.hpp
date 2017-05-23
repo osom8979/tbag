@@ -20,6 +20,7 @@
 #include <libtbag/uvpp/Pipe.hpp>
 
 #include <type_traits>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -63,6 +64,88 @@ template <> struct IsNetworkType<uvpp::Pipe> : public std::true_type
 
 TBAG_API bool isIpv4(std::string const & ip);
 TBAG_API bool isIpv6(std::string const & ip);
+
+/**
+ * Client interface.
+ *
+ * @author zer0
+ * @date   2017-05-02
+ * @date   2017-05-23 (Rename: Client -> ClientInterface)
+ */
+struct ClientInterface
+{
+    using binf = uvpp::binf;
+    using Id   = id::Id;
+
+    virtual Id getId() const = 0;
+
+    virtual bool init(char const * destination, int port = 0, uint64_t millisec = 0) = 0;
+
+    virtual bool  start() = 0;
+    virtual bool   stop() = 0;
+    virtual void  close() = 0;
+    virtual void cancel() = 0;
+
+    virtual bool write(binf const * buffer, std::size_t size, uint64_t millisec = 0) = 0;
+    virtual bool write(char const * buffer, std::size_t size, uint64_t millisec = 0) = 0;
+
+    virtual void * getUserData() = 0;
+
+    virtual void runBackendConnect(Err code) = 0;
+    virtual void runBackendShutdown(Err code) = 0;
+    virtual void runBackendWrite(Err code) = 0;
+    virtual void runBackendRead(Err code, char const * buffer, std::size_t size) = 0;
+    virtual void runBackendClose() = 0;
+
+    // ---------------
+    // Event callback.
+    // ---------------
+
+    virtual void onConnect(Err code) { /* EMPTY. */ }
+    virtual void onShutdown(Err code) { /* EMPTY. */ }
+    virtual void onWrite(Err code) { /* EMPTY. */ }
+    virtual void onRead(Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
+    virtual void onClose() { /* EMPTY. */ }
+};
+
+/**
+ * Server interface.
+ *
+ * @author zer0
+ * @date   2017-05-02
+ * @date   2017-05-23 (Rename: Server -> ServerInterface)
+ */
+struct ServerInterface
+{
+    using SharedClient = std::shared_ptr<ClientInterface>;
+    using   WeakClient =   std::weak_ptr<ClientInterface>;
+
+    virtual bool init(char const * destination, int port = 0) = 0;
+    virtual void close() = 0;
+
+    virtual WeakClient accept() = 0;
+    virtual WeakClient getClient(Id id) = 0;
+
+    virtual char const * getDestination() const = 0;
+    virtual int getPort() const = 0;
+
+    virtual void runBackendConnection(Err code) = 0;
+    virtual void runBackendClose() = 0;
+
+    // ---------------
+    // Event callback.
+    // ---------------
+
+    virtual void onConnection(Err code) { /* EMPTY. */ }
+    virtual void onClientShutdown(WeakClient node, Err code) { /* EMPTY. */ }
+    virtual void onClientWrite(WeakClient node, Err code) { /* EMPTY. */ }
+    virtual void onClientRead(WeakClient node, Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
+    virtual void onClientClose(WeakClient node) { /* EMPTY. */ }
+    virtual void onServerClose() { /* EMPTY. */ }
+
+    virtual void * onClientUserDataAlloc(WeakClient node) { return nullptr; }
+    virtual void onClientUserDataDealloc(WeakClient node, void * data) { /* EMPTY. */ }
+};
 
 } // namespace details
 } // namespace network

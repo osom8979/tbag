@@ -42,9 +42,11 @@ template <typename BaseType>
 class StreamServerBackend : public BaseType
 {
 public:
-    using StreamType = details::StreamType;
-    using Parent     = BaseType;
-    using Loop       = uvpp::Loop;
+    using StreamType      = details::StreamType;
+    using ServerInterface = details::ServerInterface;
+
+    using Parent = BaseType;
+    using Loop   = uvpp::Loop;
 
     TBAG_CONSTEXPR static StreamType getStreamType() TBAG_NOEXCEPT
     {
@@ -55,10 +57,10 @@ public:
                   "The BaseType must be uvpp::Tcp or uvpp::Pipe.");
 
 private:
-    Server * _parent;
+    ServerInterface * _parent;
 
 public:
-    StreamServerBackend(Loop & loop, Server * parent) : Parent(loop), _parent(parent)
+    StreamServerBackend(Loop & loop, ServerInterface * parent) : Parent(loop), _parent(parent)
     {
         // EMPTY.
     }

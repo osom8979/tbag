@@ -40,15 +40,18 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-10
  */
-class StreamServer : public Server
+class StreamServer : public details::ServerInterface
 {
 public:
-    using StreamType = details::StreamType;
-    using Loop       = uvpp::Loop;
-    using Stream     = uvpp::Stream;
+    using StreamType      = details::StreamType;
+    using ClientInterface = details::ClientInterface;
+    using ServerInterface = details::ServerInterface;
 
-    using SharedClient = Server::SharedClient;
-    using   WeakClient = Server::WeakClient;
+    using Loop   = uvpp::Loop;
+    using Stream = uvpp::Stream;
+
+    using SharedClient = ServerInterface::SharedClient;
+    using   WeakClient = ServerInterface::WeakClient;
 
 public:
     using SafetyAsync      = uvpp::ex::SafetyAsync;
@@ -117,7 +120,7 @@ private:
 
 public:
     /** Initialize this class. */
-    virtual bool init(std::string const & destination, int port = 0) override;
+    virtual bool init(char const * destination, int port = 0) override;
 
     /**
      * Safety close() operation.

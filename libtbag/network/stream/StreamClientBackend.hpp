@@ -48,11 +48,13 @@ template <typename BaseType>
 class StreamClientBackend : public BaseType
 {
 public:
-    using StreamType = details::StreamType;
-    using Parent     = BaseType;
-    using Loop       = uvpp::Loop;
-    using binf       = uvpp::binf;
-    using Buffer     = std::vector<char>;
+    using StreamType      = details::StreamType;
+    using ClientInterface = details::ClientInterface;
+
+    using Parent = BaseType;
+    using Loop   = uvpp::Loop;
+    using binf   = uvpp::binf;
+    using Buffer = std::vector<char>;
 
     using ConnectRequest  = uvpp::ConnectRequest;
     using ShutdownRequest = uvpp::ShutdownRequest;
@@ -67,13 +69,13 @@ public:
                   "The BaseType must be uvpp::Tcp or uvpp::Pipe.");
 
 private:
-    Client * _parent;
-    Buffer   _buffer;
+    ClientInterface * _parent;
+    Buffer _buffer;
 
     ConnectRequest _connect_req;
 
 public:
-    StreamClientBackend(Loop & loop, Client * parent) : Parent(loop), _parent(parent)
+    StreamClientBackend(Loop & loop, ClientInterface * parent) : Parent(loop), _parent(parent)
     { /* EMPTY. */ }
     virtual ~StreamClientBackend()
     { /* EMPTY. */ }

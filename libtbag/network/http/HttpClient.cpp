@@ -30,7 +30,7 @@ Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeo
         return ADDRINFO_RESULT;
     }
 
-    if (http.init(host, port, timeout) == false) {
+    if (http.init(host.c_str(), port, timeout) == false) {
         return Err::E_EINIT;
     }
 

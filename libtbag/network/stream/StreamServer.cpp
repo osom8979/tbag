@@ -113,7 +113,7 @@ void StreamServer::closeAll()
     _port = 0;
 }
 
-bool StreamServer::init(std::string const & destination, int port)
+bool StreamServer::init(char const * destination, int port)
 {
     assert(static_cast<bool>(_server));
     Guard guard(_mutex);
@@ -180,7 +180,7 @@ StreamServer::WeakClient StreamServer::accept()
     }
 
     Guard guard(_mutex);
-    auto client = std::static_pointer_cast<StreamServerNode, Client>(createClient());
+    auto client = std::static_pointer_cast<StreamServerNode, ClientInterface>(createClient());
 
     if (auto shared = client->getClient().lock()) {
         Err const CODE = _server->accept(*shared);

@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace stream  {
 
-StreamServerNode::StreamServerNode(Loop & loop, StreamType type, Server * parent)
+StreamServerNode::StreamServerNode(Loop & loop, StreamType type, ServerInterface * parent)
         : StreamClient(loop, type), _parent(parent)
 {
     // EMPTY.

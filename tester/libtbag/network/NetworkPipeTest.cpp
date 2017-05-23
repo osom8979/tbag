@@ -136,7 +136,7 @@ TEST(NetworkPipeTest, MultiEcho)
         clients.at(i)->setOnClose([&, i](){
             close_result.at(i) = Err::E_SUCCESS;
         });
-        clients.at(i)->init(path);
+        clients.at(i)->init(path.getString().c_str());
 
         cthreads.at(i) = std::thread([&, i](){
             loop_result.at(i) = cloops.at(i)->run();
