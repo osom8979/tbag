@@ -20,6 +20,7 @@
 
 #include <libtbag/network/Server.hpp>
 #include <libtbag/uvpp/Stream.hpp>
+#include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
 
 #include <unordered_map>
 #include <string>

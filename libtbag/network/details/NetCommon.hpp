@@ -16,26 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#include <libtbag/uvpp/UvCommon.hpp>
-#include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/uvpp/Udp.hpp>
 #include <libtbag/uvpp/Pipe.hpp>
-#include <libtbag/uvpp/Timer.hpp>
-#include <libtbag/uvpp/Request.hpp>
-
-#include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
-#include <libtbag/uvpp/ex/TimeoutClose.hpp>
-#include <libtbag/uvpp/ex/TimeoutShutdown.hpp>
-#include <libtbag/uvpp/ex/WriteJob.hpp>
-
-#include <libtbag/id/Id.hpp>
-
-#include <memory>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <mutex>
 
 #include <type_traits>
 
@@ -77,56 +59,6 @@ template <> struct IsNetworkType<uvpp::Tcp> : public std::true_type
 template <> struct IsNetworkType<uvpp::Pipe> : public std::true_type
 {
     TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::PIPE;
-};
-
-/**
- * Common types for the network package.
- *
- * @author zer0
- * @date   2017-05-03
- */
-struct NetCommon
-{
-    using binf   = uvpp::binf;
-    using Type   = StreamType;
-    using Size   = std::size_t;
-    using String = std::string;
-
-    using Loop  = uvpp::Loop;
-    using Timer = uvpp::Timer;
-
-    using Id = uvpp::Handle::Id;
-
-    using SafetyAsync        = uvpp::ex::SafetyAsync;
-    using SafetyWriteAsync   = uvpp::ex::SafetyWriteAsync;
-    using SharedSafetyWriter = SafetyWriteAsync::SharedWriter;
-
-    using AsyncJob = SafetyAsync::Job;
-    using WriteJob = uvpp::ex::WriteJob;
-
-    using ShutdownRequest = uvpp::ShutdownRequest;
-    using ConnectRequest  = uvpp::ConnectRequest;
-    using WriteRequest    = uvpp::WriteRequest;
-
-    using Buffer = std::vector<char>;
-
-    using Seconds      = std::chrono::seconds;
-    using Milliseconds = std::chrono::milliseconds;
-
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
-
-    using TimeoutClose    = uvpp::ex::TimeoutClose;
-    using TimeoutShutdown = uvpp::ex::TimeoutShutdown;
-
-    using SharedTimeoutClose = std::shared_ptr<TimeoutClose>;
-    using   WeakTimeoutClose =   std::weak_ptr<TimeoutClose>;
-
-    using SharedTimeoutShutdown = std::shared_ptr<TimeoutShutdown>;
-    using   WeakTimeoutShutdown =   std::weak_ptr<TimeoutShutdown>;
-
-    using SharedSafetyWriteAsync = std::shared_ptr<SafetyWriteAsync>;
-    using   WeakSafetyWriteAsync =   std::weak_ptr<SafetyWriteAsync>;
 };
 
 TBAG_API bool isIpv4(std::string const & ip);

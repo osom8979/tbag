@@ -39,7 +39,7 @@ namespace network {
  * @author zer0
  * @date   2017-05-02
  */
-struct Server : public details::NetCommon
+struct Server
 {
     using SharedClient = std::shared_ptr<Client>;
     using   WeakClient =   std::weak_ptr<Client>;
@@ -84,17 +84,17 @@ struct FunctionalServer : public BaseType
 {
     // @formatter:off
     using Parent = BaseType;
+    using Loop   = uvpp::Loop;
+
+    using SharedClient = Server::SharedClient;
+    using   WeakClient = Server::WeakClient;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(Server, Parent);
-
-    using Loop = uvpp::Loop;
-    using Size = details::NetCommon::Size;
-    using WeakClient = Server::WeakClient;
 
     using OnConnection     = std::function<void(Err)>;
     using OnClientShutdown = std::function<void(WeakClient, Err)>;
     using OnClientWrite    = std::function<void(WeakClient, Err)>;
-    using OnClientRead     = std::function<void(WeakClient, Err, char const *, Size)>;
+    using OnClientRead     = std::function<void(WeakClient, Err, char const *, std::size_t)>;
     using OnClientClose    = std::function<void(WeakClient)>;
     using OnServerClose    = std::function<void(void)>;
 
@@ -132,7 +132,7 @@ struct FunctionalServer : public BaseType
     { if (client_shutdown_cb) { client_shutdown_cb(node, code); } }
     virtual void onClientWrite(WeakClient node, Err code) override
     { if (client_write_cb) { client_write_cb(node, code); } }
-    virtual void onClientRead(WeakClient node, Err code, char const * buffer, Size size) override
+    virtual void onClientRead(WeakClient node, Err code, char const * buffer, std::size_t size) override
     { if (client_read_cb) { client_read_cb(node, code, buffer, size); } }
     virtual void onClientClose(WeakClient node) override
     { if (client_close_cb) { client_close_cb(node); } }
