@@ -31,7 +31,7 @@ TEST(NetworkHttpTest, TcpHttpServer)
     char const * const TEST_BODY = "<html><head><title>TEST</title></head><body><p>Hello, World!</p></body></html>";
 
     uvpp::Loop loop;
-    TcpHttpServer server(loop);
+    HttpServer server(loop);
 
     int on_open    = 0;
     int on_request = 0;
@@ -46,7 +46,7 @@ TEST(NetworkHttpTest, TcpHttpServer)
 
     std::cout << "Request URL: " << request_url << std::endl;
 
-    server.setOnOpen([&](TcpHttpServer::WeakClient node){
+    server.setOnOpen([&](HttpServer::WeakClient node){
         std::cout << "Server.OnOpen()\n";
         ++on_open;
     });
@@ -59,7 +59,7 @@ TEST(NetworkHttpTest, TcpHttpServer)
         response.body = TEST_BODY;
         timeout = 10000;
     });
-    server.setOnClose([&](TcpHttpServer::WeakClient node){
+    server.setOnClose([&](HttpServer::WeakClient node){
         std::cout << "Server.OnClose()\n";
         ++on_close;
         server.close();
