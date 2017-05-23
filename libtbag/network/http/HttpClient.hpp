@@ -41,17 +41,17 @@ namespace http    {
  * @author zer0
  * @date   2017-05-19
  */
-template <typename ClientType>
-class HttpClient : public ClientType
+class HttpClient : public stream::StreamClient
 {
 public:
-    using Parent = ClientType;
+    using StreamType = details::StreamType;
+    using Parent     = stream::StreamClient;
 
 public:
-    using Loop     = uvpp::Loop;
-    using String   = HttpParser::String;
-    using Size     = HttpParser::Size;
-    using Buffer   = std::vector<char>;
+    using Loop   = uvpp::Loop;
+    using String = HttpParser::String;
+    using Size   = HttpParser::Size;
+    using Buffer = std::vector<char>;
 
     using SystemClock = std::chrono::system_clock;
     using TimePoint   = SystemClock::time_point;
@@ -70,10 +70,8 @@ private:
     TimePoint  _start_time;
 
 public:
-    HttpClient(Loop & loop) : Parent(loop), _builder(), _parser(HttpParser::Type::RESPONSE)
-    { /* EMPTY. */ }
-    virtual ~HttpClient()
-    { /* EMPTY. */ }
+    HttpClient(Loop & loop, StreamType type = StreamType::TCP);
+    virtual ~HttpClient();
 
 public:
     // @formatter:off
@@ -84,77 +82,18 @@ public:
     // @formatter:on
 
 public:
-    void setup(HttpBuilder const & request,
-               OnResponse const & response_cb,
-               Millisec const & timeout = Millisec(0))
-    {
-        _builder     = request;
-        _response_cb = response_cb;
-        _timeout     = timeout;
-        _start_time  = SystemClock::now();
-    }
+    void setup(HttpBuilder const & request, OnResponse const & response_cb, Millisec const & timeout = Millisec(0));
 
-// TcpClient callback.
 public:
-    virtual void onConnect(Err code) override
-    {
-        if (code == Err::E_SUCCESS) {
-            using namespace std::chrono;
-
-            auto buffer = _builder.request();
-            Millisec left_time = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
-            if (this->write(buffer.data(), buffer.size(), left_time.count()) == false) {
-                _response_cb(Err::E_WRERR, _parser);
-                this->close();
-            }
-        } else {
-            _response_cb(code, _parser);
-            this->close();
-        }
-    }
-
-    virtual void onShutdown(Err code) override
-    {
-        _response_cb(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _parser);
-        this->close();
-    }
-
-    virtual void onWrite(Err code) override
-    {
-        if (code == Err::E_SUCCESS) {
-            this->start();
-        } else {
-            _response_cb(code, _parser);
-            this->close();
-        }
-    }
-
-    virtual void onRead(Err code, char const * buffer, Size size) override
-    {
-        if (code == Err::E_EOF) {
-            _parser.execute(buffer, size);
-            _response_cb(Err::E_SUCCESS, _parser);
-
-            this->stop();
-            this->close();
-        } else if (code == Err::E_SUCCESS) {
-            _parser.execute(buffer, size);
-            if (_parser.isComplete()) {
-                _response_cb(Err::E_SUCCESS, _parser);
-
-                this->stop();
-                this->close();
-            }
-        } else {
-            _response_cb(code, _parser);
-            this->stop();
-            this->close();
-        }
-    }
+    virtual void onConnect(Err code) override;
+    virtual void onShutdown(Err code) override;
+    virtual void onWrite(Err code) override;
+    virtual void onRead(Err code, char const * buffer, Size size) override;
 };
 
-using TcpHttpClient  = HttpClient<stream::TcpClient>;
-using PipeHttpClient = HttpClient<stream::PipeClient>;
+// ----------
+// Utilities.
+// ----------
 
 TBAG_API Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeout, HttpResponse & result);
 TBAG_API Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result);

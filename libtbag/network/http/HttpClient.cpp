@@ -15,11 +15,92 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
+HttpClient::HttpClient(Loop & loop, StreamType type)
+        : Parent(loop, type), _builder(), _parser(HttpParser::Type::RESPONSE)
+{
+    // EMPTY.
+}
+
+HttpClient::~HttpClient()
+{
+    // EMPTY.
+}
+
+void HttpClient::setup(HttpBuilder const & request,
+                       OnResponse const & response_cb,
+                       Millisec const & timeout)
+{
+    _builder     = request;
+    _response_cb = response_cb;
+    _timeout     = timeout;
+    _start_time  = SystemClock::now();
+}
+
+void HttpClient::onConnect(Err code)
+{
+    if (code == Err::E_SUCCESS) {
+        using namespace std::chrono;
+
+        auto buffer = _builder.request();
+        Millisec left_time = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
+        if (this->write(buffer.data(), buffer.size(), left_time.count()) == false) {
+            _response_cb(Err::E_WRERR, _parser);
+            this->close();
+        }
+    } else {
+        _response_cb(code, _parser);
+        this->close();
+    }
+}
+
+void HttpClient::onShutdown(Err code)
+{
+    _response_cb(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _parser);
+    this->close();
+}
+
+void HttpClient::onWrite(Err code)
+{
+    if (code == Err::E_SUCCESS) {
+        this->start();
+    } else {
+        _response_cb(code, _parser);
+        this->close();
+    }
+}
+
+void HttpClient::onRead(Err code, char const * buffer, Size size)
+{
+    if (code == Err::E_EOF) {
+        _parser.execute(buffer, size);
+        _response_cb(Err::E_SUCCESS, _parser);
+
+        this->stop();
+        this->close();
+    } else if (code == Err::E_SUCCESS) {
+        _parser.execute(buffer, size);
+        if (_parser.isComplete()) {
+            _response_cb(Err::E_SUCCESS, _parser);
+
+            this->stop();
+            this->close();
+        }
+    } else {
+        _response_cb(code, _parser);
+        this->stop();
+        this->close();
+    }
+}
+
+// ----------
+// Utilities.
+// ----------
+
 Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeout, HttpResponse & result)
 {
     using Loop = uvpp::Loop;
     Loop loop;
-    TcpHttpClient http(loop);
+    HttpClient http(loop);
 
     std::string host;
     int port = 0;
@@ -62,7 +143,7 @@ Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeo
         result.body = response.body;
         result.status = response.getStatusCode();
         result.reason = response.getErrnoDescription();
-    }, TcpHttpClient::Millisec(timeout));
+    }, HttpClient::Millisec(timeout));
 
     Err LOOP_RESULT = loop.run();
     if (LOOP_RESULT != Err::E_SUCCESS) {
