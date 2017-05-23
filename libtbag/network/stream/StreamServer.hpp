@@ -23,6 +23,7 @@
 #include <libtbag/network/Server.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/stream/StreamServerNode.hpp>
+#include <libtbag/network/stream/StreamServerBackend.hpp>
 
 #include <cassert>
 #include <atomic>
@@ -52,58 +53,31 @@ public:
 
 public:
     using ClientNode = StreamServerNode<BaseStreamClient>;
+    using ServerBackend = StreamServerBackend<BaseStream>;
 
-    /**
-     * ServerBackend class prototype.
-     *
-     * @author zer0
-     * @date   2017-05-10
-     */
-    class ServerBackend : public details::NetCommon, public BaseStream
+public:
+    using AtomicBool = std::atomic_bool;
+
+    AtomicBool _on_connection;
+
+    inline bool isOnConnection() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_on_connection.load()))
+    { return _on_connection.load(); }
+
+    virtual void runBackendConnection(Err code) override
     {
-    public:
-        using AtomicBool = std::atomic_bool;
+        _on_connection.store(true);
+        onConnection(code);
+        _on_connection.store(false);
+    }
 
-    private:
-        StreamServer * _parent;
-        AtomicBool _on_connection;
+    virtual void runBackendClose() override
+    {
+        onServerClose();
 
-    public:
-        inline bool isOnConnection() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_on_connection.load()))
-        { return _on_connection.load(); }
-
-    public:
-        ServerBackend(Loop & loop, StreamServer * parent) : BaseStream(loop), _parent(parent)
-        {
-            assert(_parent != nullptr);
-            _on_connection.store(false);
-        }
-
-        virtual ~ServerBackend()
-        {
-            assert(_parent != nullptr);
-        }
-
-    public:
-        virtual void onConnection(Err code) override
-        {
-            assert(_parent != nullptr);
-
-            _on_connection.store(true);
-            _parent->onConnection(code);
-            _on_connection.store(false);
-        }
-
-        virtual void onClose() override
-        {
-            assert(_parent != nullptr);
-            _parent->onServerClose();
-
-            _parent->_mutex.lock();
-            _parent->closeAll();
-            _parent->_mutex.unlock();
-        }
-    };
+        _mutex.lock();
+        closeAll();
+        _mutex.unlock();
+    }
 
 public:
     using SharedServerBackend = std::shared_ptr<ServerBackend>;
@@ -128,6 +102,8 @@ private:
 public:
     StreamServer(Loop & loop)
     {
+        _on_connection.store(false);
+
         _server = loop.newHandle<ServerBackend>(loop, this);
         _async  = loop.newHandle<SafetyWriteAsync>(loop);
         assert(static_cast<bool>(_server));
@@ -287,7 +263,7 @@ public:
     virtual WeakClient accept() override
     {
         assert(static_cast<bool>(_server));
-        if (_server->isOnConnection() == false) {
+        if (isOnConnection() == false) {
             tDLogE("StreamServer::accept() server is not a connection state.");
             return WeakClient();
         }

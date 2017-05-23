@@ -55,6 +55,9 @@ struct Server : public details::NetCommon
     virtual WeakClient getClient(Id id) = 0;
     // @formatter:on
 
+    virtual void runBackendConnection(Err code) = 0;
+    virtual void runBackendClose() = 0;
+
     // ---------------
     // Event callback.
     // ---------------
