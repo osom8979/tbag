@@ -36,10 +36,6 @@ namespace network {
 class TBAG_API Uri
 {
 public:
-    using BaseChar = char;
-    using String   = std::basic_string<BaseChar>;
-
-public:
     struct FieldInfo
     {
         uint16_t offset; ///< Offset into buffer in which field starts.
@@ -72,7 +68,7 @@ public:
     };
 
 private:
-    String _uri;
+    std::string _uri;
 
 private:
     FieldInfo _schema  ;
@@ -85,23 +81,23 @@ private:
 
 public:
     Uri();
-    explicit Uri(BaseChar const * uri, bool is_connect = false);
-    explicit Uri(String const & uri, bool is_connect = false);
+    explicit Uri(char const * uri, bool is_connect = false);
+    explicit Uri(std::string const & uri, bool is_connect = false);
     Uri(Uri const & obj);
     Uri(Uri && obj);
     ~Uri();
 
 public:
-    Uri & operator =(BaseChar const * uri);
-    Uri & operator =(String const & uri);
+    Uri & operator =(char const * uri);
+    Uri & operator =(std::string const & uri);
 
     Uri & operator =(Uri const & obj);
     Uri & operator =(Uri && obj);
 
 // Casting
 public:
-    operator String() const;
-    operator BaseChar const *() const;
+    operator std::string() const;
+    operator char const *() const;
 
 public:
     void swap(Uri & obj) TBAG_NOEXCEPT;
@@ -125,28 +121,28 @@ public:
     inline bool isUserinfo() const TBAG_NOEXCEPT { return _userinfo.enable; }
 
 public:
-    String getSchema  () const { return getFieldString(_uri, _schema  ); }
-    String getHost    () const { return getFieldString(_uri, _host    ); }
-    String getPort    () const { return getFieldString(_uri, _port    ); }
-    String getPath    () const { return getFieldString(_uri, _path    ); }
-    String getQuery   () const { return getFieldString(_uri, _query   ); }
-    String getFragment() const { return getFieldString(_uri, _fragment); }
-    String getUserinfo() const { return getFieldString(_uri, _userinfo); }
+    std::string getSchema  () const { return getFieldString(_uri, _schema  ); }
+    std::string getHost    () const { return getFieldString(_uri, _host    ); }
+    std::string getPort    () const { return getFieldString(_uri, _port    ); }
+    std::string getPath    () const { return getFieldString(_uri, _path    ); }
+    std::string getQuery   () const { return getFieldString(_uri, _query   ); }
+    std::string getFragment() const { return getFieldString(_uri, _fragment); }
+    std::string getUserinfo() const { return getFieldString(_uri, _userinfo); }
 
 public:
     int getPortNumber() const;
-    String getRequestPath() const;
+    std::string getRequestPath() const;
 
 public:
     void clear();
-    bool parse(String const & uri, bool is_connect = false);
+    bool parse(std::string const & uri, bool is_connect = false);
 
 // Alias methods.
 public:
-    inline bool set(String const & uri, bool is_connect = false)
+    inline bool set(std::string const & uri, bool is_connect = false)
     { return parse(uri, is_connect); }
 
-    inline String get() const
+    inline std::string get() const
     { return _uri; }
 
 public:
@@ -156,11 +152,11 @@ public:
         MOST_IPV6,
     };
 
-    Err requestAddrInfo(String & host, int & port, AddrFlags flags = AddrFlags::MOST_IPV4) const;
+    Err requestAddrInfo(std::string & host, int & port, AddrFlags flags = AddrFlags::MOST_IPV4) const;
 
 // Static methods.
 public:
-    static String getFieldString(String const & original, FieldInfo const & info);
+    static std::string getFieldString(std::string const & original, FieldInfo const & info);
 };
 
 } // namespace network

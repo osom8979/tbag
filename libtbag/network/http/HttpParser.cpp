@@ -48,32 +48,45 @@ static int __global_http_on_chunk_complete__  (http_parser * parser);
 class HttpParser::HttpParserImpl : public Noncopyable
 {
 public:
-    HttpParser * parent;
+    using HeaderMap  = HttpParser::HeaderMap;
+    using HeaderPair = HttpParser::HeaderPair;
 
 public:
-    http_parser parser;
-    http_parser_url url;
-    http_parser_settings settings;
-
-private:
     struct Cache
     {
         std::string field;
     };
 
-private:
-    Cache _cache;
+public:
+    HttpParser * parent;
 
 public:
-    void clearCache()
+    http_parser parser;
+    http_parser_settings settings;
+
+public:
+    HeaderMap headers;
+    std::string body;
+    std::string url;
+    std::string status;
+    bool message_complete;
+
+public:
+    Cache cache;
+
+public:
+    void clear()
     {
-        _cache.field.clear();
+        headers.clear();
+        body.clear();
+        url.clear();
+        status.clear();
+        message_complete = false;
     }
 
-public:
-    inline Cache & atCache()
+    void clearCache()
     {
-        return _cache;
+        cache.field.clear();
     }
 
 public:
@@ -91,8 +104,6 @@ public:
 
         ::http_parser_init(&parser, type);
         parser.data = this;
-
-        ::http_parser_url_init(&url);
 
         ::http_parser_settings_init(&settings);
         settings.on_message_begin    = __global_http_on_message_begin__   ;
@@ -113,6 +124,36 @@ public:
     }
 
 public:
+    inline bool insertHeader(std::string const & key, std::string const & val)
+    {
+        return headers.insert(HeaderPair(key, val)).second;
+    }
+
+    inline std::string getHeader(std::string const & key) const
+    {
+        auto itr = headers.find(key);
+        if (itr != headers.end()) {
+            return itr->second;
+        }
+        return std::string();
+    }
+
+    inline bool eraseHeader(std::string const & key)
+    {
+        return headers.erase(key) == 1U;
+    }
+
+    inline bool existsHeader(std::string const & key) const
+    {
+        return headers.find(key) != headers.end();
+    }
+
+    inline void appendBody(std::string const & content)
+    {
+        body.append(content);
+    }
+
+public:
     std::size_t execute(char const * data, std::size_t length)
     {
         return ::http_parser_execute(&parser, &settings, data, length);
@@ -126,12 +167,6 @@ public:
         // If you are the server, respond with the "Connection: close" header.
         // If you are the client, close the connection.
         return ::http_should_keep_alive(&parser) != 0;
-    }
-
-    bool parseUrl(char const * buffer, std::size_t length, bool is_connect)
-    {
-        // Parse a URL; return nonzero on failure.
-        return ::http_parser_parse_url(buffer, length, (is_connect ? 1 : 0), &url) == 0;
     }
 
     void pause(bool paused)
@@ -195,7 +230,7 @@ int __global_http_on_message_begin__(http_parser * parser)
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    impl->parent->clear();
+    impl->clear();
     return impl->parent->onMessageBegin();
 }
 
@@ -206,9 +241,12 @@ int __global_http_on_url__(http_parser * parser, const char * at, std::size_t le
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    std::string const TEMP(at, at + length);
-    impl->parent->url = TEMP;
-    return impl->parent->onUrl(TEMP);
+    if (length == 0) {
+        impl->url.clear();
+    } else {
+        impl->url.assign(at, at + length);
+    }
+    return impl->parent->onUrl(impl->url);
 }
 
 int __global_http_on_status__(http_parser * parser, const char * at, std::size_t length)
@@ -218,9 +256,12 @@ int __global_http_on_status__(http_parser * parser, const char * at, std::size_t
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    std::string const TEMP(at, at + length);
-    impl->parent->setStatus(TEMP);
-    return impl->parent->onStatus(TEMP);
+    if (length == 0) {
+        impl->status.clear();
+    } else {
+        impl->status.assign(at, at + length);
+    }
+    return impl->parent->onStatus(impl->status);
 }
 
 int __global_http_on_header_field__(http_parser * parser, const char * at, std::size_t length)
@@ -230,9 +271,12 @@ int __global_http_on_header_field__(http_parser * parser, const char * at, std::
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    std::string const TEMP(at, at + length);
-    impl->atCache().field = TEMP;
-    return impl->parent->onHeaderField(TEMP);
+    if (length == 0) {
+        impl->cache.field.clear();
+    } else {
+        impl->cache.field.assign(at, at + length);
+    }
+    return impl->parent->onHeaderField(impl->cache.field);
 }
 
 int __global_http_on_header_value__(http_parser * parser, const char * at, std::size_t length)
@@ -242,12 +286,12 @@ int __global_http_on_header_value__(http_parser * parser, const char * at, std::
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    std::string const TEMP(at, at + length);
-    if (impl->atCache().field.empty() == false) {
-        impl->parent->insertHeader(impl->atCache().field, TEMP);
+    std::string const VALUE(at, at + length);
+    if (impl->cache.field.empty() == false) {
+        impl->insertHeader(impl->cache.field, VALUE);
     }
     impl->clearCache();
-    return impl->parent->onHeaderValue(TEMP);
+    return impl->parent->onHeaderValue(VALUE);
 }
 
 int __global_http_on_headers_complete__(http_parser * parser)
@@ -266,9 +310,9 @@ int __global_http_on_body__(http_parser * parser, const char * at, std::size_t l
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    std::string const TEMP(at, at + length);
-    impl->parent->appendBody(TEMP);
-    return impl->parent->onBody(TEMP);
+    std::string const BODY_CHUNK(at, at + length);
+    impl->appendBody(BODY_CHUNK);
+    return impl->parent->onBody(BODY_CHUNK);
 }
 
 int __global_http_on_message_complete__(http_parser * parser)
@@ -278,7 +322,7 @@ int __global_http_on_message_complete__(http_parser * parser)
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
-    impl->parent->setComplete(true);
+    impl->message_complete = true;
     return impl->parent->onMessageComplete();
 }
 
@@ -311,77 +355,55 @@ HttpParser::HttpParser(Type type) : TYPE(type), _parser(new HttpParserImpl(this)
     assert(static_cast<bool>(_parser));
 }
 
-HttpParser::HttpParser(HttpParser const & obj) : TYPE(obj.TYPE)
-{
-    (*this) = obj;
-}
-
-HttpParser::HttpParser(HttpParser && obj) : TYPE(obj.TYPE)
-{
-    (*this) = std::move(obj);
-}
-
 HttpParser::~HttpParser()
 {
     // EMPTY.
 }
 
-HttpParser & HttpParser::operator =(HttpParser const & obj)
-{
-    if (this != &obj) {
-        version = obj.version;
-        headers = obj.headers;
-        body    = obj.body;
-
-        method = obj.method;
-        url    = obj.url;
-
-        status = obj.status;
-        reason = obj.reason;
-
-        _message_complete = obj._message_complete;
-    }
-    return *this;
-}
-
-HttpParser & HttpParser::operator =(HttpParser && obj)
-{
-    if (this != &obj) {
-        version.swap(obj.version);
-        headers.swap(obj.headers);
-        body   .swap(obj.body   );
-
-        method.swap(obj.method);
-        url   .swap(obj.url   );
-
-        std::swap(status, obj.status);
-        reason.swap(obj.reason);
-
-        std::swap(_message_complete, obj._message_complete);
-    }
-    return *this;
-}
-
 void HttpParser::clear()
 {
+    _parser->clear();
     _parser->clearCache();
-
-    version.clear();
-    headers.clear();
-    body.clear();
-
-    method.clear();
-    url.clear();
-
-    status = 0;
-    reason.clear();
-
-    _message_complete = false;
 }
 
 void HttpParser::clearCache()
 {
     _parser->clearCache();
+}
+
+HttpParser::HeaderMap const & HttpParser::atHeaders() const
+{
+    return _parser->headers;
+}
+
+std::string HttpParser::getHeader(std::string const & key) const
+{
+    return _parser->getHeader(key);
+}
+
+bool HttpParser::existsHeader(std::string const & key) const
+{
+    return _parser->existsHeader(key);
+}
+
+std::string HttpParser::getUrl() const
+{
+    return _parser->url;
+}
+
+std::string HttpParser::getBody() const
+{
+    return _parser->body;
+}
+
+std::string HttpParser::getStatus() const
+{
+    return _parser->status;
+}
+
+bool HttpParser::isComplete() const TBAG_NOEXCEPT
+{
+    return _parser->message_complete;
 }
 
 int HttpParser::getHttpMajor() const TBAG_NOEXCEPT
@@ -440,11 +462,6 @@ std::size_t HttpParser::execute(char const * data, std::size_t length)
 bool HttpParser::shouldKeepAlive() const
 {
     return _parser->shouldKeepAlive();
-}
-
-bool HttpParser::parseUrl(char const * buffer, std::size_t length, bool is_connect)
-{
-    return _parser->parseUrl(buffer, length, is_connect);
 }
 
 void HttpParser::pause(bool is_paused)

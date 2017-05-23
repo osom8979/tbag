@@ -41,7 +41,7 @@ void HttpClient::onConnect(Err code)
     if (code == Err::E_SUCCESS) {
         using namespace std::chrono;
 
-        auto buffer = _builder.request();
+        auto buffer = _builder.toRequestDefaultString();
         Millisec left_time = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
         if (this->write(buffer.data(), buffer.size(), left_time.count()) == false) {
             _response_cb(Err::E_WRERR, _parser);
@@ -119,8 +119,8 @@ Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeo
     if (real_request.method.empty()) {
         real_request.setMethod(METHOD_GET);
     }
-    if (real_request.version == HttpVersion(0, 0)) {
-        real_request.version.set(1, 1);
+    if (real_request.maj == 0 && real_request.min == 0) {
+        real_request.setVersion(1, 1);
     }
     if (real_request.url.empty()) {
         real_request.url = uri.getRequestPath();
@@ -138,11 +138,11 @@ Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeo
     Err http_result = Err::E_UNKNOWN;
     http.setup(real_request, [&](Err code, HttpParser const & response){
         http_result = code;
-        result.version.set(response.getHttpMajor(), response.getHttpMinor());
-        result.headers = response.headers;
-        result.body = response.body;
+        result.setVersion(response.getHttpMajor(), response.getHttpMinor());
+        result.headers = response.atHeaders();
+        result.body = response.getBody();
         result.status = response.getStatusCode();
-        result.reason = response.getErrnoDescription();
+        result.reason = response.getStatus();
     }, HttpClient::Millisec(timeout));
 
     Err LOOP_RESULT = loop.run();

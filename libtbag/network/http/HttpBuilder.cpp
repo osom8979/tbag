@@ -19,7 +19,7 @@ namespace http    {
 
 HttpBuilder::HttpBuilder()
 {
-    // EMPTY.
+    setVersion(1, 1);
 }
 
 HttpBuilder::HttpBuilder(int major, int minor)
@@ -45,7 +45,8 @@ HttpBuilder::~HttpBuilder()
 HttpBuilder & HttpBuilder::operator =(HttpBuilder const & obj)
 {
     if (this != &obj) {
-        version = obj.version;
+        maj     = obj.maj;
+        min     = obj.min;
         headers = obj.headers;
         body    = obj.body   ;
         method  = obj.method ;
@@ -66,7 +67,8 @@ HttpBuilder & HttpBuilder::operator =(HttpBuilder && obj)
 
 void HttpBuilder::swap(HttpBuilder & obj)
 {
-    version.swap(obj.version);
+    std::swap(maj, obj.maj);
+    std::swap(min, obj.min);
     headers.swap(obj.headers);
     body   .swap(obj.body   );
     method .swap(obj.method );
@@ -77,51 +79,77 @@ void HttpBuilder::swap(HttpBuilder & obj)
 
 void HttpBuilder::clear()
 {
-    version.set(0, 0);
+    maj = 0;
+    min = 0;
     headers.clear();
-    body   .clear();
-    method .clear();
-    url    .clear();
-    reason .clear();
+    body.clear();
+    method.clear();
+    url.clear();
+    reason.clear();
     status = 0;
 }
 
-std::string HttpBuilder::request() const
+std::string HttpBuilder::toRequestString() const
 {
-    return buildRequest(method, url, headers, body, version);
+    return getRequestString(method, url, headers, body, maj, min);
 }
 
-std::string HttpBuilder::response() const
+std::string HttpBuilder::toResponseString() const
 {
-    return buildResponse(getStatus(), reason, headers, body, version);
+    return getResponseString(getStatus(), reason, headers, body, maj, min);
 }
 
-std::string HttpBuilder::requestDefault() const
+std::string HttpBuilder::toRequestDefaultString() const
 {
-    return buildRequest(method, url, headers, body, version);
+    HeaderMap temp = headers;
+    int http_major = (maj == 0 ? 1 : maj);
+    int http_minor = (min == 0 ? 1 : min);
+
+    Uri const URI(url);
+
+    std::string real_method = (method.empty() ? METHOD_GET : method);
+    std::string real_url    = URI.getRequestPath();
+
+    existsOrInsert(temp, HEADER_HOST, URI.getHost());
+    existsOrInsert(temp, HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);
+    existsOrInsert(temp, HEADER_ACCEPT, HEADER_DEFAULT_ACCEPT);
+
+    return getRequestString(real_method, real_url, temp, body, http_major, http_minor);
 }
 
-std::string HttpBuilder::responseDefault() const
+std::string HttpBuilder::toResponseDefaultString() const
 {
-    HeaderMap resl_headers = headers;
-    if (resl_headers.find(HEADER_SERVER) == resl_headers.end()) {
-        resl_headers.insert(HeaderPair(HEADER_SERVER, HEADER_DEFAULT_SERVER));
+    HeaderMap temp = headers;
+    int http_major = (maj == 0 ? 1 : maj);
+    int http_minor = (min == 0 ? 1 : min);
+
+    existsOrInsert(temp, HEADER_SERVER, HEADER_DEFAULT_SERVER);
+    existsOrInsert(temp, HEADER_CONTENT_TYPE, HEADER_DEFAULT_CONTENT_TYPE);
+    existsOrInsert(temp, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+
+    return getResponseString(getStatus(), reason, temp, body, http_major, http_minor);
+}
+
+void HttpBuilder::existsOrInsert(HeaderMap & headers, std::string const & key, std::string const & val)
+{
+    if (headers.find(key) == headers.end()) {
+        headers.insert(HeaderPair(key, val));
     }
-    if (resl_headers.find(HEADER_CONTENT_TYPE) == resl_headers.end()) {
-        resl_headers.insert(HeaderPair(HEADER_CONTENT_TYPE, HEADER_DEFAULT_CONTENT_TYPE));
-    }
-    if (resl_headers.find(HEADER_CONTENT_LENGTH) == resl_headers.end()) {
-        resl_headers.insert(HeaderPair(HEADER_CONTENT_LENGTH, std::to_string(body.size())));
-    }
-    return buildResponse(getStatus(), reason, resl_headers, body, version);
 }
 
-std::string HttpBuilder::buildRequest(std::string const & method, std::string const & url,
-                                      HeaderMap const & headers, std::string const & body,
-                                      HttpVersion const & version)
+std::string HttpBuilder::getVersionString(int major, int minor)
 {
     std::stringstream ss;
-    ss << method << SP << url << SP << version.toString() << CRLF;
+    ss << HTTP << '/' << major << '.' << minor;
+    return ss.str();
+}
+
+std::string HttpBuilder::getRequestString(std::string const & method, std::string const & url,
+                                          HeaderMap const & headers, std::string const & body,
+                                          int major, int minor)
+{
+    std::stringstream ss;
+    ss << method << SP << url << SP << getVersionString(major, minor) << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }
@@ -129,12 +157,12 @@ std::string HttpBuilder::buildRequest(std::string const & method, std::string co
     return ss.str();
 }
 
-std::string HttpBuilder::buildResponse(std::string const & status, std::string const & reason,
-                                       HeaderMap const & headers, std::string const & body,
-                                       HttpVersion const & version)
+std::string HttpBuilder::getResponseString(std::string const & status, std::string const & reason,
+                                           HeaderMap const & headers, std::string const & body,
+                                           int major, int minor)
 {
     std::stringstream ss;
-    ss << version.toString() << SP << status << SP << reason << CRLF;
+    ss << getVersionString(major, minor) << SP << status << SP << reason << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }

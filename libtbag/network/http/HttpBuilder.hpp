@@ -50,18 +50,13 @@ public:
 
 public:
     // @formatter:off
-    inline HttpBuilder & setMajor(int val) { version.major_number = val; return *this; }
-    inline HttpBuilder & setMinor(int val) { version.minor_number = val; return *this; }
-    inline HttpBuilder & setVersion(int maj, int min) { version.set(maj, min); return *this; }
-
-    inline HttpBuilder & setHeaders(HeaderMap const & val) { headers = val;  return *this; }
-    inline HttpBuilder & setBody   (std::string    const & val) { body    = val;  return *this; }
-    inline HttpBuilder & setMethod (std::string    const & val) { method  = val;  return *this; }
-    inline HttpBuilder & setUrl    (std::string    const & val) { url     = val;  return *this; }
-    inline HttpBuilder & setReason (std::string    const & val) { reason  = val;  return *this; }
+    inline HttpBuilder & setBody   (std::string const & val) { body    = val;  return *this; }
+    inline HttpBuilder & setMethod (std::string const & val) { method  = val;  return *this; }
+    inline HttpBuilder & setUrl    (std::string const & val) { url     = val;  return *this; }
+    inline HttpBuilder & setReason (std::string const & val) { reason  = val;  return *this; }
     // @formatter:on
 
-    inline HttpBuilder & setStatus (int val)
+    inline HttpBuilder & setStatus(int val)
     {
         status = val;
         return *this;
@@ -74,19 +69,21 @@ public:
     }
 
 public:
-    std::string request() const;
-    std::string response() const;
+    std::string toRequestString() const;
+    std::string toResponseString() const;
 
-    std::string requestDefault() const;
-    std::string responseDefault() const;
+    std::string toRequestDefaultString() const;
+    std::string toResponseDefaultString() const;
 
 public:
-    static std::string buildRequest(std::string const & method, std::string const & url,
-                               HeaderMap const & headers, std::string const & body,
-                               HttpVersion const & version);
-    static std::string buildResponse(std::string const & status, std::string const & reason,
-                                HeaderMap const & headers, std::string const & body,
-                                HttpVersion const & version);
+    static void existsOrInsert(HeaderMap & headers, std::string const & key, std::string const & val);
+    static std::string getVersionString(int major = 1, int minor = 1);
+    static std::string getRequestString(std::string const & method, std::string const & url,
+                                        HeaderMap const & headers, std::string const & body,
+                                        int major = 1, int minor = 1);
+    static std::string getResponseString(std::string const & status, std::string const & reason,
+                                         HeaderMap const & headers, std::string const & body,
+                                         int major = 1, int minor = 1);
 };
 
 } // namespace http

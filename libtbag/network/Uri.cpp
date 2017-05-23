@@ -27,12 +27,12 @@ Uri::Uri()
     // EMPTY.
 }
 
-Uri::Uri(BaseChar const * uri, bool is_connect)
+Uri::Uri(char const * uri, bool is_connect)
 {
-    parse(String(uri), is_connect);
+    parse(std::string(uri), is_connect);
 }
 
-Uri::Uri(String const & uri, bool is_connect)
+Uri::Uri(std::string const & uri, bool is_connect)
 {
     parse(uri, is_connect);
 }
@@ -52,13 +52,13 @@ Uri::~Uri()
     // EMPTY.
 }
 
-Uri & Uri::operator =(BaseChar const * uri)
+Uri & Uri::operator =(char const * uri)
 {
-    parse(String(uri));
+    parse(std::string(uri));
     return *this;
 }
 
-Uri & Uri::operator =(String const & uri)
+Uri & Uri::operator =(std::string const & uri)
 {
     parse(uri);
     return *this;
@@ -87,12 +87,12 @@ Uri & Uri::operator =(Uri && obj)
     return *this;
 }
 
-Uri::operator String() const
+Uri::operator std::string() const
 {
     return _uri;
 }
 
-Uri::operator BaseChar const * () const
+Uri::operator char const * () const
 {
     return _uri.c_str();
 }
@@ -120,9 +120,9 @@ int Uri::getPortNumber() const
     }
 }
 
-Uri::String Uri::getRequestPath() const
+std::string Uri::getRequestPath() const
 {
-    String result = getPath();
+    std::string result = getPath();
     if (isQuery()) {
         result.push_back('?');
         result.append(getQuery());
@@ -150,7 +150,7 @@ void Uri::clear()
     _userinfo.clear();
 }
 
-bool Uri::parse(String const & uri, bool is_connect)
+bool Uri::parse(std::string const & uri, bool is_connect)
 {
     _uri = uri;
     if (_uri.empty()) {
@@ -187,7 +187,7 @@ bool Uri::parse(String const & uri, bool is_connect)
     return true;
 }
 
-Err Uri::requestAddrInfo(String & host, int & port, AddrFlags flags) const
+Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
 {
     if (isHost() == false) {
         tDLogE("Uri::requestAddrInfo() Unknown host: {}.", _uri);
@@ -199,8 +199,8 @@ Err Uri::requestAddrInfo(String & host, int & port, AddrFlags flags) const
         return Err::E_ISTATE;
     }
 
-    String const HOST    = getHost();
-    String const SERVICE = isSchema() ? getSchema() : String();
+    std::string const HOST    = getHost();
+    std::string const SERVICE = isSchema() ? getSchema() : std::string();
 
     assert(HOST.empty() == false);
 
@@ -242,7 +242,7 @@ Err Uri::requestAddrInfo(String & host, int & port, AddrFlags flags) const
 // Static methods.
 // ---------------
 
-Uri::String Uri::getFieldString(String const & original, FieldInfo const & info)
+std::string Uri::getFieldString(std::string const & original, FieldInfo const & info)
 {
     return original.substr(info.offset, info.length);
 }

@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/Noncopyable.hpp>
 
 #include <memory>
 #include <string>
@@ -34,10 +34,13 @@ namespace http    {
  * @author zer0
  * @date   2017-05-18
  */
-class TBAG_API HttpParser : public HttpProperty
+class TBAG_API HttpParser : public Noncopyable
 {
 public:
     class HttpParserImpl;
+
+    using HeaderMap  = std::map<std::string, std::string>;
+    using HeaderPair = HeaderMap::value_type;
 
 public:
     enum class Type : int
@@ -52,29 +55,29 @@ private:
     Type const TYPE;
     UniqueHttpParser _parser;
 
-private:
-    bool _message_complete;
-
 public:
     HttpParser(Type type = Type::BOTH);
-    HttpParser(HttpParser const & obj);
-    HttpParser(HttpParser && obj);
     ~HttpParser();
 
 public:
-    HttpParser & operator =(HttpParser const & obj);
-    HttpParser & operator =(HttpParser && obj);
-
-public:
     // @formatter:off
-    inline Type getType() const TBAG_NOEXCEPT { return TYPE; }
-    inline bool isComplete() const TBAG_NOEXCEPT { return _message_complete; }
-    inline void setComplete(bool flag = true) TBAG_NOEXCEPT { _message_complete = flag; }
+    inline Type getType() const TBAG_NOEXCEPT
+    { return TYPE; }
     // @formatter:on
 
 public:
     void clear();
     void clearCache();
+
+    HeaderMap const & atHeaders() const;
+    std::string getHeader(std::string const & key) const;
+    bool existsHeader(std::string const & key) const;
+
+    std::string getUrl() const;
+    std::string getBody() const;
+    std::string getStatus() const;
+
+    bool isComplete() const TBAG_NOEXCEPT;
 
 public:
     int getHttpMajor() const TBAG_NOEXCEPT;
@@ -97,7 +100,6 @@ public:
 public:
     std::size_t execute(char const * data, std::size_t length);
     bool shouldKeepAlive() const;
-    bool parseUrl(char const * buffer, std::size_t length, bool is_connect = true);
     void pause(bool is_paused = true);
     bool bodyIsFinal() const TBAG_NOEXCEPT;
 
