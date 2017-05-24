@@ -24,6 +24,8 @@ using namespace libtbag::network::stream;
 
 TEST(NetworkTcpTest, ClientTimeout)
 {
+    log::SeverityGuard guard;
+
     using namespace uvpp;
     Loop loop;
     FunctionalTcpClient client(loop);

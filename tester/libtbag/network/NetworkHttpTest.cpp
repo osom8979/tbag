@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <libtbag/log/Log.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
@@ -20,6 +21,8 @@ using namespace libtbag::network::http;
 
 TEST(NetworkHttpTest, TcpHttpClient)
 {
+    log::SeverityGuard guard;
+
     HttpResponse response;
     auto result = http::requestWithSync("http://osom8979.github.io", 10000, response);
     ASSERT_EQ(Err::E_SUCCESS, result);
@@ -28,6 +31,8 @@ TEST(NetworkHttpTest, TcpHttpClient)
 
 TEST(NetworkHttpTest, TcpHttpServer)
 {
+    log::SeverityGuard guard;
+
     char const * const TEST_BODY = "<html><head><title>TEST</title></head><body><p>Hello, World!</p></body></html>";
 
     uvpp::Loop loop;
