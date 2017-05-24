@@ -116,6 +116,9 @@ Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeo
     }
 
     HttpBuilder builder = request;
+    if (builder.getMethod().empty()) {
+        builder.setMethod(METHOD_GET);
+    }
     if (builder.getUrl().empty()) {
         builder.setUrl(uri.getRequestPath());
     }
@@ -123,11 +126,11 @@ Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeo
         builder.insertHeader(HEADER_HOST, uri.getHost());
     }
 
+    tDLogI("requestWithSync() Request {}: {}", builder.getMethod(), uri.getString());
+
     Err http_result = Err::E_UNKNOWN;
     http.setup(builder, [&](Err code, HttpParser const & response){
-        tDLogI("requestWithSync({}) {} => HTTP STATUS: {}",
-               uri.getString(), getErrName(code), response.getStatusCode());
-
+        tDLogI("requestWithSync() Response Err({}) HTTP STATUS: {}", getErrName(code), response.getStatusCode());
         http_result = code;
         result = response.getResponse();
     }, HttpClient::Millisec(timeout));
