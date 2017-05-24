@@ -159,7 +159,7 @@ public:
         return ::http_parser_execute(&parser, &settings, data, length);
     }
 
-    bool shouldKeepAlive() const
+    bool shouldKeepAlive() const TBAG_NOEXCEPT
     {
         // If http_should_keep_alive() in the on_headers_complete or
         // on_message_complete callback returns 0, then this should be
@@ -416,6 +416,11 @@ int HttpParser::getHttpMinor() const TBAG_NOEXCEPT
     return _parser->parser.http_minor;
 }
 
+int HttpParser::getHttpErrno() const TBAG_NOEXCEPT
+{
+    return _parser->parser.http_errno;
+}
+
 int HttpParser::getStatusCode() const TBAG_NOEXCEPT
 {
     return _parser->parser.status_code;
@@ -424,11 +429,6 @@ int HttpParser::getStatusCode() const TBAG_NOEXCEPT
 int HttpParser::getMethod() const TBAG_NOEXCEPT
 {
     return _parser->parser.method;
-}
-
-int HttpParser::getHttpErrno() const TBAG_NOEXCEPT
-{
-    return _parser->parser.http_errno;
 }
 
 bool HttpParser::isUpgrade() const TBAG_NOEXCEPT
@@ -459,19 +459,19 @@ std::size_t HttpParser::execute(char const * data, std::size_t length)
     return _parser->execute(data, length);
 }
 
-bool HttpParser::shouldKeepAlive() const
+bool HttpParser::shouldKeepAlive() const TBAG_NOEXCEPT
 {
     return _parser->shouldKeepAlive();
-}
-
-void HttpParser::pause(bool is_paused)
-{
-    _parser->pause(is_paused);
 }
 
 bool HttpParser::bodyIsFinal() const TBAG_NOEXCEPT
 {
     return _parser->bodyIsFinal();
+}
+
+void HttpParser::pause(bool is_paused)
+{
+    _parser->pause(is_paused);
 }
 
 // --------------

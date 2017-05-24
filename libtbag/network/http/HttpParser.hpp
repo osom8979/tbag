@@ -82,6 +82,7 @@ public:
 public:
     int getHttpMajor() const TBAG_NOEXCEPT;
     int getHttpMinor() const TBAG_NOEXCEPT;
+    int getHttpErrno() const TBAG_NOEXCEPT;
 
     /** Responses only. */
     int getStatusCode() const TBAG_NOEXCEPT;
@@ -89,7 +90,17 @@ public:
     /** Requests only. */
     int getMethod() const TBAG_NOEXCEPT;
 
-    int getHttpErrno() const TBAG_NOEXCEPT;
+    /**
+     * Check the Upgrade header.
+     *
+     * @retval true
+     *      Upgrade header was present and the parser has exited because of that.
+     * @retval false
+     *      No upgrade header present.
+     *
+     * @warning
+     * Should be checked when execute() returns in addition to error checking.
+     */
     bool isUpgrade() const TBAG_NOEXCEPT;
 
 public:
@@ -99,9 +110,13 @@ public:
 
 public:
     std::size_t execute(char const * data, std::size_t length);
-    bool shouldKeepAlive() const;
-    void pause(bool is_paused = true);
+
+public:
+    bool shouldKeepAlive() const TBAG_NOEXCEPT;
     bool bodyIsFinal() const TBAG_NOEXCEPT;
+
+public:
+    void pause(bool is_paused = true);
 
 // Event methods.
 public:
@@ -115,6 +130,30 @@ public:
     virtual int onMessageComplete ();
     virtual int onChunkHeader     ();
     virtual int onChunkComplete   ();
+};
+
+/**
+ * HttpRequestParser class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-24
+ */
+struct HttpRequestParser : public HttpParser
+{
+    HttpRequestParser() : HttpParser(HttpParser::Type::REQUEST)
+    { /* EMPTY. */ }
+};
+
+/**
+ * HttpResponseParser class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-24
+ */
+struct HttpResponseParser : public HttpParser
+{
+    HttpResponseParser() : HttpParser(HttpParser::Type::RESPONSE)
+    { /* EMPTY. */ }
 };
 
 } // namespace http
