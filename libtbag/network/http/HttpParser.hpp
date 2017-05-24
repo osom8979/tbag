@@ -15,7 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/network/http/HttpProperty.hpp>
 
 #include <memory>
 #include <string>
@@ -117,6 +119,10 @@ public:
 
 public:
     void pause(bool is_paused = true);
+
+public:
+    HttpRequest getRequest() const;
+    HttpResponse getResponse() const;
 
 // Event methods.
 public:

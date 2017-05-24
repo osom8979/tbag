@@ -142,7 +142,7 @@ public:
     inline bool set(std::string const & uri, bool is_connect = false)
     { return parse(uri, is_connect); }
 
-    inline std::string get() const
+    inline std::string getString() const
     { return _uri; }
 
 public:

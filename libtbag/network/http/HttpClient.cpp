@@ -41,9 +41,9 @@ void HttpClient::onConnect(Err code)
     if (code == Err::E_SUCCESS) {
         using namespace std::chrono;
 
-        auto buffer = _builder.toRequestDefaultString();
+        auto buffer = _builder.toDefaultRequestString();
         Millisec left_time = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
-        if (this->write(buffer.data(), buffer.size(), left_time.count()) == false) {
+        if (this->write(buffer.data(), buffer.size(), static_cast<uint64_t>(left_time.count())) == false) {
             _response_cb(Err::E_WRERR, _parser);
             this->close();
         }
@@ -96,7 +96,7 @@ void HttpClient::onRead(Err code, char const * buffer, std::size_t size)
 // Utilities.
 // ----------
 
-Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeout, HttpResponse & result)
+Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result)
 {
     using Loop = uvpp::Loop;
     Loop loop;
@@ -115,34 +115,21 @@ Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeo
         return Err::E_EINIT;
     }
 
-    HttpBuilder real_request = request;
-    if (real_request.method.empty()) {
-        real_request.setMethod(METHOD_GET);
+    HttpBuilder builder = request;
+    if (builder.getUrl().empty()) {
+        builder.setUrl(uri.getRequestPath());
     }
-    if (real_request.maj == 0 && real_request.min == 0) {
-        real_request.setVersion(1, 1);
-    }
-    if (real_request.url.empty()) {
-        real_request.url = uri.getRequestPath();
-    }
-    if (real_request.existsHeader(HEADER_HOST) == false) {
-        real_request.insertHeader(HEADER_HOST, uri.getHost());
-    }
-    if (real_request.existsHeader(HEADER_USER_AGENT) == false) {
-        real_request.insertHeader(HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);
-    }
-    if (real_request.existsHeader(HEADER_ACCEPT) == false) {
-        real_request.insertHeader(HEADER_ACCEPT, HEADER_DEFAULT_ACCEPT);
+    if (builder.existsHeader(HEADER_HOST) == false) {
+        builder.insertHeader(HEADER_HOST, uri.getHost());
     }
 
     Err http_result = Err::E_UNKNOWN;
-    http.setup(real_request, [&](Err code, HttpParser const & response){
+    http.setup(builder, [&](Err code, HttpParser const & response){
+        tDLogI("requestWithSync({}) {} => HTTP STATUS: {}",
+               uri.getString(), getErrName(code), response.getStatusCode());
+
         http_result = code;
-        result.setVersion(response.getHttpMajor(), response.getHttpMinor());
-        result.headers = response.atHeaders();
-        result.body = response.getBody();
-        result.status = response.getStatusCode();
-        result.reason = response.getStatus();
+        result = response.getResponse();
     }, HttpClient::Millisec(timeout));
 
     Err LOOP_RESULT = loop.run();
@@ -155,12 +142,12 @@ Err requestWithSync(Uri const & uri, HttpBuilder const & request, uint64_t timeo
 
 Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result)
 {
-    return requestWithSync(uri, HttpBuilder(1, 1), timeout, result);
+    return requestWithSync(uri, HttpRequest(), timeout, result);
 }
 
 Err requestWithSync(std::string const & uri, uint64_t timeout, HttpResponse & result)
 {
-    return requestWithSync(Uri(uri), HttpBuilder(1, 1), timeout, result);
+    return requestWithSync(Uri(uri), HttpRequest(), timeout, result);
 }
 
 } // namespace http

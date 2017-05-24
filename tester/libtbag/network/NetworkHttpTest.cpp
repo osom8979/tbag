@@ -54,9 +54,9 @@ TEST(NetworkHttpTest, TcpHttpServer)
         std::cout << "Server.OnRequest()\n";
         ++on_request;
         request.getMethodName();
-        response.status = 200;
-        response.reason = "OK";
-        response.body = TEST_BODY;
+        response.setStatus(200);
+        response.setReason("OK");
+        response.setBody(TEST_BODY);
         timeout = 10000;
     });
     server.setOnClose([&](HttpServer::WeakClient node){

@@ -17,42 +17,30 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-HttpBuilder::HttpBuilder()
-{
-    setVersion(1, 1);
-}
-
-HttpBuilder::HttpBuilder(int major, int minor)
-{
-    setVersion(major, minor);
-}
-
-HttpBuilder::HttpBuilder(HttpBuilder const & obj)
-{
-    (*this) = obj;
-}
-
-HttpBuilder::HttpBuilder(HttpBuilder && obj)
-{
-    (*this) = std::move(obj);
-}
-
-HttpBuilder::~HttpBuilder()
-{
-    // EMPTY.
-}
+HttpBuilder::HttpBuilder() { setVersion(1, 1); }
+HttpBuilder::HttpBuilder(int major, int minor) { setVersion(major, minor); }
+HttpBuilder::HttpBuilder(HttpBuilder const & obj) { (*this) = obj; }
+HttpBuilder::HttpBuilder(HttpBuilder && obj) { (*this) = std::move(obj); }
+HttpBuilder::HttpBuilder(HttpVersionProperty  const & obj) { (*this) = obj; }
+HttpBuilder::HttpBuilder(HttpCommonProperty   const & obj) { (*this) = obj; }
+HttpBuilder::HttpBuilder(HttpRequestProperty  const & obj) { (*this) = obj; }
+HttpBuilder::HttpBuilder(HttpResponseProperty const & obj) { (*this) = obj; }
+HttpBuilder::HttpBuilder(HttpRequest          const & obj) { (*this) = obj; }
+HttpBuilder::HttpBuilder(HttpResponse         const & obj) { (*this) = obj; }
+HttpBuilder::HttpBuilder(HttpProperty         const & obj) { (*this) = obj; }
+HttpBuilder::~HttpBuilder() { /* EMPTY. */ }
 
 HttpBuilder & HttpBuilder::operator =(HttpBuilder const & obj)
 {
     if (this != &obj) {
-        maj     = obj.maj;
-        min     = obj.min;
-        headers = obj.headers;
-        body    = obj.body   ;
-        method  = obj.method ;
-        url     = obj.url    ;
-        reason  = obj.reason ;
-        status  = obj.status ;
+        _property.maj     = obj._property.maj;
+        _property.min     = obj._property.min;
+        _property.headers = obj._property.headers;
+        _property.body    = obj._property.body   ;
+        _property.method  = obj._property.method ;
+        _property.url     = obj._property.url    ;
+        _property.reason  = obj._property.reason ;
+        _property.status  = obj._property.status ;
     }
     return *this;
 }
@@ -67,81 +55,260 @@ HttpBuilder & HttpBuilder::operator =(HttpBuilder && obj)
 
 void HttpBuilder::swap(HttpBuilder & obj)
 {
-    std::swap(maj, obj.maj);
-    std::swap(min, obj.min);
-    headers.swap(obj.headers);
-    body   .swap(obj.body   );
-    method .swap(obj.method );
-    url    .swap(obj.url    );
-    reason .swap(obj.reason );
-    std::swap(status, obj.status);
+    std::swap(_property.maj, obj._property.maj);
+    std::swap(_property.min, obj._property.min);
+    _property.headers.swap(obj._property.headers);
+    _property.body   .swap(obj._property.body   );
+    _property.method .swap(obj._property.method );
+    _property.url    .swap(obj._property.url    );
+    _property.reason .swap(obj._property.reason );
+    std::swap(_property.status, obj._property.status);
 }
 
 void HttpBuilder::clear()
 {
-    maj = 0;
-    min = 0;
-    headers.clear();
-    body.clear();
-    method.clear();
-    url.clear();
-    reason.clear();
-    status = 0;
+    _property.maj = 0;
+    _property.min = 0;
+    _property.headers.clear();
+    _property.body.clear();
+    _property.method.clear();
+    _property.url.clear();
+    _property.reason.clear();
+    _property.status = 0;
+}
+
+HttpVersionProperty HttpBuilder::getVersionProperty() const
+{
+    return HttpVersionProperty{
+            .maj = _property.maj,
+            .min = _property.min
+    };
+}
+
+HttpCommonProperty HttpBuilder::getCommonProperty() const
+{
+    return HttpCommonProperty{
+            .headers = _property.headers,
+            .body    = _property.body
+    };
+}
+
+HttpRequestProperty HttpBuilder::getRequestProperty() const
+{
+    return HttpRequestProperty{
+            .method = _property.method,
+            .url    = _property.url
+    };
+}
+
+HttpResponseProperty HttpBuilder::getResponseProperty() const
+{
+    return HttpResponseProperty{
+            .status = _property.status,
+            .reason = _property.reason
+    };
+}
+
+HttpRequest HttpBuilder::getRequest() const
+{
+    HttpRequest req;
+    req.maj     = _property.maj;
+    req.min     = _property.min;
+    req.headers = _property.headers;
+    req.body    = _property.body;
+    req.method  = _property.method;
+    req.url     = _property.url;
+    return req;
+}
+
+HttpResponse HttpBuilder::getResponse() const
+{
+    HttpResponse rsp;
+    rsp.maj     = _property.maj;
+    rsp.min     = _property.min;
+    rsp.headers = _property.headers;
+    rsp.body    = _property.body;
+    rsp.status  = _property.status;
+    rsp.reason  = _property.reason;
+    return rsp;
+}
+
+HttpProperty HttpBuilder::getProperty() const
+{
+    return _property;
+}
+
+HttpBuilder & HttpBuilder::operator =(HttpVersionProperty const & obj)
+{
+    _property.maj = obj.maj;
+    _property.min = obj.min;
+    return *this;
+}
+
+HttpBuilder & HttpBuilder::operator =(HttpCommonProperty const & obj)
+{
+    _property.headers = obj.headers;
+    _property.body    = obj.body;
+    return *this;
+}
+
+HttpBuilder & HttpBuilder::operator =(HttpRequestProperty const & obj)
+{
+    _property.method = obj.method;
+    _property.url    = obj.url;
+    return *this;
+}
+
+HttpBuilder & HttpBuilder::operator =(HttpResponseProperty const & obj)
+{
+    _property.status = obj.status;
+    _property.reason = obj.reason;
+    return *this;
+}
+
+HttpBuilder & HttpBuilder::operator =(HttpRequest const & obj)
+{
+    _property.maj     = obj.maj;
+    _property.min     = obj.min;
+    _property.headers = obj.headers;
+    _property.body    = obj.body;
+    _property.method  = obj.method;
+    _property.url     = obj.url;
+    return *this;
+}
+
+HttpBuilder & HttpBuilder::operator =(HttpResponse const & obj)
+{
+    _property.maj     = obj.maj;
+    _property.min     = obj.min;
+    _property.headers = obj.headers;
+    _property.body    = obj.body;
+    _property.status  = obj.status;
+    _property.reason  = obj.reason;
+    return *this;
+}
+
+HttpBuilder & HttpBuilder::operator =(HttpProperty const & obj)
+{
+    if (&_property != &obj) {
+        _property = obj;
+    }
+    return *this;
 }
 
 std::string HttpBuilder::toRequestString() const
 {
-    return getRequestString(method, url, headers, body, maj, min);
+    return getRequestString(_property);
 }
 
 std::string HttpBuilder::toResponseString() const
 {
-    return getResponseString(getStatus(), reason, headers, body, maj, min);
+    return getResponseString(_property);
 }
 
-std::string HttpBuilder::toRequestDefaultString() const
+std::string HttpBuilder::toDefaultRequestString() const
 {
-    HeaderMap temp = headers;
-    int http_major = (maj == 0 ? 1 : maj);
-    int http_minor = (min == 0 ? 1 : min);
+    return getDefaultRequestString(_property);
+}
 
-    Uri const URI(url);
+std::string HttpBuilder::toDefaultResponseString() const
+{
+    return getDefaultResponseString(_property);
+}
+
+// --------------------------
+// getDefault*String methods.
+// --------------------------
+
+std::string HttpBuilder::getDefaultRequestString(HttpProperty const & req)
+{
+    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+}
+
+std::string HttpBuilder::getDefaultResponseString(HttpProperty const & rsp)
+{
+    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
+}
+
+std::string HttpBuilder::getDefaultRequestString(HttpRequest const & req)
+{
+    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+}
+
+std::string HttpBuilder::getDefaultResponseString(HttpResponse const & rsp)
+{
+    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
+}
+
+std::string HttpBuilder::getDefaultRequestString(std::string const & method, std::string const & url,
+                                                 HeaderMap const & headers, std::string const & body,
+                                                 int major, int minor, bool logging)
+{
+    HeaderMap real_headers = headers;
+    int http_major = (major == 0 ? 1 : major);
+    int http_minor = (minor == 0 ? 1 : minor);
 
     std::string real_method = (method.empty() ? METHOD_GET : method);
-    std::string real_url    = URI.getRequestPath();
+    std::string real_url    = (url.empty() ? "/" : url);
 
-    existsOrInsert(temp, HEADER_HOST, URI.getHost());
-    existsOrInsert(temp, HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);
-    existsOrInsert(temp, HEADER_ACCEPT, HEADER_DEFAULT_ACCEPT);
+    existsOrInsert(real_headers, HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);
+    existsOrInsert(real_headers, HEADER_ACCEPT, HEADER_DEFAULT_ACCEPT);
 
-    return getRequestString(real_method, real_url, temp, body, http_major, http_minor);
-}
-
-std::string HttpBuilder::toResponseDefaultString() const
-{
-    HeaderMap temp = headers;
-    int http_major = (maj == 0 ? 1 : maj);
-    int http_minor = (min == 0 ? 1 : min);
-
-    existsOrInsert(temp, HEADER_SERVER, HEADER_DEFAULT_SERVER);
-    existsOrInsert(temp, HEADER_CONTENT_TYPE, HEADER_DEFAULT_CONTENT_TYPE);
-    existsOrInsert(temp, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
-
-    return getResponseString(getStatus(), reason, temp, body, http_major, http_minor);
-}
-
-void HttpBuilder::existsOrInsert(HeaderMap & headers, std::string const & key, std::string const & val)
-{
-    if (headers.find(key) == headers.end()) {
-        headers.insert(HeaderPair(key, val));
+    if (logging) {
+        if (headers.find(HEADER_HOST) == headers.end()) {
+            tDLogW("HttpBuilder::getDefaultRequestString() Not found Host header.");
+        }
+        for (auto & cursor : real_headers) {
+            tDLogD("HttpBuilder::getDefaultRequestString() > {}: {}", cursor.first, cursor.second);
+        }
     }
+
+    return getRequestString(real_method, real_url, real_headers, body, http_major, http_minor);
 }
 
-std::string HttpBuilder::getVersionString(int major, int minor)
+std::string HttpBuilder::getDefaultResponseString(std::string const & status, std::string const & reason,
+                                                  HeaderMap const & headers, std::string const & body,
+                                                  int major, int minor, bool logging)
 {
-    std::stringstream ss;
-    ss << HTTP << '/' << major << '.' << minor;
-    return ss.str();
+    HeaderMap real_headers = headers;
+    int http_major = (major == 0 ? 1 : major);
+    int http_minor = (minor == 0 ? 1 : minor);
+
+    existsOrInsert(real_headers, HEADER_SERVER, HEADER_DEFAULT_SERVER);
+    existsOrInsert(real_headers, HEADER_CONTENT_TYPE, HEADER_DEFAULT_CONTENT_TYPE);
+    existsOrInsert(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+
+    if (logging) {
+        for (auto & cursor : real_headers) {
+            tDLogD("HttpBuilder::getDefaultResponseString() < {}: {}", cursor.first, cursor.second);
+        }
+    }
+
+    return getResponseString(status, reason, real_headers, body, http_major, http_minor);
+}
+
+// -------------------
+// get*String methods.
+// -------------------
+
+std::string HttpBuilder::getRequestString(HttpProperty const & req)
+{
+    return getRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+}
+
+std::string HttpBuilder::getResponseString(HttpProperty const & rsp)
+{
+    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
+}
+
+std::string HttpBuilder::getRequestString(HttpRequest const & req)
+{
+    return getRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+}
+
+std::string HttpBuilder::getResponseString(HttpResponse const & rsp)
+{
+    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
 }
 
 std::string HttpBuilder::getRequestString(std::string const & method, std::string const & url,
@@ -169,6 +336,25 @@ std::string HttpBuilder::getResponseString(std::string const & status, std::stri
     ss << CRLF << body;
     return ss.str();
 }
+
+// ------------------
+// Utilities methods.
+// ------------------
+
+void HttpBuilder::existsOrInsert(HeaderMap & headers, std::string const & key, std::string const & val)
+{
+    if (headers.find(key) == headers.end()) {
+        headers.insert(HeaderPair(key, val));
+    }
+}
+
+std::string HttpBuilder::getVersionString(int major, int minor)
+{
+    std::stringstream ss;
+    ss << HTTP << '/' << major << '.' << minor;
+    return ss.str();
+}
+
 
 } // namespace http
 } // namespace network

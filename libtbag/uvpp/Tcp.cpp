@@ -292,7 +292,7 @@ bool initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & h
 bool initCommonClient(Tcp & tcp, ConnectRequest & request, network::Uri const & uri)
 {
     if (uri.isHost() == false) {
-        tDLogE("initCommonClient() Unknown host from uri: {}.", uri.get());
+        tDLogE("initCommonClient() Unknown host from uri: {}.", uri.getString());
         return false;
     }
     if (uri.isPort()) {
@@ -300,7 +300,7 @@ bool initCommonClient(Tcp & tcp, ConnectRequest & request, network::Uri const & 
     }
 
     if (uri.isSchema() == false) {
-        tDLogE("initCommonClient() Unknown schema from uri: {}.", uri.get());
+        tDLogE("initCommonClient() Unknown schema from uri: {}.", uri.getString());
         return false;
     }
 

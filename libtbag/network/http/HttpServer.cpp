@@ -77,7 +77,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
             uint64_t timeout = 25000U;
             _request_cb(code, request, response, timeout);
 
-            auto buffer = response.toResponseDefaultString();
+            auto buffer = response.toDefaultResponseString();
             if (shared->write(buffer.data(), buffer.size(), timeout) == false) {
                 tDLogW("HttpServer::onClientRead() Write error.");
             }
