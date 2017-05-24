@@ -22,10 +22,13 @@
 #include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
+#include <libtbag/network/http/HttpFilter.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <functional>
+#include <memory>
+#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -65,6 +68,25 @@ public:
     using OnRequest = std::function<void(Err, HttpParser const &, HttpBuilder &, uint64_t &)>;
     using OnClose   = std::function<void(WeakClient)>;
 
+    using SharedFilter = std::shared_ptr<HttpFilterInterface>;
+
+public:
+    struct FilterContainer
+    {
+        SharedFilter filter;
+        OnRequest request_cb;
+
+        FilterContainer()
+        { /* EMPTY. */ }
+        FilterContainer(SharedFilter f, OnRequest const & cb) : filter(f), request_cb(cb)
+        { /* EMPTY. */ }
+        FilterContainer(HttpFilterInterface * f, OnRequest const & cb) : filter(f), request_cb(cb)
+        { /* EMPTY. */ }
+    };
+
+    using FilterMap  = std::multimap<int, FilterContainer>;
+    using FilterPair = FilterMap::value_type;
+
 public:
     struct ClientData
     {
@@ -79,6 +101,7 @@ private:
     OnOpen    _open_cb;
     OnRequest _request_cb;
     OnOpen    _close_cb;
+    FilterMap _filters;
 
 public:
     HttpServer(Loop & loop, StreamType type = StreamType::TCP);
@@ -90,6 +113,10 @@ public:
     inline void setOnRequest(OnRequest const & cb) { _request_cb = cb; }
     inline void setOnClose  (OnClose   const & cb) { _close_cb   = cb; }
     // @formatter:on
+
+public:
+    void setOnRequest(std::string const & regex_path, OnRequest const & cb, int priority = 0);
+    void setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, int priority = 0);
 
 public:
     virtual void onConnection(Err code) override;

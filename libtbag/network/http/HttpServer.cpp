@@ -27,6 +27,16 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
+void HttpServer::setOnRequest(std::string const & regex_path, OnRequest const & cb, int priority)
+{
+    setOnRequest(new (std::nothrow) HttpPathFilter(regex_path), cb);
+}
+
+void HttpServer::setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, int priority)
+{
+    _filters.insert(FilterPair(priority, FilterContainer(filter, cb)));
+}
+
 void HttpServer::onConnection(Err code)
 {
     if (code != Err::E_SUCCESS) {
@@ -72,17 +82,45 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
     HttpBuilder & response = client_data->builder;
 
     request.execute(buffer, size);
-    if (request.isComplete()) {
-        if (static_cast<bool>(_request_cb)) {
-            uint64_t timeout = 25000U;
-            _request_cb(code, request, response, timeout);
+    if (request.isComplete() == false) {
+        return;
+    }
 
-            auto buffer = response.toDefaultResponseString();
-            if (shared->write(buffer.data(), buffer.size(), timeout) == false) {
-                tDLogW("HttpServer::onClientRead() Write error.");
+    // -----------------
+    // Response process.
+    // -----------------
+
+    uint64_t timeout = 25000U;
+    bool called = false;
+
+    for (auto & filter : _filters) {
+        if (static_cast<bool>(filter.second.filter) && filter.second.filter->filter(request)) {
+            if (static_cast<bool>(filter.second.request_cb)) {
+                filter.second.request_cb(code, request, response, timeout);
             }
+
+            called = true;
+            break;
         }
     }
+
+    if (called == false && static_cast<bool>(_request_cb)) {
+        _request_cb(code, request, response, timeout);
+        called = true;
+    }
+
+    if (called == false) {
+        tDLogW("HttpServer::onClientRead() Not found request callback.");
+    }
+
+    auto const RESPONSE = response.toDefaultResponseString();
+    if (shared->write(RESPONSE.data(), RESPONSE.size(), timeout) == false) {
+        tDLogW("HttpServer::onClientRead() Write error.");
+    }
+
+    request.clear();
+    request.clearCache();
+    response.clear();
 }
 
 void HttpServer::onClientClose(WeakClient node)

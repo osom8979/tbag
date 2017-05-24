@@ -35,9 +35,9 @@ HttpPathFilter::~HttpPathFilter()
     // EMPTY.
 }
 
-bool HttpPathFilter::filter(HttpRequest const & request)
+bool HttpPathFilter::filter(HttpParser const & request)
 {
-    return std::regex_match(request.url, _regex);
+    return std::regex_match(request.getUrl(), _regex);
 }
 
 } // namespace http

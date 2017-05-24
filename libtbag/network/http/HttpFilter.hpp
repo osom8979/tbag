@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
 
 #include <string>
 #include <regex>
@@ -35,7 +35,7 @@ namespace http    {
  */
 struct HttpFilterInterface
 {
-    virtual bool filter(HttpRequest const & request) = 0;
+    virtual bool filter(HttpParser const & request) = 0;
 };
 
 /**
@@ -56,7 +56,7 @@ public:
     virtual ~HttpPathFilter();
 
 public:
-    virtual bool filter(HttpRequest const & request) override;
+    virtual bool filter(HttpParser const & request) override;
 };
 
 } // namespace http
