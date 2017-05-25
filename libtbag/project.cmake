@@ -46,10 +46,6 @@ endif ()
 
 #tbag_modules__apply_pch (${CMAKE_SOURCE_DIR}/libtbag/config.h)
 
-## Capn-proto targets.
-tbag_modules__build_ext_capnp_cpp (tbag-tpot-capnp
-    "${CMAKE_SOURCE_DIR}/libtbag/tpot/struct/Protocol.capnp")
-
 ## Final process.
 tbag_modules__add_target ()
 tbag_modules__update_all_properties ()

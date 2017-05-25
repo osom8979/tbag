@@ -1,5 +1,9 @@
 @0xf5eb5a72eb4961ef;
 
+## project.cmake:
+##  tbag_modules__build_ext_capnp_cpp (tbag-tpot-capnp
+##      "${CMAKE_SOURCE_DIR}/libtbag/tpot/struct/Protocol.capnp")
+
 struct Date {
     year  @0 :Int16; # The year. Must include the century.
     month @1 :UInt8; # Month number, 1-12.
