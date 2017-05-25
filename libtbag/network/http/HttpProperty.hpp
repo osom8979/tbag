@@ -134,12 +134,12 @@ TBAG_API HttpMethod getHttpMethod(std::string const & name);
  */
 struct HttpVersionProperty
 {
-    int maj;
-    int min;
+    int http_major;
+    int http_minor;
 
-    HttpVersionProperty() TBAG_NOEXCEPT : maj(1), min(1)
+    HttpVersionProperty() TBAG_NOEXCEPT : http_major(1), http_minor(1)
     { /* EMPTY. */ }
-    HttpVersionProperty(int v1, int v2) TBAG_NOEXCEPT : maj(v1), min(v2)
+    HttpVersionProperty(int v1, int v2) TBAG_NOEXCEPT : http_major(v1), http_minor(v2)
     { /* EMPTY. */ }
     HttpVersionProperty(HttpVersionProperty const & obj) TBAG_NOEXCEPT
     { (*this) = obj; }
@@ -149,26 +149,26 @@ struct HttpVersionProperty
     { /* EMPTY. */ }
 
     inline HttpVersionProperty & operator =(HttpVersionProperty const & obj) TBAG_NOEXCEPT
-    { if (this != &obj) { maj = obj.maj; min = obj.min; } return *this; }
+    { if (this != &obj) { http_major = obj.http_major; http_minor = obj.http_minor; } return *this; }
 
     inline HttpVersionProperty & operator =(HttpVersionProperty && obj) TBAG_NOEXCEPT
-    { if (this != &obj) { std::swap(maj, obj.maj); std::swap(min, obj.min); } return *this; }
+    { if (this != &obj) { std::swap(http_major, obj.http_major); std::swap(http_minor, obj.http_minor); } return *this; }
 
-    inline void setVersion(int maj, int min) TBAG_NOEXCEPT
-    { this->maj = maj; this->min = min; }
+    inline void setVersion(int v1, int v2) TBAG_NOEXCEPT
+    { this->http_major = v1; this->http_minor = v2; }
 
     inline void setMajor(int val) TBAG_NOEXCEPT
-    { maj = val; }
+    { http_major = val; }
     inline void setMinor(int val) TBAG_NOEXCEPT
-    { min = val; }
+    { http_minor = val; }
 
     inline int getMajor() const TBAG_NOEXCEPT
-    { return maj; }
+    { return http_major; }
     inline int getMinor() const TBAG_NOEXCEPT
-    { return min; }
+    { return http_minor; }
 
     inline friend bool operator ==(HttpVersionProperty & lh, HttpVersionProperty & rh) TBAG_NOEXCEPT
-    { return lh.maj == rh.maj && lh.min == rh.min; }
+    { return lh.http_major == rh.http_major && lh.http_minor == rh.http_minor; }
 };
 
 /**

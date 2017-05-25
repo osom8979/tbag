@@ -499,24 +499,24 @@ void HttpParser::pause(bool is_paused)
 HttpRequest HttpParser::getRequest() const
 {
     HttpRequest req;
-    req.maj     = _parser->parser.http_major;
-    req.min     = _parser->parser.http_minor;
-    req.headers = _parser->headers;
-    req.body    = _parser->body;
-    req.method  = std::string(_parser->getMethodName());
-    req.url     = _parser->url;
+    req.http_major = _parser->parser.http_major;
+    req.http_minor = _parser->parser.http_minor;
+    req.headers    = _parser->headers;
+    req.body       = _parser->body;
+    req.method     = std::string(_parser->getMethodName());
+    req.url        = _parser->url;
     return req;
 }
 
 HttpResponse HttpParser::getResponse() const
 {
     HttpResponse rsp;
-    rsp.maj     = _parser->parser.http_major;
-    rsp.min     = _parser->parser.http_minor;
-    rsp.headers = _parser->headers;
-    rsp.body    = _parser->body;
-    rsp.status  = _parser->parser.status_code;
-    rsp.reason  = _parser->status;
+    rsp.http_major = _parser->parser.http_major;
+    rsp.http_minor = _parser->parser.http_minor;
+    rsp.headers    = _parser->headers;
+    rsp.body       = _parser->body;
+    rsp.status     = _parser->parser.status_code;
+    rsp.reason     = _parser->status;
     return rsp;
 }
 

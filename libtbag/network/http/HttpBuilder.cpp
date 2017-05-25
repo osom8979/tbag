@@ -33,14 +33,14 @@ HttpBuilder::~HttpBuilder() { /* EMPTY. */ }
 HttpBuilder & HttpBuilder::operator =(HttpBuilder const & obj)
 {
     if (this != &obj) {
-        _property.maj     = obj._property.maj;
-        _property.min     = obj._property.min;
-        _property.headers = obj._property.headers;
-        _property.body    = obj._property.body   ;
-        _property.method  = obj._property.method ;
-        _property.url     = obj._property.url    ;
-        _property.reason  = obj._property.reason ;
-        _property.status  = obj._property.status ;
+        _property.http_major = obj._property.http_major;
+        _property.http_minor = obj._property.http_minor;
+        _property.headers    = obj._property.headers;
+        _property.body       = obj._property.body   ;
+        _property.method     = obj._property.method ;
+        _property.url        = obj._property.url    ;
+        _property.reason     = obj._property.reason ;
+        _property.status     = obj._property.status ;
     }
     return *this;
 }
@@ -55,8 +55,8 @@ HttpBuilder & HttpBuilder::operator =(HttpBuilder && obj)
 
 void HttpBuilder::swap(HttpBuilder & obj)
 {
-    std::swap(_property.maj, obj._property.maj);
-    std::swap(_property.min, obj._property.min);
+    std::swap(_property.http_major, obj._property.http_major);
+    std::swap(_property.http_minor, obj._property.http_minor);
     _property.headers.swap(obj._property.headers);
     _property.body   .swap(obj._property.body   );
     _property.method .swap(obj._property.method );
@@ -67,8 +67,8 @@ void HttpBuilder::swap(HttpBuilder & obj)
 
 void HttpBuilder::clear()
 {
-    _property.maj = 0;
-    _property.min = 0;
+    _property.http_major = 0;
+    _property.http_minor = 0;
     _property.headers.clear();
     _property.body.clear();
     _property.method.clear();
@@ -79,7 +79,7 @@ void HttpBuilder::clear()
 
 HttpVersionProperty HttpBuilder::getVersionProperty() const
 {
-    return HttpVersionProperty(_property.maj, _property.min);
+    return HttpVersionProperty(_property.http_major, _property.http_minor);
 }
 
 HttpCommonProperty HttpBuilder::getCommonProperty() const
@@ -100,24 +100,24 @@ HttpResponseProperty HttpBuilder::getResponseProperty() const
 HttpRequest HttpBuilder::getRequest() const
 {
     HttpRequest req;
-    req.maj     = _property.maj;
-    req.min     = _property.min;
-    req.headers = _property.headers;
-    req.body    = _property.body;
-    req.method  = _property.method;
-    req.url     = _property.url;
+    req.http_major = _property.http_major;
+    req.http_minor = _property.http_minor;
+    req.headers    = _property.headers;
+    req.body       = _property.body;
+    req.method     = _property.method;
+    req.url        = _property.url;
     return req;
 }
 
 HttpResponse HttpBuilder::getResponse() const
 {
     HttpResponse rsp;
-    rsp.maj     = _property.maj;
-    rsp.min     = _property.min;
-    rsp.headers = _property.headers;
-    rsp.body    = _property.body;
-    rsp.status  = _property.status;
-    rsp.reason  = _property.reason;
+    rsp.http_major = _property.http_major;
+    rsp.http_minor = _property.http_minor;
+    rsp.headers    = _property.headers;
+    rsp.body       = _property.body;
+    rsp.status     = _property.status;
+    rsp.reason     = _property.reason;
     return rsp;
 }
 
@@ -128,8 +128,8 @@ HttpProperty HttpBuilder::getProperty() const
 
 HttpBuilder & HttpBuilder::operator =(HttpVersionProperty const & obj)
 {
-    _property.maj = obj.maj;
-    _property.min = obj.min;
+    _property.http_major = obj.http_major;
+    _property.http_minor = obj.http_minor;
     return *this;
 }
 
@@ -156,23 +156,23 @@ HttpBuilder & HttpBuilder::operator =(HttpResponseProperty const & obj)
 
 HttpBuilder & HttpBuilder::operator =(HttpRequest const & obj)
 {
-    _property.maj     = obj.maj;
-    _property.min     = obj.min;
-    _property.headers = obj.headers;
-    _property.body    = obj.body;
-    _property.method  = obj.method;
-    _property.url     = obj.url;
+    _property.http_major = obj.http_major;
+    _property.http_minor = obj.http_minor;
+    _property.headers    = obj.headers;
+    _property.body       = obj.body;
+    _property.method     = obj.method;
+    _property.url        = obj.url;
     return *this;
 }
 
 HttpBuilder & HttpBuilder::operator =(HttpResponse const & obj)
 {
-    _property.maj     = obj.maj;
-    _property.min     = obj.min;
-    _property.headers = obj.headers;
-    _property.body    = obj.body;
-    _property.status  = obj.status;
-    _property.reason  = obj.reason;
+    _property.http_major = obj.http_major;
+    _property.http_minor = obj.http_minor;
+    _property.headers    = obj.headers;
+    _property.body       = obj.body;
+    _property.status     = obj.status;
+    _property.reason     = obj.reason;
     return *this;
 }
 
@@ -210,22 +210,22 @@ std::string HttpBuilder::toDefaultResponseString() const
 
 std::string HttpBuilder::getDefaultRequestString(HttpProperty const & req)
 {
-    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
 }
 
 std::string HttpBuilder::getDefaultResponseString(HttpProperty const & rsp)
 {
-    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
+    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
 }
 
 std::string HttpBuilder::getDefaultRequestString(HttpRequest const & req)
 {
-    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
 }
 
 std::string HttpBuilder::getDefaultResponseString(HttpResponse const & rsp)
 {
-    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
+    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
 }
 
 std::string HttpBuilder::getDefaultRequestString(std::string const & method, std::string const & url,
@@ -285,22 +285,22 @@ std::string HttpBuilder::getDefaultResponseString(std::string const & status, st
 
 std::string HttpBuilder::getRequestString(HttpProperty const & req)
 {
-    return getRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+    return getRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
 }
 
 std::string HttpBuilder::getResponseString(HttpProperty const & rsp)
 {
-    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
+    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
 }
 
 std::string HttpBuilder::getRequestString(HttpRequest const & req)
 {
-    return getRequestString(req.method, req.url, req.headers, req.body, req.maj, req.min);
+    return getRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
 }
 
 std::string HttpBuilder::getResponseString(HttpResponse const & rsp)
 {
-    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.maj, rsp.min);
+    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
 }
 
 std::string HttpBuilder::getRequestString(std::string const & method, std::string const & url,
