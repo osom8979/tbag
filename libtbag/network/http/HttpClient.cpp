@@ -167,6 +167,11 @@ Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeo
     return http_result;
 }
 
+Err requestWithSync(std::string const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result)
+{
+    return requestWithSync(Uri(uri), request, timeout, result);
+}
+
 Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result)
 {
     return requestWithSync(uri, HttpRequest(), timeout, result);

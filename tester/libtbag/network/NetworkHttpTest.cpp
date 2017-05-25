@@ -29,10 +29,8 @@ TEST(NetworkHttpTest, HttpClient)
     ASSERT_EQ(200, response.status);
 }
 
-TEST(NetworkHttpTest, GetMethod)
+static bool runSimpleServerTest(std::string const & method)
 {
-    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
-
     uvpp::Loop loop;
     HttpServer server(loop);
 
@@ -54,7 +52,7 @@ TEST(NetworkHttpTest, GetMethod)
         response.setStatus(200);
         response.setReason("OK");
         response.setBody(request.getMethodName() + request.getUrl());
-        timeout = 10000;
+        timeout = 1000;
     });
     server.setOnClose([&](HttpServer::WeakClient node){
         ++on_close;
@@ -66,16 +64,46 @@ TEST(NetworkHttpTest, GetMethod)
 
     HttpResponse response;
     HttpRequest  request;
-    request.method = "GET";
+    request.method = method;
 
     std::thread server_thread([&](){ server_result = loop.run(); });
-    std::thread client_thread([&](){ client_result = http::requestWithSync(request_url, 10000, response); });
+    std::thread client_thread([&](){ client_result = http::requestWithSync(request_url, request, 10000, response); });
 
     client_thread.join();
     server_thread.join();
 
-    ASSERT_EQ(Err::E_SUCCESS, server_result);
-    ASSERT_EQ(Err::E_SUCCESS, client_result);
-    ASSERT_EQ(200, response.status);
+    if (Err::E_SUCCESS != server_result) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Server result {} error", method, getErrName(server_result));
+        return false;
+    }
+    if (Err::E_SUCCESS != client_result) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Client result {} error", method, getErrName(client_result));
+        return false;
+    }
+
+    if (200 != response.status) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response is not OK({}).", method, response.status);
+        return false;
+    }
+
+    if (on_open != 1 || on_request != 1 || on_close != 1) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Counter error({}/{}/{}).",
+               method, on_open, on_request, on_close);
+        return false;
+    }
+
+    return true;
+}
+
+TEST(NetworkHttpTest, GetMethod)
+{
+    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
+    runSimpleServerTest("GET");
+}
+
+TEST(NetworkHttpTest, PostMethod)
+{
+    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
+    runSimpleServerTest("POST");
 }
 

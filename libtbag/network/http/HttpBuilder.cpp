@@ -241,11 +241,10 @@ std::string HttpBuilder::getDefaultRequestString(std::string const & method, std
 
     existsOrInsert(real_headers, HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);
     existsOrInsert(real_headers, HEADER_ACCEPT, HEADER_DEFAULT_ACCEPT);
-    existsOrInsert(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
 
-    //if (method == "POST") {
-    //    existsOrInsert(real_headers, HEADER_TRANSFER_ENCODING, HEADER_DEFAULT_TRANSFER_ENCODING);
-    //}
+    if (body.empty() == false) {
+        existsOrInsert(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+    }
 
     if (logging) {
         if (headers.find(HEADER_HOST) == headers.end()) {
