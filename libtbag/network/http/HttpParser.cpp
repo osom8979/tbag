@@ -69,25 +69,13 @@ public:
     std::string body;
     std::string url;
     std::string status;
+
+    bool header_complete;
+    bool body_complete;
     bool message_complete;
 
 public:
     Cache cache;
-
-public:
-    void clear()
-    {
-        headers.clear();
-        body.clear();
-        url.clear();
-        status.clear();
-        message_complete = false;
-    }
-
-    void clearCache()
-    {
-        cache.field.clear();
-    }
 
 public:
     HttpParserImpl(HttpParser * p) : parent(p)
@@ -116,11 +104,33 @@ public:
         settings.on_message_complete = __global_http_on_message_complete__;
         settings.on_chunk_header     = __global_http_on_chunk_header__    ;
         settings.on_chunk_complete   = __global_http_on_chunk_complete__  ;
+
+        header_complete  = false;
+        body_complete    = false;
+        message_complete = false;
     }
 
     ~HttpParserImpl()
     {
         // EMPTY.
+    }
+
+public:
+    void clear()
+    {
+        headers.clear();
+        body.clear();
+        url.clear();
+        status.clear();
+
+        header_complete  = false;
+        body_complete    = false;
+        message_complete = false;
+    }
+
+    void clearCache()
+    {
+        cache.field.clear();
     }
 
 public:
@@ -300,6 +310,8 @@ int __global_http_on_headers_complete__(http_parser * parser)
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    impl->header_complete = true;
     return impl->parent->onHeadersComplete();
 }
 
@@ -309,6 +321,11 @@ int __global_http_on_body__(http_parser * parser, const char * at, std::size_t l
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    if (::http_body_is_final(parser) != 0) {
+        // Checks if this is the final chunk of the body.
+        impl->body_complete = true;
+    }
 
     std::string const BODY_CHUNK(at, at + length);
     impl->appendBody(BODY_CHUNK);
@@ -321,6 +338,11 @@ int __global_http_on_message_complete__(http_parser * parser)
     HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+
+    if (::http_body_is_final(parser) != 0) {
+        // Checks if this is the final chunk of the body.
+        impl->body_complete = true;
+    }
 
     impl->message_complete = true;
     return impl->parent->onMessageComplete();
@@ -403,7 +425,7 @@ std::string HttpParser::getStatus() const
 
 bool HttpParser::isComplete() const TBAG_NOEXCEPT
 {
-    return _parser->message_complete;
+    return _parser->header_complete && (_parser->body_complete || _parser->message_complete);
 }
 
 int HttpParser::getHttpMajor() const TBAG_NOEXCEPT
