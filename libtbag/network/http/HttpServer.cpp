@@ -27,9 +27,14 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
+void HttpServer::setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, int priority)
+{
+    setOnRequest(new (std::nothrow) HttpDefaultFilter(method, regex_path), cb);
+}
+
 void HttpServer::setOnRequest(std::string const & regex_path, OnRequest const & cb, int priority)
 {
-    setOnRequest(new (std::nothrow) HttpPathFilter(regex_path), cb);
+    setOnRequest(new (std::nothrow) HttpDefaultFilter(regex_path), cb);
 }
 
 void HttpServer::setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, int priority)

@@ -51,7 +51,7 @@ static bool runSimpleServerTest(std::string const & method)
         ++on_request;
         response.setStatus(200);
         response.setReason("OK");
-        response.setBody(request.getMethodName() + request.getUrl());
+        response.setBody(request.getMethodName());
         timeout = 1000;
     });
     server.setOnClose([&](HttpServer::WeakClient node){
@@ -86,6 +86,11 @@ static bool runSimpleServerTest(std::string const & method)
         return false;
     }
 
+    if (response.body != method) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response body error({}).", method, response.body);
+        return false;
+    }
+
     if (on_open != 1 || on_request != 1 || on_close != 1) {
         tDLogA("NetworkHttpTest.runSimpleServerTest({}) Counter error({}/{}/{}).",
                method, on_open, on_request, on_close);
@@ -95,15 +100,128 @@ static bool runSimpleServerTest(std::string const & method)
     return true;
 }
 
-TEST(NetworkHttpTest, GetMethod)
+TEST(NetworkHttpTest, GetMethodServer)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
     runSimpleServerTest("GET");
 }
 
-TEST(NetworkHttpTest, PostMethod)
+TEST(NetworkHttpTest, PostMethodServer)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
     runSimpleServerTest("POST");
+}
+
+TEST(NetworkHttpTest, RoutingServer)
+{
+    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
+
+    uvpp::Loop loop;
+    HttpServer server(loop);
+
+    int on_open    = 0;
+    int on_close   = 0;
+    int on_request = 0;
+
+    int on_request_doc = 0;
+    int on_request_down_get  = 0;
+    int on_request_down_post = 0;
+
+    server.init(details::ANY_IPV4, 0);
+    int const SERVER_PORT = server.getPort();
+
+    std::string request_url = "http://localhost:";
+    request_url += std::to_string(SERVER_PORT);
+    request_url += "/";
+
+    std::string const REQUEST_URL_DOC  = request_url + "Documents";
+    std::string const REQUEST_URL_DOWN = request_url + "Downloads";
+
+    std::cout << "Request URL: " << request_url << std::endl;
+
+    server.setOnOpen([&](HttpServer::WeakClient node){
+        ++on_open;
+    });
+
+    server.setOnRequest([&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+        std::cout << "Server.OnRequest()\n";
+        ++on_request;
+        response.setStatus(200);
+        response.setReason("OK");
+        response.setBody(request.getMethodName() + request.getUrl());
+        timeout = 1000;
+    });
+    server.setOnRequest("/Documents", [&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+        std::cout << "Server.OnRequest(/Documents)\n";
+        ++on_request_doc;
+        response.setStatus(200);
+        response.setReason("OK");
+        response.setBody(request.getMethodName() + request.getUrl());
+        timeout = 1000;
+    });
+    server.setOnRequest("GET", "/Downloads", [&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+        std::cout << "Server.OnRequest([GET]/Downloads)\n";
+        ++on_request_down_get;
+        response.setStatus(200);
+        response.setReason("OK");
+        response.setBody(request.getMethodName() + request.getUrl());
+        timeout = 1000;
+    });
+    server.setOnRequest("POST", "/Downloads", [&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+        std::cout << "Server.OnRequest([POST]/Downloads)\n";
+        ++on_request_down_post;
+        response.setStatus(200);
+        response.setReason("OK");
+        response.setBody(request.getMethodName() + request.getUrl());
+        timeout = 1000;
+    });
+
+    server.setOnClose([&](HttpServer::WeakClient node){
+        ++on_close;
+        if (on_close == 5) {
+            server.close();
+        }
+    });
+
+    Err server_result = Err::E_UNKNOWN;
+    Err client_result = Err::E_UNKNOWN;
+
+    HttpResponse response;
+    HttpResponse response_doc_get;
+    HttpResponse response_doc_post;
+    HttpResponse response_down_get;
+    HttpResponse response_down_post;
+
+    HttpRequest request_get;
+    request_get.method = "GET";
+    HttpRequest request_post;
+    request_post.method = "POST";
+
+    std::thread server_thread([&](){ server_result = loop.run(); });
+    std::thread client1_thread([&](){ client_result = http::requestWithSync(request_url, 1000, response); });
+    std::thread client2_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOC, request_get, 1000, response_doc_get); });
+    std::thread client3_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOC, request_post, 1000, response_doc_post); });
+    std::thread client4_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOWN, request_get, 1000, response_down_get); });
+    std::thread client5_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOWN, request_post, 1000, response_down_post); });
+
+    client1_thread.join();
+    client2_thread.join();
+    client3_thread.join();
+    client4_thread.join();
+    client5_thread.join();
+    server_thread.join();
+
+    ASSERT_EQ(200, response.status);
+    ASSERT_EQ(200, response_doc_get.status);
+    ASSERT_EQ(200, response_doc_post.status);
+    ASSERT_EQ(200, response_down_get.status);
+    ASSERT_EQ(200, response_down_post.status);
+
+    ASSERT_EQ(5, on_open             );
+    ASSERT_EQ(1, on_request          );
+    ASSERT_EQ(2, on_request_doc      );
+    ASSERT_EQ(1, on_request_down_get );
+    ASSERT_EQ(1, on_request_down_post);
+    ASSERT_EQ(5, on_close            );
 }
 

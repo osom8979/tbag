@@ -39,21 +39,24 @@ struct HttpFilterInterface
 };
 
 /**
- * HttpFilter class prototype.
+ * HttpDefaultFilter class prototype.
  *
  * @author zer0
  * @date   2017-05-24
  */
-class TBAG_API HttpPathFilter : public HttpFilterInterface
+class TBAG_API HttpDefaultFilter : public HttpFilterInterface
 {
 private:
+    std::string _method;
     std::regex _regex;
 
 public:
-    HttpPathFilter();
-    HttpPathFilter(std::string const & regex);
-    HttpPathFilter(std::regex const & regex);
-    virtual ~HttpPathFilter();
+    HttpDefaultFilter();
+    HttpDefaultFilter(std::string const & method, std::string const & regex);
+    HttpDefaultFilter(std::string const & method, std::regex const & regex);
+    HttpDefaultFilter(std::string const & regex);
+    HttpDefaultFilter(std::regex const & regex);
+    virtual ~HttpDefaultFilter();
 
 public:
     virtual bool filter(HttpParser const & request) override;

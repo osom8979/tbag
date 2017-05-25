@@ -15,29 +15,43 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-HttpPathFilter::HttpPathFilter()
+HttpDefaultFilter::HttpDefaultFilter()
 {
     // EMPTY.
 }
 
-HttpPathFilter::HttpPathFilter(std::string const & regex) : _regex(regex)
+HttpDefaultFilter::HttpDefaultFilter(std::string const & method, std::string const & regex) : _method(method), _regex(regex)
 {
     // EMPTY.
 }
 
-HttpPathFilter::HttpPathFilter(std::regex const & regex) : _regex(regex)
+HttpDefaultFilter::HttpDefaultFilter(std::string const & method, std::regex const & regex) : _method(method), _regex(regex)
 {
     // EMPTY.
 }
 
-HttpPathFilter::~HttpPathFilter()
+HttpDefaultFilter::HttpDefaultFilter(std::string const & regex) : _regex(regex)
 {
     // EMPTY.
 }
 
-bool HttpPathFilter::filter(HttpParser const & request)
+HttpDefaultFilter::HttpDefaultFilter(std::regex const & regex) : _regex(regex)
 {
-    return std::regex_match(request.getUrl(), _regex);
+    // EMPTY.
+}
+
+HttpDefaultFilter::~HttpDefaultFilter()
+{
+    // EMPTY.
+}
+
+bool HttpDefaultFilter::filter(HttpParser const & request)
+{
+    if (_method.empty()) {
+        return std::regex_match(request.getUrl(), _regex);
+    } else {
+        return _method == request.getMethodName() && std::regex_match(request.getUrl(), _regex);
+    }
 }
 
 } // namespace http

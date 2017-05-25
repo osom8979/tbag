@@ -115,6 +115,7 @@ public:
     // @formatter:on
 
 public:
+    void setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, int priority = 0);
     void setOnRequest(std::string const & regex_path, OnRequest const & cb, int priority = 0);
     void setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, int priority = 0);
 
