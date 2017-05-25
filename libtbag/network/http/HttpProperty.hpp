@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/network/Uri.hpp>
 
+#include <utility>
 #include <algorithm>
 #include <string>
 #include <map>
@@ -27,6 +28,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+
+// --------------
+// @formatter:off
+// --------------
 
 TBAG_CONSTEXPR char const * const HTTP = "HTTP";
 TBAG_CONSTEXPR char const * const   SP = " ";
@@ -132,10 +137,22 @@ struct HttpVersionProperty
     int maj;
     int min;
 
-    HttpVersionProperty() : maj(1), min(1)
+    HttpVersionProperty() TBAG_NOEXCEPT : maj(1), min(1)
     { /* EMPTY. */ }
-    HttpVersionProperty(int v1, int v2) : maj(v1), min(v2)
+    HttpVersionProperty(int v1, int v2) TBAG_NOEXCEPT : maj(v1), min(v2)
     { /* EMPTY. */ }
+    HttpVersionProperty(HttpVersionProperty const & obj) TBAG_NOEXCEPT
+    { (*this) = obj; }
+    HttpVersionProperty(HttpVersionProperty && obj) TBAG_NOEXCEPT
+    { (*this) = std::move(obj); }
+    ~HttpVersionProperty()
+    { /* EMPTY. */ }
+
+    inline HttpVersionProperty & operator =(HttpVersionProperty const & obj) TBAG_NOEXCEPT
+    { if (this != &obj) { maj = obj.maj; min = obj.min; } return *this; }
+
+    inline HttpVersionProperty & operator =(HttpVersionProperty && obj) TBAG_NOEXCEPT
+    { if (this != &obj) { std::swap(maj, obj.maj); std::swap(min, obj.min); } return *this; }
 
     inline void setVersion(int maj, int min) TBAG_NOEXCEPT
     { this->maj = maj; this->min = min; }
@@ -174,6 +191,18 @@ struct HttpCommonProperty
     { /* EMPTY. */ }
     HttpCommonProperty(HeaderMap const & h, std::string const & b) : headers(h), body(b)
     { /* EMPTY. */ }
+    HttpCommonProperty(HttpCommonProperty const & obj)
+    { (*this) = obj; }
+    HttpCommonProperty(HttpCommonProperty && obj)
+    { (*this) = std::move(obj); }
+    ~HttpCommonProperty()
+    { /* EMPTY. */ }
+
+    inline HttpCommonProperty & operator =(HttpCommonProperty const & obj)
+    { if (this != &obj) { headers = obj.headers; body = obj.body; } return *this; }
+
+    inline HttpCommonProperty & operator =(HttpCommonProperty && obj)
+    { if (this != &obj) { headers.swap(obj.headers); body.swap(obj.body); } return *this; }
 
     inline bool insertHeader(std::string const & key, std::string const & val)
     { return headers.insert(HeaderPair(key, val)).second; }
@@ -212,6 +241,18 @@ struct HttpRequestProperty
     { /* EMPTY. */ }
     HttpRequestProperty(std::string const & m, std::string const & u) : method(m), url(u)
     { /* EMPTY. */ }
+    HttpRequestProperty(HttpRequestProperty const & obj)
+    { (*this) = obj; }
+    HttpRequestProperty(HttpRequestProperty && obj)
+    { (*this) = std::move(obj); }
+    ~HttpRequestProperty()
+    { /* EMPTY. */ }
+
+    inline HttpRequestProperty & operator =(HttpRequestProperty const & obj)
+    { if (this != &obj) { method = obj.method; url = obj.url; } return *this; }
+
+    inline HttpRequestProperty & operator =(HttpRequestProperty && obj)
+    { if (this != &obj) { method.swap(obj.method); url.swap(obj.url); } return *this; }
 
     inline Uri getUri() const
     { return Uri(url); }
@@ -234,6 +275,18 @@ struct HttpResponseProperty
     { /* EMPTY. */ }
     HttpResponseProperty(int s, std::string const & r) : status(s), reason(r)
     { /* EMPTY. */ }
+    HttpResponseProperty(HttpResponseProperty const & obj)
+    { (*this) = obj; }
+    HttpResponseProperty(HttpResponseProperty && obj)
+    { (*this) = std::move(obj); }
+    ~HttpResponseProperty()
+    { /* EMPTY. */ }
+
+    inline HttpResponseProperty & operator =(HttpResponseProperty const & obj)
+    { if (this != &obj) { status = obj.status; reason = obj.reason; } return *this; }
+
+    inline HttpResponseProperty & operator =(HttpResponseProperty && obj)
+    { if (this != &obj) { std::swap(status, obj.status); reason.swap(obj.reason); } return *this; }
 
     inline std::string getStatus() const
     { return std::to_string(status); }
@@ -248,12 +301,14 @@ struct HttpResponseProperty
     }
 };
 
-// @formatter:off
 struct HttpCommon   : public HttpVersionProperty, public HttpCommonProperty { /* EMPTY. */ };
 struct HttpRequest  : public HttpCommon, public HttpRequestProperty { /* EMPTY. */ };
 struct HttpResponse : public HttpCommon, public HttpResponseProperty { /* EMPTY. */ };
 struct HttpProperty : public HttpCommon, public HttpRequestProperty, public HttpResponseProperty { /* EMPTY. */ };
+
+// -------------
 // @formatter:on
+// -------------
 
 } // namespace http
 } // namespace network
