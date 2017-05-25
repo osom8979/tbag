@@ -87,6 +87,7 @@ public:
     virtual void onShutdown(Err code) override;
     virtual void onWrite(Err code) override;
     virtual void onRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void onClose() override;
 };
 
 // ----------

@@ -38,58 +38,82 @@ void HttpClient::setup(HttpBuilder const & request,
 
 void HttpClient::onConnect(Err code)
 {
-    if (code == Err::E_SUCCESS) {
-        using namespace std::chrono;
-
-        auto buffer = _builder.toDefaultRequestString();
-        Millisec left_time = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
-        if (this->write(buffer.data(), buffer.size(), static_cast<uint64_t>(left_time.count())) == false) {
-            _response_cb(Err::E_WRERR, _parser);
-            this->close();
-        }
-    } else {
+    if (code != Err::E_SUCCESS) {
+        tDLogE("HttpClient::onConnect() {} error.", getErrName(code));
         _response_cb(code, _parser);
-        this->close();
+        close();
+        return;
     }
+
+    auto buffer = _builder.toDefaultRequestString();
+    if (write(buffer.data(), buffer.size()) == false) {
+        tDLogE("HttpClient::onConnect() {} error.", getErrName(Err::E_WRERR));
+        _response_cb(Err::E_WRERR, _parser);
+        close();
+        return;
+    }
+
+    using namespace std::chrono;
+    Millisec const LEFT_TIME = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
+
+    if (LEFT_TIME.count() <= 0) {
+        tDLogE("HttpClient::onConnect() {} error.", getErrName(Err::E_TIMEOUT));
+        _response_cb(Err::E_TIMEOUT, _parser);
+        close();
+        return;
+    }
+
+    startTimeoutClose(LEFT_TIME);
 }
 
 void HttpClient::onShutdown(Err code)
 {
     _response_cb(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _parser);
-    this->close();
+    close();
 }
 
 void HttpClient::onWrite(Err code)
 {
-    if (code == Err::E_SUCCESS) {
-        this->start();
-    } else {
+    if (code != Err::E_SUCCESS) {
+        tDLogE("HttpClient::onWrite() {} error.", getErrName(code));
         _response_cb(code, _parser);
-        this->close();
+        close();
+        return;
     }
+
+    start();
 }
 
 void HttpClient::onRead(Err code, char const * buffer, std::size_t size)
 {
     if (code == Err::E_EOF) {
-        _parser.execute(buffer, size);
-        _response_cb(Err::E_SUCCESS, _parser);
-
-        this->stop();
-        this->close();
-    } else if (code == Err::E_SUCCESS) {
-        _parser.execute(buffer, size);
-        if (_parser.isComplete()) {
-            _response_cb(Err::E_SUCCESS, _parser);
-
-            this->stop();
-            this->close();
-        }
-    } else {
+        tDLogI("HttpClient::onRead() EOF.");
         _response_cb(code, _parser);
-        this->stop();
-        this->close();
+        close();
+        return;
     }
+
+    if (code != Err::E_SUCCESS) {
+        tDLogE("HttpServer::onRead() {} error", getErrName(code));
+        _response_cb(code, _parser);
+        close();
+        return;
+    }
+
+    assert(code == Err::E_SUCCESS);
+
+    _parser.execute(buffer, size);
+    if (_parser.isComplete()) {
+        tDLogD("HttpClient::onRead() Completed http parsing (HTTP STATUS: {}).", _parser.getStatusCode());
+
+        _response_cb(Err::E_SUCCESS, _parser);
+        close();
+    }
+}
+
+void HttpClient::onClose()
+{
+    tDLogD("HttpClient::onClose()");
 }
 
 // ----------
