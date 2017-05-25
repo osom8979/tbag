@@ -39,28 +39,25 @@ TBAG_CONSTEXPR char const * const METHOD_POST   = "POST";
 TBAG_CONSTEXPR char const * const METHOD_PUT    = "PUT";
 
 /**
- * @defgroup __DOXYGEN_GROUP__HTTP_REQUEST_HEADER__ List of http request headers.
+ * @defgroup __DOXYGEN_GROUP__HTTP_HEADER__ List of http headers.
  * @{
  */
-TBAG_CONSTEXPR char const * const HEADER_HOST       = "Host";
+TBAG_CONSTEXPR char const * const HEADER_HOST = "Host";
+TBAG_CONSTEXPR char const * const HEADER_SERVER = "Server";
 TBAG_CONSTEXPR char const * const HEADER_USER_AGENT = "User-Agent";
-TBAG_CONSTEXPR char const * const HEADER_ACCEPT     = "Accept";
-
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT     = "*/*";
-/** @} */
-
-/**
- * @defgroup __DOXYGEN_GROUP__HTTP_RESPONSE_HEADER__ List of http response headers.
- * @{
- */
-TBAG_CONSTEXPR char const * const HEADER_SERVER         = "Server";
-TBAG_CONSTEXPR char const * const HEADER_CONTENT_TYPE   = "Content-Type";
+TBAG_CONSTEXPR char const * const HEADER_ACCEPT = "Accept";
+TBAG_CONSTEXPR char const * const HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
+TBAG_CONSTEXPR char const * const HEADER_CONTENT_TYPE = "Content-Type";
 TBAG_CONSTEXPR char const * const HEADER_CONTENT_LENGTH = "Content-Length";
+/**
+ * @}
+ */
 
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_SERVER       = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_SERVER = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_CONTENT_TYPE = "text/html; charset=utf-8";
-/** @} */
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT = "*/*";
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_TRANSFER_ENCODING = "identity";
 
 /**
  * Http version structure.
@@ -72,6 +69,11 @@ struct HttpVersionProperty
 {
     int maj;
     int min;
+
+    HttpVersionProperty() : maj(1), min(1)
+    { /* EMPTY. */ }
+    HttpVersionProperty(int v1, int v2) : maj(v1), min(v2)
+    { /* EMPTY. */ }
 
     inline void setVersion(int maj, int min) TBAG_NOEXCEPT
     { this->maj = maj; this->min = min; }
@@ -103,6 +105,13 @@ struct HttpCommonProperty
 
     HeaderMap headers;
     std::string body;
+
+    HttpCommonProperty()
+    { /* EMPTY. */ }
+    HttpCommonProperty(HeaderMap const & h) : headers(h), body()
+    { /* EMPTY. */ }
+    HttpCommonProperty(HeaderMap const & h, std::string const & b) : headers(h), body(b)
+    { /* EMPTY. */ }
 
     inline bool insertHeader(std::string const & key, std::string const & val)
     { return headers.insert(HeaderPair(key, val)).second; }
@@ -137,6 +146,11 @@ struct HttpRequestProperty
     std::string method;
     std::string url;
 
+    HttpRequestProperty()
+    { /* EMPTY. */ }
+    HttpRequestProperty(std::string const & m, std::string const & u) : method(m), url(u)
+    { /* EMPTY. */ }
+
     inline Uri getUri() const
     { return Uri(url); }
 };
@@ -151,6 +165,13 @@ struct HttpResponseProperty
 {
     int status;
     std::string reason;
+
+    HttpResponseProperty()
+    { /* EMPTY. */ }
+    HttpResponseProperty(int s) : status(s)
+    { /* EMPTY. */ }
+    HttpResponseProperty(int s, std::string const & r) : status(s), reason(r)
+    { /* EMPTY. */ }
 
     inline std::string getStatus() const
     { return std::to_string(status); }

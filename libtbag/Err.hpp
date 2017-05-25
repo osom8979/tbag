@@ -37,6 +37,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_WRERR   , "Unknown Write error"   ) \
     _TBAG_XX(_SHUTDOWN, "Shutdown error"        ) \
     _TBAG_XX(_ENFOUND , "Not found error"       ) \
+    _TBAG_XX(_TIMEOUT , "Timeout error"         ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

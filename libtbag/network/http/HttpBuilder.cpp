@@ -79,34 +79,22 @@ void HttpBuilder::clear()
 
 HttpVersionProperty HttpBuilder::getVersionProperty() const
 {
-    return HttpVersionProperty{
-            .maj = _property.maj,
-            .min = _property.min
-    };
+    return HttpVersionProperty(_property.maj, _property.min);
 }
 
 HttpCommonProperty HttpBuilder::getCommonProperty() const
 {
-    return HttpCommonProperty{
-            .headers = _property.headers,
-            .body    = _property.body
-    };
+    return HttpCommonProperty(_property.headers, _property.body);
 }
 
 HttpRequestProperty HttpBuilder::getRequestProperty() const
 {
-    return HttpRequestProperty{
-            .method = _property.method,
-            .url    = _property.url
-    };
+    return HttpRequestProperty(_property.method, _property.url);
 }
 
 HttpResponseProperty HttpBuilder::getResponseProperty() const
 {
-    return HttpResponseProperty{
-            .status = _property.status,
-            .reason = _property.reason
-    };
+    return HttpResponseProperty(_property.status, _property.reason);
 }
 
 HttpRequest HttpBuilder::getRequest() const
@@ -254,6 +242,10 @@ std::string HttpBuilder::getDefaultRequestString(std::string const & method, std
     existsOrInsert(real_headers, HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);
     existsOrInsert(real_headers, HEADER_ACCEPT, HEADER_DEFAULT_ACCEPT);
     existsOrInsert(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+
+    //if (method == "POST") {
+    //    existsOrInsert(real_headers, HEADER_TRANSFER_ENCODING, HEADER_DEFAULT_TRANSFER_ENCODING);
+    //}
 
     if (logging) {
         if (headers.find(HEADER_HOST) == headers.end()) {
