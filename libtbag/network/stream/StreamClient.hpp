@@ -105,12 +105,12 @@ public:
 
     bool isWriting() const;
 
-private:
+protected:
     void startTimeoutShutdown(Milliseconds const & millisec);
     void startTimeoutClose(Milliseconds const & millisec);
     void cancelTimeoutShutdown();
     void cancelTimeoutClose();
-    bool write(SharedSafetyWriter writer, uint64_t millisec);
+    bool write(SharedSafetyWriter writer, uint64_t millisec = 0);
     void closeAll();
 
 public:

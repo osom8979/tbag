@@ -134,7 +134,7 @@ bool StreamClient::write(SharedSafetyWriter writer, uint64_t millisec)
     Loop * loop = _client->getLoop();
     assert(loop != nullptr);
 
-    if (millisec >= 1U) {
+    if (millisec > 0) {
         startTimeoutShutdown(Milliseconds(millisec));
     }
 
