@@ -45,16 +45,21 @@ void HttpServer::onConnection(Err code)
     }
 
     auto node = this->accept();
-    if (auto shared = node.lock()) {
-        if (shared->start()) {
-            if (static_cast<bool>(_open_cb)) {
-                _open_cb(node);
-            }
-        } else {
-            tDLogE("HttpServer::onConnection() Start client error.");
-        }
-    } else {
+    auto shared = node.lock();
+
+    if (static_cast<bool>(shared) == false) {
         tDLogE("HttpServer::onConnection() Expired client.");
+        return;
+    }
+
+    if (shared->start() == false) {
+        tDLogE("HttpServer::onConnection() Start client error.");
+        shared->close();
+        return;
+    }
+
+    if (static_cast<bool>(_open_cb)) {
+        _open_cb(node);
     }
 }
 
@@ -66,14 +71,21 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
         return;
     }
 
-    ClientData * client_data = static_cast<ClientData*>(shared->getUserData());
-    if (client_data == nullptr) {
-        tDLogE("HttpServer::onClientRead() User data is nullptr.");
+    if (code == Err::E_EOF) {
+        tDLogD("HttpServer::onClientRead() EOF.");
+        shared->close();
         return;
     }
 
-    if (code != Err::E_SUCCESS /* with Err::E_EOF*/) {
-        shared->stop();
+    ClientData * client_data = static_cast<ClientData*>(shared->getUserData());
+    if (client_data == nullptr) {
+        tDLogE("HttpServer::onClientRead() User data is nullptr.");
+        shared->close();
+        return;
+    }
+
+    if (code != Err::E_SUCCESS) {
+        tDLogE("HttpServer::onClientRead() {} error", getErrName(code));
         shared->close();
         return;
     }
@@ -83,6 +95,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
 
     request.execute(buffer, size);
     if (request.isComplete() == false) {
+        tDLogD("HttpServer::onClientRead() Not complete.");
         return;
     }
 
@@ -98,7 +111,6 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
             if (static_cast<bool>(filter.second.request_cb)) {
                 filter.second.request_cb(code, request, response, timeout);
             }
-
             called = true;
             break;
         }
@@ -125,13 +137,14 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
 
 void HttpServer::onClientClose(WeakClient node)
 {
-    if (auto shared = node.lock()) {
-        //shared->stop();
-        if (static_cast<bool>(_close_cb)) {
-            _close_cb(node);
-        }
-    } else {
+    auto shared = node.lock();
+    if (static_cast<bool>(shared) == false) {
         tDLogE("HttpServer::onClientClose() Expired client.");
+        return;
+    }
+
+    if (static_cast<bool>(_close_cb)) {
+        _close_cb(node);
     }
 }
 
