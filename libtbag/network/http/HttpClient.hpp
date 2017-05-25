@@ -94,6 +94,14 @@ public:
 // Utilities.
 // ----------
 
+TBAG_API Err requestWithSync(HttpClient::StreamType type,
+                             std::string const & host,
+                             int port,
+                             Uri const & uri,
+                             HttpRequest const & request,
+                             uint64_t timeout,
+                             HttpResponse & result);
+
 TBAG_API Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result);
 TBAG_API Err requestWithSync(std::string const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result);
 TBAG_API Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result);

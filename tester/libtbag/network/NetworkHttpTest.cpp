@@ -6,6 +6,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
+
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/network/http/HttpServer.hpp>
@@ -29,12 +31,12 @@ TEST(NetworkHttpTest, HttpClient)
     ASSERT_EQ(200, response.status);
 }
 
-static bool runSimpleServerTest(std::string const & method)
+static bool runSimpleServerTest(HttpServer::StreamType type, std::string const & bind, std::string const & method)
 {
     uvpp::Loop loop;
-    HttpServer server(loop);
+    HttpServer server(loop, type);
 
-    server.init(details::ANY_IPV4, 0);
+    server.init(bind.c_str());
 
     std::string request_url = "http://localhost:";
     request_url += std::to_string(server.getPort());
@@ -67,7 +69,13 @@ static bool runSimpleServerTest(std::string const & method)
     request.method = method;
 
     std::thread server_thread([&](){ server_result = loop.run(); });
-    std::thread client_thread([&](){ client_result = http::requestWithSync(request_url, request, 10000, response); });
+    std::thread client_thread([&](){
+        if (HttpServer::StreamType::PIPE == type) {
+            client_result = http::requestWithSync(type, bind, 0, Uri(request_url), request, 1000, response);
+        } else {
+            client_result = http::requestWithSync(request_url, request, 1000, response);
+        }
+    });
 
     client_thread.join();
     server_thread.join();
@@ -100,16 +108,26 @@ static bool runSimpleServerTest(std::string const & method)
     return true;
 }
 
-TEST(NetworkHttpTest, GetMethodServer)
+TEST(NetworkHttpTest, TcpHttpServer)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
-    runSimpleServerTest("GET");
+    runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "GET");
+    runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "POST");
 }
 
-TEST(NetworkHttpTest, PostMethodServer)
+TEST(NetworkHttpTest, PipeHttpServer)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    char const * const PATH = "\\\\.\\pipe\\HTTP_TEST";
+#else
+    char const * const TEST_FILENAME = "http.sock";
+    tttDir(true, true);
+    auto const PATH = tttDirGet() / TEST_FILENAME;
+#endif
+
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
-    runSimpleServerTest("POST");
+    runSimpleServerTest(HttpServer::StreamType::PIPE, PATH, "GET");
+    runSimpleServerTest(HttpServer::StreamType::PIPE, PATH, "POST");
 }
 
 TEST(NetworkHttpTest, RoutingServer)

@@ -120,20 +120,17 @@ void HttpClient::onClose()
 // Utilities.
 // ----------
 
-Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result)
+Err requestWithSync(HttpClient::StreamType type,
+                    std::string const & host,
+                    int port,
+                    Uri const & uri,
+                    HttpRequest const & request,
+                    uint64_t timeout,
+                    HttpResponse & result)
 {
     using Loop = uvpp::Loop;
     Loop loop;
-    HttpClient http(loop);
-
-    std::string host;
-    int port = 0;
-
-    Uri::AddrFlags const FLAG = Uri::AddrFlags::MOST_IPV4;
-    Err ADDRINFO_RESULT = uri.requestAddrInfo(host, port, FLAG);
-    if (ADDRINFO_RESULT != Err::E_SUCCESS) {
-        return ADDRINFO_RESULT;
-    }
+    HttpClient http(loop, type);
 
     if (http.init(host.c_str(), port, timeout) == false) {
         return Err::E_EINIT;
@@ -165,6 +162,20 @@ Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeo
     }
 
     return http_result;
+}
+
+Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result)
+{
+    std::string host;
+    int port = 0;
+
+    Uri::AddrFlags const FLAG = Uri::AddrFlags::MOST_IPV4;
+    Err ADDRINFO_RESULT = uri.requestAddrInfo(host, port, FLAG);
+    if (ADDRINFO_RESULT != Err::E_SUCCESS) {
+        return ADDRINFO_RESULT;
+    }
+
+    return requestWithSync(HttpClient::StreamType::TCP, host, port, uri, request, timeout, result);
 }
 
 Err requestWithSync(std::string const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result)
