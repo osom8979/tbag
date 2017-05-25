@@ -236,7 +236,7 @@ std::string HttpBuilder::getDefaultRequestString(std::string const & method, std
     int http_major = (major == 0 ? 1 : major);
     int http_minor = (minor == 0 ? 1 : minor);
 
-    std::string real_method = (method.empty() ? METHOD_GET : method);
+    std::string real_method = (method.empty() ? getHttpMethodName(HttpMethod::M_GET) : method);
     std::string real_url    = (url.empty() ? "/" : url);
 
     existsOrInsert(real_headers, HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);

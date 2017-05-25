@@ -141,7 +141,7 @@ Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeo
 
     HttpBuilder builder = request;
     if (builder.getMethod().empty()) {
-        builder.setMethod(METHOD_GET);
+        builder.setMethod(getHttpMethodName(HttpMethod::M_GET));
     }
     if (builder.getUrl().empty()) {
         builder.setUrl(uri.getRequestPath());
