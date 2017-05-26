@@ -227,10 +227,44 @@ TBAG_CONSTEXPR const int SOCKADDR_MAX_BYTE_SIZE = SOCK_MAXADDRLEN;
 TBAG_CONSTEXPR const int SOCKADDR_MAX_BYTE_SIZE = 255;
 #endif
 
+/**
+ * @var INET_ADDR_MAX_BYTE_SIZE
+ *
+ * Longest possible ipv4 address string.
+ *
+ * @remarks
+ *  e.g. 255.255.255.255
+ */
+#if defined(INET_ADDRSTRLEN)
+TBAG_CONSTEXPR const int INET_ADDR_MAX_BYTE_SIZE = INET_ADDRSTRLEN;
+#else
+TBAG_CONSTEXPR const int INET_ADDR_MAX_BYTE_SIZE = 16;
+#endif
+
+/**
+ * @var INET6_ADDR_MAX_BYTE_SIZE
+ *
+ * Longest possible ipv6 address string.
+ *
+ * @remarks
+ *  e.g. 2001:0db8:85a3:08d3:1319:8a2e:0370:7334
+ */
+#if defined(INET6_ADDRSTRLEN)
+TBAG_CONSTEXPR const int INET6_ADDR_MAX_BYTE_SIZE = INET6_ADDRSTRLEN;
+#else
+TBAG_CONSTEXPR const int INET6_ADDR_MAX_BYTE_SIZE = 46;
+#endif
+
 TBAG_API int getPortNumber(sockaddr const * address);
 
 TBAG_API Err initAddress(std::string const & ip, int port, sockaddr_in * addr);
 TBAG_API Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
+
+/** Cross-platform IPv6-capable implementation of inet_ntop(3). */
+TBAG_API Err convertInetNtop(int family, void const * address, std::string & text);
+
+/** Cross-platform IPv6-capable implementation of inet_pton(3). */
+TBAG_API Err convertInetPton(int family, std::string const & text, void * address);
 
 } // namespace uvpp
 

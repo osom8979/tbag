@@ -9,6 +9,8 @@
 
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cassert>
 #include <uv.h>
 
 // -------------------
@@ -114,7 +116,8 @@ std::string getIpName(sockaddr const * address)
 
 std::string getIpName(sockaddr_in const * address)
 {
-    char name[16] = {0,}; // e.g. 255.255.255.255
+    std::size_t const SIZE = INET_ADDR_MAX_BYTE_SIZE + 1;
+    char name[SIZE] = {0,}; // e.g. 255.255.255.255
     if (::uv_ip4_name(address, name, sizeof(name)) == 0) {
         return std::string(name);
     }
@@ -123,7 +126,8 @@ std::string getIpName(sockaddr_in const * address)
 
 std::string getIpName(sockaddr_in6 const * address)
 {
-    char name[40] = {0,}; // e.g. 2001:0db8:85a3:08d3:1319:8a2e:0370:7334
+    std::size_t const SIZE = INET6_ADDR_MAX_BYTE_SIZE + 1;
+    char name[SIZE] = {0,};
     if (::uv_ip6_name(address, name, sizeof(name)) == 0) {
         return std::string(name);
     }
@@ -157,6 +161,37 @@ Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
         return convertUvErrorToErr(CODE);
     }
     return Err::E_SUCCESS;
+}
+
+Err convertInetNtop(int family, void const * address, std::string & text)
+{
+    assert(family == AF_INET || family == AF_INET6);
+    std::size_t const SIZE = INET6_ADDR_MAX_BYTE_SIZE + 1;
+    char name[SIZE] = {0,};
+
+    // Cross-platform IPv6-capable implementation of inet_ntop(3) and inet_pton(3).
+    // On success they return 0. In case of error the target dst pointer is unmodified.
+    int const CODE = ::uv_inet_ntop(family, address, name, sizeof(name));
+    if (CODE != 0) {
+        tDLogE("convertInetNtop() {} error", getUvErrorName(CODE));
+    }
+    text.assign(name);
+    return convertUvErrorToErr(CODE);
+}
+
+Err convertInetPton(int family, std::string const & text, void * address)
+{
+    assert(family == AF_INET || family == AF_INET6);
+    // Cross-platform IPv6-capable implementation of inet_ntop(3) and inet_pton(3).
+    // On success they return 0. In case of error the target dst pointer is unmodified.
+
+    // When the Family parameter is AF_INET, this buffer should be large enough to hold an IN_ADDR structure.
+    // When the Family parameter is AF_INET6, this buffer should be large enough to hold an IN6_ADDR structure.
+    int const CODE = ::uv_inet_pton(family, text.c_str(), address);
+    if (CODE != 0) {
+        tDLogE("convertInetPton() {} error", getUvErrorName(CODE));
+    }
+    return convertUvErrorToErr(CODE);
 }
 
 } // namespace uvpp
