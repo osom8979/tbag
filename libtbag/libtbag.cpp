@@ -165,6 +165,6 @@ tbBOOL tbRelease()
 
 int tbPotMain(int argc, char ** argv, char ** envs)
 {
-    return libtbag::tpot::TpotMain(argc, argv, envs).run();
+    return libtbag::tpot::runTpotMain(argc, argv, envs);
 }
 

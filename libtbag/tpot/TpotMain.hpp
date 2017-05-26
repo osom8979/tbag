@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/app/Application.hpp>
+#include <libtbag/app/Service.hpp>
+#include <libtbag/string/HelpCommander.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,17 +30,48 @@ namespace tpot {
  * @author zer0
  * @date   2017-05-13
  */
-class TBAG_API TpotMain final : public app::Application
+class TBAG_API TpotMain final : app::Service
 {
+public:
+    using HelpCommander = string::HelpCommander;
+
+public:
+    enum class RunningMode
+    {
+        APPLICATION,
+        SERVICE,
+    };
+
+private:
+    HelpCommander _commander;
+    RunningMode   _mode;
+
+private:
+    bool _help;
+    bool _verbose;
+    bool _unknown;
+
 public:
     TpotMain(int argc, char ** argv, char ** envs);
     virtual ~TpotMain();
+
+private:
+    void initCommander(int argc, char ** argv);
 
 public:
     virtual void onCreate() override;
     virtual void onRunning() override;
     virtual void onDestroy() override;
+
+public:
+    int autoRun();
 };
+
+// ------------
+// Entry-point.
+// ------------
+
+TBAG_API int runTpotMain(int argc, char ** argv, char ** envs);
 
 } // namespace tpot
 
