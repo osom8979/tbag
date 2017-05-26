@@ -100,8 +100,8 @@ public:
     std::size_t request(Flags const & flags);
     std::size_t request(std::string const & arguments, std::string const & prefix, std::string const & delimiter);
     std::size_t request(std::string const & arguments);
-    std::size_t request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter);
-    std::size_t request(int argc, char ** argv);
+    std::size_t request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter, bool ignore_first = true);
+    std::size_t request(int argc, char ** argv, bool ignore_first = true);
 
 public:
     virtual bool onRequest(std::size_t index, std::size_t size, Arguments const & arguments);

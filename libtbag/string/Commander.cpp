@@ -145,18 +145,18 @@ std::size_t Commander::request(std::string const & arguments)
     return request(parseArguments(arguments, _prefix, _delimiter));
 }
 
-std::size_t Commander::request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter)
+std::size_t Commander::request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter, bool ignore_first)
 {
     std::stringstream ss;
-    for (int i = 0; i < argc; ++i) {
+    for (int i = (ignore_first ? 1 : 0); i < argc; ++i) {
         ss << argv[i] << ' ';
     }
     return request(ss.str(), prefix, delimiter);
 }
 
-std::size_t Commander::request(int argc, char ** argv)
+std::size_t Commander::request(int argc, char ** argv, bool ignore_first)
 {
-    return request(argc, argv, _prefix, _delimiter);
+    return request(argc, argv, _prefix, _delimiter, ignore_first);
 }
 
 bool Commander::onRequest(std::size_t index, std::size_t size, Arguments const & arguments)
