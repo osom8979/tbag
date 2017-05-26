@@ -210,12 +210,6 @@ TBAG_API binf defaultOnAlloc(std::vector<char> & buffer, std::size_t suggested_s
 // Network.
 // --------
 
-TBAG_API std::string getIpName(sockaddr     const * address);
-TBAG_API std::string getIpName(sockaddr_in  const * address);
-TBAG_API std::string getIpName(sockaddr_in6 const * address);
-
-TBAG_CONSTEXPR const int UNKNOWN_PORT_NUMBER = (-1);
-
 /**
  * @var SOCKADDR_MAX_BYTE_SIZE
  *
@@ -254,6 +248,12 @@ TBAG_CONSTEXPR const int INET6_ADDR_MAX_BYTE_SIZE = INET6_ADDRSTRLEN;
 #else
 TBAG_CONSTEXPR const int INET6_ADDR_MAX_BYTE_SIZE = 46;
 #endif
+
+TBAG_CONSTEXPR const int UNKNOWN_PORT_NUMBER = (-1);
+
+TBAG_API std::string getIpName(sockaddr     const * address);
+TBAG_API std::string getIpName(sockaddr_in  const * address);
+TBAG_API std::string getIpName(sockaddr_in6 const * address);
 
 TBAG_API int getPortNumber(sockaddr const * address);
 
