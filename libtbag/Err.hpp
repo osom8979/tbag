@@ -27,6 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_SUCCESS , "No error"              ) \
     _TBAG_XX(_ILLARGS , "Illegal arguments"     ) \
     _TBAG_XX(_ISTATE  , "Illegal state"         ) \
+    _TBAG_XX(_OORANGE , "Out of range"          ) \
     _TBAG_XX(_NULLPTR , "Null pointer exception") \
     _TBAG_XX(_EQUEUE  , "Empty queue"           ) \
     _TBAG_XX(_EBUFFER , "Empty buffer"          ) \
@@ -38,6 +39,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_SHUTDOWN, "Shutdown error"        ) \
     _TBAG_XX(_ENFOUND , "Not found error"       ) \
     _TBAG_XX(_TIMEOUT , "Timeout error"         ) \
+    _TBAG_XX(_PARING  , "Parsing error"         ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
