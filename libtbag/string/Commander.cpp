@@ -14,12 +14,21 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-Commander::Commander() : _default(nullptr)
+Commander::Commander() : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(nullptr)
 {
     // EMPTY.
 }
 
-Commander::Commander(Callback const & default_callback) : _default(default_callback)
+Commander::Commander(std::string const & prefix, std::string const & delimiter)
+        : _prefix(prefix), _delimiter(delimiter), _default(nullptr)
+{
+    // EMPTY.
+}
+
+Commander::Commander(Callback const & default_callback) :
+        _prefix(DEFAULT_PREFIX),
+        _delimiter(DEFAULT_DELIMITER),
+        _default(default_callback)
 {
     // EMPTY.
 }
@@ -42,8 +51,10 @@ Commander::~Commander()
 Commander & Commander::operator =(Commander const & obj)
 {
     if (this != &obj) {
-        _default = obj._default;
-        _commands = obj._commands;
+        _prefix    = obj._prefix;
+        _delimiter = obj._delimiter;
+        _default   = obj._default;
+        _commands  = obj._commands;
     }
     return *this;
 }
@@ -51,6 +62,8 @@ Commander & Commander::operator =(Commander const & obj)
 Commander & Commander::operator =(Commander && obj)
 {
     if (this != &obj) {
+        _prefix.swap(obj._prefix);
+        _delimiter.swap(obj._delimiter);
         _default.swap(obj._default);
         _commands.swap(obj._commands);
     }
@@ -59,6 +72,8 @@ Commander & Commander::operator =(Commander && obj)
 
 void Commander::clear()
 {
+    _prefix.clear();
+    _delimiter.clear();
     _default = Callback();
     _commands.clear();
 }
@@ -85,44 +100,68 @@ Commander::ArgsVector Commander::parseArguments(std::string const & arguments,
     return parseArguments(Flags(arguments, prefix, delimiter));
 }
 
-void Commander::request(ArgsVector const & args_vector)
+std::size_t Commander::request(ArgsVector const & args_vector)
 {
-    for (auto & cursor : args_vector) {
-        onRequest(cursor);
+    std::size_t const SIZE = args_vector.size();
+    std::size_t count = 0;
+
+    for (std::size_t index = 0; index < SIZE; ++index) {
+        Arguments const & arguments = args_vector[index];
+        bool const IS_CONSUMED = onRequest(index, SIZE, arguments);
+
+        if (IS_CONSUMED) {
+            continue;
+        }
+
+        auto itr = _commands.find(arguments.getName());
+        if (itr == _commands.end()) {
+            if (static_cast<bool>(_default)) {
+                _default(arguments);
+            }
+            continue;
+        }
+
+        if (static_cast<bool>(itr->second)) {
+            itr->second(arguments);
+        }
+        ++count;
     }
+
+    return count;
 }
 
-void Commander::request(Flags const & flags)
+std::size_t Commander::request(Flags const & flags)
 {
-    request(parseArguments(flags));
+    return request(parseArguments(flags));
 }
 
-void Commander::request(std::string const & arguments,
-                        std::string const & prefix,
-                        std::string const & delimiter)
+std::size_t Commander::request(std::string const & arguments, std::string const & prefix, std::string const & delimiter)
 {
-    request(parseArguments(arguments, prefix, delimiter));
+    return request(parseArguments(arguments, prefix, delimiter));
 }
 
-void Commander::request(int argc, char ** argv,
-                        std::string const & prefix,
-                        std::string const & delimiter)
+std::size_t Commander::request(std::string const & arguments)
+{
+    return request(parseArguments(arguments, _prefix, _delimiter));
+}
+
+std::size_t Commander::request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter)
 {
     std::stringstream ss;
     for (int i = 0; i < argc; ++i) {
         ss << argv[i] << ' ';
     }
-    request(ss.str(), prefix, delimiter);
+    return request(ss.str(), prefix, delimiter);
 }
 
-void Commander::onRequest(Arguments const & arguments)
+std::size_t Commander::request(int argc, char ** argv)
 {
-    auto find_itr = _commands.find(arguments.getName());
-    if (find_itr != _commands.end() && static_cast<bool>(find_itr->second)) {
-        find_itr->second(arguments);
-    } else if (static_cast<bool>(_default)) {
-        _default(arguments);
-    }
+    return request(argc, argv, _prefix, _delimiter);
+}
+
+bool Commander::onRequest(std::size_t index, std::size_t size, Arguments const & arguments)
+{
+    return false;
 }
 
 } // namespace string

@@ -15,7 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/string/Arguments.hpp>
 #include <libtbag/string/Flags.hpp>
 
@@ -36,24 +35,29 @@ namespace string {
  * @author zer0
  * @date   2016-10-01
  */
-class TBAG_API Commander : public Noncopyable
+class TBAG_API Commander
 {
 public:
-    using Callback    = std::function<void(Arguments const &)>;
+    using ArgsVector = std::vector<Arguments>;
+    using Callback   = std::function<void(Arguments const &)>;
+
     using CommandMap  = std::map<std::string, Callback>;
     using CommandPair = CommandMap::value_type;
-    using ArgsVector  = std::vector<Arguments>;
 
 public:
     TBAG_CONSTEXPR static char const * const DEFAULT_PREFIX = "--";
     TBAG_CONSTEXPR static char const * const DEFAULT_DELIMITER = "=";
 
 private:
+    std::string _prefix;
+    std::string _delimiter;
+
     Callback   _default;
     CommandMap _commands;
 
 public:
     Commander();
+    Commander(std::string const & prefix, std::string const & delimiter);
     Commander(Callback const & default_callback);
     Commander(Commander const & obj);
     Commander(Commander && obj);
@@ -64,36 +68,43 @@ public:
     Commander & operator =(Commander && obj);
 
 public:
-    inline bool empty() const TBAG_NOEXCEPT
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_commands.empty()))
     { return _commands.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT
+    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_commands.size()))
     { return _commands.size(); }
 
     inline void setDefaultCallback(Callback const & callback)
     { _default = callback; }
+
+    inline void setPrefix(std::string const & prefix) { _prefix = prefix; }
+    inline void setDelimiter(std::string const & delimiter) { _delimiter = delimiter; }
+
+    inline void setDefaultPrefix() { _prefix = DEFAULT_PREFIX; }
+    inline void setDefaultDelimiter() { _delimiter = DEFAULT_DELIMITER; }
+
+    inline std::string getPrefix() const { return _prefix; }
+    inline std::string getDelimiter() const { return _delimiter; }
 
 public:
     void clear();
     bool insert(std::string const & command, Callback const & callback);
 
 public:
-    ArgsVector parseArguments(Flags const & flags);
-    ArgsVector parseArguments(std::string const & arguments,
-                                          std::string const & prefix = DEFAULT_PREFIX,
-                                          std::string const & delimiter = DEFAULT_DELIMITER);
+    static ArgsVector parseArguments(Flags const & flags);
+    static ArgsVector parseArguments(std::string const & arguments,
+                                     std::string const & prefix = DEFAULT_PREFIX,
+                                     std::string const & delimiter = DEFAULT_DELIMITER);
 
 public:
-    void request(ArgsVector const & args_vector);
-    void request(Flags const & flags);
-    void request(std::string const & arguments,
-                 std::string const & prefix = DEFAULT_PREFIX,
-                 std::string const & delimiter = DEFAULT_DELIMITER);
-    void request(int argc, char ** argv,
-                 std::string const & prefix = DEFAULT_PREFIX,
-                 std::string const & delimiter = DEFAULT_DELIMITER);
+    std::size_t request(ArgsVector const & args_vector);
+    std::size_t request(Flags const & flags);
+    std::size_t request(std::string const & arguments, std::string const & prefix, std::string const & delimiter);
+    std::size_t request(std::string const & arguments);
+    std::size_t request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter);
+    std::size_t request(int argc, char ** argv);
 
 public:
-    virtual void onRequest(Arguments const & arguments);
+    virtual bool onRequest(std::size_t index, std::size_t size, Arguments const & arguments);
 };
 
 } // namespace string
