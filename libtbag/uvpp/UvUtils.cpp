@@ -82,27 +82,27 @@ ResourceUsage getResourceUsage()
         tDLogE("getResourceUsage() {} error", getUvErrorName(CODE));
     }
 
-    return ResourceUsage{
-            .utime.sec  = rusage.ru_utime.tv_sec,
-            .utime.usec = rusage.ru_utime.tv_usec,
-            .stime.sec  = rusage.ru_stime.tv_sec,
-            .stime.usec = rusage.ru_stime.tv_usec,
-            .maxrss     = rusage.ru_maxrss,
-            .ixrss      = rusage.ru_ixrss,
-            .idrss      = rusage.ru_idrss,
-            .isrss      = rusage.ru_isrss,
-            .minflt     = rusage.ru_minflt,
-            .majflt     = rusage.ru_majflt,
-            .nswap      = rusage.ru_nswap,
-            .inblock    = rusage.ru_inblock,
-            .oublock    = rusage.ru_oublock,
-            .msgsnd     = rusage.ru_msgsnd,
-            .msgrcv     = rusage.ru_msgrcv,
-            .nsignals   = rusage.ru_nsignals,
-            .nvcsw      = rusage.ru_nvcsw,
-            .nivcsw     = rusage.ru_nivcsw,
-    };
-};
+    ResourceUsage result;
+    result.utime.sec  = rusage.ru_utime.tv_sec;
+    result.utime.usec = rusage.ru_utime.tv_usec;
+    result.stime.sec  = rusage.ru_stime.tv_sec;
+    result.stime.usec = rusage.ru_stime.tv_usec;
+    result.maxrss     = rusage.ru_maxrss;
+    result.ixrss      = rusage.ru_ixrss;
+    result.idrss      = rusage.ru_idrss;
+    result.isrss      = rusage.ru_isrss;
+    result.minflt     = rusage.ru_minflt;
+    result.majflt     = rusage.ru_majflt;
+    result.nswap      = rusage.ru_nswap;
+    result.inblock    = rusage.ru_inblock;
+    result.oublock    = rusage.ru_oublock;
+    result.msgsnd     = rusage.ru_msgsnd;
+    result.msgrcv     = rusage.ru_msgrcv;
+    result.nsignals   = rusage.ru_nsignals;
+    result.nvcsw      = rusage.ru_nvcsw;
+    result.nivcsw     = rusage.ru_nivcsw;
+    return result;
+}
 
 std::vector<CpuInfo> getCpuInfos()
 {
