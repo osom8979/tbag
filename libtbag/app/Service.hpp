@@ -55,9 +55,6 @@ public:
     Err uninstall();
     Err start();
     Err stop();
-
-public:
-    int runService(std::string const & name);
 };
 
 } // namespace app

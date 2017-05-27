@@ -16,6 +16,18 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/Err.hpp>
+
+#include <libtbag/network/http/HttpServer.hpp>
+
+#include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/uvpp/UvUtils.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Tty.hpp>
+#include <libtbag/uvpp/Process.hpp>
+
+#include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,6 +44,9 @@ namespace tpot {
 struct TpotParams
 {
     bool enable_tty;
+
+    std::string server_bind;
+    int server_port;
 };
 
 /**
@@ -45,8 +60,26 @@ struct TpotParams
  */
 class TBAG_API TpotRunner final : public Noncopyable
 {
+public:
+    using Loop = uvpp::Loop;
+    using Tty  = uvpp::Tty;
+    using Proc = uvpp::Process;
+
+    using SharedTty  = std::shared_ptr<Tty>;
+    using SharedProc = std::shared_ptr<Proc>;
+
+    using HttpServer = network::http::HttpServer;
+    using SharedHttpServer = std::shared_ptr<HttpServer>;
+
 private:
     TpotParams _params;
+
+private:
+    Loop _loop;
+    SharedTty _stdin;
+    SharedTty _stdout;
+    SharedTty _stderr;
+    SharedHttpServer _server;
 
 public:
     TpotRunner(TpotParams const & params);

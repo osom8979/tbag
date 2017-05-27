@@ -19,6 +19,12 @@
 #include <cassert>
 #include <iostream>
 
+#define TPOT_MAIN_COMMAND_APP       "app"
+#define TPOT_MAIN_COMMAND_INSTALL   "install"
+#define TPOT_MAIN_COMMAND_UNINSTALL "uninstall"
+#define TPOT_MAIN_COMMAND_START     "start"
+#define TPOT_MAIN_COMMAND_STOP      "stop"
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -32,8 +38,11 @@ TBAG_CONSTEXPR static char const * const TPOT_MAIN_SYNOPSIS = ""
 
 TBAG_CONSTEXPR static char const * const TPOT_MAIN_REMARKS = "\n"
         "Command list:\n"
-        "app      Normal application mode. [DEFAULT]\n"
-        "service  Service(daemon) mode.\n"
+        TPOT_MAIN_COMMAND_APP "        Normal application mode. [DEFAULT]\n"
+        TPOT_MAIN_COMMAND_INSTALL "    Install service.\n"
+        TPOT_MAIN_COMMAND_UNINSTALL "  Uninstall service.\n"
+        TPOT_MAIN_COMMAND_START "      Start service.\n"
+        TPOT_MAIN_COMMAND_STOP "       Stop service.\n"
         "\n"
         "Configuration file:\n"
         "  When reading, the values are read from the system,\n"
@@ -42,18 +51,11 @@ TBAG_CONSTEXPR static char const * const TPOT_MAIN_REMARKS = "\n"
         "  can be used to tell the command to read from only that location\n"
         ""/* -- END -- */;
 
-TBAG_CONSTEXPR static char const * const TPOT_MAIN_COMMAND_APP = "app";
-TBAG_CONSTEXPR static char const * const TPOT_MAIN_COMMAND_SERVICE = "service";
-
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::Service(argc, argv, envs), _mode(RunningMode::APPLICATION),
           _help(false), _verbose(false), _unknown(false), _version(false)
 {
     _config_path = (res::TpotAsset::get_local_config() / res::TPOT_CONFIG_XML_FILE_NAME).getString();
-
-    using namespace libtbag::signal;
-    registerDefaultStdTerminateHandler();
-    registerDefaultHandler();
 
     initCommander(argc, argv);
     initConfig();
@@ -88,16 +90,18 @@ void TpotMain::initCommander(int argc, char ** argv)
 
         if (COMMAND == std::string(TPOT_MAIN_COMMAND_APP)) {
             _mode = RunningMode::APPLICATION;
-        } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_SERVICE)) {
-            _mode = RunningMode::SERVICE;
+        } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_INSTALL)) {
+            _mode = RunningMode::SERVICE_INSTALL;
+        } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_UNINSTALL)) {
+            _mode = RunningMode::SERVICE_UNINSTALL;
+        } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_START)) {
+            _mode = RunningMode::SERVICE_START;
+        } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_STOP)) {
+            _mode = RunningMode::SERVICE_STOP;
         } else {
             _unknown = true;
         }
         is_call_once = true;
-    });
-
-    _commander.insertHelpCommand([&](Arguments const & args){
-        _help = true;
     });
 
     _commander.insert("global", [&](Arguments const & args){
@@ -117,6 +121,9 @@ void TpotMain::initCommander(int argc, char ** argv)
         }
     }, "Use the given config file.", "{filename}");
 
+    _commander.insertHelpCommand([&](Arguments const & args){
+        _help = true;
+    });
     _commander.insert("verbose", [&](Arguments const & args){
         _verbose = true;
     }, "Be more verbose/talkative during the operation.");
@@ -140,10 +147,11 @@ void TpotMain::initConfig()
     config->loadOrDefaultSave(filesystem::Path(_config_path));
 }
 
-void TpotMain::onCreate()
+bool TpotMain::onCreate()
 {
     TpotLog * log = getTpotLogPointer();
     assert(log != nullptr);
+
     if (log->createLoggers() >= 1) {
         auto const NAMES = log->getNames();
         std::size_t const NAMES_SIZE = NAMES.size();
@@ -159,17 +167,30 @@ void TpotMain::onCreate()
 
     TpotNode * node = getTpotNodePointer();
     assert(node != nullptr);
+
     if (node != nullptr) {
         tDLogI("App::initConfig() Config (BIND: {}, PORT: {})", node->getBind(), node->getPort());
     } else {
         tDLogE("App::initConfig() Config is nullptr.");
+        return false;
     }
+
+    if (_mode == RunningMode::APPLICATION) {
+        libtbag::signal::registerDefaultStdTerminateHandler();
+        libtbag::signal::registerDefaultHandler();
+    } else {
+        // Service mode.
+    }
+
+    return true;
 }
 
 int TpotMain::onRunning()
 {
     TpotParams params;
-    params.enable_tty = (_mode != RunningMode::SERVICE);
+    params.enable_tty  = (_mode == RunningMode::APPLICATION);
+    params.server_bind = getTpotNodePointer()->getBind();
+    params.server_port = getTpotNodePointer()->getPort();
     return TpotRunner(params).run();
 }
 
@@ -191,18 +212,18 @@ int TpotMain::autoRun()
         return EXIT_SUCCESS;
     }
 
-    if (_mode == RunningMode::SERVICE) {
+    if (_mode == RunningMode::APPLICATION) {
         if (_verbose) {
-            std::cout << "Run service mode.\n";
+            std::cout << "Run application mode.\n";
         }
-        return runService(std::string(TPOT_SERVICE_NAME));
+        return run();
     }
 
-    assert(_mode == RunningMode::APPLICATION);
     if (_verbose) {
-        std::cout << "Run application mode.\n";
+        std::cout << "Run service mode.\n";
     }
-    return run();
+    //return runService(std::string(TPOT_SERVICE_NAME));
+    return EXIT_FAILURE;
 }
 
 TpotMain::TpotLog * TpotMain::getTpotLogPointer()

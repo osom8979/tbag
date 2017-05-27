@@ -72,7 +72,7 @@ public:
     int run();
 
 public:
-    virtual void onCreate () { /* EMPTY. */         }
+    virtual bool onCreate () { return true;         }
     virtual int  onRunning() { return EXIT_FAILURE; }
     virtual void onDestroy() { /* EMPTY. */         }
 };

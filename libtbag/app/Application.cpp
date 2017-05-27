@@ -82,9 +82,13 @@ char ** Application::getEnvs()
 
 int Application::run()
 {
-    onCreate();
+    if (onCreate() == false) {
+        return EXIT_FAILURE;
+    }
+
     int const EXIT_CODE = onRunning();
     onDestroy();
+
     return EXIT_CODE;
 }
 

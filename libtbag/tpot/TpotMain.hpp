@@ -52,7 +52,10 @@ public:
     enum class RunningMode
     {
         APPLICATION,
-        SERVICE,
+        SERVICE_INSTALL,
+        SERVICE_UNINSTALL,
+        SERVICE_START,
+        SERVICE_STOP,
     };
 
 private:
@@ -77,7 +80,7 @@ private:
     void initConfig();
 
 public:
-    virtual void onCreate () override;
+    virtual bool onCreate () override;
     virtual int  onRunning() override;
     virtual void onDestroy() override;
 

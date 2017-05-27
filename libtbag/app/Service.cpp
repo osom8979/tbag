@@ -97,14 +97,6 @@ Err Service::stop()
     return _service->stop();
 }
 
-int Service::runService(std::string const & name)
-{
-    onCreate();
-    int const EXIT_CODE = onRunning();
-    onDestroy();
-    return EXIT_CODE;
-}
-
 } // namespace app
 
 // --------------------
