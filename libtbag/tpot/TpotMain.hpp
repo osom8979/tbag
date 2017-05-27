@@ -86,7 +86,15 @@ public:
 
 public:
     /**
-     * Obtain the pointer of config node.
+     * Obtain the pointer of log config.
+     *
+     * @warning
+     *  This function is not thread safe.
+     */
+    static TpotLog * getTpotLogPointer();
+
+    /**
+     * Obtain the pointer of node config.
      *
      * @warning
      *  This function is not thread safe.

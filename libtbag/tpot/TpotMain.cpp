@@ -13,9 +13,11 @@
 #include <libtbag/util/Version.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <libtbag/tpot/res/TpotAsset.hpp>
+#include <libtbag/tpot/TpotRunner.hpp>
+
 #include <cassert>
 #include <iostream>
-#include <libtbag/tpot/res/TpotAsset.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -136,8 +138,11 @@ void TpotMain::initConfig()
     config->add(TpotConfig::SharedNode(new TpotNode()));
     config->add(TpotConfig::SharedNode(new TpotLog()));
     config->loadOrDefaultSave(filesystem::Path(_config_path));
+}
 
-    TpotLog * log = config->getPointer<TpotLog>();
+void TpotMain::onCreate()
+{
+    TpotLog * log = getTpotLogPointer();
     assert(log != nullptr);
     if (log->createLoggers() >= 1) {
         auto const NAMES = log->getNames();
@@ -152,7 +157,7 @@ void TpotMain::initConfig()
         tDLogI("TpotMain::initConfig() log->createLoggers() success ({}).", ss.str());
     }
 
-    TpotNode * node = config->getPointer<TpotNode>();
+    TpotNode * node = getTpotNodePointer();
     assert(node != nullptr);
     if (node != nullptr) {
         tDLogI("App::initConfig() Config (BIND: {}, PORT: {})", node->getBind(), node->getPort());
@@ -161,14 +166,11 @@ void TpotMain::initConfig()
     }
 }
 
-void TpotMain::onCreate()
-{
-    // EMPTY.
-}
-
 int TpotMain::onRunning()
 {
-    return EXIT_SUCCESS;
+    TpotParams params;
+    params.enable_tty = (_mode != RunningMode::SERVICE);
+    return TpotRunner(params).run();
 }
 
 void TpotMain::onDestroy()
@@ -201,6 +203,17 @@ int TpotMain::autoRun()
         std::cout << "Run application mode.\n";
     }
     return run();
+}
+
+TpotMain::TpotLog * TpotMain::getTpotLogPointer()
+{
+    using namespace libtbag::container;
+    using namespace libtbag::tpot::res;
+    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
+    if (auto shared = config.lock()) {
+        return shared->getPointer<TpotLog>();
+    }
+    return nullptr;
 }
 
 TpotMain::TpotNode * TpotMain::getTpotNodePointer()
