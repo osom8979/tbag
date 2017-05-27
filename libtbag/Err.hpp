@@ -27,6 +27,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_SUCCESS , "No error"              ) \
     _TBAG_XX(_ILLARGS , "Illegal arguments"     ) \
     _TBAG_XX(_ISTATE  , "Illegal state"         ) \
+    _TBAG_XX(_ALREADY , "Already state"         ) \
+    _TBAG_XX(_BADALLOC, "Bad allocation"         ) \
     _TBAG_XX(_OORANGE , "Out of range"          ) \
     _TBAG_XX(_NULLPTR , "Null pointer exception") \
     _TBAG_XX(_EQUEUE  , "Empty queue"           ) \

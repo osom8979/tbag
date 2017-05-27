@@ -24,6 +24,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
+TBAG_CONSTEXPR char const * const TPOT_SERVICE_NAME = "tpot";
+
 /**
  * TpotMain class prototype.
  *

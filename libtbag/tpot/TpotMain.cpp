@@ -125,7 +125,7 @@ int TpotMain::autoRun()
         if (_verbose) {
             std::cout << "Run service mode.\n";
         }
-        return runService();
+        return runService(std::string(TPOT_SERVICE_NAME));
     }
 
     assert(_mode == RunningMode::APPLICATION);

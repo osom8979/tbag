@@ -16,6 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/app/Application.hpp>
+#include <libtbag/app/details/ServiceInterface.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,13 +35,29 @@ namespace app {
 class TBAG_API Service : public Application
 {
 public:
+    using ServiceInterface = details::ServiceInterface;
+    using UniqueService    = std::unique_ptr<ServiceInterface>;
+
+private:
+    UniqueService _service;
+
+public:
     Service(int argc, char ** argv, char ** envs);
     Service(int argc, char ** argv);
     Service();
     virtual ~Service();
 
 public:
-    int runService();
+    Err createService(std::string const & name);
+
+public:
+    Err install();
+    Err uninstall();
+    Err start();
+    Err stop();
+
+public:
+    int runService(std::string const & name);
 };
 
 } // namespace app
