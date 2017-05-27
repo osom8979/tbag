@@ -18,6 +18,12 @@
 #include <libtbag/app/Service.hpp>
 #include <libtbag/string/HelpCommander.hpp>
 
+#include <libtbag/tpot/res/TpotConfig.hpp>
+#include <libtbag/tpot/res/TpotNode.hpp>
+#include <libtbag/tpot/res/TpotLog.hpp>
+
+#include <memory>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -32,10 +38,15 @@ TBAG_CONSTEXPR char const * const TPOT_SERVICE_NAME = "tpot";
  * @author zer0
  * @date   2017-05-13
  */
-class TBAG_API TpotMain final : app::Service
+class TBAG_API TpotMain final : public app::Service
 {
 public:
     using HelpCommander = string::HelpCommander;
+    using TpotLog  = res::TpotLog;
+    using TpotNode = res::TpotNode;
+
+    using WeakTpotLog  = std::weak_ptr<res::TpotLog>;
+    using WeakTpotNode = std::weak_ptr<res::TpotNode>;
 
 public:
     enum class RunningMode
@@ -49,6 +60,9 @@ private:
     RunningMode   _mode;
 
 private:
+    std::string _config_path;
+
+private:
     bool _help;
     bool _verbose;
     bool _unknown;
@@ -60,6 +74,7 @@ public:
 
 private:
     void initCommander(int argc, char ** argv);
+    void initConfig();
 
 public:
     virtual void onCreate() override;
@@ -68,6 +83,15 @@ public:
 
 public:
     int autoRun();
+
+public:
+    /**
+     * Obtain the pointer of config node.
+     *
+     * @warning
+     *  This function is not thread safe.
+     */
+    static TpotNode * getTpotNodePointer();
 };
 
 // ------------
