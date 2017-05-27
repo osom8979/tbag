@@ -51,11 +51,11 @@ public:
 public:
     enum class RunningMode
     {
-        APPLICATION,
-        SERVICE_INSTALL,
-        SERVICE_UNINSTALL,
-        SERVICE_START,
-        SERVICE_STOP,
+        RUN_APPLICATION,
+        RUN_INSTALL,
+        RUN_UNINSTALL,
+        RUN_START,
+        RUN_STOP,
     };
 
 private:

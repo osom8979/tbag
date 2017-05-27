@@ -114,7 +114,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
     for (auto & filter : _filters) {
         if (static_cast<bool>(filter.second.filter) && filter.second.filter->filter(request)) {
             if (static_cast<bool>(filter.second.request_cb)) {
-                filter.second.request_cb(code, request, response, timeout);
+                filter.second.request_cb(code, node, request, response, timeout);
             }
             called = true;
             break;
@@ -122,7 +122,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
     }
 
     if (called == false && static_cast<bool>(_request_cb)) {
-        _request_cb(code, request, response, timeout);
+        _request_cb(code, node, request, response, timeout); // Default request callback.
         called = true;
     }
 

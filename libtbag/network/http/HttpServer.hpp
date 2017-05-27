@@ -65,7 +65,7 @@ public:
     using Seconds     = std::chrono::seconds;
 
     using OnOpen    = std::function<void(WeakClient)>;
-    using OnRequest = std::function<void(Err, HttpParser const &, HttpBuilder &, uint64_t &)>;
+    using OnRequest = std::function<void(Err, WeakClient, HttpParser const &, HttpBuilder &, uint64_t &)>;
     using OnClose   = std::function<void(WeakClient)>;
 
     using SharedFilter = std::shared_ptr<HttpFilterInterface>;

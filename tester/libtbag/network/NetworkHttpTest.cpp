@@ -49,7 +49,7 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     server.setOnOpen([&](HttpServer::WeakClient node){
         ++on_open;
     });
-    server.setOnRequest([&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest([&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
         ++on_request;
         response.setStatus(200);
         response.setReason("OK");
@@ -161,7 +161,7 @@ TEST(NetworkHttpTest, RoutingServer)
         ++on_open;
     });
 
-    server.setOnRequest([&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest([&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
         std::cout << "Server.OnRequest()\n";
         ++on_request;
         response.setStatus(200);
@@ -169,7 +169,7 @@ TEST(NetworkHttpTest, RoutingServer)
         response.setBody(request.getMethodName() + request.getUrl());
         timeout = 1000;
     });
-    server.setOnRequest("/Documents", [&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest("/Documents", [&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
         std::cout << "Server.OnRequest(/Documents)\n";
         ++on_request_doc;
         response.setStatus(200);
@@ -177,7 +177,7 @@ TEST(NetworkHttpTest, RoutingServer)
         response.setBody(request.getMethodName() + request.getUrl());
         timeout = 1000;
     });
-    server.setOnRequest("GET", "/Downloads", [&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest("GET", "/Downloads", [&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
         std::cout << "Server.OnRequest([GET]/Downloads)\n";
         ++on_request_down_get;
         response.setStatus(200);
@@ -185,7 +185,7 @@ TEST(NetworkHttpTest, RoutingServer)
         response.setBody(request.getMethodName() + request.getUrl());
         timeout = 1000;
     });
-    server.setOnRequest("POST", "/Downloads", [&](Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest("POST", "/Downloads", [&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
         std::cout << "Server.OnRequest([POST]/Downloads)\n";
         ++on_request_down_post;
         response.setStatus(200);

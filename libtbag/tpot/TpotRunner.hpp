@@ -24,7 +24,6 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/Tty.hpp>
 #include <libtbag/uvpp/Process.hpp>
 
 #include <libtbag/string/Environments.hpp>
@@ -46,7 +45,8 @@ namespace tpot {
  */
 struct TpotParams
 {
-    bool enable_tty;
+    bool enable_service;
+    bool enable_verbose;
 
     std::string server_bind;
     int server_port;
@@ -65,10 +65,8 @@ class TBAG_API TpotRunner final : public Noncopyable
 {
 public:
     using Loop = uvpp::Loop;
-    using Tty  = uvpp::Tty;
     using Proc = uvpp::Process;
 
-    using SharedTty  = std::shared_ptr<Tty>;
     using SharedProc = std::shared_ptr<Proc>;
 
     using HttpParser  = network::http::HttpParser;
@@ -87,9 +85,6 @@ private:
 
 private:
     Loop _loop;
-    SharedTty _stdin;
-    SharedTty _stdout;
-    SharedTty _stderr;
     SharedHttpServer _server;
 
 public:
@@ -101,7 +96,9 @@ public:
 
 public:
     void onNodeOpen(Node node);
-    void onNodeRequest(Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
+    void onNodeRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
+    void onNodeExecRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
+    void onNodeKillRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
     void onNodeClose(Node node);
 };
 
