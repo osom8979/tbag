@@ -303,6 +303,22 @@ void * StreamClient::getUserData()
     return _client->getUserData();
 }
 
+std::string StreamClient::getDestination() const
+{
+    if (STREAM_TYPE == StreamType::TCP) {
+        return std::static_pointer_cast<uvpp::Tcp>(_client)->getPeerIp();
+    }
+    return std::string();
+}
+
+int StreamClient::getPort() const
+{
+    if (STREAM_TYPE == StreamType::TCP) {
+        return std::static_pointer_cast<uvpp::Tcp>(_client)->getPeerPort();
+    }
+    return 0;
+}
+
 void StreamClient::runBackendConnect(Err code)
 {
     _mutex.lock();

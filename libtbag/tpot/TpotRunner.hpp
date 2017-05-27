@@ -19,12 +19,15 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/http/HttpServer.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
 
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Tty.hpp>
 #include <libtbag/uvpp/Process.hpp>
+
+#include <libtbag/string/Environments.hpp>
 
 #include <memory>
 #include <string>
@@ -68,11 +71,19 @@ public:
     using SharedTty  = std::shared_ptr<Tty>;
     using SharedProc = std::shared_ptr<Proc>;
 
-    using HttpServer = network::http::HttpServer;
+    using HttpParser  = network::http::HttpParser;
+    using HttpBuilder = network::http::HttpBuilder;
+    using HttpServer  = network::http::HttpServer;
     using SharedHttpServer = std::shared_ptr<HttpServer>;
+
+    using Node = HttpServer::WeakClient;
+
+    using Environments = string::Environments;
+    using EnvFlag = Environments::Flag;
 
 private:
     TpotParams _params;
+    Environments _envs;
 
 private:
     Loop _loop;
@@ -87,6 +98,11 @@ public:
 
 public:
     int run();
+
+public:
+    void onNodeOpen(Node node);
+    void onNodeRequest(Err code, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
+    void onNodeClose(Node node);
 };
 
 } // namespace tpot

@@ -147,7 +147,7 @@ public:
     virtual WeakClient getClient(Id id) override;
 
 public:
-    virtual char const * getDestination() const override;
+    virtual std::string getDestination() const override;
     virtual int getPort() const override;
 
 public:

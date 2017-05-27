@@ -93,6 +93,9 @@ struct ClientInterface
 
     virtual void * getUserData() = 0;
 
+    virtual std::string getDestination() const = 0;
+    virtual int getPort() const = 0;
+
     virtual void runBackendConnect(Err code) = 0;
     virtual void runBackendShutdown(Err code) = 0;
     virtual void runBackendWrite(Err code) = 0;
@@ -130,7 +133,7 @@ struct ServerInterface
     virtual WeakClient accept() = 0;
     virtual WeakClient getClient(Id id) = 0;
 
-    virtual char const * getDestination() const = 0;
+    virtual std::string getDestination() const = 0;
     virtual int getPort() const = 0;
 
     virtual void runBackendConnection(Err code) = 0;

@@ -134,6 +134,10 @@ public:
     virtual void * getUserData() override;
 
 public:
+    virtual std::string getDestination() const override;
+    virtual int getPort() const override;
+
+public:
     template <typename Predicated>
     void updateUserData(Predicated predicated)
     {

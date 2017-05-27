@@ -140,9 +140,9 @@ bool StreamServer::init(char const * destination, int port)
     return is_init;
 }
 
-char const * StreamServer::getDestination() const
+std::string StreamServer::getDestination() const
 {
-    return _destination.c_str();
+    return _destination;
 }
 
 int StreamServer::getPort() const
