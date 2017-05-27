@@ -56,6 +56,7 @@ public:
         RUN_UNINSTALL,
         RUN_START,
         RUN_STOP,
+        RUN_REQUEST,
     };
 
 private:
@@ -80,13 +81,17 @@ private:
     void initConfig();
 
 public:
-    virtual bool onCreate () override;
-    virtual int  onRunning() override;
-    virtual void onDestroy() override;
-
-public:
     int autoRun();
 
+private:
+    int runRequest();
+    int runApplication();
+    int runServiceInstall();
+    int runServiceUninstall();
+    int runServiceStart();
+    int runServiceStop();
+
+// Static methods.
 public:
     /**
      * Obtain the pointer of log config.
@@ -103,6 +108,12 @@ public:
      *  This function is not thread safe.
      */
     static TpotNode * getTpotNodePointer();
+
+// Event methods.
+public:
+    virtual bool onCreate () override;
+    virtual int  onRunning() override;
+    virtual void onDestroy() override;
 };
 
 // ------------

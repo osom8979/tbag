@@ -14,6 +14,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/tpot/res/TpotAsset.hpp>
+#include <libtbag/tpot/client/TpotRequest.hpp>
 #include <libtbag/tpot/TpotRunner.hpp>
 
 #include <cassert>
@@ -24,6 +25,7 @@
 #define TPOT_MAIN_COMMAND_UNINSTALL "uninstall"
 #define TPOT_MAIN_COMMAND_START     "start"
 #define TPOT_MAIN_COMMAND_STOP      "stop"
+#define TPOT_MAIN_COMMAND_REQUEST   "request"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -43,6 +45,7 @@ TBAG_CONSTEXPR static char const * const TPOT_MAIN_REMARKS = "\n"
         TPOT_MAIN_COMMAND_UNINSTALL "  Uninstall service.\n"
         TPOT_MAIN_COMMAND_START "      Start service.\n"
         TPOT_MAIN_COMMAND_STOP "       Stop service.\n"
+        TPOT_MAIN_COMMAND_REQUEST "    Request mode.\n"
         "\n"
         "Configuration file:\n"
         "  When reading, the values are read from the system,\n"
@@ -98,6 +101,8 @@ void TpotMain::initCommander(int argc, char ** argv)
             _mode = RunningMode::RUN_START;
         } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_STOP)) {
             _mode = RunningMode::RUN_STOP;
+        } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_REQUEST)) {
+            _mode = RunningMode::RUN_REQUEST;
         } else {
             _unknown = true;
         }
@@ -137,6 +142,10 @@ void TpotMain::initCommander(int argc, char ** argv)
 
 void TpotMain::initConfig()
 {
+    if (_verbose) {
+        std::cout << "Config file path: " << _config_path << std::endl;
+    }
+
     using namespace libtbag::container;
     using namespace libtbag::tpot::res;
     auto config = Global::getInstance()->insertNewObject<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
@@ -144,8 +153,118 @@ void TpotMain::initConfig()
 
     config->add(TpotConfig::SharedNode(new TpotNode()));
     config->add(TpotConfig::SharedNode(new TpotLog()));
-    config->loadOrDefaultSave(filesystem::Path(_config_path));
+
+    bool const RESULT = config->loadOrDefaultSave(filesystem::Path(_config_path));
+    if (RESULT == false) {
+        std::cout << "config.loadOrDefaultSave() failure.\n";
+    }
 }
+
+int TpotMain::autoRun()
+{
+    if (_help || _unknown) {
+        std::cout << _commander.help() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if (_version) {
+        using namespace libtbag::util;
+        std::cout << getTbagVersion().toString() << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    // @formatter:off
+    switch (_mode) {
+    case RunningMode::RUN_REQUEST:      return runRequest();
+    case RunningMode::RUN_APPLICATION:  return runApplication();
+    case RunningMode::RUN_INSTALL:      return runServiceInstall();
+    case RunningMode::RUN_UNINSTALL:    return runServiceUninstall();
+    case RunningMode::RUN_START:        return runServiceStart();
+    case RunningMode::RUN_STOP:         return runServiceStop();
+    }
+    // @formatter:on
+
+    assert(false && "Unknown mode.");
+    return EXIT_FAILURE;
+}
+
+int TpotMain::runRequest()
+{
+    if (_verbose) {
+        std::cout << "Run request mode.\n";
+    }
+    return client::runTpotRequestWithInteractiveMode();
+}
+
+int TpotMain::runApplication()
+{
+    if (_verbose) {
+        std::cout << "Run application mode.\n";
+    }
+    return run();
+}
+
+int TpotMain::runServiceInstall()
+{
+    if (_verbose) {
+        std::cout << "Run service install mode.\n";
+    }
+    return EXIT_FAILURE;
+}
+
+int TpotMain::runServiceUninstall()
+{
+    if (_verbose) {
+        std::cout << "Run service uninstall mode.\n";
+    }
+    return EXIT_FAILURE;
+}
+
+int TpotMain::runServiceStart()
+{
+    if (_verbose) {
+        std::cout << "Run service start mode.\n";
+    }
+    return EXIT_FAILURE;
+}
+
+int TpotMain::runServiceStop()
+{
+    if (_verbose) {
+        std::cout << "Run service stop mode.\n";
+    }
+    return EXIT_FAILURE;
+}
+
+// ---------------
+// Static methods.
+// ---------------
+
+TpotMain::TpotLog * TpotMain::getTpotLogPointer()
+{
+    using namespace libtbag::container;
+    using namespace libtbag::tpot::res;
+    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
+    if (auto shared = config.lock()) {
+        return shared->getPointer<TpotLog>();
+    }
+    return nullptr;
+}
+
+TpotMain::TpotNode * TpotMain::getTpotNodePointer()
+{
+    using namespace libtbag::container;
+    using namespace libtbag::tpot::res;
+    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
+    if (auto shared = config.lock()) {
+        return shared->getPointer<TpotNode>();
+    }
+    return nullptr;
+}
+
+// --------------
+// Event methods.
+// --------------
 
 bool TpotMain::onCreate()
 {
@@ -180,8 +299,6 @@ bool TpotMain::onCreate()
     if (_mode == RunningMode::RUN_APPLICATION) {
         libtbag::signal::registerDefaultStdTerminateHandler();
         libtbag::signal::registerDefaultHandler();
-    } else {
-        // Service mode.
     }
 
     return true;
@@ -204,55 +321,6 @@ int TpotMain::onRunning()
 void TpotMain::onDestroy()
 {
     tDLogD("TpotMain::onDestroy()");
-}
-
-int TpotMain::autoRun()
-{
-    if (_help || _unknown) {
-        std::cout << _commander.help() << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    if (_version) {
-        using namespace libtbag::util;
-        std::cout << getTbagVersion().toString() << std::endl;
-        return EXIT_SUCCESS;
-    }
-
-    if (_mode == RunningMode::RUN_APPLICATION) {
-        if (_verbose) {
-            std::cout << "Run application mode.\n";
-        }
-        return run();
-    }
-
-    if (_verbose) {
-        std::cout << "Run service mode.\n";
-    }
-    //return runService(std::string(TPOT_SERVICE_NAME));
-    return EXIT_FAILURE;
-}
-
-TpotMain::TpotLog * TpotMain::getTpotLogPointer()
-{
-    using namespace libtbag::container;
-    using namespace libtbag::tpot::res;
-    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
-    if (auto shared = config.lock()) {
-        return shared->getPointer<TpotLog>();
-    }
-    return nullptr;
-}
-
-TpotMain::TpotNode * TpotMain::getTpotNodePointer()
-{
-    using namespace libtbag::container;
-    using namespace libtbag::tpot::res;
-    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
-    if (auto shared = config.lock()) {
-        return shared->getPointer<TpotNode>();
-    }
-    return nullptr;
 }
 
 // ------------
