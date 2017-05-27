@@ -52,6 +52,7 @@ private:
     bool _help;
     bool _verbose;
     bool _unknown;
+    bool _version;
 
 public:
     TpotMain(int argc, char ** argv, char ** envs);

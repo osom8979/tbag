@@ -7,7 +7,9 @@
 
 #include <libtbag/tpot/TpotMain.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/util/Version.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -40,7 +42,7 @@ TBAG_CONSTEXPR static char const * const TPOT_MAIN_COMMAND_SERVICE = "service";
 
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::Service(argc, argv, envs), _mode(RunningMode::APPLICATION),
-          _help(false), _verbose(false), _unknown(false)
+          _help(false), _verbose(false), _unknown(false), _version(false)
 {
     initCommander(argc, argv);
 }
@@ -53,6 +55,14 @@ TpotMain::~TpotMain()
 void TpotMain::initCommander(int argc, char ** argv)
 {
     using namespace libtbag::string;
+    using namespace libtbag::log;
+    using namespace libtbag::signal;
+
+    createDefaultColorConsoleLogger();
+    setDefaultSeverity(libtbag::log::DEBUG_SEVERITY);
+
+    registerDefaultStdTerminateHandler();
+    registerDefaultHandler();
 
     _commander.setSynopsis(TPOT_MAIN_SYNOPSIS);
     _commander.setRemarks(TPOT_MAIN_REMARKS);
@@ -63,10 +73,17 @@ void TpotMain::initCommander(int argc, char ** argv)
             _unknown = true;
             return;
         }
-        std::string const cmd = libtbag::string::lower(args.get(0));
-        if (cmd == std::string(TPOT_MAIN_COMMAND_APP)) {
+
+        if (args.empty()) {
+            // Skip if not found arguments.
+            _unknown = true;
+            return;
+        }
+        std::string const COMMAND = libtbag::string::lower(args.get(0));
+
+        if (COMMAND == std::string(TPOT_MAIN_COMMAND_APP)) {
             _mode = RunningMode::APPLICATION;
-        } else if (cmd == std::string(TPOT_MAIN_COMMAND_SERVICE)) {
+        } else if (COMMAND == std::string(TPOT_MAIN_COMMAND_SERVICE)) {
             _mode = RunningMode::SERVICE;
         } else {
             _unknown = true;
@@ -94,6 +111,9 @@ void TpotMain::initCommander(int argc, char ** argv)
     _commander.insert("verbose", [&](Arguments const & args){
         _verbose = true;
     }, "Be more verbose/talkative during the operation.");
+    _commander.insert("version", [&](Arguments const & args){
+        _version = true;
+    }, "print the tpot(tbag) version number and exit.");
 
     bool const IGNORE_FIRST = true;
     _commander.request(argc, argv, IGNORE_FIRST);
@@ -101,7 +121,6 @@ void TpotMain::initCommander(int argc, char ** argv)
 
 void TpotMain::onCreate()
 {
-    // EMPTY.
 }
 
 void TpotMain::onRunning()
@@ -119,6 +138,12 @@ int TpotMain::autoRun()
     if (_help || _unknown) {
         std::cout << _commander.help() << std::endl;
         return EXIT_FAILURE;
+    }
+
+    if (_version) {
+        using namespace libtbag::util;
+        std::cout << getTbagVersion().toString() << std::endl;
+        return EXIT_SUCCESS;
     }
 
     if (_mode == RunningMode::SERVICE) {
