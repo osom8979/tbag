@@ -80,31 +80,12 @@ char ** Application::getEnvs()
     return nullptr;
 }
 
-void Application::setExitCode(int code)
-{
-    if (auto shared = getProperty().lock()) {
-        shared->exit_code = code;
-    }
-    assert(false && "Expired properties.");
-}
-
-int Application::getExitCode()
-{
-    if (auto shared = getProperty().lock()) {
-        return shared->exit_code;
-    }
-    assert(false && "Expired properties.");
-    return EXIT_FAILURE;
-}
-
 int Application::run()
 {
     onCreate();
-    onRunning();
+    int const EXIT_CODE = onRunning();
     onDestroy();
-
-    assert(static_cast<bool>(_property));
-    return _property->exit_code;
+    return EXIT_CODE;
 }
 
 } // namespace app

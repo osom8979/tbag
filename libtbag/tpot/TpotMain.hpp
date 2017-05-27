@@ -77,8 +77,8 @@ private:
     void initConfig();
 
 public:
-    virtual void onCreate() override;
-    virtual void onRunning() override;
+    virtual void onCreate () override;
+    virtual int  onRunning() override;
     virtual void onDestroy() override;
 
 public:

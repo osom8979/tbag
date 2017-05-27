@@ -28,6 +28,7 @@ WindowsService::~WindowsService()
 Err WindowsService::install()
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif
@@ -36,6 +37,7 @@ Err WindowsService::install()
 Err WindowsService::uninstall()
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif
@@ -44,6 +46,7 @@ Err WindowsService::uninstall()
 Err WindowsService::start()
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif
@@ -52,6 +55,7 @@ Err WindowsService::start()
 Err WindowsService::stop()
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif

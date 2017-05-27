@@ -100,10 +100,9 @@ Err Service::stop()
 int Service::runService(std::string const & name)
 {
     onCreate();
-    onRunning();
+    int const EXIT_CODE = onRunning();
     onDestroy();
-
-    return getExitCode();
+    return EXIT_CODE;
 }
 
 } // namespace app

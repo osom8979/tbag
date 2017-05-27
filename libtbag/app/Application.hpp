@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Global.hpp>
 
+#include <cstdlib>
 #include <memory>
 
 // -------------------
@@ -40,8 +41,6 @@ public:
         int argc;
         char ** argv;
         char ** envs;
-
-        int exit_code;
     };
 
     using SharedProperty = std::shared_ptr<Property>;
@@ -70,16 +69,12 @@ public:
     static char ** getEnvs();
 
 public:
-    static void setExitCode(int code);
-    static int getExitCode();
-
-public:
     int run();
 
 public:
-    virtual void onCreate() { /* EMPTY. */ }
-    virtual void onRunning() { /* EMPTY. */ }
-    virtual void onDestroy() { /* EMPTY. */ }
+    virtual void onCreate () { /* EMPTY. */         }
+    virtual int  onRunning() { return EXIT_FAILURE; }
+    virtual void onDestroy() { /* EMPTY. */         }
 };
 
 } // namespace app

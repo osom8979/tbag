@@ -163,11 +163,12 @@ void TpotMain::initConfig()
 
 void TpotMain::onCreate()
 {
+    // EMPTY.
 }
 
-void TpotMain::onRunning()
+int TpotMain::onRunning()
 {
-    // EMPTY.
+    return EXIT_SUCCESS;
 }
 
 void TpotMain::onDestroy()

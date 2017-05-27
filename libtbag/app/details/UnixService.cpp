@@ -28,6 +28,7 @@ UnixService::~UnixService()
 Err UnixService::install()
 {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif
@@ -36,6 +37,7 @@ Err UnixService::install()
 Err UnixService::uninstall()
 {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif
@@ -44,6 +46,7 @@ Err UnixService::uninstall()
 Err UnixService::start()
 {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif
@@ -52,6 +55,7 @@ Err UnixService::start()
 Err UnixService::stop()
 {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
+    return Err::E_ENOSYS;
 #else
     return Err::E_ENOSYS;
 #endif
