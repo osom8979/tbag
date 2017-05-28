@@ -74,7 +74,7 @@ struct ResponseResult
     { return result.status == 200; }
 };
 
-struct Exec : public JsonBodyInterface, public ResponseResult, public ExecPath
+struct TBAG_API Exec : public JsonBodyInterface, public ResponseResult, public ExecPath
 {
     TBAG_CONSTEXPR static char const * const getRequestFile() TBAG_NOEXCEPT { return "file"; }
     TBAG_CONSTEXPR static char const * const getRequestCwd () TBAG_NOEXCEPT { return  "cwd"; }
@@ -106,7 +106,7 @@ struct Exec : public JsonBodyInterface, public ResponseResult, public ExecPath
     virtual Err fromResponseJsonString(std::string const & json) override;
 };
 
-struct Heartbit : public JsonBodyInterface, public ResponseResult, public HeartbitPath
+struct TBAG_API Heartbit : public JsonBodyInterface, public ResponseResult, public HeartbitPath
 {
     virtual Err toRequestJsonString(std::string & json) override;
     virtual Err toResponseJsonString(std::string & json) override;
@@ -114,7 +114,7 @@ struct Heartbit : public JsonBodyInterface, public ResponseResult, public Heartb
     virtual Err fromResponseJsonString(std::string const & json) override;
 };
 
-struct List : public JsonBodyInterface, public ResponseResult, public ListPath
+struct TBAG_API List : public JsonBodyInterface, public ResponseResult, public ListPath
 {
     TBAG_CONSTEXPR static char const * const getResponseIds() TBAG_NOEXCEPT { return "ids"; /* JSON ARRAY. */ }
 
@@ -128,7 +128,7 @@ struct List : public JsonBodyInterface, public ResponseResult, public ListPath
     virtual Err fromResponseJsonString(std::string const & json) override;
 };
 
-struct Kill : public JsonBodyInterface, public ResponseResult, public KillPath
+struct TBAG_API Kill : public JsonBodyInterface, public ResponseResult, public KillPath
 {
     TBAG_CONSTEXPR static char const * const getRequestId() TBAG_NOEXCEPT { return "id"; }
 
@@ -142,7 +142,7 @@ struct Kill : public JsonBodyInterface, public ResponseResult, public KillPath
     virtual Err fromResponseJsonString(std::string const & json) override;
 };
 
-}; // namespace structure
+} // namespace structure
 } // namespace tpot
 
 // --------------------
