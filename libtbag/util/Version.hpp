@@ -109,7 +109,7 @@ public:
 
 public:
     Err fromString(std::string const & version);
-    std::string toString();
+    std::string toString() const;
 
 public:
     static Err fromString(std::string const & version, Version & result);

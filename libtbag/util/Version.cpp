@@ -82,7 +82,7 @@ Err Version::fromString(std::string const & version)
     return fromString(version, *this);
 }
 
-std::string Version::toString()
+std::string Version::toString() const
 {
     return toString(*this);
 }
