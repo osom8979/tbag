@@ -23,6 +23,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <array>
 #include <regex>
 #include <thread>
 #include <type_traits>
@@ -97,6 +98,16 @@ TBAG_API char convertHalfByteToHexChar(uint8_t half_byte);
 TBAG_API std::string convertByteToHexString(uint8_t hex);
 TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix = "0x", std::string const & separator = "");
 
+TBAG_CONSTEXPR std::size_t const HEX_STRING_ADDRESS_BYTE_SIZE =
+        (/*PREFIX(0x)*/2) + (sizeof(void*) * 2/*HEX STRING ADDRESS*/) + (1/*NULL*/);
+using AddressHexString = std::array<char, HEX_STRING_ADDRESS_BYTE_SIZE>;
+
+/**
+ * Address to HEX string.
+ */
+TBAG_API AddressHexString convertAddressToHexString(void const * address) TBAG_NOEXCEPT;
+TBAG_API std::string convertAddressHexStringToString(AddressHexString const & address);
+
 /**
  * Regex based token.
  */
@@ -118,14 +129,6 @@ TBAG_API bool createRandomString(char * buffer, std::size_t size);
 
 TBAG_API std::string lower(std::string const & str);
 TBAG_API std::string upper(std::string const & str);
-
-// -----------------------
-// UTF-8 STRING UTILITIES.
-// -----------------------
-
-namespace utf8 {
-
-} // namespace utf8
 
 } // namespace string
 

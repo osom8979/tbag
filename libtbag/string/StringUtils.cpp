@@ -155,6 +155,35 @@ std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std:
     return result;
 }
 
+TBAG_CONSTEXPR char const TBAG_HEX_ARRAY_BYTES[] = "0123456789ABCDEF";
+
+AddressHexString convertAddressToHexString(void const * address) TBAG_NOEXCEPT
+{
+    auto addr = reinterpret_cast<std::make_unsigned<std::ptrdiff_t>::type>(address);
+    std::size_t const SIZE = sizeof(void*);
+
+    AddressHexString result = {"0x"};
+    result.back() = '\0';
+    char * rend = result.data() + SIZE * 2 + 1;
+
+    for (std::size_t i = 0; i < SIZE; ++i) {
+        *rend = TBAG_HEX_ARRAY_BYTES[(addr & 0xFFu) & 0xF];
+        --rend;
+
+        *rend = TBAG_HEX_ARRAY_BYTES[(addr & 0xFFu) >> 4];
+        --rend;
+
+        addr >>= 8;
+    }
+    return result;
+}
+
+std::string convertAddressHexStringToString(AddressHexString const & address)
+{
+    assert(address.back() == '\0');
+    return std::string(address.begin(), address.end() - (1/*NULL*/));
+}
+
 std::vector<std::string> splitMatch(std::string const & source, std::regex const & match)
 {
     using TokenIterator = std::regex_token_iterator<typename std::string::const_iterator>;

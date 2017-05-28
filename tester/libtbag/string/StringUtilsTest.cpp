@@ -11,6 +11,7 @@
 
 #include <cctype>
 #include <algorithm>
+#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::string;
@@ -188,5 +189,24 @@ TEST(StringsTest, TranslateCase)
 {
     ASSERT_EQ(std::string("abcdefg1234"), string::lower("abcdEFG1234"));
     ASSERT_EQ(std::string("ABCDEFG1234"), string::upper("abcdEFG1234"));
+}
+
+TEST(StringsTest, ConvertAddressToHexString)
+{
+    void * temp1 = nullptr;
+    int    temp2 = 0;
+
+    auto result1 = convertAddressToHexString(temp1);
+    auto result2 = convertAddressToHexString(&temp2);
+
+    auto str1 = convertAddressHexStringToString(result1);
+    auto str2 = convertAddressHexStringToString(result2);
+
+    std::cout << "HEX Address 01: " << str1 << std::endl;
+    std::cout << "HEX Address 02: " << str2 << std::endl;
+
+    std::string const REGEX = std::string("^0x[0-9A-F]+$");
+    ASSERT_TRUE(isMatch(str1, REGEX));
+    ASSERT_TRUE(isMatch(str2, REGEX));
 }
 
