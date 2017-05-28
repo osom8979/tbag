@@ -3,6 +3,8 @@
  * @brief  HttpProperty class prototype.
  * @author zer0
  * @date   2017-05-20
+ *
+ * @see <https://tools.ietf.org/html/rfc2616>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPROPERTY_HPP__
@@ -39,8 +41,10 @@ TBAG_CONSTEXPR char const * const CRLF = "\r\n";
 
 /**
  * @defgroup __DOXYGEN_GROUP__HTTP_HEADER__ List of http headers.
+ * @see <https://en.wikipedia.org/wiki/List_of_HTTP_header_fields>
  * @{
  */
+
 TBAG_CONSTEXPR char const * const HEADER_HOST = "Host";
 TBAG_CONSTEXPR char const * const HEADER_SERVER = "Server";
 TBAG_CONSTEXPR char const * const HEADER_USER_AGENT = "User-Agent";
@@ -48,32 +52,36 @@ TBAG_CONSTEXPR char const * const HEADER_ACCEPT = "Accept";
 TBAG_CONSTEXPR char const * const HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 TBAG_CONSTEXPR char const * const HEADER_CONTENT_TYPE = "Content-Type";
 TBAG_CONSTEXPR char const * const HEADER_CONTENT_LENGTH = "Content-Length";
+
 /**
  * @}
  */
 
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_SERVER = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_CONTENT_TYPE = "text/html; charset=utf-8";
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT = LIBTBAG_TITLE_STRING LIBTBAG_VERSION_STRING;
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT = "*/*";
+TBAG_CONSTEXPR char const * const DEFAULT_SERVER_INFO =
+         LIBTBAG_TITLE_STRING "/" LIBTBAG_VERSION_STRING;
+
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_SERVER            = DEFAULT_SERVER_INFO;
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_CONTENT_TYPE      = "text/html; charset=utf-8";
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT        = DEFAULT_SERVER_INFO;
+TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT            = "*/*";
 TBAG_CONSTEXPR char const * const HEADER_DEFAULT_TRANSFER_ENCODING = "identity";
 
 TBAG_CONSTEXPR int const TBAG_UNKNOWN_HTTP_METHOD = -1;
 
 #ifndef TBAG_HTTP_METHOD_MAP
 #define TBAG_HTTP_METHOD_MAP(_TBAG_XX)      \
-    _TBAG_XX(0,  DELETE,      DELETE)       \
-    _TBAG_XX(1,  GET,         GET)          \
-    _TBAG_XX(2,  HEAD,        HEAD)         \
-    _TBAG_XX(3,  POST,        POST)         \
-    _TBAG_XX(4,  PUT,         PUT)          \
+    _TBAG_XX( 0, DELETE,      DELETE)       \
+    _TBAG_XX( 1, GET,         GET)          \
+    _TBAG_XX( 2, HEAD,        HEAD)         \
+    _TBAG_XX( 3, POST,        POST)         \
+    _TBAG_XX( 4, PUT,         PUT)          \
     /* pathological */                      \
-    _TBAG_XX(5,  CONNECT,     CONNECT)      \
-    _TBAG_XX(6,  OPTIONS,     OPTIONS)      \
-    _TBAG_XX(7,  TRACE,       TRACE)        \
+    _TBAG_XX( 5, CONNECT,     CONNECT)      \
+    _TBAG_XX( 6, OPTIONS,     OPTIONS)      \
+    _TBAG_XX( 7, TRACE,       TRACE)        \
     /* WebDAV */                            \
-    _TBAG_XX(8,  COPY,        COPY)         \
-    _TBAG_XX(9,  LOCK,        LOCK)         \
+    _TBAG_XX( 8, COPY,        COPY)         \
+    _TBAG_XX( 9, LOCK,        LOCK)         \
     _TBAG_XX(10, MKCOL,       MKCOL)        \
     _TBAG_XX(11, MOVE,        MOVE)         \
     _TBAG_XX(12, PROPFIND,    PROPFIND)     \
@@ -118,6 +126,11 @@ enum class HttpMethod : int
     TBAG_HTTP_METHOD_MAP(_TBAG_XX)
 #undef _TBAG_XX
 };
+
+#define _TBAG_XX(num, name, str) \
+    struct HttpMethod##name { TBAG_CONSTEXPR static char const * const getMethod() TBAG_NOEXCEPT { return #name; } };
+    TBAG_HTTP_METHOD_MAP(_TBAG_XX)
+#undef _TBAG_XX
 
 static_assert(static_cast<int>(HttpMethod::M_UNKNOWN) == TBAG_UNKNOWN_HTTP_METHOD,
               "Unknown HTTP Method number is not equals.");
