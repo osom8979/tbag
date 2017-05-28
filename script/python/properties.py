@@ -10,8 +10,8 @@ import re
 ## Path & Directory setting.
 #THIS_FILE_PATH  = os.path.abspath(main.__file__) # import __main__ as main
 THIS_FILE_PATH   = os.path.realpath(__file__)
-TOOLS_DIR        = os.path.dirname(THIS_FILE_PATH)
-PROJECT_DIR      = os.path.normpath(TOOLS_DIR + '/..')
+SCRIPT_DIR       = os.path.dirname(THIS_FILE_PATH)
+PROJECT_DIR      = os.path.normpath(SCRIPT_DIR + '/../..')
 SOURCE_DIR       = os.path.normpath(PROJECT_DIR + '/')
 TEST_DIR         = os.path.normpath(PROJECT_DIR + '/tester')
 TEMPLATE_DIR     = os.path.normpath(PROJECT_DIR + '/template')

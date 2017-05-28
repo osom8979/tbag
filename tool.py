@@ -11,7 +11,7 @@ import __main__ as main
 from optparse import OptionParser
 
 # Project packages.
-import tools
+import script.python as tools
 
 SCRIPT_PATH = os.path.abspath(main.__file__)
 RUNTIME_DIR = os.path.dirname(SCRIPT_PATH)
