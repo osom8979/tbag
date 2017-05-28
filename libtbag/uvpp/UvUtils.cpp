@@ -222,9 +222,15 @@ Password getPassword()
     }
 
     Password result;
-    result.username.assign(pwd.username);
-    result.shell.assign(pwd.shell);
-    result.homedir.assign(pwd.homedir);
+    if (pwd.username != nullptr) {
+        result.username.assign(pwd.username);
+    }
+    if (pwd.shell != nullptr) {
+        result.shell.assign(pwd.shell);
+    }
+    if (pwd.homedir != nullptr) {
+        result.homedir.assign(pwd.homedir);
+    }
     result.uid = pwd.uid;
     result.gid = pwd.gid;
 
