@@ -102,10 +102,10 @@ public:
     }
 
     inline friend bool operator <=(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    { return lh == rh || lh < rh; }
+    { return !(lh > rh); }
 
     inline friend bool operator >=(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    { return lh == rh || lh > rh; }
+    { return !(lh < rh); }
 
 public:
     Err fromString(std::string const & version);
