@@ -144,11 +144,11 @@ Err Exec::fromResponseJsonString(std::string const & json)
         return Err::E_PARING;
     }
 
-    if (root[getResponseId()].isUInt64() == false) {
+    if (root[getResponseId()].isInt() == false) {
         return Err::E_PARING;
     }
 
-    response.id = root[getResponseId()].asUInt64();
+    response.id = root[getResponseId()].asInt();
     return Err::E_SUCCESS;
 }
 
@@ -222,8 +222,8 @@ Err List::fromResponseJsonString(std::string const & json)
     int const SIZE = root[getResponseIds()].size();
     response.ids.resize(static_cast<std::size_t>(SIZE));
     for (int i = 0; i < SIZE; ++i) {
-        if (root[getResponseIds()][i].isUInt64()) {
-            response.ids[i] = root[getResponseIds()][i].asUInt64();
+        if (root[getResponseIds()][i].isInt()) {
+            response.ids[i] = root[getResponseIds()][i].asInt();
         } else {
             response.ids[i] = 0;
         }
@@ -262,11 +262,11 @@ Err Kill::fromRequestJsonString(std::string const & json)
         return Err::E_PARING;
     }
 
-    if (root[getRequestId()].isUInt64() == false) {
+    if (root[getRequestId()].isInt() == false) {
         return Err::E_PARING;
     }
 
-    request.id = root[getRequestId()].asUInt64();
+    request.id = root[getRequestId()].asInt();
     return Err::E_SUCCESS;
 }
 

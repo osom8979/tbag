@@ -66,7 +66,7 @@ struct JsonBodyInterface : public JsonAcceptHeader
 struct ResponseResult
 {
     struct {
-        uint32_t status;
+        int32_t status;
     } result;
 
     /** if HTTP Status code is 200(OK). */
@@ -97,7 +97,7 @@ struct Exec : public JsonBodyInterface, public ResponseResult, public ExecPath
     TBAG_CONSTEXPR static char const * const getResponseId() TBAG_NOEXCEPT { return "id"; }
 
     struct {
-        uint64_t id;
+        int32_t id;
     } response;
 
     virtual Err toRequestJsonString(std::string & json) override;
@@ -119,7 +119,7 @@ struct List : public JsonBodyInterface, public ResponseResult, public ListPath
     TBAG_CONSTEXPR static char const * const getResponseIds() TBAG_NOEXCEPT { return "ids"; /* JSON ARRAY. */ }
 
     struct {
-        std::vector<uint64_t> ids;
+        std::vector<int32_t> ids;
     } response;
 
     virtual Err toRequestJsonString(std::string & json) override;
@@ -133,7 +133,7 @@ struct Kill : public JsonBodyInterface, public ResponseResult, public KillPath
     TBAG_CONSTEXPR static char const * const getRequestId() TBAG_NOEXCEPT { return "id"; }
 
     struct {
-        uint64_t id;
+        int32_t id;
     } request;
 
     virtual Err toRequestJsonString(std::string & json) override;

@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cstdlib>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -22,9 +23,33 @@ TpotRequest::TpotRequest()
     // EMPTY.
 }
 
+TpotRequest::TpotRequest(TpotRequest const & obj)
+{
+    (*this) = obj;
+}
+
+TpotRequest::TpotRequest(TpotRequest && obj)
+{
+    (*this) = std::move(obj);
+}
+
 TpotRequest::~TpotRequest()
 {
     // EMPTY.
+}
+
+TpotRequest & TpotRequest::operator =(TpotRequest const & obj)
+{
+    if (this != &obj) {
+    }
+    return *this;
+}
+
+TpotRequest & TpotRequest::operator =(TpotRequest && obj)
+{
+    if (this != &obj) {
+    }
+    return *this;
 }
 
 // ------------
