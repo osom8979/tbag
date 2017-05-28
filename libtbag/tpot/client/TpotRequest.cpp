@@ -6,10 +6,11 @@
  */
 
 #include <libtbag/tpot/client/TpotRequest.hpp>
+#include <libtbag/tpot/structure/TpotProtocol.hpp>
+#include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <cstdlib>
-#include <utility>
+#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -18,46 +19,43 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tpot   {
 namespace client {
 
-TpotRequest::TpotRequest()
-{
-    // EMPTY.
-}
-
-TpotRequest::TpotRequest(TpotRequest const & obj)
-{
-    (*this) = obj;
-}
-
-TpotRequest::TpotRequest(TpotRequest && obj)
-{
-    (*this) = std::move(obj);
-}
-
-TpotRequest::~TpotRequest()
-{
-    // EMPTY.
-}
-
-TpotRequest & TpotRequest::operator =(TpotRequest const & obj)
-{
-    if (this != &obj) {
-    }
-    return *this;
-}
-
-TpotRequest & TpotRequest::operator =(TpotRequest && obj)
-{
-    if (this != &obj) {
-    }
-    return *this;
-}
-
-// ------------
-// Entry-point.
-// ------------
-
 int runTpotRequestWithInteractiveMode()
 {
+    using namespace libtbag::network::http;
+    using namespace libtbag::tpot::structure;
+
+    char const * const TEST_REQUEST_JSON = R"({
+"file": "/bin/ls",
+"args": ["-l", "-a"],
+"envs": ["CLICOLOR=1"]
+})";
+
+    Exec obj;
+    if (obj.fromRequestJsonString(TEST_REQUEST_JSON) != Err::E_SUCCESS) {
+        std::cout << "Json parsing error.\n";
+        return EXIT_FAILURE;
+    }
+
+    std::string json;
+    if (obj.toRequestJsonString(json) != Err::E_SUCCESS) {
+        std::cout << "Json convert error.\n";
+        return EXIT_FAILURE;
+    }
+
+    HttpRequest request;
+    request.insertHeader(obj.getAcceptKey(), obj.getAcceptValue());
+    request.method = obj.getMethod();
+    request.body = json;
+    std::string const URI = std::string("http://localhost:2100") + obj.getPath();
+
+    HttpResponse response;
+    if (requestWithSync(URI, request, 1000, response) != Err::E_SUCCESS) {
+        std::cout << "requestWithSync error.\n";
+        return EXIT_FAILURE;
+    }
+
+    std::cout << "> Status code: " << response.status << std::endl;
+    std::cout << "> Body: " << response.body << std::endl;
     return EXIT_SUCCESS;
 }
 

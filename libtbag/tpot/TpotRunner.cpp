@@ -136,6 +136,8 @@ void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & reque
     options.uid  = body.request.uid;
     options.gid  = body.request.gid;
 
+    tDLogN("TpotRunner::onNodeExecRequest(ID:{}) File: {}", shared->getId(), options.file);
+
     auto proc = _loop.newHandle<Proc>(_loop, options);
     if (static_cast<bool>(proc) == false) {
         response.setStatus(500);
