@@ -67,6 +67,7 @@ public:
     using OnOpen    = std::function<void(WeakClient)>;
     using OnRequest = std::function<void(Err, WeakClient, HttpParser const &, HttpBuilder &, uint64_t &)>;
     using OnClose   = std::function<void(WeakClient)>;
+    using OnServerClose = std::function<void(void)>;
 
     using SharedFilter = std::shared_ptr<HttpFilterInterface>;
 
@@ -98,9 +99,11 @@ public:
     };
 
 private:
-    OnOpen    _open_cb;
-    OnRequest _request_cb;
-    OnOpen    _close_cb;
+    OnOpen        _open_cb;
+    OnRequest     _request_cb;
+    OnClose       _close_cb;
+    OnServerClose _server_close_cb;
+
     FilterMap _filters;
 
 public:
@@ -109,9 +112,10 @@ public:
 
 public:
     // @formatter:off
-    inline void setOnOpen   (OnOpen    const & cb) { _open_cb    = cb; }
-    inline void setOnRequest(OnRequest const & cb) { _request_cb = cb; }
-    inline void setOnClose  (OnClose   const & cb) { _close_cb   = cb; }
+    inline void setOnOpen       (OnOpen        const & cb) { _open_cb         = cb; }
+    inline void setOnRequest    (OnRequest     const & cb) { _request_cb      = cb; }
+    inline void setOnClose      (OnClose       const & cb) { _close_cb        = cb; }
+    inline void setOnServerClose(OnServerClose const & cb) { _server_close_cb = cb; }
     // @formatter:on
 
 public:

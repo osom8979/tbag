@@ -165,7 +165,9 @@ void HttpServer::onClientWrite(WeakClient node, Err code)
 
 void HttpServer::onServerClose()
 {
-    // EMPTY.
+    if (static_cast<bool>(_server_close_cb)) {
+        _server_close_cb();
+    }
 }
 
 void * HttpServer::onClientUserDataAlloc(WeakClient node)
