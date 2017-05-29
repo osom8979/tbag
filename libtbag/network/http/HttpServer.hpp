@@ -69,24 +69,22 @@ public:
     using OnClose   = std::function<void(WeakClient)>;
     using OnServerClose = std::function<void(void)>;
 
-    using SharedFilter = std::shared_ptr<HttpFilterInterface>;
+    using UniqueHttpFilterInterface = std::unique_ptr<HttpFilterInterface>;
 
 public:
-    struct FilterContainer
+    struct Filter
     {
-        SharedFilter filter;
+        UniqueHttpFilterInterface http_filter;
         OnRequest request_cb;
 
-        FilterContainer()
-        { /* EMPTY. */ }
-        FilterContainer(SharedFilter f, OnRequest const & cb) : filter(f), request_cb(cb)
-        { /* EMPTY. */ }
-        FilterContainer(HttpFilterInterface * f, OnRequest const & cb) : filter(f), request_cb(cb)
+        Filter(HttpFilterInterface * f, OnRequest const & cb) : http_filter(f), request_cb(cb)
         { /* EMPTY. */ }
     };
 
-    using FilterMap  = std::multimap<int, FilterContainer>;
-    using FilterPair = FilterMap::value_type;
+    using SharedFilter = std::shared_ptr<Filter>;
+    using Order        = int;
+    using FilterMap    = std::multimap<Order, SharedFilter>;
+    using FilterPair   = FilterMap::value_type;
 
 public:
     struct ClientData
@@ -119,9 +117,10 @@ public:
     // @formatter:on
 
 public:
-    void setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, int priority = 0);
-    void setOnRequest(std::string const & regex_path, OnRequest const & cb, int priority = 0);
-    void setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, int priority = 0);
+    void setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, Order priority = 0);
+    void setOnRequest(std::string const & regex_path, OnRequest const & cb, Order priority = 0);
+    void setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, Order priority = 0);
+    void setOnRequest(SharedFilter filter, Order priority = 0);
 
 public:
     virtual void onConnection(Err code) override;

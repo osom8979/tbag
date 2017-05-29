@@ -48,15 +48,21 @@ class TBAG_API HttpDefaultFilter : public HttpFilterInterface
 {
 private:
     std::string _method;
-    std::regex _regex;
+    std::regex  _regex;
 
 public:
     HttpDefaultFilter();
     HttpDefaultFilter(std::string const & method, std::string const & regex);
     HttpDefaultFilter(std::string const & method, std::regex const & regex);
     HttpDefaultFilter(std::string const & regex);
-    HttpDefaultFilter(std::regex const & regex);
+    HttpDefaultFilter(std::regex  const & regex);
+    HttpDefaultFilter(HttpDefaultFilter const & obj);
+    HttpDefaultFilter(HttpDefaultFilter && obj);
     virtual ~HttpDefaultFilter();
+
+public:
+    HttpDefaultFilter & operator =(HttpDefaultFilter const & obj);
+    HttpDefaultFilter & operator =(HttpDefaultFilter && obj);
 
 public:
     virtual bool filter(HttpParser const & request) override;

@@ -27,19 +27,24 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
-void HttpServer::setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, int priority)
+void HttpServer::setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, Order priority)
 {
     setOnRequest(new (std::nothrow) HttpDefaultFilter(method, regex_path), cb);
 }
 
-void HttpServer::setOnRequest(std::string const & regex_path, OnRequest const & cb, int priority)
+void HttpServer::setOnRequest(std::string const & regex_path, OnRequest const & cb, Order priority)
 {
     setOnRequest(new (std::nothrow) HttpDefaultFilter(regex_path), cb);
 }
 
-void HttpServer::setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, int priority)
+void HttpServer::setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, Order priority)
 {
-    _filters.insert(FilterPair(priority, FilterContainer(filter, cb)));
+    setOnRequest(SharedFilter(new (std::nothrow) Filter(filter, cb)), priority);
+}
+
+void HttpServer::setOnRequest(SharedFilter filter, Order priority)
+{
+    _filters.insert(FilterPair(priority, filter));
 }
 
 void HttpServer::onConnection(Err code)
@@ -111,14 +116,21 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
     uint64_t timeout = 25000U;
     bool called = false;
 
-    for (auto & filter : _filters) {
-        if (static_cast<bool>(filter.second.filter) && filter.second.filter->filter(request)) {
-            if (static_cast<bool>(filter.second.request_cb)) {
-                filter.second.request_cb(code, node, request, response, timeout);
-            }
-            called = true;
-            break;
+    for (auto & f : _filters) {
+        Order order = f.first;
+        SharedFilter shared = f.second;
+
+        if (static_cast<bool>(shared) == false || static_cast<bool>(shared->http_filter) == false) {
+            continue;
         }
+        if (shared->http_filter->filter(request) == false) {
+            continue;
+        }
+        if (static_cast<bool>(shared->request_cb)) {
+            shared->request_cb(code, node, request, response, timeout);
+        }
+        called = true;
+        break;
     }
 
     if (called == false && static_cast<bool>(_request_cb)) {
