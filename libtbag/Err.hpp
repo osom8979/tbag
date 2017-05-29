@@ -28,7 +28,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ILLARGS , "Illegal arguments"     ) \
     _TBAG_XX(_ISTATE  , "Illegal state"         ) \
     _TBAG_XX(_ALREADY , "Already state"         ) \
-    _TBAG_XX(_BADALLOC, "Bad allocation"         ) \
+    _TBAG_XX(_BADALLOC, "Bad allocation"        ) \
     _TBAG_XX(_OORANGE , "Out of range"          ) \
     _TBAG_XX(_NULLPTR , "Null pointer exception") \
     _TBAG_XX(_EQUEUE  , "Empty queue"           ) \
@@ -42,6 +42,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ENFOUND , "Not found error"       ) \
     _TBAG_XX(_TIMEOUT , "Timeout error"         ) \
     _TBAG_XX(_PARING  , "Parsing error"         ) \
+    _TBAG_XX(_EXPIRED , "Expired error"         ) \
+    _TBAG_XX(_INSERT  , "Insert error"          ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

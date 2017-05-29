@@ -24,7 +24,7 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/Process.hpp>
+#include <libtbag/uvpp/func/FuncProcess.hpp>
 
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/tpot/structure/TpotProtocol.hpp>
@@ -67,21 +67,23 @@ class TBAG_API TpotRunner final : public Noncopyable
 {
 public:
     using Loop = uvpp::Loop;
-    using Proc = uvpp::Process;
+    using Proc = uvpp::func::FuncProcess<uvpp::Process>;
 
     using SharedProc = std::shared_ptr<Proc>;
-    using ProcMap    = std::map<int, SharedProc>;
+    using Pid        = int;
+    using ProcMap    = std::map<Pid, SharedProc>;
     using ProcPair   = ProcMap::value_type;
 
-    using Exec = structure::Exec;
-    using Hbit = structure::Heartbit;
-    using List = structure::List;
-    using Kill = structure::Kill;
+    using ExecParser = structure::Exec;
+    using HbitParser = structure::Heartbit;
+    using ListParser = structure::List;
+    using KillParser = structure::Kill;
 
     using HttpParser  = network::http::HttpParser;
     using HttpBuilder = network::http::HttpBuilder;
     using HttpServer  = network::http::HttpServer;
     using SharedHttpServer = std::shared_ptr<HttpServer>;
+    using Id = HttpServer::Id;
 
     using Node = HttpServer::WeakClient;
 
@@ -89,17 +91,15 @@ public:
     using EnvFlag = Environments::Flag;
 
 private:
-    TpotParams _params;
-    ProcMap _procs;
-
-private:
+    TpotParams   _params;
     Environments _envs;
-    std::string _body_4xx;
-    std::string _body_5xx;
+    std::string  _body_4xx;
+    std::string  _body_5xx;
 
 private:
     Loop _loop;
     SharedHttpServer _server;
+    ProcMap _procs;
 
 public:
     TpotRunner(TpotParams const & params);
@@ -112,6 +112,7 @@ public:
     void onNodeOpen (Node node);
     void onNodeClose(Node node);
 
+// HTTP Request callback.
 public:
 #ifndef _TPOT_RUNNER_REQUEST_PARAMS
 #define _TPOT_RUNNER_REQUEST_PARAMS \
@@ -123,6 +124,16 @@ public:
     void onNodeListRequest    (_TPOT_RUNNER_REQUEST_PARAMS);
     void onNodeHeartbitRequest(_TPOT_RUNNER_REQUEST_PARAMS);
 #undef _TPOT_RUNNER_REQUEST_PARAMS
+
+private:
+    Err execProcess(std::string const & body, HttpBuilder & response);
+    Err killProcess(std::string const & body, HttpBuilder & response);
+    Err listProcess(std::string const & body, HttpBuilder & response);
+
+// Process callback.
+public:
+    void onExitProcess(Pid id, int64_t exit_status, int term_signal);
+    void onCloseProcess(Pid id);
 };
 
 } // namespace tpot
