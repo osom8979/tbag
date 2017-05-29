@@ -73,10 +73,10 @@ public:
     using ProcMap    = std::map<int, SharedProc>;
     using ProcPair   = ProcMap::value_type;
 
-    using Exec     = structure::Exec;
-    using Heartbit = structure::Heartbit;
-    using List     = structure::List;
-    using Kill     = structure::Kill;
+    using Exec = structure::Exec;
+    using Hbit = structure::Heartbit;
+    using List = structure::List;
+    using Kill = structure::Kill;
 
     using HttpParser  = network::http::HttpParser;
     using HttpBuilder = network::http::HttpBuilder;
@@ -90,8 +90,12 @@ public:
 
 private:
     TpotParams _params;
-    Environments _envs;
     ProcMap _procs;
+
+private:
+    Environments _envs;
+    std::string _body_4xx;
+    std::string _body_5xx;
 
 private:
     Loop _loop;
@@ -105,13 +109,20 @@ public:
     int run();
 
 public:
-    void onNodeOpen(Node node);
-    void onNodeRequest        (Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
-    void onNodeExecRequest    (Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
-    void onNodeKillRequest    (Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
-    void onNodeListRequest    (Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
-    void onNodeHeartbitRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout);
+    void onNodeOpen (Node node);
     void onNodeClose(Node node);
+
+public:
+#ifndef _TPOT_RUNNER_REQUEST_PARAMS
+#define _TPOT_RUNNER_REQUEST_PARAMS \
+    Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout
+#endif
+    void onNodeRequest        (_TPOT_RUNNER_REQUEST_PARAMS);
+    void onNodeExecRequest    (_TPOT_RUNNER_REQUEST_PARAMS);
+    void onNodeKillRequest    (_TPOT_RUNNER_REQUEST_PARAMS);
+    void onNodeListRequest    (_TPOT_RUNNER_REQUEST_PARAMS);
+    void onNodeHeartbitRequest(_TPOT_RUNNER_REQUEST_PARAMS);
+#undef _TPOT_RUNNER_REQUEST_PARAMS
 };
 
 } // namespace tpot

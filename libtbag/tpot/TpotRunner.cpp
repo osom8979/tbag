@@ -19,23 +19,25 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
-TBAG_CONSTEXPR char const * const DEFAULT_HTML_BODY = R"HTML(
+TBAG_CONSTEXPR char const * const DEFAULT_HTML_BAD_REQUEST_BODY = R"HTML(
 <html>
-<head>
-    <title>${title}</title>
-</head>
-<body>
-    <h2>${title}</h2>
-    <p>Now running...</p>
-</body>
+<head><title>${title}</title></head>
+<body><h2>${title}</h2><p>Bad Request</p></body>
 </html>
 )HTML";
 
-TBAG_CONSTEXPR char const * const NOT_FOUND_BODY = "NOT_FOUND";
+TBAG_CONSTEXPR char const * const DEFAULT_HTML_INTERNAL_SERVER_ERROR_BODY = R"HTML(
+<html>
+<head><title>${title}</title></head>
+<body><h2>${title}</h2><p>Internal Server Error</p></body>
+</html>
+)HTML";
 
 TpotRunner::TpotRunner(TpotParams const & params) : _params(params)
 {
     _envs.push(EnvFlag("title", std::string(LIBTBAG_MAIN_TITLE)));
+    _body_4xx = _envs.convert(std::string(DEFAULT_HTML_BAD_REQUEST_BODY));
+    _body_5xx = _envs.convert(std::string(DEFAULT_HTML_INTERNAL_SERVER_ERROR_BODY));
 }
 
 TpotRunner::~TpotRunner()
@@ -52,15 +54,22 @@ int TpotRunner::run()
     }
 
     using namespace std::placeholders;
-    _server->setOnOpen   (std::bind(&TpotRunner::onNodeOpen   , this, _1));
-    _server->setOnRequest(std::bind(&TpotRunner::onNodeRequest, this, _1, _2, _3, _4, _5));
-    _server->setOnClose  (std::bind(&TpotRunner::onNodeClose  , this, _1));
+    _server->setOnOpen   (std::bind(&TpotRunner::onNodeOpen , this, _1));
+    _server->setOnClose  (std::bind(&TpotRunner::onNodeClose, this, _1));
 
-    _server->setOnRequest(    Exec::getMethod(),     Exec::getPath(), std::bind(&TpotRunner::onNodeExecRequest    , this, _1, _2, _3, _4, _5));
-    _server->setOnRequest(    Kill::getMethod(),     Kill::getPath(), std::bind(&TpotRunner::onNodeKillRequest    , this, _1, _2, _3, _4, _5));
-    _server->setOnRequest(    List::getMethod(),     List::getPath(), std::bind(&TpotRunner::onNodeListRequest    , this, _1, _2, _3, _4, _5));
-    _server->setOnRequest(Heartbit::getMethod(), Heartbit::getPath(), std::bind(&TpotRunner::onNodeHeartbitRequest, this, _1, _2, _3, _4, _5));
+    auto const func_common   = std::bind(&TpotRunner::onNodeRequest        , this, _1, _2, _3, _4, _5);
+    auto const func_exec     = std::bind(&TpotRunner::onNodeExecRequest    , this, _1, _2, _3, _4, _5);
+    auto const func_kill     = std::bind(&TpotRunner::onNodeKillRequest    , this, _1, _2, _3, _4, _5);
+    auto const func_list     = std::bind(&TpotRunner::onNodeListRequest    , this, _1, _2, _3, _4, _5);
+    auto const func_heartbit = std::bind(&TpotRunner::onNodeHeartbitRequest, this, _1, _2, _3, _4, _5);
 
+    _server->setOnRequest(Exec::getMethod(), Exec::getPath(), func_exec);
+    _server->setOnRequest(Kill::getMethod(), Kill::getPath(), func_kill);
+    _server->setOnRequest(List::getMethod(), List::getPath(), func_list);
+    _server->setOnRequest(Hbit::getMethod(), Hbit::getPath(), func_heartbit);
+    _server->setOnRequest(func_common);
+
+    tDLogN("TpoT is run!");
     Err const RESULT = _loop.run();
     if (RESULT != Err::E_SUCCESS) {
         return EXIT_FAILURE;
@@ -74,57 +83,52 @@ int TpotRunner::run()
 
 void TpotRunner::onNodeOpen(Node node)
 {
-    auto shared = node.lock();
-    if (static_cast<bool>(shared) == false) {
+    if (auto shared = node.lock()) {
+        tDLogN("TpotRunner::onNodeOpen(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
+    } else {
         tDLogE("TpotRunner::onNodeOpen() Expired client.");
-        return;
     }
-    tDLogN("TpotRunner::onNodeOpen(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
 }
+
+void TpotRunner::onNodeClose(Node node)
+{
+    if (auto shared = node.lock()) {
+        tDLogN("TpotRunner::onNodeClose(ID:{})", shared->getId());
+    } else {
+        tDLogE("TpotRunner::onNodeOpen() Expired client.");
+    }
+}
+
+// ----------------------
+// HTTP Request callback.
+// ----------------------
+
+#ifndef _TPOT_RUNNER_CHECK_ERROR
+#define _TPOT_RUNNER_CHECK_ERROR(prefix, code, node, shared)                                       \
+    auto shared = node.lock();                                                                     \
+    if (static_cast<bool>(shared) == false) { tDLogE(prefix " Expired client."); return; }         \
+    if (code != Err::E_SUCCESS) { tDLogE(prefix " {} error.", getErrName(code)); return; }         \
+    tDLogN(prefix " [ID:{}] {}:{}", shared->getId(), shared->getDestination(), shared->getPort()); \
+    /* END */
+#endif
 
 void TpotRunner::onNodeRequest(Err code, Node node, HttpParser const & request,
                                HttpBuilder & response, uint64_t & timeout)
 {
-    auto shared = node.lock();
-    if (static_cast<bool>(shared) == false) {
-        tDLogE("TpotRunner::onNodeRequest() Expired client.");
-        return;
-    }
-
-    if (code != Err::E_SUCCESS) {
-        return;
-    }
-
-    tDLogN("TpotRunner::onNodeRequest(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
-
-    response.setStatus(200);
-    response.setReason("OK");
-    response.setBody(_envs.convert(std::string(DEFAULT_HTML_BODY)));
+    _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeRequest()", code, node, shared);
+    response.setStatus(network::http::HttpStatus::SC_NOT_FOUND);
+    response.setBody(_body_4xx);
 }
 
-void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & request,
+                                   HttpBuilder & response, uint64_t & timeout)
 {
-    auto shared = node.lock();
-    if (static_cast<bool>(shared) == false) {
-        tDLogE("TpotRunner::onNodeExecRequest() Expired client.");
-        return;
-    }
-
-    if (code != Err::E_SUCCESS) {
-        tDLogE("TpotRunner::onNodeExecRequest() {} error.", getErrName(code));
-        return;
-    }
-
-    tDLogN("TpotRunner::onNodeExecRequest(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
-
-    response.setStatus(404);
-    response.setReason("Not found");
-    response.setBody(NOT_FOUND_BODY);
+    _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeExecRequest()", code, node, shared);
 
     Exec body;
     if (body.fromRequestJsonString(request.getBody()) != Err::E_SUCCESS) {
-        response.setStatus(400);
-        response.setReason("Bad Request");
+        response.setStatus(network::http::HttpStatus::SC_BAD_REQUEST);
+        response.setBody(_body_4xx);
         return;
     }
 
@@ -140,14 +144,14 @@ void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & reque
 
     auto proc = _loop.newHandle<Proc>(_loop, options);
     if (static_cast<bool>(proc) == false) {
-        response.setStatus(500);
-        response.setReason("Internal Server Error");
+        response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
+        response.setBody(_body_5xx);
         return;
     }
 
     if (_procs.insert(ProcPair(proc->getPid(), proc)).second == false) {
-        response.setStatus(500);
-        response.setReason("Internal Server Error");
+        response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
+        response.setBody(_body_5xx);
         return;
     }
 
@@ -155,79 +159,57 @@ void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & reque
 
     std::string json;
     if (body.toResponseJsonString(json) != Err::E_SUCCESS) {
-        response.setStatus(500);
-        response.setReason("Internal Server Error");
+        response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
+        response.setBody(_body_5xx);
         return;
     }
 
-    response.setStatus(200);
-    response.setReason("OK");
+    response.setStatus(network::http::HttpStatus::SC_OK);
     response.setBody(json);
 }
 
-void TpotRunner::onNodeKillRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeKillRequest(Err code, Node node, HttpParser const & request,
+                                   HttpBuilder & response, uint64_t & timeout)
 {
-    auto shared = node.lock();
-    if (static_cast<bool>(shared) == false) {
-        tDLogE("TpotRunner::onNodeKillRequest() Expired client.");
-        return;
-    }
-
-    if (code != Err::E_SUCCESS) {
-        tDLogE("TpotRunner::onNodeKillRequest() {} error.", getErrName(code));
-        return;
-    }
-
-    tDLogN("TpotRunner::onNodeKillRequest(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
+    _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeKillRequest()", code, node, shared);
 
     Kill body;
     if (body.fromRequestJsonString(request.getBody()) != Err::E_SUCCESS) {
-        response.setStatus(400);
-        response.setReason("Bad Request");
+        response.setStatus(network::http::HttpStatus::SC_BAD_REQUEST);
+        response.setBody(_body_4xx);
         return;
     }
 
     auto itr = _procs.find(body.request.id);
     if (itr == _procs.end()) {
-        response.setStatus(404);
-        response.setReason("Not Found");
+        response.setStatus(network::http::HttpStatus::SC_NOT_FOUND);
+        response.setBody(_body_4xx);
         return;
     }
 
     if (static_cast<bool>(itr->second) == false) {
-        response.setStatus(500);
-        response.setReason("Internal Server Error");
+        response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
+        response.setBody(_body_5xx);
         return;
     }
 
     Err const RESULT_CODE = itr->second->processKill(signal::SIGNAL_TERMINATION);
     if (RESULT_CODE != Err::E_SUCCESS) {
-        response.setStatus(500);
-        response.setReason("Internal Server Error");
+        response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
+        response.setBody(_body_5xx);
         return;
     }
 
     itr->second->close();
     _procs.erase(itr);
 
-    response.setStatus(200);
-    response.setReason("OK");
+    response.setStatus(network::http::HttpStatus::SC_OK);
 }
 
-void TpotRunner::onNodeListRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeListRequest(Err code, Node node, HttpParser const & request,
+                                   HttpBuilder & response, uint64_t & timeout)
 {
-    auto shared = node.lock();
-    if (static_cast<bool>(shared) == false) {
-        tDLogE("TpotRunner::onNodeListRequest() Expired client.");
-        return;
-    }
-
-    if (code != Err::E_SUCCESS) {
-        tDLogE("TpotRunner::onNodeListRequest() {} error.", getErrName(code));
-        return;
-    }
-
-    tDLogN("TpotRunner::onNodeListRequest(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
+    _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeListRequest()", code, node, shared);
 
     List body;
     for (auto & cursor : _procs) {
@@ -237,42 +219,19 @@ void TpotRunner::onNodeListRequest(Err code, Node node, HttpParser const & reque
 
     std::string json;
     if (body.toResponseJsonString(json) == Err::E_SUCCESS) {
-        response.setStatus(200);
-        response.setReason("OK");
+        response.setStatus(network::http::HttpStatus::SC_OK);
         response.setBody(json);
     } else {
-        response.setStatus(500);
-        response.setReason("Internal Server Error");
+        response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
+        response.setBody(_body_5xx);
     }
 }
 
-void TpotRunner::onNodeHeartbitRequest(Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeHeartbitRequest(Err code, Node node, HttpParser const & request,
+                                       HttpBuilder & response, uint64_t & timeout)
 {
-    auto shared = node.lock();
-    if (static_cast<bool>(shared) == false) {
-        tDLogE("TpotRunner::onNodeHeartbitRequest() Expired client.");
-        return;
-    }
-
-    if (code != Err::E_SUCCESS) {
-        tDLogE("TpotRunner::onNodeHeartbitRequest() {} error.", getErrName(code));
-        return;
-    }
-
-    tDLogN("TpotRunner::onNodeHeartbitRequest(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
-
-    response.setStatus(200);
-    response.setReason("OK");
-}
-
-void TpotRunner::onNodeClose(Node node)
-{
-    auto shared = node.lock();
-    if (static_cast<bool>(shared) == false) {
-        tDLogE("TpotRunner::onNodeOpen() Expired client.");
-        return;
-    }
-    tDLogN("TpotRunner::onNodeClose(ID:{})", shared->getId());
+    _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeHeartbitRequest()", code, node, shared);
+    response.setStatus(network::http::HttpStatus::SC_OK);
 }
 
 } // namespace tpot
