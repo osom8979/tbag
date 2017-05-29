@@ -10,11 +10,14 @@ import sys
 import __main__ as main
 from optparse import OptionParser
 
-# Project packages.
-import script.python as tools
-
 SCRIPT_PATH = os.path.abspath(main.__file__)
 RUNTIME_DIR = os.path.dirname(SCRIPT_PATH)
+SCRIPT_DIR  = os.path.join(RUNTIME_DIR, 'script')
+
+sys.path.insert(0, SCRIPT_DIR)
+
+# Project packages.
+import pytools as tools
 
 TEMPLATE_DIR = os.path.join(RUNTIME_DIR, 'template')
 
