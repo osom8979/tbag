@@ -128,6 +128,9 @@ public:
     inline HttpBuilder & setMethod(std::string const & val)
     { _property.method = val; return *this; }
 
+    inline HttpBuilder & setMethod(HttpMethod val)
+    { _property.setMethod(val); return *this; }
+
     inline HttpBuilder & setUrl(std::string const & val)
     { _property.url = val;  return *this; }
 
@@ -138,6 +141,9 @@ public:
     { _property.status = val; return *this; }
 
     inline HttpBuilder & setStatus(std::string const & val)
+    { _property.setStatus(val); return *this; }
+
+    inline HttpBuilder & setStatus(HttpStatus val)
     { _property.setStatus(val); return *this; }
 
 public:

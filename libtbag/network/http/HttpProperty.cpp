@@ -54,6 +54,36 @@ HttpMethod getHttpMethod(std::string const & name)
     return HttpMethod::M_UNKNOWN;
 }
 
+HttpStatus getHttpStatus(int status) TBAG_NOEXCEPT
+{
+    switch (status) {
+#define _TBAG_XX(code, name, reason) case static_cast<int>(HttpStatus::SC_##name): return HttpStatus::SC_##name;
+    TBAG_HTTP_STATUS_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return HttpStatus::SC_UNKNOWN;
+    }
+}
+
+char const * getHttpStatusReason(HttpStatus status) TBAG_NOEXCEPT
+{
+    switch (status) {
+#define _TBAG_XX(code, name, reason) case HttpStatus::SC_##name: return reason;
+    TBAG_HTTP_STATUS_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return "Unknown status code";
+    }
+}
+
+int getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT
+{
+    switch (status) {
+#define _TBAG_XX(code, name, reason) case HttpStatus::SC_##name: return code;
+    TBAG_HTTP_STATUS_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return static_cast<int>(HttpStatus::SC_UNKNOWN);
+    }
+}
+
 } // namespace http
 } // namespace network
 
