@@ -1,12 +1,12 @@
 /**
- * @file   FuncProcess.hpp
- * @brief  FuncProcess class prototype.
+ * @file   FuncTimer.hpp
+ * @brief  FuncTimer class prototype.
  * @author zer0
- * @date   2017-05-29
+ * @date   2017-05-30
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCPROCESS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCPROCESS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIMER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIMER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
-#include <libtbag/uvpp/Process.hpp>
+#include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
 #include <functional>
@@ -34,43 +34,42 @@ class Loop;
 namespace func {
 
 /**
- * FuncProcess class prototype.
+ * FuncTimer class prototype.
  *
  * @author zer0
- * @date   2017-05-29
+ * @date   2017-05-30
  */
-template <typename ProcessType, typename MutexType = lock::FakeLock>
-class FuncProcess : public ProcessType
+template <typename TimerType, typename MutexType = lock::FakeLock>
+class FuncTimer : public TimerType
 {
 public:
-    using Parent = ProcessType;
+    using Parent = TimerType;
     using Mutex  = MutexType;
     using Guard  = std::lock_guard<Mutex>;
 
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Process, Parent);
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Timer, Parent);
 
 public:
-    using Options = typename Parent::Options;
     using OnClose = std::function<void(void)>;
-    using OnExit  = std::function<void(int64_t, int)>;
+    using OnTimer = std::function<void(void)>;
 
 public:
     mutable Mutex _mutex;
 
 private:
     OnClose _close_cb;
-    OnExit   _exit_cb;
+    OnTimer _timer_cb;
 
 public:
-    FuncProcess(Loop & loop, Options const & options) : Parent(loop, options)
+    FuncTimer(Loop & loop) : Parent(loop)
     { /* EMPTY. */ }
-    virtual ~FuncProcess()
+    virtual ~FuncTimer()
     { /* EMPTY. */ }
 
 public:
     // @formatter:off
     inline void setOnClose(OnClose const & cb) { Guard g(_mutex); _close_cb = cb; }
-    inline void setOnExit (OnExit  const & cb) { Guard g(_mutex);  _exit_cb = cb; }
+    inline void setOnTimer(OnTimer const & cb) { Guard g(_mutex); _timer_cb = cb; }
     // @formatter:on
 
 public:
@@ -82,11 +81,11 @@ public:
         }
     }
 
-    virtual void onExit(int64_t exit_status, int term_signal) override
+    virtual void onTimer() override
     {
         Guard guard(_mutex);
-        if (static_cast<bool>(_exit_cb)) {
-            _exit_cb(exit_status, term_signal);
+        if (static_cast<bool>(_timer_cb)) {
+            _timer_cb();
         }
     }
 };
@@ -98,5 +97,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCPROCESS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIMER_HPP__
 
