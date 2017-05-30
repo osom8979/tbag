@@ -111,6 +111,7 @@ public:
 public:
     void onNodeOpen (Node node);
     void onNodeClose(Node node);
+    void onServerClose();
 
 // HTTP Request callback.
 public:

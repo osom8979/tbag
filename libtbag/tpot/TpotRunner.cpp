@@ -19,23 +19,34 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
-TBAG_CONSTEXPR char const * const DEFAULT_HTML_BAD_REQUEST_BODY = R"HTML(
+TBAG_CONSTEXPR static char const * const DEFAULT_HTML_BAD_REQUEST_BODY = R"HTML(
 <html>
-<head><title>${title}</title></head>
-<body><h2>${title}</h2><p>Bad Request</p></body>
+<head><title>${TITLE}</title></head>
+<body><h2>${TITLE}</h2><p>Bad Request</p></body>
 </html>
 )HTML";
 
-TBAG_CONSTEXPR char const * const DEFAULT_HTML_INTERNAL_SERVER_ERROR_BODY = R"HTML(
+TBAG_CONSTEXPR static char const * const DEFAULT_HTML_INTERNAL_SERVER_ERROR_BODY = R"HTML(
 <html>
-<head><title>${title}</title></head>
-<body><h2>${title}</h2><p>Internal Server Error</p></body>
+<head><title>${TITLE}</title></head>
+<body><h2>${TITLE}</h2><p>Internal Server Error</p></body>
 </html>
 )HTML";
+
+TBAG_CONSTEXPR static char const * const TPOT_ENVS_EXE_PATH = "EXE_PATH";
+TBAG_CONSTEXPR static char const * const TPOT_ENVS_EXE_DIR  = "EXE_DIR";
+TBAG_CONSTEXPR static char const * const TPOT_ENVS_WORK_DIR = "WORK_DIR";
+TBAG_CONSTEXPR static char const * const TPOT_ENVS_HOME_DIR = "HOME_DIR";
+TBAG_CONSTEXPR static char const * const TPOT_ENVS_TITLE    = "TITLE";
 
 TpotRunner::TpotRunner(TpotParams const & params) : _params(params)
 {
-    _envs.push(EnvFlag("title", std::string(LIBTBAG_MAIN_TITLE)));
+    _envs.push(EnvFlag(TPOT_ENVS_EXE_PATH, filesystem::Path::getExePath()));
+    _envs.push(EnvFlag(TPOT_ENVS_EXE_DIR , filesystem::Path::getExeDir()));
+    _envs.push(EnvFlag(TPOT_ENVS_WORK_DIR, filesystem::Path::getWorkDir()));
+    _envs.push(EnvFlag(TPOT_ENVS_HOME_DIR, filesystem::Path::getHomeDir()));
+    _envs.push(EnvFlag(TPOT_ENVS_TITLE   , std::string(LIBTBAG_MAIN_TITLE)));
+
     _body_4xx = _envs.convert(std::string(DEFAULT_HTML_BAD_REQUEST_BODY));
     _body_5xx = _envs.convert(std::string(DEFAULT_HTML_INTERNAL_SERVER_ERROR_BODY));
 }
@@ -54,8 +65,9 @@ int TpotRunner::run()
     }
 
     using namespace std::placeholders;
-    _server->setOnOpen   (std::bind(&TpotRunner::onNodeOpen , this, _1));
-    _server->setOnClose  (std::bind(&TpotRunner::onNodeClose, this, _1));
+    _server->setOnOpen       (std::bind(&TpotRunner::onNodeOpen   , this, _1));
+    _server->setOnClose      (std::bind(&TpotRunner::onNodeClose  , this, _1));
+    _server->setOnServerClose(std::bind(&TpotRunner::onServerClose, this));
 
     auto const func_common   = std::bind(&TpotRunner::onNodeRequest        , this, _1, _2, _3, _4, _5);
     auto const func_exec     = std::bind(&TpotRunner::onNodeExecRequest    , this, _1, _2, _3, _4, _5);
@@ -97,6 +109,11 @@ void TpotRunner::onNodeClose(Node node)
     } else {
         tDLogE("TpotRunner::onNodeOpen() Expired client.");
     }
+}
+
+void TpotRunner::onServerClose()
+{
+    tDLogI("TpotRunner::onServerClose()");
 }
 
 // ----------------------
@@ -181,20 +198,34 @@ Err TpotRunner::execProcess(std::string const & body, HttpBuilder & response)
         return PARSE_RESULT;
     }
 
+    if (parser.request.file.empty()) {
+        response.setStatus(network::http::HttpStatus::SC_BAD_REQUEST);
+        response.setBody(_body_4xx);
+        return Err::E_ILLARGS;
+    }
+
     Proc::Options options;
-    options.file = parser.request.file;
-    options.cwd  = parser.request.cwd;
-    options.args = parser.request.args;
-    options.envs = parser.request.envs;
+    options.file = _envs.convert(parser.request.file);
+
+    if (parser.request.cwd.empty()) {
+        options.cwd = filesystem::Path::getWorkDir().getString();
+    } else {
+        options.cwd = _envs.convert(parser.request.cwd);
+    }
+
+    for (auto & arg : parser.request.args) {
+        options.args.push_back(_envs.convert(arg));
+    }
+
+    for (auto & env : parser.request.envs) {
+        options.envs.push_back(_envs.convert(env));
+    }
+
     options.uid  = parser.request.uid;
     options.gid  = parser.request.gid;
     options.setuid   = false;
     options.setgid   = false;
     options.detached = true;
-
-    if (options.cwd.empty()) {
-        options.cwd = filesystem::Path::getWorkDir().getString();
-    }
 
     {   // Logging.
         std::stringstream ss;

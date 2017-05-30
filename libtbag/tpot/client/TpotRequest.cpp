@@ -25,9 +25,8 @@ int runTpotRequestWithInteractiveMode()
     using namespace libtbag::tpot::structure;
 
     char const * const TEST_REQUEST_JSON = R"({
-"file": "/bin/ls",
-"args": ["-l", "-a"],
-"envs": ["CLICOLOR=1"]
+"file": "${EXE_DIR}/tbproc",
+"args": ["file", "${TITLE}"]
 })";
 
     Exec obj;
