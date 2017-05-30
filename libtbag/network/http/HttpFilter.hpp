@@ -35,6 +35,9 @@ namespace http    {
  */
 struct HttpFilterInterface
 {
+    HttpFilterInterface() { /* EMPTY. */ }
+    virtual ~HttpFilterInterface() { /* EMPTY. */ }
+
     virtual bool filter(HttpParser const & request) = 0;
 };
 

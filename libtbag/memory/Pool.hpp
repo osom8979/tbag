@@ -25,12 +25,18 @@ namespace memory {
 
 struct PoolInterface
 {
+    PoolInterface() { /* EMPTY.*/ }
+    virtual ~PoolInterface() { /* EMPTY.*/ }
+
     virtual void * allocate(std::size_t allocate_size, void const * hint) = 0;
     virtual void deallocate(void * pointer, std::size_t allocated_size) = 0;
 };
 
 struct Pool : public PoolInterface
 {
+    Pool() { /* EMPTY.*/ }
+    virtual ~Pool() { /* EMPTY.*/ }
+
     virtual void * allocate(std::size_t allocate_size, void const * hint) override
     {
         assert(allocate_size > 0);

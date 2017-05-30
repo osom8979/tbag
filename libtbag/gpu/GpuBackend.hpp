@@ -24,6 +24,9 @@ namespace gpu {
 
 struct GpuBackendInterface
 {
+    GpuBackendInterface() { /* EMPTY. */ }
+    virtual ~GpuBackendInterface() { /* EMPTY. */ }
+
     virtual bool isSupport() const TBAG_NOEXCEPT = 0;
     virtual int getDeviceCount() const = 0;
 };

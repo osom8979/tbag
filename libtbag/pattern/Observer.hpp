@@ -36,7 +36,7 @@ public:
 
 public:
     ObservableInterface() { /* EMPTY. */ }
-    ~ObservableInterface() { /* EMPTY. */ }
+    virtual ~ObservableInterface() { /* EMPTY. */ }
 
 public:
     virtual bool add(Observer const & observer) = 0;

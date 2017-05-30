@@ -37,6 +37,9 @@ struct TimeInterpolator
 {
     using Rep = RepType;
 
+    TimeInterpolator() { /* EMPTY. */ }
+    virtual ~TimeInterpolator() { /* EMPTY. */ }
+
     /**
      * Virtual function that returns an interpolated value.
      *

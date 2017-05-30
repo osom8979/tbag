@@ -63,6 +63,9 @@ public:
         using Node     = XmlModel::Node;
         using String   = XmlModel::String;
 
+        NodeInterface() { /* EMPTY. */ }
+        virtual ~NodeInterface() { /* EMPTY. */ }
+
         virtual String name() const = 0;
 
         virtual void setup() = 0;

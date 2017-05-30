@@ -79,6 +79,9 @@ struct ClientInterface
     using binf = uvpp::binf;
     using Id   = id::Id;
 
+    ClientInterface() { /* EMPTY.*/ }
+    virtual ~ClientInterface() { /* EMPTY.*/ }
+
     virtual Id getId() const = 0;
 
     virtual bool init(char const * destination, int port = 0, uint64_t millisec = 0) = 0;
@@ -126,6 +129,9 @@ struct ServerInterface
 
     using SharedClient = std::shared_ptr<ClientInterface>;
     using   WeakClient =   std::weak_ptr<ClientInterface>;
+
+    ServerInterface() { /* EMPTY.*/ }
+    virtual ~ServerInterface() { /* EMPTY.*/ }
 
     virtual bool init(char const * destination, int port = 0) = 0;
     virtual void close() = 0;

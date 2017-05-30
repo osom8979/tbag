@@ -34,6 +34,9 @@ namespace st    {
  */
 struct StackTraceInterface
 {
+    StackTraceInterface() { /* EMPTY. */ }
+    virtual ~StackTraceInterface() { /* EMPTY. */ }
+
     virtual std::string name() const = 0;
     virtual std::string source() const = 0;
     virtual std::size_t line() const = 0;

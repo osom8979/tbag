@@ -82,13 +82,13 @@ NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
 #ifndef SINGLETON2_PROTOTYPE
-#define SINGLETON2_PROTOTYPE(class_name) \
-    public:                              \
+#define SINGLETON2_PROTOTYPE(class_name)         \
+    public:                                      \
         friend class ::libtbag::pattern::Singleton2<class_name>; \
-    protected:                           \
-        class_name() { /* EMPTY. */ }    \
-    public:                              \
-        ~class_name() { /* EMPTY. */ }   \
+    protected:                                   \
+        class_name() { /* EMPTY. */ }            \
+    public:                                      \
+        virtual ~class_name() { /* EMPTY. */ }   \
     private: // default access modifier of class.
 #endif // SINGLETON2_PROTOTYPE
 

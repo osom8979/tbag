@@ -34,6 +34,9 @@ namespace details {
  */
 struct ServiceInterface
 {
+    ServiceInterface() { /* EMPTY.*/ }
+    virtual ~ServiceInterface() { /* EMPTY.*/ }
+
     virtual Err install() = 0;
     virtual Err uninstall() = 0;
     virtual Err start() = 0;

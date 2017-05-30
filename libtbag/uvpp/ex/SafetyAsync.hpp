@@ -53,6 +53,9 @@ public:
 public:
     struct Job
     {
+        Job() { /* EMPTY. */ }
+        virtual ~Job() { /* EMPTY. */ }
+
         virtual void run(SafetyAsync * handle) = 0;
     };
 
@@ -65,6 +68,9 @@ public:
 
         template <typename ... Args>
         FunctionalJob(Args && ... args) : job(std::forward<Args>(args) ...)
+        { /* EMPTY. */ }
+
+        virtual ~FunctionalJob()
         { /* EMPTY. */ }
 
         virtual void run(SafetyAsync * handle) override

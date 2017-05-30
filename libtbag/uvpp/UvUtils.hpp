@@ -29,9 +29,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
-// ------------------------
-// ------------------------
-
 /** Store the program arguments. Required for getting/setting the process title. */
 TBAG_API char ** setupArgs(int argc, char ** argv);
 

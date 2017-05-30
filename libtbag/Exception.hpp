@@ -29,6 +29,7 @@ NAMESPACE_LIBTBAG_OPEN
                                               \
         name() : code(0) { }                  \
         name(int c) : code(c) { }             \
+        virtual ~name() { }                   \
                                               \
         virtual const char *                  \
         what() const TBAG_NOEXCEPT override { \

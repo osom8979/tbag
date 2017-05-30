@@ -56,6 +56,9 @@ struct JsonAcceptHeader
 
 struct JsonBodyInterface : public JsonAcceptHeader
 {
+    JsonBodyInterface() { /* EMPTY. */ }
+    virtual ~JsonBodyInterface() { /* EMPTY. */ }
+
     virtual Err toRequestJsonString(std::string & json) = 0;
     virtual Err toResponseJsonString(std::string & json) = 0;
 

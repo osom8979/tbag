@@ -42,7 +42,7 @@ namespace codec {
  * @author zer0
  * @date   2017-01-24
  */
-struct TBAG_API DatagramInterface
+struct DatagramInterface
 {
     using binf = uvpp::binf;
     using Size = uint32_t;
@@ -68,6 +68,9 @@ struct TBAG_API DatagramInterface
     TBAG_POP_MACRO(max);
 #undef __RESTORE_MAX__
 #endif
+
+    DatagramInterface() { /* EMPTY. */ }
+    virtual ~DatagramInterface() { /* EMPTY. */ }
 
     inline static  int16_t toHost( int16_t network) { return ntohs (network); }
     inline static uint16_t toHost(uint16_t network) { return ntohs (network); }
