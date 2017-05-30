@@ -68,6 +68,7 @@ private:
 
 private:
     bool _help;
+    bool _test;
     bool _verbose;
     bool _unknown;
     bool _version;

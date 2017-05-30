@@ -56,7 +56,7 @@ TBAG_CONSTEXPR static char const * const TPOT_MAIN_REMARKS = "\n"
 
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::Service(argc, argv, envs), _mode(RunningMode::RUN_APPLICATION),
-          _help(false), _verbose(false), _unknown(false), _version(false)
+          _help(false), _test(false), _verbose(false), _unknown(false), _version(false)
 {
     _config_path = (res::TpotAsset::get_local_config() / res::TPOT_CONFIG_XML_FILE_NAME).getString();
 
@@ -132,6 +132,9 @@ void TpotMain::initCommander(int argc, char ** argv)
     _commander.insert("verbose", [&](Arguments const & args){
         _verbose = true;
     }, "Be more verbose/talkative during the operation.");
+    _commander.insert("test", [&](Arguments const & args){
+        _test = true;
+    }, "Use the test mode. (Only request command)");
     _commander.insert("version", [&](Arguments const & args){
         _version = true;
     }, "print the tpot(tbag) version number and exit.");
@@ -190,10 +193,13 @@ int TpotMain::autoRun()
 
 int TpotMain::runRequest()
 {
-    if (_verbose) {
-        std::cout << "Run request mode.\n";
+    if (_test) {
+        if (_verbose) { std::cout << "Run request test mode.\n"; }
+        return client::runTpotRequestWithTest();
+    } else {
+        if (_verbose) { std::cout << "Run request mode.\n"; }
+        return client::runTpotRequest();
     }
-    return client::runTpotRequestWithInteractiveMode();
 }
 
 int TpotMain::runApplication()

@@ -131,6 +131,7 @@ public:
 
 public:
     int getPortNumber() const;
+    std::string getUrl() const;
     std::string getRequestPath() const;
 
 public:

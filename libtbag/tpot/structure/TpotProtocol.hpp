@@ -59,8 +59,8 @@ struct JsonBodyInterface : public JsonAcceptHeader
     JsonBodyInterface() { /* EMPTY. */ }
     virtual ~JsonBodyInterface() { /* EMPTY. */ }
 
-    virtual Err toRequestJsonString(std::string & json) = 0;
-    virtual Err toResponseJsonString(std::string & json) = 0;
+    virtual Err toRequestJsonString(std::string & json) const = 0;
+    virtual Err toResponseJsonString(std::string & json) const = 0;
 
     virtual Err fromRequestJsonString(std::string const & json) = 0;
     virtual Err fromResponseJsonString(std::string const & json) = 0;
@@ -103,16 +103,22 @@ struct TBAG_API Exec : public JsonBodyInterface, public ResponseResult, public E
         int32_t id;
     } response;
 
-    virtual Err toRequestJsonString(std::string & json) override;
-    virtual Err toResponseJsonString(std::string & json) override;
+    Exec() { /* EMPTY. */ }
+    virtual ~Exec() { /* EMPTY. */ }
+
+    virtual Err toRequestJsonString(std::string & json) const override;
+    virtual Err toResponseJsonString(std::string & json) const override;
     virtual Err fromRequestJsonString(std::string const & json) override;
     virtual Err fromResponseJsonString(std::string const & json) override;
 };
 
 struct TBAG_API Heartbit : public JsonBodyInterface, public ResponseResult, public HeartbitPath
 {
-    virtual Err toRequestJsonString(std::string & json) override;
-    virtual Err toResponseJsonString(std::string & json) override;
+    Heartbit() { /* EMPTY. */ }
+    virtual ~Heartbit() { /* EMPTY. */ }
+
+    virtual Err toRequestJsonString(std::string & json) const override;
+    virtual Err toResponseJsonString(std::string & json) const override;
     virtual Err fromRequestJsonString(std::string const & json) override;
     virtual Err fromResponseJsonString(std::string const & json) override;
 };
@@ -125,8 +131,11 @@ struct TBAG_API List : public JsonBodyInterface, public ResponseResult, public L
         std::vector<int32_t> ids;
     } response;
 
-    virtual Err toRequestJsonString(std::string & json) override;
-    virtual Err toResponseJsonString(std::string & json) override;
+    List() { /* EMPTY. */ }
+    virtual ~List() { /* EMPTY. */ }
+
+    virtual Err toRequestJsonString(std::string & json) const override;
+    virtual Err toResponseJsonString(std::string & json) const override;
     virtual Err fromRequestJsonString(std::string const & json) override;
     virtual Err fromResponseJsonString(std::string const & json) override;
 };
@@ -139,8 +148,11 @@ struct TBAG_API Kill : public JsonBodyInterface, public ResponseResult, public K
         int32_t id;
     } request;
 
-    virtual Err toRequestJsonString(std::string & json) override;
-    virtual Err toResponseJsonString(std::string & json) override;
+    Kill() { /* EMPTY. */ }
+    virtual ~Kill() { /* EMPTY. */ }
+
+    virtual Err toRequestJsonString(std::string & json) const override;
+    virtual Err toResponseJsonString(std::string & json) const override;
     virtual Err fromRequestJsonString(std::string const & json) override;
     virtual Err fromResponseJsonString(std::string const & json) override;
 };

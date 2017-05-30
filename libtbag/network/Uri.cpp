@@ -120,6 +120,22 @@ int Uri::getPortNumber() const
     }
 }
 
+std::string Uri::getUrl() const
+{
+    std::string result = getSchema();
+    result.append("://");
+    if (isUserinfo()) {
+        result.append(getUserinfo());
+        result.push_back('@');
+    }
+    result.append(getHost());
+    if (isPort()) {
+        result.push_back(':');
+        result.append(getPort());
+    }
+    return result;
+}
+
 std::string Uri::getRequestPath() const
 {
     std::string result = getPath();

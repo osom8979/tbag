@@ -24,7 +24,7 @@ TBAG_CONSTEXPR static bool const IS_COLLECT_COMMENTS = false;
 // Exec implementation.
 // --------------------
 
-Err Exec::toRequestJsonString(std::string & json)
+Err Exec::toRequestJsonString(std::string & json) const
 {
     if (request.file.empty()) {
         return Err::E_ILLARGS;
@@ -60,7 +60,7 @@ Err Exec::toRequestJsonString(std::string & json)
     return Err::E_SUCCESS;
 }
 
-Err Exec::toResponseJsonString(std::string & json)
+Err Exec::toResponseJsonString(std::string & json) const
 {
     Json::Value root;
     root[getResponseId()] = response.id;
@@ -156,12 +156,12 @@ Err Exec::fromResponseJsonString(std::string const & json)
 // Heartbit implementation.
 // ------------------------
 
-Err Heartbit::toRequestJsonString(std::string & json)
+Err Heartbit::toRequestJsonString(std::string & json) const
 {
     return Err::E_SUCCESS; // NO REQUEST.
 }
 
-Err Heartbit::toResponseJsonString(std::string & json)
+Err Heartbit::toResponseJsonString(std::string & json) const
 {
     return Err::E_SUCCESS; // NO RESPONSE.
 }
@@ -180,13 +180,13 @@ Err Heartbit::fromResponseJsonString(std::string const & json)
 // List implementation.
 // --------------------
 
-Err List::toRequestJsonString(std::string & json)
+Err List::toRequestJsonString(std::string & json) const
 {
     json.clear();
     return Err::E_SUCCESS; // NO REQUEST.
 }
 
-Err List::toResponseJsonString(std::string & json)
+Err List::toResponseJsonString(std::string & json) const
 {
     Json::Value root;
 
@@ -236,7 +236,7 @@ Err List::fromResponseJsonString(std::string const & json)
 // Kill implementation.
 // --------------------
 
-Err Kill::toRequestJsonString(std::string & json)
+Err Kill::toRequestJsonString(std::string & json) const
 {
     Json::Value root;
     root[getRequestId()] = request.id;
@@ -246,7 +246,7 @@ Err Kill::toRequestJsonString(std::string & json)
     return Err::E_SUCCESS;
 }
 
-Err Kill::toResponseJsonString(std::string & json)
+Err Kill::toResponseJsonString(std::string & json) const
 {
     json.clear();
     return Err::E_SUCCESS; // NO RESPONSE.
