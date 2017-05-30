@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/codec/DatagramCodec.hpp>
+#include <libtbag/bitwise/Endian.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -48,7 +49,7 @@ bool DatagramEncoder::pushWriteBuffer(char const * buffer, Size size)
     Buffer & cursor = *(shared->get());
     cursor.resize(DATAGRAM_HEADER_SIZE + size);
 
-    Size const NETWORK_BYTE_SIZE = toNetwork(static_cast<Size>(size));
+    Size const NETWORK_BYTE_SIZE = bitwise::toNetwork(static_cast<Size>(size));
     ::memcpy(&cursor[0], (char const *)&NETWORK_BYTE_SIZE, DATAGRAM_HEADER_SIZE);
     ::memcpy(&cursor[DATAGRAM_HEADER_SIZE], buffer, size);
 
@@ -63,7 +64,7 @@ DatagramEncoder::Size DatagramEncoder::parseBufferSize(char const * buffer, Size
 
     Size network_byte_size = 0;
     ::memcpy((char*)&network_byte_size, buffer, DATAGRAM_HEADER_SIZE);
-    return toHost(network_byte_size);
+    return bitwise::toHost(network_byte_size);
 }
 
 // -------------------------------
@@ -97,7 +98,7 @@ DatagramDecoder::Size DatagramDecoder::readNextDatagramSize()
     // Section 03: Update next_read_size.
     Size network_byte_size = 0;
     _data_buffer.pop((char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
-    _next_read_size = toHost(network_byte_size);
+    _next_read_size = bitwise::toHost(network_byte_size);
 
     return _next_read_size;
 }

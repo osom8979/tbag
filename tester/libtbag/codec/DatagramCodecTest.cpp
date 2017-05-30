@@ -12,23 +12,6 @@
 using namespace libtbag;
 using namespace libtbag::codec;
 
-TEST(DatagramCodecTest, DatagramInterface)
-{
-     int16_t const HOST_S16 = 10;
-    uint16_t const HOST_U16 = 11;
-     int32_t const HOST_S32 = 12;
-    uint32_t const HOST_U32 = 13;
-     int64_t const HOST_S64 = 14;
-    uint64_t const HOST_U64 = 15;
-
-    ASSERT_EQ(HOST_S16, DatagramInterface::toHost(DatagramInterface::toNetwork(HOST_S16)));
-    ASSERT_EQ(HOST_U16, DatagramInterface::toHost(DatagramInterface::toNetwork(HOST_U16)));
-    ASSERT_EQ(HOST_S32, DatagramInterface::toHost(DatagramInterface::toNetwork(HOST_S32)));
-    ASSERT_EQ(HOST_U32, DatagramInterface::toHost(DatagramInterface::toNetwork(HOST_U32)));
-    //ASSERT_EQ(HOST_S64, DatagramInterface::toHost(DatagramInterface::toNetwork(HOST_S64)));
-    //ASSERT_EQ(HOST_U64, DatagramInterface::toHost(DatagramInterface::toNetwork(HOST_U64)));
-}
-
 TEST(DatagramCodecTest, DatagramEncoder)
 {
     std::string const STEP_01 = "123456789123456789123456789123456789";

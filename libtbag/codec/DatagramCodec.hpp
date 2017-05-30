@@ -42,7 +42,7 @@ namespace codec {
  * @author zer0
  * @date   2017-01-24
  */
-struct DatagramInterface
+struct DatagramTypes
 {
     using binf = uvpp::binf;
     using Size = uint32_t;
@@ -68,23 +68,6 @@ struct DatagramInterface
     TBAG_POP_MACRO(max);
 #undef __RESTORE_MAX__
 #endif
-
-    DatagramInterface() { /* EMPTY. */ }
-    virtual ~DatagramInterface() { /* EMPTY. */ }
-
-    inline static  int16_t toHost( int16_t network) { return ntohs (network); }
-    inline static uint16_t toHost(uint16_t network) { return ntohs (network); }
-    inline static  int32_t toHost( int32_t network) { return ntohl (network); }
-    inline static uint32_t toHost(uint32_t network) { return ntohl (network); }
-    //inline static  int64_t toHost( int64_t network) { return ntohll(network); }
-    //inline static uint64_t toHost(uint64_t network) { return ntohll(network); }
-
-    inline static  int16_t toNetwork( int16_t host) { return htons (host); }
-    inline static uint16_t toNetwork(uint16_t host) { return htons (host); }
-    inline static  int32_t toNetwork( int32_t host) { return htonl (host); }
-    inline static uint32_t toNetwork(uint32_t host) { return htonl (host); }
-    //inline static  int64_t toNetwork( int64_t host) { return htonll(host); }
-    //inline static uint64_t toNetwork(uint64_t host) { return htonll(host); }
 };
 
 /**
@@ -94,7 +77,7 @@ struct DatagramInterface
  * @date   2017-01-24
  * @date   2017-05-13 (Rename: DatagramWrite -> DatagramEncoder)
  */
-class TBAG_API DatagramEncoder : public DatagramInterface, public Noncopyable
+class TBAG_API DatagramEncoder : public DatagramTypes, public Noncopyable
 {
 private:
     SharedBuffers _writers;
@@ -142,7 +125,7 @@ public:
  * @date   2017-01-24
  * @date   2017-05-13 (Rename: DatagramRead -> DatagramDecoder)
  */
-class TBAG_API DatagramDecoder : public DatagramInterface, public Noncopyable
+class TBAG_API DatagramDecoder : public DatagramTypes, public Noncopyable
 {
 private:
     Buffer _read_buffer;
