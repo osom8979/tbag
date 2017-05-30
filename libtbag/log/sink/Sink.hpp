@@ -48,7 +48,7 @@ struct SinkInterface
  * @date   2016-07-08
  */
 template <typename MutexType = lock::FakeLock>
-class Sink : public SinkInterface, public Noncopyable
+class Sink : public SinkInterface
 {
 public:
     using String = SinkInterface::String;

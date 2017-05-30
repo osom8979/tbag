@@ -8,7 +8,6 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/libtbag.h>
-#include <libtbag/string/Commander.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -18,29 +17,11 @@
 
 static char const * const DEFAULT_GTEST_FILTER = "-Network*Test.*";
 
-static char const * const DEFAULT_NETWORK_TEST_SERVER_IP = "0.0.0.0";
-static char const * const DEFAULT_NETWORK_TEST_CLIENT_IP = "127.0.0.1";
-static  int const         DEFAULT_NETWORK_TEST_PORT      = 20000;
-
-enum class TestMode
-{
-    UNKNOWN_ERROR = 0,
-    TEST,
-};
-
-bool checkNetworkArgument(libtbag::string::Arguments const & args, std::string & ip, int & port)
-{
-    if (args.optString(0, &ip)) {
-        if (args.optInteger(1, &port) == false) {
-            port = DEFAULT_NETWORK_TEST_PORT;
-        }
-        return true;
-    }
-    return false;
-}
-
 int main(int argc, char **argv)
 {
+    __tbag_debug(LIBTBAG_MAIN_TITLE);
+    __tbag_debug("Default locale name: {}", libtbag::locale::getDefaultIcuLocaleName());
+
     tbInitialize();
 
     libtbag::log::createDefaultColorConsoleLogger();
@@ -52,27 +33,11 @@ int main(int argc, char **argv)
     libtbag::DemoAsset asset;
     asset.create_temp_dir();
 
-    TestMode mode = TestMode::TEST;
-    std::string ip;
-    int port;
+    testing::GTEST_FLAG(filter) = DEFAULT_GTEST_FILTER;
+    testing::InitGoogleTest(&argc, argv);
+    int const EXIT_CODE = RUN_ALL_TESTS();
 
-    {   // COMMAND-LINE PARSING.
-        using namespace libtbag::string;
-        Commander cmd;
-        cmd.insert("", [&](Arguments const & args){
-        });
-        cmd.request(argc, argv);
-    }
-
-    switch (mode) {
-    case TestMode::TEST:
-        testing::GTEST_FLAG(filter) = DEFAULT_GTEST_FILTER;
-        testing::InitGoogleTest(&argc, argv);
-        return RUN_ALL_TESTS();
-    default: break;
-    }
-
-    std::cout << "Argument error.\n";
-    return EXIT_FAILURE;
+    tbRelease();
+    return EXIT_CODE;
 }
 
