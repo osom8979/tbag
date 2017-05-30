@@ -60,7 +60,7 @@ public:
     };
 
 public:
-    struct TBAG_API FunctionalJob : public Job
+    struct FunctionalJob : public Job
     {
         using Func = std::function<void(SafetyAsync*)>;
 
@@ -82,7 +82,7 @@ public:
     };
 
 public:
-    struct MistakeInspector : public Idle
+    struct TBAG_API MistakeInspector : public Idle
     {
     public:
         using Parent = Idle;

@@ -51,26 +51,27 @@ SafetyAsync::MistakeInspector::~MistakeInspector()
 void SafetyAsync::MistakeInspector::onIdle()
 {
     if (_async.isClosing()) {
-        tDLogD("SafetyAsync::MistakeInspector::onIdle() async is closing.");
-    } else {
-        _async._jobs.safeRun([&](JobQueue::Queue & queue){
-            if (queue.empty()) {
-                if (_async._inspector->isClosing() == false && _async._inspector->isActive()) {
-                    tDLogD("SafetyAsync::MistakeInspector::onIdle() stop inspector!");
-                    _async._inspector->stop();
-                }
-            } else {
-                if (_async.send() != Err::E_SUCCESS) {
-                    tDLogE("SafetyAsync::MistakeInspector::onIdle() send error.");
-                }
-            }
-        });
+        assert(_async._inspector->isClosing());
+        return; // async is closing ...
     }
+
+    _async._jobs.safeRun([&](JobQueue::Queue & queue){
+        if (queue.empty()) {
+            if (_async._inspector->isClosing() == false && _async._inspector->isActive()) {
+                tDLogD("SafetyAsync::MistakeInspector::onIdle() stop inspector!");
+                _async._inspector->stop();
+            }
+        } else {
+            if (_async.send() != Err::E_SUCCESS) {
+                tDLogE("SafetyAsync::MistakeInspector::onIdle() send error.");
+            }
+        }
+    });
 }
 
 void SafetyAsync::MistakeInspector::onClose()
 {
-    tDLogD("SafetyAsync::MistakeInspector::onClose() called.");
+    tDLogD("SafetyAsync::MistakeInspector::onClose()");
 }
 
 // ---------------------------
@@ -124,13 +125,14 @@ void SafetyAsync::onAsync()
 
 void SafetyAsync::onClose()
 {
+    tDLogD("SafetyAsync::onClose()");
+
     _jobs.clear();
+
     if (_inspector->isActive()) {
         _inspector->stop();
     }
     _inspector->close();
-
-    tDLogD("SafetyAsync::onClose() called.");
 }
 
 } // namespace ex
