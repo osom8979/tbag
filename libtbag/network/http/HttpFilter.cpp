@@ -57,7 +57,6 @@ HttpDefaultFilter::~HttpDefaultFilter()
     // EMPTY.
 }
 
-
 HttpDefaultFilter & HttpDefaultFilter::operator =(HttpDefaultFilter const & obj)
 {
     if (this != &obj) {
