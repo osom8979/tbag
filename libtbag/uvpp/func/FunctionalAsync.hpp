@@ -1,12 +1,12 @@
 /**
- * @file   FuncAsync.hpp
- * @brief  FuncAsync class prototype.
+ * @file   FunctionalAsync.hpp
+ * @brief  FunctionalAsync class prototype.
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCASYNC_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCASYNC_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALASYNC_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALASYNC_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,6 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Async.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
@@ -34,13 +36,13 @@ class Loop;
 namespace func {
 
 /**
- * FuncAsync class prototype.
+ * FunctionalAsync class prototype.
  *
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 template <typename AsyncType, typename MutexType = lock::FakeLock>
-class FuncAsync : public AsyncType
+class FunctionalAsync : public AsyncType
 {
 public:
     using Parent = AsyncType;
@@ -48,39 +50,29 @@ public:
     using Guard  = std::lock_guard<Mutex>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Async, Parent);
+    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
 
 public:
-    using OnClose = std::function<void(void)>;
     using OnAsync = std::function<void(void)>;
 
-public:
-    mutable Mutex _mutex;
-
 private:
-    OnClose _close_cb;
+    Mutex _mutex;
     OnAsync _async_cb;
 
 public:
-    FuncAsync(Loop & loop) : Parent(loop)
+    FunctionalAsync(Loop & loop) : Parent(loop)
     { /* EMPTY. */ }
-    virtual ~FuncAsync()
+    virtual ~FunctionalAsync()
     { /* EMPTY. */ }
 
 public:
-    // @formatter:off
-    inline void setOnClose(OnClose const & cb) { Guard g(_mutex); _close_cb = cb; }
-    inline void setOnAsync(OnAsync const & cb) { Guard g(_mutex); _async_cb = cb; }
-    // @formatter:on
-
-public:
-    virtual void onClose() override
+    void setOnAsync(OnAsync const & cb)
     {
         Guard guard(_mutex);
-        if (static_cast<bool>(_close_cb)) {
-            _close_cb();
-        }
+        _async_cb = cb;
     }
 
+public:
     virtual void onAsync() override
     {
         Guard guard(_mutex);
@@ -90,6 +82,14 @@ public:
     }
 };
 
+/**
+ * FuncAsync typedef.
+ *
+ * @author zer0
+ * @date   2017-05-30
+ */
+using FuncAsync = FunctionalAsync<libtbag::uvpp::Async>;
+
 } // namespace func
 } // namespace uvpp
 
@@ -97,5 +97,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCASYNC_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALASYNC_HPP__
 

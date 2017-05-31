@@ -7,76 +7,64 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/Timer.hpp>
-#include <libtbag/uvpp/Check.hpp>
-#include <libtbag/uvpp/Prepare.hpp>
-
-#include <memory>
-#include <iostream>
+#include <libtbag/uvpp/func/FunctionalCheck.hpp>
+#include <libtbag/uvpp/func/FunctionalPrepare.hpp>
+#include <libtbag/uvpp/func/FunctionalTimer.hpp>
 
 using namespace libtbag;
 using namespace libtbag::uvpp;
-
-struct CheckTest : public Check
-{
-    int counter;
-
-    CheckTest(Loop & loop) : Check(loop), counter(0)
-    { /* EMPTY. */ }
-
-    virtual void onCheck() override
-    {
-        ++counter;
-        stop();
-        close();
-    }
-};
-
-struct PrepareTest : public Prepare
-{
-    int counter;
-
-    PrepareTest(Loop & loop) : Prepare(loop), counter(0)
-    { /* EMPTY. */ }
-
-    virtual void onPrepare() override
-    {
-        ++counter;
-        stop();
-        close();
-    }
-};
-
-struct TimerTest : public Timer
-{
-    int counter;
-
-    TimerTest(Loop & loop) : Timer(loop), counter(0)
-    { /* EMPTY. */ }
-
-    virtual void onTimer() override
-    {
-        ++counter;
-        stop();
-        close();
-    }
-};
+using namespace libtbag::uvpp::func;
 
 TEST(TimerTest, Default)
 {
+    int prepare_counter = 0;
+    int prepare_close_counter = 0;
+
+    int timer_counter = 0;
+    int timer_close_counter = 0;
+
+    int check_counter = 0;
+    int check_close_counter = 0;
+
     Loop loop;
-    auto prepare = loop.newHandle<PrepareTest>(loop);
-    auto timer   = loop.newHandle<TimerTest>(loop);
-    auto check   = loop.newHandle<CheckTest>(loop);
+    auto prepare = loop.newHandle<FuncPrepare>(loop);
+    auto timer   = loop.newHandle<FuncTimer>(loop);
+    auto check   = loop.newHandle<FuncCheck>(loop);
 
-    prepare->start();
-    timer->start(0, 1/*millisec*/);
-    check->start();
+    prepare->setOnPrepare([&](){
+        ++prepare_counter;
+        prepare->close();
+    });
+    prepare->setOnClose([&](){
+        ++prepare_close_counter;
+    });
 
-    loop.run();
+    timer->setOnTimer([&](){
+        ++timer_counter;
+        timer->close();
+    });
+    timer->setOnClose([&](){
+        ++timer_close_counter;
+    });
 
-    ASSERT_EQ(1, prepare->counter);
-    ASSERT_EQ(1, timer->counter);
-    ASSERT_EQ(1, check->counter);
+    check->setOnCheck([&](){
+        ++check_counter;
+        check->close();
+    });
+    check->setOnClose([&](){
+        ++check_close_counter;
+    });
+
+    ASSERT_EQ(Err::E_SUCCESS, timer->start(0));
+    ASSERT_EQ(Err::E_SUCCESS, check->start());
+    ASSERT_EQ(Err::E_SUCCESS, prepare->start());
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+
+    ASSERT_EQ(1, timer_counter);
+    ASSERT_EQ(1, timer_close_counter);
+    ASSERT_EQ(1, check_counter);
+    ASSERT_EQ(1, check_close_counter);
+    ASSERT_EQ(1, prepare_counter);
+    ASSERT_EQ(1, prepare_close_counter);
 }
 

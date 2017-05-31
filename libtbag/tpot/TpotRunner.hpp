@@ -24,7 +24,7 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/func/FuncProcess.hpp>
+#include <libtbag/uvpp/func/FunctionalProcess.hpp>
 
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/tpot/structure/TpotProtocol.hpp>
@@ -67,7 +67,7 @@ class TBAG_API TpotRunner final : public Noncopyable
 {
 public:
     using Loop = uvpp::Loop;
-    using Proc = uvpp::func::FuncProcess<uvpp::Process>;
+    using Proc = uvpp::func::FuncProcess;
 
     using SharedProc = std::shared_ptr<Proc>;
     using Pid        = int;

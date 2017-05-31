@@ -1,12 +1,12 @@
 /**
- * @file   FuncTimer.hpp
- * @brief  FuncTimer class prototype.
+ * @file   FunctionalTimer.hpp
+ * @brief  FunctionalTimer class prototype.
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIMER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIMER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALTIMER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALTIMER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,6 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
@@ -34,13 +36,13 @@ class Loop;
 namespace func {
 
 /**
- * FuncTimer class prototype.
+ * FunctionalTimer class prototype.
  *
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 template <typename TimerType, typename MutexType = lock::FakeLock>
-class FuncTimer : public TimerType
+class FunctionalTimer : public TimerType
 {
 public:
     using Parent = TimerType;
@@ -48,39 +50,29 @@ public:
     using Guard  = std::lock_guard<Mutex>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Timer, Parent);
+    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
 
 public:
-    using OnClose = std::function<void(void)>;
     using OnTimer = std::function<void(void)>;
 
-public:
-    mutable Mutex _mutex;
-
 private:
-    OnClose _close_cb;
+    Mutex _mutex;
     OnTimer _timer_cb;
 
 public:
-    FuncTimer(Loop & loop) : Parent(loop)
+    FunctionalTimer(Loop & loop) : Parent(loop)
     { /* EMPTY. */ }
-    virtual ~FuncTimer()
+    virtual ~FunctionalTimer()
     { /* EMPTY. */ }
 
 public:
-    // @formatter:off
-    inline void setOnClose(OnClose const & cb) { Guard g(_mutex); _close_cb = cb; }
-    inline void setOnTimer(OnTimer const & cb) { Guard g(_mutex); _timer_cb = cb; }
-    // @formatter:on
-
-public:
-    virtual void onClose() override
+    void setOnTimer(OnTimer const & cb)
     {
         Guard guard(_mutex);
-        if (static_cast<bool>(_close_cb)) {
-            _close_cb();
-        }
+        _timer_cb = cb;
     }
 
+public:
     virtual void onTimer() override
     {
         Guard guard(_mutex);
@@ -90,6 +82,14 @@ public:
     }
 };
 
+/**
+ * FuncTimer typedef.
+ *
+ * @author zer0
+ * @date   2017-05-30
+ */
+using FuncTimer = FunctionalTimer<libtbag::uvpp::Timer>;
+
 } // namespace func
 } // namespace uvpp
 
@@ -97,5 +97,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIMER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALTIMER_HPP__
 

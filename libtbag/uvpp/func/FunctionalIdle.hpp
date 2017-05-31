@@ -1,12 +1,12 @@
 /**
- * @file   FuncIdle.hpp
- * @brief  FuncIdle class prototype.
+ * @file   FunctionalIdle.hpp
+ * @brief  FunctionalIdle class prototype.
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCIDLE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCIDLE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALIDLE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALIDLE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,6 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Idle.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
@@ -34,13 +36,13 @@ class Loop;
 namespace func {
 
 /**
- * FuncIdle class prototype.
+ * FunctionalIdle class prototype.
  *
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 template <typename IdleType, typename MutexType = lock::FakeLock>
-class FuncIdle : public IdleType
+class FunctionalIdle : public IdleType
 {
 public:
     using Parent = IdleType;
@@ -48,39 +50,29 @@ public:
     using Guard  = std::lock_guard<Mutex>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Idle, Parent);
+    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
 
 public:
-    using OnClose = std::function<void(void)>;
-    using OnIdle  = std::function<void(void)>;
-
-public:
-    mutable Mutex _mutex;
+    using OnIdle = std::function<void(void)>;
 
 private:
-    OnClose _close_cb;
-    OnIdle  _idle_cb;
+    Mutex _mutex;
+    OnIdle _idle_cb;
 
 public:
-    FuncIdle(Loop & loop) : Parent(loop)
+    FunctionalIdle(Loop & loop) : Parent(loop)
     { /* EMPTY. */ }
-    virtual ~FuncIdle()
+    virtual ~FunctionalIdle()
     { /* EMPTY. */ }
 
 public:
-    // @formatter:off
-    inline void setOnClose(OnClose const & cb) { Guard g(_mutex); _close_cb = cb; }
-    inline void setOnIdle (OnIdle  const & cb) { Guard g(_mutex); _idle_cb  = cb; }
-    // @formatter:on
-
-public:
-    virtual void onClose() override
+    inline void setOnIdle(OnIdle const & cb)
     {
         Guard guard(_mutex);
-        if (static_cast<bool>(_close_cb)) {
-            _close_cb();
-        }
+        _idle_cb = cb;
     }
 
+public:
     virtual void onIdle() override
     {
         Guard guard(_mutex);
@@ -90,6 +82,14 @@ public:
     }
 };
 
+/**
+ * FuncIdle typedef.
+ *
+ * @author zer0
+ * @date   2017-05-30
+ */
+using FuncIdle = FunctionalIdle<libtbag::uvpp::Idle>;
+
 } // namespace func
 } // namespace uvpp
 
@@ -97,5 +97,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCIDLE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALIDLE_HPP__
 

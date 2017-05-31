@@ -1,12 +1,12 @@
 /**
- * @file   FuncCheck.hpp
- * @brief  FuncCheck class prototype.
+ * @file   FunctionalCheck.hpp
+ * @brief  FunctionalCheck class prototype.
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCCHECK_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCCHECK_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALCHECK_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALCHECK_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,8 +16,11 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Check.hpp>
 #include <libtbag/lock/FakeLock.hpp>
+
 
 #include <functional>
 #include <mutex>
@@ -34,13 +37,13 @@ class Loop;
 namespace func {
 
 /**
- * FuncCheck class prototype.
+ * FunctionalCheck class prototype.
  *
  * @author zer0
- * @date   2017-05-30
+ * @date   2017-05-31
  */
 template <typename CheckType, typename MutexType = lock::FakeLock>
-class FuncCheck : public CheckType
+class FunctionalCheck : public CheckType
 {
 public:
     using Parent = CheckType;
@@ -48,39 +51,29 @@ public:
     using Guard  = std::lock_guard<Mutex>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Check, Parent);
+    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
 
 public:
-    using OnClose = std::function<void(void)>;
     using OnCheck = std::function<void(void)>;
 
-public:
-    mutable Mutex _mutex;
-
 private:
-    OnClose _close_cb;
+    Mutex _mutex;
     OnCheck _check_cb;
 
 public:
-    FuncCheck(Loop & loop) : Parent(loop)
+    FunctionalCheck(Loop & loop) : Parent(loop)
     { /* EMPTY. */ }
-    virtual ~FuncCheck()
+    virtual ~FunctionalCheck()
     { /* EMPTY. */ }
 
 public:
-    // @formatter:off
-    inline void setOnClose(OnClose const & cb) { Guard g(_mutex); _close_cb = cb; }
-    inline void setOnCheck(OnCheck const & cb) { Guard g(_mutex); _check_cb = cb; }
-    // @formatter:on
-
-public:
-    virtual void onClose() override
+    void setOnCheck(OnCheck const & cb)
     {
         Guard guard(_mutex);
-        if (static_cast<bool>(_close_cb)) {
-            _close_cb();
-        }
+        _check_cb = cb;
     }
 
+public:
     virtual void onCheck() override
     {
         Guard guard(_mutex);
@@ -90,6 +83,14 @@ public:
     }
 };
 
+/**
+ * FuncCheck typedef.
+ *
+ * @author zer0
+ * @date   2017-05-30
+ */
+using FuncCheck = FunctionalCheck<libtbag::uvpp::Check>;
+
 } // namespace func
 } // namespace uvpp
 
@@ -97,5 +98,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCCHECK_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALCHECK_HPP__
 

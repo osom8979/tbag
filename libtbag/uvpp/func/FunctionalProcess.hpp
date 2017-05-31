@@ -1,12 +1,12 @@
 /**
- * @file   FuncProcess.hpp
- * @brief  FuncProcess class prototype.
+ * @file   FunctionalProcess.hpp
+ * @brief  FunctionalProcess class prototype.
  * @author zer0
- * @date   2017-05-29
+ * @date   2017-05-31
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCPROCESS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCPROCESS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALPROCESS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALPROCESS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,9 +16,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Process.hpp>
 #include <libtbag/lock/FakeLock.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <mutex>
 
@@ -34,13 +37,13 @@ class Loop;
 namespace func {
 
 /**
- * FuncProcess class prototype.
+ * FunctionalProcess class prototype.
  *
  * @author zer0
- * @date   2017-05-29
+ * @date   2017-05-31
  */
 template <typename ProcessType, typename MutexType = lock::FakeLock>
-class FuncProcess : public ProcessType
+class FunctionalProcess : public ProcessType
 {
 public:
     using Parent = ProcessType;
@@ -48,40 +51,30 @@ public:
     using Guard  = std::lock_guard<Mutex>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Process, Parent);
+    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
 
 public:
     using Options = typename Parent::Options;
-    using OnClose = std::function<void(void)>;
     using OnExit  = std::function<void(int64_t, int)>;
 
-public:
-    mutable Mutex _mutex;
-
 private:
-    OnClose _close_cb;
-    OnExit   _exit_cb;
+    Mutex _mutex;
+    OnExit _exit_cb;
 
 public:
-    FuncProcess(Loop & loop, Options const & options) : Parent(loop, options)
+    FunctionalProcess(Loop & loop, Options const & options) : Parent(loop, options)
     { /* EMPTY. */ }
-    virtual ~FuncProcess()
+    virtual ~FunctionalProcess()
     { /* EMPTY. */ }
 
 public:
-    // @formatter:off
-    inline void setOnClose(OnClose const & cb) { Guard g(_mutex); _close_cb = cb; }
-    inline void setOnExit (OnExit  const & cb) { Guard g(_mutex);  _exit_cb = cb; }
-    // @formatter:on
-
-public:
-    virtual void onClose() override
+    void setOnExit (OnExit const & cb)
     {
         Guard guard(_mutex);
-        if (static_cast<bool>(_close_cb)) {
-            _close_cb();
-        }
+        _exit_cb = cb;
     }
 
+public:
     virtual void onExit(int64_t exit_status, int term_signal) override
     {
         Guard guard(_mutex);
@@ -91,6 +84,14 @@ public:
     }
 };
 
+/**
+ * FuncProcess typedef.
+ *
+ * @author zer0
+ * @date   2017-05-29
+ */
+using FuncProcess = FunctionalProcess<libtbag::uvpp::Process>;
+
 } // namespace func
 } // namespace uvpp
 
@@ -98,5 +99,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCPROCESS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_FUNC_FUNCTIONALPROCESS_HPP__
 
