@@ -140,7 +140,7 @@ bool StreamClient::write(SharedSafetyWriter writer, uint64_t millisec)
 
     if (loop->isAliveAndThisThread()) {
         _last_writer = writer;
-        _last_writer->run(nullptr);
+        _last_writer->run();
     } else {
         _last_writer = writer;
         if (_async->asyncWrite(writer) == false) {
@@ -255,7 +255,7 @@ void StreamClient::close()
         closeAll();
     } else {
         tDLogD("StreamClient::close() async request.");
-        _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
+        _async->newSendFunc([&](){
             Guard guard(_mutex);
             closeAll();
         });
@@ -276,7 +276,7 @@ void StreamClient::cancel()
         startTimeoutShutdown(Milliseconds(0U));
     } else {
         tDLogD("StreamClient::cancel() async request.");
-        _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
+        _async->newSendFunc([&]() {
             Guard guard(_mutex);
             startTimeoutShutdown(Milliseconds(0U));
         });

@@ -112,7 +112,7 @@ public:
         virtual WriteType getType() const override
         { return WriteType::STREAM_WRITE; }
 
-        virtual void run(SafetyAsync * handle) override;
+        virtual void run() override;
     };
 
     struct TBAG_API UdpWriter : public WriterInterface
@@ -124,7 +124,7 @@ public:
         virtual WriteType getType() const override
         { return WriteType::UDP_SEND; }
 
-        virtual void run(SafetyAsync * handle) override;
+        virtual void run() override;
     };
 
 public:

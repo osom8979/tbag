@@ -69,7 +69,7 @@ public:
     { return _result; }
 
 public:
-    virtual void run(SafetyAsync * handle) override;
+    virtual void run() override;
 };
 
 } // namespace ex

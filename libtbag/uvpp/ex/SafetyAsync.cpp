@@ -18,22 +18,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 namespace ex   {
 
-namespace __impl {
-
-struct CloseJob : public SafetyAsync::Job
-{
-    virtual void run(SafetyAsync * handle) override
-    {
-        if (handle != nullptr) {
-            handle->close();
-        } else {
-            tDLogE("CloseJob::run() handle is nullptr.");
-        }
-    }
-};
-
-} // namespace __impl
-
 // --------------------------------
 // MistakeInspector implementation.
 // --------------------------------
@@ -59,10 +43,7 @@ void SafetyAsync::MistakeInspector::onIdle()
 
     _async._jobs.safeRun([&](JobQueue::Queue & queue){
         if (queue.empty()) {
-            if (_async._inspector->isClosing() == false && _async._inspector->isActive()) {
-                tDLogD("SafetyAsync::MistakeInspector::onIdle() stop inspector!");
-                _async._inspector->stop();
-            }
+            _async.stopInspector();
         } else {
             if (_async.send() != Err::E_SUCCESS) {
                 tDLogE("SafetyAsync::MistakeInspector::onIdle() send error.");
@@ -73,7 +54,7 @@ void SafetyAsync::MistakeInspector::onIdle()
 
 void SafetyAsync::MistakeInspector::onClose()
 {
-    tDLogD("SafetyAsync::MistakeInspector::onClose()");
+    // EMPTY.
 }
 
 // ---------------------------
@@ -92,6 +73,66 @@ SafetyAsync::~SafetyAsync()
     // EMPTY.
 }
 
+void SafetyAsync::closeInspector()
+{
+    if (static_cast<bool>(_inspector) == false) {
+        return;
+    }
+
+    if (_inspector->isActive()) {
+        _inspector->stop();
+    }
+    if (_inspector->isClosing() == false) {
+        _inspector->close();
+    }
+}
+
+Err SafetyAsync::startInspector()
+{
+    if (static_cast<bool>(_inspector) == false) {
+        return Err::E_EXPIRED;
+    }
+
+    if (_inspector->isClosing()) {
+        return Err::E_CLOSING;
+    }
+
+    if (_inspector->isActive()) {
+        return Err::E_ALREADY;
+    }
+
+    Err const CODE = _inspector->start();
+    if (CODE != Err::E_SUCCESS) {
+        return CODE;
+    }
+
+    tDLogD("SafetyAsync::startInspector()");
+    return CODE;
+}
+
+Err SafetyAsync::stopInspector()
+{
+    if (static_cast<bool>(_inspector) == false) {
+        return Err::E_EXPIRED;
+    }
+
+    if (_inspector->isClosing()) {
+        return Err::E_CLOSING;
+    }
+
+    if (_inspector->isActive() == false) {
+        return Err::E_ALREADY;
+    }
+
+    Err const CODE = _inspector->stop();
+    if (CODE != Err::E_SUCCESS) {
+        return CODE;
+    }
+
+    tDLogD("SafetyAsync::stopInspector()");
+    return CODE;
+}
+
 void SafetyAsync::clearJob()
 {
     _jobs.clear();
@@ -101,17 +142,21 @@ Err SafetyAsync::sendJob(SharedJob job)
 {
     _jobs.safeRun([&](JobQueue::Queue & queue){
         queue.push(job);
-        if (_inspector->isActive() == false) {
-            tDLogD("SafetyAsync::sendJob() start inspector.");
-            _inspector->start();
-        }
+        startInspector();
     });
     return send();
 }
 
-Err SafetyAsync::sendCloseJob()
+Err SafetyAsync::sendClose()
 {
-    return sendJob(SharedJob(new (std::nothrow) __impl::CloseJob));
+    auto job = SharedJob(new (std::nothrow) FunctionalJob([&](){
+        this->close();
+    }));
+
+    if (static_cast<bool>(job) == false) {
+        return Err::E_BADALLOC;
+    }
+    return sendJob(job);
 }
 
 void SafetyAsync::onAsync()
@@ -119,7 +164,7 @@ void SafetyAsync::onAsync()
     SharedJob job;
     if (_jobs.frontAndPop(job) == JobQueue::Code::SUCCESS) {
         if (static_cast<bool>(job)) {
-            job->run(this);
+            job->run();
         }
         job.reset();
     }
@@ -128,13 +173,8 @@ void SafetyAsync::onAsync()
 void SafetyAsync::onClose()
 {
     tDLogD("SafetyAsync::onClose()");
-
-    _jobs.clear();
-
-    if (_inspector->isActive()) {
-        _inspector->stop();
-    }
-    _inspector->close();
+    clearJob();
+    closeInspector();
 }
 
 } // namespace ex

@@ -28,7 +28,7 @@ WriteJob::~WriteJob()
     // EMPTY.
 }
 
-void WriteJob::run(SafetyAsync * handle)
+void WriteJob::run()
 {
     if (_cancel.load() == false) {
         _result = _stream->write(*_request, _buffer.data(), _buffer.size());

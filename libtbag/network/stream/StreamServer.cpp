@@ -164,7 +164,7 @@ void StreamServer::close()
         closeAll();
     } else {
         tDLogD("StreamServer::close() async request.");
-        _async->newSendFunc([&](SafetyAsync * UNUSED_PARAM(async)) {
+        _async->newSendFunc([&]() {
             Guard guard(_mutex);
             closeAll();
         });

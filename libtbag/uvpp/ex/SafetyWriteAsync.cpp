@@ -42,7 +42,7 @@ bool SafetyWriteAsync::WriterInterface::cancel()
 // StreamWriter implementation.
 // ----------------------------
 
-void SafetyWriteAsync::StreamWriter::run(SafetyAsync * UNUSED_PARAM(handle))
+void SafetyWriteAsync::StreamWriter::run()
 {
     WriteState EXPECTED = WriteState::READY;
     if (state.compare_exchange_weak(EXPECTED, WriteState::WRITE)) {
@@ -60,7 +60,7 @@ void SafetyWriteAsync::StreamWriter::run(SafetyAsync * UNUSED_PARAM(handle))
 // UdpWriter implementation.
 // -------------------------
 
-void SafetyWriteAsync::UdpWriter::run(SafetyAsync * UNUSED_PARAM(handle))
+void SafetyWriteAsync::UdpWriter::run()
 {
     WriteState EXPECTED = WriteState::READY;
     if (state.compare_exchange_weak(EXPECTED, WriteState::WRITE)) {

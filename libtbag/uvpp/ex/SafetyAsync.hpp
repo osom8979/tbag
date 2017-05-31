@@ -51,38 +51,44 @@ public:
     using Parent = Async;
 
 public:
-    struct Job
+    /**
+     * Job runner.
+     */
+    struct JobInterface
     {
-        Job() { /* EMPTY. */ }
-        virtual ~Job() { /* EMPTY. */ }
+        JobInterface() { /* EMPTY. */ }
+        virtual ~JobInterface() { /* EMPTY. */ }
 
-        virtual void run(SafetyAsync * handle) = 0;
+        virtual void run() = 0;
     };
+    using Job = JobInterface;
 
 public:
+    /**
+     * Functional job callback.
+     */
     struct FunctionalJob : public Job
     {
-        using Func = std::function<void(SafetyAsync*)>;
+        using OnJob = std::function<void(void)>;
 
-        Func job;
+        OnJob job_cb;
 
-        template <typename ... Args>
-        FunctionalJob(Args && ... args) : job(std::forward<Args>(args) ...)
-        { /* EMPTY. */ }
+        FunctionalJob(OnJob const & cb) : job_cb(cb) { /* EMPTY. */ }
+        virtual ~FunctionalJob() { /* EMPTY. */ }
 
-        virtual ~FunctionalJob()
-        { /* EMPTY. */ }
-
-        virtual void run(SafetyAsync * handle) override
+        virtual void run() override
         {
-            if (static_cast<bool>(job)) {
-                job(handle);
+            if (static_cast<bool>(job_cb)) {
+                job_cb();
             }
         }
     };
 
 public:
-    struct TBAG_API MistakeInspector : public Idle
+    /**
+     * Check the missing jobs.
+     */
+    struct TBAG_API MistakeInspector : public uvpp::Idle
     {
     public:
         using Parent = Idle;
@@ -115,6 +121,11 @@ protected:
 public:
     virtual ~SafetyAsync();
 
+private:
+    void closeInspector();
+    Err startInspector();
+    Err stopInspector();
+
 public:
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_jobs.empty()))
     { return _jobs.empty(); }
@@ -124,7 +135,7 @@ public:
 public:
     void clearJob();
     Err sendJob(SharedJob job);
-    Err sendCloseJob();
+    Err sendClose();
 
 public:
     virtual void onAsync() override;
