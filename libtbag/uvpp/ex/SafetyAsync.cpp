@@ -51,7 +51,9 @@ SafetyAsync::MistakeInspector::~MistakeInspector()
 void SafetyAsync::MistakeInspector::onIdle()
 {
     if (_async.isClosing()) {
-        assert(_async._inspector->isClosing());
+        // [WARNING] Don't use the inspector assertion of closing!
+        // e.g. assert(_async._inspector->isClosing());
+        tDLogD("SafetyAsync::MistakeInspector::onIdle() async is closing ...");
         return; // async is closing ...
     }
 
