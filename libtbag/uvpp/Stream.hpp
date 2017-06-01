@@ -79,7 +79,7 @@ public:
     Err stopRead();
 
     /** Write data to stream. Buffers are written in order. */
-    Err write(WriteRequest & request, binf * infos, std::size_t infos_size);
+    Err write(WriteRequest & request, binf const * infos, std::size_t infos_size);
     Err write(WriteRequest & request, char const * buffer, std::size_t size);
 
     /**

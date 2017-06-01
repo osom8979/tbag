@@ -251,7 +251,7 @@ Err Stream::stopRead()
     return convertUvErrorToErrWithLogging("Stream::stopRead()", CODE);
 }
 
-Err Stream::write(WriteRequest & request, binf * infos, std::size_t infos_size)
+Err Stream::write(WriteRequest & request, binf const * infos, std::size_t infos_size)
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Stream::write() buffer info size too large.");
