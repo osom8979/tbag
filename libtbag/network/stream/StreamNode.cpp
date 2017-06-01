@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/network/stream/StreamNode.hpp>
+#include <libtbag/log/Log.hpp>
 #include <cassert>
 
 // -------------------
@@ -72,6 +73,8 @@ void StreamNode::onClose()
     if (user_data) {
         _parent->onClientUserDataDealloc(getWeakClient(), user_data);
     }
+
+    _parent->removeClient(this->getId());
 }
 
 } // namespace stream

@@ -87,7 +87,7 @@ bool StreamServer::insertClient(SharedClient client)
     return _clients.insert(ClientPair(client->getId(), client)).second;
 }
 
-bool StreamServer::removeClient(Id id)
+bool StreamServer::eraseClient(Id id)
 {
     return _clients.erase(id) == 1U;
 }
@@ -213,6 +213,12 @@ StreamServer::WeakClient StreamServer::getClient(Id id)
 {
     Guard guard(_mutex);
     return WeakClient(getSharedClient(id));
+}
+
+bool StreamServer::removeClient(Id id)
+{
+    Guard guard(_mutex);
+    return eraseClient(id);
 }
 
 // --------------

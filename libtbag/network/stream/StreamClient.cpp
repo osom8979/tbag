@@ -516,12 +516,12 @@ void StreamClient::runBackendRead(Err code, char const * buffer, std::size_t siz
 
 void StreamClient::runBackendClose()
 {
-    onClose();
-
     _mutex.lock();
     closeAll();
     _writer.status = WriteStatus::WS_NOT_READY;
     _mutex.unlock();
+
+    onClose();
 }
 
 } // namespace stream

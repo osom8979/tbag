@@ -79,6 +79,8 @@ public:
 
         Filter(HttpFilterInterface * f, OnRequest const & cb) : http_filter(f), request_cb(cb)
         { /* EMPTY. */ }
+        virtual ~Filter()
+        { /* EMPTY. */ }
     };
 
     using SharedFilter = std::shared_ptr<Filter>;

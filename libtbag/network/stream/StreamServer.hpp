@@ -114,7 +114,7 @@ protected:
     SharedClient getSharedClient(Id id);
 
     bool insertClient(SharedClient client);
-    bool removeClient(Id id);
+    bool eraseClient(Id id);
 
     void closeAll();
 // === PROTECTED SECTION END ===
@@ -143,9 +143,16 @@ public:
     /**
      * Obtain client.
      *
-     * @param[in] id  Node id.
+     * @param[in] id Node id.
      */
     virtual WeakClient getClient(Id id) override;
+
+    /**
+     * Remove client in buffer(map).
+     *
+     * @param[in] id Node id.
+     */
+    virtual bool removeClient(Id id) override;
 
 public:
     virtual std::string getDestination() const override;

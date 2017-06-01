@@ -138,6 +138,7 @@ struct ServerInterface
 
     virtual WeakClient accept() = 0;
     virtual WeakClient getClient(Id id) = 0;
+    virtual bool removeClient(Id id) = 0;
 
     virtual std::string getDestination() const = 0;
     virtual int getPort() const = 0;
