@@ -111,8 +111,8 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
 TEST(NetworkHttpTest, TcpHttpServer)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
-    runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "GET");
-    runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "POST");
+    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "GET"));
+    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "POST"));
 }
 
 TEST(NetworkHttpTest, PipeHttpServer)
@@ -126,8 +126,8 @@ TEST(NetworkHttpTest, PipeHttpServer)
 #endif
 
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
-    runSimpleServerTest(HttpServer::StreamType::PIPE, PATH, "GET");
-    runSimpleServerTest(HttpServer::StreamType::PIPE, PATH, "POST");
+    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::PIPE, PATH, "GET"));
+    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::PIPE, PATH, "POST"));
 }
 
 TEST(NetworkHttpTest, RoutingServer)
