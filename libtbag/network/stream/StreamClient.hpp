@@ -20,15 +20,14 @@
 
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
-
-#include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
-#include <libtbag/uvpp/ex/TimeoutClose.hpp>
-#include <libtbag/uvpp/ex/TimeoutShutdown.hpp>
+#include <libtbag/uvpp/Request.hpp>
+#include <libtbag/uvpp/ex/SafetyAsync.hpp>
+#include <libtbag/uvpp/func/FunctionalTimer.hpp>
 
 #include <string>
+#include <vector>
 #include <memory>
 #include <mutex>
-#include <chrono>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -47,71 +46,108 @@ class TBAG_API StreamClient : public details::ClientInterface
 {
 public:
     using StreamType = details::StreamType;
-    using Loop       = uvpp::Loop;
-    using Stream     = uvpp::Stream;
-    using binf       = uvpp::binf;
+
+    using Loop   = uvpp::Loop;
+    using Stream = uvpp::Stream;
+    using binf   = uvpp::binf;
+
+    using ShutdownRequest = uvpp::ShutdownRequest;
+    using WriteRequest    = uvpp::WriteRequest;
 
 public:
     using SharedClientBackend = std::shared_ptr<Stream>;
     using   WeakClientBackend =   std::weak_ptr<Stream>;
 
 public:
-    using SafetyAsync       = uvpp::ex::SafetyAsync;
-    using SafetyWriteAsync  = uvpp::ex::SafetyWriteAsync;
-    using TimeoutClose      = uvpp::ex::TimeoutClose;
-    using TimeoutShutdown   = uvpp::ex::TimeoutShutdown;
-
-    using SharedSafetyWriter = SafetyWriteAsync::SharedWriter;
-
-    using SharedTimeoutClose     = std::shared_ptr<TimeoutClose>;
-    using SharedTimeoutShutdown  = std::shared_ptr<TimeoutShutdown>;
-    using SharedSafetyWriteAsync = std::shared_ptr<SafetyWriteAsync>;
-
-    using WeakTimeoutClose     = std::weak_ptr<TimeoutClose>;
-    using WeakTimeoutShutdown  = std::weak_ptr<TimeoutShutdown>;
-    using WeakSafetyWriteAsync = std::weak_ptr<SafetyWriteAsync>;
+    using       SafetyAsync = uvpp::ex::SafetyAsync;
+    using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
+    using   WeakSafetyAsync = std::shared_ptr<SafetyAsync>;
 
 public:
+    using       FuncTimer = uvpp::func::FuncTimer;
+    using SharedFuncTimer = std::shared_ptr<FuncTimer>;
+    using   WeakFuncTimer = std::shared_ptr<FuncTimer>;
+
+public:
+    using Id      = id::Id;
+    using Buffer  = std::vector<char>;
+    using Buffers = std::vector<Buffer>;
+
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-    using Seconds      = std::chrono::seconds;
-    using Milliseconds = std::chrono::milliseconds;
-
-    using Id = id::Id;
+public:
+    enum class WriteStatus
+    {
+        WS_NOT_READY,
+        WS_READY,           ///< Next: call write.
+        WS_ASYNC,           ///< Next: onTimeout or onAsync.
+        WS_ASYNC_CANCEL,    ///< Next: onAsync.
+        WS_WRITE,           ///< Next: onTimeout or onWrite.
+        WS_SHUTDOWN,        ///< Next: onShutdown.
+    };
 
 private:
     StreamType const STREAM_TYPE;
+    bool _owner_async;
 
 private:
-    SharedClientBackend    _client;
-    SharedSafetyWriteAsync _async;
-    SharedTimeoutClose     _close;
-    SharedTimeoutShutdown  _shutdown;
+    SharedClientBackend _client;
+    SharedSafetyAsync   _async;
 
-public:
-    SharedSafetyWriter _last_writer;
+    SharedFuncTimer _close_timer;
+    SharedFuncTimer _shutdown_timer;
+
+private:
     mutable Mutex _mutex;
+
+    struct {
+        WriteStatus status;
+        WriteRequest write_req;
+        ShutdownRequest shutdown_req;
+        Buffers buffers;
+    } _writer;
 
 public:
     StreamClient(Loop & loop, StreamType type);
+    StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async);
     virtual ~StreamClient();
 
 public:
-    WeakClientBackend    getClient();
-    WeakSafetyWriteAsync getAsync();
-    WeakTimeoutClose     getClose();
-    WeakTimeoutShutdown  getShutdown();
+    WeakClientBackend getClient();
+    WeakSafetyAsync   getAsync();
 
-    bool isWriting() const;
+public:
+    static char const * getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT;
 
+    static Err startTimer(uvpp::Timer & timer, uint64_t millisec);
+    static Err stopTimer(uvpp::Timer & timer);
+
+// ===============================
+// === PROTECTED SECTION BEGIN ===
+// [WARNING] Don't mutex guard in this protected section.
 protected:
-    void startTimeoutShutdown(Milliseconds const & millisec);
-    void startTimeoutClose(Milliseconds const & millisec);
-    void cancelTimeoutShutdown();
-    void cancelTimeoutClose();
-    bool write(SharedSafetyWriter writer, uint64_t millisec = 0);
+    Err startCloseTimer(uint64_t millisec);
+    Err startShutdownTimer(uint64_t millisec);
+
+    void stopCloseTimer();
+    void stopShutdownTimer();
+
+    void updateWriteStatusToReady();
+    void updateWriteStatusToNotReady();
+    Err shutdownWrite();
+
+    Err writeReal(binf const * buffer, std::size_t size);
+    void copyToWriteBuffer(binf const * buffer, std::size_t size);
+    std::vector<binf> getWriteBufferInfo();
+
+    Err autoWrite(binf const * buffer, std::size_t size, uint64_t millisec = 0);
     void closeAll();
+// === PROTECTED SECTION END ===
+// =============================
+
+private:
+    void onAsyncWrite();
 
 public:
     /** Obtain the Client handle id. */
@@ -145,6 +181,7 @@ public:
         predicated(_client->getUserData());
     }
 
+// Event backend.
 public:
     virtual void runBackendConnect(Err code) override;
     virtual void runBackendShutdown(Err code) override;

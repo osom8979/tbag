@@ -18,7 +18,7 @@ namespace stream  {
 StreamServerNode::StreamServerNode(Loop & loop, StreamType type, ServerInterface * parent)
         : StreamClient(loop, type), _parent(parent)
 {
-    // EMPTY.
+    updateWriteStatusToReady();
 }
 
 StreamServerNode::~StreamServerNode()
@@ -34,7 +34,7 @@ StreamServerNode::WeakClient StreamServerNode::getWeakClient()
 
 void StreamServerNode::onConnect(Err code)
 {
-    // EMPTY.
+    assert(false && "Not used.");
 }
 
 void StreamServerNode::onShutdown(Err code)

@@ -63,7 +63,7 @@ void HttpClient::onConnect(Err code)
         return;
     }
 
-    startTimeoutClose(LEFT_TIME);
+    startCloseTimer(LEFT_TIME.count());
 }
 
 void HttpClient::onShutdown(Err code)
@@ -130,6 +130,7 @@ Err requestWithSync(HttpClient::StreamType type,
 {
     using Loop = uvpp::Loop;
     Loop loop;
+
     HttpClient http(loop, type);
 
     if (http.init(host.c_str(), port, timeout) == false) {
