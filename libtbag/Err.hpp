@@ -26,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
     /* Common error codes. */ \
     _TBAG_XX(_SUCCESS , "No error"              ) \
     _TBAG_XX(_ILLARGS , "Illegal arguments"     ) \
-    _TBAG_XX(_ISTATE  , "Illegal state"         ) \
+    _TBAG_XX(_ILLSTATE, "Illegal state"         ) \
     _TBAG_XX(_ALREADY , "Already state"         ) \
     _TBAG_XX(_BADALLOC, "Bad allocation"        ) \
     _TBAG_XX(_OORANGE , "Out of range"          ) \

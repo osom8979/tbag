@@ -65,7 +65,7 @@ Err Service::install()
 {
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::install() The service is not ready.");
-        return Err::E_ISTATE;
+        return Err::E_ILLSTATE;
     }
     return _service->install();
 }
@@ -74,7 +74,7 @@ Err Service::uninstall()
 {
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::uninstall() The service is not ready.");
-        return Err::E_ISTATE;
+        return Err::E_ILLSTATE;
     }
     return _service->uninstall();
 }
@@ -83,7 +83,7 @@ Err Service::start()
 {
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::start() The service is not ready.");
-        return Err::E_ISTATE;
+        return Err::E_ILLSTATE;
     }
     return _service->start();
 }
@@ -92,7 +92,7 @@ Err Service::stop()
 {
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::stop() The service is not ready.");
-        return Err::E_ISTATE;
+        return Err::E_ILLSTATE;
     }
     return _service->stop();
 }

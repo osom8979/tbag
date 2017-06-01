@@ -207,12 +207,12 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
 {
     if (isHost() == false) {
         tDLogE("Uri::requestAddrInfo() Unknown host: {}.", _uri);
-        return Err::E_ISTATE;
+        return Err::E_ILLSTATE;
     }
 
     if (isPort() == false && isSchema() == false) {
         tDLogE("Uri::requestAddrInfo() Unknown schema or port: {}.", _uri);
-        return Err::E_ISTATE;
+        return Err::E_ILLSTATE;
     }
 
     std::string const HOST    = getHost();
