@@ -33,6 +33,8 @@ namespace client {
 // ------------
 
 TBAG_API int runTpotRequest(std::string const & uri, structure::Exec const & exec);
+TBAG_API int runTpotRequest(std::string const & uri, structure::Heartbit const & heartbit);
+
 TBAG_API int runTpotRequest(std::string const & uri,
                             std::string const & file,
                             std::string const & cwd,
@@ -41,7 +43,10 @@ TBAG_API int runTpotRequest(std::string const & uri,
                             uint32_t uid = 0,
                             uint32_t gid = 0);
 TBAG_API int runTpotRequest();
+
 TBAG_API int runTpotRequestWithTest();
+TBAG_API int runTpotRequestWithExecTest();
+TBAG_API int runTpotRequestWithHeartbitTest();
 
 } // namespace client
 } // namespace tpot

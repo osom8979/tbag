@@ -38,7 +38,7 @@ int runTpotRequest(std::string const & uri, structure::Exec const & exec)
     request.body = body;
 
     uint64_t const TIMEOUT = 10000;
-    std::string const UPDATE_URI = network::Uri(uri).getUrl() + structure::Exec::getPath();
+    std::string const UPDATE_URI = network::Uri(uri).getUrl() + exec.getPath();
     std::cout << "Request URI: " << UPDATE_URI << std::endl;
     std::cout << "Timeout: " << TIMEOUT << "ms\n";
 
@@ -50,6 +50,29 @@ int runTpotRequest(std::string const & uri, structure::Exec const & exec)
 
     std::cout << "> Status code: " << response.status << std::endl;
     std::cout << "> Body: " << response.body << std::endl;
+    return EXIT_SUCCESS;
+}
+
+int runTpotRequest(std::string const & uri, structure::Heartbit const & heartbit)
+{
+    using namespace libtbag::network::http;
+
+    HttpRequest request;
+    request.insertHeader(heartbit.getAcceptKey(), heartbit.getAcceptValue());
+    request.method = heartbit.getMethod();
+
+    uint64_t const TIMEOUT = 10000;
+    std::string const UPDATE_URI = network::Uri(uri).getUrl() + heartbit.getPath();
+    std::cout << "Request URI: " << UPDATE_URI << std::endl;
+    std::cout << "Timeout: " << TIMEOUT << "ms\n";
+
+    HttpResponse response;
+    if (requestWithSync(UPDATE_URI, request, TIMEOUT, response) != Err::E_SUCCESS) {
+        std::cout << "Request error.\n";
+        return EXIT_FAILURE;
+    }
+
+    std::cout << "> Status code: " << response.status << std::endl;
     return EXIT_SUCCESS;
 }
 
@@ -137,6 +160,11 @@ int runTpotRequest()
 
 int runTpotRequestWithTest()
 {
+    return runTpotRequestWithHeartbitTest();
+}
+
+int runTpotRequestWithExecTest()
+{
     std::string const TEST = "TPOT_REQUEST_TEST";
 
     std::string const URI  = "http://localhost:2100";
@@ -154,6 +182,20 @@ int runTpotRequestWithTest()
     }
 
     std::cout << "Success! check the tbproc.txt file.\n";
+    return EXIT_SUCCESS;
+}
+
+int runTpotRequestWithHeartbitTest()
+{
+    std::string const URI = "http://localhost:2100";
+
+    int const EXIT_CODE = runTpotRequest(URI, structure::Heartbit());
+    if (EXIT_CODE != EXIT_SUCCESS) {
+        std::cerr << "Exit error (" << EXIT_CODE << ")\n";
+        return EXIT_FAILURE;
+    }
+
+    std::cout << "Success!\n";
     return EXIT_SUCCESS;
 }
 
