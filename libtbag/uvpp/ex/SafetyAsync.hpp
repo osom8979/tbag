@@ -61,13 +61,12 @@ public:
 
         virtual void run() = 0;
     };
-    using Job = JobInterface;
 
 public:
     /**
      * Functional job callback.
      */
-    struct FunctionalJob : public Job
+    struct FunctionalJob : public JobInterface
     {
         using OnJob = std::function<void(void)>;
 
@@ -108,7 +107,7 @@ public:
 public:
     using SharedInspector = std::shared_ptr<MistakeInspector>;
 
-    using SharedJob = std::shared_ptr<Job>;
+    using SharedJob = std::shared_ptr<JobInterface>;
     using JobQueue  = container::SafetyQueue<SharedJob>;
 
 private:
@@ -149,7 +148,7 @@ public:
         typedef typename remove_cr<JobType>::type ResultJobType;
         SharedJob shared = SharedJob(new (std::nothrow) JobType(std::forward<Args>(args) ...));
         sendJob(shared);
-        return std::static_pointer_cast<ResultJobType, Job>(shared);
+        return std::static_pointer_cast<ResultJobType, JobInterface>(shared);
     }
 
     template <typename ... Args>

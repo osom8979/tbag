@@ -79,7 +79,7 @@ public:
     using AtomicError = std::atomic<Err>;
 
 public:
-    struct TBAG_API WriterInterface : public SafetyAsync::Job
+    struct TBAG_API WriterInterface : public SafetyAsync::JobInterface
     {
         Id const id;
 

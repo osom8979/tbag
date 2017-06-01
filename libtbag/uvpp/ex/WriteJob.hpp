@@ -35,7 +35,7 @@ namespace ex   {
  * @author zer0
  * @date   2017-05-05
  */
-class TBAG_API WriteJob : public uvpp::ex::SafetyAsync::Job
+class TBAG_API WriteJob : public uvpp::ex::SafetyAsync::JobInterface
 {
 public:
     using SafetyAsync = uvpp::ex::SafetyAsync;
