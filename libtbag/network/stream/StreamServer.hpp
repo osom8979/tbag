@@ -20,7 +20,7 @@
 
 #include <libtbag/id/Id.hpp>
 #include <libtbag/uvpp/Stream.hpp>
-#include <libtbag/uvpp/ex/SafetyWriteAsync.hpp>
+#include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
 
 #include <unordered_map>
@@ -54,15 +54,12 @@ public:
     using SharedClient = ServerInterface::SharedClient;
     using   WeakClient = ServerInterface::WeakClient;
 
-public:
-    using SafetyAsync      = uvpp::ex::SafetyAsync;
-    using SafetyWriteAsync = uvpp::ex::SafetyWriteAsync;
+    using       SafetyAsync = uvpp::ex::SafetyAsync;
+    using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
+    using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
 
     using SharedServerBackend = std::shared_ptr<Stream>;
     using   WeakServerBackend =   std::weak_ptr<Stream>;
-
-    using SharedSafetyWriteAsync = std::shared_ptr<SafetyWriteAsync>;
-    using   WeakSafetyWriteAsync =   std::weak_ptr<SafetyWriteAsync>;
 
 public:
     using Mutex = std::mutex;
@@ -79,9 +76,9 @@ private:
     StreamType const STREAM_TYPE;
 
 private:
-    SharedServerBackend     _server;
-    SharedSafetyWriteAsync  _async;
-    ClientMap               _clients;
+    SharedServerBackend _server;
+    SharedSafetyAsync   _async;
+    ClientMap           _clients;
 
 private:
     std::string _destination;
@@ -107,7 +104,7 @@ public:
 
 public:
     WeakServerBackend getServer();
-    WeakSafetyWriteAsync getAsync();
+    WeakSafetyAsync getAsync();
 
 // ===============================
 // === PROTECTED SECTION BEGIN ===

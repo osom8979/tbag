@@ -35,7 +35,7 @@ StreamServer::StreamServer(Loop & loop, StreamType type) : STREAM_TYPE(type), _p
         throw std::bad_alloc();
     }
 
-    _async = loop.newHandle<SafetyWriteAsync>(loop);
+    _async = loop.newHandle<SafetyAsync>(loop);
 
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_async));
@@ -53,10 +53,10 @@ StreamServer::WeakServerBackend StreamServer::getServer()
     return WeakServerBackend(_server);
 }
 
-StreamServer::WeakSafetyWriteAsync StreamServer::getAsync()
+StreamServer::WeakSafetyAsync StreamServer::getAsync()
 {
     Guard g(_mutex);
-    return WeakSafetyWriteAsync(_async);
+    return WeakSafetyAsync(_async);
 }
 
 // ------------------
