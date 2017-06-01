@@ -46,11 +46,16 @@ public:
     using WeakClient = ServerInterface::WeakClient;
     using Loop       = uvpp::Loop;
 
+    using       SafetyAsync = StreamClient::SafetyAsync;
+    using SharedSafetyAsync = StreamClient::SharedSafetyAsync;
+    using   WeakSafetyAsync = StreamClient::WeakSafetyAsync;
+
 public:
     ServerInterface * _parent;
 
 public:
     StreamNode(Loop & loop, StreamType type, ServerInterface * parent);
+    StreamNode(Loop & loop, StreamType type, SharedSafetyAsync async, ServerInterface * parent);
     virtual ~StreamNode();
 
 private:

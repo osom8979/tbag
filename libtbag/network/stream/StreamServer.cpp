@@ -59,6 +59,10 @@ StreamServer::WeakSafetyWriteAsync StreamServer::getAsync()
     return WeakSafetyWriteAsync(_async);
 }
 
+// ------------------
+// PROTECTED SECTION.
+// ------------------
+
 StreamServer::SharedClient StreamServer::createClient()
 {
     assert(static_cast<bool>(_server));
@@ -66,7 +70,7 @@ StreamServer::SharedClient StreamServer::createClient()
     Loop * loop = _server->getLoop();
     assert(loop != nullptr);
 
-    return SharedClient(new (std::nothrow) StreamNode(*loop, STREAM_TYPE, this));
+    return SharedClient(new (std::nothrow) StreamNode(*loop, STREAM_TYPE, _async, this));
 }
 
 StreamServer::SharedClient StreamServer::getSharedClient(Id id)
@@ -142,11 +146,13 @@ bool StreamServer::init(char const * destination, int port)
 
 std::string StreamServer::getDestination() const
 {
+    Guard guard(_mutex);
     return _destination;
 }
 
 int StreamServer::getPort() const
 {
+    Guard guard(_mutex);
     return _port;
 }
 
@@ -158,9 +164,9 @@ void StreamServer::close()
     Loop * loop = _server->getLoop();
     assert(loop != nullptr);
 
+    Guard guard(_mutex);
     if (loop->isAliveAndThisThread()) {
         tDLogD("StreamServer::close() sync request.");
-        Guard guard(_mutex);
         closeAll();
     } else {
         tDLogD("StreamServer::close() async request.");
@@ -174,7 +180,7 @@ void StreamServer::close()
 StreamServer::WeakClient StreamServer::accept()
 {
     assert(static_cast<bool>(_server));
-    if (isOnConnection() == false) {
+    if (_on_connection.load() == false) {
         tDLogE("StreamServer::accept() server is not a connection state.");
         return WeakClient();
     }
@@ -205,8 +211,13 @@ StreamServer::WeakClient StreamServer::accept()
 
 StreamServer::WeakClient StreamServer::getClient(Id id)
 {
+    Guard guard(_mutex);
     return WeakClient(getSharedClient(id));
 }
+
+// --------------
+// Event backend.
+// --------------
 
 void StreamServer::runBackendConnection(Err code)
 {

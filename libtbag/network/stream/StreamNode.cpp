@@ -22,6 +22,12 @@ StreamNode::StreamNode(Loop & loop, StreamType type, ServerInterface * parent)
     updateWriteStatusToReady();
 }
 
+StreamNode::StreamNode(Loop & loop, StreamType type, SharedSafetyAsync async, ServerInterface * parent)
+        : StreamClient(loop, type, async), _parent(parent)
+{
+    updateWriteStatusToReady();
+}
+
 StreamNode::~StreamNode()
 {
     // EMPTY.

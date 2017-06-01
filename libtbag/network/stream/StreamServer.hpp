@@ -109,15 +109,19 @@ public:
     WeakServerBackend getServer();
     WeakSafetyWriteAsync getAsync();
 
-private:
+// ===============================
+// === PROTECTED SECTION BEGIN ===
+// [WARNING] Don't mutex guard in this protected section.
+protected:
     SharedClient createClient();
     SharedClient getSharedClient(Id id);
 
     bool insertClient(SharedClient client);
     bool removeClient(Id id);
 
-private:
     void closeAll();
+// === PROTECTED SECTION END ===
+// =============================
 
 public:
     /** Initialize this class. */
