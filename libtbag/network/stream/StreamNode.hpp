@@ -1,12 +1,13 @@
 /**
- * @file   StreamServerNode.hpp
- * @brief  StreamServerNode class prototype.
+ * @file   StreamNode.hpp
+ * @brief  StreamNode class prototype.
  * @author zer0
  * @date   2017-05-23
+ * @date   2017-06-01 (Rename: StreamServerNode -> StreamNode)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_STREAMSERVERNODE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_STREAMSERVERNODE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_STREAMNODE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_STREAMNODE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -30,12 +31,13 @@ namespace network {
 namespace stream  {
 
 /**
- * StreamServerNode class prototype.
+ * StreamNode class prototype.
  *
  * @author zer0
  * @date   2017-05-23
+ * @date   2017-06-01 (Rename: StreamServerNode -> StreamNode)
  */
-class TBAG_API StreamServerNode : public StreamClient
+class TBAG_API StreamNode : public StreamClient
 {
 public:
     using StreamType      = details::StreamType;
@@ -48,8 +50,8 @@ public:
     ServerInterface * _parent;
 
 public:
-    StreamServerNode(Loop & loop, StreamType type, ServerInterface * parent);
-    virtual ~StreamServerNode();
+    StreamNode(Loop & loop, StreamType type, ServerInterface * parent);
+    virtual ~StreamNode();
 
 private:
     WeakClient getWeakClient();
@@ -69,5 +71,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_STREAMSERVERNODE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_STREAMNODE_HPP__
 

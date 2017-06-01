@@ -1,11 +1,12 @@
 /**
- * @file   StreamServerNode.cpp
- * @brief  StreamServerNode class implementation.
+ * @file   StreamNode.cpp
+ * @brief  StreamNode class implementation.
  * @author zer0
  * @date   2017-05-23
+ * @date   2017-06-01 (Rename: StreamServerNode -> StreamNode)
  */
 
-#include <libtbag/network/stream/StreamServerNode.hpp>
+#include <libtbag/network/stream/StreamNode.hpp>
 #include <cassert>
 
 // -------------------
@@ -15,47 +16,47 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace stream  {
 
-StreamServerNode::StreamServerNode(Loop & loop, StreamType type, ServerInterface * parent)
+StreamNode::StreamNode(Loop & loop, StreamType type, ServerInterface * parent)
         : StreamClient(loop, type), _parent(parent)
 {
     updateWriteStatusToReady();
 }
 
-StreamServerNode::~StreamServerNode()
+StreamNode::~StreamNode()
 {
     // EMPTY.
 }
 
-StreamServerNode::WeakClient StreamServerNode::getWeakClient()
+StreamNode::WeakClient StreamNode::getWeakClient()
 {
     assert(_parent != nullptr);
     return _parent->getClient(this->getId());
 }
 
-void StreamServerNode::onConnect(Err code)
+void StreamNode::onConnect(Err code)
 {
     assert(false && "Not used.");
 }
 
-void StreamServerNode::onShutdown(Err code)
+void StreamNode::onShutdown(Err code)
 {
     assert(_parent != nullptr);
     _parent->onClientShutdown(getWeakClient(), code);
 }
 
-void StreamServerNode::onWrite(Err code)
+void StreamNode::onWrite(Err code)
 {
     assert(_parent != nullptr);
     _parent->onClientWrite(getWeakClient(), code);
 }
 
-void StreamServerNode::onRead(Err code, char const * buffer, std::size_t size)
+void StreamNode::onRead(Err code, char const * buffer, std::size_t size)
 {
     assert(_parent != nullptr);
     _parent->onClientRead(getWeakClient(), code, buffer, size);
 }
 
-void StreamServerNode::onClose()
+void StreamNode::onClose()
 {
     assert(_parent != nullptr);
     _parent->onClientClose(getWeakClient());

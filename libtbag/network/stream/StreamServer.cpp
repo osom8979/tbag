@@ -8,7 +8,7 @@
 #include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/stream/StreamServerBackend.hpp>
-#include <libtbag/network/stream/StreamServerNode.hpp>
+#include <libtbag/network/stream/StreamNode.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -66,7 +66,7 @@ StreamServer::SharedClient StreamServer::createClient()
     Loop * loop = _server->getLoop();
     assert(loop != nullptr);
 
-    return SharedClient(new (std::nothrow) StreamServerNode(*loop, STREAM_TYPE, this));
+    return SharedClient(new (std::nothrow) StreamNode(*loop, STREAM_TYPE, this));
 }
 
 StreamServer::SharedClient StreamServer::getSharedClient(Id id)
@@ -180,7 +180,7 @@ StreamServer::WeakClient StreamServer::accept()
     }
 
     Guard guard(_mutex);
-    auto client = std::static_pointer_cast<StreamServerNode, ClientInterface>(createClient());
+    auto client = std::static_pointer_cast<StreamNode, ClientInterface>(createClient());
 
     if (auto shared = client->getClient().lock()) {
         Err const CODE = _server->accept(*shared);
