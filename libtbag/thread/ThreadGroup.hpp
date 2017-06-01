@@ -32,7 +32,7 @@ namespace thread {
  * @author zer0
  * @date   2016-05-12
  */
-class TBAG_API ThreadGroup : public Noncopyable
+class TBAG_API ThreadGroup : private Noncopyable
 {
 public:
     using ThreadPointer = std::thread*;

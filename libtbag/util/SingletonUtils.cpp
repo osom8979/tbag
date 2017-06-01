@@ -33,7 +33,7 @@ namespace __impl {
  * @author zer0
  * @date   2017-05-18
  */
-class CreateOrRelease : public Noncopyable
+class CreateOrRelease : private Noncopyable
 {
 public:
     using Callback = std::function<void(void)>;

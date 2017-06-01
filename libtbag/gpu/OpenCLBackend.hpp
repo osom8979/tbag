@@ -30,7 +30,7 @@ namespace gpu {
  * @author zer0
  * @date   2017-04-18
  */
-class TBAG_API OpenCLBackend : public GpuBackendInterface, public Noncopyable
+class TBAG_API OpenCLBackend : public GpuBackendInterface, private Noncopyable
 {
 public:
     OpenCLBackend();

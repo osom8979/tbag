@@ -31,7 +31,7 @@ namespace lock {
  * @author zer0
  * @date   2016-05-20
  */
-class SpinLock : public Noncopyable
+class SpinLock : private Noncopyable
 {
 public:
     static TBAG_CONSTEXPR bool const   LOCKED =  true;

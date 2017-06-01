@@ -43,7 +43,7 @@ namespace ex {
  * @author zer0
  * @date   2016-12-28
  */
-class TBAG_API RequestQueue : public Noncopyable
+class TBAG_API RequestQueue : private Noncopyable
 {
 public:
     using SharedRequest = std::shared_ptr<Request>;

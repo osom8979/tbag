@@ -40,7 +40,7 @@ namespace mgr {
  * @author zer0
  * @date   2016-07-15
  */
-class TBAG_API Logger : public Noncopyable
+class TBAG_API Logger : private Noncopyable
 {
 public:
     using MsgPacket = msg::MsgPacket;

@@ -32,7 +32,7 @@ ${NAMESPACE_LIST_BEGIN}
  * @author ${AUTHOR}
  * @date   ${DATE}
  */
-class TBAG_API ${CLASSNAME} : public Noncopyable
+class TBAG_API ${CLASSNAME} : private Noncopyable
 {
 private:
     // Insert member variables.

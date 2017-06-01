@@ -36,7 +36,7 @@ namespace http    {
  * @author zer0
  * @date   2017-05-18
  */
-class TBAG_API HttpParser : public Noncopyable
+class TBAG_API HttpParser : private Noncopyable
 {
 public:
     class HttpParserImpl;

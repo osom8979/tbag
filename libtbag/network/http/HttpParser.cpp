@@ -45,7 +45,7 @@ static int __global_http_on_chunk_complete__  (http_parser * parser);
  * @author zer0
  * @date   2017-05-18
  */
-class HttpParser::HttpParserImpl : public Noncopyable
+class HttpParser::HttpParserImpl : private Noncopyable
 {
 public:
     using HeaderMap  = HttpParser::HeaderMap;

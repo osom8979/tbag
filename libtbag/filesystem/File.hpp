@@ -33,7 +33,7 @@ namespace filesystem {
  * @author zer0
  * @date   2017-03-16
  */
-class TBAG_API File : public Noncopyable
+class TBAG_API File : private Noncopyable
 {
 public:
     using ufile = details::ufile;

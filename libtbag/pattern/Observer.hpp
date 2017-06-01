@@ -52,7 +52,7 @@ public:
  * @date   2016-04-11 (Remove std::shared_ptr template class)
  */
 template <typename Functor>
-class ObservableSet : public ObservableInterface<Functor>, public Noncopyable
+class ObservableSet : public ObservableInterface<Functor>, private Noncopyable
 {
 public:
     using Observer = typename ObservableInterface<Functor>::Observer;

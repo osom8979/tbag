@@ -63,7 +63,7 @@ struct DemoAsset : public libtbag::res::Asset
  * @author zer0
  * @date   2017-03-20
  */
-struct TempDirGenerator : public Noncopyable
+struct TempDirGenerator : private Noncopyable
 {
     using Path = libtbag::res::Asset::Path;
 

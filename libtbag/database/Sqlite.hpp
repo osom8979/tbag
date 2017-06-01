@@ -36,7 +36,7 @@ namespace database {
  * @date   2016-04-29
  * @date   2016-07-06 (Rename: SqliteContext -> Sqlite)
  */
-class TBAG_API Sqlite : public Noncopyable
+class TBAG_API Sqlite : private Noncopyable
 {
 public:
     /** Fake @c sqlite3_stmt struct. */
@@ -52,7 +52,7 @@ public:
      * @author zer0
      * @date   2016-04-29
      */
-    class TBAG_API Transaction : public Noncopyable
+    class TBAG_API Transaction : private Noncopyable
     {
     private:
         Sqlite & _context;
@@ -68,7 +68,7 @@ public:
      * @author zer0
      * @date   2016-04-29
      */
-    class TBAG_API Statement : public Noncopyable
+    class TBAG_API Statement : private Noncopyable
     {
     public:
         using str = std::string;

@@ -34,7 +34,7 @@ namespace msg {
  * @author zer0
  * @date   2017-04-13
  */
-class TBAG_API PacketGenerator : public Noncopyable
+class TBAG_API PacketGenerator : private Noncopyable
 {
 public:
     enum class MakeType

@@ -63,7 +63,7 @@ struct TpotParams
  * @remarks
  *  Separate initializer and business logic.
  */
-class TBAG_API TpotRunner final : public Noncopyable
+class TBAG_API TpotRunner final : private Noncopyable
 {
 public:
     using Loop = uvpp::Loop;

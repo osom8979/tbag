@@ -100,7 +100,7 @@ TBAG_API Severity getDefaultSeverity();
  * @author zer0
  * @date   2017-05-09
  */
-class TBAG_API SeverityGuard : public Noncopyable
+class TBAG_API SeverityGuard : private Noncopyable
 {
 private:
     std::string _name;

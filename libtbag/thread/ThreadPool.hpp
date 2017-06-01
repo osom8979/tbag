@@ -37,7 +37,7 @@ namespace thread {
  * @author zer0
  * @date   2016-10-12
  */
-class TBAG_API ThreadPool : public Noncopyable
+class TBAG_API ThreadPool : private Noncopyable
 {
 public:
     struct ThreadPimpl;

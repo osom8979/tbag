@@ -26,12 +26,12 @@ NAMESPACE_LIBTBAG_OPEN
  * @author zer0
  * @date   2016-04-03
  */
-struct Noncopyable
+class Noncopyable
 {
-public:
-    Noncopyable() = default;
-
 protected:
+    TBAG_CONSTEXPR Noncopyable() = default;
+    ~Noncopyable() = default;
+
     Noncopyable(Noncopyable const &) = delete;
     void operator=(Noncopyable const &) = delete;
 };

@@ -33,7 +33,7 @@ namespace app {
  * @author zer0
  * @date   2017-05-13
  */
-class TBAG_API Application : public Noncopyable
+class TBAG_API Application : private Noncopyable
 {
 public:
     struct Property

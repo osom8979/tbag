@@ -30,7 +30,7 @@ namespace dom {
  * @author zer0
  * @date   2016-04-12
  */
-class TBAG_API Property : public Noncopyable
+class TBAG_API Property : private Noncopyable
 {
 public:
     static TBAG_CONSTEXPR char const * const getDefaultTagName() TBAG_NOEXCEPT

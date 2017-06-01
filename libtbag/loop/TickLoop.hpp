@@ -36,7 +36,7 @@ namespace loop {
  * @date   2016-04-29
  */
 template <typename DurationType = std::chrono::milliseconds>
-class TickLoop : public Noncopyable
+class TickLoop : private Noncopyable
 {
 public:
     using Duration    = DurationType;

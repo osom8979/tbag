@@ -124,7 +124,7 @@ std::string wcsToMbs(std::wstring const & path, unsigned int code_page)
  * @author zer0
  * @date   2016-11-24
  */
-struct Converter : public Noncopyable
+struct Converter : private Noncopyable
 {
     UConverter * converter;
     UErrorCode   status;

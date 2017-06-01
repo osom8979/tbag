@@ -77,7 +77,7 @@ struct DatagramTypes
  * @date   2017-01-24
  * @date   2017-05-13 (Rename: DatagramWrite -> DatagramEncoder)
  */
-class TBAG_API DatagramEncoder : public DatagramTypes, public Noncopyable
+class TBAG_API DatagramEncoder : public DatagramTypes, private Noncopyable
 {
 private:
     SharedBuffers _writers;
@@ -125,7 +125,7 @@ public:
  * @date   2017-01-24
  * @date   2017-05-13 (Rename: DatagramRead -> DatagramDecoder)
  */
-class TBAG_API DatagramDecoder : public DatagramTypes, public Noncopyable
+class TBAG_API DatagramDecoder : public DatagramTypes, private Noncopyable
 {
 private:
     Buffer _read_buffer;

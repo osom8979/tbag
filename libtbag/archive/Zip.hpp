@@ -33,7 +33,7 @@ namespace archive {
  * @author zer0
  * @date   2016-11-17
  */
-class TBAG_API Zip : public Noncopyable
+class TBAG_API Zip : private Noncopyable
 {
 public:
     enum class ResultCode

@@ -34,7 +34,7 @@ TBAG_API std::string getLibraryName(std::string const & name);
  * @author zer0
  * @date   2016-04-17
  */
-class TBAG_API SharedLibrary : public Noncopyable
+class TBAG_API SharedLibrary : private Noncopyable
 {
 public:
     using FakeLib = void;

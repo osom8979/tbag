@@ -29,7 +29,7 @@ namespace lock {
  * @author zer0
  * @date   2017-05-03
  */
-class TBAG_API UvSemaphore : public Noncopyable
+class TBAG_API UvSemaphore : private Noncopyable
 {
 private:
     void * _handle;

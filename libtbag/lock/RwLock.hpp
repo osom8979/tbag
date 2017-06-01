@@ -32,7 +32,7 @@ namespace lock {
  * @remarks
  *  Use the libuv.
  */
-class TBAG_API RwLock : public Noncopyable
+class TBAG_API RwLock : private Noncopyable
 {
 private:
     void * _handle;
@@ -58,7 +58,7 @@ public:
  * @author zer0
  * @date   2016-05-12
  */
-class ReadLockGuard : public Noncopyable
+class ReadLockGuard : private Noncopyable
 {
 private:
     RwLock & _lock;
@@ -76,7 +76,7 @@ public:
  * @author zer0
  * @date   2016-05-12
  */
-class WriteLockGuard : public Noncopyable
+class WriteLockGuard : private Noncopyable
 {
 private:
     RwLock & _lock;

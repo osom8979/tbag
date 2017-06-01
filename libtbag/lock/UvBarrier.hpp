@@ -29,7 +29,7 @@ namespace lock {
  * @author zer0
  * @date   2017-05-18
  */
-class TBAG_API UvBarrier : public Noncopyable
+class TBAG_API UvBarrier : private Noncopyable
 {
 private:
     int const COUNT;

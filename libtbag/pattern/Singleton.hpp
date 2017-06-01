@@ -79,7 +79,7 @@ std::mutex SingletonProperty<T>::_instance_lock;
  */
 class SingletonLifeManager
         : public SingletonProperty<SingletonLifeManager>
-        , public Noncopyable
+        , private Noncopyable
 {
 public:
     using Observable = ObservableSet<std::function<void(void)> >;
@@ -144,7 +144,7 @@ public:
  * @date   2016-04-22
  */
 template <typename T>
-class Singleton : public SingletonProperty<T>, public Noncopyable
+class Singleton : public SingletonProperty<T>, private Noncopyable
 {
 public:
     using BaseType = T;

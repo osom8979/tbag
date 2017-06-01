@@ -47,7 +47,7 @@ namespace loop {
  * @date   2016-04-28
  */
 template <typename Unit = std::chrono::nanoseconds>
-class RenderingLoop : public Noncopyable
+class RenderingLoop : private Noncopyable
 {
 public:
     using SystemClock = std::chrono::system_clock;

@@ -57,7 +57,7 @@ inline Duration getDurationWithPredicated(Predicated predicated)
  */
 template <typename OutputStream
         , typename Duration = std::chrono::milliseconds>
-class ElapsedTime : public Noncopyable
+class ElapsedTime : private Noncopyable
 {
 public:
     using SystemClock = std::chrono::system_clock;

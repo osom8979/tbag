@@ -29,7 +29,7 @@ namespace lock {
  * @author zer0
  * @date   2016-05-22
  */
-class FakeLock : public Noncopyable
+class FakeLock : private Noncopyable
 {
 public:
     FakeLock() = default;

@@ -34,7 +34,7 @@ namespace uvpp {
  * @date   2016-12-27 (Move package: libtbag/util -> libtbag/uv)
  * @date   2017-02-01 (Move package: libtbag/uv -> libtbag/uvpp)
  */
-class TBAG_API Native : public container::Pointer<void>, public Noncopyable
+class TBAG_API Native : public container::Pointer<void>, private Noncopyable
 {
 public:
     using Parent = container::Pointer<void>;

@@ -35,7 +35,7 @@ namespace container {
  */
 template <typename ValueType
         , typename MutexType = std::mutex>
-class SafetyQueue : public Noncopyable
+class SafetyQueue : private Noncopyable
 {
 public:
     using Value = ValueType;
