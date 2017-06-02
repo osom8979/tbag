@@ -39,15 +39,15 @@ TEST(LogXmlNodeTest, Parse)
     static Severity const S_INFO      = libtbag::log::level::INFORMATIONAL_SEVERITY;
     static Severity const S_DEBUG     = libtbag::log::level::        DEBUG_SEVERITY;
 
-    ASSERT_EQ(S_OFF      , LogXmlNode::parseSeverity(S_OFF      .text));
-    ASSERT_EQ(S_EMERGENCY, LogXmlNode::parseSeverity(S_EMERGENCY.text));
-    ASSERT_EQ(S_ALERT    , LogXmlNode::parseSeverity(S_ALERT    .text));
-    ASSERT_EQ(S_CRITICAL , LogXmlNode::parseSeverity(S_CRITICAL .text));
-    ASSERT_EQ(S_ERROR    , LogXmlNode::parseSeverity(S_ERROR    .text));
-    ASSERT_EQ(S_WARNING  , LogXmlNode::parseSeverity(S_WARNING  .text));
-    ASSERT_EQ(S_MOTICE   , LogXmlNode::parseSeverity(S_MOTICE   .text));
-    ASSERT_EQ(S_INFO     , LogXmlNode::parseSeverity(S_INFO     .text));
-    ASSERT_EQ(S_DEBUG    , LogXmlNode::parseSeverity(S_DEBUG    .text));
+    ASSERT_EQ(S_OFF      , LogXmlNode::parseSeverity(S_OFF      .getText()));
+    ASSERT_EQ(S_EMERGENCY, LogXmlNode::parseSeverity(S_EMERGENCY.getText()));
+    ASSERT_EQ(S_ALERT    , LogXmlNode::parseSeverity(S_ALERT    .getText()));
+    ASSERT_EQ(S_CRITICAL , LogXmlNode::parseSeverity(S_CRITICAL .getText()));
+    ASSERT_EQ(S_ERROR    , LogXmlNode::parseSeverity(S_ERROR    .getText()));
+    ASSERT_EQ(S_WARNING  , LogXmlNode::parseSeverity(S_WARNING  .getText()));
+    ASSERT_EQ(S_MOTICE   , LogXmlNode::parseSeverity(S_MOTICE   .getText()));
+    ASSERT_EQ(S_INFO     , LogXmlNode::parseSeverity(S_INFO     .getText()));
+    ASSERT_EQ(S_DEBUG    , LogXmlNode::parseSeverity(S_DEBUG    .getText()));
     ASSERT_EQ(S_OFF      , LogXmlNode::parseSeverity(""));
 
     ASSERT_TRUE(MakeType::DEFAULT       == LogXmlNode::parseGeneratorType(LogXmlNode::GENERATOR_DEFAULT));

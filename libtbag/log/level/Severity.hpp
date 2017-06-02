@@ -33,17 +33,17 @@ namespace level {
  */
 class Severity
 {
-public:
-    char const * text;
-    int level;
+private:
+    char const * _text;
+    int _level;
 
 public:
     // @formatter:off
-    Severity() TBAG_NOEXCEPT : text(), level()
+    Severity() TBAG_NOEXCEPT : _text(), _level()
     { /* EMPTY */ }
-    Severity(char const * t, int l) TBAG_NOEXCEPT : text(t), level(l)
+    Severity(char const * t, int l) TBAG_NOEXCEPT : _text(t), _level(l)
     { /* EMPTY */ }
-    Severity(Severity const & obj) TBAG_NOEXCEPT : text(obj.text), level(obj.level)
+    Severity(Severity const & obj) TBAG_NOEXCEPT : _text(obj._text), _level(obj._level)
     { /* EMPTY */ }
     ~Severity() TBAG_NOEXCEPT
     { /* EMPTY */ }
@@ -53,8 +53,8 @@ public:
     Severity & operator =(Severity const & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
-            level = obj.level;
-            text  = obj.text;
+            _level = obj._level;
+            _text  = obj._text;
         }
         return *this;
     }
@@ -62,36 +62,40 @@ public:
 public:
     // @formatter:off
     inline operator int() const TBAG_NOEXCEPT
-    { return level; }
+    { return _level; }
     inline operator char const *() const TBAG_NOEXCEPT
-    { return text; }
+    { return _text; }
 
     inline friend bool operator ==(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
-    { return lh.level == rh.level; }
+    { return lh._level == rh._level; }
     inline friend bool operator !=(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
-    { return lh.level != rh.level; }
+    { return lh._level != rh._level; }
 
     inline friend bool operator <(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
-    { return lh.level < rh.level; }
+    { return lh._level < rh._level; }
     inline friend bool operator >(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
-    { return lh.level > rh.level; }
+    { return lh._level > rh._level; }
 
     inline friend bool operator <=(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
-    { return lh.level <= rh.level; }
+    { return lh._level <= rh._level; }
     inline friend bool operator >=(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
-    { return lh.level >= rh.level; }
+    { return lh._level >= rh._level; }
 
     inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
-    { return level >= obj.level; }
+    { return _level >= obj._level; }
     // @formatter:on
 
     inline friend void swap(Severity & lh, Severity & rh) TBAG_NOEXCEPT
     {
         if (&lh != &rh) {
-            std::swap(lh.text, rh.text);
-            std::swap(lh.level, rh.level);
+            std::swap(lh._text, rh._text);
+            std::swap(lh._level, rh._level);
         }
     }
+
+public:
+    inline char const * getText() const TBAG_NOEXCEPT { return _text; }
+    inline int getLevel() const TBAG_NOEXCEPT { return _level; }
 };
 
 Severity const           OFF_SEVERITY("OFF"      ,   0); // Hide all messages.

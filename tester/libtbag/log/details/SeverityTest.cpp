@@ -17,7 +17,7 @@ TEST(SeverityTest, Severity)
     Severity s1 = EMERGENCY_SEVERITY;
     Severity s2 = s1;
 
-    ASSERT_EQ(static_cast<int>(EMERGENCY_SEVERITY), s1.level);
-    ASSERT_EQ(static_cast<int>(EMERGENCY_SEVERITY), s2.level);
+    ASSERT_EQ(static_cast<int>(EMERGENCY_SEVERITY), s1.getLevel());
+    ASSERT_EQ(static_cast<int>(EMERGENCY_SEVERITY), s2.getLevel());
 }
 

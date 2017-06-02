@@ -101,7 +101,7 @@ PacketGenerator::String PacketGenerator::getCurrentThreadString()
 
 PacketGenerator::String PacketGenerator::getSeverityString(Severity const & severity)
 {
-    return String(DATE_MSG_SEVERITY_PREFIX) + severity.text + DATE_MSG_SEVERITY_SUFFIX;
+    return String(DATE_MSG_SEVERITY_PREFIX) + severity.getText() + DATE_MSG_SEVERITY_SUFFIX;
 }
 
 } // namespace msg

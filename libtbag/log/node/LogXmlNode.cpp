@@ -143,14 +143,14 @@ LogXmlNode::Severity LogXmlNode::parseSeverity(String const & value)
     String const UPPER_VALUE = string::upper(value);
 
     // @formatter:off
-    if (UPPER_VALUE.compare(S_EMERGENCY.text) == 0) { return S_EMERGENCY; }
-    if (UPPER_VALUE.compare(S_ALERT    .text) == 0) { return S_ALERT    ; }
-    if (UPPER_VALUE.compare(S_CRITICAL .text) == 0) { return S_CRITICAL ; }
-    if (UPPER_VALUE.compare(S_ERROR    .text) == 0) { return S_ERROR    ; }
-    if (UPPER_VALUE.compare(S_WARNING  .text) == 0) { return S_WARNING  ; }
-    if (UPPER_VALUE.compare(S_MOTICE   .text) == 0) { return S_MOTICE   ; }
-    if (UPPER_VALUE.compare(S_INFO     .text) == 0) { return S_INFO     ; }
-    if (UPPER_VALUE.compare(S_DEBUG    .text) == 0) { return S_DEBUG    ; }
+    if (UPPER_VALUE.compare(S_EMERGENCY.getText()) == 0) { return S_EMERGENCY; }
+    if (UPPER_VALUE.compare(S_ALERT    .getText()) == 0) { return S_ALERT    ; }
+    if (UPPER_VALUE.compare(S_CRITICAL .getText()) == 0) { return S_CRITICAL ; }
+    if (UPPER_VALUE.compare(S_ERROR    .getText()) == 0) { return S_ERROR    ; }
+    if (UPPER_VALUE.compare(S_WARNING  .getText()) == 0) { return S_WARNING  ; }
+    if (UPPER_VALUE.compare(S_MOTICE   .getText()) == 0) { return S_MOTICE   ; }
+    if (UPPER_VALUE.compare(S_INFO     .getText()) == 0) { return S_INFO     ; }
+    if (UPPER_VALUE.compare(S_DEBUG    .getText()) == 0) { return S_DEBUG    ; }
     return OFF_SEVERITY;
     // @formatter:on
 }
@@ -275,7 +275,7 @@ bool LogXmlNode::insertSeverity(Element & parent, Severity severity)
 {
     auto * doc = parent.GetDocument();
     auto * element = doc->NewElement(XML_ELEMENT_SEVERITY);
-    element->SetText(severity.text);
+    element->SetText(severity.getText());
     return parent.InsertEndChild(element) != nullptr;
 }
 
