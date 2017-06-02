@@ -45,6 +45,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EXPIRED , "Expired object error"  ) \
     _TBAG_XX(_INSERT  , "Insert error"          ) \
     _TBAG_XX(_CLOSING , "Closing object"        ) \
+    _TBAG_XX(_EQUERY  , "Query error"           ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

@@ -15,9 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
+
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/3rd/tinyxml2/tinyxml2.h>
-#include <libtbag/Type.hpp>
+#include <libtbag/dom/XmlHelper.hpp>
 
 #include <map>
 #include <string>
@@ -53,11 +56,20 @@ public:
     };
 
 public:
-    struct NodeInterface
+    /**
+     * NodeInterface class prototype.
+     *
+     * @author zer0
+     * @date   2017-04-21
+     */
+    struct NodeInterface : public XmlHelper
     {
         using Document = XmlModel::Document;
         using Element  = XmlModel::Element;
         using Node     = XmlModel::Node;
+
+        STATIC_ASSERT_CHECK_IS_SAME(Document, XmlHelper::Document);
+        STATIC_ASSERT_CHECK_IS_SAME(Element , XmlHelper::Element );
 
         NodeInterface() { /* EMPTY. */ }
         virtual ~NodeInterface() { /* EMPTY. */ }

@@ -7,6 +7,8 @@
 
 #include <libtbag/dom/XmlModel.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <functional>
 #include <utility>
 
 // -------------------
@@ -15,8 +17,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace dom {
 
-TBAG_CONSTEXPR char const * const DEFAULT_ROOT_NAME = "root";
-TBAG_CONSTEXPR char const * const DEFAULT_FILE_NAME = "config.xml";
+TBAG_CONSTEXPR static char const * const DEFAULT_ROOT_NAME = "root";
+TBAG_CONSTEXPR static char const * const DEFAULT_FILE_NAME = "config.xml";
 
 // ------------------------
 // XmlModel implementation.

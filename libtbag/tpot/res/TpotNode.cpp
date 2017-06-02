@@ -99,45 +99,17 @@ void TpotNode::teardown()
 void TpotNode::load(Element const & element)
 {
     WriteGuard guard(_lock);
-
-    auto * var_node = element.FirstChildElement(TPOT_NODE_VAR);
-    if (var_node != nullptr && var_node->GetText() != nullptr) {
-        _var.assign(var_node->GetText());
-    } else {
-        _var.clear();
-    }
-
-    auto * bind_node = element.FirstChildElement(TPOT_NODE_BIND);
-    if (bind_node != nullptr && bind_node->GetText() != nullptr) {
-        _bind.assign(bind_node->GetText());
-    } else {
-        _bind.clear();
-    }
-
-    int temp_port = 0;
-    auto * port_node = element.FirstChildElement(TPOT_NODE_PORT);
-    if (port_node != nullptr && port_node->QueryIntText(&temp_port) == tinyxml2::XML_NO_ERROR) {
-        _port = temp_port;
-    } else {
-        _port = 0;
-    }
+    opt(element, TPOT_NODE_VAR, _var);
+    opt(element, TPOT_NODE_BIND, _bind);
+    opt(element, TPOT_NODE_PORT, _port);
 }
 
 void TpotNode::save(Element & element) const
 {
     ReadGuard guard(_lock);
-
-    auto * var_node = element.GetDocument()->NewElement(TPOT_NODE_VAR);
-    var_node->SetText(_var.c_str());
-    element.InsertEndChild(var_node);
-
-    auto * bind_node = element.GetDocument()->NewElement(TPOT_NODE_BIND);
-    bind_node->SetText(_bind.c_str());
-    element.InsertEndChild(bind_node);
-
-    auto * port_node = element.GetDocument()->NewElement(TPOT_NODE_PORT);
-    port_node->SetText(_port);
-    element.InsertEndChild(port_node);
+    set(element, TPOT_NODE_VAR, _var);
+    set(element, TPOT_NODE_BIND, _bind);
+    set(element, TPOT_NODE_PORT, _port);
 }
 
 std::string TpotNode::getVar() const
