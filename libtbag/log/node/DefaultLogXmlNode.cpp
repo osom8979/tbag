@@ -15,12 +15,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log  {
 namespace node {
 
-TBAG_CONSTEXPR char const * const DEFAULT_PARENT_XML_NODE_NAME  = "default_logger";
-TBAG_CONSTEXPR char const * const DEFAULT_LOGGER_FILE_EXTENSION = ".log";
+TBAG_CONSTEXPR static char const * const DEFAULT_PARENT_XML_NODE_NAME  = "default_logger";
+TBAG_CONSTEXPR static char const * const DEFAULT_LOGGER_FILE_EXTENSION = ".log";
 
-DefaultLogXmlNode::DefaultLogXmlNode() : DefaultLogXmlNode(log::TBAG_DEFAULT_LOGGER_NAME)
+DefaultLogXmlNode::DefaultLogXmlNode()
 {
-    // EMPTY.
+    _params = getDefaultParams();
 }
 
 DefaultLogXmlNode::DefaultLogXmlNode(std::string const & name)
