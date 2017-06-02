@@ -41,10 +41,7 @@ public:
     using Document = tinyxml2::XMLDocument;
     using Element  = tinyxml2::XMLElement;
     using Node     = tinyxml2::XMLNode;
-
-    using Path   = filesystem::Path;
-    using String = std::string;
-    using Size   = std::size_t;
+    using Path     = filesystem::Path;
 
 public:
     enum class Scope
@@ -61,12 +58,11 @@ public:
         using Document = XmlModel::Document;
         using Element  = XmlModel::Element;
         using Node     = XmlModel::Node;
-        using String   = XmlModel::String;
 
         NodeInterface() { /* EMPTY. */ }
         virtual ~NodeInterface() { /* EMPTY. */ }
 
-        virtual String name() const = 0;
+        virtual std::string name() const = 0;
 
         virtual void setup() = 0;
         virtual void teardown() = 0;
@@ -78,7 +74,7 @@ public:
 public:
     using SharedNode = std::shared_ptr<NodeInterface>;
     using WeakNode   = std::weak_ptr<NodeInterface>;
-    using NodeMap    = std::map<String, SharedNode>;
+    using NodeMap    = std::map<std::string, SharedNode>;
     using NodePair   = NodeMap::value_type;
 
 private:
@@ -97,17 +93,17 @@ public:
 public:
     inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.clear()))
     { _nodes.clear(); }
-    inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.size()))
     { return _nodes.size(); }
     inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.empty()))
     { return _nodes.empty(); }
 
 public:
     bool add(SharedNode model);
-    bool remove(String const & name);
+    bool remove(std::string const & name);
 
 public:
-    WeakNode get(String const & name);
+    WeakNode get(std::string const & name);
 
 public:
     template <typename Up>
@@ -121,8 +117,8 @@ public:
     }
 
 public:
-    virtual String getRootName() const;
-    virtual String getFileName() const;
+    virtual std::string getRootName() const;
+    virtual std::string getFileName() const;
 
     virtual Path getWorkDir() const;
     virtual Path getExeDir() const;

@@ -42,7 +42,6 @@ public:
     using NodeInterface = Parent::NodeInterface;
     using SharedNode    = Parent::SharedNode;
 
-    using String = Parent::String;
     using Path   = Parent::Path;
     using Scope  = Parent::Scope;
 
@@ -51,12 +50,14 @@ public:
     virtual ~TpotConfig();
 
 public:
-    virtual String getRootName () const override;
-    virtual String getFileName () const override;
-    virtual Path   getWorkDir  () const override;
-    virtual Path   getExeDir   () const override;
-    virtual Path   getHomeDir  () const override;
-    virtual Path   getGlobalDir() const override;
+    virtual std::string getRootName() const override;
+    virtual std::string getFileName() const override;
+
+public:
+    virtual Path getWorkDir  () const override;
+    virtual Path getExeDir   () const override;
+    virtual Path getHomeDir  () const override;
+    virtual Path getGlobalDir() const override;
 };
 
 } // namespace res

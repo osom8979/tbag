@@ -118,12 +118,12 @@ struct LogXmlNodeTest : public LogXmlNode
         // EMPTY.
     }
 
-    LogXmlNodeTest(String const & test_dir)
+    LogXmlNodeTest(std::string const & test_dir)
     {
         atEnvs().push(LogXmlNode::EnvFlag(ENV_TEST_DIR, test_dir));
     }
 
-    virtual String name() const override
+    virtual std::string name() const override
     {
         return TEST_LOG_NAME;
     }

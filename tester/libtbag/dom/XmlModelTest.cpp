@@ -22,7 +22,7 @@ TBAG_CONSTEXPR static int const INTEGER_ATTR_VALUE = 100;
 
 struct ModelNode : public XmlModel::NodeInterface
 {
-    String root;
+    std::string root;
 
     int call_setup;
     int call_teardown;
@@ -30,15 +30,15 @@ struct ModelNode : public XmlModel::NodeInterface
     mutable int call_save;
 
     int integer;
-    String text;
+    std::string text;
 
-    ModelNode(String const & r) : root(r) , call_setup(0), call_teardown(0), call_load(0), call_save(0)
+    ModelNode(std::string const & r) : root(r) , call_setup(0), call_teardown(0), call_load(0), call_save(0)
     { /* EMPTY. */ }
 
     ~ModelNode()
     { /* EMPTY. */ }
 
-    virtual String name() const override
+    virtual std::string name() const override
     {
         return root;
     }

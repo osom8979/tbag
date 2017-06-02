@@ -75,7 +75,7 @@ TpotNode & TpotNode::operator =(TpotNode && obj)
     return *this;
 }
 
-TpotNode::String TpotNode::name() const
+std::string TpotNode::name() const
 {
     return TPOT_NODE_ROOT;
 }
@@ -140,13 +140,13 @@ void TpotNode::save(Element & element) const
     element.InsertEndChild(port_node);
 }
 
-TpotNode::String TpotNode::getVar() const
+std::string TpotNode::getVar() const
 {
     ReadGuard guard(_lock);
     return _var;
 }
 
-TpotNode::String TpotNode::getBind() const
+std::string TpotNode::getBind() const
 {
     ReadGuard guard(_lock);
     return _bind;

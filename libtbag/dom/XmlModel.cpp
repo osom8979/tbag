@@ -66,12 +66,12 @@ bool XmlModel::add(SharedNode model)
     return _nodes.insert(NodePair(model->name(), model)).second;
 }
 
-bool XmlModel::remove(String const & name)
+bool XmlModel::remove(std::string const & name)
 {
     return _nodes.erase(name) == 1U;
 }
 
-XmlModel::WeakNode XmlModel::get(String const & name)
+XmlModel::WeakNode XmlModel::get(std::string const & name)
 {
     auto itr = _nodes.find(name);
     if (itr == _nodes.end()) {
@@ -80,12 +80,12 @@ XmlModel::WeakNode XmlModel::get(String const & name)
     return WeakNode(itr->second);
 }
 
-XmlModel::String XmlModel::getRootName() const
+std::string XmlModel::getRootName() const
 {
     return DEFAULT_ROOT_NAME;
 }
 
-XmlModel::String XmlModel::getFileName() const
+std::string XmlModel::getFileName() const
 {
     return DEFAULT_FILE_NAME;
 }

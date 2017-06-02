@@ -26,12 +26,12 @@ TpotConfig::~TpotConfig()
     // EMPTY.
 }
 
-TpotConfig::String TpotConfig::getRootName() const
+std::string TpotConfig::getRootName() const
 {
     return TPOT_CONFIG_XML_ROOT_NAME;
 }
 
-TpotConfig::String TpotConfig::getFileName() const
+std::string TpotConfig::getFileName() const
 {
     return TPOT_CONFIG_XML_FILE_NAME;
 }

@@ -42,17 +42,12 @@ public:
     using Severity = log::level::Severity;
     using MakeType = log::msg::PacketGenerator::MakeType;
     using Logger   = log::mgr::Logger;
-
     using Element  = dom::XmlModel::Element;
-    using String   = dom::XmlModel::NodeInterface::String;
 
     using Environments = string::Environments;
     using EnvFlag      = Environments::Flag;
 
-    using StringVector = std::vector<String>;
-
-public:
-    STATIC_ASSERT_CHECK_IS_SAME(String, std::string);
+    using StringVector = std::vector<std::string>;
 
 public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_TLOG_NAME   = "tlog";
@@ -93,9 +88,9 @@ public:
 public:
     struct LogInfo
     {
-        String name;
-        String sink;
-        String destination;
+        std::string name;
+        std::string sink;
+        std::string destination;
         bool auto_flush;
         bool multithread;
         bool mutex;
@@ -122,7 +117,7 @@ public:
     // @formatter:on
 
 protected:
-    virtual String name() const override;
+    virtual std::string name() const override;
 
     virtual void setup() override;
     virtual void teardown() override;
@@ -150,34 +145,34 @@ public:
 
 public:
     // @formatter:off
-    static bool     parseAutoFlush    (String const & value);
-    static bool     parseMultiThread  (String const & value);
-    static bool     parseMutex        (String const & value);
-    static Severity parseSeverity     (String const & value);
-    static MakeType parseGeneratorType(String const & value);
+    static bool     parseAutoFlush    (std::string const & value);
+    static bool     parseMultiThread  (std::string const & value);
+    static bool     parseMutex        (std::string const & value);
+    static Severity parseSeverity     (std::string const & value);
+    static MakeType parseGeneratorType(std::string const & value);
     // @formatter:on
 
 public:
-    static String getElementText(Element const * element);
+    static std::string getElementText(Element const * element);
 
 public:
-    static LogInfo getLogInfo(String const & name,
-                              String const & sink,
-                              String const & destination,
-                              String const & auto_flush,
-                              String const & multithread,
-                              String const & mutex,
-                              String const & severity,
-                              String const & generator);
+    static LogInfo getLogInfo(std::string const & name,
+                              std::string const & sink,
+                              std::string const & destination,
+                              std::string const & auto_flush,
+                              std::string const & multithread,
+                              std::string const & mutex,
+                              std::string const & severity,
+                              std::string const & generator);
     static LogInfo getLogInfo(Element const & element);
 
 public:
     static LogInfoVector loadLogInfo(Element const & element);
 
 public:
-    static bool insertName          (Element & parent, String const & name);
-    static bool insertSink          (Element & parent, String const & sink);
-    static bool insertDestination   (Element & parent, String const & destination);
+    static bool insertName          (Element & parent, std::string const & name);
+    static bool insertSink          (Element & parent, std::string const & sink);
+    static bool insertDestination   (Element & parent, std::string const & destination);
     static bool insertAutoFlush     (Element & parent, bool auto_flush);
     static bool insertMultiThread   (Element & parent, bool multithread);
     static bool insertMutex         (Element & parent, bool mutex);

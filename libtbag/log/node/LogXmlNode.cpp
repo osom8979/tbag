@@ -34,7 +34,7 @@ LogXmlNode::~LogXmlNode()
     // EMPTY.
 }
 
-LogXmlNode::String LogXmlNode::name() const
+std::string LogXmlNode::name() const
 {
     return XML_ELEMENT_TLOG_NAME;
 }
@@ -94,10 +94,10 @@ LogXmlNode::StringVector LogXmlNode::getNames() const
 // Static methods.
 // ---------------
 
-bool LogXmlNode::parseAutoFlush(String const & value)
+bool LogXmlNode::parseAutoFlush(std::string const & value)
 {
     // @formatter:off
-    String const LOWER_VALUE = string::lower(value);
+    std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == AUTO_FLUSH_ON) {
         return true;
     }
@@ -105,10 +105,10 @@ bool LogXmlNode::parseAutoFlush(String const & value)
     // @formatter:on
 }
 
-bool LogXmlNode::parseMultiThread(String const & value)
+bool LogXmlNode::parseMultiThread(std::string const & value)
 {
     // @formatter:off
-    String const LOWER_VALUE = string::lower(value);
+    std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == MULTITHREAD_ON) {
         return true;
     }
@@ -116,10 +116,10 @@ bool LogXmlNode::parseMultiThread(String const & value)
     // @formatter:on
 }
 
-bool LogXmlNode::parseMutex(String const & value)
+bool LogXmlNode::parseMutex(std::string const & value)
 {
     // @formatter:off
-    String const LOWER_VALUE = string::lower(value);
+    std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == MUTEX_ON) {
         return true;
     }
@@ -127,7 +127,7 @@ bool LogXmlNode::parseMutex(String const & value)
     // @formatter:on
 }
 
-LogXmlNode::Severity LogXmlNode::parseSeverity(String const & value)
+LogXmlNode::Severity LogXmlNode::parseSeverity(std::string const & value)
 {
     // @formatter:off
     static Severity const S_EMERGENCY = libtbag::log::level::    EMERGENCY_SEVERITY;
@@ -140,7 +140,7 @@ LogXmlNode::Severity LogXmlNode::parseSeverity(String const & value)
     static Severity const S_DEBUG     = libtbag::log::level::        DEBUG_SEVERITY;
     // @formatter:on
 
-    String const UPPER_VALUE = string::upper(value);
+    std::string const UPPER_VALUE = string::upper(value);
 
     // @formatter:off
     if (UPPER_VALUE.compare(S_EMERGENCY.getText()) == 0) { return S_EMERGENCY; }
@@ -155,10 +155,10 @@ LogXmlNode::Severity LogXmlNode::parseSeverity(String const & value)
     // @formatter:on
 }
 
-LogXmlNode::MakeType LogXmlNode::parseGeneratorType(String const & value)
+LogXmlNode::MakeType LogXmlNode::parseGeneratorType(std::string const & value)
 {
     // @formatter:off
-    String const LOWER_VALUE = string::lower(value);
+    std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == GENERATOR_DEFAULT_COLOR) {
         return MakeType::DEFAULT_COLOR;
     }
@@ -166,23 +166,23 @@ LogXmlNode::MakeType LogXmlNode::parseGeneratorType(String const & value)
     // @formatter:on
 }
 
-LogXmlNode::String LogXmlNode::getElementText(Element const * element)
+std::string LogXmlNode::getElementText(Element const * element)
 {
     if (element != nullptr && element->GetText() != nullptr) {
-        return String(element->GetText());
+        return std::string(element->GetText());
     }
-    return String();
+    return std::string();
 }
 
 LogXmlNode::LogInfo LogXmlNode::getLogInfo(
-        String const & name,
-        String const & sink,
-        String const & destination,
-        String const & auto_flush,
-        String const & multithread,
-        String const & mutex,
-        String const & severity,
-        String const & generator)
+        std::string const & name,
+        std::string const & sink,
+        std::string const & destination,
+        std::string const & auto_flush,
+        std::string const & multithread,
+        std::string const & mutex,
+        std::string const & severity,
+        std::string const & generator)
 {
     LogInfo result;
     result.name        = name;
@@ -223,7 +223,7 @@ LogXmlNode::LogInfoVector LogXmlNode::loadLogInfo(Element const & parent)
     return result;
 }
 
-bool LogXmlNode::insertName(Element & parent, String const & name)
+bool LogXmlNode::insertName(Element & parent, std::string const & name)
 {
     auto * doc = parent.GetDocument();
     auto * element = doc->NewElement(XML_ELEMENT_NAME);
@@ -231,7 +231,7 @@ bool LogXmlNode::insertName(Element & parent, String const & name)
     return parent.InsertEndChild(element) != nullptr;
 }
 
-bool LogXmlNode::insertSink(Element & parent, String const & sink)
+bool LogXmlNode::insertSink(Element & parent, std::string const & sink)
 {
     auto * doc = parent.GetDocument();
     auto * element = doc->NewElement(XML_ELEMENT_SINK);
@@ -239,7 +239,7 @@ bool LogXmlNode::insertSink(Element & parent, String const & sink)
     return parent.InsertEndChild(element) != nullptr;
 }
 
-bool LogXmlNode::insertDestination(Element & parent, String const & destination)
+bool LogXmlNode::insertDestination(Element & parent, std::string const & destination)
 {
     auto * doc = parent.GetDocument();
     auto * element = doc->NewElement(XML_ELEMENT_DESTINATION);
@@ -284,7 +284,7 @@ bool LogXmlNode::insertGeneratorType(Element & parent, MakeType type)
     auto * doc = parent.GetDocument();
     auto * element = doc->NewElement(XML_ELEMENT_GENERATOR);
 
-    String generator;
+    std::string generator;
     if (type == MakeType::DEFAULT) {
         generator = GENERATOR_DEFAULT;
     } else if (type == MakeType::DEFAULT_COLOR) {
@@ -341,7 +341,7 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
         return nullptr;
     }
 
-    String const DEST = envs.convert(info.destination);
+    std::string const DEST = envs.convert(info.destination);
 
     Logger * logger = nullptr;
     if (info.sink == SINK_COUT) {

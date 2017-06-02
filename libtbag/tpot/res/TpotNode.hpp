@@ -37,15 +37,14 @@ public:
     using Lock       = lock::RwLock;
     using ReadGuard  = lock::ReadLockGuard;
     using WriteGuard = lock::WriteLockGuard;
-    using String     = TpotConfig::String;
 
 private:
     mutable Lock _lock;
 
 private:
-    String _var;
-    String _bind;
-    int    _port;
+    std::string _var;
+    std::string _bind;
+    int _port;
 
 public:
     TpotNode();
@@ -58,7 +57,7 @@ public:
     TpotNode & operator =(TpotNode && obj);
 
 public:
-    virtual String name() const override;
+    virtual std::string name() const override;
 
     virtual void setup() override;
     virtual void teardown() override;
@@ -67,8 +66,8 @@ public:
     virtual void save(Element & element) const override;
 
 public:
-    String getVar() const;
-    String getBind() const;
+    std::string getVar() const;
+    std::string getBind() const;
     int getPort() const;
 };
 
