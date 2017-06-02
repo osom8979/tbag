@@ -107,15 +107,19 @@ XmlModel::Path XmlModel::getHomeDir() const
 
 XmlModel::Path XmlModel::getGlobalDir() const
 {
-    return Path();
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return Path("C:\\Program Files");
+#else
+    return Path("/etc");
+#endif
 }
 
 XmlModel::Path XmlModel::getFilePath(Scope scope) const
 {
     // @formatter:off
     if (scope == Scope::WORK  ) { return getWorkDir  () / getFileName(); }
-    if (scope == Scope::EXE   ) { return getWorkDir  () / getFileName(); }
-    if (scope == Scope::HOME  ) { return getExeDir   () / getFileName(); }
+    if (scope == Scope::EXE   ) { return getExeDir   () / getFileName(); }
+    if (scope == Scope::HOME  ) { return getHomeDir  () / getFileName(); }
     if (scope == Scope::GLOBAL) { return getGlobalDir() / getFileName(); }
     return Path::getHomeDir() / getFileName();
     // @formatter:on
