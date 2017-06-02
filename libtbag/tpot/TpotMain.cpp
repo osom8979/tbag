@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/tpot/TpotMain.hpp>
+#include <libtbag/tpot/TpotCommon.hpp>
 #include <libtbag/container/Global.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -155,7 +156,7 @@ void TpotMain::initConfig()
     assert(static_cast<bool>(config));
 
     config->add(TpotConfig::SharedNode(new TpotNode()));
-    config->add(TpotConfig::SharedNode(new TpotLog()));
+    config->add(TpotConfig::SharedNode(new TpotLog(TPOT_DEFAULT_LOGGER_NAME, TPOT_DEFAULT_LOGGER_FILE_PREFIX)));
 
     bool const RESULT = config->loadOrDefaultSave(filesystem::Path(_config_path));
     if (RESULT == false) {
