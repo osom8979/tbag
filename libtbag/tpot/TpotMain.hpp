@@ -18,8 +18,8 @@
 #include <libtbag/app/Service.hpp>
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/log/node/DefaultLogXmlNode.hpp>
+#include <libtbag/dom/DefaultXmlModel.hpp>
 
-#include <libtbag/tpot/res/TpotConfig.hpp>
 #include <libtbag/tpot/res/TpotNode.hpp>
 
 #include <memory>
@@ -42,8 +42,9 @@ class TBAG_API TpotMain final : public app::Service
 {
 public:
     using HelpCommander = string::HelpCommander;
-    using TpotLog  = log::node::DefaultLogXmlNode;
-    using TpotNode = res::TpotNode;
+    using TpotConfig = dom::DefaultXmlModel;
+    using TpotLog    = log::node::DefaultLogXmlNode;
+    using TpotNode   = res::TpotNode;
 
     using WeakTpotLog  = std::weak_ptr<TpotLog>;
     using WeakTpotNode = std::weak_ptr<TpotNode>;

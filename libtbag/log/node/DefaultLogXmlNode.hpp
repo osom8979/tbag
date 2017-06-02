@@ -55,7 +55,7 @@ public:
         std::string mutex;       ///< true or false.
     };
 
-public:
+private:
     InitParams _params;
 
 public:

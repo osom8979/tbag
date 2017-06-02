@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/tpot/res/TpotConfig.hpp>
+#include <libtbag/dom/XmlModel.hpp>
 #include <libtbag/lock/RwLock.hpp>
 
 // -------------------
@@ -31,7 +31,7 @@ namespace res  {
  * @author zer0
  * @date   2017-05-27
  */
-class TBAG_API TpotNode : public TpotConfig::NodeInterface
+class TBAG_API TpotNode : public libtbag::dom::XmlModel::NodeInterface
 {
 public:
     using Lock       = lock::RwLock;

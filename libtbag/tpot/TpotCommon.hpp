@@ -26,6 +26,9 @@ namespace tpot {
 TBAG_CONSTEXPR char const * const TPOT_DEFAULT_LOGGER_NAME = log::TBAG_DEFAULT_LOGGER_NAME;
 TBAG_CONSTEXPR char const * const TPOT_DEFAULT_LOGGER_FILE_PREFIX = "tpot";
 
+TBAG_CONSTEXPR char const * const TPOT_CONFIG_GLOBAL_OBJECT_KEY = "tpot-config";
+TBAG_CONSTEXPR char const * const TPOT_DEFAULT_CONFIG_ROOT_NAME = "tpot";
+
 } // namespace tpot
 
 // --------------------

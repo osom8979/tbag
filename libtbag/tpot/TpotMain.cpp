@@ -14,7 +14,6 @@
 #include <libtbag/util/Version.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <libtbag/tpot/res/TpotAsset.hpp>
 #include <libtbag/tpot/client/TpotRequest.hpp>
 #include <libtbag/tpot/TpotRunner.hpp>
 
@@ -59,7 +58,12 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::Service(argc, argv, envs), _mode(RunningMode::RUN_APPLICATION),
           _help(false), _test(false), _verbose(false), _unknown(false), _version(false)
 {
-    _config_path = (res::TpotAsset::get_local_config() / res::TPOT_CONFIG_XML_FILE_NAME).getString();
+    using namespace libtbag::container;
+    auto config = Global::getInstance()->insertNewObject<TpotConfig>(TPOT_CONFIG_GLOBAL_OBJECT_KEY,
+                                                                     TPOT_DEFAULT_CONFIG_ROOT_NAME);
+    assert(static_cast<bool>(config));
+
+    _config_path = config->getFilePath(TpotConfig::Scope::EXE).getString();
 
     initCommander(argc, argv);
     initConfig();
@@ -110,14 +114,18 @@ void TpotMain::initCommander(int argc, char ** argv)
         is_call_once = true;
     });
 
+    using namespace libtbag::container;
+    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_OBJECT_KEY).lock();
+    assert(static_cast<bool>(config));
+
     _commander.insert("global", [&](Arguments const & args){
-        _config_path = (res::TpotAsset::get_global_config() / res::TPOT_CONFIG_XML_FILE_NAME).getString();
+        _config_path = config->getFilePath(TpotConfig::Scope::GLOBAL).getString();
     }, "Use the global resource. The path is /etc/tpot/tpot.xml");
     _commander.insert("home", [&](Arguments const & args){
-        _config_path = (res::TpotAsset::get_home_config() / res::TPOT_CONFIG_XML_FILE_NAME).getString();
+        _config_path = config->getFilePath(TpotConfig::Scope::HOME).getString();
     }, "Use the home resource. The path is ~/.tpot/tpot.xml");
     _commander.insert("local", [&](Arguments const & args){
-        _config_path = (res::TpotAsset::get_local_config() / res::TPOT_CONFIG_XML_FILE_NAME).getString();
+        _config_path = config->getFilePath(TpotConfig::Scope::EXE).getString();
     }, "Use the local resource. The path is ${EXE_PATH}/config.xml [DEFAULT]");
     _commander.insert("config", [&](Arguments const & args){
         if (args.empty() == false) {
@@ -152,7 +160,7 @@ void TpotMain::initConfig()
 
     using namespace libtbag::container;
     using namespace libtbag::tpot::res;
-    auto config = Global::getInstance()->insertNewObject<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
+    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_OBJECT_KEY).lock();
     assert(static_cast<bool>(config));
 
     config->add(TpotConfig::SharedNode(new TpotNode()));
@@ -251,7 +259,7 @@ TpotMain::TpotLog * TpotMain::getTpotLogPointer()
 {
     using namespace libtbag::container;
     using namespace libtbag::tpot::res;
-    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
+    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_OBJECT_KEY);
     if (auto shared = config.lock()) {
         return shared->getPointer<TpotLog>();
     }
@@ -262,7 +270,7 @@ TpotMain::TpotNode * TpotMain::getTpotNodePointer()
 {
     using namespace libtbag::container;
     using namespace libtbag::tpot::res;
-    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_NAME);
+    auto config = Global::getInstance()->find<TpotConfig>(TPOT_CONFIG_GLOBAL_OBJECT_KEY);
     if (auto shared = config.lock()) {
         return shared->getPointer<TpotNode>();
     }
