@@ -100,21 +100,39 @@ bool HelpCommander::insert(std::string const & command, Callback const & callbac
     return Commander::insert(command, callback);
 }
 
-std::string HelpCommander::help() const
+std::string HelpCommander::help(std::string const & head, bool auto_padding) const
 {
+    std::size_t const PADDING_SIZE = 2;
+
     std::stringstream ss;
     if (_synopsis.empty() == false) {
         ss << _synopsis << std::endl;
     }
 
-    ss << "Options:\n";
+    std::size_t max_size = 0;
+    if (auto_padding) {
+        for (auto & help : _helps) {
+            std::size_t const CURSOR_SIZE = help.first.size();
+            if (CURSOR_SIZE > max_size) {
+                max_size = CURSOR_SIZE;
+            }
+        }
+    }
+
+    ss << head << std::endl;
     for (auto & cursor : _helps) {
         ss << getPrefix() << cursor.first;
-        auto param = _params.find(cursor.first);
-        if (param != _params.end()) {
-            ss << "=" << param->second;
+
+        if (max_size > 0) {
+            ss << std::string(max_size + PADDING_SIZE - cursor.first.size(), ' ');
+        } else {
+            auto param = _params.find(cursor.first);
+            if (param != _params.end()) {
+                ss << '=' << param->second;
+            }
+            ss << "\n\t";
         }
-        ss << "\n\t" << cursor.second << std::endl;
+        ss << cursor.second << std::endl;
     }
 
     if (_remarks.empty() == false) {
@@ -122,6 +140,11 @@ std::string HelpCommander::help() const
     }
 
     return ss.str();
+}
+
+std::string HelpCommander::help(bool auto_padding) const
+{
+    return help("Options:", auto_padding);
 }
 
 } // namespace string

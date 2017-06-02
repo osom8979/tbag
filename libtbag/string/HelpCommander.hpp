@@ -61,6 +61,9 @@ public:
     inline std::string getSynopsis() const { return _synopsis; }
     inline std::string getRemarks () const { return _remarks ; }
 
+    inline HelpMap getHelps () const { return _helps;  }
+    inline HelpMap getParams() const { return _params; }
+
     inline void setSynopsis(std::string const & content) { _synopsis = content; }
     inline void setRemarks (std::string const & content) { _remarks  = content; }
 
@@ -69,12 +72,12 @@ public:
 
 public:
     bool insertHelpCommand(Callback const & callback);
-    bool insert(std::string const & command, Callback const & callback);
     bool insert(std::string const & command, Callback const & callback, std::string const & help_msg);
     bool insert(std::string const & command, Callback const & callback, std::string const & help_msg, std::string const & help_param);
 
 public:
-    std::string help() const;
+    std::string help(std::string const & head, bool auto_padding = false) const;
+    std::string help(bool auto_padding = false) const;
 };
 
 } // namespace string
