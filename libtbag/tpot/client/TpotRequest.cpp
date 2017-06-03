@@ -27,7 +27,7 @@ int runTpotRequest(std::string const & uri, structure::Exec const & exec)
     using namespace libtbag::network::http;
 
     std::string body;
-    if (exec.toRequestJsonString(body) != Err::E_SUCCESS) {
+    if (exec.toRequestString(body) != Err::E_SUCCESS) {
         std::cout << "Json convert error.\n";
         return EXIT_FAILURE;
     }

@@ -24,7 +24,7 @@ TBAG_CONSTEXPR static bool const IS_COLLECT_COMMENTS = false;
 // Exec implementation.
 // --------------------
 
-Err Exec::toRequestJsonString(std::string & json) const
+Err Exec::toRequestString(std::string & json) const
 {
     if (request.file.empty()) {
         return Err::E_ILLARGS;
@@ -60,7 +60,7 @@ Err Exec::toRequestJsonString(std::string & json) const
     return Err::E_SUCCESS;
 }
 
-Err Exec::toResponseJsonString(std::string & json) const
+Err Exec::toResponseString(std::string & json) const
 {
     Json::Value root;
     root[getResponseId()] = response.id;
@@ -70,7 +70,7 @@ Err Exec::toResponseJsonString(std::string & json) const
     return Err::E_SUCCESS;
 }
 
-Err Exec::fromRequestJsonString(std::string const & json)
+Err Exec::fromRequestString(std::string const & json)
 {
     request.file.clear();
     request.cwd.clear();
@@ -134,7 +134,7 @@ Err Exec::fromRequestJsonString(std::string const & json)
     return Err::E_SUCCESS;
 }
 
-Err Exec::fromResponseJsonString(std::string const & json)
+Err Exec::fromResponseString(std::string const & json)
 {
     response.id = 0;
 
@@ -156,22 +156,22 @@ Err Exec::fromResponseJsonString(std::string const & json)
 // Heartbit implementation.
 // ------------------------
 
-Err Heartbit::toRequestJsonString(std::string & json) const
+Err Heartbit::toRequestString(std::string & json) const
 {
     return Err::E_SUCCESS; // NO REQUEST.
 }
 
-Err Heartbit::toResponseJsonString(std::string & json) const
+Err Heartbit::toResponseString(std::string & json) const
 {
     return Err::E_SUCCESS; // NO RESPONSE.
 }
 
-Err Heartbit::fromRequestJsonString(std::string const & json)
+Err Heartbit::fromRequestString(std::string const & json)
 {
     return Err::E_SUCCESS; // NO REQUEST.
 }
 
-Err Heartbit::fromResponseJsonString(std::string const & json)
+Err Heartbit::fromResponseString(std::string const & json)
 {
     return Err::E_SUCCESS; // NO RESPONSE.
 }
@@ -180,13 +180,13 @@ Err Heartbit::fromResponseJsonString(std::string const & json)
 // List implementation.
 // --------------------
 
-Err List::toRequestJsonString(std::string & json) const
+Err List::toRequestString(std::string & json) const
 {
     json.clear();
     return Err::E_SUCCESS; // NO REQUEST.
 }
 
-Err List::toResponseJsonString(std::string & json) const
+Err List::toResponseString(std::string & json) const
 {
     Json::Value root;
 
@@ -200,12 +200,12 @@ Err List::toResponseJsonString(std::string & json) const
     return Err::E_SUCCESS;
 }
 
-Err List::fromRequestJsonString(std::string const & json)
+Err List::fromRequestString(std::string const & json)
 {
     return Err::E_SUCCESS; // NO REQUEST.
 }
 
-Err List::fromResponseJsonString(std::string const & json)
+Err List::fromResponseString(std::string const & json)
 {
     response.ids.clear();
 
@@ -236,7 +236,7 @@ Err List::fromResponseJsonString(std::string const & json)
 // Kill implementation.
 // --------------------
 
-Err Kill::toRequestJsonString(std::string & json) const
+Err Kill::toRequestString(std::string & json) const
 {
     Json::Value root;
     root[getRequestId()] = request.id;
@@ -246,13 +246,13 @@ Err Kill::toRequestJsonString(std::string & json) const
     return Err::E_SUCCESS;
 }
 
-Err Kill::toResponseJsonString(std::string & json) const
+Err Kill::toResponseString(std::string & json) const
 {
     json.clear();
     return Err::E_SUCCESS; // NO RESPONSE.
 }
 
-Err Kill::fromRequestJsonString(std::string const & json)
+Err Kill::fromRequestString(std::string const & json)
 {
     request.id = 0;
 
@@ -270,7 +270,7 @@ Err Kill::fromRequestJsonString(std::string const & json)
     return Err::E_SUCCESS;
 }
 
-Err Kill::fromResponseJsonString(std::string const & json)
+Err Kill::fromResponseString(std::string const & json)
 {
     return Err::E_SUCCESS; // NO RESPONSE.
 }

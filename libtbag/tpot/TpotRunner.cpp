@@ -191,7 +191,7 @@ Err TpotRunner::execProcess(std::string const & body, HttpBuilder & response)
 {
     ExecParser parser;
 
-    Err const PARSE_RESULT = parser.fromRequestJsonString(body);
+    Err const PARSE_RESULT = parser.fromRequestString(body);
     if (PARSE_RESULT != Err::E_SUCCESS) {
         response.setStatus(network::http::HttpStatus::SC_BAD_REQUEST);
         response.setBody(_body_4xx);
@@ -255,7 +255,7 @@ Err TpotRunner::execProcess(std::string const & body, HttpBuilder & response)
     Pid const PROCESS_ID = proc->getPid();
     parser.response.id = PROCESS_ID;
 
-    Err const RESPONSE_RESULT = parser.toResponseJsonString(json);
+    Err const RESPONSE_RESULT = parser.toResponseString(json);
     if (RESPONSE_RESULT != Err::E_SUCCESS) {
         response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
         response.setBody(_body_5xx);
@@ -280,7 +280,7 @@ Err TpotRunner::killProcess(std::string const & body, HttpBuilder & response)
 {
     KillParser parser;
 
-    Err const PARSE_RESULT = parser.fromRequestJsonString(body);
+    Err const PARSE_RESULT = parser.fromRequestString(body);
     if (PARSE_RESULT != Err::E_SUCCESS) {
         response.setStatus(network::http::HttpStatus::SC_BAD_REQUEST);
         response.setBody(_body_4xx);
@@ -323,7 +323,7 @@ Err TpotRunner::listProcess(std::string const & body, HttpBuilder & response)
     }
 
     std::string json;
-    Err const CODE = parser.toResponseJsonString(json);
+    Err const CODE = parser.toResponseString(json);
 
     if (CODE == Err::E_SUCCESS) {
         response.setStatus(network::http::HttpStatus::SC_OK);

@@ -47,9 +47,7 @@ namespace tpot {
  */
 struct TpotParams
 {
-    bool enable_service;
     bool enable_verbose;
-
     std::string server_bind;
     int server_port;
 };

@@ -24,7 +24,7 @@ TEST(TpotProtocolTest, ExecRequest)
 })";
 
     Exec obj;
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestJsonString(TEST_REQUEST_JSON));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestString(TEST_REQUEST_JSON));
     ASSERT_STREQ("/bin/ls", obj.request.file.c_str());
     ASSERT_STREQ("/", obj.request.cwd.c_str());
     ASSERT_EQ(2, obj.request.args.size());
@@ -37,10 +37,10 @@ TEST(TpotProtocolTest, ExecRequest)
     ASSERT_EQ(1000, obj.request.gid);
 
     std::string json;
-    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestString(json));
 
     Exec obj2;
-    ASSERT_EQ(Err::E_SUCCESS, obj2.fromRequestJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj2.fromRequestString(json));
     ASSERT_STREQ(obj.request.file.c_str(), obj.request.file.c_str());
     ASSERT_STREQ(obj.request.cwd.c_str(), obj.request.cwd.c_str());
     ASSERT_EQ(obj2.request.args.size(), obj.request.args.size());
@@ -60,14 +60,14 @@ TEST(TpotProtocolTest, ExecResponse)
 })";
 
     Exec obj;
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseJsonString(TEST_RESPONSE_JSON));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseString(TEST_RESPONSE_JSON));
     ASSERT_EQ(1234567890, obj.response.id);
 
     std::string json;
-    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseString(json));
 
     Exec obj2;
-    ASSERT_EQ(Err::E_SUCCESS, obj2.fromResponseJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj2.fromResponseString(json));
     ASSERT_EQ(obj2.response.id, obj.response.id);
 }
 
@@ -75,18 +75,18 @@ TEST(TpotProtocolTest, Heartbit)
 {
     std::string json;
     Heartbit obj;
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestJsonString (json));
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseJsonString(json));
-    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestJsonString   (json));
-    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseJsonString  (json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestString (json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestString   (json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseString  (json));
 }
 
 TEST(TpotProtocolTest, ListRequest)
 {
     std::string json;
     List obj;
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestJsonString(json));
-    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestJsonString  (json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestString  (json));
 }
 
 TEST(TpotProtocolTest, ListResponse)
@@ -96,7 +96,7 @@ TEST(TpotProtocolTest, ListResponse)
 })";
 
     List obj;
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseJsonString(TEST_RESPONSE_JSON));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseString(TEST_RESPONSE_JSON));
     ASSERT_EQ(4, obj.response.ids.size());
     ASSERT_EQ(1, obj.response.ids[0]);
     ASSERT_EQ(2, obj.response.ids[1]);
@@ -104,10 +104,10 @@ TEST(TpotProtocolTest, ListResponse)
     ASSERT_EQ(9, obj.response.ids[3]);
 
     std::string json;
-    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseString(json));
 
     List obj2;
-    ASSERT_EQ(Err::E_SUCCESS, obj2.fromResponseJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj2.fromResponseString(json));
     ASSERT_EQ(obj2.response.ids.size(), obj.response.ids.size());
     ASSERT_EQ(obj2.response.ids[0], obj.response.ids[0]);
     ASSERT_EQ(obj2.response.ids[1], obj.response.ids[1]);
@@ -122,14 +122,14 @@ TEST(TpotProtocolTest, KillRequest)
 })";
 
     Kill obj;
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestJsonString(TEST_REQUEST_JSON));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromRequestString(TEST_REQUEST_JSON));
     ASSERT_EQ(1234567890, obj.request.id);
 
     std::string json;
-    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toRequestString(json));
 
     Kill obj2;
-    ASSERT_EQ(Err::E_SUCCESS, obj2.fromRequestJsonString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj2.fromRequestString(json));
     ASSERT_EQ(obj2.request.id, obj.request.id);
 }
 
@@ -137,7 +137,7 @@ TEST(TpotProtocolTest, KillResponse)
 {
     std::string json;
     Kill obj;
-    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseJsonString(json));
-    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseJsonString  (json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.fromResponseString(json));
+    ASSERT_EQ(Err::E_SUCCESS, obj.toResponseString  (json));
 }
 
