@@ -60,6 +60,10 @@ public:
     virtual ~DefaultXmlModel();
 
 public:
+    inline InitParams getParams() const { return _params; }
+    inline void setParams(InitParams const params) { _params = params; }
+
+public:
     virtual std::string getRootName() const override;
     virtual std::string getFileName() const override;
 

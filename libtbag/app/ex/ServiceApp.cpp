@@ -48,7 +48,6 @@ namespace app {
 namespace ex  {
 
 TBAG_CONSTEXPR static char const * const SERVICE_APP_MAIN_SYNOPSIS = ""
-        "${" SERVICE_APP_ENVIRONMENT_TITLE "} application.\n\n"
         " Usage: ${" SERVICE_APP_ENVIRONMENT_TITLE "} {options} {command}\n"
         ""/* -- END -- */;
 
@@ -61,10 +60,10 @@ TBAG_CONSTEXPR static char const * const SERVICE_APP_MAIN_REMARKS = "\n"
         SERVICE_APP_OPTIONS_PREFIX SERVICE_APP_OPTIONS_HOME   ", "
         SERVICE_APP_OPTIONS_PREFIX SERVICE_APP_OPTIONS_LOCAL  " and "
         SERVICE_APP_OPTIONS_PREFIX SERVICE_APP_OPTIONS_CONFIG SERVICE_APP_OPTIONS_DELIMITER "{filename}\n"
-        "  can be used to tell the command to read from only that location\n"
+        "  can be used to tell the command to read from only that location"
         ""/* -- END -- */;
 
-ServiceApp::ServiceApp(int argc, char ** argv, char ** envs, bool with_service)
+ServiceApp::ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs)
         : app::Service(argc, argv, envs),
           _options(SERVICE_APP_OPTIONS_PREFIX, SERVICE_APP_OPTIONS_DELIMITER),
           _commander(SERVICE_APP_COMMAND_PREFIX, SERVICE_APP_COMMAND_DELIMITER),
@@ -73,7 +72,7 @@ ServiceApp::ServiceApp(int argc, char ** argv, char ** envs, bool with_service)
     using namespace libtbag::container;
     using namespace libtbag::string;
 
-    auto config = Global::getInstance()->insertNewObject<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY);
+    auto config = Global::getInstance()->insertNewObject<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY, config_name);
     assert(static_cast<bool>(config));
     _config_path = config->getFilePath(DefaultXmlModel::Scope::EXE).getString();
 }
@@ -81,18 +80,6 @@ ServiceApp::ServiceApp(int argc, char ** argv, char ** envs, bool with_service)
 ServiceApp::~ServiceApp()
 {
     // EMPTY.
-}
-
-void ServiceApp::installDefault()
-{
-    installDefaultSynopsis();
-    installDefaultRemarks();
-
-    installDefaultCommand();
-    installDefaultOptions();
-
-    installDefaultLogNode();
-    installDefaultServerNode();
 }
 
 void ServiceApp::installDefaultSynopsis()
@@ -194,6 +181,14 @@ void ServiceApp::installDefaultLogNode(std::string const & logger_name)
     config->newAdd<DefaultLogXmlNode>(logger_name);
 }
 
+void ServiceApp::installDefaultLogNode(std::string const & logger_name, std::string const & file_name)
+{
+    using namespace libtbag::container;
+    auto config = getModel().lock();
+    assert(static_cast<bool>(config));
+    config->newAdd<DefaultLogXmlNode>(logger_name, file_name);
+}
+
 void ServiceApp::installDefaultServerNode()
 {
     using namespace libtbag::container;
@@ -221,15 +216,6 @@ bool ServiceApp::loadOrDefaultSaveConfig(std::string const & path)
     assert(static_cast<bool>(config));
 
     auto const PATH = filesystem::Path(path);
-    if (PATH.exists() == false) {
-        std::cerr << "Not found config file: " << path << std::endl;
-        return false;
-    }
-    if (PATH.isReadable() == false) {
-        std::cerr << "Could not read a config file: " << path << std::endl;
-        return false;
-    }
-
     if (config->loadOrDefaultSave(PATH) == false) {
         std::cerr << "Load or save failed.\n";
         return false;
@@ -243,7 +229,7 @@ bool ServiceApp::loadOrDefaultSaveConfig(std::string const & path)
 
 bool ServiceApp::createLoggers()
 {
-    auto log = getLog().lock();
+    auto log = getLogNode().lock();
     if (static_cast<bool>(log) == false) {
         return false;
     }
@@ -283,8 +269,18 @@ int ServiceApp::run()
 {
     using namespace libtbag::string;
 
+    if (onCreate() == false) {
+        std::cerr << "Create failed.\n";
+        return EXIT_FAILURE;
+    }
+
     StringVector cmds;
     _options.setDefaultCallback([&](Arguments const & args){
+        if (args.getName().empty()) {
+            _enable_unknown = true;
+            return;
+        }
+
         if (args.empty() == false) {
             cmds.push_back(libtbag::string::lower(args.get(0)));
         }
@@ -293,14 +289,10 @@ int ServiceApp::run()
     bool const IGNORE_FIRST = true;
     _options.request(getArgc(), getArgv(), IGNORE_FIRST);
 
-    if (onCreate() == false) {
-        std::cerr << "Create failed.\n";
-        return EXIT_FAILURE;
-    }
-
     if (loadOrDefaultSaveConfig() && onLoadConfig()) {
         if (_enable_help || _enable_unknown) {
-            std::cout << _commander.help() << std::endl;
+            std::cout << _options.help() << std::endl
+                      << _commander.help(true) << std::endl;
             _exit_code = EXIT_FAILURE;
         } else if (_enable_version) {
             std::cout << _version.toString() << std::endl;
@@ -315,7 +307,7 @@ int ServiceApp::run()
             _commander.setCallOnce();
             std::size_t const CALL_COUNT = _commander.request(ss.str());
             if (CALL_COUNT == 0U) {
-                onDefaultCommand(cmds);
+                _exit_code = onDefaultCommand(cmds);
             }
         }
     } else {
@@ -336,20 +328,20 @@ ServiceApp::WeakModel ServiceApp::getModel()
     return Global::getInstance()->find<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY);
 }
 
-ServiceApp::WeakLog ServiceApp::getLog()
+ServiceApp::WeakLogNode ServiceApp::getLogNode()
 {
     if (auto config = getModel().lock()) {
         return config->getWeak<DefaultLogXmlNode>();
     }
-    return WeakLog();
+    return WeakLogNode();
 }
 
-ServiceApp::WeakServer ServiceApp::getServer()
+ServiceApp::WeakServerNode ServiceApp::getServerNode()
 {
     if (auto config = getModel().lock()) {
         return config->getWeak<ServerXmlNode>();
     }
-    return WeakServer();
+    return WeakServerNode();
 }
 
 } // namespace ex

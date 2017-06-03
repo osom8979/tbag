@@ -51,9 +51,9 @@ public:
     using DefaultLogXmlNode = log::node::DefaultLogXmlNode;
     using ServerXmlNode     = dom::node::ServerXmlNode;
 
-    using WeakModel  = std::weak_ptr<DefaultXmlModel>;
-    using WeakLog    = std::weak_ptr<DefaultLogXmlNode>;
-    using WeakServer = std::weak_ptr<ServerXmlNode>;
+    using WeakModel      = std::weak_ptr<DefaultXmlModel>;
+    using WeakLogNode    = std::weak_ptr<DefaultLogXmlNode>;
+    using WeakServerNode = std::weak_ptr<ServerXmlNode>;
 
     using StringVector = std::vector<std::string>;
 
@@ -72,29 +72,34 @@ public:
     TBAG_CONSTEXPR static char const * const GLOBAL_MODEL_OBJECT_KEY
             = "libtbag.app.ex.ServiceApp.DefaultXmlModel";
 
-private:
+protected:
     HelpCommander _options;
     HelpCommander _commander;
 
     std::string _config_path;
-    Version _version;
+    Version     _version;
 
-private:
+protected:
     bool _enable_help;
     bool _enable_verbose;
     bool _enable_unknown;
     bool _enable_version;
 
-private:
+protected:
     int _exit_code;
 
 public:
-    ServiceApp(int argc, char ** argv, char ** envs, bool with_service = false);
+    ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs);
     virtual ~ServiceApp();
 
-protected:
-    void installDefault();
+public:
+    inline HelpCommander       & atOptions()       TBAG_NOEXCEPT { return _options; }
+    inline HelpCommander const & atOptions() const TBAG_NOEXCEPT { return _options; }
 
+    inline HelpCommander       & atCommander()       TBAG_NOEXCEPT { return _commander; }
+    inline HelpCommander const & atCommander() const TBAG_NOEXCEPT { return _commander; }
+
+protected:
     void installDefaultSynopsis();
     void installDefaultSynopsis(std::string const & synopsis);
 
@@ -107,6 +112,8 @@ protected:
 
     void installDefaultLogNode();
     void installDefaultLogNode(std::string const & logger_name);
+    void installDefaultLogNode(std::string const & logger_name, std::string const & file_name);
+
     void installDefaultServerNode();
     void installDefaultServerNode(std::string const & var, std::string const & ip, int port);
 
@@ -124,12 +131,12 @@ public:
 
 // Static methods.
 public:
-    static WeakModel  getModel();
-    static WeakLog    getLog();
-    static WeakServer getServer();
+    static WeakModel      getModel();
+    static WeakLogNode    getLogNode();
+    static WeakServerNode getServerNode();
 
 public:
-    virtual int onLoadConfig() { return 0; }
+    virtual bool onLoadConfig() { return true; }
     virtual int onDefaultCommand(StringVector const & args) { return 0; }
 };
 

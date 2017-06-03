@@ -15,14 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/app/Service.hpp>
-#include <libtbag/string/HelpCommander.hpp>
-#include <libtbag/log/node/DefaultLogXmlNode.hpp>
-#include <libtbag/dom/DefaultXmlModel.hpp>
-
-#include <libtbag/tpot/res/TpotNode.hpp>
-
-#include <memory>
+#include <libtbag/app/ex/ServiceApp.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,92 +23,30 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
-TBAG_CONSTEXPR char const * const TPOT_SERVICE_NAME = "tpot";
-
 /**
  * TpotMain class prototype.
  *
  * @author zer0
  * @date   2017-05-13
  */
-class TBAG_API TpotMain final : public app::Service
+class TBAG_API TpotMain final : public app::ex::ServiceApp
 {
-public:
-    using HelpCommander = string::HelpCommander;
-    using TpotConfig = dom::DefaultXmlModel;
-    using TpotLog    = log::node::DefaultLogXmlNode;
-    using TpotNode   = res::TpotNode;
-
-    using WeakTpotLog  = std::weak_ptr<TpotLog>;
-    using WeakTpotNode = std::weak_ptr<TpotNode>;
-
-public:
-    enum class RunningMode
-    {
-        RUN_APPLICATION,
-        RUN_INSTALL,
-        RUN_UNINSTALL,
-        RUN_START,
-        RUN_STOP,
-        RUN_REQUEST,
-    };
-
 private:
-    HelpCommander _commander;
-    RunningMode   _mode;
-
-private:
-    std::string _config_path;
-
-private:
-    bool _help;
-    bool _test;
-    bool _verbose;
-    bool _unknown;
-    bool _version;
+    bool _enable_test;
 
 public:
     TpotMain(int argc, char ** argv, char ** envs);
     virtual ~TpotMain();
 
-private:
-    void initCommander(int argc, char ** argv);
-    void initConfig();
-
-public:
-    int autoRun();
-
-private:
-    int runRequest();
-    int runApplication();
-    int runServiceInstall();
-    int runServiceUninstall();
-    int runServiceStart();
-    int runServiceStop();
-
-// Static methods.
-public:
-    /**
-     * Obtain the pointer of log config.
-     *
-     * @warning
-     *  This function is not thread safe.
-     */
-    static TpotLog * getTpotLogPointer();
-
-    /**
-     * Obtain the pointer of node config.
-     *
-     * @warning
-     *  This function is not thread safe.
-     */
-    static TpotNode * getTpotNodePointer();
-
 // Event methods.
 public:
-    virtual bool onCreate () override;
-    virtual int  onRunning() override;
-    virtual void onDestroy() override;
+    virtual bool onCreate    () override;
+    virtual bool onLoadConfig() override;
+    virtual int  onRunning   () override;
+    virtual void onDestroy   () override;
+
+public:
+    virtual int onDefaultCommand(StringVector const & args) override;
 };
 
 // ------------
