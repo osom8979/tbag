@@ -235,21 +235,21 @@ bool XmlModel::load(Path const & path)
     return true;
 }
 
-bool XmlModel::loadOrDefaultSave()
+bool XmlModel::loadOrDefaultSave(bool create_dir)
 {
     Path path = findExistsFilePathOfNearest();
     if (path.empty()) {
         path = findWritablePathOfNearest();
     }
-    return loadOrDefaultSave(path);
+    return loadOrDefaultSave(path, create_dir);
 }
 
-bool XmlModel::loadOrDefaultSave(Scope scope)
+bool XmlModel::loadOrDefaultSave(Scope scope, bool create_dir)
 {
-    return loadOrDefaultSave(getFilePath(scope));
+    return loadOrDefaultSave(getFilePath(scope), create_dir);
 }
 
-bool XmlModel::loadOrDefaultSave(Path const & path)
+bool XmlModel::loadOrDefaultSave(Path const & path, bool create_dir)
 {
     if (path.exists()) {
         if (path.isReadable()) {
@@ -259,7 +259,12 @@ bool XmlModel::loadOrDefaultSave(Path const & path)
         }
     }
 
-    if (path.getParent().isWritable() == false) {
+    auto const PARENT_DIR = path.getParent();
+    if (create_dir && PARENT_DIR.isDirectory() == false && PARENT_DIR.createDir() == false) {
+        return false;
+    }
+
+    if (PARENT_DIR.isWritable() == false) {
         return false;
     }
 

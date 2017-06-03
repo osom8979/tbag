@@ -94,11 +94,6 @@ void ServiceApp::installDefaultSynopsis(std::string const & synopsis)
     _options.setSynopsis(synopsis);
 }
 
-void ServiceApp::installDefaultRemarks()
-{
-    installDefaultRemarks(std::string(SERVICE_APP_MAIN_REMARKS));
-}
-
 void ServiceApp::installDefaultRemarks(std::string const & remarks)
 {
     _commander.setRemarks(remarks);
@@ -109,7 +104,12 @@ void ServiceApp::installDefaultCommand()
     using namespace libtbag::string;
     _commander.insert(SERVICE_APP_COMMAND_APP, [&](Arguments const & args){
         _exit_code = onRunning();
-    }, "Normal application mode. [DEFAULT]");
+    }, "Normal application mode.");
+}
+
+void ServiceApp::installServiceCommand()
+{
+    using namespace libtbag::string;
     _commander.insert(SERVICE_APP_COMMAND_INSTALL, [&](Arguments const & args){
         _exit_code = (install() == Err::E_SUCCESS ? EXIT_SUCCESS : EXIT_FAILURE);
     }, "Install service.");
@@ -124,7 +124,23 @@ void ServiceApp::installDefaultCommand()
     }, "Stop service.");
 }
 
-void ServiceApp::installDefaultOptions()
+void ServiceApp::installHelpOptions()
+{
+    using namespace libtbag::string;
+    _options.insertHelpCommand([&](Arguments const & args){
+        _enable_help = true;
+    });
+}
+
+void ServiceApp::installVerboseOptions()
+{
+    using namespace libtbag::string;
+    _options.insert(SERVICE_APP_OPTIONS_VERBOSE, [&](Arguments const & args){
+        _enable_verbose = true;
+    }, "Be more verbose/talkative during the operation.");
+}
+
+void ServiceApp::installConfigOptions()
 {
     using namespace libtbag::string;
     auto config = getModel().lock();
@@ -150,16 +166,10 @@ void ServiceApp::installDefaultOptions()
             _enable_unknown = true;
         }
     }, "Use the given config file.", "{filename}");
-
-    _options.insertHelpCommand([&](Arguments const & args){
-        _enable_help = true;
-    });
-    _options.insert(SERVICE_APP_OPTIONS_VERBOSE, [&](Arguments const & args){
-        _enable_verbose = true;
-    }, "Be more verbose/talkative during the operation.");
+    _commander.setRemarks(std::string(SERVICE_APP_MAIN_REMARKS));
 }
 
-void ServiceApp::installDefaultVersion(int major, int minor, int patch)
+void ServiceApp::installVersionOptions(int major, int minor, int patch)
 {
     using namespace libtbag::string;
     _version.set(static_cast<uint32_t>(major), static_cast<uint32_t>(minor), static_cast<uint32_t>(patch));
@@ -205,26 +215,18 @@ void ServiceApp::installDefaultServerNode(std::string const & var, std::string c
     config->newAdd<ServerXmlNode>(var, ip, port);
 }
 
-bool ServiceApp::loadOrDefaultSaveConfig()
+bool ServiceApp::loadOrDefaultSaveConfig(bool create_parent_dir)
 {
-    return loadOrDefaultSaveConfig(_config_path);
+    return loadOrDefaultSaveConfig(_config_path, create_parent_dir);
 }
 
-bool ServiceApp::loadOrDefaultSaveConfig(std::string const & path)
+bool ServiceApp::loadOrDefaultSaveConfig(std::string const & path, bool create_parent_dir)
 {
     auto config = getModel().lock();
     assert(static_cast<bool>(config));
 
     auto const PATH = filesystem::Path(path);
-    if (config->loadOrDefaultSave(PATH) == false) {
-        std::cerr << "Load or save failed.\n";
-        return false;
-    }
-
-    if (_enable_verbose) {
-        std::cout << "Load or save config file: " << path << std::endl;
-    }
-    return true;
+    return config->loadOrDefaultSave(PATH, create_parent_dir);
 }
 
 bool ServiceApp::createLoggers()
@@ -269,19 +271,26 @@ int ServiceApp::run()
 {
     using namespace libtbag::string;
 
-    if (onCreate() == false) {
+    ApplicationGuard<ServiceApp> const APP_GUARD(*this);
+    if (APP_GUARD.isCreateSuccess() == false) {
         std::cerr << "Create failed.\n";
-        return EXIT_FAILURE;
+        return (_exit_code = EXIT_FAILURE);
     }
+
+    // ----------------
+    // REQUEST OPTIONS.
+    // ----------------
 
     StringVector cmds;
     _options.setDefaultCallback([&](Arguments const & args){
-        if (args.getName().empty()) {
+        if (args.getName().empty() == false) {
+            // This block comes when an unknown option is hit.
             _enable_unknown = true;
             return;
         }
 
         if (args.empty() == false) {
+            // Command arguments.
             cmds.push_back(libtbag::string::lower(args.get(0)));
         }
     });
@@ -289,33 +298,74 @@ int ServiceApp::run()
     bool const IGNORE_FIRST = true;
     _options.request(getArgc(), getArgv(), IGNORE_FIRST);
 
-    if (loadOrDefaultSaveConfig() && onLoadConfig()) {
-        if (_enable_help || _enable_unknown) {
-            std::cout << _options.help() << std::endl
-                      << _commander.help(true) << std::endl;
-            _exit_code = EXIT_FAILURE;
-        } else if (_enable_version) {
-            std::cout << _version.toString() << std::endl;
-            _exit_code = EXIT_SUCCESS;
-        } else {
-            char const SPACE = ' ';
-            std::stringstream ss;
-            for (auto & cmd : cmds) {
-                ss << cmd << SPACE;
-            }
+    // --------------
+    // CHECK OPTIONS.
+    // --------------
 
-            _commander.setCallOnce();
-            std::size_t const CALL_COUNT = _commander.request(ss.str());
-            if (CALL_COUNT == 0U) {
-                _exit_code = onDefaultCommand(cmds);
-            }
-        }
-    } else {
-        _exit_code = EXIT_FAILURE;
+    if (_enable_unknown) {
+        std::cerr << "Found the unknown commands." << std::endl;
+        return (_exit_code = EXIT_FAILURE);
     }
 
-    onDestroy();
+    if (_enable_help) {
+        std::cout << _options.help() << std::endl << _commander.help(true) << std::endl;
+        return (_exit_code = EXIT_SUCCESS);
+    }
+
+    if (_enable_version) {
+        std::cout << _version.toString() << std::endl;
+        return (_exit_code = EXIT_FAILURE);
+    }
+
+    // ------------
+    // CONFIG LOAD.
+    // ------------
+
+    bool const CREATE_PARENT_DIR = true;
+    if (loadOrDefaultSaveConfig(_config_path, CREATE_PARENT_DIR) == false) {
+        std::cerr << "Load or save failed: " << _config_path << std::endl;
+        return (_exit_code = EXIT_FAILURE);
+    }
+
+    if (_enable_verbose) {
+        std::cout << "Load or save config file: " << _config_path << std::endl;
+    }
+
+    if (onLoadConfig() == false) {
+        std::cerr << "onLoad event failed.\n";
+        return (_exit_code = EXIT_FAILURE);
+    }
+
+    // ------------
+    // RUN COMMAND.
+    // ------------
+
+    char const SPACE = ' ';
+    std::stringstream ss;
+    for (auto & cmd : cmds) {
+        ss << cmd << SPACE;
+    }
+
+    _commander.setCallOnce();
+    std::size_t const CALL_COUNT = _commander.request(ss.str());
+    if (CALL_COUNT == 0U) {
+        _exit_code = onDefaultCommand(cmds);
+    }
     return _exit_code;
+}
+
+bool ServiceApp::onLoadConfig()
+{
+    return true;
+}
+
+int ServiceApp::onDefaultCommand(StringVector const & args)
+{
+    if (args.empty() == false) {
+        std::cerr << "Unknown commands." << std::endl;
+        return EXIT_FAILURE;
+    }
+    return onRunning();
 }
 
 // ---------------

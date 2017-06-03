@@ -20,12 +20,7 @@
 #include <cassert>
 #include <iostream>
 
-#define TPOT_MAIN_COMMAND_APP       "app"
-#define TPOT_MAIN_COMMAND_INSTALL   "install"
-#define TPOT_MAIN_COMMAND_UNINSTALL "uninstall"
-#define TPOT_MAIN_COMMAND_START     "start"
-#define TPOT_MAIN_COMMAND_STOP      "stop"
-#define TPOT_MAIN_COMMAND_REQUEST   "request"
+#define TPOT_MAIN_COMMAND_REQUEST "request"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -47,17 +42,6 @@ TpotMain::~TpotMain()
     // EMPTY.
 }
 
-//int TpotMain::runRequest()
-//{
-//    if (_test) {
-//        if (_verbose) { std::cout << "Run request test mode.\n"; }
-//        return client::runTpotRequestWithTest();
-//    } else {
-//        if (_verbose) { std::cout << "Run request mode.\n"; }
-//        return client::runTpotRequest();
-//    }
-//}
-
 // --------------
 // Event methods.
 // --------------
@@ -67,20 +51,37 @@ bool TpotMain::onCreate()
     tDLogD("TpotMain::onCreate()");
 
     installDefaultSynopsis();
-    installDefaultRemarks();
 
     installDefaultCommand();
-    installDefaultOptions();
+    installServiceCommand();
+
+    installConfigOptions();
+    installHelpOptions();
+    installVerboseOptions();
+    installVersionOptions(LIBTBAG_VERSION_MAJOR, LIBTBAG_VERSION_MINOR, LIBTBAG_VERSION_PATCH);
 
     using namespace libtbag::string;
     atOptions().insert("test", [&](Arguments const & args){
         _enable_test = true;
     }, "Use the test mode. (Only request command)");
 
+    atCommander().insert(TPOT_MAIN_COMMAND_REQUEST, [&](Arguments const & args){
+        if (_enable_test) {
+            if (_enable_verbose) {
+                std::cout << "Run request test mode.\n";
+            }
+            _exit_code = client::runTpotRequestWithTest();
+        } else {
+            if (_enable_verbose) {
+                std::cout << "Run request mode.\n";
+            }
+            _exit_code = client::runTpotRequest();
+        }
+    }, "Request mode");
+
     installDefaultLogNode(TPOT_DEFAULT_LOGGER_NAME, TPOT_DEFAULT_LOGGER_FILE_PREFIX);
     installDefaultServerNode();
 
-    installDefaultVersion(LIBTBAG_VERSION_MAJOR, LIBTBAG_VERSION_MINOR, LIBTBAG_VERSION_PATCH);
     return true;
 }
 
@@ -121,17 +122,6 @@ int TpotMain::onRunning()
 void TpotMain::onDestroy()
 {
     tDLogD("TpotMain::onDestroy()");
-}
-
-int TpotMain::onDefaultCommand(StringVector const & args)
-{
-    tDLogD("TpotMain::onDefaultCommand()");
-
-    for (auto & i : args) {
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
-    return 0;
 }
 
 // ------------

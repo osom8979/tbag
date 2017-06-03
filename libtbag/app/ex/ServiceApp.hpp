@@ -41,7 +41,7 @@ namespace ex  {
  * @author zer0
  * @date   2017-06-02
  */
-class TBAG_API ServiceApp : private Service
+class TBAG_API ServiceApp : public Service
 {
 public:
     using Version = util::Version;
@@ -99,16 +99,30 @@ public:
     inline HelpCommander       & atCommander()       TBAG_NOEXCEPT { return _commander; }
     inline HelpCommander const & atCommander() const TBAG_NOEXCEPT { return _commander; }
 
+    inline std::string getConfigPath() const TBAG_NOEXCEPT_EXPR(std::is_nothrow_copy_assignable<std::string>::value)
+    { return _config_path; }
+    inline Version getVersion() const TBAG_NOEXCEPT_EXPR(std::is_nothrow_copy_assignable<Version>::value)
+    { return _version; }
+
+    inline bool isEnableHelp   () const TBAG_NOEXCEPT { return _enable_help;    }
+    inline bool isEnableVerbose() const TBAG_NOEXCEPT { return _enable_verbose; }
+    inline bool isEnableUnknown() const TBAG_NOEXCEPT { return _enable_unknown; }
+    inline bool isEnableVersion() const TBAG_NOEXCEPT { return _enable_version; }
+
+    inline int getExitCode() const TBAG_NOEXCEPT { return _exit_code; }
+
 protected:
     void installDefaultSynopsis();
     void installDefaultSynopsis(std::string const & synopsis);
-
-    void installDefaultRemarks();
     void installDefaultRemarks(std::string const & remarks);
 
     void installDefaultCommand();
-    void installDefaultOptions();
-    void installDefaultVersion(int major, int minor = 0, int patch = 0);
+    void installServiceCommand();
+
+    void installHelpOptions();
+    void installVerboseOptions();
+    void installConfigOptions();
+    void installVersionOptions(int major, int minor = 0, int patch = 0);
 
     void installDefaultLogNode();
     void installDefaultLogNode(std::string const & logger_name);
@@ -118,8 +132,8 @@ protected:
     void installDefaultServerNode(std::string const & var, std::string const & ip, int port);
 
 private:
-    bool loadOrDefaultSaveConfig();
-    bool loadOrDefaultSaveConfig(std::string const & path);
+    bool loadOrDefaultSaveConfig(bool create_parent_dir = false);
+    bool loadOrDefaultSaveConfig(std::string const & path, bool create_parent_dir = false);
 
 protected:
     bool createLoggers();
@@ -129,15 +143,15 @@ protected:
 public:
     int run();
 
+public:
+    virtual bool onLoadConfig();
+    virtual int onDefaultCommand(StringVector const & args);
+
 // Static methods.
 public:
     static WeakModel      getModel();
     static WeakLogNode    getLogNode();
     static WeakServerNode getServerNode();
-
-public:
-    virtual bool onLoadConfig() { return true; }
-    virtual int onDefaultCommand(StringVector const & args) { return 0; }
 };
 
 } // namespace ex

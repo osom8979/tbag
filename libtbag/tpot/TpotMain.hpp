@@ -44,9 +44,6 @@ public:
     virtual bool onLoadConfig() override;
     virtual int  onRunning   () override;
     virtual void onDestroy   () override;
-
-public:
-    virtual int onDefaultCommand(StringVector const & args) override;
 };
 
 // ------------

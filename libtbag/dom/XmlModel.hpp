@@ -180,9 +180,9 @@ public:
     bool load(Path const & path);
 
 public:
-    bool loadOrDefaultSave();
-    bool loadOrDefaultSave(Scope scope);
-    bool loadOrDefaultSave(Path const & path);
+    bool loadOrDefaultSave(bool create_dir = false);
+    bool loadOrDefaultSave(Scope scope, bool create_dir = false);
+    bool loadOrDefaultSave(Path const & path, bool create_dir = false);
 };
 
 } // namespace dom

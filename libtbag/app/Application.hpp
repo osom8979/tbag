@@ -77,6 +77,43 @@ public:
     virtual void onDestroy() { /* EMPTY. */         }
 };
 
+/**
+ * Application event guard.
+ *
+ * @author zer0
+ * @date   2017-06-03
+ */
+template <typename ApplicationType>
+class ApplicationGuard
+{
+private:
+    ApplicationType & _app;
+    bool create_result;
+
+public:
+    ApplicationGuard(ApplicationType & app) : _app(app)
+    {
+        try {
+            create_result = _app.onCreate();
+        } catch (...) {
+            create_result = false;
+        }
+    }
+
+    virtual ~ApplicationGuard()
+    {
+        if (create_result) {
+            _app.onDestroy();
+        }
+    }
+
+public:
+    inline bool isCreateSuccess() const TBAG_NOEXCEPT
+    {
+        return create_result;
+    }
+};
+
 } // namespace app
 
 // --------------------
