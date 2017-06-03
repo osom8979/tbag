@@ -55,6 +55,8 @@ private:
     Callback   _default;
     CommandMap _commands;
 
+    bool _call_once;
+
 public:
     Commander();
     Commander(std::string const & prefix, std::string const & delimiter);
@@ -84,6 +86,9 @@ public:
 
     inline std::string getPrefix() const { return _prefix; }
     inline std::string getDelimiter() const { return _delimiter; }
+
+    inline void setCallOnce(bool flag = true) { _call_once = flag; }
+    inline bool isCallOnce() const TBAG_NOEXCEPT { return _call_once; }
 
 public:
     void clear();

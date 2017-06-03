@@ -8,6 +8,7 @@
 #include <libtbag/dom/XmlModel.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cassert>
 #include <functional>
 #include <utility>
 
@@ -60,12 +61,18 @@ XmlModel & XmlModel::operator =(XmlModel && obj)
     return *this;
 }
 
-bool XmlModel::add(SharedNode model)
+bool XmlModel::add(NodeInterface * node)
 {
-    if (static_cast<bool>(model) == false) {
+    assert(node != nullptr);
+    return add(SharedNode(node));
+}
+
+bool XmlModel::add(SharedNode node)
+{
+    if (static_cast<bool>(node) == false) {
         return false;
     }
-    return _nodes.insert(NodePair(model->name(), model)).second;
+    return _nodes.insert(NodePair(node->name(), node)).second;
 }
 
 bool XmlModel::remove(std::string const & name)

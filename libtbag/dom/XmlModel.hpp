@@ -111,13 +111,26 @@ public:
     { return _nodes.empty(); }
 
 public:
-    bool add(SharedNode model);
+    bool add(NodeInterface * node);
+    bool add(SharedNode node);
     bool remove(std::string const & name);
 
 public:
     WeakNode get(std::string const & name);
 
 public:
+    /** Create(new) & add node. */
+    template <typename Up, typename ... Args>
+    inline std::shared_ptr<typename remove_cr<Up>::type> newAdd(Args && ... args)
+    {
+        typedef typename remove_cr<Up>::type ResultObjectType;
+        SharedNode shared(new (std::nothrow) ResultObjectType(std::forward<Args>(args) ...));
+        if (shared != nullptr && add(shared)) {
+            return std::static_pointer_cast<ResultObjectType>(shared);
+        }
+        return std::shared_ptr<ResultObjectType>();
+    }
+
     template <typename Up>
     Up * getPointer()
     {
@@ -126,6 +139,16 @@ public:
             return static_cast<Up*>(shared.get());
         }
         return nullptr;
+    }
+
+    template <typename Up>
+    std::weak_ptr<Up> getWeak()
+    {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(NodeInterface, Up);
+        if (auto shared = get(Up().name()).lock()) {
+            return std::weak_ptr<Up>(std::static_pointer_cast<Up>(shared));
+        }
+        return std::weak_ptr<Up>();
     }
 
 public:

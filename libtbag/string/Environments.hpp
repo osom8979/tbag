@@ -76,6 +76,8 @@ public:
     { return _flags.empty(); }
 
 public:
+    inline void push(std::string const & key, std::string const & value)
+    { _flags.push(Flag(key, value)); }
     inline void push(Flag const & flag)
     { _flags.push(flag); }
 

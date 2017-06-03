@@ -7,6 +7,7 @@
 
 #include <libtbag/string/Commander.hpp>
 #include <sstream>
+#include <algorithm>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -14,21 +15,19 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-Commander::Commander() : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(nullptr)
+Commander::Commander() : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(nullptr), _call_once(false)
 {
     // EMPTY.
 }
 
 Commander::Commander(std::string const & prefix, std::string const & delimiter)
-        : _prefix(prefix), _delimiter(delimiter), _default(nullptr)
+        : _prefix(prefix), _delimiter(delimiter), _default(nullptr), _call_once(false)
 {
     // EMPTY.
 }
 
-Commander::Commander(Callback const & default_callback) :
-        _prefix(DEFAULT_PREFIX),
-        _delimiter(DEFAULT_DELIMITER),
-        _default(default_callback)
+Commander::Commander(Callback const & default_callback)
+        : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(default_callback), _call_once(false)
 {
     // EMPTY.
 }
@@ -55,6 +54,7 @@ Commander & Commander::operator =(Commander const & obj)
         _delimiter = obj._delimiter;
         _default   = obj._default;
         _commands  = obj._commands;
+        _call_once = obj._call_once;
     }
     return *this;
 }
@@ -66,6 +66,7 @@ Commander & Commander::operator =(Commander && obj)
         _delimiter.swap(obj._delimiter);
         _default.swap(obj._default);
         _commands.swap(obj._commands);
+        std::swap(_call_once, obj._call_once);
     }
     return *this;
 }
@@ -76,6 +77,7 @@ void Commander::clear()
     _delimiter.clear();
     _default = Callback();
     _commands.clear();
+    _call_once = false;
 }
 
 bool Commander::insert(std::string const & command, Callback const & callback)
@@ -124,7 +126,11 @@ std::size_t Commander::request(ArgsVector const & args_vector)
         if (static_cast<bool>(itr->second)) {
             itr->second(arguments);
         }
+
         ++count;
+        if (_call_once) {
+            break;
+        }
     }
 
     return count;
