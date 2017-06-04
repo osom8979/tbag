@@ -8,6 +8,8 @@
 
 #include <libtbag/Err.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <errno.h>
 #include <uv.h>
 #include <lmdb.h>
 
@@ -77,8 +79,14 @@ Err convertMdbErrorToErr(int mdb_error_code) TBAG_NOEXCEPT
 Err convertMdbErrorToErrWithLogging(char const * prefix, int mdb_error_code)
 {
     if (mdb_error_code != MDB_SUCCESS) {
-        tDLogE("mdb {} error [{}] {}", prefix, mdb_error_code, getUvErrorName(mdb_error_code));
-        return convertMdbErrorToErr(mdb_error_code);
+        Err const CODE = convertMdbErrorToErr(mdb_error_code);
+        if (mdb_error_code < 0) {
+            tDLogE("mdb {} error [{}]", prefix, getErrName(CODE));
+        } else {
+            // System error number.
+            tDLogE("mdb system {} error [{}]", prefix, mdb_error_code);
+        }
+        return CODE;
     }
     return Err::E_SUCCESS;
 }
