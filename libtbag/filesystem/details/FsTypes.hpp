@@ -16,6 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/bitwise/BitFlags.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 
@@ -117,7 +118,7 @@ TBAG_CONSTEXPR DirentType const DIRENT_ALL = DIRENT_UNKNOWN | DIRENT_FILE | DIRE
                                              DIRENT_FIFO | DIRENT_SOCKET | DIRENT_CHAR | DIRENT_BLOCK;
 
 using ufile = uvpp::ufile;
-using binf  = uvpp::binf;
+using binf  = util::binf;
 
 /**
  * Portable @c timespec structure.

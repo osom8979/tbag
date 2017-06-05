@@ -18,6 +18,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
 # include <cstdint>
@@ -63,6 +64,8 @@ using ufd    = int;
 using uuser  = uint32_t;
 using ugroup = uint32_t;
 #endif
+
+using binf = util::binf;
 
 #ifndef TBAG_UV_HANDLE_MAP
 #define TBAG_UV_HANDLE_MAP(_TBAG_HANDLE_XX, _TBAG_REQ_XX, _TBAG_ETC_XX) \
@@ -146,26 +149,6 @@ using AddressType = std::uintptr_t;
 using AddressType = std::size_t;
 #endif
 AddressType const DEBUG_UV_DELETED_ADDRESS_VALUE = static_cast<AddressType>(-1);
-
-/**
- * Buffer information structure.
- *
- * @author zer0
- * @date   2016-12-27
- */
-struct BufferInfo
-{
-    char * buffer;
-    std::size_t size;
-
-    // @formatter:off
-    BufferInfo(char * b, std::size_t s) : buffer(b), size(s) { /* EMPTY. */ }
-    BufferInfo() : BufferInfo(nullptr, 0) { /* EMPTY. */ }
-    // @formatter:on
-};
-
-/** Short name of BufferInfo type. */
-typedef BufferInfo binf;
 
 TBAG_CONSTEXPR static unsigned int getBufferInfoSizeMax() TBAG_NOEXCEPT
 {
