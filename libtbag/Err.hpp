@@ -52,6 +52,29 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_CONNECTION_RESET, "A connection was forcibly closed by a peer") \
     /* Process */ \
     _TBAG_XX(_UNKNOWN_PROCESS_ID, "Unknown process id") \
+    /* Missing system error in libuv. */ \
+    _TBAG_XX(_EBADMSG        ,  "Bad message"                                          ) \
+    _TBAG_XX(_ECHILD         ,  "No child processes"                                   ) \
+    _TBAG_XX(_EDEADLK        ,  "Resource deadlock would occur"                        ) \
+    _TBAG_XX(_EDOM           ,  "Mathematics argument out of domain of function"       ) \
+    _TBAG_XX(_EIDRM          ,  "Identifier removed"                                   ) \
+    _TBAG_XX(_EILSEQ         ,  "Illegal byte sequence"                                ) \
+    _TBAG_XX(_EINPROGRESS    ,  "Operation in progress"                                ) \
+    _TBAG_XX(_ENETRESET      ,  "Connection aborted by network"                        ) \
+    _TBAG_XX(_ENODATA        ,  "No message is available on the STREAM head read queue") \
+    _TBAG_XX(_ENOEXEC        ,  "Executable file format error"                         ) \
+    _TBAG_XX(_ENOLCK         ,  "No locks available"                                   ) \
+    _TBAG_XX(_ENOLINK        ,  "Link has been severed"                                ) \
+    _TBAG_XX(_ENOMSG         ,  "No message of the desired type"                       ) \
+    _TBAG_XX(_ENOSR          ,  "No STREAM resources"                                  ) \
+    _TBAG_XX(_ENOSTR         ,  "Not a STREAM"                                         ) \
+    _TBAG_XX(_ENOTRECOVERABLE,  "State not recoverable"                                ) \
+    _TBAG_XX(_ENOTTY         ,  "Inappropriate I/O control operation"                  ) \
+    _TBAG_XX(_EOPNOTSUPP     ,  "Operation not supported on socket"                    ) \
+    _TBAG_XX(_EOVERFLOW      ,  "Value too large to be stored in data type"            ) \
+    _TBAG_XX(_EOWNERDEAD     ,  "Previous owner died"                                  ) \
+    _TBAG_XX(_ETIME          ,  "Stream ioctl() timeout"                               ) \
+    _TBAG_XX(_EWOULDBLOCK    ,  "Operation would block"                                ) \
     /* libuv/uvpp */ \
     _TBAG_UV_XX(_E2BIG           , "Argument list too long"                ) \
     _TBAG_UV_XX(_EACCES          , "Permission denied"                     ) \
@@ -175,6 +198,8 @@ TBAG_API Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_co
 
 TBAG_API Err convertMdbErrorToErr(int mdb_error_code) TBAG_NOEXCEPT;
 TBAG_API Err convertMdbErrorToErrWithLogging(char const * prefix, int uv_error_code);
+
+TBAG_API Err convertSystemErrorToErr(int system_error);
 
 // ----------------
 // libuv debugging.
