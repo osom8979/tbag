@@ -29,7 +29,6 @@ tbag_modules__apply_dep_boost_include ()
 tbag_modules__apply_dep_http_parser ()
 tbag_modules__apply_dep_icu     ()
 tbag_modules__apply_dep_lmdb    ()
-tbag_modules__apply_dep_lzma    ()
 tbag_modules__apply_dep_minizip () ## And apply_dep_z
 tbag_modules__apply_dep_sqlite3 ()
 tbag_modules__apply_dep_uv      ()
