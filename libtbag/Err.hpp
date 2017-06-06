@@ -200,6 +200,7 @@ TBAG_API Err convertMdbErrorToErr(int mdb_error_code) TBAG_NOEXCEPT;
 TBAG_API Err convertMdbErrorToErrWithLogging(char const * prefix, int uv_error_code);
 
 TBAG_API Err convertSystemErrorToErr(int system_error);
+TBAG_API Err getGlobalSystemError();
 
 // ----------------
 // libuv debugging.
@@ -226,6 +227,15 @@ TBAG_API char const * getUvErrorName(int uv_error_code);
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+#include <ostream>
+
+template <class CharT, class TraitsT>
+std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, libtbag::Err err)
+{
+    os << libtbag::getErrName(err);
+    return os;
+}
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_ERR_HPP__
 

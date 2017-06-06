@@ -231,6 +231,11 @@ Err convertSystemErrorToErr(int system_error)
     return __impl::convertSystemErrorToErr(system_error);
 }
 
+Err getGlobalSystemError()
+{
+    return convertSystemErrorToErr(errno);
+}
+
 // ----------------
 // libuv debugging.
 // ----------------

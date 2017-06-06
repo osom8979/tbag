@@ -16,7 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+
+#include <cstdio>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,8 +28,6 @@ namespace debug {
 namespace st    {
 namespace unix  {
 
-// Forward declaration.
-
 /**
  * AddressToLine class prototype.
  *
@@ -36,12 +36,21 @@ namespace unix  {
  */
 class TBAG_API AddressToLine : private Noncopyable
 {
+public:
+    struct Impl;
+    friend struct Impl;
+
+    using UniqueImpl = std::unique_ptr<Impl>;
+
 private:
-    // Insert member variables.
+    UniqueImpl _impl;
 
 public:
-    AddressToLine();
+    AddressToLine(const char * flag, const char * exec_path, const char * addr);
     virtual ~AddressToLine();
+
+public:
+    FILE * getFilePointer() const TBAG_NOEXCEPT;
 };
 
 } // namespace unix
