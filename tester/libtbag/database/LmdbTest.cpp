@@ -22,43 +22,53 @@ TEST(LmdbTest, Default)
     ASSERT_EQ(Err::E_SUCCESS, db.setMaxIndividualDatabase(1));
     ASSERT_EQ(Err::E_SUCCESS, db.open(PATH.getString(), 0));
 
-    std::string const TEST_DB_NAME = "TEST_DB";
-    std::string const TEST_KEY     = "KEY";
-    std::string const TEST_DATA    = "DATA";
+    std::string const TEST_DB_NAME1 = "TEST_DB_1";
+    std::string const TEST_DB_NAME2 = "TEST_DB_2";
 
-    LmdbTransaction txn;
-    ASSERT_EQ(Err::E_SUCCESS, txn.begin(db));
+    std::string const TEST_KEY1 = "KEY1";
+    std::string const TEST_VAL1 = "VAL1";
 
-    LmdbIndividualDatabase dbi;
-    ASSERT_EQ(Err::E_SUCCESS, dbi.open(txn, TEST_DB_NAME, TBAG_DBI_OF_CREATE));
+    std::string const TEST_KEY2 = "KEY2";
+    std::string const TEST_VAL2 = "VAL2";
 
-    std::string key  = TEST_KEY;
-    std::string data = TEST_DATA;
+    {   // PUT
+        LmdbTxn txn(db);
+        ASSERT_EQ(Err::E_SUCCESS, txn.begin());
 
-    ASSERT_EQ(Err::E_SUCCESS, dbi.put(txn, key, data));
-    ASSERT_EQ(Err::E_SUCCESS, txn.commit());
+        LmdbDbi dbi(txn);
+        ASSERT_EQ(Err::E_SUCCESS, dbi.open(TEST_DB_NAME1, TBAG_DBI_OF_CREATE));
+        ASSERT_EQ(Err::E_SUCCESS, dbi.put(TEST_KEY1, TEST_VAL1));
+        ASSERT_EQ(Err::E_SUCCESS, dbi.put(TEST_KEY2, TEST_VAL2));
+        ASSERT_EQ(Err::E_SUCCESS, txn.commit());
+    }
 
-//    {   // READ.
-//        LmdbTransaction read_txn;
-//        ASSERT_EQ(Err::E_SUCCESS, read_txn.begin(db, TBAG_LMDB_OF_RDONLY));
-//
-//        LmdbCursor cursor;
-//        ASSERT_EQ(Err::E_SUCCESS, cursor.open(read_txn, dbi));
-//
-//        std::string key = TEST_KEY;
-//        std::string read_value;
-//        read_value.resize(100);
-//
-//        int read_count = 0;
-//        while (cursor.get(key, read_value, LmdbCursorOperations::CO_NEXT) == Err::E_SUCCESS) {
-//            ++read_count;
-//        }
-//
-//        ASSERT_EQ(1, read_count);
-//        ASSERT_EQ(TEST_DATA, read_value);
-//        read_txn.abort();
-//    }
+    {   // GET
+        std::string key1;
+        std::string val1;
 
-    dbi.close(db);
+        std::string key2;
+        std::string val2;
+
+        std::string key3;
+        std::string val3;
+
+        LmdbTxn txn(db);
+        ASSERT_EQ(Err::E_SUCCESS, txn.begin(TBAG_LMDB_OF_RDONLY));
+
+        LmdbDbi dbi(txn);
+        ASSERT_EQ(Err::E_SUCCESS, dbi.open(TEST_DB_NAME1, TBAG_DBI_OF_CREATE));
+
+        LmdbCursor cursor(txn, dbi);
+        ASSERT_EQ(Err::E_SUCCESS , cursor.get(key1, val1, LmdbCursorOperations::CO_NEXT));
+        ASSERT_EQ(Err::E_SUCCESS , cursor.get(key2, val2, LmdbCursorOperations::CO_NEXT));
+        ASSERT_EQ(Err::E_NOTFOUND, cursor.get(key3, val3, LmdbCursorOperations::CO_NEXT));
+
+        ASSERT_EQ(TEST_KEY1, key1);
+        ASSERT_EQ(TEST_VAL1, val1);
+
+        ASSERT_EQ(TEST_KEY2, key2);
+        ASSERT_EQ(TEST_VAL2, val2);
+        // txn.abort();
+    }
 }
 

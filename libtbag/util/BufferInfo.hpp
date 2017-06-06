@@ -50,6 +50,9 @@ struct BufferInfo
 
     ~BufferInfo()
     { /* EMPTY. */ }
+
+    inline void set(Base * b, Size s) TBAG_NOEXCEPT
+    { buffer = b; size = s; }
 };
 
 /** Short name of BufferInfo type. */

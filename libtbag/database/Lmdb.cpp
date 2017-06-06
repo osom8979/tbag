@@ -123,128 +123,210 @@ Err Lmdb::open(std::string const & path, LmdbOpenFlags flags, int mode)
     return convertMdbErrorToErrWithLogging("Lmdb::open()", CODE);
 }
 
-// -------------------------------
-// LmdbTransaction implementation.
-// -------------------------------
+// -----------------------
+// LmdbTxn implementation.
+// -----------------------
 
-LmdbTransaction::LmdbTransaction() : Parent(nullptr)
+LmdbTxn::LmdbTxn(Lmdb & db) : Parent(nullptr), _db(db), _end(false)
 {
     // EMPTY.
 }
 
-LmdbTransaction::LmdbTransaction(Lmdb & db, LmdbTransaction & parent, LmdbOpenFlags flags) : Parent(nullptr)
+LmdbTxn::LmdbTxn(Lmdb & db, LmdbTxn & parent, LmdbOpenFlags flags) : Parent(nullptr), _db(db), _end(false)
 {
-    if (begin(db, parent, flags) != Err::E_SUCCESS) {
+    if (begin(parent, flags) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
 
-LmdbTransaction::LmdbTransaction(Lmdb & db, LmdbOpenFlags flags) : Parent(nullptr)
+LmdbTxn::LmdbTxn(Lmdb & db, LmdbOpenFlags flags) : Parent(nullptr), _db(db), _end(false)
 {
-    if (begin(db, flags) != Err::E_SUCCESS) {
+    if (begin(flags) != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
 
-LmdbTransaction::~LmdbTransaction()
+LmdbTxn::~LmdbTxn()
 {
-    // EMPTY.
+    reset();
 }
 
-Err LmdbTransaction::begin(Lmdb & db, LmdbTransaction & parent, LmdbOpenFlags flags)
+std::size_t LmdbTxn::getId() const
 {
-    int const CODE = ::mdb_txn_begin(cast_mdb_env(db.get()), cast_mdb_txn(parent.get()),
+    return ::mdb_txn_id(cast_mdb_txn(ptr));
+}
+
+Err LmdbTxn::begin(LmdbTxn & parent, OpenFlags flags)
+{
+    int const CODE = ::mdb_txn_begin(cast_mdb_env(_db.get()), cast_mdb_txn(parent.get()),
                                      flags, reinterpret_cast<MDB_txn**>(&ptr));
-    return convertMdbErrorToErrWithLogging("LmdbTransaction::begin()", CODE);
+    return convertMdbErrorToErrWithLogging("LmdbTxn::begin()", CODE);
 }
 
-Err LmdbTransaction::begin(Lmdb & db, LmdbOpenFlags flags)
+Err LmdbTxn::begin(OpenFlags flags)
 {
-    LmdbTransaction NULL_PARENT;
-    return begin(db, NULL_PARENT, flags);
+    int const CODE = ::mdb_txn_begin(cast_mdb_env(_db.get()), nullptr,
+                                     flags, reinterpret_cast<MDB_txn**>(&ptr));
+    return convertMdbErrorToErrWithLogging("LmdbTxn::begin()", CODE);
 }
 
-Err LmdbTransaction::commit()
+Err LmdbTxn::renew()
+{
+    int const CODE = ::mdb_txn_renew(cast_mdb_txn(ptr));
+    return convertMdbErrorToErrWithLogging("LmdbTxn::renew()", CODE);
+}
+
+void LmdbTxn::reset()
+{
+    ::mdb_txn_reset(cast_mdb_txn(ptr));
+}
+
+Err LmdbTxn::commit()
 {
     int const CODE = ::mdb_txn_commit(cast_mdb_txn(ptr));
     return convertMdbErrorToErrWithLogging("Lmdb::commit()", CODE);
 }
 
-void LmdbTransaction::abort()
+void LmdbTxn::abort()
 {
     ::mdb_txn_abort(cast_mdb_txn(ptr));
+    ptr = nullptr;
 }
 
-// --------------------------------------
-// LmdbIndividualDatabase implementation.
-// --------------------------------------
+// -----------------------
+// LmdbDbi implementation.
+// -----------------------
 
-LmdbIndividualDatabase::LmdbIndividualDatabase() : _index(0)
+LmdbDbi::LmdbDbi(LmdbTxn & txn) : _txn(txn), _index(0)
 {
     // EMPTY.
 }
 
-LmdbIndividualDatabase::~LmdbIndividualDatabase()
+LmdbDbi::~LmdbDbi()
 {
-    // EMPTY.
+    close();
 }
 
-Err LmdbIndividualDatabase::open(LmdbTransaction & txn, std::string const & name, DbiOpenFlags flags)
+Err LmdbDbi::getFlags(unsigned int * flags) const
 {
-    int const CODE = ::mdb_dbi_open(cast_mdb_txn(txn.get()), name.c_str(), flags, (MDB_dbi*)&_index);
-    return convertMdbErrorToErrWithLogging("LmdbIndividualDatabase::open()", CODE);
+    int const CODE = ::mdb_dbi_flags(cast_mdb_txn(_txn.get()), _index, flags);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::getFlags()", CODE);
 }
 
-void LmdbIndividualDatabase::close(Lmdb & db)
+Err LmdbDbi::open(std::string const & name, OpenFlags flags)
 {
-    ::mdb_dbi_close(cast_mdb_env(db.get()), cast_mdb_dbi(_index));
+    int const CODE = ::mdb_dbi_open(cast_mdb_txn(_txn.get()), name.c_str(), flags, (MDB_dbi*)&_index);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::open()", CODE);
 }
 
-Err LmdbIndividualDatabase::put(LmdbTransaction & txn,
-                                void const * key_data, std::size_t key_size,
-                                void const * value_data, std::size_t value_size,
-                                unsigned int flags)
+void LmdbDbi::close()
 {
-    MDB_val key;
-    key.mv_data = const_cast<void*>(key_data);
-    key.mv_size = key_size;
-
-    MDB_val val;
-    val.mv_data = const_cast<void*>(value_data);
-    val.mv_size = value_size;
-
-    int const CODE = ::mdb_put(cast_mdb_txn(txn.get()), cast_mdb_dbi(_index), &key, &val, flags);
-    return convertMdbErrorToErrWithLogging("LmdbIndividualDatabase::put()", CODE);
+    ::mdb_dbi_close(cast_mdb_env(_txn.getDb().get()), cast_mdb_dbi(_index));
+    _index = 0;
 }
 
-Err LmdbIndividualDatabase::put(LmdbTransaction & txn,
-                                std::vector<char> const & key,
-                                std::vector<char> const & value,
-                                unsigned int flags)
+Err LmdbDbi::drop(int del)
 {
-    return put(txn, (void const *)&key[0], key.size(), (void const *)&value[0], value.size(), flags);
+    int const CODE = ::mdb_drop(cast_mdb_txn(_txn.get()), cast_mdb_dbi(_index), del);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::drop()", CODE);
 }
 
-Err LmdbIndividualDatabase::put(LmdbTransaction & txn,
-                                std::string const & key,
-                                std::string const & value,
-                                unsigned int flags)
+Err LmdbDbi::put(binf const & key, binf const & val, WriteFlags flags)
 {
-    return put(txn, (void const *)&key[0], key.size(), (void const *)&value[0], value.size(), flags);
+    MDB_val mdb_key;
+    mdb_key.mv_data = key.buffer;
+    mdb_key.mv_size = key.size;
+
+    MDB_val mdb_val;
+    mdb_val.mv_data = val.buffer;
+    mdb_val.mv_size = val.size;
+
+    int const CODE = ::mdb_put(cast_mdb_txn(_txn.get()), cast_mdb_dbi(_index), &mdb_key, &mdb_val, flags);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::put()", CODE);
+}
+
+Err LmdbDbi::put(Buffer const & key, Buffer const & val, WriteFlags flags)
+{
+    binf const KEY(const_cast<char*>(&key[0]), key.size());
+    binf const VAL(const_cast<char*>(&val[0]), val.size());
+    return put(KEY, VAL, flags);
+}
+
+Err LmdbDbi::put(std::string const & key, std::string const & val, WriteFlags flags)
+{
+    binf const KEY(const_cast<char*>(&key[0]), key.size());
+    binf const VAL(const_cast<char*>(&val[0]), val.size());
+    return put(KEY, VAL, flags);
+}
+
+Err LmdbDbi::get(binf & key, binf & val)
+{
+    MDB_val mdb_key = {0,};
+    MDB_val mdb_val = {0,};
+
+    int const CODE = ::mdb_get(cast_mdb_txn(_txn.get()), cast_mdb_dbi(_index), &mdb_key, &mdb_val);
+    if (CODE == MDB_SUCCESS) {
+        key.set(static_cast<char*>(mdb_key.mv_data), mdb_key.mv_size);
+        val.set(static_cast<char*>(mdb_val.mv_data), mdb_val.mv_size);
+    }
+    return convertMdbErrorToErr(CODE);
+}
+
+Err LmdbDbi::get(Buffer & key, Buffer & val)
+{
+    binf binf_key, binf_val;
+    Err const RESULT = get(binf_key, binf_val);
+    if (RESULT == Err::E_SUCCESS) {
+        key.assign(binf_key.buffer, binf_key.buffer + binf_key.size);
+        val.assign(binf_val.buffer, binf_val.buffer + binf_val.size);
+    }
+    return RESULT;
+}
+
+Err LmdbDbi::get(std::string & key, std::string & val)
+{
+    binf binf_key, binf_val;
+    Err const RESULT = get(binf_key, binf_val);
+    if (RESULT == Err::E_SUCCESS) {
+        key.assign(binf_key.buffer, binf_key.buffer + binf_key.size);
+        val.assign(binf_val.buffer, binf_val.buffer + binf_val.size);
+    }
+    return RESULT;
+}
+
+Err LmdbDbi::del(binf const & key, binf & val)
+{
+    MDB_val mdb_key;
+    mdb_key.mv_data = key.buffer;
+    mdb_key.mv_size = key.size;
+
+    MDB_val mdb_val;
+    mdb_val.mv_data = val.buffer;
+    mdb_val.mv_size = val.size;
+
+    int const CODE = ::mdb_del(cast_mdb_txn(_txn.get()), cast_mdb_dbi(_index), &mdb_key, &mdb_val);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::del()", CODE);
+}
+
+Err LmdbDbi::del(Buffer const & key, Buffer & val)
+{
+    binf result((&val[0]), val.size());
+    return del(binf(const_cast<char*>(&key[0]), key.size()), result);
+}
+
+Err LmdbDbi::del(std::string const & key, std::string & val)
+{
+    binf result((&val[0]), val.size());
+    return del(binf(const_cast<char*>(&key[0]), key.size()), result);
 }
 
 // --------------------------
 // LmdbCursor implementation.
 // --------------------------
 
-LmdbCursor::LmdbCursor() : Parent(nullptr)
+LmdbCursor::LmdbCursor(LmdbTxn & txn, LmdbDbi & dbi) : Parent(nullptr), _txn(txn), _dbi(dbi)
 {
-    // EMPTY.
-}
-
-LmdbCursor::LmdbCursor(LmdbTransaction & txn, LmdbIndividualDatabase & dbi) : Parent(nullptr)
-{
-    if (open(txn, dbi) != Err::E_SUCCESS) {
+    if (open() != Err::E_SUCCESS) {
         throw std::bad_alloc();
     }
 }
@@ -254,9 +336,9 @@ LmdbCursor::~LmdbCursor()
     close();
 }
 
-Err LmdbCursor::open(LmdbTransaction & txn, LmdbIndividualDatabase & dbi)
+Err LmdbCursor::open()
 {
-    int const CODE = ::mdb_cursor_open(cast_mdb_txn(txn.get()), dbi.getIndex(), reinterpret_cast<MDB_cursor**>(&ptr));
+    int const CODE = ::mdb_cursor_open(cast_mdb_txn(_txn.get()), _dbi.getIndex(), reinterpret_cast<MDB_cursor**>(&ptr));
     return convertMdbErrorToErrWithLogging("LmdbCursor::open()", CODE);
 }
 
@@ -268,34 +350,85 @@ void LmdbCursor::close()
     }
 }
 
-Err LmdbCursor::get(void const * key_data, std::size_t key_size,
-                    void * value_data, std::size_t value_size,
-                    LmdbCursorOperations op)
+Err LmdbCursor::get(binf & key, binf & val, Operation op)
 {
-    MDB_val key;
-    key.mv_data = const_cast<void*>(key_data);
-    key.mv_size = key_size;
+    MDB_val mdb_key = {0,};
+    MDB_val mdb_val = {0,};
 
-    MDB_val val;
-    val.mv_data = value_data;
-    val.mv_size = value_size;
-
-    int const CODE = ::mdb_cursor_get(cast_mdb_cursor(ptr), &key, &val, __impl::convertCursorOp(op));
-    return convertMdbErrorToErrWithLogging("LmdbCursor::get()", CODE);
+    int const CODE = ::mdb_cursor_get(cast_mdb_cursor(ptr), &mdb_key, &mdb_val, __impl::convertCursorOp(op));
+    if (CODE == MDB_SUCCESS) {
+        key.set(static_cast<char*>(mdb_key.mv_data), mdb_key.mv_size);
+        val.set(static_cast<char*>(mdb_val.mv_data), mdb_val.mv_size);
+    }
+    return convertMdbErrorToErr(CODE);
 }
 
-Err LmdbCursor::get(std::vector<char> const & key,
-                    std::vector<char> & value,
-                    LmdbCursorOperations op)
+Err LmdbCursor::get(Buffer & key, Buffer & val, Operation op)
 {
-    return get((void const *)&key[0], key.size(), (void*)&value[0], value.size(), op);
+    binf binf_key, binf_val;
+    Err const RESULT = get(binf_key, binf_val, op);
+    if (RESULT == Err::E_SUCCESS) {
+        key.assign(binf_key.buffer, binf_key.buffer + binf_key.size);
+        val.assign(binf_val.buffer, binf_val.buffer + binf_val.size);
+    }
+    return RESULT;
 }
 
-Err LmdbCursor::get(std::string const & key,
-                    std::string & value,
-                    LmdbCursorOperations op)
+Err LmdbCursor::get(std::string & key, std::string & val, Operation op)
 {
-    return get((void const *)&key[0], key.size(), (void*)&value[0], value.size(), op);
+    binf binf_key, binf_val;
+    Err const RESULT = get(binf_key, binf_val, op);
+    if (RESULT == Err::E_SUCCESS) {
+        key.assign(binf_key.buffer, binf_key.buffer + binf_key.size);
+        val.assign(binf_val.buffer, binf_val.buffer + binf_val.size);
+    }
+    return RESULT;
+}
+
+Err LmdbCursor::renew()
+{
+    int const CODE = ::mdb_cursor_renew(cast_mdb_txn(_txn.get()), cast_mdb_cursor(ptr));
+    return convertMdbErrorToErrWithLogging("LmdbCursor::renew()", CODE);
+}
+
+Err LmdbCursor::put(binf const & key, binf const & val, WriteFlags flags)
+{
+    MDB_val mdb_key;
+    mdb_key.mv_data = key.buffer;
+    mdb_key.mv_size = key.size;
+
+    MDB_val mdb_val;
+    mdb_val.mv_data = val.buffer;
+    mdb_val.mv_size = val.size;
+
+    int const CODE = ::mdb_cursor_put(cast_mdb_cursor(ptr), &mdb_key, &mdb_val, flags);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::put()", CODE);
+}
+
+Err LmdbCursor::put(Buffer const & key, Buffer const & val, WriteFlags flags)
+{
+    binf const KEY(const_cast<char*>(&key[0]), key.size());
+    binf const VAL(const_cast<char*>(&val[0]), val.size());
+    return put(KEY, VAL, flags);
+}
+
+Err LmdbCursor::put(std::string const & key, std::string const & val, WriteFlags flags)
+{
+    binf const KEY(const_cast<char*>(&key[0]), key.size());
+    binf const VAL(const_cast<char*>(&val[0]), val.size());
+    return put(KEY, VAL, flags);
+}
+
+Err LmdbCursor::del(unsigned int flags)
+{
+    int const CODE = ::mdb_cursor_del(cast_mdb_cursor(ptr), flags);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::put()", CODE);
+}
+
+Err LmdbCursor::count(std::size_t * result)
+{
+    int const CODE = ::mdb_cursor_count(cast_mdb_cursor(ptr), result);
+    return convertMdbErrorToErrWithLogging("LmdbDbi::put()", CODE);
 }
 
 } // namespace database

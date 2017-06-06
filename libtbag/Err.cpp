@@ -198,6 +198,11 @@ Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_code)
 
 Err convertMdbErrorToErr(int mdb_error_code) TBAG_NOEXCEPT
 {
+    if (mdb_error_code > 0) {
+        // In this case is the system error number.
+        return convertSystemErrorToErr(mdb_error_code);
+    }
+
     // @formatter:off
     switch (mdb_error_code) {
     case 0: return Err::E_SUCCESS;
@@ -215,13 +220,7 @@ Err convertMdbErrorToErrWithLogging(char const * prefix, int mdb_error_code)
 {
     if (mdb_error_code != MDB_SUCCESS) {
         Err const CODE = convertMdbErrorToErr(mdb_error_code);
-        if (mdb_error_code < 0) {
-            tDLogE("mdb {} error [{}] {}", prefix, mdb_error_code, getErrName(CODE));
-        } else {
-            // In this case is the system error number.
-            tDLogE("mdb {} system error [{}] {}", prefix, mdb_error_code,
-                   getErrName(convertSystemErrorToErr(mdb_error_code)));
-        }
+        tDLogE("mdb {} error [{}] {}", prefix, mdb_error_code, getErrName(CODE));
         return CODE;
     }
     return Err::E_SUCCESS;
