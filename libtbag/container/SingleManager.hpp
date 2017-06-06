@@ -159,7 +159,7 @@ public:
     template <typename ... Args>
     static WeakBase singleNewAdd(Key id, Args && ... args)
     {
-        return getInstance()->template newAdd(id, std::forward<Args>(args) ...);
+        return getInstance()->/*template*/newAdd(id, std::forward<Args>(args) ...);
     }
 };
 
