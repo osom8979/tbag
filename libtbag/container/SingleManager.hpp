@@ -16,7 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
-#include <libtbag/pattern/Singleton2.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/pattern/Singleton3.hpp>
 
 #include <unordered_map>
 #include <memory>
@@ -34,9 +35,12 @@ namespace container {
  *
  * @author zer0
  * @date   2017-06-06
+ *
+ * @remarks
+ *  Singletone2 does not work with MSVC. So, we use Singletone3.
  */
 template <typename KeyType, typename BaseType, typename MutexType = std::mutex>
-class SingleManager : public libtbag::pattern::Singleton2<SingleManager<KeyType, BaseType, MutexType> >
+class SingleManager : private Noncopyable
 {
 public:
     using Key   = KeyType;
@@ -57,7 +61,7 @@ private:
     BaseMap _map;
 
 public:
-    friend class ::libtbag::pattern::Singleton2<Self>;
+    SINGLETON3_INSTANCE(Self);
 protected:
     SingleManager() { /* EMPTY. */ }
 public:
@@ -122,42 +126,45 @@ public:
 // ---------------
 
 public:
-    static bool singleEmpty() { return Self::getInstance()->empty(); }
-    static std::size_t singleSize() { return Self::getInstance()->size(); }
+    static bool singleEmpty() { return getInstance()->empty(); }
+    static std::size_t singleSize() { return getInstance()->size(); }
 
 public:
     static void singleClear()
     {
-        Self::getInstance()->clear();
+        getInstance()->clear();
     }
 
     static WeakBase singleInsert(Key id, SharedBase const & base)
     {
-        return Self::getInstance()->insert(id, base);
+        return getInstance()->insert(id, base);
     }
 
     static bool singleRemove(Key id)
     {
-        return Self::getInstance()->remove(id);
+        return getInstance()->remove(id);
     }
 
     static bool singleExists(Key id)
     {
-        return Self::getInstance()->exists(id);
+        return getInstance()->exists(id);
     }
 
     static WeakBase singleGet(Key id)
     {
-        return Self::getInstance()->get(id);
+        return getInstance()->get(id);
     }
 
 public:
     template <typename ... Args>
     static WeakBase singleNewAdd(Key id, Args && ... args)
     {
-        return Self::getInstance()->template newAdd(id, std::forward<Args>(args) ...);
+        return getInstance()->template newAdd(id, std::forward<Args>(args) ...);
     }
 };
+
+template <typename K, typename B, typename M>
+typename SingleManager<K, B, M>::Self * SingleManager<K, B, M>::__instance = nullptr;
 
 } // namespace container
 
