@@ -140,12 +140,16 @@ check_c_source_compiles ("
 
 if (HAVE_WINDBG)
     add_definitions (-DBOOST_STACKTRACE_USE_WINDBG)
+    add_definitions (-DTBAG_STACKTRACE_WINDBG)
 elseif (HAVE_BACKTRACE)
     add_definitions (-DBOOST_STACKTRACE_USE_BACKTRACE)
+    add_definitions (-DTBAG_STACKTRACE_BACKTRACE)
 elseif (HAVE_UNWIND)
     add_definitions (-DBOOST_STACKTRACE_USE_UNWIND)
+    add_definitions (-DTBAG_STACKTRACE_UNWIND)
 else ()
     add_definitions (-DBOOST_STACKTRACE_USE_NOOP)
+    add_definitions (-DTBAG_STACKTRACE_FAKE)
 endif ()
 
 set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
