@@ -44,8 +44,8 @@ using cbinf = util::cbinf;
     _TBAG_XX(_RDONLY    ,   0x20000, "read only"                                                    ) \
     _TBAG_XX(_NOMETASYNC,   0x40000, "don't fsync metapage after commit"                            ) \
     _TBAG_XX(_WRITEMAP  ,   0x80000, "use writable mmap"                                            ) \
-    _TBAG_XX(_MAPASYNC  ,  0x100000, "use asynchronous msync when #MDB_WRITEMAP is used"            ) \
-    _TBAG_XX(_NOTLS     ,  0x200000, "tie reader locktable slots to #MDB_txn objects instead of to threads" ) \
+    _TBAG_XX(_MAPASYNC  ,  0x100000, "use asynchronous msync when MDB_WRITEMAP is used"             ) \
+    _TBAG_XX(_NOTLS     ,  0x200000, "tie reader locktable slots to MDB_txn objects instead of to threads" ) \
     _TBAG_XX(_NOLOCK    ,  0x400000, "don't do any locking, caller must manage their own locks"     ) \
     _TBAG_XX(_NORDAHEAD ,  0x800000, "don't do readahead (no effect on Windows)"                    ) \
     _TBAG_XX(_NOMEMINIT , 0x1000000, "don't initialize malloc'd memory before writing to datafile"  ) \
@@ -64,13 +64,13 @@ TBAG_LMDB_OPEN_FLAG_MAP(_TBAG_XX)
 
 #ifndef TBAG_LMDB_DBI_OPEN_FLAG_MAP
 #define TBAG_LMDB_DBI_OPEN_FLAG_MAP(_TBAG_XX) \
-    _TBAG_XX(_REVERSEKEY,    0x02, "use reverse string keys"                    ) \
-    _TBAG_XX(_DUPSORT   ,    0x04, "use sorted duplicates"                      ) \
-    _TBAG_XX(_INTEGERKEY,    0x08, "numeric keys in native byte order"          ) \
-    _TBAG_XX(_DUPFIXED  ,    0x10, "with #MDB_DUPSORT, sorted dup items have fixed size") \
-    _TBAG_XX(_INTEGERDUP,    0x20, "with #MDB_DUPSORT, dups are #MDB_INTEGERKEY-style integers") \
-    _TBAG_XX(_REVERSEDUP,    0x40, "with #MDB_DUPSORT, use reverse string dups" ) \
-    _TBAG_XX(_CREATE    , 0x40000, "create DB if not already existing"          ) \
+    _TBAG_XX(_REVERSEKEY,    0x02, "use reverse string keys"                  ) \
+    _TBAG_XX(_DUPSORT   ,    0x04, "use sorted duplicates"                    ) \
+    _TBAG_XX(_INTEGERKEY,    0x08, "numeric keys in native byte order"        ) \
+    _TBAG_XX(_DUPFIXED  ,    0x10, "with MDB_DUPSORT, sorted dup items have fixed size") \
+    _TBAG_XX(_INTEGERDUP,    0x20, "with MDB_DUPSORT, dups are MDB_INTEGERKEY-style integers") \
+    _TBAG_XX(_REVERSEDUP,    0x40, "with MDB_DUPSORT, use reverse string dups") \
+    _TBAG_XX(_CREATE    , 0x40000, "create DB if not already existing"        ) \
     /* -- END -- */
 #endif
 
@@ -88,7 +88,7 @@ TBAG_LMDB_DBI_OPEN_FLAG_MAP(_TBAG_XX)
 #define TBAG_LMDB_WRITE_FLAGS_MAP(_TBAG_XX) \
     /* For put: Don't write if the key already exists. */               \
     _TBAG_XX(_NOOVERWRITE,    0x10, "LMDB_NOOVERWRITE")                 \
-    /* Only for #MDB_DUPSORT */                                         \
+    /* Only for MDB_DUPSORT */                                          \
     /* For put: don't write if the key and data pair already exist. */  \
     /* For mdb_cursor_del: remove all duplicate data items. */          \
     _TBAG_XX(_NODUPDATA  ,    0x20, "LMDB_NODUPDATA")                   \
@@ -102,7 +102,7 @@ TBAG_LMDB_DBI_OPEN_FLAG_MAP(_TBAG_XX)
     /* Duplicate data is being appended, don't split full pages. */     \
     _TBAG_XX(_APPENDDUP  , 0x40000, "LMDB_APPENDDUP")                   \
     /* Store multiple data items in one call. */                        \
-    /* Only for #MDB_DUPFIXED. */                                       \
+    /* Only for MDB_DUPFIXED. */                                        \
     _TBAG_XX(_MULTIPLE   , 0x80000, "LMDB_MULTIPLE")                    \
     /* -- END -- */
 #endif
@@ -119,23 +119,23 @@ TBAG_LMDB_DBI_OPEN_FLAG_MAP(_TBAG_XX)
 
 #ifndef TBAG_LMDB_CURSOR_OP_MAP
 #define TBAG_LMDB_CURSOR_OP_MAP(_TBAG_XX) \
-    _TBAG_XX(_FIRST         , "Position at first key/data item"                     ) \
-    _TBAG_XX(_FIRST_DUP     , "Position at first data item of current key."         ) \
-    _TBAG_XX(_GET_BOTH      , "Position at key/data pair. Only for #MDB_DUPSORT"    ) \
-    _TBAG_XX(_GET_BOTH_RANGE, "position at key, nearest data. Only for #MDB_DUPSORT") \
-    _TBAG_XX(_GET_CURRENT   , "Return key/data at current cursor position"          ) \
+    _TBAG_XX(_FIRST         , "Position at first key/data item"                    ) \
+    _TBAG_XX(_FIRST_DUP     , "Position at first data item of current key."        ) \
+    _TBAG_XX(_GET_BOTH      , "Position at key/data pair. Only for MDB_DUPSORT"    ) \
+    _TBAG_XX(_GET_BOTH_RANGE, "position at key, nearest data. Only for MDB_DUPSORT") \
+    _TBAG_XX(_GET_CURRENT   , "Return key/data at current cursor position"         ) \
     _TBAG_XX(_GET_MULTIPLE  , "Return key and up to a page of duplicate data items from current cursor position.") \
-    _TBAG_XX(_LAST          , "Position at last key/data item"                      ) \
-    _TBAG_XX(_LAST_DUP      , "Position at last data item of current key."          ) \
-    _TBAG_XX(_NEXT          , "Position at next data item"                          ) \
-    _TBAG_XX(_NEXT_DUP      , "Position at next data item of current key."          ) \
+    _TBAG_XX(_LAST          , "Position at last key/data item"                     ) \
+    _TBAG_XX(_LAST_DUP      , "Position at last data item of current key."         ) \
+    _TBAG_XX(_NEXT          , "Position at next data item"                         ) \
+    _TBAG_XX(_NEXT_DUP      , "Position at next data item of current key."         ) \
     _TBAG_XX(_NEXT_MULTIPLE , "Return key and up to a page of duplicate data items from next cursor position.") \
-    _TBAG_XX(_NEXT_NODUP    , "Position at first data item of next key"             ) \
-    _TBAG_XX(_PREV          , "Position at previous data item"                      ) \
-    _TBAG_XX(_PREV_DUP      , "Position at previous data item of current key."      ) \
-    _TBAG_XX(_PREV_NODUP    , "Position at last data item of previous key"          ) \
-    _TBAG_XX(_SET           , "Position at specified key"                           ) \
-    _TBAG_XX(_SET_KEY       , "Position at specified key, return key + data"        ) \
+    _TBAG_XX(_NEXT_NODUP    , "Position at first data item of next key"            ) \
+    _TBAG_XX(_PREV          , "Position at previous data item"                     ) \
+    _TBAG_XX(_PREV_DUP      , "Position at previous data item of current key."     ) \
+    _TBAG_XX(_PREV_NODUP    , "Position at last data item of previous key"         ) \
+    _TBAG_XX(_SET           , "Position at specified key"                          ) \
+    _TBAG_XX(_SET_KEY       , "Position at specified key, return key + data"       ) \
     _TBAG_XX(_SET_RANGE     , "Position at first key greater than or equal to specified key.") \
     /* -- END -- */
 #endif
@@ -164,7 +164,8 @@ enum class LmdbCursorOperations
  * @date   2017-06-04
  *
  * @remarks
- *  A DB environment supports multiple databases, all residing in the same shared-memory map.
+ *  A DB environment supports multiple databases, @n
+ *  all residing in the same shared-memory map.
  */
 class TBAG_API Lmdb : public container::Pointer<void>, private Noncopyable
 {
@@ -207,7 +208,8 @@ public:
  * @date   2017-06-04
  *
  * @remarks
- *  All database operations require a transaction handle. Transactions may be read-only or read-write.
+ *  All database operations require a transaction handle. @n
+ *  Transactions may be read-only or read-write.
  */
 class TBAG_API LmdbTxn : public container::Pointer<void>, private Noncopyable
 {
@@ -299,13 +301,13 @@ public:
     // /** Set a custom key comparison function for a database. */
     // Err setCompare(MDB_cmp_func *cmp);
 
-    // /** Set a custom data comparison function for a #MDB_DUPSORT database. */
+    // /** Set a custom data comparison function for a MDB_DUPSORT database. */
     // Err setDupsort(MDB_cmp_func *cmp);
 
-    // /** Set a relocation function for a #MDB_FIXEDMAP database. */
+    // /** Set a relocation function for a MDB_FIXEDMAP database. */
     // Err setRelfunc(MDB_rel_func *rel);
 
-    // /** Set a context pointer for a #MDB_FIXEDMAP database's relocation function. */
+    // /** Set a context pointer for a MDB_FIXEDMAP database's relocation function. */
     // Err setRelctx(void * ctx);
 
 public:

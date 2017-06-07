@@ -91,7 +91,9 @@ struct AddressToLine::Impl : private Noncopyable
     }
 
     inline operator FILE *() const TBAG_NOEXCEPT
-    { return output_pipe; }
+    {
+        return output_pipe;
+    }
 };
 
 AddressToLine::AddressToLine(const char * flag, const char * exec_path, const char * addr)
