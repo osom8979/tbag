@@ -31,10 +31,10 @@ namespace memory {
  * @date   2017-04-15
  */
 template <typename Type>
-class PoolAllocator : public BaseAllocator<Type>
+struct PoolAllocator : public BaseAllocator<Type>
 {
 public:
-    TBAG_BASE_ALLOCATOR_TYPES(PoolAllocator, Type, BaseAllocator);
+    TBAG_ALLOCATOR_BASE(Allocator, Type, BaseAllocator);
 
 private:
     Pool & _pool;
