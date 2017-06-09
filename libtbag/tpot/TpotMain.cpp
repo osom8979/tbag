@@ -48,12 +48,7 @@ TpotMain::~TpotMain()
 
 bool TpotMain::onCreate()
 {
-    tDLogD("TpotMain::onCreate()");
-
     installDefaultSynopsis();
-
-    installDefaultCommand();
-    installServiceCommand();
 
     installConfigOptions();
     installHelpOptions();
@@ -65,59 +60,45 @@ bool TpotMain::onCreate()
         _enable_test = true;
     }, "Use the test mode. (Only request command)");
 
-    atCommander().insert(TPOT_MAIN_COMMAND_REQUEST, [&](Arguments const & args){
-        if (_enable_test) {
-            if (_enable_verbose) {
-                std::cout << "Run request test mode.\n";
-            }
-            _exit_code = client::runTpotRequestWithTest();
-        } else {
-            if (_enable_verbose) {
-                std::cout << "Run request mode.\n";
-            }
-            _exit_code = client::runTpotRequest();
-        }
-    }, "Request mode");
-
-    installDefaultLogNode(TPOT_DEFAULT_LOGGER_NAME, TPOT_DEFAULT_LOGGER_FILE_PREFIX);
-    installDefaultServerNode();
+    //installDefaultLogNode(TPOT_DEFAULT_LOGGER_NAME, TPOT_DEFAULT_LOGGER_FILE_PREFIX);
+    //installDefaultServerNode();
 
     return true;
 }
 
-bool TpotMain::onLoadConfig()
+bool TpotMain::onLoadConfig(DefaultXmlModel & config)
 {
-    tDLogD("TpotMain::onLoadConfig()");
+    //createDefaultLoggers();
+    //registerDefaultSignalHandler();
 
-    createLoggers();
-    registerDefaultSignalHandler();
+    //auto node = getDefaultServerNode().lock();
+    //assert(static_cast<bool>(node));
+    //if (node != nullptr) {
+    //    tDLogI("TpotMain::initConfig() Config (BIND: {}, PORT: {})", node->getIp(), node->getPort());
+    //} else {
+    //    tDLogW("TpotMain::initConfig() Config is nullptr.");
+    //}
+    //return true;
 
-    auto node = getServerNode().lock();
-    assert(static_cast<bool>(node));
-    if (node != nullptr) {
-        tDLogI("TpotMain::initConfig() Config (BIND: {}, PORT: {})", node->getIp(), node->getPort());
-    } else {
-        tDLogW("TpotMain::initConfig() Config is nullptr.");
-    }
-    return true;
+    return false;
 }
 
-int TpotMain::onRunning()
-{
-    tDLogD("TpotMain::onRunning() BEGIN");
-
-    auto node = getServerNode().lock();
-    assert(static_cast<bool>(node));
-
-    TpotParams params;
-    params.enable_verbose = _enable_verbose;
-    params.server_bind = node->getIp();
-    params.server_port = node->getPort();
-    int const EXIT_CODE = TpotRunner(params).run();
-
-    tDLogD("TpotMain::onRunning() END");
-    return EXIT_CODE;
-}
+//int TpotMain::onRunning()
+//{
+//    tDLogD("TpotMain::onRunning() BEGIN");
+//
+//    auto node = getServerNode().lock();
+//    assert(static_cast<bool>(node));
+//
+//    TpotParams params;
+//    params.enable_verbose = _enable_verbose;
+//    params.server_bind = node->getIp();
+//    params.server_port = node->getPort();
+//    int const EXIT_CODE = TpotRunner(params).run();
+//
+//    tDLogD("TpotMain::onRunning() END");
+//    return EXIT_CODE;
+//}
 
 void TpotMain::onDestroy()
 {

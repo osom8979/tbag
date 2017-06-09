@@ -103,28 +103,19 @@ bool HelpCommander::insert(std::string const & command, Callback const & callbac
 std::string HelpCommander::help(std::string const & head, bool auto_padding) const
 {
     std::size_t const PADDING_SIZE = 2;
+    std::size_t const MAX_SIZE = getMaxCommandSize(_helps);
 
     std::stringstream ss;
     if (_synopsis.empty() == false) {
         ss << _synopsis << std::endl;
     }
 
-    std::size_t max_size = 0;
-    if (auto_padding) {
-        for (auto & help : _helps) {
-            std::size_t const CURSOR_SIZE = help.first.size();
-            if (CURSOR_SIZE > max_size) {
-                max_size = CURSOR_SIZE;
-            }
-        }
-    }
-
     ss << head << std::endl;
     for (auto & cursor : _helps) {
         ss << getPrefix() << cursor.first;
 
-        if (max_size > 0) {
-            ss << std::string(max_size + PADDING_SIZE - cursor.first.size(), ' ');
+        if (MAX_SIZE > 0) {
+            ss << std::string(MAX_SIZE + PADDING_SIZE - cursor.first.size(), ' ');
         } else {
             auto param = _params.find(cursor.first);
             if (param != _params.end()) {
@@ -145,6 +136,37 @@ std::string HelpCommander::help(std::string const & head, bool auto_padding) con
 std::string HelpCommander::help(bool auto_padding) const
 {
     return help("Options:", auto_padding);
+}
+
+// ---------------
+// Static methods.
+// ---------------
+
+std::size_t HelpCommander::getMaxCommandSize(HelpMap const & helps)
+{
+    std::size_t max_size = 0;
+    for (auto & help : helps) {
+        std::size_t const CURSOR_SIZE = help.first.size();
+        if (CURSOR_SIZE > max_size) {
+            max_size = CURSOR_SIZE;
+        }
+    }
+    return max_size;
+}
+
+std::string HelpCommander::getPaddingCommandHelp(std::string const & prefix, HelpMap const & helps, int padding_size)
+{
+    std::size_t const MAX_SIZE = getMaxCommandSize(helps);
+    std::stringstream ss;
+
+    for (auto & cursor : helps) {
+        ss << prefix << cursor.first;
+        if (MAX_SIZE > 0) {
+            ss << std::string(MAX_SIZE + padding_size - cursor.first.size(), ' ');
+        }
+        ss << cursor.second << std::endl;
+    }
+    return ss.str();
 }
 
 } // namespace string

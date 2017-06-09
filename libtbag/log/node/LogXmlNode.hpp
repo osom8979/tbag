@@ -132,6 +132,7 @@ public:
      * @return The number of created loggers.
      */
     int createLoggers();
+    int createLoggers(std::string & preview_message);
 
     /**
      * Remove loggers.

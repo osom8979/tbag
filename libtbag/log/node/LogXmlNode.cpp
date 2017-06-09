@@ -70,6 +70,25 @@ int LogXmlNode::createLoggers()
     return count;
 }
 
+int LogXmlNode::createLoggers(std::string & preview_message)
+{
+    int const RESULT = createLoggers();
+    if (createLoggers() >= 1) {
+        auto const NAMES = getNames();
+        std::size_t const NAMES_SIZE = NAMES.size();
+        assert(NAMES_SIZE >= 1);
+
+        std::stringstream ss;
+        ss << "Create loggers: " << NAMES[0];
+        for (std::size_t i = 1; i < NAMES_SIZE; ++i) {
+            ss << "," << NAMES[i];
+        }
+        ss << std::endl;
+        preview_message = ss.str();
+    }
+    return RESULT;
+}
+
 int LogXmlNode::removeLoggers()
 {
     int count = 0;

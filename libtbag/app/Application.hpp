@@ -49,7 +49,8 @@ public:
     using Global = container::Global;
 
 public:
-    TBAG_CONSTEXPR static char const * const PROPERTY_NAME = "libtbag::app::Application::Property";
+    TBAG_CONSTEXPR static char const * const PROPERTY_NAME
+            = "libtbag.app.Application.Property";
 
 private:
     SharedProperty _property;
@@ -69,7 +70,7 @@ public:
     static char ** getEnvs();
 
 public:
-    int run();
+    virtual int run();
 
 public:
     virtual bool onCreate () { return true;         }

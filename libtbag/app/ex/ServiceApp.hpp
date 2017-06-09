@@ -46,27 +46,11 @@ class TBAG_API ServiceApp : public Service
 public:
     using Version = util::Version;
 
-    using HelpCommander     = string::HelpCommander;
-    using DefaultXmlModel   = dom::DefaultXmlModel;
-    using DefaultLogXmlNode = log::node::DefaultLogXmlNode;
-    using ServerXmlNode     = dom::node::ServerXmlNode;
-
-    using WeakModel      = std::weak_ptr<DefaultXmlModel>;
-    using WeakLogNode    = std::weak_ptr<DefaultLogXmlNode>;
-    using WeakServerNode = std::weak_ptr<ServerXmlNode>;
+    using HelpCommander   = string::HelpCommander;
+    using DefaultXmlModel = dom::DefaultXmlModel;
+    using WeakModel       = std::weak_ptr<DefaultXmlModel>;
 
     using StringVector = std::vector<std::string>;
-
-public:
-    enum class RunningMode
-    {
-        RUN_UNKNOWN,
-        RUN_APPLICATION,
-        RUN_INSTALL,
-        RUN_UNINSTALL,
-        RUN_START,
-        RUN_STOP,
-    };
 
 public:
     TBAG_CONSTEXPR static char const * const GLOBAL_MODEL_OBJECT_KEY
@@ -74,19 +58,14 @@ public:
 
 protected:
     HelpCommander _options;
-    HelpCommander _commander;
-
-    std::string _config_path;
-    Version     _version;
+    std::string   _config_path;
+    Version       _version;
 
 protected:
     bool _enable_help;
     bool _enable_verbose;
     bool _enable_unknown;
     bool _enable_version;
-
-protected:
-    int _exit_code;
 
 public:
     ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs);
@@ -95,9 +74,6 @@ public:
 public:
     inline HelpCommander       & atOptions()       TBAG_NOEXCEPT { return _options; }
     inline HelpCommander const & atOptions() const TBAG_NOEXCEPT { return _options; }
-
-    inline HelpCommander       & atCommander()       TBAG_NOEXCEPT { return _commander; }
-    inline HelpCommander const & atCommander() const TBAG_NOEXCEPT { return _commander; }
 
     inline std::string getConfigPath() const TBAG_NOEXCEPT_EXPR(std::is_nothrow_copy_assignable<std::string>::value)
     { return _config_path; }
@@ -109,49 +85,59 @@ public:
     inline bool isEnableUnknown() const TBAG_NOEXCEPT { return _enable_unknown; }
     inline bool isEnableVersion() const TBAG_NOEXCEPT { return _enable_version; }
 
-    inline int getExitCode() const TBAG_NOEXCEPT { return _exit_code; }
-
 protected:
+
+    /**
+     * @defgroup __DOXYGEN_GROUP__SERVICE_APP_CREATE_HELPER_METHODS__ List of onCreate() helpers.
+     * @remarks
+     *  This protected groups can be called from the onCreate() function.
+     * @{
+     */
+
+    static std::string getDefaultSynopsis();
+    static std::string getDefaultRemarks();
+
     void installDefaultSynopsis();
     void installDefaultSynopsis(std::string const & synopsis);
-    void installDefaultRemarks(std::string const & remarks);
 
-    void installDefaultCommand();
-    void installServiceCommand();
+    void installDefaultRemarks();
+    void installDefaultRemarks(std::string const & remarks);
 
     void installHelpOptions();
     void installVerboseOptions();
     void installConfigOptions();
+
+    void installVersionOptions(Version const & version);
     void installVersionOptions(int major, int minor = 0, int patch = 0);
 
-    void installDefaultLogNode();
-    void installDefaultLogNode(std::string const & logger_name);
-    void installDefaultLogNode(std::string const & logger_name, std::string const & file_name);
-
-    void installDefaultServerNode();
-    void installDefaultServerNode(std::string const & var, std::string const & ip, int port);
+    /**
+     * @}
+     */
 
 private:
-    bool loadOrDefaultSaveConfig(bool create_parent_dir = false);
+    bool loadOrDefaultSaveConfig();
     bool loadOrDefaultSaveConfig(std::string const & path, bool create_parent_dir = false);
 
-protected:
-    bool createLoggers();
-    void registerDefaultSignalHandler();
-    void registerDefaultSignalHandler(std::string const & logger);
+public:
+    virtual int run() override;
+
+private:
+    /**
+     * Disable onRunning() method.
+     * Instead, use the onDefaultCommand() method.
+     */
+    virtual int onRunning() override
+    {
+        return EXIT_FAILURE;
+    }
 
 public:
-    int run();
-
-public:
-    virtual bool onLoadConfig();
+    virtual bool onLoadConfig(DefaultXmlModel & config);
     virtual int onDefaultCommand(StringVector const & args);
 
 // Static methods.
 public:
-    static WeakModel      getModel();
-    static WeakLogNode    getLogNode();
-    static WeakServerNode getServerNode();
+    static WeakModel getModel();
 };
 
 } // namespace ex

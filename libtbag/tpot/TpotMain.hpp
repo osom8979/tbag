@@ -40,10 +40,9 @@ public:
 
 // Event methods.
 public:
-    virtual bool onCreate    () override;
-    virtual bool onLoadConfig() override;
-    virtual int  onRunning   () override;
-    virtual void onDestroy   () override;
+    virtual bool onCreate() override;
+    virtual bool onLoadConfig(DefaultXmlModel & config) override;
+    virtual void onDestroy() override;
 };
 
 // ------------

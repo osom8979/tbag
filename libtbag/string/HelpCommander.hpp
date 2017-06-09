@@ -78,6 +78,10 @@ public:
 public:
     std::string help(std::string const & head, bool auto_padding = false) const;
     std::string help(bool auto_padding = false) const;
+
+public:
+    static std::size_t getMaxCommandSize(HelpMap const & helps);
+    static std::string getPaddingCommandHelp(std::string const & prefix, HelpMap const & helps, int padding_size = 2);
 };
 
 } // namespace string
