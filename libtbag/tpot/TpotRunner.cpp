@@ -53,7 +53,7 @@ TpotRunner::TpotRunner(TpotParams const & params) : _params(params)
 
 TpotRunner::~TpotRunner()
 {
-    // EMPTY.
+    _server.reset();
 }
 
 int TpotRunner::run()

@@ -73,7 +73,7 @@ int LogXmlNode::createLoggers()
 int LogXmlNode::createLoggers(std::string & preview_message)
 {
     int const RESULT = createLoggers();
-    if (createLoggers() >= 1) {
+    if (RESULT >= 1) {
         auto const NAMES = getNames();
         std::size_t const NAMES_SIZE = NAMES.size();
         assert(NAMES_SIZE >= 1);
@@ -83,8 +83,9 @@ int LogXmlNode::createLoggers(std::string & preview_message)
         for (std::size_t i = 1; i < NAMES_SIZE; ++i) {
             ss << "," << NAMES[i];
         }
-        ss << std::endl;
         preview_message = ss.str();
+    } else {
+        preview_message = "Not found logger";
     }
     return RESULT;
 }

@@ -16,6 +16,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/app/ex/ServiceApp.hpp>
+#include <libtbag/string/HelpCommander.hpp>
+
+#include <libtbag/log/node/DefaultLogXmlNode.hpp>
+#include <libtbag/dom/node/ServerXmlNode.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,7 +37,18 @@ namespace tpot {
  */
 class TBAG_API TpotMain final : public app::ex::ServiceApp
 {
+public:
+    using HelpMap  = HelpCommander::HelpMap;
+    using HelpPair = HelpCommander::HelpPair;
+
+    using DefaultLogXmlNode = log::node::DefaultLogXmlNode;
+    using WeakLogNode = std::weak_ptr<DefaultLogXmlNode>;
+
+    using ServerXmlNode = dom::node::ServerXmlNode;
+    using WeakServerNode = std::weak_ptr<ServerXmlNode>;
+
 private:
+    HelpMap _commands;
     bool _enable_test;
 
 public:
@@ -42,7 +59,12 @@ public:
 public:
     virtual bool onCreate() override;
     virtual bool onLoadConfig(DefaultXmlModel & config) override;
+    virtual int  onDefaultCommand(StringVector const & args) override;
     virtual void onDestroy() override;
+
+public:
+    static WeakLogNode getLogNode();
+    static WeakServerNode getServerNode();
 };
 
 // ------------

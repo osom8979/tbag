@@ -10,19 +10,11 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Environments.hpp>
-#include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/util/Version.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
 #include <iostream>
-
-#define SERVICE_APP_COMMAND_APP       "app"
-#define SERVICE_APP_COMMAND_INSTALL   "install"
-#define SERVICE_APP_COMMAND_UNINSTALL "uninstall"
-#define SERVICE_APP_COMMAND_START     "start"
-#define SERVICE_APP_COMMAND_STOP      "stop"
-#define SERVICE_APP_COMMAND_REQUEST   "request"
 
 #define SERVICE_APP_OPTIONS_PREFIX    "--"
 #define SERVICE_APP_OPTIONS_DELIMITER "="
@@ -35,7 +27,6 @@
 #define SERVICE_APP_OPTIONS_VERSION   "version"
 
 #define SERVICE_APP_ENVIRONMENT_TITLE "TITLE"
-#define SERVICE_APP_COMMAND_HELP_HEAD "Command list:"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -129,7 +120,7 @@ void ServiceApp::installVerboseOptions()
 void ServiceApp::installConfigOptions()
 {
     using namespace libtbag::string;
-    auto config = getModel().lock();
+    auto config = getConfig().lock();
     assert(static_cast<bool>(config));
 
     std::string const GLOBAL_PATH = config->getFilePath(DefaultXmlModel::Scope::GLOBAL).getString();
@@ -176,7 +167,7 @@ bool ServiceApp::loadOrDefaultSaveConfig()
 
 bool ServiceApp::loadOrDefaultSaveConfig(std::string const & path, bool create_parent_dir)
 {
-    auto config = getModel().lock();
+    auto config = getConfig().lock();
     assert(static_cast<bool>(config));
 
     auto const PATH = filesystem::Path(path);
@@ -246,7 +237,7 @@ int ServiceApp::run()
         std::cout << "Load or save config file: " << _config_path << std::endl;
     }
 
-    auto config = getModel().lock();
+    auto config = getConfig().lock();
     if (onLoadConfig(*config) == false) {
         std::cerr << "onLoad event failed.\n";
         return EXIT_FAILURE;
@@ -269,7 +260,7 @@ int ServiceApp::onDefaultCommand(StringVector const & args)
 // Static methods.
 // ---------------
 
-ServiceApp::WeakModel ServiceApp::getModel()
+ServiceApp::WeakModel ServiceApp::getConfig()
 {
     using namespace libtbag::container;
     return Global::getInstance()->find<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY);

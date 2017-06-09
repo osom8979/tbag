@@ -103,7 +103,7 @@ bool HelpCommander::insert(std::string const & command, Callback const & callbac
 std::string HelpCommander::help(std::string const & head, bool auto_padding) const
 {
     std::size_t const PADDING_SIZE = 2;
-    std::size_t const MAX_SIZE = getMaxCommandSize(_helps);
+    std::size_t const MAX_SIZE = auto_padding ? getMaxCommandSize(_helps) : 0;
 
     std::stringstream ss;
     if (_synopsis.empty() == false) {

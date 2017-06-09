@@ -137,7 +137,7 @@ public:
 
 // Static methods.
 public:
-    static WeakModel getModel();
+    static WeakModel getConfig();
 };
 
 } // namespace ex
