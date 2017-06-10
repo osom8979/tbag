@@ -59,17 +59,22 @@ inline TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
 }
 
 /**
- * RGBA Color structure.
+ * RGB Color structure.
  *
  * @author zer0
  * @date   2015-06-10
  * @date   2015-08-23 (Move the world library)
  * @date   2015-10-18 (Change to the trivial type)
+ * @date   2016-06-10 (Remove alpha channel)
+ * @date   2016-06-11 (Rename: Color -> Rgb24)
  */
-struct Color
+struct Rgb24
 {
     Channel r, g, b;
 };
+
+/** General color structure. */
+using Color = Rgb24;
 
 static_assert(std::is_trivial<Color>::value, "Color is not trivial type.");
 

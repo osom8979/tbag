@@ -31,7 +31,16 @@ namespace graphic {
 using ImageRgb24 = container::Array2d<Color>;
 using Image = ImageRgb24;
 
+/**
+ * Read image file.
+ *
+ * @warning
+ *  Ignore alpha channel.
+ */
 TBAG_API Err readImage(std::string const & path, Image & image);
+
+/** Save image file. */
+TBAG_API Err saveImage(std::string const & path, Image const & image);
 
 } // namespace graphic
 
