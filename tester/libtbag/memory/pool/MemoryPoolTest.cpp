@@ -18,12 +18,12 @@ TEST(MemoryPoolTest, Default)
     MemoryPool pool(ALLOC_SIZE);
     ASSERT_NE(nullptr, pool.memory());
     ASSERT_EQ(ALLOC_SIZE, pool.max());
-    ASSERT_EQ(0, pool.cursor());
+    ASSERT_EQ(0, pool.size());
 
     void * ptr = pool.allocate(ALLOC_SIZE, 0);
     ASSERT_NE(nullptr, ptr);
     ASSERT_EQ(ALLOC_SIZE, pool.max());
-    ASSERT_EQ(ALLOC_SIZE, pool.cursor());
+    ASSERT_EQ(ALLOC_SIZE, pool.size());
 
     pool.deallocate(ptr, ALLOC_SIZE);
 }

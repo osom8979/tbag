@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/memory/PoolAllocator.hpp>
 #include <libtbag/memory/pool/MemoryPool.hpp>
+#include <libtbag/memory/pool/MultiMemoryPool.hpp>
 
 #include <vector>
 
@@ -43,5 +44,68 @@ TEST(PoolAllocatorTest, BadAlloc)
     buffer.assign(TEST_SIZE, 'A');
 
     ASSERT_THROW(buffer.push_back('A'), std::bad_alloc);
+}
+
+TEST(PoolAllocatorTest, Fragment)
+{
+    MemoryPool pool(10);
+    using TestPool = PoolAllocator<char, MemoryPool>;
+    TestPool alloc(pool);
+
+    ASSERT_EQ(10, pool.left());
+    {
+        MpFragment f(pool);
+        std::size_t const TEST_SIZE = 10;
+        std::vector<char, TestPool> buffer(alloc);
+        buffer.assign(TEST_SIZE, 'A');
+    }
+    ASSERT_EQ(10, pool.left());
+
+    std::size_t const TEST_SIZE = 10;
+    std::vector<char, TestPool> buffer(alloc);
+    buffer.assign(TEST_SIZE, 'A');
+}
+
+TEST(PoolAllocatorTest, MultiMemoryPool)
+{
+    std::size_t const   SMALL_SIZE =  4;
+    std::size_t const  NORMAL_SIZE =  8;
+    std::size_t const   LARGE_SIZE = 16;
+    std::size_t const OBJECT_COUNT =  1;
+
+    MultiMemoryPool pool(SMALL_SIZE, NORMAL_SIZE, LARGE_SIZE, OBJECT_COUNT);
+    using TestPool = PoolAllocator<char, MultiMemoryPool>;
+    TestPool alloc(pool);
+
+    ASSERT_EQ( SMALL_SIZE * OBJECT_COUNT, pool.atSmall ().max());
+    ASSERT_EQ(NORMAL_SIZE * OBJECT_COUNT, pool.atNormal().max());
+    ASSERT_EQ( LARGE_SIZE * OBJECT_COUNT, pool.atLarge ().max());
+
+    ASSERT_EQ( SMALL_SIZE * OBJECT_COUNT, pool.atSmall ().left());
+    ASSERT_EQ(NORMAL_SIZE * OBJECT_COUNT, pool.atNormal().left());
+    ASSERT_EQ( LARGE_SIZE * OBJECT_COUNT, pool.atLarge ().left());
+
+    {
+        MmpFragment fragment(pool);
+
+        std::vector<char, TestPool> small_buffer(alloc);
+        small_buffer.assign(SMALL_SIZE, 'A');
+        std::vector<char, TestPool> normal_buffer(alloc);
+        normal_buffer.assign(NORMAL_SIZE, 'A');
+        std::vector<char, TestPool> large_buffer(alloc);
+        large_buffer.assign(LARGE_SIZE, 'A');
+
+        ASSERT_EQ( SMALL_SIZE, pool.atSmall ().size());
+        ASSERT_EQ(NORMAL_SIZE, pool.atNormal().size());
+        ASSERT_EQ( LARGE_SIZE, pool.atLarge ().size());
+    }
+
+    ASSERT_EQ(0, pool.atSmall ().size());
+    ASSERT_EQ(0, pool.atNormal().size());
+    ASSERT_EQ(0, pool.atLarge ().size());
+
+    ASSERT_EQ( SMALL_SIZE * OBJECT_COUNT, pool.atSmall ().left());
+    ASSERT_EQ(NORMAL_SIZE * OBJECT_COUNT, pool.atNormal().left());
+    ASSERT_EQ( LARGE_SIZE * OBJECT_COUNT, pool.atLarge ().left());
 }
 

@@ -15,10 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/Unit.hpp>
 #include <libtbag/log/Log.hpp>
+
 #include <libtbag/memory/pool/PoolInterface.hpp>
 #include <libtbag/memory/alloc/TraceNew.hpp>
+
 #include <cassert>
 
 // -------------------
@@ -39,6 +42,25 @@ class MemoryPool : public PoolInterface
 public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_MEMORY_POOL_SIZE
             = static_cast<std::size_t>(10 * MEGA_BYTE_TO_BYTE);
+
+public:
+    class Fragment : private Noncopyable
+    {
+    private:
+        MemoryPool & _pool;
+        std::size_t _cursor;
+
+    public:
+        Fragment(MemoryPool & pool) TBAG_NOEXCEPT : _pool(pool), _cursor(pool._cursor)
+        {
+            // EMPTY.
+        }
+
+        virtual ~Fragment()
+        {
+            _pool._cursor = _cursor;
+        }
+    };
 
 private:
     void * _memory;
@@ -65,12 +87,10 @@ public:
 
 public:
     // @formatter:off
-    inline void const * memory() const TBAG_NOEXCEPT
-    { return _memory; }
-    inline std::size_t max() const TBAG_NOEXCEPT
-    { return _max; }
-    inline std::size_t cursor() const TBAG_NOEXCEPT
-    { return _cursor; }
+    inline void const * memory() const TBAG_NOEXCEPT { return _memory; }
+    inline std::size_t     max() const TBAG_NOEXCEPT { return _max; }
+    inline std::size_t    size() const TBAG_NOEXCEPT { return _cursor; }
+    inline std::size_t    left() const TBAG_NOEXCEPT { return _max - _cursor; }
     // @formatter:on
 
 public:
@@ -78,6 +98,13 @@ public:
     { return reinterpret_cast<std::ptrdiff_t>(_memory); }
     inline std::ptrdiff_t end() const TBAG_NOEXCEPT
     { return begin() + _max; }
+
+public:
+    inline bool exists(void * pointer) TBAG_NOEXCEPT
+    {
+        std::ptrdiff_t const CURRENT = reinterpret_cast<std::ptrdiff_t>(pointer);
+        return begin() <= COMPARE_AND(CURRENT) < end();
+    }
 
 public:
     virtual void * allocate(std::size_t allocate_size, void const * hint) override
@@ -98,6 +125,8 @@ public:
         assert(begin() <= COMPARE_AND(CURRENT) < end());
     }
 };
+
+using MpFragment = MemoryPool::Fragment;
 
 } // namespace pool
 } // namespace memory
