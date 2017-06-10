@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Unit.hpp>
+#include <libtbag/log/Log.hpp>
 #include <libtbag/memory/pool/PoolInterface.hpp>
 #include <libtbag/memory/alloc/TraceNew.hpp>
 #include <cassert>
@@ -34,13 +36,17 @@ namespace pool   {
  */
 class MemoryPool : public PoolInterface
 {
+public:
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_MEMORY_POOL_SIZE
+            = static_cast<std::size_t>(10 * MEGA_BYTE_TO_BYTE);
+
 private:
     void * _memory;
     std::size_t _max;
     std::size_t _cursor;
 
 public:
-    MemoryPool(std::size_t size)
+    MemoryPool(std::size_t size = DEFAULT_MEMORY_POOL_SIZE)
     {
         assert(size > 0);
         _memory = ::libtbag::memory::alloc::allocate(size);
@@ -81,11 +87,13 @@ public:
         }
         void * result = (void*)(reinterpret_cast<std::ptrdiff_t>(_memory) + _cursor);
         _cursor += allocate_size;
+        tDLogD("MemoryPool::allocate@{}({}) -> {}", reinterpret_cast<void*>(this), allocate_size, result);
         return result;
     }
 
     virtual void deallocate(void * pointer, std::size_t allocated_size) override
     {
+        tDLogD("MemoryPool::deallocate@{}({}, {})", reinterpret_cast<void*>(this), pointer, allocated_size);
         std::ptrdiff_t const CURRENT = reinterpret_cast<std::ptrdiff_t>(pointer);
         assert(begin() <= COMPARE_AND(CURRENT) < end());
     }

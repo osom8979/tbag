@@ -27,11 +27,16 @@ NAMESPACE_LIBTBAG_OPEN
  * @{
  */
 
-TBAG_CONSTEXPR uint64_t const      BYTE_UNIT = tmp::Power<     1024, 1>::value;
-TBAG_CONSTEXPR uint64_t const KILO_BYTE_UNIT = tmp::Power<BYTE_UNIT, 2>::value;
-TBAG_CONSTEXPR uint64_t const MEGA_BYTE_UNIT = tmp::Power<BYTE_UNIT, 3>::value;
-TBAG_CONSTEXPR uint64_t const GIGA_BYTE_UNIT = tmp::Power<BYTE_UNIT, 4>::value;
-TBAG_CONSTEXPR uint64_t const TERA_BYTE_UNIT = tmp::Power<BYTE_UNIT, 5>::value;
+TBAG_CONSTEXPR uint64_t const BYTE_UNIT = 1024;
+
+TBAG_CONSTEXPR uint64_t const  KILO_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 1>::value;
+TBAG_CONSTEXPR uint64_t const  MEGA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 2>::value;
+TBAG_CONSTEXPR uint64_t const  GIGA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 3>::value;
+TBAG_CONSTEXPR uint64_t const  TERA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 4>::value;
+TBAG_CONSTEXPR uint64_t const  PETA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 5>::value;
+TBAG_CONSTEXPR uint64_t const   EXA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 6>::value;
+TBAG_CONSTEXPR uint64_t const ZETTA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 7>::value;
+TBAG_CONSTEXPR uint64_t const YOTTA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 8>::value;
 
 /**
  * @}

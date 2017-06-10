@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/memory/Allocator.hpp>
-#include <libtbag/memory/Pool.hpp>
+#include <libtbag/memory/pool/BasePool.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,11 +30,14 @@ namespace memory {
  * @author zer0
  * @date   2017-04-15
  */
-template <typename Type>
+template <typename Type, typename PoolType>
 struct PoolAllocator : public BaseAllocator<Type>
 {
 public:
     TBAG_ALLOCATOR_BASE(Allocator, Type, BaseAllocator);
+
+public:
+    using Pool = PoolType;
 
 private:
     Pool & _pool;
@@ -43,8 +46,8 @@ public:
     PoolAllocator(Pool & pool) : _pool(pool)
     { /* EMPTY. */ }
 
-    template <typename Up>
-    PoolAllocator(PoolAllocator<Up> const & obj) TBAG_NOEXCEPT
+    template <typename Up, typename UpPool>
+    PoolAllocator(PoolAllocator<Up, UpPool> const & obj) TBAG_NOEXCEPT
     { /* EMPTY. */ }
 
     ~PoolAllocator()
