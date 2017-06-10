@@ -17,7 +17,6 @@
 #include <libtbag/predef.hpp>
 
 #include <cstdint>
-
 #include <limits>
 
 // -------------------
@@ -68,7 +67,7 @@ inline TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
  */
 struct Color
 {
-    Channel r, g, b, a;
+    Channel r, g, b;
 };
 
 static_assert(std::is_trivial<Color>::value, "Color is not trivial type.");
@@ -79,42 +78,42 @@ static_assert(std::is_trivial<Color>::value, "Color is not trivial type.");
  * @{
  */
 
-Color const BLACK_COLOR = {channel_min(), channel_min(), channel_min(), channel_max()};
-Color const WHITE_COLOR = {channel_max(), channel_max(), channel_max(), channel_max()};
+Color const BLACK_COLOR = {channel_min(), channel_min(), channel_min()};
+Color const WHITE_COLOR = {channel_max(), channel_max(), channel_max()};
 
-Color const RED_COLOR   = {channel_max(), channel_min(), channel_min(), channel_max()};
-Color const GREEN_COLOR = {channel_min(), channel_max(), channel_min(), channel_max()};
-Color const BLUE_COLOR  = {channel_min(), channel_min(), channel_max(), channel_max()};
+Color const RED_COLOR   = {channel_max(), channel_min(), channel_min()};
+Color const GREEN_COLOR = {channel_min(), channel_max(), channel_min()};
+Color const BLUE_COLOR  = {channel_min(), channel_min(), channel_max()};
 
-Color const GRAY_COLOR  = {211, 211, 211, channel_max()};
+Color const GRAY_COLOR  = {211, 211, 211};
 
 // ------------
 // Flat colors.
 // ------------
 
-Color const TURQUOISE_COLOR     = { 26, 188, 156, channel_max()};
-Color const EMERALD_COLOR       = { 46, 204, 113, channel_max()};
-Color const PETER_RIVER_COLOR   = { 52, 152, 219, channel_max()};
-Color const AMETHYST_COLOR      = {155,  89, 182, channel_max()};
-Color const WET_ASPHALT_COLOR   = { 52,  73,  94, channel_max()};
+Color const TURQUOISE_COLOR     = { 26, 188, 156};
+Color const EMERALD_COLOR       = { 46, 204, 113};
+Color const PETER_RIVER_COLOR   = { 52, 152, 219};
+Color const AMETHYST_COLOR      = {155,  89, 182};
+Color const WET_ASPHALT_COLOR   = { 52,  73,  94};
 
-Color const GREEN_SEA_COLOR     = { 22, 160, 133, channel_max()};
-Color const NEPHRITIS_COLOR     = { 39, 174,  96, channel_max()};
-Color const BELIZE_HOLE_COLOR   = { 41, 128, 185, channel_max()};
-Color const WISTERIA_COLOR      = {142,  68, 173, channel_max()};
-Color const MIDNIGHT_BLUE_COLOR = { 44,  62,  80, channel_max()};
+Color const GREEN_SEA_COLOR     = { 22, 160, 133};
+Color const NEPHRITIS_COLOR     = { 39, 174,  96};
+Color const BELIZE_HOLE_COLOR   = { 41, 128, 185};
+Color const WISTERIA_COLOR      = {142,  68, 173};
+Color const MIDNIGHT_BLUE_COLOR = { 44,  62,  80};
 
-Color const SUN_FLOWER_COLOR    = {241, 196,  15, channel_max()};
-Color const CARROT_COLOR        = {230, 126,  34, channel_max()};
-Color const ALIZARIN_COLOR      = {231,  76,  60, channel_max()};
-Color const CLOUDS_COLOR        = {236, 240, 241, channel_max()};
-Color const CONCRETE_COLOR      = {149, 165, 166, channel_max()};
+Color const SUN_FLOWER_COLOR    = {241, 196,  15};
+Color const CARROT_COLOR        = {230, 126,  34};
+Color const ALIZARIN_COLOR      = {231,  76,  60};
+Color const CLOUDS_COLOR        = {236, 240, 241};
+Color const CONCRETE_COLOR      = {149, 165, 166};
 
-Color const ORANGE_COLOR        = {243, 156,  18, channel_max()};
-Color const PUMPKIN_COLOR       = {211,  84,   0, channel_max()};
-Color const POMEGRANATE_COLOR   = {192,  57,  43, channel_max()};
-Color const SILVER_COLOR        = {189, 195, 199, channel_max()};
-Color const ASBESTOS_COLOR      = {127, 140, 141, channel_max()};
+Color const ORANGE_COLOR        = {243, 156,  18};
+Color const PUMPKIN_COLOR       = {211,  84,   0};
+Color const POMEGRANATE_COLOR   = {192,  57,  43};
+Color const SILVER_COLOR        = {189, 195, 199};
+Color const ASBESTOS_COLOR      = {127, 140, 141};
 
 /**
  * @}
@@ -127,13 +126,7 @@ Color const ASBESTOS_COLOR      = {127, 140, 141, channel_max()};
 /** The Rect are equal? */
 inline bool operator == (Color const & c1, Color const & c2) TBAG_NOEXCEPT
 {
-    if (/**/c1.r != c2.r
-         || c1.g != c2.g
-         || c1.b != c2.b
-         || c1.a != c2.a) {
-        return false;
-    }
-    return true;
+    return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
 }
 
 inline bool operator != (Color const & c1, Color const & c2) TBAG_NOEXCEPT
@@ -142,42 +135,37 @@ inline bool operator != (Color const & c1, Color const & c2) TBAG_NOEXCEPT
 }
 
 /** Create color instance. */
-TBAG_CONSTEXPR Color makeColor(Channel r = channel_max()
-                        , Channel g = channel_max()
-                        , Channel b = channel_max()
-                        , Channel a = channel_max()) TBAG_NOEXCEPT
+TBAG_CONSTEXPR Color makeColor(Channel r = channel_max(),
+                               Channel g = channel_max(),
+                               Channel b = channel_max()) TBAG_NOEXCEPT
 {
-    return Color{r, g, b, a};
+    return Color{r, g, b};
 }
 
 /** Inverse color. */
 inline Color inverse(Color const & c) TBAG_NOEXCEPT
 {
-    return Color{static_cast<Channel>(channel_max() ^ c.r)
-               , static_cast<Channel>(channel_max() ^ c.g)
-               , static_cast<Channel>(channel_max() ^ c.b)
-               , c.a};
+    return Color{static_cast<Channel>(channel_max() ^ c.r),
+                 static_cast<Channel>(channel_max() ^ c.g),
+                 static_cast<Channel>(channel_max() ^ c.b)};
 }
-
 
 // -------------------
 // Stream overloading.
 // -------------------
 
-char const __COLOR_PREFIX_CHAR             = 'C';
-char const __COLOR_STREAM_BRACE_OPEN       = '{';
-char const __COLOR_STREAM_VALUE_SEPARATOR  = ',';
-char const __COLOR_STREAM_BRACE_CLOSE      = '}';
+TBAG_CONSTEXPR char const __COLOR_PREFIX_CHAR             = 'C';
+TBAG_CONSTEXPR char const __COLOR_STREAM_BRACE_OPEN       = '{';
+TBAG_CONSTEXPR char const __COLOR_STREAM_VALUE_SEPARATOR  = ',';
+TBAG_CONSTEXPR char const __COLOR_STREAM_BRACE_CLOSE      = '}';
 
-inline std::string
-toString(Color const & color)
+inline std::string toString(Color const & color)
 {
     std::stringstream ss;
     ss << __COLOR_PREFIX_CHAR << __COLOR_STREAM_BRACE_OPEN
        << color.r << __COLOR_STREAM_VALUE_SEPARATOR
        << color.g << __COLOR_STREAM_VALUE_SEPARATOR
-       << color.b << __COLOR_STREAM_VALUE_SEPARATOR
-       << color.a << __COLOR_STREAM_BRACE_CLOSE;
+       << color.b << __COLOR_STREAM_BRACE_CLOSE;
     return ss.str();
 }
 
