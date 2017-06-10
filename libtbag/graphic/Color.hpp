@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <cstdint>
+#include <sstream>
 #include <limits>
 
 // -------------------

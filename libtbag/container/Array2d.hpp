@@ -315,6 +315,12 @@ public:
     }
 
 public:
+    void assign(void const * data, std::size_t data_size)
+    {
+        ::memcpy(_data, data, (data_size < byte() ? data_size : byte()));
+    }
+
+public:
     inline Value & operator [](std::size_t index)
     { return *(_data + index); }
 
