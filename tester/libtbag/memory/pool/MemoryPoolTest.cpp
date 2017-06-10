@@ -20,11 +20,22 @@ TEST(MemoryPoolTest, Default)
     ASSERT_EQ(ALLOC_SIZE, pool.max());
     ASSERT_EQ(0, pool.size());
 
-    void * ptr = pool.allocate(ALLOC_SIZE, 0);
+    std::size_t obtain_size = ALLOC_SIZE;
+    void * ptr = pool.allocate(obtain_size, 0);
     ASSERT_NE(nullptr, ptr);
     ASSERT_EQ(ALLOC_SIZE, pool.max());
-    ASSERT_EQ(ALLOC_SIZE, pool.size());
+    ASSERT_EQ(obtain_size, pool.size());
+    pool.deallocate(ptr, obtain_size);
+    ASSERT_EQ(ALLOC_SIZE, pool.left());
 
-    pool.deallocate(ptr, ALLOC_SIZE);
+    obtain_size = 1;
+    ptr = pool.allocate(obtain_size, 0);
+    ASSERT_NE(nullptr, ptr);
+    ASSERT_EQ(reinterpret_cast<std::ptrdiff_t>(ptr), pool.begin());
+    ASSERT_EQ(ALLOC_SIZE, pool.max());
+    ASSERT_EQ(obtain_size, pool.size());
+    ASSERT_EQ(ALLOC_SIZE - obtain_size, pool.left());
+    pool.deallocate(ptr, obtain_size);
+    ASSERT_EQ(ALLOC_SIZE, pool.left());
 }
 

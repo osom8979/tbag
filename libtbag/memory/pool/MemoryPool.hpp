@@ -97,13 +97,15 @@ public:
     inline std::ptrdiff_t begin() const TBAG_NOEXCEPT
     { return reinterpret_cast<std::ptrdiff_t>(_memory); }
     inline std::ptrdiff_t end() const TBAG_NOEXCEPT
+    { return reinterpret_cast<std::ptrdiff_t>(_memory) + _cursor; }
+    inline std::ptrdiff_t last() const TBAG_NOEXCEPT
     { return begin() + _max; }
 
 public:
     inline bool exists(void * pointer) TBAG_NOEXCEPT
     {
         std::ptrdiff_t const CURRENT = reinterpret_cast<std::ptrdiff_t>(pointer);
-        return begin() <= COMPARE_AND(CURRENT) < end();
+        return begin() <= COMPARE_AND(CURRENT) < last();
     }
 
 public:
@@ -120,9 +122,11 @@ public:
 
     virtual void deallocate(void * pointer, std::size_t allocated_size) override
     {
+        assert(exists(pointer));
         tDLogD("MemoryPool::deallocate@{}({}, {})", reinterpret_cast<void*>(this), pointer, allocated_size);
-        std::ptrdiff_t const CURRENT = reinterpret_cast<std::ptrdiff_t>(pointer);
-        assert(begin() <= COMPARE_AND(CURRENT) < end());
+        if (exists(pointer) && end() == reinterpret_cast<std::ptrdiff_t>(pointer) + allocated_size) {
+            _cursor -= allocated_size;
+        }
     }
 };
 
