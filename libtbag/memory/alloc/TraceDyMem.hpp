@@ -2,11 +2,11 @@
  * @file   TraceDyMem.hpp
  * @brief  TraceDyMem class prototype.
  * @author zer0
- * @date   2017-06-08
+ * @date   2017-06-10
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_TRACEDYMEM_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_TRACEDYMEM_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOC_TRACEDYMEM_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOC_TRACEDYMEM_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,7 +25,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace debug {
+namespace memory {
+namespace alloc  {
 
 TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL0 = 0;
 TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL1 = 1;
@@ -36,7 +37,7 @@ TBAG_CONSTEXPR int const TBAG_MEMORY_SIMPLE_TRACE = TBAG_MEMORY_LEVEL1;
 TBAG_CONSTEXPR int const TBAG_MEMORY_STACK_TRACE  = TBAG_MEMORY_LEVEL2;
 
 /** Memory trace level. */
-TBAG_CONSTEXPR int getTraceLevel()
+TBAG_CONSTEXPR int getTraceLevel() TBAG_NOEXCEPT
 {
     return TBAG_MEMORY_TRACE_LEVEL;
 }
@@ -53,11 +54,12 @@ void * malloc(std::size_t size);
 /** Reallocate memory block. */
 void * realloc(void * ptr, std::size_t size);
 
-} // namespace debug
+} // namespace alloc
+} // namespace memory
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_TRACEDYMEM_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOC_TRACEDYMEM_HPP__
 

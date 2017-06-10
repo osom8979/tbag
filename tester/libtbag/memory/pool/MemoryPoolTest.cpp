@@ -2,14 +2,15 @@
  * @file   MemoryPoolTest.cpp
  * @brief  MemoryPool class tester.
  * @author zer0
- * @date   2017-04-16
+ * @date   2017-06-10
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/memory/MemoryPool.hpp>
+#include <libtbag/memory/pool/MemoryPool.hpp>
 
 using namespace libtbag;
 using namespace libtbag::memory;
+using namespace libtbag::memory::pool;
 
 TEST(MemoryPoolTest, Default)
 {

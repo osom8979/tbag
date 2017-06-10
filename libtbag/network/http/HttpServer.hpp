@@ -91,7 +91,6 @@ public:
 public:
     struct ClientData
     {
-        Buffer      buffer;
         HttpBuilder builder;
         HttpParser  parser;
         Millisec    timeout;

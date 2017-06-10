@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/memory/alloc/TraceNew.hpp>
 
 #include <cassert>
 #include <memory>
@@ -26,22 +27,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace memory {
-
-template <typename T>
-inline T * addressof(T & val) TBAG_NOEXCEPT
-{
-    return (T*)&reinterpret_cast<const volatile char&>(val);
-}
-
-inline void * allocate(std::size_t size)
-{
-    return ::operator new(size);
-}
-
-inline void deallocate(void * ptr)
-{
-    ::operator delete(ptr);
-}
 
 template <typename Type>
 struct AllocatorTypse
@@ -99,7 +84,7 @@ struct BaseAllocator : public AllocatorTypse<Type>
     /** obtains the address of an object. */
     const_pointer address(const_reference val) const TBAG_NOEXCEPT
     {
-        return addressof(val);
+        return ::libtbag::memory::alloc::addressof(val);
     }
 
     /** constructs an object in allocated storage. */
@@ -144,14 +129,14 @@ struct Allocator : public BaseAllocator<Type>
     pointer allocate(size_type size, void const * hint = 0)
     {
         assert(size > 0);
-        return static_cast<pointer>(::libtbag::memory::allocate(size * sizeof(value_type)));
+        return static_cast<pointer>(::libtbag::memory::alloc::allocate(size * sizeof(value_type)));
     }
 
     /** deallocates storage. */
     void deallocate(pointer ptr, size_type allocated_size)
     {
         assert(ptr != nullptr);
-        ::libtbag::memory::deallocate((void*)ptr);
+        ::libtbag::memory::alloc::deallocate((void*)ptr);
     }
 };
 

@@ -2,17 +2,18 @@
  * @file   TraceDyMem.cpp
  * @brief  TraceDyMem class implementation.
  * @author zer0
- * @date   2017-06-08
+ * @date   2017-06-10
  */
 
-#include <libtbag/debug/TraceDyMem.hpp>
+#include <libtbag/memory/alloc/TraceDyMem.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace debug {
+namespace memory {
+namespace alloc  {
 
 void * calloc(std::size_t num, std::size_t size)
 {
@@ -49,7 +50,8 @@ void * realloc(void * ptr, std::size_t size)
     return result;
 }
 
-} // namespace debug
+} // namespace alloc
+} // namespace memory
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

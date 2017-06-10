@@ -2,11 +2,11 @@
  * @file   MemoryPool.hpp
  * @brief  MemoryPool class prototype.
  * @author zer0
- * @date   2017-04-16
+ * @date   2017-06-10
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_MEMORYPOOL_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_MEMORYPOOL_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_POOL_MEMORYPOOL_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_POOL_MEMORYPOOL_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/memory/Pool.hpp>
-
+#include <libtbag/memory/pool/PoolInterface.hpp>
+#include <libtbag/memory/alloc/TraceNew.hpp>
 #include <cassert>
 
 // -------------------
@@ -24,12 +24,13 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace memory {
+namespace pool   {
 
 /**
  * MemoryPool class prototype.
  *
  * @author zer0
- * @date   2017-04-16
+ * @date   2017-06-10
  */
 class MemoryPool : public PoolInterface
 {
@@ -42,7 +43,7 @@ public:
     MemoryPool(std::size_t size)
     {
         assert(size > 0);
-        _memory = ::libtbag::memory::allocate(size);
+        _memory = ::libtbag::memory::alloc::allocate(size);
         _max    = size;
         _cursor = 0;
     }
@@ -52,7 +53,7 @@ public:
         assert(_memory != nullptr);
         _max    = 0;
         _cursor = 0;
-        ::libtbag::memory::deallocate(_memory);
+        ::libtbag::memory::alloc::deallocate(_memory);
         _memory = nullptr;
     }
 
@@ -90,11 +91,12 @@ public:
     }
 };
 
+} // namespace pool
 } // namespace memory
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_MEMORYPOOL_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_POOL_MEMORYPOOL_HPP__
 

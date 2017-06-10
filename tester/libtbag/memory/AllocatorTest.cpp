@@ -41,8 +41,6 @@ TEST(AllocatorTest, Memroy1)
 TEST(AllocatorTest, Memroy2)
 {
     Allocator<AllocTestObject> allocator;
-
-
     AllocTestObject * data = allocator.allocate(1);
     {
         ASSERT_EQ(data, allocator.address(*data));
