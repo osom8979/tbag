@@ -32,12 +32,12 @@ inline T * addressof(T & val) TBAG_NOEXCEPT
 
 inline void * allocate(std::size_t size)
 {
-    return ::libtbag::memory::alloc::malloc(size);
+    return ::libtbag::memory::alloc::TraceDyMem::_malloc(size);
 }
 
 inline void deallocate(void * ptr)
 {
-    return ::libtbag::memory::alloc::free(ptr);
+    return ::libtbag::memory::alloc::TraceDyMem::_free(ptr);
 }
 
 } // namespace alloc
