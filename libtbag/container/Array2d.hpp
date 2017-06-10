@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <cassert>
+#include <cstring>
 
 #include <memory>
 #include <algorithm>
