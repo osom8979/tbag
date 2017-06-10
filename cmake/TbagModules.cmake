@@ -267,6 +267,10 @@ macro (tbag_modules__apply_dep_lua)
     tbag_modules__add_whole_archive ($<TARGET_FILE:lua>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_stb)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/stb)
+endmacro ()
+
 macro (tbag_modules__apply_dep_luabridge)
     ## Header-only library.
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/luabridge)
