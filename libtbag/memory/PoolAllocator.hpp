@@ -33,39 +33,36 @@ namespace memory {
 template <typename Type, typename PoolType>
 struct PoolAllocator : public BaseAllocator<Type>
 {
-public:
     TBAG_ALLOCATOR_BASE(Allocator, Type, BaseAllocator);
 
-public:
     using Pool = PoolType;
 
-private:
-    Pool & _pool;
+    Pool * pool;
 
-public:
-    PoolAllocator(Pool & pool) : _pool(pool)
+    PoolAllocator(Pool * p) : pool(p)
     { /* EMPTY. */ }
 
     template <typename Up, typename UpPool>
-    PoolAllocator(PoolAllocator<Up, UpPool> const & obj) TBAG_NOEXCEPT
+    PoolAllocator(PoolAllocator<Up, UpPool> const & obj) TBAG_NOEXCEPT : pool(obj.pool)
     { /* EMPTY. */ }
 
     ~PoolAllocator()
     { /* EMPTY. */ }
 
-public:
     /** allocates uninitialized storage. */
     pointer allocate(size_type size, void const * hint = 0)
     {
+        assert(pool != nullptr);
         assert(size > 0);
-        return static_cast<pointer>(_pool.allocate(size * sizeof(value_type), hint));
+        return static_cast<pointer>(pool->allocate(size * sizeof(value_type), hint));
     }
 
     /** deallocates storage. */
     void deallocate(pointer ptr, size_type allocated_size)
     {
+        assert(pool != nullptr);
         assert(ptr != nullptr);
-        _pool.deallocate(ptr, allocated_size);
+        pool->deallocate(ptr, allocated_size);
     }
 };
 
