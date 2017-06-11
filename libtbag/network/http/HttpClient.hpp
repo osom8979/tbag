@@ -56,16 +56,26 @@ public:
     using Millisec    = std::chrono::milliseconds;
     using Seconds     = std::chrono::seconds;
 
+    using OnConnect  = std::function<void(Err)>;
     using OnResponse = std::function<void(Err, HttpParser const &)>;
+    using OnShutdown = std::function<void(Err)>;
+    using OnWrite    = std::function<void(Err)>;
+    using OnClose    = std::function<void(void)>;
 
 private:
     HttpBuilder _builder;
     HttpParser  _parser;
 
 private:
+    OnConnect  _connect_cb;
     OnResponse _response_cb;
-    Millisec   _timeout;
-    TimePoint  _start_time;
+    OnShutdown _shutdown_cb;
+    OnWrite    _write_cb;
+    OnClose    _close_cb;
+
+private:
+    Millisec  _timeout;
+    TimePoint _start_time;
 
 public:
     HttpClient(Loop & loop, StreamType type = StreamType::TCP);
@@ -77,10 +87,25 @@ public:
     inline HttpBuilder const & atBuilder() const TBAG_NOEXCEPT { return _builder; }
     inline HttpParser        & atParser ()       TBAG_NOEXCEPT { return _parser;  }
     inline HttpParser  const & atParser () const TBAG_NOEXCEPT { return _parser;  }
+
+    inline void setOnConnect (OnConnect  const & cb) { _connect_cb  = cb; }
+    inline void setOnResponse(OnResponse const & cb) { _response_cb = cb; }
+    inline void setOnShutdown(OnShutdown const & cb) { _shutdown_cb = cb; }
+    inline void setOnWrite   (OnWrite    const & cb) { _write_cb    = cb; }
+    inline void setOnClose   (OnClose    const & cb) { _close_cb    = cb; }
+
+    inline void setRequest(HttpBuilder const & request) { _builder = request; }
+    inline void setTimeout(Millisec const & timeout = Millisec(0)) { _timeout = timeout; }
+    inline void markupTimer() { _start_time = SystemClock::now(); }
     // @formatter:on
 
 public:
-    void setup(HttpBuilder const & request, OnResponse const & response_cb, Millisec const & timeout = Millisec(0));
+    void setup(HttpBuilder const & request, Millisec const & timeout = Millisec(0))
+    {
+        setRequest(request);
+        setTimeout(timeout);
+        markupTimer();
+    }
 
 public:
     virtual void onConnect(Err code) override;

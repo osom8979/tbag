@@ -4,7 +4,8 @@
  * @author zer0
  * @date   2017-05-20
  *
- * @see <https://tools.ietf.org/html/rfc2616>
+ * @see HTTP: <https://tools.ietf.org/html/rfc2616>
+ * @see WebSocket: <https://tools.ietf.org/html/rfc6455>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPROPERTY_HPP__
@@ -45,26 +46,37 @@ TBAG_CONSTEXPR char const * const CRLF = "\r\n";
  * @{
  */
 
-TBAG_CONSTEXPR char const * const HEADER_HOST = "Host";
-TBAG_CONSTEXPR char const * const HEADER_SERVER = "Server";
-TBAG_CONSTEXPR char const * const HEADER_USER_AGENT = "User-Agent";
-TBAG_CONSTEXPR char const * const HEADER_ACCEPT = "Accept";
-TBAG_CONSTEXPR char const * const HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
-TBAG_CONSTEXPR char const * const HEADER_CONTENT_TYPE = "Content-Type";
-TBAG_CONSTEXPR char const * const HEADER_CONTENT_LENGTH = "Content-Length";
+TBAG_CONSTEXPR char const * const HEADER_HOST               = "Host";
+TBAG_CONSTEXPR char const * const HEADER_UPGRADE            = "Upgrade";
+TBAG_CONSTEXPR char const * const HEADER_SERVER             = "Server";
+TBAG_CONSTEXPR char const * const HEADER_USER_AGENT         = "User-Agent";
+TBAG_CONSTEXPR char const * const HEADER_ACCEPT             = "Accept";
+TBAG_CONSTEXPR char const * const HEADER_TRANSFER_ENCODING  = "Transfer-Encoding";
+TBAG_CONSTEXPR char const * const HEADER_CONTENT_TYPE       = "Content-Type";
+TBAG_CONSTEXPR char const * const HEADER_CONTENT_LENGTH     = "Content-Length";
+
+// WebSocket
+
+TBAG_CONSTEXPR char const * const HEADER_CONNECTION             = "Connection";
+TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_KEY      = "Sec-WebSocket-Key";
+TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_VERSION  = "Sec-WebSocket-Version";
 
 /**
  * @}
  */
 
-TBAG_CONSTEXPR char const * const DEFAULT_SERVER_INFO =
+TBAG_CONSTEXPR char const * const VALUE_SERVER_INFO =
          LIBTBAG_TITLE_STRING "/" LIBTBAG_VERSION_STRING;
 
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_SERVER            = DEFAULT_SERVER_INFO;
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_CONTENT_TYPE      = "text/html; charset=utf-8";
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_USER_AGENT        = DEFAULT_SERVER_INFO;
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_ACCEPT            = "*/*";
-TBAG_CONSTEXPR char const * const HEADER_DEFAULT_TRANSFER_ENCODING = "identity";
+TBAG_CONSTEXPR char const * const DEFAULT_HEADER_SERVER            = VALUE_SERVER_INFO;
+TBAG_CONSTEXPR char const * const DEFAULT_HEADER_CONTENT_TYPE      = "text/html; charset=utf-8";
+TBAG_CONSTEXPR char const * const DEFAULT_HEADER_USER_AGENT        = VALUE_SERVER_INFO;
+TBAG_CONSTEXPR char const * const DEFAULT_HEADER_ACCEPT            = "*/*";
+TBAG_CONSTEXPR char const * const DEFAULT_HEADER_TRANSFER_ENCODING = "identity";
+
+TBAG_CONSTEXPR char const * const VALUE_UPGRADE_WEBSOCKET = "websocket";
+TBAG_CONSTEXPR char const * const VALUE_UPGRADE           = "Upgrade";
 
 TBAG_CONSTEXPR int const TBAG_UNKNOWN_HTTP_METHOD = -1;
 

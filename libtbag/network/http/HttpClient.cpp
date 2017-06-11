@@ -26,30 +26,22 @@ HttpClient::~HttpClient()
     // EMPTY.
 }
 
-void HttpClient::setup(HttpBuilder const & request,
-                       OnResponse const & response_cb,
-                       Millisec const & timeout)
-{
-    _builder     = request;
-    _response_cb = response_cb;
-    _timeout     = timeout;
-    _start_time  = SystemClock::now();
-}
-
 void HttpClient::onConnect(Err code)
 {
     if (code != Err::E_SUCCESS) {
         tDLogE("HttpClient::onConnect() {} error.", getErrName(code));
-        _response_cb(code, _parser);
-        close();
+        if (static_cast<bool>(_connect_cb)) {
+            _connect_cb(code);
+        }
         return;
     }
 
     auto buffer = _builder.toDefaultRequestString();
     if (write(buffer.data(), buffer.size()) == false) {
         tDLogE("HttpClient::onConnect() {} error.", getErrName(Err::E_WRERR));
-        _response_cb(Err::E_WRERR, _parser);
-        close();
+        if (static_cast<bool>(_connect_cb)) {
+            _connect_cb(Err::E_WRERR);
+        }
         return;
     }
 
@@ -58,62 +50,81 @@ void HttpClient::onConnect(Err code)
 
     if (LEFT_TIME.count() <= 0) {
         tDLogE("HttpClient::onConnect() {} error.", getErrName(Err::E_TIMEOUT));
-        _response_cb(Err::E_TIMEOUT, _parser);
-        close();
+        if (static_cast<bool>(_connect_cb)) {
+            _connect_cb(Err::E_TIMEOUT);
+        }
         return;
     }
 
-    startCloseTimer(LEFT_TIME.count());
+    startCloseTimer(static_cast<uint64_t>(LEFT_TIME.count()));
 }
 
 void HttpClient::onShutdown(Err code)
 {
-    _response_cb(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code, _parser);
-    close();
+    if (static_cast<bool>(_shutdown_cb)) {
+        _shutdown_cb(code);
+    }
 }
 
 void HttpClient::onWrite(Err code)
 {
     if (code != Err::E_SUCCESS) {
         tDLogE("HttpClient::onWrite() {} error.", getErrName(code));
-        _response_cb(code, _parser);
-        close();
+        if (static_cast<bool>(_write_cb)) {
+            _write_cb(code);
+        }
         return;
     }
 
-    start();
+    if (start() == false) {
+        tDLogE("HttpClient::onWrite() start error.");
+        if (static_cast<bool>(_write_cb)) {
+            _write_cb(Err::E_RDERR);
+        }
+        return;
+    }
+
+    if (static_cast<bool>(_write_cb)) {
+        _write_cb(code);
+    }
 }
 
 void HttpClient::onRead(Err code, char const * buffer, std::size_t size)
 {
     if (code == Err::E_EOF) {
         tDLogI("HttpClient::onRead() EOF.");
-        _response_cb(code, _parser);
-        close();
+        if (static_cast<bool>(_response_cb)) {
+            assert(code == Err::E_EOF);
+            _response_cb(code, _parser);
+        }
         return;
     }
 
     if (code != Err::E_SUCCESS) {
         tDLogE("HttpServer::onRead() {} error", getErrName(code));
-        _response_cb(code, _parser);
-        close();
+        if (static_cast<bool>(_response_cb)) {
+            _response_cb(code, _parser);
+        }
         return;
     }
 
     assert(code == Err::E_SUCCESS);
-
     _parser.execute(buffer, size);
+
     if (_parser.isComplete()) {
         tDLogD("HttpClient::onRead() Completed http parsing (HTTP STATUS: {}).", _parser.getStatusCode());
-
-        _response_cb(Err::E_SUCCESS, _parser);
-        close();
+        if (static_cast<bool>(_response_cb)) {
+            _response_cb(code, _parser);
+        }
     }
 }
 
 void HttpClient::onClose()
 {
     tDLogD("HttpClient::onClose()");
+    if (static_cast<bool>(_close_cb)) {
+        _close_cb();
+    }
 }
 
 // ----------
@@ -149,13 +160,36 @@ Err requestWithSync(HttpClient::StreamType type,
     }
 
     tDLogI("requestWithSync() Request {}: {}", builder.getMethod(), uri.getString());
-
     Err http_result = Err::E_UNKNOWN;
-    http.setup(builder, [&](Err code, HttpParser const & response){
+
+    http.setOnConnect([&](Err code){
+        if (code != Err::E_SUCCESS) {
+            http_result = code;
+            http.close();
+        }
+    });
+    http.setOnResponse([&](Err code, HttpParser const & response){
         tDLogI("requestWithSync() Response Err({}) HTTP STATUS: {}", getErrName(code), response.getStatusCode());
         http_result = code;
         result = response.getResponse();
-    }, HttpClient::Millisec(timeout));
+        http.close();
+    });
+    http.setOnShutdown([&](Err code){
+        if (code == Err::E_SUCCESS) {
+            http_result = Err::E_SHUTDOWN;
+            http.close();
+        }
+    });
+    http.setOnWrite([&](Err code){
+        if (code != Err::E_SUCCESS) {
+            http_result = code;
+            http.close();
+        }
+    });
+    http.setOnClose([&](){
+        // EMPTY.
+    });
+    http.setup(builder, HttpClient::Millisec(timeout));
 
     Err LOOP_RESULT = loop.run();
     if (LOOP_RESULT != Err::E_SUCCESS) {
@@ -175,7 +209,6 @@ Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeo
     if (ADDRINFO_RESULT != Err::E_SUCCESS) {
         return ADDRINFO_RESULT;
     }
-
     return requestWithSync(HttpClient::StreamType::TCP, host, port, uri, request, timeout, result);
 }
 

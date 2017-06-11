@@ -239,8 +239,8 @@ std::string HttpBuilder::getDefaultRequestString(std::string const & method, std
     std::string real_method = (method.empty() ? getHttpMethodName(HttpMethod::M_GET) : method);
     std::string real_url    = (url.empty() ? "/" : url);
 
-    existsOrInsert(real_headers, HEADER_USER_AGENT, HEADER_DEFAULT_USER_AGENT);
-    existsOrInsert(real_headers, HEADER_ACCEPT, HEADER_DEFAULT_ACCEPT);
+    existsOrInsert(real_headers, HEADER_USER_AGENT, DEFAULT_HEADER_USER_AGENT);
+    existsOrInsert(real_headers, HEADER_ACCEPT, DEFAULT_HEADER_ACCEPT);
 
     if (body.empty() == false) {
         existsOrInsert(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
@@ -266,8 +266,8 @@ std::string HttpBuilder::getDefaultResponseString(std::string const & status, st
     int http_major = (major == 0 ? 1 : major);
     int http_minor = (minor == 0 ? 1 : minor);
 
-    existsOrInsert(real_headers, HEADER_SERVER, HEADER_DEFAULT_SERVER);
-    existsOrInsert(real_headers, HEADER_CONTENT_TYPE, HEADER_DEFAULT_CONTENT_TYPE);
+    existsOrInsert(real_headers, HEADER_SERVER, DEFAULT_HEADER_SERVER);
+    existsOrInsert(real_headers, HEADER_CONTENT_TYPE, DEFAULT_HEADER_CONTENT_TYPE);
     existsOrInsert(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
 
     if (logging) {
