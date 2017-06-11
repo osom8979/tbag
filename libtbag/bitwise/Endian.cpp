@@ -10,10 +10,10 @@
 
 #if defined(TBAG_PLATFORM_WINDOWS)
 # include <winsock2.h>
-# include <WS2tcpip.h> // sockaddr_in6
-# include <Windows.h>
+#elif defined(TBAG_PLATFORM_LINUX)
+# include <endian.h>
 #else
-# include <netinet/in.h>
+# include <netinet/in.h> // or <arpa/inet.h>
 #endif
 
 // -------------------
@@ -34,10 +34,41 @@ uint16_t toNetwork(uint16_t host) TBAG_NOEXCEPT { return htons (host); }
 uint32_t toNetwork(uint32_t host) TBAG_NOEXCEPT { return htonl (host); }
 // @formatter:on
 
-// int64_t toHost( int64_t network) { return ntohll(network); }
-//uint64_t toHost(uint64_t network) { return ntohll(network); }
-// int64_t toNetwork( int64_t host) { return htonll(host); }
-//uint64_t toNetwork(uint64_t host) { return htonll(host); }
+int64_t toHost(int64_t network) TBAG_NOEXCEPT
+{
+#if defined(TBAG_PLATFORM_LINUX)
+    return be64toh(network);
+#else
+    return ntohll(network);
+#endif
+}
+
+uint64_t toHost(uint64_t network) TBAG_NOEXCEPT
+{
+#if defined(TBAG_PLATFORM_LINUX)
+    return be64toh(network);
+#else
+    return ntohll(network);
+#endif
+}
+
+int64_t toNetwork(int64_t host) TBAG_NOEXCEPT
+{
+#if defined(TBAG_PLATFORM_LINUX)
+    return htobe64(network);
+#else
+    return htonll(host);
+#endif
+}
+
+uint64_t toNetwork(uint64_t host) TBAG_NOEXCEPT
+{
+#if defined(TBAG_PLATFORM_LINUX)
+    return htobe64(network);
+#else
+    return htonll(host);
+#endif
+}
 
 } // namespace bitwise
 

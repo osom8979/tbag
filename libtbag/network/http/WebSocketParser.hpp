@@ -41,6 +41,10 @@ namespace http    {
 class TBAG_API WebSocketParser
 {
 public:
+    using Buffer = std::vector<char>;
+
+private:
+    Buffer _buffer;
 
 public:
     WebSocketParser();
