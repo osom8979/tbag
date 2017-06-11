@@ -101,7 +101,7 @@ public:
      *      No upgrade header present.
      *
      * @warning
-     * Should be checked when execute() returns in addition to error checking.
+     *  Should be checked when execute() returns in addition to error checking.
      */
     bool isUpgrade() const TBAG_NOEXCEPT;
 

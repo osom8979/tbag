@@ -15,7 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
+#include <cstdint>
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,6 +31,8 @@ TBAG_API std::size_t getDecodeLength(std::string const & input);
 
 TBAG_API bool encodeBase64(std::string const & input, std::string & output);
 TBAG_API bool decodeBase64(std::string const & input, std::string & output);
+
+TBAG_API bool encodeBase64WithBinary(std::vector<uint8_t> const & input, std::string & output);
 
 } // namespace encrypt
 

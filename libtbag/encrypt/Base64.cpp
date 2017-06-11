@@ -47,23 +47,7 @@ std::size_t getDecodeLength(std::string const & base64)
 
 bool encodeBase64(std::string const & input, std::string & output)
 {
-    BIO * b64 = BIO_new(BIO_f_base64());
-    BIO * bmem = BIO_new(BIO_s_mem());
-    BIO_push(b64, bmem);
-
-    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // Ignore newlines - write everything in one line
-    int const WSIZE = BIO_write(b64, input.c_str(), input.size());
-    BIO_flush(b64);
-
-    BUF_MEM * bptr = nullptr;
-    BIO_get_mem_ptr(b64, &bptr);
-
-    output.clear();
-    output.assign(bptr->data, bptr->data + bptr->length);
-    std::size_t const BLENGTH = bptr->length;
-
-    BIO_free_all(b64);
-    return WSIZE == input.size() && /* CHECK THIS CONDITION */ BLENGTH >= input.size();
+    return encodeBase64WithBinary(std::vector<uint8_t>(input.begin(), input.end()), output);
 }
 
 bool decodeBase64(std::string const & input, std::string & output)
@@ -86,6 +70,27 @@ bool decodeBase64(std::string const & input, std::string & output)
 
     BIO_free_all(b64);
     return length == RSIZE;
+}
+
+bool encodeBase64WithBinary(std::vector<uint8_t> const & input, std::string & output)
+{
+    BIO * b64 = BIO_new(BIO_f_base64());
+    BIO * bmem = BIO_new(BIO_s_mem());
+    BIO_push(b64, bmem);
+
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // Ignore newlines - write everything in one line
+    int const WSIZE = BIO_write(b64, input.data(), input.size());
+    BIO_flush(b64);
+
+    BUF_MEM * bptr = nullptr;
+    BIO_get_mem_ptr(b64, &bptr);
+
+    output.clear();
+    output.assign(bptr->data, bptr->data + bptr->length);
+    std::size_t const BLENGTH = bptr->length;
+
+    BIO_free_all(b64);
+    return WSIZE == input.size() && /* CHECK THIS CONDITION */ BLENGTH >= input.size();
 }
 
 } // namespace encrypt

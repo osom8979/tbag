@@ -5,7 +5,7 @@
  * @date   2017-05-20
  *
  * @see HTTP: <https://tools.ietf.org/html/rfc2616>
- * @see WebSocket: <https://tools.ietf.org/html/rfc6455>
+ * @see WebSocket v13: <https://tools.ietf.org/html/rfc6455>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPROPERTY_HPP__
@@ -54,10 +54,11 @@ TBAG_CONSTEXPR char const * const HEADER_ACCEPT             = "Accept";
 TBAG_CONSTEXPR char const * const HEADER_TRANSFER_ENCODING  = "Transfer-Encoding";
 TBAG_CONSTEXPR char const * const HEADER_CONTENT_TYPE       = "Content-Type";
 TBAG_CONSTEXPR char const * const HEADER_CONTENT_LENGTH     = "Content-Length";
+TBAG_CONSTEXPR char const * const HEADER_ORIGIN             = "Origin";
+TBAG_CONSTEXPR char const * const HEADER_CONNECTION         = "Connection";
 
 // WebSocket
 
-TBAG_CONSTEXPR char const * const HEADER_CONNECTION             = "Connection";
 TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_KEY      = "Sec-WebSocket-Key";
 TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_VERSION  = "Sec-WebSocket-Version";
@@ -75,8 +76,14 @@ TBAG_CONSTEXPR char const * const DEFAULT_HEADER_USER_AGENT        = VALUE_SERVE
 TBAG_CONSTEXPR char const * const DEFAULT_HEADER_ACCEPT            = "*/*";
 TBAG_CONSTEXPR char const * const DEFAULT_HEADER_TRANSFER_ENCODING = "identity";
 
-TBAG_CONSTEXPR char const * const VALUE_UPGRADE_WEBSOCKET = "websocket";
-TBAG_CONSTEXPR char const * const VALUE_UPGRADE           = "Upgrade";
+TBAG_CONSTEXPR char const * const VALUE_WEBSOCKET = "websocket";
+TBAG_CONSTEXPR char const * const VALUE_UPGRADE   = "Upgrade";
+
+TBAG_CONSTEXPR char const * const WEBSOCKET_HANDSHAKE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+// ------------
+// HTTP METHOD.
+// ------------
 
 TBAG_CONSTEXPR int const TBAG_UNKNOWN_HTTP_METHOD = -1;
 
