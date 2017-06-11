@@ -60,12 +60,15 @@ TBAG_CONSTEXPR char const * const HEADER_CONNECTION         = "Connection";
 // WebSocket
 
 TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_KEY      = "Sec-WebSocket-Key";
+TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_ACCEPT   = "Sec-WebSocket-Accept";
 TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_VERSION  = "Sec-WebSocket-Version";
 
 /**
  * @}
  */
+
+TBAG_CONSTEXPR char const * const VALUE_DELIMITER = ",";
 
 TBAG_CONSTEXPR char const * const VALUE_SERVER_INFO =
          LIBTBAG_TITLE_STRING "/" LIBTBAG_VERSION_STRING;
@@ -78,6 +81,13 @@ TBAG_CONSTEXPR char const * const DEFAULT_HEADER_TRANSFER_ENCODING = "identity";
 
 TBAG_CONSTEXPR char const * const VALUE_WEBSOCKET = "websocket";
 TBAG_CONSTEXPR char const * const VALUE_UPGRADE   = "Upgrade";
+
+TBAG_CONSTEXPR char const * const VALUE_TBAG_PROTOCOL = "tbag";
+
+TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI00 =  0;
+TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI07 =  7;
+TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI08 =  8;
+TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI13 = 13;
 
 TBAG_CONSTEXPR char const * const WEBSOCKET_HANDSHAKE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 

@@ -15,8 +15,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/Err.hpp>
 
+#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/HttpBuilder.hpp>
+
+#include <vector>
+#include <set>
 #include <string>
 
 // -------------------
@@ -41,7 +47,17 @@ public:
     virtual ~WebSocketParser();
 };
 
-TBAG_API std::string upgradeWebsocketKey(std::string const & base64_key);
+// ----------
+// Utilities.
+// ----------
+
+TBAG_API std::string upgradeWebSocketKey(std::string const & base64_key);
+
+TBAG_API bool existsWebSocketVersion13(std::string const & versions);
+TBAG_API std::string getWebSocketProtocol(std::string const & protocols, std::set<std::string> const & accept_protocols);
+TBAG_API std::string getWebSocketProtocolWithTbag(std::string const & protocols);
+
+TBAG_API Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response);
 
 } // namespace http
 } // namespace network
