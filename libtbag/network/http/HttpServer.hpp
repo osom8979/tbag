@@ -64,10 +64,14 @@ public:
     using Millisec    = std::chrono::milliseconds;
     using Seconds     = std::chrono::seconds;
 
-    using OnOpen    = std::function<void(WeakClient)>;
-    using OnRequest = std::function<void(Err, WeakClient, HttpParser const &, HttpBuilder &, uint64_t &)>;
-    using OnClose   = std::function<void(WeakClient)>;
-    using OnServerClose = std::function<void(void)>;
+    using OnOpen            = std::function<void(WeakClient)>;
+    using OnRequest         = std::function<void(Err, WeakClient, HttpParser const &, HttpBuilder &, uint64_t &)>;
+    using OnClose           = std::function<void(WeakClient)>;
+    using OnShutdown        = std::function<void(WeakClient, Err)>;
+    using OnWrite           = std::function<void(WeakClient, Err)>;
+    using OnUserDataAlloc   = std::function<void*(WeakClient)>;
+    using OnUserDataDealloc = std::function<void(WeakClient, void*)>;
+    using OnServerClose     = std::function<void(void)>;
 
     using UniqueHttpFilterInterface = std::unique_ptr<HttpFilterInterface>;
 
@@ -97,24 +101,47 @@ public:
         TimePoint   start_time;
     };
 
-private:
-    OnOpen        _open_cb;
-    OnRequest     _request_cb;
-    OnClose       _close_cb;
-    OnServerClose _server_close_cb;
+    using SharedClientData = std::shared_ptr<ClientData>;
+    using   WeakClientData =   std::weak_ptr<ClientData>;
 
+    using ClientDataMap    = std::unordered_map<Id, SharedClientData>;
+    using ClientDataPair   = ClientDataMap::value_type;
+
+private:
+    OnOpen            _open_cb;
+    OnRequest         _request_cb;
+    OnClose           _close_cb;
+    OnShutdown        _shutdown_cb;
+    OnWrite           _write_cb;
+    OnUserDataAlloc   _user_data_alloc_cb;
+    OnUserDataDealloc _user_data_dealloc_cb;
+    OnServerClose     _server_close_cb;
+
+private:
     FilterMap _filters;
+
+private:
+    ClientDataMap _dataset;
 
 public:
     HttpServer(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~HttpServer();
 
+private:
+    bool createClientData(Id id);
+    bool removeClientData(Id id);
+    WeakClientData getClientData(Id id);
+
 public:
     // @formatter:off
-    inline void setOnOpen       (OnOpen        const & cb) { _open_cb         = cb; }
-    inline void setOnRequest    (OnRequest     const & cb) { _request_cb      = cb; }
-    inline void setOnClose      (OnClose       const & cb) { _close_cb        = cb; }
-    inline void setOnServerClose(OnServerClose const & cb) { _server_close_cb = cb; }
+    inline void setOnOpen           (OnOpen            const & cb) { _open_cb              = cb; }
+    inline void setOnRequest        (OnRequest         const & cb) { _request_cb           = cb; }
+    inline void setOnClose          (OnClose           const & cb) { _close_cb             = cb; }
+    inline void setOnShutdown       (OnShutdown        const & cb) { _shutdown_cb          = cb; }
+    inline void setOnWrite          (OnWrite           const & cb) { _write_cb             = cb; }
+    inline void setOnUserDataAlloc  (OnUserDataAlloc   const & cb) { _user_data_alloc_cb   = cb; }
+    inline void setOnUserDataDealloc(OnUserDataDealloc const & cb) { _user_data_dealloc_cb = cb; }
+    inline void setOnServerClose    (OnServerClose     const & cb) { _server_close_cb      = cb; }
     // @formatter:on
 
 public:
@@ -131,11 +158,13 @@ public:
 public:
     virtual void onClientShutdown(WeakClient node, Err code) override;
     virtual void onClientWrite(WeakClient node, Err code) override;
-    virtual void onServerClose() override;
 
 public:
     virtual void * onClientUserDataAlloc(WeakClient node) override;
     virtual void onClientUserDataDealloc(WeakClient node, void * data) override;
+
+public:
+    virtual void onServerClose() override;
 };
 
 } // namespace http

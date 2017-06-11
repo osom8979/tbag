@@ -27,6 +27,25 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
+bool HttpServer::createClientData(Id id)
+{
+    return _dataset.insert(ClientDataPair(id, SharedClientData(new (std::nothrow) ClientData))).second;
+}
+
+bool HttpServer::removeClientData(Id id)
+{
+    return _dataset.erase(id) == 1U;
+}
+
+HttpServer::WeakClientData HttpServer::getClientData(Id id)
+{
+    auto itr = _dataset.find(id);
+    if (itr == _dataset.end()) {
+        return WeakClientData();
+    }
+    return WeakClientData(itr->second);
+}
+
 void HttpServer::setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, Order priority)
 {
     setOnRequest(new (std::nothrow) HttpDefaultFilter(method, regex_path), cb);
@@ -68,6 +87,12 @@ void HttpServer::onConnection(Err code)
         return;
     }
 
+    if (createClientData(shared->getId()) == false) {
+        tDLogE("HttpServer::onConnection() Bad allocated client-data.");
+        shared->close();
+        return;
+    }
+
     if (static_cast<bool>(_open_cb)) {
         _open_cb(node);
     }
@@ -87,9 +112,9 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
         return;
     }
 
-    ClientData * client_data = static_cast<ClientData*>(shared->getUserData());
-    if (client_data == nullptr) {
-        tDLogE("HttpServer::onClientRead() User data is nullptr.");
+    auto dataset = getClientData(shared->getId()).lock();
+    if (static_cast<bool>(dataset) == false) {
+        tDLogE("HttpServer::onClientRead() Expired client data.");
         shared->close();
         return;
     }
@@ -100,8 +125,8 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
         return;
     }
 
-    HttpParser  & request  = client_data->parser;
-    HttpBuilder & response = client_data->builder;
+    HttpParser  & request  = dataset->parser;
+    HttpBuilder & response = dataset->builder;
 
     request.execute(buffer, size);
     if (request.isComplete() == false) {
@@ -163,16 +188,39 @@ void HttpServer::onClientClose(WeakClient node)
     if (static_cast<bool>(_close_cb)) {
         _close_cb(node);
     }
+
+    if (removeClientData(shared->getId()) == false) {
+        tDLogW("HttpServer::onClientClose() Client-data removal failed.");
+    }
 }
 
 void HttpServer::onClientShutdown(WeakClient node, Err code)
 {
-    // EMPTY.
+    if (static_cast<bool>(_shutdown_cb)) {
+        _shutdown_cb(node, code);
+    }
 }
 
 void HttpServer::onClientWrite(WeakClient node, Err code)
 {
-    // EMPTY.
+    if (static_cast<bool>(_write_cb)) {
+        _write_cb(node, code);
+    }
+}
+
+void * HttpServer::onClientUserDataAlloc(WeakClient node)
+{
+    if (static_cast<bool>(_user_data_alloc_cb)) {
+        return _user_data_alloc_cb(node);
+    }
+    return nullptr;
+}
+
+void HttpServer::onClientUserDataDealloc(WeakClient node, void * data)
+{
+    if (static_cast<bool>(_user_data_dealloc_cb)) {
+        _user_data_dealloc_cb(node, data);
+    }
 }
 
 void HttpServer::onServerClose()
@@ -180,20 +228,6 @@ void HttpServer::onServerClose()
     if (static_cast<bool>(_server_close_cb)) {
         _server_close_cb();
     }
-}
-
-void * HttpServer::onClientUserDataAlloc(WeakClient node)
-{
-    auto * client_data = new (std::nothrow) ClientData;
-    assert(client_data != nullptr);
-    return client_data;
-}
-
-void HttpServer::onClientUserDataDealloc(WeakClient node, void * data)
-{
-    auto * client_data = static_cast<ClientData*>(data);
-    assert(client_data != nullptr);
-    delete client_data;
 }
 
 } // namespace http
