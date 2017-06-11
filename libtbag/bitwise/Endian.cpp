@@ -8,6 +8,10 @@
 #include <libtbag/bitwise/Endian.hpp>
 #include <libtbag/log/Log.hpp>
 
+// For the Windows platform:
+// https://msdn.microsoft.com/en-us/library/a3140177.aspx
+#include <stdlib.h>
+
 #if defined(TBAG_PLATFORM_WINDOWS)
 # include <winsock2.h>
 #elif defined(TBAG_PLATFORM_LINUX)
@@ -36,7 +40,9 @@ uint32_t toNetwork(uint32_t host) TBAG_NOEXCEPT { return htonl (host); }
 
 int64_t toHost(int64_t network) TBAG_NOEXCEPT
 {
-#if defined(TBAG_PLATFORM_LINUX)
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return _byteswap_uint64(network);
+#elif defined(TBAG_PLATFORM_LINUX)
     return be64toh(network);
 #else
     return ntohll(network);
@@ -45,7 +51,9 @@ int64_t toHost(int64_t network) TBAG_NOEXCEPT
 
 uint64_t toHost(uint64_t network) TBAG_NOEXCEPT
 {
-#if defined(TBAG_PLATFORM_LINUX)
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return _byteswap_uint64(network);
+#elif defined(TBAG_PLATFORM_LINUX)
     return be64toh(network);
 #else
     return ntohll(network);
@@ -54,8 +62,10 @@ uint64_t toHost(uint64_t network) TBAG_NOEXCEPT
 
 int64_t toNetwork(int64_t host) TBAG_NOEXCEPT
 {
-#if defined(TBAG_PLATFORM_LINUX)
-    return htobe64(network);
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return _byteswap_uint64(host);
+#elif defined(TBAG_PLATFORM_LINUX)
+    return htobe64(host);
 #else
     return htonll(host);
 #endif
@@ -63,8 +73,10 @@ int64_t toNetwork(int64_t host) TBAG_NOEXCEPT
 
 uint64_t toNetwork(uint64_t host) TBAG_NOEXCEPT
 {
-#if defined(TBAG_PLATFORM_LINUX)
-    return htobe64(network);
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return _byteswap_uint64(host);
+#elif defined(TBAG_PLATFORM_LINUX)
+    return htobe64(host);
 #else
     return htonll(host);
 #endif
