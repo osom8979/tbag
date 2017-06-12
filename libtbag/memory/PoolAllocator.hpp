@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/memory/Allocator.hpp>
+#include <libtbag/memory/pool/PoolInterface.hpp>
 #include <libtbag/memory/pool/BasePool.hpp>
 
 // -------------------
@@ -30,20 +31,20 @@ namespace memory {
  * @author zer0
  * @date   2017-04-15
  */
-template <typename Type, typename PoolType>
+template <typename Type>
 struct PoolAllocator : public BaseAllocator<Type>
 {
-    TBAG_ALLOCATOR_BASE(Allocator, Type, BaseAllocator);
+    TBAG_ALLOCATOR_BASE(PoolAllocator, Type, BaseAllocator);
 
-    using Pool = PoolType;
+    using Pool = pool::PoolInterface;
 
     Pool * pool;
 
     PoolAllocator(Pool * p) : pool(p)
     { /* EMPTY. */ }
 
-    template <typename Up, typename UpPool>
-    PoolAllocator(PoolAllocator<Up, UpPool> const & obj) TBAG_NOEXCEPT : pool(obj.pool)
+    template <typename Up>
+    PoolAllocator(PoolAllocator<Up> const & obj) TBAG_NOEXCEPT : pool(obj.pool)
     { /* EMPTY. */ }
 
     ~PoolAllocator()

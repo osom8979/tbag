@@ -19,7 +19,7 @@ using namespace libtbag::memory::pool;
 TEST(PoolAllocatorTest, Default)
 {
     MemoryPool pool;
-    using TestPool = PoolAllocator<char, MemoryPool>;
+    using TestPool = PoolAllocator<char>;
     TestPool alloc(&pool);
 
     std::size_t const TEST_SIZE = 10;
@@ -36,7 +36,7 @@ TEST(PoolAllocatorTest, Default)
 TEST(PoolAllocatorTest, BadAlloc)
 {
     MemoryPool pool(10);
-    using TestPool = PoolAllocator<char, MemoryPool>;
+    using TestPool = PoolAllocator<char>;
     TestPool alloc(&pool);
 
     std::size_t const TEST_SIZE = 10;
@@ -49,7 +49,7 @@ TEST(PoolAllocatorTest, BadAlloc)
 TEST(PoolAllocatorTest, Fragment)
 {
     MemoryPool pool(10);
-    using TestPool = PoolAllocator<char, MemoryPool>;
+    using TestPool = PoolAllocator<char>;
     TestPool alloc(&pool);
 
     ASSERT_EQ(10, pool.left());
@@ -74,7 +74,7 @@ TEST(PoolAllocatorTest, MultiMemoryPool)
     std::size_t const OBJECT_COUNT =  1;
 
     MultiMemoryPool pool(SMALL_SIZE, NORMAL_SIZE, LARGE_SIZE, OBJECT_COUNT);
-    using TestPool = PoolAllocator<char, MultiMemoryPool>;
+    using TestPool = PoolAllocator<char>;
     TestPool alloc(&pool);
 
     ASSERT_EQ( SMALL_SIZE * OBJECT_COUNT, pool.atSmall ().max());
