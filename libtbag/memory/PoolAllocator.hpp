@@ -40,7 +40,10 @@ struct PoolAllocator : public BaseAllocator<Type>
 
     Pool * pool;
 
-    PoolAllocator(Pool * p) : pool(p)
+    PoolAllocator() TBAG_NOEXCEPT : pool(nullptr)
+    { /* EMPTY. */ }
+
+    PoolAllocator(Pool * p) TBAG_NOEXCEPT : pool(p)
     { /* EMPTY. */ }
 
     template <typename Up>
@@ -53,17 +56,23 @@ struct PoolAllocator : public BaseAllocator<Type>
     /** allocates uninitialized storage. */
     pointer allocate(size_type size, void const * hint = 0)
     {
-        assert(pool != nullptr);
         assert(size > 0);
-        return static_cast<pointer>(pool->allocate(size * sizeof(value_type), hint));
+        if (pool != nullptr) {
+            return static_cast<pointer>(pool->allocate(size * sizeof(value_type), hint));
+        } else {
+            return static_cast<pointer>(::libtbag::memory::alloc::allocate(size * sizeof(value_type)));
+        }
     }
 
     /** deallocates storage. */
     void deallocate(pointer ptr, size_type allocated_size)
     {
-        assert(pool != nullptr);
         assert(ptr != nullptr);
-        pool->deallocate(ptr, allocated_size);
+        if (pool != nullptr) {
+            pool->deallocate(ptr, allocated_size);
+        } else {
+            ::libtbag::memory::alloc::deallocate((void*)ptr);
+        }
     }
 };
 

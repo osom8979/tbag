@@ -16,6 +16,26 @@ using namespace libtbag;
 using namespace libtbag::memory;
 using namespace libtbag::memory::pool;
 
+TEST(PoolAllocatorTest, CopyConstructor)
+{
+    MemoryPool pool(10);
+
+    using CharPool = PoolAllocator<char>;
+    using ShortPool = PoolAllocator<short>;
+
+    CharPool alloc1(&pool);
+    ShortPool alloc2(alloc1);
+    ASSERT_EQ(10, pool.left());
+
+    std::vector<char, CharPool> buffer1(alloc1);
+    buffer1.resize(1);
+    ASSERT_EQ(9, pool.left());
+
+    std::vector<short, ShortPool> buffer2(alloc2);
+    buffer2.resize(1);
+    ASSERT_EQ(7, pool.left());
+}
+
 TEST(PoolAllocatorTest, Default)
 {
     MemoryPool pool;
