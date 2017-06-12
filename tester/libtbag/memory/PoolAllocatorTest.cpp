@@ -35,6 +35,9 @@ TEST(PoolAllocatorTest, Default)
 
 TEST(PoolAllocatorTest, BadAlloc)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test in Windows Platform.\n";
+#else
     MemoryPool pool(10);
     using TestPool = PoolAllocator<char>;
     TestPool alloc(&pool);
@@ -44,6 +47,7 @@ TEST(PoolAllocatorTest, BadAlloc)
     buffer.assign(TEST_SIZE, 'A');
 
     ASSERT_THROW(buffer.push_back('A'), std::bad_alloc);
+#endif
 }
 
 TEST(PoolAllocatorTest, Fragment)
