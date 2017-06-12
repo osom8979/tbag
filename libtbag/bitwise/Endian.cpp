@@ -27,34 +27,36 @@ NAMESPACE_LIBTBAG_OPEN
 namespace bitwise {
 
 // @formatter:off
- int16_t toHost( int16_t network) TBAG_NOEXCEPT { return ntohs (network); }
-uint16_t toHost(uint16_t network) TBAG_NOEXCEPT { return ntohs (network); }
- int32_t toHost( int32_t network) TBAG_NOEXCEPT { return ntohl (network); }
-uint32_t toHost(uint32_t network) TBAG_NOEXCEPT { return ntohl (network); }
+ int16_t    toHost( int16_t network) TBAG_NOEXCEPT { return ntohs(network); }
+uint16_t    toHost(uint16_t network) TBAG_NOEXCEPT { return ntohs(network); }
+ int16_t toNetwork( int16_t    host) TBAG_NOEXCEPT { return htons(host); }
+uint16_t toNetwork(uint16_t    host) TBAG_NOEXCEPT { return htons(host); }
 
- int16_t toNetwork( int16_t host) TBAG_NOEXCEPT { return htons (host); }
-uint16_t toNetwork(uint16_t host) TBAG_NOEXCEPT { return htons (host); }
- int32_t toNetwork( int32_t host) TBAG_NOEXCEPT { return htonl (host); }
-uint32_t toNetwork(uint32_t host) TBAG_NOEXCEPT { return htonl (host); }
+ int32_t    toHost( int32_t network) TBAG_NOEXCEPT { return ntohl(network); }
+uint32_t    toHost(uint32_t network) TBAG_NOEXCEPT { return ntohl(network); }
+ int32_t toNetwork( int32_t    host) TBAG_NOEXCEPT { return htonl(host); }
+uint32_t toNetwork(uint32_t    host) TBAG_NOEXCEPT { return htonl(host); }
 // @formatter:on
 
 int64_t toHost(int64_t network) TBAG_NOEXCEPT
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
-    return _byteswap_uint64(network);
-#elif defined(TBAG_PLATFORM_LINUX)
-    return be64toh(network);
-#else
-    return ntohll(network);
-#endif
+    return toHost((uint64_t)network);
 }
 
 uint64_t toHost(uint64_t network) TBAG_NOEXCEPT
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
-    return _byteswap_uint64(network);
+    if (isBigEndianSystem()) {
+        return network;
+    } else {
+        return _byteswap_uint64(network);
+    }
 #elif defined(TBAG_PLATFORM_LINUX)
-    return be64toh(network);
+    if (isBigEndianSystem()) {
+        return network;
+    } else {
+        return be64toh(network);
+    }
 #else
     return ntohll(network);
 #endif
@@ -62,21 +64,23 @@ uint64_t toHost(uint64_t network) TBAG_NOEXCEPT
 
 int64_t toNetwork(int64_t host) TBAG_NOEXCEPT
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
-    return _byteswap_uint64(host);
-#elif defined(TBAG_PLATFORM_LINUX)
-    return htobe64(host);
-#else
-    return htonll(host);
-#endif
+    return toNetwork((uint64_t)host);
 }
 
 uint64_t toNetwork(uint64_t host) TBAG_NOEXCEPT
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
-    return _byteswap_uint64(host);
+    if (isBigEndianSystem()) {
+        return host;
+    } else {
+        return _byteswap_uint64(host);
+    }
 #elif defined(TBAG_PLATFORM_LINUX)
-    return htobe64(host);
+    if (isBigEndianSystem()) {
+        return host;
+    } else {
+        return htobe64(host);
+    }
 #else
     return htonll(host);
 #endif

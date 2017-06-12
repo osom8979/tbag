@@ -73,13 +73,9 @@ template <typename BaseType>
 struct BitFlag
 {
     using Implement = BitFlagImplement<BaseType, std::is_unsigned<BaseType>::value>;
+    TBAG_CONSTEXPR static BaseType max() TBAG_NOEXCEPT { return Implement::max(); }
 
-    static TBAG_CONSTEXPR BaseType max() TBAG_NOEXCEPT
-    {
-        return Implement::max();
-    }
-
-    static inline BaseType getRightLogicalShift(BaseType flag) TBAG_NOEXCEPT
+    static BaseType getRightLogicalShift(BaseType flag) TBAG_NOEXCEPT
     {
         if (isArithmeticShift() && std::is_signed<BaseType>::value && (flag & max())) {
             return (flag >> 1) ^ max();
