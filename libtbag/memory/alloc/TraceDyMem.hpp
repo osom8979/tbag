@@ -25,18 +25,6 @@
 #define TBAG_MEMORY_TRACE_LEVEL 2
 #endif
 
-#define TBAG_MEMORY_LEVEL0  0
-#define TBAG_MEMORY_LEVEL1  1
-#define TBAG_MEMORY_LEVEL2  2
-#define TBAG_MEMORY_LEVEL3  3
-#define TBAG_MEMORY_LEVEL4  4
-
-#define TBAG_MEMORY_NO_TRACE      TBAG_MEMORY_LEVEL0
-#define TBAG_MEMORY_STDERR_TRACE  TBAG_MEMORY_LEVEL1
-#define TBAG_MEMORY_TDLOGI_TRACE  TBAG_MEMORY_LEVEL2
-#define TBAG_MEMORY_SIMPLE_TRACE  TBAG_MEMORY_LEVEL3
-#define TBAG_MEMORY_STACK_TRACE   TBAG_MEMORY_LEVEL4
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -44,14 +32,38 @@ NAMESPACE_LIBTBAG_OPEN
 namespace memory {
 namespace alloc  {
 
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL0 = 0;
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL1 = 1;
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL2 = 2;
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL3 = 3;
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL4 = 4;
+
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL_MIN = TBAG_MEMORY_LEVEL0;
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL_MAX = TBAG_MEMORY_LEVEL4;
+
+TBAG_CONSTEXPR int const TBAG_MEMORY_NO_TRACE     = TBAG_MEMORY_LEVEL0;
+TBAG_CONSTEXPR int const TBAG_MEMORY_STDERR_TRACE = TBAG_MEMORY_LEVEL1;
+TBAG_CONSTEXPR int const TBAG_MEMORY_LOG_TRACE    = TBAG_MEMORY_LEVEL2;
+TBAG_CONSTEXPR int const TBAG_MEMORY_SIMPLE_TRACE = TBAG_MEMORY_LEVEL3;
+TBAG_CONSTEXPR int const TBAG_MEMORY_STACK_TRACE  = TBAG_MEMORY_LEVEL4;
+
 /** Memory trace level. */
 TBAG_CONSTEXPR int getTraceLevel() TBAG_NOEXCEPT
 {
     return TBAG_MEMORY_TRACE_LEVEL;
 }
 
-static_assert(TBAG_MEMORY_LEVEL0 <= COMPARE_AND(getTraceLevel()) <= TBAG_MEMORY_LEVEL4,
+static_assert(TBAG_MEMORY_LEVEL_MIN <= COMPARE_AND(getTraceLevel()) <= TBAG_MEMORY_LEVEL_MAX,
               "Invalid TBAG_MEMORY_TRACE_LEVEL macro value.");
+
+enum class TraceLevel : int
+{
+    TL_NO     = TBAG_MEMORY_NO_TRACE,
+    TL_STDERR = TBAG_MEMORY_STDERR_TRACE,
+    TL_LOG    = TBAG_MEMORY_LOG_TRACE,
+    TL_SIMPLE = TBAG_MEMORY_SIMPLE_TRACE,
+    TL_STACK  = TBAG_MEMORY_STACK_TRACE,
+};
 
 /**
  * TraceDyMem class prototype.
@@ -59,32 +71,39 @@ static_assert(TBAG_MEMORY_LEVEL0 <= COMPARE_AND(getTraceLevel()) <= TBAG_MEMORY_
  * @author zer0
  * @date   2017-06-10
  */
+template <int LevelValue = TBAG_MEMORY_LOG_TRACE>
 struct TraceDyMem : private Noncopyable
 {
+    TBAG_CONSTEXPR static TraceLevel getTraceLevel() TBAG_NOEXCEPT
+    { return static_cast<TraceLevel>(LevelValue); }
+
     /** Allocate and zero-initialize array. */
     static void * _calloc(std::size_t num, std::size_t size)
     {
         void * result = ::calloc(num, size);
-#if (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STDERR_TRACE)
-        fprintf(stderr, "_calloc(%zu, %zu) -> %p\n", num, size, result);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_TDLOGI_TRACE)
-        tDLogI("_calloc({}, {}) -> {}", num, size, result);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_SIMPLE_TRACE)
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STACK_TRACE)
-#endif
+
+        if (getTraceLevel() == TraceLevel::TL_STDERR) {
+            fprintf(stderr, "_calloc(%zu, %zu) -> %p\n", num, size, result);
+        } else if (getTraceLevel() == TraceLevel::TL_LOG) {
+            tDLogI("_calloc({}, {}) -> {}", num, size, result);
+        } else if (getTraceLevel() == TraceLevel::TL_SIMPLE) {
+        } else if (getTraceLevel() == TraceLevel::TL_STACK) {
+        }
+
         return result;
     }
 
     /** Deallocate memory block. */
     static void _free(void * ptr)
     {
-#if (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STDERR_TRACE)
-        fprintf(stderr, "_free(%p)\n", ptr);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_TDLOGI_TRACE)
-        tDLogI("_free({})", ptr);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_SIMPLE_TRACE)
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STACK_TRACE)
-#endif
+        if (getTraceLevel() == TraceLevel::TL_STDERR) {
+            fprintf(stderr, "_free(%p)\n", ptr);
+        } else if (getTraceLevel() == TraceLevel::TL_LOG) {
+            tDLogI("_free({})", ptr);
+        } else if (getTraceLevel() == TraceLevel::TL_SIMPLE) {
+        } else if (getTraceLevel() == TraceLevel::TL_STACK) {
+        }
+
         ::free(ptr);
     }
 
@@ -92,13 +111,15 @@ struct TraceDyMem : private Noncopyable
     static void * _malloc(std::size_t size)
     {
         void * result = ::malloc(size);
-#if (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STDERR_TRACE)
-        fprintf(stderr, "_malloc(%zu) -> %p\n", size, result);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_TDLOGI_TRACE)
-        tDLogI("_malloc({}) -> {}", size, result);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_SIMPLE_TRACE)
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STACK_TRACE)
-#endif
+
+        if (getTraceLevel() == TraceLevel::TL_STDERR) {
+            fprintf(stderr, "_malloc(%zu) -> %p\n", size, result);
+        } else if (getTraceLevel() == TraceLevel::TL_LOG) {
+            tDLogI("_malloc({}) -> {}", size, result);
+        } else if (getTraceLevel() == TraceLevel::TL_SIMPLE) {
+        } else if (getTraceLevel() == TraceLevel::TL_STACK) {
+        }
+
         return result;
     }
 
@@ -106,13 +127,15 @@ struct TraceDyMem : private Noncopyable
     static void * _realloc(void * ptr, std::size_t size)
     {
         void * result = ::realloc(ptr, size);
-#if (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STDERR_TRACE)
-        fprintf(stderr, "_realloc(%p, %zu) -> %p\n", ptr, size, result);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_TDLOGI_TRACE)
-        tDLogI("_realloc({}, {}) -> {}", ptr, size, result);
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_SIMPLE_TRACE)
-#elif (TBAG_MEMORY_TRACE_LEVEL == TBAG_MEMORY_STACK_TRACE)
-#endif
+
+        if (getTraceLevel() == TraceLevel::TL_STDERR) {
+            fprintf(stderr, "_realloc(%p, %zu) -> %p\n", ptr, size, result);
+        } else if (getTraceLevel() == TraceLevel::TL_LOG) {
+            tDLogI("_realloc({}, {}) -> {}", ptr, size, result);
+        } else if (getTraceLevel() == TraceLevel::TL_SIMPLE) {
+        } else if (getTraceLevel() == TraceLevel::TL_STACK) {
+        }
+
         return result;
     }
 };
@@ -124,10 +147,12 @@ struct TraceDyMem : private Noncopyable
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#define calloc(num, size)   ::libtbag::memory::alloc::TraceDyMem::_calloc(num, size)
-#define free(ptr)           ::libtbag::memory::alloc::TraceDyMem::_free(ptr)
-#define malloc(size)        ::libtbag::memory::alloc::TraceDyMem::_malloc( size)
-#define realloc(ptr, size)  ::libtbag::memory::alloc::TraceDyMem::_realloc(ptr, size)
+#if !defined(TBAG_NO_REDEFINE_MEMORY_FUNCTIONS)
+# define calloc(num, size)   ::libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_calloc(num, size)
+# define free(ptr)           ::libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_free(ptr)
+# define malloc(size)        ::libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_malloc(size)
+# define realloc(ptr, size)  ::libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_realloc(ptr, size)
+#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOC_TRACEDYMEM_HPP__
 

@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
+#define TBAG_MEMORY_TRACE_LEVEL 2
 #include <libtbag/memory/alloc/TraceDyMem.hpp>
 
 // -------------------
@@ -32,12 +34,12 @@ inline T * addressof(T & val) TBAG_NOEXCEPT
 
 inline void * allocate(std::size_t size)
 {
-    return ::libtbag::memory::alloc::TraceDyMem::_malloc(size);
+    return malloc(size);
 }
 
 inline void deallocate(void * ptr)
 {
-    return ::libtbag::memory::alloc::TraceDyMem::_free(ptr);
+    return free(ptr);
 }
 
 } // namespace alloc
