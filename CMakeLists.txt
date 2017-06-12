@@ -34,6 +34,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL MSVC)
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244") ## conversion from 'type1' to 'type2', possible loss of data.
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251") ## class 'type' needs to have dll-interface to be used by clients of class 'type2'.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267") ## conversion from 'size_t' to 'type', possible loss of data.
+    set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4275") ## non - dll-interface classkey 'identifier' used as base for dll-interface classkey 'identifier'.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4333") ## right shift by too large amount, data loss.
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4595") ## non-member operator new or delete functions may not be declared inline.
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819") ## code page warning.
