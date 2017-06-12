@@ -31,12 +31,22 @@ typedef uint8_t Channel;
 
 static_assert(std::is_pod<Channel>::value, "Channel is not POD type.");
 
+
 /**
  * Minimum channel value.
  */
 inline TBAG_CONSTEXPR Channel channel_min() TBAG_NOEXCEPT
 {
+#if defined(min)
+    TBAG_PUSH_MACRO(min);
+#undef min
+#define __RESTORE_MIN__
+#endif
     return std::numeric_limits<Channel>::min();
+#if defined(__RESTORE_MIN__)
+    TBAG_POP_MACRO(min);
+#undef __RESTORE_MIN__
+#endif
 }
 
 /**
@@ -44,17 +54,23 @@ inline TBAG_CONSTEXPR Channel channel_min() TBAG_NOEXCEPT
  */
 inline TBAG_CONSTEXPR Channel channel_max() TBAG_NOEXCEPT
 {
+#if defined(max)
+    TBAG_PUSH_MACRO(max);
+#undef max
+#define __RESTORE_MAX__
+#endif
     return std::numeric_limits<Channel>::max();
+#if defined(__RESTORE_MAX__)
+    TBAG_POP_MACRO(max);
+#undef __RESTORE_MAX__
+#endif
 }
 
 /**
  * Half channel value.
  */
-inline TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
+TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
 {
-#if defined(TBAG_HAS_CONSTEXPR)
-    static_assert((channel_min() + channel_max()) != 0, "Divide by zero is NaN.");
-#endif
     return static_cast<Channel>((channel_min() + channel_max()) / 2);
 }
 
