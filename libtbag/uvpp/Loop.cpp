@@ -19,6 +19,23 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
+// ----------------
+// libuv utilities.
+// ----------------
+
+inline static uv_run_mode convertRunModeToUvRunMode(BaseLoop::RunMode mode) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (mode) {
+    case BaseLoop::RunMode::RUN_DEFAULT: return UV_RUN_DEFAULT;
+    case BaseLoop::RunMode::RUN_ONCE:    return UV_RUN_ONCE;
+    case BaseLoop::RunMode::RUN_NOWAIT:  return UV_RUN_NOWAIT;
+    }
+    assert(false && "Inaccessible block.");
+    return UV_RUN_DEFAULT;
+    // @formatter:on
+}
+
 // --------------------
 // Global libuv events.
 // --------------------
@@ -80,31 +97,28 @@ Err BaseLoop::close()
 
 Err BaseLoop::run(RunMode mode)
 {
-    if (_running.load()) {
+    bool NOW_WAITING = false;
+    if (_running.compare_exchange_weak(NOW_WAITING, true) == false) {
         tDLogE("BaseLoop::run() already working");
         return Err::E_EALREADY;
     }
-
-    uv_run_mode uv_mode = UV_RUN_DEFAULT;
-    // @formatter:off
-    switch (mode) {
-    case RunMode::RUN_DEFAULT: uv_mode = UV_RUN_DEFAULT; break;
-    case RunMode::RUN_ONCE:    uv_mode = UV_RUN_ONCE;    break;
-    case RunMode::RUN_NOWAIT:  uv_mode = UV_RUN_NOWAIT;  break;
-    }
-    // @formatter:on
 
     // Update owner thread id.
     _owner_thread_id = std::this_thread::get_id();
 
     // It will act differently depending on the specified mode:
-    // - UV_RUN_DEFAULT: Runs the event loop until there are no more active and referenced handles or requests. Returns non-zero if uv_stop() was called and there are still active handles or requests. Returns zero in all other cases.
-    // - UV_RUN_ONCE: Poll for i/o once. Note that this function blocks if there are no pending callbacks. Returns zero when done (no active handles or requests left), or non-zero if more callbacks are expected (meaning you should run the event loop again sometime in the future).
-    // - UV_RUN_NOWAIT: Poll for i/o once but don’t block if there are no pending callbacks. Returns zero if done (no active handles or requests left), or non-zero if more callbacks are expected (meaning you should run the event loop again sometime in the future).
-    _running.store(true);
-    int const CODE = ::uv_run(Parent::cast<uv_loop_t>(), uv_mode);
-    _running.store(false);
+    // - UV_RUN_DEFAULT: Runs the event loop until there are no more active and referenced handles or requests.
+    //                   Returns non-zero if uv_stop() was called and there are still active handles or requests.
+    //                   Returns zero in all other cases.
+    // - UV_RUN_ONCE: Poll for i/o once. Note that this function blocks if there are no pending callbacks.
+    //                Returns zero when done (no active handles or requests left), or non-zero if more callbacks
+    //                are expected (meaning you should run the event loop again sometime in the future).
+    // - UV_RUN_NOWAIT: Poll for i/o once but don’t block if there are no pending callbacks. Returns zero if done
+    //                  (no active handles or requests left), or non-zero if more callbacks are expected
+    //                  (meaning you should run the event loop again sometime in the future).
+    int const CODE = ::uv_run(Parent::cast<uv_loop_t>(), convertRunModeToUvRunMode(mode));
 
+    _running.store(false);
     return convertUvErrorToErrWithLogging("BaseLoop::run()", CODE);
 }
 
