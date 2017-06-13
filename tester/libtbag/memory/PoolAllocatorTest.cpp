@@ -39,7 +39,7 @@ TEST(PoolAllocatorTest, Default)
 
 TEST(PoolAllocatorTest, Fragment)
 {
-    std::size_t const TEST_SIZE = 16;
+    std::size_t const TEST_SIZE = 64;
 
     MemoryPool pool(TEST_SIZE);
     using TestPool = PoolAllocator<char>;
