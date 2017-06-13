@@ -69,7 +69,7 @@ struct PoolAllocator : public BaseAllocator<Type>
     {
         assert(ptr != nullptr);
         if (pool != nullptr) {
-            pool->deallocate(ptr, allocated_size);
+            pool->deallocate(ptr, allocated_size * sizeof(value_type));
         } else {
             ::libtbag::memory::alloc::deallocate((void*)ptr);
         }

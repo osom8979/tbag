@@ -16,26 +16,6 @@ using namespace libtbag;
 using namespace libtbag::memory;
 using namespace libtbag::memory::pool;
 
-TEST(PoolAllocatorTest, CopyConstructor)
-{
-    MemoryPool pool(10);
-
-    using CharPool = PoolAllocator<char>;
-    using ShortPool = PoolAllocator<short>;
-
-    CharPool alloc1(&pool);
-    ShortPool alloc2(alloc1);
-    ASSERT_EQ(10, pool.left());
-
-    std::vector<char, CharPool> buffer1(alloc1);
-    buffer1.resize(1);
-    ASSERT_EQ(9, pool.left());
-
-    std::vector<short, ShortPool> buffer2(alloc2);
-    buffer2.resize(1);
-    ASSERT_EQ(7, pool.left());
-}
-
 TEST(PoolAllocatorTest, Default)
 {
     MemoryPool pool;
@@ -44,92 +24,89 @@ TEST(PoolAllocatorTest, Default)
 
     std::size_t const TEST_SIZE = 10;
     std::vector<char, TestPool> buffer(alloc);
+
+    // [WARNING] MSVC allocates std::_Container_proxy more.
+    std::size_t const MORE_ALLOC_SIZE = pool.size();
+
     buffer.assign(TEST_SIZE, 'A');
 
     char const * MEMORY = static_cast<char const *>(pool.memory());
-    std::string test1(MEMORY, MEMORY + TEST_SIZE);
+    std::string test1(MEMORY + MORE_ALLOC_SIZE, MEMORY + MORE_ALLOC_SIZE + TEST_SIZE);
     std::string test2(buffer.begin(), buffer.end());
 
     ASSERT_EQ(test1, test2);
 }
 
-TEST(PoolAllocatorTest, BadAlloc)
-{
-#if defined(TBAG_PLATFORM_WINDOWS)
-    std::cout << "Skip this test in Windows Platform.\n";
-#else
-    MemoryPool pool(10);
-    using TestPool = PoolAllocator<char>;
-    TestPool alloc(&pool);
-
-    std::size_t const TEST_SIZE = 10;
-    std::vector<char, TestPool> buffer(alloc);
-    buffer.assign(TEST_SIZE, 'A');
-
-    ASSERT_THROW(buffer.push_back('A'), std::bad_alloc);
-#endif
-}
-
 TEST(PoolAllocatorTest, Fragment)
 {
-    MemoryPool pool(10);
+    std::size_t const TEST_SIZE = 16;
+
+    MemoryPool pool(TEST_SIZE);
     using TestPool = PoolAllocator<char>;
     TestPool alloc(&pool);
 
-    ASSERT_EQ(10, pool.left());
+    ASSERT_EQ(TEST_SIZE, pool.left());
     {
-        MpFragment f(pool);
-        std::size_t const TEST_SIZE = 10;
-        std::vector<char, TestPool> buffer(alloc);
-        buffer.assign(TEST_SIZE, 'A');
-    }
-    ASSERT_EQ(10, pool.left());
+        auto fragment = pool.save();
+        std::vector<char, TestPool> buffer1(alloc);
+        buffer1.push_back('A');
+        buffer1.push_back('A');
 
-    std::size_t const TEST_SIZE = 10;
-    std::vector<char, TestPool> buffer(alloc);
-    buffer.assign(TEST_SIZE, 'A');
+        std::vector<char, TestPool> buffer2(alloc);
+        buffer2.push_back('A');
+        buffer2.push_back('A');
+        ASSERT_NE(TEST_SIZE, pool.left());
+    }
+    ASSERT_EQ(TEST_SIZE, pool.left());
 }
 
-TEST(PoolAllocatorTest, MultiMemoryPool)
+TEST(PoolAllocatorTest, CopyConstructor)
 {
-    std::size_t const   SMALL_SIZE =  4;
-    std::size_t const  NORMAL_SIZE =  8;
-    std::size_t const   LARGE_SIZE = 16;
-    std::size_t const OBJECT_COUNT =  1;
+    std::size_t TEST_MEM_SIZE = 100;
+    MemoryPool pool(TEST_MEM_SIZE);
 
-    MultiMemoryPool pool(SMALL_SIZE, NORMAL_SIZE, LARGE_SIZE, OBJECT_COUNT);
+    using CharPool = PoolAllocator<char>;
+    using ShortPool = PoolAllocator<short>;
+
+    CharPool alloc1(&pool);
+    ShortPool alloc2(alloc1);
+    ASSERT_EQ(TEST_MEM_SIZE, pool.left());
+
+    {
+        auto fragment = pool.save();
+        std::vector<char, CharPool> buffer1(alloc1);
+        // [WARNING] MSVC allocates std::_Container_proxy more.
+        std::size_t const MORE_ALLOC_SIZE = pool.size();
+        buffer1.resize(1);
+        ASSERT_EQ(TEST_MEM_SIZE - MORE_ALLOC_SIZE - sizeof(char), pool.left());
+    }
+    ASSERT_EQ(TEST_MEM_SIZE, pool.left());
+
+    {
+        auto fragment = pool.save();
+        std::vector<short, ShortPool> buffer2(alloc2);
+        // [WARNING] MSVC allocates std::_Container_proxy more.
+        std::size_t const MORE_ALLOC_SIZE = pool.size();
+        buffer2.resize(1);
+        ASSERT_EQ(TEST_MEM_SIZE - MORE_ALLOC_SIZE - sizeof(short), pool.left());
+    }
+    ASSERT_EQ(TEST_MEM_SIZE, pool.left());
+}
+
+TEST(PoolAllocatorTest, BadAlloc)
+{
+    std::size_t const TEST_SIZE = 32;
+    MemoryPool pool(TEST_SIZE);
     using TestPool = PoolAllocator<char>;
     TestPool alloc(&pool);
 
-    ASSERT_EQ( SMALL_SIZE * OBJECT_COUNT, pool.atSmall ().max());
-    ASSERT_EQ(NORMAL_SIZE * OBJECT_COUNT, pool.atNormal().max());
-    ASSERT_EQ( LARGE_SIZE * OBJECT_COUNT, pool.atLarge ().max());
+    std::vector<char, TestPool> buffer(alloc);
 
-    ASSERT_EQ( SMALL_SIZE * OBJECT_COUNT, pool.atSmall ().left());
-    ASSERT_EQ(NORMAL_SIZE * OBJECT_COUNT, pool.atNormal().left());
-    ASSERT_EQ( LARGE_SIZE * OBJECT_COUNT, pool.atLarge ().left());
+    // [WARNING] MSVC allocates std::_Container_proxy more.
+    std::size_t const MORE_ALLOC_SIZE = pool.size();
 
-    {
-        MmpFragment fragment(pool);
+    buffer.assign(TEST_SIZE - MORE_ALLOC_SIZE, 'A');
 
-        std::vector<char, TestPool> small_buffer(alloc);
-        small_buffer.assign(SMALL_SIZE, 'A');
-        std::vector<char, TestPool> normal_buffer(alloc);
-        normal_buffer.assign(NORMAL_SIZE, 'A');
-        std::vector<char, TestPool> large_buffer(alloc);
-        large_buffer.assign(LARGE_SIZE, 'A');
-
-        ASSERT_EQ( SMALL_SIZE, pool.atSmall ().size());
-        ASSERT_EQ(NORMAL_SIZE, pool.atNormal().size());
-        ASSERT_EQ( LARGE_SIZE, pool.atLarge ().size());
-    }
-
-    ASSERT_EQ(0, pool.atSmall ().size());
-    ASSERT_EQ(0, pool.atNormal().size());
-    ASSERT_EQ(0, pool.atLarge ().size());
-
-    ASSERT_EQ( SMALL_SIZE * OBJECT_COUNT, pool.atSmall ().left());
-    ASSERT_EQ(NORMAL_SIZE * OBJECT_COUNT, pool.atNormal().left());
-    ASSERT_EQ( LARGE_SIZE * OBJECT_COUNT, pool.atLarge ().left());
+    ASSERT_THROW(buffer.push_back('A'), std::bad_alloc);
 }
 

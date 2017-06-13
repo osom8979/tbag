@@ -23,6 +23,7 @@
 #include <libtbag/memory/alloc/TraceNew.hpp>
 
 #include <cassert>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -61,6 +62,8 @@ public:
             _pool._cursor = _cursor;
         }
     };
+
+    using UniqueFragment = std::unique_ptr<Fragment>;
 
 private:
     void * _memory;
@@ -124,13 +127,29 @@ public:
     {
         assert(exists(pointer));
         tDLogD("MemoryPool::deallocate@{}({}, {})", reinterpret_cast<void*>(this), pointer, allocated_size);
+#if (0) // MOVE LAST CURSOR
         if (exists(pointer) && end() == reinterpret_cast<std::ptrdiff_t>(pointer) + allocated_size) {
             _cursor -= allocated_size;
         }
+#endif
+    }
+
+public:
+    /**
+     * Save fragment.
+     *
+     * @example
+     *  @code
+     *   MemoryPool pool;
+     *   // ...
+     *   auto fragment = pool.save();
+     *  @endcode
+     */
+    UniqueFragment save()
+    {
+        return UniqueFragment(new (std::nothrow) Fragment(*this));
     }
 };
-
-using MpFragment = MemoryPool::Fragment;
 
 } // namespace pool
 } // namespace memory
