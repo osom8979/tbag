@@ -8,7 +8,6 @@
 #include <gtest/gtest.h>
 #include <libtbag/memory/PoolAllocator.hpp>
 #include <libtbag/memory/pool/MemoryPool.hpp>
-#include <libtbag/memory/pool/MultiMemoryPool.hpp>
 
 #include <vector>
 
