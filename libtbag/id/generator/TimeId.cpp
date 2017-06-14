@@ -23,11 +23,14 @@ static Id getTimeSinceEpochCount()
 Id genTimeId(bool sleep_wait)
 {
     Id id = getTimeSinceEpochCount();
+
+    // Prevent the same ID.
     while (getTimeSinceEpochCount() == id) {
         if (sleep_wait) {
             std::this_thread::sleep_for(std::chrono::high_resolution_clock::duration(1));
         }
     }
+
     return id;
 }
 
