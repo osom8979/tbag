@@ -56,7 +56,7 @@ void HttpClient::onConnect(Err code)
         return;
     }
 
-    startCloseTimer(static_cast<uint64_t>(LEFT_TIME.count()));
+    _startCloseTimer(static_cast<uint64_t>(LEFT_TIME.count()));
 }
 
 void HttpClient::onShutdown(Err code)

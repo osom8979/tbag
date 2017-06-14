@@ -23,7 +23,6 @@
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/func/FunctionalTimer.hpp>
-#include <libtbag/uvpp/func/FunctionalPrepare.hpp>
 
 #include <string>
 #include <vector>
@@ -68,10 +67,6 @@ public:
     using       FuncTimer = uvpp::func::FuncTimer;
     using SharedFuncTimer = std::shared_ptr<FuncTimer>;
     using   WeakFuncTimer = std::shared_ptr<FuncTimer>;
-
-    using       FuncPrepare = uvpp::func::FuncPrepare;
-    using SharedFuncPrepare = std::shared_ptr<FuncPrepare>;
-    using   WeakFuncPrepare = std::shared_ptr<FuncPrepare>;
 
 public:
     using Id      = id::Id;
@@ -143,20 +138,21 @@ public:
 // === PROTECTED SECTION BEGIN ===
 // [WARNING] Don't mutex guard in this protected section.
 protected:
-    Err startCloseTimer(uint64_t millisec);
-    Err startShutdownTimer(uint64_t millisec);
+    bool _initInternalHandles();
 
-    void stopCloseTimer();
-    void stopShutdownTimer();
+    Err _startCloseTimer(uint64_t millisec);
+    Err _startShutdownTimer(uint64_t millisec);
 
-    Err shutdownWrite();
+    void _stopCloseTimer();
+    void _stopShutdownTimer();
 
-    Err writeReal(binf const * buffer, std::size_t size);
-    void copyToWriteBuffer(binf const * buffer, std::size_t size);
-    std::vector<binf> getWriteBufferInfo();
+    Err _shutdownWrite();
+    Err _writeReal(binf const * buffer, std::size_t size);
+    void _copyToWriteBuffer(binf const * buffer, std::size_t size);
+    std::vector<binf> _getWriteBufferInfo();
+    Err _autoWrite(binf const * buffer, std::size_t size, uint64_t millisec = 0);
 
-    Err autoWrite(binf const * buffer, std::size_t size, uint64_t millisec = 0);
-    void closeAll();
+    void _closeAll();
 // === PROTECTED SECTION END ===
 // =============================
 

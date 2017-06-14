@@ -22,11 +22,22 @@ using namespace libtbag::network;
 using namespace libtbag::network::details;
 using namespace libtbag::network::stream;
 
-TEST(NetworkTcpTest, JustCreate)
+TEST(NetworkTcpTest, JustCreateClient)
 {
     using namespace uvpp;
     Loop loop;
-    //TcpClient client(loop);
+    TcpClient client(loop);
+    client.close();
+    loop.run();
+}
+
+TEST(NetworkTcpTest, JustCreateServer)
+{
+    using namespace uvpp;
+    Loop loop;
+    TcpServer server(loop);
+    server.close();
+    loop.run();
 }
 
 TEST(NetworkTcpTest, ClientTimeout)
