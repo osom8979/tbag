@@ -7,8 +7,8 @@
  */
 
 #include <libtbag/network/stream/StreamNode.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
-#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -17,16 +17,10 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace stream  {
 
-StreamNode::StreamNode(Loop & loop, StreamType type, ServerInterface * parent)
-        : StreamClient(loop, type), _parent(parent)
-{
-    updateWriteStatusToReady();
-}
-
 StreamNode::StreamNode(Loop & loop, StreamType type, SharedSafetyAsync async, ServerInterface * parent)
-        : StreamClient(loop, type, async), _parent(parent)
+        : StreamClient(loop, type, async, StreamClient::WriteReady()), _parent(parent)
 {
-    updateWriteStatusToReady();
+    assert(getWriteStatus() == StreamClient::WriteStatus::WS_READY);
 }
 
 StreamNode::~StreamNode()
@@ -42,7 +36,7 @@ StreamNode::WeakClient StreamNode::getWeakClient()
 
 void StreamNode::onConnect(Err code)
 {
-    assert(false && "Not used.");
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
 }
 
 void StreamNode::onShutdown(Err code)

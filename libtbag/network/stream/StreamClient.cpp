@@ -7,6 +7,7 @@
 
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/stream/StreamClientBackend.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -24,11 +25,18 @@ StreamClient::StreamClient(Loop & loop, StreamType type)
     // EMPTY.
 }
 
+StreamClient::StreamClient(Loop & loop,
+                           StreamType type,
+                           SharedSafetyAsync async,
+                           WriteReady const & UNUSED_PARAM(ready))
+        : StreamClient(loop, type, async)
+{
+    _writer.status = WriteStatus::WS_READY;
+}
+
 StreamClient::StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async)
          : STREAM_TYPE(type)
 {
-    bool const IS_AUTO_CLOSE = false;
-
     using  TcpBackend = StreamClientBackend<uvpp::Tcp>;
     using PipeBackend = StreamClientBackend<uvpp::Pipe>;
 
@@ -88,19 +96,6 @@ StreamClient::WeakSafetyAsync StreamClient::getAsync()
     return WeakSafetyAsync(_async);
 }
 
-char const * StreamClient::getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT
-{
-    switch (status) {
-    case WriteStatus::WS_NOT_READY:     return "NOT_READY";
-    case WriteStatus::WS_READY:         return "READY";
-    case WriteStatus::WS_ASYNC:         return "ASYNC";
-    case WriteStatus::WS_ASYNC_CANCEL:  return "ASYNC_CANCEL";
-    case WriteStatus::WS_WRITE:         return "WRITE";
-    case WriteStatus::WS_SHUTDOWN:      return "SHUTDOWN";
-    default:                            return "UNKNOWN";
-    }
-}
-
 Err StreamClient::startTimer(uvpp::Timer & timer, uint64_t millisec)
 {
     if (timer.isActive()) {
@@ -112,6 +107,22 @@ Err StreamClient::startTimer(uvpp::Timer & timer, uint64_t millisec)
 Err StreamClient::stopTimer(uvpp::Timer & timer)
 {
     return timer.stop();
+}
+
+char const * StreamClient::getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT
+{
+    switch (status) {
+    case WriteStatus::WS_NOT_READY:     return "NOT_READY";
+    case WriteStatus::WS_READY:         return "READY";
+    case WriteStatus::WS_ASYNC:         return "ASYNC";
+    case WriteStatus::WS_ASYNC_CANCEL:  return "ASYNC_CANCEL";
+    case WriteStatus::WS_WRITE:         return "WRITE";
+    case WriteStatus::WS_SHUTDOWN:      return "SHUTDOWN";
+    case WriteStatus::WS_END:           return "END";
+    }
+
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    return "UNKNOWN";
 }
 
 // ------------------
@@ -154,16 +165,6 @@ void StreamClient::stopShutdownTimer()
     if (CODE != Err::E_SUCCESS) {
         tDLogE("StreamClient::stopShutdownTimer() {} error.", getErrName(CODE));
     }
-}
-
-void StreamClient::updateWriteStatusToReady()
-{
-    _writer.status = WriteStatus::WS_READY;
-}
-
-void StreamClient::updateWriteStatusToNotReady()
-{
-    _writer.status = WriteStatus::WS_NOT_READY;
 }
 
 Err StreamClient::shutdownWrite()
@@ -518,7 +519,7 @@ void StreamClient::runBackendClose()
 {
     _mutex.lock();
     closeAll();
-    _writer.status = WriteStatus::WS_NOT_READY;
+    _writer.status = WriteStatus::WS_END;
     _mutex.unlock();
 
     onClose();

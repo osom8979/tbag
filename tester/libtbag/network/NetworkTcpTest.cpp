@@ -22,6 +22,13 @@ using namespace libtbag::network;
 using namespace libtbag::network::details;
 using namespace libtbag::network::stream;
 
+TEST(NetworkTcpTest, JustCreate)
+{
+    using namespace uvpp;
+    Loop loop;
+    //TcpClient client(loop);
+}
+
 TEST(NetworkTcpTest, ClientTimeout)
 {
     log::SeverityGuard guard;

@@ -23,6 +23,7 @@
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/func/FunctionalTimer.hpp>
+#include <libtbag/uvpp/func/FunctionalPrepare.hpp>
 
 #include <string>
 #include <vector>
@@ -68,6 +69,10 @@ public:
     using SharedFuncTimer = std::shared_ptr<FuncTimer>;
     using   WeakFuncTimer = std::shared_ptr<FuncTimer>;
 
+    using       FuncPrepare = uvpp::func::FuncPrepare;
+    using SharedFuncPrepare = std::shared_ptr<FuncPrepare>;
+    using   WeakFuncPrepare = std::shared_ptr<FuncPrepare>;
+
 public:
     using Id      = id::Id;
     using Buffer  = std::vector<char>;
@@ -85,7 +90,11 @@ public:
         WS_ASYNC_CANCEL,    ///< Next: onAsync.
         WS_WRITE,           ///< Next: onTimeout or onWrite.
         WS_SHUTDOWN,        ///< Next: onShutdown.
+        WS_END,
     };
+
+public:
+    struct WriteReady { /* EMPTY. */ };
 
 private:
     StreamType const STREAM_TYPE;
@@ -110,6 +119,7 @@ private:
 
 public:
     StreamClient(Loop & loop, StreamType type);
+    StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async, WriteReady const & ready);
     StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async);
     virtual ~StreamClient();
 
@@ -118,10 +128,16 @@ public:
     WeakSafetyAsync   getAsync();
 
 public:
-    static char const * getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT;
-
     static Err startTimer(uvpp::Timer & timer, uint64_t millisec);
     static Err stopTimer(uvpp::Timer & timer);
+
+    static char const * getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT;
+
+public:
+    inline WriteStatus getWriteStatus() const TBAG_NOEXCEPT
+    { return _writer.status; }
+    inline char const * getWriteStatusName() const TBAG_NOEXCEPT
+    { return getWriteStatusName(_writer.status); }
 
 // ===============================
 // === PROTECTED SECTION BEGIN ===
@@ -133,8 +149,6 @@ protected:
     void stopCloseTimer();
     void stopShutdownTimer();
 
-    void updateWriteStatusToReady();
-    void updateWriteStatusToNotReady();
     Err shutdownWrite();
 
     Err writeReal(binf const * buffer, std::size_t size);
