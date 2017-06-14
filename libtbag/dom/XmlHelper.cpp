@@ -93,7 +93,7 @@ Err XmlHelper::opt(Element const & element, std::string const & key, std::string
         return Err::E_SUCCESS;
     }
     result = default_value;
-    return Err::E_PARING;
+    return Err::E_PARSING;
 }
 
 // @formatter:off

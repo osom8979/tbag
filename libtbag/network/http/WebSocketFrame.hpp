@@ -28,6 +28,33 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
+enum class OpCode : uint8_t
+{
+    OC_CONTINUATION_FRAME           = 0x0,
+    OC_TEXT_FRAME                   = 0x1,
+    OC_BINARY_FRAME                 = 0x2,
+    OC_RESERVED_NON_CONTROL_FRAME_1 = 0x3,
+    OC_RESERVED_NON_CONTROL_FRAME_2 = 0x4,
+    OC_RESERVED_NON_CONTROL_FRAME_3 = 0x5,
+    OC_RESERVED_NON_CONTROL_FRAME_4 = 0x6,
+    OC_RESERVED_NON_CONTROL_FRAME_5 = 0x7,
+    OC_CONNECTION_CLOSE             = 0x8,
+    OC_DENOTES_PING                 = 0x9,
+    OC_DENOTES_PONG                 = 0xA,
+    OC_RESERVED_CONTROL_FRAME_1     = 0xB,
+    OC_RESERVED_CONTROL_FRAME_2     = 0xC,
+    OC_RESERVED_CONTROL_FRAME_3     = 0xD,
+    OC_RESERVED_CONTROL_FRAME_4     = 0xE,
+    OC_RESERVED_CONTROL_FRAME_5     = 0xF,
+};
+
+enum class PayloadBit : uint8_t
+{
+    PL_BIT_7  =  7,
+    PL_BIT_16 = 16,
+    PL_BIT_64 = 64,
+};
+
 /**
  * WebSocketFrame class prototype.
  *
@@ -59,29 +86,43 @@ class TBAG_API WebSocketFrame
 public:
     using Buffer = std::vector<uint8_t>;
 
-public:
-    enum class OpCode : uint8_t
-    {
-        CONTINUATION_FRAME           = 0x0,
-        TEXT_FRAME                   = 0x1,
-        BINARY_FRAME                 = 0x2,
-        RESERVED_NON_CONTROL_FRAME_1 = 0x3,
-        RESERVED_NON_CONTROL_FRAME_2 = 0x4,
-        RESERVED_NON_CONTROL_FRAME_3 = 0x5,
-        RESERVED_NON_CONTROL_FRAME_4 = 0x6,
-        RESERVED_NON_CONTROL_FRAME_5 = 0x7,
-        CONNECTION_CLOSE             = 0x8,
-        DENOTES_PING                 = 0x9,
-        DENOTES_PONG                 = 0xA,
-        RESERVED_CONTROL_FRAME_1     = 0xB,
-        RESERVED_CONTROL_FRAME_2     = 0xC,
-        RESERVED_CONTROL_FRAME_3     = 0xD,
-        RESERVED_CONTROL_FRAME_4     = 0xE,
-        RESERVED_CONTROL_FRAME_5     = 0xF,
-    };
+private:
+    /**
+     * Indicates that this is the final fragment in a message.
+     * The first fragment MAY also be the final fragment.
+     */
+    bool _fin;
+
+    /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
+    bool _rsv1;
+
+    /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
+    bool _rsv2;
+
+    /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
+    bool _rsv3;
+
+    /** Defines the interpretation of the "Payload data". */
+    OpCode _opcode;
+
+    /** Defines whether the "Payload data" is masked. */
+    bool _mask;
+
+    /** payload length. */
+    uint64_t _payload_length;
+
+    /** Masking-key, if MASK set to 1. */
+    uint32_t _masking_key;
 
 private:
-    Buffer _buffer;
+    Buffer _payload_buffer;
+
+public:
+    inline uint8_t const * getPayloadDataPointer() const TBAG_NOEXCEPT
+    { return _payload_buffer.data(); }
+
+    inline std::size_t getPayloadDataSize() const TBAG_NOEXCEPT
+    { return static_cast<std::size_t>(_payload_length); }
 
 public:
     WebSocketFrame();
@@ -94,61 +135,52 @@ public:
     WebSocketFrame & operator =(WebSocketFrame && obj);
 
 public:
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_buffer.empty()))
-    { return _buffer.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_buffer.size()))
-    { return _buffer.size(); }
+    inline bool getFin() const TBAG_NOEXCEPT { return _fin; }
+    inline void setFin(bool flag) TBAG_NOEXCEPT { _fin = flag; }
+
+    inline bool getRsv1() const TBAG_NOEXCEPT { return _rsv1; }
+    inline void setRsv1(bool flag) TBAG_NOEXCEPT { _rsv1 = flag; }
+
+    inline bool getRsv2() const TBAG_NOEXCEPT { return _rsv2; }
+    inline void setRsv2(bool flag) TBAG_NOEXCEPT { _rsv2 = flag; }
+
+    inline bool getRsv3() const TBAG_NOEXCEPT { return _rsv3; }
+    inline void setRsv3(bool flag) TBAG_NOEXCEPT { _rsv3 = flag; }
+
+    inline OpCode getOpCode() const TBAG_NOEXCEPT { return _opcode; }
+    inline void setOpCode(OpCode code) TBAG_NOEXCEPT { _opcode = code; }
+
+    inline bool getMask() const TBAG_NOEXCEPT { return _mask; }
+    inline void setMask(bool flag) TBAG_NOEXCEPT { _mask = flag; }
+
+    inline uint64_t getPayloadLength() const TBAG_NOEXCEPT { return _payload_length; }
+    inline void setPayloadLength(uint64_t size) TBAG_NOEXCEPT { _payload_length = size; }
+
+    inline uint32_t getMaskingKey() const TBAG_NOEXCEPT { return _masking_key; }
+    inline void setMaskingKey(uint32_t key) TBAG_NOEXCEPT { _masking_key = key; }
 
 public:
-    /**
-     * Indicates that this is the final fragment in a message.
-     * The first fragment MAY also be the final fragment.
-     */
-    bool fin() const;
-
-    /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
-    bool rsv1() const;
-
-    /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
-    bool rsv2() const;
-
-    /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
-    bool rsv3() const;
-
-    /** Defines the interpretation of the "Payload data". */
-    OpCode opcode() const;
-
-    /** Defines whether the "Payload data" is masked. */
-    bool mask() const;
-
-    enum class PayloadBit : uint8_t
-    {
-        PL_BIT_7  =  7,
-        PL_BIT_16 = 16,
-        PL_BIT_64 = 64,
-    };
-
-    /** bit size of payload length. */
-    PayloadBit payloadLengthBitSize() const;
-
-    /** payload length. */
-    uint64_t payloadLength() const;
-
-    /** byte index of Masking-key. */
-    uint8_t maskingKeyByteIndex() const;
-
-    /** Masking-key, if MASK set to 1. */
-    uint32_t maskingKey() const;
-
-    /** byte index of payload data. */
-    uint8_t payloadDataByteIndex() const;
-
-    /** Payload data. */
-    void const * payloadData() const;
+    Err execute(uint8_t const * data, std::size_t size);
 
 public:
-    Err readData(std::vector<uint8_t> & result);
+    std::size_t write(uint8_t * data, std::size_t data_size);
+    std::size_t write(Buffer & buffer);
 };
+
+// ----------
+// Utilities.
+// ----------
+
+TBAG_API uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
+TBAG_API uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
+
+TBAG_API PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
+TBAG_API uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT;
+
+TBAG_API std::string getPayloadData(uint32_t mask, std::string const & data);
+TBAG_API std::vector<uint8_t> getPayloadData(uint32_t mask, std::vector<uint8_t> const & data);
+TBAG_API std::vector<uint8_t> getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
+TBAG_API void updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size);
 
 } // namespace http
 } // namespace network

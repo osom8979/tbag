@@ -41,11 +41,12 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_SHUTDOWN, "Shutdown error"        ) \
     _TBAG_XX(_ENFOUND , "Not found error"       ) \
     _TBAG_XX(_TIMEOUT , "Timeout error"         ) \
-    _TBAG_XX(_PARING  , "Parsing error"         ) \
+    _TBAG_XX(_PARSING , "Parsing error"         ) \
     _TBAG_XX(_EXPIRED , "Expired object error"  ) \
     _TBAG_XX(_INSERT  , "Insert error"          ) \
     _TBAG_XX(_CLOSING , "Closing object"        ) \
     _TBAG_XX(_EQUERY  , "Query error"           ) \
+    _TBAG_XX(_SMALLBUF, "Buffer size is small"  ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

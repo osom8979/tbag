@@ -103,7 +103,7 @@ Err Version::fromString(std::string const & version, Version & result)
         if (size >= 3) { result.setPatch(static_cast<uint32_t>(std::stoul(tokens[2]))); }
         // @formatter:on
     } catch (std::invalid_argument & e) {
-        return Err::E_PARING; // Don't use the Err::E_ILLARGS error (Reason: duplicate return value).
+        return Err::E_PARSING; // Don't use the Err::E_ILLARGS error (Reason: duplicate return value).
     } catch (std::out_of_range & e) {
         return Err::E_OORANGE;
     } catch (...) {

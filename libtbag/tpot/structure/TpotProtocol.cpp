@@ -82,11 +82,11 @@ Err Exec::fromRequestString(std::string const & json)
     Json::Value root;
     Json::Reader reader;
     if (reader.parse(json, root, IS_COLLECT_COMMENTS) == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     if (root[getRequestFile()].isString() == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     request.file = root[getRequestFile()].asString();
@@ -141,11 +141,11 @@ Err Exec::fromResponseString(std::string const & json)
     Json::Value root;
     Json::Reader reader;
     if (reader.parse(json, root, IS_COLLECT_COMMENTS) == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     if (root[getResponseId()].isInt() == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     response.id = root[getResponseId()].asInt();
@@ -212,11 +212,11 @@ Err List::fromResponseString(std::string const & json)
     Json::Value root;
     Json::Reader reader;
     if (reader.parse(json, root, IS_COLLECT_COMMENTS) == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     if (root[getResponseIds()].isArray() == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     int const SIZE = root[getResponseIds()].size();
@@ -259,11 +259,11 @@ Err Kill::fromRequestString(std::string const & json)
     Json::Value root;
     Json::Reader reader;
     if (reader.parse(json, root, IS_COLLECT_COMMENTS) == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     if (root[getRequestId()].isInt() == false) {
-        return Err::E_PARING;
+        return Err::E_PARSING;
     }
 
     request.id = root[getRequestId()].asInt();
