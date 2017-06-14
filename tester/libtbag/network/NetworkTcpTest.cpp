@@ -40,6 +40,27 @@ TEST(NetworkTcpTest, JustCreateServer)
     loop.run();
 }
 
+TEST(NetworkTcpTest, AddressAlreadyInUse)
+{
+    log::SeverityGuard guard;
+
+    using namespace uvpp;
+    Loop loop;
+    TcpServer server1(loop);
+    TcpServer server2(loop);
+
+    ASSERT_TRUE(server1.init("0.0.0.0", 0));
+    int const SERVER_PORT = server1.getPort();
+    ASSERT_LT(0, SERVER_PORT);
+
+    ASSERT_FALSE(server2.init("0.0.0.0", SERVER_PORT));
+
+    server1.close();
+    server2.close();
+
+    loop.run();
+}
+
 TEST(NetworkTcpTest, ClientTimeout)
 {
     log::SeverityGuard guard;

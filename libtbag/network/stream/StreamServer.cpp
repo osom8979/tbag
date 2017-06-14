@@ -34,17 +34,12 @@ StreamServer::StreamServer(Loop & loop, StreamType type) : STREAM_TYPE(type), _p
     } else {
         throw std::bad_alloc();
     }
-
-    _async = loop.newHandle<SafetyAsync>(loop);
-
     assert(static_cast<bool>(_server));
-    assert(static_cast<bool>(_async));
 }
 
 StreamServer::~StreamServer()
 {
-    _server.reset();
-    _async.reset();
+    // EMPTY.
 }
 
 StreamServer::WeakServerBackend StreamServer::getServer()
@@ -63,17 +58,28 @@ StreamServer::WeakSafetyAsync StreamServer::getAsync()
 // PROTECTED SECTION.
 // ------------------
 
-StreamServer::SharedClient StreamServer::createClient()
+bool StreamServer::_initInternalHandles()
 {
     assert(static_cast<bool>(_server));
+    Loop * loop = _server->getLoop();
+    assert(loop != nullptr);
 
+    _async = loop->newHandle<SafetyAsync>(*loop);
+    assert(static_cast<bool>(_async));
+
+    return true;
+}
+
+StreamServer::SharedClient StreamServer::_createClient()
+{
+    assert(static_cast<bool>(_server));
     Loop * loop = _server->getLoop();
     assert(loop != nullptr);
 
     return SharedClient(new (std::nothrow) StreamNode(*loop, STREAM_TYPE, _async, this));
 }
 
-StreamServer::SharedClient StreamServer::getSharedClient(Id id)
+StreamServer::SharedClient StreamServer::_getSharedClient(Id id)
 {
     auto itr = _clients.find(id);
     if (itr != _clients.end()) {
@@ -82,17 +88,17 @@ StreamServer::SharedClient StreamServer::getSharedClient(Id id)
     return SharedClient();
 }
 
-bool StreamServer::insertClient(SharedClient client)
+bool StreamServer::_insertClient(SharedClient client)
 {
     return _clients.insert(ClientPair(client->getId(), client)).second;
 }
 
-bool StreamServer::eraseClient(Id id)
+bool StreamServer::_eraseClient(Id id)
 {
     return _clients.erase(id) == 1U;
 }
 
-void StreamServer::closeAll()
+void StreamServer::_closeAll()
 {
     {   // Close all clients.
         for (auto & cursor : _clients) {
@@ -102,13 +108,14 @@ void StreamServer::closeAll()
         }
     }
 
-    assert(static_cast<bool>(_server));
-    assert(static_cast<bool>(_async));
-
-    if (_async->isClosing() == false) {
-        _async->close();
+    if (static_cast<bool>(_async)) {
+        if (_async->isClosing() == false) {
+            _async->close();
+        }
+        _async.reset();
     }
 
+    assert(static_cast<bool>(_server));
     if (_server->isClosing() == false) {
         _server->close();
     }
@@ -141,7 +148,10 @@ bool StreamServer::init(char const * destination, int port)
         _port = 0;
     }
 
-    return is_init;
+    if (is_init) {
+        return _initInternalHandles();
+    }
+    return false;
 }
 
 std::string StreamServer::getDestination() const
@@ -159,20 +169,18 @@ int StreamServer::getPort() const
 void StreamServer::close()
 {
     assert(static_cast<bool>(_server));
-    assert(static_cast<bool>(_async));
-
     Loop * loop = _server->getLoop();
     assert(loop != nullptr);
 
     Guard guard(_mutex);
-    if (loop->isAliveAndThisThread()) {
+    if (loop->isAliveAndThisThread() || static_cast<bool>(_async) == false) {
         tDLogD("StreamServer::close() sync request.");
-        closeAll();
+        _closeAll();
     } else {
         tDLogD("StreamServer::close() async request.");
         _async->newSendFunc([&]() {
             Guard guard(_mutex);
-            closeAll();
+            _closeAll();
         });
     }
 }
@@ -186,13 +194,13 @@ StreamServer::WeakClient StreamServer::accept()
     }
 
     Guard guard(_mutex);
-    auto client = std::static_pointer_cast<StreamNode, ClientInterface>(createClient());
+    auto client = std::static_pointer_cast<StreamNode, ClientInterface>(_createClient());
 
-    if (auto shared = client->getClient().lock()) {
+   if (auto shared = client->getClient().lock()) {
         Err const CODE = _server->accept(*shared);
         if (CODE == Err::E_SUCCESS) {
             tDLogD("StreamServer::accept() client connect.");
-            bool const INSERT_RESULT = insertClient(client);
+            bool const INSERT_RESULT = _insertClient(client);
             assert(INSERT_RESULT);
 
             auto weak_client = WeakClient(client);
@@ -212,13 +220,13 @@ StreamServer::WeakClient StreamServer::accept()
 StreamServer::WeakClient StreamServer::getClient(Id id)
 {
     Guard guard(_mutex);
-    return WeakClient(getSharedClient(id));
+    return WeakClient(_getSharedClient(id));
 }
 
 bool StreamServer::removeClient(Id id)
 {
     Guard guard(_mutex);
-    return eraseClient(id);
+    return _eraseClient(id);
 }
 
 // --------------
@@ -237,7 +245,7 @@ void StreamServer::runBackendClose()
     onServerClose();
 
     _mutex.lock();
-    closeAll();
+    _closeAll();
     _mutex.unlock();
 }
 

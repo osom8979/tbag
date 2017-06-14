@@ -110,13 +110,15 @@ public:
 // === PROTECTED SECTION BEGIN ===
 // [WARNING] Don't mutex guard in this protected section.
 protected:
-    SharedClient createClient();
-    SharedClient getSharedClient(Id id);
+    bool _initInternalHandles();
 
-    bool insertClient(SharedClient client);
-    bool eraseClient(Id id);
+    SharedClient _createClient();
+    SharedClient _getSharedClient(Id id);
 
-    void closeAll();
+    bool _insertClient(SharedClient client);
+    bool _eraseClient(Id id);
+
+    void _closeAll();
 // === PROTECTED SECTION END ===
 // =============================
 
