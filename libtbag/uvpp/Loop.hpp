@@ -152,11 +152,17 @@ public:
 private:
     HandleMap _handles;
 
+private:
+    bool _auto_erase_handle;
+
 public:
-    Loop();
+    Loop(bool auto_erase = true);
     virtual ~Loop();
 
 public:
+    inline bool isAutoEraseHandle() const TBAG_NOEXCEPT
+    { return _auto_erase_handle; }
+
     inline bool isAliveAndThisThread() const
     { return isRunning() && isAlive() && getOwnerThreadId() == std::this_thread::get_id(); }
 
@@ -168,13 +174,14 @@ private:
     /** @warning Don't use this method of user level developers. */
     void runCloseAllHandles();
 
-// @formatter:off
-private: WeakHandle findChildHandle(void * native_handle);
-public : WeakHandle findChildHandle(Handle & h);
-private: bool eraseChildHandle(void * native_handle);
-public : bool eraseChildHandle(Handle & h);
-public : WeakHandle insertChildHandle(SharedHandle h);
-// @formatter:on
+private:
+    WeakHandle findChildHandle(void * native_handle);
+    bool eraseChildHandle(void * native_handle);
+
+public:
+    WeakHandle insertChildHandle(SharedHandle h);
+    WeakHandle findChildHandle(Handle & h);
+    bool eraseChildHandle(Handle & h);
 
 // By-pass methods.
 public:

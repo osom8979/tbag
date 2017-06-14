@@ -236,7 +236,7 @@ std::size_t BaseLoop::getNativeSize() TBAG_NOEXCEPT
 // Loop implementation.
 // --------------------
 
-Loop::Loop()
+Loop::Loop(bool auto_erase) : _auto_erase_handle(auto_erase)
 {
     // EMPTY.
 }
@@ -293,11 +293,6 @@ Loop::WeakHandle Loop::findChildHandle(void * native_handle)
     return WeakHandle(itr->second);
 }
 
-Loop::WeakHandle Loop::findChildHandle(Handle & h)
-{
-    return findChildHandle(h.get());
-}
-
 bool Loop::eraseChildHandle(void * native_handle)
 {
     WeakHandle weak = findChildHandle(native_handle);
@@ -320,11 +315,6 @@ bool Loop::eraseChildHandle(void * native_handle)
     return true;
 }
 
-bool Loop::eraseChildHandle(Handle & h)
-{
-    return eraseChildHandle(h.get());
-}
-
 Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
 {
     auto itr = _handles.insert(HandleMap::value_type(NativeHandle(h->get()), h));
@@ -337,6 +327,16 @@ Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
     tDLogE("Loop::insertChildHandle(@{}[{}]) Failure (Handles: {})",
            static_cast<void*>(h.get()), h->getName(), _handles.size());
     return WeakHandle();
+}
+
+Loop::WeakHandle Loop::findChildHandle(Handle & h)
+{
+    return findChildHandle(h.get());
+}
+
+bool Loop::eraseChildHandle(Handle & h)
+{
+    return eraseChildHandle(h.get());
 }
 
 void Loop::forceClear()

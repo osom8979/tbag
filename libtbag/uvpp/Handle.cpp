@@ -42,11 +42,18 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
             loop = static_cast<Loop*>(handle->loop->data);
         }
 
-        // @formatter:off
-        if (loop != nullptr) { loop->onClosing(h); }
-        h->onClose();
-        if (loop != nullptr) { loop->onClosed(h); loop->eraseChildHandle(*h); }
-        // @formatter:on
+        if (loop != nullptr && isDeletedAddress(handle->loop) == false) {
+            loop->onClosing(h);
+        }
+
+        h->onClose(); // Handle event.
+
+        if (loop != nullptr && isDeletedAddress(handle->loop) == false) {
+            loop->onClosed(h);
+            if (loop->isAutoEraseHandle()) {
+                loop->eraseChildHandle(*h);
+            }
+        }
 
         UNUSED_PARAM(h); // Do not call this handle any more.
     }
