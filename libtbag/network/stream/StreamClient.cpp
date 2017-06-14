@@ -258,7 +258,7 @@ Err StreamClient::_autoWrite(binf const * buffer, std::size_t size, uint64_t mil
     Loop * loop = _client->getLoop();
     assert(loop != nullptr);
 
-    if (loop->isAliveAndThisThread()) {
+    if (loop->isAliveAndThisThread() || static_cast<bool>(_async) == false) {
         Err const CODE = _writeReal(buffer, size);
         if (CODE != Err::E_SUCCESS) {
             tDLogE("StreamClient::_autoWrite() Write {} error.", getErrName(CODE));

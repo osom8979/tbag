@@ -109,7 +109,6 @@ struct ClientInterface
     // Event callback.
     // ---------------
 
-    virtual void onStart() { /* EMPTY. */ }
     virtual void onConnect(Err code) { /* EMPTY. */ }
     virtual void onShutdown(Err code) { /* EMPTY. */ }
     virtual void onWrite(Err code) { /* EMPTY. */ }
@@ -151,7 +150,6 @@ struct ServerInterface
     // Event callback.
     // ---------------
 
-    virtual void onStart() { /* EMPTY. */ }
     virtual void onConnection(Err code) { /* EMPTY. */ }
     virtual void onClientShutdown(WeakClient node, Err code) { /* EMPTY. */ }
     virtual void onClientWrite(WeakClient node, Err code) { /* EMPTY. */ }
