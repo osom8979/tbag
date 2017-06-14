@@ -8,6 +8,7 @@
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <http_parser.h>
+#include <sstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -82,6 +83,52 @@ int getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT
 #undef _TBAG_XX
     default: return static_cast<int>(HttpStatus::SC_UNKNOWN);
     }
+}
+
+std::string toDebugString(HttpCommonProperty::HeaderMap const & obj)
+{
+    std::stringstream ss;
+    std::size_t const SIZE = obj.size();
+    auto itr = obj.begin();
+    for (std::size_t i = 0; i < SIZE; ++i, ++itr) {
+        ss << "[H] " << itr->first << ": " << itr->second;
+        if (i + 1 < SIZE) {
+            ss << std::endl;
+        }
+    }
+    return ss.str();
+}
+
+std::string toDebugString(HttpCommonProperty const & obj)
+{
+    std::stringstream ss;
+    ss << toDebugString(obj.headers) << std::endl;
+    ss << "[BODY] " << obj.body;
+    return ss.str();
+}
+
+std::string toDebugString(HttpCommon const & obj)
+{
+    std::stringstream ss;
+    ss << "HTTP/" << obj.http_minor << "." << obj.http_minor << std::endl;
+    ss << toDebugString(static_cast<HttpCommonProperty const &>(obj));
+    return ss.str();
+}
+
+std::string toDebugString(HttpRequest const & obj)
+{
+    std::stringstream ss;
+    ss << "REQUEST: " << obj.method << " " << obj.url << " ";
+    ss << toDebugString(static_cast<HttpCommon const &>(obj));
+    return ss.str();
+}
+
+std::string toDebugString(HttpResponse const & obj)
+{
+    std::stringstream ss;
+    ss << "RESPONSE: " << obj.status << " " << obj.reason << " ";
+    ss << toDebugString(static_cast<HttpCommon const &>(obj));
+    return ss.str();
 }
 
 } // namespace http

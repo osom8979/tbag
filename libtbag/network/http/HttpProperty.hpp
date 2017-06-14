@@ -293,7 +293,7 @@ struct HttpVersionProperty
  */
 struct HttpCommonProperty
 {
-    using HeaderMap  = std::map<std::string, std::string>;
+    using HeaderMap  = std::multimap<std::string, std::string>;
     using HeaderPair = HeaderMap::value_type;
 
     HeaderMap headers;
@@ -318,8 +318,8 @@ struct HttpCommonProperty
     inline HttpCommonProperty & operator =(HttpCommonProperty && obj)
     { if (this != &obj) { headers.swap(obj.headers); body.swap(obj.body); } return *this; }
 
-    inline bool insertHeader(std::string const & key, std::string const & val)
-    { return headers.insert(HeaderPair(key, val)).second; }
+    inline void insertHeader(std::string const & key, std::string const & val)
+    { headers.insert(HeaderPair(key, val)); }
 
     inline bool eraseHeader(std::string const & key)
     { return headers.erase(key) == 1U; }
@@ -428,6 +428,12 @@ struct HttpCommon   : public HttpVersionProperty, public HttpCommonProperty { /*
 struct HttpRequest  : public HttpCommon, public HttpRequestProperty { /* EMPTY. */ };
 struct HttpResponse : public HttpCommon, public HttpResponseProperty { /* EMPTY. */ };
 struct HttpProperty : public HttpCommon, public HttpRequestProperty, public HttpResponseProperty { /* EMPTY. */ };
+
+TBAG_API std::string toDebugString(HttpCommonProperty::HeaderMap const & obj);
+TBAG_API std::string toDebugString(HttpCommonProperty const & obj);
+TBAG_API std::string toDebugString(HttpCommon const & obj);
+TBAG_API std::string toDebugString(HttpRequest const & obj);
+TBAG_API std::string toDebugString(HttpResponse const & obj);
 
 // -------------
 // @formatter:on

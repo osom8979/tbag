@@ -134,9 +134,9 @@ public:
     }
 
 public:
-    inline bool insertHeader(std::string const & key, std::string const & val)
+    inline void insertHeader(std::string const & key, std::string const & val)
     {
-        return headers.insert(HeaderPair(key, val)).second;
+        headers.insert(HeaderPair(key, val));
     }
 
     inline std::string getHeader(std::string const & key) const

@@ -41,8 +41,8 @@ class TBAG_API HttpParser : private Noncopyable
 public:
     class HttpParserImpl;
 
-    using HeaderMap  = std::map<std::string, std::string>;
-    using HeaderPair = HeaderMap::value_type;
+    using HeaderMap  = HttpCommonProperty::HeaderMap;
+    using HeaderPair = HttpCommonProperty::HeaderPair;
 
 public:
     enum class Type : int
