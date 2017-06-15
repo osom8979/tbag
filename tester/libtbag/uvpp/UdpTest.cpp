@@ -40,11 +40,8 @@ TEST(UdpTest, Default)
         return defaultOnAlloc(recv_buffer, suggested_size);
     });
     recv_udp->setOnRecv([&](Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags){
-        if (size == 0 && addr == nullptr) {
-            recv_udp->close();
-        } else {
-            recv_string = std::string(buffer, buffer + size);
-        }
+        recv_string = std::string(buffer, buffer + size);
+        recv_udp->close();
     });
     send_udp->setOnSend([&](UdpSendRequest & request, Err code){
         send_udp->close();
