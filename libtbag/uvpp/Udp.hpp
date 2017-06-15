@@ -113,9 +113,31 @@ public:
     Err send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr);
     Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
+    // @formatter:off
+    inline Err send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr_in const * addr)
+    { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
+    inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in const * addr)
+    { return send(request, buffer, size, (struct sockaddr const *)addr); }
+    inline Err send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr_in6 const * addr)
+    { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
+    inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in6 const * addr)
+    { return send(request, buffer, size, (struct sockaddr const *)addr); }
+    // @formatter:on
+
     /** Same as send(), but won't queue a send request if it can't be completed immediately. */
     std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result = nullptr);
     std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result = nullptr);
+
+    // @formatter:off
+    inline std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr_in const * addr, Err * result = nullptr)
+    { return trySend(infos, infos_size, (struct sockaddr const *)addr, result); }
+    inline std::size_t trySend(char const * buffer, std::size_t size, sockaddr_in const * addr, Err * result = nullptr)
+    { return trySend(buffer, size, (struct sockaddr const *)addr, result); }
+    inline std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr_in6 const * addr, Err * result = nullptr)
+    { return trySend(infos, infos_size, (struct sockaddr const *)addr, result); }
+    inline std::size_t trySend(char const * buffer, std::size_t size, sockaddr_in6 const * addr, Err * result = nullptr)
+    { return trySend(buffer, size, (struct sockaddr const *)addr, result); }
+    // @formatter:on
 
     /** Prepare for receiving data. */
     Err startRecv();

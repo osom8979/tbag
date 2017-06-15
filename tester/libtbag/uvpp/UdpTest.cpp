@@ -9,6 +9,7 @@
 #include <libtbag/uvpp/Udp.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/func/FunctionalUdp.hpp>
+#include <libtbag/uvpp/func/FunctionalIdle.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 
 #include <vector>
@@ -27,6 +28,11 @@ TEST(UdpTest, Default)
     Loop loop;
     auto recv_udp = loop.newHandle<FuncUdp>(loop);
     auto send_udp = loop.newHandle<FuncUdp>(loop);
+    auto idle = loop.newHandle<FuncIdle>(loop);
+
+    sockaddr_in recv_ipv4;
+    sockaddr_in send_ipv4;
+    UdpSendRequest req;
 
     Buffer recv_buffer;
     std::string recv_string;
@@ -43,9 +49,10 @@ TEST(UdpTest, Default)
     send_udp->setOnSend([&](UdpSendRequest & request, Err code){
         send_udp->close();
     });
-
-    sockaddr_in recv_ipv4;
-    sockaddr_in send_ipv4;
+    idle->setOnIdle([&](){
+        send_udp->send(req, TEST_MESSAGE, sizeof(TEST_MESSAGE), &send_ipv4);
+        idle->close();
+    });
 
     ASSERT_EQ(Err::E_SUCCESS, initAddress(ANY_IPV4, 0, &recv_ipv4));
     ASSERT_EQ(Err::E_SUCCESS, recv_udp->bind(&recv_ipv4));
@@ -53,11 +60,9 @@ TEST(UdpTest, Default)
 
     int const BIND_PORT = recv_udp->getSockPort();
     std::cout << "Bind port: " << BIND_PORT << std::endl;
-
     ASSERT_EQ(Err::E_SUCCESS, initAddress(LOOPBACK_IPV4, BIND_PORT, &send_ipv4));
-    UdpSendRequest req;
-    ASSERT_EQ(Err::E_SUCCESS, send_udp->send(req, TEST_MESSAGE, sizeof(TEST_MESSAGE), (struct sockaddr const *)&send_ipv4));
 
+    ASSERT_EQ(Err::E_SUCCESS, idle->start());
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_STREQ(TEST_MESSAGE, recv_string.c_str());
 }
