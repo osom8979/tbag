@@ -67,6 +67,29 @@ template <> struct IsNetworkType<uvpp::Pipe> : public std::true_type
 TBAG_API bool isIpv4(std::string const & ip);
 TBAG_API bool isIpv6(std::string const & ip);
 
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+inline bool isWellKnownPort(int port) TBAG_NOEXCEPT
+{
+    return 0 <= COMPARE_AND(port) <= 1023;
+}
+
+inline bool isRegisteredPort(int port) TBAG_NOEXCEPT
+{
+    return 1024 <= COMPARE_AND(port) <= 49151;
+}
+
+inline bool isDynamicPort(int port) TBAG_NOEXCEPT
+{
+    return 49152 <= COMPARE_AND(port) <= 65535;
+}
+
+// ----------------
+// Interface class.
+// ----------------
+
 /**
  * Client interface.
  *
