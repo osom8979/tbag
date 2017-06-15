@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/random/MaskingDevice.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -164,6 +163,7 @@ public:
     Err execute(uint8_t const * data, std::size_t size);
 
 public:
+    std::size_t calculateWriteBufferSize() const;
     std::size_t write(uint8_t * data, std::size_t data_size);
     std::size_t write(Buffer & buffer);
 
@@ -180,6 +180,7 @@ TBAG_API uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) T
 TBAG_API uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
 
 TBAG_API PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
+TBAG_API PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
 TBAG_API uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT;
 
 TBAG_API std::string getPayloadData(uint32_t mask, std::string const & data);

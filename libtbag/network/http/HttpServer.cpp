@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
+#include "HttpServer.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -17,7 +18,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-HttpServer::HttpServer(Loop & loop, StreamType type) : Parent(loop, type)
+TBAG_CONSTEXPR static uint64_t const DEFAULT_WRITE_TIMEOUT_MILLISECOND = 5 * 1000;
+
+HttpServer::HttpServer(Loop & loop, StreamType type) : Parent(loop, type), _use_websocket(false)
 {
     // EMPTY.
 }
@@ -125,6 +128,38 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
         return;
     }
 
+    if (_use_websocket && dataset->websocket.upgrade) {
+        // WebSocket interrupt process (WebSocket Frame).
+        WebSocketFrame & recv_frame = dataset->websocket.recv_frame;
+        WebSocketFrame & write_frame = dataset->websocket.write_frame;
+        WebSocketFrame::Buffer & frame_buffer = dataset->websocket.frame_buffer;
+
+        if (recv_frame.execute((uint8_t*)buffer, size) != Err::E_SUCCESS) {
+            tDLogE("HttpServer::onClientRead() WebSocket frame {} error", getErrName(code));
+            return;
+        }
+
+        uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
+        if (static_cast<bool>(_on_web_socket_message)) {
+            _on_web_socket_message(code, node, recv_frame, write_frame, timeout);
+        }
+
+        std::size_t const RESERVE_SIZE = write_frame.calculateWriteBufferSize();
+        if (frame_buffer.size() < write_frame.calculateWriteBufferSize()) {
+            frame_buffer.resize(RESERVE_SIZE);
+        }
+
+        if (write_frame.write(frame_buffer.data(), frame_buffer.size()) == 0) {
+            tDLogE("HttpServer::onClientRead() WebSocket frame write error.");
+            return;
+        }
+
+        if (shared->write((char const *)frame_buffer.data(), frame_buffer.size(), timeout) == false) {
+            tDLogW("HttpServer::onClientRead() WebSocket response write error.");
+        }
+        return;
+    }
+
     HttpParser  & request  = dataset->parser;
     HttpBuilder & response = dataset->builder;
 
@@ -134,11 +169,39 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
         return;
     }
 
+    // ------------------
+    // WebSocket process.
+    // ------------------
+
+    if (_use_websocket && request.isUpgrade()) {
+        // WebSocket interrupt process (HTTP Request).
+        if (getResponseWebSocket(request, response) == Err::E_SUCCESS) {
+            tDLogI("HttpServer::onClientRead() Request WebSocket header.");
+            dataset->websocket.upgrade = true;
+
+            uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
+            if (static_cast<bool>(_on_web_socket_open)) {
+                _on_web_socket_open(code, node, request, response, timeout);
+            }
+
+            auto const RESPONSE = response.toDefaultResponseString();
+            if (shared->write(RESPONSE.data(), RESPONSE.size(), timeout) == false) {
+                tDLogW("HttpServer::onClientRead() WebSocket response write error.");
+            }
+            request.clear();
+            request.clearCache();
+            response.clear();
+            return;
+        } else {
+            tDLogW("HttpServer::onClientRead() Unknown WebSocket request. Switches to the regular HTTP protocol.");
+        }
+    }
+
     // -----------------
     // Response process.
     // -----------------
 
-    uint64_t timeout = 25000U;
+    uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
     bool called = false;
 
     for (auto & f : _filters) {
@@ -171,7 +234,6 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
     if (shared->write(RESPONSE.data(), RESPONSE.size(), timeout) == false) {
         tDLogW("HttpServer::onClientRead() Write error.");
     }
-
     request.clear();
     request.clearCache();
     response.clear();

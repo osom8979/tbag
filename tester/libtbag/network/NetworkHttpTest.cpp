@@ -243,3 +243,29 @@ TEST(NetworkHttpTest, RoutingServer)
     ASSERT_EQ(5, on_close            );
 }
 
+TEST(NetworkHttpTest, WebSocket)
+{
+//    uvpp::Loop loop;
+//    HttpServer server(loop);
+//    server.setUseWebSocket();
+//
+//    ASSERT_TRUE(server.init(details::ANY_IPV4, 0));
+//    int const SERVER_PORT = server.getPort();
+//    ASSERT_LT(0, SERVER_PORT);
+//    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
+//
+//    server.setOnWebSocketOpen([&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+//        std::cout << "Server.OnWebSocketOpen\n";
+//    });
+//    server.setOnWebSocketMessage([&](Err code, HttpServer::WeakClient node, WebSocketFrame const & request, WebSocketFrame & response, uint64_t & timeout){
+//        std::cout << "Server.OnWebSocketMessage\n";
+//        response = request;
+//        response.setMask(false);
+//    });
+//    server.setOnClose([&](HttpServer::WeakClient node){
+//        std::cout << "Server.OnClose\n";
+//    });
+//
+//    loop.run();
+}
+

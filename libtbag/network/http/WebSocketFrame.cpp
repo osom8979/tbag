@@ -157,6 +157,17 @@ TBAG_POP_MACRO(max);
 #undef __RESTORE_MAX__
 #endif
 
+std::size_t WebSocketFrame::calculateWriteBufferSize() const
+{
+    std::size_t default_size = 2/*HEADER*/ + _payload_length + (_mask ? sizeof(uint32_t) : 0);
+    switch(getPayloadBitWithPayloadLength(_payload_length)) {
+    case PayloadBit::PL_BIT_7:  return default_size;
+    case PayloadBit::PL_BIT_16: return default_size + MAX_UINT16_BYTE_SIZE;
+    case PayloadBit::PL_BIT_64: return default_size + MAX_UINT64_BYTE_SIZE;
+    default:                    return default_size;
+    }
+}
+
 std::size_t WebSocketFrame::write(uint8_t * data, std::size_t size)
 {
     ::memset(data, 0x00, size);
@@ -300,6 +311,18 @@ PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }
     return PayloadBit::PL_BIT_7;
+}
+
+PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
+{
+    if (payload_length <= 125) {
+        return PayloadBit::PL_BIT_7;
+    } else if (payload_length <= MAX_UINT16_BYTE_SIZE) {
+        return PayloadBit::PL_BIT_16;
+    }
+
+    assert(MAX_UINT16_BYTE_SIZE < COMPARE_AND(payload_length) <= MAX_UINT64_BYTE_SIZE);
+    return PayloadBit::PL_BIT_64;
 }
 
 uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
