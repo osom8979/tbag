@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/random/MaskingDevice.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -165,6 +166,10 @@ public:
 public:
     std::size_t write(uint8_t * data, std::size_t data_size);
     std::size_t write(Buffer & buffer);
+
+public:
+    bool updateRequest(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode, uint32_t masking_key, uint8_t const * data, std::size_t size);
+    bool updateResponse(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode, uint8_t const * data, std::size_t size);
 };
 
 // ----------

@@ -90,7 +90,7 @@ Err WebSocketFrame::execute(uint8_t const * data, std::size_t size)
     _rsv2   = static_cast<  bool>(data[0] & 0x20 /* 0b00100000 */);
     _rsv3   = static_cast<  bool>(data[0] & 0x10 /* 0b00010000 */);
     _opcode = static_cast<OpCode>(data[0] & 0x0F /* 0b00001111 */);
-    _mask   = static_cast<  bool>(data[1] & 0x40 /* 0b10000000 */);
+    _mask   = static_cast<  bool>(data[1] & 0x80 /* 0b10000000 */);
 
     auto const PAYLOAD_LENGTH_7BIT = static_cast<uint8_t>(data[1] & 0x7F /* 0b01111111 */);
     auto const PAYLOAD_BIT    = getPayloadBit(PAYLOAD_LENGTH_7BIT);
@@ -170,7 +170,7 @@ std::size_t WebSocketFrame::write(uint8_t * data, std::size_t size)
     *(data + 0) |= (_rsv2 ? 0x20 : 0);
     *(data + 0) |= (_rsv3 ? 0x10 : 0);
     *(data + 0) |= static_cast<uint8_t>(_opcode);
-    *(data + 1) |= (_mask ? 0x40 : 0);
+    *(data + 1) |= (_mask ? 0x80 : 0);
 
     // Next index (Written size)
     std::size_t index = 2;
@@ -218,6 +218,9 @@ std::size_t WebSocketFrame::write(uint8_t * data, std::size_t size)
             return 0;
         }
         ::memcpy(data + index, _payload_buffer.data(), _payload_length);
+        if (_mask) {
+            updatePayloadData(_masking_key, data + index, _payload_length);
+        }
         index += _payload_length;
     }
 
@@ -227,6 +230,42 @@ std::size_t WebSocketFrame::write(uint8_t * data, std::size_t size)
 std::size_t WebSocketFrame::write(Buffer & buffer)
 {
     return write(buffer.data(), buffer.size());
+}
+
+bool WebSocketFrame::updateRequest(bool fin, bool rsv1, bool rsv2, bool rsv3,
+                                   OpCode opcode, uint32_t masking_key, uint8_t const * data, std::size_t size)
+{
+    _fin  = fin;
+    _rsv1 = rsv1;
+    _rsv2 = rsv2;
+    _rsv3 = rsv3;
+    _opcode = opcode;
+    _mask = true;
+    _payload_length = size;
+    _masking_key = masking_key;
+    if (_payload_buffer.size() < _payload_length) {
+        _payload_buffer.resize(_payload_length);
+    }
+    _payload_buffer.assign(data, data + _payload_length);
+    return true;
+}
+
+bool WebSocketFrame::updateResponse(bool fin, bool rsv1, bool rsv2, bool rsv3,
+                                    OpCode opcode, uint8_t const * data, std::size_t size)
+{
+    _fin  = fin;
+    _rsv1 = rsv1;
+    _rsv2 = rsv2;
+    _rsv3 = rsv3;
+    _opcode = opcode;
+    _mask = false;
+    _payload_length = size;
+    _masking_key = 0;
+    if (_payload_buffer.size() < _payload_length) {
+        _payload_buffer.resize(_payload_length);
+    }
+    _payload_buffer.assign(data, data + _payload_length);
+    return true;
 }
 
 // ----------
