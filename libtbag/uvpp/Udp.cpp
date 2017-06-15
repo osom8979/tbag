@@ -103,6 +103,14 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
             code = convertUvErrorToErr(static_cast<int>(nread));
         }
 
+#if (0) // COMMENT SECTION.
+        if (nread == 0 && addr == nullptr) {
+            // Nothing to read.
+        } else if (nread == 0 && addr != nullptr) {
+            // Empty UDP packet is received.
+        }
+#endif
+
         u->onRecv(code, buf->base, static_cast<std::size_t>(nread), addr, flags);
     }
 }
@@ -185,6 +193,30 @@ Err Udp::getSockName(sockaddr * name, int * namelen)
 
     int const CODE = ::uv_udp_getsockname(Parent::cast<uv_udp_t>(), name, namelen);
     return convertUvErrorToErrWithLogging("Udp::getSockName()", CODE);
+}
+
+std::string Udp::getSockIp()
+{
+    uint8_t buffer[SOCKADDR_MAX_BYTE_SIZE] = {0,};
+    sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
+    int length = SOCKADDR_MAX_BYTE_SIZE;
+
+    if (getSockName(address, &length) != Err::E_SUCCESS) {
+        return std::string();
+    }
+    return getIpName(address);
+}
+
+int Udp::getSockPort()
+{
+    uint8_t buffer[SOCKADDR_MAX_BYTE_SIZE] = {0,};
+    sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
+    int length = SOCKADDR_MAX_BYTE_SIZE;
+
+    if (getSockName(address, &length) != Err::E_SUCCESS) {
+        return UNKNOWN_PORT_NUMBER;
+    }
+    return getPortNumber(address);
 }
 
 Err Udp::setMembership(char const * multicast_addr, char const * interface_addr, Membership membership)

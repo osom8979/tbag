@@ -29,9 +29,9 @@ namespace uvpp {
 // Forward declaration.
 class Loop;
 
-unsigned int const UDP_FLAG_IPV6ONLY  = 0x01;
-unsigned int const UDP_FLAG_PARTIAL   = 0x02;
-unsigned int const UDP_FLAG_REUSEADDR = 0x04;
+TBAG_CONSTEXPR unsigned int const UDP_FLAG_IPV6ONLY  = 0x01;
+TBAG_CONSTEXPR unsigned int const UDP_FLAG_PARTIAL   = 0x02;
+TBAG_CONSTEXPR unsigned int const UDP_FLAG_REUSEADDR = 0x04;
 
 /**
  * Udp class prototype.
@@ -76,16 +76,26 @@ public:
     Err open(usock sock);
 
     /** Bind the UDP handle to an IP address and port. */
-    Err bind(sockaddr const * addr, unsigned int flags);
+    Err bind(sockaddr const * addr, unsigned int flags = 0);
+
+    // @formatter:off
+    inline Err bind(sockaddr_in  const * addr, unsigned int flags = 0)
+    { return bind((struct sockaddr const *)addr, flags); }
+    inline Err bind(sockaddr_in6 const * addr, unsigned int flags = 0)
+    { return bind((struct sockaddr const *)addr, flags); }
+    // @formatter:on
 
     /** Get the local IP and port of the UDP handle. */
     Err getSockName(sockaddr * name, int * namelen);
+
+    std::string getSockIp();
+    int getSockPort();
 
     /** Set membership for a multicast address. */
     Err setMembership(char const * multicast_addr, char const * interface_addr, Membership membership);
 
     /** Set IP multicast loop flag. */
-    Err setMulticastLoop(bool on);
+    Err setMulticastLoop(bool on = true);
 
     /** Set the multicast ttl. */
     Err setMulticastTtl(int ttl);
@@ -94,7 +104,7 @@ public:
     Err setMulticastInterface(char const * interface_addr);
 
     /** Set broadcast on or off. */
-    Err setBroadcast(bool on);
+    Err setBroadcast(bool on = true);
 
     /** Set the time to live. */
     Err setTtl(int ttl);
