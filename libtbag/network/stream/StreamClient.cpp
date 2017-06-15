@@ -541,7 +541,8 @@ void StreamClient::runBackendWrite(Err code)
     onWrite(code);
 }
 
-void StreamClient::runBackendRead(Err code, char const * buffer, std::size_t size)
+void StreamClient::runBackendRead(Err code, char const * buffer, std::size_t size,
+                                  sockaddr const * UNUSED_PARAM(addr), unsigned int UNUSED_PARAM(flags))
 {
     onRead(code, buffer, size);
 }

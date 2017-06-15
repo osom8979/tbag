@@ -125,7 +125,8 @@ struct ClientInterface
     virtual void runBackendConnect(Err code) = 0;
     virtual void runBackendShutdown(Err code) = 0;
     virtual void runBackendWrite(Err code) = 0;
-    virtual void runBackendRead(Err code, char const * buffer, std::size_t size) = 0;
+    virtual void runBackendRead(Err code, char const * buffer, std::size_t size,
+                                sockaddr const * addr = nullptr, unsigned int flags = 0) = 0;
     virtual void runBackendClose() = 0;
 
     // ---------------

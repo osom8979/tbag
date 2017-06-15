@@ -196,7 +196,8 @@ public:
     virtual void runBackendConnect(Err code) override;
     virtual void runBackendShutdown(Err code) override;
     virtual void runBackendWrite(Err code) override;
-    virtual void runBackendRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void runBackendRead(Err code, char const * buffer, std::size_t size,
+                                sockaddr const * addr = nullptr, unsigned int flags = 0) override;
     virtual void runBackendClose() override;
 };
 
