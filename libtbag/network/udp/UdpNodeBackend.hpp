@@ -40,7 +40,7 @@ namespace udp     {
  * @author zer0
  * @date   2017-06-15
  */
-class TBAG_API UdpNodeBackend : private uvpp::Udp
+class TBAG_API UdpNodeBackend : public uvpp::Udp
 {
 public:
     using ClientInterface = details::ClientInterface;
