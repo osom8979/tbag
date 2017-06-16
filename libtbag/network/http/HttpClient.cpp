@@ -18,7 +18,7 @@ namespace http    {
 HttpClient::HttpClient(Loop & loop, StreamType type)
         : Parent(loop, type), _builder(), _parser(HttpParser::Type::RESPONSE)
 {
-    // EMPTY.
+    setSkipTimeout();
 }
 
 HttpClient::~HttpClient()
@@ -53,10 +53,9 @@ void HttpClient::onConnect(Err code)
         if (static_cast<bool>(_connect_cb)) {
             _connect_cb(Err::E_TIMEOUT);
         }
+        close();
         return;
     }
-
-    _startCloseTimer(static_cast<uint64_t>(LEFT_TIME.count()));
 }
 
 void HttpClient::onShutdown(Err code)

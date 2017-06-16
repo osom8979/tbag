@@ -93,26 +93,34 @@ public:
 public:
     struct WriteReady { /* EMPTY. */ };
 
+public:
+    struct Internal;
+    friend struct Internal;
+
+public:
+    using UniqueInternal = std::unique_ptr<Internal>;
+
 private:
     StreamType const STREAM_TYPE;
     bool _owner_async;
+    bool _skip_timeout;
 
 private:
-    SharedClientBackend _client;
-    SharedSafetyAsync   _async;
-
-    SharedFuncTimer _close_timer;
-    SharedFuncTimer _shutdown_timer;
+    UniqueInternal       _internal;
+    SharedClientBackend  _client;
+    SharedSafetyAsync    _async;
+    SharedFuncTimer      _close_timer;
+    SharedFuncTimer      _shutdown_timer;
 
 private:
     mutable Mutex _mutex;
 
     struct {
-        WriteStatus status;
-        ConnectRequest  connect_req;
-        WriteRequest    write_req;
-        ShutdownRequest shutdown_req;
-        Buffers buffers;
+        WriteStatus      status;
+        ConnectRequest   connect_req;
+        WriteRequest     write_req;
+        ShutdownRequest  shutdown_req;
+        Buffers          buffers;
     } _writer;
 
 public:
@@ -126,37 +134,15 @@ public:
     WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
 
 private:
-    static Err startTimer(uvpp::Timer & timer, uint64_t millisec);
-    static Err stopTimer (uvpp::Timer & timer);
     static char const * getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT;
 
 public:
+    inline void setSkipTimeout(bool flag = true) TBAG_NOEXCEPT
+    { _skip_timeout = flag; }
     inline WriteStatus getWriteStatus() const TBAG_NOEXCEPT
     { return _writer.status; }
     inline char const * getWriteStatusName() const TBAG_NOEXCEPT
     { return getWriteStatusName(_writer.status); }
-
-// ===============================
-// === PROTECTED SECTION BEGIN ===
-// [WARNING] Don't mutex guard in this protected section.
-protected:
-    bool _initInternalHandles();
-
-    Err _startCloseTimer(uint64_t millisec);
-    Err _startShutdownTimer(uint64_t millisec);
-
-    void _stopCloseTimer();
-    void _stopShutdownTimer();
-
-    Err _shutdownWrite();
-    Err _writeReal(binf const * buffer, std::size_t size);
-    void _copyToWriteBuffer(binf const * buffer, std::size_t size);
-    std::vector<binf> _getWriteBufferInfo();
-    Err _autoWrite(binf const * buffer, std::size_t size, uint64_t millisec = 0);
-
-    void _closeAll();
-// === PROTECTED SECTION END ===
-// =============================
 
 private:
     void onAsyncWrite();
