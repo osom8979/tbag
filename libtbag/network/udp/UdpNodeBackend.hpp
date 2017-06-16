@@ -24,7 +24,6 @@
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/uvpp/Udp.hpp>
 
-#include <cassert>
 #include <vector>
 
 // -------------------
@@ -44,6 +43,7 @@ class TBAG_API UdpNodeBackend : public uvpp::Udp
 {
 public:
     using ClientInterface = details::ClientInterface;
+    using ReadPacket      = details::ReadPacket;
 
     using Parent = uvpp::Udp;
     using Loop   = uvpp::Loop;
