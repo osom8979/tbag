@@ -71,13 +71,21 @@ public:
     using AtomicBool = std::atomic_bool;
     using Id = ClientInterface::Id;
 
+public:
+    struct Internal;
+    friend struct Internal;
+
+public:
+    using UniqueInternal = std::unique_ptr<Internal>;
+
 private:
     StreamType const STREAM_TYPE;
 
 private:
-    SharedServerBackend _server;
-    SharedSafetyAsync   _async;
-    ClientMap           _clients;
+    UniqueInternal       _internal;
+    SharedServerBackend  _server;
+    SharedSafetyAsync    _async;
+    ClientMap            _clients;
 
 private:
     std::string _destination;
@@ -104,22 +112,6 @@ public:
 public:
     WeakServerBackend getServer() { Guard g(_mutex); return WeakServerBackend(_server); }
     WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
-
-// ===============================
-// === PROTECTED SECTION BEGIN ===
-// [WARNING] Don't mutex guard in this protected section.
-protected:
-    Err _initInternalHandles();
-
-    SharedClient _createClient();
-    SharedClient _getSharedClient(Id id);
-
-    bool _insertClient(SharedClient client);
-    bool _eraseClient(Id id);
-
-    void _closeAll();
-// === PROTECTED SECTION END ===
-// =============================
 
 public:
     virtual std::string dest() const override;
