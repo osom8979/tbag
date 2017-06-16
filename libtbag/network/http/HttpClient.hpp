@@ -111,7 +111,7 @@ public:
     virtual void onConnect(Err code) override;
     virtual void onShutdown(Err code) override;
     virtual void onWrite(Err code) override;
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override;
+    virtual void onRead(Err code, ReadPacket const & packet) override;
     virtual void onClose() override;
 };
 

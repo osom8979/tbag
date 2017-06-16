@@ -31,7 +31,7 @@ StreamNode::~StreamNode()
 StreamNode::WeakClient StreamNode::getWeakClient()
 {
     assert(_parent != nullptr);
-    return _parent->getClient(this->getId());
+    return _parent->get(this->id());
 }
 
 void StreamNode::onConnect(Err code)
@@ -51,10 +51,10 @@ void StreamNode::onWrite(Err code)
     _parent->onClientWrite(getWeakClient(), code);
 }
 
-void StreamNode::onRead(Err code, char const * buffer, std::size_t size)
+void StreamNode::onRead(Err code, ReadPacket const & packet)
 {
     assert(_parent != nullptr);
-    _parent->onClientRead(getWeakClient(), code, buffer, size);
+    _parent->onClientRead(getWeakClient(), code, packet);
 }
 
 void StreamNode::onClose()
@@ -63,12 +63,11 @@ void StreamNode::onClose()
     _parent->onClientClose(getWeakClient());
 
     // Deallocate user data.
-    void * user_data = this->getUserData();
+    void * user_data = this->udata();
     if (user_data) {
-        _parent->onClientUserDataDealloc(getWeakClient(), user_data);
+        _parent->onClientUdataDealloc(getWeakClient(), user_data);
     }
-
-    _parent->removeClient(this->getId());
+    _parent->remove(this->id());
 }
 
 } // namespace stream

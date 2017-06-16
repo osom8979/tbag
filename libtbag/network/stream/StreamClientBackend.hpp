@@ -49,6 +49,7 @@ class StreamClientBackend : public BaseType
 public:
     using StreamType      = details::StreamType;
     using ClientInterface = details::ClientInterface;
+    using ReadPacket      = details::ReadPacket;
 
     using Parent = BaseType;
     using Loop   = uvpp::Loop;
@@ -71,8 +72,6 @@ private:
     ClientInterface * _parent;
     Buffer _buffer;
 
-    ConnectRequest _connect_req;
-
 public:
     StreamClientBackend(Loop & loop, ClientInterface * parent) : Parent(loop), _parent(parent)
     { /* EMPTY. */ }
@@ -80,26 +79,22 @@ public:
     { /* EMPTY. */ }
 
 public:
-    inline ConnectRequest       & atConnectReq()       TBAG_NOEXCEPT { return _connect_req; }
-    inline ConnectRequest const & atConnectReq() const TBAG_NOEXCEPT { return _connect_req; }
-
-public:
     virtual void onConnect(ConnectRequest & request, Err code) override
     {
         assert(_parent != nullptr);
-        _parent->runBackendConnect(code);
+        _parent->backConnect(code);
     }
 
     virtual void onShutdown(ShutdownRequest & request, Err code) override
     {
         assert(_parent != nullptr);
-        _parent->runBackendShutdown(code);
+        _parent->backShutdown(code);
     }
 
     virtual void onWrite(WriteRequest & request, Err code) override
     {
         assert(_parent != nullptr);
-        _parent->runBackendWrite(code);
+        _parent->backWrite(code);
     }
 
     virtual binf onAlloc(std::size_t suggested_size) override
@@ -110,13 +105,13 @@ public:
     virtual void onRead(Err code, char const * buffer, std::size_t size) override
     {
         assert(_parent != nullptr);
-        _parent->runBackendRead(code, buffer, size);
+        _parent->backRead(code, ReadPacket(buffer, size));
     }
 
     virtual void onClose() override
     {
         assert(_parent != nullptr);
-        _parent->runBackendClose();
+        _parent->backClose();
     }
 };
 

@@ -49,8 +49,9 @@ namespace http    {
 class TBAG_API HttpServer : public stream::StreamServer
 {
 public:
-    using StreamType = details::StreamType;
     using Parent     = stream::StreamServer;
+    using StreamType = details::StreamType;
+    using ReadPacket = details::ReadPacket;
 
     using ClientInterface = details::ClientInterface;
     using ServerInterface = details::ServerInterface;
@@ -179,7 +180,7 @@ public:
 
 public:
     virtual void onConnection(Err code) override;
-    virtual void onClientRead(WeakClient node, Err code, char const * buffer, std::size_t size) override;
+    virtual void onClientRead(WeakClient node, Err code, ReadPacket const & packet) override;
     virtual void onClientClose(WeakClient node) override;
 
 public:
@@ -187,11 +188,11 @@ public:
     virtual void onClientWrite(WeakClient node, Err code) override;
 
 public:
-    virtual void * onClientUserDataAlloc(WeakClient node) override;
-    virtual void onClientUserDataDealloc(WeakClient node, void * data) override;
+    virtual void * onClientUdataAlloc(WeakClient node) override;
+    virtual void   onClientUdataDealloc(WeakClient node, void * data) override;
 
 public:
-    virtual void onServerClose() override;
+    virtual void onClose() override;
 };
 
 } // namespace http

@@ -37,7 +37,7 @@ void HttpClient::onConnect(Err code)
     }
 
     auto buffer = _builder.toDefaultRequestString();
-    if (write(buffer.data(), buffer.size()) == false) {
+    if (write(buffer.data(), buffer.size()) != Err::E_SUCCESS) {
         tDLogE("HttpClient::onConnect() {} error.", getErrName(Err::E_WRERR));
         if (static_cast<bool>(_connect_cb)) {
             _connect_cb(Err::E_WRERR);
@@ -76,7 +76,7 @@ void HttpClient::onWrite(Err code)
         return;
     }
 
-    if (start() == false) {
+    if (start() != Err::E_SUCCESS) {
         tDLogE("HttpClient::onWrite() start error.");
         if (static_cast<bool>(_write_cb)) {
             _write_cb(Err::E_RDERR);
@@ -89,7 +89,7 @@ void HttpClient::onWrite(Err code)
     }
 }
 
-void HttpClient::onRead(Err code, char const * buffer, std::size_t size)
+void HttpClient::onRead(Err code, ReadPacket const & packet)
 {
     if (code == Err::E_EOF) {
         tDLogI("HttpClient::onRead() EOF.");
@@ -109,7 +109,7 @@ void HttpClient::onRead(Err code, char const * buffer, std::size_t size)
     }
 
     assert(code == Err::E_SUCCESS);
-    _parser.execute(buffer, size);
+    _parser.execute(packet.buffer, packet.size);
 
     if (_parser.isComplete()) {
         tDLogD("HttpClient::onRead() Completed http parsing (HTTP STATUS: {}).", _parser.getStatusCode());
@@ -144,7 +144,7 @@ Err requestWithSync(HttpClient::StreamType type,
 
     HttpClient http(loop, type);
 
-    if (http.init(host.c_str(), port, timeout) == false) {
+    if (http.init(host.c_str(), port, timeout) != Err::E_SUCCESS) {
         return Err::E_EINIT;
     }
 

@@ -9,6 +9,7 @@
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/stream/StreamServerBackend.hpp>
 #include <libtbag/network/stream/StreamNode.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -42,23 +43,11 @@ StreamServer::~StreamServer()
     // EMPTY.
 }
 
-StreamServer::WeakServerBackend StreamServer::getServer()
-{
-    Guard g(_mutex);
-    return WeakServerBackend(_server);
-}
-
-StreamServer::WeakSafetyAsync StreamServer::getAsync()
-{
-    Guard g(_mutex);
-    return WeakSafetyAsync(_async);
-}
-
 // ------------------
 // PROTECTED SECTION.
 // ------------------
 
-bool StreamServer::_initInternalHandles()
+Err StreamServer::_initInternalHandles()
 {
     assert(static_cast<bool>(_server));
     Loop * loop = _server->getLoop();
@@ -67,7 +56,7 @@ bool StreamServer::_initInternalHandles()
     _async = loop->newHandle<SafetyAsync>(*loop);
     assert(static_cast<bool>(_async));
 
-    return true;
+    return Err::E_SUCCESS;
 }
 
 StreamServer::SharedClient StreamServer::_createClient()
@@ -90,7 +79,7 @@ StreamServer::SharedClient StreamServer::_getSharedClient(Id id)
 
 bool StreamServer::_insertClient(SharedClient client)
 {
-    return _clients.insert(ClientPair(client->getId(), client)).second;
+    return _clients.insert(ClientPair(client->id(), client)).second;
 }
 
 bool StreamServer::_eraseClient(Id id)
@@ -124,7 +113,19 @@ void StreamServer::_closeAll()
     _port = 0;
 }
 
-bool StreamServer::init(char const * destination, int port)
+std::string StreamServer::dest() const
+{
+    Guard guard(_mutex);
+    return _destination;
+}
+
+int StreamServer::port() const
+{
+    Guard guard(_mutex);
+    return _port;
+}
+
+Err StreamServer::init(char const * destination, int port)
 {
     assert(static_cast<bool>(_server));
     Guard guard(_mutex);
@@ -146,24 +147,15 @@ bool StreamServer::init(char const * destination, int port)
 
         _destination = destination;
         _port = 0;
+    } else {
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return Err::E_UNKNOWN;
     }
 
     if (is_init) {
         return _initInternalHandles();
     }
-    return false;
-}
-
-std::string StreamServer::getDestination() const
-{
-    Guard guard(_mutex);
-    return _destination;
-}
-
-int StreamServer::getPort() const
-{
-    Guard guard(_mutex);
-    return _port;
+    return Err::E_UNKNOWN;
 }
 
 void StreamServer::close()
@@ -205,7 +197,7 @@ StreamServer::WeakClient StreamServer::accept()
 
             auto weak_client = WeakClient(client);
             {   // Allocate User Data.
-                shared->setUserData(this->onClientUserDataAlloc(weak_client));
+                shared->setUserData(onClientUdataAlloc(weak_client));
             }
             return weak_client;
         } else {
@@ -217,32 +209,32 @@ StreamServer::WeakClient StreamServer::accept()
     return WeakClient();
 }
 
-StreamServer::WeakClient StreamServer::getClient(Id id)
+StreamServer::WeakClient StreamServer::get(Id id)
 {
     Guard guard(_mutex);
     return WeakClient(_getSharedClient(id));
 }
 
-bool StreamServer::removeClient(Id id)
+Err StreamServer::remove(Id id)
 {
     Guard guard(_mutex);
-    return _eraseClient(id);
+    return _eraseClient(id) ? Err::E_SUCCESS : Err::E_UNKNOWN;
 }
 
 // --------------
 // Event backend.
 // --------------
 
-void StreamServer::runBackendConnection(Err code)
+void StreamServer::backConnection(Err code)
 {
     _on_connection.store(true);
     onConnection(code);
     _on_connection.store(false);
 }
 
-void StreamServer::runBackendClose()
+void StreamServer::backClose()
 {
-    onServerClose();
+    onClose();
 
     _mutex.lock();
     _closeAll();

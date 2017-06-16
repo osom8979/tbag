@@ -73,13 +73,13 @@ public:
     virtual void onConnection(Err code) override
     {
         assert(_parent != nullptr);
-        _parent->runBackendConnection(code);
+        _parent->backConnection(code);
     }
 
     virtual void onClose() override
     {
         assert(_parent != nullptr);
-        _parent->runBackendClose();
+        _parent->backClose();
     }
 };
 

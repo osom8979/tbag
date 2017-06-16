@@ -64,6 +64,40 @@ template <> struct IsNetworkType<uvpp::Pipe> : public std::true_type
     TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::PIPE;
 };
 
+enum class PacketType
+{
+    PT_STREAM,
+    PT_DATAGRAM,
+};
+
+/**
+ * Read event parameter.
+ *
+ * @author zer0
+ * @date   2017-06-16
+ */
+struct ReadPacket
+{
+    PacketType        type;
+    char const *      buffer;
+    std::size_t       size;
+    sockaddr const *  addr;
+    unsigned int      flags;
+
+    explicit ReadPacket(PacketType t, char const * b, std::size_t s, sockaddr const * a, unsigned int f)
+            : type(t), buffer(b), size(s), addr(a), flags(f)
+    { /* EMPTY. */ }
+    explicit ReadPacket(char const * b, std::size_t s, sockaddr const * a, unsigned int f)
+            : ReadPacket(PacketType::PT_DATAGRAM, b, s, a, f)
+    { /* EMPTY. */ }
+    explicit ReadPacket(char const * b, std::size_t s)
+            : ReadPacket(PacketType::PT_STREAM, b, s, nullptr, 0)
+    { /* EMPTY. */ }
+
+    virtual ~ReadPacket()
+    { /* EMPTY. */ }
+};
+
 TBAG_API bool isIpv4(std::string const & ip);
 TBAG_API bool isIpv6(std::string const & ip);
 
@@ -99,45 +133,48 @@ inline bool isDynamicPort(int port) TBAG_NOEXCEPT
  */
 struct ClientInterface
 {
-    using binf = uvpp::binf;
     using Id   = id::Id;
+    using binf = uvpp::binf;
 
     ClientInterface() { /* EMPTY.*/ }
     virtual ~ClientInterface() { /* EMPTY.*/ }
 
-    virtual Id getId() const = 0;
+    virtual Id          id   () const { return reinterpret_cast<Id>(this); }
+    virtual std::string dest () const { return std::string(); }
+    virtual int         port () const { return 0; }
+    virtual void *      udata() { return nullptr; }
 
-    virtual bool init(char const * destination, int port = 0, uint64_t millisec = 0) = 0;
+    // -------------
+    // Pure virtual.
+    // -------------
 
-    virtual bool  start() = 0;
-    virtual bool   stop() = 0;
-    virtual void  close() = 0;
+    virtual Err  init  (char const * destination, int port = 0, uint64_t millisec = 0U) = 0;
+    virtual Err  start () = 0;
+    virtual Err  stop  () = 0;
+    virtual void close () = 0;
     virtual void cancel() = 0;
+    virtual Err  write (binf const * buffer, std::size_t size, uint64_t millisec = 0U) = 0;
+    virtual Err  write (char const * buffer, std::size_t size, uint64_t millisec = 0U) = 0;
 
-    virtual bool write(binf const * buffer, std::size_t size, uint64_t millisec = 0) = 0;
-    virtual bool write(char const * buffer, std::size_t size, uint64_t millisec = 0) = 0;
+    // ---------------
+    // Backend helper.
+    // ---------------
 
-    virtual void * getUserData() = 0;
-
-    virtual std::string getDestination() const = 0;
-    virtual int getPort() const = 0;
-
-    virtual void runBackendConnect(Err code) = 0;
-    virtual void runBackendShutdown(Err code) = 0;
-    virtual void runBackendWrite(Err code) = 0;
-    virtual void runBackendRead(Err code, char const * buffer, std::size_t size,
-                                sockaddr const * addr = nullptr, unsigned int flags = 0) = 0;
-    virtual void runBackendClose() = 0;
+    virtual void backConnect (Err code) = 0;
+    virtual void backShutdown(Err code) = 0;
+    virtual void backWrite   (Err code) = 0;
+    virtual void backRead    (Err code, ReadPacket const & packet) = 0;
+    virtual void backClose   () = 0;
 
     // ---------------
     // Event callback.
     // ---------------
 
-    virtual void onConnect(Err code) { /* EMPTY. */ }
+    virtual void onConnect (Err code) { /* EMPTY. */ }
     virtual void onShutdown(Err code) { /* EMPTY. */ }
-    virtual void onWrite(Err code) { /* EMPTY. */ }
-    virtual void onRead(Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onClose() { /* EMPTY. */ }
+    virtual void onWrite   (Err code) { /* EMPTY. */ }
+    virtual void onRead    (Err code, ReadPacket const & packet) { /* EMPTY. */ }
+    virtual void onClose   () { /* EMPTY. */ }
 };
 
 /**
@@ -157,32 +194,39 @@ struct ServerInterface
     ServerInterface() { /* EMPTY.*/ }
     virtual ~ServerInterface() { /* EMPTY.*/ }
 
-    virtual bool init(char const * destination, int port = 0) = 0;
-    virtual void close() = 0;
+    virtual std::string dest () const { return std::string(); }
+    virtual int         port () const { return 0; }
 
+    // -------------
+    // Pure virtual.
+    // -------------
+
+    virtual Err        init  (char const * destination, int port = 0) = 0;
+    virtual void       close () = 0;
     virtual WeakClient accept() = 0;
-    virtual WeakClient getClient(Id id) = 0;
-    virtual bool removeClient(Id id) = 0;
+    virtual WeakClient get   (Id id) = 0;
+    virtual Err        remove(Id id) = 0;
 
-    virtual std::string getDestination() const = 0;
-    virtual int getPort() const = 0;
+    // ---------------
+    // Backend helper.
+    // ---------------
 
-    virtual void runBackendConnection(Err code) = 0;
-    virtual void runBackendClose() = 0;
+    virtual void backConnection(Err code) = 0;
+    virtual void backClose() = 0;
 
     // ---------------
     // Event callback.
     // ---------------
 
-    virtual void onConnection(Err code) { /* EMPTY. */ }
+    virtual void onConnection    (Err code) { /* EMPTY. */ }
     virtual void onClientShutdown(WeakClient node, Err code) { /* EMPTY. */ }
-    virtual void onClientWrite(WeakClient node, Err code) { /* EMPTY. */ }
-    virtual void onClientRead(WeakClient node, Err code, char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onClientClose(WeakClient node) { /* EMPTY. */ }
-    virtual void onServerClose() { /* EMPTY. */ }
+    virtual void onClientWrite   (WeakClient node, Err code) { /* EMPTY. */ }
+    virtual void onClientRead    (WeakClient node, Err code, ReadPacket const & packet) { /* EMPTY. */ }
+    virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
+    virtual void onClose         () { /* EMPTY. */ }
 
-    virtual void * onClientUserDataAlloc(WeakClient node) { return nullptr; }
-    virtual void onClientUserDataDealloc(WeakClient node, void * data) { /* EMPTY. */ }
+    virtual void * onClientUdataAlloc  (WeakClient node) { return nullptr; }
+    virtual void   onClientUdataDealloc(WeakClient node, void * data) { /* EMPTY. */ }
 };
 
 } // namespace details

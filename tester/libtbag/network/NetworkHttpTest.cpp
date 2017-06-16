@@ -39,7 +39,7 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     server.init(bind.c_str());
 
     std::string request_url = "http://localhost:";
-    request_url += std::to_string(server.getPort());
+    request_url += std::to_string(server.port());
     request_url += "/";
 
     int on_open    = 0;
@@ -146,7 +146,7 @@ TEST(NetworkHttpTest, RoutingServer)
     int on_request_down_post = 0;
 
     server.init(details::ANY_IPV4, 0);
-    int const SERVER_PORT = server.getPort();
+    int const SERVER_PORT = server.port();
 
     std::string request_url = "http://localhost:";
     request_url += std::to_string(SERVER_PORT);

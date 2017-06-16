@@ -84,13 +84,13 @@ void HttpServer::onConnection(Err code)
         return;
     }
 
-    if (shared->start() == false) {
+    if (shared->start() != Err::E_SUCCESS) {
         tDLogE("HttpServer::onConnection() Start client error.");
         shared->close();
         return;
     }
 
-    if (createClientData(shared->getId()) == false) {
+    if (createClientData(shared->id()) == false) {
         tDLogE("HttpServer::onConnection() Bad allocated client-data.");
         shared->close();
         return;
@@ -101,7 +101,7 @@ void HttpServer::onConnection(Err code)
     }
 }
 
-void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, std::size_t size)
+void HttpServer::onClientRead(WeakClient node, Err code, ReadPacket const & packet)
 {
     auto shared = node.lock();
     if (static_cast<bool>(shared) == false) {
@@ -115,7 +115,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
         return;
     }
 
-    auto dataset = getClientData(shared->getId()).lock();
+    auto dataset = getClientData(shared->id()).lock();
     if (static_cast<bool>(dataset) == false) {
         tDLogE("HttpServer::onClientRead() Expired client data.");
         shared->close();
@@ -134,7 +134,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
         WebSocketFrame & write_frame = dataset->websocket.write_frame;
         WebSocketFrame::Buffer & frame_buffer = dataset->websocket.frame_buffer;
 
-        if (recv_frame.execute((uint8_t*)buffer, size) != Err::E_SUCCESS) {
+        if (recv_frame.execute((uint8_t*)packet.buffer, packet.size) != Err::E_SUCCESS) {
             tDLogE("HttpServer::onClientRead() WebSocket frame {} error", getErrName(code));
             return;
         }
@@ -154,7 +154,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
             return;
         }
 
-        if (shared->write((char const *)frame_buffer.data(), frame_buffer.size(), timeout) == false) {
+        if (shared->write((char const *)frame_buffer.data(), frame_buffer.size(), timeout) != Err::E_SUCCESS) {
             tDLogW("HttpServer::onClientRead() WebSocket response write error.");
         }
         return;
@@ -163,7 +163,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
     HttpParser  & request  = dataset->parser;
     HttpBuilder & response = dataset->builder;
 
-    request.execute(buffer, size);
+    request.execute(packet.buffer, packet.size);
     if (request.isComplete() == false) {
         tDLogD("HttpServer::onClientRead() Not complete.");
         return;
@@ -185,7 +185,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
             }
 
             auto const RESPONSE = response.toDefaultResponseString();
-            if (shared->write(RESPONSE.data(), RESPONSE.size(), timeout) == false) {
+            if (shared->write(RESPONSE.data(), RESPONSE.size(), timeout) != Err::E_SUCCESS) {
                 tDLogW("HttpServer::onClientRead() WebSocket response write error.");
             }
             request.clear();
@@ -231,9 +231,10 @@ void HttpServer::onClientRead(WeakClient node, Err code, char const * buffer, st
     }
 
     auto const RESPONSE = response.toDefaultResponseString();
-    if (shared->write(RESPONSE.data(), RESPONSE.size(), timeout) == false) {
+    if (shared->write(RESPONSE.data(), RESPONSE.size(), timeout) != Err::E_SUCCESS) {
         tDLogW("HttpServer::onClientRead() Write error.");
     }
+
     request.clear();
     request.clearCache();
     response.clear();
@@ -251,7 +252,7 @@ void HttpServer::onClientClose(WeakClient node)
         _close_cb(node);
     }
 
-    if (removeClientData(shared->getId()) == false) {
+    if (removeClientData(shared->id()) == false) {
         tDLogW("HttpServer::onClientClose() Client-data removal failed.");
     }
 }
@@ -270,7 +271,7 @@ void HttpServer::onClientWrite(WeakClient node, Err code)
     }
 }
 
-void * HttpServer::onClientUserDataAlloc(WeakClient node)
+void * HttpServer::onClientUdataAlloc(WeakClient node)
 {
     if (static_cast<bool>(_user_data_alloc_cb)) {
         return _user_data_alloc_cb(node);
@@ -278,14 +279,14 @@ void * HttpServer::onClientUserDataAlloc(WeakClient node)
     return nullptr;
 }
 
-void HttpServer::onClientUserDataDealloc(WeakClient node, void * data)
+void HttpServer::onClientUdataDealloc(WeakClient node, void * data)
 {
     if (static_cast<bool>(_user_data_dealloc_cb)) {
         _user_data_dealloc_cb(node, data);
     }
 }
 
-void HttpServer::onServerClose()
+void HttpServer::onClose()
 {
     if (static_cast<bool>(_server_close_cb)) {
         _server_close_cb();

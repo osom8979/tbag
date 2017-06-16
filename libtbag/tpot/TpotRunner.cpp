@@ -60,7 +60,7 @@ int TpotRunner::run()
 {
     _server.reset(new (std::nothrow) HttpServer(_loop, HttpServer::StreamType::TCP));
     assert(static_cast<bool>(_server));
-    if (_server->init(_params.server_bind.c_str(), _params.server_port) == false) {
+    if (_server->init(_params.server_bind.c_str(), _params.server_port) != Err::E_SUCCESS) {
         return EXIT_FAILURE;
     }
 
@@ -96,7 +96,7 @@ int TpotRunner::run()
 void TpotRunner::onNodeOpen(Node node)
 {
     if (auto shared = node.lock()) {
-        tDLogN("TpotRunner::onNodeOpen(ID:{}) {}:{}", shared->getId(), shared->getDestination(), shared->getPort());
+        tDLogN("TpotRunner::onNodeOpen(ID:{}) {}:{}", shared->id(), shared->dest(), shared->port());
     } else {
         tDLogE("TpotRunner::onNodeOpen() Expired client.");
     }
@@ -105,7 +105,7 @@ void TpotRunner::onNodeOpen(Node node)
 void TpotRunner::onNodeClose(Node node)
 {
     if (auto shared = node.lock()) {
-        tDLogN("TpotRunner::onNodeClose(ID:{})", shared->getId());
+        tDLogN("TpotRunner::onNodeClose(ID:{})", shared->id());
     } else {
         tDLogE("TpotRunner::onNodeOpen() Expired client.");
     }
@@ -125,7 +125,7 @@ void TpotRunner::onServerClose()
     auto shared = node.lock();                                                                     \
     if (static_cast<bool>(shared) == false) { tDLogE(prefix " Expired client."); return; }         \
     if (code != Err::E_SUCCESS) { tDLogE(prefix " {} error.", getErrName(code)); return; }         \
-    tDLogN(prefix " [ID:{}] {}:{}", shared->getId(), shared->getDestination(), shared->getPort()); \
+    tDLogN(prefix " [ID:{}] {}:{}", shared->id(), shared->dest(), shared->port()); \
     /* END */
 #endif
 
@@ -144,9 +144,9 @@ void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & reque
 
     Err const CODE = execProcess(request.getBody(), response);
     if (CODE == Err::E_SUCCESS) {
-        tDLogI("TpotRunner::onNodeExecRequest(ID:{}) Success.", shared->getId());
+        tDLogI("TpotRunner::onNodeExecRequest(ID:{}) Success.", shared->id());
     } else {
-        tDLogE("TpotRunner::onNodeExecRequest(ID:{}) {} error", shared->getId(), getErrName(CODE));
+        tDLogE("TpotRunner::onNodeExecRequest(ID:{}) {} error", shared->id(), getErrName(CODE));
     }
 }
 
@@ -157,9 +157,9 @@ void TpotRunner::onNodeKillRequest(Err code, Node node, HttpParser const & reque
 
     Err const CODE = killProcess(request.getBody(), response);
     if (CODE == Err::E_SUCCESS) {
-        tDLogI("TpotRunner::onNodeKillRequest(ID:{}) Success.", shared->getId());
+        tDLogI("TpotRunner::onNodeKillRequest(ID:{}) Success.", shared->id());
     } else {
-        tDLogE("TpotRunner::onNodeKillRequest(ID:{}) {} error", shared->getId(), getErrName(CODE));
+        tDLogE("TpotRunner::onNodeKillRequest(ID:{}) {} error", shared->id(), getErrName(CODE));
     }
 }
 
@@ -170,9 +170,9 @@ void TpotRunner::onNodeListRequest(Err code, Node node, HttpParser const & reque
 
     Err const CODE = listProcess(request.getBody(), response);
     if (CODE == Err::E_SUCCESS) {
-        tDLogI("TpotRunner::onNodeListRequest(ID:{}) Success.", shared->getId());
+        tDLogI("TpotRunner::onNodeListRequest(ID:{}) Success.", shared->id());
     } else {
-        tDLogE("TpotRunner::onNodeListRequest(ID:{}) {} error", shared->getId(), getErrName(CODE));
+        tDLogE("TpotRunner::onNodeListRequest(ID:{}) {} error", shared->id(), getErrName(CODE));
     }
 }
 

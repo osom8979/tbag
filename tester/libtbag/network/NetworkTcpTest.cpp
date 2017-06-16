@@ -49,11 +49,11 @@ TEST(NetworkTcpTest, AddressAlreadyInUse)
     TcpServer server1(loop);
     TcpServer server2(loop);
 
-    ASSERT_TRUE(server1.init("0.0.0.0", 0));
-    int const SERVER_PORT = server1.getPort();
+    ASSERT_EQ(Err::E_SUCCESS, server1.init("0.0.0.0", 0));
+    int const SERVER_PORT = server1.port();
     ASSERT_LT(0, SERVER_PORT);
 
-    ASSERT_FALSE(server2.init("0.0.0.0", SERVER_PORT));
+    ASSERT_NE(Err::E_SUCCESS, server2.init("0.0.0.0", SERVER_PORT));
 
     server1.close();
     server2.close();
@@ -69,7 +69,7 @@ TEST(NetworkTcpTest, ClientTimeout)
     Loop loop;
     FunctionalTcpClient client(loop);
 
-    if (client.init("8.8.8.8", 9999, 50) == false) {
+    if (client.init("8.8.8.8", 9999, 50) != Err::E_SUCCESS) {
         std::cout << "Network unreachable.\n";
         return;
     }
@@ -127,18 +127,18 @@ TEST(NetworkTcpTest, MultiEcho)
 
     server.setOnConnection([&](Err code){
         if (auto shared = server.accept().lock()) {
-            if (shared->start()) {
+            if (shared->start() == Err::E_SUCCESS) {
                 server_connection++;
             }
         }
     });
     server.setOnClientRead([&](FunctionalTcpServer::WeakClient node, Err code,
-                               char const * buffer, std::size_t size){
+                               ReadPacket const & packet){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
-                if (shared->stop()) {
+                if (shared->stop() == Err::E_SUCCESS) {
                     server_client_read++;
-                    shared->write(buffer, size);
+                    shared->write(packet.buffer, packet.size);
                 }
             }
         }
@@ -161,21 +161,21 @@ TEST(NetworkTcpTest, MultiEcho)
 #endif
         }
     });
-    server.setOnServerClose([&](){
+    server.setOnClose([&](){
         server_close++;
     });
 
-    server.setOnClientUserDataAlloc([&](FunctionalTcpServer::WeakClient node) -> void *{
+    server.setOnClientUdataAlloc([&](FunctionalTcpServer::WeakClient node) -> void *{
         server_udata_alloc++;
         return new int (100);
     });
-    server.setOnClientUserDataDealloc([&](FunctionalTcpServer::WeakClient node, void * data){
+    server.setOnClientUdataDealloc([&](FunctionalTcpServer::WeakClient node, void * data){
         server_udata_dealloc++;
         delete static_cast<int*>(data);
     });
 
     server.init(details::ANY_IPV4, 0);
-    int const SERVER_PORT = server.getPort();
+    int const SERVER_PORT = server.port();
 
     std::cout << "Server port number: " << SERVER_PORT << std::endl;
 
@@ -211,17 +211,17 @@ TEST(NetworkTcpTest, MultiEcho)
         cloops.at(i).reset(new Loop());
         clients.at(i).reset(new FunctionalTcpClient(*(cloops.at(i))));
         clients.at(i)->setOnConnect([&, i](Err code){
-            if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size())) {
+            if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size()) == Err::E_SUCCESS) {
                 connect_result.at(i) = code;
             }
         });
         clients.at(i)->setOnWrite([&, i](Err code){
-            if (clients.at(i)->start()) {
+            if (clients.at(i)->start() == Err::E_SUCCESS) {
                 write_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnRead([&, i](Err code, char const * buffer, std::size_t size){
-            if (clients.at(i)->stop()) {
+        clients.at(i)->setOnRead([&, i](Err code, ReadPacket const & packet){
+            if (clients.at(i)->stop() == Err::E_SUCCESS) {
                 read_result.at(i) = code;
                 clients.at(i)->close();
             }

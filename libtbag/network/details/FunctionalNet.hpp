@@ -49,7 +49,7 @@ struct FunctionalClient : public BaseType
     using OnConnect  = std::function<void(Err)>;
     using OnShutdown = std::function<void(Err)>;
     using OnWrite    = std::function<void(Err)>;
-    using OnRead     = std::function<void(Err, char const *, std::size_t)>;
+    using OnRead     = std::function<void(Err, ReadPacket const &)>;
     using OnClose    = std::function<void(void)>;
 
     OnConnect   connect_cb;
@@ -75,8 +75,8 @@ struct FunctionalClient : public BaseType
     { if (shutdown_cb) { shutdown_cb(code); } }
     virtual void onWrite(Err code) override
     { if (write_cb) { write_cb(code); } }
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override
-    { if (read_cb) { read_cb(code, buffer, size); } }
+    virtual void onRead(Err code, ReadPacket const & packet) override
+    { if (read_cb) { read_cb(code, packet); } }
     virtual void onClose() override
     { if (close_cb) { close_cb(); } }
     // @formatter:on
@@ -102,22 +102,22 @@ struct FunctionalServer : public BaseType
     using OnConnection     = std::function<void(Err)>;
     using OnClientShutdown = std::function<void(WeakClient, Err)>;
     using OnClientWrite    = std::function<void(WeakClient, Err)>;
-    using OnClientRead     = std::function<void(WeakClient, Err, char const *, std::size_t)>;
+    using OnClientRead     = std::function<void(WeakClient, Err, ReadPacket const &)>;
     using OnClientClose    = std::function<void(WeakClient)>;
-    using OnServerClose    = std::function<void(void)>;
+    using OnClose          = std::function<void(void)>;
 
-    using OnClientUserDataAlloc   = std::function<void*(WeakClient)>;
-    using OnClientUserDataDealloc = std::function<void(WeakClient, void*)>;
+    using OnClientUdataAlloc   = std::function<void*(WeakClient)>;
+    using OnClientUdataDealloc = std::function<void(WeakClient, void*)>;
 
     OnConnection     connection_cb;
     OnClientShutdown client_shutdown_cb;
     OnClientWrite    client_write_cb;
     OnClientRead     client_read_cb;
     OnClientClose    client_close_cb;
-    OnServerClose    server_close_cb;
+    OnClose          close_cb;
 
-    OnClientUserDataAlloc   client_userdata_alloc_cb;
-    OnClientUserDataDealloc client_userdata_dealloc_cb;
+    OnClientUdataAlloc   client_udata_alloc_cb;
+    OnClientUdataDealloc client_udata_dealloc_cb;
 
     FunctionalServer(Loop & loop) : Parent(loop)
     { /* EMPTY */ }
@@ -129,10 +129,10 @@ struct FunctionalServer : public BaseType
     inline void setOnClientWrite   (OnClientWrite    const & cb) { client_write_cb    = cb; }
     inline void setOnClientRead    (OnClientRead     const & cb) { client_read_cb     = cb; }
     inline void setOnClientClose   (OnClientClose    const & cb) { client_close_cb    = cb; }
-    inline void setOnServerClose   (OnServerClose    const & cb) { server_close_cb    = cb; }
+    inline void setOnClose         (OnClose          const & cb) { close_cb           = cb; }
 
-    inline void setOnClientUserDataAlloc  (OnClientUserDataAlloc   const & cb) { client_userdata_alloc_cb   = cb; }
-    inline void setOnClientUserDataDealloc(OnClientUserDataDealloc const & cb) { client_userdata_dealloc_cb = cb; }
+    inline void setOnClientUdataAlloc  (OnClientUdataAlloc   const & cb) { client_udata_alloc_cb   = cb; }
+    inline void setOnClientUdataDealloc(OnClientUdataDealloc const & cb) { client_udata_dealloc_cb = cb; }
 
     virtual void onConnection(Err code) override
     { if (connection_cb) { connection_cb(code); } }
@@ -141,17 +141,17 @@ struct FunctionalServer : public BaseType
     { if (client_shutdown_cb) { client_shutdown_cb(node, code); } }
     virtual void onClientWrite(WeakClient node, Err code) override
     { if (client_write_cb) { client_write_cb(node, code); } }
-    virtual void onClientRead(WeakClient node, Err code, char const * buffer, std::size_t size) override
-    { if (client_read_cb) { client_read_cb(node, code, buffer, size); } }
+    virtual void onClientRead(WeakClient node, Err code, ReadPacket const & packet) override
+    { if (client_read_cb) { client_read_cb(node, code, packet); } }
     virtual void onClientClose(WeakClient node) override
     { if (client_close_cb) { client_close_cb(node); } }
-    virtual void onServerClose() override
-    { if (server_close_cb) { server_close_cb(); } }
+    virtual void onClose() override
+    { if (close_cb) { close_cb(); } }
 
-    virtual void * onClientUserDataAlloc(WeakClient node) override
-    { if (client_userdata_alloc_cb) { return client_userdata_alloc_cb(node); } return nullptr; }
-    virtual void onClientUserDataDealloc(WeakClient node, void * data) override
-    { if (client_userdata_dealloc_cb) { client_userdata_dealloc_cb(node, data); } }
+    virtual void * onClientUdataAlloc(WeakClient node) override
+    { if (client_udata_alloc_cb) { return client_udata_alloc_cb(node); } return nullptr; }
+    virtual void onClientUdataDealloc(WeakClient node, void * data) override
+    { if (client_udata_dealloc_cb) { client_udata_dealloc_cb(node, data); } }
 };
 
 } // namespace details

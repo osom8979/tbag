@@ -46,11 +46,13 @@ class TBAG_API StreamClient : public details::ClientInterface
 {
 public:
     using StreamType = details::StreamType;
+    using ReadPacket = details::ReadPacket;
 
     using Loop   = uvpp::Loop;
     using Stream = uvpp::Stream;
     using binf   = uvpp::binf;
 
+    using ConnectRequest  = uvpp::ConnectRequest;
     using ShutdownRequest = uvpp::ShutdownRequest;
     using WriteRequest    = uvpp::WriteRequest;
 
@@ -107,7 +109,8 @@ private:
 
     struct {
         WriteStatus status;
-        WriteRequest write_req;
+        ConnectRequest  connect_req;
+        WriteRequest    write_req;
         ShutdownRequest shutdown_req;
         Buffers buffers;
     } _writer;
@@ -119,13 +122,12 @@ public:
     virtual ~StreamClient();
 
 public:
-    WeakClientBackend getClient();
-    WeakSafetyAsync   getAsync();
+    WeakClientBackend getClient() { Guard g(_mutex); return WeakClientBackend(_client); }
+    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
 
-public:
+private:
     static Err startTimer(uvpp::Timer & timer, uint64_t millisec);
-    static Err stopTimer(uvpp::Timer & timer);
-
+    static Err stopTimer (uvpp::Timer & timer);
     static char const * getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT;
 
 public:
@@ -160,28 +162,27 @@ private:
     void onAsyncWrite();
 
 public:
-    /** Obtain the Client handle id. */
-    virtual Id getId() const override;
+    virtual Id          id   () const override;
+    virtual std::string dest () const override;
+    virtual int         port () const override;
+    virtual void *      udata() override;
 
 public:
-    virtual bool init(char const * destination, int port = 0, uint64_t millisec = 0) override;
-
-public:
-    virtual bool  start() override;
-    virtual bool   stop() override;
-    virtual void  close() override;
+    virtual Err  init  (char const * destination, int port = 0, uint64_t millisec = 0) override;
+    virtual Err  start () override;
+    virtual Err  stop  () override;
+    virtual void close () override;
     virtual void cancel() override;
+    virtual Err  write (binf const * buffer, std::size_t size, uint64_t millisec = 0) override;
+    virtual Err  write (char const * buffer, std::size_t size, uint64_t millisec = 0) override;
 
+// Event backend.
 public:
-    virtual bool write(binf const * buffer, std::size_t size, uint64_t millisec = 0) override;
-    virtual bool write(char const * buffer, std::size_t size, uint64_t millisec = 0) override;
-
-public:
-    virtual void * getUserData() override;
-
-public:
-    virtual std::string getDestination() const override;
-    virtual int getPort() const override;
+    virtual void backConnect(Err code) override;
+    virtual void backShutdown(Err code) override;
+    virtual void backWrite(Err code) override;
+    virtual void backRead(Err code, ReadPacket const & packet) override;
+    virtual void backClose() override;
 
 public:
     template <typename Predicated>
@@ -190,15 +191,6 @@ public:
         Guard guard(_mutex);
         predicated(_client->getUserData());
     }
-
-// Event backend.
-public:
-    virtual void runBackendConnect(Err code) override;
-    virtual void runBackendShutdown(Err code) override;
-    virtual void runBackendWrite(Err code) override;
-    virtual void runBackendRead(Err code, char const * buffer, std::size_t size,
-                                sockaddr const * addr = nullptr, unsigned int flags = 0) override;
-    virtual void runBackendClose() override;
 };
 
 /**

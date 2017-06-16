@@ -49,18 +49,18 @@ TEST(NetworkPipeTest, MultiEcho)
 
     server.setOnConnection([&](Err code){
         if (auto shared = server.accept().lock()) {
-            if (shared->start()) {
+            if (shared->start() == Err::E_SUCCESS) {
                 server_connection++;
             }
         }
     });
     server.setOnClientRead([&](FunctionalPipeServer::WeakClient node, Err code,
-                               char const * buffer, std::size_t size){
+                               ReadPacket const & packet){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
-                if (shared->stop()) {
+                if (shared->stop() == Err::E_SUCCESS) {
                     server_client_read++;
-                    shared->write(buffer, size);
+                    shared->write(packet.buffer, packet.size);
                 }
             }
         }
@@ -81,7 +81,7 @@ TEST(NetworkPipeTest, MultiEcho)
             server.close();
         }
     });
-    server.setOnServerClose([&](){
+    server.setOnClose([&](){
         server_close++;
     });
     server.init(path, 0);
@@ -118,17 +118,17 @@ TEST(NetworkPipeTest, MultiEcho)
         cloops.at(i).reset(new Loop());
         clients.at(i).reset(new FunctionalPipeClient(*(cloops.at(i))));
         clients.at(i)->setOnConnect([&, i](Err code){
-            if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size())) {
+            if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size()) == Err::E_SUCCESS) {
                 connect_result.at(i) = code;
             }
         });
         clients.at(i)->setOnWrite([&, i](Err code){
-            if (clients.at(i)->start()) {
+            if (clients.at(i)->start() == Err::E_SUCCESS) {
                 write_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnRead([&, i](Err code, char const * buffer, std::size_t size){
-            if (clients.at(i)->stop()) {
+        clients.at(i)->setOnRead([&, i](Err code, ReadPacket const & packet){
+            if (clients.at(i)->stop() == Err::E_SUCCESS) {
                 read_result.at(i) = code;
                 clients.at(i)->close();
             }
@@ -163,3 +163,4 @@ TEST(NetworkPipeTest, MultiEcho)
     ASSERT_EQ(CLIENT_SIZE, server_client_close);
     ASSERT_EQ(1, server_close);
 }
+

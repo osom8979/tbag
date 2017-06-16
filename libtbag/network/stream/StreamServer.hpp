@@ -69,8 +69,7 @@ public:
     using ClientPair = ClientMap::value_type;
 
     using AtomicBool = std::atomic_bool;
-
-    using Id = id::Id;
+    using Id = ClientInterface::Id;
 
 private:
     StreamType const STREAM_TYPE;
@@ -103,14 +102,14 @@ public:
     // @formatter:on
 
 public:
-    WeakServerBackend getServer();
-    WeakSafetyAsync getAsync();
+    WeakServerBackend getServer() { Guard g(_mutex); return WeakServerBackend(_server); }
+    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
 
 // ===============================
 // === PROTECTED SECTION BEGIN ===
 // [WARNING] Don't mutex guard in this protected section.
 protected:
-    bool _initInternalHandles();
+    Err _initInternalHandles();
 
     SharedClient _createClient();
     SharedClient _getSharedClient(Id id);
@@ -123,8 +122,12 @@ protected:
 // =============================
 
 public:
+    virtual std::string dest() const override;
+    virtual int         port() const override;
+
+public:
     /** Initialize this class. */
-    virtual bool init(char const * destination, int port = 0) override;
+    virtual Err init(char const * destination, int port = 0) override;
 
     /**
      * Safety close() operation.
@@ -147,22 +150,18 @@ public:
      *
      * @param[in] id Node id.
      */
-    virtual WeakClient getClient(Id id) override;
+    virtual WeakClient get(Id id) override;
 
     /**
      * Remove client in buffer(map).
      *
      * @param[in] id Node id.
      */
-    virtual bool removeClient(Id id) override;
+    virtual Err remove(Id id) override;
 
 public:
-    virtual std::string getDestination() const override;
-    virtual int getPort() const override;
-
-public:
-    virtual void runBackendConnection(Err code) override;
-    virtual void runBackendClose() override;
+    virtual void backConnection(Err code) override;
+    virtual void backClose() override;
 
 public:
     template <typename Predicated>
