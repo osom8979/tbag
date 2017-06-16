@@ -9,7 +9,11 @@
 #include <libtbag/uvpp/Udp.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Dns.hpp>
+#include <libtbag/network/Uri.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 
+#include <cassert>
 #include <uv.h>
 
 // -------------------
@@ -435,6 +439,122 @@ binf Udp::onAlloc(std::size_t suggested_size)
 void Udp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags)
 {
     tDLogD("Udp::onRecv({}) called (size:{}).", getErrName(code), size);
+}
+
+// ----------------
+// Utility methods.
+// ----------------
+
+bool initUdpIpv4(Udp & udp, std::string const & host, int port)
+{
+    sockaddr_in addr;
+    Err const CODE = initAddress(host, port, &addr);
+    if (CODE != Err::E_SUCCESS) {
+        tDLogE("initUdpIpv4() sockaddr init {} error.", getErrName(CODE));
+        return false;
+    }
+    return true;
+}
+
+bool initUdpIpv6(Udp & udp, std::string const & host, int port)
+{
+    sockaddr_in6 addr;
+    Err const CODE = initAddress(host, port, &addr);
+    if (CODE != Err::E_SUCCESS) {
+        tDLogE("initUdpIpv6() sockaddr init {} error.", getErrName(CODE));
+        return false;
+    }
+    return true;
+}
+
+bool initUdpName(Udp & udp, std::string const & host, int port)
+{
+    Loop loop;
+    DnsAddrInfo addr;
+    if (addr.requestAddrInfoWithSync(loop, host) != Err::E_SUCCESS) {
+        return false;
+    }
+
+    addrinfo const * info = addr.getAddrInfo();
+    assert(info != nullptr);
+    if (info->ai_addrlen == 0) {
+        return false;
+    }
+
+    addrinfo * next = addr.getAddrInfo()->ai_next;
+    assert(next != nullptr);
+
+    sockaddr * sa = info->ai_addr;
+    assert(sa != nullptr);
+
+    if (sa->sa_family == AF_INET) {
+        sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
+        return initUdpIpv4(udp, getIpName(ipv4_sa), port);
+    } else if (sa->sa_family == AF_INET6) {
+        sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
+        return initUdpIpv6(udp, getIpName(ipv6_sa), port);
+    }
+    return false;
+}
+
+bool initUdp(Udp & udp, std::string const & host, int port)
+{
+    using namespace libtbag::network::details;
+    if (isIpv4(host)) {
+        return initUdpIpv4(udp, host, port);
+    } else if (isIpv6(host)) {
+        return initUdpIpv6(udp, host, port);
+    }
+    return initUdpName(udp, host, port);
+}
+
+bool initUdp(Udp & udp, network::Uri const & uri)
+{
+    if (uri.isHost() == false) {
+        tDLogE("initUdp() Unknown host from uri: {}.", uri.getString());
+        return false;
+    }
+    if (uri.isPort()) {
+        return initUdpName(udp, uri.getHost(), uri.getPortNumber());
+    }
+
+    if (uri.isSchema() == false) {
+        tDLogE("initUdp() Unknown schema from uri: {}.", uri.getString());
+        return false;
+    }
+
+    std::string const SERVICE = uri.getSchema();
+    std::string const HOST    = uri.getHost();
+
+    assert(SERVICE.empty() == false);
+    assert(HOST.empty() == false);
+
+    Loop loop;
+    DnsAddrInfo addr;
+    if (addr.requestAddrInfoWithSync(loop, HOST, SERVICE) != Err::E_SUCCESS) {
+        return false;
+    }
+
+    addrinfo const * info = addr.getAddrInfo();
+    assert(info != nullptr);
+    if (info->ai_addrlen == 0) {
+        return false;
+    }
+
+    addrinfo * next = addr.getAddrInfo()->ai_next;
+    assert(next != nullptr);
+
+    sockaddr * sa = info->ai_addr;
+    assert(sa != nullptr);
+
+    if (sa->sa_family == AF_INET) {
+        sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
+        return initUdpIpv4(udp, getIpName(ipv4_sa), ipv4_sa->sin_port);
+    } else if (sa->sa_family == AF_INET6) {
+        sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
+        return initUdpIpv6(udp, getIpName(ipv6_sa), ipv6_sa->sin6_port);
+    }
+    return false;
 }
 
 } // namespace uvpp

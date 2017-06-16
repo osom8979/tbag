@@ -151,6 +151,15 @@ public:
     virtual void onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
 };
 
+// ----------------
+// Utility methods.
+// ----------------
+
+TBAG_API bool initUdpIpv4(Udp & udp, std::string const & host, int port);
+TBAG_API bool initUdpIpv6(Udp & udp, std::string const & host, int port);
+TBAG_API bool initUdpName(Udp & udp, std::string const & host, int port);
+TBAG_API bool initUdp(Udp & udp, std::string const & host, int port);
+
 } // namespace uvpp
 
 // --------------------
