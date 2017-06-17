@@ -19,6 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/uvpp/Handle.hpp>
 #include <libtbag/uvpp/Request.hpp>
+#include <libtbag/network/Uri.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -155,10 +156,12 @@ public:
 // Utility methods.
 // ----------------
 
-TBAG_API bool initUdpIpv4(Udp & udp, std::string const & host, int port);
-TBAG_API bool initUdpIpv6(Udp & udp, std::string const & host, int port);
-TBAG_API bool initUdpName(Udp & udp, std::string const & host, int port);
-TBAG_API bool initUdp(Udp & udp, std::string const & host, int port);
+TBAG_API bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr);
+TBAG_API bool initRecvUdpIpv4(Udp & udp, std::string const & host, int port);
+TBAG_API bool initRecvUdpIpv6(Udp & udp, std::string const & host, int port);
+TBAG_API bool initRecvUdpName(Udp & udp, std::string const & host, int port);
+TBAG_API bool initRecvUdp(Udp & udp, std::string const & host, int port);
+TBAG_API bool initRecvUdp(Udp & udp, network::Uri const & uri);
 
 } // namespace uvpp
 

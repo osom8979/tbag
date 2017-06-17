@@ -136,11 +136,28 @@ std::string getIpName(sockaddr_in6 const * address)
 
 int getPortNumber(sockaddr const * address)
 {
-    switch (address->sa_family) {
-    case AF_INET:  return ntohs(((struct sockaddr_in const *)address)->sin_port);
-    case AF_INET6: return ntohs(((struct sockaddr_in6 const *)address)->sin6_port);
-    default:       return UNKNOWN_PORT_NUMBER;
+    if (address->sa_family == AF_INET) {
+        return getPortNumber((struct sockaddr_in const *)address);
+    } else if (address->sa_family == AF_INET6) {
+        return getPortNumber((struct sockaddr_in6 const *)address);
     }
+    return UNKNOWN_PORT_NUMBER;
+}
+
+int getPortNumber(sockaddr_in const * address)
+{
+    if (address->sin_family == AF_INET) {
+        return ntohs(address->sin_port);
+    }
+    return UNKNOWN_PORT_NUMBER;
+}
+
+int getPortNumber(sockaddr_in6 const * address)
+{
+    if (address->sin6_family == AF_INET6) {
+        return ntohs(address->sin6_port);
+    }
+    return UNKNOWN_PORT_NUMBER;
 }
 
 Err initAddress(std::string const & ip, int port, sockaddr_in * addr)

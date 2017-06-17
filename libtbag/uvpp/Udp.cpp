@@ -10,7 +10,6 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Dns.hpp>
-#include <libtbag/network/Uri.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 
 #include <cassert>
@@ -445,29 +444,44 @@ void Udp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr const
 // Utility methods.
 // ----------------
 
-bool initUdpIpv4(Udp & udp, std::string const & host, int port)
+bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr)
+{
+    if (udp.isInit() == false) {
+        tDLogE("initRecvUdpSock() udp is not initialized.");
+        return false;
+    }
+
+    Err const BIND_CODE = udp.bind(addr);
+    if (BIND_CODE != Err::E_SUCCESS) {
+        tDLogE("initRecvUdpSock() udp bind {} error.", getErrName(BIND_CODE));
+        return false;
+    }
+    return true;
+}
+
+bool initRecvUdpIpv4(Udp & udp, std::string const & host, int port)
 {
     sockaddr_in addr;
     Err const CODE = initAddress(host, port, &addr);
     if (CODE != Err::E_SUCCESS) {
-        tDLogE("initUdpIpv4() sockaddr init {} error.", getErrName(CODE));
+        tDLogE("initRecvUdpIpv4() sockaddr init {} error.", getErrName(CODE));
         return false;
     }
-    return true;
+    return initRecvUdpSock(udp, (struct sockaddr const *)&addr);
 }
 
-bool initUdpIpv6(Udp & udp, std::string const & host, int port)
+bool initRecvUdpIpv6(Udp & udp, std::string const & host, int port)
 {
     sockaddr_in6 addr;
     Err const CODE = initAddress(host, port, &addr);
     if (CODE != Err::E_SUCCESS) {
-        tDLogE("initUdpIpv6() sockaddr init {} error.", getErrName(CODE));
+        tDLogE("initRecvUdpIpv6() sockaddr init {} error.", getErrName(CODE));
         return false;
     }
-    return true;
+    return initRecvUdpSock(udp, (struct sockaddr const *)&addr);
 }
 
-bool initUdpName(Udp & udp, std::string const & host, int port)
+bool initRecvUdpName(Udp & udp, std::string const & host, int port)
 {
     Loop loop;
     DnsAddrInfo addr;
@@ -489,37 +503,37 @@ bool initUdpName(Udp & udp, std::string const & host, int port)
 
     if (sa->sa_family == AF_INET) {
         sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
-        return initUdpIpv4(udp, getIpName(ipv4_sa), port);
+        return initRecvUdpIpv4(udp, getIpName(ipv4_sa), port);
     } else if (sa->sa_family == AF_INET6) {
         sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
-        return initUdpIpv6(udp, getIpName(ipv6_sa), port);
+        return initRecvUdpIpv6(udp, getIpName(ipv6_sa), port);
     }
     return false;
 }
 
-bool initUdp(Udp & udp, std::string const & host, int port)
+bool initRecvUdp(Udp & udp, std::string const & host, int port)
 {
     using namespace libtbag::network::details;
     if (isIpv4(host)) {
-        return initUdpIpv4(udp, host, port);
+        return initRecvUdpIpv4(udp, host, port);
     } else if (isIpv6(host)) {
-        return initUdpIpv6(udp, host, port);
+        return initRecvUdpIpv6(udp, host, port);
     }
-    return initUdpName(udp, host, port);
+    return initRecvUdpName(udp, host, port);
 }
 
-bool initUdp(Udp & udp, network::Uri const & uri)
+bool initRecvUdp(Udp & udp, network::Uri const & uri)
 {
     if (uri.isHost() == false) {
-        tDLogE("initUdp() Unknown host from uri: {}.", uri.getString());
+        tDLogE("initRecvUdp() Unknown host from uri: {}.", uri.getString());
         return false;
     }
     if (uri.isPort()) {
-        return initUdpName(udp, uri.getHost(), uri.getPortNumber());
+        return initRecvUdpName(udp, uri.getHost(), uri.getPortNumber());
     }
 
     if (uri.isSchema() == false) {
-        tDLogE("initUdp() Unknown schema from uri: {}.", uri.getString());
+        tDLogE("initRecvUdp() Unknown schema from uri: {}.", uri.getString());
         return false;
     }
 
@@ -549,10 +563,10 @@ bool initUdp(Udp & udp, network::Uri const & uri)
 
     if (sa->sa_family == AF_INET) {
         sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
-        return initUdpIpv4(udp, getIpName(ipv4_sa), ipv4_sa->sin_port);
+        return initRecvUdpIpv4(udp, getIpName(ipv4_sa), ipv4_sa->sin_port);
     } else if (sa->sa_family == AF_INET6) {
         sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
-        return initUdpIpv6(udp, getIpName(ipv6_sa), ipv6_sa->sin6_port);
+        return initRecvUdpIpv6(udp, getIpName(ipv6_sa), ipv6_sa->sin6_port);
     }
     return false;
 }

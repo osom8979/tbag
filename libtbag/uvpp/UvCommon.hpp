@@ -239,6 +239,8 @@ TBAG_API std::string getIpName(sockaddr_in  const * address);
 TBAG_API std::string getIpName(sockaddr_in6 const * address);
 
 TBAG_API int getPortNumber(sockaddr const * address);
+TBAG_API int getPortNumber(sockaddr_in const * address);
+TBAG_API int getPortNumber(sockaddr_in6 const * address);
 
 TBAG_API Err initAddress(std::string const & ip, int port, sockaddr_in * addr);
 TBAG_API Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr);
