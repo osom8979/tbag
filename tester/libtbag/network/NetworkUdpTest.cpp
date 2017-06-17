@@ -6,11 +6,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/udp/UdpNode.hpp>
-
-using namespace libtbag;
-using namespace libtbag::network;
-using namespace libtbag::network::udp;
 
 TEST(NetworkUdpTest, Default)
 {
