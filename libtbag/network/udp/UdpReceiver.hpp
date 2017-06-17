@@ -66,21 +66,32 @@ public:
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-private:
-    ServerInterface * _parent;
+public:
+    struct Internal;
+    friend struct Internal;
+
+public:
+    using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
+    ServerInterface * _parent;
+    bool _owner_async;
+
+private:
+    UniqueInternal      _internal;
     SharedClientBackend _client;
+    SharedSafetyAsync   _async;
 
 private:
     mutable Mutex _mutex;
 
 public:
-    UdpReceiver(Loop & loop, ServerInterface * parent);
+    UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * parent);
     virtual ~UdpReceiver();
 
 public:
     WeakClientBackend getClient() { Guard g(_mutex); return WeakClientBackend(_client); }
+    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
 
 public:
     virtual Id          id   () const override;

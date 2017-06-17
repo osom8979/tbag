@@ -67,9 +67,15 @@ public:
     using Guard = std::lock_guard<Mutex>;
 
 public:
+    struct Internal;
+    friend struct Internal;
+
+public:
+    using UniqueInternal = std::unique_ptr<Internal>;
+
+public:
     enum class SendStatus
     {
-        SS_NOT_READY,
         SS_READY,           ///< Next: call send.
         SS_ASYNC,           ///< Next: onTimeout or onAsync.
         SS_ASYNC_CANCEL,    ///< Next: onAsync.
@@ -82,6 +88,7 @@ private:
     bool _owner_async;
 
 private:
+    UniqueInternal      _internal;
     SharedClientBackend _client;
     SharedSafetyAsync   _async;
 
