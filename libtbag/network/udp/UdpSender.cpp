@@ -144,6 +144,7 @@ int UdpSender::port() const
     } else if (_addr.ipv6.sin6_family == AF_INET6) {
         return uvpp::getPortNumber(&_addr.ipv6);
     }
+    return 0;
 }
 
 void * UdpSender::udata()
@@ -154,6 +155,7 @@ void * UdpSender::udata()
 
 Err UdpSender::init(char const * destination, int port, uint64_t millisec)
 {
+    // TODO...
 }
 
 Err UdpSender::start()

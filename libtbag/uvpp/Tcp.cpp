@@ -14,9 +14,11 @@
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/network/SocketAddress.hpp>
 
 #include <cstdint>
 #include <uv.h>
+#include "UvUtils.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -207,9 +209,9 @@ void Tcp::onConnect(ConnectRequest & request, Err code)
     tDLogD("Tcp::onConnect({}) called.", getErrName(code));
 }
 
-// -----------------------
-// Client utility methods.
-// -----------------------
+// ----------------
+// Utility methods.
+// ----------------
 
 bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr)
 {
@@ -226,121 +228,14 @@ bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr c
     return true;
 }
 
-bool initCommonClientIpv4(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
-{
-    sockaddr_in addr;
-    Err const CODE = initAddress(host, port, &addr);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrName(CODE));
-        return false;
-    }
-    return initCommonClientSock(tcp, request, (sockaddr const *)&addr);
-}
-
-bool initCommonClientIpv6(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
-{
-    sockaddr_in6 addr;
-    Err const CODE = initAddress(host, port, &addr);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrName(CODE));
-        return false;
-    }
-    return initCommonClientSock(tcp, request, (sockaddr const *)&addr);
-}
-
-bool initCommonClientName(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
-{
-    Loop loop;
-    DnsAddrInfo addr;
-    if (addr.requestAddrInfoWithSync(loop, host) != Err::E_SUCCESS) {
-        return false;
-    }
-
-    addrinfo const * info = addr.getAddrInfo();
-    assert(info != nullptr);
-    if (info->ai_addrlen == 0) {
-        return false;
-    }
-
-    addrinfo * next = addr.getAddrInfo()->ai_next;
-    assert(next != nullptr);
-
-    sockaddr * sa = info->ai_addr;
-    assert(sa != nullptr);
-
-    if (sa->sa_family == AF_INET) {
-        sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
-        return initCommonClientIpv4(tcp, request, getIpName(ipv4_sa), port);
-    } else if (sa->sa_family == AF_INET6) {
-        sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
-        return initCommonClientIpv6(tcp, request, getIpName(ipv6_sa), port);
-    }
-    return false;
-}
-
 bool initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
 {
-    using namespace libtbag::network::details;
-    if (isIpv4(host)) {
-        return initCommonClientIpv4(tcp, request, host, port);
-    } else if (isIpv6(host)) {
-        return initCommonClientIpv6(tcp, request, host, port);
+    libtbag::network::SocketAddress addr;
+    if (addr.init(host, port) != Err::E_SUCCESS) {
+        return false;
     }
-    return initCommonClientName(tcp, request, host, port);
+    return initCommonClientSock(tcp, request, addr.getCommon());
 }
-
-bool initCommonClient(Tcp & tcp, ConnectRequest & request, network::Uri const & uri)
-{
-    if (uri.isHost() == false) {
-        tDLogE("initCommonClient() Unknown host from uri: {}.", uri.getString());
-        return false;
-    }
-    if (uri.isPort()) {
-        return initCommonClientName(tcp, request, uri.getHost(), uri.getPortNumber());
-    }
-
-    if (uri.isSchema() == false) {
-        tDLogE("initCommonClient() Unknown schema from uri: {}.", uri.getString());
-        return false;
-    }
-
-    std::string const SERVICE = uri.getSchema();
-    std::string const HOST    = uri.getHost();
-
-    assert(SERVICE.empty() == false);
-    assert(HOST.empty() == false);
-
-    Loop loop;
-    DnsAddrInfo addr;
-    if (addr.requestAddrInfoWithSync(loop, HOST, SERVICE) != Err::E_SUCCESS) {
-        return false;
-    }
-
-    addrinfo const * info = addr.getAddrInfo();
-    assert(info != nullptr);
-    if (info->ai_addrlen == 0) {
-        return false;
-    }
-
-    addrinfo * next = addr.getAddrInfo()->ai_next;
-    assert(next != nullptr);
-
-    sockaddr * sa = info->ai_addr;
-    assert(sa != nullptr);
-
-    if (sa->sa_family == AF_INET) {
-        sockaddr_in const * ipv4_sa = reinterpret_cast<sockaddr_in const *>(sa);
-        return initCommonClientIpv4(tcp, request, getIpName(ipv4_sa), ipv4_sa->sin_port);
-    } else if (sa->sa_family == AF_INET6) {
-        sockaddr_in6 const * ipv6_sa = reinterpret_cast<sockaddr_in6 const *>(sa);
-        return initCommonClientIpv6(tcp, request, getIpName(ipv6_sa), ipv6_sa->sin6_port);
-    }
-    return false;
-}
-
-// -----------------------
-// Server utility methods.
-// -----------------------
 
 bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
 {
@@ -363,37 +258,13 @@ bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
     return true;
 }
 
-bool initCommonServerIpv4(Tcp & tcp, std::string const & ip, int port)
-{
-    sockaddr_in addr;
-    Err const CODE = initAddress(ip, port, &addr);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv4() sockaddr init {} error.", getErrName(CODE));
-        return false;
-    }
-    return initCommonServerSock(tcp, (sockaddr const *)&addr);
-}
-
-bool initCommonServerIpv6(Tcp & tcp, std::string const & ip, int port)
-{
-    sockaddr_in6 addr;
-    Err const CODE = initAddress(ip, port, &addr);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("initCommonServerIpv6() sockaddr init {} error.", getErrName(CODE));
-        return false;
-    }
-    return initCommonServerSock(tcp, (sockaddr const *)&addr);
-}
-
 bool initCommonServer(Tcp & tcp, std::string const & ip, int port)
 {
-    using namespace libtbag::network::details;
-    if (isIpv4(ip)) {
-        return initCommonServerIpv4(tcp, ip, port);
-    } else if (isIpv6(ip)) {
-        return initCommonServerIpv6(tcp, ip, port);
+    libtbag::network::SocketAddress addr;
+    if (addr.init(ip, port) != Err::E_SUCCESS) {
+        return false;
     }
-    return false;
+    return initCommonServerSock(tcp, addr.getCommon());
 }
 
 } // namespace uvpp

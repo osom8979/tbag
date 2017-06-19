@@ -157,11 +157,7 @@ public:
 // ----------------
 
 TBAG_API bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr);
-TBAG_API bool initRecvUdpIpv4(Udp & udp, std::string const & host, int port);
-TBAG_API bool initRecvUdpIpv6(Udp & udp, std::string const & host, int port);
-TBAG_API bool initRecvUdpName(Udp & udp, std::string const & host, int port);
-TBAG_API bool initRecvUdp(Udp & udp, std::string const & host, int port);
-TBAG_API bool initRecvUdp(Udp & udp, network::Uri const & uri);
+TBAG_API bool initRecvUdp    (Udp & udp, std::string const & host, int port);
 
 } // namespace uvpp
 

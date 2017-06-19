@@ -98,15 +98,9 @@ public:
 
 // @formatter:off
 TBAG_API bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr);
-TBAG_API bool initCommonClientIpv4(Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
-TBAG_API bool initCommonClientIpv6(Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
-TBAG_API bool initCommonClientName(Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
 TBAG_API bool initCommonClient    (Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
-TBAG_API bool initCommonClient    (Tcp & tcp, ConnectRequest & request, network::Uri const & uri);
 
 TBAG_API bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr);
-TBAG_API bool initCommonServerIpv4(Tcp & tcp, std::string const & ip, int port);
-TBAG_API bool initCommonServerIpv6(Tcp & tcp, std::string const & ip, int port);
 TBAG_API bool initCommonServer    (Tcp & tcp, std::string const & ip, int port);
 // @formatter:on
 
