@@ -58,6 +58,81 @@ struct UdpSender::Internal : private Noncopyable
         return true;
     }
 
+    Err sendReal(binf const * buffer, std::size_t size)
+    {
+        assert(_parent != nullptr);
+        UdpSender & p = *_parent;
+
+        assert(static_cast<bool>(p._client));
+        return p._client->send(p._sender.send_req, buffer, size, p._addr.getCommon());
+    }
+
+    void copyToSendBuffer(binf const * buffer, std::size_t size)
+    {
+        assert(_parent != nullptr);
+        UdpSender & p = *_parent;
+
+        // COPY TO TEMP BUFFER ...
+        p._sender.buffers.resize(size);
+        for (std::size_t i = 0; i < size; ++i) {
+            char const * b = (buffer + i)->buffer;
+            std::size_t bs = (buffer + i)->size;
+            p._sender.buffers[i].assign(b, b + bs);
+        }
+    }
+
+    std::vector<binf> getSendBufferInfo()
+    {
+        assert(_parent != nullptr);
+        UdpSender & p = *_parent;
+
+        std::size_t SIZE = p._sender.buffers.size();
+        std::vector<binf> result(SIZE);
+        for (std::size_t i = 0; i < SIZE; ++i) {
+            result[i].buffer = &p._sender.buffers[i][0];
+            result[i].size   =  p._sender.buffers[i].size();
+        }
+        return result;
+    }
+
+    Err autoSend(binf const * buffer, std::size_t size)
+    {
+        assert(_parent != nullptr);
+        UdpSender & p = *_parent;
+
+        if (p._sender.status != SendStatus::SS_READY) {
+            tDLogE("UdpSender::Internal::autoSend() Illegal state error: {}",
+                   getSendStatusName(p._sender.status));
+            return Err::E_ILLSTATE;
+        }
+
+        assert(static_cast<bool>(p._client));
+        assert(static_cast<bool>(p._async));
+
+        Loop * loop = p._client->getLoop();
+        assert(loop != nullptr);
+
+        if (loop->isAliveAndThisThread() || static_cast<bool>(p._async) == false) {
+            Err const CODE = sendReal(buffer, size);
+            if (CODE != Err::E_SUCCESS) {
+                tDLogE("UdpSender::Internal::autoSend() Write {} error.", getErrName(CODE));
+                return CODE;
+            }
+            p._sender.status = SendStatus::SS_SEND;
+
+        } else {
+            copyToSendBuffer(buffer, size);
+            auto job = p._async->newSendFunc(std::bind(&UdpSender::onAsyncSend, _parent));
+            if (static_cast<bool>(job) == false) {
+                tDLogE("UdpSender::Internal::autoSend() New job error.");
+                return Err::E_BADALLOC;
+            }
+            p._sender.status = SendStatus::SS_ASYNC;
+        }
+
+        return Err::E_SUCCESS;
+    }
+
     void closeAll()
     {
         assert(_parent != nullptr);
@@ -119,43 +194,79 @@ char const * UdpSender::getSendStatusName(SendStatus status) TBAG_NOEXCEPT
 
 void UdpSender::onAsyncSend()
 {
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+
+    if (_sender.status == SendStatus::SS_ASYNC_CANCEL) {
+        tDLogN("UdpSender::onAsyncSend() Cancel async write.");
+        _sender.status = SendStatus::SS_READY;
+        return;
+    }
+
+    if (_sender.status != SendStatus::SS_ASYNC) {
+        tDLogE("UdpSender::onAsyncSend() Error state: {}", getSendStatusName(_sender.status));
+        _sender.status = SendStatus::SS_READY;
+        return;
+    }
+
+    assert(_sender.status == SendStatus::SS_ASYNC);
+    auto binfs = _internal->getSendBufferInfo();
+    Err const CODE = _internal->sendReal(&binfs[0], binfs.size());
+
+    if (CODE == Err::E_SUCCESS) {
+        _sender.status = SendStatus::SS_SEND;
+    } else {
+        tDLogE("UdpSender::onAsyncSend() {} error.", getErrName(CODE));
+        _sender.status = SendStatus::SS_READY;
+    }
 }
 
 UdpSender::Id UdpSender::id() const
 {
     assert(static_cast<bool>(_client));
+    Guard const MUTEX_GUARD(_mutex);
     return _client->id();
 }
 
 std::string UdpSender::dest() const
 {
-    if (_addr.ipv4.sin_family == AF_INET) {
-        return uvpp::getIpName(&_addr.ipv4);
-    } else if (_addr.ipv6.sin6_family == AF_INET6) {
-        return uvpp::getIpName(&_addr.ipv6);
-    }
-    return std::string(); // Unsupported family.
+    Guard const MUTEX_GUARD(_mutex);
+    return _addr.getIpName();
 }
 
 int UdpSender::port() const
 {
-    if (_addr.ipv4.sin_family == AF_INET) {
-        return uvpp::getPortNumber(&_addr.ipv4);
-    } else if (_addr.ipv6.sin6_family == AF_INET6) {
-        return uvpp::getPortNumber(&_addr.ipv6);
-    }
-    return 0;
+    Guard const MUTEX_GUARD(_mutex);
+    return _addr.getPortNumber();
 }
 
 void * UdpSender::udata()
 {
     assert(static_cast<bool>(_client));
+    Guard const MUTEX_GUARD(_mutex);
     return _client->getUserData();
 }
 
-Err UdpSender::init(char const * destination, int port, uint64_t millisec)
+Err UdpSender::init(char const * destination, int port, uint64_t UNUSED_PARAM(millisec))
 {
-    // TODO...
+    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_internal));
+
+    Guard const MUTEX_GUARD(_mutex);
+    if (static_cast<bool>(_client) == false) {
+        return Err::E_EXPIRED;
+    }
+
+    if (_addr.init(destination, port) != Err::E_SUCCESS) {
+        tDLogE("UdpReceiver::init() Initialize fail.");
+        return Err::E_UNKNOWN;
+    }
+
+    if (_internal->initHandles() == false) {
+        tDLogE("UdpReceiver::init() Initialize fail (internal handles).");
+        return Err::E_UNKNOWN;
+    }
+    return Err::E_SUCCESS;
 }
 
 Err UdpSender::start()
@@ -182,7 +293,7 @@ void UdpSender::close()
     } else {
         tDLogD("UdpReceiver::close() async request.");
         _async->newSendFunc([&](){
-            Guard const MUTEX_GUARD(_mutex);
+            Guard const ASYNC_MUTEX_GUARD(_mutex);
             _internal->closeAll();
         });
     }
@@ -190,17 +301,28 @@ void UdpSender::close()
 
 void UdpSender::cancel()
 {
-    // TODO...
+    Guard const MUTEX_GUARD(_mutex);
+    if (_sender.status == SendStatus::SS_ASYNC) {
+        _sender.status = SendStatus::SS_ASYNC_CANCEL;
+    }
 }
 
-Err UdpSender::write(binf const * buffer, std::size_t size, uint64_t millisec)
+Err UdpSender::write(binf const * buffer, std::size_t size, uint64_t UNUSED_PARAM(millisec))
 {
-    // TODO...
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->autoSend(buffer, size);
 }
 
-Err UdpSender::write(char const * buffer, std::size_t size, uint64_t millisec)
+Err UdpSender::write(char const * buffer, std::size_t size, uint64_t UNUSED_PARAM(millisec))
 {
-    // TODO...
+    assert(static_cast<bool>(_internal));
+
+    binf info;
+    info.buffer = const_cast<char*>(buffer);
+    info.size   = size;
+
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->autoSend(&info, 1U);
 }
 
 // --------------

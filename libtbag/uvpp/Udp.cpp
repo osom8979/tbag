@@ -307,7 +307,7 @@ Err Udp::setTtl(int ttl)
     return convertUvErrorToErrWithLogging("Udp::setTtl()", CODE);
 }
 
-Err Udp::send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr)
+Err Udp::send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr const * addr)
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Udp::send() buffer info size too large.");

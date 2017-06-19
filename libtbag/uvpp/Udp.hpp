@@ -111,15 +111,15 @@ public:
     Err setTtl(int ttl);
 
     /** Send data over the UDP socket. */
-    Err send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr const * addr);
+    Err send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr const * addr);
     Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
     // @formatter:off
-    inline Err send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr_in const * addr)
+    inline Err send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr_in const * addr)
     { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
     inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in const * addr)
     { return send(request, buffer, size, (struct sockaddr const *)addr); }
-    inline Err send(UdpSendRequest & request, binf * infos, std::size_t infos_size, sockaddr_in6 const * addr)
+    inline Err send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr_in6 const * addr)
     { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
     inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in6 const * addr)
     { return send(request, buffer, size, (struct sockaddr const *)addr); }

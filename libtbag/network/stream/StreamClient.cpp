@@ -393,7 +393,7 @@ void StreamClient::onAsyncWrite()
     }
 
     if (_writer.status != WriteStatus::WS_ASYNC) {
-        tDLogE("StreamClient::onAsyncWrite() Error state: {}", static_cast<int>(_writer.status));
+        tDLogE("StreamClient::onAsyncWrite() Error state: {}", getWriteStatusName(_writer.status));
         _internal->stopShutdownTimer();
         _writer.status = WriteStatus::WS_READY;
         return;

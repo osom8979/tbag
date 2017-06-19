@@ -7,9 +7,7 @@
 
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/log/Log.hpp>
-
 #include <cassert>
-#include "HttpServer.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

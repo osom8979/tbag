@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <uv.h>
-#include "UvUtils.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

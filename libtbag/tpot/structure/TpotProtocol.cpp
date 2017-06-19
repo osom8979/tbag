@@ -6,10 +6,8 @@
  */
 
 #include <libtbag/tpot/structure/TpotProtocol.hpp>
-#include <libtbag/log/Log.hpp>
-
 #include <libtbag/3rd/jsoncpp/json.h>
-#include "TpotProtocol.hpp"
+#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

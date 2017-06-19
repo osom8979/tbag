@@ -21,6 +21,7 @@
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
 #include <libtbag/network/udp/UdpNodeBackend.hpp>
+#include <libtbag/network/SocketAddress.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/Request.hpp>
 
@@ -47,6 +48,7 @@ public:
     using Udp  = uvpp::Udp;
     using binf = uvpp::binf;
 
+    using SocketAddress  = network::SocketAddress;
     using UdpSendRequest = uvpp::UdpSendRequest;
 
 public:
@@ -94,12 +96,7 @@ private:
 
 private:
     mutable Mutex _mutex;
-
-    union {
-        struct sockaddr_in  ipv4;
-        struct sockaddr_in6 ipv6;
-    } _addr;
-
+    SocketAddress _addr;
     struct {
         SendStatus     status;
         UdpSendRequest send_req;
@@ -119,9 +116,9 @@ private:
 
 public:
     inline SendStatus getSendStatus() const TBAG_NOEXCEPT
-    { return _sender.status; }
+    { Guard g(_mutex); return _sender.status; }
     inline char const * getSendStatusName() const TBAG_NOEXCEPT
-    { return getSendStatusName(_sender.status); }
+    { Guard g(_mutex); return getSendStatusName(_sender.status); }
 
 public:
     virtual Id          id   () const override;
