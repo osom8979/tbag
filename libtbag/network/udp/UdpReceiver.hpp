@@ -115,11 +115,19 @@ public:
 
 // Event backend.
 public:
-    virtual void backConnect(Err code) override;
+    virtual void backConnect (Err code) override;
     virtual void backShutdown(Err code) override;
-    virtual void backWrite(Err code) override;
-    virtual void backRead(Err code, ReadPacket const & packet) override;
-    virtual void backClose() override;
+    virtual void backWrite   (Err code) override;
+    virtual void backRead    (Err code, ReadPacket const & packet) override;
+    virtual void backClose   () override;
+
+// Event callback.
+private:
+    virtual void onConnect (Err code) override;
+    virtual void onShutdown(Err code) override;
+    virtual void onWrite   (Err code) override;
+    virtual void onRead    (Err code, ReadPacket const & packet) override;
+    virtual void onClose   () override;
 };
 
 } // namespace udp

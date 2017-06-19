@@ -157,7 +157,7 @@ struct UdpSender::Internal : private Noncopyable
 // ---------------------------
 
 UdpSender::UdpSender(Loop & loop, SharedSafetyAsync async, ServerInterface * parent)
-        : _parent(parent)
+        : _parent(parent), _internal(new Internal(this))
 {
     _client = loop.newHandle<UdpNodeBackend>(loop, this);
     assert(static_cast<bool>(_client));
@@ -190,35 +190,6 @@ char const * UdpSender::getSendStatusName(SendStatus status) TBAG_NOEXCEPT
 
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
     return "UNKNOWN";
-}
-
-void UdpSender::onAsyncSend()
-{
-    assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-
-    if (_sender.status == SendStatus::SS_ASYNC_CANCEL) {
-        tDLogN("UdpSender::onAsyncSend() Cancel async write.");
-        _sender.status = SendStatus::SS_READY;
-        return;
-    }
-
-    if (_sender.status != SendStatus::SS_ASYNC) {
-        tDLogE("UdpSender::onAsyncSend() Error state: {}", getSendStatusName(_sender.status));
-        _sender.status = SendStatus::SS_READY;
-        return;
-    }
-
-    assert(_sender.status == SendStatus::SS_ASYNC);
-    auto binfs = _internal->getSendBufferInfo();
-    Err const CODE = _internal->sendReal(&binfs[0], binfs.size());
-
-    if (CODE == Err::E_SUCCESS) {
-        _sender.status = SendStatus::SS_SEND;
-    } else {
-        tDLogE("UdpSender::onAsyncSend() {} error.", getErrName(CODE));
-        _sender.status = SendStatus::SS_READY;
-    }
 }
 
 UdpSender::Id UdpSender::id() const
@@ -341,12 +312,12 @@ void UdpSender::backShutdown(Err code)
 
 void UdpSender::backWrite(Err code)
 {
-    assert(static_cast<bool>(_internal));
     _mutex.lock();
     _sender.status = SendStatus::SS_READY;
     _mutex.unlock();
 
-    onWrite(code);
+    assert(_parent != nullptr);
+    _parent->onClientWrite(_parent->get(id()), code);
 }
 
 void UdpSender::backRead(Err code, ReadPacket const & packet)
@@ -362,7 +333,66 @@ void UdpSender::backClose()
     _sender.status = SendStatus::SS_END;
     _mutex.unlock();
 
-    onClose();
+    assert(_parent != nullptr);
+    _parent->onClientClose(_parent->get(id()));
+}
+
+// ---------------
+// Event callback.
+// ---------------
+
+void UdpSender::onConnect(Err code)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpSender::onShutdown(Err code)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpSender::onWrite(Err code)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpSender::onRead(Err code, ReadPacket const & packet)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpSender::onClose()
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpSender::onAsyncSend()
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+
+    if (_sender.status == SendStatus::SS_ASYNC_CANCEL) {
+        tDLogN("UdpSender::onAsyncSend() Cancel async write.");
+        _sender.status = SendStatus::SS_READY;
+        return;
+    }
+
+    if (_sender.status != SendStatus::SS_ASYNC) {
+        tDLogE("UdpSender::onAsyncSend() Error state: {}", getSendStatusName(_sender.status));
+        _sender.status = SendStatus::SS_READY;
+        return;
+    }
+
+    assert(_sender.status == SendStatus::SS_ASYNC);
+    auto binfs = _internal->getSendBufferInfo();
+    Err const CODE = _internal->sendReal(&binfs[0], binfs.size());
+
+    if (CODE == Err::E_SUCCESS) {
+        _sender.status = SendStatus::SS_SEND;
+    } else {
+        tDLogE("UdpSender::onAsyncSend() {} error.", getErrName(CODE));
+        _sender.status = SendStatus::SS_READY;
+    }
 }
 
 } // namespace udp

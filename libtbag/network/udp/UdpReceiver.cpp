@@ -87,7 +87,7 @@ UdpReceiver::UdpReceiver(Loop & loop, ServerInterface * parent) : UdpReceiver(lo
 }
 
 UdpReceiver::UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * parent)
-        : _parent(parent), _bind_flags(0)
+        : _parent(parent), _bind_flags(0), _internal(new Internal(this))
 {
     _client = loop.newHandle<UdpNodeBackend>(loop, this);
     assert(static_cast<bool>(_client));
@@ -150,7 +150,7 @@ Err UdpReceiver::init(char const * destination, int port, uint64_t UNUSED_PARAM(
         return Err::E_UNKNOWN;
     }
 
-    return Err::E_SUCCESS;
+    return _client->startRecv();
 }
 
 Err UdpReceiver::start()
@@ -231,7 +231,8 @@ void UdpReceiver::backWrite(Err code)
 
 void UdpReceiver::backRead(Err code, ReadPacket const & packet)
 {
-    onRead(code, packet);
+    assert(_parent != nullptr);
+    _parent->onClientRead(_parent->get(id()), code, packet);
 }
 
 void UdpReceiver::backClose()
@@ -241,7 +242,37 @@ void UdpReceiver::backClose()
     _internal->closeAll();
     _mutex.unlock();
 
-    onClose();
+    assert(_parent != nullptr);
+    _parent->onClientClose(_parent->get(id()));
+}
+
+// ---------------
+// Event callback.
+// ---------------
+
+void UdpReceiver::onConnect(Err code)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpReceiver::onShutdown(Err code)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpReceiver::onWrite(Err code)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpReceiver::onRead(Err code, ReadPacket const & packet)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
+
+void UdpReceiver::onClose()
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
 }
 
 } // namespace udp
