@@ -156,8 +156,8 @@ public:
 // Utility methods.
 // ----------------
 
-TBAG_API bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr);
-TBAG_API bool initRecvUdp    (Udp & udp, std::string const & host, int port);
+TBAG_API bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr, unsigned int flags = 0);
+TBAG_API bool initRecvUdp(Udp & udp, std::string const & host, int port, unsigned int flags = 0);
 
 } // namespace uvpp
 

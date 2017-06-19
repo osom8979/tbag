@@ -445,14 +445,14 @@ void Udp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr const
 // Utility methods.
 // ----------------
 
-bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr)
+bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr, unsigned int flags)
 {
     if (udp.isInit() == false) {
         tDLogE("initRecvUdpSock() udp is not initialized.");
         return false;
     }
 
-    Err const BIND_CODE = udp.bind(addr);
+    Err const BIND_CODE = udp.bind(addr, flags);
     if (BIND_CODE != Err::E_SUCCESS) {
         tDLogE("initRecvUdpSock() udp bind {} error.", getErrName(BIND_CODE));
         return false;
@@ -460,7 +460,7 @@ bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr)
     return true;
 }
 
-bool initRecvUdp(Udp & udp, std::string const & host, int port)
+bool initRecvUdp(Udp & udp, std::string const & host, int port, unsigned int flags)
 {
     libtbag::network::SocketAddress addr;
     if (addr.init(host, port) != Err::E_SUCCESS) {

@@ -81,7 +81,8 @@ struct UdpReceiver::Internal : private Noncopyable
 // UdpReceiver implementation.
 // ---------------------------
 
-UdpReceiver::UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * parent) : _parent(parent)
+UdpReceiver::UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * parent)
+        : _parent(parent), _bind_flags(0)
 {
     _client = loop.newHandle<UdpNodeBackend>(loop, this);
     assert(static_cast<bool>(_client));
@@ -124,7 +125,7 @@ void * UdpReceiver::udata()
     return _client->getUserData();
 }
 
-Err UdpReceiver::init(char const * destination, int port, uint64_t millisec)
+Err UdpReceiver::init(char const * destination, int port, uint64_t UNUSED_PARAM(millisec))
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_internal));
@@ -134,7 +135,7 @@ Err UdpReceiver::init(char const * destination, int port, uint64_t millisec)
         return Err::E_EXPIRED;
     }
 
-    if (uvpp::initRecvUdp(*_client, destination, port) == false) {
+    if (uvpp::initRecvUdp(*_client, destination, port, _bind_flags) == false) {
         tDLogE("UdpReceiver::init() Initialize fail.");
         return Err::E_UNKNOWN;
     }

@@ -76,6 +76,7 @@ public:
 private:
     ServerInterface * _parent;
     bool _owner_async;
+    unsigned int _bind_flags;
 
 private:
     UniqueInternal      _internal;
@@ -92,6 +93,9 @@ public:
 public:
     WeakClientBackend getClient() { Guard g(_mutex); return WeakClientBackend(_client); }
     WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
+
+    inline void setBindFlags(unsigned int flags) TBAG_NOEXCEPT { Guard g(_mutex); _bind_flags = flags; }
+    inline unsigned int getBindFlags() const TBAG_NOEXCEPT { Guard g(_mutex); return _bind_flags; }
 
 public:
     virtual Id          id   () const override;
