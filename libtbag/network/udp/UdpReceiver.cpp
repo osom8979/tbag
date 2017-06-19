@@ -81,6 +81,11 @@ struct UdpReceiver::Internal : private Noncopyable
 // UdpReceiver implementation.
 // ---------------------------
 
+UdpReceiver::UdpReceiver(Loop & loop, ServerInterface * parent) : UdpReceiver(loop, SharedSafetyAsync(), parent)
+{
+    // EMPTY.
+}
+
 UdpReceiver::UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * parent)
         : _parent(parent), _bind_flags(0)
 {

@@ -56,7 +56,7 @@ public:
 public:
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
-    using   WeakSafetyAsync = std::shared_ptr<SafetyAsync>;
+    using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
 
 public:
     using Id      = id::Id;
@@ -87,6 +87,7 @@ private:
     mutable Mutex _mutex;
 
 public:
+    UdpReceiver(Loop & loop, ServerInterface * parent);
     UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * parent);
     virtual ~UdpReceiver();
 
