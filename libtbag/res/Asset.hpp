@@ -98,7 +98,7 @@ public:
     Path getGlobalDirPath() const
     {
 #if defined(TBAG_PLATFORM_WINDOWS)
-        Path const PARENT("C:\\Program Files");
+        Path const PARENT("C:");
 #elif defined(TBAG_PLATFORM_MACOS)
         Path const PARENT("/var");
 #else
