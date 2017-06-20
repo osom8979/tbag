@@ -407,6 +407,17 @@ macro (tbag_modules__apply_gflags)
     endif ()
 endmacro ()
 
+macro (tbag_modules__check_ffmpeg)
+    if (NOT FFmpeg_FOUND)
+        message (WARNING "Not found FFmpeg.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_ffmpeg)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${FFmpeg_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${FFmpeg_LIBRARIES})
+endmacro ()
+
 macro (tbag_modules__check_glog)
     if (NOT GLog_FOUND)
         message (WARNING "Not found Google-glog.")
