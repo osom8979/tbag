@@ -89,23 +89,17 @@ public:
         return Path::getExeDir();
     }
 
-public:
-    virtual String getGlobalName() const
-    {
-        return String(LIBTBAG_TITLE_STRING);
-    }
-
-    Path getGlobalDirPath() const
+    inline static Path getGlobalDirPath()
     {
 #if defined(TBAG_PLATFORM_WINDOWS)
-        Path const PARENT("C:");
+        return Path("C:");
 #elif defined(TBAG_PLATFORM_MACOS)
-        Path const PARENT("/var");
+        return Path("/var");
 #else
-        Path const PARENT("/var");
+        return Path("/var");
 #endif
-        return PARENT / getGlobalName();
     }
+
 };
 
 #ifndef CREATE_ASSET_PATH
