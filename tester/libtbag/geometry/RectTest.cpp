@@ -89,8 +89,8 @@ TEST(RectTest, Operators_2)
     Rect r1 = {1, 1, 2, 2};
     Rect r2 = {2, 2, 2, 2};
 
-    ASSERT_EQ(makeRect(2, 2,  1,  1), r1 & r2);
-    ASSERT_EQ(makeRect(1, 1,  3,  3), r1 | r2);
+    ASSERT_EQ(makeRect(2, 2, 1, 1), r1 & r2);
+    ASSERT_EQ(makeRect(1, 1, 3, 3), r1 | r2);
 }
 
 TEST(RectTest, Utility)
@@ -192,10 +192,25 @@ TEST(RectTest, ClipRect_False)
     ASSERT_FALSE(clipRect(Rect{10, 20, 10, 10}, Rect{30, 10, 10, 10}));
 }
 
+TEST(RectTest, AbsoluteRect)
+{
+    /*
+     *  0 |  10  20
+     * ---+--------
+     *    |
+     * 10 |   +---+
+     *    |   |   |
+     * 20 |   +---+ <-(x,y)
+     */
+    Rect r = {20, 20, -10, -10};
+    ASSERT_EQ(makeRect(10, 10, 10, 10), getAbsoluteRect(r));
+    ASSERT_EQ(makeRect(10, 10, 10, 10), getAbsoluteRect(makeRect(10, 10, 10, 10)));
+}
+
 TEST(RectTest, String)
 {
     Rect p = {1, 2, 3, 4};
-    toString(p);
+    ASSERT_FALSE(toString(p).empty());
 }
 
 // Don't use std::atomic<Rect>

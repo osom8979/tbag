@@ -340,9 +340,21 @@ checkInside(BaseRect<T> const & base, BasePoint<T> const & p) TBAG_NOEXCEPT
     return checkInside(base, p.x, p.y);
 }
 
-// ---------
-// Clipping.
-// ---------
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+template <typename T>
+inline BaseRect<typename remove_cr<T>::type>
+getAbsoluteRect(BaseRect<T> const & r) TBAG_NOEXCEPT
+{
+    typedef typename remove_cr<T>::type __point_tparam;
+    __point_tparam x = getLeftTopX(r);
+    __point_tparam y = getLeftTopY(r);
+    __point_tparam w = getRightBottomX(r) - x;
+    __point_tparam h = getRightBottomY(r) - y;
+    return makeRect(x, y, w, h);
+}
 
 template <typename T>
 inline bool
