@@ -36,3 +36,21 @@ TEST(ColorTest, MakeColor)
     ASSERT_NE(c1, c2);
 }
 
+TEST(ColorTest, Operators)
+{
+    Color c1 = makeColor(1, 2, 3);
+    Color c2 = makeColor(4, 5, 6);
+
+    Color c3 = c2 + c1;
+    Color c4 = c2 - c1;
+
+    ASSERT_EQ(makeColor(5, 7, 9), c3);
+    ASSERT_EQ(makeColor(3, 3, 3), c4);
+
+    Color c5 = c1 + 1;
+    Color c6 = c1 - 1;
+
+    ASSERT_EQ(makeColor(2, 3, 4), c5);
+    ASSERT_EQ(makeColor(0, 1, 2), c6);
+}
+

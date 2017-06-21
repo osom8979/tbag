@@ -145,15 +145,75 @@ Color const ASBESTOS_COLOR      = {127, 140, 141};
 // Utility.
 // --------
 
-/** The Rect are equal? */
-inline bool operator == (Color const & c1, Color const & c2) TBAG_NOEXCEPT
+/** The Color are equal? */
+inline bool operator ==(Color const & c1, Color const & c2) TBAG_NOEXCEPT
 {
     return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
 }
 
-inline bool operator != (Color const & c1, Color const & c2) TBAG_NOEXCEPT
+inline bool operator !=(Color const & c1, Color const & c2) TBAG_NOEXCEPT
 {
     return !(c1 == c2);
+}
+
+inline Color & operator +=(Color & c1, Color const & c2) TBAG_NOEXCEPT
+{
+    c1.r += c2.r;
+    c1.g += c2.g;
+    c1.b += c2.b;
+    return c1;
+}
+
+inline Color & operator +=(Color & c1, Channel c) TBAG_NOEXCEPT
+{
+    c1.r += c;
+    c1.g += c;
+    c1.b += c;
+    return c1;
+}
+
+inline Color operator +(Color const & c1, Color const & c2) TBAG_NOEXCEPT
+{
+    Color color = c1;
+    color += c2;
+    return color;
+}
+
+inline Color operator +(Color const & c1, Channel c) TBAG_NOEXCEPT
+{
+    Color color = c1;
+    color += c;
+    return color;
+}
+
+inline Color & operator -=(Color & c1, Color const & c2) TBAG_NOEXCEPT
+{
+    c1.r -= c2.r;
+    c1.g -= c2.g;
+    c1.b -= c2.b;
+    return c1;
+}
+
+inline Color & operator -=(Color & c1, Channel c) TBAG_NOEXCEPT
+{
+    c1.r -= c;
+    c1.g -= c;
+    c1.b -= c;
+    return c1;
+}
+
+inline Color operator -(Color const & c1, Color const & c2) TBAG_NOEXCEPT
+{
+    Color color = c1;
+    color -= c2;
+    return color;
+}
+
+inline Color operator -(Color const & c1, Channel c) TBAG_NOEXCEPT
+{
+    Color color = c1;
+    color -= c;
+    return color;
 }
 
 /** Create color instance. */
