@@ -206,6 +206,15 @@ makeRect(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
 }
 
 template <typename T>
+TBAG_CONSTEXPR BaseRect<typename remove_cr<T>::type>
+makeRect(BasePoint<T> const & lt, BasePoint<T> const & rb) TBAG_NOEXCEPT
+{
+    typedef typename remove_cr<T>::type __remove_cr;
+    typedef BaseRect<__remove_cr> __rect_type;
+    return __rect_type{lt.x, lt.y, rb.x - lt.x, rb.y - lt.y};
+}
+
+template <typename T>
 inline BasePoint<typename remove_cr<T>::type>
 getPoint(BaseRect<T> const & r) TBAG_NOEXCEPT
 {
@@ -338,6 +347,13 @@ inline bool
 checkInside(BaseRect<T> const & base, BasePoint<T> const & p) TBAG_NOEXCEPT
 {
     return checkInside(base, p.x, p.y);
+}
+
+template <typename T>
+inline bool
+checkInside(BaseRect<T> const & base, BaseRect<T> const & r) TBAG_NOEXCEPT
+{
+    return checkInside(base, r.x, r.y) && checkInside(base, r.x + r.width, r.y + r.height);
 }
 
 // ------------------------

@@ -121,7 +121,7 @@ TEST(RenderingLoopTest, FastMachine)
 
     ASSERT_EQ(       1, callback.start_count);
     ASSERT_EQ(       1, callback.end_count);
-    ASSERT_LE(_MIN_FPS, callback.update_count);
+    ASSERT_LE(_MIN_FPS, callback.update_count); // TODO: Expected: (_MIN_FPS) <= (callback.update_count), actual: 7 vs 2
     ASSERT_GE(_MAX_FPS, callback.update_count);
     ASSERT_GE(    _FPS, callback.render_count);
 }

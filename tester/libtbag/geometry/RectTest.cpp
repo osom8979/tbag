@@ -141,6 +141,7 @@ TEST(RectTest, CheckInside)
     Point p2 = {25, 25};
     ASSERT_TRUE(checkInside(r, p1));
     ASSERT_TRUE(checkInside(r, p2));
+    ASSERT_TRUE(checkInside(r, makeRect(p1, p2)));
 
     Point p3 = {10, 25};
     Point p4 = {40, 25};
@@ -150,6 +151,14 @@ TEST(RectTest, CheckInside)
     ASSERT_FALSE(checkInside(r, p4));
     ASSERT_FALSE(checkInside(r, p5));
     ASSERT_FALSE(checkInside(r, p6));
+    ASSERT_FALSE(checkInside(r, makeRect(p1, p3)));
+    ASSERT_FALSE(checkInside(r, makeRect(p1, p4)));
+    ASSERT_FALSE(checkInside(r, makeRect(p1, p5)));
+    ASSERT_FALSE(checkInside(r, makeRect(p1, p6)));
+    ASSERT_FALSE(checkInside(r, makeRect(p2, p3)));
+    ASSERT_FALSE(checkInside(r, makeRect(p2, p4)));
+    ASSERT_FALSE(checkInside(r, makeRect(p2, p5)));
+    ASSERT_FALSE(checkInside(r, makeRect(p2, p6)));
 }
 
 TEST(RectTest, ClipRect_True)
