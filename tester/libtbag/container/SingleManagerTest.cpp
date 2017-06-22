@@ -39,6 +39,12 @@ TEST(SingleManagerTest, Default)
     ASSERT_FALSE(Mgr::singleEmpty());
     ASSERT_EQ(2, Mgr::singleSize());
 
+    std::size_t size = 0;
+    Mgr::singleSafeRun([&](Mgr::BaseMap const & map){
+        size = map.size();
+    });
+    ASSERT_EQ(2, size);
+
     ASSERT_TRUE (Mgr::singleGet(KEY1).expired());
     ASSERT_FALSE(Mgr::singleGet(KEY2).expired());
     ASSERT_FALSE(Mgr::singleGet(KEY3).expired());
@@ -48,5 +54,6 @@ TEST(SingleManagerTest, Default)
     ASSERT_EQ(0, Mgr::singleSize());
 
     Mgr::releaseInstance();
+
 }
 

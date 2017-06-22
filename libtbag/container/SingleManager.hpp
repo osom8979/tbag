@@ -121,6 +121,13 @@ public:
         return insert(id, SharedBase(new (std::nothrow) Base(std::forward<Args>(args) ...)));
     }
 
+    template <typename Predicated>
+    inline void safeRun(Predicated predicated)
+    {
+        Guard guard(_mutex);
+        predicated(_map);
+    }
+
 // ---------------
 // Static methods.
 // ---------------
@@ -160,6 +167,12 @@ public:
     static WeakBase singleNewAdd(Key id, Args && ... args)
     {
         return getInstance()->/*template*/newAdd(id, std::forward<Args>(args) ...);
+    }
+
+    template <typename Predicated>
+    static void singleSafeRun(Predicated predicated)
+    {
+        getInstance()->/*template*/safeRun(predicated);
     }
 };
 
