@@ -12,6 +12,12 @@
 using namespace libtbag;
 using namespace libtbag::math;
 
+TEST(VectorTest, Scalar)
+{
+    ASSERT_EQ(5, getScalar(3, 4));
+    getScalar(1, 2, 3); // Just hit!
+}
+
 TEST(VectorTest, GetDotProduct)
 {
     Vector2<double> v1{3, 0};

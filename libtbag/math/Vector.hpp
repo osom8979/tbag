@@ -57,6 +57,18 @@ inline T getScalar(Vector3<T> const & v)
 /**
  * @remarks
  *  \f[
+ *   | \vec{v} | = \sqrt{x^2 \times y^2 \times z^2}
+ *  \f]
+ */
+template <typename T>
+inline T getScalar(T const & x, T const & y, T const & z)
+{
+    return std::sqrt((x * x) + (y * y) + (z * z));
+}
+
+/**
+ * @remarks
+ *  \f[
  *   | \vec{v} | = \sqrt{x^2 \times y^2}
  *  \f]
  */
@@ -64,6 +76,18 @@ template <typename T>
 inline T getScalar(Vector2<T> const & v)
 {
     return std::sqrt((v.x * v.x) + (v.y * v.y));
+}
+
+/**
+ * @remarks
+ *  \f[
+ *   | \vec{v} | = \sqrt{x^2 \times y^2}
+ *  \f]
+ */
+template <typename T>
+inline T getScalar(T const & x, T const & y)
+{
+    return std::sqrt((x * x) + (y * y));
 }
 
 /**
