@@ -198,7 +198,7 @@ int ServiceApp::run()
 
         if (args.empty() == false) {
             // Command arguments.
-            cmds.push_back(libtbag::string::lower(args.get(0)));
+            cmds.push_back(args.get(0));
         }
     });
 
