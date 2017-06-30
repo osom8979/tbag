@@ -28,7 +28,7 @@ TEST(NetworkTcpTest, JustCreateClient)
     Loop loop;
     TcpClient client(loop);
     client.close();
-    loop.run();
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
 }
 
 TEST(NetworkTcpTest, JustCreateServer)
@@ -37,7 +37,7 @@ TEST(NetworkTcpTest, JustCreateServer)
     Loop loop;
     TcpServer server(loop);
     server.close();
-    loop.run();
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
 }
 
 TEST(NetworkTcpTest, AddressAlreadyInUse)
@@ -58,7 +58,7 @@ TEST(NetworkTcpTest, AddressAlreadyInUse)
     server1.close();
     server2.close();
 
-    loop.run();
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
 }
 
 TEST(NetworkTcpTest, ClientTimeout)

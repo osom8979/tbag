@@ -77,13 +77,14 @@ public:
     using ListParser = structure::List;
     using KillParser = structure::Kill;
 
-    using HttpParser  = network::http::HttpParser;
-    using HttpBuilder = network::http::HttpBuilder;
-    using HttpServer  = network::http::HttpServer;
-    using SharedHttpServer = std::shared_ptr<HttpServer>;
-    using Id = HttpServer::Id;
+    using HttpParser       = network::http::HttpParser;
+    using HttpBuilder      = network::http::HttpBuilder;
+    using FuncHttpServer   = network::http::FuncHttpServer;
+    using SharedHttpServer = std::shared_ptr<FuncHttpServer>;
 
-    using Node = HttpServer::WeakClient;
+    using Id = FuncHttpServer::Id;
+    using WC = FuncHttpServer::WC;
+    using HP = FuncHttpServer::HP;
 
     using Environments = string::Environments;
     using EnvFlag = Environments::Flag;
@@ -107,22 +108,17 @@ public:
     int run();
 
 public:
-    void onNodeOpen (Node node);
-    void onNodeClose(Node node);
+    void onNodeOpen (WC node);
+    void onNodeClose(WC node);
     void onServerClose();
 
 // HTTP Request callback.
 public:
-#ifndef _TPOT_RUNNER_REQUEST_PARAMS
-#define _TPOT_RUNNER_REQUEST_PARAMS \
-    Err code, Node node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout
-#endif
-    void onNodeRequest        (_TPOT_RUNNER_REQUEST_PARAMS);
-    void onNodeExecRequest    (_TPOT_RUNNER_REQUEST_PARAMS);
-    void onNodeKillRequest    (_TPOT_RUNNER_REQUEST_PARAMS);
-    void onNodeListRequest    (_TPOT_RUNNER_REQUEST_PARAMS);
-    void onNodeHeartbitRequest(_TPOT_RUNNER_REQUEST_PARAMS);
-#undef _TPOT_RUNNER_REQUEST_PARAMS
+    void onNodeRequest        (WC node, Err code, HP const & packet);
+    void onNodeExecRequest    (WC node, Err code, HP const & packet);
+    void onNodeKillRequest    (WC node, Err code, HP const & packet);
+    void onNodeListRequest    (WC node, Err code, HP const & packet);
+    void onNodeHeartbitRequest(WC node, Err code, HP const & packet);
 
 private:
     Err execProcess(std::string const & body, HttpBuilder & response);

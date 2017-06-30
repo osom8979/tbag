@@ -46,6 +46,9 @@ public:
     HttpBuilder(int maj, int min);
     HttpBuilder(HttpBuilder const & obj);
     HttpBuilder(HttpBuilder && obj);
+    ~HttpBuilder();
+
+public:
     HttpBuilder(HttpVersionProperty  const & obj);
     HttpBuilder(HttpCommonProperty   const & obj);
     HttpBuilder(HttpRequestProperty  const & obj);
@@ -53,7 +56,6 @@ public:
     HttpBuilder(HttpRequest          const & obj);
     HttpBuilder(HttpResponse         const & obj);
     HttpBuilder(HttpProperty         const & obj);
-    ~HttpBuilder();
 
 public:
     HttpBuilder & operator =(HttpBuilder const & obj);

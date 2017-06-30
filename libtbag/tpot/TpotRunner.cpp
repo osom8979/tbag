@@ -58,7 +58,7 @@ TpotRunner::~TpotRunner()
 
 int TpotRunner::run()
 {
-    _server.reset(new (std::nothrow) HttpServer(_loop, HttpServer::StreamType::TCP));
+    _server.reset(new (std::nothrow) FuncHttpServer(_loop, FuncHttpServer::StreamType::TCP));
     assert(static_cast<bool>(_server));
     if (_server->init(_params.server_bind.c_str(), _params.server_port) != Err::E_SUCCESS) {
         return EXIT_FAILURE;
@@ -69,17 +69,17 @@ int TpotRunner::run()
     _server->setOnClose      (std::bind(&TpotRunner::onNodeClose  , this, _1));
     _server->setOnServerClose(std::bind(&TpotRunner::onServerClose, this));
 
-    auto const func_common   = std::bind(&TpotRunner::onNodeRequest        , this, _1, _2, _3, _4, _5);
-    auto const func_exec     = std::bind(&TpotRunner::onNodeExecRequest    , this, _1, _2, _3, _4, _5);
-    auto const func_kill     = std::bind(&TpotRunner::onNodeKillRequest    , this, _1, _2, _3, _4, _5);
-    auto const func_list     = std::bind(&TpotRunner::onNodeListRequest    , this, _1, _2, _3, _4, _5);
-    auto const func_heartbit = std::bind(&TpotRunner::onNodeHeartbitRequest, this, _1, _2, _3, _4, _5);
+    auto const func_common   = std::bind(&TpotRunner::onNodeRequest        , this, _1, _2, _3);
+    auto const func_exec     = std::bind(&TpotRunner::onNodeExecRequest    , this, _1, _2, _3);
+    auto const func_kill     = std::bind(&TpotRunner::onNodeKillRequest    , this, _1, _2, _3);
+    auto const func_list     = std::bind(&TpotRunner::onNodeListRequest    , this, _1, _2, _3);
+    auto const func_heartbit = std::bind(&TpotRunner::onNodeHeartbitRequest, this, _1, _2, _3);
 
     _server->setOnRequest(ExecParser::getMethod(), ExecParser::getPath(), func_exec);
     _server->setOnRequest(KillParser::getMethod(), KillParser::getPath(), func_kill);
     _server->setOnRequest(ListParser::getMethod(), ListParser::getPath(), func_list);
     _server->setOnRequest(HbitParser::getMethod(), HbitParser::getPath(), func_heartbit);
-    _server->setOnRequest(func_common);
+    _server->setOnDefaultRequest(func_common);
 
     tDLogN("TpoT is run!");
     Err const RESULT = _loop.run();
@@ -93,7 +93,7 @@ int TpotRunner::run()
     return EXIT_SUCCESS;
 }
 
-void TpotRunner::onNodeOpen(Node node)
+void TpotRunner::onNodeOpen(WC node)
 {
     if (auto shared = node.lock()) {
         tDLogN("TpotRunner::onNodeOpen(ID:{}) {}:{}", shared->id(), shared->dest(), shared->port());
@@ -102,7 +102,7 @@ void TpotRunner::onNodeOpen(Node node)
     }
 }
 
-void TpotRunner::onNodeClose(Node node)
+void TpotRunner::onNodeClose(WC node)
 {
     if (auto shared = node.lock()) {
         tDLogN("TpotRunner::onNodeClose(ID:{})", shared->id());
@@ -129,20 +129,18 @@ void TpotRunner::onServerClose()
     /* END */
 #endif
 
-void TpotRunner::onNodeRequest(Err code, Node node, HttpParser const & request,
-                               HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeRequest(WC node, Err code, HP const & packet)
 {
     _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeRequest()", code, node, shared);
-    response.setStatus(network::http::HttpStatus::SC_NOT_FOUND);
-    response.setBody(_body_4xx);
+    packet.response.setStatus(network::http::HttpStatus::SC_NOT_FOUND);
+    packet.response.setBody(_body_4xx);
 }
 
-void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & request,
-                                   HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeExecRequest(WC node, Err code, HP const & packet)
 {
     _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeExecRequest()", code, node, shared);
 
-    Err const CODE = execProcess(request.getBody(), response);
+    Err const CODE = execProcess(packet.request.getBody(), packet.response);
     if (CODE == Err::E_SUCCESS) {
         tDLogI("TpotRunner::onNodeExecRequest(ID:{}) Success.", shared->id());
     } else {
@@ -150,12 +148,11 @@ void TpotRunner::onNodeExecRequest(Err code, Node node, HttpParser const & reque
     }
 }
 
-void TpotRunner::onNodeKillRequest(Err code, Node node, HttpParser const & request,
-                                   HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeKillRequest(WC node, Err code, HP const & packet)
 {
     _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeKillRequest()", code, node, shared);
 
-    Err const CODE = killProcess(request.getBody(), response);
+    Err const CODE = killProcess(packet.request.getBody(), packet.response);
     if (CODE == Err::E_SUCCESS) {
         tDLogI("TpotRunner::onNodeKillRequest(ID:{}) Success.", shared->id());
     } else {
@@ -163,12 +160,11 @@ void TpotRunner::onNodeKillRequest(Err code, Node node, HttpParser const & reque
     }
 }
 
-void TpotRunner::onNodeListRequest(Err code, Node node, HttpParser const & request,
-                                   HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeListRequest(WC node, Err code, HP const & packet)
 {
     _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeListRequest()", code, node, shared);
 
-    Err const CODE = listProcess(request.getBody(), response);
+    Err const CODE = listProcess(packet.request.getBody(), packet.response);
     if (CODE == Err::E_SUCCESS) {
         tDLogI("TpotRunner::onNodeListRequest(ID:{}) Success.", shared->id());
     } else {
@@ -176,11 +172,10 @@ void TpotRunner::onNodeListRequest(Err code, Node node, HttpParser const & reque
     }
 }
 
-void TpotRunner::onNodeHeartbitRequest(Err code, Node node, HttpParser const & request,
-                                       HttpBuilder & response, uint64_t & timeout)
+void TpotRunner::onNodeHeartbitRequest(WC node, Err code, HP const & packet)
 {
     _TPOT_RUNNER_CHECK_ERROR("TpotRunner::onNodeHeartbitRequest()", code, node, shared);
-    response.setStatus(network::http::HttpStatus::SC_OK);
+    packet.response.setStatus(network::http::HttpStatus::SC_OK);
 }
 
 // -----------------

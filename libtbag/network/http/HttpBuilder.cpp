@@ -17,10 +17,32 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-HttpBuilder::HttpBuilder() { setVersion(1, 1); }
-HttpBuilder::HttpBuilder(int major, int minor) { setVersion(major, minor); }
-HttpBuilder::HttpBuilder(HttpBuilder const & obj) { (*this) = obj; }
-HttpBuilder::HttpBuilder(HttpBuilder && obj) { (*this) = std::move(obj); }
+HttpBuilder::HttpBuilder() : HttpBuilder(1, 1)
+{
+    // EMPTY.
+}
+
+HttpBuilder::HttpBuilder(int major, int minor)
+{
+    setVersion(major, minor);
+}
+
+HttpBuilder::HttpBuilder(HttpBuilder const & obj)
+{
+    (*this) = obj;
+}
+
+HttpBuilder::HttpBuilder(HttpBuilder && obj)
+{
+    (*this) = std::move(obj);
+}
+
+HttpBuilder::~HttpBuilder()
+{
+    // EMPTY.
+}
+
+// @formatter:off
 HttpBuilder::HttpBuilder(HttpVersionProperty  const & obj) { (*this) = obj; }
 HttpBuilder::HttpBuilder(HttpCommonProperty   const & obj) { (*this) = obj; }
 HttpBuilder::HttpBuilder(HttpRequestProperty  const & obj) { (*this) = obj; }
@@ -28,7 +50,7 @@ HttpBuilder::HttpBuilder(HttpResponseProperty const & obj) { (*this) = obj; }
 HttpBuilder::HttpBuilder(HttpRequest          const & obj) { (*this) = obj; }
 HttpBuilder::HttpBuilder(HttpResponse         const & obj) { (*this) = obj; }
 HttpBuilder::HttpBuilder(HttpProperty         const & obj) { (*this) = obj; }
-HttpBuilder::~HttpBuilder() { /* EMPTY. */ }
+// @formatter:on
 
 HttpBuilder & HttpBuilder::operator =(HttpBuilder const & obj)
 {
@@ -346,7 +368,6 @@ std::string HttpBuilder::getVersionString(int major, int minor)
     ss << HTTP << '/' << major << '.' << minor;
     return ss.str();
 }
-
 
 } // namespace http
 } // namespace network

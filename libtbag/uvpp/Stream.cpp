@@ -340,7 +340,7 @@ void Stream::onConnection(Err code)
 binf Stream::onAlloc(std::size_t suggested_size)
 {
     tDLogD("Stream::onAlloc() called (suggested_size:{}).", suggested_size);
-    return binf((char*)::malloc(suggested_size), suggested_size);
+    return binf(); // binf((char*)::malloc(suggested_size), suggested_size);
 }
 
 void Stream::onRead(Err code, char const * buffer, std::size_t size)

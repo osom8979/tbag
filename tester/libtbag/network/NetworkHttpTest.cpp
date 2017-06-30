@@ -21,6 +21,10 @@ using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
 
+using WC = HttpServer::WC;
+using HP = HttpServer::HP;
+using WP = HttpServer::WP;
+
 TEST(NetworkHttpTest, HttpClient)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
@@ -34,7 +38,7 @@ TEST(NetworkHttpTest, HttpClient)
 static bool runSimpleServerTest(HttpServer::StreamType type, std::string const & bind, std::string const & method)
 {
     uvpp::Loop loop;
-    HttpServer server(loop, type);
+    FuncHttpServer server(loop, type);
 
     server.init(bind.c_str());
 
@@ -46,17 +50,17 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     int on_request = 0;
     int on_close   = 0;
 
-    server.setOnOpen([&](HttpServer::WeakClient node){
+    server.setOnOpen([&](WC node){
         ++on_open;
     });
-    server.setOnRequest([&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnDefaultRequest([&](WC node, Err code, HP & packet){
         ++on_request;
-        response.setStatus(200);
-        response.setReason("OK");
-        response.setBody(request.getMethodName());
-        timeout = 1000;
+        packet.response.setStatus(200);
+        packet.response.setReason("OK");
+        packet.response.setBody(packet.request.getMethodName());
+        packet.timeout = 1000;
     });
-    server.setOnClose([&](HttpServer::WeakClient node){
+    server.setOnClose([&](WC node){
         ++on_close;
         server.close();
     });
@@ -135,7 +139,7 @@ TEST(NetworkHttpTest, RoutingServer)
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
 
     uvpp::Loop loop;
-    HttpServer server(loop);
+    FuncHttpServer server(loop);
 
     int on_open    = 0;
     int on_close   = 0;
@@ -157,44 +161,44 @@ TEST(NetworkHttpTest, RoutingServer)
 
     std::cout << "Request URL: " << request_url << std::endl;
 
-    server.setOnOpen([&](HttpServer::WeakClient node){
+    server.setOnOpen([&](WC node){
         ++on_open;
     });
 
-    server.setOnRequest([&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnDefaultRequest([&](WC node, Err code, HP & packet){
         std::cout << "Server.OnRequest()\n";
         ++on_request;
-        response.setStatus(200);
-        response.setReason("OK");
-        response.setBody(request.getMethodName() + request.getUrl());
-        timeout = 1000;
+        packet.response.setStatus(200);
+        packet.response.setReason("OK");
+        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.timeout = 1000;
     });
-    server.setOnRequest("/Documents", [&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest("/Documents", [&](WC node, Err code, HP & packet){
         std::cout << "Server.OnRequest(/Documents)\n";
         ++on_request_doc;
-        response.setStatus(200);
-        response.setReason("OK");
-        response.setBody(request.getMethodName() + request.getUrl());
-        timeout = 1000;
+        packet.response.setStatus(200);
+        packet.response.setReason("OK");
+        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.timeout = 1000;
     });
-    server.setOnRequest("GET", "/Downloads", [&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest("GET", "/Downloads", [&](WC node, Err code, HP & packet){
         std::cout << "Server.OnRequest([GET]/Downloads)\n";
         ++on_request_down_get;
-        response.setStatus(200);
-        response.setReason("OK");
-        response.setBody(request.getMethodName() + request.getUrl());
-        timeout = 1000;
+        packet.response.setStatus(200);
+        packet.response.setReason("OK");
+        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.timeout = 1000;
     });
-    server.setOnRequest("POST", "/Downloads", [&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+    server.setOnRequest("POST", "/Downloads", [&](WC node, Err code, HP & packet){
         std::cout << "Server.OnRequest([POST]/Downloads)\n";
         ++on_request_down_post;
-        response.setStatus(200);
-        response.setReason("OK");
-        response.setBody(request.getMethodName() + request.getUrl());
-        timeout = 1000;
+        packet.response.setStatus(200);
+        packet.response.setReason("OK");
+        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.timeout = 1000;
     });
 
-    server.setOnClose([&](HttpServer::WeakClient node){
+    server.setOnClose([&](WC node){
         ++on_close;
         if (on_close == 5) {
             server.close();
@@ -254,15 +258,15 @@ TEST(NetworkHttpTest, WebSocket)
 //    ASSERT_LT(0, SERVER_PORT);
 //    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
 //
-//    server.setOnWebSocketOpen([&](Err code, HttpServer::WeakClient node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
+//    server.setOnWebSocketOpen([&](Err code, WC node, HttpParser const & request, HttpBuilder & response, uint64_t & timeout){
 //        std::cout << "Server.OnWebSocketOpen\n";
 //    });
-//    server.setOnWebSocketMessage([&](Err code, HttpServer::WeakClient node, WebSocketFrame const & request, WebSocketFrame & response, uint64_t & timeout){
+//    server.setOnWebSocketMessage([&](Err code, WC node, WebSocketFrame const & request, WebSocketFrame & response, uint64_t & timeout){
 //        std::cout << "Server.OnWebSocketMessage\n";
 //        response = request;
 //        response.setMask(false);
 //    });
-//    server.setOnClose([&](HttpServer::WeakClient node){
+//    server.setOnClose([&](WC node){
 //        std::cout << "Server.OnClose\n";
 //    });
 //
