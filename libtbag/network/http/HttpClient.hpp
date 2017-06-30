@@ -56,22 +56,37 @@ public:
     using Millisec    = std::chrono::milliseconds;
     using Seconds     = std::chrono::seconds;
 
-    using OnConnect  = std::function<void(Err)>;
-    using OnResponse = std::function<void(Err, HttpParser const &)>;
-    using OnShutdown = std::function<void(Err)>;
-    using OnWrite    = std::function<void(Err)>;
-    using OnClose    = std::function<void(void)>;
+public:
+    enum class EventStep
+    {
+        ET_CONNECT,
+        ET_WRITE,
+        ET_SHUTDOWN,
+        ET_READ,
+        ET_CLOSE,
+    };
+
+    struct Event
+    {
+        EventStep step;
+        Err code;
+        HttpParser const & response;
+
+        Event(EventStep s, Err c, HttpParser const & r) : step(s), code(c), response(r)
+        { /* EMPTY. */ }
+        ~Event()
+        { /* EMPTY. */ }
+    };
+
+    using Callback = std::function<void(Event const &)>;
 
 private:
     HttpBuilder _builder;
     HttpParser  _parser;
 
 private:
-    OnConnect  _connect_cb;
-    OnResponse _response_cb;
-    OnShutdown _shutdown_cb;
-    OnWrite    _write_cb;
-    OnClose    _close_cb;
+    bool _call_once;
+    Callback _callback;
 
 private:
     Millisec  _timeout;
@@ -87,25 +102,13 @@ public:
     inline HttpBuilder const & atBuilder() const TBAG_NOEXCEPT { return _builder; }
     inline HttpParser        & atParser ()       TBAG_NOEXCEPT { return _parser;  }
     inline HttpParser  const & atParser () const TBAG_NOEXCEPT { return _parser;  }
-
-    inline void setOnConnect (OnConnect  const & cb) { _connect_cb  = cb; }
-    inline void setOnResponse(OnResponse const & cb) { _response_cb = cb; }
-    inline void setOnShutdown(OnShutdown const & cb) { _shutdown_cb = cb; }
-    inline void setOnWrite   (OnWrite    const & cb) { _write_cb    = cb; }
-    inline void setOnClose   (OnClose    const & cb) { _close_cb    = cb; }
-
-    inline void setRequest(HttpBuilder const & request) { _builder = request; }
-    inline void setTimeout(Millisec const & timeout = Millisec(0)) { _timeout = timeout; }
-    inline void markupTimer() { _start_time = SystemClock::now(); }
     // @formatter:on
 
 public:
-    void setup(HttpBuilder const & request, Millisec const & timeout = Millisec(0))
-    {
-        setRequest(request);
-        setTimeout(timeout);
-        markupTimer();
-    }
+    void setup(HttpBuilder const & request, Callback const & cb, uint64_t const & timeout = 0);
+
+private:
+    void runCallback(EventStep step, Err code);
 
 public:
     virtual void onConnect(Err code) override;

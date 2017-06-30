@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/network/http/HttpClient.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -16,7 +17,7 @@ namespace network {
 namespace http    {
 
 HttpClient::HttpClient(Loop & loop, StreamType type)
-        : Parent(loop, type), _builder(), _parser(HttpParser::Type::RESPONSE)
+        : Parent(loop, type), _builder(), _parser(HttpParser::Type::RESPONSE), _call_once(false)
 {
     setSkipTimeout();
 }
@@ -26,22 +27,37 @@ HttpClient::~HttpClient()
     // EMPTY.
 }
 
+void HttpClient::setup(HttpBuilder const & request, Callback const & cb, uint64_t const & timeout)
+{
+    _builder    = request;
+    _timeout    = Millisec(timeout);
+    _start_time = SystemClock::now(); // Markup timer.
+    _callback   = cb;
+}
+
+void HttpClient::runCallback(EventStep step, Err code)
+{
+    if (static_cast<bool>(_callback)) {
+        _callback(Event(step, code, _parser));
+    }
+    _call_once = true;
+}
+
 void HttpClient::onConnect(Err code)
 {
     if (code != Err::E_SUCCESS) {
         tDLogE("HttpClient::onConnect() {} error.", getErrName(code));
-        if (static_cast<bool>(_connect_cb)) {
-            _connect_cb(code);
-        }
+        runCallback(EventStep::ET_CONNECT, code);
+        close();
         return;
     }
 
     auto buffer = _builder.toDefaultRequestString();
-    if (write(buffer.data(), buffer.size()) != Err::E_SUCCESS) {
-        tDLogE("HttpClient::onConnect() {} error.", getErrName(Err::E_WRERR));
-        if (static_cast<bool>(_connect_cb)) {
-            _connect_cb(Err::E_WRERR);
-        }
+    Err const WRITE_CODE = write(buffer.data(), buffer.size());
+    if (WRITE_CODE != Err::E_SUCCESS) {
+        tDLogE("HttpClient::onConnect() write {} error.", getErrName(WRITE_CODE));
+        runCallback(EventStep::ET_CONNECT, WRITE_CODE);
+        close();
         return;
     }
 
@@ -49,10 +65,8 @@ void HttpClient::onConnect(Err code)
     Millisec const LEFT_TIME = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
 
     if (LEFT_TIME.count() <= 0) {
-        tDLogE("HttpClient::onConnect() {} error.", getErrName(Err::E_TIMEOUT));
-        if (static_cast<bool>(_connect_cb)) {
-            _connect_cb(Err::E_TIMEOUT);
-        }
+        tDLogE("HttpClient::onConnect() timeout.");
+        runCallback(EventStep::ET_CONNECT, Err::E_TIMEOUT);
         close();
         return;
     }
@@ -60,31 +74,25 @@ void HttpClient::onConnect(Err code)
 
 void HttpClient::onShutdown(Err code)
 {
-    if (static_cast<bool>(_shutdown_cb)) {
-        _shutdown_cb(code);
-    }
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    close();
 }
 
 void HttpClient::onWrite(Err code)
 {
     if (code != Err::E_SUCCESS) {
         tDLogE("HttpClient::onWrite() {} error.", getErrName(code));
-        if (static_cast<bool>(_write_cb)) {
-            _write_cb(code);
-        }
+        runCallback(EventStep::ET_WRITE, code);
+        close();
         return;
     }
 
-    if (start() != Err::E_SUCCESS) {
-        tDLogE("HttpClient::onWrite() start error.");
-        if (static_cast<bool>(_write_cb)) {
-            _write_cb(Err::E_RDERR);
-        }
+    Err const START_CODE = start();
+    if (START_CODE != Err::E_SUCCESS) {
+        tDLogE("HttpClient::onWrite() start {} error.", getErrName(START_CODE));
+        runCallback(EventStep::ET_WRITE, START_CODE);
+        close();
         return;
-    }
-
-    if (static_cast<bool>(_write_cb)) {
-        _write_cb(code);
     }
 }
 
@@ -92,18 +100,17 @@ void HttpClient::onRead(Err code, ReadPacket const & packet)
 {
     if (code == Err::E_EOF) {
         tDLogI("HttpClient::onRead() EOF.");
-        if (static_cast<bool>(_response_cb)) {
-            assert(code == Err::E_EOF);
-            _response_cb(code, _parser);
+        if (_call_once == false) {
+            runCallback(EventStep::ET_READ, Err::E_NO_RESPONSE);
         }
+        close();
         return;
     }
 
     if (code != Err::E_SUCCESS) {
         tDLogE("HttpServer::onRead() {} error", getErrName(code));
-        if (static_cast<bool>(_response_cb)) {
-            _response_cb(code, _parser);
-        }
+        runCallback(EventStep::ET_READ, code);
+        close();
         return;
     }
 
@@ -112,17 +119,19 @@ void HttpClient::onRead(Err code, ReadPacket const & packet)
 
     if (_parser.isComplete()) {
         tDLogD("HttpClient::onRead() Completed http parsing (HTTP STATUS: {}).", _parser.getStatusCode());
-        if (static_cast<bool>(_response_cb)) {
-            _response_cb(code, _parser);
-        }
+        runCallback(EventStep::ET_READ, Err::E_SUCCESS);
+        close();
+        return;
     }
+
+    tDLogD("HttpClient::onRead() Incomplete. Wait for response data.");
 }
 
 void HttpClient::onClose()
 {
     tDLogD("HttpClient::onClose()");
-    if (static_cast<bool>(_close_cb)) {
-        _close_cb();
+    if (_call_once == false) {
+        runCallback(EventStep::ET_CLOSE, Err::E_TIMEOUT);
     }
 }
 
@@ -161,34 +170,16 @@ Err requestWithSync(HttpClient::StreamType type,
     tDLogI("requestWithSync() Request {}: {}", builder.getMethod(), uri.getString());
     Err http_result = Err::E_UNKNOWN;
 
-    http.setOnConnect([&](Err code){
-        if (code != Err::E_SUCCESS) {
-            http_result = code;
-            http.close();
+    http.setup(builder, [&](HttpClient::Event const & e){
+        http_result = e.code;
+        if (e.step == HttpClient::EventStep::ET_READ && e.code == Err::E_SUCCESS) {
+            tDLogI("requestWithSync() Response Err({}) HTTP STATUS: {}",
+                   getErrName(e.code), e.response.getStatusCode());
+            result = e.response.getResponse();
+        } else {
+            tDLogE("requestWithSync() HttpClient Err({})", getErrName(e.code));
         }
-    });
-    http.setOnResponse([&](Err code, HttpParser const & response){
-        tDLogI("requestWithSync() Response Err({}) HTTP STATUS: {}", getErrName(code), response.getStatusCode());
-        http_result = code;
-        result = response.getResponse();
-        http.close();
-    });
-    http.setOnShutdown([&](Err code){
-        if (code == Err::E_SUCCESS) {
-            http_result = Err::E_SHUTDOWN;
-            http.close();
-        }
-    });
-    http.setOnWrite([&](Err code){
-        if (code != Err::E_SUCCESS) {
-            http_result = code;
-            http.close();
-        }
-    });
-    http.setOnClose([&](){
-        // EMPTY.
-    });
-    http.setup(builder, HttpClient::Millisec(timeout));
+    }, timeout);
 
     Err LOOP_RESULT = loop.run();
     if (LOOP_RESULT != Err::E_SUCCESS) {
