@@ -49,10 +49,6 @@ static int __global_http_on_chunk_complete__  (http_parser * parser);
 class HttpParser::HttpParserImpl : private Noncopyable
 {
 public:
-    using HeaderMap  = HttpParser::HeaderMap;
-    using HeaderPair = HttpParser::HeaderPair;
-
-public:
     struct Cache
     {
         std::string field;
@@ -66,7 +62,7 @@ public:
     http_parser_settings settings;
 
 public:
-    HeaderMap headers;
+    HttpHeaderMap headers;
     std::string body;
     std::string url;
     std::string status;
@@ -137,7 +133,7 @@ public:
 public:
     inline void insertHeader(std::string const & key, std::string const & val)
     {
-        headers.insert(HeaderPair(key, val));
+        headers.insert(HttpHeaderPair(key, val));
     }
 
     inline std::string getHeader(std::string const & key) const
@@ -399,7 +395,7 @@ void HttpParser::clearCache()
     _parser->clearCache();
 }
 
-HttpParser::HeaderMap const & HttpParser::atHeaders() const
+HttpHeaderMap const & HttpParser::atHeaders() const
 {
     return _parser->headers;
 }

@@ -83,7 +83,7 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
         _callback->onWebSocketOpen(node, code, hp);
     }
 
-    auto const RESPONSE = response.toDefaultResponseString();
+    auto const RESPONSE = response.buildDefaultResponseString();
     Err const WRITE_CODE = node->write(RESPONSE.data(), RESPONSE.size(), timeout);
     if (WRITE_CODE != Err::E_SUCCESS) {
         tDLogW("HttpServer::runWebSocketOpen() WebSocket response write {} error.", getErrName(WRITE_CODE));
@@ -167,7 +167,7 @@ void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & pac
         }
     }
 
-    auto const RESPONSE = response.toDefaultResponseString();
+    auto const RESPONSE = response.buildDefaultResponseString();
     Err const WRITE_CODE = node->write(RESPONSE.data(), RESPONSE.size(), timeout);
     if (WRITE_CODE != Err::E_SUCCESS) {
         tDLogW("HttpServer::onClientRead() Write {} error.", getErrName(WRITE_CODE));

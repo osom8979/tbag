@@ -52,7 +52,7 @@ void HttpClient::onConnect(Err code)
         return;
     }
 
-    auto buffer = _builder.toDefaultRequestString();
+    auto buffer = _builder.buildDefaultRequestString();
     Err const WRITE_CODE = write(buffer.data(), buffer.size());
     if (WRITE_CODE != Err::E_SUCCESS) {
         tDLogE("HttpClient::onConnect() write {} error.", getErrName(WRITE_CODE));

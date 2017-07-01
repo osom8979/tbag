@@ -34,10 +34,6 @@ namespace http    {
  */
 class TBAG_API HttpBuilder
 {
-public:
-    using HeaderMap  = HttpCommonProperty::HeaderMap;
-    using HeaderPair = HttpCommonProperty::HeaderPair;
-
 private:
     HttpProperty _property;
 
@@ -153,48 +149,65 @@ public:
     { _property.setStatus(val); return *this; }
 
 public:
-    std::string toRequestString() const;
-    std::string toResponseString() const;
+    std::string buildRequestString() const;
+    std::string buildResponseString() const;
 
-    std::string toDefaultRequestString() const;
-    std::string toDefaultResponseString() const;
+    std::string buildDefaultRequestString() const;
+    std::string buildDefaultResponseString() const;
 
-    std::string toRequestDebugString() const;
-    std::string toResponseDebugString() const;
-
-public:
-    static std::string getDefaultRequestString(HttpProperty const & req);
-    static std::string getDefaultResponseString(HttpProperty const & rsp);
-
-    static std::string getDefaultRequestString(HttpRequest const & req);
-    static std::string getDefaultResponseString(HttpResponse const & rsp);
-
-    static std::string getDefaultRequestString(std::string const & method, std::string const & url,
-                                               HeaderMap const & headers, std::string const & body,
-                                               int major = 1, int minor = 1, bool logging = false);
-    static std::string getDefaultResponseString(std::string const & status, std::string const & reason,
-                                                HeaderMap const & headers, std::string const & body,
-                                                int major = 1, int minor = 1, bool logging = false);
-
-public:
-    static std::string getRequestString(HttpProperty const & req);
-    static std::string getResponseString(HttpProperty const & rsp);
-
-    static std::string getRequestString(HttpRequest const & req);
-    static std::string getResponseString(HttpResponse const & rsp);
-
-    static std::string getRequestString(std::string const & method, std::string const & url,
-                                        HeaderMap const & headers, std::string const & body,
-                                        int major = 1, int minor = 1);
-    static std::string getResponseString(std::string const & status, std::string const & reason,
-                                         HeaderMap const & headers, std::string const & body,
-                                         int major = 1, int minor = 1);
-
-public:
-    /** If it does not exist, insert it. */
-    static void insertIfNotExists(HeaderMap & headers, std::string const & key, std::string const & val);
-    static std::string getVersionString(int major = 1, int minor = 1);
+    std::string buildRequestDebugString() const;
+    std::string buildResponseDebugString() const;
 };
+
+// ----------------
+// Build utilities.
+// ----------------
+
+/**
+ * If it does not exist, insert it.
+ */
+TBAG_API void insertIfNotExists(HttpHeaderMap & headers, std::string const & key, std::string const & val);
+TBAG_API std::string getVersionString(int major = 1, int minor = 1);
+
+// ----------------------
+// Build default methods.
+// ----------------------
+
+TBAG_API std::string buildDefaultRequestString(HttpProperty const & req);
+TBAG_API std::string buildDefaultResponseString(HttpProperty const & rsp);
+
+TBAG_API std::string buildDefaultRequestString(HttpRequest const & req);
+TBAG_API std::string buildDefaultResponseString(HttpResponse const & rsp);
+
+TBAG_API std::string buildDefaultRequestString(
+        std::string const & method, std::string const & url,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major = 1, int minor = 1, bool logging = false);
+
+TBAG_API std::string buildDefaultResponseString(
+        std::string const & status, std::string const & reason,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major = 1, int minor = 1, bool logging = false);
+
+// --------------
+// Build methods.
+// --------------
+
+TBAG_API std::string buildRequestString(HttpProperty const & req);
+TBAG_API std::string buildResponseString(HttpProperty const & rsp);
+
+TBAG_API std::string buildRequestString(HttpRequest const & req);
+TBAG_API std::string buildResponseString(HttpResponse const & rsp);
+
+TBAG_API std::string buildRequestString(
+        std::string const & method, std::string const & url,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major = 1, int minor = 1);
+
+TBAG_API std::string buildResponseString(
+        std::string const & status, std::string const & reason,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major = 1, int minor = 1);
 
 } // namespace http
 } // namespace network

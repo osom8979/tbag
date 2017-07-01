@@ -104,7 +104,7 @@ bool HttpCommonProperty::existsHeaderValue(std::string const & key, std::string 
 }
 
 bool HttpCommonProperty::existsHeaderValueFromHeaderMap(
-        HeaderMap const & headers,
+        HttpHeaderMap const & headers,
         std::string const & key,
         std::string const & value,
         bool ignore_case)
@@ -138,7 +138,7 @@ void HttpResponseProperty::setStatus(std::string const & str)
 // Debugging methods.
 // ------------------
 
-std::string toDebugString(HttpCommonProperty::HeaderMap const & obj)
+std::string toDebugString(HttpHeaderMap const & obj)
 {
     std::stringstream ss;
     std::size_t const SIZE = obj.size();

@@ -41,9 +41,6 @@ class TBAG_API HttpParser : private Noncopyable
 public:
     class HttpParserImpl;
 
-    using HeaderMap  = HttpCommonProperty::HeaderMap;
-    using HeaderPair = HttpCommonProperty::HeaderPair;
-
 public:
     enum class Type : int
     {
@@ -71,7 +68,7 @@ public:
     void clear();
     void clearCache();
 
-    HeaderMap const & atHeaders() const;
+    HttpHeaderMap const & atHeaders() const;
     std::string getHeader(std::string const & key) const;
     bool existsHeader(std::string const & key) const;
     bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const;

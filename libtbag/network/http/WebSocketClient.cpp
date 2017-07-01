@@ -52,14 +52,16 @@ Err WebSocketClient::sendClose()
 
 void WebSocketClient::onConnect(Err code)
 {
-//    if (code != Err::E_SUCCESS) {
-//        tDLogE("WebSocketClient::onConnect() {} error.", getErrName(code));
-//        runCallback(EventStep::ET_CONNECT, code);
-//        close();
-//        return;
-//    }
-//
-//    auto buffer = _builder.toDefaultRequestString();
+    if (code != Err::E_SUCCESS) {
+        tDLogE("WebSocketClient::onConnect() {} error.", getErrName(code));
+        if (_callback != nullptr) {
+            _callback->onError(code);
+        }
+        close();
+        return;
+    }
+
+//    auto buffer = atBuilder().buildDefaultRequestString();
 //    Err const WRITE_CODE = write(buffer.data(), buffer.size());
 //    if (WRITE_CODE != Err::E_SUCCESS) {
 //        tDLogE("WebSocketClient::onConnect() write {} error.", getErrName(WRITE_CODE));
@@ -67,7 +69,7 @@ void WebSocketClient::onConnect(Err code)
 //        close();
 //        return;
 //    }
-//
+
 //    using namespace std::chrono;
 //    Millisec const LEFT_TIME = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
 //

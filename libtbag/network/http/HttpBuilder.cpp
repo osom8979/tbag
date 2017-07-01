@@ -206,138 +206,157 @@ HttpBuilder & HttpBuilder::operator =(HttpProperty const & obj)
     return *this;
 }
 
-std::string HttpBuilder::toRequestString() const
+std::string HttpBuilder::buildRequestString() const
 {
-    return getRequestString(_property);
+    return http::buildRequestString(_property);
 }
 
-std::string HttpBuilder::toResponseString() const
+std::string HttpBuilder::buildResponseString() const
 {
-    return getResponseString(_property);
+    return http::buildResponseString(_property);
 }
 
-std::string HttpBuilder::toDefaultRequestString() const
+std::string HttpBuilder::buildDefaultRequestString() const
 {
-    return getDefaultRequestString(_property);
+    return http::buildDefaultRequestString(_property);
 }
 
-std::string HttpBuilder::toDefaultResponseString() const
+std::string HttpBuilder::buildDefaultResponseString() const
 {
-    return getDefaultResponseString(_property);
+    return http::buildDefaultResponseString(_property);
 }
 
-std::string HttpBuilder::toRequestDebugString() const
+std::string HttpBuilder::buildRequestDebugString() const
 {
     return http::toDebugString(getRequest());
 }
 
-std::string HttpBuilder::toResponseDebugString() const
+std::string HttpBuilder::buildResponseDebugString() const
 {
-    return toDebugString(getResponse());
+    return http::toDebugString(getResponse());
 }
 
-// --------------------------
-// getDefault*String methods.
-// --------------------------
+// ----------------
+// Build utilities.
+// ----------------
 
-std::string HttpBuilder::getDefaultRequestString(HttpProperty const & req)
+void insertIfNotExists(HttpHeaderMap & headers, std::string const & key, std::string const & val)
 {
-    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
+    if (headers.find(key) == headers.end()) {
+        headers.insert(HttpHeaderPair(key, val));
+    }
 }
 
-std::string HttpBuilder::getDefaultResponseString(HttpProperty const & rsp)
+std::string getVersionString(int major, int minor)
 {
-    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
+    std::stringstream ss;
+    ss << HTTP << '/' << major << '.' << minor;
+    return ss.str();
 }
 
-std::string HttpBuilder::getDefaultRequestString(HttpRequest const & req)
+// ----------------------
+// Build default methods.
+// ----------------------
+
+std::string buildDefaultRequestString(HttpProperty const & req)
 {
-    return getDefaultRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
+    return buildDefaultRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
 }
 
-std::string HttpBuilder::getDefaultResponseString(HttpResponse const & rsp)
+std::string buildDefaultResponseString(HttpProperty const & rsp)
 {
-    return getDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
+    return buildDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
 }
 
-std::string HttpBuilder::getDefaultRequestString(std::string const & method, std::string const & url,
-                                                 HeaderMap const & headers, std::string const & body,
-                                                 int major, int minor, bool logging)
+std::string buildDefaultRequestString(HttpRequest const & req)
 {
-    HeaderMap real_headers = headers;
-    int http_major = (major == 0 ? 1 : major);
-    int http_minor = (minor == 0 ? 1 : minor);
+    return buildDefaultRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
+}
 
-    std::string real_method = (method.empty() ? getHttpMethodName(HttpMethod::M_GET) : method);
-    std::string real_url    = (url.empty() ? "/" : url);
+std::string buildDefaultResponseString(HttpResponse const & rsp)
+{
+    return buildDefaultResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
+}
 
-    insertIfNotExists(real_headers, HEADER_USER_AGENT, DEFAULT_HEADER_USER_AGENT);
-    insertIfNotExists(real_headers, HEADER_ACCEPT, DEFAULT_HEADER_ACCEPT);
+std::string buildDefaultRequestString(
+        std::string const & method, std::string const & url,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major, int minor, bool logging)
+{
+
+    HttpHeaderMap update_headers = headers;
+    insertIfNotExists(update_headers, HEADER_USER_AGENT, DEFAULT_HEADER_USER_AGENT);
+    insertIfNotExists(update_headers, HEADER_ACCEPT, DEFAULT_HEADER_ACCEPT);
 
     if (body.empty() == false) {
-        insertIfNotExists(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+        insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
     }
 
     if (logging) {
         if (headers.find(HEADER_HOST) == headers.end()) {
-            tDLogW("HttpBuilder::getDefaultRequestString() Not found Host header.");
+            tDLogW("buildDefaultRequestString() Not found Host header.");
         }
-        for (auto & cursor : real_headers) {
-            tDLogD("HttpBuilder::getDefaultRequestString() > {}: {}", cursor.first, cursor.second);
+        for (auto & cursor : update_headers) {
+            tDLogD("buildDefaultRequestString() > {}: {}", cursor.first, cursor.second);
         }
     }
 
-    return getRequestString(real_method, real_url, real_headers, body, http_major, http_minor);
+    std::string const REAL_METHOD = (method.empty() ? getHttpMethodName(HttpMethod::M_GET) : method);
+    std::string const REAL_URL    = (url.empty() ? "/" : url);
+    int const HTTP_MAJOR = (major == 0 ? 1 : major);
+    int const HTTP_MINOR = (minor == 0 ? 1 : minor);
+    return buildRequestString(REAL_METHOD, REAL_URL, update_headers, body, HTTP_MAJOR, HTTP_MINOR);
 }
 
-std::string HttpBuilder::getDefaultResponseString(std::string const & status, std::string const & reason,
-                                                  HeaderMap const & headers, std::string const & body,
-                                                  int major, int minor, bool logging)
+std::string buildDefaultResponseString(
+        std::string const & status, std::string const & reason,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major, int minor, bool logging)
 {
-    HeaderMap real_headers = headers;
-    int http_major = (major == 0 ? 1 : major);
-    int http_minor = (minor == 0 ? 1 : minor);
-
-    insertIfNotExists(real_headers, HEADER_SERVER, DEFAULT_HEADER_SERVER);
-    insertIfNotExists(real_headers, HEADER_CONTENT_TYPE, DEFAULT_HEADER_CONTENT_TYPE);
-    insertIfNotExists(real_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+    HttpHeaderMap update_headers = headers;
+    insertIfNotExists(update_headers, HEADER_SERVER, DEFAULT_HEADER_SERVER);
+    insertIfNotExists(update_headers, HEADER_CONTENT_TYPE, DEFAULT_HEADER_CONTENT_TYPE);
+    insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
 
     if (logging) {
-        for (auto & cursor : real_headers) {
-            tDLogD("HttpBuilder::getDefaultResponseString() < {}: {}", cursor.first, cursor.second);
+        for (auto & cursor : update_headers) {
+            tDLogD("buildDefaultResponseString() < {}: {}", cursor.first, cursor.second);
         }
     }
 
-    return getResponseString(status, reason, real_headers, body, http_major, http_minor);
+    int const HTTP_MAJOR = (major == 0 ? 1 : major);
+    int const HTTP_MINOR = (minor == 0 ? 1 : minor);
+    return buildResponseString(status, reason, update_headers, body, HTTP_MAJOR, HTTP_MINOR);
 }
 
-// -------------------
-// get*String methods.
-// -------------------
+// --------------
+// Build methods.
+// --------------
 
-std::string HttpBuilder::getRequestString(HttpProperty const & req)
+std::string buildRequestString(HttpProperty const & req)
 {
-    return getRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
+    return buildRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
 }
 
-std::string HttpBuilder::getResponseString(HttpProperty const & rsp)
+std::string buildResponseString(HttpProperty const & rsp)
 {
-    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
+    return buildResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
 }
 
-std::string HttpBuilder::getRequestString(HttpRequest const & req)
+std::string buildRequestString(HttpRequest const & req)
 {
-    return getRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
+    return buildRequestString(req.method, req.url, req.headers, req.body, req.http_major, req.http_minor);
 }
 
-std::string HttpBuilder::getResponseString(HttpResponse const & rsp)
+std::string buildResponseString(HttpResponse const & rsp)
 {
-    return getResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
+    return buildResponseString(rsp.getStatus(), rsp.reason, rsp.headers, rsp.body, rsp.http_major, rsp.http_minor);
 }
 
-std::string HttpBuilder::getRequestString(std::string const & method, std::string const & url,
-                                          HeaderMap const & headers, std::string const & body,
-                                          int major, int minor)
+std::string buildRequestString(
+        std::string const & method, std::string const & url,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major, int minor)
 {
     std::stringstream ss;
     ss << method << SP << url << SP << getVersionString(major, minor) << CRLF;
@@ -348,9 +367,10 @@ std::string HttpBuilder::getRequestString(std::string const & method, std::strin
     return ss.str();
 }
 
-std::string HttpBuilder::getResponseString(std::string const & status, std::string const & reason,
-                                           HeaderMap const & headers, std::string const & body,
-                                           int major, int minor)
+std::string buildResponseString(
+        std::string const & status, std::string const & reason,
+        HttpHeaderMap const & headers, std::string const & body,
+        int major, int minor)
 {
     std::stringstream ss;
     ss << getVersionString(major, minor) << SP << status << SP << reason << CRLF;
@@ -358,24 +378,6 @@ std::string HttpBuilder::getResponseString(std::string const & status, std::stri
         ss << header.first << ": " << header.second << CRLF;
     }
     ss << CRLF << body;
-    return ss.str();
-}
-
-// ------------------
-// Utilities methods.
-// ------------------
-
-void HttpBuilder::insertIfNotExists(HeaderMap & headers, std::string const & key, std::string const & val)
-{
-    if (headers.find(key) == headers.end()) {
-        headers.insert(HeaderPair(key, val));
-    }
-}
-
-std::string HttpBuilder::getVersionString(int major, int minor)
-{
-    std::stringstream ss;
-    ss << HTTP << '/' << major << '.' << minor;
     return ss.str();
 }
 

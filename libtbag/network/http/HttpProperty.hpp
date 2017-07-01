@@ -288,6 +288,9 @@ struct HttpVersionProperty
     { return lh.http_major == rh.http_major && lh.http_minor == rh.http_minor; }
 };
 
+using HttpHeaderMap  = std::multimap<std::string, std::string>;
+using HttpHeaderPair = HttpHeaderMap::value_type;
+
 /**
  * Http header & body structure.
  *
@@ -296,17 +299,14 @@ struct HttpVersionProperty
  */
 struct HttpCommonProperty
 {
-    using HeaderMap  = std::multimap<std::string, std::string>;
-    using HeaderPair = HeaderMap::value_type;
-
-    HeaderMap headers;
+    HttpHeaderMap headers;
     std::string body;
 
     HttpCommonProperty()
     { /* EMPTY. */ }
-    HttpCommonProperty(HeaderMap const & h) : headers(h), body()
+    HttpCommonProperty(HttpHeaderMap const & h) : headers(h), body()
     { /* EMPTY. */ }
-    HttpCommonProperty(HeaderMap const & h, std::string const & b) : headers(h), body(b)
+    HttpCommonProperty(HttpHeaderMap const & h, std::string const & b) : headers(h), body(b)
     { /* EMPTY. */ }
     HttpCommonProperty(HttpCommonProperty const & obj)
     { (*this) = obj; }
@@ -322,7 +322,7 @@ struct HttpCommonProperty
     { if (this != &obj) { headers.swap(obj.headers); body.swap(obj.body); } return *this; }
 
     inline void insertHeader(std::string const & key, std::string const & val)
-    { headers.insert(HeaderPair(key, val)); }
+    { headers.insert(HttpHeaderPair(key, val)); }
 
     inline bool eraseHeader(std::string const & key)
     { return headers.erase(key) == 1U; }
@@ -337,7 +337,7 @@ struct HttpCommonProperty
     bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const;
 
     static bool existsHeaderValueFromHeaderMap(
-            HeaderMap const & headers,
+            HttpHeaderMap const & headers,
             std::string const & key,
             std::string const & value,
             bool ignore_case = true);
@@ -429,7 +429,7 @@ struct HttpProperty : public HttpCommon, public HttpRequestProperty, public Http
 // Debugging methods.
 // ------------------
 
-TBAG_API std::string toDebugString(HttpCommonProperty::HeaderMap const & obj);
+TBAG_API std::string toDebugString(HttpHeaderMap const & obj);
 TBAG_API std::string toDebugString(HttpCommonProperty const & obj);
 TBAG_API std::string toDebugString(HttpCommon const & obj);
 TBAG_API std::string toDebugString(HttpRequest const & obj);
