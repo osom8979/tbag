@@ -98,7 +98,11 @@ public:
     inline int getMajor() const { return _property.getMajor(); }
     inline int getMinor() const { return _property.getMinor(); }
 
-    inline bool existsHeader(std::string const & key) const { return _property.existsHeader(key); }
+    inline bool existsHeader(std::string const & key) const
+    { return _property.existsHeader(key); }
+    inline bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const
+    { return _property.existsHeaderValue(key, value, ignore_case); }
+
     inline std::string getHeader(std::string const & key) const { return _property.getHeader(key); }
     inline std::string getBody() const { return _property.body; }
 
@@ -187,7 +191,8 @@ public:
                                          int major = 1, int minor = 1);
 
 public:
-    static void existsOrInsert(HeaderMap & headers, std::string const & key, std::string const & val);
+    /** If it does not exist, insert it. */
+    static void insertIfNotExists(HeaderMap & headers, std::string const & key, std::string const & val);
     static std::string getVersionString(int major = 1, int minor = 1);
 };
 

@@ -74,7 +74,7 @@ public:
     HeaderMap const & atHeaders() const;
     std::string getHeader(std::string const & key) const;
     bool existsHeader(std::string const & key) const;
-    bool existsValue(std::string const & key, std::string const & value, bool ignore_case = true) const;
+    bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const;
 
     std::string getUrl() const;
     std::string getBody() const;

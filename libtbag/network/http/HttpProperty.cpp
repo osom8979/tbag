@@ -85,6 +85,59 @@ int getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT
     }
 }
 
+// ----------------------------------
+// HttpCommonProperty implementation.
+// ----------------------------------
+
+std::string HttpCommonProperty::getHeader(std::string const & key) const
+{
+    auto itr = headers.find(key);
+    if (itr != headers.end()) {
+        return itr->second;
+    }
+    return std::string();
+}
+
+bool HttpCommonProperty::existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case) const
+{
+    return existsHeaderValueFromHeaderMap(headers, key, value, ignore_case);
+}
+
+bool HttpCommonProperty::existsHeaderValueFromHeaderMap(
+        HeaderMap const & headers,
+        std::string const & key,
+        std::string const & value,
+        bool ignore_case)
+{
+    auto itr = headers.find(key);
+    if (itr != headers.end()) {
+        std::string const VALUE = (ignore_case ? string::lower(value) : value);
+        for (auto & cursor : string::splitTokens(itr->second, HEADER_VALUE_DELIMITER)) {
+            if (VALUE == string::lower(string::trim(cursor))) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// ------------------------------------
+// HttpResponseProperty implementation.
+// ------------------------------------
+
+void HttpResponseProperty::setStatus(std::string const & str)
+{
+    try {
+        status = std::stoi(str);
+    } catch (...) {
+        status = 0;
+    }
+}
+
+// ------------------
+// Debugging methods.
+// ------------------
+
 std::string toDebugString(HttpCommonProperty::HeaderMap const & obj)
 {
     std::stringstream ss;

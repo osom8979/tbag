@@ -539,10 +539,10 @@ std::string getWebSocketProtocolWithTbag(std::string const & protocols)
 
 Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response)
 {
-    if (request.existsValue(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
+    if (request.existsHeaderValue(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
         return Err::E_ILLARGS;
     }
-    if (request.existsValue(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
+    if (request.existsHeaderValue(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
         return Err::E_ILLARGS;
     }
     if (existsWebSocketVersion13(request.getHeader(HEADER_SEC_WEBSOCKET_VERSION)) == false) {

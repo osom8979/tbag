@@ -19,6 +19,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/network/Uri.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <utility>
 #include <algorithm>
@@ -45,6 +46,8 @@ TBAG_CONSTEXPR char const * const CRLF = "\r\n";
  * @see <https://en.wikipedia.org/wiki/List_of_HTTP_header_fields>
  * @{
  */
+
+TBAG_CONSTEXPR char const * const HEADER_VALUE_DELIMITER = ",";
 
 TBAG_CONSTEXPR char const * const HEADER_HOST               = "Host";
 TBAG_CONSTEXPR char const * const HEADER_UPGRADE            = "Upgrade";
@@ -327,17 +330,17 @@ struct HttpCommonProperty
     inline bool existsHeader(std::string const & key) const
     { return headers.find(key) != headers.end(); }
 
-    std::string getHeader(std::string const & key) const
-    {
-        auto itr = headers.find(key);
-        if (itr != headers.end()) {
-            return itr->second;
-        }
-        return std::string();
-    }
-
     inline void appendBody(std::string const & content)
     { body.append(content); }
+
+    std::string getHeader(std::string const & key) const;
+    bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const;
+
+    static bool existsHeaderValueFromHeaderMap(
+            HeaderMap const & headers,
+            std::string const & key,
+            std::string const & value,
+            bool ignore_case = true);
 };
 
 /**
@@ -408,26 +411,23 @@ struct HttpResponseProperty
     inline std::string getStatus() const
     { return std::to_string(status); }
 
-    void setStatus(std::string const & str)
-    {
-        try {
-            status = std::stoi(str);
-        } catch (...) {
-            status = 0;
-        }
-    }
-
     inline void setStatus(HttpStatus s) TBAG_NOEXCEPT
     {
         status = getHttpStatusNumber(s);
         reason = getHttpStatusReason(s);
     }
+
+    void setStatus(std::string const & str);
 };
 
 struct HttpCommon   : public HttpVersionProperty, public HttpCommonProperty { /* EMPTY. */ };
 struct HttpRequest  : public HttpCommon, public HttpRequestProperty { /* EMPTY. */ };
 struct HttpResponse : public HttpCommon, public HttpResponseProperty { /* EMPTY. */ };
 struct HttpProperty : public HttpCommon, public HttpRequestProperty, public HttpResponseProperty { /* EMPTY. */ };
+
+// ------------------
+// Debugging methods.
+// ------------------
 
 TBAG_API std::string toDebugString(HttpCommonProperty::HeaderMap const & obj);
 TBAG_API std::string toDebugString(HttpCommonProperty const & obj);

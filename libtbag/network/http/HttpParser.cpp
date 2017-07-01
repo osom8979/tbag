@@ -159,6 +159,11 @@ public:
         return headers.find(key) != headers.end();
     }
 
+    bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case) const
+    {
+        return HttpCommon::existsHeaderValueFromHeaderMap(headers, key, value, ignore_case);
+    }
+
     inline void appendBody(std::string const & content)
     {
         body.append(content);
@@ -409,19 +414,9 @@ bool HttpParser::existsHeader(std::string const & key) const
     return _parser->existsHeader(key);
 }
 
-bool HttpParser::existsValue(std::string const & key, std::string const & value, bool ignore_case) const
+bool HttpParser::existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case) const
 {
-    if (existsHeader(key) == false) {
-        return false;
-    }
-
-    std::string const VALUE = (ignore_case ? string::lower(value) : value);
-    for (auto & cursor : string::splitTokens(getHeader(key), ",")) {
-        if (VALUE == string::lower(string::trim(cursor))) {
-            return true;
-        }
-    }
-    return false;
+    return _parser->existsHeaderValue(key, value, ignore_case);
 }
 
 std::string HttpParser::getUrl() const
