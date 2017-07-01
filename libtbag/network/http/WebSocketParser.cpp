@@ -86,10 +86,10 @@ std::string getWebSocketProtocolWithTbag(std::string const & protocols)
 
 Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response)
 {
-    if (string::lower(request.getHeader(HEADER_CONNECTION)) != string::lower(VALUE_UPGRADE)) {
+    if (request.existsValue(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
         return Err::E_ILLARGS;
     }
-    if (string::lower(request.getHeader(HEADER_UPGRADE)) != string::lower(VALUE_WEBSOCKET)) {
+    if (request.existsValue(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
         return Err::E_ILLARGS;
     }
     if (existsWebSocketVersion13(request.getHeader(HEADER_SEC_WEBSOCKET_VERSION)) == false) {

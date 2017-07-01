@@ -44,17 +44,17 @@ TEST(WebSocketFrameTest, RequestFrame)
     // Request buffer to frame.
     WebSocketFrame frame;
     ASSERT_EQ(Err::E_SUCCESS, frame.execute(REQUEST_FRAME, sizeof(REQUEST_FRAME)));
-    ASSERT_TRUE(frame.getFin());
-    ASSERT_FALSE(frame.getRsv1());
-    ASSERT_FALSE(frame.getRsv2());
-    ASSERT_FALSE(frame.getRsv3());
-    ASSERT_TRUE(frame.getMask());
-    ASSERT_EQ(bitwise::toNetwork(0x6c11e8e3), frame.getMaskingKey());
+    ASSERT_TRUE(frame.fin);
+    ASSERT_FALSE(frame.rsv1);
+    ASSERT_FALSE(frame.rsv2);
+    ASSERT_FALSE(frame.rsv3);
+    ASSERT_TRUE(frame.mask);
+    ASSERT_EQ(bitwise::toNetwork(0x6c11e8e3), frame.masking_key);
 
-    char const * data = (char const *)frame.getPayloadDataPointer();
-    std::size_t size = frame.getPayloadLength();
+    char const * data = (char const *)frame.getPayloadData();
+    std::size_t size = frame.getPayloadSize();
     std::string payload(data, data + size);
-    ASSERT_EQ(size, frame.getPayloadLength());
+    ASSERT_EQ(size, frame.getPayloadSize());
     ASSERT_EQ(RESULT_STRING, payload);
 
     // Frame to request buffer.

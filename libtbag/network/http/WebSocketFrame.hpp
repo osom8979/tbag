@@ -3,6 +3,8 @@
  * @brief  WebSocketFrame class prototype.
  * @author zer0
  * @date   2017-06-11
+ *
+ * @see <https://tools.ietf.org/html/rfc6455>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WEBSOCKETFRAME_HPP__
@@ -48,11 +50,34 @@ enum class OpCode : uint8_t
     OC_RESERVED_CONTROL_FRAME_5     = 0xF,
 };
 
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_CONTINUE = "CONTINUE";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_TEXT     = "TEXT";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_BINARY   = "BINARY";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF1     = "NCF1";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF2     = "NCF2";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF3     = "NCF3";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF4     = "NCF4";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF5     = "NCF5";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_CLOSE    = "CLOSE";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_PING     = "PING";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_PONG     = "PONG";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF1      = "CF1";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF2      = "CF2";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF3      = "CF3";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF4      = "CF4";
+TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF5      = "CF5";
+
 enum class PayloadBit : uint8_t
 {
     PL_BIT_7  =  7,
     PL_BIT_16 = 16,
     PL_BIT_64 = 64,
+};
+
+enum class WebSocketDirection
+{
+    WSD_REQUEST,
+    WSD_RESPONSE,
 };
 
 /**
@@ -84,45 +109,39 @@ enum class PayloadBit : uint8_t
 class TBAG_API WebSocketFrame
 {
 public:
+    using Direction = WebSocketDirection;
     using Buffer = std::vector<uint8_t>;
 
-private:
+public:
     /**
      * Indicates that this is the final fragment in a message.
      * The first fragment MAY also be the final fragment.
      */
-    bool _fin;
+    bool fin;
 
     /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
-    bool _rsv1;
+    bool rsv1;
 
     /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
-    bool _rsv2;
+    bool rsv2;
 
     /** MUST be 0 unless an extension is negotiated that defines meanings for non-zero values. */
-    bool _rsv3;
+    bool rsv3;
 
     /** Defines the interpretation of the "Payload data". */
-    OpCode _opcode;
+    OpCode opcode;
 
     /** Defines whether the "Payload data" is masked. */
-    bool _mask;
+    bool mask;
 
     /** payload length. */
-    uint64_t _payload_length;
+    uint64_t payload_length;
 
     /** Masking-key, if MASK set to 1. */
-    uint32_t _masking_key;
+    uint32_t masking_key;
 
-private:
-    Buffer _payload_buffer;
-
-public:
-    inline uint8_t const * getPayloadDataPointer() const TBAG_NOEXCEPT
-    { return _payload_buffer.data(); }
-
-    inline std::size_t getPayloadDataSize() const TBAG_NOEXCEPT
-    { return static_cast<std::size_t>(_payload_length); }
+    /** Payload buffer. */
+    Buffer payload;
 
 public:
     WebSocketFrame();
@@ -135,29 +154,11 @@ public:
     WebSocketFrame & operator =(WebSocketFrame && obj);
 
 public:
-    inline bool getFin() const TBAG_NOEXCEPT { return _fin; }
-    inline void setFin(bool flag) TBAG_NOEXCEPT { _fin = flag; }
+    inline uint8_t const * getPayloadData() const TBAG_NOEXCEPT
+    { return payload.data(); }
 
-    inline bool getRsv1() const TBAG_NOEXCEPT { return _rsv1; }
-    inline void setRsv1(bool flag) TBAG_NOEXCEPT { _rsv1 = flag; }
-
-    inline bool getRsv2() const TBAG_NOEXCEPT { return _rsv2; }
-    inline void setRsv2(bool flag) TBAG_NOEXCEPT { _rsv2 = flag; }
-
-    inline bool getRsv3() const TBAG_NOEXCEPT { return _rsv3; }
-    inline void setRsv3(bool flag) TBAG_NOEXCEPT { _rsv3 = flag; }
-
-    inline OpCode getOpCode() const TBAG_NOEXCEPT { return _opcode; }
-    inline void setOpCode(OpCode code) TBAG_NOEXCEPT { _opcode = code; }
-
-    inline bool getMask() const TBAG_NOEXCEPT { return _mask; }
-    inline void setMask(bool flag) TBAG_NOEXCEPT { _mask = flag; }
-
-    inline uint64_t getPayloadLength() const TBAG_NOEXCEPT { return _payload_length; }
-    inline void setPayloadLength(uint64_t size) TBAG_NOEXCEPT { _payload_length = size; }
-
-    inline uint32_t getMaskingKey() const TBAG_NOEXCEPT { return _masking_key; }
-    inline void setMaskingKey(uint32_t key) TBAG_NOEXCEPT { _masking_key = key; }
+    inline std::size_t getPayloadSize() const TBAG_NOEXCEPT
+    { return static_cast<std::size_t>(payload_length); }
 
 public:
     Err execute(uint8_t const * data, std::size_t size);
@@ -168,13 +169,57 @@ public:
     std::size_t write(Buffer & buffer);
 
 public:
-    bool updateRequest(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode, uint32_t masking_key, uint8_t const * data, std::size_t size);
-    bool updateResponse(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode, uint8_t const * data, std::size_t size);
+    void set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
+    void set(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT;
+
+public:
+    Err updateRequest(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode, uint32_t masking_key,
+                      uint8_t const * data = nullptr, std::size_t size = 0);
+    Err updateResponse(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode,
+                       uint8_t const * data = nullptr, std::size_t size = 0);
+
+public:
+    Err textRequest(uint32_t masking_key, std::string const & text, bool continuation = false, bool finish = true);
+    Err textResponse(std::string const & text, bool continuation = false, bool finish = true);
+
+    Err binaryRequest(uint32_t masking_key, Buffer const & buffer, bool continuation = false, bool finish = true);
+    Err binaryResponse(Buffer const & buffer, bool continuation = false, bool finish = true);
+
+// Control Frames.
+public:
+    /**
+     * Closing the connection.
+     */
+    Err closeRequest(uint32_t masking_key);
+    Err closeResponse();
+
+    /**
+     * Pings: The Heartbeat of WebSockets.
+     *
+     * @remarks
+     *  for pings and pongs, the max payload length is 125.
+     */
+    Err pingRequest(uint32_t masking_key, uint8_t const * data, std::size_t size);
+    Err pingResponse(uint8_t const * data, std::size_t size);
+
+    /**
+     * Pongs: The Heartbeat of WebSockets.
+     *
+     * @remarks
+     *  for pings and pongs, the max payload length is 125.
+     */
+    Err pongRequest(uint32_t masking_key, uint8_t const * data, std::size_t size);
+    Err pongResponse(uint8_t const * data, std::size_t size);
+
+public:
+    std::string toDebugString() const;
 };
 
 // ----------
 // Utilities.
 // ----------
+
+TBAG_API char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT;
 
 TBAG_API uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
 TBAG_API uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;

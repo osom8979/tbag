@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <http_parser.h>
@@ -408,6 +409,21 @@ bool HttpParser::existsHeader(std::string const & key) const
     return _parser->existsHeader(key);
 }
 
+bool HttpParser::existsValue(std::string const & key, std::string const & value, bool ignore_case) const
+{
+    if (existsHeader(key) == false) {
+        return false;
+    }
+
+    std::string const VALUE = (ignore_case ? string::lower(value) : value);
+    for (auto & cursor : string::splitTokens(getHeader(key), ",")) {
+        if (VALUE == string::lower(string::trim(cursor))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 std::string HttpParser::getUrl() const
 {
     return _parser->url;
@@ -588,6 +604,26 @@ int HttpParser::onChunkComplete()
 {
     hp_tDLogD("HttpParser::onChunkComplete()");
     return 0;
+}
+
+// -----------------
+// Debugging method.
+// -----------------
+
+std::string HttpParser::toDebugString() const
+{
+    if (TYPE == Type::REQUEST) {
+        return http::toDebugString(getRequest());
+    } else if (TYPE == Type::RESPONSE) {
+        return http::toDebugString(getResponse());
+    } else {
+        if (getStatusCode() == 0) {
+            return http::toDebugString(getRequest());
+        } else if (getMethod() == 0 && 100 <= COMPARE_AND(getStatusCode()) < 600) {
+            return http::toDebugString(getResponse());
+        }
+    }
+    return "UNKNOWN";
 }
 
 } // namespace http

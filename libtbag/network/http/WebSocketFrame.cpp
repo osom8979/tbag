@@ -9,10 +9,12 @@
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/bitwise/Endian.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <cstring>
 
+#include <sstream>
 #include <algorithm>
 #include <utility>
 #include <limits>
@@ -25,9 +27,9 @@ namespace network {
 namespace http    {
 
 WebSocketFrame::WebSocketFrame()
-        : _fin (false), _rsv1(false), _rsv2(false), _rsv3(false),
-          _opcode(OpCode::OC_CONTINUATION_FRAME), _mask(false),
-          _payload_length(0), _masking_key(0)
+        : fin (false), rsv1(false), rsv2(false), rsv3(false),
+          opcode(OpCode::OC_CONTINUATION_FRAME), mask(false),
+          payload_length(0), masking_key(0)
 {
     // EMPTY.
 }
@@ -50,15 +52,15 @@ WebSocketFrame::~WebSocketFrame()
 WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame const & obj)
 {
     if (this != &obj) {
-        _fin = obj._fin;
-        _rsv1 = obj._rsv1;
-        _rsv2 = obj._rsv2;
-        _rsv3 = obj._rsv3;
-        _opcode = obj._opcode;
-        _mask = obj._mask;
-        _payload_length = obj._payload_length;
-        _masking_key = obj._masking_key;
-        _payload_buffer = obj._payload_buffer;
+        fin = obj.fin;
+        rsv1 = obj.rsv1;
+        rsv2 = obj.rsv2;
+        rsv3 = obj.rsv3;
+        opcode = obj.opcode;
+        mask = obj.mask;
+        payload_length = obj.payload_length;
+        masking_key = obj.masking_key;
+        payload = obj.payload;
     }
     return *this;
 }
@@ -66,15 +68,15 @@ WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame const & obj)
 WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame && obj)
 {
     if (this != &obj) {
-        std::swap(_fin, obj._fin);
-        std::swap(_rsv1, obj._rsv1);
-        std::swap(_rsv2, obj._rsv2);
-        std::swap(_rsv3, obj._rsv3);
-        std::swap(_opcode, obj._opcode);
-        std::swap(_mask, obj._mask);
-        std::swap(_payload_length, obj._payload_length);
-        std::swap(_masking_key, obj._masking_key);
-        _payload_buffer.swap(obj._payload_buffer);
+        std::swap(fin, obj.fin);
+        std::swap(rsv1, obj.rsv1);
+        std::swap(rsv2, obj.rsv2);
+        std::swap(rsv3, obj.rsv3);
+        std::swap(opcode, obj.opcode);
+        std::swap(mask, obj.mask);
+        std::swap(payload_length, obj.payload_length);
+        std::swap(masking_key, obj.masking_key);
+        payload.swap(obj.payload);
     }
     return *this;
 }
@@ -85,59 +87,76 @@ Err WebSocketFrame::execute(uint8_t const * data, std::size_t size)
         return Err::E_SMALLBUF;
     }
 
-    _fin    = static_cast<  bool>(data[0] & 0x80 /* 0b10000000 */);
-    _rsv1   = static_cast<  bool>(data[0] & 0x40 /* 0b01000000 */);
-    _rsv2   = static_cast<  bool>(data[0] & 0x20 /* 0b00100000 */);
-    _rsv3   = static_cast<  bool>(data[0] & 0x10 /* 0b00010000 */);
-    _opcode = static_cast<OpCode>(data[0] & 0x0F /* 0b00001111 */);
-    _mask   = static_cast<  bool>(data[1] & 0x80 /* 0b10000000 */);
+    opcode = static_cast<OpCode>(data[0] & 0x0F /* 0b00001111 */); // Forces the first checker.
+    fin    = static_cast<  bool>(data[0] & 0x80 /* 0b10000000 */);
+    rsv1   = static_cast<  bool>(data[0] & 0x40 /* 0b01000000 */);
+    rsv2   = static_cast<  bool>(data[0] & 0x20 /* 0b00100000 */);
+    rsv3   = static_cast<  bool>(data[0] & 0x10 /* 0b00010000 */);
+    mask   = static_cast<  bool>(data[1] & 0x80 /* 0b10000000 */);
 
     auto const PAYLOAD_LENGTH_7BIT = static_cast<uint8_t>(data[1] & 0x7F /* 0b01111111 */);
     auto const PAYLOAD_BIT    = getPayloadBit(PAYLOAD_LENGTH_7BIT);
     auto const MASK_KEY_INDEX = getMaskingKeyByteIndex(PAYLOAD_BIT);
-    auto const DATA_INDEX     = getPayloadDataByteIndex(PAYLOAD_BIT, _mask);
+    auto const DATA_INDEX     = getPayloadDataByteIndex(PAYLOAD_BIT, mask);
 
     if (size < MASK_KEY_INDEX) {
         return Err::E_SMALLBUF;
     }
 
+    uint64_t const PREV_PAYLOAD_LENGTH = payload_length;
+
     // Update payload length.
     if (PAYLOAD_BIT == PayloadBit::PL_BIT_7) {
-        _payload_length = PAYLOAD_LENGTH_7BIT;
+        payload_length = PAYLOAD_LENGTH_7BIT;
     } else if (PAYLOAD_BIT == PayloadBit::PL_BIT_16) {
         uint16_t temp = 0;
         ::memcpy(&temp, &data[2], sizeof(uint16_t));
-        _payload_length = bitwise::toHost(temp);
+        payload_length = bitwise::toHost(temp);
     } else if (PAYLOAD_BIT == PayloadBit::PL_BIT_64) {
         uint64_t temp = 0;
         ::memcpy(&temp, &data[2], sizeof(uint64_t));
-        _payload_length = bitwise::toHost(temp);
+        payload_length = bitwise::toHost(temp);
     } else {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }
 
     // Update masking key.
-    if (_mask) {
+    if (mask) {
         if (size < DATA_INDEX) {
             return Err::E_SMALLBUF;
         }
-        _masking_key = libtbag::network::http::getMaskingKey(&data[MASK_KEY_INDEX]);
+        masking_key = libtbag::network::http::getMaskingKey(&data[MASK_KEY_INDEX]);
     } else {
-        _masking_key = 0;
+        masking_key = 0;
     }
 
     // Update payload data.
-    if (_payload_length > 0) {
-        if (size < DATA_INDEX + _payload_length) {
+    if (payload_length > 0) {
+        if (size < DATA_INDEX + payload_length) {
             return Err::E_SMALLBUF;
         }
-        if (_payload_buffer.size() < _payload_length) {
-            _payload_buffer.resize(_payload_length);
+
+        if (opcode == OpCode::OC_CONTINUATION_FRAME) {
+            if (payload.size() < payload_length + PREV_PAYLOAD_LENGTH) {
+                payload.resize(payload_length + PREV_PAYLOAD_LENGTH);
+            }
+            payload.insert(payload.begin() + PREV_PAYLOAD_LENGTH, &data[DATA_INDEX], &data[DATA_INDEX] + payload_length);
+            if (mask) {
+                updatePayloadData(masking_key, payload.data() + PREV_PAYLOAD_LENGTH, payload_length);
+            }
+        } else {
+            if (payload.size() < payload_length) {
+                payload.resize(payload_length);
+            }
+            payload.assign(&data[DATA_INDEX], &data[DATA_INDEX] + payload_length);
+            if (mask) {
+                updatePayloadData(masking_key, payload.data(), payload_length);
+            }
         }
-        _payload_buffer.assign(&data[DATA_INDEX], &data[DATA_INDEX] + _payload_length);
-        if (_mask) {
-            updatePayloadData(_masking_key, _payload_buffer.data(), _payload_length);
-        }
+    }
+
+    if (opcode == OpCode::OC_CONTINUATION_FRAME) {
+        payload_length += PREV_PAYLOAD_LENGTH;
     }
 
     return Err::E_SUCCESS;
@@ -159,8 +178,8 @@ TBAG_POP_MACRO(max);
 
 std::size_t WebSocketFrame::calculateWriteBufferSize() const
 {
-    std::size_t default_size = 2/*HEADER*/ + _payload_length + (_mask ? sizeof(uint32_t) : 0);
-    switch(getPayloadBitWithPayloadLength(_payload_length)) {
+    std::size_t default_size = 2/*HEADER*/ + payload_length + (mask ? sizeof(uint32_t) : 0);
+    switch(getPayloadBitWithPayloadLength(payload_length)) {
     case PayloadBit::PL_BIT_7:  return default_size;
     case PayloadBit::PL_BIT_16: return default_size + MAX_UINT16_BYTE_SIZE;
     case PayloadBit::PL_BIT_64: return default_size + MAX_UINT64_BYTE_SIZE;
@@ -176,63 +195,63 @@ std::size_t WebSocketFrame::write(uint8_t * data, std::size_t size)
         return 0;
     }
 
-    *(data + 0) |= ( _fin ? 0x80 : 0);
-    *(data + 0) |= (_rsv1 ? 0x40 : 0);
-    *(data + 0) |= (_rsv2 ? 0x20 : 0);
-    *(data + 0) |= (_rsv3 ? 0x10 : 0);
-    *(data + 0) |= static_cast<uint8_t>(_opcode);
-    *(data + 1) |= (_mask ? 0x80 : 0);
+    *(data + 0) |= ( fin ? 0x80 : 0);
+    *(data + 0) |= (rsv1 ? 0x40 : 0);
+    *(data + 0) |= (rsv2 ? 0x20 : 0);
+    *(data + 0) |= (rsv3 ? 0x10 : 0);
+    *(data + 0) |= static_cast<uint8_t>(opcode);
+    *(data + 1) |= (mask ? 0x80 : 0);
 
     // Next index (Written size)
     std::size_t index = 2;
 
     // Update payload length.
-    if (_payload_length <= 125) {
+    if (payload_length <= 125) {
         if (size < index) {
             return 0;
         }
-        *(data + 1) |= _payload_length;
+        *(data + 1) |= payload_length;
 
-    } else if (_payload_length <= MAX_UINT16_BYTE_SIZE) {
+    } else if (payload_length <= MAX_UINT16_BYTE_SIZE) {
         if (size < index + sizeof(uint16_t)) {
             return 0;
         }
         *(data + 1) |= 0x7E;
-        uint16_t temp = bitwise::toNetwork(static_cast<uint16_t>(_payload_length));
+        uint16_t temp = bitwise::toNetwork(static_cast<uint16_t>(payload_length));
         ::memcpy(data + index, &temp, sizeof(uint16_t));
         index += sizeof(uint16_t);
 
     } else {
-        assert(MAX_UINT16_BYTE_SIZE < COMPARE_AND(_payload_length) <= MAX_UINT64_BYTE_SIZE);
+        assert(MAX_UINT16_BYTE_SIZE < COMPARE_AND(payload_length) <= MAX_UINT64_BYTE_SIZE);
         if (size < index + sizeof(uint64_t)) {
             return 0;
         }
 
         *(data + 1) |= 0x7F;
-        uint64_t temp = bitwise::toNetwork(static_cast<uint64_t>(_payload_length));
+        uint64_t temp = bitwise::toNetwork(static_cast<uint64_t>(payload_length));
         ::memcpy(data + index, &temp, sizeof(uint64_t));
         index += sizeof(uint64_t);
     }
 
     // Update masking key.
-    if (_mask) {
+    if (mask) {
         if (size < index + sizeof(uint32_t)) {
             return 0;
         }
-        ::memcpy(data + index, &_masking_key, sizeof(uint32_t));
+        ::memcpy(data + index, &masking_key, sizeof(uint32_t));
         index += sizeof(uint32_t);
     }
 
     // Update payload data.
-    if (_payload_length > 0) {
-        if (size < index + _payload_length) {
+    if (payload_length > 0) {
+        if (size < index + payload_length) {
             return 0;
         }
-        ::memcpy(data + index, _payload_buffer.data(), _payload_length);
-        if (_mask) {
-            updatePayloadData(_masking_key, data + index, _payload_length);
+        ::memcpy(data + index, payload.data(), payload_length);
+        if (mask) {
+            updatePayloadData(masking_key, data + index, payload_length);
         }
-        index += _payload_length;
+        index += payload_length;
     }
 
     return index;
@@ -243,45 +262,149 @@ std::size_t WebSocketFrame::write(Buffer & buffer)
     return write(buffer.data(), buffer.size());
 }
 
-bool WebSocketFrame::updateRequest(bool fin, bool rsv1, bool rsv2, bool rsv3,
-                                   OpCode opcode, uint32_t masking_key, uint8_t const * data, std::size_t size)
+void WebSocketFrame::set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key) TBAG_NOEXCEPT
 {
-    _fin  = fin;
-    _rsv1 = rsv1;
-    _rsv2 = rsv2;
-    _rsv3 = rsv3;
-    _opcode = opcode;
-    _mask = true;
-    _payload_length = size;
-    _masking_key = masking_key;
-    if (_payload_buffer.size() < _payload_length) {
-        _payload_buffer.resize(_payload_length);
-    }
-    _payload_buffer.assign(data, data + _payload_length);
-    return true;
+    fin = f;
+    rsv1 = r1;
+    rsv2 = r2;
+    rsv3 = r3;
+    opcode = op;
+    mask = (key != 0);
+    masking_key = key;
 }
 
-bool WebSocketFrame::updateResponse(bool fin, bool rsv1, bool rsv2, bool rsv3,
-                                    OpCode opcode, uint8_t const * data, std::size_t size)
+void WebSocketFrame::set(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
 {
-    _fin  = fin;
-    _rsv1 = rsv1;
-    _rsv2 = rsv2;
-    _rsv3 = rsv3;
-    _opcode = opcode;
-    _mask = false;
-    _payload_length = size;
-    _masking_key = 0;
-    if (_payload_buffer.size() < _payload_length) {
-        _payload_buffer.resize(_payload_length);
+    if (data != nullptr && size > 0) {
+        if (payload.size() < payload_length) {
+            payload.resize(payload_length);
+        }
+        payload.assign(data, data + payload_length);
+        payload_length = size;
+    } else {
+        payload_length = 0;
     }
-    _payload_buffer.assign(data, data + _payload_length);
-    return true;
+}
+
+Err WebSocketFrame::updateRequest(bool f, bool r1, bool r2, bool r3,
+                                  OpCode op, uint32_t key, uint8_t const * data, std::size_t size)
+{
+    set(f, r1, r2, r3, op, key);
+    set(data, size);
+    return Err::E_SUCCESS;
+}
+
+Err WebSocketFrame::updateResponse(bool f, bool r1, bool r2, bool r3,
+                                   OpCode op, uint8_t const * data, std::size_t size)
+{
+    set(f, r1, r2, r3, op);
+    set(data, size);
+    return Err::E_SUCCESS;
+}
+
+Err WebSocketFrame::textRequest(uint32_t masking_key, std::string const & text, bool continuation, bool finish)
+{
+    return updateRequest(finish, false, false, false,
+                         (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
+                         masking_key, (uint8_t const *)text.data(), text.size());
+}
+
+Err WebSocketFrame::textResponse(std::string const & text, bool continuation, bool finish)
+{
+    return updateResponse(finish, false, false, false,
+                          (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
+                          (uint8_t const *)text.data(), text.size());
+}
+
+Err WebSocketFrame::binaryRequest(uint32_t masking_key, Buffer const & buffer, bool continuation, bool finish)
+{
+    return updateRequest(finish, false, false, false,
+                         (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
+                         masking_key, buffer.data(), buffer.size());
+}
+
+Err WebSocketFrame::binaryResponse(Buffer const & buffer, bool continuation, bool finish)
+{
+    return updateResponse(finish, false, false, false,
+                          (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
+                          buffer.data(), buffer.size());
+}
+
+Err WebSocketFrame::closeRequest(uint32_t masking_key)
+{
+    return updateRequest(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, masking_key);
+}
+
+Err WebSocketFrame::closeResponse()
+{
+    return updateResponse(true, false, false, false, OpCode::OC_CONNECTION_CLOSE);
+}
+
+Err WebSocketFrame::pingRequest(uint32_t masking_key, uint8_t const * data, std::size_t size)
+{
+    return updateRequest(true, false, false, false, OpCode::OC_DENOTES_PING, masking_key, data, size);
+}
+
+Err WebSocketFrame::pingResponse(uint8_t const * data, std::size_t size)
+{
+    return updateResponse(true, false, false, false, OpCode::OC_DENOTES_PING, data, size);
+}
+
+Err WebSocketFrame::pongRequest(uint32_t masking_key, uint8_t const * data, std::size_t size)
+{
+    return updateRequest(true, false, false, false, OpCode::OC_DENOTES_PONG, masking_key, data, size);
+}
+
+Err WebSocketFrame::pongResponse(uint8_t const * data, std::size_t size)
+{
+    return updateResponse(true, false, false, false, OpCode::OC_DENOTES_PONG, data, size);
+}
+
+std::string WebSocketFrame::toDebugString() const
+{
+    std::stringstream ss;
+    ss << "WS[" << (fin?'1':'0') << (rsv1?'1':'0') << (rsv2?'1':'0') << (rsv3?'1':'0')
+       << '/' << getOpCodeName(opcode) << ']';
+    if (mask) {
+        ss << " M(" << masking_key << ")";
+    }
+    if (payload_length > 0) {
+        if (opcode == OpCode::OC_TEXT_FRAME) {
+            ss << std::string(payload.data(), payload.data() + payload_length);
+        } else {
+            auto data = std::vector<uint8_t>(payload.data(), payload.data() + payload_length);
+            ss << string::convertByteArrayToHexString(data);
+        }
+    }
+    return ss.str();
 }
 
 // ----------
 // Utilities.
 // ----------
+
+char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT
+{
+    switch (code) {
+    case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
+    case OpCode::OC_TEXT_FRAME                  : return OP_CODE_NAME_TEXT;
+    case OpCode::OC_BINARY_FRAME                : return OP_CODE_NAME_BINARY;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return OP_CODE_NAME_NCF1;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return OP_CODE_NAME_NCF2;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return OP_CODE_NAME_NCF3;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return OP_CODE_NAME_NCF4;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return OP_CODE_NAME_NCF5;
+    case OpCode::OC_CONNECTION_CLOSE            : return OP_CODE_NAME_CLOSE;
+    case OpCode::OC_DENOTES_PING                : return OP_CODE_NAME_PING;
+    case OpCode::OC_DENOTES_PONG                : return OP_CODE_NAME_PONG;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return OP_CODE_NAME_CF1;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return OP_CODE_NAME_CF2;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return OP_CODE_NAME_CF3;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return OP_CODE_NAME_CF4;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return OP_CODE_NAME_CF5;
+    default: return "UNKNOWN";
+    }
+}
 
 uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
 {

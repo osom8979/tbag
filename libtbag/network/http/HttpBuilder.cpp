@@ -226,6 +226,16 @@ std::string HttpBuilder::toDefaultResponseString() const
     return getDefaultResponseString(_property);
 }
 
+std::string HttpBuilder::toRequestDebugString() const
+{
+    return http::toDebugString(getRequest());
+}
+
+std::string HttpBuilder::toResponseDebugString() const
+{
+    return http::toDebugString(getResponse());
+}
+
 // --------------------------
 // getDefault*String methods.
 // --------------------------

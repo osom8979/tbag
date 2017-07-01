@@ -155,6 +155,9 @@ public:
     std::string toDefaultRequestString() const;
     std::string toDefaultResponseString() const;
 
+    std::string toRequestDebugString() const;
+    std::string toResponseDebugString() const;
+
 public:
     static std::string getDefaultRequestString(HttpProperty const & req);
     static std::string getDefaultResponseString(HttpProperty const & rsp);
