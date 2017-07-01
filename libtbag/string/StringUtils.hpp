@@ -18,6 +18,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
 #include <string>
@@ -101,6 +102,12 @@ TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & by
 TBAG_CONSTEXPR std::size_t const HEX_STRING_ADDRESS_BYTE_SIZE =
         (/*PREFIX(0x)*/2) + (sizeof(void*) * 2/*HEX STRING ADDRESS*/) + (1/*NULL*/);
 using AddressHexString = std::array<char, HEX_STRING_ADDRESS_BYTE_SIZE>;
+
+/**
+ * HEX string to Byte array.
+ */
+TBAG_API Err convertHexCharToHalfByte(char hex_char, uint8_t & result);
+TBAG_API Err convertHexStringToByte(char high_char, char low_char, uint8_t & result);
 
 /**
  * Address to HEX string.
