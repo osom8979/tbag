@@ -9,13 +9,16 @@
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/bitwise/Endian.hpp>
+#include <libtbag/encrypt/Base64.hpp>
+#include <libtbag/encrypt/Sha1.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <cstring>
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
+#include <iostream>
 #include <utility>
 #include <limits>
 
@@ -125,7 +128,7 @@ Err WebSocketFrame::execute(uint8_t const * data, std::size_t size)
         if (size < DATA_INDEX) {
             return Err::E_SMALLBUF;
         }
-        masking_key = libtbag::network::http::getMaskingKey(&data[MASK_KEY_INDEX]);
+        masking_key = getMaskingKey(&data[MASK_KEY_INDEX]);
     } else {
         masking_key = 0;
     }
@@ -379,11 +382,11 @@ std::string WebSocketFrame::toDebugString() const
     return ss.str();
 }
 
-// ----------
-// Utilities.
-// ----------
+// ---------------
+// Static methods.
+// ---------------
 
-char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT
+char const * const WebSocketFrame::getOpCodeName(OpCode code) TBAG_NOEXCEPT
 {
     switch (code) {
     case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
@@ -406,12 +409,12 @@ char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT
     }
 }
 
-uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
+uint8_t WebSocketFrame::getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
 {
     return getMaskingKeyByteIndex(payload_bit) + (is_mask ? sizeof(uint32_t) : 0);
 }
 
-uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
+uint8_t WebSocketFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
 {
     switch (payload_bit) {
     case PayloadBit::PL_BIT_7:  return 2;
@@ -422,7 +425,7 @@ uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
     return 0;
 }
 
-PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
+PayloadBit WebSocketFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
 {
     if (payload_length_7bit <= 125) {
         return PayloadBit::PL_BIT_7;
@@ -436,7 +439,7 @@ PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
     return PayloadBit::PL_BIT_7;
 }
 
-PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
+PayloadBit WebSocketFrame::getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
 {
     if (payload_length <= 125) {
         return PayloadBit::PL_BIT_7;
@@ -448,39 +451,116 @@ PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
     return PayloadBit::PL_BIT_64;
 }
 
-uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
+uint32_t WebSocketFrame::getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
 {
     uint32_t network_32byte_size = 0;
     ::memcpy(&network_32byte_size, data, sizeof(uint32_t));
     return network_32byte_size;
 }
 
-std::string getPayloadData(uint32_t mask, std::string const & data)
+std::string WebSocketFrame::getPayloadData(uint32_t mask, std::string const & data)
 {
     std::vector<uint8_t> const INPUT(data.begin(), data.end());
     std::vector<uint8_t> const OUTPUT = getPayloadData(mask, INPUT);
     return std::string(OUTPUT.begin(), OUTPUT.end());
 }
 
-std::vector<uint8_t> getPayloadData(uint32_t mask, std::vector<uint8_t> const & data)
+std::vector<uint8_t> WebSocketFrame::getPayloadData(uint32_t mask, std::vector<uint8_t> const & data)
 {
     return getPayloadData(mask, data.data(), data.size());
 }
 
-std::vector<uint8_t> getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
+std::vector<uint8_t> WebSocketFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
 {
     std::vector<uint8_t> result(data, data + size);
     updatePayloadData(mask, result.data(), result.size());
     return result;
 }
 
-void updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size)
+void WebSocketFrame::updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size)
 {
     static_assert(sizeof(uint32_t) == 4, "Why not?");
     uint8_t const * mask_ptr = reinterpret_cast<uint8_t const *>(&mask);
     for (std::size_t i = 0; i < size; ++i) {
         *(result + i) ^= mask_ptr[i % sizeof(uint32_t)];
     }
+}
+
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+std::string upgradeWebSocketKey(std::string const & original_key)
+{
+    encrypt::Sha1Hash sha1_key;
+    if (encrypt::encryptSha1(original_key + WEBSOCKET_HANDSHAKE_GUID, sha1_key) == false) {
+        return std::string();
+    }
+
+    std::vector<uint8_t> const SHA1_BUFFER(sha1_key.begin(), sha1_key.end());
+    std::string base64_key;
+
+    if (encrypt::encodeBase64WithBinary(SHA1_BUFFER, base64_key) == false) {
+        return std::string();
+    }
+
+    return base64_key;
+}
+
+bool existsWebSocketVersion13(std::string const & versions)
+{
+    for (auto & ver : string::splitTokens(versions, VALUE_DELIMITER)) {
+        try {
+            if (std::stoi(string::trim(ver)) == WEBSOCKET_VERSION_HYBI13) {
+                return true;
+            }
+        } catch (...) {
+            // EMPTY.
+        }
+    }
+    return false;
+}
+
+std::string getWebSocketProtocol(std::string const & protocols, std::set<std::string> const & accept_protocols)
+{
+    std::stringstream ss;
+    for (auto & proto : string::splitTokens(protocols, VALUE_DELIMITER)) {
+        if (accept_protocols.find(string::trim(proto)) != accept_protocols.end()) {
+            ss << string::trim(proto) << VALUE_DELIMITER;
+        }
+    }
+    return ss.str();
+}
+
+std::string getWebSocketProtocolWithTbag(std::string const & protocols)
+{
+    return getWebSocketProtocol(protocols, {VALUE_TBAG_PROTOCOL});
+}
+
+Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response)
+{
+    if (request.existsValue(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
+        return Err::E_ILLARGS;
+    }
+    if (request.existsValue(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
+        return Err::E_ILLARGS;
+    }
+    if (existsWebSocketVersion13(request.getHeader(HEADER_SEC_WEBSOCKET_VERSION)) == false) {
+        return Err::E_VERSION_MISMATCH;
+    }
+
+    std::string const UPGRADE_KEY = upgradeWebSocketKey(request.getHeader(HEADER_SEC_WEBSOCKET_KEY));
+    if (UPGRADE_KEY.empty()) {
+        return Err::E_ILLARGS;
+    }
+
+    response.setVersion(1, 1);
+    response.setStatus(HttpStatus::SC_SWITCHING_PROTOCOLS);
+    response.insertHeader(HEADER_UPGRADE, VALUE_WEBSOCKET);
+    response.insertHeader(HEADER_CONNECTION, VALUE_UPGRADE);
+    response.insertHeader(HEADER_SEC_WEBSOCKET_ACCEPT, UPGRADE_KEY);
+
+    return Err::E_SUCCESS;
 }
 
 } // namespace http

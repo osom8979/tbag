@@ -25,7 +25,6 @@
 #include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/HttpFilter.hpp>
 #include <libtbag/network/http/WebSocketFrame.hpp>
-#include <libtbag/network/http/WebSocketParser.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 

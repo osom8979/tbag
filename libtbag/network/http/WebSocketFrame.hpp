@@ -19,9 +19,14 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 
+#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/HttpBuilder.hpp>
+
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <set>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -213,25 +218,34 @@ public:
 
 public:
     std::string toDebugString() const;
+
+public:
+    static char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT;
+
+    static uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
+    static uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
+
+    static PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
+    static PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
+    static uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT;
+
+    static std::string getPayloadData(uint32_t mask, std::string const & data);
+    static std::vector<uint8_t> getPayloadData(uint32_t mask, std::vector<uint8_t> const & data);
+    static std::vector<uint8_t> getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
+    static void updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size);
 };
 
-// ----------
-// Utilities.
-// ----------
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
 
-TBAG_API char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT;
+TBAG_API std::string upgradeWebSocketKey(std::string const & base64_key);
 
-TBAG_API uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
-TBAG_API uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
+TBAG_API bool existsWebSocketVersion13(std::string const & versions);
+TBAG_API std::string getWebSocketProtocol(std::string const & protocols, std::set<std::string> const & accept_protocols);
+TBAG_API std::string getWebSocketProtocolWithTbag(std::string const & protocols);
 
-TBAG_API PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
-TBAG_API PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
-TBAG_API uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT;
-
-TBAG_API std::string getPayloadData(uint32_t mask, std::string const & data);
-TBAG_API std::vector<uint8_t> getPayloadData(uint32_t mask, std::vector<uint8_t> const & data);
-TBAG_API std::vector<uint8_t> getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
-TBAG_API void updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size);
+TBAG_API Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response);
 
 } // namespace http
 } // namespace network

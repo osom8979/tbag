@@ -18,7 +18,6 @@
 
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/network/http/WebSocketFrame.hpp>
-#include <libtbag/network/http/WebSocketParser.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

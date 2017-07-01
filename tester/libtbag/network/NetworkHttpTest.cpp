@@ -250,31 +250,31 @@ TEST(NetworkHttpTest, RoutingServer)
 
 TEST(NetworkHttpTest, WebSocket)
 {
-    uvpp::Loop loop;
-    FuncHttpServer server(loop);
-    server.setUseWebSocket();
-
-    ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
-    int const SERVER_PORT = server.port();
-    ASSERT_LT(0, SERVER_PORT);
-    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
-
-    server.setOnWebSocketOpen([&](WC node, Err code, HP & packet){
-        std::cout << "Server.OnWebSocketOpen(" << getErrName(code)
-                  << ")\nRequest:\n" << packet.request.toDebugString()
-                  << "\nResponse:\n" << packet.response.toResponseDebugString()
-                  << std::endl;
-    });
-    server.setOnWebSocketMessage([&](WC client, Err code, WP & packet){
-        packet.response = packet.request;
-        packet.response.mask = false;
-        std::cout << "Server.OnWebSocketMessage(" << getErrName(code)
-                  << ")\nFrame:\n" << packet.response.toDebugString() << std::endl;
-    });
-    server.setOnClose([&](WC node){
-        std::cout << "Server.OnClose\n";
-    });
-
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+//    uvpp::Loop loop;
+//    FuncHttpServer server(loop);
+//    server.setUseWebSocket();
+//
+//    ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
+//    int const SERVER_PORT = server.port();
+//    ASSERT_LT(0, SERVER_PORT);
+//    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
+//
+//    server.setOnWebSocketOpen([&](WC node, Err code, HP & packet){
+//        std::cout << "Server.OnWebSocketOpen(" << getErrName(code)
+//                  << ")\nRequest:\n" << packet.request.toDebugString()
+//                  << "\nResponse:\n" << packet.response.toResponseDebugString()
+//                  << std::endl;
+//    });
+//    server.setOnWebSocketMessage([&](WC client, Err code, WP & packet){
+//        packet.response = packet.request;
+//        packet.response.mask = false;
+//        std::cout << "Server.OnWebSocketMessage(" << getErrName(code)
+//                  << ")\nFrame:\n" << packet.response.toDebugString() << std::endl;
+//    });
+//    server.setOnClose([&](WC node){
+//        std::cout << "Server.OnClose\n";
+//    });
+//
+//    ASSERT_EQ(Err::E_SUCCESS, loop.run());
 }
 
