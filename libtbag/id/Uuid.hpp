@@ -166,8 +166,8 @@ public:
 
 // Capacity methods.
 public:
-    TBAG_CONSTEXPR size_type  size() const TBAG_NOEXCEPT { return BYTE_SIZE; }
-    TBAG_CONSTEXPR      bool empty() const TBAG_NOEXCEPT { return false; }
+    TBAG_CONSTEXPR static size_type  size() TBAG_NOEXCEPT { return BYTE_SIZE; }
+    TBAG_CONSTEXPR static      bool empty() TBAG_NOEXCEPT { return false; }
 
 // Element access methods.
 public:
