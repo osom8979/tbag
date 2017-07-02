@@ -103,7 +103,8 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
-    union {
+    union Identifier
+    {
         struct {
             uint32_t time_low;              ///< The low field of the timestamp.
             uint16_t time_mid;              ///< The middle field of the timestamp.
@@ -113,11 +114,15 @@ public:
             uint8_t  node[NODE_BYTE_SIZE];  ///< The spatially unique node identifier.
         };
         value_type data[BYTE_SIZE];
-    } id;
+    };
 
 public:
-    static_assert(sizeof(id) == BYTE_SIZE,
-                  "A universally unique identifier (UUID) is a 128-bit number used to identify information in computer systems.");
+    Identifier id;
+
+public:
+    static_assert(sizeof(Identifier) == BYTE_SIZE,
+                  "A universally unique identifier (UUID) is a 128-bit number "
+                  "used to identify information in computer systems.");
 
 public:
     Uuid() TBAG_NOEXCEPT;
