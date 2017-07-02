@@ -156,6 +156,9 @@ struct ClientInterface
     virtual Err  write (binf const * buffer, std::size_t size, uint64_t millisec = 0U) = 0;
     virtual Err  write (char const * buffer, std::size_t size, uint64_t millisec = 0U) = 0;
 
+    virtual Err startTimeout(uint64_t millisec) = 0;
+    virtual void stopTimeout() = 0;
+
     // ---------------
     // Backend helper.
     // ---------------

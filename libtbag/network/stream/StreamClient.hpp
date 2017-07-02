@@ -162,6 +162,10 @@ public:
     virtual Err  write (binf const * buffer, std::size_t size, uint64_t millisec = 0) override;
     virtual Err  write (char const * buffer, std::size_t size, uint64_t millisec = 0) override;
 
+public:
+    virtual Err startTimeout(uint64_t millisec) override;
+    virtual void stopTimeout() override;
+
 // Event backend.
 public:
     virtual void backConnect(Err code) override;

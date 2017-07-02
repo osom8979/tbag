@@ -571,6 +571,18 @@ Err StreamClient::write(char const * buffer, std::size_t size, uint64_t millisec
     return _internal->autoWrite(&info, 1U, millisec);
 }
 
+Err StreamClient::startTimeout(uint64_t millisec)
+{
+    assert(static_cast<bool>(_internal));
+    return _internal->startCloseTimer(millisec);
+}
+
+void StreamClient::stopTimeout()
+{
+    assert(static_cast<bool>(_internal));
+    _internal->stopCloseTimer();
+}
+
 // --------------
 // Event backend.
 // --------------

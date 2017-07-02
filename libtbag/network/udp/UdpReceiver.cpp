@@ -210,6 +210,16 @@ Err UdpReceiver::write(char const * buffer, std::size_t size, uint64_t millisec)
     return Err::E_UNSUPOP;
 }
 
+Err UdpReceiver::startTimeout(uint64_t millisec)
+{
+    return Err::E_UNSUPOP;
+}
+
+void UdpReceiver::stopTimeout()
+{
+    // EMPTY.
+}
+
 // --------------
 // Event backend.
 // --------------

@@ -296,6 +296,16 @@ Err UdpSender::write(char const * buffer, std::size_t size, uint64_t UNUSED_PARA
     return _internal->autoSend(&info, 1U);
 }
 
+Err UdpSender::startTimeout(uint64_t millisec)
+{
+    return Err::E_UNSUPOP;
+}
+
+void UdpSender::stopTimeout()
+{
+    // EMPTY.
+}
+
 // --------------
 // Event backend.
 // --------------
