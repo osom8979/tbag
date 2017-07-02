@@ -210,6 +210,7 @@ public:
      * that is, all bits set to zero.
      */
     static Uuid nil() TBAG_NOEXCEPT;
+    static Uuid ver4() TBAG_NOEXCEPT;
 };
 
 } // namespace id

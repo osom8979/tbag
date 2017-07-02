@@ -28,8 +28,13 @@ TEST(UuidTest, Default)
     ASSERT_EQ(TEST_UUID_STR, string::lower(UUID3_STRING));
     ASSERT_NE(Uuid::nil(), uuid3);
 
-    Uuid uuid4(Uuid::Version::UUID_VER_4);
+    Uuid uuid4 = Uuid::ver4();
+    Uuid uuid5 = Uuid::ver4();
+
     ASSERT_NE(Uuid::nil(), uuid4);
-    std::cout << "UUID Version4: " << uuid4.toString() << std::endl;
+    ASSERT_NE(Uuid::nil(), uuid5);
+    ASSERT_NE(uuid4, uuid5);
+    std::cout << "UUID Version4 [1]: " << uuid4.toString() << std::endl;
+    std::cout << "UUID Version4 [2]: " << uuid5.toString() << std::endl;
 }
 

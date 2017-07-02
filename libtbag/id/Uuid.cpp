@@ -234,6 +234,11 @@ Uuid Uuid::nil() TBAG_NOEXCEPT
     return Uuid();
 }
 
+Uuid Uuid::ver4() TBAG_NOEXCEPT
+{
+    return Uuid(Uuid::Version::UUID_VER_4);
+}
+
 } // namespace id
 
 // --------------------
