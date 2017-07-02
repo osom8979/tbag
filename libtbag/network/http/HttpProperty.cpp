@@ -85,6 +85,22 @@ int getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT
     }
 }
 
+// -----------------------------------
+// HttpVersionProperty implementation.
+// -----------------------------------
+
+std::string HttpVersionProperty::toString()
+{
+    return getVersionString(http_major, http_minor);
+}
+
+std::string HttpVersionProperty::getVersionString(int major, int minor)
+{
+    std::stringstream ss;
+    ss << HTTP << '/' << major << '.' << minor;
+    return ss.str();
+}
+
 // ----------------------------------
 // HttpCommonProperty implementation.
 // ----------------------------------
@@ -103,6 +119,11 @@ bool HttpCommonProperty::existsHeaderValue(std::string const & key, std::string 
     return existsHeaderValueFromHeaderMap(headers, key, value, ignore_case);
 }
 
+void HttpCommonProperty::insertIfNotExists(std::string const & key, std::string const & val)
+{
+    return insertIfNotExists(headers, key, val);
+}
+
 bool HttpCommonProperty::existsHeaderValueFromHeaderMap(
         HttpHeaderMap const & headers,
         std::string const & key,
@@ -119,6 +140,13 @@ bool HttpCommonProperty::existsHeaderValueFromHeaderMap(
         }
     }
     return false;
+}
+
+void HttpCommonProperty::insertIfNotExists(HttpHeaderMap & headers, std::string const & key, std::string const & val)
+{
+    if (headers.find(key) == headers.end()) {
+        headers.insert(HttpHeaderPair(key, val));
+    }
 }
 
 // ------------------------------------

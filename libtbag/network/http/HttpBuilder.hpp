@@ -125,6 +125,8 @@ public:
 public:
     inline HttpBuilder & insertHeader(std::string const & key, std::string const & val)
     { _property.insertHeader(key, val); return *this; }
+    inline HttpBuilder & insertIfNotExists(std::string const & key, std::string const & val)
+    { _property.insertIfNotExists(key, val); return *this; }
 
 public:
     inline HttpBuilder & setMethod(std::string const & val)
@@ -158,16 +160,6 @@ public:
     std::string buildRequestDebugString() const;
     std::string buildResponseDebugString() const;
 };
-
-// ----------------
-// Build utilities.
-// ----------------
-
-/**
- * If it does not exist, insert it.
- */
-TBAG_API void insertIfNotExists(HttpHeaderMap & headers, std::string const & key, std::string const & val);
-TBAG_API std::string getVersionString(int major = 1, int minor = 1);
 
 // ----------------------
 // Build default methods.

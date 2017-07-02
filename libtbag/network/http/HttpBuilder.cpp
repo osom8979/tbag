@@ -236,24 +236,6 @@ std::string HttpBuilder::buildResponseDebugString() const
     return http::toDebugString(getResponse());
 }
 
-// ----------------
-// Build utilities.
-// ----------------
-
-void insertIfNotExists(HttpHeaderMap & headers, std::string const & key, std::string const & val)
-{
-    if (headers.find(key) == headers.end()) {
-        headers.insert(HttpHeaderPair(key, val));
-    }
-}
-
-std::string getVersionString(int major, int minor)
-{
-    std::stringstream ss;
-    ss << HTTP << '/' << major << '.' << minor;
-    return ss.str();
-}
-
 // ----------------------
 // Build default methods.
 // ----------------------
@@ -283,13 +265,12 @@ std::string buildDefaultRequestString(
         HttpHeaderMap const & headers, std::string const & body,
         int major, int minor, bool logging)
 {
-
     HttpHeaderMap update_headers = headers;
-    insertIfNotExists(update_headers, HEADER_USER_AGENT, DEFAULT_HEADER_USER_AGENT);
-    insertIfNotExists(update_headers, HEADER_ACCEPT, DEFAULT_HEADER_ACCEPT);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_USER_AGENT, DEFAULT_HEADER_USER_AGENT);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_ACCEPT, DEFAULT_HEADER_ACCEPT);
 
     if (body.empty() == false) {
-        insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+        HttpCommonProperty::insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
     }
 
     if (logging) {
@@ -314,9 +295,9 @@ std::string buildDefaultResponseString(
         int major, int minor, bool logging)
 {
     HttpHeaderMap update_headers = headers;
-    insertIfNotExists(update_headers, HEADER_SERVER, DEFAULT_HEADER_SERVER);
-    insertIfNotExists(update_headers, HEADER_CONTENT_TYPE, DEFAULT_HEADER_CONTENT_TYPE);
-    insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_SERVER, DEFAULT_HEADER_SERVER);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_CONTENT_TYPE, DEFAULT_HEADER_CONTENT_TYPE);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
 
     if (logging) {
         for (auto & cursor : update_headers) {
@@ -359,7 +340,7 @@ std::string buildRequestString(
         int major, int minor)
 {
     std::stringstream ss;
-    ss << method << SP << url << SP << getVersionString(major, minor) << CRLF;
+    ss << method << SP << url << SP << HttpVersionProperty::getVersionString(major, minor) << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }
@@ -373,7 +354,7 @@ std::string buildResponseString(
         int major, int minor)
 {
     std::stringstream ss;
-    ss << getVersionString(major, minor) << SP << status << SP << reason << CRLF;
+    ss << HttpVersionProperty::getVersionString(major, minor) << SP << status << SP << reason << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }

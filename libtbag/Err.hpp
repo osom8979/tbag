@@ -47,11 +47,13 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_CLOSING , "Closing object"        ) \
     _TBAG_XX(_EQUERY  , "Query error"           ) \
     _TBAG_XX(_SMALLBUF, "Buffer size is small"  ) \
+    _TBAG_XX(_KEYGEN  , "Key generator error"   ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
     _TBAG_XX(_CONNECTION_RESET, "A connection was forcibly closed by a peer") \
     _TBAG_XX(_NO_RESPONSE     , "No response"                               ) \
+    _TBAG_XX(_NOT_WS_RESPONSE , "Not WebSocket response"                    ) \
     /* Process */ \
     _TBAG_XX(_UNKNOWN_PROCESS_ID, "Unknown process id") \
     /* Missing system error in libuv. */ \

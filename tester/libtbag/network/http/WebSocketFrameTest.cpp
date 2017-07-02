@@ -73,7 +73,7 @@ TEST(WebSocketFrameTest, GetResponseWebSocket)
             "Host: server.example.com\r\n"
             "Upgrade: websocket\r\n"
             "Connection: Upgrade\r\n"
-            "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
+            "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n" // Base64 original key: "the sample nonce"
             "Origin: http://example.com\r\n"
             "Sec-WebSocket-Protocol: chat, superchat\r\n"
             "Sec-WebSocket-Version: 13\r\n\r\n";
@@ -88,7 +88,7 @@ TEST(WebSocketFrameTest, GetResponseWebSocket)
     ASSERT_TRUE(request.isComplete());
 
     HttpBuilder response;
-    ASSERT_EQ(Err::E_SUCCESS, getResponseWebSocket(request, response));
+    ASSERT_EQ(Err::E_SUCCESS, updateResponseWebSocket(request, response));
 
     HttpParser test_response;
     test_response.execute(TEST_RESPONSE.c_str(), TEST_RESPONSE.size());
@@ -106,6 +106,6 @@ TEST(WebSocketFrameTest, UpgradeWebsocketKey)
 {
     std::string const TEST_ORIGINAL = "dGhlIHNhbXBsZSBub25jZQ==";
     std::string const TEST_RESULT   = "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=";
-    ASSERT_EQ(TEST_RESULT, upgradeWebSocketKey(TEST_ORIGINAL));
+    ASSERT_EQ(TEST_RESULT, getUpgradeWebSocketKey(TEST_ORIGINAL));
 }
 

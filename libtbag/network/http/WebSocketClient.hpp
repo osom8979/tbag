@@ -15,9 +15,17 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
 
-#include <libtbag/network/http/HttpClient.hpp>
+#include <libtbag/network/stream/StreamClient.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/WebSocketFrame.hpp>
+#include <libtbag/network/Uri.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,50 +40,70 @@ namespace http    {
  * @author zer0
  * @date   2017-06-30
  */
-class TBAG_API WebSocketClient : protected HttpClient
+class TBAG_API WebSocketClient : protected stream::StreamClient
 {
 public:
-    using StreamType = HttpClient::StreamType;
-    using Buffer = HttpClient::Buffer;
-    using Loop = uvpp::Loop;
+    using StreamType = details::StreamType;
+    using Parent     = stream::StreamClient;
+
+public:
+    using Loop   = uvpp::Loop;
+    using Buffer = std::vector<char>;
 
     using Frame = WebSocketFrame;
     using FrameBuffer = WebSocketFrame::Buffer;
 
 public:
-    struct WebSocketCallback
+    TBAG_CONSTEXPR static uint64_t const DEFAULT_WRITE_TIMEOUT_MILLISECOND = 5 * 1000;
+
+public:
+    struct ClientData
     {
-        /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
-        virtual void onOpen() = 0;
+        struct {
+            bool upgrade = false;
+            WebSocketFrame recv_frame;
+            WebSocketFrame write_frame;
+            WebSocketFrame::Buffer frame_buffer;
+        } websocket;
 
-        /** When a message has been received from WebSocket server. */
-        virtual void onMessage(Err code, Frame const & frame) = 0;
+        HttpBuilder builder;
+        HttpParser  parser;
 
-        /** Triggered when error occurred. */
-        virtual void onError(Err code) = 0;
-
-        /** When a socket has been closed. */
-        virtual void onClose() = 0;
+        std::string key;
+        std::string protocols;
     };
 
-private:
-    WebSocketCallback * _callback;
-
-private:
-    Frame _recv_frame;
-    Frame _write_frame;
-    FrameBuffer _frame_buffer;
+    ClientData _data;
 
 public:
     WebSocketClient(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~WebSocketClient();
 
 public:
-    Err sendText(std::string const & text);
-    Err sendBinary(Buffer const & binary);
-    Err sendPing(Buffer const & binary);
-    Err sendPong(Buffer const & binary);
-    Err sendClose();
+    // @formatter:off
+    inline HttpBuilder       & atBuilder()       TBAG_NOEXCEPT { return _data.builder; }
+    inline HttpBuilder const & atBuilder() const TBAG_NOEXCEPT { return _data.builder; }
+    inline HttpParser        & atParser ()       TBAG_NOEXCEPT { return _data.parser;  }
+    inline HttpParser  const & atParser () const TBAG_NOEXCEPT { return _data.parser;  }
+    // @formatter:on
+
+    inline bool isUpgradeWebSocket() const TBAG_NOEXCEPT
+    { return _data.websocket.upgrade; }
+
+public:
+    Err sendText(std::string const & text, uint64_t timeout);
+    Err sendBinary(Buffer const & binary, uint64_t timeout);
+
+    Err sendPing(Buffer const & binary, uint64_t timeout);
+    Err sendPong(Buffer const & binary, uint64_t timeout);
+    Err sendClose(uint64_t timeout);
+
+public:
+    void setup(HttpBuilder const & request);
+
+private:
+    bool runWebSocketChecker(HttpParser const & response);
+    void runWebSocketRead(char const * buffer, std::size_t size);
 
 private:
     virtual void onConnect(Err code) override;
@@ -83,6 +111,19 @@ private:
     virtual void onWrite(Err code) override;
     virtual void onRead(Err code, ReadPacket const & packet) override;
     virtual void onClose() override;
+
+public:
+    /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
+    virtual void onWsOpen(HttpResponse const & response);
+
+    /** When a message has been received from WebSocket server. */
+    virtual void onWsMessage(Frame const & frame);
+
+    /** Triggered when error occurred. */
+    virtual void onWsError(Err code);
+
+    /** When a socket has been closed. */
+    virtual void onWsClose();
 };
 
 } // namespace http

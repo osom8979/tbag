@@ -12,6 +12,7 @@
 #include <libtbag/encrypt/Base64.hpp>
 #include <libtbag/encrypt/Sha1.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/id/Uuid.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -28,6 +29,20 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+
+#if defined(max)
+TBAG_PUSH_MACRO(max);
+#undef max
+#define __RESTORE_MAX__
+#endif
+
+TBAG_CONSTEXPR static std::size_t const MAX_UINT16_BYTE_SIZE = std::numeric_limits<uint16_t>::max();
+TBAG_CONSTEXPR static std::size_t const MAX_UINT64_BYTE_SIZE = std::numeric_limits<uint64_t>::max();
+
+#if defined(__RESTORE_MAX__)
+TBAG_POP_MACRO(max);
+#undef __RESTORE_MAX__
+#endif
 
 WebSocketFrame::WebSocketFrame()
         : fin (false), rsv1(false), rsv2(false), rsv3(false),
@@ -165,27 +180,13 @@ Err WebSocketFrame::execute(uint8_t const * data, std::size_t size)
     return Err::E_SUCCESS;
 }
 
-#if defined(max)
-TBAG_PUSH_MACRO(max);
-#undef max
-#define __RESTORE_MAX__
-#endif
-
-TBAG_CONSTEXPR static std::size_t const MAX_UINT16_BYTE_SIZE = std::numeric_limits<uint16_t>::max();
-TBAG_CONSTEXPR static std::size_t const MAX_UINT64_BYTE_SIZE = std::numeric_limits<uint64_t>::max();
-
-#if defined(__RESTORE_MAX__)
-TBAG_POP_MACRO(max);
-#undef __RESTORE_MAX__
-#endif
-
 std::size_t WebSocketFrame::calculateWriteBufferSize() const
 {
     std::size_t default_size = 2/*HEADER*/ + payload_length + (mask ? sizeof(uint32_t) : 0);
     switch(getPayloadBitWithPayloadLength(payload_length)) {
     case PayloadBit::PL_BIT_7:  return default_size;
-    case PayloadBit::PL_BIT_16: return default_size + MAX_UINT16_BYTE_SIZE;
-    case PayloadBit::PL_BIT_64: return default_size + MAX_UINT64_BYTE_SIZE;
+    case PayloadBit::PL_BIT_16: return default_size + sizeof(uint16_t);
+    case PayloadBit::PL_BIT_64: return default_size + sizeof(uint64_t);
     default:                    return default_size;
     }
 }
@@ -490,23 +491,6 @@ void WebSocketFrame::updatePayloadData(uint32_t mask, uint8_t * result, std::siz
 // Miscellaneous utilities.
 // ------------------------
 
-std::string upgradeWebSocketKey(std::string const & original_key)
-{
-    encrypt::Sha1Hash sha1_key;
-    if (encrypt::encryptSha1(original_key + WEBSOCKET_HANDSHAKE_GUID, sha1_key) == false) {
-        return std::string();
-    }
-
-    std::vector<uint8_t> const SHA1_BUFFER(sha1_key.begin(), sha1_key.end());
-    std::string base64_key;
-
-    if (encrypt::encodeBase64WithBinary(SHA1_BUFFER, base64_key) == false) {
-        return std::string();
-    }
-
-    return base64_key;
-}
-
 bool existsWebSocketVersion13(std::string const & versions)
 {
     for (auto & ver : string::splitTokens(versions, VALUE_DELIMITER)) {
@@ -537,8 +521,66 @@ std::string getWebSocketProtocolWithTbag(std::string const & protocols)
     return getWebSocketProtocol(protocols, {VALUE_TBAG_PROTOCOL});
 }
 
-Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response)
+std::string getWebSocketProtocolValue(std::vector<std::string> const & protocols)
 {
+    std::stringstream ss;
+    for (auto & proto : protocols) {
+        ss << proto << VALUE_DELIMITER << ' ';
+    }
+    return ss.str();
+}
+
+std::string getUpgradeWebSocketKey(std::string const & original_key)
+{
+    encrypt::Sha1Hash sha1_key;
+    if (encrypt::encryptSha1(original_key + WEBSOCKET_HANDSHAKE_GUID, sha1_key) == false) {
+        return std::string();
+    }
+
+    std::vector<uint8_t> const SHA1_BUFFER(sha1_key.begin(), sha1_key.end());
+    std::string base64_key;
+
+    if (encrypt::encodeBase64WithBinary(SHA1_BUFFER, base64_key) == false) {
+        return std::string();
+    }
+
+    return base64_key;
+}
+
+std::string getRandomWebSocketKey()
+{
+    std::string base64;
+    encrypt::encodeBase64(id::Uuid::ver4().toString(), base64);
+    return base64;
+}
+
+Err updateRequestWebSocket(HttpBuilder & request)
+{
+    request.setVersion(1, 1);
+    if (request.getMethod().empty()) {
+        request.setMethod(HttpMethod::M_GET);
+    }
+
+    request.insertIfNotExists(HEADER_CONNECTION, VALUE_UPGRADE);
+    request.insertIfNotExists(HEADER_UPGRADE, VALUE_WEBSOCKET);
+    request.insertIfNotExists(HEADER_SEC_WEBSOCKET_VERSION, std::to_string(WEBSOCKET_VERSION_HYBI13));
+
+    if (request.existsHeader(HEADER_SEC_WEBSOCKET_KEY) == false) {
+        std::string const KEY = getRandomWebSocketKey();
+        if (KEY.empty()) {
+            return Err::E_KEYGEN;
+        }
+        request.insertHeader(HEADER_SEC_WEBSOCKET_KEY, KEY);
+    }
+
+    return Err::E_SUCCESS;
+}
+
+Err updateResponseWebSocket(HttpParser const & request, HttpBuilder & response)
+{
+    if (request.getMethodName() != getHttpMethodName(HttpMethod::M_GET)) {
+        return Err::E_ILLARGS;
+    }
     if (request.existsHeaderValue(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
         return Err::E_ILLARGS;
     }
@@ -549,16 +591,16 @@ Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response)
         return Err::E_VERSION_MISMATCH;
     }
 
-    std::string const UPGRADE_KEY = upgradeWebSocketKey(request.getHeader(HEADER_SEC_WEBSOCKET_KEY));
+    std::string const UPGRADE_KEY = getUpgradeWebSocketKey(request.getHeader(HEADER_SEC_WEBSOCKET_KEY));
     if (UPGRADE_KEY.empty()) {
         return Err::E_ILLARGS;
     }
 
     response.setVersion(1, 1);
     response.setStatus(HttpStatus::SC_SWITCHING_PROTOCOLS);
-    response.insertHeader(HEADER_UPGRADE, VALUE_WEBSOCKET);
-    response.insertHeader(HEADER_CONNECTION, VALUE_UPGRADE);
-    response.insertHeader(HEADER_SEC_WEBSOCKET_ACCEPT, UPGRADE_KEY);
+    response.insertIfNotExists(HEADER_UPGRADE, VALUE_WEBSOCKET);
+    response.insertIfNotExists(HEADER_CONNECTION, VALUE_UPGRADE);
+    response.insertIfNotExists(HEADER_SEC_WEBSOCKET_ACCEPT, UPGRADE_KEY);
 
     return Err::E_SUCCESS;
 }

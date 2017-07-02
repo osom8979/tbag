@@ -239,13 +239,17 @@ public:
 // Miscellaneous utilities.
 // ------------------------
 
-TBAG_API std::string upgradeWebSocketKey(std::string const & base64_key);
-
 TBAG_API bool existsWebSocketVersion13(std::string const & versions);
+
 TBAG_API std::string getWebSocketProtocol(std::string const & protocols, std::set<std::string> const & accept_protocols);
 TBAG_API std::string getWebSocketProtocolWithTbag(std::string const & protocols);
+TBAG_API std::string getWebSocketProtocolValue(std::vector<std::string> const & protocols);
 
-TBAG_API Err getResponseWebSocket(HttpParser const & request, HttpBuilder & response);
+TBAG_API std::string getUpgradeWebSocketKey(std::string const & base64_key);
+TBAG_API std::string getRandomWebSocketKey();
+
+TBAG_API Err updateRequestWebSocket(HttpBuilder & request);
+TBAG_API Err updateResponseWebSocket(HttpParser const & request, HttpBuilder & response);
 
 } // namespace http
 } // namespace network

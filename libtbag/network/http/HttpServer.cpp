@@ -255,7 +255,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, ReadPacket const & pack
     // WebSocket checker.
     if (_use_websocket && request.isUpgrade()) {
         // WebSocket interrupt process (HTTP Request).
-        if (getResponseWebSocket(request, response) == Err::E_SUCCESS) {
+        if (updateResponseWebSocket(request, response) == Err::E_SUCCESS) {
             tDLogI("HttpServer::onClientRead() Request WebSocket header.");
             runWebSocketOpen(shared, code, packet, *dataset);
             return;

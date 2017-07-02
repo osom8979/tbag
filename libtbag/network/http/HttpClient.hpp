@@ -25,7 +25,6 @@
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <functional>
-#include <chrono>
 #include <vector>
 
 // -------------------
@@ -47,14 +46,8 @@ public:
     using StreamType = details::StreamType;
     using Parent     = stream::StreamClient;
 
-public:
     using Loop   = uvpp::Loop;
     using Buffer = std::vector<char>;
-
-    using SystemClock = std::chrono::system_clock;
-    using TimePoint   = SystemClock::time_point;
-    using Millisec    = std::chrono::milliseconds;
-    using Seconds     = std::chrono::seconds;
 
 public:
     enum class EventStep
@@ -88,10 +81,6 @@ private:
     bool _call_once;
     Callback _callback;
 
-private:
-    Millisec  _timeout;
-    TimePoint _start_time;
-
 public:
     HttpClient(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~HttpClient();
@@ -105,7 +94,7 @@ public:
     // @formatter:on
 
 public:
-    void setup(HttpBuilder const & request, Callback const & cb, uint64_t const & timeout = 0);
+    void setup(HttpBuilder const & request, Callback const & cb);
 
 private:
     void runCallback(EventStep step, Err code);

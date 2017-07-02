@@ -27,12 +27,10 @@ HttpClient::~HttpClient()
     // EMPTY.
 }
 
-void HttpClient::setup(HttpBuilder const & request, Callback const & cb, uint64_t const & timeout)
+void HttpClient::setup(HttpBuilder const & request, Callback const & cb)
 {
-    _builder    = request;
-    _timeout    = Millisec(timeout);
-    _start_time = SystemClock::now(); // Markup timer.
-    _callback   = cb;
+    _builder  = request;
+    _callback = cb;
 }
 
 void HttpClient::runCallback(EventStep step, Err code)
@@ -57,16 +55,6 @@ void HttpClient::onConnect(Err code)
     if (WRITE_CODE != Err::E_SUCCESS) {
         tDLogE("HttpClient::onConnect() write {} error.", getErrName(WRITE_CODE));
         runCallback(EventStep::ET_CONNECT, WRITE_CODE);
-        close();
-        return;
-    }
-
-    using namespace std::chrono;
-    Millisec const LEFT_TIME = _timeout - duration_cast<Millisec>(SystemClock::now() - _start_time);
-
-    if (LEFT_TIME.count() <= 0) {
-        tDLogE("HttpClient::onConnect() timeout.");
-        runCallback(EventStep::ET_CONNECT, Err::E_TIMEOUT);
         close();
         return;
     }
@@ -179,7 +167,7 @@ Err requestWithSync(HttpClient::StreamType type,
         } else {
             tDLogE("requestWithSync() HttpClient Err({})", getErrName(e.code));
         }
-    }, timeout);
+    });
 
     Err LOOP_RESULT = loop.run();
     if (LOOP_RESULT != Err::E_SUCCESS) {

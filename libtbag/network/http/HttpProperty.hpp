@@ -286,6 +286,10 @@ struct HttpVersionProperty
 
     inline friend bool operator ==(HttpVersionProperty & lh, HttpVersionProperty & rh) TBAG_NOEXCEPT
     { return lh.http_major == rh.http_major && lh.http_minor == rh.http_minor; }
+
+    std::string toString();
+
+    static std::string getVersionString(int major = 1, int minor = 1);
 };
 
 using HttpHeaderMap  = std::multimap<std::string, std::string>;
@@ -335,12 +339,14 @@ struct HttpCommonProperty
 
     std::string getHeader(std::string const & key) const;
     bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const;
+    void insertIfNotExists(std::string const & key, std::string const & val);
 
     static bool existsHeaderValueFromHeaderMap(
             HttpHeaderMap const & headers,
             std::string const & key,
             std::string const & value,
             bool ignore_case = true);
+    static void insertIfNotExists(HttpHeaderMap & headers, std::string const & key, std::string const & val);
 };
 
 /**
