@@ -122,17 +122,17 @@ public:
         { /* EMPTY. */ }
 
         /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
-        virtual void onWebSocketOpen(WC client, Err code, HP & packet)
+        virtual void onWsOpen(WC client, Err code, HP & packet)
         { /* EMPTY. */ }
 
         /** When a message has been received from WebSocket server. */
-        virtual void onWebSocketMessage(WC client, Err code, WP & packet)
+        virtual void onWsMessage(WC client, Err code, WP & packet)
         { /* EMPTY. */ }
 
-        virtual void * onUserDataAlloc(WC client)
+        virtual void * onUdataAlloc(WC client)
         { return nullptr; }
 
-        virtual void onUserDataDealloc(WC client, void * udata)
+        virtual void onUdataDealloc(WC client, void * udata)
         { /* EMPTY. */ }
 
         virtual void onServerClose()
@@ -248,53 +248,48 @@ public:
 struct FunctionalHttpServer : public HttpServer, public HttpServer::Callback
 {
     using StreamType = HttpServer::StreamType;
+
     using WC = HttpServer::WC;
     using HP = HttpServer::HP;
     using WP = HttpServer::WP;
 
-    using OnOpen     = std::function<void(WC)>;
-    using OnRequest  = HttpServer::OnRequest;
-    using OnClose    = std::function<void(WC)>;
-    using OnShutdown = std::function<void(WC, Err)>;
-    using OnWrite    = std::function<void(WC client, Err)>;
+    using OnOpen         = std::function<void(WC)>;
+    using OnRequest      = HttpServer::OnRequest;
+    using OnClose        = std::function<void(WC)>;
+    using OnShutdown     = std::function<void(WC, Err)>;
+    using OnWrite        = std::function<void(WC client, Err)>;
+    using OnWsOpen       = std::function<void(WC, Err, HP&)>;
+    using OnWsMessage    = std::function<void(WC, Err, WP&)>;
+    using OnUdataAlloc   = std::function<void*(WC)>;
+    using OnUdataDealloc = std::function<void(WC, void*)>;
+    using OnServerClose  = std::function<void(void)>;
 
-    using OnWebSocketOpen    = std::function<void(WC, Err, HP&)>;
-    using OnWebSocketMessage = std::function<void(WC, Err, WP&)>;
-
-    using OnUserDataAlloc   = std::function<void*(WC)>;
-    using OnUserDataDealloc = std::function<void(WC, void*)>;
-
-    using OnServerClose = std::function<void(void)>;
-
-    OnOpen     open_cb;
-    OnRequest  request_cb;
-    OnClose    close_cb;
-    OnShutdown shutdown_cb;
-    OnWrite    write_cb;
-
-    OnWebSocketOpen    web_socket_open_cb;
-    OnWebSocketMessage web_socket_message_cb;
-
-    OnUserDataAlloc   user_data_alloc_cb;
-    OnUserDataDealloc user_data_dealloc_cb;
-
-    OnServerClose server_close_cb;
+    OnOpen                  open_cb;
+    OnRequest            request_cb;
+    OnClose                close_cb;
+    OnShutdown          shutdown_cb;
+    OnWrite                write_cb;
+    OnWsOpen             ws_open_cb;
+    OnWsMessage       ws_message_cb;
+    OnUdataAlloc     udata_alloc_cb;
+    OnUdataDealloc udata_dealloc_cb;
+    OnServerClose   server_close_cb;
 
     FunctionalHttpServer(Loop & loop, StreamType type = StreamType::TCP) : HttpServer(loop, type)
     { setCallback(this); }
     virtual ~FunctionalHttpServer()
     { /* EMPTY. */ }
 
-    void setOnOpen            (OnOpen             const & cb) { open_cb               = cb; }
-    void setOnDefaultRequest  (OnRequest          const & cb) { request_cb            = cb; }
-    void setOnClose           (OnClose            const & cb) { close_cb              = cb; }
-    void setOnShutdown        (OnShutdown         const & cb) { shutdown_cb           = cb; }
-    void setOnWrite           (OnWrite            const & cb) { write_cb              = cb; }
-    void setOnWebSocketOpen   (OnWebSocketOpen    const & cb) { web_socket_open_cb    = cb; }
-    void setOnWebSocketMessage(OnWebSocketMessage const & cb) { web_socket_message_cb = cb; }
-    void setOnUserDataAlloc   (OnUserDataAlloc    const & cb) { user_data_alloc_cb    = cb; }
-    void setOnUserDataDealloc (OnUserDataDealloc  const & cb) { user_data_dealloc_cb  = cb; }
-    void setOnServerClose     (OnServerClose      const & cb) { server_close_cb       = cb; }
+    void setOnOpen          (OnOpen         const & cb) {          open_cb = cb; }
+    void setOnDefaultRequest(OnRequest      const & cb) {       request_cb = cb; }
+    void setOnClose         (OnClose        const & cb) {         close_cb = cb; }
+    void setOnShutdown      (OnShutdown     const & cb) {      shutdown_cb = cb; }
+    void setOnWrite         (OnWrite        const & cb) {         write_cb = cb; }
+    void setOnWsOpen        (OnWsOpen       const & cb) {       ws_open_cb = cb; }
+    void setOnWsMessage     (OnWsMessage    const & cb) {    ws_message_cb = cb; }
+    void setOnUdataAlloc    (OnUdataAlloc   const & cb) {   udata_alloc_cb = cb; }
+    void setOnUdataDealloc  (OnUdataDealloc const & cb) { udata_dealloc_cb = cb; }
+    void setOnServerClose   (OnServerClose  const & cb) {  server_close_cb = cb; }
 
     virtual void onOpen(WC client) override
     { if (static_cast<bool>(open_cb)) { open_cb(client); } }
@@ -306,14 +301,14 @@ struct FunctionalHttpServer : public HttpServer, public HttpServer::Callback
     { if (static_cast<bool>(shutdown_cb)) { shutdown_cb(client, code); } }
     virtual void onWrite(WC client, Err code) override
     { if (static_cast<bool>(write_cb)) { write_cb(client, code); } }
-    virtual void onWebSocketOpen(WC client, Err code, HP & packet) override
-    { if (static_cast<bool>(web_socket_open_cb)) { web_socket_open_cb(client, code, packet); } }
-    virtual void onWebSocketMessage(WC client, Err code, WP & packet) override
-    { if (static_cast<bool>(web_socket_message_cb)) { web_socket_message_cb(client, code, packet); } }
-    virtual void * onUserDataAlloc(WC client) override
-    { if (static_cast<bool>(user_data_alloc_cb)) { return user_data_alloc_cb(client); } return nullptr; }
-    virtual void onUserDataDealloc(WC client, void * udata) override
-    { if (static_cast<bool>(user_data_dealloc_cb)) { user_data_dealloc_cb(client, udata); } }
+    virtual void onWsOpen(WC client, Err code, HP & packet) override
+    { if (static_cast<bool>(ws_open_cb)) { ws_open_cb(client, code, packet); } }
+    virtual void onWsMessage(WC client, Err code, WP & packet) override
+    { if (static_cast<bool>(ws_message_cb)) { ws_message_cb(client, code, packet); } }
+    virtual void * onUdataAlloc(WC client) override
+    { if (static_cast<bool>(udata_alloc_cb)) { return udata_alloc_cb(client); } return nullptr; }
+    virtual void onUdataDealloc(WC client, void * udata) override
+    { if (static_cast<bool>(udata_dealloc_cb)) { udata_dealloc_cb(client, udata); } }
     virtual void onServerClose() override
     { if (static_cast<bool>(server_close_cb)) { server_close_cb(); } }
 };

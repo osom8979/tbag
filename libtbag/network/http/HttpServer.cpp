@@ -80,7 +80,7 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
     uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
     if (_callback != nullptr) {
         HP hp(request, response, timeout);
-        _callback->onWebSocketOpen(node, code, hp);
+        _callback->onWsOpen(node, code, hp);
     }
 
     auto const RESPONSE = response.buildDefaultResponseString();
@@ -117,7 +117,7 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
             char const * data = (char const *)rframe.getPayloadData();
             std::size_t size = rframe.getPayloadSize();
             WP wp(rframe.opcode, data, size);
-            _callback->onWebSocketMessage(node, code, wp);
+            _callback->onWsMessage(node, code, wp);
         }
         return;
     }
@@ -309,7 +309,7 @@ void HttpServer::onClientWrite(WeakClient node, Err code)
 void * HttpServer::onClientUdataAlloc(WeakClient node)
 {
     if (_callback != nullptr) {
-        return _callback->onUserDataAlloc(node);
+        return _callback->onUdataAlloc(node);
     }
     return nullptr;
 }
@@ -317,7 +317,7 @@ void * HttpServer::onClientUdataAlloc(WeakClient node)
 void HttpServer::onClientUdataDealloc(WeakClient node, void * data)
 {
     if (_callback != nullptr) {
-        return _callback->onUserDataDealloc(node, data);
+        return _callback->onUdataDealloc(node, data);
     }
 }
 
