@@ -157,8 +157,9 @@ public:
     std::string buildDefaultRequestString() const;
     std::string buildDefaultResponseString() const;
 
-    std::string buildRequestDebugString() const;
-    std::string buildResponseDebugString() const;
+public:
+    std::string toRequestDebugString() const;
+    std::string toResponseDebugString() const;
 };
 
 // ----------------------

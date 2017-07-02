@@ -248,7 +248,7 @@ TEST(NetworkHttpTest, RoutingServer)
     ASSERT_EQ(5, on_close            );
 }
 
-TEST(NetworkHttpTest, WebSocket)
+TEST(NetworkHttpTest, WebSocketEchoTest)
 {
 //    uvpp::Loop loop;
 //    FuncHttpServer server(loop);
@@ -266,10 +266,10 @@ TEST(NetworkHttpTest, WebSocket)
 //                  << std::endl;
 //    });
 //    server.setOnWebSocketMessage([&](WC client, Err code, WP & packet){
-//        packet.response = packet.request;
-//        packet.response.mask = false;
-//        std::cout << "Server.OnWebSocketMessage(" << getErrName(code)
-//                  << ")\nFrame:\n" << packet.response.toDebugString() << std::endl;
+//        //packet.response = packet.request;
+//        //packet.response.mask = false;
+//        //std::cout << "Server.OnWebSocketMessage(" << getErrName(code)
+//        //          << ")\nFrame:\n" << packet.response.toDebugString() << std::endl;
 //    });
 //    server.setOnClose([&](WC node){
 //        std::cout << "Server.OnClose\n";

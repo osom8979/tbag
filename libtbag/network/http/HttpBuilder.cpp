@@ -226,12 +226,12 @@ std::string HttpBuilder::buildDefaultResponseString() const
     return http::buildDefaultResponseString(_property);
 }
 
-std::string HttpBuilder::buildRequestDebugString() const
+std::string HttpBuilder::toRequestDebugString() const
 {
     return http::toDebugString(getRequest());
 }
 
-std::string HttpBuilder::buildResponseDebugString() const
+std::string HttpBuilder::toResponseDebugString() const
 {
     return http::toDebugString(getResponse());
 }

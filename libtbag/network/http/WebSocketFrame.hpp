@@ -170,8 +170,8 @@ public:
 
 public:
     std::size_t calculateWriteBufferSize() const;
-    std::size_t write(uint8_t * data, std::size_t data_size);
-    std::size_t write(Buffer & buffer);
+    std::size_t copyTo(uint8_t * data, std::size_t data_size);
+    std::size_t copyTo(Buffer & buffer);
 
 public:
     void set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
@@ -195,6 +195,7 @@ public:
     /**
      * Closing the connection.
      */
+    Err closeRequest();
     Err closeRequest(uint32_t masking_key);
     Err closeResponse();
 
@@ -204,6 +205,7 @@ public:
      * @remarks
      *  for pings and pongs, the max payload length is 125.
      */
+    Err pingRequest(uint8_t const * data, std::size_t size);
     Err pingRequest(uint32_t masking_key, uint8_t const * data, std::size_t size);
     Err pingResponse(uint8_t const * data, std::size_t size);
 
@@ -213,6 +215,7 @@ public:
      * @remarks
      *  for pings and pongs, the max payload length is 125.
      */
+    Err pongRequest(uint8_t const * data, std::size_t size);
     Err pongRequest(uint32_t masking_key, uint8_t const * data, std::size_t size);
     Err pongResponse(uint8_t const * data, std::size_t size);
 
@@ -220,8 +223,6 @@ public:
     std::string toDebugString() const;
 
 public:
-    static char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT;
-
     static uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
     static uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
 
@@ -238,6 +239,8 @@ public:
 // ------------------------
 // Miscellaneous utilities.
 // ------------------------
+
+TBAG_API char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT;
 
 TBAG_API bool existsWebSocketVersion13(std::string const & versions);
 

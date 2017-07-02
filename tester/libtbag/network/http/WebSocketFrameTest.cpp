@@ -60,7 +60,7 @@ TEST(WebSocketFrameTest, RequestFrame)
     // Frame to request buffer.
     std::vector<uint8_t> buffer;
     buffer.resize(sizeof(REQUEST_FRAME));
-    ASSERT_EQ(sizeof(REQUEST_FRAME), frame.write(buffer));
+    ASSERT_EQ(sizeof(REQUEST_FRAME), frame.copyTo(buffer));
 
     std::string const lh(REQUEST_FRAME, REQUEST_FRAME + sizeof(REQUEST_FRAME));
     std::string const rh(buffer.begin(), buffer.end());

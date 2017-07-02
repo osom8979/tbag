@@ -96,36 +96,43 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
 
 void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const & packet, ClientData & client_data)
 {
-    auto & recv_frame   = client_data.websocket.recv_frame;
-    auto & write_frame  = client_data.websocket.write_frame;
-    auto & frame_buffer = client_data.websocket.frame_buffer;
+    auto & rframe  = client_data.websocket.recv_frame;
+    auto & wframe  = client_data.websocket.write_frame;
+    auto & fbuffer = client_data.websocket.frame_buffer;
 
-    Err const EXECUTE_CODE = recv_frame.execute((uint8_t*)packet.buffer, packet.size);
+    Err const EXECUTE_CODE = rframe.execute((uint8_t*)packet.buffer, packet.size);
     if (EXECUTE_CODE != Err::E_SUCCESS) {
         tDLogE("HttpServer::runWebSocketRead() WebSocket frame {} error", getErrName(EXECUTE_CODE));
         return;
     }
 
-    uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
-    if (_callback != nullptr) {
-        WP wp(recv_frame, write_frame, timeout);
-        _callback->onWebSocketMessage(node, code, wp);
-    }
-
-    std::size_t const RESERVE_SIZE = write_frame.calculateWriteBufferSize();
-    if (frame_buffer.size() < write_frame.calculateWriteBufferSize()) {
-        frame_buffer.resize(RESERVE_SIZE);
-    }
-
-    if (write_frame.write(frame_buffer.data(), frame_buffer.size()) == 0) {
-        tDLogE("HttpServer::runWebSocketRead() WebSocket frame write error.");
+    if (rframe.fin == false) {
+        // Waiting next frame ...
         return;
     }
 
-    Err write_code = node->write((char const *)frame_buffer.data(), frame_buffer.size(), timeout);
-    if (write_code != Err::E_SUCCESS) {
-        tDLogW("HttpServer::runWebSocketRead() WebSocket response write {} error.", getErrName(write_code));
+    assert(rframe.fin);
+    if (rframe.opcode == OpCode::OC_TEXT_FRAME || rframe.opcode == OpCode::OC_BINARY_FRAME) {
+        if (_callback != nullptr) {
+            char const * data = (char const *)rframe.getPayloadData();
+            std::size_t size = rframe.getPayloadSize();
+            WP wp(rframe.opcode, data, size);
+            _callback->onWebSocketMessage(node, code, wp);
+        }
         return;
+    }
+
+    // Processing control frames.
+    if (rframe.opcode == OpCode::OC_CONNECTION_CLOSE) {
+        wframe.closeResponse();
+        wframe.copyTo(fbuffer);
+    } else if (rframe.opcode == OpCode::OC_DENOTES_PING) {
+        wframe.pongResponse(rframe.getPayloadData(), rframe.getPayloadSize());
+        wframe.copyTo(fbuffer);
+    } else if (rframe.opcode == OpCode::OC_DENOTES_PONG) {
+        client_data.websocket.tick_error_count = 0;
+    } else {
+        tDLogW("HttpServer::runWebSocketRead() Unsupported control frame: {}", getOpCodeName(rframe.opcode));
     }
 }
 

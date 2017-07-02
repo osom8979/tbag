@@ -85,21 +85,21 @@ public:
         { /* EMPTY. */ }
     };
 
-    struct WebSocketPacket
+    struct WsPacket
     {
-        WebSocketFrame const & request;
-        WebSocketFrame & response;
-        uint64_t timeout;
+        OpCode op;
+        char const * buffer;
+        std::size_t size;
 
-        WebSocketPacket(WebSocketFrame const & req, WebSocketFrame & rsp, uint64_t t) : request(req), response(rsp), timeout(t)
+        WsPacket(OpCode o, char const * b, std::size_t s) : op(o), buffer(b), size(s)
         { /* EMPTY. */ }
-        ~WebSocketPacket()
+        ~WsPacket()
         { /* EMPTY. */ }
     };
 
     using WC = WeakClient;
     using HP = HttpPacket;
-    using WP = WebSocketPacket;
+    using WP = WsPacket;
 
     using OnRequest = std::function<void(WC, Err, HP&)>;
 
@@ -163,6 +163,7 @@ public:
     {
         struct {
             bool upgrade = false;
+            unsigned tick_error_count = 0;
             WebSocketFrame recv_frame;
             WebSocketFrame write_frame;
             WebSocketFrame::Buffer frame_buffer;
@@ -185,6 +186,7 @@ private:
     bool _use_websocket;
 
 private:
+    MaskingDevice  _masking;
     FilterMap      _filters;
     ClientDataMap  _dataset;
 

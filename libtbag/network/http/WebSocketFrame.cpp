@@ -12,6 +12,7 @@
 #include <libtbag/encrypt/Base64.hpp>
 #include <libtbag/encrypt/Sha1.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/id/Uuid.hpp>
 
 #include <cassert>
@@ -191,7 +192,7 @@ std::size_t WebSocketFrame::calculateWriteBufferSize() const
     }
 }
 
-std::size_t WebSocketFrame::write(uint8_t * data, std::size_t size)
+std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size)
 {
     ::memset(data, 0x00, size);
 
@@ -261,9 +262,13 @@ std::size_t WebSocketFrame::write(uint8_t * data, std::size_t size)
     return index;
 }
 
-std::size_t WebSocketFrame::write(Buffer & buffer)
+std::size_t WebSocketFrame::copyTo(Buffer & buffer)
 {
-    return write(buffer.data(), buffer.size());
+    std::size_t const RESERVE_SIZE = calculateWriteBufferSize();
+    if (buffer.size() < RESERVE_SIZE) {
+        buffer.resize(RESERVE_SIZE);
+    }
+    return copyTo(buffer.data(), buffer.size());
 }
 
 void WebSocketFrame::set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key) TBAG_NOEXCEPT
@@ -334,6 +339,11 @@ Err WebSocketFrame::binaryResponse(Buffer const & buffer, bool continuation, boo
                           buffer.data(), buffer.size());
 }
 
+Err WebSocketFrame::closeRequest()
+{
+    return closeRequest(random::MaskingDevice().gen());
+}
+
 Err WebSocketFrame::closeRequest(uint32_t masking_key)
 {
     return updateRequest(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, masking_key);
@@ -344,6 +354,11 @@ Err WebSocketFrame::closeResponse()
     return updateResponse(true, false, false, false, OpCode::OC_CONNECTION_CLOSE);
 }
 
+Err WebSocketFrame::pingRequest(uint8_t const * data, std::size_t size)
+{
+    return pingRequest(random::MaskingDevice().gen(), data, size);
+}
+
 Err WebSocketFrame::pingRequest(uint32_t masking_key, uint8_t const * data, std::size_t size)
 {
     return updateRequest(true, false, false, false, OpCode::OC_DENOTES_PING, masking_key, data, size);
@@ -352,6 +367,11 @@ Err WebSocketFrame::pingRequest(uint32_t masking_key, uint8_t const * data, std:
 Err WebSocketFrame::pingResponse(uint8_t const * data, std::size_t size)
 {
     return updateResponse(true, false, false, false, OpCode::OC_DENOTES_PING, data, size);
+}
+
+Err WebSocketFrame::pongRequest(uint8_t const * data, std::size_t size)
+{
+    return pongRequest(random::MaskingDevice().gen(), data, size);
 }
 
 Err WebSocketFrame::pongRequest(uint32_t masking_key, uint8_t const * data, std::size_t size)
@@ -368,7 +388,7 @@ std::string WebSocketFrame::toDebugString() const
 {
     std::stringstream ss;
     ss << "WS[" << (fin?'1':'0') << (rsv1?'1':'0') << (rsv2?'1':'0') << (rsv3?'1':'0')
-       << '/' << getOpCodeName(opcode) << ']';
+       << '/' << http::getOpCodeName(opcode) << ']';
     if (mask) {
         ss << " M(" << masking_key << ")";
     }
@@ -386,29 +406,6 @@ std::string WebSocketFrame::toDebugString() const
 // ---------------
 // Static methods.
 // ---------------
-
-char const * const WebSocketFrame::getOpCodeName(OpCode code) TBAG_NOEXCEPT
-{
-    switch (code) {
-    case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
-    case OpCode::OC_TEXT_FRAME                  : return OP_CODE_NAME_TEXT;
-    case OpCode::OC_BINARY_FRAME                : return OP_CODE_NAME_BINARY;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return OP_CODE_NAME_NCF1;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return OP_CODE_NAME_NCF2;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return OP_CODE_NAME_NCF3;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return OP_CODE_NAME_NCF4;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return OP_CODE_NAME_NCF5;
-    case OpCode::OC_CONNECTION_CLOSE            : return OP_CODE_NAME_CLOSE;
-    case OpCode::OC_DENOTES_PING                : return OP_CODE_NAME_PING;
-    case OpCode::OC_DENOTES_PONG                : return OP_CODE_NAME_PONG;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return OP_CODE_NAME_CF1;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return OP_CODE_NAME_CF2;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return OP_CODE_NAME_CF3;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return OP_CODE_NAME_CF4;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return OP_CODE_NAME_CF5;
-    default: return "UNKNOWN";
-    }
-}
 
 uint8_t WebSocketFrame::getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
 {
@@ -490,6 +487,29 @@ void WebSocketFrame::updatePayloadData(uint32_t mask, uint8_t * result, std::siz
 // ------------------------
 // Miscellaneous utilities.
 // ------------------------
+
+char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT
+{
+    switch (code) {
+    case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
+    case OpCode::OC_TEXT_FRAME                  : return OP_CODE_NAME_TEXT;
+    case OpCode::OC_BINARY_FRAME                : return OP_CODE_NAME_BINARY;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return OP_CODE_NAME_NCF1;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return OP_CODE_NAME_NCF2;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return OP_CODE_NAME_NCF3;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return OP_CODE_NAME_NCF4;
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return OP_CODE_NAME_NCF5;
+    case OpCode::OC_CONNECTION_CLOSE            : return OP_CODE_NAME_CLOSE;
+    case OpCode::OC_DENOTES_PING                : return OP_CODE_NAME_PING;
+    case OpCode::OC_DENOTES_PONG                : return OP_CODE_NAME_PONG;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return OP_CODE_NAME_CF1;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return OP_CODE_NAME_CF2;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return OP_CODE_NAME_CF3;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return OP_CODE_NAME_CF4;
+    case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return OP_CODE_NAME_CF5;
+    default: return "UNKNOWN";
+    }
+}
 
 bool existsWebSocketVersion13(std::string const & versions)
 {
