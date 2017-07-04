@@ -16,9 +16,9 @@ namespace network {
 namespace http    {
 
 HttpCacheData::HttpCacheData(ClientInterface * client)
-        : _client(client), _upgrade(false),
-          _send_frame(), _recv_frame(), _buffer(), _key(), _protocols(),
-          _builder(), _parser()
+        : _client(client), upgrade(false),
+          send_frame(), recv_frame(), buffer(),
+          key(), protocols(), builder(), parser()
 {
     // EMPTY.
 }

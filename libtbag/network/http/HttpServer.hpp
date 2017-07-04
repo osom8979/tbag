@@ -24,6 +24,7 @@
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/HttpFilter.hpp>
+#include <libtbag/network/http/HttpCacheData.hpp>
 #include <libtbag/network/http/WebSocketFrame.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -159,45 +160,30 @@ public:
     using FilterPair   = FilterMap::value_type;
 
 public:
-    struct ClientData
-    {
-        struct {
-            bool upgrade = false;
-            unsigned tick_error_count = 0;
-            WebSocketFrame recv_frame;
-            WebSocketFrame write_frame;
-            WebSocketFrame::Buffer frame_buffer;
-        } websocket;
+    using       CacheData = HttpCacheData;
+    using SharedCacheData = std::shared_ptr<CacheData>;
+    using   WeakCacheData =   std::weak_ptr<CacheData>;
 
-        HttpBuilder builder;
-        HttpParser  parser;
-        Millisec    timeout;
-        TimePoint   start_time;
-    };
-
-    using SharedClientData = std::shared_ptr<ClientData>;
-    using   WeakClientData =   std::weak_ptr<ClientData>;
-
-    using ClientDataMap    = std::unordered_map<Id, SharedClientData>;
-    using ClientDataPair   = ClientDataMap::value_type;
+    using CacheDataMap  = std::unordered_map<Id, SharedCacheData>;
+    using CacheDataPair = CacheDataMap::value_type;
 
 private:
     Callback * _callback;
     bool _use_websocket;
 
 private:
-    MaskingDevice  _masking;
-    FilterMap      _filters;
-    ClientDataMap  _dataset;
+    MaskingDevice _masking;
+    FilterMap     _filters;
+    CacheDataMap  _cache_map;
 
 public:
     HttpServer(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~HttpServer();
 
 private:
-    bool createClientData(Id id);
-    bool removeClientData(Id id);
-    WeakClientData getClientData(Id id);
+    bool createCacheData(Id id);
+    bool removeCacheData(Id id);
+    WeakCacheData getCacheData(Id id);
 
 public:
     inline void setCallback(Callback * cb) TBAG_NOEXCEPT { _callback = cb; }
@@ -211,16 +197,16 @@ public:
     void setOnRequest(SharedFilter filter, Order priority = 0);
 
 private:
-    bool isUpgradeWebSocket(ClientData const & client_data) const TBAG_NOEXCEPT;
+    bool isUpgradeWebSocket(CacheData const & client_data) const TBAG_NOEXCEPT;
 
     /** WebSocket interrupt process (HTTP Request). */
-    void runWebSocketOpen(SharedClient node, Err code, ReadPacket const & packet, ClientData & client_data);
+    void runWebSocketOpen(SharedClient node, Err code, ReadPacket const & packet, CacheData & client_data);
 
     /** WebSocket interrupt process (WebSocket Frame). */
-    void runWebSocketRead(SharedClient node, Err code, ReadPacket const & packet, ClientData & client_data);
+    void runWebSocketRead(SharedClient node, Err code, ReadPacket const & packet, CacheData & client_data);
 
     /** Regular HTTP process. */
-    void runHttpRead(SharedClient node, Err code, ReadPacket const & packet, ClientData & client_data);
+    void runHttpRead(SharedClient node, Err code, ReadPacket const & packet, CacheData & client_data);
 
 public:
     virtual void onConnection(Err code) override;

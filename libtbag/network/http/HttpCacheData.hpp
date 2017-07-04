@@ -50,27 +50,24 @@ public:
 private:
     ClientInterface * _client;
 
-private:
-    bool _use_websocket;
-    bool _upgrade;
+public:
+    HttpBuilder builder;
+    HttpParser  parser;
 
-    Frame _send_frame;
-    Frame _recv_frame;
+public:
+    bool upgrade;
 
-    Buffer _buffer;
+    Frame send_frame;
+    Frame recv_frame;
 
-    std::string _key;
-    Strings _protocols;
+    Buffer buffer;
 
-private:
-    HttpBuilder _builder;
-    HttpParser  _parser;
+    std::string key;
+    Strings protocols;
 
 public:
     HttpCacheData(ClientInterface * client = nullptr);
     virtual ~HttpCacheData();
-
-public:
 };
 
 } // namespace http

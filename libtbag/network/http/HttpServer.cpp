@@ -26,23 +26,23 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
-bool HttpServer::createClientData(Id id)
+bool HttpServer::createCacheData(Id id)
 {
-    return _dataset.insert(ClientDataPair(id, SharedClientData(new (std::nothrow) ClientData))).second;
+    return _cache_map.insert(CacheDataPair(id, SharedCacheData(new (std::nothrow) CacheData))).second;
 }
 
-bool HttpServer::removeClientData(Id id)
+bool HttpServer::removeCacheData(Id id)
 {
-    return _dataset.erase(id) == 1U;
+    return _cache_map.erase(id) == 1U;
 }
 
-HttpServer::WeakClientData HttpServer::getClientData(Id id)
+HttpServer::WeakCacheData HttpServer::getCacheData(Id id)
 {
-    auto itr = _dataset.find(id);
-    if (itr == _dataset.end()) {
-        return WeakClientData();
+    auto itr = _cache_map.find(id);
+    if (itr == _cache_map.end()) {
+        return WeakCacheData();
     }
-    return WeakClientData(itr->second);
+    return WeakCacheData(itr->second);
 }
 
 void HttpServer::setOnRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, Order priority)
@@ -65,17 +65,17 @@ void HttpServer::setOnRequest(SharedFilter filter, Order priority)
     _filters.insert(FilterPair(priority, filter));
 }
 
-bool HttpServer::isUpgradeWebSocket(ClientData const & client_data) const TBAG_NOEXCEPT
+bool HttpServer::isUpgradeWebSocket(CacheData const & cache) const TBAG_NOEXCEPT
 {
-    return _use_websocket && client_data.websocket.upgrade;
+    return _use_websocket && cache.upgrade;
 }
 
-void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const & packet, ClientData & client_data)
+void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const & packet, CacheData & cache)
 {
-    client_data.websocket.upgrade = true;
+    cache.upgrade = true;
 
-    auto & request  = client_data.parser;
-    auto & response = client_data.builder;
+    auto & request  = cache.parser;
+    auto & response = cache.builder;
 
     uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
     if (_callback != nullptr) {
@@ -94,11 +94,11 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
     response.clear();
 }
 
-void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const & packet, ClientData & client_data)
+void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const & packet, CacheData & cache)
 {
-    auto & rframe  = client_data.websocket.recv_frame;
-    auto & wframe  = client_data.websocket.write_frame;
-    auto & fbuffer = client_data.websocket.frame_buffer;
+    auto & rframe  = cache.recv_frame;
+    auto & wframe  = cache.send_frame;
+    auto & fbuffer = cache.buffer;
 
     Err const EXECUTE_CODE = rframe.execute((uint8_t*)packet.buffer, packet.size);
     if (EXECUTE_CODE != Err::E_SUCCESS) {
@@ -130,16 +130,16 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
         wframe.pongResponse(rframe.getPayloadData(), rframe.getPayloadSize());
         wframe.copyTo(fbuffer);
     } else if (rframe.opcode == OpCode::OC_DENOTES_PONG) {
-        client_data.websocket.tick_error_count = 0;
+        // Ping & Pong checker.
     } else {
         tDLogW("HttpServer::runWebSocketRead() Unsupported control frame: {}", getOpCodeName(rframe.opcode));
     }
 }
 
-void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & packet, ClientData & client_data)
+void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & packet, CacheData & cache)
 {
-    auto & request  = client_data.parser;
-    auto & response = client_data.builder;
+    auto & request  = cache.parser;
+    auto & response = cache.builder;
 
     uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
     bool called = false;
@@ -206,7 +206,7 @@ void HttpServer::onConnection(Err code)
         return;
     }
 
-    if (createClientData(shared->id()) == false) {
+    if (createCacheData(shared->id()) == false) {
         tDLogE("HttpServer::onConnection() Bad allocated client-data.");
         shared->close();
         return;
@@ -231,7 +231,7 @@ void HttpServer::onClientRead(WeakClient node, Err code, ReadPacket const & pack
         return;
     }
 
-    SharedClientData dataset = getClientData(shared->id()).lock();
+    SharedCacheData dataset = getCacheData(shared->id()).lock();
     if (static_cast<bool>(dataset) == false) {
         tDLogC("HttpServer::onClientRead() Expired client data.");
         shared->close();
@@ -287,7 +287,7 @@ void HttpServer::onClientClose(WeakClient node)
         _callback->onClose(node);
     }
 
-    if (removeClientData(shared->id()) == false) {
+    if (removeCacheData(shared->id()) == false) {
         tDLogW("HttpServer::onClientClose() Client-data removal failed.");
     }
 }
