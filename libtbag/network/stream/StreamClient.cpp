@@ -498,6 +498,7 @@ char const * StreamClient::getWriteStatusName() const
 StreamClient::WeakClientBackend StreamClient::getClient()
 {
     assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
     return WeakClientBackend(_internal->client);
 }
@@ -511,6 +512,7 @@ StreamClient::WeakSafetyAsync StreamClient::getAsync()
 
 StreamClient::Id StreamClient::id() const
 {
+    assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
     return _internal->client->id();
@@ -518,6 +520,7 @@ StreamClient::Id StreamClient::id() const
 
 void * StreamClient::udata()
 {
+    assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
     return _internal->client->getUserData();
@@ -525,6 +528,7 @@ void * StreamClient::udata()
 
 std::string StreamClient::dest() const
 {
+    assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
     if (STREAM_TYPE == StreamType::TCP) {
@@ -535,6 +539,7 @@ std::string StreamClient::dest() const
 
 int StreamClient::port() const
 {
+    assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
     if (STREAM_TYPE == StreamType::TCP) {
@@ -564,6 +569,7 @@ Err StreamClient::init(char const * destination, int port)
 
 Err StreamClient::start()
 {
+    assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
     Err const CODE = _internal->client->startRead();
@@ -575,6 +581,7 @@ Err StreamClient::start()
 
 Err StreamClient::stop()
 {
+    assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
     Err const CODE = _internal->client->stopRead();

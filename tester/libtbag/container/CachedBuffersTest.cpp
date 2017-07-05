@@ -60,8 +60,9 @@ TEST(CachedBuffersTest, Default)
     ASSERT_EQ(SIZE, buffers.sizes().size());
     ASSERT_EQ(SIZE, buffers.size());
     for (i = 0; i < SIZE; ++i) {
-        ASSERT_STREQ(strings[i].c_str(), result[i].buffer);
+        std::string const CURRENT_STRING(result[i].buffer, result[i].buffer + result[i].size);
         ASSERT_EQ(strings[i].size(), result[i].size);
+        ASSERT_EQ(strings[i], CURRENT_STRING);
     }
 
     Buffers buffers2 = std::move(buffers);
@@ -102,8 +103,9 @@ TEST(CachedBuffersTest, FewSizeToMuchSize)
     ASSERT_EQ(SIZE, buffers.sizes().size());
     ASSERT_EQ(SIZE, buffers.size());
     for (i = 0; i < SIZE; ++i) {
-        ASSERT_STREQ(strings[i].c_str(), result[i].buffer);
+        std::string const CURRENT_STRING(result[i].buffer, result[i].buffer + result[i].size);
         ASSERT_EQ(strings[i].size(), result[i].size);
+        ASSERT_EQ(strings[i], CURRENT_STRING);
     }
 }
 
