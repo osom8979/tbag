@@ -57,6 +57,7 @@ public:
         ET_SHUTDOWN,
         ET_READ,
         ET_CLOSE,
+        ET_TIMER,
     };
 
     struct Event
@@ -105,6 +106,7 @@ public:
     virtual void onWrite(Err code) override;
     virtual void onRead(Err code, ReadPacket const & packet) override;
     virtual void onClose() override;
+    virtual void onTimer() override;
 };
 
 // ----------

@@ -59,7 +59,6 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
         packet.response.setStatus(200);
         packet.response.setReason("OK");
         packet.response.setBody(packet.request.getMethodName());
-        packet.timeout = 1000;
     });
     server.setOnClose([&](WC node){
         ++on_close;
@@ -172,7 +171,6 @@ TEST(NetworkHttpTest, RoutingServer)
         packet.response.setStatus(200);
         packet.response.setReason("OK");
         packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
-        packet.timeout = 1000;
     });
     server.setOnRequest("/Documents", [&](WC node, Err code, HP & packet){
         std::cout << "Server.OnRequest(/Documents)\n";
@@ -180,7 +178,6 @@ TEST(NetworkHttpTest, RoutingServer)
         packet.response.setStatus(200);
         packet.response.setReason("OK");
         packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
-        packet.timeout = 1000;
     });
     server.setOnRequest("GET", "/Downloads", [&](WC node, Err code, HP & packet){
         std::cout << "Server.OnRequest([GET]/Downloads)\n";
@@ -188,7 +185,6 @@ TEST(NetworkHttpTest, RoutingServer)
         packet.response.setStatus(200);
         packet.response.setReason("OK");
         packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
-        packet.timeout = 1000;
     });
     server.setOnRequest("POST", "/Downloads", [&](WC node, Err code, HP & packet){
         std::cout << "Server.OnRequest([POST]/Downloads)\n";
@@ -196,7 +192,6 @@ TEST(NetworkHttpTest, RoutingServer)
         packet.response.setStatus(200);
         packet.response.setReason("OK");
         packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
-        packet.timeout = 1000;
     });
 
     server.setOnClose([&](WC node){

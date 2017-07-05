@@ -77,14 +77,13 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
     auto & request  = cache.parser;
     auto & response = cache.builder;
 
-    uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
     if (_callback != nullptr) {
-        HP hp(request, response, timeout);
+        HP hp(request, response);
         _callback->onWsOpen(node, code, hp);
     }
 
     auto const RESPONSE = response.buildDefaultResponseString();
-    Err const WRITE_CODE = node->write(RESPONSE.data(), RESPONSE.size(), timeout);
+    Err const WRITE_CODE = node->write(RESPONSE.data(), RESPONSE.size());
     if (WRITE_CODE != Err::E_SUCCESS) {
         tDLogW("HttpServer::runWebSocketOpen() WebSocket response write {} error.", getErrName(WRITE_CODE));
     }
@@ -141,7 +140,6 @@ void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & pac
     auto & request  = cache.parser;
     auto & response = cache.builder;
 
-    uint64_t timeout = DEFAULT_WRITE_TIMEOUT_MILLISECOND;
     bool called = false;
 
     for (auto & f : _filters) {
@@ -156,7 +154,7 @@ void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & pac
         }
 
         if (static_cast<bool>(shared->request_cb)) {
-            HP hp(request, response, timeout);
+            HP hp(request, response);
             shared->request_cb(node, code, hp);
         }
 
@@ -167,7 +165,7 @@ void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & pac
     if (called == false) {
         if (_callback != nullptr) {
             // Default request callback.
-            HP hp(request, response, timeout);
+            HP hp(request, response);
             _callback->onRequest(node, code, hp);
         } else {
             tDLogW("HttpServer::runHttpRead() Not found request callback.");
@@ -175,7 +173,7 @@ void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & pac
     }
 
     auto const RESPONSE = response.buildDefaultResponseString();
-    Err const WRITE_CODE = node->write(RESPONSE.data(), RESPONSE.size(), timeout);
+    Err const WRITE_CODE = node->write(RESPONSE.data(), RESPONSE.size());
     if (WRITE_CODE != Err::E_SUCCESS) {
         tDLogW("HttpServer::onClientRead() Write {} error.", getErrName(WRITE_CODE));
     }

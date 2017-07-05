@@ -148,16 +148,22 @@ struct ClientInterface
     // Pure virtual.
     // -------------
 
-    virtual Err  init  (char const * destination, int port = 0, uint64_t millisec = 0U) = 0;
+    virtual Err  init  (char const * destination, int port = 0) = 0;
     virtual Err  start () = 0;
     virtual Err  stop  () = 0;
     virtual void close () = 0;
     virtual void cancel() = 0;
-    virtual Err  write (binf const * buffer, std::size_t size, uint64_t millisec = 0U) = 0;
-    virtual Err  write (char const * buffer, std::size_t size, uint64_t millisec = 0U) = 0;
+    virtual Err  write (binf const * buffer, std::size_t size) = 0;
+    virtual Err  write (char const * buffer, std::size_t size) = 0;
 
-    virtual Err startTimeout(uint64_t millisec) = 0;
-    virtual void stopTimeout() = 0;
+    // ----------------
+    // Timer utilities.
+    // ----------------
+
+    virtual void setWriteTimeout(uint64_t millisec) { /* EMPTY. */ }
+    virtual bool isActiveTimer() { return false; }
+    virtual Err startTimer(uint64_t millisec) { return Err::E_UNSUPOP; }
+    virtual void stopTimer() { /* EMPTY. */ }
 
     // ---------------
     // Backend helper.
@@ -178,6 +184,7 @@ struct ClientInterface
     virtual void onWrite   (Err code) { /* EMPTY. */ }
     virtual void onRead    (Err code, ReadPacket const & packet) { /* EMPTY. */ }
     virtual void onClose   () { /* EMPTY. */ }
+    virtual void onTimer   () { /* EMPTY. */ }
 };
 
 /**
@@ -226,6 +233,7 @@ struct ServerInterface
     virtual void onClientWrite   (WeakClient node, Err code) { /* EMPTY. */ }
     virtual void onClientRead    (WeakClient node, Err code, ReadPacket const & packet) { /* EMPTY. */ }
     virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
+    virtual void onClientTimer   (WeakClient node) { /* EMPTY. */ }
     virtual void onClose         () { /* EMPTY. */ }
 
     virtual void * onClientUdataAlloc  (WeakClient node) { return nullptr; }

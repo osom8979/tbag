@@ -77,10 +77,9 @@ public:
     struct HttpPacket
     {
         HttpParser const & request;
-        HttpBuilder & response;
-        uint64_t timeout;
+        HttpBuilder      & response;
 
-        HttpPacket(HttpParser const & req, HttpBuilder & rsp, uint64_t t) : request(req), response(rsp), timeout(t)
+        HttpPacket(HttpParser const & req, HttpBuilder & rsp) : request(req), response(rsp)
         { /* EMPTY. */ }
         ~HttpPacket()
         { /* EMPTY. */ }

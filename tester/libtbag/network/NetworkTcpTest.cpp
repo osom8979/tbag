@@ -69,10 +69,11 @@ TEST(NetworkTcpTest, ClientTimeout)
     Loop loop;
     FunctionalTcpClient client(loop);
 
-    if (client.init("8.8.8.8", 9999, 50) != Err::E_SUCCESS) {
+    if (client.init("8.8.8.8", 9999) != Err::E_SUCCESS) {
         std::cout << "Network unreachable.\n";
         return;
     }
+    client.startTimer(50);
 
     int connect = 0;
     int close   = 0;
@@ -86,6 +87,9 @@ TEST(NetworkTcpTest, ClientTimeout)
     });
     client.setOnClose([&](){
         close++;
+    });
+    client.setOnTimer([&](){
+        client.close();
     });
 
     std::thread thread([&](){

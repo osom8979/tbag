@@ -51,12 +51,14 @@ struct FunctionalClient : public BaseType
     using OnWrite    = std::function<void(Err)>;
     using OnRead     = std::function<void(Err, ReadPacket const &)>;
     using OnClose    = std::function<void(void)>;
+    using OnTimer    = std::function<void(void)>;
 
     OnConnect   connect_cb;
     OnShutdown  shutdown_cb;
     OnWrite     write_cb;
     OnRead      read_cb;
     OnClose     close_cb;
+    OnTimer     timer_cb;
 
     FunctionalClient(Loop & loop) : Parent(loop)
     { /* EMPTY */ }
@@ -68,6 +70,7 @@ struct FunctionalClient : public BaseType
     inline void setOnWrite   (OnWrite    const & cb) { write_cb    = cb; }
     inline void setOnRead    (OnRead     const & cb) { read_cb     = cb; }
     inline void setOnClose   (OnClose    const & cb) { close_cb    = cb; }
+    inline void setOnTimer   (OnTimer    const & cb) { timer_cb    = cb; }
 
     virtual void onConnect(Err code) override
     { if (connect_cb) { connect_cb(code); } }
@@ -79,6 +82,8 @@ struct FunctionalClient : public BaseType
     { if (read_cb) { read_cb(code, packet); } }
     virtual void onClose() override
     { if (close_cb) { close_cb(); } }
+    virtual void onTimer() override
+    { if (timer_cb) { timer_cb(); } }
     // @formatter:on
 };
 

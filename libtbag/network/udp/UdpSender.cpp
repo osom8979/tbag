@@ -218,7 +218,7 @@ void * UdpSender::udata()
     return _client->getUserData();
 }
 
-Err UdpSender::init(char const * destination, int port, uint64_t UNUSED_PARAM(millisec))
+Err UdpSender::init(char const * destination, int port)
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_internal));
@@ -278,13 +278,13 @@ void UdpSender::cancel()
     }
 }
 
-Err UdpSender::write(binf const * buffer, std::size_t size, uint64_t UNUSED_PARAM(millisec))
+Err UdpSender::write(binf const * buffer, std::size_t size)
 {
     Guard const MUTEX_GUARD(_mutex);
     return _internal->autoSend(buffer, size);
 }
 
-Err UdpSender::write(char const * buffer, std::size_t size, uint64_t UNUSED_PARAM(millisec))
+Err UdpSender::write(char const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_internal));
 
@@ -294,16 +294,6 @@ Err UdpSender::write(char const * buffer, std::size_t size, uint64_t UNUSED_PARA
 
     Guard const MUTEX_GUARD(_mutex);
     return _internal->autoSend(&info, 1U);
-}
-
-Err UdpSender::startTimeout(uint64_t millisec)
-{
-    return Err::E_UNSUPOP;
-}
-
-void UdpSender::stopTimeout()
-{
-    // EMPTY.
 }
 
 // --------------

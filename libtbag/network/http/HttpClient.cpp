@@ -19,7 +19,7 @@ namespace http    {
 HttpClient::HttpClient(Loop & loop, StreamType type)
         : Parent(loop, type), _builder(), _parser(HttpParser::Type::RESPONSE), _call_once(false)
 {
-    setSkipTimeout();
+    //setSkipTimeout();
 }
 
 HttpClient::~HttpClient()
@@ -118,9 +118,13 @@ void HttpClient::onRead(Err code, ReadPacket const & packet)
 void HttpClient::onClose()
 {
     tDLogD("HttpClient::onClose()");
-    if (_call_once == false) {
-        runCallback(EventStep::ET_CLOSE, Err::E_TIMEOUT);
-    }
+}
+
+void HttpClient::onTimer()
+{
+    tDLogD("HttpClient::onTimer()");
+    runCallback(EventStep::ET_TIMER, Err::E_TIMEOUT);
+    close();
 }
 
 // ----------
@@ -140,8 +144,18 @@ Err requestWithSync(HttpClient::StreamType type,
 
     HttpClient http(loop, type);
 
-    if (http.init(host.c_str(), port, timeout) != Err::E_SUCCESS) {
-        return Err::E_EINIT;
+    Err const INIT_CODE = http.init(host.c_str(), port);
+    if (INIT_CODE != Err::E_SUCCESS) {
+        return INIT_CODE;
+    }
+
+    if (timeout > 0) {
+        Err const TIMER_CODE = http.startTimer(timeout);
+        if (TIMER_CODE != Err::E_SUCCESS) {
+            http.close();
+            loop.run();
+            return TIMER_CODE;
+        }
     }
 
     HttpBuilder builder = request;

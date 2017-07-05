@@ -18,7 +18,7 @@ namespace http    {
 
 WebSocketClient::WebSocketClient(Loop & loop, StreamType type) : Parent(loop, type)
 {
-    setSkipTimeout();
+    //setSkipTimeout();
 }
 
 WebSocketClient::~WebSocketClient()
@@ -201,7 +201,7 @@ void WebSocketClient::onRead(Err code, ReadPacket const & packet)
     }
 
     tDLogI("WebSocketClient::onRead() Upgrade complete!");
-    stopTimeout();
+    stopTimer();
     _data.websocket.upgrade = true;
     onWsOpen(response.getResponse());
 }

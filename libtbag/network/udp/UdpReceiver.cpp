@@ -130,7 +130,7 @@ void * UdpReceiver::udata()
     return _client->getUserData();
 }
 
-Err UdpReceiver::init(char const * destination, int port, uint64_t UNUSED_PARAM(millisec))
+Err UdpReceiver::init(char const * destination, int port)
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_internal));
@@ -182,14 +182,14 @@ void UdpReceiver::close()
     Loop * loop = _client->getLoop();
     assert(loop != nullptr);
 
-    Guard const MUTEX_GUARD(_mutex);
+    Guard const MUTEX_GUARD_OUT(_mutex);
     if (loop->isAliveAndThisThread() || static_cast<bool>(_async) == false) {
         tDLogD("UdpReceiver::close() request.");
         _internal->closeAll();
     } else {
         tDLogD("UdpReceiver::close() async request.");
         _async->newSendFunc([&](){
-            Guard const MUTEX_GUARD(_mutex);
+            Guard const MUTEX_GUARD_IN(_mutex);
             _internal->closeAll();
         });
     }
@@ -200,24 +200,14 @@ void UdpReceiver::cancel()
     // EMPTY.
 }
 
-Err UdpReceiver::write(binf const * buffer, std::size_t size, uint64_t millisec)
+Err UdpReceiver::write(binf const * buffer, std::size_t size)
 {
     return Err::E_UNSUPOP;
 }
 
-Err UdpReceiver::write(char const * buffer, std::size_t size, uint64_t millisec)
+Err UdpReceiver::write(char const * buffer, std::size_t size)
 {
     return Err::E_UNSUPOP;
-}
-
-Err UdpReceiver::startTimeout(uint64_t millisec)
-{
-    return Err::E_UNSUPOP;
-}
-
-void UdpReceiver::stopTimeout()
-{
-    // EMPTY.
 }
 
 // --------------

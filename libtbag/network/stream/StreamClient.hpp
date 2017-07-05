@@ -22,7 +22,6 @@
 #include <libtbag/network/details/FunctionalNet.hpp>
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
-#include <libtbag/uvpp/func/FunctionalTimer.hpp>
 
 #include <string>
 #include <vector>
@@ -52,10 +51,6 @@ public:
     using Stream = uvpp::Stream;
     using binf   = uvpp::binf;
 
-    using ConnectRequest  = uvpp::ConnectRequest;
-    using ShutdownRequest = uvpp::ShutdownRequest;
-    using WriteRequest    = uvpp::WriteRequest;
-
 public:
     using SharedClientBackend = std::shared_ptr<Stream>;
     using   WeakClientBackend =   std::weak_ptr<Stream>;
@@ -64,11 +59,6 @@ public:
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
     using   WeakSafetyAsync = std::shared_ptr<SafetyAsync>;
-
-public:
-    using       FuncTimer = uvpp::func::FuncTimer;
-    using SharedFuncTimer = std::shared_ptr<FuncTimer>;
-    using   WeakFuncTimer = std::shared_ptr<FuncTimer>;
 
 public:
     using Id      = id::Id;
@@ -102,50 +92,30 @@ public:
 
 private:
     StreamType const STREAM_TYPE;
-    bool _owner_async;
-    bool _skip_timeout;
 
 private:
-    UniqueInternal       _internal;
-    SharedClientBackend  _client;
-    SharedSafetyAsync    _async;
-    SharedFuncTimer      _close_timer;
-    SharedFuncTimer      _shutdown_timer;
-
-private:
+    UniqueInternal _internal;
     mutable Mutex _mutex;
-
-    struct {
-        WriteStatus      status;
-        ConnectRequest   connect_req;
-        WriteRequest     write_req;
-        ShutdownRequest  shutdown_req;
-        Buffers          buffers;
-    } _writer;
 
 public:
     StreamClient(Loop & loop, StreamType type);
-    StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async, WriteReady const & ready);
+    StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async, WriteReady const & UNUSED_PARAM(ready));
     StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async);
     virtual ~StreamClient();
 
-public:
-    WeakClientBackend getClient() { Guard g(_mutex); return WeakClientBackend(_client); }
-    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
-
 private:
+    void onShutdownTimer();
+    void onAsyncWrite();
+
+public:
     static char const * getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT;
 
 public:
-    inline void setSkipTimeout(bool flag = true) TBAG_NOEXCEPT
-    { _skip_timeout = flag; }
-    inline WriteStatus getWriteStatus() const TBAG_NOEXCEPT
-    { return _writer.status; }
-    inline char const * getWriteStatusName() const TBAG_NOEXCEPT
-    { return getWriteStatusName(_writer.status); }
+    WriteStatus getWriteStatus() const;
+    char const * getWriteStatusName() const;
 
-private:
-    void onAsyncWrite();
+    WeakClientBackend getClient();
+    WeakSafetyAsync getAsync();
 
 public:
     virtual Id          id   () const override;
@@ -154,17 +124,19 @@ public:
     virtual void *      udata() override;
 
 public:
-    virtual Err  init  (char const * destination, int port = 0, uint64_t millisec = 0) override;
+    virtual Err  init  (char const * destination, int port = 0) override;
     virtual Err  start () override;
     virtual Err  stop  () override;
     virtual void close () override;
     virtual void cancel() override;
-    virtual Err  write (binf const * buffer, std::size_t size, uint64_t millisec = 0) override;
-    virtual Err  write (char const * buffer, std::size_t size, uint64_t millisec = 0) override;
+    virtual Err  write (binf const * buffer, std::size_t size) override;
+    virtual Err  write (char const * buffer, std::size_t size) override;
 
 public:
-    virtual Err startTimeout(uint64_t millisec) override;
-    virtual void stopTimeout() override;
+    virtual void setWriteTimeout(uint64_t millisec) override;
+    virtual bool isActiveTimer() override;
+    virtual Err  startTimer(uint64_t millisec) override;
+    virtual void stopTimer() override;
 
 // Event backend.
 public:
@@ -173,14 +145,6 @@ public:
     virtual void backWrite(Err code) override;
     virtual void backRead(Err code, ReadPacket const & packet) override;
     virtual void backClose() override;
-
-public:
-    template <typename Predicated>
-    void updateUserData(Predicated predicated)
-    {
-        Guard guard(_mutex);
-        predicated(_client->getUserData());
-    }
 };
 
 /**
