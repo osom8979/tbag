@@ -35,52 +35,94 @@ struct StreamServer::Internal : private Noncopyable
 {
     using SharedClient = StreamServer::SharedClient;
 
+    using ClientMap  = std::unordered_map<Id, SharedClient>;
+    using ClientPair = ClientMap::value_type;
+
+    using AtomicBool = std::atomic_bool;
+
     StreamServer * _parent;
 
-    Internal(StreamServer * parent) : _parent(parent)
+    std::string destination;
+    int port;
+
+    SharedServerBackend  server;
+    SharedSafetyAsync    async;
+    ClientMap            clients;
+
+    AtomicBool on_connection;
+
+    Internal(StreamServer * parent) : _parent(parent), destination(), port(0)
+    {
+        on_connection.store(false);
+    }
+
+    virtual ~Internal()
     {
         // EMPTY.
     }
 
-    ~Internal()
+    Loop & getLoop()
     {
-        // EMPTY.
+        assert(static_cast<bool>(server));
+        Loop * loop = server->getLoop();
+        assert(loop != nullptr);
+        return *loop;
+    }
+
+    Err initServer(StreamType type, std::string const & destination, int port = 0)
+    {
+        if (static_cast<bool>(server) == false) {
+            return Err::E_EXPIRED;
+        }
+
+        using  TcpBackend = StreamServerBackend<uvpp::Tcp>;
+        using PipeBackend = StreamServerBackend<uvpp::Pipe>;
+
+        Err code = Err::E_UNKNOWN;
+        if (type == StreamType::TCP) {
+            auto backend = std::static_pointer_cast<TcpBackend>(server);
+            code = uvpp::initCommonServer(*backend, destination, port);
+
+            this->destination = backend->getSockIp();
+            this->port = backend->getSockPort();
+
+        } else if (type == StreamType::PIPE) {
+            auto backend = std::static_pointer_cast<PipeBackend>(server);
+            code = uvpp::initPipeServer(*backend, destination);
+
+            this->destination = destination;
+            this->port = 0;
+
+        } else {
+            code = Err::E_ILLARGS;
+            this->destination.clear();
+            this->port = 0;
+            TBAG_INACCESSIBLE_BLOCK_ASSERT();
+            tDLogA("StreamServer::Internal::initServer() Unknown stream type.");
+        }
+
+        return code;
     }
 
     Err initHandles()
     {
-        assert(_parent != nullptr);
-        StreamServer & p = *_parent;
-
-        assert(static_cast<bool>(p._server));
-        Loop * loop = p._server->getLoop();
-        assert(loop != nullptr);
-
-        p._async = loop->newHandle<SafetyAsync>(*loop);
-        assert(static_cast<bool>(p._async));
-
+        Loop & loop = getLoop();
+        async = loop.newHandle<SafetyAsync>(loop);
+        assert(static_cast<bool>(async));
         return Err::E_SUCCESS;
     }
 
-    SharedClient createClient()
+    SharedClient createClient(StreamType type)
     {
         assert(_parent != nullptr);
-        StreamServer & p = *_parent;
-
-        assert(static_cast<bool>(p._server));
-        Loop * loop = p._server->getLoop();
-        assert(loop != nullptr);
-
-        return SharedClient(new (std::nothrow) StreamNode(*loop, p.STREAM_TYPE, p._async, _parent));
+        Loop & loop = getLoop();
+        return SharedClient(new (std::nothrow) StreamNode(loop, type, async, _parent));
     }
 
     SharedClient getSharedClient(Id id)
     {
-        assert(_parent != nullptr);
-        StreamServer & p = *_parent;
-
-        auto itr = p._clients.find(id);
-        if (itr != p._clients.end()) {
+        auto itr = clients.find(id);
+        if (itr != clients.end()) {
             return itr->second;
         }
         return SharedClient();
@@ -88,45 +130,37 @@ struct StreamServer::Internal : private Noncopyable
 
     bool insertClient(SharedClient client)
     {
-        assert(_parent != nullptr);
-        StreamServer & p = *_parent;
-        return p._clients.insert(ClientPair(client->id(), client)).second;
+        return clients.insert(ClientPair(client->id(), client)).second;
     }
 
     bool eraseClient(Id id)
     {
-        assert(_parent != nullptr);
-        StreamServer & p = *_parent;
-        return p._clients.erase(id) == 1U;
+        return clients.erase(id) == 1U;
     }
 
     void closeAll()
     {
-        assert(_parent != nullptr);
-        StreamServer & p = *_parent;
-
-        {   // Close all clients.
-            for (auto & cursor : p._clients) {
-                if (static_cast<bool>(cursor.second)) {
-                    cursor.second->close();
-                }
+        // Close all clients.
+        for (auto & cursor : clients) {
+            if (static_cast<bool>(cursor.second)) {
+                cursor.second->close();
             }
         }
 
-        if (static_cast<bool>(p._async)) {
-            if (p._async->isClosing() == false) {
-                p._async->close();
+        if (static_cast<bool>(async)) {
+            if (async->isClosing() == false) {
+                async->close();
             }
-            p._async.reset();
+            async.reset();
         }
 
-        assert(static_cast<bool>(p._server));
-        if (p._server->isClosing() == false) {
-            p._server->close();
+        assert(static_cast<bool>(server));
+        if (server->isClosing() == false) {
+            server->close();
         }
 
-        p._destination.clear();
-        p._port = 0;
+        destination.clear();
+        port = 0;
     }
 };
 
@@ -135,21 +169,21 @@ struct StreamServer::Internal : private Noncopyable
 // ----------------------------
 
 StreamServer::StreamServer(Loop & loop, StreamType type)
-        : STREAM_TYPE(type), _internal(new Internal(this)), _destination(), _port(0)
+        : STREAM_TYPE(type), _internal(new Internal(this))
 {
-    _on_connection.store(false);
+    assert(static_cast<bool>(_internal));
 
     using  TcpBackend = StreamServerBackend<uvpp::Tcp>;
     using PipeBackend = StreamServerBackend<uvpp::Pipe>;
 
     if (type == StreamType::TCP) {
-        _server = loop.newHandle<TcpBackend>(loop, this);
+        _internal->server = loop.newHandle<TcpBackend>(loop, this);
     } else if (type == StreamType::PIPE) {
-        _server = loop.newHandle<PipeBackend>(loop, this);
+        _internal->server = loop.newHandle<PipeBackend>(loop, this);
     } else {
         throw std::bad_alloc();
     }
-    assert(static_cast<bool>(_server));
+    assert(static_cast<bool>(_internal->server));
 }
 
 StreamServer::~StreamServer()
@@ -157,87 +191,99 @@ StreamServer::~StreamServer()
     // EMPTY.
 }
 
+bool StreamServer::isOnConnection() const
+{
+    assert(static_cast<bool>(_internal));
+    return _internal->on_connection.load();
+}
+
+bool StreamServer::emptyClients() const
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->clients.empty();
+}
+
+std::size_t StreamServer::sizeClients() const
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->clients.size();
+}
+
+StreamServer::WeakServerBackend StreamServer::getServer()
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return WeakServerBackend(_internal->server);
+}
+
+StreamServer::WeakSafetyAsync StreamServer::getAsync()
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return WeakSafetyAsync(_internal->async);
+}
+
 std::string StreamServer::dest() const
 {
-    Guard guard(_mutex);
-    return _destination;
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->destination;
 }
 
 int StreamServer::port() const
 {
-    Guard guard(_mutex);
-    return _port;
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->port;
 }
 
 Err StreamServer::init(char const * destination, int port)
 {
-    assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_internal));
-    Guard guard(_mutex);
-
-    using  TcpBackend = StreamServerBackend<uvpp::Tcp>;
-    using PipeBackend = StreamServerBackend<uvpp::Pipe>;
-
-    Err code = Err::E_UNKNOWN;
-    if (STREAM_TYPE == StreamType::TCP) {
-        auto backend = std::static_pointer_cast<TcpBackend>(_server);
-        code = uvpp::initCommonServer(*backend, destination, port);
-
-        _destination = backend->getSockIp();
-        _port = backend->getSockPort();
-
-    } else if (STREAM_TYPE == StreamType::PIPE) {
-        auto backend = std::static_pointer_cast<PipeBackend>(_server);
-        code = uvpp::initPipeServer(*backend, destination);
-
-        _destination = destination;
-        _port = 0;
-    } else {
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        _destination.clear();
-        _port = 0;
-        return Err::E_UNKNOWN;
+    Guard const MUTEX_GUARD(_mutex);
+    Err const CODE = _internal->initServer(STREAM_TYPE, destination, port);
+    if (CODE != Err::E_SUCCESS) {
+        return CODE;
     }
-
-    if (code == Err::E_SUCCESS) {
-        return _internal->initHandles();
-    }
-    return Err::E_UNKNOWN;
+    return _internal->initHandles();
 }
 
 void StreamServer::close()
 {
-    assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_internal));
-    Loop * loop = _server->getLoop();
-    assert(loop != nullptr);
+    Guard const MUTEX_GUARD_OUT(_mutex);
+    Loop & loop = _internal->getLoop();
 
-    Guard guard(_mutex);
-    if (loop->isAliveAndThisThread() || static_cast<bool>(_async) == false) {
-        tDLogD("StreamServer::close() sync request.");
-        _internal->closeAll();
-    } else {
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
         tDLogD("StreamServer::close() async request.");
-        _async->newSendFunc([&]() {
-            Guard const MUTEX_GUARD(_mutex);
+        _internal->async->newSendFunc([&]() {
+            assert(static_cast<bool>(_internal));
+            Guard const MUTEX_GUARD_IN(_mutex);
             _internal->closeAll();
         });
+
+    } else {
+        tDLogD("StreamServer::close() sync request.");
+        _internal->closeAll();
     }
 }
 
 StreamServer::WeakClient StreamServer::accept()
 {
-    assert(static_cast<bool>(_server));
-    if (_on_connection.load() == false) {
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->server));
+    if (_internal->on_connection.load() == false) {
         tDLogE("StreamServer::accept() server is not a connection state.");
         return WeakClient();
     }
 
-    Guard guard(_mutex);
-    auto client = std::static_pointer_cast<StreamNode, ClientInterface>(_internal->createClient());
+    Guard const MUTEX_GUARD(_mutex);
+    auto client = std::static_pointer_cast<StreamNode, ClientInterface>(_internal->createClient(STREAM_TYPE));
 
-   if (auto shared = client->getClient().lock()) {
-        Err const CODE = _server->accept(*shared);
+    if (auto shared = client->getClient().lock()) {
+        Err const CODE = _internal->server->accept(*shared);
         if (CODE == Err::E_SUCCESS) {
             tDLogD("StreamServer::accept() client connect.");
             bool const INSERT_RESULT = _internal->insertClient(client);
@@ -277,17 +323,18 @@ Err StreamServer::remove(Id id)
 
 void StreamServer::backConnection(Err code)
 {
-    _on_connection.store(true);
+    assert(static_cast<bool>(_internal));
+    _internal->on_connection.store(true);
     onConnection(code);
-    _on_connection.store(false);
+    _internal->on_connection.store(false);
 }
 
 void StreamServer::backClose()
 {
-    assert(static_cast<bool>(_internal));
     onClose();
 
     _mutex.lock();
+    assert(static_cast<bool>(_internal));
     _internal->closeAll();
     _mutex.unlock();
 }

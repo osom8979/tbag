@@ -271,18 +271,6 @@ struct StreamClient::Internal : private Noncopyable
         return client->write(writer.write_req, buffer, size);
     }
 
-    std::vector<binf> getWriteBufferInfo()
-    {
-        return writer.buffers.info();
-        //std::size_t SIZE = writer.buffers.size();
-        //std::vector<binf> result(SIZE);
-        //for (std::size_t i = 0; i < SIZE; ++i) {
-        //    result[i].buffer = &writer.buffers[i][0];
-        //    result[i].size   =  writer.buffers[i].size();
-        //}
-        //return result;
-    }
-
     Err autoWrite(binf const * buffer, std::size_t size)
     {
         if (writer.status != WriteStatus::WS_READY) {
@@ -594,8 +582,6 @@ Err StreamClient::stop()
 void StreamClient::close()
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-
     Guard const MUTEX_GUARD_OUT(_mutex);
     Loop & loop = _internal->getLoop();
 
@@ -615,8 +601,6 @@ void StreamClient::close()
 void StreamClient::cancel()
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-
     Guard const MUTEX_GUARD_OUT(_mutex);
     Loop & loop = _internal->getLoop();
 

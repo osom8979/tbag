@@ -50,6 +50,7 @@ public:
 
     using Loop   = uvpp::Loop;
     using Stream = uvpp::Stream;
+    using Id     = ClientInterface::Id;
 
     using SharedClient = ServerInterface::SharedClient;
     using   WeakClient = ServerInterface::WeakClient;
@@ -65,12 +66,6 @@ public:
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-    using ClientMap  = std::unordered_map<Id, SharedClient>;
-    using ClientPair = ClientMap::value_type;
-
-    using AtomicBool = std::atomic_bool;
-    using Id = ClientInterface::Id;
-
 public:
     struct Internal;
     friend struct Internal;
@@ -82,17 +77,7 @@ private:
     StreamType const STREAM_TYPE;
 
 private:
-    UniqueInternal       _internal;
-    SharedServerBackend  _server;
-    SharedSafetyAsync    _async;
-    ClientMap            _clients;
-
-private:
-    std::string _destination;
-    int _port;
-
-private:
-    AtomicBool _on_connection;
+    UniqueInternal _internal;
     mutable Mutex _mutex;
 
 public:
@@ -100,18 +85,12 @@ public:
     virtual ~StreamServer();
 
 public:
-    // @formatter:off
-    inline bool isOnConnection() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_on_connection.load()))
-    { return _on_connection.load(); }
-    inline bool emptyClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.empty()))
-    { Guard g(_mutex); return _clients.empty(); }
-    inline std::size_t sizeClients() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_clients.size()))
-    { Guard g(_mutex); return _clients.size(); }
-    // @formatter:on
+    bool isOnConnection() const;
+    bool emptyClients() const;
+    std::size_t sizeClients() const;
 
-public:
-    WeakServerBackend getServer() { Guard g(_mutex); return WeakServerBackend(_server); }
-    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
+    WeakServerBackend getServer();
+    WeakSafetyAsync getAsync();
 
 public:
     virtual std::string dest() const override;
@@ -154,23 +133,6 @@ public:
 public:
     virtual void backConnection(Err code) override;
     virtual void backClose() override;
-
-public:
-    template <typename Predicated>
-    void foreach(Predicated predicated)
-    {
-        Guard guard(_mutex);
-        for (auto & cursor : _clients) {
-            predicated(cursor);
-        }
-    }
-
-    template <typename Predicated>
-    void updateClients(Predicated predicated)
-    {
-        Guard guard(_mutex);
-        predicated(_clients);
-    }
 };
 
 /**
