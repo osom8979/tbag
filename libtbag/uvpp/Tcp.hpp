@@ -97,11 +97,11 @@ public:
 // ----------------
 
 // @formatter:off
-TBAG_API bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr);
-TBAG_API bool initCommonClient    (Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
+TBAG_API Err initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr);
+TBAG_API Err initCommonClient    (Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
 
-TBAG_API bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr);
-TBAG_API bool initCommonServer    (Tcp & tcp, std::string const & ip, int port);
+TBAG_API Err initCommonServerSock(Tcp & tcp, struct sockaddr const * addr);
+TBAG_API Err initCommonServer    (Tcp & tcp, std::string const & ip, int port);
 // @formatter:on
 
 } // namespace uvpp

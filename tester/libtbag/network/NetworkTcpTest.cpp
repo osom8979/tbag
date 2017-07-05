@@ -40,6 +40,16 @@ TEST(NetworkTcpTest, JustCreateServer)
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
 }
 
+TEST(NetworkTcpTest, InitAndCloseClient)
+{
+    using namespace uvpp;
+    Loop loop;
+    TcpClient client(loop);
+    client.init("127.0.0.0", 9999);
+    client.close();
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+}
+
 TEST(NetworkTcpTest, AddressAlreadyInUse)
 {
     log::SeverityGuard guard;
@@ -77,6 +87,7 @@ TEST(NetworkTcpTest, ClientTimeout)
 
     int connect = 0;
     int close   = 0;
+    int timer   = 0;
 
     Err connect_result = Err::E_UNKNOWN;
     Err result = Err::E_UNKNOWN;
@@ -89,6 +100,7 @@ TEST(NetworkTcpTest, ClientTimeout)
         close++;
     });
     client.setOnTimer([&](){
+        timer++;
         client.close();
     });
 
@@ -102,6 +114,7 @@ TEST(NetworkTcpTest, ClientTimeout)
     ASSERT_EQ(Err::E_SUCCESS, result);
     ASSERT_EQ(1, connect);
     ASSERT_EQ(1, close);
+    ASSERT_EQ(1, timer);
 }
 
 TEST(NetworkTcpTest, MultiEcho)

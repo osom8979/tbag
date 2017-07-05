@@ -125,6 +125,27 @@ struct StreamClient::Internal : private Noncopyable
         return *loop;
     }
 
+    Err initClient(StreamType type, std::string const & destination, int port = 0)
+    {
+        if (static_cast<bool>(client) == false) {
+            return Err::E_EXPIRED;
+        }
+
+        using TcpBackend  = StreamClientBackend<uvpp::Tcp>;
+        using PipeBackend = StreamClientBackend<uvpp::Pipe>;
+
+        if (type == StreamType::TCP) {
+            auto backend = std::static_pointer_cast<TcpBackend>(client);
+            return uvpp::initCommonClient(*backend, writer.connect_req, destination, port);
+        } else if (type == StreamType::PIPE) {
+            auto backend = std::static_pointer_cast<PipeBackend>(client);
+            return uvpp::initPipeClient(*backend, writer.connect_req, destination);
+        }
+
+        tDLogA("StreamClient::Internal::initClient() Unknown stream type.");
+        return Err::E_ILLARGS;
+    }
+
     bool initHandles()
     {
         Loop & loop = getLoop();
@@ -524,32 +545,13 @@ int StreamClient::port() const
 
 Err StreamClient::init(char const * destination, int port)
 {
-    assert(static_cast<bool>(_internal->client));
     assert(static_cast<bool>(_internal));
-
     Guard const MUTEX_GUARD(_mutex);
-    if (static_cast<bool>(_internal->client) == false) {
-        return Err::E_EXPIRED;
-    }
 
-    using TcpBackend  = StreamClientBackend<uvpp::Tcp>;
-    using PipeBackend = StreamClientBackend<uvpp::Pipe>;
-
-    bool is_init = false;
-    if (STREAM_TYPE == StreamType::TCP) {
-        auto backend = std::static_pointer_cast<TcpBackend>(_internal->client);
-        is_init = uvpp::initCommonClient(*backend, _internal->writer.connect_req, destination, port);
-    } else if (STREAM_TYPE == StreamType::PIPE) {
-        auto backend = std::static_pointer_cast<PipeBackend>(_internal->client);
-        is_init = uvpp::initPipeClient(*backend, _internal->writer.connect_req, destination);
-    } else {
-        tDLogA("StreamClient::init() Unknown stream type.");
-        return Err::E_ILLARGS;
-    }
-
-    if (is_init == false) {
+    Err const INIT_CODE = _internal->initClient(STREAM_TYPE, std::string(destination), port);
+    if (INIT_CODE != Err::E_SUCCESS) {
         tDLogE("StreamClient::init() Initialize fail.");
-        return Err::E_UNKNOWN;
+        return INIT_CODE;
     }
 
     if (_internal->initHandles() == false) {
@@ -584,14 +586,16 @@ Err StreamClient::stop()
 
 void StreamClient::close()
 {
-    assert(static_cast<bool>(_internal->client));
     assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
 
     Guard const MUTEX_GUARD_OUT(_mutex);
     Loop & loop = _internal->getLoop();
+
     if (loop.isAliveAndThisThread() || static_cast<bool>(_internal->async) == false) {
         tDLogD("StreamClient::close() request.");
         _internal->closeAll();
+
     } else {
         tDLogD("StreamClient::close() async request.");
         _internal->async->newSendFunc([&](){
@@ -603,14 +607,16 @@ void StreamClient::close()
 
 void StreamClient::cancel()
 {
-    assert(static_cast<bool>(_internal->client));
     assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
 
     Guard const MUTEX_GUARD_OUT(_mutex);
     Loop & loop = _internal->getLoop();
+
     if (loop.isAliveAndThisThread() || static_cast<bool>(_internal->async) == false) {
         tDLogD("StreamClient::cancel() request.");
         _internal->shutdownWrite();
+
     } else {
         tDLogD("StreamClient::cancel() async request.");
         _internal->async->newSendFunc([&]() {

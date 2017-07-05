@@ -184,32 +184,32 @@ void Pipe::onConnect(ConnectRequest & request, Err code)
 // Utility methods.
 // ----------------
 
-bool initPipeServer(Pipe & pipe, std::string const & path)
+Err initPipeServer(Pipe & pipe, std::string const & path)
 {
     Err const BIND_CODE = pipe.bind(path.c_str());
     if (BIND_CODE != Err::E_SUCCESS) {
         tDLogE("initPipeServer() pipe bind {} error.", getErrName(BIND_CODE));
-        return false;
+        return BIND_CODE;
     }
 
     Err const LISTEN_CODE = pipe.listen();
     if (LISTEN_CODE != Err::E_SUCCESS) {
         tDLogE("initPipeServer() pipe listen {} error.", getErrName(LISTEN_CODE));
-        return false;
+        return LISTEN_CODE;
     }
 
-    return true;
+    return Err::E_SUCCESS;
 }
 
-bool initPipeClient(Pipe & pipe, ConnectRequest & request, std::string const & path)
+Err initPipeClient(Pipe & pipe, ConnectRequest & request, std::string const & path)
 {
     if (filesystem::Path(path).exists() == false) {
         tDLogE("initPipeClient() not exists error: {}.", path);
-        return false;
+        return Err::E_EEXIST;
     }
 
     pipe.connect(request, path.c_str());
-    return true;
+    return Err::E_SUCCESS;
 }
 
 } // namespace uvpp

@@ -178,26 +178,28 @@ Err StreamServer::init(char const * destination, int port)
     using  TcpBackend = StreamServerBackend<uvpp::Tcp>;
     using PipeBackend = StreamServerBackend<uvpp::Pipe>;
 
-    bool is_init = false;
+    Err code = Err::E_UNKNOWN;
     if (STREAM_TYPE == StreamType::TCP) {
         auto backend = std::static_pointer_cast<TcpBackend>(_server);
-        is_init = uvpp::initCommonServer(*backend, destination, port);
+        code = uvpp::initCommonServer(*backend, destination, port);
 
         _destination = backend->getSockIp();
         _port = backend->getSockPort();
 
     } else if (STREAM_TYPE == StreamType::PIPE) {
         auto backend = std::static_pointer_cast<PipeBackend>(_server);
-        is_init = uvpp::initPipeServer(*backend, destination);
+        code = uvpp::initPipeServer(*backend, destination);
 
         _destination = destination;
         _port = 0;
     } else {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        _destination.clear();
+        _port = 0;
         return Err::E_UNKNOWN;
     }
 
-    if (is_init) {
+    if (code == Err::E_SUCCESS) {
         return _internal->initHandles();
     }
     return Err::E_UNKNOWN;

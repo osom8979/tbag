@@ -212,56 +212,60 @@ void Tcp::onConnect(ConnectRequest & request, Err code)
 // Utility methods.
 // ----------------
 
-bool initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr)
+Err initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr)
 {
     if (tcp.isInit() == false) {
         tDLogE("initCommonClientSock() tcp is not initialized.");
-        return false;
+        return Err::E_EINIT;
     }
 
     Err const CODE = tcp.connect(request, addr);
     if (CODE != Err::E_SUCCESS) {
         tDLogE("initCommonServerSock() tcp connect {} error.", getErrName(CODE));
-        return false;
+        return CODE;
     }
-    return true;
+
+    return Err::E_SUCCESS;
 }
 
-bool initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
+Err initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
 {
     libtbag::network::SocketAddress addr;
-    if (addr.init(host, port) != Err::E_SUCCESS) {
-        return false;
+    Err const CODE = addr.init(host, port);
+    if (CODE != Err::E_SUCCESS) {
+        return CODE;
     }
     return initCommonClientSock(tcp, request, addr.getCommon());
 }
 
-bool initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
+Err initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
 {
     if (tcp.isInit() == false) {
         tDLogE("initCommonServerSock() tcp is not initialized.");
-        return false;
+        return Err::E_EINIT;
     }
 
     Err const BIND_CODE = tcp.bind(addr);
     if (BIND_CODE != Err::E_SUCCESS) {
         tDLogE("initCommonServerSock() tcp bind {} error.", getErrName(BIND_CODE));
-        return false;
+        return BIND_CODE;
     }
 
     Err const LISTEN_CODE = tcp.listen();
     if (LISTEN_CODE != Err::E_SUCCESS) {
         tDLogE("initCommonServerSock() tcp listen {} error.", getErrName(LISTEN_CODE));
-        return false;
+        return LISTEN_CODE;
     }
-    return true;
+
+    return Err::E_SUCCESS;
 }
 
-bool initCommonServer(Tcp & tcp, std::string const & ip, int port)
+Err initCommonServer(Tcp & tcp, std::string const & ip, int port)
 {
     libtbag::network::SocketAddress addr;
-    if (addr.init(ip, port) != Err::E_SUCCESS) {
-        return false;
+    Err const CODE = addr.init(ip, port);
+    if (CODE != Err::E_SUCCESS) {
+        return CODE;
     }
     return initCommonServerSock(tcp, addr.getCommon());
 }
