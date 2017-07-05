@@ -7,9 +7,11 @@
 
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/stream/StreamClientBackend.hpp>
+#include <libtbag/container/CachedBuffers.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
@@ -87,7 +89,10 @@ struct StreamClient::Internal : private Noncopyable
     using SharedUserTimer     = std::shared_ptr<UserTimer>;
     using SharedShutdownTimer = std::shared_ptr<ShutdownTimer>;
 
-    using binf = StreamClient::binf;
+    using binf    = StreamClient::binf;
+    using Buffers = container::CachedBuffers<binf::Base, binf::Size>;
+
+    STATIC_ASSERT_CHECK_IS_SAME(binf, Buffers::binf);
 
     StreamClient * parent;
 
@@ -266,26 +271,16 @@ struct StreamClient::Internal : private Noncopyable
         return client->write(writer.write_req, buffer, size);
     }
 
-    void copyToWriteBuffer(binf const * buffer, std::size_t size)
-    {
-        // COPY TO TEMP BUFFER ...
-        writer.buffers.resize(size);
-        for (std::size_t i = 0; i < size; ++i) {
-            char const * b = (buffer + i)->buffer;
-            std::size_t bs = (buffer + i)->size;
-            writer.buffers[i].assign(b, b + bs);
-        }
-    }
-
     std::vector<binf> getWriteBufferInfo()
     {
-        std::size_t SIZE = writer.buffers.size();
-        std::vector<binf> result(SIZE);
-        for (std::size_t i = 0; i < SIZE; ++i) {
-            result[i].buffer = &writer.buffers[i][0];
-            result[i].size   =  writer.buffers[i].size();
-        }
-        return result;
+        return writer.buffers.info();
+        //std::size_t SIZE = writer.buffers.size();
+        //std::vector<binf> result(SIZE);
+        //for (std::size_t i = 0; i < SIZE; ++i) {
+        //    result[i].buffer = &writer.buffers[i][0];
+        //    result[i].size   =  writer.buffers[i].size();
+        //}
+        //return result;
     }
 
     Err autoWrite(binf const * buffer, std::size_t size)
@@ -310,7 +305,7 @@ struct StreamClient::Internal : private Noncopyable
             writer.status = WriteStatus::WS_WRITE;
 
         } else {
-            copyToWriteBuffer(buffer, size);
+            writer.buffers.assign(buffer, size);
             auto job = async->newSendJob<AsyncWrite>(parent);
             if (static_cast<bool>(job) == false) {
                 tDLogE("StreamClient::Internal::autoWrite() New job error.");
@@ -453,9 +448,14 @@ void StreamClient::onAsyncWrite()
     }
 
     assert(_internal->writer.status == WriteStatus::WS_ASYNC);
-    auto binfs = _internal->getWriteBufferInfo();
-    Err const CODE = _internal->writeReal(&binfs[0], binfs.size());
+    auto binfs = _internal->writer.buffers.info();
+    if (binfs.empty()) {
+        tDLogD("StreamClient::onAsyncWrite() Empty binfs.");
+        _internal->writer.status = WriteStatus::WS_READY;
+        return;
+    }
 
+    Err const CODE = _internal->writeReal(&binfs[0], binfs.size());
     if (CODE == Err::E_SUCCESS) {
         _internal->writer.status = WriteStatus::WS_WRITE;
     } else {

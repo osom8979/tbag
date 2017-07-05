@@ -50,6 +50,7 @@ public:
     using Loop   = uvpp::Loop;
     using Stream = uvpp::Stream;
     using binf   = uvpp::binf;
+    using Id     = id::Id;
 
 public:
     using SharedClientBackend = std::shared_ptr<Stream>;
@@ -61,10 +62,6 @@ public:
     using   WeakSafetyAsync = std::shared_ptr<SafetyAsync>;
 
 public:
-    using Id      = id::Id;
-    using Buffer  = std::vector<char>;
-    using Buffers = std::vector<Buffer>;
-
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
