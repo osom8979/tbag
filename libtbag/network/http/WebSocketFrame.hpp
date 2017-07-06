@@ -199,6 +199,9 @@ public:
     Err closeRequest(uint32_t masking_key);
     Err closeResponse(uint16_t status_code, std::string const & reason);
 
+    uint16_t getStatusCode() const;
+    std::string getReason() const;
+
     /**
      * Pings: The Heartbeat of WebSockets.
      *

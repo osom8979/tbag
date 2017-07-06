@@ -358,6 +358,24 @@ Err WebSocketFrame::closeResponse(uint16_t status_code, std::string const & reas
     return updateResponse(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
 }
 
+uint16_t WebSocketFrame::getStatusCode() const
+{
+    if (opcode == OpCode::OC_CONNECTION_CLOSE && payload_length >= sizeof(uint16_t)) {
+        uint16_t temp = 0;
+        ::memcpy(&temp, &payload[0], sizeof(uint16_t));
+        return bitwise::toHost(temp);
+    }
+    return 0U;
+}
+
+std::string WebSocketFrame::getReason() const
+{
+    if (opcode == OpCode::OC_CONNECTION_CLOSE && payload_length > sizeof(uint16_t)) {
+        return std::string(&payload[sizeof(uint16_t)], &payload[sizeof(uint16_t)] + payload_length - sizeof(uint16_t));
+    }
+    return std::string();
+}
+
 Err WebSocketFrame::pingRequest(uint8_t const * data, std::size_t size)
 {
     return pingRequest(random::MaskingDevice().gen(), data, size);
