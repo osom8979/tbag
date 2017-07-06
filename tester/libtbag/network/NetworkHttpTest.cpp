@@ -254,17 +254,15 @@ TEST(NetworkHttpTest, WebSocketEchoTest)
 //    ASSERT_LT(0, SERVER_PORT);
 //    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
 //
-//    server.setOnWebSocketOpen([&](WC node, Err code, HP & packet){
+//    server.setOnWsOpen([&](WC node, Err code, HP & packet){
 //        std::cout << "Server.OnWebSocketOpen(" << getErrName(code)
 //                  << ")\nRequest:\n" << packet.request.toDebugString()
 //                  << "\nResponse:\n" << packet.response.toResponseDebugString()
 //                  << std::endl;
 //    });
-//    server.setOnWebSocketMessage([&](WC client, Err code, WP & packet){
-//        //packet.response = packet.request;
-//        //packet.response.mask = false;
-//        //std::cout << "Server.OnWebSocketMessage(" << getErrName(code)
-//        //          << ")\nFrame:\n" << packet.response.toDebugString() << std::endl;
+//    server.setOnWsMessage([&](WC client, Err code, WP & packet){
+//        server.writeText(client, std::string(packet.buffer, packet.buffer + packet.size));
+//        std::cout << "Server.OnWebSocketMessage(" << getErrName(code) << std::endl;
 //    });
 //    server.setOnClose([&](WC node){
 //        std::cout << "Server.OnClose\n";

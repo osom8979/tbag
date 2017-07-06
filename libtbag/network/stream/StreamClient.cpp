@@ -321,7 +321,7 @@ struct StreamClient::Internal : private Noncopyable
                 tDLogW("StreamClient::Internal::autoWrite() Timer job {} error!", getErrName(CODE));
             }
         } else {
-            tDLogD("StreamClient::Internal::autoWrite() No timeout.");
+            // tDLogD("StreamClient::Internal::autoWrite() No timeout.");
         }
 
         return result_code;

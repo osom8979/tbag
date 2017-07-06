@@ -26,9 +26,9 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
-bool HttpServer::createCacheData(Id id)
+bool HttpServer::createCacheData(ClientInterface * client)
 {
-    return _cache_map.insert(CacheDataPair(id, SharedCacheData(new (std::nothrow) CacheData))).second;
+    return _cache_map.insert(CacheDataPair(client->id(), SharedCacheData(new (std::nothrow) CacheData(client)))).second;
 }
 
 bool HttpServer::removeCacheData(Id id)
@@ -65,6 +65,50 @@ void HttpServer::setOnRequest(SharedFilter filter, Order priority)
     _filters.insert(FilterPair(priority, filter));
 }
 
+Err HttpServer::writeText(WeakClient node, std::string const & text, bool continuation, bool finish)
+{
+    auto shared = node.lock();
+    if (static_cast<bool>(shared) == false) {
+        return Err::E_EXPIRED;
+    }
+    auto cache = getCacheData(shared->id()).lock();
+    if (static_cast<bool>(cache) == false) {
+        return Err::E_EXPIRED;
+    }
+    return cache->writeTextResponse(text, continuation, finish);
+}
+
+Err HttpServer::writeBinary(WeakClient node, WebSocketFrame::Buffer const & buffer, bool continuation, bool finish)
+{
+    auto shared = node.lock();
+    if (static_cast<bool>(shared) == false) {
+        return Err::E_EXPIRED;
+    }
+    auto cache = getCacheData(shared->id()).lock();
+    if (static_cast<bool>(cache) == false) {
+        return Err::E_EXPIRED;
+    }
+    return cache->writeBinaryResponse(buffer, continuation, finish);
+}
+
+Err HttpServer::closeClient(WeakClient node, uint16_t status_code, std::string const & reason)
+{
+    auto shared = node.lock();
+    if (static_cast<bool>(shared) == false) {
+        return Err::E_EXPIRED;
+    }
+    auto cache = getCacheData(shared->id()).lock();
+    if (static_cast<bool>(cache) == false) {
+        return Err::E_EXPIRED;
+    }
+
+    Err const CODE = cache->writeCloseResponse(status_code, reason);
+    if (CODE != Err::E_SUCCESS) {
+        tDLogW("HttpServer::closeClient() Close response {} error", getErrName(CODE));
+    }
+    return shared->close();
+}
+
 bool HttpServer::isUpgradeWebSocket(CacheData const & cache) const TBAG_NOEXCEPT
 {
     return _use_websocket && cache.upgrade;
@@ -95,43 +139,21 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
 
 void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const & packet, CacheData & cache)
 {
-    auto & rframe  = cache.recv_frame;
-    auto & wframe  = cache.send_frame;
-    auto & fbuffer = cache.buffer;
+    auto & frame = cache.recv_frame;
 
-    Err const EXECUTE_CODE = rframe.execute((uint8_t*)packet.buffer, packet.size);
+    Err const EXECUTE_CODE = frame.execute((uint8_t*)packet.buffer, packet.size);
     if (EXECUTE_CODE != Err::E_SUCCESS) {
         tDLogE("HttpServer::runWebSocketRead() WebSocket frame {} error", getErrName(EXECUTE_CODE));
         return;
     }
 
-    if (rframe.fin == false) {
-        // Waiting next frame ...
-        return;
-    }
-
-    assert(rframe.fin);
-    if (rframe.opcode == OpCode::OC_TEXT_FRAME || rframe.opcode == OpCode::OC_BINARY_FRAME) {
+    if (frame.fin) {
         if (_callback != nullptr) {
-            char const * data = (char const *)rframe.getPayloadData();
-            std::size_t size = rframe.getPayloadSize();
-            WP wp(rframe.opcode, data, size);
+            WP wp(frame.opcode, (char const *)frame.getPayloadData(), frame.getPayloadSize());
             _callback->onWsMessage(node, code, wp);
         }
-        return;
-    }
-
-    // Processing control frames.
-    if (rframe.opcode == OpCode::OC_CONNECTION_CLOSE) {
-        wframe.closeResponse();
-        wframe.copyTo(fbuffer);
-    } else if (rframe.opcode == OpCode::OC_DENOTES_PING) {
-        wframe.pongResponse(rframe.getPayloadData(), rframe.getPayloadSize());
-        wframe.copyTo(fbuffer);
-    } else if (rframe.opcode == OpCode::OC_DENOTES_PONG) {
-        // Ping & Pong checker.
     } else {
-        tDLogW("HttpServer::runWebSocketRead() Unsupported control frame: {}", getOpCodeName(rframe.opcode));
+        tDLogD("HttpServer::runWebSocketRead() Waiting next frame ...");
     }
 }
 
@@ -204,7 +226,7 @@ void HttpServer::onConnection(Err code)
         return;
     }
 
-    if (createCacheData(shared->id()) == false) {
+    if (createCacheData(shared.get()) == false) {
         tDLogE("HttpServer::onConnection() Bad allocated client-data.");
         shared->close();
         return;

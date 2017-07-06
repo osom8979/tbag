@@ -170,8 +170,8 @@ public:
 
 public:
     std::size_t calculateWriteBufferSize() const;
-    std::size_t copyTo(uint8_t * data, std::size_t data_size);
-    std::size_t copyTo(Buffer & buffer);
+    std::size_t copyTo(uint8_t * data, std::size_t data_size) const;
+    std::size_t copyTo(Buffer & buffer) const;
 
 public:
     void set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
@@ -197,7 +197,7 @@ public:
      */
     Err closeRequest();
     Err closeRequest(uint32_t masking_key);
-    Err closeResponse();
+    Err closeResponse(uint16_t status_code, std::string const & reason);
 
     /**
      * Pings: The Heartbeat of WebSockets.

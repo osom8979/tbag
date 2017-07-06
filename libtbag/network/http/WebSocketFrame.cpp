@@ -192,7 +192,7 @@ std::size_t WebSocketFrame::calculateWriteBufferSize() const
     }
 }
 
-std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size)
+std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size) const
 {
     ::memset(data, 0x00, size);
 
@@ -262,7 +262,7 @@ std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size)
     return index;
 }
 
-std::size_t WebSocketFrame::copyTo(Buffer & buffer)
+std::size_t WebSocketFrame::copyTo(Buffer & buffer) const
 {
     std::size_t const RESERVE_SIZE = calculateWriteBufferSize();
     if (buffer.size() < RESERVE_SIZE) {
@@ -285,10 +285,10 @@ void WebSocketFrame::set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t 
 void WebSocketFrame::set(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
 {
     if (data != nullptr && size > 0) {
-        if (payload.size() < payload_length) {
-            payload.resize(payload_length);
+        if (payload.size() < size) {
+            payload.resize(size);
         }
-        payload.assign(data, data + payload_length);
+        ::memcpy(&payload[0], data, size);
         payload_length = size;
     } else {
         payload_length = 0;
@@ -349,9 +349,13 @@ Err WebSocketFrame::closeRequest(uint32_t masking_key)
     return updateRequest(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, masking_key);
 }
 
-Err WebSocketFrame::closeResponse()
+Err WebSocketFrame::closeResponse(uint16_t status_code, std::string const & reason)
 {
-    return updateResponse(true, false, false, false, OpCode::OC_CONNECTION_CLOSE);
+    uint16_t const CODE = bitwise::toNetwork(status_code);
+    Buffer buffer(sizeof(CODE) + reason.size());
+    memcpy(&buffer[0], &CODE, sizeof(CODE));
+    memcpy(&buffer[sizeof(CODE)], &reason[0], reason.size());
+    return updateResponse(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
 }
 
 Err WebSocketFrame::pingRequest(uint8_t const * data, std::size_t size)

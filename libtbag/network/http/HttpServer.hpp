@@ -29,6 +29,7 @@
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <map>
@@ -180,7 +181,7 @@ public:
     virtual ~HttpServer();
 
 private:
-    bool createCacheData(Id id);
+    bool createCacheData(ClientInterface * client);
     bool removeCacheData(Id id);
     WeakCacheData getCacheData(Id id);
 
@@ -194,6 +195,13 @@ public:
     void setOnRequest(std::string const & regex_path, OnRequest const & cb, Order priority = 0);
     void setOnRequest(HttpFilterInterface * filter, OnRequest const & cb, Order priority = 0);
     void setOnRequest(SharedFilter filter, Order priority = 0);
+
+public:
+    Err writeText(WeakClient node, std::string const & text, bool continuation = false, bool finish = true);
+    Err writeBinary(WeakClient node, WebSocketFrame::Buffer const & buffer, bool continuation = false, bool finish = true);
+
+public:
+    Err closeClient(WeakClient node, uint16_t status_code, std::string const & reason);
 
 private:
     bool isUpgradeWebSocket(CacheData const & client_data) const TBAG_NOEXCEPT;

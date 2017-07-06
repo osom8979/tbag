@@ -19,7 +19,7 @@ namespace http    {
 HttpClient::HttpClient(Loop & loop, StreamType type)
         : Parent(loop, type), _builder(), _parser(HttpParser::Type::RESPONSE), _call_once(false)
 {
-    //setSkipTimeout();
+    // EMPTY.
 }
 
 HttpClient::~HttpClient()
