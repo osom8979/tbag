@@ -645,14 +645,10 @@ Err StreamClient::write(binf const * buffer, std::size_t size)
 
 Err StreamClient::write(char const * buffer, std::size_t size)
 {
-    assert(static_cast<bool>(_internal));
-
     binf info;
     info.buffer = const_cast<char*>(buffer);
     info.size   = size;
-
-    Guard const MUTEX_GUARD(_mutex);
-    return _internal->autoWrite(&info, 1U);
+    return write(&info, 1U);
 }
 
 void StreamClient::setWriteTimeout(uint64_t millisec)

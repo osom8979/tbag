@@ -15,9 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 
 #include <deque>
-#include <memory>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,72 +40,99 @@ public:
     using Queue = std::deque<Value>;
 
 private:
-    Queue _active_queue;
-    Queue _remove_queue;
+    Queue _active;
+    Queue _remove;
 
 public:
-    ReuseQueue() = default;
-    ~ReuseQueue() = default;
+    ReuseQueue() : _active(), _remove()
+    {
+        // EMPTY.
+    }
 
-    ReuseQueue(ReuseQueue const & obj) = default;
-    ReuseQueue & operator =(ReuseQueue const & obj) = default;
+    ReuseQueue(ReuseQueue const & obj) : ReuseQueue()
+    {
+        (*this) = obj;
+    }
 
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    ReuseQueue(ReuseQueue && obj) = default;
-    ReuseQueue & operator =(ReuseQueue && obj) = default;
-#endif
+    ReuseQueue(ReuseQueue && obj) : ReuseQueue()
+    {
+        (*this) = std::move(obj);
+    }
+
+    ~ReuseQueue()
+    {
+        // EMPTY.
+    }
+
+public:
+    ReuseQueue & operator =(ReuseQueue const & obj)
+    {
+        if (this != &obj) {
+            _active = obj._active;
+            _remove = obj._remove;
+        }
+        return *this;
+    }
+
+    ReuseQueue & operator =(ReuseQueue && obj)
+    {
+        if (this != &obj) {
+            _active.swap(obj._active);
+            _remove.swap(obj._remove);
+        }
+        return *this;
+    }
+
+public:
+    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.empty()))
+    { return _active.size(); }
+    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.empty()))
+    { return _active.empty(); }
+
+public:
+    inline std::size_t sizeOfRemoveQueue() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_remove.size()))
+    { return _remove.size(); }
+    inline bool emptyOfRemoveQueue() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_remove.empty()))
+    { return _remove.empty(); }
 
 public:
     void clear()
     {
-        _active_queue.clear();
-        _remove_queue.clear();
+        _active.clear();
+        _remove.clear();
     }
 
 public:
-    Value * push()
+    Value & push()
     {
-        if (_remove_queue.empty()) {
-            _active_queue.push_back(Value());
+        if (_remove.empty()) {
+            _active.push_back(Value());
         } else {
-            _active_queue.push_back(_remove_queue.front());
-            _remove_queue.pop_front();
+            _active.push_back(_remove.front());
+            _remove.pop_front();
         }
-        return &_active_queue.back();
+        return _active.back();
     }
 
-    void pop()
+    Err pop()
     {
-        if (_active_queue.empty()) {
-            return;
+        if (_active.empty()) {
+            return Err::E_EQUEUE;
         }
-
-        _remove_queue.push_back(_active_queue.front());
-        _active_queue.pop_front();
+        _remove.push_back(_active.front());
+        _active.pop_front();
+        return Err::E_SUCCESS;
     }
 
-    Value * front()
+    Err front(Value & result)
     {
-        if (_active_queue.empty()) {
-            return nullptr;
+        if (_active.empty()) {
+            return Err::E_EQUEUE;
         }
-        return &_active_queue.front();
+        result = _active.front();
+        return Err::E_SUCCESS;
     }
-
-public:
-    inline std::size_t size() const TBAG_NOEXCEPT
-    { return _active_queue.size(); }
-    inline bool empty() const TBAG_NOEXCEPT
-    { return _active_queue.empty(); }
-
-    inline std::size_t sizeOfRemoveQueue() const TBAG_NOEXCEPT
-    { return _remove_queue.size(); }
-    inline bool emptyOfRemoveQueue() const TBAG_NOEXCEPT
-    { return _remove_queue.empty(); }
 };
-
-template <typename Key>
-using ReusePtrQueue = ReuseQueue<std::shared_ptr<Key> >;
 
 } // namespace container
 

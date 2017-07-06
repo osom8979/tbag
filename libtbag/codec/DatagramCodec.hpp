@@ -102,12 +102,12 @@ public:
     {
         Guard guard(_writers_mutex);
 
-        SharedBuffer * shared = _writers.front();
-        if (shared == nullptr || static_cast<bool>(shared) == false) {
+        SharedBuffer shared;
+        if (_writers.front(shared) != Err::E_SUCCESS) {
             return false;
         }
 
-        Buffer & cursor = *(shared->get());
+        Buffer & cursor = *shared;
         predicated(&cursor[0], cursor.size());
 
         _writers.pop();

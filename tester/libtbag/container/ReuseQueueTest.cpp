@@ -24,7 +24,6 @@ TEST(ReuseQueueTest, Constructor)
     ASSERT_EQ(1U, q2.size());
 }
 
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
 TEST(ReuseQueueTest, MoveConstructor)
 {
     ReuseQueue<int> q1;
@@ -32,10 +31,10 @@ TEST(ReuseQueueTest, MoveConstructor)
 
     q1.push();
     q2 = std::move(q1);
+
     ASSERT_EQ(0U, q1.size());
     ASSERT_EQ(1U, q2.size());
 }
-#endif
 
 TEST(ReuseQueueTest, Default)
 {
@@ -47,24 +46,25 @@ TEST(ReuseQueueTest, Default)
     ASSERT_TRUE(queue.empty());
     ASSERT_TRUE(queue.emptyOfRemoveQueue());
 
-    int * test1_value = queue.push();
-    int * test2_value = queue.push();
-    ASSERT_NE(nullptr, test1_value);
-    ASSERT_NE(nullptr, test2_value);
+    int & test1_value = queue.push();
+    int & test2_value = queue.push();
     ASSERT_EQ(2U, queue.size());
     ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
-    *test1_value = 100;
-    *test2_value = 200;
-    ASSERT_EQ(100, *queue.front());
+    test1_value = 100;
+    test2_value = 200;
+
+    int result;
+    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
+    ASSERT_EQ(100, result);
 
     queue.pop();
-    ASSERT_EQ(200, *queue.front());
-    ASSERT_EQ(1U,   queue.size());
-    ASSERT_EQ(1U,   queue.sizeOfRemoveQueue());
+    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
+    ASSERT_EQ(200, result);
+    ASSERT_EQ(1U,  queue.size());
+    ASSERT_EQ(1U,  queue.sizeOfRemoveQueue());
 
-    int * test3_value = queue.push();
-    ASSERT_NE(nullptr, test3_value);
+    int & test3_value = queue.push();
     ASSERT_EQ(2U, queue.size());
     ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
 
@@ -75,30 +75,5 @@ TEST(ReuseQueueTest, Default)
     queue.clear();
     ASSERT_TRUE(queue.empty());
     ASSERT_TRUE(queue.emptyOfRemoveQueue());
-}
-
-TEST(ReuseQueueTest, ReusePtrQueue)
-{
-    ReusePtrQueue<int> queue;
-
-    int const TEST_NUMBER = 100;
-
-    auto item = queue.push();
-    ASSERT_NE(nullptr, item);
-    item->reset(new int(TEST_NUMBER));
-    ASSERT_EQ(1U, queue.size());
-    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
-
-    queue.pop();
-    ASSERT_EQ(0U, queue.size());
-    ASSERT_EQ(1U, queue.sizeOfRemoveQueue());
-
-    queue.push();
-    ASSERT_EQ(1U, queue.size());
-    ASSERT_EQ(0U, queue.sizeOfRemoveQueue());
-
-    auto find_item = queue.front();
-    ASSERT_NE(nullptr, find_item);
-    ASSERT_EQ(TEST_NUMBER, *(find_item->get()));
 }
 

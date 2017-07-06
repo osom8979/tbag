@@ -34,19 +34,15 @@ bool DatagramEncoder::pushWriteBuffer(char const * buffer, Size size)
 {
     Guard guard(_writers_mutex);
 
-    SharedBuffer * shared = _writers.push();
-    if (shared == nullptr || static_cast<bool>(shared) == false) {
-        return false;
-    }
-
-    if ((*shared).get() == nullptr) {
-        shared->reset(new (std::nothrow) Buffer(DATAGRAM_HEADER_SIZE + size));
-        if ((*shared).get() == nullptr) {
+    SharedBuffer & shared = _writers.push();
+    if (static_cast<bool>(shared) == false) {
+        shared.reset(new (std::nothrow) Buffer(DATAGRAM_HEADER_SIZE + size));
+        if (static_cast<bool>(shared) == false) {
             return false;
         }
     }
 
-    Buffer & cursor = *(shared->get());
+    Buffer & cursor = *shared;
     cursor.resize(DATAGRAM_HEADER_SIZE + size);
 
     Size const NETWORK_BYTE_SIZE = bitwise::toNetwork(static_cast<Size>(size));

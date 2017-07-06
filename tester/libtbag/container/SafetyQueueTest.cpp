@@ -22,18 +22,18 @@ TEST(SafetyQueueTest, Default)
 
     queue.push(10);
     ASSERT_EQ(1U, queue.size());
-    ASSERT_EQ(Queue::Code::SUCCESS, queue.front(result));
+    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
     ASSERT_EQ(10, result);
 
     queue.push(20);
     queue.push(30);
     ASSERT_EQ(3U, queue.size());
-    ASSERT_EQ(Queue::Code::SUCCESS, queue.front(result));
+    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
     ASSERT_EQ(10, result);
 
     queue.pop();
     ASSERT_EQ(2U, queue.size());
-    ASSERT_EQ(Queue::Code::SUCCESS, queue.front(result));
+    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
     ASSERT_EQ(20, result);
 
     queue.clear();
@@ -62,7 +62,7 @@ TEST(SafetyQueueTest, SpinLock)
 
     queue.push(10);
     ASSERT_EQ(1U, queue.size());
-    ASSERT_EQ(Queue::Code::SUCCESS, queue.frontAndPop(result));
+    ASSERT_EQ(Err::E_SUCCESS, queue.frontAndPop(result));
     ASSERT_EQ(10, result);
     ASSERT_EQ(0U, queue.size());
 }

@@ -162,7 +162,7 @@ Err SafetyAsync::sendClose()
 void SafetyAsync::onAsync()
 {
     SharedJob job;
-    if (_jobs.frontAndPop(job) == JobQueue::Code::SUCCESS) {
+    if (_jobs.frontAndPop(job) == Err::E_SUCCESS) {
         if (static_cast<bool>(job)) {
             job->run();
         }
