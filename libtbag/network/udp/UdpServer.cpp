@@ -103,35 +103,37 @@ Err UdpServer::init(char const * destination, int port)
     return Err::E_SUCCESS;
 }
 
-void UdpServer::close()
+Err UdpServer::close()
 {
     Guard const MUTEX_GUARD(_mutex);
     auto receiver = _receiver.getClient().lock();
     if (static_cast<bool>(receiver) == false) {
         tDLogW("UdpServer::close() expired receiver.");
         closeAll();
-        return;
+        return Err::E_WARNING;
     }
 
     auto async = _receiver.getAsync().lock();
     if (static_cast<bool>(async) == false) {
         tDLogW("UdpServer::close() expired async.");
         closeAll();
-        return;
+        return Err::E_WARNING;
     }
 
     Loop * loop = receiver->getLoop();
     assert(loop != nullptr);
-    if (loop->isAliveAndThisThread()) {
-        tDLogD("UdpServer::close() sync request.");
-        closeAll();
-    } else {
+    if (loop->isAliveAndThisThread() == false) {
         tDLogD("UdpServer::close() async request.");
         async->newSendFunc([&]() {
-            Guard const ASYNC_MUTEX_GUARD(_mutex);
+            Guard const MUTEX_GUARD_ASYNC(_mutex);
             closeAll();
         });
+        return Err::E_ASYNCREQ;
     }
+
+    tDLogD("UdpServer::close() sync request.");
+    closeAll();
+    return Err::E_SUCCESS;
 }
 
 UdpServer::WeakClient UdpServer::accept()

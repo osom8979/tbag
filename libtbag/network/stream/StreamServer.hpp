@@ -106,7 +106,7 @@ public:
      * @remarks
      *  Select sync/async operations automatically according to Thread ID.
      */
-    virtual void close() override;
+    virtual Err close() override;
 
     /**
      * Accept client.

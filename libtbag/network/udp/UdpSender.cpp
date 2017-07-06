@@ -152,9 +152,9 @@ struct UdpSender::Internal : private Noncopyable
     }
 };
 
-// ---------------------------
-// UdpReceiver implementation.
-// ---------------------------
+// -------------------------
+// UdpSender implementation.
+// -------------------------
 
 UdpSender::UdpSender(Loop & loop, SharedSafetyAsync async, ServerInterface * parent)
         : _parent(parent), _internal(new Internal(this))
@@ -229,12 +229,12 @@ Err UdpSender::init(char const * destination, int port)
     }
 
     if (_addr.init(destination, port) != Err::E_SUCCESS) {
-        tDLogE("UdpReceiver::init() Initialize fail.");
+        tDLogE("UdpSender::init() Initialize fail.");
         return Err::E_UNKNOWN;
     }
 
     if (_internal->initHandles() == false) {
-        tDLogE("UdpReceiver::init() Initialize fail (internal handles).");
+        tDLogE("UdpSender::init() Initialize fail (internal handles).");
         return Err::E_UNKNOWN;
     }
     return Err::E_SUCCESS;
@@ -250,7 +250,7 @@ Err UdpSender::stop()
     return Err::E_UNSUPOP;
 }
 
-void UdpSender::close()
+Err UdpSender::close()
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_internal));
@@ -258,24 +258,33 @@ void UdpSender::close()
     assert(loop != nullptr);
 
     Guard const MUTEX_GUARD(_mutex);
-    if (loop->isAliveAndThisThread() || static_cast<bool>(_async) == false) {
-        tDLogD("UdpReceiver::close() request.");
-        _internal->closeAll();
-    } else {
-        tDLogD("UdpReceiver::close() async request.");
+    if (loop->isAliveAndThisThread() == false && static_cast<bool>(_async)) {
+        tDLogD("UdpSender::close() Async request.");
         _async->newSendFunc([&](){
-            Guard const ASYNC_MUTEX_GUARD(_mutex);
+            Guard const MUTEX_GUARD_ASYNC(_mutex);
             _internal->closeAll();
         });
+        return Err::E_ASYNCREQ;
     }
+
+    Err code = Err::E_SUCCESS;
+    if (loop->isAliveAndThisThread() == false && static_cast<bool>(_async) == false) {
+        tDLogW("UdpSender::close() Async is expired.");
+        code = Err::E_WARNING;
+    }
+
+    tDLogD("UdpSender::close() Synced request.");
+    _internal->closeAll();
+    return code;
 }
 
-void UdpSender::cancel()
+Err UdpSender::cancel()
 {
     Guard const MUTEX_GUARD(_mutex);
     if (_sender.status == SendStatus::SS_ASYNC) {
         _sender.status = SendStatus::SS_ASYNC_CANCEL;
     }
+    return Err::E_SUCCESS;
 }
 
 Err UdpSender::write(binf const * buffer, std::size_t size)

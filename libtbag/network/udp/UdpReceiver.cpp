@@ -175,29 +175,37 @@ Err UdpReceiver::stop()
     return CODE;
 }
 
-void UdpReceiver::close()
+Err UdpReceiver::close()
 {
     assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_internal));
     Loop * loop = _client->getLoop();
     assert(loop != nullptr);
 
-    Guard const MUTEX_GUARD_OUT(_mutex);
-    if (loop->isAliveAndThisThread() || static_cast<bool>(_async) == false) {
-        tDLogD("UdpReceiver::close() request.");
-        _internal->closeAll();
-    } else {
-        tDLogD("UdpReceiver::close() async request.");
+    Guard const MUTEX_GUARD(_mutex);
+    if (loop->isAliveAndThisThread() == false && static_cast<bool>(_async)) {
+        tDLogD("UdpReceiver::close() Async request.");
         _async->newSendFunc([&](){
-            Guard const MUTEX_GUARD_IN(_mutex);
+            Guard const MUTEX_GUARD_ASYNC(_mutex);
             _internal->closeAll();
         });
+        return Err::E_ASYNCREQ;
     }
+
+    Err code = Err::E_SUCCESS;
+    if (loop->isAliveAndThisThread() == false && static_cast<bool>(_async) == false) {
+        tDLogW("UdpReceiver::close() Async is expired.");
+        code = Err::E_WARNING;
+    }
+
+    tDLogD("UdpReceiver::close() Synced request.");
+    _internal->closeAll();
+    return code;
 }
 
-void UdpReceiver::cancel()
+Err UdpReceiver::cancel()
 {
-    // EMPTY.
+    return Err::E_UNSUPOP;
 }
 
 Err UdpReceiver::write(binf const * buffer, std::size_t size)

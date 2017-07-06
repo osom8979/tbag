@@ -250,24 +250,31 @@ Err StreamServer::init(char const * destination, int port)
     return _internal->initHandles();
 }
 
-void StreamServer::close()
+Err StreamServer::close()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD_OUT(_mutex);
+    Guard const MUTEX_GUARD(_mutex);
     Loop & loop = _internal->getLoop();
 
     if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
-        tDLogD("StreamServer::close() async request.");
+        tDLogD("StreamServer::close() Async request.");
         _internal->async->newSendFunc([&]() {
             assert(static_cast<bool>(_internal));
-            Guard const MUTEX_GUARD_IN(_mutex);
+            Guard const MUTEX_GUARD_ASYNC(_mutex);
             _internal->closeAll();
         });
-
-    } else {
-        tDLogD("StreamServer::close() sync request.");
-        _internal->closeAll();
+        return Err::E_ASYNCREQ;
     }
+
+    Err code = Err::E_SUCCESS;
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async) == false) {
+        tDLogW("StreamServer::close() Async is expired.");
+        code = Err::E_WARNING;
+    }
+
+    tDLogD("StreamServer::close() Synced request.");
+    _internal->closeAll();
+    return code;
 }
 
 StreamServer::WeakClient StreamServer::accept()
@@ -306,14 +313,14 @@ StreamServer::WeakClient StreamServer::accept()
 StreamServer::WeakClient StreamServer::get(Id id)
 {
     assert(static_cast<bool>(_internal));
-    Guard guard(_mutex);
+    Guard const MUTEX_GUARD(_mutex);
     return WeakClient(_internal->getSharedClient(id));
 }
 
 Err StreamServer::remove(Id id)
 {
     assert(static_cast<bool>(_internal));
-    Guard guard(_mutex);
+    Guard const MUTEX_GUARD(_mutex);
     return _internal->eraseClient(id) ? Err::E_SUCCESS : Err::E_UNKNOWN;
 }
 
@@ -333,8 +340,8 @@ void StreamServer::backClose()
 {
     onClose();
 
-    _mutex.lock();
     assert(static_cast<bool>(_internal));
+    _mutex.lock();
     _internal->closeAll();
     _mutex.unlock();
 }

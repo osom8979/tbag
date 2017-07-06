@@ -148,13 +148,13 @@ struct ClientInterface
     // Pure virtual.
     // -------------
 
-    virtual Err  init  (char const * destination, int port = 0) = 0;
-    virtual Err  start () = 0;
-    virtual Err  stop  () = 0;
-    virtual void close () = 0;
-    virtual void cancel() = 0;
-    virtual Err  write (binf const * buffer, std::size_t size) = 0;
-    virtual Err  write (char const * buffer, std::size_t size) = 0;
+    virtual Err init  (char const * destination, int port = 0) = 0;
+    virtual Err start () = 0;
+    virtual Err stop  () = 0;
+    virtual Err close () = 0;
+    virtual Err cancel() = 0;
+    virtual Err write (binf const * buffer, std::size_t size) = 0;
+    virtual Err write (char const * buffer, std::size_t size) = 0;
 
     // ----------------
     // Timer utilities.
@@ -212,7 +212,7 @@ struct ServerInterface
     // -------------
 
     virtual Err        init  (char const * destination, int port = 0) = 0;
-    virtual void       close () = 0;
+    virtual Err        close () = 0;
     virtual WeakClient accept() = 0;
     virtual WeakClient get   (Id id) = 0;
     virtual Err        remove(Id id) = 0;

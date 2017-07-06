@@ -121,13 +121,13 @@ public:
     virtual void *      udata() override;
 
 public:
-    virtual Err  init  (char const * destination, int port = 0) override;
-    virtual Err  start () override;
-    virtual Err  stop  () override;
-    virtual void close () override;
-    virtual void cancel() override;
-    virtual Err  write (binf const * buffer, std::size_t size) override;
-    virtual Err  write (char const * buffer, std::size_t size) override;
+    virtual Err init  (char const * destination, int port = 0) override;
+    virtual Err start () override;
+    virtual Err stop  () override;
+    virtual Err close () override;
+    virtual Err cancel() override;
+    virtual Err write (binf const * buffer, std::size_t size) override;
+    virtual Err write (char const * buffer, std::size_t size) override;
 
 public:
     virtual void setWriteTimeout(uint64_t millisec) override;

@@ -70,6 +70,12 @@ void StreamNode::onClose()
     _parent->remove(this->id());
 }
 
+void StreamNode::onTimer()
+{
+    assert(_parent != nullptr);
+    _parent->onClientTimer(getWeakClient());
+}
+
 } // namespace stream
 } // namespace network
 

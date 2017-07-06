@@ -283,16 +283,9 @@ struct StreamClient::Internal : private Noncopyable
         assert(static_cast<bool>(async));
 
         Loop & loop = getLoop();
+        Err result_code = Err::E_UNKNOWN;
 
-        if (loop.isAliveAndThisThread() || static_cast<bool>(async) == false) {
-            Err const CODE = writeReal(buffer, size);
-            if (CODE != Err::E_SUCCESS) {
-                tDLogE("StreamClient::Internal::autoWrite() Write {} error.", getErrName(CODE));
-                return CODE;
-            }
-            writer.status = WriteStatus::WS_WRITE;
-
-        } else {
+        if (loop.isAliveAndThisThread() == false && static_cast<bool>(async)) {
             writer.buffers.assign(buffer, size);
             auto job = async->newSendJob<AsyncWrite>(parent);
             if (static_cast<bool>(job) == false) {
@@ -300,6 +293,22 @@ struct StreamClient::Internal : private Noncopyable
                 return Err::E_BADALLOC;
             }
             writer.status = WriteStatus::WS_ASYNC;
+            result_code = Err::E_ASYNCREQ;
+
+        } else {
+            Err const CODE = writeReal(buffer, size);
+            if (CODE != Err::E_SUCCESS) {
+                tDLogE("StreamClient::Internal::autoWrite() Write {} error.", getErrName(CODE));
+                return CODE;
+            }
+
+            writer.status = WriteStatus::WS_WRITE;
+            if (loop.isAliveAndThisThread() == false && static_cast<bool>(async) == false) {
+                tDLogW("StreamClient::Internal::autoWrite() Async is expired.");
+                result_code = Err::E_WARNING;
+            } else {
+                result_code = Err::E_SUCCESS;
+            }
         }
 
         if (write_timeout > 0) {
@@ -315,7 +324,7 @@ struct StreamClient::Internal : private Noncopyable
             tDLogD("StreamClient::Internal::autoWrite() No timeout.");
         }
 
-        return Err::E_SUCCESS;
+        return result_code;
     }
 
     void closeAll()
@@ -579,42 +588,52 @@ Err StreamClient::stop()
     return CODE;
 }
 
-void StreamClient::close()
+Err StreamClient::close()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD_OUT(_mutex);
+    Guard const MUTEX_GUARD(_mutex);
     Loop & loop = _internal->getLoop();
 
-    if (loop.isAliveAndThisThread() || static_cast<bool>(_internal->async) == false) {
-        tDLogD("StreamClient::close() request.");
-        _internal->closeAll();
-
-    } else {
-        tDLogD("StreamClient::close() async request.");
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
+        tDLogD("StreamClient::close() Async request.");
         _internal->async->newSendFunc([&](){
-            Guard const MUTEX_GUARD_IN(_mutex);
+            Guard const MUTEX_GUARD_ASYNC(_mutex);
             _internal->closeAll();
         });
+        return Err::E_ASYNCREQ;
     }
+
+    Err code = Err::E_SUCCESS;
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async) == false) {
+        tDLogW("StreamClient::close() Async is expired.");
+        code = Err::E_WARNING;
+    }
+
+    tDLogD("StreamClient::close() Synced request.");
+    _internal->closeAll();
+    return code;
 }
 
-void StreamClient::cancel()
+Err StreamClient::cancel()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD_OUT(_mutex);
+    Guard const MUTEX_GUARD(_mutex);
     Loop & loop = _internal->getLoop();
 
-    if (loop.isAliveAndThisThread() || static_cast<bool>(_internal->async) == false) {
-        tDLogD("StreamClient::cancel() request.");
-        _internal->shutdownWrite();
-
-    } else {
-        tDLogD("StreamClient::cancel() async request.");
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
+        tDLogD("StreamClient::cancel() Async request.");
         _internal->async->newSendFunc([&]() {
-            Guard const MUTEX_GUARD_IN(_mutex);
+            Guard const MUTEX_GUARD_ASYNC(_mutex);
             _internal->shutdownWrite();
         });
+        return Err::E_ASYNCREQ;
     }
+
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async) == false) {
+        tDLogW("StreamClient::cancel() Async is expired.");
+    }
+    tDLogD("StreamClient::cancel() Synced request.");
+    return _internal->shutdownWrite();
 }
 
 Err StreamClient::write(binf const * buffer, std::size_t size)
@@ -693,6 +712,8 @@ void StreamClient::backWrite(Err code)
     assert(static_cast<bool>(_internal));
     _mutex.lock();
     _internal->stopShutdownTimer();
+    assert(/**/_internal->writer.status == WriteStatus::WS_WRITE ||
+               _internal->writer.status == WriteStatus::WS_SHUTDOWN);
     _internal->writer.status = WriteStatus::WS_READY;
     _mutex.unlock();
 

@@ -29,8 +29,16 @@ namespace uvpp {
 struct ShutdownRequest;
 struct WriteRequest;
 
-/** backlog indicates the number of connections the kernel might queue. */
-int const BACKLOG_LIMIT = 128;
+/**
+ * @var BACKLOG_LIMIT
+ *
+ * backlog indicates the number of connections the kernel might queue.
+ */
+#if defined(SOMAXCONN)
+TBAG_CONSTEXPR int const BACKLOG_LIMIT = SOMAXCONN;
+#else
+TBAG_CONSTEXPR int const BACKLOG_LIMIT = 128;
+#endif
 
 /**
  * Stream class prototype.

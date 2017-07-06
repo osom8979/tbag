@@ -25,6 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX, _TBAG_LMDB_XX) \
     /* Common error codes. */ \
     _TBAG_XX(_SUCCESS , "No error"              ) \
+    _TBAG_XX(_WARNING , "Success, but warning"  ) \
     _TBAG_XX(_ILLARGS , "Illegal arguments"     ) \
     _TBAG_XX(_ILLSTATE, "Illegal state"         ) \
     _TBAG_XX(_ALREADY , "Already state"         ) \
@@ -48,6 +49,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EQUERY  , "Query error"           ) \
     _TBAG_XX(_SMALLBUF, "Buffer size is small"  ) \
     _TBAG_XX(_KEYGEN  , "Key generator error"   ) \
+    _TBAG_XX(_ASYNCREQ, "Async request"         ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

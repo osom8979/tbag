@@ -98,7 +98,7 @@ public:
 
 public:
     virtual Err        init  (char const * destination, int port = 0) override;
-    virtual void       close () override;
+    virtual Err        close () override;
     virtual WeakClient accept() override;
     virtual WeakClient get   (Id id) override;
     virtual Err        remove(Id id) override;
