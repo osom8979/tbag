@@ -23,6 +23,7 @@
 #include <iostream>
 #include <utility>
 #include <limits>
+#include <set>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -271,7 +272,7 @@ std::size_t WebSocketFrame::copyTo(Buffer & buffer) const
     return copyTo(buffer.data(), buffer.size());
 }
 
-void WebSocketFrame::set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key) TBAG_NOEXCEPT
+void WebSocketFrame::setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key) TBAG_NOEXCEPT
 {
     fin = f;
     rsv1 = r1;
@@ -282,7 +283,7 @@ void WebSocketFrame::set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t 
     masking_key = key;
 }
 
-void WebSocketFrame::set(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
+void WebSocketFrame::setData(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
 {
     if (data != nullptr && size > 0) {
         if (payload.size() < size) {
@@ -298,16 +299,16 @@ void WebSocketFrame::set(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
 Err WebSocketFrame::updateRequest(bool f, bool r1, bool r2, bool r3,
                                   OpCode op, uint32_t key, uint8_t const * data, std::size_t size)
 {
-    set(f, r1, r2, r3, op, key);
-    set(data, size);
+    setHeader(f, r1, r2, r3, op, key);
+    setData(data, size);
     return Err::E_SUCCESS;
 }
 
 Err WebSocketFrame::updateResponse(bool f, bool r1, bool r2, bool r3,
                                    OpCode op, uint8_t const * data, std::size_t size)
 {
-    set(f, r1, r2, r3, op);
-    set(data, size);
+    setHeader(f, r1, r2, r3, op);
+    setData(data, size);
     return Err::E_SUCCESS;
 }
 
@@ -510,7 +511,24 @@ void WebSocketFrame::updatePayloadData(uint32_t mask, uint8_t * result, std::siz
 // Miscellaneous utilities.
 // ------------------------
 
-char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CONTINUE = "CONTINUE";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_TEXT     = "TEXT";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_BINARY   = "BINARY";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF1     = "NCF1";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF2     = "NCF2";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF3     = "NCF3";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF4     = "NCF4";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF5     = "NCF5";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CLOSE    = "CLOSE";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_PING     = "PING";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_PONG     = "PONG";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF1      = "CF1";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF2      = "CF2";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF3      = "CF3";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF4      = "CF4";
+TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF5      = "CF5";
+
+char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT
 {
     switch (code) {
     case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
@@ -535,7 +553,7 @@ char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT
 
 bool existsWebSocketVersion13(std::string const & versions)
 {
-    for (auto & ver : string::splitTokens(versions, VALUE_DELIMITER)) {
+    for (auto & ver : fromDelimiterString(versions)) {
         try {
             if (std::stoi(string::trim(ver)) == WEBSOCKET_VERSION_HYBI13) {
                 return true;
@@ -545,31 +563,6 @@ bool existsWebSocketVersion13(std::string const & versions)
         }
     }
     return false;
-}
-
-std::string getWebSocketProtocol(std::string const & protocols, std::set<std::string> const & accept_protocols)
-{
-    std::stringstream ss;
-    for (auto & proto : string::splitTokens(protocols, VALUE_DELIMITER)) {
-        if (accept_protocols.find(string::trim(proto)) != accept_protocols.end()) {
-            ss << string::trim(proto) << VALUE_DELIMITER;
-        }
-    }
-    return ss.str();
-}
-
-std::string getWebSocketProtocolWithTbag(std::string const & protocols)
-{
-    return getWebSocketProtocol(protocols, {VALUE_TBAG_PROTOCOL});
-}
-
-std::string getWebSocketProtocolValue(std::vector<std::string> const & protocols)
-{
-    std::stringstream ss;
-    for (auto & proto : protocols) {
-        ss << proto << VALUE_DELIMITER << ' ';
-    }
-    return ss.str();
 }
 
 std::string getUpgradeWebSocketKey(std::string const & original_key)

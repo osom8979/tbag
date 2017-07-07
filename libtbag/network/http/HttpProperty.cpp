@@ -212,6 +212,57 @@ std::string toDebugString(HttpResponse const & obj)
     return ss.str();
 }
 
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+std::string convertRegularString(std::string const & source)
+{
+    return string::lower(string::trim(source));
+}
+
+std::set<std::string> convertRegularSet(std::vector<std::string> const & sources)
+{
+    std::set<std::string> result;
+    for (auto & cursor : sources) {
+        result.insert(convertRegularString(cursor));
+    }
+    return result;
+}
+
+std::vector<std::string> findAccept(std::vector<std::string> const & sources,
+                                    std::vector<std::string> const & accepts)
+{
+    std::vector<std::string> result;
+    auto regulars = convertRegularSet(accepts);
+    for (auto & proto : sources) {
+        if (regulars.find(string::lower(string::trim(proto))) != regulars.end()) {
+            result.push_back(proto);
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> findAccept(std::string const & sources,
+                                    std::vector<std::string> const & accepts)
+{
+    return findAccept(fromDelimiterString(sources), accepts);
+}
+
+std::vector<std::string> fromDelimiterString(std::string const & sources, std::string const & delimiter)
+{
+    return string::splitTokens(sources, delimiter);
+}
+
+std::string toDelimiterString(std::vector<std::string> const & sources)
+{
+    std::stringstream ss;
+    for (auto & cursor : sources) {
+        ss << cursor << VALUE_DELIMITER;
+    }
+    return ss.str();
+}
+
 } // namespace http
 } // namespace network
 

@@ -107,6 +107,10 @@ public:
 public:
     struct Callback
     {
+        using WC = HttpServer::WeakClient;
+        using HP = HttpServer::HttpPacket;
+        using WP = HttpServer::WsPacket;
+
         virtual void onOpen(WC client)
         { /* EMPTY. */ }
 

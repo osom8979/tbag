@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <string>
 #include <map>
+#include <set>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -440,6 +441,22 @@ TBAG_API std::string toDebugString(HttpCommonProperty const & obj);
 TBAG_API std::string toDebugString(HttpCommon const & obj);
 TBAG_API std::string toDebugString(HttpRequest const & obj);
 TBAG_API std::string toDebugString(HttpResponse const & obj);
+
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+TBAG_API std::string convertRegularString(std::string const & source);
+TBAG_API std::set<std::string> convertRegularSet(std::vector<std::string> const & sources);
+
+TBAG_API std::vector<std::string> findAccept(std::vector<std::string> const & sources,
+                                             std::vector<std::string> const & accepts);
+TBAG_API std::vector<std::string> findAccept(std::string const & sources,
+                                             std::vector<std::string> const & accepts);
+
+TBAG_API std::vector<std::string> fromDelimiterString(std::string const & sources,
+                                                      std::string const & delimiter = VALUE_DELIMITER);
+TBAG_API std::string toDelimiterString(std::vector<std::string> const & sources);
 
 // -------------
 // @formatter:on

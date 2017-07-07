@@ -26,7 +26,6 @@
 #include <cstdint>
 #include <vector>
 #include <string>
-#include <set>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -55,34 +54,11 @@ enum class OpCode : uint8_t
     OC_RESERVED_CONTROL_FRAME_5     = 0xF,
 };
 
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_CONTINUE = "CONTINUE";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_TEXT     = "TEXT";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_BINARY   = "BINARY";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF1     = "NCF1";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF2     = "NCF2";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF3     = "NCF3";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF4     = "NCF4";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_NCF5     = "NCF5";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_CLOSE    = "CLOSE";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_PING     = "PING";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_PONG     = "PONG";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF1      = "CF1";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF2      = "CF2";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF3      = "CF3";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF4      = "CF4";
-TBAG_CONSTEXPR char const * const OP_CODE_NAME_CF5      = "CF5";
-
 enum class PayloadBit : uint8_t
 {
     PL_BIT_7  =  7,
     PL_BIT_16 = 16,
     PL_BIT_64 = 64,
-};
-
-enum class WebSocketDirection
-{
-    WSD_REQUEST,
-    WSD_RESPONSE,
 };
 
 /**
@@ -114,7 +90,6 @@ enum class WebSocketDirection
 class TBAG_API WebSocketFrame
 {
 public:
-    using Direction = WebSocketDirection;
     using Buffer = std::vector<uint8_t>;
 
 public:
@@ -174,8 +149,8 @@ public:
     std::size_t copyTo(Buffer & buffer) const;
 
 public:
-    void set(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
-    void set(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT;
+    void setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
+    void setData(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT;
 
 public:
     Err updateRequest(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode, uint32_t masking_key,
@@ -243,13 +218,9 @@ public:
 // Miscellaneous utilities.
 // ------------------------
 
-TBAG_API char const * const getOpCodeName(OpCode code) TBAG_NOEXCEPT;
+TBAG_API char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT;
 
 TBAG_API bool existsWebSocketVersion13(std::string const & versions);
-
-TBAG_API std::string getWebSocketProtocol(std::string const & protocols, std::set<std::string> const & accept_protocols);
-TBAG_API std::string getWebSocketProtocolWithTbag(std::string const & protocols);
-TBAG_API std::string getWebSocketProtocolValue(std::vector<std::string> const & protocols);
 
 TBAG_API std::string getUpgradeWebSocketKey(std::string const & base64_key);
 TBAG_API std::string getRandomWebSocketKey();
