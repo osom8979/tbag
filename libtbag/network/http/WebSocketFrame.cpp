@@ -125,6 +125,19 @@ WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame && obj)
     return *this;
 }
 
+void WebSocketFrame::clear()
+{
+    fin  = false;
+    rsv1 = false;
+    rsv2 = false;
+    rsv3 = false;
+    opcode = OpCode::OC_CONTINUATION_FRAME;
+    mask = false;
+    payload_length = 0;
+    masking_key = 0;
+    payload.clear();
+}
+
 Err WebSocketFrame::execute(uint8_t const * data, std::size_t size)
 {
     if (size < 2) {
