@@ -46,6 +46,30 @@ TBAG_POP_MACRO(max);
 #undef __RESTORE_MAX__
 #endif
 
+char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT
+{
+    switch (code) {
+#define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return #name;
+    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return "WSSC_UNKNOWN";
+    }
+}
+
+uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT
+{
+    switch (code) {
+#define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return num;
+    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE;
+    }
+}
+
+// ------------------------------
+// WebSocketFrame implementation.
+// ------------------------------
+
 WebSocketFrame::WebSocketFrame()
         : fin (false), rsv1(false), rsv2(false), rsv3(false),
           opcode(OpCode::OC_CONTINUATION_FRAME), mask(false),

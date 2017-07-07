@@ -34,6 +34,89 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
+/**
+ * @def TBAG_WEB_SOCKET_STATUS_CODE_MAP
+ *
+ * WebSocket Status Codes
+ * Reference: https://tools.ietf.org/html/rfc6455#section-7.4
+ */
+#ifndef TBAG_WEB_SOCKET_STATUS_CODE_MAP
+#define TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX) \
+    _TBAG_XX(1000, NORMAL_CLOSURE         , "") \
+    _TBAG_XX(1001, GOING_AWAY             , "") \
+    _TBAG_XX(1002, PROTOCOL_ERROR         , "") \
+    _TBAG_XX(1003, CANNOT_ACCEPT          , "") \
+    _TBAG_XX(1004, RESERVED               , "") \
+    _TBAG_XX(1005, NO_STATUS              , "") \
+    _TBAG_XX(1006, ABNORMAL_CLOSE         , "") \
+    _TBAG_XX(1007, INVALID_PAYLOAD        , "") \
+    _TBAG_XX(1008, POLICY_VIOLATION       , "") \
+    _TBAG_XX(1009, MESSAGE_TOO_BIG        , "") \
+    _TBAG_XX(1010, EXTENSION_REQUIRED     , "") \
+    _TBAG_XX(1011, INTERNAL_ENDPOINT_ERROR, "") \
+    _TBAG_XX(1015, TLS_HANDSHAKE          , "") \
+    /* END */
+#endif
+
+TBAG_CONSTEXPR uint16_t const TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE = -1;
+
+/**
+ * List of WebSocket status code.
+ *
+ * @author zer0
+ * @date 2017-07-07
+ */
+enum class WebSocketStatusCode : uint16_t
+{
+#define _TBAG_XX(num, name, str) WSSC_##name = num,
+    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+};
+
+TBAG_API char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT;
+TBAG_API uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT;
+
+// WebSocket - Reserved Status Code Ranges
+// Reference: https://tools.ietf.org/html/rfc6455#section-7.4.2
+
+/** Status codes in the range 0-999 are not used. */
+inline bool isWsStatusCodeNotUsed(uint16_t code) TBAG_NOEXCEPT
+{
+    return 0 <= COMPARE_AND(code) <= 999;
+}
+
+/**
+ * Status codes in the range 1000-2999 are reserved for definition by
+ * this protocol, its future revisions, and extensions specified in a
+ * permanent and readily available public specification.
+ */
+inline bool isWsStatusCodePublicSpecification(uint16_t code) TBAG_NOEXCEPT
+{
+    return 1000 <= COMPARE_AND(code) <= 2999;
+}
+
+/**
+ * Status codes in the range 3000-3999 are reserved for use by
+ * libraries, frameworks, and applications.  These status codes are
+ * registered directly with IANA. The interpretation of these codes
+ * is undefined by this protocol.
+ */
+inline bool isWsStatusCodeIANA(uint16_t code) TBAG_NOEXCEPT
+{
+    return 3000 <= COMPARE_AND(code) <= 3999;
+}
+
+/**
+ * Status codes in the range 4000-4999 are reserved for private use
+ * and thus can't be registered.  Such codes can be used by prior
+ * agreements between WebSocket applications.  The interpretation of
+ * these codes is undefined by this protocol.
+ */
+inline bool isWsStatusCodeUserDefined(uint16_t code) TBAG_NOEXCEPT
+{
+    return 4000 <= COMPARE_AND(code) <= 4999;
+}
+
 enum class OpCode : uint8_t
 {
     OC_CONTINUATION_FRAME           = 0x0,
