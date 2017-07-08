@@ -42,23 +42,23 @@ namespace http    {
  */
 #ifndef TBAG_WEB_SOCKET_STATUS_CODE_MAP
 #define TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX) \
-    _TBAG_XX(1000, NORMAL_CLOSURE         , "") \
-    _TBAG_XX(1001, GOING_AWAY             , "") \
-    _TBAG_XX(1002, PROTOCOL_ERROR         , "") \
-    _TBAG_XX(1003, CANNOT_ACCEPT          , "") \
-    _TBAG_XX(1004, RESERVED               , "") \
-    _TBAG_XX(1005, NO_STATUS              , "") \
-    _TBAG_XX(1006, ABNORMAL_CLOSE         , "") \
-    _TBAG_XX(1007, INVALID_PAYLOAD        , "") \
-    _TBAG_XX(1008, POLICY_VIOLATION       , "") \
-    _TBAG_XX(1009, MESSAGE_TOO_BIG        , "") \
-    _TBAG_XX(1010, EXTENSION_REQUIRED     , "") \
-    _TBAG_XX(1011, INTERNAL_ENDPOINT_ERROR, "") \
-    _TBAG_XX(1015, TLS_HANDSHAKE          , "") \
+    _TBAG_XX(1000, NORMAL_CLOSURE         , "Normal closure"         ) \
+    _TBAG_XX(1001, GOING_AWAY             , "Going away"             ) \
+    _TBAG_XX(1002, PROTOCOL_ERROR         , "Protocol error"         ) \
+    _TBAG_XX(1003, CANNOT_ACCEPT          , "Cannot accept"          ) \
+    _TBAG_XX(1004, RESERVED               , "Reserved"               ) \
+    _TBAG_XX(1005, NO_STATUS              , "No status"              ) \
+    _TBAG_XX(1006, ABNORMAL_CLOSE         , "Abnormal close"         ) \
+    _TBAG_XX(1007, INVALID_PAYLOAD        , "Invalid payload"        ) \
+    _TBAG_XX(1008, POLICY_VIOLATION       , "Policy violation"       ) \
+    _TBAG_XX(1009, MESSAGE_TOO_BIG        , "Message too big"        ) \
+    _TBAG_XX(1010, EXTENSION_REQUIRED     , "Extension required"     ) \
+    _TBAG_XX(1011, INTERNAL_ENDPOINT_ERROR, "Internal endpoint error") \
+    _TBAG_XX(1015, TLS_HANDSHAKE          , "TLS handshake"          ) \
     /* END */
 #endif
 
-TBAG_CONSTEXPR uint16_t const TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE = -1;
+TBAG_CONSTEXPR uint16_t const TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE = 0;
 
 /**
  * List of WebSocket status code.
@@ -68,11 +68,13 @@ TBAG_CONSTEXPR uint16_t const TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE = -1;
  */
 enum class WebSocketStatusCode : uint16_t
 {
+    WSSC_UNKNOWN = TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE,
 #define _TBAG_XX(num, name, str) WSSC_##name = num,
     TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
 };
 
+TBAG_API WebSocketStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT;
 TBAG_API char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT;
 TBAG_API uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT;
 
@@ -217,7 +219,7 @@ public:
     WebSocketFrame & operator =(WebSocketFrame && obj);
 
 public:
-    inline uint8_t const * getPayloadData() const TBAG_NOEXCEPT
+    inline uint8_t const * getPayloadDataPtr() const TBAG_NOEXCEPT
     { return payload.data(); }
 
     inline std::size_t getPayloadSize() const TBAG_NOEXCEPT
@@ -245,26 +247,25 @@ public:
     void setData(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT;
 
 public:
-    Err updateRequest(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode, uint32_t masking_key,
-                      uint8_t const * data = nullptr, std::size_t size = 0);
-    Err updateResponse(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode,
-                       uint8_t const * data = nullptr, std::size_t size = 0);
+    Err build(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode,
+              uint8_t const * data = nullptr, std::size_t size = 0,
+              uint32_t key = 0);
 
 public:
-    Err textRequest(uint32_t masking_key, std::string const & text, bool continuation = false, bool finish = true);
-    Err textResponse(std::string const & text, bool continuation = false, bool finish = true);
+    Err text(std::string const & str, uint32_t key, bool continuation = false, bool finish = true);
+    Err text(std::string const & str, bool continuation = false, bool finish = true);
 
-    Err binaryRequest(uint32_t masking_key, Buffer const & buffer, bool continuation = false, bool finish = true);
-    Err binaryResponse(Buffer const & buffer, bool continuation = false, bool finish = true);
+    Err binary(Buffer const & buffer, uint32_t key, bool continuation = false, bool finish = true);
+    Err binary(Buffer const & buffer, bool continuation = false, bool finish = true);
 
 // Control Frames.
 public:
     /**
      * Closing the connection.
      */
-    Err closeRequest();
-    Err closeRequest(uint32_t masking_key);
-    Err closeResponse(uint16_t status_code, std::string const & reason);
+    Err close(uint32_t key);
+    Err close(uint16_t code, std::string const & reason);
+    Err close(WebSocketStatusCode code);
 
     uint16_t getStatusCode() const;
     std::string getReason() const;
@@ -275,9 +276,8 @@ public:
      * @remarks
      *  for pings and pongs, the max payload length is 125.
      */
-    Err pingRequest(uint8_t const * data, std::size_t size);
-    Err pingRequest(uint32_t masking_key, uint8_t const * data, std::size_t size);
-    Err pingResponse(uint8_t const * data, std::size_t size);
+    Err ping(uint8_t const * data, std::size_t size, uint32_t key = 0);
+    Err ping(std::string const & str, uint32_t key = 0);
 
     /**
      * Pongs: The Heartbeat of WebSockets.
@@ -285,17 +285,13 @@ public:
      * @remarks
      *  for pings and pongs, the max payload length is 125.
      */
-    Err pongRequest(uint8_t const * data, std::size_t size);
-    Err pongRequest(uint32_t masking_key, uint8_t const * data, std::size_t size);
-    Err pongResponse(uint8_t const * data, std::size_t size);
+    Err pong(uint8_t const * data, std::size_t size, uint32_t key = 0);
+    Err pong(std::string const & str, uint32_t key = 0);
 
 public:
     std::string toDebugString() const;
 
 public:
-    static uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
-    static uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
-
     /**
      * @remarks
      *  The length of the "Payload data", in bytes: if 0-125, that is the
@@ -316,11 +312,15 @@ public:
      */
     static PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
     static PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
+
+    static uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
+    static uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
+
     static uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT;
 
     static std::string getPayloadData(uint32_t mask, std::string const & data);
-    static std::vector<uint8_t> getPayloadData(uint32_t mask, std::vector<uint8_t> const & data);
-    static std::vector<uint8_t> getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
+    static Buffer getPayloadData(uint32_t mask, Buffer const & data);
+    static Buffer getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
     static void updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size);
 };
 

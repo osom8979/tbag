@@ -52,7 +52,7 @@ TEST(WebSocketFrameTest, RequestFrame)
     ASSERT_TRUE(frame.mask);
     ASSERT_EQ(bitwise::toNetwork(0x6c11e8e3), frame.masking_key);
 
-    char const * data = (char const *)frame.getPayloadData();
+    char const * data = (char const *)frame.getPayloadDataPtr();
     std::size_t size = frame.getPayloadSize();
     std::string payload(data, data + size);
     ASSERT_EQ(size, frame.getPayloadSize());
@@ -137,7 +137,7 @@ TEST(WebSocketFrameTest, LargeData)
     test_buffer.assign(BUFFER_SIZE, 0x10);
     WebSocketFrame::Buffer buffer;
 
-    ASSERT_EQ(Err::E_SUCCESS, sender.binaryRequest(device.gen(), test_buffer));
+    ASSERT_EQ(Err::E_SUCCESS, sender.binary(test_buffer, device.gen()));
     auto const REQUEST_SIZE = sender.copyTo(buffer);
     ASSERT_EQ(BUFFER_SIZE + 2/*header*/ + 8/*payload_length*/ + 4/*masking*/, REQUEST_SIZE);
     ASSERT_EQ(REQUEST_SIZE, buffer.size());
@@ -167,7 +167,7 @@ TEST(WebSocketFrameTest, TextRequest)
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
     WebSocketFrame::Buffer buffer;
 
-    ASSERT_EQ(Err::E_SUCCESS, sender.textRequest(device.gen(), TEST_TEXT));
+    ASSERT_EQ(Err::E_SUCCESS, sender.text(TEST_TEXT, device.gen()));
     auto const REQUEST_SIZE = sender.copyTo(buffer);
     ASSERT_LT(0, REQUEST_SIZE);
 
@@ -191,7 +191,7 @@ TEST(WebSocketFrameTest, TextResponse)
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
     WebSocketFrame::Buffer buffer;
 
-    ASSERT_EQ(Err::E_SUCCESS, sender.textResponse(TEST_TEXT));
+    ASSERT_EQ(Err::E_SUCCESS, sender.text(TEST_TEXT));
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
     ASSERT_LT(0, RESPONSE_SIZE);
 
@@ -204,5 +204,54 @@ TEST(WebSocketFrameTest, TextResponse)
     ASSERT_FALSE(receiver.mask);
     ASSERT_EQ(0, receiver.masking_key);
     ASSERT_EQ(TEST_TEXT, receiver.toText());
+}
+
+TEST(WebSocketFrameTest, PingRequest)
+{
+    WebSocketFrame sender;
+    WebSocketFrame receiver;
+    random::MaskingDevice device;
+
+    std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
+    WebSocketFrame::Buffer buffer;
+
+    ASSERT_EQ(Err::E_SUCCESS, sender.ping(TEST_TEXT, device.gen()));
+    auto const RESPONSE_SIZE = sender.copyTo(buffer);
+    ASSERT_LT(0, RESPONSE_SIZE);
+
+    ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
+    ASSERT_EQ(OpCode::OC_DENOTES_PING, receiver.opcode);
+    ASSERT_TRUE(receiver.fin);
+    ASSERT_FALSE(receiver.rsv1);
+    ASSERT_FALSE(receiver.rsv2);
+    ASSERT_FALSE(receiver.rsv3);
+    ASSERT_TRUE(receiver.mask);
+    ASSERT_NE(0, receiver.masking_key);
+    ASSERT_EQ(TEST_TEXT, receiver.toText());
+}
+
+TEST(WebSocketFrameTest, CloseResponse)
+{
+    WebSocketFrame sender;
+    WebSocketFrame receiver;
+    random::MaskingDevice device;
+    WebSocketFrame::Buffer buffer;
+
+    auto code = WebSocketStatusCode::WSSC_GOING_AWAY;
+    ASSERT_EQ(Err::E_SUCCESS, sender.close(code));
+    auto const RESPONSE_SIZE = sender.copyTo(buffer);
+    ASSERT_LT(0, RESPONSE_SIZE);
+
+    ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
+    ASSERT_EQ(OpCode::OC_CONNECTION_CLOSE, receiver.opcode);
+    ASSERT_TRUE(receiver.fin);
+    ASSERT_FALSE(receiver.rsv1);
+    ASSERT_FALSE(receiver.rsv2);
+    ASSERT_FALSE(receiver.rsv3);
+    ASSERT_FALSE(receiver.mask);
+    ASSERT_EQ(0, receiver.masking_key);
+
+    ASSERT_EQ(getWsStatusCodeNumber(code), receiver.getStatusCode());
+    ASSERT_STREQ(getWsStatusCodeName(code), receiver.getReason().c_str());
 }
 

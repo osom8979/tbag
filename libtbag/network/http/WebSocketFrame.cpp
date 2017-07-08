@@ -46,6 +46,20 @@ TBAG_POP_MACRO(max);
 #undef __RESTORE_MAX__
 #endif
 
+TBAG_CONSTEXPR static uint8_t const PAYLOAD_7BIT_TYPE_SIZE  = 125;
+TBAG_CONSTEXPR static uint8_t const PAYLOAD_16BIT_TYPE_SIZE = 126;
+TBAG_CONSTEXPR static uint8_t const PAYLOAD_64BIT_TYPE_SIZE = 127;
+
+WebSocketStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT
+{
+    switch (code) {
+#define _TBAG_XX(num, name, str) case num: return WebSocketStatusCode::WSSC_##name;
+    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return WebSocketStatusCode::WSSC_UNKNOWN;
+    }
+}
+
 char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
@@ -249,7 +263,7 @@ std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size) const
     std::size_t index = 2;
 
     // Update payload length.
-    if (payload_length <= 125) {
+    if (payload_length <= PAYLOAD_7BIT_TYPE_SIZE) {
         if (size < index) {
             return 0;
         }
@@ -333,67 +347,56 @@ void WebSocketFrame::setData(uint8_t const * data, std::size_t size) TBAG_NOEXCE
     }
 }
 
-Err WebSocketFrame::updateRequest(bool f, bool r1, bool r2, bool r3,
-                                  OpCode op, uint32_t key, uint8_t const * data, std::size_t size)
+Err WebSocketFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
+                          uint8_t const * data, std::size_t size,
+                          uint32_t key)
 {
     setHeader(f, r1, r2, r3, op, key);
     setData(data, size);
     return Err::E_SUCCESS;
 }
 
-Err WebSocketFrame::updateResponse(bool f, bool r1, bool r2, bool r3,
-                                   OpCode op, uint8_t const * data, std::size_t size)
+Err WebSocketFrame::text(std::string const & str, uint32_t key, bool continuation, bool finish)
 {
-    setHeader(f, r1, r2, r3, op);
-    setData(data, size);
-    return Err::E_SUCCESS;
+    return build(finish, false, false, false,
+                 (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
+                 (uint8_t const *)str.data(), str.size(), key);
 }
 
-Err WebSocketFrame::textRequest(uint32_t masking_key, std::string const & text, bool continuation, bool finish)
+Err WebSocketFrame::text(std::string const & str, bool continuation, bool finish)
 {
-    return updateRequest(finish, false, false, false,
-                         (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
-                         masking_key, (uint8_t const *)text.data(), text.size());
+    return text(str, 0, continuation, finish);
 }
 
-Err WebSocketFrame::textResponse(std::string const & text, bool continuation, bool finish)
+Err WebSocketFrame::binary(Buffer const & buffer, uint32_t key, bool continuation, bool finish)
 {
-    return updateResponse(finish, false, false, false,
-                          (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
-                          (uint8_t const *)text.data(), text.size());
+    return build(finish, false, false, false,
+                 (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
+                 buffer.data(), buffer.size(), key);
 }
 
-Err WebSocketFrame::binaryRequest(uint32_t masking_key, Buffer const & buffer, bool continuation, bool finish)
+Err WebSocketFrame::binary(Buffer const & buffer, bool continuation, bool finish)
 {
-    return updateRequest(finish, false, false, false,
-                         (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
-                         masking_key, buffer.data(), buffer.size());
+    return binary(buffer, 0, continuation, finish);
 }
 
-Err WebSocketFrame::binaryResponse(Buffer const & buffer, bool continuation, bool finish)
+Err WebSocketFrame::close(uint32_t key)
 {
-    return updateResponse(finish, false, false, false,
-                          (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
-                          buffer.data(), buffer.size());
+    return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, nullptr, 0, key);
 }
 
-Err WebSocketFrame::closeRequest()
+Err WebSocketFrame::close(uint16_t code, std::string const & reason)
 {
-    return closeRequest(random::MaskingDevice().gen());
+    code = bitwise::toNetwork(code);
+    Buffer buffer(sizeof(uint16_t) + reason.size());
+    memcpy(&buffer[0], &code, sizeof(uint16_t));
+    memcpy(&buffer[sizeof(uint16_t)], &reason[0], reason.size());
+    return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
 }
 
-Err WebSocketFrame::closeRequest(uint32_t masking_key)
+Err WebSocketFrame::close(WebSocketStatusCode code)
 {
-    return updateRequest(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, masking_key);
-}
-
-Err WebSocketFrame::closeResponse(uint16_t status_code, std::string const & reason)
-{
-    uint16_t const CODE = bitwise::toNetwork(status_code);
-    Buffer buffer(sizeof(CODE) + reason.size());
-    memcpy(&buffer[0], &CODE, sizeof(CODE));
-    memcpy(&buffer[sizeof(CODE)], &reason[0], reason.size());
-    return updateResponse(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
+    return close(getWsStatusCodeNumber(code), std::string(getWsStatusCodeName(code)));
 }
 
 uint16_t WebSocketFrame::getStatusCode() const
@@ -414,34 +417,30 @@ std::string WebSocketFrame::getReason() const
     return std::string();
 }
 
-Err WebSocketFrame::pingRequest(uint8_t const * data, std::size_t size)
+Err WebSocketFrame::ping(uint8_t const * data, std::size_t size, uint32_t key)
 {
-    return pingRequest(random::MaskingDevice().gen(), data, size);
+    if (size > PAYLOAD_7BIT_TYPE_SIZE) {
+        return Err::E_ILLARGS;
+    }
+    return build(true, false, false, false, OpCode::OC_DENOTES_PING, data, size, key);
 }
 
-Err WebSocketFrame::pingRequest(uint32_t masking_key, uint8_t const * data, std::size_t size)
+Err WebSocketFrame::ping(std::string const & str, uint32_t key)
 {
-    return updateRequest(true, false, false, false, OpCode::OC_DENOTES_PING, masking_key, data, size);
+    return ping((uint8_t const *)str.data(), str.size(), key);
 }
 
-Err WebSocketFrame::pingResponse(uint8_t const * data, std::size_t size)
+Err WebSocketFrame::pong(uint8_t const * data, std::size_t size, uint32_t key)
 {
-    return updateResponse(true, false, false, false, OpCode::OC_DENOTES_PING, data, size);
+    if (size > PAYLOAD_7BIT_TYPE_SIZE) {
+        return Err::E_ILLARGS;
+    }
+    return build(true, false, false, false, OpCode::OC_DENOTES_PONG, data, size, key);
 }
 
-Err WebSocketFrame::pongRequest(uint8_t const * data, std::size_t size)
+Err WebSocketFrame::pong(std::string const & str, uint32_t key)
 {
-    return pongRequest(random::MaskingDevice().gen(), data, size);
-}
-
-Err WebSocketFrame::pongRequest(uint32_t masking_key, uint8_t const * data, std::size_t size)
-{
-    return updateRequest(true, false, false, false, OpCode::OC_DENOTES_PONG, masking_key, data, size);
-}
-
-Err WebSocketFrame::pongResponse(uint8_t const * data, std::size_t size)
-{
-    return updateResponse(true, false, false, false, OpCode::OC_DENOTES_PONG, data, size);
+    return pong((uint8_t const *)str.data(), str.size(), key);
 }
 
 std::string WebSocketFrame::toDebugString() const
@@ -467,29 +466,13 @@ std::string WebSocketFrame::toDebugString() const
 // Static methods.
 // ---------------
 
-uint8_t WebSocketFrame::getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
-{
-    return getMaskingKeyByteIndex(payload_bit) + (is_mask ? sizeof(uint32_t) : 0);
-}
-
-uint8_t WebSocketFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
-{
-    switch (payload_bit) {
-    case PayloadBit::PL_BIT_7:  return 2;
-    case PayloadBit::PL_BIT_16: return 2 + sizeof(uint16_t);
-    case PayloadBit::PL_BIT_64: return 2 + sizeof(uint64_t);
-    }
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return 0;
-}
-
 PayloadBit WebSocketFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
 {
-    if (payload_length_7bit <= 125) {
+    if (payload_length_7bit <= PAYLOAD_7BIT_TYPE_SIZE) {
         return PayloadBit::PL_BIT_7;
-    } else if (payload_length_7bit == 126) {
+    } else if (payload_length_7bit == PAYLOAD_16BIT_TYPE_SIZE) {
         return PayloadBit::PL_BIT_16;
-    } else if (payload_length_7bit == 127) {
+    } else if (payload_length_7bit == PAYLOAD_64BIT_TYPE_SIZE) {
         return PayloadBit::PL_BIT_64;
     } else {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
@@ -499,7 +482,7 @@ PayloadBit WebSocketFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXC
 
 PayloadBit WebSocketFrame::getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
 {
-    if (payload_length <= 125) {
+    if (payload_length <= PAYLOAD_7BIT_TYPE_SIZE) {
         return PayloadBit::PL_BIT_7;
     } else if (payload_length <= MAX_UINT16_BYTE_SIZE) {
         return PayloadBit::PL_BIT_16;
@@ -507,6 +490,22 @@ PayloadBit WebSocketFrame::getPayloadBitWithPayloadLength(uint64_t payload_lengt
 
     assert(MAX_UINT16_BYTE_SIZE < COMPARE_AND(payload_length) <= MAX_UINT64_BYTE_SIZE);
     return PayloadBit::PL_BIT_64;
+}
+
+uint8_t WebSocketFrame::getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
+{
+    return getMaskingKeyByteIndex(payload_bit) + (is_mask ? sizeof(uint32_t) : 0);
+}
+
+uint8_t WebSocketFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
+{
+    switch (payload_bit) {
+        case PayloadBit::PL_BIT_7:  return 2;
+        case PayloadBit::PL_BIT_16: return 2 + sizeof(uint16_t);
+        case PayloadBit::PL_BIT_64: return 2 + sizeof(uint64_t);
+    }
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    return 0;
 }
 
 uint32_t WebSocketFrame::getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
@@ -518,19 +517,19 @@ uint32_t WebSocketFrame::getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
 
 std::string WebSocketFrame::getPayloadData(uint32_t mask, std::string const & data)
 {
-    std::vector<uint8_t> const INPUT(data.begin(), data.end());
-    std::vector<uint8_t> const OUTPUT = getPayloadData(mask, INPUT);
+    Buffer const INPUT(data.begin(), data.end());
+    Buffer const OUTPUT = getPayloadData(mask, INPUT);
     return std::string(OUTPUT.begin(), OUTPUT.end());
 }
 
-std::vector<uint8_t> WebSocketFrame::getPayloadData(uint32_t mask, std::vector<uint8_t> const & data)
+WebSocketFrame::Buffer WebSocketFrame::getPayloadData(uint32_t mask, Buffer const & data)
 {
     return getPayloadData(mask, data.data(), data.size());
 }
 
-std::vector<uint8_t> WebSocketFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
+WebSocketFrame::Buffer WebSocketFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
 {
-    std::vector<uint8_t> result(data, data + size);
+    Buffer result(data, data + size);
     updatePayloadData(mask, result.data(), result.size());
     return result;
 }

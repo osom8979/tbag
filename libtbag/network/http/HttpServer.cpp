@@ -149,7 +149,7 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
 
     if (frame.fin) {
         if (_callback != nullptr) {
-            WP wp(frame.opcode, (char const *)frame.getPayloadData(), frame.getPayloadSize());
+            WP wp(frame.opcode, (char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
             _callback->onWsMessage(node, code, wp);
         }
     } else {
