@@ -618,7 +618,7 @@ std::string getUpgradeWebSocketKey(std::string const & original_key)
     return base64_key;
 }
 
-std::string getRandomWebSocketKey()
+std::string generateRandomWebSocketKey()
 {
     std::string base64;
     encrypt::encodeBase64(id::Uuid::ver4().toString(), base64);
@@ -637,7 +637,7 @@ Err updateRequestWebSocket(HttpBuilder & request)
     request.insertIfNotExists(HEADER_SEC_WEBSOCKET_VERSION, std::to_string(WEBSOCKET_VERSION_HYBI13));
 
     if (request.existsHeader(HEADER_SEC_WEBSOCKET_KEY) == false) {
-        std::string const KEY = getRandomWebSocketKey();
+        std::string const KEY = generateRandomWebSocketKey();
         if (KEY.empty()) {
             return Err::E_KEYGEN;
         }

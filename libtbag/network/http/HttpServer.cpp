@@ -111,12 +111,12 @@ Err HttpServer::closeClient(WeakClient node, uint16_t status_code, std::string c
 
 bool HttpServer::isUpgradeWebSocket(CacheData const & cache) const TBAG_NOEXCEPT
 {
-    return _use_websocket && cache.upgrade;
+    return _use_websocket && cache.ws.upgrade;
 }
 
 void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const & packet, CacheData & cache)
 {
-    cache.upgrade = true;
+    cache.ws.upgrade = true;
 
     auto & request  = cache.parser;
     auto & response = cache.builder;
@@ -139,7 +139,8 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
 
 void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const & packet, CacheData & cache)
 {
-    auto & frame = cache.recv_frame;
+    assert(static_cast<bool>(node));
+    auto & frame = cache.ws.receiver;
 
     Err const EXECUTE_CODE = frame.execute((uint8_t*)packet.buffer, packet.size);
     if (EXECUTE_CODE != Err::E_SUCCESS) {
@@ -147,13 +148,32 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
         return;
     }
 
-    if (frame.fin) {
+    if (frame.fin == false) {
+        tDLogD("HttpServer::runWebSocketRead() Waiting next frame ...");
+        return;
+    }
+
+    assert(frame.fin);
+
+    if (frame.opcode == OpCode::OC_TEXT_FRAME || frame.opcode == OpCode::OC_BINARY_FRAME) {
         if (_callback != nullptr) {
             WP wp(frame.opcode, (char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
             _callback->onWsMessage(node, code, wp);
         }
-    } else {
-        tDLogD("HttpServer::runWebSocketRead() Waiting next frame ...");
+
+    } else if (frame.opcode == OpCode::OC_DENOTES_PING) {
+        std::string const PONG((char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
+        Err const PONG_CODE = cache.writePongResponse(PONG);
+        if (PONG_CODE != Err::E_SUCCESS) {
+            tDLogE("HttpServer::runWebSocketRead() WebSocket pong write {} error", getErrName(PONG_CODE));
+        }
+
+    } else if (frame.opcode == OpCode::OC_CONNECTION_CLOSE) {
+        Err const CLOSE_CODE = cache.writeCloseResponse();
+        if (CLOSE_CODE != Err::E_SUCCESS) {
+            tDLogE("HttpServer::runWebSocketRead() WebSocket close write {} error", getErrName(CLOSE_CODE));
+        }
+        node->startTimer(100);
     }
 }
 
@@ -310,6 +330,10 @@ void HttpServer::onClientClose(WeakClient node)
     if (removeCacheData(shared->id()) == false) {
         tDLogW("HttpServer::onClientClose() Client-data removal failed.");
     }
+}
+
+void HttpServer::onClientTimer(WeakClient node)
+{
 }
 
 void HttpServer::onClientShutdown(WeakClient node, Err code)

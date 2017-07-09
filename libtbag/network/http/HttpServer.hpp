@@ -223,6 +223,7 @@ public:
     virtual void onConnection(Err code) override;
     virtual void onClientRead(WeakClient node, Err code, ReadPacket const & packet) override;
     virtual void onClientClose(WeakClient node) override;
+    virtual void onClientTimer(WeakClient node) override;
 
 public:
     virtual void onClientShutdown(WeakClient node, Err code) override;

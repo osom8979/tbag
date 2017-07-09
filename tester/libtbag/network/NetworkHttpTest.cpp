@@ -262,7 +262,7 @@ TEST(NetworkHttpTest, WebSocketEchoTest)
 //    });
 //    server.setOnWsMessage([&](WC client, Err code, WP & packet){
 //        server.writeText(client, std::string(packet.buffer, packet.buffer + packet.size));
-//        std::cout << "Server.OnWebSocketMessage(" << getErrName(code) << std::endl;
+//        std::cout << "Server.OnWebSocketMessage(" << getErrName(code) << ")\n";
 //    });
 //    server.setOnClose([&](WC node){
 //        std::cout << "Server.OnClose\n";
