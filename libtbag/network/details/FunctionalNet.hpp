@@ -109,7 +109,7 @@ struct FunctionalServer : public BaseType
     using OnClientWrite    = std::function<void(WeakClient, Err)>;
     using OnClientRead     = std::function<void(WeakClient, Err, ReadPacket const &)>;
     using OnClientClose    = std::function<void(WeakClient)>;
-    using OnClose          = std::function<void(void)>;
+    using OnServerClose    = std::function<void(void)>;
 
     using OnClientUdataAlloc   = std::function<void*(WeakClient)>;
     using OnClientUdataDealloc = std::function<void(WeakClient, void*)>;
@@ -119,7 +119,7 @@ struct FunctionalServer : public BaseType
     OnClientWrite    client_write_cb;
     OnClientRead     client_read_cb;
     OnClientClose    client_close_cb;
-    OnClose          close_cb;
+    OnServerClose    server_close_cb;
 
     OnClientUdataAlloc   client_udata_alloc_cb;
     OnClientUdataDealloc client_udata_dealloc_cb;
@@ -134,7 +134,7 @@ struct FunctionalServer : public BaseType
     inline void setOnClientWrite   (OnClientWrite    const & cb) { client_write_cb    = cb; }
     inline void setOnClientRead    (OnClientRead     const & cb) { client_read_cb     = cb; }
     inline void setOnClientClose   (OnClientClose    const & cb) { client_close_cb    = cb; }
-    inline void setOnClose         (OnClose          const & cb) { close_cb           = cb; }
+    inline void setOnServerClose   (OnServerClose    const & cb) { server_close_cb    = cb; }
 
     inline void setOnClientUdataAlloc  (OnClientUdataAlloc   const & cb) { client_udata_alloc_cb   = cb; }
     inline void setOnClientUdataDealloc(OnClientUdataDealloc const & cb) { client_udata_dealloc_cb = cb; }
@@ -150,8 +150,8 @@ struct FunctionalServer : public BaseType
     { if (client_read_cb) { client_read_cb(node, code, packet); } }
     virtual void onClientClose(WeakClient node) override
     { if (client_close_cb) { client_close_cb(node); } }
-    virtual void onClose() override
-    { if (close_cb) { close_cb(); } }
+    virtual void onServerClose() override
+    { if (server_close_cb) { server_close_cb(); } }
 
     virtual void * onClientUdataAlloc(WeakClient node) override
     { if (client_udata_alloc_cb) { return client_udata_alloc_cb(node); } return nullptr; }

@@ -81,7 +81,7 @@ TEST(NetworkPipeTest, MultiEcho)
             server.close();
         }
     });
-    server.setOnClose([&](){
+    server.setOnServerClose([&](){
         server_close++;
     });
     server.init(path, 0);

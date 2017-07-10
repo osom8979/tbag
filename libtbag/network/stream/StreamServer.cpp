@@ -338,7 +338,7 @@ void StreamServer::backConnection(Err code)
 
 void StreamServer::backClose()
 {
-    onClose();
+    onServerClose();
 
     assert(static_cast<bool>(_internal));
     _mutex.lock();

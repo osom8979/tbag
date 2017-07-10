@@ -130,10 +130,8 @@ void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const 
     auto & request  = cache.parser;
     auto & response = cache.builder;
 
-    if (_callback != nullptr) {
-        HP hp(request, response);
-        _callback->onWsOpen(node, code, hp);
-    }
+    HP hp(request, response);
+    onWsOpen(node, code, hp);
 
     auto const RESPONSE = response.buildDefaultResponseString();
     Err const WRITE_CODE = node->write(RESPONSE.data(), RESPONSE.size());
@@ -165,10 +163,8 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
     assert(frame.fin);
 
     if (frame.opcode == OpCode::OC_TEXT_FRAME || frame.opcode == OpCode::OC_BINARY_FRAME) {
-        if (_callback != nullptr) {
-            WP wp(frame.opcode, (char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
-            _callback->onWsMessage(node, code, wp);
-        }
+        WP wp(frame.opcode, (char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
+        onWsMessage(node, code, wp);
 
     } else if (frame.opcode == OpCode::OC_DENOTES_PING) {
         std::string const PONG((char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
@@ -215,13 +211,9 @@ void HttpServer::runHttpRead(SharedClient node, Err code, ReadPacket const & pac
     }
 
     if (called == false) {
-        if (_callback != nullptr) {
-            // Default request callback.
-            HP hp(request, response);
-            _callback->onRequest(node, code, hp);
-        } else {
-            tDLogW("HttpServer::runHttpRead() Not found request callback.");
-        }
+        // Default request callback.
+        HP hp(request, response);
+        onRequest(node, code, hp);
     }
 
     auto const RESPONSE = response.buildDefaultResponseString();
@@ -262,9 +254,7 @@ void HttpServer::onConnection(Err code)
         return;
     }
 
-    if (_callback != nullptr) {
-        _callback->onOpen(node);
-    }
+    onOpen(node);
 }
 
 void HttpServer::onClientRead(WeakClient node, Err code, ReadPacket const & packet)
@@ -333,9 +323,7 @@ void HttpServer::onClientClose(WeakClient node)
         return;
     }
 
-    if (_callback != nullptr) {
-        _callback->onClose(node);
-    }
+    onClose(node);
 
     if (removeCacheData(shared->id()) == false) {
         tDLogW("HttpServer::onClientClose() Client-data removal failed.");
@@ -363,45 +351,27 @@ void HttpServer::onClientTimer(WeakClient node)
         return;
     }
 
-    if (_callback != nullptr) {
-        _callback->onTimer(node);
-    }
+    onTimer(node);
 }
 
 void HttpServer::onClientShutdown(WeakClient node, Err code)
 {
-    if (_callback != nullptr) {
-        _callback->onShutdown(node, code);
-    }
+    onShutdown(node, code);
 }
 
 void HttpServer::onClientWrite(WeakClient node, Err code)
 {
-    if (_callback != nullptr) {
-        _callback->onWrite(node, code);
-    }
+    onWrite(node, code);
 }
 
 void * HttpServer::onClientUdataAlloc(WeakClient node)
 {
-    if (_callback != nullptr) {
-        return _callback->onUdataAlloc(node);
-    }
-    return nullptr;
+    return onUdataAlloc(node);
 }
 
 void HttpServer::onClientUdataDealloc(WeakClient node, void * data)
 {
-    if (_callback != nullptr) {
-        return _callback->onUdataDealloc(node, data);
-    }
-}
-
-void HttpServer::onClose()
-{
-    if (_callback != nullptr) {
-        return _callback->onServerClose();
-    }
+    onUdataDealloc(node, data);
 }
 
 } // namespace http

@@ -234,7 +234,7 @@ struct ServerInterface
     virtual void onClientRead    (WeakClient node, Err code, ReadPacket const & packet) { /* EMPTY. */ }
     virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
     virtual void onClientTimer   (WeakClient node) { /* EMPTY. */ }
-    virtual void onClose         () { /* EMPTY. */ }
+    virtual void onServerClose   () { /* EMPTY. */ }
 
     virtual void * onClientUdataAlloc  (WeakClient node) { return nullptr; }
     virtual void   onClientUdataDealloc(WeakClient node, void * data) { /* EMPTY. */ }

@@ -36,7 +36,7 @@ struct TestTcpServer : public TcpServer
     int     client_read_cb_counter = 0;
     int    client_close_cb_counter = 0;
     int    client_timer_cb_counter = 0;
-    int           close_cb_counter = 0;
+    int    server_close_cb_counter = 0;
 
     int   client_udata_alloc_cb_counter = 0;
     int client_udata_dealloc_cb_counter = 0;
@@ -47,7 +47,7 @@ struct TestTcpServer : public TcpServer
     using OnClientRead     = std::function<void(WeakClient, Err, ReadPacket const &)>;
     using OnClientClose    = std::function<void(WeakClient)>;
     using OnClientTimer    = std::function<void(WeakClient)>;
-    using OnClose          = std::function<void(void)>;
+    using OnServerClose    = std::function<void(void)>;
 
     OnConnection     connection_cb;
     OnClientShutdown client_shutdown_cb;
@@ -55,7 +55,7 @@ struct TestTcpServer : public TcpServer
     OnClientRead     client_read_cb;
     OnClientClose    client_close_cb;
     OnClientTimer    client_timer_cb;
-    OnClose          close_cb;
+    OnServerClose    server_close_cb;
 
     TestTcpServer(Loop & loop) : TcpServer(loop)
     { /* EMPTY */ }
@@ -68,7 +68,7 @@ struct TestTcpServer : public TcpServer
     inline void setOnClientRead    (OnClientRead     const & cb) { client_read_cb     = cb; }
     inline void setOnClientClose   (OnClientClose    const & cb) { client_close_cb    = cb; }
     inline void setOnClientTimer   (OnClientTimer    const & cb) { client_timer_cb    = cb; }
-    inline void setOnClose         (OnClose          const & cb) { close_cb           = cb; }
+    inline void setOnClose         (OnServerClose    const & cb) { server_close_cb    = cb; }
 
     virtual void onConnection(Err code) override
     { connection_cb_counter++; if (connection_cb) { connection_cb(code); } }
@@ -83,8 +83,8 @@ struct TestTcpServer : public TcpServer
     { client_close_cb_counter++; if (client_close_cb) { client_close_cb(node); } }
     virtual void onClientTimer(WeakClient node) override
     { client_timer_cb_counter++; if (client_timer_cb) { client_timer_cb(node); } }
-    virtual void onClose() override
-    { close_cb_counter++; if (close_cb) { close_cb(); } }
+    virtual void onServerClose() override
+    { server_close_cb_counter++; if (server_close_cb) { server_close_cb(); } }
 
     virtual void * onClientUdataAlloc(WeakClient node) override
     { client_udata_alloc_cb_counter++; return nullptr; }
@@ -336,7 +336,7 @@ TEST(NetworkTcpTest, ReadStop)
     ASSERT_EQ(1, server.client_read_cb_counter);
     ASSERT_EQ(1, server.client_write_cb_counter);
     ASSERT_EQ(1, server.client_close_cb_counter);
-    ASSERT_EQ(1, server.close_cb_counter);
+    ASSERT_EQ(1, server.server_close_cb_counter);
     ASSERT_EQ(1, connect_cb_called);
     ASSERT_EQ(2, timer_cb_called);
     ASSERT_EQ(1, write_cb_called);
@@ -412,7 +412,7 @@ TEST(NetworkTcpTest, ShutdownAfterWrite)
     ASSERT_EQ(1, server.client_read_cb_counter);
     ASSERT_EQ(0, server.client_write_cb_counter);
     ASSERT_EQ(1, server.client_close_cb_counter);
-    ASSERT_EQ(1, server.close_cb_counter);
+    ASSERT_EQ(1, server.server_close_cb_counter);
     ASSERT_EQ(1, connect_cb_called);
     ASSERT_EQ(1, timer_cb_called);
     ASSERT_EQ(1, write_cb_called);
@@ -506,7 +506,7 @@ TEST(NetworkTcpTest, DoubleBufferEcho)
     ASSERT_EQ(1, server.client_read_cb_counter);
     ASSERT_EQ(1, server.client_write_cb_counter);
     ASSERT_EQ(1, server.client_close_cb_counter);
-    ASSERT_EQ(1, server.close_cb_counter);
+    ASSERT_EQ(1, server.server_close_cb_counter);
     ASSERT_EQ(1, connect_cb_called);
     ASSERT_EQ(1, write_cb_called);
     ASSERT_EQ(1, read_cb_called);
@@ -569,7 +569,7 @@ TEST(NetworkTcpTest, MultiEcho)
             ASSERT_EQ(Err::E_SUCCESS, server.close());
         }
     });
-    server.setOnClose([&](){
+    server.setOnServerClose([&](){
         server_close++;
     });
 

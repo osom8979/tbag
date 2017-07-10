@@ -96,49 +96,6 @@ public:
     using OnRequest = std::function<void(WC, Err, HP&)>;
 
 public:
-    struct Callback
-    {
-        using WC = HttpServer::WeakClient;
-        using HP = HttpServer::HttpPacket;
-        using WP = HttpServer::WsPacket;
-
-        virtual void onOpen(WC client)
-        { /* EMPTY. */ }
-
-        virtual void onRequest(WC client, Err code, HP & packet)
-        { /* EMPTY. */ }
-
-        virtual void onClose(WC client)
-        { /* EMPTY. */ }
-
-        virtual void onTimer(WC client)
-        { /* EMPTY. */ }
-
-        virtual void onShutdown(WC client, Err code)
-        { /* EMPTY. */ }
-
-        virtual void onWrite(WC client, Err code)
-        { /* EMPTY. */ }
-
-        /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
-        virtual void onWsOpen(WC client, Err code, HP & packet)
-        { /* EMPTY. */ }
-
-        /** When a message has been received from WebSocket server. */
-        virtual void onWsMessage(WC client, Err code, WP & packet)
-        { /* EMPTY. */ }
-
-        virtual void * onUdataAlloc(WC client)
-        { return nullptr; }
-
-        virtual void onUdataDealloc(WC client, void * udata)
-        { /* EMPTY. */ }
-
-        virtual void onServerClose()
-        { /* EMPTY. */ }
-    };
-
-public:
     struct Filter
     {
         using UniqueHttpFilterInterface = std::unique_ptr<HttpFilterInterface>;
@@ -166,7 +123,6 @@ public:
     using CacheDataPair = CacheDataMap::value_type;
 
 private:
-    Callback * _callback;
     bool _use_websocket;
 
 private:
@@ -183,7 +139,6 @@ private:
     WeakCacheData getCacheData(Id id);
 
 public:
-    inline void setCallback(Callback * cb) TBAG_NOEXCEPT { _callback = cb; }
     inline bool isUseWebSocket() const TBAG_NOEXCEPT { return _use_websocket; }
     inline void setUseWebSocket(bool flag = true) TBAG_NOEXCEPT { _use_websocket = flag; }
 
@@ -212,22 +167,47 @@ private:
     /** Regular HTTP process. */
     void runHttpRead(SharedClient node, Err code, ReadPacket const & packet, CacheData & client_data);
 
-public:
-    virtual void onConnection(Err code) override;
-    virtual void onClientRead(WeakClient node, Err code, ReadPacket const & packet) override;
-    virtual void onClientClose(WeakClient node) override;
-    virtual void onClientTimer(WeakClient node) override;
+private:
+    virtual void onConnection(Err code) final override;
+    virtual void onClientRead(WeakClient node, Err code, ReadPacket const & packet) final override;
+    virtual void onClientClose(WeakClient node) final override;
+    virtual void onClientTimer(WeakClient node) final override;
+
+private:
+    virtual void onClientShutdown(WeakClient node, Err code) final override;
+    virtual void onClientWrite(WeakClient node, Err code) final override;
+
+private:
+    virtual void * onClientUdataAlloc(WeakClient node) final override;
+    virtual void onClientUdataDealloc(WeakClient node, void * data) final override;
+
+// ------------------------
+// User's callback methods.
+// ------------------------
 
 public:
-    virtual void onClientShutdown(WeakClient node, Err code) override;
-    virtual void onClientWrite(WeakClient node, Err code) override;
+    virtual void onOpen(WC client) { /* EMPTY. */ }
+    virtual void onRequest(WC client, Err code, HP & packet) { /* EMPTY. */ }
+    virtual void onClose(WC client) { /* EMPTY. */ }
+    virtual void onTimer(WC client) { /* EMPTY. */ }
 
 public:
-    virtual void * onClientUdataAlloc(WeakClient node) override;
-    virtual void   onClientUdataDealloc(WeakClient node, void * data) override;
+    /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
+    virtual void onWsOpen(WC client, Err code, HP & packet) { /* EMPTY. */ }
+
+    /** When a message has been received from WebSocket server. */
+    virtual void onWsMessage(WC client, Err code, WP & packet) { /* EMPTY. */ }
 
 public:
-    virtual void onClose() override;
+    virtual void onShutdown(WC client, Err code) { /* EMPTY. */ }
+    virtual void onWrite(WC client, Err code) { /* EMPTY. */ }
+
+public:
+    virtual void * onUdataAlloc(WC client) { return nullptr; }
+    virtual void onUdataDealloc(WC client, void * udata) { /* EMPTY. */ }
+
+public:
+    virtual void onServerClose() override { /* EMPTY. */ };
 };
 
 /**
@@ -236,7 +216,7 @@ public:
  * @author zer0
  * @date   2017-06-30
  */
-struct FunctionalHttpServer : public HttpServer, public HttpServer::Callback
+struct FunctionalHttpServer : public HttpServer
 {
     using StreamType = HttpServer::StreamType;
 
@@ -267,7 +247,7 @@ struct FunctionalHttpServer : public HttpServer, public HttpServer::Callback
     OnServerClose   server_close_cb;
 
     FunctionalHttpServer(Loop & loop, StreamType type = StreamType::TCP) : HttpServer(loop, type)
-    { setCallback(this); }
+    { /* EMPTY. */ }
     virtual ~FunctionalHttpServer()
     { /* EMPTY. */ }
 

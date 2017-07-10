@@ -71,7 +71,7 @@ TEST(NetworkUdpTest, Default)
     server1.setOnClientClose([&](FunctionalUdpServer::WeakClient node){
         ++server1_client_close;
     });
-    server1.setOnClose([&](){
+    server1.setOnServerClose([&](){
         ++server1_server_close;
     });
 
@@ -88,7 +88,7 @@ TEST(NetworkUdpTest, Default)
     server2.setOnClientClose([&](FunctionalUdpServer::WeakClient node){
         ++server2_client_close;
     });
-    server2.setOnClose([&](){
+    server2.setOnServerClose([&](){
         ++server2_server_close;
     });
 
