@@ -99,8 +99,8 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
         return false;
     }
 
-    if (response.body != method) {
-        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response body error({}).", method, response.body);
+    if (response.getBody() != method) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response body error({}).", method, response.getBody());
         return false;
     }
 

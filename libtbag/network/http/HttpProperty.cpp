@@ -105,6 +105,16 @@ std::string HttpVersionProperty::getVersionString(int major, int minor)
 // HttpCommonProperty implementation.
 // ----------------------------------
 
+void HttpCommonProperty::setBody(std::string const & val)
+{
+    body.assign(val.begin(), val.end());
+}
+
+std::string HttpCommonProperty::getBody() const
+{
+    return std::string(body.begin(), body.end());
+}
+
 std::string HttpCommonProperty::getHeader(std::string const & key) const
 {
     auto itr = headers.find(key);
@@ -184,7 +194,7 @@ std::string toDebugString(HttpCommonProperty const & obj)
 {
     std::stringstream ss;
     ss << toDebugString(obj.headers) << std::endl;
-    ss << "[BODY] " << obj.body;
+    ss << "[BODY] " << obj.getBody();
     return ss.str();
 }
 

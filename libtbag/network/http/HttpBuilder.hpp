@@ -100,7 +100,7 @@ public:
     { return _property.existsHeaderValue(key, value, ignore_case); }
 
     inline std::string getHeader(std::string const & key) const { return _property.getHeader(key); }
-    inline std::string getBody() const { return _property.body; }
+    inline std::string getBody() const { return std::string(_property.body.begin(), _property.body.end()); }
 
     inline std::string getMethod() const { return _property.method; }
     inline std::string getUrl() const { return _property.url; }
@@ -118,7 +118,9 @@ public:
 
 public:
     inline HttpBuilder & setBody(std::string const & val)
-    { _property.body = val; return *this; }
+    { _property.body.assign(val.begin(), val.end()); return *this; }
+    inline HttpBuilder & appendBody(char const * buffer, std::size_t size)
+    { _property.appendBody(buffer, size); return *this; }
     inline HttpBuilder & appendBody(std::string const & val)
     { _property.appendBody(val); return *this; }
 
@@ -174,12 +176,12 @@ TBAG_API std::string buildDefaultResponseString(HttpResponse const & rsp);
 
 TBAG_API std::string buildDefaultRequestString(
         std::string const & method, std::string const & url,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major = 1, int minor = 1, bool logging = false);
 
 TBAG_API std::string buildDefaultResponseString(
         std::string const & status, std::string const & reason,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major = 1, int minor = 1, bool logging = false);
 
 // --------------
@@ -194,12 +196,12 @@ TBAG_API std::string buildResponseString(HttpResponse const & rsp);
 
 TBAG_API std::string buildRequestString(
         std::string const & method, std::string const & url,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major = 1, int minor = 1);
 
 TBAG_API std::string buildResponseString(
         std::string const & status, std::string const & reason,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major = 1, int minor = 1);
 
 } // namespace http

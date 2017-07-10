@@ -262,7 +262,7 @@ std::string buildDefaultResponseString(HttpResponse const & rsp)
 
 std::string buildDefaultRequestString(
         std::string const & method, std::string const & url,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major, int minor, bool logging)
 {
     HttpHeaderMap update_headers = headers;
@@ -291,7 +291,7 @@ std::string buildDefaultRequestString(
 
 std::string buildDefaultResponseString(
         std::string const & status, std::string const & reason,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major, int minor, bool logging)
 {
     HttpHeaderMap update_headers = headers;
@@ -336,7 +336,7 @@ std::string buildResponseString(HttpResponse const & rsp)
 
 std::string buildRequestString(
         std::string const & method, std::string const & url,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major, int minor)
 {
     std::stringstream ss;
@@ -344,13 +344,13 @@ std::string buildRequestString(
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }
-    ss << CRLF << body;
+    ss << CRLF << std::string(body.begin(), body.end());
     return ss.str();
 }
 
 std::string buildResponseString(
         std::string const & status, std::string const & reason,
-        HttpHeaderMap const & headers, std::string const & body,
+        HttpHeaderMap const & headers, HttpBodyBuffer const & body,
         int major, int minor)
 {
     std::stringstream ss;
@@ -358,7 +358,7 @@ std::string buildResponseString(
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }
-    ss << CRLF << body;
+    ss << CRLF << std::string(body.begin(), body.end());
     return ss.str();
 }
 

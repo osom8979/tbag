@@ -295,6 +295,7 @@ struct HttpVersionProperty
 
 using HttpHeaderMap  = std::multimap<std::string, std::string>;
 using HttpHeaderPair = HttpHeaderMap::value_type;
+using HttpBodyBuffer = std::vector<char>;
 
 /**
  * Http header & body structure.
@@ -304,14 +305,18 @@ using HttpHeaderPair = HttpHeaderMap::value_type;
  */
 struct HttpCommonProperty
 {
+    using BodyBuffer = std::vector<char>;
+
     HttpHeaderMap headers;
-    std::string body;
+    HttpBodyBuffer body;
 
     HttpCommonProperty()
     { /* EMPTY. */ }
     HttpCommonProperty(HttpHeaderMap const & h) : headers(h), body()
     { /* EMPTY. */ }
-    HttpCommonProperty(HttpHeaderMap const & h, std::string const & b) : headers(h), body(b)
+    explicit HttpCommonProperty(HttpHeaderMap const & h, std::string const & b) : headers(h), body(b.begin(), b.end())
+    { /* EMPTY. */ }
+    explicit HttpCommonProperty(HttpHeaderMap const & h, HttpBodyBuffer const & b) : headers(h), body(b)
     { /* EMPTY. */ }
     HttpCommonProperty(HttpCommonProperty const & obj)
     { (*this) = obj; }
@@ -335,10 +340,15 @@ struct HttpCommonProperty
     inline bool existsHeader(std::string const & key) const
     { return headers.find(key) != headers.end(); }
 
+    inline void appendBody(char const * buffer, std::size_t size)
+    { body.insert(body.end(), buffer, buffer + size); }
     inline void appendBody(std::string const & content)
-    { body.append(content); }
+    { body.insert(body.end(), content.begin(), content.end()); }
 
+    void setBody(std::string const & val);
+    std::string getBody() const;
     std::string getHeader(std::string const & key) const;
+
     bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const;
     void insertIfNotExists(std::string const & key, std::string const & val);
 

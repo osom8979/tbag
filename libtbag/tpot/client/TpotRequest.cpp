@@ -35,7 +35,7 @@ int runTpotRequest(std::string const & uri, structure::Exec const & exec)
     HttpRequest request;
     request.insertHeader(exec.getAcceptKey(), exec.getAcceptValue());
     request.method = exec.getMethod();
-    request.body = body;
+    request.setBody(body);
 
     uint64_t const TIMEOUT = 10000;
     std::string const UPDATE_URI = network::Uri(uri).getUrl() + exec.getPath();
@@ -49,7 +49,7 @@ int runTpotRequest(std::string const & uri, structure::Exec const & exec)
     }
 
     std::cout << "> Status code: " << response.status << std::endl;
-    std::cout << "> Body: " << response.body << std::endl;
+    std::cout << "> Body: " << response.getBody() << std::endl;
     return EXIT_SUCCESS;
 }
 

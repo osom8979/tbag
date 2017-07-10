@@ -49,6 +49,9 @@ static int __global_http_on_chunk_complete__  (http_parser * parser);
 class HttpParser::HttpParserImpl : private Noncopyable
 {
 public:
+    using BodyBuffer = HttpCommonProperty::BodyBuffer;
+
+public:
     struct Cache
     {
         std::string field;
@@ -63,7 +66,7 @@ public:
 
 public:
     HttpHeaderMap headers;
-    std::string body;
+    BodyBuffer body;
     std::string url;
     std::string status;
 
@@ -162,7 +165,7 @@ public:
 
     inline void appendBody(std::string const & content)
     {
-        body.append(content);
+        body.insert(body.end(), content.begin(), content.end());
     }
 
 public:
@@ -422,7 +425,7 @@ std::string HttpParser::getUrl() const
 
 std::string HttpParser::getBody() const
 {
-    return _parser->body;
+    return std::string(_parser->body.begin(), _parser->body.end());
 }
 
 std::string HttpParser::getStatus() const
