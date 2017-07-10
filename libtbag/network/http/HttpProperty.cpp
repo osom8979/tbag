@@ -159,9 +159,29 @@ void HttpCommonProperty::insertIfNotExists(HttpHeaderMap & headers, std::string 
     }
 }
 
+// -----------------------------------
+// HttpRequestProperty implementation.
+// -----------------------------------
+
+Uri HttpRequestProperty::getUri() const
+{
+    return Uri(url);
+}
+
+void HttpRequestProperty::setMethod(HttpMethod m)
+{
+    method = getHttpMethodName(m);
+}
+
 // ------------------------------------
 // HttpResponseProperty implementation.
 // ------------------------------------
+
+void HttpResponseProperty::setStatus(HttpStatus s)
+{
+    status = getHttpStatusNumber(s);
+    reason = getHttpStatusReason(s);
+}
 
 void HttpResponseProperty::setStatus(std::string const & str)
 {

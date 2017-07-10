@@ -250,7 +250,7 @@ TBAG_API int getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT;
  * @author zer0
  * @date   2017-05-20
  */
-struct HttpVersionProperty
+struct TBAG_API HttpVersionProperty
 {
     int http_major;
     int http_minor;
@@ -303,7 +303,7 @@ using HttpBodyBuffer = std::vector<char>;
  * @author zer0
  * @date   2017-05-20
  */
-struct HttpCommonProperty
+struct TBAG_API HttpCommonProperty
 {
     using BodyBuffer = std::vector<char>;
 
@@ -366,7 +366,7 @@ struct HttpCommonProperty
  * @author zer0
  * @date   2017-05-20
  */
-struct HttpRequestProperty
+struct TBAG_API HttpRequestProperty
 {
     std::string method;
     std::string url;
@@ -388,11 +388,8 @@ struct HttpRequestProperty
     inline HttpRequestProperty & operator =(HttpRequestProperty && obj)
     { if (this != &obj) { method.swap(obj.method); url.swap(obj.url); } return *this; }
 
-    inline Uri getUri() const
-    { return Uri(url); }
-
-    inline void setMethod(HttpMethod m)
-    { method = getHttpMethodName(m); }
+    Uri getUri() const;
+    void setMethod(HttpMethod m);
 };
 
 /**
@@ -401,7 +398,7 @@ struct HttpRequestProperty
  * @author zer0
  * @date   2017-05-20
  */
-struct HttpResponseProperty
+struct TBAG_API HttpResponseProperty
 {
     int status;
     std::string reason;
@@ -428,12 +425,7 @@ struct HttpResponseProperty
     inline std::string getStatus() const
     { return std::to_string(status); }
 
-    inline void setStatus(HttpStatus s) TBAG_NOEXCEPT
-    {
-        status = getHttpStatusNumber(s);
-        reason = getHttpStatusReason(s);
-    }
-
+    void setStatus(HttpStatus s);
     void setStatus(std::string const & str);
 };
 
