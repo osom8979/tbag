@@ -8,7 +8,6 @@
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/log/Log.hpp>
 #include <cassert>
-#include "HttpCacheData.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -179,7 +178,7 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
         }
 
     } else if (frame.opcode == OpCode::OC_CONNECTION_CLOSE) {
-        Err const CLOSE_CODE = cache.writeCloseResponse();
+        Err const CLOSE_CODE = cache.writeCloseResponse(WebSocketStatusCode::WSSC_NORMAL_CLOSURE);
         if (CLOSE_CODE != Err::E_SUCCESS) {
             tDLogE("HttpServer::runWebSocketRead() WebSocket close write {} error", getErrName(CLOSE_CODE));
         }

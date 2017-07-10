@@ -625,7 +625,7 @@ std::string generateRandomWebSocketKey()
     return base64;
 }
 
-Err updateRequestWebSocket(HttpBuilder & request)
+Err updateRequestWebSocket(HttpBuilder & request, std::string const & key)
 {
     request.setVersion(1, 1);
     if (request.getMethod().empty()) {
@@ -637,13 +637,11 @@ Err updateRequestWebSocket(HttpBuilder & request)
     request.insertIfNotExists(HEADER_SEC_WEBSOCKET_VERSION, std::to_string(WEBSOCKET_VERSION_HYBI13));
 
     if (request.existsHeader(HEADER_SEC_WEBSOCKET_KEY) == false) {
-        std::string const KEY = generateRandomWebSocketKey();
-        if (KEY.empty()) {
+        if (key.empty()) {
             return Err::E_KEYGEN;
         }
-        request.insertHeader(HEADER_SEC_WEBSOCKET_KEY, KEY);
+        request.insertHeader(HEADER_SEC_WEBSOCKET_KEY, key);
     }
-
     return Err::E_SUCCESS;
 }
 

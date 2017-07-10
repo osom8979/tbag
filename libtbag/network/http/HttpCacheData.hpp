@@ -20,6 +20,8 @@
 
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/WebSocketFrame.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
 
@@ -67,8 +69,6 @@ public:
 
         std::string key;
         Strings protocols;
-
-        WebSocketStatusCode code;
     } ws; ///< WebSocket properties.
 
 public:
@@ -78,6 +78,9 @@ public:
 public:
     inline bool isUpgrade() const TBAG_NOEXCEPT { return ws.upgrade; }
     inline bool isClosing() const TBAG_NOEXCEPT { return ws.closing; }
+
+public:
+    std::string getKey() const { return ws.key; }
 
 public:
     void clear();
@@ -108,7 +111,6 @@ public:
     Err writeCloseRequest();
     Err writeCloseResponse(uint16_t status_code, std::string const & reason);
     Err writeCloseResponse(WebSocketStatusCode code);
-    Err writeCloseResponse();
 };
 
 } // namespace http

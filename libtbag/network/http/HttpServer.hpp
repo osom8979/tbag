@@ -18,11 +18,8 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/stream/StreamServer.hpp>
-#include <libtbag/network/http/HttpParser.hpp>
-#include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/HttpFilter.hpp>
 #include <libtbag/network/http/HttpCacheData.hpp>
 #include <libtbag/network/http/WebSocketFrame.hpp>
@@ -65,15 +62,8 @@ public:
     using SharedClient = ServerInterface::SharedClient;
     using   WeakClient = ServerInterface::WeakClient;
 
-    using SystemClock = std::chrono::system_clock;
-    using TimePoint   = SystemClock::time_point;
-    using Millisec    = std::chrono::milliseconds;
-    using Seconds     = std::chrono::seconds;
-
-    using MaskingDevice = random::MaskingDevice;
-
 public:
-    TBAG_CONSTEXPR static uint64_t const DEFAULT_CLOSING_TIMEOUT_MILLISECOND = 5 * 1000;
+    TBAG_CONSTEXPR static uint64_t const DEFAULT_CLOSING_TIMEOUT_MILLISECOND = 10 * 1000;
 
 public:
     struct HttpPacket
@@ -180,7 +170,6 @@ private:
     bool _use_websocket;
 
 private:
-    MaskingDevice _masking;
     FilterMap     _filters;
     CacheDataMap  _cache_map;
 

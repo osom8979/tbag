@@ -167,11 +167,6 @@ Err HttpCacheData::writeCloseResponse(WebSocketStatusCode code)
     return writeCloseResponse(getWsStatusCodeNumber(code), std::string(getWsStatusCodeName(code)));
 }
 
-Err HttpCacheData::writeCloseResponse()
-{
-    return writeCloseResponse(ws.code);
-}
-
 } // namespace http
 } // namespace network
 

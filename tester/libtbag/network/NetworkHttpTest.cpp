@@ -13,6 +13,7 @@
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/WebSocketClient.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <iostream>
@@ -245,29 +246,71 @@ TEST(NetworkHttpTest, RoutingServer)
 
 TEST(NetworkHttpTest, WebSocketEchoTest)
 {
-//    uvpp::Loop loop;
-//    FuncHttpServer server(loop);
-//    server.setUseWebSocket();
-//
-//    ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
-//    int const SERVER_PORT = server.port();
-//    ASSERT_LT(0, SERVER_PORT);
-//    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
-//
-//    server.setOnWsOpen([&](WC node, Err code, HP & packet){
-//        std::cout << "Server.OnWebSocketOpen(" << getErrName(code)
-//                  << ")\nRequest:\n" << packet.request.toDebugString()
-//                  << "\nResponse:\n" << packet.response.toResponseDebugString()
-//                  << std::endl;
-//    });
-//    server.setOnWsMessage([&](WC client, Err code, WP & packet){
-//        server.writeText(client, std::string(packet.buffer, packet.buffer + packet.size));
-//        std::cout << "Server.OnWebSocketMessage(" << getErrName(code) << ")\n";
-//    });
-//    server.setOnClose([&](WC node){
-//        std::cout << "Server.OnClose\n";
-//    });
-//
-//    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    log::SeverityGuard guard;
+
+    uvpp::Loop loop;
+    FuncHttpServer server(loop);
+    server.setUseWebSocket();
+
+    ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
+    int const SERVER_PORT = server.port();
+    ASSERT_LT(0, SERVER_PORT);
+    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
+
+    server.setOnWsOpen([&](WC node, Err code, HP & packet){
+        std::cout << "Server.OnWebSocketOpen(" << getErrName(code)
+                  << ")\nRequest:\n" << packet.request.toDebugString()
+                  << "\nResponse:\n" << packet.response.toResponseDebugString()
+                  << std::endl;
+    });
+    server.setOnWsMessage([&](WC client, Err code, WP & packet){
+        server.writeText(client, std::string(packet.buffer, packet.buffer + packet.size));
+        std::cout << "Server.OnWebSocketMessage(" << getErrName(code) << ")\n";
+    });
+    server.setOnClose([&](WC node){
+        std::cout << "Server.OnClose\n";
+    });
+
+    FunctionalWebSocketClient client(loop);
+    HttpBuilder builder;
+    Uri const URI(std::string("ws://localhost:") + std::to_string(SERVER_PORT));
+    builder.setMethod(getHttpMethodName(HttpMethod::M_GET));
+    builder.setUrl(URI.getRequestPath());
+    builder.insertHeader(HEADER_HOST, URI.getHost());
+    builder.insertHeader(HEADER_ORIGIN, URI.getHost());
+    client.setup(builder);
+    ASSERT_EQ(Err::E_SUCCESS, client.init("127.0.0.1", SERVER_PORT));
+
+    int ws_open_counter = 0;
+    int ws_message_counter = 0;
+    int ws_error_counter = 0;
+    int ws_close_counter = 0;
+
+    std::string const TEST_TEXT = "ECHO MESSAGE";
+    client.setOnWsOpen([&](HttpResponse const & response){
+        ASSERT_EQ(Err::E_SUCCESS, client.writeText(TEST_TEXT));
+        ws_open_counter++;
+    });
+    client.setOnWsMessage([&](OpCode op, char const * buffer, std::size_t size){
+        ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
+        ASSERT_EQ(TEST_TEXT, std::string(buffer, buffer + size));
+        ASSERT_EQ(Err::E_SUCCESS, client.writeClose());
+        ws_message_counter++;
+    });
+    client.setOnWsError([&](Err code){
+        ws_error_counter++;
+    });
+    client.setOnWsClose([&](uint16_t code, std::string const & reason){
+        ASSERT_EQ(getWsStatusCodeNumber(WebSocketStatusCode::WSSC_NORMAL_CLOSURE), code);
+        ASSERT_EQ(std::string(getWsStatusCodeName(WebSocketStatusCode::WSSC_NORMAL_CLOSURE)), reason);
+        ASSERT_EQ(Err::E_SUCCESS, server.close());
+        ws_close_counter++;
+    });
+
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(1, ws_open_counter);
+    ASSERT_EQ(1, ws_message_counter);
+    ASSERT_EQ(0, ws_error_counter);
+    ASSERT_EQ(1, ws_close_counter);
 }
 

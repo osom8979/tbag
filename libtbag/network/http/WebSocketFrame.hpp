@@ -335,7 +335,7 @@ TBAG_API bool existsWebSocketVersion13(std::string const & versions);
 TBAG_API std::string getUpgradeWebSocketKey(std::string const & base64_key);
 TBAG_API std::string generateRandomWebSocketKey();
 
-TBAG_API Err updateRequestWebSocket(HttpBuilder & request);
+TBAG_API Err updateRequestWebSocket(HttpBuilder & request, std::string const & key);
 TBAG_API Err updateResponseWebSocket(HttpParser const & request, HttpBuilder & response);
 
 } // namespace http
