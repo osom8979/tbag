@@ -58,6 +58,7 @@ public:
 public:
     struct {
         bool upgrade;
+        bool closing;
         MaskingDevice device;
 
         WebSocketFrame sender;
@@ -75,8 +76,8 @@ public:
     virtual ~HttpCacheData();
 
 public:
-    inline bool isUpgrade() const TBAG_NOEXCEPT
-    { return ws.upgrade; }
+    inline bool isUpgrade() const TBAG_NOEXCEPT { return ws.upgrade; }
+    inline bool isClosing() const TBAG_NOEXCEPT { return ws.closing; }
 
 public:
     void clear();

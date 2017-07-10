@@ -8,6 +8,7 @@
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/log/Log.hpp>
 #include <cassert>
+#include "HttpCacheData.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -75,6 +76,9 @@ Err HttpServer::writeText(WeakClient node, std::string const & text, bool contin
     if (static_cast<bool>(cache) == false) {
         return Err::E_EXPIRED;
     }
+    if (isUpgradeWebSocket(*cache) == false) {
+        return Err::E_ILLSTATE;
+    }
     return cache->writeTextResponse(text, continuation, finish);
 }
 
@@ -87,6 +91,9 @@ Err HttpServer::writeBinary(WeakClient node, WebSocketFrame::Buffer const & buff
     auto cache = getCacheData(shared->id()).lock();
     if (static_cast<bool>(cache) == false) {
         return Err::E_EXPIRED;
+    }
+    if (isUpgradeWebSocket(*cache) == false) {
+        return Err::E_ILLSTATE;
     }
     return cache->writeBinaryResponse(buffer, continuation, finish);
 }
@@ -101,6 +108,9 @@ Err HttpServer::closeClient(WeakClient node, uint16_t status_code, std::string c
     if (static_cast<bool>(cache) == false) {
         return Err::E_EXPIRED;
     }
+    if (isUpgradeWebSocket(*cache) == false) {
+        return Err::E_ILLSTATE;
+    }
 
     Err const CODE = cache->writeCloseResponse(status_code, reason);
     if (CODE != Err::E_SUCCESS) {
@@ -111,7 +121,7 @@ Err HttpServer::closeClient(WeakClient node, uint16_t status_code, std::string c
 
 bool HttpServer::isUpgradeWebSocket(CacheData const & cache) const TBAG_NOEXCEPT
 {
-    return _use_websocket && cache.ws.upgrade;
+    return _use_websocket && cache.isUpgrade();
 }
 
 void HttpServer::runWebSocketOpen(SharedClient node, Err code, ReadPacket const & packet, CacheData & cache)
@@ -173,7 +183,8 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
         if (CLOSE_CODE != Err::E_SUCCESS) {
             tDLogE("HttpServer::runWebSocketRead() WebSocket close write {} error", getErrName(CLOSE_CODE));
         }
-        node->startTimer(100);
+        cache.ws.closing = true;
+        node->startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
     }
 }
 
@@ -334,6 +345,28 @@ void HttpServer::onClientClose(WeakClient node)
 
 void HttpServer::onClientTimer(WeakClient node)
 {
+    auto shared = node.lock();
+    if (static_cast<bool>(shared) == false) {
+        tDLogC("HttpServer::onClientTimer() Expired client.");
+        return;
+    }
+
+    SharedCacheData dataset = getCacheData(shared->id()).lock();
+    if (static_cast<bool>(dataset) == false) {
+        tDLogC("HttpServer::onClientTimer() Expired client data.");
+        shared->close();
+        return;
+    }
+
+    if (dataset->isClosing()) {
+        tDLogI("HttpServer::onClientTimer() Closing timeout.");
+        shared->close();
+        return;
+    }
+
+    if (_callback != nullptr) {
+        _callback->onTimer(node);
+    }
 }
 
 void HttpServer::onClientShutdown(WeakClient node, Err code)

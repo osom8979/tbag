@@ -61,6 +61,7 @@ public:
     using Loop   = uvpp::Loop;
     using Buffer = std::vector<char>;
 
+    using Id = ServerInterface::Id;
     using SharedClient = ServerInterface::SharedClient;
     using   WeakClient = ServerInterface::WeakClient;
 
@@ -72,7 +73,7 @@ public:
     using MaskingDevice = random::MaskingDevice;
 
 public:
-    TBAG_CONSTEXPR static uint64_t const DEFAULT_WRITE_TIMEOUT_MILLISECOND = 5 * 1000;
+    TBAG_CONSTEXPR static uint64_t const DEFAULT_CLOSING_TIMEOUT_MILLISECOND = 5 * 1000;
 
 public:
     struct HttpPacket
@@ -118,6 +119,9 @@ public:
         { /* EMPTY. */ }
 
         virtual void onClose(WC client)
+        { /* EMPTY. */ }
+
+        virtual void onTimer(WC client)
         { /* EMPTY. */ }
 
         virtual void onShutdown(WC client, Err code)

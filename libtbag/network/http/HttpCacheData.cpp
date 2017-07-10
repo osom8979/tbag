@@ -32,6 +32,7 @@ void HttpCacheData::clear()
     parser.clear();
     parser.clearCache();
     ws.upgrade = false;
+    ws.closing = false;
     ws.sender.clear();
     ws.receiver.clear();
     ws.write_buffer.clear();
