@@ -24,13 +24,28 @@
 # endif
 #endif
 
+/**
+ * @def TBAG_NOEXCEPT_OPERATOR
+ *
+ * noexcept operator (since C++11) @n
+ * @n
+ * The noexcept operator performs a compile-time check that returns true if an expression is declared to not throw any exceptions.
+ * It can be used within a function template's noexcept specifier to declare that the function will throw exceptions for some types but not others.
+ *
+ * @remarks
+ *  Bracket ~ <code>()</code> ~ was used as a trick to distinguish OPERATOR and Specifier.
+ *
+ * @see <http://en.cppreference.com/w/cpp/language/noexcept>
+ */
 #ifndef TBAG_NOEXCEPT
 # if defined(TBAG_HAS_NOEXCEPT)
-#  define TBAG_NOEXCEPT noexcept
-#  define TBAG_NOEXCEPT_EXPR(e) noexcept(e)
+#  define TBAG_NOEXCEPT_OPERATOR(e)  (noexcept(e))
+#  define TBAG_NOEXCEPT_SPECIFIER(e) noexcept(e)
+#  define TBAG_NOEXCEPT              TBAG_NOEXCEPT_SPECIFIER(true)
 # else
+#  define TBAG_NOEXCEPT_OPERATOR(e)
+#  define TBAG_NOEXCEPT_SPECIFIER(e)
 #  define TBAG_NOEXCEPT
-#  define TBAG_NOEXCEPT_EXPR(e)
 # endif
 #endif
 

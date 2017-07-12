@@ -88,9 +88,9 @@ public:
     virtual ~DatagramEncoder();
 
 public:
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_writers.empty()))
     { Guard g(_writers_mutex); return _writers.empty(); }
-    inline Size size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_writers.size()))
+    inline Size size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_writers.size()))
     { Guard g(_writers_mutex); return _writers.size();  }
 
 public:

@@ -83,8 +83,8 @@
 #  define TBAG_HAS_DIGIT_SEPARATORS
 # endif
 
-# if (TBAG_COMP_MSVC_VERSION >= 1900)
-#  define TBAG_HAS_CONSTEXPR // Unknown _MSC_FULL_VER
+# if (TBAG_COMP_MSVC_VERSION >= 1900) // Unknown _MSC_FULL_VER
+#  define TBAG_HAS_CONSTEXPR
 # endif
 #endif // defined(TBAG_COMP_MSVC)
 // FEATURE CLOSE.

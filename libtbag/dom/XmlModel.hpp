@@ -103,11 +103,11 @@ public:
     XmlModel & operator =(XmlModel && obj);
 
 public:
-    inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.clear()))
+    inline void clear() TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_nodes.clear()))
     { _nodes.clear(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_nodes.size()))
     { return _nodes.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_nodes.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_nodes.empty()))
     { return _nodes.empty(); }
 
 public:

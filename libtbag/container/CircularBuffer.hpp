@@ -145,7 +145,7 @@ private:
 
 public:
     CircularBuffer(Size size = CIRCULAR_BUFFER_DEFAULT_SIZE)
-            TBAG_NOEXCEPT_EXPR(buffer_is_nothrow_constructible)
+            TBAG_NOEXCEPT_SPECIFIER(buffer_is_nothrow_constructible)
             : _buffer(size), _capacity(_buffer.size()), _read_index(0), _written_size(0)
     { /* EMPTY. */ }
 
@@ -154,7 +154,7 @@ public:
 
 public:
     CircularBuffer(CircularBuffer const & obj)
-            TBAG_NOEXCEPT_EXPR(std::is_nothrow_copy_constructible<Buffer>::value)
+            TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_copy_constructible<Buffer>::value)
     {
         if (this != &obj) {
             _buffer       = obj._buffer;
@@ -165,7 +165,7 @@ public:
     }
 
     CircularBuffer(CircularBuffer && obj)
-            TBAG_NOEXCEPT_EXPR(std::is_nothrow_move_assignable<Buffer>::value)
+            TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_move_assignable<Buffer>::value)
     {
         if (this != &obj) {
             _buffer       = std::move(obj._buffer);
@@ -179,13 +179,13 @@ public:
 
 public:
     CircularBuffer & operator =(CircularBuffer const & obj)
-            TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(copy(obj)))
+            TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(copy(obj)))
     {
         return copy(obj);
     }
 
     CircularBuffer & operator =(CircularBuffer && obj)
-            TBAG_NOEXCEPT_EXPR(std::is_nothrow_move_assignable<Buffer>::value)
+            TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_move_assignable<Buffer>::value)
     {
         if (this != &obj) {
             _buffer       = std::move(obj._buffer);
@@ -199,7 +199,7 @@ public:
     }
 
 public:
-    CircularBuffer & copy(CircularBuffer const & obj) TBAG_NOEXCEPT_EXPR(std::is_nothrow_copy_assignable<Buffer>::value)
+    CircularBuffer & copy(CircularBuffer const & obj) TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_copy_assignable<Buffer>::value)
     {
         if (this != &obj) {
             _buffer       = obj._buffer;
@@ -211,7 +211,7 @@ public:
     }
 
 public:
-    void swap(CircularBuffer & obj) TBAG_NOEXCEPT_EXPR(std::is_nothrow_move_assignable<Buffer>::value)
+    void swap(CircularBuffer & obj) TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_move_assignable<Buffer>::value)
     {
         if (this != &obj) {
             _buffer.swap(obj._buffer);

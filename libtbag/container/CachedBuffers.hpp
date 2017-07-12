@@ -110,7 +110,7 @@ public:
         _datas_size = 0;
     }
 
-    inline Size size() const TBAG_NOEXCEPT_EXPR(__size_is_nothrow_assignable__)
+    inline Size size() const TBAG_NOEXCEPT_SPECIFIER(__size_is_nothrow_assignable__)
     {
         return _datas_size;
     }

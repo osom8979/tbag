@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-Path::Path() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<std::string>::value) : _path()
+Path::Path() TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_default_constructible<std::string>::value) : _path()
 {
     // EMPTY.
 }

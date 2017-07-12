@@ -73,11 +73,11 @@ public:
 
 public:
     // @formatter:off
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_assets.empty()))
     { return _assets.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_assets.size()))
     { return _assets.size(); }
-    inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_assets.clear()))
+    inline void clear() TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_assets.clear()))
     { _assets.clear(); }
     // @formatter:on
 

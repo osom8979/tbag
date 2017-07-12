@@ -66,11 +66,11 @@ public:
 
 public:
     // @formatter:off
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_paths.empty()))
     { return _paths.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_paths.size()))
     { return _paths.size(); }
-    inline void clear() TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_paths.clear()))
+    inline void clear() TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_paths.clear()))
     { _paths.clear(); }
     // @formatter:on
 

@@ -75,9 +75,9 @@ public:
     inline HelpCommander       & atOptions()       TBAG_NOEXCEPT { return _options; }
     inline HelpCommander const & atOptions() const TBAG_NOEXCEPT { return _options; }
 
-    inline std::string getConfigPath() const TBAG_NOEXCEPT_EXPR(std::is_nothrow_copy_assignable<std::string>::value)
+    inline std::string getConfigPath() const TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_copy_assignable<std::string>::value)
     { return _config_path; }
-    inline Version getVersion() const TBAG_NOEXCEPT_EXPR(std::is_nothrow_copy_assignable<Version>::value)
+    inline Version getVersion() const TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_copy_assignable<Version>::value)
     { return _version; }
 
     inline bool isEnableHelp   () const TBAG_NOEXCEPT { return _enable_help;    }

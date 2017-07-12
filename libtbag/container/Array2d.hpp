@@ -169,7 +169,7 @@ private:
     unsigned _height;
 
 public:
-    Array2d() TBAG_NOEXCEPT_EXPR(std::is_nothrow_default_constructible<allocator_type>::value)
+    Array2d() TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_default_constructible<allocator_type>::value)
             : _data(nullptr), _width(0), _height(0)
     { /* EMPTY. */ }
 

@@ -77,7 +77,7 @@ protected: // IMPORTANT!!
 public:
     inline std::thread::id getOwnerThreadId() const TBAG_NOEXCEPT
     { return _owner_thread_id; }
-    inline bool isRunning() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_running.load()))
+    inline bool isRunning() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_running.load()))
     { return _running.load(); }
 
 public:
@@ -188,7 +188,7 @@ public:
 
 #ifndef TBAG_UV_LOOP_BY_PASS_METHOD
 #define TBAG_UV_LOOP_BY_PASS_METHOD(retval, name, qualifier) \
-    inline retval name() qualifier TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_handles.name())) { return _handles.name(); }
+    inline retval name() qualifier TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_handles.name())) { return _handles.name(); }
 #define TBAG_EMPTY_QUALIFIER
 #endif
 

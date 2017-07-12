@@ -84,15 +84,15 @@ public:
     }
 
 public:
-    inline std::size_t size() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.empty()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_active.empty()))
     { return _active.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_active.empty()))
     { return _active.empty(); }
 
 public:
-    inline std::size_t sizeOfRemoveQueue() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_remove.size()))
+    inline std::size_t sizeOfRemoveQueue() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_remove.size()))
     { return _remove.size(); }
-    inline bool emptyOfRemoveQueue() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_remove.empty()))
+    inline bool emptyOfRemoveQueue() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_remove.empty()))
     { return _remove.empty(); }
 
 public:

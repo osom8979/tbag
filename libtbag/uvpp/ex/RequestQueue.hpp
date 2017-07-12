@@ -71,14 +71,14 @@ public:
     virtual ~RequestQueue();
 
 public:
-    inline bool getPrepareEmpty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_prepare.empty()))
+    inline bool getPrepareEmpty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_prepare.empty()))
     { Guard g(_mutex); return _prepare.empty(); }
-    inline bool getActiveEmpty() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.empty()))
+    inline bool getActiveEmpty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_active.empty()))
     { Guard g(_mutex); return _active.empty(); }
 
-    inline std::size_t getPrepareSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_prepare.size()))
+    inline std::size_t getPrepareSize() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_prepare.size()))
     { Guard g(_mutex); return _prepare.size(); }
-    inline std::size_t getActiveSize() const TBAG_NOEXCEPT_EXPR(TBAG_NOEXCEPT_EXPR(_active.size()))
+    inline std::size_t getActiveSize() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_active.size()))
     { Guard g(_mutex); return _active.size(); }
 
 public:
