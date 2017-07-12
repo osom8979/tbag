@@ -22,6 +22,7 @@
 #include <string>
 #include <thread>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <functional>
 
