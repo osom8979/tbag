@@ -81,9 +81,9 @@ public:
     virtual ~UdpServer();
 
 public:
-    inline bool emptySenders() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_senders.empty()))
+    inline bool emptySenders() const TBAG_NOEXCEPT_SP_OP(_senders.empty())
     { Guard g(_mutex); return _senders.empty(); }
-    inline std::size_t sizeSenders() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_senders.size()))
+    inline std::size_t sizeSenders() const TBAG_NOEXCEPT_SP_OP(_senders.size())
     { Guard g(_mutex); return _senders.size(); }
 
 private:

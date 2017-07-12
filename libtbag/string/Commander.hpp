@@ -70,9 +70,9 @@ public:
     Commander & operator =(Commander && obj);
 
 public:
-    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_commands.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_commands.empty())
     { return _commands.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_commands.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_commands.size())
     { return _commands.size(); }
 
     inline void setDefaultCallback(Callback const & callback)

@@ -68,11 +68,11 @@ public:
     Environments & operator =(Flags && flags);
 
 public:
-    inline void clear() TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_flags.clear()))
+    inline void clear() TBAG_NOEXCEPT_SP_OP(_flags.clear())
     { _flags.clear(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_flags.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_flags.size())
     { return _flags.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_flags.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_flags.empty())
     { return _flags.empty(); }
 
 public:

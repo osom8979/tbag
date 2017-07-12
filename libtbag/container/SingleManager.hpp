@@ -68,10 +68,10 @@ public:
     virtual ~SingleManager() { /* EMPTY. */ }
 
 public:
-    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_map.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_map.empty())
     { Guard g(_mutex); return _map.empty(); }
 
-    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_map.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_map.size())
     { Guard g(_mutex); return _map.size(); }
 
 public:

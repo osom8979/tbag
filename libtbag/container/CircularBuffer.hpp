@@ -179,7 +179,7 @@ public:
 
 public:
     CircularBuffer & operator =(CircularBuffer const & obj)
-            TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(copy(obj)))
+            TBAG_NOEXCEPT_SP_OP(copy(obj))
     {
         return copy(obj);
     }

@@ -90,9 +90,9 @@ public:
 
 public:
     // @formatter:off
-    inline void clear() TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_path.clear()))
+    inline void clear() TBAG_NOEXCEPT_SP_OP(_path.clear())
     { _path.clear(); }
-    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_path.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_path.empty())
     { return _path.empty(); }
     // @formatter:on
 

@@ -41,10 +41,12 @@
 # if defined(TBAG_HAS_NOEXCEPT)
 #  define TBAG_NOEXCEPT_OPERATOR(e)  (noexcept(e))
 #  define TBAG_NOEXCEPT_SPECIFIER(e) noexcept(e)
+#  define TBAG_NOEXCEPT_SP_OP(e)     TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(e))
 #  define TBAG_NOEXCEPT              TBAG_NOEXCEPT_SPECIFIER(true)
 # else
 #  define TBAG_NOEXCEPT_OPERATOR(e)
 #  define TBAG_NOEXCEPT_SPECIFIER(e)
+#  define TBAG_NOEXCEPT_SP_OP(e)
 #  define TBAG_NOEXCEPT
 # endif
 #endif

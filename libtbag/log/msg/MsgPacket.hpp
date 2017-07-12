@@ -128,13 +128,13 @@ public:
 
 public:
     // @formatter:off
-    inline char const * c_str() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_message.c_str()))
+    inline char const * c_str() const TBAG_NOEXCEPT_SP_OP(_message.c_str())
     { return _message.c_str(); }
-    inline bool empty() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_message.empty()))
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_message.empty())
     { return _message.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_message.size()))
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_message.size())
     { return _message.size(); }
-    inline void clear() TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_message.clear()))
+    inline void clear() TBAG_NOEXCEPT_SP_OP(_message.clear())
     { _message.clear(); }
     // @formatter:on
 
