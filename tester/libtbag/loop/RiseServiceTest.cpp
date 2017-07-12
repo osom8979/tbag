@@ -174,13 +174,20 @@ TEST(RiseServiceTest, RiseServiceCallback)
 TEST(RiseServiceTest, RiseServiceDefault)
 {
     RiseService::SharedComSet coms;
-    auto com1 = RiseService::SharedCom(new TestCom);
-    auto com2 = RiseService::SharedCom(new TestCom);
+    TestCom * test_com1 = new TestCom();
+    TestCom * test_com2 = new TestCom();
+    auto com1 = RiseService::SharedCom(test_com1);
+    auto com2 = RiseService::SharedCom(test_com2);
+    ASSERT_TRUE(static_cast<bool>(com1));
+    ASSERT_TRUE(static_cast<bool>(com2));
     ASSERT_TRUE(coms.insert(com1).second);
     ASSERT_TRUE(coms.insert(com2).second);
     ASSERT_EQ(2, coms.size());
 
     RiseService service(1, true);
     ASSERT_EQ(Err::E_SUCCESS, service.run(coms));
+
+    ASSERT_EQ(1, test_com1->run_count);
+    ASSERT_EQ(1, test_com2->run_count);
 }
 
