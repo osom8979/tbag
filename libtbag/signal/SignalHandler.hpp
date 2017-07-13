@@ -48,7 +48,7 @@ TBAG_API void releaseInstance();
     /* -- END -- */
 #endif
 
-#define _TBAG_XX(name, signal, message) static int const name = signal;
+#define _TBAG_XX(name, signal, message) TBAG_CONSTEXPR int const TBAG_##name = signal;
 TBAG_SIGNAL_MAP(_TBAG_XX)
 #undef _TBAG_XX
 

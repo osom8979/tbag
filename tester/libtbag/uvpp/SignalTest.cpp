@@ -40,17 +40,17 @@ TEST(SignalTest, Default)
 #else
     Loop loop;
     auto signal = loop.newHandle<SignalTest>(loop);
-    signal->start(signal::SIGNAL_INTERRUPT);
+    signal->start(signal::TBAG_SIGNAL_INTERRUPT);
 
     std::thread thread = std::thread([&loop](){
         loop.run();
     });
 
-    signal::raise(signal::SIGNAL_INTERRUPT);
+    signal::raise(signal::TBAG_SIGNAL_INTERRUPT);
     thread.join();
 
     ASSERT_EQ(1, signal->counter);
-    ASSERT_EQ(signal::SIGNAL_INTERRUPT, signal->last_signum);
+    ASSERT_EQ(signal::TBAG_SIGNAL_INTERRUPT, signal->last_signum);
 #endif
 }
 

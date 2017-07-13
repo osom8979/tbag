@@ -295,7 +295,7 @@ Err TpotRunner::killProcess(std::string const & body, HttpBuilder & response)
         return Err::E_EXPIRED;
     }
 
-    Err const KILL_RESULT = itr->second->processKill(signal::SIGNAL_TERMINATION);
+    Err const KILL_RESULT = itr->second->processKill(signal::TBAG_SIGNAL_TERMINATION);
     if (KILL_RESULT != Err::E_SUCCESS) {
         response.setStatus(network::http::HttpStatus::SC_INTERNAL_SERVER_ERROR);
         response.setBody(_body_5xx);

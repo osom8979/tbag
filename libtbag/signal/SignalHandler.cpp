@@ -212,7 +212,7 @@ static void __std_terminate_dispatcher__()
 std::string getSignalName(int signal_number)
 {
     switch (signal_number) {
-#define _TBAG_XX(name, signal, message) case name: return #signal;
+#define _TBAG_XX(name, signal, message) case TBAG_##name: return #signal;
     TBAG_SIGNAL_MAP(_TBAG_XX)
 #undef _TBAG_XX
     default: return std::to_string(signal_number);
@@ -246,9 +246,9 @@ void registerDefaultStdTerminateHandler(std::string const & logger_name)
 
 void registerDefaultHandler(std::string const & logger_name)
 {
-    registerHandler(SIGNAL_ABORT                 , new __impl::DefaultAbortHandler    (logger_name), LAST_ORDER);
-    registerHandler(SIGNAL_SEGMENTATION_VIOLATION, new __impl::DefaultSegFaultHandler (logger_name), LAST_ORDER);
-    registerHandler(SIGNAL_TERMINATION           , new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);
+    registerHandler(TBAG_SIGNAL_ABORT                 , new __impl::DefaultAbortHandler    (logger_name), LAST_ORDER);
+    registerHandler(TBAG_SIGNAL_SEGMENTATION_VIOLATION, new __impl::DefaultSegFaultHandler (logger_name), LAST_ORDER);
+    registerHandler(TBAG_SIGNAL_TERMINATION           , new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);
 }
 
 SignalHandler * createDefaultSignalHandler(std::string const & logger_name)
