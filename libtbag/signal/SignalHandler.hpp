@@ -22,6 +22,7 @@
 
 #include <string>
 #include <exception>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -68,6 +69,33 @@ struct SignalHandler
 {
     virtual void run(int signal) = 0;
 };
+
+/**
+ * FunctionalSignalHandler handler interface.
+ *
+ * @author zer0
+ * @date   2017-07-14
+ */
+struct FunctionalSignalHandler : public SignalHandler
+{
+    using Callback = std::function<void(int)>;
+
+    Callback on_run_cb;
+
+    FunctionalSignalHandler() { /* EMPTY. */ }
+    virtual ~FunctionalSignalHandler() { /* EMPTY. */ }
+
+    void setRun(Callback const & cb) { on_run_cb = cb; }
+    virtual void run(int signal) override { if (on_run_cb) { on_run_cb(signal); } }
+};
+
+/**
+ * FuncSignalHandler typedef.
+ *
+ * @author zer0
+ * @date   2017-07-14
+ */
+using FuncSignalHandler = FunctionalSignalHandler;
 
 TBAG_API std::string getSignalName(int signal_number);
 
