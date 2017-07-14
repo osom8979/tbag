@@ -9,6 +9,8 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/func/FunctionalTimer.hpp>
+#include <libtbag/uvpp/func/FunctionalSignal.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
 
 #include <cassert>
 #include <utility>
@@ -192,8 +194,9 @@ Err RiseService::run(SharedComSet const & init_coms)
 {
     tDLogD("RiseService::run() == BEGIN ==");
 
-    using Loop = libtbag::uvpp::Loop;
-    using FuncTimer = libtbag::uvpp::func::FuncTimer;
+    using Loop       = libtbag::uvpp::Loop;
+    using FuncTimer  = libtbag::uvpp::func::FuncTimer;
+    using FuncSignal = libtbag::uvpp::func::FuncSignal;
 
     Loop loop;
     auto timer = loop.newHandle<FuncTimer>(loop);
@@ -202,12 +205,21 @@ Err RiseService::run(SharedComSet const & init_coms)
         return Err::E_BADALLOC;
     }
 
-    Err const START_CODE = timer->start(0, REPEAT);
-    if (START_CODE != Err::E_SUCCESS) {
-        tDLogE("RiseService::run() Timer start {} error", getErrName(START_CODE));
+    auto signal = loop.newHandle<FuncSignal>(loop);
+    if (static_cast<bool>(signal) == false) {
+        tDLogA("RiseService::run() Signal handle is expired.");
+        return Err::E_BADALLOC;
+    }
+
+    Err const TIMER_START_CODE = timer->start(0, REPEAT);
+    Err const SIGNAL_START_CODE = signal->start(signal::TBAG_SIGNAL_INTERRUPT);
+
+    if (SIGNAL_START_CODE != Err::E_SUCCESS || TIMER_START_CODE != Err::E_SUCCESS) {
+        tDLogE("RiseService::run() Handle start (T:{}, S:{}) error", getErrName(TIMER_START_CODE), getErrName(SIGNAL_START_CODE));
         timer->close();
+        signal->close();
         loop.run();
-        return START_CODE;
+        return SIGNAL_START_CODE;
     }
 
     SharedComSet coms = init_coms;
@@ -236,6 +248,13 @@ Err RiseService::run(SharedComSet const & init_coms)
 
         if (end_count == COMS_SIZE) {
             timer->close();
+            signal->close();
+        }
+    });
+    signal->setOnSignal([&](int signum) {
+        if (onInterrupt(coms) == TERMINATE_LOOP_FLAG) {
+            timer->close();
+            signal->close();
         }
     });
 
@@ -274,6 +293,11 @@ void RiseService::onTimer(SharedComSet & coms)
 void RiseService::onDestroy(SharedComSet & coms)
 {
     // EMPTY.
+}
+
+bool RiseService::onInterrupt(SharedComSet & coms)
+{
+    return TERMINATE_LOOP_FLAG;
 }
 
 } // namespace loop

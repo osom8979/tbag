@@ -114,6 +114,7 @@ public:
 
 public:
     TBAG_CONSTEXPR static uint64_t const RISE_REPEAT_MILLISECONDS = 5 * 1000;
+    TBAG_CONSTEXPR static bool const TERMINATE_LOOP_FLAG = true;
 
 public:
     uint64_t const REPEAT;
@@ -135,6 +136,12 @@ public:
     virtual void onCreate(SharedComSet & coms);
     virtual void onTimer(SharedComSet & coms);
     virtual void onDestroy(SharedComSet & coms);
+
+public:
+    /**
+     * @return If true, the loop terminates.
+     */
+    virtual bool onInterrupt(SharedComSet & coms);
 };
 
 /**
@@ -149,10 +156,13 @@ struct FunctionalRiseService : public RiseService
     using SharedComSet = std::set<SharedCom>;
 
     using Callback = std::function<void(SharedComSet&)>;
+    using InterruptCallback = std::function<bool(SharedComSet&)>;
 
     Callback on_create_cb;
     Callback on_timer_cb;
     Callback on_destroy_cb;
+
+    InterruptCallback on_interrupt_cb;
 
     FunctionalRiseService(uint64_t repeat = RISE_REPEAT_MILLISECONDS, bool verbose = false) : RiseService(repeat, verbose)
     { /* EMPTY. */ }
@@ -162,10 +172,19 @@ struct FunctionalRiseService : public RiseService
     void setOnCreate (Callback const & cb) {  on_create_cb = cb; }
     void setOnTimer  (Callback const & cb) {   on_timer_cb = cb; }
     void setOnDestroy(Callback const & cb) { on_destroy_cb = cb; }
+    void setOnInterrupt(InterruptCallback const & cb) { on_interrupt_cb = cb; }
 
     virtual void onCreate (SharedComSet & coms) override { if ( on_create_cb) {  on_create_cb(coms); } }
     virtual void onTimer  (SharedComSet & coms) override { if (  on_timer_cb) {   on_timer_cb(coms); } }
     virtual void onDestroy(SharedComSet & coms) override { if (on_destroy_cb) { on_destroy_cb(coms); } }
+
+    virtual bool onInterrupt(SharedComSet & coms) override
+    {
+        if (on_interrupt_cb) {
+            return on_interrupt_cb(coms);
+        }
+        return RiseService::TERMINATE_LOOP_FLAG;
+    }
 };
 
 using FuncRiseService = FunctionalRiseService;
