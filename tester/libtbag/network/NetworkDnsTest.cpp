@@ -41,9 +41,15 @@ TEST(NetworkDnsTest, Sync)
     ASSERT_LE(1U, ip_list.size());
     for (auto & ip : ip_list) {
         DnsNameInfo name;
-        struct sockaddr_in addr = {0,};
-        ASSERT_EQ(Err::E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
-        ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
+        if (isIpv4(ip)) {
+            struct sockaddr_in addr = {0,};
+            ASSERT_EQ(Err::E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
+            ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
+        } else if (isIpv6(ip)) {
+            struct sockaddr_in6 addr = {0,};
+            ASSERT_EQ(Err::E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
+            ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
+        }
 
         ASSERT_FALSE(name.getHost().empty());
         std::cout << "Ip: " << ip << " -> Domain: " << name.getHost() << std::endl;
