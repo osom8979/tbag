@@ -50,14 +50,14 @@ public:
 public:
     void lock() TBAG_NOEXCEPT
     {
-        while (this->_state.exchange(LOCKED, std::memory_order_acquire) == LOCKED) {
+        while (_state.exchange(LOCKED, std::memory_order_acquire) == LOCKED) {
             // BUSY WAIT.
         }
     }
 
     void unlock() volatile TBAG_NOEXCEPT
     {
-        this->_state.store(UNLOCKED, std::memory_order_release);
+        _state.store(UNLOCKED, std::memory_order_release);
     }
 };
 

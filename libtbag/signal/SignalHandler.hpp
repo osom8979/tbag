@@ -110,11 +110,14 @@ TBAG_API SignalHandler * createDefaultSignalHandler(std::string const & logger_n
 // @formatter:off
 inline int raise(int signal)
 { return std::raise(signal); }
-inline void terminate() TBAG_NOEXCEPT_SP_OP(std::terminate())
+
+[[ noreturn ]] inline void terminate() TBAG_NOEXCEPT_SP_OP(std::terminate())
 { std::terminate(); }
-inline void exit(int code)
+
+[[ noreturn ]] inline void exit(int code) TBAG_NOEXCEPT_SP_OP(std::exit(code))
 { std::exit(code); }
-inline void exitForce(int code)
+
+[[ noreturn ]] inline void exitForce(int code) TBAG_NOEXCEPT_SP_OP(std::_Exit(code))
 { std::_Exit(code); }
 // @formatter:on
 
