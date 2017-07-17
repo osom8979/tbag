@@ -138,12 +138,13 @@ public:
     /**
      * Save fragment.
      *
-     * @example
-     *  @code
-     *   MemoryPool pool;
-     *   // ...
-     *   auto fragment = pool.save();
-     *  @endcode
+     * @remarks
+     *  Example:
+     *   @code
+     *    MemoryPool pool;
+     *    // ...
+     *    auto fragment = pool.save();
+     *   @endcode
      */
     UniqueFragment save()
     {
