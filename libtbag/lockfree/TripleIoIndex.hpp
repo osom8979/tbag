@@ -20,6 +20,7 @@
 
 #include <thread>
 #include <atomic>
+#include <array>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -96,7 +97,7 @@ public:
     TripleIoIndex(int  input_value = 0,
                   int output_value = 1,
                   int  ready_value = 2, bool cas_loop = true);
-    virtual ~TripleIoIndex();
+    ~TripleIoIndex();
 
 public:
     static Info createInfo(int  input_value = 0, bool  input_flag = false,
@@ -147,6 +148,70 @@ public:
 
     int nextInputValue();
     int nextOutputValue();
+};
+
+/**
+ * TripleIoBuffer class prototype.
+ *
+ * @author zer0
+ * @date   2017-07-17
+ */
+template <typename BufferType>
+class TripleIoBuffer : private Noncopyable
+{
+public:
+    using Buffer = BufferType;
+    using BufferArray = std::array<Buffer, TripleIoIndex::SIZE>;
+
+public:
+    using value_type             = Buffer;
+    using reference              = value_type&;
+    using const_reference        = const value_type&;
+    using iterator               = value_type*;
+    using const_iterator         = const value_type*;
+    using pointer                = value_type*;
+    using const_pointer          = const value_type*;
+    using size_type              = std::size_t;
+    using difference_type        = std::ptrdiff_t;
+    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+private:
+    TripleIoIndex _index;
+    BufferArray _buffers;
+
+public:
+    TripleIoBuffer(bool cas_loop = true) : _index(0, 1, 2, cas_loop), _buffers()
+    { /* EMPTY. */ }
+    ~TripleIoBuffer()
+    { /* EMPTY. */ }
+
+// Capacity methods.
+public:
+    TBAG_CONSTEXPR static size_type  size() TBAG_NOEXCEPT { return TripleIoIndex::SIZE; }
+    TBAG_CONSTEXPR static      bool empty() TBAG_NOEXCEPT { return false; }
+
+// Iterators methods.
+public:
+    inline       iterator begin()       TBAG_NOEXCEPT { return _buffers.begin(); }
+    inline const_iterator begin() const TBAG_NOEXCEPT { return _buffers.begin(); }
+    inline       iterator   end()       TBAG_NOEXCEPT { return _buffers.end(); }
+    inline const_iterator   end() const TBAG_NOEXCEPT { return _buffers.end(); }
+
+    inline       reverse_iterator rbegin()       TBAG_NOEXCEPT { return _buffers.rbegin(); }
+    inline const_reverse_iterator rbegin() const TBAG_NOEXCEPT { return _buffers.rbegin(); }
+    inline       reverse_iterator   rend()       TBAG_NOEXCEPT { return _buffers.rend(); }
+    inline const_reverse_iterator   rend() const TBAG_NOEXCEPT { return _buffers.rend(); }
+
+    inline         const_iterator  cbegin() const TBAG_NOEXCEPT { return _buffers.cbegin (); }
+    inline         const_iterator    cend() const TBAG_NOEXCEPT { return _buffers.cend   (); }
+    inline const_reverse_iterator crbegin() const TBAG_NOEXCEPT { return _buffers.crbegin(); }
+    inline const_reverse_iterator   crend() const TBAG_NOEXCEPT { return _buffers.crend  (); }
+
+// I/O Methods.
+public:
+    reference atNextInput () TBAG_NOEXCEPT { return _buffers[_index.nextInputValue ()]; }
+    reference atNextOutput() TBAG_NOEXCEPT { return _buffers[_index.nextOutputValue()]; }
 };
 
 } // namespace lockfree

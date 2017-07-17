@@ -17,11 +17,12 @@
 #define DISABLE_MASSIVE_TEST
 
 #if defined(DISABLE_MASSIVE_TEST)
+TBAG_CONSTEXPR static std::size_t const BUFFER_SIZE = 512;
 TBAG_CONSTEXPR static std::size_t const LOOP_COUNT = 10000;
 #else
-TBAG_CONSTEXPR static std::size_t const LOOP_COUNT = 20000000;
+TBAG_CONSTEXPR static std::size_t const BUFFER_SIZE = 512 * 2;
+TBAG_CONSTEXPR static std::size_t const LOOP_COUNT = 10000 * 200;
 #endif
-TBAG_CONSTEXPR static std::size_t const BUFFER_SIZE = 512;
 
 using namespace libtbag;
 using namespace libtbag::lockfree;
@@ -149,33 +150,28 @@ static void runBenchmark(IndexType & index)
     std::atomic_bool is_error(false);
 
     std::thread input_thread([&](){
-        int input_index = index.nextInputValue();
         for (std::size_t i = 0; i < LOOP_COUNT; ++i) {
-            for (auto & c : buffers[input_index]) {
+            int const INPUT_INDEX = index.nextInputValue();
+            for (auto & c : buffers[INPUT_INDEX]) {
                 if (is_error) { break; }
                 c = i;
             }
             if (is_error) { break; }
-            input_index = index.nextInputValue();
         }
     });
 
     std::thread output_thread([&](){
-        int output_index = index.nextOutputValue();
         for (std::size_t i = 0; i < LOOP_COUNT; ++i) {
-            auto temp = buffers[output_index];
-            ASSERT_LT(0, temp.size());
-
-            std::size_t const CHECK_VALUE = temp[0];
-            for (auto & c : temp) {
+            int const OUTPUT_INDEX = index.nextOutputValue();
+            ASSERT_EQ(BUFFER_SIZE, buffers[OUTPUT_INDEX].size());
+            std::size_t const CHECK_VALUE = buffers[OUTPUT_INDEX][0];
+            for (auto & c : buffers[OUTPUT_INDEX]) {
                 if (CHECK_VALUE != c) {
                     is_error = true;
                     std::cerr << "Error loop: " << i << std::endl;
                 }
                 ASSERT_EQ(CHECK_VALUE, c);
             }
-
-            output_index = index.nextOutputValue();
         }
     });
 
@@ -196,5 +192,48 @@ TEST(TripleIoIndexTest, BenchmarkOfMutex)
 {
     TripleIoIndexLock index;
     runBenchmark(index);
+}
+
+TEST(TripleIoIndexTest, BenchmarkOfTripleIoBuffer)
+{
+    TripleIoBuffer<Buffer> buffers;
+    ASSERT_EQ(3, buffers.size());
+    for (auto & b : buffers) {
+        b.assign(BUFFER_SIZE, 0x00);
+    }
+
+    std::atomic_bool is_error(false);
+
+    std::thread input_thread([&](){
+        for (std::size_t i = 0; i < LOOP_COUNT; ++i) {
+            Buffer & input = buffers.atNextInput();
+            for (auto & c : input) {
+                if (is_error) { break; }
+                c = i;
+            }
+            if (is_error) { break; }
+        }
+    });
+
+    std::thread output_thread([&](){
+        for (std::size_t i = 0; i < LOOP_COUNT; ++i) {
+            Buffer & output = buffers.atNextOutput();
+            ASSERT_EQ(BUFFER_SIZE, output.size());
+            std::size_t const CHECK_VALUE = output[0];
+            for (auto & c : output) {
+                if (CHECK_VALUE != c) {
+                    is_error = true;
+                    std::cerr << "Error loop: " << i << std::endl;
+                }
+                ASSERT_EQ(CHECK_VALUE, c);
+            }
+        }
+    });
+
+    ASSERT_TRUE(input_thread.joinable());
+    ASSERT_TRUE(output_thread.joinable());
+
+    input_thread.join();
+    output_thread.join();
 }
 
