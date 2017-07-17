@@ -47,7 +47,6 @@ namespace lockfree {
  *   |G|             |G|             |G|             |               |
  *   +-+-------------+-+-------------+-+-------------+---------------+
  *  @endcode
- * - <code>^</code>: Update flag.
  * Thread:
  *  @code
  *   ~~ Thread 01 ~~> ${input} ~~> ...
@@ -141,10 +140,6 @@ public:
 
 public:
     inline Info getInfo() const TBAG_NOEXCEPT_SP_OP(_info.load()) { return _info.load(); }
-
-    inline uint8_t  getInputByte() const TBAG_NOEXCEPT_SP_OP(getInfo()) { return  getInputByte(getInfo()); }
-    inline uint8_t getOutputByte() const TBAG_NOEXCEPT_SP_OP(getInfo()) { return getOutputByte(getInfo()); }
-    inline uint8_t  getReadyByte() const TBAG_NOEXCEPT_SP_OP(getInfo()) { return  getReadyByte(getInfo()); }
 
 public:
     Info nextInput();
