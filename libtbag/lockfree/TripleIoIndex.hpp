@@ -164,17 +164,17 @@ public:
     using BufferArray = std::array<Buffer, TripleIoIndex::SIZE>;
 
 public:
-    using value_type             = Buffer;
-    using reference              = value_type&;
-    using const_reference        = const value_type&;
-    using iterator               = value_type*;
-    using const_iterator         = const value_type*;
-    using pointer                = value_type*;
-    using const_pointer          = const value_type*;
-    using size_type              = std::size_t;
-    using difference_type        = std::ptrdiff_t;
-    using reverse_iterator       = std::reverse_iterator<iterator>;
-    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+    using value_type             = typename BufferArray::value_type;
+    using reference              = typename BufferArray::reference;
+    using const_reference        = typename BufferArray::const_reference;
+    using iterator               = typename BufferArray::iterator;
+    using const_iterator         = typename BufferArray::const_iterator;
+    using pointer                = typename BufferArray::pointer;
+    using const_pointer          = typename BufferArray::const_pointer;
+    using size_type              = typename BufferArray::size_type;
+    using difference_type        = typename BufferArray::difference_type;
+    using reverse_iterator       = typename BufferArray::reverse_iterator;
+    using const_reverse_iterator = typename BufferArray::const_reverse_iterator;
 
 private:
     TripleIoIndex _index;

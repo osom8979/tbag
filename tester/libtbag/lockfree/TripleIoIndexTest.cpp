@@ -198,8 +198,8 @@ TEST(TripleIoIndexTest, BenchmarkOfTripleIoBuffer)
 {
     TripleIoBuffer<Buffer> buffers;
     ASSERT_EQ(3, buffers.size());
-    for (auto & b : buffers) {
-        b.assign(BUFFER_SIZE, 0x00);
+    for (auto itr = buffers.begin(); itr != buffers.end(); ++itr) {
+        itr->assign(BUFFER_SIZE, 0x00);
     }
 
     std::atomic_bool is_error(false);
