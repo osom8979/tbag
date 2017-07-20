@@ -23,6 +23,32 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+std::string format(char const * f, ...)
+{
+    va_list args_list;
+    va_start(args_list, f);
+    std::string const RESULT = vformat(f, DEFAULT_FORMAT_BUFFER_SIZE, args_list);
+    va_end(args_list);
+    return RESULT;
+}
+
+std::string vformat(char const * f, std::size_t buffer_size, va_list & l)
+{
+    std::size_t step = 1;
+    while (step <= MAX_FORMAT_RESIZE_LOOP_COUNT) {
+        std::vector<char> buffer(buffer_size * step);
+        int const WRITE_SIZE = std::vsnprintf(&buffer[0], buffer.size(), f, l);
+
+        if (WRITE_SIZE <= 0) {
+            return std::string(); // empty or error.
+        } else if (0 < COMPARE_AND(static_cast<std::size_t>(WRITE_SIZE)) < buffer.size()) {
+            return std::string(buffer.data(), buffer.data() + WRITE_SIZE);
+        }
+        ++step;
+    }
+    return std::string();
+}
+
 std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter)
 {
     if (source.empty() || delimiter.empty()) {

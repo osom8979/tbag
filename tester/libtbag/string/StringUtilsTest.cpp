@@ -16,6 +16,14 @@
 using namespace libtbag;
 using namespace libtbag::string;
 
+TEST(StringsTest, Format)
+{
+    ASSERT_STREQ("TEST", format("%s", "TEST").c_str());
+    ASSERT_STREQ("1234", format("%d", 1234).c_str());
+    ASSERT_STREQ("TEST/1234", format("%s/%d", "TEST", 1234).c_str());
+    ASSERT_STREQ("TEST/1234", fformat("{}/{}", "TEST", 1234).c_str());
+}
+
 TEST(StringsTest, SplitTokens)
 {
     std::string delimiter = "//";

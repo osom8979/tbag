@@ -20,7 +20,9 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/3rd/fmt/format.h>
 
+#include <cstdarg>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -28,6 +30,7 @@
 #include <regex>
 #include <thread>
 #include <type_traits>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -71,6 +74,18 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
     return ss.str();
 }
 
+template <typename ... Args>
+std::string fformat(std::string const & f, Args && ... args)
+{
+    return ::fmt::format(f, std::forward<Args>(args) ...);
+}
+
+TBAG_CONSTEXPR std::size_t const DEFAULT_FORMAT_BUFFER_SIZE = 1024;
+TBAG_CONSTEXPR std::size_t const MAX_FORMAT_RESIZE_LOOP_COUNT = 5;
+
+TBAG_API std::string  format(char const * f, ...);
+TBAG_API std::string vformat(char const * f, std::size_t buffer_size, va_list & l);
+
 /**
  * Separate tokens.
  *
@@ -84,7 +99,6 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
  *  Token vector.
  */
 TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
-
 TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter);
 
 /**
