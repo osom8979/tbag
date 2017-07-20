@@ -25,11 +25,9 @@ namespace string {
 
 std::string format(char const * f, ...)
 {
-    va_list args_list;
-    va_start(args_list, f);
-    std::string const RESULT = vformat(f, DEFAULT_FORMAT_BUFFER_SIZE, args_list);
-    va_end(args_list);
-    return RESULT;
+    std::string result;
+    TBAG_FORMAT_VA_LIST(result, f, f, DEFAULT_FORMAT_BUFFER_SIZE);
+    return result;
 }
 
 std::string vformat(char const * f, std::size_t buffer_size, va_list & l)

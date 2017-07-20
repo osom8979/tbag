@@ -86,6 +86,16 @@ TBAG_CONSTEXPR std::size_t const MAX_FORMAT_RESIZE_LOOP_COUNT = 5;
 TBAG_API std::string  format(char const * f, ...);
 TBAG_API std::string vformat(char const * f, std::size_t buffer_size, va_list & l);
 
+#ifndef TBAG_FORMAT_VA_LIST
+#define TBAG_FORMAT_VA_LIST(result, format_string, last_argument_name, buffer_size)     \
+    do {                                                                                \
+        va_list __args_list__;                                                          \
+        va_start(__args_list__, last_argument_name);                                    \
+        result = ::libtbag::string::vformat(format_string, buffer_size, __args_list__); \
+        va_end(__args_list__);                                                          \
+    } while (0)
+#endif
+
 /**
  * Separate tokens.
  *
