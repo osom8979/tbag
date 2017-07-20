@@ -20,6 +20,8 @@ TEST(StringsTest, Format)
 {
     ASSERT_STREQ("TEST", format("%s", "TEST").c_str());
     ASSERT_STREQ("1234", format("%d", 1234).c_str());
+    ASSERT_STREQ("1234", format("%.0Lf", static_cast<long double>(1234.123)).c_str());
+    ASSERT_STREQ("1.34", format("%.2f", static_cast<double>(1.344555)).c_str());
     ASSERT_STREQ("TEST/1234", format("%s/%d", "TEST", 1234).c_str());
     ASSERT_STREQ("TEST/1234", fformat("{}/{}", "TEST", 1234).c_str());
 }
