@@ -16,6 +16,14 @@ TEST(EqualsTest, Default)
     ASSERT_FALSE(isFloatingPointEquals(0.015, 0.017, 0.001));
     ASSERT_TRUE (isFloatingPointEquals(0.015, 0.017, 0.1));
 
+    ASSERT_TRUE(__check_floating_point_of_equals(0.101, 0.102, 0.0001));
+    ASSERT_TRUE(__check_floating_point_of_equals(0.101, 0.102, 100));
+    ASSERT_TRUE(__check_floating_point_of_equals(0.101, 0.102));
+
+    ASSERT_FALSE(__check_floating_point_of_equals(100, 100, 0.01));
+    ASSERT_FALSE(__check_floating_point_of_equals(100, 100, 100));
+    ASSERT_FALSE(__check_floating_point_of_equals(100, 100));
+
     ASSERT_FALSE(equals(0.101, 0.102, 0.0001));
     ASSERT_TRUE (equals(0.101, 0.102, 0.01));
 

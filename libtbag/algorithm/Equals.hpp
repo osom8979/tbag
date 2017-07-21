@@ -74,20 +74,36 @@ struct Equals : protected __EqualsBackend<T, E, std::is_floating_point<T>::value
     using Parent = __EqualsBackend<T, E, std::is_floating_point<T>::value>;
     static_assert(std::is_pod<T>::value, "Only POD types are supported.");
 
+    TBAG_CONSTEXPR static bool const value = Parent::value;
+
+    TBAG_CONSTEXPR static bool isFloatingPoint() TBAG_NOEXCEPT { return value; }
+
     inline static bool equals(T lh, T rh, E epsilon = static_cast<E>(TBAG_DEFAULT_FLOATING_POINT_EQUALS_EPSILON)) TBAG_NOEXCEPT
     { return Parent::__equals(lh, rh, epsilon); }
 };
 
 template <typename T, typename E>
-bool equals(T a, T b, E epsilon)
+inline bool equals(T a, T b, E epsilon)
 {
     return Equals<T, E>::equals(a, b, epsilon);
 }
 
 template <typename T>
-bool equals(T a, T b)
+inline bool equals(T a, T b)
 {
     return Equals<T, T>::equals(a, b);
+}
+
+template <typename T, typename E>
+inline bool __check_floating_point_of_equals(T a, T b, E epsilon)
+{
+    return Equals<T, E>::isFloatingPoint();
+}
+
+template <typename T>
+inline bool __check_floating_point_of_equals(T a, T b)
+{
+    return Equals<T, T>::isFloatingPoint();
 }
 
 } // namespace algorithm
