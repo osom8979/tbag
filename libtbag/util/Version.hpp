@@ -121,6 +121,8 @@ public:
 // --------------------
 
 TBAG_API Version getTbagVersion() TBAG_NOEXCEPT;
+TBAG_API Version getTbagPacketVersion() TBAG_NOEXCEPT;
+TBAG_API Version getTbagReleaseVersion() TBAG_NOEXCEPT;
 
 } // namespace util
 

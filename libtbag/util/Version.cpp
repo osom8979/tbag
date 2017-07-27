@@ -128,6 +128,16 @@ Version getTbagVersion() TBAG_NOEXCEPT
     return Version(LIBTBAG_VERSION_MAJOR, LIBTBAG_VERSION_MINOR, LIBTBAG_VERSION_PATCH);
 }
 
+Version getTbagPacketVersion() TBAG_NOEXCEPT
+{
+    return Version(LIBTBAG_VERSION_PACKET_MAJOR, LIBTBAG_VERSION_PACKET_MINOR);
+}
+
+Version getTbagReleaseVersion() TBAG_NOEXCEPT
+{
+    return Version(LIBTBAG_VERSION_RELEASE);
+}
+
 } // namespace util
 
 // --------------------
