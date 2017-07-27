@@ -61,6 +61,11 @@ public:
     SocketAddress & operator =(SocketAddress && obj);
 
 public:
+    Err init(struct sockaddr     const * addr);
+    Err init(struct sockaddr_in  const * addr);
+    Err init(struct sockaddr_in6 const * addr);
+
+public:
     Err initIpv4(std::string const & ip, int port = 0);
     Err initIpv6(std::string const & ip, int port = 0);
     Err initName(std::string const & host, std::string const & service = "", int port = 0);
@@ -74,7 +79,7 @@ public:
     inline struct sockaddr_in  const * getIpv4  () const TBAG_NOEXCEPT { return &addr.ipv4; }
     inline struct sockaddr_in6 const * getIpv6  () const TBAG_NOEXCEPT { return &addr.ipv6; }
 
-    inline bool isIpv4() const TBAG_NOEXCEPT { return addr.ipv4.sin_port == AF_INET; }
+    inline bool isIpv4() const TBAG_NOEXCEPT { return addr.ipv4.sin_port  == AF_INET;  }
     inline bool isIpv6() const TBAG_NOEXCEPT { return addr.ipv6.sin6_port == AF_INET6; }
 
 public:

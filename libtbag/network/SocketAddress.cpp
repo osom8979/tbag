@@ -58,6 +58,30 @@ SocketAddress & SocketAddress::operator =(SocketAddress && obj)
     return *this;
 }
 
+Err SocketAddress::init(struct sockaddr const * in)
+{
+    if (in->sa_family == AF_INET) {
+        return init((struct sockaddr_in const *)in);
+    } else if (in->sa_family == AF_INET6) {
+        return init((struct sockaddr_in6 const *)in);
+    }
+    return Err::E_UNKNOWN;
+}
+
+Err SocketAddress::init(struct sockaddr_in const * in)
+{
+    ::memset(&addr, 0x00, sizeof(addr));
+    ::memcpy(&addr.ipv4, in, sizeof(sockaddr_in));
+    return Err::E_SUCCESS;
+}
+
+Err SocketAddress::init(struct sockaddr_in6 const * in)
+{
+    ::memset(&addr, 0x00, sizeof(addr));
+    ::memcpy(&addr.ipv6, in, sizeof(sockaddr_in6));
+    return Err::E_SUCCESS;
+}
+
 Err SocketAddress::initIpv4(std::string const & ip, int port)
 {
     return uvpp::initAddress(ip, port, &addr.ipv4);
