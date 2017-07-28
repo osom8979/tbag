@@ -7,6 +7,7 @@
 
 #include <libtbag/dom/node/ServerXmlNode.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/network/details/NetCommon.hpp>
 
 #include <algorithm>
 #include <utility>
@@ -18,18 +19,92 @@ NAMESPACE_LIBTBAG_OPEN
 namespace dom  {
 namespace node {
 
-TBAG_CONSTEXPR char const * const SERVER_XML_NODE_ROOT = "server";
-TBAG_CONSTEXPR char const * const SERVER_XML_NODE_VAR  = "var";
-TBAG_CONSTEXPR char const * const SERVER_XML_NODE_IP   = "ip";
-TBAG_CONSTEXPR char const * const SERVER_XML_NODE_PORT = "port";
+// ---------------------------------
+// SocketAddressInfo implementation.
+// ---------------------------------
 
-ServerXmlNode::ServerXmlNode() : ServerXmlNode("${EXE_DIR}", "0.0.0.0", 1001)
+SocketAddressInfo::SocketAddressInfo()
+        : ip(network::details::ANY_IPV4), port(0), enable(false)
 {
     // EMPTY.
 }
 
-ServerXmlNode::ServerXmlNode(std::string const & var, std::string const & ip, int port)
-        : _default_var(var), _default_ip(ip), _default_port(port)
+SocketAddressInfo::SocketAddressInfo(std::string const & i, int p, bool e)
+        : ip(i), port(p), enable(e)
+{
+    // EMPTY.
+}
+
+SocketAddressInfo::~SocketAddressInfo()
+{
+    // EMPTY.
+}
+
+void SocketAddressInfo::setProperties(std::string const & i, int p, bool e)
+{
+    enable = e;
+    ip     = i;
+    port   = p;
+}
+
+void SocketAddressInfo::clear()
+{
+    enable = false;
+    ip.clear();
+    port = 0;
+}
+
+void SocketAddressInfo::swap(SocketAddressInfo & obj)
+{
+    std::swap(enable, obj.enable);
+    ip.swap(obj.ip);
+    std::swap(port, obj.port);
+}
+
+bool SocketAddressInfo::load(Element const & parent, std::string const & element_name)
+{
+    Element const * cursor = parent.FirstChildElement(element_name.c_str());
+    if (cursor != nullptr) {
+        opt(*cursor, SERVER_XML_NODE_ENDABLE, enable);
+        opt(*cursor, SERVER_XML_NODE_IP     , ip);
+        opt(*cursor, SERVER_XML_NODE_PORT   , port);
+        return true;
+    }
+
+    clear();
+    return false;
+}
+
+bool SocketAddressInfo::save(Element & parent, std::string const & element_name) const
+{
+    auto * doc = parent.GetDocument();
+    if (doc == nullptr) {
+        return false;
+    }
+
+    auto * element = doc->NewElement(element_name.c_str());
+    if (element == nullptr) {
+        return false;
+    }
+
+    set(*element, SERVER_XML_NODE_ENDABLE, enable);
+    set(*element, SERVER_XML_NODE_IP     , ip);
+    set(*element, SERVER_XML_NODE_PORT   , port);
+
+    return parent.InsertEndChild(element) != nullptr;
+}
+
+// -----------------------------
+// ServerXmlNode implementation.
+// -----------------------------
+
+ServerXmlNode::ServerXmlNode() : _default_var(), _default_addr()
+{
+    // EMPTY.
+}
+
+ServerXmlNode::ServerXmlNode(std::string const & var, std::string const & ip, int port, bool enable)
+        : _default_var(var), _default_addr(ip, port, enable)
 {
     // EMPTY.
 }
@@ -55,12 +130,10 @@ ServerXmlNode & ServerXmlNode::operator =(ServerXmlNode const & obj)
         this->_lock.writeLock();
         obj._lock.readLock();
         {
+            _default_addr = obj._default_addr;
             _default_var  = obj._default_var;
-            _default_ip   = obj._default_ip;
-            _default_port = obj._default_port;
+            _addr = obj._addr;
             _var  = obj._var;
-            _ip   = obj._ip;
-            _port = obj._port;
         }
         obj._lock.readUnlock();
         this->_lock.writeUnlock();
@@ -74,13 +147,10 @@ ServerXmlNode & ServerXmlNode::operator =(ServerXmlNode && obj)
         this->_lock.writeLock();
         obj._lock.readLock();
         {
+            _default_addr.swap(obj._default_addr);
             _default_var.swap(obj._default_var);
-            _default_ip.swap(obj._default_ip);
-            std::swap(_default_port, obj._default_port);
-
+            _addr.swap(obj._addr);
             _var.swap(obj._var);
-            _ip.swap(obj._ip);
-            std::swap(_port, obj._port);
         }
         obj._lock.readUnlock();
         this->_lock.writeUnlock();
@@ -96,33 +166,29 @@ std::string ServerXmlNode::name() const
 void ServerXmlNode::setup()
 {
     WriteGuard guard(_lock);
+    _addr = _default_addr;
     _var  = _default_var;
-    _ip   = _default_ip;
-    _port = _default_port;
 }
 
 void ServerXmlNode::teardown()
 {
     WriteGuard guard(_lock);
+    _addr.clear();
     _var.clear();
-    _ip.clear();
-    _port = 0;
 }
 
 void ServerXmlNode::load(Element const & element)
 {
     WriteGuard guard(_lock);
-    opt(element, SERVER_XML_NODE_VAR , _var );
-    opt(element, SERVER_XML_NODE_IP  , _ip  );
-    opt(element, SERVER_XML_NODE_PORT, _port);
+    _addr.load(element, SERVER_XML_NODE_ADDR);
+    opt(element, SERVER_XML_NODE_VAR, _var);
 }
 
 void ServerXmlNode::save(Element & element) const
 {
     ReadGuard guard(_lock);
-    set(element, SERVER_XML_NODE_VAR , _var );
-    set(element, SERVER_XML_NODE_IP  , _ip  );
-    set(element, SERVER_XML_NODE_PORT, _port);
+    _addr.save(element, SERVER_XML_NODE_ADDR);
+    set(element, SERVER_XML_NODE_VAR, _var);
 }
 
 std::string ServerXmlNode::getVar() const
@@ -131,16 +197,22 @@ std::string ServerXmlNode::getVar() const
     return _var;
 }
 
+bool ServerXmlNode::getEnable() const
+{
+    ReadGuard guard(_lock);
+    return _addr.enable;
+}
+
 std::string ServerXmlNode::getIp() const
 {
     ReadGuard guard(_lock);
-    return _ip;
+    return _addr.ip;
 }
 
 int ServerXmlNode::getPort() const
 {
     ReadGuard guard(_lock);
-    return _port;
+    return _addr.port;
 }
 
 } // namespace node

@@ -28,6 +28,34 @@ namespace dom  {
 namespace node {
 
 /**
+ * SocketAddressInfo class prototype.
+ *
+ * @author zer0
+ * @date   2017-07-28
+ */
+struct TBAG_API SocketAddressInfo : public XmlHelper
+{
+    TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_ENDABLE = "enable";
+    TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_IP      = "ip";
+    TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_PORT    = "port";
+
+    bool enable;
+    std::string ip;
+    int port;
+
+    SocketAddressInfo();
+    SocketAddressInfo(std::string const & ip, int port, bool enable = true);
+    ~SocketAddressInfo();
+
+    void setProperties(std::string const & ip, int port, bool enable = true);
+    void clear();
+    void swap(SocketAddressInfo & obj);
+
+    bool load(Element const & parent, std::string const & element_name);
+    bool save(Element & parent, std::string const & element_name) const;
+};
+
+/**
  * ServerXmlNode class prototype.
  *
  * @author zer0
@@ -40,22 +68,25 @@ public:
     using ReadGuard  = lock::ReadLockGuard;
     using WriteGuard = lock::WriteLockGuard;
 
+public:
+    TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_ROOT = "server";
+    TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_ADDR = "addr";
+    TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_VAR  = "var";
+
 private:
     mutable Lock _lock;
 
 private:
+    SocketAddressInfo _default_addr;
     std::string _default_var;
-    std::string _default_ip;
-    int _default_port;
 
 private:
+    SocketAddressInfo _addr;
     std::string _var;
-    std::string _ip;
-    int _port;
 
 public:
     ServerXmlNode();
-    ServerXmlNode(std::string const & var, std::string const & ip, int port);
+    ServerXmlNode(std::string const & var, std::string const & ip, int port, bool enable = true);
     ServerXmlNode(ServerXmlNode const & obj);
     ServerXmlNode(ServerXmlNode && obj);
     virtual ~ServerXmlNode();
@@ -76,6 +107,7 @@ public:
 
 public:
     std::string getVar() const;
+    bool getEnable() const;
     std::string getIp() const;
     int getPort() const;
 };

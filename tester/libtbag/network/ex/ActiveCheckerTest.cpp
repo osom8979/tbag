@@ -57,6 +57,11 @@ TEST(ActiveCheckerTest, Response)
 
 TEST(ActiveCheckerTest, Default)
 {
+    if (isWindowsPlatform()) {
+        std::cout << "Skip this test in Windows Platform.\n";
+        return;
+    }
+
     std::string const SERVER_BIND_IP = ANY_IPV4;
     std::string const CLIENT_BIND_IP = ANY_IPV4;
     int const SERVER_BIND_PORT     = 4100;
