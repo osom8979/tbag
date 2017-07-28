@@ -363,11 +363,6 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
         return 0U;
     }
 
-    // Same as uv_udp_send(), but won't queue a send request if it can't be completed immediately.
-    // Returns:
-    //  >= 0: number of bytes sent (it matches the given buffer size).
-    //  <  0: negative error code (UV_EAGAIN is returned when the message can't be sent immediately).
-
     std::vector<uv_buf_t> uv_infos;
     uv_infos.resize(infos_size);
     for (std::size_t i = 0; i < infos_size; ++i) {
@@ -375,14 +370,25 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
         uv_infos[i].len  = (infos + i)->size;
     }
 
-    int  const WRITE_SIZE = ::uv_udp_try_send(Parent::cast<uv_udp_t>(),
-                                              &uv_infos[0],
-                                              static_cast<unsigned int>(uv_infos.size()),
-                                              addr);
-    Err const ERROR_CODE = convertUvErrorToErrWithLogging("Udp::trySend()", WRITE_SIZE);
+    // Same as uv_udp_send(), but won't queue a send request if it can't be completed immediately.
+    // Returns:
+    //  >= 0: number of bytes sent (it matches the given buffer size).
+    //  <  0: negative error code (UV_EAGAIN is returned when the message can't be sent immediately).
+
+    int const WRITE_SIZE = ::uv_udp_try_send(Parent::cast<uv_udp_t>(),
+                                             &uv_infos[0],
+                                             static_cast<unsigned int>(uv_infos.size()),
+                                             addr);
+
+    Err error_code = Err::E_UNKNOWN;
+    if (WRITE_SIZE >= 0) {
+        error_code = Err::E_SUCCESS;
+    } else {
+        error_code = convertUvErrorToErrWithLogging("Udp::trySend()", WRITE_SIZE);
+    }
 
     if (result != nullptr) {
-        *result = ERROR_CODE;
+        *result = error_code;
     }
     return static_cast<std::size_t>(WRITE_SIZE);
 }
