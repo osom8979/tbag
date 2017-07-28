@@ -181,6 +181,14 @@ NAMESPACE_LIBTBAG_OPEN
     /* -- END -- */
 #endif
 
+#ifndef TBAG_ERR_SUCCESS
+#define TBAG_ERR_SUCCESS(code) (code == ::libtbag::Err::E_SUCCESS)
+#endif
+
+#ifndef TBAG_ERR_FAILURE
+#define TBAG_ERR_FAILURE(code) (!TBAG_ERR_SUCCESS(code))
+#endif
+
 /**
  * List of error code.
  *
