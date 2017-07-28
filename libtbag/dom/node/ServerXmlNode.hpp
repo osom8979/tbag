@@ -33,7 +33,7 @@ namespace node {
  * @author zer0
  * @date   2017-07-28
  */
-struct TBAG_API SocketAddressInfo : public XmlHelper
+struct TBAG_API SocketAddressInfo : protected XmlHelper
 {
     TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_ENDABLE = "enable";
     TBAG_CONSTEXPR static char const * const SERVER_XML_NODE_IP      = "ip";
