@@ -203,6 +203,15 @@ public:
         return true;
     }
 
+    bool initServerOrClose(Loop & loop, std::string const & bind_ip, int bind_port, Response const & response)
+    {
+        if (initServer(loop, bind_ip, bind_port, response) == false) {
+            closeByNoSafe();
+            return false;
+        }
+        return true;
+    }
+
     bool initClient(Loop & loop, std::string const & bind_ip, int bind_port, uint64_t timeout, Request const & request)
     {
         _json     = request.toJsonString();
@@ -250,6 +259,15 @@ public:
             return false;
         }
         if (setBroadcast(*_sender) == false) {
+            return false;
+        }
+        return true;
+    }
+
+    bool initClientOrClose(Loop & loop, std::string const & bind_ip, int bind_port, uint64_t timeout, Request const & request)
+    {
+        if (initClient(loop, bind_ip, bind_port, timeout, request) == false) {
+            closeByNoSafe();
             return false;
         }
         return true;
@@ -509,7 +527,7 @@ int ActiveChecker::getRecvPort() const
 bool ActiveChecker::initServer(Loop & loop, std::string const & ip, int port, Response const & response)
 {
     assert(static_cast<bool>(_internal));
-    _is_init = _internal->initServer(loop, ip, port, response);
+    _is_init = _internal->initServerOrClose(loop, ip, port, response);
     if (_is_init == false) {
         tDLogE("ActiveChecker::ActiveChecker() init server error.");
     }
@@ -520,7 +538,7 @@ bool ActiveChecker::initClient(Loop & loop, std::string const & ip, int port,
                                uint64_t timeout, Request const & request)
 {
     assert(static_cast<bool>(_internal));
-    _is_init = _internal->initClient(loop, ip, port, timeout, request);
+    _is_init = _internal->initClientOrClose(loop, ip, port, timeout, request);
     if (_is_init == false) {
         tDLogE("ActiveChecker::initClient() init error.");
     }
