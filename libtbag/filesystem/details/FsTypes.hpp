@@ -47,54 +47,54 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 namespace details    {
 
-std::size_t const MAX_PATH_LENGTH_OF_WINDOWS     = 32767;
-std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API =   260; // MAX_PATH define in windows.
-std::size_t const MAX_PATH_LENGTH_OF_POSIX_API   =  1024; // PATH_MAX define in posix.
+TBAG_CONSTEXPR std::size_t const MAX_PATH_LENGTH_OF_WINDOWS     = 32767;
+TBAG_CONSTEXPR std::size_t const MAX_PATH_LENGTH_OF_WINDOWS_API =   260; // MAX_PATH define in windows.
+TBAG_CONSTEXPR std::size_t const MAX_PATH_LENGTH_OF_POSIX_API   =  1024; // PATH_MAX define in posix.
 
 #if defined(TBAG_PLATFORM_WINDOWS)
-std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_WINDOWS_API;
+TBAG_CONSTEXPR std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_WINDOWS_API;
 #else
-std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_POSIX_API;
+TBAG_CONSTEXPR std::size_t const MAX_PATH_LENGTH = MAX_PATH_LENGTH_OF_POSIX_API;
 #endif
 
 /** Max path buffer size. */
-std::size_t const MAX_PATH_BUFFER_SIZE = MAX_PATH_LENGTH_OF_WINDOWS_API;
+TBAG_CONSTEXPR std::size_t const MAX_PATH_BUFFER_SIZE = MAX_PATH_LENGTH_OF_WINDOWS_API;
 
-char const PATH_SEPARATOR_OF_WINDOWS = '\\';
-char const PATH_SEPARATOR_OF_POSIX   = '/';
-char const PATH_SEPARATOR_OF_GENERIC = PATH_SEPARATOR_OF_POSIX;
-
-#if defined(TBAG_PLATFORM_WINDOWS)
-char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
-#else
-char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
-#endif
-
-char const PATH_SPLITTER_OF_WINDOWS = ';';
-char const PATH_SPLITTER_OF_POSIX   = ':';
+TBAG_CONSTEXPR char const PATH_SEPARATOR_OF_WINDOWS = '\\';
+TBAG_CONSTEXPR char const PATH_SEPARATOR_OF_POSIX   = '/';
+TBAG_CONSTEXPR char const PATH_SEPARATOR_OF_GENERIC = PATH_SEPARATOR_OF_POSIX;
 
 #if defined(TBAG_PLATFORM_WINDOWS)
-char const PATH_SPLITTER = PATH_SPLITTER_OF_WINDOWS;
+TBAG_CONSTEXPR char const PATH_SEPARATOR = PATH_SEPARATOR_OF_WINDOWS;
 #else
-char const PATH_SPLITTER = PATH_SPLITTER_OF_POSIX;
+TBAG_CONSTEXPR char const PATH_SEPARATOR = PATH_SEPARATOR_OF_POSIX;
 #endif
 
-char const * const CURRENT_DIRECTORY_SHORTCUT =  ".";
-char const * const  PARENT_DIRECTORY_SHORTCUT = "..";
-char const * const    HOME_DIRECTORY_SHORTCUT =  "~";
+TBAG_CONSTEXPR char const PATH_SPLITTER_OF_WINDOWS = ';';
+TBAG_CONSTEXPR char const PATH_SPLITTER_OF_POSIX   = ':';
 
-char const * const TEMP_DIRECTORY_SUFFIX = ".temp";
+#if defined(TBAG_PLATFORM_WINDOWS)
+TBAG_CONSTEXPR char const PATH_SPLITTER = PATH_SPLITTER_OF_WINDOWS;
+#else
+TBAG_CONSTEXPR char const PATH_SPLITTER = PATH_SPLITTER_OF_POSIX;
+#endif
 
-int const CREATE_TEMPDIR_RETRY_COUNT = 10;
+TBAG_CONSTEXPR char const * const CURRENT_DIRECTORY_SHORTCUT =  ".";
+TBAG_CONSTEXPR char const * const  PARENT_DIRECTORY_SHORTCUT = "..";
+TBAG_CONSTEXPR char const * const    HOME_DIRECTORY_SHORTCUT =  "~";
 
-static char const * const  TMPDIR_ENV_NAME = "TMPDIR";
-static char const * const     TMP_ENV_NAME = "TMP";
-static char const * const    TEMP_ENV_NAME = "TEMP";
-static char const * const TEMPDIR_ENV_NAME = "TEMPDIR";
-static char const * const    HOME_ENV_NAME = "HOME";
+TBAG_CONSTEXPR char const * const TEMP_DIRECTORY_SUFFIX = ".temp";
 
-static char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
-static char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
+TBAG_CONSTEXPR int const CREATE_TEMPDIR_RETRY_COUNT = 10;
+
+TBAG_CONSTEXPR char const * const  TMPDIR_ENV_NAME = "TMPDIR";
+TBAG_CONSTEXPR char const * const     TMP_ENV_NAME = "TMP";
+TBAG_CONSTEXPR char const * const    TEMP_ENV_NAME = "TEMP";
+TBAG_CONSTEXPR char const * const TEMPDIR_ENV_NAME = "TEMPDIR";
+TBAG_CONSTEXPR char const * const    HOME_ENV_NAME = "HOME";
+
+TBAG_CONSTEXPR char const * const LAST_ANDROID_TEMP_VALUE = "/data/local/tmp";
+TBAG_CONSTEXPR char const * const   LAST_POSIX_TEMP_VALUE = "/tmp";
 
 // No temp environment variables defined.
 #if defined(TBAG_PLATFORM_ANDROID)
@@ -177,16 +177,16 @@ enum AccessModeTable
  * @{
  */
 
-static uint32_t const FILE_TYPE_S_IFMT   = _WIN_OR_POSIX(S_IFMT);   ///< type of file mask.
-static uint32_t const FILE_TYPE_S_IFCHR  = _WIN_OR_POSIX(S_IFCHR);  ///< character special.
-static uint32_t const FILE_TYPE_S_IFDIR  = _WIN_OR_POSIX(S_IFDIR);  ///< directory.
-static uint32_t const FILE_TYPE_S_IFREG  = _WIN_OR_POSIX(S_IFREG);  ///< regular file.
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFMT   = _WIN_OR_POSIX(S_IFMT);   ///< type of file mask.
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFCHR  = _WIN_OR_POSIX(S_IFCHR);  ///< character special.
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFDIR  = _WIN_OR_POSIX(S_IFDIR);  ///< directory.
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFREG  = _WIN_OR_POSIX(S_IFREG);  ///< regular file.
 
 #if 0
-static uint32_t const FILE_TYPE_S_IFIFO  = S_IFIFO;  ///< named pipe (fifo).
-static uint32_t const FILE_TYPE_S_IFBLK  = S_IFBLK;  ///< block special.
-static uint32_t const FILE_TYPE_S_IFLNK  = S_IFLNK;  ///< symbolic link.
-static uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK; ///< socket.
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFIFO  = S_IFIFO;  ///< named pipe (fifo).
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFBLK  = S_IFBLK;  ///< block special.
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFLNK  = S_IFLNK;  ///< symbolic link.
+TBAG_CONSTEXPR uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK; ///< socket.
 #endif
 
 /**
@@ -200,27 +200,27 @@ static uint32_t const FILE_TYPE_S_IFSOCK = S_IFSOCK; ///< socket.
  * @{
  */
 
-static uint32_t const FILE_OPEN_FLAG_READ_ONLY  = _WIN_OR_POSIX(O_RDONLY); ///< open for reading only.
-static uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = _WIN_OR_POSIX(O_WRONLY); ///< open for writing only.
-static uint32_t const FILE_OPEN_FLAG_READ_WRITE = _WIN_OR_POSIX(O_RDWR);   ///< open for reading and writing.
-static uint32_t const FILE_OPEN_APPEND          = _WIN_OR_POSIX(O_APPEND); ///< set append mode.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_FLAG_READ_ONLY  = _WIN_OR_POSIX(O_RDONLY); ///< open for reading only.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_FLAG_WRITE_ONLY = _WIN_OR_POSIX(O_WRONLY); ///< open for writing only.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_FLAG_READ_WRITE = _WIN_OR_POSIX(O_RDWR);   ///< open for reading and writing.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_APPEND          = _WIN_OR_POSIX(O_APPEND); ///< set append mode.
 
-static uint32_t const FILE_OPEN_CREATE          = _WIN_OR_POSIX(O_CREAT);  ///< create if nonexistant.
-static uint32_t const FILE_OPEN_TRUNCATE        = _WIN_OR_POSIX(O_TRUNC);  ///< truncate to zero length.
-static uint32_t const FILE_OPEN_EXISTS_ERROR    = _WIN_OR_POSIX(O_EXCL);   ///< error if already exists.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_CREATE          = _WIN_OR_POSIX(O_CREAT);  ///< create if nonexistant.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_TRUNCATE        = _WIN_OR_POSIX(O_TRUNC);  ///< truncate to zero length.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_EXISTS_ERROR    = _WIN_OR_POSIX(O_EXCL);   ///< error if already exists.
 
 #if 0
 // !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
-static uint32_t const FILE_OPEN_FLAG_ACCESS_ALL = O_ACCMODE;   ///< mask for above modes.
-static uint32_t const FILE_OPEN_NON_BLOCK       = O_NONBLOCK;  ///< no delay.
-static uint32_t const FILE_OPEN_SHARED_LOCK     = O_SHLOCK;    ///< open with shared file lock.
-static uint32_t const FILE_OPEN_EXCLUSIVE_LOCK  = O_EXLOCK;    ///< open with exclusive file lock.
-static uint32_t const FILE_OPEN_ASYNC           = O_ASYNC;     ///< signal pgrp when data ready.
-static uint32_t const FILE_OPEN_SYNC            = O_FSYNC;     ///< synch I/O file integrity. (source compatibility: do not use)
-static uint32_t const FILE_OPEN_NOFOLLOW        = O_NOFOLLOW;  ///< don't follow symlinks.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_FLAG_ACCESS_ALL = O_ACCMODE;   ///< mask for above modes.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_NON_BLOCK       = O_NONBLOCK;  ///< no delay.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_SHARED_LOCK     = O_SHLOCK;    ///< open with shared file lock.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_EXCLUSIVE_LOCK  = O_EXLOCK;    ///< open with exclusive file lock.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_ASYNC           = O_ASYNC;     ///< signal pgrp when data ready.
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_SYNC            = O_FSYNC;     ///< synch I/O file integrity. (source compatibility: do not use)
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_NOFOLLOW        = O_NOFOLLOW;  ///< don't follow symlinks.
 #endif
 
-static uint32_t const FILE_OPEN_DEFAULT = FILE_OPEN_CREATE | FILE_OPEN_FLAG_READ_WRITE;
+TBAG_CONSTEXPR uint32_t const FILE_OPEN_DEFAULT = FILE_OPEN_CREATE | FILE_OPEN_FLAG_READ_WRITE;
 
 /**
  * @}
@@ -283,33 +283,72 @@ private:
 
 // Read, write, execute/search by owner.
 #if defined(TBAG_PLATFORM_WINDOWS)
-static uint32_t const FILE_MODE_OWNER_READ  = _S_IREAD;  ///< [XSI] R for owner.
-static uint32_t const FILE_MODE_OWNER_WRITE = _S_IWRITE; ///< [XSI] W for owner.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OWNER_READ  = _S_IREAD;  ///< [XSI] R for owner.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OWNER_WRITE = _S_IWRITE; ///< [XSI] W for owner.
 #else
-static uint32_t const FILE_MODE_OWNER_READ  = S_IRUSR;  ///< [XSI] R for owner.
-static uint32_t const FILE_MODE_OWNER_WRITE = S_IWUSR;  ///< [XSI] W for owner.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OWNER_READ  = S_IRUSR;  ///< [XSI] R for owner.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OWNER_WRITE = S_IWUSR;  ///< [XSI] W for owner.
 #endif
 
 #if 0
-static uint32_t const FILE_MODE_OWNER_ALL      = S_IRWXU;  ///< [XSI] RWX mask for owner.
-static uint32_t const FILE_MODE_OWNER_EXECUTE  = S_IXUSR;  ///< [XSI] X for owner.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OWNER_ALL      = S_IRWXU;  ///< [XSI] RWX mask for owner.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OWNER_EXECUTE  = S_IXUSR;  ///< [XSI] X for owner.
 
 // Read, write, execute/search by group.
-static uint32_t const FILE_MODE_GROUP_ALL      = S_IRWXG;  ///< [XSI] RWX mask for group.
-static uint32_t const FILE_MODE_GROUP_READ     = S_IRGRP;  ///< [XSI] R for group.
-static uint32_t const FILE_MODE_GROUP_WRITE    = S_IWGRP;  ///< [XSI] W for group.
-static uint32_t const FILE_MODE_GROUP_EXECUTE  = S_IXGRP;  ///< [XSI] X for group.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_GROUP_ALL      = S_IRWXG;  ///< [XSI] RWX mask for group.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_GROUP_READ     = S_IRGRP;  ///< [XSI] R for group.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_GROUP_WRITE    = S_IWGRP;  ///< [XSI] W for group.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_GROUP_EXECUTE  = S_IXGRP;  ///< [XSI] X for group.
 
 // Read, write, execute/search by others.
-static uint32_t const FILE_MODE_OTHER_ALL      = S_IRWXO;  ///< [XSI] RWX mask for other.
-static uint32_t const FILE_MODE_OTHER_READ     = S_IROTH;  ///< [XSI] R for other.
-static uint32_t const FILE_MODE_OTHER_WRITE    = S_IWOTH;  ///< [XSI] W for other.
-static uint32_t const FILE_MODE_OTHER_EXECUTE  = S_IXOTH;  ///< [XSI] X for other.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OTHER_ALL      = S_IRWXO;  ///< [XSI] RWX mask for other.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OTHER_READ     = S_IROTH;  ///< [XSI] R for other.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OTHER_WRITE    = S_IWOTH;  ///< [XSI] W for other.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_OTHER_EXECUTE  = S_IXOTH;  ///< [XSI] X for other.
 
-static uint32_t const FILE_MODE_S_ISUID        = S_ISUID;  ///< [XSI] set user id on execution.
-static uint32_t const FILE_MODE_S_ISGID        = S_ISGID;  ///< [XSI] set group id on execution.
-static uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrcted delete.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_S_ISUID        = S_ISUID;  ///< [XSI] set user id on execution.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_S_ISGID        = S_ISGID;  ///< [XSI] set group id on execution.
+TBAG_CONSTEXPR uint32_t const FILE_MODE_S_ISVTX        = S_ISVTX;  ///< [XSI] directory restrcted delete.
 #endif
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup __DOXYGEN_GROUP__FILE_EXTENSIONS__ List of file extension.
+ * @{
+ */
+
+TBAG_CONSTEXPR char const * const WINDOWS_STATIC_LIBRARY_PREFIX = "";
+TBAG_CONSTEXPR char const * const WINDOWS_STATIC_LIBRARY_SUFFIX = ".lib";
+TBAG_CONSTEXPR char const * const WINDOWS_SHARED_LIBRARY_PREFIX = "";
+TBAG_CONSTEXPR char const * const WINDOWS_SHARED_LIBRARY_SUFFIX = ".dll";
+
+TBAG_CONSTEXPR char const * const WINDOWS_EXPORT_PREFIX = "";
+TBAG_CONSTEXPR char const * const WINDOWS_EXPORT_SUFFIX = ".exp";
+
+TBAG_CONSTEXPR char const * const MINGW_STATIC_LIBRARY_PREFIX = "lib";
+TBAG_CONSTEXPR char const * const MINGW_STATIC_LIBRARY_SUFFIX = ".a";
+TBAG_CONSTEXPR char const * const MINGW_SHARED_LIBRARY_PREFIX = "";
+TBAG_CONSTEXPR char const * const MINGW_SHARED_LIBRARY_SUFFIX = ".dll.so";
+
+TBAG_CONSTEXPR char const * const MACHO_STATIC_LIBRARY_PREFIX = "lib";
+TBAG_CONSTEXPR char const * const MACHO_STATIC_LIBRARY_SUFFIX = ".a";
+TBAG_CONSTEXPR char const * const MACHO_SHARED_LIBRARY_PREFIX = "lib";
+TBAG_CONSTEXPR char const * const MACHO_SHARED_LIBRARY_SUFFIX = ".dylib";
+
+TBAG_CONSTEXPR char const * const ELF_STATIC_LIBRARY_PREFIX = "lib";
+TBAG_CONSTEXPR char const * const ELF_STATIC_LIBRARY_SUFFIX = ".a";
+TBAG_CONSTEXPR char const * const ELF_SHARED_LIBRARY_PREFIX = "lib";
+TBAG_CONSTEXPR char const * const ELF_SHARED_LIBRARY_SUFFIX = ".so";
+
+TBAG_CONSTEXPR char const * const WINDOWS_EXECUTABLE_PREFIX = "";
+TBAG_CONSTEXPR char const * const WINDOWS_EXECUTABLE_SUFFIX = ".exe";
+TBAG_CONSTEXPR char const * const MACHO_EXECUTABLE_PREFIX = "";
+TBAG_CONSTEXPR char const * const MACHO_EXECUTABLE_SUFFIX = "";
+TBAG_CONSTEXPR char const * const ELF_EXECUTABLE_PREFIX = "";
+TBAG_CONSTEXPR char const * const ELF_EXECUTABLE_SUFFIX = "";
 
 /**
  * @}

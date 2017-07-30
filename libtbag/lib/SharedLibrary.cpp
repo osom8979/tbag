@@ -20,35 +20,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace lib {
 
-std::string getLibraryPrefix()
-{
-#if defined(TBAG_PLATFORM_WINDOWS) && !defined(TBAG_PLATFORM_MINGW)
-    return "";
-#else
-    return "lib";
-#endif
-}
-
-std::string getLibrarySuffix()
-{
-#if defined(TBAG_PLATFORM_WINDOWS)
-# if defined(TBAG_PLATFORM_MINGW)
-    return ".dll.so";
-# else
-    return ".dll";
-# endif
-#elif defined(TBAG_PLATFORM_MACOS)
-    return ".dylib";
-#else
-    return ".so";
-#endif
-}
-
-std::string getLibraryName(std::string const & name)
-{
-    return getLibraryPrefix() + name + getLibrarySuffix();
-}
-
 template <typename T>
 inline uv_lib_t * uv_lib_cast(T * object)
 {

@@ -30,6 +30,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
+TBAG_API std::string getLibraryPrefix();
+TBAG_API std::string getLibrarySuffix();
+TBAG_API std::string getLibraryName(std::string const & name);
+
+TBAG_API std::string getExecutablePrefix();
+TBAG_API std::string getExecutableSuffix();
+TBAG_API std::string getExecutableName(std::string const & name);
+
 /**
  * Path class prototype.
  *
@@ -101,10 +109,14 @@ public:
     void swap(Path && obj);
     void swap(Path & obj);
 
-// Accessors & Mutators.
+// Accessors
 public:
-    inline std::string getString() const
-    { return _path; }
+    inline std::string getPathString() const { return _path; }
+    inline std::string getString    () const { return _path; }
+    inline std::string toString     () const { return _path; }
+
+// Mutators.
+public:
     inline void setString(std::string const & path)
     { _path.assign(path); }
     inline void setString(char const * path)
@@ -166,8 +178,8 @@ public:
 
 // Casting
 public:
-    operator std::string() const;
-    operator char const *() const;
+    inline operator std::string  () const { return _path; }
+    inline operator char const * () const { return _path.c_str(); }
 
 // Parent.
 public:
@@ -251,6 +263,16 @@ public:
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+#include <ostream>
+
+template <class CharT, class TraitsT>
+std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os,
+                                                libtbag::filesystem::Path const & path)
+{
+    os << path.toString();
+    return os;
+}
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_PATH_HPP__
 

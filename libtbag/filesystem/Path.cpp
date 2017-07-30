@@ -18,6 +18,58 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
+std::string getLibraryPrefix()
+{
+#if defined(TBAG_PLATFORM_WINDOWS) && !defined(TBAG_PLATFORM_MINGW)
+    return details::WINDOWS_SHARED_LIBRARY_PREFIX;
+#else
+    return details::ELF_SHARED_LIBRARY_PREFIX;
+#endif
+}
+
+std::string getLibrarySuffix()
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+# if defined(TBAG_PLATFORM_MINGW)
+    return details::MINGW_SHARED_LIBRARY_SUFFIX;
+# else  // if defined(TBAG_PLATFORM_MINGW)
+    return details::WINDOWS_SHARED_LIBRARY_SUFFIX;
+# endif // if defined(TBAG_PLATFORM_MINGW)
+#elif defined(TBAG_PLATFORM_MACOS)
+    return details::MACHO_SHARED_LIBRARY_SUFFIX;
+#else
+    return details::ELF_SHARED_LIBRARY_SUFFIX;
+#endif
+}
+
+std::string getLibraryName(std::string const & name)
+{
+    return getLibraryPrefix() + name + getLibrarySuffix();
+}
+
+std::string getExecutablePrefix()
+{
+    return details::ELF_EXECUTABLE_PREFIX;
+}
+
+std::string getExecutableSuffix()
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return details::WINDOWS_EXECUTABLE_SUFFIX;
+#else
+    return details::ELF_EXECUTABLE_SUFFIX;
+#endif
+}
+
+std::string getExecutableName(std::string const & name)
+{
+    return getExecutablePrefix() + name + getExecutableSuffix();
+}
+
+// --------------------
+// Path implementation.
+// --------------------
+
 Path::Path() TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_default_constructible<std::string>::value) : _path()
 {
     // EMPTY.
@@ -259,16 +311,6 @@ Path & Path::operator /=(std::string const & child)
 {
     path.append(child);
     return path;
-}
-
-Path::operator std::string() const
-{
-    return _path;
-}
-
-Path::operator char const * () const
-{
-    return _path.c_str();
 }
 
 std::string Path::getParentString() const
