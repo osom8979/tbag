@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <functional>
 #include <mutex>
+#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -61,11 +62,22 @@ private:
     Mutex _mutex;
     OnExit _exit_cb;
 
+private:
+    std::atomic<bool>    _exit;
+    std::atomic<int64_t> _exit_status;
+    std::atomic<int>     _term_signal;
+
 public:
-    FunctionalProcess(Loop & loop, Options const & options) : Parent(loop, options)
+    FunctionalProcess(Loop & loop, Options const & options)
+            : Parent(loop, options), _exit(false), _exit_status(0), _term_signal(0)
     { /* EMPTY. */ }
     virtual ~FunctionalProcess()
     { /* EMPTY. */ }
+
+public:
+    inline bool    isExit() const { return _exit; }
+    inline int64_t getExitStatus() const { return _exit_status; }
+    inline int     getTermSignal() const { return _term_signal; }
 
 public:
     void setOnExit(OnExit const & cb)
@@ -77,6 +89,10 @@ public:
 public:
     virtual void onExit(int64_t exit_status, int term_signal) override
     {
+        _exit = true;
+        _exit_status = exit_status;
+        _term_signal = term_signal;
+
         Guard guard(_mutex);
         if (static_cast<bool>(_exit_cb)) {
             _exit_cb(exit_status, term_signal);

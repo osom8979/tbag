@@ -50,6 +50,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_SMALLBUF, "Buffer size is small"  ) \
     _TBAG_XX(_KEYGEN  , "Key generator error"   ) \
     _TBAG_XX(_ASYNCREQ, "Async request"         ) \
+    _TBAG_XX(_UNKEXCP , "Unknown exception"     ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
