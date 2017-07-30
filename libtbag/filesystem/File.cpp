@@ -108,7 +108,23 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 
     int READ_SIZE = f.read((char*)&result[0], SIZE, 0);
     if (SIZE != static_cast<uint64_t>(READ_SIZE)) {
-        tDLogW("readToBuffer() Read size is not the same: {}/{}.", SIZE, READ_SIZE);
+        tDLogW("readToBuffer() Read size is not the same: {}/{}.", READ_SIZE, SIZE);
+    }
+
+    return Err::E_SUCCESS;
+}
+
+template <typename StlContainerType>
+static Err writeFromBuffer(std::string const & path, StlContainerType const & result)
+{
+    File f(path, File::Flags().clear().creat().wronly());
+    if (f.isOpen() == false) {
+        return Err::E_ENOENT;
+    }
+
+    int WRITE_SIZE = f.write((char*)&result[0], result.size(), 0);
+    if (result.size() != static_cast<uint64_t>(WRITE_SIZE)) {
+        tDLogW("writeFromBuffer() Read size is not the same: {}/{}.", WRITE_SIZE, result.size());
     }
 
     return Err::E_SUCCESS;
@@ -130,12 +146,12 @@ Err readFile(std::string const & path, std::string & result, uint64_t limit_size
 
 Err writeFile(std::string const & path, std::string const & result)
 {
-    return Err::E_UNKNOWN;
+    return impl::writeFromBuffer(path, result);
 }
 
 Err writeFile(std::string const & path, std::vector<char> const & result)
 {
-    return Err::E_UNKNOWN;
+    return impl::writeFromBuffer(path, result);
 }
 
 } // namespace filesystem
