@@ -50,17 +50,10 @@ TEST(ProcessTest, Default)
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_EQ(0, result_exit_status);
     ASSERT_EQ(0, result_term_signal);
-
     ASSERT_TRUE(TBPROC_TXT.exists());
-    File result_file(TBPROC_TXT);
-    ASSERT_TRUE(result_file.isOpen());
-    auto const RESULT_FILE_SIZE = result_file.getState().size;
 
     std::string buffer;
-    buffer.resize(RESULT_FILE_SIZE);
-
-    int read_size = result_file.read(&buffer[0], RESULT_FILE_SIZE, 0);
-    ASSERT_EQ(RESULT_FILE_SIZE, read_size);
-    ASSERT_STREQ(WRITE_BODY, buffer.c_str());
+    ASSERT_EQ(Err::E_SUCCESS, readFile(TBPROC_TXT, buffer));
+    ASSERT_EQ(std::string(WRITE_BODY), buffer);
 }
 

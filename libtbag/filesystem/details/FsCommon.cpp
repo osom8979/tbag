@@ -448,7 +448,7 @@ int read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset)
     return READ_SIZE;
 }
 
-int read2(ufile file, char const * buffer, std::size_t size, int64_t offset)
+int read(ufile file, char * buffer, std::size_t size, int64_t offset)
 {
     uv_buf_t buf;
     buf.base = (char*)buffer;
@@ -477,7 +477,7 @@ int write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset
     return WRITE_SIZE;
 }
 
-int write2(ufile file, char const * buffer, std::size_t size, int64_t offset)
+int write(ufile file, char const * buffer, std::size_t size, int64_t offset)
 {
     uv_buf_t buf;
     buf.base = (char*)buffer;

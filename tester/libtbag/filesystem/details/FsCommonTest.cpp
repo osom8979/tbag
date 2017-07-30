@@ -178,12 +178,12 @@ TEST(FsCommonTest, ReadWrite2)
     std::string BUFFER = "FsIoTest/Default";
 
     // Write file.
-    int wsize = fs::write2(f, BUFFER.c_str(), BUFFER.size(), 0);
+    int wsize = fs::write(f, BUFFER.c_str(), BUFFER.size(), 0);
     ASSERT_EQ(BUFFER.size(), wsize);
 
     // Read file.
     std::string rbuf(BUFFER.size(), '\0');
-    int rsize = fs::read2(f, &rbuf[0], rbuf.size(), 0);
+    int rsize = fs::read(f, &rbuf[0], rbuf.size(), 0);
     ASSERT_EQ(BUFFER.size(), rsize);
     ASSERT_EQ(BUFFER, rbuf);
 

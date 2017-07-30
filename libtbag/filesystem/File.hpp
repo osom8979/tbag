@@ -16,9 +16,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/Unit.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
 
 #include <cstdint>
+#include <vector>
 #include <string>
 
 // -------------------
@@ -61,7 +64,7 @@ public:
 
 public:
     int read(binf const * infos, std::size_t infos_size, int64_t offset);
-    int read(char const * buffer, std::size_t size, int64_t offset);
+    int read(char * buffer, std::size_t size, int64_t offset);
 
 public:
     int write(binf const * infos, std::size_t infos_size, int64_t offset);
@@ -74,6 +77,12 @@ public:
 public:
     FileState getState() const;
 };
+
+Err readFile(std::string const & path, std::string & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
+Err readFile(std::string const & path, std::vector<char> & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
+
+Err writeFile(std::string const & path, std::string const & result);
+Err writeFile(std::string const & path, std::vector<char> const & result);
 
 } // namespace filesystem
 

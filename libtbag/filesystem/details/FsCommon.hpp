@@ -209,16 +209,16 @@ TBAG_API bool close(ufile file);
  *
  * @see <https://linux.die.net/man/2/preadv>
  */
-TBAG_API int  read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
-TBAG_API int read2(ufile file, char const * buffer, std::size_t size, int64_t offset);
+TBAG_API int read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
+TBAG_API int read(ufile file, char * buffer, std::size_t size, int64_t offset);
 
 /**
  * Read or write data into multiple buffers.
  *
  * @see <https://linux.die.net/man/2/pwritev>
  */
-TBAG_API int  write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
-TBAG_API int write2(ufile file, char const * buffer, std::size_t size, int64_t offset);
+TBAG_API int write(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
+TBAG_API int write(ufile file, char const * buffer, std::size_t size, int64_t offset);
 
 } // namespace details
 } // namespace filesystem

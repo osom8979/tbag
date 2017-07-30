@@ -56,9 +56,9 @@ int File::read(binf const * infos, std::size_t infos_size, int64_t offset)
     return details::read(_file, infos, infos_size, offset);
 }
 
-int File::read(char const * buffer, std::size_t size, int64_t offset)
+int File::read(char * buffer, std::size_t size, int64_t offset)
 {
-    return details::read2(_file, buffer, size, offset);
+    return details::read(_file, buffer, size, offset);
 }
 
 int File::write(binf const * infos, std::size_t infos_size, int64_t offset)
@@ -68,7 +68,7 @@ int File::write(binf const * infos, std::size_t infos_size, int64_t offset)
 
 int File::write(char const * buffer, std::size_t size, int64_t offset)
 {
-    return details::write2(_file, buffer, size, offset);
+    return details::write(_file, buffer, size, offset);
 }
 
 File::FileState File::getState() const
@@ -78,6 +78,64 @@ File::FileState File::getState() const
         tDLogE("File::getState() result error.");
     }
     return state;
+}
+
+// ---------------
+// Static methods.
+// ---------------
+
+// -------------
+namespace impl {
+// -------------
+
+template <typename StlContainerType>
+static Err readToBuffer(std::string const & path, StlContainerType & result, uint64_t limit_size)
+{
+    File f(path, File::Flags().clear().rdonly());
+    if (f.isOpen() == false) {
+        return Err::E_ENOENT;
+    }
+
+    uint64_t const SIZE = f.getState().size;
+    if (SIZE >= limit_size) {
+        tDLogE("readToBuffer() result error.");
+        return Err::E_SMALLBUF;
+    }
+
+    if (result.size() < SIZE) {
+        result.resize(SIZE);
+    }
+
+    int READ_SIZE = f.read((char*)&result[0], SIZE, 0);
+    if (SIZE != static_cast<uint64_t>(READ_SIZE)) {
+        tDLogW("readToBuffer() Read size is not the same: {}/{}.", SIZE, READ_SIZE);
+    }
+
+    return Err::E_SUCCESS;
+}
+
+// ----------------
+} // namespace impl
+// ----------------
+
+Err readFile(std::string const & path, std::vector<char> & result, uint64_t limit_size)
+{
+    return impl::readToBuffer(path, result, limit_size);
+}
+
+Err readFile(std::string const & path, std::string & result, uint64_t limit_size)
+{
+    return impl::readToBuffer(path, result, limit_size);
+}
+
+Err writeFile(std::string const & path, std::string const & result)
+{
+    return Err::E_UNKNOWN;
+}
+
+Err writeFile(std::string const & path, std::vector<char> const & result)
+{
+    return Err::E_UNKNOWN;
 }
 
 } // namespace filesystem
