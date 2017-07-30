@@ -57,7 +57,7 @@ TEST(PollTest, Default)
         loop.run();
     });
     int const WRITE_SIZE = 4;
-    ASSERT_EQ(WRITE_SIZE, f.write2("TEMP", WRITE_SIZE, 0));
+    ASSERT_EQ(WRITE_SIZE, f.write("TEMP", WRITE_SIZE, 0));
     ASSERT_TRUE(f.close());
 
     thread.join();

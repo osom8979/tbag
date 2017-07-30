@@ -60,12 +60,12 @@ public:
     bool close();
 
 public:
-    int  read(binf const * infos, std::size_t infos_size, int64_t offset);
-    int write(binf const * infos, std::size_t infos_size, int64_t offset);
+    int read(binf const * infos, std::size_t infos_size, int64_t offset);
+    int read(char const * buffer, std::size_t size, int64_t offset);
 
 public:
-    int  read2(char const * buffer, std::size_t size, int64_t offset);
-    int write2(char const * buffer, std::size_t size, int64_t offset);
+    int write(binf const * infos, std::size_t infos_size, int64_t offset);
+    int write(char const * buffer, std::size_t size, int64_t offset);
 
 public:
     using TimeSpec  = details::TimeSpec;

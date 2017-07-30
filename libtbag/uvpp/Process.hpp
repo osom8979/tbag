@@ -68,7 +68,7 @@ public:
      * @remarks
      *  Container for each stdio handle or fd passed to a child process.
      */
-    struct StdioContainer
+    struct TBAG_API StdioContainer
     {
         enum class Type
         {
@@ -84,6 +84,22 @@ public:
         bool inherit_stream;
         bool readable_pipe;
         bool writable_pipe;
+
+        StdioContainer();
+        explicit StdioContainer(Stream * s);
+        explicit StdioContainer(int f);
+        ~StdioContainer();
+
+        StdioContainer & clear();
+
+        StdioContainer & setStream(Stream * s);
+        StdioContainer & setFd(int f);
+
+        StdioContainer & setCreatePipe(bool flag = true);
+        StdioContainer & setInheritFd(bool flag = true);
+        StdioContainer & setInheritStream(bool flag = true);
+        StdioContainer & setReadablePipe(bool flag = true);
+        StdioContainer & setWritablePipe(bool flag = true);
     };
 
     /**
@@ -92,14 +108,13 @@ public:
      * @author zer0
      * @date   2017-02-04
      */
-    struct Options
+    struct TBAG_API Options
     {
-        using String  = std::string;
-        using Strings = std::vector<String>;
+        using Strings = std::vector<std::string>;
         using Stdios  = std::vector<StdioContainer>;
 
-        String file; ///< Executable file path.
-        String cwd;  ///< Working directory.
+        std::string file; ///< Executable file path.
+        std::string cwd;  ///< Working directory.
 
         Strings args; ///< Arguments.
         Strings envs; ///< Environment variables (e.g. VAR=VALUE).
@@ -115,6 +130,27 @@ public:
         bool detached;
         bool verbatim_args;
         bool hide;
+
+        Options();
+        ~Options();
+
+        Options & clear();
+
+        Options & setFile(std::string const & path);
+        Options & setWorking(std::string const & dir);
+        Options & setCurrentWorking();
+
+        Options & appendArgument(std::string const & arg);
+        Options & appendEnvironment(std::string const & env);
+
+        Options & appendStdio(StdioContainer const & io);
+
+        Options & setUserId(uuser id, bool enable = true);
+        Options & setGroupId(ugroup id, bool enable = true);
+
+        Options & setDetached(bool flag = true);
+        Options & setVerbatimArguments(bool flag = true);
+        Options & setHide(bool flag = true);
     };
 
 private:

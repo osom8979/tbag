@@ -44,9 +44,9 @@ public:
 
         Flag() : key(), value()
         { /* EMPTY. */ }
-        Flag(std::string k) : key(k), value()
+        Flag(std::string const & k) : key(k), value()
         { /* EMPTY. */ }
-        Flag(std::string k, std::string v) : key(k), value(v)
+        Flag(std::string const & k, std::string const & v) : key(k), value(v)
         { /* EMPTY. */ }
     };
 

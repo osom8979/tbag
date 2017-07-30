@@ -62,7 +62,7 @@ public:
     virtual void write(String const & message) override
     {
         if (_file.isOpen()) {
-            _file.write2(message.c_str(), message.size(), -1);
+            _file.write(message.c_str(), message.size(), -1);
         }
     }
 

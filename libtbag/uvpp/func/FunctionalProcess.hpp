@@ -68,7 +68,7 @@ public:
     { /* EMPTY. */ }
 
 public:
-    void setOnExit (OnExit const & cb)
+    void setOnExit(OnExit const & cb)
     {
         Guard guard(_mutex);
         _exit_cb = cb;

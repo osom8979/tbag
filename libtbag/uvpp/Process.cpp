@@ -151,6 +151,192 @@ static bool updateOptions(Process::Options & options,
 
 } // namespace impl
 
+// ---------------------------------------
+// Process::StdioContainer implementation.
+// ---------------------------------------
+
+Process::StdioContainer::StdioContainer() : type(Type::STDIO_CONTAINER_FD), stream(nullptr), fd(0),
+                                            create_pipe(false), inherit_fd(false), inherit_stream(false),
+                                            readable_pipe(false), writable_pipe(false)
+{
+    // EMPTY.
+}
+
+Process::StdioContainer::StdioContainer(Stream * s) : StdioContainer()
+{
+    type = Type::STDIO_CONTAINER_STREAM;
+    stream = s;
+}
+
+Process::StdioContainer::StdioContainer(int f) : StdioContainer()
+{
+    type = Type::STDIO_CONTAINER_FD;
+    fd = f;
+}
+
+Process::StdioContainer::~StdioContainer()
+{
+    // EMPTY.
+}
+
+Process::StdioContainer & Process::StdioContainer::clear()
+{
+    type = Type::STDIO_CONTAINER_FD;
+    stream = nullptr;
+    fd = 0;
+    create_pipe = false;
+    inherit_fd = false;
+    inherit_stream = false;
+    readable_pipe = false;
+    writable_pipe = false;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setStream(Stream * s)
+{
+    type = Type::STDIO_CONTAINER_STREAM;
+    stream = s;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setFd(int f)
+{
+    type = Type::STDIO_CONTAINER_FD;
+    fd = f;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setCreatePipe(bool flag)
+{
+    create_pipe = flag;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setInheritFd(bool flag)
+{
+    inherit_fd = flag;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setInheritStream(bool flag)
+{
+    inherit_stream = flag;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setReadablePipe(bool flag)
+{
+    readable_pipe = flag;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setWritablePipe(bool flag)
+{
+    writable_pipe = flag;
+    return *this;
+}
+
+// --------------------------------
+// Process::Options implementation.
+// --------------------------------
+
+Process::Options::Options() : file(), cwd(), args(), envs(), stdios(),
+                              uid(0), gid(0), setuid(false), setgid(false),
+                              detached(false), verbatim_args(false), hide(false)
+{
+    // EMPTY.
+}
+
+Process::Options::~Options()
+{
+    // EMPTY.
+}
+
+Process::Options & Process::Options::clear()
+{
+    file.clear();
+    cwd.clear();
+    args.clear();
+    envs.clear();
+    stdios.clear();
+    uid = 0;
+    gid = 0;
+    setuid = false;
+    setgid = false;
+    detached = false;
+    verbatim_args = false;
+    hide = false;
+    return *this;
+}
+
+Process::Options & Process::Options::setFile(std::string const & path)
+{
+    file = path;
+    return *this;
+}
+
+Process::Options & Process::Options::setWorking(std::string const & dir)
+{
+    cwd = dir;
+    return *this;
+}
+
+Process::Options & Process::Options::setCurrentWorking()
+{
+    cwd = filesystem::Path::getWorkDir().getString();
+    return *this;
+}
+
+Process::Options & Process::Options::appendArgument(std::string const & arg)
+{
+    args.push_back(arg);
+    return *this;
+}
+
+Process::Options & Process::Options::appendEnvironment(std::string const & env)
+{
+    envs.push_back(env);
+    return *this;
+}
+
+Process::Options & Process::Options::appendStdio(StdioContainer const & io)
+{
+    stdios.push_back(io);
+    return *this;
+}
+
+Process::Options & Process::Options::setUserId(uuser id, bool enable)
+{
+    uid = id;
+    setuid = enable;
+    return *this;
+}
+
+Process::Options & Process::Options::setGroupId(ugroup id, bool enable)
+{
+    gid = id;
+    setgid = enable;
+    return *this;
+}
+
+Process::Options & Process::Options::setDetached(bool flag)
+{
+    detached = flag;
+    return *this;
+}
+
+Process::Options & Process::Options::setVerbatimArguments(bool flag)
+{
+    verbatim_args = flag;
+    return *this;
+}
+
+Process::Options & Process::Options::setHide(bool flag)
+{
+    hide = flag;
+    return *this;
+}
+
 // -----------------------
 // Process implementation.
 // -----------------------
