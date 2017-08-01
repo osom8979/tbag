@@ -32,13 +32,14 @@ OpenCLBackend::~OpenCLBackend()
     // EMPTY.
 }
 
+BackendType OpenCLBackend::getType() const TBAG_NOEXCEPT
+{
+    return BackendType::BT_OPENCL;
+}
+
 bool OpenCLBackend::isSupport() const TBAG_NOEXCEPT
 {
-#if defined(USE_OPENCL)
-    return true;
-#else
-    return false;
-#endif
+    return isOpenCLSupport();
 }
 
 int OpenCLBackend::getDeviceCount() const

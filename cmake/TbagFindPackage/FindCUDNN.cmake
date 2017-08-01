@@ -7,6 +7,7 @@
 #  CUDNN_FOUND
 #  CUDNN_INCLUDE_DIRS
 #  CUDNN_LIBRARIES
+#  CUDNN_VERSION
 
 if (CUDNN_FOUND)
     return ()
@@ -38,4 +39,34 @@ set (__libs    "cudnn")
 
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")
+
+if (CUDNN_FOUND)
+    list (GET CUDNN_INCLUDE_DIRS 0 __cudnn_include_dir_0)
+    file (READ "${__cudnn_include_dir_0}/cudnn.h" __cudnn_version_file_contents)
+
+    string (REGEX MATCH   "define CUDNN_MAJOR * +([0-9]+)"        CUDNN_VERSION_MAJOR "${__cudnn_version_file_contents}")
+    string (REGEX REPLACE "define CUDNN_MAJOR * +([0-9]+)" "\\1"  CUDNN_VERSION_MAJOR "${CUDNN_VERSION_MAJOR}")
+
+    string (REGEX MATCH   "define CUDNN_MINOR * +([0-9]+)"        CUDNN_VERSION_MINOR "${__cudnn_version_file_contents}")
+    string (REGEX REPLACE "define CUDNN_MINOR * +([0-9]+)" "\\1"  CUDNN_VERSION_MINOR "${CUDNN_VERSION_MINOR}")
+
+    string (REGEX MATCH   "define CUDNN_PATCHLEVEL * +([0-9]+)"        CUDNN_VERSION_PATCH "${__cudnn_version_file_contents}")
+    string (REGEX REPLACE "define CUDNN_PATCHLEVEL * +([0-9]+)" "\\1"  CUDNN_VERSION_PATCH "${CUDNN_VERSION_PATCH}")
+
+    if (NOT CUDNN_VERSION_MAJOR)
+        set (CUDNN_VERSION)
+    else ()
+        set (CUDNN_VERSION "${CUDNN_VERSION_MAJOR}.${CUDNN_VERSION_MINOR}.${CUDNN_VERSION_PATCH}")
+    endif ()
+    message (STATUS "cuDNN Version: ${CUDNN_VERSION}")
+
+    # cuDNN v3 and beyond.
+    string (COMPARE LESS "${CUDNN_VERSION_MAJOR}" 3 __cudnn_version_incompatible)
+    if (__cuDNN_Version_Incompatible)
+        message (FATAL_ERROR "cuDNN version >3 is required.")
+    endif ()
+
+    # Result variables.
+    set (CUDNN_VERSION "${CUDNN_VERSION}" PARENT_SCOPE)
+endif ()
 

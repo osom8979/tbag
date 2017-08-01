@@ -43,7 +43,7 @@
 
 # Known NVIDIA GPU achitectures.
 # This list will be used for 'CUDA_ARCH_NAME = All' option.
-set (TBAG_CUDA_KNOWN_GPU_ARCHS "20 21(20) 30 35 50")
+set (TBAG_CUDA_KNOWN_GPU_ARCHS "20 21(20) 30 35 50 52 61")
 
 #/// A function for automatic detection of GPUs installed  (if autodetection is enabled)
 #///
@@ -105,7 +105,7 @@ endfunction ()
 #/// @param __result [out] Output result variable.
 function (tabg_cuda__select_nvcc_arch_flags __result)
     # List of arch names
-    set (__archs_names "Fermi" "Kepler" "Maxwell" "All" "Manual" "Local")
+    set (__archs_names "Fermi" "Kepler" "Maxwell" "Pascal" "All" "Manual" "Local")
     set (__archs_name_default "All")
     if (NOT CMAKE_CROSSCOMPILING)
         list (APPEND __archs_names "Auto")
@@ -125,7 +125,7 @@ function (tabg_cuda__select_nvcc_arch_flags __result)
 
     if (${CUDA_ARCH_NAME} STREQUAL "Manual")
         set (CUDA_ARCH_BIN ${TBAG_CUDA_KNOWN_GPU_ARCHS} CACHE STRING "Specify 'real' GPU architectures to build binaries for, BIN(PTX) format is supported")
-        set (CUDA_ARCH_PTX "50" CACHE STRING "Specify 'virtual' PTX architectures to build PTX intermediate code for")
+        set (CUDA_ARCH_PTX "50"                         CACHE STRING "Specify 'virtual' PTX architectures to build PTX intermediate code for")
         mark_as_advanced (CUDA_ARCH_BIN CUDA_ARCH_PTX)
     else ()
         unset (CUDA_ARCH_BIN CACHE)
@@ -138,6 +138,8 @@ function (tabg_cuda__select_nvcc_arch_flags __result)
         set (__cuda_arch_bin "30 35")
     elseif (${CUDA_ARCH_NAME} STREQUAL "Maxwell")
         set (__cuda_arch_bin "50")
+    elseif (${CUDA_ARCH_NAME} STREQUAL "Pascal")
+        set (__cuda_arch_bin "61")
     elseif (${CUDA_ARCH_NAME} STREQUAL "All")
         set (__cuda_arch_bin ${TBAG_CUDA_KNOWN_GPU_ARCHS})
     elseif (${CUDA_ARCH_NAME} STREQUAL "Auto")
