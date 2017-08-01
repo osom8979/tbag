@@ -212,15 +212,18 @@ message (STATUS "Added CUDA NVCC flags for: ${NVCC_FLAGS_EXTRA_readable}")
 #    set (CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \"-DBOOST_NOINLINE=__attribute__((noinline))\" ")
 #endif ()
 
-## See: cmake revision 48040c1 - Merge topic 'FindCUDA.cmake/C++11Flags'
-if (CMAKE_VERSION VERSION_LESS "3.2.2")
-    # Process the C++11 flag.
-    # cc1: warning: command line option ‘-std=c++11’ is valid for C++/ObjC++ but not for C
-    if ("${CMAKE_CXX_FLAGS}" MATCHES "-std=c\\+\\+11")
-        # Add the c++11 flag to nvcc if it isn't already present.  Note that we only look at
-        # the main flag instead of the configuration specific flags.
-        if (NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std;c\\+\\+11" )
-            list (APPEND CUDA_NVCC_FLAGS --std c++11)
+if (ENABLE_CUDA_STD_CXX11)
+    message (STATUS "Enable NVCC C++11 Standard.")
+    ## See: cmake revision 48040c1 - Merge topic 'FindCUDA.cmake/C++11Flags'
+    if (CMAKE_VERSION VERSION_LESS "3.2.2")
+        # Process the C++11 flag.
+        # cc1: warning: command line option ‘-std=c++11’ is valid for C++/ObjC++ but not for C
+        if ("${CMAKE_CXX_FLAGS}" MATCHES "-std=c\\+\\+11")
+            # Add the c++11 flag to nvcc if it isn't already present.  Note that we only look at
+            # the main flag instead of the configuration specific flags.
+            if (NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std;c\\+\\+11" )
+                list (APPEND CUDA_NVCC_FLAGS --std c++11)
+            endif ()
         endif ()
     endif ()
 endif ()

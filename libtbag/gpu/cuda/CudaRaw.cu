@@ -8,10 +8,10 @@
 #include <libtbag/gpu/cuda/CudaRaw.h>
 #include <cuda.h>
 
-__global__ void add(int * a, int * b, int * c, int N)
+__global__ void add(int * a, int * b, int * c, int size)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < N) {
+    if (idx < size) {
         c[idx] = a[idx] + b[idx];
     }
 }
@@ -29,7 +29,7 @@ int tbCudaAddByGpu(int const * lh, int const * rh, int * result, int size)
     ::cudaMemcpy(device_lh, lh, size, ::cudaMemcpyHostToDevice);
     ::cudaMemcpy(device_rh, rh, size, ::cudaMemcpyHostToDevice);
 
-    add<<<size, 1>>>(device_lh, device_rh, device_result);
+    add<<<size, 1>>>(device_lh, device_rh, device_result, size);
 
     ::cudaMemcpy(result, device_rh, size, ::cudaMemcpyDeviceToHost);
 

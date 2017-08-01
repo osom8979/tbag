@@ -65,8 +65,5 @@ if (CUDNN_FOUND)
     if (__cuDNN_Version_Incompatible)
         message (FATAL_ERROR "cuDNN version >3 is required.")
     endif ()
-
-    # Result variables.
-    set (CUDNN_VERSION "${CUDNN_VERSION}" PARENT_SCOPE)
 endif ()
 
