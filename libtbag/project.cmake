@@ -42,6 +42,9 @@ endif ()
 if (CUDA_FOUND)
     tbag_modules__check_cuda ()
     tbag_modules__apply_cuda ()
+
+    tbag_modules__find_files (__find_cuda_source_files "${TBAG_PROJECT_CONST_DIR_PATH}" ".cu")
+    tbag_modules__build_cuda (${__find_cuda_source_files})
 endif ()
 
 if (WIN32)

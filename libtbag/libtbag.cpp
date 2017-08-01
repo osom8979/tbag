@@ -142,18 +142,18 @@ tbBOOL tbInitialize(tbInitParam * param)
 {
     if (libtbag::LibtbagInitializer::isInit()) {
         __tbag_debug("It has already been initialized.");
-        return AB_TRUE;
+        return TB_TRUE;
     }
-    return libtbag::LibtbagInitializer::init(param) ? AB_TRUE : AB_FALSE;
+    return libtbag::LibtbagInitializer::init(param) ? TB_TRUE : TB_FALSE;
 }
 
 tbBOOL tbRelease()
 {
     if (libtbag::LibtbagInitializer::isInit() == false) {
         __tbag_debug("It has already been release.");
-        return AB_TRUE;
+        return TB_TRUE;
     }
-    return libtbag::LibtbagInitializer::release() ? AB_TRUE : AB_FALSE;
+    return libtbag::LibtbagInitializer::release() ? TB_TRUE : TB_FALSE;
 }
 
 #include <libtbag/tpot/TpotMain.hpp>

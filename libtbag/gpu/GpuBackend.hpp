@@ -32,6 +32,13 @@ enum class BackendType
     BT_OPENCL,
 };
 
+enum class BrewType
+{
+    BT_UNKNOWN,
+    BT_CPU,
+    BT_GPU,
+};
+
 TBAG_CONSTEXPR bool isCudaSupport() TBAG_NOEXCEPT
 {
 #if defined(USE_CUDA)
