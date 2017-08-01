@@ -39,6 +39,11 @@ if (OpenCL_FOUND)
     list (APPEND TBAG_PROJECT_LDFLAGS      ${OpenCL_LIBRARY})
 endif ()
 
+if (CUDA_FOUND)
+    tbag_modules__check_cuda ()
+    tbag_modules__apply_cuda ()
+endif ()
+
 if (WIN32)
     list (APPEND TBAG_PROJECT_LDFLAGS shlwapi.lib) # filesystem with windows.
 endif ()
