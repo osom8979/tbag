@@ -1,11 +1,11 @@
 /**
- * @file   CudaUtils.cu
- * @brief  CUDA utilities implementation.
+ * @file   CudaRaw.cu
+ * @brief  CUDA raw implementation.
  * @author zer0
  * @date   2017-08-01
  */
 
-#include <libtbag/gpu/cuda/CudaUtils.hpp>
+#include <libtbag/gpu/cuda/CudaRaw.h>
 #include <cuda.h>
 
 __global__ void add(int * a, int * b, int * c, int N)
@@ -37,6 +37,6 @@ int tbCudaAddByGpu(int const * lh, int const * rh, int * result, int size)
     ::cudaFree(device_rh);
     ::cudaFree(device_result);
 
-    return 0;
+    return TB_CUDA_TRUE;
 }
 
