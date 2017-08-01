@@ -1,5 +1,5 @@
 /**
- * @file   CudaRaw.hpp
+ * @file   CudaRaw.h
  * @brief  CUDA raw prototype.
  * @author zer0
  * @date   2017-08-01

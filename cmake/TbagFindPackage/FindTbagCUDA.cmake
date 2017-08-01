@@ -188,6 +188,19 @@ function (tabg_cuda__select_nvcc_arch_flags __result)
     set (${__result}_readable ${__nvcc_archs_readable} PARENT_SCOPE)
 endfunction ()
 
+#/// Short command for cuda compilation
+#///
+#/// @param __result [out] Output result variable.
+macro (tabg_cuda__compile __result)
+    if (UNIX OR APPLE)
+        list (APPEND CUDA_NVCC_FLAGS -Xcompiler -fPIC)
+    endif ()
+    if (APPLE)
+        list (APPEND CUDA_NVCC_FLAGS -Xcompiler -Wno-unused-function)
+    endif ()
+    cuda_compile (${__result} ${ARGN})
+endmacro ()
+
 ############ FIND ############
 find_package (CUDA 5.5 QUIET)#
 ##############################

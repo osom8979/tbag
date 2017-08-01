@@ -184,7 +184,7 @@ endmacro ()
 
 macro (tbag_modules__build_cuda)
     foreach (__cuda_cusor ${ARGN})
-        cuda_compile (__cuda_object ${__cuda_cusor})
+        tabg_cuda__compile (__cuda_object ${__cuda_cusor})
         list (APPEND TBAG_PROJECT_OBJECTS ${__cuda_object})
     endforeach ()
 endmacro ()
