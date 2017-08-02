@@ -4,6 +4,7 @@
 #  Flatc_ROOT
 #  Flatc_SKIP_FOUND
 #  Flatc_INCLUDE_DIRS
+#  Flatc_GENERATE_DEPENDS (in flatc_generate() function.)
 #
 # The following are set after configuration is done:
 #  Flatc_FOUND
@@ -98,7 +99,7 @@ function (flatc_generate __result __flatc __output_dir __type __fbs)
         add_custom_command (
                 OUTPUT  "${__output_path}"
                 COMMAND ${__flatc} ${__output_flag} -o ${__output_dir} ${__flatc_include} ${__absolute}
-                DEPENDS ${__absolute}
+                DEPENDS ${__absolute} ${Flatc_GENERATE_DEPENDS}
                 WORKING_DIRECTORY ${__output_dir}
                 COMMENT "Running FlatBuffers compiler on ${__fbs_cursor}" VERBATIM)
 

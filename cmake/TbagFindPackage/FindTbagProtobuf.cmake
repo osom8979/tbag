@@ -5,6 +5,7 @@
 #
 # The following variables are optionally searched for defaults
 #  TbagProtobuf_SKIP_FOUND
+#  TbagProtobuf_GENERATE_DEPENDS (in tbag_protobuf__generate() function.)
 
 if (NOT TbagProtobuf_SKIP_FOUND)
     if (PROTOBUF_FOUND)
@@ -98,7 +99,7 @@ function (tbag_protobuf__generate __sources __headers __type __protos)
         add_custom_command (
                 OUTPUT  "${__cursor_of_source_path}" "${__cursor_of_header_path}"
                 COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ${__output_flag} ${__output_dir} ${__protoc_include} ${__absolute}
-                DEPENDS ${__absolute}
+                DEPENDS ${__absolute} ${TbagProtobuf_GENERATE_DEPENDS}
                 WORKING_DIRECTORY ${__output_dir}
                 COMMENT "Running Google-protocol-buffers compiler on ${__proto_cursor}" VERBATIM)
     endforeach ()
