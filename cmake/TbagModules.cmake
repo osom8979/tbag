@@ -162,6 +162,17 @@ macro (tbag_modules__apply_module_library)
     set (TBAG_PROJECT_LIB_TYPE MODULE)
 endmacro ()
 
+macro (tbag_modules__apply_window_subsystem)
+    if (WIN32)
+        if (MSVC)
+            list (APPEND TBAG_PROJECT_LDFLAGS  /SUBSYSTEM:WINDOWS)
+        elseif (MINGW)
+            list (APPEND TBAG_PROJECT_CXXFLAGS -Wno-deprecated-declarations)
+            list (APPEND TBAG_PROJECT_LDFLAGS  -mwindows)
+        endif ()
+    endif ()
+endmacro ()
+
 ## -----
 ## CUDA.
 ## -----
@@ -628,6 +639,19 @@ endmacro ()
 macro (tbag_modules__apply_uv)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${UV_INCLUDE_DIRS})
     list (APPEND TBAG_PROJECT_LDFLAGS      ${UV_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__check_wxwidgets)
+    if (NOT wxWidgets_FOUND)
+        message (WARNING "Not found wxWidgets.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_wxwidgets)
+    list (APPEND TBAG_PROJECT_DEFINITIONS  ${wxWidgets_DEFINITIONS})
+    list (APPEND TBAG_PROJECT_CXXFLAGS     ${wxWidgets_CXX_FLAGS})
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${wxWidgets_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${wxWidgets_LIBRARIES})
 endmacro ()
 
 ## ------------------
