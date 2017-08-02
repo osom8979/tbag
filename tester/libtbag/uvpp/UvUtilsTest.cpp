@@ -136,3 +136,10 @@ TEST(UvUtilsTest, HighResolutionTime)
     std::cout << "High resolution time: " << HTIME << std::endl;
 }
 
+TEST(UvUtilsTest, GetEnv)
+{
+    std::string path;
+    ASSERT_EQ(Err::E_SUCCESS, getEnv("PATH", path));
+    ASSERT_FALSE(path.empty());
+}
+

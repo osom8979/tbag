@@ -9,6 +9,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cstdlib>
 #include <cstring>
 #include <cassert>
 #include <uv.h>
@@ -258,8 +259,12 @@ uint64_t getHighResolutionTime()
 
 Err getEnv(std::string const & name, std::string & value)
 {
-    tDLogE("getEnv() Function not implemented.");
-    return Err::E_ENOSYS;
+    char * env_value = ::getenv(name.c_str());
+    if (env_value != nullptr) {
+        value = std::string(env_value);
+        return Err::E_SUCCESS;
+    }
+    return Err::E_NOTFOUND;
 }
 
 Err setEnv(std::string const & name, std::string const & value)
