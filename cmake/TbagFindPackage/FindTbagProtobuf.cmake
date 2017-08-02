@@ -2,8 +2,15 @@
 #/// @brief  Find the Google-protocol-buffers library.
 #/// @author zer0
 #/// @date   2016-05-27
+#
+# The following variables are optionally searched for defaults
+#  TbagProtobuf_SKIP_FOUND
 
-if (NOT PROTOBUF_FOUND)
+if (NOT TbagProtobuf_SKIP_FOUND)
+    if (PROTOBUF_FOUND)
+        return ()
+    endif ()
+
     if (TbagProtobuf_FIND_QUIETLY)
         set (__tbag_protobuf_quiet QUIET)
     else ()

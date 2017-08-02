@@ -219,11 +219,18 @@ message (STATUS "Added CUDA NVCC flags for: ${NVCC_FLAGS_EXTRA_readable}")
 
 # Boost 1.55 workaround, see https://svn.boost.org/trac/boost/ticket/9392 or
 # https://github.com/ComputationalRadiationPhysics/picongpu/blob/master/src/picongpu/CMakeLists.txt
-#if (Boost_VERSION EQUAL 105500)
-#    message (STATUS "Cuda + Boost 1.55: Applying noinline work around.")
-#    # avoid warning for CMake >= 2.8.12
-#    set (CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \"-DBOOST_NOINLINE=__attribute__((noinline))\" ")
-#endif ()
+if (Boost_VERSION EQUAL 105500)
+    message (STATUS "Cuda + Boost 1.55: Applying noinline work around.")
+    # avoid warning for CMake >= 2.8.12
+    set (CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \"-DBOOST_NOINLINE=__attribute__((noinline))\" ")
+endif ()
+
+if (ENABLE_CUDA_DIAGNOSTIC)
+    # disable some nvcc diagnostic that apears in boost, glog, glags, opencv, etc.
+    foreach (diag cc_clobber_ignored integer_sign_change useless_using_declaration set_but_not_used)
+        list (APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_suppress=${diag})
+    endforeach ()
+endif ()
 
 if (ENABLE_CUDA_STD_CXX11)
     message (STATUS "Enable NVCC C++11 Standard.")
@@ -240,4 +247,9 @@ if (ENABLE_CUDA_STD_CXX11)
         endif ()
     endif ()
 endif ()
+
+mark_as_advanced (ENABLE_CUDA_DIAGNOSTIC ENABLE_CUDA_STD_CXX11)
+mark_as_advanced (CUDA_PROPAGATE_HOST_FLAGS)
+mark_as_advanced (CUDA_BUILD_CUBIN CUDA_BUILD_EMULATION CUDA_VERBOSE_BUILD)
+mark_as_advanced (CUDA_SDK_ROOT_DIR CUDA_SEPARABLE_COMPILATION)
 
