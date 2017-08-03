@@ -150,7 +150,7 @@ public:
 // Iterators methods.
 public:
     inline       iterator begin()       TBAG_NOEXCEPT { return       iterator(id.data); }
-    inline const_iterator begin() const TBAG_NOEXCEPT { return const_iterator(id.data + BYTE_SIZE); }
+    inline const_iterator begin() const TBAG_NOEXCEPT { return const_iterator(id.data); }
     inline       iterator   end()       TBAG_NOEXCEPT { return       iterator(id.data + BYTE_SIZE); }
     inline const_iterator   end() const TBAG_NOEXCEPT { return const_iterator(id.data + BYTE_SIZE); }
 
