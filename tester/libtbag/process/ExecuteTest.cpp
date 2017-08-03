@@ -6,9 +6,12 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/process/Execute.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
+#include <libtbag/filesystem/FindPath.hpp>
+#include <libtbag/filesystem/details/FsCommon.hpp>
 
 using namespace libtbag;
 using namespace libtbag::process;
@@ -41,7 +44,22 @@ TEST(ExecuteTest, Default)
 TEST(ExecuteTest, RunShell)
 {
     Err code = Err::E_UNKNOWN;
-    ASSERT_EQ(0, runShellCommand("echo 'haha'", &code));
+    ASSERT_EQ(0, runShellCommand("echo 'Test echo message'", &code));
+    ASSERT_EQ(Err::E_SUCCESS, code);
+}
+
+TEST(ExecuteTest, TestLink)
+{
+    TBAG_TEST_TEMP_DIR(true, true);
+    auto link_path = TBAG_TEST_TEMP_DIR_GET() / "link";
+
+    using namespace filesystem;
+    ASSERT_FALSE(link_path.exists());
+    ASSERT_TRUE(filesystem::details::symlink(findDefaultShell().toString(), link_path.toString()));
+    ASSERT_TRUE(link_path.exists());
+
+    Err code = Err::E_UNKNOWN;
+    ASSERT_EQ(0, execute(link_path, {(isWindowsPlatform() ? "/C" : "-c"), "echo 'Test(Link) echo message'"}, &code));
     ASSERT_EQ(Err::E_SUCCESS, code);
 }
 

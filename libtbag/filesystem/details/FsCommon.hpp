@@ -171,7 +171,7 @@ TBAG_API std::string getRealPath(std::string const & path);
 TBAG_API bool link(std::string const & path, std::string const & new_path);
 
 /** @see <https://linux.die.net/man/2/symlink> */
-TBAG_API bool symlink(std::string const & path, std::string const & new_path, int flags);
+TBAG_API bool symlink(std::string const & path, std::string const & new_path, int flags = 0);
 
 /** @see <https://linux.die.net/man/2/unlink> */
 TBAG_API bool unlink(std::string const & path);

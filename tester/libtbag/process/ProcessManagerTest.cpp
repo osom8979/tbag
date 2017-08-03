@@ -23,7 +23,6 @@ TEST(ProcessManagerTest, Default)
 
     char const * const WRITE_BODY = "TEMP_BODY";
 
-
     ASSERT_TRUE(TBPROC_EXE.exists());
     if (TBPROC_TXT.exists()) {
         ASSERT_TRUE(TBPROC_TXT.remove());

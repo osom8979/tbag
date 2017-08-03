@@ -39,7 +39,7 @@ std::vector<Path> findUtf8ExecuteFile(std::string const & regex)
         return std::vector<Path>();
     }
     auto const PATHS = string::splitTokens(path_env, std::string(1, details::PATH_SPLITTER));
-    return findUtf8File(PATHS, regex, Path::DIRENT_FILE);
+    return findUtf8File(PATHS, regex, Path::DIRENT_FILE | Path::DIRENT_LINK);
 }
 
 Path findFirstUtf8ExecuteFile(std::string const & regex)
