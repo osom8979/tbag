@@ -94,12 +94,17 @@ int execute(std::string const & file,
     return static_cast<int>(exit_code);
 }
 
-int execute(std::string const & file, std::vector<std::string> const & args, std::vector<std::string> const & envs, Err * code)
+int execute(std::string const & file,
+            std::vector<std::string> const & args,
+            std::vector<std::string> const & envs,
+            Err * code)
 {
     return execute(file, args, std::vector<std::string>(), filesystem::Path::getWorkDir().toString(), code);
 }
 
-int execute(std::string const & file, std::vector<std::string> const & args, Err * code)
+int execute(std::string const & file,
+            std::vector<std::string> const & args,
+            Err * code)
 {
     return execute(file, args, std::vector<std::string>(), code);
 }
@@ -121,23 +126,26 @@ int execute(std::string const & args, Err * code)
     return execute(string::splitTokens(args, std::string(" ")), code);
 }
 
-int runShell(std::string const & args, Err * code)
+int runShell(std::vector<std::string> const & args, Err * code)
 {
-    using namespace filesystem;
+    return execute(filesystem::findDefaultShell().toString(), args, code);
+}
 
-    Path shell;
+int runShellScript(std::string const & file, Err * code)
+{
+    return runShell({file}, code);
+}
+
+int runShellCommand(std::string const & command, Err * code)
+{
     std::vector<std::string> all_arguments;
-
     if (isWindowsPlatform()) {
-        shell = findCmd();
-        all_arguments.push_back("/C"); // Carries out the command specified by string and then terminates.
+        all_arguments.emplace_back("/C"); // Carries out the command specified by string and then terminates.
     } else {
-        shell = findShell();
-        all_arguments.push_back("-c"); // If the -c option is present, then commands are read from string.
+        all_arguments.emplace_back("-c"); // If the -c option is present, then commands are read from string.
     }
-
-    all_arguments.push_back(args);
-    return execute(shell.toString(), all_arguments, code);
+    all_arguments.push_back(command);
+    return runShell(all_arguments, code);
 }
 
 } // namespace process

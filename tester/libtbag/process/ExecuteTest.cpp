@@ -41,7 +41,7 @@ TEST(ExecuteTest, Default)
 TEST(ExecuteTest, RunShell)
 {
     Err code = Err::E_UNKNOWN;
-    ASSERT_EQ(0, runShell("echo 'haha'", &code));
+    ASSERT_EQ(0, runShellCommand("echo 'haha'", &code));
     ASSERT_EQ(Err::E_SUCCESS, code);
 }
 

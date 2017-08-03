@@ -32,7 +32,9 @@ TBAG_API int execute(std::string const & file, std::vector<std::string> const & 
 TBAG_API int execute(std::vector<std::string> const & args, Err * code = nullptr);
 TBAG_API int execute(std::string const & args, Err * code = nullptr);
 
-TBAG_API int runShell(std::string const & args, Err * code = nullptr);
+TBAG_API int runShell(std::vector<std::string> const & args, Err * code = nullptr);
+TBAG_API int runShellScript(std::string const & file, Err * code = nullptr);
+TBAG_API int runShellCommand(std::string const & command, Err * code = nullptr);
 
 } // namespace process
 
