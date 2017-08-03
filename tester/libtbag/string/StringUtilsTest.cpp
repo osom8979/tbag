@@ -3,7 +3,7 @@
  * @brief  String utilities tester.
  * @author zer0
  * @date   2016-04-04
- * @date   2016-12-05 (Rename: StringsTest -> StringUtilsTest)
+ * @date   2016-12-05 (Rename: StringUtilsTest -> StringUtilsTest)
  */
 
 #include <gtest/gtest.h>
@@ -18,7 +18,7 @@ using namespace libtbag;
 using namespace libtbag::string;
 using namespace libtbag::test_data;
 
-TEST(StringsTest, Format)
+TEST(StringUtilsTest, Format)
 {
     ASSERT_STREQ("TEST", format("%s", "TEST").c_str());
     ASSERT_STREQ("1234", format("%d", 1234).c_str());
@@ -28,7 +28,7 @@ TEST(StringsTest, Format)
     ASSERT_STREQ("TEST/1234", fformat("{}/{}", "TEST", 1234).c_str());
 }
 
-TEST(StringsTest, SplitTokens)
+TEST(StringUtilsTest, SplitTokens)
 {
     std::string delimiter = "//";
     std::string temp1 = std::string("1TEMP1");
@@ -78,7 +78,7 @@ TEST(StringsTest, SplitTokens)
     ASSERT_EQ(temp2, path_set[1]);
 }
 
-TEST(StringsTest, splitUtf8Tokens)
+TEST(StringUtilsTest, splitUtf8Tokens)
 {
     std::vector<std::string> tokens;
 
@@ -99,19 +99,19 @@ TEST(StringsTest, splitUtf8Tokens)
     ASSERT_EQ(UTF8_GA + UTF8_NA, tokens[0]);
 }
 
-TEST(StringsTest, ConvertStringWithFloatingPoint)
+TEST(StringUtilsTest, ConvertStringWithFloatingPoint)
 {
     std::string result = convertStringWithFloatingPoint(10.5542, 2);
     ASSERT_STREQ("10.55", result.c_str());
 }
 
-TEST(StringsTest, ConvertStringWithThreadId)
+TEST(StringUtilsTest, ConvertStringWithThreadId)
 {
     std::string result = convertStringWithThreadId(std::this_thread::get_id());
     ASSERT_FALSE(result.empty());
 }
 
-TEST(StringsTest, SplitMatch)
+TEST(StringUtilsTest, SplitMatch)
 {
     std::string match = R"(TEST[^ ]*)";
     std::string content = std::string("TEST1 TEST10 TEST");
@@ -123,14 +123,14 @@ TEST(StringsTest, SplitMatch)
     ASSERT_STREQ("TEST", list[2].c_str());
 }
 
-TEST(StringsTest, IsMatch)
+TEST(StringUtilsTest, IsMatch)
 {
     std::string content = "https://www.blackhole-project.com:8080/test";
     std::string match   = R"(^https?:\/\/[a-zA-Z0-9\.\-]+(:[0-9]+)?\/.*$)";
     ASSERT_TRUE(isMatch(content, match));
 }
 
-TEST(StringsTest, IsUtf8Match)
+TEST(StringUtilsTest, IsUtf8Match)
 {
     std::string content1 = UTF8_SOURCE;
     std::string match1 = "^??" + UTF8_DA + "$";
@@ -144,7 +144,7 @@ TEST(StringsTest, IsUtf8Match)
     ASSERT_TRUE(isUtf8Match(content2, match3));
 }
 
-TEST(StringsTest, TrimLeft)
+TEST(StringUtilsTest, TrimLeft)
 {
     std::string t1 = "  TEST";
     std::string t2 = "  ";
@@ -159,7 +159,7 @@ TEST(StringsTest, TrimLeft)
     ASSERT_STREQ(     "", trimLeft(t5).c_str());
 }
 
-TEST(StringsTest, TrimRight)
+TEST(StringUtilsTest, TrimRight)
 {
     std::string t1 = "TEST  ";
     std::string t2 = "  ";
@@ -174,7 +174,7 @@ TEST(StringsTest, TrimRight)
     ASSERT_STREQ(     "", trimRight(t5).c_str());
 }
 
-TEST(StringsTest, Trim)
+TEST(StringUtilsTest, Trim)
 {
     std::string t1 = " TEST  ";
     std::string t2 = "  ";
@@ -191,7 +191,7 @@ TEST(StringsTest, Trim)
     ASSERT_STREQ(     "", trim(t6).c_str());
 }
 
-TEST(StringsTest, createRandomString)
+TEST(StringUtilsTest, createRandomString)
 {
     const std::size_t BUFFER_SIZE = 5;
     const std::size_t TEST_COUNT  = 100;
@@ -205,13 +205,13 @@ TEST(StringsTest, createRandomString)
     }
 }
 
-TEST(StringsTest, TranslateCase)
+TEST(StringUtilsTest, TranslateCase)
 {
     ASSERT_EQ(std::string("abcdefg1234"), string::lower("abcdEFG1234"));
     ASSERT_EQ(std::string("ABCDEFG1234"), string::upper("abcdEFG1234"));
 }
 
-TEST(StringsTest, ConvertAddressToHexString)
+TEST(StringUtilsTest, ConvertAddressToHexString)
 {
     void * temp1 = nullptr;
     int    temp2 = 0;
