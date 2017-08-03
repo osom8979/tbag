@@ -51,16 +51,6 @@ Path findFirstUtf8ExecuteFile(std::string const & regex)
     return files[0];
 }
 
-Path findSh()
-{
-    return findFirstUtf8ExecuteFile("^sh$");
-}
-
-Path findBash()
-{
-    return findFirstUtf8ExecuteFile("^bash$");
-}
-
 Path findEnvOrExe(std::string const & env, std::string const & regex)
 {
     std::string value;
@@ -73,15 +63,14 @@ Path findEnvOrExe(std::string const & env, std::string const & regex)
     return findFirstUtf8ExecuteFile(regex);
 }
 
-Path findCmd()
-{
-    return findEnvOrExe("ComSpec", "^cmd\\.exe$");
-}
-
-Path findShell()
-{
-    return findEnvOrExe("SHELL", "^(bash|sh)$");
-}
+// @formatter:off
+Path findBash       () { return findFirstUtf8ExecuteFile("^bash$"); }
+Path findBourneShell() { return findFirstUtf8ExecuteFile("^sh$");   }
+Path findCShell     () { return findFirstUtf8ExecuteFile("^(csh|tcsh)$");  }
+Path findZShell     () { return findFirstUtf8ExecuteFile("^zsh$");  }
+Path findCmd        () { return findEnvOrExe("ComSpec", "^cmd\\.exe$"); }
+Path findShell      () { return findEnvOrExe("SHELL", "^(bash|sh|csh|tcsh|zsh)$"); }
+// @formatter:on
 
 Path findDefaultShell()
 {

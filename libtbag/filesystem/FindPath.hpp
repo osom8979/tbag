@@ -32,10 +32,12 @@ TBAG_API std::vector<Path> findUtf8File(std::vector<std::string> const & paths,
 TBAG_API std::vector<Path> findUtf8ExecuteFile(std::string const & regex);
 TBAG_API Path findFirstUtf8ExecuteFile(std::string const & regex);
 
-TBAG_API Path findSh();
-TBAG_API Path findBash();
-
 TBAG_API Path findEnvOrExe(std::string const & env, std::string const & regex);
+
+TBAG_API Path findBash();
+TBAG_API Path findBourneShell();
+TBAG_API Path findCShell();
+TBAG_API Path findZShell();
 TBAG_API Path findCmd();
 TBAG_API Path findShell();
 

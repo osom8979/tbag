@@ -29,7 +29,7 @@ TEST(FindPathTest, FindUtf8ExecuteFile)
     if (isWindowsPlatform()) {
         exe_file = "^cmd\\.exe$";
     } else {
-        exe_file = "^sh$";
+        exe_file = "^ls$";
     }
     auto result = findUtf8ExecuteFile(exe_file);
     ASSERT_FALSE(result.empty());
