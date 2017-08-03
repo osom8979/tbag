@@ -79,6 +79,7 @@ public:
         Stream * stream;
         int fd;
 
+        bool ignore;
         bool create_pipe;
         bool inherit_fd;
         bool inherit_stream;
@@ -86,8 +87,8 @@ public:
         bool writable_pipe;
 
         StdioContainer();
-        explicit StdioContainer(Stream * s);
-        explicit StdioContainer(int f);
+        explicit StdioContainer(Stream * s, bool inherit = false);
+        explicit StdioContainer(int f, bool inherit = false);
         ~StdioContainer();
 
         StdioContainer & clear();
@@ -95,6 +96,7 @@ public:
         StdioContainer & setStream(Stream * s);
         StdioContainer & setFd(int f);
 
+        StdioContainer & setIgnore();
         StdioContainer & setCreatePipe(bool flag = true);
         StdioContainer & setInheritFd(bool flag = true);
         StdioContainer & setInheritStream(bool flag = true);
@@ -151,6 +153,8 @@ public:
         Options & setDetached(bool flag = true);
         Options & setVerbatimArguments(bool flag = true);
         Options & setHide(bool flag = true);
+
+        std::string getAllArguments() const;
     };
 
 private:

@@ -53,5 +53,6 @@ TEST(ProcessTest, Default)
     std::string buffer;
     ASSERT_EQ(Err::E_SUCCESS, readFile(TBPROC_TXT, buffer));
     ASSERT_EQ(std::string(WRITE_BODY), buffer);
+    ASSERT_TRUE(TBPROC_TXT.remove());
 }
 

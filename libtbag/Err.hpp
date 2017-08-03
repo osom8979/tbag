@@ -51,6 +51,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_KEYGEN  , "Key generator error"   ) \
     _TBAG_XX(_ASYNCREQ, "Async request"         ) \
     _TBAG_XX(_UNKEXCP , "Unknown exception"     ) \
+    _TBAG_XX(_UNKSIG  , "Unknown signal"        ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
@@ -204,6 +205,9 @@ enum class Err : int
     TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
 };
+
+inline int toInt(Err code) TBAG_NOEXCEPT { return static_cast<int>(code); }
+inline Err toErr(int code) TBAG_NOEXCEPT { return static_cast<Err>(code); }
 
 TBAG_API char const * getErrName(Err code) TBAG_NOEXCEPT;
 TBAG_API char const * getErrDetail(Err code) TBAG_NOEXCEPT;

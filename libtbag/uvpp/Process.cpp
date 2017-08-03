@@ -11,6 +11,8 @@
 #include <libtbag/uvpp/Stream.hpp>
 #include <uv.h>
 
+#include <sstream>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -122,6 +124,7 @@ static bool updateOptions(Process::Options & options,
 
     stdios.clear();
     stdios.resize(STDIOS_SIZE);
+    native.stdio = &stdios[0];
 
     // The 'stdio' field points to an array of uv_stdio_container_t structs that
     // describe the file descriptors that will be made available to the child
@@ -132,17 +135,22 @@ static bool updateOptions(Process::Options & options,
     // child process only if the child processes uses the MSVCRT runtime.
     for (std::size_t index = 0; index < STDIOS_SIZE; ++index) {
         Process::StdioContainer & stdio = options.stdios[index];
-        stdios[index].flags = static_cast<uv_stdio_flags>(UV_IGNORE);
-        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.create_pipe    ? UV_CREATE_PIPE    : 0));
-        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.inherit_fd     ? UV_INHERIT_FD     : 0));
-        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.inherit_stream ? UV_INHERIT_STREAM : 0));
-        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.readable_pipe  ? UV_READABLE_PIPE  : 0));
-        stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.writable_pipe  ? UV_WRITABLE_PIPE  : 0));
 
-        if (stdio.type == Process::StdioContainer::Type::STDIO_CONTAINER_STREAM && stdio.stream != nullptr) {
-            stdios[index].data.stream = stdio.stream->cast<uv_stream_t>();
-        } else /*if (stdio.type == Process::StdioContainer::Type::STDIO_CONTAINER_FD)*/ {
-            stdios[index].data.fd = stdio.fd;
+        if (stdio.ignore) {
+            stdios[index].flags = static_cast<uv_stdio_flags>(UV_IGNORE);
+        } else {
+            stdios[index].flags = static_cast<uv_stdio_flags>(0);
+            stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.create_pipe    ? UV_CREATE_PIPE    : 0));
+            stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.inherit_fd     ? UV_INHERIT_FD     : 0));
+            stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.inherit_stream ? UV_INHERIT_STREAM : 0));
+            stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.readable_pipe  ? UV_READABLE_PIPE  : 0));
+            stdios[index].flags = static_cast<uv_stdio_flags>(stdios[index].flags | (stdio.writable_pipe  ? UV_WRITABLE_PIPE  : 0));
+
+            if (stdio.type == Process::StdioContainer::Type::STDIO_CONTAINER_STREAM && stdio.stream != nullptr) {
+                stdios[index].data.stream = stdio.stream->cast<uv_stream_t>();
+            } else /*if (stdio.type == Process::StdioContainer::Type::STDIO_CONTAINER_FD)*/ {
+                stdios[index].data.fd = stdio.fd;
+            }
         }
     }
 
@@ -156,22 +164,24 @@ static bool updateOptions(Process::Options & options,
 // ---------------------------------------
 
 Process::StdioContainer::StdioContainer() : type(Type::STDIO_CONTAINER_FD), stream(nullptr), fd(0),
-                                            create_pipe(false), inherit_fd(false), inherit_stream(false),
+                                            ignore(false), create_pipe(false), inherit_fd(false), inherit_stream(false),
                                             readable_pipe(false), writable_pipe(false)
 {
     // EMPTY.
 }
 
-Process::StdioContainer::StdioContainer(Stream * s) : StdioContainer()
+Process::StdioContainer::StdioContainer(Stream * s, bool inherit) : StdioContainer()
 {
     type = Type::STDIO_CONTAINER_STREAM;
     stream = s;
+    inherit_stream = inherit;
 }
 
-Process::StdioContainer::StdioContainer(int f) : StdioContainer()
+Process::StdioContainer::StdioContainer(int f, bool inherit) : StdioContainer()
 {
     type = Type::STDIO_CONTAINER_FD;
     fd = f;
+    inherit_fd = inherit;
 }
 
 Process::StdioContainer::~StdioContainer()
@@ -184,11 +194,12 @@ Process::StdioContainer & Process::StdioContainer::clear()
     type = Type::STDIO_CONTAINER_FD;
     stream = nullptr;
     fd = 0;
-    create_pipe = false;
-    inherit_fd = false;
+    ignore         = false;
+    create_pipe    = false;
+    inherit_fd     = false;
     inherit_stream = false;
-    readable_pipe = false;
-    writable_pipe = false;
+    readable_pipe  = false;
+    writable_pipe  = false;
     return *this;
 }
 
@@ -203,6 +214,12 @@ Process::StdioContainer & Process::StdioContainer::setFd(int f)
 {
     type = Type::STDIO_CONTAINER_FD;
     fd = f;
+    return *this;
+}
+
+Process::StdioContainer & Process::StdioContainer::setIgnore()
+{
+    ignore = true;
     return *this;
 }
 
@@ -337,6 +354,19 @@ Process::Options & Process::Options::setHide(bool flag)
     return *this;
 }
 
+std::string Process::Options::getAllArguments() const
+{
+    std::stringstream ss;
+    std::size_t const SIZE = args.size();
+    for (std::size_t i = 0; i < SIZE; ++i) {
+        ss << args[i];
+        if (i + 1 < SIZE) {
+            ss << ' ';
+        }
+    }
+    return ss.str();
+}
+
 // -----------------------
 // Process implementation.
 // -----------------------
@@ -379,6 +409,7 @@ Err Process::spawn(Loop & loop, Options const & options)
     // (but not be limited to) the file to execute not existing,
     // not having permissions to use the setuid or setgid specified,
     // or not having enough memory to allocate for the new process.
+    tDLogD("Process::spawn() {} {}", _options.file, _options.getAllArguments());
     int const CODE = ::uv_spawn(loop.cast<uv_loop_t>(), Parent::cast<uv_process_t>(), &uv_options);
     return convertUvErrorToErrWithLogging("Process::spawn()", CODE);
 }
