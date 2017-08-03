@@ -15,6 +15,7 @@
 #include <random>
 
 #include <unicode/unistr.h>
+#include <unicode/regex.h>
 #include <libtbag/Err.hpp>
 
 // -------------------
@@ -282,14 +283,31 @@ std::string removeRegex(std::string const & source, std::string const & regex)
     return replaceRegex(source, regex, std::string());
 }
 
-bool isMatch(std::string const & original, std::regex const & regex)
+bool isMatch(std::string const & source, std::regex const & regex)
 {
-    return std::regex_match(original, regex);
+    return std::regex_match(source, regex);
 }
 
-bool isMatch(std::string const & original, std::string const & regex)
+bool isMatch(std::string const & source, std::string const & regex)
 {
-    return isMatch(original, std::regex(regex));
+    return isMatch(source, std::regex(regex));
+}
+
+bool isUtf8Match(std::string const & utf8_source, std::string const & regex)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    icu::RegexMatcher matcher(icu::UnicodeString::fromUTF8(icu::StringPiece(regex.c_str())), 0, status);
+    if (U_FAILURE(status)) {
+        // Handle any syntax errors in the regular expression here
+        return false;
+    }
+
+    matcher.reset(icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_source.c_str())));
+    if (matcher.find() == TRUE) {
+        int const START_OF_MATCH = matcher.start(status); // string index of start of match.
+        return true;
+    }
+    return false;
 }
 
 std::string trimLeft(std::string const & str)

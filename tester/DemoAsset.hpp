@@ -29,6 +29,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace test_data {
 // ------------------
 
+// Don't use u8 literal.
 std::string const UTF8_GA = "\xea\xb0\x80"; // "가"
 std::string const UTF8_NA = "\xeb\x82\x98"; // "나"
 std::string const UTF8_DA = "\xeb\x8b\xa4"; // "다"

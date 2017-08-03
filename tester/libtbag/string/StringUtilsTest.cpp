@@ -7,6 +7,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cctype>
@@ -15,6 +16,7 @@
 
 using namespace libtbag;
 using namespace libtbag::string;
+using namespace libtbag::test_data;
 
 TEST(StringsTest, Format)
 {
@@ -78,11 +80,6 @@ TEST(StringsTest, SplitTokens)
 
 TEST(StringsTest, splitUtf8Tokens)
 {
-    // Don't use u8 literal.
-    std::string const UTF8_GA = "\xea\xb0\x80"; // "가"
-    std::string const UTF8_NA = "\xeb\x82\x98"; // "나"
-    std::string const UTF8_DA = "\xeb\x8b\xa4"; // "다"
-    std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
     std::vector<std::string> tokens;
 
     // 1st.
@@ -130,8 +127,21 @@ TEST(StringsTest, IsMatch)
 {
     std::string content = "https://www.blackhole-project.com:8080/test";
     std::string match   = R"(^https?:\/\/[a-zA-Z0-9\.\-]+(:[0-9]+)?\/.*$)";
-
     ASSERT_TRUE(isMatch(content, match));
+}
+
+TEST(StringsTest, IsUtf8Match)
+{
+    std::string content1 = UTF8_SOURCE;
+    std::string match1 = "^??" + UTF8_DA + "$";
+    std::string match2 = "^????" + UTF8_DA + "$";
+
+    ASSERT_TRUE (isUtf8Match(content1, match1));
+    ASSERT_FALSE(isUtf8Match(content1, match2));
+
+    std::string content2 = UTF8_GA + "A" + UTF8_NA + "B" + UTF8_DA;
+    std::string match3 = "^?A?B?$";
+    ASSERT_TRUE(isUtf8Match(content2, match3));
 }
 
 TEST(StringsTest, TrimLeft)
