@@ -39,6 +39,10 @@ struct FsPollTest : public FsPoll
 
 TEST(FsPollTest, Default)
 {
+#if defined(SKIP_FSPOLL_TESTER)
+    std::cout << "Skip this test. (The SKIP_FSPOLL_TESTER macro has been defined)\n";
+    return;
+#endif
     char const * const TEST_FILENAME = "test.file";
     tttDir(true, true);
     auto path = tttDirGet() / TEST_FILENAME;

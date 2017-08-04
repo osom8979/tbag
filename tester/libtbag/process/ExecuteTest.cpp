@@ -50,6 +50,11 @@ TEST(ExecuteTest, RunShell)
 
 TEST(ExecuteTest, TestLink)
 {
+    if (isWindowsPlatform()) {
+        std::cout << "Skip this test in Windows Platform.\n";
+        return;
+    }
+
     TBAG_TEST_TEMP_DIR(true, true);
     auto link_path = TBAG_TEST_TEMP_DIR_GET() / "link";
 
