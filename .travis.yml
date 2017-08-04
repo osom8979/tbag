@@ -1,13 +1,15 @@
 # Travis CI Build.
 # HOME path: /home/travis
 # Git clone path: /home/travis/build/osom8979/tbag
+# build directory: $TRAVIS_BUILD_DIR
 
 language: cpp
 
 cache:
   apt: true
   directories:
-    - /home/travis/tparty
+    - $HOME/tparty
+    - $TRAVIS_BUILD_DIR/cmake_build/external/local
 
 compiler: g++
 
@@ -40,6 +42,8 @@ install:
   - bash script/travis_install.sh
 
 script:
+  - echo "Current dir: $PWD"
+  - echo "Travis build dir: $TRAVIS_BUILD_DIR"
   - mkdir cmake_build
   - cd cmake_build
   - cmake ..
