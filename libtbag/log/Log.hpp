@@ -212,6 +212,54 @@ NAMESPACE_LIBTBAG_CLOSE
 #define tDLogI(...)  tLogI(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
 #define tDLogD(...)  tLogD(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
 
+#if defined(DISABLE_TBAG_LOG)
+# define tLogIf(condition, name, level, ...)
+#else
+# define tLogIf(condition, name, level, ...) do { if (condition) { tLog(name, level, __VA_ARGS__); } } while (0)
+#endif
+
+#define tLogIfM(c, name, ...)  tLogIf(c, name, ::libtbag::log::EMERGENCY_SEVERITY, __VA_ARGS__)
+#define tLogIfA(c, name, ...)  tLogIf(c, name, ::libtbag::log::ALERT_SEVERITY    , __VA_ARGS__)
+#define tLogIfC(c, name, ...)  tLogIf(c, name, ::libtbag::log::CRITICAL_SEVERITY , __VA_ARGS__)
+#define tLogIfE(c, name, ...)  tLogIf(c, name, ::libtbag::log::ERROR_SEVERITY    , __VA_ARGS__)
+#define tLogIfW(c, name, ...)  tLogIf(c, name, ::libtbag::log::WARNING_SEVERITY  , __VA_ARGS__)
+#define tLogIfN(c, name, ...)  tLogIf(c, name, ::libtbag::log::NOTICE_SEVERITY   , __VA_ARGS__)
+#define tLogIfI(c, name, ...)  tLogIf(c, name, ::libtbag::log::INFO_SEVERITY     , __VA_ARGS__)
+#define tLogIfD(c, name, ...)  tLogIf(c, name, ::libtbag::log::DEBUG_SEVERITY    , __VA_ARGS__)
+
+#define tDLogIfM(c, ...)  tLogIfM(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogIfA(c, ...)  tLogIfA(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogIfC(c, ...)  tLogIfC(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogIfE(c, ...)  tLogIfE(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogIfW(c, ...)  tLogIfW(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogIfN(c, ...)  tLogIfN(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogIfI(c, ...)  tLogIfI(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogIfD(c, ...)  tLogIfD(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+
+#if defined(DISABLE_TBAG_LOG)
+# define tLogS(name, level, ...)
+#else
+# define tLogS(name, level, ...) tLogIf(::libtbag::log::getSeverity(name).isContain(level), name, level, __VA_ARGS__)
+#endif
+
+#define tLogSM(name, ...)  tLogS(name, ::libtbag::log::EMERGENCY_SEVERITY, __VA_ARGS__)
+#define tLogSA(name, ...)  tLogS(name, ::libtbag::log::ALERT_SEVERITY    , __VA_ARGS__)
+#define tLogSC(name, ...)  tLogS(name, ::libtbag::log::CRITICAL_SEVERITY , __VA_ARGS__)
+#define tLogSE(name, ...)  tLogS(name, ::libtbag::log::ERROR_SEVERITY    , __VA_ARGS__)
+#define tLogSW(name, ...)  tLogS(name, ::libtbag::log::WARNING_SEVERITY  , __VA_ARGS__)
+#define tLogSN(name, ...)  tLogS(name, ::libtbag::log::NOTICE_SEVERITY   , __VA_ARGS__)
+#define tLogSI(name, ...)  tLogS(name, ::libtbag::log::INFO_SEVERITY     , __VA_ARGS__)
+#define tLogSD(name, ...)  tLogS(name, ::libtbag::log::DEBUG_SEVERITY    , __VA_ARGS__)
+
+#define tDLogSM(...)  tLogSM(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogSA(...)  tLogSA(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogSC(...)  tLogSC(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogSE(...)  tLogSE(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogSW(...)  tLogSW(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogSN(...)  tLogSN(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogSI(...)  tLogSI(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+#define tDLogSD(...)  tLogSD(::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
+
 /**
  * @def tDLogD
  *
