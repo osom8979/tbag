@@ -103,10 +103,11 @@ public:
     }
 
 public:
-    Value & push()
+    template <typename ... Args>
+    Value & push(Args && ... args)
     {
         if (_remove.empty()) {
-            _active.push_back(Value());
+            _active.push_back(Value(std::forward<Args>(args) ...));
         } else {
             _active.push_back(_remove.front());
             _remove.pop_front();

@@ -77,3 +77,14 @@ TEST(ReuseQueueTest, Default)
     ASSERT_TRUE(queue.emptyOfRemoveQueue());
 }
 
+TEST(ReuseQueueTest, EmplacePush)
+{
+    int const TEST_VALUE = 100;
+    ReuseQueue<int> queue;
+    queue.push(TEST_VALUE);
+
+    int result = 0;
+    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
+    ASSERT_EQ(TEST_VALUE, result);
+}
+
