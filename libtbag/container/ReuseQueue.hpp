@@ -41,10 +41,10 @@ public:
 
 private:
     Queue _active;
-    Queue _remove;
+    Queue _ready;
 
 public:
-    ReuseQueue() : _active(), _remove()
+    ReuseQueue() : _active(), _ready()
     {
         // EMPTY.
     }
@@ -69,7 +69,7 @@ public:
     {
         if (this != &obj) {
             _active = obj._active;
-            _remove = obj._remove;
+            _ready = obj._ready;
         }
         return *this;
     }
@@ -77,10 +77,16 @@ public:
     ReuseQueue & operator =(ReuseQueue && obj)
     {
         if (this != &obj) {
-            _active.swap(obj._active);
-            _remove.swap(obj._remove);
+            swap(*this, obj);
         }
         return *this;
+    }
+
+public:
+    TBAG_API friend void swap(ReuseQueue & lh, ReuseQueue & rh)
+    {
+        lh._active.swap(rh._active);
+        lh._ready.swap(rh._ready);
     }
 
 public:
@@ -90,27 +96,40 @@ public:
     { return _active.empty(); }
 
 public:
-    inline std::size_t sizeOfRemoveQueue() const TBAG_NOEXCEPT_SP_OP(_remove.size())
-    { return _remove.size(); }
-    inline bool emptyOfRemoveQueue() const TBAG_NOEXCEPT_SP_OP(_remove.empty())
-    { return _remove.empty(); }
+    inline std::size_t sizeOfReadyQueue() const TBAG_NOEXCEPT_SP_OP(_ready.size())
+    { return _ready.size(); }
+    inline bool emptyOfReadyQueue() const TBAG_NOEXCEPT_SP_OP(_ready.empty())
+    { return _ready.empty(); }
 
 public:
     void clear()
     {
         _active.clear();
-        _remove.clear();
+        _ready.clear();
+    }
+
+public:
+    inline Value       & frontRef()       TBAG_NOEXCEPT_SP_OP(_active.front()) { return _active.front(); }
+    inline Value const & frontRef() const TBAG_NOEXCEPT_SP_OP(_active.front()) { return _active.front(); }
+
+    Err front(Value & result)
+    {
+        if (_active.empty()) {
+            return Err::E_EQUEUE;
+        }
+        result = _active.front();
+        return Err::E_SUCCESS;
     }
 
 public:
     template <typename ... Args>
     Value & push(Args && ... args)
     {
-        if (_remove.empty()) {
+        if (_ready.empty()) {
             _active.push_back(Value(std::forward<Args>(args) ...));
         } else {
-            _active.push_back(_remove.front());
-            _remove.pop_front();
+            _active.push_back(_ready.front());
+            _ready.pop_front();
         }
         return _active.back();
     }
@@ -120,17 +139,20 @@ public:
         if (_active.empty()) {
             return Err::E_EQUEUE;
         }
-        _remove.push_back(_active.front());
+        _ready.push_back(_active.front());
         _active.pop_front();
         return Err::E_SUCCESS;
     }
 
-    Err front(Value & result)
+public:
+    Err frontAndPop(Value & result)
     {
         if (_active.empty()) {
             return Err::E_EQUEUE;
         }
         result = _active.front();
+        _ready.push_back(_active.front());
+        _active.pop_front();
         return Err::E_SUCCESS;
     }
 };

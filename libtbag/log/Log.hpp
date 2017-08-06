@@ -215,7 +215,7 @@ NAMESPACE_LIBTBAG_CLOSE
 #if defined(DISABLE_TBAG_LOG)
 # define tLogIf(condition, name, level, ...)
 #else
-# define tLogIf(condition, name, level, ...) do { if (condition) { tLog(name, level, __VA_ARGS__); } } while (0)
+# define tLogIf(condition, name, level, ...) do { if (condition) { tLog(name, level, __VA_ARGS__); } } while (false)
 #endif
 
 #define tLogIfM(c, name, ...)  tLogIf(c, name, ::libtbag::log::EMERGENCY_SEVERITY, __VA_ARGS__)
