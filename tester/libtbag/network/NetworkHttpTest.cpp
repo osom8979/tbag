@@ -294,7 +294,7 @@ TEST(NetworkHttpTest, WebSocketEchoTest)
     client.setOnWsMessage([&](OpCode op, char const * buffer, std::size_t size){
         ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
         ASSERT_EQ(TEST_TEXT, std::string(buffer, buffer + size));
-        ASSERT_EQ(Err::E_SUCCESS, client.writeClose());
+        ASSERT_EQ(Err::E_SUCCESS, client.closeWebSocket());
         ws_message_counter++;
     });
     client.setOnWsError([&](Err code){

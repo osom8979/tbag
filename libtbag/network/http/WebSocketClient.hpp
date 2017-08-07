@@ -18,13 +18,23 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
-#include <libtbag/network/http/HttpCacheData.hpp>
+#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/HttpBuilder.hpp>
+#include <libtbag/network/http/WebSocketFrame.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
+#include <libtbag/container/ReuseQueue.hpp>
+#include <libtbag/random/MaskingDevice.hpp>
+
 #include <functional>
 #include <vector>
+#include <string>
+#include <atomic>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -47,33 +57,68 @@ public:
 
     using Loop     = uvpp::Loop;
     using WsBuffer = WebSocketFrame::WsBuffer;
+    using WsQueue  = container::ReuseQueue<WsBuffer>;
+    using Masking  = random::MaskingDevice;
+
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
 public:
     TBAG_CONSTEXPR static uint64_t const DEFAULT_CLOSING_TIMEOUT_MILLISECOND = 5 * 1000;
 
 private:
-    HttpCacheData _cache;
+    std::string const KEY;
+
+// Flags.
+private:
+    std::atomic_bool _upgrade;
+    std::atomic_bool _closing;
+
+private:
+    Masking _device;
+
+// HTTP Request.
+private:
+    mutable Mutex _request_mutex;
+    HttpBuilder _request;
+
+private:
+    mutable Mutex _queue_mutex;
+    WsQueue _queue;
+
+private:
     WsCloseResult _close;
+
+// Receive packet.
+private:
+    struct {
+        HttpParser response; ///< Response packet parser.
+        WebSocketFrame receiver; ///< Web socket frame.
+    } __on_read_only__; ///< @warning It should only be used with the onRead() method.
 
 public:
     WebSocketClient(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~WebSocketClient();
 
 public:
-    // @formatter:off
-    inline HttpBuilder       & atBuilder()       TBAG_NOEXCEPT { return _cache.builder; }
-    inline HttpBuilder const & atBuilder() const TBAG_NOEXCEPT { return _cache.builder; }
-    inline HttpParser        & atParser ()       TBAG_NOEXCEPT { return _cache.parser;  }
-    inline HttpParser  const & atParser () const TBAG_NOEXCEPT { return _cache.parser;  }
-    // @formatter:on
+    inline bool isUpgrade() const TBAG_NOEXCEPT_SP_OP(_upgrade.load()) { return _upgrade.load(); }
+    inline bool isClosing() const TBAG_NOEXCEPT_SP_OP(_closing.load()) { return _closing.load(); }
 
 public:
     void setup(HttpBuilder const & request);
+    HttpBuilder getRequest() const;
+
+private:
+    Err writeOrEnqueue(char const * buffer, std::size_t size);
+    Err writeOrEnqueue(WebSocketFrame const & frame);
+    Err writeFromQueue();
 
 public:
     Err writeText(std::string const & text, bool continuation = false, bool finish = true);
     Err writeBinary(WsBuffer const & binary, bool continuation = false, bool finish = true);
-    Err writeClose();
+
+public:
+    Err closeWebSocket();
 
 private:
     bool runWebSocketChecker(HttpParser const & response);

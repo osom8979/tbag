@@ -56,7 +56,7 @@ public:
 
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
-    using   WeakSafetyAsync = std::shared_ptr<SafetyAsync>;
+    using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
 
     using Id    = id::Id;
     using Mutex = std::mutex;
