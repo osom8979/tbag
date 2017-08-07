@@ -53,6 +53,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ASYNCREQ, "Async request"         ) \
     _TBAG_XX(_UNKEXCP , "Unknown exception"     ) \
     _TBAG_XX(_UNKSIG  , "Unknown signal"        ) \
+    _TBAG_XX(_ECOPY   , "Copy error"            ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

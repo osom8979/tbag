@@ -57,9 +57,12 @@ void HttpCacheData::addProtocol(std::string const & protocol)
 
 Err HttpCacheData::writeSendWsFrame(ClientInterface * interface, WebSocketFrame const & sender, WsBuffer & buffer)
 {
+    std::size_t const COPY_SIZE = sender.copyTo(buffer);
+    if (COPY_SIZE == 0) {
+        return Err::E_ECOPY;
+    }
     assert(interface != nullptr);
-    std::size_t const SIZE = sender.copyTo(buffer);
-    return interface->write((char const *)buffer.data(), SIZE);
+    return interface->write((char const *)buffer.data(), COPY_SIZE);
 }
 
 Err HttpCacheData::writeSendWsFrame()
@@ -70,100 +73,70 @@ Err HttpCacheData::writeSendWsFrame()
 Err HttpCacheData::writeTextRequest(std::string const & text, bool continuation, bool finish)
 {
     Err const CODE = ws.sender.text(text, ws.device.gen(), continuation, finish);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writeTextRequest() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writeTextResponse(std::string const & text, bool continuation, bool finish)
 {
     Err const CODE = ws.sender.text(text, continuation, finish);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writeTextResponse() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writeBinaryRequest(WsBuffer const & buffer, bool continuation, bool finish)
 {
     Err const CODE = ws.sender.binary(buffer, ws.device.gen(), continuation, finish);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writeBinaryRequest() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writeBinaryResponse(WsBuffer const & buffer, bool continuation, bool finish)
 {
     Err const CODE = ws.sender.binary(buffer, continuation, finish);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writeBinaryResponse() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writePingRequest(std::string const & str)
 {
     Err const CODE = ws.sender.ping(str, ws.device.gen());
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writePingRequest() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writePingResponse(std::string const & str)
 {
     Err const CODE = ws.sender.ping(str);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writePingResponse() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writePongRequest(std::string const & str)
 {
     Err const CODE = ws.sender.pong(str, ws.device.gen());
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writePongRequest() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writePongResponse(std::string const & str)
 {
     Err const CODE = ws.sender.pong(str);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writePongResponse() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writeCloseRequest()
 {
     Err const CODE = ws.sender.close(ws.device.gen());
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writeCloseRequest() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 
 Err HttpCacheData::writeCloseResponse(uint16_t status_code, std::string const & reason)
 {
     Err const CODE = ws.sender.close(status_code, reason);
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("HttpCacheData::writeCloseResponse() WebSocket frame {} error.", getErrName(CODE));
-        return CODE;
-    }
+    if (TBAG_ERR_FAILURE(CODE)) { return CODE; }
     return writeSendWsFrame();
 }
 

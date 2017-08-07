@@ -7,6 +7,7 @@
 
 #include <libtbag/network/http/WebSocketClient.hpp>
 #include <libtbag/log/Log.hpp>
+#include "HttpCacheData.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -210,8 +211,7 @@ void WebSocketClient::onRead(Err code, ReadPacket const & packet)
         return;
     }
 
-    HttpBuilder & request  = _cache.builder;
-    HttpParser  & response = _cache.parser;
+    HttpParser & response = _cache.parser;
 
     assert(code == Err::E_SUCCESS);
     response.execute(packet.buffer, packet.size);

@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
@@ -46,6 +47,7 @@ class TBAG_API HttpCacheData : private Noncopyable
 public:
     using WsBuffer = WebSocketFrame::WsBuffer;
     using Strings  = std::vector<std::string>;
+    using WsQueue  = container::ReuseQueue<WsBuffer>;
 
     using MaskingDevice   = random::MaskingDevice;
     using ClientInterface = details::ClientInterface;
@@ -101,16 +103,16 @@ public:
     Err writeSendWsFrame();
 
 public:
-    Err writeTextRequest(std::string const & text, bool continuation = false, bool finish = true);
+    Err writeTextRequest (std::string const & text, bool continuation = false, bool finish = true);
     Err writeTextResponse(std::string const & text, bool continuation = false, bool finish = true);
 
-    Err writeBinaryRequest(WsBuffer const & buffer, bool continuation = false, bool finish = true);
+    Err writeBinaryRequest (WsBuffer const & buffer, bool continuation = false, bool finish = true);
     Err writeBinaryResponse(WsBuffer const & buffer, bool continuation = false, bool finish = true);
 
-    Err writePingRequest(std::string const & str);
+    Err writePingRequest (std::string const & str);
     Err writePingResponse(std::string const & str);
 
-    Err writePongRequest(std::string const & str);
+    Err writePongRequest (std::string const & str);
     Err writePongResponse(std::string const & str);
 
     Err writeCloseRequest();
