@@ -75,7 +75,7 @@ public:
     using UniqueInternal = std::unique_ptr<Internal>;
 
 public:
-    enum class SendStatus
+    enum class SendState
     {
         SS_READY,           ///< Next: call send.
         SS_ASYNC,           ///< Next: onTimeout or onAsync.
@@ -97,7 +97,7 @@ private:
     mutable Mutex _mutex;
     SocketAddress _addr;
     struct {
-        SendStatus     status;
+        SendState     state;
         UdpSendRequest send_req;
         Buffer         buffer;
     } _sender;
@@ -111,13 +111,13 @@ public:
     WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
 
 private:
-    static char const * getSendStatusName(SendStatus status) TBAG_NOEXCEPT;
+    static char const * getSendStateName(SendState state) TBAG_NOEXCEPT;
 
 public:
-    inline SendStatus getSendStatus() const TBAG_NOEXCEPT
-    { Guard g(_mutex); return _sender.status; }
-    inline char const * getSendStatusName() const TBAG_NOEXCEPT
-    { Guard g(_mutex); return getSendStatusName(_sender.status); }
+    inline SendState getSendState() const TBAG_NOEXCEPT
+    { Guard g(_mutex); return _sender.state; }
+    inline char const * getSendStateName() const TBAG_NOEXCEPT
+    { Guard g(_mutex); return getSendStateName(_sender.state); }
 
 public:
     virtual Id          id   () const override;

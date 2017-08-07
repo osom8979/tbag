@@ -66,7 +66,7 @@ public:
     using Guard = std::lock_guard<Mutex>;
 
 public:
-    enum class WriteStatus
+    enum class WriteState
     {
         WS_NOT_READY,
         WS_READY,           ///< Next: call write.
@@ -105,11 +105,11 @@ private:
     void onAsyncWrite();
 
 public:
-    static char const * getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT;
+    static char const * getWriteStateName(WriteState status) TBAG_NOEXCEPT;
 
 public:
-    WriteStatus getWriteStatus() const;
-    char const * getWriteStatusName() const;
+    WriteState getWriteState() const;
+    char const * getWriteStateName() const;
 
     WeakClientBackend getClient();
     WeakSafetyAsync getAsync();

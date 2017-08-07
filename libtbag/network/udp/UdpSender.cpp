@@ -89,9 +89,9 @@ struct UdpSender::Internal : private Noncopyable
         assert(_parent != nullptr);
         UdpSender & p = *_parent;
 
-        if (p._sender.status != SendStatus::SS_READY) {
+        if (p._sender.state != SendState::SS_READY) {
             tDLogE("UdpSender::Internal::autoSend() Illegal state error: {}",
-                   getSendStatusName(p._sender.status));
+                   getSendStateName(p._sender.state));
             return Err::E_ILLSTATE;
         }
 
@@ -107,7 +107,7 @@ struct UdpSender::Internal : private Noncopyable
                 tDLogE("UdpSender::Internal::autoSend() Write {} error.", getErrName(CODE));
                 return CODE;
             }
-            p._sender.status = SendStatus::SS_SEND;
+            p._sender.state = SendState::SS_SEND;
 
         } else {
             assignSendBuffer(buffer, size);
@@ -116,7 +116,7 @@ struct UdpSender::Internal : private Noncopyable
                 tDLogE("UdpSender::Internal::autoSend() New job error.");
                 return Err::E_BADALLOC;
             }
-            p._sender.status = SendStatus::SS_ASYNC;
+            p._sender.state = SendState::SS_ASYNC;
         }
 
         return Err::E_SUCCESS;
@@ -159,7 +159,7 @@ UdpSender::UdpSender(Loop & loop, SharedSafetyAsync async, ServerInterface * par
         _async.reset();
     }
 
-    _sender.status = SendStatus::SS_READY;
+    _sender.state = SendState::SS_READY;
 }
 
 UdpSender::~UdpSender()
@@ -167,14 +167,14 @@ UdpSender::~UdpSender()
     // EMPTY.
 }
 
-char const * UdpSender::getSendStatusName(SendStatus status) TBAG_NOEXCEPT
+char const * UdpSender::getSendStateName(SendState state) TBAG_NOEXCEPT
 {
-    switch (status) {
-    case SendStatus::SS_READY:         return "READY";
-    case SendStatus::SS_ASYNC:         return "ASYNC";
-    case SendStatus::SS_ASYNC_CANCEL:  return "ASYNC_CANCEL";
-    case SendStatus::SS_SEND:          return "SEND";
-    case SendStatus::SS_END:           return "END";
+    switch (state) {
+    case SendState::SS_READY:         return "READY";
+    case SendState::SS_ASYNC:         return "ASYNC";
+    case SendState::SS_ASYNC_CANCEL:  return "ASYNC_CANCEL";
+    case SendState::SS_SEND:          return "SEND";
+    case SendState::SS_END:           return "END";
     }
 
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
@@ -270,8 +270,8 @@ Err UdpSender::close()
 Err UdpSender::cancel()
 {
     Guard const MUTEX_GUARD(_mutex);
-    if (_sender.status == SendStatus::SS_ASYNC) {
-        _sender.status = SendStatus::SS_ASYNC_CANCEL;
+    if (_sender.state == SendState::SS_ASYNC) {
+        _sender.state = SendState::SS_ASYNC_CANCEL;
     }
     return Err::E_SUCCESS;
 }
@@ -300,7 +300,7 @@ void UdpSender::backShutdown(Err code)
 void UdpSender::backWrite(Err code)
 {
     _mutex.lock();
-    _sender.status = SendStatus::SS_READY;
+    _sender.state = SendState::SS_READY;
     _mutex.unlock();
 
     assert(_parent != nullptr);
@@ -317,7 +317,7 @@ void UdpSender::backClose()
     assert(static_cast<bool>(_internal));
     _mutex.lock();
     _internal->closeAll();
-    _sender.status = SendStatus::SS_END;
+    _sender.state = SendState::SS_END;
     _mutex.unlock();
 
     assert(_parent != nullptr);
@@ -358,32 +358,32 @@ void UdpSender::onAsyncSend()
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
 
-    if (_sender.status == SendStatus::SS_ASYNC_CANCEL) {
+    if (_sender.state == SendState::SS_ASYNC_CANCEL) {
         tDLogN("UdpSender::onAsyncSend() Cancel async write.");
-        _sender.status = SendStatus::SS_READY;
+        _sender.state = SendState::SS_READY;
         return;
     }
 
-    if (_sender.status != SendStatus::SS_ASYNC) {
-        tDLogE("UdpSender::onAsyncSend() Error state: {}", getSendStatusName(_sender.status));
-        _sender.status = SendStatus::SS_READY;
+    if (_sender.state != SendState::SS_ASYNC) {
+        tDLogE("UdpSender::onAsyncSend() Error state: {}", getSendStateName(_sender.state));
+        _sender.state = SendState::SS_READY;
         return;
     }
 
-    assert(_sender.status == SendStatus::SS_ASYNC);
+    assert(_sender.state == SendState::SS_ASYNC);
 
     if (_sender.buffer.empty()) {
         tDLogD("StreamClient::onAsyncWrite() Empty writer buffer.");
-        _sender.status = SendStatus::SS_READY;
+        _sender.state = SendState::SS_READY;
         return;
     }
 
     Err const CODE = _internal->sendReal(_sender.buffer.data(), _sender.buffer.size());
     if (CODE == Err::E_SUCCESS) {
-        _sender.status = SendStatus::SS_SEND;
+        _sender.state = SendState::SS_SEND;
     } else {
         tDLogE("UdpSender::onAsyncSend() {} error.", getErrName(CODE));
-        _sender.status = SendStatus::SS_READY;
+        _sender.state = SendState::SS_READY;
     }
 }
 

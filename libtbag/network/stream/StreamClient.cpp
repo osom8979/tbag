@@ -103,7 +103,7 @@ struct StreamClient::Internal : private Noncopyable
     SharedShutdownTimer shutdown_timer;
 
     struct {
-        WriteStatus      status;
+        WriteState      state;
         ConnectRequest   connect_req;
         WriteRequest     write_req;
         ShutdownRequest  shutdown_req;
@@ -240,18 +240,18 @@ struct StreamClient::Internal : private Noncopyable
 
     Err shutdownWrite()
     {
-        if (writer.status == WriteStatus::WS_ASYNC) {
-            writer.status = WriteStatus::WS_ASYNC_CANCEL;
+        if (writer.state == WriteState::WS_ASYNC) {
+            writer.state = WriteState::WS_ASYNC_CANCEL;
             return Err::E_SUCCESS;
         }
 
-        if (writer.status != WriteStatus::WS_WRITE) {
+        if (writer.state != WriteState::WS_WRITE) {
             tDLogE("StreamClient::Internal::shutdownWrite() Illegal state error: {}",
-                   getWriteStatusName(writer.status));
+                   getWriteStateName(writer.state));
             return Err::E_ILLSTATE;
         }
 
-        assert(writer.status == WriteStatus::WS_WRITE);
+        assert(writer.state == WriteState::WS_WRITE);
 
         Err const CODE = client->shutdown(writer.shutdown_req);
         if (CODE != Err::E_SUCCESS) {
@@ -259,7 +259,7 @@ struct StreamClient::Internal : private Noncopyable
             return CODE;
         }
 
-        writer.status = WriteStatus::WS_SHUTDOWN;
+        writer.state = WriteState::WS_SHUTDOWN;
         return Err::E_SUCCESS;
     }
 
@@ -281,9 +281,9 @@ struct StreamClient::Internal : private Noncopyable
 
     Err autoWrite(char const * buffer, std::size_t size)
     {
-        if (writer.status != WriteStatus::WS_READY) {
+        if (writer.state != WriteState::WS_READY) {
             tDLogE("StreamClient::Internal::autoWrite() Illegal state error: {}",
-                   getWriteStatusName(writer.status));
+                   getWriteStateName(writer.state));
             return Err::E_ILLSTATE;
         }
 
@@ -300,7 +300,7 @@ struct StreamClient::Internal : private Noncopyable
                 tDLogE("StreamClient::Internal::autoWrite() New job error.");
                 return Err::E_BADALLOC;
             }
-            writer.status = WriteStatus::WS_ASYNC;
+            writer.state = WriteState::WS_ASYNC;
             result_code = Err::E_ASYNCREQ;
 
         } else {
@@ -310,7 +310,7 @@ struct StreamClient::Internal : private Noncopyable
                 return CODE;
             }
 
-            writer.status = WriteStatus::WS_WRITE;
+            writer.state = WriteState::WS_WRITE;
             if (loop.isAliveAndThisThread() == false && static_cast<bool>(async) == false) {
                 tDLogW("StreamClient::Internal::autoWrite() Async is expired.");
                 result_code = Err::E_WARNING;
@@ -389,7 +389,7 @@ StreamClient::StreamClient(Loop & loop,
 {
     assert(static_cast<bool>(_internal));
     if (_internal->initHandles()) {
-        _internal->writer.status = WriteStatus::WS_READY;
+        _internal->writer.state = WriteState::WS_READY;
     }
 }
 
@@ -418,7 +418,7 @@ StreamClient::StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async
         _internal->async.reset();
     }
 
-    _internal->writer.status = WriteStatus::WS_NOT_READY;
+    _internal->writer.state = WriteState::WS_NOT_READY;
 }
 
 StreamClient::~StreamClient()
@@ -438,66 +438,66 @@ void StreamClient::onAsyncWrite()
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
 
-    if (_internal->writer.status == WriteStatus::WS_ASYNC_CANCEL) {
+    if (_internal->writer.state == WriteState::WS_ASYNC_CANCEL) {
         tDLogN("StreamClient::onAsyncWrite() Cancel async write.");
         _internal->stopShutdownTimer();
-        _internal->writer.status = WriteStatus::WS_READY;
+        _internal->writer.state = WriteState::WS_READY;
         return;
     }
 
-    if (_internal->writer.status != WriteStatus::WS_ASYNC) {
-        tDLogE("StreamClient::onAsyncWrite() Error state: {}", getWriteStatusName(_internal->writer.status));
+    if (_internal->writer.state != WriteState::WS_ASYNC) {
+        tDLogE("StreamClient::onAsyncWrite() Error state: {}", getWriteStateName(_internal->writer.state));
         _internal->stopShutdownTimer();
-        _internal->writer.status = WriteStatus::WS_READY;
+        _internal->writer.state = WriteState::WS_READY;
         return;
     }
 
-    assert(_internal->writer.status == WriteStatus::WS_ASYNC);
+    assert(_internal->writer.state == WriteState::WS_ASYNC);
 
     if (_internal->writer.buffer.empty()) {
         tDLogD("StreamClient::onAsyncWrite() Empty writer buffer.");
-        _internal->writer.status = WriteStatus::WS_READY;
+        _internal->writer.state = WriteState::WS_READY;
         return;
     }
 
     Err const CODE = _internal->writeReal(_internal->writer.buffer.data(), _internal->writer.buffer.size());
     if (CODE == Err::E_SUCCESS) {
-        _internal->writer.status = WriteStatus::WS_WRITE;
+        _internal->writer.state = WriteState::WS_WRITE;
     } else {
         tDLogE("StreamClient::onAsyncWrite() {} error.", getErrName(CODE));
         _internal->stopShutdownTimer();
-        _internal->writer.status = WriteStatus::WS_READY;
+        _internal->writer.state = WriteState::WS_READY;
     }
 }
 
-char const * StreamClient::getWriteStatusName(WriteStatus status) TBAG_NOEXCEPT
+char const * StreamClient::getWriteStateName(WriteState state) TBAG_NOEXCEPT
 {
-    switch (status) {
-    case WriteStatus::WS_NOT_READY:     return "NOT_READY";
-    case WriteStatus::WS_READY:         return "READY";
-    case WriteStatus::WS_ASYNC:         return "ASYNC";
-    case WriteStatus::WS_ASYNC_CANCEL:  return "ASYNC_CANCEL";
-    case WriteStatus::WS_WRITE:         return "WRITE";
-    case WriteStatus::WS_SHUTDOWN:      return "SHUTDOWN";
-    case WriteStatus::WS_END:           return "END";
+    switch (state) {
+    case WriteState::WS_NOT_READY:     return "NOT_READY";
+    case WriteState::WS_READY:         return "READY";
+    case WriteState::WS_ASYNC:         return "ASYNC";
+    case WriteState::WS_ASYNC_CANCEL:  return "ASYNC_CANCEL";
+    case WriteState::WS_WRITE:         return "WRITE";
+    case WriteState::WS_SHUTDOWN:      return "SHUTDOWN";
+    case WriteState::WS_END:           return "END";
     }
 
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
     return "UNKNOWN";
 }
 
-StreamClient::WriteStatus StreamClient::getWriteStatus() const
+StreamClient::WriteState StreamClient::getWriteState() const
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
-    return _internal->writer.status;
+    return _internal->writer.state;
 }
 
-char const * StreamClient::getWriteStatusName() const
+char const * StreamClient::getWriteStateName() const
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
-    return getWriteStatusName(_internal->writer.status);
+    return getWriteStateName(_internal->writer.state);
 }
 
 StreamClient::WeakClientBackend StreamClient::getClient()
@@ -687,7 +687,7 @@ void StreamClient::backConnect(Err code)
 {
     assert(static_cast<bool>(_internal));
     _mutex.lock();
-    _internal->writer.status = WriteStatus::WS_READY;
+    _internal->writer.state = WriteState::WS_READY;
     _mutex.unlock();
 
     onConnect(code);
@@ -697,7 +697,7 @@ void StreamClient::backShutdown(Err code)
 {
     assert(static_cast<bool>(_internal));
     _mutex.lock();
-    _internal->writer.status = WriteStatus::WS_READY;
+    _internal->writer.state = WriteState::WS_READY;
     _mutex.unlock();
 
     onShutdown(code);
@@ -708,9 +708,9 @@ void StreamClient::backWrite(Err code)
     assert(static_cast<bool>(_internal));
     _mutex.lock();
     _internal->stopShutdownTimer();
-    assert(/**/_internal->writer.status == WriteStatus::WS_WRITE ||
-               _internal->writer.status == WriteStatus::WS_SHUTDOWN);
-    _internal->writer.status = WriteStatus::WS_READY;
+    assert(/**/_internal->writer.state == WriteState::WS_WRITE ||
+               _internal->writer.state == WriteState::WS_SHUTDOWN);
+    _internal->writer.state = WriteState::WS_READY;
     _mutex.unlock();
 
     onWrite(code);
@@ -726,7 +726,7 @@ void StreamClient::backClose()
     assert(static_cast<bool>(_internal));
     _mutex.lock();
     _internal->closeAll();
-    _internal->writer.status = WriteStatus::WS_END;
+    _internal->writer.state = WriteState::WS_END;
     _mutex.unlock();
 
     onClose();
