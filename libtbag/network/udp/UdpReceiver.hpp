@@ -49,42 +49,30 @@ public:
 
     using UdpSendRequest = uvpp::UdpSendRequest;
 
-public:
     using SharedClientBackend = std::shared_ptr<UdpNodeBackend>;
     using   WeakClientBackend =   std::weak_ptr<UdpNodeBackend>;
 
-public:
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
     using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
 
-public:
-    using Id      = id::Id;
-    using Buffer  = std::vector<char>;
-    using Buffers = std::vector<Buffer>;
-
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
+    using Id     = id::Id;
+    using Buffer = std::vector<char>;
+    using Mutex  = std::mutex;
+    using Guard  = std::lock_guard<Mutex>;
 
 public:
     struct Internal;
     friend struct Internal;
 
-public:
     using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
-    ServerInterface * _parent;
-    bool _owner_async;
-    unsigned int _bind_flags;
+    ServerInterface * _interface;
 
 private:
-    UniqueInternal      _internal;
-    SharedClientBackend _client;
-    SharedSafetyAsync   _async;
-
-private:
-    mutable Mutex _mutex;
+    UniqueInternal _internal;
+    mutable Mutex  _mutex;
 
 public:
     UdpReceiver(Loop & loop, ServerInterface * parent);
@@ -92,11 +80,11 @@ public:
     virtual ~UdpReceiver();
 
 public:
-    WeakClientBackend getClient() { Guard g(_mutex); return WeakClientBackend(_client); }
-    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
+    void setBindFlags(unsigned int flags) TBAG_NOEXCEPT;
+    unsigned int getBindFlags() const TBAG_NOEXCEPT;
 
-    inline void setBindFlags(unsigned int flags) TBAG_NOEXCEPT { Guard g(_mutex); _bind_flags = flags; }
-    inline unsigned int getBindFlags() const TBAG_NOEXCEPT { Guard g(_mutex); return _bind_flags; }
+    WeakClientBackend getClient();
+    WeakSafetyAsync getAsync();
 
 public:
     virtual Id          id   () const override;

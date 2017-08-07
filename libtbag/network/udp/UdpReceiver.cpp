@@ -30,9 +30,15 @@ struct UdpReceiver::Internal : private Noncopyable
 {
     using binf = UdpReceiver::binf;
 
-    UdpReceiver * _parent;
+    UdpReceiver * parent;
 
-    Internal(UdpReceiver * parent) : _parent(parent)
+    bool owner_async;
+    unsigned int bind_flags;
+
+    SharedClientBackend client;
+    SharedSafetyAsync   async;
+
+    Internal(UdpReceiver * parent) : parent(parent), owner_async(false), bind_flags(0)
     {
         // EMPTY.
     }
@@ -42,37 +48,36 @@ struct UdpReceiver::Internal : private Noncopyable
         // EMPTY.
     }
 
+    Loop & getLoop()
+    {
+        assert(static_cast<bool>(client));
+        Loop * loop = client->getLoop();
+        assert(loop != nullptr);
+        return *loop;
+    }
+
     bool initHandles()
     {
-        assert(_parent != nullptr);
-        UdpReceiver & p = *_parent;
-
-        assert(p._client != nullptr);
-        Loop * loop = p._client->getLoop();
-        assert(loop != nullptr);
-
-        if (static_cast<bool>(p._async) == false) {
-            p._async = loop->newHandle<SafetyAsync>(*loop);
+        Loop & loop = getLoop();
+        if (static_cast<bool>(async) == false) {
+            async = loop.newHandle<SafetyAsync>(loop);
         }
-        assert(static_cast<bool>(p._async));
+        assert(static_cast<bool>(async));
         return true;
     }
 
     void closeAll()
     {
-        assert(_parent != nullptr);
-        UdpReceiver & p = *_parent;
-
-        assert(static_cast<bool>(p._client));
-        if (p._client->isClosing() == false) {
-            p._client->close();
+        assert(static_cast<bool>(client));
+        if (client->isClosing() == false) {
+            client->close();
         }
 
-        if (p._owner_async && static_cast<bool>(p._async)) {
-            if (p._async->isClosing() == false) {
-                p._async->close();
+        if (owner_async && static_cast<bool>(async)) {
+            if (async->isClosing() == false) {
+                async->close();
             }
-            p._async.reset();
+            async.reset();
         }
     }
 };
@@ -86,18 +91,19 @@ UdpReceiver::UdpReceiver(Loop & loop, ServerInterface * parent) : UdpReceiver(lo
     // EMPTY.
 }
 
-UdpReceiver::UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * parent)
-        : _parent(parent), _bind_flags(0), _internal(new Internal(this))
+UdpReceiver::UdpReceiver(Loop & loop, SharedSafetyAsync async, ServerInterface * interface)
+        : _interface(interface), _internal(new Internal(this))
 {
-    _client = loop.newHandle<UdpNodeBackend>(loop, this);
-    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_internal));
+    _internal->client = loop.newHandle<UdpNodeBackend>(loop, this);
+    assert(static_cast<bool>(_internal->client));
 
     if (static_cast<bool>(async) && loop.id() == async->getLoop()->id()) {
-        _owner_async = false;
-        _async = async;
+        _internal->owner_async = false;
+        _internal->async = async;
     } else {
-        _owner_async = true;
-        _async.reset();
+        _internal->owner_async = true;
+        _internal->async.reset();
     }
 }
 
@@ -106,41 +112,79 @@ UdpReceiver::~UdpReceiver()
     // EMPTY.
 }
 
+void UdpReceiver::setBindFlags(unsigned int flags) TBAG_NOEXCEPT
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    _internal->bind_flags = flags;
+}
+
+unsigned int UdpReceiver::getBindFlags() const TBAG_NOEXCEPT
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->bind_flags;
+}
+
+UdpReceiver::WeakClientBackend UdpReceiver::getClient()
+{
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+    return WeakClientBackend(_internal->client);
+}
+
+UdpReceiver::WeakSafetyAsync UdpReceiver::getAsync()
+{
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+    return WeakSafetyAsync(_internal->async);
+}
+
 UdpReceiver::Id UdpReceiver::id() const
 {
-    assert(static_cast<bool>(_client));
-    return _client->id();
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->client->id();
 }
 
 std::string UdpReceiver::dest() const
 {
-    assert(static_cast<bool>(_client));
-    return _client->getSockIp();
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->client->getSockIp();
 }
 
 int UdpReceiver::port() const
 {
-    assert(static_cast<bool>(_client));
-    return _client->getSockPort();
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->client->getSockPort();
 }
 
 void * UdpReceiver::udata()
 {
-    assert(static_cast<bool>(_client));
-    return _client->getUserData();
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->client->getUserData();
 }
 
 Err UdpReceiver::init(char const * destination, int port)
 {
-    assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_internal));
-
+    assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
-    if (static_cast<bool>(_client) == false) {
+
+    if (static_cast<bool>(_internal->client) == false) {
         return Err::E_EXPIRED;
     }
 
-    if (uvpp::initRecvUdp(*_client, destination, port, _bind_flags) == false) {
+    if (uvpp::initRecvUdp(*(_internal->client), destination, port, _internal->bind_flags) == false) {
         tDLogE("UdpReceiver::init() Initialize fail.");
         return Err::E_UNKNOWN;
     }
@@ -150,14 +194,16 @@ Err UdpReceiver::init(char const * destination, int port)
         return Err::E_UNKNOWN;
     }
 
-    return _client->startRecv();
+    return _internal->client->startRecv();
 }
 
 Err UdpReceiver::start()
 {
-    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
-    Err const CODE = _client->startRecv();
+
+    Err const CODE = _internal->client->startRecv();
     if (CODE != Err::E_SUCCESS) {
         tDLogE("UdpReceiver::start() {} error", getErrName(CODE));
     }
@@ -166,9 +212,11 @@ Err UdpReceiver::start()
 
 Err UdpReceiver::stop()
 {
-    assert(static_cast<bool>(_client));
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
-    Err const CODE = _client->stopRecv();
+
+    Err const CODE = _internal->client->stopRecv();
     if (CODE != Err::E_SUCCESS) {
         tDLogE("UdpReceiver::stop() {} error", getErrName(CODE));
     }
@@ -177,15 +225,14 @@ Err UdpReceiver::stop()
 
 Err UdpReceiver::close()
 {
-    assert(static_cast<bool>(_client));
     assert(static_cast<bool>(_internal));
-    Loop * loop = _client->getLoop();
-    assert(loop != nullptr);
-
+    assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
-    if (loop->isAliveAndThisThread() == false && static_cast<bool>(_async)) {
+    Loop & loop = _internal->getLoop();
+
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
         tDLogD("UdpReceiver::close() Async request.");
-        _async->newSendFunc([&](){
+        _internal->async->newSendFunc([&](){
             Guard const MUTEX_GUARD_ASYNC(_mutex);
             _internal->closeAll();
         });
@@ -193,7 +240,7 @@ Err UdpReceiver::close()
     }
 
     Err code = Err::E_SUCCESS;
-    if (loop->isAliveAndThisThread() == false && static_cast<bool>(_async) == false) {
+    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async) == false) {
         tDLogW("UdpReceiver::close() Async is expired.");
         code = Err::E_WARNING;
     }
@@ -234,8 +281,8 @@ void UdpReceiver::backWrite(Err code)
 
 void UdpReceiver::backRead(Err code, ReadPacket const & packet)
 {
-    assert(_parent != nullptr);
-    _parent->onClientRead(_parent->get(id()), code, packet);
+    assert(_interface != nullptr);
+    _interface->onClientRead(_interface->get(id()), code, packet);
 }
 
 void UdpReceiver::backClose()
@@ -245,8 +292,8 @@ void UdpReceiver::backClose()
     _internal->closeAll();
     _mutex.unlock();
 
-    assert(_parent != nullptr);
-    _parent->onClientClose(_parent->get(id()));
+    assert(_interface != nullptr);
+    _interface->onClientClose(_interface->get(id()));
 }
 
 // ---------------

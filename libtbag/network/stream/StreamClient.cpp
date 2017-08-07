@@ -103,7 +103,7 @@ struct StreamClient::Internal : private Noncopyable
     SharedShutdownTimer shutdown_timer;
 
     struct {
-        WriteState      state;
+        WriteState       state;
         ConnectRequest   connect_req;
         WriteRequest     write_req;
         ShutdownRequest  shutdown_req;

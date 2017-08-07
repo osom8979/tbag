@@ -51,27 +51,22 @@ public:
     using SocketAddress  = network::SocketAddress;
     using UdpSendRequest = uvpp::UdpSendRequest;
 
-public:
     using SharedClientBackend = std::shared_ptr<UdpNodeBackend>;
     using   WeakClientBackend =   std::weak_ptr<UdpNodeBackend>;
 
-public:
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
     using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
 
-public:
     using Id     = id::Id;
     using Buffer = std::vector<char>;
-
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
+    using Mutex  = std::mutex;
+    using Guard  = std::lock_guard<Mutex>;
 
 public:
     struct Internal;
     friend struct Internal;
 
-public:
     using UniqueInternal = std::unique_ptr<Internal>;
 
 public:
@@ -85,39 +80,28 @@ public:
     };
 
 private:
-    ServerInterface * _parent;
-    bool _owner_async;
+    ServerInterface * _interface;
 
-private:
-    UniqueInternal      _internal;
-    SharedClientBackend _client;
-    SharedSafetyAsync   _async;
-
-private:
-    mutable Mutex _mutex;
-    SocketAddress _addr;
-    struct {
-        SendState     state;
-        UdpSendRequest send_req;
-        Buffer         buffer;
-    } _sender;
+    UniqueInternal _internal;
+    mutable Mutex  _mutex;
 
 public:
-    UdpSender(Loop & loop, SharedSafetyAsync async, ServerInterface * parent);
+    UdpSender(Loop & loop, SharedSafetyAsync async, ServerInterface * interface);
     virtual ~UdpSender();
 
-public:
-    WeakClientBackend getClient() { Guard g(_mutex); return WeakClientBackend(_client); }
-    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync(_async); }
+private:
+    void onAsyncSend();
 
 private:
     static char const * getSendStateName(SendState state) TBAG_NOEXCEPT;
 
 public:
-    inline SendState getSendState() const TBAG_NOEXCEPT
-    { Guard g(_mutex); return _sender.state; }
-    inline char const * getSendStateName() const TBAG_NOEXCEPT
-    { Guard g(_mutex); return getSendStateName(_sender.state); }
+    SendState getSendState() const TBAG_NOEXCEPT;
+    char const * getSendStateName() const TBAG_NOEXCEPT;
+
+public:
+    WeakClientBackend getClient();
+    WeakSafetyAsync getAsync();
 
 public:
     virtual Id          id   () const override;
@@ -148,9 +132,6 @@ private:
     virtual void onWrite   (Err code) override;
     virtual void onRead    (Err code, ReadPacket const & packet) override;
     virtual void onClose   () override;
-
-private:
-    void onAsyncSend();
 };
 
 } // namespace udp

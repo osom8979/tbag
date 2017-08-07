@@ -24,7 +24,7 @@ namespace network {
 
 SocketAddress::SocketAddress()
 {
-    ::memset(&addr, 0x00, sizeof(addr));
+    ::memset(&_addr, 0x00, sizeof(_addr));
 }
 
 SocketAddress::SocketAddress(SocketAddress const & obj)
@@ -45,7 +45,7 @@ SocketAddress::~SocketAddress()
 SocketAddress & SocketAddress::operator =(SocketAddress const & obj)
 {
     if (this != &obj) {
-        ::memcpy(&addr, &obj.addr, sizeof(addr));
+        ::memcpy(&_addr, &obj._addr, sizeof(_addr));
     }
     return *this;
 }
@@ -53,7 +53,7 @@ SocketAddress & SocketAddress::operator =(SocketAddress const & obj)
 SocketAddress & SocketAddress::operator =(SocketAddress && obj)
 {
     if (this != &obj) {
-        std::swap(addr, obj.addr);
+        std::swap(_addr, obj._addr);
     }
     return *this;
 }
@@ -70,26 +70,26 @@ Err SocketAddress::init(struct sockaddr const * in)
 
 Err SocketAddress::init(struct sockaddr_in const * in)
 {
-    ::memset(&addr, 0x00, sizeof(addr));
-    ::memcpy(&addr.ipv4, in, sizeof(sockaddr_in));
+    ::memset(&_addr, 0x00, sizeof(_addr));
+    ::memcpy(&_addr.ipv4, in, sizeof(sockaddr_in));
     return Err::E_SUCCESS;
 }
 
 Err SocketAddress::init(struct sockaddr_in6 const * in)
 {
-    ::memset(&addr, 0x00, sizeof(addr));
-    ::memcpy(&addr.ipv6, in, sizeof(sockaddr_in6));
+    ::memset(&_addr, 0x00, sizeof(_addr));
+    ::memcpy(&_addr.ipv6, in, sizeof(sockaddr_in6));
     return Err::E_SUCCESS;
 }
 
 Err SocketAddress::initIpv4(std::string const & ip, int port)
 {
-    return uvpp::initAddress(ip, port, &addr.ipv4);
+    return uvpp::initAddress(ip, port, &_addr.ipv4);
 }
 
 Err SocketAddress::initIpv6(std::string const & ip, int port)
 {
-    return uvpp::initAddress(ip, port, &addr.ipv6);
+    return uvpp::initAddress(ip, port, &_addr.ipv6);
 }
 
 Err SocketAddress::initName(std::string const & host, std::string const & service, int port)
@@ -163,20 +163,20 @@ Err SocketAddress::init(Uri const & uri)
 
 std::string SocketAddress::getIpName() const
 {
-    if (addr.ipv4.sin_port == AF_INET) {
-        return uvpp::getIpName(&addr.ipv4);
-    } else if (addr.ipv6.sin6_port == AF_INET6) {
-        return uvpp::getIpName(&addr.ipv6);
+    if (_addr.ipv4.sin_port == AF_INET) {
+        return uvpp::getIpName(&_addr.ipv4);
+    } else if (_addr.ipv6.sin6_port == AF_INET6) {
+        return uvpp::getIpName(&_addr.ipv6);
     }
     return std::string();
 }
 
 int SocketAddress::getPortNumber() const
 {
-    if (addr.ipv4.sin_port == AF_INET) {
-        return uvpp::getPortNumber(&addr.ipv4);
-    } else if (addr.ipv6.sin6_port == AF_INET6) {
-        return uvpp::getPortNumber(&addr.ipv6);
+    if (_addr.ipv4.sin_port == AF_INET) {
+        return uvpp::getPortNumber(&_addr.ipv4);
+    } else if (_addr.ipv6.sin6_port == AF_INET6) {
+        return uvpp::getPortNumber(&_addr.ipv6);
     }
     return 0;
 }

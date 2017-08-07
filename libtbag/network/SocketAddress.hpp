@@ -48,7 +48,7 @@ private:
         sockaddr     common;
         sockaddr_in  ipv4;
         sockaddr_in6 ipv6;
-    } addr;
+    } _addr;
 
 public:
     SocketAddress();
@@ -75,12 +75,12 @@ public:
     Err init(Uri const & uri);
 
 public:
-    inline struct sockaddr     const * getCommon() const TBAG_NOEXCEPT { return &addr.common; }
-    inline struct sockaddr_in  const * getIpv4  () const TBAG_NOEXCEPT { return &addr.ipv4; }
-    inline struct sockaddr_in6 const * getIpv6  () const TBAG_NOEXCEPT { return &addr.ipv6; }
+    inline struct sockaddr     const * getCommon() const TBAG_NOEXCEPT { return &_addr.common; }
+    inline struct sockaddr_in  const * getIpv4  () const TBAG_NOEXCEPT { return &_addr.ipv4; }
+    inline struct sockaddr_in6 const * getIpv6  () const TBAG_NOEXCEPT { return &_addr.ipv6; }
 
-    inline bool isIpv4() const TBAG_NOEXCEPT { return addr.ipv4.sin_port  == AF_INET;  }
-    inline bool isIpv6() const TBAG_NOEXCEPT { return addr.ipv6.sin6_port == AF_INET6; }
+    inline bool isIpv4() const TBAG_NOEXCEPT { return _addr.ipv4.sin_port  == AF_INET;  }
+    inline bool isIpv6() const TBAG_NOEXCEPT { return _addr.ipv6.sin6_port == AF_INET6; }
 
 public:
     std::string getIpName() const;

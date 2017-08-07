@@ -50,20 +50,23 @@ public:
     using Loop   = uvpp::Loop;
     using Stream = uvpp::Stream;
     using binf   = uvpp::binf;
-    using Id     = id::Id;
 
-public:
     using SharedClientBackend = std::shared_ptr<Stream>;
     using   WeakClientBackend =   std::weak_ptr<Stream>;
 
-public:
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
     using   WeakSafetyAsync = std::shared_ptr<SafetyAsync>;
 
-public:
+    using Id    = id::Id;
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
+
+public:
+    struct Internal;
+    friend struct Internal;
+
+    using UniqueInternal = std::unique_ptr<Internal>;
 
 public:
     enum class WriteState
@@ -77,22 +80,14 @@ public:
         WS_END,
     };
 
-public:
     struct WriteReady { /* EMPTY. */ };
-
-public:
-    struct Internal;
-    friend struct Internal;
-
-public:
-    using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
     StreamType const STREAM_TYPE;
 
 private:
     UniqueInternal _internal;
-    mutable Mutex _mutex;
+    mutable Mutex  _mutex;
 
 public:
     StreamClient(Loop & loop, StreamType type);
