@@ -22,7 +22,7 @@
 #include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/http/HttpFilter.hpp>
 #include <libtbag/network/http/HttpCacheData.hpp>
-#include <libtbag/network/http/WebSocketFrame.hpp>
+#include <libtbag/network/http/WsFrame.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -150,7 +150,7 @@ public:
 
 public:
     Err writeText(WeakClient node, std::string const & text, bool continuation = false, bool finish = true);
-    Err writeBinary(WeakClient node, WebSocketFrame::WsBuffer const & buffer, bool continuation = false, bool finish = true);
+    Err writeBinary(WeakClient node, WsFrame::WsBuffer const & buffer, bool continuation = false, bool finish = true);
 
 public:
     Err closeClient(WeakClient node, uint16_t status_code, std::string const & reason);

@@ -1,12 +1,13 @@
 /**
- * @file   WebSocketFrameTest.cpp
- * @brief  WebSocketFrame class tester.
+ * @file   WsFrameTest.cpp
+ * @brief  WsFrame class tester.
  * @author zer0
  * @date   2017-06-11
+ * @date   2017-08-07 (Rename: WebSocketFrameTest -> WsFrameTest)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/WebSocketFrame.hpp>
+#include <libtbag/network/http/WsFrame.hpp>
 #include <libtbag/bitwise/Endian.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
 
@@ -14,7 +15,7 @@ using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
 
-TEST(WebSocketFrameTest, GetMaskData)
+TEST(WsFrameTest, GetMaskData)
 {
     uint8_t const MASKING_KEY[] = {0xb0, 0xad, 0xf0, 0xa7};
     uint8_t const ORIGINAL_DATA[] = {
@@ -29,11 +30,11 @@ TEST(WebSocketFrameTest, GetMaskData)
     std::string const OUTPUT(RESULT_DATA, RESULT_DATA + sizeof(RESULT_DATA));
 
     ASSERT_EQ(RESULT_STRING, OUTPUT);
-    ASSERT_EQ(OUTPUT, WebSocketFrame::getPayloadData(WebSocketFrame::getMaskingKey(MASKING_KEY), INPUT));
-    ASSERT_EQ(INPUT, WebSocketFrame::getPayloadData(WebSocketFrame::getMaskingKey(MASKING_KEY), OUTPUT));
+    ASSERT_EQ(OUTPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey(MASKING_KEY), INPUT));
+    ASSERT_EQ(INPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey(MASKING_KEY), OUTPUT));
 }
 
-TEST(WebSocketFrameTest, RequestFrame)
+TEST(WsFrameTest, RequestFrame)
 {
     uint8_t const REQUEST_FRAME[] = {0x81, 0x9c, 0x6c, 0x11, 0xe8, 0xe3, 0x3e, 0x7e,
                                      0x8b, 0x88, 0x4c, 0x78, 0x9c, 0xc3, 0x1b, 0x78,
@@ -43,7 +44,7 @@ TEST(WebSocketFrameTest, RequestFrame)
     std::string const RESULT_STRING = "Rock it with HTML5 WebSocket";
 
     // Request buffer to frame.
-    WebSocketFrame frame;
+    WsFrame frame;
     ASSERT_EQ(Err::E_SUCCESS, frame.execute(REQUEST_FRAME, sizeof(REQUEST_FRAME)));
     ASSERT_TRUE(frame.fin);
     ASSERT_FALSE(frame.rsv1);
@@ -68,7 +69,7 @@ TEST(WebSocketFrameTest, RequestFrame)
     ASSERT_EQ(lh, rh);
 }
 
-TEST(WebSocketFrameTest, GetResponseWebSocket)
+TEST(WsFrameTest, GetResponseWebSocket)
 {
     std::string const TEST_REQUEST = "GET /chat HTTP/1.1\r\n"
             "Host: server.example.com\r\n"
@@ -103,39 +104,39 @@ TEST(WebSocketFrameTest, GetResponseWebSocket)
     ASSERT_EQ(test_response.getHeader(HEADER_SEC_WEBSOCKET_ACCEPT), response.getHeader(HEADER_SEC_WEBSOCKET_ACCEPT));
 }
 
-TEST(WebSocketFrameTest, UpgradeWebsocketKey)
+TEST(WsFrameTest, UpgradeWebsocketKey)
 {
     std::string const TEST_ORIGINAL = "dGhlIHNhbXBsZSBub25jZQ==";
     std::string const TEST_RESULT   = "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=";
     ASSERT_EQ(TEST_RESULT, getUpgradeWebSocketKey(TEST_ORIGINAL));
 }
 
-TEST(WebSocketFrameTest, PayloadLength)
+TEST(WsFrameTest, PayloadLength)
 {
     for (uint8_t i = 0; i <= 125; ++i) {
-        ASSERT_TRUE(PayloadBit::PL_BIT_7 == WebSocketFrame::getPayloadBit(i));
-        ASSERT_TRUE(PayloadBit::PL_BIT_7 == WebSocketFrame::getPayloadBitWithPayloadLength(i));
+        ASSERT_TRUE(PayloadBit::PL_BIT_7 == WsFrame::getPayloadBit(i));
+        ASSERT_TRUE(PayloadBit::PL_BIT_7 == WsFrame::getPayloadBitWithPayloadLength(i));
     }
 
-    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WebSocketFrame::getPayloadBit(126));
-    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WebSocketFrame::getPayloadBitWithPayloadLength(126));
-    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WebSocketFrame::getPayloadBitWithPayloadLength(65535));
+    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WsFrame::getPayloadBit(126));
+    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(126));
+    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(65535));
 
-    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WebSocketFrame::getPayloadBit(127));
-    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WebSocketFrame::getPayloadBitWithPayloadLength(65536));
-    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WebSocketFrame::getPayloadBitWithPayloadLength(100000));
+    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WsFrame::getPayloadBit(127));
+    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(65536));
+    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(100000));
 }
 
-TEST(WebSocketFrameTest, LargeData)
+TEST(WsFrameTest, LargeData)
 {
-    WebSocketFrame sender;
-    WebSocketFrame receiver;
+    WsFrame sender;
+    WsFrame receiver;
     random::MaskingDevice device;
 
     std::size_t const BUFFER_SIZE = 65536;
-    WebSocketFrame::WsBuffer test_buffer;
+    WsFrame::WsBuffer test_buffer;
     test_buffer.assign(BUFFER_SIZE, 0x10);
-    WebSocketFrame::WsBuffer buffer;
+    WsFrame::WsBuffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.binary(test_buffer, device.gen()));
     auto const REQUEST_SIZE = sender.copyTo(buffer);
@@ -158,14 +159,14 @@ TEST(WebSocketFrameTest, LargeData)
     }
 }
 
-TEST(WebSocketFrameTest, TextRequest)
+TEST(WsFrameTest, TextRequest)
 {
-    WebSocketFrame sender;
-    WebSocketFrame receiver;
+    WsFrame sender;
+    WsFrame receiver;
     random::MaskingDevice device;
 
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
-    WebSocketFrame::WsBuffer buffer;
+    WsFrame::WsBuffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.text(TEST_TEXT, device.gen()));
     auto const REQUEST_SIZE = sender.copyTo(buffer);
@@ -182,14 +183,14 @@ TEST(WebSocketFrameTest, TextRequest)
     ASSERT_EQ(TEST_TEXT, receiver.toText());
 }
 
-TEST(WebSocketFrameTest, TextResponse)
+TEST(WsFrameTest, TextResponse)
 {
-    WebSocketFrame sender;
-    WebSocketFrame receiver;
+    WsFrame sender;
+    WsFrame receiver;
     random::MaskingDevice device;
 
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
-    WebSocketFrame::WsBuffer buffer;
+    WsFrame::WsBuffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.text(TEST_TEXT));
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
@@ -206,14 +207,14 @@ TEST(WebSocketFrameTest, TextResponse)
     ASSERT_EQ(TEST_TEXT, receiver.toText());
 }
 
-TEST(WebSocketFrameTest, PingRequest)
+TEST(WsFrameTest, PingRequest)
 {
-    WebSocketFrame sender;
-    WebSocketFrame receiver;
+    WsFrame sender;
+    WsFrame receiver;
     random::MaskingDevice device;
 
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
-    WebSocketFrame::WsBuffer buffer;
+    WsFrame::WsBuffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.ping(TEST_TEXT, device.gen()));
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
@@ -230,12 +231,12 @@ TEST(WebSocketFrameTest, PingRequest)
     ASSERT_EQ(TEST_TEXT, receiver.toText());
 }
 
-TEST(WebSocketFrameTest, CloseResponse)
+TEST(WsFrameTest, CloseResponse)
 {
-    WebSocketFrame sender;
-    WebSocketFrame receiver;
+    WsFrame sender;
+    WsFrame receiver;
     random::MaskingDevice device;
-    WebSocketFrame::WsBuffer buffer;
+    WsFrame::WsBuffer buffer;
 
     auto code = WebSocketStatusCode::WSSC_GOING_AWAY;
     ASSERT_EQ(Err::E_SUCCESS, sender.close(code));

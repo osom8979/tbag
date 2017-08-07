@@ -1,14 +1,13 @@
 /**
- * @file   WebSocketFrame.hpp
- * @brief  WebSocketFrame class prototype.
+ * @file   WsFrame.hpp
+ * @brief  WsFrame class prototype.
  * @author zer0
  * @date   2017-06-11
- *
- * @see <https://tools.ietf.org/html/rfc6455>
+ * @date   2017-08-07 (Rename: WebSocketFrame -> WsFrame)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WEBSOCKETFRAME_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WEBSOCKETFRAME_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WSFRAME_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WSFRAME_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -180,10 +179,11 @@ enum class PayloadBit : uint8_t
 };
 
 /**
- * WebSocketFrame class prototype.
+ * WsFrame class prototype.
  *
  * @author zer0
  * @date   2017-06-11
+ * @date   2017-08-07 (Rename: WebSocketFrame -> WsFrame)
  *
  * @remarks
  *    0                   1                   2                   3
@@ -205,7 +205,7 @@ enum class PayloadBit : uint8_t
  *   |                     Payload Data continued ...                |
  *   +---------------------------------------------------------------+
  */
-class TBAG_API WebSocketFrame
+class TBAG_API WsFrame
 {
 public:
     using WsBuffer = std::vector<uint8_t>;
@@ -242,14 +242,14 @@ public:
     WsBuffer payload;
 
 public:
-    WebSocketFrame();
-    WebSocketFrame(WebSocketFrame const & obj);
-    WebSocketFrame(WebSocketFrame && obj);
-    virtual ~WebSocketFrame();
+    WsFrame();
+    WsFrame(WsFrame const & obj);
+    WsFrame(WsFrame && obj);
+    virtual ~WsFrame();
 
 public:
-    WebSocketFrame & operator =(WebSocketFrame const & obj);
-    WebSocketFrame & operator =(WebSocketFrame && obj);
+    WsFrame & operator =(WsFrame const & obj);
+    WsFrame & operator =(WsFrame && obj);
 
 public:
     inline uint8_t const * getPayloadDataPtr() const TBAG_NOEXCEPT
@@ -268,7 +268,7 @@ public:
     void clear();
 
 public:
-    Err execute(uint8_t const * data, std::size_t size);
+    Err execute(uint8_t const * data, std::size_t size, std::size_t * read_size = nullptr);
 
 public:
     std::size_t calculateWriteBufferSize() const;
@@ -380,5 +380,5 @@ TBAG_API Err updateResponseWebSocket(HttpParser const & request, HttpBuilder & r
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WEBSOCKETFRAME_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WSFRAME_HPP__
 

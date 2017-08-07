@@ -23,7 +23,7 @@
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
-#include <libtbag/network/http/WebSocketFrame.hpp>
+#include <libtbag/network/http/WsFrame.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
 
 #include <vector>
@@ -45,7 +45,7 @@ namespace http    {
 class TBAG_API HttpCacheData : private Noncopyable
 {
 public:
-    using WsBuffer = WebSocketFrame::WsBuffer;
+    using WsBuffer = WsFrame::WsBuffer;
     using Strings  = std::vector<std::string>;
     using WsQueue  = container::ReuseQueue<WsBuffer>;
 
@@ -65,8 +65,8 @@ public:
         bool closing;
         MaskingDevice device;
 
-        WebSocketFrame sender;
-        WebSocketFrame receiver;
+        WsFrame sender;
+        WsFrame receiver;
         WsBuffer write_buffer;
 
         std::string key;
@@ -97,7 +97,7 @@ public:
     void addProtocol(std::string const & protocol);
 
 public:
-    static Err writeSendWsFrame(ClientInterface * interface, WebSocketFrame const & sender, WsBuffer & buffer);
+    static Err writeSendWsFrame(ClientInterface * interface, WsFrame const & sender, WsBuffer & buffer);
 
 public:
     Err writeSendWsFrame();

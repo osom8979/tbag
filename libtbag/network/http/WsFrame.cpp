@@ -1,11 +1,12 @@
 /**
- * @file   WebSocketFrame.cpp
- * @brief  WebSocketFrame class implementation.
+ * @file   WsFrame.cpp
+ * @brief  WsFrame class implementation.
  * @author zer0
  * @date   2017-06-11
+ * @date   2017-08-07 (Rename: WebSocketFrame -> WsFrame)
  */
 
-#include <libtbag/network/http/WebSocketFrame.hpp>
+#include <libtbag/network/http/WsFrame.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/bitwise/Endian.hpp>
@@ -54,9 +55,9 @@ WebSocketStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT
 {
     switch (code) {
 #define _TBAG_XX(num, name, str) case num: return WebSocketStatusCode::WSSC_##name;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+        TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
-    default: return WebSocketStatusCode::WSSC_UNKNOWN;
+        default: return WebSocketStatusCode::WSSC_UNKNOWN;
     }
 }
 
@@ -64,9 +65,9 @@ char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
 #define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return #name;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+        TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
-    default: return "WSSC_UNKNOWN";
+        default: return "WSSC_UNKNOWN";
     }
 }
 
@@ -74,9 +75,9 @@ char const * getWsStatusCodeReason(WebSocketStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
 #define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return str;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+        TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
-    default: return "Unknown reason";
+        default: return "Unknown reason";
     }
 }
 
@@ -84,17 +85,17 @@ uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
 #define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return num;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+        TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
-    default: return TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE;
+        default: return TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE;
     }
 }
 
 // ------------------------------
-// WebSocketFrame implementation.
+// WsFrame implementation.
 // ------------------------------
 
-WebSocketFrame::WebSocketFrame()
+WsFrame::WsFrame()
         : fin (false), rsv1(false), rsv2(false), rsv3(false),
           opcode(OpCode::OC_CONTINUATION_FRAME), mask(false),
           payload_length(0), masking_key(0)
@@ -102,22 +103,22 @@ WebSocketFrame::WebSocketFrame()
     // EMPTY.
 }
 
-WebSocketFrame::WebSocketFrame(WebSocketFrame const & obj)
+WsFrame::WsFrame(WsFrame const & obj)
 {
     (*this) = obj;
 }
 
-WebSocketFrame::WebSocketFrame(WebSocketFrame && obj)
+WsFrame::WsFrame(WsFrame && obj)
 {
     (*this) = std::move(obj);
 }
 
-WebSocketFrame::~WebSocketFrame()
+WsFrame::~WsFrame()
 {
     // EMPTY.
 }
 
-WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame const & obj)
+WsFrame & WsFrame::operator =(WsFrame const & obj)
 {
     if (this != &obj) {
         fin = obj.fin;
@@ -133,7 +134,7 @@ WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame const & obj)
     return *this;
 }
 
-WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame && obj)
+WsFrame & WsFrame::operator =(WsFrame && obj)
 {
     if (this != &obj) {
         std::swap(fin, obj.fin);
@@ -149,7 +150,7 @@ WebSocketFrame & WebSocketFrame::operator =(WebSocketFrame && obj)
     return *this;
 }
 
-void WebSocketFrame::clear()
+void WsFrame::clear()
 {
     fin  = false;
     rsv1 = false;
@@ -162,7 +163,7 @@ void WebSocketFrame::clear()
     payload.clear();
 }
 
-Err WebSocketFrame::execute(uint8_t const * data, std::size_t size)
+Err WsFrame::execute(uint8_t const * data, std::size_t size, std::size_t * read_size)
 {
     if (size < 2) {
         return Err::E_SMALLBUF;
@@ -240,21 +241,24 @@ Err WebSocketFrame::execute(uint8_t const * data, std::size_t size)
         payload_length += PREV_PAYLOAD_LENGTH;
     }
 
+    if (read_size != nullptr) {
+        *read_size = calculateWriteBufferSize();
+    }
     return Err::E_SUCCESS;
 }
 
-std::size_t WebSocketFrame::calculateWriteBufferSize() const
+std::size_t WsFrame::calculateWriteBufferSize() const
 {
     std::size_t default_size = 2/*HEADER*/ + payload_length + (mask ? sizeof(uint32_t) : 0);
     switch(getPayloadBitWithPayloadLength(payload_length)) {
-    case PayloadBit::PL_BIT_7:  return default_size;
-    case PayloadBit::PL_BIT_16: return default_size + sizeof(uint16_t);
-    case PayloadBit::PL_BIT_64: return default_size + sizeof(uint64_t);
-    default:                    return default_size;
+        case PayloadBit::PL_BIT_7:  return default_size;
+        case PayloadBit::PL_BIT_16: return default_size + sizeof(uint16_t);
+        case PayloadBit::PL_BIT_64: return default_size + sizeof(uint64_t);
+        default:                    return default_size;
     }
 }
 
-std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size) const
+std::size_t WsFrame::copyTo(uint8_t * data, std::size_t size) const
 {
     ::memset(data, 0x00, size);
 
@@ -324,7 +328,7 @@ std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size) const
     return index;
 }
 
-std::size_t WebSocketFrame::copyTo(WsBuffer & buffer) const
+std::size_t WsFrame::copyTo(WsBuffer & buffer) const
 {
     std::size_t const RESERVE_SIZE = calculateWriteBufferSize();
     if (buffer.size() < RESERVE_SIZE) {
@@ -333,7 +337,7 @@ std::size_t WebSocketFrame::copyTo(WsBuffer & buffer) const
     return copyTo(buffer.data(), buffer.size());
 }
 
-void WebSocketFrame::setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key) TBAG_NOEXCEPT
+void WsFrame::setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key) TBAG_NOEXCEPT
 {
     fin = f;
     rsv1 = r1;
@@ -344,7 +348,7 @@ void WebSocketFrame::setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uin
     masking_key = key;
 }
 
-void WebSocketFrame::setData(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
+void WsFrame::setData(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
 {
     if (data != nullptr && size > 0) {
         if (payload.size() < size) {
@@ -357,7 +361,7 @@ void WebSocketFrame::setData(uint8_t const * data, std::size_t size) TBAG_NOEXCE
     }
 }
 
-Err WebSocketFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
+Err WsFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
                           uint8_t const * data, std::size_t size,
                           uint32_t key)
 {
@@ -366,36 +370,36 @@ Err WebSocketFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
     return Err::E_SUCCESS;
 }
 
-Err WebSocketFrame::text(std::string const & str, uint32_t key, bool continuation, bool finish)
+Err WsFrame::text(std::string const & str, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
                  (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
                  (uint8_t const *)str.data(), str.size(), key);
 }
 
-Err WebSocketFrame::text(std::string const & str, bool continuation, bool finish)
+Err WsFrame::text(std::string const & str, bool continuation, bool finish)
 {
     return text(str, 0, continuation, finish);
 }
 
-Err WebSocketFrame::binary(WsBuffer const & buffer, uint32_t key, bool continuation, bool finish)
+Err WsFrame::binary(WsBuffer const & buffer, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
                  (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
                  buffer.data(), buffer.size(), key);
 }
 
-Err WebSocketFrame::binary(WsBuffer const & buffer, bool continuation, bool finish)
+Err WsFrame::binary(WsBuffer const & buffer, bool continuation, bool finish)
 {
     return binary(buffer, 0, continuation, finish);
 }
 
-Err WebSocketFrame::close(uint32_t key)
+Err WsFrame::close(uint32_t key)
 {
     return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, nullptr, 0, key);
 }
 
-Err WebSocketFrame::close(uint16_t code, std::string const & reason)
+Err WsFrame::close(uint16_t code, std::string const & reason)
 {
     code = bitwise::toNetwork(code);
     WsBuffer buffer(sizeof(uint16_t) + reason.size());
@@ -404,12 +408,12 @@ Err WebSocketFrame::close(uint16_t code, std::string const & reason)
     return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
 }
 
-Err WebSocketFrame::close(WebSocketStatusCode code)
+Err WsFrame::close(WebSocketStatusCode code)
 {
     return close(getWsStatusCodeNumber(code), std::string(getWsStatusCodeName(code)));
 }
 
-uint16_t WebSocketFrame::getStatusCode() const
+uint16_t WsFrame::getStatusCode() const
 {
     if (opcode == OpCode::OC_CONNECTION_CLOSE && payload_length >= sizeof(uint16_t)) {
         uint16_t temp = 0;
@@ -419,7 +423,7 @@ uint16_t WebSocketFrame::getStatusCode() const
     return 0U;
 }
 
-std::string WebSocketFrame::getReason() const
+std::string WsFrame::getReason() const
 {
     if (opcode == OpCode::OC_CONNECTION_CLOSE && payload_length > sizeof(uint16_t)) {
         return std::string(&payload[sizeof(uint16_t)], &payload[sizeof(uint16_t)] + payload_length - sizeof(uint16_t));
@@ -427,12 +431,12 @@ std::string WebSocketFrame::getReason() const
     return std::string();
 }
 
-WsCloseResult WebSocketFrame::getCloseResult() const
+WsCloseResult WsFrame::getCloseResult() const
 {
     return WsCloseResult(getStatusCode(), getReason());
 }
 
-Err WebSocketFrame::ping(uint8_t const * data, std::size_t size, uint32_t key)
+Err WsFrame::ping(uint8_t const * data, std::size_t size, uint32_t key)
 {
     if (size > PAYLOAD_7BIT_TYPE_SIZE) {
         return Err::E_ILLARGS;
@@ -440,12 +444,12 @@ Err WebSocketFrame::ping(uint8_t const * data, std::size_t size, uint32_t key)
     return build(true, false, false, false, OpCode::OC_DENOTES_PING, data, size, key);
 }
 
-Err WebSocketFrame::ping(std::string const & str, uint32_t key)
+Err WsFrame::ping(std::string const & str, uint32_t key)
 {
     return ping((uint8_t const *)str.data(), str.size(), key);
 }
 
-Err WebSocketFrame::pong(uint8_t const * data, std::size_t size, uint32_t key)
+Err WsFrame::pong(uint8_t const * data, std::size_t size, uint32_t key)
 {
     if (size > PAYLOAD_7BIT_TYPE_SIZE) {
         return Err::E_ILLARGS;
@@ -453,12 +457,12 @@ Err WebSocketFrame::pong(uint8_t const * data, std::size_t size, uint32_t key)
     return build(true, false, false, false, OpCode::OC_DENOTES_PONG, data, size, key);
 }
 
-Err WebSocketFrame::pong(std::string const & str, uint32_t key)
+Err WsFrame::pong(std::string const & str, uint32_t key)
 {
     return pong((uint8_t const *)str.data(), str.size(), key);
 }
 
-std::string WebSocketFrame::toDebugString() const
+std::string WsFrame::toDebugString() const
 {
     std::stringstream ss;
     ss << "WS[" << (fin?'1':'0') << (rsv1?'1':'0') << (rsv2?'1':'0') << (rsv3?'1':'0')
@@ -481,7 +485,7 @@ std::string WebSocketFrame::toDebugString() const
 // Static methods.
 // ---------------
 
-PayloadBit WebSocketFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
+PayloadBit WsFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
 {
     if (payload_length_7bit <= PAYLOAD_7BIT_TYPE_SIZE) {
         return PayloadBit::PL_BIT_7;
@@ -495,7 +499,7 @@ PayloadBit WebSocketFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXC
     return PayloadBit::PL_BIT_7;
 }
 
-PayloadBit WebSocketFrame::getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
+PayloadBit WsFrame::getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
 {
     if (payload_length <= PAYLOAD_7BIT_TYPE_SIZE) {
         return PayloadBit::PL_BIT_7;
@@ -507,12 +511,12 @@ PayloadBit WebSocketFrame::getPayloadBitWithPayloadLength(uint64_t payload_lengt
     return PayloadBit::PL_BIT_64;
 }
 
-uint8_t WebSocketFrame::getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
+uint8_t WsFrame::getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
 {
     return getMaskingKeyByteIndex(payload_bit) + (is_mask ? sizeof(uint32_t) : 0);
 }
 
-uint8_t WebSocketFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
+uint8_t WsFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
 {
     switch (payload_bit) {
         case PayloadBit::PL_BIT_7:  return 2;
@@ -523,33 +527,33 @@ uint8_t WebSocketFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEX
     return 0;
 }
 
-uint32_t WebSocketFrame::getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
+uint32_t WsFrame::getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
 {
     uint32_t network_32byte_size = 0;
     ::memcpy(&network_32byte_size, data, sizeof(uint32_t));
     return network_32byte_size;
 }
 
-std::string WebSocketFrame::getPayloadData(uint32_t mask, std::string const & data)
+std::string WsFrame::getPayloadData(uint32_t mask, std::string const & data)
 {
     WsBuffer const INPUT(data.begin(), data.end());
     WsBuffer const OUTPUT = getPayloadData(mask, INPUT);
     return std::string(OUTPUT.begin(), OUTPUT.end());
 }
 
-WebSocketFrame::WsBuffer WebSocketFrame::getPayloadData(uint32_t mask, WsBuffer const & data)
+WsFrame::WsBuffer WsFrame::getPayloadData(uint32_t mask, WsBuffer const & data)
 {
     return getPayloadData(mask, data.data(), data.size());
 }
 
-WebSocketFrame::WsBuffer WebSocketFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
+WsFrame::WsBuffer WsFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
 {
     WsBuffer result(data, data + size);
     updatePayloadData(mask, result.data(), result.size());
     return result;
 }
 
-void WebSocketFrame::updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size)
+void WsFrame::updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size)
 {
     static_assert(sizeof(uint32_t) == 4, "Why not?");
     uint8_t const * mask_ptr = reinterpret_cast<uint8_t const *>(&mask);
@@ -582,23 +586,23 @@ TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF5      = "CF5";
 char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT
 {
     switch (code) {
-    case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
-    case OpCode::OC_TEXT_FRAME                  : return OP_CODE_NAME_TEXT;
-    case OpCode::OC_BINARY_FRAME                : return OP_CODE_NAME_BINARY;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return OP_CODE_NAME_NCF1;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return OP_CODE_NAME_NCF2;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return OP_CODE_NAME_NCF3;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return OP_CODE_NAME_NCF4;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return OP_CODE_NAME_NCF5;
-    case OpCode::OC_CONNECTION_CLOSE            : return OP_CODE_NAME_CLOSE;
-    case OpCode::OC_DENOTES_PING                : return OP_CODE_NAME_PING;
-    case OpCode::OC_DENOTES_PONG                : return OP_CODE_NAME_PONG;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return OP_CODE_NAME_CF1;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return OP_CODE_NAME_CF2;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return OP_CODE_NAME_CF3;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return OP_CODE_NAME_CF4;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return OP_CODE_NAME_CF5;
-    default: return "UNKNOWN";
+        case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
+        case OpCode::OC_TEXT_FRAME                  : return OP_CODE_NAME_TEXT;
+        case OpCode::OC_BINARY_FRAME                : return OP_CODE_NAME_BINARY;
+        case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return OP_CODE_NAME_NCF1;
+        case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return OP_CODE_NAME_NCF2;
+        case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return OP_CODE_NAME_NCF3;
+        case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return OP_CODE_NAME_NCF4;
+        case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return OP_CODE_NAME_NCF5;
+        case OpCode::OC_CONNECTION_CLOSE            : return OP_CODE_NAME_CLOSE;
+        case OpCode::OC_DENOTES_PING                : return OP_CODE_NAME_PING;
+        case OpCode::OC_DENOTES_PONG                : return OP_CODE_NAME_PONG;
+        case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return OP_CODE_NAME_CF1;
+        case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return OP_CODE_NAME_CF2;
+        case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return OP_CODE_NAME_CF3;
+        case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return OP_CODE_NAME_CF4;
+        case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return OP_CODE_NAME_CF5;
+        default: return "UNKNOWN";
     }
 }
 

@@ -55,7 +55,7 @@ void HttpCacheData::addProtocol(std::string const & protocol)
     ws.protocols.push_back(protocol);
 }
 
-Err HttpCacheData::writeSendWsFrame(ClientInterface * interface, WebSocketFrame const & sender, WsBuffer & buffer)
+Err HttpCacheData::writeSendWsFrame(ClientInterface * interface, WsFrame const & sender, WsBuffer & buffer)
 {
     std::size_t const COPY_SIZE = sender.copyTo(buffer);
     if (COPY_SIZE == 0) {

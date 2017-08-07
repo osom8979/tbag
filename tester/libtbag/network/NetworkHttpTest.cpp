@@ -13,7 +13,7 @@
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
-#include <libtbag/network/http/WebSocketClient.hpp>
+#include <libtbag/network/http/WsClient.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <iostream>
@@ -271,7 +271,7 @@ TEST(NetworkHttpTest, WebSocketEchoTest)
         std::cout << "Server.OnClose\n";
     });
 
-    FunctionalWebSocketClient client(loop);
+    FuncWsClient client(loop);
     HttpBuilder builder;
     Uri const URI(std::string("ws://localhost:") + std::to_string(SERVER_PORT));
     builder.setMethod(getHttpMethodName(HttpMethod::M_GET));
