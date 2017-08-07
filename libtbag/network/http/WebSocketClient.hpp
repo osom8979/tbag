@@ -45,19 +45,15 @@ public:
     using StreamType = details::StreamType;
     using Parent     = stream::StreamClient;
 
-public:
-    using Loop   = uvpp::Loop;
-    using Buffer = WebSocketFrame::Buffer;
+    using Loop     = uvpp::Loop;
+    using WsBuffer = WebSocketFrame::WsBuffer;
 
 public:
     TBAG_CONSTEXPR static uint64_t const DEFAULT_CLOSING_TIMEOUT_MILLISECOND = 5 * 1000;
 
 private:
     HttpCacheData _cache;
-
-private:
-    uint16_t _code;
-    std::string _reason;
+    WsCloseResult _close;
 
 public:
     WebSocketClient(Loop & loop, StreamType type = StreamType::TCP);
@@ -72,25 +68,27 @@ public:
     // @formatter:on
 
 public:
-    Err writeText(std::string const & text, bool continuation = false, bool finish = true);
-    Err writeBinary(Buffer const & binary, bool continuation = false, bool finish = true);
-    Err writeClose();
+    void setup(HttpBuilder const & request);
 
 public:
-    void setup(HttpBuilder const & request);
+    Err writeText(std::string const & text, bool continuation = false, bool finish = true);
+    Err writeBinary(WsBuffer const & binary, bool continuation = false, bool finish = true);
+    Err writeClose();
 
 private:
     bool runWebSocketChecker(HttpParser const & response);
     void runWebSocketRead(char const * buffer, std::size_t size);
 
+// Stream event methods.
 protected:
-    virtual void onConnect(Err code) override;
+    virtual void onConnect (Err code) override;
     virtual void onShutdown(Err code) override;
-    virtual void onWrite(Err code) override;
-    virtual void onRead(Err code, ReadPacket const & packet) override;
-    virtual void onClose() override;
-    virtual void onTimer() override;
+    virtual void onWrite   (Err code) override;
+    virtual void onRead    (Err code, ReadPacket const & packet) override;
+    virtual void onClose   () override;
+    virtual void onTimer   () override;
 
+// Event methods.
 public:
     /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
     virtual void onWsOpen(HttpResponse const & response);

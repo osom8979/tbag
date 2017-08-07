@@ -55,11 +55,16 @@ void HttpCacheData::addProtocol(std::string const & protocol)
     ws.protocols.push_back(protocol);
 }
 
+Err HttpCacheData::writeSendWsFrame(ClientInterface * interface, WebSocketFrame const & sender, WsBuffer & buffer)
+{
+    assert(interface != nullptr);
+    std::size_t const SIZE = sender.copyTo(buffer);
+    return interface->write((char const *)buffer.data(), SIZE);
+}
+
 Err HttpCacheData::writeSendWsFrame()
 {
-    assert(_client != nullptr);
-    std::size_t const SIZE = ws.sender.copyTo(ws.write_buffer);
-    return _client->write((char const *)&ws.write_buffer[0], SIZE);
+    return writeSendWsFrame(_client, ws.sender, ws.write_buffer);
 }
 
 Err HttpCacheData::writeTextRequest(std::string const & text, bool continuation, bool finish)
@@ -82,7 +87,7 @@ Err HttpCacheData::writeTextResponse(std::string const & text, bool continuation
     return writeSendWsFrame();
 }
 
-Err HttpCacheData::writeBinaryRequest(Buffer const & buffer, bool continuation, bool finish)
+Err HttpCacheData::writeBinaryRequest(WsBuffer const & buffer, bool continuation, bool finish)
 {
     Err const CODE = ws.sender.binary(buffer, ws.device.gen(), continuation, finish);
     if (CODE != Err::E_SUCCESS) {
@@ -92,7 +97,7 @@ Err HttpCacheData::writeBinaryRequest(Buffer const & buffer, bool continuation, 
     return writeSendWsFrame();
 }
 
-Err HttpCacheData::writeBinaryResponse(Buffer const & buffer, bool continuation, bool finish)
+Err HttpCacheData::writeBinaryResponse(WsBuffer const & buffer, bool continuation, bool finish)
 {
     Err const CODE = ws.sender.binary(buffer, continuation, finish);
     if (CODE != Err::E_SUCCESS) {

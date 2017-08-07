@@ -150,7 +150,7 @@ public:
 
 public:
     Err writeText(WeakClient node, std::string const & text, bool continuation = false, bool finish = true);
-    Err writeBinary(WeakClient node, WebSocketFrame::Buffer const & buffer, bool continuation = false, bool finish = true);
+    Err writeBinary(WeakClient node, WebSocketFrame::WsBuffer const & buffer, bool continuation = false, bool finish = true);
 
 public:
     Err closeClient(WeakClient node, uint16_t status_code, std::string const & reason);

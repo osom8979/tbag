@@ -81,7 +81,7 @@ Err HttpServer::writeText(WeakClient node, std::string const & text, bool contin
     return cache->writeTextResponse(text, continuation, finish);
 }
 
-Err HttpServer::writeBinary(WeakClient node, WebSocketFrame::Buffer const & buffer, bool continuation, bool finish)
+Err HttpServer::writeBinary(WeakClient node, WebSocketFrame::WsBuffer const & buffer, bool continuation, bool finish)
 {
     auto shared = node.lock();
     if (static_cast<bool>(shared) == false) {

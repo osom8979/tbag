@@ -70,6 +70,16 @@ char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT
     }
 }
 
+char const * getWsStatusCodeReason(WebSocketStatusCode code) TBAG_NOEXCEPT
+{
+    switch (code) {
+#define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return str;
+    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return "Unknown reason";
+    }
+}
+
 uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
@@ -314,7 +324,7 @@ std::size_t WebSocketFrame::copyTo(uint8_t * data, std::size_t size) const
     return index;
 }
 
-std::size_t WebSocketFrame::copyTo(Buffer & buffer) const
+std::size_t WebSocketFrame::copyTo(WsBuffer & buffer) const
 {
     std::size_t const RESERVE_SIZE = calculateWriteBufferSize();
     if (buffer.size() < RESERVE_SIZE) {
@@ -368,14 +378,14 @@ Err WebSocketFrame::text(std::string const & str, bool continuation, bool finish
     return text(str, 0, continuation, finish);
 }
 
-Err WebSocketFrame::binary(Buffer const & buffer, uint32_t key, bool continuation, bool finish)
+Err WebSocketFrame::binary(WsBuffer const & buffer, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
                  (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
                  buffer.data(), buffer.size(), key);
 }
 
-Err WebSocketFrame::binary(Buffer const & buffer, bool continuation, bool finish)
+Err WebSocketFrame::binary(WsBuffer const & buffer, bool continuation, bool finish)
 {
     return binary(buffer, 0, continuation, finish);
 }
@@ -388,7 +398,7 @@ Err WebSocketFrame::close(uint32_t key)
 Err WebSocketFrame::close(uint16_t code, std::string const & reason)
 {
     code = bitwise::toNetwork(code);
-    Buffer buffer(sizeof(uint16_t) + reason.size());
+    WsBuffer buffer(sizeof(uint16_t) + reason.size());
     memcpy(&buffer[0], &code, sizeof(uint16_t));
     memcpy(&buffer[sizeof(uint16_t)], &reason[0], reason.size());
     return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
@@ -415,6 +425,11 @@ std::string WebSocketFrame::getReason() const
         return std::string(&payload[sizeof(uint16_t)], &payload[sizeof(uint16_t)] + payload_length - sizeof(uint16_t));
     }
     return std::string();
+}
+
+WsCloseResult WebSocketFrame::getCloseResult() const
+{
+    return WsCloseResult(getStatusCode(), getReason());
 }
 
 Err WebSocketFrame::ping(uint8_t const * data, std::size_t size, uint32_t key)
@@ -517,19 +532,19 @@ uint32_t WebSocketFrame::getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
 
 std::string WebSocketFrame::getPayloadData(uint32_t mask, std::string const & data)
 {
-    Buffer const INPUT(data.begin(), data.end());
-    Buffer const OUTPUT = getPayloadData(mask, INPUT);
+    WsBuffer const INPUT(data.begin(), data.end());
+    WsBuffer const OUTPUT = getPayloadData(mask, INPUT);
     return std::string(OUTPUT.begin(), OUTPUT.end());
 }
 
-WebSocketFrame::Buffer WebSocketFrame::getPayloadData(uint32_t mask, Buffer const & data)
+WebSocketFrame::WsBuffer WebSocketFrame::getPayloadData(uint32_t mask, WsBuffer const & data)
 {
     return getPayloadData(mask, data.data(), data.size());
 }
 
-WebSocketFrame::Buffer WebSocketFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
+WebSocketFrame::WsBuffer WebSocketFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
 {
-    Buffer result(data, data + size);
+    WsBuffer result(data, data + size);
     updatePayloadData(mask, result.data(), result.size());
     return result;
 }

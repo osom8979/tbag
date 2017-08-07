@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-WebSocketClient::WebSocketClient(Loop & loop, StreamType type) : Parent(loop, type), _cache(this), _code(0), _reason()
+WebSocketClient::WebSocketClient(Loop & loop, StreamType type) : Parent(loop, type), _cache(this), _close()
 {
     _cache.generateWebSocketKey();
 }
@@ -23,6 +23,11 @@ WebSocketClient::WebSocketClient(Loop & loop, StreamType type) : Parent(loop, ty
 WebSocketClient::~WebSocketClient()
 {
     // EMPTY.
+}
+
+void WebSocketClient::setup(HttpBuilder const & request)
+{
+    _cache.builder = request;
 }
 
 Err WebSocketClient::writeText(std::string const & text, bool continuation, bool finish)
@@ -33,7 +38,7 @@ Err WebSocketClient::writeText(std::string const & text, bool continuation, bool
     return _cache.writeTextRequest(text, continuation, finish);
 }
 
-Err WebSocketClient::writeBinary(Buffer const & binary, bool continuation, bool finish)
+Err WebSocketClient::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
 {
     if (_cache.isUpgrade() == false) {
         return Err::E_ILLSTATE;
@@ -46,13 +51,15 @@ Err WebSocketClient::writeClose()
     if (_cache.isUpgrade() == false) {
         return Err::E_ILLSTATE;
     }
-    startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
-    return _cache.writeCloseRequest();
-}
 
-void WebSocketClient::setup(HttpBuilder const & request)
-{
-    _cache.builder = request;
+    Err const CLOSE_TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
+    _cache.ws.closing = true;
+    if (TBAG_ERR_FAILURE(CLOSE_TIMER_CODE)) {
+        tDLogE("WebSocketClient::writeClose() close timer error: {} -> Force closing!", getErrName(CLOSE_TIMER_CODE));
+        _close.set(WebSocketStatusCode::WSSC_CLIENT_TIMER_ERROR);
+        close();
+    }
+    return _cache.writeCloseRequest();
 }
 
 bool WebSocketClient::runWebSocketChecker(HttpParser const & response)
@@ -88,35 +95,40 @@ bool WebSocketClient::runWebSocketChecker(HttpParser const & response)
 
 void WebSocketClient::runWebSocketRead(char const * buffer, std::size_t size)
 {
-    auto & frame = _cache.ws.receiver;
-
-    Err const EXECUTE_CODE = frame.execute((uint8_t*)buffer, size);
+    Err const EXECUTE_CODE = _cache.ws.receiver.execute((uint8_t*)buffer, size);
     if (EXECUTE_CODE != Err::E_SUCCESS) {
         tDLogE("WebSocketClient::runWebSocketRead() WebSocket frame {} error", getErrName(EXECUTE_CODE));
         return;
     }
 
-    if (frame.fin == false) {
+    if (_cache.ws.receiver.fin == false) {
         tDLogD("WebSocketClient::runWebSocketRead() Waiting next frame ...");
         return;
     }
 
-    assert(frame.fin);
+    assert(_cache.ws.receiver.fin);
+    WebSocketFrame & frame = _cache.ws.receiver;
 
     if (frame.opcode == OpCode::OC_TEXT_FRAME || frame.opcode == OpCode::OC_BINARY_FRAME) {
         onWsMessage(frame.opcode, (char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
 
     } else if (frame.opcode == OpCode::OC_CONNECTION_CLOSE) {
-        _code = frame.getStatusCode();
-        _reason = frame.getReason();
+        _close = frame.getCloseResult();
         _cache.ws.closing = true;
+
         Err const CLOSE_CODE = close();
         if (CLOSE_CODE != Err::E_SUCCESS) {
             tDLogE("WebSocketClient::runWebSocketRead() Close {} error.", getErrName(CLOSE_CODE));
-            return;
         }
+
+    } else {
+        tDLogW("WebSocketClient::runWebSocketRead() Unsupported opcode: {}", getOpCodeName(frame.opcode));
     }
 }
+
+// ---------------------
+// Stream event methods.
+// ---------------------
 
 void WebSocketClient::onConnect(Err code)
 {
@@ -141,6 +153,7 @@ void WebSocketClient::onConnect(Err code)
     if (START_CODE != Err::E_SUCCESS) {
         tDLogE("WebSocketClient::onConnect() Start {} error.", getErrName(START_CODE));
         onWsError(START_CODE);
+        close();
         return;
     }
 
@@ -164,8 +177,8 @@ void WebSocketClient::onConnect(Err code)
 
 void WebSocketClient::onShutdown(Err code)
 {
+    // [WARNING] Don't use 'close' method.
     onWsError(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code);
-    // Don't use 'close' method.
 }
 
 void WebSocketClient::onWrite(Err code)
@@ -192,6 +205,7 @@ void WebSocketClient::onRead(Err code, ReadPacket const & packet)
     }
 
     if (_cache.isUpgrade()) {
+        // WebSocket packet processing.
         runWebSocketRead(packet.buffer, packet.size);
         return;
     }
@@ -220,8 +234,8 @@ void WebSocketClient::onRead(Err code, ReadPacket const & packet)
 
 void WebSocketClient::onClose()
 {
-    tDLogD("WebSocketClient::onClose({}, {})", _code, _reason);
-    onWsClose(_code, _reason);
+    tDLogD("WebSocketClient::onClose({}, {})", _close.code, _close.reason);
+    onWsClose(_close.code, _close.reason);
 }
 
 void WebSocketClient::onTimer()

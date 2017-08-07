@@ -44,8 +44,8 @@ namespace http    {
 class TBAG_API HttpCacheData : private Noncopyable
 {
 public:
-    using Buffer  = WebSocketFrame::Buffer;
-    using Strings = std::vector<std::string>;
+    using WsBuffer = WebSocketFrame::WsBuffer;
+    using Strings  = std::vector<std::string>;
 
     using MaskingDevice   = random::MaskingDevice;
     using ClientInterface = details::ClientInterface;
@@ -65,7 +65,7 @@ public:
 
         WebSocketFrame sender;
         WebSocketFrame receiver;
-        Buffer write_buffer;
+        WsBuffer write_buffer;
 
         std::string key;
         Strings protocols;
@@ -76,8 +76,10 @@ public:
     virtual ~HttpCacheData();
 
 public:
+    // @formatter:off
     inline bool isUpgrade() const TBAG_NOEXCEPT { return ws.upgrade; }
     inline bool isClosing() const TBAG_NOEXCEPT { return ws.closing; }
+    // @formatter:on
 
 public:
     std::string getKey() const { return ws.key; }
@@ -93,14 +95,17 @@ public:
     void addProtocol(std::string const & protocol);
 
 public:
+    static Err writeSendWsFrame(ClientInterface * interface, WebSocketFrame const & sender, WsBuffer & buffer);
+
+public:
     Err writeSendWsFrame();
 
 public:
     Err writeTextRequest(std::string const & text, bool continuation = false, bool finish = true);
     Err writeTextResponse(std::string const & text, bool continuation = false, bool finish = true);
 
-    Err writeBinaryRequest(Buffer const & buffer, bool continuation = false, bool finish = true);
-    Err writeBinaryResponse(Buffer const & buffer, bool continuation = false, bool finish = true);
+    Err writeBinaryRequest(WsBuffer const & buffer, bool continuation = false, bool finish = true);
+    Err writeBinaryResponse(WsBuffer const & buffer, bool continuation = false, bool finish = true);
 
     Err writePingRequest(std::string const & str);
     Err writePingResponse(std::string const & str);

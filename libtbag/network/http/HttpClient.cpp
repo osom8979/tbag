@@ -139,9 +139,7 @@ Err requestWithSync(HttpClient::StreamType type,
                     uint64_t timeout,
                     HttpResponse & result)
 {
-    using Loop = uvpp::Loop;
-    Loop loop;
-
+    uvpp::Loop loop;
     HttpClient http(loop, type);
 
     Err const INIT_CODE = http.init(host.c_str(), port);

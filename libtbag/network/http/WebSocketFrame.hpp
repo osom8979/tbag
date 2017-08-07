@@ -55,6 +55,8 @@ namespace http    {
     _TBAG_XX(1010, EXTENSION_REQUIRED     , "Extension required"     ) \
     _TBAG_XX(1011, INTERNAL_ENDPOINT_ERROR, "Internal endpoint error") \
     _TBAG_XX(1015, TLS_HANDSHAKE          , "TLS handshake"          ) \
+    _TBAG_XX(3000, UNKNOWN_ERROR          , "Unknown error"          ) \
+    _TBAG_XX(3001, CLIENT_TIMER_ERROR     , "Client timer error"     ) \
     /* END */
 #endif
 
@@ -76,7 +78,38 @@ enum class WebSocketStatusCode : uint16_t
 
 TBAG_API WebSocketStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT;
 TBAG_API char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT;
+TBAG_API char const * getWsStatusCodeReason(WebSocketStatusCode code) TBAG_NOEXCEPT;
 TBAG_API uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT;
+
+/**
+ * WebSocket close result structure.
+ *
+ * @author zer0
+ * @date 2017-07-07
+ */
+struct WsCloseResult
+{
+    uint16_t    code;
+    std::string reason;
+
+    WsCloseResult() : code(0), reason()
+    { /* EMPTY. */ }
+
+    WsCloseResult(uint16_t c, std::string const & r) : code(c), reason(r)
+    { /* EMPTY. */ }
+
+    WsCloseResult(WebSocketStatusCode s) : code(getWsStatusCodeNumber(s)), reason(getWsStatusCodeReason(s))
+    { /* EMPTY. */ }
+
+    ~WsCloseResult()
+    { /* EMPTY. */ }
+
+    void set(WebSocketStatusCode s)
+    {
+        code = getWsStatusCodeNumber(s);
+        reason = getWsStatusCodeReason(s);
+    }
+};
 
 // WebSocket - Reserved Status Code Ranges
 // Reference: https://tools.ietf.org/html/rfc6455#section-7.4.2
@@ -99,7 +132,7 @@ inline bool isWsStatusCodePublicSpecification(uint16_t code) TBAG_NOEXCEPT
 
 /**
  * Status codes in the range 3000-3999 are reserved for use by
- * libraries, frameworks, and applications.  These status codes are
+ * libraries, frameworks, and applications. These status codes are
  * registered directly with IANA. The interpretation of these codes
  * is undefined by this protocol.
  */
@@ -175,7 +208,7 @@ enum class PayloadBit : uint8_t
 class TBAG_API WebSocketFrame
 {
 public:
-    using Buffer = std::vector<uint8_t>;
+    using WsBuffer = std::vector<uint8_t>;
 
 public:
     /**
@@ -206,7 +239,7 @@ public:
     uint32_t masking_key;
 
     /** Payload buffer. */
-    Buffer payload;
+    WsBuffer payload;
 
 public:
     WebSocketFrame();
@@ -228,8 +261,8 @@ public:
     inline std::string toText() const
     { return std::string(payload.data(), payload.data() + payload_length); }
 
-    inline Buffer toBinary() const
-    { return Buffer(payload.data(), payload.data() + payload_length); }
+    inline WsBuffer toBinary() const
+    { return WsBuffer(payload.data(), payload.data() + payload_length); }
 
 public:
     void clear();
@@ -240,7 +273,7 @@ public:
 public:
     std::size_t calculateWriteBufferSize() const;
     std::size_t copyTo(uint8_t * data, std::size_t data_size) const;
-    std::size_t copyTo(Buffer & buffer) const;
+    std::size_t copyTo(WsBuffer & buffer) const;
 
 public:
     void setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
@@ -255,8 +288,8 @@ public:
     Err text(std::string const & str, uint32_t key, bool continuation = false, bool finish = true);
     Err text(std::string const & str, bool continuation = false, bool finish = true);
 
-    Err binary(Buffer const & buffer, uint32_t key, bool continuation = false, bool finish = true);
-    Err binary(Buffer const & buffer, bool continuation = false, bool finish = true);
+    Err binary(WsBuffer const & buffer, uint32_t key, bool continuation = false, bool finish = true);
+    Err binary(WsBuffer const & buffer, bool continuation = false, bool finish = true);
 
 // Control Frames.
 public:
@@ -269,6 +302,8 @@ public:
 
     uint16_t getStatusCode() const;
     std::string getReason() const;
+
+    WsCloseResult getCloseResult() const;
 
     /**
      * Pings: The Heartbeat of WebSockets.
@@ -319,8 +354,8 @@ public:
     static uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT;
 
     static std::string getPayloadData(uint32_t mask, std::string const & data);
-    static Buffer getPayloadData(uint32_t mask, Buffer const & data);
-    static Buffer getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
+    static WsBuffer getPayloadData(uint32_t mask, WsBuffer const & data);
+    static WsBuffer getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
     static void updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size);
 };
 
