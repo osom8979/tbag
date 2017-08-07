@@ -61,9 +61,8 @@ public:
     using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
 
 public:
-    using Id      = id::Id;
-    using Buffer  = std::vector<char>;
-    using Buffers = std::vector<Buffer>;
+    using Id     = id::Id;
+    using Buffer = std::vector<char>;
 
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
@@ -100,7 +99,7 @@ private:
     struct {
         SendStatus     status;
         UdpSendRequest send_req;
-        Buffers        buffers;
+        Buffer         buffer;
     } _sender;
 
 public:
@@ -132,7 +131,6 @@ public:
     virtual Err stop  () override;
     virtual Err close () override;
     virtual Err cancel() override;
-    virtual Err write (binf const * buffer, std::size_t size) override;
     virtual Err write (char const * buffer, std::size_t size) override;
 
 // Event backend.

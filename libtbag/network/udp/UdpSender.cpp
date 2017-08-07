@@ -10,6 +10,10 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#include <cassert>
+#include <cstring>
+#include "UdpSender.hpp"
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -58,7 +62,7 @@ struct UdpSender::Internal : private Noncopyable
         return true;
     }
 
-    Err sendReal(binf const * buffer, std::size_t size)
+    Err sendReal(char const * buffer, std::size_t size)
     {
         assert(_parent != nullptr);
         UdpSender & p = *_parent;
@@ -67,35 +71,20 @@ struct UdpSender::Internal : private Noncopyable
         return p._client->send(p._sender.send_req, buffer, size, p._addr.getCommon());
     }
 
-    void copyToSendBuffer(binf const * buffer, std::size_t size)
+    void assignSendBuffer(char const * buffer, std::size_t size)
     {
         assert(_parent != nullptr);
         UdpSender & p = *_parent;
 
-        // COPY TO TEMP BUFFER ...
-        p._sender.buffers.resize(size);
-        for (std::size_t i = 0; i < size; ++i) {
-            char const * b = (buffer + i)->buffer;
-            std::size_t bs = (buffer + i)->size;
-            p._sender.buffers[i].assign(b, b + bs);
+        assert(buffer != nullptr);
+        assert(size > 0);
+        if (p._sender.buffer.size() < size) {
+            p._sender.buffer.resize(size);
         }
+        ::memcpy(p._sender.buffer.data(), buffer, size);
     }
 
-    std::vector<binf> getSendBufferInfo()
-    {
-        assert(_parent != nullptr);
-        UdpSender & p = *_parent;
-
-        std::size_t SIZE = p._sender.buffers.size();
-        std::vector<binf> result(SIZE);
-        for (std::size_t i = 0; i < SIZE; ++i) {
-            result[i].buffer = &p._sender.buffers[i][0];
-            result[i].size   =  p._sender.buffers[i].size();
-        }
-        return result;
-    }
-
-    Err autoSend(binf const * buffer, std::size_t size)
+    Err autoSend(char const * buffer, std::size_t size)
     {
         assert(_parent != nullptr);
         UdpSender & p = *_parent;
@@ -121,7 +110,7 @@ struct UdpSender::Internal : private Noncopyable
             p._sender.status = SendStatus::SS_SEND;
 
         } else {
-            copyToSendBuffer(buffer, size);
+            assignSendBuffer(buffer, size);
             auto job = p._async->newSendFunc(std::bind(&UdpSender::onAsyncSend, _parent));
             if (static_cast<bool>(job) == false) {
                 tDLogE("UdpSender::Internal::autoSend() New job error.");
@@ -287,22 +276,11 @@ Err UdpSender::cancel()
     return Err::E_SUCCESS;
 }
 
-Err UdpSender::write(binf const * buffer, std::size_t size)
-{
-    Guard const MUTEX_GUARD(_mutex);
-    return _internal->autoSend(buffer, size);
-}
-
 Err UdpSender::write(char const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_internal));
-
-    binf info;
-    info.buffer = const_cast<char*>(buffer);
-    info.size   = size;
-
     Guard const MUTEX_GUARD(_mutex);
-    return _internal->autoSend(&info, 1U);
+    return _internal->autoSend(buffer, size);
 }
 
 // --------------
@@ -393,9 +371,14 @@ void UdpSender::onAsyncSend()
     }
 
     assert(_sender.status == SendStatus::SS_ASYNC);
-    auto binfs = _internal->getSendBufferInfo();
-    Err const CODE = _internal->sendReal(&binfs[0], binfs.size());
 
+    if (_sender.buffer.empty()) {
+        tDLogD("StreamClient::onAsyncWrite() Empty writer buffer.");
+        _sender.status = SendStatus::SS_READY;
+        return;
+    }
+
+    Err const CODE = _internal->sendReal(_sender.buffer.data(), _sender.buffer.size());
     if (CODE == Err::E_SUCCESS) {
         _sender.status = SendStatus::SS_SEND;
     } else {

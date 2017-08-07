@@ -423,97 +423,97 @@ TEST(NetworkTcpTest, ShutdownAfterWrite)
     ASSERT_EQ(1, close_cb_called);
 }
 
-TEST(NetworkTcpTest, DoubleBufferEcho)
-{
-    log::SeverityGuard guard;
-
-    using namespace uvpp;
-    Loop loop;
-    TestTcpServer server(loop);
-
-    ASSERT_EQ(Err::E_SUCCESS, server.init("0.0.0.0"));
-    int const SERVER_PORT = server.port();
-
-    std::string message1 = "ECHO";
-    std::string message2 = "MESSAGE";
-    std::string echo_result;
-
-    binf buffers[2];
-    buffers[0].buffer = &message1[0];
-    buffers[0].size   =  message1.size();
-    buffers[1].buffer = &message2[0];
-    buffers[1].size   =  message2.size();
-
-    server.setOnConnection([&](Err code){
-        auto shared = server.accept().lock();
-        ASSERT_TRUE(static_cast<bool>(shared));
-        ASSERT_EQ(Err::E_SUCCESS, shared->start());
-    });
-    server.setOnClientRead([&](FunctionalTcpServer::WeakClient node, Err code, ReadPacket const & packet){
-        ASSERT_TRUE(code == Err::E_SUCCESS || code == Err::E_EOF);
-        if (code == Err::E_SUCCESS) {
-            auto shared = node.lock();
-            ASSERT_TRUE(static_cast<bool>(shared));
-            ASSERT_EQ(Err::E_SUCCESS, shared->stop());
-            ASSERT_EQ(Err::E_SUCCESS, shared->write(packet.buffer, packet.size));
-        }
-    });
-    server.setOnClientWrite([&](FunctionalTcpServer::WeakClient node, Err code){
-        ASSERT_EQ(Err::E_SUCCESS, code);
-        auto shared = node.lock();
-        ASSERT_TRUE(static_cast<bool>(shared));
-        ASSERT_EQ(Err::E_SUCCESS, shared->close());
-    });
-    server.setOnClientClose([&](FunctionalTcpServer::WeakClient node){
-        auto shared = node.lock();
-        ASSERT_TRUE(static_cast<bool>(shared));
-        ASSERT_EQ(Err::E_SUCCESS, server.close());
-    });
-
-    FunctionalTcpClient client(loop);
-    ASSERT_EQ(Err::E_SUCCESS, client.init(LOOPBACK_IPV4, SERVER_PORT));
-
-    int connect_cb_called = 0;
-    int write_cb_called = 0;
-    int read_cb_called = 0;
-    int close_cb_called = 0;
-
-    client.setOnConnect([&](Err code){
-        connect_cb_called++;
-        ASSERT_EQ(Err::E_SUCCESS, code);
-        ASSERT_EQ(Err::E_SUCCESS, client.write(buffers, 2));
-    });
-    client.setOnWrite([&](Err code){
-        write_cb_called++;
-        ASSERT_EQ(Err::E_SUCCESS, code);
-        ASSERT_EQ(Err::E_SUCCESS, client.start());
-    });
-    client.setOnRead([&](Err code, ReadPacket const & packet){
-        read_cb_called++;
-        ASSERT_TRUE(code == Err::E_SUCCESS || code == Err::E_EOF);
-        if (code == Err::E_SUCCESS) {
-            echo_result = std::string(packet.buffer, packet.buffer + packet.size);
-        }
-        ASSERT_EQ(Err::E_SUCCESS, client.stop());
-        ASSERT_EQ(Err::E_SUCCESS, client.close());
-    });
-    client.setOnClose([&](){
-        close_cb_called++;
-        ASSERT_EQ(Err::E_SUCCESS, server.close());
-    });
-
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
-    ASSERT_EQ(message1 + message2, echo_result);
-    ASSERT_EQ(1, server.connection_cb_counter);
-    ASSERT_EQ(1, server.client_read_cb_counter);
-    ASSERT_EQ(1, server.client_write_cb_counter);
-    ASSERT_EQ(1, server.client_close_cb_counter);
-    ASSERT_EQ(1, server.server_close_cb_counter);
-    ASSERT_EQ(1, connect_cb_called);
-    ASSERT_EQ(1, write_cb_called);
-    ASSERT_EQ(1, read_cb_called);
-    ASSERT_EQ(1, close_cb_called);
-}
+//TEST(NetworkTcpTest, DoubleBufferEcho)
+//{
+//    log::SeverityGuard guard;
+//
+//    using namespace uvpp;
+//    Loop loop;
+//    TestTcpServer server(loop);
+//
+//    ASSERT_EQ(Err::E_SUCCESS, server.init("0.0.0.0"));
+//    int const SERVER_PORT = server.port();
+//
+//    std::string message1 = "ECHO";
+//    std::string message2 = "MESSAGE";
+//    std::string echo_result;
+//
+//    binf buffers[2];
+//    buffers[0].buffer = &message1[0];
+//    buffers[0].size   =  message1.size();
+//    buffers[1].buffer = &message2[0];
+//    buffers[1].size   =  message2.size();
+//
+//    server.setOnConnection([&](Err code){
+//        auto shared = server.accept().lock();
+//        ASSERT_TRUE(static_cast<bool>(shared));
+//        ASSERT_EQ(Err::E_SUCCESS, shared->start());
+//    });
+//    server.setOnClientRead([&](FunctionalTcpServer::WeakClient node, Err code, ReadPacket const & packet){
+//        ASSERT_TRUE(code == Err::E_SUCCESS || code == Err::E_EOF);
+//        if (code == Err::E_SUCCESS) {
+//            auto shared = node.lock();
+//            ASSERT_TRUE(static_cast<bool>(shared));
+//            ASSERT_EQ(Err::E_SUCCESS, shared->stop());
+//            ASSERT_EQ(Err::E_SUCCESS, shared->write(packet.buffer, packet.size));
+//        }
+//    });
+//    server.setOnClientWrite([&](FunctionalTcpServer::WeakClient node, Err code){
+//        ASSERT_EQ(Err::E_SUCCESS, code);
+//        auto shared = node.lock();
+//        ASSERT_TRUE(static_cast<bool>(shared));
+//        ASSERT_EQ(Err::E_SUCCESS, shared->close());
+//    });
+//    server.setOnClientClose([&](FunctionalTcpServer::WeakClient node){
+//        auto shared = node.lock();
+//        ASSERT_TRUE(static_cast<bool>(shared));
+//        ASSERT_EQ(Err::E_SUCCESS, server.close());
+//    });
+//
+//    FunctionalTcpClient client(loop);
+//    ASSERT_EQ(Err::E_SUCCESS, client.init(LOOPBACK_IPV4, SERVER_PORT));
+//
+//    int connect_cb_called = 0;
+//    int write_cb_called = 0;
+//    int read_cb_called = 0;
+//    int close_cb_called = 0;
+//
+//    client.setOnConnect([&](Err code){
+//        connect_cb_called++;
+//        ASSERT_EQ(Err::E_SUCCESS, code);
+//        ASSERT_EQ(Err::E_SUCCESS, client.write(buffers, 2));
+//    });
+//    client.setOnWrite([&](Err code){
+//        write_cb_called++;
+//        ASSERT_EQ(Err::E_SUCCESS, code);
+//        ASSERT_EQ(Err::E_SUCCESS, client.start());
+//    });
+//    client.setOnRead([&](Err code, ReadPacket const & packet){
+//        read_cb_called++;
+//        ASSERT_TRUE(code == Err::E_SUCCESS || code == Err::E_EOF);
+//        if (code == Err::E_SUCCESS) {
+//            echo_result = std::string(packet.buffer, packet.buffer + packet.size);
+//        }
+//        ASSERT_EQ(Err::E_SUCCESS, client.stop());
+//        ASSERT_EQ(Err::E_SUCCESS, client.close());
+//    });
+//    client.setOnClose([&](){
+//        close_cb_called++;
+//        ASSERT_EQ(Err::E_SUCCESS, server.close());
+//    });
+//
+//    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+//    ASSERT_EQ(message1 + message2, echo_result);
+//    ASSERT_EQ(1, server.connection_cb_counter);
+//    ASSERT_EQ(1, server.client_read_cb_counter);
+//    ASSERT_EQ(1, server.client_write_cb_counter);
+//    ASSERT_EQ(1, server.client_close_cb_counter);
+//    ASSERT_EQ(1, server.server_close_cb_counter);
+//    ASSERT_EQ(1, connect_cb_called);
+//    ASSERT_EQ(1, write_cb_called);
+//    ASSERT_EQ(1, read_cb_called);
+//    ASSERT_EQ(1, close_cb_called);
+//}
 
 TEST(NetworkTcpTest, MultiEcho)
 {

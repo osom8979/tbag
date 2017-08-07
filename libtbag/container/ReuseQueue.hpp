@@ -83,7 +83,7 @@ public:
     }
 
 public:
-    TBAG_API friend void swap(ReuseQueue & lh, ReuseQueue & rh)
+    friend void swap(ReuseQueue & lh, ReuseQueue & rh)
     {
         lh._active.swap(rh._active);
         lh._ready.swap(rh._ready);

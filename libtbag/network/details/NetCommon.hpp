@@ -153,7 +153,6 @@ struct ClientInterface
     virtual Err stop  () = 0;
     virtual Err close () = 0;
     virtual Err cancel() = 0;
-    virtual Err write (binf const * buffer, std::size_t size) = 0;
     virtual Err write (char const * buffer, std::size_t size) = 0;
 
     // ----------------

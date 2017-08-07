@@ -208,11 +208,6 @@ Err UdpReceiver::cancel()
     return Err::E_UNSUPOP;
 }
 
-Err UdpReceiver::write(binf const * buffer, std::size_t size)
-{
-    return Err::E_UNSUPOP;
-}
-
 Err UdpReceiver::write(char const * buffer, std::size_t size)
 {
     return Err::E_UNSUPOP;
