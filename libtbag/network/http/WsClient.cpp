@@ -166,32 +166,25 @@ bool WsClient::runWsChecker(HttpParser const & response)
 
 void WsClient::runWsRead(char const * buffer, std::size_t size)
 {
-    WsFrame & frame = __on_read_only__.receiver;
-    Err const EXECUTE_CODE = frame.execute((uint8_t*)buffer, size);
-    if (EXECUTE_CODE != Err::E_SUCCESS) {
-        tDLogE("WsClient::runWsRead() WebSocket frame {} error", getErrName(EXECUTE_CODE));
-        return;
-    }
+    __on_read_only__.receiver.exec(buffer, size, [&](OpCode opcode, bool finish, WsFrameBuffer::Buffer & buffer) -> bool {
+        if (finish) {
+            if (opcode == OpCode::OC_TEXT_FRAME || opcode == OpCode::OC_BINARY_FRAME) {
+                onWsMessage(opcode, &buffer[0], buffer.size());
 
-    if (frame.fin == false) {
-        tDLogD("WsClient::runWsRead() Waiting next frame ...");
-        return;
-    }
+            } else if (opcode == OpCode::OC_CONNECTION_CLOSE) {
+                _close = __on_read_only__.receiver.atCachedFrame().getCloseResult();
+                Err const CLOSE_CODE = close();
+                if (CLOSE_CODE != Err::E_SUCCESS) {
+                    tDLogE("WsClient::runWsRead() Close {} error.", getErrName(CLOSE_CODE));
+                }
 
-    assert(frame.fin);
-    if (frame.opcode == OpCode::OC_TEXT_FRAME || frame.opcode == OpCode::OC_BINARY_FRAME) {
-        onWsMessage(frame.opcode, (char const *)frame.getPayloadDataPtr(), frame.getPayloadSize());
-
-    } else if (frame.opcode == OpCode::OC_CONNECTION_CLOSE) {
-        _close = frame.getCloseResult();
-        Err const CLOSE_CODE = close();
-        if (CLOSE_CODE != Err::E_SUCCESS) {
-            tDLogE("WsClient::runWsRead() Close {} error.", getErrName(CLOSE_CODE));
+            } else {
+                tDLogW("WsClient::runWsRead() Unsupported opcode: {}", getOpCodeName(opcode));
+            }
         }
 
-    } else {
-        tDLogW("WsClient::runWsRead() Unsupported opcode: {}", getOpCodeName(frame.opcode));
-    }
+        return true;
+    });
 }
 
 // ---------------------

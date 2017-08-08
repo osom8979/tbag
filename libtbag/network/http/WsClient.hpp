@@ -24,7 +24,7 @@
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
-#include <libtbag/network/http/WsFrame.hpp>
+#include <libtbag/network/http/WsFrameBuffer.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -95,7 +95,7 @@ private:
 private:
     struct {
         HttpParser response; ///< Response packet parser.
-        WsFrame receiver; ///< Web socket frame.
+        WsFrameBuffer receiver; ///< WebSocket frame buffer.
     } __on_read_only__; ///< @warning It should only be used with the onRead() method.
 
 public:
