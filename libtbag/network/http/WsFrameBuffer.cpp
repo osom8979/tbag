@@ -8,6 +8,10 @@
 #include <libtbag/network/http/WsFrameBuffer.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cstring>
+#include <algorithm>
+#include <iterator>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -15,7 +19,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-WsFrameBuffer::WsFrameBuffer()
+WsFrameBuffer::WsFrameBuffer() : _buffer(), _size(0), _opcode(OpCode::OC_CONTINUATION_FRAME), _finish(false), _payload()
 {
     // EMPTY.
 }
@@ -25,69 +29,64 @@ WsFrameBuffer::~WsFrameBuffer()
     // EMPTY.
 }
 
-std::size_t WsFrameBuffer::readNextDatagramSize()
+void WsFrameBuffer::clearBuffer()
 {
-//    // Section 01: Exists next_read_size.
-//    if (_next_read_size != NO_NEXT_READ_SIZE) {
-//        return _next_read_size;
-//    }
-//
-//    // Section 02: Find the next_read_size in buffer.
-//    if (_data_buffer.size() < DATAGRAM_HEADER_SIZE) {
-//        return NO_NEXT_READ_SIZE;
-//    }
-//
-//    // Section 03: Update next_read_size.
-//    Size network_byte_size = 0;
-//    _data_buffer.pop((char*)&network_byte_size, DATAGRAM_HEADER_SIZE);
-//    _next_read_size = bitwise::toHost(network_byte_size);
-//
-//    return _next_read_size;
-    return 0;
+    _buffer.clear();
+    _size = 0;
+}
+
+void WsFrameBuffer::clearCache()
+{
+    __cache__.frame.clear();
+}
+
+void WsFrameBuffer::clear()
+{
+    clearBuffer();
+    clearCache();
 }
 
 void WsFrameBuffer::alloc(std::size_t suggested_size)
 {
-    if (_buffer.capacity() < suggested_size) {
-        _buffer.extendCapacity(suggested_size - _buffer.capacity());
+    if (_buffer.size() < suggested_size) {
+        _buffer.resize(suggested_size);
     }
 }
 
 void WsFrameBuffer::push(char const * buffer, std::size_t size)
 {
-    _buffer.extendPush(buffer, size);
+    if (_buffer.size() < _size + size) {
+        _buffer.resize(_size + size);
+    }
+    ::memcpy(&_buffer[_size], buffer, size);
+    _size += size;
 }
 
-bool WsFrameBuffer::next(WsFrame * result)
+bool WsFrameBuffer::next()
 {
-//    Err const & CODE = _frame.execute();
-//    std::size_t const READ_SIZE = readNextDatagramSize();
-//    if (READ_SIZE == NO_NEXT_READ_SIZE) {
-//        return false;
-//    }
-//
-//    if (_buffer.size() < READ_SIZE) {
-//        return false;
-//    }
-//
-//    // Realloc with read buffer.
-//    if (_read.size() < READ_SIZE) {
-//        _read.resize(READ_SIZE);
-//    }
-//
-//    std::size_t real_read_size = _buffer.pop(&_read_buffer[0], READ_SIZE);
-//    if (real_read_size != READ_SIZE) {
-//        return false;
-//    }
-//
-//    if (result != nullptr) {
-//        result->buffer = &_read_buffer[0];
-//        result->size   = real_read_size;
-//    }
-//
-//    // Clear next datagram size.
-//    _next_read_size = NO_NEXT_READ_SIZE;
-    return false;
+    std::size_t read_size = 0;
+    Err const CODE = __cache__.frame.execute((uint8_t const *)&_buffer[0], _size, &read_size);
+    if (TBAG_ERR_FAILURE(CODE)) {
+        return false;
+    }
+
+    std::swap_ranges(_buffer.begin() + read_size, _buffer.begin() + _size, _buffer.begin());
+    _size -= read_size;
+    return true;
+}
+
+void WsFrameBuffer::update()
+{
+    uint8_t const * payload_data = __cache__.frame.getPayloadDataPtr();
+    std::size_t payload_size = __cache__.frame.getPayloadSize();
+
+    _finish = __cache__.frame.fin;
+    if (__cache__.frame.opcode == OpCode::OC_CONTINUATION_FRAME) {
+        _payload.insert(_payload.end(), payload_data, payload_data + payload_size);
+    } else {
+        _opcode = __cache__.frame.opcode;
+        _payload.assign(payload_data, payload_data + payload_size);
+    }
 }
 
 } // namespace http

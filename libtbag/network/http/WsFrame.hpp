@@ -211,6 +211,9 @@ public:
     using WsBuffer = std::vector<uint8_t>;
 
 public:
+    TBAG_CONSTEXPR static std::size_t const MINIMUM_BUFFER_SIZE = 2;
+
+public:
     /**
      * Indicates that this is the final fragment in a message.
      * The first fragment MAY also be the final fragment.

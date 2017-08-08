@@ -18,8 +18,8 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/container/CircularBuffer.hpp>
 #include <libtbag/network/http/WsFrame.hpp>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,34 +37,62 @@ namespace http    {
 class TBAG_API WsFrameBuffer : private Noncopyable
 {
 public:
-    using CircularBuffer = container::CircularBuffer<char>;
     using Buffer = std::vector<char>;
 
 private:
-    CircularBuffer _buffer;
-    Buffer _read;
+    Buffer _buffer;
+    std::size_t _size;
 
 private:
-    WsFrame _frame;
+    OpCode _opcode;
+    bool   _finish;
+    Buffer _payload;
+
+private:
+    struct {
+        WsFrame frame;
+    } __cache__;
 
 public:
     WsFrameBuffer();
     virtual ~WsFrameBuffer();
 
 public:
-    // @formatter:off
-    inline CircularBuffer       & atBuffer()       TBAG_NOEXCEPT { return _buffer; }
-    inline CircularBuffer const & atBuffer() const TBAG_NOEXCEPT { return _buffer; }
-    // @formatter:on
+    inline WsFrame       & atCachedFrame()       TBAG_NOEXCEPT { return __cache__.frame; }
+    inline WsFrame const & atCachedFrame() const TBAG_NOEXCEPT { return __cache__.frame; }
 
-private:
-    std::size_t readNextDatagramSize();
+public:
+    void clearBuffer();
+    void clearCache();
+    void clear();
 
 // Event by-pass methods.
 public:
     void alloc(std::size_t suggested_size);
     void push(char const * buffer, std::size_t size);
-    bool next(WsFrame * result);
+    bool next();
+    void update();
+
+public:
+    template <typename Predicated>
+    std::size_t exec(char const * buffer, std::size_t size, Predicated predicated)
+    {
+        std::size_t counter = 0;
+        bool is_continue = false;
+
+        push(buffer, size);
+
+        while (next()) {
+            update();
+            ++counter;
+            is_continue = predicated(_opcode, _finish, _payload);
+            if (is_continue == false) {
+                break;
+            }
+            clearCache();
+        }
+        return counter;
+    }
 };
 
 } // namespace http
