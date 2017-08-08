@@ -140,7 +140,7 @@ Err HttpCacheData::writeCloseResponse(uint16_t status_code, std::string const & 
     return writeSendWsFrame();
 }
 
-Err HttpCacheData::writeCloseResponse(WebSocketStatusCode code)
+Err HttpCacheData::writeCloseResponse(WsStatusCode code)
 {
     return writeCloseResponse(getWsStatusCodeNumber(code), std::string(getWsStatusCodeName(code)));
 }

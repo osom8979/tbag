@@ -301,8 +301,8 @@ TEST(NetworkHttpTest, WebSocketEchoTest)
         ws_error_counter++;
     });
     client.setOnWsClose([&](uint16_t code, std::string const & reason){
-        ASSERT_EQ(getWsStatusCodeNumber(WebSocketStatusCode::WSSC_NORMAL_CLOSURE), code);
-        ASSERT_EQ(std::string(getWsStatusCodeName(WebSocketStatusCode::WSSC_NORMAL_CLOSURE)), reason);
+        ASSERT_EQ(getWsStatusCodeNumber(WsStatusCode::WSSC_NORMAL_CLOSURE), code);
+        ASSERT_EQ(std::string(getWsStatusCodeName(WsStatusCode::WSSC_NORMAL_CLOSURE)), reason);
         ASSERT_EQ(Err::E_SUCCESS, server.close());
         ws_close_counter++;
     });

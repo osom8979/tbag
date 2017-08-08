@@ -238,7 +238,7 @@ TEST(WsFrameTest, CloseResponse)
     random::MaskingDevice device;
     WsFrame::WsBuffer buffer;
 
-    auto code = WebSocketStatusCode::WSSC_GOING_AWAY;
+    auto code = WsStatusCode::WSSC_GOING_AWAY;
     ASSERT_EQ(Err::E_SUCCESS, sender.close(code));
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
     ASSERT_LT(0, RESPONSE_SIZE);

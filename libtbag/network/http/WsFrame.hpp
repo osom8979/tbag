@@ -66,8 +66,9 @@ TBAG_CONSTEXPR uint16_t const TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE = 0;
  *
  * @author zer0
  * @date 2017-07-07
+ * @date 2017-08-08 (Rename: WebSocketStatusCode -> WsStatusCode)
  */
-enum class WebSocketStatusCode : uint16_t
+enum class WsStatusCode : uint16_t
 {
     WSSC_UNKNOWN = TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE,
 #define _TBAG_XX(num, name, str) WSSC_##name = num,
@@ -75,10 +76,10 @@ enum class WebSocketStatusCode : uint16_t
 #undef _TBAG_XX
 };
 
-TBAG_API WebSocketStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT;
-TBAG_API char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT;
-TBAG_API char const * getWsStatusCodeReason(WebSocketStatusCode code) TBAG_NOEXCEPT;
-TBAG_API uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT;
+TBAG_API WsStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT;
+TBAG_API char const * getWsStatusCodeName(WsStatusCode code) TBAG_NOEXCEPT;
+TBAG_API char const * getWsStatusCodeReason(WsStatusCode code) TBAG_NOEXCEPT;
+TBAG_API uint16_t getWsStatusCodeNumber(WsStatusCode code) TBAG_NOEXCEPT;
 
 /**
  * WebSocket close result structure.
@@ -97,13 +98,13 @@ struct WsCloseResult
     WsCloseResult(uint16_t c, std::string const & r) : code(c), reason(r)
     { /* EMPTY. */ }
 
-    WsCloseResult(WebSocketStatusCode s) : code(getWsStatusCodeNumber(s)), reason(getWsStatusCodeReason(s))
+    WsCloseResult(WsStatusCode s) : code(getWsStatusCodeNumber(s)), reason(getWsStatusCodeReason(s))
     { /* EMPTY. */ }
 
     ~WsCloseResult()
     { /* EMPTY. */ }
 
-    void set(WebSocketStatusCode s)
+    void set(WsStatusCode s)
     {
         code = getWsStatusCodeNumber(s);
         reason = getWsStatusCodeReason(s);
@@ -301,7 +302,7 @@ public:
      */
     Err close(uint32_t key);
     Err close(uint16_t code, std::string const & reason);
-    Err close(WebSocketStatusCode code);
+    Err close(WsStatusCode code);
 
     uint16_t getStatusCode() const;
     std::string getReason() const;

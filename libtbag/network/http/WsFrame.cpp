@@ -51,40 +51,40 @@ TBAG_CONSTEXPR static uint8_t const PAYLOAD_7BIT_TYPE_SIZE  = 125;
 TBAG_CONSTEXPR static uint8_t const PAYLOAD_16BIT_TYPE_SIZE = 126;
 TBAG_CONSTEXPR static uint8_t const PAYLOAD_64BIT_TYPE_SIZE = 127;
 
-WebSocketStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT
+WsStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT
 {
     switch (code) {
-#define _TBAG_XX(num, name, str) case num: return WebSocketStatusCode::WSSC_##name;
+#define _TBAG_XX(num, name, str) case num: return WsStatusCode::WSSC_##name;
     TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
-    default: return WebSocketStatusCode::WSSC_UNKNOWN;
+    default: return WsStatusCode::WSSC_UNKNOWN;
     }
 }
 
-char const * getWsStatusCodeName(WebSocketStatusCode code) TBAG_NOEXCEPT
+char const * getWsStatusCodeName(WsStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
-#define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return #name;
+#define _TBAG_XX(num, name, str) case WsStatusCode::WSSC_##name: return #name;
     TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
     default: return "WSSC_UNKNOWN";
     }
 }
 
-char const * getWsStatusCodeReason(WebSocketStatusCode code) TBAG_NOEXCEPT
+char const * getWsStatusCodeReason(WsStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
-#define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return str;
+#define _TBAG_XX(num, name, str) case WsStatusCode::WSSC_##name: return str;
     TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
     default: return "Unknown reason";
     }
 }
 
-uint16_t getWsStatusCodeNumber(WebSocketStatusCode code) TBAG_NOEXCEPT
+uint16_t getWsStatusCodeNumber(WsStatusCode code) TBAG_NOEXCEPT
 {
     switch (code) {
-#define _TBAG_XX(num, name, str) case WebSocketStatusCode::WSSC_##name: return num;
+#define _TBAG_XX(num, name, str) case WsStatusCode::WSSC_##name: return num;
     TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
 #undef _TBAG_XX
     default: return TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE;
@@ -411,7 +411,7 @@ Err WsFrame::close(uint16_t code, std::string const & reason)
     return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
 }
 
-Err WsFrame::close(WebSocketStatusCode code)
+Err WsFrame::close(WsStatusCode code)
 {
     return close(getWsStatusCodeNumber(code), std::string(getWsStatusCodeName(code)));
 }

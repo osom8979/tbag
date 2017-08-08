@@ -174,7 +174,7 @@ void HttpServer::runWebSocketRead(SharedClient node, Err code, ReadPacket const 
         }
 
     } else if (frame.opcode == OpCode::OC_CONNECTION_CLOSE) {
-        Err const CLOSE_CODE = cache.writeCloseResponse(WebSocketStatusCode::WSSC_NORMAL_CLOSURE);
+        Err const CLOSE_CODE = cache.writeCloseResponse(WsStatusCode::WSSC_NORMAL_CLOSURE);
         if (CLOSE_CODE != Err::E_SUCCESS) {
             tDLogE("HttpServer::runWebSocketRead() WebSocket close write {} error", getErrName(CLOSE_CODE));
         }

@@ -117,7 +117,7 @@ public:
 
     Err writeCloseRequest();
     Err writeCloseResponse(uint16_t status_code, std::string const & reason);
-    Err writeCloseResponse(WebSocketStatusCode code);
+    Err writeCloseResponse(WsStatusCode code);
 };
 
 } // namespace http
