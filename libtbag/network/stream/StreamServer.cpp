@@ -8,7 +8,6 @@
 #include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/stream/StreamServerBackend.hpp>
-#include <libtbag/network/stream/StreamNode.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
@@ -110,13 +109,6 @@ struct StreamServer::Internal : private Noncopyable
         async = loop.newHandle<SafetyAsync>(loop);
         assert(static_cast<bool>(async));
         return Err::E_SUCCESS;
-    }
-
-    SharedClient createClient(StreamType type)
-    {
-        assert(_parent != nullptr);
-        Loop & loop = getLoop();
-        return SharedClient(new (std::nothrow) StreamNode(loop, type, async, _parent));
     }
 
     SharedClient getSharedClient(Id id)
@@ -287,18 +279,21 @@ StreamServer::WeakClient StreamServer::accept()
     }
 
     Guard const MUTEX_GUARD(_mutex);
-    auto client = std::static_pointer_cast<StreamNode, ClientInterface>(_internal->createClient(STREAM_TYPE));
+    SharedStreamNode client = createClient(STREAM_TYPE);
 
-    if (auto shared = client->getClient().lock()) {
-        Err const CODE = _internal->server->accept(*shared);
+    if (StreamClient::SharedClientBackend shared = client->getClient().lock()) {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(typename StreamClient::SharedClientBackend::element_type, uvpp::Stream);
+        uvpp::Stream & uv_stream = *shared;
+
+        Err const CODE = _internal->server->accept(uv_stream);
         if (CODE == Err::E_SUCCESS) {
             tDLogD("StreamServer::accept() client connect.");
             bool const INSERT_RESULT = _internal->insertClient(client);
             assert(INSERT_RESULT);
 
-            auto weak_client = WeakClient(client);
+            WeakClient weak_client(client);
             {   // Allocate User Data.
-                shared->setUserData(onClientUdataAlloc(weak_client));
+                uv_stream.setUserData(onClientUdataAlloc(weak_client));
             }
             return weak_client;
         } else {
@@ -344,6 +339,17 @@ void StreamServer::backClose()
     _mutex.lock();
     _internal->closeAll();
     _mutex.unlock();
+}
+
+// -----------------------
+// StreamServer extension.
+// -----------------------
+
+StreamServer::SharedStreamNode StreamServer::createClient(StreamType type)
+{
+    assert(static_cast<bool>(_internal));
+    Loop & loop = _internal->getLoop();
+    return SharedStreamNode(new (std::nothrow) StreamNode(loop, type, _internal->async, this));
 }
 
 } // namespace stream

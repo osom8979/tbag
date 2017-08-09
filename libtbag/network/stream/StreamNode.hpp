@@ -51,14 +51,18 @@ public:
     using SharedSafetyAsync = StreamClient::SharedSafetyAsync;
     using   WeakSafetyAsync = StreamClient::WeakSafetyAsync;
 
-public:
+private:
     ServerInterface * _parent;
 
 public:
     StreamNode(Loop & loop, StreamType type, SharedSafetyAsync async, ServerInterface * parent);
     virtual ~StreamNode();
 
-private:
+public:
+    inline ServerInterface       * getParentPtr()       TBAG_NOEXCEPT { return _parent; }
+    inline ServerInterface const * getParentPtr() const TBAG_NOEXCEPT { return _parent; }
+
+public:
     WeakClient getWeakClient();
 
 public:

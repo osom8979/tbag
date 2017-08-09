@@ -22,11 +22,13 @@
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
+#include <libtbag/network/stream/StreamNode.hpp>
 
 #include <unordered_map>
 #include <string>
 #include <atomic>
 #include <mutex>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -54,6 +56,9 @@ public:
 
     using SharedClient = ServerInterface::SharedClient;
     using   WeakClient = ServerInterface::WeakClient;
+
+    using SharedStreamNode = std::shared_ptr<StreamNode>;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(typename SharedClient::element_type, typename SharedStreamNode::element_type);
 
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
@@ -133,6 +138,24 @@ public:
 public:
     virtual void backConnection(Err code) override;
     virtual void backClose() override;
+
+// StreamServer extension.
+public:
+    /**
+     * @warning Don't use the mutex.
+     */
+    virtual SharedStreamNode createClient(StreamType type);
+
+public:
+    template <typename T>
+    inline static std::shared_ptr<T> castSharedClient(WeakClient const & client)
+            TBAG_NOEXCEPT_SPECIFIER(
+                    TBAG_NOEXCEPT_OPERATOR(client.lock()) &&
+                    TBAG_NOEXCEPT_OPERATOR(std::static_pointer_cast<T>(SharedClient()))
+            )
+    {
+        return std::static_pointer_cast<T>(client.lock());
+    }
 };
 
 /**
