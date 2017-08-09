@@ -156,10 +156,3 @@ tbBOOL tbRelease()
     return libtbag::LibtbagInitializer::release() ? TB_TRUE : TB_FALSE;
 }
 
-#include <libtbag/tpot/TpotMain.hpp>
-
-int tbPotMain(int argc, char ** argv, char ** envs)
-{
-    return libtbag::tpot::runTpotMain(argc, argv, envs);
-}
-
