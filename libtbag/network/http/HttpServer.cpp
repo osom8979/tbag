@@ -121,7 +121,7 @@ Err HttpServer::HttpNode::closeWebSocket(uint16_t status_code, std::string const
     }
 
     Err const CLOSE_TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
-    _closing.store(true);
+    _closing = true;
 
     if (TBAG_ERR_FAILURE(CLOSE_TIMER_CODE)) {
         tDLogE("HttpServer::HttpNode::closeWebSocket() Close timer error: {} -> Force closing!", getErrName(CLOSE_TIMER_CODE));
@@ -155,14 +155,7 @@ void HttpServer::HttpNode::backWsFrame(Err code, ReadPacket const & packet)
 
             } else if (opcode == OpCode::OC_CONNECTION_CLOSE) {
                 Err const WRITE_CLOSE_CODE = closeWebSocket(WsStatusCode::WSSC_NORMAL_CLOSURE);
-                if (TBAG_ERR_SUCCESS(WRITE_CLOSE_CODE)) {
-                    _closing = true;
-                    Err const TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
-                    if (TBAG_ERR_FAILURE(TIMER_CODE)) {
-                        tDLogE("HttpServer::HttpNode::backWsFrame() WebSocket close timer {} error", getErrName(TIMER_CODE));
-                        close();
-                    }
-                } else {
+                if (TBAG_ERR_FAILURE(WRITE_CLOSE_CODE)) {
                     tDLogE("HttpServer::HttpNode::backWsFrame() WebSocket close write {} error", getErrName(WRITE_CLOSE_CODE));
                     close();
                 }
@@ -450,13 +443,15 @@ void HttpServer::onClientTimer(WeakClient node)
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
 }
 
-HttpServer::SharedStreamNode HttpServer::createClient(StreamType type)
+HttpServer::SharedStreamNode HttpServer::createClient(StreamType type,
+                                                      Loop & loop,
+                                                      SharedServerBackend & server,
+                                                      SharedSafetyAsync & async)
 {
-    auto server = getServer().lock();
-    auto async  = getAsync ().lock();
     assert(static_cast<bool>(server));
     assert(static_cast<bool>(async));
-    return SharedStreamNode(new (std::nothrow) HttpNode(*server->getLoop(), type, async, this));
+    tDLogSD("HttpServer::createClient() Create HttpNode");
+    return SharedStreamNode(new (std::nothrow) HttpNode(loop, type, async, this));
 }
 
 } // namespace http

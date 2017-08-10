@@ -232,7 +232,10 @@ protected:
     virtual void onClientTimer   (WeakClient node) final override;
 
 protected:
-    virtual SharedStreamNode createClient(StreamType type) final override;
+    virtual SharedStreamNode createClient(StreamType type,
+                                          Loop & loop,
+                                          SharedServerBackend & server,
+                                          SharedSafetyAsync & async) final override;
 
 // ------------------------
 // User's callback methods.

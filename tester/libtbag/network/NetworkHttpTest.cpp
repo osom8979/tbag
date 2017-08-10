@@ -302,7 +302,7 @@ TEST(NetworkHttpTest, WebSocketEchoTest)
     });
     client.setOnWsClose([&](uint16_t code, std::string const & reason){
         ASSERT_EQ(getWsStatusCodeNumber(WsStatusCode::WSSC_NORMAL_CLOSURE), code);
-        ASSERT_EQ(std::string(getWsStatusCodeName(WsStatusCode::WSSC_NORMAL_CLOSURE)), reason);
+        ASSERT_EQ(std::string(getWsStatusCodeReason(WsStatusCode::WSSC_NORMAL_CLOSURE)), reason);
         ASSERT_EQ(Err::E_SUCCESS, server.close());
         ws_close_counter++;
     });

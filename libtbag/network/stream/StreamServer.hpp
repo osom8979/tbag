@@ -60,6 +60,12 @@ public:
     using SharedStreamNode = std::shared_ptr<StreamNode>;
     STATIC_ASSERT_CHECK_IS_BASE_OF(typename SharedClient::element_type, typename SharedStreamNode::element_type);
 
+    using ClientMap  = std::unordered_map<Id, SharedClient>;
+    using ClientPair = ClientMap::value_type;
+
+    using ClientIterator      = ClientMap::iterator;
+    using ClientConstIterator = ClientMap::const_iterator;
+
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
     using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
@@ -67,9 +73,26 @@ public:
     using SharedServerBackend = std::shared_ptr<Stream>;
     using   WeakServerBackend =   std::weak_ptr<Stream>;
 
-public:
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
+
+public:
+    class TBAG_API ClientIteratorGuard : private Noncopyable
+    {
+    private:
+        StreamServer::Mutex & _mutex;
+
+    public:
+        ClientIterator begin;
+        ClientIterator end;
+
+    public:
+        ClientIteratorGuard(StreamServer & server);
+        virtual ~ClientIteratorGuard();
+    };
+
+    friend class ClientIteratorGuard;
+    using UniqueClientIteratorGuard = std::unique_ptr<ClientIteratorGuard>;
 
 public:
     struct Internal;
@@ -96,6 +119,20 @@ public:
 
     WeakServerBackend getServer();
     WeakSafetyAsync getAsync();
+
+public:
+    UniqueClientIteratorGuard getIterators();
+
+public:
+    template <typename Predicated>
+    void forEach(Predicated predicated)
+    {
+        auto itrs = getIterators();
+        while (itrs->begin != itrs->end) {
+            predicated(*(itrs->begin));
+            ++(itrs->begin);
+        }
+    }
 
 public:
     virtual std::string dest() const override;
@@ -142,9 +179,14 @@ public:
 // StreamServer extension.
 public:
     /**
+     * Create an instance of node.
+     *
      * @warning Don't use the mutex.
      */
-    virtual SharedStreamNode createClient(StreamType type);
+    virtual SharedStreamNode createClient(StreamType type,
+                                          Loop & loop,
+                                          SharedServerBackend & server,
+                                          SharedSafetyAsync & async);
 
 public:
     template <typename T>

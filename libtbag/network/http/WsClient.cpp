@@ -114,8 +114,8 @@ Err WsClient::closeWebSocket()
         return Err::E_ILLSTATE;
     }
 
-    Err const CLOSE_TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
     _closing.store(true);
+    Err const CLOSE_TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
 
     if (TBAG_ERR_FAILURE(CLOSE_TIMER_CODE)) {
         tDLogE("WsClient::closeWebSocket() Close timer error: {} -> Force closing!", getErrName(CLOSE_TIMER_CODE));

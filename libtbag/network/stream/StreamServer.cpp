@@ -34,8 +34,8 @@ struct StreamServer::Internal : private Noncopyable
 {
     using SharedClient = StreamServer::SharedClient;
 
-    using ClientMap  = std::unordered_map<Id, SharedClient>;
-    using ClientPair = ClientMap::value_type;
+    using ClientMap  = StreamServer::ClientMap;
+    using ClientPair = StreamServer::ClientPair;
 
     using AtomicBool = std::atomic_bool;
 
@@ -156,6 +156,23 @@ struct StreamServer::Internal : private Noncopyable
     }
 };
 
+// -----------------------------------
+// ClientIteratorGuard implementation.
+// -----------------------------------
+
+StreamServer::ClientIteratorGuard::ClientIteratorGuard(StreamServer & server)
+        : _mutex(server._mutex),
+          begin(server._internal->clients.begin()),
+          end(server._internal->clients.end())
+{
+    _mutex.lock();
+}
+
+StreamServer::ClientIteratorGuard::~ClientIteratorGuard()
+{
+    _mutex.unlock();
+}
+
 // ----------------------------
 // StreamServer implementation.
 // ----------------------------
@@ -215,6 +232,11 @@ StreamServer::WeakSafetyAsync StreamServer::getAsync()
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
     return WeakSafetyAsync(_internal->async);
+}
+
+StreamServer::UniqueClientIteratorGuard StreamServer::getIterators()
+{
+    return UniqueClientIteratorGuard(new ClientIteratorGuard(*this));
 }
 
 std::string StreamServer::dest() const
@@ -279,7 +301,7 @@ StreamServer::WeakClient StreamServer::accept()
     }
 
     Guard const MUTEX_GUARD(_mutex);
-    SharedStreamNode client = createClient(STREAM_TYPE);
+    SharedStreamNode client = createClient(STREAM_TYPE, _internal->getLoop(), _internal->server, _internal->async);
 
     if (StreamClient::SharedClientBackend shared = client->getClient().lock()) {
         STATIC_ASSERT_CHECK_IS_BASE_OF(typename StreamClient::SharedClientBackend::element_type, uvpp::Stream);
@@ -345,11 +367,12 @@ void StreamServer::backClose()
 // StreamServer extension.
 // -----------------------
 
-StreamServer::SharedStreamNode StreamServer::createClient(StreamType type)
+StreamServer::SharedStreamNode StreamServer::createClient(StreamType type,
+                                                          Loop & loop,
+                                                          SharedServerBackend & server,
+                                                          SharedSafetyAsync & async)
 {
-    assert(static_cast<bool>(_internal));
-    Loop & loop = _internal->getLoop();
-    return SharedStreamNode(new (std::nothrow) StreamNode(loop, type, _internal->async, this));
+    return SharedStreamNode(new (std::nothrow) StreamNode(loop, type, async, this));
 }
 
 } // namespace stream
