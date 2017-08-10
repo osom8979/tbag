@@ -244,7 +244,7 @@ TEST(NetworkHttpTest, RoutingServer)
     ASSERT_EQ(5, on_close            );
 }
 
-TEST(NetworkHttpTest, WebSocketEchoTest)
+TEST(NetworkHttpTest, WebSocketEcho)
 {
     log::SeverityGuard guard;
 
@@ -312,5 +312,115 @@ TEST(NetworkHttpTest, WebSocketEchoTest)
     ASSERT_EQ(1, ws_message_counter);
     ASSERT_EQ(0, ws_error_counter);
     ASSERT_EQ(1, ws_close_counter);
+}
+
+TEST(NetworkHttpTest, MultipleWebSocketClients)
+{
+    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::WARNING_SEVERITY);
+
+    uvpp::Loop loop;
+    FuncHttpServer server(loop);
+    server.enableWebSocket();
+
+    ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
+    int const SERVER_PORT = server.port();
+    ASSERT_LT(0, SERVER_PORT);
+    std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
+
+    int const TEST_CLIENT_COUNT =  90;
+    int const TEST_ECHO_COUNT   = 120;
+    int const TOTAL_WRITE_COUNT = TEST_CLIENT_COUNT * (TEST_ECHO_COUNT + 2/*HTTP_REQUEST&WS_CLOSE*/);
+
+    int server_on_write_count       = 0;
+    int server_on_ws_open_count     = 0;
+    int server_on_ws_message_count  = 0;
+    int server_on_http_close        = 0;
+
+    server.setOnHttpWrite([&](WeakClient node, Err code){
+        //std::cout << "server.setOnHttpWrite()" << std::endl;
+        ++server_on_write_count;
+    });
+    server.setOnWsOpen([&](WeakClient node, Err code, HttpPacket & packet){
+        //std::cout << "server.setOnWsOpen()" << std::endl;
+        ++server_on_ws_open_count;
+    });
+    server.setOnWsMessage([&](WeakClient node, OpCode op, char const * buffer, std::size_t size){
+        //std::cout << "server.setOnWsMessage()" << std::endl;
+        ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
+        ++server_on_ws_message_count;
+        for (int i = 0; i < TEST_ECHO_COUNT; ++i) {
+            server.writeText(node, std::string(buffer, buffer + size) + std::to_string(i));
+        }
+    });
+    server.setOnHttpClose([&](WeakClient node){
+        //std::cout << "server.setOnHttpClose()" << std::endl;
+        ++server_on_http_close;
+    });
+
+    std::vector<std::shared_ptr<FuncWsClient> > clients;
+    std::vector<int> ws_open_counter   (TEST_CLIENT_COUNT, 0);
+    std::vector<int> ws_message_counter(TEST_CLIENT_COUNT, 0);
+    std::vector<int> ws_error_counter  (TEST_CLIENT_COUNT, 0);
+    std::vector<int> ws_close_counter  (TEST_CLIENT_COUNT, 0);
+    int ws_total_close_counter = 0;
+
+    for (int i = 0; i < TEST_CLIENT_COUNT; ++i) {
+        std::shared_ptr<FuncWsClient> shared(new FuncWsClient(loop));
+        clients.push_back(shared);
+        auto & client = *shared;
+
+        HttpBuilder builder;
+        Uri const URI(std::string("ws://localhost:") + std::to_string(SERVER_PORT));
+        builder.setMethod(getHttpMethodName(HttpMethod::M_GET));
+        builder.setUrl(URI.getRequestPath());
+        builder.insertHeader(HEADER_HOST, URI.getHost());
+        builder.insertHeader(HEADER_ORIGIN, URI.getHost());
+        client.setup(builder);
+        ASSERT_EQ(Err::E_SUCCESS, client.init("127.0.0.1", SERVER_PORT));
+
+        std::string const TEST_TEXT = "abcdefghijklmnopqrstuvwxyz";
+
+        client.setOnWsOpen([&, i](HttpResponse const & response){
+            //std::cout << "client.setOnWsOpen(" << i << ")" << std::endl;
+            ASSERT_EQ(Err::E_SUCCESS, client.writeText(TEST_TEXT));
+            ++(ws_open_counter.at(i));
+        });
+        client.setOnWsMessage([&, i](OpCode op, char const * buffer, std::size_t size){
+            //std::cout << "client.setOnWsMessage(" << i << ")" << std::endl;
+            ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
+            ASSERT_EQ(TEST_TEXT + std::to_string(ws_message_counter.at(i)), std::string(buffer, buffer + size));
+            ++(ws_message_counter.at(i));
+            if (ws_message_counter.at(i) >= TEST_ECHO_COUNT) {
+                ASSERT_EQ(Err::E_SUCCESS, client.closeWebSocket());
+            }
+        });
+        client.setOnWsError([&, i](Err code){
+            //std::cout << "client.setOnWsError(" << i << ")" << std::endl;
+            ++(ws_error_counter.at(i));
+        });
+        client.setOnWsClose([&, i](uint16_t code, std::string const & reason){
+            //std::cout << "client.setOnWsClose(" << i << ")" << std::endl;
+            ++(ws_close_counter.at(i));
+            ++ws_total_close_counter;
+            if (ws_total_close_counter >= TEST_CLIENT_COUNT) {
+                server.close();
+            }
+        });
+    }
+
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+
+    ASSERT_EQ(TEST_CLIENT_COUNT, server_on_ws_open_count);
+    ASSERT_EQ(TEST_CLIENT_COUNT, server_on_ws_message_count);
+    ASSERT_EQ(TEST_CLIENT_COUNT, server_on_http_close);
+
+    for (int i = 0; i < TEST_CLIENT_COUNT; ++i) {
+        ASSERT_EQ(1, ws_open_counter[i]);
+        ASSERT_EQ(TEST_ECHO_COUNT, ws_message_counter[i]);
+        ASSERT_EQ(0, ws_error_counter[i]);
+        ASSERT_EQ(1, ws_close_counter[i]);
+    }
+    ASSERT_EQ(TEST_CLIENT_COUNT, ws_total_close_counter);
+    EXPECT_EQ(TOTAL_WRITE_COUNT, server_on_write_count);
 }
 
