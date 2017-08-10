@@ -75,7 +75,8 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/sqlite3)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lua)
 
-tbag_config__set_option (SKIP_FSPOLL_TESTER ON)
+tbag_config__set_option (SKIP_FSPOLL_TESTER    OFF)
+tbag_config__set_option (SKIP_FINDPATH_TESTER  OFF)
 
 ## Thread settings.
 tbag_config__find_thread ()

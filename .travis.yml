@@ -46,7 +46,7 @@ script:
   - echo "Travis build dir: $TRAVIS_BUILD_DIR"
   - mkdir cmake_build
   - cd cmake_build
-  - cmake ..
+  - cmake -DSKIP_FSPOLL_TESTER=ON -DSKIP_FINDPATH_TESTER=ON ..
   - make VERBOSE=0
   - ./tester
 

@@ -25,13 +25,17 @@ TEST(FindPathTest, FindUtf8File)
 
 TEST(FindPathTest, FindUtf8ExecuteFile)
 {
+#if defined(SKIP_FINDPATH_TESTER)
+    std::cout << "Skip this test. (The SKIP_FINDPATH_TESTER macro has been defined)\n";
+    return;
+#endif
     std::string exe_file;
     if (isWindowsPlatform()) {
         exe_file = "^cmd\\.exe$";
     } else {
         exe_file = "^bash$";
     }
-    auto result = findUtf8ExecuteFile(exe_file);
+    auto result = findUtf8ExecuteFile(exe_file); // [WARNING] Not found in Travis-CI.
     ASSERT_FALSE(result.empty());
 }
 
