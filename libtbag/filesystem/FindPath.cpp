@@ -23,8 +23,11 @@ std::vector<Path> findUtf8File(std::vector<std::string> const & paths,
 {
     std::vector<Path> result;
     for (auto & path : paths) {
+        /* -- */ __tbag_debug("findUtf8File() path: {}", path); /* -- */
         for (auto & child : details::scanDir(path, type)) {
+            /* -- */ __tbag_debug(" --- : {}", child); /* -- */
             if (string::isUtf8Match(child, regex)) {
+                /* -- */ __tbag_debug("  **********  PUSH!!"); /* -- */
                 result.push_back(Path(path) / child);
             }
         }
