@@ -95,6 +95,16 @@ public:
     }
 };
 
+inline bool isWsWriteSuccess(Err code) TBAG_NOEXCEPT
+{
+    return code == Err::E_SUCCESS || code == Err::E_ENQASYNC || code == Err::E_ASYNCREQ;
+}
+
+inline bool isWsWriteFailure(Err code) TBAG_NOEXCEPT
+{
+    return !isWsWriteSuccess(code);
+}
+
 } // namespace http
 } // namespace network
 
