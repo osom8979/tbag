@@ -124,7 +124,11 @@ static bool updateOptions(Process::Options & options,
 
     stdios.clear();
     stdios.resize(STDIOS_SIZE);
-    native.stdio = &stdios[0];
+    if (stdios.empty()) {
+        native.stdio = nullptr;
+    } else {
+        native.stdio = &stdios[0];
+    }
 
     // The 'stdio' field points to an array of uv_stdio_container_t structs that
     // describe the file descriptors that will be made available to the child
