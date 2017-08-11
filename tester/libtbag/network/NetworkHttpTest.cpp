@@ -378,7 +378,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
         client.setup(builder);
         ASSERT_EQ(Err::E_SUCCESS, client.init("127.0.0.1", SERVER_PORT));
 
-        std::string const TEST_TEXT = "abcdefghijklmnopqrstuvwxyz";
+        char const TEST_TEXT[] = "abcdefghijklmnopqrstuvwxyz";
 
         client.setOnWsOpen([&, i](HttpResponse const & response){
             //std::cout << "client.setOnWsOpen(" << i << ")" << std::endl;
@@ -388,7 +388,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
         client.setOnWsMessage([&, i](OpCode op, char const * buffer, std::size_t size){
             //std::cout << "client.setOnWsMessage(" << i << ")" << std::endl;
             ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
-            ASSERT_EQ(TEST_TEXT + std::to_string(ws_message_counter.at(i)), std::string(buffer, buffer + size));
+            ASSERT_EQ(std::string(TEST_TEXT) + std::to_string(ws_message_counter.at(i)), std::string(buffer, buffer + size));
             ++(ws_message_counter.at(i));
             if (ws_message_counter.at(i) >= TEST_ECHO_COUNT) {
                 ASSERT_EQ(Err::E_SUCCESS, client.closeWebSocket());

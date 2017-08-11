@@ -351,13 +351,15 @@ void WsFrame::setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t k
     masking_key = key;
 }
 
-void WsFrame::setData(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT
+void WsFrame::setData(uint8_t const * data, std::size_t size)
 {
     if (data != nullptr && size > 0) {
         if (payload.size() < size) {
             payload.resize(size);
         }
-        ::memcpy(&payload[0], data, size);
+        //::memcpy(&payload[0], data, size);
+        assert(payload.size() == size);
+        std::copy(data, data + size, payload.begin());
         payload_length = size;
     } else {
         payload_length = 0;

@@ -281,7 +281,7 @@ public:
 
 public:
     void setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
-    void setData(uint8_t const * data, std::size_t size) TBAG_NOEXCEPT;
+    void setData(uint8_t const * data, std::size_t size);
 
 public:
     Err build(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode,
