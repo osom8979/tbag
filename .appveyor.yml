@@ -44,7 +44,7 @@ environment:
 
 # build cache to preserve files/folders between builds
 cache:
-  - %TBAG_BUILD%\external\local
+  - "%TBAG_BUILD%\\external\\local"
 
 #---------------------------------#
 #       build configuration       #

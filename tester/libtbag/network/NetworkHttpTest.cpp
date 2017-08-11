@@ -27,6 +27,8 @@ using WeakClient = HttpServer::WeakClient;
 using HttpPacket = HttpServer::HttpPacket;
 using WsPacket   = HttpServer::WsPacket;
 
+//#define MESSIVE_NETWORK_HTTP_TEST
+
 TEST(NetworkHttpTest, HttpClient)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
@@ -327,8 +329,18 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     ASSERT_LT(0, SERVER_PORT);
     std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
 
-    int const TEST_CLIENT_COUNT =  90;
-    int const TEST_ECHO_COUNT   = 120;
+#if defined(MESSIVE_NETWORK_HTTP_TEST)
+    int const TEST_CLIENT_COUNT = 100;
+    int const TEST_ECHO_COUNT   = 180;
+    char const TEST_TEXT[] = "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
+                             "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
+                             "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
+                             "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz";
+#else
+    int const TEST_CLIENT_COUNT = 50;
+    int const TEST_ECHO_COUNT   = 90;
+    char const TEST_TEXT[] = "abcdefghijklmnopqrstuvwxyz";
+#endif
     int const TOTAL_WRITE_COUNT = TEST_CLIENT_COUNT * (TEST_ECHO_COUNT + 2/*HTTP_REQUEST&WS_CLOSE*/);
 
     int server_on_write_count       = 0;
@@ -377,8 +389,6 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
         builder.insertHeader(HEADER_ORIGIN, URI.getHost());
         client.setup(builder);
         ASSERT_EQ(Err::E_SUCCESS, client.init("127.0.0.1", SERVER_PORT));
-
-        char const TEST_TEXT[] = "abcdefghijklmnopqrstuvwxyz";
 
         client.setOnWsOpen([&, i](HttpResponse const & response){
             //std::cout << "client.setOnWsOpen(" << i << ")" << std::endl;
