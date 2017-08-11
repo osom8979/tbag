@@ -1,6 +1,7 @@
 # AppVeyor CI Build.
 # HOME path: ~
 # Git clone path: c:\Project\tbag
+# Reference: https://www.appveyor.com/docs/appveyor-yml/
 
 #---------------------------------#
 #      general configuration      #
@@ -40,6 +41,10 @@ clone_folder: c:\Project\tbag
 environment:
   TBAG_HOME: c:\Project\tbag
   TBAG_BUILD: c:\Project\tbag\build
+
+# build cache to preserve files/folders between builds
+cache:
+  - %TBAG_BUILD%\external\local
 
 #---------------------------------#
 #       build configuration       #

@@ -42,13 +42,11 @@ install:
   - bash script/travis_install.sh
 
 script:
-  - echo "Current dir: $PWD"
-  - echo "Travis build dir: $TRAVIS_BUILD_DIR"
-  - mkdir cmake_build
+  - if [[ ! -d cmake_build ]]; then mkdir cmake_build; fi
   - cd cmake_build
   - cmake -DSKIP_FSPOLL_TESTER=ON -DSKIP_FINDPATH_TESTER=ON ..
   - make VERBOSE=0
-  - ./tester
+  - ./tester --gtest_filter=*
 
 notifications:
   email:
