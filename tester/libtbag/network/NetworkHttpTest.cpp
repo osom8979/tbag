@@ -27,7 +27,7 @@ using WeakClient = HttpServer::WeakClient;
 using HttpPacket = HttpServer::HttpPacket;
 using WsPacket   = HttpServer::WsPacket;
 
-//#define MESSIVE_NETWORK_HTTP_TEST
+#define MASSIVE_NETWORK_HTTP_TEST
 
 TEST(NetworkHttpTest, HttpClient)
 {
@@ -329,15 +329,15 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     ASSERT_LT(0, SERVER_PORT);
     std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
 
-#if defined(MESSIVE_NETWORK_HTTP_TEST)
-    int const TEST_CLIENT_COUNT = 100;
+#if defined(MASSIVE_NETWORK_HTTP_TEST)
+    int const TEST_CLIENT_COUNT = 80;
     int const TEST_ECHO_COUNT   = 180;
     char const TEST_TEXT[] = "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
                              "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
                              "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
                              "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz";
 #else
-    int const TEST_CLIENT_COUNT = 50;
+    int const TEST_CLIENT_COUNT = 40;
     int const TEST_ECHO_COUNT   = 90;
     char const TEST_TEXT[] = "abcdefghijklmnopqrstuvwxyz";
 #endif
