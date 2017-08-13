@@ -28,7 +28,7 @@ using WeakClient = HttpServer::WeakClient;
 using HttpPacket = HttpServer::HttpPacket;
 using WsPacket   = HttpServer::WsPacket;
 
-#define MASSIVE_NETWORK_HTTP_TEST
+//#define MASSIVE_NETWORK_HTTP_TEST
 
 TEST(NetworkHttpTest, HttpClient)
 {

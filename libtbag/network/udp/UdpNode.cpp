@@ -1,17 +1,20 @@
 /**
- * @file   UdpSender.cpp
- * @brief  UdpSender class implementation.
+ * @file   UdpNode.cpp
+ * @brief  UdpNode class implementation.
  * @author zer0
- * @date   2017-06-17
+ * @date   2017-08-12
  */
 
-#include <libtbag/network/udp/UdpSender.hpp>
+#include <libtbag/network/udp/UdpNode.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/Noncopyable.hpp>
+#include <libtbag/bitwise/BitFlags.hpp>
+
+#include <libtbag/network/SocketAddress.hpp>
+#include <libtbag/uvpp/Request.hpp>
 
 #include <cassert>
-#include <cstring>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -29,25 +32,43 @@ namespace udp     {
  * @warning
  *  Don't mutex guard in this class. (However, callbacks are an exception)
  */
-struct UdpSender::Internal : private Noncopyable
+struct UdpNode::Internal : private Noncopyable
 {
-    using binf = UdpSender::binf;
+    using SocketAddress  = network::SocketAddress;
+    using UdpSendRequest = uvpp::UdpSendRequest;
 
-    UdpSender * parent;
+    struct AsyncSend : public SafetyAsync::JobInterface
+    {
+        UdpNode * parent;
+
+        AsyncSend(UdpNode * p) : parent(p)
+        { /* EMPTY. */ }
+        virtual ~AsyncSend()
+        { /* EMPTY. */ }
+
+        virtual void run() override
+        {
+            assert(parent != nullptr);
+            parent->onAsyncSend();
+        }
+    };
+
+    UdpNode * parent;
 
     bool owner_async;
+    unsigned int bind_flags;
 
     SharedClientBackend client;
     SharedSafetyAsync   async;
 
-    SocketAddress addr;
     struct {
+        SocketAddress  addr;
         SendState      state;
         UdpSendRequest send_req;
         Buffer         buffer;
     } sender;
 
-    Internal(UdpSender * parent) : parent(parent), owner_async(false)
+    Internal(UdpNode * p) : parent(p), owner_async(false), bind_flags(0)
     {
         // EMPTY.
     }
@@ -78,7 +99,7 @@ struct UdpSender::Internal : private Noncopyable
     Err sendReal(char const * buffer, std::size_t size)
     {
         assert(static_cast<bool>(client));
-        return client->send(sender.send_req, buffer, size, addr.getCommon());
+        return client->send(sender.send_req, buffer, size, sender.addr.getCommon());
     }
 
     void assignSendBuffer(char const * buffer, std::size_t size)
@@ -103,16 +124,17 @@ struct UdpSender::Internal : private Noncopyable
         assert(static_cast<bool>(async));
 
         Loop & loop = getLoop();
-        assert(loop != nullptr);
+        Err result_code = Err::E_UNKNOWN;
 
-        if (loop.isAliveAndThisThread() == false || static_cast<bool>(async)) {
+        if (loop.isAliveAndThisThread() == false && static_cast<bool>(async)) {
             assignSendBuffer(buffer, size);
-            auto job = async->newSendFunc(std::bind(&UdpSender::onAsyncSend, parent));
+            auto job = async->newSendJob<AsyncSend>(parent);
             if (static_cast<bool>(job) == false) {
                 tDLogE("UdpSender::Internal::autoSend() New job error.");
                 return Err::E_BADALLOC;
             }
             sender.state = SendState::SS_ASYNC;
+            result_code = Err::E_ASYNCREQ;
 
         } else {
             Err const CODE = sendReal(buffer, size);
@@ -120,10 +142,17 @@ struct UdpSender::Internal : private Noncopyable
                 tDLogE("UdpSender::Internal::autoSend() Write {} error.", getErrName(CODE));
                 return CODE;
             }
+
             sender.state = SendState::SS_SEND;
+            if (loop.isAliveAndThisThread() == false && static_cast<bool>(async) == false) {
+                tDLogW("UdpSender::Internal::autoSend() Async is expired.");
+                result_code = Err::E_WARNING;
+            } else {
+                result_code = Err::E_SUCCESS;
+            }
         }
 
-        return Err::E_SUCCESS;
+        return result_code;
     }
 
     void closeAll()
@@ -142,12 +171,28 @@ struct UdpSender::Internal : private Noncopyable
     }
 };
 
-// -------------------------
-// UdpSender implementation.
-// -------------------------
+// -----------------------
+// UdpNode implementation.
+// -----------------------
 
-UdpSender::UdpSender(Loop & loop, SharedSafetyAsync async, ServerInterface * interface)
-        : _interface(interface), _internal(new Internal(this))
+UdpNode::UdpNode(Loop & loop, unsigned int flags) : UdpNode(loop, SharedSafetyAsync(), flags)
+{
+    // EMPTY.
+}
+
+UdpNode::UdpNode(Loop & loop, SharedSafetyAsync async, send_only const & UNUSED_PARAM(send))
+        : UdpNode(loop, SharedSafetyAsync(), UDP_NODE_FLAG_NOTING)
+{
+    // EMPTY.
+}
+
+UdpNode::UdpNode(Loop & loop, SharedSafetyAsync async, recv_only const & UNUSED_PARAM(recv))
+        : UdpNode(loop, SharedSafetyAsync(), UDP_NODE_FLAG_USE_BIND)
+{
+    // EMPTY.
+}
+
+UdpNode::UdpNode(Loop & loop, SharedSafetyAsync async, unsigned int flags) : _internal(new Internal(this)), _flags(flags)
 {
     assert(static_cast<bool>(_internal));
     _internal->client = loop.newHandle<UdpNodeBackend>(loop, this);
@@ -163,24 +208,24 @@ UdpSender::UdpSender(Loop & loop, SharedSafetyAsync async, ServerInterface * int
     _internal->sender.state = SendState::SS_READY;
 }
 
-UdpSender::~UdpSender()
+UdpNode::~UdpNode()
 {
     // EMPTY.
 }
 
-void UdpSender::onAsyncSend()
+void UdpNode::onAsyncSend()
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
 
     if (_internal->sender.state == SendState::SS_ASYNC_CANCEL) {
-        tDLogN("UdpSender::onAsyncSend() Cancel async write.");
+        tDLogN("UdpNode::onAsyncSend() Cancel async write.");
         _internal->sender.state = SendState::SS_READY;
         return;
     }
 
     if (_internal->sender.state != SendState::SS_ASYNC) {
-        tDLogE("UdpSender::onAsyncSend() Error state: {}", getSendStateName(_internal->sender.state));
+        tDLogE("UdpNode::onAsyncSend() Error state: {}", getSendStateName(_internal->sender.state));
         _internal->sender.state = SendState::SS_READY;
         return;
     }
@@ -188,7 +233,7 @@ void UdpSender::onAsyncSend()
     assert(_internal->sender.state == SendState::SS_ASYNC);
 
     if (_internal->sender.buffer.empty()) {
-        tDLogD("StreamClient::onAsyncWrite() Empty writer buffer.");
+        tDLogD("UdpNode::onAsyncSend() Empty writer buffer.");
         _internal->sender.state = SendState::SS_READY;
         return;
     }
@@ -197,12 +242,12 @@ void UdpSender::onAsyncSend()
     if (CODE == Err::E_SUCCESS) {
         _internal->sender.state = SendState::SS_SEND;
     } else {
-        tDLogE("UdpSender::onAsyncSend() {} error.", getErrName(CODE));
+        tDLogE("UdpNode::onAsyncSend() {} error.", getErrName(CODE));
         _internal->sender.state = SendState::SS_READY;
     }
 }
 
-char const * UdpSender::getSendStateName(SendState state) TBAG_NOEXCEPT
+char const * UdpNode::getSendStateName(SendState state) TBAG_NOEXCEPT
 {
     switch (state) {
     case SendState::SS_READY:         return "READY";
@@ -216,35 +261,64 @@ char const * UdpSender::getSendStateName(SendState state) TBAG_NOEXCEPT
     return "UNKNOWN";
 }
 
-UdpSender::SendState UdpSender::getSendState() const TBAG_NOEXCEPT
+UdpNode::SendState UdpNode::getSendState() const TBAG_NOEXCEPT
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
     return _internal->sender.state;
 }
 
-char const * UdpSender::getSendStateName() const TBAG_NOEXCEPT
+char const * UdpNode::getSendStateName() const TBAG_NOEXCEPT
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
     return getSendStateName(_internal->sender.state);
 }
 
-UdpSender::WeakClientBackend UdpSender::getClient()
+void UdpNode::setBindFlags(unsigned int flags) TBAG_NOEXCEPT
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    _internal->bind_flags = flags;
+}
+
+unsigned int UdpNode::getBindFlags() const TBAG_NOEXCEPT
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->bind_flags;
+}
+
+Err UdpNode::setDestination(char const * destination, int port)
+{
+    assert(static_cast<bool>(_internal));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->sender.addr.init(destination, port);
+}
+
+Err UdpNode::setBroadcast(bool on)
+{
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+    return _internal->client->setBroadcast(on);
+}
+
+UdpNode::WeakClientBackend UdpNode::getClient()
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
     return WeakClientBackend(_internal->client);
 }
 
-UdpSender::WeakSafetyAsync UdpSender::getAsync()
+UdpNode::WeakSafetyAsync UdpNode::getAsync()
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
     return WeakSafetyAsync(_internal->async);
 }
 
-UdpSender::Id UdpSender::id() const
+UdpNode::Id UdpNode::id() const
 {
     assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
@@ -252,21 +326,21 @@ UdpSender::Id UdpSender::id() const
     return _internal->client->id();
 }
 
-std::string UdpSender::dest() const
+std::string UdpNode::dest() const
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
-    return _internal->addr.getIpName();
+    return _internal->client->getSockIp();
 }
 
-int UdpSender::port() const
+int UdpNode::port() const
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
-    return _internal->addr.getPortNumber();
+    return _internal->client->getSockPort();
 }
 
-void * UdpSender::udata()
+void * UdpNode::udata()
 {
     assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
@@ -274,38 +348,66 @@ void * UdpSender::udata()
     return _internal->client->getUserData();
 }
 
-Err UdpSender::init(char const * destination, int port)
+Err UdpNode::init(char const * destination, int port)
 {
     assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
 
-    if (static_cast<bool>(_internal->client) == false) {
-        return Err::E_EXPIRED;
+    if (_internal->client->isInit() == false) {
+        tDLogE("UdpNode::init() Udp is not initialized.");
+        return Err::E_EINIT;
     }
 
-    if (_internal->addr.init(destination, port) != Err::E_SUCCESS) {
-        tDLogE("UdpSender::init() Initialize fail.");
-        return Err::E_UNKNOWN;
+    if (bitwise::checkFlag(_flags, UDP_NODE_FLAG_USE_BIND)) {
+        SocketAddress addr;
+        Err const ADDRESS_INIT_CODE = addr.init(destination, port);
+        if (ADDRESS_INIT_CODE != Err::E_SUCCESS) {
+            tDLogE("UdpNode::init() Address initialize {} error.", getErrName(ADDRESS_INIT_CODE));
+            return ADDRESS_INIT_CODE;
+        }
+
+        Err const BIND_CODE = _internal->client->bind(addr.getCommon(), _internal->bind_flags);
+        if (BIND_CODE != Err::E_SUCCESS) {
+            tDLogE("UdpNode::init() Udp bind {} error.", getErrName(BIND_CODE));
+            return BIND_CODE;
+        }
     }
 
     if (_internal->initHandles() == false) {
-        tDLogE("UdpSender::init() Initialize fail (internal handles).");
+        tDLogE("UdpNode::init() Initialize fail (internal handles).");
         return Err::E_UNKNOWN;
     }
     return Err::E_SUCCESS;
 }
 
-Err UdpSender::start()
+Err UdpNode::start()
 {
-    return Err::E_UNSUPOP;
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+
+    Err const CODE = _internal->client->startRecv();
+    if (CODE != Err::E_SUCCESS) {
+        tDLogE("UdpNode::start() {} error", getErrName(CODE));
+    }
+    return CODE;
 }
 
-Err UdpSender::stop()
+Err UdpNode::stop()
 {
-    return Err::E_UNSUPOP;
+    assert(static_cast<bool>(_internal));
+    assert(static_cast<bool>(_internal->client));
+    Guard const MUTEX_GUARD(_mutex);
+
+    Err const CODE = _internal->client->stopRecv();
+    if (CODE != Err::E_SUCCESS) {
+        tDLogE("UdpNode::stop() {} error", getErrName(CODE));
+    }
+    return CODE;
 }
 
-Err UdpSender::close()
+Err UdpNode::close()
 {
     assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
@@ -332,7 +434,7 @@ Err UdpSender::close()
     return code;
 }
 
-Err UdpSender::cancel()
+Err UdpNode::cancel()
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
@@ -342,7 +444,7 @@ Err UdpSender::cancel()
     return Err::E_SUCCESS;
 }
 
-Err UdpSender::write(char const * buffer, std::size_t size)
+Err UdpNode::write(char const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_internal));
     Guard const MUTEX_GUARD(_mutex);
@@ -353,17 +455,17 @@ Err UdpSender::write(char const * buffer, std::size_t size)
 // Event backend.
 // --------------
 
-void UdpSender::backConnect(Err code)
+void UdpNode::backConnect(Err code)
 {
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
 }
 
-void UdpSender::backShutdown(Err code)
+void UdpNode::backShutdown(Err code)
 {
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
 }
 
-void UdpSender::backWrite(Err code)
+void UdpNode::backWrite(Err code)
 {
     assert(static_cast<bool>(_internal));
     _mutex.lock();
@@ -371,16 +473,16 @@ void UdpSender::backWrite(Err code)
     _internal->sender.state = SendState::SS_READY;
     _mutex.unlock();
 
-    assert(_interface != nullptr);
-    _interface->onClientWrite(_interface->get(id()), code);
+    onWrite(code);
 }
 
-void UdpSender::backRead(Err code, ReadPacket const & packet)
+void UdpNode::backRead(Err code, ReadPacket const & packet)
 {
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    assert(static_cast<bool>(_internal));
+    onRead(code, packet);
 }
 
-void UdpSender::backClose()
+void UdpNode::backClose()
 {
     assert(static_cast<bool>(_internal));
     _mutex.lock();
@@ -388,37 +490,7 @@ void UdpSender::backClose()
     _internal->sender.state = SendState::SS_END;
     _mutex.unlock();
 
-    assert(_interface != nullptr);
-    _interface->onClientClose(_interface->get(id()));
-}
-
-// ---------------
-// Event callback.
-// ---------------
-
-void UdpSender::onConnect(Err code)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-void UdpSender::onShutdown(Err code)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-void UdpSender::onWrite(Err code)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-void UdpSender::onRead(Err code, ReadPacket const & packet)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-void UdpSender::onClose()
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    onClose();
 }
 
 } // namespace udp
