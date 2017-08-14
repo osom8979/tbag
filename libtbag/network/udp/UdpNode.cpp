@@ -24,10 +24,11 @@ namespace network {
 namespace udp     {
 
 /**
- * UdpSender internal helper class.
+ * UdpNode internal helper class.
  *
  * @author zer0
  * @date   2017-06-17
+ * @date   2017-08-12 (Rename: UdpSender::Internal -> UdpNode::Internal)
  *
  * @warning
  *  Don't mutex guard in this class. (However, callbacks are an exception)
@@ -115,7 +116,7 @@ struct UdpNode::Internal : private Noncopyable
     Err autoSend(char const * buffer, std::size_t size)
     {
         if (sender.state != SendState::SS_READY) {
-            tDLogE("UdpSender::Internal::autoSend() Illegal state error: {}",
+            tDLogE("UdpNode::Internal::autoSend() Illegal state error: {}",
                    getSendStateName(sender.state));
             return Err::E_ILLSTATE;
         }
@@ -130,7 +131,7 @@ struct UdpNode::Internal : private Noncopyable
             assignSendBuffer(buffer, size);
             auto job = async->newSendJob<AsyncSend>(parent);
             if (static_cast<bool>(job) == false) {
-                tDLogE("UdpSender::Internal::autoSend() New job error.");
+                tDLogE("UdpNode::Internal::autoSend() New job error.");
                 return Err::E_BADALLOC;
             }
             sender.state = SendState::SS_ASYNC;
@@ -139,13 +140,13 @@ struct UdpNode::Internal : private Noncopyable
         } else {
             Err const CODE = sendReal(buffer, size);
             if (CODE != Err::E_SUCCESS) {
-                tDLogE("UdpSender::Internal::autoSend() Write {} error.", getErrName(CODE));
+                tDLogE("UdpNode::Internal::autoSend() Write {} error.", getErrName(CODE));
                 return CODE;
             }
 
             sender.state = SendState::SS_SEND;
             if (loop.isAliveAndThisThread() == false && static_cast<bool>(async) == false) {
-                tDLogW("UdpSender::Internal::autoSend() Async is expired.");
+                tDLogW("UdpNode::Internal::autoSend() Async is expired.");
                 result_code = Err::E_WARNING;
             } else {
                 result_code = Err::E_SUCCESS;
@@ -415,7 +416,7 @@ Err UdpNode::close()
     Loop & loop = _internal->getLoop();
 
     if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
-        tDLogD("UdpSender::close() Async request.");
+        tDLogD("UdpNode::close() Async request.");
         _internal->async->newSendFunc([&](){
             Guard const MUTEX_GUARD_ASYNC(_mutex);
             _internal->closeAll();
@@ -425,11 +426,11 @@ Err UdpNode::close()
 
     Err code = Err::E_SUCCESS;
     if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async) == false) {
-        tDLogW("UdpSender::close() Async is expired.");
+        tDLogW("UdpNode::close() Async is expired.");
         code = Err::E_WARNING;
     }
 
-    tDLogD("UdpSender::close() Synced request.");
+    tDLogD("UdpNode::close() Synced request.");
     _internal->closeAll();
     return code;
 }
