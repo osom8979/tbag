@@ -52,6 +52,9 @@ private:
 
 public:
     SocketAddress();
+    SocketAddress(struct sockaddr     const * addr);
+    SocketAddress(struct sockaddr_in  const * addr);
+    SocketAddress(struct sockaddr_in6 const * addr);
     SocketAddress(SocketAddress const & obj);
     SocketAddress(SocketAddress && obj);
     virtual ~SocketAddress();

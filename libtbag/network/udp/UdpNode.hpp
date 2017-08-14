@@ -90,13 +90,13 @@ private:
     unsigned int _flags;
 
 public:
-    struct send_only { /* EMPTY. */ };
-    struct recv_only { /* EMPTY. */ };
+    struct send_flags { /* EMPTY. */ };
+    struct recv_flags { /* EMPTY. */ };
 
 public:
     UdpNode(Loop & loop, unsigned int flags = UDP_NODE_FLAG_NOTING);
-    UdpNode(Loop & loop, SharedSafetyAsync async, send_only const & send);
-    UdpNode(Loop & loop, SharedSafetyAsync async, recv_only const & recv);
+    UdpNode(Loop & loop, SharedSafetyAsync async, send_flags const & send);
+    UdpNode(Loop & loop, SharedSafetyAsync async, recv_flags const & recv);
     UdpNode(Loop & loop, SharedSafetyAsync async, unsigned int flags = UDP_NODE_FLAG_NOTING);
     virtual ~UdpNode();
 

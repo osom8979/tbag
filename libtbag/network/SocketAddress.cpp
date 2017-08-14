@@ -27,6 +27,27 @@ SocketAddress::SocketAddress()
     ::memset(&_addr, 0x00, sizeof(_addr));
 }
 
+SocketAddress::SocketAddress(struct sockaddr const * addr) : SocketAddress()
+{
+    if (TBAG_ERR_FAILURE(init(addr))) {
+        throw std::bad_alloc();
+    }
+}
+
+SocketAddress::SocketAddress(struct sockaddr_in const * addr) : SocketAddress()
+{
+    if (TBAG_ERR_FAILURE(init(addr))) {
+        throw std::bad_alloc();
+    }
+}
+
+SocketAddress::SocketAddress(struct sockaddr_in6 const * addr) : SocketAddress()
+{
+    if (TBAG_ERR_FAILURE(init(addr))) {
+        throw std::bad_alloc();
+    }
+}
+
 SocketAddress::SocketAddress(SocketAddress const & obj)
 {
     (*this) = obj;

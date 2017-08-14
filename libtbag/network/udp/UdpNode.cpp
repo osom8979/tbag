@@ -181,13 +181,13 @@ UdpNode::UdpNode(Loop & loop, unsigned int flags) : UdpNode(loop, SharedSafetyAs
     // EMPTY.
 }
 
-UdpNode::UdpNode(Loop & loop, SharedSafetyAsync async, send_only const & UNUSED_PARAM(send))
+UdpNode::UdpNode(Loop & loop, SharedSafetyAsync async, send_flags const & UNUSED_PARAM(send))
         : UdpNode(loop, SharedSafetyAsync(), UDP_NODE_FLAG_NOTING)
 {
     // EMPTY.
 }
 
-UdpNode::UdpNode(Loop & loop, SharedSafetyAsync async, recv_only const & UNUSED_PARAM(recv))
+UdpNode::UdpNode(Loop & loop, SharedSafetyAsync async, recv_flags const & UNUSED_PARAM(recv))
         : UdpNode(loop, SharedSafetyAsync(), UDP_NODE_FLAG_USE_BIND)
 {
     // EMPTY.
