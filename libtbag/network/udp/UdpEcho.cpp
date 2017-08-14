@@ -18,9 +18,30 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace udp     {
 
-UdpEcho::UdpEcho(Loop & loop) : UdpNode(loop, UdpNode::UDP_NODE_FLAG_USE_BIND),
-                                _type(EchoType::ET_UNKNOWN),
-                                _timer(loop.newHandle<FuncTimer>(loop))
+UdpEcho::UdpEcho(Loop & loop)
+        : UdpNode(loop, UdpNode::UDP_NODE_FLAG_USE_BIND),
+          _type(EchoType::ET_UNKNOWN), _timer(loop.newHandle<FuncTimer>(loop))
+{
+    // EMPTY.
+}
+
+UdpEcho::UdpEcho(Loop & loop, SharedSafetyAsync async, send_flags const & UNUSED_PARAM(send))
+        : UdpNode(loop, async, UdpNode::send_flags()),
+          _type(EchoType::ET_UNKNOWN), _timer(loop.newHandle<FuncTimer>(loop))
+{
+    // EMPTY.
+}
+
+UdpEcho::UdpEcho(Loop & loop, SharedSafetyAsync async, recv_flags const & UNUSED_PARAM(recv))
+        : UdpNode(loop, async, UdpNode::recv_flags()),
+          _type(EchoType::ET_UNKNOWN), _timer(loop.newHandle<FuncTimer>(loop))
+{
+    // EMPTY.
+}
+
+UdpEcho::UdpEcho(Loop & loop, SharedSafetyAsync async, unsigned int flags)
+        : UdpNode(loop, async, flags),
+          _type(EchoType::ET_UNKNOWN), _timer(loop.newHandle<FuncTimer>(loop))
 {
     // EMPTY.
 }

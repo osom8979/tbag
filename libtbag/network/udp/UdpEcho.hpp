@@ -55,12 +55,18 @@ public:
         ET_CLIENT,
     };
 
+    using send_flags = UdpNode::send_flags;
+    using recv_flags = UdpNode::recv_flags;
+
 private:
     EchoType _type;
     SharedFuncTimer _timer;
 
 public:
     UdpEcho(Loop & loop);
+    UdpEcho(Loop & loop, SharedSafetyAsync async, send_flags const & send);
+    UdpEcho(Loop & loop, SharedSafetyAsync async, recv_flags const & recv);
+    UdpEcho(Loop & loop, SharedSafetyAsync async, unsigned int flags = UdpNode::UDP_NODE_FLAG_NOTING);
     virtual ~UdpEcho();
 
 public:
@@ -100,10 +106,18 @@ struct FunctionalUdpEcho : public UdpEcho
     OnEcho echo_cb;
     OnEnd  end_cb;
 
+    // @formatter:off
     FunctionalUdpEcho(Loop & loop) : UdpEcho(loop)
+    { /* EMPTY. */ }
+    FunctionalUdpEcho(Loop & loop, SharedSafetyAsync async, send_flags const & send) : UdpEcho(loop, async, send)
+    { /* EMPTY. */ }
+    FunctionalUdpEcho(Loop & loop, SharedSafetyAsync async, recv_flags const & recv) : UdpEcho(loop, async, recv)
+    { /* EMPTY. */ }
+    FunctionalUdpEcho(Loop & loop, SharedSafetyAsync async, unsigned int flags = UdpNode::UDP_NODE_FLAG_NOTING) : UdpEcho(loop, async, flags)
     { /* EMPTY. */ }
     virtual ~FunctionalUdpEcho()
     { /* EMPTY. */ }
+    // @formatter:on
 
     inline void setOnEcho(OnEcho const & cb) { echo_cb = cb; }
     inline void setOnEnd (OnEnd  const & cb) { end_cb = cb; }
