@@ -103,15 +103,20 @@ TEST(NetworkUdpTest, EchoServer)
     std::string const TEST_MESSAGE = "TEST_ECHO_MESSAGE";
     std::string result_message;
 
-    int server_end_count      = 0;
-    int client_response_count = 0;
-    int client_end_count      = 0;
+    int server_echo_count = 0;
+    int server_end_count  = 0;
 
+    int client_echo_count = 0;
+    int client_end_count  = 0;
+
+    server.setOnEcho([&](std::string & message, SocketAddress & addr){
+        ++server_echo_count;
+    });
     server.setOnEnd([&](){
         ++server_end_count;
     });
-    client.setOnResponse([&](std::string const & message, SocketAddress const & addr){
-        ++client_response_count;
+    client.setOnEcho([&](std::string & message, SocketAddress & addr){
+        ++client_echo_count;
         result_message = message;
         client.close();
     });
@@ -123,8 +128,9 @@ TEST(NetworkUdpTest, EchoServer)
 
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_EQ(TEST_MESSAGE, result_message);
+    ASSERT_EQ(1, server_echo_count);
     ASSERT_EQ(1, server_end_count);
-    ASSERT_EQ(1, client_response_count);
+    ASSERT_EQ(1, client_echo_count);
     ASSERT_EQ(1, client_end_count);
 }
 

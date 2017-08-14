@@ -90,6 +90,10 @@ void UdpEcho::onRead(Err code, ReadPacket const & packet)
 {
     assert(packet.type == details::PacketType::PT_DATAGRAM);
     if (code == Err::E_SUCCESS && packet.size > 0 && packet.addr != nullptr) {
+
+        SocketAddress addr(packet.addr);
+        std::string message(packet.buffer, packet.buffer + packet.size);
+
         if (_type == EchoType::ET_SERVER) {
             auto client = getClient().lock();
             assert(static_cast<bool>(client));
@@ -100,17 +104,17 @@ void UdpEcho::onRead(Err code, ReadPacket const & packet)
             auto udp = loop->newHandle<uvpp::Udp>(*loop);
             assert(static_cast<bool>(udp));
 
+            onEcho(message, addr);
+
             Err send_result = Err::E_UNKNOWN;
-            auto send_size = udp->trySend(packet.buffer, packet.size, packet.addr, &send_result);
+            auto send_size = udp->trySend(message.data(), message.size(), packet.addr, &send_result);
 
             if (send_size != packet.size || TBAG_ERR_FAILURE(send_result)) {
                 tDLogE("UdpEcho::onRead() try_send error (size: {}, code: {})", send_size, getErrName(send_result));
             }
             udp->close();
         } else {
-            std::string message(packet.buffer, packet.buffer + packet.size);
-            SocketAddress addr(packet.addr);
-            onResponse(message, addr);
+            onEcho(message, addr);
         }
     }
 }

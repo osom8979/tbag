@@ -82,7 +82,7 @@ protected:
     virtual void onClose() final override;
 
 public:
-    virtual void onResponse(std::string const & message, SocketAddress const & addr) { /* EMPTY. */ }
+    virtual void onEcho(std::string & message, SocketAddress & addr) { /* EMPTY. */ }
     virtual void onEnd() { /* EMPTY. */ }
 };
 
@@ -94,24 +94,24 @@ public:
  */
 struct FunctionalUdpEcho : public UdpEcho
 {
-    using OnResponse = std::function<void(std::string const &, SocketAddress const &)>;
-    using OnEnd = std::function<void(void)>;
+    using OnEcho = std::function<void(std::string &, SocketAddress &)>;
+    using OnEnd  = std::function<void(void)>;
 
-    OnResponse response_cb;
-    OnEnd      end_cb;
+    OnEcho echo_cb;
+    OnEnd  end_cb;
 
     FunctionalUdpEcho(Loop & loop) : UdpEcho(loop)
     { /* EMPTY. */ }
     virtual ~FunctionalUdpEcho()
     { /* EMPTY. */ }
 
-    inline void setOnResponse(OnResponse const & cb) { response_cb = cb; }
-    inline void setOnEnd     (OnEnd      const & cb) { end_cb = cb; }
+    inline void setOnEcho(OnEcho const & cb) { echo_cb = cb; }
+    inline void setOnEnd (OnEnd  const & cb) { end_cb = cb; }
 
-    virtual void onResponse(std::string const & message, SocketAddress const & addr) override
+    virtual void onEcho(std::string & message, SocketAddress & addr) override
     {
-        if (static_cast<bool>(response_cb)) {
-            response_cb(message, addr);
+        if (static_cast<bool>(echo_cb)) {
+            echo_cb(message, addr);
         }
     }
 
@@ -123,6 +123,12 @@ struct FunctionalUdpEcho : public UdpEcho
     }
 };
 
+/**
+ * FunctionalUdpEchoServer class prototype.
+ *
+ * @author zer0
+ * @date   2017-08-14
+ */
 struct FunctionalUdpEchoServer : public FunctionalUdpEcho
 {
     FunctionalUdpEchoServer(Loop & loop, std::string const & bind_ip, int port, uint64_t timeout = 0)
@@ -137,6 +143,12 @@ struct FunctionalUdpEchoServer : public FunctionalUdpEcho
     { /* EMPTY. */ }
 };
 
+/**
+ * FunctionalUdpEchoClient class prototype.
+ *
+ * @author zer0
+ * @date   2017-08-14
+ */
 struct FunctionalUdpEchoClient : public FunctionalUdpEcho
 {
     FunctionalUdpEchoClient(Loop & loop, std::string const & bind_ip, int port, int broadcast_port, uint64_t timeout = 0)
