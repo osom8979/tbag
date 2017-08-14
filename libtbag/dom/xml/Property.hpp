@@ -5,8 +5,8 @@
  * @date   2016-04-12
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_PROPERTY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_PROPERTY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_PROPERTY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_PROPERTY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,13 +16,14 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/dom/Resource.hpp>
+#include <libtbag/dom/xml/Resource.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 /**
  * Property class prototype.
@@ -62,6 +63,7 @@ public:
     { /* EMPTY. */ }
 };
 
+} // namespace xml
 } // namespace dom
 
 #ifndef CREATE_PROPERTY
@@ -80,5 +82,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_PROPERTY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_PROPERTY_HPP__
 

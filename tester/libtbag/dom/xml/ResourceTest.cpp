@@ -6,10 +6,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/dom/Resource.hpp>
+#include <libtbag/dom/xml/Resource.hpp>
 
 using namespace libtbag;
 using namespace libtbag::dom;
+using namespace libtbag::dom::xml;
 
 TEST(ResourceTest, Utf8)
 {

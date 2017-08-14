@@ -5,8 +5,8 @@
  * @date   2017-06-02
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XMLHELPER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XMLHELPER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_XMLHELPER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_XMLHELPER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,6 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 /**
  * XmlHelper class prototype.
@@ -64,11 +65,12 @@ struct TBAG_API XmlHelper
     static Element & setAttr(Element & element, std::string const & key, double value);
 };
 
+} // namespace xml
 } // namespace dom
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XMLHELPER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_XMLHELPER_HPP__
 

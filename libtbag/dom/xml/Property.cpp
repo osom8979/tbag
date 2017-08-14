@@ -5,7 +5,7 @@
  * @date   2016-10-30
  */
 
-#include <libtbag/dom/Property.hpp>
+#include <libtbag/dom/xml/Property.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 // -------------------
@@ -13,6 +13,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 Property::Property()
 {
@@ -51,6 +52,7 @@ bool Property::loadOrCreate(std::string const & path)
     return save(path);
 }
 
+} // namespace xml
 } // namespace dom
 
 // --------------------

@@ -5,7 +5,7 @@
  * @date   2017-06-03
  */
 
-#include <libtbag/dom/node/ServerXmlNode.hpp>
+#include <libtbag/dom/xml/node/ServerXmlNode.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 
@@ -17,6 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom  {
+namespace xml  {
 namespace node {
 
 // ---------------------------------
@@ -216,6 +217,7 @@ int ServerXmlNode::getPort() const
 }
 
 } // namespace node
+} // namespace xml
 } // namespace dom
 
 // --------------------

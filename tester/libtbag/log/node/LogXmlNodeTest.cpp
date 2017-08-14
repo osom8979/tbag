@@ -9,7 +9,7 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/log/node/LogXmlNode.hpp>
-#include <libtbag/dom/XmlModel.hpp>
+#include <libtbag/dom/xml/XmlModel.hpp>
 
 using namespace libtbag;
 using namespace libtbag::log;
@@ -144,7 +144,7 @@ TEST(LogXmlNodeTest, Default)
     auto const LOGFILE_PATH = tttDirGet() / "test.log";
 
     {   // Create xml file.
-        using namespace libtbag::dom;
+        using namespace libtbag::dom::xml;
         XmlModel model;
         model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDirGet().getString())));
         model.setup();
@@ -153,7 +153,7 @@ TEST(LogXmlNodeTest, Default)
     ASSERT_TRUE(CONFIG_PATH.exists());
 
     // Read xml file.
-    using namespace libtbag::dom;
+    using namespace libtbag::dom::xml;
     XmlModel model;
     model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDirGet().getString())));
     ASSERT_TRUE(model.load(CONFIG_PATH));

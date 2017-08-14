@@ -5,7 +5,7 @@
  * @date   2016-07-06
  */
 
-#include <libtbag/dom/Resource.hpp>
+#include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/3rd/tinyxml2/tinyxml2.h>
 
 // -------------------
@@ -13,6 +13,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 /* inline */ namespace impl {
 
@@ -227,7 +228,7 @@ bool Resource::save(std::string const & path, std::string const & tag, Map const
     return (doc.SaveFile(path.c_str(), isCompactXmlFile()) == tinyxml2::XML_NO_ERROR);
 }
 
-
+} // namespace xml
 } // namespace dom
 
 // --------------------

@@ -5,8 +5,8 @@
  * @date   2017-06-03
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_NODE_SERVERXMLNODE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_NODE_SERVERXMLNODE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_NODE_SERVERXMLNODE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_NODE_SERVERXMLNODE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/dom/XmlModel.hpp>
+#include <libtbag/dom/xml/XmlModel.hpp>
 #include <libtbag/lock/RwLock.hpp>
 
 #include <string>
@@ -25,6 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom  {
+namespace xml  {
 namespace node {
 
 /**
@@ -113,11 +114,12 @@ public:
 };
 
 } // namespace node
+} // namespace xml
 } // namespace dom
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_NODE_SERVERXMLNODE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_NODE_SERVERXMLNODE_HPP__
 

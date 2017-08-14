@@ -5,8 +5,8 @@
  * @date   2016-04-12
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_RESOURCE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_RESOURCE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_RESOURCE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_RESOURCE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -23,6 +23,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 inline TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
 {
@@ -178,11 +179,12 @@ public:
     static bool save(std::string const & path, std::string const & tag, Map const & map);
 };
 
+} // namespace xml
 } // namespace dom
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_RESOURCE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_RESOURCE_HPP__
 

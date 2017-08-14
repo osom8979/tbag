@@ -5,7 +5,7 @@
  * @date   2017-06-02
  */
 
-#include <libtbag/dom/XmlHelper.hpp>
+#include <libtbag/dom/xml/XmlHelper.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -13,6 +13,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 // ---------------
 namespace __impl {
@@ -161,6 +162,7 @@ XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & k
 { element.SetAttribute(key.c_str(), value); return element; }
 // @formatter:on
 
+} // namespace xml
 } // namespace dom
 
 // --------------------

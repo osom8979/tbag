@@ -7,12 +7,13 @@
 
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
-#include <libtbag/dom/XmlModel.hpp>
+#include <libtbag/dom/xml/XmlModel.hpp>
 
 #include <string>
 
 using namespace libtbag;
 using namespace libtbag::dom;
+using namespace libtbag::dom::xml;
 
 TBAG_CONSTEXPR static char const * const FIRST_NODE_NAME   = "Node";
 TBAG_CONSTEXPR static char const * const INTEGER_ATTR_NAME = "Integer";

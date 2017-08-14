@@ -5,8 +5,8 @@
  * @date   2017-06-02
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_DEFAULTXMLMODEL_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_DEFAULTXMLMODEL_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_DEFAULTXMLMODEL_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_DEFAULTXMLMODEL_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,13 +15,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/dom/XmlModel.hpp>
+#include <libtbag/dom/xml/XmlModel.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 /**
  * DefaultXmlModel class prototype.
@@ -79,11 +80,12 @@ public:
     static InitParams getDefaultParams(std::string const & root_name, std::string const & file_name);
 };
 
+} // namespace xml
 } // namespace dom
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_DEFAULTXMLMODEL_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_DEFAULTXMLMODEL_HPP__
 

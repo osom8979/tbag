@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/dom/XmlModel.hpp>
+#include <libtbag/dom/xml/XmlModel.hpp>
 #include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/msg/PacketGenerator.hpp>
 #include <libtbag/log/mgr/Logger.hpp>
@@ -36,13 +36,13 @@ namespace node {
  * @author zer0
  * @date   2017-04-25
  */
-class TBAG_API LogXmlNode : public dom::XmlModel::NodeInterface
+class TBAG_API LogXmlNode : public dom::xml::XmlModel::NodeInterface
 {
 public:
     using Severity = log::level::Severity;
     using MakeType = log::msg::PacketGenerator::MakeType;
     using Logger   = log::mgr::Logger;
-    using Element  = dom::XmlModel::Element;
+    using Element  = dom::xml::XmlModel::Element;
 
     using Environments = string::Environments;
     using EnvFlag      = Environments::Flag;

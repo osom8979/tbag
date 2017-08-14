@@ -6,10 +6,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/dom/Property.hpp>
+#include <libtbag/dom/xml/Property.hpp>
 
 using namespace libtbag;
 using namespace libtbag::dom;
+using namespace libtbag::dom::xml;
 
 class DemoProperty : public Property
 {

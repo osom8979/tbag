@@ -5,7 +5,7 @@
  * @date   2017-06-02
  */
 
-#include <libtbag/dom/DefaultXmlModel.hpp>
+#include <libtbag/dom/xml/DefaultXmlModel.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -13,6 +13,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 TBAG_CONSTEXPR static char const * const DEFAULT_ROOT_XML_NODE_NAME = "config";
 TBAG_CONSTEXPR static char const * const DEFAULT_XML_FILE_EXTENSION = ".xml";
@@ -97,6 +98,7 @@ DefaultXmlModel::InitParams DefaultXmlModel::getDefaultParams(std::string const 
     return params;
 }
 
+} // namespace xml
 } // namespace dom
 
 // --------------------

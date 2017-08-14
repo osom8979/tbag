@@ -19,8 +19,8 @@
 
 #include <libtbag/app/Service.hpp>
 #include <libtbag/string/HelpCommander.hpp>
-#include <libtbag/dom/DefaultXmlModel.hpp>
-#include <libtbag/dom/node/ServerXmlNode.hpp>
+#include <libtbag/dom/xml/DefaultXmlModel.hpp>
+#include <libtbag/dom/xml/node/ServerXmlNode.hpp>
 #include <libtbag/log/node/DefaultLogXmlNode.hpp>
 
 #include <memory>
@@ -47,7 +47,7 @@ public:
     using Version = util::Version;
 
     using HelpCommander   = string::HelpCommander;
-    using DefaultXmlModel = dom::DefaultXmlModel;
+    using DefaultXmlModel = dom::xml::DefaultXmlModel;
     using WeakModel       = std::weak_ptr<DefaultXmlModel>;
 
     using StringVector = std::vector<std::string>;

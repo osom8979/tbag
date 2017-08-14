@@ -5,8 +5,8 @@
  * @date   2017-04-21
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XMLMODEL_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XMLMODEL_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_XMLMODEL_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_XMLMODEL_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -20,7 +20,7 @@
 
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/3rd/tinyxml2/tinyxml2.h>
-#include <libtbag/dom/XmlHelper.hpp>
+#include <libtbag/dom/xml/XmlHelper.hpp>
 
 #include <map>
 #include <string>
@@ -31,6 +31,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 /**
  * XmlModel class prototype.
@@ -185,11 +186,12 @@ public:
     bool loadOrDefaultSave(Path const & path, bool create_dir = false);
 };
 
+} // namespace xml
 } // namespace dom
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XMLMODEL_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DOM_XML_XMLMODEL_HPP__
 

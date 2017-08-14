@@ -5,7 +5,7 @@
  * @date   2017-04-21
  */
 
-#include <libtbag/dom/XmlModel.hpp>
+#include <libtbag/dom/xml/XmlModel.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -17,6 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace dom {
+namespace xml {
 
 TBAG_CONSTEXPR static char const * const DEFAULT_ROOT_NAME = "root";
 TBAG_CONSTEXPR static char const * const DEFAULT_FILE_NAME = "config.xml";
@@ -274,6 +275,7 @@ bool XmlModel::loadOrDefaultSave(Path const & path, bool create_dir)
     return save(path);
 }
 
+} // namespace xml
 } // namespace dom
 
 // --------------------
