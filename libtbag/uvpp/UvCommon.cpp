@@ -167,6 +167,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in * addr)
         tDLogE("initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
         return convertUvErrorToErr(CODE);
     }
+    addr->sin_len = sizeof(struct sockaddr_in);
     return Err::E_SUCCESS;
 }
 
@@ -177,6 +178,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
         tDLogE("initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
         return convertUvErrorToErr(CODE);
     }
+    addr->sin6_len = sizeof(struct sockaddr_in6);
     return Err::E_SUCCESS;
 }
 
