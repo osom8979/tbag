@@ -167,7 +167,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in * addr)
         tDLogE("initAddress({}, {}) ipv4 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
         return convertUvErrorToErr(CODE);
     }
-    addr->sin_len = sizeof(struct sockaddr_in);
+    //addr->sin_len = sizeof(struct sockaddr_in); // [BUG] GCC ERROR: has no member named 'sin_len'
     return Err::E_SUCCESS;
 }
 
@@ -178,7 +178,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
         tDLogE("initAddress({}, {}) ipv6 error [{}] {}", ip, port, CODE, getUvErrorName(CODE));
         return convertUvErrorToErr(CODE);
     }
-    addr->sin6_len = sizeof(struct sockaddr_in6);
+    //addr->sin6_len = sizeof(struct sockaddr_in6); // [BUG] GCC ERROR: has no member named 'sin6_len'
     return Err::E_SUCCESS;
 }
 
