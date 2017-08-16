@@ -15,6 +15,7 @@
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/WsClient.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/func/FunctionalTimer.hpp>
 
 #include <iostream>
 #include <thread>
@@ -331,14 +332,16 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
 
 #if defined(MASSIVE_NETWORK_HTTP_TEST)
-    int const TEST_CLIENT_COUNT = 80;
-    int const TEST_ECHO_COUNT   = 180;
+    int const TEST_CLIENT_COUNT   = 80;
+    int const TEST_ECHO_COUNT     = 180;
+    int const TEST_SERVER_TIMEOUT = 5 * 1000;
 #define _MASSIVE_TEST_DATA "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
     char const TEST_TEXT[] = _MASSIVE_TEST_DATA _MASSIVE_TEST_DATA _MASSIVE_TEST_DATA _MASSIVE_TEST_DATA;
 #undef _MASSIVE_TEST_DATA
 #else
-    int const TEST_CLIENT_COUNT = 40;
-    int const TEST_ECHO_COUNT   = 90;
+    int const TEST_CLIENT_COUNT   = 40;
+    int const TEST_ECHO_COUNT     = 90;
+    int const TEST_SERVER_TIMEOUT = 2 * 1000;
     char const TEST_TEXT[] = "abcdefghijklmnopqrstuvwxyz";
 #endif
     int const TOTAL_WRITE_COUNT = TEST_CLIENT_COUNT * (TEST_ECHO_COUNT + 2/*HTTP_REQUEST&WS_CLOSE*/);
@@ -348,6 +351,16 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     int server_on_ws_message_count  = 0;
     int server_on_http_close        = 0;
     Err server_loop_result = Err::E_UNKNOWN;
+
+    bool server_timeout = false;
+
+    auto timer = server_loop.newHandle<uvpp::func::FuncTimer>(server_loop);
+    timer->setOnTimer([&](){
+        server_timeout = true;
+        server.close();
+        timer->close();
+    });
+    timer->start(TEST_SERVER_TIMEOUT);
 
     server.setOnHttpWrite([&](WeakClient node, Err code){
         ++server_on_write_count;
@@ -365,7 +378,14 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     });
     server.setOnHttpClose([&](WeakClient node){
         ++server_on_http_close;
+        if (timer->isActive()) {
+            timer->stop();
+        }
+        if (timer->isClosing() == false) {
+            timer->close();
+        }
     });
+
     std::thread server_thread([&](){
         server_loop_result = server_loop.run();
     });
@@ -388,8 +408,14 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     ws_total_close_counter.store(0);
 
     for (int i = 0; i < TEST_CLIENT_COUNT; ++i) {
-        SharedFuncWsClient client(new FuncWsClient(client_loops[i]));
-        clients.push_back(client);
+        clients.emplace_back(new FuncWsClient(client_loops[i]));
+    }
+
+    ASSERT_EQ(TEST_CLIENT_COUNT, clients.size());
+
+    for (int i = 0; i < TEST_CLIENT_COUNT; ++i) {
+        auto client = clients[i];
+        ASSERT_TRUE(static_cast<bool>(client));
 
         HttpBuilder builder;
         Uri const URI(std::string("ws://localhost:") + std::to_string(SERVER_PORT));
@@ -401,9 +427,11 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
         ASSERT_EQ(Err::E_SUCCESS, client->init("127.0.0.1", SERVER_PORT));
 
         client->setOnWsOpen([&, i](HttpResponse const & response){
+            auto shared_client = clients[i];
+            ASSERT_TRUE(static_cast<bool>(shared_client));
             ++(ws_open_counter.at(i));
             client_write_threads[i] = std::thread([&, i](){
-                for (int count = 0; count < TEST_ECHO_COUNT; ++count) {
+                for (int echo_count = 0; echo_count < TEST_ECHO_COUNT; ++echo_count) {
                     Err write_code = clients[i]->writeText(TEST_TEXT);
                     if (isWsWriteSuccess(write_code)) {
                         ++(ws_write_counter.at(i));
@@ -414,6 +442,8 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
             });
         });
         client->setOnWsMessage([&, i](OpCode op, char const * buffer, std::size_t size){
+            auto shared_client = clients[i];
+            ASSERT_TRUE(static_cast<bool>(shared_client));
             ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
             ASSERT_EQ(std::string(TEST_TEXT), std::string(buffer, buffer + size));
             ++(ws_message_counter.at(i));
@@ -422,9 +452,13 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
             }
         });
         client->setOnWsError([&, i](Err code){
+            auto shared_client = clients[i];
+            ASSERT_TRUE(static_cast<bool>(shared_client));
             ++(ws_error_counter.at(i));
         });
         client->setOnWsClose([&, i](uint16_t code, std::string const & reason){
+            auto shared_client = clients[i];
+            ASSERT_TRUE(static_cast<bool>(shared_client));
             ++(ws_close_counter.at(i));
             ++ws_total_close_counter;
             if (ws_total_close_counter >= TEST_CLIENT_COUNT) {
@@ -457,5 +491,6 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     }
     ASSERT_EQ(TEST_CLIENT_COUNT, ws_total_close_counter);
     EXPECT_EQ(TOTAL_WRITE_COUNT, server_on_write_count);
+    EXPECT_FALSE(server_timeout);
 }
 
