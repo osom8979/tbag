@@ -78,7 +78,7 @@ public:
 public:
     bool readFile(std::string const & path, std::string const & tag);
     bool readString(std::string const & xml, std::string const & tag);
-    bool save(std::string const & path);
+    bool save(std::string const & path) const;
 
 // Accessor.
 public:

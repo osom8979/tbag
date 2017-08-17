@@ -130,7 +130,7 @@ bool Resource::readString(std::string const & xml, std::string const & tag)
     return (_map.empty() == false);
 }
 
-bool Resource::save(std::string const & path)
+bool Resource::save(std::string const & path) const
 {
     return Resource::save(path, _tag, _map);
 }
