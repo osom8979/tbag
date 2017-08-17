@@ -128,6 +128,13 @@ public:
         predicated(_map);
     }
 
+    template <typename Predicated>
+    inline void safeRun(Predicated predicated) const
+    {
+        Guard guard(_mutex);
+        predicated(_map);
+    }
+
 // ---------------
 // Static methods.
 // ---------------
@@ -135,6 +142,13 @@ public:
 public:
     static bool singleEmpty() { return getInstance()->empty(); }
     static std::size_t singleSize() { return getInstance()->size(); }
+
+public:
+    template <typename Derived>
+    inline static Derived * getDerivedInstance() TBAG_NOEXCEPT
+    {
+        return static_cast<Derived*>(getInstance());
+    }
 
 public:
     static void singleClear()
