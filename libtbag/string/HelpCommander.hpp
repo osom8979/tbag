@@ -16,6 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/string/Commander.hpp>
+#include <libtbag/Type.hpp>
+
+#include <cassert>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -76,6 +80,23 @@ public:
     bool insert(std::string const & command, Callback const & callback, std::string const & help_msg, std::string const & help_param);
 
 public:
+    template <typename ValueType>
+    bool insertDefault(std::string const & command,
+                       ValueType * value,
+                       typename std::remove_reference<ValueType>::type default_value,
+                       std::string const & help_msg = std::string(),
+                       std::string const & help_param = std::string())
+    {
+        static_assert(std::is_const<ValueType>::value == false, "The ValueType must not be const type.");
+        assert(value != nullptr);
+        return insert(command, [value, default_value](Arguments const & args){
+            if (args.opt(0, value) == false) {
+                *value = default_value;
+            }
+        }, help_msg, help_param);
+    }
+
+public:
     std::string help(std::string const & head, bool auto_padding = false) const;
     std::string help(bool auto_padding = false) const;
 
@@ -89,6 +110,31 @@ public:
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+#ifndef TBAG_HELP_COMMANDER_INSERT
+#define TBAG_HELP_COMMANDER_INSERT(obj, c, v, d, h, p) \
+    do { (obj).insertDefault(c, v, d, h, p); } while (false)
+#endif
+
+#ifndef TBAG_HELP_COMMANDER_INSERT2
+#define TBAG_HELP_COMMANDER_INSERT2(obj, c, v, d, h) \
+    TBAG_HELP_COMMANDER_INSERT(obj, c, v, d, h, std::string())
+#endif
+
+#ifndef TBAG_HELP_COMMANDER_INFO
+#define TBAG_HELP_COMMANDER_INFO(obj, p, d, s, r) \
+    do {                       \
+        (obj).setPrefix(p);    \
+        (obj).setDelimiter(d); \
+        (obj).setSynopsis(s);  \
+        (obj).setRemarks(r);   \
+    } while (false)
+#endif
+
+#ifndef TBAG_HELP_COMMANDER_RUN
+#define TBAG_HELP_COMMANDER_RUN(obj, s) \
+    do { (obj).request(s); } while (false)
+#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_STRING_HELPCOMMANDER_HPP__
 
