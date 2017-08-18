@@ -27,9 +27,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-char const * const DEFAULT_ARGUMENTS_DELIMITER       = ",";
-char const * const DEFAULT_ARGUMENTS_POINT_DELIMITER = "x";
-
 /**
  * Arguments class prototype.
  *
@@ -38,6 +35,18 @@ char const * const DEFAULT_ARGUMENTS_POINT_DELIMITER = "x";
  */
 class TBAG_API Arguments
 {
+public:
+    TBAG_CONSTEXPR static char const * const DEFAULT_ARGUMENTS_DELIMITER       = ",";
+    TBAG_CONSTEXPR static char const * const DEFAULT_ARGUMENTS_POINT_DELIMITER = "x";
+
+    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_TRUE_CASE1 = "ON";
+    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_TRUE_CASE2 = "YES";
+    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_TRUE_CASE3 = "TRUE";
+
+    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE1 = "OFF";
+    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE2 = "NO";
+    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE3 = "FALSE";
+
 private:
     std::string _name;
     std::vector<std::string> _args;
@@ -119,9 +128,20 @@ private:
     }
 
 public:
-    bool optInteger(std::size_t index, int         * output, bool check_grammar = true) const;
-    bool optDouble (std::size_t index, double      * output, bool check_grammar = true) const;
-    bool optString (std::size_t index, std::string * output) const;
+    bool optBoolean         (std::size_t index, bool               * output, bool check_grammar = true) const;
+    bool optChar            (std::size_t index, char               * output, bool check_grammar = true) const;
+    bool optUnsignedChar    (std::size_t index, unsigned char      * output, bool check_grammar = true) const;
+    bool optShort           (std::size_t index, short              * output, bool check_grammar = true) const;
+    bool optUnsignedShort   (std::size_t index, unsigned short     * output, bool check_grammar = true) const;
+    bool optInteger         (std::size_t index, int                * output, bool check_grammar = true) const;
+    bool optLong            (std::size_t index, long               * output, bool check_grammar = true) const;
+    bool optUnsignedLong    (std::size_t index, unsigned long      * output, bool check_grammar = true) const;
+    bool optLongLong        (std::size_t index, long long          * output, bool check_grammar = true) const;
+    bool optUnsignedLongLong(std::size_t index, unsigned long long * output, bool check_grammar = true) const;
+    bool optFloat           (std::size_t index, float              * output, bool check_grammar = true) const;
+    bool optDouble          (std::size_t index, double             * output, bool check_grammar = true) const;
+    bool optLongDouble      (std::size_t index, long double        * output, bool check_grammar = true) const;
+    bool optString          (std::size_t index, std::string        * output) const;
 
 // ----------
 // EXTENSION.
@@ -183,6 +203,28 @@ public:
     std::vector<Pointd     > getDoublePoints () const;
     std::vector<Recti      > getIntegerRects () const;
     std::vector<Rectd      > getDoubleRects  () const;
+
+public:
+    // @formatter:off
+    bool opt(std::size_t i, bool               * o, bool c = true) const { return optBoolean         (i, o, c); }
+    bool opt(std::size_t i, char               * o, bool c = true) const { return optChar            (i, o, c); }
+    bool opt(std::size_t i, unsigned char      * o, bool c = true) const { return optUnsignedChar    (i, o, c); }
+    bool opt(std::size_t i, short              * o, bool c = true) const { return optShort           (i, o, c); }
+    bool opt(std::size_t i, unsigned short     * o, bool c = true) const { return optUnsignedShort   (i, o, c); }
+    bool opt(std::size_t i, int                * o, bool c = true) const { return optInteger         (i, o, c); }
+    bool opt(std::size_t i, long               * o, bool c = true) const { return optLong            (i, o, c); }
+    bool opt(std::size_t i, unsigned long      * o, bool c = true) const { return optUnsignedLong    (i, o, c); }
+    bool opt(std::size_t i, long long          * o, bool c = true) const { return optLongLong        (i, o, c); }
+    bool opt(std::size_t i, unsigned long long * o, bool c = true) const { return optUnsignedLongLong(i, o, c); }
+    bool opt(std::size_t i, float              * o, bool c = true) const { return optFloat           (i, o, c); }
+    bool opt(std::size_t i, double             * o, bool c = true) const { return optDouble          (i, o, c); }
+    bool opt(std::size_t i, long double        * o, bool c = true) const { return optLongDouble      (i, o, c); }
+    bool opt(std::size_t i, std::string        * o, bool c = true) const { return optString          (i, o);    }
+    bool opt(std::size_t i, Pointi             * o, bool c = true) const { return optIntegerPoint    (i, o, c); }
+    bool opt(std::size_t i, Pointd             * o, bool c = true) const { return optDoublePoint     (i, o, c); }
+    bool opt(std::size_t i, Recti              * o, bool c = true) const { return optIntegerRect     (i, o, c); }
+    bool opt(std::size_t i, Rectd              * o, bool c = true) const { return optDoubleRect      (i, o, c); }
+    // @formatter:on
 };
 
 } // namespace string

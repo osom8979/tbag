@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/string/Arguments.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/Exception.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -104,25 +105,70 @@ std::string Arguments::toString()
     return result;
 }
 
-bool Arguments::optInteger(std::size_t index, int * output, bool check_grammar) const
+bool Arguments::optBoolean(std::size_t index, bool * output, bool check_grammar) const
 {
     return tryObtainArgument(index, output, [this, check_grammar](std::string const & value){
         if (check_grammar && value.find(this->_point_delimiter) != std::string::npos) {
             throw ParseException();
         }
-        return std::stoi(value);
+        std::string const UPPER = string::upper(string::trim(value));
+        if (UPPER == DEFAULT_BOOLEAN_TRUE_CASE1 ) { return  true; }
+        if (UPPER == DEFAULT_BOOLEAN_TRUE_CASE2 ) { return  true; }
+        if (UPPER == DEFAULT_BOOLEAN_TRUE_CASE3 ) { return  true; }
+        if (UPPER == DEFAULT_BOOLEAN_FALSE_CASE1) { return false; }
+        if (UPPER == DEFAULT_BOOLEAN_FALSE_CASE2) { return false; }
+        if (UPPER == DEFAULT_BOOLEAN_FALSE_CASE3) { return false; }
+        return std::stoi(value) != 0 ? true : false;
     });
 }
 
-bool Arguments::optDouble(std::size_t index, double * output, bool check_grammar) const
-{
-    return tryObtainArgument(index, output, [this, check_grammar](std::string const & value){
-        if (check_grammar && value.find(this->_point_delimiter) != std::string::npos) {
-            throw ParseException();
-        }
-        return std::stod(value);
+#ifndef __TBAG_ARGUMENTS_OBTAIN_TRY
+#define __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, param_name, retval) \
+    return tryObtainArgument(index, output, [this, check_grammar](std::string const & param_name){ \
+        if (check_grammar && param_name.find(this->_point_delimiter) != std::string::npos) { \
+            throw ParseException(); \
+        } \
+        return retval; \
     });
-}
+#endif
+
+bool Arguments::optChar(std::size_t index, char * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<char>(std::stoi(value))); }
+
+bool Arguments::optUnsignedChar(std::size_t index, unsigned char * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<unsigned char>(std::stoi(value))); }
+
+bool Arguments::optShort(std::size_t index, short * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<short>(std::stoi(value))); }
+
+bool Arguments::optUnsignedShort(std::size_t index, unsigned short * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<unsigned short>(std::stoi(value))); }
+
+bool Arguments::optInteger(std::size_t index, int * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoi(value)); }
+
+bool Arguments::optLong(std::size_t index, long * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stol(value)); }
+
+bool Arguments::optUnsignedLong(std::size_t index, unsigned long * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoul(value)); }
+
+bool Arguments::optLongLong(std::size_t index, long long * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoll(value)); }
+
+bool Arguments::optUnsignedLongLong(std::size_t index, unsigned long long * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoull(value)); }
+
+bool Arguments::optFloat(std::size_t index, float * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stof(value)); }
+
+bool Arguments::optDouble(std::size_t index, double * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stod(value)); }
+
+bool Arguments::optLongDouble(std::size_t index, long double * output, bool check_grammar) const
+{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stold(value)); }
+
+#undef __TBAG_ARGUMENTS_OBTAIN_TRY
 
 bool Arguments::optString(std::size_t index, std::string * output) const
 {
