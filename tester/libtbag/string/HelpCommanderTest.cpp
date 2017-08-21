@@ -60,6 +60,6 @@ TEST(HelpCommanderTest, MacroExample)
 
     ASSERT_EQ( true, value1);
     ASSERT_EQ(10000, value2);
-    ASSERT_EQ(    0, value3);
+    ASSERT_EQ(99999, value3);
 }
 
