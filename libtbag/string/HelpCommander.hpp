@@ -113,7 +113,11 @@ NAMESPACE_LIBTBAG_CLOSE
 
 #ifndef TBAG_HELP_COMMANDER_INSERT
 #define TBAG_HELP_COMMANDER_INSERT(obj, c, v, d, h, p) \
-    do { (obj).insertDefault(c, v, d, h, p); } while (false)
+    do {                                    \
+        assert(v != nullptr);               \
+        *v = d;                             \
+        (obj).insertDefault(c, v, d, h, p); \
+    } while (false)
 #endif
 
 #ifndef TBAG_HELP_COMMANDER_INSERT2
