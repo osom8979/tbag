@@ -15,6 +15,7 @@
 
 #include <cstdlib>
 #include <cassert>
+#include <sstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -78,6 +79,22 @@ char ** Application::getEnvs()
     }
     assert(false && "Expired properties.");
     return nullptr;
+}
+
+std::string Application::getCommandLineArgumentsString()
+{
+    int argc = getArgc();
+    char ** argv = getArgv();
+    std::stringstream ss;
+
+    for (int i = 0; i < argc; ++i) {
+        ss << argv[i];
+        if (i + 1 < argc) {
+            ss << ' ';
+        }
+    }
+
+    return ss.str();
 }
 
 int Application::run()

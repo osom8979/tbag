@@ -15,6 +15,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <sstream>
 
 #define SERVICE_APP_OPTIONS_PREFIX    "--"
 #define SERVICE_APP_OPTIONS_DELIMITER "="
@@ -235,6 +236,7 @@ int ServiceApp::run()
 
     if (_enable_verbose) {
         std::cout << "Load or save config file: " << _config_path << std::endl;
+        std::cout << "Command Line Arguments: " << getCommandLineArgumentsString() << std::endl;
     }
 
     auto config = getConfig().lock();

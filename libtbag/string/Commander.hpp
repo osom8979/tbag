@@ -101,6 +101,21 @@ public:
                                      std::string const & delimiter = DEFAULT_DELIMITER);
 
 public:
+    /**
+     * @remarks
+     *  Callback loop:
+     *  <pre>
+     *   +- Arguments foreach
+     *   |        |
+     *   |   onRequest() *--{return_yes}--> skip callback *----------------------------------------------------------->+
+     *   |               |                                                                                             |
+     *   |               +--{return_no}---> find command callback *----{find_callback}-----> call command callback *-->+
+     *   |                                                        |                                                    |
+     *   |                                                        +--{not_found_callback}--> call default callback *-->+
+     *   |                                                                                                             |
+     *   +------------------------------------------------- loop end <-------------------------------------------------+
+     *  </pre>
+     */
     std::size_t request(ArgsVector const & args_vector);
     std::size_t request(Flags const & flags);
     std::size_t request(std::string const & arguments, std::string const & prefix, std::string const & delimiter);

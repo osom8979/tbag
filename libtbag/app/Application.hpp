@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -68,6 +69,9 @@ public:
     static int getArgc();
     static char ** getArgv();
     static char ** getEnvs();
+
+public:
+    static std::string getCommandLineArgumentsString();
 
 public:
     virtual int run();
