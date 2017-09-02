@@ -37,9 +37,7 @@
 #include <stdio.h>  // for NULL
 #include <libtbag/3rd/demangle/demangle.hpp>
 
-namespace libtbag  {
-namespace debug    {
-namespace demangle {
+namespace google {
 
 typedef struct {
   const char *abbrev;
@@ -1303,7 +1301,5 @@ bool Demangle(const char *mangled, char *out, int out_size) {
   return ParseTopLevelMangledName(&state) && !state.overflowed;
 }
 
-} // namespace demangle
-} // namespace debug
-} // namespace libtbag
+} // namespace google
 

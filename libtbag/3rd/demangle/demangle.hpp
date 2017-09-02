@@ -70,18 +70,14 @@
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_DEMANGLE_DEMANGLE_HPP__
 #define __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_DEMANGLE_DEMANGLE_HPP__
 
-namespace libtbag  {
-namespace debug    {
-namespace demangle {
+namespace google {
 
 // Demangle "mangled".  On success, return true and write the
 // demangled symbol name to "out".  Otherwise, return false.
 // "out" is modified even if demangling is unsuccessful.
 bool /* GOOGLE_GLOG_DLL_DECL */ Demangle(const char * mangled, char * out, int out_size);
 
-} // namespace demangle
-} // namespace debug
-} // namespace libtbag
+} // namespace google
 
 #endif  // __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_DEMANGLE_DEMANGLE_HPP__
 
