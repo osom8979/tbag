@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/debug/st/StFrame.hpp>
 
 #include <vector>
 #include <string>
@@ -29,6 +30,8 @@ namespace st    {
 TBAG_API bool isExecInfoSupport() TBAG_NOEXCEPT;
 TBAG_API std::vector<void*> getExecInfoStackTrace(int max_depth = 64);
 TBAG_API std::vector<std::string> getExecInfoSymbolize(std::vector<void*> const & stack);
+
+TBAG_API StFrame parseExecInfoSymbolize(void const * addr, char const * symbols_format);
 
 } // namespace st
 } // namespace debug

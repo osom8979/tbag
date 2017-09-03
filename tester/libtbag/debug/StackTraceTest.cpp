@@ -25,6 +25,16 @@ TEST(StackTraceTest, ExecInfo)
     }
 }
 
+TEST(StackTraceTest, ExecInfoSymbolize)
+{
+    char const * const TEST_STACK = "5   libtbag.0.dylib   0x000000010de59128 _ZN7testing8TestInfo3RunEv + 216";
+    auto frame = st::parseExecInfoSymbolize(nullptr, TEST_STACK);
+    ASSERT_EQ(5, frame.index);
+    ASSERT_STREQ("libtbag.0.dylib", frame.name);
+    ASSERT_STREQ("_ZN7testing8TestInfo3RunEv", frame.source);
+    ASSERT_EQ(216, frame.line);
+}
+
 TEST(StackTraceTest, Libunwind)
 {
     if (st::isLibunwindSupport()) {

@@ -36,8 +36,22 @@ namespace st    {
  */
 class TBAG_API StFrame
 {
+public:
+    TBAG_CONSTEXPR static std::size_t const NAME_MEM_SIZE   =  64;
+    TBAG_CONSTEXPR static std::size_t const SOURCE_MEM_SIZE = 256;
+
+public:
+    TBAG_CONSTEXPR static std::size_t getNameMemSize() TBAG_NOEXCEPT { return NAME_MEM_SIZE; }
+    TBAG_CONSTEXPR static std::size_t getSourceMemSize() TBAG_NOEXCEPT { return SOURCE_MEM_SIZE; }
+
 private:
     void const * _addr;
+
+public:
+    char name[NAME_MEM_SIZE + 1];
+    char source[SOURCE_MEM_SIZE + 1];
+    int  line;
+    int  index;
 
 public:
     StFrame() TBAG_NOEXCEPT;
@@ -57,11 +71,6 @@ public:
     inline operator bool() const TBAG_NOEXCEPT { return _addr != nullptr; }
 
 public:
-    std::string name() const;
-    std::string source() const;
-    std::size_t line() const;
-
-public:
     inline std::size_t toHash() TBAG_NOEXCEPT
     { return reinterpret_cast<std::size_t>(_addr); }
 };
@@ -72,23 +81,6 @@ inline bool operator<=(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { r
 inline bool operator>=(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return !(lh < rh); }
 inline bool operator==(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return lh.address() == rh.address(); }
 inline bool operator!=(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return !(lh == rh); }
-
-template <class CharT, class TraitsT>
-std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, StFrame const & f)
-{
-    std::string const NAME = f.name();
-    if (NAME.empty() == false) {
-        os << NAME;
-    } else {
-        os << f.address();
-    }
-
-    std::size_t const LINE = f.line();
-    if (LINE) {
-        os << " at " << f.source() << ':' << LINE;
-    }
-    return os;
-}
 
 } // namespace st
 } // namespace debug
