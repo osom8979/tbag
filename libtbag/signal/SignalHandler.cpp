@@ -24,8 +24,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace signal  {
 
-// ===============
+// ----------------------------
 /* inline */ namespace __impl {
+// ----------------------------
 
 // #define SIGHUP     1  // hangup
 // #define SIGINT     2  // interrupt
@@ -184,8 +185,9 @@ void releaseInstance()
     SignalObservable::releaseInstance();
 }
 
+// ------------------
 } // namespace __impl
-// ==================
+// ------------------
 
 static void __signal_dispatcher__(int signal)
 {

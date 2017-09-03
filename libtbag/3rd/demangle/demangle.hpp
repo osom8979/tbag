@@ -67,17 +67,25 @@
 // C++ ABI in the future.
 //
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_DEMANGLE_DEMANGLE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_DEMANGLE_DEMANGLE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_3RD_DEMANGLE_DEMANGLE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_3RD_DEMANGLE_DEMANGLE_HPP__
+
+// MS compatible compilers support #pragma once
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#pragma once
+#endif
+
+#include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 
 namespace google {
 
 // Demangle "mangled".  On success, return true and write the
 // demangled symbol name to "out".  Otherwise, return false.
 // "out" is modified even if demangling is unsuccessful.
-bool /* GOOGLE_GLOG_DLL_DECL */ Demangle(const char * mangled, char * out, int out_size);
+TBAG_API bool Demangle(const char * mangled, char * out, int out_size);
 
 } // namespace google
 
-#endif  // __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_DEMANGLE_DEMANGLE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_3RD_DEMANGLE_DEMANGLE_HPP__
 

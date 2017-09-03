@@ -8,9 +8,6 @@
 #include <libtbag/debug/StackTrace.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <sstream>
-#include <boost/stacktrace.hpp>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -19,9 +16,10 @@ namespace debug {
 
 std::string getStackTrace()
 {
-    std::stringstream ss;
-    ss << boost::stacktrace::stacktrace();
-    return ss.str();
+//    std::stringstream ss;
+//    ss << boost::stacktrace::stacktrace();
+//    return ss.str();
+    return std::string();
 }
 
 } // namespace debug

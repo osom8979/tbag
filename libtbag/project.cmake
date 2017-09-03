@@ -24,15 +24,14 @@ tbag_modules__apply_ext_z    ()
 tbag_modules__apply_ext_ressl()
 
 ## Dependencies.
-tbag_modules__apply_dep_boost_include ()
 tbag_modules__apply_dep_http_parser ()
-tbag_modules__apply_dep_icu     ()
-tbag_modules__apply_dep_lmdb    ()
-tbag_modules__apply_dep_minizip () ## And apply_dep_z
-tbag_modules__apply_dep_sqlite3 ()
-tbag_modules__apply_dep_uv      ()
-tbag_modules__apply_dep_lua     ()
-tbag_modules__apply_dep_stb     ()
+tbag_modules__apply_dep_icu         ()
+tbag_modules__apply_dep_lmdb        ()
+tbag_modules__apply_dep_minizip     () ## And apply_dep_z
+tbag_modules__apply_dep_sqlite3     ()
+tbag_modules__apply_dep_uv          ()
+tbag_modules__apply_dep_lua         ()
+tbag_modules__apply_dep_stb         ()
 
 if (OpenCL_FOUND)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})

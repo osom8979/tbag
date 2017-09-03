@@ -11,5 +11,32 @@
 /* Define to 1 if you have the <sys/syscall.h> header file. */
 #cmakedefine HAVE_SYS_SYSCALL_H
 
+/* Define to 1 if you have the <mman.h> header file. */
+#cmakedefine HAVE_SYS_MMAN_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#cmakedefine HAVE_DLFCN_H
+
+/* Define to 1 if you have the <execinfo.h> header file. */
+#cmakedefine HAVE_EXECINFO_H
+
+/* Define to 1 if you have the <unwind.h> header file. */
+#cmakedefine HAVE_UNWIND_H
+
+/* Define to 1 if you have the <libunwind.h> header file. */
+#cmakedefine HAVE_LIBUNWIND_H
+
+/* Define to 1 if you have the <windows.h> header file. */
+#cmakedefine HAVE_WINDOWS_H
+
+/* Define to 1 if you have the <dbgeng.h> header file. */
+#cmakedefine HAVE_DBGENG_H
+
+/* Define to 1 if you have the <dbgeng.h> header file. And the COM library initialized successfully. */
+#cmakedefine HAVE_DBGENG_CO_INIT
+
 #endif /* __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_EX_H__ */
 

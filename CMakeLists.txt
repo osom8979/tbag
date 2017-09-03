@@ -114,8 +114,17 @@ include (CheckIncludeFile)
 ## - ${CMAKE_REQUIRED_FLAGS}: string of compile command line flags
 ## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
 ## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
-check_include_file (sys/syscall.h  HAVE_SYS_SYSCALL_H)
+
 check_include_file (syscall.h      HAVE_SYSCALL_H)
+check_include_file (sys/syscall.h  HAVE_SYS_SYSCALL_H)
+check_include_file (sys/mman.h     HAVE_SYS_MMAN_H)
+check_include_file (unistd.h       HAVE_UNISTD_H)
+check_include_file (dlfcn.h        HAVE_DLFCN_H)
+check_include_file (execinfo.h     HAVE_EXECINFO_H)
+check_include_file (unwind.h       HAVE_UNWIND_H)
+check_include_file (libunwind.h    HAVE_LIBUNWIND_H)
+check_include_file (Windows.h      HAVE_WINDOWS_H) ## Win32
+check_include_file (Dbgen.h        HAVE_DBGENG_H) ## Win32
 
 ## Compile checker.
 include (CheckCSourceCompiles)
@@ -124,36 +133,15 @@ include (CheckCXXSourceCompiles)
 ## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
 ## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
 ## - ${CMAKE_REQUIRED_LIBRARIES}: list of libraries to link
-check_c_source_compiles ("
-    #include <cstring>
-    #include <windows.h>
-    #include \"Dbgeng.h\"
-    #pragma comment(lib, \"ole32.lib\")
-    #pragma comment(lib, \"Dbgeng.lib\")
-    int main() { CoInitializeEx(0, COINIT_MULTITHREADED); return 0; }
-    " HAVE_WINDBG)
-check_c_source_compiles ("
-    #include <dlfcn.h>
-    #include <execinfo.h>
-    int main() { void* buf[10]; ::backtrace(buf, 10); return 0; }
-    " HAVE_BACKTRACE)
-check_c_source_compiles ("
-    #include <unwind.h>
-    int main() { return 0; }
-    " HAVE_UNWIND)
-
-if (HAVE_WINDBG)
-    add_definitions (-DBOOST_STACKTRACE_USE_WINDBG)
-    add_definitions (-DTBAG_STACKTRACE_WINDBG)
-elseif (HAVE_BACKTRACE)
-    add_definitions (-DBOOST_STACKTRACE_USE_BACKTRACE)
-    add_definitions (-DTBAG_STACKTRACE_BACKTRACE)
-elseif (HAVE_UNWIND)
-    add_definitions (-DBOOST_STACKTRACE_USE_UNWIND)
-    add_definitions (-DTBAG_STACKTRACE_UNWIND)
-else ()
-    add_definitions (-DBOOST_STACKTRACE_USE_NOOP)
-    add_definitions (-DTBAG_STACKTRACE_FAKE)
+if (WIN32 AND HAVE_WINDOWS_H AND HAVE_DBGENG_H)
+    check_c_source_compiles ("
+        #include <cstring>
+        #include <windows.h>
+        #include <Dbgeng.h>
+        #pragma comment(lib, \"ole32.lib\")
+        #pragma comment(lib, \"Dbgeng.lib\")
+        int main() { return ::CoInitializeEx(NULL, COINIT_MULTITHREADED) == S_OK ? 0 : 1; }
+        " HAVE_DBGENG_CO_INIT)
 endif ()
 
 set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")

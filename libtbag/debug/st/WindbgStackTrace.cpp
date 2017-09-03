@@ -7,6 +7,14 @@
 
 #include <libtbag/debug/st/WindbgStackTrace.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/config-ex.h>
+
+#if defined(HAVE_DBGENG_CO_INIT)
+#include <windows.h>
+#include <Dbgeng.h>
+#pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "Dbgeng.lib")
+#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,14 +23,21 @@ NAMESPACE_LIBTBAG_OPEN
 namespace debug {
 namespace st    {
 
-WindbgStackTrace::WindbgStackTrace()
+bool isWindbgSupport() TBAG_NOEXCEPT
 {
-    // EMPTY.
+#if defined(HAVE_DBGENG_CO_INIT)
+    return true;
+#else
+    return false;
+#endif
 }
 
-WindbgStackTrace::~WindbgStackTrace()
+std::vector<void*> getWindbgStackTrace(int max_depth)
 {
-    // EMPTY.
+    std::vector<void*> result;
+#if defined(HAVE_DBGENG_CO_INIT)
+#endif
+    return result;
 }
 
 } // namespace st
