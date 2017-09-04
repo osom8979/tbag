@@ -149,21 +149,28 @@ public:
 #endif
 
 #ifndef _TBAG_DEFAULT_SIGNAL_HANDLER
-#define _TBAG_DEFAULT_SIGNAL_HANDLER(cls, msg)                      \
-    struct cls : public ::libtbag::signal::SignalHandler {          \
-        std::string _logger;                                        \
-        cls(std::string const & logger = "") : _logger(logger) { }  \
-        virtual ~cls() { }                                          \
-        virtual void run(int signal) override {                     \
-            auto sname  = ::libtbag::signal::getSignalName(signal); \
-            auto strace = ::libtbag::debug::getStackTrace();        \
-            if (_logger.empty()) {                                  \
-                tDLogD("{} ({}):\n{}", msg, sname, strace);   \
-            } else {                                                \
-                tLogA(_logger, "{} ({}):\n{}", msg, sname, strace); \
-            }                                                       \
-            _TBAG_FORCE_FAILURE_EXIT(EXIT_FAILURE);                 \
-        }                                                           \
+#define _TBAG_DEFAULT_SIGNAL_HANDLER(cls, msg)                              \
+    struct cls : public ::libtbag::signal::SignalHandler {                  \
+        std::string _logger;                                                \
+        cls(std::string const & logger = "") : _logger(logger) { }          \
+        virtual ~cls() { }                                                  \
+        virtual void run(int signal) override {                             \
+            auto sname  = ::libtbag::signal::getSignalName(signal);         \
+            auto strace = ::libtbag::debug::getStackTraceString();          \
+            if (_logger.empty()) {                                          \
+                using namespace libtbag::signal;                            \
+                if (signal == TBAG_SIGNAL_ABORT) {                          \
+                    tDLogA("{} ({}):\n{}", msg, sname, strace);             \
+                } else if (signal == TBAG_SIGNAL_SEGMENTATION_VIOLATION) {  \
+                    tDLogA("{} ({}):\n{}", msg, sname, strace);             \
+                } else {                                                    \
+                    tDLogD("{} ({}):\n{}", msg, sname, strace);             \
+                }                                                           \
+            } else {                                                        \
+                tLogA(_logger, "{} ({}):\n{}", msg, sname, strace);         \
+            }                                                               \
+            _TBAG_FORCE_FAILURE_EXIT(EXIT_FAILURE);                         \
+        }                                                                   \
     };
 #endif
 

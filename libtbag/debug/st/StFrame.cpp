@@ -7,6 +7,7 @@
 
 #include <libtbag/debug/st/StFrame.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cstring>
 #include <algorithm>
@@ -21,14 +22,14 @@ namespace st    {
 
 StFrame::StFrame() TBAG_NOEXCEPT : _addr(nullptr), line(0), index(0)
 {
-    std::memset(name  , 0x00,   NAME_MEM_SIZE);
-    std::memset(source, 0x00, SOURCE_MEM_SIZE);
+    clearName();
+    clearSource();
 }
 
 StFrame::StFrame(void const * addr) TBAG_NOEXCEPT : _addr(addr), line(0), index(0)
 {
-    std::memset(name  , 0x00,   NAME_MEM_SIZE);
-    std::memset(source, 0x00, SOURCE_MEM_SIZE);
+    clearName();
+    clearSource();
 }
 
 StFrame::StFrame(StFrame const & obj) TBAG_NOEXCEPT
@@ -72,6 +73,29 @@ StFrame & StFrame::operator =(StFrame && obj) TBAG_NOEXCEPT
         // @formatter:on
     }
     return *this;
+}
+
+void StFrame::clearName()
+{
+    std::memset(name, 0x00, NAME_MEM_SIZE);
+}
+
+void StFrame::clearSource()
+{
+    std::memset(source, 0x00, SOURCE_MEM_SIZE);
+}
+
+std::string StFrame::toAddressString() const
+{
+    return string::convertAddressHexStringToString(string::convertAddressToHexString(_addr));
+}
+
+std::string StFrame::toString() const
+{
+    if (*source == '\0' && *name == '\0') {
+        return toAddressString();
+    }
+    return toAddressString() + " " + source + ":" + std::to_string(line) + " [" + name + "]";
 }
 
 } // namespace st

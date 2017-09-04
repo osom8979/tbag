@@ -8,6 +8,7 @@
 #include <libtbag/debug/st/ExecInfoStackTrace.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/config-ex.h>
+#include <libtbag/3rd/demangle/demangle.hpp>
 
 #include <cstring>
 #include <iterator>
@@ -69,22 +70,17 @@ StFrame parseExecInfoSymbolize(void const * addr, char const * symbols_format)
         return StFrame(addr);
     }
 
-    static int const SYMBOL_STRINGS_COLUMN_INDEX   = 0;
-    static int const SYMBOL_STRINGS_COLUMN_MODULE  = 1;
-    static int const SYMBOL_STRINGS_COLUMN_ADDRESS = 2;
-    static int const SYMBOL_STRINGS_COLUMN_SYMBOL  = 3;
-    static int const SYMBOL_STRINGS_COLUMN_LINE    = 4;
-
     char const * cursor = symbols_format;
     char const * column_begin = nullptr;
     char const * column_end = nullptr;
     std::size_t column_distance = 0;
+    std::size_t copy_size = 0;
     int column = 0;
 
-    int const BUFFER_SIZE = 32;
-    char buffer[BUFFER_SIZE + 1] = {0,};
-    StFrame frame(addr);
+    std::size_t const BUFFER_SIZE = StFrame::getSourceMemSize();
+    char buffer[BUFFER_SIZE] = {0,};
 
+    StFrame frame(addr);
     do {
         if (*cursor == '\0') { break; }
         if (column == SYMBOL_STRINGS_COLUMN_LINE) {
@@ -98,29 +94,30 @@ StFrame parseExecInfoSymbolize(void const * addr, char const * symbols_format)
         column_end = cursor;
 
         column_distance = static_cast<std::size_t>(std::distance(column_begin, column_end));
+        copy_size = column_distance <= (BUFFER_SIZE - 1) ? column_distance : (BUFFER_SIZE - 1);
+
         assert(column_distance >= 1);
+        assert(copy_size >= 1);
+        assert(copy_size <= (BUFFER_SIZE - 1));
+
+        std::memcpy(buffer, column_begin, copy_size);
+        buffer[copy_size] = '\0';
 
         if (column == SYMBOL_STRINGS_COLUMN_INDEX) {
-            std::size_t const COPY_SIZE = column_distance <= BUFFER_SIZE ? column_distance : BUFFER_SIZE;
-            std::memcpy(buffer, column_begin, COPY_SIZE);
             frame.index = std::atoi(buffer);
 
         } else if (column == SYMBOL_STRINGS_COLUMN_MODULE) {
-            std::size_t const COPY_SIZE = column_distance <= StFrame::getNameMemSize() ? column_distance : StFrame::getNameMemSize();
-            std::memcpy(frame.name, column_begin, COPY_SIZE);
-            frame.name[COPY_SIZE] = '\0';
+            frame.clearName();
+            std::memcpy(frame.name, buffer, copy_size);
 
         } else if (column == SYMBOL_STRINGS_COLUMN_ADDRESS) {
             // SKIP.
 
         } else if (column == SYMBOL_STRINGS_COLUMN_SYMBOL) {
-            std::size_t const COPY_SIZE = column_distance <= StFrame::getSourceMemSize() ? column_distance : StFrame::getSourceMemSize();
-            std::memcpy(frame.source, column_begin, COPY_SIZE);
-            frame.source[COPY_SIZE] = '\0';
+            frame.clearSource();
+            google::Demangle(buffer, frame.source, static_cast<int>(StFrame::getSourceMemSize()));
 
         } else if (column == SYMBOL_STRINGS_COLUMN_LINE) {
-            std::size_t const COPY_SIZE = column_distance <= BUFFER_SIZE ? column_distance : BUFFER_SIZE;
-            std::memcpy(buffer, column_begin, COPY_SIZE);
             frame.line = std::atoi(buffer);
 
         } else {

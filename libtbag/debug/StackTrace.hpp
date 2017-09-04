@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/debug/st/StFrame.hpp>
+
 #include <string>
 
 // -------------------
@@ -23,7 +25,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace debug {
 
-TBAG_API std::string getStackTrace();
+TBAG_API st::StFrameArray getStackTrace(int skip = 2);
+TBAG_API std::string getStackTraceString(int skip = 2);
 
 } // namespace debug
 

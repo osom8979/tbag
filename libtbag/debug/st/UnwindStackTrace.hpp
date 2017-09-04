@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/debug/st/StFrame.hpp>
+
 #include <vector>
 
 // -------------------
@@ -25,7 +27,7 @@ namespace debug {
 namespace st    {
 
 TBAG_API bool isUnwindSupport() TBAG_NOEXCEPT;
-TBAG_API std::vector<void*> getUnwindStackTrace(int max_depth = 64);
+TBAG_API std::vector<void*> getUnwindStackTrace(int max_depth = DEFAULT_MAX_DEPTH_OF_STACKTRACE);
 
 } // namespace st
 } // namespace debug

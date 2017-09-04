@@ -28,8 +28,15 @@ namespace debug {
 namespace st    {
 
 TBAG_API bool isExecInfoSupport() TBAG_NOEXCEPT;
-TBAG_API std::vector<void*> getExecInfoStackTrace(int max_depth = 64);
+
+TBAG_API std::vector<void*> getExecInfoStackTrace(int max_depth = DEFAULT_MAX_DEPTH_OF_STACKTRACE);
 TBAG_API std::vector<std::string> getExecInfoSymbolize(std::vector<void*> const & stack);
+
+TBAG_CONSTEXPR int const SYMBOL_STRINGS_COLUMN_INDEX   = 0;
+TBAG_CONSTEXPR int const SYMBOL_STRINGS_COLUMN_MODULE  = 1;
+TBAG_CONSTEXPR int const SYMBOL_STRINGS_COLUMN_ADDRESS = 2;
+TBAG_CONSTEXPR int const SYMBOL_STRINGS_COLUMN_SYMBOL  = 3;
+TBAG_CONSTEXPR int const SYMBOL_STRINGS_COLUMN_LINE    = 4;
 
 TBAG_API StFrame parseExecInfoSymbolize(void const * addr, char const * symbols_format);
 

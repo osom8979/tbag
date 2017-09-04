@@ -31,7 +31,7 @@ TEST(StackTraceTest, ExecInfoSymbolize)
     auto frame = st::parseExecInfoSymbolize(nullptr, TEST_STACK);
     ASSERT_EQ(5, frame.index);
     ASSERT_STREQ("libtbag.0.dylib", frame.name);
-    ASSERT_STREQ("_ZN7testing8TestInfo3RunEv", frame.source);
+    ASSERT_STREQ("testing::TestInfo::Run()", frame.source);
     ASSERT_EQ(216, frame.line);
 }
 
@@ -64,6 +64,6 @@ TEST(StackTraceTest, Windbg)
 
 TEST(StackTraceTest, Default)
 {
-    std::cout << getStackTrace() << std::endl;
+    std::cout << getStackTraceString() << std::endl;
 }
 

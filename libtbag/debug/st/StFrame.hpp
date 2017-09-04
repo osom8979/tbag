@@ -15,11 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 
 #include <cstdlib>
 #include <iosfwd>
 #include <string>
+#include <array>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -27,6 +27,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace debug {
 namespace st    {
+
+TBAG_CONSTEXPR int const DEFAULT_MAX_DEPTH_OF_STACKTRACE = 64;
 
 /**
  * StFrame class prototype.
@@ -48,8 +50,8 @@ private:
     void const * _addr;
 
 public:
-    char name[NAME_MEM_SIZE + 1];
-    char source[SOURCE_MEM_SIZE + 1];
+    char name[NAME_MEM_SIZE];
+    char source[SOURCE_MEM_SIZE];
     int  line;
     int  index;
 
@@ -65,10 +67,18 @@ public:
     StFrame & operator =(StFrame && obj) TBAG_NOEXCEPT;
 
 public:
+    void clearName();
+    void clearSource();
+
+public:
     inline void const * address() const TBAG_NOEXCEPT { return _addr; }
     inline bool empty() const TBAG_NOEXCEPT { return _addr == nullptr; }
     inline bool operator!() const TBAG_NOEXCEPT { return _addr == nullptr; }
     inline operator bool() const TBAG_NOEXCEPT { return _addr != nullptr; }
+
+public:
+    std::string toAddressString() const;
+    std::string toString() const;
 
 public:
     inline std::size_t toHash() TBAG_NOEXCEPT
@@ -81,6 +91,8 @@ inline bool operator<=(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { r
 inline bool operator>=(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return !(lh < rh); }
 inline bool operator==(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return lh.address() == rh.address(); }
 inline bool operator!=(StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return !(lh == rh); }
+
+using StFrameArray = std::array<StFrame, DEFAULT_MAX_DEPTH_OF_STACKTRACE>;
 
 } // namespace st
 } // namespace debug
