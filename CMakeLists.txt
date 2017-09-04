@@ -124,7 +124,7 @@ check_include_file (execinfo.h     HAVE_EXECINFO_H)
 check_include_file (unwind.h       HAVE_UNWIND_H)
 check_include_file (libunwind.h    HAVE_LIBUNWIND_H)
 check_include_file (Windows.h      HAVE_WINDOWS_H) ## Win32
-check_include_file (Dbgen.h        HAVE_DBGENG_H) ## Win32
+check_include_file (Dbgeng.h       HAVE_DBGENG_H) ## Win32
 
 ## Compile checker.
 include (CheckCSourceCompiles)
@@ -134,7 +134,7 @@ include (CheckCXXSourceCompiles)
 ## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
 ## - ${CMAKE_REQUIRED_LIBRARIES}: list of libraries to link
 if (WIN32 AND HAVE_WINDOWS_H AND HAVE_DBGENG_H)
-    check_c_source_compiles ("
+    check_cxx_source_compiles ("
         #include <cstring>
         #include <windows.h>
         #include <Dbgeng.h>
