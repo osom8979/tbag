@@ -46,7 +46,7 @@ st::StFrameArray getStackTrace(int skip)
     if (st::isExecInfoSupport()) {
         auto strings = st::getExecInfoSymbolize(stack);
         for (std::size_t i = skip; i < stack.size(); ++i) {
-            result[i - skip] = st::parseExecInfoSymbolize(stack[i], strings[i].c_str());
+            result[i - skip] = st::StFrame::parseSymbolize(strings[i].c_str(), stack[i]);
         }
     } else {
         for (std::size_t i = 0; i < stack.size(); ++i) {

@@ -8,7 +8,6 @@
 #include <libtbag/debug/st/ExecInfoStackTrace.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/config-ex.h>
-#include <libtbag/3rd/demangle/demangle.hpp>
 
 #include <cstring>
 #include <iterator>
@@ -44,11 +43,6 @@ std::vector<void*> getExecInfoStackTrace(int max_depth)
     return result;
 }
 
-// Example:
-// 0  tester          0x0000000105f84708 _ZN7testing8UnitTest3RunEv + 408
-// 1  tester          0x0000000105f60011 _Z13RUN_ALL_TESTSv + 17
-// 2  tester          0x0000000105f5feb2 main + 578
-// 3  libdyld.dylib   0x00007fffa12ef235 start + 1
 std::vector<std::string> getExecInfoSymbolize(std::vector<void*> const & stack)
 {
     std::vector<std::string> result;
@@ -62,73 +56,6 @@ std::vector<std::string> getExecInfoSymbolize(std::vector<void*> const & stack)
     }
 #endif
     return result;
-}
-
-StFrame parseExecInfoSymbolize(void const * addr, char const * symbols_format)
-{
-    if (symbols_format == nullptr) {
-        return StFrame(addr);
-    }
-
-    char const * cursor = symbols_format;
-    char const * column_begin = nullptr;
-    char const * column_end = nullptr;
-    std::size_t column_distance = 0;
-    std::size_t copy_size = 0;
-    int column = 0;
-
-    std::size_t const BUFFER_SIZE = StFrame::getSourceMemSize();
-    char buffer[BUFFER_SIZE] = {0,};
-
-    StFrame frame(addr);
-    do {
-        if (*cursor == '\0') { break; }
-        if (column == SYMBOL_STRINGS_COLUMN_LINE) {
-            while (*cursor == ' ' || *cursor == '+') { ++cursor; }
-        } else {
-            while (*cursor == ' ') { ++cursor; }
-        }
-        if (*cursor == '\0') { break; }
-        column_begin = cursor;
-        while (*cursor != ' ' && *cursor != '\0') { ++cursor; }
-        column_end = cursor;
-
-        column_distance = static_cast<std::size_t>(std::distance(column_begin, column_end));
-        copy_size = column_distance <= (BUFFER_SIZE - 1) ? column_distance : (BUFFER_SIZE - 1);
-
-        assert(column_distance >= 1);
-        assert(copy_size >= 1);
-        assert(copy_size <= (BUFFER_SIZE - 1));
-
-        std::memcpy(buffer, column_begin, copy_size);
-        buffer[copy_size] = '\0';
-
-        if (column == SYMBOL_STRINGS_COLUMN_INDEX) {
-            frame.index = std::atoi(buffer);
-
-        } else if (column == SYMBOL_STRINGS_COLUMN_MODULE) {
-            frame.clearName();
-            std::memcpy(frame.name, buffer, copy_size);
-
-        } else if (column == SYMBOL_STRINGS_COLUMN_ADDRESS) {
-            // SKIP.
-
-        } else if (column == SYMBOL_STRINGS_COLUMN_SYMBOL) {
-            frame.clearSource();
-            google::Demangle(buffer, frame.source, static_cast<int>(StFrame::getSourceMemSize()));
-
-        } else if (column == SYMBOL_STRINGS_COLUMN_LINE) {
-            frame.line = std::atoi(buffer);
-
-        } else {
-            break;
-        }
-
-        ++column;
-        ++cursor;
-    } while (true);
-
-    return frame;
 }
 
 } // namespace st

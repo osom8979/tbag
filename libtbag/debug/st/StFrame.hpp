@@ -46,13 +46,11 @@ public:
     TBAG_CONSTEXPR static std::size_t getNameMemSize() TBAG_NOEXCEPT { return NAME_MEM_SIZE; }
     TBAG_CONSTEXPR static std::size_t getSourceMemSize() TBAG_NOEXCEPT { return SOURCE_MEM_SIZE; }
 
-private:
-    void const * _addr;
-
 public:
+    void const * addr;
     char name[NAME_MEM_SIZE];
     char source[SOURCE_MEM_SIZE];
-    int  line;
+    int  offset;
     int  index;
 
 public:
@@ -71,18 +69,43 @@ public:
     void clearSource();
 
 public:
-    inline void const * address() const TBAG_NOEXCEPT { return _addr; }
-    inline bool empty() const TBAG_NOEXCEPT { return _addr == nullptr; }
-    inline bool operator!() const TBAG_NOEXCEPT { return _addr == nullptr; }
-    inline operator bool() const TBAG_NOEXCEPT { return _addr != nullptr; }
+    inline void const * address() const TBAG_NOEXCEPT { return addr; }
+    inline std::ptrdiff_t diff() const TBAG_NOEXCEPT { return reinterpret_cast<std::ptrdiff_t>(addr); }
+    inline bool empty() const TBAG_NOEXCEPT { return addr == nullptr; }
+    inline bool operator!() const TBAG_NOEXCEPT { return addr == nullptr; }
+    inline operator bool() const TBAG_NOEXCEPT { return addr != nullptr; }
+
+public:
+    inline std::size_t toHash() TBAG_NOEXCEPT
+    { return reinterpret_cast<std::size_t>(addr); }
+
+public:
+    void demangleAssign(char const * symbol, std::size_t symbol_size);
 
 public:
     std::string toAddressString() const;
     std::string toString() const;
 
 public:
-    inline std::size_t toHash() TBAG_NOEXCEPT
-    { return reinterpret_cast<std::size_t>(_addr); }
+    // Example: ./tester(_ZN7testing8UnitTest3RunEv+0xb7) [0x7ee1eb]
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_GCC_COLUMN_MODULE  = 0;
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_GCC_COLUMN_SYMBOL  = 1;
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_GCC_COLUMN_OFFSET  = 2;
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_GCC_COLUMN_ADDRESS = 3;
+
+    // Example: 0 tester 0x0000000105f84708 _ZN7testing8UnitTest3RunEv + 408
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_INDEX   = 0;
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_MODULE  = 1;
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_ADDRESS = 2;
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_SYMBOL  = 3;
+    TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_OFFSET  = 4;
+
+public:
+    // @formatter:off
+    static StFrame parseGccSymbolize  (char const * symbols_format, void const * addr = nullptr);
+    static StFrame parseClangSymbolize(char const * symbols_format, void const * addr = nullptr);
+    static StFrame parseSymbolize     (char const * symbols_format, void const * addr = nullptr);
+    // @formatter:on
 };
 
 inline bool operator< (StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return lh.address() < rh.address(); }
