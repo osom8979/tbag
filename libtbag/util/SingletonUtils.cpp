@@ -10,6 +10,7 @@
 #include <libtbag/log/Log.hpp>
 
 // Singleton classes.
+#include <libtbag/lib/ComInitializer.hpp>
 #include <libtbag/log/mgr/LoggerManager.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/container/Global.hpp>
@@ -83,13 +84,14 @@ static void runCreateOrRelease(bool is_create = true)
     using Func = CreateOrRelease::Func;
 
     // @formatter:off
+    Func    com([](){     lib::ComInitializer::createInstance(); }, [](){     lib::ComInitializer::releaseInstance(); });
     Func    log([](){ log::mgr::LoggerManager::createInstance(); }, [](){ log::mgr::LoggerManager::releaseInstance(); });
     Func signal([](){          signal::__impl::createInstance(); }, [](){          signal::__impl::releaseInstance(); });
     Func   time([](){            time::__impl::createInstance(); }, [](){            time::__impl::releaseInstance(); });
     Func global([](){       container::Global::createInstance(); }, [](){       container::Global::releaseInstance(); });
     // @formatter:on
 
-    CreateOrRelease init({log, signal, time, global});
+    CreateOrRelease init({com, log, signal, time, global});
 
     if (is_create) {
         init.create();
