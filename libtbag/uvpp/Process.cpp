@@ -120,14 +120,14 @@ static bool updateOptions(Process::Options & options,
     native.flags |= (options.hide ? UV_PROCESS_WINDOWS_HIDE : 0);
 
     std::size_t const STDIOS_SIZE = options.stdios.size();
-    native.stdio_count = static_cast<int>(options.stdios.size());
+    native.stdio_count = static_cast<int>(STDIOS_SIZE);
 
     stdios.clear();
-    stdios.resize(STDIOS_SIZE);
-    if (stdios.empty()) {
-        native.stdio = nullptr;
-    } else {
+    if (STDIOS_SIZE > 0) {
+        stdios.resize(STDIOS_SIZE);
         native.stdio = &stdios[0];
+    } else {
+        native.stdio = nullptr;
     }
 
     // The 'stdio' field points to an array of uv_stdio_container_t structs that
@@ -167,9 +167,10 @@ static bool updateOptions(Process::Options & options,
 // Process::StdioContainer implementation.
 // ---------------------------------------
 
-Process::StdioContainer::StdioContainer() : type(Type::STDIO_CONTAINER_FD), stream(nullptr), fd(0),
-                                            ignore(false), create_pipe(false), inherit_fd(false), inherit_stream(false),
-                                            readable_pipe(false), writable_pipe(false)
+Process::StdioContainer::StdioContainer(bool ignore_flag)
+        : type(Type::STDIO_CONTAINER_FD), stream(nullptr), fd(0),
+          ignore(ignore_flag), create_pipe(false), inherit_fd(false), inherit_stream(false),
+          readable_pipe(false), writable_pipe(false)
 {
     // EMPTY.
 }
@@ -179,6 +180,7 @@ Process::StdioContainer::StdioContainer(Stream * s, bool inherit) : StdioContain
     type = Type::STDIO_CONTAINER_STREAM;
     stream = s;
     inherit_stream = inherit;
+    ignore = false;
 }
 
 Process::StdioContainer::StdioContainer(int f, bool inherit) : StdioContainer()
@@ -186,6 +188,7 @@ Process::StdioContainer::StdioContainer(int f, bool inherit) : StdioContainer()
     type = Type::STDIO_CONTAINER_FD;
     fd = f;
     inherit_fd = inherit;
+    ignore = false;
 }
 
 Process::StdioContainer::~StdioContainer()
@@ -323,6 +326,12 @@ Process::Options & Process::Options::appendEnvironment(std::string const & env)
 Process::Options & Process::Options::appendStdio(StdioContainer const & io)
 {
     stdios.push_back(io);
+    return *this;
+}
+
+Process::Options & Process::Options::appendIgnoreStdio()
+{
+    stdios.emplace_back(true);
     return *this;
 }
 

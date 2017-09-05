@@ -86,7 +86,7 @@ public:
         bool readable_pipe;
         bool writable_pipe;
 
-        StdioContainer();
+        StdioContainer(bool ignore_flag = false);
         explicit StdioContainer(Stream * s, bool inherit = false);
         explicit StdioContainer(int f, bool inherit = false);
         ~StdioContainer();
@@ -146,6 +146,7 @@ public:
         Options & appendEnvironment(std::string const & env);
 
         Options & appendStdio(StdioContainer const & io);
+        Options & appendIgnoreStdio();
 
         Options & setUserId(uuser id, bool enable = true);
         Options & setGroupId(ugroup id, bool enable = true);

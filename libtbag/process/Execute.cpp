@@ -52,7 +52,11 @@ int execute(std::string const & file,
     Process::Options options;
     options.clear();
     options.setFile(EXE_FILE.toString());
-    options.setWorking(cwd);
+    if (cwd.empty()) {
+        options.setWorking(Path::getWorkDir().toString());
+    } else {
+        options.setWorking(cwd);
+    }
 
     for (auto & arg : args) {
         options.appendArgument(arg);
@@ -99,7 +103,7 @@ int execute(std::string const & file,
             std::vector<std::string> const & envs,
             Err * code)
 {
-    return execute(file, args, std::vector<std::string>(), filesystem::Path::getWorkDir().toString(), code);
+    return execute(file, args, std::vector<std::string>(), std::string(), code);
 }
 
 int execute(std::string const & file,
