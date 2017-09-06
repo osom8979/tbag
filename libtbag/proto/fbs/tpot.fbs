@@ -2,10 +2,101 @@
 
 namespace libtbag.proto.fbs.tpot;
 
-struct Version
+enum ResultCode : int
 {
-    major : byte = 0;
-    minor : byte = 1;
+    SUCCESS = 0,
+    UNKNOWN_ERROR,
 }
 
+/// Tpot packet version.
+struct PacketVersion
+{
+    major : uint = 0;
+    minor : uint = 1;
+}
+
+struct Header
+{
+    id   : ulong;
+    code : ResultCode;
+}
+
+// ------
+// Tables
+// ------
+
+table PacketVersionRequest
+{
+    // EMPTY.
+}
+
+table PacketVersionResponse
+{
+    version : PacketVersion;
+}
+
+table ExecRequest
+{
+    file : string;
+    cwd  : string;
+    args : [string];
+    envs : [string];
+}
+
+table ExecResponse
+{
+    pid : int;
+}
+
+table HeartbitRequest
+{
+    echo : string;
+}
+
+table HeartbitResponse
+{
+    echo : string;
+}
+
+table ListRequest
+{
+    // EMPTY.
+}
+
+table ListResponse
+{
+    pids : [int];
+}
+
+table KillRequest
+{
+    pid : int;
+}
+
+table KillResponse
+{
+    // EMPTY.
+}
+
+union AnyPacket
+{
+    PacketVersionRequest,
+    PacketVersionResponse,
+    ExecRequest,
+    ExecResponse,
+    HeartbitRequest,
+    HeartbitResponse,
+    ListRequest,
+    ListResponse,
+    KillRequest,
+    KillResponse,
+}
+
+table TpotPacket
+{
+    header : Header;
+    packet : AnyPacket;
+}
+
+root_type TpotPacket;
 
