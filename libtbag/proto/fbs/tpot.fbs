@@ -37,10 +37,11 @@ table PacketVersionResponse
 
 table ExecRequest
 {
-    file : string;
-    cwd  : string;
-    args : [string];
-    envs : [string];
+    file  : string;
+    args  : [string];
+    envs  : [string];
+    cwd   : string;
+    input : string;
 }
 
 table ExecResponse
