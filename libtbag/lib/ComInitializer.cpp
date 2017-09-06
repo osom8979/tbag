@@ -24,12 +24,12 @@ namespace lib {
 
 ComInitializer::ComInitializer() : _init(false)
 {
-    // EMPTY.
+    init();
 }
 
 ComInitializer::~ComInitializer()
 {
-    // EMPTY.
+    uninit();
 }
 
 bool ComInitializer::init()
