@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/pattern/Singleton2.hpp>
 
-#include <atomic>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,8 +36,12 @@ class TBAG_API ComInitializer : public pattern::Singleton2<ComInitializer>
 public:
     friend class pattern::Singleton2<ComInitializer>;
 
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
+
 private:
-    std::atomic_bool _init;
+    mutable Mutex _mutex;
+    bool _init;
 
 protected:
     ComInitializer();
@@ -46,8 +50,12 @@ public:
     virtual ~ComInitializer();
 
 public:
-    inline bool isInit() const TBAG_NOEXCEPT_SP_OP(_init.load())
-    { return _init.load(); }
+    bool init();
+    void uninit();
+
+public:
+    inline bool isInit() const
+    { Guard g(_mutex); return _init; }
 };
 
 } // namespace lib

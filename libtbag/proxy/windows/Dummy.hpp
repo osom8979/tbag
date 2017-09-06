@@ -181,8 +181,32 @@
 # define S_OK 0x00000000 // Operation successful.
 # endif
 
+# ifndef S_FALSE
+# define S_FALSE 0x000000001
+# endif
+
+# ifndef E_ACCESSDENIED
+# define E_ACCESSDENIED 0x80070005 // Access denied.
+# endif
+
 # ifndef E_FAIL
 # define E_FAIL 0x80004005 // Unspecified failure.
+# endif
+
+# ifndef E_INVALIDARG
+# define E_INVALIDARG 0x80070057 // Invalid parameter value.
+# endif
+
+# ifndef E_OUTOFMEMORY
+# define E_OUTOFMEMORY 0x8007000E // Out of memory.
+# endif
+
+# ifndef E_POINTER
+# define E_POINTER 0x80004003 // NULL was passed incorrectly for a pointer value.
+# endif
+
+# ifndef E_UNEXPECTED
+# define E_UNEXPECTED 0x8000FFFF // Unexpected condition.
 # endif
 
 # ifndef ERROR_INVALID_FUNCTION
@@ -380,6 +404,19 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace proxy   {
 namespace windows {
+
+/**
+ * Determines the concurrency model used for incoming calls to objects created by this thread.
+ * This concurrency model can be either apartment-threaded or multithreaded.
+ *
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms695279(v=vs.85).aspx>
+ */
+typedef enum tagCOINIT {
+    COINIT_APARTMENTTHREADED  = 0x2,
+    COINIT_MULTITHREADED      = 0x0,
+    COINIT_DISABLE_OLE1DDE    = 0x4,
+    COINIT_SPEED_OVER_MEMORY  = 0x8
+} COINIT;
 
 typedef struct _GENERIC_MAPPING {
     ACCESS_MASK GenericRead;    ///< Specifies an access mask defining read access to an object.
@@ -832,6 +869,38 @@ inline BOOL FindNextFileW(_In_  HANDLE             hFindFile,
  */
 inline BOOL FindClose(_Inout_ HANDLE hFindFile)
 { return FALSE; }
+
+/**
+ * Initializes the COM library for use by the calling thread, sets the thread's concurrency model,
+ * and creates a new apartment for the thread if one is required.
+ *
+ * You should call Windows::Foundation::Initialize to initialize the thread instead of CoInitializeEx
+ * if you want to use the Windows Runtime APIs or if you want to use both COM and Windows Runtime components.
+ * Windows::Foundation::Initialize is sufficient to use for COM components.
+ *
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms695279(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: Objbase.h
+ *  - Library: Ole32.lib
+ */
+inline HRESULT CoInitializeEx(_In_opt_ LPVOID pvReserved, _In_ DWORD dwCoInit)
+{ return E_UNEXPECTED; }
+
+/**
+ * Closes the COM library on the current thread,
+ * unloads all DLLs loaded by the thread,
+ * frees any other resources that the thread maintains,
+ * and forces all RPC connections on the thread to close.
+ *
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms688715(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Header: Objbase.h
+ *  - Library: Ole32.lib
+ */
+inline void CoUninitialize(void)
+{ /* EMPTY. */ }
 
 } // namespace windows
 } // namespace proxy

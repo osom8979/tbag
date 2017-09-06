@@ -8,9 +8,12 @@
 #include <libtbag/lib/ComInitializer.hpp>
 #include <libtbag/log/Log.hpp>
 
-#if defined(TBAG_PLATFORM_WINDOWS)
-#include <windows.h>
+#if defined(HAVE_COINITIALIZEEX_FUNC)
+#include <Objbase.h>
 #pragma comment(lib, "ole32.lib")
+#else
+#include <libtbag/proxy/windows/Dummy.hpp>
+using namespace libtbag::proxy::windows;
 #endif
 
 // -------------------
@@ -21,22 +24,31 @@ namespace lib {
 
 ComInitializer::ComInitializer() : _init(false)
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
-    // We do not care about the result of the function call: any result is OK for us.
-    if (CoInitializeEx(0, COINIT_MULTITHREADED) == S_OK) {
-        _init = true;
-    }
-#endif
+    // EMPTY.
 }
 
 ComInitializer::~ComInitializer()
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
+    // EMPTY.
+}
+
+bool ComInitializer::init()
+{
+    Guard g(_mutex);
+    if (_init == false) {
+        // We do not care about the result of the function call: any result is OK for us.
+        _init = (CoInitializeEx(0, COINIT_MULTITHREADED) == S_OK ? true : false);
+    }
+    return _init;
+}
+
+void ComInitializer::uninit()
+{
+    Guard g(_mutex);
     if (_init) {
         CoUninitialize();
-        _init = true;
+        _init = false;
     }
-#endif
 }
 
 } // namespace lib

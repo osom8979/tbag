@@ -24,7 +24,6 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
-#include <atomic>
 #include <mutex>
 #include <thread>
 
@@ -93,16 +92,12 @@ public:
     using ProcMap  = std::unordered_map<int, SharedProc>;
     using ProcPair = ProcMap::value_type;
 
-    using Mutex     = std::mutex;
-    using Guard     = std::lock_guard<Mutex>;
-    using Condition = std::condition_variable;
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
 private:
     mutable Mutex _mutex;
     ProcMap _procs;
-
-private:
-    std::atomic_bool _auto_erase;
 
 public:
     ProcessManager();

@@ -124,6 +124,7 @@ check_include_file (execinfo.h     HAVE_EXECINFO_H)
 check_include_file (unwind.h       HAVE_UNWIND_H)
 check_include_file (libunwind.h    HAVE_LIBUNWIND_H)
 check_include_file (Windows.h      HAVE_WINDOWS_H) ## Win32
+check_include_file (Objbase.h      HAVE_OBJBASE_H) ## Win32
 check_include_file (Dbgeng.h       HAVE_DBGENG_H) ## Win32
 
 ## Compile checker.
@@ -133,15 +134,12 @@ include (CheckCXXSourceCompiles)
 ## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
 ## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
 ## - ${CMAKE_REQUIRED_LIBRARIES}: list of libraries to link
-if (WIN32 AND HAVE_WINDOWS_H AND HAVE_DBGENG_H)
+if (WIN32 AND HAVE_OBJBASE_H)
     check_cxx_source_compiles ("
-        #include <cstring>
-        #include <windows.h>
-        #include <Dbgeng.h>
+        #include <Objbase.h>
         #pragma comment(lib, \"ole32.lib\")
-        #pragma comment(lib, \"Dbgeng.lib\")
         int main() { return ::CoInitializeEx(NULL, COINIT_MULTITHREADED) == S_OK ? 0 : 1; }
-        " HAVE_DBGENG_CO_INIT)
+        " HAVE_COINITIALIZEEX_FUNC)
 endif ()
 
 set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")

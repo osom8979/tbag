@@ -35,8 +35,8 @@
 /* Define to 1 if you have the <dbgeng.h> header file. */
 #cmakedefine HAVE_DBGENG_H
 
-/* Define to 1 if you have the <dbgeng.h> header file. And the COM library initialized successfully. */
-#cmakedefine HAVE_DBGENG_CO_INIT
+/* COM library initialized successfully. */
+#cmakedefine HAVE_COINITIALIZEEX_FUNC
 
 #endif /* __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_CONFIG_EX_H__ */
 
