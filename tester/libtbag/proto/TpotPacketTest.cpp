@@ -35,7 +35,7 @@ TEST(TpotPacketTest, Default)
     ASSERT_LT(0, buffer.size());
 
     uint64_t header_id = 0;
-    ResultCode header_code;
+    int header_code;
 
     std::string file;
     std::vector<std::string> args;
@@ -45,7 +45,7 @@ TEST(TpotPacketTest, Default)
 
     packet.setOnExecRequest([&](Header const & header, ExecRequest const & packet){
         header_id   = header.id();
-        header_code = header.code();
+        header_code = static_cast<int>(header.code());
         file  = packet.file()->str();
         cwd   = packet.cwd()->str();
         input = packet.input()->str();
@@ -59,7 +59,7 @@ TEST(TpotPacketTest, Default)
     ASSERT_EQ(Err::E_SUCCESS, packet.parse(buffer.data(), buffer.size()));
 
     ASSERT_LT(0, header_id);
-    ASSERT_EQ(ResultCode_SUCCESS, header_code);
+    ASSERT_EQ(static_cast<int>(ResultCode_SUCCESS), header_code);
     ASSERT_EQ(TEST_FILE, file);
     ASSERT_EQ(TEST_CWD, cwd);
     ASSERT_EQ(TEST_INPUT, input);
