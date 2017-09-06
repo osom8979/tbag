@@ -28,33 +28,6 @@ StdProcess::~StdProcess()
     // EMPTY.
 }
 
-Err StdProcess::spawn(Loop & loop, std::string const & file)
-{
-    return spawn(loop, file, std::vector<std::string>());
-}
-
-Err StdProcess::spawn(Loop & loop, std::string const & file, std::vector<std::string> const & args)
-{
-    return spawn(loop, file, args, std::vector<std::string>());
-}
-
-Err StdProcess::spawn(Loop & loop,
-                      std::string const & file,
-                      std::vector<std::string> const & args,
-                      std::vector<std::string> const & envs)
-{
-    return spawn(loop, file, args, envs, std::string());
-}
-
-Err StdProcess::spawn(Loop & loop,
-                      std::string const & file,
-                      std::vector<std::string> const & args,
-                      std::vector<std::string> const & envs,
-                      std::string const & cwd)
-{
-    return spawn(loop, file, args, envs, cwd, std::string());
-}
-
 Err StdProcess::spawn(Loop & loop,
                       std::string const & file,
                       std::vector<std::string> const & args,
@@ -151,9 +124,12 @@ Err StdProcess::spawn(Loop & loop,
 
     try {
         _process = loop.newHandle<FuncProcess>(loop, options);
-    } catch (...) {
+    } catch (std::bad_alloc & e) {
         return Err::E_BADALLOC;
+    } catch (...) {
+        return Err::E_UNKEXCP;
     }
+
     _process->setOnExit([&](int64_t exit_status, int term_signal){
         onExit(exit_status, term_signal);
         _process->close();

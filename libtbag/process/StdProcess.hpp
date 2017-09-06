@@ -83,13 +83,12 @@ public:
     // @formatter:on
 
 public:
-    // @formatter:off
-    Err spawn(Loop & loop, std::string const & file);
-    Err spawn(Loop & loop, std::string const & file, std::vector<std::string> const & args);
-    Err spawn(Loop & loop, std::string const & file, std::vector<std::string> const & args, std::vector<std::string> const & envs);
-    Err spawn(Loop & loop, std::string const & file, std::vector<std::string> const & args, std::vector<std::string> const & envs, std::string const & cwd);
-    Err spawn(Loop & loop, std::string const & file, std::vector<std::string> const & args, std::vector<std::string> const & envs, std::string const & cwd, std::string const & input);
-    // @formatter:on
+    Err spawn(Loop & loop,
+              std::string const & file,
+              std::vector<std::string> const & args = std::vector<std::string>(),
+              std::vector<std::string> const & envs = std::vector<std::string>(),
+              std::string const & cwd = std::string(),
+              std::string const & input = std::string());
 
 public:
     Err kill(int signum);

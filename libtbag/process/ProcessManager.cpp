@@ -7,6 +7,7 @@
 
 #include <libtbag/process/ProcessManager.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
 #include <cassert>
 
 // -------------------
@@ -15,77 +16,181 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace process {
 
-// ------------------------------
-// ProcessManager implementation.
-// ------------------------------
+// ------------------------------------
+// ProcessManager::Proc implementation.
+// ------------------------------------
 
-ProcessManager::ProcessManager() : ProcessManager(true)
+ProcessManager::Proc::Proc(ProcessManager * parent) : _parent(parent)
 {
     // EMPTY.
 }
 
-ProcessManager::ProcessManager(bool auto_erase) : _procs(), _auto_erase(auto_erase)
+ProcessManager::Proc::~Proc()
+{
+    if (_thread.joinable()) {
+        _thread.join();
+    }
+}
+
+void ProcessManager::Proc::onOutRead(char const * buffer, std::size_t size)
+{
+    assert(_parent != nullptr);
+    _parent->onOutRead(getPid(), buffer, size);
+}
+
+void ProcessManager::Proc::onErrRead(char const * buffer, std::size_t size)
+{
+    assert(_parent != nullptr);
+    _parent->onErrRead(getPid(), buffer, size);
+}
+
+void ProcessManager::Proc::runner()
+{
+    int const PID = getPid();
+    if (PID == 0) {
+        tDLogE("ProcessManager::Proc::runner() Unknown process id");
+        return;
+    }
+
+    Err const CODE = _loop.run();
+    if (TBAG_ERR_FAILURE(CODE)) {
+        tDLogW("ProcessManager::Proc::runner() loop {} error (PID: {})", getErrName(CODE), PID);
+    }
+
+    assert(_parent != nullptr);
+    _parent->onExit(PID, getExitStatus(), getTermSignal());
+}
+
+Err ProcessManager::Proc::exec(std::string const & file,
+                               std::vector<std::string> const & args,
+                               std::vector<std::string> const & envs,
+                               std::string const & cwd,
+                               std::string const & input)
+{
+    Err const CODE = spawn(_loop, file, args, envs, cwd, input);
+    if (TBAG_ERR_FAILURE(CODE)) {
+        return CODE;
+    }
+    try {
+        _thread = std::thread(&ProcessManager::Proc::runner, this);
+    } catch (...) {
+        return Err::E_UNKEXCP;
+    }
+    return Err::E_SUCCESS;
+}
+
+bool ProcessManager::Proc::joinable() const
+{
+    return _thread.joinable();
+}
+
+void ProcessManager::Proc::join()
+{
+    _thread.join();
+}
+
+// ------------------------------
+// ProcessManager implementation.
+// ------------------------------
+
+ProcessManager::ProcessManager()
 {
     // EMPTY.
 }
 
 ProcessManager::~ProcessManager()
 {
-    // EMPTY.
+    Guard g(_mutex);
+    for (auto & proc : _procs) {
+        if (static_cast<bool>(proc.second) && proc.second->isRunning()) {
+            proc.second->kill(signal::TBAG_SIGNAL_TERMINATION);
+        }
+    }
+    _procs.clear();
 }
 
-ProcessManager::WeakProcess ProcessManager::get(int pid)
+void ProcessManager::join()
 {
+    tDLogD("ProcessManager::join() BEGIN");
+    Guard g(_mutex);
+    for (auto & proc : _procs) {
+        if (static_cast<bool>(proc.second) && proc.second->joinable()) {
+            proc.second->join();
+        }
+    }
+    tDLogD("ProcessManager::join() END");
+}
+
+bool ProcessManager::exists(int pid) const
+{
+    Guard g(_mutex);
+    return _procs.find(pid) != _procs.end();
+}
+
+std::vector<int> ProcessManager::list() const
+{
+    std::vector<int> result;
+    Guard g(_mutex);
+    for (auto & proc : _procs) {
+        result.push_back(proc.first);
+    }
+    return result;
+}
+
+ProcessManager::WeakProc ProcessManager::get(int pid)
+{
+    Guard g(_mutex);
     auto itr = _procs.find(pid);
     if (itr != _procs.end()) {
-        return WeakProcess(itr->second);
+        return WeakProc(itr->second);
     }
-    return WeakProcess();
+    return WeakProc();
 }
 
-int ProcessManager::exec(Loop & loop, Options const & options)
+bool ProcessManager::erase(int pid)
 {
-    Err code = Err::E_UNKNOWN;
-    int pid = 0;
+    Guard g(_mutex);
+    return _procs.erase(pid) == 1U;
+}
 
-    try {
-        auto proc = loop.newHandle<FuncProcess>(loop, options);
-        proc->setOnExit([proc](int64_t exit_status, int term_signal){
-            proc->close();
-        });
-        proc->setOnClose([this, proc](){
-            this->onExit(proc->getPid(), proc->getExitStatus(), proc->getTermSignal());
-            this->_procs.erase(proc->getPid());
-        });
-
-        pid = proc->getPid();
-        if (_procs.insert(ProcessPair(pid, proc)).second) {
-            code = Err::E_SUCCESS;
-        } else {
-            code = Err::E_INSERT;
-        }
-    } catch (...) {
-        code = Err::E_UNKEXCP;
-        pid = 0;
+int ProcessManager::exec(std::string const & file,
+                         std::vector<std::string> const & args,
+                         std::vector<std::string> const & envs,
+                         std::string const & cwd,
+                         std::string const & input)
+{
+    Guard g(_mutex);
+    SharedProc proc(new Proc(this));
+    Err const SPAWN_CODE = proc->exec(file, args, envs, cwd, input);
+    if (TBAG_ERR_FAILURE(SPAWN_CODE)) {
+        tDLogE("ProcessManager::spawn() process spawn error.", getErrName(SPAWN_CODE));
+        return 0;
     }
 
-    this->onSpawn(code, pid);
-    return pid;
+    int const PID = proc->getPid();
+    if (_procs.insert(ProcPair(PID, proc)).second == false) {
+        tDLogE("ProcessManager::spawn() Insert error.");
+        return 0;
+    }
+    return PID;
 }
 
 Err ProcessManager::kill(int pid, int signum)
 {
-    return uvpp::Process::kill(pid, signum);
-}
-
-void ProcessManager::onSpawn(Err code, int pid)
-{
-    // EMPTY.
-}
-
-void ProcessManager::onExit(int pid, int64_t exit_status, int term_signal)
-{
-    // EMPTY.
+    Guard g(_mutex);
+    auto itr = _procs.find(pid);
+    if (itr != _procs.end()) {
+        if (static_cast<bool>(itr->second)) {
+            if (itr->second->isRunning()) {
+                return itr->second->kill(signum);
+            } else {
+                return Err::E_ILLSTATE;
+            }
+        } else {
+            return Err::E_EXPIRED;
+        }
+    }
+    return Err::E_NOTFOUND;
 }
 
 } // namespace process
