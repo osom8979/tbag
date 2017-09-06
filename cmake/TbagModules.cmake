@@ -236,6 +236,12 @@ macro (tbag_modules__build_dep_flatc_cpp __target __fbs)
     flatc_generate_target2 (${__target} $<TARGET_FILE:flatc> cpp ${__fbs})
 endmacro ()
 
+macro (tbag_modules__apply_dep_flatbuffers)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES flatbuffers)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/flatbuffers/include)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:flatbuffers>)
+endmacro ()
+
 macro (tbag_modules__apply_dep_gtest)
     list (APPEND TBAG_PROJECT_DEPENDENCIES gtest)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/gtest/include)

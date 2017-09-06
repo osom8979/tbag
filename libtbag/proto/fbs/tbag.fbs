@@ -1,0 +1,31 @@
+// tbag packet protocols.
+
+namespace libtbag.proto.fbs.tbag;
+
+struct Version
+{
+    major : byte = 0;
+    minor : byte = 1;
+    patch : byte = 0;
+}
+
+struct Point
+{
+    x : int;
+    y : int;
+}
+
+struct Size
+{
+    width  : int;
+    height : int;
+}
+
+struct Rect
+{
+    x      : int;
+    y      : int;
+    width  : int;
+    height : int;
+}
+

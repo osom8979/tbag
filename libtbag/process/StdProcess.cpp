@@ -8,6 +8,7 @@
 #include <libtbag/process/StdProcess.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/FindPath.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
@@ -38,21 +39,24 @@ Err StdProcess::spawn(Loop & loop,
     using namespace filesystem;
     using namespace uvpp;
 
-    Path const EXE_FILE(file);
+    Path exe_file(file);
 
-    if (EXE_FILE.exists() == false) {
-        tDLogE("StdProcess::spawn({}) No such file or directory", file);
-        return Err::E_ENOENT;
+    if (exe_file.exists() == false) {
+        exe_file = findFirstUtf8ExecuteFile("^" + file + "$");
+        if (exe_file.empty() == false && exe_file.exists() == false) {
+            tDLogE("StdProcess::spawn({}) No such file or directory", file);
+            return Err::E_ENOENT;
+        }
     }
 
-    if (EXE_FILE.isExecutable() == false) {
+    if (exe_file.isExecutable() == false) {
         tDLogE("StdProcess::spawn({}) Permission denied", file);
         return Err::E_EACCES;
     }
 
     Process::Options options;
     options.clear();
-    options.setFile(EXE_FILE.toString());
+    options.setFile(exe_file.toString());
     if (cwd.empty()) {
         options.setWorking(Path::getWorkDir().toString());
     } else {

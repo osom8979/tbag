@@ -1,0 +1,11 @@
+// tpot packet protocols.
+
+namespace libtbag.proto.fbs.tpot;
+
+struct Version
+{
+    major : byte = 0;
+    minor : byte = 1;
+}
+
+

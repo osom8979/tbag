@@ -32,6 +32,12 @@ tbag_modules__apply_dep_sqlite3     ()
 tbag_modules__apply_dep_uv          ()
 tbag_modules__apply_dep_lua         ()
 tbag_modules__apply_dep_stb         ()
+tbag_modules__apply_dep_flatbuffers ()
+
+set (TBAG_FBS_SRC "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
+set (TPOT_FBS_SRC "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tbag.fbs")
+tbag_modules__build_dep_flatc_cpp (tbag_fbs ${TBAG_FBS_SRC})
+tbag_modules__build_dep_flatc_cpp (tpot_fbs ${TPOT_FBS_SRC})
 
 if (OpenCL_FOUND)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})
