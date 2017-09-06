@@ -4,9 +4,9 @@ namespace libtbag.proto.fbs.tbag;
 
 struct Version
 {
-    major : byte = 0;
-    minor : byte = 1;
-    patch : byte = 0;
+    major : uint = 0;
+    minor : uint = 1;
+    patch : uint = 0;
 }
 
 struct Point

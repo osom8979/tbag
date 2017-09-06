@@ -7,7 +7,6 @@
 
 #include <libtbag/proto/TbagPacket.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/proto/fbs/tbag_generated.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,14 +14,44 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace proto {
 
-TbagPacket::TbagPacket()
+util::Version toVersion(proto::fbs::tbag::Version const & version)
 {
-    // EMPTY.
+    return util::Version(version.major(), version.minor(), version.patch());
 }
 
-TbagPacket::~TbagPacket()
+proto::fbs::tbag::Version fromVersion(util::Version const & version)
 {
-    // EMPTY.
+    return proto::fbs::tbag::Version(version.getMajor(), version.getMinor(), version.getPatch());
+}
+
+geometry::Point toPoint(proto::fbs::tbag::Point const & point)
+{
+    return geometry::makePoint<int>(point.x(), point.y());
+}
+
+proto::fbs::tbag::Point fromPoint(geometry::Point const & point)
+{
+    return proto::fbs::tbag::Point(point.x, point.y);
+}
+
+geometry::Size toSize(proto::fbs::tbag::Size const & size)
+{
+    return geometry::makeSize<int>(size.width(), size.height());
+}
+
+proto::fbs::tbag::Size fromSize(geometry::Size const & size)
+{
+    return proto::fbs::tbag::Size(size.width, size.height);
+}
+
+geometry::Rect toRect(proto::fbs::tbag::Rect const & rect)
+{
+    return geometry::makeRect<int>(rect.x(), rect.y(), rect.width(), rect.height());
+}
+
+proto::fbs::tbag::Rect fromRect(geometry::Rect const & rect)
+{
+    return proto::fbs::tbag::Rect(rect.x, rect.y, rect.width, rect.height);
 }
 
 } // namespace proto

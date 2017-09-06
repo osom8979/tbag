@@ -7,7 +7,6 @@
 
 #include <libtbag/proto/TpotPacket.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/proto/fbs/tpot_generated.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

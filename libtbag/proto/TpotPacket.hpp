@@ -16,15 +16,14 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+
+#include <libtbag/proto/fbs/tpot_generated.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace proto {
-
-// Forward declaration.
 
 /**
  * TpotPacket class prototype.
@@ -34,9 +33,6 @@ namespace proto {
  */
 class TBAG_API TpotPacket : private Noncopyable
 {
-private:
-    // Insert member variables.
-
 public:
     TpotPacket();
     virtual ~TpotPacket();

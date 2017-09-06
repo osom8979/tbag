@@ -59,7 +59,7 @@ struct BaseSize
 // ------------
 
 using Point = BasePoint<int>;
-using Size  = BaseSize <int>;
+using Size  = BaseSize<int>;
 
 Point const EMPTY_POINT = {0, 0};
 Size  const EMPTY_SIZE  = {0, 0};
