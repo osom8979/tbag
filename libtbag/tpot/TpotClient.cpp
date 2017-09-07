@@ -8,6 +8,7 @@
 #include <libtbag/tpot/TpotClient.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/HelpCommander.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -234,8 +235,13 @@ TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_DELIMITER =
 
 int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> const & cmd_args)
 {
+    std::stringstream ss;
+    for (auto & a : cmd_args) {
+        ss << a << ' ';
+    }
+
     if (cmd_args.empty()) {
-        std::cerr << "Empty arguments.\n";
+        std::cerr << "Empty arguments: " << ss.str() << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -248,45 +254,38 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     std::string input;
     std::string msg;
     int pid;
+    bool help;
 
     using namespace string;
     HelpCommander commander(TPOT_CLIENT_REQUEST_COMMAND_PREFIX, TPOT_CLIENT_REQUEST_COMMAND_DELIMITER);
     {   // Initialize commander.
         using namespace libtbag::string;
-        TBAG_HELP_COMMANDER_INSERT2(commander, "file" , &file , "", "exec file");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "cwd"  , &cwd  , "", "exec cwd");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "input", &input, "", "exec stdin");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "msg"  , &msg  , "", "message");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "pid"  , &pid  ,  0, "process id");
+        TBAG_HELP_COMMANDER_INSERT2(commander, "file" , &file ,     "", "exec file");
+        TBAG_HELP_COMMANDER_INSERT2(commander, "cwd"  , &cwd  ,     "", "exec cwd");
+        TBAG_HELP_COMMANDER_INSERT2(commander, "input", &input,     "", "exec stdin");
+        TBAG_HELP_COMMANDER_INSERT2(commander, "msg"  , &msg  , "TpoT", "message");
+        TBAG_HELP_COMMANDER_INSERT2(commander, "pid"  , &pid  ,      0, "process id");
+        TBAG_HELP_COMMANDER_INSERT2(commander, "help" , &help ,  false, "process id");
         commander.insert("args", [&](Arguments const & a){
             args = a.getStrings();
         }, "exec args");
         commander.insert("envs", [&](Arguments const & a){
             envs = a.getStrings();
         }, "exec envs");
-        commander.setDefaultCallback([&](Arguments const & args){
-            if (args.getName().empty() == false) {
+        commander.setDefaultCallback([&](Arguments const & a){
+            if (a.getName().empty() == false) {
                 // This block comes when an unknown option is hit.
                 if (param.verbose) {
-                    tDLogW("requestTpotClient() Unknown command: ", args.getName());
+                    tDLogW("requestTpotClient() Unknown command: ", a.getName());
                 }
                 return;
             }
-            if (args.empty() == false) {
+            if (a.empty() == false) {
                 // Command arguments.
-                commands.push_back(args.get(0));
+                commands.push_back(a.get(0));
             }
         });
-        std::stringstream ss;
-        for (auto & i : cmd_args) {
-            ss << i << ' ';
-        }
         commander.request(ss.str());
-    }
-
-    if (commands.empty()) {
-        std::cerr << "Empty command.\n";
-        return EXIT_FAILURE;
     }
 
     std::string const  VERSION_CMD = std::string(proto:: VersionPath::getPath()).substr(1);
@@ -294,6 +293,21 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     std::string const HEARTBIT_CMD = std::string(proto::HeartbitPath::getPath()).substr(1);
     std::string const     LIST_CMD = std::string(proto::    ListPath::getPath()).substr(1);
     std::string const     KILL_CMD = std::string(proto::    KillPath::getPath()).substr(1);
+
+    if (help) {
+        std::cout << commander.help(true) << "\nCommand list:\n"
+                  << "* " << VERSION_CMD  << std::endl
+                  << "* " << EXEC_CMD     << std::endl
+                  << "* " << HEARTBIT_CMD << std::endl
+                  << "* " << LIST_CMD     << std::endl
+                  << "* " << KILL_CMD     << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if (commands.empty()) {
+        std::cerr << "Empty command: " << ss.str() << std::endl;
+        return EXIT_FAILURE;
+    }
 
     TpotClient client(param);
     TpotClient::Result result;
@@ -304,25 +318,33 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     Err request_code;
 
     if (commands[0] == VERSION_CMD) {
-        std::cout << "Request PacketVersion";
         result.response.version = &result_version;
         request_code = client.requestPacketVersion(&result);
+        std::cout << string::fformat("Request version (ID:{}, CODE:{}, VER:{})\n", result.id, result.code, result.response.version->toString());
 
     } else if (commands[0] == EXEC_CMD) {
-        std::cout << "Request Exec";
         result.response.pid = &result_pid;
         request_code = client.requestExec(file, args, envs, cwd, input, &result);
+        std::cout << string::fformat("Request exec (ID:{}, CODE:{}, PID:{})\n", result.id, result.code, *(result.response.pid));
+
     } else if (commands[0] == HEARTBIT_CMD) {
-        std::cout << "Request Heartbit";
         result.response.echo = &result_echo;
         request_code = client.requestHeartbit(msg, &result);
+        std::cout << string::fformat("Request heartbit (ID:{}, CODE:{}, ECHO:{})\n", result.id, result.code, *(result.response.echo));
+
     } else if (commands[0] == LIST_CMD) {
-        std::cout << "Request List";
         result.response.list = &result_list;
         request_code = client.requestList(&result);
+        std::cout << string::fformat("Request list (ID:{}, CODE:{}, Size:{})\n", result.id, result.code, result.response.list->size());
+        for (auto & id : *(result.response.list)) {
+            std::cout << id << ',';
+        }
+        std::cout << std::endl;
+
     } else if (commands[0] == KILL_CMD) {
-        std::cout << "Request Kill";
         request_code = client.requestKill(pid, &result);
+        std::cout << string::fformat("Request kill (ID:{}, CODE:{})\n", result.id, result.code);
+
     } else {
         std::cerr << "Unknown command: " << commands[0] << std::endl;
         return EXIT_FAILURE;

@@ -118,7 +118,7 @@ std::string HelpCommander::help(std::string const & head, bool auto_padding) con
             ss << std::string(MAX_SIZE + PADDING_SIZE - cursor.first.size(), ' ');
         } else {
             auto param = _params.find(cursor.first);
-            if (param != _params.end()) {
+            if (param != _params.end() && param->second.empty() == false) {
                 ss << '=' << param->second;
             }
             ss << "\n\t";

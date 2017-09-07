@@ -26,8 +26,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
-TBAG_CONSTEXPR static char const * const TPOT_COMMAND_APP       = "app";
-TBAG_CONSTEXPR static char const * const TPOT_COMMAND_TEST      = "test";
+TBAG_CONSTEXPR static char const * const TPOT_COMMAND_SERVER = "server";
+TBAG_CONSTEXPR static char const * const TPOT_COMMAND_TEST   = "test";
 
 TBAG_CONSTEXPR static char const * const TPOT_NAME = "tpot";
 
@@ -35,8 +35,8 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::ex::ServiceApp(TPOT_NAME, argc, argv, envs),
           _commands(), _ip(), _port(0)
 {
-    _commands.insert(HelpPair(TPOT_COMMAND_APP , "Normal application mode."));
-    _commands.insert(HelpPair(TPOT_COMMAND_TEST, "Test mode."));
+    _commands.insert(HelpPair(TPOT_COMMAND_SERVER, "TpoT server mode."));
+    _commands.insert(HelpPair(TPOT_COMMAND_TEST  , "TpoT test mode."));
 }
 
 TpotMain::~TpotMain()
@@ -131,7 +131,7 @@ int TpotMain::onDefaultCommand(StringVector const & args)
         ip = "0.0.0.0";
     }
 
-    if (_port == 0) {
+    if (_port != 0) {
         port = _port;
     } else if (node->getEnable()) {
         port = node->getPort();
@@ -140,7 +140,7 @@ int TpotMain::onDefaultCommand(StringVector const & args)
     }
 
     int exit_code = EXIT_FAILURE;
-    if (args[0] == TPOT_COMMAND_APP) {
+    if (args[0] == TPOT_COMMAND_SERVER) {
         TpotServer::Param param;
         param.verbose = isEnableVerbose();
         param.bind = ip;
@@ -151,7 +151,7 @@ int TpotMain::onDefaultCommand(StringVector const & args)
         param.verbose = isEnableVerbose();
         param.ip = ip;
         param.port = port;
-        return requestTpotClient(param, args);
+        return requestTpotClient(param, std::vector<std::string>(args.begin() + 1, args.end()));
     } else {
         std::cerr << "Unknown command: " << args[0] << std::endl;
     }
