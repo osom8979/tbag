@@ -96,9 +96,9 @@ class CppGenerator : public BaseGenerator {
     code_ += "#define " + include_guard;
     code_ += "";
 
-    code_ += "#include \"flatbuffers/flatbuffers.h\"";
+    code_ += "#include <libtbag/3rd/flatbuffers/flatbuffers.h>";
     if (parser_.uses_flexbuffers_) {
-      code_ += "#include \"flatbuffers/flexbuffers.h\"";
+      code_ += "#include <libtbag/3rd/flatbuffers/flatbuffers.h>";
     }
     code_ += "";
 
