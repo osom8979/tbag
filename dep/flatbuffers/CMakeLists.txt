@@ -25,23 +25,37 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 
 ## flatbuffers (lib)
-set (FLATBUFFERS_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_parser.cpp"
+set (FLATBUFFERS_SRCS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/code_generators.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_parser.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_text.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/reflection.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/util.cpp")
 add_library (flatbuffers STATIC ${FLATBUFFERS_SRCS})
 
+## flathash
+set (FLATHASH_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/flathash.cpp")
+add_executable (flathash ${FLATHASH_SRCS})
+
 ## flatc (compiler)
-set (FLATC_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_cpp.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_general.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_go.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_js.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_php.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_python.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_fbs.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_grpc.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/flatc.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/grpc/src/compiler/cpp_generator.cc")
+set (FLATC_SRCS
+        #"${CMAKE_CURRENT_SOURCE_DIR}/src/code_generators.cpp"
+        #"${CMAKE_CURRENT_SOURCE_DIR}/src/idl_parser.cpp"
+        #"${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_text.cpp"
+        #"${CMAKE_CURRENT_SOURCE_DIR}/src/reflection.cpp"
+        #"${CMAKE_CURRENT_SOURCE_DIR}/src/util.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_cpp.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_general.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_go.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_js.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_php.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_python.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_fbs.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_grpc.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/flatc.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/flatc_main.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/grpc/src/compiler/cpp_generator.cc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/grpc/src/compiler/go_generator.cc")
 add_executable (flatc ${FLATC_SRCS})
 target_link_libraries (flatc PRIVATE flatbuffers)
 
@@ -51,8 +65,4 @@ add_custom_command (TARGET flatc
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:flatc> "${OUTPUT_FLATC_PATH}"
                     COMMENT "POST_BUILD of flatc: copy target.")
-
-## flathash
-set (FLATHASH_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/flathash.cpp")
-add_executable (flathash ${FLATHASH_SRCS})
 

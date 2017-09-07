@@ -66,7 +66,7 @@ namespace php {
                      const bool needs_imports, std::string *code_ptr) {
         std::string &code = *code_ptr;
         code += "<?php\n";
-        code = code + "// " + FlatBuffersGeneratedWarning();
+        code = code + "// " + FlatBuffersGeneratedWarning() + "\n\n";
         code += "namespace " + name_space_name + ";\n\n";
 
         if (needs_imports) {
@@ -89,10 +89,10 @@ namespace php {
         code += classcode;
 
         std::string filename = NamespaceDir(*def.defined_namespace) +
-                               kPathSeparator + def.name + ".php";
+                               def.name + ".php";
         return SaveFile(filename.c_str(), code, false);
       }
-      
+
     // Begin a class declaration.
     static void BeginClass(const StructDef &struct_def, std::string *code_ptr) {
       std::string &code = *code_ptr;
@@ -955,7 +955,7 @@ namespace php {
       code += Indent + Indent + "return $builder->offset();\n";
       code += Indent + "}\n";
     }
-      
+
     };
     }  // namespace php
 

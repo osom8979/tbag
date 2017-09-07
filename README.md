@@ -10,7 +10,7 @@ Tea-bag is Third party extension utility project.
 
 ## Dependencies
 
-- flatbuffers 1.4.0 (Apache License, Version 2.0)
+- flatbuffers 1.7.1 (Apache License, Version 2.0)
 - gtest 1.7.0 (BSD 3-clause license)
 - http-parser 2.7.1 (MIT license)
 - icu4c 57.1 (ICU license; http://source.icu-project.org/repos/icu/icu/trunk/LICENSE)

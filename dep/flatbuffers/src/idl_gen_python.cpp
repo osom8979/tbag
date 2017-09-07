@@ -630,7 +630,7 @@ class PythonGenerator : public BaseGenerator {
   void BeginFile(const std::string name_space_name, const bool needs_imports,
                  std::string *code_ptr) {
     std::string &code = *code_ptr;
-    code = code + "# " + FlatBuffersGeneratedWarning();
+    code = code + "# " + FlatBuffersGeneratedWarning() + "\n\n";
     code += "# namespace: " + name_space_name + "\n\n";
     if (needs_imports) {
       code += "import flatbuffers\n\n";
@@ -655,7 +655,7 @@ class PythonGenerator : public BaseGenerator {
     BeginFile(LastNamespacePart(*def.defined_namespace), needs_imports, &code);
     code += classcode;
     std::string filename = NamespaceDir(*def.defined_namespace) +
-                           kPathSeparator + def.name + ".py";
+                           def.name + ".py";
     return SaveFile(filename.c_str(), code, false);
   }
 };
