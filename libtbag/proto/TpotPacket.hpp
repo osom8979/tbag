@@ -97,9 +97,6 @@ public:
     Err buildKillResponse(Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
 public:
-    std::string toJsonString();
-
-public:
     Err parse(char const * buffer, std::size_t size);
 
 protected:

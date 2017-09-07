@@ -36,7 +36,7 @@ TBAG_CONSTEXPR static char const * const TPOT_ENVS_WORK_DIR = "WORK_DIR";
 TBAG_CONSTEXPR static char const * const TPOT_ENVS_HOME_DIR = "HOME_DIR";
 TBAG_CONSTEXPR static char const * const TPOT_ENVS_TITLE    = "TITLE";
 
-TpotServer::TpotServer() : _loop(), HttpServer(_loop, StreamType::TCP)
+TpotServer::TpotServer(Param param) : _param(param)
 {
     _envs.push(EnvFlag(TPOT_ENVS_EXE_PATH, filesystem::Path::getExePath()));
     _envs.push(EnvFlag(TPOT_ENVS_EXE_DIR , filesystem::Path::getExeDir()));
@@ -53,14 +53,19 @@ TpotServer::~TpotServer()
     // EMPTY.
 }
 
-int TpotServer::run(std::string const & bind, int port)
+int TpotServer::run()
 {
-    using namespace network::http;
-    if (init(bind.c_str(), port) != Err::E_SUCCESS) {
+    _server.reset(new (std::nothrow) Server(this, _loop, StreamType::TCP));
+    assert(static_cast<bool>(_server));
+
+    if (_param.verbose) {
+        tDLogN("TpotServer::run() initialize({}:{}) ...", _param.bind, _param.port);
+    }
+    if (_server->init(_param.bind.c_str(), _param.port) != Err::E_SUCCESS) {
         return EXIT_FAILURE;
     }
 
-    tDLogN("TpoT is run!");
+    tDLogN("TpoT is run! (BIND: {}, PORT: {})", _server->dest(), _server->port());
     Err const RESULT = _loop.run();
     if (RESULT != Err::E_SUCCESS) {
         return EXIT_FAILURE;

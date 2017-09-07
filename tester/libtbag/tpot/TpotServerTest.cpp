@@ -13,7 +13,7 @@ using namespace libtbag::tpot;
 
 TEST(TpotServerTest, Default)
 {
-    TpotServer object;
-    ASSERT_TRUE(true);
+//    TpotServer object;
+//    ASSERT_TRUE(true);
 }
 

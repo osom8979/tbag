@@ -164,11 +164,6 @@ Err TpotPacket::buildKillResponse(Code code)
     return Err::E_SUCCESS;
 }
 
-std::string TpotPacket::toJsonString()
-{
-    flatbuffers::Parser parser;
-}
-
 Err TpotPacket::parse(char const * buffer, std::size_t size)
 {
     using namespace flatbuffers;

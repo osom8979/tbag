@@ -76,13 +76,20 @@ DefaultLogXmlNode::InitParams DefaultLogXmlNode::getDefaultParams(std::string co
 {
     InitParams params;
     params.name = name;
-    params.sink = SINK_FILE;
     params.destination  = std::string("${") + std::string(ENVS_EXE_DIR) + std::string("}/")
                           + file_name + std::string(DEFAULT_LOGGER_FILE_EXTENSION);
-    params.severity = INFO_SEVERITY.getText();
     params.auto_flush = AUTO_FLUSH_ON;
     params.multithread = MULTITHREAD_OFF;
     params.mutex = MUTEX_ON;
+    if (isReleaseMode()) {
+        params.sink = SINK_FILE;
+        params.severity = INFO_SEVERITY.getText();
+        params.generator = GENERATOR_DEFAULT;
+    } else {
+        params.sink = SINK_COUT;
+        params.severity = DEBUG_SEVERITY.getText();
+        params.generator = GENERATOR_DEFAULT_COLOR;
+    }
     return params;
 }
 
