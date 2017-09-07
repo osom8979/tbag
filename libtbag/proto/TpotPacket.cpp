@@ -164,7 +164,7 @@ Err TpotPacket::buildKillResponse(Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::parse(char const * buffer, std::size_t size)
+Err TpotPacket::parse(char const * buffer, std::size_t size, void * arg)
 {
     using namespace flatbuffers;
     using namespace proto::fbs::tpot;
@@ -184,16 +184,16 @@ Err TpotPacket::parse(char const * buffer, std::size_t size)
 
         // @formatter:off
         switch (type) {
-        case AnyPacket_PacketVersionRequest: onPacketVersionRequest (*header, *(PacketVersionRequest *)packet); break;
-        case AnyPacket_PacketVersionResponse:onPacketVersionResponse(*header, *(PacketVersionResponse*)packet); break;
-        case AnyPacket_ExecRequest:          onExecRequest          (*header, *(ExecRequest          *)packet); break;
-        case AnyPacket_ExecResponse:         onExecResponse         (*header, *(ExecResponse         *)packet); break;
-        case AnyPacket_HeartbitRequest:      onHeartbitRequest      (*header, *(HeartbitRequest      *)packet); break;
-        case AnyPacket_HeartbitResponse:     onHeartbitResponse     (*header, *(HeartbitResponse     *)packet); break;
-        case AnyPacket_ListRequest:          onListRequest          (*header, *(ListRequest          *)packet); break;
-        case AnyPacket_ListResponse:         onListResponse         (*header, *(ListResponse         *)packet); break;
-        case AnyPacket_KillRequest:          onKillRequest          (*header, *(KillRequest          *)packet); break;
-        case AnyPacket_KillResponse:         onKillResponse         (*header, *(KillResponse         *)packet); break;
+        case AnyPacket_PacketVersionRequest: onPacketVersionRequest (*header, *(PacketVersionRequest *)packet, arg); break;
+        case AnyPacket_PacketVersionResponse:onPacketVersionResponse(*header, *(PacketVersionResponse*)packet, arg); break;
+        case AnyPacket_ExecRequest:          onExecRequest          (*header, *(ExecRequest          *)packet, arg); break;
+        case AnyPacket_ExecResponse:         onExecResponse         (*header, *(ExecResponse         *)packet, arg); break;
+        case AnyPacket_HeartbitRequest:      onHeartbitRequest      (*header, *(HeartbitRequest      *)packet, arg); break;
+        case AnyPacket_HeartbitResponse:     onHeartbitResponse     (*header, *(HeartbitResponse     *)packet, arg); break;
+        case AnyPacket_ListRequest:          onListRequest          (*header, *(ListRequest          *)packet, arg); break;
+        case AnyPacket_ListResponse:         onListResponse         (*header, *(ListResponse         *)packet, arg); break;
+        case AnyPacket_KillRequest:          onKillRequest          (*header, *(KillRequest          *)packet, arg); break;
+        case AnyPacket_KillResponse:         onKillResponse         (*header, *(KillResponse         *)packet, arg); break;
         default:
             TBAG_INACCESSIBLE_BLOCK_ASSERT();
         }

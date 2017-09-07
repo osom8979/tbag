@@ -60,14 +60,34 @@ public:
     using HttpBuilder = network::http::HttpBuilder;
     using HttpServer  = network::http::HttpServer;
 
-    using Id         = HttpServer::Id;
-    using StreamType = HttpServer::StreamType;
-    using WeakClient = HttpServer::WeakClient;
-    using HttpPacket = HttpServer::HttpPacket;
-    using WsPacket   = HttpServer::WsPacket;
+    using Id           = HttpServer::Id;
+    using StreamType   = HttpServer::StreamType;
+    using Client       = HttpServer::ClientInterface;
+    using SharedClient = HttpServer::SharedClient;
+    using WeakClient   = HttpServer::WeakClient;
+    using HttpPacket   = HttpServer::HttpPacket;
+    using WsPacket     = HttpServer::WsPacket;
 
+public:
     using Environments = string::Environments;
     using EnvFlag      = Environments::Flag;
+
+public:
+    using ProcessManager = process::FunctionalProcessManager;
+
+public:
+    using FuncTpotPacket        = proto::FunctionalTpotPacket;
+    using Header                = FuncTpotPacket::Header;
+    using PacketVersionRequest  = FuncTpotPacket::PacketVersionRequest;
+    using PacketVersionResponse = FuncTpotPacket::PacketVersionResponse;
+    using ExecRequest           = FuncTpotPacket::ExecRequest;
+    using ExecResponse          = FuncTpotPacket::ExecResponse;
+    using HeartbitRequest       = FuncTpotPacket::HeartbitRequest;
+    using HeartbitResponse      = FuncTpotPacket::HeartbitResponse;
+    using ListRequest           = FuncTpotPacket::ListRequest;
+    using ListResponse          = FuncTpotPacket::ListResponse;
+    using KillRequest           = FuncTpotPacket::KillRequest;
+    using KillResponse          = FuncTpotPacket::KillResponse;
 
 public:
     class Server : public HttpServer
@@ -104,15 +124,41 @@ public:
     using SharedServer = std::shared_ptr<Server>;
     using WeakServer   = std::weak_ptr<Server>;
 
+public:
+    // --------------------
+    // HTTP Path structure.
+    // --------------------
+
+#ifndef _TPOT_CREATE_PATH_STRUCTURE
+#define _TPOT_CREATE_PATH_STRUCTURE(name, path, method) \
+    struct name : public libtbag::network::http::HttpMethod##method \
+    { TBAG_CONSTEXPR static char const * const getPath() TBAG_NOEXCEPT { return path; } };
+#endif
+
+    _TPOT_CREATE_PATH_STRUCTURE( VersionPath, "/ver" ,    GET)
+    _TPOT_CREATE_PATH_STRUCTURE(    ExecPath, "/exec",    PUT)
+    _TPOT_CREATE_PATH_STRUCTURE(HeartbitPath, "/hbit",    GET)
+    _TPOT_CREATE_PATH_STRUCTURE(    ListPath, "/list",    GET)
+    _TPOT_CREATE_PATH_STRUCTURE(    KillPath, "/kill", DELETE)
+
+#undef _TPOT_CREATE_PATH_STRUCTURE
+
+    TBAG_CONSTEXPR static char const * const getAcceptKey  () TBAG_NOEXCEPT { return "Accept"; }
+    TBAG_CONSTEXPR static char const * const getAcceptValue() TBAG_NOEXCEPT { return "application/octet-stream"; }
+
 private:
     Param _param;
 
 private:
     Loop _loop;
     SharedServer _server;
-    Environments _envs;
-    std::string  _body_4xx;
-    std::string  _body_5xx;
+    ProcessManager _procs;
+
+private:
+    FuncTpotPacket _packet;
+    Environments   _envs;
+    std::string    _body_4xx;
+    std::string    _body_5xx;
 
 public:
     TpotServer(Param param);
@@ -129,6 +175,18 @@ protected:
     void onHttpTimer   (WeakClient node);
     void onHttpShutdown(WeakClient node, Err code);
     void onHttpWrite   (WeakClient node, Err code);
+
+    void onVersionRequest (WeakClient node, Err code, HttpPacket & packet);
+    void onExecRequest    (WeakClient node, Err code, HttpPacket & packet);
+    void onHeartbitRequest(WeakClient node, Err code, HttpPacket & packet);
+    void onListRequest    (WeakClient node, Err code, HttpPacket & packet);
+    void onKillRequest    (WeakClient node, Err code, HttpPacket & packet);
+
+    void onPacketVersionRequest(Header const & header, PacketVersionRequest const & packet, HttpPacket & hp);
+    void onExecRequest         (Header const & header, ExecRequest          const & packet, HttpPacket & hp);
+    void onHeartbitRequest     (Header const & header, HeartbitRequest      const & packet, HttpPacket & hp);
+    void onListRequest         (Header const & header, ListRequest          const & packet, HttpPacket & hp);
+    void onKillRequest         (Header const & header, KillRequest          const & packet, HttpPacket & hp);
 
 // Process callback.
 public:

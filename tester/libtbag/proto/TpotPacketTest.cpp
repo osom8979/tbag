@@ -43,7 +43,7 @@ TEST(TpotPacketTest, Default)
     std::string cwd;
     std::string input;
 
-    packet.setOnExecRequest([&](Header const & header, ExecRequest const & packet){
+    packet.setOnExecRequest([&](Header const & header, ExecRequest const & packet, void * arg){
         header_id   = header.id();
         header_code = static_cast<int>(header.code());
         file  = packet.file()->str();

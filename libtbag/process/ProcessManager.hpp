@@ -20,6 +20,7 @@
 
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/process/StdProcess.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
 
 #include <unordered_map>
 #include <vector>
