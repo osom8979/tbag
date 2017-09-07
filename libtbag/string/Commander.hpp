@@ -101,6 +101,10 @@ public:
                                      std::string const & delimiter = DEFAULT_DELIMITER);
 
 public:
+    void setDefaultCallbackForLeftArguments(std::vector<std::string> * left_arguments,
+                                            std::vector<std::string> * unknown_flags = nullptr);
+
+public:
     /**
      * @remarks
      *  Callback loop:

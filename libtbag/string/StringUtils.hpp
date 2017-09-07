@@ -111,6 +111,8 @@ TBAG_API std::string vformat(char const * f, std::size_t buffer_size, va_list & 
 TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
 TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter);
 
+TBAG_API std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter);
+
 /**
  * Thread ID to string.
  */

@@ -28,6 +28,13 @@ HelpCommander::HelpCommander(std::string const & prefix, std::string const & del
     // EMPTY.
 }
 
+HelpCommander::HelpCommander(std::string const & prefix, std::string const & delimiter,
+                             std::string const & synopsis, std::string const & remarks)
+        : Commander(prefix, delimiter), _synopsis(synopsis), _remarks(remarks)
+{
+    // EMPTY.
+}
+
 HelpCommander::HelpCommander(Commander::Callback const & default_callback)
         : Commander(default_callback)
 {

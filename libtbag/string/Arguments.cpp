@@ -17,10 +17,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace string {
 
 Arguments::Arguments()
-        : _name()
-        , _args()
-        , _delimiter(DEFAULT_ARGUMENTS_DELIMITER)
-        , _point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
+        : _original(), _name(), _args(),
+          _delimiter(DEFAULT_ARGUMENTS_DELIMITER),
+          _point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
 {
     // EMPTY.
 }
@@ -29,10 +28,8 @@ Arguments::Arguments(std::string const & name
                    , std::string const & arguments
                    , std::string const & delimiter
                    , std::string const & point_delimiter)
-        : _name(name)
-        , _args()
-        , _delimiter(delimiter)
-        , _point_delimiter(point_delimiter)
+        : _original(), _name(name), _args(),
+          _delimiter(delimiter), _point_delimiter(point_delimiter)
 {
     if (parse(arguments) == false) {
         tDLogE("Arguments::Arguments() parse error.");
@@ -57,6 +54,7 @@ Arguments::~Arguments()
 Arguments & Arguments::operator =(Arguments const & obj)
 {
     if (this != &obj) {
+        _original = obj._original;
         _name = obj._name;
         _args = obj._args;
         _delimiter = obj._delimiter;
@@ -68,6 +66,7 @@ Arguments & Arguments::operator =(Arguments const & obj)
 Arguments & Arguments::operator =(Arguments && obj)
 {
     if (this != &obj) {
+        _original.swap(obj._original);
         _name.swap(obj._name);
         _args.swap(obj._args);
         _delimiter.swap(obj._delimiter);
@@ -83,6 +82,7 @@ void Arguments::insert(std::size_t index, std::string const & argument)
 
 bool Arguments::parse(std::string const & arguments)
 {
+    _original = arguments;
     for (auto & cursor : libtbag::string::splitTokens(arguments, _delimiter)) {
         push(cursor);
     }
@@ -98,7 +98,7 @@ std::string Arguments::toString()
     }
 
     std::size_t const SIZE = _args.size();
-    std::string result = _args.at(0);
+    std::string result = _args[0];
     for (std::size_t index = 1; index < SIZE; ++index) {
         result += _delimiter + _args.at(index);
     }

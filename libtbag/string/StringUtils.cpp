@@ -121,6 +121,19 @@ std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::s
     return result;
 }
 
+std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter)
+{
+    std::stringstream ss;
+    std::size_t const SIZE = tokens.size();
+    for (std::size_t i = 0; i < SIZE; ++i) {
+        ss << tokens[i];
+        if (i + 1 < SIZE) {
+            ss << delimiter;
+        }
+    }
+    return ss.str();
+}
+
 std::string convertStringWithThreadId(std::thread::id const & id)
 {
     std::stringstream ss;

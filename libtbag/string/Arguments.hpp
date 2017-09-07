@@ -48,6 +48,8 @@ public:
     TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE3 = "FALSE";
 
 private:
+    std::string _original; ///< The original string that was last parsed.
+
     std::string _name;
     std::vector<std::string> _args;
 
@@ -70,6 +72,8 @@ public:
     Arguments & operator =(Arguments && obj);
 
 public:
+    inline std::string getOriginalArgumentString() const
+    { return _original; }
     inline std::string getName() const
     { return _name; }
     inline std::string getDelimiter() const

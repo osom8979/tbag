@@ -37,7 +37,7 @@ namespace app {
 namespace ex  {
 
 TBAG_CONSTEXPR static char const * const SERVICE_APP_MAIN_SYNOPSIS = ""
-        " Usage: ${" SERVICE_APP_ENVIRONMENT_TITLE "} {options} {command}\n"
+        " Usage: ${" SERVICE_APP_ENVIRONMENT_TITLE "} [flags] cmd1 [cmd2] ...\n"
         ""/* -- END -- */;
 
 TBAG_CONSTEXPR static char const * const SERVICE_APP_MAIN_REMARKS = "\n"
@@ -199,7 +199,7 @@ int ServiceApp::run()
 
         if (args.empty() == false) {
             // Command arguments.
-            cmds.push_back(args.get(0));
+            cmds.push_back(args.getOriginalArgumentString());
         }
     });
 

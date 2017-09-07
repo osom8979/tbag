@@ -88,7 +88,7 @@ bool Commander::insert(std::string const & command, Callback const & callback)
 Commander::ArgsVector Commander::parseArguments(Flags const & flags)
 {
     std::size_t const SIZE = flags.size();
-    std::vector<Arguments> result;
+    ArgsVector result;
     for (std::size_t index = 0; index < SIZE; ++index) {
         result.push_back(Arguments(flags.at(index).key, flags.at(index).value));
     }
@@ -100,6 +100,27 @@ Commander::ArgsVector Commander::parseArguments(std::string const & arguments,
                                                 std::string const & delimiter)
 {
     return parseArguments(Flags(arguments, prefix, delimiter));
+}
+
+void Commander::setDefaultCallbackForLeftArguments(std::vector<std::string> * left_arguments,
+                                                   std::vector<std::string> * unknown_flags)
+{
+    _default = [left_arguments, unknown_flags](Arguments const & args){
+        if (args.getName().empty() == false) {
+            // This block comes when an unknown option is hit.
+            if (unknown_flags != nullptr) {
+                unknown_flags->push_back(args.getName());
+            }
+            return;
+        }
+
+        if (args.empty() == false) {
+            // Non flag arguments.
+            if (left_arguments != nullptr) {
+                left_arguments->push_back(args.getOriginalArgumentString());
+            }
+        }
+    };
 }
 
 std::size_t Commander::request(ArgsVector const & args_vector)

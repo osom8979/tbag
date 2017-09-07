@@ -26,8 +26,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
-TBAG_CONSTEXPR static char const * const TPOT_COMMAND_SERVER = "server";
-TBAG_CONSTEXPR static char const * const TPOT_COMMAND_TEST   = "test";
+TBAG_CONSTEXPR static char const * const TPOT_COMMAND_SERVER  = "server";
+TBAG_CONSTEXPR static char const * const TPOT_COMMAND_REQUEST = "request";
 
 TBAG_CONSTEXPR static char const * const TPOT_NAME = "tpot";
 
@@ -35,8 +35,8 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::ex::ServiceApp(TPOT_NAME, argc, argv, envs),
           _commands(), _ip(), _port(0)
 {
-    _commands.insert(HelpPair(TPOT_COMMAND_SERVER, "TpoT server mode."));
-    _commands.insert(HelpPair(TPOT_COMMAND_TEST  , "TpoT test mode."));
+    _commands.insert(HelpPair(TPOT_COMMAND_SERVER , "TpoT server mode."));
+    _commands.insert(HelpPair(TPOT_COMMAND_REQUEST, "TpoT request mode."));
 }
 
 TpotMain::~TpotMain()
@@ -101,7 +101,7 @@ bool TpotMain::onLoadConfig(DefaultXmlModel & config)
     auto server = getServerNode().lock();
     assert(static_cast<bool>(server));
     if (server != nullptr) {
-        tDLogI("TpotMain::initConfig() Config (BIND: {}, PORT: {})", server->getIp(), server->getPort());
+        tDLogIfI(isEnableVerbose(), "TpotMain::initConfig() Config (BIND: {}, PORT: {})", server->getIp(), server->getPort());
     } else {
         tDLogW("TpotMain::initConfig() Config is nullptr.");
     }
@@ -115,7 +115,7 @@ int TpotMain::onDefaultCommand(StringVector const & args)
         return EXIT_FAILURE;
     }
 
-    tDLogD("TpotMain::onDefaultCommand() BEGIN");
+    tDLogIfD(isEnableVerbose(), "TpotMain::onDefaultCommand() BEGIN");
 
     auto node = getServerNode().lock();
     assert(static_cast<bool>(node));
@@ -146,23 +146,25 @@ int TpotMain::onDefaultCommand(StringVector const & args)
         param.bind = ip;
         param.port = port;
         exit_code = TpotServer(param).run();
-    } else if (args[0] == TPOT_COMMAND_TEST) {
+
+    } else if (args[0] == TPOT_COMMAND_REQUEST) {
         TpotClient::Param param;
         param.verbose = isEnableVerbose();
         param.ip = ip;
         param.port = port;
-        return requestTpotClient(param, std::vector<std::string>(args.begin() + 1, args.end()));
+        exit_code = requestTpotClient(param, std::vector<std::string>(args.begin() + 1, args.end()));
+
     } else {
         std::cerr << "Unknown command: " << args[0] << std::endl;
     }
 
-    tDLogD("TpotMain::onDefaultCommand() END");
+    tDLogIfD(isEnableVerbose(), "TpotMain::onDefaultCommand() END ({})", exit_code);
     return exit_code;
 }
 
 void TpotMain::onDestroy()
 {
-    tDLogD("TpotMain::onDestroy()");
+    tDLogIfD(isEnableVerbose(), "TpotMain::onDestroy()");
 }
 
 TpotMain::WeakLogNode TpotMain::getLogNode()

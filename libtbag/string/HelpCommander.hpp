@@ -52,6 +52,8 @@ private:
 public:
     HelpCommander();
     HelpCommander(std::string const & prefix, std::string const & delimiter);
+    HelpCommander(std::string const & prefix, std::string const & delimiter,
+                  std::string const & synopsis, std::string const & remarks);
     HelpCommander(Commander::Callback const & default_callback);
     HelpCommander(HelpCommander const & obj);
     HelpCommander(HelpCommander && obj);
@@ -71,6 +73,17 @@ public:
     inline void setSynopsis(std::string const & content) { _synopsis = content; }
     inline void setRemarks (std::string const & content) { _remarks  = content; }
 
+    inline void info(std::string const & prefix,
+                     std::string const & delimiter,
+                     std::string const & synopsis,
+                     std::string const & remarks)
+    {
+        setPrefix(prefix);
+        setDelimiter(delimiter);
+        setSynopsis(synopsis);
+        setRemarks(remarks);
+    }
+
 public:
     void clear();
 
@@ -82,16 +95,17 @@ public:
 public:
     template <typename ValueType>
     bool insertDefault(std::string const & command,
-                       ValueType * value,
+                       ValueType * value_pointer,
                        typename std::remove_reference<ValueType>::type default_value,
                        std::string const & help_msg = std::string(),
-                       std::string const & help_param = std::string())
+                       std::string const & help_param = std::string(),
+                       std::size_t argument_index = 0)
     {
         static_assert(std::is_const<ValueType>::value == false, "The ValueType must not be const type.");
-        assert(value != nullptr);
-        return insert(command, [value, default_value](Arguments const & args){
-            if (args.opt(0, value) == false) {
-                *value = default_value;
+        assert(value_pointer != nullptr);
+        return insert(command, [value_pointer, default_value, argument_index](Arguments const & args){
+            if (args.opt(argument_index, value_pointer) == false) {
+                *value_pointer = default_value;
             }
         }, help_msg, help_param);
     }
@@ -110,35 +124,6 @@ public:
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
-#ifndef TBAG_HELP_COMMANDER_INSERT
-#define TBAG_HELP_COMMANDER_INSERT(obj, c, v, d, h, p) \
-    do {                                    \
-        assert(v != nullptr);               \
-        *v = d;                             \
-        (obj).insertDefault(c, v, d, h, p); \
-    } while (false)
-#endif
-
-#ifndef TBAG_HELP_COMMANDER_INSERT2
-#define TBAG_HELP_COMMANDER_INSERT2(obj, c, v, d, h) \
-    TBAG_HELP_COMMANDER_INSERT(obj, c, v, d, h, std::string())
-#endif
-
-#ifndef TBAG_HELP_COMMANDER_INFO
-#define TBAG_HELP_COMMANDER_INFO(obj, p, d, s, r) \
-    do {                       \
-        (obj).setPrefix(p);    \
-        (obj).setDelimiter(d); \
-        (obj).setSynopsis(s);  \
-        (obj).setRemarks(r);   \
-    } while (false)
-#endif
-
-#ifndef TBAG_HELP_COMMANDER_RUN
-#define TBAG_HELP_COMMANDER_RUN(obj, s) \
-    do { (obj).request(s); } while (false)
-#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_STRING_HELPCOMMANDER_HPP__
 

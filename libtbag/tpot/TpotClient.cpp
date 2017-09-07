@@ -232,19 +232,17 @@ Err TpotClient::requestKill(int pid, Result * result)
 
 TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_PREFIX    = "-";
 TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_DELIMITER = "=";
+TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_SYNOPSIS  = "Usage: test [flags] request";
+TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_REMARKS   = "\nThe command line interface of the TpoT server.";
 
 int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> const & cmd_args)
 {
-    std::stringstream ss;
-    for (auto & a : cmd_args) {
-        ss << a << ' ';
-    }
-
     if (cmd_args.empty()) {
-        std::cerr << "Empty arguments: " << ss.str() << std::endl;
+        std::cerr << "Empty arguments.\n";
         return EXIT_FAILURE;
     }
 
+    std::string const MERGE_ARGS = string::mergeTokens(cmd_args, std::string(" "));
     std::vector<std::string> commands;
 
     std::string file;
@@ -252,40 +250,31 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     std::vector<std::string> args;
     std::vector<std::string> envs;
     std::string input;
-    std::string msg;
-    int pid;
-    bool help;
+    std::string msg = "TpoT";
+    int pid = 0;
+    bool help = false;
 
     using namespace string;
-    HelpCommander commander(TPOT_CLIENT_REQUEST_COMMAND_PREFIX, TPOT_CLIENT_REQUEST_COMMAND_DELIMITER);
+    HelpCommander commander(TPOT_CLIENT_REQUEST_COMMAND_PREFIX,
+                            TPOT_CLIENT_REQUEST_COMMAND_DELIMITER,
+                            TPOT_CLIENT_REQUEST_COMMAND_SYNOPSIS,
+                            TPOT_CLIENT_REQUEST_COMMAND_REMARKS);
     {   // Initialize commander.
         using namespace libtbag::string;
-        TBAG_HELP_COMMANDER_INSERT2(commander, "file" , &file ,     "", "exec file");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "cwd"  , &cwd  ,     "", "exec cwd");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "input", &input,     "", "exec stdin");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "msg"  , &msg  , "TpoT", "message");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "pid"  , &pid  ,      0, "process id");
-        TBAG_HELP_COMMANDER_INSERT2(commander, "help" , &help ,  false, "process id");
+        commander.insertDefault("file" , &file ,     "", "Executable file path [exec]");
+        commander.insertDefault("cwd"  , &cwd  ,     "", "Working directory [exec]");
+        commander.insertDefault("input", &input,     "", "Standard input string [exec]");
+        commander.insertDefault("msg"  , &msg  , "TpoT", "Message [echo]");
+        commander.insertDefault("pid"  , &pid  ,      0, "Process id [kill]");
+        commander.insertDefault("help" , &help ,   true, "Help message");
         commander.insert("args", [&](Arguments const & a){
             args = a.getStrings();
-        }, "exec args");
+        }, "Command-line arguments [exec]");
         commander.insert("envs", [&](Arguments const & a){
             envs = a.getStrings();
-        }, "exec envs");
-        commander.setDefaultCallback([&](Arguments const & a){
-            if (a.getName().empty() == false) {
-                // This block comes when an unknown option is hit.
-                if (param.verbose) {
-                    tDLogW("requestTpotClient() Unknown command: ", a.getName());
-                }
-                return;
-            }
-            if (a.empty() == false) {
-                // Command arguments.
-                commands.push_back(a.get(0));
-            }
-        });
-        commander.request(ss.str());
+        }, "Environment variables [exec]");
+        commander.setDefaultCallbackForLeftArguments(&commands);
+        commander.request(MERGE_ARGS);
     }
 
     std::string const  VERSION_CMD = std::string(proto:: VersionPath::getPath()).substr(1);
@@ -295,17 +284,18 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     std::string const     KILL_CMD = std::string(proto::    KillPath::getPath()).substr(1);
 
     if (help) {
-        std::cout << commander.help(true) << "\nCommand list:\n"
-                  << "* " << VERSION_CMD  << std::endl
-                  << "* " << EXEC_CMD     << std::endl
-                  << "* " << HEARTBIT_CMD << std::endl
-                  << "* " << LIST_CMD     << std::endl
-                  << "* " << KILL_CMD     << std::endl;
+        std::cout << commander.help(true)
+                  << "Request list: "
+                  << VERSION_CMD  << ", "
+                  << EXEC_CMD     << ", "
+                  << HEARTBIT_CMD << ", "
+                  << LIST_CMD     << ", "
+                  << KILL_CMD     << std::endl;
         return EXIT_FAILURE;
     }
 
     if (commands.empty()) {
-        std::cerr << "Empty command: " << ss.str() << std::endl;
+        std::cerr << "Empty command: " << MERGE_ARGS << std::endl;
         return EXIT_FAILURE;
     }
 
