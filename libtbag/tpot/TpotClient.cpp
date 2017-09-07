@@ -21,7 +21,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
-TpotClient::TpotClient(Param const & param, StreamType type) : _param(param), _type(type)
+TpotClient::TpotClient(Param const & param, StreamType type) : _param(param), _type(type), _timeout(0)
 {
     // @formatter:off
     _packet.setOnPacketVersionResponse([&](Header const & h, PacketVersionResponse const & p, void * a) { onPacketVersionResponse(h, p, (Result*)a); });
@@ -103,8 +103,9 @@ void TpotClient::onListResponse(Header const & header, ListResponse const & pack
     result->id   = header.id();
     result->code = static_cast<uint32_t>(header.code());
     result->type = ResultType::List;
-    for (auto itr = packet.pids()->begin(); itr != packet.pids()->end(); ++itr) {
-        result->response.list->push_back(*itr);
+
+    for (auto itr = packet.procs()->begin(); itr != packet.procs()->end(); ++itr) {
+        result->response.procs->emplace_back(itr->pid(), itr->active());
     }
 }
 
@@ -304,7 +305,7 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     util::Version result_version;
     int result_pid;
     std::string result_echo;
-    std::vector<int> result_list;
+    std::vector<TpotClient::ProcessInfo> result_list;
     Err request_code;
 
     if (commands[0] == VERSION_CMD) {
@@ -323,11 +324,11 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
         std::cout << string::fformat("Request heartbit (ID:{}, CODE:{}, ECHO:{})\n", result.id, result.code, *(result.response.echo));
 
     } else if (commands[0] == LIST_CMD) {
-        result.response.list = &result_list;
+        result.response.procs = &result_list;
         request_code = client.requestList(&result);
-        std::cout << string::fformat("Request list (ID:{}, CODE:{}, Size:{})\n", result.id, result.code, result.response.list->size());
-        for (auto & id : *(result.response.list)) {
-            std::cout << id << ',';
+        std::cout << string::fformat("Request list (ID:{}, CODE:{}, Size:{})\n", result.id, result.code, result.response.procs->size());
+        for (auto & proc : *(result.response.procs)) {
+            std::cout << proc.pid() << "[" << proc.active() << "],";
         }
         std::cout << std::endl;
 

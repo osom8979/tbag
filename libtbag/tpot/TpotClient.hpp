@@ -61,6 +61,7 @@ public:
 public:
     using FuncTpotPacket        = proto::FunctionalTpotPacket;
     using Header                = FuncTpotPacket::Header;
+    using ProcessInfo           = FuncTpotPacket::ProcessInfo;
     using PacketVersionRequest  = FuncTpotPacket::PacketVersionRequest;
     using PacketVersionResponse = FuncTpotPacket::PacketVersionResponse;
     using ExecRequest           = FuncTpotPacket::ExecRequest;
@@ -80,6 +81,7 @@ public:
         Heartbit,
         List,
         Kill,
+        Unknown,
     };
 
     struct Result
@@ -92,8 +94,13 @@ public:
             util::Version * version;
             int * pid;
             std::string * echo;
-            std::vector<int> * list;
+            std::vector<ProcessInfo> * procs;
         } response;
+
+        Result(uint64_t i = 0, uint32_t c = 0, ResultType t = ResultType::Unknown) : id(i), code(c), type(t)
+        { /* EMPTY. */ }
+        ~Result()
+        { /* EMPTY. */ }
     };
 
 private:

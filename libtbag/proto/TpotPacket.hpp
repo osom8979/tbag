@@ -44,8 +44,9 @@ class TBAG_API TpotPacket : private Noncopyable
 public:
     using FlatBuilder = flatbuffers::FlatBufferBuilder;
 
-    using Code   = proto::fbs::tpot::ResultCode;
-    using Header = proto::fbs::tpot::Header;
+    using Code        = proto::fbs::tpot::ResultCode;
+    using Header      = proto::fbs::tpot::Header;
+    using ProcessInfo = proto::fbs::tpot::ProcessInfo;
 
     using PacketVersionRequest  = proto::fbs::tpot::PacketVersionRequest;
     using PacketVersionResponse = proto::fbs::tpot::PacketVersionResponse;
@@ -92,7 +93,7 @@ public:
                               Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
     Err buildListRequest (Code code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildListResponse(std::vector<int> const & pids, Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildListResponse(std::vector<ProcessInfo> const & procs, Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
     Err buildKillRequest (int pid, Code code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildKillResponse(Code code = proto::fbs::tpot::ResultCode_SUCCESS);

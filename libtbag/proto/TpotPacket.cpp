@@ -128,14 +128,14 @@ Err TpotPacket::buildListRequest(Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildListResponse(std::vector<int> const & pids, Code code)
+Err TpotPacket::buildListResponse(std::vector<ProcessInfo> const & procs, Code code)
 {
     using namespace proto::fbs::tpot;
     Header header(id::generator::genTimeId(), code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_ListResponse,
-            CreateListResponse(_builder, _builder.CreateVector(pids)).Union());
+            CreateListResponse(_builder, _builder.CreateVectorOfStructs(procs)).Union());
     _builder.Finish(packet);
     return Err::E_SUCCESS;
 }

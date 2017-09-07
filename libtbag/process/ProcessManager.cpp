@@ -127,6 +127,16 @@ bool ProcessManager::exists(int pid) const
     return _procs.find(pid) != _procs.end();
 }
 
+bool ProcessManager::isActive(int pid) const
+{
+    Guard g(_mutex);
+    auto itr = _procs.find(pid);
+    if (itr != _procs.end() && static_cast<bool>(itr->second)) {
+        return itr->second->isRunning();
+    }
+    return false;
+}
+
 std::vector<int> ProcessManager::list() const
 {
     std::vector<int> result;

@@ -244,10 +244,13 @@ void TpotServer::onHeartbitRequest(Header const & header, HeartbitRequest const 
 
 void TpotServer::onListRequest(Header const & header, ListRequest const & packet, HttpPacket & hp)
 {
-    auto PROCESS_LIST = _procs.list();
-    _packet.buildListResponse(PROCESS_LIST);
+    std::vector<ProcessInfo> pinfos;
+    for (auto & pid : _procs.list()) {
+        pinfos.emplace_back(pid, _procs.isActive(pid));
+    }
+    _packet.buildListResponse(pinfos);
 
-    tDLogI("TpotServer::onListRequest() Response OK (List size: {})", PROCESS_LIST.size());
+    tDLogI("TpotServer::onListRequest() Response OK (List size: {})", pinfos.size());
     hp.response.setStatus(network::http::HttpStatus::SC_OK);
     hp.response.appendBody((char const *)_packet.point(), _packet.size());
 }

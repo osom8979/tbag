@@ -21,6 +21,12 @@ struct Header
     code : ResultCode;
 }
 
+struct ProcessInfo
+{
+    pid    : int;
+    active : bool;
+}
+
 // ------
 // Tables
 // ------
@@ -66,7 +72,7 @@ table ListRequest
 
 table ListResponse
 {
-    pids : [int];
+    procs : [ProcessInfo];
 }
 
 table KillRequest

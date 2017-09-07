@@ -113,6 +113,7 @@ public:
 
 public:
     bool exists(int pid) const;
+    bool isActive(int pid) const;
     std::vector<int> list() const;
 
 public:

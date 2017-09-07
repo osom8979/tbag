@@ -78,6 +78,7 @@ public:
 public:
     using FuncTpotPacket        = proto::FunctionalTpotPacket;
     using Header                = FuncTpotPacket::Header;
+    using ProcessInfo           = FuncTpotPacket::ProcessInfo;
     using PacketVersionRequest  = FuncTpotPacket::PacketVersionRequest;
     using PacketVersionResponse = FuncTpotPacket::PacketVersionResponse;
     using ExecRequest           = FuncTpotPacket::ExecRequest;
