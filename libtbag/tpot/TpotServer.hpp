@@ -124,28 +124,6 @@ public:
     using SharedServer = std::shared_ptr<Server>;
     using WeakServer   = std::weak_ptr<Server>;
 
-public:
-    // --------------------
-    // HTTP Path structure.
-    // --------------------
-
-#ifndef _TPOT_CREATE_PATH_STRUCTURE
-#define _TPOT_CREATE_PATH_STRUCTURE(name, path, method) \
-    struct name : public libtbag::network::http::HttpMethod##method \
-    { TBAG_CONSTEXPR static char const * const getPath() TBAG_NOEXCEPT { return path; } };
-#endif
-
-    _TPOT_CREATE_PATH_STRUCTURE( VersionPath, "/ver" ,    GET)
-    _TPOT_CREATE_PATH_STRUCTURE(    ExecPath, "/exec",    PUT)
-    _TPOT_CREATE_PATH_STRUCTURE(HeartbitPath, "/hbit",    GET)
-    _TPOT_CREATE_PATH_STRUCTURE(    ListPath, "/list",    GET)
-    _TPOT_CREATE_PATH_STRUCTURE(    KillPath, "/kill", DELETE)
-
-#undef _TPOT_CREATE_PATH_STRUCTURE
-
-    TBAG_CONSTEXPR static char const * const getAcceptKey  () TBAG_NOEXCEPT { return "Accept"; }
-    TBAG_CONSTEXPR static char const * const getAcceptValue() TBAG_NOEXCEPT { return "application/octet-stream"; }
-
 private:
     Param _param;
 
@@ -161,7 +139,7 @@ private:
     std::string    _body_5xx;
 
 public:
-    TpotServer(Param param);
+    TpotServer(Param const & param);
     virtual ~TpotServer();
 
 public:

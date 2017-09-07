@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <libtbag/app/ex/ServiceApp.hpp>
+#include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/log/node/DefaultLogXmlNode.hpp>
 #include <libtbag/dom/xml/node/ServerXmlNode.hpp>
 
@@ -37,6 +38,9 @@ namespace tpot {
 class TBAG_API TpotMain final : public app::ex::ServiceApp
 {
 public:
+    using HelpMap  = HelpCommander::HelpMap;
+    using HelpPair = HelpCommander::HelpPair;
+
     using DefaultLogXmlNode = log::node::DefaultLogXmlNode;
     using WeakLogNode       = std::weak_ptr<DefaultLogXmlNode>;
 
@@ -44,7 +48,10 @@ public:
     using WeakServerNode = std::weak_ptr<ServerXmlNode>;
 
 private:
-    std::string _bind;
+    HelpMap _commands;
+
+private:
+    std::string _ip;
     int _port;
 
 public:

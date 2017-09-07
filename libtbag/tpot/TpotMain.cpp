@@ -9,6 +9,8 @@
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/tpot/TpotServer.hpp>
+#include <libtbag/tpot/TpotClient.hpp>
+
 #include <libtbag/container/Global.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -24,13 +26,17 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
+TBAG_CONSTEXPR static char const * const TPOT_COMMAND_APP       = "app";
+TBAG_CONSTEXPR static char const * const TPOT_COMMAND_TEST      = "test";
+
 TBAG_CONSTEXPR static char const * const TPOT_NAME = "tpot";
 
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::ex::ServiceApp(TPOT_NAME, argc, argv, envs),
-          _bind(), _port(0)
+          _commands(), _ip(), _port(0)
 {
-    // EMPTY.
+    _commands.insert(HelpPair(TPOT_COMMAND_APP , "Normal application mode."));
+    _commands.insert(HelpPair(TPOT_COMMAND_TEST, "Test mode."));
 }
 
 TpotMain::~TpotMain()
@@ -44,8 +50,13 @@ TpotMain::~TpotMain()
 
 bool TpotMain::onCreate()
 {
+    std::stringstream remarks;
+    remarks << std::endl << "Command list:" << std::endl
+            << HelpCommander::getPaddingCommandHelp(std::string(), _commands)
+            << getDefaultRemarks();
+
     installDefaultSynopsis();
-    installDefaultRemarks();
+    installDefaultRemarks(remarks.str());
 
     installConfigOptions();
     installHelpOptions();
@@ -53,11 +64,11 @@ bool TpotMain::onCreate()
     installVersionOptions(util::getTbagVersion());
 
     using namespace libtbag::string;
-    atOptions().insert("bind", [&](Arguments const & args){
-        if (args.optString(0, &_bind) == false) {
-            _bind.clear();
+    atOptions().insert("ip", [&](Arguments const & args){
+        if (args.optString(0, &_ip) == false) {
+            _ip.clear();
         }
-    }, "Assign bind address directly. (If not, refer to the config file)");
+    }, "Assign ip address directly. (If not, refer to the config file)");
     atOptions().insert("port", [&](Arguments const & args){
         if (args.optInteger(0, &_port) == false) {
             _port = 0;
@@ -99,31 +110,54 @@ bool TpotMain::onLoadConfig(DefaultXmlModel & config)
 
 int TpotMain::onDefaultCommand(StringVector const & args)
 {
+    if (args.empty()) {
+        std::cerr << "Not found command.\n";
+        return EXIT_FAILURE;
+    }
+
     tDLogD("TpotMain::onDefaultCommand() BEGIN");
 
     auto node = getServerNode().lock();
     assert(static_cast<bool>(node));
 
-    TpotServer::Param param;
-    param.verbose = isEnableVerbose();
-    if (_bind.empty() == false) {
-        param.bind = _bind;
+    std::string ip;
+    int port;
+
+    if (_ip.empty() == false) {
+        ip = _ip;
     } else if (node->getEnable()) {
-        param.bind = node->getIp();
+        ip = node->getIp();
     } else {
-        param.bind = "0.0.0.0";
-    }
-    if (_port == 0) {
-        param.port = _port;
-    } else if (node->getEnable()) {
-        param.port = node->getPort();
-    } else {
-        param.port = 0;
+        ip = "0.0.0.0";
     }
 
-    int const EXIT_CODE = TpotServer(param).run();
+    if (_port == 0) {
+        port = _port;
+    } else if (node->getEnable()) {
+        port = node->getPort();
+    } else {
+        port = 0;
+    }
+
+    int exit_code = EXIT_FAILURE;
+    if (args[0] == TPOT_COMMAND_APP) {
+        TpotServer::Param param;
+        param.verbose = isEnableVerbose();
+        param.bind = ip;
+        param.port = port;
+        exit_code = TpotServer(param).run();
+    } else if (args[0] == TPOT_COMMAND_TEST) {
+        TpotClient::Param param;
+        param.verbose = isEnableVerbose();
+        param.ip = ip;
+        param.port = port;
+        return requestTpotClient(param, args);
+    } else {
+        std::cerr << "Unknown command: " << args[0] << std::endl;
+    }
+
     tDLogD("TpotMain::onDefaultCommand() END");
-    return EXIT_CODE;
+    return exit_code;
 }
 
 void TpotMain::onDestroy()

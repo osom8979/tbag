@@ -20,6 +20,7 @@
 
 #include <libtbag/proto/fbs/tpot_generated.h>
 #include <libtbag/Unit.hpp>
+#include <libtbag/network/http/HttpProperty.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -202,6 +203,27 @@ public:
     virtual void onKillResponse         (Header const & header, KillResponse          const & packet, void * arg) { if (static_cast<bool>(_kill_response_cb          )) { _kill_response_cb          (header, packet, arg); } }
     // @formatter:on
 };
+
+// --------------------
+// HTTP Path structure.
+// --------------------
+
+#ifndef _TPOT_CREATE_PATH_STRUCTURE
+#define _TPOT_CREATE_PATH_STRUCTURE(name, path, method) \
+    struct name : public libtbag::network::http::HttpMethod##method \
+    { TBAG_CONSTEXPR static char const * const getPath() TBAG_NOEXCEPT { return path; } };
+#endif
+
+_TPOT_CREATE_PATH_STRUCTURE( VersionPath, "/ver" ,    GET)
+_TPOT_CREATE_PATH_STRUCTURE(    ExecPath, "/exec",    PUT)
+_TPOT_CREATE_PATH_STRUCTURE(HeartbitPath, "/hbit",    GET)
+_TPOT_CREATE_PATH_STRUCTURE(    ListPath, "/list",    GET)
+_TPOT_CREATE_PATH_STRUCTURE(    KillPath, "/kill", DELETE)
+
+#undef _TPOT_CREATE_PATH_STRUCTURE
+
+TBAG_CONSTEXPR char const * const getAcceptKey  () TBAG_NOEXCEPT { return "Accept"; }
+TBAG_CONSTEXPR char const * const getAcceptValue() TBAG_NOEXCEPT { return "application/octet-stream"; }
 
 } // namespace proto
 

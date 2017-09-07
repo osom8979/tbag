@@ -24,36 +24,40 @@ NAMESPACE_LIBTBAG_OPEN
 #ifndef TBAG_ERROR_INFO_MAP
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX, _TBAG_LMDB_XX) \
     /* Common error codes. */ \
-    _TBAG_XX(_SUCCESS , "No error"              ) \
-    _TBAG_XX(_WARNING , "Success, but warning"  ) \
-    _TBAG_XX(_ILLARGS , "Illegal arguments"     ) \
-    _TBAG_XX(_ILLSTATE, "Illegal state"         ) \
-    _TBAG_XX(_ALREADY , "Already state"         ) \
-    _TBAG_XX(_BADALLOC, "Bad allocation"        ) \
-    _TBAG_XX(_OORANGE , "Out of range"          ) \
-    _TBAG_XX(_NULLPTR , "Null pointer exception") \
-    _TBAG_XX(_EBUFFER , "Empty buffer"          ) \
-    _TBAG_XX(_EQUEUE  , "Empty queue"           ) \
-    _TBAG_XX(_ENQASYNC, "Enqueue and async"     ) \
-    _TBAG_XX(_NREADY  , "Not ready"             ) \
-    _TBAG_XX(_UNSUPOP , "Unsupported operation" ) \
-    _TBAG_XX(_EINIT   , "Initialize error"      ) \
-    _TBAG_XX(_RDERR   , "Unknown Read error"    ) \
-    _TBAG_XX(_WRERR   , "Unknown Write error"   ) \
-    _TBAG_XX(_SHUTDOWN, "Shutdown error"        ) \
-    _TBAG_XX(_ENFOUND , "Not found error"       ) \
-    _TBAG_XX(_TIMEOUT , "Timeout error"         ) \
-    _TBAG_XX(_PARSING , "Parsing error"         ) \
-    _TBAG_XX(_EXPIRED , "Expired object error"  ) \
-    _TBAG_XX(_INSERT  , "Insert error"          ) \
-    _TBAG_XX(_CLOSING , "Closing object"        ) \
-    _TBAG_XX(_EQUERY  , "Query error"           ) \
-    _TBAG_XX(_SMALLBUF, "Buffer size is small"  ) \
-    _TBAG_XX(_KEYGEN  , "Key generator error"   ) \
-    _TBAG_XX(_ASYNCREQ, "Async request"         ) \
-    _TBAG_XX(_UNKEXCP , "Unknown exception"     ) \
-    _TBAG_XX(_UNKSIG  , "Unknown signal"        ) \
-    _TBAG_XX(_ECOPY   , "Copy error"            ) \
+    _TBAG_XX(_SUCCESS , "No error"                ) \
+    _TBAG_XX(_WARNING , "Success, but warning"    ) \
+    _TBAG_XX(_ILLARGS , "Illegal arguments"       ) \
+    _TBAG_XX(_ILLSTATE, "Illegal state"           ) \
+    _TBAG_XX(_ALREADY , "Already state"           ) \
+    _TBAG_XX(_BADALLOC, "Bad allocation"          ) \
+    _TBAG_XX(_OORANGE , "Out of range"            ) \
+    _TBAG_XX(_NULLPTR , "Null pointer exception"  ) \
+    _TBAG_XX(_EBUFFER , "Empty buffer"            ) \
+    _TBAG_XX(_EQUEUE  , "Empty queue"             ) \
+    _TBAG_XX(_ENQASYNC, "Enqueue and async"       ) \
+    _TBAG_XX(_NREADY  , "Not ready"               ) \
+    _TBAG_XX(_UNSUPOP , "Unsupported operation"   ) \
+    _TBAG_XX(_EINIT   , "Initialize error"        ) \
+    _TBAG_XX(_RDERR   , "Unknown Read error"      ) \
+    _TBAG_XX(_WRERR   , "Unknown Write error"     ) \
+    _TBAG_XX(_SHUTDOWN, "Shutdown error"          ) \
+    _TBAG_XX(_ENFOUND , "Not found error"         ) \
+    _TBAG_XX(_TIMEOUT , "Timeout error"           ) \
+    _TBAG_XX(_PARSING , "Parsing error"           ) \
+    _TBAG_XX(_EXPIRED , "Expired object error"    ) \
+    _TBAG_XX(_INSERT  , "Insert error"            ) \
+    _TBAG_XX(_CLOSING , "Closing object"          ) \
+    _TBAG_XX(_EQUERY  , "Query error"             ) \
+    _TBAG_XX(_SMALLBUF, "Buffer size is small"    ) \
+    _TBAG_XX(_KEYGEN  , "Key generator error"     ) \
+    _TBAG_XX(_ASYNCREQ, "Async request"           ) \
+    _TBAG_XX(_UNKEXCP , "Unknown exception"       ) \
+    _TBAG_XX(_UNKSIG  , "Unknown signal"          ) \
+    _TBAG_XX(_ECOPY   , "Copy error"              ) \
+    _TBAG_XX(_HTTP_1XX, "Informational (HTTP 1xx)") \
+    _TBAG_XX(_HTTP_3XX, "Redirection (HTTP 3xx)"  ) \
+    _TBAG_XX(_HTTP_4XX, "Client Error (HTTP 4xx)" ) \
+    _TBAG_XX(_HTTP_5XX, "Server Error (HTTP 5xx)" ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

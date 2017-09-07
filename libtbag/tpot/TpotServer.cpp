@@ -37,7 +37,7 @@ TBAG_CONSTEXPR static char const * const TPOT_ENVS_WORK_DIR = "WORK_DIR";
 TBAG_CONSTEXPR static char const * const TPOT_ENVS_HOME_DIR = "HOME_DIR";
 TBAG_CONSTEXPR static char const * const TPOT_ENVS_TITLE    = "TITLE";
 
-TpotServer::TpotServer(Param param) : _param(param)
+TpotServer::TpotServer(Param const & param) : _param(param)
 {
     _envs.push(EnvFlag(TPOT_ENVS_EXE_PATH, filesystem::Path::getExePath()));
     _envs.push(EnvFlag(TPOT_ENVS_EXE_DIR , filesystem::Path::getExeDir()));
@@ -67,6 +67,7 @@ int TpotServer::run()
     }
 
     // @formatter:off
+    using namespace proto;
     _server->setRequest( VersionPath::getMethod(),  VersionPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onVersionRequest (n, c, p); });
     _server->setRequest(    ExecPath::getMethod(),     ExecPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onExecRequest    (n, c, p); });
     _server->setRequest(HeartbitPath::getMethod(), HeartbitPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onHeartbitRequest(n, c, p); });
@@ -102,10 +103,12 @@ int TpotServer::run()
 
 void TpotServer::onServerClose()
 {
+    // EMPTY.
 }
 
 void TpotServer::onHttpOpen(WeakClient node)
 {
+    // EMPTY.
 }
 
 void TpotServer::onHttpRequest(WeakClient node, Err code, HttpPacket & packet)
@@ -117,18 +120,22 @@ void TpotServer::onHttpRequest(WeakClient node, Err code, HttpPacket & packet)
 
 void TpotServer::onHttpClose(WeakClient node)
 {
+    // EMPTY.
 }
 
 void TpotServer::onHttpTimer(WeakClient node)
 {
+    // EMPTY.
 }
 
 void TpotServer::onHttpShutdown(WeakClient node, Err code)
 {
+    // EMPTY.
 }
 
 void TpotServer::onHttpWrite(WeakClient node, Err code)
 {
+    // EMPTY.
 }
 
 void TpotServer::onVersionRequest(WeakClient node, Err code, HttpPacket & packet)
