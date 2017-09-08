@@ -50,8 +50,8 @@ TEST(ProcessManagerTest, Default)
     ASSERT_FALSE(pm.empty());
     auto list = pm.list();
     ASSERT_EQ(TEST_COUNT, list.size());
-    for (auto & id : list) {
-        auto shared = pm.get(id).lock();
+    for (auto & proc : list) {
+        auto shared = pm.get(proc.pid).lock();
         ASSERT_EQ(0, shared->getExitStatus());
         ASSERT_EQ(0, shared->getTermSignal());
     }

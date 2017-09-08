@@ -19,8 +19,9 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/proto/fbs/tpot_generated.h>
-#include <libtbag/Unit.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/util/ProcInfo.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -33,18 +34,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace proto {
 
-/**
- * TpotPacket class prototype.
- *
- * @author zer0
- * @date   2017-09-06
- */
-class TBAG_API TpotPacket : private Noncopyable
+struct TpotPacketTypes : private Noncopyable
 {
-public:
     using FlatBuilder = flatbuffers::FlatBufferBuilder;
 
-    using Code        = proto::fbs::tpot::ResultCode;
+    using ResultCode  = proto::fbs::tpot::ResultCode;
     using Header      = proto::fbs::tpot::Header;
     using ProcessInfo = proto::fbs::tpot::ProcessInfo;
 
@@ -59,45 +53,75 @@ public:
     using KillRequest           = proto::fbs::tpot::KillRequest;
     using KillResponse          = proto::fbs::tpot::KillResponse;
 
-public:
+    using ProcInfo = util::ProcInfo;
+
     TBAG_CONSTEXPR static std::size_t const DEFAULT_BUILDER_CAPACITY = 1 * MEGA_BYTE_TO_BYTE;
     TBAG_CONSTEXPR static char const * const DEFAULT_ECHO_MESSAGE = "TPOT";
+};
 
+/**
+ * TpotPacketBuilder class prototype.
+ *
+ * @author zer0
+ * @date   2017-09-08
+ */
+class TBAG_API TpotPacketBuilder : public TpotPacketTypes
+{
 private:
     FlatBuilder _builder;
 
 public:
-    TpotPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
-    virtual ~TpotPacket();
+    TpotPacketBuilder(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    virtual ~TpotPacketBuilder();
+
+public:
+    uint8_t * point() const;
+    std::size_t size() const;
 
 public:
     void clear();
 
 public:
-    Err buildPacketVersionRequest(uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildPacketVersionRequest(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildPacketVersionResponse(unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
                                    unsigned minor = LIBTBAG_VERSION_PACKET_MINOR,
-                                   uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+                                   uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
     Err buildExecRequest(std::string const & file,
                          std::vector<std::string> const & args = std::vector<std::string>(),
                          std::vector<std::string> const & envs = std::vector<std::string>(),
                          std::string const & cwd = std::string(),
                          std::string const & input = std::string(),
-                         uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildExecResponse(int pid, uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+                         uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildExecResponse(int pid, uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
     Err buildHeartbitRequest (std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                              uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+                              uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildHeartbitResponse(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                              uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+                              uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildListRequest (uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildListResponse(std::vector<ProcessInfo> const & procs,
-                          uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildListRequest (uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildListResponse(std::vector<ProcInfo> const & procs,
+                          uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildKillRequest (int pid, uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildKillResponse(uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildKillRequest (int pid, uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildKillResponse(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+
+public:
+    static uint64_t genId();
+};
+
+/**
+ * TpotPacketParser class prototype.
+ *
+ * @author zer0
+ * @date   2017-09-08
+ */
+class TBAG_API TpotPacketParser : public TpotPacketTypes
+{
+public:
+    TpotPacketParser();
+    virtual ~TpotPacketParser();
 
 public:
     Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
@@ -113,13 +137,19 @@ protected:
     virtual void onListResponse         (Header const & header, ListResponse          const & packet, void * arg) { /* EMPTY. */ }
     virtual void onKillRequest          (Header const & header, KillRequest           const & packet, void * arg) { /* EMPTY. */ }
     virtual void onKillResponse         (Header const & header, KillResponse          const & packet, void * arg) { /* EMPTY. */ }
+};
 
+/**
+ * TpotPacket class prototype.
+ *
+ * @author zer0
+ * @date   2017-09-06
+ */
+class TBAG_API TpotPacket : public TpotPacketBuilder, public TpotPacketParser
+{
 public:
-    uint8_t * point() const;
-    std::size_t size() const;
-
-public:
-    static uint64_t genId();
+    TpotPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    virtual ~TpotPacket();
 };
 
 /**
@@ -132,7 +162,7 @@ class FunctionalTpotPacket : public TpotPacket
 {
 public:
     // @formatter:off
-    using Code                  = TpotPacket::Code;
+    using ResultCode            = TpotPacket::ResultCode;
     using Header                = TpotPacket::Header;
     using PacketVersionRequest  = TpotPacket::PacketVersionRequest;
     using PacketVersionResponse = TpotPacket::PacketVersionResponse;

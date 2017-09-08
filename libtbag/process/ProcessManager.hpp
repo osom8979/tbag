@@ -21,6 +21,7 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/process/StdProcess.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/util/ProcInfo.hpp>
 
 #include <unordered_map>
 #include <vector>
@@ -45,14 +46,13 @@ class TBAG_API ProcessManager : private Noncopyable
 public:
     using Loop = uvpp::Loop;
 
-public:
     /**
      * Proc class prototype.
      *
      * @author zer0
      * @date   2017-09-06
      */
-    class Proc : public StdProcess
+    class TBAG_API Proc : public StdProcess
     {
     private:
         ProcessManager * _parent;
@@ -96,6 +96,8 @@ public:
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
+    using ProcInfo = util::ProcInfo;
+
 private:
     mutable Mutex _mutex;
     ProcMap _procs;
@@ -114,7 +116,7 @@ public:
 public:
     bool exists(int pid) const;
     bool isActive(int pid) const;
-    std::vector<int> list() const;
+    std::vector<ProcInfo> list() const;
 
 public:
     WeakProc get(int pid);

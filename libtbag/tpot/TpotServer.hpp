@@ -74,21 +74,16 @@ public:
 
 public:
     using ProcessManager = process::FunctionalProcessManager;
+    using ProcInfo = ProcessManager::ProcInfo;
 
 public:
     using FuncTpotPacket        = proto::FunctionalTpotPacket;
     using Header                = FuncTpotPacket::Header;
-    using ProcessInfo           = FuncTpotPacket::ProcessInfo;
     using PacketVersionRequest  = FuncTpotPacket::PacketVersionRequest;
-    using PacketVersionResponse = FuncTpotPacket::PacketVersionResponse;
     using ExecRequest           = FuncTpotPacket::ExecRequest;
-    using ExecResponse          = FuncTpotPacket::ExecResponse;
     using HeartbitRequest       = FuncTpotPacket::HeartbitRequest;
-    using HeartbitResponse      = FuncTpotPacket::HeartbitResponse;
     using ListRequest           = FuncTpotPacket::ListRequest;
-    using ListResponse          = FuncTpotPacket::ListResponse;
     using KillRequest           = FuncTpotPacket::KillRequest;
-    using KillResponse          = FuncTpotPacket::KillResponse;
 
 public:
     class Server : public HttpServer
@@ -166,9 +161,6 @@ protected:
     void onHeartbitRequest     (Header const & header, HeartbitRequest      const & packet, HttpPacket & hp);
     void onListRequest         (Header const & header, ListRequest          const & packet, HttpPacket & hp);
     void onKillRequest         (Header const & header, KillRequest          const & packet, HttpPacket & hp);
-
-// Process callback.
-public:
 };
 
 } // namespace tpot

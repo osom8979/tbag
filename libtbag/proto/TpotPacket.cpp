@@ -18,22 +18,26 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace proto {
 
-TpotPacket::TpotPacket(std::size_t capacity) : _builder(capacity, nullptr)
+// ---------------------------------
+// TpotPacketBuilder implementation.
+// ---------------------------------
+
+TpotPacketBuilder::TpotPacketBuilder(std::size_t capacity) : _builder(capacity, nullptr)
 {
     // EMPTY.
 }
 
-TpotPacket::~TpotPacket()
+TpotPacketBuilder::~TpotPacketBuilder()
 {
     // EMPTY.
 }
 
-void TpotPacket::clear()
+void TpotPacketBuilder::clear()
 {
     _builder.Clear();
 }
 
-Err TpotPacket::buildPacketVersionRequest(uint64_t id, Code code)
+Err TpotPacketBuilder::buildPacketVersionRequest(uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -45,7 +49,7 @@ Err TpotPacket::buildPacketVersionRequest(uint64_t id, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildPacketVersionResponse(unsigned major, unsigned minor, uint64_t id, Code code)
+Err TpotPacketBuilder::buildPacketVersionResponse(unsigned major, unsigned minor, uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -58,12 +62,12 @@ Err TpotPacket::buildPacketVersionResponse(unsigned major, unsigned minor, uint6
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildExecRequest(std::string const & file,
+Err TpotPacketBuilder::buildExecRequest(std::string const & file,
                                  std::vector<std::string> const & args,
                                  std::vector<std::string> const & envs,
                                  std::string const & cwd,
                                  std::string const & input,
-                                 uint64_t id, Code code)
+                                 uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -80,7 +84,7 @@ Err TpotPacket::buildExecRequest(std::string const & file,
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildExecResponse(int pid, uint64_t id, Code code)
+Err TpotPacketBuilder::buildExecResponse(int pid, uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -92,7 +96,7 @@ Err TpotPacket::buildExecResponse(int pid, uint64_t id, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildHeartbitRequest(std::string const & echo, uint64_t id, Code code)
+Err TpotPacketBuilder::buildHeartbitRequest(std::string const & echo, uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -104,7 +108,7 @@ Err TpotPacket::buildHeartbitRequest(std::string const & echo, uint64_t id, Code
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildHeartbitResponse(std::string const & echo, uint64_t id, Code code)
+Err TpotPacketBuilder::buildHeartbitResponse(std::string const & echo, uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -116,7 +120,7 @@ Err TpotPacket::buildHeartbitResponse(std::string const & echo, uint64_t id, Cod
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildListRequest(uint64_t id, Code code)
+Err TpotPacketBuilder::buildListRequest(uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -128,19 +132,23 @@ Err TpotPacket::buildListRequest(uint64_t id, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildListResponse(std::vector<ProcessInfo> const & procs, uint64_t id, Code code)
+Err TpotPacketBuilder::buildListResponse(std::vector<ProcInfo> const & procs, uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
     _builder.Clear();
+    std::vector<ProcessInfo> process_infos;
+    for (auto & p : procs) {
+        process_infos.emplace_back(p.pid, p.active);
+    }
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_ListResponse,
-            CreateListResponse(_builder, _builder.CreateVectorOfStructs(procs)).Union());
+            CreateListResponse(_builder, _builder.CreateVectorOfStructs(process_infos)).Union());
     _builder.Finish(packet);
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildKillRequest(int pid, uint64_t id, Code code)
+Err TpotPacketBuilder::buildKillRequest(int pid, uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -152,7 +160,7 @@ Err TpotPacket::buildKillRequest(int pid, uint64_t id, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildKillResponse(uint64_t id, Code code)
+Err TpotPacketBuilder::buildKillResponse(uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -164,7 +172,36 @@ Err TpotPacket::buildKillResponse(uint64_t id, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::parse(char const * buffer, std::size_t size, void * arg)
+uint8_t * TpotPacketBuilder::point() const
+{
+    return _builder.GetBufferPointer();
+}
+
+std::size_t TpotPacketBuilder::size() const
+{
+    return _builder.GetSize();
+}
+
+uint64_t TpotPacketBuilder::genId()
+{
+    return static_cast<uint64_t>(id::generator::genTimeId());
+}
+
+// --------------------------------
+// TpotPacketParser implementation.
+// --------------------------------
+
+TpotPacketParser::TpotPacketParser()
+{
+    // EMPTY.
+}
+
+TpotPacketParser::~TpotPacketParser()
+{
+    // EMPTY.
+}
+
+Err TpotPacketParser::parse(char const * buffer, std::size_t size, void * arg)
 {
     using namespace flatbuffers;
     using namespace proto::fbs::tpot;
@@ -203,19 +240,18 @@ Err TpotPacket::parse(char const * buffer, std::size_t size, void * arg)
     return Err::E_PARSING;
 }
 
-uint8_t * TpotPacket::point() const
+// --------------------------
+// TpotPacket implementation.
+// --------------------------
+
+TpotPacket::TpotPacket(std::size_t capacity) : TpotPacketBuilder(capacity), TpotPacketParser()
 {
-    return _builder.GetBufferPointer();
+    // EMPTY.
 }
 
-std::size_t TpotPacket::size() const
+TpotPacket::~TpotPacket()
 {
-    return _builder.GetSize();
-}
-
-uint64_t TpotPacket::genId()
-{
-    return static_cast<uint64_t>(id::generator::genTimeId());
+    // EMPTY.
 }
 
 } // namespace proto

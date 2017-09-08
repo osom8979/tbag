@@ -137,12 +137,14 @@ bool ProcessManager::isActive(int pid) const
     return false;
 }
 
-std::vector<int> ProcessManager::list() const
+std::vector<ProcessManager::ProcInfo> ProcessManager::list() const
 {
-    std::vector<int> result;
+    std::vector<ProcInfo> result;
     Guard g(_mutex);
     for (auto & proc : _procs) {
-        result.push_back(proc.first);
+        if (static_cast<bool>(proc.second)) {
+            result.emplace_back(proc.second->getPid(), proc.second->isRunning());
+        }
     }
     return result;
 }

@@ -21,6 +21,7 @@
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/proto/TpotPacket.hpp>
 #include <libtbag/util/Version.hpp>
+#include <libtbag/util/ProcInfo.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -57,31 +58,26 @@ public:
 
     using Id           = HttpClient::Id;
     using StreamType   = HttpClient::StreamType;
+    using ProcInfo     = util::ProcInfo;
 
 public:
     using FuncTpotPacket        = proto::FunctionalTpotPacket;
     using Header                = FuncTpotPacket::Header;
-    using ProcessInfo           = FuncTpotPacket::ProcessInfo;
-    using PacketVersionRequest  = FuncTpotPacket::PacketVersionRequest;
     using PacketVersionResponse = FuncTpotPacket::PacketVersionResponse;
-    using ExecRequest           = FuncTpotPacket::ExecRequest;
     using ExecResponse          = FuncTpotPacket::ExecResponse;
-    using HeartbitRequest       = FuncTpotPacket::HeartbitRequest;
     using HeartbitResponse      = FuncTpotPacket::HeartbitResponse;
-    using ListRequest           = FuncTpotPacket::ListRequest;
     using ListResponse          = FuncTpotPacket::ListResponse;
-    using KillRequest           = FuncTpotPacket::KillRequest;
     using KillResponse          = FuncTpotPacket::KillResponse;
 
 public:
     enum class ResultType : int
     {
+        Unknown,
         PacketVersion,
         Exec,
         Heartbit,
         List,
         Kill,
-        Unknown,
     };
 
     struct Result
@@ -95,7 +91,7 @@ public:
             util::Version * version;
             int * pid;
             std::string * echo;
-            std::vector<ProcessInfo> * procs;
+            std::vector<ProcInfo> * procs;
         } response;
 
         Result(uint64_t req = 0, uint64_t res = 0, uint32_t c = 0, ResultType t = ResultType::Unknown)

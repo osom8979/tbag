@@ -262,7 +262,7 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     util::Version result_version;
     int result_pid;
     std::string result_echo;
-    std::vector<TpotClient::ProcessInfo> result_list;
+    std::vector<TpotClient::ProcInfo> result_list;
     Err request_code = Err::E_UNKNOWN;
 
     if (commands[0] == VERSION_CMD) {
@@ -285,7 +285,7 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
         request_code = client.requestList(&result);
         std::cout << string::fformat("Request list (ID:{}, CODE:{}, Size:{})\n", result.response_id, result.code, result.response.procs->size());
         for (auto & proc : *(result.response.procs)) {
-            std::cout << proc.pid() << "[" << proc.active() << "],";
+            std::cout << proc.pid << "[" << proc.active << "],";
         }
         std::cout << std::endl;
 
