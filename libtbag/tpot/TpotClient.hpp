@@ -50,15 +50,10 @@ public:
     };
 
 public:
-    using HttpParser   = network::http::HttpParser;
-    using HttpBuilder  = network::http::HttpBuilder;
     using HttpClient   = network::http::HttpClient;
     using HttpRequest  = network::http::HttpRequest;
     using HttpResponse = network::http::HttpResponse;
-
-    using Id           = HttpClient::Id;
     using StreamType   = HttpClient::StreamType;
-    using ProcInfo     = util::ProcInfo;
 
 public:
     enum class ResultType : int
@@ -82,7 +77,7 @@ public:
             util::Version * version;
             int * pid;
             std::string * echo;
-            std::vector<ProcInfo> * procs;
+            std::vector<util::ProcInfo> * procs;
         } response;
 
         Result(uint64_t req = 0, uint64_t res = 0, uint32_t c = 0, ResultType t = ResultType::Unknown)

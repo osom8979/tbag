@@ -77,19 +77,18 @@ struct TpotClient::Internal
         return requestWithSync(type, param.ip, param.port, network::Uri(ss.str()), request, timeout, response);
     }
 
-    Err requestCommon(std::string const & prefix, std::string const & method,
-                      std::string const & path, Result * result)
+    Err requestCommon(std::string const & method, std::string const & path, Result * result)
     {
         using namespace proto;
         HttpResponse response;
         Err const CODE = request(method, path, packet.point(), packet.size(), response);
         if (TBAG_ERR_FAILURE(CODE)) {
-            tDLogE("{} Request {} error", prefix, getErrName(CODE));
+            tDLogE("TpotClient::Internal::requestCommon({}) Request {} error", path, getErrName(CODE));
             return CODE;
         }
 
         if (!(100 <= COMPARE_AND(response.status) < 300)) { /* 1xx ~ 2xx */
-            tDLogE("{} Response error status code: {}", prefix, response.status);
+            tDLogE("TpotClient::Internal::requestCommon({}) Response error status code: {}", path, response.status);
             if (300 <= COMPARE_AND(response.status) < 400) {
                 return Err::E_HTTP_3XX;
             } else if (500 <= COMPARE_AND(response.status) < 500) {
@@ -101,7 +100,7 @@ struct TpotClient::Internal
 
         Err const PARSE_CODE = packet.parse(response.body.data(), response.body.size(), result);
         if (TBAG_ERR_FAILURE(PARSE_CODE)) {
-            tDLogE("{} Response parse {} error", prefix, getErrName(PARSE_CODE));
+            tDLogE("TpotClient::Internal::requestCommon({}) Response parse {} error", path, getErrName(PARSE_CODE));
             return PARSE_CODE;
         }
         return Err::E_SUCCESS;
@@ -176,10 +175,7 @@ Err TpotClient::requestVersion(Result * result)
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
     _internal->packet.buildVersionRequest(REQUEST_ID);
-    return _internal->requestCommon("TpotClient::requestVersion()",
-                                    VersionPath::getMethod(),
-                                    VersionPath::getPath(),
-                                    result);
+    return _internal->requestCommon(VersionPath::getMethod(), VersionPath::getPath(), result);
 }
 
 Err TpotClient::requestExec(std::string const & file,
@@ -193,7 +189,7 @@ Err TpotClient::requestExec(std::string const & file,
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
     _internal->packet.buildExecRequest(file, args, envs, cwd, input, REQUEST_ID);
-    return _internal->requestCommon("TpotClient::requestExec()", ExecPath::getMethod(), ExecPath::getPath(), result);
+    return _internal->requestCommon(ExecPath::getMethod(), ExecPath::getPath(), result);
 }
 
 Err TpotClient::requestHeartbit(std::string const & echo, Result * result)
@@ -202,10 +198,7 @@ Err TpotClient::requestHeartbit(std::string const & echo, Result * result)
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
     _internal->packet.buildHeartbitRequest(echo, REQUEST_ID);
-    return _internal->requestCommon("TpotClient::requestHeartbit()",
-                                    HeartbitPath::getMethod(),
-                                    HeartbitPath::getPath(),
-                                    result);
+    return _internal->requestCommon(HeartbitPath::getMethod(), HeartbitPath::getPath(), result);
 }
 
 Err TpotClient::requestList(Result * result)
@@ -214,7 +207,7 @@ Err TpotClient::requestList(Result * result)
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
     _internal->packet.buildListRequest(REQUEST_ID);
-    return _internal->requestCommon("TpotClient::requestList()", ListPath::getMethod(), ListPath::getPath(), result);
+    return _internal->requestCommon(ListPath::getMethod(), ListPath::getPath(), result);
 }
 
 Err TpotClient::requestKill(int pid, Result * result)
@@ -223,7 +216,7 @@ Err TpotClient::requestKill(int pid, Result * result)
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
     _internal->packet.buildKillRequest(pid, REQUEST_ID);
-    return _internal->requestCommon("TpotClient::requestKill()", KillPath::getMethod(), KillPath::getPath(), result);
+    return _internal->requestCommon(KillPath::getMethod(), KillPath::getPath(), result);
 }
 
 // ------------
@@ -302,7 +295,7 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     util::Version result_version;
     int result_pid;
     std::string result_echo;
-    std::vector<TpotClient::ProcInfo> result_list;
+    std::vector<util::ProcInfo> result_list;
     Err request_code = Err::E_UNKNOWN;
 
     if (commands[0] == VERSION_CMD) {
