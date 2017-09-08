@@ -24,11 +24,11 @@ namespace tpot {
 TpotClient::TpotClient(Param const & param, StreamType type) : _param(param), _type(type), _timeout(0)
 {
     // @formatter:off
-    _packet.setOnPacketVersionResponse([&](Header const & h, PacketVersionResponse const & p, void * a) { onPacketVersionResponse(h, p, (Result*)a); });
-    _packet.setOnExecResponse         ([&](Header const & h, ExecResponse          const & p, void * a) { onExecResponse         (h, p, (Result*)a); });
-    _packet.setOnHeartbitResponse     ([&](Header const & h, HeartbitResponse      const & p, void * a) { onHeartbitResponse     (h, p, (Result*)a); });
-    _packet.setOnListResponse         ([&](Header const & h, ListResponse          const & p, void * a) { onListResponse         (h, p, (Result*)a); });
-    _packet.setOnKillResponse         ([&](Header const & h, KillResponse          const & p, void * a) { onKillResponse         (h, p, (Result*)a); });
+    _packet.setOnVersionResponse ([&](Header const & h, VersionResponse  const & p, void * a) { onVersionResponse (h, p, (Result*)a); });
+    _packet.setOnExecResponse    ([&](Header const & h, ExecResponse     const & p, void * a) { onExecResponse    (h, p, (Result*)a); });
+    _packet.setOnHeartbitResponse([&](Header const & h, HeartbitResponse const & p, void * a) { onHeartbitResponse(h, p, (Result*)a); });
+    _packet.setOnListResponse    ([&](Header const & h, ListResponse     const & p, void * a) { onListResponse    (h, p, (Result*)a); });
+    _packet.setOnKillResponse    ([&](Header const & h, KillResponse     const & p, void * a) { onKillResponse    (h, p, (Result*)a); });
     // @formatter:on
 }
 
@@ -37,13 +37,13 @@ TpotClient::~TpotClient()
     // EMPTY.
 }
 
-void TpotClient::onPacketVersionResponse(Header const & header, PacketVersionResponse const & packet, Result * result)
+void TpotClient::onVersionResponse(Header const & header, VersionResponse const & packet, Result * result)
 {
     if (result == nullptr) { return; }
     result->response_id = header.id();
     result->code = static_cast<uint32_t>(header.code());
-    result->type = ResultType::PacketVersion;
-    result->response.version->setMajor(packet.version()->minor());
+    result->type = ResultType::Version;
+    result->response.version->setMajor(packet.version()->major());
     result->response.version->setMinor(packet.version()->minor());
 }
 
@@ -136,13 +136,13 @@ Err TpotClient::requestCommon(std::string const & prefix,
     return Err::E_SUCCESS;
 }
 
-Err TpotClient::requestPacketVersion(Result * result)
+Err TpotClient::requestVersion(Result * result)
 {
     using namespace proto;
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
-    _packet.buildPacketVersionRequest(REQUEST_ID);
-    return requestCommon("TpotClient::requestPacketVersion()", VersionPath::getMethod(), VersionPath::getPath(), result);
+    _packet.buildVersionRequest(REQUEST_ID);
+    return requestCommon("TpotClient::requestVersion()", VersionPath::getMethod(), VersionPath::getPath(), result);
 }
 
 Err TpotClient::requestExec(std::string const & file,
@@ -267,7 +267,7 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
 
     if (commands[0] == VERSION_CMD) {
         result.response.version = &result_version;
-        request_code = client.requestPacketVersion(&result);
+        request_code = client.requestVersion(&result);
         std::cout << string::fformat("Request version (ID:{}, CODE:{}, VER:{})\n", result.response_id, result.code, result.response.version->toString());
 
     } else if (commands[0] == EXEC_CMD) {

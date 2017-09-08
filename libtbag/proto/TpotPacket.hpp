@@ -42,16 +42,16 @@ struct TpotPacketTypes : private Noncopyable
     using Header      = proto::fbs::tpot::Header;
     using ProcessInfo = proto::fbs::tpot::ProcessInfo;
 
-    using PacketVersionRequest  = proto::fbs::tpot::PacketVersionRequest;
-    using PacketVersionResponse = proto::fbs::tpot::PacketVersionResponse;
-    using ExecRequest           = proto::fbs::tpot::ExecRequest;
-    using ExecResponse          = proto::fbs::tpot::ExecResponse;
-    using HeartbitRequest       = proto::fbs::tpot::HeartbitRequest;
-    using HeartbitResponse      = proto::fbs::tpot::HeartbitResponse;
-    using ListRequest           = proto::fbs::tpot::ListRequest;
-    using ListResponse          = proto::fbs::tpot::ListResponse;
-    using KillRequest           = proto::fbs::tpot::KillRequest;
-    using KillResponse          = proto::fbs::tpot::KillResponse;
+    using VersionRequest   = proto::fbs::tpot::VersionRequest;
+    using VersionResponse  = proto::fbs::tpot::VersionResponse;
+    using ExecRequest      = proto::fbs::tpot::ExecRequest;
+    using ExecResponse     = proto::fbs::tpot::ExecResponse;
+    using HeartbitRequest  = proto::fbs::tpot::HeartbitRequest;
+    using HeartbitResponse = proto::fbs::tpot::HeartbitResponse;
+    using ListRequest      = proto::fbs::tpot::ListRequest;
+    using ListResponse     = proto::fbs::tpot::ListResponse;
+    using KillRequest      = proto::fbs::tpot::KillRequest;
+    using KillResponse     = proto::fbs::tpot::KillResponse;
 
     using ProcInfo = util::ProcInfo;
 
@@ -82,10 +82,10 @@ public:
     void clear();
 
 public:
-    Err buildPacketVersionRequest(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildPacketVersionResponse(unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
-                                   unsigned minor = LIBTBAG_VERSION_PACKET_MINOR,
-                                   uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildVersionRequest(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildVersionResponse(unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
+                             unsigned minor = LIBTBAG_VERSION_PACKET_MINOR,
+                             uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
     Err buildExecRequest(std::string const & file,
                          std::vector<std::string> const & args = std::vector<std::string>(),
@@ -95,16 +95,16 @@ public:
                          uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildExecResponse(int pid, uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildHeartbitRequest (std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                              uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildHeartbitRequest(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
+                             uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildHeartbitResponse(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
                               uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildListRequest (uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildListRequest(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildListResponse(std::vector<ProcInfo> const & procs,
                           uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildKillRequest (int pid, uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildKillRequest(int pid, uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildKillResponse(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
 
 public:
@@ -127,16 +127,16 @@ public:
     Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
 
 protected:
-    virtual void onPacketVersionRequest (Header const & header, PacketVersionRequest  const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onPacketVersionResponse(Header const & header, PacketVersionResponse const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onExecRequest          (Header const & header, ExecRequest           const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onExecResponse         (Header const & header, ExecResponse          const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onHeartbitRequest      (Header const & header, HeartbitRequest       const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onHeartbitResponse     (Header const & header, HeartbitResponse      const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onListRequest          (Header const & header, ListRequest           const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onListResponse         (Header const & header, ListResponse          const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onKillRequest          (Header const & header, KillRequest           const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onKillResponse         (Header const & header, KillResponse          const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onVersionRequest  (Header const & header, VersionRequest   const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onVersionResponse (Header const & header, VersionResponse  const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onExecRequest     (Header const & header, ExecRequest      const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onExecResponse    (Header const & header, ExecResponse     const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onHeartbitRequest (Header const & header, HeartbitRequest  const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onHeartbitResponse(Header const & header, HeartbitResponse const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onListRequest     (Header const & header, ListRequest      const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onListResponse    (Header const & header, ListResponse     const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onKillRequest     (Header const & header, KillRequest      const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onKillResponse    (Header const & header, KillResponse     const & packet, void * arg) { /* EMPTY. */ }
 };
 
 /**
@@ -162,46 +162,46 @@ class FunctionalTpotPacket : public TpotPacket
 {
 public:
     // @formatter:off
-    using ResultCode            = TpotPacket::ResultCode;
-    using Header                = TpotPacket::Header;
-    using PacketVersionRequest  = TpotPacket::PacketVersionRequest;
-    using PacketVersionResponse = TpotPacket::PacketVersionResponse;
-    using ExecRequest           = TpotPacket::ExecRequest;
-    using ExecResponse          = TpotPacket::ExecResponse;
-    using HeartbitRequest       = TpotPacket::HeartbitRequest;
-    using HeartbitResponse      = TpotPacket::HeartbitResponse;
-    using ListRequest           = TpotPacket::ListRequest;
-    using ListResponse          = TpotPacket::ListResponse;
-    using KillRequest           = TpotPacket::KillRequest;
-    using KillResponse          = TpotPacket::KillResponse;
+    using ResultCode       = TpotPacket::ResultCode;
+    using Header           = TpotPacket::Header;
+    using VersionRequest   = TpotPacket::VersionRequest;
+    using VersionResponse  = TpotPacket::VersionResponse;
+    using ExecRequest      = TpotPacket::ExecRequest;
+    using ExecResponse     = TpotPacket::ExecResponse;
+    using HeartbitRequest  = TpotPacket::HeartbitRequest;
+    using HeartbitResponse = TpotPacket::HeartbitResponse;
+    using ListRequest      = TpotPacket::ListRequest;
+    using ListResponse     = TpotPacket::ListResponse;
+    using KillRequest      = TpotPacket::KillRequest;
+    using KillResponse     = TpotPacket::KillResponse;
     // @formatter:on
 
 public:
     // @formatter:off
-    using OnPacketVersionRequest  = std::function<void(Header const &, PacketVersionRequest  const &, void*)>;
-    using OnPacketVersionResponse = std::function<void(Header const &, PacketVersionResponse const &, void*)>;
-    using OnExecRequest           = std::function<void(Header const &, ExecRequest           const &, void*)>;
-    using OnExecResponse          = std::function<void(Header const &, ExecResponse          const &, void*)>;
-    using OnHeartbitRequest       = std::function<void(Header const &, HeartbitRequest       const &, void*)>;
-    using OnHeartbitResponse      = std::function<void(Header const &, HeartbitResponse      const &, void*)>;
-    using OnListRequest           = std::function<void(Header const &, ListRequest           const &, void*)>;
-    using OnListResponse          = std::function<void(Header const &, ListResponse          const &, void*)>;
-    using OnKillRequest           = std::function<void(Header const &, KillRequest           const &, void*)>;
-    using OnKillResponse          = std::function<void(Header const &, KillResponse          const &, void*)>;
+    using OnVersionRequest   = std::function<void(Header const &, VersionRequest   const &, void*)>;
+    using OnVersionResponse  = std::function<void(Header const &, VersionResponse  const &, void*)>;
+    using OnExecRequest      = std::function<void(Header const &, ExecRequest      const &, void*)>;
+    using OnExecResponse     = std::function<void(Header const &, ExecResponse     const &, void*)>;
+    using OnHeartbitRequest  = std::function<void(Header const &, HeartbitRequest  const &, void*)>;
+    using OnHeartbitResponse = std::function<void(Header const &, HeartbitResponse const &, void*)>;
+    using OnListRequest      = std::function<void(Header const &, ListRequest      const &, void*)>;
+    using OnListResponse     = std::function<void(Header const &, ListResponse     const &, void*)>;
+    using OnKillRequest      = std::function<void(Header const &, KillRequest      const &, void*)>;
+    using OnKillResponse     = std::function<void(Header const &, KillResponse     const &, void*)>;
     // @formatter:on
 
 private:
     // @formatter:off
-    OnPacketVersionRequest  _packet_version_request_cb;
-    OnPacketVersionResponse _packet_version_response_cb;
-    OnExecRequest           _exec_request_cb;
-    OnExecResponse          _exec_response_cb;
-    OnHeartbitRequest       _heartbit_request_cb;
-    OnHeartbitResponse      _heartbit_response_cb;
-    OnListRequest           _list_request_cb;
-    OnListResponse          _list_response_cb;
-    OnKillRequest           _kill_request_cb;
-    OnKillResponse          _kill_response_cb;
+    OnVersionRequest   _version_request_cb;
+    OnVersionResponse  _version_response_cb;
+    OnExecRequest      _exec_request_cb;
+    OnExecResponse     _exec_response_cb;
+    OnHeartbitRequest  _heartbit_request_cb;
+    OnHeartbitResponse _heartbit_response_cb;
+    OnListRequest      _list_request_cb;
+    OnListResponse     _list_response_cb;
+    OnKillRequest      _kill_request_cb;
+    OnKillResponse     _kill_response_cb;
     // @formatter:on
 
 public:
@@ -212,30 +212,30 @@ public:
 
 public:
     // @formatter:off
-    void setOnPacketVersionRequest (OnPacketVersionRequest  const & cb) { _packet_version_request_cb    = cb; }
-    void setOnPacketVersionResponse(OnPacketVersionResponse const & cb) { _packet_version_response_cb   = cb; }
-    void setOnExecRequest          (OnExecRequest           const & cb) { _exec_request_cb              = cb; }
-    void setOnExecResponse         (OnExecResponse          const & cb) { _exec_response_cb             = cb; }
-    void setOnHeartbitRequest      (OnHeartbitRequest       const & cb) { _heartbit_request_cb          = cb; }
-    void setOnHeartbitResponse     (OnHeartbitResponse      const & cb) { _heartbit_response_cb         = cb; }
-    void setOnListRequest          (OnListRequest           const & cb) { _list_request_cb              = cb; }
-    void setOnListResponse         (OnListResponse          const & cb) { _list_response_cb             = cb; }
-    void setOnKillRequest          (OnKillRequest           const & cb) { _kill_request_cb              = cb; }
-    void setOnKillResponse         (OnKillResponse          const & cb) { _kill_response_cb             = cb; }
+    void setOnVersionRequest  (OnVersionRequest   const & cb) { _version_request_cb   = cb; }
+    void setOnVersionResponse (OnVersionResponse  const & cb) { _version_response_cb  = cb; }
+    void setOnExecRequest     (OnExecRequest      const & cb) { _exec_request_cb      = cb; }
+    void setOnExecResponse    (OnExecResponse     const & cb) { _exec_response_cb     = cb; }
+    void setOnHeartbitRequest (OnHeartbitRequest  const & cb) { _heartbit_request_cb  = cb; }
+    void setOnHeartbitResponse(OnHeartbitResponse const & cb) { _heartbit_response_cb = cb; }
+    void setOnListRequest     (OnListRequest      const & cb) { _list_request_cb      = cb; }
+    void setOnListResponse    (OnListResponse     const & cb) { _list_response_cb     = cb; }
+    void setOnKillRequest     (OnKillRequest      const & cb) { _kill_request_cb      = cb; }
+    void setOnKillResponse    (OnKillResponse     const & cb) { _kill_response_cb     = cb; }
     // @formatter:on
 
 public:
     // @formatter:off
-    virtual void onPacketVersionRequest (Header const & header, PacketVersionRequest  const & packet, void * arg) { if (static_cast<bool>(_packet_version_request_cb )) { _packet_version_request_cb (header, packet, arg); } }
-    virtual void onPacketVersionResponse(Header const & header, PacketVersionResponse const & packet, void * arg) { if (static_cast<bool>(_packet_version_response_cb)) { _packet_version_response_cb(header, packet, arg); } }
-    virtual void onExecRequest          (Header const & header, ExecRequest           const & packet, void * arg) { if (static_cast<bool>(_exec_request_cb           )) { _exec_request_cb           (header, packet, arg); } }
-    virtual void onExecResponse         (Header const & header, ExecResponse          const & packet, void * arg) { if (static_cast<bool>(_exec_response_cb          )) { _exec_response_cb          (header, packet, arg); } }
-    virtual void onHeartbitRequest      (Header const & header, HeartbitRequest       const & packet, void * arg) { if (static_cast<bool>(_heartbit_request_cb       )) { _heartbit_request_cb       (header, packet, arg); } }
-    virtual void onHeartbitResponse     (Header const & header, HeartbitResponse      const & packet, void * arg) { if (static_cast<bool>(_heartbit_response_cb      )) { _heartbit_response_cb      (header, packet, arg); } }
-    virtual void onListRequest          (Header const & header, ListRequest           const & packet, void * arg) { if (static_cast<bool>(_list_request_cb           )) { _list_request_cb           (header, packet, arg); } }
-    virtual void onListResponse         (Header const & header, ListResponse          const & packet, void * arg) { if (static_cast<bool>(_list_response_cb          )) { _list_response_cb          (header, packet, arg); } }
-    virtual void onKillRequest          (Header const & header, KillRequest           const & packet, void * arg) { if (static_cast<bool>(_kill_request_cb           )) { _kill_request_cb           (header, packet, arg); } }
-    virtual void onKillResponse         (Header const & header, KillResponse          const & packet, void * arg) { if (static_cast<bool>(_kill_response_cb          )) { _kill_response_cb          (header, packet, arg); } }
+    virtual void onVersionRequest  (Header const & header, VersionRequest   const & packet, void * arg) { if (static_cast<bool>(_version_request_cb  )) { _version_request_cb  (header, packet, arg); } }
+    virtual void onVersionResponse (Header const & header, VersionResponse  const & packet, void * arg) { if (static_cast<bool>(_version_response_cb )) { _version_response_cb (header, packet, arg); } }
+    virtual void onExecRequest     (Header const & header, ExecRequest      const & packet, void * arg) { if (static_cast<bool>(_exec_request_cb     )) { _exec_request_cb     (header, packet, arg); } }
+    virtual void onExecResponse    (Header const & header, ExecResponse     const & packet, void * arg) { if (static_cast<bool>(_exec_response_cb    )) { _exec_response_cb    (header, packet, arg); } }
+    virtual void onHeartbitRequest (Header const & header, HeartbitRequest  const & packet, void * arg) { if (static_cast<bool>(_heartbit_request_cb )) { _heartbit_request_cb (header, packet, arg); } }
+    virtual void onHeartbitResponse(Header const & header, HeartbitResponse const & packet, void * arg) { if (static_cast<bool>(_heartbit_response_cb)) { _heartbit_response_cb(header, packet, arg); } }
+    virtual void onListRequest     (Header const & header, ListRequest      const & packet, void * arg) { if (static_cast<bool>(_list_request_cb     )) { _list_request_cb     (header, packet, arg); } }
+    virtual void onListResponse    (Header const & header, ListResponse     const & packet, void * arg) { if (static_cast<bool>(_list_response_cb    )) { _list_response_cb    (header, packet, arg); } }
+    virtual void onKillRequest     (Header const & header, KillRequest      const & packet, void * arg) { if (static_cast<bool>(_kill_request_cb     )) { _kill_request_cb     (header, packet, arg); } }
+    virtual void onKillResponse    (Header const & header, KillResponse     const & packet, void * arg) { if (static_cast<bool>(_kill_response_cb    )) { _kill_response_cb    (header, packet, arg); } }
     // @formatter:on
 };
 

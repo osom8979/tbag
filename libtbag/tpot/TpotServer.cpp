@@ -73,11 +73,11 @@ int TpotServer::run()
     _server->setRequest(HeartbitPath::getMethod(), HeartbitPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onHeartbitRequest(n, c, p); });
     _server->setRequest(    ListPath::getMethod(),     ListPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onListRequest    (n, c, p); });
     _server->setRequest(    KillPath::getMethod(),     KillPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onKillRequest    (n, c, p); });
-    _packet.setOnPacketVersionRequest([&](Header const & h, PacketVersionRequest const & p, void * a) { onPacketVersionRequest(h, p, *(HttpPacket*)a); });
-    _packet.setOnExecRequest         ([&](Header const & h, ExecRequest          const & p, void * a) { onExecRequest         (h, p, *(HttpPacket*)a); });
-    _packet.setOnHeartbitRequest     ([&](Header const & h, HeartbitRequest      const & p, void * a) { onHeartbitRequest     (h, p, *(HttpPacket*)a); });
-    _packet.setOnListRequest         ([&](Header const & h, ListRequest          const & p, void * a) { onListRequest         (h, p, *(HttpPacket*)a); });
-    _packet.setOnKillRequest         ([&](Header const & h, KillRequest          const & p, void * a) { onKillRequest         (h, p, *(HttpPacket*)a); });
+    _packet.setOnVersionRequest ([&](Header const & h, VersionRequest  const & p, void * a) { onVersionRequest (h, p, *(HttpPacket*)a); });
+    _packet.setOnExecRequest    ([&](Header const & h, ExecRequest     const & p, void * a) { onExecRequest    (h, p, *(HttpPacket*)a); });
+    _packet.setOnHeartbitRequest([&](Header const & h, HeartbitRequest const & p, void * a) { onHeartbitRequest(h, p, *(HttpPacket*)a); });
+    _packet.setOnListRequest    ([&](Header const & h, ListRequest     const & p, void * a) { onListRequest    (h, p, *(HttpPacket*)a); });
+    _packet.setOnKillRequest    ([&](Header const & h, KillRequest     const & p, void * a) { onKillRequest    (h, p, *(HttpPacket*)a); });
     // @formatter:on
 
     tDLogN("TpoT is run! (BIND: {}, PORT: {})", _server->dest(), _server->port());
@@ -193,12 +193,12 @@ void TpotServer::onKillRequest(WeakClient node, Err code, HttpPacket & packet)
     }
 }
 
-void TpotServer::onPacketVersionRequest(Header const & header, PacketVersionRequest const & packet, HttpPacket & hp)
+void TpotServer::onVersionRequest(Header const & header, VersionRequest const & packet, HttpPacket & hp)
 {
     util::Version const PACKET_VERSION = util::getTbagPacketVersion();
-    _packet.buildPacketVersionResponse(PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor(), header.id());
+    _packet.buildVersionResponse(PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor(), header.id());
 
-    tDLogI("TpotServer::onPacketVersionRequest() Response OK (Version: {})", PACKET_VERSION.toString());
+    tDLogI("TpotServer::onVersionRequest() Response OK (Version: {})", PACKET_VERSION.toString());
     hp.response.setStatus(network::http::HttpStatus::SC_OK);
     hp.response.appendBody((char const *)_packet.point(), _packet.size());
 }

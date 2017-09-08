@@ -10,8 +10,6 @@
 #include <libtbag/id/generator/TimeId.hpp>
 #include <libtbag/debug/Assert.hpp>
 
-#include <flatbuffers/idl.h>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -37,37 +35,37 @@ void TpotPacketBuilder::clear()
     _builder.Clear();
 }
 
-Err TpotPacketBuilder::buildPacketVersionRequest(uint64_t id, ResultCode code)
+Err TpotPacketBuilder::buildVersionRequest(uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
-            _builder, &header, AnyPacket_PacketVersionRequest,
-            CreatePacketVersionRequest(_builder).Union());
+            _builder, &header, AnyPacket_VersionRequest,
+            CreateVersionRequest(_builder).Union());
     _builder.Finish(packet);
     return Err::E_SUCCESS;
 }
 
-Err TpotPacketBuilder::buildPacketVersionResponse(unsigned major, unsigned minor, uint64_t id, ResultCode code)
+Err TpotPacketBuilder::buildVersionResponse(unsigned major, unsigned minor, uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
-    PacketVersion packet_version(major, minor);
+    Version packet_version(major, minor);
     _builder.Clear();
     auto packet = CreateTpotPacket(
-            _builder, &header, AnyPacket_PacketVersionResponse,
-            CreatePacketVersionResponse(_builder, &packet_version).Union());
+            _builder, &header, AnyPacket_VersionResponse,
+            CreateVersionResponse(_builder, &packet_version).Union());
     _builder.Finish(packet);
     return Err::E_SUCCESS;
 }
 
 Err TpotPacketBuilder::buildExecRequest(std::string const & file,
-                                 std::vector<std::string> const & args,
-                                 std::vector<std::string> const & envs,
-                                 std::string const & cwd,
-                                 std::string const & input,
-                                 uint64_t id, ResultCode code)
+                                        std::vector<std::string> const & args,
+                                        std::vector<std::string> const & envs,
+                                        std::string const & cwd,
+                                        std::string const & input,
+                                        uint64_t id, ResultCode code)
 {
     using namespace proto::fbs::tpot;
     Header header(id, code);
@@ -221,16 +219,16 @@ Err TpotPacketParser::parse(char const * buffer, std::size_t size, void * arg)
 
         // @formatter:off
         switch (type) {
-        case AnyPacket_PacketVersionRequest: onPacketVersionRequest (*header, *(PacketVersionRequest *)packet, arg); break;
-        case AnyPacket_PacketVersionResponse:onPacketVersionResponse(*header, *(PacketVersionResponse*)packet, arg); break;
-        case AnyPacket_ExecRequest:          onExecRequest          (*header, *(ExecRequest          *)packet, arg); break;
-        case AnyPacket_ExecResponse:         onExecResponse         (*header, *(ExecResponse         *)packet, arg); break;
-        case AnyPacket_HeartbitRequest:      onHeartbitRequest      (*header, *(HeartbitRequest      *)packet, arg); break;
-        case AnyPacket_HeartbitResponse:     onHeartbitResponse     (*header, *(HeartbitResponse     *)packet, arg); break;
-        case AnyPacket_ListRequest:          onListRequest          (*header, *(ListRequest          *)packet, arg); break;
-        case AnyPacket_ListResponse:         onListResponse         (*header, *(ListResponse         *)packet, arg); break;
-        case AnyPacket_KillRequest:          onKillRequest          (*header, *(KillRequest          *)packet, arg); break;
-        case AnyPacket_KillResponse:         onKillResponse         (*header, *(KillResponse         *)packet, arg); break;
+        case AnyPacket_VersionRequest:   onVersionRequest  (*header, *(VersionRequest  *)packet, arg); break;
+        case AnyPacket_VersionResponse:  onVersionResponse (*header, *(VersionResponse *)packet, arg); break;
+        case AnyPacket_ExecRequest:      onExecRequest     (*header, *(ExecRequest     *)packet, arg); break;
+        case AnyPacket_ExecResponse:     onExecResponse    (*header, *(ExecResponse    *)packet, arg); break;
+        case AnyPacket_HeartbitRequest:  onHeartbitRequest (*header, *(HeartbitRequest *)packet, arg); break;
+        case AnyPacket_HeartbitResponse: onHeartbitResponse(*header, *(HeartbitResponse*)packet, arg); break;
+        case AnyPacket_ListRequest:      onListRequest     (*header, *(ListRequest     *)packet, arg); break;
+        case AnyPacket_ListResponse:     onListResponse    (*header, *(ListResponse    *)packet, arg); break;
+        case AnyPacket_KillRequest:      onKillRequest     (*header, *(KillRequest     *)packet, arg); break;
+        case AnyPacket_KillResponse:     onKillResponse    (*header, *(KillResponse    *)packet, arg); break;
         default:
             TBAG_INACCESSIBLE_BLOCK_ASSERT();
         }

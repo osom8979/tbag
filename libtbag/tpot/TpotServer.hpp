@@ -77,13 +77,13 @@ public:
     using ProcInfo = ProcessManager::ProcInfo;
 
 public:
-    using FuncTpotPacket        = proto::FunctionalTpotPacket;
-    using Header                = FuncTpotPacket::Header;
-    using PacketVersionRequest  = FuncTpotPacket::PacketVersionRequest;
-    using ExecRequest           = FuncTpotPacket::ExecRequest;
-    using HeartbitRequest       = FuncTpotPacket::HeartbitRequest;
-    using ListRequest           = FuncTpotPacket::ListRequest;
-    using KillRequest           = FuncTpotPacket::KillRequest;
+    using FuncTpotPacket  = proto::FunctionalTpotPacket;
+    using Header          = FuncTpotPacket::Header;
+    using VersionRequest  = FuncTpotPacket::VersionRequest;
+    using ExecRequest     = FuncTpotPacket::ExecRequest;
+    using HeartbitRequest = FuncTpotPacket::HeartbitRequest;
+    using ListRequest     = FuncTpotPacket::ListRequest;
+    using KillRequest     = FuncTpotPacket::KillRequest;
 
 public:
     class Server : public HttpServer
@@ -156,11 +156,11 @@ protected:
     void onListRequest    (WeakClient node, Err code, HttpPacket & packet);
     void onKillRequest    (WeakClient node, Err code, HttpPacket & packet);
 
-    void onPacketVersionRequest(Header const & header, PacketVersionRequest const & packet, HttpPacket & hp);
-    void onExecRequest         (Header const & header, ExecRequest          const & packet, HttpPacket & hp);
-    void onHeartbitRequest     (Header const & header, HeartbitRequest      const & packet, HttpPacket & hp);
-    void onListRequest         (Header const & header, ListRequest          const & packet, HttpPacket & hp);
-    void onKillRequest         (Header const & header, KillRequest          const & packet, HttpPacket & hp);
+    void onVersionRequest (Header const & header, VersionRequest  const & packet, HttpPacket & hp);
+    void onExecRequest    (Header const & header, ExecRequest     const & packet, HttpPacket & hp);
+    void onHeartbitRequest(Header const & header, HeartbitRequest const & packet, HttpPacket & hp);
+    void onListRequest    (Header const & header, ListRequest     const & packet, HttpPacket & hp);
+    void onKillRequest    (Header const & header, KillRequest     const & packet, HttpPacket & hp);
 };
 
 } // namespace tpot
