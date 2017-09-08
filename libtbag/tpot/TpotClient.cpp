@@ -7,8 +7,10 @@
 
 #include <libtbag/tpot/TpotClient.hpp>
 #include <libtbag/log/Log.hpp>
+
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/proto/TpotPacket.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -21,15 +23,146 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 
-TpotClient::TpotClient(Param const & param, StreamType type) : _param(param), _type(type), _timeout(0)
+// ------------------------------------
+// TpotClient::Internal implementation.
+// ------------------------------------
+
+struct TpotClient::Internal
 {
-    // @formatter:off
-    _packet.setOnVersionResponse ([&](Header const & h, VersionResponse  const & p, void * a) { onVersionResponse (h, p, (Result*)a); });
-    _packet.setOnExecResponse    ([&](Header const & h, ExecResponse     const & p, void * a) { onExecResponse    (h, p, (Result*)a); });
-    _packet.setOnHeartbitResponse([&](Header const & h, HeartbitResponse const & p, void * a) { onHeartbitResponse(h, p, (Result*)a); });
-    _packet.setOnListResponse    ([&](Header const & h, ListResponse     const & p, void * a) { onListResponse    (h, p, (Result*)a); });
-    _packet.setOnKillResponse    ([&](Header const & h, KillResponse     const & p, void * a) { onKillResponse    (h, p, (Result*)a); });
-    // @formatter:on
+    using FuncTpotPacket   = proto::FunctionalTpotPacket;
+    using Header           = FuncTpotPacket::Header;
+    using VersionResponse  = FuncTpotPacket::VersionResponse;
+    using ExecResponse     = FuncTpotPacket::ExecResponse;
+    using HeartbitResponse = FuncTpotPacket::HeartbitResponse;
+    using ListResponse     = FuncTpotPacket::ListResponse;
+    using KillResponse     = FuncTpotPacket::KillResponse;
+
+    TpotClient   * parent;
+    Param          param;
+    StreamType     type;
+    uint64_t       timeout;
+    FuncTpotPacket packet;
+
+    Internal(TpotClient * p, Param pm, StreamType t) : parent(p), param(pm), type(t), timeout(0), packet()
+    {
+        // @formatter:off
+        packet.setOnVersionResponse ([&](Header const & h, VersionResponse  const & p, void * a) { onVersionResponse (h, p, (Result*)a); });
+        packet.setOnExecResponse    ([&](Header const & h, ExecResponse     const & p, void * a) { onExecResponse    (h, p, (Result*)a); });
+        packet.setOnHeartbitResponse([&](Header const & h, HeartbitResponse const & p, void * a) { onHeartbitResponse(h, p, (Result*)a); });
+        packet.setOnListResponse    ([&](Header const & h, ListResponse     const & p, void * a) { onListResponse    (h, p, (Result*)a); });
+        packet.setOnKillResponse    ([&](Header const & h, KillResponse     const & p, void * a) { onKillResponse    (h, p, (Result*)a); });
+        // @formatter:on
+    }
+
+    ~Internal()
+    {
+        // EMPTY.
+    }
+
+    Err request(std::string const & method, std::string const & path,
+                uint8_t const * buffer, std::size_t size,
+                HttpResponse & response)
+    {
+        using namespace network::http;
+        std::stringstream ss;
+        if (type == StreamType::TCP) {
+            ss << "http://" << param.ip << ':' << param.port << path;
+        } else {
+            ss << param.ip;
+        }
+
+        HttpRequest request;
+        request.setMethod(getHttpMethod(method));
+        request.body.assign(buffer, buffer + size);
+        return requestWithSync(type, param.ip, param.port, network::Uri(ss.str()), request, timeout, response);
+    }
+
+    Err requestCommon(std::string const & prefix, std::string const & method,
+                      std::string const & path, Result * result)
+    {
+        using namespace proto;
+        HttpResponse response;
+        Err const CODE = request(method, path, packet.point(), packet.size(), response);
+        if (TBAG_ERR_FAILURE(CODE)) {
+            tDLogE("{} Request {} error", prefix, getErrName(CODE));
+            return CODE;
+        }
+
+        if (!(100 <= COMPARE_AND(response.status) < 300)) { /* 1xx ~ 2xx */
+            tDLogE("{} Response error status code: {}", prefix, response.status);
+            if (300 <= COMPARE_AND(response.status) < 400) {
+                return Err::E_HTTP_3XX;
+            } else if (500 <= COMPARE_AND(response.status) < 500) {
+                return Err::E_HTTP_4XX;
+            } else {
+                return Err::E_UNKNOWN;
+            }
+        }
+
+        Err const PARSE_CODE = packet.parse(response.body.data(), response.body.size(), result);
+        if (TBAG_ERR_FAILURE(PARSE_CODE)) {
+            tDLogE("{} Response parse {} error", prefix, getErrName(PARSE_CODE));
+            return PARSE_CODE;
+        }
+        return Err::E_SUCCESS;
+    }
+
+    void onVersionResponse(Header const & header, VersionResponse const & packet, Result * result)
+    {
+        if (result == nullptr) { return; }
+        result->response_id = header.id();
+        result->code = static_cast<uint32_t>(header.code());
+        result->type = ResultType::Version;
+        result->response.version->setMajor(packet.version()->major());
+        result->response.version->setMinor(packet.version()->minor());
+    }
+
+    void onExecResponse(Header const & header, ExecResponse const & packet, Result * result)
+    {
+        if (result == nullptr) { return; }
+        result->response_id = header.id();
+        result->code = static_cast<uint32_t>(header.code());
+        result->type = ResultType::Exec;
+        *(result->response.pid) = packet.pid();
+    }
+
+    void onHeartbitResponse(Header const & header, HeartbitResponse const & packet, Result * result)
+    {
+        if (result == nullptr) { return; }
+        result->response_id = header.id();
+        result->code = static_cast<uint32_t>(header.code());
+        result->type = ResultType::Heartbit;
+        result->response.echo->assign(packet.echo()->str());
+    }
+
+    void onListResponse(Header const & header, ListResponse const & packet, Result * result)
+    {
+        if (result == nullptr) { return; }
+        result->response_id = header.id();
+        result->code = static_cast<uint32_t>(header.code());
+        result->type = ResultType::List;
+        for (auto itr = packet.procs()->begin(); itr != packet.procs()->end(); ++itr) {
+            result->response.procs->emplace_back(itr->pid(), itr->active());
+        }
+    }
+
+    void onKillResponse(Header const & header, KillResponse const & packet, Result * result)
+    {
+        if (result == nullptr) { return; }
+        result->response_id = header.id();
+        result->code = static_cast<uint32_t>(header.code());
+        result->type = ResultType::Kill;
+    }
+};
+
+// --------------------------
+// TpotClient implementation.
+// --------------------------
+
+TpotClient::TpotClient(Param const & param, StreamType type)
+        : _internal(new Internal(this, param, type))
+{
+    assert(static_cast<bool>(_internal));
 }
 
 TpotClient::~TpotClient()
@@ -37,112 +170,16 @@ TpotClient::~TpotClient()
     // EMPTY.
 }
 
-void TpotClient::onVersionResponse(Header const & header, VersionResponse const & packet, Result * result)
-{
-    if (result == nullptr) { return; }
-    result->response_id = header.id();
-    result->code = static_cast<uint32_t>(header.code());
-    result->type = ResultType::Version;
-    result->response.version->setMajor(packet.version()->major());
-    result->response.version->setMinor(packet.version()->minor());
-}
-
-void TpotClient::onExecResponse(Header const & header, ExecResponse const & packet, Result * result)
-{
-    if (result == nullptr) { return; }
-    result->response_id = header.id();
-    result->code = static_cast<uint32_t>(header.code());
-    result->type = ResultType::Exec;
-    *(result->response.pid) = packet.pid();
-}
-
-void TpotClient::onHeartbitResponse(Header const & header, HeartbitResponse const & packet, Result * result)
-{
-    if (result == nullptr) { return; }
-    result->response_id = header.id();
-    result->code = static_cast<uint32_t>(header.code());
-    result->type = ResultType::Heartbit;
-    result->response.echo->assign(packet.echo()->str());
-}
-
-void TpotClient::onListResponse(Header const & header, ListResponse const & packet, Result * result)
-{
-    if (result == nullptr) { return; }
-    result->response_id = header.id();
-    result->code = static_cast<uint32_t>(header.code());
-    result->type = ResultType::List;
-    for (auto itr = packet.procs()->begin(); itr != packet.procs()->end(); ++itr) {
-        result->response.procs->emplace_back(itr->pid(), itr->active());
-    }
-}
-
-void TpotClient::onKillResponse(Header const & header, KillResponse const & packet, Result * result)
-{
-    if (result == nullptr) { return; }
-    result->response_id = header.id();
-    result->code = static_cast<uint32_t>(header.code());
-    result->type = ResultType::Kill;
-}
-
-Err TpotClient::request(std::string const & method,
-                        std::string const & path,
-                        uint8_t const * buffer,
-                        std::size_t size,
-                        HttpResponse & response)
-{
-    using namespace network::http;
-    std::stringstream ss;
-    if (_type == StreamType::TCP) {
-        ss << "http://" << _param.ip << ':' << _param.port << path;
-    } else {
-        ss << _param.ip;
-    }
-
-    HttpRequest request;
-    request.setMethod(getHttpMethod(method));
-    request.body.assign(buffer, buffer + size);
-    return requestWithSync(_type, _param.ip, _param.port, network::Uri(ss.str()), request, _timeout, response);
-}
-
-Err TpotClient::requestCommon(std::string const & prefix,
-                              std::string const & method,
-                              std::string const & path,
-                              Result * result)
-{
-    using namespace proto;
-    HttpResponse response;
-    Err const CODE = request(method, path, _packet.point(), _packet.size(), response);
-    if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("{} Request {} error", prefix, getErrName(CODE));
-        return CODE;
-    }
-
-    if (!(100 <= COMPARE_AND(response.status) < 300)) { /* 1xx ~ 2xx */
-        tDLogE("{} Response error status code: {}", prefix, response.status);
-        if (300 <= COMPARE_AND(response.status) < 400) {
-            return Err::E_HTTP_3XX;
-        } else if (500 <= COMPARE_AND(response.status) < 500) {
-            return Err::E_HTTP_4XX;
-        } else {
-            return Err::E_UNKNOWN;
-        }
-    }
-
-    Err const PARSE_CODE = _packet.parse(response.body.data(), response.body.size(), result);
-    if (TBAG_ERR_FAILURE(PARSE_CODE)) {
-        tDLogE("{} Response parse {} error", prefix, getErrName(PARSE_CODE));
-        return PARSE_CODE;
-    }
-    return Err::E_SUCCESS;
-}
-
 Err TpotClient::requestVersion(Result * result)
 {
     using namespace proto;
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
-    _packet.buildVersionRequest(REQUEST_ID);
-    return requestCommon("TpotClient::requestVersion()", VersionPath::getMethod(), VersionPath::getPath(), result);
+    _internal->packet.buildVersionRequest(REQUEST_ID);
+    return _internal->requestCommon("TpotClient::requestVersion()",
+                                    VersionPath::getMethod(),
+                                    VersionPath::getPath(),
+                                    result);
 }
 
 Err TpotClient::requestExec(std::string const & file,
@@ -155,8 +192,8 @@ Err TpotClient::requestExec(std::string const & file,
     using namespace proto;
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
-    _packet.buildExecRequest(file, args, envs, cwd, input, REQUEST_ID);
-    return requestCommon("TpotClient::requestExec()", ExecPath::getMethod(), ExecPath::getPath(), result);
+    _internal->packet.buildExecRequest(file, args, envs, cwd, input, REQUEST_ID);
+    return _internal->requestCommon("TpotClient::requestExec()", ExecPath::getMethod(), ExecPath::getPath(), result);
 }
 
 Err TpotClient::requestHeartbit(std::string const & echo, Result * result)
@@ -164,8 +201,11 @@ Err TpotClient::requestHeartbit(std::string const & echo, Result * result)
     using namespace proto;
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
-    _packet.buildHeartbitRequest(echo, REQUEST_ID);
-    return requestCommon("TpotClient::requestHeartbit()", HeartbitPath::getMethod(), HeartbitPath::getPath(), result);
+    _internal->packet.buildHeartbitRequest(echo, REQUEST_ID);
+    return _internal->requestCommon("TpotClient::requestHeartbit()",
+                                    HeartbitPath::getMethod(),
+                                    HeartbitPath::getPath(),
+                                    result);
 }
 
 Err TpotClient::requestList(Result * result)
@@ -173,8 +213,8 @@ Err TpotClient::requestList(Result * result)
     using namespace proto;
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
-    _packet.buildListRequest(REQUEST_ID);
-    return requestCommon("TpotClient::requestList()", ListPath::getMethod(), ListPath::getPath(), result);
+    _internal->packet.buildListRequest(REQUEST_ID);
+    return _internal->requestCommon("TpotClient::requestList()", ListPath::getMethod(), ListPath::getPath(), result);
 }
 
 Err TpotClient::requestKill(int pid, Result * result)
@@ -182,18 +222,18 @@ Err TpotClient::requestKill(int pid, Result * result)
     using namespace proto;
     uint64_t const REQUEST_ID = TpotPacket::genId();
     if (result != nullptr) { result->request_id = REQUEST_ID; }
-    _packet.buildKillRequest(pid, REQUEST_ID);
-    return requestCommon("TpotClient::requestKill()", KillPath::getMethod(), KillPath::getPath(), result);
+    _internal->packet.buildKillRequest(pid, REQUEST_ID);
+    return _internal->requestCommon("TpotClient::requestKill()", KillPath::getMethod(), KillPath::getPath(), result);
 }
 
 // ------------
 // Entry-point.
 // ------------
 
-TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_PREFIX    = "-";
-TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_DELIMITER = "=";
-TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_SYNOPSIS  = "Usage: test [flags] request";
-TBAG_CONSTEXPR static char const * const TPOT_CLIENT_REQUEST_COMMAND_REMARKS   = "\nThe command line interface of the TpoT server.";
+TBAG_CONSTEXPR static char const * const _TPOT_REQ_CMD_PREFIX    = "-";
+TBAG_CONSTEXPR static char const * const _TPOT_REQ_CMD_DELIMITER = "=";
+TBAG_CONSTEXPR static char const * const _TPOT_REQ_CMD_SYNOPSIS  = "Usage: test [flags] request";
+TBAG_CONSTEXPR static char const * const _TPOT_REQ_CMD_REMARKS   = "\nThe command line interface of the TpoT server.";
 
 int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> const & cmd_args)
 {
@@ -221,10 +261,10 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     bool help = false;
 
     using namespace string;
-    HelpCommander commander(TPOT_CLIENT_REQUEST_COMMAND_PREFIX,
-                            TPOT_CLIENT_REQUEST_COMMAND_DELIMITER,
-                            TPOT_CLIENT_REQUEST_COMMAND_SYNOPSIS,
-                            TPOT_CLIENT_REQUEST_COMMAND_REMARKS);
+    HelpCommander commander(_TPOT_REQ_CMD_PREFIX,
+                            _TPOT_REQ_CMD_DELIMITER,
+                            _TPOT_REQ_CMD_SYNOPSIS,
+                            _TPOT_REQ_CMD_REMARKS);
     {   // Initialize commander.
         using namespace libtbag::string;
         // @formatter:off
@@ -233,9 +273,9 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
         commander.insertDefault("input", &input, std::string(), std::string("Standard input string [") + EXEC_CMD     + "]");
         commander.insert("args", [&](Arguments const & a){ args = a.getStrings(); }, std::string("Command-line arguments [") + EXEC_CMD + "]");
         commander.insert("envs", [&](Arguments const & a){ envs = a.getStrings(); }, std::string("Environment variables [")  + EXEC_CMD + "]");
-        commander.insertDefault("msg"  , &msg  , "TpoT", std::string("Message [")    + HEARTBIT_CMD + "]");
-        commander.insertDefault("pid"  , &pid  ,      0, std::string("Process id [") + KILL_CMD     + "]");
-        commander.insertDefault("help" , &help ,   true, std::string("Help message"));
+        commander.insertDefault("msg" , &msg , "TpoT", std::string("Message [")    + HEARTBIT_CMD + "]");
+        commander.insertDefault("pid" , &pid ,      0, std::string("Process id [") + KILL_CMD     + "]");
+        commander.insertDefault("help", &help,   true, std::string("Help message"));
         commander.setDefaultCallbackForLeftArguments(&commands);
         commander.request(MERGE_ARGS);
         // @formatter:on

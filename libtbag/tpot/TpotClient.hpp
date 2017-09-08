@@ -19,13 +19,13 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/http/HttpClient.hpp>
-#include <libtbag/proto/TpotPacket.hpp>
 #include <libtbag/util/Version.hpp>
 #include <libtbag/util/ProcInfo.hpp>
 
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -61,15 +61,6 @@ public:
     using ProcInfo     = util::ProcInfo;
 
 public:
-    using FuncTpotPacket   = proto::FunctionalTpotPacket;
-    using Header           = FuncTpotPacket::Header;
-    using VersionResponse  = FuncTpotPacket::VersionResponse;
-    using ExecResponse     = FuncTpotPacket::ExecResponse;
-    using HeartbitResponse = FuncTpotPacket::HeartbitResponse;
-    using ListResponse     = FuncTpotPacket::ListResponse;
-    using KillResponse     = FuncTpotPacket::KillResponse;
-
-public:
     enum class ResultType : int
     {
         Unknown,
@@ -101,35 +92,17 @@ public:
         { /* EMPTY. */ }
     };
 
-private:
-    Param      _param;
-    StreamType _type;
-    uint64_t   _timeout;
+public:
+    struct Internal;
+    friend struct Internal;
+    using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
-    FuncTpotPacket _packet;
+    UniqueInternal _internal;
 
 public:
     TpotClient(Param const & param, StreamType type = StreamType::TCP);
     virtual ~TpotClient();
-
-protected:
-    void onVersionResponse (Header const & header, VersionResponse  const & packet, Result * result);
-    void onExecResponse    (Header const & header, ExecResponse     const & packet, Result * result);
-    void onHeartbitResponse(Header const & header, HeartbitResponse const & packet, Result * result);
-    void onListResponse    (Header const & header, ListResponse     const & packet, Result * result);
-    void onKillResponse    (Header const & header, KillResponse     const & packet, Result * result);
-
-private:
-    Err request(std::string const & method,
-                std::string const & path,
-                uint8_t const * buffer,
-                std::size_t size,
-                HttpResponse & response);
-    Err requestCommon(std::string const & prefix,
-                      std::string const & method,
-                      std::string const & path,
-                      Result * result = nullptr);
 
 public:
     Err requestVersion(Result * result = nullptr);
