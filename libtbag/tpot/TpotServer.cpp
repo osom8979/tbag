@@ -196,7 +196,7 @@ void TpotServer::onKillRequest(WeakClient node, Err code, HttpPacket & packet)
 void TpotServer::onPacketVersionRequest(Header const & header, PacketVersionRequest const & packet, HttpPacket & hp)
 {
     util::Version const PACKET_VERSION = util::getTbagPacketVersion();
-    _packet.buildPacketVersionResponse(PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor());
+    _packet.buildPacketVersionResponse(PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor(), header.id());
 
     tDLogI("TpotServer::onPacketVersionRequest() Response OK (Version: {})", PACKET_VERSION.toString());
     hp.response.setStatus(network::http::HttpStatus::SC_OK);
@@ -221,11 +221,11 @@ void TpotServer::onExecRequest(Header const & header, ExecRequest const & packet
 
     int const PID = _procs.exec(file, args, envs, cwd, input);
     if (PID != 0) {
-        _packet.buildExecResponse(PID);
+        _packet.buildExecResponse(PID, header.id());
         tDLogI("TpotServer::onExecRequest() Execute OK (PID: {})", PID);
     } else {
         using namespace proto::fbs::tpot;
-        _packet.buildExecResponse(PID, ResultCode_UNKNOWN_ERROR);
+        _packet.buildExecResponse(PID, header.id(), ResultCode_EXECUTE_ERROR);
         tDLogW("TpotServer::onExecRequest() Execute error");
     }
     hp.response.setStatus(network::http::HttpStatus::SC_OK);
@@ -235,7 +235,7 @@ void TpotServer::onExecRequest(Header const & header, ExecRequest const & packet
 void TpotServer::onHeartbitRequest(Header const & header, HeartbitRequest const & packet, HttpPacket & hp)
 {
     std::string const ECHO_MESSAGE = packet.echo()->str();
-    _packet.buildHeartbitResponse(ECHO_MESSAGE);
+    _packet.buildHeartbitResponse(ECHO_MESSAGE, header.id());
 
     tDLogI("TpotServer::onHeartbitRequest() Response OK (Echo: {})", ECHO_MESSAGE);
     hp.response.setStatus(network::http::HttpStatus::SC_OK);
@@ -248,7 +248,7 @@ void TpotServer::onListRequest(Header const & header, ListRequest const & packet
     for (auto & pid : _procs.list()) {
         pinfos.emplace_back(pid, _procs.isActive(pid));
     }
-    _packet.buildListResponse(pinfos);
+    _packet.buildListResponse(pinfos, header.id());
 
     tDLogI("TpotServer::onListRequest() Response OK (List size: {})", pinfos.size());
     hp.response.setStatus(network::http::HttpStatus::SC_OK);
@@ -264,14 +264,14 @@ void TpotServer::onKillRequest(Header const & header, KillRequest const & packet
         Err const CODE = _procs.kill(PID, signal::TBAG_SIGNAL_TERMINATION);
         if (TBAG_ERR_SUCCESS(CODE)) {
             tDLogI("TpotServer::onKillRequest() Kill success (PID: {})", PID);
-            _packet.buildKillResponse(ResultCode_SUCCESS);
+            _packet.buildKillResponse(header.id(), ResultCode_SUCCESS);
         } else {
             tDLogE("TpotServer::onKillRequest() Kill {} error (PID: {})", getErrName(CODE), PID);
-            _packet.buildKillResponse(ResultCode_UNKNOWN_ERROR);
+            _packet.buildKillResponse(header.id(), ResultCode_KILL_ERROR);
         }
     } else {
         tDLogW("TpotServer::onKillRequest() Not exists process (PID: {})", PID);
-        _packet.buildKillResponse(ResultCode_SUCCESS);
+        _packet.buildKillResponse(header.id(), ResultCode_NOT_EXISTS);
     }
     hp.response.setStatus(network::http::HttpStatus::SC_OK);
     hp.response.appendBody((char const *)_packet.point(), _packet.size());

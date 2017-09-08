@@ -33,10 +33,10 @@ void TpotPacket::clear()
     _builder.Clear();
 }
 
-Err TpotPacket::buildPacketVersionRequest(Code code)
+Err TpotPacket::buildPacketVersionRequest(uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_PacketVersionRequest,
@@ -45,10 +45,10 @@ Err TpotPacket::buildPacketVersionRequest(Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildPacketVersionResponse(unsigned major, unsigned minor, Code code)
+Err TpotPacket::buildPacketVersionResponse(unsigned major, unsigned minor, uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     PacketVersion packet_version(major, minor);
     _builder.Clear();
     auto packet = CreateTpotPacket(
@@ -63,10 +63,10 @@ Err TpotPacket::buildExecRequest(std::string const & file,
                                  std::vector<std::string> const & envs,
                                  std::string const & cwd,
                                  std::string const & input,
-                                 Code code)
+                                 uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_ExecRequest,
@@ -80,10 +80,10 @@ Err TpotPacket::buildExecRequest(std::string const & file,
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildExecResponse(int pid, Code code)
+Err TpotPacket::buildExecResponse(int pid, uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_ExecResponse,
@@ -92,10 +92,10 @@ Err TpotPacket::buildExecResponse(int pid, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildHeartbitRequest(std::string const & echo, Code code)
+Err TpotPacket::buildHeartbitRequest(std::string const & echo, uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_HeartbitRequest,
@@ -104,10 +104,10 @@ Err TpotPacket::buildHeartbitRequest(std::string const & echo, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildHeartbitResponse(std::string const & echo, Code code)
+Err TpotPacket::buildHeartbitResponse(std::string const & echo, uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_HeartbitResponse,
@@ -116,10 +116,10 @@ Err TpotPacket::buildHeartbitResponse(std::string const & echo, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildListRequest(Code code)
+Err TpotPacket::buildListRequest(uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_ListRequest,
@@ -128,10 +128,10 @@ Err TpotPacket::buildListRequest(Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildListResponse(std::vector<ProcessInfo> const & procs, Code code)
+Err TpotPacket::buildListResponse(std::vector<ProcessInfo> const & procs, uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_ListResponse,
@@ -140,10 +140,10 @@ Err TpotPacket::buildListResponse(std::vector<ProcessInfo> const & procs, Code c
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildKillRequest(int pid, Code code)
+Err TpotPacket::buildKillRequest(int pid, uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_KillRequest,
@@ -152,10 +152,10 @@ Err TpotPacket::buildKillRequest(int pid, Code code)
     return Err::E_SUCCESS;
 }
 
-Err TpotPacket::buildKillResponse(Code code)
+Err TpotPacket::buildKillResponse(uint64_t id, Code code)
 {
     using namespace proto::fbs::tpot;
-    Header header(id::generator::genTimeId(), code);
+    Header header(id, code);
     _builder.Clear();
     auto packet = CreateTpotPacket(
             _builder, &header, AnyPacket_KillResponse,
@@ -211,6 +211,11 @@ uint8_t * TpotPacket::point() const
 std::size_t TpotPacket::size() const
 {
     return _builder.GetSize();
+}
+
+uint64_t TpotPacket::genId()
+{
+    return static_cast<uint64_t>(id::generator::genTimeId());
 }
 
 } // namespace proto

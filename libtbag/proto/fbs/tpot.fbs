@@ -6,6 +6,9 @@ enum ResultCode : int
 {
     SUCCESS = 0,
     UNKNOWN_ERROR,
+    EXECUTE_ERROR,
+    NOT_EXISTS,
+    KILL_ERROR,
 }
 
 /// Tpot packet version.

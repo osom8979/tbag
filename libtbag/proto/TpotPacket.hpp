@@ -74,29 +74,30 @@ public:
     void clear();
 
 public:
-    Err buildPacketVersionRequest (Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildPacketVersionRequest(uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildPacketVersionResponse(unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
                                    unsigned minor = LIBTBAG_VERSION_PACKET_MINOR,
-                                   Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+                                   uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildExecRequest (std::string const & file,
-                          std::vector<std::string> const & args = std::vector<std::string>(),
-                          std::vector<std::string> const & envs = std::vector<std::string>(),
-                          std::string const & cwd = std::string(),
-                          std::string const & input = std::string(),
-                          Code code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildExecResponse(int pid, Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildExecRequest(std::string const & file,
+                         std::vector<std::string> const & args = std::vector<std::string>(),
+                         std::vector<std::string> const & envs = std::vector<std::string>(),
+                         std::string const & cwd = std::string(),
+                         std::string const & input = std::string(),
+                         uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildExecResponse(int pid, uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
     Err buildHeartbitRequest (std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                              Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+                              uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
     Err buildHeartbitResponse(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                              Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+                              uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildListRequest (Code code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildListResponse(std::vector<ProcessInfo> const & procs, Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildListRequest (uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildListResponse(std::vector<ProcessInfo> const & procs,
+                          uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
-    Err buildKillRequest (int pid, Code code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildKillResponse(Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildKillRequest (int pid, uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildKillResponse(uint64_t id = genId(), Code code = proto::fbs::tpot::ResultCode_SUCCESS);
 
 public:
     Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
@@ -116,6 +117,9 @@ protected:
 public:
     uint8_t * point() const;
     std::size_t size() const;
+
+public:
+    static uint64_t genId();
 };
 
 /**
@@ -210,16 +214,19 @@ public:
 // --------------------
 
 #ifndef _TPOT_CREATE_PATH_STRUCTURE
-#define _TPOT_CREATE_PATH_STRUCTURE(name, path, method) \
-    struct name : public libtbag::network::http::HttpMethod##method \
-    { TBAG_CONSTEXPR static char const * const getPath() TBAG_NOEXCEPT { return path; } };
+#define _TPOT_CREATE_PATH_STRUCTURE(class_name, path_name, method) \
+    struct class_name : public libtbag::network::http::HttpMethod##method \
+    { \
+        TBAG_CONSTEXPR static char const * const getName() TBAG_NOEXCEPT { return     path_name; } \
+        TBAG_CONSTEXPR static char const * const getPath() TBAG_NOEXCEPT { return "/" path_name; } \
+    };
 #endif
 
-_TPOT_CREATE_PATH_STRUCTURE( VersionPath, "/ver" ,    GET)
-_TPOT_CREATE_PATH_STRUCTURE(    ExecPath, "/exec",    PUT)
-_TPOT_CREATE_PATH_STRUCTURE(HeartbitPath, "/hbit",    GET)
-_TPOT_CREATE_PATH_STRUCTURE(    ListPath, "/list",    GET)
-_TPOT_CREATE_PATH_STRUCTURE(    KillPath, "/kill", DELETE)
+_TPOT_CREATE_PATH_STRUCTURE( VersionPath, "ver" ,    GET)
+_TPOT_CREATE_PATH_STRUCTURE(    ExecPath, "exec",    PUT)
+_TPOT_CREATE_PATH_STRUCTURE(HeartbitPath, "hbit",    GET)
+_TPOT_CREATE_PATH_STRUCTURE(    ListPath, "list",    GET)
+_TPOT_CREATE_PATH_STRUCTURE(    KillPath, "kill", DELETE)
 
 #undef _TPOT_CREATE_PATH_STRUCTURE
 

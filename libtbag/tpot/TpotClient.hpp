@@ -86,7 +86,8 @@ public:
 
     struct Result
     {
-        uint64_t   id;
+        uint64_t   request_id;
+        uint64_t   response_id;
         uint32_t   code;
         ResultType type;
 
@@ -97,7 +98,8 @@ public:
             std::vector<ProcessInfo> * procs;
         } response;
 
-        Result(uint64_t i = 0, uint32_t c = 0, ResultType t = ResultType::Unknown) : id(i), code(c), type(t)
+        Result(uint64_t req = 0, uint64_t res = 0, uint32_t c = 0, ResultType t = ResultType::Unknown)
+                : request_id(req), response_id(res), code(c), type(t), response()
         { /* EMPTY. */ }
         ~Result()
         { /* EMPTY. */ }
