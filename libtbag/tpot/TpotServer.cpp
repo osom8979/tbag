@@ -50,12 +50,11 @@ struct TpotServer::Internal
 {
     using Loop = uvpp::Loop;
 
-    using FuncHttpServer = network::http::FuncHttpServer;
-    using StreamType     = FuncHttpServer::StreamType;
-    using WeakClient     = FuncHttpServer::WeakClient;
-    using HttpPacket     = FuncHttpServer::HttpPacket;
+    using StreamType = network::http::HttpServer::StreamType;
+    using WeakClient = network::http::HttpServer::WeakClient;
+    using HttpPacket = network::http::HttpServer::HttpPacket;
 
-    using SharedServer = std::shared_ptr<FuncHttpServer>;
+    using SharedServer = std::shared_ptr<network::http::FuncHttpServer>;
     using FuncProcMgr  = process::FunctionalProcessManager;
 
     using FuncTpotPacket  = proto::FunctionalTpotPacket;
@@ -67,24 +66,23 @@ struct TpotServer::Internal
     using KillRequest     = FuncTpotPacket::KillRequest;
 
     TpotServer * parent;
+    Param param;
 
-    FuncTpotPacket _packet;
+    Loop         loop;
+    SharedServer server;
+    FuncProcMgr  procs;
 
-    Param _param;
+    FuncTpotPacket tpot;
 
-    Loop _loop;
-    SharedServer _server;
-    FuncProcMgr _procs;
-
-    Internal(TpotServer * p, Param const & pm) : parent(p), _param(pm), _packet()
+    Internal(TpotServer * p, Param const & pm) : parent(p), param(pm), tpot()
     {
         // @formatter:off
         using namespace proto;
-        _packet.setOnVersionRequest ([&](Header const & h, VersionRequest  const & p, void * a) { onVersionRequest (h, p, *(HttpPacket*)a); });
-        _packet.setOnExecRequest    ([&](Header const & h, ExecRequest     const & p, void * a) { onExecRequest    (h, p, *(HttpPacket*)a); });
-        _packet.setOnHeartbitRequest([&](Header const & h, HeartbitRequest const & p, void * a) { onHeartbitRequest(h, p, *(HttpPacket*)a); });
-        _packet.setOnListRequest    ([&](Header const & h, ListRequest     const & p, void * a) { onListRequest    (h, p, *(HttpPacket*)a); });
-        _packet.setOnKillRequest    ([&](Header const & h, KillRequest     const & p, void * a) { onKillRequest    (h, p, *(HttpPacket*)a); });
+        tpot.setOnVersionRequest ([&](Header const & h, VersionRequest  const & p, void * a) { onVersionRequest (h, p, *(HttpPacket*)a); });
+        tpot.setOnExecRequest    ([&](Header const & h, ExecRequest     const & p, void * a) { onExecRequest    (h, p, *(HttpPacket*)a); });
+        tpot.setOnHeartbitRequest([&](Header const & h, HeartbitRequest const & p, void * a) { onHeartbitRequest(h, p, *(HttpPacket*)a); });
+        tpot.setOnListRequest    ([&](Header const & h, ListRequest     const & p, void * a) { onListRequest    (h, p, *(HttpPacket*)a); });
+        tpot.setOnKillRequest    ([&](Header const & h, KillRequest     const & p, void * a) { onKillRequest    (h, p, *(HttpPacket*)a); });
         // @formatter:on
     }
 
@@ -95,26 +93,27 @@ struct TpotServer::Internal
 
     int run()
     {
-        _server.reset(new (std::nothrow) FuncHttpServer(_loop, StreamType::TCP));
-        assert(static_cast<bool>(_server));
+        using namespace network::http;
+        server.reset(new (std::nothrow) FuncHttpServer(loop, StreamType::TCP));
+        assert(static_cast<bool>(server));
 
-        tDLogIfN(_param.verbose, "TpotServer::Internal::run() initialize({}:{}) ...", _param.bind, _param.port);
-        if (_server->init(_param.bind.c_str(), _param.port) != Err::E_SUCCESS) {
+        tDLogIfN(param.verbose, "TpotServer::Internal::run() initialize({}:{}) ...", param.bind, param.port);
+        if (server->init(param.bind.c_str(), param.port) != Err::E_SUCCESS) {
             return EXIT_FAILURE;
         }
 
         // @formatter:off
         using namespace proto;
-        _server->setOnHttpRequest([&](WeakClient n, Err c, HttpPacket & p){ onHttpRequest(n, c, p); });
-        _server->setRequest( VersionPath::getMethod(),  VersionPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onVersionRequest (n, c, p); });
-        _server->setRequest(    ExecPath::getMethod(),     ExecPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onExecRequest    (n, c, p); });
-        _server->setRequest(HeartbitPath::getMethod(), HeartbitPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onHeartbitRequest(n, c, p); });
-        _server->setRequest(    ListPath::getMethod(),     ListPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onListRequest    (n, c, p); });
-        _server->setRequest(    KillPath::getMethod(),     KillPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onKillRequest    (n, c, p); });
+        server->setOnHttpRequest([&](WeakClient n, Err c, HttpPacket & p){ onHttpRequest(n, c, p); });
+        server->setRequest( VersionPath::getMethod(),  VersionPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onVersionRequest (n, c, p); });
+        server->setRequest(    ExecPath::getMethod(),     ExecPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onExecRequest    (n, c, p); });
+        server->setRequest(HeartbitPath::getMethod(), HeartbitPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onHeartbitRequest(n, c, p); });
+        server->setRequest(    ListPath::getMethod(),     ListPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onListRequest    (n, c, p); });
+        server->setRequest(    KillPath::getMethod(),     KillPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onKillRequest    (n, c, p); });
         // @formatter:on
 
-        tDLogN("TpoT is run! (BIND: {}, PORT: {})", _server->dest(), _server->port());
-        Err const RESULT = _loop.run();
+        tDLogN("TpoT is run! (BIND: {}, PORT: {})", server->dest(), server->port());
+        Err const RESULT = loop.run();
         if (RESULT != Err::E_SUCCESS) {
             return EXIT_FAILURE;
         }
@@ -128,11 +127,11 @@ struct TpotServer::Internal
     void onVersionRequest(Header const & header, VersionRequest const & packet, HttpPacket & hp)
     {
         util::Version const PACKET_VERSION = util::getTbagPacketVersion();
-        _packet.buildVersionResponse(PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor(), header.id());
+        tpot.buildVersionResponse(PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor(), header.id());
 
         tDLogI("TpotServer::onVersionRequest() Response OK (Version: {})", PACKET_VERSION.toString());
         hp.response.setStatus(network::http::HttpStatus::SC_OK);
-        hp.response.appendBody((char const *)_packet.point(), _packet.size());
+        hp.response.appendBody((char const *)tpot.point(), tpot.size());
     }
 
     void onExecRequest(Header const & header, ExecRequest const & packet, HttpPacket & hp)
@@ -151,37 +150,37 @@ struct TpotServer::Internal
             args.push_back(itr->str());
         }
 
-        int const PID = _procs.exec(file, args, envs, cwd, input);
+        int const PID = procs.exec(file, args, envs, cwd, input);
         if (PID != 0) {
-            _packet.buildExecResponse(PID, header.id());
+            tpot.buildExecResponse(PID, header.id());
             tDLogI("TpotServer::onExecRequest() Execute OK (PID: {})", PID);
         } else {
             using namespace proto::fbs::tpot;
-            _packet.buildExecResponse(PID, header.id(), ResultCode_EXECUTE_ERROR);
+            tpot.buildExecResponse(PID, header.id(), ResultCode_EXECUTE_ERROR);
             tDLogW("TpotServer::onExecRequest() Execute error");
         }
         hp.response.setStatus(network::http::HttpStatus::SC_OK);
-        hp.response.appendBody((char const *)_packet.point(), _packet.size());
+        hp.response.appendBody((char const *)tpot.point(), tpot.size());
     }
 
     void onHeartbitRequest(Header const & header, HeartbitRequest const & packet, HttpPacket & hp)
     {
         std::string const ECHO_MESSAGE = packet.echo()->str();
-        _packet.buildHeartbitResponse(ECHO_MESSAGE, header.id());
+        tpot.buildHeartbitResponse(ECHO_MESSAGE, header.id());
 
         tDLogI("TpotServer::onHeartbitRequest() Response OK (Echo: {})", ECHO_MESSAGE);
         hp.response.setStatus(network::http::HttpStatus::SC_OK);
-        hp.response.appendBody((char const *)_packet.point(), _packet.size());
+        hp.response.appendBody((char const *)tpot.point(), tpot.size());
     }
 
     void onListRequest(Header const & header, ListRequest const & packet, HttpPacket & hp)
     {
-        auto infos = _procs.list();
-        _packet.buildListResponse(infos, header.id());
+        auto infos = procs.list();
+        tpot.buildListResponse(infos, header.id());
 
         tDLogI("TpotServer::onListRequest() Response OK (List size: {})", infos.size());
         hp.response.setStatus(network::http::HttpStatus::SC_OK);
-        hp.response.appendBody((char const *)_packet.point(), _packet.size());
+        hp.response.appendBody((char const *)tpot.point(), tpot.size());
     }
 
     void onKillRequest(Header const & header, KillRequest const & packet, HttpPacket & hp)
@@ -189,27 +188,27 @@ struct TpotServer::Internal
         using namespace proto::fbs::tpot;
         int const PID = packet.pid();
 
-        if (_procs.exists(PID)) {
-            Err const CODE = _procs.kill(PID, signal::TBAG_SIGNAL_TERMINATION);
+        if (procs.exists(PID)) {
+            Err const CODE = procs.kill(PID, signal::TBAG_SIGNAL_TERMINATION);
             if (TBAG_ERR_SUCCESS(CODE)) {
                 tDLogI("TpotServer::onKillRequest() Kill success (PID: {})", PID);
-                _packet.buildKillResponse(header.id(), ResultCode_SUCCESS);
+                tpot.buildKillResponse(header.id(), ResultCode_SUCCESS);
             } else {
                 tDLogE("TpotServer::onKillRequest() Kill {} error (PID: {})", getErrName(CODE), PID);
-                _packet.buildKillResponse(header.id(), ResultCode_KILL_ERROR);
+                tpot.buildKillResponse(header.id(), ResultCode_KILL_ERROR);
             }
         } else {
             tDLogW("TpotServer::onKillRequest() Not exists process (PID: {})", PID);
-            _packet.buildKillResponse(header.id(), ResultCode_NOT_EXISTS);
+            tpot.buildKillResponse(header.id(), ResultCode_NOT_EXISTS);
         }
         hp.response.setStatus(network::http::HttpStatus::SC_OK);
-        hp.response.appendBody((char const *)_packet.point(), _packet.size());
+        hp.response.appendBody((char const *)tpot.point(), tpot.size());
     }
 
     void response(HttpPacket & packet)
     {
         auto body = packet.request.getBody();
-        if (_packet.parse(body.data(), body.size(), &packet) != Err::E_SUCCESS) {
+        if (tpot.parse(body.data(), body.size(), &packet) != Err::E_SUCCESS) {
             packet.response.setStatus(network::http::HttpStatus::SC_BAD_REQUEST);
             packet.response.setBody(TPOT_HTML_BAD_REQUEST_BODY);
         }
@@ -260,6 +259,7 @@ struct TpotServer::Internal
         _TPOT_SERVER_CHECK_ERROR("TpotServer::Internal::onKillRequest()", code, node, shared);
         response(packet);
     }
+
 #undef _TPOT_SERVER_CHECK_ERROR
 };
 
