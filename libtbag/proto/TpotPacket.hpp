@@ -57,6 +57,7 @@ struct TpotPacketTypes : private Noncopyable
 
     TBAG_CONSTEXPR static std::size_t const DEFAULT_BUILDER_CAPACITY = 1 * MEGA_BYTE_TO_BYTE;
     TBAG_CONSTEXPR static char const * const DEFAULT_ECHO_MESSAGE = "TPOT";
+    TBAG_CONSTEXPR static ResultCode const SUCCESS_CODE = proto::fbs::tpot::ResultCode_SUCCESS;
 };
 
 /**
@@ -82,30 +83,30 @@ public:
     void clear();
 
 public:
-    Err buildVersionRequest(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildVersionRequest(uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
     Err buildVersionResponse(unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
                              unsigned minor = LIBTBAG_VERSION_PACKET_MINOR,
-                             uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+                             uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
 
     Err buildExecRequest(std::string const & file,
                          std::vector<std::string> const & args = std::vector<std::string>(),
                          std::vector<std::string> const & envs = std::vector<std::string>(),
                          std::string const & cwd = std::string(),
                          std::string const & input = std::string(),
-                         uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildExecResponse(int pid, uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+                         uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
+    Err buildExecResponse(int pid, uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
 
     Err buildHeartbitRequest(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                             uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+                             uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
     Err buildHeartbitResponse(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                              uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+                              uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
 
-    Err buildListRequest(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildListRequest(uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
     Err buildListResponse(std::vector<ProcInfo> const & procs,
-                          uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+                          uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
 
-    Err buildKillRequest(int pid, uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
-    Err buildKillResponse(uint64_t id = genId(), ResultCode code = proto::fbs::tpot::ResultCode_SUCCESS);
+    Err buildKillRequest(int pid, uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
+    Err buildKillResponse(uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
 
 public:
     static uint64_t genId();

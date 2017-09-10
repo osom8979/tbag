@@ -101,6 +101,11 @@ struct ReadPacket
 TBAG_API bool isIpv4(std::string const & ip);
 TBAG_API bool isIpv6(std::string const & ip);
 
+inline bool isIp(std::string const & ip)
+{
+    return isIpv4(ip) || isIpv6(ip);
+}
+
 // ------------------------
 // Miscellaneous utilities.
 // ------------------------

@@ -78,6 +78,12 @@ public:
     bool push(Task const & task);
 
 public:
+    bool waitPush(Task const & task)
+    {
+        return waitTask(*this, task);
+    }
+
+public:
     static bool waitTask(ThreadPool & pool, Task const & task);
 };
 
