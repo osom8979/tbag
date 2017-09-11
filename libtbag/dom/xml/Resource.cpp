@@ -166,7 +166,7 @@ std::string Resource::getString(std::string const & key) const
 auto Resource::get(std::string const & key
                  , std::string default_value) const -> decltype(default_value)
 {
-    return this->getString(key, std::string(""));
+    return this->getString(key, default_value);
 }
 
 void Resource::set(std::string const & key, std::string const & value)
