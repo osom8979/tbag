@@ -45,6 +45,11 @@ struct ThreadPool::ThreadPimpl
 
     ~ThreadPimpl()
     {
+        join();
+    }
+
+    void join()
+    {
         ::uv_thread_join(&thread);
     }
 
@@ -169,6 +174,14 @@ void ThreadPool::exit()
     _exit = true;
     _signal.broadcast();
     _mutex.unlock();
+}
+
+void ThreadPool::join()
+{
+    for (auto & thread : _threads) {
+        assert(static_cast<bool>(thread));
+        thread->join();
+    }
 }
 
 bool ThreadPool::isExit() const

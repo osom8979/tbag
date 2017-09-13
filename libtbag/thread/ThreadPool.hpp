@@ -74,6 +74,7 @@ private:
 public:
     void clear();
     void exit();
+    void join();
     bool isExit() const;
     bool push(Task const & task);
 
