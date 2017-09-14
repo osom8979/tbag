@@ -1,6 +1,6 @@
 /**
  * @file   Cat.hpp
- * @brief  Cat class prototype.
+ * @brief  Cat preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

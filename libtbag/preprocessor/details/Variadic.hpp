@@ -1,6 +1,6 @@
 /**
  * @file   Variadic.hpp
- * @brief  Variadic class prototype.
+ * @brief  Variadic preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

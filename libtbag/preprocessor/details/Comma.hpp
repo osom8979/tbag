@@ -1,6 +1,6 @@
 /**
  * @file   Comma.hpp
- * @brief  Comma class prototype.
+ * @brief  Comma preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

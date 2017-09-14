@@ -1,6 +1,6 @@
 /**
  * @file   Boolean.hpp
- * @brief  Boolean class prototype.
+ * @brief  Boolean preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

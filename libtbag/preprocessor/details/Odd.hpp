@@ -1,6 +1,6 @@
 /**
  * @file   Odd.hpp
- * @brief  Odd class prototype.
+ * @brief  Odd preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

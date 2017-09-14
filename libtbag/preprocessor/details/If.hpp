@@ -1,6 +1,6 @@
 /**
  * @file   If.hpp
- * @brief  If class prototype.
+ * @brief  If preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

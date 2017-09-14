@@ -1,6 +1,6 @@
 /**
  * @file   Empty.hpp
- * @brief  Empty class prototype.
+ * @brief  Empty preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

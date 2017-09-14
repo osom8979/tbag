@@ -1,6 +1,6 @@
 /**
  * @file   Even.hpp
- * @brief  Even class prototype.
+ * @brief  Even preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

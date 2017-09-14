@@ -1,6 +1,6 @@
 /**
  * @file   CommaIf.hpp
- * @brief  CommaIf class prototype.
+ * @brief  CommaIf preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

@@ -1,6 +1,6 @@
 /**
  * @file   Stringify.hpp
- * @brief  Stringify class prototype.
+ * @brief  Stringify preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */

@@ -74,11 +74,11 @@ TEST(PreprocessorTest, Repeat)
 {
     std::string const SUFFIX = "i";
 
-#ifndef __TBAG_PREPROCESSOR_TEST__REPEAT_MACRO
-#define __TBAG_PREPROCESSOR_TEST__REPEAT_MACRO(n, d) (std::to_string(n)+d) TBAG_PP_COMMA()
+#ifndef _PP_TEST_MACRO_REPEAT
+#define _PP_TEST_MACRO_REPEAT(s, n, d) TBAG_PP_COMMA_IF(n) (std::to_string(n)+d)
 #endif
-    std::vector<std::string> const TEST = { TBAG_PP_REPEAT(5, __TBAG_PREPROCESSOR_TEST__REPEAT_MACRO, SUFFIX) };
-#undef __TBAG_PREPROCESSOR_TEST__REPEAT_MACRO
+    std::vector<std::string> const TEST = { TBAG_PP_REPEAT(5, _PP_TEST_MACRO_REPEAT, SUFFIX) };
+#undef _PP_TEST_MACRO_REPEAT
 
     ASSERT_EQ(5, TEST.size());
     ASSERT_EQ("0i", TEST[0]);
@@ -88,18 +88,43 @@ TEST(PreprocessorTest, Repeat)
     ASSERT_EQ("4i", TEST[4]);
 }
 
+TEST(PreprocessorTest, Tuple)
+{
+#define _PP_TEST_MACRO_TUPLES "OK", "NO"
+    std::string const TEST1 = TBAG_PP_TUPLE_ELEM(2, 0, TBAG_PP_VARIADIC_TO_TUPLE(_PP_TEST_MACRO_TUPLES));
+    std::string const TEST2 = TBAG_PP_TUPLE_ELEM(2, 1, TBAG_PP_VARIADIC_TO_TUPLE(_PP_TEST_MACRO_TUPLES));
+#undef _PP_TEST_MACRO_TUPLES
+
+    ASSERT_STREQ("OK", TEST1.c_str());
+    ASSERT_STREQ("NO", TEST2.c_str());
+}
+
 TEST(PreprocessorTest, Variadic)
 {
-#ifndef __TBAG_PREPROCESSOR_TEST__VARIADIC_MACRO
-#define __TBAG_PREPROCESSOR_TEST__VARIADIC_MACRO "a", "b", "c", "d"
+#ifndef _PP_TEST_MACRO_VARIADIC
+#define _PP_TEST_MACRO_VARIADIC "a", "b", "c", "d"
 #endif
-    std::string const TEST1 = TBAG_PP_VARIADIC_ELEM(0, __TBAG_PREPROCESSOR_TEST__VARIADIC_MACRO);
-    std::string const TEST2 = TBAG_PP_VARIADIC_ELEM(3, __TBAG_PREPROCESSOR_TEST__VARIADIC_MACRO);
-    std::size_t TEST_SIZE   = TBAG_PP_VARIADIC_SIZE(__TBAG_PREPROCESSOR_TEST__VARIADIC_MACRO);
-#undef __TBAG_PREPROCESSOR_TEST__VARIADIC_MACRO
+    std::string const TEST1 = TBAG_PP_VARIADIC_ELEM(0, _PP_TEST_MACRO_VARIADIC);
+    std::string const TEST2 = TBAG_PP_VARIADIC_ELEM(3, _PP_TEST_MACRO_VARIADIC);
+    std::size_t TEST_SIZE   = TBAG_PP_VARIADIC_SIZE(_PP_TEST_MACRO_VARIADIC);
+#undef _PP_TEST_MACRO_VARIADIC
 
     ASSERT_STREQ("a", TEST1.c_str());
     ASSERT_STREQ("d", TEST2.c_str());
     ASSERT_EQ(4, TEST_SIZE);
+}
+
+TEST(PreprocessorTest, VariadicArgs)
+{
+    int result0;
+    std::string result1;
+    auto func = [&](TBAG_PP_EXTEND_PARAMS(int, std::string)){
+        result0 = v0;
+        result1 = v1;
+    };
+    func(123456, "TEST");
+
+    ASSERT_EQ(123456, result0);
+    ASSERT_EQ("TEST", result1);
 }
 

@@ -1,6 +1,6 @@
 /**
  * @file   OddEvenIf.hpp
- * @brief  OddEvenIf class prototype.
+ * @brief  OddEvenIf preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
  */
