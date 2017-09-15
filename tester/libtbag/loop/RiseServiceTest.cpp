@@ -6,7 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/loop/RiseService.hpp>
+#include <libtbag/loop/FunctionalRiseService.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/log/Log.hpp>
 

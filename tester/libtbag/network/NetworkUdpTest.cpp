@@ -9,7 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/udp/UdpNode.hpp>
-#include <libtbag/network/udp/UdpEcho.hpp>
+#include <libtbag/network/udp/FunctionalUdpEcho.hpp>
 
 #include <iostream>
 

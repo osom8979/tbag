@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/process/ProcessManager.hpp>
+#include <libtbag/process/FunctionalProcessManager.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
@@ -30,7 +30,7 @@ TEST(ProcessManagerTest, Default)
     int on_error = 0;
     int on_exit  = 0;
 
-    FunctionalProcessManager pm;
+    FuncProcessManager pm;
     pm.setOnOutRead([&](int pid, char const * buffer, std::size_t size){
         ++on_read;
     });

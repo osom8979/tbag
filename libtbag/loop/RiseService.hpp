@@ -24,7 +24,6 @@
 #include <memory>
 #include <mutex>
 #include <set>
-#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -143,51 +142,6 @@ public:
      */
     virtual bool onInterrupt(SharedComSet & coms);
 };
-
-/**
- * FunctionalRiseService class prototype.
- *
- * @author zer0
- * @date   2017-07-12
- */
-struct FunctionalRiseService : public RiseService
-{
-    using SharedCom    = std::shared_ptr<RiseComponent>;
-    using SharedComSet = std::set<SharedCom>;
-
-    using Callback = std::function<void(SharedComSet&)>;
-    using InterruptCallback = std::function<bool(SharedComSet&)>;
-
-    Callback on_create_cb;
-    Callback on_timer_cb;
-    Callback on_destroy_cb;
-
-    InterruptCallback on_interrupt_cb;
-
-    FunctionalRiseService(uint64_t repeat = RISE_REPEAT_MILLISECONDS, bool verbose = false) : RiseService(repeat, verbose)
-    { /* EMPTY. */ }
-    virtual ~FunctionalRiseService()
-    { /* EMPTY. */ }
-
-    void setOnCreate (Callback const & cb) {  on_create_cb = cb; }
-    void setOnTimer  (Callback const & cb) {   on_timer_cb = cb; }
-    void setOnDestroy(Callback const & cb) { on_destroy_cb = cb; }
-    void setOnInterrupt(InterruptCallback const & cb) { on_interrupt_cb = cb; }
-
-    virtual void onCreate (SharedComSet & coms) override { if ( on_create_cb) {  on_create_cb(coms); } }
-    virtual void onTimer  (SharedComSet & coms) override { if (  on_timer_cb) {   on_timer_cb(coms); } }
-    virtual void onDestroy(SharedComSet & coms) override { if (on_destroy_cb) { on_destroy_cb(coms); } }
-
-    virtual bool onInterrupt(SharedComSet & coms) override
-    {
-        if (on_interrupt_cb) {
-            return on_interrupt_cb(coms);
-        }
-        return RiseService::TERMINATE_LOOP_FLAG;
-    }
-};
-
-using FuncRiseService = FunctionalRiseService;
 
 } // namespace loop
 

@@ -8,8 +8,8 @@
 #include <libtbag/tpot/TpotServer.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <libtbag/network/http/HttpServer.hpp>
-#include <libtbag/process/ProcessManager.hpp>
+#include <libtbag/network/http/FunctionalHttpServer.hpp>
+#include <libtbag/process/FunctionalProcessManager.hpp>
 #include <libtbag/util/Version.hpp>
 
 #include <libtbag/uvpp/UvCommon.hpp>
@@ -55,7 +55,7 @@ struct TpotServer::Internal
     using HttpPacket = network::http::HttpServer::HttpPacket;
 
     using SharedServer = std::shared_ptr<network::http::FuncHttpServer>;
-    using FuncProcMgr  = process::FunctionalProcessManager;
+    using FuncProcMgr  = process::FuncProcessManager;
 
     using FuncTpotPacket  = proto::FunctionalTpotPacket;
     using Header          = FuncTpotPacket::Header;
@@ -104,7 +104,7 @@ struct TpotServer::Internal
 
         // @formatter:off
         using namespace proto;
-        server->setOnHttpRequest([&](WeakClient n, Err c, HttpPacket & p){ onHttpRequest(n, c, p); });
+        server->set_onHttpRequest([&](WeakClient n, Err c, HttpPacket & p){ onHttpRequest(n, c, p); });
         server->setRequest( VersionPath::getMethod(),  VersionPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onVersionRequest (n, c, p); });
         server->setRequest(    ExecPath::getMethod(),     ExecPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onExecRequest    (n, c, p); });
         server->setRequest(HeartbitPath::getMethod(), HeartbitPath::getPath(), [&](WeakClient n, Err c, HttpPacket & p){ onHeartbitRequest(n, c, p); });

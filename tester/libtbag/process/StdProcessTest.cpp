@@ -6,7 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/process/StdProcess.hpp>
+#include <libtbag/process/FunctionalStdProcess.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -27,7 +27,7 @@ TEST(StdProcessTest, InAndOut)
     int on_exit  = 0;
     int on_close = 0;
 
-    FunctionalStdProcess proc;
+    FuncStdProcess proc;
     proc.setOnOutRead([&](char const * buffer, std::size_t size){
         output.assign(buffer, buffer + size);
     });
