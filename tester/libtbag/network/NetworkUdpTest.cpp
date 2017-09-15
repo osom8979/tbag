@@ -49,32 +49,32 @@ TEST(NetworkUdpTest, Default)
 
     std::string result_message;
 
-    node1.setOnRead([&](Err code, ReadPacket const & packet){
+    node1.set_onRead([&](Err code, ReadPacket const & packet){
         if (code == Err::E_SUCCESS && packet.size > 0 && packet.addr != nullptr) {
             ++node1_read;
             node1.write(packet.buffer, packet.size);
         }
     });
-    node1.setOnWrite([&](Err code){
+    node1.set_onWrite([&](Err code){
         ++node1_write;
         node1.close();
     });
-    node1.setOnClose([&](){
+    node1.set_onClose([&](){
         ++node1_close;
     });
     node1.start();
 
-    node2.setOnRead([&](Err code, ReadPacket const & packet){
+    node2.set_onRead([&](Err code, ReadPacket const & packet){
         if (code == Err::E_SUCCESS && packet.size > 0 && packet.addr != nullptr) {
             ++node2_read;
             result_message.assign(packet.buffer, packet.buffer + packet.size);
             node2.close();
         }
     });
-    node2.setOnWrite([&](Err code){
+    node2.set_onWrite([&](Err code){
         ++node2_write;
     });
-    node2.setOnClose([&](){
+    node2.set_onClose([&](){
         ++node2_close;
     });
     node2.start();

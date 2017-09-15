@@ -202,10 +202,10 @@ TEST(NetworkTcpTest, ClientTimeout)
         connect_result = code;
         connect++;
     });
-    client.setOnClose([&](){
+    client.set_onClose([&](){
         close++;
     });
-    client.setOnTimer([&](){
+    client.set_onTimer([&](){
         timer++;
         client.close();
     });
@@ -250,10 +250,10 @@ TEST(NetworkTcpTest, CloseWhileConnecting)
             netunreach_errors++;
         }
     });
-    client.setOnClose([&](){
+    client.set_onClose([&](){
         close_cb_called++;
     });
-    client.setOnTimer([&](){
+    client.set_onTimer([&](){
         timer_cb_called++;
         client.close();
     });
@@ -311,7 +311,7 @@ TEST(NetworkTcpTest, ReadStop)
         ASSERT_EQ(Err::E_SUCCESS, client.startTimer(50));
         ASSERT_EQ(Err::E_SUCCESS, client.start());
     });
-    client.setOnTimer([&](){
+    client.set_onTimer([&](){
         if (timer_cb_called == 0) {
             ASSERT_EQ(Err::E_SUCCESS, client.write("PING", 4));
             ASSERT_EQ(Err::E_SUCCESS, client.stop());
@@ -320,15 +320,15 @@ TEST(NetworkTcpTest, ReadStop)
         }
         timer_cb_called++;
     });
-    client.setOnWrite([&](Err code){
+    client.set_onWrite([&](Err code){
         write_cb_called++;
         ASSERT_EQ(Err::E_SUCCESS, code);
         ASSERT_EQ(Err::E_SUCCESS, client.startTimer(50));
     });
-    client.setOnRead([&](Err code, ReadPacket const & packet){
+    client.set_onRead([&](Err code, ReadPacket const & packet){
         read_cb_called++;
     });
-    client.setOnClose([&](){
+    client.set_onClose([&](){
         close_cb_called++;
         server.close();
     });
@@ -387,24 +387,24 @@ TEST(NetworkTcpTest, ShutdownAfterWrite)
         ASSERT_EQ(Err::E_SUCCESS, code);
         ASSERT_EQ(Err::E_SUCCESS, client.start());
     });
-    client.setOnTimer([&](){
+    client.set_onTimer([&](){
         timer_cb_called++;
         ASSERT_EQ(Err::E_SUCCESS, client.write("PING", 4));
         ASSERT_EQ(Err::E_SUCCESS, client.cancel());
     });
-    client.setOnShutdown([&](Err code){
+    client.set_onShutdown([&](Err code){
         shutdown_cb_called++;
         ASSERT_EQ(Err::E_SUCCESS, code);
         ASSERT_EQ(Err::E_SUCCESS, client.close());
     });
-    client.setOnWrite([&](Err code){
+    client.set_onWrite([&](Err code){
         write_cb_called++;
         ASSERT_EQ(Err::E_SUCCESS, code);
     });
-    client.setOnRead([&](Err code, ReadPacket const & packet){
+    client.set_onRead([&](Err code, ReadPacket const & packet){
         read_cb_called++;
     });
-    client.setOnClose([&](){
+    client.set_onClose([&](){
         close_cb_called++;
         ASSERT_EQ(Err::E_SUCCESS, server.close());
     });
@@ -540,13 +540,13 @@ TEST(NetworkTcpTest, MultiEcho)
     int server_udata_dealloc = 0;
     Err server_result = Err::E_UNKNOWN;
 
-    server.setOnConnection([&](Err code){
+    server.set_onConnection([&](Err code){
         auto shared = server.accept().lock();
         ASSERT_TRUE(static_cast<bool>(shared));
         ASSERT_EQ(Err::E_SUCCESS, shared->start());
         server_connection++;
     });
-    server.setOnClientRead([&](FunctionalTcpServer::WeakClient node, Err code, ReadPacket const & packet){
+    server.set_onClientRead([&](FunctionalTcpServer::WeakClient node, Err code, ReadPacket const & packet){
         ASSERT_TRUE(code == Err::E_SUCCESS || code == Err::E_EOF);
         if (code == Err::E_SUCCESS) {
             auto shared = node.lock();
@@ -556,14 +556,14 @@ TEST(NetworkTcpTest, MultiEcho)
             ASSERT_EQ(Err::E_SUCCESS, shared->write(packet.buffer, packet.size));
         }
     });
-    server.setOnClientWrite([&](FunctionalTcpServer::WeakClient node, Err code){
+    server.set_onClientWrite([&](FunctionalTcpServer::WeakClient node, Err code){
         ASSERT_EQ(Err::E_SUCCESS, code);
         auto shared = node.lock();
         ASSERT_TRUE(static_cast<bool>(shared));
         ASSERT_EQ(Err::E_SUCCESS, shared->close());
         server_client_write++;
     });
-    server.setOnClientClose([&](FunctionalTcpServer::WeakClient node){
+    server.set_onClientClose([&](FunctionalTcpServer::WeakClient node){
         auto shared = node.lock();
         ASSERT_TRUE(static_cast<bool>(shared));
         server_client_close++;
@@ -571,16 +571,16 @@ TEST(NetworkTcpTest, MultiEcho)
             ASSERT_EQ(Err::E_SUCCESS, server.close());
         }
     });
-    server.setOnServerClose([&](){
+    server.set_onServerClose([&](){
         server_close++;
     });
 
     int const TEST_USER_DATA_NUMBER = 100;
-    server.setOnClientUdataAlloc([&](FunctionalTcpServer::WeakClient node) -> void *{
+    server.set_onClientUdataAlloc([&](FunctionalTcpServer::WeakClient node) -> void *{
         server_udata_alloc++;
         return new (std::nothrow) int (TEST_USER_DATA_NUMBER);
     });
-    server.setOnClientUdataDealloc([&](FunctionalTcpServer::WeakClient node, void * data){
+    server.set_onClientUdataDealloc([&](FunctionalTcpServer::WeakClient node, void * data){
         ASSERT_NE(nullptr, data);
         ASSERT_EQ(TEST_USER_DATA_NUMBER, *static_cast<int*>(data));
         server_udata_dealloc++;
@@ -626,18 +626,18 @@ TEST(NetworkTcpTest, MultiEcho)
                 connect_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnWrite([&, i](Err code){
+        clients.at(i)->set_onWrite([&, i](Err code){
             if (clients.at(i)->start() == Err::E_SUCCESS) {
                 write_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnRead([&, i](Err code, ReadPacket const & packet){
+        clients.at(i)->set_onRead([&, i](Err code, ReadPacket const & packet){
             if (clients.at(i)->stop() == Err::E_SUCCESS) {
                 read_result.at(i) = code;
                 clients.at(i)->close();
             }
         });
-        clients.at(i)->setOnClose([&, i](){
+        clients.at(i)->set_onClose([&, i](){
             close_result.at(i) = Err::E_SUCCESS;
         });
         clients.at(i)->init(details::LOOPBACK_IPV4, SERVER_PORT);

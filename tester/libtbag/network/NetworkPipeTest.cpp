@@ -47,14 +47,14 @@ TEST(NetworkPipeTest, MultiEcho)
     int server_close        = 0;
     Err server_result = Err::E_UNKNOWN;
 
-    server.setOnConnection([&](Err code){
+    server.set_onConnection([&](Err code){
         if (auto shared = server.accept().lock()) {
             if (shared->start() == Err::E_SUCCESS) {
                 server_connection++;
             }
         }
     });
-    server.setOnClientRead([&](FunctionalPipeServer::WeakClient node, Err code,
+    server.set_onClientRead([&](FunctionalPipeServer::WeakClient node, Err code,
                                ReadPacket const & packet){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
@@ -65,7 +65,7 @@ TEST(NetworkPipeTest, MultiEcho)
             }
         }
     });
-    server.setOnClientWrite([&](FunctionalPipeServer::WeakClient node, Err code){
+    server.set_onClientWrite([&](FunctionalPipeServer::WeakClient node, Err code){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
                 server_client_write++;
@@ -73,7 +73,7 @@ TEST(NetworkPipeTest, MultiEcho)
             }
         }
     });
-    server.setOnClientClose([&](FunctionalPipeServer::WeakClient node){
+    server.set_onClientClose([&](FunctionalPipeServer::WeakClient node){
         if (auto shared = node.lock()) {
             server_client_close++;
         }
@@ -81,7 +81,7 @@ TEST(NetworkPipeTest, MultiEcho)
             server.close();
         }
     });
-    server.setOnServerClose([&](){
+    server.set_onServerClose([&](){
         server_close++;
     });
     server.init(path, 0);
@@ -122,18 +122,18 @@ TEST(NetworkPipeTest, MultiEcho)
                 connect_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnWrite([&, i](Err code){
+        clients.at(i)->set_onWrite([&, i](Err code){
             if (clients.at(i)->start() == Err::E_SUCCESS) {
                 write_result.at(i) = code;
             }
         });
-        clients.at(i)->setOnRead([&, i](Err code, ReadPacket const & packet){
+        clients.at(i)->set_onRead([&, i](Err code, ReadPacket const & packet){
             if (clients.at(i)->stop() == Err::E_SUCCESS) {
                 read_result.at(i) = code;
                 clients.at(i)->close();
             }
         });
-        clients.at(i)->setOnClose([&, i](){
+        clients.at(i)->set_onClose([&, i](){
             close_result.at(i) = Err::E_SUCCESS;
         });
         clients.at(i)->init(path.getString().c_str());
