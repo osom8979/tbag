@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/functional/CallbackHelper.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -46,14 +47,12 @@ struct FunctionalClient : public BaseType
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(ClientInterface, Parent);
 
-    using OnConnect  = std::function<void(Err)>;
     using OnShutdown = std::function<void(Err)>;
     using OnWrite    = std::function<void(Err)>;
     using OnRead     = std::function<void(Err, ReadPacket const &)>;
     using OnClose    = std::function<void(void)>;
     using OnTimer    = std::function<void(void)>;
 
-    OnConnect   connect_cb;
     OnShutdown  shutdown_cb;
     OnWrite     write_cb;
     OnRead      read_cb;
@@ -65,15 +64,12 @@ struct FunctionalClient : public BaseType
     virtual ~FunctionalClient()
     { /* EMPTY */ }
 
-    inline void setOnConnect (OnConnect  const & cb) { connect_cb  = cb; }
     inline void setOnShutdown(OnShutdown const & cb) { shutdown_cb = cb; }
     inline void setOnWrite   (OnWrite    const & cb) { write_cb    = cb; }
     inline void setOnRead    (OnRead     const & cb) { read_cb     = cb; }
     inline void setOnClose   (OnClose    const & cb) { close_cb    = cb; }
     inline void setOnTimer   (OnTimer    const & cb) { timer_cb    = cb; }
 
-    virtual void onConnect(Err code) override
-    { if (connect_cb) { connect_cb(code); } }
     virtual void onShutdown(Err code) override
     { if (shutdown_cb) { shutdown_cb(code); } }
     virtual void onWrite(Err code) override
@@ -85,6 +81,13 @@ struct FunctionalClient : public BaseType
     virtual void onTimer() override
     { if (timer_cb) { timer_cb(); } }
     // @formatter:on
+
+//    using OnConnect  = std::function<void(Err)>;
+//    OnConnect   connect_cb;
+//    inline void setOnConnect (OnConnect  const & cb) { connect_cb  = cb; }
+//    virtual void onConnect(Err code) override
+//    { if (connect_cb) { connect_cb(code); } }
+    TBAG_VOID_CALLBACK_HELPER(onConnect, libtbag::Err);
 };
 
 /**

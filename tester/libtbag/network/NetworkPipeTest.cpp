@@ -117,7 +117,7 @@ TEST(NetworkPipeTest, MultiEcho)
     for (i = 0; i < CLIENT_SIZE; ++i) {
         cloops.at(i).reset(new Loop());
         clients.at(i).reset(new FunctionalPipeClient(*(cloops.at(i))));
-        clients.at(i)->setOnConnect([&, i](Err code){
+        clients.at(i)->set_onConnect([&, i](Err code){
             if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size()) == Err::E_SUCCESS) {
                 connect_result.at(i) = code;
             }

@@ -198,7 +198,7 @@ TEST(NetworkTcpTest, ClientTimeout)
     Err connect_result = Err::E_UNKNOWN;
     Err result = Err::E_UNKNOWN;
 
-    client.setOnConnect([&](Err code){
+    client.set_onConnect([&](Err code){
         connect_result = code;
         connect++;
     });
@@ -243,7 +243,7 @@ TEST(NetworkTcpTest, CloseWhileConnecting)
     int timer_cb_called = 0;
     int netunreach_errors = 0;
 
-    client.setOnConnect([&](Err code){
+    client.set_onConnect([&](Err code){
         ASSERT_TRUE(code == Err::E_ECANCELED || code == Err::E_ENETUNREACH);
         connect_cb_called++;
         if (code == Err::E_ENETUNREACH) {
@@ -305,7 +305,7 @@ TEST(NetworkTcpTest, ReadStop)
     int read_cb_called = 0;
     int close_cb_called = 0;
 
-    client.setOnConnect([&](Err code){
+    client.set_onConnect([&](Err code){
         connect_cb_called++;
         ASSERT_EQ(Err::E_SUCCESS, code);
         ASSERT_EQ(Err::E_SUCCESS, client.startTimer(50));
@@ -382,7 +382,7 @@ TEST(NetworkTcpTest, ShutdownAfterWrite)
     int shutdown_cb_called = 0;
     int close_cb_called = 0;
 
-    client.setOnConnect([&](Err code){
+    client.set_onConnect([&](Err code){
         connect_cb_called++;
         ASSERT_EQ(Err::E_SUCCESS, code);
         ASSERT_EQ(Err::E_SUCCESS, client.start());
@@ -621,7 +621,7 @@ TEST(NetworkTcpTest, MultiEcho)
     for (i = 0; i < CLIENT_SIZE; ++i) {
         cloops.at(i).reset(new Loop());
         clients.at(i).reset(new FunctionalTcpClient(*(cloops.at(i))));
-        clients.at(i)->setOnConnect([&, i](Err code){
+        clients.at(i)->set_onConnect([&, i](Err code){
             if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size()) == Err::E_SUCCESS) {
                 connect_result.at(i) = code;
             }
