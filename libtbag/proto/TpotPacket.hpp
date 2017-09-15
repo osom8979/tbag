@@ -15,10 +15,36 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
+#if defined(TBAG_COMP_MSVC)
+# if defined(min)
+TBAG_PUSH_MACRO(min);
+# undef min
+# define __RESTORE_MIN__
+# endif // defined(min)
+# if defined(max)
+TBAG_PUSH_MACRO(max);
+# undef max
+# define __RESTORE_MAX__
+# endif // defined(max)
+#endif // defined(TBAG_COMP_MSVC)
+
+#include <libtbag/proto/fbs/tpot_generated.h>
+
+#if defined(TBAG_COMP_MSVC)
+# if defined(__RESTORE_MIN__)
+TBAG_POP_MACRO(min);
+# undef __RESTORE_MIN__
+# endif // defined(__RESTORE_MIN__)
+# if defined(__RESTORE_MAX__)
+TBAG_POP_MACRO(max);
+# undef __RESTORE_MAX__
+# endif // defined(__RESTORE_MAX__)
+#endif // defined(TBAG_COMP_MSVC)
+
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/proto/fbs/tpot_generated.h>
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/util/ProcInfo.hpp>
 #include <libtbag/Unit.hpp>
