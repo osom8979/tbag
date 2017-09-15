@@ -20,7 +20,7 @@ TEST(PreprocessorTest, Cat)
 
 TEST(PreprocessorTest, Stringify)
 {
-    std::string const STR = TBAG_PP_STRINGIFY(test_string);
+    std::string const STR = TBAG_PP_STRINGIZE(test_string);
     ASSERT_EQ("test_string", STR);
 }
 
@@ -75,7 +75,7 @@ TEST(PreprocessorTest, Repeat)
     std::string const SUFFIX = "i";
 
 #ifndef _PP_TEST_MACRO_REPEAT
-#define _PP_TEST_MACRO_REPEAT(s, n, d) TBAG_PP_COMMA_IF(n) (std::to_string(n)+d)
+#define _PP_TEST_MACRO_REPEAT(z, s, n, d) TBAG_PP_COMMA_IF(n) (std::to_string(n)+d)
 #endif
     std::vector<std::string> const TEST = { TBAG_PP_REPEAT(5, _PP_TEST_MACRO_REPEAT, SUFFIX) };
 #undef _PP_TEST_MACRO_REPEAT
@@ -118,7 +118,7 @@ TEST(PreprocessorTest, VariadicArgs)
 {
     int result0;
     std::string result1;
-    auto func = [&](TBAG_PP_EXTEND_PARAMS(int, std::string)){
+    auto func = [&](TBAG_PP_EXPEND_PARAMS(int, std::string)){
         result0 = v0;
         result1 = v1;
     };

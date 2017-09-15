@@ -3,6 +3,8 @@
  * @brief  If preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
+ *
+ * @see <http://www.boost.org/doc/libs/1_63_0/libs/preprocessor/doc/index.html>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_IF_HPP__
@@ -13,22 +15,31 @@
 #pragma once
 #endif
 
+#include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/preprocessor/details/Boolean.hpp>
 
-#ifndef TBAG_PP_IF
-#define TBAG_PP_IF(cond, t, f) TBAG_PP_IF_IMPL(TBAG_PP_BOOL(cond), t, f)
+// --------
+// IF Part.
+// --------
+
+#define TBAG_PP_IF(cond, t, f)  TBAG_PP_IIF(TBAG_PP_BOOL(cond), t, f)
+
+// ---------
+// IIF Part.
+// ---------
+
+#define TBAG_PP_IIF(bit, t, f)     TBAG_PP_IIF_I(bit, t, f)
+
+#if defined(TBAG_COMP_MSVC)
+# define TBAG_PP_IIF_I(bit, t, f)  TBAG_PP_IIF_II(TBAG_PP_IIF_ ## bit(t, f))
+# define TBAG_PP_IIF_II(id) id
+#else
+# define TBAG_PP_IIF_I(bit, t, f)  TBAG_PP_IIF_ ## bit(t, f)
 #endif
 
-#ifndef TBAG_PP_IF_IMPL
-#define TBAG_PP_IF_IMPL(bit, t, f) TBAG_PP_IF_IMPL2(bit, t, f)
-#endif
-
-#ifndef TBAG_PP_IF_IMPL2
-#define TBAG_PP_IF_IMPL2(bit, t, f) TBAG_PP_IF_IMPL_##bit(t, f)
-#endif
-
-#define TBAG_PP_IF_IMPL_0(t, f) f
-#define TBAG_PP_IF_IMPL_1(t, f) t
+#define TBAG_PP_IIF_0(t, f)  f
+#define TBAG_PP_IIF_1(t, f)  t
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_IF_HPP__
 

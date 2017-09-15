@@ -3,6 +3,8 @@
  * @brief  Odd preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
+ *
+ * @see <http://www.boost.org/doc/libs/1_63_0/libs/preprocessor/doc/index.html>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_ODD_HPP__
@@ -13,13 +15,8 @@
 #pragma once
 #endif
 
-#ifndef TBAG_PP_ODD
-#define TBAG_PP_ODD(x) TBAG_PP_ODD_IMPL(x)
-#endif
-
-#ifndef TBAG_PP_ODD_IMPL
-#define TBAG_PP_ODD_IMPL(x) TBAG_PP_ODD_##x
-#endif
+#define TBAG_PP_ODD(x)   TBAG_PP_ODD_I(x)
+#define TBAG_PP_ODD_I(x) TBAG_PP_ODD_ ## x
 
 #define TBAG_PP_ODD_0 0
 #define TBAG_PP_ODD_1 1

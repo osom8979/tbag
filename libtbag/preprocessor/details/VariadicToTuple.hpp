@@ -3,6 +3,8 @@
  * @brief  VariadicToTuple preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
+ *
+ * @see <http://www.boost.org/doc/libs/1_63_0/libs/preprocessor/doc/index.html>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_VARIADICTOTUPLE_HPP__
@@ -13,9 +15,7 @@
 #pragma once
 #endif
 
-#ifndef TBAG_PP_VARIADIC_TO_TUPLE
-#define TBAG_PP_VARIADIC_TO_TUPLE(...) (__VA_ARGS__)
-#endif
+#define TBAG_PP_VARIADIC_TO_TUPLE(...)  (__VA_ARGS__)
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_VARIADICTOTUPLE_HPP__
 

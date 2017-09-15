@@ -3,6 +3,8 @@
  * @brief  Tuple preprocessor prototype.
  * @author zer0
  * @date   2017-09-14
+ *
+ * @see <http://www.boost.org/doc/libs/1_63_0/libs/preprocessor/doc/index.html>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_TUPLE_HPP__
@@ -13,14 +15,17 @@
 #pragma once
 #endif
 
+#include <libtbag/config.h>
+#include <libtbag/predef.hpp>
 #include <libtbag/preprocessor/details/Cat.hpp>
 
-#ifndef TBAG_PP_TUPLE_ELEM
-#define TBAG_PP_TUPLE_ELEM(size, n, tuple) TBAG_PP_TUPLE_ELEM_I(TBAG_PP_CAT(TBAG_PP_TUPLE_ELEM_, n) TBAG_PP_CAT(TBAG_PP_TUPLE_ELEM_E_, size) tuple)
-#endif
-
-#ifndef TBAG_PP_TUPLE_ELEM_I
-#define TBAG_PP_TUPLE_ELEM_I(x) x
+#if defined(TBAG_COMP_MSVC)
+# define TBAG_PP_TUPLE_ELEM(size, n, tuple)  TBAG_PP_TUPLE_ELEM_I(TBAG_PP_CAT(TBAG_PP_TUPLE_ELEM_, n), TBAG_PP_CAT(TBAG_PP_CAT(TBAG_PP_TUPLE_ELEM_E_, size), tuple))
+# define TBAG_PP_TUPLE_ELEM_I(m, args)       TBAG_PP_TUPLE_ELEM_II(m, args)
+# define TBAG_PP_TUPLE_ELEM_II(m, args)      TBAG_PP_CAT(m ## args,)
+#else
+# define TBAG_PP_TUPLE_ELEM(size, n, tuple)  TBAG_PP_TUPLE_ELEM_I(TBAG_PP_CAT(TBAG_PP_TUPLE_ELEM_, n) TBAG_PP_CAT(TBAG_PP_TUPLE_ELEM_E_, size) tuple)
+# define TBAG_PP_TUPLE_ELEM_I(x)             x
 #endif
 
 #define TBAG_PP_TUPLE_ELEM_E_1(e0) (e0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -152,6 +157,13 @@
 #define TBAG_PP_TUPLE_ELEM_61(e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19, e20, e21, e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37, e38, e39, e40, e41, e42, e43, e44, e45, e46, e47, e48, e49, e50, e51, e52, e53, e54, e55, e56, e57, e58, e59, e60, e61, e62, e63) e61
 #define TBAG_PP_TUPLE_ELEM_62(e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19, e20, e21, e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37, e38, e39, e40, e41, e42, e43, e44, e45, e46, e47, e48, e49, e50, e51, e52, e53, e54, e55, e56, e57, e58, e59, e60, e61, e62, e63) e62
 #define TBAG_PP_TUPLE_ELEM_63(e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19, e20, e21, e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37, e38, e39, e40, e41, e42, e43, e44, e45, e46, e47, e48, e49, e50, e51, e52, e53, e54, e55, e56, e57, e58, e59, e60, e61, e62, e63) e63
+
+#define TBAG_PP_TUPLE_ELEM_1_0(a)        a
+#define TBAG_PP_TUPLE_ELEM_2_0(a, b)     a
+#define TBAG_PP_TUPLE_ELEM_2_1(a, b)     b
+#define TBAG_PP_TUPLE_ELEM_3_0(a, b, c)  a
+#define TBAG_PP_TUPLE_ELEM_3_1(a, b, c)  b
+#define TBAG_PP_TUPLE_ELEM_3_2(a, b, c)  c
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_TUPLE_HPP__
 
