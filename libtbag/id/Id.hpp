@@ -15,7 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <cstddef>
+#include <cstdint>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,8 +25,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace id {
 
+using LargeId  = uint64_t;
+using MediumId = uint32_t;
+using SmallId  = uint16_t;
+
 /** Common ID type. */
-typedef std::size_t Id;
+using Id = LargeId;
+
+TBAG_CONSTEXPR LargeId  const UNKNOWN_LARGE_ID  = 0;
+TBAG_CONSTEXPR MediumId const UNKNOWN_MEDIUM_ID = 0;
+TBAG_CONSTEXPR SmallId  const UNKNOWN_SMALL_ID  = 0;
 
 /** Unknown ID. */
 TBAG_CONSTEXPR Id const UNKNOWN_ID = 0;
