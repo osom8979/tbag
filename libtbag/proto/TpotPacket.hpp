@@ -15,44 +15,17 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-
-#if defined(TBAG_COMP_MSVC)
-# if defined(min)
-TBAG_PUSH_MACRO(min);
-# undef min
-# define __RESTORE_MIN__
-# endif // defined(min)
-# if defined(max)
-TBAG_PUSH_MACRO(max);
-# undef max
-# define __RESTORE_MAX__
-# endif // defined(max)
-#endif // defined(TBAG_COMP_MSVC)
-
-#include <libtbag/proto/fbs/tpot_generated.h>
-
-#if defined(TBAG_COMP_MSVC)
-# if defined(__RESTORE_MIN__)
-TBAG_POP_MACRO(min);
-# undef __RESTORE_MIN__
-# endif // defined(__RESTORE_MIN__)
-# if defined(__RESTORE_MAX__)
-TBAG_POP_MACRO(max);
-# undef __RESTORE_MAX__
-# endif // defined(__RESTORE_MAX__)
-#endif // defined(TBAG_COMP_MSVC)
-
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <libtbag/network/http/HttpProperty.hpp>
-#include <libtbag/util/ProcInfo.hpp>
-#include <libtbag/Unit.hpp>
+#include <libtbag/util/Structures.hpp>
 
 #include <cstdint>
 #include <vector>
 #include <string>
-#include <functional>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -62,28 +35,16 @@ namespace proto {
 
 struct TpotPacketTypes : private Noncopyable
 {
-    using FlatBuilder = flatbuffers::FlatBufferBuilder;
+    enum class ResultCode : int
+    {
+        RC_SUCCESS = 0,
+        RC_UNKNOWN_ERROR,
+        RC_EXECUTE_ERROR,
+        RC_NOT_EXISTS,
+        RC_KILL_ERROR,
+    };
 
-    using ResultCode  = proto::fbs::tpot::ResultCode;
-    using Header      = proto::fbs::tpot::Header;
-    using ProcessInfo = proto::fbs::tpot::ProcessInfo;
-
-    using VersionRequest   = proto::fbs::tpot::VersionRequest;
-    using VersionResponse  = proto::fbs::tpot::VersionResponse;
-    using ExecRequest      = proto::fbs::tpot::ExecRequest;
-    using ExecResponse     = proto::fbs::tpot::ExecResponse;
-    using HeartbitRequest  = proto::fbs::tpot::HeartbitRequest;
-    using HeartbitResponse = proto::fbs::tpot::HeartbitResponse;
-    using ListRequest      = proto::fbs::tpot::ListRequest;
-    using ListResponse     = proto::fbs::tpot::ListResponse;
-    using KillRequest      = proto::fbs::tpot::KillRequest;
-    using KillResponse     = proto::fbs::tpot::KillResponse;
-
-    using ProcInfo = util::ProcInfo;
-
-    TBAG_CONSTEXPR static std::size_t const DEFAULT_BUILDER_CAPACITY = 1 * MEGA_BYTE_TO_BYTE;
-    TBAG_CONSTEXPR static char const * const DEFAULT_ECHO_MESSAGE = "TPOT";
-    TBAG_CONSTEXPR static ResultCode const SUCCESS_CODE = proto::fbs::tpot::ResultCode_SUCCESS;
+    TBAG_CONSTEXPR static ResultCode const SUCCESS_CODE = ResultCode::RC_SUCCESS;
 };
 
 /**
@@ -94,8 +55,17 @@ struct TpotPacketTypes : private Noncopyable
  */
 class TBAG_API TpotPacketBuilder : public TpotPacketTypes
 {
+public:
+    class Internal;
+    friend class Internal;
+    using UniqueInternal = std::unique_ptr<Internal>;
+
+public:
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_BUILDER_CAPACITY = 1 * MEGA_BYTE_TO_BYTE;
+    TBAG_CONSTEXPR static char const * const DEFAULT_ECHO_MESSAGE = "TPOT";
+
 private:
-    FlatBuilder _builder;
+    UniqueInternal _internal;
 
 public:
     TpotPacketBuilder(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
@@ -106,36 +76,37 @@ public:
     std::size_t size() const;
 
 public:
-    void clear();
-
-public:
-    Err buildVersionRequest(uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
-    Err buildVersionResponse(unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
+    Err buildVersionRequest(util::Header const & header);
+    Err buildVersionResponse(util::Header const & header,
+                             unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
                              unsigned minor = LIBTBAG_VERSION_PACKET_MINOR,
-                             uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
+                             util::Pairs const & features = util::Pairs());
 
-    Err buildExecRequest(std::string const & file,
+    Err buildEchoRequest(util::Header const & header, std::string const & message = DEFAULT_ECHO_MESSAGE);
+    Err buildEchoResponse(util::Header const & header, std::string const & message = DEFAULT_ECHO_MESSAGE);
+
+    Err buildLoginRequest(util::Header const & header, std::string const & id, std::string const & pw);
+    Err buildLoginResponse(util::Header const & header, std::string const & key);
+
+    Err buildLogoutRequest(util::Header const & header);
+    Err buildLogoutResponse(util::Header const & header);
+
+    Err buildExecRequest(util::Header const & header,
+                         std::string const & file,
                          std::vector<std::string> const & args = std::vector<std::string>(),
                          std::vector<std::string> const & envs = std::vector<std::string>(),
                          std::string const & cwd = std::string(),
-                         std::string const & input = std::string(),
-                         uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
-    Err buildExecResponse(int pid, uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
+                         std::string const & input = std::string());
+    Err buildExecResponse(util::Header const & header, int pid);
 
-    Err buildHeartbitRequest(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                             uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
-    Err buildHeartbitResponse(std::string const & echo = std::string(DEFAULT_ECHO_MESSAGE),
-                              uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
+    Err buildProcessListRequest(util::Header const & header);
+    Err buildProcessListResponse(util::Header const & header, std::vector<util::ProcessInfo> const & procs);
 
-    Err buildListRequest(uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
-    Err buildListResponse(std::vector<ProcInfo> const & procs,
-                          uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
+    Err buildProcessKillRequest(util::Header const & header, int pid, int signum);
+    Err buildProcessKillResponse(util::Header const & header);
 
-    Err buildKillRequest(int pid, uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
-    Err buildKillResponse(uint64_t id = genId(), ResultCode code = SUCCESS_CODE);
-
-public:
-    static uint64_t genId();
+    Err buildProcessRemoveRequest(util::Header const & header, int pid);
+    Err buildProcessRemoveResponse(util::Header const & header);
 };
 
 /**
@@ -147,23 +118,42 @@ public:
 class TBAG_API TpotPacketParser : public TpotPacketTypes
 {
 public:
+    class Internal;
+    friend class Internal;
+    using UniqueInternal = std::unique_ptr<Internal>;
+
+private:
+    UniqueInternal _internal;
+
+public:
     TpotPacketParser();
     virtual ~TpotPacketParser();
 
 public:
-    Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
+    Err parse(char const * buffer, std::size_t size);
 
 protected:
-    virtual void onVersionRequest  (Header const & header, VersionRequest   const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onVersionResponse (Header const & header, VersionResponse  const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onExecRequest     (Header const & header, ExecRequest      const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onExecResponse    (Header const & header, ExecResponse     const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onHeartbitRequest (Header const & header, HeartbitRequest  const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onHeartbitResponse(Header const & header, HeartbitResponse const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onListRequest     (Header const & header, ListRequest      const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onListResponse    (Header const & header, ListResponse     const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onKillRequest     (Header const & header, KillRequest      const & packet, void * arg) { /* EMPTY. */ }
-    virtual void onKillResponse    (Header const & header, KillResponse     const & packet, void * arg) { /* EMPTY. */ }
+    virtual void onVersionRequest       (util::Header const & header) { /* EMPTY. */ }
+    virtual void onVersionResponse      (util::Header const & header, unsigned major, unsigned minor, util::Pairs const & features) { /* EMPTY. */ }
+    virtual void onEchoRequest          (util::Header const & header, std::string const & message) { /* EMPTY. */ }
+    virtual void onEchoResponse         (util::Header const & header, std::string const & message) { /* EMPTY. */ }
+    virtual void onLoginRequest         (util::Header const & header, std::string const & id, std::string const & pw) { /* EMPTY. */ }
+    virtual void onLoginResponse        (util::Header const & header, std::string const & key) { /* EMPTY. */ }
+    virtual void onLogoutRequest        (util::Header const & header) { /* EMPTY. */ }
+    virtual void onLogoutResponse       (util::Header const & header) { /* EMPTY. */ }
+    virtual void onExecRequest          (util::Header const & header,
+                                         std::string const & file,
+                                         std::vector<std::string> const & args,
+                                         std::vector<std::string> const & envs,
+                                         std::string const & cwd,
+                                         std::string const & input) { /* EMPTY. */ }
+    virtual void onExecResponse         (util::Header const & header, int pid) { /* EMPTY. */ }
+    virtual void onProcessListRequest   (util::Header const & header) { /* EMPTY. */ }
+    virtual void onProcessListResponse  (util::Header const & header, std::vector<util::ProcessInfo> const & procs) { /* EMPTY. */ }
+    virtual void onProcessKillRequest   (util::Header const & header, int pid, int signum) { /* EMPTY. */ }
+    virtual void onProcessKillResponse  (util::Header const & header) { /* EMPTY. */ }
+    virtual void onProcessRemoveRequest (util::Header const & header, int pid) { /* EMPTY. */ }
+    virtual void onProcessRemoveResponse(util::Header const & header) { /* EMPTY. */ }
 };
 
 /**
@@ -179,93 +169,6 @@ public:
     virtual ~TpotPacket();
 };
 
-/**
- * FunctionalTpotPacket class prototype.
- *
- * @author zer0
- * @date   2017-09-06
- */
-class FunctionalTpotPacket : public TpotPacket
-{
-public:
-    // @formatter:off
-    using ResultCode       = TpotPacket::ResultCode;
-    using Header           = TpotPacket::Header;
-    using VersionRequest   = TpotPacket::VersionRequest;
-    using VersionResponse  = TpotPacket::VersionResponse;
-    using ExecRequest      = TpotPacket::ExecRequest;
-    using ExecResponse     = TpotPacket::ExecResponse;
-    using HeartbitRequest  = TpotPacket::HeartbitRequest;
-    using HeartbitResponse = TpotPacket::HeartbitResponse;
-    using ListRequest      = TpotPacket::ListRequest;
-    using ListResponse     = TpotPacket::ListResponse;
-    using KillRequest      = TpotPacket::KillRequest;
-    using KillResponse     = TpotPacket::KillResponse;
-    // @formatter:on
-
-public:
-    // @formatter:off
-    using OnVersionRequest   = std::function<void(Header const &, VersionRequest   const &, void*)>;
-    using OnVersionResponse  = std::function<void(Header const &, VersionResponse  const &, void*)>;
-    using OnExecRequest      = std::function<void(Header const &, ExecRequest      const &, void*)>;
-    using OnExecResponse     = std::function<void(Header const &, ExecResponse     const &, void*)>;
-    using OnHeartbitRequest  = std::function<void(Header const &, HeartbitRequest  const &, void*)>;
-    using OnHeartbitResponse = std::function<void(Header const &, HeartbitResponse const &, void*)>;
-    using OnListRequest      = std::function<void(Header const &, ListRequest      const &, void*)>;
-    using OnListResponse     = std::function<void(Header const &, ListResponse     const &, void*)>;
-    using OnKillRequest      = std::function<void(Header const &, KillRequest      const &, void*)>;
-    using OnKillResponse     = std::function<void(Header const &, KillResponse     const &, void*)>;
-    // @formatter:on
-
-private:
-    // @formatter:off
-    OnVersionRequest   _version_request_cb;
-    OnVersionResponse  _version_response_cb;
-    OnExecRequest      _exec_request_cb;
-    OnExecResponse     _exec_response_cb;
-    OnHeartbitRequest  _heartbit_request_cb;
-    OnHeartbitResponse _heartbit_response_cb;
-    OnListRequest      _list_request_cb;
-    OnListResponse     _list_response_cb;
-    OnKillRequest      _kill_request_cb;
-    OnKillResponse     _kill_response_cb;
-    // @formatter:on
-
-public:
-    FunctionalTpotPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY) : TpotPacket(capacity)
-    { /* EMPTY. */ }
-    virtual ~FunctionalTpotPacket()
-    { /* EMPTY. */ }
-
-public:
-    // @formatter:off
-    void setOnVersionRequest  (OnVersionRequest   const & cb) { _version_request_cb   = cb; }
-    void setOnVersionResponse (OnVersionResponse  const & cb) { _version_response_cb  = cb; }
-    void setOnExecRequest     (OnExecRequest      const & cb) { _exec_request_cb      = cb; }
-    void setOnExecResponse    (OnExecResponse     const & cb) { _exec_response_cb     = cb; }
-    void setOnHeartbitRequest (OnHeartbitRequest  const & cb) { _heartbit_request_cb  = cb; }
-    void setOnHeartbitResponse(OnHeartbitResponse const & cb) { _heartbit_response_cb = cb; }
-    void setOnListRequest     (OnListRequest      const & cb) { _list_request_cb      = cb; }
-    void setOnListResponse    (OnListResponse     const & cb) { _list_response_cb     = cb; }
-    void setOnKillRequest     (OnKillRequest      const & cb) { _kill_request_cb      = cb; }
-    void setOnKillResponse    (OnKillResponse     const & cb) { _kill_response_cb     = cb; }
-    // @formatter:on
-
-public:
-    // @formatter:off
-    virtual void onVersionRequest  (Header const & header, VersionRequest   const & packet, void * arg) { if (static_cast<bool>(_version_request_cb  )) { _version_request_cb  (header, packet, arg); } }
-    virtual void onVersionResponse (Header const & header, VersionResponse  const & packet, void * arg) { if (static_cast<bool>(_version_response_cb )) { _version_response_cb (header, packet, arg); } }
-    virtual void onExecRequest     (Header const & header, ExecRequest      const & packet, void * arg) { if (static_cast<bool>(_exec_request_cb     )) { _exec_request_cb     (header, packet, arg); } }
-    virtual void onExecResponse    (Header const & header, ExecResponse     const & packet, void * arg) { if (static_cast<bool>(_exec_response_cb    )) { _exec_response_cb    (header, packet, arg); } }
-    virtual void onHeartbitRequest (Header const & header, HeartbitRequest  const & packet, void * arg) { if (static_cast<bool>(_heartbit_request_cb )) { _heartbit_request_cb (header, packet, arg); } }
-    virtual void onHeartbitResponse(Header const & header, HeartbitResponse const & packet, void * arg) { if (static_cast<bool>(_heartbit_response_cb)) { _heartbit_response_cb(header, packet, arg); } }
-    virtual void onListRequest     (Header const & header, ListRequest      const & packet, void * arg) { if (static_cast<bool>(_list_request_cb     )) { _list_request_cb     (header, packet, arg); } }
-    virtual void onListResponse    (Header const & header, ListResponse     const & packet, void * arg) { if (static_cast<bool>(_list_response_cb    )) { _list_response_cb    (header, packet, arg); } }
-    virtual void onKillRequest     (Header const & header, KillRequest      const & packet, void * arg) { if (static_cast<bool>(_kill_request_cb     )) { _kill_request_cb     (header, packet, arg); } }
-    virtual void onKillResponse    (Header const & header, KillResponse     const & packet, void * arg) { if (static_cast<bool>(_kill_response_cb    )) { _kill_response_cb    (header, packet, arg); } }
-    // @formatter:on
-};
-
 // --------------------
 // HTTP Path structure.
 // --------------------
@@ -279,16 +182,22 @@ public:
     };
 #endif
 
-_TPOT_CREATE_PATH_STRUCTURE( VersionPath, "ver" ,    GET)
-_TPOT_CREATE_PATH_STRUCTURE(    ExecPath, "exec",    PUT)
-_TPOT_CREATE_PATH_STRUCTURE(HeartbitPath, "hbit",    GET)
-_TPOT_CREATE_PATH_STRUCTURE(    ListPath, "list",    GET)
-_TPOT_CREATE_PATH_STRUCTURE(    KillPath, "kill", DELETE)
+_TPOT_CREATE_PATH_STRUCTURE(      VersionPath,   "ver" ,    GET)
+_TPOT_CREATE_PATH_STRUCTURE(         EchoPath,   "echo",    GET)
+_TPOT_CREATE_PATH_STRUCTURE(        LoginPath,  "login",   POST)
+_TPOT_CREATE_PATH_STRUCTURE(       LogoutPath, "logout",   POST)
+_TPOT_CREATE_PATH_STRUCTURE(         ExecPath,   "exec",    PUT)
+_TPOT_CREATE_PATH_STRUCTURE(  ProcessListPath,   "list",    GET)
+_TPOT_CREATE_PATH_STRUCTURE(  ProcessKillPath,   "kill",   POST)
+_TPOT_CREATE_PATH_STRUCTURE(ProcessRemovePath, "remove", DELETE)
 
 #undef _TPOT_CREATE_PATH_STRUCTURE
 
 TBAG_CONSTEXPR char const * const getAcceptKey  () TBAG_NOEXCEPT { return "Accept"; }
 TBAG_CONSTEXPR char const * const getAcceptValue() TBAG_NOEXCEPT { return "application/octet-stream"; }
+
+TBAG_CONSTEXPR int const DEFAULT_TPOT_SERVER_PORT_NUMBER = 7907; ///< "TPOT" -> "7907"
+TBAG_CONSTEXPR uint64_t const DEFAULT_TPOT_TIMEOUT_MILLISEC = 15 * 1000;
 
 } // namespace proto
 

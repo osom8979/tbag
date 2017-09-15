@@ -21,7 +21,7 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/process/StdProcess.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
-#include <libtbag/util/ProcInfo.hpp>
+#include <libtbag/util/Structures.hpp>
 
 #include <unordered_map>
 #include <vector>
@@ -96,7 +96,7 @@ public:
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
 
-    using ProcInfo = util::ProcInfo;
+    using ProcessInfo = util::ProcessInfo;
 
 private:
     mutable Mutex _mutex;
@@ -116,7 +116,7 @@ public:
 public:
     bool exists(int pid) const;
     bool isActive(int pid) const;
-    std::vector<ProcInfo> list() const;
+    std::vector<ProcessInfo> list() const;
 
 public:
     WeakProc get(int pid);

@@ -137,9 +137,9 @@ bool ProcessManager::isActive(int pid) const
     return false;
 }
 
-std::vector<ProcessManager::ProcInfo> ProcessManager::list() const
+std::vector<ProcessManager::ProcessInfo> ProcessManager::list() const
 {
-    std::vector<ProcInfo> result;
+    std::vector<ProcessInfo> result;
     Guard g(_mutex);
     for (auto & proc : _procs) {
         if (static_cast<bool>(proc.second)) {

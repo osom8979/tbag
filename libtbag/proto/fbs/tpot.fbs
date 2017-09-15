@@ -18,21 +18,33 @@ struct Version
     minor : uint = 1;
 }
 
-struct Header
-{
-    id   : ulong;
-    code : ResultCode;
-}
-
-struct ProcessInfo
-{
-    pid    : int;
-    active : bool;
-}
-
 // ------
 // Tables
 // ------
+
+table Pair
+{
+    key : string;
+    val : string;
+}
+
+table ProcessInfo
+{
+    pid    : int;
+    active : bool;
+    infos  : [Pair];
+}
+
+table Header
+{
+    id    : ulong;
+    code  : ResultCode;
+    infos : [Pair];
+}
+
+// ---------------------------
+// Tables (Request & Response)
+// ---------------------------
 
 table VersionRequest
 {
@@ -41,7 +53,39 @@ table VersionRequest
 
 table VersionResponse
 {
-    version : Version;
+    version  : Version;
+    features : [Pair];
+}
+
+table EchoRequest
+{
+    msg : string;
+}
+
+table EchoResponse
+{
+    msg : string;
+}
+
+table LoginRequest
+{
+    id : string;
+    pw : string;
+}
+
+table LoginResponse
+{
+    key : string; // Authentication information.
+}
+
+table LogoutRequest
+{
+    // EMPTY.
+}
+
+table LogoutResponse
+{
+    // EMPTY.
 }
 
 table ExecRequest
@@ -58,32 +102,33 @@ table ExecResponse
     pid : int;
 }
 
-table HeartbitRequest
-{
-    echo : string;
-}
-
-table HeartbitResponse
-{
-    echo : string;
-}
-
-table ListRequest
+table ProcessListRequest
 {
     // EMPTY.
 }
 
-table ListResponse
+table ProcessListResponse
 {
     procs : [ProcessInfo];
 }
 
-table KillRequest
+table ProcessKillRequest
+{
+    pid    : int;
+    signum : int;
+}
+
+table ProcessKillResponse
+{
+    // EMPTY.
+}
+
+table ProcessRemoveRequest
 {
     pid : int;
 }
 
-table KillResponse
+table ProcessRemoveResponse
 {
     // EMPTY.
 }
@@ -92,14 +137,23 @@ union AnyPacket
 {
     VersionRequest,
     VersionResponse,
+
+    EchoRequest,
+    EchoResponse,
+
+    LoginRequest,
+    LoginResponse,
+    LogoutRequest,
+    LogoutResponse,
+
     ExecRequest,
     ExecResponse,
-    HeartbitRequest,
-    HeartbitResponse,
-    ListRequest,
-    ListResponse,
-    KillRequest,
-    KillResponse,
+    ProcessListRequest,
+    ProcessListResponse,
+    ProcessKillRequest,
+    ProcessKillResponse,
+    ProcessRemoveRequest,
+    ProcessRemoveResponse,
 }
 
 table TpotPacket

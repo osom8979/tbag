@@ -49,7 +49,7 @@ public:
     using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
-    UniqueInternal _internal;
+//    UniqueInternal _internal;
 
 public:
     TpotServer(Param const & param);

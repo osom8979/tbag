@@ -48,6 +48,11 @@
     static_assert(std::is_same<type1, type2>::value, #type1 " must be the same type as " #type2)
 #endif
 
+#ifndef STATIC_ASSERT_CHECK_IS_EQUALS
+#define STATIC_ASSERT_CHECK_IS_EQUALS(value1, value2) \
+    static_assert(value1 == value2, #value1 " and " #value2 " should be the same.")
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

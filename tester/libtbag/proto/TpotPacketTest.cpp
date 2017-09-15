@@ -6,12 +6,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/proto/TpotPacket.hpp>
+#include <libtbag/proto/FunctionalTpotPacket.hpp>
 
 using namespace libtbag;
 using namespace libtbag::proto;
-using namespace libtbag::proto::fbs;
-using namespace libtbag::proto::fbs::tpot;
 
 TEST(TpotPacketTest, Default)
 {
@@ -25,8 +23,9 @@ TEST(TpotPacketTest, Default)
     std::string const TEST_INPUT = "input";
 
     std::vector<char> buffer;
-    FunctionalTpotPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.buildExecRequest(TEST_FILE,
+    FuncTpotPacket packet;
+    ASSERT_EQ(Err::E_SUCCESS, packet.buildExecRequest(util::Header(),
+                                                      TEST_FILE,
                                                       {TEST_ARG1, TEST_ARG2},
                                                       {TEST_ENV1, TEST_ENV2, TEST_ENV3},
                                                       TEST_CWD,
@@ -43,23 +42,24 @@ TEST(TpotPacketTest, Default)
     std::string cwd;
     std::string input;
 
-    packet.setOnExecRequest([&](Header const & header, ExecRequest const & packet, void * arg){
-        header_id   = header.id();
-        header_code = static_cast<int>(header.code());
-        file  = packet.file()->str();
-        cwd   = packet.cwd()->str();
-        input = packet.input()->str();
-        for (auto args_itr = packet.args()->begin(); args_itr != packet.args()->end(); ++args_itr) {
-            args.push_back(args_itr->str());
-        }
-        for (auto envs_itr = packet.envs()->begin(); envs_itr != packet.envs()->end(); ++envs_itr) {
-            envs.push_back(envs_itr->str());
-        }
+    packet.set_onExecRequest([&](util::Header const & header,
+                                 std::string const & result_file,
+                                 std::vector<std::string> const & result_args,
+                                 std::vector<std::string> const & result_envs,
+                                 std::string const & result_cwd,
+                                 std::string const & result_input){
+        header_id   = header.id;
+        header_code = static_cast<int>(header.code);
+        file  = result_file;
+        cwd   = result_cwd;
+        input = result_input;
+        args  = result_args;
+        envs  = result_envs;
     });
     ASSERT_EQ(Err::E_SUCCESS, packet.parse(buffer.data(), buffer.size()));
 
     ASSERT_LT(0, header_id);
-    ASSERT_EQ(static_cast<int>(ResultCode_SUCCESS), header_code);
+    ASSERT_EQ(0, header_code);
     ASSERT_EQ(TEST_FILE, file);
     ASSERT_EQ(TEST_CWD, cwd);
     ASSERT_EQ(TEST_INPUT, input);

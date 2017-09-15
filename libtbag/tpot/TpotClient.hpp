@@ -20,7 +20,8 @@
 
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/util/Version.hpp>
-#include <libtbag/util/ProcInfo.hpp>
+#include <libtbag/util/Structures.hpp>
+#include <libtbag/proto/FunctionalTpotPacket.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -39,77 +40,68 @@ namespace tpot {
  * @author zer0
  * @date   2017-09-07
  */
-class TBAG_API TpotClient : private Noncopyable
+class TBAG_API TpotClient : private proto::TpotPacket
 {
 public:
-    struct Param
-    {
-        bool verbose;
-        std::string ip;
-        int port;
-    };
+    using Parent = proto::TpotPacket;
 
-public:
     using HttpClient   = network::http::HttpClient;
     using HttpRequest  = network::http::HttpRequest;
     using HttpResponse = network::http::HttpResponse;
     using StreamType   = HttpClient::StreamType;
 
 public:
-    enum class ResultType : int
+    struct Param
     {
-        Unknown,
-        Version,
-        Exec,
-        Heartbit,
-        List,
-        Kill,
-    };
+        std::string ip;
+        int         port;
+        StreamType  type;
+        uint64_t    timeout;
+        bool        verbose;
 
-    struct Result
-    {
-        uint64_t   request_id;
-        uint64_t   response_id;
-        uint32_t   code;
-        ResultType type;
-
-        union {
-            util::Version * version;
-            int * pid;
-            std::string * echo;
-            std::vector<util::ProcInfo> * procs;
-        } response;
-
-        Result(uint64_t req = 0, uint64_t res = 0, uint32_t c = 0, ResultType t = ResultType::Unknown)
-                : request_id(req), response_id(res), code(c), type(t), response()
+        Param(std::string const & i = network::details::LOOPBACK_IPV4,
+              int p = proto::DEFAULT_TPOT_SERVER_PORT_NUMBER,
+              StreamType t = StreamType::TCP,
+              uint64_t o = proto::DEFAULT_TPOT_TIMEOUT_MILLISEC,
+              bool v = false) : ip(i), port(p), type(t), timeout(o), verbose(v)
         { /* EMPTY. */ }
-        ~Result()
+        ~Param()
         { /* EMPTY. */ }
     };
-
-public:
-    struct Internal;
-    friend struct Internal;
-    using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
-    UniqueInternal _internal;
+    Param _param;
 
 public:
-    TpotClient(Param const & param, StreamType type = StreamType::TCP);
+    TpotClient(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    TpotClient(Param const & param, std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
     virtual ~TpotClient();
 
 public:
-    Err requestVersion(Result * result = nullptr);
+    inline void setParam(Param const & param) { _param = param; }
+    inline Param getParam() const { return _param; }
+
+private:
+    Err request(std::string const & method, std::string const & path,
+                uint8_t const * buffer, std::size_t size, HttpResponse & response);
+    Err requestCommon(std::string const & method, std::string const & path);
+
+public:
+    Err requestVersion();
+    Err requestEcho(std::string const & message);
+
+    Err requestLogin(std::string const & id, std::string const & pw);
+    Err requestLogout();
+
     Err requestExec(std::string const & file,
                     std::vector<std::string> const & args,
                     std::vector<std::string> const & envs,
                     std::string const & cwd,
-                    std::string const & input,
-                    Result * result = nullptr);
-    Err requestHeartbit(std::string const & echo, Result * result = nullptr);
-    Err requestList(Result * result = nullptr);
-    Err requestKill(int pid, Result * result = nullptr);
+                    std::string const & input);
+
+    Err requestProcessList();
+    Err requestProcessKill(int pid, int signum);
+    Err requestProcessRemove(int pid);
 };
 
 // ------------
