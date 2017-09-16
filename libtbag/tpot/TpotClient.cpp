@@ -10,11 +10,14 @@
 
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/util/Structures.hpp>
+#include <libtbag/proto/FunctionalTpotPacket.hpp>
 
 #include <cassert>
 #include <cstdlib>
 #include <sstream>
 #include <iostream>
+#include <libtbag/signal/SignalHandler.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -111,13 +114,9 @@ Err TpotClient::requestLogout()
     return requestCommon(proto::LogoutPath::getMethod(), proto::LogoutPath::getPath());
 }
 
-Err TpotClient::requestExec(std::string const & file,
-                            std::vector<std::string> const & args,
-                            std::vector<std::string> const & envs,
-                            std::string const & cwd,
-                            std::string const & input)
+Err TpotClient::requestExec(util::ExecParam const & param)
 {
-    buildExecRequest(util::Header(), file, args, envs, cwd, input);
+    buildExecRequest(util::Header(), param.file, param.args, param.envs, param.cwd, param.input);
     return requestCommon(proto::ExecPath::getMethod(), proto::ExecPath::getPath());
 }
 
@@ -169,15 +168,18 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     std::string const MERGE_ARGS = string::mergeTokens(cmd_args, std::string(" "));
     std::vector<std::string> commands;
 
+    std::string const DEFAULT_ECHO_MESSAGE = "TpoT";
+
     std::string file;
     std::string cwd;
     std::vector<std::string> args;
     std::vector<std::string> envs;
     std::string input;
-    std::string msg = "TpoT";
+    std::string msg = DEFAULT_ECHO_MESSAGE;
     std::string id;
     std::string pw;
     std::string key;
+    int signum = signal::TBAG_SIGNAL_TERMINATION;
     int pid = 0;
     bool help = false;
 
@@ -189,17 +191,18 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
     {   // Initialize commander.
         using namespace libtbag::string;
         // @formatter:off
-        commander.insertDefault("file" , &file , std::string(), std::string("Executable file path [")  + EXEC_CMD     + "]");
-        commander.insertDefault("cwd"  , &cwd  , std::string(), std::string("Working directory [")     + EXEC_CMD     + "]");
-        commander.insertDefault("input", &input, std::string(), std::string("Standard input string [") + EXEC_CMD     + "]");
+        commander.insertDefault("file" , &file , std::string(), std::string("Executable file path [")  + EXEC_CMD + "]");
+        commander.insertDefault("cwd"  , &cwd  , std::string(), std::string("Working directory [")     + EXEC_CMD + "]");
+        commander.insertDefault("input", &input, std::string(), std::string("Standard input string [") + EXEC_CMD + "]");
         commander.insert("args", [&](Arguments const & a){ args = a.getStrings(); }, std::string("Command-line arguments [") + EXEC_CMD + "]");
         commander.insert("envs", [&](Arguments const & a){ envs = a.getStrings(); }, std::string("Environment variables [")  + EXEC_CMD + "]");
-        commander.insertDefault("msg" , &msg ,        "TpoT", std::string("Message [") + ECHO_CMD + "]");
-        commander.insertDefault("pid" , &pid ,             0, std::string("Process id [") + PROCESS_KILL_CMD + "," + PROCESS_REMOVE_CMD + "]");
-        commander.insertDefault("id"  , &id  , std::string(), std::string("Login ID [") + LOGIN_CMD + "]");
-        commander.insertDefault("pw"  , &pw  , std::string(), std::string("Login PW [") + LOGIN_CMD + "]");
-        commander.insertDefault("key" , &key , std::string(), std::string("Authentication KEY CODE"));
-        commander.insertDefault("help", &help,          true, std::string("Help message"));
+        commander.insertDefault(   "msg", &msg   , DEFAULT_ECHO_MESSAGE, std::string("Message [") + ECHO_CMD + "]");
+        commander.insertDefault("signum", &signum, signal::TBAG_SIGNAL_TERMINATION, std::string("Kill signal [") + PROCESS_KILL_CMD + "]");
+        commander.insertDefault(   "pid", &pid   , 0, std::string("Process id [") + PROCESS_KILL_CMD + "," + PROCESS_REMOVE_CMD + "]");
+        commander.insertDefault(    "id", &id    , std::string(), std::string("Login ID [") + LOGIN_CMD + "]");
+        commander.insertDefault(    "pw", &pw    , std::string(), std::string("Login PW [") + LOGIN_CMD + "]");
+        commander.insertDefault(   "key", &key   , std::string(), std::string("Authentication KEY CODE"));
+        commander.insertDefault(  "help", &help  , true, std::string("Help message"));
         commander.setDefaultCallbackForLeftArguments(&commands);
         commander.request(MERGE_ARGS);
         // @formatter:on
@@ -226,37 +229,110 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
 
     proto::FunctionalTpotPacket<TpotClient> client;
     client.setParam(param);
+
+    util::Header header;
     Err request_code = Err::E_UNKNOWN;
+    std::string request_name;
+    std::string request_value;
 
-//    if (commands[0] == VERSION_CMD) {
-//        request_code = client.requestVersion(&result);
-//        std::cout << string::fformat("Request version (ID:{}, CODE:{}, VER:{})\n", result.response_id, result.code, result.response.version->toString());
-//
-//    } else if (commands[0] == EXEC_CMD) {
-//        request_code = client.requestExec(file, args, envs, cwd, input, &result);
-//        std::cout << string::fformat("Request exec (ID:{}, CODE:{}, PID:{})\n", result.response_id, result.code, *(result.response.pid));
-//
-//    } else if (commands[0] == HEARTBIT_CMD) {
-//        request_code = client.requestHeartbit(msg, &result);
-//        std::cout << string::fformat("Request heartbit (ID:{}, CODE:{}, ECHO:{})\n", result.response_id, result.code, *(result.response.echo));
-//
-//    } else if (commands[0] == LIST_CMD) {
-//        request_code = client.requestList(&result);
-//        std::cout << string::fformat("Request list (ID:{}, CODE:{}, Size:{})\n", result.response_id, result.code, result.response.procs->size());
-//        for (auto & proc : *(result.response.procs)) {
-//            std::cout << proc.pid << "[" << proc.active << "],";
-//        }
-//        std::cout << std::endl;
-//
-//    } else if (commands[0] == KILL_CMD) {
-//        request_code = client.requestKill(pid, &result);
-//        std::cout << string::fformat("Request kill (ID:{}, CODE:{})\n", result.response_id, result.code);
-//
-//    } else {
-//        request_code = Err::E_UNKNOWN;
-//        std::cerr << "Unknown command: " << commands[0] << std::endl;
-//    }
+    if (commands[0] == VERSION_CMD) {
+        util::Version version;
+        client.set_onVersionResponse([&](util::Header const & h, util::Version const & v, util::Pairs const & p, void * a){
+            header = h;
+            version = v;
+        });
+        request_code = client.requestVersion();
+        request_name = VERSION_CMD;
+        request_value = version.toString();
 
+    } else if (commands[0] == ECHO_CMD) {
+        std::string message;
+        client.set_onEchoResponse([&](util::Header const & h, std::string const & m, void * a){
+            header = h;
+            message = m;
+        });
+        request_code = client.requestEcho(msg);
+        request_name = VERSION_CMD;
+        request_value = message;
+
+    } else if (commands[0] == LOGIN_CMD) {
+        std::string key;
+        client.set_onLoginResponse([&](util::Header const & h, std::string const & k, void * a){
+            header = h;
+            key = k;
+        });
+        request_code = client.requestLogin(id, pw);
+        request_name = LOGIN_CMD;
+        request_value = key;
+
+    } else if (commands[0] == LOGOUT_CMD) {
+        client.set_onLogoutResponse([&](util::Header const & h, void * a){
+            header = h;
+        });
+        request_code = client.requestLogout();
+        request_name = LOGOUT_CMD;
+        request_value = "[EMPTY]";
+
+    } else if (commands[0] == EXEC_CMD) {
+        int pid = 0;
+        client.set_onExecResponse([&](util::Header const & h, int p, void * a){
+            header = h;
+            pid = p;
+        });
+        util::ExecParam param;
+        param.file  = file;
+        param.args  = args;
+        param.envs  = envs;
+        param.cwd   = cwd;
+        param.input = input;
+        request_code = client.requestExec(param);
+        request_name = EXEC_CMD;
+        request_value = std::to_string(pid);
+
+    } else if (commands[0] == PROCESS_LIST_CMD) {
+        std::vector<util::ProcessInfo> procs;
+        client.set_onProcessListResponse([&](util::Header const & h, std::vector<util::ProcessInfo> const & p, void * a){
+            header = h;
+            procs = p;
+        });
+        request_code = client.requestProcessList();
+        request_name = PROCESS_LIST_CMD;
+
+        std::stringstream ss;
+        for (std::size_t i = 0; i < procs.size(); ++i) {
+            ss << string::fformat("\n * [{}] {} ({})", i, procs[i].pid, (procs[i].active ? "active" : "inactive"));
+            for (auto & info : procs[i].infos) {
+                ss << string::fformat("[{}:{}]", info.key, info.val);
+            }
+        }
+        request_value = string::fformat("SIZE({})", procs.size()) + ss.str();
+
+    } else if (commands[0] == PROCESS_KILL_CMD) {
+        client.set_onProcessKillResponse([&](util::Header const & h, void * a){
+            header = h;
+        });
+        request_code = client.requestProcessKill(pid, signum);
+        request_name = PROCESS_KILL_CMD;
+        request_value = "[EMPTY]";
+
+    } else if (commands[0] == PROCESS_REMOVE_CMD) {
+        client.set_onProcessRemoveResponse([&](util::Header const & h, void * a){
+            header = h;
+        });
+        request_code = client.requestProcessRemove(pid);
+        request_name = PROCESS_REMOVE_CMD;
+        request_value = "[EMPTY]";
+
+    } else {
+        request_code = Err::E_UNKNOWN;
+        std::cerr << "Unknown command: " << commands[0] << std::endl;
+    }
+
+    if (TBAG_ERR_SUCCESS(request_code)) {
+        std::cout << string::fformat("REQUEST [ID({}) CODE({})] {}: {}\n", header.id, header.code, request_name, request_value);
+    } else {
+        std::cerr << string::fformat("REQUEST({}) ERROR: {}\n", request_name, getErrName(request_code));
+    }
     return TBAG_ERR_SUCCESS(request_code) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

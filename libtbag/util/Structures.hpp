@@ -74,9 +74,8 @@ struct Header
     using Id   = LargeId;
     using Code = ResultCode;
 
-    Id   id;
-    Code code;
-
+    Id    id;
+    Code  code;
     Pairs infos;
 
     Header() : id(genLargeId()), code(RCT_SUCCESS), infos()
@@ -97,6 +96,24 @@ struct UserInfo
     UserInfo(Id i = 0, Pairs const & ifs = Pairs()) : id(i), infos(ifs)
     { /* EMPTY. */ }
     ~UserInfo()
+    { /* EMPTY. */ }
+};
+
+struct ExecParam
+{
+    std::string file;
+    std::vector<std::string> args;
+    std::vector<std::string> envs;
+    std::string cwd;
+    std::string input;
+
+    ExecParam(std::string const & f = std::string(),
+              std::vector<std::string> const & as = std::vector<std::string>(),
+              std::vector<std::string> const & es = std::vector<std::string>(),
+              std::string const & c = std::string(),
+              std::string const & i = std::string()) : file(f), args(as), envs(es), cwd(c), input(i)
+    { /* EMPTY. */ }
+    ~ExecParam()
     { /* EMPTY. */ }
 };
 

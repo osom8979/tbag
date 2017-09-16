@@ -195,6 +195,11 @@ Err TpotPacketBuilder::buildVersionResponse(util::Header const & header, unsigne
     return Err::E_SUCCESS;
 }
 
+Err TpotPacketBuilder::buildVersionResponse(util::Header const & header, util::Version const & version, util::Pairs const & features)
+{
+    return buildVersionResponse(header, version.getMajor(), version.getMinor(), features);
+}
+
 Err TpotPacketBuilder::buildEchoRequest(util::Header const & header, std::string const & message)
 {
     assert(static_cast<bool>(_internal));
@@ -280,6 +285,11 @@ Err TpotPacketBuilder::buildExecRequest(util::Header const & header,
                                                                  builder.CreateString(input)).Union());
     _internal->finish(packet);
     return Err::E_SUCCESS;
+}
+
+Err TpotPacketBuilder::buildExecRequest(util::Header const & header, util::ExecParam const & param)
+{
+    return buildExecRequest(header, param.file, param.args, param.envs, param.cwd, param.input);
 }
 
 Err TpotPacketBuilder::buildExecResponse(util::Header const & header, int pid)
@@ -390,7 +400,7 @@ public:
     }
 
 public:
-    Err parse(char const * buffer, std::size_t size)
+    Err parse(char const * buffer, std::size_t size, void * arg)
     {
         using namespace flatbuffers;
         Verifier verifier((uint8_t const *)buffer, size);
@@ -409,22 +419,22 @@ public:
 
             // @formatter:off
             switch (type) {
-            case tpot::AnyPacket_VersionRequest:        onVersionRequest       (header, (tpot::VersionRequest        const *)packet); break;
-            case tpot::AnyPacket_VersionResponse:       onVersionResponse      (header, (tpot::VersionResponse       const *)packet); break;
-            case tpot::AnyPacket_EchoRequest:           onEchoRequest          (header, (tpot::EchoRequest           const *)packet); break;
-            case tpot::AnyPacket_EchoResponse:          onEchoResponse         (header, (tpot::EchoResponse          const *)packet); break;
-            case tpot::AnyPacket_LoginRequest:          onLoginRequest         (header, (tpot::LoginRequest          const *)packet); break;
-            case tpot::AnyPacket_LoginResponse:         onLoginResponse        (header, (tpot::LoginResponse         const *)packet); break;
-            case tpot::AnyPacket_LogoutRequest:         onLogoutRequest        (header, (tpot::LogoutRequest         const *)packet); break;
-            case tpot::AnyPacket_LogoutResponse:        onLogoutResponse       (header, (tpot::LogoutResponse        const *)packet); break;
-            case tpot::AnyPacket_ExecRequest:           onExecRequest          (header, (tpot::ExecRequest           const *)packet); break;
-            case tpot::AnyPacket_ExecResponse:          onExecResponse         (header, (tpot::ExecResponse          const *)packet); break;
-            case tpot::AnyPacket_ProcessListRequest:    onProcessListRequest   (header, (tpot::ProcessListRequest    const *)packet); break;
-            case tpot::AnyPacket_ProcessListResponse:   onProcessListResponse  (header, (tpot::ProcessListResponse   const *)packet); break;
-            case tpot::AnyPacket_ProcessKillRequest:    onProcessKillRequest   (header, (tpot::ProcessKillRequest    const *)packet); break;
-            case tpot::AnyPacket_ProcessKillResponse:   onProcessKillResponse  (header, (tpot::ProcessKillResponse   const *)packet); break;
-            case tpot::AnyPacket_ProcessRemoveRequest:  onProcessRemoveRequest (header, (tpot::ProcessRemoveRequest  const *)packet); break;
-            case tpot::AnyPacket_ProcessRemoveResponse: onProcessRemoveResponse(header, (tpot::ProcessRemoveResponse const *)packet); break;
+            case tpot::AnyPacket_VersionRequest:        onVersionRequest       (header, (tpot::VersionRequest        const *)packet, arg); break;
+            case tpot::AnyPacket_VersionResponse:       onVersionResponse      (header, (tpot::VersionResponse       const *)packet, arg); break;
+            case tpot::AnyPacket_EchoRequest:           onEchoRequest          (header, (tpot::EchoRequest           const *)packet, arg); break;
+            case tpot::AnyPacket_EchoResponse:          onEchoResponse         (header, (tpot::EchoResponse          const *)packet, arg); break;
+            case tpot::AnyPacket_LoginRequest:          onLoginRequest         (header, (tpot::LoginRequest          const *)packet, arg); break;
+            case tpot::AnyPacket_LoginResponse:         onLoginResponse        (header, (tpot::LoginResponse         const *)packet, arg); break;
+            case tpot::AnyPacket_LogoutRequest:         onLogoutRequest        (header, (tpot::LogoutRequest         const *)packet, arg); break;
+            case tpot::AnyPacket_LogoutResponse:        onLogoutResponse       (header, (tpot::LogoutResponse        const *)packet, arg); break;
+            case tpot::AnyPacket_ExecRequest:           onExecRequest          (header, (tpot::ExecRequest           const *)packet, arg); break;
+            case tpot::AnyPacket_ExecResponse:          onExecResponse         (header, (tpot::ExecResponse          const *)packet, arg); break;
+            case tpot::AnyPacket_ProcessListRequest:    onProcessListRequest   (header, (tpot::ProcessListRequest    const *)packet, arg); break;
+            case tpot::AnyPacket_ProcessListResponse:   onProcessListResponse  (header, (tpot::ProcessListResponse   const *)packet, arg); break;
+            case tpot::AnyPacket_ProcessKillRequest:    onProcessKillRequest   (header, (tpot::ProcessKillRequest    const *)packet, arg); break;
+            case tpot::AnyPacket_ProcessKillResponse:   onProcessKillResponse  (header, (tpot::ProcessKillResponse   const *)packet, arg); break;
+            case tpot::AnyPacket_ProcessRemoveRequest:  onProcessRemoveRequest (header, (tpot::ProcessRemoveRequest  const *)packet, arg); break;
+            case tpot::AnyPacket_ProcessRemoveResponse: onProcessRemoveResponse(header, (tpot::ProcessRemoveResponse const *)packet, arg); break;
             default:
                 TBAG_INACCESSIBLE_BLOCK_ASSERT();
             }
@@ -471,107 +481,108 @@ public:
     }
 
 protected:
-    void onVersionRequest(tpot::Header const * header, tpot::VersionRequest const * packet)
+    void onVersionRequest(tpot::Header const * header, tpot::VersionRequest const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onVersionRequest(createHeader(header));
+        _parent->onVersionRequest(createHeader(header), arg);
     }
 
-    void onVersionResponse(tpot::Header const * header, tpot::VersionResponse const * packet)
+    void onVersionResponse(tpot::Header const * header, tpot::VersionResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onVersionResponse(createHeader(header), packet->version()->major(), packet->version()->minor(),
-                                   createPairs(packet->features()));
+        util::Version const VERSION(packet->version()->major(), packet->version()->minor());
+        _parent->onVersionResponse(createHeader(header), VERSION, createPairs(packet->features()), arg);
     }
 
-    void onEchoRequest(tpot::Header const * header, tpot::EchoRequest const * packet)
+    void onEchoRequest(tpot::Header const * header, tpot::EchoRequest const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onEchoRequest(createHeader(header), packet->msg()->str());
+        _parent->onEchoRequest(createHeader(header), packet->msg()->str(), arg);
     }
 
-    void onEchoResponse(tpot::Header const * header, tpot::EchoResponse const * packet)
+    void onEchoResponse(tpot::Header const * header, tpot::EchoResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onEchoResponse(createHeader(header), packet->msg()->str());
+        _parent->onEchoResponse(createHeader(header), packet->msg()->str(), arg);
     }
 
-    void onLoginRequest(tpot::Header const * header, tpot::LoginRequest const * packet)
+    void onLoginRequest(tpot::Header const * header, tpot::LoginRequest const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onLoginRequest(createHeader(header), packet->id()->str(), packet->pw()->str());
+        _parent->onLoginRequest(createHeader(header), packet->id()->str(), packet->pw()->str(), arg);
     }
 
-    void onLoginResponse(tpot::Header const * header, tpot::LoginResponse const * packet)
+    void onLoginResponse(tpot::Header const * header, tpot::LoginResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onLoginResponse(createHeader(header), packet->key()->str());
+        _parent->onLoginResponse(createHeader(header), packet->key()->str(), arg);
     }
 
-    void onLogoutRequest(tpot::Header const * header, tpot::LogoutRequest const * packet)
+    void onLogoutRequest(tpot::Header const * header, tpot::LogoutRequest const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onLogoutRequest(createHeader(header));
+        _parent->onLogoutRequest(createHeader(header), arg);
     }
 
-    void onLogoutResponse(tpot::Header const * header, tpot::LogoutResponse const * packet)
+    void onLogoutResponse(tpot::Header const * header, tpot::LogoutResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onLogoutResponse(createHeader(header));
+        _parent->onLogoutResponse(createHeader(header), arg);
     }
 
-    void onExecRequest(tpot::Header const * header, tpot::ExecRequest const * packet)
+    void onExecRequest(tpot::Header const * header, tpot::ExecRequest const * packet, void * arg)
     {
         auto itr = packet->args();
         assert(_parent != nullptr);
-        _parent->onExecRequest(createHeader(header),
-                               packet->file()->str(),
-                               createStrings(packet->args()),
-                               createStrings(packet->envs()),
-                               packet->cwd()->str(),
-                               packet->input()->str());
+        util::ExecParam params;
+        params.file  = packet->file()->str();
+        params.args  = createStrings(packet->args());
+        params.envs  = createStrings(packet->envs());
+        params.cwd   = packet->cwd()->str();
+        params.input = packet->input()->str();
+        _parent->onExecRequest(createHeader(header), params, arg);
     }
 
-    void onExecResponse(tpot::Header const * header, tpot::ExecResponse const * packet)
+    void onExecResponse(tpot::Header const * header, tpot::ExecResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onExecResponse(createHeader(header), packet->pid());
+        _parent->onExecResponse(createHeader(header), packet->pid(), arg);
     }
 
-    void onProcessListRequest(tpot::Header const * header, tpot::ProcessListRequest const * packet)
+    void onProcessListRequest(tpot::Header const * header, tpot::ProcessListRequest const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onProcessListRequest(createHeader(header));
+        _parent->onProcessListRequest(createHeader(header), arg);
     }
 
-    void onProcessListResponse(tpot::Header const * header, tpot::ProcessListResponse const * packet)
+    void onProcessListResponse(tpot::Header const * header, tpot::ProcessListResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onProcessListResponse(createHeader(header), createProcessInfos(packet->procs()));
+        _parent->onProcessListResponse(createHeader(header), createProcessInfos(packet->procs()), arg);
     }
 
-    void onProcessKillRequest(tpot::Header const * header, tpot::ProcessKillRequest const * packet)
+    void onProcessKillRequest(tpot::Header const * header, tpot::ProcessKillRequest const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onProcessKillRequest(createHeader(header), packet->pid(), packet->signum());
+        _parent->onProcessKillRequest(createHeader(header), packet->pid(), packet->signum(), arg);
     }
 
-    void onProcessKillResponse(tpot::Header const * header, tpot::ProcessKillResponse const * packet)
+    void onProcessKillResponse(tpot::Header const * header, tpot::ProcessKillResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onProcessKillResponse(createHeader(header));
+        _parent->onProcessKillResponse(createHeader(header), arg);
     }
 
-    void onProcessRemoveRequest(tpot::Header const * header, tpot::ProcessRemoveRequest const * packet)
+    void onProcessRemoveRequest(tpot::Header const * header, tpot::ProcessRemoveRequest const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onProcessRemoveRequest(createHeader(header), packet->pid());
+        _parent->onProcessRemoveRequest(createHeader(header), packet->pid(), arg);
     }
 
-    void onProcessRemoveResponse(tpot::Header const * header, tpot::ProcessRemoveResponse const * packet)
+    void onProcessRemoveResponse(tpot::Header const * header, tpot::ProcessRemoveResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        _parent->onProcessRemoveResponse(createHeader(header));
+        _parent->onProcessRemoveResponse(createHeader(header), arg);
     }
 };
 
@@ -589,10 +600,10 @@ TpotPacketParser::~TpotPacketParser()
     // EMPTY.
 }
 
-Err TpotPacketParser::parse(char const * buffer, std::size_t size)
+Err TpotPacketParser::parse(char const * buffer, std::size_t size, void * arg)
 {
     assert(static_cast<bool>(_internal));
-    return _internal->parse(buffer, size);
+    return _internal->parse(buffer, size, arg);
 }
 
 // --------------------------

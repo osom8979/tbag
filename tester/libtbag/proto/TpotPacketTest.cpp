@@ -42,19 +42,14 @@ TEST(TpotPacketTest, Default)
     std::string cwd;
     std::string input;
 
-    packet.set_onExecRequest([&](util::Header const & header,
-                                 std::string const & result_file,
-                                 std::vector<std::string> const & result_args,
-                                 std::vector<std::string> const & result_envs,
-                                 std::string const & result_cwd,
-                                 std::string const & result_input){
+    packet.set_onExecRequest([&](util::Header const & header, util::ExecParam const & param, void * arg){
         header_id   = header.id;
         header_code = static_cast<int>(header.code);
-        file  = result_file;
-        cwd   = result_cwd;
-        input = result_input;
-        args  = result_args;
-        envs  = result_envs;
+        file  = param.file;
+        cwd   = param.cwd;
+        input = param.input;
+        args  = param.args;
+        envs  = param.envs;
     });
     ASSERT_EQ(Err::E_SUCCESS, packet.parse(buffer.data(), buffer.size()));
 

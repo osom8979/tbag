@@ -30,10 +30,11 @@ TBAG_CONSTEXPR static char const * const TPOT_COMMAND_SERVER  = "server";
 TBAG_CONSTEXPR static char const * const TPOT_COMMAND_REQUEST = "request";
 
 TBAG_CONSTEXPR static char const * const TPOT_NAME = "tpot";
+TBAG_CONSTEXPR static int const DEFAULT_TIMEOUT_MILLISEC = 10 * 1000;
 
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::ex::ServiceApp(TPOT_NAME, argc, argv, envs),
-          _commands(), _ip(), _port(0)
+          _commands(), _ip(), _port(0), _timeout(0)
 {
     _commands.insert(HelpPair(TPOT_COMMAND_SERVER , "TpoT server mode."));
     _commands.insert(HelpPair(TPOT_COMMAND_REQUEST, "TpoT request mode."));
@@ -74,6 +75,11 @@ bool TpotMain::onCreate()
             _port = 0;
         }
     }, "Assign port number directly. (If not, refer to the config file)");
+    atOptions().insert("timeout", [&](Arguments const & args){
+        if (args.optInteger(0, &_timeout) == false) {
+            _timeout = DEFAULT_TIMEOUT_MILLISEC;
+        }
+    }, "Write(request/response) packet timeout.");
 
     auto config = getConfig().lock();
     assert(static_cast<bool>(config));
@@ -145,6 +151,8 @@ int TpotMain::onDefaultCommand(StringVector const & args)
         param.verbose = isEnableVerbose();
         param.bind = ip;
         param.port = port;
+        param.timeout = static_cast<uint64_t>(_timeout);
+        param.type = TpotServer::StreamType::TCP;
         exit_code = TpotServer(param).run();
 
     } else if (args[0] == TPOT_COMMAND_REQUEST) {
@@ -152,6 +160,8 @@ int TpotMain::onDefaultCommand(StringVector const & args)
         param.verbose = isEnableVerbose();
         param.ip = ip;
         param.port = port;
+        param.timeout = static_cast<uint64_t>(_timeout);
+        param.type = TpotServer::StreamType::TCP;
         exit_code = requestTpotClient(param, std::vector<std::string>(args.begin() + 1, args.end()));
 
     } else {

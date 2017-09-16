@@ -9,6 +9,7 @@ enum ResultCode : int
     EXECUTE_ERROR,
     NOT_EXISTS,
     KILL_ERROR,
+    RC_REMOVE_ERROR,
 }
 
 /// Tpot(libtbag) protocol version.

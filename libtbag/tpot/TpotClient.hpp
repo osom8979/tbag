@@ -19,9 +19,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/http/HttpClient.hpp>
-#include <libtbag/util/Version.hpp>
-#include <libtbag/util/Structures.hpp>
-#include <libtbag/proto/FunctionalTpotPacket.hpp>
+#include <libtbag/proto/TpotPacket.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -40,7 +38,7 @@ namespace tpot {
  * @author zer0
  * @date   2017-09-07
  */
-class TBAG_API TpotClient : private proto::TpotPacket
+class TBAG_API TpotClient : protected proto::TpotPacket
 {
 public:
     using Parent = proto::TpotPacket;
@@ -89,19 +87,24 @@ private:
 public:
     Err requestVersion();
     Err requestEcho(std::string const & message);
-
     Err requestLogin(std::string const & id, std::string const & pw);
     Err requestLogout();
-
-    Err requestExec(std::string const & file,
-                    std::vector<std::string> const & args,
-                    std::vector<std::string> const & envs,
-                    std::string const & cwd,
-                    std::string const & input);
-
+    Err requestExec(util::ExecParam const & param);
     Err requestProcessList();
     Err requestProcessKill(int pid, int signum);
     Err requestProcessRemove(int pid);
+
+private:
+    // @formatter:off
+    virtual void onVersionRequest      (util::Header const & header, void * arg) override { /* EMPTY. */ }
+    virtual void onEchoRequest         (util::Header const & header, std::string const & message, void * arg) override { /* EMPTY. */ }
+    virtual void onLoginRequest        (util::Header const & header, std::string const & id, std::string const & pw, void * arg) override { /* EMPTY. */ }
+    virtual void onLogoutRequest       (util::Header const & header, void * arg) override { /* EMPTY. */ }
+    virtual void onExecRequest         (util::Header const & header, util::ExecParam const & exec, void * arg) override { /* EMPTY. */ }
+    virtual void onProcessListRequest  (util::Header const & header, void * arg) override { /* EMPTY. */ }
+    virtual void onProcessKillRequest  (util::Header const & header, int pid, int signum, void * arg) override { /* EMPTY. */ }
+    virtual void onProcessRemoveRequest(util::Header const & header, int pid, void * arg) override { /* EMPTY. */ }
+    // @formatter:on
 };
 
 // ------------

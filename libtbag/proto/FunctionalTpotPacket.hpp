@@ -50,22 +50,22 @@ public:
 
 public:
     // @formatter:off
-    TBAG_VOID_CALLBACK_HELPER(onVersionRequest       , util::Header const &)
-    TBAG_VOID_CALLBACK_HELPER(onVersionResponse      , util::Header const &, unsigned, unsigned, util::Pairs const &);
-    TBAG_VOID_CALLBACK_HELPER(onEchoRequest          , util::Header const &, std::string const &);
-    TBAG_VOID_CALLBACK_HELPER(onEchoResponse         , util::Header const &, std::string const &);
-    TBAG_VOID_CALLBACK_HELPER(onLoginRequest         , util::Header const &, std::string const &, std::string const &);
-    TBAG_VOID_CALLBACK_HELPER(onLoginResponse        , util::Header const &, std::string const &);
-    TBAG_VOID_CALLBACK_HELPER(onLogoutRequest        , util::Header const &);
-    TBAG_VOID_CALLBACK_HELPER(onLogoutResponse       , util::Header const &);
-    TBAG_VOID_CALLBACK_HELPER(onExecRequest          , util::Header const &, std::string const &, std::vector<std::string> const &, std::vector<std::string> const &, std::string const &, std::string const &);
-    TBAG_VOID_CALLBACK_HELPER(onExecResponse         , util::Header const &, int);
-    TBAG_VOID_CALLBACK_HELPER(onProcessListRequest   , util::Header const &);
-    TBAG_VOID_CALLBACK_HELPER(onProcessListResponse  , util::Header const &, std::vector<util::ProcessInfo> const &);
-    TBAG_VOID_CALLBACK_HELPER(onProcessKillRequest   , util::Header const &, int, int);
-    TBAG_VOID_CALLBACK_HELPER(onProcessKillResponse  , util::Header const &);
-    TBAG_VOID_CALLBACK_HELPER(onProcessRemoveRequest , util::Header const &, int);
-    TBAG_VOID_CALLBACK_HELPER(onProcessRemoveResponse, util::Header const &);
+    TBAG_VOID_CALLBACK_HELPER(onVersionRequest       , util::Header const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onVersionResponse      , util::Header const &, util::Version const &, util::Pairs const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onEchoRequest          , util::Header const &, std::string const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onEchoResponse         , util::Header const &, std::string const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onLoginRequest         , util::Header const &, std::string const &, std::string const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onLoginResponse        , util::Header const &, std::string const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onLogoutRequest        , util::Header const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onLogoutResponse       , util::Header const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onExecRequest          , util::Header const &, util::ExecParam const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onExecResponse         , util::Header const &, int, void*);
+    TBAG_VOID_CALLBACK_HELPER(onProcessListRequest   , util::Header const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onProcessListResponse  , util::Header const &, std::vector<util::ProcessInfo> const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onProcessKillRequest   , util::Header const &, int, int, void*);
+    TBAG_VOID_CALLBACK_HELPER(onProcessKillResponse  , util::Header const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onProcessRemoveRequest , util::Header const &, int, void*);
+    TBAG_VOID_CALLBACK_HELPER(onProcessRemoveResponse, util::Header const &, void*);
     // @formatter:on
 };
 

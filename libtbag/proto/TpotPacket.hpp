@@ -21,6 +21,7 @@
 
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/util/Structures.hpp>
+#include <libtbag/util/Version.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -42,6 +43,7 @@ struct TpotPacketTypes : private Noncopyable
         RC_EXECUTE_ERROR,
         RC_NOT_EXISTS,
         RC_KILL_ERROR,
+        RC_REMOVE_ERROR,
     };
 
     TBAG_CONSTEXPR static ResultCode const SUCCESS_CODE = ResultCode::RC_SUCCESS;
@@ -64,6 +66,9 @@ public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_BUILDER_CAPACITY = 1 * MEGA_BYTE_TO_BYTE;
     TBAG_CONSTEXPR static char const * const DEFAULT_ECHO_MESSAGE = "TPOT";
 
+    TBAG_CONSTEXPR static unsigned int const TPOT_VER_MAJOR = LIBTBAG_VERSION_PACKET_MAJOR;
+    TBAG_CONSTEXPR static unsigned int const TPOT_VER_MINOR = LIBTBAG_VERSION_PACKET_MINOR;
+
 private:
     UniqueInternal _internal;
 
@@ -78,8 +83,11 @@ public:
 public:
     Err buildVersionRequest(util::Header const & header);
     Err buildVersionResponse(util::Header const & header,
-                             unsigned major = LIBTBAG_VERSION_PACKET_MAJOR,
-                             unsigned minor = LIBTBAG_VERSION_PACKET_MINOR,
+                             unsigned major = TPOT_VER_MAJOR,
+                             unsigned minor = TPOT_VER_MINOR,
+                             util::Pairs const & features = util::Pairs());
+    Err buildVersionResponse(util::Header const & header,
+                             util::Version const & version = util::Version(TPOT_VER_MAJOR, TPOT_VER_MINOR),
                              util::Pairs const & features = util::Pairs());
 
     Err buildEchoRequest(util::Header const & header, std::string const & message = DEFAULT_ECHO_MESSAGE);
@@ -97,6 +105,7 @@ public:
                          std::vector<std::string> const & envs = std::vector<std::string>(),
                          std::string const & cwd = std::string(),
                          std::string const & input = std::string());
+    Err buildExecRequest(util::Header const & header, util::ExecParam const & param);
     Err buildExecResponse(util::Header const & header, int pid);
 
     Err buildProcessListRequest(util::Header const & header);
@@ -130,30 +139,27 @@ public:
     virtual ~TpotPacketParser();
 
 public:
-    Err parse(char const * buffer, std::size_t size);
+    Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
 
 protected:
-    virtual void onVersionRequest       (util::Header const & header) { /* EMPTY. */ }
-    virtual void onVersionResponse      (util::Header const & header, unsigned major, unsigned minor, util::Pairs const & features) { /* EMPTY. */ }
-    virtual void onEchoRequest          (util::Header const & header, std::string const & message) { /* EMPTY. */ }
-    virtual void onEchoResponse         (util::Header const & header, std::string const & message) { /* EMPTY. */ }
-    virtual void onLoginRequest         (util::Header const & header, std::string const & id, std::string const & pw) { /* EMPTY. */ }
-    virtual void onLoginResponse        (util::Header const & header, std::string const & key) { /* EMPTY. */ }
-    virtual void onLogoutRequest        (util::Header const & header) { /* EMPTY. */ }
-    virtual void onLogoutResponse       (util::Header const & header) { /* EMPTY. */ }
-    virtual void onExecRequest          (util::Header const & header,
-                                         std::string const & file,
-                                         std::vector<std::string> const & args,
-                                         std::vector<std::string> const & envs,
-                                         std::string const & cwd,
-                                         std::string const & input) { /* EMPTY. */ }
-    virtual void onExecResponse         (util::Header const & header, int pid) { /* EMPTY. */ }
-    virtual void onProcessListRequest   (util::Header const & header) { /* EMPTY. */ }
-    virtual void onProcessListResponse  (util::Header const & header, std::vector<util::ProcessInfo> const & procs) { /* EMPTY. */ }
-    virtual void onProcessKillRequest   (util::Header const & header, int pid, int signum) { /* EMPTY. */ }
-    virtual void onProcessKillResponse  (util::Header const & header) { /* EMPTY. */ }
-    virtual void onProcessRemoveRequest (util::Header const & header, int pid) { /* EMPTY. */ }
-    virtual void onProcessRemoveResponse(util::Header const & header) { /* EMPTY. */ }
+    // @formatter:off
+    virtual void onVersionRequest       (util::Header const & header, void * arg) { /* EMPTY. */ }
+    virtual void onVersionResponse      (util::Header const & header, util::Version const & version, util::Pairs const & features, void * arg) { /* EMPTY. */ }
+    virtual void onEchoRequest          (util::Header const & header, std::string const & message, void * arg) { /* EMPTY. */ }
+    virtual void onEchoResponse         (util::Header const & header, std::string const & message, void * arg) { /* EMPTY. */ }
+    virtual void onLoginRequest         (util::Header const & header, std::string const & id, std::string const & pw, void * arg) { /* EMPTY. */ }
+    virtual void onLoginResponse        (util::Header const & header, std::string const & key, void * arg) { /* EMPTY. */ }
+    virtual void onLogoutRequest        (util::Header const & header, void * arg) { /* EMPTY. */ }
+    virtual void onLogoutResponse       (util::Header const & header, void * arg) { /* EMPTY. */ }
+    virtual void onExecRequest          (util::Header const & header, util::ExecParam const & exec, void * arg) { /* EMPTY. */ }
+    virtual void onExecResponse         (util::Header const & header, int pid, void * arg) { /* EMPTY. */ }
+    virtual void onProcessListRequest   (util::Header const & header, void * arg) { /* EMPTY. */ }
+    virtual void onProcessListResponse  (util::Header const & header, std::vector<util::ProcessInfo> const & procs, void * arg) { /* EMPTY. */ }
+    virtual void onProcessKillRequest   (util::Header const & header, int pid, int signum, void * arg) { /* EMPTY. */ }
+    virtual void onProcessKillResponse  (util::Header const & header, void * arg) { /* EMPTY. */ }
+    virtual void onProcessRemoveRequest (util::Header const & header, int pid, void * arg) { /* EMPTY. */ }
+    virtual void onProcessRemoveResponse(util::Header const & header, void * arg) { /* EMPTY. */ }
+    // @formatter:on
 };
 
 /**
