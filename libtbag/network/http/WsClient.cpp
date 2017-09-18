@@ -9,12 +9,38 @@
 #include <libtbag/network/http/WsClient.hpp>
 #include <libtbag/log/Log.hpp>
 
+//#define TBAG_WS_CLIENT_CHECK_BUFFER
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
 namespace http    {
+
+static void checkWsBuffer(std::string const & prefix, uint8_t const * buffer, std::size_t size)
+{
+    tDLogD("checkWsBuffer({}) [CHECK] BUFFER SIZE:{})!", prefix, size);
+
+    using namespace libtbag::network::http;
+    WsFrame frame;
+    Err const EXECUTE_CODE = frame.execute(buffer, size);
+    if (TBAG_ERR_FAILURE(EXECUTE_CODE)) {
+        tDLogW("checkWsBuffer({}) [CHECK] PARSING {} ERROR!", prefix, getErrName(EXECUTE_CODE));
+        return;
+    }
+
+    if (isControlFrame(frame.opcode)) {
+        tDLogW("checkWsBuffer({}) [CHECK] CONTROL FRAME!", prefix);
+    }
+}
+
+#if defined(TBAG_WS_CLIENT_CHECK_BUFFER)
+#define TBAG_WS_CLIENT_CHECK_BUFFER_IMPL(prefix, buffer, size) \
+    ::libtbag::network::http::checkWsBuffer(prefix, (uint8_t const *)buffer, (std::size_t)size)
+#else
+#define TBAG_WS_CLIENT_CHECK_BUFFER_IMPL(prefix, buffer, size)
+#endif
 
 WsClient::WsClient(Loop & loop, StreamType type)
         : Parent(loop, type), KEY(generateRandomWebSocketKey()),
@@ -44,6 +70,7 @@ Err WsClient::writeOrEnqueue(char const * buffer, std::size_t size)
 {
     Guard const LOCK_GUARD(_queue_mutex);
     if (_queue.empty() && getWriteState() == WriteState::WS_READY) {
+        TBAG_WS_CLIENT_CHECK_BUFFER_IMPL("WsClient::writeOrEnqueue", buffer, size);
         return write(buffer, size);
     }
     _queue.push().assign(buffer, buffer + size);
@@ -69,6 +96,7 @@ Err WsClient::writeFromQueue()
     }
 
     auto & buffer = _queue.frontRef();
+    TBAG_WS_CLIENT_CHECK_BUFFER_IMPL("WsClient::writeFromQueue", buffer.data(), buffer.size());
     Err const WRITE_CODE = write((char const *)buffer.data(), buffer.size());
     _queue.pop();
 

@@ -368,6 +368,7 @@ public:
 // ------------------------
 
 TBAG_API char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT;
+TBAG_API bool isControlFrame(OpCode code) TBAG_NOEXCEPT;
 
 TBAG_API bool existsWebSocketVersion13(std::string const & versions);
 

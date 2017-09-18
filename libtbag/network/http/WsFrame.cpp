@@ -590,6 +590,7 @@ TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF5      = "CF5";
 
 char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT
 {
+    // @formatter:off
     switch (code) {
     case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
     case OpCode::OC_TEXT_FRAME                  : return OP_CODE_NAME_TEXT;
@@ -609,6 +610,15 @@ char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT
     case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return OP_CODE_NAME_CF5;
     default: return "UNKNOWN";
     }
+    // @formatter:on
+}
+
+bool isControlFrame(OpCode code) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    return (OpCode::OC_RESERVED_NON_CONTROL_FRAME_1 <= COMPARE_AND(code) <= OpCode::OC_RESERVED_NON_CONTROL_FRAME_5) ||
+           (OpCode::OC_RESERVED_CONTROL_FRAME_1     <= COMPARE_AND(code) <= OpCode::OC_RESERVED_CONTROL_FRAME_5);
+    // @formatter:on
 }
 
 bool existsWebSocketVersion13(std::string const & versions)
