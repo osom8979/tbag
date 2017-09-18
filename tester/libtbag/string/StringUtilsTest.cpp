@@ -230,3 +230,23 @@ TEST(StringUtilsTest, ConvertAddressToHexString)
     ASSERT_TRUE(isMatch(str2, REGEX));
 }
 
+TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
+{
+    int const WIDTH = 16;
+    int const HEIGHT = 5;
+    int const SIZE = WIDTH * HEIGHT;
+
+    int i = 0;
+    std::vector<uint8_t> buffer;
+    for (i = 0; i < SIZE - 1; ++i) {
+        buffer.push_back(i);
+    }
+    std::cout << convertByteArrayToHexStringBox(buffer, WIDTH) << std::endl;
+
+    buffer.push_back(i++);
+    std::cout << convertByteArrayToHexStringBox(buffer, WIDTH) << std::endl;
+
+    buffer.push_back(i++);
+    std::cout << convertByteArrayToHexStringBox(buffer, WIDTH) << std::endl;
+}
+

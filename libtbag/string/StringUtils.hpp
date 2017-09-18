@@ -123,7 +123,13 @@ TBAG_API std::string convertStringWithThreadId(std::thread::id const & id);
  */
 TBAG_API char convertHalfByteToHexChar(uint8_t half_byte);
 TBAG_API std::string convertByteToHexString(uint8_t hex);
-TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix = "0x", std::string const & separator = "");
+TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes,
+                                                 std::string const & prefix = "0x",
+                                                 std::string const & separator = "");
+TBAG_API std::string convertByteArrayToHexStringBox(std::vector<uint8_t> const & bytes,
+                                                    int line_width = (2 * 8),
+                                                    std::string const & prefix = "0x",
+                                                    std::string const & separator = " ");
 
 TBAG_CONSTEXPR std::size_t const HEX_STRING_ADDRESS_BYTE_SIZE =
         (/*PREFIX(0x)*/2) + (sizeof(void*) * 2/*HEX STRING ADDRESS*/) + (1/*NULL*/);

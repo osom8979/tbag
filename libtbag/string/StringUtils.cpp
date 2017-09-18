@@ -194,6 +194,38 @@ std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std:
     return result;
 }
 
+std::string convertByteArrayToHexStringBox(std::vector<uint8_t> const & bytes,
+                                           int line_width,
+                                           std::string const & prefix,
+                                           std::string const & separator)
+{
+    if (line_width < 1) {
+        return convertByteArrayToHexString(bytes, prefix, separator);
+    }
+
+    std::vector<uint8_t> line_buffer;
+    std::size_t const ROW = bytes.size() / line_width;
+    uint8_t const * DATA = bytes.data();
+
+    std::size_t i = 0;
+    std::stringstream ss;
+    for (i = 0; i < ROW; ++i) {
+        line_buffer.assign(bytes.begin() + (i * line_width), bytes.begin() + ((i + 1) * line_width));
+        if (i != 0) {
+            ss << std::endl;
+        }
+        ss << convertByteArrayToHexString(line_buffer, prefix, separator);
+    }
+
+    // Last line.
+    if ((ROW * line_width) < bytes.size()) {
+        line_buffer.assign(bytes.begin() + (ROW * line_width), bytes.end());
+        ss << std::endl << convertByteArrayToHexString(line_buffer, prefix, separator);
+    }
+
+    return ss.str();
+}
+
 Err convertHexCharToHalfByte(char hex_char, uint8_t & result)
 {
     switch (hex_char) {
