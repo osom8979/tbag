@@ -124,6 +124,7 @@ struct StreamClient::Internal : private Noncopyable
         WriteRequest     write_req;
         ShutdownRequest  shutdown_req;
         Buffer           buffer;
+        std::size_t      buffer_size;
     } writer;
 
     Internal(StreamClient * parent) : parent(parent), owner_async(false), write_timeout(0)
@@ -294,6 +295,7 @@ struct StreamClient::Internal : private Noncopyable
             writer.buffer.resize(size);
         }
         ::memcpy(writer.buffer.data(), buffer, size);
+        writer.buffer_size = size;
     }
 
     Err autoWrite(char const * buffer, std::size_t size)
@@ -471,13 +473,13 @@ void StreamClient::onAsyncWrite()
 
     assert(_internal->writer.state == WriteState::WS_ASYNC);
 
-    if (_internal->writer.buffer.empty()) {
+    if (_internal->writer.buffer.empty() || _internal->writer.buffer_size == 0) {
         tDLogD("StreamClient::onAsyncWrite() Empty writer buffer.");
         _internal->writer.state = WriteState::WS_READY;
         return;
     }
 
-    Err const CODE = _internal->writeReal(_internal->writer.buffer.data(), _internal->writer.buffer.size());
+    Err const CODE = _internal->writeReal(_internal->writer.buffer.data(), _internal->writer.buffer_size);
     if (CODE == Err::E_SUCCESS) {
         _internal->writer.state = WriteState::WS_WRITE;
     } else {
