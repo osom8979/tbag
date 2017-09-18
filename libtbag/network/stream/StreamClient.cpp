@@ -12,9 +12,12 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Type.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <cstring>
+
+//#define TBAG_STREAM_CLIENT_PRINT_BUFFER
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -22,6 +25,19 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace stream  {
+
+static void printBufferOfStreamBuffer(std::string const & prefix, uint8_t const * buffer, std::size_t size)
+{
+    tDLogD("printBufferOfStreamBuffer({}) SIZE:{}\n{}",
+           prefix, size, string::convertByteArrayToHexStringBox(std::vector<std::uint8_t>(buffer, buffer + size)));
+}
+
+#if defined(TBAG_STREAM_CLIENT_PRINT_BUFFER)
+#define TBAG_STREAM_CLIENT_PRINT_BUFFER_IMPL(prefix, buffer, size) \
+    ::libtbag::network::stream::printBufferOfStreamBuffer(prefix, (uint8_t const *)buffer, size)
+#else
+#define TBAG_STREAM_CLIENT_PRINT_BUFFER_IMPL(prefix, buffer, size)
+#endif
 
 /**
  * Stream internal helper class.
@@ -266,6 +282,7 @@ struct StreamClient::Internal : private Noncopyable
     Err writeReal(char const * buffer, std::size_t size)
     {
         assert(static_cast<bool>(client));
+        TBAG_STREAM_CLIENT_PRINT_BUFFER_IMPL("StreamClient::Internal::writeReal", buffer, size);
         return client->write(writer.write_req, buffer, size);
     }
 

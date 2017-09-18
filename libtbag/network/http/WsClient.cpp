@@ -20,18 +20,18 @@ namespace http    {
 
 static void checkWsBuffer(std::string const & prefix, uint8_t const * buffer, std::size_t size)
 {
-    tDLogD("checkWsBuffer({}) [CHECK] BUFFER SIZE:{})!", prefix, size);
+    tDLogD("checkWsBuffer({}) [CHECK] BUFFER SIZE: {}", prefix, size);
 
     using namespace libtbag::network::http;
     WsFrame frame;
     Err const EXECUTE_CODE = frame.execute(buffer, size);
     if (TBAG_ERR_FAILURE(EXECUTE_CODE)) {
-        tDLogW("checkWsBuffer({}) [CHECK] PARSING {} ERROR!", prefix, getErrName(EXECUTE_CODE));
+        tDLogW("checkWsBuffer({}) [CHECK] PARSING {} ERROR", prefix, getErrName(EXECUTE_CODE));
         return;
     }
 
     if (isControlFrame(frame.opcode)) {
-        tDLogW("checkWsBuffer({}) [CHECK] CONTROL FRAME!", prefix);
+        tDLogW("checkWsBuffer({}) [CHECK] CONTROL FRAME", prefix);
     }
 }
 
