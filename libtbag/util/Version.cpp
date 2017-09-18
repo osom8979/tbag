@@ -30,6 +30,11 @@ Version::Version(uint32_t major, uint32_t minor, uint32_t patch) TBAG_NOEXCEPT
     // EMPTY.
 }
 
+Version::Version(std::string const & ver) : _major(0), _minor(0), _patch(0)
+{
+    fromString(ver, *this);
+}
+
 Version::Version(Version const & obj) TBAG_NOEXCEPT
 {
     (*this) = obj;

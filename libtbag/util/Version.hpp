@@ -45,6 +45,7 @@ private:
 public:
     Version() TBAG_NOEXCEPT;
     Version(uint32_t major, uint32_t minor = 0, uint32_t patch = 0) TBAG_NOEXCEPT;
+    Version(std::string const & ver);
     Version(Version const & obj) TBAG_NOEXCEPT;
     Version(Version && obj) TBAG_NOEXCEPT;
     ~Version();

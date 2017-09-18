@@ -62,6 +62,14 @@ TEST(VersionTest, String)
     ASSERT_STREQ("1.2.3", ver.toString().c_str());
 }
 
+TEST(VersionTest, StringConstructor)
+{
+    Version ver("100.2.50");
+    ASSERT_EQ(100, ver.getMajor());
+    ASSERT_EQ(  2, ver.getMinor());
+    ASSERT_EQ( 50, ver.getPatch());
+}
+
 TEST(VersionTest, TbagVersion)
 {
     auto ver = getTbagVersion();
