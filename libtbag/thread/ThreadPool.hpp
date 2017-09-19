@@ -53,7 +53,7 @@ public:
     using Mutex  = libtbag::lock::UvLock;
     using Signal = libtbag::lock::UvCondition;
 
-public:
+private:
     mutable Mutex _mutex;
 
     bool   _exit;

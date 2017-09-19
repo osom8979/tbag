@@ -194,9 +194,9 @@ TEST(TripleIoIndexTest, BenchmarkOfMutex)
     runBenchmark(index);
 }
 
-TEST(TripleIoIndexTest, BenchmarkOfTripleIoBuffer)
+TEST(TripleIoIndexTest, BenchmarkOfTripleIoArray)
 {
-    TripleIoBuffer<Buffer> buffers;
+    TripleIoArray<Buffer> buffers;
     ASSERT_EQ(3, buffers.size());
     for (auto itr = buffers.begin(); itr != buffers.end(); ++itr) {
         itr->assign(BUFFER_SIZE, 0x00);

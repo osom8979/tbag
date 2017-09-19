@@ -155,35 +155,36 @@ public:
  *
  * @author zer0
  * @date   2017-07-17
+ * @date   2017-09-19 (Rename: TripleIoBuffer -> TripleIoArray)
  */
-template <typename BufferType>
-class TripleIoBuffer : private Noncopyable
+template <typename T>
+class TripleIoArray : private Noncopyable
 {
 public:
-    using Buffer = BufferType;
-    using BufferArray = std::array<Buffer, TripleIoIndex::SIZE>;
+    using Type = T;
+    using Array = std::array<Type, TripleIoIndex::SIZE>;
 
 public:
-    using value_type             = typename BufferArray::value_type;
-    using reference              = typename BufferArray::reference;
-    using const_reference        = typename BufferArray::const_reference;
-    using iterator               = typename BufferArray::iterator;
-    using const_iterator         = typename BufferArray::const_iterator;
-    using pointer                = typename BufferArray::pointer;
-    using const_pointer          = typename BufferArray::const_pointer;
-    using size_type              = typename BufferArray::size_type;
-    using difference_type        = typename BufferArray::difference_type;
-    using reverse_iterator       = typename BufferArray::reverse_iterator;
-    using const_reverse_iterator = typename BufferArray::const_reverse_iterator;
+    using value_type             = typename Array::value_type;
+    using reference              = typename Array::reference;
+    using const_reference        = typename Array::const_reference;
+    using iterator               = typename Array::iterator;
+    using const_iterator         = typename Array::const_iterator;
+    using pointer                = typename Array::pointer;
+    using const_pointer          = typename Array::const_pointer;
+    using size_type              = typename Array::size_type;
+    using difference_type        = typename Array::difference_type;
+    using reverse_iterator       = typename Array::reverse_iterator;
+    using const_reverse_iterator = typename Array::const_reverse_iterator;
 
 private:
     TripleIoIndex _index;
-    BufferArray _buffers;
+    Array _array;
 
 public:
-    TripleIoBuffer(bool cas_loop = true) : _index(0, 1, 2, cas_loop), _buffers()
+    TripleIoArray(bool cas_loop = true) : _index(0, 1, 2, cas_loop), _array()
     { /* EMPTY. */ }
-    ~TripleIoBuffer()
+    ~TripleIoArray()
     { /* EMPTY. */ }
 
 // Capacity methods.
@@ -193,25 +194,25 @@ public:
 
 // Iterators methods.
 public:
-    inline       iterator begin()       TBAG_NOEXCEPT { return _buffers.begin(); }
-    inline const_iterator begin() const TBAG_NOEXCEPT { return _buffers.begin(); }
-    inline       iterator   end()       TBAG_NOEXCEPT { return _buffers.end(); }
-    inline const_iterator   end() const TBAG_NOEXCEPT { return _buffers.end(); }
+    inline       iterator begin()       TBAG_NOEXCEPT { return _array.begin(); }
+    inline const_iterator begin() const TBAG_NOEXCEPT { return _array.begin(); }
+    inline       iterator   end()       TBAG_NOEXCEPT { return _array.end(); }
+    inline const_iterator   end() const TBAG_NOEXCEPT { return _array.end(); }
 
-    inline       reverse_iterator rbegin()       TBAG_NOEXCEPT { return _buffers.rbegin(); }
-    inline const_reverse_iterator rbegin() const TBAG_NOEXCEPT { return _buffers.rbegin(); }
-    inline       reverse_iterator   rend()       TBAG_NOEXCEPT { return _buffers.rend(); }
-    inline const_reverse_iterator   rend() const TBAG_NOEXCEPT { return _buffers.rend(); }
+    inline       reverse_iterator rbegin()       TBAG_NOEXCEPT { return _array.rbegin(); }
+    inline const_reverse_iterator rbegin() const TBAG_NOEXCEPT { return _array.rbegin(); }
+    inline       reverse_iterator   rend()       TBAG_NOEXCEPT { return _array.rend(); }
+    inline const_reverse_iterator   rend() const TBAG_NOEXCEPT { return _array.rend(); }
 
-    inline         const_iterator  cbegin() const TBAG_NOEXCEPT { return _buffers.cbegin (); }
-    inline         const_iterator    cend() const TBAG_NOEXCEPT { return _buffers.cend   (); }
-    inline const_reverse_iterator crbegin() const TBAG_NOEXCEPT { return _buffers.crbegin(); }
-    inline const_reverse_iterator   crend() const TBAG_NOEXCEPT { return _buffers.crend  (); }
+    inline         const_iterator  cbegin() const TBAG_NOEXCEPT { return _array.cbegin (); }
+    inline         const_iterator    cend() const TBAG_NOEXCEPT { return _array.cend   (); }
+    inline const_reverse_iterator crbegin() const TBAG_NOEXCEPT { return _array.crbegin(); }
+    inline const_reverse_iterator   crend() const TBAG_NOEXCEPT { return _array.crend  (); }
 
 // I/O Methods.
 public:
-    reference atNextInput () TBAG_NOEXCEPT { return _buffers[_index.nextInputValue ()]; }
-    reference atNextOutput() TBAG_NOEXCEPT { return _buffers[_index.nextOutputValue()]; }
+    reference atNextInput () TBAG_NOEXCEPT { return _array[_index.nextInputValue ()]; }
+    reference atNextOutput() TBAG_NOEXCEPT { return _array[_index.nextOutputValue()]; }
 };
 
 } // namespace lockfree
