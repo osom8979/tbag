@@ -90,6 +90,12 @@ public:
               std::string const & input = std::string());
 
 public:
+    std::string              getFile() const { return _process->atOptions().file; }
+    std::vector<std::string> getArgs() const { return _process->atOptions().args; }
+    std::vector<std::string> getEnvs() const { return _process->atOptions().envs; }
+    std::string              getCwd () const { return _process->atOptions().cwd;  }
+
+public:
     Err kill(int signum);
 
 public:

@@ -8,6 +8,7 @@
 #include <libtbag/process/ProcessManager.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <cassert>
 
 // -------------------
@@ -143,7 +144,14 @@ std::vector<ProcessManager::ProcessInfo> ProcessManager::list() const
     Guard g(_mutex);
     for (auto & proc : _procs) {
         if (static_cast<bool>(proc.second)) {
-            result.emplace_back(proc.second->getPid(), proc.second->isRunning());
+            ProcessInfo info;
+            info.pid = proc.second->getPid();
+            info.active = proc.second->isRunning();
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_FILE, proc.second->getFile());
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_ARGS, string::mergeTokens(proc.second->getArgs(), util::PROCESS_INFO_VAL_DELIMITER));
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_ENVS, string::mergeTokens(proc.second->getEnvs(), util::PROCESS_INFO_VAL_DELIMITER));
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_CWD, proc.second->getCwd());
+            result.push_back(std::move(info));
         }
     }
     return result;

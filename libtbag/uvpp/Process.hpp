@@ -168,6 +168,10 @@ public:
     virtual ~Process();
 
 public:
+    inline Options       & atOptions()       TBAG_NOEXCEPT { return _options; }
+    inline Options const & atOptions() const TBAG_NOEXCEPT { return _options; }
+
+public:
     /** The PID of the spawned process. It’s set after calling uv_spawn(). */
     int getPid() const;
 
