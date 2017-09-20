@@ -99,7 +99,12 @@ public:
     int run(Loop & loop);
     int run();
 
-public:
+protected:
+    virtual void onOutRead(int pid, char const * buffer, std::size_t size) override;
+    virtual void onErrRead(int pid, char const * buffer, std::size_t size) override;
+    virtual void onExit(int pid, int64_t exit_status, int term_signal) override;
+
+protected:
     virtual void onVersionRequest      (util::Header const & header, void * arg) override;
     virtual void onEchoRequest         (util::Header const & header, std::string const & message, void * arg) override;
     virtual void onLoginRequest        (util::Header const & header, std::string const & id, std::string const & pw, void * arg) override;

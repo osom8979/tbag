@@ -147,10 +147,12 @@ std::vector<ProcessManager::ProcessInfo> ProcessManager::list() const
             ProcessInfo info;
             info.pid = proc.second->getPid();
             info.active = proc.second->isRunning();
-            info.infos.emplace_back(util::PROCESS_INFO_KEY_FILE, proc.second->getFile());
-            info.infos.emplace_back(util::PROCESS_INFO_KEY_ARGS, string::mergeTokens(proc.second->getArgs(), util::PROCESS_INFO_VAL_DELIMITER));
-            info.infos.emplace_back(util::PROCESS_INFO_KEY_ENVS, string::mergeTokens(proc.second->getEnvs(), util::PROCESS_INFO_VAL_DELIMITER));
-            info.infos.emplace_back(util::PROCESS_INFO_KEY_CWD, proc.second->getCwd());
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_FILE  , proc.second->getFile());
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_ARGS  , string::mergeTokens(proc.second->getArgs(), util::PROCESS_INFO_VAL_DELIMITER));
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_ENVS  , string::mergeTokens(proc.second->getEnvs(), util::PROCESS_INFO_VAL_DELIMITER));
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_CWD   , proc.second->getCwd());
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_EXIT  , std::to_string(proc.second->getExitStatus()));
+            info.infos.emplace_back(util::PROCESS_INFO_KEY_SIGNUM, std::to_string(proc.second->getTermSignal()));
             result.push_back(std::move(info));
         }
     }

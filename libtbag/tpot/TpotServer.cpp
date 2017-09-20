@@ -196,6 +196,29 @@ int TpotServer::run()
     return this->run(loop);
 }
 
+// ---------------------
+// ProcessManager event.
+// ---------------------
+
+void TpotServer::onOutRead(int pid, char const * buffer, std::size_t size)
+{
+    tDLogIfI(_param.verbose, "TpotServer::onOutRead({}) {}", pid, std::string(buffer, buffer + size));
+}
+
+void TpotServer::onErrRead(int pid, char const * buffer, std::size_t size)
+{
+    tDLogIfI(_param.verbose, "TpotServer::onErrRead({}) {}", pid, std::string(buffer, buffer + size));
+}
+
+void TpotServer::onExit(int pid, int64_t exit_status, int term_signal)
+{
+    tDLogIfI(_param.verbose, "TpotServer::onExit({}) Exit: {}, TermSignal: {}", pid, exit_status, term_signal);
+}
+
+// -----------------
+// TpotPacket event.
+// -----------------
+
 void TpotServer::onVersionRequest(util::Header const & header, void * arg)
 {
     assert(arg != nullptr);

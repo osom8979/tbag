@@ -121,6 +121,8 @@ TBAG_CONSTEXPR char const * const PROCESS_INFO_KEY_FILE      = "file";
 TBAG_CONSTEXPR char const * const PROCESS_INFO_KEY_ARGS      = "args";
 TBAG_CONSTEXPR char const * const PROCESS_INFO_KEY_ENVS      = "envs";
 TBAG_CONSTEXPR char const * const PROCESS_INFO_KEY_CWD       = "cwd";
+TBAG_CONSTEXPR char const * const PROCESS_INFO_KEY_EXIT      = "exit";
+TBAG_CONSTEXPR char const * const PROCESS_INFO_KEY_SIGNUM    = "signum";
 TBAG_CONSTEXPR char const * const PROCESS_INFO_VAL_DELIMITER = ",";
 
 struct ProcessInfo
