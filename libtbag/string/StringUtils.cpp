@@ -298,6 +298,11 @@ std::string convertAddressHexStringToString(AddressHexString const & address)
     return std::string(address.begin(), address.end() - (1/*NULL*/));
 }
 
+std::string convertAddressToString(void const * address)
+{
+    return convertAddressHexStringToString(convertAddressToHexString(address));
+}
+
 std::vector<std::string> splitMatch(std::string const & source, std::regex const & match)
 {
     using TokenIterator = std::regex_token_iterator<typename std::string::const_iterator>;

@@ -17,10 +17,12 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/id/Id.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <functional>
 #include <algorithm>
 #include <type_traits>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -65,7 +67,7 @@ struct Pointer
     inline Pointer & operator =(Pointer const & obj) TBAG_NOEXCEPT
     { if (this != &obj) { ptr = obj.ptr; } return *this; }
     inline Pointer & operator =(Pointer && obj) TBAG_NOEXCEPT
-    { if (this != &obj) { std::swap(ptr, obj.ptr); } return *this; }
+    { if (this != &obj) { swap(*this, obj); } return *this; }
 
     inline bool operator ==(Pointer const & obj) const TBAG_NOEXCEPT
     { return ptr == obj.ptr; }
@@ -83,6 +85,9 @@ struct Pointer
     { return ptr; }
     inline Type const * operator ->() const TBAG_NOEXCEPT
     { return ptr; }
+
+    inline friend void swap(Pointer & lh, Pointer & rh) TBAG_NOEXCEPT
+    { std::swap(lh.ptr, rh.ptr); }
 
     inline Type * get() TBAG_NOEXCEPT
     { return ptr; }
@@ -116,6 +121,9 @@ struct Pointer
     inline CastType * forceCast() const TBAG_NOEXCEPT
     { return (CastType*)(ptr); }
 
+    std::string toString() const
+    { return string::convertAddressToString(ptr); }
+
     // ------------------------
     // Specialization of class.
     // ------------------------
@@ -136,8 +144,8 @@ struct Pointer
         using second_argument_type = Pointer;
         using result_type          = bool;
 
-        inline result_type operator()(first_argument_type  const & v1
-                                    , second_argument_type const & v2) const
+        inline result_type operator()(first_argument_type  const & v1,
+                                      second_argument_type const & v2) const
         { return v1 == v2; }
     };
 
@@ -147,8 +155,8 @@ struct Pointer
         using second_argument_type = Pointer;
         using result_type          = bool;
 
-        inline result_type operator()(first_argument_type  const & v1
-                                    , second_argument_type const & v2) const
+        inline result_type operator()(first_argument_type  const & v1,
+                                      second_argument_type const & v2) const
         { return v1 < v2; }
     };
 };

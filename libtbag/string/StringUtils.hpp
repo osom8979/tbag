@@ -146,6 +146,7 @@ TBAG_API Err convertHexStringToByte(char high_char, char low_char, uint8_t & res
  */
 TBAG_API AddressHexString convertAddressToHexString(void const * address) TBAG_NOEXCEPT;
 TBAG_API std::string convertAddressHexStringToString(AddressHexString const & address);
+TBAG_API std::string convertAddressToString(void const * address);
 
 /**
  * Regex based token.

@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/container/Pointer.hpp>
+#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::container;
@@ -88,5 +89,12 @@ TEST(PointerTest, Cast)
     ASSERT_EQ(100, p1->value);
 
     delete i1;
+}
+
+TEST(PointerTest, ToString)
+{
+    int temp = 0;
+    Pointer<int> ptr(&temp);
+    std::cout << "Pointer::toString(): " << ptr.toString() << std::endl;
 }
 
