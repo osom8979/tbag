@@ -112,6 +112,34 @@ DynamicAsset::PathVector DynamicAsset::scan(String const & key) const
     return _paths.at(key).scanDir();
 }
 
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+DynamicAsset getDynamicAsset(filesystem::Path const & path, std::vector<std::string> const & layouts)
+{
+    DynamicAsset asset;
+    for (auto & layout : layouts) {
+        asset.add(layout, (path / layout));
+    }
+    return asset;
+}
+
+DynamicAsset getDynamicAsset(std::string const & path, std::vector<std::string> const & layouts)
+{
+    return getDynamicAsset(filesystem::Path(path), layouts);
+}
+
+DynamicAsset getDynamicAsset(filesystem::Path const & path)
+{
+    return getDynamicAsset(path, getDefaultLayout());
+}
+
+DynamicAsset getDynamicAsset(std::string const & path)
+{
+    return getDynamicAsset(filesystem::Path(path));
+}
+
 } // namespace res
 
 // --------------------

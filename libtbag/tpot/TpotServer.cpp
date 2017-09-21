@@ -11,6 +11,7 @@
 #include <libtbag/network/http/FunctionalHttpServer.hpp>
 #include <libtbag/util/Version.hpp>
 
+#include <libtbag/uvpp/func/FunctionalSignal.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -49,41 +50,67 @@ class TpotServer::Internal
 {
 public:
     using SharedServer = std::shared_ptr<network::http::FuncHttpServer>;
+    using SharedSignal = std::shared_ptr<uvpp::func::FuncSignal>;
 
 private:
     TpotServer * _parent;
     SharedServer _server;
+    SharedSignal _signal;
 
 private:
     uint64_t _timeout;
     bool _verbose;
 
 public:
-    Internal(TpotServer * parent) : _parent(parent)
+    Internal(TpotServer * parent) : _parent(parent), _server(), _signal()
     { /* EMPTY. */ }
     ~Internal()
     { /* EMPTY. */ }
 
 public:
-    int run(Loop & loop, Param const & param)
+    Err init(Loop & loop, Param const & param)
     {
         _timeout = param.timeout;
         _verbose = param.verbose;
 
-        using namespace network::http;
-        _server.reset(new (std::nothrow) FuncHttpServer(loop, param.type));
+        try {
+            using namespace network::http;
+            using namespace uvpp::func;
+            _server.reset(new FuncHttpServer(loop, param.type));
+            _signal = loop.newHandle<FuncSignal>(loop);
+        } catch (...) {
+            tDLogE("TpotServer::Internal::init() Server bad allocation.");
+            return Err::E_BADALLOC;
+        }
+
         assert(static_cast<bool>(_server));
+        assert(static_cast<bool>(_signal));
 
         tDLogIfN(_verbose, "TpoT initialize ({}:{}) ...", param.bind, param.port);
-        if (_server->init(param.bind.c_str(), param.port) != Err::E_SUCCESS) {
-            return EXIT_FAILURE;
+        Err const INIT_CODE = _server->init(param.bind.c_str(), param.port);
+        if (TBAG_ERR_FAILURE(INIT_CODE)) {
+            tDLogE("TpotServer::Internal::init() Server init {} error", getErrName(INIT_CODE));
+            return INIT_CODE;
+        }
+
+        BRACE("Close callbacks") {
+            _signal->setOnSignal([&](int signum){
+                tDLogW("TpotServer::Internal::init()::OnSignal() Signal: {}", libtbag::signal::getSignalName(signum));
+                close();
+            });
+            _server->set_onServerClose([&](){
+                tDLogN("TpotServer::Internal::init()::OnServerClose()");
+                if (static_cast<bool>(_signal) && _signal->isClosing() == false) {
+                    _signal->close();
+                }
+                onServerClose();
+            });
         }
 
         // @formatter:off
         using namespace proto;
         _server->set_onHttpOpen([&](WeakClient n){ onHttpOpen(n); });
         _server->set_onHttpClose([&](WeakClient n){ onHttpClose(n); });
-        _server->set_onServerClose([&](){ onServerClose(); });
         _server->set_onHttpRequest([&](WeakClient n, Err c, HttpPacket & p){ onHttpRequest(n, c, p); });
         auto const TPOT_REQUEST_CB = [&](WeakClient n, Err c, HttpPacket & p){ onTpotRequest(n, c, p); };
         _server->setRequest(      VersionPath::getMethod(),       VersionPath::getPath(), TPOT_REQUEST_CB);
@@ -96,16 +123,22 @@ public:
         _server->setRequest(ProcessRemovePath::getMethod(), ProcessRemovePath::getPath(), TPOT_REQUEST_CB);
         // @formatter:on
 
-        tDLogN("TpoT is run! (BIND: {}, PORT: {})", _server->dest(), _server->port());
-        Err const RESULT = loop.run();
-        if (RESULT != Err::E_SUCCESS) {
-            return EXIT_FAILURE;
-        }
+        tDLogN("TpoT initialize success! (BIND: {}, PORT: {})", _server->dest(), _server->port());
+        tDLogIfN(_verbose, "===== TPOT INFORMATION =====");
+        tDLogIfN(_verbose, "* Tbag version: {}", util::getTbagVersion().toString());
+        tDLogIfN(_verbose, "* Packet version: {}", util::getTbagPacketVersion().toString());
+        tDLogIfN(_verbose, "* Release version: {}", util::getTbagReleaseVersion().toString());
+        return Err::E_SUCCESS;
+    }
 
-        {   // Check the last state.
-            // XXXX
+    Err close()
+    {
+        tDLogN("TpotServer::Internal::close()");
+        if (static_cast<bool>(_signal) && _signal->isClosing() == false) {
+            _signal->close();
         }
-        return EXIT_SUCCESS;
+        assert(static_cast<bool>(_server));
+        return _server->close();
     }
 
 #ifndef _TPOT_SERVER_CHECK_ERROR
@@ -174,8 +207,15 @@ TpotServer::TpotServer(std::size_t capacity)
 }
 
 TpotServer::TpotServer(Param const & param, std::size_t capacity)
-        : TpotPacket(capacity), ProcessManager(), _internal(new Internal(this)), _param(param)
+        : TpotPacket(capacity), ProcessManager(), _internal(new Internal(this)), _param(param),
+          _asset(res::getDynamicAsset(param.var, {TBAG_DYNAMIC_ASSERT_LAYOUT_LOG}))
 {
+    tDLogI("TpotServer::TpotServer() Variable directory: {}", param.var);
+    auto const LOG_DIR = _asset.get(TBAG_DYNAMIC_ASSERT_LAYOUT_LOG);
+    if (LOG_DIR.exists() == false) {
+        tDLogI("TpotServer::TpotServer() Create log directory: {}", LOG_DIR.toString());
+        LOG_DIR.createDir();
+    }
     assert(static_cast<bool>(_internal));
 }
 
@@ -184,16 +224,10 @@ TpotServer::~TpotServer()
     // EMPTY.
 }
 
-int TpotServer::run(Loop & loop)
+Err TpotServer::init(Loop & loop)
 {
     assert(static_cast<bool>(_internal));
-    return _internal->run(loop, _param);
-}
-
-int TpotServer::run()
-{
-    Loop loop;
-    return this->run(loop);
+    return _internal->init(loop, _param);
 }
 
 // ---------------------
@@ -354,6 +388,30 @@ void TpotServer::onProcessRemoveRequest(util::Header const & header, int pid, vo
     buildProcessRemoveResponse(util::Header(header.id, code));
     packet->response.setStatus(network::http::HttpStatus::SC_OK);
     packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+}
+
+// ------------
+// Entry-point.
+// ------------
+
+int runTpotServer(TpotServer::Param const & param)
+{
+    uvpp::Loop loop;
+    TpotServer server(param);
+
+    Err const INIT_SERVER_CODE = server.init(loop);
+    if (TBAG_ERR_FAILURE(INIT_SERVER_CODE)) {
+        tDLogE("runTpotServer() Server init {} error", getErrName(INIT_SERVER_CODE));
+        return EXIT_FAILURE;
+    }
+
+    Err const LOOP_RUN_CODE = loop.run();
+    if (TBAG_ERR_FAILURE(LOOP_RUN_CODE)) {
+        tDLogE("runTpotServer() Loop {} error", getErrName(LOOP_RUN_CODE));
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
 
 } // namespace tpot

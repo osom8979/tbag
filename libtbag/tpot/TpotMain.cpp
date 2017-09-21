@@ -29,7 +29,8 @@ namespace tpot {
 TBAG_CONSTEXPR static char const * const TPOT_COMMAND_SERVER  = "server";
 TBAG_CONSTEXPR static char const * const TPOT_COMMAND_REQUEST = "request";
 
-TBAG_CONSTEXPR static char const * const TPOT_NAME = "tpot";
+TBAG_CONSTEXPR static char const * const TPOT_NAME    = "tpot";
+TBAG_CONSTEXPR static char const * const TPOT_VAR_EXT = ".conf";
 TBAG_CONSTEXPR static int const DEFAULT_TIMEOUT_MILLISEC = 10 * 1000;
 
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
@@ -65,21 +66,9 @@ bool TpotMain::onCreate()
     installVersionOptions(util::getTbagVersion());
 
     using namespace libtbag::string;
-    atOptions().insert("ip", [&](Arguments const & args){
-        if (args.optString(0, &_ip) == false) {
-            _ip.clear();
-        }
-    }, "Assign ip address directly. (If not, refer to the config file)");
-    atOptions().insert("port", [&](Arguments const & args){
-        if (args.optInteger(0, &_port) == false) {
-            _port = 0;
-        }
-    }, "Assign port number directly. (If not, refer to the config file)");
-    atOptions().insert("timeout", [&](Arguments const & args){
-        if (args.optInteger(0, &_timeout) == false) {
-            _timeout = DEFAULT_TIMEOUT_MILLISEC;
-        }
-    }, "Write(request/response) packet timeout.");
+    atOptions().insertDefault("ip", &_ip, std::string(), "Assign ip address directly. (If not, refer to the config file)");
+    atOptions().insertDefault("port", &_port, 0, "Assign port number directly. (If not, refer to the config file)");
+    atOptions().insertDefault("timeout", &_timeout, DEFAULT_TIMEOUT_MILLISEC, "Write(request/response) packet timeout.");
 
     auto config = getConfig().lock();
     assert(static_cast<bool>(config));
@@ -145,15 +134,24 @@ int TpotMain::onDefaultCommand(StringVector const & args)
         port = 0;
     }
 
+    using namespace libtbag::filesystem;
+    auto var = node->getVar();
+    if (var.empty()) {
+        Path const CONF_PATH(getConfigPath());
+        Path const CONF_DIR = CONF_PATH.getParent() / (std::string(TPOT_NAME) + std::string(TPOT_VAR_EXT));
+        var = CONF_DIR.toString();
+    }
+
     int exit_code = EXIT_FAILURE;
     if (args[0] == TPOT_COMMAND_SERVER) {
         TpotServer::Param param;
         param.verbose = isEnableVerbose();
         param.bind = ip;
         param.port = port;
+        param.var  = var;
         param.timeout = static_cast<uint64_t>(_timeout);
         param.type = TpotServer::StreamType::TCP;
-        exit_code = TpotServer(param).run();
+        exit_code = runTpotServer(param);
 
     } else if (args[0] == TPOT_COMMAND_REQUEST) {
         TpotClient::Param param;

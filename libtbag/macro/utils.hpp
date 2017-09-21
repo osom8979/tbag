@@ -44,6 +44,8 @@
 
 #define UNUSED_PARAM(x)
 #define NAMELESS(x)
+#define COMMENT(x)
+#define BRACE(x)
 
 #ifndef REMOVE_UNUSED_DECLARATION
 /** Remove unused declaration warning. */

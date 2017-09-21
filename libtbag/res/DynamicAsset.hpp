@@ -97,6 +97,58 @@ public:
     PathVector scan(String const & key) const;
 };
 
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_BIN      "bin"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_DATA     "data"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_DB       "db"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_DOM      "dom"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_CONFIG   "config"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_IMAGE    "image"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_LOG      "log"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_MAP      "map"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_PLUGIN   "plugin"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_SAVE     "save"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_SCRIPT   "script"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_SPRITE   "sprite"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_STRING   "string"
+#define TBAG_DYNAMIC_ASSERT_LAYOUT_TEMP     "temp"
+
+TBAG_CONSTEXPR char const * const DEFAULT_ASSET_LAYOUT[] = {
+        TBAG_DYNAMIC_ASSERT_LAYOUT_BIN   ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_DATA  ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_DB    ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_DOM   ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_CONFIG,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_IMAGE ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_LOG   ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_MAP   ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_PLUGIN,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_SAVE  ,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_SCRIPT,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_SPRITE,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_STRING,
+        TBAG_DYNAMIC_ASSERT_LAYOUT_TEMP  ,
+};
+TBAG_CONSTEXPR std::size_t const DEFAULT_ASSET_LAYOUT_SIZE =
+        sizeof(DEFAULT_ASSET_LAYOUT) / sizeof(DEFAULT_ASSET_LAYOUT[0]);
+
+inline std::vector<std::string> getDefaultLayout()
+{
+    std::vector<std::string> result;
+    for (std::size_t i = 0; i < DEFAULT_ASSET_LAYOUT_SIZE; ++i) {
+        result.emplace_back(DEFAULT_ASSET_LAYOUT[i]);
+    }
+    return result;
+}
+
+TBAG_API DynamicAsset getDynamicAsset(filesystem::Path const & path, std::vector<std::string> const & layouts);
+TBAG_API DynamicAsset getDynamicAsset(std::string      const & path, std::vector<std::string> const & layouts);
+TBAG_API DynamicAsset getDynamicAsset(filesystem::Path const & path);
+TBAG_API DynamicAsset getDynamicAsset(std::string      const & path);
+
 } // namespace res
 
 // --------------------

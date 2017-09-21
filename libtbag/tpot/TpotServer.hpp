@@ -22,6 +22,7 @@
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/proto/TpotPacket.hpp>
 #include <libtbag/process/ProcessManager.hpp>
+#include <libtbag/res/DynamicAsset.hpp>
 
 #include <memory>
 #include <string>
@@ -51,11 +52,14 @@ public:
     using WeakClient = HttpServer::WeakClient;
     using HttpPacket = HttpServer::HttpPacket;
 
+    using DynamicAsset = res::DynamicAsset;
+
 public:
     struct Param
     {
         std::string bind;
         int         port;
+        std::string var;  ///< Variable directory.
         StreamType  type;
         uint64_t    timeout;
         bool        verbose;
@@ -80,6 +84,7 @@ private:
 
 private:
     Param _param;
+    DynamicAsset _asset;
 
 public:
     TpotServer(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
@@ -96,8 +101,7 @@ public:
     inline std::size_t  getProcessSize      () const { return ProcessManager::size(); }
 
 public:
-    int run(Loop & loop);
-    int run();
+    Err init(Loop & loop);
 
 protected:
     virtual void onOutRead(int pid, char const * buffer, std::size_t size) override;
@@ -114,6 +118,12 @@ protected:
     virtual void onProcessKillRequest  (util::Header const & header, int pid, int signum, void * arg) override;
     virtual void onProcessRemoveRequest(util::Header const & header, int pid, void * arg) override;
 };
+
+// ------------
+// Entry-point.
+// ------------
+
+TBAG_API int runTpotServer(TpotServer::Param const & param);
 
 } // namespace tpot
 
