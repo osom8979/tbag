@@ -34,8 +34,10 @@ tbag_modules__apply_dep_lua         ()
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_flatbuffers ()
 
-set (TPOT_FBS_SRC "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
-tbag_modules__build_dep_flatc_cpp (tpot_fbs ${TPOT_FBS_SRC})
+set (TPOT_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
+set (TPOT_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot_t2s.h")
+tbag_modules__build_dep_flatc_cpp (tpot_fbs "${TPOT_FBS_SRC}")
+tbag_modules__text_to_cpp11string (tpot_t2s "${TPOT_T2S_PATH}" tpot __tpot__ "${TPOT_FBS_SRC}")
 
 if (OpenCL_FOUND)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})

@@ -320,6 +320,26 @@ endmacro ()
 ## Generator.
 ## ----------
 
+#/// Write Text to String C++11 header file.
+#///
+#/// @param __output_path [in] Output header file path.
+#/// @param __name        [in] Variable name.
+#/// @param __delimiter   [in] Delimiter of C++11 string literal.
+#/// @param __text        [in] Text string.
+function (tbag_config__generate_text_to_cpp11_string __output_path __name __delimiter __text)
+    file (WRITE ${__output_path} ""
+            "\n#ifndef __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_${__name}_TEXT_TO_CPP11_STRING_H__"
+            "\n#define __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_${__name}_TEXT_TO_CPP11_STRING_H__"
+            "\n"
+            "\ninline char * char get_${__name}_text()"
+            "\n{"
+            "\n    return R\"${__delimiter}(${__text})${__delimiter}\""
+            "\n}"
+            "\n"
+            "\n#endif /* __INCLUDE_${MAIN_NAME_UPPER}__${MAIN_NAME_UPPER}_${__name}_TEXT_TO_CPP11_STRING_H__ */"
+            "\n")
+endfunction ()
+
 #/// Write C/C++ header file.
 #///
 #/// @param __output_path [in] Output header file path.

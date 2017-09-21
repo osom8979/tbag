@@ -104,6 +104,16 @@ public:
         return WeakBase();
     }
 
+    WeakBase get(Key id) const
+    {
+        Guard guard(_mutex);
+        auto itr = _map.find(id);
+        if (itr != _map.end()) {
+            return WeakBase(itr->second);
+        }
+        return WeakBase();
+    }
+
 public:
     /** Create(new) & insert. */
     template <typename ... Args>

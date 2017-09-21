@@ -23,6 +23,9 @@ endif()
 if (NOT DEFINED TBAG_FIND_PACKAGE_DIR)
     set (TBAG_FIND_PACKAGE_DIR "${TBAG_CMAKE_ROOT_DIR}/TbagFindPackage")
 endif ()
+if (NOT DEFINED TBAG_SCRIPT_DIR)
+    set (TBAG_SCRIPT_DIR "${TBAG_CMAKE_ROOT_DIR}/TbagScript")
+endif ()
 
 ## ------------
 ## Path macros.

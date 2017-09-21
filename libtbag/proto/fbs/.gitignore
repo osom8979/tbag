@@ -1,4 +1,5 @@
 # GIT IGNORE FILE.
 
 *_generated.h
+*_t2s.h
 

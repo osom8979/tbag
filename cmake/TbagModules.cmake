@@ -173,6 +173,30 @@ macro (tbag_modules__apply_window_subsystem)
     endif ()
 endmacro ()
 
+## ----------
+## Generators
+## ----------
+
+#/// Write Text to String C++11 header file.
+#///
+#/// @param __output_path [in] Output header file path.
+#/// @param __name        [in] Variable name.
+#/// @param __delimiter   [in] Delimiter of C++11 string literal.
+#/// @param __text_path   [in] Text file path.
+macro (tbag_modules__text_to_cpp11string __target __output_path __name __delimiter __text_path)
+    add_custom_command (
+            OUTPUT  "${__output_path}"
+            COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
+                                     "-DNAME=${__name}"
+                                     "-DDELIMITER=${__delimiter}"
+                                     "-DTEXT_PATH=${__text_path}"
+                                     -P "${TBAG_SCRIPT_DIR}/TbagText2Cpp11String.cmake"
+            DEPENDS ${__text_path}
+            COMMENT "Text to Cpp11String: ${__output_path}" VERBATIM)
+    add_custom_target (${__target} SOURCES "${__output_path}")
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
+endmacro ()
+
 ## -----
 ## CUDA.
 ## -----

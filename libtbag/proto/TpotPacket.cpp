@@ -20,6 +20,7 @@ TBAG_PUSH_MACRO(max);
 
 // FlatBuffers generated files.
 #include <libtbag/proto/fbs/tpot_generated.h>
+#include <libtbag/proto/fbs/tpot_t2s.h>
 
 #if defined(TBAG_COMP_MSVC)
 # if defined(__RESTORE_MIN__)
@@ -170,6 +171,11 @@ std::size_t TpotPacketBuilder::size() const
 {
     assert(static_cast<bool>(_internal));
     return _internal->size();
+}
+
+char const * const TpotPacketBuilder::getProtocol() TBAG_NOEXCEPT
+{
+    return __get_text_to_cpp11_string__tpot__();
 }
 
 Err TpotPacketBuilder::buildVersionRequest(util::Header const & header)

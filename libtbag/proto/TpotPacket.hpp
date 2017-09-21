@@ -81,6 +81,9 @@ public:
     std::size_t size() const;
 
 public:
+    static char const * const getProtocol() TBAG_NOEXCEPT;
+
+public:
     Err buildVersionRequest(util::Header const & header);
     Err buildVersionResponse(util::Header const & header,
                              unsigned major = TPOT_VER_MAJOR,
