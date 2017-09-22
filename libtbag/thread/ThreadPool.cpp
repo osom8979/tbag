@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 
+#include <cassert>
 #include <exception>
 #include <uv.h>
 
@@ -29,16 +30,15 @@ namespace thread {
  */
 struct ThreadPool::ThreadPimpl
 {
-    using Callback = std::function<void(void)>;
+    ThreadPool * parent;
+    uv_thread_t  thread;
 
-    uv_thread_t thread;
-    Callback callback;
-
-    ThreadPimpl(Callback const & c) : callback(c)
+    ThreadPimpl(ThreadPool * p) : parent(p)
     {
-        int error_code = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
-        if (error_code != 0) {
-            tDLogE("ThreadPimpl::ThreadPimpl() error[{}] {}", error_code, getUvErrorName(error_code));
+        assert(parent != nullptr);
+        int const ERROR_CODE = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
+        if (ERROR_CODE != 0) {
+            tDLogE("ThreadPimpl::ThreadPimpl() error[{}] {}", ERROR_CODE, getUvErrorName(ERROR_CODE));
             throw std::bad_alloc();
         }
     }
@@ -56,7 +56,12 @@ struct ThreadPool::ThreadPimpl
 private:
     static void globalCallback(void * arg)
     {
-        static_cast<ThreadPool::ThreadPimpl*>(arg)->callback();
+        ThreadPool::ThreadPimpl * thread = static_cast<ThreadPool::ThreadPimpl*>(arg);
+        assert(thread != nullptr);
+        assert(thread->parent != nullptr);
+        thread->parent->setUp();
+        thread->parent->runner();
+        thread->parent->tearDown();
     }
 };
 
@@ -86,12 +91,11 @@ bool ThreadPool::createThreads(std::size_t size)
         _threads.resize(size);
 
         for (std::size_t i = 0; i < size; ++i) {
-            _threads[i] = SharedThread(new (std::nothrow) ThreadPimpl([this](){ this->runner(); }));
+            _threads[i] = SharedThread(new ThreadPimpl(this));
             if (static_cast<bool>(_threads[i]) == false) {
                 result = false;
                 break;
             }
-            --size;
         }
 
         if (result == false) {

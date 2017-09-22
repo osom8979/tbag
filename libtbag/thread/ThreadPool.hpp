@@ -79,6 +79,10 @@ public:
     bool push(Task const & task);
 
 public:
+    virtual void setUp   () { /* EMPTY. */ }
+    virtual void tearDown() { /* EMPTY. */ }
+
+public:
     bool waitPush(Task const & task)
     {
         return waitTask(*this, task);
