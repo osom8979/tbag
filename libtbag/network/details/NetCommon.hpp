@@ -42,6 +42,9 @@ TBAG_CONSTEXPR char const * const LOOPBACK_IPV6 = "::1";
 
 TBAG_CONSTEXPR int const OS_RANDOMLY_ASSIGNS_PORT = 0;
 
+/** Maximum continuous failure count of write. */
+TBAG_CONSTEXPR int const MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE = 5;
+
 enum class StreamType : int
 {
     UNKNOWN,

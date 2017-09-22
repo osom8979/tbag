@@ -125,11 +125,16 @@ struct StreamClient::Internal : private Noncopyable
         ShutdownRequest  shutdown_req;
         Buffer           buffer;
         std::size_t      buffer_size;
+
+        int max_fail_count; ///< Maximum continuous failure count.
+        int cur_fail_count; ///< Current continuous failure count.
     } writer;
 
     Internal(StreamClient * parent) : parent(parent), owner_async(false), write_timeout(0)
     {
-        // EMPTY.
+        writer.buffer_size    = 0;
+        writer.max_fail_count = details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE;
+        writer.cur_fail_count = 0;
     }
 
     virtual ~Internal()
@@ -284,7 +289,26 @@ struct StreamClient::Internal : private Noncopyable
     {
         assert(static_cast<bool>(client));
         TBAG_STREAM_CLIENT_PRINT_BUFFER_IMPL("StreamClient::Internal::writeReal", buffer, size);
-        return client->write(writer.write_req, buffer, size);
+
+        Err const WRITE_CODE = client->write(writer.write_req, buffer, size);
+        if (TBAG_ERR_SUCCESS(WRITE_CODE)) {
+            if (writer.cur_fail_count > 0) {
+                tDLogI("StreamClient::Internal::writeReal() Restore fail count.");
+                writer.cur_fail_count = 0;
+            }
+            return Err::E_SUCCESS;
+        }
+
+        ++writer.cur_fail_count;
+        if (writer.cur_fail_count < writer.max_fail_count) {
+            tDLogW("StreamClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}).",
+                   getErrName(WRITE_CODE), writer.cur_fail_count, writer.max_fail_count);
+        } else {
+            tDLogE("StreamClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}) => Force close!",
+                   getErrName(WRITE_CODE), writer.cur_fail_count, writer.max_fail_count);
+            closeAll();
+        }
+        return WRITE_CODE;
     }
 
     void assignWriteBuffer(char const * buffer, std::size_t size)
