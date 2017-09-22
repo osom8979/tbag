@@ -106,6 +106,9 @@ public:
         mutable Mutex _queue_mutex;
         WsQueue _queue;
 
+    private:
+        int _max_queue_size;
+
     public:
         HttpNode(Loop & loop, StreamType type, SharedSafetyAsync async, HttpServer * parent);
         virtual ~HttpNode();
