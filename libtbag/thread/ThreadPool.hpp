@@ -79,6 +79,13 @@ public:
     bool push(Task const & task);
 
 public:
+    bool isEmptyOfThreads() const;
+    bool isEmptyOfTasks() const;
+
+    std::size_t sizeOfThreads() const;
+    std::size_t sizeOfTasks() const;
+
+public:
     virtual void setUp   () { /* EMPTY. */ }
     virtual void tearDown() { /* EMPTY. */ }
 

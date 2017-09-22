@@ -47,11 +47,17 @@ TEST(ThreadPoolTest, DoubleThreadCheck)
     std::atomic_bool thread2_exit(false);
     std::atomic_bool thread3_exit(false);
 
-    ThreadPool pool(2U);
-
     std::thread::id thread1_id;
     std::thread::id thread2_id;
     std::thread::id thread3_id;
+
+    ThreadPool pool(2U);
+
+    ASSERT_FALSE(pool.isEmptyOfThreads());
+    ASSERT_EQ(2U, pool.sizeOfThreads());
+
+    ASSERT_TRUE(pool.isEmptyOfTasks());
+    ASSERT_EQ(0, pool.sizeOfTasks());
 
     ASSERT_TRUE(pool.push([&](){
         thread1_id = std::this_thread::get_id();

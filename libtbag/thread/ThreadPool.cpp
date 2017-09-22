@@ -210,6 +210,34 @@ bool ThreadPool::push(Task const & task)
     return result;
 }
 
+bool ThreadPool::isEmptyOfThreads() const
+{
+    return _threads.empty();
+}
+
+bool ThreadPool::isEmptyOfTasks() const
+{
+    bool is_empty = false;
+    _mutex.lock();
+    is_empty = _task.empty();
+    _mutex.unlock();
+    return is_empty;
+}
+
+std::size_t ThreadPool::sizeOfThreads() const
+{
+    return _threads.size();
+}
+
+std::size_t ThreadPool::sizeOfTasks() const
+{
+    std::size_t size = 0;
+    _mutex.lock();
+    size = _task.size();
+    _mutex.unlock();
+    return size;
+}
+
 bool ThreadPool::waitTask(ThreadPool & pool, Task const & task)
 {
     Mutex  mutex;
