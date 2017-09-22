@@ -19,6 +19,8 @@ TBAG_PUSH_MACRO(max);
 #endif // defined(TBAG_COMP_MSVC)
 
 // FlatBuffers generated files.
+#include <flatbuffers/flatbuffers.h>
+#include <flatbuffers/idl.h>
 #include <libtbag/proto/fbs/tpot_generated.h>
 #include <libtbag/proto/fbs/tpot_t2s.h>
 
@@ -46,45 +48,49 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace proto {
 
+using namespace proto::fbs;
+
+using FlatBufferBuilder = flatbuffers::FlatBufferBuilder;
+using FlatBufferParser  = flatbuffers::Parser;
+
+using StringOffset                  = flatbuffers::Offset<flatbuffers::String>;
+using StringOffsetVector            = flatbuffers::Vector<StringOffset>;
+using HeaderOffset                  = flatbuffers::Offset<tpot::Header>;
+using PairOffset                    = flatbuffers::Offset<tpot::Pair>;
+using PairOffsetVector              = flatbuffers::Vector<PairOffset>;
+using PairOffsetVectorOffset        = flatbuffers::Offset<PairOffsetVector>;
+using ProcessInfoOffset             = flatbuffers::Offset<tpot::ProcessInfo>;
+using ProcessInfoOffsetVector       = flatbuffers::Vector<ProcessInfoOffset>;
+using ProcessInfoOffsetVectorOffset = flatbuffers::Offset<ProcessInfoOffsetVector>;
+
+// @formatter:off
+STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_SUCCESS      , static_cast<int>(TpotPacketTypes::ResultCode::RC_SUCCESS));
+STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_UNKNOWN_ERROR, static_cast<int>(TpotPacketTypes::ResultCode::RC_UNKNOWN_ERROR));
+STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_EXECUTE_ERROR, static_cast<int>(TpotPacketTypes::ResultCode::RC_EXECUTE_ERROR));
+STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_NOT_EXISTS   , static_cast<int>(TpotPacketTypes::ResultCode::RC_NOT_EXISTS));
+STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_KILL_ERROR   , static_cast<int>(TpotPacketTypes::ResultCode::RC_KILL_ERROR));
+// @formatter:on
+
 // -------------------------------------------
 // TpotPacketBuilder::Internal implementation.
 // -------------------------------------------
 
-using namespace proto::fbs;
-
 class TpotPacketBuilder::Internal
 {
-public:
-    using FlatBufferBuilder      = flatbuffers::FlatBufferBuilder;
-
-    using HeaderOffset           = flatbuffers::Offset<tpot::Header>;
-
-    using PairOffset             = flatbuffers::Offset<tpot::Pair>;
-    using PairOffsetVector       = flatbuffers::Vector<PairOffset>;
-    using PairOffsetVectorOffset = flatbuffers::Offset<PairOffsetVector>;
-
-    using ProcessInfoOffset             = flatbuffers::Offset<tpot::ProcessInfo>;
-    using ProcessInfoOffsetVector       = flatbuffers::Vector<ProcessInfoOffset>;
-    using ProcessInfoOffsetVectorOffset = flatbuffers::Offset<ProcessInfoOffsetVector>;
-
-    // @formatter:off
-    STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_SUCCESS      , static_cast<int>(TpotPacketTypes::ResultCode::RC_SUCCESS));
-    STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_UNKNOWN_ERROR, static_cast<int>(TpotPacketTypes::ResultCode::RC_UNKNOWN_ERROR));
-    STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_EXECUTE_ERROR, static_cast<int>(TpotPacketTypes::ResultCode::RC_EXECUTE_ERROR));
-    STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_NOT_EXISTS   , static_cast<int>(TpotPacketTypes::ResultCode::RC_NOT_EXISTS));
-    STATIC_ASSERT_CHECK_IS_EQUALS(tpot::ResultCode_KILL_ERROR   , static_cast<int>(TpotPacketTypes::ResultCode::RC_KILL_ERROR));
-    // @formatter:on
-
 private:
     TpotPacketBuilder * _parent;
 
 private:
     FlatBufferBuilder _builder;
+    FlatBufferParser  _parser;
 
 public:
     Internal(TpotPacketBuilder * parent, std::size_t capacity) : _parent(parent), _builder(capacity, nullptr)
     {
-        // EMPTY.
+        if (_parser.Parse(__get_text_to_cpp11_string__tpot__()) == false) {
+            tDLogA("TpotPacketBuilder::Internal() Parse fail.");
+            throw std::bad_alloc();
+        }
     }
 
     ~Internal()
@@ -95,13 +101,21 @@ public:
 public:
     inline FlatBufferBuilder       & atBuilder()       TBAG_NOEXCEPT { return _builder; }
     inline FlatBufferBuilder const & atBuilder() const TBAG_NOEXCEPT { return _builder; }
+    inline FlatBufferParser        & atParser ()       TBAG_NOEXCEPT { return _parser;  }
+    inline FlatBufferParser const  & atParser () const TBAG_NOEXCEPT { return _parser;  }
 
     uint8_t *  point() const { return _builder.GetBufferPointer(); }
     std::size_t size() const { return _builder.GetSize(); }
 
-    void clear()
+    void clear() { _builder.Clear(); }
+
+    std::string toJsonString() const
     {
-        _builder.Clear();
+        std::string result;
+        if (flatbuffers::GenerateText(_parser, _builder.GetBufferPointer(), &result)) {
+            return result;
+        }
+        return std::string();
     }
 
     template <typename T>
@@ -173,9 +187,10 @@ std::size_t TpotPacketBuilder::size() const
     return _internal->size();
 }
 
-char const * const TpotPacketBuilder::getProtocol() TBAG_NOEXCEPT
+std::string TpotPacketBuilder::toJsonString() const
 {
-    return __get_text_to_cpp11_string__tpot__();
+    assert(static_cast<bool>(_internal));
+    return _internal->toJsonString();
 }
 
 Err TpotPacketBuilder::buildVersionRequest(util::Header const & header)
@@ -381,16 +396,6 @@ Err TpotPacketBuilder::buildProcessRemoveResponse(util::Header const & header)
 
 class TpotPacketParser::Internal
 {
-public:
-    using PairOffset       = flatbuffers::Offset<tpot::Pair>;
-    using PairOffsetVector = flatbuffers::Vector<PairOffset>;
-
-    using ProcessInfoOffset       = flatbuffers::Offset<tpot::ProcessInfo>;
-    using ProcessInfoOffsetVector = flatbuffers::Vector<ProcessInfoOffset>;
-
-    using StringOffset       = flatbuffers::Offset<flatbuffers::String>;
-    using StringOffsetVector = flatbuffers::Vector<StringOffset>;
-
 private:
     TpotPacketParser * _parent;
 

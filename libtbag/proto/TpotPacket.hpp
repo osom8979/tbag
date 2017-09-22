@@ -81,13 +81,11 @@ public:
     std::size_t size() const;
 
 public:
-    static char const * const getProtocol() TBAG_NOEXCEPT;
+    std::string toJsonString() const;
 
 public:
     Err buildVersionRequest(util::Header const & header);
-    Err buildVersionResponse(util::Header const & header,
-                             unsigned major = TPOT_VER_MAJOR,
-                             unsigned minor = TPOT_VER_MINOR,
+    Err buildVersionResponse(util::Header const & header, unsigned major, unsigned minor,
                              util::Pairs const & features = util::Pairs());
     Err buildVersionResponse(util::Header const & header,
                              util::Version const & version = util::Version(TPOT_VER_MAJOR, TPOT_VER_MINOR),

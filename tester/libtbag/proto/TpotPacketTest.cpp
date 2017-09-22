@@ -67,3 +67,11 @@ TEST(TpotPacketTest, Default)
     ASSERT_EQ(TEST_ENV3, envs[2]);
 }
 
+TEST(TpotPacketTest, ToJson)
+{
+    FuncTpotPacket packet;
+    packet.buildVersionResponse(util::Header());
+    auto const JSON_STRING = packet.toJsonString();
+    ASSERT_FALSE(JSON_STRING.empty());
+}
+
