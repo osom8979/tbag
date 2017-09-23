@@ -124,6 +124,8 @@ struct TcpClient : public stream::StreamClient
 {
     TcpClient(Loop & loop) : stream::StreamClient(loop, StreamType::TCP)
     { /* EMPTY. */ }
+    ~TcpClient()
+    { /* EMPTY. */ }
 };
 
 /**
@@ -135,6 +137,8 @@ struct TcpClient : public stream::StreamClient
 struct PipeClient : public stream::StreamClient
 {
     PipeClient(Loop & loop) : stream::StreamClient(loop, StreamType::PIPE)
+    { /* EMPTY. */ }
+    ~PipeClient()
     { /* EMPTY. */ }
 };
 

@@ -521,8 +521,9 @@ protected:
 
         if (TBAG_ERR_FAILURE(WRITE_CODE)) {
             assert(_parent != nullptr);
-            tDLogD("StreamClient::Internal::onAsyncWrite() ~~> onWrite({}) event force call.", getErrName(WRITE_CODE));
-            _parent->onWrite(WRITE_CODE);
+            tDLogD("StreamClient::Internal::onAsyncWrite() ~~> onShutdown({}) event force call.",
+                   getErrName(WRITE_CODE));
+            _parent->onShutdown(WRITE_CODE);
         }
     }
 

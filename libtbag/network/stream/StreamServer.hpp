@@ -27,8 +27,8 @@
 #include <unordered_map>
 #include <string>
 #include <atomic>
-#include <mutex>
 #include <memory>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -61,10 +61,21 @@ public:
     STATIC_ASSERT_CHECK_IS_BASE_OF(typename SharedClient::element_type, typename SharedStreamNode::element_type);
 
     using ClientMap  = std::unordered_map<Id, SharedClient>;
-    using ClientPair = ClientMap::value_type;
 
-    using ClientIterator      = ClientMap::iterator;
-    using ClientConstIterator = ClientMap::const_iterator;
+    using key_type        = typename ClientMap::key_type;
+    using mapped_type     = typename ClientMap::mapped_type;
+    using hasher          = typename ClientMap::hasher;
+    using key_equal       = typename ClientMap::key_equal;
+    using allocator_type  = typename ClientMap::allocator_type;
+    using value_type      = typename ClientMap::value_type;
+    using reference       = typename ClientMap::reference;
+    using const_reference = typename ClientMap::const_reference;
+    using pointer         = typename ClientMap::pointer;
+    using const_pointer   = typename ClientMap::const_pointer;
+    using size_type       = typename ClientMap::size_type;
+    using difference_type = typename ClientMap::difference_type;
+    using iterator        = typename ClientMap::iterator;
+    using const_iterator  = typename ClientMap::const_iterator;
 
     using       SafetyAsync = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
@@ -80,33 +91,37 @@ public:
     class TBAG_API ClientIteratorGuard : private Noncopyable
     {
     private:
-        StreamServer::Mutex & _mutex;
+        StreamServer * _parent;
 
     public:
-        ClientIterator begin;
-        ClientIterator end;
-
-    public:
-        ClientIteratorGuard(StreamServer & server);
+        ClientIteratorGuard(StreamServer * parent);
         virtual ~ClientIteratorGuard();
+
+    public:
+        iterator begin();
+        iterator end();
+
+        const_iterator begin() const;
+        const_iterator end() const;
+
+        const_iterator cbegin() const;
+        const_iterator cend() const;
+
+        bool empty() const;
+        size_type size() const;
+        size_type max_size() const;
     };
 
     friend class ClientIteratorGuard;
     using UniqueClientIteratorGuard = std::unique_ptr<ClientIteratorGuard>;
 
 public:
-    struct Internal;
-    friend struct Internal;
-
-public:
+    class Internal;
+    friend class Internal;
     using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
-    StreamType const STREAM_TYPE;
-
-private:
     UniqueInternal _internal;
-    mutable Mutex _mutex;
 
 public:
     StreamServer(Loop & loop, StreamType type);
@@ -114,8 +129,8 @@ public:
 
 public:
     bool isOnConnection() const;
-    bool emptyClients() const;
-    std::size_t sizeClients() const;
+    bool isEmptyOfClients() const;
+    std::size_t sizeOfClients() const;
 
     WeakServerBackend getServer();
     WeakSafetyAsync getAsync();
@@ -128,9 +143,9 @@ public:
     void forEach(Predicated predicated)
     {
         auto itrs = getIterators();
-        while (itrs->begin != itrs->end) {
-            predicated(*(itrs->begin));
-            ++(itrs->begin);
+        auto const END = itrs->end();
+        for (auto itr = itrs->begin(); itr != END; ++itr) {
+            predicated(*(itrs->begin()));
         }
     }
 
@@ -183,9 +198,7 @@ public:
      *
      * @warning Don't use the mutex.
      */
-    virtual SharedStreamNode createClient(StreamType type,
-                                          Loop & loop,
-                                          SharedServerBackend & server);
+    virtual SharedStreamNode createClient(StreamType type, Loop & loop, SharedServerBackend & server);
 
 public:
     template <typename T>
@@ -209,6 +222,8 @@ struct TcpServer : public stream::StreamServer
 {
     TcpServer(Loop & loop) : stream::StreamServer(loop, StreamType::TCP)
     { /* EMPTY. */ }
+    ~TcpServer()
+    { /* EMPTY. */ }
 };
 
 /**
@@ -220,6 +235,8 @@ struct TcpServer : public stream::StreamServer
 struct PipeServer : public stream::StreamServer
 {
     PipeServer(Loop & loop) : stream::StreamServer(loop, StreamType::PIPE)
+    { /* EMPTY. */ }
+    ~PipeServer()
     { /* EMPTY. */ }
 };
 
