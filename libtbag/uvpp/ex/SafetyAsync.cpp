@@ -22,7 +22,8 @@ namespace ex   {
 // MistakeInspector implementation.
 // --------------------------------
 
-SafetyAsync::MistakeInspector::MistakeInspector(Loop & loop, SafetyAsync & async) : Idle(loop), _async(async)
+SafetyAsync::MistakeInspector::MistakeInspector(Loop & loop, SafetyAsync & async)
+        : Idle(loop), _async(async)
 {
     // EMPTY.
 }
@@ -63,7 +64,7 @@ void SafetyAsync::MistakeInspector::onClose()
 
 SafetyAsync::SafetyAsync(Loop & loop) : Async(loop), _inspector(nullptr)
 {
-    _inspector = loop.newHandle<MistakeInspector>(loop, *this);
+    _inspector = loop.newInternalHandle<MistakeInspector>(true, loop, *this);
     assert(_inspector->isActive() == false);
     _inspector->start();
 }

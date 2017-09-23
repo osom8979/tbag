@@ -20,6 +20,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/uvpp/Native.hpp>
 
+#include <bitset>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -58,6 +60,15 @@ public:
     using Parent = Native;
 
 public:
+    TBAG_CONSTEXPR static std::size_t const FLAG_SIZE = 1;
+    TBAG_CONSTEXPR static std::size_t const FLAG_INDEX_INTERNAL = 0;
+
+    using Flags = std::bitset<FLAG_SIZE>;
+
+private:
+    Flags _flags;
+
+public:
     Handle(uhandle type);
     virtual ~Handle();
 
@@ -74,6 +85,10 @@ public:
 
 public:
     bool isInit() const TBAG_NOEXCEPT;
+
+public:
+    inline bool isInternal() const { return _flags.test(FLAG_INDEX_INTERNAL); }
+    inline void setInternal(bool flag = true) { _flags.set(FLAG_INDEX_INTERNAL, flag); }
 
 public:
     /**

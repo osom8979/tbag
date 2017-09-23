@@ -145,16 +145,21 @@ public:
     template <typename JobType, typename ... Args>
     inline std::shared_ptr<typename remove_cr<JobType>::type> newSendJob(Args && ... args)
     {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(JobInterface, JobType);
         typedef typename remove_cr<JobType>::type ResultJobType;
+        typedef std::shared_ptr<ResultJobType> ResultSharedJobType;
         SharedJob shared = SharedJob(new (std::nothrow) JobType(std::forward<Args>(args) ...));
-        sendJob(shared);
-        return std::static_pointer_cast<ResultJobType, JobInterface>(shared);
+        if (static_cast<bool>(shared)) {
+            sendJob(shared);
+            return std::static_pointer_cast<ResultJobType, JobInterface>(shared);
+        }
+        return ResultSharedJobType();
     }
 
     template <typename ... Args>
     inline std::shared_ptr<FunctionalJob> newSendFunc(Args && ... args)
     {
-        return newSendJob<FunctionalJob>(std::forward<Args>(args) ...);
+        return newSendJob<FunctionalJob, Args ...>(std::forward<Args>(args) ...);
     }
 };
 

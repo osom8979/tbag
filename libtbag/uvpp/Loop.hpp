@@ -20,6 +20,7 @@
 #include <libtbag/Type.hpp>
 
 #include <libtbag/uvpp/Native.hpp>
+#include <libtbag/uvpp/Handle.hpp>
 
 #include <cstdint>
 
@@ -33,9 +34,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace uvpp {
-
-// Forward declaration.
-class Handle;
 
 /**
  * BaseLoop class prototype.
@@ -146,17 +144,30 @@ public:
             typename NativeHandle::Hash,
             typename NativeHandle::EqualTo>;
 
-    using iterator       = typename HandleMap::iterator;
-    using const_iterator = typename HandleMap::const_iterator;
+    using key_type        = typename HandleMap::key_type;
+    using mapped_type     = typename HandleMap::mapped_type;
+    using hasher          = typename HandleMap::hasher;
+    using key_equal       = typename HandleMap::key_equal;
+    using allocator_type  = typename HandleMap::allocator_type;
+    using value_type      = typename HandleMap::value_type;
+    using reference       = typename HandleMap::reference;
+    using const_reference = typename HandleMap::const_reference;
+    using pointer         = typename HandleMap::pointer;
+    using const_pointer   = typename HandleMap::const_pointer;
+    using size_type       = typename HandleMap::size_type;
+    using difference_type = typename HandleMap::difference_type;
+    using iterator        = typename HandleMap::iterator;
+    using const_iterator  = typename HandleMap::const_iterator;
 
 private:
     HandleMap _handles;
 
 private:
     bool _auto_erase_handle;
+    bool _print_internal_handle;
 
 public:
-    Loop(bool auto_erase = true);
+    Loop(bool auto_erase = true, bool print_internal = false);
     virtual ~Loop();
 
 public:
@@ -185,27 +196,17 @@ public:
 
 // By-pass methods.
 public:
-
-#ifndef TBAG_UV_LOOP_BY_PASS_METHOD
-#define TBAG_UV_LOOP_BY_PASS_METHOD(retval, name, qualifier) \
-    inline retval name() qualifier TBAG_NOEXCEPT_SP_OP(_handles.name()) { return _handles.name(); }
-#define TBAG_EMPTY_QUALIFIER
-#endif
-
-    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator, begin, TBAG_EMPTY_QUALIFIER);
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator, begin, const);
-    TBAG_UV_LOOP_BY_PASS_METHOD(      iterator,   end, TBAG_EMPTY_QUALIFIER);
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,   end, const);
-
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,  cbegin, const);
-    TBAG_UV_LOOP_BY_PASS_METHOD(const_iterator,    cend, const);
-
-    TBAG_UV_LOOP_BY_PASS_METHOD(       bool,    empty, const);
-    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t,     size, const);
-    TBAG_UV_LOOP_BY_PASS_METHOD(std::size_t, max_size, const);
-
-#undef TBAG_EMPTY_QUALIFIER
-#undef TBAG_UV_LOOP_BY_PASS_METHOD
+    // @formatter:off
+    inline       iterator    begin()       TBAG_NOEXCEPT_SP_OP(_handles.   begin()) { return _handles.   begin(); }
+    inline const_iterator    begin() const TBAG_NOEXCEPT_SP_OP(_handles.   begin()) { return _handles.   begin(); }
+    inline       iterator      end()       TBAG_NOEXCEPT_SP_OP(_handles.     end()) { return _handles.     end(); }
+    inline const_iterator      end() const TBAG_NOEXCEPT_SP_OP(_handles.     end()) { return _handles.     end(); }
+    inline const_iterator   cbegin() const TBAG_NOEXCEPT_SP_OP(_handles.  cbegin()) { return _handles.  cbegin(); }
+    inline const_iterator     cend() const TBAG_NOEXCEPT_SP_OP(_handles.    cend()) { return _handles.    cend(); }
+    inline           bool    empty() const TBAG_NOEXCEPT_SP_OP(_handles.   empty()) { return _handles.   empty(); }
+    inline      size_type     size() const TBAG_NOEXCEPT_SP_OP(_handles.    size()) { return _handles.    size(); }
+    inline      size_type max_size() const TBAG_NOEXCEPT_SP_OP(_handles.max_size()) { return _handles.max_size(); }
+    // @formatter:on
 
 public:
     /** @warning This function should be avoided. */
@@ -217,13 +218,26 @@ public:
     virtual void onClosed(Handle * handle);
 
 public:
+    /** [INTERNAL] Create(new) & insert handle. */
+    template <typename HandleType, typename ... Args>
+    inline std::shared_ptr<typename remove_cr<HandleType>::type> newInternalHandle(bool is_internal, Args && ... args)
+    {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(Handle, HandleType);
+        typedef typename remove_cr<HandleType>::type ResultHandleType;
+        typedef std::shared_ptr<ResultHandleType> ResultSharedHandleType;
+        SharedHandle shared(new (std::nothrow) HandleType(std::forward<Args>(args) ...));
+        if (static_cast<bool>(shared)) {
+            shared->setInternal(is_internal);
+            return std::static_pointer_cast<ResultHandleType, Handle>(insertChildHandle(shared).lock());
+        }
+        return ResultSharedHandleType();
+    }
+
     /** Create(new) & insert handle. */
     template <typename HandleType, typename ... Args>
     inline std::shared_ptr<typename remove_cr<HandleType>::type> newHandle(Args && ... args)
     {
-        typedef typename remove_cr<HandleType>::type ResultHandleType;
-        SharedHandle shared(new (std::nothrow) HandleType(std::forward<Args>(args) ...));
-        return std::static_pointer_cast<ResultHandleType, Handle>(insertChildHandle(shared).lock());
+        return newInternalHandle<HandleType, Args ...>(false, std::forward<Args>(args) ...);
     }
 };
 

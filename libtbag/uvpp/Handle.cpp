@@ -63,7 +63,7 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
 // Handle implementation.
 // ----------------------
 
-Handle::Handle(uhandle type) : Native(static_cast<utype>(type))
+Handle::Handle(uhandle type) : Native(static_cast<utype>(type)), _flags()
 {
     if (isHandle() == false) {
         tDLogE("Handle::Handle({}) type is not handle type", static_cast<int>(type));

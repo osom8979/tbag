@@ -236,7 +236,8 @@ std::size_t BaseLoop::getNativeSize() TBAG_NOEXCEPT
 // Loop implementation.
 // --------------------
 
-Loop::Loop(bool auto_erase) : _auto_erase_handle(auto_erase)
+Loop::Loop(bool auto_erase, bool print_internal)
+        : _auto_erase_handle(auto_erase), _print_internal_handle(print_internal)
 {
     // EMPTY.
 }
@@ -302,6 +303,7 @@ bool Loop::eraseChildHandle(void * native_handle)
     }
 
     void const * HANDLE_ADDRESS   = shared.get();
+    bool const IS_INTERNAL = shared->isInternal();
     std::string const HANDLE_NAME = shared->getName();
 
     if (_handles.erase(NativeHandle(native_handle)) != 1U) {
@@ -310,17 +312,24 @@ bool Loop::eraseChildHandle(void * native_handle)
         return false;
     }
 
-    tDLogD("Loop::eraseChildHandle(@{}[{}]) Success (Handles: {})",
-           HANDLE_ADDRESS, HANDLE_NAME, _handles.size());
+    tDLogIfD(_print_internal_handle || IS_INTERNAL == false,
+             "Loop::eraseChildHandle(@{}[{}]) Success (Handles: {})",
+             HANDLE_ADDRESS, HANDLE_NAME, _handles.size());
     return true;
 }
 
 Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
 {
-    auto itr = _handles.insert(HandleMap::value_type(NativeHandle(h->get()), h));
-    if (itr.second) {
-        tDLogD("Loop::insertChildHandle(@{}[{}]) Success (Handles: {})",
-               static_cast<void*>(h.get()), h->getName(), _handles.size());
+    if (static_cast<bool>(h) == false) {
+        tDLogE("Loop::insertChildHandle() Expired handle.");
+        return WeakHandle();
+    }
+
+    auto itr = _handles.insert(value_type(NativeHandle(h->get()), h));
+    if (static_cast<bool>(itr.second)) {
+        tDLogIfD(_print_internal_handle || h->isInternal() == false,
+                 "Loop::insertChildHandle(@{}[{}]) Success (Handles: {})",
+                 static_cast<void*>(h.get()), h->getName(), _handles.size());
         return WeakHandle(itr.first->second);
     }
 
