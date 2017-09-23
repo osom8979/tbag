@@ -21,8 +21,8 @@ namespace http    {
 // HttpNode implementation.
 // ------------------------
 
-HttpServer::HttpNode::HttpNode(Loop & loop, StreamType type, SharedSafetyAsync async, HttpServer * parent)
-        : StreamNode(loop, type, async, parent), _upgrade(false), _closing(false), _max_queue_size(details::MAXIMUM_QUEUE_SIZE)
+HttpServer::HttpNode::HttpNode(Loop & loop, StreamType type, HttpServer * parent)
+        : StreamNode(loop, type, parent), _upgrade(false), _closing(false), _max_queue_size(details::MAXIMUM_QUEUE_SIZE)
 {
     // EMPTY.
 }
@@ -449,13 +449,11 @@ void HttpServer::onClientTimer(WeakClient node)
 
 HttpServer::SharedStreamNode HttpServer::createClient(StreamType type,
                                                       Loop & loop,
-                                                      SharedServerBackend & server,
-                                                      SharedSafetyAsync & async)
+                                                      SharedServerBackend & server)
 {
     assert(static_cast<bool>(server));
-    assert(static_cast<bool>(async));
     tDLogSD("HttpServer::createClient() Create HttpNode");
-    return SharedStreamNode(new (std::nothrow) HttpNode(loop, type, async, this));
+    return SharedStreamNode(new (std::nothrow) HttpNode(loop, type, this));
 }
 
 } // namespace http

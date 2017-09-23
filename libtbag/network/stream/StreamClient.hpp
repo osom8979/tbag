@@ -26,7 +26,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -46,66 +45,43 @@ class TBAG_API StreamClient : public details::ClientInterface
 public:
     using StreamType = details::StreamType;
     using ReadPacket = details::ReadPacket;
+    using WriteState = details::WriteState;
+    using WriteInfo  = details::WriteInfo;
 
     using Loop   = uvpp::Loop;
     using Stream = uvpp::Stream;
     using binf   = uvpp::binf;
 
     using SharedClientBackend = std::shared_ptr<Stream>;
-    using   WeakClientBackend =   std::weak_ptr<Stream>;
+    using WeakClientBackend   = std::weak_ptr<Stream>;
 
-    using       SafetyAsync = uvpp::ex::SafetyAsync;
+    using SafetyAsync       = uvpp::ex::SafetyAsync;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
-    using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
+    using WeakSafetyAsync   = std::weak_ptr<SafetyAsync>;
 
-    using Id    = id::Id;
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
+    using Id = id::Id;
 
 public:
-    struct Internal;
-    friend struct Internal;
-
+    class Internal;
+    friend class Internal;
     using UniqueInternal = std::unique_ptr<Internal>;
 
 public:
-    enum class WriteState
-    {
-        WS_NOT_READY,
-        WS_READY,           ///< Next: call write.
-        WS_ASYNC,           ///< Next: onTimeout or onAsync.
-        WS_ASYNC_CANCEL,    ///< Next: onAsync.
-        WS_WRITE,           ///< Next: onTimeout or onWrite.
-        WS_SHUTDOWN,        ///< Next: onShutdown.
-        WS_END,
-    };
-
     struct WriteReady { /* EMPTY. */ };
 
 private:
-    StreamType const STREAM_TYPE;
-
-private:
     UniqueInternal _internal;
-    mutable Mutex  _mutex;
 
 public:
     StreamClient(Loop & loop, StreamType type);
-    StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async, WriteReady const & UNUSED_PARAM(ready));
-    StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async);
+    StreamClient(Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready));
     virtual ~StreamClient();
-
-private:
-    void onShutdownTimer();
-    void onAsyncWrite();
-
-public:
-    static char const * getWriteStateName(WriteState status) TBAG_NOEXCEPT;
 
 public:
     WriteState getWriteState() const;
     char const * getWriteStateName() const;
 
+public:
     WeakClientBackend getClient();
     WeakSafetyAsync getAsync();
 
@@ -130,7 +106,7 @@ public:
     virtual void stopTimer() override;
 
 // Event backend.
-public:
+protected:
     virtual void backConnect(Err code) override;
     virtual void backShutdown(Err code) override;
     virtual void backWrite(Err code) override;

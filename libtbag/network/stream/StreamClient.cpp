@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <mutex>
 
 //#define TBAG_STREAM_CLIENT_PRINT_BUFFER
 
@@ -46,113 +47,155 @@ static void printBufferOfStreamBuffer(std::string const & prefix, uint8_t const 
  * @date   2017-06-16
  *
  * @warning
- *  Don't mutex guard in this class. (However, callbacks are an exception)
+ *  - Do not use a mutex if the function name starts with '_'.
  */
-struct StreamClient::Internal : private Noncopyable
+class StreamClient::Internal : private Noncopyable
 {
-    using ConnectRequest  = uvpp::ConnectRequest;
-    using ShutdownRequest = uvpp::ShutdownRequest;
-    using WriteRequest    = uvpp::WriteRequest;
-
-    struct UserTimer : public uvpp::Timer
+public:
+    struct UserTimer final : public uvpp::Timer
     {
-        StreamClient * parent;
-
-        UserTimer(Loop & loop, StreamClient * p) : uvpp::Timer(loop), parent(p)
-        { /* EMPTY. */ }
-        virtual ~UserTimer()
-        { /* EMPTY. */ }
-
-        virtual void onTimer() override
-        {
-            assert(parent != nullptr);
-            parent->onTimer();
-        }
+        Internal * parent;
+        UserTimer(Loop & loop, Internal * p) : uvpp::Timer(loop), parent(p) { /* EMPTY. */ }
+        virtual ~UserTimer() { /* EMPTY. */ }
+        virtual void onTimer() override { parent->onUserTimer(); }
     };
 
-    struct ShutdownTimer : public uvpp::Timer
+    struct ShutdownTimer final : public uvpp::Timer
     {
-        StreamClient * parent;
-
-        ShutdownTimer(Loop & loop, StreamClient * p) : uvpp::Timer(loop), parent(p)
-        { /* EMPTY. */ }
-        virtual ~ShutdownTimer()
-        { /* EMPTY. */ }
-
-        virtual void onTimer() override
-        {
-            assert(parent != nullptr);
-            parent->onShutdownTimer();
-        }
+        Internal * parent;
+        ShutdownTimer(Loop & loop, Internal * p) : uvpp::Timer(loop), parent(p) { /* EMPTY. */ }
+        virtual ~ShutdownTimer() { /* EMPTY. */ }
+        virtual void onTimer() override { parent->onShutdownTimer(); }
     };
 
-    struct AsyncWrite : public SafetyAsync::JobInterface
+    struct AsyncWrite final : public SafetyAsync::JobInterface
     {
-        StreamClient * parent;
-
-        AsyncWrite(StreamClient * p) : parent(p)
-        { /* EMPTY. */ }
-        virtual ~AsyncWrite()
-        { /* EMPTY. */ }
-
-        virtual void run() override
-        {
-            assert(parent != nullptr);
-            parent->onAsyncWrite();
-        }
+        Internal * parent;
+        AsyncWrite(Internal * p) : parent(p) { /* EMPTY. */ }
+        virtual ~AsyncWrite() { /* EMPTY. */ }
+        virtual void run() override { parent->onAsyncWrite(); }
     };
 
+public:
     using SharedUserTimer     = std::shared_ptr<UserTimer>;
     using SharedShutdownTimer = std::shared_ptr<ShutdownTimer>;
 
     using binf   = StreamClient::binf;
     using Buffer = std::vector<char>;
 
-    StreamClient * parent;
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
-    bool owner_async;
-    uint64_t write_timeout;
+private:
+    StreamType const STREAM_TYPE;
 
-    SharedClientBackend client;
-    SharedSafetyAsync   async;
-    SharedUserTimer     user_timer;
-    SharedShutdownTimer shutdown_timer;
+private:
+    StreamClient * _parent;
 
-    struct {
-        WriteState       state;
-        ConnectRequest   connect_req;
-        WriteRequest     write_req;
-        ShutdownRequest  shutdown_req;
-        Buffer           buffer;
-        std::size_t      buffer_size;
+private:
+    mutable Mutex _mutex;
 
-        int max_fail_count; ///< Maximum continuous failure count.
-        int cur_fail_count; ///< Current continuous failure count.
-    } writer;
+private:
+    SharedClientBackend _client;
+    SharedSafetyAsync   _safety_async;
+    SharedUserTimer     _user_timer;
+    SharedShutdownTimer _shutdown_timer;
 
-    Internal(StreamClient * parent) : parent(parent), owner_async(false), write_timeout(0)
+private:
+    WriteInfo _winfo;
+
+public:
+    Internal(StreamClient * parent, Loop & loop, StreamType type)
+            : STREAM_TYPE(type), _parent(parent)
     {
-        writer.buffer_size    = 0;
-        writer.max_fail_count = details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE;
-        writer.cur_fail_count = 0;
+        using  TcpBackend = StreamClientBackend<uvpp::Tcp>;
+        using PipeBackend = StreamClientBackend<uvpp::Pipe>;
+
+        if (type == StreamType::TCP) {
+            _client = loop.newHandle<TcpBackend>(loop, _parent);
+        } else if (type == StreamType::PIPE) {
+            _client = loop.newHandle<PipeBackend>(loop, _parent);
+        } else {
+            throw std::bad_alloc();
+        }
+
+        assert(static_cast<bool>(_client));
+        _winfo.setNotReady();
     }
 
-    virtual ~Internal()
+    Internal(StreamClient * parent, Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready))
+            : Internal(parent, loop, type)
+    {
+        if (initInternalHandles()) {
+            _winfo.setReady();
+        }
+    }
+
+    ~Internal()
     {
         // EMPTY.
     }
 
-    Loop & getLoop()
+public:
+    inline StreamType getStreamType() const TBAG_NOEXCEPT { return STREAM_TYPE; }
+
+public:
+    inline WriteState   getState    () const TBAG_NOEXCEPT { Guard g(_mutex); return _winfo.getState    (); }
+    inline char const * getStateName() const TBAG_NOEXCEPT { Guard g(_mutex); return _winfo.getStateName(); }
+
+    WeakClientBackend   getClient        () { Guard g(_mutex); return WeakClientBackend  (        _client); }
+    WeakSafetyAsync     getAsync         () { Guard g(_mutex); return WeakSafetyAsync    (  _safety_async); }
+    SharedUserTimer     getUserTimer     () { Guard g(_mutex); return SharedUserTimer    (    _user_timer); }
+    SharedShutdownTimer getShutdownTimer () { Guard g(_mutex); return SharedShutdownTimer(_shutdown_timer); }
+
+public:
+    void * getUserData() TBAG_NOEXCEPT
     {
-        assert(static_cast<bool>(client));
-        Loop * loop = client->getLoop();
-        assert(loop != nullptr);
-        return *loop;
+        Guard g(_mutex);
+        if (static_cast<bool>(_client)) {
+            return _client->getUserData();
+        }
+        return nullptr;
     }
 
+    void setWriteTimeout(uint64_t millisec) TBAG_NOEXCEPT
+    {
+        Guard const LOCK(_mutex);
+        _winfo.timeout = millisec;
+    }
+
+    Id getId() const
+    {
+        Guard const LOCK(_mutex);
+        if (static_cast<bool>(_client)) {
+            return _client->id();
+        }
+        return id::UNKNOWN_ID;
+    }
+
+    std::string dest() const
+    {
+        Guard const LOCK(_mutex);
+        if (_client && STREAM_TYPE == StreamType::TCP) {
+            return std::static_pointer_cast<uvpp::Tcp>(_client)->getPeerIp();
+        }
+        return std::string();
+    }
+
+    int port() const
+    {
+        Guard const LOCK(_mutex);
+        if (_client && STREAM_TYPE == StreamType::TCP) {
+            return std::static_pointer_cast<uvpp::Tcp>(_client)->getPeerPort();
+        }
+        return 0;
+    }
+
+public:
     Err initClient(StreamType type, std::string const & destination, int port = 0)
     {
-        if (static_cast<bool>(client) == false) {
+        Guard const LOCK(_mutex);
+        if (static_cast<bool>(_client) == false) {
             return Err::E_EXPIRED;
         }
 
@@ -160,201 +203,97 @@ struct StreamClient::Internal : private Noncopyable
         using PipeBackend = StreamClientBackend<uvpp::Pipe>;
 
         if (type == StreamType::TCP) {
-            auto backend = std::static_pointer_cast<TcpBackend>(client);
-            return uvpp::initCommonClient(*backend, writer.connect_req, destination, port);
+            auto backend = std::static_pointer_cast<TcpBackend>(_client);
+            return uvpp::initCommonClient(*backend, _winfo.connect_req, destination, port);
+
         } else if (type == StreamType::PIPE) {
-            auto backend = std::static_pointer_cast<PipeBackend>(client);
-            return uvpp::initPipeClient(*backend, writer.connect_req, destination);
+            auto backend = std::static_pointer_cast<PipeBackend>(_client);
+            return uvpp::initPipeClient(*backend, _winfo.connect_req, destination);
         }
 
         tDLogA("StreamClient::Internal::initClient() Unknown stream type.");
         return Err::E_ILLARGS;
     }
 
-    bool initHandles()
+    bool initInternalHandles()
     {
-        Loop & loop = getLoop();
+        Guard const LOCK(_mutex);
+        Loop & loop = _getLoop();
+        _safety_async   = loop.newInternalHandle<SafetyAsync  >(true, loop);
+        _shutdown_timer = loop.newInternalHandle<ShutdownTimer>(true, loop, this);
+        _user_timer     = loop.newInternalHandle<UserTimer    >(true, loop, this);
+        return _safety_async && _shutdown_timer && _user_timer;
+    }
 
-        if (static_cast<bool>(async) == false) {
-            async = loop.newHandle<SafetyAsync>(loop);
+    Err startRead()
+    {
+        Guard const LOCK(_mutex);
+        Err const CODE = _client->startRead();
+        if (TBAG_ERR_FAILURE(CODE)) {
+            tDLogE("StreamClient::Internal::startRead() {} error", getErrName(CODE));
         }
-        user_timer = loop.newHandle<UserTimer>(loop, parent);
-        shutdown_timer = loop.newHandle<ShutdownTimer>(loop, parent);
+        return CODE;
+    }
 
-        assert(static_cast<bool>(async));
-        assert(static_cast<bool>(user_timer));
-        assert(static_cast<bool>(shutdown_timer));
-
-        return true;
+    Err stopRead()
+    {
+        Guard const LOCK(_mutex);
+        Err const CODE = _client->stopRead();
+        if (TBAG_ERR_FAILURE(CODE)) {
+            tDLogE("StreamClient::Internal::stopRead() {} error", getErrName(CODE));
+        }
+        return CODE;
     }
 
     bool isActiveUserTimer() const
     {
-        if (static_cast<bool>(user_timer) == false) {
-            return false;
-        }
-        return user_timer->isActive();
+        Guard const LOCK(_mutex);
+        return uvpp::isActiveTimer(_user_timer);
     }
 
     Err startUserTimer(uint64_t millisec)
     {
-        if (static_cast<bool>(user_timer) == false) {
-            return Err::E_ALREADY;
-        }
-        if (user_timer->isActive()) {
-            return Err::E_EBUSY;
-        }
-
-        Err const CODE = user_timer->start(millisec);
-        if (CODE != Err::E_SUCCESS) {
-            tDLogE("StreamClient::Internal::startUserTimer() {} error.", getErrName(CODE));
-        }
-        return CODE;
+        Guard const LOCK(_mutex);
+        return uvpp::startTimer(_user_timer, millisec);
     }
 
-    void stopUserTimer()
+    Err stopUserTimer()
     {
-        if (static_cast<bool>(user_timer) == false) {
-            return;
-        }
-
-        Err const CODE = user_timer->stop();
-        if (CODE != Err::E_SUCCESS) {
-            tDLogE("StreamClient::Internal::stopUserTimer() {} error.", getErrName(CODE));
-        }
-    }
-
-    bool isActiveShutdownTimer() const
-    {
-        if (static_cast<bool>(shutdown_timer) == false) {
-            return false;
-        }
-        return shutdown_timer->isActive();
-    }
-
-    Err startShutdownTimer(uint64_t millisec)
-    {
-        if (static_cast<bool>(shutdown_timer) == false) {
-            return Err::E_ALREADY;
-        }
-        if (shutdown_timer->isActive()) {
-            return Err::E_EBUSY;
-        }
-
-        Err const CODE = shutdown_timer->start(millisec);
-        if (CODE != Err::E_SUCCESS) {
-            tDLogE("StreamClient::Internal::startShutdownTimer() {} error.", getErrName(CODE));
-        }
-        return CODE;
-    }
-
-    void stopShutdownTimer()
-    {
-        if (static_cast<bool>(shutdown_timer) == false) {
-            return;
-        }
-
-        Err const CODE = shutdown_timer->stop();
-        if (CODE != Err::E_SUCCESS) {
-            tDLogE("StreamClient::Internal::stopShutdownTimer() {} error.", getErrName(CODE));
-        }
-    }
-
-    Err shutdownWrite()
-    {
-        if (writer.state == WriteState::WS_ASYNC) {
-            writer.state = WriteState::WS_ASYNC_CANCEL;
-            return Err::E_SUCCESS;
-        }
-
-        if (writer.state != WriteState::WS_WRITE) {
-            tDLogE("StreamClient::Internal::shutdownWrite() Illegal state error: {}",
-                   getWriteStateName(writer.state));
-            return Err::E_ILLSTATE;
-        }
-
-        assert(writer.state == WriteState::WS_WRITE);
-
-        Err const CODE = client->shutdown(writer.shutdown_req);
-        if (CODE != Err::E_SUCCESS) {
-            tDLogE("StreamClient::Internal::shutdownWrite() {} error", getErrName(CODE));
-            return CODE;
-        }
-
-        writer.state = WriteState::WS_SHUTDOWN;
-        return Err::E_SUCCESS;
-    }
-
-    Err writeReal(char const * buffer, std::size_t size)
-    {
-        assert(static_cast<bool>(client));
-        TBAG_STREAM_CLIENT_PRINT_BUFFER_IMPL("StreamClient::Internal::writeReal", buffer, size);
-
-        Err const WRITE_CODE = client->write(writer.write_req, buffer, size);
-        if (TBAG_ERR_SUCCESS(WRITE_CODE)) {
-            if (writer.cur_fail_count > 0) {
-                tDLogI("StreamClient::Internal::writeReal() Restore fail count.");
-                writer.cur_fail_count = 0;
-            }
-            return Err::E_SUCCESS;
-        }
-
-        ++writer.cur_fail_count;
-        if (writer.cur_fail_count < writer.max_fail_count) {
-            tDLogW("StreamClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}).",
-                   getErrName(WRITE_CODE), writer.cur_fail_count, writer.max_fail_count);
-        } else {
-            tDLogE("StreamClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}) => Force close!",
-                   getErrName(WRITE_CODE), writer.cur_fail_count, writer.max_fail_count);
-            closeAll();
-        }
-        return WRITE_CODE;
-    }
-
-    void assignWriteBuffer(char const * buffer, std::size_t size)
-    {
-        assert(buffer != nullptr);
-        assert(size > 0);
-        if (writer.buffer.size() < size) {
-            writer.buffer.resize(size);
-        }
-        ::memcpy(writer.buffer.data(), buffer, size);
-        writer.buffer_size = size;
+        Guard const LOCK(_mutex);
+        return uvpp::stopTimer(_user_timer);
     }
 
     Err autoWrite(char const * buffer, std::size_t size)
     {
-        if (writer.state != WriteState::WS_READY) {
-            tDLogE("StreamClient::Internal::autoWrite() Illegal state error: {}",
-                   getWriteStateName(writer.state));
+        Guard const LOCK(_mutex);
+        if (_winfo.isReady() == false) {
+            tDLogE("StreamClient::Internal::autoWrite() Illegal state error: {}", _winfo.getStateName());
             return Err::E_ILLSTATE;
         }
 
-        assert(static_cast<bool>(client));
-        assert(static_cast<bool>(async));
+        assert(static_cast<bool>(_client));
+        assert(static_cast<bool>(_safety_async));
 
-        Loop & loop = getLoop();
+        Loop & loop = _getLoop();
         Err result_code = Err::E_UNKNOWN;
 
-        if (loop.isAliveAndThisThread() == false && static_cast<bool>(async)) {
-            assignWriteBuffer(buffer, size);
-            auto job = async->newSendJob<AsyncWrite>(parent);
-            if (static_cast<bool>(job) == false) {
-                tDLogE("StreamClient::Internal::autoWrite() New job error.");
-                return Err::E_BADALLOC;
+        if (_safety_async && loop.isAliveAndThisThread() == false) {
+            result_code = _asyncWrite(buffer, size);
+            if (TBAG_ERR_FAILURE(result_code)) {
+                tDLogE("StreamClient::Internal::autoWrite() Async write {} error.", getErrName(result_code));
+                return result_code;
             }
-            writer.state = WriteState::WS_ASYNC;
-            result_code = Err::E_ASYNCREQ;
+            result_code = Err::E_ENQASYNC;
 
         } else {
-            Err const CODE = writeReal(buffer, size);
-            if (CODE != Err::E_SUCCESS) {
-                tDLogE("StreamClient::Internal::autoWrite() Write {} error.", getErrName(CODE));
-                return CODE;
+            result_code = _writeReal(buffer, size);
+            if (TBAG_ERR_FAILURE(result_code)) {
+                tDLogE("StreamClient::Internal::autoWrite() Direct write {} error.", getErrName(result_code));
+                return result_code;
             }
+            _winfo.setWrite();
 
-            writer.state = WriteState::WS_WRITE;
-            if (loop.isAliveAndThisThread() == false && static_cast<bool>(async) == false) {
+            if (!_safety_async && loop.isAliveAndThisThread() == false) {
                 tDLogW("StreamClient::Internal::autoWrite() Async is expired.");
                 result_code = Err::E_WARNING;
             } else {
@@ -362,55 +301,262 @@ struct StreamClient::Internal : private Noncopyable
             }
         }
 
-        if (write_timeout > 0) {
-            if (isActiveShutdownTimer()) {
-                stopShutdownTimer();
+        if (_shutdown_timer && _winfo.timeout > 0) {
+            if (uvpp::isActiveTimer(_shutdown_timer)) {
+                uvpp::stopTimer(_shutdown_timer);
             }
-
-            Err const CODE = startShutdownTimer(write_timeout);
-            if (CODE != Err::E_SUCCESS) {
-                tDLogW("StreamClient::Internal::autoWrite() Timer job {} error!", getErrName(CODE));
+            Err const CODE = uvpp::startTimer(_shutdown_timer, _winfo.timeout);
+            if (TBAG_ERR_FAILURE(CODE)) {
+                tDLogW("StreamClient::Internal::_autoWrite() Timer job {} error!", getErrName(CODE));
             }
-        } else {
-            // tDLogD("StreamClient::Internal::autoWrite() No timeout.");
         }
 
         return result_code;
     }
 
-    void closeAll()
+    Err close()
     {
-        assert(static_cast<bool>(client));
-        if (client->isClosing() == false) {
-            client->close();
+        Guard const LOCK(_mutex);
+        Loop & loop = _getLoop();
+
+        if (_safety_async && loop.isAliveAndThisThread() == false) {
+            tDLogD("StreamClient::Internal::close() Async request.");
+            auto job = _safety_async->newSendFunc([&](){
+                _closeClient();
+            });
+            if (static_cast<bool>(job)) {
+                return Err::E_ASYNCREQ;
+            }
+            return Err::E_ESEND;
         }
 
-        if (owner_async && static_cast<bool>(async)) {
-            if (async->isClosing() == false) {
-                async->close();
-            }
-            async.reset();
+        _closeClient();
+
+        Err result_code = Err::E_SUCCESS;
+        if (!_safety_async && loop.isAliveAndThisThread() == false) {
+            tDLogW("StreamClient::Internal::close() Async is expired.");
+            result_code = Err::E_WARNING;
         }
 
-        if (static_cast<bool>(user_timer)) {
-            if (user_timer->isActive()) {
-                user_timer->stop();
+        tDLogD("StreamClient::Internal::close() Synced request.");
+        return result_code;
+    }
+
+    Err cancel()
+    {
+        Guard const LOCK(_mutex);
+        Loop & loop = _getLoop();
+
+        if (_safety_async && loop.isAliveAndThisThread() == false) {
+            tDLogD("StreamClient::Internal::cancel() Async request.");
+            auto job = _safety_async->newSendFunc([&](){
+                _shutdownWrite();
+            });
+            if (static_cast<bool>(job)) {
+                return Err::E_ASYNCREQ;
             }
-            if (user_timer->isClosing() == false) {
-                user_timer->close();
-            }
-            user_timer.reset();
+            return Err::E_ESEND;
         }
 
-        if (static_cast<bool>(shutdown_timer)) {
-            if (shutdown_timer->isActive()) {
-                shutdown_timer->stop();
-            }
-            if (shutdown_timer->isClosing() == false) {
-                shutdown_timer->close();
-            }
-            shutdown_timer.reset();
+        _shutdownWrite();
+
+        Err result_code = Err::E_SUCCESS;
+        if (!_safety_async && loop.isAliveAndThisThread() == false) {
+            tDLogW("StreamClient::Internal::cancel() Async is expired.");
+            result_code = Err::E_WARNING;
         }
+
+        tDLogD("StreamClient::Internal::cancel() Synced request.");
+        return result_code;
+    }
+
+private:
+    Loop & _getLoop()
+    {
+        assert(static_cast<bool>(_client));
+        Loop * loop = _client->getLoop();
+        assert(loop != nullptr);
+        return *loop;
+    }
+
+    Err _writeReal(char const * buffer, std::size_t size)
+    {
+        assert(static_cast<bool>(_client));
+        TBAG_STREAM_CLIENT_PRINT_BUFFER_IMPL("StreamClient::Internal::writeReal", buffer, size);
+
+        Err const WRITE_CODE = _client->write(_winfo.write_req, buffer, size);
+        if (TBAG_ERR_SUCCESS(WRITE_CODE)) {
+            if (_winfo.cur_fail_count > 0) {
+                tDLogI("StreamClient::Internal::_writeReal() Restore fail count.");
+                _winfo.cur_fail_count = 0;
+            }
+            return Err::E_SUCCESS;
+        }
+
+        ++_winfo.cur_fail_count;
+        if (_winfo.cur_fail_count < _winfo.max_fail_count) {
+            tDLogW("StreamClient::Internal::_writeReal() Write {} error (FAIL_COUNT:{}/{}).",
+                   getErrName(WRITE_CODE), _winfo.cur_fail_count, _winfo.max_fail_count);
+        } else {
+            tDLogE("StreamClient::Internal::_writeReal() Write {} error (FAIL_COUNT:{}/{}) => Force close!",
+                   getErrName(WRITE_CODE), _winfo.cur_fail_count, _winfo.max_fail_count);
+            _closeClient();
+        }
+        return WRITE_CODE;
+    }
+
+    Err _asyncWrite(char const * buffer, std::size_t size)
+    {
+        _winfo.buffer.assign(buffer, buffer + size);
+        if (auto job = _safety_async->newSendJob<AsyncWrite>(this)) {
+            _winfo.setAsync();
+            return Err::E_SUCCESS;
+        }
+        return Err::E_ESEND;
+    }
+
+    Err _writeFromOnAsync()
+    {
+        assert(_parent != nullptr);
+        if (_winfo.isAsyncCancel()) {
+            tDLogW("StreamClient::Internal::onAsyncWrite() Cancel async write.");
+            uvpp::stopTimer(_shutdown_timer);
+            _winfo.setReady();
+            return Err::E_ECANCELED;
+        }
+
+        if (_winfo.isAsync() == false) {
+            tDLogE("StreamClient::Internal::onAsyncWrite() Error state: {}", _winfo.getStateName());
+            uvpp::stopTimer(_shutdown_timer);
+            _winfo.setReady();
+            return Err::E_ILLSTATE;
+        }
+
+        assert(_winfo.isAsync());
+
+        if (_winfo.buffer.empty()) {
+            tDLogE("StreamClient::Internal::onAsyncWrite() Empty buffer");
+            uvpp::stopTimer(_shutdown_timer);
+            _winfo.setReady();
+            return Err::E_EBUFFER;
+        }
+
+        Err const CODE = _writeReal(_winfo.buffer.data(), _winfo.buffer.size());
+        if (TBAG_ERR_FAILURE(CODE)) {
+            tDLogE("StreamClient::Internal::onAsyncWrite() Write {} error.", getErrName(CODE));
+            uvpp::stopTimer(_shutdown_timer);
+            _winfo.setReady();
+            return CODE;
+        }
+
+        _winfo.setWrite();
+        return Err::E_SUCCESS;
+    }
+
+    Err _shutdownWrite()
+    {
+        if (_winfo.isAsync()) {
+            _winfo.setAsyncCancel();
+            return Err::E_SUCCESS;
+        }
+
+        if (_winfo.isWrite() == false) {
+            tDLogE("StreamClient::Internal::_shutdownWrite() Illegal state error: {}", _winfo.getStateName());
+            return Err::E_ILLSTATE;
+        }
+
+        assert(_winfo.isWrite());
+
+        Err const CODE = _client->shutdown(_winfo.shutdown_req);
+        if (TBAG_ERR_FAILURE(CODE)) {
+            tDLogE("StreamClient::Internal::_shutdownWrite() {} error", getErrName(CODE));
+            return CODE;
+        }
+
+        _winfo.setShutdown();
+        return Err::E_SUCCESS;
+    }
+
+    void _closeClient()
+    {
+        assert(static_cast<bool>(_client));
+        if (_client->isClosing() == false) {
+            _client->close();
+        }
+        _winfo.setClosing();
+    }
+
+    void _closeInternal()
+    {
+        // Close all internal handles.
+        if (_safety_async && _safety_async->isClosing() == false) {
+            _safety_async->close();
+        }
+        if (_user_timer && _user_timer->isClosing() == false) {
+            _user_timer->close();
+        }
+        if (_shutdown_timer && _shutdown_timer->isClosing() == false) {
+            _shutdown_timer->close();
+        }
+    }
+
+protected:
+    void onUserTimer()
+    {
+        assert(_parent != nullptr);
+        _parent->onTimer();
+    }
+
+    void onShutdownTimer()
+    {
+        Guard const LOCK(_mutex);
+        _shutdownWrite();
+    }
+
+    void onAsyncWrite()
+    {
+        _mutex.lock();
+        Err const WRITE_CODE = _writeFromOnAsync();
+        _mutex.unlock();
+
+        if (TBAG_ERR_FAILURE(WRITE_CODE)) {
+            assert(_parent != nullptr);
+            tDLogD("StreamClient::Internal::onAsyncWrite() ~~> onWrite({}) event force call.", getErrName(WRITE_CODE));
+            _parent->onWrite(WRITE_CODE);
+        }
+    }
+
+public:
+    void preConnect(Err code)
+    {
+        Guard const LOCK(_mutex);
+        _winfo.setReady();
+    }
+
+    void preShutdown(Err code)
+    {
+        Guard const LOCK(_mutex);
+        _winfo.setReady();
+    }
+
+    void preWrite(Err code)
+    {
+        Guard const LOCK(_mutex);
+        uvpp::stopTimer(_shutdown_timer);
+        assert(_winfo.isWrite() || _winfo.isShutdown());
+        _winfo.setReady();
+    }
+
+    void preRead(Err code, ReadPacket const & packet)
+    {
+        // EMPTY.
+    }
+
+    void preClose()
+    {
+        Guard const LOCK(_mutex);
+        _closeInternal();
+        _winfo.setEnd();
     }
 };
 
@@ -419,195 +565,82 @@ struct StreamClient::Internal : private Noncopyable
 // ----------------------------
 
 StreamClient::StreamClient(Loop & loop, StreamType type)
-        : StreamClient(loop, type, SharedSafetyAsync())
+        : _internal(new Internal(this, loop, type))
 {
     assert(static_cast<bool>(_internal));
 }
 
-StreamClient::StreamClient(Loop & loop,
-                           StreamType type,
-                           SharedSafetyAsync async,
-                           WriteReady const & UNUSED_PARAM(ready))
-        : StreamClient(loop, type, async)
+StreamClient::StreamClient(Loop & loop, StreamType type, WriteReady const & ready)
+        : _internal(new Internal(this, loop, type, ready))
 {
     assert(static_cast<bool>(_internal));
-    if (_internal->initHandles()) {
-        _internal->writer.state = WriteState::WS_READY;
-    }
-}
-
-StreamClient::StreamClient(Loop & loop, StreamType type, SharedSafetyAsync async)
-         : STREAM_TYPE(type), _internal(new Internal(this))
-{
-    assert(static_cast<bool>(_internal));
-
-    using  TcpBackend = StreamClientBackend<uvpp::Tcp>;
-    using PipeBackend = StreamClientBackend<uvpp::Pipe>;
-
-    if (type == StreamType::TCP) {
-        _internal->client = loop.newHandle<TcpBackend>(loop, this);
-    } else if (type == StreamType::PIPE) {
-        _internal->client = loop.newHandle<PipeBackend>(loop, this);
-    } else {
-        throw std::bad_alloc();
-    }
-    assert(static_cast<bool>(_internal->client));
-
-    if (static_cast<bool>(async) && loop.id() == async->getLoop()->id()) {
-        _internal->owner_async = false;
-        _internal->async = async;
-    } else {
-        _internal->owner_async = true;
-        _internal->async.reset();
-    }
-
-    _internal->writer.state = WriteState::WS_NOT_READY;
 }
 
 StreamClient::~StreamClient()
 {
-    // EMPTY.
-}
-
-void StreamClient::onShutdownTimer()
-{
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-    _internal->shutdownWrite();
-}
-
-void StreamClient::onAsyncWrite()
-{
-    assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-
-    if (_internal->writer.state == WriteState::WS_ASYNC_CANCEL) {
-        tDLogN("StreamClient::onAsyncWrite() Cancel async write.");
-        _internal->stopShutdownTimer();
-        _internal->writer.state = WriteState::WS_READY;
-        return;
-    }
-
-    if (_internal->writer.state != WriteState::WS_ASYNC) {
-        tDLogE("StreamClient::onAsyncWrite() Error state: {}", getWriteStateName(_internal->writer.state));
-        _internal->stopShutdownTimer();
-        _internal->writer.state = WriteState::WS_READY;
-        return;
-    }
-
-    assert(_internal->writer.state == WriteState::WS_ASYNC);
-
-    if (_internal->writer.buffer.empty() || _internal->writer.buffer_size == 0) {
-        tDLogD("StreamClient::onAsyncWrite() Empty writer buffer.");
-        _internal->writer.state = WriteState::WS_READY;
-        return;
-    }
-
-    Err const CODE = _internal->writeReal(_internal->writer.buffer.data(), _internal->writer.buffer_size);
-    if (CODE == Err::E_SUCCESS) {
-        _internal->writer.state = WriteState::WS_WRITE;
-    } else {
-        tDLogE("StreamClient::onAsyncWrite() {} error.", getErrName(CODE));
-        _internal->stopShutdownTimer();
-        _internal->writer.state = WriteState::WS_READY;
-    }
-}
-
-char const * StreamClient::getWriteStateName(WriteState state) TBAG_NOEXCEPT
-{
-    switch (state) {
-    case WriteState::WS_NOT_READY:     return "NOT_READY";
-    case WriteState::WS_READY:         return "READY";
-    case WriteState::WS_ASYNC:         return "ASYNC";
-    case WriteState::WS_ASYNC_CANCEL:  return "ASYNC_CANCEL";
-    case WriteState::WS_WRITE:         return "WRITE";
-    case WriteState::WS_SHUTDOWN:      return "SHUTDOWN";
-    case WriteState::WS_END:           return "END";
-    }
-
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return "UNKNOWN";
+    _internal.reset();
 }
 
 StreamClient::WriteState StreamClient::getWriteState() const
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-    return _internal->writer.state;
+    return _internal->getState();
 }
 
 char const * StreamClient::getWriteStateName() const
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-    return getWriteStateName(_internal->writer.state);
+    return _internal->getStateName();
 }
 
 StreamClient::WeakClientBackend StreamClient::getClient()
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-    Guard const MUTEX_GUARD(_mutex);
-    return WeakClientBackend(_internal->client);
+    return _internal->getClient();
 }
 
 StreamClient::WeakSafetyAsync StreamClient::getAsync()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-    return WeakSafetyAsync(_internal->async);
+    return _internal->getAsync();
 }
 
 StreamClient::Id StreamClient::id() const
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-    Guard const MUTEX_GUARD(_mutex);
-    return _internal->client->id();
+    return _internal->getId();
 }
 
 void * StreamClient::udata()
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-    Guard const MUTEX_GUARD(_mutex);
-    return _internal->client->getUserData();
+    return _internal->getUserData();
 }
 
 std::string StreamClient::dest() const
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-    Guard const MUTEX_GUARD(_mutex);
-    if (STREAM_TYPE == StreamType::TCP) {
-        return std::static_pointer_cast<uvpp::Tcp>(_internal->client)->getPeerIp();
-    }
-    return std::string();
+    return _internal->dest();
 }
 
 int StreamClient::port() const
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-    Guard const MUTEX_GUARD(_mutex);
-    if (STREAM_TYPE == StreamType::TCP) {
-        return std::static_pointer_cast<uvpp::Tcp>(_internal->client)->getPeerPort();
-    }
-    return 0;
+    return _internal->port();
 }
 
 Err StreamClient::init(char const * destination, int port)
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
 
-    Err const INIT_CODE = _internal->initClient(STREAM_TYPE, std::string(destination), port);
+    Err const INIT_CODE = _internal->initClient(_internal->getStreamType(), std::string(destination), port);
     if (INIT_CODE != Err::E_SUCCESS) {
         tDLogE("StreamClient::init() Initialize fail.");
         return INIT_CODE;
     }
 
-    if (_internal->initHandles() == false) {
+    if (_internal->initInternalHandles() == false) {
         tDLogE("StreamClient::init() Initialize fail (internal handles).");
         return Err::E_UNKNOWN;
     }
@@ -618,107 +651,54 @@ Err StreamClient::init(char const * destination, int port)
 Err StreamClient::start()
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-    Guard const MUTEX_GUARD(_mutex);
-    Err const CODE = _internal->client->startRead();
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("StreamClient::start() {} error", getErrName(CODE));
-    }
-    return CODE;
+    return _internal->startRead();
 }
 
 Err StreamClient::stop()
 {
     assert(static_cast<bool>(_internal));
-    assert(static_cast<bool>(_internal->client));
-    Guard const MUTEX_GUARD(_mutex);
-    Err const CODE = _internal->client->stopRead();
-    if (CODE != Err::E_SUCCESS) {
-        tDLogE("StreamClient::stop() {} error", getErrName(CODE));
-    }
-    return CODE;
+    return _internal->stopRead();
 }
 
 Err StreamClient::close()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-    Loop & loop = _internal->getLoop();
-
-    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
-        tDLogD("StreamClient::close() Async request.");
-        _internal->async->newSendFunc([&](){
-            Guard const MUTEX_GUARD_ASYNC(_mutex);
-            _internal->closeAll();
-        });
-        return Err::E_ASYNCREQ;
-    }
-
-    Err code = Err::E_SUCCESS;
-    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async) == false) {
-        tDLogW("StreamClient::close() Async is expired.");
-        code = Err::E_WARNING;
-    }
-
-    tDLogD("StreamClient::close() Synced request.");
-    _internal->closeAll();
-    return code;
+    return _internal->close();
 }
 
 Err StreamClient::cancel()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-    Loop & loop = _internal->getLoop();
-
-    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async)) {
-        tDLogD("StreamClient::cancel() Async request.");
-        _internal->async->newSendFunc([&]() {
-            Guard const MUTEX_GUARD_ASYNC(_mutex);
-            _internal->shutdownWrite();
-        });
-        return Err::E_ASYNCREQ;
-    }
-
-    if (loop.isAliveAndThisThread() == false && static_cast<bool>(_internal->async) == false) {
-        tDLogW("StreamClient::cancel() Async is expired.");
-    }
-    tDLogD("StreamClient::cancel() Synced request.");
-    return _internal->shutdownWrite();
+    return _internal->cancel();
 }
 
 Err StreamClient::write(char const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
     return _internal->autoWrite(buffer, size);
 }
 
 void StreamClient::setWriteTimeout(uint64_t millisec)
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
-    _internal->write_timeout = millisec;
+    _internal->setWriteTimeout(millisec);
 }
 
 bool StreamClient::isActiveTimer()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
     return _internal->isActiveUserTimer();
 }
 
 Err StreamClient::startTimer(uint64_t millisec)
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
     return _internal->startUserTimer(millisec);
 }
 
 void StreamClient::stopTimer()
 {
     assert(static_cast<bool>(_internal));
-    Guard const MUTEX_GUARD(_mutex);
     _internal->stopUserTimer();
 }
 
@@ -729,49 +709,35 @@ void StreamClient::stopTimer()
 void StreamClient::backConnect(Err code)
 {
     assert(static_cast<bool>(_internal));
-    _mutex.lock();
-    _internal->writer.state = WriteState::WS_READY;
-    _mutex.unlock();
-
+    _internal->preConnect(code);
     onConnect(code);
 }
 
 void StreamClient::backShutdown(Err code)
 {
     assert(static_cast<bool>(_internal));
-    _mutex.lock();
-    _internal->writer.state = WriteState::WS_READY;
-    _mutex.unlock();
-
+    _internal->preShutdown(code);
     onShutdown(code);
 }
 
 void StreamClient::backWrite(Err code)
 {
     assert(static_cast<bool>(_internal));
-    _mutex.lock();
-    _internal->stopShutdownTimer();
-    assert(/**/_internal->writer.state == WriteState::WS_WRITE ||
-               _internal->writer.state == WriteState::WS_SHUTDOWN);
-    _internal->writer.state = WriteState::WS_READY;
-    _mutex.unlock();
-
+    _internal->preWrite(code);
     onWrite(code);
 }
 
 void StreamClient::backRead(Err code, ReadPacket const & packet)
 {
+    assert(static_cast<bool>(_internal));
+    _internal->preRead(code, packet);
     onRead(code, packet);
 }
 
 void StreamClient::backClose()
 {
     assert(static_cast<bool>(_internal));
-    _mutex.lock();
-    _internal->closeAll();
-    _internal->writer.state = WriteState::WS_END;
-    _mutex.unlock();
-
+    _internal->preClose();
     onClose();
 }
 

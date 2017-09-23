@@ -185,8 +185,7 @@ public:
      */
     virtual SharedStreamNode createClient(StreamType type,
                                           Loop & loop,
-                                          SharedServerBackend & server,
-                                          SharedSafetyAsync & async);
+                                          SharedServerBackend & server);
 
 public:
     template <typename T>

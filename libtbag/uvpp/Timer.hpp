@@ -16,9 +16,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/uvpp/Handle.hpp>
 
 #include <cstdint>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -71,6 +73,40 @@ public:
 public:
     virtual void onTimer();
 };
+
+// ----------
+// Utilities.
+// ----------
+
+template <typename TimerType>
+bool isActiveTimer(std::shared_ptr<TimerType> const & timer)
+{
+    STATIC_ASSERT_CHECK_IS_BASE_OF(Timer, TimerType);
+    return timer && timer->isActive();
+}
+
+template <typename TimerType>
+Err startTimer(std::shared_ptr<TimerType> const & timer, uint64_t millisec)
+{
+    STATIC_ASSERT_CHECK_IS_BASE_OF(Timer, TimerType);
+    if (static_cast<bool>(timer) == false) {
+        return Err::E_ALREADY;
+    }
+    if (timer->isActive()) {
+        return Err::E_EBUSY;
+    }
+    return timer->start(millisec);
+}
+
+template <typename TimerType>
+Err stopTimer(std::shared_ptr<TimerType> const & timer)
+{
+    STATIC_ASSERT_CHECK_IS_BASE_OF(Timer, TimerType);
+    if (static_cast<bool>(timer) == false) {
+        return Err::E_EXPIRED;
+    }
+    return timer->stop();
+}
 
 } // namespace uvpp
 

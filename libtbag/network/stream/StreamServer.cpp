@@ -301,7 +301,7 @@ StreamServer::WeakClient StreamServer::accept()
     }
 
     Guard const MUTEX_GUARD(_mutex);
-    SharedStreamNode client = createClient(STREAM_TYPE, _internal->getLoop(), _internal->server, _internal->async);
+    SharedStreamNode client = createClient(STREAM_TYPE, _internal->getLoop(), _internal->server);
 
     if (StreamClient::SharedClientBackend shared = client->getClient().lock()) {
         STATIC_ASSERT_CHECK_IS_BASE_OF(typename StreamClient::SharedClientBackend::element_type, uvpp::Stream);
@@ -369,10 +369,9 @@ void StreamServer::backClose()
 
 StreamServer::SharedStreamNode StreamServer::createClient(StreamType type,
                                                           Loop & loop,
-                                                          SharedServerBackend & server,
-                                                          SharedSafetyAsync & async)
+                                                          SharedServerBackend & server)
 {
-    return SharedStreamNode(new (std::nothrow) StreamNode(loop, type, async, this));
+    return SharedStreamNode(new (std::nothrow) StreamNode(loop, type, this));
 }
 
 } // namespace stream

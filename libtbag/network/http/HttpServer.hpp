@@ -110,7 +110,7 @@ public:
         int _max_queue_size;
 
     public:
-        HttpNode(Loop & loop, StreamType type, SharedSafetyAsync async, HttpServer * parent);
+        HttpNode(Loop & loop, StreamType type, HttpServer * parent);
         virtual ~HttpNode();
 
     public:
@@ -237,8 +237,7 @@ protected:
 protected:
     virtual SharedStreamNode createClient(StreamType type,
                                           Loop & loop,
-                                          SharedServerBackend & server,
-                                          SharedSafetyAsync & async) final override;
+                                          SharedServerBackend & server) final override;
 
 // ------------------------
 // User's callback methods.

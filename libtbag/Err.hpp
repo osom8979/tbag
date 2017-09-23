@@ -55,6 +55,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_UNKSIG  , "Unknown signal"          ) \
     _TBAG_XX(_ECOPY   , "Copy error"              ) \
     _TBAG_XX(_EPUSH   , "Push error"              ) \
+    _TBAG_XX(_ESEND   , "Send error"              ) \
     _TBAG_XX(_EPOP    , "Pop error"               ) \
     _TBAG_XX(_HTTP_1XX, "Informational (HTTP 1xx)") \
     _TBAG_XX(_HTTP_3XX, "Redirection (HTTP 3xx)"  ) \

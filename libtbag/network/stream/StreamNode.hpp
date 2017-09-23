@@ -55,7 +55,7 @@ private:
     ServerInterface * _parent;
 
 public:
-    StreamNode(Loop & loop, StreamType type, SharedSafetyAsync async, ServerInterface * parent);
+    StreamNode(Loop & loop, StreamType type, ServerInterface * parent);
     virtual ~StreamNode();
 
 public:

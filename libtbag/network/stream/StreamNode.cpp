@@ -17,8 +17,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace stream  {
 
-StreamNode::StreamNode(Loop & loop, StreamType type, SharedSafetyAsync async, ServerInterface * parent)
-        : StreamClient(loop, type, async, StreamClient::WriteReady()), _parent(parent)
+StreamNode::StreamNode(Loop & loop, StreamType type, ServerInterface * parent)
+        : StreamClient(loop, type, StreamClient::WriteReady()), _parent(parent)
 {
     assert(getWriteState() == StreamClient::WriteState::WS_READY);
 }
