@@ -22,7 +22,7 @@ namespace http    {
 // ------------------------
 
 HttpServer::HttpNode::HttpNode(Loop & loop, StreamType type, HttpServer * parent)
-        : StreamNode(loop, type, parent), _upgrade(false), _closing(false), _max_queue_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
+        : StreamNode(loop, type, parent), _upgrade(false), _closing(false)
 {
     // EMPTY.
 }
@@ -32,20 +32,7 @@ HttpServer::HttpNode::~HttpNode()
     // EMPTY.
 }
 
-Err HttpServer::HttpNode::writeOrEnqueue(char const * buffer, std::size_t size)
-{
-    Guard const LOCK_GUARD(_queue_mutex);
-    if (_queue.size() >= _max_queue_size) {
-        return Err::E_EBUSY;
-    }
-    if (_queue.empty() && getWriteState() == WriteState::WS_READY) {
-        return write(buffer, size);
-    }
-    _queue.push().assign((uint8_t const *)(buffer), (uint8_t const *)(buffer + size));
-    return Err::E_ENQASYNC;
-}
-
-Err HttpServer::HttpNode::writeOrEnqueue(WsFrame const & frame)
+Err HttpServer::HttpNode::writeWsFrame(WsFrame const & frame)
 {
     WsBuffer buffer;
     std::size_t const SIZE = frame.copyTo(buffer);
@@ -53,26 +40,7 @@ Err HttpServer::HttpNode::writeOrEnqueue(WsFrame const & frame)
         tDLogE("HttpServer::HttpNode::writeOrEnqueue() WsFrame -> Buffer copy error");
         return Err::E_ECOPY;
     }
-    return writeOrEnqueue((char const *)buffer.data(), buffer.size());
-}
-
-Err HttpServer::HttpNode::writeFromQueue()
-{
-    Guard const LOCK_GUARD(_queue_mutex);
-    if (_queue.empty() || getWriteState() != WriteState::WS_READY) {
-        return Err::E_ILLSTATE;
-    }
-
-    auto & buffer = _queue.frontRef();
-    Err const WRITE_CODE = write((char const *)buffer.data(), buffer.size());
-    _queue.pop();
-
-    tDLogD("HttpServer::HttpNode::writeFromQueue() Remaining queue size: {}", _queue.size());
-
-    if (TBAG_ERR_FAILURE(WRITE_CODE)) {
-        tDLogE("HttpServer::HttpNode::writeFromQueue() write {} error", getErrName(WRITE_CODE));
-    }
-    return WRITE_CODE;
+    return write((char const *)buffer.data(), buffer.size());
 }
 
 Err HttpServer::HttpNode::writeText(std::string const & text, bool continuation, bool finish)
@@ -87,7 +55,7 @@ Err HttpServer::HttpNode::writeText(std::string const & text, bool continuation,
         tDLogE("HttpServer::HttpNode::writeText() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
-    return writeOrEnqueue(frame);
+    return writeWsFrame(frame);
 }
 
 Err HttpServer::HttpNode::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
@@ -102,7 +70,7 @@ Err HttpServer::HttpNode::writeBinary(WsBuffer const & binary, bool continuation
         tDLogE("HttpServer::HttpNode::writeBinary() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
-    return writeOrEnqueue(frame);
+    return writeWsFrame(frame);
 }
 
 Err HttpServer::HttpNode::writeHttpResponse(HttpBuilder const & response)
@@ -115,7 +83,7 @@ Err HttpServer::HttpNode::writeString(std::string const & response)
     if (response.empty()) {
         return Err::E_ILLARGS;
     }
-    return writeOrEnqueue(response.data(), response.size());
+    return write(response.data(), response.size());
 }
 
 Err HttpServer::HttpNode::closeWebSocket(uint16_t status_code, std::string const & reason)
@@ -139,7 +107,7 @@ Err HttpServer::HttpNode::closeWebSocket(uint16_t status_code, std::string const
         tDLogE("HttpServer::HttpNode::closeWebSocket() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
-    return writeOrEnqueue(frame);
+    return writeWsFrame(frame);
 }
 
 Err HttpServer::HttpNode::closeWebSocket(WsStatusCode code)
@@ -174,8 +142,6 @@ void HttpServer::HttpNode::backWsFrame(Err code, ReadPacket const & packet)
 
 void HttpServer::HttpNode::onShutdown(Err code)
 {
-    writeFromQueue();
-
     auto * server = getHttpServerPtr();
     assert(server != nullptr);
     server->onHttpShutdown(getWeakClient(), code);
@@ -183,8 +149,6 @@ void HttpServer::HttpNode::onShutdown(Err code)
 
 void HttpServer::HttpNode::onWrite(Err code)
 {
-    writeFromQueue();
-
     auto * server = getHttpServerPtr();
     assert(server != nullptr);
     server->onHttpWrite(getWeakClient(), code);

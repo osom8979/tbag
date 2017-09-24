@@ -196,6 +196,11 @@ NAMESPACE_LIBTBAG_OPEN
 #define TBAG_ERR_SUCCESS(code) (code == ::libtbag::Err::E_SUCCESS)
 #endif
 
+#ifndef TBAG_ERR_SUCCESS_OR_ENQASYNC
+#define TBAG_ERR_SUCCESS_OR_ENQASYNC(code) \
+    (code == ::libtbag::Err::E_SUCCESS || code == ::libtbag::Err::E_ENQASYNC)
+#endif
+
 #ifndef TBAG_ERR_FAILURE
 #define TBAG_ERR_FAILURE(code) (!TBAG_ERR_SUCCESS(code))
 #endif

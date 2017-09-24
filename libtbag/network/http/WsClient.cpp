@@ -66,18 +66,7 @@ HttpBuilder WsClient::getRequest() const
     return _request;
 }
 
-Err WsClient::writeOrEnqueue(char const * buffer, std::size_t size)
-{
-    Guard const LOCK_GUARD(_queue_mutex);
-    if (_queue.empty() && getWriteState() == WriteState::WS_READY) {
-        TBAG_WS_CLIENT_CHECK_BUFFER_IMPL("WsClient::writeOrEnqueue", buffer, size);
-        return write(buffer, size);
-    }
-    _queue.push().assign(buffer, buffer + size);
-    return Err::E_ENQASYNC;
-}
-
-Err WsClient::writeOrEnqueue(WsFrame const & frame)
+Err WsClient::writeWsFrame(WsFrame const & frame)
 {
     WsBuffer buffer;
     std::size_t const SIZE = frame.copyTo(buffer);
@@ -85,25 +74,7 @@ Err WsClient::writeOrEnqueue(WsFrame const & frame)
         tDLogE("WsClient::writeOrEnqueue() WsFrame -> Buffer copy error");
         return Err::E_ECOPY;
     }
-    return writeOrEnqueue((char const *)buffer.data(), buffer.size());
-}
-
-Err WsClient::writeFromQueue()
-{
-    Guard const LOCK_GUARD(_queue_mutex);
-    if (_queue.empty() || getWriteState() != WriteState::WS_READY) {
-        return Err::E_ILLSTATE;
-    }
-
-    auto & buffer = _queue.frontRef();
-    TBAG_WS_CLIENT_CHECK_BUFFER_IMPL("WsClient::writeFromQueue", buffer.data(), buffer.size());
-    Err const WRITE_CODE = write((char const *)buffer.data(), buffer.size());
-    _queue.pop();
-
-    if (TBAG_ERR_FAILURE(WRITE_CODE)) {
-        tDLogE("WsClient::writeFromQueue() write {} error", getErrName(WRITE_CODE));
-    }
-    return WRITE_CODE;
+    return write((char const *)buffer.data(), buffer.size());
 }
 
 Err WsClient::writeText(std::string const & text, bool continuation, bool finish)
@@ -118,7 +89,7 @@ Err WsClient::writeText(std::string const & text, bool continuation, bool finish
         tDLogE("WsClient::writeText() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
-    return writeOrEnqueue(frame);
+    return writeWsFrame(frame);
 }
 
 Err WsClient::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
@@ -133,7 +104,7 @@ Err WsClient::writeBinary(WsBuffer const & binary, bool continuation, bool finis
         tDLogE("WsClient::writeBinary() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
-    return writeOrEnqueue(frame);
+    return writeWsFrame(frame);
 }
 
 Err WsClient::closeWebSocket()
@@ -158,7 +129,7 @@ Err WsClient::closeWebSocket()
         tDLogE("WsClient::closeWebSocket() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
-    return writeOrEnqueue(frame);
+    return writeWsFrame(frame);
 }
 
 bool WsClient::runWsChecker(HttpParser const & response)
@@ -266,16 +237,12 @@ void WsClient::onConnect(Err code)
 
 void WsClient::onShutdown(Err code)
 {
-    writeFromQueue();
-
     onWsError(code == Err::E_SUCCESS ? Err::E_SHUTDOWN : code);
     // [WARNING] Don't use 'close' method.
 }
 
 void WsClient::onWrite(Err code)
 {
-    writeFromQueue();
-
     if (code != Err::E_SUCCESS) {
         tDLogE("WsClient::onWrite() {} error.", getErrName(code));
         onWsError(code);

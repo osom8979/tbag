@@ -102,13 +102,6 @@ public:
     private:
         WsFrameBuffer _buffer;
 
-    private:
-        mutable Mutex _queue_mutex;
-        WsQueue _queue;
-
-    private:
-        int _max_queue_size;
-
     public:
         HttpNode(Loop & loop, StreamType type, HttpServer * parent);
         virtual ~HttpNode();
@@ -122,9 +115,7 @@ public:
         inline bool isClosing() const TBAG_NOEXCEPT_SP_OP(_closing.load()) { return _closing.load(); }
 
     private:
-        Err writeOrEnqueue(char const * buffer, std::size_t size);
-        Err writeOrEnqueue(WsFrame const & frame);
-        Err writeFromQueue();
+        Err writeWsFrame(WsFrame const & frame);
 
     public:
         Err writeText(std::string const & text, bool continuation = false, bool finish = true);

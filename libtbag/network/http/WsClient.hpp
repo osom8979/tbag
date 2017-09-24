@@ -84,10 +84,6 @@ private:
     HttpBuilder _request;
 
 private:
-    mutable Mutex _queue_mutex;
-    WsQueue _queue;
-
-private:
     WsCloseResult _close;
 
 // Receive packet.
@@ -110,9 +106,7 @@ public:
     HttpBuilder getRequest() const;
 
 private:
-    Err writeOrEnqueue(char const * buffer, std::size_t size);
-    Err writeOrEnqueue(WsFrame const & frame);
-    Err writeFromQueue();
+    Err writeWsFrame(WsFrame const & frame);
 
 public:
     Err writeText(std::string const & text, bool continuation = false, bool finish = true);
