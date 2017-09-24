@@ -258,8 +258,7 @@ NAMESPACE_LIBTBAG_CLOSE
 
 #include <ostream>
 
-template <class CharT, class TraitsT>
-std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, libtbag::Err err)
+inline std::ostream & operator << (std::ostream & os, libtbag::Err const & err)
 {
     os << libtbag::getErrName(err);
     return os;

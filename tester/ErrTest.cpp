@@ -18,5 +18,7 @@ TEST(ErrTest, Default)
     Err code = static_cast<Err>(std::numeric_limits<int>::max());
     ASSERT_NE(nullptr, getErrName(code));
     ASSERT_NE(nullptr, getErrDetail(code));
+
+    std::cout << "Error code: " << code << std::endl;
 }
 

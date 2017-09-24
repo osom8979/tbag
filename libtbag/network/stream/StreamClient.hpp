@@ -17,9 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/container/ReuseQueue.hpp>
-#include <libtbag/network/stream/InternalClient.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
+#include <libtbag/network/stream/WriteQueueClient.hpp>
 
 #include <string>
 #include <vector>
@@ -59,7 +58,7 @@ public:
     using Id   = id::Id;
 
 private:
-    InternalClient _internal;
+    WriteQueueClient _internal;
 
 public:
     StreamClient(Loop & loop, StreamType type);

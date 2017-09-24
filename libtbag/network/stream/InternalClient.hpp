@@ -129,9 +129,9 @@ public:
     inline StreamType getStreamType() const TBAG_NOEXCEPT { return STREAM_TYPE; }
 
 public:
-    inline void     lock() TBAG_NOEXCEPT_SP_OP(_mutex.  lock()) { _mutex.lock(); }
-    inline void   unlock() TBAG_NOEXCEPT_SP_OP(_mutex.unlock()) { _mutex.unlock(); }
-    inline bool try_lock() TBAG_NOEXCEPT_SP_OP(_mutex.try_lock()) { return _mutex.try_lock(); }
+    inline void     lock() const TBAG_NOEXCEPT_SP_OP(_mutex.  lock()) { _mutex.lock(); }
+    inline void   unlock() const TBAG_NOEXCEPT_SP_OP(_mutex.unlock()) { _mutex.unlock(); }
+    inline bool try_lock() const TBAG_NOEXCEPT_SP_OP(_mutex.try_lock()) { return _mutex.try_lock(); }
 
     inline WriteState   getState    () const TBAG_NOEXCEPT { Guard g(_mutex); return _winfo.getState    (); }
     inline char const * getStateName() const TBAG_NOEXCEPT { Guard g(_mutex); return _winfo.getStateName(); }
@@ -164,7 +164,7 @@ public:
     Err  close();
     Err  cancel();
 
-public:
+protected:
     inline WriteInfo       & _atWriteInfo()       TBAG_NOEXCEPT { return _winfo; }
     inline WriteInfo const & _atWriteInfo() const TBAG_NOEXCEPT { return _winfo; }
 

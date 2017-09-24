@@ -126,7 +126,7 @@ public:
     Value & push(Args && ... args)
     {
         if (_ready.empty()) {
-            _active.push_back(Value(std::forward<Args>(args) ...));
+            _active.emplace_back(std::forward<Args>(args) ...);
         } else {
             _active.push_back(_ready.front());
             _ready.pop_front();

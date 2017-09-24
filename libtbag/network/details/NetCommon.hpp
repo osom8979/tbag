@@ -48,8 +48,8 @@ TBAG_CONSTEXPR int const OS_RANDOMLY_ASSIGNS_PORT = 0;
 /** Maximum continuous failure count of write. */
 TBAG_CONSTEXPR int const MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE = 8;
 
-/** Maximum queue size. */
-TBAG_CONSTEXPR int const MAXIMUM_QUEUE_SIZE = 256;
+/** Maximum write queue size. */
+TBAG_CONSTEXPR int const MAXIMUM_WRITE_QUEUE_SIZE = 256;
 
 enum class StreamType : int
 {

@@ -22,7 +22,7 @@ namespace http    {
 // ------------------------
 
 HttpServer::HttpNode::HttpNode(Loop & loop, StreamType type, HttpServer * parent)
-        : StreamNode(loop, type, parent), _upgrade(false), _closing(false), _max_queue_size(details::MAXIMUM_QUEUE_SIZE)
+        : StreamNode(loop, type, parent), _upgrade(false), _closing(false), _max_queue_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
 {
     // EMPTY.
 }

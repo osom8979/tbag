@@ -121,8 +121,7 @@ Err StreamClient::cancel()
 
 Err StreamClient::write(char const * buffer, std::size_t size)
 {
-    std::lock_guard<InternalClient> const LOCK(_internal);
-    return _internal._autoWrite(buffer, size);
+    return _internal.autoWrite(buffer, size);
 }
 
 void StreamClient::setWriteTimeout(uint64_t millisec)
@@ -151,46 +150,31 @@ bool StreamClient::isActiveTimer()
 
 void StreamClient::backConnect(Err code)
 {
-    _internal.lock();
-    _internal._atWriteInfo().setReady();
-    _internal.unlock();
-
+    _internal.preConnect(code);
     onConnect(code);
 }
 
 void StreamClient::backShutdown(Err code)
 {
-    _internal.lock();
-    _internal._atWriteInfo().setReady();
-    _internal.unlock();
-
+    _internal.preShutdown(code);
     onShutdown(code);
 }
 
 void StreamClient::backWrite(Err code)
 {
-    _internal.lock();
-    auto & winfo = _internal._atWriteInfo();
-    assert(winfo.isWrite() || winfo.isShutdown());
-    winfo.setReady();
-    _internal._stopShutdownTimer();
-    _internal.unlock();
-
+    _internal.preWrite(code);
     onWrite(code);
 }
 
 void StreamClient::backRead(Err code, ReadPacket const & packet)
 {
+    _internal.preRead(code, packet);
     onRead(code, packet);
 }
 
 void StreamClient::backClose()
 {
-    _internal.lock();
-    _internal._closeInternal();
-    _internal._atWriteInfo().setEnd();
-    _internal.unlock();
-
+    _internal.preClose();
     onClose();
 }
 
