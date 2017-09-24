@@ -47,7 +47,6 @@ public:
     using Loop       = uvpp::Loop;
 
     using        ReadPacket = StreamClient::ReadPacket;
-    using       SafetyAsync = StreamClient::SafetyAsync;
     using SharedSafetyAsync = StreamClient::SharedSafetyAsync;
     using   WeakSafetyAsync = StreamClient::WeakSafetyAsync;
 
@@ -66,12 +65,12 @@ public:
     WeakClient getWeakClient();
 
 public:
-    virtual void onConnect(Err code) override;
+    virtual void onConnect (Err code) override;
     virtual void onShutdown(Err code) override;
-    virtual void onWrite(Err code) override;
-    virtual void onRead(Err code, ReadPacket const & packet) override;
-    virtual void onClose() override;
-    virtual void onTimer() override;
+    virtual void onWrite   (Err code) override;
+    virtual void onRead    (Err code, ReadPacket const & packet) override;
+    virtual void onClose   () override;
+    virtual void onTimer   () override;
 };
 
 } // namespace stream

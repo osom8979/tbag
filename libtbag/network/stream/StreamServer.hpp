@@ -240,8 +240,8 @@ struct PipeServer : public stream::StreamServer
     { /* EMPTY. */ }
 };
 
-using FunctionalTcpServer  = details::FunctionalServer<TcpServer>;
-using FunctionalPipeServer = details::FunctionalServer<PipeServer>;
+using FuncTcpServer  = details::FunctionalServer<TcpServer>;
+using FuncPipeServer = details::FunctionalServer<PipeServer>;
 
 } // namespace stream
 } // namespace network

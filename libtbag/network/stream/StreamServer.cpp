@@ -28,7 +28,7 @@ namespace stream  {
  * @date   2017-06-16
  *
  * @warning
- *  - Do not use a mutex if the function name starts with '_'.
+ *  Do not use a mutex if the function name starts with '_'.
  */
 class StreamServer::Internal : private Noncopyable
 {

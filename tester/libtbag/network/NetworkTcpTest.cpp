@@ -181,7 +181,7 @@ TEST(NetworkTcpTest, ClientTimeout)
     log::SeverityGuard guard;
     using namespace uvpp;
     Loop loop;
-    FunctionalTcpClient client(loop);
+    FuncTcpClient client(loop);
 
     Err const INIT_CODE = client.init("8.8.8.8", 9999);
     if (INIT_CODE == Err::E_ENETUNREACH) {
@@ -227,7 +227,7 @@ TEST(NetworkTcpTest, CloseWhileConnecting)
     log::SeverityGuard guard;
     using namespace uvpp;
     Loop loop;
-    FunctionalTcpClient client(loop);
+    FuncTcpClient client(loop);
 
     Err const INIT_CODE = client.init("1.2.3.4", 9999);
     if (INIT_CODE == Err::E_ENETUNREACH) {
@@ -296,7 +296,7 @@ TEST(NetworkTcpTest, ReadStop)
         shared->close();
     });
 
-    FunctionalTcpClient client(loop);
+    FuncTcpClient client(loop);
     ASSERT_EQ(Err::E_SUCCESS, client.init(LOOPBACK_IPV4, SERVER_PORT));
 
     int connect_cb_called = 0;
@@ -371,7 +371,7 @@ TEST(NetworkTcpTest, ShutdownAfterWrite)
         ASSERT_EQ(Err::E_SUCCESS, shared->close());
     });
 
-    FunctionalTcpClient client(loop);
+    FuncTcpClient client(loop);
     ASSERT_EQ(Err::E_SUCCESS, client.init(LOOPBACK_IPV4, SERVER_PORT));
     ASSERT_EQ(Err::E_SUCCESS, client.startTimer(125));
 
@@ -529,7 +529,7 @@ TEST(NetworkTcpTest, MultiEcho)
     // ---------------
 
     Loop loop_server;
-    FunctionalTcpServer server(loop_server);
+    FuncTcpServer server(loop_server);
 
     int server_connection    = 0;
     int server_client_read   = 0;
@@ -546,7 +546,7 @@ TEST(NetworkTcpTest, MultiEcho)
         ASSERT_EQ(Err::E_SUCCESS, shared->start());
         server_connection++;
     });
-    server.set_onClientRead([&](FunctionalTcpServer::WeakClient node, Err code, ReadPacket const & packet){
+    server.set_onClientRead([&](FuncTcpServer::WeakClient node, Err code, ReadPacket const & packet){
         ASSERT_TRUE(code == Err::E_SUCCESS || code == Err::E_EOF);
         if (code == Err::E_SUCCESS) {
             auto shared = node.lock();
@@ -556,14 +556,14 @@ TEST(NetworkTcpTest, MultiEcho)
             ASSERT_EQ(Err::E_SUCCESS, shared->write(packet.buffer, packet.size));
         }
     });
-    server.set_onClientWrite([&](FunctionalTcpServer::WeakClient node, Err code){
+    server.set_onClientWrite([&](FuncTcpServer::WeakClient node, Err code){
         ASSERT_EQ(Err::E_SUCCESS, code);
         auto shared = node.lock();
         ASSERT_TRUE(static_cast<bool>(shared));
         ASSERT_EQ(Err::E_SUCCESS, shared->close());
         server_client_write++;
     });
-    server.set_onClientClose([&](FunctionalTcpServer::WeakClient node){
+    server.set_onClientClose([&](FuncTcpServer::WeakClient node){
         auto shared = node.lock();
         ASSERT_TRUE(static_cast<bool>(shared));
         server_client_close++;
@@ -576,11 +576,11 @@ TEST(NetworkTcpTest, MultiEcho)
     });
 
     int const TEST_USER_DATA_NUMBER = 100;
-    server.set_onClientUdataAlloc([&](FunctionalTcpServer::WeakClient node) -> void *{
+    server.set_onClientUdataAlloc([&](FuncTcpServer::WeakClient node) -> void *{
         server_udata_alloc++;
         return new (std::nothrow) int (TEST_USER_DATA_NUMBER);
     });
-    server.set_onClientUdataDealloc([&](FunctionalTcpServer::WeakClient node, void * data){
+    server.set_onClientUdataDealloc([&](FuncTcpServer::WeakClient node, void * data){
         ASSERT_NE(nullptr, data);
         ASSERT_EQ(TEST_USER_DATA_NUMBER, *static_cast<int*>(data));
         server_udata_dealloc++;
@@ -601,7 +601,7 @@ TEST(NetworkTcpTest, MultiEcho)
     using SharedLoop = std::shared_ptr<Loop>;
     using LoopVector = std::vector<SharedLoop>;
 
-    using SharedFuncClient = std::shared_ptr<FunctionalTcpClient>;
+    using SharedFuncClient = std::shared_ptr<FuncTcpClient>;
     using ClientVector = std::vector<SharedFuncClient>;
 
     using ThreadVector = std::vector<std::thread>;
@@ -620,7 +620,7 @@ TEST(NetworkTcpTest, MultiEcho)
 
     for (i = 0; i < CLIENT_SIZE; ++i) {
         cloops.at(i).reset(new Loop());
-        clients.at(i).reset(new FunctionalTcpClient(*(cloops.at(i))));
+        clients.at(i).reset(new FuncTcpClient(*(cloops.at(i))));
         clients.at(i)->set_onConnect([&, i](Err code){
             if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size()) == Err::E_SUCCESS) {
                 connect_result.at(i) = code;

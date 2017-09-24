@@ -38,7 +38,7 @@ TEST(NetworkPipeTest, MultiEcho)
     // ---------------
 
     Loop loop_server;
-    FunctionalPipeServer server(loop_server);
+    FuncPipeServer server(loop_server);
 
     int server_connection   = 0;
     int server_client_read  = 0;
@@ -54,7 +54,7 @@ TEST(NetworkPipeTest, MultiEcho)
             }
         }
     });
-    server.set_onClientRead([&](FunctionalPipeServer::WeakClient node, Err code,
+    server.set_onClientRead([&](FuncPipeServer::WeakClient node, Err code,
                                ReadPacket const & packet){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
@@ -65,7 +65,7 @@ TEST(NetworkPipeTest, MultiEcho)
             }
         }
     });
-    server.set_onClientWrite([&](FunctionalPipeServer::WeakClient node, Err code){
+    server.set_onClientWrite([&](FuncPipeServer::WeakClient node, Err code){
         if (code == Err::E_SUCCESS) {
             if (auto shared = node.lock()) {
                 server_client_write++;
@@ -73,7 +73,7 @@ TEST(NetworkPipeTest, MultiEcho)
             }
         }
     });
-    server.set_onClientClose([&](FunctionalPipeServer::WeakClient node){
+    server.set_onClientClose([&](FuncPipeServer::WeakClient node){
         if (auto shared = node.lock()) {
             server_client_close++;
         }
@@ -97,7 +97,7 @@ TEST(NetworkPipeTest, MultiEcho)
     using SharedLoop = std::shared_ptr<Loop>;
     using LoopVector = std::vector<SharedLoop>;
 
-    using SharedFuncClient = std::shared_ptr<FunctionalPipeClient>;
+    using SharedFuncClient = std::shared_ptr<FuncPipeClient>;
     using ClientVector = std::vector<SharedFuncClient>;
 
     using ThreadVector = std::vector<std::thread>;
@@ -116,7 +116,7 @@ TEST(NetworkPipeTest, MultiEcho)
 
     for (i = 0; i < CLIENT_SIZE; ++i) {
         cloops.at(i).reset(new Loop());
-        clients.at(i).reset(new FunctionalPipeClient(*(cloops.at(i))));
+        clients.at(i).reset(new FuncPipeClient(*(cloops.at(i))));
         clients.at(i)->set_onConnect([&, i](Err code){
             if (clients.at(i)->write(ECHO_MESSAGE.data(), ECHO_MESSAGE.size()) == Err::E_SUCCESS) {
                 connect_result.at(i) = code;

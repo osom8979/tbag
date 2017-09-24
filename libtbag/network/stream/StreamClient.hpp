@@ -16,12 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/id/Id.hpp>
 
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/container/ReuseQueue.hpp>
+#include <libtbag/network/stream/InternalClient.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
-#include <libtbag/uvpp/Request.hpp>
-#include <libtbag/uvpp/ex/SafetyAsync.hpp>
 
 #include <string>
 #include <vector>
@@ -43,34 +41,25 @@ namespace stream  {
 class TBAG_API StreamClient : public details::ClientInterface
 {
 public:
-    using StreamType = details::StreamType;
-    using ReadPacket = details::ReadPacket;
-    using WriteState = details::WriteState;
-    using WriteInfo  = details::WriteInfo;
-
-    using Loop   = uvpp::Loop;
-    using Stream = uvpp::Stream;
-    using binf   = uvpp::binf;
-
-    using SharedClientBackend = std::shared_ptr<Stream>;
-    using WeakClientBackend   = std::weak_ptr<Stream>;
-
-    using SafetyAsync       = uvpp::ex::SafetyAsync;
-    using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
-    using WeakSafetyAsync   = std::weak_ptr<SafetyAsync>;
-
-    using Id = id::Id;
+    friend class InternalClient;
 
 public:
-    class Internal;
-    friend class Internal;
-    using UniqueInternal = std::unique_ptr<Internal>;
+    using StreamType = InternalClient::StreamType;
+    using ReadPacket = InternalClient::ReadPacket;
+    using WriteState = InternalClient::WriteState;
+    using WriteReady = InternalClient::WriteReady;
 
-public:
-    struct WriteReady { /* EMPTY. */ };
+    using SharedClientBackend = InternalClient::SharedClientBackend;
+    using WeakClientBackend   = InternalClient::WeakClientBackend;
+    using SharedSafetyAsync   = InternalClient::SharedSafetyAsync;
+    using WeakSafetyAsync     = InternalClient::WeakSafetyAsync;
+    using SharedUserTimer     = InternalClient::SharedUserTimer;
+
+    using Loop = uvpp::Loop;
+    using Id   = id::Id;
 
 private:
-    UniqueInternal _internal;
+    InternalClient _internal;
 
 public:
     StreamClient(Loop & loop, StreamType type);
@@ -101,17 +90,17 @@ public:
 
 public:
     virtual void setWriteTimeout(uint64_t millisec) override;
-    virtual bool isActiveTimer() override;
-    virtual Err  startTimer(uint64_t millisec) override;
-    virtual void stopTimer() override;
+    virtual Err  startTimer     (uint64_t millisec) override;
+    virtual void stopTimer      () override;
+    virtual bool isActiveTimer  () override;
 
 // Event backend.
 protected:
-    virtual void backConnect(Err code) override;
+    virtual void backConnect (Err code) override;
     virtual void backShutdown(Err code) override;
-    virtual void backWrite(Err code) override;
-    virtual void backRead(Err code, ReadPacket const & packet) override;
-    virtual void backClose() override;
+    virtual void backWrite   (Err code) override;
+    virtual void backRead    (Err code, ReadPacket const & packet) override;
+    virtual void backClose   () override;
 };
 
 /**
@@ -142,8 +131,8 @@ struct PipeClient : public stream::StreamClient
     { /* EMPTY. */ }
 };
 
-using FunctionalTcpClient  = details::FunctionalClient<TcpClient>;
-using FunctionalPipeClient = details::FunctionalClient<PipeClient>;
+using FuncTcpClient  = details::FunctionalClient<TcpClient>;
+using FuncPipeClient = details::FunctionalClient<PipeClient>;
 
 } // namespace stream
 } // namespace network
