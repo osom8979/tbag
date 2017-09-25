@@ -134,16 +134,16 @@ protected:
 // Event methods.
 public:
     /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
-    virtual void onWsOpen(HttpResponse const & response);
+    virtual void onWsOpen(HttpResponse const & response) { /* EMPTY. */ }
 
     /** When a message has been received from WebSocket server. */
-    virtual void onWsMessage(OpCode op, char const * buffer, std::size_t size);
+    virtual void onWsMessage(OpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
 
     /** Triggered when error occurred. */
-    virtual void onWsError(Err code);
+    virtual void onWsError(Err code) { /* EMPTY. */ }
 
     /** When a socket has been closed. */
-    virtual void onWsClose(uint16_t code, std::string const & reason);
+    virtual void onWsClose(uint16_t code, std::string const & reason) { /* EMPTY. */ }
 };
 
 } // namespace http

@@ -314,30 +314,6 @@ void WsClient::onTimer()
     }
 }
 
-// -----------------
-// Callback methods.
-// -----------------
-
-void WsClient::onWsOpen(HttpResponse const & response)
-{
-    // EMPTY.
-}
-
-void WsClient::onWsMessage(OpCode op, char const * buffer, std::size_t size)
-{
-    // EMPTY.
-}
-
-void WsClient::onWsError(Err code)
-{
-    // EMPTY.
-}
-
-void WsClient::onWsClose(uint16_t code, std::string const & reason)
-{
-    // EMPTY.
-}
-
 } // namespace http
 } // namespace network
 
