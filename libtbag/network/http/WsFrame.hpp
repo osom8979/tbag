@@ -289,8 +289,14 @@ public:
               uint32_t key = 0);
 
 public:
+    Err text(char const * buffer, std::size_t size, uint32_t key, bool continuation = false, bool finish = true);
+    Err text(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
+
     Err text(std::string const & str, uint32_t key, bool continuation = false, bool finish = true);
     Err text(std::string const & str, bool continuation = false, bool finish = true);
+
+    Err binary(uint8_t const * buffer, std::size_t size, uint32_t key, bool continuation = false, bool finish = true);
+    Err binary(uint8_t const * buffer, std::size_t size, bool continuation = false, bool finish = true);
 
     Err binary(WsBuffer const & buffer, uint32_t key, bool continuation = false, bool finish = true);
     Err binary(WsBuffer const & buffer, bool continuation = false, bool finish = true);

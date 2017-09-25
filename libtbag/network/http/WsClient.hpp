@@ -109,7 +109,10 @@ private:
     Err writeWsFrame(WsFrame const & frame);
 
 public:
+    Err writeText(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
     Err writeText(std::string const & text, bool continuation = false, bool finish = true);
+
+    Err writeBinary(uint8_t const * buffer, std::size_t size, bool continuation = false, bool finish = true);
     Err writeBinary(WsBuffer const & binary, bool continuation = false, bool finish = true);
 
 public:

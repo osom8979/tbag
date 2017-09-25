@@ -77,14 +77,14 @@ Err WsClient::writeWsFrame(WsFrame const & frame)
     return write((char const *)buffer.data(), buffer.size());
 }
 
-Err WsClient::writeText(std::string const & text, bool continuation, bool finish)
+Err WsClient::writeText(char const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (isUpgrade() == false) {
         return Err::E_ILLSTATE;
     }
 
     WsFrame frame;
-    Err const CODE = frame.text(text, _device.gen(), continuation, finish);
+    Err const CODE = frame.text(buffer, size, _device.gen(), continuation, finish);
     if (TBAG_ERR_FAILURE(CODE)) {
         tDLogE("WsClient::writeText() WsFrame build {} error.", getErrName(CODE));
         return CODE;
@@ -92,19 +92,29 @@ Err WsClient::writeText(std::string const & text, bool continuation, bool finish
     return writeWsFrame(frame);
 }
 
-Err WsClient::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
+Err WsClient::writeText(std::string const & text, bool continuation, bool finish)
+{
+    return writeText(text.c_str(), text.size(), continuation, finish);
+}
+
+Err WsClient::writeBinary(uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (isUpgrade() == false) {
         return Err::E_ILLSTATE;
     }
 
     WsFrame frame;
-    Err const CODE = frame.binary(binary, _device.gen(), continuation, finish);
+    Err const CODE = frame.binary(buffer, size, _device.gen(), continuation, finish);
     if (TBAG_ERR_FAILURE(CODE)) {
         tDLogE("WsClient::writeBinary() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
     return writeWsFrame(frame);
+}
+
+Err WsClient::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
+{
+    return writeBinary(binary.data(), binary.size(), continuation, finish);
 }
 
 Err WsClient::closeWebSocket()

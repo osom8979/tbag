@@ -375,11 +375,21 @@ Err WsFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
     return Err::E_SUCCESS;
 }
 
-Err WsFrame::text(std::string const & str, uint32_t key, bool continuation, bool finish)
+Err WsFrame::text(char const * buffer, std::size_t size, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
                  (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
-                 (uint8_t const *)str.data(), str.size(), key);
+                 (uint8_t const *)buffer, size, key);
+}
+
+Err WsFrame::text(char const * buffer, std::size_t size, bool continuation, bool finish)
+{
+    return text(buffer, size, 0, continuation, finish);
+}
+
+Err WsFrame::text(std::string const & str, uint32_t key, bool continuation, bool finish)
+{
+    return text(str.c_str(), str.size(), key, continuation, finish);
 }
 
 Err WsFrame::text(std::string const & str, bool continuation, bool finish)
@@ -387,11 +397,21 @@ Err WsFrame::text(std::string const & str, bool continuation, bool finish)
     return text(str, 0, continuation, finish);
 }
 
-Err WsFrame::binary(WsBuffer const & buffer, uint32_t key, bool continuation, bool finish)
+Err WsFrame::binary(uint8_t const * buffer, std::size_t size, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
                  (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
-                 buffer.data(), buffer.size(), key);
+                 buffer, size, key);
+}
+
+Err WsFrame::binary(uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
+{
+    return binary(buffer, size, 0, continuation, finish);
+}
+
+Err WsFrame::binary(WsBuffer const & buffer, uint32_t key, bool continuation, bool finish)
+{
+    return binary(buffer.data(), buffer.size(), key, continuation, finish);
 }
 
 Err WsFrame::binary(WsBuffer const & buffer, bool continuation, bool finish)
