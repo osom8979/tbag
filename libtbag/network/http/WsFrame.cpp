@@ -333,10 +333,7 @@ std::size_t WsFrame::copyTo(uint8_t * data, std::size_t size) const
 
 std::size_t WsFrame::copyTo(WsBuffer & buffer) const
 {
-    std::size_t const RESERVE_SIZE = calculateWriteBufferSize();
-    if (buffer.size() < RESERVE_SIZE) {
-        buffer.resize(RESERVE_SIZE);
-    }
+    buffer.resize(calculateWriteBufferSize());
     return copyTo(buffer.data(), buffer.size());
 }
 

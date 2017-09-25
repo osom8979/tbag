@@ -43,14 +43,14 @@ Err HttpServer::HttpNode::writeWsFrame(WsFrame const & frame)
     return write((char const *)buffer.data(), buffer.size());
 }
 
-Err HttpServer::HttpNode::writeText(std::string const & text, bool continuation, bool finish)
+Err HttpServer::HttpNode::writeText(char const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (isUpgrade() == false) {
         return Err::E_ILLSTATE;
     }
 
     WsFrame frame;
-    Err const CODE = frame.text(text, continuation, finish);
+    Err const CODE = frame.text(buffer, size, continuation, finish);
     if (TBAG_ERR_FAILURE(CODE)) {
         tDLogE("HttpServer::HttpNode::writeText() WsFrame build {} error.", getErrName(CODE));
         return CODE;
@@ -58,19 +58,29 @@ Err HttpServer::HttpNode::writeText(std::string const & text, bool continuation,
     return writeWsFrame(frame);
 }
 
-Err HttpServer::HttpNode::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
+Err HttpServer::HttpNode::writeText(std::string const & text, bool continuation, bool finish)
+{
+    return writeText(text.c_str(), text.size(), continuation, finish);
+}
+
+Err HttpServer::HttpNode::writeBinary(uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (isUpgrade() == false) {
         return Err::E_ILLSTATE;
     }
 
     WsFrame frame;
-    Err const CODE = frame.binary(binary, continuation, finish);
+    Err const CODE = frame.binary(buffer, size, continuation, finish);
     if (TBAG_ERR_FAILURE(CODE)) {
         tDLogE("HttpServer::HttpNode::writeBinary() WsFrame build {} error.", getErrName(CODE));
         return CODE;
     }
     return writeWsFrame(frame);
+}
+
+Err HttpServer::HttpNode::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
+{
+    return writeBinary(binary.data(), binary.size(), continuation, finish);
 }
 
 Err HttpServer::HttpNode::writeHttpResponse(HttpBuilder const & response)
