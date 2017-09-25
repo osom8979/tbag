@@ -209,8 +209,12 @@ public:
     void setRequest(SharedFilter filter, Order priority = 0);
 
 public:
+    Err writeText(WeakClient & node, char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
     Err writeText(WeakClient & node, std::string const & text, bool continuation = false, bool finish = true);
+
+    Err writeBinary(WeakClient & node, uint8_t const * buffer, std::size_t size, bool continuation = false, bool finish = true);
     Err writeBinary(WeakClient & node, WsBuffer const & buffer, bool continuation = false, bool finish = true);
+
     Err closeClient(WeakClient & node, uint16_t status_code, std::string const & reason);
 
 public:

@@ -301,20 +301,30 @@ void HttpServer::setRequest(SharedFilter filter, Order priority)
     _filters.insert(FilterPair(priority, filter));
 }
 
-Err HttpServer::writeText(WeakClient & node, std::string const & text, bool continuation, bool finish)
+Err HttpServer::writeText(WeakClient & node, char const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (auto shared = castSharedClient<HttpNode>(node)) {
-        return shared->writeText(text, continuation, finish);
+        return shared->writeText(buffer, size, continuation, finish);
+    }
+    return Err::E_EXPIRED;
+}
+
+Err HttpServer::writeText(WeakClient & node, std::string const & text, bool continuation, bool finish)
+{
+    return writeText(node, text.c_str(), text.size(), continuation, finish);
+}
+
+Err HttpServer::writeBinary(WeakClient & node, uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
+{
+    if (auto shared = castSharedClient<HttpNode>(node)) {
+        return shared->writeBinary(buffer, size, continuation, finish);
     }
     return Err::E_EXPIRED;
 }
 
 Err HttpServer::writeBinary(WeakClient & node, WsBuffer const & buffer, bool continuation, bool finish)
 {
-    if (auto shared = castSharedClient<HttpNode>(node)) {
-        return shared->writeBinary(buffer, continuation, finish);
-    }
-    return Err::E_EXPIRED;
+    return writeBinary(node, buffer.data(), buffer.size(), continuation, finish);
 }
 
 Err HttpServer::closeClient(WeakClient & node, uint16_t status_code, std::string const & reason)
