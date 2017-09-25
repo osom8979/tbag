@@ -16,13 +16,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace stream  {
 
-WriteQueueClient::WriteQueueClient(StreamClient * parent, Loop & loop, StreamType type)
+WriteQueueClient::WriteQueueClient(ClientInterface * parent, Loop & loop, StreamType type)
         : InternalClient(parent, loop, type), _queue(), _max_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
 {
     // EMPTY.
 }
 
-WriteQueueClient::WriteQueueClient(StreamClient * parent, Loop & loop, StreamType type, WriteReady const & ready)
+WriteQueueClient::WriteQueueClient(ClientInterface * parent, Loop & loop, StreamType type, WriteReady const & ready)
         : InternalClient(parent, loop, type, ready), _queue(), _max_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
 {
     // EMPTY.
@@ -128,12 +128,6 @@ Err WriteQueueClient::autoWrite(char const * buffer, std::size_t size)
     return Err::E_ENQASYNC;
 }
 
-void WriteQueueClient::preConnect(Err code)
-{
-    ClientGuard const LOCK(*this);
-    _atWriteInfo().setReady();
-}
-
 void WriteQueueClient::preShutdown(Err code)
 {
     ClientGuard const LOCK(*this);
@@ -153,18 +147,6 @@ void WriteQueueClient::preWrite(Err code)
     if (_queue.empty() == false) {
         _writeFromQueue();
     }
-}
-
-void WriteQueueClient::preRead(Err code, ReadPacket const & packet)
-{
-    // EMPTY.
-}
-
-void WriteQueueClient::preClose()
-{
-    ClientGuard const LOCK(*this);
-    _closeInternal();
-    _atWriteInfo().setEnd();
 }
 
 } // namespace stream

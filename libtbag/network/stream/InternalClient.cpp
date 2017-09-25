@@ -9,7 +9,6 @@
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/network/stream/StreamClientBackend.hpp>
-#include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
@@ -36,7 +35,7 @@ static void printBufferOfStreamBuffer(std::string const & prefix, uint8_t const 
 #define TBAG_INTERNAL_CLIENT_PRINT_BUFFER_IMPL(prefix, buffer, size)
 #endif
 
-InternalClient::InternalClient(StreamClient * parent, Loop & loop, StreamType type)
+InternalClient::InternalClient(ClientInterface * parent, Loop & loop, StreamType type)
         : STREAM_TYPE(type), _parent(parent)
 {
     using  TcpBackend = StreamClientBackend<uvpp::Tcp>;
@@ -54,10 +53,10 @@ InternalClient::InternalClient(StreamClient * parent, Loop & loop, StreamType ty
     _winfo.setNotReady();
 }
 
-InternalClient::InternalClient(StreamClient * parent,
-                                           Loop & loop,
-                                           StreamType type,
-                                           WriteReady const & UNUSED_PARAM(ready))
+InternalClient::InternalClient(ClientInterface * parent,
+                               Loop & loop,
+                               StreamType type,
+                               WriteReady const & UNUSED_PARAM(ready))
         : InternalClient(parent, loop, type)
 {
     if (TBAG_ERR_FAILURE(initInternalHandles())) {
@@ -332,7 +331,6 @@ Err InternalClient::_autoWrite(char const * buffer, std::size_t size)
 
 Err InternalClient::_writeFromOnAsync()
 {
-    assert(_parent != nullptr);
     if (_winfo.isAsyncCancel()) {
         tDLogW("InternalClient::onAsyncWrite() Cancel async write.");
         _stopShutdownTimer();
@@ -454,6 +452,38 @@ void InternalClient::onAsyncWrite()
                getErrName(WRITE_CODE));
         _parent->onShutdown(WRITE_CODE);
     }
+}
+
+void InternalClient::preConnect(Err code)
+{
+    Guard const LOCK(_mutex);
+    _winfo.setReady();
+}
+
+void InternalClient::preShutdown(Err code)
+{
+    Guard const LOCK(_mutex);
+    _winfo.setReady();
+}
+
+void InternalClient::preWrite(Err code)
+{
+    Guard const LOCK(_mutex);
+    assert(_winfo.isWrite() || _winfo.isShutdown());
+    _winfo.setReady();
+    _stopShutdownTimer();
+}
+
+void InternalClient::preRead(Err code, ReadPacket const & packet)
+{
+    // EMPTY.
+}
+
+void InternalClient::preClose()
+{
+    Guard const LOCK(_mutex);
+    _closeInternal();
+    _winfo.setEnd();
 }
 
 } // namespace stream

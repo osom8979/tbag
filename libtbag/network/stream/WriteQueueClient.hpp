@@ -53,8 +53,8 @@ private:
     std::size_t _max_size;
 
 public:
-    WriteQueueClient(StreamClient * parent, Loop & loop, StreamType type);
-    WriteQueueClient(StreamClient * parent, Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready));
+    WriteQueueClient(ClientInterface * parent, Loop & loop, StreamType type);
+    WriteQueueClient(ClientInterface * parent, Loop & loop, StreamType type, WriteReady const & ready);
     virtual ~WriteQueueClient();
 
 protected:
@@ -72,11 +72,8 @@ public:
     Err autoWrite(char const * buffer, std::size_t size);
 
 public:
-    void preConnect (Err code);
-    void preShutdown(Err code);
-    void preWrite   (Err code);
-    void preRead    (Err code, ReadPacket const & packet);
-    void preClose   ();
+    virtual void preShutdown(Err code) override;
+    virtual void preWrite   (Err code) override;
 };
 
 } // namespace stream

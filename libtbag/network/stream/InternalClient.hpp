@@ -49,10 +49,11 @@ class StreamClient;
 class TBAG_API InternalClient : private Noncopyable
 {
 public:
-    using StreamType = details::StreamType;
-    using ReadPacket = details::ReadPacket;
-    using WriteState = details::WriteState;
-    using WriteInfo  = details::WriteInfo;
+    using ClientInterface = details::ClientInterface;
+    using StreamType      = details::StreamType;
+    using ReadPacket      = details::ReadPacket;
+    using WriteState      = details::WriteState;
+    using WriteInfo       = details::WriteInfo;
 
     using Loop   = uvpp::Loop;
     using Timer  = uvpp::Timer;
@@ -106,7 +107,7 @@ private:
     StreamType const STREAM_TYPE;
 
 private:
-    StreamClient * _parent;
+    ClientInterface * _parent;
 
 private:
     mutable Mutex _mutex;
@@ -121,8 +122,8 @@ private:
     WriteInfo _winfo;
 
 public:
-    InternalClient(StreamClient * parent, Loop & loop, StreamType type);
-    InternalClient(StreamClient * parent, Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready));
+    InternalClient(ClientInterface * parent, Loop & loop, StreamType type);
+    InternalClient(ClientInterface * parent, Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready));
     virtual ~InternalClient();
 
 public:
@@ -168,6 +169,7 @@ protected:
     inline WriteInfo       & _atWriteInfo()       TBAG_NOEXCEPT { return _winfo; }
     inline WriteInfo const & _atWriteInfo() const TBAG_NOEXCEPT { return _winfo; }
 
+protected:
     Loop & _getLoop();
     Err    _writeReal(char const * buffer, std::size_t size);
     Err    _autoWrite(char const * buffer, std::size_t size);
@@ -183,6 +185,13 @@ protected:
     void onUserTimer();
     void onShutdownTimer();
     void onAsyncWrite();
+
+public:
+    virtual void preConnect (Err code);
+    virtual void preShutdown(Err code);
+    virtual void preWrite   (Err code);
+    virtual void preRead    (Err code, ReadPacket const & packet);
+    virtual void preClose   ();
 };
 
 } // namespace stream
