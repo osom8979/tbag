@@ -422,7 +422,7 @@ Err Process::spawn(Loop & loop, Options const & options)
     // (but not be limited to) the file to execute not existing,
     // not having permissions to use the setuid or setgid specified,
     // or not having enough memory to allocate for the new process.
-    tDLogD("Process::spawn() {} {}", _options.file, _options.getAllArguments());
+    tDLogN("Process::spawn() {} {}", _options.file, _options.getAllArguments());
     int const CODE = ::uv_spawn(loop.cast<uv_loop_t>(), Parent::cast<uv_process_t>(), &uv_options);
     return convertUvErrorToErrWithLogging("Process::spawn()", CODE);
 }
