@@ -131,7 +131,11 @@ Err WriteQueueClient::autoWrite(char const * buffer, std::size_t size)
 void WriteQueueClient::preShutdown(Err code)
 {
     ClientGuard const LOCK(*this);
-    _atWriteInfo().setReady();
+    auto & winfo = _atWriteInfo();
+    if (winfo.isClosing() || winfo.isEnd()) {
+        return;
+    }
+    winfo.setReady();
     if (_queue.empty() == false) {
         _writeFromQueue();
     }
@@ -141,6 +145,9 @@ void WriteQueueClient::preWrite(Err code)
 {
     ClientGuard const LOCK(*this);
     auto & winfo = _atWriteInfo();
+    if (winfo.isClosing() || winfo.isEnd()) {
+        return;
+    }
     assert(winfo.isWrite() || winfo.isShutdown());
     winfo.setReady();
     _stopShutdownTimer();

@@ -457,18 +457,27 @@ void InternalClient::onAsyncWrite()
 void InternalClient::preConnect(Err code)
 {
     Guard const LOCK(_mutex);
+    if (_winfo.isClosing() || _winfo.isEnd()) {
+        return;
+    }
     _winfo.setReady();
 }
 
 void InternalClient::preShutdown(Err code)
 {
     Guard const LOCK(_mutex);
+    if (_winfo.isClosing() || _winfo.isEnd()) {
+        return;
+    }
     _winfo.setReady();
 }
 
 void InternalClient::preWrite(Err code)
 {
     Guard const LOCK(_mutex);
+    if (_winfo.isClosing() || _winfo.isEnd()) {
+        return;
+    }
     assert(_winfo.isWrite() || _winfo.isShutdown());
     _winfo.setReady();
     _stopShutdownTimer();
