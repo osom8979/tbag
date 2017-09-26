@@ -14,6 +14,7 @@
 #include <cstring>
 #include <cassert>
 
+#include <iostream>
 #include <thread>
 #include <string>
 #include <vector>
@@ -212,6 +213,8 @@ TEST(PipeTest, Default)
     auto server_pipe = server.newHandle<PipeServerTest>(server);
     ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH));
     ASSERT_EQ(Err::E_SUCCESS, server_pipe->listen());
+
+    std::cout << "Sock name: " << server_pipe->getSockName() << std::endl;
 
     std::thread thread1 = std::thread([&](){
         server.run();

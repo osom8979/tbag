@@ -47,6 +47,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EXPIRED , "Expired object error"    ) \
     _TBAG_XX(_INSERT  , "Insert error"            ) \
     _TBAG_XX(_CLOSING , "Closing object"          ) \
+    _TBAG_XX(_CLOSED  , "Closed object"           ) \
     _TBAG_XX(_EQUERY  , "Query error"             ) \
     _TBAG_XX(_SMALLBUF, "Buffer size is small"    ) \
     _TBAG_XX(_KEYGEN  , "Key generator error"     ) \

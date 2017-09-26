@@ -7,7 +7,7 @@
  For the license information refer to format.h.
  */
 
-#include <libtbag/string/fmt/ostream.h>
+#include <libtbag/3rd/fmt/ostream.h>
 
 namespace fmt {
 

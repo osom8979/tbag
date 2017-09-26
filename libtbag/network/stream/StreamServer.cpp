@@ -59,10 +59,6 @@ private:
     StreamServer * _parent;
 
 private:
-    std::string _destination;
-    int _port;
-
-private:
     SharedServerBackend  _server;
     SharedSafetyAsync    _async;
     ClientMap            _clients;
@@ -73,7 +69,7 @@ private:
 
 public:
     Internal(StreamServer * parent, Loop & loop, StreamType type)
-            : STREAM_TYPE(type), _parent(parent), _destination(), _port(0), _on_connection(false)
+            : STREAM_TYPE(type), _parent(parent), _on_connection(false)
     {
         using  TcpBackend = StreamServerBackend<uvpp::Tcp>;
         using PipeBackend = StreamServerBackend<uvpp::Pipe>;
@@ -102,8 +98,40 @@ public:
     WeakServerBackend getServer() { Guard g(_mutex); return WeakServerBackend(_server); }
     WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync  ( _async); }
 
-    inline std::string dest() const { Guard g(_mutex); return _destination; }
-    inline int         port() const { Guard g(_mutex); return        _port; }
+public:
+    std::string dest() const
+    {
+        Guard g(_mutex);
+
+        if (static_cast<bool>(_server) == false) {
+            tDLogW("StreamServer::Internal::dest() Expired client.");
+            return std::string();
+        }
+
+        if (STREAM_TYPE == StreamType::TCP) {
+            return std::static_pointer_cast<uvpp::Tcp>(_server)->getSockIp();
+        } else if (STREAM_TYPE == StreamType::PIPE) {
+            return std::static_pointer_cast<uvpp::Pipe>(_server)->getSockName();
+        }
+
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        tDLogW("StreamServer::Internal::dest() Unknown stream type: {}", static_cast<int>(STREAM_TYPE));
+        return std::string();
+    }
+
+    int port() const
+    {
+        Guard g(_mutex);
+        if (static_cast<bool>(_server) == false) {
+            tDLogW("StreamServer::Internal::port() Expired client.");
+            return 0;
+        }
+
+        if (STREAM_TYPE == StreamType::TCP) {
+            return std::static_pointer_cast<uvpp::Tcp>(_server)->getSockPort();
+        }
+        return 0;
+    }
 
 public:
     inline bool isOnConnection() const TBAG_NOEXCEPT_SP_OP(_on_connection.load())
@@ -155,20 +183,13 @@ public:
         if (type == StreamType::TCP) {
             auto backend = std::static_pointer_cast<TcpBackend>(_server);
             code = uvpp::initCommonServer(*backend, destination, port);
-            _destination = backend->getSockIp();
-            _port = backend->getSockPort();
 
         } else if (type == StreamType::PIPE) {
             auto backend = std::static_pointer_cast<PipeBackend>(_server);
             code = uvpp::initPipeServer(*backend, destination);
-            _destination = destination;
-            _port = 0;
 
         } else {
             code = Err::E_ILLARGS;
-            _destination.clear();
-            _port = 0;
-
             TBAG_INACCESSIBLE_BLOCK_ASSERT();
             tDLogA("StreamServer::Internal::initServer() Unknown stream type.");
         }

@@ -7,6 +7,7 @@
 
 #include <libtbag/network/stream/InternalClient.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/Type.hpp>
 
 #include <libtbag/network/stream/StreamClientBackend.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -88,26 +89,42 @@ void InternalClient::setWriteTimeout(uint64_t millisec) TBAG_NOEXCEPT
 InternalClient::Id InternalClient::getId() const
 {
     Guard const LOCK(_mutex);
-    if (static_cast<bool>(_client)) {
-        return _client->id();
+    if (static_cast<bool>(_client) == false) {
+        tDLogW("InternalClient::getId() Expired client.");
+        return id::UNKNOWN_ID;
     }
-    return id::UNKNOWN_ID;
+    return _client->id();
 }
 
 std::string InternalClient::dest() const
 {
     Guard const LOCK(_mutex);
-    if (_client && STREAM_TYPE == StreamType::TCP) {
-        return std::static_pointer_cast<uvpp::Tcp>(_client)->getPeerIp();
+    if (static_cast<bool>(_client) == false) {
+        tDLogW("InternalClient::dest() Expired client.");
+        return std::string();
     }
+
+    if (STREAM_TYPE == StreamType::TCP) {
+        return std::static_pointer_cast<uvpp::Tcp>(_client)->getSockIp();
+    } else if (STREAM_TYPE == StreamType::PIPE) {
+        return std::static_pointer_cast<uvpp::Pipe>(_client)->getSockName();
+    }
+
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    tDLogW("InternalClient::dest() Unknown stream type: {}", static_cast<int>(STREAM_TYPE));
     return std::string();
 }
 
 int InternalClient::port() const
 {
     Guard const LOCK(_mutex);
-    if (_client && STREAM_TYPE == StreamType::TCP) {
-        return std::static_pointer_cast<uvpp::Tcp>(_client)->getPeerPort();
+    if (static_cast<bool>(_client) == false) {
+        tDLogW("InternalClient::port() Expired client.");
+        return 0;
+    }
+
+    if (STREAM_TYPE == StreamType::TCP) {
+        return std::static_pointer_cast<uvpp::Tcp>(_client)->getSockPort();
     }
     return 0;
 }
@@ -138,6 +155,7 @@ Err InternalClient::initClient(StreamType type, std::string const & destination,
 Err InternalClient::initInternalHandles()
 {
     Guard const LOCK(_mutex);
+
     Loop & loop = _getLoop();
     _safety_async   = loop.newInternalHandle<SafetyAsync  >(true, loop);
     _shutdown_timer = loop.newInternalHandle<ShutdownTimer>(true, loop, this);
@@ -254,7 +272,7 @@ InternalClient::Loop & InternalClient::_getLoop()
 Err InternalClient::_writeReal(char const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_client));
-    TBAG_INTERNAL_CLIENT_PRINT_BUFFER_IMPL("InternalClient::writeReal", buffer, size);
+    TBAG_INTERNAL_CLIENT_PRINT_BUFFER_IMPL("InternalClient::_writeReal", buffer, size);
 
     Err const WRITE_CODE = _client->write(_winfo.write_req, buffer, size);
     if (TBAG_ERR_SUCCESS(WRITE_CODE)) {
@@ -280,7 +298,7 @@ Err InternalClient::_writeReal(char const * buffer, std::size_t size)
 Err InternalClient::_autoWrite(char const * buffer, std::size_t size)
 {
     if (_winfo.isReady() == false) {
-        tDLogE("InternalClient::autoWrite() Illegal state error: {}", _winfo.getStateName());
+        tDLogE("InternalClient::_autoWrite() Illegal state error: {}", _winfo.getStateName());
         return Err::E_ILLSTATE;
     }
 
@@ -296,20 +314,20 @@ Err InternalClient::_autoWrite(char const * buffer, std::size_t size)
             _winfo.setAsync();
             result_code = Err::E_ENQASYNC;
         } else {
-            tDLogE("InternalClient::autoWrite() Async write {} error.", getErrName(result_code));
+            tDLogE("InternalClient::_autoWrite() Async write {} error.", getErrName(result_code));
             return Err::E_ESEND;
         }
 
     } else {
         result_code = _writeReal(buffer, size);
         if (TBAG_ERR_FAILURE(result_code)) {
-            tDLogE("InternalClient::autoWrite() Direct write {} error.", getErrName(result_code));
+            tDLogE("InternalClient::_autoWrite() Direct write {} error.", getErrName(result_code));
             return result_code;
         }
         _winfo.setWrite();
 
         if (!_safety_async && loop.isAliveAndThisThread() == false) {
-            tDLogW("InternalClient::autoWrite() Async is expired.");
+            tDLogW("InternalClient::_autoWrite() Async is expired.");
             result_code = Err::E_WARNING;
         } else {
             result_code = Err::E_SUCCESS;
@@ -331,15 +349,23 @@ Err InternalClient::_autoWrite(char const * buffer, std::size_t size)
 
 Err InternalClient::_writeFromOnAsync()
 {
+    if (_winfo.isClosing()) {
+        tDLogW("InternalClient::_writeFromOnAsync() Closing ...");
+        return Err::E_CLOSING;
+    } else if (_winfo.isEnd()) {
+        tDLogW("InternalClient::_writeFromOnAsync() Client END.");
+        return Err::E_CLOSED;
+    }
+
     if (_winfo.isAsyncCancel()) {
-        tDLogW("InternalClient::onAsyncWrite() Cancel async write.");
+        tDLogW("InternalClient::_writeFromOnAsync() Cancel async write.");
         _stopShutdownTimer();
         _winfo.setReady();
         return Err::E_ECANCELED;
     }
 
     if (_winfo.isAsync() == false) {
-        tDLogE("InternalClient::onAsyncWrite() Error state: {}", _winfo.getStateName());
+        tDLogE("InternalClient::_writeFromOnAsync() Error state: {}", _winfo.getStateName());
         _stopShutdownTimer();
         _winfo.setReady();
         return Err::E_ILLSTATE;
@@ -348,7 +374,7 @@ Err InternalClient::_writeFromOnAsync()
     assert(_winfo.isAsync());
 
     if (_winfo.buffer.empty()) {
-        tDLogE("InternalClient::onAsyncWrite() Empty buffer");
+        tDLogE("InternalClient::_writeFromOnAsync() Empty buffer");
         _stopShutdownTimer();
         _winfo.setReady();
         return Err::E_EBUFFER;
@@ -356,7 +382,7 @@ Err InternalClient::_writeFromOnAsync()
 
     Err const CODE = _writeReal(_winfo.buffer.data(), _winfo.buffer.size());
     if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("InternalClient::onAsyncWrite() Write {} error.", getErrName(CODE));
+        tDLogE("InternalClient::_writeFromOnAsync() Write {} error.", getErrName(CODE));
         _stopShutdownTimer();
         _winfo.setReady();
         return CODE;
