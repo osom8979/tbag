@@ -1,11 +1,11 @@
 /**
- * @file   WriteStateClient.cpp
- * @brief  WriteStateClient class implementation.
+ * @file   SafetyClient.cpp
+ * @brief  SafetyClient class implementation.
  * @author zer0
  * @date   2017-09-24
  */
 
-#include <libtbag/network/stream/client/WriteStateClient.hpp>
+#include <libtbag/network/stream/client/SafetyClient.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Type.hpp>
 
@@ -40,16 +40,16 @@ static void printBuffer(std::string const & name, uint8_t const * buffer, std::s
 #endif
 
 // ------------------------------------------
-// WriteStateClient::Internal implementation.
+// SafetyClient::Internal implementation.
 // ------------------------------------------
 
-struct WriteStateClient::Internal : public BasicClientProperty
+struct SafetyClient::Internal : public BaseClientProperty
 {
     StreamType const STREAM_TYPE;
-    WriteStateClient * parent;
+    SafetyClient * parent;
     Loop & loop;
 
-    Internal(WriteStateClient * p, ClientInterface * interface, Loop & l, StreamType t) : parent(p), loop(l), STREAM_TYPE(t)
+    Internal(SafetyClient * p, ClientInterface * interface, Loop & l, StreamType t) : parent(p), loop(l), STREAM_TYPE(t)
     {
 
         using  TcpBackend = StreamClientBackend<uvpp::Tcp>;
@@ -121,7 +121,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
         }
 
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        tDLogA("WriteStateClient::Internal::initClient() Unknown stream type: {}", static_cast<int>(STREAM_TYPE));
+        tDLogA("SafetyClient::Internal::initClient() Unknown stream type: {}", static_cast<int>(STREAM_TYPE));
         return Err::E_ILLARGS;
     }
 
@@ -185,7 +185,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
         }
 
         if (isWrite() == false) {
-            tDLogE("WriteStateClient::Internal::shutdownWrite() Illegal state error: {}", getStateName());
+            tDLogE("SafetyClient::Internal::shutdownWrite() Illegal state error: {}", getStateName());
             return Err::E_ILLSTATE;
         }
 
@@ -193,7 +193,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
 
         Err const CODE = client_stream->shutdown(shutdown_req);
         if (TBAG_ERR_FAILURE(CODE)) {
-            tDLogE("WriteStateClient::Internal::shutdownWrite() {} error", getErrName(CODE));
+            tDLogE("SafetyClient::Internal::shutdownWrite() {} error", getErrName(CODE));
             return CODE;
         }
 
@@ -204,12 +204,12 @@ struct WriteStateClient::Internal : public BasicClientProperty
     Err writeReal(char const * buffer, std::size_t size)
     {
         assert(static_cast<bool>(client_stream));
-        TBAG_INTERNAL_CLIENT_PRINT_BUFFER_IMPL("WriteStateClient::_writeReal", buffer, size);
+        TBAG_INTERNAL_CLIENT_PRINT_BUFFER_IMPL("SafetyClient::_writeReal", buffer, size);
 
         Err const WRITE_CODE = client_stream->write(write_req, buffer, size);
         if (TBAG_ERR_SUCCESS(WRITE_CODE)) {
             if (cur_fail_count > 0) {
-                tDLogI("WriteStateClient::Internal::writeReal() Restore fail count.");
+                tDLogI("SafetyClient::Internal::writeReal() Restore fail count.");
                 cur_fail_count = 0;
             }
             return Err::E_SUCCESS;
@@ -217,10 +217,10 @@ struct WriteStateClient::Internal : public BasicClientProperty
 
         ++cur_fail_count;
         if (cur_fail_count < max_fail_count) {
-            tDLogW("WriteStateClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}).",
+            tDLogW("SafetyClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}).",
                    getErrName(WRITE_CODE), cur_fail_count, max_fail_count);
         } else {
-            tDLogE("WriteStateClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}) => Force close!",
+            tDLogE("SafetyClient::Internal::writeReal() Write {} error (FAIL_COUNT:{}/{}) => Force close!",
                    getErrName(WRITE_CODE), cur_fail_count, max_fail_count);
             closeClient();
         }
@@ -236,19 +236,19 @@ struct WriteStateClient::Internal : public BasicClientProperty
         SharedBuffer buffer;
         Err const POP_CODE = queue.frontAndPop(buffer);
         if (TBAG_ERR_FAILURE(POP_CODE)) {
-            tDLogE("WriteStateClient::Internal::writeFromQueue() Dequeue {} error", getErrName(POP_CODE));
+            tDLogE("SafetyClient::Internal::writeFromQueue() Dequeue {} error", getErrName(POP_CODE));
             return POP_CODE;
         }
 
-        tDLogD("WriteStateClient::Internal::writeFromQueue() Remaining queue size: {}", queue.size());
+        tDLogD("SafetyClient::Internal::writeFromQueue() Remaining queue size: {}", queue.size());
 
         if (static_cast<bool>(buffer) == false) {
-            tDLogE("WriteStateClient::Internal::writeFromQueue() Expired buffer");
+            tDLogE("SafetyClient::Internal::writeFromQueue() Expired buffer");
             return Err::E_EXPIRED;
         }
 
         if (buffer->empty()) {
-            tDLogE("WriteStateClient::Internal::writeFromQueue() Empty current buffer");
+            tDLogE("SafetyClient::Internal::writeFromQueue() Empty current buffer");
             return Err::E_EBUFFER;
         }
 
@@ -258,22 +258,22 @@ struct WriteStateClient::Internal : public BasicClientProperty
     Err writeFromOnAsync()
     {
         if (isClosing()) {
-            tDLogW("WriteStateClient::Internal::writeFromOnAsync() Closing ...");
+            tDLogW("SafetyClient::Internal::writeFromOnAsync() Closing ...");
             return Err::E_CLOSING;
         } else if (isEnd()) {
-            tDLogW("WriteStateClient::Internal::writeFromOnAsync() Client END.");
+            tDLogW("SafetyClient::Internal::writeFromOnAsync() Client END.");
             return Err::E_CLOSED;
         }
 
         if (isAsyncCancel()) {
-            tDLogW("WriteStateClient::Internal::writeFromOnAsync() Cancel async write.");
+            tDLogW("SafetyClient::Internal::writeFromOnAsync() Cancel async write.");
             stopShutdownTimer();
             setReady();
             return Err::E_ECANCELED;
         }
 
         if (isAsync() == false) {
-            tDLogE("WriteStateClient::Internal::writeFromOnAsync() Error state: {}", getStateName());
+            tDLogE("SafetyClient::Internal::writeFromOnAsync() Error state: {}", getStateName());
             stopShutdownTimer();
             setReady();
             return Err::E_ILLSTATE;
@@ -282,7 +282,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
         assert(isAsync());
 
         if (wbuffer.empty()) {
-            tDLogE("WriteStateClient::Internal::writeFromOnAsync() Empty buffer");
+            tDLogE("SafetyClient::Internal::writeFromOnAsync() Empty buffer");
             stopShutdownTimer();
             setReady();
             return Err::E_EBUFFER;
@@ -290,7 +290,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
 
         Err const CODE = writeReal(wbuffer.data(), wbuffer.size());
         if (TBAG_ERR_FAILURE(CODE)) {
-            tDLogE("WriteStateClient::Internal::writeFromOnAsync() Write {} error.", getErrName(CODE));
+            tDLogE("SafetyClient::Internal::writeFromOnAsync() Write {} error.", getErrName(CODE));
             stopShutdownTimer();
             setReady();
             return CODE;
@@ -303,7 +303,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
     Err autoWrite(char const * buffer, std::size_t size)
     {
         if (isReady() == false) {
-            tDLogE("WriteStateClient::Internal::autoWrite() Illegal state error: {}", getStateName());
+            tDLogE("SafetyClient::Internal::autoWrite() Illegal state error: {}", getStateName());
             return Err::E_ILLSTATE;
         }
 
@@ -318,20 +318,20 @@ struct WriteStateClient::Internal : public BasicClientProperty
                 setAsync();
                 result_code = Err::E_ENQASYNC;
             } else {
-                tDLogE("WriteStateClient::Internal::autoWrite() Async write {} error.", getErrName(result_code));
+                tDLogE("SafetyClient::Internal::autoWrite() Async write {} error.", getErrName(result_code));
                 return Err::E_ESEND;
             }
 
         } else {
             result_code = writeReal(buffer, size);
             if (TBAG_ERR_FAILURE(result_code)) {
-                tDLogE("WriteStateClient::Internal::autoWrite() Direct write {} error.", getErrName(result_code));
+                tDLogE("SafetyClient::Internal::autoWrite() Direct write {} error.", getErrName(result_code));
                 return result_code;
             }
             setWrite();
 
             if (!safety_async && loop.isAliveAndThisThread() == false) {
-                tDLogW("WriteStateClient::Internal::autoWrite() Async is expired.");
+                tDLogW("SafetyClient::Internal::autoWrite() Async is expired.");
                 result_code = Err::E_WARNING;
             } else {
                 result_code = Err::E_SUCCESS;
@@ -344,7 +344,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
             }
             Err const CODE = startShutdownTimer(timeout);
             if (TBAG_ERR_FAILURE(CODE)) {
-                tDLogW("WriteStateClient::Internal::autoWrite() Timer job {} error!", getErrName(CODE));
+                tDLogW("SafetyClient::Internal::autoWrite() Timer job {} error!", getErrName(CODE));
             }
         }
 
@@ -362,7 +362,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
         }
 
         if (queue.size() >= max_queue_size) {
-            tDLogE("WriteStateClient::Internal::write() The queue is full ({})", max_queue_size);
+            tDLogE("SafetyClient::Internal::write() The queue is full ({})", max_queue_size);
             return Err::E_EBUSY;
         }
 
@@ -373,7 +373,7 @@ struct WriteStateClient::Internal : public BasicClientProperty
             try {
                 back.reset(new Buffer(buffer, buffer + size));
             } catch (...) {
-                tDLogE("WriteStateClient::Internal::write() Queue alloc fail.");
+                tDLogE("SafetyClient::Internal::write() Queue alloc fail.");
                 return Err::E_BADALLOC;
             }
         }
@@ -409,17 +409,17 @@ struct WriteStateClient::Internal : public BasicClientProperty
 };
 
 // --------------------------------
-// WriteStateClient implementation.
+// SafetyClient implementation.
 // --------------------------------
 
-WriteStateClient::WriteStateClient(ClientInterface * parent, Loop & loop, StreamType type)
+SafetyClient::SafetyClient(ClientInterface * parent, Loop & loop, StreamType type)
         : _internal(new Internal(this, parent, loop, type)), _parent(parent), _user_data(nullptr)
 {
     assert(static_cast<bool>(_internal));
 }
 
-WriteStateClient::WriteStateClient(ClientInterface * parent, Loop & loop, StreamType type, UpdateReady const & UNUSED_PARAM(ready))
-        : WriteStateClient(parent, loop, type)
+SafetyClient::SafetyClient(ClientInterface * parent, Loop & loop, StreamType type, UpdateReady const & UNUSED_PARAM(ready))
+        : SafetyClient(parent, loop, type)
 {
     assert(static_cast<bool>(_internal));
     if (TBAG_ERR_FAILURE(initInternalHandles())) {
@@ -428,62 +428,62 @@ WriteStateClient::WriteStateClient(ClientInterface * parent, Loop & loop, Stream
     _internal->setReady();
 }
 
-WriteStateClient::~WriteStateClient()
+SafetyClient::~SafetyClient()
 {
     // EMPTY.
 }
 
-WriteStateClient::StreamType WriteStateClient::getStreamType() const TBAG_NOEXCEPT
+SafetyClient::StreamType SafetyClient::getStreamType() const TBAG_NOEXCEPT
 {
     return _internal->STREAM_TYPE;
 }
 
-WriteState WriteStateClient::getState() const
+WriteState SafetyClient::getState() const
 {
     Guard const LOCK(_mutex);
     return _internal->getState();
 }
 
-char const * WriteStateClient::getStateName() const
+char const * SafetyClient::getStateName() const
 {
     Guard const LOCK(_mutex);
     return _internal->getStateName();
 }
 
-uint64_t WriteStateClient::getWriteTimeout(uint64_t millisec) const
+uint64_t SafetyClient::getWriteTimeout(uint64_t millisec) const
 {
     Guard const LOCK(_mutex);
     return _internal->timeout;
 }
 
-void WriteStateClient::setWriteTimeout(uint64_t millisec)
+void SafetyClient::setWriteTimeout(uint64_t millisec)
 {
     Guard const LOCK(_mutex);
     _internal->timeout = millisec;
 }
 
 // @formatter:off
-WriteStateClient::WeakStream          WriteStateClient::getClient       () { Guard g(_mutex); return _internal->client_stream;  }
-WriteStateClient::WeakSafetyAsync     WriteStateClient::getAsync        () { Guard g(_mutex); return _internal->safety_async;   }
-WriteStateClient::SharedUserTimer     WriteStateClient::getUserTimer    () { Guard g(_mutex); return _internal->user_timer;     }
-WriteStateClient::SharedShutdownTimer WriteStateClient::getShutdownTimer() { Guard g(_mutex); return _internal->shutdown_timer; }
+SafetyClient::WeakStream          SafetyClient::getClient       () { Guard g(_mutex); return _internal->client_stream;  }
+SafetyClient::WeakSafetyAsync     SafetyClient::getAsync        () { Guard g(_mutex); return _internal->safety_async;   }
+SafetyClient::SharedUserTimer     SafetyClient::getUserTimer    () { Guard g(_mutex); return _internal->user_timer;     }
+SafetyClient::SharedShutdownTimer SafetyClient::getShutdownTimer() { Guard g(_mutex); return _internal->shutdown_timer; }
 // @formatter:on
 
-WriteStateClient::Id WriteStateClient::id() const
+SafetyClient::Id SafetyClient::id() const
 {
     Guard const LOCK(_mutex);
     if (static_cast<bool>(_internal->client_stream) == false) {
-        tDLogW("WriteStateClient::id() Expired client.");
+        tDLogW("SafetyClient::id() Expired client.");
         return id::UNKNOWN_ID;
     }
     return _internal->client_stream->id();
 }
 
-std::string WriteStateClient::dest() const
+std::string SafetyClient::dest() const
 {
     Guard const LOCK(_mutex);
     if (static_cast<bool>(_internal->client_stream) == false) {
-        tDLogW("WriteStateClient::dest() Expired client.");
+        tDLogW("SafetyClient::dest() Expired client.");
         return std::string();
     }
 
@@ -494,15 +494,15 @@ std::string WriteStateClient::dest() const
     }
 
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    tDLogW("WriteStateClient::dest() Unknown stream type: {}", static_cast<int>(_internal->STREAM_TYPE));
+    tDLogW("SafetyClient::dest() Unknown stream type: {}", static_cast<int>(_internal->STREAM_TYPE));
     return std::string();
 }
 
-int WriteStateClient::port() const
+int SafetyClient::port() const
 {
     Guard const LOCK(_mutex);
     if (static_cast<bool>(_internal->client_stream) == false) {
-        tDLogW("WriteStateClient::port() Expired client.");
+        tDLogW("SafetyClient::port() Expired client.");
         return 0;
     }
 
@@ -512,7 +512,7 @@ int WriteStateClient::port() const
     return 0;
 }
 
-Err WriteStateClient::initClient(std::string const & destination, int port)
+Err SafetyClient::initClient(std::string const & destination, int port)
 {
     Guard const LOCK(_mutex);
     if (_internal->isNotReady()) {
@@ -521,7 +521,7 @@ Err WriteStateClient::initClient(std::string const & destination, int port)
     return Err::E_ILLSTATE;
 }
 
-Err WriteStateClient::initInternalHandles()
+Err SafetyClient::initInternalHandles()
 {
     Guard const LOCK(_mutex);
     if (_internal->isNotReady()) {
@@ -530,7 +530,7 @@ Err WriteStateClient::initInternalHandles()
     return Err::E_ILLSTATE;
 }
 
-Err WriteStateClient::startRead()
+Err SafetyClient::startRead()
 {
     Guard const LOCK(_mutex);
     if (_internal->isDisconnectedState()) {
@@ -538,12 +538,12 @@ Err WriteStateClient::startRead()
     }
     Err const CODE = _internal->client_stream->startRead();
     if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("WriteStateClient::startRead() Start {} error", getErrName(CODE));
+        tDLogE("SafetyClient::startRead() Start {} error", getErrName(CODE));
     }
     return CODE;
 }
 
-Err WriteStateClient::stopRead()
+Err SafetyClient::stopRead()
 {
     Guard const LOCK(_mutex);
     if (_internal->isDisconnectedState()) {
@@ -551,30 +551,30 @@ Err WriteStateClient::stopRead()
     }
     Err const CODE = _internal->client_stream->stopRead();
     if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("WriteStateClient::stopRead() Stop {} error", getErrName(CODE));
+        tDLogE("SafetyClient::stopRead() Stop {} error", getErrName(CODE));
     }
     return CODE;
 }
 
-bool WriteStateClient::isActiveUserTimer() const
+bool SafetyClient::isActiveUserTimer() const
 {
     Guard const LOCK(_mutex);
     return _internal->isActiveUserTimer();
 }
 
-Err WriteStateClient::startUserTimer(uint64_t millisec)
+Err SafetyClient::startUserTimer(uint64_t millisec)
 {
     Guard const LOCK(_mutex);
     return _internal->startUserTimer(millisec);
 }
 
-Err WriteStateClient::stopUserTimer()
+Err SafetyClient::stopUserTimer()
 {
     Guard const LOCK(_mutex);
     return _internal->stopUserTimer();
 }
 
-Err WriteStateClient::close()
+Err SafetyClient::close()
 {
     Guard const LOCK(_mutex);
     if (_internal->safety_async && _internal->loop.isAliveAndThisThread() == false) {
@@ -587,7 +587,7 @@ Err WriteStateClient::close()
     return _internal->closeClient();
 }
 
-Err WriteStateClient::cancel()
+Err SafetyClient::cancel()
 {
     Guard const LOCK(_mutex);
     if (_internal->isDisconnectedState()) {
@@ -603,25 +603,25 @@ Err WriteStateClient::cancel()
     return _internal->shutdownWrite();
 }
 
-Err WriteStateClient::write(char const * buffer, std::size_t size)
+Err SafetyClient::write(char const * buffer, std::size_t size)
 {
     Guard const LOCK(_mutex);
     return _internal->writeOrEnqueueOrAsync(buffer, size);
 }
 
-void WriteStateClient::onUserTimer()
+void SafetyClient::onUserTimer()
 {
     assert(_parent != nullptr);
     _parent->onTimer();
 }
 
-void WriteStateClient::onShutdownTimer()
+void SafetyClient::onShutdownTimer()
 {
     Guard const LOCK(_mutex);
     _internal->shutdownWrite();
 }
 
-void WriteStateClient::onAsyncWrite()
+void SafetyClient::onAsyncWrite()
 {
     _mutex.lock();
     Err const WRITE_CODE = _internal->writeFromOnAsync();
@@ -629,18 +629,18 @@ void WriteStateClient::onAsyncWrite()
 
     if (TBAG_ERR_FAILURE(WRITE_CODE)) {
         assert(_parent != nullptr);
-        tDLogD("WriteStateClient::onAsyncWrite() ~~> onShutdown({}) event force call.", getErrName(WRITE_CODE));
+        tDLogD("SafetyClient::onAsyncWrite() ~~> onShutdown({}) event force call.", getErrName(WRITE_CODE));
         _parent->onShutdown(WRITE_CODE);
     }
 }
 
-void WriteStateClient::preConnect(Err code)
+void SafetyClient::preConnect(Err code)
 {
     Guard const LOCK(_mutex);
     _internal->setReady();
 }
 
-void WriteStateClient::preShutdown(Err code)
+void SafetyClient::preShutdown(Err code)
 {
     Guard const LOCK(_mutex);
     if (_internal->isDisconnectedState()) {
@@ -653,11 +653,11 @@ void WriteStateClient::preShutdown(Err code)
     }
 }
 
-void WriteStateClient::preWrite(Err code)
+void SafetyClient::preWrite(Err code)
 {
     Guard const LOCK(_mutex);
     if (code == Err::E_EOF) {
-        tDLogD("WriteStateClient::preWrite() END OF FILE.");
+        tDLogD("SafetyClient::preWrite() END OF FILE.");
         return;
     }
 
@@ -673,12 +673,12 @@ void WriteStateClient::preWrite(Err code)
     }
 }
 
-void WriteStateClient::preRead(Err code, ReadPacket const & packet)
+void SafetyClient::preRead(Err code, ReadPacket const & packet)
 {
     // EMPTY.
 }
 
-void WriteStateClient::preClose()
+void SafetyClient::preClose()
 {
     Guard const LOCK(_mutex);
     _internal->closeInternal();

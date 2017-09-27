@@ -1,12 +1,12 @@
 /**
- * @file   WriteStateClient.hpp
- * @brief  WriteStateClient class prototype.
+ * @file   SafetyClient.hpp
+ * @brief  SafetyClient class prototype.
  * @author zer0
  * @date   2017-09-24
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATECLIENT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATECLIENT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_STREAMCLIENT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_STREAMCLIENT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
-#include <libtbag/network/stream/client/WriteStateProperty.hpp>
+#include <libtbag/network/stream/client/ClientProperty.hpp>
 
 #include <memory>
 
@@ -30,17 +30,18 @@ namespace stream  {
 namespace client  {
 
 /**
- * Internal StreamClient class prototype.
+ * StreamClient class prototype.
  *
  * @author zer0
  * @date   2017-06-16
  * @date   2017-09-24 (Rename: StreamClient::Internal -> InternalClient)
  * @date   2017-09-27 (Rename: InternalClient -> WriteStateClient)
+ * @date   2017-09-27 (Rename: WriteStateClient -> SafetyClient)
  */
-class TBAG_API WriteStateClient : public BasicClientTypes,
-                                  public BasicClientTypes::OnUserTimerCallback,
-                                  public BasicClientTypes::OnShutdownTimerCallback,
-                                  public BasicClientTypes::OnAsyncWriteCallback,
+class TBAG_API SafetyClient : public BaseClientTypes,
+                                  public BaseClientTypes::OnUserTimerCallback,
+                                  public BaseClientTypes::OnShutdownTimerCallback,
+                                  public BaseClientTypes::OnAsyncWriteCallback,
                                   private Noncopyable
 {
 public:
@@ -57,9 +58,9 @@ private:
     void * _user_data;
 
 public:
-    WriteStateClient(ClientInterface * parent, Loop & loop, StreamType type);
-    WriteStateClient(ClientInterface * parent, Loop & loop, StreamType type, UpdateReady const & UNUSED_PARAM(ready));
-    virtual ~WriteStateClient();
+    SafetyClient(ClientInterface * parent, Loop & loop, StreamType type);
+    SafetyClient(ClientInterface * parent, Loop & loop, StreamType type, UpdateReady const & UNUSED_PARAM(ready));
+    virtual ~SafetyClient();
 
 public:
     inline void       * getUserData()       TBAG_NOEXCEPT { Guard g(_mutex); return _user_data; }
@@ -128,5 +129,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATECLIENT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_STREAMCLIENT_HPP__
 

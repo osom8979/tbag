@@ -18,7 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/details/FunctionalNet.hpp>
-#include <libtbag/network/stream/client/WriteStateClient.hpp>
+#include <libtbag/network/stream/client/SafetyClient.hpp>
 
 #include <string>
 #include <vector>
@@ -40,24 +40,24 @@ namespace stream  {
 class TBAG_API StreamClient : public details::ClientInterface
 {
 public:
-    using WriteStateClient = client::WriteStateClient;
+    using SafetyClient = client::SafetyClient;
 
-    using StreamType  = WriteStateClient::StreamType;
-    using ReadPacket  = WriteStateClient::ReadPacket;
-    using UpdateReady = WriteStateClient::UpdateReady;
+    using StreamType  = SafetyClient::StreamType;
+    using ReadPacket  = SafetyClient::ReadPacket;
+    using UpdateReady = SafetyClient::UpdateReady;
     using WriteState  = client::WriteState;
 
-    using SharedStream      = WriteStateClient::SharedStream;
-    using WeakStream        = WriteStateClient::WeakStream;
-    using SharedSafetyAsync = WriteStateClient::SharedSafetyAsync;
-    using WeakSafetyAsync   = WriteStateClient::WeakSafetyAsync;
-    using SharedUserTimer   = WriteStateClient::SharedUserTimer;
+    using SharedStream      = SafetyClient::SharedStream;
+    using WeakStream        = SafetyClient::WeakStream;
+    using SharedSafetyAsync = SafetyClient::SharedSafetyAsync;
+    using WeakSafetyAsync   = SafetyClient::WeakSafetyAsync;
+    using SharedUserTimer   = SafetyClient::SharedUserTimer;
 
     using Loop = uvpp::Loop;
     using Id   = id::Id;
 
 private:
-    WriteStateClient _client;
+    SafetyClient _client;
 
 public:
     StreamClient(Loop & loop, StreamType type);

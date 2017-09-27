@@ -1,12 +1,12 @@
 /**
- * @file   WriteStateProperty.hpp
- * @brief  WriteStateProperty class prototype.
+ * @file   ClientProperty.hpp
+ * @brief  ClientProperty class prototype.
  * @author zer0
  * @date   2017-09-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATEPROPERTY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATEPROPERTY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_CLIENTPROPERTY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_CLIENTPROPERTY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -70,7 +70,7 @@ inline char const * getWriteStateName(WriteState state) TBAG_NOEXCEPT
     return "UNKNOWN";
 }
 
-struct BasicClientTypes
+struct BaseClientTypes
 {
     using ClientInterface = details::ClientInterface;
     using StreamType      = details::StreamType;
@@ -140,12 +140,12 @@ struct BasicClientTypes
 };
 
 /**
- * BasicClientProperty structure.
+ * BaseClientProperty structure.
  *
  * @author zer0
  * @date   2017-09-27
  */
-struct BasicClientProperty : public BasicClientTypes
+struct BaseClientProperty : public BaseClientTypes
 {
     StreamType stream_type;
 
@@ -169,11 +169,11 @@ struct BasicClientProperty : public BasicClientTypes
 
     WriteState state;
 
-    BasicClientProperty() : max_fail_count(details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE),
+    BaseClientProperty() : max_fail_count(details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE),
                             cur_fail_count(0), timeout(0), max_queue_size(details::MAXIMUM_WRITE_QUEUE_SIZE),
                             state(WriteState::WS_NOT_READY)
     { /* EMPTY. */ }
-    virtual ~BasicClientProperty()
+    virtual ~BaseClientProperty()
     { /* EMPTY. */ }
 };
 
@@ -185,5 +185,5 @@ struct BasicClientProperty : public BasicClientTypes
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATEPROPERTY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_CLIENTPROPERTY_HPP__
 
