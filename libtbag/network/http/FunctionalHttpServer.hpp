@@ -50,8 +50,6 @@ public:
 
 public:
     TBAG_VOID_NOPARAM_CALLBACK_HELPER(onServerClose);
-    TBAG_CALLBACK_HELPER(onClientUdataAlloc, void*, nullptr, WeakClient);
-    TBAG_VOID_CALLBACK_HELPER(onClientUdataDealloc, WeakClient, void*);
     TBAG_VOID_CALLBACK_HELPER(onHttpOpen    , WeakClient);
     TBAG_VOID_CALLBACK_HELPER(onHttpRequest , WeakClient, Err, HttpPacket&);
     TBAG_VOID_CALLBACK_HELPER(onHttpClose   , WeakClient);

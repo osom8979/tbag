@@ -246,12 +246,6 @@ public:
     virtual void onServerClose() override
     { /* EMPTY. */ }
 
-    virtual void * onClientUdataAlloc(WeakClient node) override
-    { return nullptr; }
-
-    virtual void onClientUdataDealloc(WeakClient node, void * data) override
-    { /* EMPTY. */ }
-
 public:
     virtual void onHttpOpen    (WeakClient node) { /* EMPTY. */ }
     virtual void onHttpRequest (WeakClient node, Err code, HttpPacket & packet) { /* EMPTY. */ }

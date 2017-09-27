@@ -18,7 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/details/FunctionalNet.hpp>
-#include <libtbag/network/stream/client/WriteQueueClient.hpp>
+#include <libtbag/network/stream/client/WriteStateClient.hpp>
 
 #include <string>
 #include <vector>
@@ -40,28 +40,28 @@ namespace stream  {
 class TBAG_API StreamClient : public details::ClientInterface
 {
 public:
-    using WriteQueueClient = client::WriteQueueClient;
+    using WriteStateClient = client::WriteStateClient;
 
-    using StreamType = WriteQueueClient::StreamType;
-    using ReadPacket = WriteQueueClient::ReadPacket;
-    using WriteReady = WriteQueueClient::WriteReady;
-    using WriteState = client::WriteState;
+    using StreamType  = WriteStateClient::StreamType;
+    using ReadPacket  = WriteStateClient::ReadPacket;
+    using UpdateReady = WriteStateClient::UpdateReady;
+    using WriteState  = client::WriteState;
 
-    using SharedClientBackend = WriteQueueClient::SharedClientBackend;
-    using WeakClientBackend   = WriteQueueClient::WeakClientBackend;
-    using SharedSafetyAsync   = WriteQueueClient::SharedSafetyAsync;
-    using WeakSafetyAsync     = WriteQueueClient::WeakSafetyAsync;
-    using SharedUserTimer     = WriteQueueClient::SharedUserTimer;
+    using SharedStream      = WriteStateClient::SharedStream;
+    using WeakStream        = WriteStateClient::WeakStream;
+    using SharedSafetyAsync = WriteStateClient::SharedSafetyAsync;
+    using WeakSafetyAsync   = WriteStateClient::WeakSafetyAsync;
+    using SharedUserTimer   = WriteStateClient::SharedUserTimer;
 
     using Loop = uvpp::Loop;
     using Id   = id::Id;
 
 private:
-    WriteQueueClient _internal;
+    WriteStateClient _client;
 
 public:
     StreamClient(Loop & loop, StreamType type);
-    StreamClient(Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready));
+    StreamClient(Loop & loop, StreamType type, UpdateReady const & UNUSED_PARAM(ready));
     virtual ~StreamClient();
 
 public:
@@ -69,14 +69,16 @@ public:
     char const * getWriteStateName() const;
 
 public:
-    WeakClientBackend getClient();
+    WeakStream getClient();
     WeakSafetyAsync getAsync();
 
 public:
     virtual Id          id   () const override;
     virtual std::string dest () const override;
     virtual int         port () const override;
-    virtual void *      udata() override;
+
+public:
+    virtual void * udata(void * data = nullptr) override;
 
 public:
     virtual Err init  (char const * destination, int port = 0) override;

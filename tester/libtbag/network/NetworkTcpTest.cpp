@@ -38,9 +38,6 @@ struct TestTcpServer : public TcpServer
     int    client_timer_cb_counter = 0;
     int    server_close_cb_counter = 0;
 
-    int   client_udata_alloc_cb_counter = 0;
-    int client_udata_dealloc_cb_counter = 0;
-
     using OnConnection     = std::function<void(Err)>;
     using OnClientShutdown = std::function<void(WeakClient, Err)>;
     using OnClientWrite    = std::function<void(WeakClient, Err)>;
@@ -85,11 +82,6 @@ struct TestTcpServer : public TcpServer
     { client_timer_cb_counter++; if (client_timer_cb) { client_timer_cb(node); } }
     virtual void onServerClose() override
     { server_close_cb_counter++; if (server_close_cb) { server_close_cb(); } }
-
-    virtual void * onClientUdataAlloc(WeakClient node) override
-    { client_udata_alloc_cb_counter++; return nullptr; }
-    virtual void onClientUdataDealloc(WeakClient node, void * data) override
-    { client_udata_dealloc_cb_counter++; }
 };
 
 TEST(NetworkTcpTest, JustCreateClient)
@@ -536,8 +528,6 @@ TEST(NetworkTcpTest, MultiEcho)
     int server_client_write  = 0;
     int server_client_close  = 0;
     int server_close         = 0;
-    int server_udata_alloc   = 0;
-    int server_udata_dealloc = 0;
     Err server_result = Err::E_UNKNOWN;
 
     server.set_onConnection([&](Err code){
@@ -573,18 +563,6 @@ TEST(NetworkTcpTest, MultiEcho)
     });
     server.set_onServerClose([&](){
         server_close++;
-    });
-
-    int const TEST_USER_DATA_NUMBER = 100;
-    server.set_onClientUdataAlloc([&](FuncTcpServer::WeakClient node) -> void *{
-        server_udata_alloc++;
-        return new (std::nothrow) int (TEST_USER_DATA_NUMBER);
-    });
-    server.set_onClientUdataDealloc([&](FuncTcpServer::WeakClient node, void * data){
-        ASSERT_NE(nullptr, data);
-        ASSERT_EQ(TEST_USER_DATA_NUMBER, *static_cast<int*>(data));
-        server_udata_dealloc++;
-        delete static_cast<int*>(data);
     });
 
     server.init(details::ANY_IPV4, 0);
@@ -665,8 +643,6 @@ TEST(NetworkTcpTest, MultiEcho)
     ASSERT_EQ(CLIENT_SIZE, server_client_read  );
     ASSERT_EQ(CLIENT_SIZE, server_client_write );
     ASSERT_EQ(CLIENT_SIZE, server_client_close );
-    ASSERT_EQ(CLIENT_SIZE, server_udata_alloc  );
-    ASSERT_EQ(CLIENT_SIZE, server_udata_dealloc);
     ASSERT_EQ(1, server_close);
 }
 

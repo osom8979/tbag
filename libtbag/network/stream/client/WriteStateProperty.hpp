@@ -27,6 +27,7 @@
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <memory>
 #include <vector>
@@ -68,64 +69,6 @@ inline char const * getWriteStateName(WriteState state) TBAG_NOEXCEPT
     // @formatter:on
     return "UNKNOWN";
 }
-
-/**
- * Write information structure.
- *
- * @author zer0
- * @date   2017-09-23
- */
-struct WriteInfo : private Noncopyable
-{
-    using ConnectRequest  = uvpp::ConnectRequest;
-    using WriteRequest    = uvpp::WriteRequest;
-    using ShutdownRequest = uvpp::ShutdownRequest;
-
-    using binf   = uvpp::binf;
-    using Buffer = std::vector<char>;
-
-    int  max_fail_count; ///< Maximum continuous failure count.
-    int  cur_fail_count; ///< Current continuous failure count.
-
-    uint64_t timeout; ///< Write timeout. (milliseconds)
-
-    WriteState  state;
-    Buffer      buffer;
-
-    ConnectRequest    connect_req;
-    WriteRequest        write_req;
-    ShutdownRequest  shutdown_req;
-
-    WriteInfo() : max_fail_count(details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE),
-                  cur_fail_count(0), timeout(0), state(WriteState::WS_NOT_READY), buffer()
-    { /* EMPTY. */ }
-    ~WriteInfo()
-    { /* EMPTY. */ }
-
-    inline void setNotReady   () TBAG_NOEXCEPT { state = WriteState::WS_NOT_READY;    }
-    inline void setReady      () TBAG_NOEXCEPT { state = WriteState::WS_READY;        }
-    inline void setAsync      () TBAG_NOEXCEPT { state = WriteState::WS_ASYNC;        }
-    inline void setAsyncCancel() TBAG_NOEXCEPT { state = WriteState::WS_ASYNC_CANCEL; }
-    inline void setWrite      () TBAG_NOEXCEPT { state = WriteState::WS_WRITE;        }
-    inline void setShutdown   () TBAG_NOEXCEPT { state = WriteState::WS_SHUTDOWN;     }
-    inline void setClosing    () TBAG_NOEXCEPT { state = WriteState::WS_CLOSING;      }
-    inline void setEnd        () TBAG_NOEXCEPT { state = WriteState::WS_END;          }
-
-    inline bool isNotReady   () const TBAG_NOEXCEPT { return state == WriteState::WS_NOT_READY;    }
-    inline bool isReady      () const TBAG_NOEXCEPT { return state == WriteState::WS_READY;        }
-    inline bool isAsync      () const TBAG_NOEXCEPT { return state == WriteState::WS_ASYNC;        }
-    inline bool isAsyncCancel() const TBAG_NOEXCEPT { return state == WriteState::WS_ASYNC_CANCEL; }
-    inline bool isWrite      () const TBAG_NOEXCEPT { return state == WriteState::WS_WRITE;        }
-    inline bool isShutdown   () const TBAG_NOEXCEPT { return state == WriteState::WS_SHUTDOWN;     }
-    inline bool isClosing    () const TBAG_NOEXCEPT { return state == WriteState::WS_CLOSING;      }
-    inline bool isEnd        () const TBAG_NOEXCEPT { return state == WriteState::WS_END;          }
-
-    inline WriteState getState() const TBAG_NOEXCEPT { return state; }
-    inline char const * getStateName() const TBAG_NOEXCEPT { return getWriteStateName(state); }
-
-    inline bool isReadyToWriteState() TBAG_NOEXCEPT_SP_OP(buffer.empty())
-    { return isReady() || (isAsync() && buffer.empty() == false); }
-};
 
 struct BasicClientTypes
 {
@@ -206,13 +149,11 @@ struct BasicClientProperty : public BasicClientTypes
 {
     StreamType stream_type;
 
-    ClientInterface * interface;
-
     int max_fail_count; ///< Maximum continuous failure count.
     int cur_fail_count; ///< Current continuous failure count.
 
     uint64_t timeout;   ///< Write timeout. (milliseconds)
-    Buffer   buffer;    ///< Write buffer.
+    Buffer   wbuffer;   ///< Write buffer.
 
     ReuseQueue  queue;
     std::size_t max_queue_size;
@@ -226,54 +167,14 @@ struct BasicClientProperty : public BasicClientTypes
     SharedUserTimer      user_timer;
     SharedShutdownTimer  shutdown_timer;
 
+    WriteState state;
+
     BasicClientProperty() : max_fail_count(details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE),
-                            cur_fail_count(0), timeout(0), max_queue_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
+                            cur_fail_count(0), timeout(0), max_queue_size(details::MAXIMUM_WRITE_QUEUE_SIZE),
+                            state(WriteState::WS_NOT_READY)
     { /* EMPTY. */ }
     virtual ~BasicClientProperty()
     { /* EMPTY. */ }
-};
-
-/**
- * SafetyClientProperty structure.
- *
- * @author zer0
- * @date   2017-09-27
- */
-struct SafetyClientProperty : public BasicClientProperty
-{
-    using ClientGuard = std::lock_guard<SafetyClientProperty>;
-
-    mutable Mutex mutex;
-
-    SafetyClientProperty()
-    { /* EMPTY. */ }
-    virtual ~SafetyClientProperty()
-    { /* EMPTY. */ }
-
-    inline void     lock() const TBAG_NOEXCEPT_SP_OP(    mutex.lock()) {            mutex.lock(); }
-    inline void   unlock() const TBAG_NOEXCEPT_SP_OP(  mutex.unlock()) {          mutex.unlock(); }
-    inline bool try_lock() const TBAG_NOEXCEPT_SP_OP(mutex.try_lock()) { return mutex.try_lock(); }
-
-    template <typename Predicated>
-    void set(Predicated predicated)
-    {
-        Guard const LOCK(mutex);
-        predicated(static_cast<BasicClientProperty&>(*this));
-    }
-
-    template <typename ReturnType, typename Predicated>
-    ReturnType get(Predicated predicated)
-    {
-        Guard const LOCK(mutex);
-        return predicated(static_cast<BasicClientProperty&>(*this));
-    }
-
-    template <typename ReturnType, typename Predicated>
-    ReturnType get(Predicated predicated) const
-    {
-        Guard const LOCK(mutex);
-        return predicated(static_cast<BasicClientProperty const &>(*this));
-    }
 };
 
 } // namespace client

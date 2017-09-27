@@ -247,8 +247,8 @@ public:
 
         SharedStreamNode client = _parent->createClient(STREAM_TYPE, _getLoop(), _server);
 
-        if (StreamClient::SharedClientBackend shared = client->getClient().lock()) {
-            STATIC_ASSERT_CHECK_IS_BASE_OF(typename StreamClient::SharedClientBackend::element_type, uvpp::Stream);
+        if (StreamClient::SharedStream shared = client->getClient().lock()) {
+            STATIC_ASSERT_CHECK_IS_BASE_OF(typename StreamClient::SharedStream::element_type, uvpp::Stream);
             uvpp::Stream & uv_stream = *shared;
 
             Err const CODE = _server->accept(uv_stream);
@@ -256,10 +256,7 @@ public:
                 tDLogD("StreamServer::Internal::accept() client connect.");
                 bool const INSERT_RESULT = _clients.insert(value_type(client->id(), client)).second;
                 assert(INSERT_RESULT);
-
-                WeakClient weak_client(client);
-                uv_stream.setUserData(_parent->onClientUdataAlloc(weak_client)); // Allocate User Data.
-                return weak_client;
+                return WeakClient(client);
             } else {
                 tDLogE("StreamServer::Internal::accept() {} error.", getErrName(CODE));
             }

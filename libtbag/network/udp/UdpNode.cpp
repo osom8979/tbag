@@ -341,11 +341,14 @@ int UdpNode::port() const
     return _internal->client->getSockPort();
 }
 
-void * UdpNode::udata()
+void * UdpNode::udata(void * data)
 {
     assert(static_cast<bool>(_internal));
     assert(static_cast<bool>(_internal->client));
     Guard const MUTEX_GUARD(_mutex);
+    if (data != nullptr) {
+        _internal->client->setUserData(data);
+    }
     return _internal->client->getUserData();
 }
 

@@ -153,7 +153,8 @@ struct ClientInterface
     virtual Id          id   () const { return reinterpret_cast<Id>(this); }
     virtual std::string dest () const { return std::string(); }
     virtual int         port () const { return 0; }
-    virtual void *      udata() { return nullptr; }
+
+    virtual void * udata(void * data = nullptr) { return nullptr; }
 
     // -------------
     // Pure virtual.
@@ -245,9 +246,6 @@ struct ServerInterface
     virtual void onClientClose   (WeakClient node) { /* EMPTY. */ }
     virtual void onClientTimer   (WeakClient node) { /* EMPTY. */ }
     virtual void onServerClose   () { /* EMPTY. */ }
-
-    virtual void * onClientUdataAlloc  (WeakClient node) { return nullptr; }
-    virtual void   onClientUdataDealloc(WeakClient node, void * data) { /* EMPTY. */ }
 };
 
 } // namespace details

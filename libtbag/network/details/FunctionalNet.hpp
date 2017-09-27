@@ -88,9 +88,6 @@ struct FunctionalServer : public BaseType
     TBAG_VOID_CALLBACK_HELPER(onClientRead,     WeakClient, Err, ReadPacket const &);
     TBAG_VOID_CALLBACK_HELPER(onClientClose,    WeakClient);
     TBAG_VOID_NOPARAM_CALLBACK_HELPER(onServerClose);
-
-    TBAG_CALLBACK_HELPER(onClientUdataAlloc, void*, nullptr, WeakClient);
-    TBAG_VOID_CALLBACK_HELPER(onClientUdataDealloc, WeakClient, void*);
 };
 
 } // namespace details

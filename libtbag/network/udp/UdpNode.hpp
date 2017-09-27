@@ -127,7 +127,8 @@ public:
     virtual Id          id   () const override;
     virtual std::string dest () const override;
     virtual int         port () const override;
-    virtual void *      udata() override;
+
+    virtual void * udata(void * data = nullptr) override;
 
 public:
     virtual Err init  (char const * destination, int port = 0) override;

@@ -28,13 +28,13 @@ namespace stream  {
 // ----------------------------
 
 StreamClient::StreamClient(Loop & loop, StreamType type)
-        : _internal(this, loop, type)
+        : _client(this, loop, type)
 {
     // EMPTY.
 }
 
-StreamClient::StreamClient(Loop & loop, StreamType type, WriteReady const & ready)
-        : _internal(this, loop, type, ready)
+StreamClient::StreamClient(Loop & loop, StreamType type, UpdateReady const & ready)
+        : _client(this, loop, type, ready)
 {
     // EMPTY.
 }
@@ -46,53 +46,53 @@ StreamClient::~StreamClient()
 
 StreamClient::WriteState StreamClient::getWriteState() const
 {
-    return _internal.getState();
+    return _client.getState();
 }
 
 char const * StreamClient::getWriteStateName() const
 {
-    return _internal.getStateName();
+    return _client.getStateName();
 }
 
-StreamClient::WeakClientBackend StreamClient::getClient()
+StreamClient::WeakStream StreamClient::getClient()
 {
-    return _internal.getClient();
+    return _client.getClient();
 }
 
 StreamClient::WeakSafetyAsync StreamClient::getAsync()
 {
-    return _internal.getAsync();
+    return _client.getAsync();
 }
 
 StreamClient::Id StreamClient::id() const
 {
-    return _internal.getId();
+    return _client.id();
 }
 
-void * StreamClient::udata()
+void * StreamClient::udata(void * data)
 {
-    return _internal.getUserData();
+    return _client.udata(data);
 }
 
 std::string StreamClient::dest() const
 {
-    return _internal.dest();
+    return _client.dest();
 }
 
 int StreamClient::port() const
 {
-    return _internal.port();
+    return _client.port();
 }
 
 Err StreamClient::init(char const * destination, int port)
 {
-    Err const INIT_CODE = _internal.initClient(_internal.getStreamType(), std::string(destination), port);
-    if (INIT_CODE != Err::E_SUCCESS) {
-        tDLogE("StreamClient::init() Initialize fail.");
+    Err const INIT_CODE = _client.initClient(std::string(destination), port);
+    if (TBAG_ERR_FAILURE(INIT_CODE)) {
+        tDLogE("StreamClient::init() Initialize {} error.", getErrName(INIT_CODE));
         return INIT_CODE;
     }
 
-    if (TBAG_ERR_FAILURE(_internal.initInternalHandles())) {
+    if (TBAG_ERR_FAILURE(_client.initInternalHandles())) {
         tDLogE("StreamClient::init() Initialize fail (internal handles).");
         return Err::E_UNKNOWN;
     }
@@ -101,47 +101,47 @@ Err StreamClient::init(char const * destination, int port)
 
 Err StreamClient::start()
 {
-    return _internal.startRead();
+    return _client.startRead();
 }
 
 Err StreamClient::stop()
 {
-    return _internal.stopRead();
+    return _client.stopRead();
 }
 
 Err StreamClient::close()
 {
-    return _internal.close();
+    return _client.close();
 }
 
 Err StreamClient::cancel()
 {
-    return _internal.cancel();
+    return _client.cancel();
 }
 
 Err StreamClient::write(char const * buffer, std::size_t size)
 {
-    return _internal.autoWrite(buffer, size);
+    return _client.write(buffer, size);
 }
 
 void StreamClient::setWriteTimeout(uint64_t millisec)
 {
-    _internal.setWriteTimeout(millisec);
+    _client.setWriteTimeout(millisec);
 }
 
 Err StreamClient::startTimer(uint64_t millisec)
 {
-    return _internal.startUserTimer(millisec);
+    return _client.startUserTimer(millisec);
 }
 
 void StreamClient::stopTimer()
 {
-    _internal.stopUserTimer();
+    _client.stopUserTimer();
 }
 
 bool StreamClient::isActiveTimer()
 {
-    return _internal.isActiveUserTimer();
+    return _client.isActiveUserTimer();
 }
 
 // --------------
@@ -150,31 +150,31 @@ bool StreamClient::isActiveTimer()
 
 void StreamClient::backConnect(Err code)
 {
-    _internal.preConnect(code);
+    _client.preConnect(code);
     onConnect(code);
 }
 
 void StreamClient::backShutdown(Err code)
 {
-    _internal.preShutdown(code);
+    _client.preShutdown(code);
     onShutdown(code);
 }
 
 void StreamClient::backWrite(Err code)
 {
-    _internal.preWrite(code);
+    _client.preWrite(code);
     onWrite(code);
 }
 
 void StreamClient::backRead(Err code, ReadPacket const & packet)
 {
-    _internal.preRead(code, packet);
+    _client.preRead(code, packet);
     onRead(code, packet);
 }
 
 void StreamClient::backClose()
 {
-    _internal.preClose();
+    _client.preClose();
     onClose();
 }
 

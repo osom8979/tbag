@@ -18,7 +18,7 @@ namespace network {
 namespace stream  {
 
 StreamNode::StreamNode(Loop & loop, StreamType type, ServerInterface * parent)
-        : StreamClient(loop, type, StreamClient::WriteReady()), _parent(parent)
+        : StreamClient(loop, type, StreamClient::UpdateReady()), _parent(parent)
 {
     assert(getWriteState() == StreamClient::WriteState::WS_READY);
 }
@@ -61,12 +61,6 @@ void StreamNode::onClose()
 {
     assert(_parent != nullptr);
     _parent->onClientClose(getWeakClient());
-
-    // Deallocate user data.
-    void * user_data = this->udata();
-    if (user_data) {
-        _parent->onClientUdataDealloc(getWeakClient(), user_data);
-    }
     _parent->remove(this->id());
 }
 
