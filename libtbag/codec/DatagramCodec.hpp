@@ -97,6 +97,10 @@ public:
     bool pushWriteBuffer(char const * buffer, Size size);
 
 public:
+    Err front(Buffer & buffer);
+    Err pop();
+
+public:
     template <typename Predicated>
     bool popWriteBuffer(Predicated predicated)
     {

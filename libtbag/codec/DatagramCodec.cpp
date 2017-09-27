@@ -52,6 +52,23 @@ bool DatagramEncoder::pushWriteBuffer(char const * buffer, Size size)
     return true;
 }
 
+Err DatagramEncoder::front(Buffer & buffer)
+{
+    Guard guard(_writers_mutex);
+    SharedBuffer shared;
+    Err const CODE = _writers.front(shared);
+    if (TBAG_ERR_SUCCESS(CODE) && shared && shared->empty() == false) {
+        buffer.assign(shared->begin(), shared->end());
+    }
+    return CODE;
+}
+
+Err DatagramEncoder::pop()
+{
+    Guard guard(_writers_mutex);
+    return _writers.pop();
+}
+
 DatagramEncoder::Size DatagramEncoder::parseBufferSize(char const * buffer, Size size)
 {
     if (size < DATAGRAM_HEADER_SIZE) {
