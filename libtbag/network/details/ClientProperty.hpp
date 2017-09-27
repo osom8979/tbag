@@ -5,8 +5,8 @@
  * @date   2017-09-27
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_CLIENTPROPERTY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_CLIENTPROPERTY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_CLIENTPROPERTY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_CLIENTPROPERTY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -37,8 +37,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
-namespace stream  {
-namespace client  {
+namespace details {
 
 enum class WriteState
 {
@@ -70,7 +69,7 @@ inline char const * getWriteStateName(WriteState state) TBAG_NOEXCEPT
     return "UNKNOWN";
 }
 
-struct BaseClientTypes
+struct ClientTypes
 {
     using ClientInterface = details::ClientInterface;
     using StreamType      = details::StreamType;
@@ -140,21 +139,13 @@ struct BaseClientTypes
 };
 
 /**
- * BaseClientProperty structure.
+ * ClientProperty structure.
  *
  * @author zer0
  * @date   2017-09-27
  */
-struct BaseClientProperty : public BaseClientTypes
+struct ClientProperty : public ClientTypes
 {
-    StreamType stream_type;
-
-    int max_fail_count; ///< Maximum continuous failure count.
-    int cur_fail_count; ///< Current continuous failure count.
-
-    uint64_t timeout;   ///< Write timeout. (milliseconds)
-    Buffer   wbuffer;   ///< Write buffer.
-
     ReuseQueue  queue;
     std::size_t max_queue_size;
 
@@ -167,23 +158,28 @@ struct BaseClientProperty : public BaseClientTypes
     SharedUserTimer      user_timer;
     SharedShutdownTimer  shutdown_timer;
 
-    WriteState state;
+    int  max_fail_count; ///< Maximum continuous failure count.
+    int  cur_fail_count; ///< Current continuous failure count.
 
-    BaseClientProperty() : max_fail_count(details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE),
-                            cur_fail_count(0), timeout(0), max_queue_size(details::MAXIMUM_WRITE_QUEUE_SIZE),
-                            state(WriteState::WS_NOT_READY)
+    uint64_t  timeout;   ///< Write timeout. (milliseconds)
+    Buffer    wbuffer;   ///< Write buffer.
+
+    WriteState  state;
+
+    ClientProperty() : max_queue_size(details::MAXIMUM_WRITE_QUEUE_SIZE),
+                       max_fail_count(details::MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE),
+                       cur_fail_count(0), timeout(0), state(WriteState::WS_NOT_READY)
     { /* EMPTY. */ }
-    virtual ~BaseClientProperty()
+    ~ClientProperty()
     { /* EMPTY. */ }
 };
 
-} // namespace client
-} // namespace stream
+} // namespace details
 } // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_CLIENTPROPERTY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_CLIENTPROPERTY_HPP__
 

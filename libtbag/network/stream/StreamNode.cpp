@@ -20,7 +20,7 @@ namespace stream  {
 StreamNode::StreamNode(Loop & loop, StreamType type, ServerInterface * parent)
         : StreamClient(loop, type, StreamClient::UpdateReady()), _parent(parent)
 {
-    assert(getWriteState() == StreamClient::WriteState::WS_READY);
+    assert(getState() == StreamClient::WriteState::WS_READY);
 }
 
 StreamNode::~StreamNode()

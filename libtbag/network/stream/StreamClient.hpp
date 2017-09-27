@@ -18,7 +18,8 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/details/FunctionalNet.hpp>
-#include <libtbag/network/stream/client/SafetyClient.hpp>
+#include <libtbag/network/details/ClientProperty.hpp>
+#include <libtbag/container/ReuseQueue.hpp>
 
 #include <string>
 #include <vector>
@@ -37,27 +38,30 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-10
  */
-class TBAG_API StreamClient : public details::ClientInterface
+class TBAG_API StreamClient : public details::ClientInterface,
+                              public details::ClientTypes,
+                              public details::ClientTypes::OnUserTimerCallback,
+                              public details::ClientTypes::OnShutdownTimerCallback,
+                              public details::ClientTypes::OnAsyncWriteCallback,
+                              private Noncopyable
 {
 public:
-    using SafetyClient = client::SafetyClient;
+    using WriteState  = details::WriteState;
+    using ClientTypes = details::ClientTypes;
 
-    using StreamType  = SafetyClient::StreamType;
-    using ReadPacket  = SafetyClient::ReadPacket;
-    using UpdateReady = SafetyClient::UpdateReady;
-    using WriteState  = client::WriteState;
+    using Id = ClientTypes::Id;
 
-    using SharedStream      = SafetyClient::SharedStream;
-    using WeakStream        = SafetyClient::WeakStream;
-    using SharedSafetyAsync = SafetyClient::SharedSafetyAsync;
-    using WeakSafetyAsync   = SafetyClient::WeakSafetyAsync;
-    using SharedUserTimer   = SafetyClient::SharedUserTimer;
-
-    using Loop = uvpp::Loop;
-    using Id   = id::Id;
+public:
+    struct Internal;
+    friend struct Internal;
+    using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
-    SafetyClient _client;
+    mutable Mutex _mutex;
+    UniqueInternal _internal;
+
+private:
+    void * _user_data;
 
 public:
     StreamClient(Loop & loop, StreamType type);
@@ -65,36 +69,50 @@ public:
     virtual ~StreamClient();
 
 public:
-    WriteState getWriteState() const;
-    char const * getWriteStateName() const;
+    void       * getUserData()       TBAG_NOEXCEPT { Guard g(_mutex); return _user_data; }
+    void const * getUserData() const TBAG_NOEXCEPT { Guard g(_mutex); return _user_data; }
 
 public:
-    WeakStream getClient();
-    WeakSafetyAsync getAsync();
+    StreamType   getStreamType() const TBAG_NOEXCEPT;
+    WriteState   getState     () const;
+    char const * getStateName () const;
+
+    WeakStream          getClient       ();
+    WeakSafetyAsync     getAsync        ();
+    SharedUserTimer     getUserTimer    ();
+    SharedShutdownTimer getShutdownTimer();
+
+private:
+    Err initClient(std::string const & destination, int port = 0);
+    Err initInternalHandles();
 
 public:
-    virtual Id          id   () const override;
-    virtual std::string dest () const override;
-    virtual int         port () const override;
+    virtual Id            id() const override;
+    virtual std::string dest() const override;
+    virtual int         port() const override;
 
 public:
     virtual void * udata(void * data = nullptr) override;
 
 public:
-    virtual Err init  (char const * destination, int port = 0) override;
-    virtual Err start () override;
-    virtual Err stop  () override;
-    virtual Err close () override;
+    virtual Err   init(char const * destination, int port = 0) override;
+    virtual Err  start() override;
+    virtual Err   stop() override;
+    virtual Err  close() override;
     virtual Err cancel() override;
-    virtual Err write (char const * buffer, std::size_t size) override;
+    virtual Err  write(char const * buffer, std::size_t size) override;
 
 public:
     virtual void setWriteTimeout(uint64_t millisec) override;
-    virtual Err  startTimer     (uint64_t millisec) override;
-    virtual void stopTimer      () override;
-    virtual bool isActiveTimer  () override;
+    virtual Err       startTimer(uint64_t millisec) override;
+    virtual void       stopTimer() override;
+    virtual bool   isActiveTimer() override;
 
-// Event backend.
+protected:
+    virtual void     onUserTimer() override;
+    virtual void onShutdownTimer() override;
+    virtual void    onAsyncWrite() override;
+
 protected:
     virtual void backConnect (Err code) override;
     virtual void backShutdown(Err code) override;
