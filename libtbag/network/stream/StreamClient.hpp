@@ -18,7 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/details/FunctionalNet.hpp>
-#include <libtbag/network/stream/WriteQueueClient.hpp>
+#include <libtbag/network/stream/client/WriteQueueClient.hpp>
 
 #include <string>
 #include <vector>
@@ -40,19 +40,18 @@ namespace stream  {
 class TBAG_API StreamClient : public details::ClientInterface
 {
 public:
-    friend class InternalClient;
+    using WriteQueueClient = client::WriteQueueClient;
 
-public:
-    using StreamType = InternalClient::StreamType;
-    using ReadPacket = InternalClient::ReadPacket;
-    using WriteState = InternalClient::WriteState;
-    using WriteReady = InternalClient::WriteReady;
+    using StreamType = WriteQueueClient::StreamType;
+    using ReadPacket = WriteQueueClient::ReadPacket;
+    using WriteState = WriteQueueClient::WriteState;
+    using WriteReady = WriteQueueClient::WriteReady;
 
-    using SharedClientBackend = InternalClient::SharedClientBackend;
-    using WeakClientBackend   = InternalClient::WeakClientBackend;
-    using SharedSafetyAsync   = InternalClient::SharedSafetyAsync;
-    using WeakSafetyAsync     = InternalClient::WeakSafetyAsync;
-    using SharedUserTimer     = InternalClient::SharedUserTimer;
+    using SharedClientBackend = WriteQueueClient::SharedClientBackend;
+    using WeakClientBackend   = WriteQueueClient::WeakClientBackend;
+    using SharedSafetyAsync   = WriteQueueClient::SharedSafetyAsync;
+    using WeakSafetyAsync     = WriteQueueClient::WeakSafetyAsync;
+    using SharedUserTimer     = WriteQueueClient::SharedUserTimer;
 
     using Loop = uvpp::Loop;
     using Id   = id::Id;

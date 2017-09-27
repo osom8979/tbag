@@ -354,20 +354,6 @@ void Loop::forceClear()
     _handles.clear();
 }
 
-// --------------
-// Event methods.
-// --------------
-
-void Loop::onClosing(Handle * handle)
-{
-    // EMPTY.
-}
-
-void Loop::onClosed(Handle * handle)
-{
-    // EMPTY.
-}
-
 // ----------
 // Utilities.
 // ----------

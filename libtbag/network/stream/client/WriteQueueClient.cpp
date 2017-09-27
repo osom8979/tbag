@@ -5,7 +5,7 @@
  * @date   2017-09-24
  */
 
-#include <libtbag/network/stream/WriteQueueClient.hpp>
+#include <libtbag/network/stream/client/WriteQueueClient.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 
@@ -15,15 +15,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace stream  {
+namespace client  {
 
 WriteQueueClient::WriteQueueClient(ClientInterface * parent, Loop & loop, StreamType type)
-        : InternalClient(parent, loop, type), _queue(), _max_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
+        : WriteStateClient(parent, loop, type), _queue(), _max_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
 {
     // EMPTY.
 }
 
 WriteQueueClient::WriteQueueClient(ClientInterface * parent, Loop & loop, StreamType type, WriteReady const & ready)
-        : InternalClient(parent, loop, type, ready), _queue(), _max_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
+        : WriteStateClient(parent, loop, type, ready), _queue(), _max_size(details::MAXIMUM_WRITE_QUEUE_SIZE)
 {
     // EMPTY.
 }
@@ -156,6 +157,7 @@ void WriteQueueClient::preWrite(Err code)
     }
 }
 
+} // namespace client
 } // namespace stream
 } // namespace network
 

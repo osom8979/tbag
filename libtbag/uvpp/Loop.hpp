@@ -214,8 +214,8 @@ public:
 
 // Event methods.
 public:
-    virtual void onClosing(Handle * handle);
-    virtual void onClosed(Handle * handle);
+    virtual void onClosing(Handle * handle) { /* EMPTY. */ }
+    virtual void onClosed (Handle * handle) { /* EMPTY. */ }
 
 public:
     /** [INTERNAL] Create(new) & insert handle. */

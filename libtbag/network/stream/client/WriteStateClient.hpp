@@ -1,12 +1,12 @@
 /**
- * @file   InternalClient.hpp
- * @brief  InternalClient class prototype.
+ * @file   WriteStateClient.hpp
+ * @brief  WriteStateClient class prototype.
  * @author zer0
  * @date   2017-09-24
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_INTERNALCLIENT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_INTERNALCLIENT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATECLIENT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATECLIENT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -32,6 +32,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace stream  {
+namespace client  {
 
 // Forward declaration.
 class StreamClient;
@@ -42,11 +43,12 @@ class StreamClient;
  * @author zer0
  * @date   2017-06-16
  * @date   2017-09-24 (Rename: StreamClient::Internal -> InternalClient)
+ * @date   2017-09-27 (Rename: InternalClient -> WriteStateClient)
  *
  * @warning
  *  Do not use a mutex if the function name starts with '_'.
  */
-class TBAG_API InternalClient : private Noncopyable
+class TBAG_API WriteStateClient : private Noncopyable
 {
 public:
     using ClientInterface = details::ClientInterface;
@@ -73,24 +75,24 @@ public:
 public:
     struct UserTimer final : public Timer
     {
-        InternalClient * parent;
-        UserTimer(Loop & loop, InternalClient * p) : uvpp::Timer(loop), parent(p) { /* EMPTY. */ }
+        WriteStateClient * parent;
+        UserTimer(Loop & loop, WriteStateClient * p) : uvpp::Timer(loop), parent(p) { /* EMPTY. */ }
         virtual ~UserTimer() { /* EMPTY. */ }
         virtual void onTimer() override { parent->onUserTimer(); }
     };
 
     struct ShutdownTimer final : public Timer
     {
-        InternalClient * parent;
-        ShutdownTimer(Loop & loop, InternalClient * p) : uvpp::Timer(loop), parent(p) { /* EMPTY. */ }
+        WriteStateClient * parent;
+        ShutdownTimer(Loop & loop, WriteStateClient * p) : uvpp::Timer(loop), parent(p) { /* EMPTY. */ }
         virtual ~ShutdownTimer() { /* EMPTY. */ }
         virtual void onTimer() override { parent->onShutdownTimer(); }
     };
 
     struct AsyncWrite final : public JobInterface
     {
-        InternalClient * parent;
-        AsyncWrite(InternalClient * p) : parent(p) { /* EMPTY. */ }
+        WriteStateClient * parent;
+        AsyncWrite(WriteStateClient * p) : parent(p) { /* EMPTY. */ }
         virtual ~AsyncWrite() { /* EMPTY. */ }
         virtual void run() override { parent->onAsyncWrite(); }
     };
@@ -122,9 +124,9 @@ private:
     WriteInfo _winfo;
 
 public:
-    InternalClient(ClientInterface * parent, Loop & loop, StreamType type);
-    InternalClient(ClientInterface * parent, Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready));
-    virtual ~InternalClient();
+    WriteStateClient(ClientInterface * parent, Loop & loop, StreamType type);
+    WriteStateClient(ClientInterface * parent, Loop & loop, StreamType type, WriteReady const & UNUSED_PARAM(ready));
+    virtual ~WriteStateClient();
 
 public:
     inline StreamType getStreamType() const TBAG_NOEXCEPT { return STREAM_TYPE; }
@@ -194,6 +196,7 @@ public:
     virtual void preClose   ();
 };
 
+} // namespace client
 } // namespace stream
 } // namespace network
 
@@ -201,5 +204,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_INTERNALCLIENT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_STREAM_CLIENT_WRITESTATECLIENT_HPP__
 
