@@ -20,6 +20,7 @@
 #include <libtbag/id/Id.hpp>
 
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/network/stream/client/WriteStateProperty.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/Timer.hpp>
@@ -33,9 +34,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace stream  {
 namespace client  {
-
-// Forward declaration.
-class StreamClient;
 
 /**
  * Internal StreamClient class prototype.
@@ -54,8 +52,6 @@ public:
     using ClientInterface = details::ClientInterface;
     using StreamType      = details::StreamType;
     using ReadPacket      = details::ReadPacket;
-    using WriteState      = details::WriteState;
-    using WriteInfo       = details::WriteInfo;
 
     using Loop   = uvpp::Loop;
     using Timer  = uvpp::Timer;

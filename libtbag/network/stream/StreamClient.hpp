@@ -44,8 +44,8 @@ public:
 
     using StreamType = WriteQueueClient::StreamType;
     using ReadPacket = WriteQueueClient::ReadPacket;
-    using WriteState = WriteQueueClient::WriteState;
     using WriteReady = WriteQueueClient::WriteReady;
+    using WriteState = client::WriteState;
 
     using SharedClientBackend = WriteQueueClient::SharedClientBackend;
     using WeakClientBackend   = WriteQueueClient::WeakClientBackend;
