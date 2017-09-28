@@ -115,7 +115,7 @@ public:
         auto itrs = getIterators();
         auto const END = itrs->end();
         for (auto itr = itrs->begin(); itr != END; ++itr) {
-            predicated(*(itrs->begin()));
+            predicated(*itr);
         }
     }
 

@@ -550,9 +550,6 @@ Err StreamClient::init(char const * destination, int port)
 Err StreamClient::start()
 {
     Guard const LOCK(_mutex);
-    if (_internal->isDisconnectedState()) {
-        return Err::E_ILLSTATE;
-    }
     Err const CODE = _internal->client_stream->startRead();
     if (TBAG_ERR_FAILURE(CODE)) {
         tDLogE("StreamClient::start() Start {} error", getErrName(CODE));
@@ -563,9 +560,6 @@ Err StreamClient::start()
 Err StreamClient::stop()
 {
     Guard const LOCK(_mutex);
-    if (_internal->isDisconnectedState()) {
-        return Err::E_ILLSTATE;
-    }
     Err const CODE = _internal->client_stream->stopRead();
     if (TBAG_ERR_FAILURE(CODE)) {
         tDLogE("StreamClient::stop() Stop {} error", getErrName(CODE));
