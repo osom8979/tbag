@@ -31,7 +31,14 @@ std::size_t LoggerManager::getSize() const TBAG_NOEXCEPT
 
 Logger * LoggerManager::getLoggerPtr(std::string const & name)
 {
-    return _logs.at(name).get();
+    // Don't use the _logs.at() method.
+    // This is to avoid the std::out_of_range exception.
+
+    auto itr = _logs.find(name);
+    if (itr == _logs.end()) {
+        return nullptr;
+    }
+    return itr->second.get();
 }
 
 } // namespace mgr
