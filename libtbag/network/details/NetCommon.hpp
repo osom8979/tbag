@@ -48,6 +48,9 @@ TBAG_CONSTEXPR int const MAXIMUM_CONTINUOUS_FAILURE_COUNT_OF_WRITE = 8;
 /** Maximum write queue size. */
 TBAG_CONSTEXPR int const MAXIMUM_WRITE_QUEUE_SIZE = 256;
 
+/** Maximum connection size. */
+TBAG_CONSTEXPR int const MAXIMUM_CONNECTION_SIZE = 10000;
+
 enum class StreamType : int
 {
     UNKNOWN,

@@ -236,7 +236,7 @@ protected:
 protected:
     virtual SharedStreamNode createClient(StreamType type,
                                           Loop & loop,
-                                          SharedServerBackend & server) final override;
+                                          SharedStream & server) final override;
 
 // ------------------------
 // User's callback methods.

@@ -75,7 +75,7 @@ struct FunctionalServer : public BaseType
     using SharedClient = ServerInterface::SharedClient;
     using   WeakClient = ServerInterface::WeakClient;
 
-    STATIC_ASSERT_CHECK_IS_BASE_OF(ServerInterface, Parent);
+    STATIC_ASSERT_CHECK_IS_BASE_OF(details::ServerInterface, Parent);
 
     FunctionalServer(Loop & loop) : Parent(loop)
     { /* EMPTY */ }

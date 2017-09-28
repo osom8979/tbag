@@ -15,13 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
 #include <libtbag/id/Id.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
-
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/Stream.hpp>
@@ -31,6 +29,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -71,10 +70,6 @@ inline char const * getWriteStateName(WriteState state) TBAG_NOEXCEPT
 
 struct ClientTypes
 {
-    using ClientInterface = details::ClientInterface;
-    using StreamType      = details::StreamType;
-    using ReadPacket      = details::ReadPacket;
-
     using ConnectRequest  = uvpp::ConnectRequest;
     using WriteRequest    = uvpp::WriteRequest;
     using ShutdownRequest = uvpp::ShutdownRequest;
@@ -162,7 +157,7 @@ struct ClientProperty : public ClientTypes
     int  cur_fail_count; ///< Current continuous failure count.
 
     uint64_t  timeout;   ///< Write timeout. (milliseconds)
-    Buffer    wbuffer;   ///< Write buffer.
+    Buffer    wbuffer;   ///< The last buffer written.
 
     WriteState  state;
 

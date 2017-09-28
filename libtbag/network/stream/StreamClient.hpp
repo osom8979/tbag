@@ -15,15 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
+#include <libtbag/Noncopyable.hpp>
 
 #include <libtbag/network/details/FunctionalNet.hpp>
 #include <libtbag/network/details/ClientProperty.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
-
-#include <string>
-#include <vector>
-#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -47,6 +43,8 @@ class TBAG_API StreamClient
           private Noncopyable
 {
 public:
+    using StreamType  = details::StreamType;
+    using ReadPacket  = details::ReadPacket;
     using WriteState  = details::WriteState;
     using ClientTypes = details::ClientTypes;
 

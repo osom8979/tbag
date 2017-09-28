@@ -15,20 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
-#include <libtbag/Type.hpp>
+#include <libtbag/Noncopyable.hpp>
 
-#include <libtbag/id/Id.hpp>
-#include <libtbag/uvpp/Stream.hpp>
-#include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
+#include <libtbag/network/details/ServerProperty.hpp>
 #include <libtbag/network/stream/StreamNode.hpp>
-
-#include <unordered_map>
-#include <string>
-#include <atomic>
-#include <memory>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -43,59 +34,38 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-10
  */
-class TBAG_API StreamServer : public details::ServerInterface
+class TBAG_API StreamServer
+        : public details::ServerInterface,
+          public details::ServerTypes,
+          private Noncopyable
 {
 public:
-    using StreamType      = details::StreamType;
-    using ClientInterface = details::ClientInterface;
-    using ServerInterface = details::ServerInterface;
-
-    using Loop   = uvpp::Loop;
-    using Stream = uvpp::Stream;
-    using Id     = ClientInterface::Id;
-
-    using SharedClient = ServerInterface::SharedClient;
-    using   WeakClient = ServerInterface::WeakClient;
-
-    using SharedStreamNode = std::shared_ptr<StreamNode>;
-    STATIC_ASSERT_CHECK_IS_BASE_OF(typename SharedClient::element_type, typename SharedStreamNode::element_type);
-
-    using ClientMap  = std::unordered_map<Id, SharedClient>;
-
-    using key_type        = typename ClientMap::key_type;
-    using mapped_type     = typename ClientMap::mapped_type;
-    using hasher          = typename ClientMap::hasher;
-    using key_equal       = typename ClientMap::key_equal;
-    using allocator_type  = typename ClientMap::allocator_type;
-    using value_type      = typename ClientMap::value_type;
-    using reference       = typename ClientMap::reference;
-    using const_reference = typename ClientMap::const_reference;
-    using pointer         = typename ClientMap::pointer;
-    using const_pointer   = typename ClientMap::const_pointer;
-    using size_type       = typename ClientMap::size_type;
-    using difference_type = typename ClientMap::difference_type;
-    using iterator        = typename ClientMap::iterator;
-    using const_iterator  = typename ClientMap::const_iterator;
-
-    using       SafetyAsync = uvpp::ex::SafetyAsync;
-    using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
-    using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
-
-    using SharedServerBackend = std::shared_ptr<Stream>;
-    using   WeakServerBackend =   std::weak_ptr<Stream>;
-
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
+    using StreamType = details::StreamType;
 
 public:
-    class TBAG_API ClientIteratorGuard : private Noncopyable
+    using SharedStreamNode = std::shared_ptr<StreamNode>;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(typename details::ServerInterface::SharedClient::element_type,
+                                   typename SharedStreamNode::element_type);
+
+public:
+    /**
+     * ClientGuard class prototype.
+     *
+     * @author zer0
+     * @date   2017-08-10
+     * @date   2017-09-28 (Rename: ClientIteratorGuard -> ClientGuard)
+     *
+     * @remarks
+     *  Use a mutex to protect the thread.
+     */
+    class TBAG_API ClientGuard : private Noncopyable
     {
     private:
         StreamServer * _parent;
 
     public:
-        ClientIteratorGuard(StreamServer * parent);
-        virtual ~ClientIteratorGuard();
+        ClientGuard(StreamServer * parent);
+        ~ClientGuard();
 
     public:
         iterator begin();
@@ -112,8 +82,8 @@ public:
         size_type max_size() const;
     };
 
-    friend class ClientIteratorGuard;
-    using UniqueClientIteratorGuard = std::unique_ptr<ClientIteratorGuard>;
+    friend class ClientGuard;
+    using UniqueClientGuard = std::unique_ptr<ClientGuard>;
 
 public:
     class Internal;
@@ -121,6 +91,7 @@ public:
     using UniqueInternal = std::unique_ptr<Internal>;
 
 private:
+    mutable Mutex _mutex;
     UniqueInternal _internal;
 
 public:
@@ -128,15 +99,14 @@ public:
     virtual ~StreamServer();
 
 public:
-    bool isOnConnection() const;
-    bool isEmptyOfClients() const;
-    std::size_t sizeOfClients() const;
+    bool empty() const;
+    std::size_t size() const;
 
-    WeakServerBackend getServer();
+    WeakStream getServer();
     WeakSafetyAsync getAsync();
 
 public:
-    UniqueClientIteratorGuard getIterators();
+    UniqueClientGuard getIterators();
 
 public:
     template <typename Predicated>
@@ -198,7 +168,7 @@ public:
      *
      * @warning Don't use the mutex.
      */
-    virtual SharedStreamNode createClient(StreamType type, Loop & loop, SharedServerBackend & server);
+    virtual SharedStreamNode createClient(StreamType type, Loop & loop, SharedStream & server);
 
 public:
     template <typename T>

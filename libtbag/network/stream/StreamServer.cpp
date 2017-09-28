@@ -6,11 +6,12 @@
  */
 
 #include <libtbag/network/stream/StreamServer.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/debug/Assert.hpp>
+#include <libtbag/Type.hpp>
+
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/stream/StreamServerBackend.hpp>
-#include <libtbag/debug/Assert.hpp>
-#include <libtbag/log/Log.hpp>
-#include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
 
@@ -26,62 +27,28 @@ namespace stream  {
  *
  * @author zer0
  * @date   2017-06-16
- *
- * @warning
- *  Do not use a mutex if the function name starts with '_'.
  */
-class StreamServer::Internal : private Noncopyable
+struct StreamServer::Internal : public details::ServerProperty
 {
-public:
-    using SharedClient = StreamServer::SharedClient;
-    using ClientMap    = StreamServer::ClientMap;
-    using AtomicBool   = std::atomic_bool;
-
-    using key_type        = typename ClientMap::key_type;
-    using mapped_type     = typename ClientMap::mapped_type;
-    using hasher          = typename ClientMap::hasher;
-    using key_equal       = typename ClientMap::key_equal;
-    using allocator_type  = typename ClientMap::allocator_type;
-    using value_type      = typename ClientMap::value_type;
-    using reference       = typename ClientMap::reference;
-    using const_reference = typename ClientMap::const_reference;
-    using pointer         = typename ClientMap::pointer;
-    using const_pointer   = typename ClientMap::const_pointer;
-    using size_type       = typename ClientMap::size_type;
-    using difference_type = typename ClientMap::difference_type;
-    using iterator        = typename ClientMap::iterator;
-    using const_iterator  = typename ClientMap::const_iterator;
-
-private:
     StreamType const STREAM_TYPE;
+    StreamServer * parent;
+    Loop & loop;
 
-private:
-    StreamServer * _parent;
-
-private:
-    SharedServerBackend  _server;
-    SharedSafetyAsync    _async;
-    ClientMap            _clients;
-
-private:
-    mutable Mutex _mutex;
-    AtomicBool _on_connection;
-
-public:
-    Internal(StreamServer * parent, Loop & loop, StreamType type)
-            : STREAM_TYPE(type), _parent(parent), _on_connection(false)
+    Internal(StreamServer * p, Loop & l, StreamType type)
+            : STREAM_TYPE(type), parent(p), loop(l)
     {
         using  TcpBackend = StreamServerBackend<uvpp::Tcp>;
         using PipeBackend = StreamServerBackend<uvpp::Pipe>;
 
         if (type == StreamType::TCP) {
-            _server = loop.newHandle<TcpBackend>(loop, _parent);
+            server_stream = loop.newHandle<TcpBackend>(loop, parent);
         } else if (type == StreamType::PIPE) {
-            _server = loop.newHandle<PipeBackend>(loop, _parent);
+            server_stream = loop.newHandle<PipeBackend>(loop, parent);
         } else {
             throw std::bad_alloc();
         }
-        assert(static_cast<bool>(_server));
+
+        assert(static_cast<bool>(server_stream));
     }
 
     ~Internal()
@@ -90,74 +57,23 @@ public:
     }
 
 public:
-    inline StreamType getStreamType() const TBAG_NOEXCEPT { return STREAM_TYPE; }
-
-    inline Mutex       & atMutex()       TBAG_NOEXCEPT { return _mutex; }
-    inline Mutex const & atMutex() const TBAG_NOEXCEPT { return _mutex; }
-
-    WeakServerBackend getServer() { Guard g(_mutex); return WeakServerBackend(_server); }
-    WeakSafetyAsync   getAsync () { Guard g(_mutex); return WeakSafetyAsync  ( _async); }
-
-public:
-    std::string dest() const
-    {
-        Guard g(_mutex);
-
-        if (static_cast<bool>(_server) == false) {
-            tDLogW("StreamServer::Internal::dest() Expired client.");
-            return std::string();
-        }
-
-        if (STREAM_TYPE == StreamType::TCP) {
-            return std::static_pointer_cast<uvpp::Tcp>(_server)->getSockIp();
-        } else if (STREAM_TYPE == StreamType::PIPE) {
-            return std::static_pointer_cast<uvpp::Pipe>(_server)->getSockName();
-        }
-
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        tDLogW("StreamServer::Internal::dest() Unknown stream type: {}", static_cast<int>(STREAM_TYPE));
-        return std::string();
-    }
-
-    int port() const
-    {
-        Guard g(_mutex);
-        if (static_cast<bool>(_server) == false) {
-            tDLogW("StreamServer::Internal::port() Expired client.");
-            return 0;
-        }
-
-        if (STREAM_TYPE == StreamType::TCP) {
-            return std::static_pointer_cast<uvpp::Tcp>(_server)->getSockPort();
-        }
-        return 0;
-    }
-
-public:
-    inline bool isOnConnection() const TBAG_NOEXCEPT_SP_OP(_on_connection.load())
-    { return _on_connection.load(); }
-
-public:
-    inline       iterator    _begin()       TBAG_NOEXCEPT_SP_OP(_clients.   begin()) { return _clients.   begin(); }
-    inline const_iterator    _begin() const TBAG_NOEXCEPT_SP_OP(_clients.   begin()) { return _clients.   begin(); }
-    inline       iterator      _end()       TBAG_NOEXCEPT_SP_OP(_clients.     end()) { return _clients.     end(); }
-    inline const_iterator      _end() const TBAG_NOEXCEPT_SP_OP(_clients.     end()) { return _clients.     end(); }
-    inline const_iterator   _cbegin() const TBAG_NOEXCEPT_SP_OP(_clients.  cbegin()) { return _clients.  cbegin(); }
-    inline const_iterator     _cend() const TBAG_NOEXCEPT_SP_OP(_clients.    cend()) { return _clients.    cend(); }
-    inline           bool    _empty() const TBAG_NOEXCEPT_SP_OP(_clients.   empty()) { return _clients.   empty(); }
-    inline      size_type     _size() const TBAG_NOEXCEPT_SP_OP(_clients.    size()) { return _clients.    size(); }
-    inline      size_type _max_size() const TBAG_NOEXCEPT_SP_OP(_clients.max_size()) { return _clients.max_size(); }
-
-public:
-    inline      bool empty() const TBAG_NOEXCEPT_SP_OP(_clients.empty()) { Guard g(_mutex); return _clients.empty(); }
-    inline size_type  size() const TBAG_NOEXCEPT_SP_OP(_clients. size()) { Guard g(_mutex); return _clients.size (); }
+    // @formatter:off
+    inline       iterator    begin()       TBAG_NOEXCEPT_SP_OP(clients.   begin()) { return clients.   begin(); }
+    inline const_iterator    begin() const TBAG_NOEXCEPT_SP_OP(clients.   begin()) { return clients.   begin(); }
+    inline       iterator      end()       TBAG_NOEXCEPT_SP_OP(clients.     end()) { return clients.     end(); }
+    inline const_iterator      end() const TBAG_NOEXCEPT_SP_OP(clients.     end()) { return clients.     end(); }
+    inline const_iterator   cbegin() const TBAG_NOEXCEPT_SP_OP(clients.  cbegin()) { return clients.  cbegin(); }
+    inline const_iterator     cend() const TBAG_NOEXCEPT_SP_OP(clients.    cend()) { return clients.    cend(); }
+    inline           bool    empty() const TBAG_NOEXCEPT_SP_OP(clients.   empty()) { return clients.   empty(); }
+    inline      size_type     size() const TBAG_NOEXCEPT_SP_OP(clients.    size()) { return clients.    size(); }
+    inline      size_type max_size() const TBAG_NOEXCEPT_SP_OP(clients.max_size()) { return clients.max_size(); }
+    // @formatter:on
 
 public:
     WeakClient getWeakClient(Id id)
     {
-        Guard const LOCK(_mutex);
-        auto itr = _clients.find(id);
-        if (itr != _clients.end()) {
+        auto itr = clients.find(id);
+        if (itr != clients.end()) {
             return WeakClient(itr->second);
         }
         return WeakClient();
@@ -165,158 +81,108 @@ public:
 
     bool eraseClient(Id id)
     {
-        Guard const LOCK(_mutex);
-        return _clients.erase(id) == 1U;
+        return clients.erase(id) == 1U;
     }
 
-    Err initServer(StreamType type, std::string const & destination, int port = 0)
+public:
+    Err initServer(std::string const & destination, int port = 0)
     {
-        Guard const LOCK(_mutex);
-        if (static_cast<bool>(_server) == false) {
+        if (static_cast<bool>(server_stream) == false) {
             return Err::E_EXPIRED;
         }
 
         using  TcpBackend = StreamServerBackend<uvpp::Tcp>;
         using PipeBackend = StreamServerBackend<uvpp::Pipe>;
 
-        Err code = Err::E_UNKNOWN;
-        if (type == StreamType::TCP) {
-            auto backend = std::static_pointer_cast<TcpBackend>(_server);
-            code = uvpp::initCommonServer(*backend, destination, port);
+        if (STREAM_TYPE == StreamType::TCP) {
+            auto backend = std::static_pointer_cast<TcpBackend>(server_stream);
+            return uvpp::initCommonServer(*backend, destination, port);
 
-        } else if (type == StreamType::PIPE) {
-            auto backend = std::static_pointer_cast<PipeBackend>(_server);
-            code = uvpp::initPipeServer(*backend, destination);
-
-        } else {
-            code = Err::E_ILLARGS;
-            TBAG_INACCESSIBLE_BLOCK_ASSERT();
-            tDLogA("StreamServer::Internal::initServer() Unknown stream type.");
+        } else if (STREAM_TYPE == StreamType::PIPE) {
+            auto backend = std::static_pointer_cast<PipeBackend>(server_stream);
+            return uvpp::initPipeServer(*backend, destination);
         }
 
-        return code;
+        tDLogA("StreamServer::Internal::initServer() Unknown stream type: {}", static_cast<int>(STREAM_TYPE));
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return Err::E_ILLARGS;
     }
 
     Err initInternalHandles()
     {
-        Guard const LOCK(_mutex);
-        Loop & loop = _getLoop();
-        _async = loop.newInternalHandle<SafetyAsync>(true, loop);
-        assert(static_cast<bool>(_async));
-        return Err::E_SUCCESS;
-    }
-
-    Err close()
-    {
-        Guard const LOCK(_mutex);
-        Loop & loop = _getLoop();
-
-        if (_async && loop.isAliveAndThisThread() == false) {
-            tDLogD("StreamServer::Internal::close() Async request.");
-            auto job = _async->newSendFunc([&](){
-                _closeServer();
-            });
-            if (static_cast<bool>(job)) {
-                return Err::E_ASYNCREQ;
-            }
-            return Err::E_ESEND;
+        safety_async = loop.newInternalHandle<SafetyAsync>(true, loop);
+        if (safety_async) {
+            return Err::E_SUCCESS;
         }
-
-        _closeServer();
-
-        Err result_code = Err::E_SUCCESS;
-        if (!_async && loop.isAliveAndThisThread() == false) {
-            tDLogW("StreamServer::Internal::close() Async is expired.");
-            result_code = Err::E_WARNING;
-        }
-
-        tDLogD("StreamServer::Internal::close() Synced request.");
-        return result_code;
+        return Err::E_BADALLOC;
     }
 
     WeakClient accept()
     {
-        if (_on_connection == false) {
+        if (on_connection == false) {
             tDLogE("StreamServer::Internal::accept() server is not a connection state.");
             return WeakClient();
         }
 
-        Guard const LOCK(_mutex);
-        assert(_parent != nullptr);
-        assert(static_cast<bool>(_server));
-
-        SharedStreamNode client = _parent->createClient(STREAM_TYPE, _getLoop(), _server);
-
-        if (StreamClient::SharedStream shared = client->getClient().lock()) {
-            STATIC_ASSERT_CHECK_IS_BASE_OF(typename StreamClient::SharedStream::element_type, uvpp::Stream);
-            uvpp::Stream & uv_stream = *shared;
-
-            Err const CODE = _server->accept(uv_stream);
-            if (CODE == Err::E_SUCCESS) {
-                tDLogD("StreamServer::Internal::accept() client connect.");
-                bool const INSERT_RESULT = _clients.insert(value_type(client->id(), client)).second;
-                assert(INSERT_RESULT);
-                return WeakClient(client);
-            } else {
-                tDLogE("StreamServer::Internal::accept() {} error.", getErrName(CODE));
-            }
-        } else {
-            tDLogE("StreamServer::Internal::accept() client is nullptr.");
+        if (cur_connection_count + 1 >= max_connection_count) {
+            tDLogE("StreamServer::Internal::accept() The connection is full ({})", max_connection_count);
+            return WeakClient();
         }
-        return WeakClient();
+
+        assert(parent != nullptr);
+        assert(static_cast<bool>(server_stream));
+
+        SharedStreamNode client = parent->createClient(STREAM_TYPE, loop, server_stream);
+        auto shared = client->getClient().lock();
+
+        if (static_cast<bool>(shared) == false) {
+            tDLogE("StreamServer::Internal::accept() Expired client.");
+            return WeakClient();
+        }
+
+        STATIC_ASSERT_CHECK_IS_BASE_OF(typename StreamClient::SharedStream::element_type, uvpp::Stream);
+        uvpp::Stream & uv_stream = *shared;
+
+        Err const CODE = server_stream->accept(uv_stream);
+        if (TBAG_ERR_FAILURE(CODE)) {
+            tDLogE("StreamServer::Internal::accept() Accept {} error.", getErrName(CODE));
+            return WeakClient();
+        }
+
+        tDLogD("StreamServer::Internal::accept() client connect.");
+        bool const INSERT_RESULT = clients.insert(value_type(client->id(), client)).second;
+        if (INSERT_RESULT == false) {
+            tDLogA("StreamServer::Internal::accept() Insert failure.");
+        }
+
+        ++cur_connection_count;
+        tDLogI("StreamServer::Internal::accept() New accept ({}/{})", cur_connection_count, max_connection_count);
+        return WeakClient(client);
     }
 
-private:
-    Loop & _getLoop()
-    {
-        assert(static_cast<bool>(_server));
-        Loop * loop = _server->getLoop();
-        assert(loop != nullptr);
-        return *loop;
-    }
-
-    void _closeServer()
+    Err closeServer()
     {
         // Close all clients.
-        for (auto & cursor : _clients) {
+        for (auto & cursor : clients) {
             if (static_cast<bool>(cursor.second)) {
                 cursor.second->close();
             }
         }
 
-        assert(static_cast<bool>(_server));
-        if (_server->isClosing() == false) {
-            _server->close();
+        assert(static_cast<bool>(server_stream));
+        if (server_stream->isClosing() == false) {
+            server_stream->close();
         }
+        return Err::E_SUCCESS;
     }
 
-    void _closeInternal()
+    Err closeInternal()
     {
-        if (_async && _async->isClosing() == false) {
-            _async->close();
+        // Close all internal handles.
+        if (safety_async && safety_async->isClosing() == false) {
+            safety_async->close();
         }
-    }
-
-public:
-    void preConnection(Err code)
-    {
-        _on_connection.store(true);
-    }
-
-    void postConnection(Err code)
-    {
-        _on_connection.store(false);
-    }
-
-    void preClose()
-    {
-        Guard const LOCK(_mutex);
-        _closeInternal();
-    }
-
-    void postClose()
-    {
-        // EMPTY.
+        return Err::E_SUCCESS;
     }
 };
 
@@ -324,81 +190,79 @@ public:
 // ClientIteratorGuard implementation.
 // -----------------------------------
 
-StreamServer::ClientIteratorGuard::ClientIteratorGuard(StreamServer * parent) : _parent(parent)
+StreamServer::ClientGuard::ClientGuard(StreamServer * parent) : _parent(parent)
 {
     assert(_parent != nullptr);
-    assert(static_cast<bool>(_parent->_internal));
-    _parent->_internal->atMutex().lock();
+    _parent->_mutex.lock();
 }
 
-StreamServer::ClientIteratorGuard::~ClientIteratorGuard()
+StreamServer::ClientGuard::~ClientGuard()
 {
     assert(_parent != nullptr);
-    assert(static_cast<bool>(_parent->_internal));
-    _parent->_internal->atMutex().unlock();
+    _parent->_mutex.unlock();
 }
 
-StreamServer::iterator StreamServer::ClientIteratorGuard::begin()
+StreamServer::iterator StreamServer::ClientGuard::begin()
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_begin();
+    return _parent->_internal->begin();
 }
 
-StreamServer::iterator StreamServer::ClientIteratorGuard::end()
+StreamServer::iterator StreamServer::ClientGuard::end()
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_end();
+    return _parent->_internal->end();
 }
 
-StreamServer::const_iterator StreamServer::ClientIteratorGuard::begin() const
+StreamServer::const_iterator StreamServer::ClientGuard::begin() const
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_begin();
+    return _parent->_internal->begin();
 }
 
-StreamServer::const_iterator StreamServer::ClientIteratorGuard::end() const
+StreamServer::const_iterator StreamServer::ClientGuard::end() const
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_end();
+    return _parent->_internal->end();
 }
 
-StreamServer::const_iterator StreamServer::ClientIteratorGuard::cbegin() const
+StreamServer::const_iterator StreamServer::ClientGuard::cbegin() const
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_cbegin();
+    return _parent->_internal->cbegin();
 }
 
-StreamServer::const_iterator StreamServer::ClientIteratorGuard::cend() const
+StreamServer::const_iterator StreamServer::ClientGuard::cend() const
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_cend();
+    return _parent->_internal->cend();
 }
 
-bool StreamServer::ClientIteratorGuard::empty() const
+bool StreamServer::ClientGuard::empty() const
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_empty();
+    return _parent->_internal->empty();
 }
 
-StreamServer::size_type StreamServer::ClientIteratorGuard::size() const
+StreamServer::size_type StreamServer::ClientGuard::size() const
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_size();
+    return _parent->_internal->size();
 }
 
-StreamServer::size_type StreamServer::ClientIteratorGuard::max_size() const
+StreamServer::size_type StreamServer::ClientGuard::max_size() const
 {
     assert(_parent != nullptr);
     assert(static_cast<bool>(_parent->_internal));
-    return _parent->_internal->_max_size();
+    return _parent->_internal->max_size();
 }
 
 // ----------------------------
@@ -416,84 +280,113 @@ StreamServer::~StreamServer()
     // EMPTY.
 }
 
-bool StreamServer::isOnConnection() const
+bool StreamServer::empty() const
 {
-    assert(static_cast<bool>(_internal));
-    return _internal->isOnConnection();
-}
-
-bool StreamServer::isEmptyOfClients() const
-{
-    assert(static_cast<bool>(_internal));
+    Guard const LOCK(_mutex);
     return _internal->empty();
 }
 
-std::size_t StreamServer::sizeOfClients() const
+std::size_t StreamServer::size() const
 {
-    assert(static_cast<bool>(_internal));
+    Guard const LOCK(_mutex);
     return _internal->size();
 }
 
-StreamServer::WeakServerBackend StreamServer::getServer()
+StreamServer::WeakStream StreamServer::getServer()
 {
-    assert(static_cast<bool>(_internal));
-    return _internal->getServer();
+    Guard const LOCK(_mutex);
+    return _internal->server_stream;
 }
 
 StreamServer::WeakSafetyAsync StreamServer::getAsync()
 {
-    assert(static_cast<bool>(_internal));
-    return _internal->getAsync();
+    Guard const LOCK(_mutex);
+    return _internal->safety_async;
 }
 
-StreamServer::UniqueClientIteratorGuard StreamServer::getIterators()
+StreamServer::UniqueClientGuard StreamServer::getIterators()
 {
-    return UniqueClientIteratorGuard(new ClientIteratorGuard(this));
+    return UniqueClientGuard(new ClientGuard(this));
 }
 
 std::string StreamServer::dest() const
 {
-    assert(static_cast<bool>(_internal));
-    return _internal->dest();
+    Guard const LOCK(_mutex);
+    if (static_cast<bool>(_internal->server_stream) == false) {
+        tDLogW("StreamServer::dest() Expired client.");
+        return std::string();
+    }
+
+    if (_internal->STREAM_TYPE == StreamType::TCP) {
+        return std::static_pointer_cast<uvpp::Tcp>(_internal->server_stream)->getSockIp();
+    } else if (_internal->STREAM_TYPE == StreamType::PIPE) {
+        return std::static_pointer_cast<uvpp::Pipe>(_internal->server_stream)->getSockName();
+    }
+
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    tDLogW("StreamServer::dest() Unknown stream type: {}", static_cast<int>(_internal->STREAM_TYPE));
+    return std::string();
 }
 
 int StreamServer::port() const
 {
-    assert(static_cast<bool>(_internal));
-    return _internal->port();
+    Guard const LOCK(_mutex);
+    if (static_cast<bool>(_internal->server_stream) == false) {
+        tDLogW("StreamServer::port() Expired client.");
+        return 0;
+    }
+
+    if (_internal->STREAM_TYPE == StreamType::TCP) {
+        return std::static_pointer_cast<uvpp::Tcp>(_internal->server_stream)->getSockPort();
+    }
+    return 0;
 }
 
 Err StreamServer::init(char const * destination, int port)
 {
-    assert(static_cast<bool>(_internal));
-    Err const CODE = _internal->initServer(_internal->getStreamType(), destination, port);
-    if (TBAG_ERR_FAILURE(CODE)) {
-        return CODE;
+    Guard const LOCK(_mutex);
+    Err const INIT_CODE = _internal->initServer(destination, port);
+    if (TBAG_ERR_FAILURE(INIT_CODE)) {
+        tDLogE("StreamClient::init() Initialize {} error.", getErrName(INIT_CODE));
+        return INIT_CODE;
     }
-    return _internal->initInternalHandles();
+
+    Err const INIT_INTERNAL_CODE = _internal->initInternalHandles();
+    if (TBAG_ERR_FAILURE(INIT_INTERNAL_CODE)) {
+        tDLogE("StreamClient::init() Initialize {} error (internal handles).", getErrName(INIT_INTERNAL_CODE));
+        return INIT_INTERNAL_CODE;
+    }
+    return Err::E_SUCCESS;
 }
 
 Err StreamServer::close()
 {
-    assert(static_cast<bool>(_internal));
-    return _internal->close();
+    Guard const LOCK(_mutex);
+    if (_internal->safety_async && _internal->loop.isAliveAndThisThread() == false) {
+        auto job = _internal->safety_async->newSendFunc([&](){
+            Guard const ASYNC_LOCK(_mutex);
+            _internal->closeServer();
+        });
+        return static_cast<bool>(job) ? Err::E_ASYNCREQ : Err::E_ESEND;
+    }
+    return _internal->closeServer();
 }
 
 StreamServer::WeakClient StreamServer::accept()
 {
-    assert(static_cast<bool>(_internal));
+    Guard const LOCK(_mutex);
     return _internal->accept();
 }
 
 StreamServer::WeakClient StreamServer::get(Id id)
 {
-    assert(static_cast<bool>(_internal));
+    Guard const LOCK(_mutex);
     return _internal->getWeakClient(id);
 }
 
 Err StreamServer::remove(Id id)
 {
-    assert(static_cast<bool>(_internal));
+    Guard const LOCK(_mutex);
     return _internal->eraseClient(id) ? Err::E_SUCCESS : Err::E_UNKNOWN;
 }
 
@@ -503,25 +396,25 @@ Err StreamServer::remove(Id id)
 
 void StreamServer::backConnection(Err code)
 {
-    assert(static_cast<bool>(_internal));
-    _internal->preConnection(code);
+    _internal->on_connection.store(true);
     onConnection(code);
-    _internal->postConnection(code);
+    _internal->on_connection.store(false);
 }
 
 void StreamServer::backClose()
 {
-    assert(static_cast<bool>(_internal));
-    _internal->preClose();
+    {
+        Guard const LOCK(_mutex);
+        _internal->closeInternal();
+    }
     onServerClose();
-    _internal->postClose();
 }
 
 // -----------------------
 // StreamServer extension.
 // -----------------------
 
-StreamServer::SharedStreamNode StreamServer::createClient(StreamType type, Loop & loop, SharedServerBackend & server)
+StreamServer::SharedStreamNode StreamServer::createClient(StreamType type, Loop & loop, SharedStream & server)
 {
     return SharedStreamNode(new (std::nothrow) StreamNode(loop, type, this));
 }

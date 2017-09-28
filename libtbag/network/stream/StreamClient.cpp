@@ -126,8 +126,8 @@ struct StreamClient::Internal : public details::ClientProperty
             return uvpp::initPipeClient(*backend, connect_req, destination);
         }
 
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
         tDLogA("StreamClient::Internal::initClient() Unknown stream type: {}", static_cast<int>(STREAM_TYPE));
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
         return Err::E_ILLARGS;
     }
 
@@ -181,7 +181,6 @@ struct StreamClient::Internal : public details::ClientProperty
         }
         return uvpp::stopTimer(shutdown_timer);
     }
-
 
     Err shutdownWrite()
     {
@@ -317,9 +316,9 @@ struct StreamClient::Internal : public details::ClientProperty
         assert(static_cast<bool>(safety_async));
 
         Err result_code = Err::E_UNKNOWN;
+        wbuffer.assign(buffer, buffer + size); // The last buffer written.
 
         if (safety_async && loop.isAliveAndThisThread() == false) {
-            wbuffer.assign(buffer, buffer + size);
             if (auto job = safety_async->newSendJob<AsyncWrite>(parent)) {
                 setAsync();
                 result_code = Err::E_ENQASYNC;
@@ -535,7 +534,7 @@ void * StreamClient::udata(void * data)
 
 Err StreamClient::init(char const * destination, int port)
 {
-    Err const INIT_CODE = initClient(std::string(destination), port);
+    Err const INIT_CODE = initClient(destination, port);
     if (TBAG_ERR_FAILURE(INIT_CODE)) {
         tDLogE("StreamClient::init() Initialize {} error.", getErrName(INIT_CODE));
         return INIT_CODE;

@@ -433,7 +433,7 @@ void HttpServer::onClientTimer(WeakClient node)
 
 HttpServer::SharedStreamNode HttpServer::createClient(StreamType type,
                                                       Loop & loop,
-                                                      SharedServerBackend & server)
+                                                      SharedStream & server)
 {
     assert(static_cast<bool>(server));
     tDLogSD("HttpServer::createClient() Create HttpNode");
