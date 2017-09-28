@@ -160,7 +160,8 @@ public:
     using const_iterator  = typename HandleMap::const_iterator;
 
 private:
-    HandleMap _handles;
+    HandleMap   _handles;
+    std::size_t _handle_count; ///< Handle count excluding Internal.
 
 private:
     bool _auto_erase_handle;
