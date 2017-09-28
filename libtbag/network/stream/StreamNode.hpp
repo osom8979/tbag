@@ -31,14 +31,18 @@ namespace network {
 namespace stream  {
 
 /**
- * StreamNode class prototype.
+ * BaseStreamNode class prototype.
  *
  * @author zer0
- * @date   2017-05-23
- * @date   2017-06-01 (Rename: StreamServerNode -> StreamNode)
+ * @date   2017-09-28
  */
-class TBAG_API StreamNode : public StreamClient
+template <typename StreamClientType>
+class BaseStreamNode : public StreamClientType
 {
+public:
+    using Parent = StreamClientType;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(stream::StreamClient, Parent);
+
 public:
     using StreamType      = details::StreamType;
     using ServerInterface = details::ServerInterface;
@@ -46,32 +50,82 @@ public:
     using WeakClient = ServerInterface::WeakClient;
     using Loop       = uvpp::Loop;
 
-    using        ReadPacket = StreamClient::ReadPacket;
+    using ReadPacket        = StreamClient::ReadPacket;
     using SharedSafetyAsync = StreamClient::SharedSafetyAsync;
-    using   WeakSafetyAsync = StreamClient::WeakSafetyAsync;
+    using WeakSafetyAsync   = StreamClient::WeakSafetyAsync;
 
 private:
     ServerInterface * _parent;
 
 public:
-    StreamNode(Loop & loop, StreamType type, ServerInterface * parent);
-    virtual ~StreamNode();
+    BaseStreamNode(Loop & loop, StreamType type, ServerInterface * parent)
+            : StreamClientType(loop, type, StreamClient::UpdateReady()), _parent(parent)
+    {
+        assert(StreamClientType::getState() == StreamClient::WriteState::WS_READY);
+    }
+
+    virtual ~BaseStreamNode()
+    {
+        // EMPTY.
+    }
 
 public:
     inline ServerInterface       * getParentPtr()       TBAG_NOEXCEPT { return _parent; }
     inline ServerInterface const * getParentPtr() const TBAG_NOEXCEPT { return _parent; }
 
 public:
-    WeakClient getWeakClient();
+    WeakClient getWeakClient()
+    {
+        assert(_parent != nullptr);
+        return _parent->get(this->id());
+    }
 
 public:
-    virtual void onConnect (Err code) override;
-    virtual void onShutdown(Err code) override;
-    virtual void onWrite   (Err code) override;
-    virtual void onRead    (Err code, ReadPacket const & packet) override;
-    virtual void onClose   () override;
-    virtual void onTimer   () override;
+    virtual void onConnect (Err code) override
+    {
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    }
+
+    virtual void onShutdown(Err code) override
+    {
+        assert(_parent != nullptr);
+        _parent->onClientShutdown(getWeakClient(), code);
+    }
+
+    virtual void onWrite(Err code) override
+    {
+        assert(_parent != nullptr);
+        _parent->onClientWrite(getWeakClient(), code);
+    }
+
+    virtual void onRead(Err code, ReadPacket const & packet) override
+    {
+        assert(_parent != nullptr);
+        _parent->onClientRead(getWeakClient(), code, packet);
+    }
+
+    virtual void onClose() override
+    {
+        assert(_parent != nullptr);
+        _parent->onClientClose(getWeakClient());
+        _parent->remove(this->id());
+    }
+
+    virtual void onTimer() override
+    {
+        assert(_parent != nullptr);
+        _parent->onClientTimer(getWeakClient());
+    }
 };
+
+/**
+ * StreamNode class prototype.
+ *
+ * @author zer0
+ * @date   2017-05-23
+ * @date   2017-06-01 (Rename: StreamServerNode -> StreamNode)
+ */
+using StreamNode = BaseStreamNode<StreamClient>;
 
 } // namespace stream
 } // namespace network
