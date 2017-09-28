@@ -38,12 +38,13 @@ namespace stream  {
  * @author zer0
  * @date   2017-05-10
  */
-class TBAG_API StreamClient : public details::ClientInterface,
-                              public details::ClientTypes,
-                              public details::ClientTypes::OnUserTimerCallback,
-                              public details::ClientTypes::OnShutdownTimerCallback,
-                              public details::ClientTypes::OnAsyncWriteCallback,
-                              private Noncopyable
+class TBAG_API StreamClient
+        : public details::ClientInterface,
+          public details::ClientTypes,
+          public details::ClientTypes::OnUserTimerCallback,
+          public details::ClientTypes::OnShutdownTimerCallback,
+          public details::ClientTypes::OnAsyncWriteCallback,
+          private Noncopyable
 {
 public:
     using WriteState  = details::WriteState;

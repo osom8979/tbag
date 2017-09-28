@@ -44,7 +44,7 @@ struct FunctionalClient : public BaseType
     using Parent = BaseType;
     using Loop   = uvpp::Loop;
 
-    STATIC_ASSERT_CHECK_IS_BASE_OF(ClientInterface, Parent);
+    STATIC_ASSERT_CHECK_IS_BASE_OF(details::ClientInterface, Parent);
 
     FunctionalClient(Loop & loop) : Parent(loop)
     { /* EMPTY */ }
