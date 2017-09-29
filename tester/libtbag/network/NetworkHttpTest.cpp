@@ -14,8 +14,9 @@
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/FunctionalHttpServer.hpp>
 #include <libtbag/network/http/FunctionalWsClient.hpp>
-#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/network/http/SimpleHttpClient.hpp>
 #include <libtbag/uvpp/func/FunctionalTimer.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <iostream>
 #include <thread>

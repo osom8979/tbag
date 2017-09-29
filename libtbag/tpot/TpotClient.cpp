@@ -8,16 +8,17 @@
 #include <libtbag/tpot/TpotClient.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <libtbag/network/http/SimpleHttpClient.hpp>
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/util/Structures.hpp>
 #include <libtbag/proto/FunctionalTpotPacket.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
 
 #include <cassert>
 #include <cstdlib>
 #include <sstream>
 #include <iostream>
-#include <libtbag/signal/SignalHandler.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
