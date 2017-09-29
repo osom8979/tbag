@@ -340,7 +340,7 @@ std::string buildRequestString(
         int major, int minor)
 {
     std::stringstream ss;
-    ss << method << SP << url << SP << HttpVersionProperty::getVersionString(major, minor) << CRLF;
+    ss << method << SP << url << SP << HttpVersion::toString(major, minor) << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }
@@ -354,7 +354,7 @@ std::string buildResponseString(
         int major, int minor)
 {
     std::stringstream ss;
-    ss << HttpVersionProperty::getVersionString(major, minor) << SP << status << SP << reason << CRLF;
+    ss << HttpVersionProperty::toString(major, minor) << SP << status << SP << reason << CRLF;
     for (auto & header : headers) {
         ss << header.first << ": " << header.second << CRLF;
     }

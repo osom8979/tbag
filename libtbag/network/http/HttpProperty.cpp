@@ -17,22 +17,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-// -----------------------------------
-// HttpVersionProperty implementation.
-// -----------------------------------
-
-std::string HttpVersionProperty::toString()
-{
-    return getVersionString(http_major, http_minor);
-}
-
-std::string HttpVersionProperty::getVersionString(int major, int minor)
-{
-    std::stringstream ss;
-    ss << HTTP << '/' << major << '.' << minor;
-    return ss.str();
-}
-
 // ----------------------------------
 // HttpCommonProperty implementation.
 // ----------------------------------

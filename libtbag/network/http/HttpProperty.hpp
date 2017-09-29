@@ -23,6 +23,7 @@
 
 #include <libtbag/network/http/common/HttpMethod.hpp>
 #include <libtbag/network/http/common/HttpStatus.hpp>
+#include <libtbag/network/http/common/HttpVersion.hpp>
 
 #include <utility>
 #include <algorithm>
@@ -38,6 +39,7 @@ namespace network {
 namespace http    {
 
 using namespace libtbag::network::http::common;
+using HttpVersionProperty = HttpVersion;
 
 // --------------
 // @formatter:off
@@ -95,55 +97,6 @@ TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_CONTENT_TYPE      = "text/htm
 TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_USER_AGENT        = VALUE_TBAG_SERVER_INFO;
 TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_ACCEPT            = "*/*";
 TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_TRANSFER_ENCODING = "identity";
-
-/**
- * Http version structure.
- *
- * @author zer0
- * @date   2017-05-20
- */
-struct TBAG_API HttpVersionProperty
-{
-    int http_major;
-    int http_minor;
-
-    HttpVersionProperty() TBAG_NOEXCEPT : http_major(1), http_minor(1)
-    { /* EMPTY. */ }
-    HttpVersionProperty(int v1, int v2) TBAG_NOEXCEPT : http_major(v1), http_minor(v2)
-    { /* EMPTY. */ }
-    HttpVersionProperty(HttpVersionProperty const & obj) TBAG_NOEXCEPT
-    { (*this) = obj; }
-    HttpVersionProperty(HttpVersionProperty && obj) TBAG_NOEXCEPT
-    { (*this) = std::move(obj); }
-    ~HttpVersionProperty()
-    { /* EMPTY. */ }
-
-    inline HttpVersionProperty & operator =(HttpVersionProperty const & obj) TBAG_NOEXCEPT
-    { if (this != &obj) { http_major = obj.http_major; http_minor = obj.http_minor; } return *this; }
-
-    inline HttpVersionProperty & operator =(HttpVersionProperty && obj) TBAG_NOEXCEPT
-    { if (this != &obj) { std::swap(http_major, obj.http_major); std::swap(http_minor, obj.http_minor); } return *this; }
-
-    inline void setVersion(int v1, int v2) TBAG_NOEXCEPT
-    { this->http_major = v1; this->http_minor = v2; }
-
-    inline void setMajor(int val) TBAG_NOEXCEPT
-    { http_major = val; }
-    inline void setMinor(int val) TBAG_NOEXCEPT
-    { http_minor = val; }
-
-    inline int getMajor() const TBAG_NOEXCEPT
-    { return http_major; }
-    inline int getMinor() const TBAG_NOEXCEPT
-    { return http_minor; }
-
-    inline friend bool operator ==(HttpVersionProperty & lh, HttpVersionProperty & rh) TBAG_NOEXCEPT
-    { return lh.http_major == rh.http_major && lh.http_minor == rh.http_minor; }
-
-    std::string toString();
-
-    static std::string getVersionString(int major = 1, int minor = 1);
-};
 
 using HttpHeaderMap  = std::multimap<std::string, std::string>;
 using HttpHeaderPair = HttpHeaderMap::value_type;

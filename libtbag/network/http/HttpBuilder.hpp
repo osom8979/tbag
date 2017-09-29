@@ -110,7 +110,7 @@ public:
 
 public:
     inline HttpBuilder & setVersion(int maj, int min) TBAG_NOEXCEPT
-    { _property.setVersion(maj, min); return *this; }
+    { _property.http_major = maj; _property.http_minor = min; return *this; }
     inline HttpBuilder & setMajor(int val) TBAG_NOEXCEPT
     { _property.setMajor(val); return *this; }
     inline HttpBuilder & setMinor(int val) TBAG_NOEXCEPT
