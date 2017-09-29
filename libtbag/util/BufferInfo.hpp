@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <type_traits>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,7 +32,7 @@ namespace util {
  * @author zer0
  * @date   2016-12-27
  */
-template <typename BaseType, typename SizeType>
+template <typename BaseType, typename SizeType = std::size_t>
 struct BufferInfo
 {
     static_assert(std::is_pointer<BaseType>::value == false,
@@ -45,14 +46,31 @@ struct BufferInfo
     Base * buffer;
     Size size;
 
-    BufferInfo(Base * b = nullptr, Size s = 0) : buffer(b), size(s)
+    BufferInfo(Base * b = nullptr, Size s = 0) TBAG_NOEXCEPT : buffer(b), size(s)
+    { /* EMPTY. */ }
+
+    template <typename T>
+    BufferInfo(std::vector<T> & b) TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(b.data()) &&
+                                                           TBAG_NOEXCEPT_OPERATOR(b.size()))
+            : buffer((Base*)b.data()), size(b.size())
     { /* EMPTY. */ }
 
     ~BufferInfo()
     { /* EMPTY. */ }
 
     inline void set(Base * b, Size s) TBAG_NOEXCEPT
-    { buffer = b; size = s; }
+    {
+        buffer = b;
+        size   = s;
+    }
+
+    template <typename T>
+    inline void set(std::vector<T> & b) TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(b.data()) &&
+                                                                TBAG_NOEXCEPT_OPERATOR(b.size()))
+    {
+        buffer = (Base*)b.data();
+        size   = b.size();
+    }
 };
 
 /** Short name of BufferInfo type. */
@@ -60,6 +78,9 @@ using  binf = BufferInfo<char      , std::size_t>;
 using cbinf = BufferInfo<char const, std::size_t>;
 
 } // namespace util
+
+/** Common buffer container. */
+using Buffer = std::vector<char>;
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
