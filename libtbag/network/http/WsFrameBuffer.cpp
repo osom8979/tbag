@@ -65,7 +65,7 @@ void WsFrameBuffer::push(char const * buffer, std::size_t size)
 bool WsFrameBuffer::next()
 {
     std::size_t read_size = 0;
-    Err const CODE = __cache__.frame.execute((uint8_t const *)&_buffer[0], _size, &read_size);
+    Err const CODE = __cache__.frame.execute(&_buffer[0], _size, &read_size);
     if (TBAG_ERR_FAILURE(CODE)) {
         return false;
     }
@@ -77,7 +77,7 @@ bool WsFrameBuffer::next()
 
 void WsFrameBuffer::update()
 {
-    uint8_t const * payload_data = __cache__.frame.getPayloadDataPtr();
+    char const * payload_data = __cache__.frame.getPayloadDataPtr();
     std::size_t payload_size = __cache__.frame.getPayloadSize();
 
     _finish = __cache__.frame.fin;

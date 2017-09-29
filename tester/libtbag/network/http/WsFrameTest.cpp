@@ -30,8 +30,8 @@ TEST(WsFrameTest, GetMaskData)
     std::string const OUTPUT(RESULT_DATA, RESULT_DATA + sizeof(RESULT_DATA));
 
     ASSERT_EQ(RESULT_STRING, OUTPUT);
-    ASSERT_EQ(OUTPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey(MASKING_KEY), INPUT));
-    ASSERT_EQ(INPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey(MASKING_KEY), OUTPUT));
+    ASSERT_EQ(OUTPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey((char const *)MASKING_KEY), INPUT));
+    ASSERT_EQ(INPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey((char const *)MASKING_KEY), OUTPUT));
 }
 
 TEST(WsFrameTest, RequestFrame)
@@ -45,7 +45,7 @@ TEST(WsFrameTest, RequestFrame)
 
     // Request buffer to frame.
     WsFrame frame;
-    ASSERT_EQ(Err::E_SUCCESS, frame.execute(REQUEST_FRAME, sizeof(REQUEST_FRAME)));
+    ASSERT_EQ(Err::E_SUCCESS, frame.execute((char const *)REQUEST_FRAME, sizeof(REQUEST_FRAME)));
     ASSERT_TRUE(frame.fin);
     ASSERT_FALSE(frame.rsv1);
     ASSERT_FALSE(frame.rsv2);
@@ -60,7 +60,7 @@ TEST(WsFrameTest, RequestFrame)
     ASSERT_EQ(RESULT_STRING, payload);
 
     // Frame to request buffer.
-    std::vector<uint8_t> buffer;
+    std::vector<char> buffer;
     buffer.resize(sizeof(REQUEST_FRAME));
     ASSERT_EQ(sizeof(REQUEST_FRAME), frame.copyTo(buffer));
 
@@ -269,7 +269,7 @@ TEST(WsFrameTest, Case01)
     ASSERT_EQ(86, req.size());
 
     WsFrame frame;
-    ASSERT_EQ(Err::E_SUCCESS, frame.execute((uint8_t const *)req.data(), req.size()));
+    ASSERT_EQ(Err::E_SUCCESS, frame.execute(req.data(), req.size()));
     ASSERT_EQ(OpCode::OC_BINARY_FRAME, frame.opcode);
     ASSERT_EQ(req.size() - 6, frame.payload_length);
     ASSERT_TRUE(frame.fin);

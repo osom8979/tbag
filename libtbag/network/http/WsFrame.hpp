@@ -209,7 +209,7 @@ enum class PayloadBit : uint8_t
 class TBAG_API WsFrame
 {
 public:
-    using WsBuffer = std::vector<uint8_t>;
+    using WsBuffer = std::vector<char>;
 
 public:
     TBAG_CONSTEXPR static std::size_t const MINIMUM_BUFFER_SIZE = 2;
@@ -256,7 +256,7 @@ public:
     WsFrame & operator =(WsFrame && obj);
 
 public:
-    inline uint8_t const * getPayloadDataPtr() const TBAG_NOEXCEPT
+    inline char const * getPayloadDataPtr() const TBAG_NOEXCEPT
     { return payload.data(); }
 
     inline std::size_t getPayloadSize() const TBAG_NOEXCEPT
@@ -272,20 +272,20 @@ public:
     void clear();
 
 public:
-    Err execute(uint8_t const * data, std::size_t size, std::size_t * read_size = nullptr);
+    Err execute(char const * data, std::size_t size, std::size_t * read_size = nullptr);
 
 public:
     std::size_t calculateWriteBufferSize() const;
-    std::size_t copyTo(uint8_t * data, std::size_t data_size) const;
+    std::size_t copyTo(char * data, std::size_t data_size) const;
     std::size_t copyTo(WsBuffer & buffer) const;
 
 public:
     void setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
-    void setData(uint8_t const * data, std::size_t size);
+    void setData(char const * data, std::size_t size);
 
 public:
     Err build(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode,
-              uint8_t const * data = nullptr, std::size_t size = 0,
+              char const * data = nullptr, std::size_t size = 0,
               uint32_t key = 0);
 
 public:
@@ -295,8 +295,8 @@ public:
     Err text(std::string const & str, uint32_t key, bool continuation = false, bool finish = true);
     Err text(std::string const & str, bool continuation = false, bool finish = true);
 
-    Err binary(uint8_t const * buffer, std::size_t size, uint32_t key, bool continuation = false, bool finish = true);
-    Err binary(uint8_t const * buffer, std::size_t size, bool continuation = false, bool finish = true);
+    Err binary(char const * buffer, std::size_t size, uint32_t key, bool continuation = false, bool finish = true);
+    Err binary(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
 
     Err binary(WsBuffer const & buffer, uint32_t key, bool continuation = false, bool finish = true);
     Err binary(WsBuffer const & buffer, bool continuation = false, bool finish = true);
@@ -321,7 +321,7 @@ public:
      * @remarks
      *  for pings and pongs, the max payload length is 125.
      */
-    Err ping(uint8_t const * data, std::size_t size, uint32_t key = 0);
+    Err ping(char const * data, std::size_t size, uint32_t key = 0);
     Err ping(std::string const & str, uint32_t key = 0);
 
     /**
@@ -330,7 +330,7 @@ public:
      * @remarks
      *  for pings and pongs, the max payload length is 125.
      */
-    Err pong(uint8_t const * data, std::size_t size, uint32_t key = 0);
+    Err pong(char const * data, std::size_t size, uint32_t key = 0);
     Err pong(std::string const & str, uint32_t key = 0);
 
 public:
@@ -361,12 +361,12 @@ public:
     static uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
     static uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
 
-    static uint32_t getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT;
+    static uint32_t getMaskingKey(char const * data) TBAG_NOEXCEPT;
 
     static std::string getPayloadData(uint32_t mask, std::string const & data);
     static WsBuffer getPayloadData(uint32_t mask, WsBuffer const & data);
-    static WsBuffer getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size);
-    static void updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size);
+    static WsBuffer getPayloadData(uint32_t mask, char const * data, std::size_t size);
+    static void updatePayloadData(uint32_t mask, char * result, std::size_t size);
 };
 
 // ------------------------

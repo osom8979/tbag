@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-static void checkWsBuffer(std::string const & prefix, uint8_t const * buffer, std::size_t size)
+static void checkWsBuffer(std::string const & prefix, char const * buffer, std::size_t size)
 {
     tDLogD("checkWsBuffer({}) [CHECK] BUFFER SIZE: {}", prefix, size);
 
@@ -97,7 +97,7 @@ Err WsClient::writeText(std::string const & text, bool continuation, bool finish
     return writeText(text.c_str(), text.size(), continuation, finish);
 }
 
-Err WsClient::writeBinary(uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
+Err WsClient::writeBinary(char const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (isUpgrade() == false) {
         return Err::E_ILLSTATE;

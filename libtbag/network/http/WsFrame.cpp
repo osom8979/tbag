@@ -163,7 +163,7 @@ void WsFrame::clear()
     payload.clear();
 }
 
-Err WsFrame::execute(uint8_t const * data, std::size_t size, std::size_t * read_size)
+Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_size)
 {
     if (size < WsFrame::MINIMUM_BUFFER_SIZE) {
         return Err::E_SMALLBUF;
@@ -261,7 +261,7 @@ std::size_t WsFrame::calculateWriteBufferSize() const
     }
 }
 
-std::size_t WsFrame::copyTo(uint8_t * data, std::size_t size) const
+std::size_t WsFrame::copyTo(char * data, std::size_t size) const
 {
     ::memset(data, 0x00, size);
 
@@ -273,7 +273,7 @@ std::size_t WsFrame::copyTo(uint8_t * data, std::size_t size) const
     *(data + 0) |= (rsv1 ? 0x40 : 0);
     *(data + 0) |= (rsv2 ? 0x20 : 0);
     *(data + 0) |= (rsv3 ? 0x10 : 0);
-    *(data + 0) |= static_cast<uint8_t>(opcode);
+    *(data + 0) |= static_cast<char>(opcode);
     *(data + 1) |= (mask ? 0x80 : 0);
 
     // Next index (Written size)
@@ -348,7 +348,7 @@ void WsFrame::setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t k
     masking_key = key;
 }
 
-void WsFrame::setData(uint8_t const * data, std::size_t size)
+void WsFrame::setData(char const * data, std::size_t size)
 {
     if (data != nullptr && size > 0) {
         if (payload.size() < size) {
@@ -364,8 +364,8 @@ void WsFrame::setData(uint8_t const * data, std::size_t size)
 }
 
 Err WsFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
-                          uint8_t const * data, std::size_t size,
-                          uint32_t key)
+                   char const * data, std::size_t size,
+                   uint32_t key)
 {
     setHeader(f, r1, r2, r3, op, key);
     setData(data, size);
@@ -376,7 +376,7 @@ Err WsFrame::text(char const * buffer, std::size_t size, uint32_t key, bool cont
 {
     return build(finish, false, false, false,
                  (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
-                 (uint8_t const *)buffer, size, key);
+                 buffer, size, key);
 }
 
 Err WsFrame::text(char const * buffer, std::size_t size, bool continuation, bool finish)
@@ -394,14 +394,14 @@ Err WsFrame::text(std::string const & str, bool continuation, bool finish)
     return text(str, 0, continuation, finish);
 }
 
-Err WsFrame::binary(uint8_t const * buffer, std::size_t size, uint32_t key, bool continuation, bool finish)
+Err WsFrame::binary(char const * buffer, std::size_t size, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
                  (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
                  buffer, size, key);
 }
 
-Err WsFrame::binary(uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
+Err WsFrame::binary(char const * buffer, std::size_t size, bool continuation, bool finish)
 {
     return binary(buffer, size, 0, continuation, finish);
 }
@@ -458,7 +458,7 @@ WsCloseResult WsFrame::getCloseResult() const
     return WsCloseResult(getStatusCode(), getReason());
 }
 
-Err WsFrame::ping(uint8_t const * data, std::size_t size, uint32_t key)
+Err WsFrame::ping(char const * data, std::size_t size, uint32_t key)
 {
     if (size > PAYLOAD_7BIT_TYPE_SIZE) {
         return Err::E_ILLARGS;
@@ -468,10 +468,10 @@ Err WsFrame::ping(uint8_t const * data, std::size_t size, uint32_t key)
 
 Err WsFrame::ping(std::string const & str, uint32_t key)
 {
-    return ping((uint8_t const *)str.data(), str.size(), key);
+    return ping(str.data(), str.size(), key);
 }
 
-Err WsFrame::pong(uint8_t const * data, std::size_t size, uint32_t key)
+Err WsFrame::pong(char const * data, std::size_t size, uint32_t key)
 {
     if (size > PAYLOAD_7BIT_TYPE_SIZE) {
         return Err::E_ILLARGS;
@@ -481,7 +481,7 @@ Err WsFrame::pong(uint8_t const * data, std::size_t size, uint32_t key)
 
 Err WsFrame::pong(std::string const & str, uint32_t key)
 {
-    return pong((uint8_t const *)str.data(), str.size(), key);
+    return pong(str.data(), str.size(), key);
 }
 
 std::string WsFrame::toDebugString() const
@@ -496,7 +496,8 @@ std::string WsFrame::toDebugString() const
         if (opcode == OpCode::OC_TEXT_FRAME) {
             ss << std::string(payload.data(), payload.data() + payload_length);
         } else {
-            auto data = std::vector<uint8_t>(payload.data(), payload.data() + payload_length);
+            auto data = std::vector<uint8_t>((uint8_t*)payload.data(),
+                                             (uint8_t*)payload.data() + payload_length);
             ss << string::convertByteArrayToHexString(data);
         }
     }
@@ -549,7 +550,7 @@ uint8_t WsFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
     return 0;
 }
 
-uint32_t WsFrame::getMaskingKey(uint8_t const * data) TBAG_NOEXCEPT
+uint32_t WsFrame::getMaskingKey(char const * data) TBAG_NOEXCEPT
 {
     uint32_t network_32byte_size = 0;
     ::memcpy(&network_32byte_size, data, sizeof(uint32_t));
@@ -568,14 +569,14 @@ WsFrame::WsBuffer WsFrame::getPayloadData(uint32_t mask, WsBuffer const & data)
     return getPayloadData(mask, data.data(), data.size());
 }
 
-WsFrame::WsBuffer WsFrame::getPayloadData(uint32_t mask, uint8_t const * data, std::size_t size)
+WsFrame::WsBuffer WsFrame::getPayloadData(uint32_t mask, char const * data, std::size_t size)
 {
     WsBuffer result(data, data + size);
     updatePayloadData(mask, result.data(), result.size());
     return result;
 }
 
-void WsFrame::updatePayloadData(uint32_t mask, uint8_t * result, std::size_t size)
+void WsFrame::updatePayloadData(uint32_t mask, char * result, std::size_t size)
 {
     static_assert(sizeof(uint32_t) == 4, "Why not?");
     uint8_t const * mask_ptr = reinterpret_cast<uint8_t const *>(&mask);

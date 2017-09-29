@@ -63,7 +63,7 @@ Err HttpServer::HttpNode::writeText(std::string const & text, bool continuation,
     return writeText(text.c_str(), text.size(), continuation, finish);
 }
 
-Err HttpServer::HttpNode::writeBinary(uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
+Err HttpServer::HttpNode::writeBinary(char const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (isUpgrade() == false) {
         return Err::E_ILLSTATE;
@@ -314,7 +314,7 @@ Err HttpServer::writeText(WeakClient & node, std::string const & text, bool cont
     return writeText(node, text.c_str(), text.size(), continuation, finish);
 }
 
-Err HttpServer::writeBinary(WeakClient & node, uint8_t const * buffer, std::size_t size, bool continuation, bool finish)
+Err HttpServer::writeBinary(WeakClient & node, char const * buffer, std::size_t size, bool continuation, bool finish)
 {
     if (auto shared = castSharedClient<HttpNode>(node)) {
         return shared->writeBinary(buffer, size, continuation, finish);
