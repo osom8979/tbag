@@ -42,17 +42,20 @@ private:
     uint32_t _minor;
     uint32_t _patch;
 
+private:
+    std::string _tweak;
+
 public:
-    Version() TBAG_NOEXCEPT;
-    Version(uint32_t major, uint32_t minor = 0, uint32_t patch = 0) TBAG_NOEXCEPT;
+    Version();
+    Version(uint32_t major, uint32_t minor = 0, uint32_t patch = 0, std::string const & tweak = std::string());
     Version(std::string const & ver);
-    Version(Version const & obj) TBAG_NOEXCEPT;
-    Version(Version && obj) TBAG_NOEXCEPT;
+    Version(Version const & obj);
+    Version(Version && obj);
     ~Version();
 
 public:
-    Version & operator =(Version const & obj) TBAG_NOEXCEPT;
-    Version & operator =(Version && obj) TBAG_NOEXCEPT;
+    Version & operator =(Version const & obj);
+    Version & operator =(Version && obj);
 
 public:
     inline uint32_t getMajor() const TBAG_NOEXCEPT { return _major; }
@@ -67,8 +70,12 @@ public:
     { _major = major; _minor = minor; _patch = patch; }
 
 public:
-    void clear() TBAG_NOEXCEPT;
-    void swap(Version & obj) TBAG_NOEXCEPT;
+    inline std::string getTweak() const { return _tweak; }
+    inline void setTweak(std::string const & val) { _tweak = val; }
+
+public:
+    void clear();
+    void swap(Version & obj);
 
 public:
     inline friend bool operator ==(Version const & lh, Version const & rh) TBAG_NOEXCEPT
@@ -78,27 +85,21 @@ public:
 
     inline friend bool operator <(Version const & lh, Version const & rh) TBAG_NOEXCEPT
     {
-#ifndef _TBAG_VERSION_LT_SINGLE
-#define _TBAG_VERSION_LT_SINGLE(lh, rh) \
-        if (lh < rh) { return true; } else if (lh > rh) { return false; }
-#endif
-        _TBAG_VERSION_LT_SINGLE(lh._major, rh._major);
-        _TBAG_VERSION_LT_SINGLE(lh._minor, rh._minor);
-        _TBAG_VERSION_LT_SINGLE(lh._patch, rh._patch);
-#undef _TBAG_VERSION_LT_SINGLE
+        // @formatter:off
+        if (lh._major < rh._major) { return true; } else if (lh._major > rh._major) { return false; }
+        if (lh._minor < rh._minor) { return true; } else if (lh._minor > rh._minor) { return false; }
+        if (lh._patch < rh._patch) { return true; } else if (lh._patch > rh._patch) { return false; }
+        // @formatter:on
         return false;
     }
 
     inline friend bool operator >(Version const & lh, Version const & rh) TBAG_NOEXCEPT
     {
-#ifndef _TBAG_VERSION_GT_SINGLE
-#define _TBAG_VERSION_GT_SINGLE(lh, rh) \
-    if (lh > rh) { return true; } else if (lh < rh) { return false; }
-#endif
-        _TBAG_VERSION_GT_SINGLE(lh._major, rh._major);
-        _TBAG_VERSION_GT_SINGLE(lh._minor, rh._minor);
-        _TBAG_VERSION_GT_SINGLE(lh._patch, rh._patch);
-#undef _TBAG_VERSION_GT_SINGLE
+        // @formatter:off
+        if (lh._major > rh._major) { return true; } else if (lh._major < rh._major) { return false; }
+        if (lh._minor > rh._minor) { return true; } else if (lh._minor < rh._minor) { return false; }
+        if (lh._patch > rh._patch) { return true; } else if (lh._patch < rh._patch) { return false; }
+        // @formatter:on
         return false;
     }
 
@@ -110,11 +111,15 @@ public:
 
 public:
     Err fromString(std::string const & version);
-    std::string toString() const;
+
+    std::string      toString() const;
+    std::string toShortString() const;
+    std::string  toLongString() const;
 
 public:
     static Err fromString(std::string const & version, Version & result);
-    static std::string toString(Version const & version);
+    static std::string toShortString(Version const & version);
+    static std::string toLongString(Version const & version);
 };
 
 // --------------------

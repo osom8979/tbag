@@ -54,12 +54,22 @@ TEST(VersionTest, Default)
     ASSERT_FALSE(lh <  rh);
 }
 
-TEST(VersionTest, String)
+TEST(VersionTest, String1)
 {
     Version ver;
-    ASSERT_EQ(Err::E_SUCCESS, ver.fromString("1.2.3.3"));
+    ASSERT_EQ(Err::E_SUCCESS, ver.fromString("1.2.3.4.9999.a"));
     ASSERT_EQ(Version(1, 2, 3), ver);
     ASSERT_STREQ("1.2.3", ver.toString().c_str());
+    ASSERT_STREQ("4.9999.a", ver.getTweak().c_str());
+}
+
+TEST(VersionTest, String2)
+{
+    Version ver;
+    ASSERT_EQ(Err::E_SUCCESS, ver.fromString("1."));
+    ASSERT_EQ(Version(1), ver);
+    ASSERT_EQ(Version(1, 0), ver);
+    ASSERT_STREQ("1", ver.toString().c_str());
 }
 
 TEST(VersionTest, StringConstructor)

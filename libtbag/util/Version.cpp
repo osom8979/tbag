@@ -19,28 +19,28 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace util {
 
-Version::Version() TBAG_NOEXCEPT : _major(0), _minor(0), _patch(0)
+Version::Version() : _major(0), _minor(0), _patch(0), _tweak()
 {
     // EMPTY.
 }
 
-Version::Version(uint32_t major, uint32_t minor, uint32_t patch) TBAG_NOEXCEPT
-        : _major(major), _minor(minor), _patch(patch)
+Version::Version(uint32_t major, uint32_t minor, uint32_t patch, std::string const & tweak)
+        : _major(major), _minor(minor), _patch(patch), _tweak(tweak)
 {
     // EMPTY.
 }
 
-Version::Version(std::string const & ver) : _major(0), _minor(0), _patch(0)
+Version::Version(std::string const & ver) : _major(0), _minor(0), _patch(0), _tweak()
 {
     fromString(ver, *this);
 }
 
-Version::Version(Version const & obj) TBAG_NOEXCEPT
+Version::Version(Version const & obj)
 {
     (*this) = obj;
 }
 
-Version::Version(Version && obj) TBAG_NOEXCEPT
+Version::Version(Version && obj)
 {
     (*this) = std::move(obj);
 }
@@ -50,17 +50,18 @@ Version::~Version()
     // EMPTY.
 }
 
-Version & Version::operator =(Version const & obj) TBAG_NOEXCEPT
+Version & Version::operator =(Version const & obj)
 {
     if (this != &obj) {
         _major = obj._major;
         _minor = obj._minor;
         _patch = obj._patch;
+        _tweak = obj._tweak;
     }
     return *this;
 }
 
-Version & Version::operator =(Version && obj) TBAG_NOEXCEPT
+Version & Version::operator =(Version && obj)
 {
     if (this != &obj) {
         swap(obj);
@@ -68,18 +69,20 @@ Version & Version::operator =(Version && obj) TBAG_NOEXCEPT
     return *this;
 }
 
-void Version::clear() TBAG_NOEXCEPT
+void Version::clear()
 {
     _major = 0;
     _minor = 0;
     _patch = 0;
+    _tweak.clear();
 }
 
-void Version::swap(Version & obj) TBAG_NOEXCEPT
+void Version::swap(Version & obj)
 {
     algorithm::swapWithPod(_major, obj._major);
     algorithm::swapWithPod(_minor, obj._minor);
     algorithm::swapWithPod(_patch, obj._patch);
+    _tweak.swap(obj._tweak);
 }
 
 Err Version::fromString(std::string const & version)
@@ -89,7 +92,17 @@ Err Version::fromString(std::string const & version)
 
 std::string Version::toString() const
 {
-    return toString(*this);
+    return toShortString(*this);
+}
+
+std::string Version::toShortString() const
+{
+    return toShortString(*this);
+}
+
+std::string Version::toLongString() const
+{
+    return toLongString(*this);
 }
 
 Err Version::fromString(std::string const & version, Version & result)
@@ -107,6 +120,9 @@ Err Version::fromString(std::string const & version, Version & result)
         if (size >= 2) { result.setMinor(static_cast<uint32_t>(std::stoul(tokens[1]))); }
         if (size >= 3) { result.setPatch(static_cast<uint32_t>(std::stoul(tokens[2]))); }
         // @formatter:on
+        if (size >= 4) {
+            result.setTweak(version.substr(tokens[0].size() + tokens[1].size() + tokens[2].size() + 3/*POINT('.') COUNT*/));
+        }
     } catch (std::invalid_argument & e) {
         return Err::E_PARSING; // Don't use the Err::E_ILLARGS error (Reason: duplicate return value).
     } catch (std::out_of_range & e) {
@@ -117,10 +133,26 @@ Err Version::fromString(std::string const & version, Version & result)
     return Err::E_SUCCESS;
 }
 
-std::string Version::toString(Version const & version)
+std::string Version::toShortString(Version const & version)
 {
     std::stringstream ss;
-    ss << version.getMajor() << POINT_STR << version.getMinor() << POINT_STR << version.getPatch();
+    ss << version.getMajor();
+    if (version.getMinor() != 0) {
+        ss << POINT_STR << version.getMinor();
+    }
+    if (version.getPatch() != 0) {
+        ss << POINT_STR << version.getPatch();
+    }
+    return ss.str();
+}
+
+std::string Version::toLongString(Version const & version)
+{
+    std::stringstream ss;
+    ss << version.getMajor()
+       << POINT_STR << version.getMinor()
+       << POINT_STR << version.getPatch()
+       << POINT_STR << version.getTweak();
     return ss.str();
 }
 
@@ -130,7 +162,7 @@ std::string Version::toString(Version const & version)
 
 Version getTbagVersion() TBAG_NOEXCEPT
 {
-    return Version(LIBTBAG_VERSION_MAJOR, LIBTBAG_VERSION_MINOR, LIBTBAG_VERSION_PATCH);
+    return Version(LIBTBAG_VERSION_MAJOR, LIBTBAG_VERSION_MINOR, LIBTBAG_VERSION_PATCH, LIBTBAG_VERSION_TWEAK);
 }
 
 Version getTbagPacketVersion() TBAG_NOEXCEPT
