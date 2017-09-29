@@ -57,7 +57,7 @@ public:
     using Parent     = stream::StreamClient;
 
     using Loop     = uvpp::Loop;
-    using WsBuffer = WsFrame::WsBuffer;
+    using WsBuffer = WsFrame::Buffer;
     using WsQueue  = container::ReuseQueue<WsBuffer>;
     using Masking  = random::MaskingDevice;
 

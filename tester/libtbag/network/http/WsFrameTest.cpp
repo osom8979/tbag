@@ -134,9 +134,9 @@ TEST(WsFrameTest, LargeData)
     random::MaskingDevice device;
 
     std::size_t const BUFFER_SIZE = 65536;
-    WsFrame::WsBuffer test_buffer;
+    WsFrame::Buffer test_buffer;
     test_buffer.assign(BUFFER_SIZE, 0x10);
-    WsFrame::WsBuffer buffer;
+    WsFrame::Buffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.binary(test_buffer, device.gen()));
     auto const REQUEST_SIZE = sender.copyTo(buffer);
@@ -166,7 +166,7 @@ TEST(WsFrameTest, TextRequest)
     random::MaskingDevice device;
 
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
-    WsFrame::WsBuffer buffer;
+    WsFrame::Buffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.text(TEST_TEXT, device.gen()));
     auto const REQUEST_SIZE = sender.copyTo(buffer);
@@ -190,7 +190,7 @@ TEST(WsFrameTest, TextResponse)
     random::MaskingDevice device;
 
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
-    WsFrame::WsBuffer buffer;
+    WsFrame::Buffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.text(TEST_TEXT));
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
@@ -214,7 +214,7 @@ TEST(WsFrameTest, PingRequest)
     random::MaskingDevice device;
 
     std::string const TEST_TEXT = "TEST ECHO MESSAGE!";
-    WsFrame::WsBuffer buffer;
+    WsFrame::Buffer buffer;
 
     ASSERT_EQ(Err::E_SUCCESS, sender.ping(TEST_TEXT, device.gen()));
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
@@ -236,7 +236,7 @@ TEST(WsFrameTest, CloseResponse)
     WsFrame sender;
     WsFrame receiver;
     random::MaskingDevice device;
-    WsFrame::WsBuffer buffer;
+    WsFrame::Buffer buffer;
 
     auto code = WsStatusCode::WSSC_GOING_AWAY;
     ASSERT_EQ(Err::E_SUCCESS, sender.close(code));

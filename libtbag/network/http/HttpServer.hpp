@@ -68,7 +68,7 @@ public:
     using StreamNode       = stream::StreamNode;
     using SharedStreamNode = Parent::SharedStreamNode;
 
-    using WsBuffer = WsFrame::WsBuffer;
+    using WsBuffer = WsFrame::Buffer;
     using WsQueue  = container::ReuseQueue<WsBuffer>;
 
     using Loop   = uvpp::Loop;

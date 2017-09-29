@@ -21,6 +21,7 @@
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -209,7 +210,7 @@ enum class PayloadBit : uint8_t
 class TBAG_API WsFrame
 {
 public:
-    using WsBuffer = std::vector<char>;
+    using Buffer = libtbag::Buffer;
 
 public:
     TBAG_CONSTEXPR static std::size_t const MINIMUM_BUFFER_SIZE = 2;
@@ -243,7 +244,7 @@ public:
     uint32_t masking_key;
 
     /** Payload buffer. */
-    WsBuffer payload;
+    Buffer payload;
 
 public:
     WsFrame();
@@ -265,8 +266,8 @@ public:
     inline std::string toText() const
     { return std::string(payload.data(), payload.data() + payload_length); }
 
-    inline WsBuffer toBinary() const
-    { return WsBuffer(payload.data(), payload.data() + payload_length); }
+    inline Buffer toBinary() const
+    { return Buffer(payload.data(), payload.data() + payload_length); }
 
 public:
     void clear();
@@ -277,7 +278,7 @@ public:
 public:
     std::size_t calculateWriteBufferSize() const;
     std::size_t copyTo(char * data, std::size_t data_size) const;
-    std::size_t copyTo(WsBuffer & buffer) const;
+    std::size_t copyTo(Buffer & buffer) const;
 
 public:
     void setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
@@ -298,8 +299,8 @@ public:
     Err binary(char const * buffer, std::size_t size, uint32_t key, bool continuation = false, bool finish = true);
     Err binary(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
 
-    Err binary(WsBuffer const & buffer, uint32_t key, bool continuation = false, bool finish = true);
-    Err binary(WsBuffer const & buffer, bool continuation = false, bool finish = true);
+    Err binary(Buffer const & buffer, uint32_t key, bool continuation = false, bool finish = true);
+    Err binary(Buffer const & buffer, bool continuation = false, bool finish = true);
 
 // Control Frames.
 public:
@@ -364,8 +365,8 @@ public:
     static uint32_t getMaskingKey(char const * data) TBAG_NOEXCEPT;
 
     static std::string getPayloadData(uint32_t mask, std::string const & data);
-    static WsBuffer getPayloadData(uint32_t mask, WsBuffer const & data);
-    static WsBuffer getPayloadData(uint32_t mask, char const * data, std::size_t size);
+    static Buffer getPayloadData(uint32_t mask, Buffer const & data);
+    static Buffer getPayloadData(uint32_t mask, char const * data, std::size_t size);
     static void updatePayloadData(uint32_t mask, char * result, std::size_t size);
 };
 

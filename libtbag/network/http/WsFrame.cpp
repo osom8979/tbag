@@ -331,7 +331,7 @@ std::size_t WsFrame::copyTo(char * data, std::size_t size) const
     return index;
 }
 
-std::size_t WsFrame::copyTo(WsBuffer & buffer) const
+std::size_t WsFrame::copyTo(Buffer & buffer) const
 {
     buffer.resize(calculateWriteBufferSize());
     return copyTo(buffer.data(), buffer.size());
@@ -406,12 +406,12 @@ Err WsFrame::binary(char const * buffer, std::size_t size, bool continuation, bo
     return binary(buffer, size, 0, continuation, finish);
 }
 
-Err WsFrame::binary(WsBuffer const & buffer, uint32_t key, bool continuation, bool finish)
+Err WsFrame::binary(Buffer const & buffer, uint32_t key, bool continuation, bool finish)
 {
     return binary(buffer.data(), buffer.size(), key, continuation, finish);
 }
 
-Err WsFrame::binary(WsBuffer const & buffer, bool continuation, bool finish)
+Err WsFrame::binary(Buffer const & buffer, bool continuation, bool finish)
 {
     return binary(buffer, 0, continuation, finish);
 }
@@ -424,7 +424,7 @@ Err WsFrame::close(uint32_t key)
 Err WsFrame::close(uint16_t code, std::string const & reason)
 {
     code = bitwise::toNetwork(code);
-    WsBuffer buffer(sizeof(uint16_t) + reason.size());
+    Buffer buffer(sizeof(uint16_t) + reason.size());
     memcpy(&buffer[0], &code, sizeof(uint16_t));
     memcpy(&buffer[sizeof(uint16_t)], &reason[0], reason.size());
     return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
@@ -559,19 +559,19 @@ uint32_t WsFrame::getMaskingKey(char const * data) TBAG_NOEXCEPT
 
 std::string WsFrame::getPayloadData(uint32_t mask, std::string const & data)
 {
-    WsBuffer const INPUT(data.begin(), data.end());
-    WsBuffer const OUTPUT = getPayloadData(mask, INPUT);
+    Buffer const INPUT(data.begin(), data.end());
+    Buffer const OUTPUT = getPayloadData(mask, INPUT);
     return std::string(OUTPUT.begin(), OUTPUT.end());
 }
 
-WsFrame::WsBuffer WsFrame::getPayloadData(uint32_t mask, WsBuffer const & data)
+WsFrame::Buffer WsFrame::getPayloadData(uint32_t mask, Buffer const & data)
 {
     return getPayloadData(mask, data.data(), data.size());
 }
 
-WsFrame::WsBuffer WsFrame::getPayloadData(uint32_t mask, char const * data, std::size_t size)
+WsFrame::Buffer WsFrame::getPayloadData(uint32_t mask, char const * data, std::size_t size)
 {
-    WsBuffer result(data, data + size);
+    Buffer result(data, data + size);
     updatePayloadData(mask, result.data(), result.size());
     return result;
 }
