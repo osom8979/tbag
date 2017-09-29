@@ -95,9 +95,13 @@ TEST(UvUtilsTest, InterfaceAddresses)
     }
 }
 
-TEST(UvUtilsTest, Load)
+TEST(UvUtilsTest, LoadAverage)
 {
     auto load = getLoadAverage();
+    if (load.empty()) {
+        std::cout << "Empty load_average. Skip this test.\n";
+        return;
+    }
     ASSERT_EQ(3, load.size());
 #if defined(TBAG_PLATFORM_WINDOWS)
     ASSERT_EQ(0, load[0]);
