@@ -263,7 +263,7 @@ public:
 class TBAG_API LmdbDbi : private Noncopyable
 {
 public:
-    using Buffer = std::vector<char>;
+    using Buffer = util::Buffer;
     using OpenFlags = LmdbOpenFlags;
     using WriteFlags = LmdbWriteFlags;
 

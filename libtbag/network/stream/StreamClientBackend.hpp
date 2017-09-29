@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -54,7 +55,7 @@ public:
     using Parent = BaseType;
     using Loop   = uvpp::Loop;
     using binf   = uvpp::binf;
-    using Buffer = std::vector<char>;
+    using Buffer = util::Buffer;
 
     using ConnectRequest  = uvpp::ConnectRequest;
     using ShutdownRequest = uvpp::ShutdownRequest;

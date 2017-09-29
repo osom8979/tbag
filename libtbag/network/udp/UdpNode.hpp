@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/id/Id.hpp>
 
+#include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
 #include <libtbag/network/udp/UdpNodeBackend.hpp>
@@ -58,7 +59,7 @@ public:
     using   WeakSafetyAsync =   std::weak_ptr<SafetyAsync>;
 
     using Id     = id::Id;
-    using Buffer = std::vector<char>;
+    using Buffer = util::Buffer;
     using Mutex  = std::mutex;
     using Guard  = std::lock_guard<Mutex>;
 

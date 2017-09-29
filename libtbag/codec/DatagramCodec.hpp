@@ -19,6 +19,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
+#include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/container/CircularBuffer.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
@@ -47,7 +48,7 @@ struct DatagramTypes
     using binf = uvpp::binf;
     using Size = uint32_t;
 
-    using Buffer         = std::vector<char>;
+    using Buffer         = util::Buffer;
     using SharedBuffer   = std::shared_ptr<Buffer>;
     using SharedBuffers  = container::ReuseQueue<SharedBuffer>;
     using CircularBuffer = container::CircularBuffer<char>;

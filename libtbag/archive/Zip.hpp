@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
 #include <string>
@@ -53,18 +54,18 @@ public:
     static int const MAX_ENCODE_LEVEL = 9;
     static int const DECODE_LEVEL = 0;
 
-    using Buffer = std::vector<uint8_t>;
+    using Buffer = util::Buffer;
 
 public:
     Zip();
     ~Zip();
 
 private:
-    static ResultCode coding(Buffer & output, uint8_t const * input, std::size_t size, int level = DECODE_LEVEL);
+    static ResultCode coding(Buffer & output, char const * input, std::size_t size, int level = DECODE_LEVEL);
 
 public:
-    static ResultCode encode(Buffer & output, uint8_t const * input, std::size_t size, int level = DEFAULT_ENCODE_LEVEL);
-    static ResultCode decode(Buffer & output, uint8_t const * input, std::size_t size);
+    static ResultCode encode(Buffer & output, char const * input, std::size_t size, int level = DEFAULT_ENCODE_LEVEL);
+    static ResultCode decode(Buffer & output, char const * input, std::size_t size);
 
 public:
     static ResultCode   zip(std::string const & file, std::string const & dir);

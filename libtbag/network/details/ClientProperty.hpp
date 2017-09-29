@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/id/Id.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
@@ -80,7 +81,7 @@ struct ClientTypes
     using binf   = uvpp::binf;
     using Id     = id::Id;
 
-    using Buffer = std::vector<char>;
+    using Buffer = util::Buffer;
     using Mutex  = std::mutex;
     using Guard  = std::lock_guard<Mutex>;
 

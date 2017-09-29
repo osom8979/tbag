@@ -77,10 +77,10 @@ struct BufferInfo
 using  binf = BufferInfo<char      , std::size_t>;
 using cbinf = BufferInfo<char const, std::size_t>;
 
-} // namespace util
-
 /** Common buffer container. */
 using Buffer = std::vector<char>;
+
+} // namespace util
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

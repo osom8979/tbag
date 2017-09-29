@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
+#include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/network/http/WsFrame.hpp>
 #include <vector>
 
@@ -37,7 +38,7 @@ namespace http    {
 class TBAG_API WsFrameBuffer : private Noncopyable
 {
 public:
-    using Buffer = std::vector<char>;
+    using Buffer = util::Buffer;
 
 private:
     Buffer _buffer;

@@ -28,17 +28,17 @@ TEST(ZipTest, Default)
     std::string const TEST_BODY = std::string(CONTENT) + std::string(CONTENT);
     std::string result;
 
-    std::vector<uint8_t> input;
+    util::Buffer input;
     input.assign(TEST_BODY.begin(), TEST_BODY.end());
 
-    std::vector<uint8_t> deflate;
+    util::Buffer deflate;
     ASSERT_EQ(Zip::ResultCode::SUCCESS, Zip::encode(deflate, &input[0], input.size()));
 
     result.assign(deflate.begin(), deflate.end());
     ASSERT_NE(TEST_BODY, result);
     ASSERT_GT(TEST_BODY.size(), result.size());
 
-    std::vector<uint8_t> inflate;
+    util::Buffer inflate;
     ASSERT_EQ(Zip::ResultCode::SUCCESS, Zip::decode(inflate, &deflate[0], deflate.size()));
 
     result.assign(inflate.begin(), inflate.end());
@@ -56,13 +56,13 @@ TEST(ZipTest, ImageTest)
     std::mt19937 engine(device());
     std::uniform_int_distribution<int> distribution(0x00, 0xFF);
 
-    std::vector<uint8_t> input;
+    util::Buffer input;
     input.resize(total);
     for (auto & pixel : input) {
         pixel = distribution(engine);
     }
 
-    std::vector<uint8_t> deflate;
+    util::Buffer deflate;
     Zip::ResultCode result;
 
     auto encode_duration = time::getDurationWithPredicated<std::chrono::milliseconds>([&](){
@@ -71,7 +71,7 @@ TEST(ZipTest, ImageTest)
     ASSERT_EQ(Zip::ResultCode::SUCCESS, result);
     std::cout << "Image(" << width << "x" << height << ") Encode size: " << deflate.size() << " byte, time: " << encode_duration.count() << " milliseconds.\n";
 
-    std::vector<uint8_t> inflate;
+    util::Buffer inflate;
     auto decode_duration = time::getDurationWithPredicated<std::chrono::milliseconds>([&](){
         result = Zip::decode(inflate, &deflate[0], deflate.size());
     });

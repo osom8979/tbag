@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/stream/StreamServer.hpp>
@@ -72,7 +73,7 @@ public:
     using WsQueue  = container::ReuseQueue<WsBuffer>;
 
     using Loop   = uvpp::Loop;
-    using Buffer = std::vector<char>;
+    using Buffer = util::Buffer;
 
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;

@@ -35,7 +35,7 @@ Zip::~Zip()
     // EMPTY.
 }
 
-Zip::ResultCode Zip::coding(Buffer & output, uint8_t const * input, std::size_t size, int level)
+Zip::ResultCode Zip::coding(Buffer & output, char const * input, std::size_t size, int level)
 {
     bool const ENCODE = (level != DECODE_LEVEL);
 
@@ -106,7 +106,7 @@ Zip::ResultCode Zip::coding(Buffer & output, uint8_t const * input, std::size_t 
     return ResultCode::SUCCESS;
 }
 
-Zip::ResultCode Zip::encode(Buffer & output, uint8_t const * input, std::size_t size, int level)
+Zip::ResultCode Zip::encode(Buffer & output, char const * input, std::size_t size, int level)
 {
     if (level < MIN_ENCODE_LEVEL || level > MAX_ENCODE_LEVEL) {
         level = Z_DEFAULT_COMPRESSION;
@@ -114,7 +114,7 @@ Zip::ResultCode Zip::encode(Buffer & output, uint8_t const * input, std::size_t 
     return coding(output, input, size, level);
 }
 
-Zip::ResultCode Zip::decode(Buffer & output, uint8_t const * input, std::size_t size)
+Zip::ResultCode Zip::decode(Buffer & output, char const * input, std::size_t size)
 {
     return coding(output, input, size, DECODE_LEVEL);
 }

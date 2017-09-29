@@ -210,7 +210,7 @@ enum class PayloadBit : uint8_t
 class TBAG_API WsFrame
 {
 public:
-    using Buffer = libtbag::Buffer;
+    using Buffer = util::Buffer;
 
 public:
     TBAG_CONSTEXPR static std::size_t const MINIMUM_BUFFER_SIZE = 2;
