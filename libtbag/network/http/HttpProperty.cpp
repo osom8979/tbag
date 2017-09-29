@@ -143,7 +143,7 @@ bool HttpCommonProperty::existsHeaderValueFromHeaderMap(
     auto itr = headers.find(key);
     if (itr != headers.end()) {
         std::string const VALUE = (ignore_case ? string::lower(value) : value);
-        for (auto & cursor : string::splitTokens(itr->second, HEADER_VALUE_DELIMITER)) {
+        for (auto & cursor : string::splitTokens(itr->second, VALUE_DELIMITER)) {
             if (VALUE == string::lower(string::trim(cursor))) {
                 return true;
             }

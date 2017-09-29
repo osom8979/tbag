@@ -266,8 +266,8 @@ std::string buildDefaultRequestString(
         int major, int minor, bool logging)
 {
     HttpHeaderMap update_headers = headers;
-    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_USER_AGENT, DEFAULT_HEADER_USER_AGENT);
-    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_ACCEPT, DEFAULT_HEADER_ACCEPT);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_USER_AGENT, DEFAULT_VALUE_OF_USER_AGENT);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_ACCEPT, DEFAULT_VALUE_OF_ACCEPT);
 
     if (body.empty() == false) {
         HttpCommonProperty::insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
@@ -295,8 +295,8 @@ std::string buildDefaultResponseString(
         int major, int minor, bool logging)
 {
     HttpHeaderMap update_headers = headers;
-    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_SERVER, DEFAULT_HEADER_SERVER);
-    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_CONTENT_TYPE, DEFAULT_HEADER_CONTENT_TYPE);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
+    HttpCommonProperty::insertIfNotExists(update_headers, HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
     HttpCommonProperty::insertIfNotExists(update_headers, HEADER_CONTENT_LENGTH, std::to_string(body.size()));
 
     if (logging) {

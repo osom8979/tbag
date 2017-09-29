@@ -41,14 +41,14 @@ namespace http    {
 TBAG_CONSTEXPR char const * const HTTP = "HTTP";
 TBAG_CONSTEXPR char const * const   SP = " ";
 TBAG_CONSTEXPR char const * const CRLF = "\r\n";
+TBAG_CONSTEXPR char const * const   CR = "\r";
+TBAG_CONSTEXPR char const * const   LF = "\n";
 
 /**
  * @defgroup __DOXYGEN_GROUP__HTTP_HEADER__ List of http headers.
  * @see <https://en.wikipedia.org/wiki/List_of_HTTP_header_fields>
  * @{
  */
-
-TBAG_CONSTEXPR char const * const HEADER_VALUE_DELIMITER = ",";
 
 TBAG_CONSTEXPR char const * const HEADER_HOST               = "Host";
 TBAG_CONSTEXPR char const * const HEADER_UPGRADE            = "Upgrade";
@@ -72,28 +72,24 @@ TBAG_CONSTEXPR char const * const HEADER_SEC_WEBSOCKET_VERSION  = "Sec-WebSocket
  * @}
  */
 
-TBAG_CONSTEXPR char const * const VALUE_DELIMITER = ",";
+TBAG_CONSTEXPR char const * const VALUE_DELIMITER        = ",";
+TBAG_CONSTEXPR char const * const VALUE_WEBSOCKET        = "WebSocket";
+TBAG_CONSTEXPR char const * const VALUE_UPGRADE          = "Upgrade";
+TBAG_CONSTEXPR char const * const VALUE_TBAG_PROTOCOL    = "Tbag";
+TBAG_CONSTEXPR char const * const VALUE_TBAG_SERVER_INFO = LIBTBAG_TITLE_STRING "/" LIBTBAG_VERSION_STRING;
 
-TBAG_CONSTEXPR char const * const VALUE_SERVER_INFO =
-         LIBTBAG_TITLE_STRING "/" LIBTBAG_VERSION_STRING;
-
-TBAG_CONSTEXPR char const * const DEFAULT_HEADER_SERVER            = VALUE_SERVER_INFO;
-TBAG_CONSTEXPR char const * const DEFAULT_HEADER_CONTENT_TYPE      = "text/html; charset=utf-8";
-TBAG_CONSTEXPR char const * const DEFAULT_HEADER_USER_AGENT        = VALUE_SERVER_INFO;
-TBAG_CONSTEXPR char const * const DEFAULT_HEADER_ACCEPT            = "*/*";
-TBAG_CONSTEXPR char const * const DEFAULT_HEADER_TRANSFER_ENCODING = "identity";
-
-TBAG_CONSTEXPR char const * const VALUE_WEBSOCKET = "websocket";
-TBAG_CONSTEXPR char const * const VALUE_UPGRADE   = "Upgrade";
-
-TBAG_CONSTEXPR char const * const VALUE_TBAG_PROTOCOL = "tbag";
-
-TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI00 =  0; // Interim
-TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI07 =  7; // Interim
-TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI08 =  8; // Interim
+TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI00 =  0; ///< Interim
+TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI07 =  7; ///< Interim
+TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI08 =  8; ///< Interim
 TBAG_CONSTEXPR int const WEBSOCKET_VERSION_HYBI13 = 13; ///< RFC 6455 (Standard)
 
 TBAG_CONSTEXPR char const * const WEBSOCKET_HANDSHAKE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_SERVER            = VALUE_TBAG_SERVER_INFO;
+TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_CONTENT_TYPE      = "text/html; charset=utf-8";
+TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_USER_AGENT        = VALUE_TBAG_SERVER_INFO;
+TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_ACCEPT            = "*/*";
+TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_TRANSFER_ENCODING = "identity";
 
 // ------------
 // HTTP METHOD.
@@ -160,17 +156,26 @@ enum class HttpMethod : int
 #undef _TBAG_XX
 };
 
-#define _TBAG_XX(num, name, str) \
-    struct HttpMethod##name { TBAG_CONSTEXPR static char const * const getMethod() TBAG_NOEXCEPT { return #name; } };
+#define _TBAG_XX(num, name, str)                                      \
+    struct HttpMethod##name                                           \
+    {                                                                 \
+        TBAG_CONSTEXPR static char const * getMethod() TBAG_NOEXCEPT  \
+        {                                                             \
+            return #name;                                             \
+        }                                                             \
+    };                                                                \
+    /* -- END -- */
     TBAG_HTTP_METHOD_MAP(_TBAG_XX)
 #undef _TBAG_XX
 
 static_assert(static_cast<int>(HttpMethod::M_UNKNOWN) == TBAG_UNKNOWN_HTTP_METHOD,
               "Unknown HTTP Method number is not equals.");
 
-TBAG_API char const * getHttpMethodName(HttpMethod method) TBAG_NOEXCEPT;
-TBAG_API int getHttpMethodNumber(HttpMethod method) TBAG_NOEXCEPT;
-TBAG_API HttpMethod getHttpMethod(std::string const & name);
+// @formatter:off
+TBAG_API char const * getHttpMethodName  (HttpMethod method) TBAG_NOEXCEPT;
+TBAG_API int          getHttpMethodNumber(HttpMethod method) TBAG_NOEXCEPT;
+TBAG_API HttpMethod   getHttpMethod(std::string const & name);
+// @formatter:on
 
 // HTTP Status Code Definitions.
 // Reference: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -240,9 +245,11 @@ enum class HttpStatus : int
 #undef _TBAG_XX
 };
 
-TBAG_API HttpStatus getHttpStatus(int status) TBAG_NOEXCEPT;
+// @formatter:off
+TBAG_API HttpStatus   getHttpStatus(int status) TBAG_NOEXCEPT;
 TBAG_API char const * getHttpStatusReason(HttpStatus status) TBAG_NOEXCEPT;
-TBAG_API int getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT;
+TBAG_API int          getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT;
+// @formatter:on
 
 /**
  * Http version structure.
