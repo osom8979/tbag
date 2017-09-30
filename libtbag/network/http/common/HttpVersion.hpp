@@ -36,6 +36,8 @@ namespace common  {
  *
  * @remarks
  *  Use 'http_' as a prefix to avoid variable name conflicts.
+ *
+ * @see <https://tools.ietf.org/html/rfc2616#section-3.1>
  */
 struct HttpVersion
 {
@@ -71,6 +73,12 @@ struct HttpVersion
         return toString(http_major, http_minor);
     }
 
+    /**
+     * @remarks
+     *  @code
+     *   HTTP-Version = "HTTP" "/" 1*DIGIT "." 1*DIGIT
+     *  @endcode
+     */
     static std::string toString(int major, int minor)
     {
         return string::fformat("HTTP/{}.{}", major, minor);
