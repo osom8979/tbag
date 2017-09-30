@@ -149,8 +149,11 @@ public:
     mapped_type getIgnoreCase(key_type const & key) const;
 
 public:
-    iterator insert(key_type const & key, mapped_type const & val);
-    iterator insertIfNotExists(key_type const & key, mapped_type const & val);
+    iterator  insert(key_type const & key, mapped_type const & val);
+    size_type insert(HttpHeader const & header);
+
+    iterator  insertIfNotExists(key_type const & key, mapped_type const & val);
+    size_type insertIfNotExists(HttpHeader const & header);
 
 public:
     bool exists(key_type const & key) const;
@@ -158,6 +161,10 @@ public:
 
     bool existsInSplitValues(key_type const & key, mapped_type const & val) const;
     bool existsInSplitValues(key_type const & key, mapped_type const & val, mapped_type const & delimiter) const;
+
+public:
+    void updateDefaultRequest(std::size_t body_size = 0);
+    void updateDefaultResponse(std::size_t body_size = 0);
 
 public:
     /**

@@ -110,12 +110,34 @@ HttpHeader::iterator HttpHeader::insert(key_type const & key, mapped_type const 
     return _headers.insert(value_type(key, val));
 }
 
+HttpHeader::size_type HttpHeader::insert(HttpHeader const & header)
+{
+    size_type insert_count = 0;
+    for (auto & cursor : header) {
+        if (_headers.insert(cursor) != _headers.end()) {
+            ++insert_count;
+        }
+    }
+    return insert_count;
+}
+
 HttpHeader::iterator HttpHeader::insertIfNotExists(key_type const & key, mapped_type const & val)
 {
     if (exists(key) == false) {
         return _headers.insert(value_type(key, val));
     }
     return _headers.end();
+}
+
+HttpHeader::size_type HttpHeader::insertIfNotExists(HttpHeader const & header)
+{
+    size_type insert_count = 0;
+    for (auto & cursor : header) {
+        if (insertIfNotExists(cursor.first, cursor.second) != _headers.end()) {
+            ++insert_count;
+        }
+    }
+    return insert_count;
 }
 
 bool HttpHeader::exists(key_type const & key) const
@@ -154,6 +176,24 @@ bool HttpHeader::existsInSplitValues(key_type const & key,
         }
     }
     return false;
+}
+
+void HttpHeader::updateDefaultRequest(std::size_t body_size)
+{
+    insertIfNotExists(HEADER_USER_AGENT, DEFAULT_VALUE_OF_USER_AGENT);
+    insertIfNotExists(HEADER_ACCEPT, DEFAULT_VALUE_OF_ACCEPT);
+    if (body_size > 0) {
+        insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
+    }
+}
+
+void HttpHeader::updateDefaultResponse(std::size_t body_size)
+{
+    insertIfNotExists(HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
+    insertIfNotExists(HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
+    if (body_size > 0) {
+        insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
+    }
 }
 
 std::string HttpHeader::toString() const
