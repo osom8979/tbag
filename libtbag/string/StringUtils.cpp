@@ -421,6 +421,16 @@ std::string upper(std::string const & str)
     return result;
 }
 
+void lowerSelf(std::string & str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+}
+
+void upperSelf(std::string & str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
+
 } // namespace string
 
 // --------------------

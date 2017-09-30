@@ -171,6 +171,9 @@ TBAG_API bool createRandomString(char * buffer, std::size_t size);
 TBAG_API std::string lower(std::string const & str);
 TBAG_API std::string upper(std::string const & str);
 
+TBAG_API void lowerSelf(std::string & str);
+TBAG_API void upperSelf(std::string & str);
+
 } // namespace string
 
 // --------------------
