@@ -59,7 +59,7 @@ bool HttpCommonProperty::existsHeaderValueFromHeaderMap(
     auto itr = headers.find(key);
     if (itr != headers.end()) {
         std::string const VALUE = (ignore_case ? string::lower(value) : value);
-        for (auto & cursor : string::splitTokens(itr->second, VALUE_DELIMITER)) {
+        for (auto & cursor : string::splitTokens(itr->second, DEFAULT_VALUE_DELIMITER)) {
             if (VALUE == string::lower(string::trim(cursor))) {
                 return true;
             }
@@ -204,7 +204,7 @@ std::string toDelimiterString(std::vector<std::string> const & sources)
 {
     std::stringstream ss;
     for (auto & cursor : sources) {
-        ss << cursor << VALUE_DELIMITER;
+        ss << cursor << DEFAULT_VALUE_DELIMITER;
     }
     return ss.str();
 }
