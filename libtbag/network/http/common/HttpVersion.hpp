@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
+#include <algorithm>
 #include <string>
 
 // -------------------
@@ -46,7 +47,8 @@ struct HttpVersion
     int http_major;
     int http_minor;
 
-    HttpVersion(int v1 = 1, int v2 = 1) TBAG_NOEXCEPT : http_major(v1), http_minor(v2)
+    HttpVersion(int v1 = DEFAULT_HTTP_VERSION_MAJOR, int v2 = DEFAULT_HTTP_VERSION_MINOR) TBAG_NOEXCEPT
+            : http_major(v1), http_minor(v2)
     { /* EMPTY. */ }
     ~HttpVersion()
     { /* EMPTY. */ }
@@ -66,6 +68,12 @@ struct HttpVersion
     inline friend bool operator ==(HttpVersion & lh, HttpVersion & rh) TBAG_NOEXCEPT
     {
         return lh.http_major == rh.http_major && lh.http_minor == rh.http_minor;
+    }
+
+    void swap(HttpVersion & obj)
+    {
+        std::swap(http_major, obj.http_major);
+        std::swap(http_minor, obj.http_minor);
     }
 
     std::string toString() const

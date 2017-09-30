@@ -31,6 +31,9 @@ TBAG_CONSTEXPR char const * const   CR = "\r";
 TBAG_CONSTEXPR char const * const   LF = "\n";
 TBAG_CONSTEXPR char const * const   HT = "\t";
 
+TBAG_CONSTEXPR int const DEFAULT_HTTP_VERSION_MAJOR = 1;
+TBAG_CONSTEXPR int const DEFAULT_HTTP_VERSION_MINOR = 1;
+
 /**
  * @defgroup __DOXYGEN_GROUP__HTTP_HEADER__ List of http headers.
  * @see <https://en.wikipedia.org/wiki/List_of_HTTP_header_fields>
