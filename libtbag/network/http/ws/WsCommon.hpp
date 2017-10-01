@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/debug/Assert.hpp>
 
 #include <cstdint>
 
@@ -25,17 +26,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 namespace ws      {
-
-enum class WsPayloadBit : uint8_t
-{
-    WSPL_BIT_7  =  7,
-    WSPL_BIT_16 = 16,
-    WSPL_BIT_64 = 64,
-};
-
-TBAG_CONSTEXPR uint8_t const WS_PAYLOAD_7BIT_TYPE_SIZE  = 125;
-TBAG_CONSTEXPR uint8_t const WS_PAYLOAD_16BIT_TYPE_SIZE = 126;
-TBAG_CONSTEXPR uint8_t const WS_PAYLOAD_64BIT_TYPE_SIZE = 127;
 
 } // namespace ws
 } // namespace http

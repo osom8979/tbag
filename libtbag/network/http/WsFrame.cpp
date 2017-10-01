@@ -135,7 +135,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
     mask   = static_cast<  bool>(data[1] & 0x80 /* 0b10000000 */);
 
     auto const PAYLOAD_LENGTH_7BIT = static_cast<uint8_t>(data[1] & 0x7F /* 0b01111111 */);
-    auto const PAYLOAD_BIT    = getPayloadBit(PAYLOAD_LENGTH_7BIT);
+    auto const PAYLOAD_BIT    = getWsPayloadBit(PAYLOAD_LENGTH_7BIT);
     auto const MASK_KEY_INDEX = getMaskingKeyByteIndex(PAYLOAD_BIT);
     auto const DATA_INDEX     = getPayloadDataByteIndex(PAYLOAD_BIT, mask);
     calculated_byte = WsFrame::MINIMUM_BUFFER_SIZE;
@@ -166,7 +166,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
         if (size < DATA_INDEX) {
             return Err::E_SMALLBUF;
         }
-        masking_key = getMaskingKey(&data[MASK_KEY_INDEX]);
+        masking_key = copyMaskingKeyFromBuffer(&data[MASK_KEY_INDEX]);
     } else {
         masking_key = 0;
     }
@@ -209,7 +209,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
 std::size_t WsFrame::calculateWriteBufferSize() const
 {
     std::size_t default_size = 2/*HEADER*/ + payload_length + (mask ? sizeof(uint32_t) : 0);
-    switch (getPayloadBitWithPayloadLength(payload_length)) {
+    switch (getWsPayloadBitWithPayloadLength(payload_length)) {
     case WsPayloadBit::WSPL_BIT_7:  return default_size;
     case WsPayloadBit::WSPL_BIT_16: return default_size + sizeof(uint16_t);
     case WsPayloadBit::WSPL_BIT_64: return default_size + sizeof(uint64_t);
@@ -463,55 +463,6 @@ std::string WsFrame::toDebugString() const
 // ---------------
 // Static methods.
 // ---------------
-
-WsPayloadBit WsFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
-{
-    if (payload_length_7bit <= WS_PAYLOAD_7BIT_TYPE_SIZE) {
-        return WsPayloadBit::WSPL_BIT_7;
-    } else if (payload_length_7bit == WS_PAYLOAD_16BIT_TYPE_SIZE) {
-        return WsPayloadBit::WSPL_BIT_16;
-    } else if (payload_length_7bit == WS_PAYLOAD_64BIT_TYPE_SIZE) {
-        return WsPayloadBit::WSPL_BIT_64;
-    } else {
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    }
-    return WsPayloadBit::WSPL_BIT_7;
-}
-
-WsPayloadBit WsFrame::getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
-{
-    if (payload_length <= WS_PAYLOAD_7BIT_TYPE_SIZE) {
-        return WsPayloadBit::WSPL_BIT_7;
-    } else if (payload_length <= MAX_UINT16_BYTE_SIZE) {
-        return WsPayloadBit::WSPL_BIT_16;
-    }
-
-    assert(MAX_UINT16_BYTE_SIZE < COMPARE_AND(payload_length) <= MAX_UINT64_BYTE_SIZE);
-    return WsPayloadBit::WSPL_BIT_64;
-}
-
-uint8_t WsFrame::getPayloadDataByteIndex(WsPayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
-{
-    return getMaskingKeyByteIndex(payload_bit) + (is_mask ? sizeof(uint32_t) : 0);
-}
-
-uint8_t WsFrame::getMaskingKeyByteIndex(WsPayloadBit payload_bit) TBAG_NOEXCEPT
-{
-    switch (payload_bit) {
-    case WsPayloadBit::WSPL_BIT_7:  return 2;
-    case WsPayloadBit::WSPL_BIT_16: return 2 + sizeof(uint16_t);
-    case WsPayloadBit::WSPL_BIT_64: return 2 + sizeof(uint64_t);
-    }
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return 0;
-}
-
-uint32_t WsFrame::getMaskingKey(char const * data) TBAG_NOEXCEPT
-{
-    uint32_t network_32byte_size = 0;
-    ::memcpy(&network_32byte_size, data, sizeof(uint32_t));
-    return network_32byte_size;
-}
 
 std::string WsFrame::getPayloadData(uint32_t mask, std::string const & data)
 {

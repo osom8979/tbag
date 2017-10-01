@@ -30,8 +30,8 @@ TEST(WsFrameTest, GetMaskData)
     std::string const OUTPUT(RESULT_DATA, RESULT_DATA + sizeof(RESULT_DATA));
 
     ASSERT_EQ(RESULT_STRING, OUTPUT);
-    ASSERT_EQ(OUTPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey((char const *)MASKING_KEY), INPUT));
-    ASSERT_EQ(INPUT, WsFrame::getPayloadData(WsFrame::getMaskingKey((char const *)MASKING_KEY), OUTPUT));
+    ASSERT_EQ(OUTPUT, WsFrame::getPayloadData(copyMaskingKeyFromBuffer((char const *)MASKING_KEY), INPUT));
+    ASSERT_EQ(INPUT, WsFrame::getPayloadData(copyMaskingKeyFromBuffer((char const *)MASKING_KEY), OUTPUT));
 }
 
 TEST(WsFrameTest, RequestFrame)
@@ -109,22 +109,6 @@ TEST(WsFrameTest, UpgradeWebsocketKey)
     std::string const TEST_ORIGINAL = "dGhlIHNhbXBsZSBub25jZQ==";
     std::string const TEST_RESULT   = "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=";
     ASSERT_EQ(TEST_RESULT, getUpgradeWebSocketKey(TEST_ORIGINAL));
-}
-
-TEST(WsFrameTest, PayloadLength)
-{
-    for (uint8_t i = 0; i <= 125; ++i) {
-        ASSERT_TRUE(WsPayloadBit::WSPL_BIT_7 == WsFrame::getPayloadBit(i));
-        ASSERT_TRUE(WsPayloadBit::WSPL_BIT_7 == WsFrame::getPayloadBitWithPayloadLength(i));
-    }
-
-    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_16 == WsFrame::getPayloadBit(126));
-    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(126));
-    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(65535));
-
-    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_64 == WsFrame::getPayloadBit(127));
-    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(65536));
-    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(100000));
 }
 
 TEST(WsFrameTest, LargeData)

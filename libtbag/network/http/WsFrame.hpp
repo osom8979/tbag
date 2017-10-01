@@ -21,6 +21,7 @@
 #include <libtbag/network/http/ws/WsCommon.hpp>
 #include <libtbag/network/http/ws/WsStatus.hpp>
 #include <libtbag/network/http/ws/WsOpCode.hpp>
+#include <libtbag/network/http/ws/WsPyloadBit.hpp>
 
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
@@ -198,32 +199,6 @@ public:
     std::string toDebugString() const;
 
 public:
-    /**
-     * @remarks
-     *  The length of the "Payload data", in bytes: if 0-125, that is the
-     *  payload length.  If 126, the following 2 bytes interpreted as a
-     *  16-bit unsigned integer are the payload length.  If 127, the
-     *  following 8 bytes interpreted as a 64-bit unsigned integer (the
-     *  most significant bit MUST be 0) are the payload length.  Multibyte
-     *  length quantities are expressed in network byte order.  Note that
-     *  in all cases, the minimal number of bytes MUST be used to encode
-     *  the length, for example, the length of a 124-byte-long string
-     *  can't be encoded as the sequence 126, 0, 124.  The payload length
-     *  is the length of the "Extension data" + the length of the
-     *  "Application data".  The length of the "Extension data" may be
-     *  zero, in which case the payload length is the length of the
-     *  "Application data".
-     *
-     * @see <https://tools.ietf.org/html/rfc6455#section-5.2>
-     */
-    static WsPayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
-    static WsPayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
-
-    static uint8_t getPayloadDataByteIndex(WsPayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
-    static uint8_t getMaskingKeyByteIndex(WsPayloadBit payload_bit) TBAG_NOEXCEPT;
-
-    static uint32_t getMaskingKey(char const * data) TBAG_NOEXCEPT;
-
     static std::string getPayloadData(uint32_t mask, std::string const & data);
     static Buffer getPayloadData(uint32_t mask, Buffer const & data);
     static Buffer getPayloadData(uint32_t mask, char const * data, std::size_t size);
