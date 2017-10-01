@@ -416,43 +416,49 @@ public:
         using namespace flatbuffers;
         Verifier verifier((uint8_t const *)buffer, size);
         if (tpot::VerifyTpotPacketBuffer(verifier) == false) {
+            onParsingError(Err::E_PARSING, buffer, size, arg);
             return Err::E_PARSING;
         }
+
         auto tpot_packet = tpot::GetTpotPacket(buffer);
         auto type = tpot_packet->packet_type();
 
-        if (tpot::AnyPacket_MIN < COMPARE_AND(type) <= tpot::AnyPacket_MAX) {
-            auto header = tpot_packet->header();
-            auto packet = tpot_packet->packet();
-            if (VerifyAnyPacket(verifier, packet, type) == false) {
-                return Err::E_PARSING;
-            }
-
-            // @formatter:off
-            switch (type) {
-            case tpot::AnyPacket_VersionRequest:        onVersionRequest       (header, (tpot::VersionRequest        const *)packet, arg); break;
-            case tpot::AnyPacket_VersionResponse:       onVersionResponse      (header, (tpot::VersionResponse       const *)packet, arg); break;
-            case tpot::AnyPacket_EchoRequest:           onEchoRequest          (header, (tpot::EchoRequest           const *)packet, arg); break;
-            case tpot::AnyPacket_EchoResponse:          onEchoResponse         (header, (tpot::EchoResponse          const *)packet, arg); break;
-            case tpot::AnyPacket_LoginRequest:          onLoginRequest         (header, (tpot::LoginRequest          const *)packet, arg); break;
-            case tpot::AnyPacket_LoginResponse:         onLoginResponse        (header, (tpot::LoginResponse         const *)packet, arg); break;
-            case tpot::AnyPacket_LogoutRequest:         onLogoutRequest        (header, (tpot::LogoutRequest         const *)packet, arg); break;
-            case tpot::AnyPacket_LogoutResponse:        onLogoutResponse       (header, (tpot::LogoutResponse        const *)packet, arg); break;
-            case tpot::AnyPacket_ExecRequest:           onExecRequest          (header, (tpot::ExecRequest           const *)packet, arg); break;
-            case tpot::AnyPacket_ExecResponse:          onExecResponse         (header, (tpot::ExecResponse          const *)packet, arg); break;
-            case tpot::AnyPacket_ProcessListRequest:    onProcessListRequest   (header, (tpot::ProcessListRequest    const *)packet, arg); break;
-            case tpot::AnyPacket_ProcessListResponse:   onProcessListResponse  (header, (tpot::ProcessListResponse   const *)packet, arg); break;
-            case tpot::AnyPacket_ProcessKillRequest:    onProcessKillRequest   (header, (tpot::ProcessKillRequest    const *)packet, arg); break;
-            case tpot::AnyPacket_ProcessKillResponse:   onProcessKillResponse  (header, (tpot::ProcessKillResponse   const *)packet, arg); break;
-            case tpot::AnyPacket_ProcessRemoveRequest:  onProcessRemoveRequest (header, (tpot::ProcessRemoveRequest  const *)packet, arg); break;
-            case tpot::AnyPacket_ProcessRemoveResponse: onProcessRemoveResponse(header, (tpot::ProcessRemoveResponse const *)packet, arg); break;
-            default:
-                TBAG_INACCESSIBLE_BLOCK_ASSERT();
-            }
-            // @formatter:on
-            return Err::E_SUCCESS;
+        if (!(tpot::AnyPacket_MIN < COMPARE_AND(type) <= tpot::AnyPacket_MAX)) {
+            onParsingError((tpot::AnyPacket_NONE == type ? Err::E_UNSUPOP : Err::E_ENOMSG), buffer, size, arg);
+            return Err::E_ENOMSG;
         }
-        return Err::E_PARSING;
+
+        auto header = tpot_packet->header();
+        auto packet = tpot_packet->packet();
+
+        if (VerifyAnyPacket(verifier, packet, type) == false) {
+            // Use 'Verifier error' to distinguish it from 'Parsing error' at the top.
+            onParsingError(Err::E_VERIFIER, buffer, size, arg);
+            return Err::E_VERIFIER;
+        }
+
+        // @formatter:off
+        switch (type) {
+        case tpot::AnyPacket_VersionRequest:        onVersionRequest       (header, (tpot::VersionRequest        const *)packet, arg); break;
+        case tpot::AnyPacket_VersionResponse:       onVersionResponse      (header, (tpot::VersionResponse       const *)packet, arg); break;
+        case tpot::AnyPacket_EchoRequest:           onEchoRequest          (header, (tpot::EchoRequest           const *)packet, arg); break;
+        case tpot::AnyPacket_EchoResponse:          onEchoResponse         (header, (tpot::EchoResponse          const *)packet, arg); break;
+        case tpot::AnyPacket_LoginRequest:          onLoginRequest         (header, (tpot::LoginRequest          const *)packet, arg); break;
+        case tpot::AnyPacket_LoginResponse:         onLoginResponse        (header, (tpot::LoginResponse         const *)packet, arg); break;
+        case tpot::AnyPacket_LogoutRequest:         onLogoutRequest        (header, (tpot::LogoutRequest         const *)packet, arg); break;
+        case tpot::AnyPacket_LogoutResponse:        onLogoutResponse       (header, (tpot::LogoutResponse        const *)packet, arg); break;
+        case tpot::AnyPacket_ExecRequest:           onExecRequest          (header, (tpot::ExecRequest           const *)packet, arg); break;
+        case tpot::AnyPacket_ExecResponse:          onExecResponse         (header, (tpot::ExecResponse          const *)packet, arg); break;
+        case tpot::AnyPacket_ProcessListRequest:    onProcessListRequest   (header, (tpot::ProcessListRequest    const *)packet, arg); break;
+        case tpot::AnyPacket_ProcessListResponse:   onProcessListResponse  (header, (tpot::ProcessListResponse   const *)packet, arg); break;
+        case tpot::AnyPacket_ProcessKillRequest:    onProcessKillRequest   (header, (tpot::ProcessKillRequest    const *)packet, arg); break;
+        case tpot::AnyPacket_ProcessKillResponse:   onProcessKillResponse  (header, (tpot::ProcessKillResponse   const *)packet, arg); break;
+        case tpot::AnyPacket_ProcessRemoveRequest:  onProcessRemoveRequest (header, (tpot::ProcessRemoveRequest  const *)packet, arg); break;
+        case tpot::AnyPacket_ProcessRemoveResponse: onProcessRemoveResponse(header, (tpot::ProcessRemoveResponse const *)packet, arg); break;
+        default: TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        }
+        // @formatter:on
+        return Err::E_SUCCESS;
     }
 
 public:
@@ -594,6 +600,12 @@ protected:
     {
         assert(_parent != nullptr);
         _parent->onProcessRemoveResponse(createHeader(header), arg);
+    }
+
+    void onParsingError(Err code, char const * buffer, std::size_t size, void * arg)
+    {
+        assert(_parent != nullptr);
+        _parent->onParsingError(code, buffer, size, arg);
     }
 };
 

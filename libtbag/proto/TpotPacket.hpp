@@ -160,6 +160,7 @@ protected:
     virtual void onProcessKillResponse  (util::Header const & header, void * arg) { /* EMPTY. */ }
     virtual void onProcessRemoveRequest (util::Header const & header, int pid, void * arg) { /* EMPTY. */ }
     virtual void onProcessRemoveResponse(util::Header const & header, void * arg) { /* EMPTY. */ }
+    virtual void onParsingError         (Err code, char const * buffer, std::size_t size, void * arg) { /* EMPTY. */ }
     // @formatter:on
 };
 

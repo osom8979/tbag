@@ -44,6 +44,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ENFOUND , "Not found error"         ) \
     _TBAG_XX(_TIMEOUT , "Timeout error"           ) \
     _TBAG_XX(_PARSING , "Parsing error"           ) \
+    _TBAG_XX(_VERIFIER, "Verifier error"          ) \
     _TBAG_XX(_EXPIRED , "Expired object error"    ) \
     _TBAG_XX(_INSERT  , "Insert error"            ) \
     _TBAG_XX(_CLOSING , "Closing object"          ) \

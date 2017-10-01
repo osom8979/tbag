@@ -66,6 +66,7 @@ public:
     TBAG_VOID_CALLBACK_HELPER(onProcessKillResponse  , util::Header const &, void*);
     TBAG_VOID_CALLBACK_HELPER(onProcessRemoveRequest , util::Header const &, int, void*);
     TBAG_VOID_CALLBACK_HELPER(onProcessRemoveResponse, util::Header const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onParsingError, Err, char const *, std::size_t, void*);
     // @formatter:on
 };
 
