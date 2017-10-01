@@ -33,14 +33,14 @@ TEST(WsFrameBufferTest, Default)
     std::string const RESULT_STRING2 = "Rock it with HTML5 WebSocketRock it with HTML5 WebSocket";
 
     std::size_t hit_count = 0;
-    OpCode opcode_result = OpCode::OC_CONTINUATION_FRAME;
+    WsOpCode opcode_result = WsOpCode::WSOC_CONTINUATION_FRAME;
     bool finish_result = false;
     std::string result;
 
     WsFrameBuffer wsbuf;
     std::size_t count;
 
-    count = wsbuf.exec(req1.data(), req1.size(), [&](OpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
+    count = wsbuf.exec(req1.data(), req1.size(), [&](WsOpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
         opcode_result = code;
         finish_result = finish;
         result.assign(buffer.begin(), buffer.end());
@@ -50,15 +50,15 @@ TEST(WsFrameBufferTest, Default)
     ASSERT_EQ(1, count);
     ASSERT_EQ(1, hit_count);
     ASSERT_EQ(RESULT_STRING1, result);
-    ASSERT_EQ(OpCode::OC_TEXT_FRAME, opcode_result);
+    ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, opcode_result);
     ASSERT_FALSE(finish_result);
 
     hit_count = 0;
-    opcode_result = OpCode::OC_CONTINUATION_FRAME;
+    opcode_result = WsOpCode::WSOC_CONTINUATION_FRAME;
     finish_result = false;
     result.clear();
 
-    count = wsbuf.exec(req2.data(), req2.size(), [&](OpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
+    count = wsbuf.exec(req2.data(), req2.size(), [&](WsOpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
         opcode_result = code;
         finish_result = finish;
         result.assign(buffer.begin(), buffer.end());
@@ -68,7 +68,7 @@ TEST(WsFrameBufferTest, Default)
     ASSERT_EQ(1, count);
     ASSERT_EQ(1, hit_count);
     ASSERT_EQ(RESULT_STRING2, result);
-    ASSERT_EQ(OpCode::OC_TEXT_FRAME, opcode_result);
+    ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, opcode_result);
     ASSERT_TRUE(finish_result);
 }
 
@@ -84,14 +84,14 @@ TEST(WsFrameBufferTest, SplitPayload)
     std::string const RESULT_STRING = "Rock it with HTML5 WebSocket";
 
     std::size_t hit_count = 0;
-    OpCode opcode_result = OpCode::OC_CONTINUATION_FRAME;
+    WsOpCode opcode_result = WsOpCode::WSOC_CONTINUATION_FRAME;
     bool finish_result = false;
     std::string result;
 
     WsFrameBuffer wsbuf;
     std::size_t count;
 
-    count = wsbuf.exec(req1.data(), req1.size(), [&](OpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
+    count = wsbuf.exec(req1.data(), req1.size(), [&](WsOpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
         ++hit_count;
         return true;
     });
@@ -99,11 +99,11 @@ TEST(WsFrameBufferTest, SplitPayload)
     ASSERT_EQ(0, hit_count);
 
     hit_count = 0;
-    opcode_result = OpCode::OC_CONTINUATION_FRAME;
+    opcode_result = WsOpCode::WSOC_CONTINUATION_FRAME;
     finish_result = false;
     result.clear();
 
-    count = wsbuf.exec(req2.data(), req2.size(), [&](OpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
+    count = wsbuf.exec(req2.data(), req2.size(), [&](WsOpCode code, bool finish, WsFrameBuffer::Buffer & buffer) -> bool{
         opcode_result = code;
         finish_result = finish;
         result.assign(buffer.begin(), buffer.end());
@@ -113,7 +113,7 @@ TEST(WsFrameBufferTest, SplitPayload)
     ASSERT_EQ(1, count);
     ASSERT_EQ(1, hit_count);
     ASSERT_EQ(RESULT_STRING, result);
-    ASSERT_EQ(OpCode::OC_TEXT_FRAME, opcode_result);
+    ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, opcode_result);
     ASSERT_TRUE(finish_result);
 }
 

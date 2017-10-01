@@ -137,7 +137,7 @@ public:
     virtual void onWsOpen(HttpResponse const & response) { /* EMPTY. */ }
 
     /** When a message has been received from WebSocket server. */
-    virtual void onWsMessage(OpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
+    virtual void onWsMessage(WsOpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
 
     /** Triggered when error occurred. */
     virtual void onWsError(Err code) { /* EMPTY. */ }

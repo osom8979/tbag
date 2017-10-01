@@ -114,17 +114,17 @@ TEST(WsFrameTest, UpgradeWebsocketKey)
 TEST(WsFrameTest, PayloadLength)
 {
     for (uint8_t i = 0; i <= 125; ++i) {
-        ASSERT_TRUE(PayloadBit::PL_BIT_7 == WsFrame::getPayloadBit(i));
-        ASSERT_TRUE(PayloadBit::PL_BIT_7 == WsFrame::getPayloadBitWithPayloadLength(i));
+        ASSERT_TRUE(WsPayloadBit::WSPL_BIT_7 == WsFrame::getPayloadBit(i));
+        ASSERT_TRUE(WsPayloadBit::WSPL_BIT_7 == WsFrame::getPayloadBitWithPayloadLength(i));
     }
 
-    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WsFrame::getPayloadBit(126));
-    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(126));
-    ASSERT_TRUE(PayloadBit::PL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(65535));
+    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_16 == WsFrame::getPayloadBit(126));
+    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(126));
+    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_16 == WsFrame::getPayloadBitWithPayloadLength(65535));
 
-    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WsFrame::getPayloadBit(127));
-    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(65536));
-    ASSERT_TRUE(PayloadBit::PL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(100000));
+    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_64 == WsFrame::getPayloadBit(127));
+    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(65536));
+    ASSERT_TRUE(WsPayloadBit::WSPL_BIT_64 == WsFrame::getPayloadBitWithPayloadLength(100000));
 }
 
 TEST(WsFrameTest, LargeData)
@@ -144,7 +144,7 @@ TEST(WsFrameTest, LargeData)
     ASSERT_EQ(REQUEST_SIZE, buffer.size());
 
     ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), REQUEST_SIZE));
-    ASSERT_EQ(OpCode::OC_BINARY_FRAME, receiver.opcode);
+    ASSERT_EQ(WsOpCode::WSOC_BINARY_FRAME, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
     ASSERT_FALSE(receiver.rsv2);
@@ -173,7 +173,7 @@ TEST(WsFrameTest, TextRequest)
     ASSERT_LT(0, REQUEST_SIZE);
 
     ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), REQUEST_SIZE));
-    ASSERT_EQ(OpCode::OC_TEXT_FRAME, receiver.opcode);
+    ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
     ASSERT_FALSE(receiver.rsv2);
@@ -197,7 +197,7 @@ TEST(WsFrameTest, TextResponse)
     ASSERT_LT(0, RESPONSE_SIZE);
 
     ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
-    ASSERT_EQ(OpCode::OC_TEXT_FRAME, receiver.opcode);
+    ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
     ASSERT_FALSE(receiver.rsv2);
@@ -221,7 +221,7 @@ TEST(WsFrameTest, PingRequest)
     ASSERT_LT(0, RESPONSE_SIZE);
 
     ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
-    ASSERT_EQ(OpCode::OC_DENOTES_PING, receiver.opcode);
+    ASSERT_EQ(WsOpCode::WSOC_DENOTES_PING, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
     ASSERT_FALSE(receiver.rsv2);
@@ -244,7 +244,7 @@ TEST(WsFrameTest, CloseResponse)
     ASSERT_LT(0, RESPONSE_SIZE);
 
     ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
-    ASSERT_EQ(OpCode::OC_CONNECTION_CLOSE, receiver.opcode);
+    ASSERT_EQ(WsOpCode::WSOC_CONNECTION_CLOSE, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
     ASSERT_FALSE(receiver.rsv2);
@@ -270,7 +270,7 @@ TEST(WsFrameTest, Case01)
 
     WsFrame frame;
     ASSERT_EQ(Err::E_SUCCESS, frame.execute(req.data(), req.size()));
-    ASSERT_EQ(OpCode::OC_BINARY_FRAME, frame.opcode);
+    ASSERT_EQ(WsOpCode::WSOC_BINARY_FRAME, frame.opcode);
     ASSERT_EQ(req.size() - 6, frame.payload_length);
     ASSERT_TRUE(frame.fin);
 }

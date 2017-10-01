@@ -30,7 +30,7 @@ static void checkWsBuffer(std::string const & prefix, char const * buffer, std::
         return;
     }
 
-    if (isControlFrame(frame.opcode)) {
+    if (isWsControlFrame(frame.opcode)) {
         tDLogW("checkWsBuffer({}) [CHECK] CONTROL FRAME", prefix);
     }
 }
@@ -175,12 +175,12 @@ bool WsClient::runWsChecker(HttpParser const & response)
 
 void WsClient::runWsRead(char const * buffer, std::size_t size)
 {
-    __on_read_only__.receiver.exec(buffer, size, [&](OpCode opcode, bool finish, WsFrameBuffer::Buffer & buffer) -> bool {
+    __on_read_only__.receiver.exec(buffer, size, [&](WsOpCode opcode, bool finish, WsFrameBuffer::Buffer & buffer) -> bool {
         if (finish) {
-            if (opcode == OpCode::OC_TEXT_FRAME || opcode == OpCode::OC_BINARY_FRAME) {
+            if (opcode == WsOpCode::WSOC_TEXT_FRAME || opcode == WsOpCode::WSOC_BINARY_FRAME) {
                 onWsMessage(opcode, &buffer[0], buffer.size());
 
-            } else if (opcode == OpCode::OC_CONNECTION_CLOSE) {
+            } else if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE) {
                 _close = __on_read_only__.receiver.atCachedFrame().getCloseResult();
                 Err const CLOSE_CODE = close();
                 if (CLOSE_CODE != Err::E_SUCCESS) {
@@ -188,7 +188,7 @@ void WsClient::runWsRead(char const * buffer, std::size_t size)
                 }
 
             } else {
-                tDLogW("WsClient::runWsRead() Unsupported opcode: {}", getOpCodeName(opcode));
+                tDLogW("WsClient::runWsRead() Unsupported opcode: {}", getWsOpCodeName(opcode));
             }
         }
 

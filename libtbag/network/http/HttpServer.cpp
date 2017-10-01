@@ -127,15 +127,15 @@ Err HttpServer::HttpNode::closeWebSocket(WsStatusCode code)
 
 void HttpServer::HttpNode::backWsFrame(Err code, ReadPacket const & packet)
 {
-    __on_read_only__.receiver.exec(packet.buffer, packet.size, [&](OpCode opcode, bool finish, WsFrameBuffer::Buffer & buffer) -> bool {
+    __on_read_only__.receiver.exec(packet.buffer, packet.size, [&](WsOpCode opcode, bool finish, WsFrameBuffer::Buffer & buffer) -> bool {
         if (finish) {
             auto * server = getHttpServerPtr();
             assert(server != nullptr);
 
-            if (opcode == OpCode::OC_TEXT_FRAME || opcode == OpCode::OC_BINARY_FRAME) {
+            if (opcode == WsOpCode::WSOC_TEXT_FRAME || opcode == WsOpCode::WSOC_BINARY_FRAME) {
                 server->onWsMessage(getWeakClient(), opcode, &buffer[0], buffer.size());
 
-            } else if (opcode == OpCode::OC_CONNECTION_CLOSE) {
+            } else if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE) {
                 Err const WRITE_CLOSE_CODE = closeWebSocket(WsStatusCode::WSSC_NORMAL_CLOSURE);
                 if (TBAG_ERR_FAILURE(WRITE_CLOSE_CODE)) {
                     tDLogE("HttpServer::HttpNode::backWsFrame() WebSocket close write {} error", getErrName(WRITE_CLOSE_CODE));
@@ -143,7 +143,7 @@ void HttpServer::HttpNode::backWsFrame(Err code, ReadPacket const & packet)
                 }
 
             } else {
-                tDLogW("HttpServer::HttpNode::backWsFrame() Unsupported opcode: {}", getOpCodeName(opcode));
+                tDLogW("HttpServer::HttpNode::backWsFrame() Unsupported opcode: {}", getWsOpCodeName(opcode));
             }
         }
         return true;

@@ -268,9 +268,9 @@ TEST(NetworkHttpTest, WebSocketEcho)
                   << "\nResponse:\n" << packet.response.toResponseDebugString()
                   << std::endl;
     });
-    server.set_onWsMessage([&](WeakClient node, OpCode op, char const * buffer, std::size_t size){
+    server.set_onWsMessage([&](WeakClient node, WsOpCode op, char const * buffer, std::size_t size){
         server.writeText(node, std::string(buffer, buffer + size));
-        std::cout << "Server.OnWebSocketMessage(" << getOpCodeName(op) << ")\n";
+        std::cout << "Server.OnWebSocketMessage(" << getWsOpCodeName(op) << ")\n";
     });
     server.set_onHttpClose([&](WeakClient node){
         std::cout << "Server.OnClose\n";
@@ -296,8 +296,8 @@ TEST(NetworkHttpTest, WebSocketEcho)
         ASSERT_EQ(Err::E_SUCCESS, client.writeText(TEST_TEXT));
         ws_open_counter++;
     });
-    client.setOnWsMessage([&](OpCode op, char const * buffer, std::size_t size){
-        ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
+    client.setOnWsMessage([&](WsOpCode op, char const * buffer, std::size_t size){
+        ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, op);
         ASSERT_EQ(TEST_TEXT, std::string(buffer, buffer + size));
         ASSERT_EQ(Err::E_SUCCESS, client.closeWebSocket());
         ws_message_counter++;
@@ -369,8 +369,8 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     server.set_onWsOpen([&](WeakClient node, Err code, HttpPacket & packet){
         ++server_on_ws_open_count;
     });
-    server.set_onWsMessage([&](WeakClient node, OpCode op, char const * buffer, std::size_t size){
-        if (op == OpCode::OC_TEXT_FRAME) {
+    server.set_onWsMessage([&](WeakClient node, WsOpCode op, char const * buffer, std::size_t size){
+        if (op == WsOpCode::WSOC_TEXT_FRAME) {
             Err const write_code = server.writeText(node, std::string(buffer, buffer + size));
             if (isWsWriteSuccess(write_code)) {
                 ++server_on_ws_message_count;
@@ -442,10 +442,10 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
                 }
             });
         });
-        client->setOnWsMessage([&, i](OpCode op, char const * buffer, std::size_t size){
+        client->setOnWsMessage([&, i](WsOpCode op, char const * buffer, std::size_t size){
             auto shared_client = clients[i];
             ASSERT_TRUE(static_cast<bool>(shared_client));
-            ASSERT_EQ(OpCode::OC_TEXT_FRAME, op);
+            ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, op);
             ASSERT_EQ(std::string(TEST_TEXT), std::string(buffer, buffer + size));
             ++(ws_message_counter.at(i));
             if (ws_message_counter.at(i) >= TEST_ECHO_COUNT) {

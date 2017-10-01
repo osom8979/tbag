@@ -159,11 +159,11 @@ public:
     /** WebSocket packet information. */
     struct WsPacket
     {
-        OpCode opcode;
+        WsOpCode opcode;
         char const * buffer;
         std::size_t size;
 
-        WsPacket(OpCode o, char const * b, std::size_t s) : opcode(o), buffer(b), size(s) { /* EMPTY. */ }
+        WsPacket(WsOpCode o, char const * b, std::size_t s) : opcode(o), buffer(b), size(s) { /* EMPTY. */ }
         ~WsPacket() { /* EMPTY. */ }
     };
 
@@ -260,7 +260,7 @@ public:
     virtual void onWsOpen(WeakClient node, Err code, HttpPacket & packet) { /* EMPTY. */ }
 
     /** When a message has been received from WebSocket server. */
-    virtual void onWsMessage(WeakClient node, OpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
+    virtual void onWsMessage(WeakClient node, WsOpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
 };
 
 } // namespace http

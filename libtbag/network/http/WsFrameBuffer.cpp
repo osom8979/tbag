@@ -19,7 +19,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-WsFrameBuffer::WsFrameBuffer() : _buffer(), _size(0), _opcode(OpCode::OC_CONTINUATION_FRAME), _finish(false), _payload()
+WsFrameBuffer::WsFrameBuffer() : _buffer(), _size(0), _opcode(WsOpCode::WSOC_CONTINUATION_FRAME), _finish(false), _payload()
 {
     // EMPTY.
 }
@@ -81,7 +81,7 @@ void WsFrameBuffer::update()
     std::size_t payload_size = __cache__.frame.getPayloadSize();
 
     _finish = __cache__.frame.fin;
-    if (__cache__.frame.opcode == OpCode::OC_CONTINUATION_FRAME) {
+    if (__cache__.frame.opcode == WsOpCode::WSOC_CONTINUATION_FRAME) {
         _payload.insert(_payload.end(), payload_data, payload_data + payload_size);
     } else {
         _opcode = __cache__.frame.opcode;

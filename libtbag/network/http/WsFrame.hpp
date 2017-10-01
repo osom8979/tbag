@@ -18,7 +18,10 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 
+#include <libtbag/network/http/ws/WsCommon.hpp>
 #include <libtbag/network/http/ws/WsStatus.hpp>
+#include <libtbag/network/http/ws/WsOpCode.hpp>
+
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
 #include <libtbag/network/http/HttpBuilder.hpp>
@@ -36,33 +39,6 @@ namespace network {
 namespace http    {
 
 using namespace libtbag::network::http::ws;
-
-enum class OpCode : uint8_t
-{
-    OC_CONTINUATION_FRAME           = 0x0,
-    OC_TEXT_FRAME                   = 0x1,
-    OC_BINARY_FRAME                 = 0x2,
-    OC_RESERVED_NON_CONTROL_FRAME_1 = 0x3,
-    OC_RESERVED_NON_CONTROL_FRAME_2 = 0x4,
-    OC_RESERVED_NON_CONTROL_FRAME_3 = 0x5,
-    OC_RESERVED_NON_CONTROL_FRAME_4 = 0x6,
-    OC_RESERVED_NON_CONTROL_FRAME_5 = 0x7,
-    OC_CONNECTION_CLOSE             = 0x8,
-    OC_DENOTES_PING                 = 0x9,
-    OC_DENOTES_PONG                 = 0xA,
-    OC_RESERVED_CONTROL_FRAME_1     = 0xB,
-    OC_RESERVED_CONTROL_FRAME_2     = 0xC,
-    OC_RESERVED_CONTROL_FRAME_3     = 0xD,
-    OC_RESERVED_CONTROL_FRAME_4     = 0xE,
-    OC_RESERVED_CONTROL_FRAME_5     = 0xF,
-};
-
-enum class PayloadBit : uint8_t
-{
-    PL_BIT_7  =  7,
-    PL_BIT_16 = 16,
-    PL_BIT_64 = 64,
-};
 
 /**
  * WsFrame class prototype.
@@ -116,7 +92,7 @@ public:
     bool rsv3;
 
     /** Defines the interpretation of the "Payload data". */
-    OpCode opcode;
+    WsOpCode opcode;
 
     /** Defines whether the "Payload data" is masked. */
     bool mask;
@@ -165,11 +141,11 @@ public:
     std::size_t copyTo(Buffer & buffer) const;
 
 public:
-    void setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
+    void setHeader(bool f, bool r1, bool r2, bool r3, WsOpCode op, uint32_t key = 0) TBAG_NOEXCEPT;
     void setData(char const * data, std::size_t size);
 
 public:
-    Err build(bool fin, bool rsv1, bool rsv2, bool rsv3, OpCode opcode,
+    Err build(bool fin, bool rsv1, bool rsv2, bool rsv3, WsOpCode opcode,
               char const * data = nullptr, std::size_t size = 0,
               uint32_t key = 0);
 
@@ -240,11 +216,11 @@ public:
      *
      * @see <https://tools.ietf.org/html/rfc6455#section-5.2>
      */
-    static PayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
-    static PayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
+    static WsPayloadBit getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT;
+    static WsPayloadBit getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
 
-    static uint8_t getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
-    static uint8_t getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT;
+    static uint8_t getPayloadDataByteIndex(WsPayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
+    static uint8_t getMaskingKeyByteIndex(WsPayloadBit payload_bit) TBAG_NOEXCEPT;
 
     static uint32_t getMaskingKey(char const * data) TBAG_NOEXCEPT;
 
@@ -257,9 +233,6 @@ public:
 // ------------------------
 // Miscellaneous utilities.
 // ------------------------
-
-TBAG_API char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT;
-TBAG_API bool isControlFrame(OpCode code) TBAG_NOEXCEPT;
 
 TBAG_API bool existsWebSocketVersion13(std::string const & versions);
 

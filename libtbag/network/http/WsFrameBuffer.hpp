@@ -45,9 +45,9 @@ private:
     std::size_t _size;
 
 private:
-    OpCode _opcode;
-    bool   _finish;
-    Buffer _payload;
+    WsOpCode _opcode;
+    bool     _finish;
+    Buffer   _payload;
 
 private:
     struct {

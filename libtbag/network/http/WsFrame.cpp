@@ -47,17 +47,13 @@ TBAG_POP_MACRO(max);
 #undef __RESTORE_MAX__
 #endif
 
-TBAG_CONSTEXPR static uint8_t const PAYLOAD_7BIT_TYPE_SIZE  = 125;
-TBAG_CONSTEXPR static uint8_t const PAYLOAD_16BIT_TYPE_SIZE = 126;
-TBAG_CONSTEXPR static uint8_t const PAYLOAD_64BIT_TYPE_SIZE = 127;
-
 // ------------------------------
 // WsFrame implementation.
 // ------------------------------
 
 WsFrame::WsFrame()
         : fin (false), rsv1(false), rsv2(false), rsv3(false),
-          opcode(OpCode::OC_CONTINUATION_FRAME), mask(false),
+          opcode(WsOpCode::WSOC_CONTINUATION_FRAME), mask(false),
           payload_length(0), masking_key(0)
 {
     // EMPTY.
@@ -116,7 +112,7 @@ void WsFrame::clear()
     rsv1 = false;
     rsv2 = false;
     rsv3 = false;
-    opcode = OpCode::OC_CONTINUATION_FRAME;
+    opcode = WsOpCode::WSOC_CONTINUATION_FRAME;
     mask = false;
     payload_length = 0;
     masking_key = 0;
@@ -131,7 +127,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
 
     std::size_t calculated_byte = 0;
 
-    opcode = static_cast<OpCode>(data[0] & 0x0F /* 0b00001111 */); // Forces the first checker.
+    opcode = static_cast<WsOpCode>(data[0] & 0x0F /* 0b00001111 */); // Forces the first checker.
     fin    = static_cast<  bool>(data[0] & 0x80 /* 0b10000000 */);
     rsv1   = static_cast<  bool>(data[0] & 0x40 /* 0b01000000 */);
     rsv2   = static_cast<  bool>(data[0] & 0x20 /* 0b00100000 */);
@@ -151,13 +147,13 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
     uint64_t const PREV_PAYLOAD_LENGTH = payload_length;
 
     // Update payload length.
-    if (PAYLOAD_BIT == PayloadBit::PL_BIT_7) {
+    if (PAYLOAD_BIT == WsPayloadBit::WSPL_BIT_7) {
         payload_length = PAYLOAD_LENGTH_7BIT;
-    } else if (PAYLOAD_BIT == PayloadBit::PL_BIT_16) {
+    } else if (PAYLOAD_BIT == WsPayloadBit::WSPL_BIT_16) {
         uint16_t temp = 0;
         ::memcpy(&temp, &data[2], sizeof(uint16_t));
         payload_length = bitwise::toHost(temp);
-    } else if (PAYLOAD_BIT == PayloadBit::PL_BIT_64) {
+    } else if (PAYLOAD_BIT == WsPayloadBit::WSPL_BIT_64) {
         uint64_t temp = 0;
         ::memcpy(&temp, &data[2], sizeof(uint64_t));
         payload_length = bitwise::toHost(temp);
@@ -181,7 +177,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
             return Err::E_SMALLBUF;
         }
 
-        if (opcode == OpCode::OC_CONTINUATION_FRAME) {
+        if (opcode == WsOpCode::WSOC_CONTINUATION_FRAME) {
             if (payload.size() < payload_length + PREV_PAYLOAD_LENGTH) {
                 payload.resize(payload_length + PREV_PAYLOAD_LENGTH);
             }
@@ -200,7 +196,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
         }
     }
 
-    if (opcode == OpCode::OC_CONTINUATION_FRAME) {
+    if (opcode == WsOpCode::WSOC_CONTINUATION_FRAME) {
         payload_length += PREV_PAYLOAD_LENGTH;
     }
 
@@ -214,9 +210,9 @@ std::size_t WsFrame::calculateWriteBufferSize() const
 {
     std::size_t default_size = 2/*HEADER*/ + payload_length + (mask ? sizeof(uint32_t) : 0);
     switch (getPayloadBitWithPayloadLength(payload_length)) {
-    case PayloadBit::PL_BIT_7:  return default_size;
-    case PayloadBit::PL_BIT_16: return default_size + sizeof(uint16_t);
-    case PayloadBit::PL_BIT_64: return default_size + sizeof(uint64_t);
+    case WsPayloadBit::WSPL_BIT_7:  return default_size;
+    case WsPayloadBit::WSPL_BIT_16: return default_size + sizeof(uint16_t);
+    case WsPayloadBit::WSPL_BIT_64: return default_size + sizeof(uint64_t);
     default:                    return default_size;
     }
 }
@@ -240,7 +236,7 @@ std::size_t WsFrame::copyTo(char * data, std::size_t size) const
     std::size_t index = 2;
 
     // Update payload length.
-    if (payload_length <= PAYLOAD_7BIT_TYPE_SIZE) {
+    if (payload_length <= WS_PAYLOAD_7BIT_TYPE_SIZE) {
         if (size < index) {
             return 0;
         }
@@ -297,7 +293,7 @@ std::size_t WsFrame::copyTo(Buffer & buffer) const
     return copyTo(buffer.data(), buffer.size());
 }
 
-void WsFrame::setHeader(bool f, bool r1, bool r2, bool r3, OpCode op, uint32_t key) TBAG_NOEXCEPT
+void WsFrame::setHeader(bool f, bool r1, bool r2, bool r3, WsOpCode op, uint32_t key) TBAG_NOEXCEPT
 {
     fin = f;
     rsv1 = r1;
@@ -323,7 +319,7 @@ void WsFrame::setData(char const * data, std::size_t size)
     }
 }
 
-Err WsFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
+Err WsFrame::build(bool f, bool r1, bool r2, bool r3, WsOpCode op,
                    char const * data, std::size_t size,
                    uint32_t key)
 {
@@ -335,7 +331,7 @@ Err WsFrame::build(bool f, bool r1, bool r2, bool r3, OpCode op,
 Err WsFrame::text(char const * buffer, std::size_t size, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
-                 (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_TEXT_FRAME),
+                 (continuation ? WsOpCode::WSOC_CONTINUATION_FRAME : WsOpCode::WSOC_TEXT_FRAME),
                  buffer, size, key);
 }
 
@@ -357,7 +353,7 @@ Err WsFrame::text(std::string const & str, bool continuation, bool finish)
 Err WsFrame::binary(char const * buffer, std::size_t size, uint32_t key, bool continuation, bool finish)
 {
     return build(finish, false, false, false,
-                 (continuation ? OpCode::OC_CONTINUATION_FRAME : OpCode::OC_BINARY_FRAME),
+                 (continuation ? WsOpCode::WSOC_CONTINUATION_FRAME : WsOpCode::WSOC_BINARY_FRAME),
                  buffer, size, key);
 }
 
@@ -378,7 +374,7 @@ Err WsFrame::binary(Buffer const & buffer, bool continuation, bool finish)
 
 Err WsFrame::close(uint32_t key)
 {
-    return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, nullptr, 0, key);
+    return build(true, false, false, false, WsOpCode::WSOC_CONNECTION_CLOSE, nullptr, 0, key);
 }
 
 Err WsFrame::close(uint16_t code, std::string const & reason)
@@ -387,7 +383,7 @@ Err WsFrame::close(uint16_t code, std::string const & reason)
     Buffer buffer(sizeof(uint16_t) + reason.size());
     memcpy(&buffer[0], &code, sizeof(uint16_t));
     memcpy(&buffer[sizeof(uint16_t)], &reason[0], reason.size());
-    return build(true, false, false, false, OpCode::OC_CONNECTION_CLOSE, buffer.data(), buffer.size());
+    return build(true, false, false, false, WsOpCode::WSOC_CONNECTION_CLOSE, buffer.data(), buffer.size());
 }
 
 Err WsFrame::close(WsStatusCode code)
@@ -397,7 +393,7 @@ Err WsFrame::close(WsStatusCode code)
 
 uint16_t WsFrame::getStatusCode() const
 {
-    if (opcode == OpCode::OC_CONNECTION_CLOSE && payload_length >= sizeof(uint16_t)) {
+    if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE && payload_length >= sizeof(uint16_t)) {
         uint16_t temp = 0;
         ::memcpy(&temp, &payload[0], sizeof(uint16_t));
         return bitwise::toHost(temp);
@@ -407,7 +403,7 @@ uint16_t WsFrame::getStatusCode() const
 
 std::string WsFrame::getReason() const
 {
-    if (opcode == OpCode::OC_CONNECTION_CLOSE && payload_length > sizeof(uint16_t)) {
+    if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE && payload_length > sizeof(uint16_t)) {
         return std::string(&payload[sizeof(uint16_t)], &payload[sizeof(uint16_t)] + payload_length - sizeof(uint16_t));
     }
     return std::string();
@@ -420,10 +416,10 @@ WsStatus WsFrame::getCloseResult() const
 
 Err WsFrame::ping(char const * data, std::size_t size, uint32_t key)
 {
-    if (size > PAYLOAD_7BIT_TYPE_SIZE) {
+    if (size > WS_PAYLOAD_7BIT_TYPE_SIZE) {
         return Err::E_ILLARGS;
     }
-    return build(true, false, false, false, OpCode::OC_DENOTES_PING, data, size, key);
+    return build(true, false, false, false, WsOpCode::WSOC_DENOTES_PING, data, size, key);
 }
 
 Err WsFrame::ping(std::string const & str, uint32_t key)
@@ -433,10 +429,10 @@ Err WsFrame::ping(std::string const & str, uint32_t key)
 
 Err WsFrame::pong(char const * data, std::size_t size, uint32_t key)
 {
-    if (size > PAYLOAD_7BIT_TYPE_SIZE) {
+    if (size > WS_PAYLOAD_7BIT_TYPE_SIZE) {
         return Err::E_ILLARGS;
     }
-    return build(true, false, false, false, OpCode::OC_DENOTES_PONG, data, size, key);
+    return build(true, false, false, false, WsOpCode::WSOC_DENOTES_PONG, data, size, key);
 }
 
 Err WsFrame::pong(std::string const & str, uint32_t key)
@@ -448,12 +444,12 @@ std::string WsFrame::toDebugString() const
 {
     std::stringstream ss;
     ss << "WS[" << (fin?'1':'0') << (rsv1?'1':'0') << (rsv2?'1':'0') << (rsv3?'1':'0')
-       << '/' << http::getOpCodeName(opcode) << ']';
+       << '/' << http::getWsOpCodeName(opcode) << ']';
     if (mask) {
         ss << " M(" << masking_key << ")";
     }
     if (payload_length > 0) {
-        if (opcode == OpCode::OC_TEXT_FRAME) {
+        if (opcode == WsOpCode::WSOC_TEXT_FRAME) {
             ss << std::string(payload.data(), payload.data() + payload_length);
         } else {
             auto data = std::vector<uint8_t>((uint8_t*)payload.data(),
@@ -468,43 +464,43 @@ std::string WsFrame::toDebugString() const
 // Static methods.
 // ---------------
 
-PayloadBit WsFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
+WsPayloadBit WsFrame::getPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
 {
-    if (payload_length_7bit <= PAYLOAD_7BIT_TYPE_SIZE) {
-        return PayloadBit::PL_BIT_7;
-    } else if (payload_length_7bit == PAYLOAD_16BIT_TYPE_SIZE) {
-        return PayloadBit::PL_BIT_16;
-    } else if (payload_length_7bit == PAYLOAD_64BIT_TYPE_SIZE) {
-        return PayloadBit::PL_BIT_64;
+    if (payload_length_7bit <= WS_PAYLOAD_7BIT_TYPE_SIZE) {
+        return WsPayloadBit::WSPL_BIT_7;
+    } else if (payload_length_7bit == WS_PAYLOAD_16BIT_TYPE_SIZE) {
+        return WsPayloadBit::WSPL_BIT_16;
+    } else if (payload_length_7bit == WS_PAYLOAD_64BIT_TYPE_SIZE) {
+        return WsPayloadBit::WSPL_BIT_64;
     } else {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }
-    return PayloadBit::PL_BIT_7;
+    return WsPayloadBit::WSPL_BIT_7;
 }
 
-PayloadBit WsFrame::getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
+WsPayloadBit WsFrame::getPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT
 {
-    if (payload_length <= PAYLOAD_7BIT_TYPE_SIZE) {
-        return PayloadBit::PL_BIT_7;
+    if (payload_length <= WS_PAYLOAD_7BIT_TYPE_SIZE) {
+        return WsPayloadBit::WSPL_BIT_7;
     } else if (payload_length <= MAX_UINT16_BYTE_SIZE) {
-        return PayloadBit::PL_BIT_16;
+        return WsPayloadBit::WSPL_BIT_16;
     }
 
     assert(MAX_UINT16_BYTE_SIZE < COMPARE_AND(payload_length) <= MAX_UINT64_BYTE_SIZE);
-    return PayloadBit::PL_BIT_64;
+    return WsPayloadBit::WSPL_BIT_64;
 }
 
-uint8_t WsFrame::getPayloadDataByteIndex(PayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
+uint8_t WsFrame::getPayloadDataByteIndex(WsPayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT
 {
     return getMaskingKeyByteIndex(payload_bit) + (is_mask ? sizeof(uint32_t) : 0);
 }
 
-uint8_t WsFrame::getMaskingKeyByteIndex(PayloadBit payload_bit) TBAG_NOEXCEPT
+uint8_t WsFrame::getMaskingKeyByteIndex(WsPayloadBit payload_bit) TBAG_NOEXCEPT
 {
     switch (payload_bit) {
-    case PayloadBit::PL_BIT_7:  return 2;
-    case PayloadBit::PL_BIT_16: return 2 + sizeof(uint16_t);
-    case PayloadBit::PL_BIT_64: return 2 + sizeof(uint64_t);
+    case WsPayloadBit::WSPL_BIT_7:  return 2;
+    case WsPayloadBit::WSPL_BIT_16: return 2 + sizeof(uint16_t);
+    case WsPayloadBit::WSPL_BIT_64: return 2 + sizeof(uint64_t);
     }
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
     return 0;
@@ -548,39 +544,6 @@ void WsFrame::updatePayloadData(uint32_t mask, char * result, std::size_t size)
 // ------------------------
 // Miscellaneous utilities.
 // ------------------------
-
-char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT
-{
-    // @formatter:off
-    switch (code) {
-    case OpCode::OC_CONTINUATION_FRAME          : return "CONTINUE";
-    case OpCode::OC_TEXT_FRAME                  : return "TEXT";
-    case OpCode::OC_BINARY_FRAME                : return "BINARY";
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return "NCF1";
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return "NCF2";
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return "NCF3";
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return "NCF4";
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return "NCF5";
-    case OpCode::OC_CONNECTION_CLOSE            : return "CLOSE";
-    case OpCode::OC_DENOTES_PING                : return "PING";
-    case OpCode::OC_DENOTES_PONG                : return "PONG";
-    case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return "CF1";
-    case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return "CF2";
-    case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return "CF3";
-    case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return "CF4";
-    case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return "CF5";
-    default: return "UNKNOWN";
-    }
-    // @formatter:on
-}
-
-bool isControlFrame(OpCode code) TBAG_NOEXCEPT
-{
-    // @formatter:off
-    return (OpCode::OC_RESERVED_NON_CONTROL_FRAME_1 <= COMPARE_AND(code) <= OpCode::OC_RESERVED_NON_CONTROL_FRAME_5) ||
-           (OpCode::OC_RESERVED_CONTROL_FRAME_1     <= COMPARE_AND(code) <= OpCode::OC_RESERVED_CONTROL_FRAME_5);
-    // @formatter:on
-}
 
 bool existsWebSocketVersion13(std::string const & versions)
 {

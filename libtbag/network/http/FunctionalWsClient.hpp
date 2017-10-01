@@ -39,7 +39,7 @@ public:
     using StreamType = WsClient::StreamType;
 
     using OnWsOpen    = std::function<void(HttpResponse const &)>;
-    using OnWsMessage = std::function<void(OpCode, char const *, std::size_t)>;
+    using OnWsMessage = std::function<void(WsOpCode, char const *, std::size_t)>;
     using OnWsError   = std::function<void(Err)>;
     using OnWsClose   = std::function<void(uint16_t, std::string const &)>;
 
@@ -69,7 +69,7 @@ protected:
         }
     }
 
-    virtual void onWsMessage(OpCode op, char const * buffer, std::size_t size) override
+    virtual void onWsMessage(WsOpCode op, char const * buffer, std::size_t size) override
     {
         if (static_cast<bool>(_ws_message_cb)) {
             _ws_message_cb(op, buffer, size);
