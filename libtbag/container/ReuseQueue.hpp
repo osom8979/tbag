@@ -77,16 +77,21 @@ public:
     ReuseQueue & operator =(ReuseQueue && obj)
     {
         if (this != &obj) {
-            swap(*this, obj);
+            swap(obj);
         }
         return *this;
     }
 
 public:
+    void swap(ReuseQueue & obj)
+    {
+        _active.swap(obj._active);
+        _ready.swap(obj._ready);
+    }
+
     friend void swap(ReuseQueue & lh, ReuseQueue & rh)
     {
-        lh._active.swap(rh._active);
-        lh._ready.swap(rh._ready);
+        lh.swap(rh);
     }
 
 public:

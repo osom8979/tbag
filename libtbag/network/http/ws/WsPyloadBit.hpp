@@ -15,7 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <libtbag/util/BufferInfo.hpp>
+#include <libtbag/network/http/ws/WsCommon.hpp>
 
 #include <cstdint>
 #include <string>
@@ -34,8 +36,6 @@ enum class WsPayloadBit : uint8_t
     WSPL_BIT_16 = 16,
     WSPL_BIT_64 = 64,
 };
-
-TBAG_CONSTEXPR uint8_t const WS_MINIMUM_HEADER_BYTE_SIZE = 2;
 
 TBAG_CONSTEXPR uint8_t const WS_PAYLOAD_7BIT_TYPE_SIZE  = 125;
 TBAG_CONSTEXPR uint8_t const WS_PAYLOAD_16BIT_TYPE_SIZE = 126;
@@ -63,7 +63,7 @@ TBAG_API WsPayloadBit getWsPayloadBit(uint8_t payload_length_7bit) TBAG_NOEXCEPT
 TBAG_API WsPayloadBit getWsPayloadBitWithPayloadLength(uint64_t payload_length) TBAG_NOEXCEPT;
 
 TBAG_API uint8_t getPayloadDataByteIndex(WsPayloadBit payload_bit, bool is_mask) TBAG_NOEXCEPT;
-TBAG_API uint8_t getMaskingKeyByteIndex(WsPayloadBit payload_bit) TBAG_NOEXCEPT;
+TBAG_API uint8_t getMaskingKeyByteIndex (WsPayloadBit payload_bit) TBAG_NOEXCEPT;
 
 TBAG_API uint32_t copyMaskingKeyFromBuffer(char const * data) TBAG_NOEXCEPT;
 
@@ -71,6 +71,11 @@ TBAG_API std::string  getPayloadData   (uint32_t mask, std::string const & data)
 TBAG_API util::Buffer getPayloadData   (uint32_t mask, util::Buffer const & data);
 TBAG_API util::Buffer getPayloadData   (uint32_t mask, char const * data, std::size_t size);
 TBAG_API void         updatePayloadData(uint32_t mask, char * result, std::size_t size);
+
+TBAG_API uint64_t getPayloadLength(char const * total_data);
+TBAG_API uint64_t getPayloadLength(char const * data, uint8_t payload_length_7bit, WsPayloadBit payload_bit);
+
+TBAG_API std::size_t calculateBufferSize(uint64_t payload_length, bool is_mask);
 
 } // namespace ws
 } // namespace http

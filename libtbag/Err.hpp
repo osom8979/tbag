@@ -26,6 +26,8 @@ NAMESPACE_LIBTBAG_OPEN
     /* Common error codes. */ \
     _TBAG_XX(_SUCCESS , "No error"                ) \
     _TBAG_XX(_WARNING , "Success, but warning"    ) \
+    _TBAG_XX(_CONTINUE, "Wait for the next"       ) \
+    _TBAG_XX(_ENQASYNC, "Enqueue and async"       ) \
     _TBAG_XX(_ILLARGS , "Illegal arguments"       ) \
     _TBAG_XX(_ILLSTATE, "Illegal state"           ) \
     _TBAG_XX(_ALREADY , "Already state"           ) \
@@ -34,7 +36,6 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_NULLPTR , "Null pointer exception"  ) \
     _TBAG_XX(_EBUFFER , "Empty buffer"            ) \
     _TBAG_XX(_EQUEUE  , "Empty queue"             ) \
-    _TBAG_XX(_ENQASYNC, "Enqueue and async"       ) \
     _TBAG_XX(_NREADY  , "Not ready"               ) \
     _TBAG_XX(_UNSUPOP , "Unsupported operation"   ) \
     _TBAG_XX(_EINIT   , "Initialize error"        ) \
