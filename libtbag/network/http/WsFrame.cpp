@@ -51,46 +51,6 @@ TBAG_CONSTEXPR static uint8_t const PAYLOAD_7BIT_TYPE_SIZE  = 125;
 TBAG_CONSTEXPR static uint8_t const PAYLOAD_16BIT_TYPE_SIZE = 126;
 TBAG_CONSTEXPR static uint8_t const PAYLOAD_64BIT_TYPE_SIZE = 127;
 
-WsStatusCode getWsStatusCode(uint16_t code) TBAG_NOEXCEPT
-{
-    switch (code) {
-#define _TBAG_XX(num, name, str) case num: return WsStatusCode::WSSC_##name;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    default: return WsStatusCode::WSSC_UNKNOWN;
-    }
-}
-
-char const * getWsStatusCodeName(WsStatusCode code) TBAG_NOEXCEPT
-{
-    switch (code) {
-#define _TBAG_XX(num, name, str) case WsStatusCode::WSSC_##name: return #name;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    default: return "WSSC_UNKNOWN";
-    }
-}
-
-char const * getWsStatusCodeReason(WsStatusCode code) TBAG_NOEXCEPT
-{
-    switch (code) {
-#define _TBAG_XX(num, name, str) case WsStatusCode::WSSC_##name: return str;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    default: return "Unknown reason";
-    }
-}
-
-uint16_t getWsStatusCodeNumber(WsStatusCode code) TBAG_NOEXCEPT
-{
-    switch (code) {
-#define _TBAG_XX(num, name, str) case WsStatusCode::WSSC_##name: return num;
-    TBAG_WEB_SOCKET_STATUS_CODE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    default: return TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE;
-    }
-}
-
 // ------------------------------
 // WsFrame implementation.
 // ------------------------------
@@ -453,9 +413,9 @@ std::string WsFrame::getReason() const
     return std::string();
 }
 
-WsCloseResult WsFrame::getCloseResult() const
+WsStatus WsFrame::getCloseResult() const
 {
-    return WsCloseResult(getStatusCode(), getReason());
+    return WsStatus(getStatusCode(), getReason());
 }
 
 Err WsFrame::ping(char const * data, std::size_t size, uint32_t key)
@@ -589,43 +549,26 @@ void WsFrame::updatePayloadData(uint32_t mask, char * result, std::size_t size)
 // Miscellaneous utilities.
 // ------------------------
 
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CONTINUE = "CONTINUE";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_TEXT     = "TEXT";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_BINARY   = "BINARY";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF1     = "NCF1";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF2     = "NCF2";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF3     = "NCF3";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF4     = "NCF4";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_NCF5     = "NCF5";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CLOSE    = "CLOSE";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_PING     = "PING";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_PONG     = "PONG";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF1      = "CF1";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF2      = "CF2";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF3      = "CF3";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF4      = "CF4";
-TBAG_CONSTEXPR static char const * const OP_CODE_NAME_CF5      = "CF5";
-
 char const * getOpCodeName(OpCode code) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (code) {
-    case OpCode::OC_CONTINUATION_FRAME          : return OP_CODE_NAME_CONTINUE;
-    case OpCode::OC_TEXT_FRAME                  : return OP_CODE_NAME_TEXT;
-    case OpCode::OC_BINARY_FRAME                : return OP_CODE_NAME_BINARY;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return OP_CODE_NAME_NCF1;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return OP_CODE_NAME_NCF2;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return OP_CODE_NAME_NCF3;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return OP_CODE_NAME_NCF4;
-    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return OP_CODE_NAME_NCF5;
-    case OpCode::OC_CONNECTION_CLOSE            : return OP_CODE_NAME_CLOSE;
-    case OpCode::OC_DENOTES_PING                : return OP_CODE_NAME_PING;
-    case OpCode::OC_DENOTES_PONG                : return OP_CODE_NAME_PONG;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return OP_CODE_NAME_CF1;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return OP_CODE_NAME_CF2;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return OP_CODE_NAME_CF3;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return OP_CODE_NAME_CF4;
-    case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return OP_CODE_NAME_CF5;
+    case OpCode::OC_CONTINUATION_FRAME          : return "CONTINUE";
+    case OpCode::OC_TEXT_FRAME                  : return "TEXT";
+    case OpCode::OC_BINARY_FRAME                : return "BINARY";
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_1: return "NCF1";
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_2: return "NCF2";
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_3: return "NCF3";
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_4: return "NCF4";
+    case OpCode::OC_RESERVED_NON_CONTROL_FRAME_5: return "NCF5";
+    case OpCode::OC_CONNECTION_CLOSE            : return "CLOSE";
+    case OpCode::OC_DENOTES_PING                : return "PING";
+    case OpCode::OC_DENOTES_PONG                : return "PONG";
+    case OpCode::OC_RESERVED_CONTROL_FRAME_1    : return "CF1";
+    case OpCode::OC_RESERVED_CONTROL_FRAME_2    : return "CF2";
+    case OpCode::OC_RESERVED_CONTROL_FRAME_3    : return "CF3";
+    case OpCode::OC_RESERVED_CONTROL_FRAME_4    : return "CF4";
+    case OpCode::OC_RESERVED_CONTROL_FRAME_5    : return "CF5";
     default: return "UNKNOWN";
     }
     // @formatter:on

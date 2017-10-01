@@ -84,7 +84,7 @@ private:
     HttpBuilder _request;
 
 private:
-    WsCloseResult _close;
+    WsStatus _close;
 
 // Receive packet.
 private:

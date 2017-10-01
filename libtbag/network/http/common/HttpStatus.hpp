@@ -78,6 +78,8 @@ namespace common  {
     /* END */
 #endif
 
+TBAG_CONSTEXPR int const TBAG_UNKNOWN_HTTP_STATUS = 0;
+
 /**
  * List of http status.
  *
@@ -86,7 +88,7 @@ namespace common  {
  */
 enum class HttpStatus : int
 {
-    SC_UNKNOWN = 0,
+    SC_UNKNOWN = TBAG_UNKNOWN_HTTP_STATUS,
 #define _TBAG_XX(code, name, reason) SC_##name = code,
     TBAG_HTTP_STATUS_MAP(_TBAG_XX)
 #undef _TBAG_XX

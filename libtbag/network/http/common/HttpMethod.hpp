@@ -81,7 +81,7 @@ TBAG_CONSTEXPR int const TBAG_UNKNOWN_HTTP_METHOD = -1;
  */
 enum class HttpMethod : int
 {
-    M_UNKNOWN = -1,
+    M_UNKNOWN = TBAG_UNKNOWN_HTTP_METHOD,
 #define _TBAG_XX(num, name, str) M_##name = num,
     TBAG_HTTP_METHOD_MAP(_TBAG_XX)
 #undef _TBAG_XX
