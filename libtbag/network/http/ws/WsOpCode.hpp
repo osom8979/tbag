@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-
+#include <libtbag/algorithm/Swap.hpp>
 #include <cstdint>
 
 // -------------------
@@ -48,6 +48,11 @@ enum class WsOpCode : uint8_t
 
 TBAG_API char const * getWsOpCodeName(WsOpCode code) TBAG_NOEXCEPT;
 TBAG_API bool isWsControlFrame(WsOpCode code) TBAG_NOEXCEPT;
+
+inline void swap(libtbag::network::http::ws::WsOpCode & lh, libtbag::network::http::ws::WsOpCode & rh) TBAG_NOEXCEPT
+{
+    libtbag::algorithm::swapWithPod((uint8_t&)lh, (uint8_t&)rh);
+}
 
 } // namespace ws
 } // namespace http

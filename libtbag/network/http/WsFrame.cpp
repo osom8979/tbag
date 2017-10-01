@@ -10,7 +10,6 @@
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/bitwise/Endian.hpp>
-#include <libtbag/encrypt/Base64.hpp>
 #include <libtbag/encrypt/Sha1.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
@@ -97,7 +96,7 @@ WsFrame & WsFrame::operator =(WsFrame && obj)
         std::swap(rsv1, obj.rsv1);
         std::swap(rsv2, obj.rsv2);
         std::swap(rsv3, obj.rsv3);
-        std::swap(opcode, obj.opcode);
+        ws::swap(opcode, obj.opcode);
         std::swap(mask, obj.mask);
         std::swap(payload_length, obj.payload_length);
         std::swap(masking_key, obj.masking_key);
@@ -460,38 +459,6 @@ std::string WsFrame::toDebugString() const
     return ss.str();
 }
 
-// ---------------
-// Static methods.
-// ---------------
-
-std::string WsFrame::getPayloadData(uint32_t mask, std::string const & data)
-{
-    Buffer const INPUT(data.begin(), data.end());
-    Buffer const OUTPUT = getPayloadData(mask, INPUT);
-    return std::string(OUTPUT.begin(), OUTPUT.end());
-}
-
-WsFrame::Buffer WsFrame::getPayloadData(uint32_t mask, Buffer const & data)
-{
-    return getPayloadData(mask, data.data(), data.size());
-}
-
-WsFrame::Buffer WsFrame::getPayloadData(uint32_t mask, char const * data, std::size_t size)
-{
-    Buffer result(data, data + size);
-    updatePayloadData(mask, result.data(), result.size());
-    return result;
-}
-
-void WsFrame::updatePayloadData(uint32_t mask, char * result, std::size_t size)
-{
-    static_assert(sizeof(uint32_t) == 4, "Why not?");
-    uint8_t const * mask_ptr = reinterpret_cast<uint8_t const *>(&mask);
-    for (std::size_t i = 0; i < size; ++i) {
-        *(result + i) ^= mask_ptr[i % sizeof(uint32_t)];
-    }
-}
-
 // ------------------------
 // Miscellaneous utilities.
 // ------------------------
@@ -508,30 +475,6 @@ bool existsWebSocketVersion13(std::string const & versions)
         }
     }
     return false;
-}
-
-std::string getUpgradeWebSocketKey(std::string const & original_key)
-{
-    encrypt::Sha1Hash sha1_key;
-    if (encrypt::encryptSha1(original_key + WEBSOCKET_HANDSHAKE_GUID, sha1_key) == false) {
-        return std::string();
-    }
-
-    std::vector<uint8_t> const SHA1_BUFFER(sha1_key.begin(), sha1_key.end());
-    std::string base64_key;
-
-    if (encrypt::encodeBase64WithBinary(SHA1_BUFFER, base64_key) == false) {
-        return std::string();
-    }
-
-    return base64_key;
-}
-
-std::string generateRandomWebSocketKey()
-{
-    std::string base64;
-    encrypt::encodeBase64(id::Uuid::ver4().toString(), base64);
-    return base64;
 }
 
 Err updateRequestWebSocket(HttpBuilder & request, std::string const & key)

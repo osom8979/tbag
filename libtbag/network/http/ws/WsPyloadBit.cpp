@@ -86,6 +86,34 @@ uint32_t copyMaskingKeyFromBuffer(char const * data) TBAG_NOEXCEPT
     return network_32byte_size;
 }
 
+std::string getPayloadData(uint32_t mask, std::string const & data)
+{
+    util::Buffer const INPUT(data.begin(), data.end());
+    util::Buffer const OUTPUT = getPayloadData(mask, INPUT);
+    return std::string(OUTPUT.begin(), OUTPUT.end());
+}
+
+util::Buffer getPayloadData(uint32_t mask, util::Buffer const & data)
+{
+    return getPayloadData(mask, data.data(), data.size());
+}
+
+util::Buffer getPayloadData(uint32_t mask, char const * data, std::size_t size)
+{
+    util::Buffer result(data, data + size);
+    updatePayloadData(mask, result.data(), result.size());
+    return result;
+}
+
+void updatePayloadData(uint32_t mask, char * result, std::size_t size)
+{
+    static_assert(sizeof(uint32_t) == 4, "Why not?");
+    uint8_t const * mask_ptr = reinterpret_cast<uint8_t const *>(&mask);
+    for (std::size_t i = 0; i < size; ++i) {
+        *(result + i) ^= mask_ptr[i % sizeof(uint32_t)];
+    }
+}
+
 } // namespace ws
 } // namespace http
 } // namespace network

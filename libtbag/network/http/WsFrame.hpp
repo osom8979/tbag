@@ -22,6 +22,7 @@
 #include <libtbag/network/http/ws/WsStatus.hpp>
 #include <libtbag/network/http/ws/WsOpCode.hpp>
 #include <libtbag/network/http/ws/WsPyloadBit.hpp>
+#include <libtbag/network/http/ws/WsUtils.hpp>
 
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
@@ -197,12 +198,6 @@ public:
 
 public:
     std::string toDebugString() const;
-
-public:
-    static std::string getPayloadData(uint32_t mask, std::string const & data);
-    static Buffer getPayloadData(uint32_t mask, Buffer const & data);
-    static Buffer getPayloadData(uint32_t mask, char const * data, std::size_t size);
-    static void updatePayloadData(uint32_t mask, char * result, std::size_t size);
 };
 
 // ------------------------
@@ -210,9 +205,6 @@ public:
 // ------------------------
 
 TBAG_API bool existsWebSocketVersion13(std::string const & versions);
-
-TBAG_API std::string getUpgradeWebSocketKey(std::string const & base64_key);
-TBAG_API std::string generateRandomWebSocketKey();
 
 TBAG_API Err updateRequestWebSocket(HttpBuilder & request, std::string const & key);
 TBAG_API Err updateResponseWebSocket(HttpParser const & request, HttpBuilder & response);

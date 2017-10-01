@@ -15,8 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -64,6 +66,11 @@ TBAG_API uint8_t getPayloadDataByteIndex(WsPayloadBit payload_bit, bool is_mask)
 TBAG_API uint8_t getMaskingKeyByteIndex(WsPayloadBit payload_bit) TBAG_NOEXCEPT;
 
 TBAG_API uint32_t copyMaskingKeyFromBuffer(char const * data) TBAG_NOEXCEPT;
+
+TBAG_API std::string  getPayloadData   (uint32_t mask, std::string const & data);
+TBAG_API util::Buffer getPayloadData   (uint32_t mask, util::Buffer const & data);
+TBAG_API util::Buffer getPayloadData   (uint32_t mask, char const * data, std::size_t size);
+TBAG_API void         updatePayloadData(uint32_t mask, char * result, std::size_t size);
 
 } // namespace ws
 } // namespace http
