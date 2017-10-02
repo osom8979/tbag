@@ -187,6 +187,28 @@ std::string HttpHeader::toString() const
     return ss.str();
 }
 
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+void updateDefaultRequest(HttpHeader & header, std::size_t body_size)
+{
+    header.insertIfNotExists(HEADER_USER_AGENT, DEFAULT_VALUE_OF_USER_AGENT);
+    header.insertIfNotExists(HEADER_ACCEPT, DEFAULT_VALUE_OF_ACCEPT);
+    if (body_size > 0) {
+        header.insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
+    }
+}
+
+void updateDefaultResponse(HttpHeader & header, std::size_t body_size)
+{
+    header.insertIfNotExists(HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
+    header.insertIfNotExists(HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
+    if (body_size > 0) {
+        header.insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
+    }
+}
+
 } // namespace common
 } // namespace http
 } // namespace network

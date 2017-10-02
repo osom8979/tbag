@@ -84,7 +84,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
     if (temp_mask && size < DATA_INDEX) {
         return Err::E_SMALLBUF; // Check masking key.
     }
-    if (PAYLOAD_LENGTH > 0 && (size < DATA_INDEX) + PAYLOAD_LENGTH) {
+    if (PAYLOAD_LENGTH > 0 && size < DATA_INDEX + PAYLOAD_LENGTH) {
         return Err::E_SMALLBUF; // Check payload data.
     }
 

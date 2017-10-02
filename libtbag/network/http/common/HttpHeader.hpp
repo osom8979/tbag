@@ -16,6 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/Err.hpp>
+
 #include <libtbag/network/http/common/HttpCommon.hpp>
 
 #include <string>
@@ -181,99 +183,12 @@ public:
     std::string toString() const;
 };
 
-//// ----------
-//// Utilities.
-//// ----------
-//
-//void HttpHeader::updateDefaultRequest(std::size_t body_size = 0)
-//{
-//    insertIfNotExists(HEADER_USER_AGENT, DEFAULT_VALUE_OF_USER_AGENT);
-//    insertIfNotExists(HEADER_ACCEPT, DEFAULT_VALUE_OF_ACCEPT);
-//    if (body_size > 0) {
-//        insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
-//    }
-//}
-//
-//void HttpHeader::updateDefaultResponse(std::size_t body_size = 0)
-//{
-//    insertIfNotExists(HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
-//    insertIfNotExists(HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
-//    if (body_size > 0) {
-//        insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
-//    }
-//}
-//
-//
-//
-//std::vector<std::string> findAccept(std::vector<std::string> const & sources,
-//                                    std::vector<std::string> const & accepts)
-//{
-//    std::vector<std::string> result;
-//    auto regulars = convertRegularSet(accepts);
-//    for (auto & proto : sources) {
-//        if (regulars.find(string::lower(string::trim(proto))) != regulars.end()) {
-//            result.push_back(proto);
-//        }
-//    }
-//    return result;
-//}
-//
-//std::vector<std::string> findAccept(std::string const & sources,
-//                                    std::vector<std::string> const & accepts)
-//{
-//    return findAccept(fromDelimiterString(sources), accepts);
-//}
-//
-//
-//// ------------------
-//// Debugging methods.
-//// ------------------
-//
-//std::string toDebugString(HttpHeaderMap const & obj)
-//{
-//    std::stringstream ss;
-//    std::size_t const SIZE = obj.size();
-//    auto itr = obj.begin();
-//    for (std::size_t i = 0; i < SIZE; ++i, ++itr) {
-//        ss << "[H] " << itr->first << ": " << itr->second;
-//        if (i + 1 < SIZE) {
-//            ss << std::endl;
-//        }
-//    }
-//    return ss.str();
-//}
-//
-//std::string toDebugString(HttpCommonProperty const & obj)
-//{
-//    std::stringstream ss;
-//    ss << toDebugString(obj.headers) << std::endl;
-//    ss << "[BODY] " << obj.getBody();
-//    return ss.str();
-//}
-//
-//std::string toDebugString(HttpCommon const & obj)
-//{
-//    std::stringstream ss;
-//    ss << "HTTP/" << obj.http_minor << "." << obj.http_minor << std::endl;
-//    ss << toDebugString(static_cast<HttpCommonProperty const &>(obj));
-//    return ss.str();
-//}
-//
-//std::string toDebugString(HttpRequest const & obj)
-//{
-//    std::stringstream ss;
-//    ss << "REQUEST: " << obj.method << " " << obj.url << " ";
-//    ss << toDebugString(static_cast<HttpCommon const &>(obj));
-//    return ss.str();
-//}
-//
-//std::string toDebugString(HttpResponse const & obj)
-//{
-//    std::stringstream ss;
-//    ss << "RESPONSE: " << obj.status << " " << obj.reason << " ";
-//    ss << toDebugString(static_cast<HttpCommon const &>(obj));
-//    return ss.str();
-//}
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+TBAG_API void updateDefaultRequest (HttpHeader & header, std::size_t body_size = 0);
+TBAG_API void updateDefaultResponse(HttpHeader & header, std::size_t body_size = 0);
 
 } // namespace common
 } // namespace http
