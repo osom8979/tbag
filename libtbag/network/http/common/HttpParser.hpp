@@ -1,12 +1,12 @@
 /**
- * @file   HttpPacket.hpp
- * @brief  HttpPacket class prototype.
+ * @file   HttpParser.hpp
+ * @brief  HttpParser class prototype.
  * @author zer0
- * @date   2017-10-02
+ * @date   2017-10-03
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPACKET_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPACKET_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPARSER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPARSER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -31,13 +31,14 @@ namespace http    {
 namespace common  {
 
 /**
- * HttpPacket class prototype.
+ * HttpParser class prototype.
  *
  * @author zer0
  * @date   2017-05-18
  * @date   2017-10-02 (Rename: HttpParser -> HttpPacket)
+ * @date   2017-10-03 (Rename: HttpPacket -> HttpParser)
  */
-class TBAG_API HttpPacket : public common::HttpProperty,
+class TBAG_API HttpParser : public common::HttpProperty,
                             private Noncopyable
 {
 public:
@@ -56,8 +57,8 @@ private:
     UniqueParserImpl _parser;
 
 public:
-    HttpPacket(ParserType type = ParserType::BOTH);
-    virtual ~HttpPacket();
+    HttpParser(ParserType type = ParserType::BOTH);
+    virtual ~HttpParser();
 
 public:
     void clear();
@@ -114,5 +115,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPACKET_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPARSER_HPP__
 
