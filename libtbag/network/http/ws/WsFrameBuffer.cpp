@@ -93,8 +93,12 @@ void WsFrameBuffer::push(char const * buffer, std::size_t size)
 
 bool WsFrameBuffer::next(Err * code, std::size_t * size)
 {
+    WsFrame      & current_buffer = __cache__.buffer;
+    WsOpCode     & result_opcode  = __cache__.opcode;
+    util::Buffer & result_payload = __cache__.payload;
+
     std::size_t read_size = 0;
-    Err const CODE = __cache__.buffer.execute(&_buffer[0], _buffer_size, &read_size);
+    Err const CODE = current_buffer.execute(&_buffer[0], _buffer_size, &read_size);
     if (TBAG_ERR_FAILURE(CODE)) {
         if (code != nullptr) { (*code) = CODE; }
         if (size != nullptr) { (*size) = 0; }
@@ -108,13 +112,12 @@ bool WsFrameBuffer::next(Err * code, std::size_t * size)
         _buffer_size -= read_size;
     }
 
-    if (__cache__.buffer.fin == false) {
-        if (__cache__.buffer.opcode == WsOpCode::WSOC_CONTINUATION_FRAME) {
-            if (_frames.size() < _frames_size + 1) {
-                _frames.resize(_frames_size + 1);
-            }
-            _frames[_frames_size].swap(__cache__.buffer);
+    if (current_buffer.fin == false) {
+        // It is temporarily stored in the buffer until 'Finish' is confirmed.
+        if (_frames.size() < _frames_size + 1) {
+            _frames.resize(_frames_size + 1);
         }
+        _frames[_frames_size].swap(current_buffer);
         ++_frames_size;
 
         if (code != nullptr) { (*code) = Err::E_CONTINUE; }
@@ -122,18 +125,16 @@ bool WsFrameBuffer::next(Err * code, std::size_t * size)
         return false;
     }
 
-    __cache__.payload.clear();
+    result_payload.clear();
     if (_frames_size > 0) {
-        __cache__.opcode = _frames[0].opcode;
+        result_opcode = _frames[0].opcode;
         for (auto const & f : _frames) {
-            __cache__.payload.insert(__cache__.payload.end(), f.payload.begin(), f.payload.end());
+            result_payload.insert(result_payload.end(), f.payload.begin(), f.payload.end());
         }
     } else {
-        __cache__.opcode = __cache__.buffer.opcode;
+        result_opcode = current_buffer.opcode;
     }
-    __cache__.payload.insert(__cache__.payload.end(),
-                             __cache__.buffer.payload.begin(),
-                             __cache__.buffer.payload.end());
+    result_payload.insert(result_payload.end(), current_buffer.payload.begin(), current_buffer.payload.end());
     _frames_size = 0;
 
     if (code != nullptr) { (*code) = Err::E_SUCCESS; }
