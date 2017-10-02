@@ -65,14 +65,43 @@ public:
     void swap(HttpProperty & obj);
 
 public:
-    inline HttpRequest        & atRequest ()       TBAG_NOEXCEPT { return _request;  }
-    inline HttpRequest  const & atRequest () const TBAG_NOEXCEPT { return _request;  }
+    inline HttpRequest        & atRequest ()       TBAG_NOEXCEPT { return  _request; }
+    inline HttpRequest  const & atRequest () const TBAG_NOEXCEPT { return  _request; }
     inline HttpResponse       & atResponse()       TBAG_NOEXCEPT { return _response; }
     inline HttpResponse const & atResponse() const TBAG_NOEXCEPT { return _response; }
-    inline HttpHeader         & atHeaders ()       TBAG_NOEXCEPT { return _headers;  }
-    inline HttpHeader   const & atHeaders () const TBAG_NOEXCEPT { return _headers;  }
-    inline util::Buffer       & atBody    ()       TBAG_NOEXCEPT { return _body;     }
-    inline util::Buffer const & atBody    () const TBAG_NOEXCEPT { return _body;     }
+    inline HttpHeader         & atHeaders ()       TBAG_NOEXCEPT { return  _headers; }
+    inline HttpHeader   const & atHeaders () const TBAG_NOEXCEPT { return  _headers; }
+    inline util::Buffer       & atBody    ()       TBAG_NOEXCEPT { return     _body; }
+    inline util::Buffer const & atBody    () const TBAG_NOEXCEPT { return     _body; }
+
+    inline std::string getBodyString() const { return std::string(_body.begin(), _body.end()); }
+
+public:
+    inline void  setRequestVersion(int major, int minor) TBAG_NOEXCEPT {  _request.version.set(major, minor); }
+    inline void setResponseVersion(int major, int minor) TBAG_NOEXCEPT { _response.version.set(major, minor); }
+
+    inline void setVersion(int major, int minor) TBAG_NOEXCEPT
+    {
+        setRequestVersion(major, minor);
+        setResponseVersion(major, minor);
+    }
+
+    inline HttpVersion getRequestVersion () const TBAG_NOEXCEPT { return  _request.version; }
+    inline HttpVersion getResponseVersion() const TBAG_NOEXCEPT { return _response.version; }
+
+public:
+    inline void setMethod(std::string const & val) { _request.method = val; }
+    inline void    setUri(std::string const & val) { _request.uri    = val; }
+
+    inline std::string getMethod() const { return _request.method; }
+    inline std::string    getUri() const { return _request.uri;    }
+
+public:
+    inline void setStatusCode(int code) TBAG_NOEXCEPT { _response.code = code; }
+    inline void setReason(std::string const & val) { _response.reason = val; }
+
+    inline int getStatusCode() const TBAG_NOEXCEPT { return _response.code; }
+    inline std::string getReason() const { return _response.reason; }
 
 public:
     void clear();

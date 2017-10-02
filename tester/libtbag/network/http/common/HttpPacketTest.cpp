@@ -1,21 +1,19 @@
 /**
- * @file   HttpParserTest.cpp
- * @brief  HttpParser class tester.
+ * @file   HttpPacketTest.cpp
+ * @brief  HttpPacket class tester.
  * @author zer0
- * @date   2017-05-18
+ * @date   2017-10-02
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/HttpParser.hpp>
-
-#include <vector>
-#include <string>
+#include <libtbag/network/http/common/HttpPacket.hpp>
 
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
+using namespace libtbag::network::http::common;
 
-TEST(HttpParserTest, Request)
+TEST(HttpPacketTest, Request)
 {
     char const TEST_DATA[] = "POST /joyent/http-parser HTTP/1.1\r\n"
             "Host: github.com\r\n"
@@ -33,19 +31,22 @@ TEST(HttpParserTest, Request)
             "Cache-Control: max-age=0\r\n\r\nb\r\nhello world\r\n0\r\n\r\n";
     std::size_t const TEST_DATA_LENGTH = sizeof(TEST_DATA) - 1;
 
-    HttpParser http;
-    ASSERT_EQ(TEST_DATA_LENGTH, http.execute(TEST_DATA, TEST_DATA_LENGTH));
+    HttpPacket http;
+    std::size_t read_size = 0;
 
-    ASSERT_EQ(1, http.getHttpMajor());
-    ASSERT_EQ(1, http.getHttpMinor());
+    ASSERT_EQ(Err::E_SUCCESS, http.execute(TEST_DATA, TEST_DATA_LENGTH, &read_size));
+    ASSERT_EQ(TEST_DATA_LENGTH, read_size);
+
+    ASSERT_EQ(1, http.atRequest().version.http_major);
+    ASSERT_EQ(1, http.atRequest().version.http_minor);
     ASSERT_EQ(10U, http.atHeaders().size());
-    ASSERT_STREQ("github.com", http.getHeader("Host").c_str());
-    ASSERT_STREQ("POST", http.getMethodName().c_str());
-    ASSERT_STREQ("/joyent/http-parser", http.getUrl().c_str());
-    ASSERT_LT(0, http.getBody().size());
+    ASSERT_STREQ("github.com", http.atHeaders().get("Host").c_str());
+    ASSERT_STREQ("POST", http.atRequest().method.c_str());
+    ASSERT_STREQ("/joyent/http-parser", http.atRequest().uri.c_str());
+    ASSERT_LT(0, http.atBody().size());
 }
 
-TEST(HttpParserTest, Response)
+TEST(HttpPacketTest, Response)
 {
     std::vector<std::string> data;
     data.push_back("HTTP/1.1 301 Moved Permanently\r\n");
@@ -66,22 +67,22 @@ TEST(HttpParserTest, Response)
     data.push_back("</BODY></HTML>\r\n");
 
     std::size_t const SIZE = data.size();
-    HttpParser http;
+    HttpPacket http;
 
     for (std::size_t i = 0; i < SIZE; ++i) {
-        ASSERT_LT(0, http.execute(data[i].data(), data[i].size()));
+        ASSERT_EQ(Err::E_SUCCESS, http.execute(data[i].data(), data[i].size()));
 
         if (i + 1 == SIZE) {
-            ASSERT_TRUE(http.isComplete());
+            ASSERT_TRUE(http.isFinish());
         } else {
-            ASSERT_FALSE(http.isComplete());
+            ASSERT_FALSE(http.isFinish());
         }
     }
 
-    ASSERT_EQ(1, http.getHttpMajor());
-    ASSERT_EQ(1, http.getHttpMinor());
+    ASSERT_EQ(1, http.atResponse().version.http_major);
+    ASSERT_EQ(1, http.atResponse().version.http_minor);
     ASSERT_EQ(8U, http.atHeaders().size());
-    ASSERT_EQ(301, http.getStatusCode());
-    ASSERT_LT(0, http.getBody().size());
+    ASSERT_EQ(301, http.atResponse().code);
+    ASSERT_LT(0, http.atBody().size());
 }
 

@@ -5,8 +5,8 @@
  * @date   2017-10-02
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPACKET_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPACKET_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPACKET_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPACKET_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -28,12 +28,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace common  {
 
 /**
  * HttpPacket class prototype.
  *
  * @author zer0
- * @date   2017-10-02
+ * @date   2017-05-18
+ * @date   2017-10-02 (Rename: HttpParser -> HttpPacket)
  */
 class TBAG_API HttpPacket : public common::HttpProperty,
                             private Noncopyable
@@ -104,6 +106,7 @@ public:
     // @formatter:on
 };
 
+} // namespace common
 } // namespace http
 } // namespace network
 
@@ -111,5 +114,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPACKET_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPPACKET_HPP__
 

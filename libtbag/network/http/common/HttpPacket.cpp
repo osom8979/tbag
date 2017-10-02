@@ -5,11 +5,10 @@
  * @date   2017-10-02
  */
 
-#include <libtbag/network/http/HttpPacket.hpp>
+#include <libtbag/network/http/common/HttpPacket.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
-
 #include <http_parser.h>
 
 // -------------------
@@ -18,6 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace common  {
 
 // @formatter:off
 static int __global_http_on_message_begin__   (http_parser * parser);
@@ -127,16 +127,9 @@ public:
         if (read_size != nullptr) {
             *read_size = EXEC_SIZE;
         }
-
         if (parser.http_errno != HPE_OK) {
             return Err::E_PARSING;
         }
-
-        __cache__.property.atRequest().version.http_major  = parser.http_major;
-        __cache__.property.atRequest().version.http_minor  = parser.http_minor;
-        __cache__.property.atRequest().method = ::http_method_str(static_cast<http_method>(parser.method));
-        __cache__.property.atResponse().version.http_major = parser.http_major;
-        __cache__.property.atResponse().version.http_minor = parser.http_minor;
         return Err::E_SUCCESS;
     }
 };
@@ -164,6 +157,7 @@ int __global_http_on_url__(http_parser * parser, const char * at, std::size_t le
     assert(impl->parent != nullptr);
     auto & property = impl->__cache__.property;
 
+    property.atRequest().method = ::http_method_str(static_cast<http_method>(parser->method));
     if (length == 0) {
         property.atRequest().uri.clear();
     } else {
@@ -215,7 +209,7 @@ int __global_http_on_header_value__(http_parser * parser, const char * at, std::
     if (impl->__cache__.header_field_temp.empty() == false) {
         property.atHeaders().insert(impl->__cache__.header_field_temp, std::string(at, at + length));
     }
-    impl->clearCache();
+    impl->__cache__.header_field_temp.clear();
     return impl->parent->onHeaderValue(at, length);
 }
 
@@ -225,7 +219,9 @@ int __global_http_on_headers_complete__(http_parser * parser)
     HttpPacket::ParserImpl * impl = static_cast<HttpPacket::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+    auto & property = impl->__cache__.property;
 
+    property.setVersion(parser->http_major, parser->http_minor);
     impl->header_complete = true;
     return impl->parent->onHeadersComplete();
 }
@@ -306,7 +302,7 @@ void HttpPacket::clear()
 Err HttpPacket::execute(char const * data, std::size_t size, std::size_t * read_size)
 {
     Err const EXEC_CODE = _parser->execute(data, size, read_size);
-    if (TBAG_ERR_SUCCESS(EXEC_CODE)) {
+    if (EXEC_CODE == Err::E_SUCCESS && isFinish()) {
         swap(_parser->__cache__.property);
     }
     return EXEC_CODE;
@@ -354,6 +350,7 @@ char const * HttpPacket::getErrnoDescription() const
     return ::http_errno_description(static_cast<http_errno>(_parser->parser.http_errno));
 }
 
+} // namespace common
 } // namespace http
 } // namespace network
 
