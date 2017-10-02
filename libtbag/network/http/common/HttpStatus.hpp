@@ -16,6 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -98,8 +100,10 @@ enum class HttpStatus : int
 TBAG_API char const * getHttpStatusName  (HttpStatus status) TBAG_NOEXCEPT;
 TBAG_API char const * getHttpStatusReason(HttpStatus status) TBAG_NOEXCEPT;
 TBAG_API int          getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT;
-TBAG_API HttpStatus   getHttpStatus      (int        status) TBAG_NOEXCEPT;
 // @formatter:on
+
+TBAG_API HttpStatus getHttpStatus(int status) TBAG_NOEXCEPT;
+TBAG_API HttpStatus getHttpStatus(std::string const & status);
 
 } // namespace common
 } // namespace http

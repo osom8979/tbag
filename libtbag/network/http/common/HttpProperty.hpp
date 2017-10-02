@@ -49,7 +49,7 @@ private:
     HttpRequest  _request;
     HttpResponse _response;
     HttpHeader   _headers;
-    std::string  _body;
+    util::Buffer _body;
 
 public:
     HttpProperty();
@@ -71,8 +71,11 @@ public:
     inline HttpResponse const & atResponse() const TBAG_NOEXCEPT { return _response; }
     inline HttpHeader         & atHeaders ()       TBAG_NOEXCEPT { return _headers;  }
     inline HttpHeader   const & atHeaders () const TBAG_NOEXCEPT { return _headers;  }
-    inline std::string        & atBody    ()       TBAG_NOEXCEPT { return _body;     }
-    inline std::string  const & atBody    () const TBAG_NOEXCEPT { return _body;     }
+    inline util::Buffer       & atBody    ()       TBAG_NOEXCEPT { return _body;     }
+    inline util::Buffer const & atBody    () const TBAG_NOEXCEPT { return _body;     }
+
+public:
+    void clear();
 
 public:
     std::string toRequestString() const;

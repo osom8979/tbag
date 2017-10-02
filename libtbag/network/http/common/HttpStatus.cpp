@@ -56,6 +56,17 @@ HttpStatus getHttpStatus(int status) TBAG_NOEXCEPT
     }
 }
 
+HttpStatus getHttpStatus(std::string const & status)
+{
+    int number = 0;
+    try {
+        number = std::stoi(status);
+    } catch (...) {
+        number = 0;
+    }
+    return getHttpStatus(number);
+}
+
 } // namespace common
 } // namespace http
 } // namespace network

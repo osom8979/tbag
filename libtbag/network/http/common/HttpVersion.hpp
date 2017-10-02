@@ -76,6 +76,12 @@ struct HttpVersion
         std::swap(http_minor, obj.http_minor);
     }
 
+    void clear()
+    {
+        http_major = 0;
+        http_minor = 0;
+    }
+
     std::string toString() const
     {
         return toString(http_major, http_minor);

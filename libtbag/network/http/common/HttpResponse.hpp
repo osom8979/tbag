@@ -57,6 +57,11 @@ struct HttpResponse
         reason = common::getHttpStatusReason(s);
     }
 
+    void setHttpStatus(std::string const & name)
+    {
+        setHttpStatus(common::getHttpStatus(name));
+    }
+
     HttpStatus getHttpStatus() const
     {
         return common::getHttpStatus(code);
@@ -67,6 +72,13 @@ struct HttpResponse
         version.swap(obj.version);
         std::swap(code, obj.code);
         reason.swap(obj.reason);
+    }
+
+    void clear()
+    {
+        version.clear();
+        code = 0;
+        reason.clear();
     }
 
     /**

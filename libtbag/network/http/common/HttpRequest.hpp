@@ -67,6 +67,13 @@ struct HttpRequest
         version.swap(obj.version);
     }
 
+    void clear()
+    {
+        method.clear();
+        uri.clear();
+        version.clear();
+    }
+
     /**
      * @remarks
      *  @code

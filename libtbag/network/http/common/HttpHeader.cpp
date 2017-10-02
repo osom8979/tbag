@@ -178,24 +178,6 @@ bool HttpHeader::existsInSplitValues(key_type const & key,
     return false;
 }
 
-void HttpHeader::updateDefaultRequest(std::size_t body_size)
-{
-    insertIfNotExists(HEADER_USER_AGENT, DEFAULT_VALUE_OF_USER_AGENT);
-    insertIfNotExists(HEADER_ACCEPT, DEFAULT_VALUE_OF_ACCEPT);
-    if (body_size > 0) {
-        insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
-    }
-}
-
-void HttpHeader::updateDefaultResponse(std::size_t body_size)
-{
-    insertIfNotExists(HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
-    insertIfNotExists(HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
-    if (body_size > 0) {
-        insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
-    }
-}
-
 std::string HttpHeader::toString() const
 {
     std::stringstream ss;
