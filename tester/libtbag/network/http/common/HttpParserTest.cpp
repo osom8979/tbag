@@ -39,8 +39,8 @@ TEST(HttpParserTest, Request)
 
     ASSERT_EQ(1, http.atRequest().version.http_major);
     ASSERT_EQ(1, http.atRequest().version.http_minor);
-    ASSERT_EQ(10U, http.atHeaders().size());
-    ASSERT_STREQ("github.com", http.atHeaders().get("Host").c_str());
+    ASSERT_EQ(10U, http.size());
+    ASSERT_STREQ("github.com", http.get("Host").c_str());
     ASSERT_STREQ("POST", http.atRequest().method.c_str());
     ASSERT_STREQ("/joyent/http-parser", http.atRequest().uri.c_str());
     ASSERT_LT(0, http.atBody().size());
@@ -81,7 +81,7 @@ TEST(HttpParserTest, Response)
 
     ASSERT_EQ(1, http.atResponse().version.http_major);
     ASSERT_EQ(1, http.atResponse().version.http_minor);
-    ASSERT_EQ(8U, http.atHeaders().size());
+    ASSERT_EQ(8U, http.size());
     ASSERT_EQ(301, http.atResponse().code);
     ASSERT_LT(0, http.atBody().size());
 }

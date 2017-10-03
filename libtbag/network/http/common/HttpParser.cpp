@@ -53,8 +53,9 @@ public:
     bool message_complete;
 
     struct {
-        common::HttpProperty property;
-        std::string header_field_temp;
+        ParserType   direction;
+        HttpProperty property;
+        std::string  header_field_temp;
     } __cache__;
 
     ParserImpl(HttpParser * p, ParserType parser_type)
@@ -121,18 +122,6 @@ public:
         __cache__.property.clear();
         __cache__.header_field_temp.clear();
     }
-
-    Err execute(char const * data, std::size_t size, std::size_t * read_size = nullptr)
-    {
-        std::size_t const EXEC_SIZE = ::http_parser_execute(&parser, &settings, data, size);
-        if (read_size != nullptr) {
-            *read_size = EXEC_SIZE;
-        }
-        if (parser.http_errno != HPE_OK) {
-            return Err::E_PARSING;
-        }
-        return Err::E_SUCCESS;
-    }
 };
 
 // --------------------------
@@ -156,8 +145,10 @@ int __global_http_on_url__(http_parser * parser, const char * at, std::size_t le
     HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
-    auto & property = impl->__cache__.property;
+    auto & property  = impl->__cache__.property;
+    auto & direction = impl->__cache__.direction;
 
+    direction = HttpParser::ParserType::REQUEST;
     property.atRequest().method = ::http_method_str(static_cast<http_method>(parser->method));
     if (length == 0) {
         property.atRequest().uri.clear();
@@ -173,8 +164,10 @@ int __global_http_on_status__(http_parser * parser, const char * at, std::size_t
     HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
-    auto & property = impl->__cache__.property;
+    auto & property  = impl->__cache__.property;
+    auto & direction = impl->__cache__.direction;
 
+    direction = HttpParser::ParserType::RESPONSE;
     if (length == 0) {
         property.atResponse().reason.clear();
     } else {
@@ -208,7 +201,7 @@ int __global_http_on_header_value__(http_parser * parser, const char * at, std::
 
     property.atResponse().code = impl->parser.status_code;
     if (impl->__cache__.header_field_temp.empty() == false) {
-        property.atHeaders().insert(impl->__cache__.header_field_temp, std::string(at, at + length));
+        property.insert(impl->__cache__.header_field_temp, std::string(at, at + length));
     }
     impl->__cache__.header_field_temp.clear();
     return impl->parent->onHeaderValue(at, length);
@@ -284,9 +277,9 @@ int __global_http_on_chunk_complete__(http_parser * parser)
 // HttpParser implementation.
 // --------------------------
 
-HttpParser::HttpParser(ParserType type) : _parser(new ParserImpl(this, type))
+HttpParser::HttpParser(ParserType type) : _impl(new ParserImpl(this, type))
 {
-    assert(static_cast<bool>(_parser));
+    assert(static_cast<bool>(_impl));
 }
 
 HttpParser::~HttpParser()
@@ -296,17 +289,27 @@ HttpParser::~HttpParser()
 
 void HttpParser::clear()
 {
-    _parser->clear();
-    _parser->clearCache();
+    _impl->clear();
+    _impl->clearCache();
 }
 
-Err HttpParser::execute(char const * data, std::size_t size, std::size_t * read_size)
+Err HttpParser::execute(char const * data, std::size_t size, std::size_t * read_size, ParserType * direction)
 {
-    Err const EXEC_CODE = _parser->execute(data, size, read_size);
-    if (EXEC_CODE == Err::E_SUCCESS && isFinish()) {
-        swap(_parser->__cache__.property);
+    std::size_t const EXEC_SIZE = ::http_parser_execute(&_impl->parser, &_impl->settings, data, size);
+    if (_impl->parser.http_errno != HPE_OK) {
+        return Err::E_PARSING;
     }
-    return EXEC_CODE;
+
+    if (isFinish()) {
+        swap(_impl->__cache__.property);
+    }
+    if (read_size != nullptr) {
+        *read_size = EXEC_SIZE;
+    }
+    if (direction != nullptr) {
+        *direction = _impl->__cache__.direction;
+    }
+    return Err::E_SUCCESS;
 }
 
 bool HttpParser::shouldKeepAlive() const TBAG_NOEXCEPT
@@ -316,39 +319,39 @@ bool HttpParser::shouldKeepAlive() const TBAG_NOEXCEPT
     // the last message on the connection.
     // If you are the server, respond with the "Connection: close" header.
     // If you are the client, close the connection.
-    return ::http_should_keep_alive(&_parser->parser) != 0;
+    return ::http_should_keep_alive(&_impl->parser) != 0;
 }
 
 bool HttpParser::bodyIsFinal() const TBAG_NOEXCEPT
 {
     // Checks if this is the final chunk of the body.
-    return ::http_body_is_final(&_parser->parser) != 0;
+    return ::http_body_is_final(&_impl->parser) != 0;
 }
 
 bool HttpParser::isUpgrade() const TBAG_NOEXCEPT
 {
-    return _parser->parser.upgrade == 1 ? true : false;
+    return _impl->parser.upgrade == 1 ? true : false;
 }
 
 bool HttpParser::isFinish() const TBAG_NOEXCEPT
 {
-    return _parser->header_complete && (_parser->body_complete || _parser->message_complete);
+    return _impl->header_complete && (_impl->body_complete || _impl->message_complete);
 }
 
 void HttpParser::pause(bool paused)
 {
     // Pause or un-pause the parser; a nonzero value pauses.
-    ::http_parser_pause(&_parser->parser, (paused ? 1 : 0));
+    ::http_parser_pause(&_impl->parser, (paused ? 1 : 0));
 }
 
 char const * HttpParser::getErrnoName() const
 {
-    return ::http_errno_name(static_cast<http_errno>(_parser->parser.http_errno));
+    return ::http_errno_name(static_cast<http_errno>(_impl->parser.http_errno));
 }
 
 char const * HttpParser::getErrnoDescription() const
 {
-    return ::http_errno_description(static_cast<http_errno>(_parser->parser.http_errno));
+    return ::http_errno_description(static_cast<http_errno>(_impl->parser.http_errno));
 }
 
 } // namespace common

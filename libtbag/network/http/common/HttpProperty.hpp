@@ -43,12 +43,11 @@ namespace common  {
  * @author zer0
  * @date   2017-09-30
  */
-class TBAG_API HttpProperty
+class TBAG_API HttpProperty : public HttpHeader
 {
-private:
+protected:
     HttpRequest  _request;
     HttpResponse _response;
-    HttpHeader   _headers;
     util::Buffer _body;
 
 public:
@@ -69,8 +68,6 @@ public:
     inline HttpRequest  const & atRequest () const TBAG_NOEXCEPT { return  _request; }
     inline HttpResponse       & atResponse()       TBAG_NOEXCEPT { return _response; }
     inline HttpResponse const & atResponse() const TBAG_NOEXCEPT { return _response; }
-    inline HttpHeader         & atHeaders ()       TBAG_NOEXCEPT { return  _headers; }
-    inline HttpHeader   const & atHeaders () const TBAG_NOEXCEPT { return  _headers; }
     inline util::Buffer       & atBody    ()       TBAG_NOEXCEPT { return     _body; }
     inline util::Buffer const & atBody    () const TBAG_NOEXCEPT { return     _body; }
 
@@ -90,21 +87,26 @@ public:
     inline HttpVersion getResponseVersion() const TBAG_NOEXCEPT { return _response.version; }
 
 public:
-    inline void setMethod(std::string const & val) { _request.method = val; }
-    inline void    setUri(std::string const & val) { _request.uri    = val; }
+    inline void setHttpMethod(HttpMethod m) { _request.setHttpMethod(m); }
+    inline void     setMethod(std::string const & val) { _request.method = val; }
+    inline void        setUri(std::string const & val) { _request.uri    = val; }
 
-    inline std::string getMethod() const { return _request.method; }
-    inline std::string    getUri() const { return _request.uri;    }
+    inline HttpMethod  getHttpMethod() const { return _request.getHttpMethod(); }
+    inline std::string     getMethod() const { return _request.method; }
+    inline std::string        getUri() const { return _request.uri;    }
 
 public:
+    inline void setHttpStatus(HttpStatus s) { _response.setHttpStatus(s); }
+    inline void setHttpStatus(std::string const & name) { _response.setHttpStatus(name); }
     inline void setStatusCode(int code) TBAG_NOEXCEPT { _response.code = code; }
     inline void setReason(std::string const & val) { _response.reason = val; }
 
+    inline HttpStatus getHttpStatus() const { return _response.getHttpStatus(); }
     inline int getStatusCode() const TBAG_NOEXCEPT { return _response.code; }
     inline std::string getReason() const { return _response.reason; }
 
 public:
-    void clear();
+    void clearAllProperties();
 
 public:
     std::string toRequestString() const;

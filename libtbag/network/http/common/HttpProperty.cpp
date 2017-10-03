@@ -65,7 +65,7 @@ void HttpProperty::swap(HttpProperty & obj)
     _body.swap(obj._body);
 }
 
-void HttpProperty::clear()
+void HttpProperty::clearAllProperties()
 {
     _request.clear();
     _response.clear();
@@ -77,7 +77,7 @@ std::string HttpProperty::toRequestString() const
 {
     std::stringstream ss;
     ss << _request.toString() << CRLF
-       << _headers.toString() << CRLF
+       << toString() << CRLF
        << std::string(_body.begin(), _body.end());
     return ss.str();
 }
@@ -86,7 +86,7 @@ std::string HttpProperty::toResponseString() const
 {
     std::stringstream ss;
     ss << _response.toString() << CRLF
-       <<  _headers.toString() << CRLF
+       << toString() << CRLF
        << std::string(_body.begin(), _body.end());
     return ss.str();
 }

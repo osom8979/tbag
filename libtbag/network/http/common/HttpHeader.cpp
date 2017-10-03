@@ -209,6 +209,20 @@ void updateDefaultResponse(HttpHeader & header, std::size_t body_size)
     }
 }
 
+std::vector<int> getWsVersions(HttpHeader const & header)
+{
+    std::vector<int> result;
+    auto const VERSIONS = header.getIgnoreCase(HEADER_SEC_WEBSOCKET_VERSION);
+    for (auto & ver : string::splitTokens(VERSIONS, DEFAULT_VALUE_DELIMITER)) {
+        try {
+            result.push_back(std::stoi(string::trim(ver)));
+        } catch (...) {
+            // SKIP.
+        }
+    }
+    return result;
+}
+
 } // namespace common
 } // namespace http
 } // namespace network

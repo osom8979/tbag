@@ -38,7 +38,7 @@ namespace common  {
  * @date   2017-10-02 (Rename: HttpParser -> HttpPacket)
  * @date   2017-10-03 (Rename: HttpPacket -> HttpParser)
  */
-class TBAG_API HttpParser : public common::HttpProperty,
+class TBAG_API HttpParser : public HttpProperty,
                             private Noncopyable
 {
 public:
@@ -54,7 +54,7 @@ public:
     using UniqueParserImpl = std::shared_ptr<ParserImpl>;
 
 private:
-    UniqueParserImpl _parser;
+    UniqueParserImpl _impl;
 
 public:
     HttpParser(ParserType type = ParserType::BOTH);
@@ -64,7 +64,9 @@ public:
     void clear();
 
 public:
-    Err execute(char const * data, std::size_t size, std::size_t * read_size = nullptr);
+    Err execute(char const * data, std::size_t size,
+                std::size_t * read_size = nullptr,
+                ParserType * direction = nullptr);
 
 public:
     bool shouldKeepAlive() const TBAG_NOEXCEPT;

@@ -20,10 +20,11 @@
 
 #include <libtbag/network/http/common/HttpCommon.hpp>
 
-#include <string>
-#include <map>
 #include <initializer_list>
 #include <utility>
+#include <vector>
+#include <string>
+#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -66,7 +67,7 @@ public:
     STATIC_ASSERT_CHECK_IS_SAME(   key_type, std::string);
     STATIC_ASSERT_CHECK_IS_SAME(mapped_type, std::string);
 
-private:
+protected:
     HeaderMultiMap _headers;
 
 public:
@@ -189,6 +190,8 @@ public:
 
 TBAG_API void updateDefaultRequest (HttpHeader & header, std::size_t body_size = 0);
 TBAG_API void updateDefaultResponse(HttpHeader & header, std::size_t body_size = 0);
+
+TBAG_API std::vector<int> getWsVersions(HttpHeader const & header);
 
 } // namespace common
 } // namespace http
