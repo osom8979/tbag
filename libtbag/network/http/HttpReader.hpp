@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/network/http/common/HttpParser.hpp>
@@ -32,12 +33,37 @@ namespace network {
 namespace http    {
 
 /**
+ * HttpReader interface.
+ *
+ * @author zer0
+ * @date   2017-10-06
+ */
+struct HttpReaderInterface
+{
+    /** Incomplete (Parsing is not finish). Wait for the next packet. */
+    virtual void onContinue(void * arg) { /* EMPTY. */ }
+
+    /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
+    virtual bool onSwitchingProtocol(common::HttpProperty const & response, void * arg) { return true; }
+
+    /** When a message has been received from WebSocket client/server. */
+    virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) { /* EMPTY. */ }
+
+    /** Regular http message. */
+    virtual void onRegularHttp(common::HttpProperty const & response, void * arg) { /* EMPTY. */ }
+
+    /** Triggered when error occurred. */
+    virtual void onParseError(Err code, void * arg) { /* EMPTY. */ }
+};
+
+/**
  * HttpReader class prototype.
  *
  * @author zer0
  * @date   2017-10-03
  */
-class TBAG_API HttpReader : public common::HttpParser
+class TBAG_API HttpReader : public common::HttpParser,
+                            public HttpReaderInterface
 {
 private:
     ws::WsFrameBuffer _frame_buffer;
@@ -60,20 +86,11 @@ public:
     Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
 
 protected:
-    /** Parsing is not finish. Wait for the next packet. */
-    void onContinue(void * arg) { /* EMPTY. */ }
-
-    /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
-    bool onSwitchingProtocol(common::HttpProperty const & response, void * arg) { return true; }
-
-    /** When a message has been received from WebSocket client/server. */
-    void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) { /* EMPTY. */ }
-
-    /** Regular http message. */
-    void onRegularHttp(common::HttpProperty const & response, void * arg) { /* EMPTY. */ }
-
-    /** Triggered when error occurred. */
-    void onParseError(Err code, void * arg) { /* EMPTY. */ }
+    virtual void onContinue(void * arg) override { /* EMPTY. */ }
+    virtual bool onSwitchingProtocol(common::HttpProperty const & response, void * arg) override { return true; }
+    virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override { /* EMPTY. */ }
+    virtual void onRegularHttp(common::HttpProperty const & response, void * arg) override { /* EMPTY. */ }
+    virtual void onParseError(Err code, void * arg) override { /* EMPTY. */ }
 };
 
 // ------------------------
@@ -86,6 +103,40 @@ TBAG_API bool testWsVersion (common::HttpProperty const & property, int test_ver
 
 TBAG_API Err updateWsRequest (common::HttpProperty & request , std::string const & key);
 TBAG_API Err updateWsResponse(common::HttpProperty & response, std::string const & key);
+
+/**
+ * HttpReader for the callback style.
+ *
+ * @author zer0
+ * @date   2017-10-03
+ */
+template <typename ByPassType>
+struct HttpReaderForCallback : public HttpReader
+{
+    using Parent = ByPassType;
+
+    STATIC_ASSERT_CHECK_IS_BASE_OF(HttpReaderInterface, Parent);
+
+    Parent * parent;
+
+    HttpReaderForCallback(Parent * p, bool use_websocket) : HttpReader(use_websocket), parent(p)
+    { /* EMPTY. */ }
+    HttpReaderForCallback(Parent * p, std::string const & key, bool use_websocket) : HttpReader(key, use_websocket), parent(p)
+    { /* EMPTY. */ }
+    virtual ~HttpReaderForCallback()
+    { /* EMPTY. */ }
+
+    virtual void onContinue(void * arg) override
+    { parent->onContinue(arg); }
+    virtual bool onSwitchingProtocol(common::HttpProperty const & response, void * arg) override
+    { parent->onSwitchingProtocol(response, arg); }
+    virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override
+    { parent->onWsMessage(opcode, payload, arg); }
+    virtual void onRegularHttp(common::HttpProperty const & response, void * arg) override
+    { parent->onRegularHttp(response, arg); }
+    virtual void onParseError(Err code, void * arg) override
+    { parent->onParseError(code, arg); }
+};
 
 } // namespace http
 } // namespace network

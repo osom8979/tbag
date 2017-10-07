@@ -65,7 +65,7 @@ void HttpProperty::swap(HttpProperty & obj)
     _body.swap(obj._body);
 }
 
-void HttpProperty::clearAllProperties()
+void HttpProperty::clear()
 {
     _request.clear();
     _response.clear();

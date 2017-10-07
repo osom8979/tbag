@@ -106,7 +106,7 @@ public:
     inline std::string getReason() const { return _response.reason; }
 
 public:
-    void clearAllProperties();
+    void clear();
 
 public:
     std::string toRequestString() const;

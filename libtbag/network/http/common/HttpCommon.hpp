@@ -16,6 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <cstdint>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -75,6 +77,8 @@ TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_TRANSFER_ENCODING = "identity
 
 TBAG_CONSTEXPR char const * const HEADER_DELIMITER = ":";
 TBAG_CONSTEXPR char const * const DEFAULT_VALUE_DELIMITER = ",";
+
+TBAG_CONSTEXPR uint64_t const DEFAULT_HTTP_TIMEOUT_MILLISEC = 15 * 1000;
 
 } // namespace common
 } // namespace http
