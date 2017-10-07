@@ -46,6 +46,9 @@ struct ServerTypes
     using WeakStream   = std::weak_ptr<Stream>;
 
     using SafetyAsync       = uvpp::ex::SafetyAsync;
+    using JobInterface      = SafetyAsync::JobInterface;
+    using FunctionalJob     = SafetyAsync::FunctionalJob;
+    using SharedJob         = SafetyAsync::SharedJob;
     using SharedSafetyAsync = std::shared_ptr<SafetyAsync>;
     using WeakSafetyAsync   = std::weak_ptr<SafetyAsync>;
 

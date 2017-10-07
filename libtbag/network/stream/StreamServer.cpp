@@ -304,6 +304,15 @@ StreamServer::WeakSafetyAsync StreamServer::getAsync()
     return _internal->safety_async;
 }
 
+Err StreamServer::sendJob(SharedJob job)
+{
+    Guard const LOCK(_mutex);
+    if (static_cast<bool>(_internal->safety_async) == false) {
+        return Err::E_EXPIRED;
+    }
+    return _internal->safety_async->sendJob(job);
+}
+
 StreamServer::UniqueClientGuard StreamServer::getIterators()
 {
     return UniqueClientGuard(new ClientGuard(this));

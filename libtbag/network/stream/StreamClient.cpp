@@ -462,6 +462,15 @@ StreamClient::SharedUserTimer     StreamClient::getUserTimer    () { Guard g(_mu
 StreamClient::SharedShutdownTimer StreamClient::getShutdownTimer() { Guard g(_mutex); return _internal->shutdown_timer; }
 // @formatter:on
 
+Err StreamClient::sendJob(SharedJob job)
+{
+    Guard const LOCK(_mutex);
+    if (static_cast<bool>(_internal->safety_async) == false) {
+        return Err::E_EXPIRED;
+    }
+    return _internal->safety_async->sendJob(job);
+}
+
 Err StreamClient::initClient(std::string const & destination, int port)
 {
     Guard const LOCK(_mutex);

@@ -88,8 +88,10 @@ struct ClientTypes
     using SharedBuffer = std::shared_ptr<Buffer>;
     using ReuseQueue   = container::ReuseQueue<SharedBuffer>;
 
-    using SafetyAsync  = uvpp::ex::SafetyAsync;
-    using JobInterface = SafetyAsync::JobInterface;
+    using SafetyAsync   = uvpp::ex::SafetyAsync;
+    using JobInterface  = SafetyAsync::JobInterface;
+    using FunctionalJob = SafetyAsync::FunctionalJob;
+    using SharedJob     = SafetyAsync::SharedJob;
 
     using SharedStream = std::shared_ptr<Stream>;
     using WeakStream   = std::weak_ptr<Stream>;
