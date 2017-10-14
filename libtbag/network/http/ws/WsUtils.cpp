@@ -8,7 +8,7 @@
 #include <libtbag/network/http/ws/WsUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <libtbag/network/http/ws/WsCommon.hpp>
+#include <libtbag/network/http/HttpCommon.hpp>
 #include <libtbag/id/Uuid.hpp>
 #include <libtbag/encrypt/Base64.hpp>
 #include <libtbag/encrypt/Sha1.hpp>

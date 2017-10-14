@@ -57,7 +57,7 @@ public:
     TBAG_VOID_CALLBACK_HELPER(onHttpShutdown, WeakClient, Err);
     TBAG_VOID_CALLBACK_HELPER(onHttpWrite   , WeakClient, Err);
     TBAG_VOID_CALLBACK_HELPER(onWsOpen      , WeakClient, Err, HttpPacket&);
-    TBAG_VOID_CALLBACK_HELPER(onWsMessage   , WeakClient, WsOpCode, char const*, std::size_t);
+    TBAG_VOID_CALLBACK_HELPER(onWsMessage   , WeakClient, ws::WsOpCode, char const*, std::size_t);
 };
 
 using FuncHttpServer = FunctionalHttpServer;

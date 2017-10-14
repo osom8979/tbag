@@ -5,7 +5,7 @@
  * @date   2017-09-29
  */
 
-#include <libtbag/network/http/common/HttpMethod.hpp>
+#include <libtbag/network/http/HttpMethod.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
@@ -17,7 +17,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
-namespace common  {
 
 #define _TBAG_XX(num, name, str) \
     static_assert(static_cast<int>(::http_method::HTTP_##name) == static_cast<int>(HttpMethod::M_##name), \
@@ -57,7 +56,6 @@ HttpMethod getHttpMethod(std::string const & name)
     return HttpMethod::M_UNKNOWN;
 }
 
-} // namespace common
 } // namespace http
 } // namespace network
 

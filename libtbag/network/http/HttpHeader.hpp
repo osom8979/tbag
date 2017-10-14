@@ -5,8 +5,8 @@
  * @date   2017-09-29
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPHEADER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPHEADER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPHEADER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPHEADER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -18,7 +18,7 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/network/http/common/HttpCommon.hpp>
+#include <libtbag/network/http/HttpCommon.hpp>
 
 #include <initializer_list>
 #include <utility>
@@ -32,7 +32,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
-namespace common  {
 
 /**
  * HttpHeader class prototype.
@@ -106,16 +105,8 @@ public:
     inline const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(_headers.crbegin()) { return _headers.crbegin(); }
     inline const_reverse_iterator   crend() const TBAG_NOEXCEPT_SP_OP(_headers.  crend()) { return _headers.  crend(); }
 
-    inline bool         empty() const TBAG_NOEXCEPT_SP_OP(_headers.   empty()) { return _headers.   empty(); }
-    inline size_type     size() const TBAG_NOEXCEPT_SP_OP(_headers.    size()) { return _headers.    size(); }
-    inline size_type max_size() const TBAG_NOEXCEPT_SP_OP(_headers.max_size()) { return _headers.max_size(); }
-
     inline   key_compare   key_comp() const { return _headers.  key_comp(); }
     inline value_compare value_comp() const { return _headers.value_comp(); }
-
-    inline void clear() { _headers.clear(); }
-
-    inline void swap(HttpHeader & obj) { _headers.swap(obj._headers); }
 
     inline iterator insert(value_type const & pair) { return _headers.insert(pair); }
     inline iterator insert(value_type && pair)      { return _headers.insert(std::move(pair)); }
@@ -139,6 +130,14 @@ public:
 
     inline       range equal_range(key_type const & key)       { return _headers.equal_range(key); }
     inline const_range equal_range(key_type const & key) const { return _headers.equal_range(key); }
+
+public:
+    inline bool      emptyOfHeaders() const TBAG_NOEXCEPT_SP_OP(_headers.empty()) { return _headers.empty(); }
+    inline size_type  sizeOfHeaders() const TBAG_NOEXCEPT_SP_OP(_headers. size()) { return _headers. size(); }
+
+public:
+    inline void clearHeaders() { _headers.clear(); }
+    inline void swapHeaders(HeaderMultiMap & headers) { _headers.swap(headers); }
 
 public:
     /**
@@ -181,19 +180,9 @@ public:
      *
      * @see <https://tools.ietf.org/html/rfc2616#section-4.2>
      */
-    std::string toString() const;
+    std::string toMessageHeader() const;
 };
 
-// ------------------------
-// Miscellaneous utilities.
-// ------------------------
-
-TBAG_API void updateDefaultRequest (HttpHeader & header, std::size_t body_size = 0);
-TBAG_API void updateDefaultResponse(HttpHeader & header, std::size_t body_size = 0);
-
-TBAG_API std::vector<int> getWsVersions(HttpHeader const & header);
-
-} // namespace common
 } // namespace http
 } // namespace network
 
@@ -201,5 +190,5 @@ TBAG_API std::vector<int> getWsVersions(HttpHeader const & header);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPHEADER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPHEADER_HPP__
 

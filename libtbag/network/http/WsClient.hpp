@@ -23,13 +23,12 @@
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
-#include <libtbag/network/http/HttpBuilder.hpp>
-#include <libtbag/network/http/WsFrameBuffer.hpp>
+#include <libtbag/network/http/ws/WsFrameBuffer.hpp>
 #include <libtbag/network/Uri.hpp>
-#include <libtbag/uvpp/Loop.hpp>
 
 #include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <vector>
 #include <string>
@@ -57,7 +56,7 @@ public:
     using Parent     = stream::StreamClient;
 
     using Loop     = uvpp::Loop;
-    using WsBuffer = http::WsFrame::Buffer;
+    using WsBuffer = util::Buffer;
     using WsQueue  = container::ReuseQueue<WsBuffer>;
     using Masking  = random::MaskingDevice;
 
@@ -81,16 +80,16 @@ private:
 // HTTP Request.
 private:
     mutable Mutex _request_mutex;
-    HttpBuilder _request;
+    HttpProperty _request;
 
 private:
-    WsStatus _close;
+    ws::WsStatus _close;
 
 // Receive packet.
 private:
     struct {
-        http::HttpParser    response; ///< Response packet parser.
-        http::WsFrameBuffer receiver; ///< WebSocket frame buffer.
+        HttpParser          response; ///< Response packet parser.
+        ws::WsFrameBuffer   receiver; ///< WebSocket frame buffer.
     } __on_read_only__; ///< @warning It should only be used with the onRead() method.
 
 public:
@@ -102,11 +101,11 @@ public:
     inline bool isClosing() const TBAG_NOEXCEPT_SP_OP(_closing.load()) { return _closing.load(); }
 
 public:
-    void setup(HttpBuilder const & request);
-    HttpBuilder getRequest() const;
+    void setup(HttpProperty const & request);
+    HttpProperty getRequest() const;
 
 private:
-    Err writeWsFrame(http::WsFrame const & frame);
+    Err writeWsFrame(ws::WsFrame const & frame);
 
 public:
     Err writeText(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
@@ -137,7 +136,7 @@ public:
     virtual void onWsOpen(http::HttpResponse const & response) { /* EMPTY. */ }
 
     /** When a message has been received from WebSocket server. */
-    virtual void onWsMessage(WsOpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
+    virtual void onWsMessage(ws::WsOpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
 
     /** Triggered when error occurred. */
     virtual void onWsError(Err code) { /* EMPTY. */ }

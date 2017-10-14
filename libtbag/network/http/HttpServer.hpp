@@ -18,16 +18,16 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/HttpParser.hpp>
-#include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/HttpFilter.hpp>
-#include <libtbag/network/http/WsFrameBuffer.hpp>
+#include <libtbag/network/http/ws/WsFrameBuffer.hpp>
 #include <libtbag/network/Uri.hpp>
+
+#include <libtbag/util/BufferInfo.hpp>
+#include <libtbag/container/ReuseQueue.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <cstdint>
@@ -69,7 +69,7 @@ public:
     using StreamNode       = stream::StreamNode;
     using SharedStreamNode = Parent::SharedStreamNode;
 
-    using WsBuffer = http::WsFrame::Buffer;
+    using WsBuffer = util::Buffer;
     using WsQueue  = container::ReuseQueue<WsBuffer>;
 
     using Loop   = uvpp::Loop;
@@ -95,13 +95,13 @@ public:
     // Receive packet.
     private:
         struct {
-            http::HttpParser    parser; ///< Request packet parser.
-            HttpBuilder         builder; ///< Response packet parser.
-            http::WsFrameBuffer receiver; ///< WebSocket frame buffer.
+            HttpParser        parser; ///< Request packet parser.
+            HttpProperty      builder; ///< Response packet parser.
+            ws::WsFrameBuffer receiver; ///< WebSocket frame buffer.
         } __on_read_only__; ///< @warning It should only be used with the onRead() method.
 
     private:
-        http::WsFrameBuffer _buffer;
+        ws::WsFrameBuffer _buffer;
 
     public:
         HttpNode(Loop & loop, StreamType type, HttpServer * parent);
@@ -116,7 +116,7 @@ public:
         inline bool isClosing() const TBAG_NOEXCEPT_SP_OP(_closing.load()) { return _closing.load(); }
 
     private:
-        Err writeWsFrame(http::WsFrame const & frame);
+        Err writeWsFrame(ws::WsFrame const & frame);
 
     public:
         Err writeText(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
@@ -125,12 +125,12 @@ public:
         Err writeBinary(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
         Err writeBinary(WsBuffer const & binary, bool continuation = false, bool finish = true);
 
-        Err writeHttpResponse(HttpBuilder const & response);
+        Err writeHttpResponse(HttpResponse const & response);
         Err writeString(std::string const & response);
 
     public:
         Err closeWebSocket(uint16_t status_code, std::string const & reason);
-        Err closeWebSocket(WsStatusCode code);
+        Err closeWebSocket(ws::WsStatusCode code);
 
     private:
         /** WebSocket interrupt process (WebSocket Frame). */
@@ -138,9 +138,9 @@ public:
 
     protected:
         virtual void onShutdown(Err code) final override;
-        virtual void onWrite(Err code) final override;
-        virtual void onRead(Err code, ReadPacket const & packet) final override;
-        virtual void onTimer() final override;
+        virtual void onWrite   (Err code) final override;
+        virtual void onRead    (Err code, ReadPacket const & packet) final override;
+        virtual void onTimer   () final override;
     };
 
     using SharedHttpNode = std::shared_ptr<HttpNode>;
@@ -149,21 +149,21 @@ public:
     /** HTTP packet reference. */
     struct HttpPacket
     {
-        http::HttpParser const & request;
-        HttpBuilder & response;
+        HttpParser const & request;
+        HttpResponse & response;
 
-        HttpPacket(http::HttpParser const & req, HttpBuilder & rsp) : request(req), response(rsp) { /* EMPTY. */ }
+        HttpPacket(HttpParser const & req, HttpResponse & rsp) : request(req), response(rsp) { /* EMPTY. */ }
         ~HttpPacket() { /* EMPTY. */ }
     };
 
     /** WebSocket packet information. */
     struct WsPacket
     {
-        WsOpCode opcode;
+        ws::WsOpCode opcode;
         char const * buffer;
         std::size_t size;
 
-        WsPacket(WsOpCode o, char const * b, std::size_t s) : opcode(o), buffer(b), size(s) { /* EMPTY. */ }
+        WsPacket(ws::WsOpCode o, char const * b, std::size_t s) : opcode(o), buffer(b), size(s) { /* EMPTY. */ }
         ~WsPacket() { /* EMPTY. */ }
     };
 
@@ -260,7 +260,7 @@ public:
     virtual void onWsOpen(WeakClient node, Err code, HttpPacket & packet) { /* EMPTY. */ }
 
     /** When a message has been received from WebSocket server. */
-    virtual void onWsMessage(WeakClient node, WsOpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
+    virtual void onWsMessage(WeakClient node, ws::WsOpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }
 };
 
 } // namespace http

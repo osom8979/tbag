@@ -2,19 +2,14 @@
  * @file   HttpParser.cpp
  * @brief  HttpParser class implementation.
  * @author zer0
- * @date   2017-05-18
+ * @date   2017-10-03
  */
 
 #include <libtbag/network/http/HttpParser.hpp>
-#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <http_parser.h>
 #include <cassert>
-#include <algorithm>
-#include <utility>
-
-#define DISABLE_HTTP_PARSER_VERBOSE_LOG
+#include <http_parser.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,55 +31,41 @@ static int __global_http_on_chunk_header__    (http_parser * parser);
 static int __global_http_on_chunk_complete__  (http_parser * parser);
 // @formatter:on
 
-// ------------------------------
-// HttpParserImpl implementation.
-// ------------------------------
-
 /**
- * HttpParserImpl class implementation.
+ * ParserImpl class implementation.
  *
  * @author zer0
  * @date   2017-05-18
+ * @date   2017-10-02 (Rename: HttpParser::HttpParserImpl -> HttpPacket::ParserImpl)
+ * @date   2017-10-03 (Rename: HttpPacket::HttpParserImpl -> HttpParser::ParserImpl)
  */
-class HttpParser::HttpParserImpl : private Noncopyable
+struct HttpParser::ParserImpl : private Noncopyable
 {
-public:
-    using BodyBuffer = HttpCommonProperty::BodyBuffer;
-
-public:
-    struct Cache
-    {
-        std::string field;
-    };
-
 public:
     HttpParser * parent;
 
-public:
-    http_parser parser;
-    http_parser_settings settings;
-
-public:
-    HttpHeaderMap headers;
-    BodyBuffer body;
-    std::string url;
-    std::string status;
+    http_parser           parser;
+    http_parser_settings  settings;
 
     bool header_complete;
     bool body_complete;
     bool message_complete;
 
-public:
-    Cache cache;
+    struct {
+        ParserType   direction;
+        HttpProperty property;
+        std::string  header_field_temp;
+    } __cache__;
 
-public:
-    HttpParserImpl(HttpParser * p) : parent(p)
+    ParserImpl(HttpParser * p, ParserType parser_type)
+            : parent(p), header_complete(false), body_complete(false), message_complete(false)
     {
         assert(p);
+
         http_parser_type type;
-        if (parent->TYPE == Type::REQUEST) {
+        if (parser_type == ParserType::REQUEST) {
             type = HTTP_REQUEST;
-        } else if (parent->TYPE == Type::RESPONSE) {
+        } else if (parser_type == ParserType::RESPONSE) {
             type = HTTP_RESPONSE;
         } else {
             type = HTTP_BOTH;
@@ -93,6 +74,23 @@ public:
         ::http_parser_init(&parser, type);
         parser.data = this;
 
+        // Callbacks should return non-zero to indicate an error. The parser will
+        // then halt execution.
+        //
+        // The one exception is on_headers_complete. In a HTTP_RESPONSE parser
+        // returning '1' from on_headers_complete will tell the parser that it
+        // should not expect a body. This is used when receiving a response to a
+        // HEAD request which may contain 'Content-Length' or 'Transfer-Encoding:
+        // chunked' headers that indicate the presence of a body.
+        //
+        // Returning `2` from on_headers_complete will tell parser that it should not
+        // expect neither a body nor any futher responses on this connection. This is
+        // useful for handling responses to a CONNECT request which may not contain
+        // `Upgrade` or `Connection: upgrade` headers.
+        //
+        // http_data_cb does not return data chunks. It will be called arbitrarily
+        // many times for each string. E.G. you might get 10 callbacks for "on_url"
+        // each providing just a few characters more data.
         ::http_parser_settings_init(&settings);
         settings.on_message_begin    = __global_http_on_message_begin__   ;
         settings.on_url              = __global_http_on_url__             ;
@@ -104,25 +102,15 @@ public:
         settings.on_message_complete = __global_http_on_message_complete__;
         settings.on_chunk_header     = __global_http_on_chunk_header__    ;
         settings.on_chunk_complete   = __global_http_on_chunk_complete__  ;
-
-        header_complete  = false;
-        body_complete    = false;
-        message_complete = false;
     }
 
-    ~HttpParserImpl()
+    ~ParserImpl()
     {
         // EMPTY.
     }
 
-public:
     void clear()
     {
-        headers.clear();
-        body.clear();
-        url.clear();
-        status.clear();
-
         header_complete  = false;
         body_complete    = false;
         message_complete = false;
@@ -130,107 +118,8 @@ public:
 
     void clearCache()
     {
-        cache.field.clear();
-    }
-
-public:
-    inline void insertHeader(std::string const & key, std::string const & val)
-    {
-        headers.insert(HttpHeaderPair(key, val));
-    }
-
-    inline std::string getHeader(std::string const & key) const
-    {
-        auto itr = headers.find(key);
-        if (itr != headers.end()) {
-            return itr->second;
-        }
-        return std::string();
-    }
-
-    inline bool eraseHeader(std::string const & key)
-    {
-        return headers.erase(key) == 1U;
-    }
-
-    inline bool existsHeader(std::string const & key) const
-    {
-        return headers.find(key) != headers.end();
-    }
-
-    bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case) const
-    {
-        return HttpCommon::existsHeaderValueFromHeaderMap(headers, key, value, ignore_case);
-    }
-
-    inline void appendBody(std::string const & content)
-    {
-        body.insert(body.end(), content.begin(), content.end());
-    }
-
-public:
-    std::size_t execute(char const * data, std::size_t length)
-    {
-        return ::http_parser_execute(&parser, &settings, data, length);
-    }
-
-    bool shouldKeepAlive() const TBAG_NOEXCEPT
-    {
-        // If http_should_keep_alive() in the on_headers_complete or
-        // on_message_complete callback returns 0, then this should be
-        // the last message on the connection.
-        // If you are the server, respond with the "Connection: close" header.
-        // If you are the client, close the connection.
-        return ::http_should_keep_alive(&parser) != 0;
-    }
-
-    void pause(bool paused)
-    {
-        // Pause or un-pause the parser; a nonzero value pauses.
-        ::http_parser_pause(&parser, (paused ? 1 : 0));
-    }
-
-    bool bodyIsFinal() const TBAG_NOEXCEPT
-    {
-        // Checks if this is the final chunk of the body.
-        return ::http_body_is_final(&parser) != 0;
-    }
-
-    char const * getMethodName() const
-    {
-        return getMethodName(static_cast<http_method>(parser.method));
-    }
-
-    char const * getErrnoName() const
-    {
-        return getErrnoName(static_cast<http_errno>(parser.http_errno));
-    }
-
-    char const * getErrnoDescription() const
-    {
-        return getErrnoDescription(static_cast<http_errno>(parser.http_errno));
-    }
-
-    // ---------------
-    // Static methods.
-    // ---------------
-
-    static char const * getMethodName(enum http_method m)
-    {
-        // Returns a string version of the HTTP method.
-        return ::http_method_str(m);
-    }
-
-    static const char * getErrnoName(enum http_errno err)
-    {
-        // Return a string name of the given error.
-        return ::http_errno_name(err);
-    }
-
-    static const char * getErrnoDescription(enum http_errno err)
-    {
-        // Return a string description of the given error.
-        return ::http_errno_description(err);
+        __cache__.property.clear();
+        __cache__.header_field_temp.clear();
     }
 };
 
@@ -241,7 +130,7 @@ public:
 int __global_http_on_message_begin__(http_parser * parser)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
@@ -252,70 +141,80 @@ int __global_http_on_message_begin__(http_parser * parser)
 int __global_http_on_url__(http_parser * parser, const char * at, std::size_t length)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+    auto & property  = impl->__cache__.property;
+    auto & direction = impl->__cache__.direction;
 
+    direction = HttpParser::ParserType::REQUEST;
+    property.method = ::http_method_str(static_cast<http_method>(parser->method));
     if (length == 0) {
-        impl->url.clear();
+        property.path.clear();
     } else {
-        impl->url.assign(at, at + length);
+        property.path.assign(at, at + length);
     }
-    return impl->parent->onUrl(impl->url);
+    return impl->parent->onUrl(at, length);
 }
 
 int __global_http_on_status__(http_parser * parser, const char * at, std::size_t length)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+    auto & property  = impl->__cache__.property;
+    auto & direction = impl->__cache__.direction;
 
+    direction = HttpParser::ParserType::RESPONSE;
     if (length == 0) {
-        impl->status.clear();
+        property.reason.clear();
     } else {
-        impl->status.assign(at, at + length);
+        property.reason.assign(at, at + length);
     }
-    return impl->parent->onStatus(impl->status);
+    return impl->parent->onStatus(at, length);
 }
 
 int __global_http_on_header_field__(http_parser * parser, const char * at, std::size_t length)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
     if (length == 0) {
-        impl->cache.field.clear();
+        impl->__cache__.header_field_temp.clear();
     } else {
-        impl->cache.field.assign(at, at + length);
+        impl->__cache__.header_field_temp.assign(at, at + length);
     }
-    return impl->parent->onHeaderField(impl->cache.field);
+    return impl->parent->onHeaderField(at, length);
 }
 
 int __global_http_on_header_value__(http_parser * parser, const char * at, std::size_t length)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+    auto & property = impl->__cache__.property;
 
-    std::string const VALUE(at, at + length);
-    if (impl->cache.field.empty() == false) {
-        impl->insertHeader(impl->cache.field, VALUE);
+    property.code = impl->parser.status_code;
+    if (impl->__cache__.header_field_temp.empty() == false) {
+        property.insert(impl->__cache__.header_field_temp, std::string(at, at + length));
     }
-    impl->clearCache();
-    return impl->parent->onHeaderValue(VALUE);
+    impl->__cache__.header_field_temp.clear();
+    return impl->parent->onHeaderValue(at, length);
 }
 
 int __global_http_on_headers_complete__(http_parser * parser)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+    auto & property = impl->__cache__.property;
 
+    property.setVersion(parser->http_major, parser->http_minor);
     impl->header_complete = true;
     return impl->parent->onHeadersComplete();
 }
@@ -323,24 +222,24 @@ int __global_http_on_headers_complete__(http_parser * parser)
 int __global_http_on_body__(http_parser * parser, const char * at, std::size_t length)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
+    auto & property = impl->__cache__.property;
 
     if (::http_body_is_final(parser) != 0) {
         // Checks if this is the final chunk of the body.
         impl->body_complete = true;
     }
 
-    std::string const BODY_CHUNK(at, at + length);
-    impl->appendBody(BODY_CHUNK);
-    return impl->parent->onBody(BODY_CHUNK);
+    property.body.insert(property.body.end(), at, at + length);
+    return impl->parent->onBody(at, length);
 }
 
 int __global_http_on_message_complete__(http_parser * parser)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
 
@@ -358,7 +257,7 @@ int __global_http_on_chunk_header__(http_parser * parser)
     // When on_chunk_header is called, the current chunk length is stored
     // in parser->content_length.
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
     return impl->parent->onChunkHeader();
@@ -367,7 +266,7 @@ int __global_http_on_chunk_header__(http_parser * parser)
 int __global_http_on_chunk_complete__(http_parser * parser)
 {
     assert(parser != nullptr);
-    HttpParser::HttpParserImpl * impl = static_cast<HttpParser::HttpParserImpl*>(parser->data);
+    HttpParser::ParserImpl * impl = static_cast<HttpParser::ParserImpl*>(parser->data);
     assert(impl != nullptr);
     assert(impl->parent != nullptr);
     return impl->parent->onChunkComplete();
@@ -377,9 +276,9 @@ int __global_http_on_chunk_complete__(http_parser * parser)
 // HttpParser implementation.
 // --------------------------
 
-HttpParser::HttpParser(Type type) : TYPE(type), _parser(new HttpParserImpl(this))
+HttpParser::HttpParser(ParserType type) : _impl(new ParserImpl(this, type))
 {
-    assert(static_cast<bool>(_parser));
+    assert(static_cast<bool>(_impl));
 }
 
 HttpParser::~HttpParser()
@@ -389,235 +288,70 @@ HttpParser::~HttpParser()
 
 void HttpParser::clear()
 {
-    _parser->clear();
-    _parser->clearCache();
+    _impl->clear();
+    _impl->clearCache();
 }
 
-void HttpParser::clearCache()
+Err HttpParser::execute(char const * data, std::size_t size, std::size_t * read_size, ParserType * direction)
 {
-    _parser->clearCache();
-}
+    std::size_t const EXEC_SIZE = ::http_parser_execute(&_impl->parser, &_impl->settings, data, size);
+    if (_impl->parser.http_errno != HPE_OK) {
+        tDLogE("HttpParser::execute() Execute {} error", getErrnoName());
+        return Err::E_PARSING;
+    }
 
-HttpHeaderMap const & HttpParser::atHeaders() const
-{
-    return _parser->headers;
-}
-
-std::string HttpParser::getHeader(std::string const & key) const
-{
-    return _parser->getHeader(key);
-}
-
-bool HttpParser::existsHeader(std::string const & key) const
-{
-    return _parser->existsHeader(key);
-}
-
-bool HttpParser::existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case) const
-{
-    return _parser->existsHeaderValue(key, value, ignore_case);
-}
-
-std::string HttpParser::getUrl() const
-{
-    return _parser->url;
-}
-
-std::string HttpParser::getBody() const
-{
-    return std::string(_parser->body.begin(), _parser->body.end());
-}
-
-std::string HttpParser::getStatus() const
-{
-    return _parser->status;
-}
-
-bool HttpParser::isComplete() const TBAG_NOEXCEPT
-{
-    return _parser->header_complete && (_parser->body_complete || _parser->message_complete);
-}
-
-int HttpParser::getHttpMajor() const TBAG_NOEXCEPT
-{
-    return _parser->parser.http_major;
-}
-
-int HttpParser::getHttpMinor() const TBAG_NOEXCEPT
-{
-    return _parser->parser.http_minor;
-}
-
-int HttpParser::getHttpErrno() const TBAG_NOEXCEPT
-{
-    return _parser->parser.http_errno;
-}
-
-int HttpParser::getStatusCode() const TBAG_NOEXCEPT
-{
-    return _parser->parser.status_code;
-}
-
-int HttpParser::getMethod() const TBAG_NOEXCEPT
-{
-    return _parser->parser.method;
-}
-
-bool HttpParser::isUpgrade() const TBAG_NOEXCEPT
-{
-    // 1 = Upgrade header was present and the parser has exited because of that.
-    // 0 = No upgrade header present.
-    // Should be checked when http_parser_execute() returns in addition to error checking.
-    return _parser->parser.upgrade == 1 ? true : false;
-}
-
-std::string HttpParser::getMethodName() const
-{
-    return std::string(_parser->getMethodName());
-}
-
-std::string HttpParser::getErrnoName() const
-{
-    return std::string(_parser->getErrnoName());
-}
-
-std::string HttpParser::getErrnoDescription() const
-{
-    return std::string(_parser->getErrnoDescription());
-}
-
-std::size_t HttpParser::execute(char const * data, std::size_t length)
-{
-    return _parser->execute(data, length);
+    if (isFinish()) {
+        swap(_impl->__cache__.property);
+    }
+    if (read_size != nullptr) {
+        *read_size = EXEC_SIZE;
+    }
+    if (direction != nullptr) {
+        *direction = _impl->__cache__.direction;
+    }
+    return Err::E_SUCCESS;
 }
 
 bool HttpParser::shouldKeepAlive() const TBAG_NOEXCEPT
 {
-    return _parser->shouldKeepAlive();
+    // If http_should_keep_alive() in the on_headers_complete or
+    // on_message_complete callback returns 0, then this should be
+    // the last message on the connection.
+    // If you are the server, respond with the "Connection: close" header.
+    // If you are the client, close the connection.
+    return ::http_should_keep_alive(&_impl->parser) != 0;
 }
 
 bool HttpParser::bodyIsFinal() const TBAG_NOEXCEPT
 {
-    return _parser->bodyIsFinal();
+    // Checks if this is the final chunk of the body.
+    return ::http_body_is_final(&_impl->parser) != 0;
 }
 
-void HttpParser::pause(bool is_paused)
+bool HttpParser::isUpgrade() const TBAG_NOEXCEPT
 {
-    _parser->pause(is_paused);
+    return _impl->parser.upgrade == 1 ? true : false;
 }
 
-http::HttpRequest HttpParser::getRequest() const
+bool HttpParser::isFinish() const TBAG_NOEXCEPT
 {
-    HttpRequest req;
-    req.http_major = _parser->parser.http_major;
-    req.http_minor = _parser->parser.http_minor;
-    req.headers    = _parser->headers;
-    req.body       = _parser->body;
-    req.method     = std::string(_parser->getMethodName());
-    req.url        = _parser->url;
-    return req;
+    return _impl->header_complete && (_impl->body_complete || _impl->message_complete);
 }
 
-http::HttpResponse HttpParser::getResponse() const
+void HttpParser::pause(bool paused)
 {
-    HttpResponse rsp;
-    rsp.http_major = _parser->parser.http_major;
-    rsp.http_minor = _parser->parser.http_minor;
-    rsp.headers    = _parser->headers;
-    rsp.body       = _parser->body;
-    rsp.status     = _parser->parser.status_code;
-    rsp.reason     = _parser->status;
-    return rsp;
+    // Pause or un-pause the parser; a nonzero value pauses.
+    ::http_parser_pause(&_impl->parser, (paused ? 1 : 0));
 }
 
-// --------------
-// Event methods.
-// --------------
-
-#ifndef DISABLE_HTTP_PARSER_VERBOSE_LOG
-#define hp_tDLogD(...) tDLogD(__VA_ARGS__)
-#else
-#define hp_tDLogD(...)
-#endif
-
-int HttpParser::onMessageBegin()
+char const * HttpParser::getErrnoName() const
 {
-    hp_tDLogD("HttpParser::onMessageBegin()");
-    return 0;
+    return ::http_errno_name(static_cast<http_errno>(_impl->parser.http_errno));
 }
 
-int HttpParser::onUrl(std::string const & at)
+char const * HttpParser::getErrnoDescription() const
 {
-    hp_tDLogD("HttpParser::onUrl({})", at);
-    return 0;
-}
-
-int HttpParser::onStatus(std::string const & at)
-{
-    hp_tDLogD("HttpParser::onStatus({})", at);
-    return 0;
-}
-
-int HttpParser::onHeaderField(std::string const & at)
-{
-    hp_tDLogD("HttpParser::onHeaderField({})", at);
-    return 0;
-}
-
-int HttpParser::onHeaderValue(std::string const & at)
-{
-    hp_tDLogD("HttpParser::onHeaderValue({})", at);
-    return 0;
-}
-
-int HttpParser::onHeadersComplete()
-{
-    hp_tDLogD("HttpParser::onHeadersComplete()");
-    return 0;
-}
-
-int HttpParser::onBody(std::string const & at)
-{
-    hp_tDLogD("HttpParser::onBody({})", at);
-    return 0;
-}
-
-int HttpParser::onMessageComplete()
-{
-    hp_tDLogD("HttpParser::onMessageComplete()");
-    return 0;
-}
-
-int HttpParser::onChunkHeader()
-{
-    hp_tDLogD("HttpParser::onChunkHeader()");
-    return 0;
-}
-
-int HttpParser::onChunkComplete()
-{
-    hp_tDLogD("HttpParser::onChunkComplete()");
-    return 0;
-}
-
-// -----------------
-// Debugging method.
-// -----------------
-
-std::string HttpParser::toDebugString() const
-{
-    if (TYPE == Type::REQUEST) {
-        return http::toDebugString(getRequest());
-    } else if (TYPE == Type::RESPONSE) {
-        return http::toDebugString(getResponse());
-    } else {
-        if (getStatusCode() == 0) {
-            return http::toDebugString(getRequest());
-        } else if (getMethod() == 0 && 100 <= COMPARE_AND(getStatusCode()) < 600) {
-            return http::toDebugString(getResponse());
-        }
-    }
-    return "UNKNOWN";
+    return ::http_errno_description(static_cast<http_errno>(_impl->parser.http_errno));
 }
 
 } // namespace http

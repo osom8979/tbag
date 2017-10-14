@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/HttpProperty.hpp>
 
 #include <string>
 #include <regex>
@@ -38,7 +38,7 @@ struct HttpFilterInterface
     HttpFilterInterface() { /* EMPTY. */ }
     virtual ~HttpFilterInterface() { /* EMPTY. */ }
 
-    virtual bool filter(http::HttpParser const & request) = 0;
+    virtual bool filter(HttpRequest const & request) = 0;
 };
 
 /**
@@ -68,7 +68,7 @@ public:
     HttpDefaultFilter & operator =(HttpDefaultFilter && obj);
 
 public:
-    virtual bool filter(http::HttpParser const & request) override;
+    virtual bool filter(HttpRequest const & request) override;
 };
 
 } // namespace http

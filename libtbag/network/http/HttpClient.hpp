@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 
+#include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/network/http/HttpReader.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -39,9 +40,9 @@ class TBAG_API HttpClient : public stream::StreamClient, public HttpReaderInterf
 public:
     using StreamType = details::StreamType;
     using Parent     = stream::StreamClient;
-
-    using Loop = uvpp::Loop;
-    using HttpProperty = common::HttpProperty;
+    using Loop       = uvpp::Loop;
+    using Masking    = random::MaskingDevice;
+    using WsFrame    = ws::WsFrame;
 
     enum class EventType
     {
@@ -52,13 +53,24 @@ public:
 
 private:
     HttpReaderForCallback<HttpClient> _reader;
+    Masking _device;
 
 public:
     HttpClient(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~HttpClient();
 
 public:
-    Err writeRequest(HttpProperty const & property);
+    Err writeRequest(HttpRequest const & request);
+    Err writeWsFrame(WsFrame const & frame);
+
+public:
+    Err writeText(char const * buffer, std::size_t size, bool finish = true);
+    Err writeText(std::string const & text, bool finish = true);
+
+    Err writeBinary(char const * buffer, std::size_t size, bool finish = true);
+    Err writeBinary(util::Buffer const & binary, bool finish = true);
+
+    Err writeClose();
 
 public:
     virtual void onConnect(Err code) override;

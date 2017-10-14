@@ -2,7 +2,7 @@
  * @file   HttpParser.hpp
  * @brief  HttpParser class prototype.
  * @author zer0
- * @date   2017-05-18
+ * @date   2017-10-03
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPARSER_HPP__
@@ -15,13 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <libtbag/network/http/HttpProperty.hpp>
 
 #include <memory>
 #include <string>
-#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,60 +34,42 @@ namespace http    {
  *
  * @author zer0
  * @date   2017-05-18
+ * @date   2017-10-02 (Rename: HttpParser -> HttpPacket)
+ * @date   2017-10-03 (Rename: HttpPacket -> HttpParser)
  */
-class TBAG_API HttpParser : private Noncopyable
+class TBAG_API HttpParser : public HttpProperty,
+                            private Noncopyable
 {
 public:
-    class HttpParserImpl;
-
-public:
-    enum class Type : int
+    enum class ParserType
     {
         REQUEST, RESPONSE, BOTH
     };
 
 public:
-    using UniqueHttpParser = std::unique_ptr<HttpParserImpl>;
+    struct ParserImpl;
+    friend struct ParserImpl;
+
+    using UniqueParserImpl = std::shared_ptr<ParserImpl>;
 
 private:
-    Type const TYPE;
-    UniqueHttpParser _parser;
+    UniqueParserImpl _impl;
 
 public:
-    HttpParser(Type type = Type::BOTH);
-    ~HttpParser();
-
-public:
-    // @formatter:off
-    inline Type getType() const TBAG_NOEXCEPT
-    { return TYPE; }
-    // @formatter:on
+    HttpParser(ParserType type = ParserType::BOTH);
+    virtual ~HttpParser();
 
 public:
     void clear();
-    void clearCache();
-
-    HttpHeaderMap const & atHeaders() const;
-    std::string getHeader(std::string const & key) const;
-    bool existsHeader(std::string const & key) const;
-    bool existsHeaderValue(std::string const & key, std::string const & value, bool ignore_case = true) const;
-
-    std::string getUrl() const;
-    std::string getBody() const;
-    std::string getStatus() const;
-
-    bool isComplete() const TBAG_NOEXCEPT;
 
 public:
-    int getHttpMajor() const TBAG_NOEXCEPT;
-    int getHttpMinor() const TBAG_NOEXCEPT;
-    int getHttpErrno() const TBAG_NOEXCEPT;
+    Err execute(char const * data, std::size_t size,
+                std::size_t * read_size = nullptr,
+                ParserType * direction = nullptr);
 
-    /** Responses only. */
-    int getStatusCode() const TBAG_NOEXCEPT;
-
-    /** Requests only. */
-    int getMethod() const TBAG_NOEXCEPT;
+public:
+    bool shouldKeepAlive() const TBAG_NOEXCEPT;
+    bool bodyIsFinal() const TBAG_NOEXCEPT;
 
     /**
      * Check the Upgrade header.
@@ -102,65 +83,29 @@ public:
      *  Should be checked when execute() returns in addition to error checking.
      */
     bool isUpgrade() const TBAG_NOEXCEPT;
+    bool isFinish() const TBAG_NOEXCEPT;
 
 public:
-    std::string getMethodName() const;
-    std::string getErrnoName() const;
-    std::string getErrnoDescription() const;
+    void pause(bool paused);
 
 public:
-    std::size_t execute(char const * data, std::size_t length);
-
-public:
-    bool shouldKeepAlive() const TBAG_NOEXCEPT;
-    bool bodyIsFinal() const TBAG_NOEXCEPT;
-
-public:
-    void pause(bool is_paused = true);
-
-public:
-    http::HttpRequest getRequest() const;
-    http::HttpResponse getResponse() const;
+    char const * getErrnoName() const;
+    char const * getErrnoDescription() const;
 
 // Event methods.
 public:
-    virtual int onMessageBegin    ();
-    virtual int onUrl             (std::string const & at);
-    virtual int onStatus          (std::string const & at);
-    virtual int onHeaderField     (std::string const & at);
-    virtual int onHeaderValue     (std::string const & at);
-    virtual int onHeadersComplete ();
-    virtual int onBody            (std::string const & at);
-    virtual int onMessageComplete ();
-    virtual int onChunkHeader     ();
-    virtual int onChunkComplete   ();
-
-public:
-    std::string toDebugString() const;
-};
-
-/**
- * HttpRequestParser class prototype.
- *
- * @author zer0
- * @date   2017-05-24
- */
-struct HttpRequestParser : public http::HttpParser
-{
-    HttpRequestParser() : HttpParser(HttpParser::Type::REQUEST)
-    { /* EMPTY. */ }
-};
-
-/**
- * HttpResponseParser class prototype.
- *
- * @author zer0
- * @date   2017-05-24
- */
-struct HttpResponseParser : public http::HttpParser
-{
-    HttpResponseParser() : HttpParser(HttpParser::Type::RESPONSE)
-    { /* EMPTY. */ }
+    // @formatter:off
+    virtual int onMessageBegin    () { return 0; }
+    virtual int onUrl             (char const * buffer, std::size_t size) { return 0; }
+    virtual int onStatus          (char const * buffer, std::size_t size) { return 0; }
+    virtual int onHeaderField     (char const * buffer, std::size_t size) { return 0; }
+    virtual int onHeaderValue     (char const * buffer, std::size_t size) { return 0; }
+    virtual int onHeadersComplete () { return 0; }
+    virtual int onBody            (char const * buffer, std::size_t size) { return 0; }
+    virtual int onMessageComplete () { return 0; }
+    virtual int onChunkHeader     () { return 0; }
+    virtual int onChunkComplete   () { return 0; }
+    // @formatter:on
 };
 
 } // namespace http

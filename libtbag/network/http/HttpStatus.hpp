@@ -5,8 +5,8 @@
  * @date   2017-09-29
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPSTATUS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPSTATUS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPSTATUS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPSTATUS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,7 +24,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
-namespace common  {
 
 // HTTP Status Code Definitions.
 // Reference: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -105,7 +104,6 @@ TBAG_API int          getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT;
 TBAG_API HttpStatus getHttpStatus(int status) TBAG_NOEXCEPT;
 TBAG_API HttpStatus getHttpStatus(std::string const & status);
 
-} // namespace common
 } // namespace http
 } // namespace network
 
@@ -113,5 +111,5 @@ TBAG_API HttpStatus getHttpStatus(std::string const & status);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPSTATUS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPSTATUS_HPP__
 

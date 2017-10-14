@@ -308,7 +308,7 @@ bool Loop::eraseChildHandle(void * native_handle)
 
     if (_handles.erase(NativeHandle(native_handle)) != 1U) {
         tDLogE("Loop::eraseChildHandle(@{}[{}]) Failure (Handles: {})",
-               HANDLE_ADDRESS, HANDLE_NAME, _handles.size());
+               HANDLE_ADDRESS, HANDLE_NAME, _handle_count);
         return false;
     }
 
@@ -338,7 +338,7 @@ Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
     }
 
     tDLogE("Loop::insertChildHandle(@{}[{}]) Failure (Handles: {})",
-           static_cast<void*>(h.get()), h->getName(), _handles.size());
+           static_cast<void*>(h.get()), h->getName(), _handle_count);
     return WeakHandle();
 }
 

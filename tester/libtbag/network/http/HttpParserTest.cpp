@@ -6,12 +6,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/common/HttpParser.hpp>
+#include <libtbag/network/http/HttpParser.hpp>
 
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
-using namespace libtbag::network::http::common;
 
 TEST(HttpParserTest, Request)
 {
@@ -37,13 +36,13 @@ TEST(HttpParserTest, Request)
     ASSERT_EQ(Err::E_SUCCESS, http.execute(TEST_DATA, TEST_DATA_LENGTH, &read_size));
     ASSERT_EQ(TEST_DATA_LENGTH, read_size);
 
-    ASSERT_EQ(1, http.atRequest().version.http_major);
-    ASSERT_EQ(1, http.atRequest().version.http_minor);
-    ASSERT_EQ(10U, http.size());
+    ASSERT_EQ(1, http.http_major);
+    ASSERT_EQ(1, http.http_minor);
+    ASSERT_EQ(10U, http.sizeOfHeaders());
     ASSERT_STREQ("github.com", http.get("Host").c_str());
-    ASSERT_STREQ("POST", http.atRequest().method.c_str());
-    ASSERT_STREQ("/joyent/http-parser", http.atRequest().uri.c_str());
-    ASSERT_LT(0, http.atBody().size());
+    ASSERT_STREQ("POST", http.method.c_str());
+    ASSERT_STREQ("/joyent/http-parser", http.path.c_str());
+    ASSERT_LT(0, http.body.size());
 }
 
 TEST(HttpParserTest, Response)
@@ -79,10 +78,10 @@ TEST(HttpParserTest, Response)
         }
     }
 
-    ASSERT_EQ(1, http.atResponse().version.http_major);
-    ASSERT_EQ(1, http.atResponse().version.http_minor);
-    ASSERT_EQ(8U, http.size());
-    ASSERT_EQ(301, http.atResponse().code);
-    ASSERT_LT(0, http.atBody().size());
+    ASSERT_EQ(1, http.http_major);
+    ASSERT_EQ(1, http.http_minor);
+    ASSERT_EQ(8U, http.sizeOfHeaders());
+    ASSERT_EQ(301, http.code);
+    ASSERT_LT(0, http.body.size());
 }
 

@@ -5,7 +5,7 @@
  * @date   2017-09-29
  */
 
-#include <libtbag/network/http/common/HttpHeader.hpp>
+#include <libtbag/network/http/HttpHeader.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
@@ -17,7 +17,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
-namespace common  {
 
 HttpHeader::HttpHeader() : _headers()
 {
@@ -178,7 +177,7 @@ bool HttpHeader::existsInSplitValues(key_type const & key,
     return false;
 }
 
-std::string HttpHeader::toString() const
+std::string HttpHeader::toMessageHeader() const
 {
     std::stringstream ss;
     for (auto & header : _headers) {
@@ -187,43 +186,6 @@ std::string HttpHeader::toString() const
     return ss.str();
 }
 
-// ------------------------
-// Miscellaneous utilities.
-// ------------------------
-
-void updateDefaultRequest(HttpHeader & header, std::size_t body_size)
-{
-    header.insertIfNotExists(HEADER_USER_AGENT, DEFAULT_VALUE_OF_USER_AGENT);
-    header.insertIfNotExists(HEADER_ACCEPT, DEFAULT_VALUE_OF_ACCEPT);
-    if (body_size > 0) {
-        header.insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
-    }
-}
-
-void updateDefaultResponse(HttpHeader & header, std::size_t body_size)
-{
-    header.insertIfNotExists(HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
-    header.insertIfNotExists(HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
-    if (body_size > 0) {
-        header.insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body_size));
-    }
-}
-
-std::vector<int> getWsVersions(HttpHeader const & header)
-{
-    std::vector<int> result;
-    auto const VERSIONS = header.getIgnoreCase(HEADER_SEC_WEBSOCKET_VERSION);
-    for (auto & ver : string::splitTokens(VERSIONS, DEFAULT_VALUE_DELIMITER)) {
-        try {
-            result.push_back(std::stoi(string::trim(ver)));
-        } catch (...) {
-            // SKIP.
-        }
-    }
-    return result;
-}
-
-} // namespace common
 } // namespace http
 } // namespace network
 

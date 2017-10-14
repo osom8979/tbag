@@ -10,7 +10,6 @@
 
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
-#include <libtbag/network/http/HttpBuilder.hpp>
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/http/FunctionalHttpServer.hpp>
 #include <libtbag/network/http/FunctionalWsClient.hpp>
@@ -36,10 +35,10 @@ TEST(NetworkHttpTest, HttpClient)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
 
-    common::HttpProperty response;
+    HttpResponse response;
     auto result = http::requestWithSync("http://osom8979.github.io", response, 10000);
     ASSERT_EQ(Err::E_SUCCESS, result);
-    ASSERT_EQ(200, response.getStatusCode());
+    ASSERT_EQ(200, response.code);
 }
 
 static bool runSimpleServerTest(HttpServer::StreamType type, std::string const & bind, std::string const & method)
@@ -58,9 +57,9 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     });
     server.set_onHttpRequest([&](WeakClient node, Err code, HttpPacket & packet){
         ++on_request;
-        packet.response.setStatus(200);
-        packet.response.setReason("OK");
-        packet.response.setBody(packet.request.getMethodName());
+        packet.response.code = 200;
+        packet.response.reason = "OK";
+        packet.response.setBody(packet.request.method);
     });
     server.set_onHttpClose([&](WeakClient node){
         ++on_close;
@@ -70,9 +69,9 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     Err server_result = Err::E_UNKNOWN;
     Err client_result = Err::E_UNKNOWN;
 
-    common::HttpProperty response;
-    common::HttpProperty request;
-    request.setMethod(method);
+    HttpResponse response;
+    HttpRequest  request;
+    request.method = method;
 
     std::thread server_thread([&](){ server_result = loop.run(); });
     std::thread client_thread([&](){
@@ -99,12 +98,12 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
         return false;
     }
 
-    if (200 != response.getStatusCode()) {
-        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response is not OK({}).", method, response.getStatusCode());
+    if (200 != response.code) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response is not OK({}).", method, response.code);
         return false;
     }
 
-    if (response.getBodyString() != method) {
+    if (response.toBodyString() != method) {
         tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response body error({}).", method, response.getBodyString());
         return false;
     }
@@ -174,30 +173,30 @@ TEST(NetworkHttpTest, RoutingServer)
     server.set_onHttpRequest([&](WeakClient node, Err code, HttpPacket & packet){
         std::cout << "Server.OnRequest()\n";
         ++on_request;
-        packet.response.setStatus(200);
-        packet.response.setReason("OK");
-        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.response.code = 200;
+        packet.response.reason = "OK";
+        packet.response.setBody(packet.request.method + packet.request.path);
     });
     server.setRequest("/Documents", [&](WeakClient node, Err code, HttpPacket & packet){
         std::cout << "Server.OnRequest(/Documents)\n";
         ++on_request_doc;
-        packet.response.setStatus(200);
-        packet.response.setReason("OK");
-        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.response.code = 200;
+        packet.response.reason = "OK";
+        packet.response.setBody(packet.request.method + packet.request.path);
     });
     server.setRequest("GET", "/Downloads", [&](WeakClient node, Err code, HttpPacket & packet){
         std::cout << "Server.OnRequest([GET]/Downloads)\n";
         ++on_request_down_get;
-        packet.response.setStatus(200);
-        packet.response.setReason("OK");
-        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.response.code = 200;
+        packet.response.reason = "OK";
+        packet.response.setBody(packet.request.method + packet.request.path);
     });
     server.setRequest("POST", "/Downloads", [&](WeakClient node, Err code, HttpPacket & packet){
         std::cout << "Server.OnRequest([POST]/Downloads)\n";
         ++on_request_down_post;
-        packet.response.setStatus(200);
-        packet.response.setReason("OK");
-        packet.response.setBody(packet.request.getMethodName() + packet.request.getUrl());
+        packet.response.code = 200;
+        packet.response.reason = "OK";
+        packet.response.setBody(packet.request.method + packet.request.path);
     });
 
     server.set_onHttpClose([&](WeakClient node){
@@ -210,16 +209,16 @@ TEST(NetworkHttpTest, RoutingServer)
     Err server_result = Err::E_UNKNOWN;
     Err client_result = Err::E_UNKNOWN;
 
-    common::HttpProperty response;
-    common::HttpProperty response_doc_get;
-    common::HttpProperty response_doc_post;
-    common::HttpProperty response_down_get;
-    common::HttpProperty response_down_post;
+    HttpProperty response;
+    HttpProperty response_doc_get;
+    HttpProperty response_doc_post;
+    HttpProperty response_down_get;
+    HttpProperty response_down_post;
 
-    common::HttpProperty request_get;
-    request_get.setMethod("GET");
-    common::HttpProperty request_post;
-    request_post.setMethod("POST");
+    HttpProperty request_get;
+    request_get.method = "GET";
+    HttpProperty request_post;
+    request_post.method = "POST";
 
     std::thread server_thread([&](){ server_result = loop.run(); });
     std::thread client1_thread([&](){ client_result = http::requestWithSync(request_url, response, 1000); });
@@ -235,11 +234,11 @@ TEST(NetworkHttpTest, RoutingServer)
     client5_thread.join();
     server_thread.join();
 
-    ASSERT_EQ(200, response.getStatusCode());
-    ASSERT_EQ(200, response_doc_get.getStatusCode());
-    ASSERT_EQ(200, response_doc_post.getStatusCode());
-    ASSERT_EQ(200, response_down_get.getStatusCode());
-    ASSERT_EQ(200, response_down_post.getStatusCode());
+    ASSERT_EQ(200, response.code);
+    ASSERT_EQ(200, response_doc_get.code);
+    ASSERT_EQ(200, response_doc_post.code);
+    ASSERT_EQ(200, response_down_get.code);
+    ASSERT_EQ(200, response_down_post.code);
 
     ASSERT_EQ(5, on_open             );
     ASSERT_EQ(1, on_request          );
@@ -264,25 +263,25 @@ TEST(NetworkHttpTest, WebSocketEcho)
 
     server.set_onWsOpen([&](WeakClient node, Err code, HttpPacket & packet){
         std::cout << "Server.OnWebSocketOpen(" << getErrName(code)
-                  << ")\nRequest:\n" << packet.request.toDebugString()
-                  << "\nResponse:\n" << packet.response.toResponseDebugString()
+                  << ")\nRequest:\n" << packet.request.toDebugRequestString()
+                  << "\nResponse:\n" << packet.response.toDebugResponseString()
                   << std::endl;
     });
-    server.set_onWsMessage([&](WeakClient node, WsOpCode op, char const * buffer, std::size_t size){
+    server.set_onWsMessage([&](WeakClient node, ws::WsOpCode op, char const * buffer, std::size_t size){
         server.writeText(node, std::string(buffer, buffer + size));
-        std::cout << "Server.OnWebSocketMessage(" << getWsOpCodeName(op) << ")\n";
+        std::cout << "Server.OnWebSocketMessage(" << ws::getWsOpCodeName(op) << ")\n";
     });
     server.set_onHttpClose([&](WeakClient node){
         std::cout << "Server.OnClose\n";
     });
 
     FuncWsClient client(loop);
-    HttpBuilder builder;
+    HttpProperty builder;
     Uri const URI(std::string("ws://localhost:") + std::to_string(SERVER_PORT));
-    builder.setMethod(getHttpMethodName(HttpMethod::M_GET));
-    builder.setUrl(URI.getRequestPath());
-    builder.insertHeader(HEADER_HOST, URI.getHost());
-    builder.insertHeader(HEADER_ORIGIN, URI.getHost());
+    builder.setHttpMethod(HttpMethod::M_GET);
+    builder.path = URI.getRequestPath();
+    builder.insert(HEADER_HOST, URI.getHost());
+    builder.insert(HEADER_ORIGIN, URI.getHost());
     client.setup(builder);
     ASSERT_EQ(Err::E_SUCCESS, client.init("127.0.0.1", SERVER_PORT));
 
@@ -296,8 +295,8 @@ TEST(NetworkHttpTest, WebSocketEcho)
         ASSERT_EQ(Err::E_SUCCESS, client.writeText(TEST_TEXT));
         ws_open_counter++;
     });
-    client.setOnWsMessage([&](WsOpCode op, char const * buffer, std::size_t size){
-        ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, op);
+    client.setOnWsMessage([&](ws::WsOpCode op, char const * buffer, std::size_t size){
+        ASSERT_EQ(ws::WsOpCode::WSOC_TEXT_FRAME, op);
         ASSERT_EQ(TEST_TEXT, std::string(buffer, buffer + size));
         ASSERT_EQ(Err::E_SUCCESS, client.closeWebSocket());
         ws_message_counter++;
@@ -306,8 +305,8 @@ TEST(NetworkHttpTest, WebSocketEcho)
         ws_error_counter++;
     });
     client.setOnWsClose([&](uint16_t code, std::string const & reason){
-        ASSERT_EQ(getWsStatusCodeNumber(WsStatusCode::WSSC_NORMAL_CLOSURE), code);
-        ASSERT_EQ(std::string(getWsStatusCodeReason(WsStatusCode::WSSC_NORMAL_CLOSURE)), reason);
+        ASSERT_EQ(ws::getWsStatusCodeNumber(ws::WsStatusCode::WSSC_NORMAL_CLOSURE), code);
+        ASSERT_EQ(std::string(getWsStatusCodeReason(ws::WsStatusCode::WSSC_NORMAL_CLOSURE)), reason);
         ASSERT_EQ(Err::E_SUCCESS, server.close());
         ws_close_counter++;
     });
@@ -369,10 +368,10 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     server.set_onWsOpen([&](WeakClient node, Err code, HttpPacket & packet){
         ++server_on_ws_open_count;
     });
-    server.set_onWsMessage([&](WeakClient node, WsOpCode op, char const * buffer, std::size_t size){
-        if (op == WsOpCode::WSOC_TEXT_FRAME) {
+    server.set_onWsMessage([&](WeakClient node, ws::WsOpCode op, char const * buffer, std::size_t size){
+        if (op == ws::WsOpCode::WSOC_TEXT_FRAME) {
             Err const write_code = server.writeText(node, std::string(buffer, buffer + size));
-            if (isWsWriteSuccess(write_code)) {
+            if (Err::E_ENQASYNC == write_code || Err::E_SUCCESS == write_code) {
                 ++server_on_ws_message_count;
             }
         }
@@ -418,12 +417,12 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
         auto client = clients[i];
         ASSERT_TRUE(static_cast<bool>(client));
 
-        HttpBuilder builder;
+        HttpProperty builder;
         Uri const URI(std::string("ws://localhost:") + std::to_string(SERVER_PORT));
-        builder.setMethod(getHttpMethodName(HttpMethod::M_GET));
-        builder.setUrl(URI.getRequestPath());
-        builder.insertHeader(HEADER_HOST, URI.getHost());
-        builder.insertHeader(HEADER_ORIGIN, URI.getHost());
+        builder.setHttpMethod(HttpMethod::M_GET);
+        builder.path = URI.getRequestPath();
+        builder.insert(HEADER_HOST, URI.getHost());
+        builder.insert(HEADER_ORIGIN, URI.getHost());
         client->setup(builder);
         ASSERT_EQ(Err::E_SUCCESS, client->init("127.0.0.1", SERVER_PORT));
 
@@ -434,7 +433,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
             client_write_threads[i] = std::thread([&, i](){
                 for (int echo_count = 0; echo_count < TEST_ECHO_COUNT; ++echo_count) {
                     Err write_code = clients[i]->writeText(TEST_TEXT);
-                    if (isWsWriteSuccess(write_code)) {
+                    if (Err::E_ENQASYNC == write_code || Err::E_SUCCESS == write_code) {
                         ++(ws_write_counter.at(i));
                     } else {
                         tDLogE("client[{}]->writeText() {} error", i, getErrName(write_code));
@@ -442,10 +441,10 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
                 }
             });
         });
-        client->setOnWsMessage([&, i](WsOpCode op, char const * buffer, std::size_t size){
+        client->setOnWsMessage([&, i](ws::WsOpCode op, char const * buffer, std::size_t size){
             auto shared_client = clients[i];
             ASSERT_TRUE(static_cast<bool>(shared_client));
-            ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, op);
+            ASSERT_EQ(ws::WsOpCode::WSOC_TEXT_FRAME, op);
             ASSERT_EQ(std::string(TEST_TEXT), std::string(buffer, buffer + size));
             ++(ws_message_counter.at(i));
             if (ws_message_counter.at(i) >= TEST_ECHO_COUNT) {

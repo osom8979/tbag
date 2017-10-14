@@ -5,8 +5,8 @@
  * @date   2017-09-29
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPMETHOD_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPMETHOD_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPMETHOD_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPMETHOD_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,7 +24,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
-namespace common  {
 
 #ifndef TBAG_HTTP_METHOD_MAP
 #define TBAG_HTTP_METHOD_MAP(_TBAG_XX)      \
@@ -108,7 +107,6 @@ TBAG_API int          getHttpMethodNumber(HttpMethod method) TBAG_NOEXCEPT;
 TBAG_API HttpMethod   getHttpMethod      (std::string const & name);
 // @formatter:on
 
-} // namespace common
 } // namespace http
 } // namespace network
 
@@ -116,5 +114,5 @@ TBAG_API HttpMethod   getHttpMethod      (std::string const & name);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_COMMON_HTTPMETHOD_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPMETHOD_HPP__
 

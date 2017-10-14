@@ -32,7 +32,7 @@ HttpServer::HttpNode::~HttpNode()
     // EMPTY.
 }
 
-Err HttpServer::HttpNode::writeWsFrame(WsFrame const & frame)
+Err HttpServer::HttpNode::writeWsFrame(ws::WsFrame const & frame)
 {
     WsBuffer buffer;
     std::size_t const SIZE = frame.copyTo(buffer);
@@ -49,12 +49,8 @@ Err HttpServer::HttpNode::writeText(char const * buffer, std::size_t size, bool 
         return Err::E_ILLSTATE;
     }
 
-    WsFrame frame;
-    Err const CODE = frame.text(buffer, size, continuation, finish);
-    if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("HttpServer::HttpNode::writeText() WsFrame build {} error.", getErrName(CODE));
-        return CODE;
-    }
+    ws::WsFrame frame;
+    frame.text(buffer, size, finish);
     return writeWsFrame(frame);
 }
 
@@ -69,12 +65,8 @@ Err HttpServer::HttpNode::writeBinary(char const * buffer, std::size_t size, boo
         return Err::E_ILLSTATE;
     }
 
-    WsFrame frame;
-    Err const CODE = frame.binary(buffer, size, continuation, finish);
-    if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("HttpServer::HttpNode::writeBinary() WsFrame build {} error.", getErrName(CODE));
-        return CODE;
-    }
+    ws::WsFrame frame;
+    frame.binary(buffer, size, finish);
     return writeWsFrame(frame);
 }
 
@@ -83,9 +75,11 @@ Err HttpServer::HttpNode::writeBinary(WsBuffer const & binary, bool continuation
     return writeBinary(binary.data(), binary.size(), continuation, finish);
 }
 
-Err HttpServer::HttpNode::writeHttpResponse(HttpBuilder const & response)
+Err HttpServer::HttpNode::writeHttpResponse(HttpResponse const & response)
 {
-    return writeString(response.buildDefaultResponseString());
+    HttpResponse temp = response;
+    temp.updateDefaultResponse();
+    return writeString(temp.toResponseString());
 }
 
 Err HttpServer::HttpNode::writeString(std::string const & response)
@@ -111,43 +105,40 @@ Err HttpServer::HttpNode::closeWebSocket(uint16_t status_code, std::string const
         return CLOSE_TIMER_CODE;
     }
 
-    WsFrame frame;
-    Err const CODE = frame.close(status_code, reason);
-    if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("HttpServer::HttpNode::closeWebSocket() WsFrame build {} error.", getErrName(CODE));
-        return CODE;
-    }
+    ws::WsFrame frame;
+    frame.close(status_code, reason);
     return writeWsFrame(frame);
 }
 
-Err HttpServer::HttpNode::closeWebSocket(WsStatusCode code)
+Err HttpServer::HttpNode::closeWebSocket(ws::WsStatusCode code)
 {
     return closeWebSocket(getWsStatusCodeNumber(code), getWsStatusCodeReason(code));
 }
 
 void HttpServer::HttpNode::backWsFrame(Err code, ReadPacket const & packet)
 {
-    __on_read_only__.receiver.exec(packet.buffer, packet.size, [&](WsOpCode opcode, bool finish, WsFrameBuffer::Buffer & buffer) -> bool {
-        if (finish) {
-            auto * server = getHttpServerPtr();
-            assert(server != nullptr);
+    __on_read_only__.receiver.push(packet.buffer, packet.size);
+    while (__on_read_only__.receiver.next()) {
+        auto opcode = __on_read_only__.receiver.getOpCode();
+        auto & payload = __on_read_only__.receiver.atPayload();
 
-            if (opcode == WsOpCode::WSOC_TEXT_FRAME || opcode == WsOpCode::WSOC_BINARY_FRAME) {
-                server->onWsMessage(getWeakClient(), opcode, &buffer[0], buffer.size());
+        auto * server = getHttpServerPtr();
+        assert(server != nullptr);
 
-            } else if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE) {
-                Err const WRITE_CLOSE_CODE = closeWebSocket(WsStatusCode::WSSC_NORMAL_CLOSURE);
-                if (TBAG_ERR_FAILURE(WRITE_CLOSE_CODE)) {
-                    tDLogE("HttpServer::HttpNode::backWsFrame() WebSocket close write {} error", getErrName(WRITE_CLOSE_CODE));
-                    close();
-                }
+        if (opcode == ws::WsOpCode::WSOC_TEXT_FRAME || opcode == ws::WsOpCode::WSOC_BINARY_FRAME) {
+            server->onWsMessage(getWeakClient(), opcode, &payload[0], payload.size());
 
-            } else {
-                tDLogW("HttpServer::HttpNode::backWsFrame() Unsupported opcode: {}", getWsOpCodeName(opcode));
+        } else if (opcode == ws::WsOpCode::WSOC_CONNECTION_CLOSE) {
+            Err const WRITE_CLOSE_CODE = closeWebSocket(ws::WsStatusCode::WSSC_NORMAL_CLOSURE);
+            if (TBAG_ERR_FAILURE(WRITE_CLOSE_CODE)) {
+                tDLogE("HttpServer::HttpNode::backWsFrame() WebSocket close write {} error", getErrName(WRITE_CLOSE_CODE));
+                close();
             }
+
+        } else {
+            tDLogW("HttpServer::HttpNode::backWsFrame() Unsupported opcode: {}", getWsOpCodeName(opcode));
         }
-        return true;
-    });
+    }
 }
 
 void HttpServer::HttpNode::onShutdown(Err code)
@@ -194,19 +185,20 @@ void HttpServer::HttpNode::onRead(Err code, ReadPacket const & packet)
     // HTTP request.
     // -------------
 
-    HttpParser  & request  = __on_read_only__.parser;
-    HttpBuilder & response = __on_read_only__.builder;
+    HttpParser   & request  = __on_read_only__.parser;
+    HttpResponse & response = __on_read_only__.builder;
 
-    std::size_t const EXEC_SIZE = request.execute(packet.buffer, packet.size);
-    if (EXEC_SIZE < packet.size) {
-        tDLogW("HttpServer::HttpNode::onRead() exec_size({}) < packet_size({})", EXEC_SIZE, packet.size);
-    } else if (EXEC_SIZE > packet.size) {
-        tDLogW("HttpServer::HttpNode::onRead() exec_size({}) > packet_size({})", EXEC_SIZE, packet.size);
+    std::size_t exec_size = 0;
+    request.execute(packet.buffer, packet.size, &exec_size);
+    if (exec_size < packet.size) {
+        tDLogW("HttpServer::HttpNode::onRead() exec_size({}) < packet_size({})", exec_size, packet.size);
+    } else if (exec_size > packet.size) {
+        tDLogW("HttpServer::HttpNode::onRead() exec_size({}) > packet_size({})", exec_size, packet.size);
     } else {
-        assert(EXEC_SIZE == packet.size);
+        assert(exec_size == packet.size);
     }
 
-    if (request.isComplete() == false) {
+    if (request.isFinish() == false) {
         tDLogD("HttpServer::HttpNode::onRead() Not complete.");
         return;
     }
@@ -217,7 +209,9 @@ void HttpServer::HttpNode::onRead(Err code, ReadPacket const & packet)
 
     if (server->isEnableWebSocket() && request.isUpgrade()) {
         // WebSocket interrupt process (HTTP Request).
-        if (updateResponseWebSocket(request, response) == Err::E_SUCCESS) {
+        if (request.checkWsRequest()) {
+            response.updateDefaultWsResponse(request);
+            //updateResponseWebSocket(request, response)
             tDLogI("HttpServer::HttpNode::onClientRead() Request WebSocket header.");
             _upgrade = true;
 
@@ -230,8 +224,10 @@ void HttpServer::HttpNode::onRead(Err code, ReadPacket const & packet)
             }
 
             request.clear();
-            request.clearCache();
-            response.clear();
+            response.code = 0;
+            response.reason.clear();
+            response.body.clear();
+            response.clearHeaders();
             return;
         } else {
             tDLogW("HttpServer::HttpNode::onRead() Unknown WebSocket request. Switches to the regular HTTP protocol.");
@@ -250,8 +246,10 @@ void HttpServer::HttpNode::onRead(Err code, ReadPacket const & packet)
     }
 
     request.clear();
-    request.clearCache();
-    response.clear();
+    response.code = 0;
+    response.reason.clear();
+    response.body.clear();
+    response.clearHeaders();
 }
 
 void HttpServer::HttpNode::onTimer()

@@ -23,7 +23,7 @@ static void checkWsBuffer(std::string const & prefix, char const * buffer, std::
     tDLogD("checkWsBuffer({}) [CHECK] BUFFER SIZE: {}", prefix, size);
 
     using namespace libtbag::network::http;
-    WsFrame frame;
+    ws::WsFrame frame;
     Err const EXECUTE_CODE = frame.execute(buffer, size);
     if (TBAG_ERR_FAILURE(EXECUTE_CODE)) {
         tDLogW("checkWsBuffer({}) [CHECK] PARSING {} ERROR", prefix, getErrName(EXECUTE_CODE));
@@ -43,7 +43,7 @@ static void checkWsBuffer(std::string const & prefix, char const * buffer, std::
 #endif
 
 WsClient::WsClient(Loop & loop, StreamType type)
-        : Parent(loop, type), KEY(generateRandomWebSocketKey()),
+        : Parent(loop, type), KEY(ws::generateRandomWebSocketKey()),
           _upgrade(false), _closing(false), _close()
 {
     // EMPTY.
@@ -54,19 +54,19 @@ WsClient::~WsClient()
     // EMPTY.
 }
 
-void WsClient::setup(HttpBuilder const & request)
+void WsClient::setup(HttpProperty const & request)
 {
     Guard const LOCK_GUARD(_request_mutex);
     _request = request;
 }
 
-HttpBuilder WsClient::getRequest() const
+HttpProperty WsClient::getRequest() const
 {
     Guard const LOCK_GUARD(_request_mutex);
     return _request;
 }
 
-Err WsClient::writeWsFrame(WsFrame const & frame)
+Err WsClient::writeWsFrame(ws::WsFrame const & frame)
 {
     WsBuffer buffer;
     std::size_t const SIZE = frame.copyTo(buffer);
@@ -83,12 +83,8 @@ Err WsClient::writeText(char const * buffer, std::size_t size, bool continuation
         return Err::E_ILLSTATE;
     }
 
-    WsFrame frame;
-    Err const CODE = frame.text(buffer, size, _device.gen(), continuation, finish);
-    if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("WsClient::writeText() WsFrame build {} error.", getErrName(CODE));
-        return CODE;
-    }
+    ws::WsFrame frame;
+    frame.text(buffer, size, _device.gen(), finish);
     return writeWsFrame(frame);
 }
 
@@ -103,12 +99,8 @@ Err WsClient::writeBinary(char const * buffer, std::size_t size, bool continuati
         return Err::E_ILLSTATE;
     }
 
-    WsFrame frame;
-    Err const CODE = frame.binary(buffer, size, _device.gen(), continuation, finish);
-    if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("WsClient::writeBinary() WsFrame build {} error.", getErrName(CODE));
-        return CODE;
-    }
+    ws::WsFrame frame;
+    frame.binary(buffer, size, _device.gen(), finish);
     return writeWsFrame(frame);
 }
 
@@ -128,44 +120,40 @@ Err WsClient::closeWebSocket()
 
     if (TBAG_ERR_FAILURE(CLOSE_TIMER_CODE)) {
         tDLogE("WsClient::closeWebSocket() Close timer error: {} -> Force closing!", getErrName(CLOSE_TIMER_CODE));
-        _close.setWsStatusCode(WsStatusCode::WSSC_CLIENT_TIMER_ERROR);
+        _close.setWsStatusCode(ws::WsStatusCode::WSSC_CLIENT_TIMER_ERROR);
         close();
         return CLOSE_TIMER_CODE;
     }
 
-    WsFrame frame;
-    Err const CODE = frame.close(_device.gen());
-    if (TBAG_ERR_FAILURE(CODE)) {
-        tDLogE("WsClient::closeWebSocket() WsFrame build {} error.", getErrName(CODE));
-        return CODE;
-    }
+    ws::WsFrame frame;
+    frame.close(_device.gen());
     return writeWsFrame(frame);
 }
 
 bool WsClient::runWsChecker(HttpParser const & response)
 {
-    if (response.getStatusCode() != getHttpStatusNumber(HttpStatus::SC_SWITCHING_PROTOCOLS)) {
-        tDLogE("WsClient::runWsChecker() Not 101 status code error: {}", response.getStatusCode());
+    if (response.code != getHttpStatusNumber(HttpStatus::SC_SWITCHING_PROTOCOLS)) {
+        tDLogE("WsClient::runWsChecker() Not 101 status code error: {}", response.code);
         return false;
     }
 
-    if (response.existsHeaderValue(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
+    if (response.exists(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
         tDLogE("WsClient::runWsChecker() Not found upgrade connection.");
         return false;
     }
 
-    if (response.existsHeaderValue(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
+    if (response.exists(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
         tDLogE("WsClient::runWsChecker() Not found websocket upgrade.");
         return false;
     }
 
-    if (response.existsHeader(HEADER_SEC_WEBSOCKET_ACCEPT) == false) {
+    if (response.exists(HEADER_SEC_WEBSOCKET_ACCEPT) == false) {
         tDLogE("WsClient::runWsChecker() Not found Sec-WebSocket-Accept header.");
         return false;
     }
 
-    std::string const ACCEPT_KEY = response.getHeader(HEADER_SEC_WEBSOCKET_ACCEPT);
-    if (ACCEPT_KEY != getUpgradeWebSocketKey(KEY)) {
+    std::string const ACCEPT_KEY = response.get(HEADER_SEC_WEBSOCKET_ACCEPT);
+    if (ACCEPT_KEY != ws::getUpgradeWebSocketKey(KEY)) {
         tDLogE("WsClient::runWsChecker() Accept key error: {}", ACCEPT_KEY);
         return false;
     }
@@ -175,25 +163,27 @@ bool WsClient::runWsChecker(HttpParser const & response)
 
 void WsClient::runWsRead(char const * buffer, std::size_t size)
 {
-    __on_read_only__.receiver.exec(buffer, size, [&](WsOpCode opcode, bool finish, WsFrameBuffer::Buffer & buffer) -> bool {
-        if (finish) {
-            if (opcode == WsOpCode::WSOC_TEXT_FRAME || opcode == WsOpCode::WSOC_BINARY_FRAME) {
-                onWsMessage(opcode, &buffer[0], buffer.size());
+    __on_read_only__.receiver.push(buffer, size);
+    while (__on_read_only__.receiver.next()) {
+        auto opcode = __on_read_only__.receiver.getOpCode();
+        auto & payload = __on_read_only__.receiver.atPayload();
 
-            } else if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE) {
-                _close = __on_read_only__.receiver.atCachedFrame().getCloseResult();
-                Err const CLOSE_CODE = close();
-                if (CLOSE_CODE != Err::E_SUCCESS) {
-                    tDLogE("WsClient::runWsRead() Close {} error.", getErrName(CLOSE_CODE));
-                }
+        if (opcode == ws::WsOpCode::WSOC_TEXT_FRAME || opcode == ws::WsOpCode::WSOC_BINARY_FRAME) {
+            onWsMessage(opcode, &payload[0], payload.size());
 
-            } else {
-                tDLogW("WsClient::runWsRead() Unsupported opcode: {}", getWsOpCodeName(opcode));
+        } else if (opcode == ws::WsOpCode::WSOC_CONNECTION_CLOSE) {
+            _close.code   = ws::WsFrame::getStatusCode(payload.data(), payload.size());
+            _close.reason = ws::WsFrame::getReason(payload.data(), payload.size());
+
+            Err const CLOSE_CODE = close();
+            if (CLOSE_CODE != Err::E_SUCCESS) {
+                tDLogE("WsClient::runWsRead() Close {} error.", getErrName(CLOSE_CODE));
             }
-        }
 
-        return true;
-    });
+        } else {
+            tDLogW("WsClient::runWsRead() Unsupported opcode: {}", getWsOpCodeName(opcode));
+        }
+    }
 }
 
 // ---------------------
@@ -209,15 +199,8 @@ void WsClient::onConnect(Err code)
         return;
     }
 
-    HttpBuilder request = getRequest();
-
-    Err const UPDATE_WS_CODE = updateRequestWebSocket(request, KEY);
-    if (UPDATE_WS_CODE != Err::E_SUCCESS) {
-        tDLogE("WsClient::onConnect() Upgrade WebSocket {} error.", getErrName(UPDATE_WS_CODE));
-        onWsError(UPDATE_WS_CODE);
-        close();
-        return;
-    }
+    HttpRequest request = getRequest();
+    request.updateDefaultWsRequest(KEY);
 
     Err const START_CODE = start();
     if (START_CODE != Err::E_SUCCESS) {
@@ -227,7 +210,7 @@ void WsClient::onConnect(Err code)
         return;
     }
 
-    auto buffer = request.buildDefaultRequestString();
+    auto buffer = request.toRequestString();
     Err const WRITE_CODE = write(buffer.data(), buffer.size());
     if (WRITE_CODE != Err::E_SUCCESS) {
         tDLogE("WsClient::onConnect() Write {} error.", getErrName(WRITE_CODE));
@@ -236,11 +219,11 @@ void WsClient::onConnect(Err code)
         return;
     }
 
-    if (request.existsHeader(HEADER_ORIGIN) == false) {
+    if (request.exists(HEADER_ORIGIN) == false) {
         tDLogW("WsClient::onConnect() Not found {} header.", HEADER_ORIGIN);
     }
-    if (request.getMethod() != getHttpMethodName(HttpMethod::M_GET)) {
-        tDLogW("WsClient::onConnect() Not a GET method: {}", request.getMethod());
+    if (request.getHttpMethod() != HttpMethod::M_GET) {
+        tDLogW("WsClient::onConnect() Not a GET method: {}", request.method);
     }
     tDLogI("WsClient::onConnect() Request WebSocket key: {}", KEY);
 }
@@ -284,7 +267,7 @@ void WsClient::onRead(Err code, ReadPacket const & packet)
 
     assert(code == Err::E_SUCCESS);
     res.execute(packet.buffer, packet.size);
-    if (res.isComplete() == false) {
+    if (res.isFinish() == false) {
         tDLogD("WsClient::onRead() Not complete.");
         return;
     }
@@ -297,7 +280,7 @@ void WsClient::onRead(Err code, ReadPacket const & packet)
 
     tDLogI("WsClient::onRead() Upgrade complete!");
     _upgrade.store(true);
-    onWsOpen(res.getResponse());
+    onWsOpen(res);
 }
 
 void WsClient::onClose()

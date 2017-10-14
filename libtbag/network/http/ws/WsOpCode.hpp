@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/algorithm/Swap.hpp>
+
 #include <cstdint>
 
 // -------------------

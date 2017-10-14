@@ -75,12 +75,12 @@ HttpDefaultFilter & HttpDefaultFilter::operator =(HttpDefaultFilter && obj)
     return *this;
 }
 
-bool HttpDefaultFilter::filter(HttpParser const & request)
+bool HttpDefaultFilter::filter(HttpRequest const & request)
 {
     if (_method.empty()) {
-        return std::regex_match(request.getUrl(), _regex);
+        return std::regex_match(request.path, _regex);
     } else {
-        return _method == request.getMethodName() && std::regex_match(request.getUrl(), _regex);
+        return _method == request.method && std::regex_match(request.path, _regex);
     }
 }
 

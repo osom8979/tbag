@@ -111,13 +111,13 @@ void SimpleHttpClient::onError(EventType from, Err code)
 // ----------
 
 Err requestWithSync(Uri const & uri,
-                    common::HttpProperty const & request,
-                    common::HttpProperty & response,
+                    HttpRequest const & request,
+                    HttpResponse & response,
                     uint64_t timeout,
                     HttpClient::StreamType type)
 {
     std::string host;
-    int port = common::DEFAULT_HTTP_PORT;
+    int port = DEFAULT_HTTP_PORT;
 
     if (type == HttpClient::StreamType::PIPE) {
         host = uri.toString();
@@ -153,22 +153,22 @@ Err requestWithSync(Uri const & uri,
         }
     }
 
-    common::HttpProperty builder = request;
-    if (builder.getMethod().empty()) {
-        builder.setHttpMethod(common::HttpMethod::M_GET);
+    HttpRequest builder = request;
+    if (builder.method.empty()) {
+        builder.setHttpMethod(HttpMethod::M_GET);
     }
-    if (builder.getUri().empty()) {
-        builder.setUri(uri.getRequestPath());
+    if (builder.path.empty()) {
+        builder.path.assign(uri.getRequestPath());
     }
-    if (builder.exists(common::HEADER_HOST) == false) {
-        builder.insert(common::HEADER_HOST, uri.getHost());
+    if (builder.exists(HEADER_HOST) == false) {
+        builder.insert(HEADER_HOST, uri.getHost());
     }
-    common::updateDefaultRequest(builder, builder.atBody().size());
+    builder.updateDefaultRequest();
 
-    tDLogI("requestWithSync() Request {}: {}", builder.getMethod(), uri.toString());
+    tDLogI("requestWithSync() Request {}: {}", builder.method, uri.toString());
     Err code = Err::E_UNKNOWN;
     http->setRequest(builder);
-    http->setOnResponse([&](common::HttpProperty const & r){
+    http->setOnResponse([&](HttpResponse const & r){
         code = Err::E_SUCCESS;
         response = r;
     });
@@ -184,19 +184,14 @@ Err requestWithSync(Uri const & uri,
     return code;
 }
 
-Err requestWithSync(std::string const & uri,
-                    common::HttpProperty const & request,
-                    common::HttpProperty & response,
-                    uint64_t timeout)
+Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout)
 {
     return requestWithSync(Uri(uri), request, response, timeout);
 }
 
-Err requestWithSync(std::string const & uri,
-                    common::HttpProperty & response,
-                    uint64_t timeout)
+Err requestWithSync(std::string const & uri, HttpResponse & response, uint64_t timeout)
 {
-    return requestWithSync(Uri(uri), common::HttpProperty(), response, timeout);
+    return requestWithSync(Uri(uri), HttpProperty(), response, timeout);
 }
 
 } // namespace http

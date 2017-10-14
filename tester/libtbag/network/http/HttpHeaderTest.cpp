@@ -6,13 +6,12 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/common/HttpHeader.hpp>
+#include <libtbag/network/http/HttpHeader.hpp>
 #include <iterator>
 
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
-using namespace libtbag::network::http::common;
 
 TEST(HttpHeaderTest, Default)
 {
@@ -36,7 +35,7 @@ TEST(HttpHeaderTest, Default)
     ASSERT_FALSE(header.existsInSplitValues("Sec-WebSocket-Version", "20"));
     ASSERT_FALSE(header.existsInSplitValues("sec-websocket-version", "13")); // lower-case
 
-    std::cout << "Header Information:\n" << header.toString();
+    std::cout << "Header Information:\n" << header.toMessageHeader();
 
     header.regularization();
     ASSERT_EQ(std::string("localhost"), header.get("host"));
@@ -53,7 +52,7 @@ TEST(HttpHeaderTest, MultiHeader)
     ASSERT_NE(header.end(), header.insert("Upgrade", "Temp"));
     ASSERT_NE(header.end(), header.insert("Upgrade", "AAAA"));
     ASSERT_NE(header.end(), header.insert("Upgrade", "Temp"));
-    ASSERT_EQ(6, header.size());
+    ASSERT_EQ(6, header.sizeOfHeaders());
 
     ASSERT_TRUE(header.exists("Upgrade", "Temp"));
 

@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/network/http/ws/WsCommon.hpp>
+#include <libtbag/network/http/HttpCommon.hpp>
 
 #include <cstdint>
 #include <string>

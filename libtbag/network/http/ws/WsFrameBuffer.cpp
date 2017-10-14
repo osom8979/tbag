@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <utility>
-#include "WsFrameBuffer.hpp"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

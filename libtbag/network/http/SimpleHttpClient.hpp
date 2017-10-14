@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/http/HttpClient.hpp>
+#include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -43,10 +44,7 @@ namespace http    {
 class TBAG_API SimpleHttpClient : public HttpClient
 {
 public:
-    using HttpProperty = HttpClient::HttpProperty;
-
-public:
-    using OnResponse = std::function<void(HttpProperty const &)>;
+    using OnResponse = std::function<void(HttpResponse const &)>;
     using OnError    = std::function<void(libtbag::Err)>;
     using OnClose    = std::function<void(void)>;
 
@@ -55,16 +53,16 @@ private:
     OnError    _error_cb;
 
 private:
-    HttpProperty _request;
+    HttpRequest _request;
 
 public:
     SimpleHttpClient(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~SimpleHttpClient();
 
 public:
-    inline void setOnResponse(OnResponse   const & cb) { _response_cb = cb; }
-    inline void setOnError   (OnError      const & cb) {    _error_cb = cb; }
-    inline void setRequest   (HttpProperty const & rq) {     _request = rq; }
+    inline void setOnResponse(OnResponse  const & cb) { _response_cb = cb; }
+    inline void setOnError   (OnError     const & cb) {    _error_cb = cb; }
+    inline void setRequest   (HttpRequest const & rq) {     _request = rq; }
 
 private:
     void callOnErrorAndClose(Err code);
@@ -94,14 +92,12 @@ public:
 // Utilities.
 // ----------
 
-TBAG_API Err requestWithSync(Uri const & uri,
-                             common::HttpProperty const & request,
-                             common::HttpProperty & response,
-                             uint64_t timeout = common::DEFAULT_HTTP_TIMEOUT_MILLISEC,
+TBAG_API Err requestWithSync(Uri const & uri, HttpRequest const & request, HttpResponse & response,
+                             uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC,
                              HttpClient::StreamType type = HttpClient::StreamType::TCP);
 
-TBAG_API Err requestWithSync(std::string const & uri, common::HttpProperty const & request, common::HttpProperty & response, uint64_t timeout = common::DEFAULT_HTTP_TIMEOUT_MILLISEC);
-TBAG_API Err requestWithSync(std::string const & uri, common::HttpProperty & response, uint64_t timeout = common::DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API Err requestWithSync(std::string const & uri, HttpResponse & response, uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 
 
 } // namespace http
