@@ -119,8 +119,8 @@ public:
     void pause(bool is_paused = true);
 
 public:
-    HttpRequest getRequest() const;
-    HttpResponse getResponse() const;
+    http::HttpRequest getRequest() const;
+    http::HttpResponse getResponse() const;
 
 // Event methods.
 public:
@@ -145,7 +145,7 @@ public:
  * @author zer0
  * @date   2017-05-24
  */
-struct HttpRequestParser : public HttpParser
+struct HttpRequestParser : public http::HttpParser
 {
     HttpRequestParser() : HttpParser(HttpParser::Type::REQUEST)
     { /* EMPTY. */ }
@@ -157,7 +157,7 @@ struct HttpRequestParser : public HttpParser
  * @author zer0
  * @date   2017-05-24
  */
-struct HttpResponseParser : public HttpParser
+struct HttpResponseParser : public http::HttpParser
 {
     HttpResponseParser() : HttpParser(HttpParser::Type::RESPONSE)
     { /* EMPTY. */ }

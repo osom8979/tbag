@@ -207,7 +207,7 @@ public:
 TBAG_API bool existsWebSocketVersion13(std::string const & versions);
 
 TBAG_API Err updateRequestWebSocket(HttpBuilder & request, std::string const & key);
-TBAG_API Err updateResponseWebSocket(HttpParser const & request, HttpBuilder & response);
+TBAG_API Err updateResponseWebSocket(http::HttpParser const & request, HttpBuilder & response);
 
 } // namespace http
 } // namespace network

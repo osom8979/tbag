@@ -497,7 +497,7 @@ Err updateRequestWebSocket(HttpBuilder & request, std::string const & key)
     return Err::E_SUCCESS;
 }
 
-Err updateResponseWebSocket(HttpParser const & request, HttpBuilder & response)
+Err updateResponseWebSocket(http::HttpParser const & request, HttpBuilder & response)
 {
     if (request.getMethodName() != getHttpMethodName(HttpMethod::M_GET)) {
         return Err::E_ILLARGS;

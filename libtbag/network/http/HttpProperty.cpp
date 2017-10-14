@@ -126,7 +126,7 @@ std::string toDebugString(HttpHeaderMap const & obj)
     return ss.str();
 }
 
-std::string toDebugString(HttpCommonProperty const & obj)
+std::string toDebugString(http::HttpCommonProperty const & obj)
 {
     std::stringstream ss;
     ss << toDebugString(obj.headers) << std::endl;
@@ -134,7 +134,7 @@ std::string toDebugString(HttpCommonProperty const & obj)
     return ss.str();
 }
 
-std::string toDebugString(HttpCommon const & obj)
+std::string toDebugString(http::HttpCommon const & obj)
 {
     std::stringstream ss;
     ss << "HTTP/" << obj.http_minor << "." << obj.http_minor << std::endl;
@@ -142,7 +142,7 @@ std::string toDebugString(HttpCommon const & obj)
     return ss.str();
 }
 
-std::string toDebugString(HttpRequest const & obj)
+std::string toDebugString(http::HttpRequest const & obj)
 {
     std::stringstream ss;
     ss << "REQUEST: " << obj.method << " " << obj.url << " ";
@@ -150,7 +150,7 @@ std::string toDebugString(HttpRequest const & obj)
     return ss.str();
 }
 
-std::string toDebugString(HttpResponse const & obj)
+std::string toDebugString(http::HttpResponse const & obj)
 {
     std::stringstream ss;
     ss << "RESPONSE: " << obj.status << " " << obj.reason << " ";

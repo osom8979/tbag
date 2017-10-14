@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
+#include <libtbag/network/http/common/HttpProperty.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/proto/TpotPacket.hpp>
 
@@ -81,7 +82,7 @@ public:
 
 private:
     Err request(std::string const & method, std::string const & path,
-                uint8_t const * buffer, std::size_t size, HttpResponse & response);
+                uint8_t const * buffer, std::size_t size, network::http::common::HttpProperty & response);
     Err requestCommon(std::string const & method, std::string const & path);
 
 public:

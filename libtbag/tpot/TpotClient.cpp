@@ -9,6 +9,8 @@
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/network/http/SimpleHttpClient.hpp>
+#include <libtbag/network/Uri.hpp>
+
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/util/Structures.hpp>
@@ -46,7 +48,7 @@ TpotClient::~TpotClient()
 }
 
 Err TpotClient::request(std::string const & method, std::string const & path,
-                        uint8_t const * buffer, std::size_t size, HttpResponse & response)
+                        uint8_t const * buffer, std::size_t size, network::http::common::HttpProperty & response)
 {
     using namespace network::http;
     std::stringstream ss;
@@ -56,34 +58,37 @@ Err TpotClient::request(std::string const & method, std::string const & path,
         ss << _param.ip;
     }
 
-    HttpRequest request;
-    request.setMethod(getHttpMethod(method));
-    request.body.assign(buffer, buffer + size);
-    return requestWithSync(_param.type, _param.ip, _param.port, network::Uri(ss.str()), request, _param.timeout, response);
+    common::HttpProperty request;
+    request.setHttpMethod(getHttpMethod(method));
+    request.atBody().assign(buffer, buffer + size);
+
+    network::Uri uri(ss.str());
+    return requestWithSync(uri, request, response, _param.timeout, _param.type);
 }
 
 Err TpotClient::requestCommon(std::string const & method, std::string const & path)
 {
     using namespace proto;
-    HttpResponse response;
+    using namespace network::http;
+    common::HttpProperty response;
     Err const CODE = request(method, path, this->point(), this->size(), response);
     if (TBAG_ERR_FAILURE(CODE)) {
         tDLogE("TpotClient::Internal::requestCommon({}) Request {} error", path, getErrName(CODE));
         return CODE;
     }
 
-    if (!(100 <= COMPARE_AND(response.status) < 300)) { /* 1xx ~ 2xx */
-        tDLogE("TpotClient::Internal::requestCommon({}) Response error status code: {}", path, response.status);
-        if (300 <= COMPARE_AND(response.status) < 400) {
+    if (!(100 <= COMPARE_AND(response.getStatusCode()) < 300)) { /* 1xx ~ 2xx */
+        tDLogE("TpotClient::Internal::requestCommon({}) Response error status code: {}", path, response.getStatusCode());
+        if (300 <= COMPARE_AND(response.getStatusCode()) < 400) {
             return Err::E_HTTP_3XX;
-        } else if (500 <= COMPARE_AND(response.status) < 500) {
+        } else if (500 <= COMPARE_AND(response.getStatusCode()) < 500) {
             return Err::E_HTTP_4XX;
         } else {
             return Err::E_UNKNOWN;
         }
     }
 
-    Err const PARSE_CODE = this->parse(response.body.data(), response.body.size());
+    Err const PARSE_CODE = this->parse(response.atBody().data(), response.atBody().size());
     if (TBAG_ERR_FAILURE(PARSE_CODE)) {
         tDLogE("TpotClient::Internal::requestCommon({}) Response parse {} error", path, getErrName(PARSE_CODE));
         return PARSE_CODE;

@@ -51,7 +51,7 @@ private:
 
 private:
     struct {
-        WsFrame frame;
+        http::WsFrame frame;
     } __cache__;
 
 public:
@@ -59,8 +59,8 @@ public:
     virtual ~WsFrameBuffer();
 
 public:
-    inline WsFrame       & atCachedFrame()       TBAG_NOEXCEPT { return __cache__.frame; }
-    inline WsFrame const & atCachedFrame() const TBAG_NOEXCEPT { return __cache__.frame; }
+    inline http::WsFrame       & atCachedFrame()       TBAG_NOEXCEPT { return __cache__.frame; }
+    inline http::WsFrame const & atCachedFrame() const TBAG_NOEXCEPT { return __cache__.frame; }
 
 public:
     void clearBuffer();

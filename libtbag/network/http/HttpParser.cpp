@@ -506,7 +506,7 @@ void HttpParser::pause(bool is_paused)
     _parser->pause(is_paused);
 }
 
-HttpRequest HttpParser::getRequest() const
+http::HttpRequest HttpParser::getRequest() const
 {
     HttpRequest req;
     req.http_major = _parser->parser.http_major;
@@ -518,7 +518,7 @@ HttpRequest HttpParser::getRequest() const
     return req;
 }
 
-HttpResponse HttpParser::getResponse() const
+http::HttpResponse HttpParser::getResponse() const
 {
     HttpResponse rsp;
     rsp.http_major = _parser->parser.http_major;

@@ -57,7 +57,7 @@ public:
     using Parent     = stream::StreamClient;
 
     using Loop     = uvpp::Loop;
-    using WsBuffer = WsFrame::Buffer;
+    using WsBuffer = http::WsFrame::Buffer;
     using WsQueue  = container::ReuseQueue<WsBuffer>;
     using Masking  = random::MaskingDevice;
 
@@ -89,8 +89,8 @@ private:
 // Receive packet.
 private:
     struct {
-        HttpParser response; ///< Response packet parser.
-        WsFrameBuffer receiver; ///< WebSocket frame buffer.
+        http::HttpParser    response; ///< Response packet parser.
+        http::WsFrameBuffer receiver; ///< WebSocket frame buffer.
     } __on_read_only__; ///< @warning It should only be used with the onRead() method.
 
 public:
@@ -106,7 +106,7 @@ public:
     HttpBuilder getRequest() const;
 
 private:
-    Err writeWsFrame(WsFrame const & frame);
+    Err writeWsFrame(http::WsFrame const & frame);
 
 public:
     Err writeText(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
@@ -119,7 +119,7 @@ public:
     Err closeWebSocket();
 
 private:
-    bool runWsChecker(HttpParser const & response);
+    bool runWsChecker(http::HttpParser const & response);
     void runWsRead(char const * buffer, std::size_t size);
 
 // Stream event methods.
@@ -134,7 +134,7 @@ protected:
 // Event methods.
 public:
     /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
-    virtual void onWsOpen(HttpResponse const & response) { /* EMPTY. */ }
+    virtual void onWsOpen(http::HttpResponse const & response) { /* EMPTY. */ }
 
     /** When a message has been received from WebSocket server. */
     virtual void onWsMessage(WsOpCode op, char const * buffer, std::size_t size) { /* EMPTY. */ }

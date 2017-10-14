@@ -71,6 +71,8 @@ public:
     inline util::Buffer       & atBody    ()       TBAG_NOEXCEPT { return     _body; }
     inline util::Buffer const & atBody    () const TBAG_NOEXCEPT { return     _body; }
 
+public:
+    inline void setBody(std::string const & body) { _body.assign(body.begin(), body.end()); }
     inline std::string getBodyString() const { return std::string(_body.begin(), _body.end()); }
 
 public:

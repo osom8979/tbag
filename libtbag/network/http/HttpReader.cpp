@@ -135,28 +135,23 @@ bool testWsResponse(common::HttpProperty const & response, std::string const & k
     using namespace common;
 
     if (response.getStatusCode() != getHttpStatusNumber(HttpStatus::SC_SWITCHING_PROTOCOLS)) {
-        tDLogE("testWsResponse() Not 101 status code error: {}", response.getStatusCode());
         return false;
     }
 
     if (response.exists(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
-        tDLogE("testWsResponse() Not found upgrade connection.");
         return false;
     }
 
     if (response.exists(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
-        tDLogE("testWsResponse() Not found websocket upgrade.");
         return false;
     }
 
     if (response.exists(HEADER_SEC_WEBSOCKET_ACCEPT) == false) {
-        tDLogE("testWsResponse() Not found Sec-WebSocket-Accept header.");
         return false;
     }
 
     std::string const ACCEPT_KEY = response.get(HEADER_SEC_WEBSOCKET_ACCEPT);
     if (ACCEPT_KEY != ws::getUpgradeWebSocketKey(key)) {
-        tDLogE("testWsResponse() Accept key error: {}", ACCEPT_KEY);
         return false;
     }
 

@@ -192,10 +192,10 @@ struct HttpProperty : public HttpCommon, public HttpRequestProperty, public Http
 // ------------------
 
 TBAG_API std::string toDebugString(HttpHeaderMap const & obj);
-TBAG_API std::string toDebugString(HttpCommonProperty const & obj);
-TBAG_API std::string toDebugString(HttpCommon const & obj);
-TBAG_API std::string toDebugString(HttpRequest const & obj);
-TBAG_API std::string toDebugString(HttpResponse const & obj);
+TBAG_API std::string toDebugString(http::HttpCommonProperty const & obj);
+TBAG_API std::string toDebugString(http::HttpCommon const & obj);
+TBAG_API std::string toDebugString(http::HttpRequest const & obj);
+TBAG_API std::string toDebugString(http::HttpResponse const & obj);
 
 // ------------------------
 // Miscellaneous utilities.

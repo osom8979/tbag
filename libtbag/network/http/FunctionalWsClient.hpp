@@ -38,7 +38,7 @@ class FunctionalWsClient : public WsClient
 public:
     using StreamType = WsClient::StreamType;
 
-    using OnWsOpen    = std::function<void(HttpResponse const &)>;
+    using OnWsOpen    = std::function<void(http::HttpResponse const &)>;
     using OnWsMessage = std::function<void(WsOpCode, char const *, std::size_t)>;
     using OnWsError   = std::function<void(Err)>;
     using OnWsClose   = std::function<void(uint16_t, std::string const &)>;
@@ -62,7 +62,7 @@ public:
     inline void setOnWsClose  (OnWsClose   const & cb) { _ws_close_cb   = cb; }
 
 protected:
-    virtual void onWsOpen(HttpResponse const & response) override
+    virtual void onWsOpen(http::HttpResponse const & response) override
     {
         if (static_cast<bool>(_ws_open_cb)) {
             _ws_open_cb(response);

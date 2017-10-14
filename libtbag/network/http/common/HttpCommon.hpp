@@ -80,6 +80,8 @@ TBAG_CONSTEXPR char const * const DEFAULT_VALUE_DELIMITER = ",";
 
 TBAG_CONSTEXPR uint64_t const DEFAULT_HTTP_TIMEOUT_MILLISEC = 15 * 1000;
 
+TBAG_CONSTEXPR int const DEFAULT_HTTP_PORT = 80;
+
 } // namespace common
 } // namespace http
 } // namespace network

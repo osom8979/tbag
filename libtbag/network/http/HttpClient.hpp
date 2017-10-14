@@ -16,16 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/Type.hpp>
 
 #include <libtbag/network/stream/StreamClient.hpp>
-#include <libtbag/network/http/HttpParser.hpp>
-#include <libtbag/network/http/HttpBuilder.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/network/http/HttpReader.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-
-#include <functional>
-#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,73 +34,42 @@ namespace http    {
  * @author zer0
  * @date   2017-05-19
  */
-class TBAG_API HttpClient : public stream::StreamClient
+class TBAG_API HttpClient : public stream::StreamClient, public HttpReaderInterface
 {
 public:
     using StreamType = details::StreamType;
     using Parent     = stream::StreamClient;
 
-    using Loop   = uvpp::Loop;
-    using Buffer = std::vector<char>;
+    using Loop = uvpp::Loop;
+    using HttpProperty = common::HttpProperty;
 
-public:
-    enum class EventStep
+    enum class EventType
     {
         ET_CONNECT,
-        ET_WRITE,
-        ET_SHUTDOWN,
-        ET_READ,
-        ET_CLOSE,
-        ET_TIMER,
+        ET_START,
+        ET_READ
     };
 
-    struct Event
-    {
-        EventStep step;
-        Err code;
-        HttpParser const & response;
-
-        Event(EventStep s, Err c, HttpParser const & r) : step(s), code(c), response(r)
-        { /* EMPTY. */ }
-        ~Event()
-        { /* EMPTY. */ }
-    };
-
-    using Callback = std::function<void(Event const &)>;
-
 private:
-    HttpBuilder _builder;
-    HttpParser  _parser;
-
-private:
-    bool _call_once;
-    Callback _callback;
+    HttpReaderForCallback<HttpClient> _reader;
 
 public:
     HttpClient(Loop & loop, StreamType type = StreamType::TCP);
     virtual ~HttpClient();
 
 public:
-    // @formatter:off
-    inline HttpBuilder       & atBuilder()       TBAG_NOEXCEPT { return _builder; }
-    inline HttpBuilder const & atBuilder() const TBAG_NOEXCEPT { return _builder; }
-    inline HttpParser        & atParser ()       TBAG_NOEXCEPT { return _parser;  }
-    inline HttpParser  const & atParser () const TBAG_NOEXCEPT { return _parser;  }
-    // @formatter:on
-
-public:
-    void setup(HttpBuilder const & request, Callback const & cb);
-
-private:
-    void runCallback(EventStep step, Err code);
+    Err writeRequest(HttpProperty const & property);
 
 public:
     virtual void onConnect(Err code) override;
-    virtual void onShutdown(Err code) override;
-    virtual void onWrite(Err code) override;
-    virtual void onRead(Err code, ReadPacket const & packet) override;
-    virtual void onClose() override;
-    virtual void onTimer() override;
+    virtual void onRead   (Err code, ReadPacket const & packet) override;
+
+public:
+    virtual void onOpen();
+    virtual void onEof();
+
+public:
+    virtual void onError(EventType from, Err code);
 };
 
 } // namespace http

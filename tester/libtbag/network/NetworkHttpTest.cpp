@@ -36,10 +36,10 @@ TEST(NetworkHttpTest, HttpClient)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
 
-    HttpResponse response;
-    auto result = http::requestWithSync("http://osom8979.github.io", 10000, response);
+    common::HttpProperty response;
+    auto result = http::requestWithSync("http://osom8979.github.io", response, 10000);
     ASSERT_EQ(Err::E_SUCCESS, result);
-    ASSERT_EQ(200, response.status);
+    ASSERT_EQ(200, response.getStatusCode());
 }
 
 static bool runSimpleServerTest(HttpServer::StreamType type, std::string const & bind, std::string const & method)
@@ -48,10 +48,6 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     FuncHttpServer server(loop, type);
 
     server.init(bind.c_str());
-
-    std::string request_url = "http://localhost:";
-    request_url += std::to_string(server.port());
-    request_url += "/";
 
     int on_open    = 0;
     int on_request = 0;
@@ -74,16 +70,20 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     Err server_result = Err::E_UNKNOWN;
     Err client_result = Err::E_UNKNOWN;
 
-    HttpResponse response;
-    HttpRequest  request;
-    request.method = method;
+    common::HttpProperty response;
+    common::HttpProperty request;
+    request.setMethod(method);
 
     std::thread server_thread([&](){ server_result = loop.run(); });
     std::thread client_thread([&](){
         if (HttpServer::StreamType::PIPE == type) {
-            client_result = http::requestWithSync(type, bind, 0, Uri(request_url), request, 1000, response);
+            client_result = http::requestWithSync(Uri(bind), request, response, 1000, type);
         } else {
-            client_result = http::requestWithSync(request_url, request, 1000, response);
+            std::string request_url = "http://" + bind + ":";
+            request_url += std::to_string(server.port());
+            request_url += "/";
+
+            client_result = http::requestWithSync(request_url, request, response, 1000);
         }
     });
 
@@ -99,13 +99,13 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
         return false;
     }
 
-    if (200 != response.status) {
-        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response is not OK({}).", method, response.status);
+    if (200 != response.getStatusCode()) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response is not OK({}).", method, response.getStatusCode());
         return false;
     }
 
-    if (response.getBody() != method) {
-        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response body error({}).", method, response.getBody());
+    if (response.getBodyString() != method) {
+        tDLogA("NetworkHttpTest.runSimpleServerTest({}) Response body error({}).", method, response.getBodyString());
         return false;
     }
 
@@ -210,23 +210,23 @@ TEST(NetworkHttpTest, RoutingServer)
     Err server_result = Err::E_UNKNOWN;
     Err client_result = Err::E_UNKNOWN;
 
-    HttpResponse response;
-    HttpResponse response_doc_get;
-    HttpResponse response_doc_post;
-    HttpResponse response_down_get;
-    HttpResponse response_down_post;
+    common::HttpProperty response;
+    common::HttpProperty response_doc_get;
+    common::HttpProperty response_doc_post;
+    common::HttpProperty response_down_get;
+    common::HttpProperty response_down_post;
 
-    HttpRequest request_get;
-    request_get.method = "GET";
-    HttpRequest request_post;
-    request_post.method = "POST";
+    common::HttpProperty request_get;
+    request_get.setMethod("GET");
+    common::HttpProperty request_post;
+    request_post.setMethod("POST");
 
     std::thread server_thread([&](){ server_result = loop.run(); });
-    std::thread client1_thread([&](){ client_result = http::requestWithSync(request_url, 1000, response); });
-    std::thread client2_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOC, request_get, 1000, response_doc_get); });
-    std::thread client3_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOC, request_post, 1000, response_doc_post); });
-    std::thread client4_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOWN, request_get, 1000, response_down_get); });
-    std::thread client5_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOWN, request_post, 1000, response_down_post); });
+    std::thread client1_thread([&](){ client_result = http::requestWithSync(request_url, response, 1000); });
+    std::thread client2_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOC , request_get , response_doc_get  , 1000); });
+    std::thread client3_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOC , request_post, response_doc_post , 1000); });
+    std::thread client4_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOWN, request_get , response_down_get , 1000); });
+    std::thread client5_thread([&](){ client_result = http::requestWithSync(REQUEST_URL_DOWN, request_post, response_down_post, 1000); });
 
     client1_thread.join();
     client2_thread.join();
@@ -235,11 +235,11 @@ TEST(NetworkHttpTest, RoutingServer)
     client5_thread.join();
     server_thread.join();
 
-    ASSERT_EQ(200, response.status);
-    ASSERT_EQ(200, response_doc_get.status);
-    ASSERT_EQ(200, response_doc_post.status);
-    ASSERT_EQ(200, response_down_get.status);
-    ASSERT_EQ(200, response_down_post.status);
+    ASSERT_EQ(200, response.getStatusCode());
+    ASSERT_EQ(200, response_doc_get.getStatusCode());
+    ASSERT_EQ(200, response_doc_post.getStatusCode());
+    ASSERT_EQ(200, response_down_get.getStatusCode());
+    ASSERT_EQ(200, response_down_post.getStatusCode());
 
     ASSERT_EQ(5, on_open             );
     ASSERT_EQ(1, on_request          );
@@ -292,7 +292,7 @@ TEST(NetworkHttpTest, WebSocketEcho)
     int ws_close_counter = 0;
 
     std::string const TEST_TEXT = "ECHO MESSAGE";
-    client.setOnWsOpen([&](HttpResponse const & response){
+    client.setOnWsOpen([&](http::HttpResponse const & response){
         ASSERT_EQ(Err::E_SUCCESS, client.writeText(TEST_TEXT));
         ws_open_counter++;
     });
@@ -427,7 +427,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
         client->setup(builder);
         ASSERT_EQ(Err::E_SUCCESS, client->init("127.0.0.1", SERVER_PORT));
 
-        client->setOnWsOpen([&, i](HttpResponse const & response){
+        client->setOnWsOpen([&, i](http::HttpResponse const & response){
             auto shared_client = clients[i];
             ASSERT_TRUE(static_cast<bool>(shared_client));
             ++(ws_open_counter.at(i));

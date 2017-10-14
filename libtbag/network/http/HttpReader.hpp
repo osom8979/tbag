@@ -115,13 +115,11 @@ struct HttpReaderForCallback : public HttpReader
 {
     using Parent = ByPassType;
 
-    STATIC_ASSERT_CHECK_IS_BASE_OF(HttpReaderInterface, Parent);
-
     Parent * parent;
 
-    HttpReaderForCallback(Parent * p, bool use_websocket) : HttpReader(use_websocket), parent(p)
+    HttpReaderForCallback(Parent * p, bool use_websocket = true) : HttpReader(use_websocket), parent(p)
     { /* EMPTY. */ }
-    HttpReaderForCallback(Parent * p, std::string const & key, bool use_websocket) : HttpReader(key, use_websocket), parent(p)
+    HttpReaderForCallback(Parent * p, std::string const & key, bool use_websocket = true) : HttpReader(key, use_websocket), parent(p)
     { /* EMPTY. */ }
     virtual ~HttpReaderForCallback()
     { /* EMPTY. */ }
@@ -129,7 +127,7 @@ struct HttpReaderForCallback : public HttpReader
     virtual void onContinue(void * arg) override
     { parent->onContinue(arg); }
     virtual bool onSwitchingProtocol(common::HttpProperty const & response, void * arg) override
-    { parent->onSwitchingProtocol(response, arg); }
+    { return parent->onSwitchingProtocol(response, arg); }
     virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override
     { parent->onWsMessage(opcode, payload, arg); }
     virtual void onRegularHttp(common::HttpProperty const & response, void * arg) override

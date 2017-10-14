@@ -69,7 +69,7 @@ public:
     using StreamNode       = stream::StreamNode;
     using SharedStreamNode = Parent::SharedStreamNode;
 
-    using WsBuffer = WsFrame::Buffer;
+    using WsBuffer = http::WsFrame::Buffer;
     using WsQueue  = container::ReuseQueue<WsBuffer>;
 
     using Loop   = uvpp::Loop;
@@ -95,13 +95,13 @@ public:
     // Receive packet.
     private:
         struct {
-            HttpParser      parser; ///< Request packet parser.
-            HttpBuilder    builder; ///< Response packet parser.
-            WsFrameBuffer receiver; ///< WebSocket frame buffer.
+            http::HttpParser    parser; ///< Request packet parser.
+            HttpBuilder         builder; ///< Response packet parser.
+            http::WsFrameBuffer receiver; ///< WebSocket frame buffer.
         } __on_read_only__; ///< @warning It should only be used with the onRead() method.
 
     private:
-        WsFrameBuffer _buffer;
+        http::WsFrameBuffer _buffer;
 
     public:
         HttpNode(Loop & loop, StreamType type, HttpServer * parent);
@@ -116,7 +116,7 @@ public:
         inline bool isClosing() const TBAG_NOEXCEPT_SP_OP(_closing.load()) { return _closing.load(); }
 
     private:
-        Err writeWsFrame(WsFrame const & frame);
+        Err writeWsFrame(http::WsFrame const & frame);
 
     public:
         Err writeText(char const * buffer, std::size_t size, bool continuation = false, bool finish = true);
@@ -149,10 +149,10 @@ public:
     /** HTTP packet reference. */
     struct HttpPacket
     {
-        HttpParser const & request;
+        http::HttpParser const & request;
         HttpBuilder & response;
 
-        HttpPacket(HttpParser const & req, HttpBuilder & rsp) : request(req), response(rsp) { /* EMPTY. */ }
+        HttpPacket(http::HttpParser const & req, HttpBuilder & rsp) : request(req), response(rsp) { /* EMPTY. */ }
         ~HttpPacket() { /* EMPTY. */ }
     };
 
@@ -223,7 +223,7 @@ public:
     bool isUpgradeWebSocket(WeakClient const & node) const TBAG_NOEXCEPT;
 
 public:
-    SharedFilter findFilter(HttpParser const & request);
+    SharedFilter findFilter(http::HttpParser const & request);
     void findAndExecuteTheReadCallback(WeakClient node, Err code, HttpPacket & packet);
 
 protected:

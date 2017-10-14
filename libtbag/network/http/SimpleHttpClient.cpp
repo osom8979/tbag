@@ -8,6 +8,8 @@
 #include <libtbag/network/http/SimpleHttpClient.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cassert>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -15,7 +17,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-SimpleHttpClient::SimpleHttpClient(Loop & loop, StreamType type) : HttpClient(loop, type)
+SimpleHttpClient::SimpleHttpClient(Loop & loop, StreamType type)
+        : HttpClient(loop, type)
 {
     // EMPTY.
 }
@@ -25,94 +28,175 @@ SimpleHttpClient::~SimpleHttpClient()
     // EMPTY.
 }
 
+void SimpleHttpClient::callOnErrorAndClose(Err code)
+{
+    if (static_cast<bool>(_error_cb)) {
+        _error_cb(code);
+    }
+    close();
+}
+
+void SimpleHttpClient::onShutdown(Err code)
+{
+    callOnErrorAndClose(Err::E_INACCES);
+}
+
+void SimpleHttpClient::onWrite(Err code)
+{
+    if (TBAG_ERR_FAILURE(code)) {
+        callOnErrorAndClose(code);
+    }
+}
+
+void SimpleHttpClient::onClose()
+{
+    // EMPTY.
+}
+
+void SimpleHttpClient::onTimer()
+{
+    callOnErrorAndClose(Err::E_TIMEOUT);
+}
+
+void SimpleHttpClient::onContinue(void * arg)
+{
+    // EMPTY.
+}
+
+bool SimpleHttpClient::onSwitchingProtocol(HttpProperty const & response, void * arg)
+{
+    callOnErrorAndClose(Err::E_INACCES);
+    return false;
+}
+
+void SimpleHttpClient::onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg)
+{
+    callOnErrorAndClose(Err::E_INACCES);
+}
+
+void SimpleHttpClient::onRegularHttp(HttpProperty const & response, void * arg)
+{
+    if (static_cast<bool>(_response_cb)) {
+        _response_cb(response);
+    }
+    stopTimer();
+    close();
+}
+
+void SimpleHttpClient::onParseError(Err code, void * arg)
+{
+    callOnErrorAndClose(code);
+}
+
+void SimpleHttpClient::onOpen()
+{
+    Err const WRITE_CODE = writeRequest(_request);
+    if (TBAG_ERR_FAILURE(WRITE_CODE)) {
+        callOnErrorAndClose(WRITE_CODE);
+    }
+}
+
+void SimpleHttpClient::onEof()
+{
+    close();
+}
+
+void SimpleHttpClient::onError(EventType from, Err code)
+{
+    callOnErrorAndClose(code);
+}
+
 // ----------
 // Utilities.
 // ----------
 
-Err requestWithSync(HttpClient::StreamType type,
-                    std::string const & host,
-                    int port,
-                    Uri const & uri,
-                    HttpRequest const & request,
+Err requestWithSync(Uri const & uri,
+                    common::HttpProperty const & request,
+                    common::HttpProperty & response,
                     uint64_t timeout,
-                    HttpResponse & result)
+                    HttpClient::StreamType type)
 {
-    uvpp::Loop loop;
-    HttpClient http(loop, type);
+    std::string host;
+    int port = common::DEFAULT_HTTP_PORT;
 
-    Err const INIT_CODE = http.init(host.c_str(), port);
+    if (type == HttpClient::StreamType::PIPE) {
+        host = uri.toString();
+        port = 0;
+    } else {
+        Err const ADDR_CODE = uri.requestAddrInfo(host, port, Uri::AddrFlags::MOST_IPV4);
+        if (ADDR_CODE != Err::E_SUCCESS) {
+            return ADDR_CODE;
+        }
+    }
+
+    uvpp::Loop loop;
+    std::shared_ptr<SimpleHttpClient> http;
+    try {
+        http.reset(new SimpleHttpClient(loop, type));
+    } catch (...) {
+        return Err::E_BADALLOC;
+    }
+
+    assert(static_cast<bool>(http));
+
+    Err const INIT_CODE = http->init(host.c_str(), port);
     if (INIT_CODE != Err::E_SUCCESS) {
         return INIT_CODE;
     }
 
     if (timeout > 0) {
-        Err const TIMER_CODE = http.startTimer(timeout);
+        Err const TIMER_CODE = http->startTimer(timeout);
         if (TIMER_CODE != Err::E_SUCCESS) {
-            http.close();
+            http->close();
             loop.run();
             return TIMER_CODE;
         }
     }
 
-    HttpBuilder builder = request;
+    common::HttpProperty builder = request;
     if (builder.getMethod().empty()) {
-        builder.setMethod(getHttpMethodName(HttpMethod::M_GET));
+        builder.setHttpMethod(common::HttpMethod::M_GET);
     }
-    if (builder.getUrl().empty()) {
-        builder.setUrl(uri.getRequestPath());
+    if (builder.getUri().empty()) {
+        builder.setUri(uri.getRequestPath());
     }
-    if (builder.existsHeader(HEADER_HOST) == false) {
-        builder.insertHeader(HEADER_HOST, uri.getHost());
+    if (builder.exists(common::HEADER_HOST) == false) {
+        builder.insert(common::HEADER_HOST, uri.getHost());
     }
+    common::updateDefaultRequest(builder, builder.atBody().size());
 
-    tDLogI("requestWithSync() Request {}: {}", builder.getMethod(), uri.getString());
-    Err http_result = Err::E_UNKNOWN;
-
-    http.setup(builder, [&](HttpClient::Event const & e){
-        http_result = e.code;
-        if (e.step == HttpClient::EventStep::ET_READ && e.code == Err::E_SUCCESS) {
-            tDLogI("requestWithSync() Response Err({}) HTTP STATUS: {}",
-                   getErrName(e.code), e.response.getStatusCode());
-            result = e.response.getResponse();
-        } else {
-            tDLogE("requestWithSync() HttpClient Err({})", getErrName(e.code));
-        }
+    tDLogI("requestWithSync() Request {}: {}", builder.getMethod(), uri.toString());
+    Err code = Err::E_UNKNOWN;
+    http->setRequest(builder);
+    http->setOnResponse([&](common::HttpProperty const & r){
+        code = Err::E_SUCCESS;
+        response = r;
+    });
+    http->setOnError([&](Err const & e){
+        code = e;
     });
 
-    Err LOOP_RESULT = loop.run();
+    Err const LOOP_RESULT = loop.run();
     if (LOOP_RESULT != Err::E_SUCCESS) {
         return LOOP_RESULT;
     }
 
-    return http_result;
+    return code;
 }
 
-Err requestWithSync(Uri const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result)
+Err requestWithSync(std::string const & uri,
+                    common::HttpProperty const & request,
+                    common::HttpProperty & response,
+                    uint64_t timeout)
 {
-    std::string host;
-    int port = 0;
-
-    Uri::AddrFlags const FLAG = Uri::AddrFlags::MOST_IPV4;
-    Err ADDRINFO_RESULT = uri.requestAddrInfo(host, port, FLAG);
-    if (ADDRINFO_RESULT != Err::E_SUCCESS) {
-        return ADDRINFO_RESULT;
-    }
-    return requestWithSync(HttpClient::StreamType::TCP, host, port, uri, request, timeout, result);
+    return requestWithSync(Uri(uri), request, response, timeout);
 }
 
-Err requestWithSync(std::string const & uri, HttpRequest const & request, uint64_t timeout, HttpResponse & result)
+Err requestWithSync(std::string const & uri,
+                    common::HttpProperty & response,
+                    uint64_t timeout)
 {
-    return requestWithSync(Uri(uri), request, timeout, result);
-}
-
-Err requestWithSync(Uri const & uri, uint64_t timeout, HttpResponse & result)
-{
-    return requestWithSync(uri, HttpRequest(), timeout, result);
-}
-
-Err requestWithSync(std::string const & uri, uint64_t timeout, HttpResponse & result)
-{
-    return requestWithSync(Uri(uri), HttpRequest(), timeout, result);
+    return requestWithSync(Uri(uri), common::HttpProperty(), response, timeout);
 }
 
 } // namespace http

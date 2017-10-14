@@ -38,7 +38,7 @@ struct HttpFilterInterface
     HttpFilterInterface() { /* EMPTY. */ }
     virtual ~HttpFilterInterface() { /* EMPTY. */ }
 
-    virtual bool filter(HttpParser const & request) = 0;
+    virtual bool filter(http::HttpParser const & request) = 0;
 };
 
 /**
@@ -68,7 +68,7 @@ public:
     HttpDefaultFilter & operator =(HttpDefaultFilter && obj);
 
 public:
-    virtual bool filter(HttpParser const & request) override;
+    virtual bool filter(http::HttpParser const & request) override;
 };
 
 } // namespace http

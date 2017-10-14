@@ -35,7 +35,7 @@ namespace http    {
 class TBAG_API HttpBuilder
 {
 private:
-    HttpProperty _property;
+    http::HttpProperty _property;
 
 public:
     HttpBuilder();
@@ -49,9 +49,9 @@ public:
     HttpBuilder(HttpCommonProperty   const & obj);
     HttpBuilder(HttpRequestProperty  const & obj);
     HttpBuilder(HttpResponseProperty const & obj);
-    HttpBuilder(HttpRequest          const & obj);
-    HttpBuilder(HttpResponse         const & obj);
-    HttpBuilder(HttpProperty         const & obj);
+    HttpBuilder(http::HttpRequest          const & obj);
+    HttpBuilder(http::HttpResponse         const & obj);
+    HttpBuilder(http::HttpProperty         const & obj);
 
 public:
     HttpBuilder & operator =(HttpBuilder const & obj);
@@ -62,33 +62,33 @@ public:
     void clear();
 
 public:
-    inline HttpProperty       & atProperty()       TBAG_NOEXCEPT { return _property; }
-    inline HttpProperty const & atProperty() const TBAG_NOEXCEPT { return _property; }
+    inline http::HttpProperty       & atProperty()       TBAG_NOEXCEPT { return _property; }
+    inline http::HttpProperty const & atProperty() const TBAG_NOEXCEPT { return _property; }
 
 public:
     HttpVersionProperty  getVersionProperty () const;
     HttpCommonProperty   getCommonProperty  () const;
     HttpRequestProperty  getRequestProperty () const;
     HttpResponseProperty getResponseProperty() const;
-    HttpRequest          getRequest         () const;
-    HttpResponse         getResponse        () const;
-    HttpProperty         getProperty        () const;
+    http::HttpRequest    getRequest         () const;
+    http::HttpResponse   getResponse        () const;
+    http::HttpProperty   getProperty        () const;
 
     inline operator HttpVersionProperty () const { return getVersionProperty (); }
     inline operator HttpCommonProperty  () const { return getCommonProperty  (); }
     inline operator HttpRequestProperty () const { return getRequestProperty (); }
     inline operator HttpResponseProperty() const { return getResponseProperty(); }
-    inline operator HttpRequest         () const { return getRequest         (); }
-    inline operator HttpResponse        () const { return getResponse        (); }
-    inline operator HttpProperty        () const { return getProperty        (); }
+    inline operator http::HttpRequest   () const { return getRequest         (); }
+    inline operator http::HttpResponse  () const { return getResponse        (); }
+    inline operator http::HttpProperty  () const { return getProperty        (); }
 
     HttpBuilder & operator =(HttpVersionProperty  const & obj);
     HttpBuilder & operator =(HttpCommonProperty   const & obj);
     HttpBuilder & operator =(HttpRequestProperty  const & obj);
     HttpBuilder & operator =(HttpResponseProperty const & obj);
-    HttpBuilder & operator =(HttpRequest          const & obj);
-    HttpBuilder & operator =(HttpResponse         const & obj);
-    HttpBuilder & operator =(HttpProperty         const & obj);
+    HttpBuilder & operator =(http::HttpRequest    const & obj);
+    HttpBuilder & operator =(http::HttpResponse   const & obj);
+    HttpBuilder & operator =(http::HttpProperty   const & obj);
 
 public:
     inline int getMajor() const { return _property.getMajor(); }
@@ -168,11 +168,11 @@ public:
 // Build default methods.
 // ----------------------
 
-TBAG_API std::string buildDefaultRequestString(HttpProperty const & req);
-TBAG_API std::string buildDefaultResponseString(HttpProperty const & rsp);
+TBAG_API std::string buildDefaultRequestString(http::HttpProperty const & req);
+TBAG_API std::string buildDefaultResponseString(http::HttpProperty const & rsp);
 
-TBAG_API std::string buildDefaultRequestString(HttpRequest const & req);
-TBAG_API std::string buildDefaultResponseString(HttpResponse const & rsp);
+TBAG_API std::string buildDefaultRequestString(http::HttpRequest const & req);
+TBAG_API std::string buildDefaultResponseString(http::HttpResponse const & rsp);
 
 TBAG_API std::string buildDefaultRequestString(
         std::string const & method, std::string const & url,
@@ -188,11 +188,11 @@ TBAG_API std::string buildDefaultResponseString(
 // Build methods.
 // --------------
 
-TBAG_API std::string buildRequestString(HttpProperty const & req);
-TBAG_API std::string buildResponseString(HttpProperty const & rsp);
+TBAG_API std::string buildRequestString(http::HttpProperty const & req);
+TBAG_API std::string buildResponseString(http::HttpProperty const & rsp);
 
-TBAG_API std::string buildRequestString(HttpRequest const & req);
-TBAG_API std::string buildResponseString(HttpResponse const & rsp);
+TBAG_API std::string buildRequestString(http::HttpRequest const & req);
+TBAG_API std::string buildResponseString(http::HttpResponse const & rsp);
 
 TBAG_API std::string buildRequestString(
         std::string const & method, std::string const & url,
