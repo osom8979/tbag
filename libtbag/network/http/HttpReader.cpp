@@ -63,7 +63,7 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
     ParserType direction = ParserType::BOTH;
     Err const EXEC_CODE = execute(buffer, size, &read_size, &direction);
 
-    if (TBAG_ERR_FAILURE(EXEC_CODE)) {
+    if (isFailure(EXEC_CODE)) {
         tDLogE("HttpReader::parse() Execute {} error", getErrName(EXEC_CODE));
         onParseError(EXEC_CODE, arg);
         return EXEC_CODE;

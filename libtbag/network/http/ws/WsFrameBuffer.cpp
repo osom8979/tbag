@@ -98,7 +98,7 @@ bool WsFrameBuffer::next(Err * code, std::size_t * size)
 
     std::size_t read_size = 0;
     Err const CODE = current_buffer.execute(&_buffer[0], _buffer_size, &read_size);
-    if (TBAG_ERR_FAILURE(CODE)) {
+    if (isFailure(CODE)) {
         if (code != nullptr) { (*code) = CODE; }
         if (size != nullptr) { (*size) = 0; }
         return false;

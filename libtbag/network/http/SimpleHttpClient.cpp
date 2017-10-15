@@ -43,7 +43,7 @@ void SimpleHttpClient::onShutdown(Err code)
 
 void SimpleHttpClient::onWrite(Err code)
 {
-    if (TBAG_ERR_FAILURE(code)) {
+    if (isFailure(code)) {
         callOnErrorAndClose(code);
     }
 }
@@ -91,7 +91,7 @@ void SimpleHttpClient::onParseError(Err code, void * arg)
 void SimpleHttpClient::onOpen()
 {
     Err const WRITE_CODE = writeRequest(_request);
-    if (TBAG_ERR_FAILURE(WRITE_CODE)) {
+    if (isFailure(WRITE_CODE)) {
         callOnErrorAndClose(WRITE_CODE);
     }
 }

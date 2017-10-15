@@ -57,7 +57,7 @@ Err DatagramEncoder::front(Buffer & buffer)
     Guard guard(_writers_mutex);
     SharedBuffer shared;
     Err const CODE = _writers.front(shared);
-    if (TBAG_ERR_SUCCESS(CODE) && shared && shared->empty() == false) {
+    if (isSuccess(CODE) && shared && shared->empty() == false) {
         buffer.assign(shared->begin(), shared->end());
     }
     return CODE;

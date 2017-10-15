@@ -144,7 +144,7 @@ public:
         uvpp::Stream & uv_stream = *shared;
 
         Err const CODE = server_stream->accept(uv_stream);
-        if (TBAG_ERR_FAILURE(CODE)) {
+        if (isFailure(CODE)) {
             tDLogE("StreamServer::Internal::accept() Accept {} error.", getErrName(CODE));
             return WeakClient();
         }
@@ -355,13 +355,13 @@ Err StreamServer::init(char const * destination, int port)
 {
     Guard const LOCK(_mutex);
     Err const INIT_CODE = _internal->initServer(destination, port);
-    if (TBAG_ERR_FAILURE(INIT_CODE)) {
+    if (isFailure(INIT_CODE)) {
         tDLogE("StreamClient::init() Initialize {} error.", getErrName(INIT_CODE));
         return INIT_CODE;
     }
 
     Err const INIT_INTERNAL_CODE = _internal->initInternalHandles();
-    if (TBAG_ERR_FAILURE(INIT_INTERNAL_CODE)) {
+    if (isFailure(INIT_INTERNAL_CODE)) {
         tDLogE("StreamClient::init() Initialize {} error (internal handles).", getErrName(INIT_INTERNAL_CODE));
         return INIT_INTERNAL_CODE;
     }

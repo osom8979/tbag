@@ -29,21 +29,21 @@ SocketAddress::SocketAddress()
 
 SocketAddress::SocketAddress(struct sockaddr const * addr) : SocketAddress()
 {
-    if (TBAG_ERR_FAILURE(init(addr))) {
+    if (isFailure(init(addr))) {
         throw std::bad_alloc();
     }
 }
 
 SocketAddress::SocketAddress(struct sockaddr_in const * addr) : SocketAddress()
 {
-    if (TBAG_ERR_FAILURE(init(addr))) {
+    if (isFailure(init(addr))) {
         throw std::bad_alloc();
     }
 }
 
 SocketAddress::SocketAddress(struct sockaddr_in6 const * addr) : SocketAddress()
 {
-    if (TBAG_ERR_FAILURE(init(addr))) {
+    if (isFailure(init(addr))) {
         throw std::bad_alloc();
     }
 }

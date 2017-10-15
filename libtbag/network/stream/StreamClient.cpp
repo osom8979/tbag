@@ -197,7 +197,7 @@ struct StreamClient::Internal : public details::ClientProperty
         assert(isWrite());
 
         Err const CODE = client_stream->shutdown(shutdown_req);
-        if (TBAG_ERR_FAILURE(CODE)) {
+        if (isFailure(CODE)) {
             tDLogE("StreamClient::Internal::shutdownWrite() {} error", getErrName(CODE));
             return CODE;
         }
@@ -212,7 +212,7 @@ struct StreamClient::Internal : public details::ClientProperty
         TBAG_INTERNAL_CLIENT_PRINT_BUFFER_IMPL("StreamClient::Internal::writeReal()", buffer, size);
 
         Err const WRITE_CODE = client_stream->write(write_req, buffer, size);
-        if (TBAG_ERR_SUCCESS(WRITE_CODE)) {
+        if (isSuccess(WRITE_CODE)) {
             if (cur_fail_count > 0) {
                 tDLogI("StreamClient::Internal::writeReal() Restore fail count.");
                 cur_fail_count = 0;
@@ -240,7 +240,7 @@ struct StreamClient::Internal : public details::ClientProperty
 
         SharedBuffer buffer;
         Err const POP_CODE = queue.frontAndPop(buffer);
-        if (TBAG_ERR_FAILURE(POP_CODE)) {
+        if (isFailure(POP_CODE)) {
             tDLogE("StreamClient::Internal::writeFromQueue() Dequeue {} error", getErrName(POP_CODE));
             return POP_CODE;
         }
@@ -294,7 +294,7 @@ struct StreamClient::Internal : public details::ClientProperty
         }
 
         Err const CODE = writeReal(wbuffer.data(), wbuffer.size());
-        if (TBAG_ERR_FAILURE(CODE)) {
+        if (isFailure(CODE)) {
             tDLogE("StreamClient::Internal::writeFromOnAsync() Write {} error.", getErrName(CODE));
             stopShutdownTimer();
             setReady();
@@ -329,7 +329,7 @@ struct StreamClient::Internal : public details::ClientProperty
 
         } else {
             result_code = writeReal(buffer, size);
-            if (TBAG_ERR_FAILURE(result_code)) {
+            if (isFailure(result_code)) {
                 tDLogE("StreamClient::Internal::autoWrite() Direct write {} error.", getErrName(result_code));
                 return result_code;
             }
@@ -348,7 +348,7 @@ struct StreamClient::Internal : public details::ClientProperty
                 stopShutdownTimer();
             }
             Err const CODE = startShutdownTimer(timeout);
-            if (TBAG_ERR_FAILURE(CODE)) {
+            if (isFailure(CODE)) {
                 tDLogW("StreamClient::Internal::autoWrite() Timer job {} error!", getErrName(CODE));
             }
         }
@@ -427,7 +427,7 @@ StreamClient::StreamClient(Loop & loop, StreamType type, UpdateReady const & rea
         : StreamClient(loop, type)
 {
     assert(static_cast<bool>(_internal));
-    if (TBAG_ERR_FAILURE(initInternalHandles())) {
+    if (isFailure(initInternalHandles())) {
         throw std::bad_alloc();
     }
     _internal->setReady();
@@ -544,12 +544,12 @@ void * StreamClient::udata(void * data)
 Err StreamClient::init(char const * destination, int port)
 {
     Err const INIT_CODE = initClient(destination, port);
-    if (TBAG_ERR_FAILURE(INIT_CODE)) {
+    if (isFailure(INIT_CODE)) {
         tDLogE("StreamClient::init() Initialize {} error.", getErrName(INIT_CODE));
         return INIT_CODE;
     }
 
-    if (TBAG_ERR_FAILURE(initInternalHandles())) {
+    if (isFailure(initInternalHandles())) {
         tDLogE("StreamClient::init() Initialize fail (internal handles).");
         return Err::E_UNKNOWN;
     }
@@ -560,7 +560,7 @@ Err StreamClient::start()
 {
     Guard const LOCK(_mutex);
     Err const CODE = _internal->client_stream->startRead();
-    if (TBAG_ERR_FAILURE(CODE)) {
+    if (isFailure(CODE)) {
         tDLogE("StreamClient::start() Start {} error", getErrName(CODE));
     }
     return CODE;
@@ -570,7 +570,7 @@ Err StreamClient::stop()
 {
     Guard const LOCK(_mutex);
     Err const CODE = _internal->client_stream->stopRead();
-    if (TBAG_ERR_FAILURE(CODE)) {
+    if (isFailure(CODE)) {
         tDLogE("StreamClient::stop() Stop {} error", getErrName(CODE));
     }
     return CODE;
@@ -656,7 +656,7 @@ void StreamClient::onAsyncWrite()
     Err const WRITE_CODE = _internal->writeFromOnAsync();
     _mutex.unlock();
 
-    if (TBAG_ERR_FAILURE(WRITE_CODE)) {
+    if (isFailure(WRITE_CODE)) {
         tDLogD("StreamClient::onAsyncWrite() ~~> onShutdown({}) event force call.", getErrName(WRITE_CODE));
         onShutdown(WRITE_CODE);
     }

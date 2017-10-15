@@ -80,7 +80,7 @@ int execute(std::string const & file,
     });
 
     Err const LOOP_RESULT = loop.run();
-    if (TBAG_ERR_FAILURE(LOOP_RESULT)) {
+    if (isFailure(LOOP_RESULT)) {
         if (code != nullptr) {
             *code = Err::E_ILLSTATE;
         }

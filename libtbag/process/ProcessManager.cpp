@@ -54,7 +54,7 @@ void ProcessManager::Proc::runner()
     }
 
     Err const CODE = _loop.run();
-    if (TBAG_ERR_FAILURE(CODE)) {
+    if (isFailure(CODE)) {
         tDLogW("ProcessManager::Proc::runner() loop {} error (PID: {})", getErrName(CODE), PID);
     }
 
@@ -69,7 +69,7 @@ Err ProcessManager::Proc::exec(std::string const & file,
                                std::string const & input)
 {
     Err const CODE = spawn(_loop, file, args, envs, cwd, input);
-    if (TBAG_ERR_FAILURE(CODE)) {
+    if (isFailure(CODE)) {
         return CODE;
     }
     try {
@@ -184,7 +184,7 @@ int ProcessManager::exec(std::string const & file,
     Guard g(_mutex);
     SharedProc proc(new Proc(this));
     Err const SPAWN_CODE = proc->exec(file, args, envs, cwd, input);
-    if (TBAG_ERR_FAILURE(SPAWN_CODE)) {
+    if (isFailure(SPAWN_CODE)) {
         tDLogE("ProcessManager::spawn() process spawn error.", getErrName(SPAWN_CODE));
         return 0;
     }

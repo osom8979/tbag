@@ -88,7 +88,7 @@ public:
 
         tDLogIfN(_verbose, "TpoT initialize ({}:{}) ...", param.bind, param.port);
         Err const INIT_CODE = _server->init(param.bind.c_str(), param.port);
-        if (TBAG_ERR_FAILURE(INIT_CODE)) {
+        if (isFailure(INIT_CODE)) {
             tDLogE("TpotServer::Internal::init() Server init {} error", getErrName(INIT_CODE));
             return INIT_CODE;
         }
@@ -347,7 +347,7 @@ void TpotServer::onProcessKillRequest(util::Header const & header, int pid, int 
 
     if (ProcessManager::exists(pid)) {
         Err const CODE = ProcessManager::kill(pid, signum);
-        if (TBAG_ERR_SUCCESS(CODE)) {
+        if (isSuccess(CODE)) {
             code = static_cast<util::Header::Code>(ResultCode::RC_SUCCESS);
             tDLogI("TpotServer::onProcessKillRequest() Kill success (PID: {}, SIGNUM: {})", pid, signum);
         } else {
@@ -400,13 +400,13 @@ int runTpotServer(TpotServer::Param const & param)
     TpotServer server(param);
 
     Err const INIT_SERVER_CODE = server.init(loop);
-    if (TBAG_ERR_FAILURE(INIT_SERVER_CODE)) {
+    if (isFailure(INIT_SERVER_CODE)) {
         tDLogE("runTpotServer() Server init {} error", getErrName(INIT_SERVER_CODE));
         return EXIT_FAILURE;
     }
 
     Err const LOOP_RUN_CODE = loop.run();
-    if (TBAG_ERR_FAILURE(LOOP_RUN_CODE)) {
+    if (isFailure(LOOP_RUN_CODE)) {
         tDLogE("runTpotServer() Loop {} error", getErrName(LOOP_RUN_CODE));
         return EXIT_FAILURE;
     }

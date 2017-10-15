@@ -79,13 +79,13 @@ Err HttpClient::writeClose()
 
 void HttpClient::onConnect(Err code)
 {
-    if (TBAG_ERR_FAILURE(code)) {
+    if (isFailure(code)) {
         onError(EventType::ET_CONNECT, code);
         return;
     }
 
     Err const START_CODE = start();
-    if (TBAG_ERR_FAILURE(START_CODE)) {
+    if (isFailure(START_CODE)) {
         onError(EventType::ET_START, START_CODE);
         return;
     }

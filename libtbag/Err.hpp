@@ -196,19 +196,6 @@ NAMESPACE_LIBTBAG_OPEN
     /* -- END -- */
 #endif
 
-#ifndef TBAG_ERR_SUCCESS
-#define TBAG_ERR_SUCCESS(code) (code == ::libtbag::Err::E_SUCCESS)
-#endif
-
-#ifndef TBAG_ERR_SUCCESS_OR_ENQASYNC
-#define TBAG_ERR_SUCCESS_OR_ENQASYNC(code) \
-    (code == ::libtbag::Err::E_SUCCESS || code == ::libtbag::Err::E_ENQASYNC)
-#endif
-
-#ifndef TBAG_ERR_FAILURE
-#define TBAG_ERR_FAILURE(code) (!TBAG_ERR_SUCCESS(code))
-#endif
-
 /**
  * List of error code.
  *
@@ -264,6 +251,31 @@ TBAG_API char const * getUvErrorName(int uv_error_code);
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+inline bool isSuccess(libtbag::Err err) TBAG_NOEXCEPT
+{
+    return err == libtbag::Err::E_SUCCESS;
+}
+
+inline bool isFailure(libtbag::Err err) TBAG_NOEXCEPT
+{
+    return !isSuccess(err);
+}
+
+inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
+{
+    using namespace libtbag;
+    return err == Err::E_SUCCESS || err == Err::E_WARNING || err == Err::E_ASYNCREQ;
+}
+
+inline bool isFailureAnyway(libtbag::Err err) TBAG_NOEXCEPT
+{
+    return !isSuccessAnyway(err);
+}
+
+// --------------
+// Output Stream.
+// --------------
 
 #include <ostream>
 

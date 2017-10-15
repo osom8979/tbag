@@ -25,7 +25,7 @@ static void checkWsBuffer(std::string const & prefix, char const * buffer, std::
     using namespace libtbag::network::http;
     ws::WsFrame frame;
     Err const EXECUTE_CODE = frame.execute(buffer, size);
-    if (TBAG_ERR_FAILURE(EXECUTE_CODE)) {
+    if (isFailure(EXECUTE_CODE)) {
         tDLogW("checkWsBuffer({}) [CHECK] PARSING {} ERROR", prefix, getErrName(EXECUTE_CODE));
         return;
     }
@@ -118,7 +118,7 @@ Err WsClient::closeWebSocket()
     _closing.store(true);
     Err const CLOSE_TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
 
-    if (TBAG_ERR_FAILURE(CLOSE_TIMER_CODE)) {
+    if (isFailure(CLOSE_TIMER_CODE)) {
         tDLogE("WsClient::closeWebSocket() Close timer error: {} -> Force closing!", getErrName(CLOSE_TIMER_CODE));
         _close.setWsStatusCode(ws::WsStatusCode::WSSC_CLIENT_TIMER_ERROR);
         close();

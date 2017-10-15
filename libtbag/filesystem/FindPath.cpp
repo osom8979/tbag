@@ -35,7 +35,7 @@ std::vector<Path> findUtf8File(std::vector<std::string> const & paths,
 std::vector<Path> findUtf8ExecuteFile(std::string const & regex)
 {
     std::string path_env;
-    if (TBAG_ERR_FAILURE(uvpp::getEnv("PATH", path_env))) {
+    if (isFailure(uvpp::getEnv("PATH", path_env))) {
         return std::vector<Path>();
     }
     auto const PATHS = string::splitTokens(path_env, std::string(1, details::PATH_SPLITTER));
@@ -54,7 +54,7 @@ Path findFirstUtf8ExecuteFile(std::string const & regex)
 Path findEnvOrExe(std::string const & env, std::string const & regex)
 {
     std::string value;
-    if (TBAG_ERR_SUCCESS(uvpp::getEnv(env, value))) {
+    if (isSuccess(uvpp::getEnv(env, value))) {
         Path com_path(value);
         if (com_path.exists()) {
             return com_path;

@@ -54,17 +54,17 @@ UdpEcho::~UdpEcho()
 Err UdpEcho::initDefault(std::string const & bind_ip, int port, uint64_t timeout)
 {
     Err const INIT_CODE = UdpNode::init(bind_ip.c_str(), port);
-    if (TBAG_ERR_FAILURE(INIT_CODE)) {
+    if (isFailure(INIT_CODE)) {
         return INIT_CODE;
     }
 
     Err const BROADCAST_CODE = UdpNode::setBroadcast();
-    if (TBAG_ERR_FAILURE(BROADCAST_CODE)) {
+    if (isFailure(BROADCAST_CODE)) {
         return BROADCAST_CODE;
     }
 
     Err const START_CODE = UdpNode::start();
-    if (TBAG_ERR_FAILURE(START_CODE)) {
+    if (isFailure(START_CODE)) {
         return START_CODE;
     }
 
@@ -73,7 +73,7 @@ Err UdpEcho::initDefault(std::string const & bind_ip, int port, uint64_t timeout
             close();
         });
         Err const START_TIMER_CODE = _timer->start(timeout);
-        if (TBAG_ERR_FAILURE(START_TIMER_CODE)) {
+        if (isFailure(START_TIMER_CODE)) {
             return START_TIMER_CODE;
         }
     }
@@ -91,7 +91,7 @@ Err UdpEcho::initClient(std::string const & bind_ip, int port, int broadcast_por
 {
     _type = EchoType::ET_CLIENT;
     Err const SET_DEST_CODE = UdpNode::setDestination(details::BROADCAST_SUBNET_IPV4, broadcast_port);
-    if (TBAG_ERR_FAILURE(SET_DEST_CODE)) {
+    if (isFailure(SET_DEST_CODE)) {
         return SET_DEST_CODE;
     }
     return initDefault(bind_ip, port, timeout);
@@ -130,7 +130,7 @@ void UdpEcho::onRead(Err code, ReadPacket const & packet)
             Err send_result = Err::E_UNKNOWN;
             auto send_size = udp->trySend(message.data(), message.size(), packet.addr, &send_result);
 
-            if (send_size != packet.size || TBAG_ERR_FAILURE(send_result)) {
+            if (send_size != packet.size || isFailure(send_result)) {
                 tDLogE("UdpEcho::onRead() try_send error (size: {}, code: {})", send_size, getErrName(send_result));
             }
             udp->close();

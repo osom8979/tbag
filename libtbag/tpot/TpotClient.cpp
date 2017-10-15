@@ -73,7 +73,7 @@ Err TpotClient::requestCommon(std::string const & method, std::string const & pa
 
     HttpResponse response;
     Err const CODE = request(method, path, this->point(), this->size(), response);
-    if (TBAG_ERR_FAILURE(CODE)) {
+    if (isFailure(CODE)) {
         tDLogE("TpotClient::Internal::requestCommon({}) Request {} error", path, getErrName(CODE));
         return CODE;
     }
@@ -90,7 +90,7 @@ Err TpotClient::requestCommon(std::string const & method, std::string const & pa
     }
 
     Err const PARSE_CODE = this->parse(response.body.data(), response.body.size());
-    if (TBAG_ERR_FAILURE(PARSE_CODE)) {
+    if (isFailure(PARSE_CODE)) {
         tDLogE("TpotClient::Internal::requestCommon({}) Response parse {} error", path, getErrName(PARSE_CODE));
         return PARSE_CODE;
     }
@@ -335,12 +335,12 @@ int requestTpotClient(TpotClient::Param const & param, std::vector<std::string> 
         std::cerr << "Unknown command: " << commands[0] << std::endl;
     }
 
-    if (TBAG_ERR_SUCCESS(request_code)) {
+    if (isSuccess(request_code)) {
         std::cout << string::fformat("REQUEST [ID({}) CODE({})] {}: {}\n", header.id, header.code, request_name, request_value);
     } else {
         std::cerr << string::fformat("REQUEST({}) ERROR: {}\n", request_name, getErrName(request_code));
     }
-    return TBAG_ERR_SUCCESS(request_code) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return isSuccess(request_code) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 } // namespace tpot

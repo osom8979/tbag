@@ -99,7 +99,7 @@ Err HttpServer::HttpNode::closeWebSocket(uint16_t status_code, std::string const
     Err const CLOSE_TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
     _closing = true;
 
-    if (TBAG_ERR_FAILURE(CLOSE_TIMER_CODE)) {
+    if (isFailure(CLOSE_TIMER_CODE)) {
         tDLogE("HttpServer::HttpNode::closeWebSocket() Close timer error: {} -> Force closing!", getErrName(CLOSE_TIMER_CODE));
         close();
         return CLOSE_TIMER_CODE;
@@ -130,7 +130,7 @@ void HttpServer::HttpNode::backWsFrame(Err code, ReadPacket const & packet)
 
         } else if (opcode == ws::WsOpCode::WSOC_CONNECTION_CLOSE) {
             Err const WRITE_CLOSE_CODE = closeWebSocket(ws::WsStatusCode::WSSC_NORMAL_CLOSURE);
-            if (TBAG_ERR_FAILURE(WRITE_CLOSE_CODE)) {
+            if (isFailure(WRITE_CLOSE_CODE)) {
                 tDLogE("HttpServer::HttpNode::backWsFrame() WebSocket close write {} error", getErrName(WRITE_CLOSE_CODE));
                 close();
             }
