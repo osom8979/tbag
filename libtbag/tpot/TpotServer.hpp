@@ -46,11 +46,15 @@ public:
     using TpotPacket     = proto::TpotPacket;
     using ProcessManager = process::ProcessManager;
 
-    using Loop       = uvpp::Loop;
-    using HttpServer = network::http::HttpServer;
-    using StreamType = HttpServer::StreamType;
-    using WeakClient = HttpServer::WeakClient;
-    using HttpPacket = HttpServer::HttpPacket;
+    using Loop           = uvpp::Loop;
+    using HttpRequest    = network::http::HttpRequest;
+    using HttpResponse   = network::http::HttpResponse;
+    using HttpProperty   = network::http::HttpProperty;
+    using HttpServer     = network::http::HttpServer;
+    using StreamType     = HttpServer::StreamType;
+    using WeakClient     = HttpServer::WeakClient;
+    using HttpNode       = HttpServer::HttpNode;
+    using SharedHttpNode = std::shared_ptr<HttpNode>;
 
     using DynamicAsset = res::DynamicAsset;
 

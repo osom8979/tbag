@@ -34,7 +34,9 @@ std::string HttpClient::getKey() const
 
 Err HttpClient::writeRequest(HttpRequest const & request)
 {
-    std::string const & REQUEST_STRING = request.toRequestString();
+    HttpRequest update_request = request;
+    update_request.updateDefaultRequest();
+    std::string const & REQUEST_STRING = update_request.toRequestString();
     return write(REQUEST_STRING.data(), REQUEST_STRING.size());
 }
 
@@ -125,6 +127,11 @@ void HttpClient::onRead(Err code, ReadPacket const & packet)
     } else {
         _reader.parse(packet.buffer, packet.size);
     }
+}
+
+void HttpClient::onParseError(Err code, void * arg)
+{
+    close();
 }
 
 void HttpClient::onOpen()

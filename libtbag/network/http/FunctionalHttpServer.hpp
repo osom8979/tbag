@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
+
 #include <libtbag/network/http/HttpServer.hpp>
 #include <libtbag/functional/CallbackHelper.hpp>
 
@@ -33,34 +35,95 @@ namespace http    {
  * @author zer0
  * @date   2017-06-30
  * @date   2017-08-09 (Rename: FunctionalHttpServer -> FuncHttpServer)
+ * @date   2017-10-16 (Change to the class template)
  */
-class FunctionalHttpServer : public HttpServer
+template <typename HttpServerType>
+class FunctionalHttpServer : public HttpServerType
 {
 public:
+    using Parent     = HttpServerType;
+    using Loop       = HttpServer::Loop;
     using StreamType = HttpServer::StreamType;
     using WeakClient = HttpServer::WeakClient;
-    using HttpPacket = HttpServer::HttpPacket;
-    using WsPacket   = HttpServer::WsPacket;
+
+    STATIC_ASSERT_CHECK_IS_BASE_OF(HttpServer, Parent);
 
 public:
-    FunctionalHttpServer(Loop & loop, StreamType type = StreamType::TCP) : HttpServer(loop, type)
+    FunctionalHttpServer(Loop & loop, StreamType type = StreamType::TCP) : Parent(loop, type)
     { /* EMPTY. */ }
     virtual ~FunctionalHttpServer()
     { /* EMPTY. */ }
 
 public:
+    using       onConnection_func = std::function<void(Err)>;
+    using        onClientEof_func = std::function<void(WeakClient)>;
+    using  onClientReadError_func = std::function<void(WeakClient, Err)>;
+    using onClientParseError_func = std::function<void(WeakClient, Err)>;
+
+private:
+          onConnection_func        __onConnection_cb;
+           onClientEof_func         __onClientEof_cb;
+     onClientReadError_func   __onClientReadError_cb;
+    onClientParseError_func  __onClientParseError_cb;
+
+public:
+    inline void       set_onConnection(      onConnection_func const & cb) {       __onConnection_cb = cb; }
+    inline void        set_onClientEof(       onClientEof_func const & cb) {        __onClientEof_cb = cb; }
+    inline void  set_onClientReadError( onClientReadError_func const & cb) {  __onClientReadError_cb = cb; }
+    inline void set_onClientParseError(onClientParseError_func const & cb) { __onClientParseError_cb = cb; }
+
+protected:
+    virtual void onConnection(Err code) override
+    {
+        if (static_cast<bool>(__onConnection_cb)) {
+            __onConnection_cb(code);
+        } else {
+            Parent::onConnection(code);
+        }
+    }
+
+    virtual void onClientEof(WeakClient node) override
+    {
+        if (static_cast<bool>(__onClientEof_cb)) {
+            __onClientEof_cb(node);
+        } else {
+            Parent::onClientEof(node);
+        }
+    }
+
+    virtual void onClientReadError(WeakClient node, Err code) override
+    {
+        if (static_cast<bool>(__onClientReadError_cb)) {
+            __onClientReadError_cb(node, code);
+        } else {
+            Parent::onClientReadError(node, code);
+        }
+    }
+
+    virtual void onClientParseError(WeakClient node, Err code) override
+    {
+        if (static_cast<bool>(__onClientParseError_cb)) {
+            __onClientParseError_cb(node, code);
+        } else {
+            Parent::onClientParseError(node, code);
+        }
+    }
+
+public:
+    TBAG_VOID_CALLBACK_HELPER(onClientShutdown, WeakClient, Err);
+    TBAG_VOID_CALLBACK_HELPER(onClientWrite   , WeakClient, Err);
+    TBAG_VOID_CALLBACK_HELPER(onClientClose   , WeakClient);
+    TBAG_VOID_CALLBACK_HELPER(onClientTimer   , WeakClient);
     TBAG_VOID_NOPARAM_CALLBACK_HELPER(onServerClose);
-    TBAG_VOID_CALLBACK_HELPER(onHttpOpen    , WeakClient);
-    TBAG_VOID_CALLBACK_HELPER(onHttpRequest , WeakClient, Err, HttpPacket&);
-    TBAG_VOID_CALLBACK_HELPER(onHttpClose   , WeakClient);
-    TBAG_VOID_CALLBACK_HELPER(onHttpTimer   , WeakClient);
-    TBAG_VOID_CALLBACK_HELPER(onHttpShutdown, WeakClient, Err);
-    TBAG_VOID_CALLBACK_HELPER(onHttpWrite   , WeakClient, Err);
-    TBAG_VOID_CALLBACK_HELPER(onWsOpen      , WeakClient, Err, HttpPacket&);
-    TBAG_VOID_CALLBACK_HELPER(onWsMessage   , WeakClient, ws::WsOpCode, char const*, std::size_t);
+
+    TBAG_VOID_CALLBACK_HELPER(onClientOpen        , WeakClient);
+    TBAG_VOID_CALLBACK_HELPER(onClientContinue    , WeakClient);
+    TBAG_CALLBACK_HELPER(onClientSwitchingProtocol, bool, true, WeakClient, HttpRequest const &);
+    TBAG_VOID_CALLBACK_HELPER(onClientWsMessage   , WeakClient, ws::WsOpCode, util::Buffer const &);
+    TBAG_VOID_CALLBACK_HELPER(onClientRequest     , WeakClient, HttpRequest const &);
 };
 
-using FuncHttpServer = FunctionalHttpServer;
+using FuncHttpServer = FunctionalHttpServer<HttpServer>;
 
 } // namespace http
 } // namespace network

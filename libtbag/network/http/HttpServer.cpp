@@ -22,7 +22,7 @@ namespace http    {
 // ------------------------
 
 HttpServer::HttpNode::HttpNode(Loop & loop, StreamType type, HttpServer * parent)
-        : StreamNode(loop, type, parent), _upgrade(false), _closing(false)
+        : stream::StreamNode(loop, type, parent), _reader(this)
 {
     // EMPTY.
 }
@@ -32,127 +32,76 @@ HttpServer::HttpNode::~HttpNode()
     // EMPTY.
 }
 
-Err HttpServer::HttpNode::writeWsFrame(ws::WsFrame const & frame)
+Err HttpServer::HttpNode::writeResponse(HttpResponse const & response)
 {
-    WsBuffer buffer;
-    std::size_t const SIZE = frame.copyTo(buffer);
-    if (SIZE == 0) {
-        tDLogE("HttpServer::HttpNode::writeOrEnqueue() WsFrame -> Buffer copy error");
-        return Err::E_ECOPY;
-    }
-    return write((char const *)buffer.data(), buffer.size());
+    HttpResponse update_response = response;
+    update_response.updateDefaultResponse();
+    std::string const & RESPONSE_STRING = update_response.toResponseString();
+    return write(RESPONSE_STRING.data(), RESPONSE_STRING.size());
 }
 
-Err HttpServer::HttpNode::writeText(char const * buffer, std::size_t size, bool continuation, bool finish)
+Err HttpServer::HttpNode::writeWsResponse(HttpRequest const & request, HttpResponse const & response)
 {
-    if (isUpgrade() == false) {
+    HttpResponse ws_response = response;
+    ws_response.updateDefaultWsResponse(request);
+    std::string const & RESPONSE_STRING = ws_response.toResponseString();
+    return write(RESPONSE_STRING.data(), RESPONSE_STRING.size());
+}
+
+Err HttpServer::HttpNode::writeWsFrame(WsFrame const & frame)
+{
+    if (_reader.isEnableWebsocket() == false) {
         return Err::E_ILLSTATE;
     }
 
-    ws::WsFrame frame;
+    util::Buffer buffer;
+    std::size_t const SIZE = frame.copyTo(buffer);
+    if (SIZE == 0) {
+        tDLogE("HttpServer::HttpNode::writeWsFrame() WsFrame -> Buffer copy error");
+        return Err::E_ECOPY;
+    }
+    return write(buffer.data(), buffer.size());
+}
+
+Err HttpServer::HttpNode::writeText(char const * buffer, std::size_t size, bool finish)
+{
+    WsFrame frame;
     frame.text(buffer, size, finish);
     return writeWsFrame(frame);
 }
 
-Err HttpServer::HttpNode::writeText(std::string const & text, bool continuation, bool finish)
+Err HttpServer::HttpNode::writeText(std::string const & text, bool finish)
 {
-    return writeText(text.c_str(), text.size(), continuation, finish);
+    return writeText(text.data(), text.size(), finish);
 }
 
-Err HttpServer::HttpNode::writeBinary(char const * buffer, std::size_t size, bool continuation, bool finish)
+Err HttpServer::HttpNode::writeBinary(char const * buffer, std::size_t size, bool finish)
 {
-    if (isUpgrade() == false) {
-        return Err::E_ILLSTATE;
-    }
-
-    ws::WsFrame frame;
+    WsFrame frame;
     frame.binary(buffer, size, finish);
     return writeWsFrame(frame);
 }
 
-Err HttpServer::HttpNode::writeBinary(WsBuffer const & binary, bool continuation, bool finish)
+Err HttpServer::HttpNode::writeBinary(util::Buffer const & binary, bool finish)
 {
-    return writeBinary(binary.data(), binary.size(), continuation, finish);
+    return writeBinary(binary.data(), binary.size(), finish);
 }
 
-Err HttpServer::HttpNode::writeHttpResponse(HttpResponse const & response)
+Err HttpServer::HttpNode::writeClose(WsStatus const & status)
 {
-    HttpResponse temp = response;
-    temp.updateDefaultResponse();
-    return writeString(temp.toResponseString());
-}
-
-Err HttpServer::HttpNode::writeString(std::string const & response)
-{
-    if (response.empty()) {
-        return Err::E_ILLARGS;
-    }
-    return write(response.data(), response.size());
-}
-
-Err HttpServer::HttpNode::closeWebSocket(uint16_t status_code, std::string const & reason)
-{
-    if (isUpgrade() == false) {
-        return Err::E_ILLSTATE;
-    }
-
-    Err const CLOSE_TIMER_CODE = startTimer(DEFAULT_CLOSING_TIMEOUT_MILLISECOND);
-    _closing = true;
-
-    if (isFailure(CLOSE_TIMER_CODE)) {
-        tDLogE("HttpServer::HttpNode::closeWebSocket() Close timer error: {} -> Force closing!", getErrName(CLOSE_TIMER_CODE));
-        close();
-        return CLOSE_TIMER_CODE;
-    }
-
-    ws::WsFrame frame;
-    frame.close(status_code, reason);
+    WsFrame frame;
+    frame.close(status);
     return writeWsFrame(frame);
 }
 
-Err HttpServer::HttpNode::closeWebSocket(ws::WsStatusCode code)
+Err HttpServer::HttpNode::writeClose(WsStatusCode code)
 {
-    return closeWebSocket(getWsStatusCodeNumber(code), getWsStatusCodeReason(code));
+    return writeClose(WsStatus(code));
 }
 
-void HttpServer::HttpNode::backWsFrame(Err code, ReadPacket const & packet)
+Err HttpServer::HttpNode::writeClose()
 {
-    __on_read_only__.receiver.push(packet.buffer, packet.size);
-    while (__on_read_only__.receiver.next()) {
-        auto opcode = __on_read_only__.receiver.getOpCode();
-        auto & payload = __on_read_only__.receiver.atPayload();
-
-        auto * server = getHttpServerPtr();
-        assert(server != nullptr);
-
-        if (opcode == ws::WsOpCode::WSOC_TEXT_FRAME || opcode == ws::WsOpCode::WSOC_BINARY_FRAME) {
-            server->onWsMessage(getWeakClient(), opcode, &payload[0], payload.size());
-
-        } else if (opcode == ws::WsOpCode::WSOC_CONNECTION_CLOSE) {
-            Err const WRITE_CLOSE_CODE = closeWebSocket(ws::WsStatusCode::WSSC_NORMAL_CLOSURE);
-            if (isFailure(WRITE_CLOSE_CODE)) {
-                tDLogE("HttpServer::HttpNode::backWsFrame() WebSocket close write {} error", getErrName(WRITE_CLOSE_CODE));
-                close();
-            }
-
-        } else {
-            tDLogW("HttpServer::HttpNode::backWsFrame() Unsupported opcode: {}", getWsOpCodeName(opcode));
-        }
-    }
-}
-
-void HttpServer::HttpNode::onShutdown(Err code)
-{
-    auto * server = getHttpServerPtr();
-    assert(server != nullptr);
-    server->onHttpShutdown(getWeakClient(), code);
-}
-
-void HttpServer::HttpNode::onWrite(Err code)
-{
-    auto * server = getHttpServerPtr();
-    assert(server != nullptr);
-    server->onHttpWrite(getWeakClient(), code);
+    return writeClose(WsStatusCode::WSSC_NORMAL_CLOSURE);
 }
 
 void HttpServer::HttpNode::onRead(Err code, ReadPacket const & packet)
@@ -161,114 +110,54 @@ void HttpServer::HttpNode::onRead(Err code, ReadPacket const & packet)
     assert(server != nullptr);
 
     if (code == Err::E_EOF) {
-        tDLogD("HttpServer::HttpNode::onRead() EOF.");
-        close();
-        return;
-    }
-
-    if (code != Err::E_SUCCESS) {
-        tDLogE("HttpServer::HttpNode::onRead() {} error", getErrName(code));
-        close();
-        return;
-    }
-
-    // ------------------
-    // WebSocket process.
-    // ------------------
-
-    if (server->isEnableWebSocket() && isUpgrade()) {
-        backWsFrame(code, packet);
-        return;
-    }
-
-    // -------------
-    // HTTP request.
-    // -------------
-
-    HttpParser   & request  = __on_read_only__.parser;
-    HttpResponse & response = __on_read_only__.builder;
-
-    std::size_t exec_size = 0;
-    request.execute(packet.buffer, packet.size, &exec_size);
-    if (exec_size < packet.size) {
-        tDLogW("HttpServer::HttpNode::onRead() exec_size({}) < packet_size({})", exec_size, packet.size);
-    } else if (exec_size > packet.size) {
-        tDLogW("HttpServer::HttpNode::onRead() exec_size({}) > packet_size({})", exec_size, packet.size);
+        server->onClientEof(getWeakClient());
+    } else if (code != Err::E_SUCCESS) {
+        server->onClientReadError(getWeakClient(), code);
     } else {
-        assert(exec_size == packet.size);
+        _reader.parse(packet.buffer, packet.size);
     }
-
-    if (request.isFinish() == false) {
-        tDLogD("HttpServer::HttpNode::onRead() Not complete.");
-        return;
-    }
-
-    // ------------------
-    // WebSocket checker.
-    // ------------------
-
-    if (server->isEnableWebSocket() && request.isUpgrade()) {
-        // WebSocket interrupt process (HTTP Request).
-        if (request.checkWsRequest()) {
-            response.updateDefaultWsResponse(request);
-            //updateResponseWebSocket(request, response)
-            tDLogI("HttpServer::HttpNode::onClientRead() Request WebSocket header.");
-            _upgrade = true;
-
-            HttpPacket hp(request, response);
-            server->onWsOpen(getWeakClient(), code, hp);
-
-            Err const WRITE_CODE = writeHttpResponse(response);
-            if (WRITE_CODE != Err::E_SUCCESS) {
-                tDLogW("HttpServer::HttpNode::onRead() WebSocket response write {} error.", getErrName(WRITE_CODE));
-            }
-
-            request.clear();
-            response.code = 0;
-            response.reason.clear();
-            response.body.clear();
-            response.clearHeaders();
-            return;
-        } else {
-            tDLogW("HttpServer::HttpNode::onRead() Unknown WebSocket request. Switches to the regular HTTP protocol.");
-        }
-    }
-
-    // ---------------------
-    // Regular HTTP process.
-    // ---------------------
-
-    HttpPacket hp(request, response);
-    server->findAndExecuteTheReadCallback(getWeakClient(), code, hp);
-    Err const WRITE_CODE = writeHttpResponse(response);
-    if (WRITE_CODE != Err::E_SUCCESS) {
-        tDLogW("HttpServer::HttpNode::onRead() Write {} error.", getErrName(WRITE_CODE));
-    }
-
-    request.clear();
-    response.code = 0;
-    response.reason.clear();
-    response.body.clear();
-    response.clearHeaders();
 }
 
-void HttpServer::HttpNode::onTimer()
+void HttpServer::HttpNode::onContinue(void * arg)
 {
-    if (isClosing()) {
-        close();
-        return;
-    }
-
     auto * server = getHttpServerPtr();
     assert(server != nullptr);
-    server->onHttpTimer(getWeakClient());
+    server->onClientContinue(getWeakClient());
+}
+
+bool HttpServer::HttpNode::onSwitchingProtocol(HttpProperty const & property, void * arg)
+{
+    auto * server = getHttpServerPtr();
+    assert(server != nullptr);
+    return server->onClientSwitchingProtocol(getWeakClient(), property);
+}
+
+void HttpServer::HttpNode::onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg)
+{
+    auto * server = getHttpServerPtr();
+    assert(server != nullptr);
+    return server->onClientWsMessage(getWeakClient(), opcode, payload);
+}
+
+void HttpServer::HttpNode::onRegularHttp(HttpProperty const & property, void * arg)
+{
+    auto * server = getHttpServerPtr();
+    assert(server != nullptr);
+    server->findAndExecute(getWeakClient(), property);
+}
+
+void HttpServer::HttpNode::onParseError(Err code, void * arg)
+{
+    auto * server = getHttpServerPtr();
+    assert(server != nullptr);
+    return server->onClientParseError(getWeakClient(), code);
 }
 
 // --------------------------
 // HttpServer implementation.
 // --------------------------
 
-HttpServer::HttpServer(Loop & loop, StreamType type) : Parent(loop, type), _websocket(false)
+HttpServer::HttpServer(Loop & loop, StreamType type) : Parent(loop, type)
 {
     // EMPTY.
 }
@@ -278,107 +167,141 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
-void HttpServer::setRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, Order priority)
+void HttpServer::setRequest(std::string const & method, std::string const & regex_path, OnRequest const & cb, int priority)
 {
-    setRequest(new (std::nothrow) HttpDefaultFilter(method, regex_path), cb);
+    setRequest(HttpFilter::SharedFilter(new (std::nothrow) HttpBaseFilter(method, regex_path)), cb);
 }
 
-void HttpServer::setRequest(std::string const & regex_path, OnRequest const & cb, Order priority)
+void HttpServer::setRequest(std::regex const & regex_path, OnRequest const & cb, int priority)
 {
-    setRequest(new (std::nothrow) HttpDefaultFilter(regex_path), cb);
+    setRequest(HttpFilter::SharedFilter(new (std::nothrow) HttpBaseFilter(regex_path)), cb);
 }
 
-void HttpServer::setRequest(HttpFilterInterface * filter, OnRequest const & cb, Order priority)
+void HttpServer::setRequest(HttpFilter::SharedFilter const & filter, OnRequest const & cb, int priority)
 {
-    setRequest(SharedFilter(new (std::nothrow) Filter(filter, cb)), priority);
+    setRequest(HttpFilter(filter, cb), priority);
 }
 
-void HttpServer::setRequest(SharedFilter filter, Order priority)
+void HttpServer::setRequest(HttpFilter const & filter, int priority)
 {
-    Guard LOCK_GUARD(_filters_mutex);
-    _filters.insert(FilterPair(priority, filter));
+    WriteGuard const LOCK_GUARD(_filters_mutex);
+    _filters.insert(HttpFilterMap::value_type(priority, filter));
 }
 
-Err HttpServer::writeText(WeakClient & node, char const * buffer, std::size_t size, bool continuation, bool finish)
+Err HttpServer::writeResponse(WeakClient & node, HttpResponse const & response)
 {
-    if (auto shared = castSharedClient<HttpNode>(node)) {
-        return shared->writeText(buffer, size, continuation, finish);
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeResponse(response);
     }
     return Err::E_EXPIRED;
 }
 
-Err HttpServer::writeText(WeakClient & node, std::string const & text, bool continuation, bool finish)
+Err HttpServer::writeWsResponse(WeakClient & node, HttpRequest const & request, HttpResponse const & response)
 {
-    return writeText(node, text.c_str(), text.size(), continuation, finish);
-}
-
-Err HttpServer::writeBinary(WeakClient & node, char const * buffer, std::size_t size, bool continuation, bool finish)
-{
-    if (auto shared = castSharedClient<HttpNode>(node)) {
-        return shared->writeBinary(buffer, size, continuation, finish);
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeWsResponse(request, response);
     }
     return Err::E_EXPIRED;
 }
 
-Err HttpServer::writeBinary(WeakClient & node, WsBuffer const & buffer, bool continuation, bool finish)
+Err HttpServer::writeWsFrame(WeakClient & node, WsFrame const & frame)
 {
-    return writeBinary(node, buffer.data(), buffer.size(), continuation, finish);
-}
-
-Err HttpServer::closeClient(WeakClient & node, uint16_t status_code, std::string const & reason)
-{
-    if (auto shared = castSharedClient<HttpNode>(node)) {
-        return shared->closeWebSocket(status_code, reason);
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeWsFrame(frame);
     }
     return Err::E_EXPIRED;
 }
 
-bool HttpServer::isUpgradeWebSocket(SharedHttpNode const & node) const TBAG_NOEXCEPT
+Err HttpServer::writeText(WeakClient & node, char const * buffer, std::size_t size, bool finish)
 {
-    if (static_cast<bool>(node)) {
-        return _websocket && node->isUpgrade();
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeText(buffer, size, finish);
     }
-    return false;
+    return Err::E_EXPIRED;
 }
 
-bool HttpServer::isUpgradeWebSocket(WeakClient const & node) const TBAG_NOEXCEPT
+Err HttpServer::writeText(WeakClient & node, std::string const & text, bool finish)
 {
-    return isUpgradeWebSocket(castSharedClient<HttpNode>(node));
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeText(text, finish);
+    }
+    return Err::E_EXPIRED;
 }
 
-HttpServer::SharedFilter HttpServer::findFilter(HttpParser const & request)
+Err HttpServer::writeBinary(WeakClient & node, char const * buffer, std::size_t size, bool finish)
 {
-    Guard LOCK_GUARD(_filters_mutex);
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeBinary(buffer, size, finish);
+    }
+    return Err::E_EXPIRED;
+}
+
+Err HttpServer::writeBinary(WeakClient & node, util::Buffer const & buffer, bool finish)
+{
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeBinary(buffer, finish);
+    }
+    return Err::E_EXPIRED;
+}
+
+Err HttpServer::writeClose(WeakClient & node, WsStatus const & status)
+{
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeClose(status);
+    }
+    return Err::E_EXPIRED;
+}
+
+Err HttpServer::writeClose(WeakClient & node, WsStatusCode code)
+{
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeClose(code);
+    }
+    return Err::E_EXPIRED;
+}
+
+Err HttpServer::writeClose(WeakClient & node)
+{
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeClose();
+    }
+    return Err::E_EXPIRED;
+}
+
+HttpServer::HttpFilter HttpServer::findFilter(HttpRequest const & request)
+{
+    ReadGuard const LOCK_GUARD(_filters_mutex);
     for (auto & cursor : _filters) {
-        Order order = cursor.first;
-        SharedFilter filter = cursor.second;
-
-        if (static_cast<bool>(filter) == false || static_cast<bool>(filter->http_filter) == false) {
+        auto & filter = cursor.second;
+        if (static_cast<bool>(filter.filter) == false) {
             continue;
         }
-        if (filter->http_filter->filter(request) == false) {
+        if (filter.filter->filter(request) == false) {
             continue;
         }
-
-        if (static_cast<bool>(filter)) {
-            return filter;
-        }
+        return filter;
     }
-    return SharedFilter();
+    return HttpFilter();
 }
 
-void HttpServer::findAndExecuteTheReadCallback(WeakClient node, Err code, HttpPacket & packet)
+void HttpServer::findAndExecute(WeakClient node, HttpRequest const & request)
 {
-    if (auto filter = findFilter(packet.request)) {
-        filter->request_cb(node, code, packet);
+    auto filter = findFilter(request);
+    if (static_cast<bool>(filter.request_cb)) {
+        filter.request_cb(node, request);
     } else {
-        onHttpRequest(node, code, packet); // Default request callback.
+        onClientRequest(node, request); // Default request callback.
     }
 }
 
 // ---------------
 // Event handling.
 // ---------------
+
+void HttpServer::onClientRead(WeakClient node, Err code, ReadPacket const & packet)
+{
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+}
 
 void HttpServer::onConnection(Err code)
 {
@@ -401,41 +324,35 @@ void HttpServer::onConnection(Err code)
         return;
     }
 
-    onHttpOpen(node);
+    onClientOpen(node);
 }
 
-void HttpServer::onClientShutdown(WeakClient node, Err code)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-void HttpServer::onClientWrite(WeakClient node, Err code)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-void HttpServer::onClientRead(WeakClient node, Err code, ReadPacket const & packet)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-void HttpServer::onClientClose(WeakClient node)
-{
-    onHttpClose(node);
-}
-
-void HttpServer::onClientTimer(WeakClient node)
-{
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-}
-
-HttpServer::SharedStreamNode HttpServer::createClient(StreamType type,
-                                                      Loop & loop,
-                                                      SharedStream & server)
+HttpServer::SharedStreamNode HttpServer::createClient(StreamType type, Loop & loop, SharedStream & server)
 {
     assert(static_cast<bool>(server));
     tDLogSD("HttpServer::createClient() Create HttpNode");
     return SharedStreamNode(new (std::nothrow) HttpNode(loop, type, this));
+}
+
+void HttpServer::onClientEof(WeakClient node)
+{
+    if (auto shared = toSharedNode(node)) {
+        shared->close();
+    }
+}
+
+void HttpServer::onClientReadError(WeakClient node, Err code)
+{
+    if (auto shared = toSharedNode(node)) {
+        shared->close();
+    }
+}
+
+void HttpServer::onClientParseError(WeakClient node, Err code)
+{
+    if (auto shared = toSharedNode(node)) {
+        shared->close();
+    }
 }
 
 } // namespace http

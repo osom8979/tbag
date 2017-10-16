@@ -92,6 +92,12 @@ void WsFrameBuffer::push(char const * buffer, std::size_t size)
 
 bool WsFrameBuffer::next(Err * code, std::size_t * size)
 {
+    if (_buffer_size == 0) {
+        if (code != nullptr) { (*code) = Err::E_SUCCESS; }
+        if (size != nullptr) { (*size) = 0; }
+        return false;
+    }
+
     WsFrame      & current_buffer = __cache__.buffer;
     WsOpCode     & result_opcode  = __cache__.opcode;
     util::Buffer & result_payload = __cache__.payload;

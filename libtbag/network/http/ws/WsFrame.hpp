@@ -152,6 +152,7 @@ public:
     void close(uint32_t key);
     void close(uint16_t code, std::string const & reason);
     void close(WsStatusCode code);
+    void close(WsStatus const & status);
 
     WsStatus getWsStatus() const;
 

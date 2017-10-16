@@ -42,32 +42,24 @@ struct HttpFilterInterface
 };
 
 /**
- * HttpDefaultFilter class prototype.
+ * HttpBaseFilter class prototype.
  *
  * @author zer0
  * @date   2017-05-24
+ * @date   2017-10-16 (HttpDefaultFilter -> HttpBaseFilter)
  */
-class TBAG_API HttpDefaultFilter : public HttpFilterInterface
+struct TBAG_API HttpBaseFilter : public HttpFilterInterface
 {
-private:
     std::string _method;
     std::regex  _regex;
 
-public:
-    HttpDefaultFilter();
-    HttpDefaultFilter(std::string const & method, std::string const & regex);
-    HttpDefaultFilter(std::string const & method, std::regex const & regex);
-    HttpDefaultFilter(std::string const & regex);
-    HttpDefaultFilter(std::regex  const & regex);
-    HttpDefaultFilter(HttpDefaultFilter const & obj);
-    HttpDefaultFilter(HttpDefaultFilter && obj);
-    virtual ~HttpDefaultFilter();
+    HttpBaseFilter();
+    explicit HttpBaseFilter(std::string const & method);
+    explicit HttpBaseFilter(std::regex  const & regex);
+    explicit HttpBaseFilter(std::string const & method, std::string const & regex);
+    explicit HttpBaseFilter(std::string const & method, std::regex const & regex);
+    virtual ~HttpBaseFilter();
 
-public:
-    HttpDefaultFilter & operator =(HttpDefaultFilter const & obj);
-    HttpDefaultFilter & operator =(HttpDefaultFilter && obj);
-
-public:
     virtual bool filter(HttpRequest const & request) override;
 };
 

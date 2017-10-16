@@ -26,8 +26,6 @@ using namespace libtbag::network;
 using namespace libtbag::network::http;
 
 using WeakClient = HttpServer::WeakClient;
-using HttpPacket = HttpServer::HttpPacket;
-using WsPacket   = HttpServer::WsPacket;
 
 //#define MASSIVE_NETWORK_HTTP_TEST
 
@@ -52,16 +50,18 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
     int on_request = 0;
     int on_close   = 0;
 
-    server.set_onHttpOpen([&](WeakClient node){
+    server.set_onClientOpen([&](WeakClient node){
         ++on_open;
     });
-    server.set_onHttpRequest([&](WeakClient node, Err code, HttpPacket & packet){
+    server.set_onClientRequest([&](WeakClient node, HttpRequest const & request){
         ++on_request;
-        packet.response.code = 200;
-        packet.response.reason = "OK";
-        packet.response.setBody(packet.request.method);
+        HttpResponse response;
+        response.code = 200;
+        response.reason = "OK";
+        response.setBody(request.method);
+        server.writeResponse(node, response);
     });
-    server.set_onHttpClose([&](WeakClient node){
+    server.set_onClientClose([&](WeakClient node){
         ++on_close;
         server.close();
     });
@@ -166,40 +166,48 @@ TEST(NetworkHttpTest, RoutingServer)
 
     std::cout << "Request URL: " << request_url << std::endl;
 
-    server.set_onHttpOpen([&](WeakClient node){
+    server.set_onClientOpen([&](WeakClient node){
         ++on_open;
     });
 
-    server.set_onHttpRequest([&](WeakClient node, Err code, HttpPacket & packet){
+    server.set_onClientRequest([&](WeakClient node, HttpRequest const & request){
         std::cout << "Server.OnRequest()\n";
         ++on_request;
-        packet.response.code = 200;
-        packet.response.reason = "OK";
-        packet.response.setBody(packet.request.method + packet.request.path);
+        HttpResponse response;
+        response.code = 200;
+        response.reason = "OK";
+        response.setBody(request.method + request.path);
+        server.writeResponse(node, response);
     });
-    server.setRequest("/Documents", [&](WeakClient node, Err code, HttpPacket & packet){
+    server.setRequest(std::regex("/Documents"), [&](WeakClient node, HttpRequest const & request){
         std::cout << "Server.OnRequest(/Documents)\n";
         ++on_request_doc;
-        packet.response.code = 200;
-        packet.response.reason = "OK";
-        packet.response.setBody(packet.request.method + packet.request.path);
+        HttpResponse response;
+        response.code = 200;
+        response.reason = "OK";
+        response.setBody(request.method + request.path);
+        server.writeResponse(node, response);
     });
-    server.setRequest("GET", "/Downloads", [&](WeakClient node, Err code, HttpPacket & packet){
+    server.setRequest("GET", "/Downloads", [&](WeakClient node, HttpRequest const & request){
         std::cout << "Server.OnRequest([GET]/Downloads)\n";
         ++on_request_down_get;
-        packet.response.code = 200;
-        packet.response.reason = "OK";
-        packet.response.setBody(packet.request.method + packet.request.path);
+        HttpResponse response;
+        response.code = 200;
+        response.reason = "OK";
+        response.setBody(request.method + request.path);
+        server.writeResponse(node, response);
     });
-    server.setRequest("POST", "/Downloads", [&](WeakClient node, Err code, HttpPacket & packet){
+    server.setRequest("POST", "/Downloads", [&](WeakClient node, HttpRequest const & request){
         std::cout << "Server.OnRequest([POST]/Downloads)\n";
         ++on_request_down_post;
-        packet.response.code = 200;
-        packet.response.reason = "OK";
-        packet.response.setBody(packet.request.method + packet.request.path);
+        HttpResponse response;
+        response.code = 200;
+        response.reason = "OK";
+        response.setBody(request.method + request.path);
+        server.writeResponse(node, response);
     });
 
-    server.set_onHttpClose([&](WeakClient node){
+    server.set_onClientClose([&](WeakClient node){
         ++on_close;
         if (on_close == 5) {
             server.close();
@@ -254,25 +262,28 @@ TEST(NetworkHttpTest, WebSocketEcho)
 
     uvpp::Loop loop;
     FuncHttpServer server(loop);
-    server.enableWebSocket();
 
     ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
     int const SERVER_PORT = server.port();
     ASSERT_LT(0, SERVER_PORT);
     std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
 
-    server.set_onWsOpen([&](WeakClient node, Err code, HttpPacket & packet){
-        std::cout << "Server.OnWebSocketOpen(" << getErrName(code)
-                  << ")\nRequest:\n" << packet.request.toDebugRequestString()
-                  << "\nResponse:\n" << packet.response.toDebugResponseString()
-                  << std::endl;
+    server.set_onClientSwitchingProtocol([&](WeakClient node, HttpRequest const & request) -> bool {
+        std::cout << "Server.OnWebSocketOpen() Request:\n" << request.toDebugRequestString() << std::endl;
+        HttpResponse response;
+        server.writeWsResponse(node, request, response);
+        return true;
     });
-    server.set_onWsMessage([&](WeakClient node, ws::WsOpCode op, char const * buffer, std::size_t size){
-        server.writeText(node, std::string(buffer, buffer + size));
-        std::cout << "Server.OnWebSocketMessage(" << ws::getWsOpCodeName(op) << ")\n";
+    server.set_onClientWsMessage([&](WeakClient node, ws::WsOpCode opcode, util::Buffer const & payload){
+        std::cout << "Server.OnClientWsMessage(" << ws::getWsOpCodeName(opcode) << ")\n";
+        if (opcode == ws::WsOpCode::WSOC_TEXT_FRAME) {
+            server.writeText(node, std::string(payload.begin(), payload.end()));
+        } else if (opcode == ws::WsOpCode::WSOC_CONNECTION_CLOSE) {
+            server.writeClose(node);
+        }
     });
-    server.set_onHttpClose([&](WeakClient node){
-        std::cout << "Server.OnClose\n";
+    server.set_onClientClose([&](WeakClient node){
+        std::cout << "Server.OnClientClose\n";
     });
 
     FuncHttpClient client(loop);
@@ -306,6 +317,7 @@ TEST(NetworkHttpTest, WebSocketEcho)
     });
 
     client.set_onWsMessage([&](ws::WsOpCode opcode, util::Buffer const & payload, void * arg){
+        std::cout << "Client.OnWsMessage(" << ws::getWsOpCodeName(opcode) << ")\n";
         if (opcode == ws::WsOpCode::WSOC_TEXT_FRAME) {
             if (std::string(payload.begin(), payload.end()) == TEST_TEXT) {
                 ws_message_counter++;
@@ -343,7 +355,6 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
 
     uvpp::Loop server_loop;
     FuncHttpServer server(server_loop);
-    server.enableWebSocket();
 
     ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
     int const SERVER_PORT = server.port();
@@ -381,21 +392,26 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     });
     timer->start(TEST_SERVER_TIMEOUT);
 
-    server.set_onHttpWrite([&](WeakClient node, Err code){
+    server.set_onClientWrite([&](WeakClient node, Err code){
         ++server_on_write_count;
     });
-    server.set_onWsOpen([&](WeakClient node, Err code, HttpPacket & packet){
+    server.set_onClientSwitchingProtocol([&](WeakClient node, HttpRequest const & request) -> bool {
         ++server_on_ws_open_count;
+        HttpResponse response;
+        server.writeWsResponse(node, request, response);
+        return true;
     });
-    server.set_onWsMessage([&](WeakClient node, ws::WsOpCode op, char const * buffer, std::size_t size){
-        if (op == ws::WsOpCode::WSOC_TEXT_FRAME) {
-            Err const write_code = server.writeText(node, std::string(buffer, buffer + size));
-            if (Err::E_ENQASYNC == write_code || Err::E_SUCCESS == write_code) {
+    server.set_onClientWsMessage([&](WeakClient node, ws::WsOpCode opcode, util::Buffer const & payload){
+        if (opcode == ws::WsOpCode::WSOC_TEXT_FRAME) {
+            Err const write_code = server.writeText(node, std::string(payload.begin(), payload.end()));
+            if (isSuccessAnyway(write_code)) {
                 ++server_on_ws_message_count;
             }
+        } else if (opcode == ws::WsOpCode::WSOC_CONNECTION_CLOSE) {
+            server.writeClose(node);
         }
     });
-    server.set_onHttpClose([&](WeakClient node){
+    server.set_onClientClose([&](WeakClient node){
         ++server_on_http_close;
         if (timer->isActive()) {
             timer->stop();
@@ -456,7 +472,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
             client_write_threads[i] = std::thread([&, i](){
                 for (int echo_count = 0; echo_count < TEST_ECHO_COUNT; ++echo_count) {
                     Err write_code = clients[i]->writeText(TEST_TEXT);
-                    if (Err::E_ENQASYNC == write_code || Err::E_SUCCESS == write_code) {
+                    if (isSuccessAnyway(write_code)) {
                         ++(ws_write_counter.at(i));
                     } else {
                         tDLogE("client[{}]->writeText() {} error", i, getErrName(write_code));
@@ -477,9 +493,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
                 }
             } else if (shared_client && opcode == ws::WsOpCode::WSOC_CONNECTION_CLOSE) {
                 ws_status[i].parse(payload);
-                if (isSuccess(clients[i]->close())) {
-                    ++(ws_close_counter.at(i));
-                }
+                clients[i]->close();
             }
         });
 
@@ -491,6 +505,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
         });
 
         client->set_onClose([&, i](){
+            ++(ws_close_counter.at(i));
             ++ws_total_close_counter;
             if (ws_total_close_counter >= TEST_CLIENT_COUNT) {
                 server.close();

@@ -15,67 +15,39 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-HttpDefaultFilter::HttpDefaultFilter()
+HttpBaseFilter::HttpBaseFilter() : _method(), _regex()
 {
     // EMPTY.
 }
 
-HttpDefaultFilter::HttpDefaultFilter(std::string const & method, std::string const & regex)
+HttpBaseFilter::HttpBaseFilter(std::string const & method) : _method(method), _regex()
+{
+    // EMPTY.
+}
+
+HttpBaseFilter::HttpBaseFilter(std::regex const & regex) : _method(), _regex(regex)
+{
+    // EMPTY.
+}
+
+HttpBaseFilter::HttpBaseFilter(std::string const & method, std::string const & regex)
         : _method(method), _regex(regex)
 {
     // EMPTY.
 }
 
-HttpDefaultFilter::HttpDefaultFilter(std::string const & method, std::regex const & regex)
+HttpBaseFilter::HttpBaseFilter(std::string const & method, std::regex const & regex)
         : _method(method), _regex(regex)
 {
     // EMPTY.
 }
 
-HttpDefaultFilter::HttpDefaultFilter(std::string const & regex) : _regex(regex)
+HttpBaseFilter::~HttpBaseFilter()
 {
     // EMPTY.
 }
 
-HttpDefaultFilter::HttpDefaultFilter(std::regex const & regex) : _regex(regex)
-{
-    // EMPTY.
-}
-
-HttpDefaultFilter::HttpDefaultFilter(HttpDefaultFilter const & obj)
-{
-    (*this) = obj;
-}
-
-HttpDefaultFilter::HttpDefaultFilter(HttpDefaultFilter && obj)
-{
-    (*this) = std::move(obj);
-}
-
-HttpDefaultFilter::~HttpDefaultFilter()
-{
-    // EMPTY.
-}
-
-HttpDefaultFilter & HttpDefaultFilter::operator =(HttpDefaultFilter const & obj)
-{
-    if (this != &obj) {
-        _method = obj._method;
-        _regex  = obj._regex;
-    }
-    return *this;
-}
-
-HttpDefaultFilter & HttpDefaultFilter::operator =(HttpDefaultFilter && obj)
-{
-    if (this != &obj) {
-        _method.swap(obj._method);
-        _regex.swap(obj._regex);
-    }
-    return *this;
-}
-
-bool HttpDefaultFilter::filter(HttpRequest const & request)
+bool HttpBaseFilter::filter(HttpRequest const & request)
 {
     if (_method.empty()) {
         return std::regex_match(request.path, _regex);

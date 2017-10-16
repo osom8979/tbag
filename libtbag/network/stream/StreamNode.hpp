@@ -59,7 +59,7 @@ private:
 
 public:
     BaseStreamNode(Loop & loop, StreamType type, ServerInterface * parent)
-            : StreamClientType(loop, type, StreamClient::UpdateReady()), _parent(parent)
+            : Parent(loop, type, StreamClient::UpdateReady()), _parent(parent)
     {
         assert(StreamClientType::getState() == StreamClient::WriteState::WS_READY);
     }
@@ -81,7 +81,7 @@ public:
     }
 
 public:
-    virtual void onConnect (Err code) override
+    virtual void onConnect(Err code) override
     {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }

@@ -124,7 +124,13 @@ public:
     virtual Err   stop() override;
     virtual Err  close() override;
     virtual Err cancel() override;
-    virtual Err  write(char const * buffer, std::size_t size) override;
+
+    /**
+     * @retval Err::E_SUCCESS   Write success.
+     * @retval Err::E_ASYNCREQ  Async request.
+     * @retval Err::E_ENQASYNC  Enqueue and async request.
+     */
+    virtual Err write(char const * buffer, std::size_t size) override;
 
 public:
     virtual void setWriteTimeout(uint64_t millisec) override;

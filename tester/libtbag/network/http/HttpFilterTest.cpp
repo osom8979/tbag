@@ -29,11 +29,10 @@ TEST(HttpFilterTest, HttpDefaultFilter)
     request_get_aaa .path = "/aaa";
     request_get_bbb .path = "/bbb";
 
-    HttpDefaultFilter f1;
-    HttpDefaultFilter f2("GET", "/aaa.*");
-    HttpDefaultFilter f3("/bbb.*");
-    HttpDefaultFilter f4 = f3;
-    HttpDefaultFilter f5 = std::move(f4);
+    HttpBaseFilter f1;
+    HttpBaseFilter f2("GET", "/aaa.*");
+    HttpBaseFilter f3(std::regex("/bbb.*"));
+    HttpBaseFilter f4 = f3;
 
     ASSERT_FALSE(f1.filter(request_post_aaa));
     ASSERT_FALSE(f1.filter(request_post_bbb));
@@ -51,13 +50,8 @@ TEST(HttpFilterTest, HttpDefaultFilter)
     ASSERT_TRUE (f3.filter( request_get_bbb));
 
     ASSERT_FALSE(f4.filter(request_post_aaa));
-    ASSERT_FALSE(f4.filter(request_post_bbb));
+    ASSERT_TRUE (f4.filter(request_post_bbb));
     ASSERT_FALSE(f4.filter( request_get_aaa));
-    ASSERT_FALSE(f4.filter( request_get_bbb));
-
-    ASSERT_FALSE(f5.filter(request_post_aaa));
-    ASSERT_TRUE (f5.filter(request_post_bbb));
-    ASSERT_FALSE(f5.filter( request_get_aaa));
-    ASSERT_TRUE (f5.filter( request_get_bbb));
+    ASSERT_TRUE (f4.filter( request_get_bbb));
 }
 

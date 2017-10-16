@@ -23,11 +23,13 @@ NAMESPACE_LIBTBAG_OPEN
 
 #ifndef TBAG_ERROR_INFO_MAP
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX, _TBAG_LMDB_XX) \
-    /* Common error codes. */ \
+    /* Common error codes (Success Anyway). */ \
     _TBAG_XX(_SUCCESS , "No error"                ) \
     _TBAG_XX(_WARNING , "Success, but warning"    ) \
     _TBAG_XX(_CONTINUE, "Wait for the next"       ) \
+    _TBAG_XX(_ASYNCREQ, "Async request"           ) \
     _TBAG_XX(_ENQASYNC, "Enqueue and async"       ) \
+    /* Common error codes. */ \
     _TBAG_XX(_ILLARGS , "Illegal arguments"       ) \
     _TBAG_XX(_ILLSTATE, "Illegal state"           ) \
     _TBAG_XX(_ALREADY , "Already state"           ) \
@@ -53,7 +55,6 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EQUERY  , "Query error"             ) \
     _TBAG_XX(_SMALLBUF, "Buffer size is small"    ) \
     _TBAG_XX(_KEYGEN  , "Key generator error"     ) \
-    _TBAG_XX(_ASYNCREQ, "Async request"           ) \
     _TBAG_XX(_UNKEXCP , "Unknown exception"       ) \
     _TBAG_XX(_UNKSIG  , "Unknown signal"          ) \
     _TBAG_XX(_ECOPY   , "Copy error"              ) \
@@ -265,7 +266,13 @@ inline bool isFailure(libtbag::Err err) TBAG_NOEXCEPT
 inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
 {
     using namespace libtbag;
-    return err == Err::E_SUCCESS || err == Err::E_WARNING || err == Err::E_ASYNCREQ;
+    // @formatter:off
+    return err == Err::E_SUCCESS  ||
+           err == Err::E_WARNING  ||
+           err == Err::E_CONTINUE ||
+           err == Err::E_ASYNCREQ ||
+           err == Err::E_ENQASYNC;
+    // @formatter:on
 }
 
 inline bool isFailureAnyway(libtbag::Err err) TBAG_NOEXCEPT

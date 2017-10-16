@@ -36,10 +36,12 @@ namespace http    {
  * @date   2017-10-15
  */
 template <typename HttpClientType>
-class FunctionalHttpClient : public HttpClient
+class FunctionalHttpClient : public HttpClientType
 {
 public:
     using Parent     = HttpClientType;
+    using Loop       = HttpServer::Loop;
+    using StreamType = HttpServer::StreamType;
     using ReadPacket = HttpClient::ReadPacket;
     using EventType  = HttpClient::EventType;
 
@@ -54,6 +56,7 @@ public:
 public:
     using           onConnect_func = std::function<void(Err)>;
     using              onRead_func = std::function<void(Err, ReadPacket const &)>;
+    using        onParseError_func = std::function<void(Err, void*)>;
     using onSwitchingProtocol_func = std::function<bool(HttpProperty const &, void*)>;
     using              onOpen_func = std::function<void(void)>;
     using               onEof_func = std::function<void(void)>;
@@ -62,6 +65,7 @@ public:
 private:
               onConnect_func           __onConnect_cb;
                  onRead_func              __onRead_cb;
+           onParseError_func        __onParseError_cb;
     onSwitchingProtocol_func __onSwitchingProtocol_cb;
                  onOpen_func              __onOpen_cb;
                   onEof_func               __onEof_cb;
@@ -70,6 +74,7 @@ private:
 public:
     inline void           set_onConnect(          onConnect_func const & cb) {           __onConnect_cb = cb; }
     inline void              set_onRead(             onRead_func const & cb) {              __onRead_cb = cb; }
+    inline void        set_onParseError(       onParseError_func const & cb) {        __onParseError_cb = cb; }
     inline void set_onSwitchingProtocol(onSwitchingProtocol_func const & cb) { __onSwitchingProtocol_cb = cb; }
     inline void              set_onOpen(             onOpen_func const & cb) {              __onOpen_cb = cb; }
     inline void               set_onEof(              onEof_func const & cb) {               __onEof_cb = cb; }
@@ -91,6 +96,15 @@ protected:
             __onRead_cb(code, packet);
         } else {
             Parent::onRead(code, packet);
+        }
+    }
+
+    virtual void onParseError(Err code, void * arg) override
+    {
+        if (static_cast<bool>(__onParseError_cb)) {
+            __onParseError_cb(code, arg);
+        } else {
+            Parent::onParseError(code, arg);
         }
     }
 
@@ -132,8 +146,8 @@ protected:
 
 public:
     // @formatter:off
+    TBAG_VOID_CALLBACK_HELPER(onWrite   , Err);
     TBAG_VOID_CALLBACK_HELPER(onShutdown, Err);
-    TBAG_VOID_CALLBACK_HELPER(onWrite, Err);
     TBAG_VOID_NOPARAM_CALLBACK_HELPER(onClose);
     TBAG_VOID_NOPARAM_CALLBACK_HELPER(onTimer);
     // @formatter:on
@@ -143,7 +157,6 @@ public:
     TBAG_VOID_CALLBACK_HELPER(onContinue   , void*);
     TBAG_VOID_CALLBACK_HELPER(onWsMessage  , ws::WsOpCode, util::Buffer const &, void*);
     TBAG_VOID_CALLBACK_HELPER(onRegularHttp, HttpProperty const &, void*);
-    TBAG_VOID_CALLBACK_HELPER(onParseError , Err, void*);
     // @formatter:on
 };
 

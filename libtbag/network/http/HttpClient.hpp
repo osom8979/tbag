@@ -77,10 +77,11 @@ public:
     Err writeClose();
 
 public:
-
-public:
     virtual void onConnect(Err code) override;
     virtual void onRead   (Err code, ReadPacket const & packet) override;
+
+public:
+    virtual void onParseError(Err code, void * arg) override;
 
 public:
     virtual void onOpen();

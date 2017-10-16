@@ -109,10 +109,10 @@ public:
 
         // @formatter:off
         using namespace proto;
-        _server->set_onHttpOpen([&](WeakClient n){ onHttpOpen(n); });
-        _server->set_onHttpClose([&](WeakClient n){ onHttpClose(n); });
-        _server->set_onHttpRequest([&](WeakClient n, Err c, HttpPacket & p){ onHttpRequest(n, c, p); });
-        auto const TPOT_REQUEST_CB = [&](WeakClient n, Err c, HttpPacket & p){ onTpotRequest(n, c, p); };
+        _server->set_onClientOpen([&](WeakClient n){ onClientOpen(n); });
+        _server->set_onClientClose([&](WeakClient n){ onClientClose(n); });
+        _server->set_onClientRequest([&](WeakClient n, HttpRequest const & r){ onClientRequest(n, r); });
+        auto const TPOT_REQUEST_CB = [&](WeakClient n, HttpRequest const & r){ onTpotRequest(n, r); };
         _server->setRequest(      VersionPath::getMethod(),       VersionPath::getPath(), TPOT_REQUEST_CB);
         _server->setRequest(         EchoPath::getMethod(),          EchoPath::getPath(), TPOT_REQUEST_CB);
         _server->setRequest(        LoginPath::getMethod(),         LoginPath::getPath(), TPOT_REQUEST_CB);
@@ -141,52 +141,48 @@ public:
         return _server->close();
     }
 
-#ifndef _TPOT_SERVER_CHECK_ERROR
-#define _TPOT_SERVER_CHECK_ERROR(prefix, code, node, shared)                               \
-    auto shared = node.lock();                                                             \
-    if (static_cast<bool>(shared) == false) { tDLogE(prefix " Expired client."); return; } \
-    if (code != Err::E_SUCCESS) { tDLogE(prefix " {} error.", getErrName(code)); return; } \
-    tDLogN(prefix " [ID:{}] {}:{}", shared->id(), shared->dest(), shared->port());         \
-    /* END */
-#endif
-
-    void onHttpRequest(WeakClient node, Err code, HttpPacket & packet)
+    void onClientRequest(WeakClient node, HttpRequest const & request)
     {
-        _TPOT_SERVER_CHECK_ERROR("TpotServer::Internal::onHttpRequest()", code, node, shared);
-        packet.response.setHttpStatus(network::http::HttpStatus::SC_NOT_FOUND);
-        packet.response.setBody(TPOT_HTML_BAD_REQUEST_BODY);
-    }
-
-    void onTpotRequest(WeakClient node, Err code, HttpPacket & packet)
-    {
-        _TPOT_SERVER_CHECK_ERROR("TpotServer::Internal::onTpotRequest()", code, node, shared);
         assert(_parent != nullptr);
-        auto body = packet.request.body;
-        if (_parent->parse(body.data(), body.size(), &packet) != Err::E_SUCCESS) {
-            packet.response.setHttpStatus(network::http::HttpStatus::SC_BAD_REQUEST);
-            packet.response.setBody(TPOT_HTML_BAD_REQUEST_BODY);
+        if (auto shared = HttpServer::toSharedNode(node)) {
+            HttpResponse response;
+            response.setHttpStatus(network::http::HttpStatus::SC_NOT_FOUND);
+            response.setBody(TPOT_HTML_BAD_REQUEST_BODY);
+            shared->writeResponse(response);
         }
     }
 
-#undef _TPOT_SERVER_CHECK_ERROR
-
-    void onHttpOpen(WeakClient node)
+    void onTpotRequest(WeakClient node, HttpRequest const & request)
     {
-        if (auto shared = node.lock()) {
+        assert(_parent != nullptr);
+        if (auto shared = HttpServer::toSharedNode(node)) {
+            auto & body = request.body;
+            if (_parent->parse(body.data(), body.size(), &shared) != Err::E_SUCCESS) {
+                HttpResponse response;
+                response.setHttpStatus(network::http::HttpStatus::SC_BAD_REQUEST);
+                response.setBody(TPOT_HTML_BAD_REQUEST_BODY);
+                shared->writeResponse(response);
+            }
+        }
+    }
+
+    void onClientOpen(WeakClient node)
+    {
+        if (auto shared = HttpServer::toSharedNode(node)) {
             assert(_parent != nullptr);
             shared->setWriteTimeout(_parent->_param.timeout);
         } else {
-            tDLogE("TpotServer::Internal::onHttpOpen() Expired client.");
+            tDLogE("TpotServer::Internal::onClientOpen() Expired client.");
         }
     }
 
-    void onHttpClose(WeakClient node)
+    void onClientClose(WeakClient node)
     {
-        if (auto shared = node.lock()) {
+        if (auto shared = HttpServer::toSharedNode(node)) {
             assert(_parent != nullptr);
-            tDLogIfI(_verbose, "TpotServer::Internal::onHttpClose() [ID:{}]", shared->id());
+            tDLogIfI(_verbose, "TpotServer::Internal::onClientClose() [ID:{}]", shared->id());
         } else {
-            tDLogE("TpotServer::Internal::onHttpClose() Expired client.");
+            tDLogE("TpotServer::Internal::onClientClose() Expired client.");
         }
     }
 
@@ -256,56 +252,68 @@ void TpotServer::onExit(int pid, int64_t exit_status, int term_signal)
 void TpotServer::onVersionRequest(util::Header const & header, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
     util::Version const PACKET_VERSION = util::getTbagPacketVersion();
     tDLogI("TpotServer::onVersionRequest() Response OK (Version: {})", PACKET_VERSION.toString());
     buildVersionResponse(util::Header(header.id), PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor());
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 void TpotServer::onEchoRequest(util::Header const & header, std::string const & message, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
     tDLogI("TpotServer::onEchoRequest() Response OK (Echo: {})", message);
     buildEchoResponse(util::Header(header.id), message);
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 void TpotServer::onLoginRequest(util::Header const & header, std::string const & id, std::string const & pw, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
 
     std::string key;
     // TODO: LOGIN
 
     tDLogI("TpotServer::onLoginRequest() Response OK (ID: {})", id);
     buildLoginResponse(util::Header(header.id), key);
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 void TpotServer::onLogoutRequest(util::Header const & header, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
 
     std::string id;
     // TODO: LOGOUT
 
     tDLogI("TpotServer::onLogoutRequest() Response OK (ID: {})", id);
     buildLogoutResponse(util::Header(header.id));
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 void TpotServer::onExecRequest(util::Header const & header, util::ExecParam const & exec, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
 
     using ResultCode = proto::TpotPacketTypes::ResultCode;
     util::Header::Code code;
@@ -318,29 +326,33 @@ void TpotServer::onExecRequest(util::Header const & header, util::ExecParam cons
         code = static_cast<util::Header::Code>(ResultCode::RC_EXECUTE_ERROR);
         tDLogE("TpotServer::onExecRequest() Execute error");
     }
-
     buildExecResponse(util::Header(header.id, code), PID);
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 void TpotServer::onProcessListRequest(util::Header const & header, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
 
     auto const list = ProcessManager::list();
     tDLogI("TpotServer::onProcessListRequest() Response OK (List size: {})", list.size());
-
     buildProcessListResponse(util::Header(header.id), list);
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 void TpotServer::onProcessKillRequest(util::Header const & header, int pid, int signum, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
 
     using ResultCode = proto::TpotPacketTypes::ResultCode;
     util::Header::Code code;
@@ -358,16 +370,18 @@ void TpotServer::onProcessKillRequest(util::Header const & header, int pid, int 
         code = static_cast<util::Header::Code>(ResultCode::RC_NOT_EXISTS);
         tDLogW("TpotServer::onProcessKillRequest() Not exists process (PID: {})", pid);
     }
-
     buildProcessKillResponse(util::Header(header.id, code));
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 void TpotServer::onProcessRemoveRequest(util::Header const & header, int pid, void * arg)
 {
     assert(arg != nullptr);
-    HttpPacket * packet = static_cast<HttpPacket*>(arg);
+    SharedHttpNode node = *static_cast<SharedHttpNode*>(arg);
 
     using ResultCode = proto::TpotPacketTypes::ResultCode;
     util::Header::Code code;
@@ -384,10 +398,12 @@ void TpotServer::onProcessRemoveRequest(util::Header const & header, int pid, vo
         code = static_cast<util::Header::Code>(ResultCode::RC_NOT_EXISTS);
         tDLogW("TpotServer::onProcessRemoveRequest() Not exists process (PID: {})", pid);
     }
-
     buildProcessRemoveResponse(util::Header(header.id, code));
-    packet->response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    packet->response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+
+    HttpResponse response;
+    response.setHttpStatus(network::http::HttpStatus::SC_OK);
+    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    node->writeResponse(response);
 }
 
 // ------------

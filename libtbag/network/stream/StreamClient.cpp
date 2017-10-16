@@ -321,7 +321,7 @@ struct StreamClient::Internal : public details::ClientProperty
         if (safety_async && loop.isAliveAndThisThread() == false) {
             if (auto job = safety_async->newSendJob<AsyncWrite>(parent)) {
                 setAsync();
-                result_code = Err::E_ENQASYNC;
+                result_code = Err::E_ASYNCREQ;
             } else {
                 tDLogE("StreamClient::Internal::autoWrite() Async write {} error.", getErrName(result_code));
                 return Err::E_ESEND;

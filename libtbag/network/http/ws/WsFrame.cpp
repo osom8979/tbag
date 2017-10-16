@@ -276,6 +276,11 @@ void WsFrame::close(WsStatusCode code)
     return close(getWsStatusCodeNumber(code), getWsStatusCodeName(code));
 }
 
+void WsFrame::close(WsStatus const & status)
+{
+    close(status.code, status.reason);
+}
+
 WsStatus WsFrame::getWsStatus() const
 {
     return WsStatus(payload);
