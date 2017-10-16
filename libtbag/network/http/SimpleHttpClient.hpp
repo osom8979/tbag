@@ -75,9 +75,9 @@ public:
 
 public:
     virtual void onContinue(void * arg) override;
-    virtual bool onSwitchingProtocol(HttpProperty const & response, void * arg) override;
+    virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) override;
     virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override;
-    virtual void onRegularHttp(HttpProperty const & response, void * arg) override;
+    virtual void onRegularHttp(HttpProperty const & property, void * arg) override;
     virtual void onParseError(Err code, void * arg) override;
 
 public:

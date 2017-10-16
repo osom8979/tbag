@@ -153,12 +153,6 @@ public:
     void close(uint16_t code, std::string const & reason);
     void close(WsStatusCode code);
 
-    uint16_t getStatusCode() const;
-    std::string  getReason() const;
-
-    static uint16_t getStatusCode(char const * payload_begin, std::size_t payload_length);
-    static std::string  getReason(char const * payload_begin, std::size_t payload_length);
-
     WsStatus getWsStatus() const;
 
 public:

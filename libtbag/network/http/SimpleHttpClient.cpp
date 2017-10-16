@@ -63,7 +63,7 @@ void SimpleHttpClient::onContinue(void * arg)
     // EMPTY.
 }
 
-bool SimpleHttpClient::onSwitchingProtocol(HttpProperty const & response, void * arg)
+bool SimpleHttpClient::onSwitchingProtocol(HttpProperty const & property, void * arg)
 {
     callOnErrorAndClose(Err::E_INACCES);
     return false;
@@ -74,10 +74,10 @@ void SimpleHttpClient::onWsMessage(ws::WsOpCode opcode, util::Buffer const & pay
     callOnErrorAndClose(Err::E_INACCES);
 }
 
-void SimpleHttpClient::onRegularHttp(HttpProperty const & response, void * arg)
+void SimpleHttpClient::onRegularHttp(HttpProperty const & property, void * arg)
 {
     if (static_cast<bool>(_response_cb)) {
-        _response_cb(response);
+        _response_cb(property);
     }
     stopTimer();
     close();

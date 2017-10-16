@@ -276,44 +276,9 @@ void WsFrame::close(WsStatusCode code)
     return close(getWsStatusCodeNumber(code), getWsStatusCodeName(code));
 }
 
-uint16_t WsFrame::getStatusCode() const
-{
-    if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE) {
-        return getStatusCode(payload.data(), payload_length);
-    }
-    return 0;
-}
-
-std::string WsFrame::getReason() const
-{
-    if (opcode == WsOpCode::WSOC_CONNECTION_CLOSE) {
-        return getReason(payload.data(), payload_length);
-    }
-    return std::string();
-}
-
-uint16_t WsFrame::getStatusCode(char const * payload_begin, std::size_t payload_length)
-{
-    if (payload_length >= sizeof(uint16_t)) {
-        uint16_t temp = 0;
-        ::memcpy(&temp, &payload_begin[0], sizeof(temp));
-        return bitwise::toHost(temp);
-    }
-    return 0;
-}
-
-std::string WsFrame::getReason(char const * payload_begin, std::size_t payload_length)
-{
-    if (payload_length > sizeof(uint16_t)) {
-        return std::string(&payload_begin[sizeof(uint16_t)],
-                           &payload_begin[sizeof(uint16_t)] + payload_length - sizeof(uint16_t));
-    }
-    return std::string();
-}
-
 WsStatus WsFrame::getWsStatus() const
 {
-    return WsStatus(getStatusCode(), getReason());
+    return WsStatus(payload);
 }
 
 void WsFrame::ping(char const * data, std::size_t size, uint32_t key)

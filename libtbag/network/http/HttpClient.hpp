@@ -60,7 +60,11 @@ public:
     virtual ~HttpClient();
 
 public:
+    std::string getKey() const;
+
+public:
     Err writeRequest(HttpRequest const & request);
+    Err writeWsRequest(HttpRequest const & request);
     Err writeWsFrame(WsFrame const & frame);
 
 public:
@@ -71,6 +75,8 @@ public:
     Err writeBinary(util::Buffer const & binary, bool finish = true);
 
     Err writeClose();
+
+public:
 
 public:
     virtual void onConnect(Err code) override;

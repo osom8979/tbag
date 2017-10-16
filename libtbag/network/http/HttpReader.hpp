@@ -23,6 +23,7 @@
 #include <libtbag/network/http/ws/WsFrameBuffer.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
+#include <cstdint>
 #include <string>
 
 // -------------------
@@ -43,14 +44,22 @@ struct HttpReaderInterface
     /** Incomplete (Parsing is not finish). Wait for the next packet. */
     virtual void onContinue(void * arg) { /* EMPTY. */ }
 
-    /** When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake. */
-    virtual bool onSwitchingProtocol(HttpProperty const & response, void * arg) { return true; }
+    /**
+     * Protocol switching.
+     *
+     * @return
+     *  Returns true to allow Protocol switching.
+     *
+     * @remarks
+     *  When a socket has opened, i.e. after TCP three-way handshake and WebSocket handshake.
+     */
+    virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) { return true; }
 
     /** When a message has been received from WebSocket client/server. */
     virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) { /* EMPTY. */ }
 
     /** Regular http message. */
-    virtual void onRegularHttp(HttpProperty const & response, void * arg) { /* EMPTY. */ }
+    virtual void onRegularHttp(HttpProperty const & property, void * arg) { /* EMPTY. */ }
 
     /** Triggered when error occurred. */
     virtual void onParseError(Err code, void * arg) { /* EMPTY. */ }
@@ -78,6 +87,7 @@ public:
     virtual ~HttpReader();
 
 public:
+    void setKey(std::string const & key) { _key = key; }
     std::string getKey() const { return _key; }
 
 public:
@@ -87,13 +97,6 @@ public:
 
 public:
     Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
-
-protected:
-    virtual void onContinue(void * arg) override { /* EMPTY. */ }
-    virtual bool onSwitchingProtocol(HttpProperty const & response, void * arg) override { return true; }
-    virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override { /* EMPTY. */ }
-    virtual void onRegularHttp(HttpProperty const & response, void * arg) override { /* EMPTY. */ }
-    virtual void onParseError(Err code, void * arg) override { /* EMPTY. */ }
 };
 
 /**
@@ -118,12 +121,12 @@ struct HttpReaderForCallback : public HttpReader
 
     virtual void onContinue(void * arg) override
     { parent->onContinue(arg); }
-    virtual bool onSwitchingProtocol(HttpProperty const & response, void * arg) override
-    { return parent->onSwitchingProtocol(response, arg); }
+    virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) override
+    { return parent->onSwitchingProtocol(property, arg); }
     virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override
     { parent->onWsMessage(opcode, payload, arg); }
-    virtual void onRegularHttp(HttpProperty const & response, void * arg) override
-    { parent->onRegularHttp(response, arg); }
+    virtual void onRegularHttp(HttpProperty const & property, void * arg) override
+    { parent->onRegularHttp(property, arg); }
     virtual void onParseError(Err code, void * arg) override
     { parent->onParseError(code, arg); }
 };

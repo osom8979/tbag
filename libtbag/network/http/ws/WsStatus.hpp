@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
 #include <string>
@@ -122,33 +124,31 @@ inline bool isWsStatusCodeUserDefined(uint16_t code) TBAG_NOEXCEPT
  * @author zer0
  * @date 2017-07-07
  */
-struct WsStatus
+struct TBAG_API WsStatus
 {
     uint16_t    code;
     std::string reason;
 
-    WsStatus(uint16_t c = 0, std::string const & r = std::string()) : code(c), reason(r)
-    { /* EMPTY. */ }
-    WsStatus(WsStatusCode s) : code(getWsStatusCodeNumber(s)), reason(getWsStatusCodeReason(s))
-    { /* EMPTY. */ }
-    ~WsStatus()
-    { /* EMPTY. */ }
+    WsStatus();
+    WsStatus(uint16_t c);
+    WsStatus(uint16_t c, std::string const & r);
 
-    void setWsStatusCode(WsStatusCode s)
-    {
-        code   = ws::getWsStatusCodeNumber(s);
-        reason = ws::getWsStatusCodeReason(s);
-    }
+    explicit WsStatus(char const * buffer, std::size_t size);
+    explicit WsStatus(util::Buffer const & payload);
 
-    WsStatusCode getWsStatusCode() const TBAG_NOEXCEPT
-    {
-        return ws::getWsStatusCode(code);
-    }
+    explicit WsStatus(WsStatusCode s);
+    ~WsStatus();
 
-    std::string toString() const
-    {
-        return ws::getWsStatusCodeName(ws::getWsStatusCode(code));
-    }
+    void setWsStatusCode(WsStatusCode s);
+    WsStatusCode getWsStatusCode() const TBAG_NOEXCEPT;
+
+    Err parse(char const * buffer, std::size_t size);
+    Err parse(util::Buffer const & payload);
+
+    static Err getStatusCode(char const * payload_begin, std::size_t payload_length, uint16_t * result);
+    static Err     getReason(char const * payload_begin, std::size_t payload_length, std::string * result);
+
+    std::string toString() const;
 };
 
 } // namespace ws

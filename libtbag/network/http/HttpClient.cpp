@@ -8,6 +8,8 @@
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/log/Log.hpp>
 
+//#define TBAG_WS_CLIENT_CHECK_BUFFER
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -25,15 +27,36 @@ HttpClient::~HttpClient()
     // EMPTY.
 }
 
+std::string HttpClient::getKey() const
+{
+    return _reader.getKey();
+}
+
 Err HttpClient::writeRequest(HttpRequest const & request)
 {
     std::string const & REQUEST_STRING = request.toRequestString();
     return write(REQUEST_STRING.data(), REQUEST_STRING.size());
 }
 
+Err HttpClient::writeWsRequest(HttpRequest const & request)
+{
+    HttpRequest ws_request = request;
+    ws_request.updateDefaultWsRequest(_reader.getKey());
+
+    if (ws_request.exists(HEADER_ORIGIN) == false) {
+        tDLogW("HttpClient::writeWsRequest() Not found {} header.", HEADER_ORIGIN);
+    }
+    if (ws_request.getHttpMethod() != HttpMethod::M_GET) {
+        tDLogW("HttpClient::writeWsRequest() Not a GET method: {}", request.method);
+    }
+
+    std::string const & REQUEST_STRING = ws_request.toRequestString();
+    return write(REQUEST_STRING.data(), REQUEST_STRING.size());
+}
+
 Err HttpClient::writeWsFrame(WsFrame const & frame)
 {
-    if (_reader.isWsReady() == false) {
+    if (_reader.isEnableWebsocket() == false) {
         return Err::E_ILLSTATE;
     }
 

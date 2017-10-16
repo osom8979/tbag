@@ -211,8 +211,9 @@ TEST(WsFrameTest, CloseResponse)
     ASSERT_FALSE(receiver.mask);
     ASSERT_EQ(0, receiver.masking_key);
 
-    ASSERT_EQ(getWsStatusCodeNumber(code), receiver.getStatusCode());
-    ASSERT_STREQ(getWsStatusCodeName(code), receiver.getReason().c_str());
+    auto status = receiver.getWsStatus();
+    ASSERT_EQ(getWsStatusCodeNumber(code), status.code);
+    ASSERT_STREQ(getWsStatusCodeName(code), status.reason.c_str());
 }
 
 TEST(WsFrameTest, Case01)

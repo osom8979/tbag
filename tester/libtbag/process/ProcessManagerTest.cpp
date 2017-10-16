@@ -17,7 +17,7 @@ using namespace libtbag::uvpp;
 
 TEST(ProcessManagerTest, Default)
 {
-    log::SeverityGuard guard;
+    //log::SeverityGuard guard;
 
     std::string const EXE_NAME = "tbproc";
     std::string const TEST_OUT = "test_output_string";
