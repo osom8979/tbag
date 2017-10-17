@@ -212,7 +212,7 @@ public:
 public:
     virtual void onClientOpen(WeakClient node) { /* EMPTY. */ }
     virtual void onClientContinue(WeakClient node) { /* EMPTY. */ }
-    virtual bool onClientSwitchingProtocol(WeakClient node, HttpRequest const & property) { return true; }
+    virtual bool onClientSwitchingProtocol(WeakClient node, HttpRequest const & request) { return true; }
     virtual void onClientWsMessage(WeakClient node, ws::WsOpCode opcode, util::Buffer const & payload) { /* EMPTY. */ }
     virtual void onClientRequest(WeakClient node, HttpRequest const & request) { /* EMPTY. */ }
 };

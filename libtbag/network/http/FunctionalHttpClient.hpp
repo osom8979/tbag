@@ -40,8 +40,8 @@ class FunctionalHttpClient : public HttpClientType
 {
 public:
     using Parent     = HttpClientType;
-    using Loop       = HttpServer::Loop;
-    using StreamType = HttpServer::StreamType;
+    using Loop       = HttpClient::Loop;
+    using StreamType = HttpClient::StreamType;
     using ReadPacket = HttpClient::ReadPacket;
     using EventType  = HttpClient::EventType;
 
