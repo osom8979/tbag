@@ -93,7 +93,7 @@ void WsFrameBuffer::push(char const * buffer, std::size_t size)
 bool WsFrameBuffer::next(Err * code, std::size_t * size)
 {
     if (_buffer_size == 0) {
-        if (code != nullptr) { (*code) = Err::E_SUCCESS; }
+        if (code != nullptr) { (*code) = Err::E_SMALLBUF; }
         if (size != nullptr) { (*size) = 0; }
         return false;
     }

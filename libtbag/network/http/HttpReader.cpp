@@ -49,12 +49,12 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
             onWsMessage(_frame_buffer.getOpCode(), _frame_buffer.atPayload(), arg);
         }
 
-        if (next_code == Err::E_CONTINUE) {
+        if (next_code == Err::E_SMALLBUF || next_code == Err::E_CONTINUE) {
             onContinue(arg);
         } else if (next_code != Err::E_SUCCESS) {
             onParseError(next_code, arg);
         } else {
-            assert(frame_count >= 1);
+            assert(next_code == Err::E_SUCCESS);
         }
         return next_code;
     }
