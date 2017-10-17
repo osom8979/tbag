@@ -56,7 +56,7 @@ TBAG_API bool testWsVersion(HttpHeader const & header, int test_version = WEBSOC
  *
  * @see <https://tools.ietf.org/html/rfc2616#section-3.1>
  */
-struct HttpVersion
+struct TBAG_API HttpVersion
 {
     int http_major;
     int http_minor;
@@ -84,10 +84,7 @@ struct HttpVersion
         return lh.http_major == rh.http_major && lh.http_minor == rh.http_minor;
     }
 
-    std::string toVersionString() const
-    {
-        return toVersionString(http_major, http_minor);
-    }
+    std::string toVersionString() const;
 
     /**
      * @remarks
@@ -95,10 +92,7 @@ struct HttpVersion
      *   HTTP-Version = "HTTP" "/" 1*DIGIT "." 1*DIGIT
      *  @endcode
      */
-    static std::string toVersionString(int major, int minor)
-    {
-        return string::fformat("HTTP/{}.{}", major, minor);
-    }
+    static std::string toVersionString(int major, int minor);
 };
 
 /**
@@ -107,48 +101,21 @@ struct HttpVersion
  * @author zer0
  * @date   2017-10-14
  */
-struct HttpCommonProperty : public HttpVersion, public HttpHeader
+struct TBAG_API HttpCommonProperty : public HttpVersion, public HttpHeader
 {
     util::Buffer body;
 
-    void setBody(std::string const & b)
-    {
-        body.assign(b.begin(), b.end());
-    }
+    void setBody(std::string const & b);
+    void setBody(char const * begin, std::size_t size);
 
-    void setBody(char const * begin, std::size_t size)
-    {
-        body.assign(begin, begin + size);
-    }
+    void appendBody(char const * begin, std::size_t size);
+    void appendBody(util::Buffer const & buffer);
+    void appendBody(std::string const & str);
 
-    void appendBody(char const * begin, std::size_t size)
-    {
-        body.insert(body.end(), begin, begin + size);
-    }
+    std::string getBodyString() const;
+    std::string toBodyString() const;
 
-    std::string getBodyString() const
-    {
-        return std::string(body.begin(), body.end());
-    }
-
-    std::string toBodyString() const
-    {
-        return std::string(body.begin(), body.end());
-    }
-
-    std::string toDebugHeaderString() const
-    {
-        std::stringstream ss;
-        std::size_t const SIZE = sizeOfHeaders();
-        auto itr = begin();
-        for (std::size_t i = 0; i < SIZE; ++i, ++itr) {
-            ss << "[H] " << itr->first << ": " << itr->second;
-            if (i + 1 < SIZE) {
-                ss << std::endl;
-            }
-        }
-        return ss.str();
-    }
+    std::string toDebugHeaderString() const;
 };
 
 /**
@@ -159,71 +126,21 @@ struct HttpCommonProperty : public HttpVersion, public HttpHeader
  *
  * @see <https://tools.ietf.org/html/rfc2616#section-5.1>
  */
-struct HttpRequest : public virtual HttpCommonProperty
+struct TBAG_API HttpRequest : public virtual HttpCommonProperty
 {
     std::string method;
     std::string path;
 
-    void setHttpMethod(HttpMethod m)
-    {
-        method = http::getHttpMethodName(m);
-    }
-
-    HttpMethod getHttpMethod() const
-    {
-        return http::getHttpMethod(method.c_str());
-    }
+    void setHttpMethod(HttpMethod m);
+    HttpMethod getHttpMethod() const;
 
     /**
      * Generally, Called from the server side.
      */
-    bool checkWsRequest(int test_version = WEBSOCKET_VERSION_HYBI13) const
-    {
-        if (getHttpMethod() != HttpMethod::M_GET) {
-            return false;
-        }
-        if (exists(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
-            return false;
-        }
-        if (exists(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
-            return false;
-        }
-        if (testWsVersion(*this, test_version) == false) {
-            return false;
-        }
-        return true;
-    }
+    bool checkWsRequest(int test_version = WEBSOCKET_VERSION_HYBI13) const;
 
-    void updateDefaultRequest()
-    {
-        insertIfNotExists(HEADER_USER_AGENT, DEFAULT_VALUE_OF_USER_AGENT);
-        insertIfNotExists(HEADER_ACCEPT, DEFAULT_VALUE_OF_ACCEPT);
-        if (body.empty() == false) {
-            insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body.size()));
-        }
-
-        // @formatter:off
-        if (method.empty()) { method = http::getHttpMethodName(HttpMethod::M_GET); }
-        if (path.empty()) { path = "/"; }
-        if (http_major == 0) { http_major = DEFAULT_HTTP_VERSION_MAJOR; }
-        if (http_minor == 0) { http_minor = DEFAULT_HTTP_VERSION_MINOR; }
-        // @formatter:on
-    }
-
-    void updateDefaultWsRequest(std::string const & ws_key)
-    {
-        insertIfNotExists(HEADER_CONNECTION, VALUE_UPGRADE);
-        insertIfNotExists(HEADER_UPGRADE, VALUE_WEBSOCKET);
-        insertIfNotExists(HEADER_SEC_WEBSOCKET_VERSION, std::to_string(WEBSOCKET_VERSION_HYBI13));
-        insertIfNotExists(HEADER_SEC_WEBSOCKET_KEY, ws_key);
-
-        // @formatter:off
-        if (method.empty()) { method = http::getHttpMethodName(HttpMethod::M_GET); }
-        if (path.empty()) { path = "/"; }
-        if (http_major == 0) { http_major = DEFAULT_HTTP_VERSION_MAJOR; }
-        if (http_minor == 0) { http_minor = DEFAULT_HTTP_VERSION_MINOR; }
-        // @formatter:on
-    }
+    void updateDefaultRequest();
+    void updateDefaultWsRequest(std::string const & ws_key);
 
     /**
      * @remarks
@@ -231,31 +148,9 @@ struct HttpRequest : public virtual HttpCommonProperty
      *   Request-Line = Method SP Request-URI SP HTTP-Version CRLF
      *  @endcode
      */
-    std::string toRequestLine() const
-    {
-        std::stringstream ss;
-        ss << (method.empty() ? HttpMethodGET::getMethod() : method) << SP
-           << (path.empty() ? "/" : path) << SP
-           << toVersionString();
-        return ss.str();
-    }
-
-    std::string toRequestString() const
-    {
-        std::stringstream ss;
-        ss << toRequestLine() << CRLF
-           << toMessageHeader() /* Include CRLF */ << CRLF
-           << toBodyString();
-        return ss.str();
-    }
-
-    std::string toDebugRequestString() const
-    {
-        std::stringstream ss;
-        ss << "[REQ] " << toRequestLine() << std::endl
-           << toDebugHeaderString();
-        return ss.str();
-    }
+    std::string toRequestLine() const;
+    std::string toRequestString() const;
+    std::string toDebugRequestString() const;
 };
 
 /**
@@ -266,83 +161,23 @@ struct HttpRequest : public virtual HttpCommonProperty
  *
  * @see <https://tools.ietf.org/html/rfc2616#section-6.1>
  */
-struct HttpResponse : public virtual HttpCommonProperty
+struct TBAG_API HttpResponse : public virtual HttpCommonProperty
 {
     int code = 0;
     std::string reason;
 
-    void setHttpStatus(HttpStatus s)
-    {
-        code   = http::getHttpStatusNumber(s);
-        reason = http::getHttpStatusReason(s);
-    }
-
-    void setHttpStatus(std::string const & name)
-    {
-        setHttpStatus(http::getHttpStatus(name));
-    }
-
-    HttpStatus getHttpStatus() const
-    {
-        return http::getHttpStatus(code);
-    }
+    void setHttpStatus(HttpStatus s);
+    void setHttpStatus(std::string const & name);
+    HttpStatus getHttpStatus() const;
 
     /**
      * Generally, Called from the client side.
      */
-    bool checkWsResponse(std::string const & original_key) const
-    {
-        if (code != getHttpStatusNumber(HttpStatus::SC_SWITCHING_PROTOCOLS)) {
-            return false;
-        }
-        if (exists(HEADER_CONNECTION, VALUE_UPGRADE) == false) {
-            return false;
-        }
-        if (exists(HEADER_UPGRADE, VALUE_WEBSOCKET) == false) {
-            return false;
-        }
-        if (exists(HEADER_SEC_WEBSOCKET_ACCEPT) == false) {
-            return false;
-        }
-        std::string const ACCEPT_KEY = get(HEADER_SEC_WEBSOCKET_ACCEPT);
-        if (ACCEPT_KEY != ws::getUpgradeWebSocketKey(original_key)) {
-            return false;
-        }
-        return true;
-    }
+    bool checkWsResponse(std::string const & original_key) const;
 
-    void updateDefaultResponse()
-    {
-        insertIfNotExists(HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
-        insertIfNotExists(HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
-        if (body.empty() == false) {
-            insertIfNotExists(HEADER_CONTENT_LENGTH, std::to_string(body.size()));
-        }
-
-        // @formatter:off
-        if (code == 0) { setHttpStatus(HttpStatus::SC_OK); }
-        if (http_major == 0) { http_major = DEFAULT_HTTP_VERSION_MAJOR; }
-        if (http_minor == 0) { http_minor = DEFAULT_HTTP_VERSION_MINOR; }
-        // @formatter:on
-    }
-
-    void updateDefaultWsResponse(std::string const & key)
-    {
-        insertIfNotExists(HEADER_UPGRADE, VALUE_WEBSOCKET);
-        insertIfNotExists(HEADER_CONNECTION, VALUE_UPGRADE);
-        insertIfNotExists(HEADER_SEC_WEBSOCKET_ACCEPT, ws::getUpgradeWebSocketKey(key));
-        setHttpStatus(HttpStatus::SC_SWITCHING_PROTOCOLS); // Force update!
-
-        // @formatter:off
-        if (http_major == 0) { http_major = DEFAULT_HTTP_VERSION_MAJOR; }
-        if (http_minor == 0) { http_minor = DEFAULT_HTTP_VERSION_MINOR; }
-        // @formatter:on
-    }
-
-    void updateDefaultWsResponse(HttpRequest const & request)
-    {
-        updateDefaultWsResponse(request.get(HEADER_SEC_WEBSOCKET_KEY));
-    }
+    void updateDefaultResponse();
+    void updateDefaultWsResponse(std::string const & key);
+    void updateDefaultWsResponse(HttpRequest const & request);
 
     /**
      * @remarks
@@ -350,31 +185,9 @@ struct HttpResponse : public virtual HttpCommonProperty
      *   Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
      *  @endcode
      */
-    std::string toStatusLine() const
-    {
-        std::stringstream ss;
-        ss << toVersionString() << SP
-           << code << SP
-           << (reason.empty() ? getErrName(Err::E_EINIT) : reason);
-        return ss.str();
-    }
-
-    std::string toResponseString() const
-    {
-        std::stringstream ss;
-        ss << toStatusLine() << CRLF
-           << toMessageHeader() /* Include CRLF */ << CRLF
-           << toBodyString();
-        return ss.str();
-    }
-
-    std::string toDebugResponseString() const
-    {
-        std::stringstream ss;
-        ss << "[RES] " << toStatusLine() << std::endl
-           << toDebugHeaderString();
-        return ss.str();
-    }
+    std::string toStatusLine() const;
+    std::string toResponseString() const;
+    std::string toDebugResponseString() const;
 };
 
 /**
@@ -383,37 +196,10 @@ struct HttpResponse : public virtual HttpCommonProperty
  * @author zer0
  * @date   2017-09-30
  */
-struct HttpProperty : public HttpRequest, public HttpResponse
+struct TBAG_API HttpProperty : public HttpRequest, public HttpResponse
 {
-    void clear()
-    {
-        http_major = 0;
-        http_minor = 0;
-
-        clearHeaders();
-        body.clear();
-
-        method.clear();
-        path.clear();
-
-        code = 0;
-        reason.clear();
-    }
-
-    void swap(HttpProperty & obj)
-    {
-        std::swap(http_major, obj.http_major);
-        std::swap(http_minor, obj.http_minor);
-
-        swapHeaders(obj._headers);
-        body.swap(obj.body);
-
-        method.swap(obj.method);
-        path.swap(obj.path);
-
-        std::swap(code, obj.code);
-        reason.swap(obj.reason);
-    }
+    void clear();
+    void swap(HttpProperty & obj);
 };
 
 } // namespace http
