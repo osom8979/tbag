@@ -15,12 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
 #include <string>
-#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,49 +27,17 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace archive {
 
-/**
- * Zip class prototype.
- *
- * @author zer0
- * @date   2016-11-17
- */
-class TBAG_API Zip : private Noncopyable
-{
-public:
-    enum class ResultCode
-    {
-        UNKNOWN = 0,
-        SUCCESS,
-        FAILURE,
+static int const TBAG_ZIP_DECODE_LEVEL          = 0;
+static int const TBAG_ZIP_MIN_ENCODE_LEVEL      = 1;
+static int const TBAG_ZIP_DEFAULT_ENCODE_LEVEL  = 6;
+static int const TBAG_ZIP_MAX_ENCODE_LEVEL      = 9;
 
-        INIT_ERROR,
-        OPEN_ERROR,
-        GO_TO_FIRST_FILE_ERROR,
-        OPEN_CURRENT_FILE_ERROR,
-    };
+TBAG_API Err coding(char const * input, std::size_t size, util::Buffer & output, int level = TBAG_ZIP_DECODE_LEVEL);
+TBAG_API Err encode(char const * input, std::size_t size, util::Buffer & output, int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL);
+TBAG_API Err decode(char const * input, std::size_t size, util::Buffer & output);
 
-    static int const DEFAULT_ENCODE_LEVEL = 6;
-    static int const MIN_ENCODE_LEVEL = 1;
-    static int const MAX_ENCODE_LEVEL = 9;
-    static int const DECODE_LEVEL = 0;
-
-    using Buffer = util::Buffer;
-
-public:
-    Zip();
-    ~Zip();
-
-private:
-    static ResultCode coding(Buffer & output, char const * input, std::size_t size, int level = DECODE_LEVEL);
-
-public:
-    static ResultCode encode(Buffer & output, char const * input, std::size_t size, int level = DEFAULT_ENCODE_LEVEL);
-    static ResultCode decode(Buffer & output, char const * input, std::size_t size);
-
-public:
-    static ResultCode   zip(std::string const & file, std::string const & dir);
-    static ResultCode unzip(std::string const & file, std::string const & dir);
-};
+TBAG_API Err   zip(std::string const & path, std::string const & output_dir);
+TBAG_API Err unzip(std::string const & path, std::string const & output_dir);
 
 } // namespace archive
 

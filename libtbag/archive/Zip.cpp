@@ -7,13 +7,10 @@
 
 #include <libtbag/archive/Zip.hpp>
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/filesystem/details/FsCommon.hpp>
+#include <libtbag/filesystem/File.hpp>
 
 #include <cassert>
 #include <cstring>
-
-#include <fstream>
-#include <iostream>
 
 #include <zlib.h>
 #include <zip.h>
@@ -25,19 +22,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace archive {
 
-Zip::Zip()
+Err coding(char const * input, std::size_t size, util::Buffer & output, int level)
 {
-    // EMPTY.
-}
-
-Zip::~Zip()
-{
-    // EMPTY.
-}
-
-Zip::ResultCode Zip::coding(Buffer & output, char const * input, std::size_t size, int level)
-{
-    bool const ENCODE = (level != DECODE_LEVEL);
+    bool const ENCODE = (level != TBAG_ZIP_DECODE_LEVEL);
 
     z_stream stream = {0,};
     stream.zalloc   = Z_NULL;
@@ -52,7 +39,7 @@ Zip::ResultCode Zip::coding(Buffer & output, char const * input, std::size_t siz
     }
 
     if (result != Z_OK) {
-        return ResultCode::FAILURE;
+        return Err::E_EINIT;
     }
 
     std::size_t const BUFFER_SIZE = 2048; // TODO: CHANGE PAGE SIZE.
@@ -74,7 +61,7 @@ Zip::ResultCode Zip::coding(Buffer & output, char const * input, std::size_t siz
             flush = Z_FINISH; // EOF.
         }
 
-        memcpy(in, input + read_index, stream.avail_in);
+        ::memcpy(in, input + read_index, stream.avail_in);
         read_index += stream.avail_in;
 
         do {
@@ -83,9 +70,9 @@ Zip::ResultCode Zip::coding(Buffer & output, char const * input, std::size_t siz
             stream.next_out  = out;
 
             if (ENCODE) {
-                result = deflate(&stream, flush);
+                result = ::deflate(&stream, flush);
             } else {
-                result = inflate(&stream, flush);
+                result = ::inflate(&stream, flush);
             }
             assert(result != Z_STREAM_ERROR);
 
@@ -98,48 +85,46 @@ Zip::ResultCode Zip::coding(Buffer & output, char const * input, std::size_t siz
     assert(result == Z_STREAM_END);
 
     if (ENCODE) {
-        deflateEnd(&stream);
+        ::deflateEnd(&stream);
     } else {
-        inflateEnd(&stream);
+        ::inflateEnd(&stream);
     }
 
-    return ResultCode::SUCCESS;
+    return Err::E_SUCCESS;
 }
 
-Zip::ResultCode Zip::encode(Buffer & output, char const * input, std::size_t size, int level)
+Err encode(char const * input, std::size_t size, util::Buffer & output, int level)
 {
-    if (level < MIN_ENCODE_LEVEL || level > MAX_ENCODE_LEVEL) {
+    if (level < TBAG_ZIP_MIN_ENCODE_LEVEL || level > TBAG_ZIP_MAX_ENCODE_LEVEL) {
         level = Z_DEFAULT_COMPRESSION;
     }
-    return coding(output, input, size, level);
+    return coding(input, size, output, level);
 }
 
-Zip::ResultCode Zip::decode(Buffer & output, char const * input, std::size_t size)
+Err decode(char const * input, std::size_t size, util::Buffer & output)
 {
-    return coding(output, input, size, DECODE_LEVEL);
+    return coding(input, size, output, TBAG_ZIP_DECODE_LEVEL);
 }
 
-Zip::ResultCode Zip::zip(std::string const & file, std::string const & dir)
+Err zip(std::string const & path, std::string const & output_dir)
 {
-    return ResultCode::FAILURE;
+    return Err::E_ENOSYS;
 }
 
-Zip::ResultCode Zip::unzip(std::string const & file, std::string const & dir)
+Err unzip(std::string const & path, std::string const & output_dir)
 {
-    using Path = filesystem::Path;
-
-    unzFile uf = unzOpen(file.c_str());
+    unzFile uf = unzOpen(path.c_str());
     if (uf == nullptr) {
-        return ResultCode::OPEN_ERROR;
+        return Err::E_EOPEN;
     }
 
     if (unzGoToFirstFile(uf) != UNZ_OK) {
         unzClose(uf);
-        return ResultCode::GO_TO_FIRST_FILE_ERROR;
+        return Err::E_EINDEX;
     }
 
-    std::size_t const MAX_PATH_LENGTH = 256;
-    std::size_t const MAX_COMMENT     = 256;
+    std::size_t const MAX_PATH_LENGTH = filesystem::details::MAX_PATH_LENGTH;
+    std::size_t const MAX_COMMENT     = filesystem::details::MAX_PATH_LENGTH;
 
     char filename[MAX_PATH_LENGTH] = {0,};
     char  comment[MAX_COMMENT] = {0,};
@@ -147,45 +132,47 @@ Zip::ResultCode Zip::unzip(std::string const & file, std::string const & dir)
     std::size_t const INPUT_BUFFER = 2048;
     Bytef in[INPUT_BUFFER] = {0,};
 
-    unz_file_info info;
+    unz_file_info info = {0,};
 
+    filesystem::Path const OUTPUT_DIRECTORY(output_dir);
     do {
         unzGetCurrentFileInfo(uf, &info, filename, MAX_PATH_LENGTH, nullptr, 0, comment, MAX_COMMENT);
 
-         //std::cout << "NAME("        << filename
-         //          << ") COMP_SIZE(" << info.compressed_size
-         //          << ") ORI_SIZE("  << info.uncompressed_size
-         //          << ")\n";
+        // filename
+        // info.compressed_size
+        // info.uncompressed_size
 
-        std::string const OUTPUT_NODE_PATH = dir + filesystem::details::PATH_SEPARATOR + filename;
+        auto node_path = OUTPUT_DIRECTORY / filename;
 
         if (info.compressed_size == 0 && info.uncompressed_size == 0) {
             // Directory.
-            //OUTPUT_NODE_PATH.createDirWithRecursive();
-            libtbag::filesystem::details::createDirectory(OUTPUT_NODE_PATH);
+            node_path.createDir();
 
         } else {
             // Regular file.
-
             if (unzOpenCurrentFile(uf) == UNZ_OK) {
-                std::ofstream op(OUTPUT_NODE_PATH, std::ios_base::binary);
-                int readsize = 0;
+                filesystem::File node_file(node_path);
+                int node_offset = 0;
+                int read_size   = 0;
+                int write_size  = 0;
 
                 do {
-                    readsize = unzReadCurrentFile(uf, (void*)in, INPUT_BUFFER);
-                    op.write((char const *) in, readsize);
-                } while (readsize != 0);
-
-                op.close();
+                    read_size = unzReadCurrentFile(uf, (void*)in, INPUT_BUFFER);
+                    write_size = node_file.write((char const *)in, (std::size_t)read_size, node_offset);
+                    if (write_size == read_size) {
+                        node_offset += write_size;
+                    } else {
+                        break; // read & write error.
+                    }
+                } while (read_size != 0);
+                node_file.close();
             }
-
             unzCloseCurrentFile(uf);
         }
     } while (unzGoToNextFile(uf) == UNZ_OK);
-
     unzClose(uf);
 
-    return ResultCode::SUCCESS;
+    return Err::E_SUCCESS;
 }
 
 } // namespace archive
