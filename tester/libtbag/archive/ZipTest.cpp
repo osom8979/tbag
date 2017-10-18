@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <libtbag/archive/Zip.hpp>
 #include <libtbag/time/ElapsedTime.hpp>
+#include <libtbag/filesystem/File.hpp>
+#include <tester/DemoAsset.hpp>
 
 #include <cstdint>
 
@@ -81,8 +83,32 @@ TEST(ZipTest, ImageTest)
     }
 }
 
-TEST(ZipTest, unzip)
+TEST(ZipTest, ZipAndUnzip)
 {
-    //Zip::unzip("tiny.zip", ".");
+    std::string const TEMP_NAME    = "temp.txt";
+    std::string const TEMP_CONTENT = "__tester_archive_ziptest_zip_and_unzip__";
+    std::string const ZIP_NAME     = "temp.zip";
+
+    tttDir(true, true);
+    auto const TEMP_DIR   = tttDirGet();
+    auto const TEMP_PATH  = TEMP_DIR / TEMP_NAME;
+    auto const ZIP_PATH   = TEMP_DIR / ZIP_NAME;
+    auto const OUT_PATH   = TEMP_DIR / "output";
+    auto const UNZIP_TEMP = OUT_PATH / TEMP_NAME;
+
+    ASSERT_FALSE(ZIP_PATH.isRegularFile());
+    ASSERT_EQ(Err::E_SUCCESS, filesystem::writeFile(TEMP_PATH, TEMP_CONTENT));
+    ASSERT_EQ(Err::E_SUCCESS, zip({TEMP_PATH.toString()}, ZIP_PATH.toString(), {TEMP_PATH.getName()}));
+    ASSERT_TRUE(ZIP_PATH.isRegularFile());
+
+    ASSERT_TRUE(OUT_PATH.createDir());
+    ASSERT_EQ(Err::E_SUCCESS, unzip(ZIP_PATH.toString(), OUT_PATH.toString()));
+    ASSERT_TRUE(UNZIP_TEMP.isRegularFile());
+
+    std::vector<char> buffer;
+    ASSERT_EQ(Err::E_SUCCESS, filesystem::readFile(UNZIP_TEMP.toString(), buffer));
+
+    std::string const RESULT(buffer.begin(), buffer.end());
+    ASSERT_EQ(TEMP_CONTENT, RESULT);
 }
 

@@ -106,9 +106,100 @@ Err decode(char const * input, std::size_t size, util::Buffer & output)
     return coding(input, size, output, TBAG_ZIP_DECODE_LEVEL);
 }
 
-Err zip(std::string const & path, std::string const & output_dir)
+Err zip(std::vector<std::string> const & files,
+        std::string const & output_path,
+        std::vector<std::string> const & names,
+        std::vector<std::string> const & comments,
+        std::string const & global_comment)
 {
-    return Err::E_ENOSYS;
+    filesystem::Path const OUTPUT_FILE_PATH(output_path);
+    if (OUTPUT_FILE_PATH.exists()) {
+        return Err::E_EEXIST;
+    }
+
+    zipFile zf = zipOpen(output_path.c_str(), APPEND_STATUS_CREATE);
+    if (zf == nullptr) {
+        return Err::E_EOPEN;
+    }
+
+    zip_fileinfo info = {0,};
+    time_t time = 0;
+    ::time(&time);
+    struct tm * tdata = localtime(&time);
+    info.tmz_date.tm_hour = (uInt)tdata->tm_hour;
+    info.tmz_date.tm_mday = (uInt)tdata->tm_mday;
+    info.tmz_date.tm_min  = (uInt)tdata->tm_min;
+    info.tmz_date.tm_mon  = (uInt)tdata->tm_mon;
+    info.tmz_date.tm_sec  = (uInt)tdata->tm_sec;
+    info.tmz_date.tm_year = (uInt)tdata->tm_year;
+
+    std::size_t const INPUT_BUFFER = 2048;
+    Bytef in[INPUT_BUFFER] = {0,};
+
+    auto    file_itr =    files.begin();
+    auto    name_itr =    names.begin();
+    auto comment_itr = comments.begin();
+
+    auto const    FILE_END =    files.end();
+    auto const    NAME_END =    names.end();
+    auto const COMMENT_END = comments.end();
+
+    std::string    file_cursor;
+    std::string    name_cursor;
+    std::string comment_cursor;
+
+    while (file_itr != FILE_END) {
+        file_cursor = *file_itr;
+
+        if (name_itr == NAME_END) {
+            name_cursor = file_cursor;
+        } else {
+            name_cursor = *name_itr;
+        }
+
+        if (comment_itr == COMMENT_END) {
+            comment_cursor.clear();
+        } else {
+            comment_cursor = *comment_itr;
+        }
+
+        // Create file list.
+        int const OPEN_RESULT = zipOpenNewFileInZip(zf, name_cursor.c_str(), &info,
+                                                    nullptr, 0, nullptr, 0, comment_cursor.c_str(),
+                                                    Z_DEFLATED, Z_DEFAULT_COMPRESSION);
+
+        if (OPEN_RESULT == 0) {
+            do {
+                filesystem::File file(file_cursor);
+                if (file.isOpen() == false) {
+                    break;
+                }
+
+                int total_size = 0;
+                int read_size = 0;
+
+                do {
+                    read_size = file.read((char*)in, INPUT_BUFFER, total_size);
+                    total_size += read_size;
+                    zipWriteInFileInZip(zf, (void const *)in, (unsigned)read_size);
+                } while (read_size == 0);
+
+                file.close();
+            } while(false);
+            zipCloseFileInZip(zf);
+        }
+
+        ++file_itr;
+        if (name_itr != NAME_END) {
+            ++name_itr;
+        }
+        if (comment_itr != COMMENT_END) {
+            ++comment_itr;
+        }
+    }
+
+    zipClose(zf, global_comment.c_str());
+    return Err::E_SUCCESS;
 }
 
 Err unzip(std::string const & path, std::string const & output_dir)
@@ -135,14 +226,19 @@ Err unzip(std::string const & path, std::string const & output_dir)
     unz_file_info info = {0,};
 
     filesystem::Path const OUTPUT_DIRECTORY(output_dir);
+    if (OUTPUT_DIRECTORY.exists() == false) {
+        return Err::E_ENOENT;
+    }
+
     do {
         unzGetCurrentFileInfo(uf, &info, filename, MAX_PATH_LENGTH, nullptr, 0, comment, MAX_COMMENT);
 
-        // filename
-        // info.compressed_size
-        // info.uncompressed_size
-
-        auto node_path = OUTPUT_DIRECTORY / filename;
+        filesystem::Path node_path;
+        if (filesystem::Path(filename).isAbsolute()) {
+            node_path = filename;
+        } else {
+            node_path = OUTPUT_DIRECTORY / filename;
+        }
 
         if (info.compressed_size == 0 && info.uncompressed_size == 0) {
             // Directory.

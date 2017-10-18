@@ -81,8 +81,8 @@ public:
 TBAG_API Err readFile(std::string const & path, std::string & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
 TBAG_API Err readFile(std::string const & path, std::vector<char> & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
 
-TBAG_API Err writeFile(std::string const & path, std::string const & result);
-TBAG_API Err writeFile(std::string const & path, std::vector<char> const & result);
+TBAG_API Err writeFile(std::string const & path, std::string const & content);
+TBAG_API Err writeFile(std::string const & path, std::vector<char> const & content);
 
 } // namespace filesystem
 

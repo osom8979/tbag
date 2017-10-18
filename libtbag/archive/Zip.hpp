@@ -19,6 +19,7 @@
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
+#include <vector>
 #include <string>
 
 // -------------------
@@ -36,7 +37,11 @@ TBAG_API Err coding(char const * input, std::size_t size, util::Buffer & output,
 TBAG_API Err encode(char const * input, std::size_t size, util::Buffer & output, int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL);
 TBAG_API Err decode(char const * input, std::size_t size, util::Buffer & output);
 
-TBAG_API Err   zip(std::string const & path, std::string const & output_dir);
+TBAG_API Err zip(std::vector<std::string> const & files,
+                 std::string const & output_path,
+                 std::vector<std::string> const & names = std::vector<std::string>(),
+                 std::vector<std::string> const & comments = std::vector<std::string>(),
+                 std::string const & global_comment = std::string());
 TBAG_API Err unzip(std::string const & path, std::string const & output_dir);
 
 } // namespace archive
