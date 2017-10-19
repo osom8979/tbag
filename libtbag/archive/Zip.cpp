@@ -141,24 +141,24 @@ Err zip(std::vector<std::string> const & files,
     auto    name_itr =    names.begin();
     auto comment_itr = comments.begin();
 
-    auto const    FILE_END =    files.end();
-    auto const    NAME_END =    names.end();
-    auto const COMMENT_END = comments.end();
+    auto    file_end =    files.end();
+    auto    name_end =    names.end();
+    auto comment_end = comments.end();
 
     std::string    file_cursor;
     std::string    name_cursor;
     std::string comment_cursor;
 
-    while (file_itr != FILE_END) {
+    while (file_itr != file_end) {
         file_cursor = *file_itr;
 
-        if (name_itr == NAME_END) {
+        if (name_itr == name_end) {
             name_cursor = file_cursor;
         } else {
             name_cursor = *name_itr;
         }
 
-        if (comment_itr == COMMENT_END) {
+        if (comment_itr == comment_end) {
             comment_cursor.clear();
         } else {
             comment_cursor = *comment_itr;
@@ -191,10 +191,10 @@ Err zip(std::vector<std::string> const & files,
         }
 
         ++file_itr;
-        if (name_itr != NAME_END) {
+        if (name_itr != name_end) {
             ++name_itr;
         }
-        if (comment_itr != COMMENT_END) {
+        if (comment_itr != comment_end) {
             ++comment_itr;
         }
     }
