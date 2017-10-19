@@ -15,14 +15,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-File::File() : _file(0)
+File::File() : _file(0), _offset(0)
 {
     // EMPTY.
 }
 
-File::File(std::string const & path, Flags flags, int mode)
+File::File(std::string const & path, Flags flags, int mode) : File()
 {
-    open(path, flags, mode);
+    if (open(path, flags, mode) == false) {
+        throw std::bad_alloc();
+    }
 }
 
 File::~File()
@@ -61,6 +63,21 @@ int File::read(char * buffer, std::size_t size, int64_t offset)
     return details::read(_file, buffer, size, offset);
 }
 
+int File::read(binf const * infos, std::size_t infos_size)
+{
+    int const READ_SIZE = read(infos, infos_size, _offset);
+    if (READ_SIZE > 0) {
+        _offset += READ_SIZE;
+    }
+    return READ_SIZE;
+}
+
+int File::read(char * buffer, std::size_t size)
+{
+    binf const info(buffer, size);
+    return read(&info, 1U);
+}
+
 int File::write(binf const * infos, std::size_t infos_size, int64_t offset)
 {
     return details::write(_file, infos, infos_size, offset);
@@ -69,6 +86,21 @@ int File::write(binf const * infos, std::size_t infos_size, int64_t offset)
 int File::write(char const * buffer, std::size_t size, int64_t offset)
 {
     return details::write(_file, buffer, size, offset);
+}
+
+int File::write(binf const * infos, std::size_t infos_size)
+{
+    int const WRITE_SIZE = write(infos, infos_size, _offset);
+    if (WRITE_SIZE > 0) {
+        _offset += WRITE_SIZE;
+    }
+    return WRITE_SIZE;
+}
+
+int File::write(char const * buffer, std::size_t size)
+{
+    binf const info(const_cast<char*>(buffer), size);
+    return read(&info, 1U);
 }
 
 File::FileState File::getState() const
@@ -80,9 +112,10 @@ File::FileState File::getState() const
     return state;
 }
 
-// ---------------
-// Static methods.
-// ---------------
+bool File::isEof() const
+{
+    return _offset >= getState().size;
+}
 
 // -------------
 namespace impl {

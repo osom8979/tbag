@@ -43,8 +43,12 @@ public:
     using binf  = details::binf;
     using Flags = details::FileOpenFlags;
 
+    using TimeSpec  = details::TimeSpec;
+    using FileState = details::FileState;
+
 private:
-    ufile _file;
+    ufile   _file;
+    int64_t _offset;
 
 public:
     File();
@@ -58,6 +62,9 @@ public:
     inline ufile getFd() const TBAG_NOEXCEPT
     { return _file; }
 
+    inline void seek(int64_t offset) TBAG_NOEXCEPT
+    { _offset = offset; }
+
 public:
     bool open(std::string const & path, Flags flags = Flags(), int mode = 0664);
     bool close();
@@ -66,16 +73,21 @@ public:
     int read(binf const * infos, std::size_t infos_size, int64_t offset);
     int read(char * buffer, std::size_t size, int64_t offset);
 
+    int read(binf const * infos, std::size_t infos_size);
+    int read(char * buffer, std::size_t size);
+
 public:
     int write(binf const * infos, std::size_t infos_size, int64_t offset);
     int write(char const * buffer, std::size_t size, int64_t offset);
 
-public:
-    using TimeSpec  = details::TimeSpec;
-    using FileState = details::FileState;
+    int write(binf const * infos, std::size_t infos_size);
+    int write(char const * buffer, std::size_t size);
 
 public:
     FileState getState() const;
+
+public:
+    bool isEof() const;
 };
 
 TBAG_API Err readFile(std::string const & path, std::string & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
