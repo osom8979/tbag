@@ -18,8 +18,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-TBAG_CONSTEXPR static char const * const DEFAULT_ENVIRONMENTS_FLAGS_PREFIX = "";
-
 Environments::Environments()
 {
     // EMPTY.
@@ -27,27 +25,37 @@ Environments::Environments()
 
 Environments::Environments(char ** envs)
 {
-    parse(envs);
+    if (parse(envs) == false) {
+        throw std::bad_alloc();
+    }
 }
 
 Environments::Environments(char ** envs, std::string const & delimiter)
 {
-    parse(envs, delimiter);
+    if (parse(envs, delimiter) == false) {
+        throw std::bad_alloc();
+    }
 }
 
 Environments::Environments(std::string const & envs)
 {
-    parse(envs);
+    if (parse(envs) == false) {
+        throw std::bad_alloc();
+    }
 }
 
 Environments::Environments(std::string const & envs, std::string const & delimiter)
 {
-    parse(envs, delimiter);
+    if (parse(envs, delimiter) == false) {
+        throw std::bad_alloc();
+    }
 }
 
-Environments::Environments(StringVector const & envs, std::string const & delimiter)
+Environments::Environments(std::vector<std::string> const & envs, std::string const & delimiter)
 {
-    parse(envs, delimiter);
+    if (parse(envs, delimiter) == false) {
+        throw std::bad_alloc();
+    }
 }
 
 Environments::Environments(Flags const & flags)
@@ -117,6 +125,11 @@ void Environments::assign(Flags && flags)
     _flags = std::move(flags);
 }
 
+void Environments::swap(Environments & obj)
+{
+    _flags.swap(obj._flags);
+}
+
 bool Environments::parse(char ** envs)
 {
     return parse(envs, DEFAULT_DELIMITER);
@@ -126,9 +139,9 @@ bool Environments::parse(char ** envs, std::string const & delimiter)
 {
     std::size_t const SIZE = getEnvsSize(envs);
     if (SIZE > static_cast<std::size_t>(INT32_MAX)) {
-        tDLogD("[WARNING] envs size({}) is too big.", SIZE);
+        tDLogW("Environments::parse() envs size({}) is too big.", SIZE);
     }
-    return _flags.parse(static_cast<int>(SIZE), envs, DEFAULT_ENVIRONMENTS_FLAGS_PREFIX, delimiter);
+    return _flags.parse(static_cast<int>(SIZE), envs, ENVIRONMENTS_FLAGS_PREFIX, delimiter);
 }
 
 bool Environments::parse(std::string const & envs)
@@ -138,12 +151,12 @@ bool Environments::parse(std::string const & envs)
 
 bool Environments::parse(std::string const & envs, std::string const & delimiter)
 {
-    return _flags.parse(envs, DEFAULT_ENVIRONMENTS_FLAGS_PREFIX, delimiter);
+    return _flags.parse(envs, ENVIRONMENTS_FLAGS_PREFIX, delimiter);
 }
 
-bool Environments::parse(StringVector const & envs, std::string const & delimiter)
+bool Environments::parse(std::vector<std::string> const & envs, std::string const & delimiter)
 {
-    return _flags.parse(envs, DEFAULT_ENVIRONMENTS_FLAGS_PREFIX, delimiter);
+    return _flags.parse(envs, ENVIRONMENTS_FLAGS_PREFIX, delimiter);
 }
 
 std::string Environments::convert(std::string const & source) const

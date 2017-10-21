@@ -65,6 +65,11 @@ Flags & Flags::operator =(Flags && obj)
     return *this;
 }
 
+void Flags::swap(Flags & obj)
+{
+    _flags.swap(obj._flags);
+}
+
 Flags::Flag Flags::find(FlagVector::const_iterator itr) const
 {
     if (itr == _flags.end()) {
@@ -116,7 +121,7 @@ bool Flags::existsWithValue(std::string const & value) const
     return !findWithValue(value).value.empty();
 }
 
-Flags::StringVector Flags::getUnnamedValues() const
+std::vector<std::string> Flags::getUnnamedValues() const
 {
     std::vector<std::string> result;
     for (auto & cursor : _flags) {
@@ -150,7 +155,7 @@ bool Flags::parse(std::string const & args, std::string const & prefix, std::str
     return parse(splitTokens(args), prefix, delimiter);
 }
 
-bool Flags::parse(StringVector const & args, std::string const & prefix, std::string const & delimiter)
+bool Flags::parse(std::vector<std::string> const & args, std::string const & prefix, std::string const & delimiter)
 {
     for (auto & cursor : args) {
         push(convertFlag(cursor, prefix, delimiter));

@@ -32,14 +32,13 @@ namespace string {
 class TBAG_API Environments
 {
 public:
-    TBAG_CONSTEXPR static char const * const DEFAULT_REGEX_PREFIX = "\\$\\{";
-    TBAG_CONSTEXPR static char const * const DEFAULT_REGEX_SUFFIX = "\\}";
-
-    TBAG_CONSTEXPR static char const * const DEFAULT_DELIMITER = "=";
+    TBAG_CONSTEXPR static char const * const DEFAULT_REGEX_PREFIX      = "\\$\\{";
+    TBAG_CONSTEXPR static char const * const DEFAULT_REGEX_SUFFIX      = "\\}";
+    TBAG_CONSTEXPR static char const * const DEFAULT_DELIMITER         = "=";
+    TBAG_CONSTEXPR static char const * const ENVIRONMENTS_FLAGS_PREFIX = "";
 
 public:
     using Flag = Flags::Flag;
-    using StringVector = Flags::StringVector;
 
 private:
     Flags _flags;
@@ -51,7 +50,7 @@ public:
     explicit Environments(char ** envs, std::string const & delimiter);
     explicit Environments(std::string const & envs);
     explicit Environments(std::string const & envs, std::string const & delimiter);
-    explicit Environments(StringVector const & envs, std::string const & delimiter);
+    explicit Environments(std::vector<std::string> const & envs, std::string const & delimiter);
 
     explicit Environments(Flags const & flags);
     explicit Environments(Flags && flags);
@@ -68,35 +67,31 @@ public:
     Environments & operator =(Flags && flags);
 
 public:
-    inline void clear() TBAG_NOEXCEPT_SP_OP(_flags.clear())
-    { _flags.clear(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_flags.size())
-    { return _flags.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_flags.empty())
-    { return _flags.empty(); }
+    inline void        clear()       TBAG_NOEXCEPT_SP_OP(_flags.clear()) {        _flags.clear(); }
+    inline std::size_t  size() const TBAG_NOEXCEPT_SP_OP(_flags.size ()) { return _flags.size (); }
+    inline bool        empty() const TBAG_NOEXCEPT_SP_OP(_flags.empty()) { return _flags.empty(); }
 
 public:
-    inline void push(std::string const & key, std::string const & value)
-    { _flags.push(Flag(key, value)); }
-    inline void push(Flag const & flag)
-    { _flags.push(flag); }
+    inline void push(std::string const & key, std::string const & value) { _flags.push(Flag(key, value)); }
+    inline void push(Flag const & flag) { _flags.push(flag); }
 
 public:
-    inline Flag & at(int index)
-    { return _flags.at(index); }
-    inline Flag const & at(int index) const
-    { return _flags.at(index); }
+    inline Flag       & at(std::size_t index)       { return _flags.at(index); }
+    inline Flag const & at(std::size_t index) const { return _flags.at(index); }
 
 public:
     void assign(Flags const & flags);
     void assign(Flags && flags);
 
 public:
+    void swap(Environments & obj);
+
+public:
     bool parse(char ** envs);
     bool parse(char ** envs, std::string const & delimiter);
     bool parse(std::string const & envs);
     bool parse(std::string const & envs, std::string const & delimiter);
-    bool parse(StringVector const & envs, std::string const & delimiter);
+    bool parse(std::vector<std::string> const & envs, std::string const & delimiter);
 
 public:
     std::string convert(std::string const & source) const;

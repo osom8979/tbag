@@ -1,8 +1,9 @@
 /**
  * @file   Format.hpp
- * @brief  Format class prototype.
+ * @brief  Extended formatting string.
  * @author zer0
  * @date   2017-10-21
+ *
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_STRING_FORMAT_HPP__
@@ -15,8 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,22 +24,23 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-// Forward declaration.
-
 /**
- * Format class prototype.
+ * Extended Format class prototype.
  *
  * @author zer0
  * @date   2017-10-21
  */
-class TBAG_API Format : private Noncopyable
+class TBAG_API Format
 {
-private:
-    // Insert member variables.
-
 public:
     Format();
+    Format(Format const & obj);
+    Format(Format && obj);
     virtual ~Format();
+
+public:
+    Format & operator =(Format const & obj);
+    Format & operator =(Format && obj);
 };
 
 } // namespace string

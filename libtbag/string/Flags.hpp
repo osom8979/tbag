@@ -33,6 +33,19 @@ namespace string {
  *
  * @author zer0
  * @date   2016-05-03
+ *
+ * @remarks
+ *  Example:
+ *  @code{.cpp}
+ *   Flags flags;
+ *   flags.parse("file.exe --arg1 --arg2=val2");
+ *   flags.at(0).key;   // ""
+ *   flags.at(0).value; // "file.exe"
+ *   flags.at(1).key;   // "arg1"
+ *   flags.at(1).value; // ""
+ *   flags.at(2).key;   // "arg2"
+ *   flags.at(2).value; // "val2"
+ *  @endcode
  */
 class TBAG_API Flags
 {
@@ -51,7 +64,6 @@ public:
     };
 
     using FlagVector   = std::vector<Flag>;
-    using StringVector = std::vector<std::string>;
     using ArgvVector   = std::vector<char*>;
 
     struct Argv
@@ -60,8 +72,8 @@ public:
         friend class Flags;
 
     private:
-        StringVector _strings;
-        ArgvVector   _arguments;
+        std::vector<std::string> _strings;
+        ArgvVector _arguments;
 
     public:
         inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_arguments.size())
@@ -84,9 +96,9 @@ private:
 public:
     Flags();
 
-    Flags(int argc, char ** argv);
-    Flags(std::string const & args, std::string const & prefix, std::string const & delimiter);
-    Flags(std::string const & args);
+    explicit Flags(int argc, char ** argv);
+    explicit Flags(std::string const & args, std::string const & prefix, std::string const & delimiter);
+    explicit Flags(std::string const & args);
 
     Flags(Flags const & obj);
     Flags(Flags && obj);
@@ -98,22 +110,19 @@ public:
     Flags & operator =(Flags && obj);
 
 public:
-    inline void clear() TBAG_NOEXCEPT_SP_OP(_flags.clear())
-    { _flags.clear(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_flags.size())
-    { return _flags.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_flags.empty())
-    { return _flags.empty(); }
+    inline void        clear()       TBAG_NOEXCEPT_SP_OP(_flags.clear()) {        _flags.clear(); }
+    inline std::size_t  size() const TBAG_NOEXCEPT_SP_OP(_flags.size ()) { return _flags.size (); }
+    inline bool        empty() const TBAG_NOEXCEPT_SP_OP(_flags.empty()) { return _flags.empty(); }
 
 public:
-    inline void push(Flag const & flag)
-    { _flags.push_back(flag); }
+    inline void push(Flag const & flag) { _flags.push_back(flag); }
 
 public:
-    inline Flag & at(std::size_t index)
-    { return _flags.at(index); }
-    inline Flag const & at(std::size_t index) const
-    { return _flags.at(index); }
+    inline Flag       & at(std::size_t index)       { return _flags.at(index); }
+    inline Flag const & at(std::size_t index) const { return _flags.at(index); }
+
+public:
+    void swap(Flags & obj);
 
 public:
     Flag find(FlagVector::const_iterator itr) const;
@@ -129,14 +138,14 @@ public:
     bool existsWithValue(std::string const & value) const;
 
 public:
-    StringVector getUnnamedValues() const;
+    std::vector<std::string> getUnnamedValues() const;
 
 public:
     bool parse(int argc, char ** argv);
     bool parse(int argc, char ** argv, std::string const & prefix, std::string const & delimiter);
     bool parse(std::string const & args);
     bool parse(std::string const & args, std::string const & prefix, std::string const & delimiter);
-    bool parse(StringVector const & args, std::string const & prefix, std::string const & delimiter);
+    bool parse(std::vector<std::string> const & args, std::string const & prefix, std::string const & delimiter);
 
 public:
     Argv getArgv(std::string const & prefix, std::string const & delimiter, bool last_null = false) const;
