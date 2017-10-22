@@ -13,6 +13,7 @@
 
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Format.hpp>
 #include <libtbag/util/Structures.hpp>
 #include <libtbag/proto/FunctionalTpotPacket.hpp>
 #include <libtbag/signal/SignalHandler.hpp>

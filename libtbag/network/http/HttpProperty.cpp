@@ -7,6 +7,7 @@
 
 #include <libtbag/network/http/HttpProperty.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/string/Format.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

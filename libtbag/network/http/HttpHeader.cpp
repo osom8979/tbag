@@ -8,6 +8,7 @@
 #include <libtbag/network/http/HttpHeader.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Format.hpp>
 
 #include <sstream>
 

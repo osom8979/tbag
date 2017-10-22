@@ -20,9 +20,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
-#include <libtbag/3rd/fmt/format.h>
 
-#include <cstdarg>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -74,28 +72,6 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
     return ss.str();
 }
 
-template <typename ... Args>
-std::string fformat(std::string const & f, Args && ... args)
-{
-    return ::fmt::format(f, std::forward<Args>(args) ...);
-}
-
-TBAG_CONSTEXPR std::size_t const DEFAULT_FORMAT_BUFFER_SIZE = 1024;
-TBAG_CONSTEXPR std::size_t const MAX_FORMAT_RESIZE_LOOP_COUNT = 5;
-
-TBAG_API std::string  format(char const * f, ...);
-TBAG_API std::string vformat(char const * f, std::size_t buffer_size, va_list & l);
-
-#ifndef TBAG_FORMAT_VA_LIST
-#define TBAG_FORMAT_VA_LIST(result, format_string, last_argument_name, buffer_size)     \
-    do {                                                                                \
-        va_list __args_list__;                                                          \
-        va_start(__args_list__, last_argument_name);                                    \
-        result = ::libtbag::string::vformat(format_string, buffer_size, __args_list__); \
-        va_end(__args_list__);                                                          \
-    } while (0)
-#endif
-
 /**
  * Separate tokens.
  *
@@ -118,18 +94,22 @@ TBAG_API std::string mergeTokens(std::vector<std::string> const & tokens, std::s
  */
 TBAG_API std::string convertStringWithThreadId(std::thread::id const & id);
 
+TBAG_CONSTEXPR char const * const STRING_EMPTY = "";
+TBAG_CONSTEXPR char const * const STRING_SPACE = " ";
+TBAG_CONSTEXPR char const * const STRING_HEX_PREFIX = "0x";
+
 /**
  * Byte array to HEX string.
  */
 TBAG_API char convertHalfByteToHexChar(uint8_t half_byte);
 TBAG_API std::string convertByteToHexString(uint8_t hex);
 TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes,
-                                                 std::string const & prefix = "0x",
-                                                 std::string const & separator = "");
+                                                 std::string const & prefix = STRING_HEX_PREFIX,
+                                                 std::string const & separator = STRING_EMPTY);
 TBAG_API std::string convertByteArrayToHexStringBox(std::vector<uint8_t> const & bytes,
                                                     int line_width = (2 * 8),
-                                                    std::string const & prefix = "0x",
-                                                    std::string const & separator = " ");
+                                                    std::string const & prefix = STRING_HEX_PREFIX,
+                                                    std::string const & separator = STRING_SPACE);
 
 TBAG_CONSTEXPR std::size_t const HEX_STRING_ADDRESS_BYTE_SIZE =
         (/*PREFIX(0x)*/2) + (sizeof(void*) * 2/*HEX STRING ADDRESS*/) + (1/*NULL*/);
