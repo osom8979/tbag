@@ -29,13 +29,14 @@ TEST(FormatTest, FormatClass)
 
 struct CustomFormat : public Format
 {
-    virtual std::string onEscape(char input) const override
+    virtual int onEscape(std::string const & source, std::size_t index, std::string & output) const override
     {
-        if (input == 'Z') {
-            return "TEMP";
+        if (source[index] == 'Z') {
+            output = "TEMP";
         } else {
-            return std::string(1, input);
+            output.assign(1, source[index]);
         }
+        return 1;
     }
 };
 

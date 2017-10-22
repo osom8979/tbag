@@ -6,9 +6,8 @@
  */
 
 #include <libtbag/time/TimePoint.hpp>
-#include <libtbag/time/Time.hpp>
 #include <libtbag/log/Log.hpp>
-
+#include <libtbag/time/Time.hpp>
 #include <libtbag/3rd/date/date.h>
 
 #include <ctime>
@@ -58,7 +57,7 @@ TimePoint::TimePoint(Rep rep, Rep local_diff)
 
 TimePoint::TimePoint(int y, int m, int d, int hour, int min, int sec, int milli, int micro, int nano)
 {
-    setAll(y, m, d, hour, min, sec, milli, micro, nano);
+    set(y, m, d, hour, min, sec, milli, micro, nano);
     setLocalDiff();
 }
 
@@ -100,6 +99,7 @@ TimePoint & TimePoint::operator =(Rep rep)
 TimePoint & TimePoint::operator =(TimePoint const & obj)
 {
     if (this != &obj) {
+        setEscape(obj.getEscape());
         _system_tp  = obj._system_tp;
         _local_diff = obj._local_diff;
     }
@@ -108,10 +108,7 @@ TimePoint & TimePoint::operator =(TimePoint const & obj)
 
 TimePoint & TimePoint::operator =(TimePoint && obj)
 {
-    if (this != &obj) {
-        _system_tp  = std::move(obj._system_tp);
-        _local_diff = std::move(obj._local_diff);
-    }
+    swap(obj);
     return *this;
 }
 
@@ -154,19 +151,21 @@ void TimePoint::setLocalDiff()
     _local_diff = duration_cast<Duration>(getCurrentLocalDuration());
 }
 
-void TimePoint::setAll(int y, int m, int d, int hour, int min, int sec, int milli, int micro, int nano)
+bool TimePoint::set(int y, int m, int d, int hour, int min, int sec, int milli, int micro, int nano)
 {
-    assert(y >= 1970);
-    assert(1 <= COMPARE_AND(m) <= 12);
-    assert(1 <= COMPARE_AND(d) <= 31);
+    // @formatter:off
+    if (y < RANGE_OR(1970, 9999) < y) { return false; }
+    if (m < RANGE_OR(   1,   12) < m) { return false; }
+    if (d < RANGE_OR(   1,   31) < d) { return false; }
 
-    assert(0 <= COMPARE_AND(hour) < 24);
-    assert(0 <= COMPARE_AND(min ) < 60);
-    assert(0 <= COMPARE_AND(sec ) < 60);
+    if (hour < RANGE_OR(0, 24) <= hour) { return false; }
+    if ( min < RANGE_OR(0, 60) <=  min) { return false; }
+    if ( sec < RANGE_OR(0, 60) <=  sec) { return false; }
 
-    assert(0 <= COMPARE_AND(milli) < 1000);
-    assert(0 <= COMPARE_AND(micro) < 1000);
-    assert(0 <= COMPARE_AND(nano ) < 1000);
+    if (milli < RANGE_OR(0, 1000) <= milli) { return false; }
+    if (micro < RANGE_OR(0, 1000) <= micro) { return false; }
+    if ( nano < RANGE_OR(0, 1000) <=  nano) { return false; }
+    // @formatter:on
 
     using namespace date;
     using namespace std::chrono;
@@ -175,6 +174,8 @@ void TimePoint::setAll(int y, int m, int d, int hour, int min, int sec, int mill
     auto sys_time = std::chrono::hours(hour) + std::chrono::minutes(min) + std::chrono::seconds(sec);
     auto subsec   = duration_cast<SystemDuration>(milliseconds(milli) + microseconds(micro) + nanoseconds(nano));
     _system_tp = sys_date + sys_time + subsec;
+
+    return true;
 }
 
 TimePoint::Duration TimePoint::getTimeSinceEpoch() const
@@ -243,6 +244,40 @@ int TimePoint::getLocalDays() const
     return libtbag::time::getDays(getLocalTimePoint());
 }
 
+std::string TimePoint::convertFormatString(int width, int value) const
+{
+    if (width == 4) {
+        return string::fformat("{:0>4}", value);
+    } else if (width == 3) {
+        return string::fformat("{:0>3}", value);
+    } else if (width == 2) {
+        return string::fformat("{:0>2}", value);
+    }
+    return string::fformat("{}", value);
+}
+
+// @formatter:off
+std::string TimePoint::toYearString    (bool p) const { return convertFormatString(p ? 4 : 0,     year()); }
+std::string TimePoint::toMonthString   (bool p) const { return convertFormatString(p ? 2 : 0,    month()); }
+std::string TimePoint::toDayString     (bool p) const { return convertFormatString(p ? 2 : 0,      day()); }
+std::string TimePoint::toHoursString   (bool p) const { return convertFormatString(p ? 2 : 0,    hours()); }
+std::string TimePoint::toMinutesString (bool p) const { return convertFormatString(p ? 2 : 0,  minutes()); }
+std::string TimePoint::toSecondsString (bool p) const { return convertFormatString(p ? 2 : 0,  seconds()); }
+std::string TimePoint::toMillisecString(bool p) const { return convertFormatString(p ? 3 : 0, millisec()); }
+std::string TimePoint::toMicrosecString(bool p) const { return convertFormatString(p ? 3 : 0, microsec()); }
+std::string TimePoint::toNanosecString (bool p) const { return convertFormatString(p ? 3 : 0,  nanosec()); }
+
+std::string TimePoint::toLocalYearString    (bool p) const { return convertFormatString(p ? 4 : 0,     lyear()); }
+std::string TimePoint::toLocalMonthString   (bool p) const { return convertFormatString(p ? 2 : 0,    lmonth()); }
+std::string TimePoint::toLocalDayString     (bool p) const { return convertFormatString(p ? 2 : 0,      lday()); }
+std::string TimePoint::toLocalHoursString   (bool p) const { return convertFormatString(p ? 2 : 0,    lhours()); }
+std::string TimePoint::toLocalMinutesString (bool p) const { return convertFormatString(p ? 2 : 0,  lminutes()); }
+std::string TimePoint::toLocalSecondsString (bool p) const { return convertFormatString(p ? 2 : 0,  lseconds()); }
+std::string TimePoint::toLocalMillisecString(bool p) const { return convertFormatString(p ? 3 : 0, lmillisec()); }
+std::string TimePoint::toLocalMicrosecString(bool p) const { return convertFormatString(p ? 3 : 0, lmicrosec()); }
+std::string TimePoint::toLocalNanosecString (bool p) const { return convertFormatString(p ? 3 : 0,  lnanosec()); }
+// @formatter:on
+
 std::string TimePoint::toString(std::string const & format) const
 {
     std::stringstream ss;
@@ -277,15 +312,47 @@ std::string TimePoint::toLocalShortString() const
     return toLocalString(TIMESTAMP_SHORT_FORMAT);
 }
 
-std::string TimePoint::getLongTimeString(int y, int m, int d, int hour, int min, int sec, int milli, int micro, int nano)
+int TimePoint::onEscape(std::string const & source, std::size_t index, std::string & output) const
 {
-    std::array<char, 32> buffer;
-    double sec_all = (double)sec
-                     + ((double)milli / (1000.0))
-                     + ((double)micro / (1000.0 * 1000.0))
-                     + ((double)nano  / (1000.0 * 1000.0 * 1000.0));
-    int const WRITE_SIZE = sprintf(buffer.data(), "%04d-%02d-%02dT%02d:%02d:%f", y, m, d, hour, min, sec_all);
-    return std::string(buffer.begin(), buffer.begin() + WRITE_SIZE);
+    bool padding = false;
+    int  consume = 1;
+    char cursor  = source[index];
+
+    if (cursor == 'P' || cursor == 'p') {
+        if (index + 1 >= source.size()) {
+            output.assign(1, source[index]);
+            return 1;
+        }
+        padding = true;
+        consume = 2;
+        cursor  = source[index + 1];
+    }
+
+    // @formatter:off
+    switch (cursor) {
+    case 'Y': output = toYearString         (padding); break;
+    case 'M': output = toMonthString        (padding); break;
+    case 'D': output = toDayString          (padding); break;
+    case 'H': output = toHoursString        (padding); break;
+    case 'I': output = toMinutesString      (padding); break;
+    case 'S': output = toSecondsString      (padding); break;
+    case 'L': output = toMillisecString     (padding); break;
+    case 'C': output = toMicrosecString     (padding); break;
+    case 'N': output = toNanosecString      (padding); break;
+    case 'y': output = toLocalYearString    (padding); break;
+    case 'm': output = toLocalMonthString   (padding); break;
+    case 'd': output = toLocalDayString     (padding); break;
+    case 'h': output = toLocalHoursString   (padding); break;
+    case 'i': output = toLocalMinutesString (padding); break;
+    case 's': output = toLocalSecondsString (padding); break;
+    case 'l': output = toLocalMillisecString(padding); break;
+    case 'c': output = toLocalMicrosecString(padding); break;
+    case 'n': output = toLocalNanosecString (padding); break;
+    default:  output.assign(1, source[index]);         break;
+    }
+    // @formatter:on
+
+    return consume;
 }
 
 } // namespace time

@@ -7,6 +7,8 @@
 
 #include <libtbag/string/Format.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/debug/Assert.hpp>
+
 #include <sstream>
 
 // -------------------
@@ -78,21 +80,31 @@ Format & Format::operator =(Format const & obj)
 
 Format & Format::operator =(Format && obj)
 {
+    swap(obj);
+    return *this;
+}
+
+void Format::swap(Format & obj)
+{
     if (this != &obj) {
         std::swap(_escape, obj._escape);
     }
-    return *this;
 }
 
 std::string Format::convert(std::string const & source) const
 {
     std::stringstream ss;
+    std::size_t const SIZE = source.size();
     FormatMode mode = FormatMode::FM_NORMAL;
-    for (auto & cursor : source) {
+
+    char cursor = 0;
+    for (std::size_t i = 0; i < SIZE; ++i) {
+        cursor = source[i];
         switch (mode) {
             case FormatMode::FM_NORMAL:
                 if (cursor == _escape) {
-                    mode = FormatMode::FM_ESCAPE; // First escape.
+                    // First escape.
+                    mode = FormatMode::FM_ESCAPE;
                 } else {
                     ss << cursor; // Normal character.
                 }
@@ -100,23 +112,33 @@ std::string Format::convert(std::string const & source) const
 
             case FormatMode::FM_ESCAPE:
                 if (cursor == _escape) {
-                    ss << _escape; // Double escape.
+                    // Double escape.
+                    ss << _escape;
                 } else {
-                    ss << onEscape(cursor); // Special character.
+                    // Special character.
+                    std::string output;
+                    int const CONSUME_SIZE = onEscape(source, i, output);
+                    if (CONSUME_SIZE >= 1) {
+                        i += (CONSUME_SIZE - 1);
+                        ss << output;
+                    }
                 }
                 mode = FormatMode::FM_NORMAL;
                 break;
 
             default:
+                TBAG_INACCESSIBLE_BLOCK_ASSERT();
                 break;
         }
     }
+
     return ss.str();
 }
 
-std::string Format::onEscape(char input) const
+int Format::onEscape(std::string const & source, std::size_t index, std::string & output) const
 {
-    return std::string(1, input);
+    output = source[index];
+    return 1;
 }
 
 } // namespace string

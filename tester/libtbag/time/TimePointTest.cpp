@@ -126,6 +126,13 @@ TEST(TimePointTest, DateTime)
     ASSERT_EQ(tp3, tp4);
 }
 
+TEST(TimePointTest, Format)
+{
+    TimePoint tp(2017, 4, 5, 3, 28, 27, 100, 99);
+    ASSERT_STREQ("2017-04-05T03:28:27.100,099,000", tp.fformat("$pY-$pM-$pDT$pH:$pI:$pS.$pL,$pC,$pN").c_str());
+    ASSERT_STREQ("2017-4-5T3:28:27.100,99,0", tp.fformat("$Y-$M-$DT$H:$I:$S.$L,$C,$N").c_str());
+}
+
 TEST(TimePointTest, TimeBeforeEpoch)
 {
     //TimePoint tp2(100, 1, 1, 0, 0, 1, 0, 1);

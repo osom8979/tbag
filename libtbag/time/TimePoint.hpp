@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/string/Format.hpp>
 
 #include <string>
 #include <chrono>
@@ -44,7 +45,7 @@ namespace time {
  * @see <https://en.wikipedia.org/wiki/Unix_time>
  * @see <https://en.wikipedia.org/wiki/Leap_second>
  */
-class TBAG_API TimePoint
+class TBAG_API TimePoint : public string::Format
 {
 public:
     using SystemClock    = std::chrono::system_clock;
@@ -61,8 +62,8 @@ public:
     struct now_time { /* EMPTY. */ };
 
 private:
-    SystemTp _system_tp;
-    Duration _local_diff;
+    SystemTp   _system_tp;
+    Duration   _local_diff;
 
 public:
     TimePoint();
@@ -99,71 +100,37 @@ public:
     { return lh._system_tp <= rh._system_tp; }
     inline friend bool operator >=(TimePoint const & lh, TimePoint const & rh) TBAG_NOEXCEPT
     { return lh._system_tp >= rh._system_tp; }
-    // @formatter:on
 
     inline TimePoint & operator +=(Duration const & dur)
-    {
-        using namespace std::chrono;
-        _system_tp += duration_cast<SystemDuration>(dur);
-        return *this;
-    }
-
+    { _system_tp += std::chrono::duration_cast<SystemDuration>(dur); return *this; }
     inline TimePoint & operator -=(Duration const & dur)
-    {
-        using namespace std::chrono;
-        _system_tp -= duration_cast<SystemDuration>(dur);
-        return *this;
-    }
-
+    { _system_tp -= std::chrono::duration_cast<SystemDuration>(dur); return *this; }
     inline TimePoint & operator +=(Rep rep)
-    {
-        using namespace std::chrono;
-        _system_tp += duration_cast<SystemDuration>(Duration(rep));
-        return *this;
-    }
-
+    { _system_tp += std::chrono::duration_cast<SystemDuration>(Duration(rep)); return *this; }
     inline TimePoint & operator -=(Rep rep)
-    {
-        using namespace std::chrono;
-        _system_tp -= duration_cast<SystemDuration>(Duration(rep));
-        return *this;
-    }
+    { _system_tp -= std::chrono::duration_cast<SystemDuration>(Duration(rep)); return *this; }
 
     inline friend TimePoint operator +(TimePoint const & lh, Duration const & dur)
-    {
-        TimePoint tp = lh;
-        tp += dur;
-        return tp;
-    }
-
+    { TimePoint tp = lh; tp += dur; return tp; }
     inline friend TimePoint operator -(TimePoint const & lh, Duration const & dur)
-    {
-        TimePoint tp = lh;
-        tp -= dur;
-        return tp;
-    }
-
+    { TimePoint tp = lh; tp -= dur; return tp; }
     inline friend TimePoint operator +(TimePoint const & lh, Rep rep)
-    {
-        TimePoint tp = lh;
-        tp += rep;
-        return tp;
-    }
-
+    { TimePoint tp = lh; tp += rep; return tp; }
     inline friend TimePoint operator -(TimePoint const & lh, Rep rep)
-    {
-        TimePoint tp = lh;
-        tp -= rep;
-        return tp;
-    }
+    { TimePoint tp = lh; tp -= rep; return tp; }
+    // @formatter:on
 
-    inline friend void swap(TimePoint & lh, TimePoint & rh)
+public:
+    inline void swap(TimePoint & obj)
     {
-        if (&lh != &rh) {
-            std::swap(lh._system_tp , rh._system_tp );
-            std::swap(lh._local_diff, rh._local_diff);
+        if (this != &obj) {
+            string::Format::swap(obj);
+            std::swap(_system_tp, obj._system_tp);
+            std::swap(_local_diff, obj._local_diff);
         }
     }
+
+    inline friend void swap(TimePoint & lh, TimePoint & rh) { lh.swap(rh); }
 
 public:
     void setTimePoint(SystemTp const & time_point);
@@ -178,18 +145,16 @@ public:
     void setLocalDiff();
 
 public:
-    void setAll(int y = 1970, int m = 1, int d = 1,
-                int hour = 0, int min = 0, int sec = 0,
-                int milli = 0, int micro = 0, int nano = 0);
+    bool set(int y = 1970, int m = 1, int d = 1,
+             int hour = 0, int min = 0, int sec = 0,
+             int milli = 0, int micro = 0, int nano = 0);
 
 public:
     // @formatter:off
-    inline SystemTp getTimePoint() const
-    { return _system_tp; }
+    inline SystemTp getTimePoint() const { return _system_tp; }
     inline SystemTp getLocalTimePoint() const
     { return _system_tp + std::chrono::duration_cast<SystemDuration>(_local_diff); }
-    inline Duration getLocalDiff() const
-    { return _local_diff; }
+    inline Duration getLocalDiff() const { return _local_diff; }
     // @formatter:on
 
     /**
@@ -234,6 +199,32 @@ public:
     int getDays() const;
     int getLocalDays() const;
 
+private:
+    std::string convertFormatString(int width, int value) const;
+
+public:
+    // @formatter:off
+    std::string toYearString    (bool padding = false) const;
+    std::string toMonthString   (bool padding = false) const;
+    std::string toDayString     (bool padding = false) const;
+    std::string toHoursString   (bool padding = false) const;
+    std::string toMinutesString (bool padding = false) const;
+    std::string toSecondsString (bool padding = false) const;
+    std::string toMillisecString(bool padding = false) const;
+    std::string toMicrosecString(bool padding = false) const;
+    std::string toNanosecString (bool padding = false) const;
+
+    std::string toLocalYearString    (bool padding = false) const;
+    std::string toLocalMonthString   (bool padding = false) const;
+    std::string toLocalDayString     (bool padding = false) const;
+    std::string toLocalHoursString   (bool padding = false) const;
+    std::string toLocalMinutesString (bool padding = false) const;
+    std::string toLocalSecondsString (bool padding = false) const;
+    std::string toLocalMillisecString(bool padding = false) const;
+    std::string toLocalMicrosecString(bool padding = false) const;
+    std::string toLocalNanosecString (bool padding = false) const;
+    // @formatter:on
+
 public:
     std::string toString(std::string const & format) const;
     std::string toLongString() const;
@@ -244,15 +235,28 @@ public:
     std::string toLocalShortString() const;
 
 public:
-    static std::string getLongTimeString(int y, int m, int d,
-                                         int hour, int min, int sec,
-                                         int milli = 0, int micro = 0, int nano = 0);
+    /**
+     * @warning
+     *  Not equals strftime() format. @n
+     *
+     * @remarks
+     *  Format list:
+     *   - [p][Yy]: Year
+     *   - [p][Mm]: Month
+     *   - [p][Dd]: Day
+     *   - [p][Hh]: Hours
+     *   - [p][Ii]: Minutes
+     *   - [p][Ss]: Seconds
+     *   - [p][Ll]: Millisec
+     *   - [p][Cc]: Microsec
+     *   - [p][Nn]: Nanosec
+     *  If you use 'p', the 'padding' option applies. @n
+     *  If you use lowercase letters, use local time.
+     */
+    virtual int onEscape(std::string const & source, std::size_t index, std::string & output) const override;
 
 public:
-    inline static TimePoint now()
-    {
-        return TimePoint(now_time());
-    }
+    inline static TimePoint now() { return TimePoint(now_time()); }
 };
 
 } // namespace time

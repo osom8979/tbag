@@ -35,8 +35,9 @@
 // Compare macros.
 // ---------------
 
-#define COMPARE_AND(x) (x) && (x)
-#define COMPARE_OR(x)  (x) || (x)
+#define COMPARE_AND(x)      (x) && (x)
+#define COMPARE_OR(x)       (x) || (x)
+#define RANGE_OR(min, max)  (min) || (max)
 
 // --------------
 // Remove macros.

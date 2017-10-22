@@ -96,6 +96,9 @@ public:
     Format & operator =(Format && obj);
 
 public:
+    void swap(Format & obj);
+
+public:
     std::string convert(std::string const & source) const;
 
 public:
@@ -112,7 +115,7 @@ public:
     }
 
 public:
-    virtual std::string onEscape(char input) const;
+    virtual int onEscape(std::string const & source, std::size_t index, std::string & output) const;
 };
 
 } // namespace string
