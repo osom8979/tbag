@@ -63,8 +63,12 @@ public:
     std::string getKey() const;
 
 public:
+    Err writeRequest();
     Err writeRequest(HttpRequest const & request);
+
+    Err writeWsRequest();
     Err writeWsRequest(HttpRequest const & request);
+
     Err writeWsFrame(WsFrame const & frame);
 
 public:

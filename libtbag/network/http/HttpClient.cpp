@@ -32,12 +32,26 @@ std::string HttpClient::getKey() const
     return _reader.getKey();
 }
 
+Err HttpClient::writeRequest()
+{
+    return writeRequest(HttpRequest());
+}
+
 Err HttpClient::writeRequest(HttpRequest const & request)
 {
     HttpRequest update_request = request;
     update_request.updateDefaultRequest();
     std::string const & REQUEST_STRING = update_request.toRequestString();
     return write(REQUEST_STRING.data(), REQUEST_STRING.size());
+}
+
+Err HttpClient::writeWsRequest()
+{
+    HttpRequest request;
+    request.setHttpMethod(HttpMethod::M_GET);
+    request.insert(HEADER_HOST, std::string());
+    request.insert(HEADER_ORIGIN, std::string());
+    return writeWsRequest(request);
 }
 
 Err HttpClient::writeWsRequest(HttpRequest const & request)
