@@ -5,8 +5,8 @@
  * @date   2017-09-30
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPCOMMON_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPCOMMON_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPCOMMON_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPCOMMON_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,6 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 TBAG_CONSTEXPR char const * const HTTP = "HTTP";
 TBAG_CONSTEXPR char const * const   SP = " ";
@@ -94,6 +95,10 @@ TBAG_CONSTEXPR char const * const WEBSOCKET_HANDSHAKE_GUID = "258EAFA5-E914-47DA
 
 TBAG_CONSTEXPR uint8_t const WEBSOCKET_MINIMUM_HEADER_BYTE_SIZE = 2;
 
+} // namespace base
+
+using namespace libtbag::network::http::base;
+
 } // namespace http
 } // namespace network
 
@@ -101,5 +106,5 @@ TBAG_CONSTEXPR uint8_t const WEBSOCKET_MINIMUM_HEADER_BYTE_SIZE = 2;
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPCOMMON_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPCOMMON_HPP__
 

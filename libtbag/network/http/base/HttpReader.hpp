@@ -5,8 +5,8 @@
  * @date   2017-10-03
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPREADER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPREADER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPREADER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPREADER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -18,8 +18,8 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/network/http/HttpCommon.hpp>
-#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/base/HttpCommon.hpp>
+#include <libtbag/network/http/base/HttpParser.hpp>
 #include <libtbag/network/http/ws/WsFrameBuffer.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
@@ -32,6 +32,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 /**
  * HttpReader interface.
@@ -131,6 +132,11 @@ struct HttpReaderForCallback : public HttpReader
     { parent->onParseError(code, arg); }
 };
 
+
+} // namespace base
+
+using namespace libtbag::network::http::base;
+
 } // namespace http
 } // namespace network
 
@@ -138,5 +144,5 @@ struct HttpReaderForCallback : public HttpReader
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPREADER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPREADER_HPP__
 

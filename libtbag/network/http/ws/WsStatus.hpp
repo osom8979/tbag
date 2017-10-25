@@ -152,6 +152,9 @@ struct TBAG_API WsStatus
 };
 
 } // namespace ws
+
+using namespace libtbag::network::http::ws;
+
 } // namespace http
 } // namespace network
 

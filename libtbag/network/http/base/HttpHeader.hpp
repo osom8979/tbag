@@ -5,8 +5,8 @@
  * @date   2017-09-29
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPHEADER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPHEADER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPHEADER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPHEADER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -18,7 +18,7 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/network/http/HttpCommon.hpp>
+#include <libtbag/network/http/base/HttpCommon.hpp>
 
 #include <initializer_list>
 #include <utility>
@@ -32,6 +32,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 /**
  * HttpHeader class prototype.
@@ -183,6 +184,10 @@ public:
     std::string toMessageHeader() const;
 };
 
+} // namespace base
+
+using namespace libtbag::network::http::base;
+
 } // namespace http
 } // namespace network
 
@@ -190,5 +195,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPHEADER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPHEADER_HPP__
 

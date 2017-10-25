@@ -5,8 +5,8 @@
  * @date   2017-10-03
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPARSER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPARSER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPARSER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPARSER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/base/HttpProperty.hpp>
 
 #include <memory>
 #include <string>
@@ -28,6 +28,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 /**
  * HttpParser class prototype.
@@ -108,6 +109,10 @@ public:
     // @formatter:on
 };
 
+} // namespace base
+
+using namespace libtbag::network::http::base;
+
 } // namespace http
 } // namespace network
 
@@ -115,5 +120,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPARSER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPARSER_HPP__
 

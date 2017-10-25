@@ -5,8 +5,8 @@
  * @date   2017-09-30
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPROPERTY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPROPERTY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPROPERTY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPROPERTY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,10 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#include <libtbag/network/http/HttpCommon.hpp>
-#include <libtbag/network/http/HttpMethod.hpp>
-#include <libtbag/network/http/HttpStatus.hpp>
-#include <libtbag/network/http/HttpHeader.hpp>
+#include <libtbag/network/http/base/HttpCommon.hpp>
+#include <libtbag/network/http/base/HttpMethod.hpp>
+#include <libtbag/network/http/base/HttpStatus.hpp>
+#include <libtbag/network/http/base/HttpHeader.hpp>
 #include <libtbag/network/http/ws/WsUtils.hpp>
 
 #include <libtbag/string/StringUtils.hpp>
@@ -36,6 +36,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 // ------------------------
 // Miscellaneous utilities.
@@ -202,6 +203,10 @@ struct TBAG_API HttpProperty : public HttpRequest, public HttpResponse
     void swap(HttpProperty & obj);
 };
 
+} // namespace base
+
+using namespace libtbag::network::http::base;
+
 } // namespace http
 } // namespace network
 
@@ -209,5 +214,5 @@ struct TBAG_API HttpProperty : public HttpRequest, public HttpResponse
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_HTTPPROPERTY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPROPERTY_HPP__
 

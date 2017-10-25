@@ -18,7 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/http/HttpClient.hpp>
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/base/HttpProperty.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -76,7 +76,7 @@ public:
 public:
     virtual void onContinue(void * arg) override;
     virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) override;
-    virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override;
+    virtual void onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg) override;
     virtual void onRegularHttp(HttpProperty const & property, void * arg) override;
     virtual void onParseError(Err code, void * arg) override;
 

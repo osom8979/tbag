@@ -107,6 +107,9 @@ public:
 };
 
 } // namespace ws
+
+using namespace libtbag::network::http::ws;
+
 } // namespace http
 } // namespace network
 

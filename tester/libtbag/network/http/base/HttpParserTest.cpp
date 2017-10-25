@@ -6,11 +6,12 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/base/HttpParser.hpp>
 
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
+using namespace libtbag::network::http::base;
 
 TEST(HttpParserTest, Request)
 {

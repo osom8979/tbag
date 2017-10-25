@@ -19,7 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/base/HttpProperty.hpp>
 #include <libtbag/util/Structures.hpp>
 #include <libtbag/util/Version.hpp>
 

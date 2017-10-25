@@ -6,11 +6,12 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/HttpFilter.hpp>
+#include <libtbag/network/http/base/HttpFilter.hpp>
 
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
+using namespace libtbag::network::http::base;
 
 TEST(HttpFilterTest, HttpDefaultFilter)
 {

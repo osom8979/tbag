@@ -5,7 +5,7 @@
  * @date   2017-09-29
  */
 
-#include <libtbag/network/http/HttpHeader.hpp>
+#include <libtbag/network/http/base/HttpHeader.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
@@ -18,6 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 HttpHeader::HttpHeader() : _headers()
 {
@@ -187,6 +188,7 @@ std::string HttpHeader::toMessageHeader() const
     return ss.str();
 }
 
+} // namespace base
 } // namespace http
 } // namespace network
 

@@ -8,7 +8,7 @@
 #include <libtbag/tpot/TpotServer.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <libtbag/network/http/FunctionalHttpServer.hpp>
+#include <libtbag/network/http/func/FunctionalHttpServer.hpp>
 #include <libtbag/util/Version.hpp>
 
 #include <libtbag/uvpp/func/FunctionalSignal.hpp>
@@ -49,7 +49,7 @@ TBAG_CONSTEXPR static char const * const TPOT_HTML_INTERNAL_SERVER_ERROR_BODY = 
 class TpotServer::Internal
 {
 public:
-    using SharedServer = std::shared_ptr<network::http::FuncHttpServer>;
+    using SharedServer = std::shared_ptr<network::http::func::FuncHttpServer>;
     using SharedSignal = std::shared_ptr<uvpp::func::FuncSignal>;
 
 private:
@@ -74,7 +74,7 @@ public:
         _verbose = param.verbose;
 
         try {
-            using namespace network::http;
+            using namespace network::http::func;
             using namespace uvpp::func;
             _server.reset(new FuncHttpServer(loop, param.type));
             _signal = loop.newHandle<FuncSignal>(loop);

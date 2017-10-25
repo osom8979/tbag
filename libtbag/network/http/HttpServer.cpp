@@ -132,7 +132,7 @@ bool HttpServer::HttpNode::onSwitchingProtocol(HttpProperty const & property, vo
     return server->onClientSwitchingProtocol(getWeakClient(), property);
 }
 
-void HttpServer::HttpNode::onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg)
+void HttpServer::HttpNode::onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg)
 {
     auto * server = getHttpServerPtr();
     assert(server != nullptr);

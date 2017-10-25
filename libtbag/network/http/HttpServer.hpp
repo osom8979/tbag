@@ -20,10 +20,10 @@
 
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/stream/StreamServer.hpp>
-#include <libtbag/network/http/HttpProperty.hpp>
-#include <libtbag/network/http/HttpParser.hpp>
-#include <libtbag/network/http/HttpReader.hpp>
-#include <libtbag/network/http/HttpFilter.hpp>
+#include <libtbag/network/http/base/HttpProperty.hpp>
+#include <libtbag/network/http/base/HttpParser.hpp>
+#include <libtbag/network/http/base/HttpReader.hpp>
+#include <libtbag/network/http/base/HttpFilter.hpp>
 #include <libtbag/network/http/ws/WsFrameBuffer.hpp>
 #include <libtbag/network/Uri.hpp>
 
@@ -71,14 +71,11 @@ public:
 
     using SharedStreamNode = Parent::SharedStreamNode;
 
-    using Loop         = uvpp::Loop;
-    using Buffer       = util::Buffer;
-    using WsFrame      = ws::WsFrame;
-    using WsStatus     = ws::WsStatus;
-    using WsStatusCode = ws::WsStatusCode;
+    using Loop   = uvpp::Loop;
+    using Buffer = util::Buffer;
 
     using RwLock     = lock::RwLock;
-    using ReadGuard = lock::ReadLockGuard;
+    using ReadGuard  = lock::ReadLockGuard;
     using WriteGuard = lock::WriteLockGuard;
 
     /**
@@ -123,7 +120,7 @@ public:
     public:
         virtual void onContinue(void * arg) override;
         virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) override;
-        virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override;
+        virtual void onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg) override;
         virtual void onRegularHttp(HttpProperty const & property, void * arg) override;
         virtual void onParseError(Err code, void * arg) override;
     };
@@ -213,7 +210,7 @@ public:
     virtual void onClientOpen(WeakClient node) { /* EMPTY. */ }
     virtual void onClientContinue(WeakClient node) { /* EMPTY. */ }
     virtual bool onClientSwitchingProtocol(WeakClient node, HttpRequest const & request) { return true; }
-    virtual void onClientWsMessage(WeakClient node, ws::WsOpCode opcode, util::Buffer const & payload) { /* EMPTY. */ }
+    virtual void onClientWsMessage(WeakClient node, WsOpCode opcode, util::Buffer const & payload) { /* EMPTY. */ }
     virtual void onClientRequest(WeakClient node, HttpRequest const & request) { /* EMPTY. */ }
 };
 

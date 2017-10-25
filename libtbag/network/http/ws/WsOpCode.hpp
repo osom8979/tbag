@@ -56,6 +56,9 @@ inline void swap(libtbag::network::http::ws::WsOpCode & lh, libtbag::network::ht
 }
 
 } // namespace ws
+
+using namespace libtbag::network::http::ws;
+
 } // namespace http
 } // namespace network
 

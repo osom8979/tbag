@@ -5,7 +5,7 @@
  * @date   2017-09-29
  */
 
-#include <libtbag/network/http/HttpStatus.hpp>
+#include <libtbag/network/http/base/HttpStatus.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -14,6 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 char const * getHttpStatusName(HttpStatus status) TBAG_NOEXCEPT
 {
@@ -66,6 +67,7 @@ HttpStatus getHttpStatus(std::string const & status)
     return getHttpStatus(number);
 }
 
+} // namespace base
 } // namespace http
 } // namespace network
 

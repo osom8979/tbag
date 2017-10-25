@@ -5,7 +5,7 @@
  * @date   2017-09-30
  */
 
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/base/HttpProperty.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/Format.hpp>
 
@@ -15,6 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 // ------------------------
 // Miscellaneous utilities.
@@ -333,6 +334,7 @@ void HttpProperty::swap(HttpProperty & obj)
     reason.swap(obj.reason);
 }
 
+} // namespace base
 } // namespace http
 } // namespace network
 

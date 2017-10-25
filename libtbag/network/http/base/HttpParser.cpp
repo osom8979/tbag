@@ -5,7 +5,7 @@
  * @date   2017-10-03
  */
 
-#include <libtbag/network/http/HttpParser.hpp>
+#include <libtbag/network/http/base/HttpParser.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -17,6 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 // @formatter:off
 static int __global_http_on_message_begin__   (http_parser * parser);
@@ -354,6 +355,7 @@ char const * HttpParser::getErrnoDescription() const
     return ::http_errno_description(static_cast<http_errno>(_impl->parser.http_errno));
 }
 
+} // namespace base
 } // namespace http
 } // namespace network
 

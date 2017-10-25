@@ -30,6 +30,9 @@ TBAG_API std::string generateRandomWebSocketKey();
 TBAG_API std::string getUpgradeWebSocketKey(std::string const & key);
 
 } // namespace ws
+
+using namespace libtbag::network::http::ws;
+
 } // namespace http
 } // namespace network
 

@@ -69,7 +69,7 @@ bool SimpleHttpClient::onSwitchingProtocol(HttpProperty const & property, void *
     return false;
 }
 
-void SimpleHttpClient::onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg)
+void SimpleHttpClient::onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg)
 {
     callOnErrorAndClose(Err::E_INACCES);
 }

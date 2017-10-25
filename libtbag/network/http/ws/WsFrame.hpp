@@ -18,7 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/network/http/HttpCommon.hpp>
+#include <libtbag/network/http/base/HttpCommon.hpp>
 #include <libtbag/network/http/ws/WsOpCode.hpp>
 #include <libtbag/network/http/ws/WsStatus.hpp>
 #include <libtbag/network/http/ws/WsPyloadBit.hpp>
@@ -181,6 +181,9 @@ public:
 };
 
 } // namespace ws
+
+using namespace libtbag::network::http::ws;
+
 } // namespace http
 } // namespace network
 

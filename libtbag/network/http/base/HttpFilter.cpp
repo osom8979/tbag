@@ -5,7 +5,7 @@
  * @date   2017-05-24
  */
 
-#include <libtbag/network/http/HttpFilter.hpp>
+#include <libtbag/network/http/base/HttpFilter.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -14,6 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 HttpBaseFilter::HttpBaseFilter() : _method(), _regex()
 {
@@ -56,6 +57,7 @@ bool HttpBaseFilter::filter(HttpRequest const & request)
     }
 }
 
+} // namespace base
 } // namespace http
 } // namespace network
 

@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/network/http/HttpCommon.hpp>
+#include <libtbag/network/http/base/HttpCommon.hpp>
 
 #include <cstdint>
 #include <string>
@@ -78,6 +78,9 @@ TBAG_API uint64_t getPayloadLength(char const * data, uint8_t payload_length_7bi
 TBAG_API std::size_t calculateBufferSize(uint64_t payload_length, bool is_mask);
 
 } // namespace ws
+
+using namespace libtbag::network::http::ws;
+
 } // namespace http
 } // namespace network
 

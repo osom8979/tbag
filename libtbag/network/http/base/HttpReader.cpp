@@ -5,7 +5,7 @@
  * @date   2017-10-03
  */
 
-#include <libtbag/network/http/HttpReader.hpp>
+#include <libtbag/network/http/base/HttpReader.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/http/ws/WsUtils.hpp>
 
@@ -15,6 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace base    {
 
 HttpReader::HttpReader(bool use_websocket) : HttpReader(ws::generateRandomWebSocketKey(), use_websocket)
 {
@@ -105,6 +106,7 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
     return Err::E_ENOSYS;
 }
 
+} // namespace base
 } // namespace http
 } // namespace network
 

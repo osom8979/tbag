@@ -19,7 +19,7 @@
 
 #include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
-#include <libtbag/network/http/HttpReader.hpp>
+#include <libtbag/network/http/base/HttpReader.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
@@ -42,7 +42,7 @@ public:
     using Parent     = stream::StreamClient;
     using Loop       = uvpp::Loop;
     using Masking    = random::MaskingDevice;
-    using WsFrame    = ws::WsFrame;
+    using WsFrame    = WsFrame;
 
     enum class EventType
     {

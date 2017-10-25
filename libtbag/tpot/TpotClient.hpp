@@ -18,7 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/network/http/HttpProperty.hpp>
+#include <libtbag/network/http/base/HttpProperty.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/proto/TpotPacket.hpp>
 

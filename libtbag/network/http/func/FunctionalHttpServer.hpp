@@ -5,8 +5,8 @@
  * @date   2017-09-15
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_FUNCTIONALHTTPSERVER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_FUNCTIONALHTTPSERVER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_FUNC_FUNCTIONALHTTPSERVER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_FUNC_FUNCTIONALHTTPSERVER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -28,6 +28,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace network {
 namespace http    {
+namespace func    {
 
 /**
  * FunctionalHttpServer class prototype.
@@ -125,6 +126,7 @@ public:
 
 using FuncHttpServer = FunctionalHttpServer<HttpServer>;
 
+} // namespace func
 } // namespace http
 } // namespace network
 
@@ -132,5 +134,5 @@ using FuncHttpServer = FunctionalHttpServer<HttpServer>;
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_FUNCTIONALHTTPSERVER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_FUNC_FUNCTIONALHTTPSERVER_HPP__
 

@@ -10,9 +10,9 @@
 
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
-#include <libtbag/network/http/HttpProperty.hpp>
-#include <libtbag/network/http/FunctionalHttpServer.hpp>
-#include <libtbag/network/http/FunctionalHttpClient.hpp>
+#include <libtbag/network/http/base/HttpProperty.hpp>
+#include <libtbag/network/http/func/FunctionalHttpServer.hpp>
+#include <libtbag/network/http/func/FunctionalHttpClient.hpp>
 #include <libtbag/network/http/SimpleHttpClient.hpp>
 #include <libtbag/uvpp/func/FunctionalTimer.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -24,6 +24,7 @@
 using namespace libtbag;
 using namespace libtbag::network;
 using namespace libtbag::network::http;
+using namespace libtbag::network::http::func;
 
 using WeakClient = HttpServer::WeakClient;
 
@@ -286,7 +287,7 @@ TEST(NetworkHttpTest, WebSocketEcho)
         std::cout << "Server.OnClientClose\n";
     });
 
-    FuncHttpClient client(loop);
+    func::FuncHttpClient client(loop);
     ASSERT_EQ(Err::E_SUCCESS, client.init("127.0.0.1", SERVER_PORT));
 
     int    ws_open_counter = 0;
@@ -365,9 +366,9 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     int const TEST_CLIENT_COUNT   = 80;
     int const TEST_ECHO_COUNT     = 180;
     int const TEST_SERVER_TIMEOUT = 5 * 1000;
-#define _MASSIVE_TEST_DATA "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
+# define _MASSIVE_TEST_DATA "0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz"
     char const TEST_TEXT[] = _MASSIVE_TEST_DATA _MASSIVE_TEST_DATA _MASSIVE_TEST_DATA _MASSIVE_TEST_DATA;
-#undef _MASSIVE_TEST_DATA
+# undef _MASSIVE_TEST_DATA
 #else
     int const TEST_CLIENT_COUNT   = 40;
     int const TEST_ECHO_COUNT     = 90;
