@@ -57,7 +57,7 @@ struct HttpReaderInterface
     virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) { return true; }
 
     /** When a message has been received from WebSocket client/server. */
-    virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) { /* EMPTY. */ }
+    virtual void onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg) { /* EMPTY. */ }
 
     /** Regular http message. */
     virtual void onRegularHttp(HttpProperty const & property, void * arg) { /* EMPTY. */ }
@@ -75,7 +75,7 @@ struct HttpReaderInterface
 class TBAG_API HttpReader : public HttpParser, public HttpReaderInterface
 {
 private:
-    ws::WsFrameBuffer _frame_buffer;
+    WsFrameBuffer _frame_buffer;
     std::string _key;
 
 private:
@@ -124,14 +124,13 @@ struct HttpReaderForCallback : public HttpReader
     { parent->onContinue(arg); }
     virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) override
     { return parent->onSwitchingProtocol(property, arg); }
-    virtual void onWsMessage(ws::WsOpCode opcode, util::Buffer const & payload, void * arg) override
+    virtual void onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg) override
     { parent->onWsMessage(opcode, payload, arg); }
     virtual void onRegularHttp(HttpProperty const & property, void * arg) override
     { parent->onRegularHttp(property, arg); }
     virtual void onParseError(Err code, void * arg) override
     { parent->onParseError(code, arg); }
 };
-
 
 } // namespace base
 

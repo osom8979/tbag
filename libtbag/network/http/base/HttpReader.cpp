@@ -17,7 +17,7 @@ namespace network {
 namespace http    {
 namespace base    {
 
-HttpReader::HttpReader(bool use_websocket) : HttpReader(ws::generateRandomWebSocketKey(), use_websocket)
+HttpReader::HttpReader(bool use_websocket) : HttpReader(generateRandomWebSocketKey(), use_websocket)
 {
     // EMPTY.
 }
