@@ -68,8 +68,8 @@ private:
     std::atomic<int>     _term_signal;
 
 public:
-    FunctionalProcess(Loop & loop, Options const & options)
-            : Parent(loop, options), _exit(false), _exit_status(0), _term_signal(0)
+    template <typename ... Args>
+    FunctionalProcess(Args && ... args) : Parent(std::forward<Args>(args) ...), _exit(false), _exit_status(0), _term_signal(0)
     { /* EMPTY. */ }
     virtual ~FunctionalProcess()
     { /* EMPTY. */ }

@@ -43,7 +43,7 @@ namespace func {
  * @date   2017-05-31
  */
 template <typename CheckType, typename MutexType = lock::FakeLock>
-class FunctionalCheck : public CheckType
+struct FunctionalCheck : public CheckType
 {
 public:
     using Parent = CheckType;
@@ -61,7 +61,8 @@ private:
     OnCheck _check_cb;
 
 public:
-    FunctionalCheck(Loop & loop) : Parent(loop)
+    template <typename ... Args>
+    FunctionalCheck(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalCheck()
     { /* EMPTY. */ }

@@ -50,7 +50,8 @@ public:
     STATIC_ASSERT_CHECK_IS_BASE_OF(HttpServer, Parent);
 
 public:
-    FunctionalHttpServer(Loop & loop, StreamType type = StreamType::TCP) : Parent(loop, type)
+    template <typename ... Args>
+    FunctionalHttpServer(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalHttpServer()
     { /* EMPTY. */ }

@@ -43,7 +43,6 @@ private:
     OnEnd  _end_cb;
 
 public:
-    // @formatter:off
     FunctionalUdpEcho(Loop & loop) : UdpEcho(loop)
     { /* EMPTY. */ }
     FunctionalUdpEcho(Loop & loop, SharedSafetyAsync async, send_flags const & send) : UdpEcho(loop, async, send)
@@ -54,7 +53,6 @@ public:
     { /* EMPTY. */ }
     virtual ~FunctionalUdpEcho()
     { /* EMPTY. */ }
-    // @formatter:on
 
 public:
     inline void setOnEcho(OnEcho const & cb) { _echo_cb = cb; }

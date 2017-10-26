@@ -60,7 +60,8 @@ private:
     OnPrepare _prepare_cb;
 
 public:
-    FunctionalPrepare(Loop & loop) : Parent(loop)
+    template <typename ... Args>
+    FunctionalPrepare(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalPrepare()
     { /* EMPTY. */ }

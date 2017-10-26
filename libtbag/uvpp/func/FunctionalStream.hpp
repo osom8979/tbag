@@ -74,7 +74,6 @@ public:
     template <typename ... Args>
     FunctionalStream(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
-
     virtual ~FunctionalStream()
     { /* EMPTY. */ }
 

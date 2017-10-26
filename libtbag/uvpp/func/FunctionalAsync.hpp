@@ -42,7 +42,7 @@ namespace func {
  * @date   2017-05-31
  */
 template <typename AsyncType, typename MutexType = lock::FakeLock>
-class FunctionalAsync : public AsyncType
+struct FunctionalAsync : public AsyncType
 {
 public:
     using Parent = AsyncType;
@@ -52,7 +52,6 @@ public:
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Async, Parent);
     TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
 
-public:
     using OnAsync = std::function<void(void)>;
 
 private:
@@ -60,7 +59,8 @@ private:
     OnAsync _async_cb;
 
 public:
-    FunctionalAsync(Loop & loop) : Parent(loop)
+    template <typename ... Args>
+    FunctionalAsync(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalAsync()
     { /* EMPTY. */ }

@@ -60,7 +60,8 @@ private:
     OnIdle _idle_cb;
 
 public:
-    FunctionalIdle(Loop & loop) : Parent(loop)
+    template <typename ... Args>
+    FunctionalIdle(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalIdle()
     { /* EMPTY. */ }

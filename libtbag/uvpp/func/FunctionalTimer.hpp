@@ -60,7 +60,8 @@ private:
     OnTimer _timer_cb;
 
 public:
-    FunctionalTimer(Loop & loop) : Parent(loop)
+    template <typename ... Args>
+    FunctionalTimer(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalTimer()
     { /* EMPTY. */ }

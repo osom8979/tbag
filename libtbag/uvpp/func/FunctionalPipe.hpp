@@ -40,7 +40,11 @@ template <typename PipeType, typename MutexType = lock::FakeLock>
 class FunctionalPipe : public FunctionalStream<PipeType, MutexType>
 {
 public:
-    FunctionalPipe(Loop & loop, bool is_ipc = false) : FunctionalStream<PipeType, MutexType>(loop, is_ipc)
+    using Parent = FunctionalStream<PipeType, MutexType>;
+
+public:
+    template <typename ... Args>
+    FunctionalPipe(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalPipe()
     { /* EMPTY. */ }

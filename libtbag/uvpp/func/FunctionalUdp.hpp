@@ -64,7 +64,8 @@ private:
     OnRecv  _recv_cb;
 
 public:
-    FunctionalUdp(Loop & loop) : Parent(loop)
+    template <typename ... Args>
+    FunctionalUdp(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalUdp()
     { /* EMPTY. */ }

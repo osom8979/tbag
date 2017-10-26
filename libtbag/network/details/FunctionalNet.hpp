@@ -46,8 +46,9 @@ struct FunctionalClient : public BaseType
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(details::ClientInterface, Parent);
 
-    FunctionalClient(Loop & loop) : Parent(loop)
-    { /* EMPTY */ }
+    template <typename ... Args>
+    FunctionalClient(Args && ... args) : Parent(std::forward<Args>(args) ...)
+    { /* EMPTY. */ }
     virtual ~FunctionalClient()
     { /* EMPTY */ }
 
@@ -77,8 +78,9 @@ struct FunctionalServer : public BaseType
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(details::ServerInterface, Parent);
 
-    FunctionalServer(Loop & loop) : Parent(loop)
-    { /* EMPTY */ }
+    template <typename ... Args>
+    FunctionalServer(Args && ... args) : Parent(std::forward<Args>(args) ...)
+    { /* EMPTY. */ }
     virtual ~FunctionalServer()
     { /* EMPTY */ }
 

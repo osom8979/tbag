@@ -37,7 +37,7 @@ namespace func    {
  * @date   2017-10-15
  */
 template <typename HttpClientType>
-class FunctionalHttpClient : public HttpClientType
+struct FunctionalHttpClient : public HttpClientType
 {
 public:
     using Parent     = HttpClientType;
@@ -49,7 +49,8 @@ public:
     STATIC_ASSERT_CHECK_IS_BASE_OF(HttpClient, Parent);
 
 public:
-    FunctionalHttpClient(Loop & loop, StreamType type = StreamType::TCP) : Parent(loop, type)
+    template <typename ... Args>
+    FunctionalHttpClient(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalHttpClient()
     { /* EMPTY. */ }

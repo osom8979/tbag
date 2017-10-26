@@ -43,7 +43,8 @@ public:
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::proto::TpotPacket, Parent);
 
 public:
-    FunctionalTpotPacket(std::size_t capacity = TpotPacket::DEFAULT_BUILDER_CAPACITY) : Parent(capacity)
+    template <typename ... Args>
+    FunctionalTpotPacket(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalTpotPacket()
     { /* EMPTY. */ }

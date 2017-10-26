@@ -60,7 +60,8 @@ private:
     OnSignal _signal_cb;
 
 public:
-    FunctionalSignal(Loop & loop) : Parent(loop)
+    template <typename ... Args>
+    FunctionalSignal(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalSignal()
     { /* EMPTY. */ }

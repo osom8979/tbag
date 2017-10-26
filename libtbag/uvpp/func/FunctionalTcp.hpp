@@ -40,13 +40,15 @@ template <typename TcpType, typename MutexType = lock::FakeLock>
 class FunctionalTcp : public FunctionalStream<TcpType, MutexType>
 {
 public:
+    using Parent = FunctionalStream<TcpType, MutexType>;
     using OnConnect = std::function<void(ConnectRequest&, Err)>;
 
 private:
     OnConnect _connect_cb;
 
 public:
-    FunctionalTcp(Loop & loop) : FunctionalStream<TcpType, MutexType>(loop)
+    template <typename ... Args>
+    FunctionalTcp(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalTcp()
     { /* EMPTY. */ }
