@@ -42,7 +42,6 @@ public:
     using Parent     = stream::StreamClient;
     using Loop       = uvpp::Loop;
     using Masking    = random::MaskingDevice;
-    using WsFrame    = WsFrame;
 
     enum class EventType
     {
