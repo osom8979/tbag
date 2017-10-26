@@ -99,8 +99,12 @@ public:
         inline HttpServer const * getHttpServerPtr() const TBAG_NOEXCEPT { return static_cast<HttpServer const *>(getParentPtr()); }
 
     public:
+        Err writeResponse();
         Err writeResponse(HttpResponse const & response);
+
+        Err writeWsResponse(HttpRequest const & request);
         Err writeWsResponse(HttpRequest const & request, HttpResponse const & response);
+
         Err writeWsFrame(WsFrame const & frame);
 
     public:
@@ -173,8 +177,12 @@ public:
     { return castSharedClient<HttpNode>(node); }
 
 public:
-    Err writeResponse  (WeakClient & node, HttpResponse const & response);
+    Err writeResponse(WeakClient & node);
+    Err writeResponse(WeakClient & node, HttpResponse const & response);
+
+    Err writeWsResponse(WeakClient & node, HttpRequest const & request);
     Err writeWsResponse(WeakClient & node, HttpRequest const & request, HttpResponse const & response);
+
     Err writeWsFrame   (WeakClient & node, WsFrame const & frame);
 
 public:
@@ -207,9 +215,15 @@ public:
     virtual void onClientParseError(WeakClient node, Err code);
 
 public:
+    virtual bool onClientSwitchingProtocol(WeakClient node, HttpRequest const & request)
+    {
+        writeWsResponse(node, request);
+        return true;
+    }
+
+public:
     virtual void onClientOpen(WeakClient node) { /* EMPTY. */ }
     virtual void onClientContinue(WeakClient node) { /* EMPTY. */ }
-    virtual bool onClientSwitchingProtocol(WeakClient node, HttpRequest const & request) { return true; }
     virtual void onClientWsMessage(WeakClient node, WsOpCode opcode, util::Buffer const & payload) { /* EMPTY. */ }
     virtual void onClientRequest(WeakClient node, HttpRequest const & request) { /* EMPTY. */ }
 };

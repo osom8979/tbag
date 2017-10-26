@@ -32,12 +32,22 @@ HttpServer::HttpNode::~HttpNode()
     // EMPTY.
 }
 
+Err HttpServer::HttpNode::writeResponse()
+{
+    return writeResponse(HttpResponse());
+}
+
 Err HttpServer::HttpNode::writeResponse(HttpResponse const & response)
 {
     HttpResponse update_response = response;
     update_response.updateDefaultResponse();
     std::string const & RESPONSE_STRING = update_response.toResponseString();
     return write(RESPONSE_STRING.data(), RESPONSE_STRING.size());
+}
+
+Err HttpServer::HttpNode::writeWsResponse(HttpRequest const & request)
+{
+    return writeWsResponse(request, HttpResponse());
 }
 
 Err HttpServer::HttpNode::writeWsResponse(HttpRequest const & request, HttpResponse const & response)
@@ -188,10 +198,26 @@ void HttpServer::setRequest(HttpFilter const & filter, int priority)
     _filters.insert(HttpFilterMap::value_type(priority, filter));
 }
 
+Err HttpServer::writeResponse(WeakClient & node)
+{
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeResponse();
+    }
+    return Err::E_EXPIRED;
+}
+
 Err HttpServer::writeResponse(WeakClient & node, HttpResponse const & response)
 {
     if (auto shared = toSharedNode(node)) {
         return shared->writeResponse(response);
+    }
+    return Err::E_EXPIRED;
+}
+
+Err HttpServer::writeWsResponse(WeakClient & node, HttpRequest const & request)
+{
+    if (auto shared = toSharedNode(node)) {
+        return shared->writeWsResponse(request);
     }
     return Err::E_EXPIRED;
 }

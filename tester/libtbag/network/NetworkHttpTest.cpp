@@ -271,8 +271,7 @@ TEST(NetworkHttpTest, WebSocketEcho)
 
     server.set_onClientSwitchingProtocol([&](WeakClient node, HttpRequest const & request) -> bool {
         std::cout << "Server.OnWebSocketOpen() Request:\n" << request.toDebugRequestString() << std::endl;
-        HttpResponse response;
-        server.writeWsResponse(node, request, response);
+        server.writeWsResponse(node, request);
         return true;
     });
     server.set_onClientWsMessage([&](WeakClient node, ws::WsOpCode opcode, util::Buffer const & payload){
