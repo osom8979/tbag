@@ -116,53 +116,6 @@ Err HttpClient::writeClose()
     return writeWsFrame(frame);
 }
 
-void HttpClient::onConnect(Err code)
-{
-    if (isFailure(code)) {
-        onError(EventType::ET_CONNECT, code);
-        return;
-    }
-
-    Err const START_CODE = start();
-    if (isFailure(START_CODE)) {
-        onError(EventType::ET_START, START_CODE);
-        return;
-    }
-
-    onOpen();
-}
-
-void HttpClient::onRead(Err code, ReadPacket const & packet)
-{
-    if (code == Err::E_EOF) {
-        onEof();
-    } else if (code != Err::E_SUCCESS) {
-        onError(EventType::ET_READ, code);
-    } else {
-        _reader.parse(packet.buffer, packet.size);
-    }
-}
-
-void HttpClient::onParseError(Err code, void * arg)
-{
-    close();
-}
-
-void HttpClient::onOpen()
-{
-    // EMPTY.
-}
-
-void HttpClient::onEof()
-{
-    close();
-}
-
-void HttpClient::onError(EventType from, Err code)
-{
-    close();
-}
-
 } // namespace http
 } // namespace network
 

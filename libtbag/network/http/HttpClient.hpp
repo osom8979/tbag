@@ -80,18 +80,46 @@ public:
     Err writeClose();
 
 public:
-    virtual void onConnect(Err code) override;
-    virtual void onRead   (Err code, ReadPacket const & packet) override;
+    // README:
+    // The reason for writing the callback in the header is to verify the logic when redefining the virtual function.
 
-public:
-    virtual void onParseError(Err code, void * arg) override;
+    virtual void onConnect(Err code) override
+    {
+        if (isFailure(code)) {
+            onError(EventType::ET_CONNECT, code);
+            return;
+        }
 
-public:
-    virtual void onOpen();
-    virtual void onEof();
+        Err const START_CODE = start();
+        if (isFailure(START_CODE)) {
+            onError(EventType::ET_START, START_CODE);
+            return;
+        }
 
+        onOpen();
+    }
+
+    virtual void onRead(Err code, ReadPacket const & packet) override
+    {
+        if (code == Err::E_EOF) {
+            onEof();
+        } else if (code != Err::E_SUCCESS) {
+            onError(EventType::ET_READ, code);
+        } else {
+            _reader.parse(packet.buffer, packet.size);
+        }
+    }
+
+    virtual void onParseError(Err code, void * arg) override
+    {
+        close();
+    }
+
+// Extension callback methods.
 public:
-    virtual void onError(EventType from, Err code);
+    virtual void onOpen() { /* EMPTY. */ }
+    virtual void onEof() { close(); }
+    virtual void onError(EventType from, Err code) { close(); }
 };
 
 } // namespace http
