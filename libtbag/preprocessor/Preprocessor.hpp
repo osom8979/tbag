@@ -35,6 +35,7 @@
 #include <libtbag/preprocessor/details/Tuple.hpp>
 #include <libtbag/preprocessor/details/TupleEat.hpp>
 #include <libtbag/preprocessor/details/Variadic.hpp>
+#include <libtbag/preprocessor/details/VariadicIsEmpty.hpp>
 #include <libtbag/preprocessor/details/VariadicToTuple.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_PREPROCESSOR_HPP__
