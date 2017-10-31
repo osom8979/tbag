@@ -94,9 +94,7 @@ TEST(PreprocessorTest, Repeat)
 {
     std::string const SUFFIX = "i";
 
-#ifndef _PP_TEST_MACRO_REPEAT
 #define _PP_TEST_MACRO_REPEAT(z, s, n, d) TBAG_PP_COMMA_IF(n) (std::to_string(n)+d)
-#endif
     std::vector<std::string> const TEST1 = { TBAG_PP_REPEAT(5, _PP_TEST_MACRO_REPEAT, SUFFIX) };
 #undef _PP_TEST_MACRO_REPEAT
 
@@ -121,9 +119,7 @@ TEST(PreprocessorTest, Tuple)
 
 TEST(PreprocessorTest, Variadic)
 {
-#ifndef _PP_TEST_MACRO_VARIADIC
 #define _PP_TEST_MACRO_VARIADIC "a", "b", "c", "d"
-#endif
     std::string const TEST1 = TBAG_PP_VARIADIC_ELEM(0, _PP_TEST_MACRO_VARIADIC);
     std::string const TEST2 = TBAG_PP_VARIADIC_ELEM(3, _PP_TEST_MACRO_VARIADIC);
     std::size_t TEST_SIZE   = TBAG_PP_VARIADIC_SIZE(_PP_TEST_MACRO_VARIADIC);

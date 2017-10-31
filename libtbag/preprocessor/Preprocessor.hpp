@@ -42,6 +42,7 @@
 #include <libtbag/preprocessor/details/Variadic.hpp>
 #include <libtbag/preprocessor/details/VariadicToTuple.hpp>
 
+#include <libtbag/preprocessor/seq/SeqSize.hpp>
 #include <libtbag/preprocessor/seq/VariadicSeqToSeq.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_PREPROCESSOR_HPP__
