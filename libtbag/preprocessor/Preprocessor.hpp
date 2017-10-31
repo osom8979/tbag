@@ -16,6 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <libtbag/preprocessor/arithmetic/Decrease.hpp>
+#include <libtbag/preprocessor/arithmetic/Increase.hpp>
+
 #include <libtbag/preprocessor/details/AutoRec.hpp>
 #include <libtbag/preprocessor/details/Boolean.hpp>
 #include <libtbag/preprocessor/details/Cat.hpp>
@@ -35,7 +38,6 @@
 #include <libtbag/preprocessor/details/Tuple.hpp>
 #include <libtbag/preprocessor/details/TupleEat.hpp>
 #include <libtbag/preprocessor/details/Variadic.hpp>
-#include <libtbag/preprocessor/details/VariadicIsEmpty.hpp>
 #include <libtbag/preprocessor/details/VariadicToTuple.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_PREPROCESSOR_HPP__
