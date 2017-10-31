@@ -18,10 +18,11 @@
 #include <libtbag/preprocessor/details/Cat.hpp>
 #include <libtbag/preprocessor/details/CommaIf.hpp>
 #include <libtbag/preprocessor/details/Repeat.hpp>
-#include <libtbag/preprocessor/details/Tuple.hpp>
-#include <libtbag/preprocessor/details/Variadic.hpp>
-#include <libtbag/preprocessor/details/VariadicToTuple.hpp>
 #include <libtbag/preprocessor/details/If.hpp>
+
+#include <libtbag/preprocessor/tuple/TupleElem.hpp>
+#include <libtbag/preprocessor/variadic/VariadicSize.hpp>
+#include <libtbag/preprocessor/variadic/VariadicToTuple.hpp>
 
 #define TBAG_PP_EXPEND_TYPES_MACRO(z, c, n, d)   TBAG_PP_COMMA_IF(n) TBAG_PP_TUPLE_ELEM(c, n, d)
 #define TBAG_PP_EXPEND_VALUES_MACRO(z, c, n, d)  TBAG_PP_COMMA_IF(n) TBAG_PP_CAT(v, n)

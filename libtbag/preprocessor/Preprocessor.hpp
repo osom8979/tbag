@@ -37,13 +37,17 @@
 #include <libtbag/preprocessor/details/Overload.hpp>
 #include <libtbag/preprocessor/details/Repeat.hpp>
 #include <libtbag/preprocessor/details/Stringize.hpp>
-#include <libtbag/preprocessor/details/Tuple.hpp>
-#include <libtbag/preprocessor/details/TupleEat.hpp>
-#include <libtbag/preprocessor/details/Variadic.hpp>
-#include <libtbag/preprocessor/details/VariadicToTuple.hpp>
 
 #include <libtbag/preprocessor/seq/SeqSize.hpp>
 #include <libtbag/preprocessor/seq/VariadicSeqToSeq.hpp>
+
+#include <libtbag/preprocessor/tuple/TupleElem.hpp>
+#include <libtbag/preprocessor/tuple/TupleEat.hpp>
+
+#include <libtbag/preprocessor/variadic/VariadicElem.hpp>
+#include <libtbag/preprocessor/variadic/VariadicSize.hpp>
+#include <libtbag/preprocessor/variadic/VariadicToSeq.hpp>
+#include <libtbag/preprocessor/variadic/VariadicToTuple.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_PREPROCESSOR_HPP__
 

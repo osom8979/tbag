@@ -16,7 +16,7 @@
 #endif
 
 #include <libtbag/preprocessor/details/Cat.hpp>
-#include <libtbag/preprocessor/details/Variadic.hpp>
+#include <libtbag/preprocessor/variadic/VariadicSize.hpp>
 
 #define TBAG_PP_OVERLOAD(prefix, ...)  TBAG_PP_CAT(prefix, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__))
 

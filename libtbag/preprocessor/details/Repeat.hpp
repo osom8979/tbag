@@ -18,7 +18,7 @@
 #include <libtbag/preprocessor/details/Cat.hpp>
 #include <libtbag/preprocessor/details/Error.hpp>
 #include <libtbag/preprocessor/details/AutoRec.hpp>
-#include <libtbag/preprocessor/details/TupleEat.hpp>
+#include <libtbag/preprocessor/tuple/TupleEat.hpp>
 
 # /******************************************/
 # /* Syntax:                                */
