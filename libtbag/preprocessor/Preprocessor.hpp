@@ -19,8 +19,10 @@
 #include <libtbag/preprocessor/arithmetic/Decrease.hpp>
 #include <libtbag/preprocessor/arithmetic/Increase.hpp>
 
+#include <libtbag/preprocessor/logical/Boolean.hpp>
+#include <libtbag/preprocessor/logical/Complement.hpp>
+
 #include <libtbag/preprocessor/details/AutoRec.hpp>
-#include <libtbag/preprocessor/details/Boolean.hpp>
 #include <libtbag/preprocessor/details/Cat.hpp>
 #include <libtbag/preprocessor/details/Comma.hpp>
 #include <libtbag/preprocessor/details/CommaIf.hpp>
@@ -39,6 +41,8 @@
 #include <libtbag/preprocessor/details/TupleEat.hpp>
 #include <libtbag/preprocessor/details/Variadic.hpp>
 #include <libtbag/preprocessor/details/VariadicToTuple.hpp>
+
+#include <libtbag/preprocessor/seq/VariadicSeqToSeq.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_PREPROCESSOR_HPP__
 

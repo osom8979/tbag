@@ -1,6 +1,6 @@
 /**
  * @file   Decrease.hpp
- * @brief  Decrease class prototype.
+ * @brief  Decrease preprocessor prototype.
  * @author zer0
  * @date   2017-10-31
  *

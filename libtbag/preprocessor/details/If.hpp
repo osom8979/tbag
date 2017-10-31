@@ -17,7 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/preprocessor/details/Boolean.hpp>
+#include <libtbag/preprocessor/logical/Boolean.hpp>
 
 // --------
 // IF Part.

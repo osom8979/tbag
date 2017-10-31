@@ -15,7 +15,7 @@
 #pragma once
 #endif
 
-#include <libtbag/preprocessor/details/Boolean.hpp>
+#include <libtbag/preprocessor/logical/Boolean.hpp>
 #include <libtbag/preprocessor/details/Odd.hpp>
 #include <libtbag/preprocessor/details/Even.hpp>
 #include <libtbag/preprocessor/details/If.hpp>

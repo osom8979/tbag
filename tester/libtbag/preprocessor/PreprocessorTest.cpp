@@ -44,6 +44,17 @@ TEST(PreprocessorTest, Boolean)
     ASSERT_TRUE(TEST3);
 }
 
+TEST(PreprocessorTest, Compl)
+{
+    bool const COMPL1 = TBAG_PP_COMPL(TBAG_PP_BOOL(0));
+    bool const COMPL2 = TBAG_PP_COMPL(TBAG_PP_BOOL(1));
+    bool const COMPL3 = TBAG_PP_COMPL(TBAG_PP_BOOL(100));
+
+    ASSERT_TRUE(COMPL1);
+    ASSERT_FALSE(COMPL2);
+    ASSERT_FALSE(COMPL3);
+}
+
 TEST(PreprocessorTest, If)
 {
     std::string const OK = "OK";

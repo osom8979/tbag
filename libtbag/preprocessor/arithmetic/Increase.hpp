@@ -1,6 +1,6 @@
 /**
  * @file   Increase.hpp
- * @brief  Increase class prototype.
+ * @brief  Increase preprocessor prototype.
  * @author zer0
  * @date   2017-10-31
  *
