@@ -15,6 +15,9 @@
 #pragma once
 #endif
 
+#include <libtbag/preprocessor/tuple/TupleToSeq.hpp>
+
+#define TBAG_PP_VARIADIC_TO_SEQ(...) TBAG_PP_TUPLE_TO_SEQ((__VA_ARGS__))
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_VARIADIC_VARIADICTOSEQ_HPP__
 

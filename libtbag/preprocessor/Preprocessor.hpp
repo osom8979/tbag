@@ -43,6 +43,8 @@
 
 #include <libtbag/preprocessor/tuple/TupleElem.hpp>
 #include <libtbag/preprocessor/tuple/TupleEat.hpp>
+#include <libtbag/preprocessor/tuple/TupleSize.hpp>
+#include <libtbag/preprocessor/tuple/TupleToSeq.hpp>
 
 #include <libtbag/preprocessor/variadic/VariadicElem.hpp>
 #include <libtbag/preprocessor/variadic/VariadicSize.hpp>
