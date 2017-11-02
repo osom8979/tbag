@@ -19,16 +19,14 @@
 #include <libtbag/preprocessor/facilities/IsEmpty.hpp>
 
 #if defined(TBAG_COMP_MSVC) && TBAG_COMP_MSVC_VERSION <= 1400
-# define TBAG_PP_VARIADIC_IS_EMPTY(param)                     \
-    TBAG_PP_DETAIL_IS_EMPTY_IIF                               \
-    (TBAG_PP_IS_BEGIN_PARENS(param))                          \
-    (TBAG_PP_IS_EMPTY_ZERO, TBAG_PP_DETAIL_IS_EMPTY_PROCESS)  \
+# define TBAG_PP_VARIADIC_IS_EMPTY(param)                       \
+    TBAG_PP_DETAIL_IS_EMPTY_IIF(TBAG_PP_IS_BEGIN_PARENS(param)) \
+    (TBAG_PP_IS_EMPTY_ZERO, TBAG_PP_DETAIL_IS_EMPTY_PROCESS)    \
     (param)
 #else
-# define TBAG_PP_VARIADIC_IS_EMPTY(...)                       \
-    TBAG_PP_DETAIL_IS_EMPTY_IIF                               \
-    (TBAG_PP_IS_BEGIN_PARENS(__VA_ARGS__))                    \
-    (TBAG_PP_IS_EMPTY_ZERO, TBAG_PP_DETAIL_IS_EMPTY_PROCESS)  \
+# define TBAG_PP_VARIADIC_IS_EMPTY(...)                                 \
+    TBAG_PP_DETAIL_IS_EMPTY_IIF(TBAG_PP_IS_BEGIN_PARENS(__VA_ARGS__))   \
+    (TBAG_PP_IS_EMPTY_ZERO, TBAG_PP_DETAIL_IS_EMPTY_PROCESS)            \
     (__VA_ARGS__)
 #endif
 

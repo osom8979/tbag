@@ -21,7 +21,7 @@ using namespace libtbag::network::details;
 using namespace libtbag::network::stream;
 
 TBAG_CONSTEXPR static bool const TEST_IPV4 = true;
-TBAG_CONSTEXPR static bool const TEST_IPV6 = true;
+TBAG_CONSTEXPR static bool const TEST_IPV6 = false;
 
 struct TestTcpServer : public TcpServer
 {
@@ -621,10 +621,10 @@ TEST(NetworkTcpTest, MultiEcho)
     }
 
     ASSERT_EQ(Err::E_SUCCESS, server_result);
-    ASSERT_EQ(CLIENT_SIZE, server_connection   );
-    ASSERT_EQ(CLIENT_SIZE, server_client_read  );
-    ASSERT_EQ(CLIENT_SIZE, server_client_write );
-    ASSERT_EQ(CLIENT_SIZE, server_client_close );
+    ASSERT_EQ(CLIENT_SIZE, server_connection  );
+    ASSERT_EQ(CLIENT_SIZE, server_client_read );
+    ASSERT_EQ(CLIENT_SIZE, server_client_write);
+    ASSERT_EQ(CLIENT_SIZE, server_client_close);
     ASSERT_EQ(1, server_close);
 }
 
