@@ -31,9 +31,7 @@
         name##_func __##name##_cb;                                      \
     public:                                                             \
         inline void set_##name(name##_func const & cb)                  \
-        {                                                               \
-            __##name##_cb = cb;                                         \
-        }                                                               \
+        { __##name##_cb = cb; }                                         \
     protected:                                                          \
         virtual rtype name(TBAG_PP_EXPEND_PARAMS(__VA_ARGS__)) override \
         {                                                               \
@@ -53,9 +51,7 @@
         name##_func __##name##_cb;                                  \
     public:                                                         \
         inline void set_##name(name##_func const & cb)              \
-        {                                                           \
-            __##name##_cb = cb;                                     \
-        }                                                           \
+        { __##name##_cb = cb; }                                     \
     protected:                                                      \
         virtual rtype name() override                               \
         {                                                           \
