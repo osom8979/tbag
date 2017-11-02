@@ -30,7 +30,7 @@ getBoundingBox(BasePoint<T> const * points, std::size_t size) TBAG_NOEXCEPT
 {
     typedef typename remove_cr<T>::type __point_tparam;
     if (points == nullptr || size <= 0) {
-        return makeRect<__point_tparam>(0, 0, 0, 0);
+        return BaseRect<__point_tparam>(0, 0, 0, 0);
     }
 
     BasePoint<__point_tparam> lt = *points;
@@ -45,7 +45,7 @@ getBoundingBox(BasePoint<T> const * points, std::size_t size) TBAG_NOEXCEPT
         // @formatter:on
     }
 
-    return makeRect(lt, rd);
+    return Rect(lt, rd);
 }
 
 } // namespace geometry

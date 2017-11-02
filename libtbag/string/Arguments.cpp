@@ -189,7 +189,7 @@ bool Arguments::optIntegerPoint(std::size_t index, Pointi * output, bool check_g
 
 bool Arguments::optDoublePoint(std::size_t index, Pointd * output, bool check_grammar) const
 {
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Pointd{
+    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Pointd {
         if (check_grammar && tokens.size() != 2) {
             throw ParseException();
         }
@@ -199,27 +199,21 @@ bool Arguments::optDoublePoint(std::size_t index, Pointd * output, bool check_gr
 
 bool Arguments::optIntegerRect(std::size_t index, Recti * output, bool check_grammar) const
 {
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens){
+    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Recti {
         if (check_grammar && tokens.size() != 4) {
             throw ParseException();
         }
-        return libtbag::geometry::makeRect(std::stoi(tokens.at(0))
-                                         , std::stoi(tokens.at(1))
-                                         , std::stoi(tokens.at(2))
-                                         , std::stoi(tokens.at(3)));
+        return Recti(std::stoi(tokens.at(0)), std::stoi(tokens.at(1)), std::stoi(tokens.at(2)), std::stoi(tokens.at(3)));
     });
 }
 
 bool Arguments::optDoubleRect(std::size_t index, Rectd * output, bool check_grammar) const
 {
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens){
+    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Rectd {
         if (check_grammar && tokens.size() != 4) {
             throw ParseException();
         }
-        return libtbag::geometry::makeRect(std::stod(tokens.at(0))
-                                         , std::stod(tokens.at(1))
-                                         , std::stod(tokens.at(2))
-                                         , std::stod(tokens.at(3)));
+        return Rectd(std::stod(tokens.at(0)), std::stod(tokens.at(1)), std::stod(tokens.at(2)), std::stod(tokens.at(3)));
     });
 }
 
