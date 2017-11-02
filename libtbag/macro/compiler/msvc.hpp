@@ -36,9 +36,11 @@
 // 14.0 (2015)     _MSC_VER == 1900 && _MSC_FULL_VER == ?????????
 
 #if defined(_MSC_VER)
-# define TBAG_COMP_MSVC_VERSION _MSC_VER
+# define TBAG_COMP_MSVC_VERSION       _MSC_VER
+# define TBAG_COMP_MSVC_FULL_VERSION  _MSC_FULL_VER
 #else
-# define TBAG_COMP_MSVC_VERSION 0
+# define TBAG_COMP_MSVC_VERSION       0
+# define TBAG_COMP_MSVC_FULL_VERSION  0
 #endif
 
 // =============

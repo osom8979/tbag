@@ -21,7 +21,7 @@
 #pragma once
 #endif
 
-#include <libtbag/preprocessor/details/If.hpp>
+#include <libtbag/preprocessor/control/If.hpp>
 
 #define TBAG_PP_AUTO_REC(pred, n)  TBAG_PP_NODE_ENTRY_ ## n(pred)
 

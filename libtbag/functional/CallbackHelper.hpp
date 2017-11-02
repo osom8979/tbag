@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/preprocessor/details/Empty.hpp>
-#include <libtbag/preprocessor/details/ExpendParams.hpp>
+#include <libtbag/preprocessor/facilities/Empty.hpp>
+#include <libtbag/preprocessor/ExpendParams.hpp>
 
 #include <functional>
 

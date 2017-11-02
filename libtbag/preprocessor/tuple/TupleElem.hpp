@@ -17,6 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <libtbag/preprocessor/details/Cat.hpp>
 
 #if defined(TBAG_COMP_MSVC)

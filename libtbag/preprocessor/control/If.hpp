@@ -2,13 +2,13 @@
  * @file   If.hpp
  * @brief  If preprocessor prototype.
  * @author zer0
- * @date   2017-09-14
+ * @date   2017-11-02
  *
  * @see <http://www.boost.org/doc/libs/1_63_0/libs/preprocessor/doc/index.html>
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_IF_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_IF_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_CONTROL_IF_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_CONTROL_IF_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,6 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <libtbag/preprocessor/logical/Boolean.hpp>
 
 // --------
@@ -41,5 +42,5 @@
 #define TBAG_PP_IIF_0(t, f)  f
 #define TBAG_PP_IIF_1(t, f)  t
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_DETAILS_IF_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_PREPROCESSOR_CONTROL_IF_HPP__
 

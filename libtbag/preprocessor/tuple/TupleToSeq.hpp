@@ -19,7 +19,7 @@
 #include <libtbag/predef.hpp>
 
 #include <libtbag/preprocessor/details/Cat.hpp>
-#include <libtbag/preprocessor/details/Overload.hpp>
+#include <libtbag/preprocessor/facilities/Overload.hpp>
 #include <libtbag/preprocessor/tuple/TupleSize.hpp>
 #include <libtbag/preprocessor/variadic/VariadicSize.hpp>
 
