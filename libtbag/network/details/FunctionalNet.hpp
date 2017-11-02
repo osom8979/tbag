@@ -56,9 +56,8 @@ struct FunctionalClient : public BaseType
     TBAG_VOID_CALLBACK_HELPER(onShutdown, Err);
     TBAG_VOID_CALLBACK_HELPER(onWrite,    Err);
     TBAG_VOID_CALLBACK_HELPER(onRead,     Err, ReadPacket const &);
-
-    TBAG_VOID_NOPARAM_CALLBACK_HELPER(onClose);
-    TBAG_VOID_NOPARAM_CALLBACK_HELPER(onTimer);
+    TBAG_VOID_CALLBACK_HELPER(onClose);
+    TBAG_VOID_CALLBACK_HELPER(onTimer);
 };
 
 /**
@@ -89,7 +88,7 @@ struct FunctionalServer : public BaseType
     TBAG_VOID_CALLBACK_HELPER(onClientWrite,    WeakClient, Err);
     TBAG_VOID_CALLBACK_HELPER(onClientRead,     WeakClient, Err, ReadPacket const &);
     TBAG_VOID_CALLBACK_HELPER(onClientClose,    WeakClient);
-    TBAG_VOID_NOPARAM_CALLBACK_HELPER(onServerClose);
+    TBAG_VOID_CALLBACK_HELPER(onServerClose);
 };
 
 } // namespace details

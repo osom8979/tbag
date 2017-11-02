@@ -15,74 +15,68 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/preprocessor/control/If.hpp>
 #include <libtbag/preprocessor/facilities/Empty.hpp>
+#include <libtbag/preprocessor/variadic/VariadicIsEmpty.hpp>
 #include <libtbag/preprocessor/ExpendParams.hpp>
 
 #include <functional>
 
 #ifndef TBAG_CALLBACK_HELPER_IMPL
-#define TBAG_CALLBACK_HELPER_IMPL(callback_name, return_keyword, return_type, return_default_value, ...) \
-    public:                                                                                              \
-        using callback_name##_func = std::function<return_type(TBAG_PP_EXPEND_TYPES(__VA_ARGS__))>;      \
-    private:                                                                                             \
-        callback_name##_func __##callback_name##_cb;                                                     \
-    public:                                                                                              \
-        inline void set_##callback_name(callback_name##_func const & cb)                                 \
-        {                                                                                                \
-            __##callback_name##_cb = cb;                                                                 \
-        }                                                                                                \
-    protected:                                                                                           \
-        virtual return_type callback_name(TBAG_PP_EXPEND_PARAMS(__VA_ARGS__)) override                   \
-        {                                                                                                \
-            if (static_cast<bool>(__##callback_name##_cb)) {                                             \
-                return_keyword __##callback_name##_cb(TBAG_PP_EXPEND_VALUES(__VA_ARGS__));               \
-            }                                                                                            \
-            return_keyword return_default_value;                                                         \
-        }                                                                                                \
+#define TBAG_CALLBACK_HELPER_IMPL(name, rkey, rtype, rval, ...)         \
+    public:                                                             \
+        using name##_func =                                             \
+            std::function<rtype(TBAG_PP_EXPEND_TYPES(__VA_ARGS__))>;    \
+    private:                                                            \
+        name##_func __##name##_cb;                                      \
+    public:                                                             \
+        inline void set_##name(name##_func const & cb)                  \
+        {                                                               \
+            __##name##_cb = cb;                                         \
+        }                                                               \
+    protected:                                                          \
+        virtual rtype name(TBAG_PP_EXPEND_PARAMS(__VA_ARGS__)) override \
+        {                                                               \
+            if (static_cast<bool>(__##name##_cb)) {                     \
+                rkey __##name##_cb(TBAG_PP_EXPEND_VALUES(__VA_ARGS__)); \
+            }                                                           \
+            rkey rval;                                                  \
+        }                                                               \
     private:
-#endif
-
-#ifndef TBAG_CALLBACK_HELPER
-#define TBAG_CALLBACK_HELPER(callback_name, return_type, return_default_value, ...) \
-    TBAG_CALLBACK_HELPER_IMPL(callback_name, return, return_type, return_default_value, __VA_ARGS__)
-#endif
-
-#ifndef TBAG_VOID_CALLBACK_HELPER
-#define TBAG_VOID_CALLBACK_HELPER(callback_name, ...) \
-    TBAG_CALLBACK_HELPER_IMPL(callback_name, TBAG_PP_EMPTY(), void, TBAG_PP_EMPTY(), __VA_ARGS__)
 #endif
 
 #ifndef TBAG_NOPARAM_CALLBACK_HELPER_IMPL
-#define TBAG_NOPARAM_CALLBACK_HELPER_IMPL(callback_name, return_keyword, return_type, return_default_value) \
-    public:                                                              \
-        using callback_name##_func = std::function<return_type(void)>;   \
-    private:                                                             \
-        callback_name##_func __##callback_name##_cb;                     \
-    public:                                                              \
-        inline void set_##callback_name(callback_name##_func const & cb) \
-        {                                                                \
-            __##callback_name##_cb = cb;                                 \
-        }                                                                \
-    protected:                                                           \
-        virtual return_type callback_name() override                     \
-        {                                                                \
-            if (static_cast<bool>(__##callback_name##_cb)) {             \
-                return_keyword __##callback_name##_cb();                 \
-            }                                                            \
-            return_keyword return_default_value;                         \
-        }                                                                \
+#define TBAG_NOPARAM_CALLBACK_HELPER_IMPL(name, rkey, rtype, rval)  \
+    public:                                                         \
+        using name##_func = std::function<rtype()>;                 \
+    private:                                                        \
+        name##_func __##name##_cb;                                  \
+    public:                                                         \
+        inline void set_##name(name##_func const & cb)              \
+        {                                                           \
+            __##name##_cb = cb;                                     \
+        }                                                           \
+    protected:                                                      \
+        virtual rtype name() override                               \
+        {                                                           \
+            if (static_cast<bool>(__##name##_cb)) {                 \
+                rkey __##name##_cb();                               \
+            }                                                       \
+            rkey rval;                                              \
+        }                                                           \
     private:
 #endif
 
-#ifndef TBAG_NOPARAM_CALLBACK_HELPER
-#define TBAG_NOPARAM_CALLBACK_HELPER(callback_name, return_type, return_default_value) \
-    TBAG_NOPARAM_CALLBACK_HELPER_IMPL(callback_name, return, return_type, return_default_value)
-#endif
-
-#ifndef TBAG_VOID_NOPARAM_CALLBACK_HELPER
-#define TBAG_VOID_NOPARAM_CALLBACK_HELPER(callback_name) \
-    TBAG_NOPARAM_CALLBACK_HELPER_IMPL(callback_name, TBAG_PP_EMPTY(), void, TBAG_PP_EMPTY())
-#endif
+#define TBAG_CALLBACK_HELPER(name, rkey, rtype, rval, ...)              \
+    TBAG_PP_IF(                                                         \
+        TBAG_PP_VARIADIC_IS_EMPTY(__VA_ARGS__),                         \
+        TBAG_NOPARAM_CALLBACK_HELPER_IMPL(name, rkey, rtype, rval),     \
+        TBAG_CALLBACK_HELPER_IMPL(name, rkey, rtype, rval, __VA_ARGS__) \
+    )
+#define TBAG_RETN_CALLBACK_HELPER(name, rtype, rval, ...)   \
+    TBAG_CALLBACK_HELPER(name, return, rtype, rval, __VA_ARGS__)
+#define TBAG_VOID_CALLBACK_HELPER(name, ...)                \
+    TBAG_CALLBACK_HELPER(name, TBAG_PP_EMPTY(), void, TBAG_PP_EMPTY(), __VA_ARGS__)
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_FUNCTIONAL_CALLBACKHELPER_HPP__
 

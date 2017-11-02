@@ -116,11 +116,11 @@ public:
     TBAG_VOID_CALLBACK_HELPER(onClientWrite   , WeakClient, Err);
     TBAG_VOID_CALLBACK_HELPER(onClientClose   , WeakClient);
     TBAG_VOID_CALLBACK_HELPER(onClientTimer   , WeakClient);
-    TBAG_VOID_NOPARAM_CALLBACK_HELPER(onServerClose);
+    TBAG_VOID_CALLBACK_HELPER(onServerClose);
 
     TBAG_VOID_CALLBACK_HELPER(onClientOpen        , WeakClient);
     TBAG_VOID_CALLBACK_HELPER(onClientContinue    , WeakClient);
-    TBAG_CALLBACK_HELPER(onClientSwitchingProtocol, bool, true, WeakClient, HttpRequest const &);
+    TBAG_RETN_CALLBACK_HELPER(onClientSwitchingProtocol, bool, true, WeakClient, HttpRequest const &);
     TBAG_VOID_CALLBACK_HELPER(onClientWsMessage   , WeakClient, ws::WsOpCode, util::Buffer const &);
     TBAG_VOID_CALLBACK_HELPER(onClientRequest     , WeakClient, HttpRequest const &);
 };

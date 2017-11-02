@@ -150,8 +150,8 @@ public:
     // @formatter:off
     TBAG_VOID_CALLBACK_HELPER(onWrite   , Err);
     TBAG_VOID_CALLBACK_HELPER(onShutdown, Err);
-    TBAG_VOID_NOPARAM_CALLBACK_HELPER(onClose);
-    TBAG_VOID_NOPARAM_CALLBACK_HELPER(onTimer);
+    TBAG_VOID_CALLBACK_HELPER(onClose);
+    TBAG_VOID_CALLBACK_HELPER(onTimer);
     // @formatter:on
 
 public:
