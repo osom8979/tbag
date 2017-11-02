@@ -65,9 +65,9 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
      *   -+------------------
      *    |   1   3   5
      */
-    p1 = geometry::makePoint(1, 2);
-    p2 = geometry::makePoint(5, 2);
-    p3 = geometry::makePoint(3, 1);
+    p1 = geometry::Point(1, 2);
+    p2 = geometry::Point(5, 2);
+    p3 = geometry::Point(3, 1);
     ASSERT_GT(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 
     /*
@@ -77,9 +77,9 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
      *   -+------------------
      *    |   1   3   5
      */
-    p1 = geometry::makePoint(1, 1);
-    p2 = geometry::makePoint(5, 1);
-    p3 = geometry::makePoint(3, 1);
+    p1 = geometry::Point(1, 1);
+    p2 = geometry::Point(5, 1);
+    p3 = geometry::Point(3, 1);
     ASSERT_EQ(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 }
 

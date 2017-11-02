@@ -117,10 +117,10 @@ TEST(RectTest, Methods)
      */
     Rect r = {20, 20, -10, -10};
 
-    ASSERT_EQ(makePoint(10, 10),     getLeftTop(r));
-    ASSERT_EQ(makePoint(20, 10),    getRightTop(r));
-    ASSERT_EQ(makePoint(10, 20),  getLeftBottom(r));
-    ASSERT_EQ(makePoint(20, 20), getRightBottom(r));
+    ASSERT_EQ(Point(10, 10),     getLeftTop(r));
+    ASSERT_EQ(Point(20, 10),    getRightTop(r));
+    ASSERT_EQ(Point(10, 20),  getLeftBottom(r));
+    ASSERT_EQ(Point(20, 20), getRightBottom(r));
 }
 
 TEST(RectTest, CheckInside)

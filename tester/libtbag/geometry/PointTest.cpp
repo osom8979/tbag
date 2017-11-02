@@ -46,25 +46,25 @@ TEST(PointTest, MakePoint)
     int const v2 =  1;
     int     & v3 = v1;
 
-    Point p1_1 = makePoint( 0,  0);
-    Point p1_2 = makePoint( 0, v1);
-    Point p1_3 = makePoint( 0, v2);
-    Point p1_4 = makePoint( 0, v3);
+    Point p1_1 = Point( 0,  0);
+    Point p1_2 = Point( 0, v1);
+    Point p1_3 = Point( 0, v2);
+    Point p1_4 = Point( 0, v3);
 
-    Point p2_1 = makePoint(v1,  0);
-    Point p2_2 = makePoint(v1, v1);
-    Point p2_3 = makePoint(v1, v2);
-    Point p2_4 = makePoint(v1, v3);
+    Point p2_1 = Point(v1,  0);
+    Point p2_2 = Point(v1, v1);
+    Point p2_3 = Point(v1, v2);
+    Point p2_4 = Point(v1, v3);
 
-    Point const p3_1 = makePoint(v2,  0);
-    Point const p3_2 = makePoint(v2, v1);
-    Point const p3_3 = makePoint(v2, v2);
-    Point const p3_4 = makePoint(v2, v3);
+    Point const p3_1 = Point(v2,  0);
+    Point const p3_2 = Point(v2, v1);
+    Point const p3_3 = Point(v2, v2);
+    Point const p3_4 = Point(v2, v3);
 
-    Point const p4_1 = makePoint(v3,  0);
-    Point const p4_2 = makePoint(v3, v1);
-    Point const p4_3 = makePoint(v3, v2);
-    Point const p4_4 = makePoint(v3, v3);
+    Point const p4_1 = Point(v3,  0);
+    Point const p4_2 = Point(v3, v1);
+    Point const p4_3 = Point(v3, v2);
+    Point const p4_4 = Point(v3, v3);
 
     REMOVE_UNUSED_VARIABLE(p1_1 == p1_2);
     REMOVE_UNUSED_VARIABLE(p1_3 == p1_4);
@@ -89,11 +89,11 @@ TEST(PointTest, Operators_1)
     ASSERT_EQ(p4.x, p1.x + p2.x);
     ASSERT_EQ(p4.y, p1.y + p2.y);
 
-    Point p5 = makePoint(0, 1) - p2;
-    Point p6 = makePoint(0, 1) + p2;
+    Point p5 = Point(0, 1) - p2;
+    Point p6 = Point(0, 1) + p2;
 
-    Point p7 = p1 - makePoint(4, 5);
-    Point p8 = p1 + makePoint(4, 5);
+    Point p7 = p1 - Point(4, 5);
+    Point p8 = p1 + Point(4, 5);
 
     ASSERT_EQ(p3, p5);
     ASSERT_EQ(p4, p6);
@@ -103,8 +103,8 @@ TEST(PointTest, Operators_1)
 
     // ----------
     // Size test.
-    Size       s1 = makeSize(4, 5);
-    Size const s2 = makeSize(4, 5);
+    Size       s1 = Size(4, 5);
+    Size const s2 = Size(4, 5);
     Size       s3 = {0,  0};
     Size const s4 = {8, 10};
 
@@ -123,17 +123,17 @@ TEST(PointTest, Operators_2)
     Size  s2;
 
     p2 = p1; p2 += p1;
-    ASSERT_EQ(makePoint(2, 4), p2);
+    ASSERT_EQ(Point(2, 4), p2);
     p2 = p1; p2 -= p1;
-    ASSERT_EQ(makePoint(0, 0), p2);
+    ASSERT_EQ(Point(0, 0), p2);
     p2 = p1; p2 += s1;
-    ASSERT_EQ(makePoint(4, 6), p2);
+    ASSERT_EQ(Point(4, 6), p2);
     p2 = p1; p2 -= s1;
-    ASSERT_EQ(makePoint(-2, -2), p2);
+    ASSERT_EQ(Point(-2, -2), p2);
     s2 = s1; s2 += s1;
-    ASSERT_EQ(makeSize(6, 8), s2);
+    ASSERT_EQ(Size(6, 8), s2);
     s2 = s1; s2 -= s1;
-    ASSERT_EQ(makeSize(0, 0), s2);
+    ASSERT_EQ(Size(0, 0), s2);
 }
 
 TEST(PointTest, Equals)
@@ -142,13 +142,13 @@ TEST(PointTest, Equals)
     Point const p2 = {1, 2};
 
     ASSERT_EQ(p1, p2);
-    ASSERT_EQ(makePoint(1, 2), makePoint(1, 2));
+    ASSERT_EQ(Point(1, 2), Point(1, 2));
 
-    ASSERT_EQ(p1, makePoint(1, 2));
-    ASSERT_EQ(p2, makePoint(1, 2));
+    ASSERT_EQ(p1, Point(1, 2));
+    ASSERT_EQ(p2, Point(1, 2));
 
-    ASSERT_EQ(makePoint(1, 2), p1);
-    ASSERT_EQ(makePoint(1, 2), p2);
+    ASSERT_EQ(Point(1, 2), p1);
+    ASSERT_EQ(Point(1, 2), p2);
 
     // ----------
     // Size test.
@@ -160,9 +160,9 @@ TEST(PointTest, Equals)
 TEST(PointTest, String)
 {
     Point p = {1, 2};
-    toString(p);
+    std::cout << "Point: " << p << std::endl;
 
-    Size s = {1, 2};
-    toString(s);
+    Size s = {2, 3};
+    std::cout << "Size: " << s << std::endl;
 }
 

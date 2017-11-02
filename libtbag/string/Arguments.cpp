@@ -179,21 +179,21 @@ bool Arguments::optString(std::size_t index, std::string * output) const
 
 bool Arguments::optIntegerPoint(std::size_t index, Pointi * output, bool check_grammar) const
 {
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens){
+    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Pointi {
         if (check_grammar && tokens.size() != 2) {
             throw ParseException();
         }
-        return libtbag::geometry::makePoint(std::stoi(tokens.at(0)), std::stoi(tokens.at(1)));
+        return Pointi(std::stoi(tokens.at(0)), std::stoi(tokens.at(1)));
     });
 }
 
 bool Arguments::optDoublePoint(std::size_t index, Pointd * output, bool check_grammar) const
 {
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens){
+    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Pointd{
         if (check_grammar && tokens.size() != 2) {
             throw ParseException();
         }
-        return libtbag::geometry::makePoint(std::stod(tokens.at(0)), std::stod(tokens.at(1)));
+        return Pointd(std::stod(tokens.at(0)), std::stod(tokens.at(1)));
     });
 }
 

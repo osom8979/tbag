@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
 
+#include <initializer_list>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -28,6 +29,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace geometry {
 
+template <typename T> struct BasePoint;
+template <typename T> struct BaseSize;
+
 /**
  * 2-dimensions Point template class.
  *
@@ -35,11 +39,146 @@ namespace geometry {
  * @date   2015-06-12
  * @date   2015-08-22 (Move the world library)
  * @date   2015-10-18 (Change to the trivial type)
+ * @date   2017-11-02 (Change to the class type)
  */
-template <typename T>
+template <typename BaseType>
 struct BasePoint
 {
-    T x, y;
+    using Type = BaseType;
+
+    Type x, y;
+
+    BasePoint() : x(), y()
+    { /* EMPTY. */ }
+
+    BasePoint(std::initializer_list<Type> list) : x(), y()
+    {
+        auto itr = list.begin();
+        if (itr == list.end()) {
+            return;
+        }
+        x = *itr;
+        ++itr;
+
+        if (itr == list.end()) {
+            return;
+        }
+        y = *itr;
+    }
+
+    template <typename T>
+    BasePoint(T const & x_, T const & y_) : x(x_), y(y_)
+    { /* EMPTY. */ }
+
+    template <typename T>
+    BasePoint(BasePoint<T> const & obj) : x(obj.x), y(obj.y)
+    { /* EMPTY. */ }
+
+    ~BasePoint()
+    { /* EMPTY. */ }
+
+    template <typename T>
+    BasePoint & operator =(BasePoint<T> const & obj)
+    {
+        if (this != &obj) {
+            x = obj.x;
+            y = obj.y;
+        }
+        return *this;
+    }
+
+    /** The Point are equal? */
+    bool operator ==(BasePoint const & obj) const
+    {
+        return x == obj.x && y == obj.y;
+    }
+
+    bool operator !=(BasePoint const & obj) const
+    {
+        return !((*this) == obj);
+    }
+
+    void swap(BasePoint & obj)
+    {
+        std::swap(x, obj.x);
+        std::swap(y, obj.y);
+    }
+
+    friend void swap(BasePoint & lh, BasePoint & rh)
+    {
+        lh.swap(rh);
+    }
+
+    template <typename T>
+    BasePoint & operator +=(BasePoint<T> const & obj)
+    {
+        x += obj.x;
+        y += obj.y;
+        return *this;
+    }
+
+    template <typename T>
+    BasePoint & operator -=(BasePoint<T> const & obj)
+    {
+        x -= obj.x;
+        y -= obj.y;
+        return *this;
+    }
+
+    template <typename T>
+    BasePoint & operator +=(BaseSize<T> const & obj)
+    {
+        x += obj.width;
+        y += obj.height;
+        return *this;
+    }
+
+    template <typename T>
+    BasePoint & operator -=(BaseSize<T> const & obj)
+    {
+        x -= obj.width;
+        y -= obj.height;
+        return *this;
+    }
+
+    template <typename T>
+    friend BasePoint<T> operator +(BasePoint<T> const & p1, BasePoint<T> const & p2)
+    {
+        BasePoint<T> result = p1;
+        result += p2;
+        return result;
+    }
+
+    template <typename T>
+    friend BasePoint<T> operator -(BasePoint<T> const & p1, BasePoint<T> const & p2)
+    {
+        BasePoint<T> result = p1;
+        result -= p2;
+        return result;
+    }
+
+    template <typename T>
+    friend BasePoint<T> operator +(BasePoint<T> const & p, BaseSize<T> const & s)
+    {
+        BasePoint<T> result = p;
+        result += s;
+        return result;
+    }
+
+    template <typename T>
+    friend BasePoint<T> operator -(BasePoint<T> const & p, BaseSize<T> const & s)
+    {
+        BasePoint<T> result = p;
+        result -= s;
+        return result;
+    }
+
+    std::string toString() const
+    {
+        std::stringstream ss;
+        ss << x << "x" << y;
+        return ss.str();
+    }
 };
 
 /**
@@ -47,129 +186,115 @@ struct BasePoint
  *
  * @author zer0
  * @date   2015-10-21
+ * @date   2017-11-02 (Change to the class type)
  */
-template <typename T>
+template <typename BaseType>
 struct BaseSize
 {
-    T width, height;
+    using Type = BaseType;
+
+    Type width, height;
+
+    BaseSize() : width(), height()
+    { /* EMPTY. */ }
+
+    BaseSize(std::initializer_list<Type> list) : width(), height()
+    {
+        auto itr = list.begin();
+        if (itr == list.end()) {
+            return;
+        }
+        width = *itr;
+        ++itr;
+
+        if (itr == list.end()) {
+            return;
+        }
+        height = *itr;
+    }
+
+    template <typename T>
+    BaseSize(T const & w, T const & h) : width(w), height(h)
+    { /* EMPTY. */ }
+
+    template <typename T>
+    BaseSize(BaseSize<T> const & obj) : width(obj.width), height(obj.height)
+    { /* EMPTY. */ }
+
+    ~BaseSize()
+    { /* EMPTY. */ }
+
+    template <typename T>
+    BaseSize & operator =(BaseSize<T> const & obj)
+    {
+        if (this != &obj) {
+            width  = obj.width;
+            height = obj.height;
+        }
+        return *this;
+    }
+
+    /** The Size are equal? */
+    bool operator ==(BaseSize const & obj) const
+    {
+        return width == obj.width && height == obj.height;
+    }
+
+    bool operator !=(BaseSize const & obj) const
+    {
+        return !((*this) == obj);
+    }
+
+    void swap(BaseSize & obj)
+    {
+        std::swap( width, obj. width);
+        std::swap(height, obj.height);
+    }
+
+    friend void swap(BaseSize & lh, BaseSize & rh)
+    {
+        lh.swap(rh);
+    }
+
+    template <typename T>
+    BaseSize & operator +=(BaseSize<T> const & obj)
+    {
+        width  += obj.width;
+        height += obj.height;
+        return *this;
+    }
+
+    template <typename T>
+    BaseSize & operator -=(BaseSize<T> const & obj)
+    {
+        width  -= obj.width;
+        height -= obj.height;
+        return *this;
+    }
+
+    template <typename T>
+    friend BaseSize<T> operator +(BaseSize<T> const & s1, BaseSize<T> const & s2)
+    {
+        BaseSize<T> result = s1;
+        result += s2;
+        return result;
+    }
+
+    template <typename T>
+    friend BaseSize<T> operator -(BaseSize<T> const & s1, BaseSize<T> const & s2)
+    {
+        BaseSize<T> result = s1;
+        result -= s2;
+        return result;
+    }
+
+    std::string toString() const
+    {
+        std::stringstream ss;
+        ss << width << "x" << height;
+        return ss.str();
+    }
 };
-
-// ------------
-// Pre-defined.
-// ------------
-
-using Point = BasePoint<int>;
-using Size  = BaseSize<int>;
-
-Point const EMPTY_POINT = {0, 0};
-Size  const EMPTY_SIZE  = {0, 0};
-
-static_assert(std::is_trivial<Point>::value, "Point is not trivial type.");
-static_assert(std::is_trivial< Size>::value,  "Size is not trivial type.");
-
-// ------------------------------------
-// Operation overloading for the Point.
-// ------------------------------------
-
-template <typename T>
-inline BasePoint<T> &
-operator +=(BasePoint<T> & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
-{
-    p1.x += p2.x;
-    p1.y += p2.y;
-    return p1;
-}
-
-template <typename T>
-inline BasePoint<T> &
-operator -=(BasePoint<T> & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
-{
-    p1.x -= p2.x;
-    p1.y -= p2.y;
-    return p1;
-}
-
-template <typename T>
-inline BasePoint<T>
-operator +(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
-{
-    return BasePoint<T>{p1.x + p2.x, p1.y + p2.y};
-}
-
-template <typename T>
-inline BasePoint<T>
-operator -(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
-{
-    return BasePoint<T>{p1.x - p2.x, p1.y - p2.y};
-}
-
-template <typename T>
-inline BasePoint<T> &
-operator +=(BasePoint<T> & p, BaseSize<T> const & s) TBAG_NOEXCEPT
-{
-    p.x += s.width;
-    p.y += s.height;
-    return p;
-}
-
-template <typename T>
-inline BasePoint<T> &
-operator -=(BasePoint<T> & p, BaseSize<T> const & s) TBAG_NOEXCEPT
-{
-    p.x -= s.width;
-    p.y -= s.height;
-    return p;
-}
-
-template <typename T>
-inline BasePoint<T>
-operator +(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
-{
-    return BasePoint<T>{p.x + s.width, p.y + s.height};
-}
-
-template <typename T>
-inline BasePoint<T>
-operator -(BasePoint<T> const & p, BaseSize<T> const & s) TBAG_NOEXCEPT
-{
-    return BasePoint<T>{p.x - s.width, p.y - s.height};
-}
-
-// -----------------------------------
-// Operation overloading for the Size.
-// -----------------------------------
-
-template <typename T>
-inline BaseSize<T> &
-operator +=(BaseSize<T> & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
-{
-    s1.width += s2.width;
-    s1.height += s2.height;
-    return s1;
-}
-
-template <typename T>
-inline BaseSize<T> &
-operator -=(BaseSize<T> & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
-{
-    s1.width -= s2.width;
-    s1.height -= s2.height;
-    return s1;
-}
-
-template <typename T>
-inline BaseSize<T>
-operator +(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
-{
-    return BaseSize<T>{s1.width + s2.width, s1.height + s2.height};
-}
-
-template <typename T>
-inline BaseSize<T>
-operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
-{
-    return BaseSize<T>{s1.width - s2.width, s1.height - s2.height};
-}
 
 /**
  * You can not add a position at size.
@@ -178,8 +303,7 @@ operator -(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
  *  A scalar does not have a direction, but vector has a direction.
  */
 template <typename T>
-inline BaseSize<T>
-operator +(BaseSize<T> const & s, BasePoint<T> const & p) TBAG_NOEXCEPT = delete;
+BaseSize<T> operator + (BaseSize<T> const & s, BasePoint<T> const & p) = delete;
 
 /**
  * You can not subtract a position at size.
@@ -188,103 +312,43 @@ operator +(BaseSize<T> const & s, BasePoint<T> const & p) TBAG_NOEXCEPT = delete
  *  A scalar does not have a direction, but vector has a direction.
  */
 template <typename T>
-inline BaseSize<T>
-operator -(BaseSize<T> const & s, BasePoint<T> const & p) TBAG_NOEXCEPT = delete;
+BaseSize<T> operator -(BaseSize<T> const & s, BasePoint<T> const & p) = delete;
 
-// -----------------------------
-// Equals Operation overloading.
-// -----------------------------
+// ------------
+// Pre-defined.
+// ------------
 
-/** The Point are equal? */
-template <typename T>
-inline bool
-operator ==(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
-{
-    if (p1.x != p2.x || p1.y != p2.y) {
-        return false;
-    }
-    return true;
-}
+using Point = BasePoint<int>;
+using Size  = BaseSize<int>;
 
-template <typename T>
-inline bool
-operator !=(BasePoint<T> const & p1, BasePoint<T> const & p2) TBAG_NOEXCEPT
-{
-    return !(p1 == p2);
-}
-
-/** The Size are equal? */
-template <typename T>
-inline bool
-operator ==(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
-{
-    if (s1.width != s2.width || s1.height != s2.height) {
-        return false;
-    }
-    return true;
-}
-
-template <typename T>
-inline bool
-operator !=(BaseSize<T> const & s1, BaseSize<T> const & s2) TBAG_NOEXCEPT
-{
-    return !(s1 == s2);
-}
-
-// -------------------
-// String overloading.
-// -------------------
-
-char const __POINT_PREFIX_CHAR = 'P';
-char const  __SIZE_PREFIX_CHAR = 'S';
-
-char const __POINT_STREAM_BRACE_OPEN       = '{';
-char const __POINT_STREAM_VALUE_SEPARATOR  = ',';
-char const __POINT_STREAM_BRACE_CLOSE      = '}';
-
-template <typename T>
-std::string toString(BasePoint<T> const & point)
-{
-    std::stringstream ss;
-    ss << __POINT_PREFIX_CHAR << __POINT_STREAM_BRACE_OPEN
-       << point.x << __POINT_STREAM_VALUE_SEPARATOR
-       << point.y << __POINT_STREAM_BRACE_CLOSE;
-    return ss.str();
-}
-
-template <typename T>
-std::string toString(BaseSize<T> const & size)
-{
-    std::stringstream ss;
-    ss << __SIZE_PREFIX_CHAR << __POINT_STREAM_BRACE_OPEN
-       << size.width  << __POINT_STREAM_VALUE_SEPARATOR
-       << size.height << __POINT_STREAM_BRACE_CLOSE;
-    return ss.str();
-}
-
-// -----------------
-// Create structure.
-// -----------------
-
-template <typename T1, typename T2 = T1>
-TBAG_CONSTEXPR BasePoint<typename remove_cr<T1>::type>
-makePoint(T1 && x, T2 && y) TBAG_NOEXCEPT
-{
-    return makeTrivial2<BasePoint, T1, T2>(std::forward<T1>(x), std::forward<T2>(y));
-}
-
-template <typename T1, typename T2 = T1>
-TBAG_CONSTEXPR BaseSize<typename remove_cr<T1>::type>
-makeSize(T1 && x, T2 && y) TBAG_NOEXCEPT
-{
-    return makeTrivial2<BaseSize, T1, T2>(std::forward<T1>(x), std::forward<T2>(y));
-}
+Point const EMPTY_POINT(0, 0);
+Size  const EMPTY_SIZE (0, 0);
 
 } // namespace geometry
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+// --------------
+// Output Stream.
+// --------------
+
+#include <ostream>
+
+template <typename T>
+inline std::ostream & operator << (std::ostream & os, libtbag::geometry::BasePoint<T> const & point)
+{
+    os << point.toString();
+    return os;
+}
+
+template <typename T>
+inline std::ostream & operator << (std::ostream & os, libtbag::geometry::BaseSize<T> const & size)
+{
+    os << size.toString();
+    return os;
+}
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_POINT_HPP__
 
