@@ -17,6 +17,10 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
 
+#include <cmath>
+#include <cstdlib>
+#include <cstdint>
+
 #include <initializer_list>
 #include <algorithm>
 #include <sstream>
@@ -66,8 +70,7 @@ struct BasePoint
         y = *itr;
     }
 
-    template <typename T>
-    BasePoint(T const & x_, T const & y_) : x(x_), y(y_)
+    BasePoint(Type const & x_, Type const & y_) : x(x_), y(y_)
     { /* EMPTY. */ }
 
     template <typename T>
@@ -96,6 +99,12 @@ struct BasePoint
             y = obj.y;
         }
         return *this;
+    }
+
+    template <typename T>
+    operator BasePoint<T>() const
+    {
+        return BasePoint<T>(static_cast<T>(x), static_cast<T>(y));
     }
 
     /** The Point are equal? */
@@ -141,6 +150,33 @@ struct BasePoint
         return *this;
     }
 
+    /** L2 norm */
+    double norm() const
+    {
+        return std::sqrt(((double)x * x) + ((double)y * y));
+    }
+
+    /** dot product. */
+    template <typename T>
+    Type dot(BasePoint<T> const & p) const
+    {
+        return (x * p.x) + (y * p.y);
+    }
+
+    /** dot product computed in double-precision arithmetics. */
+    template <typename T>
+    double ddot(BasePoint<T> const & p) const
+    {
+        return ((double)x * (double)p.x) + ((double)y * (double)p.y);
+    }
+
+    /** cross-product. */
+    template <typename T>
+    double cross(BasePoint<T> const & p) const
+    {
+        return ((double)x * (double)p.y) - ((double)y * (double)p.x);
+    }
+
     TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
 
     std::string toString() const
@@ -148,6 +184,11 @@ struct BasePoint
         std::stringstream ss;
         ss << x << DEFAULT_DELIMITER << y;
         return ss.str();
+    }
+
+    BaseSize<Type> toSize() const
+    {
+        return BaseSize<Type>(x, y);
     }
 };
 
@@ -215,8 +256,7 @@ struct BaseSize
         height = *itr;
     }
 
-    template <typename T>
-    BaseSize(T const & w, T const & h) : width(w), height(h)
+    BaseSize(Type const & w, Type const & h) : width(w), height(h)
     { /* EMPTY. */ }
 
     template <typename T>
@@ -245,6 +285,12 @@ struct BaseSize
             height = obj.height;
         }
         return *this;
+    }
+
+    template <typename T>
+    operator BaseSize<T>() const
+    {
+        return BaseSize<T>(static_cast<T>(width), static_cast<T>(height));
     }
 
     /** The Size are equal? */
@@ -310,6 +356,11 @@ struct BaseSize
         ss << width << DEFAULT_DELIMITER << height;
         return ss.str();
     }
+
+    BasePoint<Type> toPoint() const
+    {
+        return BasePoint<Type>(width, height);
+    }
 };
 
 template <typename T>
@@ -348,8 +399,17 @@ BaseSize<T> operator -(BaseSize<T> const & s, BasePoint<T> const & p)
 // Pre-defined.
 // ------------
 
-using Point = BasePoint<int>;
-using Size  = BaseSize<int>;
+using Pointi = BasePoint<int>;
+using Pointl = BasePoint<int64_t>;
+using Pointf = BasePoint<float>;
+using Pointd = BasePoint<double>;
+using Point  = Pointi;
+
+using Sizei = BaseSize<int>;
+using Sizel = BaseSize<int64_t>;
+using Sizef = BaseSize<float>;
+using Sized = BaseSize<double>;
+using Size  = Sizei;
 
 Point const EMPTY_POINT(0, 0);
 Size  const EMPTY_SIZE (0, 0);

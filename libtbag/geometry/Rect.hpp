@@ -20,7 +20,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <cstdint>
 
+#include <initializer_list>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -74,8 +76,7 @@ struct BaseRect
         height = *itr;
     }
 
-    template <typename T>
-    BaseRect(T const & x_, T const & y_, T const & w_, T const & h_) : x(x_), y(y_), width(w_), height(h_)
+    BaseRect(Type const & x_, Type const & y_, Type const & w_, Type const & h_) : x(x_), y(y_), width(w_), height(h_)
     { /* EMPTY. */ }
 
     template <typename T>
@@ -93,9 +94,13 @@ struct BaseRect
     ~BaseRect()
     { /* EMPTY. */ }
 
-    inline BasePoint<Type> point() const { return BasePoint<Type>(x, y); }
+    inline BasePoint<Type> point () const { return BasePoint<Type>(x, y); }
+    inline BasePoint<Type> point1() const { return point(); }
+    inline BasePoint<Type> point2() const { return BasePoint<Type>(x + width, y + height); }
+
     inline BaseSize<Type> size() const { return BaseSize<Type>(width, height); }
     inline Type area() const { return width * height; }
+    inline bool empty() const { return width <= 0 || height <= 0; }
 
     void swap(BaseRect & obj)
     {
@@ -120,6 +125,12 @@ struct BaseRect
             height = obj.height;
         }
         return *this;
+    }
+
+    template <typename T>
+    operator BaseRect<T>() const
+    {
+        return BaseRect<T>(static_cast<T>(x), static_cast<T>(y), static_cast<T>(width), static_cast<T>(height));
     }
 
     /** The Rect are equal? */
@@ -228,22 +239,22 @@ struct BaseRect
     // ----------------
 
     template <typename T>
-    inline bool inside(T const & comp_x, T const & comp_y) const
+    inline bool contains(T const & comp_x, T const & comp_y) const
     {
         return x <= COMPARE_AND(comp_x) <= (x +  width) &&
                y <= COMPARE_AND(comp_y) <= (y + height);
     }
 
     template <typename T>
-    inline bool inside(BasePoint<T> const & p) const
+    inline bool contains(BasePoint<T> const & p) const
     {
-        return inside(p.x, p.y);
+        return contains(p.x, p.y);
     }
 
     template <typename T>
-    inline bool inside(BaseRect<T> const & r) const
+    inline bool contains(BaseRect<T> const & r) const
     {
-        return inside(r.x, r.y) && inside(r.x + r.width, r.y + r.height);
+        return contains(r.point1()) && contains(r.point2());
     }
 
     // ------------------------
@@ -342,7 +353,11 @@ BaseRect<T> operator |(BaseRect<T> const & r1, BaseRect<T> const & r2)
 // Pre-defined.
 // ------------
 
-using Rect = BaseRect<int>;
+using Recti = BaseRect<int>;
+using Rectl = BaseRect<int64_t>;
+using Rectf = BaseRect<float>;
+using Rectd = BaseRect<double>;
+using Rect  = Recti;
 
 Rect const EMPTY_RECT(0, 0, 0, 0);
 

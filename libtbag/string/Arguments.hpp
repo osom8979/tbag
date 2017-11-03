@@ -152,11 +152,11 @@ public:
 // ----------
 
 public:
-    using Pointi = libtbag::geometry::BasePoint<int>;
-    using Pointd = libtbag::geometry::BasePoint<double>;
+    using Pointi = libtbag::geometry::Pointi;
+    using Pointd = libtbag::geometry::Pointd;
 
-    using Recti = libtbag::geometry::BaseRect<int>;
-    using Rectd = libtbag::geometry::BaseRect<double>;
+    using Recti = libtbag::geometry::Recti;
+    using Rectd = libtbag::geometry::Rectd;
 
 private:
     template <typename OutputType, typename Predicated>

@@ -139,26 +139,26 @@ TEST(RectTest, CheckInside)
 
     Point p1 = {30, 25};
     Point p2 = {25, 25};
-    ASSERT_TRUE(r.inside(p1));
-    ASSERT_TRUE(r.inside(p2));
-    ASSERT_TRUE(r.inside(Rect(p1, p2)));
+    ASSERT_TRUE(r.contains(p1));
+    ASSERT_TRUE(r.contains(p2));
+    ASSERT_TRUE(r.contains(Rect(p1, p2)));
 
     Point p3 = {10, 25};
     Point p4 = {40, 25};
     Point p5 = {25, 15};
     Point p6 = {25, 35};
-    ASSERT_FALSE(r.inside(p3));
-    ASSERT_FALSE(r.inside(p4));
-    ASSERT_FALSE(r.inside(p5));
-    ASSERT_FALSE(r.inside(p6));
-    ASSERT_FALSE(r.inside(Rect(p1, p3)));
-    ASSERT_FALSE(r.inside(Rect(p1, p4)));
-    ASSERT_FALSE(r.inside(Rect(p1, p5)));
-    ASSERT_FALSE(r.inside(Rect(p1, p6)));
-    ASSERT_FALSE(r.inside(Rect(p2, p3)));
-    ASSERT_FALSE(r.inside(Rect(p2, p4)));
-    ASSERT_FALSE(r.inside(Rect(p2, p5)));
-    ASSERT_FALSE(r.inside(Rect(p2, p6)));
+    ASSERT_FALSE(r.contains(p3));
+    ASSERT_FALSE(r.contains(p4));
+    ASSERT_FALSE(r.contains(p5));
+    ASSERT_FALSE(r.contains(p6));
+    ASSERT_FALSE(r.contains(Rect(p1, p3)));
+    ASSERT_FALSE(r.contains(Rect(p1, p4)));
+    ASSERT_FALSE(r.contains(Rect(p1, p5)));
+    ASSERT_FALSE(r.contains(Rect(p1, p6)));
+    ASSERT_FALSE(r.contains(Rect(p2, p3)));
+    ASSERT_FALSE(r.contains(Rect(p2, p4)));
+    ASSERT_FALSE(r.contains(Rect(p2, p5)));
+    ASSERT_FALSE(r.contains(Rect(p2, p6)));
 }
 
 TEST(RectTest, ClipRect_True)
