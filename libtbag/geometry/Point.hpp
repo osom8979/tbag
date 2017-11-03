@@ -77,6 +77,17 @@ struct BasePoint
     ~BasePoint()
     { /* EMPTY. */ }
 
+    void swap(BasePoint & obj)
+    {
+        std::swap(x, obj.x);
+        std::swap(y, obj.y);
+    }
+
+    friend void swap(BasePoint & lh, BasePoint & rh)
+    {
+        lh.swap(rh);
+    }
+
     template <typename T>
     BasePoint & operator =(BasePoint<T> const & obj)
     {
@@ -96,17 +107,6 @@ struct BasePoint
     bool operator !=(BasePoint const & obj) const
     {
         return !((*this) == obj);
-    }
-
-    void swap(BasePoint & obj)
-    {
-        std::swap(x, obj.x);
-        std::swap(y, obj.y);
-    }
-
-    friend void swap(BasePoint & lh, BasePoint & rh)
-    {
-        lh.swap(rh);
     }
 
     template <typename T>
@@ -141,45 +141,47 @@ struct BasePoint
         return *this;
     }
 
-    template <typename T>
-    friend BasePoint<T> operator +(BasePoint<T> const & p1, BasePoint<T> const & p2)
-    {
-        BasePoint<T> result = p1;
-        result += p2;
-        return result;
-    }
-
-    template <typename T>
-    friend BasePoint<T> operator -(BasePoint<T> const & p1, BasePoint<T> const & p2)
-    {
-        BasePoint<T> result = p1;
-        result -= p2;
-        return result;
-    }
-
-    template <typename T>
-    friend BasePoint<T> operator +(BasePoint<T> const & p, BaseSize<T> const & s)
-    {
-        BasePoint<T> result = p;
-        result += s;
-        return result;
-    }
-
-    template <typename T>
-    friend BasePoint<T> operator -(BasePoint<T> const & p, BaseSize<T> const & s)
-    {
-        BasePoint<T> result = p;
-        result -= s;
-        return result;
-    }
+    TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
 
     std::string toString() const
     {
         std::stringstream ss;
-        ss << x << "x" << y;
+        ss << x << DEFAULT_DELIMITER << y;
         return ss.str();
     }
 };
+
+template <typename T>
+BasePoint<T> operator +(BasePoint<T> const & p1, BasePoint<T> const & p2)
+{
+    BasePoint<T> result = p1;
+    result += p2;
+    return result;
+}
+
+template <typename T>
+BasePoint<T> operator -(BasePoint<T> const & p1, BasePoint<T> const & p2)
+{
+    BasePoint<T> result = p1;
+    result -= p2;
+    return result;
+}
+
+template <typename T>
+BasePoint<T> operator +(BasePoint<T> const & p, BaseSize<T> const & s)
+{
+    BasePoint<T> result = p;
+    result += s;
+    return result;
+}
+
+template <typename T>
+BasePoint<T> operator -(BasePoint<T> const & p, BaseSize<T> const & s)
+{
+    BasePoint<T> result = p;
+    result -= s;
+    return result;
+}
 
 /**
  * 2-dimensions Size template class.
@@ -224,6 +226,17 @@ struct BaseSize
     ~BaseSize()
     { /* EMPTY. */ }
 
+    void swap(BaseSize & obj)
+    {
+        std::swap( width, obj.width);
+        std::swap(height, obj.height);
+    }
+
+    friend void swap(BaseSize & lh, BaseSize & rh)
+    {
+        lh.swap(rh);
+    }
+
     template <typename T>
     BaseSize & operator =(BaseSize<T> const & obj)
     {
@@ -245,17 +258,6 @@ struct BaseSize
         return !((*this) == obj);
     }
 
-    void swap(BaseSize & obj)
-    {
-        std::swap( width, obj. width);
-        std::swap(height, obj.height);
-    }
-
-    friend void swap(BaseSize & lh, BaseSize & rh)
-    {
-        lh.swap(rh);
-    }
-
     template <typename T>
     BaseSize & operator +=(BaseSize<T> const & obj)
     {
@@ -272,47 +274,75 @@ struct BaseSize
         return *this;
     }
 
+    /**
+     * @remarks
+     *  You can not add a position at size. @n
+     *  A scalar does not have a direction, but vector has a direction. @n
+     *  However, this operator is computable.
+     */
     template <typename T>
-    friend BaseSize<T> operator +(BaseSize<T> const & s1, BaseSize<T> const & s2)
+    BaseSize & operator +=(BasePoint<T> const & obj)
     {
-        BaseSize<T> result = s1;
-        result += s2;
-        return result;
+        width  += obj.x;
+        height += obj.y;
+        return *this;
     }
 
+    /**
+     * @remarks
+     *  You can not add a position at size. @n
+     *  A scalar does not have a direction, but vector has a direction. @n
+     *  However, this operator is computable.
+     */
     template <typename T>
-    friend BaseSize<T> operator -(BaseSize<T> const & s1, BaseSize<T> const & s2)
+    BaseSize & operator -=(BasePoint<T> const & obj)
     {
-        BaseSize<T> result = s1;
-        result -= s2;
-        return result;
+        width  -= obj.x;
+        height -= obj.y;
+        return *this;
     }
+
+    TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
 
     std::string toString() const
     {
         std::stringstream ss;
-        ss << width << "x" << height;
+        ss << width << DEFAULT_DELIMITER << height;
         return ss.str();
     }
 };
 
-/**
- * You can not add a position at size.
- *
- * @remarks
- *  A scalar does not have a direction, but vector has a direction.
- */
 template <typename T>
-BaseSize<T> operator + (BaseSize<T> const & s, BasePoint<T> const & p) = delete;
+BaseSize<T> operator +(BaseSize<T> const & s1, BaseSize<T> const & s2)
+{
+    BaseSize<T> result = s1;
+    result += s2;
+    return result;
+}
 
-/**
- * You can not subtract a position at size.
- *
- * @remarks
- *  A scalar does not have a direction, but vector has a direction.
- */
 template <typename T>
-BaseSize<T> operator -(BaseSize<T> const & s, BasePoint<T> const & p) = delete;
+BaseSize<T> operator -(BaseSize<T> const & s1, BaseSize<T> const & s2)
+{
+    BaseSize<T> result = s1;
+    result -= s2;
+    return result;
+}
+
+template <typename T>
+BaseSize<T> operator +(BaseSize<T> const & s, BasePoint<T> const & p)
+{
+    BaseSize<T> result = s;
+    result += p;
+    return result;
+}
+
+template <typename T>
+BaseSize<T> operator -(BaseSize<T> const & s, BasePoint<T> const & p)
+{
+    BaseSize<T> result = s;
+    result -= p;
+    return result;
+}
 
 // ------------
 // Pre-defined.

@@ -100,9 +100,9 @@ TEST(RectTest, Utility)
     Rect  r = {p.x, p.y, s.width, s.height};
     int   a = s.width * s.height;
 
-    ASSERT_EQ(p, r.getPoint());
-    ASSERT_EQ(s, r.getSize ());
-    ASSERT_EQ(a, r.getArea ());
+    ASSERT_EQ(p, r.point());
+    ASSERT_EQ(s, r.size ());
+    ASSERT_EQ(a, r.area ());
 };
 
 TEST(RectTest, Methods)
@@ -139,26 +139,26 @@ TEST(RectTest, CheckInside)
 
     Point p1 = {30, 25};
     Point p2 = {25, 25};
-    ASSERT_TRUE(r.checkInside(p1));
-    ASSERT_TRUE(r.checkInside(p2));
-    ASSERT_TRUE(r.checkInside(Rect(p1, p2)));
+    ASSERT_TRUE(r.inside(p1));
+    ASSERT_TRUE(r.inside(p2));
+    ASSERT_TRUE(r.inside(Rect(p1, p2)));
 
     Point p3 = {10, 25};
     Point p4 = {40, 25};
     Point p5 = {25, 15};
     Point p6 = {25, 35};
-    ASSERT_FALSE(r.checkInside(p3));
-    ASSERT_FALSE(r.checkInside(p4));
-    ASSERT_FALSE(r.checkInside(p5));
-    ASSERT_FALSE(r.checkInside(p6));
-    ASSERT_FALSE(r.checkInside(Rect(p1, p3)));
-    ASSERT_FALSE(r.checkInside(Rect(p1, p4)));
-    ASSERT_FALSE(r.checkInside(Rect(p1, p5)));
-    ASSERT_FALSE(r.checkInside(Rect(p1, p6)));
-    ASSERT_FALSE(r.checkInside(Rect(p2, p3)));
-    ASSERT_FALSE(r.checkInside(Rect(p2, p4)));
-    ASSERT_FALSE(r.checkInside(Rect(p2, p5)));
-    ASSERT_FALSE(r.checkInside(Rect(p2, p6)));
+    ASSERT_FALSE(r.inside(p3));
+    ASSERT_FALSE(r.inside(p4));
+    ASSERT_FALSE(r.inside(p5));
+    ASSERT_FALSE(r.inside(p6));
+    ASSERT_FALSE(r.inside(Rect(p1, p3)));
+    ASSERT_FALSE(r.inside(Rect(p1, p4)));
+    ASSERT_FALSE(r.inside(Rect(p1, p5)));
+    ASSERT_FALSE(r.inside(Rect(p1, p6)));
+    ASSERT_FALSE(r.inside(Rect(p2, p3)));
+    ASSERT_FALSE(r.inside(Rect(p2, p4)));
+    ASSERT_FALSE(r.inside(Rect(p2, p5)));
+    ASSERT_FALSE(r.inside(Rect(p2, p6)));
 }
 
 TEST(RectTest, ClipRect_True)
@@ -212,8 +212,8 @@ TEST(RectTest, AbsoluteRect)
      * 20 |   +---+ <-(x,y)
      */
     Rect r = {20, 20, -10, -10};
-    ASSERT_EQ(Rect(10, 10, 10, 10), r.getAbsolute());
-    ASSERT_EQ(Rect(10, 10, 10, 10), Rect(10, 10, 10, 10).getAbsolute());
+    ASSERT_EQ(Rect(10, 10, 10, 10), r.absolute());
+    ASSERT_EQ(Rect(10, 10, 10, 10), Rect(10, 10, 10, 10).absolute());
 }
 
 TEST(RectTest, String)

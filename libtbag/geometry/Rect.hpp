@@ -93,6 +93,23 @@ struct BaseRect
     ~BaseRect()
     { /* EMPTY. */ }
 
+    inline BasePoint<Type> point() const { return BasePoint<Type>(x, y); }
+    inline BaseSize<Type> size() const { return BaseSize<Type>(width, height); }
+    inline Type area() const { return width * height; }
+
+    void swap(BaseRect & obj)
+    {
+        std::swap(     x, obj.x);
+        std::swap(     y, obj.y);
+        std::swap( width, obj.width);
+        std::swap(height, obj.height);
+    }
+
+    friend void swap(BaseRect & lh, BaseRect & rh)
+    {
+        lh.swap(rh);
+    }
+
     template <typename T>
     BaseRect & operator =(BaseRect<T> const & obj)
     {
@@ -104,10 +121,6 @@ struct BaseRect
         }
         return *this;
     }
-
-    inline BasePoint<Type> getPoint() const { return BasePoint<Type>(x, y); }
-    inline BaseSize<Type> getSize() const { return BaseSize<Type>(width, height); }
-    inline Type getArea() const { return width * height; }
 
     /** The Rect are equal? */
     template <typename T>
@@ -155,34 +168,6 @@ struct BaseRect
     }
 
     template <typename T>
-    friend BaseRect<T> operator +(BaseRect<T> const & r, BasePoint<T> const & p)
-    {
-        BaseRect<T> result = r;
-        return result += p;
-    }
-
-    template <typename T>
-    friend BaseRect<T> operator -(BaseRect<T> const & r, BasePoint<T> const & p)
-    {
-        BaseRect<T> result = r;
-        return result -= p;
-    }
-
-    template <typename T>
-    friend BaseRect<T> operator +(BaseRect<T> const & r, BaseSize<T> const & s)
-    {
-        BaseRect<T> result = r;
-        return result += s;
-    }
-
-    template <typename T>
-    friend BaseRect<T> operator -(BaseRect<T> const & r, BaseSize<T> const & s)
-    {
-        BaseRect<T> result = r;
-        return result -= s;
-    }
-
-    template <typename T>
     BaseRect & operator &=(BaseRect<T> const & obj)
     {
         Type x1 = std::max<Type>(x, obj.x);
@@ -206,66 +191,66 @@ struct BaseRect
         return *this;
     }
 
-    template <typename T>
-    friend BaseRect<T> operator &(BaseRect<T> const & r1, BaseRect<T> const & r2)
-    {
-        BaseRect<T> result = r1;
-        return result &= r2;
-    }
-
-    template <typename T>
-    friend BaseRect<T> operator |(BaseRect<T> const & r1, BaseRect<T> const & r2)
-    {
-        BaseRect<T> result = r1;
-        return result |= r2;
-    }
-
     // ------------------
     // Absolute location.
     // ------------------
 
-    Type     getLeftTopX() const { return std::min(x, x + width ); }
-    Type     getLeftTopY() const { return std::min(y, y + height); }
-    Type    getRightTopX() const { return std::max(x, x + width ); }
-    Type    getRightTopY() const { return std::min(y, y + height); }
-    Type  getLeftBottomX() const { return std::min(x, x + width ); }
-    Type  getLeftBottomY() const { return std::max(y, y + height); }
-    Type getRightBottomX() const { return std::max(x, x + width ); }
-    Type getRightBottomY() const { return std::max(y, y + height); }
+    inline Type     getLeftTopX() const { return std::min(x, x + width ); }
+    inline Type     getLeftTopY() const { return std::min(y, y + height); }
+    inline Type    getRightTopX() const { return std::max(x, x + width ); }
+    inline Type    getRightTopY() const { return std::min(y, y + height); }
+    inline Type  getLeftBottomX() const { return std::min(x, x + width ); }
+    inline Type  getLeftBottomY() const { return std::max(y, y + height); }
+    inline Type getRightBottomX() const { return std::max(x, x + width ); }
+    inline Type getRightBottomY() const { return std::max(y, y + height); }
 
-    BasePoint<Type>     getLeftTop() const { return BasePoint<Type>(    getLeftTopX(),     getLeftTopY()); }
-    BasePoint<Type>    getRightTop() const { return BasePoint<Type>(   getRightTopX(),    getRightTopY()); }
-    BasePoint<Type>  getLeftBottom() const { return BasePoint<Type>( getLeftBottomX(),  getLeftBottomY()); }
-    BasePoint<Type> getRightBottom() const { return BasePoint<Type>(getRightBottomX(), getRightBottomY()); }
+    inline Type ltx() const { return     getLeftTopX(); }
+    inline Type lty() const { return     getLeftTopY(); }
+    inline Type rtx() const { return    getRightTopX(); }
+    inline Type rty() const { return    getRightTopY(); }
+    inline Type lbx() const { return  getLeftBottomX(); }
+    inline Type lby() const { return  getLeftBottomY(); }
+    inline Type rbx() const { return getRightBottomX(); }
+    inline Type rby() const { return getRightBottomY(); }
+
+    inline BasePoint<Type>     getLeftTop() const { return BasePoint<Type>(    getLeftTopX(),     getLeftTopY()); }
+    inline BasePoint<Type>    getRightTop() const { return BasePoint<Type>(   getRightTopX(),    getRightTopY()); }
+    inline BasePoint<Type>  getLeftBottom() const { return BasePoint<Type>( getLeftBottomX(),  getLeftBottomY()); }
+    inline BasePoint<Type> getRightBottom() const { return BasePoint<Type>(getRightBottomX(), getRightBottomY()); }
+
+    inline BasePoint<Type> lt() const {     getLeftTop(); }
+    inline BasePoint<Type> rt() const {    getRightTop(); }
+    inline BasePoint<Type> lb() const {  getLeftBottom(); }
+    inline BasePoint<Type> rb() const { getRightBottom(); }
 
     // ----------------
     // Offset validate.
     // ----------------
 
     template <typename T>
-    inline bool checkInside(T const & x_, T const & y_) const
+    inline bool inside(T const & comp_x, T const & comp_y) const
     {
-        return x <= COMPARE_AND(x_) <= (x +  width) &&
-               y <= COMPARE_AND(y_) <= (y + height);
+        return x <= COMPARE_AND(comp_x) <= (x +  width) &&
+               y <= COMPARE_AND(comp_y) <= (y + height);
     }
 
     template <typename T>
-    inline bool checkInside(BasePoint<T> const & p) const
+    inline bool inside(BasePoint<T> const & p) const
     {
-        return checkInside(p.x, p.y);
+        return inside(p.x, p.y);
     }
 
     template <typename T>
-    inline bool checkInside(BaseRect<T> const & r) const
+    inline bool inside(BaseRect<T> const & r) const
     {
-        return checkInside(r.x, r.y) && checkInside(r.x + r.width, r.y + r.height);
+        return inside(r.x, r.y) && inside(r.x + r.width, r.y + r.height);
     }
 
     // ------------------------
     // Miscellaneous utilities.
     // ------------------------
 
-    BaseRect<Type> getAbsolute() const
+    BaseRect<Type> absolute() const
     {
         BaseRect<Type> result;
         result.x = getLeftTopX();
@@ -295,13 +280,63 @@ struct BaseRect
         return false;
     }
 
+    TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
+
     std::string toString() const
     {
         std::stringstream ss;
-        ss << x << "x" << y << "x" << width << "x" << height;
+        ss << x << DEFAULT_DELIMITER << y << DEFAULT_DELIMITER << width << DEFAULT_DELIMITER << height;
         return ss.str();
     }
 };
+
+template <typename T>
+BaseRect<T> operator +(BaseRect<T> const & r, BasePoint<T> const & p)
+{
+    BaseRect<T> result = r;
+    result += p;
+    return result;
+}
+
+template <typename T>
+BaseRect<T> operator -(BaseRect<T> const & r, BasePoint<T> const & p)
+{
+    BaseRect<T> result = r;
+    result -= p;
+    return result;
+}
+
+template <typename T>
+BaseRect<T> operator +(BaseRect<T> const & r, BaseSize<T> const & s)
+{
+    BaseRect<T> result = r;
+    result += s;
+    return result;
+}
+
+template <typename T>
+BaseRect<T> operator -(BaseRect<T> const & r, BaseSize<T> const & s)
+{
+    BaseRect<T> result = r;
+    result -= s;
+    return result;
+}
+
+template <typename T>
+BaseRect<T> operator &(BaseRect<T> const & r1, BaseRect<T> const & r2)
+{
+    BaseRect<T> result = r1;
+    result &= r2;
+    return result;
+}
+
+template <typename T>
+BaseRect<T> operator |(BaseRect<T> const & r1, BaseRect<T> const & r2)
+{
+    BaseRect<T> result = r1;
+    result |= r2;
+    return result;
+}
 
 // ------------
 // Pre-defined.
