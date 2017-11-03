@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/geometry/Point.hpp>
+#include <libtbag/algorithm/Equals.hpp>
 
 #include <atomic>
 #include <iostream>
@@ -24,6 +25,8 @@ TEST(PointTest, Constructor)
     Point p3 = p2;
     Point p4_move = Point{3, 4};
     Point p4 = p4_move;
+    Point p5(5, 6);
+    Point p6(p5);
 
     p1 = Point{-1, -2};
 
@@ -38,6 +41,7 @@ TEST(PointTest, Constructor)
 
     ASSERT_EQ(p3, p2);
     ASSERT_NE(p4, p3);
+    ASSERT_EQ(p5, p6);
 }
 
 TEST(PointTest, MakePoint)
@@ -76,7 +80,7 @@ TEST(PointTest, MakePoint)
     REMOVE_UNUSED_VARIABLE(p4_3 == p4_4);
 }
 
-TEST(PointTest, Operators_1)
+TEST(PointTest, Operators1)
 {
     Point       p1 = {0, 1};
     Point const p2 = {4, 5};
@@ -101,8 +105,11 @@ TEST(PointTest, Operators_1)
     ASSERT_EQ(p3, p7);
     ASSERT_EQ(p4, p8);
 
-    // ----------
-    // Size test.
+    ASSERT_EQ(Point(4, 5), (Point(1, 2) + 3));
+    ASSERT_EQ(Point(2, 0), (Point(4, 2) - 2));
+    ASSERT_EQ(Point(3, 6), (Point(1, 2) * 3));
+    ASSERT_EQ(Point(3, 2), (Point(6, 4) / 2));
+
     Size       s1 = Size(4, 5);
     Size const s2 = Size(4, 5);
     Size       s3 = {0,  0};
@@ -112,9 +119,17 @@ TEST(PointTest, Operators_1)
     ASSERT_EQ(p4, p1 + s2);
     ASSERT_EQ(s3, s1 - s2);
     ASSERT_EQ(s4, s1 + s2);
+
+    ASSERT_EQ(Size(4, 5), (Size(1, 2) + 3));
+    ASSERT_EQ(Size(2, 0), (Size(4, 2) - 2));
+    ASSERT_EQ(Size(3, 6), (Size(1, 2) * 3));
+    ASSERT_EQ(Size(3, 2), (Size(6, 4) / 2));
+
+    Point cast_point = (Point)Pointf(1.5, 2.5);
+    ASSERT_EQ(Point(1, 2), cast_point);
 }
 
-TEST(PointTest, Operators_2)
+TEST(PointTest, Operators2)
 {
     Point const p1 = {1, 2};
     Size  const s1 = {3, 4};
@@ -160,9 +175,44 @@ TEST(PointTest, Equals)
 TEST(PointTest, String)
 {
     Point p = {1, 2};
-    std::cout << "Point: " << p << std::endl;
+    Point s = {2, 3};
 
-    Size s = {2, 3};
+    ASSERT_FALSE(p.toString().empty());
+    ASSERT_FALSE(s.toString().empty());
+
+    std::cout << "Point: " << p << std::endl;
     std::cout << "Size: " << s << std::endl;
+}
+
+TEST(PointTest, Swap)
+{
+    Point p1(5, 6);
+    Point p2(7, 8);
+
+    Size s1(1, 2);
+    Size s2(3, 4);
+
+    swap(p1, p2);
+    swap(s1, s2);
+
+    ASSERT_EQ(Point(5, 6), p2);
+    ASSERT_EQ(Point(7, 8), p1);
+
+    ASSERT_EQ(Size(1, 2), s2);
+    ASSERT_EQ(Size(3, 4), s1);
+}
+
+TEST(PointTest, Math)
+{
+    ASSERT_TRUE(algorithm::equals(5.0, Point(4, 3).norm(), 0.00001));
+    ASSERT_EQ(11, Point(1, 2).dot(Point(3, 4)));
+    ASSERT_TRUE(algorithm::equals(11.0, Point(1, 2).ddot(Point(3, 4)), 0.00001));
+    ASSERT_TRUE(algorithm::equals(2.0, Point(2, 1).cross(Point(4, 3)), 0.00001));
+}
+
+TEST(PointTest, Convert)
+{
+    ASSERT_EQ(Size(1, 2), Point(1, 2).toSize());
+    ASSERT_EQ(Point(1, 2), Size(1, 2).toPoint());
 }
 

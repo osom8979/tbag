@@ -119,6 +119,38 @@ struct BasePoint
     }
 
     template <typename T>
+    BasePoint & operator +=(T const & v)
+    {
+        x += v;
+        y += v;
+        return *this;
+    }
+
+    template <typename T>
+    BasePoint & operator -=(T const & v)
+    {
+        x -= v;
+        y -= v;
+        return *this;
+    }
+
+    template <typename T>
+    BasePoint & operator *=(T const & v)
+    {
+        x *= v;
+        y *= v;
+        return *this;
+    }
+
+    template <typename T>
+    BasePoint & operator /=(T const & v)
+    {
+        x /= v;
+        y /= v;
+        return *this;
+    }
+
+    template <typename T>
     BasePoint & operator +=(BasePoint<T> const & obj)
     {
         x += obj.x;
@@ -191,6 +223,38 @@ struct BasePoint
         return BaseSize<Type>(x, y);
     }
 };
+
+template <typename T>
+BasePoint<T> operator +(BasePoint<T> const & p, T const & v)
+{
+    BasePoint<T> result = p;
+    result += v;
+    return result;
+}
+
+template <typename T>
+BasePoint<T> operator -(BasePoint<T> const & p, T const & v)
+{
+    BasePoint<T> result = p;
+    result -= v;
+    return result;
+}
+
+template <typename T>
+BasePoint<T> operator *(BasePoint<T> const & p, T const & v)
+{
+    BasePoint<T> result = p;
+    result *= v;
+    return result;
+}
+
+template <typename T>
+BasePoint<T> operator /(BasePoint<T> const & p, T const & v)
+{
+    BasePoint<T> result = p;
+    result /= v;
+    return result;
+}
 
 template <typename T>
 BasePoint<T> operator +(BasePoint<T> const & p1, BasePoint<T> const & p2)
@@ -305,6 +369,38 @@ struct BaseSize
     }
 
     template <typename T>
+    BaseSize & operator +=(T const & v)
+    {
+        width  += v;
+        height += v;
+        return *this;
+    }
+
+    template <typename T>
+    BaseSize & operator -=(T const & v)
+    {
+        width  -= v;
+        height -= v;
+        return *this;
+    }
+
+    template <typename T>
+    BaseSize & operator *=(T const & v)
+    {
+        width  *= v;
+        height *= v;
+        return *this;
+    }
+
+    template <typename T>
+    BaseSize & operator /=(T const & v)
+    {
+        width  /= v;
+        height /= v;
+        return *this;
+    }
+
+    template <typename T>
     BaseSize & operator +=(BaseSize<T> const & obj)
     {
         width  += obj.width;
@@ -348,6 +444,18 @@ struct BaseSize
         return *this;
     }
 
+    /** the area */
+    Type area() const
+    {
+        return width * height;
+    }
+
+    /** true if empty */
+    bool empty() const
+    {
+        return width <= 0 || height <= 0;
+    }
+
     TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
 
     std::string toString() const
@@ -362,6 +470,38 @@ struct BaseSize
         return BasePoint<Type>(width, height);
     }
 };
+
+template <typename T>
+BaseSize<T> operator +(BaseSize<T> const & s, T const & v)
+{
+    BaseSize<T> result = s;
+    result += v;
+    return result;
+}
+
+template <typename T>
+BaseSize<T> operator -(BaseSize<T> const & s, T const & v)
+{
+    BaseSize<T> result = s;
+    result -= v;
+    return result;
+}
+
+template <typename T>
+BaseSize<T> operator *(BaseSize<T> const & s, T const & v)
+{
+    BaseSize<T> result = s;
+    result *= v;
+    return result;
+}
+
+template <typename T>
+BaseSize<T> operator /(BaseSize<T> const & s, T const & v)
+{
+    BaseSize<T> result = s;
+    result /= v;
+    return result;
+}
 
 template <typename T>
 BaseSize<T> operator +(BaseSize<T> const & s1, BaseSize<T> const & s2)

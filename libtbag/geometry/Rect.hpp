@@ -178,6 +178,7 @@ struct BaseRect
         return *this;
     }
 
+    /** obtain the intersection rect. */
     template <typename T>
     BaseRect & operator &=(BaseRect<T> const & obj)
     {
@@ -190,6 +191,7 @@ struct BaseRect
         return *this;
     }
 
+    /** obtain the union rect. */
     template <typename T>
     BaseRect & operator |=(BaseRect<T> const & obj)
     {
