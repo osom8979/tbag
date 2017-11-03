@@ -97,23 +97,13 @@ struct BaseRect
     inline BasePoint<Type> point () const { return BasePoint<Type>(x, y); }
     inline BasePoint<Type> point1() const { return point(); }
     inline BasePoint<Type> point2() const { return BasePoint<Type>(x + width, y + height); }
+    inline BasePoint<Type> center() const { return BasePoint<Type>(x + (width / 2), y + (height / 2)); }
 
     inline BaseSize<Type> size() const { return BaseSize<Type>(width, height); }
-    inline Type area() const { return width * height; }
+    inline BaseSize<Type> half() const { return BaseSize<Type>(width / 2, height / 2); }
+
+    inline Type  area() const { return width * height; }
     inline bool empty() const { return width <= 0 || height <= 0; }
-
-    void swap(BaseRect & obj)
-    {
-        std::swap(     x, obj.x);
-        std::swap(     y, obj.y);
-        std::swap( width, obj.width);
-        std::swap(height, obj.height);
-    }
-
-    friend void swap(BaseRect & lh, BaseRect & rh)
-    {
-        lh.swap(rh);
-    }
 
     template <typename T>
     BaseRect & operator =(BaseRect<T> const & obj)
@@ -125,6 +115,21 @@ struct BaseRect
             height = obj.height;
         }
         return *this;
+    }
+
+    void swap(BaseRect & obj)
+    {
+        if (this != &obj) {
+            std::swap(x, obj.x);
+            std::swap(y, obj.y);
+            std::swap(width, obj.width);
+            std::swap(height, obj.height);
+        }
+    }
+
+    friend void swap(BaseRect & lh, BaseRect & rh)
+    {
+        lh.swap(rh);
     }
 
     template <typename T>

@@ -80,17 +80,6 @@ struct BasePoint
     ~BasePoint()
     { /* EMPTY. */ }
 
-    void swap(BasePoint & obj)
-    {
-        std::swap(x, obj.x);
-        std::swap(y, obj.y);
-    }
-
-    friend void swap(BasePoint & lh, BasePoint & rh)
-    {
-        lh.swap(rh);
-    }
-
     template <typename T>
     BasePoint & operator =(BasePoint<T> const & obj)
     {
@@ -100,6 +89,20 @@ struct BasePoint
         }
         return *this;
     }
+
+    void swap(BasePoint & obj)
+    {
+        if (this != &obj) {
+            std::swap(x, obj.x);
+            std::swap(y, obj.y);
+        }
+    }
+
+    friend void swap(BasePoint & lh, BasePoint & rh)
+    {
+        lh.swap(rh);
+    }
+
 
     template <typename T>
     operator BasePoint<T>() const
@@ -330,16 +333,9 @@ struct BaseSize
     ~BaseSize()
     { /* EMPTY. */ }
 
-    void swap(BaseSize & obj)
-    {
-        std::swap( width, obj.width);
-        std::swap(height, obj.height);
-    }
-
-    friend void swap(BaseSize & lh, BaseSize & rh)
-    {
-        lh.swap(rh);
-    }
+    inline Type      area() const { return width * height; }
+    inline bool     empty() const { return width <= 0 || height <= 0; }
+    inline BaseSize  half() const { return BaseSize(width / 2, height / 2); }
 
     template <typename T>
     BaseSize & operator =(BaseSize<T> const & obj)
@@ -349,6 +345,17 @@ struct BaseSize
             height = obj.height;
         }
         return *this;
+    }
+
+    void swap(BaseSize & obj)
+    {
+        std::swap( width, obj.width);
+        std::swap(height, obj.height);
+    }
+
+    friend void swap(BaseSize & lh, BaseSize & rh)
+    {
+        lh.swap(rh);
     }
 
     template <typename T>
@@ -442,18 +449,6 @@ struct BaseSize
         width  -= obj.x;
         height -= obj.y;
         return *this;
-    }
-
-    /** the area */
-    Type area() const
-    {
-        return width * height;
-    }
-
-    /** true if empty */
-    bool empty() const
-    {
-        return width <= 0 || height <= 0;
     }
 
     TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
