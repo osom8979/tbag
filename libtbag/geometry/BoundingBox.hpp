@@ -45,7 +45,7 @@ getBoundingBox(BasePoint<T> const * points, std::size_t size) TBAG_NOEXCEPT
         // @formatter:on
     }
 
-    return Rect(lt, rd);
+    return BaseRect<__point_tparam>(lt, rd);
 }
 
 } // namespace geometry
