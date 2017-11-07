@@ -216,6 +216,26 @@ TEST(RectTest, AbsoluteRect)
     ASSERT_EQ(Rect(10, 10, 10, 10), Rect(10, 10, 10, 10).absolute());
 }
 
+TEST(RectTest, StretchByCenter)
+{
+    /*
+     *  0 |  10  20  30  40  50
+     * ---+--------------------
+     *    |
+     * 10 |   +-----------+
+     *    |   |           |
+     * 20 |   |   +---+   |
+     *    |   |   |   |   |
+     * 30 |   |   +---+   |
+     *    |   |           |
+     * 40 |   +-----------+
+     *    |
+     * 50 |
+     */
+    Rect r = {20, 20, 10, 10};
+    ASSERT_EQ(Rect(10, 10, 30, 30), r.stretchByCenter(10));
+}
+
 TEST(RectTest, String)
 {
     Rect p = {1, 2, 3, 4};

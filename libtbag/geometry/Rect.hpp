@@ -298,6 +298,11 @@ struct BaseRect
         return false;
     }
 
+    BaseRect<Type> stretchByCenter(Type const & half_size)
+    {
+        return BaseRect<Type>(x - half_size, y - half_size, width + (half_size * 2), height + (half_size * 2));
+    }
+
     TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
 
     std::string toString() const

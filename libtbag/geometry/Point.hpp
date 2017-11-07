@@ -103,7 +103,6 @@ struct BasePoint
         lh.swap(rh);
     }
 
-
     template <typename T>
     operator BasePoint<T>() const
     {
