@@ -6,9 +6,9 @@
 #include <memory>
 #include <utility>
 #include <cstdint>
-#include "../core/family.hpp"
-#include "signal.hpp"
-#include "sigh.hpp"
+#include <libtbag/3rd/entt/core/family.hpp>
+#include <libtbag/3rd/entt/signal/signal.hpp>
+#include <libtbag/3rd/entt/signal/sigh.hpp>
 
 
 namespace entt {

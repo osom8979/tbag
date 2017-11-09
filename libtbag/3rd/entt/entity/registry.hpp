@@ -7,10 +7,10 @@
 #include <utility>
 #include <cstddef>
 #include <cassert>
-#include "../core/family.hpp"
-#include "sparse_set.hpp"
-#include "traits.hpp"
-#include "view.hpp"
+#include <libtbag/3rd/entt/core/family.hpp>
+#include <libtbag/3rd/entt/core/sparse_set.hpp>
+#include <libtbag/3rd/entt/core/traits.hpp>
+#include <libtbag/3rd/entt/core/view.hpp>
 
 
 namespace entt {
