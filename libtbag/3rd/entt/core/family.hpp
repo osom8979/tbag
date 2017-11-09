@@ -39,7 +39,7 @@ public:
      */
     template<typename... Type>
     static family_type type() noexcept {
-        return family<std::decay_t<Type>...>();
+        return family<std::decay<Type>...>();
     }
 };
 
