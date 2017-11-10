@@ -53,6 +53,13 @@ macro (tbag_flags__set_cpp_standard_11)
     #endif ()
 endmacro ()
 
+#/// Assign C++14 standard.
+macro (tbag_flags__set_cpp_standard_14)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ")
+    endif ()
+endmacro ()
+
 #/// Assign default debug definition.
 macro (tbag_flags__set_debug_define)
     # Build type: Debug, Release, RelWithDebInfo, MinSizeRel
@@ -83,7 +90,7 @@ endmacro ()
 #/// Default tbag project setup.
 macro (tbag_flags__default_setup)
     tbag_flags__set_position_independent_code  ()
-    tbag_flags__set_cpp_standard_11            ()
+    tbag_flags__set_cpp_standard_14            ()
     tbag_flags__set_debug_define               ()
 endmacro ()
 
