@@ -27,16 +27,16 @@ addons:
       - cmake-data
       - curl
       - unzip
-      - g++-4.9
+      - g++-5.0
 
 before_install:
   #- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
   #- sudo add-apt-repository --yes ppa:george-edison55/precise-backports
   #- sudo apt-get -qq update
-  #- sudo apt-get install -y git cmake cmake-data curl unzip g++-4.9
+  #- sudo apt-get install -y git cmake cmake-data curl unzip g++-5.0
   - export TPARTY_HOME=$HOME/tparty
   - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
-  - export CXX=g++-4.9
+  - export CXX=g++-5.0
 
 install:
   - bash script/travis_install.sh
