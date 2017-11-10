@@ -12,12 +12,12 @@ RUN add-apt-repository --yes ppa:ubuntu-toolchain-r/test
 RUN add-apt-repository --yes ppa:george-edison55/cmake-3.x
 RUN apt-get -qq update
 RUN apt-get install -y build-essential autoconf automake libtool pkg-config texinfo
-RUN apt-get install -y curl git cmake cmake-data curl unzip g++-4.9
+RUN apt-get install -y curl git cmake cmake-data curl unzip g++-5
 RUN apt-get install -y libreadline6 libreadline6-dev
 
 ENV TPARTY_HOME      /tparty
 ENV LD_LIBRARY_PATH  $TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
-ENV CXX              g++-4.9
+ENV CXX              g++-5
 
 ENV WORKING_DIR  /working
 ENV BUILD_DIR    /build
