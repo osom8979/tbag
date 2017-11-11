@@ -8,6 +8,7 @@
 #include <libtbag/libtbag.h>
 #include <libtbag/util/SingletonUtils.hpp>
 #include <libtbag/locale/Locale.hpp>
+#include <libtbag/encrypt/SslUtils.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -49,6 +50,7 @@ public:
         }
 
         libtbag::uvpp::initialize();
+        libtbag::encrypt::initializeSsl();
         libtbag::util::createSingletonObjects();
 
         _init = true;
@@ -64,6 +66,7 @@ public:
         }
 
         libtbag::util::releaseSingletonObjects();
+        libtbag::encrypt::releaseSsl();
         libtbag::uvpp::release();
 
         _init = false;
