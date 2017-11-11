@@ -4,7 +4,7 @@
 
 #include <tuple>
 #include <utility>
-#include <libtbag/3rd/entt/core/sparse_set.hpp>
+#include <libtbag/3rd/entt/entity/sparse_set.hpp>
 
 
 namespace entt {

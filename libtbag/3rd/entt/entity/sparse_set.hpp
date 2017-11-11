@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstddef>
 #include <cassert>
-#include <libtbag/3rd/entt/core/traits.hpp>
+#include <libtbag/3rd/entt/entity/traits.hpp>
 
 
 namespace entt {

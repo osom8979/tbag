@@ -8,9 +8,9 @@
 #include <cstddef>
 #include <cassert>
 #include <libtbag/3rd/entt/core/family.hpp>
-#include <libtbag/3rd/entt/core/sparse_set.hpp>
-#include <libtbag/3rd/entt/core/traits.hpp>
-#include <libtbag/3rd/entt/core/view.hpp>
+#include <libtbag/3rd/entt/entity/sparse_set.hpp>
+#include <libtbag/3rd/entt/entity/traits.hpp>
+#include <libtbag/3rd/entt/entity/view.hpp>
 
 
 namespace entt {
