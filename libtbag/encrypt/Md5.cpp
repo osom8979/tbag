@@ -39,7 +39,7 @@ bool encryptMd5(std::string const & input, std::string & output)
 
     std::vector<uint8_t> hex_input;
     hex_input.assign(md5.begin(), md5.end());
-    output = string::convertByteArrayToHexString(hex_input, "");
+    output = string::convertByteVectorToHexString(hex_input, "");
     std::transform(output.begin(), output.end(), output.begin(), ::tolower);
 
     return true;

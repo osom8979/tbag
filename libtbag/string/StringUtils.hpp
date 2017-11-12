@@ -103,13 +103,30 @@ TBAG_CONSTEXPR char const * const STRING_HEX_PREFIX = "0x";
  */
 TBAG_API char convertHalfByteToHexChar(uint8_t half_byte);
 TBAG_API std::string convertByteToHexString(uint8_t hex);
-TBAG_API std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes,
+TBAG_API std::string convertByteArrayToHexString(uint8_t const * bytes, std::size_t size,
                                                  std::string const & prefix = STRING_HEX_PREFIX,
                                                  std::string const & separator = STRING_EMPTY);
-TBAG_API std::string convertByteArrayToHexStringBox(std::vector<uint8_t> const & bytes,
+TBAG_API std::string convertByteArrayToHexStringBox(uint8_t const * bytes, std::size_t size,
                                                     int line_width = (2 * 8),
                                                     std::string const & prefix = STRING_HEX_PREFIX,
                                                     std::string const & separator = STRING_SPACE);
+
+template <typename T>
+std::string convertByteVectorToHexString(std::vector<T> const & bytes,
+                                         std::string const & prefix = STRING_HEX_PREFIX,
+                                         std::string const & separator = STRING_EMPTY)
+{
+    return convertByteArrayToHexString((uint8_t const *)bytes.data(), bytes.size(), prefix, separator);
+}
+
+template <typename T>
+std::string convertByteVectorToHexStringBox(std::vector<T> const & bytes, int line_width = (2 * 8),
+                                            std::string const & prefix = STRING_HEX_PREFIX,
+                                            std::string const & separator = STRING_SPACE)
+{
+    return convertByteArrayToHexStringBox((uint8_t const *)bytes.data(),
+                                          bytes.size(), line_width, prefix, separator);
+}
 
 TBAG_CONSTEXPR std::size_t const HEX_STRING_ADDRESS_BYTE_SIZE =
         (/*PREFIX(0x)*/2) + (sizeof(void*) * 2/*HEX STRING ADDRESS*/) + (1/*NULL*/);

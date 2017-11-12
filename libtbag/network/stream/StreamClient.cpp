@@ -27,7 +27,7 @@ static void printBuffer(std::string const & name, uint8_t const * buffer, std::s
 {
     std::string const BUFFER_STR = string::convertAddressToString(buffer);
     std::vector<std::uint8_t> const BUFFER_TO_VEC(buffer, buffer + size);
-    std::string const MEMORY_STR = string::convertByteArrayToHexStringBox(BUFFER_TO_VEC);
+    std::string const MEMORY_STR = string::convertByteVectorToHexStringBox(BUFFER_TO_VEC);
     tDLogD("printBuffer(NAME:{}, BUFFER:{}, SIZE:{})\n", name, BUFFER_STR, MEMORY_STR);
 }
 

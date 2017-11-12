@@ -34,7 +34,7 @@ bool encryptSha1(std::string const & input, std::string & output)
 
     std::vector<uint8_t> hex_input;
     hex_input.assign(sha1.begin(), sha1.end());
-    output = string::convertByteArrayToHexString(hex_input, "");
+    output = string::convertByteVectorToHexString(hex_input, "");
     std::transform(output.begin(), output.end(), output.begin(), ::tolower);
 
     return true;

@@ -150,10 +150,11 @@ std::string convertByteToHexString(uint8_t hex)
     return std::string(result);
 }
 
-std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std::string const & prefix, std::string const & separator)
+std::string convertByteArrayToHexString(uint8_t const * bytes, std::size_t size,
+                                        std::string const & prefix,
+                                        std::string const & separator)
 {
-    std::size_t const SIZE = bytes.size();
-    if (SIZE == 0) {
+    if (size == 0) {
         return std::string();
     }
 
@@ -161,7 +162,7 @@ std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std:
     std::size_t i = 0;
     while (true) {
         result += (prefix + convertByteToHexString(bytes[i]));
-        if ((++i) < SIZE) {
+        if ((++i) < size) {
             result += separator;
         } else {
             break;
@@ -170,33 +171,31 @@ std::string convertByteArrayToHexString(std::vector<uint8_t> const & bytes, std:
     return result;
 }
 
-std::string convertByteArrayToHexStringBox(std::vector<uint8_t> const & bytes,
-                                           int line_width,
+std::string convertByteArrayToHexStringBox(uint8_t const * bytes, std::size_t size, int line_width,
                                            std::string const & prefix,
                                            std::string const & separator)
 {
     if (line_width < 1) {
-        return convertByteArrayToHexString(bytes, prefix, separator);
+        return convertByteArrayToHexString(bytes, size, prefix, separator);
     }
 
     std::vector<uint8_t> line_buffer;
-    std::size_t const ROW = bytes.size() / line_width;
-    uint8_t const * DATA = bytes.data();
+    std::size_t const ROW = size / line_width;
 
     std::size_t i = 0;
     std::stringstream ss;
     for (i = 0; i < ROW; ++i) {
-        line_buffer.assign(bytes.begin() + (i * line_width), bytes.begin() + ((i + 1) * line_width));
+        line_buffer.assign(bytes + (i * line_width), bytes + ((i + 1) * line_width));
         if (i != 0) {
             ss << std::endl;
         }
-        ss << convertByteArrayToHexString(line_buffer, prefix, separator);
+        ss << convertByteVectorToHexString(line_buffer, prefix, separator);
     }
 
     // Last line.
-    if ((ROW * line_width) < bytes.size()) {
-        line_buffer.assign(bytes.begin() + (ROW * line_width), bytes.end());
-        ss << std::endl << convertByteArrayToHexString(line_buffer, prefix, separator);
+    if ((ROW * line_width) < size) {
+        line_buffer.assign(bytes + (ROW * line_width), bytes + size);
+        ss << std::endl << convertByteVectorToHexString(line_buffer, prefix, separator);
     }
 
     return ss.str();

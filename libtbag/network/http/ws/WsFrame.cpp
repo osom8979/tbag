@@ -322,7 +322,7 @@ std::string WsFrame::toDebugString(bool print_payload) const
         } else {
             auto data = std::vector<uint8_t>((uint8_t*)payload.data(),
                                              (uint8_t*)payload.data() + payload_length);
-            ss << string::convertByteArrayToHexString(data);
+            ss << string::convertByteVectorToHexString(data);
         }
     }
     return ss.str();

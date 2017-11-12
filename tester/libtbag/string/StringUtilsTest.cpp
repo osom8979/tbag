@@ -231,12 +231,12 @@ TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
     for (i = 0; i < SIZE - 1; ++i) {
         buffer.push_back(i);
     }
-    std::cout << convertByteArrayToHexStringBox(buffer, WIDTH) << std::endl;
+    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
 
     buffer.push_back(i++);
-    std::cout << convertByteArrayToHexStringBox(buffer, WIDTH) << std::endl;
+    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
 
     buffer.push_back(i++);
-    std::cout << convertByteArrayToHexStringBox(buffer, WIDTH) << std::endl;
+    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
 }
 

@@ -188,7 +188,7 @@ std::vector<InterfaceAddress> getInterfaceAddresses()
 std::string convertPhysicalToString(PhysicalAddress const & physical)
 {
     std::vector<uint8_t> const BUFFER(physical.begin(), physical.end());
-    return string::convertByteArrayToHexString(BUFFER, std::string(), std::string(":"));
+    return string::convertByteVectorToHexString(BUFFER, std::string(), std::string(":"));
 }
 
 void changeDirectory(std::string const & dir)
