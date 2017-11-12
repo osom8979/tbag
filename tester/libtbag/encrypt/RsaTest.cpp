@@ -13,11 +13,14 @@ using namespace libtbag::encrypt;
 
 TEST(RsaTest, Default)
 {
-    std::vector<char> public_key;
-    std::vector<char> private_key;
-    ASSERT_TRUE(generateRsa(public_key, private_key));
+    std::string public_key;
+    std::string private_key;
 
-    std::cout << std::string(public_key.begin(), public_key.end()) << std::endl;
-    std::cout << std::string(private_key.begin(), private_key.end()) << std::endl;
+    ASSERT_TRUE(Rsa::generate(public_key, private_key));
+    ASSERT_FALSE(public_key.empty());
+    ASSERT_FALSE(private_key.empty());
+
+    std::cout << public_key << std::endl;
+    std::cout << private_key << std::endl;
 }
 
