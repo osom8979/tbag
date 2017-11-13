@@ -39,8 +39,16 @@ struct UnixService::Impl : private Noncopyable
     pid_t pid_file;
 #endif
 
-    Impl(UnixService * p) : parent(p), sid(0), pgid(0), ppid(0), pid(0), pid_file(0)
-    { /* EMPTY. */ }
+    Impl(UnixService * p) : parent(p)
+    {
+#if defined(TBAG_PLATFORM_UNIX_LIKE)
+        sid  = 0;
+        pgid = 0;
+        ppid = 0;
+        pid  = 0;
+        pid_file = 0;
+#endif
+    }
 
     ~Impl()
     { /* EMPTY. */ }
@@ -85,7 +93,7 @@ struct UnixService::Impl : private Noncopyable
         //   assert(ppid == INIT_PROCESS);
         //  @endcode
         // Reason:
-        //  Not working in the OSX.
+        //  It works with root privileges.
 
         tDLogI("UnixService::Impl::eliminateControlTerminals() Fork child process: SID({}) PGID({}) PPID({}) PID({})",
                (int)sid, (int)pgid, (int)ppid, (int)pid);
