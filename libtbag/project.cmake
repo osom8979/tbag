@@ -6,6 +6,7 @@ tbag_modules__apply_default ()
 tbag_modules__update_default_objects ()
 
 ## TBAG EXPORT API.
+tbag_modules__apply_dep_lua_export_macros ()
 list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_EXPORT_API)
 list (APPEND TBAG_PROJECT_DEFINITIONS U_COMBINED_IMPLEMENTATION)
 list (APPEND TBAG_PROJECT_DEFINITIONS JSON_DLL_BUILD)

@@ -33,6 +33,8 @@ prepend (LIB_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src"
 
 if (WIN32)
     add_definitions (-DLUA_BUILD_AS_DLL)
+    add_definitions (-DLUA_CORE)
+    add_definitions (-DLUA_LIB)
 elseif (UNIX)
     if (APPLE)
         add_definitions (-DLUA_USE_MACOSX)

@@ -7,6 +7,7 @@ tbag_modules__update_default_objects ()
 
 ## Dependencies.
 tbag_modules__apply_dep_gtest ()
+tbag_modules__apply_dep_lua_import_macros ()
 
 ## libtbag library.
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbag)
