@@ -258,11 +258,16 @@ void registerDefaultStdTerminateHandler(std::string const & logger_name)
     registerStdTerminateHandler(new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);
 }
 
-void registerDefaultHandler(std::string const & logger_name)
+void registerDefaultErrorHandler(std::string const & logger_name)
 {
     registerHandler(TBAG_SIGNAL_ABORT                 , new __impl::DefaultAbortHandler    (logger_name), LAST_ORDER);
     registerHandler(TBAG_SIGNAL_SEGMENTATION_VIOLATION, new __impl::DefaultSegFaultHandler (logger_name), LAST_ORDER);
-    registerHandler(TBAG_SIGNAL_TERMINATION           , new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);
+}
+
+void registerDefaultHandler(std::string const & logger_name)
+{
+    registerDefaultErrorHandler(logger_name);
+    registerHandler(TBAG_SIGNAL_TERMINATION, new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);
 }
 
 SignalHandler * createDefaultSignalHandler(std::string const & logger_name)

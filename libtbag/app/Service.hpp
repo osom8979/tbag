@@ -41,6 +41,9 @@ public:
 private:
     UniqueService _service;
 
+private:
+    bool _is_start;
+
 public:
     Service(int argc, char ** argv, char ** envs);
     Service(int argc, char ** argv);

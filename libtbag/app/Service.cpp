@@ -26,17 +26,18 @@ using RealService = details::UnixService;
 using RealService = details::FakeService;
 #endif
 
-Service::Service(int argc, char ** argv, char ** envs) : Application(argc, argv, envs)
+Service::Service(int argc, char ** argv, char ** envs)
+        : Application(argc, argv, envs), _is_start(false)
 {
     // EMPTY.
 }
 
-Service::Service(int argc, char ** argv) : Application(argc, argv)
+Service::Service(int argc, char ** argv) : Service(argc, argv, nullptr)
 {
     // EMPTY.
 }
 
-Service::Service() : Application()
+Service::Service() : Service(0, nullptr, nullptr)
 {
     // EMPTY.
 }
@@ -88,24 +89,53 @@ Err Service::uninstall()
 
 Err Service::start()
 {
+    if (_is_start) {
+        tDLogE("Service::start() Already started state.");
+        return Err::E_ALREADY;
+    }
+
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::start() The service is not ready.");
         return Err::E_ILLSTATE;
     }
-    return _service->start();
+
+    Err const START_CODE = _service->start();
+    if (isSuccess(START_CODE)) {
+        tDLogI("Service::start() Start service.");
+        _is_start = true;
+    } else {
+        tDLogE("Service::start() Start {} error.", getErrName(START_CODE));
+    }
+    return START_CODE;
 }
 
 Err Service::stop()
 {
+    if (_is_start == false) {
+        tDLogE("Service::stop() Already stopped state.");
+        return Err::E_ALREADY;
+    }
+
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::stop() The service is not ready.");
         return Err::E_ILLSTATE;
     }
-    return _service->stop();
+
+    Err const STOP_CODE = _service->stop();
+    if (isSuccess(STOP_CODE)) {
+        tDLogI("Service::stop() Stop service.");
+        _is_start = false;
+    } else {
+        tDLogE("Service::stop() Stop {} error.", getErrName(STOP_CODE));
+    }
+    return STOP_CODE;
 }
 
 void Service::onTerminate()
 {
+    if (_is_start) {
+        stop();
+    }
     signal::exitForce(0);
 }
 

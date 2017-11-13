@@ -93,7 +93,7 @@ bool TpotMain::onLoadConfig(DefaultXmlModel & config)
 
     using namespace libtbag::signal;
     registerDefaultStdTerminateHandler(log::TBAG_DEFAULT_LOGGER_NAME);
-    registerDefaultHandler(log::TBAG_DEFAULT_LOGGER_NAME);
+    registerDefaultErrorHandler(log::TBAG_DEFAULT_LOGGER_NAME);
 
     auto server = getServerNode().lock();
     assert(static_cast<bool>(server));
@@ -152,6 +152,7 @@ int TpotMain::onDefaultCommand(StringVector const & args)
             Err const START_CODE = start();
             if (isFailure(START_CODE)) {
                 tDLogE("TpotMain::onDefaultCommand() Start service {} error", getErrName(START_CODE));
+                return EXIT_FAILURE;
             }
             registerTerminateHandler();
         }

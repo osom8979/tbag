@@ -43,9 +43,7 @@ struct UnixService::Impl : private Noncopyable
     { /* EMPTY. */ }
 
     ~Impl()
-    {
-        removePidFile();
-    }
+    { /* EMPTY. */ }
 
     Err eliminateControlTerminals()
     {
@@ -208,10 +206,7 @@ UnixService::UnixService(std::string const & name)
 
 UnixService::~UnixService()
 {
-    _impl.reset();
-    if (_pid_path.empty() == false) {
-        filesystem::Path(_pid_path).remove();
-    }
+    // EMPTY.
 }
 
 Err UnixService::install()
@@ -255,11 +250,11 @@ Err UnixService::start()
 
 Err UnixService::stop()
 {
-#if defined(TBAG_PLATFORM_UNIX_LIKE)
-    return Err::E_ENOSYS;
-#else
-    return Err::E_ENOSYS;
-#endif
+    _impl->removePidFile();
+    if (_pid_path.empty() == false) {
+        filesystem::Path(_pid_path).remove();
+    }
+    return Err::E_SUCCESS;
 }
 
 } // namespace details

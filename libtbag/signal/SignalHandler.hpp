@@ -105,6 +105,7 @@ TBAG_API void registerHandler(int signal, SignalHandler * handler, int order = 0
 TBAG_API void registerFunctionalHandler(int signal, FuncSignalHandler::Callback const & cb, int order = 0);
 
 TBAG_API void registerDefaultStdTerminateHandler(std::string const & logger_name = "");
+TBAG_API void registerDefaultErrorHandler(std::string const & logger_name = "");
 TBAG_API void registerDefaultHandler(std::string const & logger_name = "");
 
 TBAG_API SignalHandler * createDefaultSignalHandler(std::string const & logger_name = "");
