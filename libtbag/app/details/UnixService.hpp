@@ -16,6 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/app/details/ServiceInterface.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,6 +35,19 @@ namespace details {
  */
 class TBAG_API UnixService : public ServiceCommon
 {
+public:
+    struct Impl;
+    friend struct Impl;
+
+public:
+    using UniqueImpl = std::unique_ptr<Impl>;
+
+private:
+    UniqueImpl _impl;
+
+private:
+    std::string _pid_path;
+
 public:
     UnixService(std::string const & name);
     virtual ~UnixService();

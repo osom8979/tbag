@@ -35,10 +35,11 @@ TBAG_CONSTEXPR static int const DEFAULT_TIMEOUT_MILLISEC = 10 * 1000;
 
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
         : app::ex::ServiceApp(TPOT_NAME, argc, argv, envs),
-          _commands(), _ip(), _port(0), _timeout(0)
+          _commands(), _ip(), _port(0), _timeout(0), _service(false)
 {
-    _commands.insert(HelpPair(TPOT_COMMAND_SERVER , "TpoT server mode."));
-    _commands.insert(HelpPair(TPOT_COMMAND_REQUEST, "TpoT request mode."));
+    createService(TPOT_NAME);
+    _commands.insert(HelpPair(TPOT_COMMAND_SERVER   , "TpoT server mode."));
+    _commands.insert(HelpPair(TPOT_COMMAND_REQUEST  , "TpoT request mode."));
 }
 
 TpotMain::~TpotMain()
@@ -69,6 +70,7 @@ bool TpotMain::onCreate()
     atOptions().insertDefault("ip", &_ip, std::string(), "Assign ip address directly. (If not, refer to the config file)");
     atOptions().insertDefault("port", &_port, 0, "Assign port number directly. (If not, refer to the config file)");
     atOptions().insertDefault("timeout", &_timeout, DEFAULT_TIMEOUT_MILLISEC, "Write(request/response) packet timeout.");
+    atOptions().insertDefault("service", &_service, true, "Enable service(daemon) mode.");
 
     auto config = getConfig().lock();
     assert(static_cast<bool>(config));
@@ -144,6 +146,16 @@ int TpotMain::onDefaultCommand(StringVector const & args)
 
     int exit_code = EXIT_FAILURE;
     if (args[0] == TPOT_COMMAND_SERVER) {
+
+        if (_service) {
+            tDLogIfI(isEnableVerbose(), "TpotMain::onDefaultCommand() Enable Service(Daemon) Mode");
+            Err const START_CODE = start();
+            if (isFailure(START_CODE)) {
+                tDLogE("TpotMain::onDefaultCommand() Start service {} error", getErrName(START_CODE));
+            }
+            registerTerminateHandler();
+        }
+
         TpotServer::Param param;
         param.verbose = isEnableVerbose();
         param.bind = ip;

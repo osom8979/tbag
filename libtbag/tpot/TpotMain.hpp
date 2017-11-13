@@ -52,8 +52,9 @@ private:
 
 private:
     std::string _ip;
-    int _port;
-    int _timeout;
+    int  _port;
+    int  _timeout;
+    bool _service;
 
 public:
     TpotMain(int argc, char ** argv, char ** envs);

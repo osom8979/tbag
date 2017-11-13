@@ -61,6 +61,13 @@ Err Service::createService(std::string const & name)
     return Err::E_SUCCESS;
 }
 
+void Service::registerTerminateHandler()
+{
+    signal::registerFunctionalHandler(signal::TBAG_SIGNAL_TERMINATION, [this](int signal){
+        this->onTerminate();
+    });
+}
+
 Err Service::install()
 {
     if (static_cast<bool>(_service) == false) {
@@ -95,6 +102,11 @@ Err Service::stop()
         return Err::E_ILLSTATE;
     }
     return _service->stop();
+}
+
+void Service::onTerminate()
+{
+    signal::exitForce(0);
 }
 
 } // namespace app

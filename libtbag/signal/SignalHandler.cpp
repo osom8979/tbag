@@ -248,6 +248,11 @@ void registerHandler(int signal, SignalHandler * handler, int order)
     std::signal(signal, __signal_dispatcher__);
 }
 
+void registerFunctionalHandler(int signal, FuncSignalHandler::Callback const & cb, int order)
+{
+    signal::registerHandler(signal, new FuncSignalHandler(cb), order);
+}
+
 void registerDefaultStdTerminateHandler(std::string const & logger_name)
 {
     registerStdTerminateHandler(new __impl::DefaultTerminateHandler(logger_name), LAST_ORDER);

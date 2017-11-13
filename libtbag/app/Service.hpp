@@ -49,12 +49,16 @@ public:
 
 public:
     Err createService(std::string const & name);
+    void registerTerminateHandler();
 
 public:
     Err install();
     Err uninstall();
     Err start();
     Err stop();
+
+public:
+    virtual void onTerminate();
 };
 
 } // namespace app

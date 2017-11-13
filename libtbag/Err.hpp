@@ -68,6 +68,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_HTTP_3XX, "Redirection (HTTP 3xx)"  ) \
     _TBAG_XX(_HTTP_4XX, "Client Error (HTTP 4xx)" ) \
     _TBAG_XX(_HTTP_5XX, "Server Error (HTTP 5xx)" ) \
+    _TBAG_XX(_EXIT    , "Exit process"            ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
