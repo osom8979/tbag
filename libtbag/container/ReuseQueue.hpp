@@ -182,8 +182,6 @@ public:
     using SharedValue = std::shared_ptr<Value>;
     using Queue       = std::deque<SharedValue>;
 
-    static_assert(is_shared_ptr<Value>::value == false, "Value should not be std::shared_ptr type.");
-
     using value_type             = typename Queue::value_type;
     using allocator_type         = typename Queue::allocator_type;
     using reference              = typename Queue::reference;
@@ -196,6 +194,11 @@ public:
     using const_pointer          = typename Queue::const_pointer;
     using reverse_iterator       = typename Queue::reverse_iterator;
     using const_reverse_iterator = typename Queue::const_reverse_iterator;
+
+    static_assert(is_shared_ptr<Value>::value == false,
+                  "Value should not be std::shared_ptr type.");
+    static_assert(std::is_same<SharedValue, value_type>::value,
+                  "SharedValue must be the same type as value_type");
 
 private:
     Queue _active;
