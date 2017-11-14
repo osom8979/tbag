@@ -16,9 +16,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
 
 #include <deque>
+#include <memory>
 #include <utility>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -179,8 +182,7 @@ public:
     using SharedValue = std::shared_ptr<Value>;
     using Queue       = std::deque<SharedValue>;
 
-    static_assert(std::is_same<Value, typename std::shared_ptr<Value>::element_type>::value == false,
-                  "Value should not be std::shared_ptr type.");
+    static_assert(is_shared_ptr<Value>::value == false, "Value should not be std::shared_ptr type.");
 
     using value_type             = typename Queue::value_type;
     using allocator_type         = typename Queue::allocator_type;
@@ -289,20 +291,21 @@ public:
         if (_ready.empty()) {
             _active.emplace_back(new Value(std::forward<Args>(args) ...));
         } else {
-            _active.push_back(_ready.front());
-            *(_active.back()) = Value(std::forward<Args>(args) ...);
+            SharedValue temp = _ready.front();
             _ready.pop_front();
+            *temp = Value(std::forward<Args>(args) ...);
+            _active.push_back(temp);
         }
     }
 
-    Err pop()
+    bool pop()
     {
         if (_active.empty()) {
-            return Err::E_EQUEUE;
+            return false;
         }
         _ready.push_back(_active.front());
         _active.pop_front();
-        return Err::E_SUCCESS;
+        return true;
     }
 
     void clear()
@@ -329,15 +332,15 @@ public:
         _active.push_back(value);
     }
 
-    Err frontAndPop(Value & result)
+    bool frontAndPop(Value & result)
     {
         if (_active.empty()) {
-            return Err::E_EQUEUE;
+            return false;
         }
         result = _active.front();
         _ready.push_back(_active.front());
         _active.pop_front();
-        return Err::E_SUCCESS;
+        return true;
     }
 };
 

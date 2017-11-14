@@ -15,10 +15,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
 
 #include <map>
-#include <queue>
+#include <unordered_map>
+#include <deque>
 #include <memory>
+#include <utility>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,6 +35,7 @@ namespace container {
  *
  * @author zer0
  * @date   2016-08-03
+ * @date   2017-11-14 (Use the std::shared_ptr)
  *
  * @warning
  *  - Don't use the std::multimap class template.
@@ -38,105 +43,175 @@ namespace container {
  */
 template <typename KeyType
         , typename ValueType
-        , typename MapType = std::map<KeyType, ValueType> >
+        , typename MapType = std::map<KeyType, std::shared_ptr<ValueType> > >
 class ReuseMap
 {
 public:
-    using Key     = KeyType;
-    using Value   = ValueType;
-    using Map     = MapType;
+    using Key   = KeyType;
+    using Value = ValueType;
+    using Map   = MapType;
 
-    using MapItr  = typename MapType::iterator;
-    using MapPair = typename Map::value_type;
-    using Queue   = std::queue<Value>;
+    using SharedValue = std::shared_ptr<Value>;
+    using Queue       = std::deque<SharedValue>;
+
+    using key_type        = typename Map::key_type;
+    using mapped_type     = typename Map::mapped_type;
+    using value_type      = typename Map::value_type;
+    using key_compare     = typename Map::key_compare;
+    using allocator_type  = typename Map::allocator_type;
+    using reference       = typename Map::reference;
+    using const_reference = typename Map::const_reference;
+
+    using pointer                = typename Map::pointer;
+    using const_pointer          = typename Map::const_pointer;
+    using size_type              = typename Map::size_type;
+    using difference_type        = typename Map::difference_type;
+    using iterator               = typename Map::iterator;
+    using const_iterator         = typename Map::const_iterator;
+    using reverse_iterator       = typename Map::reverse_iterator;
+    using const_reverse_iterator = typename Map::const_reverse_iterator;
+
+    static_assert(is_shared_ptr<Value>::value == false,
+                  "Value should not be std::shared_ptr type.");
+    static_assert(std::is_same<SharedValue, mapped_type>::value,
+                  "SharedValue must be the same type as mapped_type");
 
 private:
-    Map   _active_map;
-    Queue _remove_queue;
+    Map   _active;
+    Queue _ready;
 
 public:
-    ReuseMap() = default;
-    ~ReuseMap() = default;
+    ReuseMap() : _active(), _ready()
+    { /* EMPTY. */ }
 
-    ReuseMap(ReuseMap const & obj) = default;
-    ReuseMap & operator =(ReuseMap const & obj) = default;
+    ReuseMap(ReuseMap const & obj) : ReuseMap()
+    { (*this) = obj; }
 
-#if defined(TBAG_HAS_DEFAULTED_FUNCTIONS) && !defined(TBAG_HAS_DEFAULTED_FUNCTIONS_BUT_NOT_MOVE_FUNCTION)
-    ReuseMap(ReuseMap && obj) = default;
-    ReuseMap & operator =(ReuseMap && obj) = default;
-#endif
+    ReuseMap(ReuseMap && obj) : ReuseMap()
+    { (*this) = std::move(obj); }
+
+    ~ReuseMap()
+    { /* EMPTY. */ }
+
 
 public:
-    void clear()
+    ReuseMap & operator =(ReuseMap const & obj)
     {
-        _active_map.clear();
-        if (_remove_queue.empty() == false) {
-            _remove_queue.pop();
+        if (this != &obj) {
+            _active = obj._active;
+            _ready = obj._ready;
         }
+        return *this;
+    }
+
+    ReuseMap & operator =(ReuseMap && obj)
+    {
+        swap(obj);
+        return *this;
     }
 
 public:
-    Value * create(KeyType const & key)
+    void swap(ReuseMap & obj)
     {
-        if (_active_map.find(key) != _active_map.end()) {
+        if (this != &obj) {
+            _active.swap(obj._active);
+            _ready.swap(obj._ready);
+        }
+    }
+
+    friend void swap(ReuseMap & lh, ReuseMap & rh)
+    {
+        lh.swap(rh);
+    }
+
+public:
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_active.size()) { return _active.size(); }
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_active.empty()) { return _active.empty(); }
+
+public:
+    inline std::size_t sizeOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.size()) { return _ready.size(); }
+    inline bool emptyOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.empty()) { return _ready.empty(); }
+
+public:
+    // @formatter:off
+          iterator begin()       TBAG_NOEXCEPT_SP_OP(_active.begin()) { return _active.begin(); }
+    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(_active.begin()) { return _active.begin(); }
+          iterator   end()       TBAG_NOEXCEPT_SP_OP(_active.  end()) { return _active.  end(); }
+    const_iterator   end() const TBAG_NOEXCEPT_SP_OP(_active.  end()) { return _active.  end(); }
+
+          reverse_iterator rbegin()       TBAG_NOEXCEPT_SP_OP(_active.rbegin()) { return _active.rbegin(); }
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT_SP_OP(_active.rbegin()) { return _active.rbegin(); }
+          reverse_iterator   rend()       TBAG_NOEXCEPT_SP_OP(_active.  rend()) { return _active.  rend(); }
+    const_reverse_iterator   rend() const TBAG_NOEXCEPT_SP_OP(_active.  rend()) { return _active.  rend(); }
+
+            const_iterator  cbegin() const TBAG_NOEXCEPT_SP_OP(_active. cbegin()) { return _active. cbegin(); }
+            const_iterator    cend() const TBAG_NOEXCEPT_SP_OP(_active.   cend()) { return _active.   cend(); }
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(_active.crbegin()) { return _active.crbegin(); }
+    const_reverse_iterator   crend() const TBAG_NOEXCEPT_SP_OP(_active.  crend()) { return _active.  crend(); }
+    // @formatter:on
+
+public:
+    template <typename ... Args>
+    std::pair<iterator, bool> insert(Key const & key, Args && ... args)
+    {
+        auto itr = _active.find(key);
+        if (itr != _active.end()) {
             // Found in the active map.
-            return nullptr;
+            return std::pair<iterator, bool>(itr, false);
         }
 
-        std::pair<MapItr, bool> itr;
-
-        if (_remove_queue.empty()) {
-            // New memory.
-            itr = _active_map.insert(MapPair(key, Value()));
+        SharedValue value;
+        if (_ready.empty()) {
+            value.reset(new Value(std::forward<Args>(args) ...));
         } else {
-            itr = _active_map.insert(MapPair(key, _remove_queue.front()));
-            _remove_queue.pop();
+            value = _ready.front();
+            _ready.pop_front();
+            *value = Value(std::forward<Args>(args) ...);
         }
-
-        if (itr.second) {
-            return &(itr.first->second);
-        }
-        return nullptr;
+        return _active.emplace(key, value);
     }
 
-    bool erase(KeyType const & key)
+    bool erase(Key const & key)
     {
-        auto active_itr = _active_map.find(key);
-        if (active_itr == _active_map.end()) {
-            // Not found in the active map.
-            return false;
+        auto itr = _active.find(key);
+        if (itr == _active.end()) {
+            return false; // Not found in the active map.
         }
-
-        _remove_queue.push(active_itr->second);
-        _active_map.erase(active_itr);
+        _ready.push_back(itr->second);
+        _active.erase(itr);
         return true;
     }
 
-    Value * find(KeyType const & key)
+    iterator find(Key const & key)
     {
-        auto active_itr = _active_map.find(key);
-        if (active_itr == _active_map.end()) {
-            // Not found in the active map.
-            return nullptr;
-        }
-
-        return &(active_itr->second);
+        return _active.find(key);
     }
 
-public:
-    inline std::size_t size() const TBAG_NOEXCEPT
-    { return _active_map.size(); }
-    inline bool empty() const TBAG_NOEXCEPT
-    { return _active_map.empty(); }
+    void clear()
+    {
+        while (_active.empty() == false) {
+            auto itr = _active.begin();
+            _ready.push_back(itr->second);
+            _active.erase(itr);
+        }
+    }
 
-    inline std::size_t sizeOfRemoveQueue() const TBAG_NOEXCEPT
-    { return _remove_queue.size(); }
-    inline bool emptyOfRemoveQueue() const TBAG_NOEXCEPT
-    { return _remove_queue.empty(); }
+    // ------------------
+    // Extension methods.
+    // ------------------
+
+    ReuseMap clone() const
+    {
+        ReuseMap result;
+        for (auto & a : _active) {
+            result._active.emplace(a.first, SharedValue(new Value(*a.second)));
+        }
+        for (auto & r : _ready) {
+            result._ready.emplace_back(SharedValue(new Value(*r)));
+        }
+        return result;
+    }
 };
-
-template <typename Key, typename Value>
-using ReusePtrMap = ReuseMap<Key, std::shared_ptr<Value> >;
 
 } // namespace container
 
