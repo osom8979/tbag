@@ -1565,9 +1565,9 @@ namespace sol {
 // beginning of sol/compatibility/version.hpp
 
 #ifdef SOL_USING_CXX_LUA
-#include <libtbag/3rd/lua/lua.h>
-#include <libtbag/3rd/lua/lualib.h>
-#include <libtbag/3rd/lua/lauxlib.h>
+#include <libtbag/3rd/lua/src/lua.h>
+#include <libtbag/3rd/lua/src/lualib.h>
+#include <libtbag/3rd/lua/src/lauxlib.h>
 #ifdef SOL_USING_CXX_LUAJIT
 #include <luajit.h>
 #endif // C++ LuaJIT ... whatever that means

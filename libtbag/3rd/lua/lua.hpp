@@ -1,9 +1,10 @@
-// lua.hpp
-// Lua header files for C++
-// <<extern "C">> not supplied automatically because Lua also compiles as C++
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_3RD_LUA_LUA_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_3RD_LUA_LUA_HPP__
 
 extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include <libtbag/3rd/lua/src/lua.h>
+#include <libtbag/3rd/lua/src/lualib.h>
+#include <libtbag/3rd/lua/src/lauxlib.h>
 }
+
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_3RD_LUA_LUA_HPP__
