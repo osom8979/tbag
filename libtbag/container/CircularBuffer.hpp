@@ -294,6 +294,7 @@ public:
         for (; index < size; ++index) {
             // @formatter:off
             // Call it only once in current loop-cycle.
+            // Reason: // TODO
             temp_last = last();
             temp_max  = capacity();
             // @formatter:on

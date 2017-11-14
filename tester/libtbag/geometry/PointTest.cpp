@@ -213,6 +213,7 @@ TEST(PointTest, Math)
 TEST(PointTest, Convert)
 {
     ASSERT_EQ(Size(1, 2), Point(1, 2).toSize());
-    ASSERT_EQ(Point(1, 2), Size(1, 2).toPoint());
+    ASSERT_EQ(Size(1, 2), Point(1, 2).toOther<Size>());
+    ASSERT_EQ(Point(1, 2), Size(1, 2).toOther<Point>());
 }
 

@@ -22,7 +22,6 @@
 #include <cstdlib>
 #include <cstdint>
 
-#include <initializer_list>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -55,27 +54,6 @@ struct BaseRect
     BaseRect() : x(), y(), width(), height()
     { /* EMPTY. */ }
 
-    BaseRect(std::initializer_list<Type> list) : x(), y(), width(), height()
-    {
-        auto itr = list.begin();
-        if (itr == list.end()) {
-            return;
-        }
-        x = *itr;
-        if ((++itr) == list.end()) {
-            return;
-        }
-        y = *itr;
-        if ((++itr) == list.end()) {
-            return;
-        }
-        width = *itr;
-        if ((++itr) == list.end()) {
-            return;
-        }
-        height = *itr;
-    }
-
     BaseRect(Type const & x_, Type const & y_, Type const & w_, Type const & h_) : x(x_), y(y_), width(w_), height(h_)
     { /* EMPTY. */ }
 
@@ -97,10 +75,10 @@ struct BaseRect
     inline BasePoint<Type> point () const { return BasePoint<Type>(x, y); }
     inline BasePoint<Type> point1() const { return point(); }
     inline BasePoint<Type> point2() const { return BasePoint<Type>(x + width, y + height); }
-    inline BasePoint<Type> center() const { return BasePoint<Type>(x + (width / 2), y + (height / 2)); }
+    inline BasePoint<Type> center() const { return BasePoint<Type>(x + (width * 0.5), y + (height * 0.5)); }
 
     inline BaseSize<Type> size() const { return BaseSize<Type>(width, height); }
-    inline BaseSize<Type> half() const { return BaseSize<Type>(width / 2, height / 2); }
+    inline BaseSize<Type> half() const { return BaseSize<Type>(width * 0.5, height  * 0.5); }
 
     inline Type  area() const { return width * height; }
     inline bool empty() const { return width <= 0 || height <= 0; }
@@ -310,6 +288,12 @@ struct BaseRect
         std::stringstream ss;
         ss << x << DEFAULT_DELIMITER << y << DEFAULT_DELIMITER << width << DEFAULT_DELIMITER << height;
         return ss.str();
+    }
+
+    template <typename OtherType>
+    OtherType toOther() const
+    {
+        return OtherType{x, y, width, height};
     }
 };
 

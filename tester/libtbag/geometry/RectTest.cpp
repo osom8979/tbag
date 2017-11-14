@@ -242,3 +242,22 @@ TEST(RectTest, String)
     ASSERT_FALSE(p.toString().empty());
 }
 
+namespace __impl {
+
+struct TestRect
+{
+    int x, y, w, h;
+};
+
+} // namespace __impl
+
+TEST(RectTest, Convert)
+{
+    using namespace __impl;
+    TestRect const TEST_RECT = Rect(1, 2, 3, 4).toOther<TestRect>();
+    ASSERT_EQ(1, TEST_RECT.x);
+    ASSERT_EQ(2, TEST_RECT.y);
+    ASSERT_EQ(3, TEST_RECT.w);
+    ASSERT_EQ(4, TEST_RECT.h);
+}
+

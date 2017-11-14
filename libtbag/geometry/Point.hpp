@@ -21,7 +21,6 @@
 #include <cstdlib>
 #include <cstdint>
 
-#include <initializer_list>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -54,21 +53,6 @@ struct BasePoint
 
     BasePoint() : x(), y()
     { /* EMPTY. */ }
-
-    BasePoint(std::initializer_list<Type> list) : x(), y()
-    {
-        auto itr = list.begin();
-        if (itr == list.end()) {
-            return;
-        }
-        x = *itr;
-        ++itr;
-
-        if (itr == list.end()) {
-            return;
-        }
-        y = *itr;
-    }
 
     BasePoint(Type const & x_, Type const & y_) : x(x_), y(y_)
     { /* EMPTY. */ }
@@ -224,6 +208,12 @@ struct BasePoint
     {
         return BaseSize<Type>(x, y);
     }
+
+    template <typename OtherType>
+    OtherType toOther() const
+    {
+        return OtherType{x, y};
+    }
 };
 
 template <typename T>
@@ -306,21 +296,6 @@ struct BaseSize
 
     BaseSize() : width(), height()
     { /* EMPTY. */ }
-
-    BaseSize(std::initializer_list<Type> list) : width(), height()
-    {
-        auto itr = list.begin();
-        if (itr == list.end()) {
-            return;
-        }
-        width = *itr;
-        ++itr;
-
-        if (itr == list.end()) {
-            return;
-        }
-        height = *itr;
-    }
 
     BaseSize(Type const & w, Type const & h) : width(w), height(h)
     { /* EMPTY. */ }
@@ -462,6 +437,12 @@ struct BaseSize
     BasePoint<Type> toPoint() const
     {
         return BasePoint<Type>(width, height);
+    }
+
+    template <typename OtherType>
+    OtherType toOther() const
+    {
+        return OtherType{width, height};
     }
 };
 
