@@ -19,6 +19,7 @@
 #include <cstddef>
 
 #include <utility>
+#include <memory>
 #include <type_traits>
 
 #define STATIC_ASSERT_CHECK_TRAIT1(traits, type) \
@@ -57,9 +58,16 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-// ----------------
-// Transformations.
-// ----------------
+template <typename T, typename SharedType = T>
+struct is_shared_ptr : public std::false_type
+{ /* EMPTY. */ };
+
+template <typename T>
+struct is_shared_ptr<std::shared_ptr<T> > : public std::true_type
+{ /* EMPTY. */ };
+
+static_assert(is_shared_ptr<int>::value == false, "T is not std::shared_ptr type.");
+static_assert(is_shared_ptr<std::shared_ptr<int> >::value, "T is std::shared_ptr type.");
 
 /**
  * Remove const & reference.
