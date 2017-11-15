@@ -122,3 +122,52 @@ TEST(ReuseMapTest, Default)
     ASSERT_EQ(3U, map.sizeOfReady());
 }
 
+TEST(ReuseMapTest, UnorderedMap)
+{
+    UnorderedReuseMap<int, int> map1;
+    UnorderedReuseMap<int, int> map2;
+
+    int const TEST_KEY1 = 100;
+    int const TEST_KEY2 = 200;
+
+    int const TEST_VALUE1 = 101;
+    int const TEST_VALUE2 = 201;
+    int const TEST_VALUE3 = 301;
+
+    ASSERT_EQ(0, map1.size());
+    ASSERT_EQ(0, map1.sizeOfReady());
+    ASSERT_TRUE(map1.empty());
+    ASSERT_TRUE(map1.emptyOfReady());
+
+    ASSERT_TRUE(map1.insert(TEST_KEY1).second);
+    ASSERT_TRUE(map1.insert(TEST_KEY2, TEST_VALUE1).second);
+    ASSERT_EQ(2, map1.size());
+    ASSERT_EQ(0, map1.sizeOfReady());
+    ASSERT_FALSE(map1.empty());
+    ASSERT_TRUE(map1.emptyOfReady());
+
+    ASSERT_TRUE(map1.erase(TEST_KEY1));
+    ASSERT_EQ(1, map1.size());
+    ASSERT_EQ(1, map1.sizeOfReady());
+
+    ASSERT_EQ(map1.end(), map1.find(TEST_KEY1));
+    ASSERT_NE(map1.end(), map1.find(TEST_KEY2));
+
+    map2 = map1;
+    *(map1.find(TEST_KEY2)->second) = TEST_VALUE2;
+    ASSERT_EQ(TEST_VALUE2, *(map2.find(TEST_KEY2)->second));
+    ASSERT_EQ(1, map1.size());
+    ASSERT_EQ(1, map2.size());
+
+    map2 = map1.clone();
+    *(map1.find(TEST_KEY2)->second) = TEST_VALUE3;
+    ASSERT_EQ(TEST_VALUE2, *(map2.find(TEST_KEY2)->second));
+    ASSERT_EQ(1, map1.size());
+    ASSERT_EQ(1, map2.size());
+
+    map1.clear();
+    map2.clear();
+    ASSERT_EQ(0, map1.size());
+    ASSERT_EQ(0, map2.size());
+}
+

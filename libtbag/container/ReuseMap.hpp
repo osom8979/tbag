@@ -57,7 +57,6 @@ public:
     using key_type        = typename Map::key_type;
     using mapped_type     = typename Map::mapped_type;
     using value_type      = typename Map::value_type;
-    using key_compare     = typename Map::key_compare;
     using allocator_type  = typename Map::allocator_type;
     using reference       = typename Map::reference;
     using const_reference = typename Map::const_reference;
@@ -68,8 +67,6 @@ public:
     using difference_type        = typename Map::difference_type;
     using iterator               = typename Map::iterator;
     using const_iterator         = typename Map::const_iterator;
-    using reverse_iterator       = typename Map::reverse_iterator;
-    using const_reverse_iterator = typename Map::const_reverse_iterator;
 
     static_assert(is_shared_ptr<Value>::value == false,
                   "Value should not be std::shared_ptr type.");
@@ -134,20 +131,12 @@ public:
 
 public:
     // @formatter:off
-          iterator begin()       TBAG_NOEXCEPT_SP_OP(_active.begin()) { return _active.begin(); }
-    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(_active.begin()) { return _active.begin(); }
-          iterator   end()       TBAG_NOEXCEPT_SP_OP(_active.  end()) { return _active.  end(); }
-    const_iterator   end() const TBAG_NOEXCEPT_SP_OP(_active.  end()) { return _active.  end(); }
-
-          reverse_iterator rbegin()       TBAG_NOEXCEPT_SP_OP(_active.rbegin()) { return _active.rbegin(); }
-    const_reverse_iterator rbegin() const TBAG_NOEXCEPT_SP_OP(_active.rbegin()) { return _active.rbegin(); }
-          reverse_iterator   rend()       TBAG_NOEXCEPT_SP_OP(_active.  rend()) { return _active.  rend(); }
-    const_reverse_iterator   rend() const TBAG_NOEXCEPT_SP_OP(_active.  rend()) { return _active.  rend(); }
-
-            const_iterator  cbegin() const TBAG_NOEXCEPT_SP_OP(_active. cbegin()) { return _active. cbegin(); }
-            const_iterator    cend() const TBAG_NOEXCEPT_SP_OP(_active.   cend()) { return _active.   cend(); }
-    const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(_active.crbegin()) { return _active.crbegin(); }
-    const_reverse_iterator   crend() const TBAG_NOEXCEPT_SP_OP(_active.  crend()) { return _active.  crend(); }
+          iterator   begin()       TBAG_NOEXCEPT_SP_OP(_active. begin()) { return _active. begin(); }
+    const_iterator   begin() const TBAG_NOEXCEPT_SP_OP(_active. begin()) { return _active. begin(); }
+          iterator     end()       TBAG_NOEXCEPT_SP_OP(_active.   end()) { return _active.   end(); }
+    const_iterator     end() const TBAG_NOEXCEPT_SP_OP(_active.   end()) { return _active.   end(); }
+    const_iterator  cbegin() const TBAG_NOEXCEPT_SP_OP(_active.cbegin()) { return _active.cbegin(); }
+    const_iterator    cend() const TBAG_NOEXCEPT_SP_OP(_active.  cend()) { return _active.  cend(); }
     // @formatter:on
 
 public:
@@ -212,6 +201,15 @@ public:
         return result;
     }
 };
+
+/**
+ * UnorderedReuseMap class prototype.
+ *
+ * @author zer0
+ * @date   2017-11-15
+ */
+template <typename KeyType, typename ValueType>
+using UnorderedReuseMap = ReuseMap<KeyType, ValueType, std::unordered_map<KeyType, std::shared_ptr<ValueType> > >;
 
 } // namespace container
 
