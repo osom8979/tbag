@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
 #include <string>
@@ -27,12 +28,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace encrypt {
 
 /** Calculates the length of a decoded string. */
-TBAG_API std::size_t getDecodeLength(std::string const & input);
+TBAG_API std::size_t getDecodeLength(std::string const & base64);
 
 TBAG_API bool encodeBase64(std::string const & input, std::string & output);
 TBAG_API bool decodeBase64(std::string const & input, std::string & output);
 
-TBAG_API bool encodeBase64WithBinary(std::vector<uint8_t> const & input, std::string & output);
+TBAG_API bool encodeBase64(util::Buffer const & input, std::string & output);
+TBAG_API bool decodeBase64(std::string const & input, util::Buffer & output);
 
 } // namespace encrypt
 

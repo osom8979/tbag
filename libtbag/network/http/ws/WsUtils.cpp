@@ -7,11 +7,11 @@
 
 #include <libtbag/network/http/ws/WsUtils.hpp>
 #include <libtbag/log/Log.hpp>
-
 #include <libtbag/network/http/base/HttpCommon.hpp>
-#include <libtbag/id/Uuid.hpp>
 #include <libtbag/encrypt/Base64.hpp>
 #include <libtbag/encrypt/Sha1.hpp>
+#include <libtbag/util/BufferInfo.hpp>
+#include <libtbag/id/Uuid.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,10 +35,10 @@ std::string getUpgradeWebSocketKey(std::string const & key)
         return std::string();
     }
 
-    std::vector<uint8_t> const SHA1_BUFFER(sha1_key.begin(), sha1_key.end());
+    util::Buffer const SHA1_BUFFER(sha1_key.begin(), sha1_key.end());
     std::string base64_key;
 
-    if (encrypt::encodeBase64WithBinary(SHA1_BUFFER, base64_key) == false) {
+    if (encrypt::encodeBase64(SHA1_BUFFER, base64_key) == false) {
         return std::string();
     }
 
