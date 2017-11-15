@@ -33,5 +33,6 @@ TEST(JaccardTest, Default)
     Rect a(10, 10, 20, 20);
     Rect b(20, 20, 20, 20);
     ASSERT_TRUE(algorithm::equals(0.857143, jaccardDistance(a, b), 0.000001));
+    ASSERT_TRUE(algorithm::equals(0.142857, jaccardIndex(a, b), 0.000001));
 }
 

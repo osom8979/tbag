@@ -26,7 +26,26 @@ NAMESPACE_LIBTBAG_OPEN
 namespace math {
 
 /**
- * measure dissimilarity between two sample sets
+ * measure similarity between two sample sets.
+ *
+ * @see <https://en.wikipedia.org/wiki/Jaccard_index>
+ */
+template <typename T>
+inline double jaccardIndex(geometry::BaseRect<T> const & a, geometry::BaseRect<T> const & b)
+{
+    double const area_a = a.area();
+    double const area_b = b.area();
+
+    if ((area_a + area_b) <= std::numeric_limits<T>::epsilon()) {
+        return 1.0;
+    }
+
+    double const area_ab = (a & b).area();
+    return area_ab / (area_a + area_b - area_ab);
+}
+
+/**
+ * measure dissimilarity between two sample sets.
  *
  * computes the complement of the Jaccard Index as described in <https://en.wikipedia.org/wiki/Jaccard_index>.
  * For rectangles this reduces to computing the intersection over the union.
@@ -34,16 +53,7 @@ namespace math {
 template <typename T>
 inline double jaccardDistance(geometry::BaseRect<T> const & a, geometry::BaseRect<T> const & b)
 {
-    double const area_a = a.area();
-    double const area_b = b.area();
-
-    if ((area_a + area_b) <= std::numeric_limits<T>::epsilon()) {
-        return 0.0; // jaccard_index = 1 -> distance = 0
-    }
-
-    double const area_ab = (a & b).area();
-    double const jaccard_index = area_ab / (area_a + area_b - area_ab);
-    return 1.0 - jaccard_index; // distance = 1 - jaccard_index
+    return 1.0 - jaccardIndex(a, b); // distance = 1 - jaccard_index
 }
 
 } // namespace math
