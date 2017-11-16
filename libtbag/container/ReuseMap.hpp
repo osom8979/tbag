@@ -160,6 +160,30 @@ public:
         return _active.emplace(key, value);
     }
 
+    template <typename Predicated>
+    std::pair<iterator, bool> insertWithCallback(Key const & key, Predicated predicated)
+    {
+        auto itr = _active.find(key);
+        if (itr != _active.end()) {
+            // Found in the active map.
+            return std::pair<iterator, bool>(itr, false);
+        }
+
+        SharedValue value;
+        if (_ready.empty()) {
+            value.reset(new Value());
+        } else {
+            value = _ready.front();
+            _ready.pop_front();
+        }
+
+        auto result = _active.emplace(key, value);
+        if (result.second) {
+            predicated(*value);
+        }
+        return result;
+    }
+
     bool erase(Key const & key)
     {
         auto itr = _active.find(key);
