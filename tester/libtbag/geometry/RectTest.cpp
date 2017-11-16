@@ -48,7 +48,7 @@ TEST(RectTest, Constructor)
     ASSERT_NE(r3, r4);
 }
 
-TEST(RectTest, Operators_1)
+TEST(RectTest, Operators1)
 {
     Point p = {1, 2};
     Size  s = {3, 4};
@@ -70,7 +70,7 @@ TEST(RectTest, Operators_1)
     ASSERT_EQ(Rect(5, 6,  4,  4), temp);
 }
 
-TEST(RectTest, Operators_2)
+TEST(RectTest, Operators2)
 {
     /*
      * 0 |  1  2  3  4  5
@@ -91,6 +91,35 @@ TEST(RectTest, Operators_2)
 
     ASSERT_EQ(Rect(2, 2, 1, 1), r1 & r2);
     ASSERT_EQ(Rect(1, 1, 3, 3), r1 | r2);
+}
+
+TEST(RectTest, Operators3)
+{
+    /*
+     * 0 |  1  2  3  4  5
+     * --+--------------------
+     *   |
+     * 1 |  +--+
+     *   |  |  |
+     * 2 |  +--+
+     *   |
+     * 3 |        +--+
+     *   |        |  |
+     * 4 |        +--+
+     *   |
+     * 5 |
+     */
+    Rect r1 = {1, 1, 1, 1};
+    Rect r2 = {3, 3, 1, 1};
+
+    Rect r_union = r1 & r2;
+    Rect r_intersection = r1 | r2;
+
+    ASSERT_TRUE(r_union.empty());
+    ASSERT_FALSE(r_intersection.empty());
+
+    ASSERT_EQ(Rect(3, 3, -1, -1), r_union);
+    ASSERT_EQ(Rect(1, 1, 3, 3), r_intersection);
 }
 
 TEST(RectTest, Utility)
