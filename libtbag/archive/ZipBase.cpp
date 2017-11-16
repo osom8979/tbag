@@ -46,7 +46,7 @@ bool encodeZipBase64(util::Buffer const & input, std::string & output)
 
     std::string base64_string;
     bool const BASE64_RESULT = encrypt::encodeBase64(zip_buffer, base64_string);
-    if (BASE64_RESULT) {
+    if (BASE64_RESULT == false) {
         tDLogE("encodeZipBase64() Base64 encode error");
         return false;
     }
@@ -62,7 +62,7 @@ bool decodeZipBase64(std::string const & input, util::Buffer & output)
 
     util::Buffer zip_buffer;
     bool const BASE64_RESULT = encrypt::decodeBase64(input, zip_buffer);
-    if (BASE64_RESULT) {
+    if (BASE64_RESULT == false) {
         tDLogE("decodeZipBase64() Base64 decode error");
         return false;
     }

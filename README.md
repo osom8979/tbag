@@ -33,6 +33,9 @@ Tea-bag is Third party extension utility project.
 - libressl 2.5.1 (Dual license; OpenSSL & SSLeay)
 - zlib 1.2.11 (zlib license)
 
+### Resources
+- ProggyClean.ttf (MIT license)
+
 ## Programming rules.
 
 - Do not use exception expressions.
