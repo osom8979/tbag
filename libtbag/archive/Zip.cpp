@@ -8,6 +8,7 @@
 #include <libtbag/archive/Zip.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
+#include <libtbag/system/Page.hpp>
 
 #include <ctime>
 #include <cstring>
@@ -43,47 +44,56 @@ Err coding(char const * input, std::size_t size, util::Buffer & output, int leve
         return Err::E_EINIT;
     }
 
-    std::size_t const BUFFER_SIZE = 2048; // TODO: CHANGE PAGE SIZE.
+    int const PAGE_SIZE = system::getPageSize();
+    std::size_t const MIN_BUFFER_SIZE = 1024;
+    std::size_t const BUFFER_SIZE = static_cast<std::size_t>(PAGE_SIZE < MIN_BUFFER_SIZE ? MIN_BUFFER_SIZE : PAGE_SIZE);
 
-    Bytef  in[BUFFER_SIZE] = {0,};
-    Bytef out[BUFFER_SIZE] = {0,};
+    std::vector<Bytef>  in(BUFFER_SIZE);
+    std::vector<Bytef> out(BUFFER_SIZE);
 
     std::size_t read_index = 0;
     int flush = Z_NO_FLUSH;
 
     do {
         // Update input buffer.
-        stream.next_in = in;
-        if (size - read_index > BUFFER_SIZE) {
-            stream.avail_in = BUFFER_SIZE;
+        stream.next_in = in.data();
+        if (size - read_index > in.size()) {
+            stream.avail_in = static_cast<uInt>(in.size());
             flush = Z_NO_FLUSH;
         } else {
             stream.avail_in = static_cast<uInt>(size - read_index);
             flush = Z_FINISH; // EOF.
         }
 
-        ::memcpy(in, input + read_index, stream.avail_in);
+        ::memcpy(in.data(), input + read_index, stream.avail_in);
         read_index += stream.avail_in;
 
         do {
             // Update output buffer.
-            stream.avail_out = BUFFER_SIZE;
-            stream.next_out  = out;
+            stream.avail_out = static_cast<uInt>(out.size());
+            stream.next_out  = out.data();
 
             if (ENCODE) {
                 result = ::deflate(&stream, flush);
             } else {
                 result = ::inflate(&stream, flush);
             }
-            assert(result != Z_STREAM_ERROR);
+            assert(result != Z_STREAM_ERROR);  // state not clobbered.
 
-            std::size_t dsize = BUFFER_SIZE - stream.avail_out;
-            output.insert(output.end(), out, out + dsize);
+            std::size_t const OUTPUT_SIZE = out.size() - stream.avail_out;
+            output.insert(output.end(), out.begin(), out.begin() + OUTPUT_SIZE);
+
         } while (stream.avail_out == 0);
-        assert(stream.avail_in == 0);
+        assert(stream.avail_in == 0); // All input will be used.
 
     } while (flush != Z_FINISH);
-    assert(result == Z_STREAM_END);
+
+    Err result_code;
+    if (result == Z_STREAM_END) {
+        result_code = Err::E_SUCCESS;
+    } else {
+        result_code = Err::E_UNKNOWN;
+    }
 
     if (ENCODE) {
         ::deflateEnd(&stream);
@@ -91,7 +101,7 @@ Err coding(char const * input, std::size_t size, util::Buffer & output, int leve
         ::inflateEnd(&stream);
     }
 
-    return Err::E_SUCCESS;
+    return result_code;
 }
 
 Err encode(char const * input, std::size_t size, util::Buffer & output, int level)
