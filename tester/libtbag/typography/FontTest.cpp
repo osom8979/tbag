@@ -7,10 +7,12 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/typography/Font.hpp>
+#include <libtbag/typography/font/ProggyClean.hpp>
 #include <libtbag/encrypt/Md5.hpp>
 
 using namespace libtbag;
 using namespace libtbag::typography;
+using namespace libtbag::typography::font;
 
 TEST(FontTest, ProggyClean)
 {
@@ -19,13 +21,13 @@ TEST(FontTest, ProggyClean)
 
 TEST(FontTest, CharToConsole)
 {
-    std::string const OUTPUT = drawTrueType(getProggyClean(), 'T');
+    std::string const OUTPUT = getAsciiImage(getProggyClean(), 'T');
     ASSERT_FALSE(OUTPUT.empty());
 }
 
 TEST(FontTest, TextToConsole)
 {
-    std::string const OUTPUT = drawTrueType(getProggyClean(), "TBAG");
+    std::string const OUTPUT = getAsciiImage(getProggyClean(), "TBAG");
     ASSERT_FALSE(OUTPUT.empty());
 
     std::cout << "---------------------------\n";

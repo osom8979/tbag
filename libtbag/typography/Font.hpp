@@ -17,10 +17,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/Err.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
+#include <array>
 #include <string>
 
 // -------------------
@@ -29,32 +28,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace typography {
 
-/**
- * Font class prototype
- *
- * @author zer0
- * @date   2017-11-16
- */
-class Font : private Noncopyable
-{
-public:
-    Font();
-    virtual ~Font();
-};
+TBAG_CONSTEXPR int  const ASCII_FONT_TABLE_SIZE = 8;
+TBAG_CONSTEXPR char const DEFAULT_ASCII_FONT_TABLE[ASCII_FONT_TABLE_SIZE + 1/*NULL*/] = " .:ioVM@";
 
-/** Read TrueType font file. */
-TBAG_API Err readTrueType(std::string const & path, Font & font);
-
-/** Save TrueType font file. */
-TBAG_API Err saveTrueType(std::string const & path, Font const & font);
-
-/** String format. */
-TBAG_API std::string drawTrueType(util::Buffer const & true_type, char c, int scale = 12);
-TBAG_API std::string drawTrueType(util::Buffer const & true_type, std::string const & text, int scale = 12);
-
-TBAG_API std::string  getCompressedProggyClean();
-TBAG_API std::string  getProggyCleanMd5();
-TBAG_API util::Buffer getProggyClean();
+TBAG_API std::string getAsciiImage(unsigned char const * true_type, std::size_t size, char c,
+                                   char const * table, std::size_t table_size, int scale = 12);
+TBAG_API std::string getAsciiImage(util::Buffer const & true_type, char c,
+                                   std::string const & table = std::string(DEFAULT_ASCII_FONT_TABLE), int scale = 12);
+TBAG_API std::string getAsciiImage(util::Buffer const & true_type, std::string const & text,
+                                   std::string const & table = std::string(DEFAULT_ASCII_FONT_TABLE), int scale = 12);
 
 } // namespace typography
 
