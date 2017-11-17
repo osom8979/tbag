@@ -26,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace math {
 
 /**
- * measure similarity between two sample sets.
+ * Measure similarity between two sample sets.
  *
  * @see <https://en.wikipedia.org/wiki/Jaccard_index>
  */
@@ -40,12 +40,17 @@ inline double jaccardIndex(geometry::BaseRect<T> const & a, geometry::BaseRect<T
         return 1.0;
     }
 
-    double const area_ab = (a & b).area();
+    geometry::BaseRect<T> ab = a & b;
+    if (ab.empty()) {
+        return 0;
+    }
+
+    double const area_ab = ab.area();
     return area_ab / (area_a + area_b - area_ab);
 }
 
 /**
- * measure dissimilarity between two sample sets.
+ * Measure dissimilarity between two sample sets.
  *
  * computes the complement of the Jaccard Index as described in <https://en.wikipedia.org/wiki/Jaccard_index>.
  * For rectangles this reduces to computing the intersection over the union.
