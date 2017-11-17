@@ -9,7 +9,6 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/archive/ZipBase.hpp>
-#include <libtbag/encrypt/Md5.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -155,14 +154,14 @@ TBAG_CONSTEXPR static char const * const PROGGY_CLEAN_FONT_ZIP_AND_BASE64 =
         "Cz5FLYYN1iiRvryWjCxJMsGqvn2aG63yXExxi1iVha56a7Gl+kuFPjXwcvpNqkt73XXkhTrGTvhOjRq9wRrpPB2l8Dvb/N714umhAkkD54UmNOS8UINHlTaa64VLdc4L"
         "BRCUVWyw/o1nR4OokijqQZKuQbKYOwU/WezLeI014ZS/xeszURD8VkyB8/ts8ect4vfLgWnoEK+5iT+gndkm14lrykPDGG3UM02pDb4e32rKRMMYeigTGwlBXTLRHIo8"
         "raofSTKXIaa8pASCrTH+qOe/Vhy6bq4S1zVVdVqE6jmNlB1b0/ld5Hv0cgf15BLqyiuQhI3patRzq5F0VeZaBl5tqgaVnMiC+NEHO6M9BDPh8WjfgjY4Fu3bxHmH2C+E"
-        "XTmCR0NwHkVHHfgdFF1zErjRvoUxvDDat7F0WxHtO8RnCjABbov2m4LzNiCnJRpnuB+OM9wPxxnu2zAfHon2HeIz4TjD/XCcq2EA/63B1A1fXVi7/0LPntNHz4wOn+jZ"
+        "XTmCR1NwHkVHHfgdFF1zErjRvoUxvDDat7F0WxHtO8RnCjABbov2m4LzNiCnJRpnuB+OM9wPxxnu2zAfHon2HeIz4TjD/XCcq2EA/63B1A1fXVi7/0LPntNHz4wOn+jZ"
         "cfro8eMjp+8dOXz22PDpPXv29ew6ffLw4Qvbjo0Mn9izZ/XAwJpV+N9dC/vhAvTAHjgNR+EMjMIwnMDHO4Lj4/hvBO/di18Pw1k8ymF8tAf/7cOf2YX3T+Lzh/EVtuH3"
         "RoLv+u/6eIofXQEGmQdCwYuFbOSgAmpCRdSMWtAENBG1okmoDU1G7WgK6kCdqAt1o6loGpqOZqCZaBaajeaguWge6gmmdQFjowjN0IJxPhFaMbbbMP+3Y8p04FnQhefG"
         "VDwXpsMMjLNZMBvmwFw8L3qgF+N5AaZHP6bmIlgMS2ApninLMT1XBhh1MX5LGK9rYRDPnTJUYD2eQRthE6bsZhiCLbAVw3w7bIc7MK52wsfgTjyz7oLfhLvx/NoFv4Vx"
         "thtj4uOwF+7D2PoE/DZ8Eu6H34EH4EF4CIZRL5qPFqA+1I8WokVoMVqClqJlaDlagVaiVWgAuWg1KqE1aC0aROtQGVXQerQBbUSb0G1oMxpCW+Aq/Bk8CZ+H78JleBee"
         "gmfgS/An8BfwDfgFXIS34Qn4A/gf+F/4MvwhPA3fg5/Af8ML8BL8Ej6AX8GL8JfwT/CPcA1zwAG4BAfhXzAFb8A/w7/Ba/Cv8H34GRyCH8Lr8O/wTUzj9+Gr8CN4A96E"
         "I/Bz+C/4InwKc8inMYccw1T/OuaE34VTmCPOYD4ZhXPwMNyE85iXL8Bn4Pfgs3Ad/hQ+B49iHfoYvAe34NttZ08cPXDy4MiCgfMDAwMufbiaPizRh2vow7X04SB9uI4+"
-        "LNOHFfpwmD6cTx8eoA8P0ocj9OEh6tAdoA9peF0aXpeG16XhdWl4XRpel4bXpeF1aXhdGl6Xhtel4XVpeF0aXvdQ08GRYyOjI872s6dPUm+VaWDLNLBlGtgyDWyZBrZM"
+        "LNOHFfpwmD7cTx8eoA8P0ocj9OEh6tAdoA9peF0aXpeG16XhdWl4XRpel4bXpeF1aXhdGl6Xhtel4XVpeF0aXvdQ08GRYyOjI872s6dPUm+VaWDLNLBlGtgyDWyZBrZM"
         "A1umgS3TwJZpYMs0sGUa2DINbJkGtkwDW6aJW6GJW6HhrdDwVmh4KzS8FRreCg1vhYa3QsNboeGt0PBWaHgrNLwVGt4KDW/lEMD/AUj5Yvc=";
 TBAG_CONSTEXPR static char const * const PROGGY_CLEAN_FONT_MD5 = "361ffa4ca82d2a1841d178464353e955";
 
@@ -171,23 +170,18 @@ std::string getCompressedProggyClean()
     return PROGGY_CLEAN_FONT_ZIP_AND_BASE64;
 }
 
-util::Buffer getProggyCleanData()
+std::string getProggyCleanMd5()
+{
+    return PROGGY_CLEAN_FONT_MD5;
+}
+
+util::Buffer getProggyClean()
 {
     util::Buffer result;
     if (archive::decodeZipBase64(PROGGY_CLEAN_FONT_ZIP_AND_BASE64, result)) {
-        result.clear();
+        return result;
     }
-    return result;
-}
-
-bool testProggyCleanAsMd5()
-{
-    util::Buffer buffer = getProggyCleanData();
-    std::string md5;
-    if (encrypt::encryptMd5(std::string(buffer.begin(), buffer.end()), md5)) {
-        return (md5 == PROGGY_CLEAN_FONT_MD5);
-    }
-    return false;
+    return util::Buffer();
 }
 
 } // namespace typography

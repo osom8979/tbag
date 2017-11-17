@@ -51,9 +51,9 @@ TBAG_API Err saveTrueType(std::string const & path, Font const & font);
 /** String format. */
 TBAG_API std::string drawTrueType(util::Buffer const & true_type, char c, int scale = 12);
 
-TBAG_API std::string getCompressedProggyClean();
-TBAG_API util::Buffer getProggyCleanData();
-TBAG_API bool testProggyCleanAsMd5();
+TBAG_API std::string  getCompressedProggyClean();
+TBAG_API std::string  getProggyCleanMd5();
+TBAG_API util::Buffer getProggyClean();
 
 } // namespace typography
 

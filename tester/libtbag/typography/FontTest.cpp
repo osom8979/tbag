@@ -7,12 +7,13 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/typography/Font.hpp>
+#include <libtbag/encrypt/Md5.hpp>
 
 using namespace libtbag;
 using namespace libtbag::typography;
 
 TEST(FontTest, ProggyClean)
 {
-//    ASSERT_TRUE(testProggyCleanAsMd5());
+    ASSERT_EQ(getProggyCleanMd5(), encrypt::getMd5(getProggyClean()));
 }
 
