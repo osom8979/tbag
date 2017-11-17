@@ -24,11 +24,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace archive {
 
-TBAG_API bool encodeZipBase64(std::string const & input, std::string & output);
-TBAG_API bool decodeZipBase64(std::string const & input, std::string & output);
-
+TBAG_API bool encodeZipBase64(char const * input, std::size_t size, std::string & output);
 TBAG_API bool encodeZipBase64(util::Buffer const & input, std::string & output);
 TBAG_API bool decodeZipBase64(std::string const & input, util::Buffer & output);
+
+TBAG_API bool encodeZipBase64(std::string const & input, std::string & output);
+TBAG_API bool decodeZipBase64(std::string const & input, std::string & output);
 
 TBAG_API bool encodeZipBase64File(std::string const & input_file_path, std::string & output);
 TBAG_API bool decodeZipBase64File(std::string const & input, std::string const & output_file_path);
