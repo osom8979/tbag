@@ -167,12 +167,12 @@ static Err writeFromBuffer(std::string const & path, StlContainerType const & co
 } // namespace impl
 // ----------------
 
-Err readFile(std::string const & path, std::vector<char> & result, uint64_t limit_size)
+Err readFile(std::string const & path, std::string & result, uint64_t limit_size)
 {
     return impl::readToBuffer(path, result, limit_size);
 }
 
-Err readFile(std::string const & path, std::string & result, uint64_t limit_size)
+Err readFile(std::string const & path, util::Buffer & result, uint64_t limit_size)
 {
     return impl::readToBuffer(path, result, limit_size);
 }
@@ -182,7 +182,7 @@ Err writeFile(std::string const & path, std::string const & content)
     return impl::writeFromBuffer(path, content);
 }
 
-Err writeFile(std::string const & path, std::vector<char> const & content)
+Err writeFile(std::string const & path, util::Buffer const & content)
 {
     return impl::writeFromBuffer(path, content);
 }

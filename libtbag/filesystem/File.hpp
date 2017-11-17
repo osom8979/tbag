@@ -19,6 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -91,10 +92,10 @@ public:
 };
 
 TBAG_API Err readFile(std::string const & path, std::string & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
-TBAG_API Err readFile(std::string const & path, std::vector<char> & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
+TBAG_API Err readFile(std::string const & path, util::Buffer & result, uint64_t limit_size = 2 * MEGA_BYTE_TO_BYTE);
 
 TBAG_API Err writeFile(std::string const & path, std::string const & content);
-TBAG_API Err writeFile(std::string const & path, std::vector<char> const & content);
+TBAG_API Err writeFile(std::string const & path, util::Buffer const & content);
 
 } // namespace filesystem
 
