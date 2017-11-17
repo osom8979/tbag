@@ -50,6 +50,7 @@ TBAG_API Err saveTrueType(std::string const & path, Font const & font);
 
 /** String format. */
 TBAG_API std::string drawTrueType(util::Buffer const & true_type, char c, int scale = 12);
+TBAG_API std::string drawTrueType(util::Buffer const & true_type, std::string const & text, int scale = 12);
 
 TBAG_API std::string  getCompressedProggyClean();
 TBAG_API std::string  getProggyCleanMd5();

@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/archive/ZipBase.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -65,6 +66,34 @@ std::string drawTrueType(util::Buffer const & true_type, char c, int scale)
             ss << ASCII_FONT_TABLE[bit >> 5];
         }
         ss << std::endl;
+    }
+    return ss.str();
+}
+
+std::string drawTrueType(util::Buffer const & true_type, std::string const & text, int scale)
+{
+    std::stringstream ss;
+    std::vector<std::string> spelling;
+    for (auto & c : text) {
+        spelling.push_back(drawTrueType(true_type, c, scale));
+    }
+
+    std::vector<std::string> line_container;
+    std::string const LF = "\n";
+    for (auto & str : spelling) {
+        auto tokens = string::splitTokens(str, LF);
+
+        std::size_t const SIZE = tokens.size();
+        for (std::size_t i = 0; i < SIZE; ++i) {
+            if (i >= line_container.size()) {
+                line_container.emplace_back();
+            }
+            line_container[i] += tokens[i];
+        }
+    }
+
+    for (auto & line : line_container) {
+        ss << line << std::endl;
     }
     return ss.str();
 }

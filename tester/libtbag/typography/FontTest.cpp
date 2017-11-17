@@ -17,3 +17,19 @@ TEST(FontTest, ProggyClean)
     ASSERT_EQ(getProggyCleanMd5(), encrypt::getMd5(getProggyClean()));
 }
 
+TEST(FontTest, CharToConsole)
+{
+    std::string const OUTPUT = drawTrueType(getProggyClean(), 'T');
+    ASSERT_FALSE(OUTPUT.empty());
+}
+
+TEST(FontTest, TextToConsole)
+{
+    std::string const OUTPUT = drawTrueType(getProggyClean(), "TBAG");
+    ASSERT_FALSE(OUTPUT.empty());
+
+    std::cout << "---------------------------\n";
+    std::cout << OUTPUT;
+    std::cout << "---------------------------\n";
+}
+
