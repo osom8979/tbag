@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <array>
 #include <string>
@@ -29,8 +30,18 @@ TBAG_CONSTEXPR int const MD5_DIGEST_BYTE = 16;
 
 using Md5Hash = std::array<unsigned char, MD5_DIGEST_BYTE>;
 
+TBAG_API bool encryptMd5(char const * input, std::size_t size, Md5Hash & output);
+
+TBAG_API bool encryptMd5(util::Buffer const & input, Md5Hash & output);
+TBAG_API bool encryptMd5(util::Buffer const & input, util::Buffer & output);
+TBAG_API bool encryptMd5(util::Buffer const & input, std::string & output);
+
 TBAG_API bool encryptMd5(std::string const & input, Md5Hash & output);
+TBAG_API bool encryptMd5(std::string const & input, util::Buffer & output);
 TBAG_API bool encryptMd5(std::string const & input, std::string & output);
+
+TBAG_API std::string getMd5(util::Buffer const & input);
+TBAG_API std::string getMd5(std::string const & input);
 
 } // namespace encrypt
 
