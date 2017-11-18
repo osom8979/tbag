@@ -81,19 +81,31 @@ char ** Application::getEnvs()
     return nullptr;
 }
 
+std::vector<std::string> Application::getCommandLineArguments()
+{
+    int const SIZE = getArgc();
+    char ** argv = getArgv();
+
+    std::vector<std::string> result;
+    for (int i = 0; i < SIZE; ++i) {
+        result.emplace_back(argv[i]);
+    }
+    return result;
+}
+
 std::string Application::getCommandLineArgumentsString()
 {
-    int argc = getArgc();
+    int const SIZE = getArgc();
     char ** argv = getArgv();
+    assert(SIZE >= 1);
+
+    char const SP = ' ';
     std::stringstream ss;
+    ss << argv[0];
 
-    for (int i = 0; i < argc; ++i) {
-        ss << argv[i];
-        if (i + 1 < argc) {
-            ss << ' ';
-        }
+    for (int i = 1; i < SIZE; ++i) {
+        ss << SP << argv[i];
     }
-
     return ss.str();
 }
 
@@ -102,10 +114,8 @@ int Application::run()
     if (onCreate() == false) {
         return EXIT_FAILURE;
     }
-
-    int const EXIT_CODE = onRunning();
+    int const EXIT_CODE = onRunning(getCommandLineArguments());
     onDestroy();
-
     return EXIT_CODE;
 }
 

@@ -64,7 +64,7 @@ public:
 public:
     virtual bool onCreate() override;
     virtual bool onLoadConfig(DefaultXmlModel & config) override;
-    virtual int  onDefaultCommand(StringVector const & args) override;
+    virtual int  onRunning(std::vector<std::string> const & args) override;
     virtual void onDestroy() override;
 
 public:

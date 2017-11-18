@@ -124,6 +124,12 @@ public:
     std::size_t request(Flags const & flags);
     std::size_t request(std::string const & arguments, std::string const & prefix, std::string const & delimiter);
     std::size_t request(std::string const & arguments);
+
+    /**
+     * @param[in] ignore_first
+     *      The argv[0] passed to the main() function is the program path. @n
+     *      Usually this value is not used and can be IGNORE processed.
+     */
     std::size_t request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter, bool ignore_first = true);
     std::size_t request(int argc, char ** argv, bool ignore_first = true);
 

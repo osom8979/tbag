@@ -101,6 +101,23 @@ public:
     }
 };
 
+// ---------------
+// Global methods.
+// ---------------
+
+template <typename UpObject, typename ... Args>
+std::shared_ptr<typename remove_cr<UpObject>::type> newGlobalObject(Global::Key const & key, Args && ... args)
+{
+    typedef typename remove_cr<UpObject>::type ResultObjectType;
+    return Global::getInstance()->insertNewObject<ResultObjectType>(key, std::forward<Args>(args) ...);
+}
+
+template <typename T>
+std::weak_ptr<T> findGlobalObject(std::string const & key)
+{
+    return Global::getInstance()->find<T>(key);
+}
+
 } // namespace container
 
 // --------------------

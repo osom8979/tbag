@@ -105,7 +105,7 @@ bool TpotMain::onLoadConfig(DefaultXmlModel & config)
     return true;
 }
 
-int TpotMain::onDefaultCommand(StringVector const & args)
+int TpotMain::onRunning(std::vector<std::string> const & args)
 {
     if (args.empty()) {
         std::cerr << "Not found command.\n";

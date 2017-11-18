@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <memory>
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -71,15 +72,18 @@ public:
     static char ** getEnvs();
 
 public:
+    static std::vector<std::string> getCommandLineArguments();
     static std::string getCommandLineArgumentsString();
 
 public:
     virtual int run();
 
 public:
-    virtual bool onCreate () { return true;         }
-    virtual int  onRunning() { return EXIT_FAILURE; }
-    virtual void onDestroy() { /* EMPTY. */         }
+    virtual bool onCreate () { return true; }
+    virtual void onDestroy() { /* EMPTY. */ }
+
+public:
+    virtual int onRunning(std::vector<std::string> const & args) = 0;
 };
 
 /**
@@ -93,30 +97,27 @@ class ApplicationGuard
 {
 private:
     ApplicationType & _app;
-    bool create_result;
+    bool _create_result;
 
 public:
     ApplicationGuard(ApplicationType & app) : _app(app)
     {
         try {
-            create_result = _app.onCreate();
+            _create_result = _app.onCreate();
         } catch (...) {
-            create_result = false;
+            _create_result = false;
         }
     }
 
     virtual ~ApplicationGuard()
     {
-        if (create_result) {
+        if (_create_result) {
             _app.onDestroy();
         }
     }
 
 public:
-    inline bool isCreateSuccess() const TBAG_NOEXCEPT
-    {
-        return create_result;
-    }
+    inline bool isCreateSuccess() const TBAG_NOEXCEPT { return _create_result; }
 };
 
 } // namespace app

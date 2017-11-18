@@ -174,9 +174,10 @@ std::size_t Commander::request(std::string const & arguments)
 
 std::size_t Commander::request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter, bool ignore_first)
 {
+    char const SP = ' ';
     std::stringstream ss;
     for (int i = (ignore_first ? 1 : 0); i < argc; ++i) {
-        ss << argv[i] << ' ';
+        ss << argv[i] << SP;
     }
     return request(ss.str(), prefix, delimiter);
 }

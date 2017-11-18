@@ -48,9 +48,8 @@ public:
 
     using HelpCommander   = string::HelpCommander;
     using DefaultXmlModel = dom::xml::DefaultXmlModel;
+    using ConfigScope     = DefaultXmlModel::Scope;
     using WeakModel       = std::weak_ptr<DefaultXmlModel>;
-
-    using StringVector = std::vector<std::string>;
 
 public:
     TBAG_CONSTEXPR static char const * const GLOBAL_MODEL_OBJECT_KEY
@@ -64,7 +63,6 @@ protected:
 protected:
     bool _enable_help;
     bool _enable_verbose;
-    bool _enable_unknown;
     bool _enable_version;
 
 public:
@@ -82,7 +80,6 @@ public:
 
     inline bool isEnableHelp   () const TBAG_NOEXCEPT { return _enable_help;    }
     inline bool isEnableVerbose() const TBAG_NOEXCEPT { return _enable_verbose; }
-    inline bool isEnableUnknown() const TBAG_NOEXCEPT { return _enable_unknown; }
     inline bool isEnableVersion() const TBAG_NOEXCEPT { return _enable_version; }
 
 protected:
@@ -105,7 +102,7 @@ protected:
 
     void installHelpOptions();
     void installVerboseOptions();
-    void installConfigOptions();
+    void installConfigOptions(ConfigScope scope = ConfigScope::EXE);
 
     void installVersionOptions(Version const & version);
     void installVersionOptions(int major, int minor = 0, int patch = 0);
@@ -121,19 +118,11 @@ private:
 public:
     virtual int run() override;
 
-private:
-    /**
-     * Disable onRunning() method.
-     * Instead, use the onDefaultCommand() method.
-     */
-    virtual int onRunning() override
-    {
-        return EXIT_FAILURE;
-    }
-
 public:
+    /**
+     * After reading the config file, Got to the chance to add work to be done.
+     */
     virtual bool onLoadConfig(DefaultXmlModel & config);
-    virtual int onDefaultCommand(StringVector const & args);
 
 // Static methods.
 public:
