@@ -178,8 +178,8 @@ typedef SSIZE_T	ssize_t;
 #define MISALIGNED_OK	1
 #endif
 
-#include "lmdb.h"
-#include "midl.h"
+#include <libtbag/3rd/lmdb/lmdb.h>
+#include <libtbag/3rd/lmdb/midl.h>
 
 #if (BYTE_ORDER == LITTLE_ENDIAN) == (BYTE_ORDER == BIG_ENDIAN)
 # error "Unknown or unsupported endianness (BYTE_ORDER)"

@@ -264,7 +264,7 @@ Err getEnv(std::string const & name, std::string & value)
         value = std::string(env_value);
         return Err::E_SUCCESS;
     }
-    return Err::E_NOTFOUND;
+    return Err::E_ENFOUND;
 }
 
 Err setEnv(std::string const & name, std::string const & value)

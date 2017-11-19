@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
-#include "midl.h"
+#include <libtbag/3rd/lmdb/midl.h>
 
 /** @defgroup internal	LMDB Internals
  *	@{

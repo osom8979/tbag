@@ -22,7 +22,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 #ifndef TBAG_ERROR_INFO_MAP
-#define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX, _TBAG_LMDB_XX) \
+#define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX) \
     /* Common error codes (Success Anyway). */ \
     _TBAG_XX(_SUCCESS , "No error"                ) \
     _TBAG_XX(_WARNING , "Success, but warning"    ) \
@@ -176,27 +176,6 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_UV_XX(_EOF             , "End of file"                           ) \
     _TBAG_UV_XX(_ENXIO           , "No such device or address"             ) \
     _TBAG_UV_XX(_EMLINK          , "Too many links"                        ) \
-    /* LMDB ERROR */ \
-    _TBAG_LMDB_XX(_KEYEXIST        , "key/data pair already exists"                                  ) \
-    _TBAG_LMDB_XX(_NOTFOUND        , "key/data pair not found (EOF)"                                 ) \
-    _TBAG_LMDB_XX(_PAGE_NOTFOUND   , "Requested page not found - this usually indicates corruption"  ) \
-    _TBAG_LMDB_XX(_CORRUPTED       , "Located page was wrong type "                                  ) \
-    _TBAG_LMDB_XX(_PANIC           , "Update of meta page failed or environment had fatal error "    ) \
-    _TBAG_LMDB_XX(_VERSION_MISMATCH, "Environment version mismatch "                                 ) \
-    _TBAG_LMDB_XX(_INVALID         , "File is not a valid LMDB file "                                ) \
-    _TBAG_LMDB_XX(_MAP_FULL        , "Environment mapsize reached "                                  ) \
-    _TBAG_LMDB_XX(_DBS_FULL        , "Environment maxdbs reached "                                   ) \
-    _TBAG_LMDB_XX(_READERS_FULL    , "Environment maxreaders reached "                               ) \
-    _TBAG_LMDB_XX(_TLS_FULL        , "Too many TLS keys in use - Windows only "                      ) \
-    _TBAG_LMDB_XX(_TXN_FULL        , "Txn has too many dirty pages "                                 ) \
-    _TBAG_LMDB_XX(_CURSOR_FULL     , "Cursor stack too deep - internal error "                       ) \
-    _TBAG_LMDB_XX(_PAGE_FULL       , "Page has not enough space - internal error "                   ) \
-    _TBAG_LMDB_XX(_MAP_RESIZED     , "Database contents grew beyond environment mapsize "            ) \
-    _TBAG_LMDB_XX(_INCOMPATIBLE    , "Operation and DB incompatible, or DB type changed."            ) \
-    _TBAG_LMDB_XX(_BAD_RSLOT       , "Invalid reuse of reader locktable slot "                       ) \
-    _TBAG_LMDB_XX(_BAD_TXN         , "Transaction must abort, has a child, or is invalid "           ) \
-    _TBAG_LMDB_XX(_BAD_VALSIZE     , "Unsupported size of key/DB name/data, or wrong DUPFIXED size " ) \
-    _TBAG_LMDB_XX(_BAD_DBI         , "The specified DBI was changed unexpectedly "                   ) \
     /* -- END -- */
 #endif
 
@@ -211,7 +190,7 @@ enum class Err : int
 {
     __START_NUMBER__ = -1,
 #define _TBAG_XX(name, msg) E##name,
-    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX)
+    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
 };
 
@@ -223,9 +202,6 @@ TBAG_API char const * getErrDetail(Err code) TBAG_NOEXCEPT;
 
 TBAG_API Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT;
 TBAG_API Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_code);
-
-TBAG_API Err convertMdbErrorToErr(int mdb_error_code) TBAG_NOEXCEPT;
-TBAG_API Err convertMdbErrorToErrWithLogging(char const * prefix, int uv_error_code);
 
 TBAG_API Err convertSystemErrorToErr(int system_error);
 TBAG_API Err getGlobalSystemError();

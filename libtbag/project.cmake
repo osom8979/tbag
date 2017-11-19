@@ -10,6 +10,7 @@ list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_EXPORT_API)
 list (APPEND TBAG_PROJECT_DEFINITIONS U_COMBINED_IMPLEMENTATION)
 list (APPEND TBAG_PROJECT_DEFINITIONS JSON_DLL_BUILD)
 list (APPEND TBAG_PROJECT_DEFINITIONS TINYXML2_EXPORT)
+list (APPEND TBAG_PROJECT_DEFINITIONS LMDB_API)
 tbag_modules__apply_dep_lua_export_macros ()
 
 ## Thread settings.
@@ -27,7 +28,6 @@ tbag_modules__apply_ext_ressl ()
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
 tbag_modules__apply_dep_icu         ()
-tbag_modules__apply_dep_lmdb        ()
 tbag_modules__apply_dep_minizip     () ## And apply_dep_z
 tbag_modules__apply_dep_sqlite3     ()
 tbag_modules__apply_dep_uv          ()

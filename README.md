@@ -28,6 +28,7 @@ Tea-bag is Third party extension utility project.
 - tinyxml2 3.0.0 (zlib license)
 - entt 2.1.0 (MIT license)
 - sol2 2.18.5 (MIT license)
+- lmdb++ master-0b43ca8 (0.9.14.1) (Public Domain)
 
 ### External projects
 - libressl 2.5.1 (Dual license; OpenSSL & SSLeay)

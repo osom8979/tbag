@@ -212,7 +212,7 @@ Err ProcessManager::kill(int pid, int signum)
             return Err::E_EXPIRED;
         }
     }
-    return Err::E_NOTFOUND;
+    return Err::E_ENFOUND;
 }
 
 } // namespace process
