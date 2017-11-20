@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/filesystem/RotatePath.hpp>
+#include <libtbag/filesystem/File.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 using namespace libtbag;
 using namespace libtbag::filesystem;
@@ -15,8 +17,24 @@ using namespace libtbag::filesystem;
 TEST(RotatePathTest, Default)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet();
+    auto const file_path = tttDirGet() / "test.log";
 
-    auto rotate = RotatePath::createDefault(PATH);
+    auto rotate = RotatePath::createDefault(file_path);
+    ASSERT_TRUE(rotate.update());
+
+    auto checker = std::static_pointer_cast<RotatePath::SizeChecker>(rotate.getChecker().lock());
+    util::Buffer const BUFFER(checker->max_size, '\0');
+
+    auto path1 = rotate.getPath();
+    ASSERT_FALSE(path1.exists());
+    ASSERT_FALSE(rotate.next());
+
+    ASSERT_EQ(Err::E_SUCCESS, writeFile(path1, BUFFER));
+    ASSERT_TRUE(path1.exists());
+    ASSERT_TRUE(rotate.next());
+
+    auto path2 = rotate.getPath();
+    ASSERT_FALSE(path2.exists());
+    ASSERT_NE(path1, path2);
 }
 

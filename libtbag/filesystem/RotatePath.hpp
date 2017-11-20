@@ -94,9 +94,11 @@ public:
      */
     struct SizeChecker : public CheckerInterface
     {
+        TBAG_CONSTEXPR static std::size_t const DEFAULT_MAX_SIZE = 1 * MEGA_BYTE_TO_BYTE;
+
         std::size_t max_size;
 
-        SizeChecker(std::size_t size = 1 * MEGA_BYTE_TO_BYTE) : max_size(size) { /* EMPTY. */ }
+        SizeChecker(std::size_t size = DEFAULT_MAX_SIZE) : max_size(size) { /* EMPTY. */ }
         virtual ~SizeChecker() { /* EMPTY. */ }
 
         virtual bool test(Path const & prev, char const * buffer, std::size_t size) override
@@ -109,6 +111,11 @@ public:
                 return false;
             }
             return true;
+        }
+
+        static std::size_t getDefaultMaxSize()
+        {
+            return DEFAULT_MAX_SIZE;
         }
     };
 
@@ -148,12 +155,13 @@ public:
      */
     struct TimeFormatUpdater : public UpdaterInterface
     {
-        TBAG_CONSTEXPR static char const * const DEFAULT_TIME_FORMAT_STRING = "$py$pm$pdT$ph$pi$ps.$pl$pc$pn";
+        TBAG_CONSTEXPR static char const * const DEFAULT_TIME_FORMAT_STRING = "-$py$pm$pdT$ph$pi$ps_$pl$pc";
 
         std::string format;
 
         TimeFormatUpdater() : format(DEFAULT_TIME_FORMAT_STRING) { /* EMPTY. */ }
-        TimeFormatUpdater(std::string const & f) : format(f) { /* EMPTY. */ }
+        explicit TimeFormatUpdater(std::string const & f) : format(f) { /* EMPTY. */ }
+        explicit TimeFormatUpdater(Path const & p) : format(getDefaultTimeFormatString(p)) { /* EMPTY. */ }
         virtual ~TimeFormatUpdater() { /* EMPTY. */ }
 
         virtual Path update(Path const & prev) override
@@ -161,10 +169,19 @@ public:
             return Path(time::TimePoint::now().fformat(format));
         }
 
-        static std::string getDefaultTimeFormatString() { return DEFAULT_TIME_FORMAT_STRING; }
-    };
+        static std::string getDefaultTimeFormatString()
+        {
+            return DEFAULT_TIME_FORMAT_STRING;
+        }
 
-    struct default_setup { /* EMPTY. */ };
+        static std::string getDefaultTimeFormatString(Path const & path)
+        {
+            std::string const PREFIX = path.getNameWithoutExtension();
+            std::string const FORMAT = TimeFormatUpdater::getDefaultTimeFormatString();
+            std::string const SUFFIX = path.getExtensionName();
+            return (path.getParent() / (PREFIX + FORMAT + SUFFIX)).toString();
+        }
+    };
 
 private:
     SharedChecker _checker;
@@ -175,7 +192,7 @@ public:
     RotatePath();
     RotatePath(Path const & path);
     RotatePath(Path const & path, SharedChecker const & checker, SharedUpdater const & updater);
-    explicit RotatePath(Path const & path, default_setup const & UNUSED_PARAM(val));
+    RotatePath(Path const & path, std::size_t size = SizeChecker::getDefaultMaxSize());
     RotatePath(RotatePath const & obj);
     RotatePath(RotatePath && obj);
     virtual ~RotatePath();
@@ -218,7 +235,7 @@ public:
     bool next();
 
 public:
-    static RotatePath createDefault(Path const & path);
+    static RotatePath createDefault(Path const & path, std::size_t size = SizeChecker::getDefaultMaxSize());
 };
 
 } // namespace filesystem

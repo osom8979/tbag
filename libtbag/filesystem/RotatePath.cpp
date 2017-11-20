@@ -32,10 +32,10 @@ RotatePath::RotatePath(Path const & path, SharedChecker const & checker, SharedU
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & path, default_setup const & UNUSED_PARAM(val))
-        : RotatePath(path, SharedChecker(new SizeChecker()), SharedUpdater(new TimeFormatUpdater()))
+RotatePath::RotatePath(Path const & path, std::size_t size)
+        : _path(), _checker(new SizeChecker(size)), _updater(new TimeFormatUpdater(path))
 {
-    // EMPTY.
+    update();
 }
 
 RotatePath::RotatePath(RotatePath const & obj)
@@ -86,8 +86,7 @@ bool RotatePath::update()
 {
     if (static_cast<bool>(_updater)) {
         Path next = _updater->update(_path);
-        if (next.empty()) {
-            tDLogE("RotatePath::update() prev({}) -> next({})", _path.toString(), next.toString());
+        if (next.empty() == false) {
             _path.swap(next);
             return true;
         }
@@ -131,9 +130,9 @@ bool RotatePath::next()
     return false;
 }
 
-RotatePath RotatePath::createDefault(Path const & path)
+RotatePath RotatePath::createDefault(Path const & path, std::size_t size)
 {
-    return RotatePath(path, default_setup{});
+    return RotatePath(path, size);
 }
 
 } // namespace filesystem
