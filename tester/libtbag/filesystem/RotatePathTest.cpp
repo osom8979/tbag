@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/filesystem/RotatePath.hpp>
 
 using namespace libtbag;
@@ -13,7 +14,9 @@ using namespace libtbag::filesystem;
 
 TEST(RotatePathTest, Default)
 {
-    RotatePath object;
-    ASSERT_TRUE(true);
+    tttDir(true, true);
+    auto const PATH = tttDirGet();
+
+    auto rotate = RotatePath::createDefault(PATH);
 }
 

@@ -16,70 +16,24 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-// ---------------------------------
-// RotatePathUpdater implementation.
-// ---------------------------------
-
-RotatePathUpdater::RotatePathUpdater(std::string const & rule) : update_rule(rule)
-{
-    // EMPTY.
-}
-
-RotatePathUpdater::~RotatePathUpdater()
-{
-    // EMPTY.
-}
-
-Path RotatePathUpdater::obtain() const
-{
-    return Path();
-}
-
-// -------------------------------------
-// RotatePathSizeChecker implementation.
-// -------------------------------------
-
-RotatePathSizeChecker::RotatePathSizeChecker(std::string const & rule, std::size_t size)
-        : RotatePathUpdater(rule), max_size(size)
-{
-    // EMPTY.
-}
-
-RotatePathSizeChecker::~RotatePathSizeChecker()
-{
-    // EMPTY.
-}
-
-bool RotatePathSizeChecker::test(Path const & prev, Path & next, char const * buffer, std::size_t size) const
-{
-    RotatePath::FileState state = {0};
-    if (details::getState(prev, &state) == false) {
-        return false;
-    }
-
-    if (state.size + size < max_size) {
-        return false;
-    }
-
-    // TODO: Update next path.
-    return true;
-}
-
-// --------------------------
-// RotatePath implementation.
-// --------------------------
-
 RotatePath::RotatePath()
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & path) : _path(path)
+RotatePath::RotatePath(Path const & path) : RotatePath(path, SharedChecker(), SharedUpdater())
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & path, SharedChecker const & checker) : _path(path), _checker(checker)
+RotatePath::RotatePath(Path const & path, SharedChecker const & checker, SharedUpdater const & updater)
+        : _path(path), _checker(checker), _updater(updater)
+{
+    // EMPTY.
+}
+
+RotatePath::RotatePath(Path const & path, default_setup const & UNUSED_PARAM(val))
+        : RotatePath(path, SharedChecker(new SizeChecker()), SharedUpdater(new TimeFormatUpdater()))
 {
     // EMPTY.
 }
@@ -103,6 +57,7 @@ RotatePath & RotatePath::operator =(RotatePath const & obj)
 {
     if (this != &obj) {
         _checker = obj._checker;
+        _updater = obj._updater;
         _path = obj._path;
     }
     return *this;
@@ -112,55 +67,10 @@ RotatePath & RotatePath::operator =(RotatePath && obj)
 {
     if (this != &obj) {
         _checker.swap(obj._checker);
+        _updater.swap(obj._updater);
         _path.swap(obj._path);
     }
     return *this;
-}
-
-bool RotatePath::testIfRead(Path const & prev, Path & next) const
-{
-    if (static_cast<bool>(_checker)) {
-        return _checker->test(prev, next, nullptr, 0);
-    }
-    return false;
-}
-
-bool RotatePath::testIfRead(Path & next) const
-{
-    return testIfRead(_path, next);
-}
-
-bool RotatePath::testIfWrite(Path const & prev, Path & next, char const * buffer, std::size_t size) const
-{
-    if (static_cast<bool>(_checker)) {
-        return _checker->test(prev, next, buffer, size);
-    }
-    return false;
-}
-
-bool RotatePath::testIfWrite(Path & next, char const * buffer, std::size_t size) const
-{
-    return testIfWrite(_path, next, buffer, size);
-}
-
-bool RotatePath::next(char const * buffer, std::size_t size)
-{
-    Path next;
-    if (testIfWrite(next, buffer, size)) {
-        _path = next;
-        return true;
-    }
-    return false;
-}
-
-bool RotatePath::next()
-{
-    Path next;
-    if (testIfRead(next)) {
-        _path = next;
-        return true;
-    }
-    return false;
 }
 
 RotatePath::FileState RotatePath::getState() const
@@ -170,6 +80,60 @@ RotatePath::FileState RotatePath::getState() const
         tDLogE("RotatePath::getState() result error.");
     }
     return state;
+}
+
+bool RotatePath::update()
+{
+    if (static_cast<bool>(_updater)) {
+        Path next = _updater->update(_path);
+        if (next.empty()) {
+            tDLogE("RotatePath::update() prev({}) -> next({})", _path.toString(), next.toString());
+            _path.swap(next);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool RotatePath::testIfRead(Path const & prev) const
+{
+    return static_cast<bool>(_checker) && _checker->test(prev, nullptr, 0);
+}
+
+bool RotatePath::testIfRead() const
+{
+    return testIfRead(_path);
+}
+
+bool RotatePath::testIfWrite(Path const & prev, char const * buffer, std::size_t size) const
+{
+    return static_cast<bool>(_checker) && _checker->test(prev, buffer, size);
+}
+
+bool RotatePath::testIfWrite(char const * buffer, std::size_t size) const
+{
+    return testIfWrite(_path, buffer, size);
+}
+
+bool RotatePath::next(char const * buffer, std::size_t size)
+{
+    if (testIfWrite(buffer, size)) {
+        return update();
+    }
+    return false;
+}
+
+bool RotatePath::next()
+{
+    if (testIfRead()) {
+        return update();
+    }
+    return false;
+}
+
+RotatePath RotatePath::createDefault(Path const & path)
+{
+    return RotatePath(path, default_setup{});
 }
 
 } // namespace filesystem
