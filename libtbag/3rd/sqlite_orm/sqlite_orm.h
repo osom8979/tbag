@@ -21,6 +21,18 @@
 #include <ostream>  //  std::ostream
 #include <iterator> //  std::iterator_traits
 
+#if defined(min)
+TBAG_PUSH_MACRO(min);
+#undef min
+#define __RESTORE_MIN__
+#endif
+
+#if defined(max)
+TBAG_PUSH_MACRO(max);
+#undef max
+#define __RESTORE_MAX__
+#endif
+
 namespace sqlite_orm {
     
     typedef sqlite_int64 int64;
@@ -3742,7 +3754,7 @@ namespace sqlite_orm {
                 }
                 
                 void operator++() {
-                    if(this->stmt and *this->stmt){
+                    if(this->stmt && *this->stmt){
                         auto ret = sqlite3_step(*this->stmt);
                         switch(ret){
                             case SQLITE_ROW:
@@ -3767,10 +3779,10 @@ namespace sqlite_orm {
                 
 				//removed const return type to remove complier warning
                 bool operator==(const iterator_t &other) const {
-                    if(this->stmt and other.stmt){
+                    if(this->stmt && other.stmt){
                         return *this->stmt == *other.stmt;
                     }else{
-                        if(!this->stmt and !other.stmt){
+                        if(!this->stmt && !other.stmt){
                             return true;
                         }else{
                             return false;
@@ -3868,7 +3880,7 @@ namespace sqlite_orm {
         storage_t(const std::string &filename_, impl_type impl_):
         filename(filename_),
         impl(impl_),
-        inMemory(filename_.empty() or filename_ == ":memory:"){
+        inMemory(filename_.empty() || filename_ == ":memory:"){
             if(inMemory){
                 this->currentTransaction = std::make_shared<internal::database_connection>(this->filename);
                 this->on_open_internal(this->currentTransaction->get_db());
@@ -4012,7 +4024,7 @@ namespace sqlite_orm {
         template<class T>
         std::string string_from_expression(T t, bool /*noTableName*/ = false, bool escape = false) {
             auto isNullable = type_is_nullable<T>::value;
-            if(isNullable and !type_is_nullable<T>()(t)){
+            if(isNullable && !type_is_nullable<T>()(t)){
                 return "NULL";
             }else{
                 auto needQuotes = std::is_base_of<text_printer, type_printer<T>>::value;
@@ -5197,7 +5209,7 @@ namespace sqlite_orm {
             }
             ss << "FROM '" << impl.table.name << "' WHERE ";
             auto primaryKeyColumnNames = impl.table.primary_key_column_names();
-            if(primaryKeyColumnNames.size() and primaryKeyColumnNames.front().length()){
+            if(primaryKeyColumnNames.size() && primaryKeyColumnNames.front().length()){
 //                ss << "\"" << primaryKeyColumnNames.front() << "\"" << " = " << string_from_expression(id);
                 for(size_t i = 0; i < primaryKeyColumnNames.size(); ++i) {
                     ss << "\"" << primaryKeyColumnNames[i] << "\"" << " = ? ";
@@ -6090,7 +6102,7 @@ namespace sqlite_orm {
             std::vector<std::string> columnNames;
             auto compositeKeyColumnNames = impl.table.composite_key_columns_names();
             impl.table.for_each_column([&impl, &columnNames, &compositeKeyColumnNames] (auto c) {
-                if(impl.table._without_rowid or !c.template has<constraints::primary_key_t<>>()) {
+                if(impl.table._without_rowid || !c.template has<constraints::primary_key_t<>>()) {
                     auto it = std::find(compositeKeyColumnNames.begin(),
                                         compositeKeyColumnNames.end(),
                                         c.name);
@@ -6124,7 +6136,7 @@ namespace sqlite_orm {
                 statement_finalizer finalizer{stmt};
                 auto index = 1;
                 impl.table.for_each_column([&o, &index, &stmt, &impl, &compositeKeyColumnNames] (auto c) {
-                    if(impl.table._without_rowid or !c.template has<constraints::primary_key_t<>>()){
+                    if(impl.table._without_rowid || !c.template has<constraints::primary_key_t<>>()){
                         auto it = std::find(compositeKeyColumnNames.begin(),
                                             compositeKeyColumnNames.end(),
                                             c.name);
@@ -6757,5 +6769,15 @@ namespace sqlite_orm {
     }
     
 }
+
+#if defined(__RESTORE_MIN__)
+TBAG_POP_MACRO(min);
+#undef __RESTORE_MIN__
+#endif
+
+#if defined(__RESTORE_MAX__)
+TBAG_POP_MACRO(max);
+#undef __RESTORE_MAX__
+#endif
 
 #endif /* sqlite_orm_h */
