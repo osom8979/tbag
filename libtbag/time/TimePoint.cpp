@@ -234,6 +234,16 @@ int TimePoint::lmicrosec() const { return libtbag::time::getMicrosec(getLocalTim
 int TimePoint::lnanosec () const { return libtbag::time::getNanosec (getLocalTimePoint()); }
 // @formatter:on
 
+int TimePoint::ldhours() const
+{
+    return static_cast<int>(date::make_time(getLocalDiff()).hours().count());
+}
+
+int TimePoint::ldminutes() const
+{
+    return static_cast<int>(date::make_time(getLocalDiff()).minutes().count());
+}
+
 int TimePoint::getDays() const
 {
     return libtbag::time::getDays(getTimePoint());
@@ -244,7 +254,7 @@ int TimePoint::getLocalDays() const
     return libtbag::time::getDays(getLocalTimePoint());
 }
 
-std::string TimePoint::convertFormatString(int width, int value) const
+std::string TimePoint::paddingString(int width, int value)
 {
     if (width == 4) {
         return string::fformat("{:0>4}", value);
@@ -257,26 +267,33 @@ std::string TimePoint::convertFormatString(int width, int value) const
 }
 
 // @formatter:off
-std::string TimePoint::toYearString    (bool p) const { return convertFormatString(p ? 4 : 0,     year()); }
-std::string TimePoint::toMonthString   (bool p) const { return convertFormatString(p ? 2 : 0,    month()); }
-std::string TimePoint::toDayString     (bool p) const { return convertFormatString(p ? 2 : 0,      day()); }
-std::string TimePoint::toHoursString   (bool p) const { return convertFormatString(p ? 2 : 0,    hours()); }
-std::string TimePoint::toMinutesString (bool p) const { return convertFormatString(p ? 2 : 0,  minutes()); }
-std::string TimePoint::toSecondsString (bool p) const { return convertFormatString(p ? 2 : 0,  seconds()); }
-std::string TimePoint::toMillisecString(bool p) const { return convertFormatString(p ? 3 : 0, millisec()); }
-std::string TimePoint::toMicrosecString(bool p) const { return convertFormatString(p ? 3 : 0, microsec()); }
-std::string TimePoint::toNanosecString (bool p) const { return convertFormatString(p ? 3 : 0,  nanosec()); }
+std::string TimePoint::toYearString     (bool p) const { return paddingString(p ? 4 : 0,     year()); }
+std::string TimePoint::toShortYearString(bool p) const { return paddingString(p ? 2 : 0,     year() % 100); }
+std::string TimePoint::toMonthString    (bool p) const { return paddingString(p ? 2 : 0,    month()); }
+std::string TimePoint::toDayString      (bool p) const { return paddingString(p ? 2 : 0,      day()); }
+std::string TimePoint::toHoursString    (bool p) const { return paddingString(p ? 2 : 0,    hours()); }
+std::string TimePoint::toMinutesString  (bool p) const { return paddingString(p ? 2 : 0,  minutes()); }
+std::string TimePoint::toSecondsString  (bool p) const { return paddingString(p ? 2 : 0,  seconds()); }
+std::string TimePoint::toMillisecString (bool p) const { return paddingString(p ? 3 : 0, millisec()); }
+std::string TimePoint::toMicrosecString (bool p) const { return paddingString(p ? 3 : 0, microsec()); }
+std::string TimePoint::toNanosecString  (bool p) const { return paddingString(p ? 3 : 0,  nanosec()); }
 
-std::string TimePoint::toLocalYearString    (bool p) const { return convertFormatString(p ? 4 : 0,     lyear()); }
-std::string TimePoint::toLocalMonthString   (bool p) const { return convertFormatString(p ? 2 : 0,    lmonth()); }
-std::string TimePoint::toLocalDayString     (bool p) const { return convertFormatString(p ? 2 : 0,      lday()); }
-std::string TimePoint::toLocalHoursString   (bool p) const { return convertFormatString(p ? 2 : 0,    lhours()); }
-std::string TimePoint::toLocalMinutesString (bool p) const { return convertFormatString(p ? 2 : 0,  lminutes()); }
-std::string TimePoint::toLocalSecondsString (bool p) const { return convertFormatString(p ? 2 : 0,  lseconds()); }
-std::string TimePoint::toLocalMillisecString(bool p) const { return convertFormatString(p ? 3 : 0, lmillisec()); }
-std::string TimePoint::toLocalMicrosecString(bool p) const { return convertFormatString(p ? 3 : 0, lmicrosec()); }
-std::string TimePoint::toLocalNanosecString (bool p) const { return convertFormatString(p ? 3 : 0,  lnanosec()); }
+std::string TimePoint::toLocalYearString     (bool p) const { return paddingString(p ? 4 : 0,     lyear()); }
+std::string TimePoint::toLocalShortYearString(bool p) const { return paddingString(p ? 2 : 0,     lyear() % 100); }
+std::string TimePoint::toLocalMonthString    (bool p) const { return paddingString(p ? 2 : 0,    lmonth()); }
+std::string TimePoint::toLocalDayString      (bool p) const { return paddingString(p ? 2 : 0,      lday()); }
+std::string TimePoint::toLocalHoursString    (bool p) const { return paddingString(p ? 2 : 0,    lhours()); }
+std::string TimePoint::toLocalMinutesString  (bool p) const { return paddingString(p ? 2 : 0,  lminutes()); }
+std::string TimePoint::toLocalSecondsString  (bool p) const { return paddingString(p ? 2 : 0,  lseconds()); }
+std::string TimePoint::toLocalMillisecString (bool p) const { return paddingString(p ? 3 : 0, lmillisec()); }
+std::string TimePoint::toLocalMicrosecString (bool p) const { return paddingString(p ? 3 : 0, lmicrosec()); }
+std::string TimePoint::toLocalNanosecString  (bool p) const { return paddingString(p ? 3 : 0,  lnanosec()); }
 // @formatter:on
+
+std::string TimePoint::toLocalDiffString() const
+{
+    return string::fformat("{}{:0>2}{:0>2}", (_local_diff < _local_diff.zero() ? '-' : '+'), ldhours(), ldminutes());
+}
 
 std::string TimePoint::toString(std::string const & format) const
 {
@@ -318,6 +335,11 @@ int TimePoint::onEscape(std::string const & source, std::size_t index, std::stri
     int  consume = 1;
     char cursor  = source[index];
 
+    if (cursor == 'f') {
+        output = toLocalDiffString();
+        return 1;
+    }
+
     if (cursor == 'P' || cursor == 'p') {
         if (index + 1 >= source.size()) {
             output.assign(1, source[index]);
@@ -330,25 +352,29 @@ int TimePoint::onEscape(std::string const & source, std::size_t index, std::stri
 
     // @formatter:off
     switch (cursor) {
-    case 'Y': output = toYearString         (padding); break;
-    case 'M': output = toMonthString        (padding); break;
-    case 'D': output = toDayString          (padding); break;
-    case 'H': output = toHoursString        (padding); break;
-    case 'I': output = toMinutesString      (padding); break;
-    case 'S': output = toSecondsString      (padding); break;
-    case 'L': output = toMillisecString     (padding); break;
-    case 'C': output = toMicrosecString     (padding); break;
-    case 'N': output = toNanosecString      (padding); break;
-    case 'y': output = toLocalYearString    (padding); break;
-    case 'm': output = toLocalMonthString   (padding); break;
-    case 'd': output = toLocalDayString     (padding); break;
-    case 'h': output = toLocalHoursString   (padding); break;
-    case 'i': output = toLocalMinutesString (padding); break;
-    case 's': output = toLocalSecondsString (padding); break;
-    case 'l': output = toLocalMillisecString(padding); break;
-    case 'c': output = toLocalMicrosecString(padding); break;
-    case 'n': output = toLocalNanosecString (padding); break;
-    default:  output.assign(1, source[index]);         break;
+    // Global Time:
+    case 'Y': output = toYearString          (padding); break;
+    case 'E': output = toShortYearString     (padding); break;
+    case 'M': output = toMonthString         (padding); break;
+    case 'D': output = toDayString           (padding); break;
+    case 'H': output = toHoursString         (padding); break;
+    case 'I': output = toMinutesString       (padding); break;
+    case 'S': output = toSecondsString       (padding); break;
+    case 'L': output = toMillisecString      (padding); break;
+    case 'C': output = toMicrosecString      (padding); break;
+    case 'N': output = toNanosecString       (padding); break;
+    // Local Time:
+    case 'y': output = toLocalYearString     (padding); break;
+    case 'e': output = toLocalShortYearString(padding); break;
+    case 'm': output = toLocalMonthString    (padding); break;
+    case 'd': output = toLocalDayString      (padding); break;
+    case 'h': output = toLocalHoursString    (padding); break;
+    case 'i': output = toLocalMinutesString  (padding); break;
+    case 's': output = toLocalSecondsString  (padding); break;
+    case 'l': output = toLocalMillisecString (padding); break;
+    case 'c': output = toLocalMicrosecString (padding); break;
+    case 'n': output = toLocalNanosecString  (padding); break;
+    default:  output.assign(1, source[index]);          break;
     }
     // @formatter:on
 

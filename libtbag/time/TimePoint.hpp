@@ -195,35 +195,42 @@ public:
     int lnanosec () const;
     // @formatter:on
 
+    int ldhours() const;
+    int ldminutes() const;
+
 public:
     int getDays() const;
     int getLocalDays() const;
 
 private:
-    std::string convertFormatString(int width, int value) const;
+    static std::string paddingString(int width, int value);
 
 public:
     // @formatter:off
-    std::string toYearString    (bool padding = false) const;
-    std::string toMonthString   (bool padding = false) const;
-    std::string toDayString     (bool padding = false) const;
-    std::string toHoursString   (bool padding = false) const;
-    std::string toMinutesString (bool padding = false) const;
-    std::string toSecondsString (bool padding = false) const;
-    std::string toMillisecString(bool padding = false) const;
-    std::string toMicrosecString(bool padding = false) const;
-    std::string toNanosecString (bool padding = false) const;
+    std::string toYearString     (bool padding = false) const;
+    std::string toShortYearString(bool padding = false) const;
+    std::string toMonthString    (bool padding = false) const;
+    std::string toDayString      (bool padding = false) const;
+    std::string toHoursString    (bool padding = false) const;
+    std::string toMinutesString  (bool padding = false) const;
+    std::string toSecondsString  (bool padding = false) const;
+    std::string toMillisecString (bool padding = false) const;
+    std::string toMicrosecString (bool padding = false) const;
+    std::string toNanosecString  (bool padding = false) const;
 
-    std::string toLocalYearString    (bool padding = false) const;
-    std::string toLocalMonthString   (bool padding = false) const;
-    std::string toLocalDayString     (bool padding = false) const;
-    std::string toLocalHoursString   (bool padding = false) const;
-    std::string toLocalMinutesString (bool padding = false) const;
-    std::string toLocalSecondsString (bool padding = false) const;
-    std::string toLocalMillisecString(bool padding = false) const;
-    std::string toLocalMicrosecString(bool padding = false) const;
-    std::string toLocalNanosecString (bool padding = false) const;
+    std::string toLocalYearString     (bool padding = false) const;
+    std::string toLocalShortYearString(bool padding = false) const;
+    std::string toLocalMonthString    (bool padding = false) const;
+    std::string toLocalDayString      (bool padding = false) const;
+    std::string toLocalHoursString    (bool padding = false) const;
+    std::string toLocalMinutesString  (bool padding = false) const;
+    std::string toLocalSecondsString  (bool padding = false) const;
+    std::string toLocalMillisecString (bool padding = false) const;
+    std::string toLocalMicrosecString (bool padding = false) const;
+    std::string toLocalNanosecString  (bool padding = false) const;
     // @formatter:on
+
+    std::string toLocalDiffString() const;
 
 public:
     std::string toString(std::string const & format) const;
@@ -242,6 +249,7 @@ public:
      * @remarks
      *  Format list:
      *   - [p][Yy]: Year
+     *   - [p][Ee]: Year divided by 100 and truncated to integer
      *   - [p][Mm]: Month
      *   - [p][Dd]: Day
      *   - [p][Hh]: Hours
@@ -250,6 +258,7 @@ public:
      *   - [p][Ll]: Millisec
      *   - [p][Cc]: Microsec
      *   - [p][Nn]: Nanosec
+     *   - [f]: Local diff
      *  If you use 'p', the 'padding' option applies. @n
      *  If you use lowercase letters, use local time.
      */
