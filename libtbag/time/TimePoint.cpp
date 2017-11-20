@@ -222,6 +222,7 @@ int TimePoint::seconds () const { return libtbag::time::getSeconds (getTimePoint
 int TimePoint::millisec() const { return libtbag::time::getMillisec(getTimePoint()); }
 int TimePoint::microsec() const { return libtbag::time::getMicrosec(getTimePoint()); }
 int TimePoint::nanosec () const { return libtbag::time::getNanosec (getTimePoint()); }
+int TimePoint::week    () const { return libtbag::time::getWeek    (getTimePoint()); }
 
 int TimePoint::lyear    () const { return libtbag::time::getYear    (getLocalTimePoint()); }
 int TimePoint::lmonth   () const { return libtbag::time::getMonth   (getLocalTimePoint()); }
@@ -232,6 +233,7 @@ int TimePoint::lseconds () const { return libtbag::time::getSeconds (getLocalTim
 int TimePoint::lmillisec() const { return libtbag::time::getMillisec(getLocalTimePoint()); }
 int TimePoint::lmicrosec() const { return libtbag::time::getMicrosec(getLocalTimePoint()); }
 int TimePoint::lnanosec () const { return libtbag::time::getNanosec (getLocalTimePoint()); }
+int TimePoint::lweek    () const { return libtbag::time::getWeek    (getLocalTimePoint()); }
 // @formatter:on
 
 int TimePoint::ldhours() const
@@ -277,6 +279,8 @@ std::string TimePoint::toSecondsString  (bool p) const { return paddingString(p 
 std::string TimePoint::toMillisecString (bool p) const { return paddingString(p ? 3 : 0, millisec()); }
 std::string TimePoint::toMicrosecString (bool p) const { return paddingString(p ? 3 : 0, microsec()); }
 std::string TimePoint::toNanosecString  (bool p) const { return paddingString(p ? 3 : 0,  nanosec()); }
+std::string TimePoint::toWeekIndexString() const { return std::to_string(week()); }
+std::string TimePoint::toWeekString     () const { return getWeekString(getTimePoint()); }
 
 std::string TimePoint::toLocalYearString     (bool p) const { return paddingString(p ? 4 : 0,     lyear()); }
 std::string TimePoint::toLocalShortYearString(bool p) const { return paddingString(p ? 2 : 0,     lyear() % 100); }
@@ -288,6 +292,8 @@ std::string TimePoint::toLocalSecondsString  (bool p) const { return paddingStri
 std::string TimePoint::toLocalMillisecString (bool p) const { return paddingString(p ? 3 : 0, lmillisec()); }
 std::string TimePoint::toLocalMicrosecString (bool p) const { return paddingString(p ? 3 : 0, lmicrosec()); }
 std::string TimePoint::toLocalNanosecString  (bool p) const { return paddingString(p ? 3 : 0,  lnanosec()); }
+std::string TimePoint::toLocalWeekIndexString() const { return std::to_string(lweek()); }
+std::string TimePoint::toLocalWeekString     () const { return getWeekString(getLocalTimePoint()); }
 // @formatter:on
 
 std::string TimePoint::toLocalDiffString() const

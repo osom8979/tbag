@@ -183,6 +183,7 @@ public:
     int millisec() const;
     int microsec() const;
     int nanosec () const;
+    int week    () const;
 
     int lyear    () const;
     int lmonth   () const;
@@ -193,6 +194,7 @@ public:
     int lmillisec() const;
     int lmicrosec() const;
     int lnanosec () const;
+    int lweek    () const;
     // @formatter:on
 
     int ldhours() const;
@@ -217,6 +219,8 @@ public:
     std::string toMillisecString (bool padding = false) const;
     std::string toMicrosecString (bool padding = false) const;
     std::string toNanosecString  (bool padding = false) const;
+    std::string toWeekIndexString() const;
+    std::string toWeekString     () const;
 
     std::string toLocalYearString     (bool padding = false) const;
     std::string toLocalShortYearString(bool padding = false) const;
@@ -228,6 +232,8 @@ public:
     std::string toLocalMillisecString (bool padding = false) const;
     std::string toLocalMicrosecString (bool padding = false) const;
     std::string toLocalNanosecString  (bool padding = false) const;
+    std::string toLocalWeekIndexString() const;
+    std::string toLocalWeekString     () const;
     // @formatter:on
 
     std::string toLocalDiffString() const;

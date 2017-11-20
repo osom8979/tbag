@@ -128,11 +128,16 @@ TEST(TimePointTest, DateTime)
 
 TEST(TimePointTest, Format)
 {
+    // 2007/04/05 AM 03:28:27.100,99 (Thursday)
+
     TimePoint tp(2007, 4, 5, 3, 28, 27, 100, 99);
     tp.setLocalDiff(std::chrono::minutes(-(2 * 60 + 30)));
     ASSERT_STREQ("2007-04-05T03:28:27.100,099,000", tp.fformat("$pY-$pM-$pDT$pH:$pI:$pS.$pL,$pC,$pN").c_str());
     ASSERT_STREQ("2007-4-5T3:28:27.100,99,0", tp.fformat("$Y-$M-$DT$H:$I:$S.$L,$C,$N").c_str());
     ASSERT_STREQ("070405T032827.100099000-0230.log", tp.fformat("$pE$pM$pDT$pH$pI$pS.$pL$pC$pN$f.log").c_str());
+
+    ASSERT_EQ(4, tp.week());
+    ASSERT_STREQ("Thu", tp.toWeekString().c_str());
 }
 
 TEST(TimePointTest, TimeBeforeEpoch)

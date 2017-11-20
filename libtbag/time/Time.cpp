@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/time/Time.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
@@ -226,6 +227,26 @@ int getSeconds(std::chrono::system_clock::time_point const & time)
 int getSubSeconds(std::chrono::system_clock::time_point const & time)
 {
     return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).subseconds().count());
+}
+
+int getWeek(std::chrono::system_clock::time_point const & time)
+{
+    return static_cast<unsigned>(date::weekday(date::floor<date::days>(time)));
+}
+
+std::string getWeekString(std::chrono::system_clock::time_point const & time)
+{
+    switch (getWeek(time)) {
+    case 0: return "Sun";
+    case 1: return "Mon";
+    case 2: return "Tue";
+    case 3: return "Wed";
+    case 4: return "Thu";
+    case 5: return "Fri";
+    case 6: return "Sat";
+    default: TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    }
+    return "[Unknown]";
 }
 
 int getMillisec(std::chrono::system_clock::time_point const & time)

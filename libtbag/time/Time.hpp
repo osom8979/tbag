@@ -73,6 +73,9 @@ TBAG_API int getHours(std::chrono::system_clock::time_point const & time);
 TBAG_API int getMinutes(std::chrono::system_clock::time_point const & time);
 TBAG_API int getSeconds(std::chrono::system_clock::time_point const & time);
 TBAG_API int getSubSeconds(std::chrono::system_clock::time_point const & time);
+TBAG_API int getWeek(std::chrono::system_clock::time_point const & time);
+
+TBAG_API std::string getWeekString(std::chrono::system_clock::time_point const & time);
 
 /** milliseconds part of the seconds 0-999. */
 TBAG_API int getMillisec(std::chrono::system_clock::time_point const & time);
