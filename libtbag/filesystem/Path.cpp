@@ -342,10 +342,17 @@ std::string Path::getName() const
     return *nodes.rbegin();
 }
 
+std::string Path::getNameWithoutExtension() const
+{
+    std::string name = getName();
+    std::size_t pos = name.find(details::FILE_EXTENSION_DELIMITER);
+    return name.substr(0, pos);
+}
+
 std::string Path::getExtensionName() const
 {
     std::string name = getName();
-    std::size_t pos = name.find(".");
+    std::size_t pos = name.find(details::FILE_EXTENSION_DELIMITER);
     if (pos != std::string::npos) {
         return name.substr(pos);
     }

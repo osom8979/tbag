@@ -195,6 +195,9 @@ public:
     /** Filename except path. */
     std::string getName() const;
 
+    /** File name without directory or longest extension. */
+    std::string getNameWithoutExtension() const;
+
     /** File extension name except path. */
     std::string getExtensionName() const;
 
