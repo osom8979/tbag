@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/log/sink/RotateFileSink.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 #include <thread>
@@ -84,33 +85,26 @@ TEST(LogTest, RotateFileSink)
     message.assign(MAX_SIZE, '0');
     ASSERT_EQ(MAX_SIZE, message.size());
 
-    createRotateFileLogger(LOGGER_NAME, PATH.toString(), MAX_SIZE, log::MakeType::RAW);
+    bool const ENABLE_MUTEX = true;
+    createRotateFileLogger(LOGGER_NAME, PATH.toString(), MAX_SIZE, log::MakeType::RAW, ENABLE_MUTEX);
+    auto * logger = log::getLogger(LOGGER_NAME);
+    auto const * sink = logger->getSink();
+    ASSERT_NE(nullptr, logger);
+    ASSERT_NE(nullptr, sink);
     tLogM(LOGGER_NAME, message);
 
-    auto files1 = tttDirGet().scanDir(filesystem::Path::DIRENT_FILE);
-    ASSERT_EQ(1, files1.size());
-
-    filesystem::Path log0 = files1[0];
-    ASSERT_EQ(MAX_SIZE, log0.getState().size);
+    auto const * rotate_sink = (log::sink::RotateFileSink<std::mutex> const *)sink;
+    ASSERT_NE(nullptr, rotate_sink);
+    filesystem::Path log_01 = rotate_sink->atRotatePath().getPath();
+    ASSERT_EQ(MAX_SIZE, log_01.getState().size);
+    std::cout << "Log file 01: " << log_01 << std::endl;
 
     tLogM(LOGGER_NAME, "1");
     tLogM(LOGGER_NAME, "2");
-    auto files2 = tttDirGet().scanDir(filesystem::Path::DIRENT_FILE);
-    ASSERT_EQ(2, files2.size());
+    filesystem::Path log_02 = rotate_sink->atRotatePath().getPath();
+    ASSERT_EQ(2, log_02.getState().size);
+    std::cout << "Log file 02: " << log_02 << std::endl;
 
-    filesystem::Path log1;
-    if (files2[0] == log0) {
-        log1 = files2[1];
-    } else if (files2[1] == log0) {
-        log1 = files2[0];
-    } else {
-        ASSERT_TRUE(false);
-    }
-    ASSERT_EQ(2, log1.getState().size);
-
-    for (auto & f : files2) {
-        std::cout << f.toString() << std::endl;
-    }
     removeLogger(LOGGER_NAME);
 }
 

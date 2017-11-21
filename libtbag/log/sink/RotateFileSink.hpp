@@ -84,6 +84,10 @@ public:
         }
     }
 
+public:
+    inline RotatePath const & atRotatePath() const TBAG_NOEXCEPT { return _path; }
+    inline File const & atFile() const TBAG_NOEXCEPT { return _file; }
+
 private:
     bool init()
     {
