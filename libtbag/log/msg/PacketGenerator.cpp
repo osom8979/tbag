@@ -19,17 +19,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 namespace msg {
 
-char const * const DATE_MSG_SEVERITY_PREFIX = "[";
-char const * const DATE_MSG_SEVERITY_SUFFIX = "]";
-char const * const DATE_MSG_THREAD_PREFIX   = "@";
-char const * const DATE_MSG_SEPARATOR       = " ";
-
-PacketGenerator::PacketGenerator() : _type(MakeType::DEFAULT)
+PacketGenerator::PacketGenerator() : _type(MakeType::DEFAULT), _endl(UNIX_NEW_LINE)
 {
     // EMPTY.
 }
 
-PacketGenerator::PacketGenerator(MakeType type) : _type(type)
+PacketGenerator::PacketGenerator(MakeType type) : _type(type), _endl(UNIX_NEW_LINE)
 {
     // EMPTY.
 }
@@ -46,6 +41,8 @@ PacketGenerator::String PacketGenerator::make(MsgPacket const & packet)
         return makeDefault(packet);
     case MakeType::DEFAULT_COLOR:
         return makeDefaultColor(packet);
+    case MakeType::RAW:
+        return makeRaw(packet);
     default:
         return packet.getMessage();
     }
@@ -53,38 +50,49 @@ PacketGenerator::String PacketGenerator::make(MsgPacket const & packet)
 
 PacketGenerator::String PacketGenerator::makeDefault(MsgPacket const & packet)
 {
-    return getNowTimeString() + DATE_MSG_SEPARATOR
-           + getCurrentThreadString() + DATE_MSG_SEPARATOR
-           + getSeverityString(packet.getSeverity()) + DATE_MSG_SEPARATOR
-           + packet.getMessage();
+    std::stringstream ss;
+    ss << getNowTimeString() << DATE_MSG_SEPARATOR
+       << getCurrentThreadString() << DATE_MSG_SEPARATOR
+       << getSeverityString(packet.getSeverity()) << DATE_MSG_SEPARATOR
+       << packet.c_str() << _endl;
+    return ss.str();
 }
 
 PacketGenerator::String PacketGenerator::makeDefaultColor(MsgPacket const & packet)
 {
     using namespace libtbag::log::level;
 
-    String prefix;
-
     Severity level = packet.getSeverity();
+    std::stringstream ss;
+
     if (level <= EMERGENCY_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_BG_RED;
-        prefix += tces::DISPLAY_ATTRIBUTE_FG_CYAN;
+        ss << tces::DISPLAY_ATTRIBUTE_BG_RED << tces::DISPLAY_ATTRIBUTE_FG_CYAN;
     } else if (level <= ALERT_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_FG_RED;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_RED;
     } else if (level <= CRITICAL_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_FG_RED;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_RED;
     } else if (level <= ERROR_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
     } else if (level <= WARNING_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
     } else if (level <= NOTICE_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_FG_GREEN;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_GREEN;
     } else if (level <= INFORMATIONAL_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_FG_GREEN;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_GREEN;
     } else if (level <= DEBUG_SEVERITY) {
-        prefix = tces::DISPLAY_ATTRIBUTE_FG_BLUE;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_BLUE;
     }
-    return prefix + makeDefault(packet) + tces::DISPLAY_ATTRIBUTE_RESET;
+
+    ss << getNowTimeString() << DATE_MSG_SEPARATOR
+       << getCurrentThreadString() << DATE_MSG_SEPARATOR
+       << getSeverityString(packet.getSeverity()) << DATE_MSG_SEPARATOR
+       << packet.c_str() << tces::DISPLAY_ATTRIBUTE_RESET << _endl;
+    return ss.str();
+}
+
+PacketGenerator::String PacketGenerator::makeRaw(MsgPacket const & packet)
+{
+    return packet.getMessage();
 }
 
 PacketGenerator::String PacketGenerator::getNowTimeString()

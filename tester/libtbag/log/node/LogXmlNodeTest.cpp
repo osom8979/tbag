@@ -131,9 +131,8 @@ struct LogXmlNodeTest : public LogXmlNode
     virtual void setup() override
     {
         atInfos().clear();
-        atInfos().push_back(getLogInfo(
-                TEST_LOG_NAME, "file", "${TEST_DIR}/test.log",
-                "true", "false", "false", "info", "default"));
+        atInfos().push_back(getLogInfo(TEST_LOG_NAME, "file", "${TEST_DIR}/test.log", "1024",
+                                       "true", "false", "false", "info", "default"));
     }
 };
 

@@ -23,6 +23,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <libtbag/3rd/tinyxml2/tinyxml2.h>
 #include <libtbag/pattern/Singleton.hpp>
@@ -57,30 +58,20 @@ Severity const      INFO_SEVERITY = ::libtbag::log::level::INFORMATIONAL_SEVERIT
 Severity const     DEBUG_SEVERITY = ::libtbag::log::level::DEBUG_SEVERITY;
 
 TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
-TBAG_API Logger * createConsoleLogger(std::string const & name, bool auto_flush = false);
-TBAG_API Logger * createConsoleLogger(std::string const & name,
-                                      MakeType type = MakeType::DEFAULT,
-                                      bool mutex = true,
-                                      bool auto_flush = false);
-
-TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
-TBAG_API Logger * createFileLogger(std::string const & name,
-                                   std::string const & path,
-                                   MakeType type = MakeType::DEFAULT,
-                                   bool mutex = true,
-                                   bool auto_flush = false);
-
-TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path, bool auto_flush = false);
-TBAG_API Logger * createRotateFileLogger(std::string const & name,
-                                         std::string const & path,
-                                         MakeType type = MakeType::DEFAULT,
-                                         bool mutex = true,
-                                         bool auto_flush = false);
+TBAG_API Logger * createConsoleLogger(std::string const & name, MakeType type = MakeType::DEFAULT,
+                                      bool mutex = true, bool auto_flush = false);
+TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path,
+                                   MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
+TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path,
+                                         std::size_t max_size = MEGA_BYTE_TO_BYTE, MakeType type = MakeType::DEFAULT,
+                                         bool mutex = true, bool auto_flush = false);
 
 TBAG_API Logger * createDefaultConsoleLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
-TBAG_API Logger * createDefaultRotateFileLogger(std::string const & path, bool auto_flush = false);
+TBAG_API Logger * createDefaultRotateFileLogger(std::string const & path,
+                                                std::size_t max_size = MEGA_BYTE_TO_BYTE,
+                                                bool auto_flush = false);
 
 TBAG_API bool removeLogger(std::string const & name);
 TBAG_API bool removeDefaultLogger();

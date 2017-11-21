@@ -54,44 +54,30 @@ public:
     using String = SinkInterface::String;
     using Mutex  = MutexType;
 
-public:
-    TBAG_CONSTEXPR static char const * const WINDOWS_NEW_LINE = "\r\n";
-    TBAG_CONSTEXPR static char const * const    UNIX_NEW_LINE = "\n";
-
 private:
     Mutex  _mutex;
     bool   _force_flush;
-    String _endl;
 
 public:
     TBAG_CONSTEXPR inline bool isLocking() const TBAG_NOEXCEPT
     { return std::is_same<MutexType, lock::FakeLock>::value; }
 
 public:
-    Sink() : _mutex(), _force_flush(false), _endl(UNIX_NEW_LINE)
+    Sink() : _mutex(), _force_flush(false)
     { /* EMPTY. */ }
-    Sink(bool force_flush) : _mutex(), _force_flush(force_flush), _endl(UNIX_NEW_LINE)
+    Sink(bool force_flush) : _mutex(), _force_flush(force_flush)
     { /* EMPTY. */ }
     virtual ~Sink()
     { /* EMPTY. */ }
 
 public:
-    // @formatter:off
-    inline void setNewLineForUnixStyle()
-    { _endl = UNIX_NEW_LINE; }
-    inline void setNewLineForWindowsStyle()
-    { _endl = WINDOWS_NEW_LINE; }
-    inline String getNewLine() const
-    { return _endl; }
-    inline bool isForceFlush() const TBAG_NOEXCEPT
-    { return _force_flush; }
-    // @formatter:on
+    inline bool isForceFlush() const TBAG_NOEXCEPT { return _force_flush; }
 
 public:
     virtual void safeWrite(String const & message) override
     {
         _mutex.lock();
-        this->write(message + _endl);
+        this->write(message);
         if (_force_flush) {
             this->flush();
         }

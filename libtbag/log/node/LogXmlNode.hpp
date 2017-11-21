@@ -56,6 +56,7 @@ public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_NAME        = "name";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_SINK        = "sink";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_DESTINATION = "destination";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MAX_SIZE    = "max_size";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_MULTITHREAD = "multithread";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_MUTEX       = "mutex";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_GENERATOR   = "generator";
@@ -91,6 +92,7 @@ public:
         std::string name;
         std::string sink;
         std::string destination;
+        std::size_t max_size;
         bool auto_flush;
         bool multithread;
         bool mutex;
@@ -146,11 +148,12 @@ public:
 
 public:
     // @formatter:off
-    static bool     parseAutoFlush    (std::string const & value);
-    static bool     parseMultiThread  (std::string const & value);
-    static bool     parseMutex        (std::string const & value);
-    static Severity parseSeverity     (std::string const & value);
-    static MakeType parseGeneratorType(std::string const & value);
+    static std::size_t parseMaxSize      (std::string const & value);
+    static bool        parseAutoFlush    (std::string const & value);
+    static bool        parseMultiThread  (std::string const & value);
+    static bool        parseMutex        (std::string const & value);
+    static Severity    parseSeverity     (std::string const & value);
+    static MakeType    parseGeneratorType(std::string const & value);
     // @formatter:on
 
 public:
@@ -160,6 +163,7 @@ public:
     static LogInfo getLogInfo(std::string const & name,
                               std::string const & sink,
                               std::string const & destination,
+                              std::string const & max_size,
                               std::string const & auto_flush,
                               std::string const & multithread,
                               std::string const & mutex,
@@ -174,6 +178,7 @@ public:
     static bool insertName          (Element & parent, std::string const & name);
     static bool insertSink          (Element & parent, std::string const & sink);
     static bool insertDestination   (Element & parent, std::string const & destination);
+    static bool insertMaxSize       (Element & parent, std::size_t max_size);
     static bool insertAutoFlush     (Element & parent, bool auto_flush);
     static bool insertMultiThread   (Element & parent, bool multithread);
     static bool insertMutex         (Element & parent, bool mutex);

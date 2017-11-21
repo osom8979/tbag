@@ -107,7 +107,7 @@ public:
             if (details::getState(prev, &state) == false) {
                 return false;
             }
-            if (state.size + size < max_size) {
+            if (state.size + size <= max_size) {
                 return false;
             }
             return true;

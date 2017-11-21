@@ -39,6 +39,9 @@ namespace node {
  *  - ${EXE_DIR}
  *  - ${WORK_DIR}
  *  - ${HOME_DIR}
+ *
+ *  See more:
+ *   LogXmlNode::createDefaultEnvironments()
  */
 class TBAG_API DefaultLogXmlNode : public LogXmlNode
 {
@@ -48,6 +51,7 @@ public:
         std::string name;        ///< logger name.
         std::string sink;        ///< cout, file, rotate_file
         std::string destination; ///< file path.
+        std::string max_size;    ///< max file size.
         std::string generator;   ///< default, default_color
         std::string severity;    ///< debug, info, error, ...
         std::string auto_flush;  ///< true or false.

@@ -59,6 +59,7 @@ void DefaultLogXmlNode::setup()
     atInfos().push_back(getLogInfo(_params.name,
                                    _params.sink,
                                    _params.destination,
+                                   _params.max_size,
                                    _params.auto_flush,
                                    _params.multithread,
                                    _params.mutex,

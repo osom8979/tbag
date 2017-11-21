@@ -111,6 +111,16 @@ LogXmlNode::StringVector LogXmlNode::getNames() const
 // Static methods.
 // ---------------
 
+std::size_t LogXmlNode::parseMaxSize(std::string const & value)
+{
+    try {
+        return static_cast<std::size_t>(std::stoi(value));
+    } catch (...) {
+        // EMPTY.
+    }
+    return 0;
+}
+
 bool LogXmlNode::parseAutoFlush(std::string const & value)
 {
     // @formatter:off
@@ -195,6 +205,7 @@ LogXmlNode::LogInfo LogXmlNode::getLogInfo(
         std::string const & name,
         std::string const & sink,
         std::string const & destination,
+        std::string const & max_size,
         std::string const & auto_flush,
         std::string const & multithread,
         std::string const & mutex,
@@ -205,6 +216,7 @@ LogXmlNode::LogInfo LogXmlNode::getLogInfo(
     result.name        = name;
     result.sink        = sink;
     result.destination = destination;
+    result.max_size    = parseMaxSize(max_size);
     result.auto_flush  = parseAutoFlush(auto_flush);
     result.multithread = parseMultiThread(multithread);
     result.mutex       = parseMutex(mutex);
@@ -218,6 +230,7 @@ LogXmlNode::LogInfo LogXmlNode::getLogInfo(Element const & element)
     return getLogInfo(getElementText(element.FirstChildElement(XML_ELEMENT_NAME)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_SINK)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_DESTINATION)),
+                      getElementText(element.FirstChildElement(XML_ELEMENT_MAX_SIZE)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_AUTO_FLUSH)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_MULTITHREAD)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_MUTEX)),
@@ -261,6 +274,14 @@ bool LogXmlNode::insertDestination(Element & parent, std::string const & destina
     auto * doc = parent.GetDocument();
     auto * element = doc->NewElement(XML_ELEMENT_DESTINATION);
     element->SetText(destination.c_str());
+    return parent.InsertEndChild(element) != nullptr;
+}
+
+bool LogXmlNode::insertMaxSize(Element & parent, std::size_t max_size)
+{
+    auto * doc = parent.GetDocument();
+    auto * element = doc->NewElement(XML_ELEMENT_MAX_SIZE);
+    element->SetText((unsigned int)max_size);
     return parent.InsertEndChild(element) != nullptr;
 }
 
@@ -328,6 +349,7 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfo const & info)
     insertName         (*element, info.name);
     insertSink         (*element, info.sink);
     insertDestination  (*element, info.destination);
+    insertMaxSize      (*element, info.max_size);
     insertAutoFlush    (*element, info.auto_flush);
     insertMultiThread  (*element, info.multithread);
     insertMutex        (*element, info.mutex);
@@ -366,7 +388,7 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
     } else if (info.sink == SINK_FILE) {
         logger = createFileLogger(info.name, DEST, info.generator, info.mutex, info.auto_flush);
     } else if (info.sink == SINK_ROTATE_FILE) {
-        logger = createRotateFileLogger(info.name, DEST, info.generator, info.mutex, info.auto_flush);
+        logger = createRotateFileLogger(info.name, DEST, info.max_size, info.generator, info.mutex, info.auto_flush);
     } else {
         return nullptr;
     }
