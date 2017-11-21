@@ -89,51 +89,78 @@ public:
     inline File const & atFile() const TBAG_NOEXCEPT { return _file; }
 
 private:
-    bool init()
-    {
-        if (_path.update() == false) {
-            return false;
-        }
-        if (_file.open(_path.getPath().toString(), File::Flags().clear().creat().rdwr().append()) == false) {
-            return false;
-        }
-        assert(_path.getPath().exists());
-        assert(_file.isOpen());
-        return true;
-    }
-
     bool reopen(std::string const & path)
     {
         if (_file.isOpen()) {
             _file.close();
         }
         assert(_file.isOpen() == false);
+
+        Path parent_dir = Path(path).getParent();
+        if (parent_dir.exists() == false) {
+            parent_dir.createDir();
+        }
+
+        if (parent_dir.isDirectory() == false) {
+            std::cerr << "RotateFileSink::reopen() Parent is not a directory: " << parent_dir.toString() << std::endl;
+            return false;
+        }
+        if (parent_dir.isWritable() == false) {
+            std::cerr << "RotateFileSink::reopen() Parent is not a writable: " << parent_dir.toString() << std::endl;
+            return false;
+        }
         if (_file.open(path, File::Flags().clear().creat().rdwr().append()) == false) {
+            std::cerr << "RotateFileSink::reopen() File open error: " << path << std::endl;
             return false;
         }
         assert(_file.isOpen());
         return true;
     }
 
+    bool reopen()
+    {
+        return reopen(_path.getPath().toString());
+    }
+
+    bool update()
+    {
+        return _path.update();
+    }
+
+    bool init()
+    {
+        return update() && reopen();
+    }
+
+public:
+    bool isOpen() const
+    {
+        return _file.isOpen();
+    }
+
 public:
     virtual void write(String const & message) override
     {
         if (_path.next(message.data(), message.size())) {
-            if (reopen(_path.getPath().toString()) == false) {
-                std::cerr << "RotateFileSink::write() next open error!\n";
+            if (reopen() == false) {
+                std::cerr << "RotateFileSink::write() Next open error!\n";
             }
         }
 
-        if (_file.isOpen()) {
-            _file.write(message.c_str(), message.size(), -1);
-        } else {
-            if (_path.update() && reopen(_path.getPath().toString())) {
-                // Re-try.
-                _file.write(message.c_str(), message.size(), -1);
-            } else {
-                std::cerr << "RotateFileSink::write() File open error.\n";
+        if (isOpen() == false) {
+            // Retry the open.
+            update();
+            reopen();
+
+            if (isOpen() == false) {
+                std::cerr << "RotateFileSink::write() Retry open error!\n";
+                assert(false && "File open error!");
+                return;
             }
         }
+
+        assert(isOpen());
+        _file.write(message.c_str(), message.size(), -1);
     }
 
     virtual void flush() override
