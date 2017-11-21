@@ -85,29 +85,30 @@ TEST(LogTest, RotateFileSink)
     ASSERT_EQ(MAX_SIZE, message.size());
 
     createRotateFileLogger(LOGGER_NAME, PATH.toString(), MAX_SIZE, log::MakeType::RAW);
-    auto files = tttDirGet().scanDir(filesystem::Path::DIRENT_FILE);
-    ASSERT_EQ(1, files.size());
-
-    filesystem::Path log0 = files[0];
-    ASSERT_EQ(0, log0.getState().size);
     tLogM(LOGGER_NAME, message);
+
+    auto files1 = tttDirGet().scanDir(filesystem::Path::DIRENT_FILE);
+    ASSERT_EQ(1, files1.size());
+
+    filesystem::Path log0 = files1[0];
     ASSERT_EQ(MAX_SIZE, log0.getState().size);
 
     tLogM(LOGGER_NAME, "1");
-    files = tttDirGet().scanDir(filesystem::Path::DIRENT_FILE);
-    ASSERT_EQ(2, files.size());
+    tLogM(LOGGER_NAME, "2");
+    auto files2 = tttDirGet().scanDir(filesystem::Path::DIRENT_FILE);
+    ASSERT_EQ(2, files2.size());
 
     filesystem::Path log1;
-    if (files[0] == log0) {
-        log1 = files[1];
-    } else if (files[1] == log0) {
-        log1 = files[0];
+    if (files2[0] == log0) {
+        log1 = files2[1];
+    } else if (files2[1] == log0) {
+        log1 = files2[0];
     } else {
         ASSERT_TRUE(false);
     }
-    ASSERT_EQ(1, log1.getState().size);
+    ASSERT_EQ(2, log1.getState().size);
 
-    for (auto & f : files) {
+    for (auto & f : files2) {
         std::cout << f.toString() << std::endl;
     }
     removeLogger(LOGGER_NAME);
