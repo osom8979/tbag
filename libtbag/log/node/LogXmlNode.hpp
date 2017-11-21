@@ -187,6 +187,9 @@ public:
 public:
     static Logger * createLogger(LogInfo const & info);
     static Logger * createLogger(LogInfo const & info, Environments const & envs);
+
+public:
+    static Environments createDefaultEnvironments();
 };
 
 TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);

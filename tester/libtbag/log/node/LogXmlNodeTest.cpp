@@ -70,7 +70,7 @@ TBAG_CONSTEXPR static char const * const TEST_TLOG_XML_STRING = R"XML(
     <logger>
         <name>test-logger-file</name>
         <sink>file</sink>
-        <destination>tbag-logger-test.log</destination>
+        <destination>${EXE_DIR}/tbag-logger-test.log</destination>
         <multithread>false</multithread>
         <mutex>false</mutex>
         <generator>default</generator>

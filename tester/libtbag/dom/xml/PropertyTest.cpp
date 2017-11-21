@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/dom/xml/Property.hpp>
 
 using namespace libtbag;
@@ -32,8 +33,11 @@ public:
 
 TEST(PropertyTest, Default)
 {
+    tttDir(true, true);
+    auto const PATH = tttDirGet() / "property.xml";
+
     DemoProperty property;
-    property.loadOrCreate("__tbag_dom_property_test__.xml");
+    property.loadOrCreate(PATH.toString());
 
     ASSERT_EQ(   100, property.get_IntegerKey());
     ASSERT_EQ("TEST", property.get_StringKey());

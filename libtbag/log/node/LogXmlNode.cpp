@@ -21,12 +21,9 @@ namespace node {
 // LogXmlNode implementation.
 // --------------------------
 
-LogXmlNode::LogXmlNode()
+LogXmlNode::LogXmlNode() : _envs(createDefaultEnvironments())
 {
-    _envs.push(EnvFlag(ENVS_EXE_PATH, filesystem::Path::getExePath()));
-    _envs.push(EnvFlag(ENVS_EXE_DIR , filesystem::Path::getExeDir()));
-    _envs.push(EnvFlag(ENVS_WORK_DIR, filesystem::Path::getWorkDir()));
-    _envs.push(EnvFlag(ENVS_HOME_DIR, filesystem::Path::getHomeDir()));
+    // EMPTY.
 }
 
 LogXmlNode::~LogXmlNode()
@@ -352,7 +349,7 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfoVector const & infos)
 
 LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info)
 {
-    return createLogger(info, Environments());
+    return createLogger(info, createDefaultEnvironments());
 }
 
 LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments const & envs)
@@ -376,6 +373,16 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
 
     logger->setSeverity(info.severity);
     return logger;
+}
+
+LogXmlNode::Environments LogXmlNode::createDefaultEnvironments()
+{
+    Environments envs;
+    envs.push(EnvFlag(ENVS_EXE_PATH, filesystem::Path::getExePath()));
+    envs.push(EnvFlag(ENVS_EXE_DIR , filesystem::Path::getExeDir()));
+    envs.push(EnvFlag(ENVS_WORK_DIR, filesystem::Path::getWorkDir()));
+    envs.push(EnvFlag(ENVS_HOME_DIR, filesystem::Path::getHomeDir()));
+    return envs;
 }
 
 // ------------------------

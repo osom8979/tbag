@@ -7,6 +7,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/database/Sqlite.hpp>
 
 using namespace libtbag;
@@ -14,8 +15,8 @@ using namespace libtbag::database;
 
 TEST(SqliteTest, Default)
 {
-    std::string const PATH = "__database_test_sqlite3.sqlite";
-    Sqlite db;
+    tttDir(true, true);
+    auto const PATH = tttDirGet() / "db.sqlite";
 
     std::string const CREATE_TABLE =
             "CREATE TABLE IF NOT EXISTS test (id INT PRIMARY KEY, name CHAR(20));";
@@ -28,7 +29,8 @@ TEST(SqliteTest, Default)
     std::string const DELETE_ITEM =
             "DELETE FROM test WHERE id > 0;";
 
-    ASSERT_TRUE(db.open(PATH));
+    Sqlite db;
+    ASSERT_TRUE(db.open(PATH.toString()));
     ASSERT_EQ(0 , db.getErrorCode());
     ASSERT_LT(0U, db.getErrorMessage().size());
 

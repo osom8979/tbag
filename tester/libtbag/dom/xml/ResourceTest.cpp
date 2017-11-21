@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/dom/xml/Resource.hpp>
 
 using namespace libtbag;
@@ -29,15 +30,17 @@ TEST(ResourceTest, Utf8)
 
     char const * const TEST_NAME = "hangul";
     char const * const TEST_TAG = "utf8";
-    char const * const FILE_NAME = "__resource_test_utf8.xml";
+
+    tttDir(true, true);
+    auto const PATH = tttDirGet() / "utf8.xml";
 
     Resource res;
     res.set(TEST_NAME, (char*)hangul);
     res.set_tag(TEST_TAG);
-    ASSERT_TRUE(res.save(FILE_NAME));
+    ASSERT_TRUE(res.save(PATH.toString()));
 
     res.clear();
-    ASSERT_TRUE(res.readFile(FILE_NAME, TEST_TAG));
+    ASSERT_TRUE(res.readFile(PATH.toString(), TEST_TAG));
     ASSERT_EQ(HANGUL_UTF8, res.getString(TEST_NAME));
 }
 
@@ -135,11 +138,12 @@ TEST_F(ResourceFixtureTest, ReadFromXmlString)
 
 TEST_F(ResourceFixtureTest, Save)
 {
-    char const * const FILE_NAME = "__resource_test_save.xml";
+    tttDir(true, true);
+    auto const PATH = tttDirGet() / "utf8.xml";
 
     Resource::Map map;
     map = Resource::readFromXmlString(xml, tag);
-    ASSERT_TRUE(Resource::save(FILE_NAME, tag, map));
+    ASSERT_TRUE(Resource::save(PATH.toString(), tag, map));
 }
 
 TEST_F(ResourceFixtureTest, GetValue)
