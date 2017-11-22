@@ -35,22 +35,15 @@ namespace animation {
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  */
-class TBAG_API FrameInterpolator : public TimeInterpolator<int>
+class TBAG_API FrameInterpolator : public TimeInterpolator
 {
-public:
-    using Parent = TimeInterpolator<int>;
-    using Rep    = Parent::Rep;
-
-    static_assert(std::is_integral<Rep>::value, "Rep is not integral type.");
-
 private:
     /**
      * Based on time to start the operation.
      *
      * @translate{ko, 연산을 시작할 기준 시간.}
      */
-    Rep _start;
-
+    int _start;
     int _fps;    ///< Frames per milliseconds (FPS).
     int _fcount; ///< Total frame count.
 
@@ -61,13 +54,11 @@ public:
     { /* EMPTY. */ }
 
 public:
-    inline void setStart(Rep start) TBAG_NOEXCEPT
-    { _start = start; }
-    inline void setFps(int fps) TBAG_NOEXCEPT
-    { _fps = fps; }
-    inline void setFrameSize(int fcount) TBAG_NOEXCEPT
-    { _fcount = fcount; }
-    inline void set(Rep start, int fps, int fcount) TBAG_NOEXCEPT
+    inline void setStart(int start) TBAG_NOEXCEPT { _start = start; }
+    inline void setFps(int fps) TBAG_NOEXCEPT { _fps = fps; }
+    inline void setFrameSize(int fcount) TBAG_NOEXCEPT { _fcount = fcount; }
+
+    inline void set(int start, int fps, int fcount) TBAG_NOEXCEPT
     {
         _start  = start;
         _fps    = fps;
@@ -86,7 +77,7 @@ public:
      *   int frame_number = animation.getInterpolation(millisec);
      *  @endcode
      */
-    virtual Rep getInterpolation(Rep rep) TBAG_NOEXCEPT override;
+    virtual float getInterpolation(float input) override;
 };
 
 } // namespace animation

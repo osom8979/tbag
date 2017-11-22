@@ -31,26 +31,21 @@ namespace animation {
  * @date   2015-06-27
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
+ * @date   2017-11-22 (Remove template)
  */
-template <typename RepType>
 struct TimeInterpolator
 {
-    using Rep = RepType;
-
-    TimeInterpolator() { /* EMPTY. */ }
-    virtual ~TimeInterpolator() { /* EMPTY. */ }
-
     /**
      * Virtual function that returns an interpolated value.
      *
      * @translate{ko, 보간된 값을 반환하는 가상함수.}
      *
-     * @param rep
+     * @param input
      *          [in] Current time.
      *
      * @return Interpolated value.
      */
-    virtual Rep getInterpolation(Rep rep) TBAG_NOEXCEPT = 0;
+    virtual float getInterpolation(float input) = 0;
 };
 
 } // namespace animation

@@ -14,12 +14,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-FrameInterpolator::Rep FrameInterpolator::getInterpolation(Rep rep) TBAG_NOEXCEPT
+float FrameInterpolator::getInterpolation(float input)
 {
     if (_fps == 0 || _fcount == 0) {
         return 0;
     }
-    return std::abs((rep - _start) / _fps % _fcount /* + 0.5f */);
+    return (int)((input - _start) / _fps) % _fcount;
 }
 
 } // namespace animation
