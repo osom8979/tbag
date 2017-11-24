@@ -78,14 +78,15 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
  * @tparam CharType    Character type.
  * @tparam StringType  std::string type (Don't change this typename).
  *
- * @param source    [in] Original string.
- * @param delimiter [in] Delimiter string.
+ * @param[in] source       Original string.
+ * @param[in] delimiter    Delimiter string.
+ * @param[in] remove_empty Remove all empty tokens.
  *
  * @return
  *  Token vector.
  */
-TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter);
-TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter);
+TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter, bool remove_empty = true);
+TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter, bool remove_empty = true);
 
 TBAG_API std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter);
 

@@ -24,7 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter)
+std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter, bool remove_empty)
 {
     if (source.empty() || delimiter.empty()) {
         return std::vector<std::string>();
@@ -38,7 +38,7 @@ std::vector<std::string> splitTokens(std::string const & source, std::string con
 
     while (end != std::string::npos) {
         token = source.substr(start, end - start);
-        if (token.empty() == false) {
+        if (remove_empty == false || token.empty() == false) {
             result.push_back(token);
         }
 
@@ -49,14 +49,14 @@ std::vector<std::string> splitTokens(std::string const & source, std::string con
 
     // Last token.
     token = source.substr(start, end);
-    if (token.empty() == false) {
+    if (remove_empty == false || token.empty() == false) {
         result.push_back(token);
     }
 
     return result;
 }
 
-std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter)
+std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter, bool remove_empty)
 {
     if (utf8_source.empty() || utf8_delimiter.empty()) {
         return std::vector<std::string>();
@@ -75,7 +75,7 @@ std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::s
 
     while (end != UNICODE_NPOS) {
         token = source.tempSubString(start, end - start);
-        if (token.isEmpty() == false) {
+        if (remove_empty == false || token.isEmpty() == false) {
             utf8_token.clear();
             token.toUTF8String(utf8_token);
             result.push_back(utf8_token);
@@ -88,7 +88,7 @@ std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::s
 
     // Last token.
     token = source.tempSubString(start);
-    if (token.isEmpty() == false) {
+    if (remove_empty == false || token.isEmpty() == false) {
         utf8_token.clear();
         token.toUTF8String(utf8_token);
         result.push_back(utf8_token);

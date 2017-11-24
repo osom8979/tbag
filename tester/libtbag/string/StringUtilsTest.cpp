@@ -20,73 +20,129 @@ using namespace libtbag::test_data;
 
 TEST(StringUtilsTest, SplitTokens)
 {
-    std::string delimiter = "//";
-    std::string temp1 = std::string("1TEMP1");
-    std::string temp2 = std::string("2TEMP2");
+    std::string const DELIMITER = "//";
 
-    std::vector<std::string> path_set;
-    std::string content;
+    auto tokens0 = splitTokens("", DELIMITER);
+    ASSERT_EQ(0, tokens0.size());
 
-    content = std::string() + delimiter;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(0U, path_set.size());
+    auto tokens1 = splitTokens("//", DELIMITER);
+    ASSERT_EQ(0, tokens1.size());
 
-    content = std::string() + delimiter + delimiter;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(0U, path_set.size());
+    auto tokens2 = splitTokens("////", DELIMITER);
+    ASSERT_EQ(0, tokens2.size());
 
-    content = std::string() + delimiter + delimiter + temp1;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(1U, path_set.size());
-    ASSERT_EQ(temp1, path_set[0]);
+    auto tokens3 = splitTokens("////A", DELIMITER);
+    ASSERT_EQ(1, tokens3.size());
+    ASSERT_STREQ("A", tokens3[0].c_str());
 
-    content = std::string() + delimiter + delimiter + temp1;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(1U, path_set.size());
-    ASSERT_EQ(temp1, path_set[0]);
+    auto tokens4 = splitTokens("A", DELIMITER);
+    ASSERT_EQ(1, tokens4.size());
+    ASSERT_STREQ("A", tokens4[0].c_str());
 
-    content = temp1;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(1U, path_set.size());
-    ASSERT_EQ(temp1, path_set[0]);
+    auto tokens5 = splitTokens("A//", DELIMITER);
+    ASSERT_EQ(1, tokens5.size());
+    ASSERT_STREQ("A", tokens5[0].c_str());
 
-    content = temp1 + delimiter;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(1U, path_set.size());
-    ASSERT_EQ(temp1, path_set[0]);
+    auto tokens6 = splitTokens("A//B", DELIMITER);
+    ASSERT_EQ(2, tokens6.size());
+    ASSERT_STREQ("A", tokens6[0].c_str());
+    ASSERT_STREQ("B", tokens6[1].c_str());
 
-    content = temp1 + delimiter + temp2;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(2U, path_set.size());
-    ASSERT_EQ(temp1, path_set[0]);
-    ASSERT_EQ(temp2, path_set[1]);
+    auto tokens7 = splitTokens("A//B//", DELIMITER);
+    ASSERT_EQ(2, tokens7.size());
+    ASSERT_STREQ("A", tokens7[0].c_str());
+    ASSERT_STREQ("B", tokens7[1].c_str());
 
-    content = temp1 + delimiter + temp2 + delimiter;
-    path_set = splitTokens(content, delimiter);
-    ASSERT_EQ(2U, path_set.size());
-    ASSERT_EQ(temp1, path_set[0]);
-    ASSERT_EQ(temp2, path_set[1]);
+    auto tokens8 = splitTokens("A//B/", DELIMITER);
+    ASSERT_EQ(2, tokens8.size());
+    ASSERT_STREQ("A", tokens8[0].c_str());
+    ASSERT_STREQ("B/", tokens8[1].c_str());
 }
 
-TEST(StringUtilsTest, splitUtf8Tokens)
+TEST(StringUtilsTest, SplitTokens_NotRemoveEmpty)
 {
-    std::vector<std::string> tokens;
+    std::string const DELIMITER = ":";
 
-    // 1st.
-    tokens = splitUtf8Tokens(UTF8_SOURCE, UTF8_NA);
-    ASSERT_EQ(2U, tokens.size());
-    ASSERT_EQ(UTF8_GA, tokens[0]);
-    ASSERT_EQ(UTF8_DA, tokens[1]);
+    auto tokens0 = splitTokens("", DELIMITER, false);
+    ASSERT_EQ(0, tokens0.size());
 
-    // 2nd.
-    tokens = splitUtf8Tokens(UTF8_SOURCE, UTF8_GA);
-    ASSERT_EQ(1U, tokens.size());
-    ASSERT_EQ(UTF8_NA + UTF8_DA, tokens[0]);
+    auto tokens1 = splitTokens("A", DELIMITER, false);
+    ASSERT_EQ(1, tokens1.size());
+    ASSERT_STREQ("A", tokens1[0].c_str());
 
-    // 3rd.
-    tokens = splitUtf8Tokens(UTF8_SOURCE, UTF8_DA);
-    ASSERT_EQ(1U, tokens.size());
-    ASSERT_EQ(UTF8_GA + UTF8_NA, tokens[0]);
+    auto tokens2 = splitTokens(":", DELIMITER, false);
+    ASSERT_EQ(2, tokens2.size());
+    ASSERT_STREQ("", tokens2[0].c_str());
+    ASSERT_STREQ("", tokens2[1].c_str());
+
+    auto tokens3 = splitTokens("::", DELIMITER, false);
+    ASSERT_EQ(3, tokens3.size());
+    ASSERT_STREQ("", tokens3[0].c_str());
+    ASSERT_STREQ("", tokens3[1].c_str());
+    ASSERT_STREQ("", tokens3[2].c_str());
+
+    auto tokens4 = splitTokens(":::", DELIMITER, false);
+    ASSERT_EQ(4, tokens4.size());
+    ASSERT_STREQ("", tokens4[0].c_str());
+    ASSERT_STREQ("", tokens4[1].c_str());
+    ASSERT_STREQ("", tokens4[2].c_str());
+    ASSERT_STREQ("", tokens4[3].c_str());
+
+    auto tokens5 = splitTokens(":A::", DELIMITER, false);
+    ASSERT_EQ(4, tokens5.size());
+    ASSERT_STREQ("", tokens5[0].c_str());
+    ASSERT_STREQ("A", tokens5[1].c_str());
+    ASSERT_STREQ("", tokens5[2].c_str());
+    ASSERT_STREQ("", tokens5[3].c_str());
+
+    auto tokens6 = splitTokens("A:", DELIMITER, false);
+    ASSERT_EQ(2, tokens6.size());
+    ASSERT_STREQ("A", tokens6[0].c_str());
+    ASSERT_STREQ("", tokens6[1].c_str());
+
+    auto tokens7 = splitTokens(":A", DELIMITER, false);
+    ASSERT_EQ(2, tokens7.size());
+    ASSERT_STREQ("", tokens7[0].c_str());
+    ASSERT_STREQ("A", tokens7[1].c_str());
+
+    auto tokens8 = splitTokens("A:B", DELIMITER, false);
+    ASSERT_EQ(2, tokens8.size());
+    ASSERT_STREQ("A", tokens8[0].c_str());
+    ASSERT_STREQ("B", tokens8[1].c_str());
+}
+
+TEST(StringUtilsTest, SplitUtf8Tokens)
+{
+    auto tokens1 = splitUtf8Tokens(UTF8_SOURCE, UTF8_NA);
+    ASSERT_EQ(2U, tokens1.size());
+    ASSERT_EQ(UTF8_GA, tokens1[0]);
+    ASSERT_EQ(UTF8_DA, tokens1[1]);
+
+    auto tokens2 = splitUtf8Tokens(UTF8_SOURCE, UTF8_GA);
+    ASSERT_EQ(1U, tokens2.size());
+    ASSERT_EQ(UTF8_NA + UTF8_DA, tokens2[0]);
+
+    auto tokens3 = splitUtf8Tokens(UTF8_SOURCE, UTF8_DA);
+    ASSERT_EQ(1U, tokens3.size());
+    ASSERT_EQ(UTF8_GA + UTF8_NA, tokens3[0]);
+}
+
+TEST(StringUtilsTest, SplitUtf8Tokens_NotRemoveEmpty)
+{
+    auto tokens1 = splitUtf8Tokens(UTF8_SOURCE, UTF8_GA, false);
+    ASSERT_EQ(2U, tokens1.size());
+    ASSERT_EQ(std::string(), tokens1[0]);
+    ASSERT_EQ(UTF8_NA + UTF8_DA, tokens1[1]);
+
+    auto tokens2 = splitUtf8Tokens(UTF8_SOURCE, UTF8_NA, false);
+    ASSERT_EQ(2U, tokens2.size());
+    ASSERT_EQ(UTF8_GA, tokens2[0]);
+    ASSERT_EQ(UTF8_DA, tokens2[1]);
+
+    auto tokens3 = splitUtf8Tokens(UTF8_SOURCE, UTF8_DA, false);
+    ASSERT_EQ(2U, tokens3.size());
+    ASSERT_EQ(UTF8_GA + UTF8_NA, tokens3[0]);
+    ASSERT_EQ(std::string(), tokens3[1]);
 }
 
 TEST(StringUtilsTest, ConvertStringWithFloatingPoint)
