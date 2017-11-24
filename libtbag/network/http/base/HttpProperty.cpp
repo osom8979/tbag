@@ -51,17 +51,37 @@ bool testWsVersion(HttpHeader const & header, int test_version)
 
 std::string HttpVersion::toVersionString() const
 {
-    return toVersionString(http_major, http_minor);
-}
-
-std::string HttpVersion::toVersionString(int major, int minor)
-{
-    return string::fformat("HTTP/{}.{}", major, minor);
+    return string::fformat("HTTP/{}.{}", http_major, http_minor);
 }
 
 // ----------------------------------
 // HttpCommonProperty implementation.
 // ----------------------------------
+
+HttpCommonProperty & HttpCommonProperty::operator =(HttpCommonProperty const & obj)
+{
+    if (this != &obj) {
+        HttpVersion::operator=(obj);
+        HttpHeader::operator=(obj);
+        body = obj.body;
+    }
+    return *this;
+}
+
+HttpCommonProperty & HttpCommonProperty::operator =(HttpCommonProperty && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void HttpCommonProperty::swap(HttpCommonProperty & obj)
+{
+    if (this != &obj) {
+        HttpVersion::swap(obj);
+        HttpHeader::swap(obj);
+        body.swap(obj.body);
+    }
+}
 
 void HttpCommonProperty::setBody(std::string const & b)
 {
@@ -115,6 +135,31 @@ std::string HttpCommonProperty::toDebugHeaderString() const
 // ---------------------------
 // HttpRequest implementation.
 // ---------------------------
+
+HttpRequest & HttpRequest::operator =(HttpRequest const & obj)
+{
+    if (this != &obj) {
+        HttpCommonProperty::operator=(obj);
+        method = obj.method;
+        path = obj.path;
+    }
+    return *this;
+}
+
+HttpRequest & HttpRequest::operator =(HttpRequest && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void HttpRequest::swap(HttpRequest & obj)
+{
+    if (this != &obj) {
+        HttpCommonProperty::swap(obj);
+        method.swap(obj.method);
+        path.swap(obj.path);
+    }
+}
 
 void HttpRequest::setHttpMethod(HttpMethod m)
 {
@@ -203,6 +248,31 @@ std::string HttpRequest::toDebugRequestString() const
 // ----------------------------
 // HttpResponse implementation.
 // ----------------------------
+
+HttpResponse & HttpResponse::operator =(HttpResponse const & obj)
+{
+    if (this != &obj) {
+        HttpCommonProperty::operator=(obj);
+        code = obj.code;
+        reason = obj.reason;
+    }
+    return *this;
+}
+
+HttpResponse & HttpResponse::operator =(HttpResponse && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void HttpResponse::swap(HttpResponse & obj)
+{
+    if (this != &obj) {
+        HttpCommonProperty::swap(obj);
+        std::swap(code, obj.code);
+        reason.swap(obj.reason);
+    }
+}
 
 void HttpResponse::setHttpStatus(HttpStatus s)
 {
@@ -304,6 +374,39 @@ std::string HttpResponse::toDebugResponseString() const
 // HttpProperty implementation.
 // ----------------------------
 
+HttpProperty & HttpProperty::operator =(HttpProperty const & obj)
+{
+    if (this != &obj) {
+        HttpCommonProperty::operator=(obj);
+
+        method = obj.method;
+        path = obj.path;
+
+        code = obj.code;
+        reason = obj.reason;
+    }
+    return *this;
+}
+
+HttpProperty & HttpProperty::operator =(HttpProperty && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void HttpProperty::swap(HttpProperty & obj)
+{
+    if (this != &obj) {
+        HttpCommonProperty::swap(obj);
+
+        method.swap(obj.method);
+        path.swap(obj.path);
+
+        std::swap(code, obj.code);
+        reason.swap(obj.reason);
+    }
+}
+
 void HttpProperty::clear()
 {
     http_major = 0;
@@ -317,21 +420,6 @@ void HttpProperty::clear()
 
     code = 0;
     reason.clear();
-}
-
-void HttpProperty::swap(HttpProperty & obj)
-{
-    std::swap(http_major, obj.http_major);
-    std::swap(http_minor, obj.http_minor);
-
-    swapHeaders(obj._headers);
-    body.swap(obj.body);
-
-    method.swap(obj.method);
-    path.swap(obj.path);
-
-    std::swap(code, obj.code);
-    reason.swap(obj.reason);
 }
 
 } // namespace base

@@ -65,8 +65,9 @@ struct TBAG_API HttpVersion
     HttpVersion(int v1 = DEFAULT_HTTP_VERSION_MAJOR, int v2 = DEFAULT_HTTP_VERSION_MINOR) TBAG_NOEXCEPT
             : http_major(v1), http_minor(v2)
     { /* EMPTY. */ }
-    ~HttpVersion()
-    { /* EMPTY. */ }
+    HttpVersion(HttpVersion const & obj) TBAG_NOEXCEPT : HttpVersion() { (*this) = obj; }
+    HttpVersion(HttpVersion && obj) TBAG_NOEXCEPT : HttpVersion() { (*this) = std::move(obj); }
+    ~HttpVersion() TBAG_NOEXCEPT { /* EMPTY. */ }
 
     inline void setVersion(int v1, int v2) TBAG_NOEXCEPT
     {
@@ -80,12 +81,40 @@ struct TBAG_API HttpVersion
     inline int getMajor() const TBAG_NOEXCEPT { return http_major; }
     inline int getMinor() const TBAG_NOEXCEPT { return http_minor; }
 
-    inline friend bool operator ==(HttpVersion & lh, HttpVersion & rh) TBAG_NOEXCEPT
+    inline friend bool operator ==(HttpVersion const & lh, HttpVersion const & rh) TBAG_NOEXCEPT
     {
         return lh.http_major == rh.http_major && lh.http_minor == rh.http_minor;
     }
 
-    std::string toVersionString() const;
+    inline friend bool operator !=(HttpVersion const & lh, HttpVersion const & rh) TBAG_NOEXCEPT
+    {
+        return !operator==(lh, rh);
+    }
+
+    inline HttpVersion & operator =(HttpVersion const & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            http_major = obj.http_major;
+            http_minor = obj.http_minor;
+        }
+        return *this;
+    }
+
+    inline HttpVersion & operator =(HttpVersion && obj) TBAG_NOEXCEPT
+    {
+        swap(obj);
+        return *this;
+    }
+
+    inline void swap(HttpVersion & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            std::swap(http_major, obj.http_major);
+            std::swap(http_minor, obj.http_minor);
+        }
+    }
+
+    inline friend void swap(HttpVersion & lh, HttpVersion & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
     /**
      * @remarks
@@ -93,7 +122,7 @@ struct TBAG_API HttpVersion
      *   HTTP-Version = "HTTP" "/" 1*DIGIT "." 1*DIGIT
      *  @endcode
      */
-    static std::string toVersionString(int major, int minor);
+    std::string toVersionString() const;
 };
 
 /**
@@ -105,6 +134,17 @@ struct TBAG_API HttpVersion
 struct TBAG_API HttpCommonProperty : public HttpVersion, public HttpHeader
 {
     util::Buffer body;
+
+    HttpCommonProperty() : body() { /* EMPTY. */ }
+    HttpCommonProperty(HttpCommonProperty const & obj) : HttpCommonProperty() { (*this) = obj; }
+    HttpCommonProperty(HttpCommonProperty && obj) : HttpCommonProperty() { (*this) = std::move(obj); }
+    ~HttpCommonProperty() { /* EMPTY. */ }
+
+    HttpCommonProperty & operator =(HttpCommonProperty const & obj);
+    HttpCommonProperty & operator =(HttpCommonProperty && obj);
+
+    void swap(HttpCommonProperty & obj);
+    friend void swap(HttpCommonProperty & lh, HttpCommonProperty & rh) { lh.swap(rh); }
 
     void setBody(std::string const & b);
     void setBody(char const * begin, std::size_t size);
@@ -131,6 +171,17 @@ struct TBAG_API HttpRequest : public virtual HttpCommonProperty
 {
     std::string method;
     std::string path;
+
+    HttpRequest() : method(), path() { /* EMPTY. */ }
+    HttpRequest(HttpRequest const & obj) : HttpRequest() { (*this) = obj; }
+    HttpRequest(HttpRequest && obj) : HttpRequest() { (*this) = std::move(obj); }
+    ~HttpRequest() { /* EMPTY. */ }
+
+    HttpRequest & operator =(HttpRequest const & obj);
+    HttpRequest & operator =(HttpRequest && obj);
+
+    void swap(HttpRequest & obj);
+    friend void swap(HttpRequest & lh, HttpRequest & rh) { lh.swap(rh); }
 
     void setHttpMethod(HttpMethod m);
     HttpMethod getHttpMethod() const;
@@ -164,8 +215,19 @@ struct TBAG_API HttpRequest : public virtual HttpCommonProperty
  */
 struct TBAG_API HttpResponse : public virtual HttpCommonProperty
 {
-    int code = 0;
+    int code;
     std::string reason;
+
+    HttpResponse() : code(0), reason() { /* EMPTY. */ }
+    HttpResponse(HttpResponse const & obj) : HttpResponse() { (*this) = obj; }
+    HttpResponse(HttpResponse && obj) : HttpResponse() { (*this) = std::move(obj); }
+    ~HttpResponse() { /* EMPTY. */ }
+
+    HttpResponse & operator =(HttpResponse const & obj);
+    HttpResponse & operator =(HttpResponse && obj);
+
+    void swap(HttpResponse & obj);
+    friend void swap(HttpResponse & lh, HttpResponse & rh) { lh.swap(rh); }
 
     void setHttpStatus(HttpStatus s);
     void setHttpStatus(std::string const & name);
@@ -199,8 +261,18 @@ struct TBAG_API HttpResponse : public virtual HttpCommonProperty
  */
 struct TBAG_API HttpProperty : public HttpRequest, public HttpResponse
 {
-    void clear();
+    HttpProperty() { /* EMPTY. */ }
+    HttpProperty(HttpProperty const & obj) : HttpProperty() { (*this) = obj; }
+    HttpProperty(HttpProperty && obj) : HttpProperty() { (*this) = std::move(obj); }
+    ~HttpProperty() { /* EMPTY. */ }
+
+    HttpProperty & operator =(HttpProperty const & obj);
+    HttpProperty & operator =(HttpProperty && obj);
+
     void swap(HttpProperty & obj);
+    friend void swap(HttpProperty & lh, HttpProperty & rh) { lh.swap(rh); }
+
+    void clear();
 };
 
 } // namespace base

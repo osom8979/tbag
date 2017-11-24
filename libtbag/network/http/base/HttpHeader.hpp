@@ -138,7 +138,23 @@ public:
 
 public:
     inline void clearHeaders() { _headers.clear(); }
-    inline void swapHeaders(HeaderMultiMap & headers) { _headers.swap(headers); }
+
+public:
+    inline void swapHeaders(HeaderMultiMap & headers)
+    {
+        if (&_headers != &headers) {
+            _headers.swap(headers);
+        }
+    }
+
+    inline void swap(HttpHeader & obj)
+    {
+        if (this != &obj) {
+            _headers.swap(obj._headers);
+        }
+    }
+
+    inline friend void swap(HttpHeader & lh, HttpHeader & rh) { lh.swap(rh); }
 
 public:
     /**
