@@ -179,6 +179,7 @@ endmacro ()
 
 #/// Write Text to String C++11 header file.
 #///
+#/// @param __target      [in] Target name.
 #/// @param __output_path [in] Output header file path.
 #/// @param __name        [in] Variable name.
 #/// @param __delimiter   [in] Delimiter of C++11 string literal.
@@ -194,6 +195,38 @@ macro (tbag_modules__text_to_cpp11string __target __output_path __name __delimit
             DEPENDS ${__text_path}
             COMMENT "Text to Cpp11String: ${__output_path}" VERBATIM)
     add_custom_target (${__target} SOURCES "${__output_path}")
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
+endmacro ()
+
+#/// Copy raw files.
+#///
+#/// @param __target             [in] Target name.
+#/// @param __source_prefix      [in] Source prefix.
+#/// @param __destination_prefix [in] Destination prefix.
+#/// @param __glob               [in] File glob pattern.
+macro (tbag_modules__copy_file __target __source_prefix __destination_prefix __glob)
+    set (__copy_files)
+    file (GLOB __glob_files RELATIVE "${__source_prefix}" "${__source_prefix}${__glob}")
+
+    foreach (__cursor ${__glob_files})
+        set (__cursor_src  "${__source_prefix}${__cursor}")
+        set (__cursor_dest "${__destination_prefix}${__cursor}")
+        tbag_debug (tbag_modules__copy_file "Target(${__target}) copy info: ${__cursor_src} -> ${__cursor_dest}")
+        add_custom_command (
+                OUTPUT  "${__cursor_dest}"
+                COMMAND ${CMAKE_COMMAND} -E copy "${__cursor_src}" "${__cursor_dest}"
+                DEPENDS "${__cursor_src}")
+        list (APPEND __copy_files "${__cursor_dest}")
+        unset (__cursor_src)
+        unset (__cursor_dest)
+    endforeach ()
+
+    add_custom_target (${__target} ALL
+            DEPENDS ${__copy_files}
+            COMMENT "Copying assets: ${__source_prefix}${__glob} -> ${__destination_prefix}${__glob}")
+    unset (__glob_files)
+    unset (__copy_files)
+
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
 
