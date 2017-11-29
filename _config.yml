@@ -1,7 +1,6 @@
 title: Tbag
 description: Tea-bag is Third party extension utility project.
-google_analytics:
-  ua: 'UA-72128436-4'
+google_analytics: 'UA-72128436-4'
 show_downloads: true
 theme: jekyll-theme-minimal
 
