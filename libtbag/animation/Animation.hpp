@@ -57,6 +57,12 @@ public:
     {
         lh.swap(rh);
     }
+
+public:
+    bool isFinished() const;
+
+public:
+    float getInterpolation(float input);
 };
 
 } // namespace animation

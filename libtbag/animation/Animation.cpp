@@ -55,6 +55,16 @@ void Animation::swap(Animation & obj)
     }
 }
 
+bool Animation::isFinished() const
+{
+    return true;
+}
+
+float Animation::getInterpolation(float input)
+{
+    return 0;
+}
+
 } // namespace animation
 
 // --------------------
