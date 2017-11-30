@@ -40,7 +40,7 @@ public:
     virtual ~MoveAnimation();
 
 public:
-    virtual void onUpdate() override;
+    virtual void onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated) override;
 };
 
 } // namespace animation

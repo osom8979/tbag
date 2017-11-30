@@ -110,6 +110,9 @@ public:
     inline TimePoint & operator -=(Rep rep)
     { _system_tp -= std::chrono::duration_cast<SystemDuration>(Duration(rep)); return *this; }
 
+    inline friend SystemDuration operator -(TimePoint const & lh, TimePoint const & rh)
+    { return std::chrono::duration_cast<SystemDuration>(lh._system_tp - rh._system_tp); }
+
     inline friend TimePoint operator +(TimePoint const & lh, Duration const & dur)
     { TimePoint tp = lh; tp += dur; return tp; }
     inline friend TimePoint operator -(TimePoint const & lh, Duration const & dur)

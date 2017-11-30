@@ -32,15 +32,21 @@ namespace animation {
 class TBAG_API AlphaAnimation : public Animation
 {
 private:
-    float _from_alpha;
-    float _to_alpha;
+    float _from_alpha;  ///< 0.0 ~ 1.0
+    float _to_alpha;    ///< 0.0 ~ 1.0
+
+private:
+    float _alpha;   ///< 0.0 ~ 1.0
 
 public:
-    AlphaAnimation();
+    AlphaAnimation(float from_alpha = 0, float to_alpha = 1);
     virtual ~AlphaAnimation();
 
 public:
-    virtual void onUpdate() override;
+    inline float getAlpha() const TBAG_NOEXCEPT { return _alpha; }
+
+public:
+    virtual void onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated) override;
 };
 
 } // namespace animation

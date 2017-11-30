@@ -7,6 +7,8 @@
 
 #include <libtbag/animation/Animation.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cassert>
 #include <utility>
 
 // -------------------
@@ -15,11 +17,13 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-Animation::Animation() : _interpolator(), _fill_after(false), _fill_before(false),
-                         _repeat_mode(RepeatMode::RM_RESTART), _repeat_count(INFINITE_REPEAT),
-                         _duration(0), _start_offset(0),
-                         _is_started(false),
-                         _start(), _repeat(0)
+Animation::Animation() : Animation(Params())
+{
+    // EMPTY.
+}
+
+Animation::Animation(Params const & params)
+        : _params(params), _start(), _is_start(false), _is_finish(false)
 {
     // EMPTY.
 }
@@ -31,16 +35,69 @@ Animation::~Animation()
 
 void Animation::clear()
 {
-    _interpolator.reset();
-    _fill_after   = false;
-    _fill_before  = false;
-    _repeat_mode  = RepeatMode::RM_RESTART;
-    _repeat_count = INFINITE_REPEAT;
-    _duration     = 0;
-    _start_offset = 0;
-    _is_started   = false;
-    _start        = 0;
-    _repeat       = 0;
+    _params.clear();
+    _start     = 0;
+    _is_start  = false;
+    _is_finish = false;
+}
+
+void Animation::start()
+{
+    _is_start = true;
+}
+
+void Animation::reset()
+{
+    _is_start  = false;
+    _is_finish = false;
+}
+
+void Animation::stop()
+{
+    _is_start = false;
+}
+
+void Animation::update(TimePoint const & tp)
+{
+    if (_is_start == false && _is_finish) {
+        return;
+    }
+
+    Milliseconds const diff = std::chrono::duration_cast<Milliseconds>(tp - _start);
+    if (diff < _params.start_offset) {
+        return;
+    }
+
+    assert(diff >= _params.start_offset);
+    assert(_params.duration > Milliseconds::zero());
+
+    Milliseconds const total_duration = std::chrono::duration_cast<Milliseconds>(diff - _params.start_offset);
+    Rep const current_repeat_count = total_duration.count() / _params.duration.count();
+
+    // Check the repeat count.
+    if (_params.repeat_count != INFINITE_REPEAT && current_repeat_count > _params.repeat_count) {
+        _is_finish = true;
+    }
+
+    Milliseconds const current_duration = std::chrono::duration_cast<Milliseconds>(total_duration - (current_repeat_count * _params.duration));
+    float ratio = static_cast<float>(current_duration.count()) / static_cast<float>(_params.duration.count());
+
+    assert(ratio >= 0.0f);
+    assert(ratio <= 1.0f);
+
+    if (_params.repeat_mode == RepeatMode::RM_REVERSE && current_repeat_count & 0x1 /* ODD Number */) {
+        ratio = 1.0f - ratio;
+    }
+
+    if (static_cast<bool>(_params.interpolator)) {
+        onUpdate(current_duration, ratio, _params.interpolator->getInterpolation(ratio));
+    } else {
+        onUpdate(current_duration, ratio, ratio);
+    }
+
+    if (_is_finish) {
+        onEnd();
+    }
 }
 
 } // namespace animation

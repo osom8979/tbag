@@ -24,7 +24,7 @@ MoveAnimation::~MoveAnimation()
     // EMPTY.
 }
 
-void MoveAnimation::onUpdate()
+void MoveAnimation::onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated)
 {
 }
 

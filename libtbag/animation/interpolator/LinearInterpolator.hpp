@@ -32,8 +32,13 @@ namespace interpolator {
  */
 class TBAG_API LinearInterpolator : public Interpolator
 {
+private:
+    float _gradient;
+    float _y_intercept;
+
 public:
     LinearInterpolator();
+    LinearInterpolator(float gradient, float y_intercept);
     virtual ~LinearInterpolator();
 
 public:

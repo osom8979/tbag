@@ -24,7 +24,7 @@ RotateAnimation::~RotateAnimation()
     // EMPTY.
 }
 
-void RotateAnimation::onUpdate()
+void RotateAnimation::onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated)
 {
 }
 

@@ -24,7 +24,7 @@ FrameAnimation::~FrameAnimation()
     // EMPTY.
 }
 
-void FrameAnimation::onUpdate()
+void FrameAnimation::onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated)
 {
 }
 

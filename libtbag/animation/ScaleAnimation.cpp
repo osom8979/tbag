@@ -24,7 +24,7 @@ ScaleAnimation::~ScaleAnimation()
     // EMPTY.
 }
 
-void ScaleAnimation::onUpdate()
+void ScaleAnimation::onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated)
 {
 }
 
