@@ -15,10 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/animation/interpolator/Interpolator.hpp>
 #include <libtbag/time/TimePoint.hpp>
 
-#include <cassert>
 #include <memory>
 #include <chrono>
 
@@ -41,7 +41,7 @@ struct AnimationCallback
  * @author zer0
  * @date   2017-11-22
  */
-class TBAG_API Animation : public AnimationCallback
+class TBAG_API Animation : public AnimationCallback, private Noncopyable
 {
 public:
     TBAG_CONSTEXPR static int const INFINITE_REPEAT = 0;
@@ -105,29 +105,6 @@ public:
 public:
     virtual void onUpdate() = 0;
 };
-
-/**
- * Obtaining the changed frame number for a period of time.
- *
- * @translate{ko, 시간 경과에 대한 변화된 프레임(Frame)번호를 획득할 수 있도록 도와주는 클래스.}
- *
- * @param[in] fps
- *      Frames per milliseconds (FPS).
- * @param[in] frames
- *      Total frame count.
- * @param[in] milliseconds
- *      Current milliseconds.
- *
- * @return
- *  Result frame number.
- */
-template <typename T, typename FloatingType = float>
-inline T getNextFrameNumber(T frames, T fps, T milliseconds)
-{
-    assert(fps != 0);
-    assert(frames != 0);
-    return static_cast<T>(static_cast<FloatingType>(milliseconds) / static_cast<FloatingType>(fps)) % frames;
-}
 
 } // namespace animation
 

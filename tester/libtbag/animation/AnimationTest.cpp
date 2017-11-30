@@ -11,10 +11,8 @@
 using namespace libtbag;
 using namespace libtbag::animation;
 
-TEST(AnimationTest, GetNextFrameNumber)
+TEST(AnimationTest, Default)
 {
-    ASSERT_EQ(9, getNextFrameNumber(10, 100,  900));
-    ASSERT_EQ(0, getNextFrameNumber(10, 100, 1000));
-    ASSERT_EQ(1, getNextFrameNumber(10, 100, 1100));
+    // EMPTY.
 }
 

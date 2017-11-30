@@ -1,0 +1,36 @@
+/**
+ * @file   FrameAnimation.cpp
+ * @brief  FrameAnimation class implementation.
+ * @author zer0
+ * @date   2017-11-30
+ */
+
+#include <libtbag/animation/FrameAnimation.hpp>
+#include <libtbag/log/Log.hpp>
+
+// -------------------
+NAMESPACE_LIBTBAG_OPEN
+// -------------------
+
+namespace animation {
+
+FrameAnimation::FrameAnimation()
+{
+    // EMPTY.
+}
+
+FrameAnimation::~FrameAnimation()
+{
+    // EMPTY.
+}
+
+void FrameAnimation::onUpdate()
+{
+}
+
+} // namespace animation
+
+// --------------------
+NAMESPACE_LIBTBAG_CLOSE
+// --------------------
+

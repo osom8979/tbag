@@ -16,6 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
