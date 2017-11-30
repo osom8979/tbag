@@ -17,7 +17,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/animation/Animation.hpp>
 
-#include <cassert>
 #include <vector>
 
 // -------------------
@@ -54,29 +53,6 @@ public:
 public:
     virtual void onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated) override;
 };
-
-/**
- * Obtaining the changed frame number for a period of time.
- *
- * @translate{ko, 시간 경과에 대한 변화된 프레임(Frame)번호를 획득할 수 있도록 도와주는 클래스.}
- *
- * @param[in] fps
- *      Frames per milliseconds (FPS).
- * @param[in] frames
- *      Total frame count.
- * @param[in] milliseconds
- *      Current milliseconds.
- *
- * @return
- *  Result frame number.
- */
-template <typename T, typename FloatingType = float>
-inline T getNextFrameNumber(T frames, T fps, T milliseconds)
-{
-    assert(fps != 0);
-    assert(frames != 0);
-    return static_cast<T>(static_cast<FloatingType>(milliseconds) / static_cast<FloatingType>(fps)) % frames;
-}
 
 } // namespace animation
 

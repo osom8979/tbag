@@ -17,10 +17,3 @@ TEST(FrameAnimationTest, Default)
     ASSERT_TRUE(true);
 }
 
-TEST(FrameAnimationTest, GetNextFrameNumber)
-{
-    ASSERT_EQ(9, getNextFrameNumber(10, 100,  900));
-    ASSERT_EQ(0, getNextFrameNumber(10, 100, 1000));
-    ASSERT_EQ(1, getNextFrameNumber(10, 100, 1100));
-}
-

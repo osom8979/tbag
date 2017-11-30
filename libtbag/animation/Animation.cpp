@@ -71,15 +71,11 @@ void Animation::update(TimePoint const & tp)
     assert(diff >= _params.start_offset);
     assert(_params.duration > Milliseconds::zero());
 
-    Milliseconds const total_duration = std::chrono::duration_cast<Milliseconds>(diff - _params.start_offset);
+    using namespace std::chrono;
+    Milliseconds const total_duration = duration_cast<Milliseconds>(diff - _params.start_offset);
     Rep const current_repeat_count = total_duration.count() / _params.duration.count();
 
-    // Check the repeat count.
-    if (_params.repeat_count != INFINITE_REPEAT && current_repeat_count > _params.repeat_count) {
-        _is_finish = true;
-    }
-
-    Milliseconds const current_duration = std::chrono::duration_cast<Milliseconds>(total_duration - (current_repeat_count * _params.duration));
+    Milliseconds const current_duration = duration_cast<Milliseconds>(total_duration - (current_repeat_count * _params.duration));
     float ratio = static_cast<float>(current_duration.count()) / static_cast<float>(_params.duration.count());
 
     assert(ratio >= 0.0f);
@@ -95,7 +91,9 @@ void Animation::update(TimePoint const & tp)
         onUpdate(current_duration, ratio, ratio);
     }
 
-    if (_is_finish) {
+    // Check the repeat count.
+    if (_params.repeat_count != INFINITE_REPEAT && current_repeat_count > _params.repeat_count) {
+        _is_finish = true;
         onEnd();
     }
 }
