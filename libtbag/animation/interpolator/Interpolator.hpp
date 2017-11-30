@@ -6,8 +6,8 @@
  * @date   2017-11-30 (Rename: TimeInterpolator -> Interpolator)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_INTERPOLATOR_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_INTERPOLATOR_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -21,7 +21,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace animation {
+namespace animation    {
+namespace interpolator {
 
 /**
  * Interpolator interface.
@@ -47,11 +48,12 @@ struct Interpolator
     virtual float getInterpolation(float input) = 0;
 };
 
+} // namespace interpolator
 } // namespace animation
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_INTERPOLATOR_HPP__
 

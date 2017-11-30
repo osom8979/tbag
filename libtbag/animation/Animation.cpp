@@ -15,19 +15,13 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-Animation::Animation()
+Animation::Animation() : _interpolator(), _fill_after(false), _fill_before(false),
+                         _repeat_mode(RepeatMode::RM_RESTART), _repeat_count(INFINITE_REPEAT),
+                         _duration(0), _start_offset(0),
+                         _is_started(false),
+                         _start(), _repeat(0)
 {
     // EMPTY.
-}
-
-Animation::Animation(Animation const & obj)
-{
-    (*this) = obj;
-}
-
-Animation::Animation(Animation && obj)
-{
-    (*this) = std::move(obj);
 }
 
 Animation::~Animation()
@@ -35,34 +29,18 @@ Animation::~Animation()
     // EMPTY.
 }
 
-Animation & Animation::operator =(Animation const & obj)
+void Animation::clear()
 {
-    if (this != &obj) {
-    }
-    return *this;
-}
-
-Animation & Animation::operator =(Animation && obj)
-{
-    swap(obj);
-    return *this;
-}
-
-void Animation::swap(Animation & obj)
-{
-    if (this != &obj) {
-        _interpolator.swap(obj._interpolator);
-    }
-}
-
-bool Animation::isFinished() const
-{
-    return true;
-}
-
-float Animation::getInterpolation(float input)
-{
-    return 0;
+    _interpolator.reset();
+    _fill_after   = false;
+    _fill_before  = false;
+    _repeat_mode  = RepeatMode::RM_RESTART;
+    _repeat_count = INFINITE_REPEAT;
+    _duration     = 0;
+    _start_offset = 0;
+    _is_started   = false;
+    _start        = 0;
+    _repeat       = 0;
 }
 
 } // namespace animation
