@@ -1,12 +1,13 @@
 /**
- * @file   TimeInterpolator.hpp
- * @brief  TimeInterpolator class prototype.
+ * @file   Interpolator.hpp
+ * @brief  Interpolator class prototype.
  * @author zer0
  * @date   2016-05-23
+ * @date   2017-11-30 (Rename: TimeInterpolator -> Interpolator)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_TIMEINTERPOLATOR_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_TIMEINTERPOLATOR_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -23,25 +24,23 @@ NAMESPACE_LIBTBAG_OPEN
 namespace animation {
 
 /**
- * Time based interpolator interface.
+ * Interpolator interface.
  *
- * @translate{ko, 시간에 기반하여 값을 보간하는 인터페이스를 제공한다.}
+ * @translate{ko, 값을 보간하는 인터페이스를 제공한다.}
  *
  * @author zer0
  * @date   2015-06-27
  * @date   2015-08-22 (Move the world library)
  * @date   2016-05-23 (Move the tbag library)
  * @date   2017-11-22 (Remove template)
+ * @date   2017-11-30 (Rename: TimeInterpolator -> Interpolator)
  */
-struct TimeInterpolator
+struct Interpolator
 {
     /**
      * Virtual function that returns an interpolated value.
      *
      * @translate{ko, 보간된 값을 반환하는 가상함수.}
-     *
-     * @param input
-     *          [in] Current time.
      *
      * @return Interpolated value.
      */
@@ -54,5 +53,5 @@ struct TimeInterpolator
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_TIMEINTERPOLATOR_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_ANIMATION_INTERPOLATOR_HPP__
 
