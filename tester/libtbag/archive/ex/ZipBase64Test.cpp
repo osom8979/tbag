@@ -74,10 +74,10 @@ TEST(ZipBase64Test, AutoEncode)
     }
 
     bool const ENCODE_RESULT = encodeZipBase64FileToFile(SOURCE_PATH.toString(), DESTINATION_PATH.toString());
-    std::cout << "Encode result: " << ENCODE_RESULT << std::endl;
     if (ENCODE_RESULT) {
         std::cout << "Please check the \"" << DESTINATION_PATH.toString() << "\" file." << std::endl;
     }
+    ASSERT_TRUE(ENCODE_RESULT);
 }
 
 TEST(ZipBase64Test, AutoDecode)
@@ -92,9 +92,9 @@ TEST(ZipBase64Test, AutoDecode)
     }
 
     bool const DECODE_RESULT = decodeZipBase64FileToFile(SOURCE_PATH.toString(), DESTINATION_PATH.toString());
-    std::cout << "Decode result: " << DECODE_RESULT << std::endl;
     if (DECODE_RESULT) {
         std::cout << "Please check the \"" << DESTINATION_PATH.toString() << "\" file." << std::endl;
     }
+    ASSERT_TRUE(DECODE_RESULT);
 }
 

@@ -130,8 +130,8 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
     }
 
     uint64_t const SIZE = f.getState().size;
-    if (SIZE >= limit_size) {
-        tDLogE("readToBuffer() result error.");
+    if (SIZE > limit_size) {
+        tDLogE("readToBuffer() limit size error: file_size({}) vs limit_siz({})", SIZE, limit_size);
         return Err::E_SMALLBUF;
     }
 
@@ -175,6 +175,18 @@ Err readFile(std::string const & path, std::string & result, uint64_t limit_size
 Err readFile(std::string const & path, util::Buffer & result, uint64_t limit_size)
 {
     return impl::readToBuffer(path, result, limit_size);
+}
+
+Err readFile(std::string const & path, std::string & result)
+{
+    Path const READ_FILE_PATH(path);
+    return readFile(path, result, READ_FILE_PATH.getState().size);
+}
+
+Err readFile(std::string const & path, util::Buffer & result)
+{
+    Path const READ_FILE_PATH(path);
+    return readFile(path, result, READ_FILE_PATH.getState().size);
 }
 
 Err writeFile(std::string const & path, std::string const & content)
