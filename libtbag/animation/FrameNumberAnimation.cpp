@@ -32,7 +32,7 @@ void FrameNumberAnimation::onUpdate(std::chrono::milliseconds const & duration, 
 
 void FrameNumberAnimation::onEnd()
 {
-    _current_frame = _total_frame;
+    _current_frame = _total_frame - 1;
 }
 
 } // namespace animation

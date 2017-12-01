@@ -32,8 +32,8 @@ namespace animation {
 class TBAG_API FrameNumberAnimation : public Animation
 {
 private:
-    int _total_frame;
-    int _current_frame;
+    int _total_frame;   ///< Total frame count.
+    int _current_frame; ///< Current frame index: 0 ~ total_frame-1
 
 public:
     FrameNumberAnimation(int total_frame = 1, int current_frame = 0);

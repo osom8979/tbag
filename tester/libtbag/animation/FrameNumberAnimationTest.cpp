@@ -52,6 +52,6 @@ TEST(FrameNumberAnimationTest, Default)
     tp += std::chrono::milliseconds(1);
     ani.update(tp);
     ASSERT_TRUE(ani.isFinished());
-    ASSERT_EQ(0, ani.getCurrentFrame());
+    ASSERT_EQ(9, ani.getCurrentFrame());
 }
 
