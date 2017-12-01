@@ -26,7 +26,7 @@ TEST(AnimationTest, CachedAnimation)
     CachedAnimation ani;
     ani.atParams().interpolator.reset(new LinearInterpolator());
     ani.atParams().setRestartMode();
-    ani.atParams().repeat_count = 1;
+    ani.atParams().repeat_count = 2;
     ani.atParams().start_offset = std::chrono::milliseconds(0);
     ani.atParams().duration     = std::chrono::milliseconds(10);
 

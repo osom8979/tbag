@@ -92,7 +92,7 @@ void Animation::update(TimePoint const & tp)
     }
 
     // Check the repeat count.
-    if (_params.repeat_count != INFINITE_REPEAT && current_repeat_count > _params.repeat_count) {
+    if (_params.repeat_count != INFINITE_REPEAT && current_repeat_count >= _params.repeat_count) {
         _is_finish = true;
         onEnd();
     }
