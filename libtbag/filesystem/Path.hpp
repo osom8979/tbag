@@ -261,6 +261,13 @@ public:
     static Path getExeDir();
 };
 
+// ----------
+// Utilities.
+// ----------
+
+TBAG_API Err checkPrepareFiles(std::string const & source_path, std::string const & destination_path, bool check_dir = true);
+TBAG_API Err checkPrepareFiles(Path const & source_path, Path const & destination_path, bool check_dir = true);
+
 } // namespace filesystem
 
 // --------------------

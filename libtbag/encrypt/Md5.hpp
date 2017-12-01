@@ -43,6 +43,8 @@ TBAG_API bool encryptMd5(std::string const & input, std::string & output);
 TBAG_API std::string getMd5(util::Buffer const & input);
 TBAG_API std::string getMd5(std::string const & input);
 
+TBAG_API std::string getMd5FromFile(std::string const & file_path);
+
 } // namespace encrypt
 
 // --------------------

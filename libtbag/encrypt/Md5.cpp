@@ -7,6 +7,7 @@
 
 #include <libtbag/encrypt/Md5.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/filesystem/File.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <openssl/md5.h>
@@ -96,6 +97,17 @@ std::string getMd5(std::string const & input)
         return md5;
     }
     return std::string();
+}
+
+std::string getMd5FromFile(std::string const & file_path)
+{
+    util::Buffer buffer;
+    Err const READ_CODE = filesystem::readFile(file_path, buffer);
+    if (isFailure(READ_CODE)) {
+        tDLogE("getMd5FromFile() Read file {} error: {}", getErrName(READ_CODE), file_path);
+        return std::string();
+    }
+    return getMd5(buffer);
 }
 
 } // namespace encrypt

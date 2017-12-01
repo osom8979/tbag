@@ -458,6 +458,53 @@ Path Path::getExeDir()
     return Path(details::removeLastNode(details::getExePath()));
 }
 
+// ----------
+// Utilities.
+// ----------
+
+Err checkPrepareFiles(std::string const & source_path, std::string const & destination_path, bool check_dir)
+{
+    return checkPrepareFiles(Path(source_path), Path(destination_path));
+}
+
+Err checkPrepareFiles(Path const & source_path, Path const & destination_path, bool check_dir)
+{
+    if (source_path.exists() == false) {
+        tDLogD("checkPrepareFiles() Not exists source file: {}", source_path.toString());
+        return Err::E_ENOENT;
+    }
+
+    if (source_path.isReadable() == false) {
+        tDLogD("checkPrepareFiles() You do not have read permission.");
+        return Err::E_EACCES;
+    }
+
+    if (destination_path.exists()) {
+        tDLogD("checkPrepareFiles() File already exists: {}", destination_path.toString());
+        return Err::E_EEXIST;
+    }
+
+    Path const DESTINATION_DIR = destination_path.getParent();
+    if (check_dir) {
+        if (DESTINATION_DIR.exists() == false) {
+            tDLogD("checkPrepareFiles() Not exists destination directory: {}", DESTINATION_DIR.toString());
+            return Err::E_ENOENT;
+        }
+
+        if (DESTINATION_DIR.isDirectory() == false) {
+            tDLogD("checkPrepareFiles() Not a directory: {}", DESTINATION_DIR.toString());
+            return Err::E_ENOENT;
+        }
+
+        if (DESTINATION_DIR.isWritable() == false) {
+            tDLogD("checkPrepareFiles() You do not have write permission.");
+            return Err::E_EACCES;
+        }
+    }
+
+    return Err::E_SUCCESS;
+}
+
 } // namespace filesystem
 
 // --------------------
