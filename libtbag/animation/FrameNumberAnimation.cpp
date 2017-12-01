@@ -30,6 +30,11 @@ void FrameNumberAnimation::onUpdate(std::chrono::milliseconds const & duration, 
     _current_frame = static_cast<int>(_total_frame * interpolated + 0.5f);
 }
 
+void FrameNumberAnimation::onEnd()
+{
+    _current_frame = _total_frame;
+}
+
 } // namespace animation
 
 // --------------------

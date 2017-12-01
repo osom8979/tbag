@@ -30,6 +30,11 @@ void AlphaAnimation::onUpdate(std::chrono::milliseconds const & duration, float 
     _alpha = _from_alpha + (_to_alpha - _from_alpha) * interpolated;
 }
 
+void AlphaAnimation::onEnd()
+{
+    _alpha = _to_alpha;
+}
+
 } // namespace animation
 
 // --------------------

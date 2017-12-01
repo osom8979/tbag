@@ -47,6 +47,7 @@ public:
 
 public:
     virtual void onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated) override;
+    virtual void onEnd() override;
 };
 
 } // namespace animation

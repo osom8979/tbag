@@ -124,6 +124,7 @@ public:
 public:
     inline bool  isStarted() const TBAG_NOEXCEPT { return _is_start; }
     inline bool isFinished() const TBAG_NOEXCEPT { return _is_finish; }
+    inline bool  isRunning() const TBAG_NOEXCEPT { return isStarted() && !isFinished(); }
 
 public:
     void clear();
