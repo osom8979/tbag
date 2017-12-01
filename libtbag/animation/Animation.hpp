@@ -60,8 +60,8 @@ public:
     using SharedInterpolator = std::shared_ptr<Interpolator>;
 
     using TimePoint    = time::TimePoint;
+    using Seconds      = std::chrono::seconds;
     using Milliseconds = std::chrono::milliseconds;
-    using Rep          = Milliseconds::rep;
 
 public:
     enum class RepeatMode
@@ -104,6 +104,7 @@ protected:
 
 private:
     TimePoint _start; ///< Start time of animation.
+    TimePoint _update;
     bool _is_finish;
     bool _is_start;
 
@@ -117,8 +118,8 @@ public:
     inline Params const & atParams() const TBAG_NOEXCEPT { return _params; }
 
 public:
-    inline TimePoint getStart() const { return _start; }
-    inline void setStart(TimePoint const & tp) { _start = tp; }
+    inline TimePoint  getStartTimePoint() const { return _start; }
+    inline TimePoint getUpdateTimePoint() const { return _update; }
 
 public:
     inline bool  isStarted() const TBAG_NOEXCEPT { return _is_start; }
@@ -128,12 +129,23 @@ public:
     void clear();
 
 public:
-    void start();
+    void start(TimePoint const & tp);
     void reset();
     void stop();
 
 public:
     void update(TimePoint const & tp);
+
+public:
+    template <typename DurationType>
+    void updateByDelta(DurationType const & dur)
+    {
+        update(_update + dur);
+    }
+
+public:
+    void updateBySeconds(Seconds::rep seconds);
+    void updateByMilliseconds(Milliseconds::rep milliseconds);
 
 public:
     virtual void onEnd() override { /* EMPTY. */ };

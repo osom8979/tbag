@@ -37,13 +37,16 @@ void Animation::clear()
 {
     _params.clear();
     _start     = 0;
+    _update    = 0;
     _is_start  = false;
     _is_finish = false;
 }
 
-void Animation::start()
+void Animation::start(TimePoint const & tp)
 {
     _is_start = true;
+    _start  = tp;
+    _update = tp;
 }
 
 void Animation::reset()
@@ -59,6 +62,8 @@ void Animation::stop()
 
 void Animation::update(TimePoint const & tp)
 {
+    _update = tp;
+
     if (_is_start == false && _is_finish) {
         return;
     }
@@ -73,7 +78,7 @@ void Animation::update(TimePoint const & tp)
 
     using namespace std::chrono;
     Milliseconds const total_duration = duration_cast<Milliseconds>(diff - _params.start_offset);
-    Rep const current_repeat_count = total_duration.count() / _params.duration.count();
+    Milliseconds::rep const current_repeat_count = total_duration.count() / _params.duration.count();
 
     Milliseconds const current_duration = duration_cast<Milliseconds>(total_duration - (current_repeat_count * _params.duration));
     float ratio = static_cast<float>(current_duration.count()) / static_cast<float>(_params.duration.count());
@@ -96,6 +101,16 @@ void Animation::update(TimePoint const & tp)
         _is_finish = true;
         onEnd();
     }
+}
+
+void Animation::updateBySeconds(Seconds::rep seconds)
+{
+    updateByDelta(Seconds(seconds));
+}
+
+void Animation::updateByMilliseconds(Milliseconds::rep milliseconds)
+{
+    updateByDelta(Milliseconds(milliseconds));
 }
 
 } // namespace animation

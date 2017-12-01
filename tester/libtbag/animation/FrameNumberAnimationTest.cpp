@@ -23,8 +23,7 @@ TEST(FrameNumberAnimationTest, Default)
     ani.atParams().duration     = std::chrono::milliseconds(10);
 
     auto tp = time::TimePoint::now();
-    ani.setStart(tp);
-    ani.start();
+    ani.start(tp);
     ani.update(tp);
 
     ASSERT_FALSE(ani.isFinished());
