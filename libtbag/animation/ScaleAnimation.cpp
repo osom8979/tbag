@@ -14,7 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-ScaleAnimation::ScaleAnimation()
+ScaleAnimation::ScaleAnimation() : Animation(AnimationType::AT_SCALE)
 {
     // EMPTY.
 }

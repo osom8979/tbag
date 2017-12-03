@@ -17,13 +17,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-Animation::Animation() : Animation(Params())
-{
-    // EMPTY.
-}
+// @formatter:off
+Animation::Animation() : Animation(Params(), static_cast<int>(AnimationType::AT_UNKNOWN)) { /* EMPTY. */ }
+Animation::Animation(AnimationType type) : Animation(static_cast<int>(type)) { /* EMPTY. */ }
+Animation::Animation(int type) : Animation(Params(), type) { /* EMPTY. */ }
+Animation::Animation(Params const & params) : Animation(params, AnimationType::AT_UNKNOWN) { /* EMPTY. */ }
+Animation::Animation(Params const & params, AnimationType type) : Animation(params, static_cast<int>(type)) { /* EMPTY. */ }
+// @formatter:on
 
-Animation::Animation(Params const & params)
-        : _params(params), _start(), _is_start(false), _is_finish(false)
+Animation::Animation(Params const & params, int type)
+        : TYPE(type), _params(params), _start(), _is_start(false), _is_finish(false)
 {
     // EMPTY.
 }

@@ -14,7 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-MoveAnimation::MoveAnimation()
+MoveAnimation::MoveAnimation() : Animation(AnimationType::AT_MOVE)
 {
     // EMPTY.
 }

@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace animation {
 
 AlphaAnimation::AlphaAnimation(float from_alpha, float to_alpha)
-        : _from_alpha(from_alpha), _to_alpha(to_alpha), _alpha(from_alpha)
+        : Animation(AnimationType::AT_ALPHA), _from_alpha(from_alpha), _to_alpha(to_alpha), _alpha(from_alpha)
 {
     // EMPTY.
 }

@@ -29,6 +29,18 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
+enum class AnimationType : int
+{
+    AT_UNKNOWN = 0,
+    AT_ALPHA,
+    AT_FRAME,
+    AT_FRAME_NUMBER,
+    AT_MOVE,
+    AT_ROTATE,
+    AT_SCALE,
+    AT_FIRST_NUMBER_OF_USER_DEFINED,
+};
+
 /**
  * Interface of animation.
  *
@@ -99,6 +111,9 @@ public:
         inline void setReverseMode() TBAG_NOEXCEPT { repeat_mode = RepeatMode::RM_REVERSE; }
     };
 
+private:
+    int const TYPE;
+
 protected:
     Params _params;
 
@@ -110,18 +125,34 @@ private:
 
 public:
     Animation();
-    Animation(Params const & params);
+    explicit Animation(AnimationType type);
+    explicit Animation(int type);
+    explicit Animation(Params const & params);
+    explicit Animation(Params const & params, AnimationType type);
+    explicit Animation(Params const & params, int type);
     virtual ~Animation();
+
+public:
+    TBAG_CONSTEXPR static int getFirstAnimationTypeNumber() TBAG_NOEXCEPT { return static_cast<int>(AnimationType::AT_UNKNOWN); }
+    TBAG_CONSTEXPR static int  getLastAnimationTypeNumber() TBAG_NOEXCEPT { return static_cast<int>(AnimationType::AT_SCALE); }
+
+public:
+    inline int getType() const TBAG_NOEXCEPT { return TYPE; }
+    inline AnimationType getAnimationType() const TBAG_NOEXCEPT
+    {
+        if (getFirstAnimationTypeNumber() <= COMPARE_AND(TYPE) <= getLastAnimationTypeNumber()) {
+            return static_cast<AnimationType>(TYPE);
+        }
+        return AnimationType::AT_UNKNOWN;
+    }
 
 public:
     inline Params       & atParams()       TBAG_NOEXCEPT { return _params; }
     inline Params const & atParams() const TBAG_NOEXCEPT { return _params; }
 
-public:
     inline TimePoint  getStartTimePoint() const { return _start; }
     inline TimePoint getUpdateTimePoint() const { return _update; }
 
-public:
     inline bool  isStarted() const TBAG_NOEXCEPT { return _is_start; }
     inline bool isFinished() const TBAG_NOEXCEPT { return _is_finish; }
     inline bool  isRunning() const TBAG_NOEXCEPT { return isStarted() && !isFinished(); }

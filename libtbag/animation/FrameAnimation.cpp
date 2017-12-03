@@ -14,7 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-FrameAnimation::FrameAnimation()
+FrameAnimation::FrameAnimation() : Animation(AnimationType::AT_FRAME)
 {
     // EMPTY.
 }

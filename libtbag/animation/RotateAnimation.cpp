@@ -14,7 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace animation {
 
-RotateAnimation::RotateAnimation()
+RotateAnimation::RotateAnimation() : Animation(AnimationType::AT_ROTATE)
 {
     // EMPTY.
 }

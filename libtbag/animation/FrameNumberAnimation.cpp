@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace animation {
 
 FrameNumberAnimation::FrameNumberAnimation(int total_frame, int current_frame)
-        : _total_frame(total_frame), _current_frame(current_frame)
+        : Animation(AnimationType::AT_FRAME_NUMBER), _total_frame(total_frame), _current_frame(current_frame)
 {
     // EMPTY.
 }
