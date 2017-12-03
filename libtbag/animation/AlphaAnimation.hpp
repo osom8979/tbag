@@ -33,7 +33,7 @@ class TBAG_API AlphaAnimation : public Animation
 {
 private:
     float _from_alpha;  ///< 0.0 ~ 1.0
-    float _to_alpha;    ///< 0.0 ~ 1.0
+    float   _to_alpha;  ///< 0.0 ~ 1.0
 
 private:
     float _alpha;   ///< 0.0 ~ 1.0

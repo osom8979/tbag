@@ -13,7 +13,6 @@ using namespace libtbag::animation;
 
 TEST(MoveAnimationTest, Default)
 {
-    MoveAnimation object;
-    ASSERT_TRUE(true);
+    // MoveAnimation object;
 }
 

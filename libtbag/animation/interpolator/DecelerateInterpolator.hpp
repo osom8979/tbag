@@ -29,11 +29,24 @@ namespace interpolator {
  *
  * @author zer0
  * @date   2017-11-30
+ *
+ * @remarks
+ *  An interpolator where the rate of change starts out quickly and and then decelerates.
  */
 class TBAG_API DecelerateInterpolator : public Interpolator
 {
+private:
+    /**
+     * @remarks
+     *  Degree to which the animation should be eased.                      @n
+     *  Setting factor to 1.0f produces an upside-down y=x^2 parabola.      @n
+     *  Increasing factor above 1.0f makes exaggerates the ease-out effect  @n
+     *  (i.e., it starts even faster and ends evens slower)
+     */
+    float _factor;
+
 public:
-    DecelerateInterpolator();
+    DecelerateInterpolator(float factor = 1.0f);
     virtual ~DecelerateInterpolator();
 
 public:

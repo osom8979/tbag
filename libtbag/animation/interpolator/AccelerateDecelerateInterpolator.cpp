@@ -7,6 +7,9 @@
 
 #include <libtbag/animation/interpolator/AccelerateDecelerateInterpolator.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/math/Constant.hpp>
+
+#include <cmath>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -27,7 +30,7 @@ AccelerateDecelerateInterpolator::~AccelerateDecelerateInterpolator()
 
 float AccelerateDecelerateInterpolator::getInterpolation(float input)
 {
-    return 0;
+    return static_cast<float>(std::cos((input + 1.0f) * MATH_CONSTANT_PI) / 2.0f) + 0.5f;
 }
 
 } // namespace interpolator

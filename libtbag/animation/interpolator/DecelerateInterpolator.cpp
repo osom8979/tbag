@@ -8,6 +8,8 @@
 #include <libtbag/animation/interpolator/DecelerateInterpolator.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cmath>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -15,7 +17,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace animation    {
 namespace interpolator {
 
-DecelerateInterpolator::DecelerateInterpolator()
+DecelerateInterpolator::DecelerateInterpolator(float factor) : _factor(factor)
 {
     // EMPTY.
 }
@@ -27,7 +29,11 @@ DecelerateInterpolator::~DecelerateInterpolator()
 
 float DecelerateInterpolator::getInterpolation(float input)
 {
-    return 0;
+    if (_factor == 1.0f) {
+        return (1.0f - (1.0f - input) * (1.0f - input));
+    } else {
+        return (1.0f - std::pow((1.0f - input), 2 * _factor));
+    }
 }
 
 } // namespace interpolator

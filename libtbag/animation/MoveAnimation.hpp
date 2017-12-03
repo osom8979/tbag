@@ -32,15 +32,27 @@ namespace animation {
 class TBAG_API MoveAnimation : public Animation
 {
 private:
-    float _to_x_delta;
-    float _to_y_delta;
+    float _from_x; ///< from x-coordinate.
+    float   _to_x; ///< to x-coordinate.
+
+    float _from_y; ///< from y-coordinate.
+    float   _to_y; ///< to y-coordinate.
+
+private:
+    float _x;
+    float _y;
 
 public:
-    MoveAnimation();
+    MoveAnimation(float from_x, float to_x, float from_y, float to_y);
     virtual ~MoveAnimation();
 
 public:
+    inline float getX() const TBAG_NOEXCEPT { return _x; }
+    inline float getY() const TBAG_NOEXCEPT { return _y; }
+
+public:
     virtual void onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated) override;
+    virtual void onEnd() override;
 };
 
 } // namespace animation

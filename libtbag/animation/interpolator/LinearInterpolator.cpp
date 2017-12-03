@@ -15,14 +15,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace animation    {
 namespace interpolator {
 
-LinearInterpolator::LinearInterpolator() : LinearInterpolator(1, 0)
+LinearInterpolator::LinearInterpolator()
 {
     // EMPTY.
-}
-
-LinearInterpolator::LinearInterpolator(float gradient, float y_intercept)
-        : _gradient(gradient), _y_intercept(y_intercept)
-{
 }
 
 LinearInterpolator::~LinearInterpolator()
@@ -32,7 +27,7 @@ LinearInterpolator::~LinearInterpolator()
 
 float LinearInterpolator::getInterpolation(float input)
 {
-    return input * _gradient + _y_intercept;
+    return input;
 }
 
 } // namespace interpolator
