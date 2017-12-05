@@ -13,9 +13,7 @@
 #pragma once
 #endif
 
-#include <libtbag/macro/architecture/arm.hpp>
-#include <libtbag/macro/architecture/x86.hpp>
-#include <libtbag/macro/architecture/x86_64.hpp>
+#include <libtbag/macro/architecture/intel.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_ARCHITECTURE_HPP__
 

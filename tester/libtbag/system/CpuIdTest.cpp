@@ -17,7 +17,7 @@ TEST(CpuIdTest, tbag_cpuid)
     unsigned int ebx = 0;
     unsigned int ecx = 0;
     unsigned int edx = 0;
-    ASSERT_TRUE(__impl::tbag_cpuid(TBAG_CPUID_SIGNATURE_LEVEL, &eax, &ebx, &ecx, &edx));
+    __impl::tbag_cpuid(TBAG_CPUID_SIGNATURE_LEVEL, &eax, &ebx, &ecx, &edx);
     std::cout << "CPU Signature: "
               << convertRegisterToString(ebx)
               << convertRegisterToString(edx)

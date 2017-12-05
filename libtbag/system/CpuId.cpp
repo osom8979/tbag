@@ -28,9 +28,9 @@ namespace system {
 namespace __impl {
 // ---------------
 
-bool tbag_cpuid_nasm_x86_or_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+bool tbag_cpuid_nasm_x86(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
-#if defined(TBAG_COMP_MSVC) && (defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64))
+#if defined(TBAG_ARCH_X86) && defined(TBAG_COMP_MSVC)
     int _eax_reg = 0;
     int _ebx_reg = 0;
     int _ecx_reg = 0;
@@ -56,6 +56,15 @@ bool tbag_cpuid_nasm_x86_or_x86_64(unsigned int level, unsigned int * eax, unsig
     *edx = _edx_reg;
 
     return true;
+#else
+    return false;
+#endif
+}
+
+bool tbag_cpuid_nasm_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+{
+#if defined(TBAG_ARCH_X86_64) && defined(TBAG_COMP_MSVC)
+    return false;
 #else
     return false;
 #endif
@@ -89,17 +98,17 @@ bool tbag_cpuid_gas_x86_64(unsigned int level, unsigned int * eax, unsigned int 
 
 bool tbag_cpuid(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
-#if defined(TBAG_COMP_MSVC)
-    return tbag_cpuid_nasm_x86_or_x86_64(level, eax, ebx, ecx, edx);
-#else
-# if defined(TBAG_ARCH_X86)
+#if defined(TBAG_ARCH_X86) && defined(TBAG_COMP_MSVC)
+    return tbag_cpuid_nasm_x86(level, eax, ebx, ecx, edx);
+#elif defined(TBAG_ARCH_X86_64) && defined(TBAG_COMP_MSVC)
+    return tbag_cpuid_nasm_x86_64(level, eax, ebx, ecx, edx);
+#elif defined(TBAG_ARCH_X86) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GNUC))
     return tbag_cpuid_gas_x86(level, eax, ebx, ecx, edx);
-# elif defined(TBAG_ARCH_X86_64)
+#elif defined(TBAG_ARCH_X86_64) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GNUC))
     return tbag_cpuid_gas_x86_64(level, eax, ebx, ecx, edx);
-# else
+#else
     return false;
-# endif
-#endif // defined(TBAG_COMP_MSVC)
+#endif
 }
 
 // ------------------

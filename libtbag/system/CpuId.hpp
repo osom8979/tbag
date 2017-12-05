@@ -107,10 +107,11 @@ NAMESPACE_LIBTBAG_OPEN
 namespace system {
 
 namespace __impl {
-TBAG_API bool tbag_cpuid_nasm_x86_or_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
-TBAG_API bool tbag_cpuid_gas_x86           (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
-TBAG_API bool tbag_cpuid_gas_x86_64        (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
-TBAG_API bool tbag_cpuid                   (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+TBAG_API bool tbag_cpuid_nasm_x86   (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+TBAG_API bool tbag_cpuid_nasm_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+TBAG_API bool tbag_cpuid_gas_x86    (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+TBAG_API bool tbag_cpuid_gas_x86_64 (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+TBAG_API bool tbag_cpuid            (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
 } // namespace __impl
 
 TBAG_API bool getCpuId(uint32_t level,
