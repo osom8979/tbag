@@ -13,6 +13,7 @@
 #pragma once
 #endif
 
+#include <libtbag/macro/architecture.hpp>
 #include <libtbag/macro/platform.hpp>
 #include <libtbag/macro/compiler.hpp>
 #include <libtbag/macro/language.hpp>
