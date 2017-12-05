@@ -28,7 +28,40 @@ namespace system {
 namespace __impl {
 // ---------------
 
-bool tbag_cpuid_x86(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+bool tbag_cpuid_nasm_x86_or_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+{
+#if defined(TBAG_COMP_MSVC) && (defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64))
+    int _eax_reg = 0;
+    int _ebx_reg = 0;
+    int _ecx_reg = 0;
+    int _edx_reg = 0;
+
+    __asm {
+        pushad
+
+        mov eax, level
+        cpuid
+
+        mov _eax_reg, eax
+        mov _ebx_reg, ebx
+        mov _edx_reg, edx
+        mov _ecx_reg, ecx
+
+        popad
+    }
+
+    *eax = _eax_reg;
+    *ebx = _ebx_reg;
+    *ecx = _ecx_reg;
+    *edx = _edx_reg;
+
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool tbag_cpuid_gas_x86(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
 #if defined(TBAG_ARCH_X86) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GNUC))
     TBAG_ASM_VOLATILE("cpuid" : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx) : "0"(level))
@@ -38,7 +71,7 @@ bool tbag_cpuid_x86(unsigned int level, unsigned int * eax, unsigned int * ebx, 
 #endif
 }
 
-bool tbag_cpuid_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+bool tbag_cpuid_gas_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
 #if defined(TBAG_ARCH_X86_64) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GNUC))
     // x86-64 uses %rbx as the base register, so preserve it.
@@ -56,13 +89,17 @@ bool tbag_cpuid_x86_64(unsigned int level, unsigned int * eax, unsigned int * eb
 
 bool tbag_cpuid(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
-#if defined(TBAG_ARCH_X86)
-    return tbag_cpuid_x86(level, eax, ebx, ecx, edx);
-#elif defined(TBAG_ARCH_X86_64)
-    return tbag_cpuid_x86_64(level, eax, ebx, ecx, edx);
+#if defined(TBAG_COMP_MSVC)
+    return tbag_cpuid_nasm_x86_or_x86_64(level, eax, ebx, ecx, edx);
 #else
+# if defined(TBAG_ARCH_X86)
+    return tbag_cpuid_gas_x86(level, eax, ebx, ecx, edx);
+# elif defined(TBAG_ARCH_X86_64)
+    return tbag_cpuid_gas_x86_64(level, eax, ebx, ecx, edx);
+# else
     return false;
-#endif
+# endif
+#endif // defined(TBAG_COMP_MSVC)
 }
 
 // ------------------
@@ -75,9 +112,9 @@ bool getCpuId(uint32_t level, uint32_t * eax, uint32_t * ebx, uint32_t * ecx, ui
     if (__get_cpuid(level, eax, ebx, ecx, edx) == false) {
         return false;
     }
-#elif defined(TBAG_COMP_MSVC) && defined(HAVE_INTRIN_H) && (defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64))
+#elif defined(HAVE_INTRIN_H)
     int cpu_info[4] = {0,};
-    __cpuid(cpuInfo, level);
+    __cpuid(cpu_info, level);
     *eax = (uint32_t)cpu_info[0];
     *ebx = (uint32_t)cpu_info[1];
     *ecx = (uint32_t)cpu_info[2];
