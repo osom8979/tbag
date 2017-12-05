@@ -16,7 +16,6 @@
 #include <intrin.h> // MSVC
 #endif
 
-#include <cstdint>
 #include <sstream>
 
 // -------------------
@@ -25,29 +24,88 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace system {
 
-#if defined(TBAG_COMP_CLANG)
-# define __ASM_KEYWORD__ __asm
-#else // GCC, ETC...
-# define __ASM_KEYWORD__ __asm__
-#endif
+// ---------------
+namespace __impl {
+// ---------------
 
-bool __tbag_cpuid(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+bool tbag_cpuid_x86(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
-#if defined(TBAG_ARCH_X86)
-    __ASM_KEYWORD__ __volatile__("cpuid" : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx) : "0"(level))
-    return true;
-#elif defined(TBAG_ARCH_X86_64)
-    // x86-64 uses %rbx as the base register, so preserve it.
-    __ASM_KEYWORD__ __volatile__(
-            "xchgq  %%rbx,%q1   \n"
-            "cpuid              \n"
-            "xchgq  %%rbx,%q1   \n"
-            : "=a"(*eax), "=r"(*ebx), "=c"(*ecx), "=d"(*edx)
-            : "0"(level));
+#if defined(TBAG_ARCH_X86) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GCC))
+    TBAG_ASM_VOLATILE("cpuid" : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx) : "0"(level))
     return true;
 #else
     return false;
 #endif
+}
+
+bool tbag_cpuid_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+{
+#if defined(TBAG_ARCH_X86_64) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GCC))
+    // x86-64 uses %rbx as the base register, so preserve it.
+    TBAG_ASM_VOLATILE(
+            "xchgq  %%rbx,%q1   \n"
+            "cpuid              \n"
+            "xchgq  %%rbx,%q1   \n"
+        : "=a"(*eax), "=r"(*ebx), "=c"(*ecx), "=d"(*edx)
+        : "0"(level));
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool tbag_cpuid(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
+{
+#if defined(TBAG_ARCH_X86)
+    return tbag_cpuid_x86(level, eax, ebx, ecx, edx);
+#elif defined(TBAG_ARCH_X86_64)
+    return tbag_cpuid_x86_64(level, eax, ebx, ecx, edx);
+#else
+    return false;
+#endif
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
+bool getCpuId(uint32_t level, uint32_t * eax, uint32_t * ebx, uint32_t * ecx, uint32_t * edx)
+{
+#if defined(HAVE_CPUID_H)
+    if (__get_cpuid(level, eax, ebx, ecx, edx) == false) {
+        return false;
+    }
+#elif defined(TBAG_COMP_MSVC) && defined(HAVE_INTRIN_H) && (defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64))
+    int cpu_info[4] = {0,};
+    __cpuid(cpuInfo, level);
+    *eax = (uint32_t)cpu_info[0];
+    *ebx = (uint32_t)cpu_info[1];
+    *ecx = (uint32_t)cpu_info[2];
+    *edx = (uint32_t)cpu_info[3];
+#else
+    unsigned int _level = level;
+    unsigned int _eax   = 0;
+    unsigned int _ebx   = 0;
+    unsigned int _ecx   = 0;
+    unsigned int _edx   = 0;
+    if (__impl::tbag_cpuid(_level, &_eax, &_ebx, &_ecx, &_edx) == false) {
+        return false;
+    }
+    *eax = _eax;
+    *ebx = _ebx;
+    *ecx = _ecx;
+    *edx = _edx;
+#endif
+    return true;
+}
+
+std::string convertRegisterToString(uint32_t value)
+{
+    std::stringstream ss;
+    for (int i = 0; i < sizeof(uint32_t); i++) {
+        ss << reinterpret_cast<char*>(&value)[i];
+    }
+    return ss.str();
 }
 
 std::string getCpuSignature()
@@ -56,44 +114,12 @@ std::string getCpuSignature()
     uint32_t ebx = 0;
     uint32_t ecx = 0;
     uint32_t edx = 0;
-
-#if defined(HAVE_CPUID_H)
-    if (__get_cpuid(0, &eax, &ebx, &ecx, &edx) == false) {
-        return std::string();
+    if (getCpuId(TBAG_CPUID_SIGNATURE_LEVEL, &eax, &ebx, &ecx, &edx)) {
+        std::stringstream ss;
+        ss << convertRegisterToString(ebx) << convertRegisterToString(edx) << convertRegisterToString(ecx);
+        return ss.str();
     }
-#elif defined(TBAG_COMP_MSVC) && defined(HAVE_INTRIN_H) && (defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64))
-    int cpuInfo[4] = {0,};
-    __cpuid(cpuInfo, 0);
-    eax = (uint32_t)cpuInfo[0];
-    ebx = (uint32_t)cpuInfo[1];
-    ecx = (uint32_t)cpuInfo[2];
-    edx = (uint32_t)cpuInfo[3];
-#else
-    unsigned int __eax = 0;
-    unsigned int __ebx = 0;
-    unsigned int __ecx = 0;
-    unsigned int __edx = 0;
-    if (__tbag_cpuid(0, &__eax, &__ebx, &__ecx, &__edx) == false) {
-        return std::string();
-    }
-    eax = __eax;
-    ebx = __ebx;
-    ecx = __ecx;
-    edx = __edx;
-#endif
-
-    std::stringstream ss;
-    int i = 0;
-    for (i = 0; i < sizeof(uint32_t); i++) {
-        ss << reinterpret_cast<char*>(&ebx)[i];
-    }
-    for (i = 0; i < sizeof(uint32_t); i++) {
-        ss << reinterpret_cast<char*>(&edx)[i];
-    }
-    for (i = 0; i < sizeof(uint32_t); i++) {
-        ss << reinterpret_cast<char*>(&ecx)[i];
-    }
-    return ss.str();
+    return std::string();
 }
 
 std::string getCpuSerialNumber()
@@ -102,45 +128,12 @@ std::string getCpuSerialNumber()
     uint32_t ebx = 0;
     uint32_t ecx = 0;
     uint32_t edx = 0;
-
-#if defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64)
-# if defined(HAVE_CPUID_H)
-    if (__get_cpuid(3, &eax, &ebx, &ecx, &edx) == false) {
-        return std::string();
+    if (getCpuId(TBAG_CPUID_SERIAL_NUMBER_LEVEL, &eax, &ebx, &ecx, &edx)) {
+        std::stringstream ss;
+        ss << convertRegisterToString(edx) << convertRegisterToString(ecx);
+        return ss.str();
     }
-# elif defined(TBAG_COMP_MSVC) && defined(HAVE_INTRIN_H)
-    int cpuInfo[4] = {0,};
-    __cpuid(cpuInfo, 0);
-    eax = (uint32_t)cpuInfo[0];
-    ebx = (uint32_t)cpuInfo[1];
-    ecx = (uint32_t)cpuInfo[2];
-    edx = (uint32_t)cpuInfo[3];
-# else
-    unsigned int __eax = 0;
-    unsigned int __ebx = 0;
-    unsigned int __ecx = 0;
-    unsigned int __edx = 0;
-    if (__tbag_cpuid(0, &__eax, &__ebx, &__ecx, &__edx) == false) {
-        return std::string();
-    }
-    eax = __eax;
-    ebx = __ebx;
-    ecx = __ecx;
-    edx = __edx;
-# endif
-#else  // defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64)
     return std::string();
-#endif // defined(TBAG_ARCH_X86) || defined(TBAG_ARCH_X86_64)
-
-    std::stringstream ss;
-    int i = 0;
-    for (i = 0; i < sizeof(uint32_t); i++) {
-        ss << reinterpret_cast<char*>(&edx)[i];
-    }
-    for (i = 0; i < sizeof(uint32_t); i++) {
-        ss << reinterpret_cast<char*>(&ecx)[i];
-    }
-    return ss.str();
 }
 
 } // namespace system

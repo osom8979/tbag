@@ -18,6 +18,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <cstdint>
 #include <string>
 
 /**
@@ -96,17 +97,27 @@
  * @}
  */
 
+#define TBAG_CPUID_SIGNATURE_LEVEL      0
+#define TBAG_CPUID_SERIAL_NUMBER_LEVEL  3
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace system {
 
-TBAG_API bool __tbag_cpuid(unsigned int level,
-                           unsigned int * eax,
-                           unsigned int * ebx,
-                           unsigned int * ecx,
-                           unsigned int * edx);
+namespace __impl {
+TBAG_API bool tbag_cpuid_x86   (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+TBAG_API bool tbag_cpuid_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+TBAG_API bool tbag_cpuid       (unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx);
+} // namespace __impl
+
+TBAG_API bool getCpuId(uint32_t level,
+                       uint32_t * eax,
+                       uint32_t * ebx,
+                       uint32_t * ecx,
+                       uint32_t * edx);
+TBAG_API std::string convertRegisterToString(uint32_t value);
 
 TBAG_API std::string getCpuSignature();
 TBAG_API std::string getCpuSerialNumber();
