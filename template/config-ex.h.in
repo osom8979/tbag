@@ -35,6 +35,12 @@
 /* Define to 1 if you have the <dbgeng.h> header file. */
 #cmakedefine HAVE_DBGENG_H
 
+/* Define to 1 if you have the <intrin.h> header file. */
+#cmakedefine HAVE_INTRIN_H
+
+/* Define to 1 if you have the <cpuid.h> header file. */
+#cmakedefine HAVE_CPUID_H
+
 /* COM library initialized successfully. */
 #cmakedefine HAVE_COINITIALIZEEX_FUNC
 
