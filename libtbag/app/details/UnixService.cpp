@@ -179,8 +179,10 @@ struct UnixService::Impl : private Noncopyable
 
         std::string const PID_STRING = std::to_string(getpid());
         // Write pid to lock file.
-        write(pid_file, PID_STRING.c_str(), PID_STRING.length());
-
+        ssize_t const write_size = write(pid_file, PID_STRING.c_str(), PID_STRING.length());
+        if (write_size == -1) {
+            tDLogW("UnixService::Impl::createPidFile() Write PID error: {}", getErrName(getGlobalSystemError()));
+        }
         return Err::E_SUCCESS;
 #else
         return Err::E_ENOSYS;
