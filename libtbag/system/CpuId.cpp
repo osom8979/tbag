@@ -30,7 +30,7 @@ namespace __impl {
 
 bool tbag_cpuid_x86(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
-#if defined(TBAG_ARCH_X86) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GCC))
+#if defined(TBAG_ARCH_X86) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GNUC))
     TBAG_ASM_VOLATILE("cpuid" : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx) : "0"(level))
     return true;
 #else
@@ -40,7 +40,7 @@ bool tbag_cpuid_x86(unsigned int level, unsigned int * eax, unsigned int * ebx, 
 
 bool tbag_cpuid_x86_64(unsigned int level, unsigned int * eax, unsigned int * ebx, unsigned int * ecx, unsigned int * edx)
 {
-#if defined(TBAG_ARCH_X86_64) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GCC))
+#if defined(TBAG_ARCH_X86_64) && (defined(TBAG_COMP_CLANG) || defined(TBAG_COMP_GNUC))
     // x86-64 uses %rbx as the base register, so preserve it.
     TBAG_ASM_VOLATILE(
             "xchgq  %%rbx,%q1   \n"
