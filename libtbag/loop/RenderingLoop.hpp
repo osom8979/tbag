@@ -94,7 +94,8 @@ public:
         _result_code = 0;
     }
 
-    ~RenderingLoop() {
+    ~RenderingLoop()
+    {
         this->_exit.store(true);
     }
 
@@ -119,7 +120,8 @@ public:
     }
 
 private:
-    void init() {
+    void init()
+    {
         this->_pre_start = SystemClock::now();
         this->_now_start = this->_pre_start;
         this->_duration  = TimeUnit(0);
@@ -141,7 +143,8 @@ private:
      *     }
      *   @endcode
      */
-    void loop(bool enable_sleep_step) {
+    void loop(bool enable_sleep_step)
+    {
         TimeUnit sleep_time;
 
         while (!_exit.load()) {
@@ -210,41 +213,20 @@ private:
     }
 
 public:
-    inline TimeUnit getTimeStep() const TBAG_NOEXCEPT {
-        return this->_time_step;
-    }
+    inline TimeUnit getTimeStep() const TBAG_NOEXCEPT { return this->_time_step; }
 
 // Sync object.
 public:
-    inline void setExit(bool exit = true) TBAG_NOEXCEPT {
-        this->_exit = exit;
-    }
-
-    inline void exit() TBAG_NOEXCEPT {
-        this->setExit(true);
-    }
-
-    inline void setResultCode(int code) TBAG_NOEXCEPT {
-        this->_result_code = code;
-    }
+    inline void setExit(bool exit = true) TBAG_NOEXCEPT { this->_exit = exit; }
+    inline void exit() TBAG_NOEXCEPT { this->setExit(true); }
+    inline void setResultCode(int code) TBAG_NOEXCEPT { this->_result_code = code; }
 
 // Loop variables.
 public:
-    inline TimePoint getPreStart() const TBAG_NOEXCEPT {
-        return this->_pre_start;
-    }
-
-    inline TimePoint getNowStart() const TBAG_NOEXCEPT {
-        return this->_now_start;
-    }
-
-    inline TimeUnit  getDuration() const TBAG_NOEXCEPT {
-        return this->_duration;
-    }
-
-    inline TimeUnit  getTimeLag() const TBAG_NOEXCEPT {
-        return this->_time_lag;
-    }
+    inline TimePoint getPreStart() const TBAG_NOEXCEPT { return this->_pre_start; }
+    inline TimePoint getNowStart() const TBAG_NOEXCEPT { return this->_now_start; }
+    inline TimeUnit  getDuration() const TBAG_NOEXCEPT { return this->_duration; }
+    inline TimeUnit   getTimeLag() const TBAG_NOEXCEPT { return this->_time_lag; }
 };
 
 } // namespace loop
