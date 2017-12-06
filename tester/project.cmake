@@ -21,6 +21,10 @@ endif ()
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbshare)
 list (APPEND TBAG_PROJECT_DEPENDENCIES tbproc)
 
+if (WITH_COVERAGE)
+    tbag_modules__apply_gcov ()
+endif ()
+
 ## Final process.
 tbag_modules__add_target ()
 tbag_modules__update_all_properties ()

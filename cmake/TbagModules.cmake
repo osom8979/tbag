@@ -275,6 +275,15 @@ macro (tbag_modules__apply_curand)
     list (APPEND TBAG_PROJECT_LDFLAGS ${CUDA_curand_LIBRARY})
 endmacro ()
 
+## -----
+## GCOV.
+## -----
+
+macro (tbag_modules__apply_gcov)
+    list (APPEND TBAG_PROJECT_CXXFLAGS -fprofile-arcs -ftest-coverage)
+    list (APPEND TBAG_PROJECT_LDFLAGS -lgcov --coverage)
+endmacro ()
+
 ## --------------
 ## Dep libraries.
 ## --------------

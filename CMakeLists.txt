@@ -73,8 +73,13 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/minizip)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/uv)
 
+tbag_config__set_option (WITH_COVERAGE         OFF)
 tbag_config__set_option (SKIP_FSPOLL_TESTER    OFF)
 tbag_config__set_option (SKIP_FINDPATH_TESTER  OFF)
+
+if (WITH_COVERAGE)
+    message (STATUS "Enable coverage.")
+endif ()
 
 ## Thread settings.
 tbag_config__find_thread ()

@@ -56,6 +56,10 @@ if (WIN32)
     list (APPEND TBAG_PROJECT_LDFLAGS shlwapi.lib) # filesystem with windows.
 endif ()
 
+if (WITH_COVERAGE)
+    tbag_modules__apply_gcov ()
+endif ()
+
 #tbag_modules__apply_pch (${CMAKE_SOURCE_DIR}/libtbag/config.h)
 
 ## Final process.
