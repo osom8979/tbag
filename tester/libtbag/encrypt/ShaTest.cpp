@@ -1,17 +1,17 @@
 /**
- * @file   Sha1Test.cpp
- * @brief  Sha1 class tester.
+ * @file   ShaTest.cpp
+ * @brief  Sha class tester.
  * @author zer0
- * @date   2017-04-11
+ * @date   2017-12-06
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/encrypt/Sha1.hpp>
+#include <libtbag/encrypt/Sha.hpp>
 
 using namespace libtbag;
 using namespace libtbag::encrypt;
 
-TEST(Sha1Test, Default)
+TEST(ShaTest, Default)
 {
     std::string const ORIGINAL = "abcdefghijklmnopqrstuvwxyz";
     std::string const ENCRYPT  = "32d10c7b8cf96570ca04ce37f2a19d84240d3a89";

@@ -1,11 +1,12 @@
 /**
- * @file   Sha1.cpp
- * @brief  Sha1 class implementation.
+ * @file   Sha.cpp
+ * @brief  Sha class implementation.
  * @author zer0
  * @date   2017-04-11
+ * @date   2017-12-06 (Rename: Sha1 -> Sha)
  */
 
-#include <libtbag/encrypt/Sha1.hpp>
+#include <libtbag/encrypt/Sha.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 

@@ -9,7 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/http/base/HttpCommon.hpp>
 #include <libtbag/encrypt/Base64.hpp>
-#include <libtbag/encrypt/Sha1.hpp>
+#include <libtbag/encrypt/Sha.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/id/Uuid.hpp>
 

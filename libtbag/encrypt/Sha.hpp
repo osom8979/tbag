@@ -1,12 +1,13 @@
 /**
- * @file   Sha1.hpp
- * @brief  Sha1 class prototype.
+ * @file   Sha.hpp
+ * @brief  Sha class prototype.
  * @author zer0
  * @date   2017-04-11
+ * @date   2017-12-06 (Rename: Sha1 -> Sha)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SHA1_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SHA1_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SHA_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SHA_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -39,5 +40,5 @@ TBAG_API bool encryptSha1(std::string const & input, std::string & output);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SHA1_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SHA_HPP__
 
