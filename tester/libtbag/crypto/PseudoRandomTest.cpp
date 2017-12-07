@@ -16,6 +16,10 @@ TEST(PseudoRandomTest, GenerateRandomString)
     std::size_t const BYTE_LENGTH = 10;
     std::string const RANDOM1 = generateRandomString(BYTE_LENGTH);
     std::string const RANDOM2 = generateRandomString(BYTE_LENGTH);
+    ASSERT_FALSE(RANDOM1.empty());
+    ASSERT_FALSE(RANDOM2.empty());
+    ASSERT_EQ(BYTE_LENGTH, RANDOM1.size() / 2);
+    ASSERT_EQ(BYTE_LENGTH, RANDOM2.size() / 2);
     ASSERT_NE(RANDOM1, RANDOM2);
 }
 
@@ -24,6 +28,10 @@ TEST(PseudoRandomTest, GeneratePseudoRandomString)
     std::size_t const BYTE_LENGTH = 10;
     std::string const RANDOM1 = generatePseudoRandomString(BYTE_LENGTH);
     std::string const RANDOM2 = generatePseudoRandomString(BYTE_LENGTH);
+    ASSERT_FALSE(RANDOM1.empty());
+    ASSERT_FALSE(RANDOM2.empty());
+    ASSERT_EQ(BYTE_LENGTH, RANDOM1.size() / 2);
+    ASSERT_EQ(BYTE_LENGTH, RANDOM2.size() / 2);
     ASSERT_NE(RANDOM1, RANDOM2);
 }
 

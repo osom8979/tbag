@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
