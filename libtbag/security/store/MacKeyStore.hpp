@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/security/store/KeyStoreInterface.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,22 +25,26 @@ NAMESPACE_LIBTBAG_OPEN
 namespace security {
 namespace store    {
 
-// Forward declaration.
-
 /**
  * MacKeyStore class prototype.
  *
  * @author zer0
  * @date   2017-12-07
  */
-class TBAG_API MacKeyStore : private Noncopyable
+class TBAG_API MacKeyStore : private Noncopyable, public KeyStoreInterface
 {
-private:
-    // Insert member variables.
-
 public:
     MacKeyStore();
     virtual ~MacKeyStore();
+
+public:
+    virtual bool create(std::string const & key) override;
+    virtual bool remove(std::string const & key) override;
+
+    virtual std::string get(std::string const & key) override;
+    virtual bool set(std::string const & key, std::string const & value) override;
+
+    virtual std::vector<std::string> list() override;
 };
 
 } // namespace store

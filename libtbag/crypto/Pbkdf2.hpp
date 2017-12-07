@@ -32,7 +32,7 @@ TBAG_CONSTEXPR int const PBKDF2_MINIMUM_ITERATION_COUNT = 1000;
 
 enum class Pbkdf2Type
 {
-    PT_MD_NULL,
+    PT_MD_NULL = 0,
     PT_MD5,
     PT_SHA1,
     PT_SHA224,

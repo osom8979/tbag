@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace security {
 namespace store    {
 
-FileKeyStore::FileKeyStore()
+FileKeyStore::FileKeyStore(std::string const & path)
 {
     // EMPTY.
 }
@@ -23,6 +23,31 @@ FileKeyStore::FileKeyStore()
 FileKeyStore::~FileKeyStore()
 {
     // EMPTY.
+}
+
+bool FileKeyStore::create(std::string const & key)
+{
+    return false;
+}
+
+bool FileKeyStore::remove(std::string const & key)
+{
+    return false;
+}
+
+std::string FileKeyStore::get(std::string const & key)
+{
+    return std::string();
+}
+
+bool FileKeyStore::set(std::string const & key, std::string const & value)
+{
+    return false;
+}
+
+std::vector<std::string> FileKeyStore::list()
+{
+    return std::vector<std::string>();
 }
 
 } // namespace store

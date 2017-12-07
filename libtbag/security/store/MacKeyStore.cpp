@@ -25,6 +25,31 @@ MacKeyStore::~MacKeyStore()
     // EMPTY.
 }
 
+bool MacKeyStore::create(std::string const & key)
+{
+    return false;
+}
+
+bool MacKeyStore::remove(std::string const & key)
+{
+    return false;
+}
+
+std::string MacKeyStore::get(std::string const & key)
+{
+    return std::string();
+}
+
+bool MacKeyStore::set(std::string const & key, std::string const & value)
+{
+    return false;
+}
+
+std::vector<std::string> MacKeyStore::list()
+{
+    return std::vector<std::string>();
+}
+
 } // namespace store
 } // namespace security
 

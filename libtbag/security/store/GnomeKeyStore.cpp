@@ -25,6 +25,31 @@ GnomeKeyStore::~GnomeKeyStore()
     // EMPTY.
 }
 
+bool GnomeKeyStore::create(std::string const & key)
+{
+    return false;
+}
+
+bool GnomeKeyStore::remove(std::string const & key)
+{
+    return false;
+}
+
+std::string GnomeKeyStore::get(std::string const & key)
+{
+    return std::string();
+}
+
+bool GnomeKeyStore::set(std::string const & key, std::string const & value)
+{
+    return false;
+}
+
+std::vector<std::string> GnomeKeyStore::list()
+{
+    return std::vector<std::string>();
+}
+
 } // namespace store
 } // namespace security
 
