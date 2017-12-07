@@ -16,15 +16,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace security {
-
-// Forward declaration.
 
 /**
  * KeyStore class prototype.
@@ -35,7 +32,6 @@ namespace security {
 class TBAG_API KeyStore : private Noncopyable
 {
 private:
-    // Insert member variables.
 
 public:
     KeyStore();

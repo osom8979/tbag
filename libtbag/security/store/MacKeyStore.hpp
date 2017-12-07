@@ -1,12 +1,12 @@
 /**
- * @file   FileKeyStore.hpp
- * @brief  FileKeyStore class prototype.
+ * @file   MacKeyStore.hpp
+ * @brief  MacKeyStore class prototype.
  * @author zer0
- * @date   2017-12-06
+ * @date   2017-12-07
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_DETAILS_FILEKEYSTORE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_DETAILS_FILEKEYSTORE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_STORE_MACKEYSTORE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_STORE_MACKEYSTORE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -23,32 +23,32 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace security {
-namespace details  {
+namespace store    {
 
 // Forward declaration.
 
 /**
- * FileKeyStore class prototype.
+ * MacKeyStore class prototype.
  *
  * @author zer0
- * @date   2017-12-06
+ * @date   2017-12-07
  */
-class TBAG_API FileKeyStore : private Noncopyable
+class TBAG_API MacKeyStore : private Noncopyable
 {
 private:
     // Insert member variables.
 
 public:
-    FileKeyStore();
-    virtual ~FileKeyStore();
+    MacKeyStore();
+    virtual ~MacKeyStore();
 };
 
-} // namespace details
+} // namespace store
 } // namespace security
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_DETAILS_FILEKEYSTORE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_STORE_MACKEYSTORE_HPP__
 

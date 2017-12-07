@@ -1,11 +1,11 @@
 /**
- * @file   MacKeyStore.cpp
- * @brief  MacKeyStore class implementation.
+ * @file   WindowsKeyStore.cpp
+ * @brief  WindowsKeyStore class implementation.
  * @author zer0
- * @date   2017-12-06
+ * @date   2017-12-07
  */
 
-#include <libtbag/security/details/MacKeyStore.hpp>
+#include <libtbag/security/store/WindowsKeyStore.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -13,19 +13,19 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace security {
-namespace details  {
+namespace store    {
 
-MacKeyStore::MacKeyStore()
+WindowsKeyStore::WindowsKeyStore()
 {
     // EMPTY.
 }
 
-MacKeyStore::~MacKeyStore()
+WindowsKeyStore::~WindowsKeyStore()
 {
     // EMPTY.
 }
 
-} // namespace details
+} // namespace store
 } // namespace security
 
 // --------------------

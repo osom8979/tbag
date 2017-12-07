@@ -1,12 +1,12 @@
 /**
- * @file   MacKeyStore.hpp
- * @brief  MacKeyStore class prototype.
+ * @file   WindowsKeyStore.hpp
+ * @brief  WindowsKeyStore class prototype.
  * @author zer0
- * @date   2017-12-06
+ * @date   2017-12-07
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_DETAILS_MACKEYSTORE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_DETAILS_MACKEYSTORE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_STORE_WINDOWSKEYSTORE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_STORE_WINDOWSKEYSTORE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -23,32 +23,32 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace security {
-namespace details  {
+namespace store    {
 
 // Forward declaration.
 
 /**
- * MacKeyStore class prototype.
+ * WindowsKeyStore class prototype.
  *
  * @author zer0
- * @date   2017-12-06
+ * @date   2017-12-07
  */
-class TBAG_API MacKeyStore : private Noncopyable
+class TBAG_API WindowsKeyStore : private Noncopyable
 {
 private:
     // Insert member variables.
 
 public:
-    MacKeyStore();
-    virtual ~MacKeyStore();
+    WindowsKeyStore();
+    virtual ~WindowsKeyStore();
 };
 
-} // namespace details
+} // namespace store
 } // namespace security
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_DETAILS_MACKEYSTORE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SECURITY_STORE_WINDOWSKEYSTORE_HPP__
 

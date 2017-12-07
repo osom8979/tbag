@@ -1,11 +1,11 @@
 /**
- * @file   FileKeyStore.cpp
- * @brief  FileKeyStore class implementation.
+ * @file   MacKeyStore.cpp
+ * @brief  MacKeyStore class implementation.
  * @author zer0
- * @date   2017-12-06
+ * @date   2017-12-07
  */
 
-#include <libtbag/security/details/FileKeyStore.hpp>
+#include <libtbag/security/store/MacKeyStore.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -13,19 +13,19 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace security {
-namespace details  {
+namespace store    {
 
-FileKeyStore::FileKeyStore()
+MacKeyStore::MacKeyStore()
 {
     // EMPTY.
 }
 
-FileKeyStore::~FileKeyStore()
+MacKeyStore::~MacKeyStore()
 {
     // EMPTY.
 }
 
-} // namespace details
+} // namespace store
 } // namespace security
 
 // --------------------
