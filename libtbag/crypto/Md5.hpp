@@ -2,11 +2,11 @@
  * @file   Md5.hpp
  * @brief  Md5 class prototype.
  * @author zer0
- * @date   2017-08-15
+ * @date   2017-12-07
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_MD5_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_MD5_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_MD5_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_MD5_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,7 +24,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 TBAG_CONSTEXPR int const MD5_DIGEST_BYTE = 16;
 
@@ -45,11 +45,11 @@ TBAG_API std::string getMd5(std::string const & input);
 
 TBAG_API std::string getMd5FromFile(std::string const & file_path);
 
-} // namespace encrypt
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_MD5_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_MD5_HPP__
 

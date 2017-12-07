@@ -2,10 +2,10 @@
  * @file   Base64.cpp
  * @brief  Base64 class implementation.
  * @author zer0
- * @date   2017-04-11
+ * @date   2017-12-07
  */
 
-#include <libtbag/encrypt/Base64.hpp>
+#include <libtbag/crypto/Base64.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cstdlib>
@@ -20,7 +20,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 std::size_t getDecodeLength(std::string const & base64)
 {
@@ -101,7 +101,7 @@ bool decodeBase64(std::string const & input, util::Buffer & output)
     return length == RSIZE;
 }
 
-} // namespace encrypt
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

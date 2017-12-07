@@ -2,10 +2,10 @@
  * @file   Md5.cpp
  * @brief  Md5 class implementation.
  * @author zer0
- * @date   2017-08-15
+ * @date   2017-12-07
  */
 
-#include <libtbag/encrypt/Md5.hpp>
+#include <libtbag/crypto/Md5.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/log/Log.hpp>
@@ -19,11 +19,11 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 bool encryptMd5(char const * input, std::size_t size, Md5Hash & output)
 {
-    static_assert(MD5_DIGEST_LENGTH == libtbag::encrypt::MD5_DIGEST_BYTE, "MD5 must be 16 digits.");
+    static_assert(MD5_DIGEST_LENGTH == libtbag::crypto::MD5_DIGEST_BYTE, "MD5 must be 16 digits.");
 
     MD5_CTX context = {0,};
     if (MD5_Init(&context) != 1) {
@@ -110,7 +110,7 @@ std::string getMd5FromFile(std::string const & file_path)
     return getMd5(buffer);
 }
 
-} // namespace encrypt
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

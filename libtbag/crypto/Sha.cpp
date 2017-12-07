@@ -2,11 +2,10 @@
  * @file   Sha.cpp
  * @brief  Sha class implementation.
  * @author zer0
- * @date   2017-04-11
- * @date   2017-12-06 (Rename: Sha1 -> Sha)
+ * @date   2017-12-07
  */
 
-#include <libtbag/encrypt/Sha.hpp>
+#include <libtbag/crypto/Sha.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -19,7 +18,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 bool encryptSha1(std::string const & input, Sha1Hash & output)
 {
@@ -41,7 +40,7 @@ bool encryptSha1(std::string const & input, std::string & output)
     return true;
 }
 
-} // namespace encrypt
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

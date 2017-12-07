@@ -9,7 +9,7 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/archive/ex/ZipBase64.hpp>
 #include <libtbag/filesystem/File.hpp>
-#include <libtbag/encrypt/Md5.hpp>
+#include <libtbag/crypto/Md5.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <iostream>
@@ -28,9 +28,9 @@ TEST(ZipBase64Test, FileToFile)
     ASSERT_TRUE(encodeZipBase64FileToFile(IMAGE_PATH.toString(), ENCODE_PATH.toString()));
     ASSERT_TRUE(decodeZipBase64FileToFile(ENCODE_PATH.toString(), DECODE_PATH.toString()));
 
-    std::string const ORIGINAL_MD5 = encrypt::getMd5FromFile(IMAGE_PATH.toString());
-    std::string const   ENCODE_MD5 = encrypt::getMd5FromFile(ENCODE_PATH.toString());
-    std::string const   DECODE_MD5 = encrypt::getMd5FromFile(DECODE_PATH.toString());
+    std::string const ORIGINAL_MD5 = crypto::getMd5FromFile(IMAGE_PATH.toString());
+    std::string const   ENCODE_MD5 = crypto::getMd5FromFile(ENCODE_PATH.toString());
+    std::string const   DECODE_MD5 = crypto::getMd5FromFile(DECODE_PATH.toString());
 
     ASSERT_FALSE(ORIGINAL_MD5.empty());
     ASSERT_FALSE(  DECODE_MD5.empty());
@@ -43,8 +43,8 @@ TEST(ZipBase64Test, FileToFile)
     ASSERT_FALSE(encode.empty());
     ASSERT_FALSE(decode.empty());
 
-    std::string const FROM_FILE_ENCODE_MD5 = encrypt::getMd5(encode);
-    std::string const FROM_FILE_DECODE_MD5 = encrypt::getMd5(decode);
+    std::string const FROM_FILE_ENCODE_MD5 = crypto::getMd5(encode);
+    std::string const FROM_FILE_DECODE_MD5 = crypto::getMd5(decode);
     ASSERT_FALSE(FROM_FILE_ENCODE_MD5.empty());
     ASSERT_FALSE(FROM_FILE_DECODE_MD5.empty());
     ASSERT_EQ(ENCODE_MD5, FROM_FILE_ENCODE_MD5);
@@ -54,8 +54,8 @@ TEST(ZipBase64Test, FileToFile)
     auto const DECODE2_PATH = tttDirGet() / "lena2.png";
     ASSERT_TRUE(encodeZipBase64ToFile(decode, ENCODE2_PATH.toString()));
     ASSERT_TRUE(decodeZipBase64ToFile(encode, DECODE2_PATH.toString()));
-    std::string const TO_FILE_ENCODE_MD5 = encrypt::getMd5FromFile(ENCODE2_PATH.toString());
-    std::string const TO_FILE_DECODE_MD5 = encrypt::getMd5FromFile(DECODE2_PATH.toString());
+    std::string const TO_FILE_ENCODE_MD5 = crypto::getMd5FromFile(ENCODE2_PATH.toString());
+    std::string const TO_FILE_DECODE_MD5 = crypto::getMd5FromFile(DECODE2_PATH.toString());
     ASSERT_FALSE(TO_FILE_ENCODE_MD5.empty());
     ASSERT_FALSE(TO_FILE_DECODE_MD5.empty());
     ASSERT_EQ(ENCODE_MD5, TO_FILE_ENCODE_MD5);

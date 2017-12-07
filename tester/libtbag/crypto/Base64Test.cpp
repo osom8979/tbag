@@ -2,14 +2,14 @@
  * @file   Base64Test.cpp
  * @brief  Base64 class tester.
  * @author zer0
- * @date   2017-04-11
+ * @date   2017-12-07
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/encrypt/Base64.hpp>
+#include <libtbag/crypto/Base64.hpp>
 
 using namespace libtbag;
-using namespace libtbag::encrypt;
+using namespace libtbag::crypto;
 
 TEST(Base64Test, Default)
 {

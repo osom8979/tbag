@@ -2,13 +2,14 @@
  * @file   SslUtils.cpp
  * @brief  SslUtils class implementation.
  * @author zer0
- * @date   2017-11-11
+ * @date   2017-12-07
  *
  * @see <https://wiki.openssl.org/index.php/Library_Initialization>
  * @see <https://en.wikibooks.org/wiki/OpenSSL/Initialization>
  */
 
-#include <libtbag/encrypt/SslUtils.hpp>
+#include <libtbag/crypto/SslUtils.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <openssl/conf.h>
 #include <openssl/err.h>
@@ -20,7 +21,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 void initializeSsl()
 {
@@ -41,7 +42,8 @@ void releaseSsl()
     ERR_remove_state(0); // If zero we look it up.
 }
 
-} // namespace encrypt
+
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

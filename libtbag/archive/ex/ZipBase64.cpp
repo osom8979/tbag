@@ -8,7 +8,7 @@
 #include <libtbag/archive/ex/ZipBase64.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/archive/Zip.hpp>
-#include <libtbag/encrypt/Base64.hpp>
+#include <libtbag/crypto/Base64.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
@@ -29,7 +29,7 @@ bool encodeZipBase64(char const * input, std::size_t size, std::string & output)
     }
 
     std::string base64_string;
-    bool const BASE64_RESULT = encrypt::encodeBase64(zip_buffer, base64_string);
+    bool const BASE64_RESULT = crypto::encodeBase64(zip_buffer, base64_string);
     if (BASE64_RESULT == false) {
         tDLogE("encodeZipBase64() Base64 encode error");
         return false;
@@ -47,7 +47,7 @@ bool encodeZipBase64(util::Buffer const & input, std::string & output)
 bool decodeZipBase64(std::string const & input, util::Buffer & output)
 {
     util::Buffer debase64_buffer;
-    bool const BASE64_RESULT = encrypt::decodeBase64(input, debase64_buffer);
+    bool const BASE64_RESULT = crypto::decodeBase64(input, debase64_buffer);
     if (BASE64_RESULT == false) {
         tDLogE("decodeZipBase64() Base64 decode error");
         return false;

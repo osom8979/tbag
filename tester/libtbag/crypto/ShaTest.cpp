@@ -2,14 +2,14 @@
  * @file   ShaTest.cpp
  * @brief  Sha class tester.
  * @author zer0
- * @date   2017-12-06
+ * @date   2017-12-07
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/encrypt/Sha.hpp>
+#include <libtbag/crypto/Sha.hpp>
 
 using namespace libtbag;
-using namespace libtbag::encrypt;
+using namespace libtbag::crypto;
 
 TEST(ShaTest, Default)
 {

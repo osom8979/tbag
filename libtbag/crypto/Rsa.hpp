@@ -2,11 +2,11 @@
  * @file   Rsa.hpp
  * @brief  Rsa class prototype.
  * @author zer0
- * @date   2017-11-11
+ * @date   2017-12-07
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_RSA_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_RSA_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_RSA_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_RSA_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,13 +25,14 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 /**
  * Rsa class prototype.
  *
  * @author zer0
  * @date   2017-11-11
+ * @date   2017-12-07 (Move package: libtbag/encrypt -> libtbag/crypto)
  */
 class TBAG_API Rsa : private Noncopyable
 {
@@ -99,14 +100,13 @@ public:
                          CipherAlgorithm algorithm, int key_length = DEFAULT_KEY_LENGTH);
     static bool generate(std::string & public_key, std::string & private_key,
                          std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
-
 };
 
-} // namespace encrypt
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_RSA_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_RSA_HPP__
 

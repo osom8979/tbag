@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/typography/Font.hpp>
 #include <libtbag/typography/font/ProggyClean.hpp>
-#include <libtbag/encrypt/Md5.hpp>
+#include <libtbag/crypto/Md5.hpp>
 
 using namespace libtbag;
 using namespace libtbag::typography;
@@ -16,7 +16,7 @@ using namespace libtbag::typography::font;
 
 TEST(FontTest, ProggyClean)
 {
-    ASSERT_EQ(getProggyCleanMd5(), encrypt::getMd5(getProggyClean()));
+    ASSERT_EQ(getProggyCleanMd5(), crypto::getMd5(getProggyClean()));
 }
 
 TEST(FontTest, CharToConsole)

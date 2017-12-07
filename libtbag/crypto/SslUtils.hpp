@@ -2,11 +2,11 @@
  * @file   SslUtils.hpp
  * @brief  SslUtils class prototype.
  * @author zer0
- * @date   2017-11-11
+ * @date   2017-12-07
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SSLUTILS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SSLUTILS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_SSLUTILS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_SSLUTILS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -20,16 +20,16 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 TBAG_API void initializeSsl();
 TBAG_API void releaseSsl();
 
-} // namespace encrypt
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_ENCRYPT_SSLUTILS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_SSLUTILS_HPP__
 

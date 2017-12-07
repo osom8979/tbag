@@ -2,14 +2,14 @@
  * @file   Md5Test.cpp
  * @brief  Md5 class tester.
  * @author zer0
- * @date   2017-08-15
+ * @date   2017-12-07
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/encrypt/Md5.hpp>
+#include <libtbag/crypto/Md5.hpp>
 
 using namespace libtbag;
-using namespace libtbag::encrypt;
+using namespace libtbag::crypto;
 
 TEST(Md5Test, Default)
 {

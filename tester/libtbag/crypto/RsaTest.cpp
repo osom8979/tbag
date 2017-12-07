@@ -2,14 +2,14 @@
  * @file   RsaTest.cpp
  * @brief  Rsa class tester.
  * @author zer0
- * @date   2017-11-11
+ * @date   2017-12-07
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/encrypt/Rsa.hpp>
+#include <libtbag/crypto/Rsa.hpp>
 
 using namespace libtbag;
-using namespace libtbag::encrypt;
+using namespace libtbag::crypto;
 
 TEST(RsaTest, Default)
 {

@@ -2,10 +2,10 @@
  * @file   Rsa.cpp
  * @brief  Rsa class implementation.
  * @author zer0
- * @date   2017-11-11
+ * @date   2017-12-07
  */
 
-#include <libtbag/encrypt/Rsa.hpp>
+#include <libtbag/crypto/Rsa.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <openssl/bio.h>
@@ -22,7 +22,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace encrypt {
+namespace crypto {
 
 // ---------------
 namespace __impl {
@@ -233,7 +233,7 @@ bool Rsa::generate(std::string & public_key, std::string & private_key, std::str
     return false;
 }
 
-} // namespace encrypt
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
