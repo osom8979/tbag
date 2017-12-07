@@ -125,6 +125,14 @@ public:
     std::size_t request(std::string const & arguments);
 
     /**
+     * @param[in] argc
+     *      Count of arguments.
+     * @param[in] argv
+     *      Variables of arguments.
+     * @param[in] prefix
+     *      Prefix of commander.
+     * @param[in] delimiter
+     *      Delimiter of commander.
      * @param[in] ignore_first
      *      The argv[0] passed to the main() function is the program path. @n
      *      Usually this value is not used and can be IGNORE processed.
