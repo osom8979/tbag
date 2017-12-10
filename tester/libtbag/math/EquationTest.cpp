@@ -34,3 +34,16 @@ TEST(EquationTest, GetIntersectionWithTwoLinearEquation)
     ASSERT_NEAR(1.0, p.y, 0.1);
 }
 
+TEST(EquationTest, IsCross)
+{
+    using namespace libtbag::geometry;
+
+    Pointd const P11(108, 53);
+    Pointd const P12(185, 144);
+    Pointd const P21(113.5, 61.5);
+    Pointd const P22(115.5, 61.5);
+    Pointd cross;
+    bool const RESULT = isCross<double, Pointd>(P11, P12, P21, P22, cross);
+    ASSERT_TRUE(RESULT);
+}
+
