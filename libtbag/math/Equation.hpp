@@ -212,28 +212,34 @@ inline bool isContains2d(Point const & p1, Point const & p2, Point const & check
 template <typename T, typename Point = geometry::BasePoint<T> >
 bool isCross(Point const & p11, Point const & p12, Point const & p21, Point const & p22, Point & cross)
 {
-    if (p11.x != p12.x && p21.x != p22.x) {
+    bool const SAME_P1_X = (p11.x == p12.x);
+    bool const SAME_P2_X = (p21.x == p22.x);
+
+    if (SAME_P1_X == false && SAME_P2_X == false) {
         LinearEquation<T> e1 = getLinearEquationWithTwoPoint<T, Point>(p11, p12);
         LinearEquation<T> e2 = getLinearEquationWithTwoPoint<T, Point>(p21, p22);
 
-        if (isParallelWithTwoLinearEquation<T>(e1, e2) == false) {
-            cross = getIntersectionWithTwoLinearEquation<T, Point>(e1, e2);
-            return isContains2d<T, Point>(p11, p12, cross) && isContains2d<T, Point>(p21, p22, cross);
-        } else {
+        if (isParallelWithTwoLinearEquation<T>(e1, e2)) {
             return false;
         }
+        cross = getIntersectionWithTwoLinearEquation<T, Point>(e1, e2);
+        return isContains2d<T, Point>(p11, p12, cross) && isContains2d<T, Point>(p21, p22, cross);
 
-    } else if (p11.x != p12.x && p21.x == p22.x) {
+    } else if (SAME_P1_X == false && SAME_P2_X) {
+        // p21->p22 is a horizontal straight line.
         LinearEquation<T> e1 = getLinearEquationWithTwoPoint<T, Point>(p11, p12);
         Point cross = Point(p21.x, getY<T>(e1, p21.x));
         return isContains<T>(p21.y, p22.y, cross.y) && isContains2d<T, Point>(p11, p12, cross);
 
-    } else if (p11.x == p12.x && p21.x != p22.x) {
+    } else if (SAME_P1_X && SAME_P2_X == false) {
+        // p11->p12 is a horizontal straight line.
         LinearEquation<T> e2 = getLinearEquationWithTwoPoint<T, Point>(p21, p22);
         Point cross = Point(p11.x, getY<T>(e2, p11.x));
         return isContains<T>(p11.y, p12.y, cross.y) && isContains2d<T, Point>(p21, p22, cross);
     }
 
+    // p11->p12 & p21->p22 is a horizontal straight line.
+    assert(SAME_P1_X && SAME_P2_X);
     return false;
 }
 
