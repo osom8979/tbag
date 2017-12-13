@@ -41,8 +41,9 @@ public:
     virtual bool create(std::string const & key) override;
     virtual bool remove(std::string const & key) override;
 
-    virtual std::string get(std::string const & key) override;
-    virtual bool set(std::string const & key, std::string const & value) override;
+    virtual bool get(std::string const & key, std::string & result) override;
+    virtual bool set(std::string const & key, std::string const & value, bool encrypt = false) override;
+    virtual bool cmp(std::string const & key, std::string const & value, bool encrypt = false) override;
 
     virtual std::vector<std::string> list() override;
 };

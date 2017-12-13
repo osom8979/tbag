@@ -17,8 +17,10 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/security/store/KeyStoreInterface.hpp>
+#include <libtbag/database/Sqlite.hpp>
 
 #include <string>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,6 +38,33 @@ namespace store    {
 class TBAG_API FileKeyStore : private Noncopyable, public KeyStoreInterface
 {
 public:
+    using Sqlite = database::Sqlite;
+    using Mutex  = std::mutex;
+    using Guard  = std::lock_guard<Mutex>;
+
+public:
+    TBAG_CONSTEXPR static char const * const TABLE_NAME = "t";
+    TBAG_CONSTEXPR static char const * const   KEY_NAME = "k";
+    TBAG_CONSTEXPR static char const * const  SALT_NAME = "s";
+    TBAG_CONSTEXPR static char const * const VALUE_NAME = "v";
+
+    TBAG_CONSTEXPR static char const * const getTableName() TBAG_NOEXCEPT { return TABLE_NAME; }
+    TBAG_CONSTEXPR static char const * const getKeyName  () TBAG_NOEXCEPT { return   KEY_NAME; }
+    TBAG_CONSTEXPR static char const * const getSaltName () TBAG_NOEXCEPT { return  SALT_NAME; }
+    TBAG_CONSTEXPR static char const * const getValueName() TBAG_NOEXCEPT { return VALUE_NAME; }
+
+public:
+    TBAG_CONSTEXPR static std::size_t const HASH_SIZE = 512;
+    TBAG_CONSTEXPR static std::size_t const SALT_SIZE = 512;
+
+    TBAG_CONSTEXPR static std::size_t const getHashSize() TBAG_NOEXCEPT { return HASH_SIZE; }
+    TBAG_CONSTEXPR static std::size_t const getSaltSize() TBAG_NOEXCEPT { return SALT_SIZE; }
+
+private:
+    Mutex mutable _mutex;
+    Sqlite _db;
+
+public:
     FileKeyStore(std::string const & path);
     virtual ~FileKeyStore();
 
@@ -43,8 +72,9 @@ public:
     virtual bool create(std::string const & key) override;
     virtual bool remove(std::string const & key) override;
 
-    virtual std::string get(std::string const & key) override;
-    virtual bool set(std::string const & key, std::string const & value) override;
+    virtual bool get(std::string const & key, std::string & result) override;
+    virtual bool set(std::string const & key, std::string const & value, bool encrypt = false) override;
+    virtual bool cmp(std::string const & key, std::string const & value, bool encrypt = false) override;
 
     virtual std::vector<std::string> list() override;
 };

@@ -37,8 +37,9 @@ struct KeyStoreInterface
     virtual bool create(std::string const & key) = 0;
     virtual bool remove(std::string const & key) = 0;
 
-    virtual std::string get(std::string const & key) = 0;
-    virtual bool set(std::string const & key, std::string const & value) = 0;
+    virtual bool get(std::string const & key, std::string & result) = 0;
+    virtual bool set(std::string const & key, std::string const & value, bool encrypt = false) = 0;
+    virtual bool cmp(std::string const & key, std::string const & value, bool encrypt = false) = 0;
 
     virtual std::vector<std::string> list() = 0;
 };

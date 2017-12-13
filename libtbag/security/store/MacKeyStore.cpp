@@ -35,12 +35,17 @@ bool MacKeyStore::remove(std::string const & key)
     return false;
 }
 
-std::string MacKeyStore::get(std::string const & key)
+bool MacKeyStore::get(std::string const & key, std::string & result)
 {
-    return std::string();
+    return false;
 }
 
-bool MacKeyStore::set(std::string const & key, std::string const & value)
+bool MacKeyStore::set(std::string const & key, std::string const & value, bool encrypt)
+{
+    return false;
+}
+
+bool MacKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt)
 {
     return false;
 }

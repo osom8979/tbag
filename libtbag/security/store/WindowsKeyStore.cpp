@@ -35,12 +35,17 @@ bool WindowsKeyStore::remove(std::string const & key)
     return false;
 }
 
-std::string WindowsKeyStore::get(std::string const & key)
+bool WindowsKeyStore::get(std::string const & key, std::string & result)
 {
-    return std::string();
+    return false;
 }
 
-bool WindowsKeyStore::set(std::string const & key, std::string const & value)
+bool WindowsKeyStore::set(std::string const & key, std::string const & value, bool encrypt)
+{
+    return false;
+}
+
+bool WindowsKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt)
 {
     return false;
 }
