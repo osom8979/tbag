@@ -23,7 +23,7 @@
 #include <type_traits>
 
 #ifndef TBAG_DEFAULT_FLOATING_POINT_EQUALS_EPSILON
-#define TBAG_DEFAULT_FLOATING_POINT_EQUALS_EPSILON  0.001
+#define TBAG_DEFAULT_FLOATING_POINT_EQUALS_EPSILON  1e-5
 #endif
 
 // -------------------
