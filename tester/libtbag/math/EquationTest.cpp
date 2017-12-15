@@ -11,6 +11,25 @@
 using namespace libtbag;
 using namespace libtbag::math;
 
+// ---------------
+namespace __impl {
+// ---------------
+
+inline bool testIsCross(double p11x, double p11y, double p12x, double p12y, double p21x, double p21y, double p22x, double p22y)
+{
+    using namespace libtbag::geometry;
+    Pointd const P11(p11x, p11y);
+    Pointd const P12(p12x, p12y);
+    Pointd const P21(p21x, p21y);
+    Pointd const P22(p22x, p22y);
+    Pointd cross;
+    return isCross<double, Pointd>(P11, P12, P21, P22, cross);
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
 TEST(EquationTest, GetLinearEquationWithTwoPoint)
 {
     auto e = getLinearEquationWithTwoPoint(1, 1, 2, 2);
@@ -36,14 +55,7 @@ TEST(EquationTest, GetIntersectionWithTwoLinearEquation)
 
 TEST(EquationTest, IsCross)
 {
-    using namespace libtbag::geometry;
-
-    Pointd const P11(108, 53);
-    Pointd const P12(185, 144);
-    Pointd const P21(113.5, 61.5);
-    Pointd const P22(115.5, 61.5);
-    Pointd cross;
-    bool const RESULT = isCross<double, Pointd>(P11, P12, P21, P22, cross);
-    ASSERT_TRUE(RESULT);
+    ASSERT_TRUE(__impl::testIsCross(108,  53, 185, 144, 113.5, 61.5, 115.5, 61.5));
+    ASSERT_TRUE(__impl::testIsCross(201, 140, 113,  42, 135.5, 67.5, 137  , 67.5));
 }
 

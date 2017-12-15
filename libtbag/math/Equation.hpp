@@ -17,10 +17,13 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/algorithm/Equals.hpp>
 #include <libtbag/geometry/Point.hpp>
+#include <libtbag/math/equation/LinearEquation.hpp>
 
 #include <cassert>
 #include <algorithm>
 #include <limits>
+
+//#define _DEBUGGING_IS_CROSS
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -210,34 +213,30 @@ inline bool isAlmostContains2d(PointType const & p1, PointType const & p2, Point
 template <typename T, typename PointType = geometry::BasePoint<T> >
 bool isCross(PointType const & p11, PointType const & p12, PointType const & p21, PointType const & p22, PointType & cross)
 {
-    bool const SAME_P1_X = (p11.x == p12.x);
-    bool const SAME_P2_X = (p21.x == p22.x);
+#if defined(_DEBUGGING_IS_CROSS)
+    std::cout << p11.x << 'x' << p11.y << ','
+              << p12.x << 'x' << p12.y << ','
+              << p21.x << 'x' << p21.y << ','
+              << p22.x << 'x' << p22.y << std::endl;
+#endif
 
-    if (SAME_P1_X == false && SAME_P2_X == false) {
-        LinearEquation<T> e1 = getLinearEquationWithTwoPoint<T, PointType>(p11, p12);
-        LinearEquation<T> e2 = getLinearEquationWithTwoPoint<T, PointType>(p21, p22);
+    equation::LinearEquation<T, PointType> e1;
+    equation::LinearEquation<T, PointType> e2;
 
-        if (isParallelWithTwoLinearEquation<T>(e1, e2)) {
-            return false;
-        }
-        cross = getIntersectionWithTwoLinearEquation<T, PointType>(e1, e2);
-        return isAlmostContains2d<T, PointType>(p11, p12, cross) && isAlmostContains2d<T, PointType>(p21, p22, cross);
-
-    } else if (SAME_P1_X == false && SAME_P2_X) {
-        // p21->p22 is a horizontal straight line.
-        LinearEquation<T> e1 = getLinearEquationWithTwoPoint<T, PointType>(p11, p12);
-        cross = PointType(p21.x, getY<T>(e1, p21.x));
-        return isAlmostContains<T>(p21.y, p22.y, cross.y) && isAlmostContains2d<T, PointType>(p11, p12, cross);
-
-    } else if (SAME_P1_X && SAME_P2_X == false) {
-        // p11->p12 is a horizontal straight line.
-        LinearEquation<T> e2 = getLinearEquationWithTwoPoint<T, PointType>(p21, p22);
-        cross = PointType(p11.x, getY<T>(e2, p11.x));
-        return isAlmostContains<T>(p11.y, p12.y, cross.y) && isAlmostContains2d<T, PointType>(p21, p22, cross);
+    if (e1.determinedByPoints(p11, p12) == false || e2.determinedByPoints(p21, p22) == false) {
+        return false;
+    }
+    if (e1.intersection(e2, cross) == false) {
+        return false;
     }
 
-    // p11->p12 & p21->p22 is a horizontal straight line.
-    assert(SAME_P1_X && SAME_P2_X);
+    bool const IS_CONTAINS = isAlmostContains2d<T, PointType>(p11, p12, cross) && isAlmostContains2d<T, PointType>(p21, p22, cross);
+    if (IS_CONTAINS) {
+#if defined(_DEBUGGING_IS_CROSS)
+        std::cout << "IsCross" << std::endl;
+#endif
+        return true;
+    }
     return false;
 }
 

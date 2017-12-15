@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/algorithm/Equals.hpp>
 #include <libtbag/geometry/Point.hpp>
 
 #include <type_traits>
@@ -39,12 +40,12 @@ namespace equation {
  *   ax + by + c = 0
  *  \f]
  */
-template <typename T>
+template <typename ValueType, typename PointType = libtbag::geometry::BasePoint<ValueType> >
 class LinearEquation
 {
 public:
-    using Value = T;
-    using Point = geometry::BasePoint<Value>;
+    using Value = ValueType;
+    using Point = PointType;
 
 public:
     static_assert(std::is_pod<Value>::value, "Value must be a POD type.");
@@ -57,6 +58,11 @@ public:
     { /* EMPTY. */ }
     LinearEquation(Value a_, Value b_, Value c_) TBAG_NOEXCEPT : a(a_), b(b_), c(c_)
     { /* EMPTY. */ }
+
+    LinearEquation(Point const & p1, Point const & p2) TBAG_NOEXCEPT : LinearEquation()
+    {
+        determinedByPoints(p1, p2);
+    }
 
     LinearEquation(LinearEquation const & obj) TBAG_NOEXCEPT : LinearEquation()
     { *this = obj; }
@@ -245,6 +251,50 @@ public:
     {
         assert(b != 0);
         return -(c / b);
+    }
+
+public:
+    /**
+     * Line–line intersection
+     *
+     * @remarks
+     *  아래와 같이 \f$ c_{N-1} \f$ 를 구할 수 있다. @n
+     *  \f[
+     *   E1: y = -\frac{a_{1}}{b_{1}}x - \frac{c_{1}}{b_{1}} \\
+     *   E2: y = -\frac{a_{2}}{b_{2}}x - \frac{c_{2}}{b_{2}}
+     *  \f]
+     *  기울기가 동일할 경우 두 직선은 평행이다. @n
+     *  \f[
+     *   -\frac{a_{1}}{b_{1}} = -\frac{a_{2}}{b_{2}} \\
+     *   \frac{a_{1}}{b_{1}} = \frac{a_{2}}{b_{2}} \\
+     *   a_{1}b_{2} = a_{2}b_{1} \\
+     *   a_{1}b_{2} - a_{2}b_{1} = 0
+     *  \f]
+     *  E1과 E2를 사용하여 값을 획득할 수 있다. @n
+     *  \f[
+     *   -\frac{a_{1}}{b_{1}}x - \frac{c_{1}}{b_{1}} = -\frac{a_{2}}{b_{2}}x - \frac{c_{2}}{b_{2}} \\
+     *   \frac{a_{1}}{b_{1}}x - \frac{a_{2}}{b_{2}}x = \frac{c_{2}}{b_{2}} - \frac{c_{1}}{b_{1}} \\
+     *   a_{1}b_{2}x - a_{2}b_{1}x = c_{2}b_{1} - c_{1}b_{2} \\
+     *   (a_{1}b_{2} - a_{2}b_{1})x = c_{2}b_{1} - c_{1}b_{2} \\
+     *   x = \frac{c_{2}b_{1} - c_{1}b_{2}}{a_{1}b_{2} - a_{2}b_{1}}
+     *  \f]
+     *  동일한 방법으로 y값을 구할 수 있다. @n
+     *  \f[
+     *   E1': x = -\frac{b_{1}}{a_{1}}y - \frac{c_{1}}{a_{1}} \\
+     *   E2': x = -\frac{b_{2}}{a_{2}}y - \frac{c_{2}}{a_{2}} \\
+     *   ...
+     *   y = \frac{c_{1}a_{2} - c_{2}a_{1}}{a_{1}b_{2} - a_{2}b_{1}}
+     *  \f]
+     */
+    inline bool intersection(LinearEquation const & e, Point & result) TBAG_NOEXCEPT
+    {
+        Value const DETERMINE = (a * e.b) - (e.a * b);
+        if (algorithm::equals<Value>(DETERMINE, static_cast<Value>(0))) {
+            return false; // Lines are parallel.
+        }
+        result.x = ((e.c * b) - (c * e.b)) / DETERMINE;
+        result.y = ((c * e.a) - (e.c * a)) / DETERMINE;
+        return true;
     }
 };
 
