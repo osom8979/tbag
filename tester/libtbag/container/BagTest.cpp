@@ -11,9 +11,23 @@
 using namespace libtbag;
 using namespace libtbag::container;
 
-TEST(BagTest, Default)
+TEST(BagTest, Coverage)
 {
-    Bag object;
-    ASSERT_TRUE(true);
+    Bagi bagi;
+    Bagf bagf;
+
+    bagi.type_name();
+    bagi.type_size();
+    bagi.type_index();
+    bagi.type_table();
+    bagi.type_maximum();
+    bagi.type_minimum();
+
+    bagf.type_name();
+    bagf.type_size();
+    bagf.type_index();
+    bagf.type_table();
+    bagf.type_maximum();
+    bagf.type_minimum();
 }
 

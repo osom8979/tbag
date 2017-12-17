@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 
 #include <vector>
+#include <initializer_list>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,38 +33,58 @@ namespace bag       {
  * @author zer0
  * @date   2017-12-08
  */
-template <typename T, typename Allocator>
+template <typename T, typename Allocator = std::allocator<T> >
 class BaseBag
 {
 public:
-    using value_type = T;
+    using Dimension = std::vector<unsigned int>;
+    using Vector    = std::vector<T, Allocator>;
 
-public:
-    using Dimension = std::vector<int>;
-    using Vector    = std::vector<T>;
+    using dim_type               = Dimension::value_type;
+    using value_type             = typename Vector::value_type;
+    using allocator_type         = typename Vector::allocator_type;
+    using reference              = typename Vector::reference;
+    using const_reference        = typename Vector::const_reference;
+    using size_type              = typename Vector::size_type;
+    using difference_type        = typename Vector::difference_type;
+    using pointer                = typename Vector::pointer;
+    using const_pointer          = typename Vector::const_pointer;
+    using iterator               = typename Vector::iterator;
+    using const_iterator         = typename Vector::const_iterator;
+    using reverse_iterator       = typename Vector::reverse_iterator;
+    using const_reverse_iterator = typename Vector::const_reverse_iterator;
+
+    using DimensionList = std::initializer_list<dim_type>;
 
 private:
-    Dimension   _dimension;
-    Vector      _vector;
+    Dimension  _dimension;
+    Vector     _vector;
 
 public:
     BaseBag() : _dimension(), _vector()
     { /* EMPTY. */ }
 
-    BaseBag(Dimension const & dim, Vector const & vec) : _dimension(dim), _vector(vec)
-    { /* EMPTY. */ }
+    BaseBag(DimensionList dims) : BaseBag()
+    {
+        size_type total = 0;
+        for (auto & dim : dims) {
+            _dimension.emplace_back(dim);
+            total += dim;
+        }
+        _vector.resize(total);
+    }
 
     BaseBag(BaseBag const & obj) : BaseBag()
-    { /* EMPTY. */ }
+    { *this = obj; }
 
     BaseBag(BaseBag && obj) : BaseBag()
-    { /* EMPTY. */ }
+    { *this = std::move(obj); }
 
     virtual ~BaseBag()
     { /* EMPTY. */ }
 
 public:
-    BaseBag & operator =(BaseBag const & obj)
+    reference operator =(BaseBag const & obj)
     {
         if (this != &obj) {
             _dimension = obj._dimension;
@@ -71,7 +93,7 @@ public:
         return *this;
     }
 
-    BaseBag & operator =(BaseBag && obj)
+    reference operator =(BaseBag && obj)
     {
         swap(obj);
         return *this;
@@ -87,8 +109,6 @@ public:
     }
 
     inline friend void swap(BaseBag & lh, BaseBag & rh) { lh.swap(rh); }
-
-public:
 };
 
 } // namespace bag
