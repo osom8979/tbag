@@ -2,10 +2,10 @@
  * @file   CudaBackend.cpp
  * @brief  CudaBackend class implementation.
  * @author zer0
- * @date   2017-08-01
+ * @date   2017-12-17
  */
 
-#include <libtbag/gpu/CudaBackend.hpp>
+#include <libtbag/gpu/backend/CudaBackend.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_CUDA)
@@ -17,21 +17,12 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gpu {
+namespace gpu     {
+namespace backend {
 
-CudaBackend::CudaBackend()
+GpuBackendType CudaBackend::getType() const TBAG_NOEXCEPT
 {
-    // EMPTY.
-}
-
-CudaBackend::~CudaBackend()
-{
-    // EMPTY.
-}
-
-BackendType CudaBackend::getType() const TBAG_NOEXCEPT
-{
-    return BackendType::BT_CUDA;
+    return GpuBackendType::GBT_CUDA;
 }
 
 bool CudaBackend::isSupport() const TBAG_NOEXCEPT
@@ -49,6 +40,7 @@ int CudaBackend::getDeviceCount() const
     return 0;
 }
 
+} // namespace backend
 } // namespace gpu
 
 // --------------------

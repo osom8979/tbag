@@ -2,10 +2,10 @@
  * @file   CpuBackend.cpp
  * @brief  CpuBackend class implementation.
  * @author zer0
- * @date   2017-08-01
+ * @date   2017-12-17
  */
 
-#include <libtbag/gpu/CpuBackend.hpp>
+#include <libtbag/gpu/backend/CpuBackend.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 
@@ -13,21 +13,12 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gpu {
+namespace gpu     {
+namespace backend {
 
-CpuBackend::CpuBackend()
+GpuBackendType CpuBackend::getType() const TBAG_NOEXCEPT
 {
-    // EMPTY.
-}
-
-CpuBackend::~CpuBackend()
-{
-    // EMPTY.
-}
-
-BackendType CpuBackend::getType() const TBAG_NOEXCEPT
-{
-    return BackendType::BT_CPU;
+    return GpuBackendType::GBT_CPU;
 }
 
 bool CpuBackend::isSupport() const TBAG_NOEXCEPT
@@ -40,6 +31,7 @@ int CpuBackend::getDeviceCount() const
     return static_cast<int>(uvpp::getCpuInfos().size());
 }
 
+} // namespace backend
 } // namespace gpu
 
 // --------------------

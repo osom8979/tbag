@@ -2,11 +2,11 @@
  * @file   CpuBackend.hpp
  * @brief  CpuBackend class prototype.
  * @author zer0
- * @date   2017-08-01
+ * @date   2017-12-17
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_CPUBACKEND_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_CPUBACKEND_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_CPUBACKEND_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_CPUBACKEND_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,38 +15,34 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/gpu/GpuBackend.hpp>
+#include <libtbag/gpu/backend/GpuBackendInterface.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gpu {
+namespace gpu     {
+namespace backend {
 
 /**
  * CpuBackend class prototype.
  *
  * @author zer0
- * @date   2017-08-01
+ * @date   2017-12-17
  */
-class TBAG_API CpuBackend : public GpuBackendInterface, private Noncopyable
+struct TBAG_API CpuBackend : public GpuBackendInterface
 {
-public:
-    CpuBackend();
-    virtual ~CpuBackend();
-
-public:
-    virtual BackendType getType() const TBAG_NOEXCEPT override;
+    virtual GpuBackendType getType() const TBAG_NOEXCEPT override;
     virtual bool isSupport() const TBAG_NOEXCEPT override;
     virtual int getDeviceCount() const override;
 };
 
+} // namespace backend
 } // namespace gpu
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_CPUBACKEND_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_CPUBACKEND_HPP__
 

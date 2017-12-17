@@ -2,15 +2,15 @@
  * @file   OpenCLBackendTest.cpp
  * @brief  OpenCLBackend class tester.
  * @author zer0
- * @date   2017-04-18
+ * @date   2017-12-17
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/gpu/OpenCLBackend.hpp>
-#include <iostream>
+#include <libtbag/gpu/backend/OpenCLBackend.hpp>
 
 using namespace libtbag;
 using namespace libtbag::gpu;
+using namespace libtbag::gpu::backend;
 
 TEST(OpenCLBackendTest, Information)
 {

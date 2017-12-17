@@ -2,15 +2,15 @@
  * @file   CudaBackendTest.cpp
  * @brief  CudaBackend class tester.
  * @author zer0
- * @date   2017-08-01
+ * @date   2017-12-17
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/gpu/CudaBackend.hpp>
-#include <iostream>
+#include <libtbag/gpu/backend/CudaBackend.hpp>
 
 using namespace libtbag;
 using namespace libtbag::gpu;
+using namespace libtbag::gpu::backend;
 
 TEST(CudaBackendTest, Information)
 {

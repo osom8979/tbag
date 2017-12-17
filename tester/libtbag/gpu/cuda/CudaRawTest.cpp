@@ -7,10 +7,11 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/gpu/cuda/CudaRaw.h>
-#include <libtbag/gpu/GpuBackend.hpp>
+#include <libtbag/gpu/backend/CudaBackend.hpp>
 
 using namespace libtbag;
 using namespace libtbag::gpu;
+using namespace libtbag::gpu::backend;
 
 TEST(CudaRawTest, AddByCpu)
 {
