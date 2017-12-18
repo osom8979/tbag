@@ -55,37 +55,36 @@ TEST(LogXmlNodeTest, Parse)
     ASSERT_TRUE(MakeType::DEFAULT       == LogXmlNode::parseGeneratorType(""));
 }
 
-TBAG_CONSTEXPR static char const * const TEST_TLOG_XML_STRING = R"XML(
-<tlog>
-    <logger>
-        <name>test-logger-cout</name>
-        <sink>cout</sink>
-        <destination></destination>
-        <multithread>false</multithread>
-        <mutex>true</mutex>
-        <generator>default_color</generator>
-        <severity>debug</severity>
-        <auto_flush>false</auto_flush>
-    </logger>
-    <logger>
-        <name>test-logger-file</name>
-        <sink>file</sink>
-        <destination>${EXE_DIR}/tbag-logger-test.log</destination>
-        <multithread>false</multithread>
-        <mutex>false</mutex>
-        <generator>default</generator>
-        <severity>critical</severity>
-        <auto_flush>true</auto_flush>
-    </logger>
-</tlog>
-)XML";
-
 TEST(LogXmlNodeTest, XmlString)
 {
+    char const * const TEST_XML_STRING = R"XML(
+        <tlog>
+            <logger>
+                <name>test-logger-cout</name>
+                <sink>cout</sink>
+                <destination></destination>
+                <multithread>false</multithread>
+                <mutex>true</mutex>
+                <generator>default_color</generator>
+                <severity>debug</severity>
+                <auto_flush>false</auto_flush>
+            </logger>
+            <logger>
+                <name>test-logger-file</name>
+                <sink>file</sink>
+                <destination>${EXE_DIR}/tbag-logger-test.log</destination>
+                <multithread>false</multithread>
+                <mutex>false</mutex>
+                <generator>default</generator>
+                <severity>critical</severity>
+                <auto_flush>true</auto_flush>
+            </logger>
+        </tlog>)XML";
+
     char const * const COUT_LOGGER = "test-logger-cout";
     char const * const FILE_LOGGER = "test-logger-file";
 
-    ASSERT_EQ(2, createLoggerWithXmlString(TEST_TLOG_XML_STRING));
+    ASSERT_EQ(2, createLoggerWithXmlString(TEST_XML_STRING));
     auto * cout_logger = getLogger(COUT_LOGGER);
     auto * file_logger = getLogger(FILE_LOGGER);
 
@@ -106,6 +105,40 @@ TEST(LogXmlNodeTest, XmlString)
 
     ASSERT_TRUE(removeLogger(COUT_LOGGER));
     ASSERT_TRUE(removeLogger(FILE_LOGGER));
+}
+
+TEST(LogXmlNodeTest, RecreateIfExists)
+{
+    char const * const TEST_XML_STRING = R"XML(
+        <tlog>
+            <logger>
+                <name>test-logger-cout</name>
+                <sink>cout</sink>
+                <destination></destination>
+                <multithread>false</multithread>
+                <mutex>true</mutex>
+                <generator>default_color</generator>
+                <severity>OFF</severity>
+                <auto_flush>false</auto_flush>
+            </logger>
+        </tlog>)XML";
+
+    char const * const COUT_LOGGER = "test-logger-cout";
+    ASSERT_NE(nullptr, createConsoleLogger(COUT_LOGGER, MakeType::DEFAULT, false, false));
+    setSeverity(COUT_LOGGER, WARNING_SEVERITY);
+
+    Logger * logger = getLogger(COUT_LOGGER);
+    ASSERT_NE(nullptr, logger);
+    ASSERT_EQ(WARNING_SEVERITY, logger->getSeverity());
+    ASSERT_TRUE(MakeType::DEFAULT == logger->getGeneratorMakeType());
+
+    ASSERT_EQ(1, createLoggerWithXmlString(TEST_XML_STRING));
+    logger = getLogger(COUT_LOGGER);
+    ASSERT_NE(nullptr, logger);
+    ASSERT_EQ(OFF_SEVERITY, logger->getSeverity());
+    ASSERT_TRUE(MakeType::DEFAULT_COLOR == logger->getGeneratorMakeType());
+
+    ASSERT_TRUE(removeLogger(COUT_LOGGER));
 }
 
 struct LogXmlNodeTest : public LogXmlNode
