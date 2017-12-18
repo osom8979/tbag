@@ -19,7 +19,15 @@ TEST(OpenCLBackendTest, Information)
         return;
     }
 
-    std::cout << "Supports OpenCL\n"
-              << " * Device count: " << device.getDeviceCount() << std::endl;
+    int const DEVICE_COUNT = device.getDeviceCount();
+
+    std::cout << "Supports OpenCL" << std::endl;
+    std::cout << " * Device count: " << DEVICE_COUNT << std::endl;
+    for (int id = 0; id < DEVICE_COUNT; ++id) {
+        std::cout << " * Device number: " << id << std::endl;
+        for (auto & info : device.getPlatformInfo(id + 1)) {
+            std::cout << " [" << id << "] " << info.first << ": " << info.second << std::endl;
+        }
+    }
 }
 

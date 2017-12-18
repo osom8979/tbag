@@ -16,6 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <string>
+#include <map>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -31,11 +34,24 @@ enum class GpuBackendType
     GBT_OPENCL,
 };
 
+TBAG_CONSTEXPR std::size_t const STRING_TEMP_BUFFER_SIZE = 1024;
+
+TBAG_CONSTEXPR char const * const PLATFORM_PROFILE    = "profile";
+TBAG_CONSTEXPR char const * const PLATFORM_VERSION    = "version";
+TBAG_CONSTEXPR char const * const PLATFORM_NAME       = "name";
+TBAG_CONSTEXPR char const * const PLATFORM_VENDOR     = "vendor";
+TBAG_CONSTEXPR char const * const PLATFORM_EXTENSIONS = "extensions";
+
 struct GpuBackendInterface
 {
+    using StringMap = std::map<std::string, std::string>;
+
     virtual GpuBackendType getType() const TBAG_NOEXCEPT = 0;
     virtual bool isSupport() const TBAG_NOEXCEPT = 0;
     virtual int getDeviceCount() const = 0;
+
+    virtual StringMap getPlatformInfo(int device_index) const
+    { return StringMap(); }
 };
 
 } // namespace backend

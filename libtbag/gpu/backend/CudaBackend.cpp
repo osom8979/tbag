@@ -40,6 +40,12 @@ int CudaBackend::getDeviceCount() const
     return 0;
 }
 
+CudaBackend::StringMap CudaBackend::getPlatformInfo(int device_index) const
+{
+    StringMap result;
+    return result;
+}
+
 } // namespace backend
 } // namespace gpu
 
