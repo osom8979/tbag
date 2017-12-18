@@ -74,8 +74,8 @@ public:
     TBAG_CONSTEXPR static int       type_index() TBAG_NOEXCEPT { return TypeInfo::index(); }
     TBAG_CONSTEXPR static TypeTable type_table() TBAG_NOEXCEPT { return TypeInfo::table(); }
 
-    TBAG_CONSTEXPR static int type_maximum() TBAG_NOEXCEPT { return TypeInfo::maximum(); }
-    TBAG_CONSTEXPR static int type_minimum() TBAG_NOEXCEPT { return TypeInfo::minimum(); }
+    TBAG_CONSTEXPR static Type type_maximum() TBAG_NOEXCEPT { return TypeInfo::maximum(); }
+    TBAG_CONSTEXPR static Type type_minimum() TBAG_NOEXCEPT { return TypeInfo::minimum(); }
 
 private:
     SharedBaseBag  _base;
