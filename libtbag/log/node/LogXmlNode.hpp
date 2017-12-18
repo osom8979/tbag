@@ -190,8 +190,8 @@ public:
     static bool saveLogInfo(Element & parent, LogInfoVector const & infos);
 
 public:
-    static Logger * createLogger(LogInfo const & info);
-    static Logger * createLogger(LogInfo const & info, Environments const & envs);
+    static Logger * createLogger(LogInfo const & info, bool recreate_if_exists = true);
+    static Logger * createLogger(LogInfo const & info, Environments const & envs, bool recreate_if_exists = true);
 
 public:
     static Environments createDefaultEnvironments();

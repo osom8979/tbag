@@ -115,17 +115,17 @@ bool removeDefaultLogger()
 
 Logger * getLogger(std::string const & name)
 {
-    try {
-        return LoggerManager::getInstance()->getLoggerPtr(name);
-    } catch (...) {
-        // EMPTY.
-    }
-    return nullptr;
+    return LoggerManager::getInstance()->getLoggerPtr(name);
 }
 
 Logger * getDefaultLogger()
 {
     return getLogger(TBAG_DEFAULT_LOGGER_NAME);
+}
+
+bool existsLogger(std::string const & name)
+{
+    return getLogger(name) != nullptr;
 }
 
 void setSeverity(std::string const & name, Severity level)

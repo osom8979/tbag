@@ -75,6 +75,8 @@ public:
     inline Generator::MakeType getGeneratorMakeType() const TBAG_NOEXCEPT
     { return _generator.getType(); }
 
+    inline void setSink(SinkType * sink) TBAG_NOEXCEPT_SP_OP(_sink.reset(sink))
+    { _sink.reset(sink); }
     inline SinkType const * getSink() const TBAG_NOEXCEPT
     { return _sink.get(); }
     // @formatter:on

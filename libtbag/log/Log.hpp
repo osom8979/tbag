@@ -38,7 +38,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
-TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME   = "__tbag_default_logger__";
+TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME = "tbag";
 
 //TBAG_CONSTEXPR bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
 //TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
@@ -78,6 +78,8 @@ TBAG_API bool removeDefaultLogger();
 
 TBAG_API Logger * getLogger(std::string const & name);
 TBAG_API Logger * getDefaultLogger();
+
+TBAG_API bool existsLogger(std::string const & name);
 
 TBAG_API void setSeverity(std::string const & name, Severity level);
 TBAG_API void setDefaultSeverity(Severity level);

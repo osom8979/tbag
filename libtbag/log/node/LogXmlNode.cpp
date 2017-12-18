@@ -369,31 +369,42 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfoVector const & infos)
     return result;
 }
 
-LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info)
+LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, bool recreate_if_exists)
 {
-    return createLogger(info, createDefaultEnvironments());
+    return createLogger(info, createDefaultEnvironments(), recreate_if_exists);
 }
 
-LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments const & envs)
+LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments const & envs, bool recreate_if_exists)
 {
     if (info.name.empty()) {
         return nullptr;
     }
 
+    std::string const NAME = info.name;
     std::string const DEST = envs.convert(info.destination);
 
-    Logger * logger = nullptr;
+    Logger * logger = getLogger(NAME);
+    if (logger != nullptr) {
+        if (recreate_if_exists) {
+            removeLogger(NAME);
+        } else {
+            return logger;
+        }
+    }
+
     if (info.sink == SINK_COUT) {
-        logger = createConsoleLogger(info.name, info.generator, info.mutex, info.auto_flush);
+        logger = createConsoleLogger(NAME, info.generator, info.mutex, info.auto_flush);
     } else if (info.sink == SINK_FILE) {
-        logger = createFileLogger(info.name, DEST, info.generator, info.mutex, info.auto_flush);
+        logger = createFileLogger(NAME, DEST, info.generator, info.mutex, info.auto_flush);
     } else if (info.sink == SINK_ROTATE_FILE) {
-        logger = createRotateFileLogger(info.name, DEST, info.max_size, info.generator, info.mutex, info.auto_flush);
+        logger = createRotateFileLogger(NAME, DEST, info.max_size, info.generator, info.mutex, info.auto_flush);
     } else {
         return nullptr;
     }
 
-    logger->setSeverity(info.severity);
+    if (logger != nullptr) {
+        logger->setSeverity(info.severity);
+    }
     return logger;
 }
 
