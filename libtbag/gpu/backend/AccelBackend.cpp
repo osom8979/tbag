@@ -18,17 +18,7 @@ namespace backend {
 
 GpuBackendType AccelBackend::getType() const TBAG_NOEXCEPT
 {
-    return GpuBackendType::GBT_CPU;
-}
-
-bool AccelBackend::isSupport() const TBAG_NOEXCEPT
-{
-    return true;
-}
-
-int AccelBackend::getDeviceCount() const
-{
-    return static_cast<int>(uvpp::getCpuInfos().size());
+    return GpuBackendType::GBT_ACCEL;
 }
 
 } // namespace backend

@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gpu/backend/GpuBackendInterface.hpp>
+#include <libtbag/gpu/backend/GpuBackend.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,12 +39,14 @@ TBAG_CONSTEXPR bool isOpenCLSupport() TBAG_NOEXCEPT
  * @author zer0
  * @date   2017-12-17
  */
-struct TBAG_API OpenCLBackend : public GpuBackendInterface
+struct TBAG_API OpenCLBackend : public GpuBackend
 {
-    virtual GpuBackendType getType() const TBAG_NOEXCEPT override;
-    virtual bool isSupport() const TBAG_NOEXCEPT override;
-    virtual int getDeviceCount() const override;
-    virtual StringMap getPlatformInfo(int device_index) const override;
+    virtual GpuBackendType  getType() const TBAG_NOEXCEPT override;
+    virtual bool          isSupport() const TBAG_NOEXCEPT override;
+    virtual int      getDeviceCount() const override;
+    virtual Devices   getDeviceList() const override;
+
+    virtual StringMap getPlatformInfo(GpuDevice const & device) const override;
 };
 
 } // namespace backend

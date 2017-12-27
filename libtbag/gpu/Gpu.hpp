@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/gpu/backend/GpuBackendInterface.hpp>
+#include <libtbag/gpu/backend/GpuBackend.hpp>
 
 #include <memory>
 
@@ -35,9 +35,14 @@ namespace gpu {
 class TBAG_API Gpu : private Noncopyable
 {
 public:
-    using BackendType      = backend::GpuBackendType;
-    using BackendInterface = backend::GpuBackendInterface;
-    using UniqueBackend    = std::unique_ptr<BackendInterface>;
+    using Backend       = backend::GpuBackend;
+    using BackendType   = backend::GpuBackendType;
+    using GpuDevice     = backend::GpuDevice;
+    using UniqueBackend = std::unique_ptr<Backend>;
+
+    using StringMap  = Backend::StringMap;
+    using StringPair = Backend::StringPair;
+    using Devices    = Backend::Devices;
 
 private:
     BackendType const TYPE;
@@ -48,11 +53,13 @@ public:
     ~Gpu();
 
 public:
-    BackendType getType() const TBAG_NOEXCEPT { return TYPE; }
+    BackendType    getType() const TBAG_NOEXCEPT { return TYPE; }
+    bool         isSupport() const TBAG_NOEXCEPT;
+    int     getDeviceCount() const;
+    Devices  getDeviceList() const;
 
-public:
-    bool isSupport() const;
-    int  getDeviceCount() const;
+    StringMap getPlatformInfo(GpuDevice const & device) const;
+    std::string getTypeString() const;
 };
 
 } // namespace gpu

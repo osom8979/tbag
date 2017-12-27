@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gpu/backend/GpuBackendInterface.hpp>
+#include <libtbag/gpu/backend/CpuBackend.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,11 +30,9 @@ namespace backend {
  * @author zer0
  * @date   2017-12-17
  */
-struct TBAG_API AccelBackend : public GpuBackendInterface
+struct TBAG_API AccelBackend : public CpuBackend
 {
     virtual GpuBackendType getType() const TBAG_NOEXCEPT override;
-    virtual bool isSupport() const TBAG_NOEXCEPT override;
-    virtual int getDeviceCount() const override;
 };
 
 } // namespace backend

@@ -7,7 +7,6 @@
 
 #include <libtbag/gpu/backend/CpuBackend.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/uvpp/UvUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,7 +27,7 @@ bool CpuBackend::isSupport() const TBAG_NOEXCEPT
 
 int CpuBackend::getDeviceCount() const
 {
-    return static_cast<int>(uvpp::getCpuInfos().size());
+    return 1;
 }
 
 } // namespace backend

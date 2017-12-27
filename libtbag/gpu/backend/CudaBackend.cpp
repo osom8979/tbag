@@ -41,7 +41,7 @@ int CudaBackend::getDeviceCount() const
     return 0;
 }
 
-CudaBackend::StringMap CudaBackend::getPlatformInfo(int device_index) const
+CudaBackend::StringMap CudaBackend::getPlatformInfo(GpuDevice const & device) const
 {
     StringMap result;
 #if defined(USE_CUDA)
@@ -52,9 +52,9 @@ CudaBackend::StringMap CudaBackend::getPlatformInfo(int device_index) const
         return result;
     }
 
-    result.insert(StringMap::value_type(PLATFORM_VERSION   , string::fformat("CUDA {}.{}", prop.major, prop.minor)));
-    result.insert(StringMap::value_type(PLATFORM_NAME      , std::string(prop.name)));
-    result.insert(StringMap::value_type(PLATFORM_VENDOR    , std::string("NVIDIA")));
+    result.insert(StringPair(PLATFORM_VERSION, string::fformat("CUDA {}.{}", prop.major, prop.minor)));
+    result.insert(StringPair(PLATFORM_NAME   , std::string(prop.name)));
+    result.insert(StringPair(PLATFORM_VENDOR , std::string("NVIDIA")));
 #endif
     return result;
 }

@@ -36,7 +36,7 @@ Gpu::~Gpu()
     // EMPTY.
 }
 
-bool Gpu::isSupport() const
+bool Gpu::isSupport() const TBAG_NOEXCEPT
 {
     return _backend->isSupport();
 }
@@ -44,6 +44,21 @@ bool Gpu::isSupport() const
 int Gpu::getDeviceCount() const
 {
     return _backend->getDeviceCount();
+}
+
+Gpu::Devices Gpu::getDeviceList() const
+{
+    return _backend->getDeviceList();
+}
+
+Gpu::StringMap Gpu::getPlatformInfo(GpuDevice const & device) const
+{
+    return _backend->getPlatformInfo(device);
+}
+
+std::string Gpu::getTypeString() const
+{
+    return _backend->getTypeString();
 }
 
 } // namespace gpu
