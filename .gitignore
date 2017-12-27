@@ -209,7 +209,7 @@ fabric.properties
 
 ###############
 ### PROJECT ###
-/build
+/build*
 /cmake-build-*
 /3rd
 /Doxyfile
