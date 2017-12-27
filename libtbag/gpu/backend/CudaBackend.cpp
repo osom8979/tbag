@@ -7,6 +7,7 @@
 
 #include <libtbag/gpu/backend/CudaBackend.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/string/Format.hpp>
 
 #if defined(USE_CUDA)
 #include <cuda.h>
@@ -43,6 +44,18 @@ int CudaBackend::getDeviceCount() const
 CudaBackend::StringMap CudaBackend::getPlatformInfo(int device_index) const
 {
     StringMap result;
+#if defined(USE_CUDA)
+    cudaDeviceProp prop;
+    cudaError_t code = ::cudaGetDeviceProperties(&prop, device_index);
+    if (code != cudaSuccess) {
+        tDLogE("CudaBackend::getPlatformInfo({}) CUDA Error: {}", device_index, ::cudaGetErrorString(code));
+        return result;
+    }
+
+    result.insert(StringMap::value_type(PLATFORM_VERSION   , string::fformat("CUDA {}.{}", prop.major, prop.minor)));
+    result.insert(StringMap::value_type(PLATFORM_NAME      , std::string(prop.name)));
+    result.insert(StringMap::value_type(PLATFORM_VENDOR    , std::string("NVIDIA")));
+#endif
     return result;
 }
 
