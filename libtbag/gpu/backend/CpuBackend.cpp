@@ -26,6 +26,16 @@ bool CpuBackend::isSupport() const TBAG_NOEXCEPT
     return true;
 }
 
+bool CpuBackend::isHost() const TBAG_NOEXCEPT
+{
+    return true;
+}
+
+bool CpuBackend::isDevice() const TBAG_NOEXCEPT
+{
+    return false;
+}
+
 int CpuBackend::getPlatformCount() const
 {
     return 1;

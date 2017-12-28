@@ -31,6 +31,16 @@ bool CudaBackend::isSupport() const TBAG_NOEXCEPT
     return isCudaSupport();
 }
 
+bool CudaBackend::isHost() const TBAG_NOEXCEPT
+{
+    return false;
+}
+
+bool CudaBackend::isDevice() const TBAG_NOEXCEPT
+{
+    return true;
+}
+
 int CudaBackend::getPlatformCount() const
 {
     return 1;

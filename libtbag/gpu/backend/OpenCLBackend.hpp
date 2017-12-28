@@ -43,6 +43,8 @@ struct TBAG_API OpenCLBackend : public GpuBackend
 {
     virtual GpuBackendType  getType() const TBAG_NOEXCEPT override;
     virtual bool          isSupport() const TBAG_NOEXCEPT override;
+    virtual bool             isHost() const TBAG_NOEXCEPT override;
+    virtual bool           isDevice() const TBAG_NOEXCEPT override;
 
     virtual int       getPlatformCount() const override;
     virtual Platforms getPlatformList () const override;

@@ -73,6 +73,24 @@ struct GpuDevice
     inline operator int() const TBAG_NOEXCEPT { return number; }
 };
 
+//struct TBAG_API SyncedMemory
+//{
+//    enum class AllocFlag
+//    {
+//        AF_DEFAULT = 0,
+//        AF_PINNED,
+//        AF_DEVICE,
+//    };
+//
+//    void * ptr = nullptr;
+//    std::size_t size = 0;
+//
+//    virtual GpuBackendType getType() const TBAG_NOEXCEPT = 0;
+//    virtual bool alloc(std::size_t size, AllocFlag flag = AllocFlag::AF_DEFAULT) = 0;
+//    virtual bool copy(GpuMemoryBackend * memory) const = 0;
+//    virtual void free() = 0;
+//};
+
 struct TBAG_API GpuBackend
 {
     using StringMap  = std::map<std::string, std::string>;
@@ -80,8 +98,10 @@ struct TBAG_API GpuBackend
     using Devices    = std::vector<GpuDevice>;
     using Platforms  = std::vector<GpuPlatform>;
 
-    virtual GpuBackendType     getType() const TBAG_NOEXCEPT = 0;
-    virtual bool             isSupport() const TBAG_NOEXCEPT = 0;
+    virtual GpuBackendType  getType() const TBAG_NOEXCEPT = 0;
+    virtual bool          isSupport() const TBAG_NOEXCEPT = 0;
+    virtual bool             isHost() const TBAG_NOEXCEPT = 0;
+    virtual bool           isDevice() const TBAG_NOEXCEPT = 0;
 
     virtual int       getPlatformCount() const = 0;
     virtual Platforms getPlatformList () const = 0;
