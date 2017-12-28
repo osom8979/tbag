@@ -43,8 +43,12 @@ struct TBAG_API CudaBackend : public GpuBackend
 {
     virtual GpuBackendType getType() const TBAG_NOEXCEPT override;
     virtual bool isSupport() const TBAG_NOEXCEPT override;
-    virtual int getDeviceCount() const override;
-    virtual StringMap getPlatformInfo(GpuDevice const & device) const override;
+
+    virtual int       getPlatformCount() const override;
+    virtual Platforms getPlatformList () const override;
+
+    virtual int     getDeviceCount() const override;
+    virtual Devices getDeviceList () const override;
 };
 
 } // namespace backend

@@ -42,12 +42,14 @@ static void run_all_if_supported(Predicated predicated)
 TEST(GpuTest, Information)
 {
     __impl::run_all_if_supported([](UniqueGpu & context){
-        std::cout << "GPU Device type: " << context->getTypeString() << std::endl
-                  << "Device count: " << context->getDeviceCount() << std::endl;
-        for (auto & device : context->getDeviceList()) {
-            for (auto & info : context->getPlatformInfo(device)) {
-                std::cout << "[" << device.number << "]" << info.first << ": " << info.second << std::endl;
-            }
+        std::cout << "GPU type: " << context->getTypeString() << "\n"
+                  << "Platform count: " << context->getPlatformCount() << std::endl;
+        for (auto & plat : context->getPlatformList()) {
+            std::cout << "[" << plat.number << "] profile: "    << plat.profile    << "\n"
+                      << "[" << plat.number << "] name: "       << plat.name       << "\n"
+                      << "[" << plat.number << "] vender: "     << plat.vendor     << "\n"
+                      << "[" << plat.number << "] version: "    << plat.version    << "\n"
+                      << "[" << plat.number << "] extensions: " << plat.extensions << std::endl;
         }
     });
 }

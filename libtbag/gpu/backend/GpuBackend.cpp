@@ -15,23 +15,16 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace backend {
 
-int GpuBackend::getDeviceCount() const
+char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT
 {
-    return 0;
-}
-
-GpuBackend::Devices GpuBackend::getDeviceList() const
-{
-    Devices result;
-    for (int i = 0; i < getDeviceCount(); ++i) {
-        result.emplace_back(getType(), i);
+    switch (type) {
+    case GpuBackendType::GBT_CPU:     return "CPU";
+    case GpuBackendType::GBT_ACCEL:   return "ACCEL";
+    case GpuBackendType::GBT_CUDA:    return "CUDA";
+    case GpuBackendType::GBT_OPENCL:  return "OPENCL";
+    default: TBAG_INACCESSIBLE_BLOCK_ASSERT(); break;
     }
-    return result;
-}
-
-GpuBackend::StringMap GpuBackend::getPlatformInfo(GpuDevice const & device) const
-{
-    return StringMap();
+    return "UNKNOWN";
 }
 
 char const * GpuBackend::getTypeString() const TBAG_NOEXCEPT

@@ -29,11 +29,11 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace backend {
 
-TBAG_CONSTEXPR char const * const PLATFORM_PROFILE    = "profile";
-TBAG_CONSTEXPR char const * const PLATFORM_VERSION    = "version";
-TBAG_CONSTEXPR char const * const PLATFORM_NAME       = "name";
-TBAG_CONSTEXPR char const * const PLATFORM_VENDOR     = "vendor";
-TBAG_CONSTEXPR char const * const PLATFORM_EXTENSIONS = "extensions";
+TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_PROFILE    = "profile";
+TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_VERSION    = "version";
+TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_NAME       = "name";
+TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_VENDOR     = "vendor";
+TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_EXTENSIONS = "extensions";
 
 enum class GpuBackendType
 {
@@ -43,17 +43,24 @@ enum class GpuBackendType
     GBT_OPENCL,
 };
 
-inline char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT
+TBAG_API char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT;
+
+struct GpuPlatform
 {
-    switch (type) {
-    case GpuBackendType::GBT_CPU:     return "CPU";
-    case GpuBackendType::GBT_ACCEL:   return "ACCEL";
-    case GpuBackendType::GBT_CUDA:    return "CUDA";
-    case GpuBackendType::GBT_OPENCL:  return "OPENCL";
-    default: TBAG_INACCESSIBLE_BLOCK_ASSERT(); break;
-    }
-    return "UNKNOWN";
-}
+    GpuBackendType type;
+    int number;
+
+    std::string profile;
+    std::string name;
+    std::string vendor;
+    std::string version;
+    std::string extensions;
+
+    GpuPlatform(GpuBackendType t, int n) : type(t), number(n) { /* EMPTY. */ }
+    ~GpuPlatform() { /* EMPTY. */ }
+
+    inline operator int() const TBAG_NOEXCEPT { return number; }
+};
 
 struct GpuDevice
 {
@@ -71,14 +78,20 @@ struct TBAG_API GpuBackend
     using StringMap  = std::map<std::string, std::string>;
     using StringPair = StringMap::value_type;
     using Devices    = std::vector<GpuDevice>;
+    using Platforms  = std::vector<GpuPlatform>;
 
     virtual GpuBackendType     getType() const TBAG_NOEXCEPT = 0;
     virtual bool             isSupport() const TBAG_NOEXCEPT = 0;
 
-    virtual int      getDeviceCount() const;
-    virtual Devices   getDeviceList() const;
+    virtual int       getPlatformCount() const = 0;
+    virtual Platforms getPlatformList () const = 0;
 
-    virtual StringMap getPlatformInfo(GpuDevice const & device) const;
+    virtual int     getDeviceCount() const = 0;
+    virtual Devices getDeviceList () const = 0;
+
+    // --------------------
+    // Non-virtual methods.
+    // --------------------
 
     char const * getTypeString() const TBAG_NOEXCEPT;
 };
