@@ -42,6 +42,10 @@ CudaBackend::Platforms CudaBackend::getPlatformList() const
     plat.name = "CUDA";
     plat.vendor = "NVIDIA";
 #if defined(USE_CUDA)
+# if defined(CUDA_VERSION)
+    plat.version += string::fformat("API({})", TO_STRING(CUDA_VERSION));
+# endif
+
     int driver_version = 0;
     cudaError_t driver_code = ::cudaDriverGetVersion(&driver_version);
     if (driver_code == cudaSuccess) {
