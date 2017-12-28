@@ -20,45 +20,36 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 
-Gpu::Gpu(BackendType type) : TYPE(type)
+UniqueGpu createGpuContext(GpuBackendType type)
 {
     switch (type) {
-    case BackendType::GBT_CPU:    _backend.reset(new backend::CpuBackend());    break;
-    case BackendType::GBT_ACCEL:  _backend.reset(new backend::AccelBackend());  break;
-    case BackendType::GBT_CUDA:   _backend.reset(new backend::CudaBackend());   break;
-    case BackendType::GBT_OPENCL: _backend.reset(new backend::OpenCLBackend()); break;
-    default: TBAG_INACCESSIBLE_BLOCK_ASSERT(); break;
+    case GpuBackendType::GBT_CPU:      return    createCpuContext();
+    case GpuBackendType::GBT_ACCEL:    return  createAccelContext();
+    case GpuBackendType::GBT_CUDA:     return   createCudaContext();
+    case GpuBackendType::GBT_OPENCL:   return createOpenCLContext();
+    default: TBAG_INACCESSIBLE_BLOCK_ASSERT();  break;
     }
+    return UniqueGpu();
 }
 
-Gpu::~Gpu()
+UniqueGpu createCpuContext()
 {
-    // EMPTY.
+    return UniqueGpu(new backend::CpuBackend());
 }
 
-bool Gpu::isSupport() const TBAG_NOEXCEPT
+UniqueGpu createAccelContext()
 {
-    return _backend->isSupport();
+    return UniqueGpu(new backend::AccelBackend());
 }
 
-int Gpu::getDeviceCount() const
+UniqueGpu createCudaContext()
 {
-    return _backend->getDeviceCount();
+    return UniqueGpu(new backend::CudaBackend());
 }
 
-Gpu::Devices Gpu::getDeviceList() const
+UniqueGpu createOpenCLContext()
 {
-    return _backend->getDeviceList();
-}
-
-Gpu::StringMap Gpu::getPlatformInfo(GpuDevice const & device) const
-{
-    return _backend->getPlatformInfo(device);
-}
-
-std::string Gpu::getTypeString() const
-{
-    return _backend->getTypeString();
+    return UniqueGpu(new backend::OpenCLBackend());
 }
 
 } // namespace gpu

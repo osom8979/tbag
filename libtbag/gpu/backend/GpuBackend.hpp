@@ -29,6 +29,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace backend {
 
+TBAG_CONSTEXPR char const * const PLATFORM_PROFILE    = "profile";
+TBAG_CONSTEXPR char const * const PLATFORM_VERSION    = "version";
+TBAG_CONSTEXPR char const * const PLATFORM_NAME       = "name";
+TBAG_CONSTEXPR char const * const PLATFORM_VENDOR     = "vendor";
+TBAG_CONSTEXPR char const * const PLATFORM_EXTENSIONS = "extensions";
+
 enum class GpuBackendType
 {
     GBT_CPU,
@@ -62,14 +68,6 @@ struct GpuDevice
 
 struct TBAG_API GpuBackend
 {
-    TBAG_CONSTEXPR static std::size_t const STRING_TEMP_BUFFER_SIZE = 1024;
-
-    TBAG_CONSTEXPR static char const * const PLATFORM_PROFILE    = "profile";
-    TBAG_CONSTEXPR static char const * const PLATFORM_VERSION    = "version";
-    TBAG_CONSTEXPR static char const * const PLATFORM_NAME       = "name";
-    TBAG_CONSTEXPR static char const * const PLATFORM_VENDOR     = "vendor";
-    TBAG_CONSTEXPR static char const * const PLATFORM_EXTENSIONS = "extensions";
-
     using StringMap  = std::map<std::string, std::string>;
     using StringPair = StringMap::value_type;
     using Devices    = std::vector<GpuDevice>;

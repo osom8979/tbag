@@ -46,9 +46,9 @@ CudaBackend::StringMap CudaBackend::getPlatformInfo(GpuDevice const & device) co
     StringMap result;
 #if defined(USE_CUDA)
     cudaDeviceProp prop;
-    cudaError_t code = ::cudaGetDeviceProperties(&prop, device_index);
+    cudaError_t code = ::cudaGetDeviceProperties(&prop, device.number);
     if (code != cudaSuccess) {
-        tDLogE("CudaBackend::getPlatformInfo({}) CUDA Error: {}", device_index, ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::getPlatformInfo({}) CUDA Error: {}", device.number, ::cudaGetErrorString(code));
         return result;
     }
 

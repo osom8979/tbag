@@ -16,12 +16,12 @@ namespace __impl {
 // ---------------
 
 template <typename Predicated>
-static void run_if_supported(std::vector<Gpu::BackendType> const & types, Predicated predicated)
+static void run_if_supported(std::vector<GpuBackendType> const & types, Predicated predicated)
 {
     for (auto & type : types) {
-        Gpu device(type);
-        if (device.isSupport()) {
-            predicated(device);
+        auto context = createGpuContext(type);
+        if (context && context->isSupport()) {
+            predicated(context);
         }
     }
 }
@@ -29,10 +29,10 @@ static void run_if_supported(std::vector<Gpu::BackendType> const & types, Predic
 template <typename Predicated>
 static void run_all_if_supported(Predicated predicated)
 {
-    run_if_supported({Gpu::BackendType::GBT_CPU,
-                      Gpu::BackendType::GBT_ACCEL,
-                      Gpu::BackendType::GBT_CUDA,
-                      Gpu::BackendType::GBT_OPENCL}, predicated);
+    run_if_supported({GpuBackendType::GBT_CPU,
+                      GpuBackendType::GBT_ACCEL,
+                      GpuBackendType::GBT_CUDA,
+                      GpuBackendType::GBT_OPENCL}, predicated);
 }
 
 // ------------------
@@ -41,12 +41,12 @@ static void run_all_if_supported(Predicated predicated)
 
 TEST(GpuTest, Information)
 {
-    __impl::run_all_if_supported([](Gpu & device){
-        std::cout << "GPU Device type: " << device.getTypeString() << std::endl
-                  << "Device count: " << device.getDeviceCount() << std::endl;
-        for (auto & d : device.getDeviceList()) {
-            for (auto & info : device.getPlatformInfo(d)) {
-                std::cout << "[" << d.number << "]" << info.first << ": " << info.second << std::endl;
+    __impl::run_all_if_supported([](UniqueGpu & context){
+        std::cout << "GPU Device type: " << context->getTypeString() << std::endl
+                  << "Device count: " << context->getDeviceCount() << std::endl;
+        for (auto & device : context->getDeviceList()) {
+            for (auto & info : context->getPlatformInfo(device)) {
+                std::cout << "[" << device.number << "]" << info.first << ": " << info.second << std::endl;
             }
         }
     });
