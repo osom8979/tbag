@@ -50,8 +50,7 @@ struct GpuPlatform
     GpuBackendType type;
     int platform_number;
 
-    GpuPlatform() : GpuPlatform(GpuBackendType::GBT_CPU) { /* EMPTY. */ }
-    GpuPlatform(GpuBackendType t, int p = 0) : type(t), platform_number(p) { /* EMPTY. */ }
+    GpuPlatform(GpuBackendType t = GpuBackendType::GBT_CPU, int p = 0) : type(t), platform_number(p) { /* EMPTY. */ }
     ~GpuPlatform() { /* EMPTY. */ }
 };
 
@@ -73,8 +72,7 @@ struct GpuDevice : public GpuPlatform
     int device_number;
 
     GpuDevice() : GpuDevice(GpuPlatform()) { /* EMPTY. */ }
-    explicit GpuDevice(GpuBackendType t, int p = 0, int d = 0) : GpuPlatform(t, p), device_number(d) { /* EMPTY. */ }
-    explicit GpuDevice(GpuPlatform const & p, int d = 0) : GpuPlatform(p), device_number(d) { /* EMPTY. */ }
+    GpuDevice(GpuPlatform const & p, int d = 0) : GpuPlatform(p), device_number(d) { /* EMPTY. */ }
     ~GpuDevice() { /* EMPTY. */ }
 };
 

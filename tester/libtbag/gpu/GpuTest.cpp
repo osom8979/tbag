@@ -45,12 +45,17 @@ TEST(GpuTest, Information)
         std::cout << "GPU type: " << gpu->getTypeString() << "\n"
                   << "Platform count: " << gpu->getPlatformCount() << std::endl;
         for (auto & plat : gpu->getPlatformList()) {
-            auto info = gpu->getPlatformInfo(plat);
-            std::cout << "[" << plat.platform_number << "] profile: "    << info.profile    << "\n"
-                      << "[" << plat.platform_number << "] name: "       << info.name       << "\n"
-                      << "[" << plat.platform_number << "] vender: "     << info.vendor     << "\n"
-                      << "[" << plat.platform_number << "] version: "    << info.version    << "\n"
-                      << "[" << plat.platform_number << "] extensions: " << info.extensions << std::endl;
+            auto plat_info = gpu->getPlatformInfo(plat);
+            std::cout << "[" << plat.platform_number << "] profile: "      << plat_info.profile    << "\n"
+                      << "[" << plat.platform_number << "] name: "         << plat_info.name       << "\n"
+                      << "[" << plat.platform_number << "] vender: "       << plat_info.vendor     << "\n"
+                      << "[" << plat.platform_number << "] version: "      << plat_info.version    << "\n"
+                      << "[" << plat.platform_number << "] extensions: "   << plat_info.extensions << "\n"
+                      << "[" << plat.platform_number << "] Device count: " << gpu->getDeviceCount(plat) << std::endl;
+            for (auto & dev : gpu->getDeviceList(plat)) {
+                auto dev_info = gpu->getDeviceInfo(dev);
+                std::cout << "[" << plat.platform_number << "][" << dev.device_number << "] name: " << dev_info.name << std::endl;
+            }
         }
     });
 }

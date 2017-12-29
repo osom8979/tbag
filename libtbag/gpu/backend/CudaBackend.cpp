@@ -60,7 +60,7 @@ GpuPlatformInfo CudaBackend::getPlatformInfo(GpuPlatform const & platform) const
     int driver_version = 0;
     cudaError_t driver_code = ::cudaDriverGetVersion(&driver_version);
     if (driver_code == cudaSuccess) {
-        plat.version += string::fformat("DRIVER({})", driver_version);
+        info.version += string::fformat("DRIVER({})", driver_version);
     } else {
         tDLogE("CudaBackend::getPlatformInfo() CUDA driver version error: {}", ::cudaGetErrorString(driver_code));
     }
@@ -68,13 +68,13 @@ GpuPlatformInfo CudaBackend::getPlatformInfo(GpuPlatform const & platform) const
     int runtime_version = 0;
     cudaError_t runtime_code = ::cudaRuntimeGetVersion(&runtime_version);
     if (runtime_code == cudaSuccess) {
-        plat.version += string::fformat("RUNTIME({})", runtime_version);
+        info.version += string::fformat("RUNTIME({})", runtime_version);
     } else {
         tDLogE("CudaBackend::getPlatformInfo() CUDA runtime version error: {}", ::cudaGetErrorString(runtime_code));
     }
 
 # if defined(CUDA_VERSION)
-    plat.version += string::fformat("API({})", TO_STRING(CUDA_VERSION));
+    info.version += string::fformat("API({})", TO_STRING(CUDA_VERSION));
 # endif
 #endif
     return info;
@@ -97,8 +97,7 @@ GpuDevices CudaBackend::getDeviceList(GpuPlatform const & platform) const
 {
     GpuDevices result;
     for (int i = 0; i < getDeviceCount(platform); ++i) {
-        GpuDevice device(getType(), i);
-        result.push_back(device);
+        result.emplace_back(GpuDevice(platform, i));
     }
     return result;
 }
@@ -108,7 +107,7 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
     GpuDeviceInfo info(device);
 #if defined(USE_CUDA)
     cudaDeviceProp prop;
-    cudaError_t code = ::cudaGetDeviceProperties(&prop, i);
+    cudaError_t code = ::cudaGetDeviceProperties(&prop, device.device_number);
     if (code == cudaSuccess) {
         info.name = prop.name;
     } else {
