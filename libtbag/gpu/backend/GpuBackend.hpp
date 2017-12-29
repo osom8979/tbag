@@ -48,9 +48,9 @@ TBAG_API char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT;
 struct GpuPlatform
 {
     GpuBackendType type;
-    int platform_number;
+    std::size_t platform_number;
 
-    GpuPlatform(GpuBackendType t = GpuBackendType::GBT_CPU, int p = 0) : type(t), platform_number(p) { /* EMPTY. */ }
+    GpuPlatform(GpuBackendType t = GpuBackendType::GBT_CPU, std::size_t p = 0) : type(t), platform_number(p) { /* EMPTY. */ }
     ~GpuPlatform() { /* EMPTY. */ }
 };
 
@@ -69,10 +69,10 @@ struct GpuPlatformInfo : public GpuPlatform
 
 struct GpuDevice : public GpuPlatform
 {
-    int device_number;
+    std::size_t device_number;
 
     GpuDevice() : GpuDevice(GpuPlatform()) { /* EMPTY. */ }
-    GpuDevice(GpuPlatform const & p, int d = 0) : GpuPlatform(p), device_number(d) { /* EMPTY. */ }
+    GpuDevice(GpuPlatform const & p, std::size_t d = 0) : GpuPlatform(p), device_number(d) { /* EMPTY. */ }
     ~GpuDevice() { /* EMPTY. */ }
 };
 
