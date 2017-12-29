@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <limits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -29,11 +30,32 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace backend {
 
-TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_PROFILE    = "profile";
-TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_VERSION    = "version";
-TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_NAME       = "name";
-TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_VENDOR     = "vendor";
-TBAG_CONSTEXPR char const * const TBAG_GPU_PLATFORM_EXTENSIONS = "extensions";
+#if defined(TBAG_COMP_MSVC)
+# if defined(min)
+TBAG_PUSH_MACRO(min);
+# undef min
+# define __RESTORE_MIN__
+# endif // defined(min)
+# if defined(max)
+TBAG_PUSH_MACRO(max);
+# undef max
+# define __RESTORE_MAX__
+# endif // defined(max)
+#endif // defined(TBAG_COMP_MSVC)
+
+using GpuId = std::size_t;
+TBAG_CONSTEXPR GpuId const UNKNOWN_GPU_ID = std::numeric_limits<GpuId>::max();
+
+#if defined(TBAG_COMP_MSVC)
+# if defined(__RESTORE_MIN__)
+TBAG_POP_MACRO(min);
+# undef __RESTORE_MIN__
+# endif // defined(__RESTORE_MIN__)
+# if defined(__RESTORE_MAX__)
+TBAG_POP_MACRO(max);
+# undef __RESTORE_MAX__
+# endif // defined(__RESTORE_MAX__)
+#endif // defined(TBAG_COMP_MSVC)
 
 enum class GpuBackendType
 {
@@ -48,10 +70,12 @@ TBAG_API char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT;
 struct GpuPlatform
 {
     GpuBackendType type;
-    std::size_t platform_number;
+    GpuId platform_id;
 
-    GpuPlatform(GpuBackendType t = GpuBackendType::GBT_CPU, std::size_t p = 0) : type(t), platform_number(p) { /* EMPTY. */ }
+    GpuPlatform(GpuBackendType t = GpuBackendType::GBT_CPU, GpuId p = UNKNOWN_GPU_ID) : type(t), platform_id(p) { /* EMPTY. */ }
     ~GpuPlatform() { /* EMPTY. */ }
+
+    inline bool isUnknownPlatform() const TBAG_NOEXCEPT { return platform_id == UNKNOWN_GPU_ID; }
 };
 
 struct GpuPlatformInfo : public GpuPlatform
@@ -69,11 +93,13 @@ struct GpuPlatformInfo : public GpuPlatform
 
 struct GpuDevice : public GpuPlatform
 {
-    std::size_t device_number;
+    GpuId device_id;
 
     GpuDevice() : GpuDevice(GpuPlatform()) { /* EMPTY. */ }
-    GpuDevice(GpuPlatform const & p, std::size_t d = 0) : GpuPlatform(p), device_number(d) { /* EMPTY. */ }
+    GpuDevice(GpuPlatform const & p, GpuId d = UNKNOWN_GPU_ID) : GpuPlatform(p), device_id(d) { /* EMPTY. */ }
     ~GpuDevice() { /* EMPTY. */ }
+
+    inline bool isUnknownDevice() const TBAG_NOEXCEPT { return device_id == UNKNOWN_GPU_ID; }
 };
 
 struct GpuDeviceInfo : public GpuDevice
@@ -87,6 +113,13 @@ struct GpuDeviceInfo : public GpuDevice
 
 struct GpuContext : public GpuDevice
 {
+    GpuId context_id;
+
+    GpuContext() : GpuContext(GpuDevice()) { /* EMPTY. */ }
+    GpuContext(GpuDevice const & d, GpuId c = UNKNOWN_GPU_ID) : GpuDevice(d), context_id(c) { /* EMPTY. */ }
+    ~GpuContext() { /* EMPTY. */ }
+
+    inline bool isUnknownContext() const TBAG_NOEXCEPT { return context_id == UNKNOWN_GPU_ID; }
 };
 
 using GpuPlatforms = std::vector<GpuPlatform>;
@@ -125,6 +158,9 @@ struct TBAG_API GpuBackend
     virtual int             getDeviceCount(GpuPlatform const & platform) const = 0;
     virtual GpuDevices      getDeviceList (GpuPlatform const & platform) const = 0;
     virtual GpuDeviceInfo   getDeviceInfo (GpuDevice   const & device)   const = 0;
+
+    virtual GpuContext createContext(GpuDevice const &  device) const = 0;
+    virtual bool      releaseContext(GpuContext      & context) const = 0;
 
     // --------------------
     // Non-virtual methods.

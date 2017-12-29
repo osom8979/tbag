@@ -107,7 +107,7 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
     GpuDeviceInfo info(device);
 #if defined(USE_CUDA)
     cudaDeviceProp prop;
-    cudaError_t code = ::cudaGetDeviceProperties(&prop, device.device_number);
+    cudaError_t code = ::cudaGetDeviceProperties(&prop, device.device_id);
     if (code == cudaSuccess) {
         info.name = prop.name;
     } else {
@@ -115,6 +115,17 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
     }
 #endif
     return info;
+}
+
+GpuContext CudaBackend::createContext(GpuDevice const & device) const
+{
+    return GpuContext(device);
+}
+
+bool CudaBackend::releaseContext(GpuContext & context) const
+{
+    context.context_id = UNKNOWN_GPU_ID;
+    return true;
 }
 
 } // namespace backend

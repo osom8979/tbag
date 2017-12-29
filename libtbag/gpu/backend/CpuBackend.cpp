@@ -72,6 +72,17 @@ GpuDeviceInfo CpuBackend::getDeviceInfo(GpuDevice const & device) const
     return info;
 }
 
+GpuContext CpuBackend::createContext(GpuDevice const & device) const
+{
+    return GpuContext(device);
+}
+
+bool CpuBackend::releaseContext(GpuContext & context) const
+{
+    context.context_id = UNKNOWN_GPU_ID;
+    return true;
+}
+
 } // namespace backend
 } // namespace gpu
 

@@ -44,6 +44,9 @@ struct TBAG_API CpuBackend : public GpuBackend
     virtual int             getDeviceCount(GpuPlatform const & platform) const override;
     virtual GpuDevices      getDeviceList (GpuPlatform const & platform) const override;
     virtual GpuDeviceInfo   getDeviceInfo (GpuDevice   const & device)   const override;
+
+    virtual GpuContext createContext(GpuDevice const &  device) const override;
+    virtual bool      releaseContext(GpuContext      & context) const override;
 };
 
 } // namespace backend
