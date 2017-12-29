@@ -9,6 +9,8 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/util/Version.hpp>
 
+#include <cstdlib>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -74,12 +76,30 @@ GpuDeviceInfo CpuBackend::getDeviceInfo(GpuDevice const & device) const
 
 GpuContext CpuBackend::createContext(GpuDevice const & device) const
 {
-    return GpuContext(device);
+    return GpuContext(device, 0);
 }
 
 bool CpuBackend::releaseContext(GpuContext & context) const
 {
     context.context_id = UNKNOWN_GPU_ID;
+    return true;
+}
+
+GpuMemory CpuBackend::alloc(GpuContext const & context, std::size_t size) const
+{
+    GpuMemory memory(context);
+    memory.data = ::malloc(size);
+    memory.memory_id = (GpuId)memory.data;
+    memory.size = size;
+    return memory;
+}
+
+bool CpuBackend::free(GpuMemory & memory) const
+{
+    ::free(memory.data);
+    memory.data = nullptr;
+    memory.memory_id = UNKNOWN_GPU_ID;
+    memory.size = 0;
     return true;
 }
 

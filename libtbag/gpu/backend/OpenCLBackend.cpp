@@ -183,6 +183,21 @@ bool OpenCLBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
+GpuMemory OpenCLBackend::alloc(GpuContext const & context, std::size_t size) const
+{
+    GpuMemory memory(context);
+#if defined(USE_OPENCL)
+#endif
+    return memory;
+}
+
+bool OpenCLBackend::free(GpuMemory & memory) const
+{
+#if defined(USE_OPENCL)
+#endif
+    return true;
+}
+
 } // namespace backend
 } // namespace gpu
 

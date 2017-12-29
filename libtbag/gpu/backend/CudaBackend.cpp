@@ -119,12 +119,42 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
 
 GpuContext CudaBackend::createContext(GpuDevice const & device) const
 {
-    return GpuContext(device);
+    return GpuContext(device, 0);
 }
 
 bool CudaBackend::releaseContext(GpuContext & context) const
 {
     context.context_id = UNKNOWN_GPU_ID;
+    return true;
+}
+
+GpuMemory CudaBackend::alloc(GpuContext const & context, std::size_t size) const
+{
+    GpuMemory memory(context);
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaMalloc((void**)&memory.data, size);
+    if (code == cudaSuccess) {
+        memory.memory_id = (GpuId)memory.data;
+        memory.size = size;
+    } else {
+        tDLogE("CudaBackend::alloc() CUDA error: {}", ::cudaGetErrorString(code));
+    }
+#endif
+    return memory;
+}
+
+bool CudaBackend::free(GpuMemory & memory) const
+{
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaFree(memory.data);
+    memory.data = nullptr;
+    memory.memory_id = UNKNOWN_GPU_ID;
+    memory.size = 0;
+    if (code != cudaSuccess) {
+        tDLogE("CudaBackend::free() CUDA error: {}", ::cudaGetErrorString(code));
+        return false;
+    }
+#endif
     return true;
 }
 

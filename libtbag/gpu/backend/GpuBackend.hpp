@@ -122,27 +122,20 @@ struct GpuContext : public GpuDevice
     inline bool isUnknownContext() const TBAG_NOEXCEPT { return context_id == UNKNOWN_GPU_ID; }
 };
 
+struct GpuMemory : public GpuContext
+{
+    GpuId memory_id;
+    void * data;
+    std::size_t size;
+
+    GpuMemory() : GpuMemory(GpuContext()) { /* EMPTY. */ }
+    GpuMemory(GpuContext const & c) : GpuContext(c), memory_id(UNKNOWN_GPU_ID), data(nullptr), size(0) { /* EMPTY. */ }
+    ~GpuMemory() { /* EMPTY. */ }
+};
+
 using GpuPlatforms = std::vector<GpuPlatform>;
 using GpuDevices   = std::vector<GpuDevice>;
 using GpuContexts  = std::vector<GpuContext>;
-
-//struct TBAG_API SyncedMemory
-//{
-//    enum class AllocFlag
-//    {
-//        AF_DEFAULT = 0,
-//        AF_PINNED,
-//        AF_DEVICE,
-//    };
-//
-//    void * ptr = nullptr;
-//    std::size_t size = 0;
-//
-//    virtual GpuBackendType getType() const TBAG_NOEXCEPT = 0;
-//    virtual bool alloc(std::size_t size, AllocFlag flag = AllocFlag::AF_DEFAULT) = 0;
-//    virtual bool copy(GpuMemoryBackend * memory) const = 0;
-//    virtual void free() = 0;
-//};
 
 struct TBAG_API GpuBackend
 {
@@ -161,6 +154,9 @@ struct TBAG_API GpuBackend
 
     virtual GpuContext createContext(GpuDevice const &  device) const = 0;
     virtual bool      releaseContext(GpuContext      & context) const = 0;
+
+    virtual GpuMemory alloc(GpuContext const & context, std::size_t size) const = 0;
+    virtual bool free(GpuMemory & memory) const = 0;
 
     // --------------------
     // Non-virtual methods.
