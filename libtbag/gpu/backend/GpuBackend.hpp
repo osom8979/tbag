@@ -48,30 +48,52 @@ TBAG_API char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT;
 struct GpuPlatform
 {
     GpuBackendType type;
-    int number;
+    int platform_number;
 
+    GpuPlatform() : GpuPlatform(GpuBackendType::GBT_CPU) { /* EMPTY. */ }
+    GpuPlatform(GpuBackendType t, int p = 0) : type(t), platform_number(p) { /* EMPTY. */ }
+    ~GpuPlatform() { /* EMPTY. */ }
+};
+
+struct GpuPlatformInfo : public GpuPlatform
+{
     std::string profile;
     std::string name;
     std::string vendor;
     std::string version;
     std::string extensions;
 
-    GpuPlatform(GpuBackendType t, int n) : type(t), number(n) { /* EMPTY. */ }
-    ~GpuPlatform() { /* EMPTY. */ }
-
-    inline operator int() const TBAG_NOEXCEPT { return number; }
+    GpuPlatformInfo() : GpuPlatformInfo(GpuPlatform()) { /* EMPTY. */ }
+    GpuPlatformInfo(GpuPlatform const & p) : GpuPlatform(p) { /* EMPTY. */ }
+    ~GpuPlatformInfo() { /* EMPTY. */ }
 };
 
-struct GpuDevice
+struct GpuDevice : public GpuPlatform
 {
-    GpuBackendType type;
-    int number;
+    int device_number;
 
-    GpuDevice(GpuBackendType t, int n) : type(t), number(n) { /* EMPTY. */ }
+    GpuDevice() : GpuDevice(GpuPlatform()) { /* EMPTY. */ }
+    explicit GpuDevice(GpuBackendType t, int p = 0, int d = 0) : GpuPlatform(t, p), device_number(d) { /* EMPTY. */ }
+    explicit GpuDevice(GpuPlatform const & p, int d = 0) : GpuPlatform(p), device_number(d) { /* EMPTY. */ }
     ~GpuDevice() { /* EMPTY. */ }
-
-    inline operator int() const TBAG_NOEXCEPT { return number; }
 };
+
+struct GpuDeviceInfo : public GpuDevice
+{
+    std::string name;
+
+    GpuDeviceInfo() : GpuDeviceInfo(GpuDevice()) { /* EMPTY. */ }
+    GpuDeviceInfo(GpuDevice const & d) : GpuDevice(d) { /* EMPTY. */ }
+    ~GpuDeviceInfo() { /* EMPTY. */ }
+};
+
+struct GpuContext : public GpuDevice
+{
+};
+
+using GpuPlatforms = std::vector<GpuPlatform>;
+using GpuDevices   = std::vector<GpuDevice>;
+using GpuContexts  = std::vector<GpuContext>;
 
 //struct TBAG_API SyncedMemory
 //{
@@ -93,21 +115,18 @@ struct GpuDevice
 
 struct TBAG_API GpuBackend
 {
-    using StringMap  = std::map<std::string, std::string>;
-    using StringPair = StringMap::value_type;
-    using Devices    = std::vector<GpuDevice>;
-    using Platforms  = std::vector<GpuPlatform>;
-
     virtual GpuBackendType  getType() const TBAG_NOEXCEPT = 0;
     virtual bool          isSupport() const TBAG_NOEXCEPT = 0;
     virtual bool             isHost() const TBAG_NOEXCEPT = 0;
     virtual bool           isDevice() const TBAG_NOEXCEPT = 0;
 
-    virtual int       getPlatformCount() const = 0;
-    virtual Platforms getPlatformList () const = 0;
+    virtual int             getPlatformCount() const = 0;
+    virtual GpuPlatforms    getPlatformList () const = 0;
+    virtual GpuPlatformInfo getPlatformInfo (GpuPlatform const & platform) const = 0;
 
-    virtual int     getDeviceCount() const = 0;
-    virtual Devices getDeviceList () const = 0;
+    virtual int             getDeviceCount(GpuPlatform const & platform) const = 0;
+    virtual GpuDevices      getDeviceList (GpuPlatform const & platform) const = 0;
+    virtual GpuDeviceInfo   getDeviceInfo (GpuDevice   const & device)   const = 0;
 
     // --------------------
     // Non-virtual methods.

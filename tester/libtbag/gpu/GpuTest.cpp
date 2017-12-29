@@ -19,9 +19,9 @@ template <typename Predicated>
 static void run_if_supported(std::vector<GpuBackendType> const & types, Predicated predicated)
 {
     for (auto & type : types) {
-        auto context = createGpuContext(type);
-        if (context && context->isSupport()) {
-            predicated(context);
+        auto gpu = createGpuContext(type);
+        if (gpu && gpu->isSupport()) {
+            predicated(gpu);
         }
     }
 }
@@ -41,15 +41,16 @@ static void run_all_if_supported(Predicated predicated)
 
 TEST(GpuTest, Information)
 {
-    __impl::run_all_if_supported([](UniqueGpu & context){
-        std::cout << "GPU type: " << context->getTypeString() << "\n"
-                  << "Platform count: " << context->getPlatformCount() << std::endl;
-        for (auto & plat : context->getPlatformList()) {
-            std::cout << "[" << plat.number << "] profile: "    << plat.profile    << "\n"
-                      << "[" << plat.number << "] name: "       << plat.name       << "\n"
-                      << "[" << plat.number << "] vender: "     << plat.vendor     << "\n"
-                      << "[" << plat.number << "] version: "    << plat.version    << "\n"
-                      << "[" << plat.number << "] extensions: " << plat.extensions << std::endl;
+    __impl::run_all_if_supported([](UniqueGpu & gpu){
+        std::cout << "GPU type: " << gpu->getTypeString() << "\n"
+                  << "Platform count: " << gpu->getPlatformCount() << std::endl;
+        for (auto & plat : gpu->getPlatformList()) {
+            auto info = gpu->getPlatformInfo(plat);
+            std::cout << "[" << plat.platform_number << "] profile: "    << info.profile    << "\n"
+                      << "[" << plat.platform_number << "] name: "       << info.name       << "\n"
+                      << "[" << plat.platform_number << "] vender: "     << info.vendor     << "\n"
+                      << "[" << plat.platform_number << "] version: "    << info.version    << "\n"
+                      << "[" << plat.platform_number << "] extensions: " << info.extensions << std::endl;
         }
     });
 }

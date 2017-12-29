@@ -41,23 +41,35 @@ int CpuBackend::getPlatformCount() const
     return 1;
 }
 
-CpuBackend::Platforms CpuBackend::getPlatformList() const
+GpuPlatforms CpuBackend::getPlatformList() const
 {
-    GpuPlatform plat(getType(), 0);
-    plat.name = "CPU";
-    plat.vendor = "TBAG";
-    plat.version = util::getTbagVersion().toLongString();
-    return {plat};
+    return {GpuPlatform(getType(), 0)};
 }
 
-int CpuBackend::getDeviceCount() const
+GpuPlatformInfo CpuBackend::getPlatformInfo(GpuPlatform const & platform) const
+{
+    GpuPlatformInfo info(platform);
+    info.name    = "CPU";
+    info.vendor  = "TBAG";
+    info.version = util::getTbagVersion().toLongString();
+    return info;
+}
+
+int CpuBackend::getDeviceCount(GpuPlatform const & platform) const
 {
     return 1;
 }
 
-CpuBackend::Devices CpuBackend::getDeviceList() const
+GpuDevices CpuBackend::getDeviceList(GpuPlatform const & platform) const
 {
-    return {GpuDevice(getType(), 0)};
+    return {GpuDevice(platform, 0)};
+}
+
+GpuDeviceInfo CpuBackend::getDeviceInfo(GpuDevice const & device) const
+{
+    GpuDeviceInfo info(device);
+    info.name = "CPU";
+    return info;
 }
 
 } // namespace backend

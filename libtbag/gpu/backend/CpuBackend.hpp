@@ -37,11 +37,13 @@ struct TBAG_API CpuBackend : public GpuBackend
     virtual bool             isHost() const TBAG_NOEXCEPT override;
     virtual bool           isDevice() const TBAG_NOEXCEPT override;
 
-    virtual int       getPlatformCount() const override;
-    virtual Platforms getPlatformList () const override;
+    virtual int             getPlatformCount() const override;
+    virtual GpuPlatforms    getPlatformList () const override;
+    virtual GpuPlatformInfo getPlatformInfo (GpuPlatform const & platform) const override;
 
-    virtual int     getDeviceCount() const override;
-    virtual Devices getDeviceList () const override;
+    virtual int             getDeviceCount(GpuPlatform const & platform) const override;
+    virtual GpuDevices      getDeviceList (GpuPlatform const & platform) const override;
+    virtual GpuDeviceInfo   getDeviceInfo (GpuDevice   const & device)   const override;
 };
 
 } // namespace backend

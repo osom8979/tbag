@@ -46,22 +46,23 @@ int CudaBackend::getPlatformCount() const
     return 1;
 }
 
-CudaBackend::Platforms CudaBackend::getPlatformList() const
+GpuPlatforms CudaBackend::getPlatformList() const
 {
-    GpuPlatform plat(getType(), 0);
-    plat.name = "CUDA";
-    plat.vendor = "NVIDIA";
-#if defined(USE_CUDA)
-# if defined(CUDA_VERSION)
-    plat.version += string::fformat("API({})", TO_STRING(CUDA_VERSION));
-# endif
+    return {GpuPlatform(getType(), 0)};
+}
 
+GpuPlatformInfo CudaBackend::getPlatformInfo(GpuPlatform const & platform) const
+{
+    GpuPlatformInfo info(platform);
+    info.name   = "CUDA";
+    info.vendor = "NVIDIA";
+#if defined(USE_CUDA)
     int driver_version = 0;
     cudaError_t driver_code = ::cudaDriverGetVersion(&driver_version);
     if (driver_code == cudaSuccess) {
         plat.version += string::fformat("DRIVER({})", driver_version);
     } else {
-        tDLogE("CudaBackend::getPlatformList() CUDA driver version error: {}", ::cudaGetErrorString(driver_code));
+        tDLogE("CudaBackend::getPlatformInfo() CUDA driver version error: {}", ::cudaGetErrorString(driver_code));
     }
 
     int runtime_version = 0;
@@ -69,13 +70,17 @@ CudaBackend::Platforms CudaBackend::getPlatformList() const
     if (runtime_code == cudaSuccess) {
         plat.version += string::fformat("RUNTIME({})", runtime_version);
     } else {
-        tDLogE("CudaBackend::getPlatformList() CUDA runtime version error: {}", ::cudaGetErrorString(runtime_code));
+        tDLogE("CudaBackend::getPlatformInfo() CUDA runtime version error: {}", ::cudaGetErrorString(runtime_code));
     }
+
+# if defined(CUDA_VERSION)
+    plat.version += string::fformat("API({})", TO_STRING(CUDA_VERSION));
+# endif
 #endif
-    return {plat};
+    return info;
 }
 
-int CudaBackend::getDeviceCount() const
+int CudaBackend::getDeviceCount(GpuPlatform const & platform) const
 {
     int result = 0;
 #if defined(USE_CUDA)
@@ -88,22 +93,29 @@ int CudaBackend::getDeviceCount() const
     return result;
 }
 
-CudaBackend::Devices CudaBackend::getDeviceList() const
+GpuDevices CudaBackend::getDeviceList(GpuPlatform const & platform) const
 {
-    Devices result;
-    for (int i = 0; i < getDeviceCount(); ++i) {
+    GpuDevices result;
+    for (int i = 0; i < getDeviceCount(platform); ++i) {
         GpuDevice device(getType(), i);
-#if defined(USE_CUDA)
-        cudaDeviceProp prop;
-        cudaError_t code = ::cudaGetDeviceProperties(&prop, i);
-        if (code == cudaSuccess) {
-        } else {
-            tDLogE("CudaBackend::getDeviceList() CUDA error: {}", ::cudaGetErrorString(code));
-        }
-#endif
         result.push_back(device);
     }
     return result;
+}
+
+GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
+{
+    GpuDeviceInfo info(device);
+#if defined(USE_CUDA)
+    cudaDeviceProp prop;
+    cudaError_t code = ::cudaGetDeviceProperties(&prop, i);
+    if (code == cudaSuccess) {
+        info.name = prop.name;
+    } else {
+        tDLogE("CudaBackend::getDeviceInfo() CUDA error: {}", ::cudaGetErrorString(code));
+    }
+#endif
+    return info;
 }
 
 } // namespace backend

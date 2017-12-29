@@ -62,47 +62,55 @@ int OpenCLBackend::getPlatformCount() const
     return result;
 }
 
-OpenCLBackend::Platforms OpenCLBackend::getPlatformList() const
+GpuPlatforms OpenCLBackend::getPlatformList() const
 {
-    Platforms result;
-    for (int i = 0; i < getDeviceCount(); ++i) {
-        GpuPlatform plat(getType(), i + 1);
-#if defined(USE_OPENCL)
-        cl_platform_id platform_id;
-        if (::clGetPlatformIDs((cl_uint)plat.number, &platform_id, nullptr) == CL_SUCCESS) {
-            auto get_platform_info = [](cl_platform_id id, cl_platform_info info) -> std::string {
-                size_t value_size = 0;
-                if (::clGetPlatformInfo(id, info, 0, nullptr, &value_size) == CL_SUCCESS) {
-                    std::vector<char> buffer(value_size, '\0');
-                    if (::clGetPlatformInfo(id, info, buffer.size(), buffer.data(), nullptr) == CL_SUCCESS) {
-                        return std::string(buffer.data());
-                    }
-                }
-                return std::string();
-            };
-            plat.profile    = get_platform_info(platform_id, CL_PLATFORM_PROFILE);
-            plat.version    = get_platform_info(platform_id, CL_PLATFORM_VERSION);
-            plat.name       = get_platform_info(platform_id, CL_PLATFORM_NAME);
-            plat.vendor     = get_platform_info(platform_id, CL_PLATFORM_VENDOR);
-            plat.extensions = get_platform_info(platform_id, CL_PLATFORM_EXTENSIONS);
-        }
-#endif
-        result.push_back(plat);
+    GpuPlatforms result;
+    for (int i = 0; i < getPlatformCount(); ++i) {
+        result.emplace_back(getType(), i + 1);
     }
     return result;
 }
 
-int OpenCLBackend::getDeviceCount() const
+GpuPlatformInfo OpenCLBackend::getPlatformInfo(GpuPlatform const & platform) const
+{
+    GpuPlatformInfo info(platform);
+#if defined(USE_OPENCL)
+    cl_platform_id platform_id;
+    if (::clGetPlatformIDs((cl_uint)info.platform_number, &platform_id, nullptr) == CL_SUCCESS) {
+        auto get_platform_info = [](cl_platform_id id, cl_platform_info info) -> std::string {
+            size_t value_size = 0;
+            if (::clGetPlatformInfo(id, info, 0, nullptr, &value_size) == CL_SUCCESS) {
+                std::vector<char> buffer(value_size, '\0');
+                if (::clGetPlatformInfo(id, info, buffer.size(), buffer.data(), nullptr) == CL_SUCCESS) {
+                    return std::string(buffer.data());
+                }
+            }
+            return std::string();
+        };
+        info.profile    = get_platform_info(platform_id, CL_PLATFORM_PROFILE);
+        info.version    = get_platform_info(platform_id, CL_PLATFORM_VERSION);
+        info.name       = get_platform_info(platform_id, CL_PLATFORM_NAME);
+        info.vendor     = get_platform_info(platform_id, CL_PLATFORM_VENDOR);
+        info.extensions = get_platform_info(platform_id, CL_PLATFORM_EXTENSIONS);
+    }
+#endif
+    return info;
+}
+
+int OpenCLBackend::getDeviceCount(GpuPlatform const & platform) const
 {
     return 1;
 }
 
-OpenCLBackend::Devices OpenCLBackend::getDeviceList() const
+GpuDevices OpenCLBackend::getDeviceList(GpuPlatform const & platform) const
 {
-    Devices result;
-    GpuDevice dev(getType(), 0);
-    result.push_back(dev);
-    return result;
+    return {GpuDevice(platform, 0)};
+}
+
+GpuDeviceInfo OpenCLBackend::getDeviceInfo(GpuDevice const & device) const
+{
+    GpuDeviceInfo info(device);
+    return info;
 }
 
 } // namespace backend
