@@ -7,6 +7,7 @@
 
 #include <libtbag/gpu/backend/CudaBackend.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/string/Format.hpp>
 
 #if defined(USE_CUDA)
@@ -20,6 +21,65 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu     {
 namespace backend {
+
+// ---------------
+namespace __impl {
+// ---------------
+
+struct CudaDeviceGuard : private Noncopyable
+{
+    int  current_id;
+    int   change_id;
+    bool   exchange;
+
+    CudaDeviceGuard(GpuDevice  const &  device) : CudaDeviceGuard( device.device_id) { /* EMPTY. */ }
+    CudaDeviceGuard(GpuContext const & context) : CudaDeviceGuard(context.device_id) { /* EMPTY. */ }
+    CudaDeviceGuard(GpuMemory  const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
+    CudaDeviceGuard(HostMemory const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
+
+    CudaDeviceGuard(GpuId const & id) : current_id(0), change_id(0), exchange(false)
+    {
+        if (id == UNKNOWN_GPU_ID) {
+            return;
+        }
+#if defined(USE_CUDA)
+        cudaError_t get_code = ::cudaGetDevice(&current_id);
+        if (get_code != cudaSuccess) {
+            tDLogE("CudaDeviceGuard::CudaDeviceGuard() CUDA cudaGetDevice() error: {}", ::cudaGetErrorString(get_code));
+            return;
+        }
+
+        change_id = (int)id.device_id;
+        if (current_id == change_id) {
+            return;
+        }
+
+        cudaError_t set_code = ::cudaSetDevice(change_id);
+        if (set_code == cudaSuccess) {
+            exchange = true;
+        } else {
+            tDLogE("CudaDeviceGuard::CudaDeviceGuard() CUDA cudaSetDevice() error: {}", ::cudaGetErrorString(set_code));
+        }
+#endif
+    }
+
+    ~CudaDeviceGuard()
+    {
+        if (exchange == false) {
+            return;
+        }
+#if defined(USE_CUDA)
+        cudaError_t set_code = ::cudaSetDevice(current_id);
+        if (set_code == cudaSuccess) {
+            tDLogE("CudaDeviceGuard::~CudaDeviceGuard() CUDA cudaSetDevice() error: {}", ::cudaGetErrorString(set_code));
+        }
+#endif
+    }
+};
+
+// ------------------
+} // namespace __impl
+// ------------------
 
 GpuBackendType CudaBackend::getType() const TBAG_NOEXCEPT
 {
@@ -172,6 +232,7 @@ GpuMemory CudaBackend::malloc(GpuContext const & context, std::size_t size) cons
 {
     checkType(context.type);
     GpuMemory memory(context);
+    __impl::CudaDeviceGuard const LOCK(context);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMalloc((void**)&memory.data, size);
     if (code == cudaSuccess) {
@@ -190,6 +251,7 @@ bool CudaBackend::free(GpuMemory & memory) const
         tDLogE("CudaBackend::free() Illegal memory.");
         return false;
     }
+    __impl::CudaDeviceGuard const LOCK(memory);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaFree(memory.data);
     memory.data = nullptr;
@@ -206,12 +268,14 @@ HostMemory CudaBackend::mallocHost(GpuContext const & context, std::size_t size,
 {
     checkType(context.type);
     HostMemory result(context);
+    __impl::CudaDeviceGuard const LOCK(context);
     return result;
 }
 
 bool CudaBackend::freeHost(HostMemory & memory) const
 {
     checkType(memory.type);
+    __impl::CudaDeviceGuard const LOCK(memory);
     return true;
 }
 
