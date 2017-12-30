@@ -49,7 +49,7 @@ struct CudaDeviceGuard : private Noncopyable
             return;
         }
 
-        change_id = (int)id.device_id;
+        change_id = (int)id;
         if (current_id == change_id) {
             return;
         }
@@ -269,6 +269,24 @@ HostMemory CudaBackend::mallocHost(GpuContext const & context, std::size_t size,
     checkType(context.type);
     HostMemory result(context);
     __impl::CudaDeviceGuard const LOCK(context);
+#if defined(USE_CUDA)
+    switch (flag) {
+    case HostMemoryFlag::HMF_UNINITIALIZED:
+        return result;
+    case HostMemoryFlag::HMF_PINNED:
+        break;
+    default:
+        return result;
+    }
+
+    cudaError_t code = ::cudaMallocHost((void**)&result.data, size);
+    if (code == cudaSuccess) {
+        result.size = size;
+        result.flag = flag;
+    } else {
+        tDLogE("CudaBackend::mallocHost() CUDA cudaMallocHost() error: {}", ::cudaGetErrorString(code));
+    }
+#endif
     return result;
 }
 
@@ -276,6 +294,16 @@ bool CudaBackend::freeHost(HostMemory & memory) const
 {
     checkType(memory.type);
     __impl::CudaDeviceGuard const LOCK(memory);
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaFreeHost(memory.data);
+    memory.data = nullptr;
+    memory.size = 0;
+    memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
+    if (code != cudaSuccess) {
+        tDLogE("CudaBackend::free() CUDA cudaFreeHost() error: {}", ::cudaGetErrorString(code));
+        return false;
+    }
+#endif
     return true;
 }
 
