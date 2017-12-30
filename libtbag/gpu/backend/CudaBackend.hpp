@@ -57,7 +57,7 @@ struct TBAG_API CudaBackend : public GpuBackend
     virtual GpuContext createContext(GpuDevice const &  device) const override;
     virtual bool      releaseContext(GpuContext      & context) const override;
 
-    virtual GpuMemory alloc(GpuContext const & context, std::size_t size) const override;
+    virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const override;
     virtual bool free(GpuMemory & memory) const override;
 };
 

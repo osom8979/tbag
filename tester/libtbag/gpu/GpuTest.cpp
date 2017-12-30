@@ -68,9 +68,15 @@ TEST(GpuTest, Information)
 TEST(GpuTest, CreateMemory)
 {
     __impl::run_all_if_supported([](UniqueGpu & gpu){
-        auto plat = gpu->getPlatformList()[0];
-        auto  dev = gpu->getDeviceList(plat)[0];
-        auto ctxt = gpu->createContext(dev);
+        auto context = gpu->createContext(0, 0);
+        ASSERT_FALSE(context.isUnknownContext());
+
+        std::size_t const ALLOC_SIZE = 1024;
+        auto memory = gpu->malloc(context, ALLOC_SIZE);
+
+        ASSERT_TRUE(memory.existsMemory());
+        ASSERT_EQ(ALLOC_SIZE, memory.size);
+        ASSERT_TRUE(gpu->free(memory));
     });
 }
 

@@ -189,7 +189,7 @@ bool OpenCLBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
-GpuMemory OpenCLBackend::alloc(GpuContext const & context, std::size_t size) const
+GpuMemory OpenCLBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
     GpuMemory result(context);
@@ -200,7 +200,7 @@ GpuMemory OpenCLBackend::alloc(GpuContext const & context, std::size_t size) con
         result.data = (void*)memory;
         result.size = size;
     } else {
-        tDLogE("OpenCLBackend::alloc() OpenCL clCreateBuffer() error code: {}", code);
+        tDLogE("OpenCLBackend::malloc() OpenCL clCreateBuffer() error code: {}", code);
     }
 #endif
     return result;

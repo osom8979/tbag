@@ -134,17 +134,16 @@ bool CudaBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
-GpuMemory CudaBackend::alloc(GpuContext const & context, std::size_t size) const
+GpuMemory CudaBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
     GpuMemory memory(context);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMalloc((void**)&memory.data, size);
     if (code == cudaSuccess) {
-        memory.memory_id = (GpuId)memory.data;
         memory.size = size;
     } else {
-        tDLogE("CudaBackend::alloc() CUDA error: {}", ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::malloc() CUDA error: {}", ::cudaGetErrorString(code));
     }
 #endif
     return memory;

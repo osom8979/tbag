@@ -43,6 +43,19 @@ char const * GpuBackend::getTypeString() const TBAG_NOEXCEPT
     return getGpuBackendString(getType());
 }
 
+GpuContext GpuBackend::createContext(int platform_index, int device_index) const
+{
+    auto const PLATFORMS = getPlatformList();
+    if (platform_index < 0 || PLATFORMS.size() <= platform_index) {
+        return GpuContext();
+    }
+    auto const DEVICES = getDeviceList(PLATFORMS[platform_index]);
+    if (device_index < 0 || DEVICES.size() <= device_index) {
+        return GpuContext();
+    }
+    return createContext(DEVICES[device_index]);
+}
+
 } // namespace backend
 } // namespace gpu
 

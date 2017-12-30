@@ -162,7 +162,7 @@ struct TBAG_API GpuBackend
     virtual GpuContext createContext(GpuDevice const &  device) const = 0;
     virtual bool      releaseContext(GpuContext      & context) const = 0;
 
-    virtual GpuMemory alloc(GpuContext const & context, std::size_t size) const = 0;
+    virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const = 0;
     virtual bool free(GpuMemory & memory) const = 0;
 
     // --------------------
@@ -171,6 +171,8 @@ struct TBAG_API GpuBackend
 
     void checkType(GpuBackendType type) const throw(GpuTypeMismatchException);
     char const * getTypeString() const TBAG_NOEXCEPT;
+
+    GpuContext createContext(int platform_index, int device_index) const;
 };
 
 } // namespace backend

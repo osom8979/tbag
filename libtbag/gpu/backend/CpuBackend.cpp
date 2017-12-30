@@ -91,7 +91,7 @@ bool CpuBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
-GpuMemory CpuBackend::alloc(GpuContext const & context, std::size_t size) const
+GpuMemory CpuBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
     GpuMemory memory(context);
