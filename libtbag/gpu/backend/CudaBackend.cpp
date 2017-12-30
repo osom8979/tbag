@@ -134,6 +134,40 @@ bool CudaBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
+GpuQueue CudaBackend::createQueue(GpuContext const & context) const
+{
+    checkType(context.type);
+    GpuQueue result(context);
+#if defined(USE_CUDA)
+    cudaStream_t stream;
+    cudaError_t code = ::cudaStreamCreate(&stream);
+    if (code == cudaSuccess) {
+        result.queue_id = (GpuId)stream;
+    } else {
+        tDLogE("CudaBackend::createQueue() CUDA error: {}", ::cudaGetErrorString(code));
+    }
+#endif
+    return result;
+}
+
+bool CudaBackend::releaseQueue(GpuQueue & queue) const
+{
+    checkType(queue.type);
+    if (queue.isUnknownQueue()) {
+        tDLogE("CudaBackend::releaseQueue() Illegal queue.");
+        return false;
+    }
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaStreamDestroy((cudaStream_t)queue.queue_id);
+    queue.queue_id = UNKNOWN_GPU_ID;
+    if (code != cudaSuccess) {
+        tDLogE("CudaBackend::releaseQueue() CUDA error: {}", ::cudaGetErrorString(code));
+        return false;
+    }
+#endif
+    return true;
+}
+
 GpuMemory CudaBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
@@ -166,18 +200,6 @@ bool CudaBackend::free(GpuMemory & memory) const
     }
 #endif
     return true;
-}
-
-GpuQueue CudaBackend::createQueue(GpuContext const & context) const
-{
-    checkType(context.type);
-    return GpuQueue(context);
-}
-
-bool CudaBackend::releaseQueue(GpuQueue & queue) const
-{
-    checkType(queue.type);
-    return false;
 }
 
 } // namespace backend

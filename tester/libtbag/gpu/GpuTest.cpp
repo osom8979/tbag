@@ -65,6 +65,18 @@ TEST(GpuTest, Information)
     });
 }
 
+TEST(GpuTest, CreateQueue)
+{
+    __impl::run_all_if_supported([](UniqueGpu & gpu){
+        auto context = gpu->createContext(0, 0);
+        ASSERT_FALSE(context.isUnknownContext());
+
+        auto queue = gpu->createQueue(context);
+        ASSERT_FALSE(queue.isUnknownQueue());
+        ASSERT_TRUE(gpu->releaseQueue(queue));
+    });
+}
+
 TEST(GpuTest, CreateMemory)
 {
     __impl::run_all_if_supported([](UniqueGpu & gpu){

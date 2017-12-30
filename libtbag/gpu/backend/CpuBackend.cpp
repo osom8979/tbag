@@ -18,6 +18,29 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace backend {
 
+// ---------------
+namespace __impl {
+// ---------------
+
+struct CpuQueueBackend
+{
+    bool verbose;
+
+    CpuQueueBackend(bool v = false) : verbose(v)
+    {
+        tDLogIfD(verbose, "CpuQueueBackend::CpuQueueBackend() ID: @{}", (void*)this);
+    }
+
+    ~CpuQueueBackend()
+    {
+        tDLogIfD(verbose, "CpuQueueBackend::~CpuQueueBackend() ID: @{}", (void*)this);
+    }
+};
+
+// ------------------
+} // namespace __impl
+// ------------------
+
 GpuBackendType CpuBackend::getType() const TBAG_NOEXCEPT
 {
     return GpuBackendType::GBT_CPU;
@@ -91,6 +114,27 @@ bool CpuBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
+GpuQueue CpuBackend::createQueue(GpuContext const & context) const
+{
+    checkType(context.type);
+    GpuQueue result(context);
+    auto * queue = new __impl::CpuQueueBackend();
+    result.queue_id = (GpuId)queue;
+    return result;
+}
+
+bool CpuBackend::releaseQueue(GpuQueue & queue) const
+{
+    checkType(queue.type);
+    if (queue.isUnknownQueue()) {
+        tDLogE("CpuBackend::releaseQueue() Illegal queue.");
+        return false;
+    }
+    delete ((__impl::CpuQueueBackend*)queue.queue_id);
+    queue.queue_id = UNKNOWN_GPU_ID;
+    return true;
+}
+
 GpuMemory CpuBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
@@ -111,18 +155,6 @@ bool CpuBackend::free(GpuMemory & memory) const
     memory.data = nullptr;
     memory.size = 0;
     return true;
-}
-
-GpuQueue CpuBackend::createQueue(GpuContext const & context) const
-{
-    checkType(context.type);
-    return GpuQueue(context);
-}
-
-bool CpuBackend::releaseQueue(GpuQueue & queue) const
-{
-    checkType(queue.type);
-    return false;
 }
 
 } // namespace backend

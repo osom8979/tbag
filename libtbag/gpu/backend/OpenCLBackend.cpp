@@ -166,11 +166,11 @@ GpuContext OpenCLBackend::createContext(GpuDevice const & device) const
 #if defined(USE_OPENCL)
     cl_int code;
     cl_context context = ::clCreateContext(nullptr, 1, (cl_device_id const *)&device.device_id, nullptr, nullptr, &code);
-    if (code != CL_SUCCESS) {
+    if (code == CL_SUCCESS) {
+        result.context_id = (std::size_t)context;
+    } else {
         tDLogE("OpenCLBackend::createContext() OpenCL clCreateContext() error code: {}", code);
-        return result;
     }
-    result.context_id = (std::size_t)context;
 #endif
     return result;
 }
@@ -183,6 +183,42 @@ bool OpenCLBackend::releaseContext(GpuContext & context) const
     context.context_id = UNKNOWN_GPU_ID;
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLBackend::releaseContext() OpenCL clReleaseContext() error code: {}", code);
+        return false;
+    }
+#endif
+    return true;
+}
+
+GpuQueue OpenCLBackend::createQueue(GpuContext const & context) const
+{
+    checkType(context.type);
+    GpuQueue result(context);
+#if defined(USE_OPENCL)
+    cl_int code;
+    cl_command_queue queue = ::clCreateCommandQueue((cl_context)context.context_id,
+                                                    (cl_device_id)context.device_id,
+                                                    (cl_command_queue_properties)0,
+                                                    &code);
+    if (code == CL_SUCCESS) {
+        result.queue_id = (GpuId)queue;
+    } else {
+        tDLogE("OpenCLBackend::createQueue() OpenCL clCreateCommandQueue() error code: {}", code);
+    }
+#endif
+    return result;
+}
+
+bool OpenCLBackend::releaseQueue(GpuQueue & queue) const
+{
+    checkType(queue.type);
+    if (queue.isUnknownQueue()) {
+        tDLogE("OpenCLBackend::releaseQueue() Illegal queue.");
+        return false;
+    }
+#if defined(USE_OPENCL)
+    cl_int code = ::clReleaseCommandQueue((cl_command_queue)queue.queue_id);
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLBackend::releaseQueue() OpenCL clReleaseCommandQueue() error code: {}", code);
         return false;
     }
 #endif
@@ -223,18 +259,6 @@ bool OpenCLBackend::free(GpuMemory & memory) const
     }
 #endif
     return true;
-}
-
-GpuQueue OpenCLBackend::createQueue(GpuContext const & context) const
-{
-    checkType(context.type);
-    return GpuQueue(context);
-}
-
-bool OpenCLBackend::releaseQueue(GpuQueue & queue) const
-{
-    checkType(queue.type);
-    return false;
 }
 
 } // namespace backend
