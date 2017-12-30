@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <limits>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -45,6 +46,8 @@ TBAG_PUSH_MACRO(max);
 
 using GpuId = std::size_t;
 TBAG_CONSTEXPR GpuId const UNKNOWN_GPU_ID = std::numeric_limits<GpuId>::max();
+
+static_assert(sizeof(GpuId) >= sizeof(void*), "The GpuId size is too small.");
 
 #if defined(TBAG_COMP_MSVC)
 # if defined(__RESTORE_MIN__)
@@ -152,7 +155,7 @@ using GpuContexts  = std::vector<GpuContext>;
 struct GpuTypeMismatchException : public std::exception
 {
     virtual const char * what() const TBAG_NOEXCEPT override
-    { return "Gpu type mismatch exception"; }
+    { return "Mismatch exception of GPU type."; }
 };
 
 struct TBAG_API GpuBackend
