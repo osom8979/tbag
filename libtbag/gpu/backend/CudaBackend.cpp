@@ -63,7 +63,7 @@ GpuPlatformInfo CudaBackend::getPlatformInfo(GpuPlatform const & platform) const
     if (driver_code == cudaSuccess) {
         info.version += string::fformat("DRIVER({})", driver_version);
     } else {
-        tDLogE("CudaBackend::getPlatformInfo() CUDA driver version error: {}", ::cudaGetErrorString(driver_code));
+        tDLogE("CudaBackend::getPlatformInfo() CUDA cudaDriverGetVersion() error: {}", ::cudaGetErrorString(driver_code));
     }
 
     int runtime_version = 0;
@@ -71,7 +71,7 @@ GpuPlatformInfo CudaBackend::getPlatformInfo(GpuPlatform const & platform) const
     if (runtime_code == cudaSuccess) {
         info.version += string::fformat("RUNTIME({})", runtime_version);
     } else {
-        tDLogE("CudaBackend::getPlatformInfo() CUDA runtime version error: {}", ::cudaGetErrorString(runtime_code));
+        tDLogE("CudaBackend::getPlatformInfo() CUDA cudaRuntimeGetVersion() error: {}", ::cudaGetErrorString(runtime_code));
     }
 
 # if defined(CUDA_VERSION)
@@ -88,7 +88,7 @@ int CudaBackend::getDeviceCount(GpuPlatform const & platform) const
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaGetDeviceCount(&result);
     if (code != cudaSuccess) {
-        tDLogE("CudaBackend::getDeviceCount() CUDA error: {}", ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::getDeviceCount() CUDA cudaGetDeviceCount() error: {}", ::cudaGetErrorString(code));
         return 0;
     }
 #endif
@@ -115,7 +115,7 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
     if (code == cudaSuccess) {
         info.name = prop.name;
     } else {
-        tDLogE("CudaBackend::getDeviceInfo() CUDA error: {}", ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::getDeviceInfo() CUDA cudaGetDeviceProperties() error: {}", ::cudaGetErrorString(code));
     }
 #endif
     return info;
@@ -144,7 +144,7 @@ GpuQueue CudaBackend::createQueue(GpuContext const & context) const
     if (code == cudaSuccess) {
         result.queue_id = (GpuId)stream;
     } else {
-        tDLogE("CudaBackend::createQueue() CUDA error: {}", ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::createQueue() CUDA cudaStreamCreate() error: {}", ::cudaGetErrorString(code));
     }
 #endif
     return result;
@@ -161,7 +161,7 @@ bool CudaBackend::releaseQueue(GpuQueue & queue) const
     cudaError_t code = ::cudaStreamDestroy((cudaStream_t)queue.queue_id);
     queue.queue_id = UNKNOWN_GPU_ID;
     if (code != cudaSuccess) {
-        tDLogE("CudaBackend::releaseQueue() CUDA error: {}", ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::releaseQueue() CUDA cudaStreamDestroy() error: {}", ::cudaGetErrorString(code));
         return false;
     }
 #endif
@@ -177,7 +177,7 @@ GpuMemory CudaBackend::malloc(GpuContext const & context, std::size_t size) cons
     if (code == cudaSuccess) {
         memory.size = size;
     } else {
-        tDLogE("CudaBackend::malloc() CUDA error: {}", ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::malloc() CUDA cudaMalloc() error: {}", ::cudaGetErrorString(code));
     }
 #endif
     return memory;
@@ -195,7 +195,7 @@ bool CudaBackend::free(GpuMemory & memory) const
     memory.data = nullptr;
     memory.size = 0;
     if (code != cudaSuccess) {
-        tDLogE("CudaBackend::free() CUDA error: {}", ::cudaGetErrorString(code));
+        tDLogE("CudaBackend::free() CUDA cudaFree() error: {}", ::cudaGetErrorString(code));
         return false;
     }
 #endif
