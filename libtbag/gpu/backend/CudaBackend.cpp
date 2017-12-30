@@ -53,6 +53,7 @@ GpuPlatforms CudaBackend::getPlatformList() const
 
 GpuPlatformInfo CudaBackend::getPlatformInfo(GpuPlatform const & platform) const
 {
+    checkType(platform.type);
     GpuPlatformInfo info(platform);
     info.name   = "CUDA";
     info.vendor = "NVIDIA";
@@ -82,6 +83,7 @@ GpuPlatformInfo CudaBackend::getPlatformInfo(GpuPlatform const & platform) const
 
 int CudaBackend::getDeviceCount(GpuPlatform const & platform) const
 {
+    checkType(platform.type);
     int result = 0;
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaGetDeviceCount(&result);
@@ -95,6 +97,7 @@ int CudaBackend::getDeviceCount(GpuPlatform const & platform) const
 
 GpuDevices CudaBackend::getDeviceList(GpuPlatform const & platform) const
 {
+    checkType(platform.type);
     GpuDevices result;
     for (int i = 0; i < getDeviceCount(platform); ++i) {
         result.emplace_back(GpuDevice(platform, i));
@@ -104,6 +107,7 @@ GpuDevices CudaBackend::getDeviceList(GpuPlatform const & platform) const
 
 GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
 {
+    checkType(device.type);
     GpuDeviceInfo info(device);
 #if defined(USE_CUDA)
     cudaDeviceProp prop;
@@ -119,17 +123,20 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
 
 GpuContext CudaBackend::createContext(GpuDevice const & device) const
 {
+    checkType(device.type);
     return GpuContext(device, 0);
 }
 
 bool CudaBackend::releaseContext(GpuContext & context) const
 {
+    checkType(context.type);
     context.context_id = UNKNOWN_GPU_ID;
     return true;
 }
 
 GpuMemory CudaBackend::alloc(GpuContext const & context, std::size_t size) const
 {
+    checkType(context.type);
     GpuMemory memory(context);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMalloc((void**)&memory.data, size);
@@ -145,10 +152,14 @@ GpuMemory CudaBackend::alloc(GpuContext const & context, std::size_t size) const
 
 bool CudaBackend::free(GpuMemory & memory) const
 {
+    checkType(memory.type);
+    if (memory.existsMemory() == false) {
+        tDLogE("CudaBackend::free() Illegal memory.");
+        return false;
+    }
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaFree(memory.data);
     memory.data = nullptr;
-    memory.memory_id = UNKNOWN_GPU_ID;
     memory.size = 0;
     if (code != cudaSuccess) {
         tDLogE("CudaBackend::free() CUDA error: {}", ::cudaGetErrorString(code));

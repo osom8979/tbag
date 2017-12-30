@@ -124,18 +124,25 @@ struct GpuContext : public GpuDevice
 
 struct GpuMemory : public GpuContext
 {
-    GpuId memory_id;
     void * data;
     std::size_t size;
 
     GpuMemory() : GpuMemory(GpuContext()) { /* EMPTY. */ }
-    GpuMemory(GpuContext const & c) : GpuContext(c), memory_id(UNKNOWN_GPU_ID), data(nullptr), size(0) { /* EMPTY. */ }
+    GpuMemory(GpuContext const & c) : GpuContext(c), data(nullptr), size(0) { /* EMPTY. */ }
     ~GpuMemory() { /* EMPTY. */ }
+
+    inline bool existsMemory() const TBAG_NOEXCEPT { return data != nullptr && size > 0U; }
 };
 
 using GpuPlatforms = std::vector<GpuPlatform>;
 using GpuDevices   = std::vector<GpuDevice>;
 using GpuContexts  = std::vector<GpuContext>;
+
+struct GpuTypeMismatchException : public std::exception
+{
+    virtual const char * what() const TBAG_NOEXCEPT override
+    { return "Gpu type mismatch exception"; }
+};
 
 struct TBAG_API GpuBackend
 {
@@ -162,6 +169,7 @@ struct TBAG_API GpuBackend
     // Non-virtual methods.
     // --------------------
 
+    void checkType(GpuBackendType type) const throw(GpuTypeMismatchException);
     char const * getTypeString() const TBAG_NOEXCEPT;
 };
 

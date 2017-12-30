@@ -80,6 +80,7 @@ GpuPlatforms OpenCLBackend::getPlatformList() const
 
 GpuPlatformInfo OpenCLBackend::getPlatformInfo(GpuPlatform const & platform) const
 {
+    checkType(platform.type);
     GpuPlatformInfo info(platform);
 #if defined(USE_OPENCL)
     auto get_platform_info = [](cl_platform_id id, cl_platform_info info) -> std::string {
@@ -104,6 +105,7 @@ GpuPlatformInfo OpenCLBackend::getPlatformInfo(GpuPlatform const & platform) con
 
 int OpenCLBackend::getDeviceCount(GpuPlatform const & platform) const
 {
+    checkType(platform.type);
     int result = 0;
 #if defined(USE_OPENCL)
     cl_uint num_devices;
@@ -119,6 +121,7 @@ int OpenCLBackend::getDeviceCount(GpuPlatform const & platform) const
 
 GpuDevices OpenCLBackend::getDeviceList(GpuPlatform const & platform) const
 {
+    checkType(platform.type);
     GpuDevices result;
 #if defined(USE_OPENCL)
     std::vector<cl_device_id> devices((std::size_t)getDeviceCount(platform));
@@ -137,6 +140,7 @@ GpuDevices OpenCLBackend::getDeviceList(GpuPlatform const & platform) const
 
 GpuDeviceInfo OpenCLBackend::getDeviceInfo(GpuDevice const & device) const
 {
+    checkType(device.type);
     GpuDeviceInfo info(device);
 #if defined(USE_OPENCL)
     auto get_device_info = [](cl_device_id id, cl_device_info info) -> std::string {
@@ -157,6 +161,7 @@ GpuDeviceInfo OpenCLBackend::getDeviceInfo(GpuDevice const & device) const
 
 GpuContext OpenCLBackend::createContext(GpuDevice const & device) const
 {
+    checkType(device.type);
     GpuContext result(device);
 #if defined(USE_OPENCL)
     cl_int code;
@@ -172,6 +177,7 @@ GpuContext OpenCLBackend::createContext(GpuDevice const & device) const
 
 bool OpenCLBackend::releaseContext(GpuContext & context) const
 {
+    checkType(context.type);
 #if defined(USE_OPENCL)
     cl_int code = ::clReleaseContext((cl_context)context.context_id);
     context.context_id = UNKNOWN_GPU_ID;
@@ -185,15 +191,36 @@ bool OpenCLBackend::releaseContext(GpuContext & context) const
 
 GpuMemory OpenCLBackend::alloc(GpuContext const & context, std::size_t size) const
 {
-    GpuMemory memory(context);
+    checkType(context.type);
+    GpuMemory result(context);
 #if defined(USE_OPENCL)
+    cl_int code;
+    cl_mem memory = ::clCreateBuffer((cl_context)context.context_id, CL_MEM_READ_WRITE, size, nullptr, &code);
+    if (code == CL_SUCCESS) {
+        result.data = (void*)memory;
+        result.size = size;
+    } else {
+        tDLogE("OpenCLBackend::alloc() OpenCL clCreateBuffer() error code: {}", code);
+    }
 #endif
-    return memory;
+    return result;
 }
 
 bool OpenCLBackend::free(GpuMemory & memory) const
 {
+    checkType(memory.type);
+    if (memory.existsMemory() == false) {
+        tDLogE("OpenCLBackend::free() Illegal memory.");
+        return false;
+    }
 #if defined(USE_OPENCL)
+    cl_int code = ::clReleaseMemObject((cl_mem)memory.data);
+    memory.data = nullptr;
+    memory.size = 0;
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLBackend::free() OpenCL clReleaseMemObject() error code: {}", code);
+        return false;
+    }
 #endif
     return true;
 }

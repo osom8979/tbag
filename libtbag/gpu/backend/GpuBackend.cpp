@@ -27,6 +27,17 @@ char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT
     return "UNKNOWN";
 }
 
+// --------------------------
+// GpuBackend implementation.
+// --------------------------
+
+void GpuBackend::checkType(GpuBackendType type) const throw(GpuTypeMismatchException)
+{
+    if (type != getType()) {
+        throw GpuTypeMismatchException();
+    }
+}
+
 char const * GpuBackend::getTypeString() const TBAG_NOEXCEPT
 {
     return getGpuBackendString(getType());
