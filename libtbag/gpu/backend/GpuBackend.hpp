@@ -148,6 +148,26 @@ struct GpuMemory : public GpuContext
     inline bool existsMemory() const TBAG_NOEXCEPT { return data != nullptr && size > 0U; }
 };
 
+enum class HostMemoryFlag
+{
+    HMF_UNINITIALIZED,
+    HMF_DEFAULT,
+    HMF_PINNED,
+};
+
+struct HostMemory : public GpuContext
+{
+    void * data;
+    std::size_t size;
+    HostMemoryFlag flag;
+
+    HostMemory() : HostMemory(GpuContext()) { /* EMPTY. */ }
+    HostMemory(GpuContext const & c) : GpuContext(c), data(nullptr), size(0), flag(HostMemoryFlag::HMF_UNINITIALIZED) { /* EMPTY. */ }
+    ~HostMemory() { /* EMPTY. */ }
+
+    inline bool existsMemory() const TBAG_NOEXCEPT { return data != nullptr && size > 0U; }
+};
+
 using GpuPlatforms = std::vector<GpuPlatform>;
 using GpuDevices   = std::vector<GpuDevice>;
 using GpuContexts  = std::vector<GpuContext>;
@@ -179,8 +199,18 @@ struct TBAG_API GpuBackend
     virtual GpuQueue createQueue(GpuContext const & context) const = 0;
     virtual bool    releaseQueue(GpuQueue         &   queue) const = 0;
 
+    // -------
+    // Memory.
+    // -------
+
     virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const = 0;
-    virtual bool free(GpuMemory & memory) const = 0;
+    virtual bool        free(GpuMemory & memory) const = 0;
+
+    virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_PINNED) const = 0;
+    virtual bool         freeHost(HostMemory & memory) const = 0;
+
+    virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size) const = 0;
+    virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size) const = 0;
 
     // --------------------
     // Non-virtual methods.

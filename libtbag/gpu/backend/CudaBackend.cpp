@@ -202,6 +202,35 @@ bool CudaBackend::free(GpuMemory & memory) const
     return true;
 }
 
+HostMemory CudaBackend::mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag) const
+{
+    checkType(context.type);
+    HostMemory result(context);
+    return result;
+}
+
+bool CudaBackend::freeHost(HostMemory & memory) const
+{
+    checkType(memory.type);
+    return true;
+}
+
+bool CudaBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    return true;
+}
+
+bool CudaBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    return true;
+}
+
 } // namespace backend
 } // namespace gpu
 

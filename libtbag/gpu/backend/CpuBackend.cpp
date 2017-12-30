@@ -22,6 +22,21 @@ namespace backend {
 namespace __impl {
 // ---------------
 
+struct CpuContextBackend
+{
+    bool verbose;
+
+    CpuContextBackend(bool v = false) : verbose(v)
+    {
+        tDLogIfD(verbose, "CpuContextBackend::CpuContextBackend() ID: @{}", (void*)this);
+    }
+
+    ~CpuContextBackend()
+    {
+        tDLogIfD(verbose, "CpuContextBackend::~CpuContextBackend() ID: @{}", (void*)this);
+    }
+};
+
 struct CpuQueueBackend
 {
     bool verbose;
@@ -104,12 +119,20 @@ GpuDeviceInfo CpuBackend::getDeviceInfo(GpuDevice const & device) const
 GpuContext CpuBackend::createContext(GpuDevice const & device) const
 {
     checkType(device.type);
-    return GpuContext(device, 0);
+    GpuContext result(device);
+    auto * context = new __impl::CpuContextBackend();
+    result.context_id = (GpuId)context;
+    return result;
 }
 
 bool CpuBackend::releaseContext(GpuContext & context) const
 {
     checkType(context.type);
+    if (context.isUnknownContext()) {
+        tDLogE("CpuBackend::releaseContext() Illegal queue.");
+        return false;
+    }
+    delete ((__impl::CpuContextBackend*)context.context_id);
     context.context_id = UNKNOWN_GPU_ID;
     return true;
 }
@@ -154,6 +177,46 @@ bool CpuBackend::free(GpuMemory & memory) const
     ::free(memory.data);
     memory.data = nullptr;
     memory.size = 0;
+    return true;
+}
+
+HostMemory CpuBackend::mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag) const
+{
+    checkType(context.type);
+    HostMemory memory(context);
+    memory.data = ::malloc(size);
+    memory.size = size;
+    memory.flag = flag;
+    return memory;
+}
+
+bool CpuBackend::freeHost(HostMemory & memory) const
+{
+    checkType(memory.type);
+    if (memory.existsMemory() == false) {
+        tDLogE("CpuBackend::freeHost() Illegal memory.");
+        return false;
+    }
+    ::free(memory.data);
+    memory.data = nullptr;
+    memory.size = 0;
+    memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
+    return true;
+}
+
+bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    return true;
+}
+
+bool CpuBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
     return true;
 }
 
