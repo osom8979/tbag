@@ -232,12 +232,12 @@ GpuMemory OpenCLBackend::malloc(GpuContext const & context, std::size_t size) co
 #if defined(USE_OPENCL)
     cl_int code;
     cl_mem memory = ::clCreateBuffer((cl_context)context.context_id, CL_MEM_READ_WRITE, size, nullptr, &code);
-    if (code == CL_SUCCESS) {
-        result.data = (void*)memory;
-        result.size = size;
-    } else {
+    if (code != CL_SUCCESS) {
         tDLogE("OpenCLBackend::malloc() OpenCL clCreateBuffer() error code: {}", code);
+        return result;
     }
+    result.data = (void*)memory;
+    result.size = size;
 #endif
     return result;
 }
@@ -249,29 +249,71 @@ bool OpenCLBackend::free(GpuMemory & memory) const
         tDLogE("OpenCLBackend::free() Illegal memory.");
         return false;
     }
+
 #if defined(USE_OPENCL)
-    cl_int code = ::clReleaseMemObject((cl_mem)memory.data);
+    cl_int code;
+    code = ::clReleaseMemObject((cl_mem)memory.data);
     memory.data = nullptr;
     memory.size = 0;
-    if (code != CL_SUCCESS) {
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
         tDLogE("OpenCLBackend::free() OpenCL clReleaseMemObject() error code: {}", code);
-        return false;
     }
 #endif
-    return true;
+    return false;
 }
 
 HostMemory OpenCLBackend::mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag) const
 {
     checkType(context.type);
     HostMemory result(context);
+#if defined(USE_OPENCL)
+    cl_mem_flags memory_flags;
+    switch (flag) {
+    case HostMemoryFlag::HMF_UNINITIALIZED:
+        return result;
+    case HostMemoryFlag::HMF_PINNED:
+        memory_flags = CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR;
+        break;
+    default:
+        return result;
+    }
+
+    cl_int code;
+    cl_mem memory = ::clCreateBuffer((cl_context)context.context_id, memory_flags, size, nullptr, &code);
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLBackend::mallocHost() OpenCL clCreateBuffer() error code: {}", code);
+        return result;
+    }
+    result.data = (void*)memory;
+    result.size = size;
+    result.flag = flag;
+#endif
     return result;
 }
 
 bool OpenCLBackend::freeHost(HostMemory & memory) const
 {
     checkType(memory.type);
-    return true;
+    if (memory.existsMemory() == false) {
+        tDLogE("OpenCLBackend::freeHost() Illegal memory.");
+        return false;
+    }
+
+#if defined(USE_OPENCL)
+    cl_int code;
+    code = ::clReleaseMemObject((cl_mem)memory.data);
+    memory.data = nullptr;
+    memory.size = 0;
+    memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::freeHost() OpenCL clReleaseMemObject() error code: {}", code);
+    }
+#endif
+    return false;
 }
 
 bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const

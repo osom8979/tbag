@@ -84,11 +84,16 @@ TEST(GpuTest, CreateMemory)
         ASSERT_FALSE(context.isUnknownContext());
 
         std::size_t const ALLOC_SIZE = 1024;
-        auto memory = gpu->malloc(context, ALLOC_SIZE);
+        auto gpu_memory = gpu->malloc(context, ALLOC_SIZE);
 
-        ASSERT_TRUE(memory.existsMemory());
-        ASSERT_EQ(ALLOC_SIZE, memory.size);
-        ASSERT_TRUE(gpu->free(memory));
+        ASSERT_TRUE(gpu_memory.existsMemory());
+        ASSERT_EQ(ALLOC_SIZE, gpu_memory.size);
+        ASSERT_TRUE(gpu->free(gpu_memory));
+
+        auto host_memory = gpu->mallocHost(context, ALLOC_SIZE);
+        ASSERT_TRUE(host_memory.existsMemory());
+        ASSERT_EQ(ALLOC_SIZE, host_memory.size);
+        ASSERT_TRUE(gpu->freeHost(host_memory));
     });
 }
 

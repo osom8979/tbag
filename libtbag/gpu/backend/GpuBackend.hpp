@@ -151,7 +151,6 @@ struct GpuMemory : public GpuContext
 enum class HostMemoryFlag
 {
     HMF_UNINITIALIZED,
-    HMF_DEFAULT,
     HMF_PINNED,
 };
 
