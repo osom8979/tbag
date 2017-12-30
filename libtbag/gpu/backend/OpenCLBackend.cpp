@@ -225,6 +225,18 @@ bool OpenCLBackend::free(GpuMemory & memory) const
     return true;
 }
 
+GpuQueue OpenCLBackend::createQueue(GpuContext const & context) const
+{
+    checkType(context.type);
+    return GpuQueue(context);
+}
+
+bool OpenCLBackend::releaseQueue(GpuQueue & queue) const
+{
+    checkType(queue.type);
+    return false;
+}
+
 } // namespace backend
 } // namespace gpu
 

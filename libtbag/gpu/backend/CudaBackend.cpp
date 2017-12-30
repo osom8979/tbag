@@ -168,6 +168,18 @@ bool CudaBackend::free(GpuMemory & memory) const
     return true;
 }
 
+GpuQueue CudaBackend::createQueue(GpuContext const & context) const
+{
+    checkType(context.type);
+    return GpuQueue(context);
+}
+
+bool CudaBackend::releaseQueue(GpuQueue & queue) const
+{
+    checkType(queue.type);
+    return false;
+}
+
 } // namespace backend
 } // namespace gpu
 

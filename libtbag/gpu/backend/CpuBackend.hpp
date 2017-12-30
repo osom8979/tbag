@@ -48,6 +48,9 @@ struct TBAG_API CpuBackend : public GpuBackend
     virtual GpuContext createContext(GpuDevice const &  device) const override;
     virtual bool      releaseContext(GpuContext      & context) const override;
 
+    virtual GpuQueue createQueue(GpuContext const & context) const override;
+    virtual bool    releaseQueue(GpuQueue         &   queue) const override;
+
     virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const override;
     virtual bool free(GpuMemory & memory) const override;
 };

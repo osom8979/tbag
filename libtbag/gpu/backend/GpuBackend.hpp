@@ -122,6 +122,17 @@ struct GpuContext : public GpuDevice
     inline bool isUnknownContext() const TBAG_NOEXCEPT { return context_id == UNKNOWN_GPU_ID; }
 };
 
+struct GpuQueue : public GpuContext
+{
+    GpuId queue_id;
+
+    GpuQueue() : GpuQueue(GpuContext()) { /* EMPTY. */ }
+    GpuQueue(GpuContext const & c, GpuId g = UNKNOWN_GPU_ID) : GpuContext(c), queue_id(g) { /* EMPTY. */ }
+    ~GpuQueue() { /* EMPTY. */ }
+
+    inline bool isUnknownQueue() const TBAG_NOEXCEPT { return queue_id == UNKNOWN_GPU_ID; }
+};
+
 struct GpuMemory : public GpuContext
 {
     void * data;
@@ -161,6 +172,9 @@ struct TBAG_API GpuBackend
 
     virtual GpuContext createContext(GpuDevice const &  device) const = 0;
     virtual bool      releaseContext(GpuContext      & context) const = 0;
+
+    virtual GpuQueue createQueue(GpuContext const & context) const = 0;
+    virtual bool    releaseQueue(GpuQueue         &   queue) const = 0;
 
     virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const = 0;
     virtual bool free(GpuMemory & memory) const = 0;
