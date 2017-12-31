@@ -272,13 +272,13 @@ GpuEvent CudaBackend::createEvent(GpuQueue const & queue) const
 {
     GpuEvent result(queue);
 #if defined(USE_CUDA)
-    cudaError_t start_code = ::cudaEventCreate((cudaEvent_t*)&result.start, ::cudaEventDefault);
+    cudaError_t start_code = ::cudaEventCreate((cudaEvent_t*)&result.start);
     if (start_code != cudaSuccess) {
         tDLogE("CudaBackend::createEvent() CUDA cudaEventCreate(start) error: {}", ::cudaGetErrorString(start_code));
         return result;
     }
 
-    cudaError_t stop_code = ::cudaEventCreate((cudaEvent_t*)&result.stop, ::cudaEventDefault);
+    cudaError_t stop_code = ::cudaEventCreate((cudaEvent_t*)&result.stop);
     if (stop_code != cudaSuccess) {
         ::cudaEventDestroy((cudaEvent_t)result.start);
         tDLogE("CudaBackend::createEvent() CUDA cudaEventCreate(stop) error: {}", ::cudaGetErrorString(stop_code));
@@ -291,8 +291,8 @@ GpuEvent CudaBackend::createEvent(GpuQueue const & queue) const
 bool CudaBackend::syncEvent(GpuEvent const & event) const
 {
 #if defined(USE_CUDA)
-    cudaError_t start_code = ::cudaEventSynchronize((cudaEvent_t)result.start);
-    cudaError_t  stop_code = ::cudaEventSynchronize((cudaEvent_t)result.stop);
+    cudaError_t start_code = ::cudaEventSynchronize((cudaEvent_t)event.start);
+    cudaError_t  stop_code = ::cudaEventSynchronize((cudaEvent_t)event.stop);
     if (start_code == cudaSuccess && stop_code == cudaSuccess) {
         return true;
     } else {
@@ -308,8 +308,8 @@ bool CudaBackend::elapsedEvent(GpuEvent & event, float * millisec) const
 #if defined(USE_CUDA)
     float elapsed_time = 0.0f;
     cudaError_t code = ::cudaEventElapsedTime(&elapsed_time,
-                                              (cudaEvent_t)event->start,
-                                              (cudaEvent_t)event->stop);
+                                              (cudaEvent_t)event.start,
+                                              (cudaEvent_t)event.stop);
     if (code == cudaSuccess) {
         if (millisec != nullptr) {
             *millisec = elapsed_time;
@@ -325,8 +325,10 @@ bool CudaBackend::elapsedEvent(GpuEvent & event, float * millisec) const
 bool CudaBackend::releaseEvent(GpuEvent & event) const
 {
 #if defined(USE_CUDA)
-    cudaError_t start_code = ::cudaEventDestroy((cudaEvent_t)result.start);
-    cudaError_t  stop_code = ::cudaEventDestroy((cudaEvent_t)result.stop);
+    cudaError_t start_code = ::cudaEventDestroy((cudaEvent_t)event.start);
+    cudaError_t  stop_code = ::cudaEventDestroy((cudaEvent_t)event.stop);
+    event.start = UNKNOWN_GPU_ID;
+    event.stop  = UNKNOWN_GPU_ID;
     if (start_code == cudaSuccess && stop_code == cudaSuccess) {
         return true;
     } else {

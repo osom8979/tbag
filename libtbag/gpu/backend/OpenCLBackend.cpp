@@ -331,6 +331,8 @@ bool OpenCLBackend::elapsedEvent(GpuEvent & event, float * millisec) const
 
 bool OpenCLBackend::releaseEvent(GpuEvent & event) const
 {
+    event.start = UNKNOWN_GPU_ID;
+    event.stop  = UNKNOWN_GPU_ID;
     return true;
 }
 
