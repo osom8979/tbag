@@ -20,6 +20,7 @@
 #include <vector>
 
 //#define TBAG_OPENCL_BACKEND_DEBUGGING
+#define TBAG_OPENCL_BACKEND_PROFILE
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,12 +42,23 @@ TBAG_CONSTEXPR static bool isOpenCLBackendVerbose() TBAG_NOEXCEPT
 #endif
 }
 
-bool write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, bool blocking)
+TBAG_CONSTEXPR static bool isOpenCLBackendProfile() TBAG_NOEXCEPT
+{
+#if defined(TBAG_OPENCL_BACKEND_PROFILE)
+    return true;
+#else
+    return false;
+#endif
+}
+
+static bool write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem,
+           std::size_t size, bool blocking, GpuEvent * event = nullptr)
 {
 #if defined(USE_OPENCL)
     cl_int code = ::clEnqueueWriteBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
                                          (blocking ? CL_TRUE : CL_FALSE),
-                                         0, host_mem.size, host_mem.data, 0, nullptr, nullptr);
+                                         0, host_mem.size, host_mem.data, 0, nullptr,
+                                         (cl_event*)(event == nullptr ? nullptr : &event->event_id));
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -56,12 +68,14 @@ bool write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, s
     return false;
 }
 
-bool read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, bool blocking)
+static bool read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem,
+          std::size_t size, bool blocking, GpuEvent * event = nullptr)
 {
 #if defined(USE_OPENCL)
     cl_int code = ::clEnqueueReadBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
                                         (blocking ? CL_TRUE : CL_FALSE),
-                                        0, host_mem.size, host_mem.data, 0, nullptr, nullptr);
+                                        0, host_mem.size, host_mem.data, 0, nullptr,
+                                        (cl_event*)(event == nullptr ? nullptr : &event->event_id));
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -244,10 +258,13 @@ GpuQueue OpenCLBackend::createQueue(GpuContext const & context) const
     GpuQueue result(context);
 #if defined(USE_OPENCL)
     cl_int code;
+    cl_command_queue_properties properties = 0;
+    if (__impl::isOpenCLBackendProfile()) {
+        properties |= CL_QUEUE_PROFILING_ENABLE;
+    }
     cl_command_queue queue = ::clCreateCommandQueue((cl_context)context.context_id,
                                                     (cl_device_id)context.device_id,
-                                                    (cl_command_queue_properties)0,
-                                                    &code);
+                                                    properties, &code);
     if (code == CL_SUCCESS) {
         result.queue_id = (GpuId)queue;
     } else {
@@ -272,6 +289,22 @@ bool OpenCLBackend::releaseQueue(GpuQueue & queue) const
         return false;
     }
 #endif
+    return true;
+}
+
+GpuEvent OpenCLBackend::createEvent(GpuQueue const & queue) const
+{
+    GpuEvent result(queue);
+    return result;
+}
+
+bool OpenCLBackend::syncEvent(GpuEvent const & event) const
+{
+    return true;
+}
+
+bool OpenCLBackend::releaseEvent(GpuEvent & event) const
+{
     return true;
 }
 
@@ -351,7 +384,7 @@ bool OpenCLBackend::freeHost(HostMemory & memory) const
     return true;
 }
 
-bool OpenCLBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+bool OpenCLBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -361,10 +394,10 @@ bool OpenCLBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory cons
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::write(queue, gpu_mem, host_mem, size, true);
+    return __impl::write(queue, gpu_mem, host_mem, size, true, event);
 }
 
-bool OpenCLBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+bool OpenCLBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -374,10 +407,10 @@ bool OpenCLBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::read(queue, gpu_mem, host_mem, size, true);
+    return __impl::read(queue, gpu_mem, host_mem, size, true, event);
 }
 
-bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -387,10 +420,10 @@ bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemo
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::write(queue, gpu_mem, host_mem, size, false);
+    return __impl::write(queue, gpu_mem, host_mem, size, false, event);
 }
 
-bool OpenCLBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+bool OpenCLBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -400,7 +433,7 @@ bool OpenCLBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, Hos
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::read(queue, gpu_mem, host_mem, size, false);
+    return __impl::read(queue, gpu_mem, host_mem, size, false, event);
 }
 
 bool OpenCLBackend::flush(GpuQueue & queue) const

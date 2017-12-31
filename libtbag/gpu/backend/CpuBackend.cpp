@@ -172,6 +172,22 @@ bool CpuBackend::releaseQueue(GpuQueue & queue) const
     return true;
 }
 
+GpuEvent CpuBackend::createEvent(GpuQueue const & queue) const
+{
+    GpuEvent result(queue);
+    return result;
+}
+
+bool CpuBackend::syncEvent(GpuEvent const & event) const
+{
+    return true;
+}
+
+bool CpuBackend::releaseEvent(GpuEvent & event) const
+{
+    return true;
+}
+
 GpuMemory CpuBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
@@ -218,7 +234,7 @@ bool CpuBackend::freeHost(HostMemory & memory) const
     return true;
 }
 
-bool CpuBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+bool CpuBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -232,7 +248,7 @@ bool CpuBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const &
     return true;
 }
 
-bool CpuBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+bool CpuBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -246,7 +262,7 @@ bool CpuBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & 
     return true;
 }
 
-bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -260,7 +276,7 @@ bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory 
     return true;
 }
 
-bool CpuBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+bool CpuBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);

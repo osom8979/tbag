@@ -60,17 +60,21 @@ struct TBAG_API OpenCLBackend : public GpuBackend
     virtual GpuQueue createQueue(GpuContext const & context) const override;
     virtual bool    releaseQueue(GpuQueue         &   queue) const override;
 
+    virtual GpuEvent createEvent(GpuQueue const & queue) const override;
+    virtual bool       syncEvent(GpuEvent const & event) const override;
+    virtual bool    releaseEvent(GpuEvent       & event) const override;
+
     virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const override;
     virtual bool        free(GpuMemory & memory) const override;
 
     virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const override;
     virtual bool         freeHost(HostMemory & memory) const override;
 
-    virtual bool write(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size) const override;
-    virtual bool  read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size) const override;
+    virtual bool write(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual bool  read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size) const override;
-    virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size) const override;
+    virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
     virtual bool  flush(GpuQueue & queue) const override;
     virtual bool finish(GpuQueue & queue) const override;

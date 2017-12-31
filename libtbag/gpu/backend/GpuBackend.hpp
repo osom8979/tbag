@@ -136,6 +136,22 @@ struct GpuQueue : public GpuContext
     inline bool isUnknownQueue() const TBAG_NOEXCEPT { return queue_id == UNKNOWN_GPU_ID; }
 };
 
+struct GpuEvent : public GpuQueue
+{
+    GpuId event_id;
+    GpuId start;
+    GpuId stop;
+    float elapsed;
+
+    GpuEvent() : GpuEvent(GpuQueue()) { /* EMPTY. */ }
+    GpuEvent(GpuQueue const & q, GpuId e = UNKNOWN_GPU_ID)
+            : GpuQueue(q), event_id(e), start(0), stop(0), elapsed(0.0f) { /* EMPTY. */ }
+    ~GpuEvent() { /* EMPTY. */ }
+
+    inline bool isUnknownEvent() const TBAG_NOEXCEPT { return event_id == UNKNOWN_GPU_ID; }
+    inline float elapsedMilliseconds() const TBAG_NOEXCEPT { return elapsed; }
+};
+
 struct GpuMemory : public GpuContext
 {
     void * data;
@@ -199,6 +215,10 @@ struct TBAG_API GpuBackend
     virtual GpuQueue createQueue(GpuContext const & context) const = 0;
     virtual bool    releaseQueue(GpuQueue         &   queue) const = 0;
 
+    virtual GpuEvent createEvent(GpuQueue const & queue) const = 0;
+    virtual bool       syncEvent(GpuEvent const & event) const = 0;
+    virtual bool    releaseEvent(GpuEvent       & event) const = 0;
+
     // -------
     // Memory.
     // -------
@@ -209,11 +229,11 @@ struct TBAG_API GpuBackend
     virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const = 0;
     virtual bool         freeHost(HostMemory & memory) const = 0;
 
-    virtual bool write(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size) const = 0;
-    virtual bool  read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size) const = 0;
+    virtual bool write(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
+    virtual bool  read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
 
-    virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size) const = 0;
-    virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size) const = 0;
+    virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
+    virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
 
     // -------
     // Memory.

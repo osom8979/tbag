@@ -26,6 +26,53 @@ namespace backend {
 namespace __impl {
 // ---------------
 
+static void startEvent(GpuQueue & queue, GpuEvent * event)
+{
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaEventRecord((cudaEvent_t)event->start, (cudaStream_t)queue.queue_id);
+    if (code != cudaSuccess) {
+        tDLogW("startEvent() CUDA cudaEventRecord() error: {}", ::cudaGetErrorString(code));
+    }
+#endif
+}
+
+static void stopEvent(GpuQueue & queue, GpuEvent * event)
+{
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaEventRecord((cudaEvent_t)event->stop, (cudaStream_t)queue.queue_id);
+    if (code != cudaSuccess) {
+        tDLogW("stopEvent() CUDA cudaEventRecord() error: {}", ::cudaGetErrorString(code));
+    }
+
+    cudaError_t elapsed_code = ::cudaEventElapsedTime(&event->elapsed,
+                                                      (cudaEvent_t)event->start,
+                                                      (cudaEvent_t)event->stop);
+    if (elapsed_code != cudaSuccess) {
+        tDLogW("stopEvent() CUDA cudaEventElapsedTime() error: {}", ::cudaGetErrorString(elapsed_code));
+    }
+#endif
+}
+
+struct CudaEventGuard : private Noncopyable
+{
+    GpuQueue & queue;
+    GpuEvent * event;
+
+    CudaEventGuard(GpuQueue & q, GpuEvent * e = nullptr) : queue(q), event(e)
+    {
+        if (event != nullptr) {
+            startEvent(queue, event);
+        }
+    }
+
+    ~CudaEventGuard()
+    {
+        if (event != nullptr) {
+            stopEvent(queue, event);
+        }
+    }
+};
+
 struct CudaDeviceGuard : private Noncopyable
 {
     int  current_id;
@@ -228,6 +275,56 @@ bool CudaBackend::releaseQueue(GpuQueue & queue) const
     return true;
 }
 
+GpuEvent CudaBackend::createEvent(GpuQueue const & queue) const
+{
+    GpuEvent result(queue);
+#if defined(USE_CUDA)
+    cudaError_t start_code = ::cudaEventCreate((cudaEvent_t*)&result.start, ::cudaEventDefault);
+    if (start_code != cudaSuccess) {
+        tDLogE("CudaBackend::createEvent() CUDA cudaEventCreate(start) error: {}", ::cudaGetErrorString(start_code));
+        return result;
+    }
+
+    cudaError_t stop_code = ::cudaEventCreate((cudaEvent_t*)&result.stop, ::cudaEventDefault);
+    if (stop_code != cudaSuccess) {
+        ::cudaEventDestroy((cudaEvent_t)result.start);
+        tDLogE("CudaBackend::createEvent() CUDA cudaEventCreate(stop) error: {}", ::cudaGetErrorString(stop_code));
+        return result;
+    }
+#endif
+    return result;
+}
+
+bool CudaBackend::syncEvent(GpuEvent const & event) const
+{
+#if defined(USE_CUDA)
+    cudaError_t start_code = ::cudaEventSynchronize((cudaEvent_t)result.start);
+    cudaError_t  stop_code = ::cudaEventSynchronize((cudaEvent_t)result.stop);
+    if (start_code == cudaSuccess && stop_code == cudaSuccess) {
+        return true;
+    } else {
+        tDLogE("CudaBackend::syncEvent() CUDA cudaEventSynchronize() error: start({}), stop({})",
+               ::cudaGetErrorString(start_code), ::cudaGetErrorString(stop_code));
+    }
+#endif
+    return false;
+}
+
+bool CudaBackend::releaseEvent(GpuEvent & event) const
+{
+#if defined(USE_CUDA)
+    cudaError_t start_code = ::cudaEventDestroy((cudaEvent_t)result.start);
+    cudaError_t  stop_code = ::cudaEventDestroy((cudaEvent_t)result.stop);
+    if (start_code == cudaSuccess && stop_code == cudaSuccess) {
+        return true;
+    } else {
+        tDLogE("CudaBackend::releaseEvent() CUDA cudaEventDestroy() error: start({}), stop({})",
+               ::cudaGetErrorString(start_code), ::cudaGetErrorString(stop_code));
+    }
+#endif
+    return false;
+}
+
 GpuMemory CudaBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
@@ -302,7 +399,7 @@ bool CudaBackend::freeHost(HostMemory & memory) const
     return false;
 }
 
-bool CudaBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+bool CudaBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -312,6 +409,8 @@ bool CudaBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const 
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CudaEventGuard const EVENT_LOCK(queue, event);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMemcpy(gpu_mem.data, host_mem.data, size, ::cudaMemcpyHostToDevice);
     if (code == cudaSuccess) {
@@ -323,7 +422,7 @@ bool CudaBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const 
     return false;
 }
 
-bool CudaBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+bool CudaBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -333,6 +432,8 @@ bool CudaBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory &
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CudaEventGuard const EVENT_LOCK(queue, event);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMemcpy(host_mem.data, gpu_mem.data, size, ::cudaMemcpyDeviceToHost);
     if (code == cudaSuccess) {
@@ -344,7 +445,7 @@ bool CudaBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory &
     return false;
 }
 
-bool CudaBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+bool CudaBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -354,6 +455,8 @@ bool CudaBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CudaEventGuard const EVENT_LOCK(queue, event);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMemcpyAsync(gpu_mem.data, host_mem.data, size, ::cudaMemcpyHostToDevice,
                                          (cudaStream_t)queue.queue_id);
@@ -366,7 +469,7 @@ bool CudaBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory
     return true;
 }
 
-bool CudaBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+bool CudaBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
@@ -376,6 +479,8 @@ bool CudaBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostM
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CudaEventGuard const EVENT_LOCK(queue, event);
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMemcpyAsync(host_mem.data, gpu_mem.data, size, ::cudaMemcpyDeviceToHost,
                                          (cudaStream_t)queue.queue_id);
