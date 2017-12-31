@@ -151,6 +151,7 @@ struct GpuMemory : public GpuContext
 enum class HostMemoryFlag
 {
     HMF_UNINITIALIZED,
+    HMF_DEFAULT,
     HMF_PINNED,
 };
 
@@ -205,11 +206,21 @@ struct TBAG_API GpuBackend
     virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const = 0;
     virtual bool        free(GpuMemory & memory) const = 0;
 
-    virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_PINNED) const = 0;
+    virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const = 0;
     virtual bool         freeHost(HostMemory & memory) const = 0;
+
+    virtual bool write(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size) const = 0;
+    virtual bool  read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size) const = 0;
 
     virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size) const = 0;
     virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size) const = 0;
+
+    // -------
+    // Memory.
+    // -------
+
+    virtual bool  flush(GpuQueue & queue) const = 0;
+    virtual bool finish(GpuQueue & queue) const = 0;
 
     // --------------------
     // Non-virtual methods.

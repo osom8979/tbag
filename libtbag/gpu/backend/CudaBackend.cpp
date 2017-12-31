@@ -268,17 +268,11 @@ HostMemory CudaBackend::mallocHost(GpuContext const & context, std::size_t size,
 {
     checkType(context.type);
     HostMemory result(context);
-    __impl::CudaDeviceGuard const LOCK(context);
-#if defined(USE_CUDA)
-    switch (flag) {
-    case HostMemoryFlag::HMF_UNINITIALIZED:
-        return result;
-    case HostMemoryFlag::HMF_PINNED:
-        break;
-    default:
+    if (HostMemoryFlag::HMF_DEFAULT != flag && HostMemoryFlag::HMF_PINNED != flag) {
         return result;
     }
-
+    __impl::CudaDeviceGuard const LOCK(context);
+#if defined(USE_CUDA)
     cudaError_t code = ::cudaMallocHost((void**)&result.data, size);
     if (code == cudaSuccess) {
         result.size = size;
@@ -299,12 +293,55 @@ bool CudaBackend::freeHost(HostMemory & memory) const
     memory.data = nullptr;
     memory.size = 0;
     memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
-    if (code != cudaSuccess) {
+    if (code == cudaSuccess) {
+        return true;
+    } else {
         tDLogE("CudaBackend::free() CUDA cudaFreeHost() error: {}", ::cudaGetErrorString(code));
-        return false;
     }
 #endif
-    return true;
+    return false;
+}
+
+bool CudaBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CudaBackend::write() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaMemcpy(gpu_mem.data, host_mem.data, size, ::cudaMemcpyHostToDevice);
+    if (code == cudaSuccess) {
+        return true;
+    } else {
+        tDLogE("CudaBackend::write() CUDA cudaMemcpy() error: {}", ::cudaGetErrorString(code));
+    }
+#endif
+    return false;
+}
+
+bool CudaBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CudaBackend::read() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaMemcpy(host_mem.data, gpu_mem.data, size, ::cudaMemcpyDeviceToHost);
+    if (code == cudaSuccess) {
+        return true;
+    } else {
+        tDLogE("CudaBackend::read() CUDA cudaMemcpy() error: {}", ::cudaGetErrorString(code));
+    }
+#endif
+    return false;
 }
 
 bool CudaBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
@@ -312,6 +349,20 @@ bool CudaBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory
     checkType(queue.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CudaBackend::enqueueWrite() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaMemcpyAsync(gpu_mem.data, host_mem.data, size, ::cudaMemcpyHostToDevice,
+                                         (cudaStream_t)queue.queue_id);
+    if (code == cudaSuccess) {
+        return true;
+    } else {
+        tDLogE("CudaBackend::enqueueWrite() CUDA cudaMemcpyAsync() error: {}", ::cudaGetErrorString(code));
+    }
+#endif
     return true;
 }
 
@@ -320,7 +371,39 @@ bool CudaBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostM
     checkType(queue.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CudaBackend::enqueueRead() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaMemcpyAsync(host_mem.data, gpu_mem.data, size, ::cudaMemcpyDeviceToHost,
+                                         (cudaStream_t)queue.queue_id);
+    if (code == cudaSuccess) {
+        return true;
+    } else {
+        tDLogE("CudaBackend::enqueueRead() CUDA cudaMemcpyAsync() error: {}", ::cudaGetErrorString(code));
+    }
+#endif
     return true;
+}
+
+bool CudaBackend::flush(GpuQueue & queue) const
+{
+    return true;
+}
+
+bool CudaBackend::finish(GpuQueue & queue) const
+{
+#if defined(USE_CUDA)
+    cudaError_t code = ::cudaStreamSynchronize((cudaStream_t)queue.queue_id);
+    if (code == cudaSuccess) {
+        return true;
+    } else {
+        tDLogE("CudaBackend::finish() CUDA cudaDeviceSynchronize() error: {}", ::cudaGetErrorString(code));
+    }
+#endif
+    return false;
 }
 
 } // namespace backend

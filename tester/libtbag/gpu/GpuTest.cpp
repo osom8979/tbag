@@ -68,32 +68,64 @@ TEST(GpuTest, Information)
 TEST(GpuTest, CreateQueue)
 {
     __impl::run_all_if_supported([](UniqueGpu & gpu){
+        std::cout << "GPU type: " << gpu->getTypeString() << std::endl;
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());
 
         auto queue = gpu->createQueue(context);
         ASSERT_FALSE(queue.isUnknownQueue());
         ASSERT_TRUE(gpu->releaseQueue(queue));
+
+        ASSERT_TRUE(gpu->releaseContext(context));
+        ASSERT_TRUE(context.isUnknownContext());
     });
 }
 
 TEST(GpuTest, CreateMemory)
 {
     __impl::run_all_if_supported([](UniqueGpu & gpu){
+        std::cout << "GPU type: " << gpu->getTypeString() << std::endl;
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());
 
-        std::size_t const ALLOC_SIZE = 1024;
-        auto gpu_memory = gpu->malloc(context, ALLOC_SIZE);
+        auto queue = gpu->createQueue(context);
+        ASSERT_FALSE(queue.isUnknownQueue());
 
+        char        const TEST_DATA[] = "TEST_DATA";
+        std::size_t const TEST_SIZE   = sizeof(TEST_DATA);
+        std::size_t const ALLOC_SIZE  = 1024;
+
+        auto gpu_memory = gpu->malloc(context, ALLOC_SIZE);
         ASSERT_TRUE(gpu_memory.existsMemory());
         ASSERT_EQ(ALLOC_SIZE, gpu_memory.size);
-        ASSERT_TRUE(gpu->free(gpu_memory));
 
         auto host_memory = gpu->mallocHost(context, ALLOC_SIZE);
         ASSERT_TRUE(host_memory.existsMemory());
         ASSERT_EQ(ALLOC_SIZE, host_memory.size);
+
+        auto host_read = gpu->mallocHost(context, ALLOC_SIZE);
+        ASSERT_TRUE(host_read.existsMemory());
+        ASSERT_EQ(ALLOC_SIZE, host_read.size);
+
+        ::memcpy(host_memory.data, TEST_DATA, TEST_SIZE);
+        ASSERT_TRUE(gpu->write(queue, gpu_memory, host_memory, TEST_SIZE));
+        ASSERT_TRUE(gpu->finish(queue));
+
+        ASSERT_TRUE(gpu->read(queue, gpu_memory, host_read, TEST_SIZE));
+        ASSERT_TRUE(gpu->finish(queue));
+
+        std::string const READ_STRING((char*)host_read.data, TEST_SIZE);
+        ASSERT_STREQ(TEST_DATA, READ_STRING.c_str());
+
+        ASSERT_TRUE(gpu->free(gpu_memory));
         ASSERT_TRUE(gpu->freeHost(host_memory));
+        ASSERT_TRUE(gpu->freeHost(host_read));
+
+        ASSERT_TRUE(gpu->releaseQueue(queue));
+        ASSERT_TRUE(queue.isUnknownQueue());
+
+        ASSERT_TRUE(gpu->releaseContext(context));
+        ASSERT_TRUE(context.isUnknownContext());
     });
 }
 

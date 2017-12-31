@@ -19,12 +19,61 @@
 #include <array>
 #include <vector>
 
+//#define TBAG_OPENCL_DEBUGGING
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace gpu     {
 namespace backend {
+
+// ---------------
+namespace __impl {
+// ---------------
+
+TBAG_CONSTEXPR static bool isVerboseLog() TBAG_NOEXCEPT
+{
+#if defined(TBAG_OPENCL_DEBUGGING)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, bool blocking)
+{
+#if defined(USE_OPENCL)
+    cl_int code = ::clEnqueueWriteBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
+                                         (blocking ? CL_TRUE : CL_FALSE),
+                                         0, host_mem.size, host_mem.data, 0, nullptr, nullptr);
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::enqueueWrite() OpenCL clEnqueueWriteBuffer() error code: {}", code);
+    }
+#endif
+    return false;
+}
+
+bool read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, bool blocking)
+{
+#if defined(USE_OPENCL)
+    cl_int code = ::clEnqueueReadBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
+                                        (blocking ? CL_TRUE : CL_FALSE),
+                                        0, host_mem.size, host_mem.data, 0, nullptr, nullptr);
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::enqueueRead() OpenCL clEnqueueReadBuffer() error code: {}", code);
+    }
+#endif
+    return false;
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
 
 GpuBackendType OpenCLBackend::getType() const TBAG_NOEXCEPT
 {
@@ -217,6 +266,7 @@ bool OpenCLBackend::releaseQueue(GpuQueue & queue) const
     }
 #if defined(USE_OPENCL)
     cl_int code = ::clReleaseCommandQueue((cl_command_queue)queue.queue_id);
+    queue.queue_id = UNKNOWN_GPU_ID;
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLBackend::releaseQueue() OpenCL clReleaseCommandQueue() error code: {}", code);
         return false;
@@ -238,6 +288,8 @@ GpuMemory OpenCLBackend::malloc(GpuContext const & context, std::size_t size) co
     }
     result.data = (void*)memory;
     result.size = size;
+    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::malloc() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
+             result.data, result.size);
 #endif
     return result;
 }
@@ -251,6 +303,8 @@ bool OpenCLBackend::free(GpuMemory & memory) const
     }
 
 #if defined(USE_OPENCL)
+    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::free() OpenCL clReleaseMemObject() MEM:{} SIZE:{}",
+             memory.data, memory.size);
     cl_int code;
     code = ::clReleaseMemObject((cl_mem)memory.data);
     memory.data = nullptr;
@@ -268,28 +322,15 @@ HostMemory OpenCLBackend::mallocHost(GpuContext const & context, std::size_t siz
 {
     checkType(context.type);
     HostMemory result(context);
-#if defined(USE_OPENCL)
-    cl_mem_flags memory_flags;
-    switch (flag) {
-    case HostMemoryFlag::HMF_UNINITIALIZED:
-        return result;
-    case HostMemoryFlag::HMF_PINNED:
-        memory_flags = CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR;
-        break;
-    default:
+    if (HostMemoryFlag::HMF_DEFAULT != flag) {
         return result;
     }
 
-    cl_int code;
-    cl_mem memory = ::clCreateBuffer((cl_context)context.context_id, memory_flags, size, nullptr, &code);
-    if (code != CL_SUCCESS) {
-        tDLogE("OpenCLBackend::mallocHost() OpenCL clCreateBuffer() error code: {}", code);
-        return result;
-    }
-    result.data = (void*)memory;
+    result.data = ::malloc(size);
     result.size = size;
     result.flag = flag;
-#endif
+    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::mallocHost() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
+             result.data, result.size);
     return result;
 }
 
@@ -301,19 +342,39 @@ bool OpenCLBackend::freeHost(HostMemory & memory) const
         return false;
     }
 
-#if defined(USE_OPENCL)
-    cl_int code;
-    code = ::clReleaseMemObject((cl_mem)memory.data);
+    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::freeHost() OpenCL clReleaseMemObject() MEM:{} SIZE:{}",
+             memory.data, memory.size);
+    ::free(memory.data);
     memory.data = nullptr;
     memory.size = 0;
     memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
-    if (code == CL_SUCCESS) {
-        return true;
-    } else {
-        tDLogE("OpenCLBackend::freeHost() OpenCL clReleaseMemObject() error code: {}", code);
+    return true;
+}
+
+bool OpenCLBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("OpenCLBackend::write() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
     }
-#endif
-    return false;
+    return __impl::write(queue, gpu_mem, host_mem, size, true);
+}
+
+bool OpenCLBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("OpenCLBackend::read() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+    return __impl::read(queue, gpu_mem, host_mem, size, true);
 }
 
 bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
@@ -321,7 +382,12 @@ bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemo
     checkType(queue.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
-    return true;
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("OpenCLBackend::enqueueWrite() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+    return __impl::write(queue, gpu_mem, host_mem, size, false);
 }
 
 bool OpenCLBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
@@ -329,7 +395,38 @@ bool OpenCLBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, Hos
     checkType(queue.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
-    return true;
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("OpenCLBackend::enqueueRead() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+    return __impl::read(queue, gpu_mem, host_mem, size, false);
+}
+
+bool OpenCLBackend::flush(GpuQueue & queue) const
+{
+#if defined(USE_OPENCL)
+    cl_int code = ::clFlush((cl_command_queue)queue.queue_id);
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::flush() OpenCL clFlush() error code: {}", code);
+    }
+#endif
+    return false;
+}
+
+bool OpenCLBackend::finish(GpuQueue & queue) const
+{
+#if defined(USE_OPENCL)
+    cl_int code = ::clFinish((cl_command_queue)queue.queue_id);
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::finish() OpenCL clFinish() error code: {}", code);
+    }
+#endif
+    return false;
 }
 
 } // namespace backend

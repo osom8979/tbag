@@ -7,9 +7,12 @@
 
 #include <libtbag/gpu/backend/CpuBackend.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/util/Version.hpp>
 
 #include <cstdlib>
+#include <queue>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -141,7 +144,11 @@ GpuQueue CpuBackend::createQueue(GpuContext const & context) const
 {
     checkType(context.type);
     GpuQueue result(context);
-    auto * queue = new __impl::CpuQueueBackend();
+    if (context.isUnknownContext()) {
+        tDLogE("CpuBackend::releaseContext() Illegal queue.");
+        return result;
+    }
+    auto * queue = new __impl::CpuQueueBackend((__impl::CpuContextBackend*)context.context_id);
     result.queue_id = (GpuId)queue;
     return result;
 }
@@ -204,11 +211,45 @@ bool CpuBackend::freeHost(HostMemory & memory) const
     return true;
 }
 
+bool CpuBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CpuBackend::write() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+    ::memcpy(gpu_mem.data, host_mem.data, size);
+    return true;
+}
+
+bool CpuBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size) const
+{
+    checkType(queue.type);
+    checkType(gpu_mem.type);
+    checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CpuBackend::read() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+    ::memcpy(host_mem.data, gpu_mem.data, size);
+    return true;
+}
+
 bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size) const
 {
     checkType(queue.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CpuBackend::enqueueWrite() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+    ::memcpy(gpu_mem.data, host_mem.data, size);
     return true;
 }
 
@@ -217,6 +258,22 @@ bool CpuBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMe
     checkType(queue.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
+    if (gpu_mem.size < size || host_mem.size < size) {
+        tDLogE("CpuBackend::enqueueRead() Invalid size error: gpu({}), host({}), size({})",
+               gpu_mem.size, host_mem.size, size);
+        return false;
+    }
+    ::memcpy(host_mem.data, gpu_mem.data, size);
+    return true;
+}
+
+bool CpuBackend::flush(GpuQueue & queue) const
+{
+    return true;
+}
+
+bool CpuBackend::finish(GpuQueue & queue) const
+{
     return true;
 }
 
