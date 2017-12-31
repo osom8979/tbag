@@ -14,6 +14,8 @@
 #include <queue>
 #include <functional>
 
+//#define TBAG_CPU_BACKEND_DEBUGGING
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -25,33 +27,38 @@ namespace backend {
 namespace __impl {
 // ---------------
 
+TBAG_CONSTEXPR static bool isCpuBackendVerbose() TBAG_NOEXCEPT
+{
+#if defined(TBAG_CPU_BACKEND_DEBUGGING)
+    return true;
+#else
+    return false;
+#endif
+}
+
 struct CpuContextBackend
 {
-    bool verbose;
-
-    CpuContextBackend(bool v = false) : verbose(v)
+    CpuContextBackend()
     {
-        tDLogIfD(verbose, "CpuContextBackend::CpuContextBackend() ID: @{}", (void*)this);
+        tDLogIfD(isCpuBackendVerbose(), "CpuContextBackend::CpuContextBackend() ID: @{}", (void*)this);
     }
 
     ~CpuContextBackend()
     {
-        tDLogIfD(verbose, "CpuContextBackend::~CpuContextBackend() ID: @{}", (void*)this);
+        tDLogIfD(isCpuBackendVerbose(), "CpuContextBackend::~CpuContextBackend() ID: @{}", (void*)this);
     }
 };
 
 struct CpuQueueBackend
 {
-    bool verbose;
-
-    CpuQueueBackend(bool v = false) : verbose(v)
+    CpuQueueBackend()
     {
-        tDLogIfD(verbose, "CpuQueueBackend::CpuQueueBackend() ID: @{}", (void*)this);
+        tDLogIfD(isCpuBackendVerbose(), "CpuQueueBackend::CpuQueueBackend() ID: @{}", (void*)this);
     }
 
     ~CpuQueueBackend()
     {
-        tDLogIfD(verbose, "CpuQueueBackend::~CpuQueueBackend() ID: @{}", (void*)this);
+        tDLogIfD(isCpuBackendVerbose(), "CpuQueueBackend::~CpuQueueBackend() ID: @{}", (void*)this);
     }
 };
 
@@ -148,7 +155,7 @@ GpuQueue CpuBackend::createQueue(GpuContext const & context) const
         tDLogE("CpuBackend::releaseContext() Illegal queue.");
         return result;
     }
-    auto * queue = new __impl::CpuQueueBackend((__impl::CpuContextBackend*)context.context_id);
+    auto * queue = new __impl::CpuQueueBackend();
     result.queue_id = (GpuId)queue;
     return result;
 }

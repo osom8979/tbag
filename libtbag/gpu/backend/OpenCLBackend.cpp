@@ -19,7 +19,7 @@
 #include <array>
 #include <vector>
 
-//#define TBAG_OPENCL_DEBUGGING
+//#define TBAG_OPENCL_BACKEND_DEBUGGING
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,9 +32,9 @@ namespace backend {
 namespace __impl {
 // ---------------
 
-TBAG_CONSTEXPR static bool isVerboseLog() TBAG_NOEXCEPT
+TBAG_CONSTEXPR static bool isOpenCLBackendVerbose() TBAG_NOEXCEPT
 {
-#if defined(TBAG_OPENCL_DEBUGGING)
+#if defined(TBAG_OPENCL_BACKEND_DEBUGGING)
     return true;
 #else
     return false;
@@ -288,7 +288,7 @@ GpuMemory OpenCLBackend::malloc(GpuContext const & context, std::size_t size) co
     }
     result.data = (void*)memory;
     result.size = size;
-    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::malloc() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
+    tDLogIfD(__impl::isOpenCLBackendVerbose(), "OpenCLBackend::malloc() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
              result.data, result.size);
 #endif
     return result;
@@ -303,7 +303,7 @@ bool OpenCLBackend::free(GpuMemory & memory) const
     }
 
 #if defined(USE_OPENCL)
-    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::free() OpenCL clReleaseMemObject() MEM:{} SIZE:{}",
+    tDLogIfD(__impl::isOpenCLBackendVerbose(), "OpenCLBackend::free() OpenCL clReleaseMemObject() MEM:{} SIZE:{}",
              memory.data, memory.size);
     cl_int code;
     code = ::clReleaseMemObject((cl_mem)memory.data);
@@ -329,7 +329,7 @@ HostMemory OpenCLBackend::mallocHost(GpuContext const & context, std::size_t siz
     result.data = ::malloc(size);
     result.size = size;
     result.flag = flag;
-    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::mallocHost() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
+    tDLogIfD(__impl::isOpenCLBackendVerbose(), "OpenCLBackend::mallocHost() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
              result.data, result.size);
     return result;
 }
@@ -342,7 +342,7 @@ bool OpenCLBackend::freeHost(HostMemory & memory) const
         return false;
     }
 
-    tDLogIfD(__impl::isVerboseLog(), "OpenCLBackend::freeHost() OpenCL clReleaseMemObject() MEM:{} SIZE:{}",
+    tDLogIfD(__impl::isOpenCLBackendVerbose(), "OpenCLBackend::freeHost() OpenCL clReleaseMemObject() MEM:{} SIZE:{}",
              memory.data, memory.size);
     ::free(memory.data);
     memory.data = nullptr;
