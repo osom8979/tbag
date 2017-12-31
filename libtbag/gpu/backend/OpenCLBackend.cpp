@@ -58,7 +58,7 @@ static bool write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host
     cl_int code = ::clEnqueueWriteBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
                                          (blocking ? CL_TRUE : CL_FALSE),
                                          0, host_mem.size, host_mem.data, 0, nullptr,
-                                         (cl_event*)(event == nullptr ? nullptr : &event->event_id));
+                                         (cl_event*)(event == nullptr ? nullptr : &event->start));
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -75,7 +75,7 @@ static bool read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_
     cl_int code = ::clEnqueueReadBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
                                         (blocking ? CL_TRUE : CL_FALSE),
                                         0, host_mem.size, host_mem.data, 0, nullptr,
-                                        (cl_event*)(event == nullptr ? nullptr : &event->event_id));
+                                        (cl_event*)(event == nullptr ? nullptr : &event->start));
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -294,13 +294,39 @@ bool OpenCLBackend::releaseQueue(GpuQueue & queue) const
 
 GpuEvent OpenCLBackend::createEvent(GpuQueue const & queue) const
 {
-    GpuEvent result(queue);
-    return result;
+    return GpuEvent(queue);
 }
 
 bool OpenCLBackend::syncEvent(GpuEvent const & event) const
 {
-    return true;
+#if defined(USE_OPENCL)
+    cl_int code = ::clWaitForEvents(1, (cl_event const *)&event.start);
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::syncEvent() OpenCL clWaitForEvents() error code: {}", code);
+    }
+#endif
+    return false;
+}
+
+bool OpenCLBackend::elapsedEvent(GpuEvent & event, float * millisec) const
+{
+#if defined(USE_OPENCL)
+    cl_ulong start_nano, stop_nano;
+    cl_int start_code = ::clGetEventProfilingInfo((cl_event)event.start, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &start_nano, nullptr);
+    cl_int  stop_code = ::clGetEventProfilingInfo((cl_event)event.start, CL_PROFILING_COMMAND_END  , sizeof(cl_ulong),  &stop_nano, nullptr);
+    if (start_code == CL_SUCCESS && stop_code == CL_SUCCESS) {
+        if (millisec != nullptr) {
+            *millisec = (stop_nano - start_nano) * 1.0e-6f;
+        }
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::elapsedEvent() OpenCL clGetEventProfilingInfo() error code: start({}), stop({})",
+               start_code, stop_code);
+    }
+#endif
+    return false;
 }
 
 bool OpenCLBackend::releaseEvent(GpuEvent & event) const

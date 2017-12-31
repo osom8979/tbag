@@ -183,6 +183,11 @@ bool CpuBackend::syncEvent(GpuEvent const & event) const
     return true;
 }
 
+bool CpuBackend::elapsedEvent(GpuEvent & event, float * millisec) const
+{
+    return true;
+}
+
 bool CpuBackend::releaseEvent(GpuEvent & event) const
 {
     return true;

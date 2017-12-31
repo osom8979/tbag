@@ -53,6 +53,7 @@ struct TBAG_API CpuBackend : public GpuBackend
 
     virtual GpuEvent createEvent(GpuQueue const & queue) const override;
     virtual bool       syncEvent(GpuEvent const & event) const override;
+    virtual bool    elapsedEvent(GpuEvent       & event, float * millisec = nullptr) const override;
     virtual bool    releaseEvent(GpuEvent       & event) const override;
 
     virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const override;

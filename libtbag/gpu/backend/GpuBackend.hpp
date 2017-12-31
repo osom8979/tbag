@@ -138,18 +138,14 @@ struct GpuQueue : public GpuContext
 
 struct GpuEvent : public GpuQueue
 {
-    GpuId event_id;
     GpuId start;
     GpuId stop;
-    float elapsed;
 
     GpuEvent() : GpuEvent(GpuQueue()) { /* EMPTY. */ }
-    GpuEvent(GpuQueue const & q, GpuId e = UNKNOWN_GPU_ID)
-            : GpuQueue(q), event_id(e), start(0), stop(0), elapsed(0.0f) { /* EMPTY. */ }
+    GpuEvent(GpuQueue const & q) : GpuQueue(q), start(UNKNOWN_GPU_ID), stop(UNKNOWN_GPU_ID) { /* EMPTY. */ }
     ~GpuEvent() { /* EMPTY. */ }
 
-    inline bool isUnknownEvent() const TBAG_NOEXCEPT { return event_id == UNKNOWN_GPU_ID; }
-    inline float elapsedMilliseconds() const TBAG_NOEXCEPT { return elapsed; }
+    inline bool isUnknownEvent() const TBAG_NOEXCEPT { return start == UNKNOWN_GPU_ID; }
 };
 
 struct GpuMemory : public GpuContext
@@ -217,6 +213,7 @@ struct TBAG_API GpuBackend
 
     virtual GpuEvent createEvent(GpuQueue const & queue) const = 0;
     virtual bool       syncEvent(GpuEvent const & event) const = 0;
+    virtual bool    elapsedEvent(GpuEvent       & event, float * millisec = nullptr) const = 0;
     virtual bool    releaseEvent(GpuEvent       & event) const = 0;
 
     // -------

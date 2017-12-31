@@ -102,17 +102,29 @@ TEST(GpuTest, CreateMemory)
         auto host_memory = gpu->mallocHost(context, ALLOC_SIZE);
         ASSERT_TRUE(host_memory.existsMemory());
         ASSERT_EQ(ALLOC_SIZE, host_memory.size);
+        ::memcpy(host_memory.data, TEST_DATA, TEST_SIZE);
 
         auto host_read = gpu->mallocHost(context, ALLOC_SIZE);
         ASSERT_TRUE(host_read.existsMemory());
         ASSERT_EQ(ALLOC_SIZE, host_read.size);
 
-        ::memcpy(host_memory.data, TEST_DATA, TEST_SIZE);
-        ASSERT_TRUE(gpu->write(queue, gpu_memory, host_memory, TEST_SIZE));
-        ASSERT_TRUE(gpu->finish(queue));
+        float write_millisec = 0;
+        float  read_millisec = 0;
+        auto write_event = gpu->createEvent(queue);
+        auto  read_event = gpu->createEvent(queue);
 
-        ASSERT_TRUE(gpu->read(queue, gpu_memory, host_read, TEST_SIZE));
+        ASSERT_TRUE(gpu->write(queue, gpu_memory, host_memory, TEST_SIZE, &write_event));
         ASSERT_TRUE(gpu->finish(queue));
+        ASSERT_TRUE(gpu->syncEvent(write_event));
+        ASSERT_TRUE(gpu->elapsedEvent(write_event, &write_millisec));
+
+        ASSERT_TRUE(gpu->read(queue, gpu_memory, host_read, TEST_SIZE, &read_event));
+        ASSERT_TRUE(gpu->finish(queue));
+        ASSERT_TRUE(gpu->syncEvent(read_event));
+        ASSERT_TRUE(gpu->elapsedEvent(read_event, &read_millisec));
+
+        std::cout << "Write: " << write_millisec << " millisec" << "\n"
+                  << "Read: "  <<  read_millisec << " millisec" << std::endl;
 
         std::string const READ_STRING((char*)host_read.data, TEST_SIZE);
         ASSERT_STREQ(TEST_DATA, READ_STRING.c_str());

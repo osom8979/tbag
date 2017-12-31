@@ -43,13 +43,6 @@ static void stopEvent(GpuQueue & queue, GpuEvent * event)
     if (code != cudaSuccess) {
         tDLogW("stopEvent() CUDA cudaEventRecord() error: {}", ::cudaGetErrorString(code));
     }
-
-    cudaError_t elapsed_code = ::cudaEventElapsedTime(&event->elapsed,
-                                                      (cudaEvent_t)event->start,
-                                                      (cudaEvent_t)event->stop);
-    if (elapsed_code != cudaSuccess) {
-        tDLogW("stopEvent() CUDA cudaEventElapsedTime() error: {}", ::cudaGetErrorString(elapsed_code));
-    }
 #endif
 }
 
@@ -305,6 +298,25 @@ bool CudaBackend::syncEvent(GpuEvent const & event) const
     } else {
         tDLogE("CudaBackend::syncEvent() CUDA cudaEventSynchronize() error: start({}), stop({})",
                ::cudaGetErrorString(start_code), ::cudaGetErrorString(stop_code));
+    }
+#endif
+    return false;
+}
+
+bool CudaBackend::elapsedEvent(GpuEvent & event, float * millisec) const
+{
+#if defined(USE_CUDA)
+    float elapsed_time = 0.0f;
+    cudaError_t code = ::cudaEventElapsedTime(&elapsed_time,
+                                              (cudaEvent_t)event->start,
+                                              (cudaEvent_t)event->stop);
+    if (code == cudaSuccess) {
+        if (millisec != nullptr) {
+            *millisec = elapsed_time;
+        }
+        return true;
+    } else {
+        tDLogW("stopEvent() CUDA cudaEventElapsedTime() error: {}", ::cudaGetErrorString(code));
     }
 #endif
     return false;
