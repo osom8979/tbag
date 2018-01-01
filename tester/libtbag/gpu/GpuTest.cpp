@@ -47,20 +47,23 @@ TEST(GpuTest, Information)
                   << "Platform count: " << gpu->getPlatformCount() << std::endl;
         for (auto & plat : gpu->getPlatformList()) {
             auto plat_info = gpu->getPlatformInfo(plat);
-            std::cout << "[" << plat.platform_id << "] profile: "      << plat_info.profile    << "\n"
-                      << "[" << plat.platform_id << "] name: "         << plat_info.name       << "\n"
-                      << "[" << plat.platform_id << "] vender: "       << plat_info.vendor     << "\n"
-                      << "[" << plat.platform_id << "] version: "      << plat_info.version    << "\n"
-                      << "[" << plat.platform_id << "] extensions: "   << plat_info.extensions << "\n"
-                      << "[" << plat.platform_id << "] Device count: " << gpu->getDeviceCount(plat) << std::endl;
+            std::cout << "Platform ID: "    << plat.platform_id     << "\n"
+                      << "* profile: "      << plat_info.profile    << "\n"
+                      << "* name: "         << plat_info.name       << "\n"
+                      << "* vender: "       << plat_info.vendor     << "\n"
+                      << "* version: "      << plat_info.version    << "\n"
+                      << "* extensions: "   << plat_info.extensions << "\n"
+                      << "* Device count: " << gpu->getDeviceCount(plat) << std::endl;
             for (auto & dev : gpu->getDeviceList(plat)) {
                 auto dev_info = gpu->getDeviceInfo(dev);
-                std::cout << "[" << plat.platform_id << "][" << dev.device_id << "] name: " << dev_info.name << std::endl;
-
-                auto context = gpu->createContext(dev);
-                std::cout << "[" << plat.platform_id << "][" << dev.device_id << "] Context: " << context.context_id << std::endl;
-                ASSERT_TRUE(gpu->releaseContext(context));
-                ASSERT_TRUE(context.isUnknownContext());
+                std::cout << "* Device ID: "       << dev.device_id           << "\n"
+                          << "** name: "           << dev_info.name           << "\n"
+                          << "** driver version: " << dev_info.driver_version << "\n"
+                          << "** device version: " << dev_info.device_version << "\n"
+                          << "** global memory: "  << dev_info.global_memory  << std::endl;
+                for (auto & prop : dev_info.properties) {
+                    std::cout << "** " << prop.first << ": " << prop.second << std::endl;
+                }
             }
         }
     });

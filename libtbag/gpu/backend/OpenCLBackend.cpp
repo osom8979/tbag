@@ -206,7 +206,7 @@ GpuDeviceInfo OpenCLBackend::getDeviceInfo(GpuDevice const & device) const
     checkType(device.type);
     GpuDeviceInfo info(device);
 #if defined(USE_OPENCL)
-    auto get_device_info = [](cl_device_id id, cl_device_info info) -> std::string {
+    auto get_device_info_str = [](cl_device_id id, cl_device_info info) -> std::string {
         size_t value_size = 0;
         if (::clGetDeviceInfo(id, info, 0, nullptr, &value_size) == CL_SUCCESS) {
             std::vector<char> buffer(value_size, '\0');
@@ -217,7 +217,18 @@ GpuDeviceInfo OpenCLBackend::getDeviceInfo(GpuDevice const & device) const
         return std::string();
     };
 
-    info.name = get_device_info((cl_device_id)device.device_id, CL_DEVICE_NAME);
+    auto get_device_info_ulong = [](cl_device_id id, cl_device_info info) -> std::size_t {
+        cl_ulong value;
+        if (::clGetDeviceInfo(id, info, sizeof(cl_ulong), &value, nullptr) == CL_SUCCESS) {
+            return static_cast<std::size_t>(value);
+        }
+        return 0;
+    };
+
+    info.name           = get_device_info_str  ((cl_device_id)device.device_id, CL_DEVICE_NAME);
+    info.device_version = get_device_info_str  ((cl_device_id)device.device_id, CL_DEVICE_VERSION);
+    info.driver_version = get_device_info_str  ((cl_device_id)device.device_id, CL_DRIVER_VERSION);
+    info.global_memory  = get_device_info_ulong((cl_device_id)device.device_id, CL_DEVICE_GLOBAL_MEM_SIZE);
 #endif
     return info;
 }

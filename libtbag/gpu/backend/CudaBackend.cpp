@@ -213,7 +213,50 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
     cudaDeviceProp prop;
     cudaError_t code = ::cudaGetDeviceProperties(&prop, device.device_id);
     if (code == cudaSuccess) {
-        info.name = prop.name;
+        info.name           = prop.name;
+        info.device_version = string::fformat("{}.{}", prop.major, prop.minor);
+        info.global_memory  = prop.totalGlobalMem;
+
+        int driver_version = 0;
+        cudaError_t driver_code = ::cudaDriverGetVersion(&driver_version);
+        if (driver_code == cudaSuccess) {
+            info.driver_version = std::to_string(driver_version);
+        } else {
+            tDLogE("CudaBackend::getDeviceInfo() CUDA cudaDriverGetVersion() error: {}", ::cudaGetErrorString(driver_code));
+        }
+
+        info.insert(TBAG_GPU_DEVICE_INFO_SHARED_MEM_PER_BLOCK       , prop.sharedMemPerBlock);
+        info.insert(TBAG_GPU_DEVICE_INFO_REGS_PER_BLOCK             , prop.regsPerBlock);
+        info.insert(TBAG_GPU_DEVICE_INFO_WARP_SIZE                  , prop.warpSize);
+        info.insert(TBAG_GPU_DEVICE_INFO_MEM_PITCH                  , prop.memPitch);
+        info.insert(TBAG_GPU_DEVICE_INFO_MAX_THREADS_PER_BLOCK      , prop.maxThreadsPerBlock);
+        info.insert(TBAG_GPU_DEVICE_INFO_MAX_THREADS_DIM_0          , prop.maxThreadsDim[0]);
+        info.insert(TBAG_GPU_DEVICE_INFO_MAX_THREADS_DIM_1          , prop.maxThreadsDim[1]);
+        info.insert(TBAG_GPU_DEVICE_INFO_MAX_THREADS_DIM_2          , prop.maxThreadsDim[2]);
+        info.insert(TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_0            , prop.maxGridSize[0]);
+        info.insert(TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_1            , prop.maxGridSize[1]);
+        info.insert(TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_2            , prop.maxGridSize[2]);
+        info.insert(TBAG_GPU_DEVICE_INFO_CLOCK_RATE                 , prop.clockRate]);
+        info.insert(TBAG_GPU_DEVICE_INFO_TOTAL_CONST_MEM            , prop.totalConstMem]);
+        info.insert(TBAG_GPU_DEVICE_INFO_TEXTURE_ALIGNMENT          , prop.textureAlignment]);
+        info.insert(TBAG_GPU_DEVICE_INFO_DEVICE_OVERLAP             , prop.deviceOverlap]);
+        info.insert(TBAG_GPU_DEVICE_INFO_MULTI_PROCESSOR_COUNT      , prop.multiProcessorCount]);
+        info.insert(TBAG_GPU_DEVICE_INFO_KERNEL_EXEC_TIMEOUT_ENABLED, prop.kernelExecTimeoutEnabled]);
+        info.insert(TBAG_GPU_DEVICE_INFO_INTEGRATED                 , prop.integrated]);
+        info.insert(TBAG_GPU_DEVICE_INFO_CAN_MAP_HOST_MEMORY        , prop.canMapHostMemory]);
+        if (prop.computeMode == ::cudaComputeModeExclusive) {
+            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, std::string(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_EXCLUSIVE));
+        } else if (prop.computeMode == ::cudaComputeModeProhibited) {
+            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, std::string(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_PROHIBITED));
+        } else {
+            assert(prop.computeMode == cudaComputeModeDefault);
+            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, std::string(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_DEFAULT));
+        }
+        info.insert(TBAG_GPU_DEVICE_INFO_CONCURRENT_KERNELS         , prop.concurrentKernels]);
+        info.insert(TBAG_GPU_DEVICE_INFO_ECC_ENABLED                , prop.ECCEnabled]);
+        info.insert(TBAG_GPU_DEVICE_INFO_PCI_BUS_ID                 , prop.pciBusID]);
+        info.insert(TBAG_GPU_DEVICE_INFO_PCI_DEVICE_ID              , prop.pciDeviceID]);
+        info.insert(TBAG_GPU_DEVICE_INFO_TCC_DRIVER                 , prop.tccDriver]);
     } else {
         tDLogE("CudaBackend::getDeviceInfo() CUDA cudaGetDeviceProperties() error: {}", ::cudaGetErrorString(code));
     }

@@ -105,13 +105,120 @@ struct GpuDevice : public GpuPlatform
     inline bool isUnknownDevice() const TBAG_NOEXCEPT { return device_id == UNKNOWN_GPU_ID; }
 };
 
+/** [*] ASCII string identifying the device; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_NAME    = "name";
+/** [*] Version string; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_VERSION = "version";
+
+/** [CUDA] is the maximum amount of shared memory available to a thread block in bytes; @n
+ * this amount is shared by all thread blocks simultaneously resident on a multiprocessor; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_SHARED_MEM_PER_BLOCK = "sharedMemPerBlock";
+/** [CUDA] is the maximum number of 32-bit registers available to a thread block; @n
+ * this number is shared by all thread blocks simultaneously resident on a multiprocessor; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_REGS_PER_BLOCK = "regsPerBlock";
+/** [CUDA] is the warp size in threads; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_WARP_SIZE = "warpSize";
+/** [CUDA] is the maximum pitch in bytes allowed by the memory copy functions @n
+ * that involve memory regions allocated through cudaMallocPitch(); */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MEM_PITCH = "memPitch";
+/** [CUDA] is the maximum number of threads per block; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_THREADS_PER_BLOCK = "maxThreadsPerBlock";
+/** [CUDA] contains the maximum size of each dimension of a block; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_THREADS_DIM_0 = "maxThreadsDim0";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_THREADS_DIM_1 = "maxThreadsDim1";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_THREADS_DIM_2 = "maxThreadsDim2";
+/** [CUDA] contains the maximum size of each dimension of a grid; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_0 = "maxGridSize0";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_1 = "maxGridSize1";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_2 = "maxGridSize2";
+/** [CUDA] is the clock frequency in kilohertz; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_CLOCK_RATE = "clockRate";
+/** [CUDA] is the total amount of constant memory available on the device in bytes; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_TOTAL_CONST_MEM = "totalConstMem";
+/** [CUDA] is the alignment requirement; texture base addresses that are aligned @n
+ * to textureAlignment bytes do not need an offset applied to texture fetches; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_TEXTURE_ALIGNMENT = "textureAlignment";
+/** [CUDA] is 1 if the device can concurrently copy memory between host and device while executing a kernel, or 0 if not; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_DEVICE_OVERLAP = "deviceOverlap";
+/** [CUDA] is the number of multiprocessors on the device; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MULTI_PROCESSOR_COUNT = "multiProcessorCount";
+/** [CUDA] is 1 if there is a run time limit for kernels executed on the device, or 0 if not. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_KERNEL_EXEC_TIMEOUT_ENABLED = "kernelExecTimeoutEnabled";
+/** [CUDA] is 1 if the device is an integrated (motherboard) GPU and 0 if it is a discrete (card) component. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_INTEGRATED = "integrated";
+/** [CUDA] is 1 if the device can map host memory into the CUDA address space @n
+ * for use with cudaHostAlloc()/cudaHostGetDevicePointer(), or 0 if not; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_CAN_MAP_HOST_MEMORY = "canMapHostMemory";
+
+/** [CUDA] is the compute mode that the device is currently in. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_COMPUTE_MODE = "computeMode";
+/** [CUDA] Default mode - Device is not restricted and multiple threads can use cudaSetDevice() with this device. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_DEFAULT = "cudaComputeModeDefault";
+/** [CUDA] Compute-exclusive mode - Only one thread will be able to use cudaSetDevice() with this device. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_EXCLUSIVE = "cudaComputeModeExclusive";
+/** [CUDA] Compute-prohibited mode - No threads can use cudaSetDevice() with this device. @n
+ * Any errors from calling cudaSetDevice() with an exclusive (and occupied) or prohibited device @n
+ * will only show up after a non-device management runtime function is called. @n
+ * At that time, cudaErrorNoDevice will be returned. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_PROHIBITED = "cudaComputeModeProhibited";
+
+/** [CUDA] is 1 if the device supports executing multiple kernels within the same context simultaneously, or 0 if not. @n
+ * It is not guaranteed that multiple kernels will be resident on the device concurrently @n
+ * so this feature should not be relied upon for correctness; */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_CONCURRENT_KERNELS = "concurrentKernels";
+/** [CUDA] is 1 if the device has ECC support turned on, or 0 if not. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_ECC_ENABLED = "ECCEnabled";
+/** [CUDA] is the PCI bus identifier of the device. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_PCI_BUS_ID = "pciBusID";
+/** [CUDA] is the PCI device (sometimes called slot) identifier of the device. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_PCI_DEVICE_ID = "pciDeviceID";
+/** [CUDA] is 1 if the device is using a TCC driver or 0 if not. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_TCC_DRIVER = "tccDriver";
+
 struct GpuDeviceInfo : public GpuDevice
 {
-    std::string name;
+    std::string name;           ///< Device name.
+    std::string device_version; ///< Version string.
+    std::string driver_version; ///< Driver version string.
+    std::size_t global_memory;  ///< Size of global device memory in bytes.
+
+    using Properties = std::map<std::string, std::string>;
+
+    Properties properties;
 
     GpuDeviceInfo() : GpuDeviceInfo(GpuDevice()) { /* EMPTY. */ }
     GpuDeviceInfo(GpuDevice const & d) : GpuDevice(d) { /* EMPTY. */ }
     ~GpuDeviceInfo() { /* EMPTY. */ }
+
+    template <typename ValueType>
+    bool insert(std::string const & name, ValueType const & prop)
+    {
+        return insert(name, std::to_string(prop));
+    }
+
+    bool insert(std::string const & name, char const * prop)
+    {
+        return insert(name, std::string(prop));
+    }
+
+    bool insert(std::string const & name, std::string const & prop)
+    {
+        return properties.insert(Properties::value_type(name, prop)).second;
+    }
+
+    bool exists(std::string const & name) const
+    {
+        return properties.find(name) != properties.end();
+    }
+
+    std::string get(std::string const & name) const
+    {
+        auto itr = properties.find(name);
+        if (itr != properties.end()) {
+            return itr->second;
+        }
+        return std::string();
+    }
 };
 
 struct GpuContext : public GpuDevice
