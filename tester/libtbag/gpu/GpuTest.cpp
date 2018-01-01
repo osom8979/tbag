@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/gpu/Gpu.hpp>
+#include <libtbag/log/Log.hpp>
 
 using namespace libtbag;
 using namespace libtbag::gpu;

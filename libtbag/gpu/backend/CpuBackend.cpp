@@ -12,6 +12,7 @@
 
 #include <cstdlib>
 #include <queue>
+#include <chrono>
 #include <functional>
 
 //#define TBAG_CPU_BACKEND_DEBUGGING
@@ -59,6 +60,31 @@ struct CpuQueueBackend
     ~CpuQueueBackend()
     {
         tDLogIfD(isCpuBackendVerbose(), "CpuQueueBackend::~CpuQueueBackend() ID: @{}", (void*)this);
+    }
+};
+
+struct CpuEventGuard : private Noncopyable
+{
+    GpuEvent * event;
+
+    CpuEventGuard(GpuEvent * e = nullptr) : event(e)
+    {
+        if (event != nullptr) {
+            event->start = now();
+        }
+    }
+
+    ~CpuEventGuard()
+    {
+        if (event != nullptr) {
+            event->stop = now();
+        }
+    }
+
+    GpuId now() const
+    {
+        using namespace std::chrono;
+        return (GpuId)duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
     }
 };
 
@@ -174,22 +200,39 @@ bool CpuBackend::releaseQueue(GpuQueue & queue) const
 
 GpuEvent CpuBackend::createEvent(GpuQueue const & queue) const
 {
+    checkType(queue.type);
     GpuEvent result(queue);
+    result.start = 0;
+    result.stop  = 0;
     return result;
 }
 
 bool CpuBackend::syncEvent(GpuEvent const & event) const
 {
+    checkType(event.type);
+    if (event.isUnknownEvent()) {
+        return false;
+    }
     return true;
 }
 
 bool CpuBackend::elapsedEvent(GpuEvent & event, float * millisec) const
 {
+    checkType(event.type);
+    if (event.isUnknownEvent()) {
+        return false;
+    }
+    if (millisec != nullptr) {
+        *millisec = (event.stop - event.start) * 1.0e-3f;
+    }
     return true;
 }
 
 bool CpuBackend::releaseEvent(GpuEvent & event) const
 {
+    checkType(event.type);
+    event.start = UNKNOWN_GPU_ID;
+    event.stop  = UNKNOWN_GPU_ID;
     return true;
 }
 
@@ -249,6 +292,8 @@ bool CpuBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const &
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(gpu_mem.data, host_mem.data, size);
     return true;
 }
@@ -263,6 +308,8 @@ bool CpuBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & 
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(host_mem.data, gpu_mem.data, size);
     return true;
 }
@@ -277,6 +324,8 @@ bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory 
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(gpu_mem.data, host_mem.data, size);
     return true;
 }
@@ -291,6 +340,8 @@ bool CpuBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMe
                gpu_mem.size, host_mem.size, size);
         return false;
     }
+
+    __impl::CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(host_mem.data, gpu_mem.data, size);
     return true;
 }

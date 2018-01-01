@@ -318,7 +318,7 @@ bool OpenCLBackend::elapsedEvent(GpuEvent & event, float * millisec) const
     cl_int  stop_code = ::clGetEventProfilingInfo((cl_event)event.start, CL_PROFILING_COMMAND_END  , sizeof(cl_ulong),  &stop_nano, nullptr);
     if (start_code == CL_SUCCESS && stop_code == CL_SUCCESS) {
         if (millisec != nullptr) {
-            *millisec = (stop_nano - start_nano) * 1.0e-6f;
+            *millisec = (stop_nano - start_nano) * 1.0e-3f;
         }
         return true;
     } else {
