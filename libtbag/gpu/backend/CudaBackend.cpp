@@ -236,27 +236,27 @@ GpuDeviceInfo CudaBackend::getDeviceInfo(GpuDevice const & device) const
         info.insert(TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_0            , prop.maxGridSize[0]);
         info.insert(TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_1            , prop.maxGridSize[1]);
         info.insert(TBAG_GPU_DEVICE_INFO_MAX_GRID_SIZE_2            , prop.maxGridSize[2]);
-        info.insert(TBAG_GPU_DEVICE_INFO_CLOCK_RATE                 , prop.clockRate]);
-        info.insert(TBAG_GPU_DEVICE_INFO_TOTAL_CONST_MEM            , prop.totalConstMem]);
-        info.insert(TBAG_GPU_DEVICE_INFO_TEXTURE_ALIGNMENT          , prop.textureAlignment]);
-        info.insert(TBAG_GPU_DEVICE_INFO_DEVICE_OVERLAP             , prop.deviceOverlap]);
-        info.insert(TBAG_GPU_DEVICE_INFO_MULTI_PROCESSOR_COUNT      , prop.multiProcessorCount]);
-        info.insert(TBAG_GPU_DEVICE_INFO_KERNEL_EXEC_TIMEOUT_ENABLED, prop.kernelExecTimeoutEnabled]);
-        info.insert(TBAG_GPU_DEVICE_INFO_INTEGRATED                 , prop.integrated]);
-        info.insert(TBAG_GPU_DEVICE_INFO_CAN_MAP_HOST_MEMORY        , prop.canMapHostMemory]);
+        info.insert(TBAG_GPU_DEVICE_INFO_CLOCK_RATE                 , prop.clockRate);
+        info.insert(TBAG_GPU_DEVICE_INFO_TOTAL_CONST_MEM            , prop.totalConstMem);
+        info.insert(TBAG_GPU_DEVICE_INFO_TEXTURE_ALIGNMENT          , prop.textureAlignment);
+        info.insert(TBAG_GPU_DEVICE_INFO_DEVICE_OVERLAP             , prop.deviceOverlap);
+        info.insert(TBAG_GPU_DEVICE_INFO_MULTI_PROCESSOR_COUNT      , prop.multiProcessorCount);
+        info.insert(TBAG_GPU_DEVICE_INFO_KERNEL_EXEC_TIMEOUT_ENABLED, prop.kernelExecTimeoutEnabled);
+        info.insert(TBAG_GPU_DEVICE_INFO_INTEGRATED                 , prop.integrated);
+        info.insert(TBAG_GPU_DEVICE_INFO_CAN_MAP_HOST_MEMORY        , prop.canMapHostMemory);
         if (prop.computeMode == ::cudaComputeModeExclusive) {
-            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, std::string(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_EXCLUSIVE));
+            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_EXCLUSIVE);
         } else if (prop.computeMode == ::cudaComputeModeProhibited) {
-            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, std::string(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_PROHIBITED));
+            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_PROHIBITED);
         } else {
             assert(prop.computeMode == cudaComputeModeDefault);
-            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, std::string(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_DEFAULT));
+            info.insert(TBAG_GPU_DEVICE_INFO_COMPUTE_MODE, TBAG_GPU_DEVICE_INFO_COMPUTE_MODE_DEFAULT);
         }
-        info.insert(TBAG_GPU_DEVICE_INFO_CONCURRENT_KERNELS         , prop.concurrentKernels]);
-        info.insert(TBAG_GPU_DEVICE_INFO_ECC_ENABLED                , prop.ECCEnabled]);
-        info.insert(TBAG_GPU_DEVICE_INFO_PCI_BUS_ID                 , prop.pciBusID]);
-        info.insert(TBAG_GPU_DEVICE_INFO_PCI_DEVICE_ID              , prop.pciDeviceID]);
-        info.insert(TBAG_GPU_DEVICE_INFO_TCC_DRIVER                 , prop.tccDriver]);
+        info.insert(TBAG_GPU_DEVICE_INFO_CONCURRENT_KERNELS         , prop.concurrentKernels);
+        info.insert(TBAG_GPU_DEVICE_INFO_ECC_ENABLED                , prop.ECCEnabled);
+        info.insert(TBAG_GPU_DEVICE_INFO_PCI_BUS_ID                 , prop.pciBusID);
+        info.insert(TBAG_GPU_DEVICE_INFO_PCI_DEVICE_ID              , prop.pciDeviceID);
+        info.insert(TBAG_GPU_DEVICE_INFO_TCC_DRIVER                 , prop.tccDriver);
     } else {
         tDLogE("CudaBackend::getDeviceInfo() CUDA cudaGetDeviceProperties() error: {}", ::cudaGetErrorString(code));
     }
