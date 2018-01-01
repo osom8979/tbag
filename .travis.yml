@@ -10,6 +10,7 @@ cache:
   directories:
     - $HOME/tparty
     - $TRAVIS_BUILD_DIR/cmake_build/external/local
+    - $TRAVIS_BUILD_DIR/cmake_build/dep
 
 compiler: g++
 
