@@ -232,24 +232,24 @@ struct GpuContext : public GpuDevice
     inline bool isUnknownContext() const TBAG_NOEXCEPT { return context_id == UNKNOWN_GPU_ID; }
 };
 
-struct GpuQueue : public GpuContext
+struct GpuStream : public GpuContext
 {
-    GpuId queue_id;
+    GpuId stream_id;
 
-    GpuQueue() : GpuQueue(GpuContext()) { /* EMPTY. */ }
-    GpuQueue(GpuContext const & c, GpuId g = UNKNOWN_GPU_ID) : GpuContext(c), queue_id(g) { /* EMPTY. */ }
-    ~GpuQueue() { /* EMPTY. */ }
+    GpuStream() : GpuStream(GpuContext()) { /* EMPTY. */ }
+    GpuStream(GpuContext const & c, GpuId s = UNKNOWN_GPU_ID) : GpuContext(c), stream_id(s) { /* EMPTY. */ }
+    ~GpuStream() { /* EMPTY. */ }
 
-    inline bool isUnknownQueue() const TBAG_NOEXCEPT { return queue_id == UNKNOWN_GPU_ID; }
+    inline bool isUnknownQueue() const TBAG_NOEXCEPT { return stream_id == UNKNOWN_GPU_ID; }
 };
 
-struct GpuEvent : public GpuQueue
+struct GpuEvent : public GpuStream
 {
     GpuId start;
     GpuId stop;
 
-    GpuEvent() : GpuEvent(GpuQueue()) { /* EMPTY. */ }
-    GpuEvent(GpuQueue const & q) : GpuQueue(q), start(UNKNOWN_GPU_ID), stop(UNKNOWN_GPU_ID) { /* EMPTY. */ }
+    GpuEvent() : GpuEvent(GpuStream()) { /* EMPTY. */ }
+    GpuEvent(GpuStream const & q) : GpuStream(q), start(UNKNOWN_GPU_ID), stop(UNKNOWN_GPU_ID) { /* EMPTY. */ }
     ~GpuEvent() { /* EMPTY. */ }
 
     inline bool isUnknownEvent() const TBAG_NOEXCEPT { return start == UNKNOWN_GPU_ID; }
@@ -315,13 +315,13 @@ struct TBAG_API GpuBackend
     virtual GpuContext createContext(GpuDevice const &  device) const = 0;
     virtual bool      releaseContext(GpuContext      & context) const = 0;
 
-    virtual GpuQueue createQueue(GpuContext const & context) const = 0;
-    virtual bool    releaseQueue(GpuQueue         &   queue) const = 0;
+    virtual GpuStream createStream(GpuContext const & context) const = 0;
+    virtual bool     releaseStream(GpuStream        &  stream) const = 0;
 
-    virtual GpuEvent createEvent(GpuQueue const & queue) const = 0;
-    virtual bool       syncEvent(GpuEvent const & event) const = 0;
-    virtual bool    elapsedEvent(GpuEvent       & event, float * millisec = nullptr) const = 0;
-    virtual bool    releaseEvent(GpuEvent       & event) const = 0;
+    virtual GpuEvent createEvent(GpuStream const & stream) const = 0;
+    virtual bool       syncEvent(GpuEvent  const & event) const = 0;
+    virtual bool    elapsedEvent(GpuEvent        & event, float * millisec = nullptr) const = 0;
+    virtual bool    releaseEvent(GpuEvent        & event) const = 0;
 
     // -------
     // Memory.
@@ -333,18 +333,18 @@ struct TBAG_API GpuBackend
     virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const = 0;
     virtual bool         freeHost(HostMemory & memory) const = 0;
 
-    virtual bool write(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
-    virtual bool  read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
+    virtual bool write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
+    virtual bool  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
 
-    virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
-    virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
+    virtual bool enqueueWrite(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
+    virtual bool  enqueueRead(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const = 0;
 
     // -------
     // Memory.
     // -------
 
-    virtual bool  flush(GpuQueue & queue) const = 0;
-    virtual bool finish(GpuQueue & queue) const = 0;
+    virtual bool  flush(GpuStream & stream) const = 0;
+    virtual bool finish(GpuStream & stream) const = 0;
 
     // --------------------
     // Non-virtual methods.

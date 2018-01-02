@@ -76,9 +76,9 @@ TEST(GpuTest, CreateQueue)
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());
 
-        auto queue = gpu->createQueue(context);
+        auto queue = gpu->createStream(context);
         ASSERT_FALSE(queue.isUnknownQueue());
-        ASSERT_TRUE(gpu->releaseQueue(queue));
+        ASSERT_TRUE(gpu->releaseStream(queue));
 
         ASSERT_TRUE(gpu->releaseContext(context));
         ASSERT_TRUE(context.isUnknownContext());
@@ -92,7 +92,7 @@ TEST(GpuTest, CreateMemory)
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());
 
-        auto queue = gpu->createQueue(context);
+        auto queue = gpu->createStream(context);
         ASSERT_FALSE(queue.isUnknownQueue());
 
         char        const TEST_DATA[] = "TEST_DATA";
@@ -137,7 +137,7 @@ TEST(GpuTest, CreateMemory)
         ASSERT_TRUE(gpu->freeHost(host_memory));
         ASSERT_TRUE(gpu->freeHost(host_read));
 
-        ASSERT_TRUE(gpu->releaseQueue(queue));
+        ASSERT_TRUE(gpu->releaseStream(queue));
         ASSERT_TRUE(queue.isUnknownQueue());
 
         ASSERT_TRUE(gpu->releaseContext(context));

@@ -51,11 +51,11 @@ TBAG_CONSTEXPR static bool isOpenCLBackendProfile() TBAG_NOEXCEPT
 #endif
 }
 
-static bool write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem,
+static bool write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
            std::size_t size, bool blocking, GpuEvent * event = nullptr)
 {
 #if defined(USE_OPENCL)
-    cl_int code = ::clEnqueueWriteBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
+    cl_int code = ::clEnqueueWriteBuffer((cl_command_queue)stream.stream_id, (cl_mem)gpu_mem.data,
                                          (blocking ? CL_TRUE : CL_FALSE),
                                          0, host_mem.size, host_mem.data, 0, nullptr,
                                          (cl_event*)(event == nullptr ? nullptr : &event->start));
@@ -68,11 +68,11 @@ static bool write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host
     return false;
 }
 
-static bool read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem,
+static bool read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
           std::size_t size, bool blocking, GpuEvent * event = nullptr)
 {
 #if defined(USE_OPENCL)
-    cl_int code = ::clEnqueueReadBuffer((cl_command_queue)queue.queue_id, (cl_mem)gpu_mem.data,
+    cl_int code = ::clEnqueueReadBuffer((cl_command_queue)stream.stream_id, (cl_mem)gpu_mem.data,
                                         (blocking ? CL_TRUE : CL_FALSE),
                                         0, host_mem.size, host_mem.data, 0, nullptr,
                                         (cl_event*)(event == nullptr ? nullptr : &event->start));
@@ -263,49 +263,49 @@ bool OpenCLBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
-GpuQueue OpenCLBackend::createQueue(GpuContext const & context) const
+GpuStream OpenCLBackend::createStream(GpuContext const & context) const
 {
     checkType(context.type);
-    GpuQueue result(context);
+    GpuStream result(context);
 #if defined(USE_OPENCL)
     cl_int code;
     cl_command_queue_properties properties = 0;
     if (__impl::isOpenCLBackendProfile()) {
         properties |= CL_QUEUE_PROFILING_ENABLE;
     }
-    cl_command_queue queue = ::clCreateCommandQueue((cl_context)context.context_id,
+    cl_command_queue stream = ::clCreateCommandQueue((cl_context)context.context_id,
                                                     (cl_device_id)context.device_id,
                                                     properties, &code);
     if (code == CL_SUCCESS) {
-        result.queue_id = (GpuId)queue;
+        result.stream_id = (GpuId)stream;
     } else {
-        tDLogE("OpenCLBackend::createQueue() OpenCL clCreateCommandQueue() error code: {}", code);
+        tDLogE("OpenCLBackend::createStream() OpenCL clCreateCommandQueue() error code: {}", code);
     }
 #endif
     return result;
 }
 
-bool OpenCLBackend::releaseQueue(GpuQueue & queue) const
+bool OpenCLBackend::releaseStream(GpuStream & stream) const
 {
-    checkType(queue.type);
-    if (queue.isUnknownQueue()) {
-        tDLogE("OpenCLBackend::releaseQueue() Illegal queue.");
+    checkType(stream.type);
+    if (stream.isUnknownQueue()) {
+        tDLogE("OpenCLBackend::releaseStream() Illegal stream.");
         return false;
     }
 #if defined(USE_OPENCL)
-    cl_int code = ::clReleaseCommandQueue((cl_command_queue)queue.queue_id);
-    queue.queue_id = UNKNOWN_GPU_ID;
+    cl_int code = ::clReleaseCommandQueue((cl_command_queue)stream.stream_id);
+    stream.stream_id = UNKNOWN_GPU_ID;
     if (code != CL_SUCCESS) {
-        tDLogE("OpenCLBackend::releaseQueue() OpenCL clReleaseCommandQueue() error code: {}", code);
+        tDLogE("OpenCLBackend::releaseStream() OpenCL clReleaseCommandQueue() error code: {}", code);
         return false;
     }
 #endif
     return true;
 }
 
-GpuEvent OpenCLBackend::createEvent(GpuQueue const & queue) const
+GpuEvent OpenCLBackend::createEvent(GpuStream const & stream) const
 {
-    return GpuEvent(queue);
+    return GpuEvent(stream);
 }
 
 bool OpenCLBackend::syncEvent(GpuEvent const & event) const
@@ -423,9 +423,9 @@ bool OpenCLBackend::freeHost(HostMemory & memory) const
     return true;
 }
 
-bool OpenCLBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+bool OpenCLBackend::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -433,12 +433,12 @@ bool OpenCLBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory cons
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::write(queue, gpu_mem, host_mem, size, true, event);
+    return __impl::write(stream, gpu_mem, host_mem, size, true, event);
 }
 
-bool OpenCLBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+bool OpenCLBackend::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -446,12 +446,12 @@ bool OpenCLBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::read(queue, gpu_mem, host_mem, size, true, event);
+    return __impl::read(stream, gpu_mem, host_mem, size, true, event);
 }
 
-bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+bool OpenCLBackend::enqueueWrite(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -459,12 +459,12 @@ bool OpenCLBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemo
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::write(queue, gpu_mem, host_mem, size, false, event);
+    return __impl::write(stream, gpu_mem, host_mem, size, false, event);
 }
 
-bool OpenCLBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+bool OpenCLBackend::enqueueRead(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -472,13 +472,13 @@ bool OpenCLBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, Hos
                gpu_mem.size, host_mem.size, size);
         return false;
     }
-    return __impl::read(queue, gpu_mem, host_mem, size, false, event);
+    return __impl::read(stream, gpu_mem, host_mem, size, false, event);
 }
 
-bool OpenCLBackend::flush(GpuQueue & queue) const
+bool OpenCLBackend::flush(GpuStream & stream) const
 {
 #if defined(USE_OPENCL)
-    cl_int code = ::clFlush((cl_command_queue)queue.queue_id);
+    cl_int code = ::clFlush((cl_command_queue)stream.stream_id);
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -488,10 +488,10 @@ bool OpenCLBackend::flush(GpuQueue & queue) const
     return false;
 }
 
-bool OpenCLBackend::finish(GpuQueue & queue) const
+bool OpenCLBackend::finish(GpuStream & stream) const
 {
 #if defined(USE_OPENCL)
-    cl_int code = ::clFinish((cl_command_queue)queue.queue_id);
+    cl_int code = ::clFinish((cl_command_queue)stream.stream_id);
     if (code == CL_SUCCESS) {
         return true;
     } else {

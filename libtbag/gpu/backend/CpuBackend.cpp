@@ -11,9 +11,7 @@
 #include <libtbag/util/Version.hpp>
 
 #include <cstdlib>
-#include <queue>
 #include <chrono>
-#include <functional>
 
 //#define TBAG_CPU_BACKEND_DEBUGGING
 
@@ -165,7 +163,7 @@ bool CpuBackend::releaseContext(GpuContext & context) const
 {
     checkType(context.type);
     if (context.isUnknownContext()) {
-        tDLogE("CpuBackend::releaseContext() Illegal queue.");
+        tDLogE("CpuBackend::releaseContext() Illegal stream.");
         return false;
     }
     delete ((__impl::CpuContextBackend*)context.context_id);
@@ -173,35 +171,35 @@ bool CpuBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
-GpuQueue CpuBackend::createQueue(GpuContext const & context) const
+GpuStream CpuBackend::createStream(GpuContext const & context) const
 {
     checkType(context.type);
-    GpuQueue result(context);
+    GpuStream result(context);
     if (context.isUnknownContext()) {
-        tDLogE("CpuBackend::releaseContext() Illegal queue.");
+        tDLogE("CpuBackend::createStream() Illegal stream.");
         return result;
     }
-    auto * queue = new __impl::CpuQueueBackend();
-    result.queue_id = (GpuId)queue;
+    auto * stream = new __impl::CpuQueueBackend();
+    result.stream_id = (GpuId)stream;
     return result;
 }
 
-bool CpuBackend::releaseQueue(GpuQueue & queue) const
+bool CpuBackend::releaseStream(GpuStream & stream) const
 {
-    checkType(queue.type);
-    if (queue.isUnknownQueue()) {
-        tDLogE("CpuBackend::releaseQueue() Illegal queue.");
+    checkType(stream.type);
+    if (stream.isUnknownQueue()) {
+        tDLogE("CpuBackend::releaseStream() Illegal stream.");
         return false;
     }
-    delete ((__impl::CpuQueueBackend*)queue.queue_id);
-    queue.queue_id = UNKNOWN_GPU_ID;
+    delete ((__impl::CpuQueueBackend*)stream.stream_id);
+    stream.stream_id = UNKNOWN_GPU_ID;
     return true;
 }
 
-GpuEvent CpuBackend::createEvent(GpuQueue const & queue) const
+GpuEvent CpuBackend::createEvent(GpuStream const & stream) const
 {
-    checkType(queue.type);
-    GpuEvent result(queue);
+    checkType(stream.type);
+    GpuEvent result(stream);
     result.start = 0;
     result.stop  = 0;
     return result;
@@ -282,9 +280,9 @@ bool CpuBackend::freeHost(HostMemory & memory) const
     return true;
 }
 
-bool CpuBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+bool CpuBackend::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -298,9 +296,9 @@ bool CpuBackend::write(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const &
     return true;
 }
 
-bool CpuBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+bool CpuBackend::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -314,9 +312,9 @@ bool CpuBackend::read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & 
     return true;
 }
 
-bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+bool CpuBackend::enqueueWrite(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -330,9 +328,9 @@ bool CpuBackend::enqueueWrite(GpuQueue & queue, GpuMemory & gpu_mem, HostMemory 
     return true;
 }
 
-bool CpuBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+bool CpuBackend::enqueueRead(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
-    checkType(queue.type);
+    checkType(stream.type);
     checkType(gpu_mem.type);
     checkType(host_mem.type);
     if (gpu_mem.size < size || host_mem.size < size) {
@@ -346,12 +344,12 @@ bool CpuBackend::enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMe
     return true;
 }
 
-bool CpuBackend::flush(GpuQueue & queue) const
+bool CpuBackend::flush(GpuStream & stream) const
 {
     return true;
 }
 
-bool CpuBackend::finish(GpuQueue & queue) const
+bool CpuBackend::finish(GpuStream & stream) const
 {
     return true;
 }

@@ -48,13 +48,13 @@ struct TBAG_API CpuBackend : public GpuBackend
     virtual GpuContext createContext(GpuDevice const &  device) const override;
     virtual bool      releaseContext(GpuContext      & context) const override;
 
-    virtual GpuQueue createQueue(GpuContext const & context) const override;
-    virtual bool    releaseQueue(GpuQueue         &   queue) const override;
+    virtual GpuStream createStream(GpuContext const & context) const override;
+    virtual bool     releaseStream(GpuStream        &  stream) const override;
 
-    virtual GpuEvent createEvent(GpuQueue const & queue) const override;
-    virtual bool       syncEvent(GpuEvent const & event) const override;
-    virtual bool    elapsedEvent(GpuEvent       & event, float * millisec = nullptr) const override;
-    virtual bool    releaseEvent(GpuEvent       & event) const override;
+    virtual GpuEvent createEvent(GpuStream const & stream) const override;
+    virtual bool       syncEvent(GpuEvent  const & event) const override;
+    virtual bool    elapsedEvent(GpuEvent        & event, float * millisec = nullptr) const override;
+    virtual bool    releaseEvent(GpuEvent        & event) const override;
 
     virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const override;
     virtual bool        free(GpuMemory & memory) const override;
@@ -62,14 +62,14 @@ struct TBAG_API CpuBackend : public GpuBackend
     virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const override;
     virtual bool         freeHost(HostMemory & memory) const override;
 
-    virtual bool write(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual bool  read(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual bool write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual bool  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual bool enqueueWrite(GpuQueue & queue, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual bool  enqueueRead(GpuQueue & queue, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual bool enqueueWrite(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual bool  enqueueRead(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual bool  flush(GpuQueue & queue) const override;
-    virtual bool finish(GpuQueue & queue) const override;
+    virtual bool  flush(GpuStream & stream) const override;
+    virtual bool finish(GpuStream & stream) const override;
 };
 
 } // namespace backend
