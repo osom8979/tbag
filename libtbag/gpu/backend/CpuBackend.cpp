@@ -171,6 +171,11 @@ bool CpuBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
+bool CpuBackend::isStreamSupported(GpuDevice const & device) const
+{
+    return true;
+}
+
 GpuStream CpuBackend::createStream(GpuContext const & context) const
 {
     checkType(context.type);

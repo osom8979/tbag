@@ -48,6 +48,7 @@ struct TBAG_API CpuBackend : public GpuBackend
     virtual GpuContext createContext(GpuDevice const &  device) const override;
     virtual bool      releaseContext(GpuContext      & context) const override;
 
+    virtual bool isStreamSupported(GpuDevice  const &  device) const override;
     virtual GpuStream createStream(GpuContext const & context) const override;
     virtual bool     releaseStream(GpuStream        &  stream) const override;
 

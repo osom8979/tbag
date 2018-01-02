@@ -263,6 +263,11 @@ bool OpenCLBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
+bool OpenCLBackend::isStreamSupported(GpuDevice const & device) const
+{
+    return true;
+}
+
 GpuStream OpenCLBackend::createStream(GpuContext const & context) const
 {
     checkType(context.type);

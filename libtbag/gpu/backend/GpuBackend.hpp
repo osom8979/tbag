@@ -219,6 +219,20 @@ struct GpuDeviceInfo : public GpuDevice
         }
         return std::string();
     }
+
+    bool getInteger(std::string const & name, int & value) const
+    {
+        auto itr = properties.find(name);
+        if (itr != properties.end()) {
+            try {
+                value = std::stoi(itr->second);
+                return true;
+            } catch (...) {
+                // EMPTY.
+            }
+        }
+        return false;
+    }
 };
 
 struct GpuContext : public GpuDevice
@@ -291,6 +305,9 @@ using GpuPlatforms = std::vector<GpuPlatform>;
 using GpuDevices   = std::vector<GpuDevice>;
 using GpuContexts  = std::vector<GpuContext>;
 
+using GpuMemories  = std::vector<GpuMemory>;
+using HostMemories = std::vector<HostMemory>;
+
 struct GpuTypeMismatchException : public std::exception
 {
     virtual const char * what() const TBAG_NOEXCEPT override
@@ -315,6 +332,7 @@ struct TBAG_API GpuBackend
     virtual GpuContext createContext(GpuDevice const &  device) const = 0;
     virtual bool      releaseContext(GpuContext      & context) const = 0;
 
+    virtual bool isStreamSupported(GpuDevice  const &  device) const = 0;
     virtual GpuStream createStream(GpuContext const & context) const = 0;
     virtual bool     releaseStream(GpuStream        &  stream) const = 0;
 

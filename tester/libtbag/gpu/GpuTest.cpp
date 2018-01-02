@@ -56,11 +56,12 @@ TEST(GpuTest, Information)
                       << "* Device count: " << gpu->getDeviceCount(plat) << std::endl;
             for (auto & dev : gpu->getDeviceList(plat)) {
                 auto dev_info = gpu->getDeviceInfo(dev);
-                std::cout << "* Device ID: "       << dev.device_id           << "\n"
-                          << "** name: "           << dev_info.name           << "\n"
-                          << "** driver version: " << dev_info.driver_version << "\n"
-                          << "** device version: " << dev_info.device_version << "\n"
-                          << "** global memory: "  << dev_info.global_memory  << std::endl;
+                std::cout << "* Device ID: "         << dev.device_id               << "\n"
+                          << "** name: "             << dev_info.name               << "\n"
+                          << "** driver version: "   << dev_info.driver_version     << "\n"
+                          << "** device version: "   << dev_info.device_version     << "\n"
+                          << "** stream supported: " << gpu->isStreamSupported(dev) << "\n"
+                          << "** global memory: "    << dev_info.global_memory      << std::endl;
                 for (auto & prop : dev_info.properties) {
                     std::cout << "** " << prop.first << ": " << prop.second << std::endl;
                 }
@@ -76,9 +77,9 @@ TEST(GpuTest, CreateQueue)
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());
 
-        auto queue = gpu->createStream(context);
-        ASSERT_FALSE(queue.isUnknownQueue());
-        ASSERT_TRUE(gpu->releaseStream(queue));
+        auto stream = gpu->createStream(context);
+        ASSERT_FALSE(stream.isUnknownQueue());
+        ASSERT_TRUE(gpu->releaseStream(stream));
 
         ASSERT_TRUE(gpu->releaseContext(context));
         ASSERT_TRUE(context.isUnknownContext());
@@ -92,12 +93,12 @@ TEST(GpuTest, CreateMemory)
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());
 
-        auto queue = gpu->createStream(context);
-        ASSERT_FALSE(queue.isUnknownQueue());
+        auto stream = gpu->createStream(context);
+        ASSERT_FALSE(stream.isUnknownQueue());
 
-        char        const TEST_DATA[] = "TEST_DATA";
-        std::size_t const TEST_SIZE   = sizeof(TEST_DATA);
-        std::size_t const ALLOC_SIZE  = 1024;
+        char        const  TEST_DATA[] = "TEST_DATA";
+        std::size_t const  TEST_SIZE   = sizeof(TEST_DATA);
+        std::size_t const ALLOC_SIZE   = 1024;
 
         auto gpu_memory = gpu->malloc(context, ALLOC_SIZE);
         ASSERT_TRUE(gpu_memory.existsMemory());
@@ -114,16 +115,16 @@ TEST(GpuTest, CreateMemory)
 
         float write_millisec = 0;
         float  read_millisec = 0;
-        auto write_event = gpu->createEvent(queue);
-        auto  read_event = gpu->createEvent(queue);
+        auto write_event = gpu->createEvent(stream);
+        auto  read_event = gpu->createEvent(stream);
 
-        ASSERT_TRUE(gpu->write(queue, gpu_memory, host_memory, TEST_SIZE, &write_event));
-        ASSERT_TRUE(gpu->finish(queue));
+        ASSERT_TRUE(gpu->write(stream, gpu_memory, host_memory, TEST_SIZE, &write_event));
+        ASSERT_TRUE(gpu->finish(stream));
         ASSERT_TRUE(gpu->syncEvent(write_event));
         ASSERT_TRUE(gpu->elapsedEvent(write_event, &write_millisec));
 
-        ASSERT_TRUE(gpu->read(queue, gpu_memory, host_read, TEST_SIZE, &read_event));
-        ASSERT_TRUE(gpu->finish(queue));
+        ASSERT_TRUE(gpu->read(stream, gpu_memory, host_read, TEST_SIZE, &read_event));
+        ASSERT_TRUE(gpu->finish(stream));
         ASSERT_TRUE(gpu->syncEvent(read_event));
         ASSERT_TRUE(gpu->elapsedEvent(read_event, &read_millisec));
 
@@ -137,8 +138,8 @@ TEST(GpuTest, CreateMemory)
         ASSERT_TRUE(gpu->freeHost(host_memory));
         ASSERT_TRUE(gpu->freeHost(host_read));
 
-        ASSERT_TRUE(gpu->releaseStream(queue));
-        ASSERT_TRUE(queue.isUnknownQueue());
+        ASSERT_TRUE(gpu->releaseStream(stream));
+        ASSERT_TRUE(stream.isUnknownQueue());
 
         ASSERT_TRUE(gpu->releaseContext(context));
         ASSERT_TRUE(context.isUnknownContext());

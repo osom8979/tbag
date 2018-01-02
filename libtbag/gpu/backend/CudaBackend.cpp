@@ -277,6 +277,18 @@ bool CudaBackend::releaseContext(GpuContext & context) const
     return true;
 }
 
+bool CudaBackend::isStreamSupported(GpuDevice const & device) const
+{
+    checkType(device.type);
+    auto const info = getDeviceInfo(device);
+
+    int value;
+    if (info.getInteger(TBAG_GPU_DEVICE_INFO_DEVICE_OVERLAP, value)) {
+        return value == 1;
+    }
+    return false;
+}
+
 GpuStream CudaBackend::createStream(GpuContext const & context) const
 {
     checkType(context.type);
