@@ -62,7 +62,7 @@ static bool write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & ho
     if (code == CL_SUCCESS) {
         return true;
     } else {
-        tDLogE("OpenCLBackend::enqueueWrite() OpenCL clEnqueueWriteBuffer() error code: {}", code);
+        tDLogE("OpenCLBackend/__impl::write({}) OpenCL clEnqueueWriteBuffer() error code: {}", blocking, code);
     }
 #endif
     return false;
@@ -79,15 +79,53 @@ static bool read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & hos
     if (code == CL_SUCCESS) {
         return true;
     } else {
-        tDLogE("OpenCLBackend::enqueueRead() OpenCL clEnqueueReadBuffer() error code: {}", code);
+        tDLogE("OpenCLBackend/__impl::read({}) OpenCL clEnqueueReadBuffer() error code: {}", blocking, code);
     }
 #endif
     return false;
 }
 
+template <typename KernelType>
+static bool setKernelMemories(KernelType kernel, GpuMemories const & mems)
+{
+    if (mems.empty()) {
+        return false;
+    }
+
+#if defined(USE_OPENCL)
+    cl_uint const SIZE = (cl_uint)mems.size();
+    for (cl_uint i = 0; i < SIZE; ++i) {
+        cl_int code = ::clSetKernelArg(kernel, i, mems[i].size, mems[i].data);
+        if (code != CL_SUCCESS) {
+            tDLogE("OpenCLBackend/__impl::setKernelMemories() OpenCL clSetKernelArg() error code: {}", code);
+            return false;
+        }
+    }
+    return true;
+#else
+    return false;
+#endif
+}
+
+template <typename KernelType, typename ... Args>
+static bool setKernelArguments(KernelType kernel, Args && ... mems)
+{
+    return setKernelMemories(kernel, {std::forward<Args>(mems) ...});
+}
+
 // ------------------
 } // namespace __impl
 // ------------------
+
+OpenCLBackend::OpenCLBackend()
+{
+    // EMPTY.
+}
+
+OpenCLBackend::~OpenCLBackend()
+{
+    // EMPTY.
+}
 
 GpuBackendType OpenCLBackend::getType() const TBAG_NOEXCEPT
 {

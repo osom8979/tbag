@@ -72,10 +72,10 @@ struct CudaDeviceGuard : private Noncopyable
     int   change_id;
     bool   exchange;
 
-    CudaDeviceGuard(GpuDevice  const &  device) : CudaDeviceGuard( device.device_id) { /* EMPTY. */ }
-    CudaDeviceGuard(GpuContext const & context) : CudaDeviceGuard(context.device_id) { /* EMPTY. */ }
-    CudaDeviceGuard(GpuMemory  const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
-    CudaDeviceGuard(HostMemory const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
+    explicit CudaDeviceGuard(GpuDevice  const &  device) : CudaDeviceGuard( device.device_id) { /* EMPTY. */ }
+    explicit CudaDeviceGuard(GpuContext const & context) : CudaDeviceGuard(context.device_id) { /* EMPTY. */ }
+    explicit CudaDeviceGuard(GpuMemory  const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
+    explicit CudaDeviceGuard(HostMemory const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
 
     CudaDeviceGuard(GpuId const & id) : current_id(0), change_id(0), exchange(false)
     {

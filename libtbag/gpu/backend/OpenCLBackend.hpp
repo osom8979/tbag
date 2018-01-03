@@ -41,6 +41,9 @@ TBAG_CONSTEXPR bool isOpenCLSupport() TBAG_NOEXCEPT
  */
 struct TBAG_API OpenCLBackend : public GpuBackend
 {
+    OpenCLBackend();
+    virtual ~OpenCLBackend();
+
     virtual GpuBackendType  getType() const TBAG_NOEXCEPT override;
     virtual bool          isSupport() const TBAG_NOEXCEPT override;
     virtual bool             isHost() const TBAG_NOEXCEPT override;
