@@ -331,7 +331,7 @@ GpuStream OpenCLBackend::createStream(GpuContext const & context) const
 bool OpenCLBackend::releaseStream(GpuStream & stream) const
 {
     checkType(stream.type);
-    if (stream.isUnknownQueue()) {
+    if (stream.isUnknownStream()) {
         tDLogE("OpenCLBackend::releaseStream() Illegal stream.");
         return false;
     }
@@ -541,6 +541,16 @@ bool OpenCLBackend::finish(GpuStream & stream) const
         tDLogE("OpenCLBackend::finish() OpenCL clFinish() error code: {}", code);
     }
 #endif
+    return false;
+}
+
+bool OpenCLBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
+                           type::TypeTable type, std::size_t count) const
+{
+    checkType(stream.type);
+    checkType(v1.type);
+    checkType(v2.type);
+    checkType(result.type);
     return false;
 }
 

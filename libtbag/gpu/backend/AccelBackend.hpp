@@ -33,6 +33,9 @@ namespace backend {
 struct TBAG_API AccelBackend : public CpuBackend
 {
     virtual GpuBackendType getType() const TBAG_NOEXCEPT override;
+
+    virtual bool runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
+                        type::TypeTable type, std::size_t count) const override;
 };
 
 } // namespace backend

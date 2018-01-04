@@ -17,6 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/debug/Assert.hpp>
+#include <libtbag/type/TypeTable.hpp>
 
 #include <string>
 #include <vector>
@@ -254,7 +255,7 @@ struct GpuStream : public GpuContext
     GpuStream(GpuContext const & c, GpuId s = UNKNOWN_GPU_ID) : GpuContext(c), stream_id(s) { /* EMPTY. */ }
     ~GpuStream() { /* EMPTY. */ }
 
-    inline bool isUnknownQueue() const TBAG_NOEXCEPT { return stream_id == UNKNOWN_GPU_ID; }
+    inline bool isUnknownStream() const TBAG_NOEXCEPT { return stream_id == UNKNOWN_GPU_ID; }
 };
 
 struct GpuEvent : public GpuStream
@@ -363,6 +364,13 @@ struct TBAG_API GpuBackend
 
     virtual bool  flush(GpuStream & stream) const = 0;
     virtual bool finish(GpuStream & stream) const = 0;
+
+    // -------
+    // Kernel.
+    // -------
+
+    virtual bool runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
+                        type::TypeTable type, std::size_t count) const = 0;
 
     // --------------------
     // Non-virtual methods.

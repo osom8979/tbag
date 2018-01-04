@@ -308,7 +308,7 @@ GpuStream CudaBackend::createStream(GpuContext const & context) const
 bool CudaBackend::releaseStream(GpuStream & stream) const
 {
     checkType(stream.type);
-    if (stream.isUnknownQueue()) {
+    if (stream.isUnknownStream()) {
         tDLogE("CudaBackend::releaseStream() Illegal stream.");
         return false;
     }
@@ -577,6 +577,16 @@ bool CudaBackend::finish(GpuStream & stream) const
         tDLogE("CudaBackend::finish() CUDA cudaDeviceSynchronize() error: {}", ::cudaGetErrorString(code));
     }
 #endif
+    return false;
+}
+
+bool CudaBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
+                         type::TypeTable type, std::size_t count) const
+{
+    checkType(stream.type);
+    checkType(v1.type);
+    checkType(v2.type);
+    checkType(result.type);
     return false;
 }
 

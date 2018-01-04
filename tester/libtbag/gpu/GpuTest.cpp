@@ -70,7 +70,7 @@ TEST(GpuTest, Information)
     });
 }
 
-TEST(GpuTest, CreateQueue)
+TEST(GpuTest, CreateStream)
 {
     __impl::run_all_if_supported([](UniqueGpu & gpu){
         std::cout << "GPU type: " << gpu->getTypeString() << std::endl;
@@ -78,7 +78,7 @@ TEST(GpuTest, CreateQueue)
         ASSERT_FALSE(context.isUnknownContext());
 
         auto stream = gpu->createStream(context);
-        ASSERT_FALSE(stream.isUnknownQueue());
+        ASSERT_FALSE(stream.isUnknownStream());
         ASSERT_TRUE(gpu->releaseStream(stream));
 
         ASSERT_TRUE(gpu->releaseContext(context));
@@ -94,7 +94,7 @@ TEST(GpuTest, CreateMemory)
         ASSERT_FALSE(context.isUnknownContext());
 
         auto stream = gpu->createStream(context);
-        ASSERT_FALSE(stream.isUnknownQueue());
+        ASSERT_FALSE(stream.isUnknownStream());
 
         char        const  TEST_DATA[] = "TEST_DATA";
         std::size_t const  TEST_SIZE   = sizeof(TEST_DATA);
@@ -139,7 +139,7 @@ TEST(GpuTest, CreateMemory)
         ASSERT_TRUE(gpu->freeHost(host_read));
 
         ASSERT_TRUE(gpu->releaseStream(stream));
-        ASSERT_TRUE(stream.isUnknownQueue());
+        ASSERT_TRUE(stream.isUnknownStream());
 
         ASSERT_TRUE(gpu->releaseContext(context));
         ASSERT_TRUE(context.isUnknownContext());

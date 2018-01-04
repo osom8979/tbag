@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <cstdint>
-#include <numeric>
+#include <limits>
 #include <type_traits>
 
 // -------------------
