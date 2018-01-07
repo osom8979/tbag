@@ -8,33 +8,39 @@
 #include <libtbag/gpu/cuda/CudaRaw.h>
 #include <cuda.h>
 
-__global__ void addByOnlyBlocks(int * lh, int * rh, int * result)
+template <typename T>
+__global__ void tbCudaAddKernel(T const * v1, T const * v2, T * result, int size)
 {
-    result[blockIdx.x] = lh[blockIdx.x] + rh[blockIdx.x];
+    int const index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    if (index < size) {
+        result[index] = v1[index] + v2[index];
+    }
 }
 
-int tbCudaAddByGpu(int const * lh, int const * rh, int * result, int size)
+int tbCudaAdd1f(float const * gpu_v1, float const * gpu_v2, float * gpu_result, int size)
 {
-    int const MEMORY_SIZE = size * sizeof(int);
-    int * device_lh;
-    int * device_rh;
-    int * device_result;
+    int block_size    = 0;
+    int min_grid_size = 0;
+    int grid_size     = 0;
 
-    ::cudaMalloc((void**)&device_lh    , MEMORY_SIZE);
-    ::cudaMalloc((void**)&device_rh    , MEMORY_SIZE);
-    ::cudaMalloc((void**)&device_result, MEMORY_SIZE);
+    ::cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, kernel, 0, size);
+    grid_size = (size + block_size - 1) / block_size;
+    grid_size = (min_grid_size > grid_size ? min_grid_size : grid_size);
+    tbCudaAddKernel<float><<<grid_size, block_size>>>(gpu_v1, gpu_v2, gpu_result, size);
 
-    ::cudaMemcpy(device_lh, lh, MEMORY_SIZE, ::cudaMemcpyHostToDevice);
-    ::cudaMemcpy(device_rh, rh, MEMORY_SIZE, ::cudaMemcpyHostToDevice);
+    return TB_CUDA_TRUE;
+}
 
-    addByOnlyBlocks<<<size, 1>>>(device_lh, device_rh, device_result);
-    ::cudaDeviceSynchronize();
+int tbCudaAdd1d(double const * gpu_v1, double const * gpu_v2, double * gpu_result, int size)
+{
+    int block_size    = 0;
+    int min_grid_size = 0;
+    int grid_size     = 0;
 
-    ::cudaMemcpy(result, device_result, MEMORY_SIZE, ::cudaMemcpyDeviceToHost);
-
-    ::cudaFree(device_lh);
-    ::cudaFree(device_rh);
-    ::cudaFree(device_result);
+    ::cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, kernel, 0, size);
+    grid_size = (size + block_size - 1) / block_size;
+    grid_size = (min_grid_size > grid_size ? min_grid_size : grid_size);
+    tbCudaAddKernel<double><<<grid_size, block_size>>>(gpu_v1, gpu_v2, gpu_result, size);
 
     return TB_CUDA_TRUE;
 }

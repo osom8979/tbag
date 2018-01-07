@@ -28,8 +28,8 @@
 extern "C" {
 #endif
 
-TBAG_API int tbCudaAddByCpu(int const * lh, int const * rh, int * result, int size);
-TBAG_API int tbCudaAddByGpu(int const * lh, int const * rh, int * result, int size);
+TBAG_API int tbCudaAdd1f(float  const * gpu_v1, float  const * gpu_v2, float  * gpu_result, int size);
+TBAG_API int tbCudaAdd1d(double const * gpu_v1, double const * gpu_v2, double * gpu_result, int size);
 
 #if defined(__cplusplus)
 } /* extern "C" */

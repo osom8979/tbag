@@ -26,22 +26,11 @@ namespace gpu     {
 namespace backend {
 namespace kernels {
 
-template <typename T>
-void addByCpu(T const * v1, T const * v2, T * result, std::size_t count)
-{
-    for (std::size_t i = 0; i < count; ++i, ++v1, ++v2, ++result) {
-        *result = *v1 + *v2;
-    }
-}
+TBAG_API bool addByCpu(float  const * v1, float  const * v2, float  * result, int count);
+TBAG_API bool addByCpu(double const * v1, double const * v2, double * result, int count);
 
-template <typename T>
-void addByCpu2(void const * v1, void const * v2, void * result, std::size_t count)
-{
-    addByCpu<T>((T const *)v1, (T const *)v2, (T*)result, count);
-}
-
-TBAG_API void addByCuda(float  const * v1, float  const * v2, float  * result, std::size_t count);
-TBAG_API void addByCuda(double const * v1, double const * v2, double * result, std::size_t count);
+TBAG_API bool addByCuda(float  const * v1, float  const * v2, float  * result, int count);
+TBAG_API bool addByCuda(double const * v1, double const * v2, double * result, int count);
 
 } // namespace kernels
 } // namespace backend

@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/gpu/backend/CpuBackend.hpp>
-#include <libtbag/gpu/backend/kernels/GpuKernels.hpp>
+#include <libtbag/gpu/backend/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/util/Version.hpp>
@@ -361,19 +361,17 @@ bool CpuBackend::finish(GpuStream & stream) const
 }
 
 bool CpuBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                        type::TypeTable type, std::size_t count) const
+                        type::TypeTable type, int count) const
 {
     checkType(stream.type);
     checkType(v1.type);
     checkType(v2.type);
     checkType(result.type);
 
-    if (type == type::TypeTable::TT_INT) {
-        kernels::addByCpu2<int>(v1.data, v2.data, result.data, count);
-    } else if (type == type::TypeTable::TT_FLOAT) {
-        kernels::addByCpu2<float>(v1.data, v2.data, result.data, count);
+    if (type == type::TypeTable::TT_FLOAT) {
+        kernels::addByCpu((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
     } else if (type == type::TypeTable::TT_DOUBLE) {
-        kernels::addByCpu2<double>(v1.data, v2.data, result.data, count);
+        kernels::addByCpu((double const *)v1.data, (double const *)v2.data, (double *)result.data, count);
     } else {
         return false;
     }

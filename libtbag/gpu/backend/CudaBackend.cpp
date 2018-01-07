@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/gpu/backend/CudaBackend.hpp>
-#include <libtbag/gpu/backend/kernels/GpuKernels.hpp>
+#include <libtbag/gpu/backend/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/string/Format.hpp>
@@ -582,13 +582,21 @@ bool CudaBackend::finish(GpuStream & stream) const
 }
 
 bool CudaBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                         type::TypeTable type, std::size_t count) const
+                         type::TypeTable type, int count) const
 {
     checkType(stream.type);
     checkType(v1.type);
     checkType(v2.type);
     checkType(result.type);
-    return false;
+
+    if (type == type::TypeTable::TT_FLOAT) {
+        kernels::addByCuda((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
+    } else if (type == type::TypeTable::TT_DOUBLE) {
+        kernels::addByCuda((double const *)v1.data, (double const *)v2.data, (double *)result.data, count);
+    } else {
+        return false;
+    }
+    return true;
 }
 
 } // namespace backend

@@ -5,8 +5,8 @@
  * @date   2018-01-07
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_GPUKERNELS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_GPUKERNELS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_GPUKERNELS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_GPUKERNELS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,11 +24,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu     {
 namespace backend {
-namespace kernels {
 
 // EMPTY.
 
-} // namespace kernels
 } // namespace backend
 } // namespace gpu
 
@@ -36,5 +34,5 @@ namespace kernels {
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_GPUKERNELS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_GPUKERNELS_HPP__
 

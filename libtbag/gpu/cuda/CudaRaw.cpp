@@ -6,27 +6,9 @@
  */
 
 #include <libtbag/gpu/cuda/CudaRaw.h>
-#include <cassert>
 
-int tbCudaAddByCpu(int const * lh, int const * rh, int * result, int size)
-{
-    for (int i = 0; i < size; ++i) {
-        *(result + i) = *(lh + i) + *(rh + i);
-    }
-    return TB_CUDA_TRUE;
-}
-
-// -------------------
 #if !defined(USE_CUDA)
-// -------------------
-
-int tbCudaAddByGpu(int const * lh, int const * rh, int * result, int size)
-{
-    assert(false && "Unsupported operation.");
-    return TB_CUDA_FALSE;
-}
-
-// -------------------------
-#endif // !defined(USE_CUDA)
-// -------------------------
+int tbCudaAdd1f(float  const * gpu_v1, float  const * gpu_v2, float  * gpu_result, int size) { return TB_CUDA_FALSE; }
+int tbCudaAdd1d(double const * gpu_v1, double const * gpu_v2, double * gpu_result, int size) { return TB_CUDA_FALSE; }
+#endif
 

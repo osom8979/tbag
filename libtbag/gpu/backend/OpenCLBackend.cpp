@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/gpu/backend/OpenCLBackend.hpp>
-#include <libtbag/gpu/backend/kernels/GpuKernels.hpp>
+#include <libtbag/gpu/backend/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_OPENCL)
@@ -546,7 +546,7 @@ bool OpenCLBackend::finish(GpuStream & stream) const
 }
 
 bool OpenCLBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                           type::TypeTable type, std::size_t count) const
+                           type::TypeTable type, int count) const
 {
     checkType(stream.type);
     checkType(v1.type);

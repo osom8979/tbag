@@ -73,7 +73,7 @@ struct TBAG_API CpuBackend : public GpuBackend
     virtual bool finish(GpuStream & stream) const override;
 
     virtual bool runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                        type::TypeTable type, std::size_t count) const override;
+                        type::TypeTable type, int count) const override;
 };
 
 } // namespace backend

@@ -370,7 +370,7 @@ struct TBAG_API GpuBackend
     // -------
 
     virtual bool runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                        type::TypeTable type, std::size_t count) const = 0;
+                        type::TypeTable type, int count) const = 0;
 
     // --------------------
     // Non-virtual methods.

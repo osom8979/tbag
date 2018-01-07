@@ -68,6 +68,7 @@ struct GpuAddKernelTest
         if (gpu->write(stream, gpu_v1, host_v1, sizeof(float) * count) == false) { return false; }
         if (gpu->write(stream, gpu_v2, host_v2, sizeof(float) * count) == false) { return false; }
         if (gpu->runAdd(stream, gpu_v1, gpu_v2, gpu_result, type::TypeTable::TT_FLOAT, count) == false) { return false; }
+        if (gpu->finish(stream) == false) { return false; }
         if (gpu->read(stream, gpu_result, host_result, sizeof(float) * count) == false) { return false; }
 
         ::memcpy(result.data(), host_result.data, sizeof(float) * count);
