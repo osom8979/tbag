@@ -119,7 +119,7 @@ TEST(GpuAddTest, Default)
 
         float millisec = 0.0f;
         ASSERT_TRUE(tester.run(v1, v2, result, &millisec));
-        std::cout << "Kernel: " << millisec << " millisec" << std::endl;
+        std::cout << "Kernel: " << millisec << std::fixed << " millisec" << std::endl;
 
         for (i = 0; i < TEST_COUNT; ++i) {
             ASSERT_TRUE(algorithm::equals(v3[i], result[i]));

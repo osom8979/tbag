@@ -45,6 +45,7 @@ SimdArch::~SimdArch()
     // EMPTY.
 }
 
+// @formatter:off
 bool SimdArch::isNULL           () const TBAG_NOEXCEPT { return _flags == static_cast<std::uint32_t>(simdpp::Arch::NONE_NULL); }
 bool SimdArch::isX86_SSE2       () const TBAG_NOEXCEPT { return __impl::testArch(_flags, simdpp::Arch::X86_SSE2       ); }
 bool SimdArch::isX86_SSE3       () const TBAG_NOEXCEPT { return __impl::testArch(_flags, simdpp::Arch::X86_SSE3       ); }
@@ -66,10 +67,12 @@ bool SimdArch::isPOWER_ALTIVEC  () const TBAG_NOEXCEPT { return __impl::testArch
 bool SimdArch::isPOWER_VSX_206  () const TBAG_NOEXCEPT { return __impl::testArch(_flags, simdpp::Arch::POWER_VSX_206  ); }
 bool SimdArch::isPOWER_VSX_207  () const TBAG_NOEXCEPT { return __impl::testArch(_flags, simdpp::Arch::POWER_VSX_207  ); }
 bool SimdArch::isMIPS_MSA       () const TBAG_NOEXCEPT { return __impl::testArch(_flags, simdpp::Arch::MIPS_MSA       ); }
+// @formatter:on
 
 std::string SimdArch::toString() const
 {
     std::stringstream ss;
+    // @formatter:off
     if (isX86_SSE2       ()) { ss << "[X86_SSE2]"; }
     if (isX86_SSE3       ()) { ss << "[X86_SSE3]"; }
     if (isX86_SSSE3      ()) { ss << "[X86_SSSE3]"; }
@@ -90,6 +93,7 @@ std::string SimdArch::toString() const
     if (isPOWER_VSX_206  ()) { ss << "[POWER_VSX_206]"; }
     if (isPOWER_VSX_207  ()) { ss << "[POWER_VSX_207]"; }
     if (isMIPS_MSA       ()) { ss << "[MIPS_MSA]"; }
+    // @formatter:on
     return ss.str();
 }
 

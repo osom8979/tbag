@@ -100,7 +100,8 @@ TEST(GpuTest, CreateMemory)
         ASSERT_TRUE(gpu->syncEvent(read_event));
         ASSERT_TRUE(gpu->elapsedEvent(read_event, &read_millisec));
 
-        std::cout << "Write: " << write_millisec << " millisec" << "\n"
+        std::cout << std::fixed
+                  << "Write: " << write_millisec << " millisec" << "\n"
                   << "Read: "  <<  read_millisec << " millisec" << std::endl;
 
         std::string const READ_STRING((char*)host_read.data, TEST_SIZE);
