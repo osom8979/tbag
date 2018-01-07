@@ -227,7 +227,7 @@ bool CpuBackend::elapsedEvent(GpuEvent & event, float * millisec) const
         return false;
     }
     if (millisec != nullptr) {
-        *millisec = (event.stop - event.start) * 1.0e-3f;
+        *millisec = (event.stop - event.start) * 1.0e-6f;
     }
     return true;
 }
@@ -368,6 +368,7 @@ bool CpuBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory cons
     checkType(v2.type);
     checkType(result.type);
 
+    __impl::CpuEventGuard const EVENT_LOCK(event);
     if (type == type::TypeTable::TT_FLOAT) {
         kernels::addByCpu((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
     } else if (type == type::TypeTable::TT_DOUBLE) {
