@@ -1,0 +1,93 @@
+/**
+ * @file   GpuAdd.simd
+ * @brief  GpuAdd class implementation.
+ * @author zer0
+ * @date   2018-01-07
+ */
+
+#include <libtbag/gpu/backend/kernels/GpuAdd.hpp>
+#include <vector>
+#include <iostream>
+
+#include <simdpp/simd.h>
+#include <simdpp/detail/align_v128.h>
+#include <simdpp/detail/mem_block.h>
+#include <simdpp/dispatch/get_arch_gcc_builtin_cpu_supports.h>
+#include <simdpp/dispatch/get_arch_linux_cpuinfo.h>
+#include <simdpp/dispatch/get_arch_raw_cpuid.h>
+
+#if SIMDPP_HAS_GET_ARCH_GCC_BUILTIN_CPU_SUPPORTS == 1
+# define SIMDPP_USER_ARCH_INFO  ::simdpp::get_arch_gcc_builtin_cpu_supports()
+#elif SIMDPP_HAS_GET_ARCH_LINUX_CPUINFO == 1
+# define SIMDPP_USER_ARCH_INFO  ::simdpp::get_arch_linux_cpuinfo()
+#elif SIMDPP_HAS_GET_ARCH_RAW_CPUID == 1
+# define SIMDPP_USER_ARCH_INFO  ::simdpp::get_arch_raw_cpuid()
+#endif
+
+// -------------------
+NAMESPACE_LIBTBAG_OPEN
+// -------------------
+
+namespace gpu     {
+namespace backend {
+namespace kernels {
+
+inline void prevent_optimization_impl(void const * ptr)
+{
+    std::cout << ptr;
+}
+
+// Some compilers are really clever figuring out ways to access to data that
+// would allow them to optimize things. Storing and reading a pointer from
+// volatile location seems to work around this.
+template <typename T>
+T * prevent_optimization(T * ptr)
+{
+    volatile bool never = false;
+    if (never) {
+        prevent_optimization_impl(ptr);
+    }
+    T * volatile * volatile opaque;
+    opaque = &ptr;
+    return *opaque;
+}
+
+// ------------------------------
+namespace SIMDPP_ARCH_NAMESPACE {
+// ------------------------------
+
+bool addByAccel1f(float const * v1, float const * v2, float * result, int count)
+{
+//    using AlignedVector = std::vector<simdpp::float32x4, simdpp::aligned_allocator<simdpp::float32x4, sizeof(simdpp::float32x4)> >;
+//    AlignedVector v1_vector;
+//    AlignedVector v2_vector;
+//    for (int i = 0; i < count; ++i) {
+//        simdpp::float32x4 v1_align = (simdpp::float32x4) *prevent_optimization(v1_vector.data() + i);
+//        simdpp::float32x4 v2_align = (simdpp::float32x4) *prevent_optimization(v2_vector.data() + i);
+//        auto r = simdpp::add(v1_align, v2_align);
+//    }
+    return false;
+}
+
+bool addByAccel1d(double const * v1, double const * v2, double * result, int count)
+{
+    return false;
+}
+
+// ---------------------------------
+} // namespace SIMDPP_ARCH_NAMESPACE
+// ---------------------------------
+
+#if defined(SIMDPP_USER_ARCH_INFO)
+SIMDPP_MAKE_DISPATCHER((bool)(addByAccel1f)((float  const *)v1, (float  const *)v2, (float  *)result, (int)count));
+SIMDPP_MAKE_DISPATCHER((bool)(addByAccel1d)((double const *)v1, (double const *)v2, (double *)result, (int)count));
+#endif
+
+} // namespace kernels
+} // namespace backend
+} // namespace gpu
+
+// --------------------
+NAMESPACE_LIBTBAG_CLOSE
+// --------------------
+

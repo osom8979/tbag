@@ -36,60 +36,37 @@ TBAG_CONSTEXPR static bool isCpuBackendVerbose() TBAG_NOEXCEPT
 #endif
 }
 
-struct CpuContextBackend
-{
-    CpuContextBackend()
-    {
-        tDLogIfD(isCpuBackendVerbose(), "CpuContextBackend::CpuContextBackend() ID: @{}", (void*)this);
-    }
-
-    ~CpuContextBackend()
-    {
-        tDLogIfD(isCpuBackendVerbose(), "CpuContextBackend::~CpuContextBackend() ID: @{}", (void*)this);
-    }
-};
-
-struct CpuQueueBackend
-{
-    CpuQueueBackend()
-    {
-        tDLogIfD(isCpuBackendVerbose(), "CpuQueueBackend::CpuQueueBackend() ID: @{}", (void*)this);
-    }
-
-    ~CpuQueueBackend()
-    {
-        tDLogIfD(isCpuBackendVerbose(), "CpuQueueBackend::~CpuQueueBackend() ID: @{}", (void*)this);
-    }
-};
-
-struct CpuEventGuard : private Noncopyable
-{
-    GpuEvent * event;
-
-    CpuEventGuard(GpuEvent * e = nullptr) : event(e)
-    {
-        if (event != nullptr) {
-            event->start = now();
-        }
-    }
-
-    ~CpuEventGuard()
-    {
-        if (event != nullptr) {
-            event->stop = now();
-        }
-    }
-
-    id::Id now() const
-    {
-        using namespace std::chrono;
-        return (id::Id)duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
-    }
-};
-
 // ------------------
 } // namespace __impl
 // ------------------
+
+// -----------------------------
+// CpuEventGuard implementation.
+// -----------------------------
+
+CpuEventGuard::CpuEventGuard(GpuEvent * e) : event(e)
+{
+    if (event != nullptr) {
+        event->start = nowNano();
+    }
+}
+
+CpuEventGuard::~CpuEventGuard()
+{
+    if (event != nullptr) {
+        event->stop = nowNano();
+    }
+}
+
+id::Id CpuEventGuard::nowNano()
+{
+    using namespace std::chrono;
+    return (id::Id)duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+// --------------------------
+// CpuBackend implementation.
+// --------------------------
 
 GpuBackendType CpuBackend::getType() const TBAG_NOEXCEPT
 {
@@ -155,7 +132,7 @@ GpuContext CpuBackend::createContext(GpuDevice const & device) const
 {
     checkType(device.type);
     GpuContext result(device);
-    auto * context = new __impl::CpuContextBackend();
+    auto * context = new CpuContextBackend();
     result.context_id = (id::Id)context;
     return result;
 }
@@ -167,7 +144,7 @@ bool CpuBackend::releaseContext(GpuContext & context) const
         tDLogE("CpuBackend::releaseContext() Illegal stream.");
         return false;
     }
-    delete ((__impl::CpuContextBackend*)context.context_id);
+    delete ((CpuContextBackend*)context.context_id);
     context.context_id = id::UNKNOWN_ID;
     return true;
 }
@@ -185,7 +162,7 @@ GpuStream CpuBackend::createStream(GpuContext const & context) const
         tDLogE("CpuBackend::createStream() Illegal stream.");
         return result;
     }
-    auto * stream = new __impl::CpuQueueBackend();
+    auto * stream = new CpuStreamBackend();
     result.stream_id = (id::Id)stream;
     return result;
 }
@@ -197,7 +174,7 @@ bool CpuBackend::releaseStream(GpuStream & stream) const
         tDLogE("CpuBackend::releaseStream() Illegal stream.");
         return false;
     }
-    delete ((__impl::CpuQueueBackend*)stream.stream_id);
+    delete ((CpuStreamBackend*)stream.stream_id);
     stream.stream_id = id::UNKNOWN_ID;
     return true;
 }
@@ -297,7 +274,7 @@ bool CpuBackend::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const
         return false;
     }
 
-    __impl::CpuEventGuard const EVENT_LOCK(event);
+    CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(gpu_mem.data, host_mem.data, size);
     return true;
 }
@@ -313,7 +290,7 @@ bool CpuBackend::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory 
         return false;
     }
 
-    __impl::CpuEventGuard const EVENT_LOCK(event);
+    CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(host_mem.data, gpu_mem.data, size);
     return true;
 }
@@ -329,7 +306,7 @@ bool CpuBackend::enqueueWrite(GpuStream & stream, GpuMemory & gpu_mem, HostMemor
         return false;
     }
 
-    __impl::CpuEventGuard const EVENT_LOCK(event);
+    CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(gpu_mem.data, host_mem.data, size);
     return true;
 }
@@ -345,7 +322,7 @@ bool CpuBackend::enqueueRead(GpuStream & stream, GpuMemory const & gpu_mem, Host
         return false;
     }
 
-    __impl::CpuEventGuard const EVENT_LOCK(event);
+    CpuEventGuard const EVENT_LOCK(event);
     ::memcpy(host_mem.data, gpu_mem.data, size);
     return true;
 }
@@ -368,15 +345,13 @@ bool CpuBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory cons
     checkType(v2.type);
     checkType(result.type);
 
-    __impl::CpuEventGuard const EVENT_LOCK(event);
+    CpuEventGuard const EVENT_LOCK(event);
     if (type == type::TypeTable::TT_FLOAT) {
-        kernels::addByCpu((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
+        return kernels::addByCpu1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
     } else if (type == type::TypeTable::TT_DOUBLE) {
-        kernels::addByCpu((double const *)v1.data, (double const *)v2.data, (double *)result.data, count);
-    } else {
-        return false;
+        return kernels::addByCpu1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count);
     }
-    return true;
+    return false;
 }
 
 } // namespace backend

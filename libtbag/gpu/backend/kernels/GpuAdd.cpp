@@ -32,13 +32,13 @@ void addByCpu(T const * v1, T const * v2, T * result, int count)
 } // namespace __impl
 // ------------------
 
-bool addByCpu(float const * v1, float const * v2, float * result, int count)
+bool addByCpu1f(float const * v1, float const * v2, float * result, int count)
 {
     __impl::addByCpu<float>(v1, v2, result, count);
     return true;
 }
 
-bool addByCpu(double const * v1, double const * v2, double * result, int count)
+bool addByCpu1d(double const * v1, double const * v2, double * result, int count)
 {
     __impl::addByCpu<double>(v1, v2, result, count);
     return true;

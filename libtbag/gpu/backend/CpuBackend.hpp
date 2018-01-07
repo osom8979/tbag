@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/gpu/backend/GpuBackend.hpp>
 
 // -------------------
@@ -23,6 +24,28 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu     {
 namespace backend {
+
+struct CpuContextBackend : private Noncopyable
+{
+    CpuContextBackend() { /* EMPTY. */ }
+    ~CpuContextBackend() { /* EMPTY. */ }
+};
+
+struct CpuStreamBackend : private Noncopyable
+{
+    CpuStreamBackend() { /* EMPTY. */ }
+    ~CpuStreamBackend() { /* EMPTY. */ }
+};
+
+struct CpuEventGuard : private Noncopyable
+{
+    GpuEvent * event;
+
+    CpuEventGuard(GpuEvent * e = nullptr);
+    ~CpuEventGuard();
+
+    static id::Id nowNano();
+};
 
 /**
  * CpuBackend class prototype.

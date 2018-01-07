@@ -26,8 +26,11 @@ namespace gpu     {
 namespace backend {
 namespace kernels {
 
-TBAG_API bool addByCpu(float  const * v1, float  const * v2, float  * result, int count);
-TBAG_API bool addByCpu(double const * v1, double const * v2, double * result, int count);
+TBAG_API bool addByCpu1f(float  const * v1, float  const * v2, float  * result, int count);
+TBAG_API bool addByCpu1d(double const * v1, double const * v2, double * result, int count);
+
+TBAG_API bool addByAccel1f(float  const * v1, float  const * v2, float  * result, int count);
+TBAG_API bool addByAccel1d(double const * v1, double const * v2, double * result, int count);
 
 } // namespace kernels
 } // namespace backend

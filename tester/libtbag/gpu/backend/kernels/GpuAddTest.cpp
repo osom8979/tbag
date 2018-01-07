@@ -98,9 +98,9 @@ TEST(GpuAddTest, Default)
     runAllIfSupported([](UniqueGpu & gpu){
         std::cout << "GPU type: " << gpu->getTypeString() << std::endl;
 
-        if (gpu->getType() != libtbag::gpu::GpuBackendType::GBT_CPU && gpu->getType() != libtbag::gpu::GpuBackendType::GBT_CUDA) {
-            return;
-        }
+        //if (gpu->getType() != libtbag::gpu::GpuBackendType::GBT_CPU && gpu->getType() != libtbag::gpu::GpuBackendType::GBT_CUDA) {
+        //    return;
+        //}
 
         int const TEST_COUNT = 1024 * 1024;
         GpuAddKernelTest tester(gpu->getType(), TEST_COUNT);
