@@ -293,7 +293,7 @@ bool OpenCLBackend::releaseContext(GpuContext & context) const
     checkType(context.type);
 #if defined(USE_OPENCL)
     cl_int code = ::clReleaseContext((cl_context)context.context_id);
-    context.context_id = UNKNOWN_GPU_ID;
+    context.context_id = id::UNKNOWN_ID;
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLBackend::releaseContext() OpenCL clReleaseContext() error code: {}", code);
         return false;
@@ -321,7 +321,7 @@ GpuStream OpenCLBackend::createStream(GpuContext const & context) const
                                                     (cl_device_id)context.device_id,
                                                     properties, &code);
     if (code == CL_SUCCESS) {
-        result.stream_id = (GpuId)stream;
+        result.stream_id = (id::Id)stream;
     } else {
         tDLogE("OpenCLBackend::createStream() OpenCL clCreateCommandQueue() error code: {}", code);
     }
@@ -338,7 +338,7 @@ bool OpenCLBackend::releaseStream(GpuStream & stream) const
     }
 #if defined(USE_OPENCL)
     cl_int code = ::clReleaseCommandQueue((cl_command_queue)stream.stream_id);
-    stream.stream_id = UNKNOWN_GPU_ID;
+    stream.stream_id = id::UNKNOWN_ID;
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLBackend::releaseStream() OpenCL clReleaseCommandQueue() error code: {}", code);
         return false;
@@ -386,8 +386,8 @@ bool OpenCLBackend::elapsedEvent(GpuEvent & event, float * millisec) const
 
 bool OpenCLBackend::releaseEvent(GpuEvent & event) const
 {
-    event.start = UNKNOWN_GPU_ID;
-    event.stop  = UNKNOWN_GPU_ID;
+    event.start = id::UNKNOWN_ID;
+    event.stop  = id::UNKNOWN_ID;
     return true;
 }
 
@@ -546,7 +546,7 @@ bool OpenCLBackend::finish(GpuStream & stream) const
 }
 
 bool OpenCLBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                           type::TypeTable type, int count) const
+                           type::TypeTable type, int count, GpuEvent * event) const
 {
     checkType(stream.type);
     checkType(v1.type);

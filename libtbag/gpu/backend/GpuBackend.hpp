@@ -17,12 +17,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/debug/Assert.hpp>
+#include <libtbag/id/Id.hpp>
 #include <libtbag/type/TypeTable.hpp>
 
 #include <string>
 #include <vector>
 #include <map>
-#include <limits>
 #include <type_traits>
 
 // -------------------
@@ -31,35 +31,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu     {
 namespace backend {
-
-#if defined(TBAG_COMP_MSVC)
-# if defined(min)
-TBAG_PUSH_MACRO(min);
-# undef min
-# define __RESTORE_MIN__
-# endif // defined(min)
-# if defined(max)
-TBAG_PUSH_MACRO(max);
-# undef max
-# define __RESTORE_MAX__
-# endif // defined(max)
-#endif // defined(TBAG_COMP_MSVC)
-
-using GpuId = std::size_t;
-TBAG_CONSTEXPR GpuId const UNKNOWN_GPU_ID = std::numeric_limits<GpuId>::max();
-
-static_assert(sizeof(GpuId) >= sizeof(void*), "The GpuId size is too small.");
-
-#if defined(TBAG_COMP_MSVC)
-# if defined(__RESTORE_MIN__)
-TBAG_POP_MACRO(min);
-# undef __RESTORE_MIN__
-# endif // defined(__RESTORE_MIN__)
-# if defined(__RESTORE_MAX__)
-TBAG_POP_MACRO(max);
-# undef __RESTORE_MAX__
-# endif // defined(__RESTORE_MAX__)
-#endif // defined(TBAG_COMP_MSVC)
 
 enum class GpuBackendType
 {
@@ -74,12 +45,12 @@ TBAG_API char const * getGpuBackendString(GpuBackendType type) TBAG_NOEXCEPT;
 struct GpuPlatform
 {
     GpuBackendType type;
-    GpuId platform_id;
+    id::Id platform_id;
 
-    GpuPlatform(GpuBackendType t = GpuBackendType::GBT_CPU, GpuId p = UNKNOWN_GPU_ID) : type(t), platform_id(p) { /* EMPTY. */ }
+    GpuPlatform(GpuBackendType t = GpuBackendType::GBT_CPU, id::Id p = id::UNKNOWN_ID) : type(t), platform_id(p) { /* EMPTY. */ }
     ~GpuPlatform() { /* EMPTY. */ }
 
-    inline bool isUnknownPlatform() const TBAG_NOEXCEPT { return platform_id == UNKNOWN_GPU_ID; }
+    inline bool isUnknownPlatform() const TBAG_NOEXCEPT { return platform_id == id::UNKNOWN_ID; }
 };
 
 struct GpuPlatformInfo : public GpuPlatform
@@ -97,13 +68,13 @@ struct GpuPlatformInfo : public GpuPlatform
 
 struct GpuDevice : public GpuPlatform
 {
-    GpuId device_id;
+    id::Id device_id;
 
     GpuDevice() : GpuDevice(GpuPlatform()) { /* EMPTY. */ }
-    GpuDevice(GpuPlatform const & p, GpuId d = UNKNOWN_GPU_ID) : GpuPlatform(p), device_id(d) { /* EMPTY. */ }
+    GpuDevice(GpuPlatform const & p, id::Id d = id::UNKNOWN_ID) : GpuPlatform(p), device_id(d) { /* EMPTY. */ }
     ~GpuDevice() { /* EMPTY. */ }
 
-    inline bool isUnknownDevice() const TBAG_NOEXCEPT { return device_id == UNKNOWN_GPU_ID; }
+    inline bool isUnknownDevice() const TBAG_NOEXCEPT { return device_id == id::UNKNOWN_ID; }
 };
 
 /** [*] ASCII string identifying the device; */
@@ -238,36 +209,36 @@ struct GpuDeviceInfo : public GpuDevice
 
 struct GpuContext : public GpuDevice
 {
-    GpuId context_id;
+    id::Id context_id;
 
     GpuContext() : GpuContext(GpuDevice()) { /* EMPTY. */ }
-    GpuContext(GpuDevice const & d, GpuId c = UNKNOWN_GPU_ID) : GpuDevice(d), context_id(c) { /* EMPTY. */ }
+    GpuContext(GpuDevice const & d, id::Id c = id::UNKNOWN_ID) : GpuDevice(d), context_id(c) { /* EMPTY. */ }
     ~GpuContext() { /* EMPTY. */ }
 
-    inline bool isUnknownContext() const TBAG_NOEXCEPT { return context_id == UNKNOWN_GPU_ID; }
+    inline bool isUnknownContext() const TBAG_NOEXCEPT { return context_id == id::UNKNOWN_ID; }
 };
 
 struct GpuStream : public GpuContext
 {
-    GpuId stream_id;
+    id::Id stream_id;
 
     GpuStream() : GpuStream(GpuContext()) { /* EMPTY. */ }
-    GpuStream(GpuContext const & c, GpuId s = UNKNOWN_GPU_ID) : GpuContext(c), stream_id(s) { /* EMPTY. */ }
+    GpuStream(GpuContext const & c, id::Id s = id::UNKNOWN_ID) : GpuContext(c), stream_id(s) { /* EMPTY. */ }
     ~GpuStream() { /* EMPTY. */ }
 
-    inline bool isUnknownStream() const TBAG_NOEXCEPT { return stream_id == UNKNOWN_GPU_ID; }
+    inline bool isUnknownStream() const TBAG_NOEXCEPT { return stream_id == id::UNKNOWN_ID; }
 };
 
 struct GpuEvent : public GpuStream
 {
-    GpuId start;
-    GpuId stop;
+    id::Id start;
+    id::Id stop;
 
     GpuEvent() : GpuEvent(GpuStream()) { /* EMPTY. */ }
-    GpuEvent(GpuStream const & q) : GpuStream(q), start(UNKNOWN_GPU_ID), stop(UNKNOWN_GPU_ID) { /* EMPTY. */ }
+    GpuEvent(GpuStream const & q) : GpuStream(q), start(id::UNKNOWN_ID), stop(id::UNKNOWN_ID) { /* EMPTY. */ }
     ~GpuEvent() { /* EMPTY. */ }
 
-    inline bool isUnknownEvent() const TBAG_NOEXCEPT { return start == UNKNOWN_GPU_ID; }
+    inline bool isUnknownEvent() const TBAG_NOEXCEPT { return start == id::UNKNOWN_ID; }
 };
 
 struct GpuMemory : public GpuContext
@@ -370,7 +341,7 @@ struct TBAG_API GpuBackend
     // -------
 
     virtual bool runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                        type::TypeTable type, int count) const = 0;
+                        type::TypeTable type, int count, GpuEvent * event = nullptr) const = 0;
 
     // --------------------
     // Non-virtual methods.

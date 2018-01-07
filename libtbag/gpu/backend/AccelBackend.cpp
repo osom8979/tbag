@@ -23,7 +23,7 @@ GpuBackendType AccelBackend::getType() const TBAG_NOEXCEPT
 }
 
 bool AccelBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                          type::TypeTable type, int count) const
+                          type::TypeTable type, int count, GpuEvent * event) const
 {
     checkType(stream.type);
     checkType(v1.type);

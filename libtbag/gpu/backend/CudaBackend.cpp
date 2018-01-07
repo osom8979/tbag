@@ -10,6 +10,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/string/Format.hpp>
+#include <libtbag/gpu/cuda/CudaRaw.h>
 
 #if defined(USE_CUDA)
 #include <cuda.h>
@@ -78,9 +79,9 @@ struct CudaDeviceGuard : private Noncopyable
     explicit CudaDeviceGuard(GpuMemory  const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
     explicit CudaDeviceGuard(HostMemory const &  memory) : CudaDeviceGuard( memory.device_id) { /* EMPTY. */ }
 
-    CudaDeviceGuard(GpuId const & id) : current_id(0), change_id(0), exchange(false)
+    CudaDeviceGuard(id::Id const & id) : current_id(0), change_id(0), exchange(false)
     {
-        if (id == UNKNOWN_GPU_ID) {
+        if (id == id::UNKNOWN_ID) {
             return;
         }
 #if defined(USE_CUDA)
@@ -274,7 +275,7 @@ GpuContext CudaBackend::createContext(GpuDevice const & device) const
 bool CudaBackend::releaseContext(GpuContext & context) const
 {
     checkType(context.type);
-    context.context_id = UNKNOWN_GPU_ID;
+    context.context_id = id::UNKNOWN_ID;
     return true;
 }
 
@@ -298,7 +299,7 @@ GpuStream CudaBackend::createStream(GpuContext const & context) const
     cudaStream_t stream;
     cudaError_t code = ::cudaStreamCreate(&stream);
     if (code == cudaSuccess) {
-        result.stream_id = (GpuId)stream;
+        result.stream_id = (id::Id)stream;
     } else {
         tDLogE("CudaBackend::createStream() CUDA cudaStreamCreate() error: {}", ::cudaGetErrorString(code));
     }
@@ -315,7 +316,7 @@ bool CudaBackend::releaseStream(GpuStream & stream) const
     }
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaStreamDestroy((cudaStream_t)stream.stream_id);
-    stream.stream_id = UNKNOWN_GPU_ID;
+    stream.stream_id = id::UNKNOWN_ID;
     if (code != cudaSuccess) {
         tDLogE("CudaBackend::releaseStream() CUDA cudaStreamDestroy() error: {}", ::cudaGetErrorString(code));
         return false;
@@ -383,8 +384,8 @@ bool CudaBackend::releaseEvent(GpuEvent & event) const
 #if defined(USE_CUDA)
     cudaError_t start_code = ::cudaEventDestroy((cudaEvent_t)event.start);
     cudaError_t  stop_code = ::cudaEventDestroy((cudaEvent_t)event.stop);
-    event.start = UNKNOWN_GPU_ID;
-    event.stop  = UNKNOWN_GPU_ID;
+    event.start = id::UNKNOWN_ID;
+    event.stop  = id::UNKNOWN_ID;
     if (start_code == cudaSuccess && stop_code == cudaSuccess) {
         return true;
     } else {
@@ -582,17 +583,23 @@ bool CudaBackend::finish(GpuStream & stream) const
 }
 
 bool CudaBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                         type::TypeTable type, int count) const
+                         type::TypeTable type, int count, GpuEvent * event) const
 {
     checkType(stream.type);
     checkType(v1.type);
     checkType(v2.type);
     checkType(result.type);
 
+    __impl::CudaEventGuard const EVENT_LOCK(stream, event);
+    void * cuda_stream = nullptr;
+    if (stream.isUnknownStream() == false) {
+        cuda_stream = (void*)stream.stream_id;
+    }
+
     if (type == type::TypeTable::TT_FLOAT) {
-        kernels::addByCuda((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
+        tbCudaAdd1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count, cuda_stream);
     } else if (type == type::TypeTable::TT_DOUBLE) {
-        kernels::addByCuda((double const *)v1.data, (double const *)v2.data, (double *)result.data, count);
+        tbCudaAdd1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count, cuda_stream);
     } else {
         return false;
     }

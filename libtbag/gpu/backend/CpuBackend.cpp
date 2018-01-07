@@ -80,10 +80,10 @@ struct CpuEventGuard : private Noncopyable
         }
     }
 
-    GpuId now() const
+    id::Id now() const
     {
         using namespace std::chrono;
-        return (GpuId)duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
+        return (id::Id)duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
     }
 };
 
@@ -156,7 +156,7 @@ GpuContext CpuBackend::createContext(GpuDevice const & device) const
     checkType(device.type);
     GpuContext result(device);
     auto * context = new __impl::CpuContextBackend();
-    result.context_id = (GpuId)context;
+    result.context_id = (id::Id)context;
     return result;
 }
 
@@ -168,7 +168,7 @@ bool CpuBackend::releaseContext(GpuContext & context) const
         return false;
     }
     delete ((__impl::CpuContextBackend*)context.context_id);
-    context.context_id = UNKNOWN_GPU_ID;
+    context.context_id = id::UNKNOWN_ID;
     return true;
 }
 
@@ -186,7 +186,7 @@ GpuStream CpuBackend::createStream(GpuContext const & context) const
         return result;
     }
     auto * stream = new __impl::CpuQueueBackend();
-    result.stream_id = (GpuId)stream;
+    result.stream_id = (id::Id)stream;
     return result;
 }
 
@@ -198,7 +198,7 @@ bool CpuBackend::releaseStream(GpuStream & stream) const
         return false;
     }
     delete ((__impl::CpuQueueBackend*)stream.stream_id);
-    stream.stream_id = UNKNOWN_GPU_ID;
+    stream.stream_id = id::UNKNOWN_ID;
     return true;
 }
 
@@ -235,8 +235,8 @@ bool CpuBackend::elapsedEvent(GpuEvent & event, float * millisec) const
 bool CpuBackend::releaseEvent(GpuEvent & event) const
 {
     checkType(event.type);
-    event.start = UNKNOWN_GPU_ID;
-    event.stop  = UNKNOWN_GPU_ID;
+    event.start = id::UNKNOWN_ID;
+    event.stop  = id::UNKNOWN_ID;
     return true;
 }
 
@@ -361,7 +361,7 @@ bool CpuBackend::finish(GpuStream & stream) const
 }
 
 bool CpuBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
-                        type::TypeTable type, int count) const
+                        type::TypeTable type, int count, GpuEvent * event) const
 {
     checkType(stream.type);
     checkType(v1.type);
