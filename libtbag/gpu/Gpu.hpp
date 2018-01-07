@@ -38,6 +38,26 @@ TBAG_API UniqueGpu  createAccelContext();
 TBAG_API UniqueGpu   createCudaContext();
 TBAG_API UniqueGpu createOpenCLContext();
 
+template <typename Predicated>
+void runIfSupported(std::vector<GpuBackendType> const & types, Predicated predicated)
+{
+    for (auto & type : types) {
+        auto gpu = createGpuContext(type);
+        if (gpu && gpu->isSupport()) {
+            predicated(gpu);
+        }
+    }
+}
+
+template <typename Predicated>
+void runAllIfSupported(Predicated predicated)
+{
+    runIfSupported({GpuBackendType::GBT_CPU,
+                    GpuBackendType::GBT_ACCEL,
+                    GpuBackendType::GBT_CUDA,
+                    GpuBackendType::GBT_OPENCL}, predicated);
+}
+
 } // namespace gpu
 
 // --------------------

@@ -12,37 +12,9 @@
 using namespace libtbag;
 using namespace libtbag::gpu;
 
-// ---------------
-namespace __impl {
-// ---------------
-
-template <typename Predicated>
-static void run_if_supported(std::vector<GpuBackendType> const & types, Predicated predicated)
-{
-    for (auto & type : types) {
-        auto gpu = createGpuContext(type);
-        if (gpu && gpu->isSupport()) {
-            predicated(gpu);
-        }
-    }
-}
-
-template <typename Predicated>
-static void run_all_if_supported(Predicated predicated)
-{
-    run_if_supported({GpuBackendType::GBT_CPU,
-                      GpuBackendType::GBT_ACCEL,
-                      GpuBackendType::GBT_CUDA,
-                      GpuBackendType::GBT_OPENCL}, predicated);
-}
-
-// ------------------
-} // namespace __impl
-// ------------------
-
 TEST(GpuTest, Information)
 {
-    __impl::run_all_if_supported([](UniqueGpu & gpu){
+    runAllIfSupported([](UniqueGpu & gpu){
         std::cout << "GPU type: " << gpu->getTypeString() << "\n"
                   << "Platform count: " << gpu->getPlatformCount() << std::endl;
         for (auto & plat : gpu->getPlatformList()) {
@@ -72,7 +44,7 @@ TEST(GpuTest, Information)
 
 TEST(GpuTest, CreateStream)
 {
-    __impl::run_all_if_supported([](UniqueGpu & gpu){
+    runAllIfSupported([](UniqueGpu & gpu){
         std::cout << "GPU type: " << gpu->getTypeString() << std::endl;
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());
@@ -88,7 +60,7 @@ TEST(GpuTest, CreateStream)
 
 TEST(GpuTest, CreateMemory)
 {
-    __impl::run_all_if_supported([](UniqueGpu & gpu){
+    runAllIfSupported([](UniqueGpu & gpu){
         std::cout << "GPU type: " << gpu->getTypeString() << std::endl;
         auto context = gpu->createContext(0, 0);
         ASSERT_FALSE(context.isUnknownContext());

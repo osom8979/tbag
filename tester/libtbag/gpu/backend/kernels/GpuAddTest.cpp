@@ -19,7 +19,7 @@ struct GpuAddKernelTest
     UniqueGpu   gpu;
     GpuContext  context;
     GpuStream   stream;
-    std::size_t count;
+    int         count;
 
     GpuMemory  gpu_v1;
     GpuMemory  gpu_v2;
@@ -29,7 +29,12 @@ struct GpuAddKernelTest
     HostMemory  host_v2;
     HostMemory  host_result;
 
-    GpuAddKernelTest(GpuBackendType t, std::size_t c) : gpu(createGpuContext(t)), count(c)
+    GpuAddKernelTest(GpuBackendType t, int c) : GpuAddKernelTest(createGpuContext(t), c)
+    {
+        // EMPTY.
+    }
+
+    GpuAddKernelTest(UniqueGpu && g, int c) : gpu(std::move(g)), count(c)
     {
         context = gpu->createContext(0, 0);
         assert(context.isUnknownContext() == false);
@@ -78,24 +83,32 @@ struct GpuAddKernelTest
 
 TEST(GpuAddTest, Cpu)
 {
-    std::size_t const TEST_COUNT = 99;
-    GpuAddKernelTest tester(GpuBackendType::GBT_CPU, TEST_COUNT);
+    runAllIfSupported([](UniqueGpu & gpu){
+        std::cout << "GPU type: " << gpu->getTypeString() << std::endl;
 
-    std::vector<float> v1(TEST_COUNT);
-    std::vector<float> v2(TEST_COUNT);
-    std::vector<float> v3(TEST_COUNT);
-    std::vector<float> result(TEST_COUNT);
-    std::size_t i = 0;
+        if (gpu->getType() != GpuBackendType::GBT_CPU || gpu->getType() != GpuBackendType::GBT_CUDA) {
+            return;
+        }
 
-    for (i = 0; i < TEST_COUNT; ++i) {
-        v1[i] = i;
-        v2[i] = 100 * i;
-        v3[i] = v1[i] + v2[i];
-    }
+        int const TEST_COUNT = 99;
+        GpuAddKernelTest tester(gpu->getType(), TEST_COUNT);
 
-    ASSERT_TRUE(tester.run(v1, v2, result));
-    for (i = 0; i < TEST_COUNT; ++i) {
-        ASSERT_EQ(v3[i], result[i]);
-    }
+        std::vector<float> v1(TEST_COUNT);
+        std::vector<float> v2(TEST_COUNT);
+        std::vector<float> v3(TEST_COUNT);
+        std::vector<float> result(TEST_COUNT);
+        std::size_t i = 0;
+
+        for (i = 0; i < TEST_COUNT; ++i) {
+            v1[i] = i;
+            v2[i] = 100 * i;
+            v3[i] = v1[i] + v2[i];
+        }
+
+        ASSERT_TRUE(tester.run(v1, v2, result));
+        for (i = 0; i < TEST_COUNT; ++i) {
+            ASSERT_EQ(v3[i], result[i]);
+        }
+    });
 }
 

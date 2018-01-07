@@ -23,7 +23,7 @@ int tbCudaAdd1f(float const * gpu_v1, float const * gpu_v2, float * gpu_result, 
     int min_grid_size = 0;
     int grid_size     = 0;
 
-    ::cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, kernel, 0, size);
+    ::cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, tbCudaAddKernel<float>, 0, size);
     grid_size = (size + block_size - 1) / block_size;
     grid_size = (min_grid_size > grid_size ? min_grid_size : grid_size);
     tbCudaAddKernel<float><<<grid_size, block_size>>>(gpu_v1, gpu_v2, gpu_result, size);
@@ -37,7 +37,7 @@ int tbCudaAdd1d(double const * gpu_v1, double const * gpu_v2, double * gpu_resul
     int min_grid_size = 0;
     int grid_size     = 0;
 
-    ::cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, kernel, 0, size);
+    ::cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, tbCudaAddKernel<double>, 0, size);
     grid_size = (size + block_size - 1) / block_size;
     grid_size = (min_grid_size > grid_size ? min_grid_size : grid_size);
     tbCudaAddKernel<double><<<grid_size, block_size>>>(gpu_v1, gpu_v2, gpu_result, size);
