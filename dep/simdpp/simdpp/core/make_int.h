@@ -18,7 +18,6 @@
 namespace simdpp {
 namespace SIMDPP_ARCH_NAMESPACE {
 
-/// @{
 /** Creates a vector from signed integer values known at compile-time.
     The result of this function may be assigned or converted to a vector of any
     type: standard conversions are used to convert the arguments. All
@@ -64,14 +63,16 @@ SIMDPP_INL expr_vec_make_const<int64_t,1> make_int(int64_t v0)
     return a;
 }
 
-SIMDPP_INL expr_vec_make_const<int64_t,2> make_int(int64_t v0, int64_t v1)
+static SIMDPP_INL
+expr_vec_make_const<int64_t,2> make_int(int64_t v0, int64_t v1)
 {
     expr_vec_make_const<int64_t,2> a;
     a.a[0] = v0;  a.a[1] = v1;
     return a;
 }
 
-SIMDPP_INL expr_vec_make_const<int64_t,4>
+static SIMDPP_INL
+expr_vec_make_const<int64_t,4>
     make_int(int64_t v0, int64_t v1, int64_t v2, int64_t v3)
 {
     expr_vec_make_const<int64_t,4> a;
@@ -79,7 +80,8 @@ SIMDPP_INL expr_vec_make_const<int64_t,4>
     return a;
 }
 
-SIMDPP_INL expr_vec_make_const<int64_t,8>
+static SIMDPP_INL
+expr_vec_make_const<int64_t,8>
     make_int(int64_t v0, int64_t v1, int64_t v2, int64_t v3,
              int64_t v4, int64_t v5, int64_t v6, int64_t v7)
 {
@@ -89,7 +91,8 @@ SIMDPP_INL expr_vec_make_const<int64_t,8>
     return a;
 }
 
-SIMDPP_INL expr_vec_make_const<int64_t,16>
+static SIMDPP_INL
+expr_vec_make_const<int64_t,16>
     make_int(int64_t v0,  int64_t v1,  int64_t v2,  int64_t v3,
              int64_t v4,  int64_t v5,  int64_t v6,  int64_t v7,
              int64_t v8,  int64_t v9,  int64_t v10, int64_t v11,
@@ -160,7 +163,6 @@ V make_int(int64_t v0,  int64_t v1,  int64_t v2,  int64_t v3,
     a.a[12] = v12;  a.a[13] = v13;  a.a[14] = v14;  a.a[15] = v15;
     return detail::insn::i_make_const_any<V>(a);
 }
-/// @}
 
 } // namespace SIMDPP_ARCH_NAMESPACE
 } // namespace simdpp

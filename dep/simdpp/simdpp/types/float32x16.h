@@ -23,9 +23,6 @@ namespace SIMDPP_ARCH_NAMESPACE {
 
 #if SIMDPP_USE_AVX512F
 
-/// @defgroup simd_vec_fp
-/// @{
-
 /// Class representing float32x16 vector
 template<>
 class float32<16, void> : public any_float32<16, float32<16,void>> {
@@ -52,14 +49,16 @@ public:
         *this = bit_cast<float32<16>>(d.wrapped().eval()); return *this;
     }
 
-    /// @{
     /// Construct from the underlying vector type
     SIMDPP_INL float32<16>(const native_type& d) : d_(d) {}
     SIMDPP_INL float32<16>& operator=(const native_type& d) { d_ = d; return *this; }
-    /// @}
 
     /// Convert to the underlying vector type
-    SIMDPP_INL operator native_type() const { return d_; }
+#if !SIMDPP_DISABLE_DEPRECATED_CONVERSION_OPERATOR_TO_NATIVE_TYPES
+    SIMDPP_INL operator native_type() const SIMDPP_IMPLICIT_CONVERSION_DEPRECATION_MSG
+    { return d_; }
+#endif
+    SIMDPP_INL native_type native() const { return d_; }
 
     template<class E> SIMDPP_INL float32<16>(const expr_vec_construct<E>& e)
     {
@@ -70,11 +69,9 @@ public:
         detail::construct_eval_wrapper(*this, e.expr()); return *this;
     }
 
-    /// @{
     /// Access base vectors
     SIMDPP_INL const float32<16>& vec(unsigned) const { return *this; }
     SIMDPP_INL float32<16>& vec(unsigned)       { return *this; }
-    /// @}
 
     SIMDPP_INL float32<16> eval() const { return *this; }
 
@@ -110,7 +107,12 @@ public:
         *this = bit_cast<mask_float32<16>>(d.eval()); return *this;
     }
 
-    SIMDPP_INL operator native_type() const { return d_; }
+    /// Convert to the underlying vector type
+#if !SIMDPP_DISABLE_DEPRECATED_CONVERSION_OPERATOR_TO_NATIVE_TYPES
+    SIMDPP_INL operator native_type() const SIMDPP_IMPLICIT_CONVERSION_DEPRECATION_MSG
+    { return d_; }
+#endif
+    SIMDPP_INL native_type native() const { return d_; }
 
     /// Access the corresponding non-mask type
     SIMDPP_INL float32<16> unmask() const
@@ -130,8 +132,6 @@ public:
 private:
     native_type d_;
 };
-
-/// @} -- end defgroup
 
 #endif // SIMDPP_USE_AVX512F
 

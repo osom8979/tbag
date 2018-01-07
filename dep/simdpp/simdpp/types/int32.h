@@ -13,16 +13,14 @@
 #endif
 
 #include <simdpp/setup_arch.h>
-#include <simdpp/types/fwd.h>
 #include <simdpp/types/any.h>
+#include <simdpp/types/fwd.h>
 #include <simdpp/core/cast.h>
+#include <simdpp/detail/array.h>
 #include <simdpp/detail/construct_eval.h>
 
 namespace simdpp {
 namespace SIMDPP_ARCH_NAMESPACE {
-
-/// @ingroup simd_vec_int
-/// @{
 
 /** Class representing an signed @a int64 vector of arbitrary length. The vector
     always contains at least one native vector.
@@ -76,7 +74,7 @@ private:
         return r;
     }
 
-    int32v d_[int32::vec_length];
+    detail::vararray<int32v, int32::vec_length> d_;
 };
 
 /** Class representing an unsigned @a int32 vector of arbitrary length. The vector
@@ -131,7 +129,7 @@ private:
         return r;
     }
 
-    uint32v d_[uint32::vec_length];
+    detail::vararray<uint32v, uint32::vec_length> d_;
 };
 
 
@@ -173,10 +171,8 @@ public:
     SIMDPP_INL mask_int32<N> eval() const { return *this; }
 
 private:
-    mask_int32v d_[mask_int32::vec_length];
+    detail::vararray<mask_int32v, mask_int32::vec_length> d_;
 };
-
-/// @} -- end ingroup
 
 } // namespace SIMDPP_ARCH_NAMESPACE
 } // namespace simdpp

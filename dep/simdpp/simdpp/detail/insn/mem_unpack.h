@@ -32,7 +32,6 @@ namespace SIMDPP_ARCH_NAMESPACE {
 namespace detail {
 namespace insn {
 
-/// @{
 /** Concatenates @a a and @a b and stores the elements of the resulting array
     as follows:
      * every (2n)-th element is stored to @a a
@@ -75,16 +74,14 @@ void mem_unpack2(any_vec<64,V>& qa, any_vec<64,V>& qb)
     qb.wrapped() = unzip128_hi(c1, c2);
 }
 #endif
-/// @}
 
-/// @{
 /** Generic implementation of mem_unpack3. The 128-bit lanes are processed
     independently
 */
 template<class T> SIMDPP_INL
 void v_mem_unpack3_impl8_128(T& a, T& b, T& c)
 {
-#if SIMDPP_USE_ALTIVEC
+#if SIMDPP_USE_ALTIVEC || SIMDPP_USE_MSA
     // [a0, b0, c0, a1, b1, c1, a2, b2, c2, a3, b3, c3, a4, b4, c4, a5 ]
     // [b5, c5, a6, b6, c6, a7, b7, c7, a8, b8, c8, a9, b9, c9, a10,b10]
     // [c10,a11,b11,c11,a12,b12,c12,a13,b13,c13,a14,b14,c14,a15,b15,c15]
@@ -161,7 +158,7 @@ void v_mem_unpack3_impl8_128(T& a, T& b, T& c)
 template<class T> SIMDPP_INL
 void v_mem_unpack3_impl16_128(T& a, T& b, T& c)
 {
-#if SIMDPP_USE_ALTIVEC
+#if SIMDPP_USE_ALTIVEC || SIMDPP_USE_MSA
     // [a0,b0,c0,a1,b1,c1,a2,b2]
     // [c2,a3,b3,c3,a4,b4,c4,a5]
     // [b5,c5,a6,b6,c6,a7,b7,c7]
@@ -229,7 +226,7 @@ void v_mem_unpack3_impl16_128(T& a, T& b, T& c)
 template<class T> SIMDPP_INL
 void v_mem_unpack3_impl32_128(T& a, T& b, T& c)
 {
-#if SIMDPP_USE_ALTIVEC
+#if SIMDPP_USE_ALTIVEC || SIMDPP_USE_MSA
     using U = typename T::uint_vector_type;
 
     // [a0,b0,c0,a1]
@@ -288,7 +285,6 @@ void v_mem_unpack3_impl64_128(T& a, T& b, T& c)
     d2 = shuffle1<0,1>(b, c);
     a = d0; b = d1; c = d2;
 }
-/// @}
 
 template<class V> SIMDPP_INL
 void v_mem_unpack3_shuffle128(any_vec<16,V>& qa, any_vec<16,V>& qb, any_vec<16,V>& qc)
@@ -344,7 +340,6 @@ void v_mem_unpack3_shuffle128(any_vec<64,V>& qa, any_vec<64,V>& qb, any_vec<64,V
 }
 #endif
 
-/// @{
 /** Concatenates @a a, @a b and @a c and stores the elements of the resulting
     array as follows:
      * every (3n)-th element is stored to @a a
@@ -394,17 +389,15 @@ void mem_unpack3(float64<N>& a, float64<N>& b, float64<N>& c)
     v_mem_unpack3_shuffle128(a, b, c);
     v_mem_unpack3_impl64_128(a, b, c);
 }
-/// @}
 
-/// @{
 /** Generic implementation of mem_unpack4. The 256-bit version applies 128-bit
     operations to each half of each vector separately.
 */
 template<class T> SIMDPP_INL
 void v_mem_unpack4_impl8_128(T& a, T& b, T& c, T& d)
 {
-#if SIMDPP_USE_SSSE3 || SIMDPP_USE_ALTIVEC
-    // TODO: optimize for altivec
+#if SIMDPP_USE_SSSE3 || SIMDPP_USE_ALTIVEC || SIMDPP_USE_MSA
+    // TODO: optimize for Altivec and MSA
     typename same_width<T>::u32 b0, b1, b2, b3;
     b0 = transpose_inplace(a);
     b1 = transpose_inplace(b);
@@ -498,8 +491,6 @@ void v_mem_unpack4_impl64_128(T& a, T& b, T& c, T& d)
     b = c;
     c = t;
 }
-/// @}
-
 
 template<class V> SIMDPP_INL
 void v_mem_unpack4_shuffle128(any_vec<16,V>& qa, any_vec<16,V>& qb,
@@ -559,7 +550,6 @@ void v_mem_unpack4_shuffle128(any_vec<64,V>& qa, any_vec<64,V>& qb,
 }
 #endif
 
-/// @{
 /** Concatenates @a a, @a b, @a c and @a d and stores the elements of the
     resulting array as follows:
      * every (4n)-th element is stored to @a a
@@ -612,9 +602,7 @@ void mem_unpack4(float64<N>& a, float64<N>& b, float64<N>& c, float64<N>& d)
     v_mem_unpack4_shuffle128(a, b, c, d);
     v_mem_unpack4_impl64_128(a, b, c, d);
 }
-/// @}
 
-/// @{
 /** Concatenates the given vectors and stores the elements of the resulting
     array as follows:
      * every (3n)-th element of the first 48 elements is stored to @a a
@@ -626,7 +614,8 @@ void mem_unpack4(float64<N>& a, float64<N>& b, float64<N>& c, float64<N>& d)
 
     n = [0, <number of elements in vector> - 1]
 */
-SIMDPP_INL void mem_unpack6(uint8x16& a, uint8x16& b, uint8x16& c,
+static SIMDPP_INL
+void mem_unpack6(uint8x16& a, uint8x16& b, uint8x16& c,
                             uint8x16& d, uint8x16& e, uint8x16& f)
 {
     uint8x16 t0, t1, t2, t3, t4, t5;
@@ -674,7 +663,8 @@ SIMDPP_INL void mem_unpack6(uint8x16& a, uint8x16& b, uint8x16& c,
     f = zip16_hi(t2, t5);
 }
 
-SIMDPP_INL void mem_unpack6(uint16x8& a, uint16x8& b, uint16x8& c,
+static SIMDPP_INL
+void mem_unpack6(uint16x8& a, uint16x8& b, uint16x8& c,
                             uint16x8& d, uint16x8& e, uint16x8& f)
 {
     uint16x8 t0, t1, t2, t3, t4, t5;
@@ -700,7 +690,6 @@ SIMDPP_INL void mem_unpack6(uint16x8& a, uint16x8& b, uint16x8& c,
     e = zip8_lo(u2, u5);
     f = zip8_hi(u2, u5);
 }
-/// @}
 
 } // namespace insn
 } // namespace detail
