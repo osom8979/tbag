@@ -59,15 +59,15 @@ static_assert(sizeof(Id)          == sizeof(std::size_t)   , "Id size mismatch."
 static_assert(sizeof(std::size_t) == sizeof(void*)         , "Id size mismatch.");
 static_assert(sizeof(void*)       == sizeof(std::ptrdiff_t), "Id size mismatch.");
 
-inline bool isUnknownId( LargeId id) TBAG_NOEXCEPT { return id ==  UNKNOWN_LARGE_ID; }
-inline bool isUnknownId(MediumId id) TBAG_NOEXCEPT { return id == UNKNOWN_MEDIUM_ID; }
-inline bool isUnknownId( SmallId id) TBAG_NOEXCEPT { return id ==  UNKNOWN_SMALL_ID; }
-inline bool isUnknownId(      Id id) TBAG_NOEXCEPT { return id ==        UNKNOWN_ID; }
+inline bool isUnknownLargeId ( LargeId id) TBAG_NOEXCEPT { return id ==  UNKNOWN_LARGE_ID; }
+inline bool isUnknownMediumId(MediumId id) TBAG_NOEXCEPT { return id == UNKNOWN_MEDIUM_ID; }
+inline bool isUnknownSmallId ( SmallId id) TBAG_NOEXCEPT { return id ==  UNKNOWN_SMALL_ID; }
+inline bool isUnknownId      (      Id id) TBAG_NOEXCEPT { return id ==        UNKNOWN_ID; }
 
-inline bool existsId( LargeId id) TBAG_NOEXCEPT { return !isUnknownId(id); }
-inline bool existsId(MediumId id) TBAG_NOEXCEPT { return !isUnknownId(id); }
-inline bool existsId( SmallId id) TBAG_NOEXCEPT { return !isUnknownId(id); }
-inline bool existsId(      Id id) TBAG_NOEXCEPT { return !isUnknownId(id); }
+inline bool existsLargeId ( LargeId id) TBAG_NOEXCEPT { return !isUnknownLargeId (id); }
+inline bool existsMediumId(MediumId id) TBAG_NOEXCEPT { return !isUnknownMediumId(id); }
+inline bool existsSmallId ( SmallId id) TBAG_NOEXCEPT { return !isUnknownSmallId (id); }
+inline bool existsId      (      Id id) TBAG_NOEXCEPT { return !isUnknownId      (id); }
 
 } // namespace id
 
