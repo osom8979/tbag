@@ -34,14 +34,12 @@ tbag_modules__apply_dep_uv          ()
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_flatbuffers ()
 tbag_modules__apply_dep_simdpp      ()
+tbag_modules__update_simd_objects   ()
 
 set (TPOT_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
 set (TPOT_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot_t2s.h")
 tbag_modules__build_dep_flatc_cpp (tpot_fbs "${TPOT_FBS_SRC}")
 tbag_modules__text_to_cpp11string (tpot_t2s "${TPOT_T2S_PATH}" tpot __tpot__ "${TPOT_FBS_SRC}")
-
-simdpp_multiarch (LIBTBAG_SYSTEM_SIMD_ARCH_FILES "libtbag/system/Simd.simd" ${SIMDPP_RUNNABLE_ARCHS})
-list (APPEND TBAG_PROJECT_OBJECTS ${LIBTBAG_SYSTEM_SIMD_ARCH_FILES})
 
 if (OpenCL_FOUND)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})

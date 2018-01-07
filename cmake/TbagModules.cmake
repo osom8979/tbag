@@ -423,6 +423,15 @@ macro (tbag_modules__apply_dep_simdpp)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/simdpp)
 endmacro ()
 
+macro (tbag_modules__build_dep_simdpp)
+    if (SIMDPP_RUNNABLE_ARCHS)
+        foreach (__simd_cusor ${ARGN})
+            simdpp_multiarch (__simd_object "${__simd_cusor}" ${SIMDPP_RUNNABLE_ARCHS})
+            list (APPEND TBAG_PROJECT_OBJECTS ${__simd_object})
+        endforeach ()
+    endif ()
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
@@ -767,6 +776,16 @@ function (tbag_modules__find_files __result __find_dir __suffix)
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 
+function (tbag_modules__find_relative_files __result __find_dir __relative __suffix)
+    set (${__result})
+
+    get_filename_component (__find_dir_absolute "${__find_dir}" ABSOLUTE)
+    file (GLOB_RECURSE ${__result} RELATIVE "${__relative}" "${__find_dir}/*${__suffix}")
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
 #/// Find & register object files.
 #///
 #/// @param __find_dir [in] find directory.
@@ -785,6 +804,11 @@ endmacro ()
 macro (tbag_modules__update_cuda_objects)
     tbag_modules__find_files (__find_cuda_objs "${TBAG_PROJECT_CONST_DIR_PATH}" ".cu")
     tbag_modules__build_cuda (${__find_cuda_objs})
+endmacro ()
+
+macro (tbag_modules__update_simd_objects)
+    tbag_modules__find_relative_files (__find_simd_objs "${TBAG_PROJECT_CONST_DIR_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}" ".simd")
+    tbag_modules__build_dep_simdpp (${__find_simd_objs})
 endmacro ()
 
 ## --------------
