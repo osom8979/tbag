@@ -1,12 +1,12 @@
 /**
- * @file   Add.hpp
- * @brief  Add kernel prototype.
+ * @file   GpuAdd.hpp
+ * @brief  GpuAdd class prototype.
  * @author zer0
- * @date   2018-01-04
+ * @date   2018-01-07
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_ADD_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_ADD_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_GPUADD_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_GPUADD_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -40,6 +40,9 @@ void addByCpu2(void const * v1, void const * v2, void * result, std::size_t coun
     addByCpu<T>((T const *)v1, (T const *)v2, (T*)result, count);
 }
 
+TBAG_API void addByCuda(float  const * v1, float  const * v2, float  * result, std::size_t count);
+TBAG_API void addByCuda(double const * v1, double const * v2, double * result, std::size_t count);
+
 } // namespace kernels
 } // namespace backend
 } // namespace gpu
@@ -48,5 +51,5 @@ void addByCpu2(void const * v1, void const * v2, void * result, std::size_t coun
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_ADD_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_BACKEND_KERNELS_GPUADD_HPP__
 

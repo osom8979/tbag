@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/gpu/backend/AccelBackend.hpp>
+#include <libtbag/gpu/backend/kernels/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 

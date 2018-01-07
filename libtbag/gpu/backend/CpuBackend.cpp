@@ -6,11 +6,10 @@
  */
 
 #include <libtbag/gpu/backend/CpuBackend.hpp>
+#include <libtbag/gpu/backend/kernels/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/util/Version.hpp>
-
-#include <libtbag/gpu/backend/kernels/Add.hpp>
 
 #include <cstdlib>
 #include <chrono>
