@@ -65,6 +65,13 @@ tbag_config__default_generate_c_header ()
 
 ## External project.
 include (${CMAKE_SOURCE_DIR}/external/External.cmake)
+include (${CMAKE_SOURCE_DIR}/dep/simdpp/cmake/SimdppMultiarch.cmake)
+
+# Check what instruction sets the current host supports. Use them for testing
+message (STATUS "Checking instruction set support in the compiler...")
+simdpp_get_compilable_archs (SIMDPP_COMPILABLE_ARCHS)
+message (STATUS "Checking instruction sets to run tests for on this host...")
+simdpp_get_runnable_archs (SIMDPP_RUNNABLE_ARCHS)
 
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)

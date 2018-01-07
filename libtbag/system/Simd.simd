@@ -1,0 +1,39 @@
+/**
+ * @file   Simd.simd
+ * @brief  Simd class implementation.
+ * @author zer0
+ * @date   2018-01-07
+ */
+
+#include <libtbag/system/Simd.hpp>
+
+#include <simdpp/simd.h>
+#include <simdpp/dispatch/get_arch_gcc_builtin_cpu_supports.h>
+#include <simdpp/dispatch/get_arch_linux_cpuinfo.h>
+#include <simdpp/dispatch/get_arch_raw_cpuid.h>
+
+#if SIMDPP_HAS_GET_ARCH_GCC_BUILTIN_CPU_SUPPORTS == 1
+# define SIMDPP_USER_ARCH_INFO  ::simdpp::get_arch_gcc_builtin_cpu_supports()
+#elif SIMDPP_HAS_GET_ARCH_LINUX_CPUINFO == 1
+# define SIMDPP_USER_ARCH_INFO  ::simdpp::get_arch_linux_cpuinfo()
+#elif SIMDPP_HAS_GET_ARCH_RAW_CPUID == 1
+# define SIMDPP_USER_ARCH_INFO  ::simdpp::get_arch_raw_cpuid()
+#endif
+
+// ------------------------------
+namespace SIMDPP_ARCH_NAMESPACE {
+// ------------------------------
+
+std::uint32_t tbGetSimdArch()
+{
+    return static_cast<std::uint32_t>(simdpp::this_compile_arch());
+}
+
+// ---------------------------------
+} // namespace SIMDPP_ARCH_NAMESPACE
+// ---------------------------------
+
+#if defined(SIMDPP_USER_ARCH_INFO)
+SIMDPP_MAKE_DISPATCHER((std::uint32_t)(tbGetSimdArch)());
+#endif
+

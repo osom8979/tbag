@@ -419,6 +419,10 @@ macro (tbag_modules__apply_dep_z)
     tbag_modules__add_whole_archive ($<TARGET_FILE:z>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_simdpp)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/simdpp)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
