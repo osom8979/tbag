@@ -9,6 +9,7 @@
 #include <libtbag/gpu/backend/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
+#include <libtbag/gpu/accel/AccelRaw.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,9 +33,9 @@ bool AccelBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory co
 
     CpuEventGuard const EVENT_LOCK(event);
     if (type == type::TypeTable::TT_FLOAT) {
-        return kernels::addByAccel1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
+        return tbAccelAdd1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count) == TB_ACCEL_TRUE;
     } else if (type == type::TypeTable::TT_DOUBLE) {
-        return kernels::addByAccel1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count);
+        return tbAccelAdd1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count) == TB_ACCEL_TRUE;
     }
     return false;
 }

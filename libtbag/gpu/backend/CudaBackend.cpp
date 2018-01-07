@@ -597,13 +597,11 @@ bool CudaBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory con
     }
 
     if (type == type::TypeTable::TT_FLOAT) {
-        tbCudaAdd1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count, cuda_stream);
+        return tbCudaAdd1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count, cuda_stream) == TB_CUDA_TRUE;
     } else if (type == type::TypeTable::TT_DOUBLE) {
-        tbCudaAdd1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count, cuda_stream);
-    } else {
-        return false;
+        return tbCudaAdd1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count, cuda_stream) == TB_CUDA_TRUE;
     }
-    return true;
+    return false;
 }
 
 } // namespace backend
