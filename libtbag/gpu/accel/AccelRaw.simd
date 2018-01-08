@@ -37,10 +37,17 @@ namespace SIMDPP_ARCH_NAMESPACE {
  *  is going to be instantiated with
  */
 #if SIMDPP_USE_ALTIVEC
+# define ACCEL_ALIGN_SIZE    16
 # define ACCEL_ALIGN_PREFIX  SIMDPP_ALIGN(16) // Force-aligning to 64 bytes exposes a bug in GCC on Altivec
 #else
+# define ACCEL_ALIGN_SIZE    64
 # define ACCEL_ALIGN_PREFIX  SIMDPP_ALIGN(64)
 #endif
+
+unsigned int tbGetAlignSize()
+{
+    return ACCEL_ALIGN_SIZE;
+}
 
 tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int count)
 {
@@ -100,6 +107,7 @@ tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int c
 // ---------------------------------
 
 #if defined(SIMDPP_USER_ARCH_INFO)
+SIMDPP_MAKE_DISPATCHER((unsigned int)(tbGetAlignSize)());
 SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1f)((float  const *)v1, (float  const *)v2, (float  *)result, (int)count));
 SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1d)((double const *)v1, (double const *)v2, (double *)result, (int)count));
 #endif

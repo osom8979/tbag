@@ -21,6 +21,8 @@
 extern "C" {
 #endif
 
+TBAG_API unsigned int tbGetAlignSize();
+
 TBAG_API tbBOOL tbAccelAdd1f(float  const * v1, float  const * v2, float  * result, int count);
 TBAG_API tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int count);
 
