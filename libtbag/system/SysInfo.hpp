@@ -1,12 +1,12 @@
 /**
- * @file   Page.hpp
- * @brief  Page class prototype.
+ * @file   SysInfo.hpp
+ * @brief  SysInfo class prototype.
  * @author zer0
- * @date   2017-10-19
+ * @date   2018-01-08
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SYSTEM_PAGE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SYSTEM_PAGE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SYSTEM_SYSINFO_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SYSTEM_SYSINFO_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -30,5 +30,5 @@ TBAG_API int getPageSize();
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SYSTEM_PAGE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SYSTEM_SYSINFO_HPP__
 

@@ -1,11 +1,11 @@
 /**
- * @file   Page.cpp
- * @brief  Page class implementation.
+ * @file   SysInfo.cpp
+ * @brief  SysInfo class implementation.
  * @author zer0
- * @date   2017-10-19
+ * @date   2018-01-08
  */
 
-#include <libtbag/system/Page.hpp>
+#include <libtbag/system/SysInfo.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/config-ex.h>
 

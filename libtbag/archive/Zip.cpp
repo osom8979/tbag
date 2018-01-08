@@ -8,7 +8,7 @@
 #include <libtbag/archive/Zip.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
-#include <libtbag/system/Page.hpp>
+#include <libtbag/system/SysInfo.hpp>
 
 #include <ctime>
 #include <cstring>

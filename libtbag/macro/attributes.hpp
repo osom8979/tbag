@@ -44,6 +44,16 @@
 # endif
 #endif
 
+#ifndef TBAG_ATTRIBUTE_ALIGN
+# if defined(TBAG_COMP_GNUC_CXX)
+#  define TBAG_ATTRIBUTE_ALIGN(n) __attribute__((__aligned__(n)))
+# elif defined(TBAG_COMP_MSVC)
+#  define TBAG_ATTRIBUTE_ALIGN(n) __declspec(align(n))
+# else
+#  define TBAG_ATTRIBUTE_ALIGN(n)
+# endif
+#endif
+
 #ifndef TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED
 # if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 40600)
 #  define TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED(code)                     \
