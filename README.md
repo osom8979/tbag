@@ -18,7 +18,7 @@ Tea-bag is Third party extension utility project.
 - lmdb bbc15ab (The OpenLDAP Public License)
 - lua 5.3.3 (MIT license)
 - minizip 1.1 (zlib license)
-- simdpp 2.0-rc2 (Boost Software License, Version 1.0)
+- simdpp 2.1 (Boost Software License, Version 1.0)
 - sqlite 3.13.0 (Public Domain)
 - stb master-c711058 (Public Domain or MIT license)
 - libuv 1.9.1 (MIT license)
