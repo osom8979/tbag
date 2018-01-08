@@ -406,6 +406,7 @@ GpuMemory OpenCLBackend::malloc(GpuContext const & context, std::size_t size) co
         return result;
     }
     result.data = (void*)memory;
+    result.capacity = size;
     result.size = size;
     tDLogIfD(__impl::isOpenCLBackendVerbose(), "OpenCLBackend::malloc() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
              result.data, result.size);
@@ -427,6 +428,7 @@ bool OpenCLBackend::free(GpuMemory & memory) const
     cl_int code;
     code = ::clReleaseMemObject((cl_mem)memory.data);
     memory.data = nullptr;
+    memory.capacity = 0;
     memory.size = 0;
     if (code == CL_SUCCESS) {
         return true;
@@ -446,6 +448,7 @@ HostMemory OpenCLBackend::mallocHost(GpuContext const & context, std::size_t siz
     }
 
     result.data = ::malloc(size);
+    result.capacity = size;
     result.size = size;
     result.flag = flag;
     tDLogIfD(__impl::isOpenCLBackendVerbose(), "OpenCLBackend::mallocHost() OpenCL clCreateBuffer() MEM:{} SIZE:{}",
@@ -465,6 +468,7 @@ bool OpenCLBackend::freeHost(HostMemory & memory) const
              memory.data, memory.size);
     ::free(memory.data);
     memory.data = nullptr;
+    memory.capacity = 0;
     memory.size = 0;
     memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
     return true;

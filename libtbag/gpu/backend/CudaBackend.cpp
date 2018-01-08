@@ -404,6 +404,7 @@ GpuMemory CudaBackend::malloc(GpuContext const & context, std::size_t size) cons
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMalloc((void**)&memory.data, size);
     if (code == cudaSuccess) {
+        memory.capacity = size;
         memory.size = size;
     } else {
         tDLogE("CudaBackend::malloc() CUDA cudaMalloc() error: {}", ::cudaGetErrorString(code));
@@ -423,6 +424,7 @@ bool CudaBackend::free(GpuMemory & memory) const
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaFree(memory.data);
     memory.data = nullptr;
+    memory.capacity = 0;
     memory.size = 0;
     if (code != cudaSuccess) {
         tDLogE("CudaBackend::free() CUDA cudaFree() error: {}", ::cudaGetErrorString(code));
@@ -443,6 +445,7 @@ HostMemory CudaBackend::mallocHost(GpuContext const & context, std::size_t size,
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaMallocHost((void**)&result.data, size);
     if (code == cudaSuccess) {
+        result.capacity = size;
         result.size = size;
         result.flag = flag;
     } else {
@@ -459,6 +462,7 @@ bool CudaBackend::freeHost(HostMemory & memory) const
 #if defined(USE_CUDA)
     cudaError_t code = ::cudaFreeHost(memory.data);
     memory.data = nullptr;
+    memory.capacity = 0;
     memory.size = 0;
     memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
     if (code == cudaSuccess) {

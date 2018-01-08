@@ -222,6 +222,7 @@ GpuMemory CpuBackend::malloc(GpuContext const & context, std::size_t size) const
     checkType(context.type);
     GpuMemory memory(context);
     memory.data = ::malloc(size);
+    memory.capacity = size;
     memory.size = size;
     return memory;
 }
@@ -235,6 +236,7 @@ bool CpuBackend::free(GpuMemory & memory) const
     }
     ::free(memory.data);
     memory.data = nullptr;
+    memory.capacity = 0;
     memory.size = 0;
     return true;
 }
@@ -244,6 +246,7 @@ HostMemory CpuBackend::mallocHost(GpuContext const & context, std::size_t size, 
     checkType(context.type);
     HostMemory memory(context);
     memory.data = ::malloc(size);
+    memory.capacity = size;
     memory.size = size;
     memory.flag = flag;
     return memory;
@@ -258,6 +261,7 @@ bool CpuBackend::freeHost(HostMemory & memory) const
     }
     ::free(memory.data);
     memory.data = nullptr;
+    memory.capacity = 0;
     memory.size = 0;
     memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
     return true;

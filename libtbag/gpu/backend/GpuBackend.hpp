@@ -244,13 +244,14 @@ struct GpuEvent : public GpuStream
 struct GpuMemory : public GpuContext
 {
     void * data;
+    std::size_t capacity;
     std::size_t size;
 
     GpuMemory() : GpuMemory(GpuContext()) { /* EMPTY. */ }
-    GpuMemory(GpuContext const & c) : GpuContext(c), data(nullptr), size(0) { /* EMPTY. */ }
+    GpuMemory(GpuContext const & c) : GpuContext(c), data(nullptr), capacity(0), size(0) { /* EMPTY. */ }
     ~GpuMemory() { /* EMPTY. */ }
 
-    inline bool existsMemory() const TBAG_NOEXCEPT { return data != nullptr && size > 0U; }
+    inline bool existsMemory() const TBAG_NOEXCEPT { return data != nullptr && capacity > 0U; }
 };
 
 enum class HostMemoryFlag
@@ -263,14 +264,15 @@ enum class HostMemoryFlag
 struct HostMemory : public GpuContext
 {
     void * data;
+    std::size_t capacity;
     std::size_t size;
     HostMemoryFlag flag;
 
     HostMemory() : HostMemory(GpuContext()) { /* EMPTY. */ }
-    HostMemory(GpuContext const & c) : GpuContext(c), data(nullptr), size(0), flag(HostMemoryFlag::HMF_UNINITIALIZED) { /* EMPTY. */ }
+    HostMemory(GpuContext const & c) : GpuContext(c), data(nullptr), capacity(0), size(0), flag(HostMemoryFlag::HMF_UNINITIALIZED) { /* EMPTY. */ }
     ~HostMemory() { /* EMPTY. */ }
 
-    inline bool existsMemory() const TBAG_NOEXCEPT { return data != nullptr && size > 0U; }
+    inline bool existsMemory() const TBAG_NOEXCEPT { return data != nullptr && capacity > 0U; }
 };
 
 using GpuPlatforms = std::vector<GpuPlatform>;

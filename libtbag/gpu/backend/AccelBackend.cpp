@@ -10,6 +10,13 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/gpu/accel/AccelRaw.hpp>
+#include <libtbag/algorithm/Align.hpp>
+
+#if defined(TBAG_COMP_MSVC)
+#include <malloc.h>
+#endif
+
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -18,9 +25,81 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace backend {
 
+// ---------------
+namespace __impl {
+// ---------------
+
+static std::size_t alignedMemorySize()
+{
+    return static_cast<std::size_t>(tbGetAlignSize());
+}
+
+static void * alignedMemoryAlloc(std::size_t size)
+{
+    return nullptr;
+}
+
+static void alignedMemoryFree(void * memory)
+{
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
 GpuBackendType AccelBackend::getType() const TBAG_NOEXCEPT
 {
     return GpuBackendType::GBT_ACCEL;
+}
+
+GpuMemory AccelBackend::malloc(GpuContext const & context, std::size_t size) const
+{
+    checkType(context.type);
+    GpuMemory memory(context);
+    memory.data = ::malloc(size);
+    memory.capacity = size;
+    memory.size = size;
+    return memory;
+}
+
+bool AccelBackend::free(GpuMemory & memory) const
+{
+    checkType(memory.type);
+    if (memory.existsMemory() == false) {
+        tDLogE("AccelBackend::free() Illegal memory.");
+        return false;
+    }
+    ::free(memory.data);
+    memory.data = nullptr;
+    memory.capacity = 0;
+    memory.size = 0;
+    return true;
+}
+
+HostMemory AccelBackend::mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag) const
+{
+    checkType(context.type);
+    HostMemory memory(context);
+    memory.data = ::malloc(size);
+    memory.capacity = size;
+    memory.size = size;
+    memory.flag = flag;
+    return memory;
+}
+
+bool AccelBackend::freeHost(HostMemory & memory) const
+{
+    checkType(memory.type);
+    if (memory.existsMemory() == false) {
+        tDLogE("AccelBackend::freeHost() Illegal memory.");
+        return false;
+    }
+    ::free(memory.data);
+    memory.data = nullptr;
+    memory.capacity = 0;
+    memory.size = 0;
+    memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
+    return true;
 }
 
 bool AccelBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
