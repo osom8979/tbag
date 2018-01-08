@@ -349,7 +349,10 @@ bool OpenCLBackend::releaseStream(GpuStream & stream) const
 
 GpuEvent OpenCLBackend::createEvent(GpuStream const & stream) const
 {
-    return GpuEvent(stream);
+    GpuEvent result(stream);
+    result.start = 0;
+    result.stop  = 0;
+    return result;
 }
 
 bool OpenCLBackend::syncEvent(GpuEvent const & event) const
