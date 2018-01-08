@@ -7,15 +7,14 @@
 
 #include <libtbag/gpu/backend/AccelBackend.hpp>
 #include <libtbag/gpu/backend/GpuKernels.hpp>
+#include <libtbag/gpu/accel/AccelRaw.hpp>
+
+#include <libtbag/Err.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
-#include <libtbag/gpu/accel/AccelRaw.hpp>
 #include <libtbag/algorithm/Align.hpp>
 
-#if defined(TBAG_COMP_MSVC)
-#include <malloc.h>
-#endif
-
+#include <cstdlib>
 #include <cassert>
 
 // -------------------
@@ -24,28 +23,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu     {
 namespace backend {
-
-// ---------------
-namespace __impl {
-// ---------------
-
-static std::size_t alignedMemorySize()
-{
-    return static_cast<std::size_t>(tbGetAlignSize());
-}
-
-static void * alignedMemoryAlloc(std::size_t size)
-{
-    return nullptr;
-}
-
-static void alignedMemoryFree(void * memory)
-{
-}
-
-// ------------------
-} // namespace __impl
-// ------------------
 
 GpuBackendType AccelBackend::getType() const TBAG_NOEXCEPT
 {

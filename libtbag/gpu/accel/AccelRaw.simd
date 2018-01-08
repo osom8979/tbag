@@ -26,44 +26,17 @@
 namespace SIMDPP_ARCH_NAMESPACE {
 // ------------------------------
 
-/**
- * @def ACCEL_ALIGN_PREFIX
- *
- * @remarks
- *  On certain architectures, e.g. armv7 NEON, 128 bit vectors are not  @n
- *  necessarily aligned to 16 bytes on the stack.                       @n
- *  NOTE: MSVC 2013 does not support constant expressions within        @n
- *  SIMDPP_ALIGN, thus we're aligning to the alignment of the largest V @n
- *  is going to be instantiated with
- */
-#if SIMDPP_USE_ALTIVEC
-# define ACCEL_ALIGN_SIZE    16
-# define ACCEL_ALIGN_PREFIX  SIMDPP_ALIGN(16) // Force-aligning to 64 bytes exposes a bug in GCC on Altivec
-#else
-# define ACCEL_ALIGN_SIZE    64
-# define ACCEL_ALIGN_PREFIX  SIMDPP_ALIGN(64)
-#endif
-
-unsigned int tbGetAlignSize()
-{
-    return ACCEL_ALIGN_SIZE;
-}
-
 tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int count)
 {
     using AlignedType = simdpp::float32x4;
     using ElementType = AlignedType::element_type;
-
-    using AlignedAllocator = simdpp::aligned_allocator<ElementType, sizeof(ElementType)>;
-    using AlignedVector    = std::vector<ElementType, AlignedAllocator>;
 
     static_assert(sizeof(AlignedType) == 16/*128bit*/, "Incorrect type size");
 
     int const ELEMENT_COUNT = AlignedType::length;
     int const VECTOR_LENGTH = libtbag::algorithm::getAlignLength<int>(count, ELEMENT_COUNT);
 
-    ACCEL_ALIGN_PREFIX ElementType result_temp[ELEMENT_COUNT] = {0,};
-    //AlignedVector result_temp(ELEMENT_COUNT);
+    TBAG_ATTRIBUTE_ALIGN(64) ElementType result_temp[ELEMENT_COUNT] = {0,};
     auto     v1_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
     auto     v2_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
     auto result_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
@@ -107,7 +80,6 @@ tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int c
 // ---------------------------------
 
 #if defined(SIMDPP_USER_ARCH_INFO)
-SIMDPP_MAKE_DISPATCHER((unsigned int)(tbGetAlignSize)());
 SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1f)((float  const *)v1, (float  const *)v2, (float  *)result, (int)count));
 SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1d)((double const *)v1, (double const *)v2, (double *)result, (int)count));
 #endif
