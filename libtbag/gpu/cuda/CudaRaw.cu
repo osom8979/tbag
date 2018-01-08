@@ -17,7 +17,7 @@ __global__ void tbCudaAddKernel(T const * v1, T const * v2, T * result, int size
     }
 }
 
-int tbCudaAdd1f(float const * gpu_v1, float const * gpu_v2, float * gpu_result, int size, void * stream)
+tbBOOL tbCudaAdd1f(float const * gpu_v1, float const * gpu_v2, float * gpu_result, int size, void * stream)
 {
     int block_size    = 0;
     int min_grid_size = 0;
@@ -28,11 +28,10 @@ int tbCudaAdd1f(float const * gpu_v1, float const * gpu_v2, float * gpu_result, 
     grid_size = (min_grid_size > grid_size ? min_grid_size : grid_size);
 
     tbCudaAddKernel<float><<<grid_size, block_size, 0, (cudaStream_t)stream>>>(gpu_v1, gpu_v2, gpu_result, size);
-
-    return TB_CUDA_TRUE;
+    return TB_TRUE;
 }
 
-int tbCudaAdd1d(double const * gpu_v1, double const * gpu_v2, double * gpu_result, int size, void * stream)
+tbBOOL tbCudaAdd1d(double const * gpu_v1, double const * gpu_v2, double * gpu_result, int size, void * stream)
 {
     int block_size    = 0;
     int min_grid_size = 0;
@@ -42,9 +41,7 @@ int tbCudaAdd1d(double const * gpu_v1, double const * gpu_v2, double * gpu_resul
     grid_size = (size + block_size - 1) / block_size;
     grid_size = (min_grid_size > grid_size ? min_grid_size : grid_size);
 
-    tbCudaAddKernel<double><<<grid_size, block_size, 0, (cudaStream_t)stream>>>
-                                                       (gpu_v1, gpu_v2, gpu_result, size);
-
-    return TB_CUDA_TRUE;
+    tbCudaAddKernel<double><<<grid_size, block_size, 0, (cudaStream_t)stream>>>(gpu_v1, gpu_v2, gpu_result, size);
+    return TB_TRUE;
 }
 

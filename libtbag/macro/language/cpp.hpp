@@ -24,9 +24,9 @@
 
 #if defined(TBAG_LANG_STDCPP_VERSION)
 # if   (TBAG_LANG_STDCPP_VERSION == 201402L)
-#  define __LANG_STDCPP_14__
+#  define TBAG_LANG_STDCPP_14
 # elif (TBAG_LANG_STDCPP_VERSION == 201103L)
-#  define __LANG_STDCPP_11__
+#  define TBAG_LANG_STDCPP_11
 # endif
 #endif // defined(TBAG_LANG_STDCPP_VERSION)
 

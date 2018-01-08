@@ -27,7 +27,7 @@
 namespace SIMDPP_ARCH_NAMESPACE {
 // ------------------------------
 
-int tbAccelAdd1f(float const * v1, float const * v2, float * result, int count)
+tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int count)
 {
 //    using AlignedVector = std::vector<simdpp::float32x4, simdpp::aligned_allocator<simdpp::float32x4, sizeof(simdpp::float32x4)> >;
 //    AlignedVector v1_vector;
@@ -37,12 +37,12 @@ int tbAccelAdd1f(float const * v1, float const * v2, float * result, int count)
 //        simdpp::float32x4 v2_align = (simdpp::float32x4) *prevent_optimization(v2_vector.data() + i);
 //        auto r = simdpp::add(v1_align, v2_align);
 //    }
-    return TB_ACCEL_FALSE;
+    return TB_FALSE;
 }
 
-int tbAccelAdd1d(double const * v1, double const * v2, double * result, int count)
+tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int count)
 {
-    return TB_ACCEL_FALSE;
+    return TB_FALSE;
 }
 
 // ---------------------------------
@@ -50,7 +50,7 @@ int tbAccelAdd1d(double const * v1, double const * v2, double * result, int coun
 // ---------------------------------
 
 #if defined(SIMDPP_USER_ARCH_INFO)
-SIMDPP_MAKE_DISPATCHER((int)(tbAccelAdd1f)((float  const *)v1, (float  const *)v2, (float  *)result, (int)count));
-SIMDPP_MAKE_DISPATCHER((int)(tbAccelAdd1d)((double const *)v1, (double const *)v2, (double *)result, (int)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1f)((float  const *)v1, (float  const *)v2, (float  *)result, (int)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1d)((double const *)v1, (double const *)v2, (double *)result, (int)count));
 #endif
 

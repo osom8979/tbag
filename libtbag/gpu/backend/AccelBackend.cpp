@@ -33,9 +33,9 @@ bool AccelBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory co
 
     CpuEventGuard const EVENT_LOCK(event);
     if (type == type::TypeTable::TT_FLOAT) {
-        return tbAccelAdd1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count) == TB_ACCEL_TRUE;
+        return tbAccelAdd1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count) == TB_TRUE;
     } else if (type == type::TypeTable::TT_DOUBLE) {
-        return tbAccelAdd1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count) == TB_ACCEL_TRUE;
+        return tbAccelAdd1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count) == TB_TRUE;
     }
     return false;
 }

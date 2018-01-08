@@ -16,24 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#ifndef TB_TRUE
-#define TB_TRUE 1
-#endif
-
-#ifndef TB_FALSE
-#define TB_FALSE  0
-#endif
-
-#ifndef TB_LOCALE_NAME_MAX_LENGTH
-#define TB_LOCALE_NAME_MAX_LENGTH 85 // Win32 API.
-#endif
-
-#ifndef TB_NULL
-#define TB_NULL 0
-#endif
-
-typedef int tbBOOL;
-
 /**
  * tbag initialize paramer.
  */

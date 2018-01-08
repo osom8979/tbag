@@ -15,21 +15,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/macro/attributes.hpp>
-
-#ifndef TB_ACCEL_TRUE
-#define TB_ACCEL_TRUE 1
-#endif
-
-#ifndef TB_ACCEL_FALSE
-#define TB_ACCEL_FALSE 0
-#endif
+#include <libtbag/macro/types.hpp>
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-TBAG_API int tbAccelAdd1f(float  const * v1, float  const * v2, float  * result, int count);
-TBAG_API int tbAccelAdd1d(double const * v1, double const * v2, double * result, int count);
+TBAG_API tbBOOL tbAccelAdd1f(float  const * v1, float  const * v2, float  * result, int count);
+TBAG_API tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int count);
 
 #if defined(__cplusplus)
 } /* extern "C" */

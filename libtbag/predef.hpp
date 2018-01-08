@@ -21,6 +21,7 @@
 // Common.
 #include <libtbag/macro/attributes.hpp>
 #include <libtbag/macro/features.hpp>
+#include <libtbag/macro/types.hpp>
 #include <libtbag/macro/utils.hpp>
 
 #include <libtbag/config.h>
