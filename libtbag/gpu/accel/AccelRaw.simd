@@ -35,7 +35,6 @@ tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int coun
     int const ELEMENT_COUNT = AlignedType::length;
     int const VECTOR_LENGTH = libtbag::algorithm::getPackedSize<int>(count, ELEMENT_COUNT);
 
-    TBAG_ATTRIBUTE_ALIGN(64) ElementType result_temp[ELEMENT_COUNT] = {0,};
     auto     v1_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
     auto     v2_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
     auto result_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
@@ -43,24 +42,10 @@ tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int coun
     static_assert(sizeof(result_align) == AlignedType::length_bytes, "Vector uses unsupported data layout");
 
     for (int i = 0; i < VECTOR_LENGTH; ++i) {
-        if (i + 1 < VECTOR_LENGTH || count - (i * ELEMENT_COUNT) == 0) {
-                v1_align = simdpp::make_float<AlignedType>(v1[0], v1[1], v1[2], v1[3]);
-                v2_align = simdpp::make_float<AlignedType>(v2[0], v2[1], v2[2], v2[3]);
-            result_align = simdpp::add(v1_align, v2_align);
-
-            simdpp::store(&result_temp, result_align);
-            //simdpp::store(result_temp.data(), result_align);
-            result[0] = result_temp[0];
-            result[1] = result_temp[0];
-            result[2] = result_temp[0];
-            result[3] = result_temp[0];
-        } else {
-            int const LAST_COUNT = count - (i * ELEMENT_COUNT);
-            if (LAST_COUNT >= 1) { result[0] = v1[0] + v2[0]; }
-            if (LAST_COUNT >= 2) { result[1] = v1[1] + v2[1]; }
-            if (LAST_COUNT >= 3) { result[2] = v1[2] + v2[2]; }
-        }
-
+        v1_align     = simdpp::make_float<AlignedType>(v1[0], v1[1], v1[2], v1[3]);
+        v2_align     = simdpp::make_float<AlignedType>(v2[0], v2[1], v2[2], v2[3]);
+        result_align = simdpp::add(v1_align, v2_align);
+        simdpp::store(result, result_align);
         v1     += ELEMENT_COUNT;
         v2     += ELEMENT_COUNT;
         result += ELEMENT_COUNT;
@@ -71,7 +56,31 @@ tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int coun
 
 tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int count)
 {
-    return TB_FALSE;
+    using AlignedType = simdpp::float64x2;
+    using ElementType = AlignedType::element_type;
+
+    static_assert(sizeof(AlignedType) == 16/*128bit*/, "Incorrect type size");
+
+    int const ELEMENT_COUNT = AlignedType::length;
+    int const VECTOR_LENGTH = libtbag::algorithm::getPackedSize<int>(count, ELEMENT_COUNT);
+
+    auto     v1_align = simdpp::make_float<AlignedType>(0, 0);
+    auto     v2_align = simdpp::make_float<AlignedType>(0, 0);
+    auto result_align = simdpp::make_float<AlignedType>(0, 0);
+
+    static_assert(sizeof(result_align) == AlignedType::length_bytes, "Vector uses unsupported data layout");
+
+    for (int i = 0; i < VECTOR_LENGTH; ++i) {
+        v1_align     = simdpp::make_float<AlignedType>(v1[0], v1[1]);
+        v2_align     = simdpp::make_float<AlignedType>(v2[0], v2[1]);
+        result_align = simdpp::add(v1_align, v2_align);
+        simdpp::store(result, result_align);
+        v1     += ELEMENT_COUNT;
+        v2     += ELEMENT_COUNT;
+        result += ELEMENT_COUNT;
+    }
+
+    return TB_TRUE;
 }
 
 // ---------------------------------

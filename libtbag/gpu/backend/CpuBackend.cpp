@@ -10,6 +10,8 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/util/Version.hpp>
+#include <libtbag/algorithm/Pack.hpp>
+#include <libtbag/memory/AlignedMemory.hpp>
 
 #include <cstdlib>
 #include <chrono>
@@ -220,11 +222,16 @@ bool CpuBackend::releaseEvent(GpuEvent & event) const
 GpuMemory CpuBackend::malloc(GpuContext const & context, std::size_t size) const
 {
     checkType(context.type);
-    GpuMemory memory(context);
-    memory.data = ::malloc(size);
-    memory.capacity = size;
-    memory.size = size;
-    return memory;
+    GpuMemory result(context);
+    auto const  ALIGNED_SIZE = memory::getDefaultAlignedSize();
+    auto const   PACKED_SIZE = algorithm::getPackedSize(size, ALIGNED_SIZE);
+    auto const CAPACITY_SIZE = PACKED_SIZE * ALIGNED_SIZE;
+    if (CAPACITY_SIZE >= size) {
+        result.data     = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
+        result.capacity = CAPACITY_SIZE;
+        result.size     = size;
+    }
+    return result;
 }
 
 bool CpuBackend::free(GpuMemory & memory) const
@@ -234,22 +241,27 @@ bool CpuBackend::free(GpuMemory & memory) const
         tDLogE("CpuBackend::free() Illegal memory.");
         return false;
     }
-    ::free(memory.data);
-    memory.data = nullptr;
+    memory::alignedMemoryFree(memory.data);
+    memory.data     = nullptr;
     memory.capacity = 0;
-    memory.size = 0;
+    memory.size     = 0;
     return true;
 }
 
 HostMemory CpuBackend::mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag) const
 {
     checkType(context.type);
-    HostMemory memory(context);
-    memory.data = ::malloc(size);
-    memory.capacity = size;
-    memory.size = size;
-    memory.flag = flag;
-    return memory;
+    HostMemory result(context);
+    auto const  ALIGNED_SIZE = memory::getDefaultAlignedSize();
+    auto const   PACKED_SIZE = algorithm::getPackedSize(size, ALIGNED_SIZE);
+    auto const CAPACITY_SIZE = PACKED_SIZE * ALIGNED_SIZE;
+    if (CAPACITY_SIZE >= size) {
+        result.data     = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
+        result.capacity = CAPACITY_SIZE;
+        result.size     = size;
+        result.flag     = flag;
+    }
+    return result;
 }
 
 bool CpuBackend::freeHost(HostMemory & memory) const
@@ -259,11 +271,11 @@ bool CpuBackend::freeHost(HostMemory & memory) const
         tDLogE("CpuBackend::freeHost() Illegal memory.");
         return false;
     }
-    ::free(memory.data);
-    memory.data = nullptr;
+    memory::alignedMemoryFree(memory.data);
+    memory.data     = nullptr;
     memory.capacity = 0;
-    memory.size = 0;
-    memory.flag = HostMemoryFlag::HMF_UNINITIALIZED;
+    memory.size     = 0;
+    memory.flag     = HostMemoryFlag::HMF_UNINITIALIZED;
     return true;
 }
 

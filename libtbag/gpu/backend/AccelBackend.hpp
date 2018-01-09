@@ -34,12 +34,6 @@ struct TBAG_API AccelBackend : public CpuBackend
 {
     virtual GpuBackendType getType() const TBAG_NOEXCEPT override;
 
-    virtual GpuMemory malloc(GpuContext const & context, std::size_t size) const override;
-    virtual bool        free(GpuMemory & memory) const override;
-
-    virtual HostMemory mallocHost(GpuContext const & context, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const override;
-    virtual bool         freeHost(HostMemory & memory) const override;
-
     virtual bool runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
                         type::TypeTable type, int count, GpuEvent * event = nullptr) const override;
 };
