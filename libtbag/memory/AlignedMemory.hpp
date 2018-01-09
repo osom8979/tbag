@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <cstdlib>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,9 +34,9 @@ namespace memory {
  * @see <https://linux.die.net/man/3/posix_memalign>
  * @see <https://msdn.microsoft.com/en-US/library/ayeb3ayc.aspx>
  */
-TBAG_API std::size_t alignedMemorySize() TBAG_NOEXCEPT;
+TBAG_API std::size_t getDefaultAlignedSize() TBAG_NOEXCEPT;
 
-TBAG_API void * alignedMemoryAlloc(std::size_t size);
+TBAG_API void * alignedMemoryAlloc(std::size_t size, std::size_t align);
 
 TBAG_API void alignedMemoryFree(void * ptr);
 

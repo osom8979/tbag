@@ -6,8 +6,7 @@
  */
 
 #include <libtbag/gpu/accel/AccelRaw.hpp>
-#include <libtbag/algorithm/Align.hpp>
-#include <vector>
+#include <libtbag/algorithm/Pack.hpp>
 
 #include <simdpp/simd.h>
 #include <simdpp/dispatch/get_arch_gcc_builtin_cpu_supports.h>
@@ -34,7 +33,7 @@ tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int coun
     static_assert(sizeof(AlignedType) == 16/*128bit*/, "Incorrect type size");
 
     int const ELEMENT_COUNT = AlignedType::length;
-    int const VECTOR_LENGTH = libtbag::algorithm::getAlignLength<int>(count, ELEMENT_COUNT);
+    int const VECTOR_LENGTH = libtbag::algorithm::getPackedSize<int>(count, ELEMENT_COUNT);
 
     TBAG_ATTRIBUTE_ALIGN(64) ElementType result_temp[ELEMENT_COUNT] = {0,};
     auto     v1_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);

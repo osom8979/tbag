@@ -12,7 +12,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
-#include <libtbag/algorithm/Align.hpp>
+#include <libtbag/algorithm/Pack.hpp>
 
 #include <cstdlib>
 #include <cassert>

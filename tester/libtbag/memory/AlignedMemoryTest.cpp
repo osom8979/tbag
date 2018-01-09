@@ -13,14 +13,14 @@ using namespace libtbag::memory;
 
 TEST(AlignedMemoryTest, Size)
 {
-    ASSERT_EQ(0, alignedMemorySize() %  2);
-    ASSERT_EQ(0, alignedMemorySize() % 16);
-    ASSERT_EQ(0, alignedMemorySize() % sizeof(void*));
+    ASSERT_EQ(0, getDefaultAlignedSize() %  2);
+    ASSERT_EQ(0, getDefaultAlignedSize() % 16);
+    ASSERT_EQ(0, getDefaultAlignedSize() % sizeof(void*));
 }
 
 TEST(AlignedMemoryTest, Memory)
 {
-    void * data = alignedMemoryAlloc(1);
+    void * data = alignedMemoryAlloc(1, getDefaultAlignedSize());
     ASSERT_NE(nullptr, data);
     alignedMemoryFree(data);
 }
