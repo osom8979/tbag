@@ -72,6 +72,7 @@ include (${CMAKE_SOURCE_DIR}/dep/simdpp/cmake/SimdppMultiarch.cmake)
 #simdpp_get_compilable_archs (SIMDPP_COMPILABLE_ARCHS)
 message (STATUS "Checking instruction sets to run tests for on this host...")
 simdpp_get_runnable_archs (SIMDPP_RUNNABLE_ARCHS)
+message (STATUS "Simdpp runnable archs: ${SIMDPP_RUNNABLE_ARCHS}")
 
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)

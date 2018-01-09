@@ -424,7 +424,7 @@ macro (tbag_modules__apply_dep_simdpp)
 endmacro ()
 
 macro (tbag_modules__build_dep_simdpp)
-    if (SIMDPP_RUNNABLE_ARCHS)
+    if (DEFINED SIMDPP_RUNNABLE_ARCHS)
         foreach (__simd_cusor ${ARGN})
             simdpp_multiarch (__simd_object "${__simd_cusor}" ${SIMDPP_RUNNABLE_ARCHS})
             list (APPEND TBAG_PROJECT_OBJECTS ${__simd_object})

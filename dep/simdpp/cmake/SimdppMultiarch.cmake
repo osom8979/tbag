@@ -1059,7 +1059,7 @@ function(simdpp_multiarch FILE_LIST_VAR SRC_FILE)
         set(CXX_FLAGS "-I\"${CMAKE_CURRENT_SOURCE_DIR}/${SRC_PATH}\" ${CXX_FLAGS}")
         if(NOT "${SUFFIX}" STREQUAL "")
             # Copy the source file and add the required flags
-            set(DST_ABS_FILE "${CMAKE_CURRENT_BINARY_DIR}/${SRC_PATH}/${SRC_NAME}_simdpp_${SUFFIX}${SRC_EXT}.cpp")
+            set(DST_ABS_FILE "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/Simdpp/${SRC_PATH}/${SRC_NAME}_simdpp_${SUFFIX}${SRC_EXT}.cpp")
             set(SRC_ABS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${SRC_FILE}")
 
             # CMake does not support adding per-source-file include directories.
