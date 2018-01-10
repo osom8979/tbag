@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/gpu/backend/OpenCLBackend.hpp>
+#include <libtbag/gpu/opencl/OpenCLRaw.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_OPENCL)
@@ -551,6 +552,84 @@ bool OpenCLBackend::finish(GpuStream & stream) const
     return false;
 }
 
+GpuProgram OpenCLBackend::createProgram(GpuContext const & context, std::string const & source) const
+{
+    checkType(context.type);
+    GpuProgram result(context);
+#if defined(USE_OPENCL)
+    char const * c_source = source.c_str();
+    cl_int code;
+    cl_program program = ::clCreateProgramWithSource((cl_context)context.context_id, 1, (char const **)c_source, nullptr, &code);
+    if (code == CL_SUCCESS) {
+        result.program_id = (id::Id)program;
+    } else {
+        tDLogE("OpenCLBackend::createProgram() OpenCL clCreateProgramWithSource() error code: {}", code);
+    }
+#endif
+    return result;
+}
+
+bool OpenCLBackend::buildProgram(GpuProgram & program) const
+{
+    checkType(program.type);
+#if defined(USE_OPENCL)
+    cl_int code = ::clBuildProgram((cl_program)program.program_id, 1, (cl_device_id const *)&program.device_id,
+                                   nullptr, nullptr, nullptr);
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::buildProgram() OpenCL clBuildProgram() error code: {}", code);
+    }
+#endif
+    return false;
+}
+
+bool OpenCLBackend::releaseProgram(GpuProgram & program) const
+{
+    checkType(program.type);
+#if defined(USE_OPENCL)
+    cl_int code = ::clReleaseProgram((cl_program)program.program_id);
+    program.program_id = id::UNKNOWN_ID;
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::releaseProgram() OpenCL clReleaseProgram() error code: {}", code);
+    }
+#endif
+    return false;
+}
+
+GpuKernel OpenCLBackend::createKernel(GpuProgram const & program, std::string const & kernel_symbol) const
+{
+    checkType(program.type);
+    GpuKernel result(program);
+#if defined(USE_OPENCL)
+    cl_int code;
+    cl_kernel kernel = ::clCreateKernel((cl_program)program.program_id, kernel_symbol.c_str(), &code);
+    if (code == CL_SUCCESS) {
+        result.kernel_id = (id::Id)kernel;
+    } else {
+        tDLogE("OpenCLBackend::createKernel() OpenCL clCreateKernel() error code: {}", code);
+    }
+#endif
+    return result;
+}
+
+bool OpenCLBackend::releaseKernel(GpuKernel & kernel) const
+{
+    checkType(kernel.type);
+#if defined(USE_OPENCL)
+    cl_int code = ::clReleaseKernel((cl_kernel)kernel.kernel_id);
+    kernel.kernel_id = id::UNKNOWN_ID;
+    if (code == CL_SUCCESS) {
+        return true;
+    } else {
+        tDLogE("OpenCLBackend::releaseKernel() OpenCL clReleaseKernel() error code: {}", code);
+    }
+#endif
+    return false;
+}
+
 bool OpenCLBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
                            type::TypeTable type, int count, GpuEvent * event) const
 {
@@ -558,7 +637,26 @@ bool OpenCLBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory c
     checkType(v1.type);
     checkType(v2.type);
     checkType(result.type);
-    return false;
+
+    auto program = createProgram(stream, opencl::getOpenCLSourceOfAdd1f());
+    buildProgram(program);
+    auto kernel = createKernel(program, "add");
+
+    std::size_t globalSize[2] = { 10/*totalWorkItemsX*/, 1/*totalWorkItemsY*/ };
+
+#if defined(USE_OPENCL)
+    cl_int code = ::clEnqueueNDRangeKernel((cl_command_queue)stream.stream_id, (cl_kernel)kernel.kernel_id,
+                                           2, nullptr, globalSize,
+                             nullptr, 0, nullptr, nullptr);
+    if (code == CL_SUCCESS) {
+    } else {
+        tDLogE("OpenCLBackend::runAdd() OpenCL clEnqueueNDRangeKernel() error code: {}", code);
+    }
+#endif
+
+    releaseKernel(kernel);
+    releaseProgram(program);
+    return true;
 }
 
 } // namespace backend

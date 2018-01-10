@@ -229,6 +229,28 @@ struct GpuStream : public GpuContext
     inline bool isUnknownStream() const TBAG_NOEXCEPT { return stream_id == id::UNKNOWN_ID; }
 };
 
+struct GpuProgram : public GpuContext
+{
+    id::Id program_id;
+
+    GpuProgram() : GpuProgram(GpuContext()) { /* EMPTY. */ }
+    GpuProgram(GpuContext const & c, id::Id p = id::UNKNOWN_ID) : GpuContext(c), program_id(p) { /* EMPTY. */ }
+    ~GpuProgram() { /* EMPTY. */ }
+
+    inline bool isUnknownProgram() const TBAG_NOEXCEPT { return program_id == id::UNKNOWN_ID; }
+};
+
+struct GpuKernel : public GpuContext
+{
+    id::Id kernel_id;
+
+    GpuKernel() : GpuKernel(GpuContext()) { /* EMPTY. */ }
+    GpuKernel(GpuContext const & c, id::Id k = id::UNKNOWN_ID) : GpuContext(c), kernel_id(k) { /* EMPTY. */ }
+    ~GpuKernel() { /* EMPTY. */ }
+
+    inline bool isUnknownKernel() const TBAG_NOEXCEPT { return kernel_id == id::UNKNOWN_ID; }
+};
+
 struct GpuEvent : public GpuStream
 {
     id::Id start;

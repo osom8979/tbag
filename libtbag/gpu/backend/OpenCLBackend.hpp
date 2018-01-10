@@ -84,6 +84,13 @@ struct TBAG_API OpenCLBackend : public GpuBackend
     virtual bool  flush(GpuStream & stream) const override;
     virtual bool finish(GpuStream & stream) const override;
 
+    GpuProgram createProgram(GpuContext const & context, std::string const & source) const;
+    bool        buildProgram(GpuProgram       & program) const;
+    bool      releaseProgram(GpuProgram       & program) const;
+
+    GpuKernel createKernel(GpuProgram const & program, std::string const & kernel_symbol) const;
+    bool     releaseKernel(GpuKernel        & kernel) const;
+
     virtual bool runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory const & v2, GpuMemory & result,
                         type::TypeTable type, int count, GpuEvent * event = nullptr) const override;
 };
