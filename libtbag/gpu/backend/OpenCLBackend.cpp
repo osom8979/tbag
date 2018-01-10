@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/gpu/backend/OpenCLBackend.hpp>
-#include <libtbag/gpu/backend/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_OPENCL)

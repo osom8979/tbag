@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/gpu/backend/AccelBackend.hpp>
-#include <libtbag/gpu/backend/GpuKernels.hpp>
 #include <libtbag/gpu/accel/AccelRaw.hpp>
 
 #include <libtbag/Err.hpp>

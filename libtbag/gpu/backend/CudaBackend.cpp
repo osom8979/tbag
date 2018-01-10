@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/gpu/backend/CudaBackend.hpp>
-#include <libtbag/gpu/backend/GpuKernels.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/string/Format.hpp>

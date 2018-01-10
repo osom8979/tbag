@@ -6,14 +6,12 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/gpu/backend/kernels/GpuAdd.hpp>
 #include <libtbag/gpu/Gpu.hpp>
 #include <libtbag/algorithm/Equals.hpp>
 
 using namespace libtbag;
 using namespace libtbag::gpu;
 using namespace libtbag::gpu::backend;
-using namespace libtbag::gpu::backend::kernels;
 
 struct GpuAddKernelTest
 {

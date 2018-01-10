@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/gpu/backend/CpuBackend.hpp>
-#include <libtbag/gpu/backend/GpuKernels.hpp>
+#include <libtbag/gpu/cpu/CpuRaw.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/util/Version.hpp>
@@ -363,9 +363,9 @@ bool CpuBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory cons
 
     CpuEventGuard const EVENT_LOCK(event);
     if (type == type::TypeTable::TT_FLOAT) {
-        return kernels::addByCpu1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count);
+        return tbCpuAdd1f((float const *)v1.data, (float const *)v2.data, (float *)result.data, count) == TB_TRUE;
     } else if (type == type::TypeTable::TT_DOUBLE) {
-        return kernels::addByCpu1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count);
+        return tbCpuAdd1d((double const *)v1.data, (double const *)v2.data, (double *)result.data, count) == TB_TRUE;
     }
     return false;
 }
