@@ -559,7 +559,7 @@ GpuProgram OpenCLBackend::createProgram(GpuContext const & context, std::string 
 #if defined(USE_OPENCL)
     char const * c_source = source.c_str();
     cl_int code;
-    cl_program program = ::clCreateProgramWithSource((cl_context)context.context_id, 1, (char const **)c_source, nullptr, &code);
+    cl_program program = ::clCreateProgramWithSource((cl_context)context.context_id, 1, (char const **)&c_source, nullptr, &code);
     if (code == CL_SUCCESS) {
         result.program_id = (id::Id)program;
     } else {
@@ -638,25 +638,29 @@ bool OpenCLBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory c
     checkType(v2.type);
     checkType(result.type);
 
+#if defined(USE_OPENCL)
     auto program = createProgram(stream, opencl::getOpenCLSourceOfAdd1f());
     buildProgram(program);
     auto kernel = createKernel(program, "add");
-
     std::size_t globalSize[2] = { 10/*totalWorkItemsX*/, 1/*totalWorkItemsY*/ };
 
-#if defined(USE_OPENCL)
+    ::clSetKernelArg((cl_kernel)kernel.kernel_id, 0, sizeof(cl_mem), &v1.data);
+    ::clSetKernelArg((cl_kernel)kernel.kernel_id, 1, sizeof(cl_mem), &v2.data);
+    ::clSetKernelArg((cl_kernel)kernel.kernel_id, 2, sizeof(cl_mem), &result.data);
     cl_int code = ::clEnqueueNDRangeKernel((cl_command_queue)stream.stream_id, (cl_kernel)kernel.kernel_id,
-                                           2, nullptr, globalSize,
-                             nullptr, 0, nullptr, nullptr);
+                                           2, nullptr, globalSize, nullptr, 0, nullptr,
+                                           (cl_event*)(event == nullptr ? nullptr : &event->start));
+
+    releaseKernel(kernel);
+    releaseProgram(program);
+
     if (code == CL_SUCCESS) {
+        return true;
     } else {
         tDLogE("OpenCLBackend::runAdd() OpenCL clEnqueueNDRangeKernel() error code: {}", code);
     }
 #endif
-
-    releaseKernel(kernel);
-    releaseProgram(program);
-    return true;
+    return false;
 }
 
 } // namespace backend

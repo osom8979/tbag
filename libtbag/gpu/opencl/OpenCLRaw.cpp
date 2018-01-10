@@ -7,7 +7,7 @@
 
 #include <libtbag/gpu/opencl/OpenCLRaw.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/string/Format.hpp>
+#include <libtbag/string/Environments.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -17,7 +17,7 @@ namespace gpu    {
 namespace opencl {
 
 TBAG_CONSTEXPR static char const * const TBAG_OPENCL_SOURCE_OF_ADD = R"(
-__kernel void add(__global {1} * v1, __global {1} * v2, __global {1} * result)
+__kernel void add(__global ${type} * v1, __global ${type} * v2, __global ${type} * result)
 {
     uint w = get_global_size(0);
     uint y = get_global_id(1);
@@ -29,12 +29,16 @@ __kernel void add(__global {1} * v1, __global {1} * v2, __global {1} * result)
 
 std::string getOpenCLSourceOfAdd1f() TBAG_NOEXCEPT
 {
-    return string::fformat(TBAG_OPENCL_SOURCE_OF_ADD, "float");
+    string::Environments envs;
+    envs.push("type", "float");
+    return envs.convert(TBAG_OPENCL_SOURCE_OF_ADD);
 }
 
 std::string getOpenCLSourceOfAdd1d() TBAG_NOEXCEPT
 {
-    return string::fformat(TBAG_OPENCL_SOURCE_OF_ADD, "double");
+    string::Environments envs;
+    envs.push("type", "double");
+    return envs.convert(TBAG_OPENCL_SOURCE_OF_ADD);
 }
 
 } // namespace opencl
