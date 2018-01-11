@@ -23,6 +23,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace system {
 
 TBAG_API int getPageSize();
+TBAG_API int getCacheLineSize();
 
 } // namespace system
 
