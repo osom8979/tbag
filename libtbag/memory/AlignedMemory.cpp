@@ -36,7 +36,8 @@ TBAG_CONSTEXPR bool isThrowMemoryError() TBAG_NOEXCEPT
 
 std::size_t getDefaultAlignedSize() TBAG_NOEXCEPT
 {
-    // On certain architectures, e.g. armv7 NEON, 128 bit vectors are not necessarily aligned to 16 bytes on the stack.
+    // [WARNING] On certain architectures, e.g. armv7 NEON,
+    // 128 bit vectors are not necessarily aligned to 16 bytes on the stack.
     static bool USE_POWER_ALTIVEC = system::SimdArch().isPOWER_ALTIVEC();
     return (USE_POWER_ALTIVEC ? TBAG_ALIGNMENT_SIZE_16BYTE : TBAG_ALIGNMENT_SIZE_64BYTE);
 }
