@@ -46,22 +46,29 @@ int getCacheLineSize()
     std::size_t line_size = 0;
 #if defined(TBAG_PLATFORM_WINDOWS)
     DWORD length = 0;
-    if (::GetLogicalProcessorInformation(nullptr, &length) == FALSE) {
-        tDLogE("getCacheLineSize() Error code: {}", ::GetLastError());
+    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer = NULL;
+    BOOL const FIRST_CODE = ::GetLogicalProcessorInformation(buffer, &length);
+    if (FIRST_CODE == FALSE && ::GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+        buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)::malloc(length);
+    } else {
+        tDLogE("getCacheLineSize() Insufficient buffer error.");
         return 0;
     }
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION * info = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*)::malloc(length);
-    if (::GetLogicalProcessorInformation(&info[0], &length) == TRUE) {
+
+    if (::GetLogicalProcessorInformation(buffer, &length) == TRUE) {
         for (int i = 0; i != length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION); ++i) {
-            if (info[i].Relationship == RelationCache && info[i].Cache.Level == 1) {
-                line_size = (std::size_t)info[i].Cache.LineSize;
+            if (buffer[i].Relationship == RelationCache && buffer[i].Cache.Level == 1) {
+                line_size = (std::size_t)buffer[i].Cache.LineSize;
                 break;
             }
         }
     } else {
         tDLogE("getCacheLineSize() Error code: {}", ::GetLastError());
     }
-    ::free(info);
+
+    if (buffer != NULL) {
+        ::free(buffer);
+    }
 #elif (defined(TBAG_PLATFORM_APPLE) && defined(HAVE_SYS_SYSCTL_H))
     std::size_t sizeof_line_size = sizeof(line_size);
     if (::sysctlbyname("hw.cachelinesize", &line_size, &sizeof_line_size, nullptr, 0) != 0) {
