@@ -376,7 +376,7 @@ bool OpenCLBackend::elapsedEvent(GpuEvent & event, float * millisec) const
     cl_int  stop_code = ::clGetEventProfilingInfo((cl_event)event.start, CL_PROFILING_COMMAND_END  , sizeof(cl_ulong),  &stop_nano, nullptr);
     if (start_code == CL_SUCCESS && stop_code == CL_SUCCESS) {
         if (millisec != nullptr) {
-            *millisec = (stop_nano - start_nano) * 1.0e-3f;
+            *millisec = (stop_nano - start_nano) * 1.0e-6f;
         }
         return true;
     } else {
@@ -642,13 +642,13 @@ bool OpenCLBackend::runAdd(GpuStream & stream, GpuMemory const & v1, GpuMemory c
     auto program = createProgram(stream, opencl::getOpenCLSourceOfAdd1f());
     buildProgram(program);
     auto kernel = createKernel(program, "add");
-    std::size_t globalSize[2] = { 10/*totalWorkItemsX*/, 1/*totalWorkItemsY*/ };
+    std::size_t global_work_size[1] = { static_cast<std::size_t>(count) };
 
     ::clSetKernelArg((cl_kernel)kernel.kernel_id, 0, sizeof(cl_mem), &v1.data);
     ::clSetKernelArg((cl_kernel)kernel.kernel_id, 1, sizeof(cl_mem), &v2.data);
     ::clSetKernelArg((cl_kernel)kernel.kernel_id, 2, sizeof(cl_mem), &result.data);
     cl_int code = ::clEnqueueNDRangeKernel((cl_command_queue)stream.stream_id, (cl_kernel)kernel.kernel_id,
-                                           2, nullptr, globalSize, nullptr, 0, nullptr,
+                                           1, nullptr, global_work_size, nullptr, 0, nullptr,
                                            (cl_event*)(event == nullptr ? nullptr : &event->start));
 
     releaseKernel(kernel);
