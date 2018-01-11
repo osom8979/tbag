@@ -69,10 +69,13 @@ int getCacheLineSize()
     }
 #elif defined(TBAG_PLATFORM_LINUX)
     FILE * f = ::fopen("/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size", "r");
-    if (f) {
-        ::fscanf(f, "%d", &line_size);
-        ::fclose(f);
+    if (f == nullptr) {
+        return 0;
     }
+    int content = 0;
+    ::fscanf(f, "%d", &content);
+    ::fclose(f);
+    line_size = (std::size_t)content;
 #endif
     return line_size;
 }
