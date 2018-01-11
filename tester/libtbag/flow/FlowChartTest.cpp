@@ -23,11 +23,6 @@ struct TestFlowLayer : public FlowLayer<int, int>
     DataMap  forward_data;
     DataMap backward_data;
 
-    virtual void init() override
-    {
-        // EMPTY.
-    }
-
     virtual bool forward(DataMap const & prev) override
     {
         forward_data = prev;
@@ -43,7 +38,9 @@ struct TestFlowLayer : public FlowLayer<int, int>
 
 TEST(FlowChartTest, Default)
 {
-    FlowChart<int, int> flow;
+    using Flow  = FlowChart<int, int>;
+    using Layer = Flow::Layer;
+    Flow flow;
     ASSERT_EQ(0, flow.size());
     ASSERT_TRUE(flow.empty());
 
@@ -57,7 +54,10 @@ TEST(FlowChartTest, Default)
     ASSERT_TRUE( static_cast<bool>(flow.cast<TestFlowLayer>(0)));
     ASSERT_FALSE(static_cast<bool>(flow.cast<TestFlowLayer>(1)));
 
-    flow.init();
+    flow.forEach([](Layer & layer){ layer.open(std::string()); });
+    flow.forEach([](Layer & layer){ layer.close(); });
+    flow.clear();
+
     ASSERT_TRUE(flow.forward());
     ASSERT_TRUE(flow.backward());
 

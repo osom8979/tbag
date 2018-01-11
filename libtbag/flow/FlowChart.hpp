@@ -145,19 +145,32 @@ public:
     }
 
 public:
-    void init()
+    template <typename Predicated>
+    void forEach(Predicated predicated)
     {
         for (auto & layer : _layers) {
             if (layer.second.layer) {
-                layer.second.layer->init();
+                predicated(*(layer.second.layer));
             }
         }
     }
 
-    bool forward()
+    void clear()
     {
-        updateDataMap();
-        resetCompleteFlags();
+        for (auto & layer : _layers) {
+            if (layer.second.layer) {
+                layer.second.layer->clear();
+            }
+        }
+    }
+
+    bool forward(bool reset = true, bool update = true)
+    {
+        // @formatter:off
+        if (update) {      updateDataMap(); }
+        if ( reset) { resetCompleteFlags(); }
+        // @formatter:on
+
         for (auto & layer : _layers) {
             if (layer.second.layer && layer.second.layer->prev.empty()) {
                 if (forward(layer.first) == false) {
@@ -168,10 +181,13 @@ public:
         return true;
     }
 
-    bool backward()
+    bool backward(bool reset = true, bool update = true)
     {
-        updateDataMap();
-        resetCompleteFlags();
+        // @formatter:off
+        if (update) {      updateDataMap(); }
+        if ( reset) { resetCompleteFlags(); }
+        // @formatter:on
+
         for (auto & layer : _layers) {
             if (layer.second.layer && layer.second.layer->next.empty()) {
                 if (backward(layer.first) == false) {

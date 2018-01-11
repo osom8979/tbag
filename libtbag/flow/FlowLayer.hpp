@@ -58,7 +58,9 @@ public:
     virtual ~FlowLayer() { /* EMPTY. */ }
 
 public:
-    virtual void init() { /* EMPTY. */ }
+    virtual bool open(std::string const & data) { return true; }
+    virtual void close() { /* EMPTY. */ }
+    virtual void clear() { /* EMPTY. */ }
 
 public:
     virtual bool  forward(DataMap const & prev) { return true; }
