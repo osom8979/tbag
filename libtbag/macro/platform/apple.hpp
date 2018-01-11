@@ -13,6 +13,10 @@
 #pragma once
 #endif
 
+#if defined(__APPLE__)
+#define TBAG_PLATFORM_APPLE
+#endif
+
 #if (defined(__APPLE__) && defined(__MACH__))
 # if defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 #  define TBAG_PLATFORM_IOS

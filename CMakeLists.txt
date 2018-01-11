@@ -129,6 +129,7 @@ include (CheckIncludeFile)
 
 check_include_file (syscall.h      HAVE_SYSCALL_H)
 check_include_file (sys/syscall.h  HAVE_SYS_SYSCALL_H)
+check_include_file (sys/sysctl.h   HAVE_SYS_SYSCTL_H)
 check_include_file (sys/mman.h     HAVE_SYS_MMAN_H)
 check_include_file (unistd.h       HAVE_UNISTD_H)
 check_include_file (dlfcn.h        HAVE_DLFCN_H)
