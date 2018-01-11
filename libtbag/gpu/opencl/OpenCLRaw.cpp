@@ -27,6 +27,11 @@ __kernel void add(__global ${type} * v1, __global ${type} * v2, __global ${type}
 }
 )";
 
+std::string getOpenCLSourceOfAddName() TBAG_NOEXCEPT
+{
+    return "add";
+}
+
 std::string getOpenCLSourceOfAdd1f() TBAG_NOEXCEPT
 {
     string::Environments envs;

@@ -14,14 +14,10 @@
 #endif
 
 #ifndef TB_NULL
-# if defined(__cplusplus)
-#  if __cplusplus >= 201103L
-#   define TB_NULL nullptr
-#  else
-#   define TB_NULL (void*)(0)
-#  endif
+# if __cplusplus >= 201103L
+#  define TB_NULL nullptr
 # else
-#  define TB_NULL  0
+#  define TB_NULL 0
 # endif
 #endif
 
