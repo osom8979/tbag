@@ -14,6 +14,9 @@
 /* Define to 1 if you have the <sys/sysctl.h> header file. */
 #cmakedefine HAVE_SYS_SYSCTL_H
 
+/* Define to 1 if you have the <sys/statvfs.h> header file. */
+#cmakedefine HAVE_SYS_STATVFS_H
+
 /* Define to 1 if you have the <mman.h> header file. */
 #cmakedefine HAVE_SYS_MMAN_H
 

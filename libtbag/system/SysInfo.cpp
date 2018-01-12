@@ -8,6 +8,7 @@
 #include <libtbag/system/SysInfo.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/config-ex.h>
+#include <libtbag/Unit.hpp>
 
 #include <cstdlib>
 #include <cstdio>
@@ -20,6 +21,9 @@
 #endif
 #if defined(HAVE_SYS_SYSCTL_H)
 #include <sys/sysctl.h>
+#endif
+#if defined(HAVE_SYS_STATVFS_H)
+#include <sys/statvfs.h>
 #endif
 
 // -------------------
@@ -85,6 +89,43 @@ int getCacheLineSize()
     line_size = (std::size_t)content;
 #endif
     return line_size;
+}
+
+bool getFilesystemInfo(std::string const & path, FilesystemStatistics & result)
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+#elif defined(HAVE_SYS_STATVFS_H)
+    struct statvfs buffer = {0,};
+    if (::statvfs(path.c_str(), &buffer) == 0) {
+        result.bsize   = buffer.f_bsize;
+        result.frsize  = buffer.f_frsize;
+        result.blocks  = buffer.f_blocks;
+        result.bfree   = buffer.f_bfree;
+        result.bavail  = buffer.f_bavail;
+        result.files   = buffer.f_files;
+        result.ffree   = buffer.f_ffree;
+        result.favail  = buffer.f_favail;
+        result.fsid    = buffer.f_fsid;
+        result.flag    = buffer.f_flag;
+        result.namemax = buffer.f_namemax;
+    }
+#endif
+    return true;
+}
+
+std::size_t getTotalDisk(FilesystemStatistics const & info)
+{
+    return info.blocks * info.frsize;
+}
+
+std::size_t getFreeDisk(FilesystemStatistics const & info)
+{
+    return info.bavail * info.frsize;
+}
+
+std::size_t getUsedDisk(FilesystemStatistics const & info)
+{
+    return (info.blocks - info.bavail) * info.frsize;
 }
 
 } // namespace system
