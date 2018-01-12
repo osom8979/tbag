@@ -42,7 +42,7 @@ TEST(SysInfoTest, GetDiskInfo)
     ASSERT_LT(0, FREE_SIZE);
     ASSERT_LT(0, USED_SIZE);
 
-    std::cout << "DISK: " << ROOT_DIR;
+    std::cout << "Filesystem: " << ROOT_DIR;
     std::cout << "\n * Filesystem block size: "      << fs_stat.bsize
               << "\n * Fragment size: "              << fs_stat.frsize
               << "\n * Size of fs in frsize units: " << fs_stat.blocks
@@ -54,8 +54,8 @@ TEST(SysInfoTest, GetDiskInfo)
               << "\n * Filesystem ID: "              << fs_stat.fsid
               << "\n * Mount flags: "                << fs_stat.flag
               << "\n * Maximum filename length: "    << fs_stat.namemax << std::endl;
-    std::cout << " * Disk total size: " << TOTAL_SIZE << " (" << TOTAL_SIZE / GIGA_BYTE_TO_BYTE << "GB)\n"
-              << " * Disk free size: "  <<  FREE_SIZE << " (" <<  FREE_SIZE / GIGA_BYTE_TO_BYTE << "GB)\n"
-              << " * Disk used size: "  <<  USED_SIZE << " (" <<  USED_SIZE / GIGA_BYTE_TO_BYTE << "GB)" << std::endl;
+    std::cout << " * Filesystem total size: " << TOTAL_SIZE << " (" << TOTAL_SIZE / GIGA_BYTE_TO_BYTE << "GB)\n"
+              << " * Filesystem free size: "  <<  FREE_SIZE << " (" <<  FREE_SIZE / GIGA_BYTE_TO_BYTE << "GB)\n"
+              << " * Filesystem used size: "  <<  USED_SIZE << " (" <<  USED_SIZE / GIGA_BYTE_TO_BYTE << "GB)" << std::endl;
 }
 
