@@ -35,24 +35,42 @@ TBAG_API int getCacheLineSize();
  */
 struct FilesystemStatistics
 {
-    std::size_t    bsize = 0;  ///< Filesystem block size.
-    std::size_t   frsize = 0;  ///< Fragment size.
-    std::size_t   blocks = 0;  ///< Size of fs in @c frsize units.
-    std::size_t    bfree = 0;  ///< Number of free blocks.
-    std::size_t   bavail = 0;  ///< Number of free blocks for unprivileged users.
-    std::size_t    files = 0;  ///< Number of inodes.
-    std::size_t    ffree = 0;  ///< Number of free inodes.
-    std::size_t   favail = 0;  ///< Number of free inodes for unprivileged users.
-    std::size_t     fsid = 0;  ///< Filesystem ID.
-    std::size_t     flag = 0;  ///< Mount flags.
-    std::size_t  namemax = 0;  ///< Maximum filename length.
+    std::size_t  bsize;     ///< Filesystem block size.
+    std::size_t  frsize;    ///< Fragment size.
+    std::size_t  blocks;    ///< Size of fs in @c frsize units.
+    std::size_t  bfree;     ///< Number of free blocks.
+    std::size_t  bavail;    ///< Number of free blocks for unprivileged users.
+    std::size_t  files;     ///< Number of inodes.
+    std::size_t  ffree;     ///< Number of free inodes.
+    std::size_t  favail;    ///< Number of free inodes for unprivileged users.
+    std::size_t  fsid;      ///< Filesystem ID.
+    std::size_t  flag;      ///< Mount flags.
+    std::size_t  namemax;   ///< Maximum filename length.
 
-    std::size_t total_byte = 0;
-    std::size_t  free_byte = 0;
-    std::size_t  used_byte = 0;
+    std::size_t total_byte;
+    std::size_t  free_byte;
+    std::size_t  used_byte;
 
-    FilesystemStatistics() { /* EMPTY. */ }
+    FilesystemStatistics() { clear(); }
     ~FilesystemStatistics() { /* EMPTY. */ }
+
+    inline void clear() TBAG_NOEXCEPT
+    {
+        bsize      = 0;
+        frsize     = 0;
+        blocks     = 0;
+        bfree      = 0;
+        bavail     = 0;
+        files      = 0;
+        ffree      = 0;
+        favail     = 0;
+        fsid       = 0;
+        flag       = 0;
+        namemax    = 0;
+        total_byte = 0;
+        free_byte  = 0;
+        used_byte  = 0;
+    }
 };
 
 TBAG_API bool getFilesystemInfo(std::string const & path, FilesystemStatistics & result);
