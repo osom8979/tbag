@@ -42,17 +42,20 @@ Logger * createLogger(std::string const & name, MakeType type, Args && ... args)
 
 } // namespace impl {
 
-Logger * createColorConsoleLogger(std::string const & name, bool auto_flush)
+Logger * createColorStdoutLogger(std::string const & name, bool auto_flush)
 {
-    return createConsoleLogger(name, MakeType::DEFAULT_COLOR, false, auto_flush);
+    return createStdoutLogger(name, MakeType::DEFAULT_COLOR, false, auto_flush);
 }
 
-Logger * createConsoleLogger(std::string const & name, MakeType type, bool mutex, bool auto_flush)
+Logger * createStdoutLogger(std::string const & name, MakeType type, bool mutex, bool auto_flush)
 {
+    using     MutexCoutSink = sink::CoutSink<std::mutex>;
+    using FakeMutexCoutSink = sink::CoutSink<lock::FakeLock>;
+
     if (mutex) {
-        return impl::createLogger<sink::CoutSink<std::mutex> >(name, type, auto_flush);
+        return impl::createLogger<MutexCoutSink>(name, type, auto_flush);
     } else {
-        return impl::createLogger<sink::CoutSink<lock::FakeLock> >(name, type, auto_flush);
+        return impl::createLogger<FakeMutexCoutSink>(name, type, auto_flush);
     }
 }
 
@@ -62,35 +65,42 @@ Logger * createFileLogger(std::string const & name,
                           bool mutex,
                           bool auto_flush)
 {
+    using     MutexFileSink = sink::FileSink<std::mutex>;
+    using FakeMutexFileSink = sink::FileSink<lock::FakeLock>;
+
     if (mutex) {
-        return impl::createLogger<sink::FileSink<std::mutex> >(name, type, path, auto_flush);
+        return impl::createLogger<MutexFileSink>(name, type, path, auto_flush);
     } else {
-        return impl::createLogger<sink::FileSink<lock::FakeLock> >(name, type, path, auto_flush);
+        return impl::createLogger<FakeMutexFileSink>(name, type, path, auto_flush);
     }
 }
 
 Logger * createRotateFileLogger(std::string const & name,
                                 std::string const & path,
                                 std::size_t max_size,
+                                std::size_t max_file_count,
                                 MakeType type,
                                 bool mutex,
                                 bool auto_flush)
 {
+    using     MutexRotateFileSink = sink::RotateFileSink<std::mutex>;
+    using FakeMutexRotateFileSink = sink::RotateFileSink<lock::FakeLock>;
+
     if (mutex) {
-        return impl::createLogger<sink::RotateFileSink<std::mutex> >(name, type, path, max_size, auto_flush);
+        return impl::createLogger<MutexRotateFileSink>(name, type, path, max_size, max_file_count, auto_flush);
     } else {
-        return impl::createLogger<sink::RotateFileSink<lock::FakeLock> >(name, type, path, max_size, auto_flush);
+        return impl::createLogger<FakeMutexRotateFileSink>(name, type, path, max_size, max_file_count, auto_flush);
     }
 }
 
-Logger * createDefaultConsoleLogger(bool auto_flush)
+Logger * createDefaultStdoutLogger(bool auto_flush)
 {
-    return createConsoleLogger(TBAG_DEFAULT_LOGGER_NAME, MakeType::DEFAULT, true, auto_flush);
+    return createStdoutLogger(TBAG_DEFAULT_LOGGER_NAME, MakeType::DEFAULT, true, auto_flush);
 }
 
-Logger * createDefaultColorConsoleLogger(bool auto_flush)
+Logger * createDefaultColorStdoutLogger(bool auto_flush)
 {
-    return createColorConsoleLogger(TBAG_DEFAULT_LOGGER_NAME, auto_flush);
+    return createColorStdoutLogger(TBAG_DEFAULT_LOGGER_NAME, auto_flush);
 }
 
 Logger * createDefaultFileLogger(std::string const & path, bool auto_flush)
@@ -98,9 +108,9 @@ Logger * createDefaultFileLogger(std::string const & path, bool auto_flush)
     return createFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, MakeType::DEFAULT, true, auto_flush);
 }
 
-Logger * createDefaultRotateFileLogger(std::string const & path, std::size_t max_size, bool auto_flush)
+Logger * createDefaultRotateFileLogger(std::string const & path, std::size_t max_size, std::size_t max_file_count, bool auto_flush)
 {
-    return createRotateFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, max_size, MakeType::DEFAULT, true, auto_flush);
+    return createRotateFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, max_size, max_file_count, MakeType::DEFAULT, true, auto_flush);
 }
 
 bool removeLogger(std::string const & name)

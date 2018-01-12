@@ -7,6 +7,9 @@
 
 #include <libtbag/log/node/DefaultLogXmlNode.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/filesystem/Path.hpp>
+#include <libtbag/Unit.hpp>
+#include <sstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -60,6 +63,7 @@ void DefaultLogXmlNode::setup()
                                    _params.sink,
                                    _params.destination,
                                    _params.max_size,
+                                   _params.max_file_count,
                                    _params.auto_flush,
                                    _params.multithread,
                                    _params.mutex,
@@ -76,19 +80,25 @@ DefaultLogXmlNode::InitParams DefaultLogXmlNode::getDefaultParams(std::string co
                                                                   std::string const & file_name)
 {
     InitParams params;
-    params.name = name;
-    params.destination  = std::string("${") + std::string(ENVS_EXE_DIR) + std::string("}/")
-                          + file_name + std::string(DEFAULT_LOGGER_FILE_EXTENSION);
-    params.auto_flush = AUTO_FLUSH_ON;
-    params.multithread = MULTITHREAD_OFF;
-    params.mutex = MUTEX_ON;
+    params.name           = name;
+    params.auto_flush     = AUTO_FLUSH_ON;
+    params.multithread    = MULTITHREAD_OFF;
+    params.mutex          = MUTEX_ON;
+    params.max_size       = std::to_string(MEGA_BYTE_TO_BYTE);
+    params.max_file_count = std::to_string(DEFAULT_LOG_FILE_COUNT);
+
+    std::stringstream ss;
+    ss << "${" << ENVS_EXE_DIR << "}" << filesystem::details::PATH_SEPARATOR
+       << file_name << DEFAULT_LOGGER_FILE_EXTENSION;
+    params.destination = ss.str();
+
     if (isReleaseMode()) {
-        params.sink = SINK_FILE;
-        params.severity = INFO_SEVERITY.getText();
+        params.sink      = SINK_ROTATE_FILE;
+        params.severity  = INFO_SEVERITY.getText();
         params.generator = GENERATOR_DEFAULT;
     } else {
-        params.sink = SINK_COUT;
-        params.severity = DEBUG_SEVERITY.getText();
+        params.sink      = SINK_STDOUT;
+        params.severity  = DEBUG_SEVERITY.getText();
         params.generator = GENERATOR_DEFAULT_COLOR;
     }
     return params;

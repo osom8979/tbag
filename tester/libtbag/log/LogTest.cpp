@@ -17,10 +17,10 @@
 using namespace libtbag;
 using namespace libtbag::log;
 
-TEST(LogTest, Console)
+TEST(LogTest, Stdout)
 {
     std::string const LOGGER_NAME = "LogTest.Console";
-    createColorConsoleLogger(LOGGER_NAME);
+    createColorStdoutLogger(LOGGER_NAME);
     setSeverity(LOGGER_NAME, log::NOTICE_SEVERITY);
 
     tLogM(LOGGER_NAME, "LogTest: {0}, {1}, {0}, {2}, {3}", 100, "emergency", 0.1, 'T');
@@ -80,32 +80,46 @@ TEST(LogTest, RotateFileSink)
     auto const PATH = tttDirGet() / "rotate.log";
     std::string const LOGGER_NAME = "LogTest.RotateFileSink";
     std::size_t const MAX_SIZE = 128;
+    std::size_t const MAX_FILE_COUNT = 2;
 
-    std::string message;
-    message.assign(MAX_SIZE, '0');
-    ASSERT_EQ(MAX_SIZE, message.size());
+    std::string message1(MAX_SIZE, '1');
+    std::string message2(MAX_SIZE, '2');
+    ASSERT_EQ(MAX_SIZE, message1.size());
+    ASSERT_EQ(MAX_SIZE, message2.size());
 
     bool const ENABLE_MUTEX = true;
-    createRotateFileLogger(LOGGER_NAME, PATH.toString(), MAX_SIZE, log::MakeType::RAW, ENABLE_MUTEX);
+    createRotateFileLogger(LOGGER_NAME, PATH.toString(), MAX_SIZE, MAX_FILE_COUNT, log::MakeType::RAW, ENABLE_MUTEX);
     auto * logger = log::getLogger(LOGGER_NAME);
     auto const * sink = logger->getSink();
     ASSERT_NE(nullptr, logger);
     ASSERT_NE(nullptr, sink);
-    tLogM(LOGGER_NAME, message);
 
     auto const * rotate_sink = (log::sink::RotateFileSink<std::mutex> const *)sink;
     ASSERT_NE(nullptr, rotate_sink);
+    ASSERT_EQ(1, rotate_sink->atHistory().size());
+
+    tLogM(LOGGER_NAME, message1);
     filesystem::Path log_01 = rotate_sink->atRotatePath().getPath();
     ASSERT_EQ(MAX_SIZE, log_01.getState().size);
+    ASSERT_EQ(1, rotate_sink->atHistory().size());
+    ASSERT_EQ(log_01.toString(), rotate_sink->atHistory().front().toString());
     std::cout << "Log file 01: " << log_01 << std::endl;
+
+    tLogM(LOGGER_NAME, message2);
+    filesystem::Path log_02 = rotate_sink->atRotatePath().getPath();
+    ASSERT_EQ(MAX_SIZE, log_02.getState().size);
+    ASSERT_EQ(2, rotate_sink->atHistory().size());
+    ASSERT_EQ(log_01.toString(), rotate_sink->atHistory().front().toString());
+    std::cout << "Log file 02: " << log_02 << std::endl;
 
     tLogM(LOGGER_NAME, "1");
     tLogM(LOGGER_NAME, "2");
-    filesystem::Path log_02 = rotate_sink->atRotatePath().getPath();
-    ASSERT_EQ(2, log_02.getState().size);
-    std::cout << "Log file 02: " << log_02 << std::endl;
+    filesystem::Path log_03 = rotate_sink->atRotatePath().getPath();
+    ASSERT_EQ(2, log_03.getState().size);
+    ASSERT_EQ(2, rotate_sink->atHistory().size());
+    ASSERT_EQ(log_02.toString(), rotate_sink->atHistory().front().toString());
+    std::cout << "Log file 03: " << log_03 << std::endl;
 
     removeLogger(LOGGER_NAME);
 }
-
 

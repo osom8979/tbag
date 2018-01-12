@@ -113,7 +113,7 @@ TEST(LogXmlNodeTest, RecreateIfExists)
         <tlog>
             <logger>
                 <name>test-logger-cout</name>
-                <sink>cout</sink>
+                <sink>stdout</sink>
                 <destination></destination>
                 <multithread>false</multithread>
                 <mutex>true</mutex>
@@ -124,7 +124,7 @@ TEST(LogXmlNodeTest, RecreateIfExists)
         </tlog>)XML";
 
     char const * const COUT_LOGGER = "test-logger-cout";
-    ASSERT_NE(nullptr, createConsoleLogger(COUT_LOGGER, MakeType::DEFAULT, false, false));
+    ASSERT_NE(nullptr, createStdoutLogger(COUT_LOGGER, MakeType::DEFAULT, false, false));
     setSeverity(COUT_LOGGER, WARNING_SEVERITY);
 
     Logger * logger = getLogger(COUT_LOGGER);
@@ -164,7 +164,7 @@ struct LogXmlNodeTest : public LogXmlNode
     virtual void setup() override
     {
         atInfos().clear();
-        atInfos().push_back(getLogInfo(TEST_LOG_NAME, "file", "${TEST_DIR}/test.log", "1024",
+        atInfos().push_back(getLogInfo(TEST_LOG_NAME, "file", "${TEST_DIR}/test.log", "1024", "10",
                                        "true", "false", "false", "info", "default"));
     }
 };

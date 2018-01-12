@@ -111,10 +111,10 @@ LogXmlNode::StringVector LogXmlNode::getNames() const
 // Static methods.
 // ---------------
 
-std::size_t LogXmlNode::parseMaxSize(std::string const & value)
+std::size_t LogXmlNode::parseSize(std::string const & value)
 {
     try {
-        return static_cast<std::size_t>(std::stoi(value));
+        return (std::size_t)std::stoll(value);
     } catch (...) {
         // EMPTY.
     }
@@ -188,6 +188,8 @@ LogXmlNode::MakeType LogXmlNode::parseGeneratorType(std::string const & value)
     std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == GENERATOR_DEFAULT_COLOR) {
         return MakeType::DEFAULT_COLOR;
+    } else if (LOWER_VALUE == GENERATOR_RAW) {
+        return MakeType::RAW;
     }
     return MakeType::DEFAULT;
     // @formatter:on
@@ -206,6 +208,7 @@ LogXmlNode::LogInfo LogXmlNode::getLogInfo(
         std::string const & sink,
         std::string const & destination,
         std::string const & max_size,
+        std::string const & max_file_count,
         std::string const & auto_flush,
         std::string const & multithread,
         std::string const & mutex,
@@ -213,15 +216,16 @@ LogXmlNode::LogInfo LogXmlNode::getLogInfo(
         std::string const & generator)
 {
     LogInfo result;
-    result.name        = name;
-    result.sink        = sink;
-    result.destination = destination;
-    result.max_size    = parseMaxSize(max_size);
-    result.auto_flush  = parseAutoFlush(auto_flush);
-    result.multithread = parseMultiThread(multithread);
-    result.mutex       = parseMutex(mutex);
-    result.severity    = parseSeverity(severity);
-    result.generator   = parseGeneratorType(generator);
+    result.name           = name;
+    result.sink           = sink;
+    result.destination    = destination;
+    result.max_size       = parseSize(max_size);
+    result.max_file_count = parseSize(max_file_count);
+    result.auto_flush     = parseAutoFlush(auto_flush);
+    result.multithread    = parseMultiThread(multithread);
+    result.mutex          = parseMutex(mutex);
+    result.severity       = parseSeverity(severity);
+    result.generator      = parseGeneratorType(generator);
     return result;
 }
 
@@ -231,6 +235,7 @@ LogXmlNode::LogInfo LogXmlNode::getLogInfo(Element const & element)
                       getElementText(element.FirstChildElement(XML_ELEMENT_SINK)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_DESTINATION)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_MAX_SIZE)),
+                      getElementText(element.FirstChildElement(XML_ELEMENT_MAX_FILE_COUNT)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_AUTO_FLUSH)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_MULTITHREAD)),
                       getElementText(element.FirstChildElement(XML_ELEMENT_MUTEX)),
@@ -285,6 +290,14 @@ bool LogXmlNode::insertMaxSize(Element & parent, std::size_t max_size)
     return parent.InsertEndChild(element) != nullptr;
 }
 
+bool LogXmlNode::insertMaxFileCount(Element & parent, std::size_t max_file_count)
+{
+    auto * doc = parent.GetDocument();
+    auto * element = doc->NewElement(XML_ELEMENT_MAX_FILE_COUNT);
+    element->SetText((unsigned int)max_file_count);
+    return parent.InsertEndChild(element) != nullptr;
+}
+
 bool LogXmlNode::insertAutoFlush(Element & parent, bool auto_flush)
 {
     auto * doc = parent.GetDocument();
@@ -327,6 +340,8 @@ bool LogXmlNode::insertGeneratorType(Element & parent, MakeType type)
         generator = GENERATOR_DEFAULT;
     } else if (type == MakeType::DEFAULT_COLOR) {
         generator = GENERATOR_DEFAULT_COLOR;
+    } else if (type == MakeType::RAW) {
+        generator = GENERATOR_RAW;
     }
 
     element->SetText(generator.c_str());
@@ -350,6 +365,7 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfo const & info)
     insertSink         (*element, info.sink);
     insertDestination  (*element, info.destination);
     insertMaxSize      (*element, info.max_size);
+    insertMaxFileCount (*element, info.max_file_count);
     insertAutoFlush    (*element, info.auto_flush);
     insertMultiThread  (*element, info.multithread);
     insertMutex        (*element, info.mutex);
@@ -382,6 +398,7 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
 
     std::string const NAME = info.name;
     std::string const DEST = envs.convert(info.destination);
+    std::string const LOWER_SINK = string::lower(info.sink);
 
     Logger * logger = getLogger(NAME);
     if (logger != nullptr) {
@@ -392,12 +409,12 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
         }
     }
 
-    if (info.sink == SINK_COUT) {
-        logger = createConsoleLogger(NAME, info.generator, info.mutex, info.auto_flush);
-    } else if (info.sink == SINK_FILE) {
+    if (LOWER_SINK == SINK_FILE) {
         logger = createFileLogger(NAME, DEST, info.generator, info.mutex, info.auto_flush);
-    } else if (info.sink == SINK_ROTATE_FILE) {
-        logger = createRotateFileLogger(NAME, DEST, info.max_size, info.generator, info.mutex, info.auto_flush);
+    } else if (LOWER_SINK == SINK_ROTATE_FILE) {
+        logger = createRotateFileLogger(NAME, DEST, info.max_size, info.max_file_count, info.generator, info.mutex, info.auto_flush);
+    } else if (LOWER_SINK == SINK_COUT || LOWER_SINK == SINK_CONSOLE || LOWER_SINK == SINK_STDOUT) {
+        logger = createStdoutLogger(NAME, info.generator, info.mutex, info.auto_flush);
     } else {
         return nullptr;
     }

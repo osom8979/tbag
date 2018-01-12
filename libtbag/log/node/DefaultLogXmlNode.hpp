@@ -48,15 +48,16 @@ class TBAG_API DefaultLogXmlNode : public LogXmlNode
 public:
     struct InitParams
     {
-        std::string name;        ///< logger name.
-        std::string sink;        ///< cout, file, rotate_file
-        std::string destination; ///< file path.
-        std::string max_size;    ///< max file size.
-        std::string generator;   ///< default, default_color
-        std::string severity;    ///< debug, info, error, ...
-        std::string auto_flush;  ///< true or false.
-        std::string multithread; ///< true or false.
-        std::string mutex;       ///< true or false.
+        std::string name;           ///< logger name.
+        std::string sink;           ///< cout, file, rotate_file
+        std::string destination;    ///< file path.
+        std::string max_size;       ///< max file size.
+        std::string max_file_count; ///< max file count.
+        std::string generator;      ///< default, default_color
+        std::string severity;       ///< debug, info, error, ...
+        std::string auto_flush;     ///< true or false.
+        std::string multithread;    ///< true or false.
+        std::string mutex;          ///< true or false.
     };
 
 private:

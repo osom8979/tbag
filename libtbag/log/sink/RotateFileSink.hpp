@@ -22,6 +22,7 @@
 #include <libtbag/time/TimePoint.hpp>
 
 #include <iostream>
+#include <queue>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -56,21 +57,35 @@ public:
     using CounterUpdater    = RotatePath::CounterUpdater;
     using TimeFormatUpdater = RotatePath::TimeFormatUpdater;
 
-private:
-    RotatePath _path;
-    File _file;
+    using PathQueue = std::queue<Path>;
 
 public:
-    RotateFileSink(std::string const & path, SharedChecker const & checker, SharedUpdater const & updater, bool force_flush = false)
-            : Parent(force_flush), _path(Path(path), checker, updater)
+    TBAG_CONSTEXPR static std::size_t const DONT_REMOVE_HISTORY =  0;
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_MAX_HISTORY = 10;
+
+    TBAG_CONSTEXPR static std::size_t getDontRemoveHistory() TBAG_NOEXCEPT { return DONT_REMOVE_HISTORY; }
+    TBAG_CONSTEXPR static std::size_t getDefaultMaxHistory() TBAG_NOEXCEPT { return DEFAULT_MAX_HISTORY; }
+
+private:
+    PathQueue   _history;
+    std::size_t _max_history;
+
+    RotatePath  _rotate_path;
+    File        _file;
+
+public:
+    RotateFileSink(std::string const & path, SharedChecker const & checker, SharedUpdater const & updater,
+                   std::size_t max_history = getDefaultMaxHistory(), bool force_flush = false)
+            : Parent(force_flush), _rotate_path(Path(path), checker, updater), _max_history(max_history)
     {
         if (init() == false) {
             throw std::bad_exception();
         }
     }
 
-    RotateFileSink(std::string const & path, std::size_t size = SizeChecker::getDefaultMaxSize(), bool force_flush = false)
-            : Parent(force_flush), _path(Path(path), size)
+    RotateFileSink(std::string const & path, std::size_t size = SizeChecker::getDefaultMaxSize(),
+                   std::size_t max_history = getDefaultMaxHistory(), bool force_flush = false)
+            : Parent(force_flush), _rotate_path(Path(path), size), _max_history(max_history)
     {
         if (init() == false) {
             throw std::bad_exception();
@@ -85,10 +100,35 @@ public:
     }
 
 public:
-    inline RotatePath const & atRotatePath() const TBAG_NOEXCEPT { return _path; }
+    inline PathQueue       & atHistory()       TBAG_NOEXCEPT { return _history; }
+    inline PathQueue const & atHistory() const TBAG_NOEXCEPT { return _history; }
+
+    inline bool isEnableHistory() const TBAG_NOEXCEPT { return _max_history != getDontRemoveHistory(); }
+
+    inline std::size_t getMaxHistory() const TBAG_NOEXCEPT { return _max_history; }
+    inline RotatePath const & atRotatePath() const TBAG_NOEXCEPT { return _rotate_path; }
     inline File const & atFile() const TBAG_NOEXCEPT { return _file; }
 
 private:
+    bool updateHistory(std::string const & path)
+    {
+        if (isEnableHistory() == false) {
+            return true;
+        }
+
+        assert(_max_history >= 1);
+        while (_history.size() >= _max_history) {
+            auto & LEGACY_PATH = _history.front();
+            if (LEGACY_PATH.remove() == false) {
+                std::cerr << "RotateFileSink::updateHistory() Remove legacy file error!\n";
+            }
+            _history.pop();
+        }
+
+        _history.push(Path(path));
+        return true;
+    }
+
     bool reopen(std::string const & path)
     {
         if (_file.isOpen()) {
@@ -113,18 +153,20 @@ private:
             std::cerr << "RotateFileSink::reopen() File open error: " << path << std::endl;
             return false;
         }
+
         assert(_file.isOpen());
+        updateHistory(path);
         return true;
     }
 
     bool reopen()
     {
-        return reopen(_path.getPath().toString());
+        return reopen(_rotate_path.getPath().toString());
     }
 
     bool update()
     {
-        return _path.update();
+        return _rotate_path.update();
     }
 
     bool init()
@@ -141,7 +183,7 @@ public:
 public:
     virtual void write(String const & message) override
     {
-        if (_path.next(message.data(), message.size())) {
+        if (_rotate_path.next(message.data(), message.size())) {
             if (reopen() == false) {
                 std::cerr << "RotateFileSink::write() Next open error!\n";
             }

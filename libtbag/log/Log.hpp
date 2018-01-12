@@ -31,6 +31,7 @@
 #include <libtbag/log/mgr/Logger.hpp>
 #include <libtbag/log/msg/PacketGenerator.hpp>
 #include <libtbag/log/node/LogXmlNode.hpp>
+#include <libtbag/log/sink/RotateFileSink.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -57,20 +58,24 @@ Severity const    NOTICE_SEVERITY = ::libtbag::log::level::NOTICE_SEVERITY;
 Severity const      INFO_SEVERITY = ::libtbag::log::level::INFORMATIONAL_SEVERITY;
 Severity const     DEBUG_SEVERITY = ::libtbag::log::level::DEBUG_SEVERITY;
 
-TBAG_API Logger * createColorConsoleLogger(std::string const & name, bool auto_flush = false);
-TBAG_API Logger * createConsoleLogger(std::string const & name, MakeType type = MakeType::DEFAULT,
-                                      bool mutex = true, bool auto_flush = false);
+TBAG_CONSTEXPR std::size_t const DEFAULT_LOG_FILE_COUNT = ::libtbag::log::sink::RotateFileSink<>::getDefaultMaxHistory();
+
+TBAG_API Logger * createColorStdoutLogger(std::string const & name, bool auto_flush = false);
+TBAG_API Logger * createStdoutLogger(std::string const & name, MakeType type = MakeType::DEFAULT,
+                                     bool mutex = true, bool auto_flush = false);
 TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path,
                                    MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
 TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path,
-                                         std::size_t max_size = MEGA_BYTE_TO_BYTE, MakeType type = MakeType::DEFAULT,
+                                         std::size_t max_size = MEGA_BYTE_TO_BYTE, std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
+                                         MakeType type = MakeType::DEFAULT,
                                          bool mutex = true, bool auto_flush = false);
 
-TBAG_API Logger * createDefaultConsoleLogger(bool auto_flush = false);
-TBAG_API Logger * createDefaultColorConsoleLogger(bool auto_flush = false);
+TBAG_API Logger * createDefaultStdoutLogger(bool auto_flush = false);
+TBAG_API Logger * createDefaultColorStdoutLogger(bool auto_flush = false);
 TBAG_API Logger * createDefaultFileLogger(std::string const & path, bool auto_flush = false);
 TBAG_API Logger * createDefaultRotateFileLogger(std::string const & path,
                                                 std::size_t max_size = MEGA_BYTE_TO_BYTE,
+                                                std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
                                                 bool auto_flush = false);
 
 TBAG_API bool removeLogger(std::string const & name);

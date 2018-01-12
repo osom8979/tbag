@@ -53,15 +53,16 @@ public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_TLOG_NAME   = "tlog";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGER_NAME = "logger";
 
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_NAME        = "name";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SINK        = "sink";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_DESTINATION = "destination";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MAX_SIZE    = "max_size";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MULTITHREAD = "multithread";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MUTEX       = "mutex";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_GENERATOR   = "generator";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY    = "severity";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_NAME           = "name";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SINK           = "sink";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_DESTINATION    = "destination";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MAX_SIZE       = "max_size";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MAX_FILE_COUNT = "max_file_count";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MULTITHREAD    = "multithread";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MUTEX          = "mutex";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_GENERATOR      = "generator";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY       = "severity";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH     = "auto_flush";
 
 public:
     TBAG_CONSTEXPR static char const * const AUTO_FLUSH_ON  = "true";
@@ -73,11 +74,14 @@ public:
     TBAG_CONSTEXPR static char const * const MUTEX_ON  = "true";
     TBAG_CONSTEXPR static char const * const MUTEX_OFF = "false";
 
-    TBAG_CONSTEXPR static char const * const GENERATOR_DEFAULT = "default";
+    TBAG_CONSTEXPR static char const * const GENERATOR_DEFAULT       = "default";
     TBAG_CONSTEXPR static char const * const GENERATOR_DEFAULT_COLOR = "default_color";
+    TBAG_CONSTEXPR static char const * const GENERATOR_RAW           = "raw";
 
-    TBAG_CONSTEXPR static char const * const SINK_COUT = "cout";
-    TBAG_CONSTEXPR static char const * const SINK_FILE = "file";
+    TBAG_CONSTEXPR static char const * const SINK_COUT        = "cout";
+    TBAG_CONSTEXPR static char const * const SINK_CONSOLE     = "console";
+    TBAG_CONSTEXPR static char const * const SINK_STDOUT      = "stdout";
+    TBAG_CONSTEXPR static char const * const SINK_FILE        = "file";
     TBAG_CONSTEXPR static char const * const SINK_ROTATE_FILE = "rotate_file";
 
 public:
@@ -93,6 +97,7 @@ public:
         std::string sink;
         std::string destination;
         std::size_t max_size;
+        std::size_t max_file_count;
         bool auto_flush;
         bool multithread;
         bool mutex;
@@ -148,7 +153,7 @@ public:
 
 public:
     // @formatter:off
-    static std::size_t parseMaxSize      (std::string const & value);
+    static std::size_t parseSize         (std::string const & value);
     static bool        parseAutoFlush    (std::string const & value);
     static bool        parseMultiThread  (std::string const & value);
     static bool        parseMutex        (std::string const & value);
@@ -164,6 +169,7 @@ public:
                               std::string const & sink,
                               std::string const & destination,
                               std::string const & max_size,
+                              std::string const & max_file_count,
                               std::string const & auto_flush,
                               std::string const & multithread,
                               std::string const & mutex,
@@ -179,6 +185,7 @@ public:
     static bool insertSink          (Element & parent, std::string const & sink);
     static bool insertDestination   (Element & parent, std::string const & destination);
     static bool insertMaxSize       (Element & parent, std::size_t max_size);
+    static bool insertMaxFileCount  (Element & parent, std::size_t max_file_count);
     static bool insertAutoFlush     (Element & parent, bool auto_flush);
     static bool insertMultiThread   (Element & parent, bool multithread);
     static bool insertMutex         (Element & parent, bool mutex);

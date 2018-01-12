@@ -25,9 +25,9 @@ int main(int argc, char **argv)
     tbInitialize();
 
 #if defined(TBAG_PLATFORM_WINDOWS)
-    libtbag::log::createDefaultConsoleLogger();
+    libtbag::log::createDefaultStdoutLogger();
 #else
-    libtbag::log::createDefaultColorConsoleLogger();
+    libtbag::log::createDefaultColorStdoutLogger();
 #endif
     libtbag::log::setDefaultSeverity(libtbag::log::DEBUG_SEVERITY);
 
