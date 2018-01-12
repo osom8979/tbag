@@ -94,38 +94,36 @@ int getCacheLineSize()
 bool getFilesystemInfo(std::string const & path, FilesystemStatistics & result)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
+    ULONGLONG total_byte = 0;
+    ULONGLONG  free_byte = 0;
+    if (::GetDiskFreeSpaceExA(path.c_str(), (PULARGE_INTEGER)&free_byte, (PULARGE_INTEGER)&total_byte, NULL) == 0) {
+        result.total_byte = total_byte;
+        result.free_byte  = free_byte;
+        result.used_byte  = total_byte - free_byte;
+        result->namemax = FILENAME_MAX;
+        return true;
+    }
 #elif defined(HAVE_SYS_STATVFS_H)
     struct statvfs buffer = {0,};
     if (::statvfs(path.c_str(), &buffer) == 0) {
-        result.bsize   = buffer.f_bsize;
-        result.frsize  = buffer.f_frsize;
-        result.blocks  = buffer.f_blocks;
-        result.bfree   = buffer.f_bfree;
-        result.bavail  = buffer.f_bavail;
-        result.files   = buffer.f_files;
-        result.ffree   = buffer.f_ffree;
-        result.favail  = buffer.f_favail;
-        result.fsid    = buffer.f_fsid;
-        result.flag    = buffer.f_flag;
-        result.namemax = buffer.f_namemax;
+        result.bsize      = buffer.f_bsize;
+        result.frsize     = buffer.f_frsize;
+        result.blocks     = buffer.f_blocks;
+        result.bfree      = buffer.f_bfree;
+        result.bavail     = buffer.f_bavail;
+        result.files      = buffer.f_files;
+        result.ffree      = buffer.f_ffree;
+        result.favail     = buffer.f_favail;
+        result.fsid       = buffer.f_fsid;
+        result.flag       = buffer.f_flag;
+        result.namemax    = buffer.f_namemax;
+        result.total_byte = buffer.f_blocks * buffer.f_frsize;
+        result.free_byte  = buffer.f_bavail * buffer.f_frsize;
+        result.used_byte  = (buffer.f_blocks - buffer.f_bavail) * buffer.f_frsize;
+        return true;
     }
 #endif
-    return true;
-}
-
-std::size_t getTotalDisk(FilesystemStatistics const & info)
-{
-    return info.blocks * info.frsize;
-}
-
-std::size_t getFreeDisk(FilesystemStatistics const & info)
-{
-    return info.bavail * info.frsize;
-}
-
-std::size_t getUsedDisk(FilesystemStatistics const & info)
-{
-    return (info.blocks - info.bavail) * info.frsize;
+    return false;
 }
 
 } // namespace system

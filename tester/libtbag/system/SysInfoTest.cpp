@@ -34,14 +34,6 @@ TEST(SysInfoTest, GetDiskInfo)
     FilesystemStatistics fs_stat;
     ASSERT_TRUE(getFilesystemInfo(ROOT_DIR, fs_stat));
 
-    auto const TOTAL_SIZE = getTotalDisk(fs_stat);
-    auto const  FREE_SIZE =  getFreeDisk(fs_stat);
-    auto const  USED_SIZE =  getUsedDisk(fs_stat);
-
-    ASSERT_LT(0, TOTAL_SIZE);
-    ASSERT_LT(0, FREE_SIZE);
-    ASSERT_LT(0, USED_SIZE);
-
     std::cout << "Filesystem: " << ROOT_DIR;
     std::cout << "\n * Filesystem block size: "      << fs_stat.bsize
               << "\n * Fragment size: "              << fs_stat.frsize
@@ -54,8 +46,8 @@ TEST(SysInfoTest, GetDiskInfo)
               << "\n * Filesystem ID: "              << fs_stat.fsid
               << "\n * Mount flags: "                << fs_stat.flag
               << "\n * Maximum filename length: "    << fs_stat.namemax << std::endl;
-    std::cout << " * Filesystem total size: " << TOTAL_SIZE << " (" << TOTAL_SIZE / GIGA_BYTE_TO_BYTE << "GB)\n"
-              << " * Filesystem free size: "  <<  FREE_SIZE << " (" <<  FREE_SIZE / GIGA_BYTE_TO_BYTE << "GB)\n"
-              << " * Filesystem used size: "  <<  USED_SIZE << " (" <<  USED_SIZE / GIGA_BYTE_TO_BYTE << "GB)" << std::endl;
+    std::cout << " * Filesystem total size: " << fs_stat.total_byte << " (" << fs_stat.total_byte / GIGA_BYTE_TO_BYTE << "GB)\n"
+              << " * Filesystem free size: "  << fs_stat.free_byte  << " (" << fs_stat.free_byte  / GIGA_BYTE_TO_BYTE << "GB)\n"
+              << " * Filesystem used size: "  << fs_stat.used_byte  << " (" << fs_stat.used_byte  / GIGA_BYTE_TO_BYTE << "GB)" << std::endl;
 }
 
