@@ -202,10 +202,10 @@ public:
     RotatePath & operator =(RotatePath && obj);
 
 public:
-    void setChecker(CheckerInterface * checker) { setChecker(checker); }
+    void setChecker(CheckerInterface * checker) { setChecker(SharedChecker(checker)); }
     void setChecker(SharedChecker const & checker) { _checker = checker; }
 
-    void setUpdater(UpdaterInterface * updater) { setUpdater(updater); }
+    void setUpdater(UpdaterInterface * updater) { setUpdater(SharedUpdater(updater)); }
     void setUpdater(SharedUpdater const & updater) { _updater = updater; }
 
     WeakChecker getChecker() const { return WeakChecker(_checker); }
