@@ -1,12 +1,12 @@
 /**
- * @file   Dummy.hpp
- * @brief  Dummy class prototype.
+ * @file   Win32.hpp
+ * @brief  Win32 class prototype.
  * @author zer0
- * @date   2017-03-05
+ * @date   2018-01-13
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PROXY_WINDOWS_DUMMY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_PROXY_WINDOWS_DUMMY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_DUMMY_WIN32_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_DUMMY_WIN32_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -402,8 +402,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace proxy   {
-namespace windows {
+namespace dummy {
+namespace win32 {
 
 /**
  * Determines the concurrency model used for incoming calls to objects created by this thread.
@@ -902,12 +902,12 @@ inline HRESULT CoInitializeEx(_In_opt_ LPVOID pvReserved, _In_ DWORD dwCoInit)
 inline void CoUninitialize(void)
 { /* EMPTY. */ }
 
-} // namespace windows
-} // namespace proxy
+} // namespace win32
+} // namespace dummy
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_PROXY_WINDOWS_DUMMY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_DUMMY_WIN32_HPP__
 

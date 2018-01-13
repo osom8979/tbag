@@ -19,8 +19,8 @@
 #if defined(TBAG_PLATFORM_WINDOWS)
 # include <Windows.h>
 #else
-# include <libtbag/proxy/windows/Dummy.hpp>
-using namespace ::libtbag::proxy::windows;
+# include <libtbag/dummy/Win32.hpp>
+using namespace ::libtbag::dummy::win32;
 #endif
 
 // -------------------

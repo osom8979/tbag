@@ -54,9 +54,9 @@ void * alignedMemoryAlloc(std::size_t size, std::size_t align)
 #else
     int const CODE = ::posix_memalign(&ptr, align, size);
     if (CODE != 0) {
-        tDLogE("__impl::alignedMemoryAlloc() posix_memalign({}) error",
+        tDLogE("alignedMemoryAlloc() posix_memalign({}) error",
                getErrName(convertSystemErrorToErr(CODE)));
-        return nullptr;
+        throw std::bad_alloc();
     }
 #endif
     if (isThrowMemoryError() && reinterpret_cast<std::uintptr_t>(ptr) % align != 0) {

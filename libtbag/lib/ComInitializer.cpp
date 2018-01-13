@@ -12,8 +12,8 @@
 #include <Objbase.h>
 #pragma comment(lib, "ole32.lib")
 #else
-#include <libtbag/proxy/windows/Dummy.hpp>
-using namespace libtbag::proxy::windows;
+# include <libtbag/dummy/Win32.hpp>
+using namespace ::libtbag::dummy::win32;
 #endif
 
 // -------------------
