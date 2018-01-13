@@ -406,6 +406,32 @@ void upperSelf(std::string & str)
     std::transform(str.begin(), str.end(), str.begin(), ::toupper);
 }
 
+#ifndef _TBAG_STRING_TO_INTEGER_IMPLEMENT
+#define _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, func, index, base) \
+    try { to = func(str, index, base); } catch (...) { return false; } return true;
+#endif
+
+#ifndef _TBAG_STRING_TO_FLOATING_IMPLEMENT
+#define _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, func, index) \
+    try { to = func(str, index); } catch (...) { return false; } return true;
+#endif
+
+// @formatter:off
+bool toVal(std::string const & str,               char & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stol  , index, base); }
+bool toVal(std::string const & str, unsigned      char & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoul , index, base); }
+bool toVal(std::string const & str,              short & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoi  , index, base); }
+bool toVal(std::string const & str, unsigned     short & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoul , index, base); }
+bool toVal(std::string const & str,                int & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoi  , index, base); }
+bool toVal(std::string const & str, unsigned       int & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoul , index, base); }
+bool toVal(std::string const & str,               long & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stol  , index, base); }
+bool toVal(std::string const & str, unsigned      long & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoul , index, base); }
+bool toVal(std::string const & str,          long long & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoll , index, base); }
+bool toVal(std::string const & str, unsigned long long & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoull, index, base); }
+bool toVal(std::string const & str,              float & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stof , index); }
+bool toVal(std::string const & str,             double & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stod , index); }
+bool toVal(std::string const & str,        long double & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stold, index); }
+// @formatter:on
+
 } // namespace string
 
 // --------------------

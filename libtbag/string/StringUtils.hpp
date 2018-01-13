@@ -172,6 +172,36 @@ TBAG_API std::string upper(std::string const & str);
 TBAG_API void lowerSelf(std::string & str);
 TBAG_API void upperSelf(std::string & str);
 
+TBAG_API bool toVal(std::string const & str,               char & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str, unsigned      char & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,              short & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str, unsigned     short & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,                int & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str, unsigned       int & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,               long & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str, unsigned      long & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,          long long & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str, unsigned long long & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,              float & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,             double & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,        long double & to, std::size_t * index = nullptr, int base = 10);
+
+template <typename T>
+inline std::string toString(T val)
+{
+    return std::to_string(val);
+}
+
+template <typename T>
+inline T toValue(std::string const & str, T default_value = T(), int base = 10)
+{
+    T result;
+    if (toVal(str, result, nullptr, base)) {
+        return result;
+    }
+    return default_value;
+}
+
 } // namespace string
 
 // --------------------

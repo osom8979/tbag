@@ -13,6 +13,7 @@
 #include <cctype>
 #include <algorithm>
 #include <iostream>
+#include <limits>
 
 using namespace libtbag;
 using namespace libtbag::string;
@@ -294,5 +295,69 @@ TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
 
     buffer.push_back(i++);
     std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
+}
+
+TEST(StringUtilsTest, ToString)
+{
+    ASSERT_STREQ("10", toString((              char)10).c_str());
+    ASSERT_STREQ("11", toString((unsigned      char)11).c_str());
+    ASSERT_STREQ("12", toString((             short)12).c_str());
+    ASSERT_STREQ("13", toString((unsigned     short)13).c_str());
+    ASSERT_STREQ("14", toString((               int)14).c_str());
+    ASSERT_STREQ("15", toString((unsigned       int)15).c_str());
+    ASSERT_STREQ("16", toString((              long)16).c_str());
+    ASSERT_STREQ("17", toString((unsigned      long)17).c_str());
+    ASSERT_STREQ("18", toString((         long long)18).c_str());
+    ASSERT_STREQ("19", toString((unsigned long long)19).c_str());
+
+    ASSERT_STREQ("200", toString((      float)200).substr(0, 3).c_str());
+    ASSERT_STREQ("201", toString((     double)201).substr(0, 3).c_str());
+    ASSERT_STREQ("202", toString((long double)202).substr(0, 3).c_str());
+
+    std::string str;
+    str = toString(std::numeric_limits<float>::infinity());
+    std::cout << "Infinity (float): " << str << std::endl;
+    str = toString(std::numeric_limits<float>::quiet_NaN());
+    std::cout << "Quiet NaN (float): " << str << std::endl;
+    str = toString(std::numeric_limits<float>::signaling_NaN());
+    std::cout << "Signaling NaN (float): " << str << std::endl;
+    str = toString(std::numeric_limits<float>::denorm_min());
+    std::cout << "Denorm min (float): " << str << std::endl;
+
+    str = toString(std::numeric_limits<double>::infinity());
+    std::cout << "Infinity (double): " << str << std::endl;
+    str = toString(std::numeric_limits<double>::quiet_NaN());
+    std::cout << "Quiet NaN (double): " << str << std::endl;
+    str = toString(std::numeric_limits<double>::signaling_NaN());
+    std::cout << "Signaling NaN (double): " << str << std::endl;
+    str = toString(std::numeric_limits<double>::denorm_min());
+    std::cout << "Denorm min (double): " << str << std::endl;
+
+    str = toString(std::numeric_limits<long double>::infinity());
+    std::cout << "Infinity (long double): " << str << std::endl;
+    str = toString(std::numeric_limits<long double>::quiet_NaN());
+    std::cout << "Quiet NaN (long double): " << str << std::endl;
+    str = toString(std::numeric_limits<long double>::signaling_NaN());
+    std::cout << "Signaling NaN (long double): " << str << std::endl;
+    str = toString(std::numeric_limits<long double>::denorm_min());
+    std::cout << "Denorm min (long double): " << str << std::endl;
+}
+
+TEST(StringUtilsTest, ToValue)
+{
+    ASSERT_EQ(10, toValue<              char>("10"));
+    ASSERT_EQ(11, toValue<unsigned      char>("11"));
+    ASSERT_EQ(12, toValue<             short>("12"));
+    ASSERT_EQ(13, toValue<unsigned     short>("13"));
+    ASSERT_EQ(14, toValue<               int>("14"));
+    ASSERT_EQ(15, toValue<unsigned       int>("15"));
+    ASSERT_EQ(16, toValue<              long>("16"));
+    ASSERT_EQ(17, toValue<unsigned      long>("17"));
+    ASSERT_EQ(18, toValue<         long long>("18"));
+    ASSERT_EQ(19, toValue<unsigned long long>("19"));
+
+    ASSERT_FLOAT_EQ(200, toValue<      float>("200"));
+    ASSERT_FLOAT_EQ(201, toValue<     double>("201"));
+    ASSERT_FLOAT_EQ(202, toValue<long double>("202"));
 }
 
