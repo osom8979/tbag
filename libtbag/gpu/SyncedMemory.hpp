@@ -41,7 +41,7 @@ public:
     };
 
 private:
-    UniqueGpu   _backend;
+    //UniqueGpu   _backend;
     SyncedHead  _head;
     std::size_t _capacity;
     std::size_t _size;
@@ -53,11 +53,11 @@ private:
     void * _gpu;
 
 public:
-    explicit SyncedMemory(GpuBackendType type);
-    SyncedMemory(std::size_t size = 0, GpuBackendType type = GpuBackendType::GBT_CPU);
-    SyncedMemory(SyncedMemory const & obj);
-    SyncedMemory(SyncedMemory && obj);
-    ~SyncedMemory();
+//    explicit SyncedMemory(GpuBackendType type);
+//    SyncedMemory(std::size_t size = 0, GpuBackendType type = GpuBackendType::GBT_CPU);
+//    SyncedMemory(SyncedMemory const & obj);
+//    SyncedMemory(SyncedMemory && obj);
+//    ~SyncedMemory();
 
 public:
     SyncedMemory & operator =(SyncedMemory const & obj);
@@ -83,7 +83,7 @@ public:
     inline void ownGpu(bool flag = true) TBAG_NOEXCEPT { _own_gpu = flag; }
 
 public:
-    GpuBackendType type() const TBAG_NOEXCEPT;
+//    GpuBackendType type() const TBAG_NOEXCEPT;
 
 public:
     void clear();

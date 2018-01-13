@@ -15,8 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/gpu/backend/GpuBackend.hpp>
+
+#include <libtbag/gpu/GpuInterface.hpp>
+#include <libtbag/gpu/accel/AccelBackend.hpp>
+#include <libtbag/gpu/cpu/CpuBackend.hpp>
+#include <libtbag/gpu/cuda/CudaBackend.hpp>
+#include <libtbag/gpu/opencl/OpenCLBackend.hpp>
 
 #include <memory>
 
@@ -26,37 +30,35 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 
-using GpuBackendType = backend::GpuBackendType;
-using GpuDevice      = backend::GpuDevice;
-using GpuBackend     = backend::GpuBackend;
-using UniqueGpu      = std::unique_ptr<GpuBackend>;
+TBAG_API int             getPlatformCount(GpuType type);
+TBAG_API GpuPlatforms    getPlatformList (GpuType type);
+TBAG_API GpuPlatformInfo getPlatformInfo (GpuPlatform const & platform);
 
-TBAG_API UniqueGpu createGpuContext(GpuBackendType type);
+TBAG_API int             getDeviceCount(GpuPlatform const & platform);
+TBAG_API GpuDevices      getDeviceList (GpuPlatform const & platform);
+TBAG_API GpuDeviceInfo   getDeviceInfo (GpuDevice   const & device);
 
-TBAG_API UniqueGpu    createCpuContext();
-TBAG_API UniqueGpu  createAccelContext();
-TBAG_API UniqueGpu   createCudaContext();
-TBAG_API UniqueGpu createOpenCLContext();
+TBAG_API SharedGpuContext createContext(GpuDevice const & device);
 
-template <typename Predicated>
-void runIfSupported(std::vector<GpuBackendType> const & types, Predicated predicated)
-{
-    for (auto & type : types) {
-        auto gpu = createGpuContext(type);
-        if (gpu && gpu->isSupport()) {
-            predicated(gpu);
-        }
-    }
-}
+//template <typename Predicated>
+//void runIfSupported(std::vector<GpuBackendType> const & types, Predicated predicated)
+//{
+//    for (auto & type : types) {
+//        auto gpu = createGpuContext(type);
+//        if (gpu && gpu->isSupport()) {
+//            predicated(gpu);
+//        }
+//    }
+//}
 
-template <typename Predicated>
-void runAllIfSupported(Predicated predicated)
-{
-    runIfSupported({GpuBackendType::GBT_CPU,
-                    GpuBackendType::GBT_ACCEL,
-                    GpuBackendType::GBT_CUDA,
-                    GpuBackendType::GBT_OPENCL}, predicated);
-}
+//template <typename Predicated>
+//void runAllIfSupported(Predicated predicated)
+//{
+//    runIfSupported({GpuBackendType::GBT_CPU,
+//                    GpuBackendType::GBT_ACCEL,
+//                    GpuBackendType::GBT_CUDA,
+//                    GpuBackendType::GBT_OPENCL}, predicated);
+//}
 
 } // namespace gpu
 

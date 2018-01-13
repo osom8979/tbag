@@ -16,37 +16,37 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 
-SyncedMemory::SyncedMemory(GpuBackendType type) : SyncedMemory(0, type)
-{
-    // EMPTY.
-}
+//SyncedMemory::SyncedMemory(GpuBackendType type) : SyncedMemory(0, type)
+//{
+//    // EMPTY.
+//}
 
-SyncedMemory::SyncedMemory(std::size_t size, GpuBackendType type)
-        : _backend(createGpuContext(type)), _head(SyncedHead::SH_UNINITIALIZED), _capacity(0), _size(0),
-          _own_cpu(true), _own_gpu(true), _cpu(nullptr), _gpu(nullptr)
-{
-    if (static_cast<bool>(_backend) == false) {
-        throw std::bad_alloc();
-    }
-    if (size > 0 && resize(size) == false) {
-        throw std::bad_alloc();
-    }
-}
+//SyncedMemory::SyncedMemory(std::size_t size, GpuBackendType type)
+//        : _backend(createGpuContext(type)), _head(SyncedHead::SH_UNINITIALIZED), _capacity(0), _size(0),
+//          _own_cpu(true), _own_gpu(true), _cpu(nullptr), _gpu(nullptr)
+//{
+//    if (static_cast<bool>(_backend) == false) {
+//        throw std::bad_alloc();
+//    }
+//    if (size > 0 && resize(size) == false) {
+//        throw std::bad_alloc();
+//    }
+//}
 
-SyncedMemory::SyncedMemory(SyncedMemory const & obj) : SyncedMemory(obj.type())
-{
-    *this = obj;
-}
-
-SyncedMemory::SyncedMemory(SyncedMemory && obj) : SyncedMemory(obj.type())
-{
-    *this = std::move(obj);
-}
-
-SyncedMemory::~SyncedMemory()
-{
-    clear();
-}
+//SyncedMemory::SyncedMemory(SyncedMemory const & obj) : SyncedMemory(obj.type())
+//{
+//    *this = obj;
+//}
+//
+//SyncedMemory::SyncedMemory(SyncedMemory && obj) : SyncedMemory(obj.type())
+//{
+//    *this = std::move(obj);
+//}
+//
+//SyncedMemory::~SyncedMemory()
+//{
+//    clear();
+//}
 
 SyncedMemory & SyncedMemory::operator =(SyncedMemory const & obj)
 {
@@ -75,10 +75,10 @@ void SyncedMemory::swap(SyncedMemory & obj)
     }
 }
 
-GpuBackendType SyncedMemory::type() const TBAG_NOEXCEPT
-{
-    return _backend->getType();
-}
+//GpuBackendType SyncedMemory::type() const TBAG_NOEXCEPT
+//{
+//    return _backend->getType();
+//}
 
 void SyncedMemory::clear()
 {
