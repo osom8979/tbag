@@ -97,7 +97,7 @@ bool getFilesystemInfo(std::string const & path, FilesystemStatistics & result)
 #if defined(TBAG_PLATFORM_WINDOWS)
     ULONGLONG total_byte = 0;
     ULONGLONG  free_byte = 0;
-    if (::GetDiskFreeSpaceExA(path.c_str(), (PULARGE_INTEGER)&free_byte, (PULARGE_INTEGER)&total_byte, NULL) == 0) {
+    if (::GetDiskFreeSpaceExA(path.c_str(), (PULARGE_INTEGER)&free_byte, (PULARGE_INTEGER)&total_byte, NULL) != 0) {
         result.namemax    = FILENAME_MAX;
         result.total_byte = total_byte;
         result.free_byte  = free_byte;
