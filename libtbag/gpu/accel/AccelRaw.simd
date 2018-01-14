@@ -124,24 +124,13 @@ static bool addByAccel(T const * v1, T const * v2, T * result, unsigned count)
 // ------------------
 
 tbBOOL tbAccelAdd1i(int const * v1, int const * v2, int * result, unsigned count)
-{
-    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
-}
-
+{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbAccelAdd1u(unsigned const * v1, unsigned const * v2, unsigned * result, unsigned count)
-{
-    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
-}
-
+{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, unsigned count)
-{
-    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
-}
-
+{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, unsigned count)
-{
-    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
-}
+{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
 
 // ---------------------------------
 } // namespace SIMDPP_ARCH_NAMESPACE
