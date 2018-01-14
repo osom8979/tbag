@@ -16,6 +16,11 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu   {
 namespace accel {
 
+bool isSupport() TBAG_NOEXCEPT
+{
+    return true;
+}
+
 int getPlatformCount()
 {
     return 1;
@@ -66,9 +71,10 @@ SharedGpuContext createContext(GpuDevice const & device)
 // AccelContext implementation.
 // ----------------------------
 
-AccelContext::AccelContext(GpuDevice const & d, GpuId c) : GpuContext(d, c)
+AccelContext::AccelContext(GpuDevice const & d, GpuId c) : cpu::CpuContext(d, c)
 {
-    // EMPTY.
+    platform_info = accel::getPlatformInfo(*this);
+    device_info = accel::getDeviceInfo(*this);
 }
 
 AccelContext::~AccelContext()
@@ -80,6 +86,7 @@ AccelContext::~AccelContext()
 bool AccelContext::isSupport() const TBAG_NOEXCEPT { return  true; }
 bool AccelContext::isHost   () const TBAG_NOEXCEPT { return  true; }
 bool AccelContext::isDevice () const TBAG_NOEXCEPT { return false; }
+bool AccelContext::isStream () const TBAG_NOEXCEPT { return  true; }
 // @formatter:on
 
 } // namespace accel

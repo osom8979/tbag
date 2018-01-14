@@ -41,6 +41,11 @@ TBAG_CONSTEXPR static bool isCpuBackendVerbose() TBAG_NOEXCEPT
 } // namespace __impl
 // ------------------
 
+bool isSupport() TBAG_NOEXCEPT
+{
+    return true;
+}
+
 int getPlatformCount()
 {
     return 1;
@@ -93,7 +98,8 @@ SharedGpuContext createContext(GpuDevice const & device)
 
 CpuContext::CpuContext(GpuDevice const & d, GpuId c) : GpuContext(d, c)
 {
-    // EMPTY.
+    platform_info = cpu::getPlatformInfo(*this);
+    device_info = cpu::getDeviceInfo(*this);
 }
 
 CpuContext::~CpuContext()
@@ -105,6 +111,7 @@ CpuContext::~CpuContext()
 bool CpuContext::isSupport() const TBAG_NOEXCEPT { return  true; }
 bool CpuContext::isHost   () const TBAG_NOEXCEPT { return  true; }
 bool CpuContext::isDevice () const TBAG_NOEXCEPT { return false; }
+bool CpuContext::isStream () const TBAG_NOEXCEPT { return  true; }
 // @formatter:on
 
 } // namespace cpu

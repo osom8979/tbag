@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gpu/GpuInterface.hpp>
+#include <libtbag/gpu/cpu/CpuBackend.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,6 +23,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu   {
 namespace accel {
+
+TBAG_API bool isSupport() TBAG_NOEXCEPT;
 
 TBAG_API int             getPlatformCount();
 TBAG_API GpuPlatforms    getPlatformList ();
@@ -40,7 +42,7 @@ TBAG_API SharedGpuContext createContext(GpuDevice const & device);
  * @author zer0
  * @date   2018-01-13
  */
-class TBAG_API AccelContext : public GpuContext
+class TBAG_API AccelContext : public cpu::CpuContext
 {
 public:
     AccelContext(GpuDevice const & d, GpuId c);
@@ -50,6 +52,7 @@ public:
     virtual bool isSupport() const TBAG_NOEXCEPT override;
     virtual bool    isHost() const TBAG_NOEXCEPT override;
     virtual bool  isDevice() const TBAG_NOEXCEPT override;
+    virtual bool  isStream() const TBAG_NOEXCEPT override;
 };
 
 } // namespace accel

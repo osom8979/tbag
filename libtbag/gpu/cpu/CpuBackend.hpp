@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gpu/GpuInterface.hpp>
+#include <libtbag/gpu/Gpu.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,6 +23,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 namespace cpu {
+
+TBAG_API bool isSupport() TBAG_NOEXCEPT;
 
 TBAG_API int             getPlatformCount();
 TBAG_API GpuPlatforms    getPlatformList ();
@@ -50,6 +52,7 @@ public:
     virtual bool isSupport() const TBAG_NOEXCEPT override;
     virtual bool    isHost() const TBAG_NOEXCEPT override;
     virtual bool  isDevice() const TBAG_NOEXCEPT override;
+    virtual bool  isStream() const TBAG_NOEXCEPT override;
 };
 
 } // namespace cpu
