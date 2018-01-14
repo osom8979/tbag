@@ -19,6 +19,10 @@
 #define TB_CUDA_DEVICE  __device__
 #endif
 
+#ifndef TB_CUDA_HOST
+#define TB_CUDA_HOST  __host__
+#endif
+
 #ifndef TB_CUDA_GLOBAL
 #define TB_CUDA_GLOBAL  __global__
 #endif
@@ -36,11 +40,9 @@ static bool isTbagCudaRawVerbose()
 #endif
 }
 
-#ifndef tCudaRawVerbose
-#define tCudaRawVerbose(condition, ...) \
-    if (condition) { \
-        ::sprintf(stdout, __VA_ARGS__)\
-    }
+#ifndef tbCudaRawVerbose
+#define tbCudaRawVerbose(condition, ...) \
+    if (condition) { printf(__VA_ARGS__); }
 #endif
 
 // ---------------
@@ -48,7 +50,7 @@ namespace __impl {
 // ---------------
 
 template <typename T>
-bool tbCudaGetMaxPotentialBlockSize(int * result_grid_size, int * result_block_size, T func, std::size array_count,
+bool tbCudaGetMaxPotentialBlockSize(int * result_grid_size, int * result_block_size, T func, std::size_t array_count,
                                     std::size_t dynamic_shared_mem_size = 0, int block_size_limit = 0)
 {
     int block_size    = 0; // The launch configurator returned block size.
@@ -62,8 +64,7 @@ bool tbCudaGetMaxPotentialBlockSize(int * result_grid_size, int * result_block_s
     }
     round_up_grid = (array_count + block_size - 1) / block_size; // Round up according to array size.
     round_up_grid = (round_up_grid > min_grid_size ? round_up_grid : min_grid_size);
-    tCudaRawVerbose(isTbagCudaRawVerbose(), "tbCudaGetMaxPotentialBlockSize() GRID: %d, BLOCK: %d",
-                    round_up_grid, block_size);
+    tbCudaRawVerbose(isTbagCudaRawVerbose(), "tbCudaGetMaxPotentialBlockSize() GRID: %d, BLOCK: %d", round_up_grid, block_size);
     if (result_grid_size != TB_NULL) {
         *result_grid_size = round_up_grid;
     }
@@ -79,20 +80,20 @@ static TB_CUDA_INLINE TB_CUDA_DEVICE int __global_index_1g_1b__()
            + threadIdx.x /*LOCAL_THREAD_OFFSET*/;
 }
 
-static TB_CUDA_INLINE TB_CUDA_DEVICE int __global_index_1g_2b__()
-{
-    return (blockIdx.x * (blockDim.x * blockDim.y)) /*GLOBAL_BLOCK_OFFSET*/
-           + (threadIdx.y * blockDim.x) /*LOCAL_THREAD_Y_OFFSET*/
-           + threadIdx.x /*LOCAL_THREAD_X_OFFSET*/;
-}
-
-static TB_CUDA_INLINE TB_CUDA_DEVICE int __global_index_1g_3b__()
-{
-    return (blockIdx.x * (blockDim.x * blockDim.y * blockDim.z)) /*GLOBAL_BLOCK_OFFSET*/
-           + (threadIdx.z * (blockDim.y * blockDim.x)) /*LOCAL_THREAD_X_OFFSET*/
-           + (threadIdx.y * blockDim.x) /*LOCAL_THREAD_Y_OFFSET*/
-           + threadIdx.x /*LOCAL_THREAD_X_OFFSET*/;
-}
+//static TB_CUDA_INLINE TB_CUDA_DEVICE int __global_index_1g_2b__()
+//{
+//    return (blockIdx.x * (blockDim.x * blockDim.y)) /*GLOBAL_BLOCK_OFFSET*/
+//           + (threadIdx.y * blockDim.x) /*LOCAL_THREAD_Y_OFFSET*/
+//           + threadIdx.x /*LOCAL_THREAD_X_OFFSET*/;
+//}
+//
+//static TB_CUDA_INLINE TB_CUDA_DEVICE int __global_index_1g_3b__()
+//{
+//    return (blockIdx.x * (blockDim.x * blockDim.y * blockDim.z)) /*GLOBAL_BLOCK_OFFSET*/
+//           + (threadIdx.z * (blockDim.y * blockDim.x)) /*LOCAL_THREAD_X_OFFSET*/
+//           + (threadIdx.y * blockDim.x) /*LOCAL_THREAD_Y_OFFSET*/
+//           + threadIdx.x /*LOCAL_THREAD_X_OFFSET*/;
+//}
 
 template <typename T>
 TB_CUDA_GLOBAL void tbCudaAddKernel(T const * v1, T const * v2, T * result, unsigned size)
@@ -107,13 +108,13 @@ template <typename T, typename StreamType>
 tbBOOL tbCudaAdd(T const * v1, T const * v2, T * result, unsigned size, StreamType stream)
 {
     int grid_size(0), block_size(0);
-    if (tbCudaGetMaxPotentialBlockSize(&grid_size, &block_size, tbCudaAddKernel<T>) == false) {
+    if (tbCudaGetMaxPotentialBlockSize(&grid_size, &block_size, tbCudaAddKernel<T>, size) == false) {
         return TB_FALSE;
     }
     assert(grid_size > 0);
     assert(block_size > 0);
 
-    tbCudaAddKernel<T><<<grid_size, block_size, 0, stream>>>(v1, v2, gpu_result, size);
+    tbCudaAddKernel<T><<<grid_size, block_size, 0, stream>>>(v1, v2, result, size);
     return TB_TRUE;
 }
 
