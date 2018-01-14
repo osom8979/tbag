@@ -26,8 +26,10 @@ namespace gpu    {
 namespace opencl {
 
 TBAG_API std::string getOpenCLSourceOfAddName() TBAG_NOEXCEPT;
-TBAG_API std::string getOpenCLSourceOfAdd1f() TBAG_NOEXCEPT;
-TBAG_API std::string getOpenCLSourceOfAdd1d() TBAG_NOEXCEPT;
+TBAG_API std::string getOpenCLSourceOfAdd1i  () TBAG_NOEXCEPT;
+TBAG_API std::string getOpenCLSourceOfAdd1u  () TBAG_NOEXCEPT;
+TBAG_API std::string getOpenCLSourceOfAdd1f  () TBAG_NOEXCEPT;
+TBAG_API std::string getOpenCLSourceOfAdd1d  () TBAG_NOEXCEPT;
 
 } // namespace opencl
 } // namespace gpu

@@ -16,8 +16,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu    {
 namespace opencl {
 
+// ---------------
+namespace __impl {
+// ---------------
+
+TBAG_CONSTEXPR static char const * const TBAG_OPENCL_NAME_OF_ADD = "add";
 TBAG_CONSTEXPR static char const * const TBAG_OPENCL_SOURCE_OF_ADD = R"(
-__kernel void add(__global ${type} * v1, __global ${type} * v2, __global ${type} * result)
+__kernel void add(__global ${type} * v1, __global ${type} * v2, __global ${type} * result, __global uint size)
 {
     uint w = get_global_size(0);
     uint y = get_global_id(1);
@@ -27,24 +32,33 @@ __kernel void add(__global ${type} * v1, __global ${type} * v2, __global ${type}
 }
 )";
 
-std::string getOpenCLSourceOfAddName() TBAG_NOEXCEPT
-{
-    return "add";
-}
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_INT    = "type=int";
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_UINT   = "type=uint";
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_FLOAT  = "type=float";
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_DOUBLE = "type=double";
 
-std::string getOpenCLSourceOfAdd1f() TBAG_NOEXCEPT
-{
-    string::Environments envs;
-    envs.push("type", "float");
-    return envs.convert(TBAG_OPENCL_SOURCE_OF_ADD);
-}
+static std::string getOpenCLSource(char const * source, char const * env)
+{ return string::Environments(env).convert(source); }
+static std::string getOpenCLIntSource(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_INT); }
+static std::string getOpenCLUintSource(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_UINT); }
+static std::string getOpenCLFloatSource(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_FLOAT); }
+static std::string getOpenCLDoubleSource(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_DOUBLE); }
 
-std::string getOpenCLSourceOfAdd1d() TBAG_NOEXCEPT
-{
-    string::Environments envs;
-    envs.push("type", "double");
-    return envs.convert(TBAG_OPENCL_SOURCE_OF_ADD);
-}
+// ------------------
+} // namespace __impl
+// ------------------
+
+using namespace libtbag::gpu::opencl::__impl;
+
+std::string getOpenCLSourceOfAddName() TBAG_NOEXCEPT { return TBAG_OPENCL_NAME_OF_ADD; }
+std::string getOpenCLSourceOfAdd1i  () TBAG_NOEXCEPT { return getOpenCLIntSource   (TBAG_OPENCL_SOURCE_OF_ADD); }
+std::string getOpenCLSourceOfAdd1u  () TBAG_NOEXCEPT { return getOpenCLUintSource  (TBAG_OPENCL_SOURCE_OF_ADD); }
+std::string getOpenCLSourceOfAdd1f  () TBAG_NOEXCEPT { return getOpenCLFloatSource (TBAG_OPENCL_SOURCE_OF_ADD); }
+std::string getOpenCLSourceOfAdd1d  () TBAG_NOEXCEPT { return getOpenCLDoubleSource(TBAG_OPENCL_SOURCE_OF_ADD); }
 
 } // namespace opencl
 } // namespace gpu

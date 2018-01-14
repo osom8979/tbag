@@ -13,6 +13,8 @@
 #include <simdpp/dispatch/get_arch_linux_cpuinfo.h>
 #include <simdpp/dispatch/get_arch_raw_cpuid.h>
 
+#include <type_traits>
+
 #if SIMDPP_HAS_GET_ARCH_GCC_BUILTIN_CPU_SUPPORTS == 1
 # define SIMDPP_USER_ARCH_INFO  ::simdpp::get_arch_gcc_builtin_cpu_supports()
 #elif SIMDPP_HAS_GET_ARCH_LINUX_CPUINFO == 1
@@ -25,62 +27,120 @@
 namespace SIMDPP_ARCH_NAMESPACE {
 // ------------------------------
 
-tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, int count)
+// ---------------
+namespace __impl {
+// ---------------
+
+template <typename BaseType, typename SimdType>
+struct BaseDataPack
 {
-    using AlignedType = simdpp::float32x4;
-    using ElementType = AlignedType::element_type;
+    using Base = BaseType;
+    using Simd = SimdType;
+    using Element = typename Simd::element_type;
 
-    static_assert(sizeof(AlignedType) == 16/*128bit*/, "Incorrect type size");
+    static_assert(std::is_same<typename std::remove_const<Base>::type , Element>::value,
+                  "Incorrect element type");
 
-    int const ELEMENT_COUNT = AlignedType::length;
-    int const VECTOR_LENGTH = libtbag::algorithm::getPackedSize<int>(count, ELEMENT_COUNT);
+    TBAG_CONSTEXPR static unsigned getElementCount() TBAG_NOEXCEPT { return Simd::length; }
+    TBAG_CONSTEXPR static unsigned     getBaseSize() TBAG_NOEXCEPT { return sizeof(Base); }
 
-    auto     v1_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
-    auto     v2_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
-    auto result_align = simdpp::make_float<AlignedType>(0, 0, 0, 0);
+    inline static unsigned calcVectorSize(unsigned count) TBAG_NOEXCEPT
+    { return libtbag::algorithm::getPackedSize<unsigned>(count, getElementCount()); }
 
-    static_assert(sizeof(result_align) == AlignedType::length_bytes, "Vector uses unsupported data layout");
+    Base * data;
+    Simd   simd;
 
-    for (int i = 0; i < VECTOR_LENGTH; ++i) {
-        v1_align     = simdpp::make_float<AlignedType>(v1[0], v1[1], v1[2], v1[3]);
-        v2_align     = simdpp::make_float<AlignedType>(v2[0], v2[1], v2[2], v2[3]);
-        result_align = simdpp::add(v1_align, v2_align);
-        simdpp::store(result, result_align);
-        v1     += ELEMENT_COUNT;
-        v2     += ELEMENT_COUNT;
-        result += ELEMENT_COUNT;
+    explicit BaseDataPack(Base * d) : data(d), simd(simdpp::make_zero<Simd>())
+    { /* EMPTY. */ }
+    explicit BaseDataPack(Base const * d) : BaseDataPack(const_cast<Base*>(d))
+    { /* EMPTY. */ }
+    ~BaseDataPack()
+    { /* EMPTY. */ }
+
+    inline void operator ++()
+    { data += getElementCount(); }
+
+    inline void store()
+    { simdpp::store(data, simd); }
+};
+
+template <typename BaseType> struct DataPack;
+
+template <> struct DataPack<int> : public BaseDataPack<int, simdpp::int32x8>
+{
+    DataPack(Base * d) : BaseDataPack(d) { /* EMPTY. */ }
+    DataPack(Base const * d) : BaseDataPack(d) { /* EMPTY. */ }
+    ~DataPack() { /* EMPTY. */ }
+    inline void load() { simd = simdpp::make_int<Simd>(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]); }
+};
+
+template <> struct DataPack<unsigned> : public BaseDataPack<unsigned, simdpp::uint32x8>
+{
+    DataPack(Base * d) : BaseDataPack(d) { /* EMPTY. */ }
+    DataPack(Base const * d) : BaseDataPack(d) { /* EMPTY. */ }
+    ~DataPack() { /* EMPTY. */ }
+    inline void load() { simd = simdpp::make_uint<Simd>(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]); }
+};
+
+template <> struct DataPack<float> : public BaseDataPack<float, simdpp::float32x8>
+{
+    DataPack(Base * d) : BaseDataPack(d) { /* EMPTY. */ }
+    DataPack(Base const * d) : BaseDataPack(d) { /* EMPTY. */ }
+    ~DataPack() { /* EMPTY. */ }
+    inline void load() { simd = simdpp::make_float<Simd>(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]); }
+};
+
+template <> struct DataPack<double> : public BaseDataPack<double, simdpp::float64x4>
+{
+    DataPack(Base * d) : BaseDataPack(d) { /* EMPTY. */ }
+    DataPack(Base const * d) : BaseDataPack(d) { /* EMPTY. */ }
+    ~DataPack() { /* EMPTY. */ }
+    inline void load() { simd = simdpp::make_float<Simd>(data[0], data[1], data[2], data[3]); }
+};
+
+template <typename T>
+static bool addByAccel(T const * v1, T const * v2, T * result, unsigned count)
+{
+    DataPack<T> v1_pack(v1);
+    DataPack<T> v2_pack(v2);
+    DataPack<T> result_pack(result);
+
+    auto loop_count = DataPack<T>::calcVectorSize(count);
+    for (; loop_count; --loop_count) {
+        v1_pack.load();
+        v2_pack.load();
+        result_pack.simd = simdpp::add(v1_pack.simd, v2_pack.simd);
+        result_pack.store();
+        ++v1_pack;
+        ++v2_pack;
+        ++result_pack;
     }
 
-    return TB_TRUE;
+    return true;
 }
 
-tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int count)
+// ------------------
+} // namespace __impl
+// ------------------
+
+tbBOOL tbAccelAdd1i(int const * v1, int const * v2, int * result, unsigned count)
 {
-    using AlignedType = simdpp::float64x2;
-    using ElementType = AlignedType::element_type;
+    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
+}
 
-    static_assert(sizeof(AlignedType) == 16/*128bit*/, "Incorrect type size");
+tbBOOL tbAccelAdd1u(unsigned const * v1, unsigned const * v2, unsigned * result, unsigned count)
+{
+    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
+}
 
-    int const ELEMENT_COUNT = AlignedType::length;
-    int const VECTOR_LENGTH = libtbag::algorithm::getPackedSize<int>(count, ELEMENT_COUNT);
+tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, unsigned count)
+{
+    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
+}
 
-    auto     v1_align = simdpp::make_float<AlignedType>(0, 0);
-    auto     v2_align = simdpp::make_float<AlignedType>(0, 0);
-    auto result_align = simdpp::make_float<AlignedType>(0, 0);
-
-    static_assert(sizeof(result_align) == AlignedType::length_bytes, "Vector uses unsupported data layout");
-
-    for (int i = 0; i < VECTOR_LENGTH; ++i) {
-        v1_align     = simdpp::make_float<AlignedType>(v1[0], v1[1]);
-        v2_align     = simdpp::make_float<AlignedType>(v2[0], v2[1]);
-        result_align = simdpp::add(v1_align, v2_align);
-        simdpp::store(result, result_align);
-        v1     += ELEMENT_COUNT;
-        v2     += ELEMENT_COUNT;
-        result += ELEMENT_COUNT;
-    }
-
-    return TB_TRUE;
+tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, unsigned count)
+{
+    return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE;
 }
 
 // ---------------------------------
@@ -88,7 +148,9 @@ tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, int c
 // ---------------------------------
 
 #if defined(SIMDPP_USER_ARCH_INFO)
-SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1f)((float  const *)v1, (float  const *)v2, (float  *)result, (int)count));
-SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1d)((double const *)v1, (double const *)v2, (double *)result, (int)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1i)((int      const *)v1, (int      const *)v2, (int      *)result, (unsigned)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1u)((unsigned const *)v1, (unsigned const *)v2, (unsigned *)result, (unsigned)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1f)((float    const *)v1, (float    const *)v2, (float    *)result, (unsigned)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1d)((double   const *)v1, (double   const *)v2, (double   *)result, (unsigned)count));
 #endif
 

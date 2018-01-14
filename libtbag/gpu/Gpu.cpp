@@ -99,8 +99,8 @@ bool GpuContext::releaseEvent(GpuEvent & event) const
         tDLogE("GpuContext::releaseEvent() Illegal event argument.");
         return false;
     }
-    event.start = id::UNKNOWN_ID;
-    event.stop  = id::UNKNOWN_ID;
+    event.start = UNKNOWN_ID;
+    event.stop  = UNKNOWN_ID;
     return true;
 }
 

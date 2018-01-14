@@ -636,6 +636,18 @@ CUDARTAPI cudaError_t cudaMemcpyAsync(void * dst, const void * src, size_t count
 CUDARTAPI cudaError_t cudaStreamSynchronize(cudaStream_t stream)
 { return cudaErrorNotSupported; }
 
+// Returns grid and block size that achieves maximum potential occupancy for a device function.
+template <typename T>
+CUDARTAPI cudaError_t cudaOccupancyMaxPotentialBlockSize(
+        int * minGridSize, int * blockSize, T func, size_t dynamicSMemSize = 0, int blockSizeLimit = 0)
+{ return cudaErrorNotSupported; }
+
+// Returns grid and block size that achieves maximum potential occupancy for a device function.
+template <typename UnaryFunction, typename T>
+CUDARTAPI cudaError_t cudaOccupancyMaxPotentialBlockSizeVariableSMem(
+        int * minGridSize, int * blockSize, T func, UnaryFunction blockSizeToDynamicSMemSize, int blockSizeLimit = 0)
+{ return cudaErrorNotSupported; }
+
 } // namespace cuda
 } // namespace dummy
 

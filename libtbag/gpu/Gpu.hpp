@@ -72,7 +72,6 @@ TBAG_CONSTEXPR bool isGpuVerbose() TBAG_NOEXCEPT
 #endif
 }
 
-
 struct GpuPlatform
 {
     GpuType const TYPE;
@@ -291,7 +290,6 @@ struct GpuMemory
 
     GpuContext const & CONTEXT;
 
-    TypeTable       type = TypeTable::TT_UNKNOWN;
     std::size_t capacity = 0;
     std::size_t     size = 0;
     void *          data = nullptr;
@@ -376,6 +374,24 @@ void runAllIfSupported(Predicated predicated, std::size_t platform_index = 0, st
                     GpuType::GT_CUDA,
                     GpuType::GT_OPENCL}, platform_index, device_index, predicated);
 }
+
+/**
+ * Gpu class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ */
+class TBAG_API Gpu : private Noncopyable
+{
+private:
+    SharedGpuContext _gpu;
+
+public:
+    Gpu(GpuType type = GpuType::GT_CPU);
+    ~Gpu();
+
+public:
+};
 
 } // namespace gpu
 

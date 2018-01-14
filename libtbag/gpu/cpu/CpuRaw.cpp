@@ -15,13 +15,31 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu {
 namespace cpu {
 
+// ---------------
+namespace __impl {
+// ---------------
+
 template <typename T>
-static void addByCpu(T const * v1, T const * v2, T * result, int count)
+static bool addByCpu(T const * v1, T const * v2, T * result, unsigned count)
 {
-    for (int i = 0; i < count; ++i, ++v1, ++v2, ++result) {
+    for (; count; ++v1, ++v2, ++result, --count) {
         *result = *v1 + *v2;
     }
+    return true;
 }
+
+// --------------------
+} // namespace __impl {
+// --------------------
+
+bool runCpuAdd1i(int const * v1, int const * v2, int * result, unsigned count)
+{ return __impl::addByCpu(v1, v2, result, count); }
+bool runCpuAdd1u(unsigned const * v1, unsigned const * v2, unsigned * result, unsigned count)
+{ return __impl::addByCpu(v1, v2, result, count); }
+bool runCpuAdd1f(float const * v1, float const * v2, float * result, unsigned count)
+{ return __impl::addByCpu(v1, v2, result, count); }
+bool runCpuAdd1d(double const * v1, double const * v2, double * result, unsigned count)
+{ return __impl::addByCpu(v1, v2, result, count); }
 
 } // namespace cpu
 } // namespace gpu
@@ -29,18 +47,4 @@ static void addByCpu(T const * v1, T const * v2, T * result, int count)
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
-tbBOOL tbCpuAdd1f(float const * v1, float const * v2, float * result, int count)
-{
-    using namespace libtbag::gpu::cpu;
-    addByCpu<float>(v1, v2, result, count);
-    return true;
-}
-
-tbBOOL tbCpuAdd1d(double const * v1, double const * v2, double * result, int count)
-{
-    using namespace libtbag::gpu::cpu;
-    addByCpu<double>(v1, v2, result, count);
-    return true;
-}
 
