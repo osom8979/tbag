@@ -14,6 +14,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 
+Gpu::Stream::Stream(GpuStream const & s) : stream(s)
+{
+    // EMPTY.
+}
+
+Gpu::Stream::~Stream()
+{
+    // EMPTY.
+}
+
 // -------------------
 // Gpu implementation.
 // -------------------
@@ -96,6 +106,38 @@ bool Gpu::init(GpuType type, std::size_t platform_index, std::size_t device_inde
     if (static_cast<bool>(context)) {
         _gpu = context;
         return true;
+    }
+    return false;
+}
+
+bool Gpu::isSupport() const
+{
+    if (_gpu) {
+        return _gpu->isSupport();
+    }
+    return false;
+}
+
+bool Gpu::isHost() const
+{
+    if (_gpu) {
+        return _gpu->isHost();
+    }
+    return false;
+}
+
+bool Gpu::isDevice() const
+{
+    if (_gpu) {
+        return _gpu->isDevice();
+    }
+    return false;
+}
+
+bool Gpu::isStream() const
+{
+    if (_gpu) {
+        return _gpu->isStream();
     }
     return false;
 }

@@ -15,7 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/gpu/GpuContext.hpp>
+#include <libtbag/gpu/SyncedMemory.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,6 +33,35 @@ namespace gpu {
  */
 class TBAG_API Gpu
 {
+public:
+    struct Event
+    {
+        GpuEvent event;
+
+        Event(GpuEvent const & e);
+        ~Event();
+
+        bool sync() const;
+        float elapsed() const;
+    };
+
+    struct Stream
+    {
+        GpuStream stream;
+
+        Stream(GpuStream const & s);
+        ~Stream();
+
+        bool write(SyncedMemory const & mem, Event * event = nullptr) const;
+        bool  read(SyncedMemory const & mem, Event * event = nullptr) const;
+
+        bool writeAsync(SyncedMemory const & mem, Event * event = nullptr) const;
+        bool  readAsync(SyncedMemory const & mem, Event * event = nullptr) const;
+
+        bool  flush() const;
+        bool finish() const;
+    };
+
 private:
     SharedGpuContext _gpu;
 
@@ -53,6 +84,12 @@ public:
 
 public:
     bool init(GpuType type = GpuType::GT_CPU, std::size_t platform_index = 0, std::size_t device_index = 0);
+
+public:
+    bool isSupport() const;
+    bool    isHost() const;
+    bool  isDevice() const;
+    bool  isStream() const;
 };
 
 } // namespace gpu

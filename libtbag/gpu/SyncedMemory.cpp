@@ -7,7 +7,9 @@
 
 #include <libtbag/gpu/SyncedMemory.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/debug/Assert.hpp>
 
+#include <algorithm>
 #include <utility>
 
 // -------------------
@@ -16,41 +18,52 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 
-//SyncedMemory::SyncedMemory(GpuBackendType type) : SyncedMemory(0, type)
-//{
-//    // EMPTY.
-//}
+SyncedMemory::SyncedMemory()
+        : _context(), _type(TypeTable::TT_UNKNOWN),
+          _head(SyncedHead::SH_UNINITIALIZED), _gpu(), _host(), _size(0)
+{
+    // EMPTY.
+}
 
-//SyncedMemory::SyncedMemory(std::size_t size, GpuBackendType type)
-//        : _backend(createGpuContext(type)), _head(SyncedHead::SH_UNINITIALIZED), _capacity(0), _size(0),
-//          _own_cpu(true), _own_gpu(true), _cpu(nullptr), _gpu(nullptr)
-//{
-//    if (static_cast<bool>(_backend) == false) {
-//        throw std::bad_alloc();
-//    }
-//    if (size > 0 && resize(size) == false) {
-//        throw std::bad_alloc();
-//    }
-//}
+SyncedMemory::SyncedMemory(WeakedGpuContext const & context, std::size_t size)
+        : _context(context), _type(TypeTable::TT_UNKNOWN),
+          _head(SyncedHead::SH_UNINITIALIZED), _gpu(), _host(), _size(0)
+{
+    // EMPTY.
+}
 
-//SyncedMemory::SyncedMemory(SyncedMemory const & obj) : SyncedMemory(obj.type())
-//{
-//    *this = obj;
-//}
-//
-//SyncedMemory::SyncedMemory(SyncedMemory && obj) : SyncedMemory(obj.type())
-//{
-//    *this = std::move(obj);
-//}
-//
-//SyncedMemory::~SyncedMemory()
-//{
-//    clear();
-//}
+SyncedMemory::SyncedMemory(SharedGpuContext const & context, std::size_t size)
+        : _context(context), _type(TypeTable::TT_UNKNOWN),
+          _head(SyncedHead::SH_UNINITIALIZED), _gpu(), _host(), _size(0)
+{
+    // EMPTY.
+}
+
+SyncedMemory::SyncedMemory(SyncedMemory const & obj) : SyncedMemory()
+{
+    (*this) = obj;
+}
+
+SyncedMemory::SyncedMemory(SyncedMemory && obj) : SyncedMemory()
+{
+    (*this) = std::move(obj);
+}
+
+SyncedMemory::~SyncedMemory()
+{
+    clear();
+}
 
 SyncedMemory & SyncedMemory::operator =(SyncedMemory const & obj)
 {
-    cloneFrom(obj);
+    if (this != &obj) {
+        _context = obj._context;
+        _type    = obj._type;
+        _head    = obj._head;
+        _gpu     = obj._gpu;
+        _host    = obj._host;
+        _size    = obj._size;
+    }
     return *this;
 }
 
@@ -60,46 +73,86 @@ SyncedMemory & SyncedMemory::operator =(SyncedMemory && obj)
     return *this;
 }
 
-bool SyncedMemory::cloneFrom(SyncedMemory const & obj)
-{
-    if (this == &obj) {
-        return true;
-    }
-    return true;
-}
-
 void SyncedMemory::swap(SyncedMemory & obj)
 {
-    if (this == &obj) {
-        return;
+    if (this != &obj) {
+        _context.swap(obj._context);
+        std::swap(_type, obj._type);
+        std::swap(_head, obj._head);
+        _gpu.swap(obj._gpu);
+        _host.swap(obj._host);
+        std::swap(_size, obj._size);
     }
 }
 
-//GpuBackendType SyncedMemory::type() const TBAG_NOEXCEPT
-//{
-//    return _backend->getType();
-//}
+void SyncedMemory::toHost() const
+{
+    if (_head != SyncedHead::SH_HEAD_AT_GPU) {
+        return; // SKIP.
+    }
+    assert(_head == SyncedHead::SH_HEAD_AT_GPU);
+    _head = SyncedHead::SH_SYNCED;
+}
+
+void SyncedMemory::toGpu() const
+{
+    if (_head != SyncedHead::SH_HEAD_AT_HOST) {
+        return; // SKIP.
+    }
+    assert(_head == SyncedHead::SH_HEAD_AT_HOST);
+    _head = SyncedHead::SH_SYNCED;
+}
+
+void * SyncedMemory::getHostData()
+{
+    if (static_cast<bool>(_host)) {
+        toHost();
+        _head = SyncedHead::SH_HEAD_AT_HOST;
+        return _host->data;
+    }
+    return nullptr;
+}
+
+void const * SyncedMemory::getHostData() const
+{
+    if (static_cast<bool>(_host)) {
+        toHost();
+        return _host->data;
+    }
+    return nullptr;
+}
+
+void * SyncedMemory::getGpuData()
+{
+    if (static_cast<bool>(_gpu)) {
+        toGpu();
+        _head = SyncedHead::SH_HEAD_AT_GPU;
+        return _gpu->data;
+    }
+    return nullptr;
+}
+
+void const * SyncedMemory::getGpuData() const
+{
+    if (static_cast<bool>(_gpu)) {
+        toGpu();
+        return _gpu->data;
+    }
+    return nullptr;
+}
+
+bool SyncedMemory::cloneFrom(SyncedMemory const & obj)
+{
+    return false;
+}
+
+bool SyncedMemory::cloneTo(SyncedMemory & obj)
+{
+    return false;
+}
 
 void SyncedMemory::clear()
 {
-    if (_cpu && _own_cpu) {
-    }
-    if (_gpu && _own_gpu) {
-//        int initial_device;
-//        cudaGetDevice(&initial_device);
-//        if (gpu_device_ != -1) {
-//            CUDA_CHECK(cudaSetDevice(gpu_device_));
-//        }
-//        CUDA_CHECK(cudaFree(gpu_ptr_));
-//        cudaSetDevice(initial_device);
-    }
-    _head     = SyncedHead::SH_UNINITIALIZED;
-    _capacity = 0;
-    _size     = 0;
-    _own_cpu  = true;
-    _own_gpu  = true;
-    _cpu      = nullptr;
-    _gpu      = nullptr;
 }
 
 bool SyncedMemory::realloc(std::size_t size)

@@ -17,7 +17,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/id/Id.hpp>
-#include <libtbag/type/TypeTable.hpp>
 
 #include <vector>
 #include <string>
@@ -286,8 +285,6 @@ struct GpuKernel
 
 struct GpuMemory
 {
-    using TypeTable = type::TypeTable;
-
     GpuContext const & CONTEXT;
 
     std::size_t capacity = 0;

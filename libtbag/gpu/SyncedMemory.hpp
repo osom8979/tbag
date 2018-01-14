@@ -15,7 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gpu/Gpu.hpp>
+#include <libtbag/gpu/GpuContext.hpp>
+#include <libtbag/type/TypeTable.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,58 +35,64 @@ namespace gpu {
 class TBAG_API SyncedMemory
 {
 public:
+    using TypeTable        = type::TypeTable;
+    using SharedGpuMemory  = std::shared_ptr<GpuMemory>;
+    using SharedHostMemory = std::shared_ptr<HostMemory>;
+
+public:
     enum class SyncedHead
     {
         SH_UNINITIALIZED,
-        SH_HEAD_AT_CPU,
+        SH_HEAD_AT_HOST,
         SH_HEAD_AT_GPU,
         SH_SYNCED,
     };
 
 private:
-    //UniqueGpu   _backend;
-    SyncedHead  _head;
-    std::size_t _capacity;
-    std::size_t _size;
-
-private:
-    bool _own_cpu;
-    bool _own_gpu;
-    void * _cpu;
-    void * _gpu;
+    WeakedGpuContext         _context;
+    TypeTable                _type;
+    SyncedHead       mutable _head;
+    SharedGpuMemory  mutable _gpu;
+    SharedHostMemory mutable _host;
+    std::size_t              _size;
 
 public:
-//    explicit SyncedMemory(GpuBackendType type);
-//    SyncedMemory(std::size_t size = 0, GpuBackendType type = GpuBackendType::GBT_CPU);
-//    SyncedMemory(SyncedMemory const & obj);
-//    SyncedMemory(SyncedMemory && obj);
-//    ~SyncedMemory();
+    SyncedMemory();
+    explicit SyncedMemory(WeakedGpuContext const & context, std::size_t size = 0);
+    explicit SyncedMemory(SharedGpuContext const & context, std::size_t size = 0);
+    SyncedMemory(SyncedMemory const & obj);
+    SyncedMemory(SyncedMemory && obj);
+    ~SyncedMemory();
 
 public:
     SyncedMemory & operator =(SyncedMemory const & obj);
     SyncedMemory & operator =(SyncedMemory && obj);
 
 public:
-    bool cloneFrom(SyncedMemory const & obj);
     void swap(SyncedMemory & obj);
-
-public:
     inline friend void swap(SyncedMemory & lh, SyncedMemory & rh) { lh.swap(rh); }
 
 public:
-    inline SyncedHead      head() const TBAG_NOEXCEPT { return     _head; }
-    inline std::size_t capacity() const TBAG_NOEXCEPT { return _capacity; }
-    inline std::size_t     size() const TBAG_NOEXCEPT { return     _size; }
+    inline SyncedHead  head() const TBAG_NOEXCEPT { return _head; }
+    inline std::size_t size() const TBAG_NOEXCEPT { return _size; }
 
 public:
-    inline bool isOwnCpu() const TBAG_NOEXCEPT { return _own_cpu; }
-    inline bool isOwnGpu() const TBAG_NOEXCEPT { return _own_gpu; }
-
-    inline void ownCpu(bool flag = true) TBAG_NOEXCEPT { _own_cpu = flag; }
-    inline void ownGpu(bool flag = true) TBAG_NOEXCEPT { _own_gpu = flag; }
+    void toHost() const;
+    void  toGpu() const;
 
 public:
-//    GpuBackendType type() const TBAG_NOEXCEPT;
+    void       * getHostData();
+    void const * getHostData() const;
+    void       *  getGpuData();
+    void const *  getGpuData() const;
+
+public:
+    void const * castHostData() const;
+    void const *  castGpuData() const;
+
+public:
+    bool cloneFrom(SyncedMemory const & obj);
+    bool cloneTo(SyncedMemory & obj);
 
 public:
     void clear();
