@@ -414,11 +414,15 @@ bool GpuStream::release()
 
 GpuStream GpuStream::create(GpuContext const * c)
 {
+    if (c == nullptr) {
+        return GpuStream();
+    }
+
     GpuStream stream(c);
     if (stream.create()) {
         return stream;
     }
-    return GpuStream(nullptr);
+    return GpuStream();
 }
 
 // ------------------------
@@ -471,6 +475,46 @@ void GpuEvent::swap(GpuEvent & obj)
         std::swap(_start, obj._start);
         std::swap(_stop, obj._stop);
     }
+}
+
+bool GpuEvent::create()
+{
+    return (_context != nullptr && _stream != nullptr ? _context->createEvent(*_stream, *this) : false);
+}
+
+bool GpuEvent::release()
+{
+    return (_context != nullptr ? _context->releaseEvent(*this) : false);
+}
+
+bool GpuEvent::sync()
+{
+    return (_context != nullptr ? _context->syncEvent(*this) : false);
+}
+
+bool GpuEvent::elapsed(float * millisec)
+{
+    return (_context != nullptr ? _context->elapsedEvent(*this, millisec) : false);
+}
+
+float GpuEvent::elapsed()
+{
+    float millisec = 0;
+    elapsed(&millisec);
+    return millisec;
+}
+
+GpuEvent GpuEvent::create(GpuStream const * s)
+{
+    if (s == nullptr) {
+        return GpuEvent();
+    }
+
+    GpuEvent event(s->getContextPtr(), s);
+    if (event.create()) {
+        return event;
+    }
+    return GpuEvent();
 }
 
 // --------------------------

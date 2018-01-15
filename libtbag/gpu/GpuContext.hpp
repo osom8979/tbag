@@ -370,6 +370,18 @@ public:
 
     inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT
     { return (_context != nullptr) && isSameContext(c) && existsId(); }
+
+public:
+    bool create();
+    bool release();
+
+public:
+    bool sync();
+    bool elapsed(float * millisec);
+    float elapsed();
+
+public:
+    static GpuEvent create(GpuStream const * s);
 };
 
 /**
