@@ -105,7 +105,7 @@ void * SyncedMemory::getHostData()
     if (static_cast<bool>(_host)) {
         toHost();
         _head = SyncedHead::SH_HEAD_AT_HOST;
-        return _host->data;
+        return _host->data();
     }
     return nullptr;
 }
@@ -114,7 +114,7 @@ void const * SyncedMemory::getHostData() const
 {
     if (static_cast<bool>(_host)) {
         toHost();
-        return _host->data;
+        return _host->data();
     }
     return nullptr;
 }
@@ -124,7 +124,7 @@ void * SyncedMemory::getGpuData()
     if (static_cast<bool>(_gpu)) {
         toGpu();
         _head = SyncedHead::SH_HEAD_AT_GPU;
-        return _gpu->data;
+        return _gpu->data();
     }
     return nullptr;
 }
@@ -133,7 +133,7 @@ void const * SyncedMemory::getGpuData() const
 {
     if (static_cast<bool>(_gpu)) {
         toGpu();
-        return _gpu->data;
+        return _gpu->data();
     }
     return nullptr;
 }

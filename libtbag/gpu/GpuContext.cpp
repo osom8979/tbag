@@ -43,17 +43,17 @@ GpuContext::~GpuContext()
     // EMPTY.
 }
 
-bool GpuContext::checkMemory(GpuStream const & stream, GpuMemory const & gpu_mem,
-                             HostMemory const & host_mem, std::size_t size) const TBAG_NOEXCEPT
+bool GpuContext::validateMemory(GpuStream const & stream, GpuMemory const & gpu_mem,
+                                HostMemory const & host_mem, std::size_t size) const TBAG_NOEXCEPT
 {
     return stream.validate(this)
-           && gpu_mem.CONTEXT == this && gpu_mem.exists() && size <= gpu_mem.size
-           && host_mem.CONTEXT == this && host_mem.exists() && size <= host_mem.size;
+           && gpu_mem.validate(this) && size <= gpu_mem.size()
+           && host_mem.validate(this) && size <= host_mem.size();
 }
 
 bool GpuContext::createStream(GpuStream & stream) const
 {
-    if (stream.getContextPtr() != this) {
+    if (stream.isSameContext(this) == false) {
         tDLogE("GpuContext::createStream() Illegal stream argument.");
         return false;
     }
@@ -77,18 +77,18 @@ bool GpuContext::createEvent(GpuStream const & stream, GpuEvent & event) const
         tDLogE("GpuContext::createEvent() Illegal stream argument.");
         return false;
     }
-    if (event.CONTEXT != this) {
+    if (event.isSameContext(this) == false) {
         tDLogE("GpuContext::createEvent() Illegal event argument.");
         return false;
     }
-    event.start = 0;
-    event.stop  = 0;
+    event.setStart(0);
+    event.setStop(0);
     return true;
 }
 
 bool GpuContext::syncEvent(GpuEvent const & event) const
 {
-    if (event.CONTEXT != this || event.exists() == false) {
+    if (event.validate(this) == false) {
         tDLogE("GpuContext::syncEvent() Illegal event argument.");
         return false;
     }
@@ -97,24 +97,23 @@ bool GpuContext::syncEvent(GpuEvent const & event) const
 
 bool GpuContext::elapsedEvent(GpuEvent & event, float * millisec) const
 {
-    if (event.CONTEXT != this || event.exists() == false) {
+    if (event.validate(this) == false) {
         tDLogE("GpuContext::elapsedEvent() Illegal event argument.");
         return false;
     }
     if (millisec != nullptr) {
-        *millisec = (event.stop - event.start) * 1.0e-6f;
+        *millisec = (event.getStop() - event.getStart()) * 1.0e-6f;
     }
     return true;
 }
 
 bool GpuContext::releaseEvent(GpuEvent & event) const
 {
-    if (event.CONTEXT != this || event.exists() == false) {
+    if (event.validate(this) == false) {
         tDLogE("GpuContext::releaseEvent() Illegal event argument.");
         return false;
     }
-    event.start = UNKNOWN_ID;
-    event.stop  = UNKNOWN_ID;
+    event.clearIds();
     return true;
 }
 
@@ -124,18 +123,18 @@ bool GpuContext::createProgram(std::string const & source, GpuProgram & program)
         tDLogE("GpuContext::createProgram() Empty source.");
         return false;
     }
-    if (program.CONTEXT != this) {
+    if (program.isSameContext(this) == false) {
         tDLogE("GpuContext::createProgram() Illegal program argument.");
         return false;
     }
 
-    program.program = 0;
+    program.setId(0);
     return true;
 }
 
 bool GpuContext::buildProgram(GpuProgram & program) const
 {
-    if (program.CONTEXT != this || program.exists() == false) {
+    if (program.validate(this) == false) {
         tDLogE("GpuContext::buildProgram() Illegal program argument.");
         return false;
     }
@@ -144,17 +143,17 @@ bool GpuContext::buildProgram(GpuProgram & program) const
 
 bool GpuContext::releaseProgram(GpuProgram & program) const
 {
-    if (program.CONTEXT != this || program.exists() == false) {
+    if (program.validate(this) == false) {
         tDLogE("GpuContext::releaseProgram() Illegal program argument.");
         return false;
     }
-    program.program = UNKNOWN_ID;
+    program.clearId();
     return true;
 }
 
 bool GpuContext::createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const
 {
-    if (program.CONTEXT != this || program.exists() == false) {
+    if (program.validate(this) == false) {
         tDLogE("GpuContext::createKernel() Illegal program arguments.");
         return false;
     }
@@ -162,28 +161,28 @@ bool GpuContext::createKernel(GpuProgram const & program, std::string const & ke
         tDLogE("GpuContext::createKernel() Empty kernel symbol.");
         return false;
     }
-    if (kernel.CONTEXT != this) {
+    if (kernel.isSameContext(this) == false) {
         tDLogE("GpuContext::createKernel() Illegal kernel arguments.");
         return false;
     }
 
-    kernel.kernel = 0;
+    kernel.setId(0);
     return true;
 }
 
 bool GpuContext::releaseKernel(GpuKernel & kernel) const
 {
-    if (kernel.CONTEXT != this || kernel.exists() == false) {
+    if (kernel.validate(this) == false) {
         tDLogE("GpuContext::releaseKernel() Illegal kernel context.");
         return false;
     }
-    kernel.kernel = UNKNOWN_ID;
+    kernel.clearId();
     return true;
 }
 
 bool GpuContext::malloc(GpuMemory & memory, std::size_t size) const
 {
-    if (memory.CONTEXT != this) {
+    if (memory.isSameContext(this) == false) {
         tDLogE("GpuContext::malloc() Illegal memory arguments.");
         return false;
     }
@@ -193,35 +192,31 @@ bool GpuContext::malloc(GpuMemory & memory, std::size_t size) const
     auto const CAPACITY_SIZE = PACKED_SIZE * ALIGNED_SIZE;
     assert(CAPACITY_SIZE >= size);
 
-    memory.data     = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
-    memory.capacity = CAPACITY_SIZE;
-    memory.size     = size;
-    tDLogIfD(isGpuVerbose(), "GpuContext::malloc({}) Aligned malloc MEM:{} CAP:{} SIZE:{}",
-             size, memory.data, memory.capacity, memory.size);
+    void * data = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
+    memory.set(data, CAPACITY_SIZE, size);
 
+    tDLogIfD(isGpuVerbose(), "GpuContext::malloc({}) Aligned malloc MEM:{} CAP:{} SIZE:{}",
+             size, memory.data(), memory.capacity(), memory.size());
     return true;
 }
 
 bool GpuContext::free(GpuMemory & memory) const
 {
-    if (memory.CONTEXT != this || memory.exists() == false) {
+    if (memory.validate(this) == false) {
         tDLogE("GpuContext::free() Illegal memory argument");
         return false;
     }
 
     tDLogIfD(isGpuVerbose(), "GpuContext::free() Aligned free MEM:{} CAP:{} SIZE:{}",
-             memory.data, memory.capacity, memory.size);
-
-    memory::alignedMemoryFree(memory.data);
-    memory.data     = nullptr;
-    memory.capacity = 0;
-    memory.size     = 0;
+             memory.data(), memory.capacity(), memory.size());
+    memory::alignedMemoryFree(memory.data());
+    memory.clear();
     return true;
 }
 
 bool GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
 {
-    if (memory.CONTEXT != this) {
+    if (memory.isSameContext(this) == false) {
         tDLogE("GpuContext::mallocHost() Illegal memory argument");
         return false;
     }
@@ -230,38 +225,55 @@ bool GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFla
         return false;
     }
 
+    auto const  ALIGNED_SIZE = memory::getDefaultAlignedSize();
+    auto const   PACKED_SIZE = algorithm::getPackedSize(size, ALIGNED_SIZE);
+    auto const CAPACITY_SIZE = PACKED_SIZE * ALIGNED_SIZE;
+
     assert(flag == HostMemoryFlag::HMF_DEFAULT);
-    return GpuContext::malloc(memory, size);
+    assert(CAPACITY_SIZE >= size);
+
+    void * data = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
+    memory.set(data, CAPACITY_SIZE, size);
+    memory.setFlag(flag);
+
+    tDLogIfD(isGpuVerbose(), "GpuContext::mallocHost({}) Aligned malloc MEM:{} CAP:{} SIZE:{}",
+             size, memory.data(), memory.capacity(), memory.size());
+    return true;
 }
 
 bool GpuContext::freeHost(HostMemory & memory) const
 {
-    if (memory.CONTEXT != this || memory.exists() == false) {
+    if (memory.validate(this) == false) {
         tDLogE("GpuContext::freeHost() Illegal memory argument");
         return false;
     }
-    return GpuContext::free(memory);
+
+    tDLogIfD(isGpuVerbose(), "GpuContext::freeHost() Aligned free MEM:{} CAP:{} SIZE:{}",
+             memory.data(), memory.capacity(), memory.size());
+    memory::alignedMemoryFree(memory.data());
+    memory.clear();
+    return true;
 }
 
 bool GpuContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
-    if (checkMemory(stream, gpu_mem, host_mem, size) == false) {
+    if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         tDLogE("GpuContext::write() Illegal arguments.");
         return false;
     }
     CpuEventGuard const EVENT_LOCK(event);
-    ::memcpy(gpu_mem.data, host_mem.data, size);
+    ::memcpy(gpu_mem.data(), host_mem.data(), size);
     return true;
 }
 
 bool GpuContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
-    if (checkMemory(stream, gpu_mem, host_mem, size) == false) {
+    if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         tDLogE("GpuContext::read() Illegal arguments.");
         return false;
     }
     CpuEventGuard const EVENT_LOCK(event);
-    ::memcpy(host_mem.data, gpu_mem.data, size);
+    ::memcpy(host_mem.data(), gpu_mem.data(), size);
     return true;
 }
 
@@ -293,11 +305,63 @@ bool GpuContext::finish(GpuStream & stream) const
     return true;
 }
 
+// ----------------------------
+// GpuIdWrapper implementation.
+// ----------------------------
+
+GpuIdWrapper::GpuIdWrapper(GpuContext const * c, GpuId i) : _context(c), _id(i)
+{
+    // EMPTY.
+}
+
+GpuIdWrapper::GpuIdWrapper(GpuIdWrapper const & obj) : GpuIdWrapper()
+{
+    (*this) = obj;
+}
+
+GpuIdWrapper::GpuIdWrapper(GpuIdWrapper && obj) : GpuIdWrapper()
+{
+    (*this) = std::move(obj);
+}
+
+GpuIdWrapper::~GpuIdWrapper()
+{
+    // EMPTY.
+}
+
+GpuIdWrapper & GpuIdWrapper::operator =(GpuIdWrapper const & obj)
+{
+    assign(obj);
+    return *this;
+}
+
+GpuIdWrapper & GpuIdWrapper::operator =(GpuIdWrapper && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void GpuIdWrapper::swap(GpuIdWrapper & obj)
+{
+    if (this != &obj) {
+        std::swap(_context, obj._context);
+        std::swap(_id, obj._id);
+    }
+}
+
+void GpuIdWrapper::assign(GpuIdWrapper const & obj)
+{
+    if (this != &obj) {
+        _context = obj._context;
+        _id = obj._id;
+    }
+}
+
 // -------------------------
 // GpuStream implementation.
 // -------------------------
 
-GpuStream::GpuStream(GpuContext const * c, GpuId i) : GpuIdWrapper(c)
+GpuStream::GpuStream(GpuContext const * c, GpuId i) : GpuIdWrapper(c, i)
 {
     // EMPTY.
 }
@@ -314,13 +378,13 @@ GpuStream::GpuStream(GpuStream && obj) : GpuStream()
 
 GpuStream::~GpuStream()
 {
-    // EMPTY.
+    release();
 }
 
 GpuStream & GpuStream::operator =(GpuStream const & obj)
 {
     if (this != &obj) {
-        assignIdWrapper(obj);
+        GpuIdWrapper::assign(obj);
     }
     return *this;
 }
@@ -334,7 +398,267 @@ GpuStream & GpuStream::operator =(GpuStream && obj)
 void GpuStream::swap(GpuStream & obj)
 {
     if (this != &obj) {
-        swapIdWrapper(obj);
+        GpuIdWrapper::swap(obj);
+    }
+}
+
+bool GpuStream::create()
+{
+    return (_context != nullptr ? _context->createStream(*this) : false);
+}
+
+bool GpuStream::release()
+{
+    return (_context != nullptr ? _context->releaseStream(*this) : false);
+}
+
+GpuStream GpuStream::create(GpuContext const * c)
+{
+    GpuStream stream(c);
+    if (stream.create()) {
+        return stream;
+    }
+    return GpuStream(nullptr);
+}
+
+// ------------------------
+// GpuEvent implementation.
+// ------------------------
+
+GpuEvent::GpuEvent(GpuContext const * c, GpuStream const * s, GpuId start, GpuId stop)
+        : _context(c), _stream(s), _start(start), _stop(stop)
+{
+    // EMPTY.
+}
+
+GpuEvent::GpuEvent(GpuEvent const & obj) : GpuEvent()
+{
+    (*this) = obj;
+}
+
+GpuEvent::GpuEvent(GpuEvent && obj) : GpuEvent()
+{
+    (*this) = std::move(obj);
+}
+
+GpuEvent::~GpuEvent()
+{
+    // EMPTY.
+}
+
+GpuEvent & GpuEvent::operator =(GpuEvent const & obj)
+{
+    if (this != &obj) {
+        _context = obj._context;
+        _stream  = obj._stream;
+        _start   = obj._start;
+        _stop    = obj._stop;
+    }
+    return *this;
+}
+
+GpuEvent & GpuEvent::operator =(GpuEvent && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void GpuEvent::swap(GpuEvent & obj)
+{
+    if (this != &obj) {
+        std::swap(_context, obj._context);
+        std::swap(_stream, obj._stream);
+        std::swap(_start, obj._start);
+        std::swap(_stop, obj._stop);
+    }
+}
+
+// --------------------------
+// GpuProgram implementation.
+// --------------------------
+
+GpuProgram::GpuProgram(GpuContext const * c, GpuId i) : GpuIdWrapper(c, i)
+{
+    // EMPTY.
+}
+
+GpuProgram::GpuProgram(GpuProgram const & obj) : GpuProgram()
+{
+    (*this) = obj;
+}
+
+GpuProgram::GpuProgram(GpuProgram && obj) : GpuProgram()
+{
+    (*this) = std::move(obj);
+}
+
+GpuProgram::~GpuProgram()
+{
+    // EMPTY.
+}
+
+GpuProgram & GpuProgram::operator =(GpuProgram const & obj)
+{
+    if (this != &obj) {
+        GpuIdWrapper::assign(obj);
+    }
+    return *this;
+}
+
+GpuProgram & GpuProgram::operator =(GpuProgram && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void GpuProgram::swap(GpuProgram & obj)
+{
+    if (this != &obj) {
+        GpuIdWrapper::swap(obj);
+    }
+}
+
+// -------------------------
+// GpuKernel implementation.
+// -------------------------
+
+GpuKernel::GpuKernel(GpuContext const * c, GpuId i) : GpuIdWrapper(c, i)
+{
+    // EMPTY.
+}
+
+GpuKernel::GpuKernel(GpuKernel const & obj) : GpuKernel()
+{
+    (*this) = obj;
+}
+
+GpuKernel::GpuKernel(GpuKernel && obj) : GpuKernel()
+{
+    (*this) = std::move(obj);
+}
+
+GpuKernel::~GpuKernel()
+{
+    // EMPTY.
+}
+
+GpuKernel & GpuKernel::operator =(GpuKernel const & obj)
+{
+    if (this != &obj) {
+        GpuIdWrapper::assign(obj);
+    }
+    return *this;
+}
+
+GpuKernel & GpuKernel::operator =(GpuKernel && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void GpuKernel::swap(GpuKernel & obj)
+{
+    if (this != &obj) {
+        GpuIdWrapper::swap(obj);
+    }
+}
+
+// -------------------------
+// GpuMemory implementation.
+// -------------------------
+
+GpuMemory::GpuMemory(GpuContext const * c) : _context(c), _capacity(0), _size(0), _data(nullptr)
+{
+    // EMPTY.
+}
+
+GpuMemory::GpuMemory(GpuMemory const & obj) : GpuMemory()
+{
+    (*this) = obj;
+}
+
+GpuMemory::GpuMemory(GpuMemory && obj) : GpuMemory()
+{
+    (*this) = std::move(obj);
+}
+
+GpuMemory::~GpuMemory()
+{
+    // EMPTY.
+}
+
+GpuMemory & GpuMemory::operator =(GpuMemory const & obj)
+{
+    if (this != &obj) {
+        _context  = obj._context;
+        _capacity = obj._capacity;
+        _size     = obj._size;
+        _data     = obj._data;
+    }
+    return *this;
+}
+
+GpuMemory & GpuMemory::operator =(GpuMemory && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void GpuMemory::swap(GpuMemory & obj)
+{
+    if (this != &obj) {
+        std::swap(_context , obj._context);
+        std::swap(_capacity, obj._capacity);
+        std::swap(_size    , obj._size);
+        std::swap(_data    , obj._data);
+    }
+}
+
+
+// -------------------------
+// HostMemory implementation.
+// -------------------------
+
+HostMemory::HostMemory(GpuContext const * c) : GpuMemory(c), _flag(HostMemoryFlag::HMF_DEFAULT)
+{
+    // EMPTY.
+}
+
+HostMemory::HostMemory(HostMemory const & obj) : HostMemory()
+{
+    (*this) = obj;
+}
+
+HostMemory::HostMemory(HostMemory && obj) : HostMemory()
+{
+    (*this) = std::move(obj);
+}
+
+HostMemory::~HostMemory()
+{
+    // EMPTY.
+}
+
+HostMemory & HostMemory::operator =(HostMemory const & obj)
+{
+    if (this != &obj) {
+        GpuMemory::operator=(obj);
+        _flag = obj._flag;
+    }
+    return *this;
+}
+
+HostMemory & HostMemory::operator =(HostMemory && obj)
+{
+    HostMemory::swap(obj);
+    return *this;
+}
+
+void HostMemory::swap(HostMemory & obj)
+{
+    if (this != &obj) {
+        GpuMemory::swap(obj);
+        std::swap(_flag, obj._flag);
     }
 }
 
@@ -342,17 +666,17 @@ void GpuStream::swap(GpuStream & obj)
 // CpuEventGuard implementation.
 // -----------------------------
 
-CpuEventGuard::CpuEventGuard(GpuEvent * e) : event(e)
+CpuEventGuard::CpuEventGuard(GpuEvent * e) : _event(e)
 {
-    if (event != nullptr) {
-        event->start = nowNano();
+    if (_event != nullptr) {
+        _event->setStart(nowNano());
     }
 }
 
 CpuEventGuard::~CpuEventGuard()
 {
-    if (event != nullptr) {
-        event->stop = nowNano();
+    if (_event != nullptr) {
+        _event->setStop(nowNano());
     }
 }
 

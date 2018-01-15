@@ -155,38 +155,43 @@ struct GpuDeviceInfo
     }
 };
 
-struct GpuStream;
-struct GpuEvent;
-struct GpuProgram;
-struct GpuKernel;
-struct GpuMemory;
-struct HostMemory;
+class GpuStream;
+class GpuEvent;
+class GpuProgram;
+class GpuKernel;
+class GpuMemory;
+class HostMemory;
 
-struct GpuContext : public GpuDevice
+/**
+ * GpuContext structure.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ */
+class TBAG_API GpuContext : public GpuDevice
 {
+public:
     GpuId const CONTEXT;
 
     GpuPlatformInfo const PLATFORM_INFO;
     GpuDeviceInfo   const   DEVICE_INFO;
 
+public:
     GpuContext(GpuDevice const & d, GpuId c);
     virtual ~GpuContext();
 
-    inline void checkType(GpuType type) const throw(GpuTypeMismatchException)
-    { if (type != TYPE) { throw GpuTypeMismatchException(); } }
+public:
+    bool validateMemory(GpuStream const & stream, GpuMemory const & gpu_mem,
+                        HostMemory const & host_mem, std::size_t size) const TBAG_NOEXCEPT;
 
-    bool checkMemory(GpuStream const & stream, GpuMemory const & gpu_mem,
-                     HostMemory const & host_mem, std::size_t size) const TBAG_NOEXCEPT;
-
+public:
     virtual bool isSupport() const TBAG_NOEXCEPT = 0;
     virtual bool    isHost() const TBAG_NOEXCEPT = 0;
     virtual bool  isDevice() const TBAG_NOEXCEPT = 0;
     virtual bool  isStream() const TBAG_NOEXCEPT = 0;
 
-    // -------
-    // Object.
-    // -------
-
+// Object.
+public:
     virtual bool  createStream(GpuStream & stream) const;
     virtual bool releaseStream(GpuStream & stream) const;
 
@@ -202,30 +207,24 @@ struct GpuContext : public GpuDevice
     virtual bool  createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const;
     virtual bool releaseKernel(GpuKernel        & kernel) const;
 
-    // -------
-    // Memory.
-    // -------
-
+// Memory.
+public:
     virtual bool malloc(GpuMemory & memory, std::size_t size) const;
     virtual bool   free(GpuMemory & memory) const;
 
     virtual bool mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const;
     virtual bool   freeHost(HostMemory & memory) const;
 
-    // -------------
-    // Input/Output.
-    // -------------
-
+// Input/Output.
+public:
     virtual bool write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
     virtual bool  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
 
     virtual bool writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
     virtual bool  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
 
-    // -------
-    // Memory.
-    // -------
-
+// Memory.
+public:
     virtual bool  flush(GpuStream & stream) const;
     virtual bool finish(GpuStream & stream) const;
 };
@@ -242,30 +241,42 @@ using WeakedGpuContext = std::weak_ptr<GpuContext>;
  * @author zer0
  * @date   2018-01-15
  */
-struct GpuIdWrapper
+class TBAG_API GpuIdWrapper
 {
-    // @formatter:off
-    GpuContext const * context;
-    GpuId id;
+protected:
+    GpuContext const * _context;
+    GpuId _id;
 
-    GpuIdWrapper(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID) : context(c), id(i) { /* EMPTY. */ }
-    ~GpuIdWrapper() { /* EMPTY. */ }
+public:
+    GpuIdWrapper(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID);
+    GpuIdWrapper(GpuIdWrapper const & obj);
+    GpuIdWrapper(GpuIdWrapper && obj);
+    virtual ~GpuIdWrapper();
 
-    inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return context; }
+public:
+    inline GpuIdWrapper & operator =(GpuIdWrapper const & obj);
+    inline GpuIdWrapper & operator =(GpuIdWrapper && obj);
 
-    inline bool existsId() const TBAG_NOEXCEPT { return id != UNKNOWN_ID; }
-    inline GpuId   getId() const TBAG_NOEXCEPT { return id; }
+public:
+    void assign(GpuIdWrapper const & obj);
+    void swap(GpuIdWrapper & obj);
 
-    inline void clearId() TBAG_NOEXCEPT { id = UNKNOWN_ID; }
+public:
+    inline bool isSameContext(GpuContext const * c) const TBAG_NOEXCEPT { return _context == c; }
+    inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return _context; }
 
-    template <typename T> inline void setId(T stream) TBAG_NOEXCEPT { id = (GpuId)stream; }
-    template <typename T> inline T   castId()   const TBAG_NOEXCEPT { return (T)id; }
+    inline bool      existsId() const TBAG_NOEXCEPT { return _id != UNKNOWN_ID; }
+    inline GpuId        getId() const TBAG_NOEXCEPT { return _id; }
+    inline GpuId       & atId()       TBAG_NOEXCEPT { return _id; }
+    inline GpuId const & atId() const TBAG_NOEXCEPT { return _id; }
 
-    inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT { return (context != nullptr) && (context == c) && existsId(); }
+    inline void clearId() TBAG_NOEXCEPT { _id = UNKNOWN_ID; }
 
-    inline void   swapIdWrapper(GpuIdWrapper & obj) { std::swap(context, obj.context); std::swap(id, obj.id); }
-    inline void assignIdWrapper(GpuIdWrapper const & obj) { context = obj.context; id = obj.id; }
-    // @formatter:on
+    template <typename T> inline void setId(T i)    TBAG_NOEXCEPT { _id = (GpuId)i; }
+    template <typename T> inline T   castId() const TBAG_NOEXCEPT { return (T)_id; }
+
+    inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT
+    { return (_context != nullptr) && isSameContext(c) && existsId(); }
 };
 
 /**
@@ -290,80 +301,228 @@ public:
 public:
     void swap(GpuStream & obj);
     inline friend void swap(GpuStream & lh, GpuStream & rh) { lh.swap(rh); }
+
+public:
+    bool create();
+    bool release();
+
+public:
+    static GpuStream create(GpuContext const * c);
 };
 
 using SharedGpuStream = std::shared_ptr<GpuStream>;
 using WeakedGpuStream = std::weak_ptr<GpuStream>;
 
-struct GpuEvent
+/**
+ * GpuEvent class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API GpuEvent
 {
-    GpuContext const * CONTEXT;
-    GpuId start = UNKNOWN_ID;
-    GpuId  stop = UNKNOWN_ID;
+private:
+    GpuContext const * _context;
+    GpuStream  const * _stream;
+    GpuId _start;
+    GpuId _stop;
 
-    GpuEvent(GpuContext const * c, GpuId st = UNKNOWN_ID, GpuId sp = UNKNOWN_ID)
-            : CONTEXT(c), start(st), stop(sp)
-    { /* EMPTY. */ }
-    ~GpuEvent() { /* EMPTY. */ }
+public:
+    GpuEvent(GpuContext const * c = nullptr, GpuStream const * s = nullptr,
+             GpuId start = UNKNOWN_ID, GpuId stop = UNKNOWN_ID);
+    GpuEvent(GpuEvent const & obj);
+    GpuEvent(GpuEvent && obj);
+    virtual ~GpuEvent();
 
-    inline bool exists() const TBAG_NOEXCEPT { return start != UNKNOWN_ID; }
+public:
+    GpuEvent & operator =(GpuEvent const & obj);
+    GpuEvent & operator =(GpuEvent && obj);
+
+public:
+    void swap(GpuEvent & obj);
+    inline friend void swap(GpuEvent & lh, GpuEvent & rh) { lh.swap(rh); }
+
+public:
+    inline bool isSameContext(GpuContext const * c) const TBAG_NOEXCEPT { return _context == c; }
+    inline bool  isSameStream(GpuStream  const * s) const TBAG_NOEXCEPT { return  _stream == s; }
+
+    inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return _context; }
+    inline GpuStream  const *  getStreamPtr() const TBAG_NOEXCEPT { return _stream; }
+
+    inline bool      existsId() const TBAG_NOEXCEPT { return _start != UNKNOWN_ID; }
+    inline GpuId        getId() const TBAG_NOEXCEPT { return _start; }
+    inline GpuId       & atId()       TBAG_NOEXCEPT { return _start; }
+    inline GpuId const & atId() const TBAG_NOEXCEPT { return _start; }
+
+    template <typename T> inline void    setId(T i) TBAG_NOEXCEPT { _start = (GpuId)i; }
+    template <typename T> inline void setStart(T i) TBAG_NOEXCEPT { _start = (GpuId)i; }
+    template <typename T> inline void  setStop(T i) TBAG_NOEXCEPT {  _stop = (GpuId)i; }
+
+    inline GpuId getStart() const TBAG_NOEXCEPT { return _start; }
+    inline GpuId  getStop() const TBAG_NOEXCEPT { return  _stop; }
+
+    template <typename T> inline T    castId() const TBAG_NOEXCEPT { return (T)_start; }
+    template <typename T> inline T castStart() const TBAG_NOEXCEPT { return (T)_start; }
+    template <typename T> inline T  castStop() const TBAG_NOEXCEPT { return (T) _stop; }
+
+    inline void clearIds() TBAG_NOEXCEPT { _start = UNKNOWN_ID; _stop = UNKNOWN_ID; }
+
+    inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT
+    { return (_context != nullptr) && isSameContext(c) && existsId(); }
 };
 
-struct GpuProgram
+/**
+ * GpuProgram class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API GpuProgram : public GpuIdWrapper
 {
-    GpuContext const * CONTEXT;
-    GpuId program = UNKNOWN_ID;
+public:
+    GpuProgram(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID);
+    GpuProgram(GpuProgram const & obj);
+    GpuProgram(GpuProgram && obj);
+    virtual ~GpuProgram();
 
-    GpuProgram(GpuContext const * c, GpuId p = UNKNOWN_ID) : CONTEXT(c), program(p) { /* EMPTY. */ }
-    ~GpuProgram() { /* EMPTY. */ }
+public:
+    GpuProgram & operator =(GpuProgram const & obj);
+    GpuProgram & operator =(GpuProgram && obj);
 
-    inline bool exists() const TBAG_NOEXCEPT { return program != UNKNOWN_ID; }
+public:
+    void swap(GpuProgram & obj);
+    inline friend void swap(GpuProgram & lh, GpuProgram & rh) { lh.swap(rh); }
 };
 
-struct GpuKernel
+/**
+ * GpuKernel class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API GpuKernel : public GpuIdWrapper
 {
-    GpuContext const * CONTEXT;
-    GpuId kernel = UNKNOWN_ID;
+public:
+    GpuKernel(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID);
+    GpuKernel(GpuKernel const & obj);
+    GpuKernel(GpuKernel && obj);
+    virtual ~GpuKernel();
 
-    GpuKernel(GpuContext const * c, GpuId k = UNKNOWN_ID) : CONTEXT(c), kernel(k) { /* EMPTY. */ }
-    ~GpuKernel() { /* EMPTY. */ }
+public:
+    GpuKernel & operator =(GpuKernel const & obj);
+    GpuKernel & operator =(GpuKernel && obj);
 
-    inline bool exists() const TBAG_NOEXCEPT { return kernel != UNKNOWN_ID; }
+public:
+    void swap(GpuKernel & obj);
+    inline friend void swap(GpuKernel & lh, GpuKernel & rh) { lh.swap(rh); }
 };
 
-struct GpuMemory
+/**
+ * GpuMemory class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API GpuMemory
 {
-    GpuContext const * CONTEXT;
+private:
+    GpuContext const * _context;
 
-    std::size_t capacity = 0;
-    std::size_t     size = 0;
-    void *          data = nullptr;
+private:
+    std::size_t _capacity;
+    std::size_t _size;
+    void *      _data;
 
-    GpuMemory(GpuContext const * c) : CONTEXT(c) { /* EMPTY. */ }
-    ~GpuMemory() { /* EMPTY. */ }
+public:
+    GpuMemory(GpuContext const * c = nullptr);
+    GpuMemory(GpuMemory const & obj);
+    GpuMemory(GpuMemory && obj);
+    virtual ~GpuMemory();
 
-    inline bool exists() const TBAG_NOEXCEPT { return data != nullptr && capacity > 0U; }
+public:
+    GpuMemory & operator =(GpuMemory const & obj);
+    GpuMemory & operator =(GpuMemory && obj);
+
+public:
+    void swap(GpuMemory & obj);
+    inline friend void swap(GpuMemory & lh, GpuMemory & rh) { lh.swap(rh); }
+
+public:
+    inline bool isSameContext(GpuContext const * c) const TBAG_NOEXCEPT { return _context == c; }
+    inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return _context; }
+
+    inline std::size_t capacity() const TBAG_NOEXCEPT { return _capacity; }
+    inline std::size_t     size() const TBAG_NOEXCEPT { return     _size; }
+
+    inline void set(void * d, std::size_t c, std::size_t s) TBAG_NOEXCEPT { _data = d; _capacity = c; _size = s; }
+    inline void clear() TBAG_NOEXCEPT { _data = nullptr; _capacity = 0; _size = 0; }
+
+    inline bool       exists() const TBAG_NOEXCEPT { return _data != nullptr && _capacity > 0; }
+    inline void       * data()       TBAG_NOEXCEPT { return _data; }
+    inline void const * data() const TBAG_NOEXCEPT { return _data; }
+
+    template <typename T> inline T castData() const TBAG_NOEXCEPT { return (T)_data; }
+
+    inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT
+    { return (_context != nullptr) && isSameContext(c) && exists(); }
 };
 
-struct HostMemory : public GpuMemory
+/**
+ * HostMemory class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API HostMemory : public GpuMemory
 {
-    HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT;
+private:
+    HostMemoryFlag _flag = HostMemoryFlag::HMF_DEFAULT;
 
-    HostMemory(GpuContext const * c) : GpuMemory(c) { /* EMPTY. */ }
-    HostMemory(GpuMemory const & m) : GpuMemory(m) { /* EMPTY. */ }
-    ~HostMemory() { /* EMPTY. */ }
+public:
+    HostMemory(GpuContext const * c = nullptr);
+    HostMemory(GpuMemory const & mem);
+    HostMemory(HostMemory const & obj);
+    HostMemory(HostMemory && obj);
+    virtual ~HostMemory();
+
+public:
+    HostMemory & operator =(HostMemory const & obj);
+    HostMemory & operator =(HostMemory && obj);
+
+public:
+    void swap(HostMemory & obj);
+    inline friend void swap(HostMemory & lh, HostMemory & rh) { lh.swap(rh); }
+
+public:
+    inline void setFlag(HostMemoryFlag flag) TBAG_NOEXCEPT { _flag = flag; }
+    inline HostMemoryFlag getFlag() const TBAG_NOEXCEPT { return _flag; }
 };
 
 using GpuMemories  = std::vector<GpuMemory>;
 using HostMemories = std::vector<HostMemory>;
 
-struct CpuEventGuard : private Noncopyable
+/**
+ * CpuEventGuard class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API CpuEventGuard : private Noncopyable
 {
-    GpuEvent * event;
+private:
+    GpuEvent * _event;
 
+public:
     CpuEventGuard(GpuEvent * e = nullptr);
     ~CpuEventGuard();
 
+public:
     static GpuId nowNano();
 };
 

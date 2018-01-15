@@ -50,7 +50,7 @@ static bool setKernelMemories(KernelType kernel, GpuMemories const & mems)
 
     auto const SIZE = (cl_uint)mems.size();
     for (cl_uint i = 0; i < SIZE; ++i) {
-        cl_int code = clSetKernelArg(kernel, i, mems[i].size, mems[i].data);
+        cl_int code = clSetKernelArg(kernel, i, mems[i].size(), mems[i].data());
         if (code != CL_SUCCESS) {
             tDLogE("setKernelMemories() OpenCL clSetKernelArg() error code: {}", code);
             return false;
@@ -225,10 +225,10 @@ OpenCLContext::~OpenCLContext()
 bool OpenCLContext::_write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
                            std::size_t size, bool blocking, GpuEvent * event) const
 {
-    cl_int code = clEnqueueWriteBuffer(stream.castId<cl_command_queue>(), (cl_mem)gpu_mem.data,
+    cl_int code = clEnqueueWriteBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
                                        (blocking ? CL_TRUE : CL_FALSE),
-                                       0, host_mem.size, host_mem.data, 0, nullptr,
-                                       (cl_event*)(event == nullptr ? nullptr : &event->start));
+                                       0, host_mem.size(), host_mem.data(), 0, nullptr,
+                                       (cl_event*)(event == nullptr ? nullptr : &event->atId()));
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -240,10 +240,10 @@ bool OpenCLContext::_write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory c
 bool OpenCLContext::_read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
                           std::size_t size, bool blocking, GpuEvent * event) const
 {
-    cl_int code = clEnqueueReadBuffer(stream.castId<cl_command_queue>(), (cl_mem)gpu_mem.data,
+    cl_int code = clEnqueueReadBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
                                       (blocking ? CL_TRUE : CL_FALSE),
-                                      0, host_mem.size, host_mem.data, 0, nullptr,
-                                      (cl_event*)(event == nullptr ? nullptr : &event->start));
+                                      0, host_mem.size(), host_mem.data(), 0, nullptr,
+                                      (cl_event*)(event == nullptr ? nullptr : &event->atId()));
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -261,7 +261,7 @@ bool OpenCLContext::isStream () const TBAG_NOEXCEPT { return true; }
 
 bool OpenCLContext::createStream(GpuStream & stream) const
 {
-    if (stream.getContextPtr() != this) {
+    if (stream.isSameContext(this) == false) {
         tDLogE("OpenCLContext::createStream() Illegal stream argument.");
         return false;
     }
@@ -306,23 +306,23 @@ bool OpenCLContext::createEvent(GpuStream const & stream, GpuEvent & event) cons
         tDLogE("OpenCLContext::createEvent() Illegal stream argument.");
         return false;
     }
-    if (event.CONTEXT != this) {
+    if (event.isSameContext(this) == false) {
         tDLogE("OpenCLContext::createEvent() Illegal event argument.");
         return false;
     }
-    event.start = 0;
-    event.stop  = 0;
+    event.setStart(0);
+    event.setStop(0);
     return true;
 }
 
 bool OpenCLContext::syncEvent(GpuEvent const & event) const
 {
-    if (event.CONTEXT != this || event.exists() == false) {
+    if (event.validate(this) == false) {
         tDLogE("OpenCLContext::syncEvent() Illegal event argument.");
         return false;
     }
 
-    cl_int code = clWaitForEvents(1, (cl_event const *)&event.start);
+    cl_int code = clWaitForEvents(1, (cl_event const *)&event.atId());
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -333,14 +333,14 @@ bool OpenCLContext::syncEvent(GpuEvent const & event) const
 
 bool OpenCLContext::elapsedEvent(GpuEvent & event, float * millisec) const
 {
-    if (event.CONTEXT != this || event.exists() == false) {
+    if (event.validate(this) == false) {
         tDLogE("OpenCLContext::elapsedEvent() Illegal event argument.");
         return false;
     }
 
     cl_ulong start_nano, stop_nano;
-    cl_int start_code = clGetEventProfilingInfo((cl_event)event.start, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &start_nano, nullptr);
-    cl_int  stop_code = clGetEventProfilingInfo((cl_event)event.start, CL_PROFILING_COMMAND_END  , sizeof(cl_ulong),  &stop_nano, nullptr);
+    cl_int start_code = clGetEventProfilingInfo(event.castId<cl_event>(), CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &start_nano, nullptr);
+    cl_int  stop_code = clGetEventProfilingInfo(event.castId<cl_event>(), CL_PROFILING_COMMAND_END  , sizeof(cl_ulong),  &stop_nano, nullptr);
     if (start_code == CL_SUCCESS && stop_code == CL_SUCCESS) {
         if (millisec != nullptr) {
             *millisec = (stop_nano - start_nano) * 1.0e-6f;
@@ -355,13 +355,11 @@ bool OpenCLContext::elapsedEvent(GpuEvent & event, float * millisec) const
 
 bool OpenCLContext::releaseEvent(GpuEvent & event) const
 {
-    if (event.CONTEXT != this || event.exists() == false) {
+    if (event.validate(this) == false) {
         tDLogE("OpenCLContext::releaseEvent() Illegal event argument.");
         return false;
     }
-
-    event.start = UNKNOWN_ID;
-    event.stop  = UNKNOWN_ID;
+    event.clearIds();
     return true;
 }
 
@@ -371,7 +369,7 @@ bool OpenCLContext::createProgram(std::string const & source, GpuProgram & progr
         tDLogE("OpenCLContext::createProgram() Empty source.");
         return false;
     }
-    if (program.CONTEXT != this) {
+    if (program.isSameContext(this) == false) {
         tDLogE("OpenCLContext::createProgram() Illegal program argument.");
         return false;
     }
@@ -380,7 +378,7 @@ bool OpenCLContext::createProgram(std::string const & source, GpuProgram & progr
     cl_int code;
     cl_program native_program = clCreateProgramWithSource((cl_context)CONTEXT, 1, &c_source, nullptr, &code);
     if (code == CL_SUCCESS) {
-        program.program = (GpuId)native_program;
+        program.setId(native_program);
         return true;
     } else {
         tDLogE("OpenCLContext::createProgram() OpenCL clCreateProgramWithSource() error code: {}", code);
@@ -390,12 +388,12 @@ bool OpenCLContext::createProgram(std::string const & source, GpuProgram & progr
 
 bool OpenCLContext::buildProgram(GpuProgram & program) const
 {
-    if (program.CONTEXT != this || program.exists() == false) {
+    if (program.validate(this) == false) {
         tDLogE("OpenCLContext::buildProgram() Illegal program argument.");
         return false;
     }
 
-    cl_int code = clBuildProgram((cl_program)program.program, 1, (cl_device_id const *)&DEVICE,
+    cl_int code = clBuildProgram(program.castId<cl_program>(), 1, (cl_device_id const *)&DEVICE,
                                  nullptr, nullptr, nullptr);
     if (code == CL_SUCCESS) {
         return true;
@@ -407,13 +405,13 @@ bool OpenCLContext::buildProgram(GpuProgram & program) const
 
 bool OpenCLContext::releaseProgram(GpuProgram & program) const
 {
-    if (program.CONTEXT != this || program.exists() == false) {
+    if (program.validate(this) == false) {
         tDLogE("OpenCLContext::releaseProgram() Illegal program argument.");
         return false;
     }
 
-    cl_int code = clReleaseProgram((cl_program)program.program);
-    program.program = UNKNOWN_ID;
+    cl_int code = clReleaseProgram(program.castId<cl_program>());
+    program.clearId();
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -424,7 +422,7 @@ bool OpenCLContext::releaseProgram(GpuProgram & program) const
 
 bool OpenCLContext::createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const
 {
-    if (program.CONTEXT != this || program.exists() == false) {
+    if (program.validate(this) == false) {
         tDLogE("OpenCLContext::createKernel() Illegal program arguments.");
         return false;
     }
@@ -432,15 +430,15 @@ bool OpenCLContext::createKernel(GpuProgram const & program, std::string const &
         tDLogE("OpenCLContext::createKernel() Empty kernel symbol.");
         return false;
     }
-    if (kernel.CONTEXT != this) {
+    if (kernel.isSameContext(this) == false) {
         tDLogE("OpenCLContext::createKernel() Illegal kernel arguments.");
         return false;
     }
 
     cl_int code;
-    cl_kernel native_kernel = clCreateKernel((cl_program)program.program, kernel_symbol.c_str(), &code);
+    cl_kernel native_kernel = clCreateKernel(program.castId<cl_program>(), kernel_symbol.c_str(), &code);
     if (code == CL_SUCCESS) {
-        kernel.kernel = (GpuId)native_kernel;
+        kernel.setId(native_kernel);
         return true;
     } else {
         tDLogE("OpenCLContext::createKernel() OpenCL clCreateKernel() error code: {}", code);
@@ -450,13 +448,13 @@ bool OpenCLContext::createKernel(GpuProgram const & program, std::string const &
 
 bool OpenCLContext::releaseKernel(GpuKernel & kernel) const
 {
-    if (kernel.CONTEXT != this || kernel.exists() == false) {
+    if (kernel.validate(this) == false) {
         tDLogE("OpenCLContext::releaseKernel() Illegal kernel context.");
         return false;
     }
 
-    cl_int code = clReleaseKernel((cl_kernel)kernel.kernel);
-    kernel.kernel = UNKNOWN_ID;
+    cl_int code = clReleaseKernel(kernel.castId<cl_kernel>());
+    kernel.clearId();
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -467,7 +465,7 @@ bool OpenCLContext::releaseKernel(GpuKernel & kernel) const
 
 bool OpenCLContext::malloc(GpuMemory & memory, std::size_t size) const
 {
-    if (memory.CONTEXT != this) {
+    if (memory.isSameContext(this) == false) {
         tDLogE("OpenCLContext::malloc() Illegal memory arguments.");
         return false;
     }
@@ -475,11 +473,9 @@ bool OpenCLContext::malloc(GpuMemory & memory, std::size_t size) const
     cl_int code;
     cl_mem native_memory = clCreateBuffer((cl_context)CONTEXT, CL_MEM_READ_WRITE, size, nullptr, &code);
     if (code == CL_SUCCESS) {
-        memory.data     = (void*)native_memory;
-        memory.capacity = size;
-        memory.size     = size;
+        memory.set((void*)native_memory, size, size);
         tDLogIfD(isGpuVerbose(), "OpenCLContext::malloc({}) OpenCL clCreateBuffer() MEM:{} CAP:{} SIZE:{}",
-                 size, memory.data, memory.capacity, memory.size);
+                 size, memory.data(), memory.capacity(), memory.size());
         return true;
     } else {
         tDLogE("OpenCLContext::malloc({}) OpenCL clCreateBuffer() error code: {}", size, code);
@@ -489,18 +485,16 @@ bool OpenCLContext::malloc(GpuMemory & memory, std::size_t size) const
 
 bool OpenCLContext::free(GpuMemory & memory) const
 {
-    if (memory.CONTEXT != this || memory.exists() == false) {
+    if (memory.validate(this) == false) {
         tDLogE("OpenCLContext::free() Illegal memory.");
         return false;
     }
 
-    tDLogIfD(isGpuVerbose(), "OpenCLContext::free() OpenCL clReleaseMemObject() MEM:{} SIZE:{}",
-             memory.data, memory.size);
+    tDLogIfD(isGpuVerbose(), "OpenCLContext::free() OpenCL clReleaseMemObject() MEM:{} CAP:{} SIZE:{}",
+             memory.data(), memory.capacity(), memory.size());
 
-    cl_int code = clReleaseMemObject((cl_mem)memory.data);
-    memory.data     = nullptr;
-    memory.capacity = 0;
-    memory.size     = 0;
+    cl_int code = clReleaseMemObject(memory.castData<cl_mem>());
+    memory.clear();
     if (code == CL_SUCCESS) {
         return true;
     } else {
@@ -511,7 +505,7 @@ bool OpenCLContext::free(GpuMemory & memory) const
 
 bool OpenCLContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
-    if (checkMemory(stream, gpu_mem, host_mem, size) == false) {
+    if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         tDLogE("OpenCLContext::write() Illegal arguments.");
         return false;
     }
@@ -520,7 +514,7 @@ bool OpenCLContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory co
 
 bool OpenCLContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
-    if (checkMemory(stream, gpu_mem, host_mem, size) == false) {
+    if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         tDLogE("OpenCLContext::read() Illegal arguments.");
         return false;
     }
@@ -529,7 +523,7 @@ bool OpenCLContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemo
 
 bool OpenCLContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
-    if (checkMemory(stream, gpu_mem, host_mem, size) == false) {
+    if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         tDLogE("OpenCLContext::writeAsync() Illegal arguments.");
         return false;
     }
@@ -538,7 +532,7 @@ bool OpenCLContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemo
 
 bool OpenCLContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
-    if (checkMemory(stream, gpu_mem, host_mem, size) == false) {
+    if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         tDLogE("OpenCLContext::readAsync() Illegal arguments.");
         return false;
     }
