@@ -98,8 +98,7 @@ SharedGpuContext createContext(GpuDevice const & device)
 
 CpuContext::CpuContext(GpuDevice const & d, GpuId c) : GpuContext(d, c)
 {
-    platform_info = cpu::getPlatformInfo(*this);
-    device_info = cpu::getDeviceInfo(*this);
+    // EMPTY.
 }
 
 CpuContext::~CpuContext()

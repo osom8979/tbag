@@ -14,20 +14,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 
-Gpu::Stream::Stream(GpuStream const & s) : stream(s)
-{
-    // EMPTY.
-}
-
-Gpu::Stream::~Stream()
-{
-    // EMPTY.
-}
-
-// -------------------
-// Gpu implementation.
-// -------------------
-
 Gpu::Gpu() : _gpu()
 {
     // EMPTY.

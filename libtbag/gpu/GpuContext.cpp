@@ -30,7 +30,10 @@ namespace gpu {
 // GpuContext implementation.
 // --------------------------
 
-GpuContext::GpuContext(GpuDevice const & d, GpuId c) : GpuDevice(d), CONTEXT(c)
+GpuContext::GpuContext(GpuDevice const & d, GpuId c)
+        : GpuDevice(d), CONTEXT(c),
+          PLATFORM_INFO(libtbag::gpu::getPlatformInfo(GpuDevice(d))),
+          DEVICE_INFO(libtbag::gpu::getDeviceInfo(GpuDevice(d)))
 {
     // EMPTY.
 }
@@ -43,38 +46,49 @@ GpuContext::~GpuContext()
 bool GpuContext::checkMemory(GpuStream const & stream, GpuMemory const & gpu_mem,
                              HostMemory const & host_mem, std::size_t size) const TBAG_NOEXCEPT
 {
-    return &stream.CONTEXT == this && stream.exists()
-           && &gpu_mem.CONTEXT == this && gpu_mem.exists() && size <= gpu_mem.size
-           && &host_mem.CONTEXT == this && host_mem.exists() && size <= host_mem.size;
+    return stream.validate(this)
+           && gpu_mem.CONTEXT == this && gpu_mem.exists() && size <= gpu_mem.size
+           && host_mem.CONTEXT == this && host_mem.exists() && size <= host_mem.size;
 }
 
-GpuStream GpuContext::createStream() const
+bool GpuContext::createStream(GpuStream & stream) const
 {
-    return GpuStream(*this, 0);
+    if (stream.getContextPtr() != this) {
+        tDLogE("GpuContext::createStream() Illegal stream argument.");
+        return false;
+    }
+    stream.setId(0);
+    return true;
 }
 
 bool GpuContext::releaseStream(GpuStream & stream) const
 {
-    if (&stream.CONTEXT != this || stream.exists()) {
+    if (stream.validate(this) == false) {
         tDLogE("GpuContext::releaseStream() Illegal stream argument.");
         return false;
     }
-    stream.stream = UNKNOWN_ID;
+    stream.clearId();
     return true;
 }
 
-GpuEvent GpuContext::createEvent(GpuStream const & stream) const
+bool GpuContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 {
-    if (&stream.CONTEXT != this || stream.exists()) {
+    if (stream.validate(this) == false) {
         tDLogE("GpuContext::createEvent() Illegal stream argument.");
-        return GpuEvent(*this);
+        return false;
     }
-    return GpuEvent(*this, 0, 0);
+    if (event.CONTEXT != this) {
+        tDLogE("GpuContext::createEvent() Illegal event argument.");
+        return false;
+    }
+    event.start = 0;
+    event.stop  = 0;
+    return true;
 }
 
 bool GpuContext::syncEvent(GpuEvent const & event) const
 {
-    if (&event.CONTEXT != this || event.exists() == false) {
+    if (event.CONTEXT != this || event.exists() == false) {
         tDLogE("GpuContext::syncEvent() Illegal event argument.");
         return false;
     }
@@ -83,7 +97,7 @@ bool GpuContext::syncEvent(GpuEvent const & event) const
 
 bool GpuContext::elapsedEvent(GpuEvent & event, float * millisec) const
 {
-    if (&event.CONTEXT != this || event.exists() == false) {
+    if (event.CONTEXT != this || event.exists() == false) {
         tDLogE("GpuContext::elapsedEvent() Illegal event argument.");
         return false;
     }
@@ -95,7 +109,7 @@ bool GpuContext::elapsedEvent(GpuEvent & event, float * millisec) const
 
 bool GpuContext::releaseEvent(GpuEvent & event) const
 {
-    if (&event.CONTEXT != this || event.exists() == false) {
+    if (event.CONTEXT != this || event.exists() == false) {
         tDLogE("GpuContext::releaseEvent() Illegal event argument.");
         return false;
     }
@@ -104,18 +118,24 @@ bool GpuContext::releaseEvent(GpuEvent & event) const
     return true;
 }
 
-GpuProgram GpuContext::createProgram(std::string const &  source) const
+bool GpuContext::createProgram(std::string const & source, GpuProgram & program) const
 {
     if (source.empty()) {
-        tDLogE("GpuContext::createProgram() Illegal source.");
-        return GpuProgram(*this);
+        tDLogE("GpuContext::createProgram() Empty source.");
+        return false;
     }
-    return GpuProgram(*this, 0);
+    if (program.CONTEXT != this) {
+        tDLogE("GpuContext::createProgram() Illegal program argument.");
+        return false;
+    }
+
+    program.program = 0;
+    return true;
 }
 
 bool GpuContext::buildProgram(GpuProgram & program) const
 {
-    if (&program.CONTEXT != this || program.exists() == false) {
+    if (program.CONTEXT != this || program.exists() == false) {
         tDLogE("GpuContext::buildProgram() Illegal program argument.");
         return false;
     }
@@ -124,7 +144,7 @@ bool GpuContext::buildProgram(GpuProgram & program) const
 
 bool GpuContext::releaseProgram(GpuProgram & program) const
 {
-    if (&program.CONTEXT != this || program.exists() == false) {
+    if (program.CONTEXT != this || program.exists() == false) {
         tDLogE("GpuContext::releaseProgram() Illegal program argument.");
         return false;
     }
@@ -132,18 +152,28 @@ bool GpuContext::releaseProgram(GpuProgram & program) const
     return true;
 }
 
-GpuKernel GpuContext::createKernel(GpuProgram const & program, std::string const & kernel_symbol) const
+bool GpuContext::createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const
 {
-    if (&program.CONTEXT != this || program.exists() == false || kernel_symbol.empty()) {
-        tDLogE("GpuContext::createKernel() Illegal arguments.");
-        return GpuKernel(*this);
+    if (program.CONTEXT != this || program.exists() == false) {
+        tDLogE("GpuContext::createKernel() Illegal program arguments.");
+        return false;
     }
-    return GpuKernel(*this, 0);
+    if (kernel_symbol.empty()) {
+        tDLogE("GpuContext::createKernel() Empty kernel symbol.");
+        return false;
+    }
+    if (kernel.CONTEXT != this) {
+        tDLogE("GpuContext::createKernel() Illegal kernel arguments.");
+        return false;
+    }
+
+    kernel.kernel = 0;
+    return true;
 }
 
 bool GpuContext::releaseKernel(GpuKernel & kernel) const
 {
-    if (&kernel.CONTEXT != this || kernel.exists() == false) {
+    if (kernel.CONTEXT != this || kernel.exists() == false) {
         tDLogE("GpuContext::releaseKernel() Illegal kernel context.");
         return false;
     }
@@ -151,24 +181,30 @@ bool GpuContext::releaseKernel(GpuKernel & kernel) const
     return true;
 }
 
-GpuMemory GpuContext::malloc(std::size_t size) const
+bool GpuContext::malloc(GpuMemory & memory, std::size_t size) const
 {
-    GpuMemory result(*this);
+    if (memory.CONTEXT != this) {
+        tDLogE("GpuContext::malloc() Illegal memory arguments.");
+        return false;
+    }
+
     auto const  ALIGNED_SIZE = memory::getDefaultAlignedSize();
     auto const   PACKED_SIZE = algorithm::getPackedSize(size, ALIGNED_SIZE);
     auto const CAPACITY_SIZE = PACKED_SIZE * ALIGNED_SIZE;
     assert(CAPACITY_SIZE >= size);
-    result.data     = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
-    result.capacity = CAPACITY_SIZE;
-    result.size     = size;
+
+    memory.data     = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
+    memory.capacity = CAPACITY_SIZE;
+    memory.size     = size;
     tDLogIfD(isGpuVerbose(), "GpuContext::malloc({}) Aligned malloc MEM:{} CAP:{} SIZE:{}",
-             size, result.data, result.capacity, result.size);
-    return result;
+             size, memory.data, memory.capacity, memory.size);
+
+    return true;
 }
 
 bool GpuContext::free(GpuMemory & memory) const
 {
-    if (&memory.CONTEXT != this || memory.exists() == false) {
+    if (memory.CONTEXT != this || memory.exists() == false) {
         tDLogE("GpuContext::free() Illegal memory argument");
         return false;
     }
@@ -183,19 +219,24 @@ bool GpuContext::free(GpuMemory & memory) const
     return true;
 }
 
-HostMemory GpuContext::mallocHost(std::size_t size, HostMemoryFlag flag) const
+bool GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
 {
+    if (memory.CONTEXT != this) {
+        tDLogE("GpuContext::mallocHost() Illegal memory argument");
+        return false;
+    }
     if (HostMemoryFlag::HMF_DEFAULT != flag) {
         tDLogE("GpuContext::mallocHost() Unsupported flag: {}", static_cast<int>(flag));
-        return HostMemory(*this);
+        return false;
     }
+
     assert(flag == HostMemoryFlag::HMF_DEFAULT);
-    return HostMemory(GpuContext::malloc(size));
+    return GpuContext::malloc(memory, size);
 }
 
 bool GpuContext::freeHost(HostMemory & memory) const
 {
-    if (&memory.CONTEXT != this || memory.exists() == false) {
+    if (memory.CONTEXT != this || memory.exists() == false) {
         tDLogE("GpuContext::freeHost() Illegal memory argument");
         return false;
     }
@@ -236,7 +277,7 @@ bool GpuContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMe
 
 bool GpuContext::flush(GpuStream & stream) const
 {
-    if (&stream.CONTEXT != this || stream.exists() == false) {
+    if (stream.validate(this) == false) {
         tDLogE("GpuContext::flush() Illegal stream argument.");
         return false;
     }
@@ -245,11 +286,56 @@ bool GpuContext::flush(GpuStream & stream) const
 
 bool GpuContext::finish(GpuStream & stream) const
 {
-    if (&stream.CONTEXT != this || stream.exists() == false) {
+    if (stream.validate(this) == false) {
         tDLogE("GpuContext::finish() Illegal stream argument.");
         return false;
     }
     return true;
+}
+
+// -------------------------
+// GpuStream implementation.
+// -------------------------
+
+GpuStream::GpuStream(GpuContext const * c, GpuId i) : GpuIdWrapper(c)
+{
+    // EMPTY.
+}
+
+GpuStream::GpuStream(GpuStream const & obj) : GpuStream()
+{
+    (*this) = obj;
+}
+
+GpuStream::GpuStream(GpuStream && obj) : GpuStream()
+{
+    (*this) = std::move(obj);
+}
+
+GpuStream::~GpuStream()
+{
+    // EMPTY.
+}
+
+GpuStream & GpuStream::operator =(GpuStream const & obj)
+{
+    if (this != &obj) {
+        assignIdWrapper(obj);
+    }
+    return *this;
+}
+
+GpuStream & GpuStream::operator =(GpuStream && obj)
+{
+    swap(obj);
+    return *this;
+}
+
+void GpuStream::swap(GpuStream & obj)
+{
+    if (this != &obj) {
+        swapIdWrapper(obj);
+    }
 }
 
 // -----------------------------

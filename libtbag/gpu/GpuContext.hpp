@@ -166,8 +166,8 @@ struct GpuContext : public GpuDevice
 {
     GpuId const CONTEXT;
 
-    GpuPlatformInfo platform_info;
-    GpuDeviceInfo     device_info;
+    GpuPlatformInfo const PLATFORM_INFO;
+    GpuDeviceInfo   const   DEVICE_INFO;
 
     GpuContext(GpuDevice const & d, GpuId c);
     virtual ~GpuContext();
@@ -187,30 +187,30 @@ struct GpuContext : public GpuDevice
     // Object.
     // -------
 
-    virtual GpuStream createStream() const;
-    virtual bool     releaseStream(GpuStream & stream) const;
+    virtual bool  createStream(GpuStream & stream) const;
+    virtual bool releaseStream(GpuStream & stream) const;
 
-    virtual GpuEvent createEvent(GpuStream const & stream) const;
-    virtual bool       syncEvent(GpuEvent  const &  event) const;
-    virtual bool    elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const;
-    virtual bool    releaseEvent(GpuEvent        &  event) const;
+    virtual bool  createEvent(GpuStream const & stream, GpuEvent & event) const;
+    virtual bool    syncEvent(GpuEvent  const &  event) const;
+    virtual bool elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const;
+    virtual bool releaseEvent(GpuEvent        &  event) const;
 
-    virtual GpuProgram createProgram(std::string const &  source) const;
-    virtual bool        buildProgram(GpuProgram        & program) const;
-    virtual bool      releaseProgram(GpuProgram        & program) const;
+    virtual bool  createProgram(std::string const &  source, GpuProgram & program) const;
+    virtual bool   buildProgram(GpuProgram        & program) const;
+    virtual bool releaseProgram(GpuProgram        & program) const;
 
-    virtual GpuKernel createKernel(GpuProgram const & program, std::string const & kernel_symbol) const;
-    virtual bool     releaseKernel(GpuKernel        & kernel) const;
+    virtual bool  createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const;
+    virtual bool releaseKernel(GpuKernel        & kernel) const;
 
     // -------
     // Memory.
     // -------
 
-    virtual GpuMemory malloc(std::size_t size) const;
-    virtual bool        free(GpuMemory & memory) const;
+    virtual bool malloc(GpuMemory & memory, std::size_t size) const;
+    virtual bool   free(GpuMemory & memory) const;
 
-    virtual HostMemory mallocHost(std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const;
-    virtual bool         freeHost(HostMemory & memory) const;
+    virtual bool mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const;
+    virtual bool   freeHost(HostMemory & memory) const;
 
     // -------------
     // Input/Output.
@@ -236,24 +236,72 @@ using GpuDevices   = std::vector<GpuDevice>;
 using SharedGpuContext = std::shared_ptr<GpuContext>;
 using WeakedGpuContext = std::weak_ptr<GpuContext>;
 
-struct GpuStream
+/**
+ * GpuIdWrapper structure.
+ *
+ * @author zer0
+ * @date   2018-01-15
+ */
+struct GpuIdWrapper
 {
-    GpuContext const & CONTEXT;
-    GpuId stream = UNKNOWN_ID;
+    // @formatter:off
+    GpuContext const * context;
+    GpuId id;
 
-    GpuStream(GpuContext const & c, GpuId s = UNKNOWN_ID) : CONTEXT(c), stream(s) { /* EMPTY. */ }
-    ~GpuStream() { /* EMPTY. */ }
+    GpuIdWrapper(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID) : context(c), id(i) { /* EMPTY. */ }
+    ~GpuIdWrapper() { /* EMPTY. */ }
 
-    inline bool exists() const TBAG_NOEXCEPT { return stream != UNKNOWN_ID; }
+    inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return context; }
+
+    inline bool existsId() const TBAG_NOEXCEPT { return id != UNKNOWN_ID; }
+    inline GpuId   getId() const TBAG_NOEXCEPT { return id; }
+
+    inline void clearId() TBAG_NOEXCEPT { id = UNKNOWN_ID; }
+
+    template <typename T> inline void setId(T stream) TBAG_NOEXCEPT { id = (GpuId)stream; }
+    template <typename T> inline T   castId()   const TBAG_NOEXCEPT { return (T)id; }
+
+    inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT { return (context != nullptr) && (context == c) && existsId(); }
+
+    inline void   swapIdWrapper(GpuIdWrapper & obj) { std::swap(context, obj.context); std::swap(id, obj.id); }
+    inline void assignIdWrapper(GpuIdWrapper const & obj) { context = obj.context; id = obj.id; }
+    // @formatter:on
 };
+
+/**
+ * GpuStream class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API GpuStream : public GpuIdWrapper
+{
+public:
+    GpuStream(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID);
+    GpuStream(GpuStream const & obj);
+    GpuStream(GpuStream && obj);
+    virtual ~GpuStream();
+
+public:
+    GpuStream & operator =(GpuStream const & obj);
+    GpuStream & operator =(GpuStream && obj);
+
+public:
+    void swap(GpuStream & obj);
+    inline friend void swap(GpuStream & lh, GpuStream & rh) { lh.swap(rh); }
+};
+
+using SharedGpuStream = std::shared_ptr<GpuStream>;
+using WeakedGpuStream = std::weak_ptr<GpuStream>;
 
 struct GpuEvent
 {
-    GpuContext const & CONTEXT;
+    GpuContext const * CONTEXT;
     GpuId start = UNKNOWN_ID;
     GpuId  stop = UNKNOWN_ID;
 
-    GpuEvent(GpuContext const & c, GpuId st = UNKNOWN_ID, GpuId sp = UNKNOWN_ID)
+    GpuEvent(GpuContext const * c, GpuId st = UNKNOWN_ID, GpuId sp = UNKNOWN_ID)
             : CONTEXT(c), start(st), stop(sp)
     { /* EMPTY. */ }
     ~GpuEvent() { /* EMPTY. */ }
@@ -263,10 +311,10 @@ struct GpuEvent
 
 struct GpuProgram
 {
-    GpuContext const & CONTEXT;
+    GpuContext const * CONTEXT;
     GpuId program = UNKNOWN_ID;
 
-    GpuProgram(GpuContext const & c, GpuId p = UNKNOWN_ID) : CONTEXT(c), program(p) { /* EMPTY. */ }
+    GpuProgram(GpuContext const * c, GpuId p = UNKNOWN_ID) : CONTEXT(c), program(p) { /* EMPTY. */ }
     ~GpuProgram() { /* EMPTY. */ }
 
     inline bool exists() const TBAG_NOEXCEPT { return program != UNKNOWN_ID; }
@@ -274,10 +322,10 @@ struct GpuProgram
 
 struct GpuKernel
 {
-    GpuContext const & CONTEXT;
+    GpuContext const * CONTEXT;
     GpuId kernel = UNKNOWN_ID;
 
-    GpuKernel(GpuContext const & c, GpuId k = UNKNOWN_ID) : CONTEXT(c), kernel(k) { /* EMPTY. */ }
+    GpuKernel(GpuContext const * c, GpuId k = UNKNOWN_ID) : CONTEXT(c), kernel(k) { /* EMPTY. */ }
     ~GpuKernel() { /* EMPTY. */ }
 
     inline bool exists() const TBAG_NOEXCEPT { return kernel != UNKNOWN_ID; }
@@ -285,13 +333,13 @@ struct GpuKernel
 
 struct GpuMemory
 {
-    GpuContext const & CONTEXT;
+    GpuContext const * CONTEXT;
 
     std::size_t capacity = 0;
     std::size_t     size = 0;
     void *          data = nullptr;
 
-    GpuMemory(GpuContext const & c) : CONTEXT(c) { /* EMPTY. */ }
+    GpuMemory(GpuContext const * c) : CONTEXT(c) { /* EMPTY. */ }
     ~GpuMemory() { /* EMPTY. */ }
 
     inline bool exists() const TBAG_NOEXCEPT { return data != nullptr && capacity > 0U; }
@@ -301,7 +349,7 @@ struct HostMemory : public GpuMemory
 {
     HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT;
 
-    HostMemory(GpuContext const & c) : GpuMemory(c) { /* EMPTY. */ }
+    HostMemory(GpuContext const * c) : GpuMemory(c) { /* EMPTY. */ }
     HostMemory(GpuMemory const & m) : GpuMemory(m) { /* EMPTY. */ }
     ~HostMemory() { /* EMPTY. */ }
 };

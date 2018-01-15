@@ -49,7 +49,7 @@ public:
     };
 
 private:
-    WeakedGpuContext         _context;
+    WeakedGpuStream          _stream;
     TypeTable                _type;
     SyncedHead       mutable _head;
     SharedGpuMemory  mutable _gpu;
@@ -58,8 +58,8 @@ private:
 
 public:
     SyncedMemory();
-    explicit SyncedMemory(WeakedGpuContext const & context, std::size_t size = 0);
-    explicit SyncedMemory(SharedGpuContext const & context, std::size_t size = 0);
+    explicit SyncedMemory(SharedGpuStream const & stream);
+    explicit SyncedMemory(WeakedGpuStream const & stream);
     SyncedMemory(SyncedMemory const & obj);
     SyncedMemory(SyncedMemory && obj);
     ~SyncedMemory();

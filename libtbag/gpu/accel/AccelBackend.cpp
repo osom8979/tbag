@@ -73,8 +73,7 @@ SharedGpuContext createContext(GpuDevice const & device)
 
 AccelContext::AccelContext(GpuDevice const & d, GpuId c) : cpu::CpuContext(d, c)
 {
-    platform_info = accel::getPlatformInfo(*this);
-    device_info = accel::getDeviceInfo(*this);
+    // EMPTY.
 }
 
 AccelContext::~AccelContext()

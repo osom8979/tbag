@@ -18,23 +18,20 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu {
 
-SyncedMemory::SyncedMemory()
-        : _context(), _type(TypeTable::TT_UNKNOWN),
-          _head(SyncedHead::SH_UNINITIALIZED), _gpu(), _host(), _size(0)
+SyncedMemory::SyncedMemory() : SyncedMemory(WeakedGpuStream())
 {
     // EMPTY.
 }
 
-SyncedMemory::SyncedMemory(WeakedGpuContext const & context, std::size_t size)
-        : _context(context), _type(TypeTable::TT_UNKNOWN),
-          _head(SyncedHead::SH_UNINITIALIZED), _gpu(), _host(), _size(0)
+SyncedMemory::SyncedMemory(SharedGpuStream const & stream)
+        : SyncedMemory(WeakedGpuStream(stream))
 {
     // EMPTY.
 }
 
-SyncedMemory::SyncedMemory(SharedGpuContext const & context, std::size_t size)
-        : _context(context), _type(TypeTable::TT_UNKNOWN),
-          _head(SyncedHead::SH_UNINITIALIZED), _gpu(), _host(), _size(0)
+SyncedMemory::SyncedMemory(WeakedGpuStream const & stream)
+        : _stream(stream), _type(TypeTable::TT_UNKNOWN), _head(SyncedHead::SH_UNINITIALIZED),
+          _gpu(), _host(), _size(0)
 {
     // EMPTY.
 }
@@ -57,12 +54,12 @@ SyncedMemory::~SyncedMemory()
 SyncedMemory & SyncedMemory::operator =(SyncedMemory const & obj)
 {
     if (this != &obj) {
-        _context = obj._context;
-        _type    = obj._type;
-        _head    = obj._head;
-        _gpu     = obj._gpu;
-        _host    = obj._host;
-        _size    = obj._size;
+        _stream = obj._stream;
+        _type   = obj._type;
+        _head   = obj._head;
+        _gpu    = obj._gpu;
+        _host   = obj._host;
+        _size   = obj._size;
     }
     return *this;
 }
@@ -76,7 +73,7 @@ SyncedMemory & SyncedMemory::operator =(SyncedMemory && obj)
 void SyncedMemory::swap(SyncedMemory & obj)
 {
     if (this != &obj) {
-        _context.swap(obj._context);
+        _stream.swap(obj._stream);
         std::swap(_type, obj._type);
         std::swap(_head, obj._head);
         _gpu.swap(obj._gpu);

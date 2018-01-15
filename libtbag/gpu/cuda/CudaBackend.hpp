@@ -54,19 +54,19 @@ public:
     virtual bool  isDevice() const TBAG_NOEXCEPT override;
     virtual bool  isStream() const TBAG_NOEXCEPT override;
 
-    virtual GpuStream createStream() const override;
-    virtual bool     releaseStream(GpuStream & stream) const override;
+    virtual bool  createStream(GpuStream & stream) const override;
+    virtual bool releaseStream(GpuStream & stream) const override;
 
-    virtual GpuEvent createEvent(GpuStream const & stream) const override;
-    virtual bool       syncEvent(GpuEvent  const &  event) const override;
-    virtual bool    elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const override;
-    virtual bool    releaseEvent(GpuEvent        &  event) const override;
+    virtual bool  createEvent(GpuStream const & stream, GpuEvent & event) const override;
+    virtual bool    syncEvent(GpuEvent  const &  event) const override;
+    virtual bool elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const override;
+    virtual bool releaseEvent(GpuEvent        &  event) const override;
 
-    virtual GpuMemory malloc(std::size_t size) const override;
-    virtual bool        free(GpuMemory & memory) const override;
+    virtual bool malloc(GpuMemory & memory, std::size_t size) const override;
+    virtual bool   free(GpuMemory & memory) const override;
 
-    virtual HostMemory mallocHost(std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const override;
-    virtual bool         freeHost(HostMemory & memory) const override;
+    virtual bool mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const override;
+    virtual bool   freeHost(HostMemory & memory) const override;
 
     virtual bool write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
     virtual bool  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;

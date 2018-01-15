@@ -33,35 +33,6 @@ namespace gpu {
  */
 class TBAG_API Gpu
 {
-public:
-    struct Event
-    {
-        GpuEvent event;
-
-        Event(GpuEvent const & e);
-        ~Event();
-
-        bool sync() const;
-        float elapsed() const;
-    };
-
-    struct Stream
-    {
-        GpuStream stream;
-
-        Stream(GpuStream const & s);
-        ~Stream();
-
-        bool write(SyncedMemory const & mem, Event * event = nullptr) const;
-        bool  read(SyncedMemory const & mem, Event * event = nullptr) const;
-
-        bool writeAsync(SyncedMemory const & mem, Event * event = nullptr) const;
-        bool  readAsync(SyncedMemory const & mem, Event * event = nullptr) const;
-
-        bool  flush() const;
-        bool finish() const;
-    };
-
 private:
     SharedGpuContext _gpu;
 
