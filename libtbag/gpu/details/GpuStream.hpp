@@ -56,7 +56,7 @@ public:
     Err release();
 
 public:
-    static GpuStream create(GpuContext const * c);
+    static GpuStream instance(GpuContext const * c);
 };
 
 using SharedGpuStream = std::shared_ptr<GpuStream>;

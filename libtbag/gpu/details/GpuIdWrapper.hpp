@@ -66,6 +66,8 @@ public:
     template <typename T> inline void setId(T i)    TBAG_NOEXCEPT { _id = (GpuId)i; }
     template <typename T> inline T   castId() const TBAG_NOEXCEPT { return (T)_id; }
 
+    inline bool validate() const TBAG_NOEXCEPT
+    { return (_context != nullptr) && existsId(); }
     inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT
     { return (_context != nullptr) && isSameContext(c) && existsId(); }
 };

@@ -84,6 +84,8 @@ public:
 
     inline void clearIds() TBAG_NOEXCEPT { _start = UNKNOWN_ID; _stop = UNKNOWN_ID; }
 
+    inline bool validate() const TBAG_NOEXCEPT
+    { return (_context != nullptr) && existsId(); }
     inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT
     { return (_context != nullptr) && isSameContext(c) && existsId(); }
 
@@ -97,7 +99,7 @@ public:
     float elapsed();
 
 public:
-    static GpuEvent create(GpuStream const * s);
+    static GpuEvent instance(GpuStream const * s);
 };
 
 /**

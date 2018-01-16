@@ -449,8 +449,7 @@ Err CudaContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFla
         return Err::E_CUDA;
     }
 
-    memory.set(data, size, size);
-    memory.setFlag(flag);
+    memory.set(data, size, size, flag);
     tDLogIfD(isGpuVerbose(), "CudaContext::mallocHost({}) CUDA cudaMallocHost() MEM:{} CAP:{} SIZE:{}",
              size, memory.data(), memory.capacity(), memory.size());
     return Err::E_SUCCESS;

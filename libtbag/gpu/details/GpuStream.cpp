@@ -61,15 +61,21 @@ void GpuStream::swap(GpuStream & obj)
 
 Err GpuStream::create()
 {
+    if (validate()) {
+        return Err::E_ALREADY;
+    }
     return (_context != nullptr ? _context->createStream(*this) : Err::E_NULLPTR);
 }
 
 Err GpuStream::release()
 {
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
     return (_context != nullptr ? _context->releaseStream(*this) : Err::E_NULLPTR);
 }
 
-GpuStream GpuStream::create(GpuContext const * c)
+GpuStream GpuStream::instance(GpuContext const * c)
 {
     if (c == nullptr) {
         return GpuStream();

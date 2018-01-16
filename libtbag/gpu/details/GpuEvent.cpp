@@ -75,21 +75,33 @@ void GpuEvent::swap(GpuEvent & obj)
 
 Err GpuEvent::create()
 {
+    if (validate()) {
+        return Err::E_ALREADY;
+    }
     return (_context != nullptr && _stream != nullptr ? _context->createEvent(*_stream, *this) : Err::E_NULLPTR);
 }
 
 Err GpuEvent::release()
 {
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
     return (_context != nullptr ? _context->releaseEvent(*this) : Err::E_NULLPTR);
 }
 
 Err GpuEvent::sync()
 {
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
     return (_context != nullptr ? _context->syncEvent(*this) : Err::E_NULLPTR);
 }
 
 Err GpuEvent::elapsed(float * millisec)
 {
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
     return (_context != nullptr ? _context->elapsedEvent(*this, millisec) : Err::E_NULLPTR);
 }
 
@@ -102,7 +114,7 @@ float GpuEvent::elapsed()
     return 0;
 }
 
-GpuEvent GpuEvent::create(GpuStream const * s)
+GpuEvent GpuEvent::instance(GpuStream const * s)
 {
     if (s == nullptr) {
         return GpuEvent();

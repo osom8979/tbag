@@ -15,8 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 #include <libtbag/gpu/details/GpuIdWrapper.hpp>
+
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,6 +27,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gpu     {
 namespace details {
+
+class GpuProgram;
 
 /**
  * GpuKernel class prototype.
@@ -34,6 +39,9 @@ namespace details {
  */
 class TBAG_API GpuKernel : public GpuIdWrapper
 {
+private:
+    std::string _name;
+
 public:
     GpuKernel(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID);
     GpuKernel(GpuKernel const & obj);
@@ -47,8 +55,17 @@ public:
 public:
     void swap(GpuKernel & obj);
     inline friend void swap(GpuKernel & lh, GpuKernel & rh) { lh.swap(rh); }
-};
 
+public:
+    inline std::string getName() const { return _name; }
+
+public:
+    Err create(GpuProgram const & program, std::string const & kernel_symbol);
+    Err release();
+
+public:
+    static GpuKernel instance(GpuProgram const & program, std::string const & kernel_symbol);
+};
 
 } // namespace details
 } // namespace gpu

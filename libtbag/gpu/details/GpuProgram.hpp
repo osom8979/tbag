@@ -15,8 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 #include <libtbag/gpu/details/GpuIdWrapper.hpp>
+
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -47,6 +50,14 @@ public:
 public:
     void swap(GpuProgram & obj);
     inline friend void swap(GpuProgram & lh, GpuProgram & rh) { lh.swap(rh); }
+
+public:
+    Err create(std::string const & source);
+    Err build();
+    Err release();
+
+public:
+    static GpuProgram instance(GpuContext const * c, std::string const & source);
 };
 
 } // namespace details

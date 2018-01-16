@@ -28,6 +28,16 @@ char const * getGpuTypeString(GpuType type) TBAG_NOEXCEPT
     return "UNKNOWN";
 }
 
+char const * getHostMemoryTypeString(HostMemoryFlag flag) TBAG_NOEXCEPT
+{
+    switch (flag) {
+    case HostMemoryFlag::HMF_DEFAULT: return "DEFAULT";
+    case HostMemoryFlag::HMF_PINNED:  return "PINNED";
+    default: TBAG_INACCESSIBLE_BLOCK_ASSERT(); break;
+    }
+    return "UNKNOWN";
+}
+
 } // namespace details
 } // namespace gpu
 

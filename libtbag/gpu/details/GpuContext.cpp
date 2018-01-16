@@ -176,17 +176,40 @@ Err GpuContext::free(GpuMemory & memory) const
 
 Err GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
 {
+    if (memory.isSameContext(this) == false) {
+        return Err::E_ILLARGS;
+    }
     if (HostMemoryFlag::HMF_DEFAULT != flag) {
         tDLogE("GpuContext::mallocHost() Unsupported flag: {}", static_cast<int>(flag));
         return Err::E_ILLARGS;
     }
+
+    auto const  ALIGNED_SIZE = memory::getDefaultAlignedSize();
+    auto const   PACKED_SIZE = algorithm::getPackedSize(size, ALIGNED_SIZE);
+    auto const CAPACITY_SIZE = PACKED_SIZE * ALIGNED_SIZE;
+
     assert(flag == HostMemoryFlag::HMF_DEFAULT);
-    return GpuContext::malloc(memory, size);
+    assert(CAPACITY_SIZE >= size);
+
+    void * data = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
+    memory.set(data, CAPACITY_SIZE, size, flag);
+
+    tDLogIfD(isGpuVerbose(), "GpuContext::mallocHost({}) Aligned malloc MEM:{} CAP:{} SIZE:{}",
+             size, memory.data(), memory.capacity(), memory.size());
+    return Err::E_SUCCESS;
 }
 
 Err GpuContext::freeHost(HostMemory & memory) const
 {
-    return GpuContext::free(memory);
+    if (memory.validate(this) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    tDLogIfD(isGpuVerbose(), "GpuContext::freeHost() Aligned free MEM:{} CAP:{} SIZE:{}",
+             memory.data(), memory.capacity(), memory.size());
+    memory::alignedMemoryFree(memory.data());
+    memory.clear();
+    return Err::E_SUCCESS;
 }
 
 Err GpuContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const

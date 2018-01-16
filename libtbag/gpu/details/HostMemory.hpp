@@ -15,8 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
-#include <libtbag/gpu/details/GpuMemory.hpp>
+#include <libtbag/gpu/details/MemoryWrapper.hpp>
 
 #include <cstdlib>
 #include <vector>
@@ -35,14 +36,14 @@ namespace details {
  * @date   2018-01-14
  * @date   2018-01-15 (struct -> class)
  */
-class TBAG_API HostMemory : public GpuMemory
+class TBAG_API HostMemory : public MemoryWrapper
 {
 private:
     HostMemoryFlag _flag;
 
 public:
     HostMemory(GpuContext const * c = nullptr);
-    explicit HostMemory(GpuMemory const & mem);
+    explicit HostMemory(MemoryWrapper const & mem);
     HostMemory(HostMemory const & obj);
     HostMemory(HostMemory && obj);
     virtual ~HostMemory();
@@ -56,8 +57,17 @@ public:
     inline friend void swap(HostMemory & lh, HostMemory & rh) { lh.swap(rh); }
 
 public:
-    inline void setFlag(HostMemoryFlag flag) TBAG_NOEXCEPT { _flag = flag; }
-    inline HostMemoryFlag getFlag() const TBAG_NOEXCEPT { return _flag; }
+    inline void set(void * d, std::size_t c, std::size_t s, HostMemoryFlag f) TBAG_NOEXCEPT
+    { _data = d; _capacity = c; _size = s; _flag = f; }
+    inline void clear() TBAG_NOEXCEPT
+    { _data = nullptr; _capacity = 0; _size = 0; _flag = HostMemoryFlag::HMF_DEFAULT; }
+
+public:
+    Err alloc(std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT);
+    Err free();
+
+public:
+    static HostMemory instance(GpuContext const * c, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT);
 };
 
 using HostMemories = std::vector<HostMemory>;

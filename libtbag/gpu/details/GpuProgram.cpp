@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/gpu/details/GpuProgram.hpp>
+#include <libtbag/gpu/details/GpuContext.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <utility>
@@ -34,7 +35,7 @@ GpuProgram::GpuProgram(GpuProgram && obj) : GpuProgram()
 
 GpuProgram::~GpuProgram()
 {
-    // EMPTY.
+    release();
 }
 
 GpuProgram & GpuProgram::operator =(GpuProgram const & obj)
@@ -56,6 +57,43 @@ void GpuProgram::swap(GpuProgram & obj)
     if (this != &obj) {
         GpuIdWrapper::swap(obj);
     }
+}
+
+Err GpuProgram::create(std::string const & source)
+{
+    if (validate()) {
+        return Err::E_ALREADY;
+    }
+    return (_context != nullptr ? _context->createProgram(source, *this) : Err::E_NULLPTR);
+}
+
+Err GpuProgram::build()
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return (_context != nullptr ? _context->buildProgram(*this) : Err::E_NULLPTR);
+}
+
+Err GpuProgram::release()
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return (_context != nullptr ? _context->releaseProgram(*this) : Err::E_NULLPTR);
+}
+
+GpuProgram GpuProgram::instance(GpuContext const * c, std::string const & source)
+{
+    if (c == nullptr) {
+        return GpuProgram();
+    }
+
+    GpuProgram program(c);
+    if (isSuccess(program.create(source))) {
+        return program;
+    }
+    return GpuProgram();
 }
 
 } // namespace details

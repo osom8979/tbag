@@ -35,6 +35,7 @@ class GpuProgram;
 class GpuKernel;
 class GpuMemory;
 class HostMemory;
+class MemoryWrapper;
 
 /**
  * GpuContext structure.

@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/gpu/details/HostMemory.hpp>
+#include <libtbag/gpu/details/GpuContext.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <algorithm>
@@ -19,13 +20,13 @@ namespace gpu     {
 namespace details {
 
 HostMemory::HostMemory(GpuContext const * c)
-        : GpuMemory(c), _flag(HostMemoryFlag::HMF_DEFAULT)
+        : MemoryWrapper(c), _flag(HostMemoryFlag::HMF_DEFAULT)
 {
     // EMPTY.
 }
 
-HostMemory::HostMemory(GpuMemory const & mem)
-        : GpuMemory(mem), _flag(HostMemoryFlag::HMF_DEFAULT)
+HostMemory::HostMemory(MemoryWrapper const & mem)
+        : MemoryWrapper(mem), _flag(HostMemoryFlag::HMF_DEFAULT)
 {
     // EMPTY.
 }
@@ -48,7 +49,7 @@ HostMemory::~HostMemory()
 HostMemory & HostMemory::operator =(HostMemory const & obj)
 {
     if (this != &obj) {
-        GpuMemory::operator=(obj);
+        MemoryWrapper::operator=(obj);
         _flag = obj._flag;
     }
     return *this;
@@ -63,9 +64,38 @@ HostMemory & HostMemory::operator =(HostMemory && obj)
 void HostMemory::swap(HostMemory & obj)
 {
     if (this != &obj) {
-        GpuMemory::swap(obj);
+        MemoryWrapper::swap(obj);
         std::swap(_flag, obj._flag);
     }
+}
+
+Err HostMemory::alloc(std::size_t size, HostMemoryFlag flag)
+{
+    if (validate()) {
+        return Err::E_ALREADY;
+    }
+    return (_context != nullptr ? _context->mallocHost(*this, size, flag) : Err::E_NULLPTR);
+}
+
+Err HostMemory::free()
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return (_context != nullptr ? _context->freeHost(*this) : Err::E_NULLPTR);
+}
+
+HostMemory HostMemory::instance(GpuContext const * c, std::size_t size, HostMemoryFlag flag)
+{
+    if (c == nullptr) {
+        return HostMemory();
+    }
+
+    HostMemory memory(c);
+    if (isSuccess(memory.alloc(size, flag))) {
+        return memory;
+    }
+    return HostMemory();
 }
 
 } // namespace details

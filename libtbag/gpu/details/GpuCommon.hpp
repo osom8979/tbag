@@ -54,11 +54,12 @@ enum class GpuType
 
 enum class HostMemoryFlag
 {
-    HMF_DEFAULT,
-    HMF_PINNED,
+    HMF_DEFAULT, ///< Aligned memory.
+    HMF_PINNED,  ///< Page-locked memory.
 };
 
 TBAG_API char const * getGpuTypeString(GpuType type) TBAG_NOEXCEPT;
+TBAG_API char const * getHostMemoryTypeString(HostMemoryFlag flag) TBAG_NOEXCEPT;
 
 struct GpuPlatform
 {
@@ -156,6 +157,7 @@ inline void checkOpenCLGpuType(GpuPlatform const & platform) { checkGpuType(plat
 
 using GpuPlatforms = std::vector<GpuPlatform>;
 using GpuDevices   = std::vector<GpuDevice>;
+
 
 } // namespace details
 } // namespace gpu
