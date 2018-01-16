@@ -1,11 +1,11 @@
 /**
- * @file   CudaBackend.cpp
- * @brief  CudaBackend class implementation.
+ * @file   CudaContext.cpp
+ * @brief  CudaContext class implementation.
  * @author zer0
- * @date   2018-01-13
+ * @date   2018-01-16
  */
 
-#include <libtbag/gpu/cuda/CudaBackend.hpp>
+#include <libtbag/gpu/cuda/CudaContext.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/Format.hpp>
 #include <libtbag/string/StringUtils.hpp>

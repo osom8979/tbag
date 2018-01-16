@@ -1,16 +1,13 @@
 /**
- * @file   CpuBackend.cpp
- * @brief  CpuBackend class implementation.
+ * @file   CpuContext.cpp
+ * @brief  CpuContext class implementation.
  * @author zer0
- * @date   2018-01-13
+ * @date   2018-01-16
  */
 
-#include <libtbag/gpu/cpu/CpuBackend.hpp>
+#include <libtbag/gpu/cpu/CpuContext.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/debug/Assert.hpp>
 #include <libtbag/util/Version.hpp>
-#include <libtbag/algorithm/Pack.hpp>
-#include <libtbag/memory/AlignedMemory.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

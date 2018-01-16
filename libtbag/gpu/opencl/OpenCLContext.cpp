@@ -1,11 +1,11 @@
 /**
- * @file   OpenCLBackend.cpp
- * @brief  OpenCLBackend class implementation.
+ * @file   OpenCLContext.cpp
+ * @brief  OpenCLContext class implementation.
  * @author zer0
- * @date   2018-01-13
+ * @date   2018-01-16
  */
 
-#include <libtbag/gpu/opencl/OpenCLBackend.hpp>
+#include <libtbag/gpu/opencl/OpenCLContext.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_OPENCL)
@@ -223,7 +223,7 @@ OpenCLContext::~OpenCLContext()
 }
 
 Err OpenCLContext::_write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
-                           std::size_t size, bool blocking, GpuEvent * event) const
+                          std::size_t size, bool blocking, GpuEvent * event) const
 {
     cl_int code = clEnqueueWriteBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
                                        (blocking ? CL_TRUE : CL_FALSE),
@@ -238,7 +238,7 @@ Err OpenCLContext::_write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory co
 }
 
 Err OpenCLContext::_read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
-                          std::size_t size, bool blocking, GpuEvent * event) const
+                         std::size_t size, bool blocking, GpuEvent * event) const
 {
     cl_int code = clEnqueueReadBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
                                       (blocking ? CL_TRUE : CL_FALSE),

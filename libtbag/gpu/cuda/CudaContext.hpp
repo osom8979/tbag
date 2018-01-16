@@ -1,12 +1,12 @@
 /**
- * @file   CudaBackend.hpp
- * @brief  CudaBackend class prototype.
+ * @file   CudaContext.hpp
+ * @brief  CudaContext class prototype.
  * @author zer0
- * @date   2018-01-13
+ * @date   2018-01-16
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_CUDA_CUDABACKEND_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_CUDA_CUDABACKEND_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_CUDA_CUDACONTEXT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_CUDA_CUDACONTEXT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -150,5 +150,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_CUDA_CUDABACKEND_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_CUDA_CUDACONTEXT_HPP__
 

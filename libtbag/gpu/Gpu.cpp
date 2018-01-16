@@ -9,10 +9,10 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
-#include <libtbag/gpu/accel/AccelBackend.hpp>
-#include <libtbag/gpu/cpu/CpuBackend.hpp>
-#include <libtbag/gpu/cuda/CudaBackend.hpp>
-#include <libtbag/gpu/opencl/OpenCLBackend.hpp>
+#include <libtbag/gpu/accel/AccelContext.hpp>
+#include <libtbag/gpu/cpu/CpuContext.hpp>
+#include <libtbag/gpu/cuda/CudaContext.hpp>
+#include <libtbag/gpu/opencl/OpenCLContext.hpp>
 
 #include <utility>
 

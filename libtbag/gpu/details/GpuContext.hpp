@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 
 #include <cstdlib>
@@ -41,7 +42,7 @@ class HostMemory;
  * @author zer0
  * @date   2018-01-14
  */
-class TBAG_API GpuContext : public GpuDevice
+class TBAG_API GpuContext : public GpuDevice, private Noncopyable
 {
 public:
     GpuId const CONTEXT;

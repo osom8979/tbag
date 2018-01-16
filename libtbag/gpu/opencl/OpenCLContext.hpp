@@ -1,12 +1,12 @@
 /**
- * @file   OpenCLBackend.hpp
- * @brief  OpenCLBackend class prototype.
+ * @file   OpenCLContext.hpp
+ * @brief  OpenCLContext class prototype.
  * @author zer0
- * @date   2018-01-13
+ * @date   2018-01-16
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_OPENCL_OPENCLBACKEND_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_OPENCL_OPENCLBACKEND_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_OPENCL_OPENCLCONTEXT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_OPENCL_OPENCLCONTEXT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -95,5 +95,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_OPENCL_OPENCLBACKEND_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_OPENCL_OPENCLCONTEXT_HPP__
 

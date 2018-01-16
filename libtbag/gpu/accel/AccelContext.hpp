@@ -1,12 +1,12 @@
 /**
- * @file   AccelBackend.hpp
- * @brief  AccelBackend class prototype.
+ * @file   AccelContext.hpp
+ * @brief  AccelContext class prototype.
  * @author zer0
- * @date   2018-01-13
+ * @date   2018-01-16
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_ACCEL_ACCELBACKEND_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_ACCEL_ACCELBACKEND_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GPU_ACCEL_ACCELCONTEXT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GPU_ACCEL_ACCELCONTEXT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gpu/cpu/CpuBackend.hpp>
+#include <libtbag/gpu/cpu/CpuContext.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -62,5 +62,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_ACCEL_ACCELBACKEND_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GPU_ACCEL_ACCELCONTEXT_HPP__
 

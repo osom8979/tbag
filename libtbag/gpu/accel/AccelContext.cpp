@@ -1,11 +1,11 @@
 /**
- * @file   AccelBackend.cpp
- * @brief  AccelBackend class implementation.
+ * @file   AccelContext.cpp
+ * @brief  AccelContext class implementation.
  * @author zer0
- * @date   2018-01-13
+ * @date   2018-01-16
  */
 
-#include <libtbag/gpu/accel/AccelBackend.hpp>
+#include <libtbag/gpu/accel/AccelContext.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/util/Version.hpp>
 
