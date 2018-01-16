@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gpu/GpuContext.hpp>
+#include <libtbag/gpu/details/GpuDetails.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

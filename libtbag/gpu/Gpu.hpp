@@ -15,15 +15,62 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/gpu/GpuContext.hpp>
-#include <libtbag/gpu/SyncedMemory.hpp>
+#include <libtbag/gpu/details/GpuDetails.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace gpu {
+
+TBAG_API bool isSupport(GpuType type) TBAG_NOEXCEPT;
+
+TBAG_API int             getPlatformCount(GpuType type);
+TBAG_API GpuPlatforms    getPlatformList (GpuType type);
+TBAG_API GpuPlatformInfo getPlatformInfo (GpuPlatform const & platform);
+
+TBAG_API int             getDeviceCount(GpuPlatform const & platform);
+TBAG_API GpuDevices      getDeviceList (GpuPlatform const & platform);
+TBAG_API GpuDeviceInfo   getDeviceInfo (GpuDevice   const & device);
+
+TBAG_API SharedGpuContext createContext(GpuDevice const & device);
+
+template <typename Predicated>
+void runIfSupported(std::vector<GpuType> const & types,
+                    std::size_t platform_index,
+                    std::size_t device_index,
+                    Predicated predicated)
+{
+    for (auto & type : types) {
+        if (isSupport(type) == false) {
+            continue;
+        }
+
+        auto const PLATFORMS = libtbag::gpu::getPlatformList(type);
+        if (PLATFORMS.size() > platform_index) {
+            continue;
+        }
+
+        auto const DEVICES = libtbag::gpu::getDeviceList(PLATFORMS[platform_index]);
+        if (DEVICES.empty() > device_index) {
+            continue;
+        }
+
+        auto context = libtbag::gpu::createContext(DEVICES[device_index]);
+        if (static_cast<bool>(context)) {
+            predicated(context);
+        }
+    }
+}
+
+template <typename Predicated>
+void runAllIfSupported(Predicated predicated, std::size_t platform_index = 0, std::size_t device_index = 0)
+{
+    runIfSupported({GpuType::GT_CPU,
+                    GpuType::GT_ACCEL,
+                    GpuType::GT_CUDA,
+                    GpuType::GT_OPENCL}, platform_index, device_index, predicated);
+}
 
 /**
  * Gpu class prototype.

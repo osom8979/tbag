@@ -12,34 +12,12 @@
 #include <libtbag/algorithm/Pack.hpp>
 #include <libtbag/memory/AlignedMemory.hpp>
 
-#include <cstdlib>
-#include <chrono>
-
-//#define TBAG_CPU_BACKEND_DEBUGGING
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace gpu {
 namespace cpu {
-
-// ---------------
-namespace __impl {
-// ---------------
-
-TBAG_CONSTEXPR static bool isCpuBackendVerbose() TBAG_NOEXCEPT
-{
-#if defined(TBAG_CPU_BACKEND_DEBUGGING)
-    return true;
-#else
-    return false;
-#endif
-}
-
-// ------------------
-} // namespace __impl
-// ------------------
 
 bool isSupport() TBAG_NOEXCEPT
 {
