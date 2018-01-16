@@ -29,6 +29,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
+class GpuMemory;
+class GpuEvent;
+
 /**
  * HostMemory class prototype.
  *
@@ -42,7 +45,7 @@ private:
     HostMemoryFlag _flag;
 
 public:
-    HostMemory(GpuContext const * c = nullptr);
+    HostMemory(GpuContext const * c = nullptr, GpuStream * s = nullptr);
     explicit HostMemory(MemoryWrapper const & mem);
     HostMemory(HostMemory const & obj);
     HostMemory(HostMemory && obj);
@@ -65,6 +68,12 @@ public:
 public:
     Err alloc(std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT);
     Err free();
+
+public:
+    Err      copy( GpuMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
+    Err      copy(HostMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
+    Err copyAsync( GpuMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
+    Err copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
 
 public:
     static HostMemory instance(GpuContext const * c, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT);

@@ -34,14 +34,6 @@ GpuContext::~GpuContext()
     // EMPTY.
 }
 
-bool GpuContext::validateMemory(GpuStream const & stream, GpuMemory const & gpu_mem,
-                                HostMemory const & host_mem, std::size_t size) const TBAG_NOEXCEPT
-{
-    return stream.validate(this)
-           && gpu_mem.validate(this) && size <= gpu_mem.size()
-           && host_mem.validate(this) && size <= host_mem.size();
-}
-
 Err GpuContext::createStream(GpuStream & stream) const
 {
     if (stream.isSameContext(this) == false) {
@@ -240,6 +232,34 @@ Err GpuContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory c
 Err GpuContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     return GpuContext::read(stream, gpu_mem, host_mem, size, event);
+}
+
+Err GpuContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+    ::memcpy(dest.data(), src.data(), size);
+    return Err::E_SUCCESS;
+}
+
+Err GpuContext::copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+    ::memcpy(dest.data(), src.data(), size);
+    return Err::E_SUCCESS;
+}
+
+Err GpuContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    return GpuContext::copy(stream, src, dest, size, event);
+}
+
+Err GpuContext::copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    return GpuContext::copy(stream, src, dest, size, event);
 }
 
 Err GpuContext::flush(GpuStream & stream) const

@@ -26,6 +26,7 @@ namespace gpu     {
 namespace details {
 
 class GpuContext;
+class GpuStream;
 
 /**
  * MemoryWrapper class prototype.
@@ -37,6 +38,7 @@ class TBAG_API MemoryWrapper
 {
 protected:
     GpuContext const * _context;
+    GpuStream * _stream;
 
 protected:
     std::size_t _capacity;
@@ -44,7 +46,7 @@ protected:
     void *      _data;
 
 public:
-    MemoryWrapper(GpuContext const * c = nullptr);
+    MemoryWrapper(GpuContext const * c = nullptr, GpuStream * s = nullptr);
     MemoryWrapper(MemoryWrapper const & obj);
     MemoryWrapper(MemoryWrapper && obj);
     ~MemoryWrapper();
@@ -59,7 +61,10 @@ public:
 
 public:
     inline bool isSameContext(GpuContext const * c) const TBAG_NOEXCEPT { return _context == c; }
+    inline bool  isSameStream(GpuStream  const * s) const TBAG_NOEXCEPT { return _stream  == s; }
+
     inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return _context; }
+    inline GpuStream  const *  getStreamPtr() const TBAG_NOEXCEPT { return _stream; }
 
     inline std::size_t capacity() const TBAG_NOEXCEPT { return _capacity; }
     inline std::size_t     size() const TBAG_NOEXCEPT { return     _size; }

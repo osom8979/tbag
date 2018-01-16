@@ -85,7 +85,7 @@ Err GpuKernel::release()
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    if (_context != nullptr) {
+    if (_context == nullptr) {
         return Err::E_NULLPTR;
     }
     assert(_context != nullptr);

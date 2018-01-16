@@ -56,6 +56,10 @@ public:
     Err release();
 
 public:
+    Err  flush();
+    Err finish();
+
+public:
     static GpuStream instance(GpuContext const * c);
 };
 

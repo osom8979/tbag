@@ -7,6 +7,7 @@
 
 #include <libtbag/gpu/details/HostMemory.hpp>
 #include <libtbag/gpu/details/GpuContext.hpp>
+#include <libtbag/gpu/details/GpuStream.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <algorithm>
@@ -19,8 +20,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-HostMemory::HostMemory(GpuContext const * c)
-        : MemoryWrapper(c), _flag(HostMemoryFlag::HMF_DEFAULT)
+HostMemory::HostMemory(GpuContext const * c, GpuStream * s)
+        : MemoryWrapper(c, s), _flag(HostMemoryFlag::HMF_DEFAULT)
 {
     // EMPTY.
 }
@@ -83,6 +84,50 @@ Err HostMemory::free()
         return Err::E_ILLSTATE;
     }
     return (_context != nullptr ? _context->freeHost(*this) : Err::E_NULLPTR);
+}
+
+Err HostMemory::copy(GpuMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->write(*_stream, memory, *this, size, event);
+}
+
+Err HostMemory::copy(HostMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->copy(*_stream, *this, memory, size, event);
+}
+
+Err HostMemory::copyAsync(GpuMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->writeAsync(*_stream, memory, *this, size, event);
+}
+
+Err HostMemory::copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->copyAsync(*_stream, *this, memory, size, event);
 }
 
 HostMemory HostMemory::instance(GpuContext const * c, std::size_t size, HostMemoryFlag flag)

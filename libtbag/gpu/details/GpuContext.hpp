@@ -53,8 +53,13 @@ public:
     virtual ~GpuContext();
 
 public:
-    bool validateMemory(GpuStream const & stream, GpuMemory const & gpu_mem,
-                        HostMemory const & host_mem, std::size_t size) const TBAG_NOEXCEPT;
+    template <typename StreamType, typename MemType1, typename MemType2>
+    inline bool validateMemory(StreamType const & stream, MemType1 const & mem1, MemType2 const & mem2, std::size_t size) const TBAG_NOEXCEPT
+    {
+        return stream.validate(this)
+               && mem1.validate(this) && size <= mem1.size()
+               && mem2.validate(this) && size <= mem2.size();
+    }
 
 public:
     virtual bool isSupport() const TBAG_NOEXCEPT = 0;
@@ -94,6 +99,12 @@ public:
 
     virtual Err writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
     virtual Err  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+
+    virtual Err copy(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
+
+    virtual Err copyAsync(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
 
 // Memory.
 public:

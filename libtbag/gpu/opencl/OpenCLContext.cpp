@@ -501,6 +501,43 @@ Err OpenCLContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, Host
     return _read(stream, gpu_mem, host_mem, size, false, event);
 }
 
+Err OpenCLContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    cl_int code = clEnqueueCopyBuffer(stream.castId<cl_command_queue>(), src.castData<cl_mem>(), dest.castData<cl_mem>(),
+                                      0, 0, size, 0, nullptr, (cl_event*)(event == nullptr ? nullptr : &event->atId()));
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLContext::copy() OpenCL clEnqueueCopyBuffer() error code: {}", code);
+        return Err::E_OPENCL;
+    }
+
+    cl_int finish_code = clFinish(stream.castId<cl_command_queue>());
+    if (finish_code != CL_SUCCESS) {
+        tDLogE("OpenCLContext::copy() OpenCL clFinish() error code: {}", finish_code);
+        return Err::E_OPENCL;
+    }
+
+    return Err::E_SUCCESS;
+}
+
+Err OpenCLContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    cl_int code = clEnqueueCopyBuffer(stream.castId<cl_command_queue>(), src.castData<cl_mem>(), dest.castData<cl_mem>(),
+                                      0, 0, size, 0, nullptr, (cl_event*)(event == nullptr ? nullptr : &event->atId()));
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLContext::copyAsync() OpenCL clEnqueueCopyBuffer() error code: {}", code);
+        return Err::E_OPENCL;
+    }
+    return Err::E_SUCCESS;
+}
+
 Err OpenCLContext::flush(GpuStream & stream) const
 {
     if (stream.validate(this) == false) {

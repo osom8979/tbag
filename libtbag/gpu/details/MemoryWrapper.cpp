@@ -18,8 +18,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-MemoryWrapper::MemoryWrapper(GpuContext const * c)
-        : _context(c), _capacity(0), _size(0), _data(nullptr)
+MemoryWrapper::MemoryWrapper(GpuContext const * c, GpuStream * s)
+        : _context(c), _stream(s), _capacity(0), _size(0), _data(nullptr)
 {
     // EMPTY.
 }
@@ -43,6 +43,7 @@ MemoryWrapper & MemoryWrapper::operator =(MemoryWrapper const & obj)
 {
     if (this != &obj) {
         _context  = obj._context;
+        _stream   = obj._stream;
         _capacity = obj._capacity;
         _size     = obj._size;
         _data     = obj._data;
@@ -60,6 +61,7 @@ void MemoryWrapper::swap(MemoryWrapper & obj)
 {
     if (this != &obj) {
         std::swap(_context , obj._context);
+        std::swap(_stream  , obj._stream);
         std::swap(_capacity, obj._capacity);
         std::swap(_size    , obj._size);
         std::swap(_data    , obj._data);

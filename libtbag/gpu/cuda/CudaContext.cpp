@@ -536,6 +536,68 @@ Err CudaContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMe
     return Err::E_SUCCESS;
 }
 
+Err CudaContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    __impl::CudaEventGuard const EVENT_LOCK(stream, event);
+    cudaError_t code = cudaMemcpy(dest.data(), src.data(), size, cudaMemcpyDeviceToDevice);
+    if (code != cudaSuccess) {
+        tDLogE("CudaContext::copy() CUDA cudaMemcpy(D2D) error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err CudaContext::copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    __impl::CudaEventGuard const EVENT_LOCK(stream, event);
+    cudaError_t code = cudaMemcpy(dest.data(), src.data(), size, cudaMemcpyHostToHost);
+    if (code != cudaSuccess) {
+        tDLogE("CudaContext::copy() CUDA cudaMemcpy(H2H) error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err CudaContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    __impl::CudaEventGuard const EVENT_LOCK(stream, event);
+    cudaError_t code = cudaMemcpyAsync(dest.data(), src.data(), size, cudaMemcpyDeviceToDevice,
+                                       stream.castId<cudaStream_t>());
+    if (code != cudaSuccess) {
+        tDLogE("CudaContext::copyAsync() CUDA cudaMemcpyAsync(D2D) error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err CudaContext::copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+{
+    if (validateMemory(stream, src, dest, size) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    __impl::CudaEventGuard const EVENT_LOCK(stream, event);
+    cudaError_t code = cudaMemcpyAsync(dest.data(), src.data(), size, cudaMemcpyHostToHost,
+                                       stream.castId<cudaStream_t>());
+    if (code != cudaSuccess) {
+        tDLogE("CudaContext::copyAsync() CUDA cudaMemcpyAsync(H2H) error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
+    }
+    return Err::E_SUCCESS;
+}
+
 Err CudaContext::flush(GpuStream & stream) const
 {
     if (stream.validate(this) == false) {

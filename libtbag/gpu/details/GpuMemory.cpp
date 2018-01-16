@@ -7,6 +7,7 @@
 
 #include <libtbag/gpu/details/GpuMemory.hpp>
 #include <libtbag/gpu/details/GpuContext.hpp>
+#include <libtbag/gpu/details/GpuStream.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <algorithm>
@@ -19,7 +20,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-GpuMemory::GpuMemory(GpuContext const * c) : MemoryWrapper(c)
+GpuMemory::GpuMemory(GpuContext const * c, GpuStream * s) : MemoryWrapper(c, s)
 {
     // EMPTY.
 }
@@ -79,6 +80,50 @@ Err GpuMemory::free()
         return Err::E_ILLSTATE;
     }
     return (_context != nullptr ? _context->free(*this) : Err::E_NULLPTR);
+}
+
+Err GpuMemory::copy(GpuMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->copy(*_stream, *this, memory, size, event);
+}
+
+Err GpuMemory::copy(HostMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->read(*_stream, *this, memory, size, event);
+}
+
+Err GpuMemory::copyAsync(GpuMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->copyAsync(*_stream, *this, memory, size, event);
+}
+
+Err GpuMemory::copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_context == nullptr || _stream == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    return _context->readAsync(*_stream, *this, memory, size, event);
 }
 
 GpuMemory GpuMemory::instance(GpuContext const * c, std::size_t size)

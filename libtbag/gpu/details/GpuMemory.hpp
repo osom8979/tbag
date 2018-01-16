@@ -28,6 +28,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
+class HostMemory;
+class GpuEvent;
+
 /**
  * GpuMemory class prototype.
  *
@@ -38,7 +41,7 @@ namespace details {
 class TBAG_API GpuMemory : public MemoryWrapper
 {
 public:
-    GpuMemory(GpuContext const * c = nullptr);
+    GpuMemory(GpuContext const * c = nullptr, GpuStream * s = nullptr);
     explicit GpuMemory(MemoryWrapper const & mem);
     GpuMemory(GpuMemory const & obj);
     GpuMemory(GpuMemory && obj);
@@ -61,6 +64,12 @@ public:
 public:
     Err alloc(std::size_t size);
     Err free();
+
+public:
+    Err      copy( GpuMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
+    Err      copy(HostMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
+    Err copyAsync( GpuMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
+    Err copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
 
 public:
     static GpuMemory instance(GpuContext const * c, std::size_t size);

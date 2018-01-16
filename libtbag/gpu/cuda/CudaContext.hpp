@@ -139,6 +139,12 @@ public:
     virtual Err writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
     virtual Err  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
+    virtual Err copy(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+
+    virtual Err copyAsync(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+
     virtual Err  flush(GpuStream & stream) const override;
     virtual Err finish(GpuStream & stream) const override;
 };
