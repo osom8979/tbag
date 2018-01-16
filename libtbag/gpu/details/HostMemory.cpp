@@ -20,7 +20,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-HostMemory::HostMemory(GpuContext const * c, GpuStream * s)
+HostMemory::HostMemory(GpuContext const * c, GpuStream const * s)
         : MemoryWrapper(c, s), _flag(HostMemoryFlag::HMF_DEFAULT)
 {
     // EMPTY.

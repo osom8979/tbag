@@ -204,7 +204,7 @@ Err GpuContext::freeHost(HostMemory & memory) const
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err GpuContext::write(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -214,7 +214,7 @@ Err GpuContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const 
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err GpuContext::read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -224,17 +224,17 @@ Err GpuContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory &
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err GpuContext::writeAsync(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     return GpuContext::write(stream, gpu_mem, host_mem, size, event);
 }
 
-Err GpuContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err GpuContext::readAsync(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     return GpuContext::read(stream, gpu_mem, host_mem, size, event);
 }
 
-Err GpuContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+Err GpuContext::copy(GpuStream const & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -243,7 +243,7 @@ Err GpuContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & dest
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+Err GpuContext::copy(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -252,17 +252,17 @@ Err GpuContext::copy(GpuStream & stream, HostMemory const & src, HostMemory & de
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+Err GpuContext::copyAsync(GpuStream const & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
 {
     return GpuContext::copy(stream, src, dest, size, event);
 }
 
-Err GpuContext::copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+Err GpuContext::copyAsync(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
 {
     return GpuContext::copy(stream, src, dest, size, event);
 }
 
-Err GpuContext::flush(GpuStream & stream) const
+Err GpuContext::flush(GpuStream const & stream) const
 {
     if (stream.validate(this) == false) {
         return Err::E_ILLARGS;
@@ -270,7 +270,7 @@ Err GpuContext::flush(GpuStream & stream) const
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::finish(GpuStream & stream) const
+Err GpuContext::finish(GpuStream const & stream) const
 {
     if (stream.validate(this) == false) {
         return Err::E_ILLARGS;

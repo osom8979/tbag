@@ -66,7 +66,7 @@ Err GpuKernel::create(GpuProgram const & program, std::string const & kernel_sym
     if (validate()) {
         return Err::E_ALREADY;
     }
-    if (_context != nullptr) {
+    if (_context == nullptr) {
         return Err::E_NULLPTR;
     }
     assert(_context != nullptr);

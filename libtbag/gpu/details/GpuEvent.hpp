@@ -40,13 +40,11 @@ class TBAG_API GpuEvent
 {
 private:
     GpuContext const * _context;
-    GpuStream  const * _stream;
     GpuId _start;
     GpuId _stop;
 
 public:
-    GpuEvent(GpuContext const * c = nullptr, GpuStream const * s = nullptr,
-             GpuId start = UNKNOWN_ID, GpuId stop = UNKNOWN_ID);
+    GpuEvent(GpuContext const * c = nullptr, GpuId start = UNKNOWN_ID, GpuId stop = UNKNOWN_ID);
     GpuEvent(GpuEvent const & obj);
     GpuEvent(GpuEvent && obj);
     virtual ~GpuEvent();
@@ -61,10 +59,7 @@ public:
 
 public:
     inline bool isSameContext(GpuContext const * c) const TBAG_NOEXCEPT { return _context == c; }
-    inline bool  isSameStream(GpuStream  const * s) const TBAG_NOEXCEPT { return  _stream == s; }
-
     inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return _context; }
-    inline GpuStream  const *  getStreamPtr() const TBAG_NOEXCEPT { return _stream; }
 
     inline bool      existsId() const TBAG_NOEXCEPT { return _start != UNKNOWN_ID; }
     inline GpuId        getId() const TBAG_NOEXCEPT { return _start; }
@@ -90,7 +85,7 @@ public:
     { return (_context != nullptr) && isSameContext(c) && existsId(); }
 
 public:
-    Err create();
+    Err create(GpuStream const & stream);
     Err release();
 
 public:
@@ -99,7 +94,7 @@ public:
     float elapsed();
 
 public:
-    static GpuEvent instance(GpuStream const * s);
+    static GpuEvent instance(GpuStream const & stream);
 };
 
 /**

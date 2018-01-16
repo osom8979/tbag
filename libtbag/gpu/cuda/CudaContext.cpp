@@ -29,7 +29,7 @@ namespace cuda {
 namespace __impl {
 // ---------------
 
-static void startEvent(GpuStream & stream, GpuEvent * event)
+static void startEvent(GpuStream const & stream, GpuEvent * event)
 {
     cudaError_t code = cudaEventRecord(event->castStart<cudaEvent_t>(), stream.castId<cudaStream_t>());
     if (code != cudaSuccess) {
@@ -37,7 +37,7 @@ static void startEvent(GpuStream & stream, GpuEvent * event)
     }
 }
 
-static void stopEvent(GpuStream & stream, GpuEvent * event)
+static void stopEvent(GpuStream const & stream, GpuEvent * event)
 {
     cudaError_t code = cudaEventRecord(event->castStop<cudaEvent_t>(), stream.castId<cudaStream_t>());
     if (code != cudaSuccess) {
@@ -47,10 +47,10 @@ static void stopEvent(GpuStream & stream, GpuEvent * event)
 
 struct CudaEventGuard : private Noncopyable
 {
-    GpuStream & stream;
+    GpuStream const & stream;
     GpuEvent * event;
 
-    CudaEventGuard(GpuStream & q, GpuEvent * e = nullptr) : stream(q), event(e)
+    CudaEventGuard(GpuStream const & q, GpuEvent * e = nullptr) : stream(q), event(e)
     {
         if (event != nullptr) {
             startEvent(stream, event);
@@ -474,7 +474,7 @@ Err CudaContext::freeHost(HostMemory & memory) const
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::write(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -489,7 +489,7 @@ Err CudaContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -504,7 +504,7 @@ Err CudaContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory 
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::writeAsync(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -520,7 +520,7 @@ Err CudaContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory 
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::readAsync(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -536,7 +536,7 @@ Err CudaContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMe
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+Err CudaContext::copy(GpuStream const & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -551,7 +551,7 @@ Err CudaContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & des
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+Err CudaContext::copy(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -566,7 +566,7 @@ Err CudaContext::copy(GpuStream & stream, HostMemory const & src, HostMemory & d
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+Err CudaContext::copyAsync(GpuStream const & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -582,7 +582,7 @@ Err CudaContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemory 
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
+Err CudaContext::copyAsync(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -598,7 +598,7 @@ Err CudaContext::copyAsync(GpuStream & stream, HostMemory const & src, HostMemor
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::flush(GpuStream & stream) const
+Err CudaContext::flush(GpuStream const & stream) const
 {
     if (stream.validate(this) == false) {
         return Err::E_ILLARGS;
@@ -606,7 +606,7 @@ Err CudaContext::flush(GpuStream & stream) const
     return Err::E_SUCCESS;
 }
 
-Err CudaContext::finish(GpuStream & stream) const
+Err CudaContext::finish(GpuStream const & stream) const
 {
     if (stream.validate(this) == false) {
         return Err::E_ILLARGS;

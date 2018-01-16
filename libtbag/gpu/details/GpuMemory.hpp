@@ -41,7 +41,7 @@ class GpuEvent;
 class TBAG_API GpuMemory : public MemoryWrapper
 {
 public:
-    GpuMemory(GpuContext const * c = nullptr, GpuStream * s = nullptr);
+    GpuMemory(GpuContext const * c = nullptr, GpuStream const * s = nullptr);
     explicit GpuMemory(MemoryWrapper const & mem);
     GpuMemory(GpuMemory const & obj);
     GpuMemory(GpuMemory && obj);

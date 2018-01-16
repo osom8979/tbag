@@ -45,7 +45,7 @@ private:
     HostMemoryFlag _flag;
 
 public:
-    HostMemory(GpuContext const * c = nullptr, GpuStream * s = nullptr);
+    HostMemory(GpuContext const * c = nullptr, GpuStream const * s = nullptr);
     explicit HostMemory(MemoryWrapper const & mem);
     HostMemory(HostMemory const & obj);
     HostMemory(HostMemory && obj);

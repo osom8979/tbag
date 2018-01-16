@@ -25,8 +25,8 @@ namespace details {
 // GpuEvent implementation.
 // ------------------------
 
-GpuEvent::GpuEvent(GpuContext const * c, GpuStream const * s, GpuId start, GpuId stop)
-        : _context(c), _stream(s), _start(start), _stop(stop)
+GpuEvent::GpuEvent(GpuContext const * c, GpuId start, GpuId stop)
+        : _context(c),  _start(start), _stop(stop)
 {
     // EMPTY.
 }
@@ -50,7 +50,6 @@ GpuEvent & GpuEvent::operator =(GpuEvent const & obj)
 {
     if (this != &obj) {
         _context = obj._context;
-        _stream  = obj._stream;
         _start   = obj._start;
         _stop    = obj._stop;
     }
@@ -67,18 +66,17 @@ void GpuEvent::swap(GpuEvent & obj)
 {
     if (this != &obj) {
         std::swap(_context, obj._context);
-        std::swap(_stream , obj._stream);
         std::swap(_start  , obj._start);
         std::swap(_stop   , obj._stop);
     }
 }
 
-Err GpuEvent::create()
+Err GpuEvent::create(GpuStream const & stream)
 {
     if (validate()) {
         return Err::E_ALREADY;
     }
-    return (_context != nullptr && _stream != nullptr ? _context->createEvent(*_stream, *this) : Err::E_NULLPTR);
+    return (_context != nullptr ? _context->createEvent(stream, *this) : Err::E_NULLPTR);
 }
 
 Err GpuEvent::release()
@@ -114,14 +112,10 @@ float GpuEvent::elapsed()
     return 0;
 }
 
-GpuEvent GpuEvent::instance(GpuStream const * s)
+GpuEvent GpuEvent::instance(GpuStream const & stream)
 {
-    if (s == nullptr) {
-        return GpuEvent();
-    }
-
-    GpuEvent event(s->getContextPtr(), s);
-    if (isSuccess(event.create())) {
+    GpuEvent event(stream.getContextPtr());
+    if (isSuccess(event.create(stream))) {
         return event;
     }
     return GpuEvent();

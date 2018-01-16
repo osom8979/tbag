@@ -94,22 +94,22 @@ public:
 
 // Input/Output.
 public:
-    virtual Err write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
-    virtual Err  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err write(GpuStream const & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err  read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
 
-    virtual Err writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
-    virtual Err  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err writeAsync(GpuStream const & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err  readAsync(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
 
-    virtual Err copy(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
-    virtual Err copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err copy(GpuStream const & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err copy(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
 
-    virtual Err copyAsync(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
-    virtual Err copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err copyAsync(GpuStream const & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err copyAsync(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const;
 
 // Memory.
 public:
-    virtual Err  flush(GpuStream & stream) const;
-    virtual Err finish(GpuStream & stream) const;
+    virtual Err  flush(GpuStream const & stream) const;
+    virtual Err finish(GpuStream const & stream) const;
 };
 
 using SharedGpuContext = std::shared_ptr<GpuContext>;

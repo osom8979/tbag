@@ -38,7 +38,7 @@ class TBAG_API MemoryWrapper
 {
 protected:
     GpuContext const * _context;
-    GpuStream * _stream;
+    GpuStream const * _stream;
 
 protected:
     std::size_t _capacity;
@@ -46,7 +46,7 @@ protected:
     void *      _data;
 
 public:
-    MemoryWrapper(GpuContext const * c = nullptr, GpuStream * s = nullptr);
+    MemoryWrapper(GpuContext const * c = nullptr, GpuStream const * s = nullptr);
     MemoryWrapper(MemoryWrapper const & obj);
     MemoryWrapper(MemoryWrapper && obj);
     ~MemoryWrapper();

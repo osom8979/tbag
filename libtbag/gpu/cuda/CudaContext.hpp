@@ -133,20 +133,20 @@ public:
     virtual Err mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const override;
     virtual Err   freeHost(HostMemory & memory) const override;
 
-    virtual Err write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual Err  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err write(GpuStream const & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err  read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual Err writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual Err  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err writeAsync(GpuStream const & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err  readAsync(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual Err copy(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual Err copy(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err copy(GpuStream const & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err copy(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual Err copyAsync(GpuStream & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual Err copyAsync(GpuStream & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err copyAsync(GpuStream const & stream,  GpuMemory const & src,  GpuMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err copyAsync(GpuStream const & stream, HostMemory const & src, HostMemory & dest, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual Err  flush(GpuStream & stream) const override;
-    virtual Err finish(GpuStream & stream) const override;
+    virtual Err  flush(GpuStream const & stream) const override;
+    virtual Err finish(GpuStream const & stream) const override;
 };
 
 } // namespace cuda

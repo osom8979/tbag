@@ -75,7 +75,7 @@ Err GpuStream::release()
     return (_context != nullptr ? _context->releaseStream(*this) : Err::E_NULLPTR);
 }
 
-Err GpuStream::flush()
+Err GpuStream::flush() const
 {
     if (validate() == false) {
         return Err::E_ILLSTATE;
@@ -83,7 +83,7 @@ Err GpuStream::flush()
     return (_context != nullptr ? _context->flush(*this) : Err::E_NULLPTR);
 }
 
-Err GpuStream::finish()
+Err GpuStream::finish() const
 {
     if (validate() == false) {
         return Err::E_ILLSTATE;

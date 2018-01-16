@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-MemoryWrapper::MemoryWrapper(GpuContext const * c, GpuStream * s)
+MemoryWrapper::MemoryWrapper(GpuContext const * c, GpuStream const * s)
         : _context(c), _stream(s), _capacity(0), _size(0), _data(nullptr)
 {
     // EMPTY.

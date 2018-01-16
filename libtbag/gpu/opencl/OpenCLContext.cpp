@@ -222,7 +222,7 @@ OpenCLContext::~OpenCLContext()
     // EMPTY.
 }
 
-Err OpenCLContext::_write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
+Err OpenCLContext::_write(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
                           std::size_t size, bool blocking, GpuEvent * event) const
 {
     cl_int code = clEnqueueWriteBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
@@ -237,7 +237,7 @@ Err OpenCLContext::_write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory co
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::_read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
+Err OpenCLContext::_read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
                          std::size_t size, bool blocking, GpuEvent * event) const
 {
     cl_int code = clEnqueueReadBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
@@ -469,7 +469,7 @@ Err OpenCLContext::free(GpuMemory & memory) const
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err OpenCLContext::write(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -477,7 +477,7 @@ Err OpenCLContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory con
     return _write(stream, gpu_mem, host_mem, size, true, event);
 }
 
-Err OpenCLContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err OpenCLContext::read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -485,7 +485,7 @@ Err OpenCLContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemor
     return _read(stream, gpu_mem, host_mem, size, true, event);
 }
 
-Err OpenCLContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err OpenCLContext::writeAsync(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -493,7 +493,7 @@ Err OpenCLContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemor
     return _write(stream, gpu_mem, host_mem, size, false, event);
 }
 
-Err OpenCLContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err OpenCLContext::readAsync(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
         return Err::E_ILLARGS;
@@ -501,7 +501,7 @@ Err OpenCLContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, Host
     return _read(stream, gpu_mem, host_mem, size, false, event);
 }
 
-Err OpenCLContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+Err OpenCLContext::copy(GpuStream const & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -523,7 +523,7 @@ Err OpenCLContext::copy(GpuStream & stream, GpuMemory const & src, GpuMemory & d
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
+Err OpenCLContext::copyAsync(GpuStream const & stream, GpuMemory const & src, GpuMemory & dest, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, src, dest, size) == false) {
         return Err::E_ILLARGS;
@@ -538,7 +538,7 @@ Err OpenCLContext::copyAsync(GpuStream & stream, GpuMemory const & src, GpuMemor
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::flush(GpuStream & stream) const
+Err OpenCLContext::flush(GpuStream const & stream) const
 {
     if (stream.validate(this) == false) {
         return Err::E_ILLARGS;
@@ -552,7 +552,7 @@ Err OpenCLContext::flush(GpuStream & stream) const
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::finish(GpuStream & stream) const
+Err OpenCLContext::finish(GpuStream const & stream) const
 {
     if (stream.validate(this) == false) {
         return Err::E_ILLARGS;
