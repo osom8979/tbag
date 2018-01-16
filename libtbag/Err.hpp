@@ -69,6 +69,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_HTTP_4XX, "Client Error (HTTP 4xx)" ) \
     _TBAG_XX(_HTTP_5XX, "Server Error (HTTP 5xx)" ) \
     _TBAG_XX(_EXIT    , "Exit process"            ) \
+    _TBAG_XX(_OPENCL  , "OpenCL error"            ) \
+    _TBAG_XX(_CUDA    , "CUDA error"              ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \

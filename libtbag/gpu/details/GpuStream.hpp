@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-
+#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 #include <libtbag/gpu/details/GpuIdWrapper.hpp>
 
@@ -52,8 +52,8 @@ public:
     inline friend void swap(GpuStream & lh, GpuStream & rh) { lh.swap(rh); }
 
 public:
-    bool create();
-    bool release();
+    Err create();
+    Err release();
 
 public:
     static GpuStream create(GpuContext const * c);

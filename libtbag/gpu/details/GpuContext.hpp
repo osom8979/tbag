@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 
 #include <cstdlib>
@@ -61,41 +62,41 @@ public:
 
 // Object.
 public:
-    virtual bool  createStream(GpuStream & stream) const;
-    virtual bool releaseStream(GpuStream & stream) const;
+    virtual Err  createStream(GpuStream & stream) const;
+    virtual Err releaseStream(GpuStream & stream) const;
 
-    virtual bool  createEvent(GpuStream const & stream, GpuEvent & event) const;
-    virtual bool    syncEvent(GpuEvent  const &  event) const;
-    virtual bool elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const;
-    virtual bool releaseEvent(GpuEvent        &  event) const;
+    virtual Err  createEvent(GpuStream const & stream, GpuEvent & event) const;
+    virtual Err    syncEvent(GpuEvent  const &  event) const;
+    virtual Err elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const;
+    virtual Err releaseEvent(GpuEvent        &  event) const;
 
-    virtual bool  createProgram(std::string const &  source, GpuProgram & program) const;
-    virtual bool   buildProgram(GpuProgram        & program) const;
-    virtual bool releaseProgram(GpuProgram        & program) const;
+    virtual Err  createProgram(std::string const &  source, GpuProgram & program) const;
+    virtual Err   buildProgram(GpuProgram        & program) const;
+    virtual Err releaseProgram(GpuProgram        & program) const;
 
-    virtual bool  createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const;
-    virtual bool releaseKernel(GpuKernel        & kernel) const;
+    virtual Err  createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const;
+    virtual Err releaseKernel(GpuKernel        & kernel) const;
 
 // Memory.
 public:
-    virtual bool malloc(GpuMemory & memory, std::size_t size) const;
-    virtual bool   free(GpuMemory & memory) const;
+    virtual Err malloc(GpuMemory & memory, std::size_t size) const;
+    virtual Err   free(GpuMemory & memory) const;
 
-    virtual bool mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const;
-    virtual bool   freeHost(HostMemory & memory) const;
+    virtual Err mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const;
+    virtual Err   freeHost(HostMemory & memory) const;
 
 // Input/Output.
 public:
-    virtual bool write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
-    virtual bool  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
 
-    virtual bool writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
-    virtual bool  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
+    virtual Err  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const;
 
 // Memory.
 public:
-    virtual bool  flush(GpuStream & stream) const;
-    virtual bool finish(GpuStream & stream) const;
+    virtual Err  flush(GpuStream & stream) const;
+    virtual Err finish(GpuStream & stream) const;
 };
 
 using SharedGpuContext = std::shared_ptr<GpuContext>;

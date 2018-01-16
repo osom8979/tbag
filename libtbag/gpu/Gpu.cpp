@@ -166,34 +166,22 @@ bool Gpu::init(GpuType type, std::size_t platform_index, std::size_t device_inde
 
 bool Gpu::isSupport() const
 {
-    if (_gpu) {
-        return _gpu->isSupport();
-    }
-    return false;
+    return (_gpu ? _gpu->isSupport() : false);
 }
 
 bool Gpu::isHost() const
 {
-    if (_gpu) {
-        return _gpu->isHost();
-    }
-    return false;
+    return (_gpu ? _gpu->isHost() : false);
 }
 
 bool Gpu::isDevice() const
 {
-    if (_gpu) {
-        return _gpu->isDevice();
-    }
-    return false;
+    return (_gpu ? _gpu->isDevice() : false);
 }
 
 bool Gpu::isStream() const
 {
-    if (_gpu) {
-        return _gpu->isStream();
-    }
-    return false;
+    return (_gpu ? _gpu->isStream() : false);
 }
 
 } // namespace gpu

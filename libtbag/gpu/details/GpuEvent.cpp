@@ -43,7 +43,7 @@ GpuEvent::GpuEvent(GpuEvent && obj) : GpuEvent()
 
 GpuEvent::~GpuEvent()
 {
-    // EMPTY.
+    release();
 }
 
 GpuEvent & GpuEvent::operator =(GpuEvent const & obj)
@@ -73,30 +73,30 @@ void GpuEvent::swap(GpuEvent & obj)
     }
 }
 
-bool GpuEvent::create()
+Err GpuEvent::create()
 {
-    return (_context != nullptr && _stream != nullptr ? _context->createEvent(*_stream, *this) : false);
+    return (_context != nullptr && _stream != nullptr ? _context->createEvent(*_stream, *this) : Err::E_NULLPTR);
 }
 
-bool GpuEvent::release()
+Err GpuEvent::release()
 {
-    return (_context != nullptr ? _context->releaseEvent(*this) : false);
+    return (_context != nullptr ? _context->releaseEvent(*this) : Err::E_NULLPTR);
 }
 
-bool GpuEvent::sync()
+Err GpuEvent::sync()
 {
-    return (_context != nullptr ? _context->syncEvent(*this) : false);
+    return (_context != nullptr ? _context->syncEvent(*this) : Err::E_NULLPTR);
 }
 
-bool GpuEvent::elapsed(float * millisec)
+Err GpuEvent::elapsed(float * millisec)
 {
-    return (_context != nullptr ? _context->elapsedEvent(*this, millisec) : false);
+    return (_context != nullptr ? _context->elapsedEvent(*this, millisec) : Err::E_NULLPTR);
 }
 
 float GpuEvent::elapsed()
 {
     float millisec = 0;
-    if (elapsed(&millisec)) {
+    if (isSuccess(elapsed(&millisec))) {
         return millisec;
     }
     return 0;
@@ -109,7 +109,7 @@ GpuEvent GpuEvent::create(GpuStream const * s)
     }
 
     GpuEvent event(s->getContextPtr(), s);
-    if (event.create()) {
+    if (isSuccess(event.create())) {
         return event;
     }
     return GpuEvent();

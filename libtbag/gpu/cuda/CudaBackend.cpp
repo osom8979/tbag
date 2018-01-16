@@ -278,155 +278,140 @@ bool CudaContext::isStream() const TBAG_NOEXCEPT
     return prop.deviceOverlap == 1;
 }
 
-bool CudaContext::createStream(GpuStream & stream) const
+Err CudaContext::createStream(GpuStream & stream) const
 {
     if (stream.isSameContext(this) == false) {
-        tDLogE("CudaContext::createStream() Illegal stream argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     cudaStream_t native_stream;
     cudaError_t code = cudaStreamCreate(&native_stream);
-    if (code == cudaSuccess) {
-        stream.setId(native_stream);
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::createStream() CUDA cudaStreamCreate() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+
+    stream.setId(native_stream);
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::releaseStream(GpuStream & stream) const
+Err CudaContext::releaseStream(GpuStream & stream) const
 {
     if (stream.validate(this) == false) {
-        tDLogE("CudaContext::releaseStream() Illegal stream argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     cudaError_t code = cudaStreamDestroy(stream.castId<cudaStream_t>());
     stream.clearId();
-    if (code == cudaSuccess) {
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::releaseStream() CUDA cudaStreamDestroy() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::createEvent(GpuStream const & stream, GpuEvent & event) const
+Err CudaContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 {
-    if (stream.validate(this) == false) {
-        tDLogE("CudaContext::createEvent() Illegal stream argument.");
-        return false;
-    }
-    if (event.isSameContext(this) == false) {
-        tDLogE("CudaContext::createEvent() Illegal event argument.");
-        return false;
+    if (stream.validate(this) == false || event.isSameContext(this) == false) {
+        return Err::E_ILLARGS;
     }
 
     cudaEvent_t native_start;
     cudaError_t start_code = cudaEventCreate(&native_start);
     if (start_code != cudaSuccess) {
-        tDLogE("CudaContext::createEvent() CUDA cudaEventCreate(start) error: {}", cudaGetErrorString(start_code));
-        return false;
+        tDLogE("CudaContext::createEvent() CUDA cudaEventCreate() start error: {}", cudaGetErrorString(start_code));
+        return Err::E_CUDA;
     }
 
     cudaEvent_t native_stop;
     cudaError_t stop_code = cudaEventCreate(&native_stop);
     if (stop_code != cudaSuccess) {
         cudaEventDestroy(native_start);
-        tDLogE("CudaContext::createEvent() CUDA cudaEventCreate(stop) error: {}", cudaGetErrorString(stop_code));
-        return false;
+        tDLogE("CudaContext::createEvent() CUDA cudaEventCreate() stop error: {}", cudaGetErrorString(stop_code));
+        return Err::E_CUDA;
     }
 
     event.setStart(native_start);
     event.setStop(native_stop);
-    return true;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::syncEvent(GpuEvent const & event) const
+Err CudaContext::syncEvent(GpuEvent const & event) const
 {
     if (event.validate(this) == false) {
-        tDLogE("CudaContext::syncEvent() Illegal event argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     cudaError_t start_code = cudaEventSynchronize(event.castStart<cudaEvent_t>());
     cudaError_t  stop_code = cudaEventSynchronize(event.castStop<cudaEvent_t>());
-    if (start_code == cudaSuccess && stop_code == cudaSuccess) {
-        return true;
-    } else {
+    if (start_code != cudaSuccess || stop_code != cudaSuccess) {
         tDLogE("CudaContext::syncEvent() CUDA cudaEventSynchronize() error: start({}), stop({})",
                cudaGetErrorString(start_code), cudaGetErrorString(stop_code));
+        return Err::E_CUDA;
     }
-    return false;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::elapsedEvent(GpuEvent & event, float * millisec) const
+Err CudaContext::elapsedEvent(GpuEvent & event, float * millisec) const
 {
     if (event.validate(this) == false) {
-        tDLogE("CudaContext::elapsedEvent() Illegal event argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     float elapsed_time = 0.0f;
     cudaError_t code = cudaEventElapsedTime(&elapsed_time, event.castStart<cudaEvent_t>(), event.castStop<cudaEvent_t>());
-    if (code == cudaSuccess) {
-        if (millisec != nullptr) {
-            *millisec = elapsed_time;
-        }
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::elapsedEvent() CUDA cudaEventElapsedTime() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+
+    if (millisec != nullptr) {
+        *millisec = elapsed_time;
+    }
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::releaseEvent(GpuEvent & event) const
+Err CudaContext::releaseEvent(GpuEvent & event) const
 {
     if (event.validate(this) == false) {
-        tDLogE("CudaContext::releaseEvent() Illegal event argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     cudaError_t start_code = cudaEventDestroy(event.castStart<cudaEvent_t>());
     cudaError_t  stop_code = cudaEventDestroy(event.castStop<cudaEvent_t>());
     event.clearIds();
-    if (start_code == cudaSuccess && stop_code == cudaSuccess) {
-        return true;
-    } else {
+    if (start_code != cudaSuccess || stop_code != cudaSuccess) {
         tDLogE("CudaContext::releaseEvent() CUDA cudaEventDestroy() error: start({}), stop({})",
                cudaGetErrorString(start_code), cudaGetErrorString(stop_code));
+        return Err::E_CUDA;
     }
-    return false;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::malloc(GpuMemory & memory, std::size_t size) const
+Err CudaContext::malloc(GpuMemory & memory, std::size_t size) const
 {
     if (memory.isSameContext(this) == false) {
-        tDLogE("CudaContext::malloc() Illegal memory arguments.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     __impl::CudaDeviceGuard const LOCK(*this);
     void * data = nullptr;
     cudaError_t code = cudaMalloc(&data, size);
-    if (code == cudaSuccess) {
-        memory.set(data, size, size);
-        tDLogIfD(isGpuVerbose(), "CudaContext::malloc({}) CUDA cudaMalloc() MEM:{} CAP:{} SIZE:{}",
-                 size, memory.data(), memory.capacity(), memory.size());
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::malloc({}) CUDA cudaMalloc() error: {}", size, cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+
+    memory.set(data, size, size);
+    tDLogIfD(isGpuVerbose(), "CudaContext::malloc({}) CUDA cudaMalloc() MEM:{} CAP:{} SIZE:{}",
+             size, memory.data(), memory.capacity(), memory.size());
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::free(GpuMemory & memory) const
+Err CudaContext::free(GpuMemory & memory) const
 {
     if (memory.validate(this) == false) {
-        tDLogE("CudaContext::free() Illegal memory.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     tDLogIfD(isGpuVerbose(), "CudaContext::free() CUDA cudaFree() MEM:{} CAP:{} SIZE:{}",
@@ -437,46 +422,44 @@ bool CudaContext::free(GpuMemory & memory) const
     memory.clear();
     if (code != cudaSuccess) {
         tDLogE("CudaContext::free() CUDA cudaFree() error: {}", cudaGetErrorString(code));
-        return false;
+        return Err::E_CUDA;
     }
-    return true;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
+Err CudaContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
 {
     if (memory.isSameContext(this) == false) {
-        tDLogE("CudaContext::mallocHost() Illegal memory argument");
-        return false;
+        return Err::E_ILLARGS;
     }
     if (HostMemoryFlag::HMF_DEFAULT == flag) {
         return GpuContext::mallocHost(memory, size, HostMemoryFlag::HMF_DEFAULT);
     }
     if (HostMemoryFlag::HMF_PINNED != flag) {
         tDLogE("CudaContext::mallocHost() Unsupported flag: {}", static_cast<int>(flag));
-        return false;
+        return Err::E_ILLARGS;
     }
     assert(flag == HostMemoryFlag::HMF_PINNED);
 
     __impl::CudaDeviceGuard const LOCK(*this);
     void * data = nullptr;
     cudaError_t code = cudaMallocHost(&data, size);
-    if (code == cudaSuccess) {
-        memory.set(data, size, size);
-        memory.setFlag(flag);
-        tDLogIfD(isGpuVerbose(), "CudaContext::mallocHost({}) CUDA cudaMallocHost() MEM:{} CAP:{} SIZE:{}",
-                 size, memory.data(), memory.capacity(), memory.size());
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::mallocHost({}) CUDA cudaMallocHost() error: {}", size, cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+
+    memory.set(data, size, size);
+    memory.setFlag(flag);
+    tDLogIfD(isGpuVerbose(), "CudaContext::mallocHost({}) CUDA cudaMallocHost() MEM:{} CAP:{} SIZE:{}",
+             size, memory.data(), memory.capacity(), memory.size());
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::freeHost(HostMemory & memory) const
+Err CudaContext::freeHost(HostMemory & memory) const
 {
     if (memory.validate(this) == false) {
-        tDLogE("CudaContext::freeHost() Illegal memory argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     tDLogIfD(isGpuVerbose(), "CudaContext::freeHost() CUDA cudaFreeHost() MEM:{} CAP:{} SIZE:{}",
@@ -485,107 +468,95 @@ bool CudaContext::freeHost(HostMemory & memory) const
     __impl::CudaDeviceGuard const LOCK(*this);
     cudaError_t code = cudaFreeHost(memory.data());
     memory.clear();
-    if (code == cudaSuccess) {
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::free() CUDA cudaFreeHost() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
-        tDLogE("CudaContext::write() Illegal arguments.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     __impl::CudaEventGuard const EVENT_LOCK(stream, event);
     cudaError_t code = cudaMemcpy(gpu_mem.data(), host_mem.data(), size, cudaMemcpyHostToDevice);
-    if (code == cudaSuccess) {
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::write() CUDA cudaMemcpy() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
-        tDLogE("CudaContext::read() Illegal arguments.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     __impl::CudaEventGuard const EVENT_LOCK(stream, event);
     cudaError_t code = cudaMemcpy(host_mem.data(), gpu_mem.data(), size, cudaMemcpyDeviceToHost);
-    if (code == cudaSuccess) {
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::read() CUDA cudaMemcpy() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::writeAsync(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
-        tDLogE("CudaContext::writeAsync() Illegal arguments.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     __impl::CudaEventGuard const EVENT_LOCK(stream, event);
     cudaError_t code = cudaMemcpyAsync(gpu_mem.data(), host_mem.data(), size, cudaMemcpyHostToDevice,
                                        stream.castId<cudaStream_t>());
-    if (code == cudaSuccess) {
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::writeAsync() CUDA cudaMemcpyAsync() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return true;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
+Err CudaContext::readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem, std::size_t size, GpuEvent * event) const
 {
     if (validateMemory(stream, gpu_mem, host_mem, size) == false) {
-        tDLogE("CudaContext::readAsync() Illegal arguments.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     __impl::CudaEventGuard const EVENT_LOCK(stream, event);
     cudaError_t code = cudaMemcpyAsync(host_mem.data(), gpu_mem.data(), size, cudaMemcpyDeviceToHost,
                                        stream.castId<cudaStream_t>());
-    if (code == cudaSuccess) {
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::readAsync() CUDA cudaMemcpyAsync() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return true;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::flush(GpuStream & stream) const
+Err CudaContext::flush(GpuStream & stream) const
 {
     if (stream.validate(this) == false) {
-        tDLogE("CudaContext::flush() Illegal stream argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
-    return true;
+    return Err::E_SUCCESS;
 }
 
-bool CudaContext::finish(GpuStream & stream) const
+Err CudaContext::finish(GpuStream & stream) const
 {
     if (stream.validate(this) == false) {
-        tDLogE("CudaContext::finish() Illegal stream argument.");
-        return false;
+        return Err::E_ILLARGS;
     }
 
     cudaError_t code = cudaStreamSynchronize(stream.castId<cudaStream_t>());
-    if (code == cudaSuccess) {
-        return true;
-    } else {
+    if (code != cudaSuccess) {
         tDLogE("CudaContext::finish() CUDA cudaDeviceSynchronize() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
     }
-    return false;
+    return Err::E_SUCCESS;
 }
 
 } // namespace cuda

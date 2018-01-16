@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 
 // -------------------
@@ -87,12 +88,12 @@ public:
     { return (_context != nullptr) && isSameContext(c) && existsId(); }
 
 public:
-    bool create();
-    bool release();
+    Err create();
+    Err release();
 
 public:
-    bool sync();
-    bool elapsed(float * millisec);
+    Err sync();
+    Err elapsed(float * millisec);
     float elapsed();
 
 public:

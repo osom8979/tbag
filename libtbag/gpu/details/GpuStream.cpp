@@ -59,14 +59,14 @@ void GpuStream::swap(GpuStream & obj)
     }
 }
 
-bool GpuStream::create()
+Err GpuStream::create()
 {
-    return (_context != nullptr ? _context->createStream(*this) : false);
+    return (_context != nullptr ? _context->createStream(*this) : Err::E_NULLPTR);
 }
 
-bool GpuStream::release()
+Err GpuStream::release()
 {
-    return (_context != nullptr ? _context->releaseStream(*this) : false);
+    return (_context != nullptr ? _context->releaseStream(*this) : Err::E_NULLPTR);
 }
 
 GpuStream GpuStream::create(GpuContext const * c)
@@ -76,7 +76,7 @@ GpuStream GpuStream::create(GpuContext const * c)
     }
 
     GpuStream stream(c);
-    if (stream.create()) {
+    if (isSuccess(stream.create())) {
         return stream;
     }
     return GpuStream();

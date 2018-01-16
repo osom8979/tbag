@@ -49,10 +49,10 @@ public:
     virtual ~OpenCLContext();
 
 private:
-    bool _write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
-                std::size_t size, bool blocking = true, GpuEvent * event = nullptr) const;
-    bool _read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
+    Err _write(GpuStream & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
                std::size_t size, bool blocking = true, GpuEvent * event = nullptr) const;
+    Err _read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
+              std::size_t size, bool blocking = true, GpuEvent * event = nullptr) const;
 
 public:
     virtual bool isSupport() const TBAG_NOEXCEPT override;
@@ -60,32 +60,32 @@ public:
     virtual bool  isDevice() const TBAG_NOEXCEPT override;
     virtual bool  isStream() const TBAG_NOEXCEPT override;
 
-    virtual bool  createStream(GpuStream & stream) const override;
-    virtual bool releaseStream(GpuStream & stream) const override;
+    virtual Err  createStream(GpuStream & stream) const override;
+    virtual Err releaseStream(GpuStream & stream) const override;
 
-    virtual bool  createEvent(GpuStream const & stream, GpuEvent & event) const override;
-    virtual bool    syncEvent(GpuEvent  const &  event) const override;
-    virtual bool elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const override;
-    virtual bool releaseEvent(GpuEvent        &  event) const override;
+    virtual Err  createEvent(GpuStream const & stream, GpuEvent & event) const override;
+    virtual Err    syncEvent(GpuEvent  const &  event) const override;
+    virtual Err elapsedEvent(GpuEvent        &  event, float * millisec = nullptr) const override;
+    virtual Err releaseEvent(GpuEvent        &  event) const override;
 
-    virtual bool  createProgram(std::string const &  source, GpuProgram & program) const override;
-    virtual bool   buildProgram(GpuProgram        & program) const override;
-    virtual bool releaseProgram(GpuProgram        & program) const override;
+    virtual Err  createProgram(std::string const &  source, GpuProgram & program) const override;
+    virtual Err   buildProgram(GpuProgram        & program) const override;
+    virtual Err releaseProgram(GpuProgram        & program) const override;
 
-    virtual bool  createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const override;
-    virtual bool releaseKernel(GpuKernel        & kernel) const override;
+    virtual Err  createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const override;
+    virtual Err releaseKernel(GpuKernel        & kernel) const override;
 
-    virtual bool malloc(GpuMemory & memory, std::size_t size) const override;
-    virtual bool   free(GpuMemory & memory) const override;
+    virtual Err malloc(GpuMemory & memory, std::size_t size) const override;
+    virtual Err   free(GpuMemory & memory) const override;
 
-    virtual bool write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual bool  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err write(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err  read(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual bool writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
-    virtual bool  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err writeAsync(GpuStream & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
+    virtual Err  readAsync(GpuStream & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
 
-    virtual bool  flush(GpuStream & stream) const override;
-    virtual bool finish(GpuStream & stream) const override;
+    virtual Err  flush(GpuStream & stream) const override;
+    virtual Err finish(GpuStream & stream) const override;
 };
 
 } // namespace opencl
