@@ -15,6 +15,7 @@
 #include <libtbag/gpu/opencl/OpenCLContext.hpp>
 
 #include <utility>
+#include <algorithm>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -82,24 +83,24 @@ SharedGpuContext createContext(GpuDevice const & device)
 // Gpu implementation.
 // -------------------
 
-Gpu::Gpu() : _gpu()
+Gpu::Gpu() : Gpu(SharedGpuContext())
 {
     // EMPTY.
 }
 
-Gpu::Gpu(GpuType type, std::size_t platform_index, std::size_t device_index) : _gpu()
+Gpu::Gpu(GpuType type, std::size_t platform_index, std::size_t device_index) : Gpu(SharedGpuContext())
 {
-    if (init(type, platform_index, device_index) == false) {
+    if (isFailure(init(type, platform_index, device_index))) {
         throw std::bad_alloc();
     }
 }
 
-Gpu::Gpu(SharedGpuContext const & gpu) : _gpu(gpu)
+Gpu::Gpu(SharedGpuContext const & gpu) : _gpu(gpu), _streams(), _platform_info(), _device_info()
 {
     // EMPTY.
 }
 
-Gpu::Gpu(WeakedGpuContext const & gpu) : _gpu(gpu)
+Gpu::Gpu(WeakedGpuContext const & gpu) : Gpu(gpu.lock())
 {
     // EMPTY.
 }
@@ -116,13 +117,16 @@ Gpu::Gpu(Gpu && obj) : Gpu()
 
 Gpu::~Gpu()
 {
-    // EMPTY.
+    clear();
 }
 
 Gpu & Gpu::operator =(Gpu const & obj)
 {
     if (this != &obj) {
-        _gpu = obj._gpu;
+        _gpu           = obj._gpu;
+        _streams       = obj._streams;
+        _platform_info = obj._platform_info;
+        _device_info   = obj._device_info;
     }
     return *this;
 }
@@ -137,31 +141,61 @@ void Gpu::swap(Gpu & obj)
 {
     if (this != &obj) {
         _gpu.swap(obj._gpu);
+        _streams.swap(obj._streams);
+        std::swap(_platform_info, obj._platform_info);
+        std::swap(_device_info, obj._device_info);
     }
 }
 
-bool Gpu::init(GpuType type, std::size_t platform_index, std::size_t device_index)
+bool Gpu::validate() const
+{
+    if (_gpu) {
+        return _gpu->existsPlatformId() && _gpu->existsDeviceId() && _gpu->existsContextId();
+    }
+    return false;
+}
+
+Err Gpu::init(GpuType type, std::size_t platform_index, std::size_t device_index)
 {
     if (libtbag::gpu::isSupport(type) == false) {
-        return false;
+        return Err::E_UNSUPOP;
     }
 
     auto const PLATFORMS = libtbag::gpu::getPlatformList(type);
     if (PLATFORMS.size() > platform_index) {
-        return false;
+        return Err::E_OORANGE;
     }
 
     auto const DEVICES = libtbag::gpu::getDeviceList(PLATFORMS[platform_index]);
     if (DEVICES.empty() > device_index) {
-        return false;
+        return Err::E_OORANGE;
     }
 
     auto context = libtbag::gpu::createContext(DEVICES[device_index]);
     if (static_cast<bool>(context)) {
         _gpu = context;
-        return true;
+        _streams.clear();
+        _platform_info = libtbag::gpu::getPlatformInfo(*_gpu);
+        _device_info   = libtbag::gpu::getDeviceInfo(*_gpu);
+        return Err::E_SUCCESS;
     }
-    return false;
+    return Err::E_EXPIRED;
+}
+
+void Gpu::clear()
+{
+    _streams.clear();
+    _gpu.reset();
+}
+
+GpuType Gpu::getType() const
+{
+    return (_gpu ? _gpu->getType() : GpuType::GT_CPU);
+}
+
+std::string Gpu::getTypeString() const
+{
+    return libtbag::gpu::getGpuTypeString(getType());
 }
 
 bool Gpu::isSupport() const
@@ -182,6 +216,17 @@ bool Gpu::isDevice() const
 bool Gpu::isStream() const
 {
     return (_gpu ? _gpu->isStream() : false);
+}
+
+SharedGpuStream Gpu::newStream(bool auto_insert)
+{
+    SharedGpuStream stream(_gpu ? new GpuStream(GpuStream::instance(_gpu.get())) : nullptr);
+    if (auto_insert && stream) {
+        if (_streams.insert(StreamPair(stream->getId(), stream)).second == false) {
+            tDLogW("Gpu::newStream() Insert failed.");
+        }
+    }
+    return stream;
 }
 
 } // namespace gpu

@@ -69,7 +69,8 @@ struct GpuPlatform
     GpuPlatform(GpuType t, GpuId p) : TYPE(t), PLATFORM(p) { /* EMPTY. */ }
     ~GpuPlatform() { /* EMPTY. */ }
 
-    inline char const * getTypeString() TBAG_NOEXCEPT { return getGpuTypeString(TYPE); }
+    inline GpuType getType() const TBAG_NOEXCEPT { return TYPE; }
+    inline char const * getTypeString() const TBAG_NOEXCEPT { return getGpuTypeString(TYPE); }
 
     inline bool  existsPlatformId() const TBAG_NOEXCEPT { return PLATFORM != UNKNOWN_ID; }
     inline GpuId    getPlatformId() const TBAG_NOEXCEPT { return PLATFORM; }

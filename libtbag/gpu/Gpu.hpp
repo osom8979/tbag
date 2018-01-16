@@ -17,6 +17,9 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/gpu/details/GpuDetails.hpp>
 
+#include <string>
+#include <unordered_map>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -80,8 +83,17 @@ void runAllIfSupported(Predicated predicated, std::size_t platform_index = 0, st
  */
 class TBAG_API Gpu
 {
+public:
+    using StreamMap  = std::unordered_map<GpuId, SharedGpuStream>;
+    using StreamPair = StreamMap::value_type;
+
 private:
     SharedGpuContext _gpu;
+    StreamMap _streams;
+
+private:
+    GpuPlatformInfo _platform_info;
+    GpuDeviceInfo     _device_info;
 
 public:
     Gpu();
@@ -101,13 +113,26 @@ public:
     friend void swap(Gpu & lh, Gpu & rh) { lh.swap(rh); }
 
 public:
-    bool init(GpuType type = GpuType::GT_CPU, std::size_t platform_index = 0, std::size_t device_index = 0);
+    inline GpuPlatformInfo const & atPlatformInfo() const TBAG_NOEXCEPT { return _platform_info; }
+    inline GpuDeviceInfo   const &   atDeviceInfo() const TBAG_NOEXCEPT { return _device_info; }
+
+public:
+    bool validate() const;
+    Err  init(GpuType type = GpuType::GT_CPU, std::size_t platform_index = 0, std::size_t device_index = 0);
+    void clear();
+
+public:
+    GpuType getType() const;
+    std::string getTypeString() const;
 
 public:
     bool isSupport() const;
     bool    isHost() const;
     bool  isDevice() const;
     bool  isStream() const;
+
+public:
+    SharedGpuStream newStream(bool auto_insert = true);
 };
 
 } // namespace gpu

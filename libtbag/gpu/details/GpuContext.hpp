@@ -53,6 +53,12 @@ public:
     virtual ~GpuContext();
 
 public:
+    inline bool  existsContextId() const TBAG_NOEXCEPT { return CONTEXT != UNKNOWN_ID; }
+    inline GpuId    getContextId() const TBAG_NOEXCEPT { return CONTEXT; }
+
+    template <typename T> inline T castContextId() const TBAG_NOEXCEPT { return (T)CONTEXT; }
+
+public:
     template <typename StreamType, typename MemType1, typename MemType2>
     inline bool validateMemory(StreamType const & stream, MemType1 const & mem1, MemType2 const & mem2, std::size_t size) const TBAG_NOEXCEPT
     {
