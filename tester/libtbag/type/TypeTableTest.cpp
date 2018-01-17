@@ -67,3 +67,35 @@ TEST(TypeTableTest, Default)
     ASSERT_TRUE(printTypeInfo<          uint64_t>("uint64_t"));
 }
 
+TEST(TypeTableTest, GetTypeName)
+{
+    ASSERT_STREQ(   "BOOL", getTypeName(TypeTable::TT_BOOL   ));
+    ASSERT_STREQ(   "CHAR", getTypeName(TypeTable::TT_CHAR   ));
+    ASSERT_STREQ(  "SCHAR", getTypeName(TypeTable::TT_SCHAR  ));
+    ASSERT_STREQ(  "UCHAR", getTypeName(TypeTable::TT_UCHAR  ));
+    ASSERT_STREQ(  "WCHAR", getTypeName(TypeTable::TT_WCHAR  ));
+    ASSERT_STREQ( "CHAR16", getTypeName(TypeTable::TT_CHAR16 ));
+    ASSERT_STREQ( "CHAR32", getTypeName(TypeTable::TT_CHAR32 ));
+    ASSERT_STREQ(  "SHORT", getTypeName(TypeTable::TT_SHORT  ));
+    ASSERT_STREQ( "USHORT", getTypeName(TypeTable::TT_USHORT ));
+    ASSERT_STREQ(    "INT", getTypeName(TypeTable::TT_INT    ));
+    ASSERT_STREQ(   "UINT", getTypeName(TypeTable::TT_UINT   ));
+    ASSERT_STREQ(   "LONG", getTypeName(TypeTable::TT_LONG   ));
+    ASSERT_STREQ(  "ULONG", getTypeName(TypeTable::TT_ULONG  ));
+    ASSERT_STREQ(  "LLONG", getTypeName(TypeTable::TT_LLONG  ));
+    ASSERT_STREQ( "ULLONG", getTypeName(TypeTable::TT_ULLONG ));
+    ASSERT_STREQ(  "FLOAT", getTypeName(TypeTable::TT_FLOAT  ));
+    ASSERT_STREQ( "DOUBLE", getTypeName(TypeTable::TT_DOUBLE ));
+    ASSERT_STREQ("LDOUBLE", getTypeName(TypeTable::TT_LDOUBLE));
+    ASSERT_STREQ( "VPOINT", getTypeName(TypeTable::TT_VPOINT ));
+}
+
+TEST(TypeTableTest, GetTypeTable)
+{
+    ASSERT_EQ(TypeTable::TT_INT, getTypeTable<               int>());
+    ASSERT_EQ(TypeTable::TT_INT, getTypeTable<        signed int>());
+    ASSERT_EQ(TypeTable::TT_INT, getTypeTable<         const int>());
+    ASSERT_EQ(TypeTable::TT_INT, getTypeTable<      volatile int>());
+    ASSERT_EQ(TypeTable::TT_INT, getTypeTable<const volatile int>());
+}
+

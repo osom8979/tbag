@@ -29,26 +29,26 @@ namespace type {
 // It's by design, C++ standard says 'char', 'signed char' and 'unsigned char' are different types.
 // see also: http://cpp14.centaur.ath.cx/basic.fundamental.html
 #ifndef TBAG_TYPE_TABLE_MAP
-#define TBAG_TYPE_TABLE_MAP(_TBAG_XX) \
-    _TBAG_XX(   BOOL,                   bool) \
-    _TBAG_XX(   CHAR,                   char) \
-    _TBAG_XX(  SCHAR,            signed char) \
-    _TBAG_XX(  UCHAR,          unsigned char) \
-    _TBAG_XX(  WCHAR,                wchar_t) \
-    _TBAG_XX( CHAR16,               char16_t) \
-    _TBAG_XX( CHAR32,               char32_t) \
-    _TBAG_XX(  SHORT,       signed short int) \
-    _TBAG_XX( USHORT,     unsigned short int) \
-    _TBAG_XX(    INT,             signed int) \
-    _TBAG_XX(   UINT,           unsigned int) \
-    _TBAG_XX(   LONG,        signed long int) \
-    _TBAG_XX(  ULONG,      unsigned long int) \
-    _TBAG_XX(  LLONG,   signed long long int) \
-    _TBAG_XX( ULLONG, unsigned long long int) \
-    _TBAG_XX(  FLOAT,                  float) \
-    _TBAG_XX( DOUBLE,                 double) \
-    _TBAG_XX(LDOUBLE,            long double) \
-    _TBAG_XX(  POINT,                  void*) \
+#define TBAG_TYPE_TABLE_MAP(_TBAG_XX)              \
+    _TBAG_XX(   BOOL,   b,                   bool) \
+    _TBAG_XX(   CHAR,   c,                   char) \
+    _TBAG_XX(  SCHAR,  sc,            signed char) \
+    _TBAG_XX(  UCHAR,  uc,          unsigned char) \
+    _TBAG_XX(  WCHAR,  wc,                wchar_t) \
+    _TBAG_XX( CHAR16, c16,               char16_t) \
+    _TBAG_XX( CHAR32, c32,               char32_t) \
+    _TBAG_XX(  SHORT,   s,       signed short int) \
+    _TBAG_XX( USHORT,  us,     unsigned short int) \
+    _TBAG_XX(    INT,   i,             signed int) \
+    _TBAG_XX(   UINT,  ui,           unsigned int) \
+    _TBAG_XX(   LONG,   l,        signed long int) \
+    _TBAG_XX(  ULONG,  ul,      unsigned long int) \
+    _TBAG_XX(  LLONG,  ll,   signed long long int) \
+    _TBAG_XX( ULLONG, ull, unsigned long long int) \
+    _TBAG_XX(  FLOAT,   f,                  float) \
+    _TBAG_XX( DOUBLE,   d,                 double) \
+    _TBAG_XX(LDOUBLE,  ld,            long double) \
+    _TBAG_XX( VPOINT,  vp,                  void*) \
     /* -- END -- */
 #endif
 
@@ -61,7 +61,7 @@ namespace type {
 enum class TypeTable : int
 {
     TT_UNKNOWN = 0,
-#define _TBAG_XX(name, type) TT_##name,
+#define _TBAG_XX(name, symbol, type) TT_##name,
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
 };
@@ -82,16 +82,12 @@ TBAG_PUSH_MACRO(max);
 template <typename T> struct TypeInfo;
 
 template <typename T>
-struct TypeInfo : public std::false_type
+struct BaseTypeInfo : public std::false_type
 {
-    using Type = T;
-
+    using Type = typename std::remove_cv<T>::type;
     TBAG_CONSTEXPR static bool const is_arithmetic = std::is_arithmetic<Type>::value;
-
     using Number = typename std::conditional<is_arithmetic, Type, int>::type;
-
     TBAG_CONSTEXPR static bool const is_specialized = std::numeric_limits<Number>::is_specialized;
-
     TBAG_CONSTEXPR static bool     isArithmetic() TBAG_NOEXCEPT { return is_arithmetic;  }
     TBAG_CONSTEXPR static bool    isSpecialized() TBAG_NOEXCEPT { return is_specialized; }
     TBAG_CONSTEXPR static char const *     name() TBAG_NOEXCEPT { return "UNKNOWN";      }
@@ -109,9 +105,9 @@ struct TypeInfo : public std::false_type
     TBAG_CONSTEXPR static Number     denorm_min() TBAG_NOEXCEPT { return std::numeric_limits<Number>::denorm_min();    }
 };
 
-#define _TBAG_XX(n, t)                                      \
-template <> struct TypeInfo<t> : public std::true_type {    \
-    using Type = t;                                         \
+#define _TBAG_XX(n, s, t)                                       \
+template <> struct BaseTypeInfo<t> : public std::true_type {    \
+    using Type = typename std::remove_cv<t>::type;              \
     TBAG_CONSTEXPR static bool const is_arithmetic = std::is_arithmetic<Type>::value;               \
     using Number = typename std::conditional<is_arithmetic, Type, int>::type;                       \
     TBAG_CONSTEXPR static bool const is_specialized = std::numeric_limits<Number>::is_specialized;  \
@@ -144,6 +140,27 @@ TBAG_POP_MACRO(max);
 # undef __RESTORE_MAX__
 # endif // defined(__RESTORE_MAX__)
 #endif // defined(TBAG_COMP_MSVC)
+
+template <typename T>
+struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
+{ /* EMPTY. */ };
+
+template <typename T>
+inline TypeTable getTypeTable() TBAG_NOEXCEPT
+{
+    return TypeInfo<T>::table();
+}
+
+inline char const * getTypeName(TypeTable t) TBAG_NOEXCEPT
+{
+    switch (t) {
+#define _TBAG_XX(name, symbol, type) case TypeTable::TT_##name: return #name;
+    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    case TypeTable::TT_UNKNOWN:
+    default: return "UNKNOWN";
+    }
+}
 
 } // namespace type
 
