@@ -30,25 +30,9 @@ namespace container {
 
 union UnionData
 {
-    bool                   b;
-    char                   c;
-    signed char           sc;
-    unsigned char         uc;
-    wchar_t               wc;
-    char16_t             c16;
-    char32_t             c32;
-    short                  s;
-    unsigned short        us;
-    int                    i;
-    unsigned int          ui;
-    long                   l;
-    unsigned long         ul;
-    long long             ll;
-    unsigned long long   ull;
-    float                  f;
-    double                 d;
-    long double           ld;
-    void*                  p;
+#define _TBAG_XX(name, symbol, type) type symbol;
+    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
 };
 
 /**
@@ -60,24 +44,23 @@ union UnionData
 class AnyPod
 {
 public:
-    template <typename T>
-    using TypeInfo  = type::TypeInfo<T>;
+    template <typename T> using TypeInfo  = type::TypeInfo<T>;
     using TypeTable = type::TypeTable;
 
 public:
     TBAG_CONSTEXPR static std::size_t size() TBAG_NOEXCEPT { return sizeof(UnionData); }
 
-public:
-    TypeTable type;
-    UnionData data;
+private:
+    TypeTable _type;
+    UnionData _data;
 
 public:
     template <typename T>
-    inline AnyPod(T d, TypeTable t = TypeInfo<T>::table()) : type(t), data()
-    { ::memcpy(&data, &d, sizeof(T)); }
+    inline AnyPod(T data, TypeTable type = TypeInfo<T>::table()) : _type(type), _data()
+    { ::memcpy(&_data, &data, sizeof(T)); }
 
-    inline AnyPod() : type(TypeTable::TT_UNKNOWN), data()
-    { ::memset(&data, 0x00, sizeof(data)); }
+    inline AnyPod() : _type(TypeTable::TT_UNKNOWN), _data()
+    { ::memset(&_data, 0x00, sizeof(_data)); }
 
     inline AnyPod(AnyPod const & obj) : AnyPod() { (*this) = obj; }
     inline AnyPod(AnyPod && obj) : AnyPod() { (*this) = std::move(obj); }
@@ -92,36 +75,42 @@ public:
     inline void assign(AnyPod const & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
-            type = obj.type;
-            data = obj.data;
+            _type = obj._type;
+            _data = obj._data;
         }
     }
 
     inline void swap(AnyPod & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
-            std::swap(type, obj.type);
-            std::swap(data, obj.data);
+            std::swap(_type, obj._type);
+            std::swap(_data, obj._data);
         }
     }
 
     inline friend void swap(AnyPod & lh, AnyPod & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
-    inline bool operator ==(AnyPod const & obj) const TBAG_NOEXCEPT { return ::memcmp(&data, &obj.data, sizeof(data)) == 0; }
-    inline bool operator !=(AnyPod const & obj) const TBAG_NOEXCEPT { return !this->operator==(obj); }
-    inline bool operator <=(AnyPod const & obj) const TBAG_NOEXCEPT { return ::memcmp(&data, &obj.data, sizeof(data)) <= 0; }
-    inline bool operator >=(AnyPod const & obj) const TBAG_NOEXCEPT { return ::memcmp(&data, &obj.data, sizeof(data)) >= 0; }
-    inline bool operator < (AnyPod const & obj) const TBAG_NOEXCEPT { return !this->operator<=(obj); }
-    inline bool operator > (AnyPod const & obj) const TBAG_NOEXCEPT { return !this->operator>=(obj); }
+    inline TypeTable type() const TBAG_NOEXCEPT { return _type; }
+    inline UnionData data() const TBAG_NOEXCEPT { return _data; }
+
+public:
+    inline bool operator ==(AnyPod const & obj) const TBAG_NOEXCEPT
+    { return ::memcmp(&_data, &obj._data, sizeof(_data)) == 0; }
+    inline bool operator !=(AnyPod const & obj) const TBAG_NOEXCEPT
+    { return !this->operator==(obj); }
 
 public:
     template <typename T>
-    inline void set(T d, TypeTable t = TypeInfo<T>::table()) TBAG_NOEXCEPT
-    {
-        ::memcpy(&data, &d, sizeof(T));
-        type = t;
-    }
+    inline T cast() const TBAG_NOEXCEPT
+    { return *((T*)(&_data)); }
+
+#define _TBAG_XX(name, symbol, type) \
+    inline void set(type v) TBAG_NOEXCEPT { _data.symbol = v; _type = TypeTable::TT_##name; } \
+    inline AnyPod & operator =(type v) { set(v); return *this; } \
+    /* -- END -- */
+    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
 };
 
 } // namespace container
