@@ -65,7 +65,7 @@ public:
     using TypeTable = type::TypeTable;
 
 public:
-    TBAG_CONSTEXPR std::size_t size() const TBAG_NOEXCEPT { return sizeof(UnionData); }
+    TBAG_CONSTEXPR static std::size_t size() TBAG_NOEXCEPT { return sizeof(UnionData); }
 
 public:
     TypeTable type;
