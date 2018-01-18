@@ -34,11 +34,14 @@ TEST(AnyPodTest, Default)
     AnyPod pod5 = 1.5;
     ASSERT_EQ(AnyPod::TypeTable::TT_DOUBLE, pod5.type());
     ASSERT_FALSE(pod5.toString().empty());
+}
 
-    int i = 0;
-    AnyPod pod6 = &i;
-    ASSERT_EQ(AnyPod::TypeTable::TT_INTP, pod6.type());
-    ASSERT_FALSE(pod6.toString().empty());
+TEST(AnyPodTest, Cast)
+{
+    AnyPod pod1 = 101.08;
+    ASSERT_EQ(AnyPod::TypeTable::TT_DOUBLE, pod1.type());
+    ASSERT_FLOAT_EQ(101.08, pod1.cast<float>());
+    ASSERT_EQ(101, pod1.cast<int>());
 }
 
 TEST(AnyPodTest, Compare)

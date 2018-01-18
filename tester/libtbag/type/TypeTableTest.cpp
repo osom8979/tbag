@@ -57,49 +57,6 @@ TEST(TypeTableTest, Default)
     ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<       long double>());
 }
 
-TEST(TypeTableTest, Pointer)
-{
-    ASSERT_FALSE(TypeInfo<    CustomTestType>::isPointer());
-    ASSERT_FALSE(TypeInfo<              bool>::isPointer());
-    ASSERT_FALSE(TypeInfo<              char>::isPointer());
-    ASSERT_FALSE(TypeInfo<       signed char>::isPointer());
-    ASSERT_FALSE(TypeInfo<     unsigned char>::isPointer());
-    ASSERT_FALSE(TypeInfo<           wchar_t>::isPointer());
-    ASSERT_FALSE(TypeInfo<          char16_t>::isPointer());
-    ASSERT_FALSE(TypeInfo<          char32_t>::isPointer());
-    ASSERT_FALSE(TypeInfo<             short>::isPointer());
-    ASSERT_FALSE(TypeInfo<    unsigned short>::isPointer());
-    ASSERT_FALSE(TypeInfo<               int>::isPointer());
-    ASSERT_FALSE(TypeInfo<      unsigned int>::isPointer());
-    ASSERT_FALSE(TypeInfo<              long>::isPointer());
-    ASSERT_FALSE(TypeInfo<     unsigned long>::isPointer());
-    ASSERT_FALSE(TypeInfo<         long long>::isPointer());
-    ASSERT_FALSE(TypeInfo<unsigned long long>::isPointer());
-    ASSERT_FALSE(TypeInfo<             float>::isPointer());
-    ASSERT_FALSE(TypeInfo<            double>::isPointer());
-    ASSERT_FALSE(TypeInfo<       long double>::isPointer());
-
-    ASSERT_TRUE(TypeInfo<    CustomTestType*>::isPointer());
-    ASSERT_TRUE(TypeInfo<              bool*>::isPointer());
-    ASSERT_TRUE(TypeInfo<              char*>::isPointer());
-    ASSERT_TRUE(TypeInfo<       signed char*>::isPointer());
-    ASSERT_TRUE(TypeInfo<     unsigned char*>::isPointer());
-    ASSERT_TRUE(TypeInfo<           wchar_t*>::isPointer());
-    ASSERT_TRUE(TypeInfo<          char16_t*>::isPointer());
-    ASSERT_TRUE(TypeInfo<          char32_t*>::isPointer());
-    ASSERT_TRUE(TypeInfo<             short*>::isPointer());
-    ASSERT_TRUE(TypeInfo<    unsigned short*>::isPointer());
-    ASSERT_TRUE(TypeInfo<               int*>::isPointer());
-    ASSERT_TRUE(TypeInfo<      unsigned int*>::isPointer());
-    ASSERT_TRUE(TypeInfo<              long*>::isPointer());
-    ASSERT_TRUE(TypeInfo<     unsigned long*>::isPointer());
-    ASSERT_TRUE(TypeInfo<         long long*>::isPointer());
-    ASSERT_TRUE(TypeInfo<unsigned long long*>::isPointer());
-    ASSERT_TRUE(TypeInfo<             float*>::isPointer());
-    ASSERT_TRUE(TypeInfo<            double*>::isPointer());
-    ASSERT_TRUE(TypeInfo<       long double*>::isPointer());
-}
-
 TEST(TypeTableTest, IntegerTypes)
 {
     EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<  int8_t>());

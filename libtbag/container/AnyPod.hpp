@@ -18,6 +18,7 @@
 #include <libtbag/type/TypeTable.hpp>
 
 #include <cstdint>
+#include <cstring>
 #include <exception>
 #include <string>
 
@@ -31,7 +32,6 @@ union UnionData
 {
 #define _TBAG_XX(name, symbol, type) type symbol;
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-    TBAG_TYPE_TABLE_POINT_MAP(_TBAG_XX)
 #undef _TBAG_XX
 };
 
@@ -89,26 +89,20 @@ public:
     inline AnyPod & operator =(type v) { set(v); return *this; }                                \
     /* -- END -- */
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-    TBAG_TYPE_TABLE_POINT_MAP(_TBAG_XX)
 #undef _TBAG_XX
 
 public:
     template <typename T>
-    T cast(bool * code = nullptr) const TBAG_NOEXCEPT
+    T cast() const TBAG_NOEXCEPT
     {
-#define _TBAG_XX(name, symbol, type)                    \
-        if (_type == TypeTable::TT_##name) {            \
-            if (code != nullptr) { *code = true; }      \
-            return (T)(std::uintptr_t)(_data.symbol);   \
+#define _TBAG_XX(name, symbol, type)        \
+        if (_type == TypeTable::TT_##name) {\
+            return (T)_data.symbol;         \
         } /* -- END -- */
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-    TBAG_TYPE_TABLE_POINT_MAP(_TBAG_XX)
 #undef _TBAG_XX
 #undef _TBAG_POINT_XX
-        if (code != nullptr) {
-            *code = false;
-        }
-        return T();
+        return *((T*)(&_data));
     }
 
 public:
