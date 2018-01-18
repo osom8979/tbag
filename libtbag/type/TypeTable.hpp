@@ -175,7 +175,7 @@ TBAG_POP_MACRO(max);
 #endif // defined(TBAG_COMP_MSVC)
 
 template <typename T>
-struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
+struct TypeInfo : public BaseTypeInfo<typename std::remove_all_extents<typename std::remove_cv<T>::type>::type>
 { /* EMPTY. */ };
 
 template <typename T>

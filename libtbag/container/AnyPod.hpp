@@ -18,9 +18,8 @@
 #include <libtbag/type/TypeTable.hpp>
 
 #include <cstdint>
-#include <cstring>
-#include <utility>
-#include <algorithm>
+#include <exception>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,10 +41,11 @@ union UnionData
  * @author zer0
  * @date   2018-01-16
  */
-class AnyPod
+class TBAG_API AnyPod
 {
 public:
-    template <typename T> using TypeInfo  = type::TypeInfo<T>;
+    template <typename T>
+    using TypeInfo  = type::TypeInfo<T>;
     using TypeTable = type::TypeTable;
 
 public:
@@ -56,63 +56,89 @@ private:
     UnionData _data;
 
 public:
+    AnyPod();
+    AnyPod(AnyPod const & obj);
+    AnyPod(AnyPod && obj);
+    ~AnyPod();
+
+public:
     template <typename T>
-    inline AnyPod(T data, TypeTable type = TypeInfo<T>::table()) : _type(type), _data()
-    { ::memcpy(&_data, &data, sizeof(T)); }
-
-    inline AnyPod() : _type(TypeTable::TT_UNKNOWN), _data()
-    { ::memset(&_data, 0x00, sizeof(_data)); }
-
-    inline AnyPod(AnyPod const & obj) : AnyPod() { (*this) = obj; }
-    inline AnyPod(AnyPod && obj) : AnyPod() { (*this) = std::move(obj); }
-
-    inline ~AnyPod() { /* EMPTY. */ }
+    AnyPod(T data) : AnyPod()
+    { set(data); }
 
 public:
-    inline AnyPod & operator =(AnyPod const & obj) { assign(obj); return *this; }
-    inline AnyPod & operator =(AnyPod && obj) { swap(obj); return *this; }
+    AnyPod & operator =(AnyPod const & obj);
+    AnyPod & operator =(AnyPod && obj);
 
 public:
-    inline void assign(AnyPod const & obj) TBAG_NOEXCEPT
-    {
-        if (this != &obj) {
-            _type = obj._type;
-            _data = obj._data;
-        }
-    }
-
-    inline void swap(AnyPod & obj) TBAG_NOEXCEPT
-    {
-        if (this != &obj) {
-            std::swap(_type, obj._type);
-            std::swap(_data, obj._data);
-        }
-    }
+    void assign(AnyPod const & obj) TBAG_NOEXCEPT;
+    void swap(AnyPod & obj) TBAG_NOEXCEPT;
 
     inline friend void swap(AnyPod & lh, AnyPod & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
-    inline TypeTable type() const TBAG_NOEXCEPT { return _type; }
-    inline UnionData data() const TBAG_NOEXCEPT { return _data; }
+    inline bool       exists() const TBAG_NOEXCEPT { return _type != TypeTable::TT_UNKNOWN; }
+    inline TypeTable    type() const TBAG_NOEXCEPT { return _type; }
+    inline char const * name() const TBAG_NOEXCEPT { return type::getTypeName(_type); }
 
-public:
-    inline bool operator ==(AnyPod const & obj) const TBAG_NOEXCEPT
-    { return ::memcmp(&_data, &obj._data, sizeof(_data)) == 0; }
-    inline bool operator !=(AnyPod const & obj) const TBAG_NOEXCEPT
-    { return !this->operator==(obj); }
+    inline UnionData       & data()       TBAG_NOEXCEPT { return _data; }
+    inline UnionData const & data() const TBAG_NOEXCEPT { return _data; }
+
+#define _TBAG_XX(name, symbol, type) \
+    inline void set(type v) TBAG_NOEXCEPT { _data.symbol = v; _type = TypeTable::TT_##name; }   \
+    inline AnyPod & operator =(type v) { set(v); return *this; }                                \
+    /* -- END -- */
+    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+    TBAG_TYPE_TABLE_POINT_MAP(_TBAG_XX)
+#undef _TBAG_XX
 
 public:
     template <typename T>
-    inline T cast() const TBAG_NOEXCEPT
-    { return *((T*)(&_data)); }
-
-#define _TBAG_XX(name, symbol, type) \
-    inline void set(type v) TBAG_NOEXCEPT { _data.symbol = v; _type = TypeTable::TT_##name; } \
-    inline AnyPod & operator =(type v) { set(v); return *this; } \
-    /* -- END -- */
+    T cast(bool * code = nullptr) const TBAG_NOEXCEPT
+    {
+#define _TBAG_XX(name, symbol, type)                    \
+        if (_type == TypeTable::TT_##name) {            \
+            if (code != nullptr) { *code = true; }      \
+            return (T)(std::uintptr_t)(_data.symbol);   \
+        } /* -- END -- */
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+    TBAG_TYPE_TABLE_POINT_MAP(_TBAG_XX)
 #undef _TBAG_XX
+#undef _TBAG_POINT_XX
+        if (code != nullptr) {
+            *code = false;
+        }
+        return T();
+    }
+
+public:
+    int compare(AnyPod const & obj) const TBAG_NOEXCEPT;
+
+public:
+    bool operator ==(AnyPod const & obj) const TBAG_NOEXCEPT;
+    bool operator !=(AnyPod const & obj) const TBAG_NOEXCEPT;
+    bool operator  >(AnyPod const & obj) const TBAG_NOEXCEPT;
+    bool operator  <(AnyPod const & obj) const TBAG_NOEXCEPT;
+    bool operator >=(AnyPod const & obj) const TBAG_NOEXCEPT;
+    bool operator <=(AnyPod const & obj) const TBAG_NOEXCEPT;
+
+    template <typename T> bool operator ==(T v) const TBAG_NOEXCEPT { return this->operator ==(AnyPod(v)); }
+    template <typename T> bool operator !=(T v) const TBAG_NOEXCEPT { return this->operator !=(AnyPod(v)); }
+    template <typename T> bool operator  >(T v) const TBAG_NOEXCEPT { return this->operator  >(AnyPod(v)); }
+    template <typename T> bool operator  <(T v) const TBAG_NOEXCEPT { return this->operator  <(AnyPod(v)); }
+    template <typename T> bool operator >=(T v) const TBAG_NOEXCEPT { return this->operator >=(AnyPod(v)); }
+    template <typename T> bool operator <=(T v) const TBAG_NOEXCEPT { return this->operator <=(AnyPod(v)); }
+
+public:
+    std::string toString() const;
 };
+
+template <typename T> bool operator ==(T v, AnyPod const & obj) TBAG_NOEXCEPT { return AnyPod(v) == obj; }
+template <typename T> bool operator !=(T v, AnyPod const & obj) TBAG_NOEXCEPT { return AnyPod(v) != obj; }
+template <typename T> bool operator  >(T v, AnyPod const & obj) TBAG_NOEXCEPT { return AnyPod(v)  > obj; }
+template <typename T> bool operator  <(T v, AnyPod const & obj) TBAG_NOEXCEPT { return AnyPod(v)  < obj; }
+template <typename T> bool operator >=(T v, AnyPod const & obj) TBAG_NOEXCEPT { return AnyPod(v) >= obj; }
+template <typename T> bool operator <=(T v, AnyPod const & obj) TBAG_NOEXCEPT { return AnyPod(v) <= obj; }
 
 } // namespace container
 
