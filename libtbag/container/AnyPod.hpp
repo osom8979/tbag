@@ -32,6 +32,7 @@ union UnionData
 {
 #define _TBAG_XX(name, symbol, type) type symbol;
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+    TBAG_TYPE_TABLE_POINT_MAP(_TBAG_XX)
 #undef _TBAG_XX
 };
 

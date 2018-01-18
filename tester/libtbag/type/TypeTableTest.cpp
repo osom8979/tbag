@@ -14,57 +14,102 @@ using namespace libtbag::type;
 struct CustomTestType { /* EMPTY. */ };
 
 template <typename T>
-bool printTypeInfo(std::string const & prefix)
+TypeTable coverageOnly()
 {
-    std::cout << prefix << ": "
-              << TypeInfo<T>::name()          << "/"
-              << TypeInfo<T>::isArithmetic()  << "/"
-              << TypeInfo<T>::isSpecialized() << "/"
-              << TypeInfo<T>::size()          << "/"
-              << TypeInfo<T>::index()         << "/"
-              << TypeInfo<T>::maximum()       << "/"
-              << TypeInfo<T>::minimum()       << "/"
-              << TypeInfo<T>::lowest()        << "/"
-              << TypeInfo<T>::epsilon()       << "/"
-              << TypeInfo<T>::round_error()   << "/"
-              << TypeInfo<T>::infinity()      << "/"
-              << TypeInfo<T>::quiet_NaN()     << "/"
-              << TypeInfo<T>::signaling_NaN() << "/"
-              << TypeInfo<T>::denorm_min()    << "/"
-              << std::endl;
-    return true;
+    TypeInfo<T>::name();
+    TypeInfo<T>::isArithmetic();
+    TypeInfo<T>::isSpecialized();
+    TypeInfo<T>::isPointer();
+    TypeInfo<T>::size();
+    TypeInfo<T>::index();
+    TypeInfo<T>::maximum();
+    TypeInfo<T>::minimum();
+    TypeInfo<T>::lowest();
+    TypeInfo<T>::epsilon();
+    TypeInfo<T>::round_error();
+    TypeInfo<T>::infinity();
+    TypeInfo<T>::quiet_NaN();
+    TypeInfo<T>::signaling_NaN();
+    TypeInfo<T>::denorm_min();
+    return TypeInfo<T>::table();
 }
 
 TEST(TypeTableTest, Default)
 {
-    ASSERT_TRUE(printTypeInfo<    CustomTestType>("CustomTestType"));
-    ASSERT_TRUE(printTypeInfo<              bool>("bool"));
-    ASSERT_TRUE(printTypeInfo<              char>("char"));
-    ASSERT_TRUE(printTypeInfo<       signed char>("signed char"));
-    ASSERT_TRUE(printTypeInfo<     unsigned char>("unsigned char"));
-    ASSERT_TRUE(printTypeInfo<           wchar_t>("wchar_t"));
-    ASSERT_TRUE(printTypeInfo<          char16_t>("char16_t"));
-    ASSERT_TRUE(printTypeInfo<          char32_t>("char32_t"));
-    ASSERT_TRUE(printTypeInfo<             short>("short"));
-    ASSERT_TRUE(printTypeInfo<    unsigned short>("unsigned short"));
-    ASSERT_TRUE(printTypeInfo<               int>("int"));
-    ASSERT_TRUE(printTypeInfo<      unsigned int>("unsigned int"));
-    ASSERT_TRUE(printTypeInfo<              long>("long"));
-    ASSERT_TRUE(printTypeInfo<     unsigned long>("unsigned long"));
-    ASSERT_TRUE(printTypeInfo<         long long>("long long"));
-    ASSERT_TRUE(printTypeInfo<unsigned long long>("unsigned long long"));
-    ASSERT_TRUE(printTypeInfo<             float>("float"));
-    ASSERT_TRUE(printTypeInfo<            double>("double"));
-    ASSERT_TRUE(printTypeInfo<       long double>("long double"));
-    ASSERT_TRUE(printTypeInfo<             void*>("void*"));
-    ASSERT_TRUE(printTypeInfo<            int8_t>("int8_t"));
-    ASSERT_TRUE(printTypeInfo<           uint8_t>("uint8_t"));
-    ASSERT_TRUE(printTypeInfo<           int16_t>("int16_t"));
-    ASSERT_TRUE(printTypeInfo<          uint16_t>("uint16_t"));
-    ASSERT_TRUE(printTypeInfo<           int32_t>("int32_t"));
-    ASSERT_TRUE(printTypeInfo<          uint32_t>("uint32_t"));
-    ASSERT_TRUE(printTypeInfo<           int64_t>("int64_t"));
-    ASSERT_TRUE(printTypeInfo<          uint64_t>("uint64_t"));
+    ASSERT_EQ(TypeTable::TT_UNKNOWN, coverageOnly<    CustomTestType>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<              bool>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<              char>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<       signed char>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<     unsigned char>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<           wchar_t>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<          char16_t>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<          char32_t>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<             short>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<    unsigned short>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<               int>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<      unsigned int>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<              long>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<     unsigned long>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<         long long>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<unsigned long long>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<             float>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<            double>());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<       long double>());
+}
+
+TEST(TypeTableTest, Pointer)
+{
+    ASSERT_FALSE(TypeInfo<    CustomTestType>::isPointer());
+    ASSERT_FALSE(TypeInfo<              bool>::isPointer());
+    ASSERT_FALSE(TypeInfo<              char>::isPointer());
+    ASSERT_FALSE(TypeInfo<       signed char>::isPointer());
+    ASSERT_FALSE(TypeInfo<     unsigned char>::isPointer());
+    ASSERT_FALSE(TypeInfo<           wchar_t>::isPointer());
+    ASSERT_FALSE(TypeInfo<          char16_t>::isPointer());
+    ASSERT_FALSE(TypeInfo<          char32_t>::isPointer());
+    ASSERT_FALSE(TypeInfo<             short>::isPointer());
+    ASSERT_FALSE(TypeInfo<    unsigned short>::isPointer());
+    ASSERT_FALSE(TypeInfo<               int>::isPointer());
+    ASSERT_FALSE(TypeInfo<      unsigned int>::isPointer());
+    ASSERT_FALSE(TypeInfo<              long>::isPointer());
+    ASSERT_FALSE(TypeInfo<     unsigned long>::isPointer());
+    ASSERT_FALSE(TypeInfo<         long long>::isPointer());
+    ASSERT_FALSE(TypeInfo<unsigned long long>::isPointer());
+    ASSERT_FALSE(TypeInfo<             float>::isPointer());
+    ASSERT_FALSE(TypeInfo<            double>::isPointer());
+    ASSERT_FALSE(TypeInfo<       long double>::isPointer());
+
+    ASSERT_TRUE(TypeInfo<    CustomTestType*>::isPointer());
+    ASSERT_TRUE(TypeInfo<              bool*>::isPointer());
+    ASSERT_TRUE(TypeInfo<              char*>::isPointer());
+    ASSERT_TRUE(TypeInfo<       signed char*>::isPointer());
+    ASSERT_TRUE(TypeInfo<     unsigned char*>::isPointer());
+    ASSERT_TRUE(TypeInfo<           wchar_t*>::isPointer());
+    ASSERT_TRUE(TypeInfo<          char16_t*>::isPointer());
+    ASSERT_TRUE(TypeInfo<          char32_t*>::isPointer());
+    ASSERT_TRUE(TypeInfo<             short*>::isPointer());
+    ASSERT_TRUE(TypeInfo<    unsigned short*>::isPointer());
+    ASSERT_TRUE(TypeInfo<               int*>::isPointer());
+    ASSERT_TRUE(TypeInfo<      unsigned int*>::isPointer());
+    ASSERT_TRUE(TypeInfo<              long*>::isPointer());
+    ASSERT_TRUE(TypeInfo<     unsigned long*>::isPointer());
+    ASSERT_TRUE(TypeInfo<         long long*>::isPointer());
+    ASSERT_TRUE(TypeInfo<unsigned long long*>::isPointer());
+    ASSERT_TRUE(TypeInfo<             float*>::isPointer());
+    ASSERT_TRUE(TypeInfo<            double*>::isPointer());
+    ASSERT_TRUE(TypeInfo<       long double*>::isPointer());
+}
+
+TEST(TypeTableTest, IntegerTypes)
+{
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<  int8_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< uint8_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< int16_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<uint16_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< int32_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<uint32_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< int64_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<uint64_t>());
 }
 
 TEST(TypeTableTest, GetTypeName)
@@ -87,7 +132,6 @@ TEST(TypeTableTest, GetTypeName)
     ASSERT_STREQ(  "FLOAT", getTypeName(TypeTable::TT_FLOAT  ));
     ASSERT_STREQ( "DOUBLE", getTypeName(TypeTable::TT_DOUBLE ));
     ASSERT_STREQ("LDOUBLE", getTypeName(TypeTable::TT_LDOUBLE));
-    ASSERT_STREQ( "VPOINT", getTypeName(TypeTable::TT_VPOINT ));
 }
 
 TEST(TypeTableTest, GetTypeTable)
