@@ -42,6 +42,18 @@ TEST(AnyPodTest, Cast)
     ASSERT_EQ(AnyPod::TypeTable::TT_DOUBLE, pod1.type());
     ASSERT_FLOAT_EQ(101.08, pod1.cast<float>());
     ASSERT_EQ(101, pod1.cast<int>());
+
+    AnyPod pod2 = 102;
+    ASSERT_EQ(AnyPod::TypeTable::TT_INT, pod2.type());
+    ASSERT_FLOAT_EQ(102.0, pod2.cast<float>());
+    ASSERT_EQ(102, pod2.cast<int>());
+}
+
+TEST(AnyPodTest, Pointer)
+{
+    int i = 0;
+    AnyPod pod1 = (void*)&i;
+    ASSERT_EQ(&i, pod1.pointer());
 }
 
 TEST(AnyPodTest, Compare)

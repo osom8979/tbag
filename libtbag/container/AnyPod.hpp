@@ -33,6 +33,7 @@ union UnionData
 #define _TBAG_XX(name, symbol, type) type symbol;
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
+    void * vp;
 };
 
 /**
@@ -84,12 +85,17 @@ public:
     inline UnionData       & data()       TBAG_NOEXCEPT { return _data; }
     inline UnionData const & data() const TBAG_NOEXCEPT { return _data; }
 
+    inline void * pointer() const TBAG_NOEXCEPT { return _data.vp; }
+
 #define _TBAG_XX(name, symbol, type) \
     inline void set(type v) TBAG_NOEXCEPT { _data.symbol = v; _type = TypeTable::TT_##name; }   \
     inline AnyPod & operator =(type v) { set(v); return *this; }                                \
     /* -- END -- */
     TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
+
+    inline void set(void * v) TBAG_NOEXCEPT { _data.vp = v; _type = TypeTable::TT_UNKNOWN; }
+    inline AnyPod & operator =(void * v) { set(v); return *this; }
 
 public:
     template <typename T>
