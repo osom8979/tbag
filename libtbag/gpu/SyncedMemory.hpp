@@ -62,8 +62,9 @@ private:
     SharedHostMemory   _host;
 
 private:
-    std::size_t _size;
-    bool _async;
+    std::size_t _elem_size;
+    std::size_t _elem_count;
+    bool        _async;
 
 public:
     SyncedMemory();
@@ -83,7 +84,10 @@ public:
 
 public:
     inline SyncedHead  head() const TBAG_NOEXCEPT { return _head; }
-    inline std::size_t size() const TBAG_NOEXCEPT { return _size; }
+    inline std::size_t size() const TBAG_NOEXCEPT { return _elem_size * _elem_count; }
+
+    inline std::size_t  sizeOfElem() const TBAG_NOEXCEPT { return _elem_size;  }
+    inline std::size_t countOfElem() const TBAG_NOEXCEPT { return _elem_count; }
 
     inline HostMemoryFlag getFlag() const TBAG_NOEXCEPT { return _flag; }
     inline void setFlag(HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) TBAG_NOEXCEPT { _flag = flag; }
@@ -123,15 +127,29 @@ public:
     bool empty() const;
 
 protected:
-    Err alloc(std::size_t size);
+    Err alloc(std::size_t size, std::size_t count);
     Err free();
 
 public:
-    Err resize(std::size_t size);
+    Err cloneFrom(SyncedMemory const & obj);
+    Err cloneTo(SyncedMemory & obj) const;
 
 public:
-    Err cloneFrom(SyncedMemory const & obj);
-    Err cloneTo(SyncedMemory & obj);
+    Err resize(std::size_t size, std::size_t count);
+
+public:
+    template <typename T>
+    Err resize(std::size_t size)
+    {
+        _type = TypeInfo<T>::table();
+        return resize(sizeof(T), size);
+    }
+
+    Err resize(std::size_t size)
+    {
+        _type = TypeTable::TT_CHAR;
+        return resize(1, size);
+    }
 };
 
 } // namespace gpu

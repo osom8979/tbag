@@ -33,7 +33,7 @@ SyncedMemory::SyncedMemory(SharedGpuStream const & stream, SharedGpuEvent const 
 SyncedMemory::SyncedMemory(WeakedGpuStream const & stream, WeakedGpuEvent const & event, bool async)
         : _stream(stream), _event(event), _type(TypeTable::TT_UNKNOWN),
           _flag(HostMemoryFlag::HMF_DEFAULT), _head(SyncedHead::SH_UNINITIALIZED),
-          _gpu(), _host(), _size(0), _async(async)
+          _gpu(), _host(), _elem_size(0), _elem_count(0), _async(async)
 {
     if (auto shared_stream = stream.lock()) {
         if (shared_stream->atContext().getType() == GpuType::GT_CUDA) {
@@ -61,14 +61,16 @@ SyncedMemory & SyncedMemory::operator =(SyncedMemory const & obj)
 {
     if (this != &obj) {
         // @formatter:off
-        _stream = obj._stream;
-        _event  = obj._event;
-        _type   = obj._type;
-        _head   = obj._head;
-        _gpu    = obj._gpu;
-        _host   = obj._host;
-        _size   = obj._size;
-        _async  = obj._async;
+        _stream     = obj._stream;
+        _event      = obj._event;
+        _type       = obj._type;
+        _flag       = obj._flag;
+        _head       = obj._head;
+        _gpu        = obj._gpu;
+        _host       = obj._host;
+        _elem_size  = obj._elem_size;
+        _elem_count = obj._elem_count;
+        _async      = obj._async;
         // @formatter:on
     }
     return *this;
@@ -87,10 +89,12 @@ void SyncedMemory::swap(SyncedMemory & obj)
         _stream.swap(obj._stream);
         _event .swap(obj._event);
         std::swap(_type, obj._type);
+        std::swap(_flag, obj._flag);
         std::swap(_head, obj._head);
         _gpu .swap(obj._gpu);
         _host.swap(obj._host);
-        std::swap(_size , obj._size);
+        std::swap(_elem_size, obj._elem_size);
+        std::swap(_elem_count, obj._elem_count);
         std::swap(_async, obj._async);
         // @formatter:on
     }
@@ -115,9 +119,9 @@ Err SyncedMemory::toHost() const
 
     Err code = Err::E_UNKNOWN;
     if (_async) {
-        code = _gpu->copyAsync(*_host, _size, (_event.expired() ? nullptr : _event.lock().get()));
+        code = _gpu->copyAsync(*_host, size(), (_event.expired() ? nullptr : _event.lock().get()));
     } else {
-        code = _gpu->copy(*_host, _size, (_event.expired() ? nullptr : _event.lock().get()));
+        code = _gpu->copy(*_host, size(), (_event.expired() ? nullptr : _event.lock().get()));
     }
 
     if (isSuccess(code)) {
@@ -135,9 +139,9 @@ Err SyncedMemory::toGpu() const
 
     Err code = Err::E_UNKNOWN;
     if (_async) {
-        code = _host->copyAsync(*_gpu, _size, (_event.expired() ? nullptr : _event.lock().get()));
+        code = _host->copyAsync(*_gpu, size(), (_event.expired() ? nullptr : _event.lock().get()));
     } else {
-        code = _host->copy(*_gpu, _size, (_event.expired() ? nullptr : _event.lock().get()));
+        code = _host->copy(*_gpu, size(), (_event.expired() ? nullptr : _event.lock().get()));
     }
 
     if (isSuccess(code)) {
@@ -201,7 +205,7 @@ float SyncedMemory::elapsed() const
 
 bool SyncedMemory::exists() const
 {
-    return !_stream.expired() && _gpu && _host && _size > 0U;
+    return !_stream.expired() && _gpu && _host && size() > 0U;
 }
 
 bool SyncedMemory::empty() const
@@ -209,8 +213,12 @@ bool SyncedMemory::empty() const
     return !exists();
 }
 
-Err SyncedMemory::alloc(std::size_t size)
+Err SyncedMemory::alloc(std::size_t size, std::size_t count)
 {
+    if (size == 0 || count == 0) {
+        return Err::E_ILLARGS;
+    }
+
     if (_stream.expired()) {
         return Err::E_EXPIRED;
     }
@@ -223,50 +231,30 @@ Err SyncedMemory::alloc(std::size_t size)
     }
 
     try {
-        _gpu.reset(new GpuMemory(*stream, size));
-        _host.reset(new HostMemory(*stream, size, _flag));
+        _gpu.reset(new GpuMemory(*stream, size * count));
+        _host.reset(new HostMemory(*stream, size * count, _flag));
     } catch (std::bad_alloc & e) {
         _gpu.reset();
         _host.reset();
         return Err::E_BADALLOC;
     }
 
-    _size = size;
+    _elem_size  = size;
+    _elem_count = count;
     return Err::E_SUCCESS;
 }
 
 Err SyncedMemory::free()
 {
-    if (static_cast<bool>(_gpu)) {
+    if (_gpu) {
         _gpu.reset();
-    } else {
-        tDLogW("SyncedMemory::free() GPU memory is already released.");
     }
-
-    if (static_cast<bool>(_host)) {
+    if (_host) {
         _host.reset();
-    } else {
-        tDLogW("SyncedMemory::free() Host memory is already released.");
     }
-
-    _size = 0;
+    _elem_size  = 0;
+    _elem_count = 0;
     return Err::E_SUCCESS;
-}
-
-Err SyncedMemory::resize(std::size_t size)
-{
-    if (size == 0) {
-        free();
-        return Err::E_SUCCESS;
-    }
-
-    assert(size > 0);
-    if (exists() && _size == size) {
-        return Err::E_ALREADY;
-    }
-
-    free();
-    return alloc(size);
 }
 
 Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
@@ -278,16 +266,17 @@ Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
     _stream = obj._stream;
     _event  = obj._event;
     _type   = obj._type;
+    _flag   = obj._flag;
     _head   = obj._head;
     _async  = obj._async;
 
     if (obj.empty()) {
-        resize(0);
+        free();
         return Err::E_SUCCESS;
     }
 
     assert(obj.size() > 0);
-    Err const CODE = resize(obj.size());
+    Err const CODE = resize(obj._elem_size, obj._elem_count);
     if (isFailure(CODE)) {
         tDLogE("SyncedMemory::cloneFrom() Resize error: {}", getErrName(CODE));
         return CODE;
@@ -326,9 +315,27 @@ Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
     return Err::E_SUCCESS;
 }
 
-Err SyncedMemory::cloneTo(SyncedMemory & obj)
+Err SyncedMemory::cloneTo(SyncedMemory & obj) const
 {
     return obj.cloneFrom(*this);
+}
+
+Err SyncedMemory::resize(std::size_t size, std::size_t count)
+{
+    if (size == 0 || count == 0) {
+        free();
+        return Err::E_SUCCESS;
+    }
+
+    assert(size > 0);
+    assert(count > 0);
+
+    if (exists() && _elem_size == size && _elem_count == count) {
+        return Err::E_ALREADY;
+    }
+
+    free();
+    return alloc(size, count);
 }
 
 } // namespace gpu
