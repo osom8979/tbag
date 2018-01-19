@@ -32,14 +32,17 @@ static bool addByCpu(T const * v1, T const * v2, T * r, int count)
 } // namespace __impl {
 // --------------------
 
-bool runCpuAdd1i(int const * v1, int const * v2, int * r, int count)
-{ return __impl::addByCpu(v1, v2, r, count); }
-bool runCpuAdd1u(unsigned const * v1, unsigned const * v2, unsigned * r, int count)
-{ return __impl::addByCpu(v1, v2, r, count); }
-bool runCpuAdd1f(float const * v1, float const * v2, float * r, int count)
-{ return __impl::addByCpu(v1, v2, r, count); }
-bool runCpuAdd1d(double const * v1, double const * v2, double * r, int count)
-{ return __impl::addByCpu(v1, v2, r, count); }
+bool runCpuAdd(type::TypeTable type, void const * v1, void const * v2, void * r, int count)
+{
+    switch (type) {
+    case type::TypeTable::TT_INT:    return __impl::addByCpu((int      const *)v1, (int      const *)v2, (int      *)r, count);
+    case type::TypeTable::TT_UINT:   return __impl::addByCpu((unsigned const *)v1, (unsigned const *)v2, (unsigned *)r, count);
+    case type::TypeTable::TT_FLOAT:  return __impl::addByCpu((float    const *)v1, (float    const *)v2, (float    *)r, count);
+    case type::TypeTable::TT_DOUBLE: return __impl::addByCpu((double   const *)v1, (double   const *)v2, (double   *)r, count);
+    default: break;
+    }
+    return false;
+}
 
 } // namespace cpu
 } // namespace gpu

@@ -116,6 +116,19 @@ public:
 public:
     virtual Err  flush(GpuStream const & stream) const;
     virtual Err finish(GpuStream const & stream) const;
+
+// Kernels.
+public:
+    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const;
+    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const;
+
+    virtual Err runKernel(GpuStream const & stream,
+                          GpuKernel const & kernel,
+                          unsigned work_dim,
+                          std::size_t const * global_work_offset,
+                          std::size_t const * global_work_size,
+                          std::size_t const * local_work_size,
+                          GpuEvent * event = nullptr) const;
 };
 
 using SharedGpuContext = std::shared_ptr<GpuContext>;

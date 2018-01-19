@@ -39,20 +39,22 @@ TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_1D = "suffix=1d type=doubl
 
 static std::string getOpenCLSource(char const * source, char const * env)
 { return string::Environments(env).convert(source); }
-static std::string getOpenCL1i(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_1I); }
-static std::string getOpenCL1u(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_1U); }
-static std::string getOpenCL1f(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_1F); }
-static std::string getOpenCL1d(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_1D); }
+
+static std::string getOpenCL1i(char const * source) { return getOpenCLSource(source, TBAG_TYPE_TO_1I); }
+static std::string getOpenCL1u(char const * source) { return getOpenCLSource(source, TBAG_TYPE_TO_1U); }
+static std::string getOpenCL1f(char const * source) { return getOpenCLSource(source, TBAG_TYPE_TO_1F); }
+static std::string getOpenCL1d(char const * source) { return getOpenCLSource(source, TBAG_TYPE_TO_1D); }
 
 // ------------------
 } // namespace __impl
 // ------------------
 
 using namespace libtbag::gpu::opencl::__impl;
+
+std::string getOpenCLName1i(std::string const & prefix) { return getOpenCL1i(prefix.c_str()); }
+std::string getOpenCLName1u(std::string const & prefix) { return getOpenCL1u(prefix.c_str()); }
+std::string getOpenCLName1f(std::string const & prefix) { return getOpenCL1f(prefix.c_str()); }
+std::string getOpenCLName1d(std::string const & prefix) { return getOpenCL1d(prefix.c_str()); }
 
 std::string getOpenCLPrefixOfAdd  () { return TBAG_OPENCL_PREFIX_OF_ADD; }
 std::string getOpenCLSourceOfAdd1i() { return getOpenCL1i(TBAG_OPENCL_SOURCE_OF_ADD); }

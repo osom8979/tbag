@@ -18,6 +18,7 @@
 #include <libtbag/gpu/details/GpuCommon.hpp>
 
 #include <string>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -62,6 +63,9 @@ public:
 public:
     inline std::string name() const { return _name; }
 };
+
+using SharedGpuKernel = std::shared_ptr<GpuKernel>;
+using WeakedGpuKernel = std::weak_ptr<GpuKernel>;
 
 } // namespace details
 } // namespace gpu

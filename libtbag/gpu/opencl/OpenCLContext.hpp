@@ -89,6 +89,17 @@ public:
 
     virtual Err  flush(GpuStream const & stream) const override;
     virtual Err finish(GpuStream const & stream) const override;
+
+    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const override;
+    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const override;
+
+    virtual Err runKernel(GpuStream const & stream,
+                          GpuKernel const & kernel,
+                          unsigned work_dim,
+                          std::size_t const * global_work_offset,
+                          std::size_t const * global_work_size,
+                          std::size_t const * local_work_size,
+                          GpuEvent * event = nullptr) const override;
 };
 
 } // namespace opencl

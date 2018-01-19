@@ -566,6 +566,48 @@ Err OpenCLContext::finish(GpuStream const & stream) const
     return Err::E_SUCCESS;
 }
 
+Err OpenCLContext::setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const
+{
+    if (kernel.validate(*this) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    cl_int code = clSetKernelArg(kernel.castId<cl_kernel>(), (cl_uint)index, size, data);
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLContext::setKernelArg() OpenCL clSetKernelArg() error code: {}", code);
+        return Err::E_OPENCL;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err OpenCLContext::setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const
+{
+    return setKernelArg(kernel, index, sizeof(cl_mem), mem.data());
+}
+
+Err OpenCLContext::runKernel(GpuStream const & stream,
+                             GpuKernel const & kernel,
+                             unsigned work_dim,
+                             std::size_t const * global_work_offset,
+                             std::size_t const * global_work_size,
+                             std::size_t const * local_work_size,
+                             GpuEvent * event) const
+{
+    if (stream.validate(*this) == false || kernel.validate(*this) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    cl_int code = clEnqueueNDRangeKernel(stream.castId<cl_command_queue>(), kernel.castId<cl_kernel>(),
+                                         work_dim, global_work_offset, global_work_size, local_work_size,
+                                         0, nullptr,
+                                         (cl_event*)(event == nullptr ? nullptr : &event->atId()));
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLContext::runKernel() OpenCL clEnqueueNDRangeKernel() error code: {}", code);
+        return Err::E_OPENCL;
+    }
+    return Err::E_SUCCESS;
+}
+
 } // namespace opencl
 } // namespace gpu
 

@@ -150,7 +150,7 @@ Err SyncedMemory::toGpu() const
     return code;
 }
 
-void * SyncedMemory::getHostData()
+void * SyncedMemory::getMutableHostData()
 {
     if (static_cast<bool>(_host)) {
         toHost();
@@ -160,21 +160,21 @@ void * SyncedMemory::getHostData()
     return nullptr;
 }
 
-void const * SyncedMemory::getHostData() const
-{
-    if (static_cast<bool>(_host)) {
-        toHost();
-        return _host->data();
-    }
-    return nullptr;
-}
-
-void * SyncedMemory::getGpuData()
+void * SyncedMemory::getMutableGpuData()
 {
     if (static_cast<bool>(_gpu)) {
         toGpu();
         _head = SyncedHead::SH_HEAD_AT_GPU;
         return _gpu->data();
+    }
+    return nullptr;
+}
+
+void const * SyncedMemory::getHostData() const
+{
+    if (static_cast<bool>(_host)) {
+        toHost();
+        return _host->data();
     }
     return nullptr;
 }
@@ -255,6 +255,18 @@ Err SyncedMemory::free()
     _elem_size  = 0;
     _elem_count = 0;
     return Err::E_SUCCESS;
+}
+
+Err SyncedMemory::syncMemory()
+{
+    if (_head == SyncedHead::SH_HEAD_AT_HOST) {
+        return toGpu();
+    } else if (_head == SyncedHead::SH_HEAD_AT_GPU) {
+        return toHost();
+    } else {
+        return Err::E_ILLSTATE;
+    }
+    return Err::E_ALREADY;
 }
 
 Err SyncedMemory::cloneFrom(SyncedMemory const & obj)

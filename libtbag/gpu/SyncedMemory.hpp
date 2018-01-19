@@ -84,6 +84,7 @@ public:
 
 public:
     inline SyncedHead  head() const TBAG_NOEXCEPT { return _head; }
+    inline TypeTable   type() const TBAG_NOEXCEPT { return _type; }
     inline std::size_t size() const TBAG_NOEXCEPT { return _elem_size * _elem_count; }
 
     inline std::size_t  sizeOfElem() const TBAG_NOEXCEPT { return _elem_size;  }
@@ -104,10 +105,11 @@ public:
     Err  toGpu() const;
 
 public:
-    void       * getHostData(); // Mutable assessor.
-    void       *  getGpuData(); // Mutable assessor.
-    void const * getHostData() const; // Immutable assessor.
-    void const *  getGpuData() const; // Immutable assessor.
+    void * getMutableHostData();
+    void *  getMutableGpuData();
+
+    void const * getHostData() const;
+    void const *  getGpuData() const;
 
 public:
     template <typename T> T       * castHostData()       { return getHostData(); }
@@ -131,6 +133,7 @@ protected:
     Err free();
 
 public:
+    Err syncMemory();
     Err cloneFrom(SyncedMemory const & obj);
     Err cloneTo(SyncedMemory & obj) const;
 

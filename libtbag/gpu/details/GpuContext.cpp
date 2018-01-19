@@ -275,6 +275,36 @@ Err GpuContext::finish(GpuStream const & stream) const
     return Err::E_SUCCESS;
 }
 
+Err GpuContext::setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const
+{
+    if (kernel.validate(*this) == false) {
+        return Err::E_ILLARGS;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err GpuContext::setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const
+{
+    if (kernel.validate(*this) == false) {
+        return Err::E_ILLARGS;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err GpuContext::runKernel(GpuStream const & stream,
+                          GpuKernel const & kernel,
+                          unsigned work_dim,
+                          std::size_t const * global_work_offset,
+                          std::size_t const * global_work_size,
+                          std::size_t const * local_work_size,
+                          GpuEvent * event) const
+{
+    if (stream.validate(*this) == false || kernel.validate(*this) == false) {
+        return Err::E_ILLARGS;
+    }
+    return Err::E_SUCCESS;
+}
+
 } // namespace details
 } // namespace gpu
 

@@ -25,6 +25,11 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu    {
 namespace opencl {
 
+TBAG_API std::string getOpenCLName1i(std::string const & prefix);
+TBAG_API std::string getOpenCLName1u(std::string const & prefix);
+TBAG_API std::string getOpenCLName1f(std::string const & prefix);
+TBAG_API std::string getOpenCLName1d(std::string const & prefix);
+
 TBAG_API std::string getOpenCLPrefixOfAdd  ();
 TBAG_API std::string getOpenCLSourceOfAdd1i();
 TBAG_API std::string getOpenCLSourceOfAdd1u();
