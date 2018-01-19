@@ -20,33 +20,33 @@ namespace opencl {
 namespace __impl {
 // ---------------
 
-TBAG_CONSTEXPR static char const * const TBAG_OPENCL_NAME_OF_ADD = "add";
+TBAG_CONSTEXPR static char const * const TBAG_OPENCL_PREFIX_OF_ADD = "add";
 TBAG_CONSTEXPR static char const * const TBAG_OPENCL_SOURCE_OF_ADD = R"(
-__kernel void add(__global ${type} * v1, __global ${type} * v2, __global ${type} * result, __global uint size)
+__kernel void add${suffix}(__global ${type} * v1, __global ${type} * v2, __global ${type} * r, __global int size)
 {
     uint w = get_global_size(0);
     uint y = get_global_id(1);
     uint x = get_global_id(0);
     uint i = y * w + x;
-    result[i] = v1[i] + v2[i];
+    r[i] = v1[i] + v2[i];
 }
 )";
 
-TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_INT    = "type=int";
-TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_UINT   = "type=uint";
-TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_FLOAT  = "type=float";
-TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_DOUBLE = "type=double";
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_1I = "suffix=1i type=int";
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_1U = "suffix=1u type=uint";
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_1F = "suffix=1f type=float";
+TBAG_CONSTEXPR static char const * const TBAG_TYPE_TO_1D = "suffix=1d type=double";
 
 static std::string getOpenCLSource(char const * source, char const * env)
 { return string::Environments(env).convert(source); }
-static std::string getOpenCLIntSource(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_INT); }
-static std::string getOpenCLUintSource(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_UINT); }
-static std::string getOpenCLFloatSource(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_FLOAT); }
-static std::string getOpenCLDoubleSource(char const * source)
-{ return getOpenCLSource(source, TBAG_TYPE_TO_DOUBLE); }
+static std::string getOpenCL1i(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_1I); }
+static std::string getOpenCL1u(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_1U); }
+static std::string getOpenCL1f(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_1F); }
+static std::string getOpenCL1d(char const * source)
+{ return getOpenCLSource(source, TBAG_TYPE_TO_1D); }
 
 // ------------------
 } // namespace __impl
@@ -54,11 +54,11 @@ static std::string getOpenCLDoubleSource(char const * source)
 
 using namespace libtbag::gpu::opencl::__impl;
 
-std::string getOpenCLSourceOfAddName() TBAG_NOEXCEPT { return TBAG_OPENCL_NAME_OF_ADD; }
-std::string getOpenCLSourceOfAdd1i  () TBAG_NOEXCEPT { return getOpenCLIntSource   (TBAG_OPENCL_SOURCE_OF_ADD); }
-std::string getOpenCLSourceOfAdd1u  () TBAG_NOEXCEPT { return getOpenCLUintSource  (TBAG_OPENCL_SOURCE_OF_ADD); }
-std::string getOpenCLSourceOfAdd1f  () TBAG_NOEXCEPT { return getOpenCLFloatSource (TBAG_OPENCL_SOURCE_OF_ADD); }
-std::string getOpenCLSourceOfAdd1d  () TBAG_NOEXCEPT { return getOpenCLDoubleSource(TBAG_OPENCL_SOURCE_OF_ADD); }
+std::string getOpenCLPrefixOfAdd  () { return TBAG_OPENCL_PREFIX_OF_ADD; }
+std::string getOpenCLSourceOfAdd1i() { return getOpenCL1i(TBAG_OPENCL_SOURCE_OF_ADD); }
+std::string getOpenCLSourceOfAdd1u() { return getOpenCL1u(TBAG_OPENCL_SOURCE_OF_ADD); }
+std::string getOpenCLSourceOfAdd1f() { return getOpenCL1f(TBAG_OPENCL_SOURCE_OF_ADD); }
+std::string getOpenCLSourceOfAdd1d() { return getOpenCL1d(TBAG_OPENCL_SOURCE_OF_ADD); }
 
 } // namespace opencl
 } // namespace gpu

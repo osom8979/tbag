@@ -25,10 +25,10 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu {
 namespace cpu {
 
-TBAG_API bool runCpuAdd1i(int      const * v1, int      const * v2, int      * result, unsigned count);
-TBAG_API bool runCpuAdd1u(unsigned const * v1, unsigned const * v2, unsigned * result, unsigned count);
-TBAG_API bool runCpuAdd1f(float    const * v1, float    const * v2, float    * result, unsigned count);
-TBAG_API bool runCpuAdd1d(double   const * v1, double   const * v2, double   * result, unsigned count);
+TBAG_API bool runCpuAdd1i(int      const * v1, int      const * v2, int      * r, int count);
+TBAG_API bool runCpuAdd1u(unsigned const * v1, unsigned const * v2, unsigned * r, int count);
+TBAG_API bool runCpuAdd1f(float    const * v1, float    const * v2, float    * r, int count);
+TBAG_API bool runCpuAdd1d(double   const * v1, double   const * v2, double   * r, int count);
 
 } // namespace cpu
 } // namespace gpu

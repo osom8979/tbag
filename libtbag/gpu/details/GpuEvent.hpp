@@ -15,9 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,6 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
+// Forward declaration.
 class GpuContext;
 class GpuStream;
 
@@ -36,32 +37,24 @@ class GpuStream;
  * @date   2018-01-14
  * @date   2018-01-15 (struct -> class)
  */
-class TBAG_API GpuEvent
+class TBAG_API GpuEvent : private Noncopyable
 {
 private:
-    GpuContext const * _context;
+    GpuStream const & _stream;
     GpuId _start;
     GpuId _stop;
 
 public:
-    GpuEvent(GpuContext const * c = nullptr, GpuId start = UNKNOWN_ID, GpuId stop = UNKNOWN_ID);
-    GpuEvent(GpuEvent const & obj);
-    GpuEvent(GpuEvent && obj);
-    virtual ~GpuEvent();
+    GpuEvent(GpuStream const & stream);
+    ~GpuEvent();
 
 public:
-    GpuEvent & operator =(GpuEvent const & obj);
-    GpuEvent & operator =(GpuEvent && obj);
+    inline GpuStream const & atStream() const TBAG_NOEXCEPT { return _stream; }
+    inline bool isSameStream(GpuStream const & stream) const TBAG_NOEXCEPT { return (&_stream) == (&stream); }
 
-public:
-    void swap(GpuEvent & obj);
-    inline friend void swap(GpuEvent & lh, GpuEvent & rh) { lh.swap(rh); }
+    inline bool validate() const TBAG_NOEXCEPT { return _start != UNKNOWN_ID; }
+    inline bool validate(GpuStream const & stream) const TBAG_NOEXCEPT { return isSameStream(stream) && validate(); }
 
-public:
-    inline bool isSameContext(GpuContext const * c) const TBAG_NOEXCEPT { return _context == c; }
-    inline GpuContext const * getContextPtr() const TBAG_NOEXCEPT { return _context; }
-
-    inline bool      existsId() const TBAG_NOEXCEPT { return _start != UNKNOWN_ID; }
     inline GpuId        getId() const TBAG_NOEXCEPT { return _start; }
     inline GpuId       & atId()       TBAG_NOEXCEPT { return _start; }
     inline GpuId const & atId() const TBAG_NOEXCEPT { return _start; }
@@ -79,23 +72,18 @@ public:
 
     inline void clearIds() TBAG_NOEXCEPT { _start = UNKNOWN_ID; _stop = UNKNOWN_ID; }
 
-    inline bool validate() const TBAG_NOEXCEPT
-    { return (_context != nullptr) && existsId(); }
-    inline bool validate(GpuContext const * c) const TBAG_NOEXCEPT
-    { return (_context != nullptr) && isSameContext(c) && existsId(); }
-
 public:
-    Err create(GpuStream const & stream);
-    Err release();
+    GpuContext const & atContext() const TBAG_NOEXCEPT;
+    bool isSameContext(GpuContext const & context) const TBAG_NOEXCEPT;
 
 public:
     Err sync();
     Err elapsed(float * millisec);
     float elapsed();
-
-public:
-    static GpuEvent instance(GpuStream const & stream);
 };
+
+using SharedGpuEvent = std::shared_ptr<GpuEvent>;
+using WeakedGpuEvent = std::weak_ptr<GpuEvent>;
 
 /**
  * CpuEventGuard class prototype.
@@ -110,7 +98,7 @@ private:
     GpuEvent * _event;
 
 public:
-    CpuEventGuard(GpuEvent * e = nullptr);
+    CpuEventGuard(GpuEvent * event = nullptr);
     ~CpuEventGuard();
 
 public:

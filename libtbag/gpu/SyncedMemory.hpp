@@ -49,12 +49,14 @@ public:
     };
 
 private:
-    WeakedGpuStream          _stream;
-    TypeTable                _type;
-    SyncedHead       mutable _head;
-    SharedGpuMemory  mutable _gpu;
-    SharedHostMemory mutable _host;
-    std::size_t              _size;
+    WeakedGpuStream    _stream;
+    WeakedGpuEvent     _event;
+    TypeTable          _type;
+    SyncedHead mutable _head;
+    SharedGpuMemory    _gpu;
+    SharedHostMemory   _host;
+    std::size_t        _size;
+    bool               _async;
 
 public:
     SyncedMemory();
@@ -76,19 +78,32 @@ public:
     inline SyncedHead  head() const TBAG_NOEXCEPT { return _head; }
     inline std::size_t size() const TBAG_NOEXCEPT { return _size; }
 
-public:
-    void toHost() const;
-    void  toGpu() const;
+    inline bool isAsync() const TBAG_NOEXCEPT { return _async; }
+    inline void setAsyncMode(bool flag = true) TBAG_NOEXCEPT { _async = flag; }
 
 public:
-    void       * getHostData();
-    void const * getHostData() const;
-    void       *  getGpuData();
-    void const *  getGpuData() const;
+    void setEvent(SharedGpuEvent const & event);
+    void setEvent(WeakedGpuEvent const & event);
 
 public:
-    void const * castHostData() const;
-    void const *  castGpuData() const;
+    Err toHost() const;
+    Err  toGpu() const;
+
+public:
+    void * getHostData(); // Mutable assessor.
+    void *  getGpuData(); // Mutable assessor.
+
+public:
+    void const * getHostData() const; // Immutable assessor.
+    void const *  getGpuData() const; // Immutable assessor.
+
+public:
+    Err      sync() const;
+    float elapsed() const;
+
+public:
+    Err alloc(std::size_t size);
+    Err free();
 
 public:
     bool cloneFrom(SyncedMemory const & obj);
@@ -96,7 +111,6 @@ public:
 
 public:
     void clear();
-    bool realloc(std::size_t size);
     bool resize(std::size_t size);
 };
 

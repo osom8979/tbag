@@ -30,8 +30,8 @@ SyncedMemory::SyncedMemory(SharedGpuStream const & stream)
 }
 
 SyncedMemory::SyncedMemory(WeakedGpuStream const & stream)
-        : _stream(stream), _type(TypeTable::TT_UNKNOWN), _head(SyncedHead::SH_UNINITIALIZED),
-          _gpu(), _host(), _size(0)
+        : _stream(stream), _event(), _type(TypeTable::TT_UNKNOWN), _head(SyncedHead::SH_UNINITIALIZED),
+          _gpu(), _host(), _size(0), _async(true)
 {
     // EMPTY.
 }
@@ -55,11 +55,13 @@ SyncedMemory & SyncedMemory::operator =(SyncedMemory const & obj)
 {
     if (this != &obj) {
         _stream = obj._stream;
+        _event  = obj._event;
         _type   = obj._type;
         _head   = obj._head;
         _gpu    = obj._gpu;
         _host   = obj._host;
         _size   = obj._size;
+        _async  = obj._async;
     }
     return *this;
 }
@@ -74,30 +76,64 @@ void SyncedMemory::swap(SyncedMemory & obj)
 {
     if (this != &obj) {
         _stream.swap(obj._stream);
+        _event .swap(obj._event);
         std::swap(_type, obj._type);
         std::swap(_head, obj._head);
-        _gpu.swap(obj._gpu);
+        _gpu .swap(obj._gpu);
         _host.swap(obj._host);
         std::swap(_size, obj._size);
+        std::swap(_async, obj._async);
     }
 }
 
-void SyncedMemory::toHost() const
+void SyncedMemory::setEvent(SharedGpuEvent const & event)
+{
+    _event = event;
+}
+
+void SyncedMemory::setEvent(WeakedGpuEvent const & event)
+{
+    _event = event;
+}
+
+Err SyncedMemory::toHost() const
 {
     if (_head != SyncedHead::SH_HEAD_AT_GPU) {
-        return; // SKIP.
+        return Err::E_SUCCESS; // SKIP.
     }
     assert(_head == SyncedHead::SH_HEAD_AT_GPU);
-    _head = SyncedHead::SH_SYNCED;
+
+    Err code = Err::E_UNKNOWN;
+    if (_async) {
+        code = _gpu->copyAsync(*_host, _size, (_event.expired() ? nullptr : _event.lock().get()));
+    } else {
+        code = _gpu->copy(*_host, _size, (_event.expired() ? nullptr : _event.lock().get()));
+    }
+
+    if (isSuccess(code)) {
+        _head = SyncedHead::SH_SYNCED;
+    }
+    return code;
 }
 
-void SyncedMemory::toGpu() const
+Err SyncedMemory::toGpu() const
 {
     if (_head != SyncedHead::SH_HEAD_AT_HOST) {
-        return; // SKIP.
+        return Err::E_SUCCESS; // SKIP.
     }
     assert(_head == SyncedHead::SH_HEAD_AT_HOST);
-    _head = SyncedHead::SH_SYNCED;
+
+    Err code = Err::E_UNKNOWN;
+    if (_async) {
+        code = _host->copyAsync(*_gpu, _size, (_event.expired() ? nullptr : _event.lock().get()));
+    } else {
+        code = _host->copy(*_gpu, _size, (_event.expired() ? nullptr : _event.lock().get()));
+    }
+
+    if (isSuccess(code)) {
+        _head = SyncedHead::SH_SYNCED;
+    }
+    return code;
 }
 
 void * SyncedMemory::getHostData()
@@ -138,6 +174,30 @@ void const * SyncedMemory::getGpuData() const
     return nullptr;
 }
 
+Err SyncedMemory::sync() const
+{
+    return (_event.expired() ? Err::E_NULLPTR : _event.lock()->sync());
+}
+
+float SyncedMemory::elapsed() const
+{
+    return (_event.expired() ? 0.0f : _event.lock()->elapsed());
+}
+
+Err SyncedMemory::alloc(std::size_t size)
+{
+    if (auto stream = _stream.lock()) {
+    }
+    return Err::E_EXPIRED;
+}
+
+Err SyncedMemory::free()
+{
+    if (auto stream = _stream.lock()) {
+    }
+    return Err::E_EXPIRED;
+}
+
 bool SyncedMemory::cloneFrom(SyncedMemory const & obj)
 {
     return false;
@@ -150,11 +210,6 @@ bool SyncedMemory::cloneTo(SyncedMemory & obj)
 
 void SyncedMemory::clear()
 {
-}
-
-bool SyncedMemory::realloc(std::size_t size)
-{
-    return false;
 }
 
 bool SyncedMemory::resize(std::size_t size)

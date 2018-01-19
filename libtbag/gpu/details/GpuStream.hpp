@@ -15,9 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
-#include <libtbag/gpu/details/GpuIdWrapper.hpp>
 
 #include <memory>
 
@@ -38,29 +36,12 @@ namespace details {
 class TBAG_API GpuStream : public GpuIdWrapper
 {
 public:
-    GpuStream(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID);
-    GpuStream(GpuStream const & obj);
-    GpuStream(GpuStream && obj);
-    virtual ~GpuStream();
-
-public:
-    GpuStream & operator =(GpuStream const & obj);
-    GpuStream & operator =(GpuStream && obj);
-
-public:
-    void swap(GpuStream & obj);
-    inline friend void swap(GpuStream & lh, GpuStream & rh) { lh.swap(rh); }
-
-public:
-    Err create();
-    Err release();
+    GpuStream(GpuContext const & context);
+    ~GpuStream();
 
 public:
     Err  flush() const;
     Err finish() const;
-
-public:
-    static GpuStream instance(GpuContext const * c);
 };
 
 using SharedGpuStream = std::shared_ptr<GpuStream>;

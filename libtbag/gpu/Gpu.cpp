@@ -125,6 +125,7 @@ Gpu & Gpu::operator =(Gpu const & obj)
     if (this != &obj) {
         _gpu           = obj._gpu;
         _streams       = obj._streams;
+        _events        = obj._events;
         _platform_info = obj._platform_info;
         _device_info   = obj._device_info;
     }
@@ -142,6 +143,7 @@ void Gpu::swap(Gpu & obj)
     if (this != &obj) {
         _gpu.swap(obj._gpu);
         _streams.swap(obj._streams);
+        _events.swap(obj._events);
         std::swap(_platform_info, obj._platform_info);
         std::swap(_device_info, obj._device_info);
     }
@@ -218,16 +220,37 @@ bool Gpu::isStream() const
     return (_gpu ? _gpu->isStream() : false);
 }
 
-SharedGpuStream Gpu::newStream(bool auto_insert)
-{
-    SharedGpuStream stream(_gpu ? new GpuStream(GpuStream::instance(_gpu.get())) : nullptr);
-    if (auto_insert && stream) {
-        if (_streams.insert(StreamPair(stream->getId(), stream)).second == false) {
-            tDLogW("Gpu::newStream() Insert failed.");
-        }
-    }
-    return stream;
-}
+//SharedGpuStream Gpu::newStream(bool auto_insert)
+//{
+//    SharedGpuStream stream(_gpu ? new GpuStream(GpuStream::instance(_gpu.get())) : nullptr);
+//    if (auto_insert && stream) {
+//        if (_streams.insert(StreamPair(stream->getId(), stream)).second == false) {
+//            tDLogW("Gpu::newStream() Insert failed.");
+//        }
+//    }
+//    return stream;
+//}
+//
+//SharedGpuEvent Gpu::newEvent(GpuStream const & stream, bool auto_insert)
+//{
+//    SharedGpuEvent event(_gpu ? new GpuEvent(GpuEvent::instance(stream)) : nullptr);
+//    if (auto_insert && event) {
+//        if (_events.insert(EventPair(event->getId(), event)).second == false) {
+//            tDLogW("Gpu::newEvent() Insert failed.");
+//        }
+//    }
+//    return event;
+//}
+//
+//SharedGpuEvent Gpu::newEvent(SharedGpuStream const & stream, bool auto_insert)
+//{
+//    return (stream ? newEvent(*stream, auto_insert) : SharedGpuEvent());
+//}
+//
+//SharedGpuEvent Gpu::newEvent(WeakedGpuStream const & stream, bool auto_insert)
+//{
+//    return (stream.expired() ? SharedGpuEvent() : newEvent(stream.lock(), auto_insert));
+//}
 
 } // namespace gpu
 

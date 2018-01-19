@@ -87,9 +87,13 @@ public:
     using StreamMap  = std::unordered_map<GpuId, SharedGpuStream>;
     using StreamPair = StreamMap::value_type;
 
+    using EventMap  = std::unordered_map<GpuId, SharedGpuEvent>;
+    using EventPair = EventMap::value_type;
+
 private:
-    SharedGpuContext _gpu;
-    StreamMap _streams;
+    SharedGpuContext  _gpu;
+    StreamMap     _streams;
+    EventMap       _events;
 
 private:
     GpuPlatformInfo _platform_info;
@@ -118,7 +122,9 @@ public:
 
 public:
     bool validate() const;
-    Err  init(GpuType type = GpuType::GT_CPU, std::size_t platform_index = 0, std::size_t device_index = 0);
+    Err  init(GpuType type = GpuType::GT_CPU,
+              std::size_t platform_index = 0,
+              std::size_t   device_index = 0);
     void clear();
 
 public:
@@ -133,6 +139,9 @@ public:
 
 public:
     SharedGpuStream newStream(bool auto_insert = true);
+    SharedGpuEvent  newEvent(GpuStream const & stream, bool auto_insert = true);
+    SharedGpuEvent  newEvent(SharedGpuStream const & stream, bool auto_insert = true);
+    SharedGpuEvent  newEvent(WeakedGpuStream const & stream, bool auto_insert = true);
 };
 
 } // namespace gpu

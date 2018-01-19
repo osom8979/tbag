@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/id/Id.hpp>
 
 #include <exception>
@@ -64,18 +66,18 @@ TBAG_API char const * getHostMemoryTypeString(HostMemoryFlag flag) TBAG_NOEXCEPT
 struct GpuPlatform
 {
     GpuType const TYPE;
-    GpuId   const PLATFORM;
+    GpuId   const PLATFORM_ID;
 
-    GpuPlatform(GpuType t, GpuId p) : TYPE(t), PLATFORM(p) { /* EMPTY. */ }
+    GpuPlatform(GpuType t, GpuId p) : TYPE(t), PLATFORM_ID(p) { /* EMPTY. */ }
     ~GpuPlatform() { /* EMPTY. */ }
 
     inline GpuType getType() const TBAG_NOEXCEPT { return TYPE; }
     inline char const * getTypeString() const TBAG_NOEXCEPT { return getGpuTypeString(TYPE); }
 
-    inline bool  existsPlatformId() const TBAG_NOEXCEPT { return PLATFORM != UNKNOWN_ID; }
-    inline GpuId    getPlatformId() const TBAG_NOEXCEPT { return PLATFORM; }
+    inline bool  existsPlatformId() const TBAG_NOEXCEPT { return PLATFORM_ID != UNKNOWN_ID; }
+    inline GpuId    getPlatformId() const TBAG_NOEXCEPT { return PLATFORM_ID; }
 
-    template <typename T> inline T castPlatformId() const TBAG_NOEXCEPT { return (T)PLATFORM; }
+    template <typename T> inline T castPlatformId() const TBAG_NOEXCEPT { return (T)PLATFORM_ID; }
 };
 
 struct GpuPlatformInfo
@@ -89,15 +91,15 @@ struct GpuPlatformInfo
 
 struct GpuDevice : public GpuPlatform
 {
-    GpuId const DEVICE;
+    GpuId const DEVICE_ID;
 
-    GpuDevice(GpuPlatform const & p, GpuId d) : GpuPlatform(p), DEVICE(d) { /* EMPTY. */ }
+    GpuDevice(GpuPlatform const & p, GpuId d) : GpuPlatform(p), DEVICE_ID(d) { /* EMPTY. */ }
     ~GpuDevice() { /* EMPTY. */ }
 
-    inline bool  existsDeviceId() const TBAG_NOEXCEPT { return DEVICE != UNKNOWN_ID; }
-    inline GpuId    getDeviceId() const TBAG_NOEXCEPT { return DEVICE; }
+    inline bool  existsDeviceId() const TBAG_NOEXCEPT { return DEVICE_ID!= UNKNOWN_ID; }
+    inline GpuId    getDeviceId() const TBAG_NOEXCEPT { return DEVICE_ID; }
 
-    template <typename T> inline T castDeviceId() const TBAG_NOEXCEPT { return (T)DEVICE; }
+    template <typename T> inline T castDeviceId() const TBAG_NOEXCEPT { return (T)DEVICE_ID; }
 };
 
 struct GpuDeviceInfo
@@ -159,6 +161,42 @@ inline void checkOpenCLGpuType(GpuPlatform const & platform) { checkGpuType(plat
 using GpuPlatforms = std::vector<GpuPlatform>;
 using GpuDevices   = std::vector<GpuDevice>;
 
+// Forward declaration.
+class GpuContext;
+
+/**
+ * GpuIdWrapper structure.
+ *
+ * @author zer0
+ * @date   2018-01-15
+ */
+class GpuIdWrapper : private Noncopyable
+{
+private:
+    GpuContext const & _context;
+
+protected:
+    GpuId _id;
+
+public:
+    GpuIdWrapper(GpuContext const & context, GpuId id = UNKNOWN_ID) : _context(context), _id(id)
+    { /* EMPTY. */ }
+    ~GpuIdWrapper()
+    { /* EMPTY. */ }
+
+public:
+    inline bool isSameContext(GpuContext const & context) const TBAG_NOEXCEPT { return (&_context) == (&context); }
+    inline GpuContext const & atContext() const TBAG_NOEXCEPT { return _context; }
+
+    inline bool validate() const TBAG_NOEXCEPT { return _id != UNKNOWN_ID; }
+    inline bool validate(GpuContext const & context) const TBAG_NOEXCEPT { return isSameContext(context) && validate(); }
+
+    inline GpuId getId() const TBAG_NOEXCEPT { return _id; }
+    inline void clearId() TBAG_NOEXCEPT { _id = UNKNOWN_ID; }
+
+    template <typename T> inline void setId(T i)    TBAG_NOEXCEPT { _id = (GpuId)i; }
+    template <typename T> inline T   castId() const TBAG_NOEXCEPT { return (T)_id; }
+};
 
 } // namespace details
 } // namespace gpu

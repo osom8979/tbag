@@ -10,9 +10,6 @@
 #include <libtbag/gpu/details/GpuStream.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <algorithm>
-#include <utility>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -20,24 +17,38 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-GpuMemory::GpuMemory(GpuContext const * c, GpuStream const * s) : MemoryWrapper(c, s)
+// -----------------------------
+// MemoryWrapper implementation.
+// -----------------------------
+
+MemoryWrapper::MemoryWrapper(GpuStream const & stream)
+        : _stream(stream), _capacity(0), _size(0), _data(nullptr)
 {
     // EMPTY.
 }
 
-GpuMemory::GpuMemory(MemoryWrapper const & mem) : MemoryWrapper(mem)
+MemoryWrapper::~MemoryWrapper()
 {
     // EMPTY.
 }
 
-GpuMemory::GpuMemory(GpuMemory const & obj) : GpuMemory()
+GpuContext const & MemoryWrapper::atContext() const TBAG_NOEXCEPT
 {
-    (*this) = obj;
+    return _stream.atContext();
 }
 
-GpuMemory::GpuMemory(GpuMemory && obj) : GpuMemory()
+bool MemoryWrapper::isSameContext(GpuContext const & context) const TBAG_NOEXCEPT
 {
-    (*this) = std::move(obj);
+    return _stream.isSameContext(context);
+}
+
+// -------------------------
+// GpuMemory implementation.
+// -------------------------
+
+GpuMemory::GpuMemory(GpuStream const & stream) : MemoryWrapper(stream)
+{
+    // EMPTY.
 }
 
 GpuMemory::~GpuMemory()
@@ -45,33 +56,12 @@ GpuMemory::~GpuMemory()
     // EMPTY.
 }
 
-GpuMemory & GpuMemory::operator =(GpuMemory const & obj)
-{
-    if (this != &obj) {
-        MemoryWrapper::operator=(obj);
-    }
-    return *this;
-}
-
-GpuMemory & GpuMemory::operator =(GpuMemory && obj)
-{
-    GpuMemory::swap(obj);
-    return *this;
-}
-
-void GpuMemory::swap(GpuMemory & obj)
-{
-    if (this != &obj) {
-        MemoryWrapper::swap(obj);
-    }
-}
-
 Err GpuMemory::alloc(std::size_t size)
 {
     if (validate()) {
         return Err::E_ALREADY;
     }
-    return (_context != nullptr ? _context->malloc(*this, size) : Err::E_NULLPTR);
+    return atContext().malloc(*this, size);
 }
 
 Err GpuMemory::free()
@@ -79,7 +69,7 @@ Err GpuMemory::free()
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    return (_context != nullptr ? _context->free(*this) : Err::E_NULLPTR);
+    return atContext().free(*this);
 }
 
 Err GpuMemory::copy(GpuMemory & memory, std::size_t size, GpuEvent * event) const
@@ -87,10 +77,7 @@ Err GpuMemory::copy(GpuMemory & memory, std::size_t size, GpuEvent * event) cons
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    if (_context == nullptr || _stream == nullptr) {
-        return Err::E_NULLPTR;
-    }
-    return _context->copy(*_stream, *this, memory, size, event);
+    return atContext().copy(atStream(), *this, memory, size, event);
 }
 
 Err GpuMemory::copy(HostMemory & memory, std::size_t size, GpuEvent * event) const
@@ -98,10 +85,7 @@ Err GpuMemory::copy(HostMemory & memory, std::size_t size, GpuEvent * event) con
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    if (_context == nullptr || _stream == nullptr) {
-        return Err::E_NULLPTR;
-    }
-    return _context->read(*_stream, *this, memory, size, event);
+    return atContext().read(atStream(), *this, memory, size, event);
 }
 
 Err GpuMemory::copyAsync(GpuMemory & memory, std::size_t size, GpuEvent * event) const
@@ -109,10 +93,7 @@ Err GpuMemory::copyAsync(GpuMemory & memory, std::size_t size, GpuEvent * event)
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    if (_context == nullptr || _stream == nullptr) {
-        return Err::E_NULLPTR;
-    }
-    return _context->copyAsync(*_stream, *this, memory, size, event);
+    return atContext().copyAsync(atStream(), *this, memory, size, event);
 }
 
 Err GpuMemory::copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event) const
@@ -120,23 +101,70 @@ Err GpuMemory::copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    if (_context == nullptr || _stream == nullptr) {
-        return Err::E_NULLPTR;
-    }
-    return _context->readAsync(*_stream, *this, memory, size, event);
+    return atContext().readAsync(atStream(), *this, memory, size, event);
 }
 
-GpuMemory GpuMemory::instance(GpuContext const * c, std::size_t size)
-{
-    if (c == nullptr) {
-        return GpuMemory();
-    }
+// --------------------------
+// HostMemory implementation.
+// --------------------------
 
-    GpuMemory memory(c);
-    if (isSuccess(memory.alloc(size))) {
-        return memory;
+HostMemory::HostMemory(GpuStream const & stream)
+        : MemoryWrapper(stream), _flag(HostMemoryFlag::HMF_DEFAULT)
+{
+    // EMPTY.
+}
+
+HostMemory::~HostMemory()
+{
+    // EMPTY.
+}
+
+Err HostMemory::alloc(std::size_t size, HostMemoryFlag flag)
+{
+    if (validate()) {
+        return Err::E_ALREADY;
     }
-    return GpuMemory();
+    return atContext().mallocHost(*this, size, flag);
+}
+
+Err HostMemory::free()
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return atContext().freeHost(*this);
+}
+
+Err HostMemory::copy(GpuMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return atContext().write(atStream(), memory, *this, size, event);
+}
+
+Err HostMemory::copy(HostMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return atContext().copy(atStream(), *this, memory, size, event);
+}
+
+Err HostMemory::copyAsync(GpuMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return atContext().writeAsync(atStream(), memory, *this, size, event);
+}
+
+Err HostMemory::copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event) const
+{
+    if (validate() == false) {
+        return Err::E_ILLSTATE;
+    }
+    return atContext().copyAsync(atStream(), *this, memory, size, event);
 }
 
 } // namespace details

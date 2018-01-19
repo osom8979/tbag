@@ -15,9 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
-#include <libtbag/gpu/details/GpuIdWrapper.hpp>
 
 #include <string>
 
@@ -28,7 +26,22 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-class GpuProgram;
+/**
+ * GpuProgram class prototype.
+ *
+ * @author zer0
+ * @date   2018-01-14
+ * @date   2018-01-15 (struct -> class)
+ */
+class TBAG_API GpuProgram : public GpuIdWrapper
+{
+public:
+    GpuProgram(GpuContext const & context, std::string const & source);
+    ~GpuProgram();
+
+public:
+    Err build();
+};
 
 /**
  * GpuKernel class prototype.
@@ -43,28 +56,11 @@ private:
     std::string _name;
 
 public:
-    GpuKernel(GpuContext const * c = nullptr, GpuId i = UNKNOWN_ID);
-    GpuKernel(GpuKernel const & obj);
-    GpuKernel(GpuKernel && obj);
-    virtual ~GpuKernel();
+    GpuKernel(GpuProgram const & program, std::string const & kernel_symbol);
+    ~GpuKernel();
 
 public:
-    GpuKernel & operator =(GpuKernel const & obj);
-    GpuKernel & operator =(GpuKernel && obj);
-
-public:
-    void swap(GpuKernel & obj);
-    inline friend void swap(GpuKernel & lh, GpuKernel & rh) { lh.swap(rh); }
-
-public:
-    inline std::string getName() const { return _name; }
-
-public:
-    Err create(GpuProgram const & program, std::string const & kernel_symbol);
-    Err release();
-
-public:
-    static GpuKernel instance(GpuProgram const & program, std::string const & kernel_symbol);
+    inline std::string name() const { return _name; }
 };
 
 } // namespace details

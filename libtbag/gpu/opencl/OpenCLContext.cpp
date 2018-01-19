@@ -121,11 +121,11 @@ GpuPlatformInfo getPlatformInfo(GpuPlatform const & platform)
         return std::string();
     };
 
-    info.profile    = get_platform_info((cl_platform_id)platform.PLATFORM, CL_PLATFORM_PROFILE);
-    info.version    = get_platform_info((cl_platform_id)platform.PLATFORM, CL_PLATFORM_VERSION);
-    info.name       = get_platform_info((cl_platform_id)platform.PLATFORM, CL_PLATFORM_NAME);
-    info.vendor     = get_platform_info((cl_platform_id)platform.PLATFORM, CL_PLATFORM_VENDOR);
-    info.extensions = get_platform_info((cl_platform_id)platform.PLATFORM, CL_PLATFORM_EXTENSIONS);
+    info.profile    = get_platform_info((cl_platform_id)platform.PLATFORM_ID, CL_PLATFORM_PROFILE);
+    info.version    = get_platform_info((cl_platform_id)platform.PLATFORM_ID, CL_PLATFORM_VERSION);
+    info.name       = get_platform_info((cl_platform_id)platform.PLATFORM_ID, CL_PLATFORM_NAME);
+    info.vendor     = get_platform_info((cl_platform_id)platform.PLATFORM_ID, CL_PLATFORM_VENDOR);
+    info.extensions = get_platform_info((cl_platform_id)platform.PLATFORM_ID, CL_PLATFORM_EXTENSIONS);
     return info;
 }
 
@@ -134,7 +134,7 @@ int getDeviceCount(GpuPlatform const & platform)
     checkOpenCLGpuType(platform);
     int result = 0;
     cl_uint num_devices;
-    cl_int code = clGetDeviceIDs((cl_platform_id)platform.PLATFORM, CL_DEVICE_TYPE_ALL, 0, nullptr, &num_devices);
+    cl_int code = clGetDeviceIDs((cl_platform_id)platform.PLATFORM_ID, CL_DEVICE_TYPE_ALL, 0, nullptr, &num_devices);
     if (code != CL_SUCCESS) {
         tDLogE("getDeviceCount() OpenCL clGetDeviceIDs() error code: {}", code);
         return 0;
@@ -148,7 +148,7 @@ GpuDevices getDeviceList(GpuPlatform const & platform)
     checkOpenCLGpuType(platform);
     GpuDevices result;
     std::vector<cl_device_id> devices((std::size_t)opencl::getDeviceCount(platform));
-    cl_int code = clGetDeviceIDs((cl_platform_id)platform.PLATFORM, CL_DEVICE_TYPE_ALL,
+    cl_int code = clGetDeviceIDs((cl_platform_id)platform.PLATFORM_ID, CL_DEVICE_TYPE_ALL,
                                  (cl_uint)devices.size(), devices.data(), nullptr);
     if (code != CL_SUCCESS) {
         tDLogE("getDeviceList() OpenCL clGetDeviceIDs() error code: {}", code);
@@ -183,10 +183,10 @@ GpuDeviceInfo getDeviceInfo(GpuDevice const & device)
         return 0;
     };
 
-    info.name           = get_device_info_str  ((cl_device_id)device.DEVICE, CL_DEVICE_NAME);
-    info.device_version = get_device_info_str  ((cl_device_id)device.DEVICE, CL_DEVICE_VERSION);
-    info.driver_version = get_device_info_str  ((cl_device_id)device.DEVICE, CL_DRIVER_VERSION);
-    info.global_memory  = get_device_info_ulong((cl_device_id)device.DEVICE, CL_DEVICE_GLOBAL_MEM_SIZE);
+    info.name           = get_device_info_str  ((cl_device_id)device.DEVICE_ID, CL_DEVICE_NAME);
+    info.device_version = get_device_info_str  ((cl_device_id)device.DEVICE_ID, CL_DEVICE_VERSION);
+    info.driver_version = get_device_info_str  ((cl_device_id)device.DEVICE_ID, CL_DRIVER_VERSION);
+    info.global_memory  = get_device_info_ulong((cl_device_id)device.DEVICE_ID, CL_DEVICE_GLOBAL_MEM_SIZE);
     return info;
 }
 
@@ -194,10 +194,10 @@ SharedGpuContext createContext(GpuDevice const & device)
 {
     checkOpenCLGpuType(device);
     cl_int code;
-    cl_context context = clCreateContext(nullptr, 1, (cl_device_id const *)&device.DEVICE, nullptr, nullptr, &code);
+    cl_context context = clCreateContext(nullptr, 1, (cl_device_id const *)&device.DEVICE_ID, nullptr, nullptr, &code);
     if (code == CL_SUCCESS) {
         return SharedGpuContext(new OpenCLContext(device, (GpuId)context), [](OpenCLContext * context){
-            cl_int code = clReleaseContext((cl_context)context->CONTEXT);
+            cl_int code = clReleaseContext((cl_context)context->CONTEXT_ID);
             if (code != CL_SUCCESS) {
                 tDLogE("createContext() OpenCL clReleaseContext() error code: {}", code);
             }
@@ -225,7 +225,7 @@ OpenCLContext::~OpenCLContext()
 Err OpenCLContext::_write(GpuStream const & stream, GpuMemory & gpu_mem, HostMemory const & host_mem,
                           std::size_t size, bool blocking, GpuEvent * event) const
 {
-    cl_int code = clEnqueueWriteBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
+    cl_int code = clEnqueueWriteBuffer(stream.castId<cl_command_queue>(), gpu_mem.cast<cl_mem>(),
                                        (blocking ? CL_TRUE : CL_FALSE),
                                        0, host_mem.size(), host_mem.data(), 0, nullptr,
                                        (cl_event*)(event == nullptr ? nullptr : &event->atId()));
@@ -240,7 +240,7 @@ Err OpenCLContext::_write(GpuStream const & stream, GpuMemory & gpu_mem, HostMem
 Err OpenCLContext::_read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory & host_mem,
                          std::size_t size, bool blocking, GpuEvent * event) const
 {
-    cl_int code = clEnqueueReadBuffer(stream.castId<cl_command_queue>(), gpu_mem.castData<cl_mem>(),
+    cl_int code = clEnqueueReadBuffer(stream.castId<cl_command_queue>(), gpu_mem.cast<cl_mem>(),
                                       (blocking ? CL_TRUE : CL_FALSE),
                                       0, host_mem.size(), host_mem.data(), 0, nullptr,
                                       (cl_event*)(event == nullptr ? nullptr : &event->atId()));
@@ -261,7 +261,7 @@ bool OpenCLContext::isStream () const TBAG_NOEXCEPT { return true; }
 
 Err OpenCLContext::createStream(GpuStream & stream) const
 {
-    if (stream.isSameContext(this) == false) {
+    if (stream.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -270,8 +270,8 @@ Err OpenCLContext::createStream(GpuStream & stream) const
     if (__impl::isOpenCLBackendProfile()) {
         properties |= CL_QUEUE_PROFILING_ENABLE;
     }
-    cl_command_queue native_stream = clCreateCommandQueue((cl_context)CONTEXT,
-                                                          (cl_device_id)DEVICE,
+    cl_command_queue native_stream = clCreateCommandQueue((cl_context)CONTEXT_ID,
+                                                          (cl_device_id)DEVICE_ID,
                                                           properties, &code);
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::createStream() OpenCL clCreateCommandQueue() error code: {}", code);
@@ -284,7 +284,7 @@ Err OpenCLContext::createStream(GpuStream & stream) const
 
 Err OpenCLContext::releaseStream(GpuStream & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -299,7 +299,7 @@ Err OpenCLContext::releaseStream(GpuStream & stream) const
 
 Err OpenCLContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 {
-    if (stream.validate(this) == false || event.isSameContext(this) == false) {
+    if (stream.validate(*this) == false || event.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     event.setStart(0);
@@ -309,7 +309,7 @@ Err OpenCLContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 
 Err OpenCLContext::syncEvent(GpuEvent const & event) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -323,7 +323,7 @@ Err OpenCLContext::syncEvent(GpuEvent const & event) const
 
 Err OpenCLContext::elapsedEvent(GpuEvent & event, float * millisec) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -345,7 +345,7 @@ Err OpenCLContext::elapsedEvent(GpuEvent & event, float * millisec) const
 
 Err OpenCLContext::releaseEvent(GpuEvent & event) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     event.clearIds();
@@ -354,13 +354,13 @@ Err OpenCLContext::releaseEvent(GpuEvent & event) const
 
 Err OpenCLContext::createProgram(std::string const & source, GpuProgram & program) const
 {
-    if (source.empty() || program.isSameContext(this) == false) {
+    if (source.empty() || program.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
     char const * c_source = source.c_str();
     cl_int code;
-    cl_program native_program = clCreateProgramWithSource((cl_context)CONTEXT, 1, &c_source, nullptr, &code);
+    cl_program native_program = clCreateProgramWithSource((cl_context)CONTEXT_ID, 1, &c_source, nullptr, &code);
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::createProgram() OpenCL clCreateProgramWithSource() error code: {}", code);
         return Err::E_OPENCL;
@@ -372,11 +372,11 @@ Err OpenCLContext::createProgram(std::string const & source, GpuProgram & progra
 
 Err OpenCLContext::buildProgram(GpuProgram & program) const
 {
-    if (program.validate(this) == false) {
+    if (program.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
-    cl_int code = clBuildProgram(program.castId<cl_program>(), 1, (cl_device_id const *)&DEVICE,
+    cl_int code = clBuildProgram(program.castId<cl_program>(), 1, (cl_device_id const *)&DEVICE_ID,
                                  nullptr, nullptr, nullptr);
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::buildProgram() OpenCL clBuildProgram() error code: {}", code);
@@ -387,7 +387,7 @@ Err OpenCLContext::buildProgram(GpuProgram & program) const
 
 Err OpenCLContext::releaseProgram(GpuProgram & program) const
 {
-    if (program.validate(this) == false) {
+    if (program.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -402,7 +402,7 @@ Err OpenCLContext::releaseProgram(GpuProgram & program) const
 
 Err OpenCLContext::createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const
 {
-    if (program.validate(this) == false || kernel_symbol.empty() || kernel.isSameContext(this) == false) {
+    if (program.validate(*this) == false || kernel_symbol.empty() || kernel.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -419,7 +419,7 @@ Err OpenCLContext::createKernel(GpuProgram const & program, std::string const & 
 
 Err OpenCLContext::releaseKernel(GpuKernel & kernel) const
 {
-    if (kernel.validate(this) == false) {
+    if (kernel.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -434,12 +434,12 @@ Err OpenCLContext::releaseKernel(GpuKernel & kernel) const
 
 Err OpenCLContext::malloc(GpuMemory & memory, std::size_t size) const
 {
-    if (memory.isSameContext(this) == false) {
+    if (memory.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
     cl_int code;
-    cl_mem native_memory = clCreateBuffer((cl_context)CONTEXT, CL_MEM_READ_WRITE, size, nullptr, &code);
+    cl_mem native_memory = clCreateBuffer((cl_context)CONTEXT_ID, CL_MEM_READ_WRITE, size, nullptr, &code);
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::malloc({}) OpenCL clCreateBuffer() error code: {}", size, code);
         return Err::E_OPENCL;
@@ -453,14 +453,14 @@ Err OpenCLContext::malloc(GpuMemory & memory, std::size_t size) const
 
 Err OpenCLContext::free(GpuMemory & memory) const
 {
-    if (memory.validate(this) == false) {
+    if (memory.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
     tDLogIfD(isGpuVerbose(), "OpenCLContext::free() OpenCL clReleaseMemObject() MEM:{} CAP:{} SIZE:{}",
              memory.data(), memory.capacity(), memory.size());
 
-    cl_int code = clReleaseMemObject(memory.castData<cl_mem>());
+    cl_int code = clReleaseMemObject(memory.cast<cl_mem>());
     memory.clear();
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::free() OpenCL clReleaseMemObject() error code: {}", code);
@@ -507,7 +507,7 @@ Err OpenCLContext::copy(GpuStream const & stream, GpuMemory const & src, GpuMemo
         return Err::E_ILLARGS;
     }
 
-    cl_int code = clEnqueueCopyBuffer(stream.castId<cl_command_queue>(), src.castData<cl_mem>(), dest.castData<cl_mem>(),
+    cl_int code = clEnqueueCopyBuffer(stream.castId<cl_command_queue>(), src.cast<cl_mem>(), dest.cast<cl_mem>(),
                                       0, 0, size, 0, nullptr, (cl_event*)(event == nullptr ? nullptr : &event->atId()));
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::copy() OpenCL clEnqueueCopyBuffer() error code: {}", code);
@@ -529,7 +529,7 @@ Err OpenCLContext::copyAsync(GpuStream const & stream, GpuMemory const & src, Gp
         return Err::E_ILLARGS;
     }
 
-    cl_int code = clEnqueueCopyBuffer(stream.castId<cl_command_queue>(), src.castData<cl_mem>(), dest.castData<cl_mem>(),
+    cl_int code = clEnqueueCopyBuffer(stream.castId<cl_command_queue>(), src.cast<cl_mem>(), dest.cast<cl_mem>(),
                                       0, 0, size, 0, nullptr, (cl_event*)(event == nullptr ? nullptr : &event->atId()));
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::copyAsync() OpenCL clEnqueueCopyBuffer() error code: {}", code);
@@ -540,7 +540,7 @@ Err OpenCLContext::copyAsync(GpuStream const & stream, GpuMemory const & src, Gp
 
 Err OpenCLContext::flush(GpuStream const & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -554,7 +554,7 @@ Err OpenCLContext::flush(GpuStream const & stream) const
 
 Err OpenCLContext::finish(GpuStream const & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 

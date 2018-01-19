@@ -15,8 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 
 #include <cstdlib>
@@ -29,6 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
+// Forward declaration.
 class GpuStream;
 class GpuEvent;
 class GpuProgram;
@@ -46,25 +45,26 @@ class MemoryWrapper;
 class TBAG_API GpuContext : public GpuDevice, private Noncopyable
 {
 public:
-    GpuId const CONTEXT;
+    GpuId const CONTEXT_ID;
 
 public:
     GpuContext(GpuDevice const & d, GpuId c);
     virtual ~GpuContext();
 
 public:
-    inline bool  existsContextId() const TBAG_NOEXCEPT { return CONTEXT != UNKNOWN_ID; }
-    inline GpuId    getContextId() const TBAG_NOEXCEPT { return CONTEXT; }
+    inline bool  existsContextId() const TBAG_NOEXCEPT { return CONTEXT_ID != UNKNOWN_ID; }
+    inline GpuId    getContextId() const TBAG_NOEXCEPT { return CONTEXT_ID; }
 
-    template <typename T> inline T castContextId() const TBAG_NOEXCEPT { return (T)CONTEXT; }
+    template <typename T> inline T castContextId() const TBAG_NOEXCEPT { return (T)CONTEXT_ID; }
 
 public:
-    template <typename StreamType, typename MemType1, typename MemType2>
-    inline bool validateMemory(StreamType const & stream, MemType1 const & mem1, MemType2 const & mem2, std::size_t size) const TBAG_NOEXCEPT
+    template <typename Stream, typename Mem1, typename Mem2>
+    inline bool validateMemory(Stream const & stream, Mem1 const & mem1, Mem2 const & mem2,
+                               std::size_t size) const TBAG_NOEXCEPT
     {
-        return stream.validate(this)
-               && mem1.validate(this) && size <= mem1.size()
-               && mem2.validate(this) && size <= mem2.size();
+        return stream.validate(*this)
+               && mem1.validate(stream) && size <= mem1.size()
+               && mem2.validate(stream) && size <= mem2.size();
     }
 
 public:

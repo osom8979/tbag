@@ -7,12 +7,9 @@
 
 #include <libtbag/gpu/details/GpuContext.hpp>
 #include <libtbag/gpu/details/GpuEvent.hpp>
-#include <libtbag/gpu/details/GpuIdWrapper.hpp>
 #include <libtbag/gpu/details/GpuKernel.hpp>
 #include <libtbag/gpu/details/GpuMemory.hpp>
-#include <libtbag/gpu/details/GpuProgram.hpp>
 #include <libtbag/gpu/details/GpuStream.hpp>
-#include <libtbag/gpu/details/HostMemory.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/memory/AlignedMemory.hpp>
 #include <libtbag/algorithm/Pack.hpp>
@@ -24,7 +21,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-GpuContext::GpuContext(GpuDevice const & d, GpuId c) : GpuDevice(d), CONTEXT(c)
+GpuContext::GpuContext(GpuDevice const & d, GpuId c) : GpuDevice(d), CONTEXT_ID(c)
 {
     // EMPTY.
 }
@@ -36,7 +33,7 @@ GpuContext::~GpuContext()
 
 Err GpuContext::createStream(GpuStream & stream) const
 {
-    if (stream.isSameContext(this) == false) {
+    if (stream.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     stream.setId(0);
@@ -45,7 +42,7 @@ Err GpuContext::createStream(GpuStream & stream) const
 
 Err GpuContext::releaseStream(GpuStream & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     stream.clearId();
@@ -54,7 +51,7 @@ Err GpuContext::releaseStream(GpuStream & stream) const
 
 Err GpuContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 {
-    if (stream.validate(this) == false || event.isSameContext(this) == false) {
+    if (stream.validate(*this) == false || event.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     event.setStart(0);
@@ -64,7 +61,7 @@ Err GpuContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 
 Err GpuContext::syncEvent(GpuEvent const & event) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     return Err::E_SUCCESS;
@@ -72,7 +69,7 @@ Err GpuContext::syncEvent(GpuEvent const & event) const
 
 Err GpuContext::elapsedEvent(GpuEvent & event, float * millisec) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     if (millisec != nullptr) {
@@ -83,7 +80,7 @@ Err GpuContext::elapsedEvent(GpuEvent & event, float * millisec) const
 
 Err GpuContext::releaseEvent(GpuEvent & event) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     event.clearIds();
@@ -92,7 +89,7 @@ Err GpuContext::releaseEvent(GpuEvent & event) const
 
 Err GpuContext::createProgram(std::string const & source, GpuProgram & program) const
 {
-    if (source.empty() || program.isSameContext(this) == false) {
+    if (source.empty() || program.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     program.setId(0);
@@ -101,7 +98,7 @@ Err GpuContext::createProgram(std::string const & source, GpuProgram & program) 
 
 Err GpuContext::buildProgram(GpuProgram & program) const
 {
-    if (program.validate(this) == false) {
+    if (program.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     return Err::E_SUCCESS;
@@ -109,7 +106,7 @@ Err GpuContext::buildProgram(GpuProgram & program) const
 
 Err GpuContext::releaseProgram(GpuProgram & program) const
 {
-    if (program.validate(this) == false) {
+    if (program.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     program.clearId();
@@ -118,7 +115,7 @@ Err GpuContext::releaseProgram(GpuProgram & program) const
 
 Err GpuContext::createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const
 {
-    if (program.validate(this) == false || kernel_symbol.empty() || kernel.isSameContext(this) == false) {
+    if (program.validate(*this) == false || kernel_symbol.empty() || kernel.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     kernel.setId(0);
@@ -127,7 +124,7 @@ Err GpuContext::createKernel(GpuProgram const & program, std::string const & ker
 
 Err GpuContext::releaseKernel(GpuKernel & kernel) const
 {
-    if (kernel.validate(this) == false) {
+    if (kernel.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     kernel.clearId();
@@ -136,7 +133,7 @@ Err GpuContext::releaseKernel(GpuKernel & kernel) const
 
 Err GpuContext::malloc(GpuMemory & memory, std::size_t size) const
 {
-    if (memory.isSameContext(this) == false) {
+    if (memory.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -155,7 +152,7 @@ Err GpuContext::malloc(GpuMemory & memory, std::size_t size) const
 
 Err GpuContext::free(GpuMemory & memory) const
 {
-    if (memory.validate(this) == false) {
+    if (memory.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -168,7 +165,7 @@ Err GpuContext::free(GpuMemory & memory) const
 
 Err GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
 {
-    if (memory.isSameContext(this) == false) {
+    if (memory.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     if (HostMemoryFlag::HMF_DEFAULT != flag) {
@@ -193,7 +190,7 @@ Err GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag
 
 Err GpuContext::freeHost(HostMemory & memory) const
 {
-    if (memory.validate(this) == false) {
+    if (memory.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -264,7 +261,7 @@ Err GpuContext::copyAsync(GpuStream const & stream, HostMemory const & src, Host
 
 Err GpuContext::flush(GpuStream const & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     return Err::E_SUCCESS;
@@ -272,7 +269,7 @@ Err GpuContext::flush(GpuStream const & stream) const
 
 Err GpuContext::finish(GpuStream const & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     return Err::E_SUCCESS;

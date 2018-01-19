@@ -25,66 +25,29 @@ namespace details {
 // GpuEvent implementation.
 // ------------------------
 
-GpuEvent::GpuEvent(GpuContext const * c, GpuId start, GpuId stop)
-        : _context(c),  _start(start), _stop(stop)
+GpuEvent::GpuEvent(GpuStream const & stream)
+        : _stream(stream), _start(UNKNOWN_ID), _stop(UNKNOWN_ID)
 {
-    // EMPTY.
-}
-
-GpuEvent::GpuEvent(GpuEvent const & obj) : GpuEvent()
-{
-    (*this) = obj;
-}
-
-GpuEvent::GpuEvent(GpuEvent && obj) : GpuEvent()
-{
-    (*this) = std::move(obj);
+    if (isFailure(_stream.atContext().createEvent(stream, *this))) {
+        throw std::bad_alloc();
+    }
 }
 
 GpuEvent::~GpuEvent()
 {
-    release();
-}
-
-GpuEvent & GpuEvent::operator =(GpuEvent const & obj)
-{
-    if (this != &obj) {
-        _context = obj._context;
-        _start   = obj._start;
-        _stop    = obj._stop;
-    }
-    return *this;
-}
-
-GpuEvent & GpuEvent::operator =(GpuEvent && obj)
-{
-    swap(obj);
-    return *this;
-}
-
-void GpuEvent::swap(GpuEvent & obj)
-{
-    if (this != &obj) {
-        std::swap(_context, obj._context);
-        std::swap(_start  , obj._start);
-        std::swap(_stop   , obj._stop);
-    }
-}
-
-Err GpuEvent::create(GpuStream const & stream)
-{
     if (validate()) {
-        return Err::E_ALREADY;
+        atContext().releaseEvent(*this);
     }
-    return (_context != nullptr ? _context->createEvent(stream, *this) : Err::E_NULLPTR);
 }
 
-Err GpuEvent::release()
+GpuContext const & GpuEvent::atContext() const TBAG_NOEXCEPT
 {
-    if (validate() == false) {
-        return Err::E_ILLSTATE;
-    }
-    return (_context != nullptr ? _context->releaseEvent(*this) : Err::E_NULLPTR);
+    return _stream.atContext();
+}
+
+bool GpuEvent::isSameContext(GpuContext const & context) const TBAG_NOEXCEPT
+{
+    return _stream.isSameContext(context);
 }
 
 Err GpuEvent::sync()
@@ -92,7 +55,7 @@ Err GpuEvent::sync()
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    return (_context != nullptr ? _context->syncEvent(*this) : Err::E_NULLPTR);
+    return atContext().syncEvent(*this);
 }
 
 Err GpuEvent::elapsed(float * millisec)
@@ -100,7 +63,7 @@ Err GpuEvent::elapsed(float * millisec)
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    return (_context != nullptr ? _context->elapsedEvent(*this, millisec) : Err::E_NULLPTR);
+    return atContext().elapsedEvent(*this, millisec);
 }
 
 float GpuEvent::elapsed()
@@ -109,23 +72,14 @@ float GpuEvent::elapsed()
     if (isSuccess(elapsed(&millisec))) {
         return millisec;
     }
-    return 0;
-}
-
-GpuEvent GpuEvent::instance(GpuStream const & stream)
-{
-    GpuEvent event(stream.getContextPtr());
-    if (isSuccess(event.create(stream))) {
-        return event;
-    }
-    return GpuEvent();
+    return 0.0f;
 }
 
 // -----------------------------
 // CpuEventGuard implementation.
 // -----------------------------
 
-CpuEventGuard::CpuEventGuard(GpuEvent * e) : _event(e)
+CpuEventGuard::CpuEventGuard(GpuEvent * event) : _event(event)
 {
     if (_event != nullptr) {
         _event->setStart(nowNano());

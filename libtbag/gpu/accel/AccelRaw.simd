@@ -44,8 +44,8 @@ struct BaseDataPack
     TBAG_CONSTEXPR static unsigned getElementCount() TBAG_NOEXCEPT { return Simd::length; }
     TBAG_CONSTEXPR static unsigned     getBaseSize() TBAG_NOEXCEPT { return sizeof(Base); }
 
-    inline static unsigned calcVectorSize(unsigned count) TBAG_NOEXCEPT
-    { return libtbag::algorithm::getPackedSize<unsigned>(count, getElementCount()); }
+    inline static int calcVectorSize(int count) TBAG_NOEXCEPT
+    { return libtbag::algorithm::getPackedSize<int>(count, getElementCount()); }
 
     Base * data;
     Simd   simd;
@@ -99,21 +99,21 @@ template <> struct DataPack<double> : public BaseDataPack<double, simdpp::float6
 };
 
 template <typename T>
-static bool addByAccel(T const * v1, T const * v2, T * result, unsigned count)
+static bool addByAccel(T const * v1, T const * v2, T * r, int count)
 {
     DataPack<T> v1_pack(v1);
     DataPack<T> v2_pack(v2);
-    DataPack<T> result_pack(result);
+    DataPack<T>  r_pack(r);
 
     auto loop_count = DataPack<T>::calcVectorSize(count);
     for (; loop_count; --loop_count) {
         v1_pack.load();
         v2_pack.load();
-        result_pack.simd = simdpp::add(v1_pack.simd, v2_pack.simd);
-        result_pack.store();
+        r_pack.simd = simdpp::add(v1_pack.simd, v2_pack.simd);
+        r_pack.store();
         ++v1_pack;
         ++v2_pack;
-        ++result_pack;
+        ++r_pack;
     }
 
     return true;
@@ -123,23 +123,23 @@ static bool addByAccel(T const * v1, T const * v2, T * result, unsigned count)
 } // namespace __impl
 // ------------------
 
-tbBOOL tbAccelAdd1i(int const * v1, int const * v2, int * result, unsigned count)
-{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
-tbBOOL tbAccelAdd1u(unsigned const * v1, unsigned const * v2, unsigned * result, unsigned count)
-{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
-tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * result, unsigned count)
-{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
-tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * result, unsigned count)
-{ return __impl::addByAccel(v1, v2, result, count) ? TB_TRUE : TB_FALSE; }
+tbBOOL tbAccelAdd1i(int const * v1, int const * v2, int * r, int count)
+{ return __impl::addByAccel(v1, v2, r, count) ? TB_TRUE : TB_FALSE; }
+tbBOOL tbAccelAdd1u(unsigned const * v1, unsigned const * v2, unsigned * r, int count)
+{ return __impl::addByAccel(v1, v2, r, count) ? TB_TRUE : TB_FALSE; }
+tbBOOL tbAccelAdd1f(float const * v1, float const * v2, float * r, int count)
+{ return __impl::addByAccel(v1, v2, r, count) ? TB_TRUE : TB_FALSE; }
+tbBOOL tbAccelAdd1d(double const * v1, double const * v2, double * r, int count)
+{ return __impl::addByAccel(v1, v2, r, count) ? TB_TRUE : TB_FALSE; }
 
 // ---------------------------------
 } // namespace SIMDPP_ARCH_NAMESPACE
 // ---------------------------------
 
 #if defined(SIMDPP_USER_ARCH_INFO)
-SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1i)((int      const *)v1, (int      const *)v2, (int      *)result, (unsigned)count));
-SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1u)((unsigned const *)v1, (unsigned const *)v2, (unsigned *)result, (unsigned)count));
-SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1f)((float    const *)v1, (float    const *)v2, (float    *)result, (unsigned)count));
-SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1d)((double   const *)v1, (double   const *)v2, (double   *)result, (unsigned)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1i)((int      const *)v1, (int      const *)v2, (int      *)r, (int)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1u)((unsigned const *)v1, (unsigned const *)v2, (unsigned *)r, (int)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1f)((float    const *)v1, (float    const *)v2, (float    *)r, (int)count));
+SIMDPP_MAKE_DISPATCHER((tbBOOL)(tbAccelAdd1d)((double   const *)v1, (double   const *)v2, (double   *)r, (int)count));
 #endif
 

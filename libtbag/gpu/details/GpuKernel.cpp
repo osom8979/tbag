@@ -7,11 +7,7 @@
 
 #include <libtbag/gpu/details/GpuKernel.hpp>
 #include <libtbag/gpu/details/GpuContext.hpp>
-#include <libtbag/gpu/details/GpuProgram.hpp>
 #include <libtbag/log/Log.hpp>
-
-#include <cassert>
-#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -20,87 +16,48 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu     {
 namespace details {
 
-GpuKernel::GpuKernel(GpuContext const * c, GpuId i) : GpuIdWrapper(c, i), _name()
-{
-    // EMPTY.
-}
+// --------------------------
+// GpuProgram implementation.
+// --------------------------
 
-GpuKernel::GpuKernel(GpuKernel const & obj) : GpuKernel()
+GpuProgram::GpuProgram(GpuContext const & context, std::string const & source)
+        : GpuIdWrapper(context)
 {
-    (*this) = obj;
-}
-
-GpuKernel::GpuKernel(GpuKernel && obj) : GpuKernel()
-{
-    (*this) = std::move(obj);
-}
-
-GpuKernel::~GpuKernel()
-{
-    release();
-}
-
-GpuKernel & GpuKernel::operator =(GpuKernel const & obj)
-{
-    if (this != &obj) {
-        GpuIdWrapper::assign(obj);
-    }
-    return *this;
-}
-
-GpuKernel & GpuKernel::operator =(GpuKernel && obj)
-{
-    GpuKernel::swap(obj);
-    return *this;
-}
-
-void GpuKernel::swap(GpuKernel & obj)
-{
-    if (this != &obj) {
-        GpuIdWrapper::swap(obj);
+    if (isFailure(atContext().createProgram(source, *this))) {
+        throw std::bad_alloc();
     }
 }
 
-Err GpuKernel::create(GpuProgram const & program, std::string const & kernel_symbol)
+GpuProgram::~GpuProgram()
 {
     if (validate()) {
-        return Err::E_ALREADY;
+        atContext().releaseProgram(*this);
     }
-    if (_context == nullptr) {
-        return Err::E_NULLPTR;
-    }
-    assert(_context != nullptr);
-
-    Err const CODE = _context->createKernel(program, kernel_symbol, *this);
-    if (isSuccess(CODE)) {
-        _name = kernel_symbol;
-    } else {
-        _name.clear();
-    }
-    return CODE;
 }
 
-Err GpuKernel::release()
+Err GpuProgram::build()
 {
     if (validate() == false) {
         return Err::E_ILLSTATE;
     }
-    if (_context == nullptr) {
-        return Err::E_NULLPTR;
-    }
-    assert(_context != nullptr);
-
-    _name.clear();
-    return _context->releaseKernel(*this);
+    return atContext().buildProgram(*this);
 }
 
-GpuKernel GpuKernel::instance(GpuProgram const & program, std::string const & kernel_symbol)
+// -------------------------
+// GpuKernel implementation.
+// -------------------------
+
+GpuKernel::GpuKernel(GpuProgram const & program, std::string const & kernel_symbol)
+        : GpuIdWrapper(program.atContext()), _name(kernel_symbol)
 {
-    GpuKernel kernel(program.getContextPtr());
-    if (isSuccess(kernel.create(program, kernel_symbol))) {
-        return kernel;
+    if (isFailure(atContext().createKernel(program, kernel_symbol, *this))) {
+        throw std::bad_alloc();
     }
-    return GpuKernel();
+}
+
+GpuKernel::~GpuKernel()
+{
+    atContext().releaseKernel(*this);
 }
 
 } // namespace details

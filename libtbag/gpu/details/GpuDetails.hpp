@@ -19,12 +19,9 @@
 #include <libtbag/gpu/details/GpuCommon.hpp>
 #include <libtbag/gpu/details/GpuContext.hpp>
 #include <libtbag/gpu/details/GpuEvent.hpp>
-#include <libtbag/gpu/details/GpuIdWrapper.hpp>
 #include <libtbag/gpu/details/GpuKernel.hpp>
 #include <libtbag/gpu/details/GpuMemory.hpp>
-#include <libtbag/gpu/details/GpuProgram.hpp>
 #include <libtbag/gpu/details/GpuStream.hpp>
-#include <libtbag/gpu/details/HostMemory.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

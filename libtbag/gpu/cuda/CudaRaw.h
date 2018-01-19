@@ -23,10 +23,10 @@
 extern "C" {
 #endif
 
-TBAG_API tbBOOL tbCudaAdd1i(int       const * gpu_v1, int       const * gpu_v2, int      * gpu_result, unsigned size, void * stream = TB_NULL);
-TBAG_API tbBOOL tbCudaAdd1u(unsigned  const * gpu_v1, unsigned  const * gpu_v2, unsigned * gpu_result, unsigned size, void * stream = TB_NULL);
-TBAG_API tbBOOL tbCudaAdd1f(float     const * gpu_v1, float     const * gpu_v2, float    * gpu_result, unsigned size, void * stream = TB_NULL);
-TBAG_API tbBOOL tbCudaAdd1d(double    const * gpu_v1, double    const * gpu_v2, double   * gpu_result, unsigned size, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd1i(int       const * v1, int       const * v2, int      * r, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd1u(unsigned  const * v1, unsigned  const * v2, unsigned * r, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd1f(float     const * v1, float     const * v2, float    * r, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd1d(double    const * v1, double    const * v2, double   * r, int count, void * stream = TB_NULL);
 
 #if defined(__cplusplus)
 } /* extern "C" */

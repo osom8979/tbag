@@ -71,8 +71,8 @@ struct CudaDeviceGuard : private Noncopyable
     int   change_id = 0;
     bool   exchange = false;
 
-    explicit CudaDeviceGuard(GpuDevice  const &  device) : CudaDeviceGuard( device.DEVICE) { /* EMPTY. */ }
-    explicit CudaDeviceGuard(GpuContext const & context) : CudaDeviceGuard(context.DEVICE) { /* EMPTY. */ }
+    explicit CudaDeviceGuard(GpuDevice  const &  device) : CudaDeviceGuard( device.getDeviceId()) { /* EMPTY. */ }
+    explicit CudaDeviceGuard(GpuContext const & context) : CudaDeviceGuard(context.getDeviceId()) { /* EMPTY. */ }
 
     CudaDeviceGuard(GpuId const & device_id) : current_id(0), change_id(0), exchange(false)
     {
@@ -188,7 +188,7 @@ GpuDeviceInfo getDeviceInfo(GpuDevice const & device)
     checkCudaGpuType(device);
     GpuDeviceInfo info;
     cudaDeviceProp prop;
-    cudaError_t code = cudaGetDeviceProperties(&prop, device.DEVICE);
+    cudaError_t code = cudaGetDeviceProperties(&prop, device.getDeviceId());
     if (code != cudaSuccess) {
         tDLogE("getDeviceInfo() CUDA cudaGetDeviceProperties() error: {}", cudaGetErrorString(code));
         return info;
@@ -280,7 +280,7 @@ bool CudaContext::isStream() const TBAG_NOEXCEPT
 
 Err CudaContext::createStream(GpuStream & stream) const
 {
-    if (stream.isSameContext(this) == false) {
+    if (stream.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -297,7 +297,7 @@ Err CudaContext::createStream(GpuStream & stream) const
 
 Err CudaContext::releaseStream(GpuStream & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -312,7 +312,7 @@ Err CudaContext::releaseStream(GpuStream & stream) const
 
 Err CudaContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 {
-    if (stream.validate(this) == false || event.isSameContext(this) == false) {
+    if (stream.validate(*this) == false || event.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -338,7 +338,7 @@ Err CudaContext::createEvent(GpuStream const & stream, GpuEvent & event) const
 
 Err CudaContext::syncEvent(GpuEvent const & event) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -354,7 +354,7 @@ Err CudaContext::syncEvent(GpuEvent const & event) const
 
 Err CudaContext::elapsedEvent(GpuEvent & event, float * millisec) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -373,7 +373,7 @@ Err CudaContext::elapsedEvent(GpuEvent & event, float * millisec) const
 
 Err CudaContext::releaseEvent(GpuEvent & event) const
 {
-    if (event.validate(this) == false) {
+    if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -390,7 +390,7 @@ Err CudaContext::releaseEvent(GpuEvent & event) const
 
 Err CudaContext::malloc(GpuMemory & memory, std::size_t size) const
 {
-    if (memory.isSameContext(this) == false) {
+    if (memory.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -410,7 +410,7 @@ Err CudaContext::malloc(GpuMemory & memory, std::size_t size) const
 
 Err CudaContext::free(GpuMemory & memory) const
 {
-    if (memory.validate(this) == false) {
+    if (memory.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -429,7 +429,7 @@ Err CudaContext::free(GpuMemory & memory) const
 
 Err CudaContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
 {
-    if (memory.isSameContext(this) == false) {
+    if (memory.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     if (HostMemoryFlag::HMF_DEFAULT == flag) {
@@ -457,7 +457,7 @@ Err CudaContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFla
 
 Err CudaContext::freeHost(HostMemory & memory) const
 {
-    if (memory.validate(this) == false) {
+    if (memory.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -600,7 +600,7 @@ Err CudaContext::copyAsync(GpuStream const & stream, HostMemory const & src, Hos
 
 Err CudaContext::flush(GpuStream const & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
     return Err::E_SUCCESS;
@@ -608,7 +608,7 @@ Err CudaContext::flush(GpuStream const & stream) const
 
 Err CudaContext::finish(GpuStream const & stream) const
 {
-    if (stream.validate(this) == false) {
+    if (stream.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
