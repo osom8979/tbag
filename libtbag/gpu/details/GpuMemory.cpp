@@ -46,30 +46,32 @@ bool MemoryWrapper::isSameContext(GpuContext const & context) const TBAG_NOEXCEP
 // GpuMemory implementation.
 // -------------------------
 
-GpuMemory::GpuMemory(GpuStream const & stream) : MemoryWrapper(stream)
+GpuMemory::GpuMemory(GpuStream const & stream, std::size_t size) : MemoryWrapper(stream)
 {
-    // EMPTY.
+    if (isFailure(atContext().malloc(*this, size))) {
+        throw std::bad_alloc();
+    }
 }
 
 GpuMemory::~GpuMemory()
 {
-    // EMPTY.
-}
-
-Err GpuMemory::alloc(std::size_t size)
-{
     if (validate()) {
-        return Err::E_ALREADY;
+        atContext().free(*this);
     }
-    return atContext().malloc(*this, size);
 }
 
-Err GpuMemory::free()
+void GpuMemory::set(void * data, std::size_t capacity, std::size_t size) TBAG_NOEXCEPT
 {
-    if (validate() == false) {
-        return Err::E_ILLSTATE;
-    }
-    return atContext().free(*this);
+    _data     = data;
+    _capacity = capacity;
+    _size     = size;
+}
+
+void GpuMemory::clear() TBAG_NOEXCEPT
+{
+    _data     = nullptr;
+    _capacity = 0;
+    _size     = 0;
 }
 
 Err GpuMemory::copy(GpuMemory & memory, std::size_t size, GpuEvent * event) const
@@ -108,31 +110,35 @@ Err GpuMemory::copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event
 // HostMemory implementation.
 // --------------------------
 
-HostMemory::HostMemory(GpuStream const & stream)
-        : MemoryWrapper(stream), _flag(HostMemoryFlag::HMF_DEFAULT)
+HostMemory::HostMemory(GpuStream const & stream, std::size_t size, HostMemoryFlag flag)
+        : MemoryWrapper(stream), _flag(flag)
 {
-    // EMPTY.
+    if (isFailure(atContext().mallocHost(*this, size, flag))) {
+        throw std::bad_alloc();
+    }
 }
 
 HostMemory::~HostMemory()
 {
-    // EMPTY.
-}
-
-Err HostMemory::alloc(std::size_t size, HostMemoryFlag flag)
-{
     if (validate()) {
-        return Err::E_ALREADY;
+        atContext().freeHost(*this);
     }
-    return atContext().mallocHost(*this, size, flag);
 }
 
-Err HostMemory::free()
+void HostMemory::set(void * data, std::size_t capacity, std::size_t size, HostMemoryFlag flag) TBAG_NOEXCEPT
 {
-    if (validate() == false) {
-        return Err::E_ILLSTATE;
-    }
-    return atContext().freeHost(*this);
+    _data     = data;
+    _capacity = capacity;
+    _size     = size;
+    _flag     = flag;
+}
+
+void HostMemory::clear() TBAG_NOEXCEPT
+{
+    _data     = nullptr;
+    _capacity = 0;
+    _size     = 0;
+    _flag     = HostMemoryFlag::HMF_DEFAULT;
 }
 
 Err HostMemory::copy(GpuMemory & memory, std::size_t size, GpuEvent * event) const

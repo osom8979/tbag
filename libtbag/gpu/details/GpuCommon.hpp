@@ -74,8 +74,8 @@ struct GpuPlatform
     inline GpuType getType() const TBAG_NOEXCEPT { return TYPE; }
     inline char const * getTypeString() const TBAG_NOEXCEPT { return getGpuTypeString(TYPE); }
 
-    inline bool  existsPlatformId() const TBAG_NOEXCEPT { return PLATFORM_ID != UNKNOWN_ID; }
-    inline GpuId    getPlatformId() const TBAG_NOEXCEPT { return PLATFORM_ID; }
+    inline bool existsPlatformId() const TBAG_NOEXCEPT { return PLATFORM_ID != UNKNOWN_ID; }
+    inline GpuId   getPlatformId() const TBAG_NOEXCEPT { return PLATFORM_ID; }
 
     template <typename T> inline T castPlatformId() const TBAG_NOEXCEPT { return (T)PLATFORM_ID; }
 };
@@ -96,8 +96,8 @@ struct GpuDevice : public GpuPlatform
     GpuDevice(GpuPlatform const & p, GpuId d) : GpuPlatform(p), DEVICE_ID(d) { /* EMPTY. */ }
     ~GpuDevice() { /* EMPTY. */ }
 
-    inline bool  existsDeviceId() const TBAG_NOEXCEPT { return DEVICE_ID!= UNKNOWN_ID; }
-    inline GpuId    getDeviceId() const TBAG_NOEXCEPT { return DEVICE_ID; }
+    inline bool existsDeviceId() const TBAG_NOEXCEPT { return DEVICE_ID!= UNKNOWN_ID; }
+    inline GpuId   getDeviceId() const TBAG_NOEXCEPT { return DEVICE_ID; }
 
     template <typename T> inline T castDeviceId() const TBAG_NOEXCEPT { return (T)DEVICE_ID; }
 };

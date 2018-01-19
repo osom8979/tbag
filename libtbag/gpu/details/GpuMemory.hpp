@@ -19,12 +19,20 @@
 
 #include <cstdlib>
 #include <vector>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gpu     {
+namespace gpu {
+
+// Forward declaration.
+namespace accel  { class  AccelContext; }
+namespace cpu    { class    CpuContext; }
+namespace cuda   { class   CudaContext; }
+namespace opencl { class OpenCLContext; }
+
 namespace details {
 
 // Forward declaration.
@@ -84,27 +92,19 @@ public:
 class TBAG_API GpuMemory : public MemoryWrapper
 {
 public:
-    GpuMemory(GpuStream const & stream);
+    friend class accel::AccelContext;
+    friend class cpu::CpuContext;
+    friend class cuda::CudaContext;
+    friend class opencl::OpenCLContext;
+    friend class GpuContext;
+
+public:
+    GpuMemory(GpuStream const & stream, std::size_t size);
     ~GpuMemory();
 
-public:
-    inline void set(void * data, std::size_t capacity, std::size_t size) TBAG_NOEXCEPT
-    {
-        _data     = data;
-        _capacity = capacity;
-        _size     = size;
-    }
-
-    inline void clear() TBAG_NOEXCEPT
-    {
-        _data     = nullptr;
-        _capacity = 0;
-        _size     = 0;
-    }
-
-public:
-    Err alloc(std::size_t size);
-    Err free();
+protected:
+    void set(void * data, std::size_t capacity, std::size_t size) TBAG_NOEXCEPT;
+    void clear() TBAG_NOEXCEPT;
 
 public:
     Err      copy( GpuMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
@@ -122,34 +122,23 @@ public:
  */
 class TBAG_API HostMemory : public MemoryWrapper
 {
+public:
+    friend class accel::AccelContext;
+    friend class cpu::CpuContext;
+    friend class cuda::CudaContext;
+    friend class opencl::OpenCLContext;
+    friend class GpuContext;
+
 private:
     HostMemoryFlag _flag;
 
 public:
-    HostMemory(GpuStream const & stream);
+    HostMemory(GpuStream const & stream, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT);
     ~HostMemory();
 
-public:
-    inline void set(void * data, std::size_t capacity, std::size_t size,
-                    HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) TBAG_NOEXCEPT
-    {
-        _data     = data;
-        _capacity = capacity;
-        _size     = size;
-        _flag     = flag;
-    }
-
-    inline void clear() TBAG_NOEXCEPT
-    {
-        _data     = nullptr;
-        _capacity = 0;
-        _size     = 0;
-        _flag     = HostMemoryFlag::HMF_DEFAULT;
-    }
-
-public:
-    Err alloc(std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT);
-    Err free();
+protected:
+    void set(void * data, std::size_t capacity, std::size_t size, HostMemoryFlag flag) TBAG_NOEXCEPT;
+    void clear() TBAG_NOEXCEPT;
 
 public:
     Err      copy( GpuMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
@@ -157,6 +146,12 @@ public:
     Err copyAsync( GpuMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
     Err copyAsync(HostMemory & memory, std::size_t size, GpuEvent * event = nullptr) const;
 };
+
+using SharedGpuMemory  = std::shared_ptr<GpuMemory>;
+using WeakedGpuMemory  = std::weak_ptr<GpuMemory>;
+
+using SharedHostMemory = std::shared_ptr<HostMemory>;
+using WeakedHostMemory = std::weak_ptr<HostMemory>;
 
 using HostMemories = std::vector<HostMemory>;
 using  GpuMemories = std::vector<GpuMemory>;

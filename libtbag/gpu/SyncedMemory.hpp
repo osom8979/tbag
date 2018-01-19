@@ -35,9 +35,9 @@ namespace gpu {
 class TBAG_API SyncedMemory
 {
 public:
-    using TypeTable        = type::TypeTable;
-    using SharedGpuMemory  = std::shared_ptr<GpuMemory>;
-    using SharedHostMemory = std::shared_ptr<HostMemory>;
+    template <typename T>
+    using TypeInfo  = type::TypeInfo<T>;
+    using TypeTable = type::TypeTable;
 
 public:
     enum class SyncedHead
@@ -49,19 +49,26 @@ public:
     };
 
 private:
-    WeakedGpuStream    _stream;
-    WeakedGpuEvent     _event;
-    TypeTable          _type;
+    WeakedGpuStream _stream;
+    WeakedGpuEvent  _event;
+
+private:
+    TypeTable       _type;
+    HostMemoryFlag  _flag;
+
+private:
     SyncedHead mutable _head;
     SharedGpuMemory    _gpu;
     SharedHostMemory   _host;
-    std::size_t        _size;
-    bool               _async;
+
+private:
+    std::size_t _size;
+    bool _async;
 
 public:
     SyncedMemory();
-    explicit SyncedMemory(SharedGpuStream const & stream);
-    explicit SyncedMemory(WeakedGpuStream const & stream);
+    explicit SyncedMemory(SharedGpuStream const & stream, SharedGpuEvent const & event = SharedGpuEvent(), bool async = true);
+    explicit SyncedMemory(WeakedGpuStream const & stream, WeakedGpuEvent const & event = WeakedGpuEvent(), bool async = true);
     SyncedMemory(SyncedMemory const & obj);
     SyncedMemory(SyncedMemory && obj);
     ~SyncedMemory();
@@ -78,6 +85,9 @@ public:
     inline SyncedHead  head() const TBAG_NOEXCEPT { return _head; }
     inline std::size_t size() const TBAG_NOEXCEPT { return _size; }
 
+    inline HostMemoryFlag getFlag() const TBAG_NOEXCEPT { return _flag; }
+    inline void setFlag(HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) TBAG_NOEXCEPT { _flag = flag; }
+
     inline bool isAsync() const TBAG_NOEXCEPT { return _async; }
     inline void setAsyncMode(bool flag = true) TBAG_NOEXCEPT { _async = flag; }
 
@@ -90,28 +100,38 @@ public:
     Err  toGpu() const;
 
 public:
-    void * getHostData(); // Mutable assessor.
-    void *  getGpuData(); // Mutable assessor.
-
-public:
+    void       * getHostData(); // Mutable assessor.
+    void       *  getGpuData(); // Mutable assessor.
     void const * getHostData() const; // Immutable assessor.
     void const *  getGpuData() const; // Immutable assessor.
 
 public:
+    template <typename T> T       * castHostData()       { return getHostData(); }
+    template <typename T> T       *  castGpuData()       { return  getGpuData(); }
+    template <typename T> T const * castHostData() const { return getHostData(); }
+    template <typename T> T const *  castGpuData() const { return  getGpuData(); }
+
+// Event by-pass methods.
+public:
     Err      sync() const;
+    Err   elapsed(float * millisec) const;
     float elapsed() const;
 
+// State checker.
 public:
+    bool exists() const;
+    bool empty() const;
+
+protected:
     Err alloc(std::size_t size);
     Err free();
 
 public:
-    bool cloneFrom(SyncedMemory const & obj);
-    bool cloneTo(SyncedMemory & obj);
+    Err resize(std::size_t size);
 
 public:
-    void clear();
-    bool resize(std::size_t size);
+    Err cloneFrom(SyncedMemory const & obj);
+    Err cloneTo(SyncedMemory & obj);
 };
 
 } // namespace gpu

@@ -75,9 +75,7 @@ SharedGpuContext createContext(GpuDevice const & device)
     _TBAG_SELECT_GPU_METHOD(device.TYPE, SharedGpuContext(), createContext, device);
 }
 
-#if defined(_TBAG_SELECT_GPU_METHOD)
 #undef _TBAG_SELECT_GPU_METHOD
-#endif
 
 // -------------------
 // Gpu implementation.
@@ -123,11 +121,13 @@ Gpu::~Gpu()
 Gpu & Gpu::operator =(Gpu const & obj)
 {
     if (this != &obj) {
+        // @formatter:off
         _gpu           = obj._gpu;
         _streams       = obj._streams;
         _events        = obj._events;
         _platform_info = obj._platform_info;
         _device_info   = obj._device_info;
+        // @formatter:on
     }
     return *this;
 }
@@ -141,11 +141,13 @@ Gpu & Gpu::operator =(Gpu && obj)
 void Gpu::swap(Gpu & obj)
 {
     if (this != &obj) {
-        _gpu.swap(obj._gpu);
+        // @formatter:off
+        _gpu    .swap(obj._gpu);
         _streams.swap(obj._streams);
-        _events.swap(obj._events);
+        _events .swap(obj._events);
         std::swap(_platform_info, obj._platform_info);
-        std::swap(_device_info, obj._device_info);
+        std::swap(_device_info  , obj._device_info);
+        // @formatter:on
     }
 }
 
@@ -197,60 +199,61 @@ GpuType Gpu::getType() const
 
 std::string Gpu::getTypeString() const
 {
-    return libtbag::gpu::getGpuTypeString(getType());
+    return (_gpu ? _gpu->getTypeString() : std::string());
 }
 
-bool Gpu::isSupport() const
+// @formatter:off
+bool Gpu::isSupport() const { return (_gpu ? _gpu->isSupport() : false); }
+bool Gpu::isHost   () const { return (_gpu ? _gpu->isHost   () : false); }
+bool Gpu::isDevice () const { return (_gpu ? _gpu->isDevice () : false); }
+bool Gpu::isStream () const { return (_gpu ? _gpu->isStream () : false); }
+// @formatter:on
+
+SharedGpuStream Gpu::newStream(bool auto_insert)
 {
-    return (_gpu ? _gpu->isSupport() : false);
+    SharedGpuStream stream;
+    try {
+        stream.reset(_gpu ? new GpuStream(*_gpu) : nullptr);
+    } catch (std::bad_alloc & e) {
+        tDLogE("Gpu::newStream() Bad allocation exception: {}", e.what());
+        return SharedGpuStream();
+    }
+
+    if (auto_insert && stream) {
+        if (_streams.insert(StreamPair(stream->getId(), stream)).second == false) {
+            tDLogW("Gpu::newStream() Auto insertion failed.");
+        }
+    }
+    return stream;
 }
 
-bool Gpu::isHost() const
+SharedGpuEvent Gpu::newEvent(GpuStream const & stream, bool auto_insert)
 {
-    return (_gpu ? _gpu->isHost() : false);
+    SharedGpuEvent event;
+    try {
+        event.reset(_gpu ? new GpuEvent(stream) : nullptr);
+    } catch (std::bad_alloc & e) {
+        tDLogE("Gpu::newEvent() Bad allocation exception: {}", e.what());
+        return SharedGpuEvent();
+    }
+
+    if (auto_insert && event) {
+        if (_events.insert(EventPair(event->getId(), event)).second == false) {
+            tDLogW("Gpu::newEvent() Auto insertion failed.");
+        }
+    }
+    return event;
 }
 
-bool Gpu::isDevice() const
+SharedGpuEvent Gpu::newEvent(SharedGpuStream const & stream, bool auto_insert)
 {
-    return (_gpu ? _gpu->isDevice() : false);
+    return (stream ? newEvent(*stream, auto_insert) : SharedGpuEvent());
 }
 
-bool Gpu::isStream() const
+SharedGpuEvent Gpu::newEvent(WeakedGpuStream const & stream, bool auto_insert)
 {
-    return (_gpu ? _gpu->isStream() : false);
+    return (stream.expired() ? SharedGpuEvent() : newEvent(stream.lock(), auto_insert));
 }
-
-//SharedGpuStream Gpu::newStream(bool auto_insert)
-//{
-//    SharedGpuStream stream(_gpu ? new GpuStream(GpuStream::instance(_gpu.get())) : nullptr);
-//    if (auto_insert && stream) {
-//        if (_streams.insert(StreamPair(stream->getId(), stream)).second == false) {
-//            tDLogW("Gpu::newStream() Insert failed.");
-//        }
-//    }
-//    return stream;
-//}
-//
-//SharedGpuEvent Gpu::newEvent(GpuStream const & stream, bool auto_insert)
-//{
-//    SharedGpuEvent event(_gpu ? new GpuEvent(GpuEvent::instance(stream)) : nullptr);
-//    if (auto_insert && event) {
-//        if (_events.insert(EventPair(event->getId(), event)).second == false) {
-//            tDLogW("Gpu::newEvent() Insert failed.");
-//        }
-//    }
-//    return event;
-//}
-//
-//SharedGpuEvent Gpu::newEvent(SharedGpuStream const & stream, bool auto_insert)
-//{
-//    return (stream ? newEvent(*stream, auto_insert) : SharedGpuEvent());
-//}
-//
-//SharedGpuEvent Gpu::newEvent(WeakedGpuStream const & stream, bool auto_insert)
-//{
-//    return (stream.expired() ? SharedGpuEvent() : newEvent(stream.lock(), auto_insert));
-//}
 
 } // namespace gpu
 

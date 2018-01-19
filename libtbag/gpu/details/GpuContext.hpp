@@ -92,11 +92,11 @@ public:
 
 // Memory.
 public:
-    virtual Err malloc(GpuMemory & memory, std::size_t size) const;
-    virtual Err   free(GpuMemory & memory) const;
+    virtual Err malloc(GpuMemory & mem, std::size_t size) const;
+    virtual Err   free(GpuMemory & mem) const;
 
-    virtual Err mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const;
-    virtual Err   freeHost(HostMemory & memory) const;
+    virtual Err mallocHost(HostMemory & mem, std::size_t size, HostMemoryFlag flag = HostMemoryFlag::HMF_DEFAULT) const;
+    virtual Err   freeHost(HostMemory & mem) const;
 
 // Input/Output.
 public:

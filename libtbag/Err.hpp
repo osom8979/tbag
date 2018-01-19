@@ -35,6 +35,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EOPEN   , "Open error"              ) \
     _TBAG_XX(_EINDEX  , "Index error"             ) \
     _TBAG_XX(_ALREADY , "Already state"           ) \
+    _TBAG_XX(_SAMEOBJ , "Same object"             ) \
     _TBAG_XX(_BADALLOC, "Bad allocation"          ) \
     _TBAG_XX(_OORANGE , "Out of range"            ) \
     _TBAG_XX(_NULLPTR , "Null pointer exception"  ) \

@@ -131,9 +131,9 @@ Err GpuContext::releaseKernel(GpuKernel & kernel) const
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::malloc(GpuMemory & memory, std::size_t size) const
+Err GpuContext::malloc(GpuMemory & mem, std::size_t size) const
 {
-    if (memory.isSameContext(*this) == false) {
+    if (mem.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -143,29 +143,29 @@ Err GpuContext::malloc(GpuMemory & memory, std::size_t size) const
     assert(CAPACITY_SIZE >= size);
 
     void * data = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
-    memory.set(data, CAPACITY_SIZE, size);
+    mem.set(data, CAPACITY_SIZE, size);
 
     tDLogIfD(isGpuVerbose(), "GpuContext::malloc({}) Aligned malloc MEM:{} CAP:{} SIZE:{}",
-             size, memory.data(), memory.capacity(), memory.size());
+             size, mem.data(), mem.capacity(), mem.size());
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::free(GpuMemory & memory) const
+Err GpuContext::free(GpuMemory & mem) const
 {
-    if (memory.validate(*this) == false) {
+    if (mem.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
     tDLogIfD(isGpuVerbose(), "GpuContext::free() Aligned free MEM:{} CAP:{} SIZE:{}",
-             memory.data(), memory.capacity(), memory.size());
-    memory::alignedMemoryFree(memory.data());
-    memory.clear();
+             mem.data(), mem.capacity(), mem.size());
+    memory::alignedMemoryFree(mem.data());
+    mem.clear();
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag flag) const
+Err GpuContext::mallocHost(HostMemory & mem, std::size_t size, HostMemoryFlag flag) const
 {
-    if (memory.isSameContext(*this) == false) {
+    if (mem.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
     if (HostMemoryFlag::HMF_DEFAULT != flag) {
@@ -181,23 +181,23 @@ Err GpuContext::mallocHost(HostMemory & memory, std::size_t size, HostMemoryFlag
     assert(CAPACITY_SIZE >= size);
 
     void * data = memory::alignedMemoryAlloc(CAPACITY_SIZE, ALIGNED_SIZE);
-    memory.set(data, CAPACITY_SIZE, size, flag);
+    mem.set(data, CAPACITY_SIZE, size, flag);
 
     tDLogIfD(isGpuVerbose(), "GpuContext::mallocHost({}) Aligned malloc MEM:{} CAP:{} SIZE:{}",
-             size, memory.data(), memory.capacity(), memory.size());
+             size, mem.data(), mem.capacity(), mem.size());
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::freeHost(HostMemory & memory) const
+Err GpuContext::freeHost(HostMemory & mem) const
 {
-    if (memory.validate(*this) == false) {
+    if (mem.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
     tDLogIfD(isGpuVerbose(), "GpuContext::freeHost() Aligned free MEM:{} CAP:{} SIZE:{}",
-             memory.data(), memory.capacity(), memory.size());
-    memory::alignedMemoryFree(memory.data());
-    memory.clear();
+             mem.data(), mem.capacity(), mem.size());
+    memory::alignedMemoryFree(mem.data());
+    mem.clear();
     return Err::E_SUCCESS;
 }
 
