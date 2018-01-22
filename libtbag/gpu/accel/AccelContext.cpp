@@ -8,6 +8,7 @@
 #include <libtbag/gpu/accel/AccelContext.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/util/Version.hpp>
+#include <libtbag/gpu/accel/AccelRaw.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -87,6 +88,15 @@ bool AccelContext::isHost   () const TBAG_NOEXCEPT { return  true; }
 bool AccelContext::isDevice () const TBAG_NOEXCEPT { return false; }
 bool AccelContext::isStream () const TBAG_NOEXCEPT { return  true; }
 // @formatter:on
+
+Err AccelContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
+{ CpuEventGuard g(event); return tbAccelAdd_i(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err AccelContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
+{ CpuEventGuard g(event); return tbAccelAdd_u(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err AccelContext::add(GpuStream const & stream, float const * in1, float const * in2, float * out, int count, GpuEvent * event) const
+{ CpuEventGuard g(event); return tbAccelAdd_f(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err AccelContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
+{ CpuEventGuard g(event); return tbAccelAdd_d(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
 
 } // namespace accel
 } // namespace gpu

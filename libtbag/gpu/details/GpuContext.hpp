@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/type/TypeTable.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 
 #include <cstdlib>
@@ -44,6 +45,9 @@ class MemoryWrapper;
  */
 class TBAG_API GpuContext : public GpuDevice, private Noncopyable
 {
+public:
+    using TypeTable = type::TypeTable;
+
 public:
     GpuId const CONTEXT_ID;
 
@@ -119,16 +123,12 @@ public:
 
 // Kernels.
 public:
-    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const;
-    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const;
+    virtual Err add(GpuStream const & stream, int      const * in1, int      const * in2, int      * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
+    virtual Err add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
+    virtual Err add(GpuStream const & stream, float    const * in1, float    const * in2, float    * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
+    virtual Err add(GpuStream const & stream, double   const * in1, double   const * in2, double   * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
 
-    virtual Err runKernel(GpuStream const & stream,
-                          GpuKernel const & kernel,
-                          unsigned work_dim,
-                          std::size_t const * global_work_offset,
-                          std::size_t const * global_work_size,
-                          std::size_t const * local_work_size,
-                          GpuEvent * event = nullptr) const;
+    Err add(GpuStream const & stream, TypeTable type, GpuMemory const & in1, GpuMemory const & in2, GpuMemory & out, int count, GpuEvent * event = nullptr);
 };
 
 using SharedGpuContext = std::shared_ptr<GpuContext>;

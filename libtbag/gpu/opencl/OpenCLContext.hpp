@@ -45,6 +45,15 @@ TBAG_API SharedGpuContext createContext(GpuDevice const & device);
 class TBAG_API OpenCLContext : public GpuContext
 {
 public:
+    struct Kernels
+    {
+        SharedGpuKernel i;
+        SharedGpuKernel u;
+        SharedGpuKernel f;
+        SharedGpuKernel d;
+    };
+
+public:
     OpenCLContext(GpuDevice const & d, GpuId c);
     virtual ~OpenCLContext();
 
@@ -90,16 +99,14 @@ public:
     virtual Err  flush(GpuStream const & stream) const override;
     virtual Err finish(GpuStream const & stream) const override;
 
-    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const override;
-    virtual Err setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const override;
+private:
+    Kernels mutable _add;
 
-    virtual Err runKernel(GpuStream const & stream,
-                          GpuKernel const & kernel,
-                          unsigned work_dim,
-                          std::size_t const * global_work_offset,
-                          std::size_t const * global_work_size,
-                          std::size_t const * local_work_size,
-                          GpuEvent * event = nullptr) const override;
+public:
+    virtual Err add(GpuStream const & stream, int      const * in1, int      const * in2, int      * out, int count, GpuEvent * event) const override;
+    virtual Err add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const override;
+    virtual Err add(GpuStream const & stream, float    const * in1, float    const * in2, float    * out, int count, GpuEvent * event) const override;
+    virtual Err add(GpuStream const & stream, double   const * in1, double   const * in2, double   * out, int count, GpuEvent * event) const override;
 };
 
 } // namespace opencl

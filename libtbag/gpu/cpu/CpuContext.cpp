@@ -88,6 +88,25 @@ bool CpuContext::isDevice () const TBAG_NOEXCEPT { return false; }
 bool CpuContext::isStream () const TBAG_NOEXCEPT { return  true; }
 // @formatter:on
 
+template <typename T>
+static Err addByCpu(T const * in1, T const * in2, T * out, int count, GpuEvent * event)
+{
+    CpuEventGuard const EVENT_LOCK(event);
+    for (; count > 0; ++in1, ++in2, ++out, --count) {
+        *out = *in1 + *in2;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err CpuContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
+{ return addByCpu(in1, in2, out, count, event); }
+Err CpuContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
+{ return addByCpu(in1, in2, out, count, event); }
+Err CpuContext::add(GpuStream const & stream, float const * in1, float const * in2, float * out, int count, GpuEvent * event) const
+{ return addByCpu(in1, in2, out, count, event); }
+Err CpuContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
+{ return addByCpu(in1, in2, out, count, event); }
+
 } // namespace cpu
 } // namespace gpu
 

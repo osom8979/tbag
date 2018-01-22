@@ -23,10 +23,10 @@
 extern "C" {
 #endif
 
-TBAG_API tbBOOL tbCudaAdd1i(int      const * v1, int      const * v2, int      * r, int count, void * stream = TB_NULL);
-TBAG_API tbBOOL tbCudaAdd1u(unsigned const * v1, unsigned const * v2, unsigned * r, int count, void * stream = TB_NULL);
-TBAG_API tbBOOL tbCudaAdd1f(float    const * v1, float    const * v2, float    * r, int count, void * stream = TB_NULL);
-TBAG_API tbBOOL tbCudaAdd1d(double   const * v1, double   const * v2, double   * r, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd_i(int      const * in1, int      const * in2, int      * out, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd_u(unsigned const * in1, unsigned const * in2, unsigned * out, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd_f(float    const * in1, float    const * in2, float    * out, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaAdd_d(double   const * in1, double   const * in2, double   * out, int count, void * stream = TB_NULL);
 
 #if defined(__cplusplus)
 } /* extern "C" */

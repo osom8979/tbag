@@ -6,11 +6,13 @@
  */
 
 #include <libtbag/gpu/details/GpuContext.hpp>
+#include <libtbag/log/Log.hpp>
+
 #include <libtbag/gpu/details/GpuEvent.hpp>
 #include <libtbag/gpu/details/GpuKernel.hpp>
 #include <libtbag/gpu/details/GpuMemory.hpp>
 #include <libtbag/gpu/details/GpuStream.hpp>
-#include <libtbag/log/Log.hpp>
+
 #include <libtbag/memory/AlignedMemory.hpp>
 #include <libtbag/algorithm/Pack.hpp>
 
@@ -275,34 +277,19 @@ Err GpuContext::finish(GpuStream const & stream) const
     return Err::E_SUCCESS;
 }
 
-Err GpuContext::setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const
-{
-    if (kernel.validate(*this) == false) {
-        return Err::E_ILLARGS;
-    }
-    return Err::E_SUCCESS;
-}
+// --------
+// Kernels.
+// --------
 
-Err GpuContext::setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const
+Err GpuContext::add(GpuStream const & stream, TypeTable type, GpuMemory const & in1, GpuMemory const & in2, GpuMemory & out, int count, GpuEvent * event)
 {
-    if (kernel.validate(*this) == false) {
-        return Err::E_ILLARGS;
+    switch (type) {
+    case TypeTable::TT_INT:    return add(stream, in1.cast<int     *>(), in2.cast<int     *>(), out.cast<int     *>(), count, event);
+    case TypeTable::TT_UINT:   return add(stream, in1.cast<unsigned*>(), in2.cast<unsigned*>(), out.cast<unsigned*>(), count, event);
+    case TypeTable::TT_FLOAT:  return add(stream, in1.cast<float   *>(), in2.cast<float   *>(), out.cast<float   *>(), count, event);
+    case TypeTable::TT_DOUBLE: return add(stream, in1.cast<double  *>(), in2.cast<double  *>(), out.cast<double  *>(), count, event);
+    default: return Err::E_UNSUPOP;
     }
-    return Err::E_SUCCESS;
-}
-
-Err GpuContext::runKernel(GpuStream const & stream,
-                          GpuKernel const & kernel,
-                          unsigned work_dim,
-                          std::size_t const * global_work_offset,
-                          std::size_t const * global_work_size,
-                          std::size_t const * local_work_size,
-                          GpuEvent * event) const
-{
-    if (stream.validate(*this) == false || kernel.validate(*this) == false) {
-        return Err::E_ILLARGS;
-    }
-    return Err::E_SUCCESS;
 }
 
 } // namespace details

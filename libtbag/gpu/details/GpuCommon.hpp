@@ -63,6 +63,14 @@ enum class HostMemoryFlag
 TBAG_API char const * getGpuTypeString(GpuType type) TBAG_NOEXCEPT;
 TBAG_API char const * getHostMemoryTypeString(HostMemoryFlag flag) TBAG_NOEXCEPT;
 
+// @formatter:off
+template <typename T> struct GpuMemoryTypeSuffix;
+template <> struct GpuMemoryTypeSuffix<     int> { TBAG_CONSTEXPR static char const * const prefix = "i"; };
+template <> struct GpuMemoryTypeSuffix<unsigned> { TBAG_CONSTEXPR static char const * const prefix = "u"; };
+template <> struct GpuMemoryTypeSuffix<   float> { TBAG_CONSTEXPR static char const * const prefix = "f"; };
+template <> struct GpuMemoryTypeSuffix<  double> { TBAG_CONSTEXPR static char const * const prefix = "d"; };
+// @formatter:on
+
 struct GpuPlatform
 {
     GpuType const TYPE;

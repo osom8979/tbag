@@ -21,10 +21,10 @@
 extern "C" {
 #endif
 
-TBAG_API tbBOOL tbAccelAdd1i(int      const * v1, int      const * v2, int      * r, int count);
-TBAG_API tbBOOL tbAccelAdd1u(unsigned const * v1, unsigned const * v2, unsigned * r, int count);
-TBAG_API tbBOOL tbAccelAdd1f(float    const * v1, float    const * v2, float    * r, int count);
-TBAG_API tbBOOL tbAccelAdd1d(double   const * v1, double   const * v2, double   * r, int count);
+TBAG_API tbBOOL tbAccelAdd_i(int      const * v1, int      const * v2, int      * r, int count);
+TBAG_API tbBOOL tbAccelAdd_u(unsigned const * v1, unsigned const * v2, unsigned * r, int count);
+TBAG_API tbBOOL tbAccelAdd_f(float    const * v1, float    const * v2, float    * r, int count);
+TBAG_API tbBOOL tbAccelAdd_d(double   const * v1, double   const * v2, double   * r, int count);
 
 #if defined(__cplusplus)
 } /* extern "C" */

@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/Format.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/gpu/cuda/CudaRaw.h>
 
 #if defined(USE_CUDA)
 # include <cuda.h>
@@ -619,6 +620,15 @@ Err CudaContext::finish(GpuStream const & stream) const
     }
     return Err::E_SUCCESS;
 }
+
+Err CudaContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaAdd_i(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err CudaContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaAdd_u(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err CudaContext::add(GpuStream const & stream, float const * in1, float const * in2, float * out, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaAdd_f(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err CudaContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaAdd_d(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
 
 } // namespace cuda
 } // namespace gpu

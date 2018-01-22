@@ -8,6 +8,8 @@
 #include <libtbag/gpu/opencl/OpenCLContext.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cassert>
+
 #if defined(USE_OPENCL)
 # if defined(TBAG_PLATFORM_MACOS)
 #  include <OpenCL/cl.h>
@@ -566,47 +568,70 @@ Err OpenCLContext::finish(GpuStream const & stream) const
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::setKernelArg(GpuKernel const & kernel, std::size_t index, std::size_t size, void const * data) const
+TBAG_CONSTEXPR static char const * const _TBAG_OPENCL_SOURCE_ADD = R"(
+template <class T>
+__kernel void add(__global T * in1, __global T * in2, __global T * out)
 {
-    if (kernel.validate(*this) == false) {
+    uint w = get_global_size(0);
+    uint y = get_global_id(1);
+    uint x = get_global_id(0);
+    uint i = y * w + x;
+    out[i] = in1[i] + in2[i];
+}
+
+template __attribute__((mangled_name(add_i))) __kernel void add(__global int      * in1, __global int      * in2, __global int      * out);
+template __attribute__((mangled_name(add_u))) __kernel void add(__global unsigned * in1, __global unsigned * in2, __global unsigned * out);
+template __attribute__((mangled_name(add_f))) __kernel void add(__global float    * in1, __global float    * in2, __global float    * out);
+template __attribute__((mangled_name(add_d))) __kernel void add(__global double   * in1, __global double   * in2, __global double   * out);
+)";
+
+template <typename T>
+static Err addByOpenCL(GpuContext const & context, GpuStream const & stream, SharedGpuKernel & kernel,
+                       T const * in1, T const * in2, T * out, int count, GpuEvent * event)
+{
+    if (stream.validate(context) == false) {
         return Err::E_ILLARGS;
     }
 
-    cl_int code = clSetKernelArg(kernel.castId<cl_kernel>(), (cl_uint)index, size, data);
-    if (code != CL_SUCCESS) {
-        tDLogE("OpenCLContext::setKernelArg() OpenCL clSetKernelArg() error code: {}", code);
+    if (static_cast<bool>(kernel) == false) {
+        GpuProgram program(context, _TBAG_OPENCL_SOURCE_ADD);
+        try {
+            kernel.reset(new GpuKernel(program, std::string("add_") + GpuMemoryTypeSuffix<T>::prefix));
+        } catch (std::bad_alloc & e) {
+            return Err::E_BADALLOC;
+        }
+    }
+
+    assert(static_cast<bool>(kernel));
+
+    cl_int c0 = clSetKernelArg(kernel->castId<cl_kernel>(), 0, sizeof(cl_mem), in1);
+    cl_int c1 = clSetKernelArg(kernel->castId<cl_kernel>(), 1, sizeof(cl_mem), in2);
+    cl_int c2 = clSetKernelArg(kernel->castId<cl_kernel>(), 2, sizeof(cl_mem), out);
+
+    if (c0 != CL_SUCCESS || c1 != CL_SUCCESS || c2 != CL_SUCCESS) {
+        tDLogE("OpenCLContext::addByOpenCL() OpenCL clSetKernelArg() error: c0({}), c1({}), c2({})", c0, c1, c2);
         return Err::E_OPENCL;
     }
-    return Err::E_SUCCESS;
-}
 
-Err OpenCLContext::setKernelArg(GpuKernel const & kernel, std::size_t index, GpuMemory const & mem) const
-{
-    return setKernelArg(kernel, index, sizeof(cl_mem), mem.data());
-}
-
-Err OpenCLContext::runKernel(GpuStream const & stream,
-                             GpuKernel const & kernel,
-                             unsigned work_dim,
-                             std::size_t const * global_work_offset,
-                             std::size_t const * global_work_size,
-                             std::size_t const * local_work_size,
-                             GpuEvent * event) const
-{
-    if (stream.validate(*this) == false || kernel.validate(*this) == false) {
-        return Err::E_ILLARGS;
-    }
-
-    cl_int code = clEnqueueNDRangeKernel(stream.castId<cl_command_queue>(), kernel.castId<cl_kernel>(),
-                                         work_dim, global_work_offset, global_work_size, local_work_size,
-                                         0, nullptr,
+    std::size_t global_work_size[1] = { static_cast<std::size_t>(count) };
+    cl_int code = clEnqueueNDRangeKernel(stream.castId<cl_command_queue>(), kernel->castId<cl_kernel>(),
+                                         1, nullptr, global_work_size, nullptr, 0, nullptr,
                                          (cl_event*)(event == nullptr ? nullptr : &event->atId()));
     if (code != CL_SUCCESS) {
-        tDLogE("OpenCLContext::runKernel() OpenCL clEnqueueNDRangeKernel() error code: {}", code);
+        tDLogE("OpenCLContext::addByOpenCL() OpenCL clEnqueueNDRangeKernel() error code: {}", code);
         return Err::E_OPENCL;
     }
     return Err::E_SUCCESS;
 }
+
+Err OpenCLContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
+{ return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
+Err OpenCLContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
+{ return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
+Err OpenCLContext::add(GpuStream const & stream, float const * in1, float const * in2, float * out, int count, GpuEvent * event) const
+{ return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
+Err OpenCLContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
+{ return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
 
 } // namespace opencl
 } // namespace gpu

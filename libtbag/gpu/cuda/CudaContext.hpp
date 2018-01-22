@@ -147,6 +147,12 @@ public:
 
     virtual Err  flush(GpuStream const & stream) const override;
     virtual Err finish(GpuStream const & stream) const override;
+
+public:
+    virtual Err add(GpuStream const & stream, int      const * in1, int      const * in2, int      * out, int count, GpuEvent * event) const override;
+    virtual Err add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const override;
+    virtual Err add(GpuStream const & stream, float    const * in1, float    const * in2, float    * out, int count, GpuEvent * event) const override;
+    virtual Err add(GpuStream const & stream, double   const * in1, double   const * in2, double   * out, int count, GpuEvent * event) const override;
 };
 
 } // namespace cuda
