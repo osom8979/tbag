@@ -123,11 +123,11 @@ bool tbCudaAdd(T const * in1, T const * in2, T * out, int count, StreamType stre
 // ------------------
 
 tbBOOL tbCudaAdd_i(int const * in1, int const * in2, int * out, int count, void * stream)
-{ return __impl::tbCudaAdd(gpu_v1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+{ return __impl::tbCudaAdd(in1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbCudaAdd_u(unsigned const * in1, unsigned const * in2, unsigned * out, int count, void * stream)
-{ return __impl::tbCudaAdd(gpu_v1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+{ return __impl::tbCudaAdd(in1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbCudaAdd_f(float const * in1, float const * in2, float * out, int count, void * stream)
-{ return __impl::tbCudaAdd(gpu_v1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+{ return __impl::tbCudaAdd(in1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbCudaAdd_d(double const * in1, double const * in2, double * out, int count, void * stream)
-{ return __impl::tbCudaAdd(gpu_v1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+{ return __impl::tbCudaAdd(in1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
 
