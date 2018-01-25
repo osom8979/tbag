@@ -191,6 +191,16 @@ TEST(StringUtilsTest, IsUtf8Match)
     ASSERT_TRUE(isUtf8Match(content2, match3));
 }
 
+TEST(StringUtilsTest, IsDigit)
+{
+    ASSERT_TRUE(isDigit("0"));
+    ASSERT_TRUE(isDigit("01234567890123456789"));
+
+    ASSERT_FALSE(isDigit("0123456789-0123456789"));
+    ASSERT_FALSE(isDigit(""));
+    ASSERT_FALSE(isDigit("-1"));
+}
+
 TEST(StringUtilsTest, TrimLeft)
 {
     std::string t1 = "  TEST";

@@ -160,6 +160,14 @@ TBAG_API bool isMatch(std::string const & source, std::regex const & regex);
 TBAG_API bool isMatch(std::string const & source, std::string const & regex);
 TBAG_API bool isUtf8Match(std::string const & utf8_source, std::string const & regex);
 
+/**
+ * Checks whether str is a decimal digit character.
+ *
+ * @remarks
+ *  Decimal digits are any of: 0 1 2 3 4 5 6 7 8 9
+ */
+TBAG_API bool isDigit(std::string const & str);
+
 TBAG_API std::string trimLeft(std::string const & str);
 TBAG_API std::string trimRight(std::string const & str);
 TBAG_API std::string trim(std::string const & str);

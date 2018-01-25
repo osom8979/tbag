@@ -335,6 +335,21 @@ bool isUtf8Match(std::string const & utf8_source, std::string const & regex)
     return false;
 }
 
+bool isDigit(std::string const & str)
+{
+    if (str.empty()) {
+        return false;
+    }
+
+    auto const end = str.end();
+    for (auto itr = str.begin(); itr != end; ++itr) {
+        if (std::isdigit(*itr) == false) {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::string trimLeft(std::string const & str)
 {
     auto itr = str.begin();
