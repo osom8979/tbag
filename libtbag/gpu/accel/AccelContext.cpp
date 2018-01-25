@@ -34,7 +34,7 @@ GpuPlatforms getPlatformList()
 
 GpuPlatformInfo getPlatformInfo(GpuPlatform const & platform)
 {
-    checkCpuGpuType(platform);
+    checkAccelGpuType(platform);
     GpuPlatformInfo info;
     info.name    = "ACCEL";
     info.vendor  = "TBAG";
@@ -44,19 +44,19 @@ GpuPlatformInfo getPlatformInfo(GpuPlatform const & platform)
 
 int getDeviceCount(GpuPlatform const & platform)
 {
-    checkCpuGpuType(platform);
+    checkAccelGpuType(platform);
     return 1;
 }
 
 GpuDevices getDeviceList(GpuPlatform const & platform)
 {
-    checkCpuGpuType(platform);
+    checkAccelGpuType(platform);
     return {GpuDevice(platform, 0)};
 }
 
 GpuDeviceInfo getDeviceInfo(GpuDevice const & device)
 {
-    checkCpuGpuType(device);
+    checkAccelGpuType(device);
     GpuDeviceInfo info;
     info.name = "ACCEL";
     return info;
@@ -64,7 +64,7 @@ GpuDeviceInfo getDeviceInfo(GpuDevice const & device)
 
 SharedGpuContext createContext(GpuDevice const & device)
 {
-    checkCpuGpuType(device);
+    checkAccelGpuType(device);
     return SharedGpuContext(new AccelContext(device, 0));
 }
 

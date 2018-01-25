@@ -86,9 +86,9 @@ Gpu::Gpu() : Gpu(SharedGpuContext())
     // EMPTY.
 }
 
-Gpu::Gpu(GpuType type, std::size_t platform_index, std::size_t device_index) : Gpu(SharedGpuContext())
+Gpu::Gpu(GpuType type, GpuId platform_id, GpuId device_id) : Gpu(SharedGpuContext())
 {
-    if (isFailure(init(type, platform_index, device_index))) {
+    if (isFailure(init(type, platform_id, device_id))) {
         throw std::bad_alloc();
     }
 }
@@ -159,23 +159,29 @@ bool Gpu::validate() const
     return false;
 }
 
-Err Gpu::init(GpuType type, std::size_t platform_index, std::size_t device_index)
+Err Gpu::init(GpuType type, GpuId platform_id, GpuId device_id)
 {
     if (libtbag::gpu::isSupport(type) == false) {
         return Err::E_UNSUPOP;
     }
 
     auto const PLATFORMS = libtbag::gpu::getPlatformList(type);
-    if (PLATFORMS.size() > platform_index) {
-        return Err::E_OORANGE;
+    auto plat_itr = std::find_if(PLATFORMS.begin(), PLATFORMS.end(), [platform_id](GpuPlatform const & plat) -> bool {
+        return plat.getPlatformId() == platform_id;
+    });
+    if (plat_itr == PLATFORMS.end()) {
+        return Err::E_ENFOUND;
     }
 
-    auto const DEVICES = libtbag::gpu::getDeviceList(PLATFORMS[platform_index]);
-    if (DEVICES.empty() > device_index) {
-        return Err::E_OORANGE;
+    auto const DEVICES = libtbag::gpu::getDeviceList(*plat_itr);
+    auto dev_itr = std::find_if(DEVICES.begin(), DEVICES.end(), [device_id](GpuDevice const & dev) -> bool {
+        return dev.getDeviceId() == device_id;
+    });
+    if (dev_itr == DEVICES.end()) {
+        return Err::E_ENFOUND;
     }
 
-    auto context = libtbag::gpu::createContext(DEVICES[device_index]);
+    auto context = libtbag::gpu::createContext(*dev_itr);
     if (static_cast<bool>(context)) {
         _gpu = context;
         _streams.clear();
@@ -200,6 +206,21 @@ GpuType Gpu::getType() const
 std::string Gpu::getTypeString() const
 {
     return (_gpu ? _gpu->getTypeString() : std::string());
+}
+
+GpuId Gpu::getPlatformId() const
+{
+    return (_gpu ? _gpu->getPlatformId() : UNKNOWN_ID);
+}
+
+GpuId Gpu::getDeviceId() const
+{
+    return (_gpu ? _gpu->getDeviceId() : UNKNOWN_ID);
+}
+
+GpuId Gpu::getContextId() const
+{
+    return (_gpu ? _gpu->getContextId() : UNKNOWN_ID);
 }
 
 // @formatter:off

@@ -38,43 +38,6 @@ TBAG_API GpuDeviceInfo   getDeviceInfo (GpuDevice   const & device);
 
 TBAG_API SharedGpuContext createContext(GpuDevice const & device);
 
-template <typename Predicated>
-void runIfSupported(std::vector<GpuType> const & types,
-                    std::size_t platform_index,
-                    std::size_t device_index,
-                    Predicated predicated)
-{
-    for (auto & type : types) {
-        if (isSupport(type) == false) {
-            continue;
-        }
-
-        auto const PLATFORMS = libtbag::gpu::getPlatformList(type);
-        if (PLATFORMS.size() > platform_index) {
-            continue;
-        }
-
-        auto const DEVICES = libtbag::gpu::getDeviceList(PLATFORMS[platform_index]);
-        if (DEVICES.empty() > device_index) {
-            continue;
-        }
-
-        auto context = libtbag::gpu::createContext(DEVICES[device_index]);
-        if (static_cast<bool>(context)) {
-            predicated(context);
-        }
-    }
-}
-
-template <typename Predicated>
-void runAllIfSupported(Predicated predicated, std::size_t platform_index = 0, std::size_t device_index = 0)
-{
-    runIfSupported({GpuType::GT_CPU,
-                    GpuType::GT_ACCEL,
-                    GpuType::GT_CUDA,
-                    GpuType::GT_OPENCL}, platform_index, device_index, predicated);
-}
-
 /**
  * Gpu class prototype.
  *
@@ -101,7 +64,7 @@ private:
 
 public:
     Gpu();
-    Gpu(GpuType type, std::size_t platform_index = 0, std::size_t device_index = 0);
+    explicit Gpu(GpuType type, GpuId platform_id, GpuId device_id);
     explicit Gpu(SharedGpuContext const & gpu);
     explicit Gpu(WeakedGpuContext const & gpu);
     Gpu(Gpu const & obj);
@@ -122,14 +85,16 @@ public:
 
 public:
     bool validate() const;
-    Err  init(GpuType type = GpuType::GT_CPU,
-              std::size_t platform_index = 0,
-              std::size_t   device_index = 0);
+    Err  init(GpuType type, GpuId platform_id, GpuId device_id);
     void clear();
 
 public:
     GpuType getType() const;
     std::string getTypeString() const;
+
+    GpuId getPlatformId() const;
+    GpuId   getDeviceId() const;
+    GpuId  getContextId() const;
 
 public:
     bool isSupport() const;
@@ -143,6 +108,33 @@ public:
     SharedGpuEvent  newEvent(SharedGpuStream const & stream, bool auto_insert = true);
     SharedGpuEvent  newEvent(WeakedGpuStream const & stream, bool auto_insert = true);
 };
+
+template <typename Predicated>
+void runIfSupported(std::vector<GpuType> const & types, Predicated predicated)
+{
+    for (auto & type : types) {
+        if (isSupport(type) == false) {
+            continue;
+        }
+
+        try {
+            for (auto & plat : getPlatformList(type)) {
+                for (auto & dev : getDeviceList(plat)) {
+                    auto gpu = Gpu(type, plat.getPlatformId(), dev.getDeviceId());
+                    predicated(gpu);
+                }
+            }
+        } catch (...) {
+            // EMPTY.
+        }
+    }
+}
+
+template <typename Predicated>
+void runAllIfSupported(Predicated predicated)
+{
+    runIfSupported({GpuType::GT_CPU, GpuType::GT_ACCEL, GpuType::GT_CUDA, GpuType::GT_OPENCL}, predicated);
+}
 
 } // namespace gpu
 

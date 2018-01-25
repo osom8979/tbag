@@ -595,6 +595,11 @@ static Err addByOpenCL(GpuContext const & context, GpuStream const & stream, Sha
 
     if (static_cast<bool>(kernel) == false) {
         GpuProgram program(context, _TBAG_OPENCL_SOURCE_ADD);
+        Err const BUILD_RESULT = program.build();
+        if (isFailure(BUILD_RESULT)) {
+            return BUILD_RESULT;
+        }
+
         try {
             kernel.reset(new GpuKernel(program, std::string("add_") + GpuMemoryTypeSuffix<T>::prefix));
         } catch (std::bad_alloc & e) {
@@ -627,11 +632,11 @@ static Err addByOpenCL(GpuContext const & context, GpuStream const & stream, Sha
 Err OpenCLContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
 { return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
 Err OpenCLContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
-{ return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
+{ return addByOpenCL(*this, stream, _add.u, in1, in2, out, count, event); }
 Err OpenCLContext::add(GpuStream const & stream, float const * in1, float const * in2, float * out, int count, GpuEvent * event) const
-{ return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
+{ return addByOpenCL(*this, stream, _add.f, in1, in2, out, count, event); }
 Err OpenCLContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
-{ return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
+{ return addByOpenCL(*this, stream, _add.d, in1, in2, out, count, event); }
 
 } // namespace opencl
 } // namespace gpu
