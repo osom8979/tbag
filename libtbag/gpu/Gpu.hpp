@@ -46,17 +46,8 @@ TBAG_API SharedGpuContext createContext(GpuDevice const & device);
  */
 class TBAG_API Gpu
 {
-public:
-    using StreamMap  = std::unordered_map<GpuId, SharedGpuStream>;
-    using StreamPair = StreamMap::value_type;
-
-    using EventMap  = std::unordered_map<GpuId, SharedGpuEvent>;
-    using EventPair = EventMap::value_type;
-
 private:
     SharedGpuContext  _gpu;
-    StreamMap     _streams;
-    EventMap       _events;
 
 private:
     GpuPlatformInfo _platform_info;
@@ -103,10 +94,10 @@ public:
     bool  isStream() const;
 
 public:
-    SharedGpuStream newStream(bool auto_insert = true);
-    SharedGpuEvent  newEvent(GpuStream const & stream, bool auto_insert = true);
-    SharedGpuEvent  newEvent(SharedGpuStream const & stream, bool auto_insert = true);
-    SharedGpuEvent  newEvent(WeakedGpuStream const & stream, bool auto_insert = true);
+    SharedGpuStream newStream();
+    SharedGpuEvent  newEvent(GpuStream const & stream);
+    SharedGpuEvent  newEvent(SharedGpuStream const & stream);
+    SharedGpuEvent  newEvent(WeakedGpuStream const & stream);
 };
 
 template <typename Predicated>

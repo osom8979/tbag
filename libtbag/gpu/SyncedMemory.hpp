@@ -153,6 +153,10 @@ public:
         _type = TypeTable::TT_CHAR;
         return resize(1, size);
     }
+
+public:
+    Err assign(void const * data, std::size_t size);
+    Err assignSync(void const * data, std::size_t size);
 };
 
 } // namespace gpu

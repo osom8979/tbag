@@ -52,8 +52,13 @@ public:
     inline GpuStream const & atStream() const TBAG_NOEXCEPT { return _stream; }
     inline bool isSameStream(GpuStream const & stream) const TBAG_NOEXCEPT { return (&_stream) == (&stream); }
 
+public:
+    GpuContext const & atContext() const TBAG_NOEXCEPT;
+    bool isSameContext(GpuContext const & context) const TBAG_NOEXCEPT;
+
+public:
     inline bool validate() const TBAG_NOEXCEPT { return _start != UNKNOWN_ID; }
-    inline bool validate(GpuStream const & stream) const TBAG_NOEXCEPT { return isSameStream(stream) && validate(); }
+    inline bool validate(GpuContext const & context) const TBAG_NOEXCEPT { return isSameContext(context) && validate(); }
 
     inline GpuId        getId() const TBAG_NOEXCEPT { return _start; }
     inline GpuId       & atId()       TBAG_NOEXCEPT { return _start; }
@@ -71,10 +76,6 @@ public:
     template <typename T> inline T  castStop() const TBAG_NOEXCEPT { return (T) _stop; }
 
     inline void clearIds() TBAG_NOEXCEPT { _start = UNKNOWN_ID; _stop = UNKNOWN_ID; }
-
-public:
-    GpuContext const & atContext() const TBAG_NOEXCEPT;
-    bool isSameContext(GpuContext const & context) const TBAG_NOEXCEPT;
 
 public:
     Err sync();

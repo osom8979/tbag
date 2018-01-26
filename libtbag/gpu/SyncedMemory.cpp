@@ -350,6 +350,31 @@ Err SyncedMemory::resize(std::size_t size, std::size_t count)
     return alloc(size, count);
 }
 
+Err SyncedMemory::assign(void const * data, std::size_t size)
+{
+    if (this->size() < size) {
+        return Err::E_OORANGE;
+    }
+
+    void * host_data = getMutableHostData();
+    if (host_data == nullptr) {
+        return Err::E_NULLPTR;
+    }
+    assert(_head == SyncedMemory::SyncedHead::SH_HEAD_AT_HOST);
+
+    ::memcpy(host_data, data, size);
+    return Err::E_SUCCESS;
+}
+
+Err SyncedMemory::assignSync(void const * data, std::size_t size)
+{
+    Err const CODE = assign(data, size);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+    return syncMemory();
+}
+
 } // namespace gpu
 
 // --------------------
