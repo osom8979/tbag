@@ -89,6 +89,27 @@ bool CpuContext::isStream () const TBAG_NOEXCEPT { return  true; }
 // @formatter:on
 
 template <typename T>
+static Err fillByCpu(T * out, T data, int count, GpuEvent * event)
+{
+    CpuEventGuard const EVENT_LOCK(event);
+    for (; count > 0; ++out, --count) {
+        *out = data;
+    }
+    return Err::E_SUCCESS;
+}
+
+// @formatter:off
+Err CpuContext::fill(GpuStream const & stream, int * out, int data, int count, GpuEvent * event) const
+{ return fillByCpu(out, data, count, event); }
+Err CpuContext::fill(GpuStream const & stream, unsigned * out, unsigned data, int count, GpuEvent * event) const
+{ return fillByCpu(out, data, count, event); }
+Err CpuContext::fill(GpuStream const & stream, float * out, float data, int count, GpuEvent * event) const
+{ return fillByCpu(out, data, count, event); }
+Err CpuContext::fill(GpuStream const & stream, double * out, double data, int count, GpuEvent * event) const
+{ return fillByCpu(out, data, count, event); }
+// @formatter:on
+
+template <typename T>
 static Err addByCpu(T const * in1, T const * in2, T * out, int count, GpuEvent * event)
 {
     CpuEventGuard const EVENT_LOCK(event);
@@ -98,6 +119,7 @@ static Err addByCpu(T const * in1, T const * in2, T * out, int count, GpuEvent *
     return Err::E_SUCCESS;
 }
 
+// @formatter:off
 Err CpuContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
 { return addByCpu(in1, in2, out, count, event); }
 Err CpuContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
@@ -106,6 +128,7 @@ Err CpuContext::add(GpuStream const & stream, float const * in1, float const * i
 { return addByCpu(in1, in2, out, count, event); }
 Err CpuContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
 { return addByCpu(in1, in2, out, count, event); }
+// @formatter:on
 
 } // namespace cpu
 } // namespace gpu

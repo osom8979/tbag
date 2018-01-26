@@ -23,6 +23,11 @@
 extern "C" {
 #endif
 
+TBAG_API tbBOOL tbCudaFill_i(int      * out, int      data, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaFill_u(unsigned * out, unsigned data, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaFill_f(float    * out, float    data, int count, void * stream = TB_NULL);
+TBAG_API tbBOOL tbCudaFill_d(double   * out, double   data, int count, void * stream = TB_NULL);
+
 TBAG_API tbBOOL tbCudaAdd_i(int      const * in1, int      const * in2, int      * out, int count, void * stream = TB_NULL);
 TBAG_API tbBOOL tbCudaAdd_u(unsigned const * in1, unsigned const * in2, unsigned * out, int count, void * stream = TB_NULL);
 TBAG_API tbBOOL tbCudaAdd_f(float    const * in1, float    const * in2, float    * out, int count, void * stream = TB_NULL);

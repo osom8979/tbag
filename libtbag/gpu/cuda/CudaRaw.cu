@@ -45,10 +45,6 @@ static bool isTbagCudaRawVerbose()
     if (condition) { printf(__VA_ARGS__); }
 #endif
 
-// ---------------
-namespace __impl {
-// ---------------
-
 template <typename T>
 bool tbCudaGetMaxPotentialBlockSize(int * result_grid_size, int * result_block_size, T func, std::size_t array_count,
                                     std::size_t dynamic_shared_mem_size = 0, int block_size_limit = 0)
@@ -96,6 +92,40 @@ static TB_CUDA_INLINE TB_CUDA_DEVICE int __global_index_1g_1b__()
 //}
 
 template <typename T>
+TB_CUDA_GLOBAL void tbCudaFillKernel(T * out, T data, int size)
+{
+    int const index = __global_index_1g_1b__();
+    if (index < size) {
+        out[index] = data;
+    }
+}
+
+template <typename T, typename StreamType>
+bool tbCudaFill(T const * in1, T const * in2, T * out, int count, StreamType stream)
+{
+    int grid_size(0), block_size(0);
+    if (tbCudaGetMaxPotentialBlockSize(&grid_size, &block_size, tbCudaFillKernel<T>, count) == false) {
+        return TB_FALSE;
+    }
+    assert(grid_size  > 0);
+    assert(block_size > 0);
+
+    tbCudaFillKernel<T><<<grid_size, block_size, 0, stream>>>(out, data, count);
+    return TB_TRUE;
+}
+
+// @formatter:off
+tbBOOL tbCudaFill_i(int * out, int data, int count, void * stream)
+{ return __impl::tbCudaFill(out, data, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+tbBOOL tbCudaFill_u(unsigned * out, unsigned data, int count, void * stream)
+{ return __impl::tbCudaFill(out, data, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+tbBOOL tbCudaFill_f(float * out, float data, int count, void * stream)
+{ return __impl::tbCudaFill(out, data, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+tbBOOL tbCudaFill_d(double * out, double data, int count, void * stream)
+{ return __impl::tbCudaFill(out, data, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+// @formatter:on
+
+template <typename T>
 TB_CUDA_GLOBAL void tbCudaAddKernel(T const * in1, T const * in2, T * out, int size)
 {
     int const index = __global_index_1g_1b__();
@@ -111,17 +141,14 @@ bool tbCudaAdd(T const * in1, T const * in2, T * out, int count, StreamType stre
     if (tbCudaGetMaxPotentialBlockSize(&grid_size, &block_size, tbCudaAddKernel<T>, count) == false) {
         return TB_FALSE;
     }
-    assert(grid_size > 0);
+    assert(grid_size  > 0);
     assert(block_size > 0);
 
     tbCudaAddKernel<T><<<grid_size, block_size, 0, stream>>>(in1, in2, out, count);
     return TB_TRUE;
 }
 
-// ------------------
-} // namespace __impl
-// ------------------
-
+// @formatter:off
 tbBOOL tbCudaAdd_i(int const * in1, int const * in2, int * out, int count, void * stream)
 { return __impl::tbCudaAdd(in1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbCudaAdd_u(unsigned const * in1, unsigned const * in2, unsigned * out, int count, void * stream)
@@ -130,4 +157,5 @@ tbBOOL tbCudaAdd_f(float const * in1, float const * in2, float * out, int count,
 { return __impl::tbCudaAdd(in1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
 tbBOOL tbCudaAdd_d(double const * in1, double const * in2, double * out, int count, void * stream)
 { return __impl::tbCudaAdd(in1, in2, out, count, (cudaStream_t)stream) ? TB_TRUE : TB_FALSE; }
+// @formatter:on
 

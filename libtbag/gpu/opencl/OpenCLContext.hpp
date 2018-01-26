@@ -100,8 +100,15 @@ public:
     virtual Err finish(GpuStream const & stream) const override;
 
 private:
-    Kernels mutable _add;
+    Kernels mutable _fill;
+public:
+    virtual Err fill(GpuStream const & stream, int      * out, int      data, int count, GpuEvent * event) const override;
+    virtual Err fill(GpuStream const & stream, unsigned * out, unsigned data, int count, GpuEvent * event) const override;
+    virtual Err fill(GpuStream const & stream, float    * out, float    data, int count, GpuEvent * event) const override;
+    virtual Err fill(GpuStream const & stream, double   * out, double   data, int count, GpuEvent * event) const override;
 
+private:
+    Kernels mutable _add;
 public:
     virtual Err add(GpuStream const & stream, int      const * in1, int      const * in2, int      * out, int count, GpuEvent * event) const override;
     virtual Err add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const override;

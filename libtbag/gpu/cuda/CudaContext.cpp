@@ -621,6 +621,18 @@ Err CudaContext::finish(GpuStream const & stream) const
     return Err::E_SUCCESS;
 }
 
+// @formatter:off
+Err CudaContext::fill(GpuStream const & stream, int * out, int data, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaFill_i(out, data, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err CudaContext::fill(GpuStream const & stream, unsigned * out, unsigned data, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaFill_u(out, data, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err CudaContext::fill(GpuStream const & stream, float * out, float data, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaFill_f(out, data, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+Err CudaContext::fill(GpuStream const & stream, double * out, double data, int count, GpuEvent * event) const
+{ __impl::CudaEventGuard g(stream, event); return tbCudaFill_d(out, data, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+// @formatter:on
+
+// @formatter:off
 Err CudaContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
 { __impl::CudaEventGuard g(stream, event); return tbCudaAdd_i(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
 Err CudaContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
@@ -629,6 +641,7 @@ Err CudaContext::add(GpuStream const & stream, float const * in1, float const * 
 { __impl::CudaEventGuard g(stream, event); return tbCudaAdd_f(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
 Err CudaContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
 { __impl::CudaEventGuard g(stream, event); return tbCudaAdd_d(in1, in2, out, count) == TB_TRUE ? Err::E_SUCCESS : Err::E_UNKNOWN; }
+// @formatter:on
 
 } // namespace cuda
 } // namespace gpu

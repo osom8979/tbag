@@ -9,6 +9,10 @@
 #include <libtbag/log/Log.hpp>
 
 #if !defined(USE_CUDA)
+tbBOOL tbCudaFill_i(int      * out, int      data, int count, void * stream) { return TB_FALSE; }
+tbBOOL tbCudaFill_u(unsigned * out, unsigned data, int count, void * stream) { return TB_FALSE; }
+tbBOOL tbCudaFill_f(float    * out, float    data, int count, void * stream) { return TB_FALSE; }
+tbBOOL tbCudaFill_d(double   * out, double   data, int count, void * stream) { return TB_FALSE; }
 tbBOOL tbCudaAdd_i(int       const * in1, int       const * in2, int      * out, int count, void * stream) { return TB_FALSE; }
 tbBOOL tbCudaAdd_u(unsigned  const * in1, unsigned  const * in2, unsigned * out, int count, void * stream) { return TB_FALSE; }
 tbBOOL tbCudaAdd_f(float     const * in1, float     const * in2, float    * out, int count, void * stream) { return TB_FALSE; }

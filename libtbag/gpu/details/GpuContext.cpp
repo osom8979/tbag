@@ -281,6 +281,17 @@ Err GpuContext::finish(GpuStream const & stream) const
 // Kernels.
 // --------
 
+Err GpuContext::fill(GpuStream const & stream, TypeTable type, GpuMemory & out, AnyPod data, int count, GpuEvent * event)
+{
+    switch (type) {
+    case TypeTable::TT_INT:    return fill(stream, out.cast<int     *>(), data.cast<int     >(), count, event);
+    case TypeTable::TT_UINT:   return fill(stream, out.cast<unsigned*>(), data.cast<unsigned>(), count, event);
+    case TypeTable::TT_FLOAT:  return fill(stream, out.cast<float   *>(), data.cast<float   >(), count, event);
+    case TypeTable::TT_DOUBLE: return fill(stream, out.cast<double  *>(), data.cast<double  >(), count, event);
+    default: return Err::E_UNSUPOP;
+    }
+}
+
 Err GpuContext::add(GpuStream const & stream, TypeTable type, GpuMemory const & in1, GpuMemory const & in2, GpuMemory & out, int count, GpuEvent * event)
 {
     switch (type) {

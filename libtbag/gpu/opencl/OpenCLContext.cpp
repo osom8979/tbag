@@ -568,6 +568,75 @@ Err OpenCLContext::finish(GpuStream const & stream) const
     return Err::E_SUCCESS;
 }
 
+TBAG_CONSTEXPR static char const * const _TBAG_OPENCL_SOURCE_FILL = R"(
+template <class T>
+__kernel void fill(__global T * out, T const data)
+{
+    uint w = get_global_size(0);
+    uint y = get_global_id(1);
+    uint x = get_global_id(0);
+    uint i = y * w + x;
+    out[i] = data;
+}
+
+template __attribute__((mangled_name(fill_i))) __kernel void fill(__global int      * out, int      data);
+template __attribute__((mangled_name(fill_u))) __kernel void fill(__global unsigned * out, unsigned data);
+template __attribute__((mangled_name(fill_f))) __kernel void fill(__global float    * out, float    data);
+template __attribute__((mangled_name(fill_d))) __kernel void fill(__global double   * out, double   data);
+)";
+
+template <typename T>
+static Err fillByOpenCL(GpuContext const & context, GpuStream const & stream, SharedGpuKernel & kernel,
+                       T * out, T data, int count, GpuEvent * event)
+{
+    if (stream.validate(context) == false) {
+        return Err::E_ILLARGS;
+    }
+
+    if (static_cast<bool>(kernel) == false) {
+        GpuProgram program(context, _TBAG_OPENCL_SOURCE_FILL);
+        Err const BUILD_RESULT = program.build();
+        if (isFailure(BUILD_RESULT)) {
+            return BUILD_RESULT;
+        }
+
+        try {
+            kernel.reset(new GpuKernel(program, std::string("fill_") + GpuMemoryTypeSuffix<T>::prefix));
+        } catch (std::bad_alloc & e) {
+            return Err::E_BADALLOC;
+        }
+    }
+
+    assert(static_cast<bool>(kernel));
+
+    cl_int c0 = clSetKernelArg(kernel->castId<cl_kernel>(), 0, sizeof(cl_mem), out);
+    cl_int c1 = clSetKernelArg(kernel->castId<cl_kernel>(), 1, sizeof(T), &data);
+
+    if (c0 != CL_SUCCESS || c1 != CL_SUCCESS) {
+        tDLogE("OpenCLContext::fillByOpenCL() OpenCL clSetKernelArg() error: c0({}), c1({})", c0, c1);
+        return Err::E_OPENCL;
+    }
+
+    std::size_t global_work_size[1] = { static_cast<std::size_t>(count) };
+    cl_int code = clEnqueueNDRangeKernel(stream.castId<cl_command_queue>(), kernel->castId<cl_kernel>(),
+                                         1, nullptr, global_work_size, nullptr, 0, nullptr,
+                                         (cl_event*)(event == nullptr ? nullptr : &event->atId()));
+    if (code != CL_SUCCESS) {
+        tDLogE("OpenCLContext::fillByOpenCL() OpenCL clEnqueueNDRangeKernel() error code: {}", code);
+        return Err::E_OPENCL;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err OpenCLContext::fill(GpuStream const & stream, int * out, int data, int count, GpuEvent * event) const
+{ return fillByOpenCL(*this, stream, _fill.i, out, data, count, event); }
+Err OpenCLContext::fill(GpuStream const & stream, unsigned * out, unsigned data, int count, GpuEvent * event) const
+{ return fillByOpenCL(*this, stream, _fill.u, out, data, count, event); }
+Err OpenCLContext::fill(GpuStream const & stream, float * out, float data, int count, GpuEvent * event) const
+{ return fillByOpenCL(*this, stream, _fill.f, out, data, count, event); }
+Err OpenCLContext::fill(GpuStream const & stream, double * out, double data, int count, GpuEvent * event) const
+{ return fillByOpenCL(*this, stream, _fill.d, out, data, count, event); }
+
 TBAG_CONSTEXPR static char const * const _TBAG_OPENCL_SOURCE_ADD = R"(
 template <class T>
 __kernel void add(__global T * in1, __global T * in2, __global T * out)
