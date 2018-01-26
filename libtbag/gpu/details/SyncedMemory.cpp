@@ -2,14 +2,19 @@
  * @file   SyncedMemory.cpp
  * @brief  SyncedMemory class implementation.
  * @author zer0
- * @date   2017-12-28
+ * @date   2018-01-26
  */
 
-#include <libtbag/gpu/SyncedMemory.hpp>
+#include <libtbag/gpu/details/SyncedMemory.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
+#include <libtbag/gpu/details/GpuContext.hpp>
+#include <libtbag/gpu/details/GpuStream.hpp>
+#include <libtbag/gpu/details/GpuEvent.hpp>
+#include <libtbag/gpu/details/GpuMemory.hpp>
 
 #include <cassert>
+#include <cstring>
 #include <utility>
 #include <algorithm>
 
@@ -17,7 +22,8 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gpu {
+namespace gpu     {
+namespace details {
 
 SyncedMemory::SyncedMemory() : SyncedMemory(WeakedGpuStream())
 {
@@ -93,7 +99,7 @@ void SyncedMemory::swap(SyncedMemory & obj)
         std::swap(_head, obj._head);
         _gpu .swap(obj._gpu);
         _host.swap(obj._host);
-        std::swap(_elem_size, obj._elem_size);
+        std::swap(_elem_size,  obj._elem_size);
         std::swap(_elem_count, obj._elem_count);
         std::swap(_async, obj._async);
         // @formatter:on
@@ -150,6 +156,18 @@ Err SyncedMemory::toGpu() const
     return code;
 }
 
+Err SyncedMemory::toSync() const
+{
+    if (_head == SyncedHead::SH_HEAD_AT_HOST) {
+        return toGpu();
+    } else if (_head == SyncedHead::SH_HEAD_AT_GPU) {
+        return toHost();
+    } else {
+        return Err::E_ILLSTATE;
+    }
+    return Err::E_ALREADY;
+}
+
 void * SyncedMemory::getMutableHostData()
 {
     if (static_cast<bool>(_host)) {
@@ -188,17 +206,17 @@ void const * SyncedMemory::getGpuData() const
     return nullptr;
 }
 
-Err SyncedMemory::sync() const
+Err SyncedMemory::syncEvent() const
 {
     return (_event.expired() ? Err::E_NULLPTR : _event.lock()->sync());
 }
 
-Err SyncedMemory::elapsed(float * millisec) const
+Err SyncedMemory::elapsedEvent(float * millisec) const
 {
     return (_event.expired() ? Err::E_NULLPTR : _event.lock()->elapsed(millisec));
 }
 
-float SyncedMemory::elapsed() const
+float SyncedMemory::elapsedEvent() const
 {
     return (_event.expired() ? 0.0f : _event.lock()->elapsed());
 }
@@ -257,45 +275,23 @@ Err SyncedMemory::free()
     return Err::E_SUCCESS;
 }
 
-Err SyncedMemory::syncMemory()
-{
-    if (_head == SyncedHead::SH_HEAD_AT_HOST) {
-        return toGpu();
-    } else if (_head == SyncedHead::SH_HEAD_AT_GPU) {
-        return toHost();
-    } else {
-        return Err::E_ILLSTATE;
-    }
-    return Err::E_ALREADY;
-}
-
-Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
+Err SyncedMemory::copyFrom(SyncedMemory const & obj)
 {
     if (this == &obj) {
         return Err::E_SAMEOBJ;
     }
-
-    _stream = obj._stream;
-    _event  = obj._event;
-    _type   = obj._type;
-    _flag   = obj._flag;
-    _head   = obj._head;
-    _async  = obj._async;
-
     if (obj.empty()) {
-        free();
-        return Err::E_SUCCESS;
+        return Err::E_ILLARGS;
+    }
+    if (size() < obj.size()) {
+        return Err::E_SMALLBUF;
     }
 
     assert(obj.size() > 0);
-    Err const CODE = resize(obj._elem_size, obj._elem_count);
-    if (isFailure(CODE)) {
-        tDLogE("SyncedMemory::cloneFrom() Resize error: {}", getErrName(CODE));
-        return CODE;
-    }
-
     assert(obj._gpu);
     assert(obj._host);
+
+    assert(size() >= obj.size());
     assert(_gpu);
     assert(_host);
 
@@ -320,11 +316,48 @@ Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
     }
 
     if (isFailure(gpu_code) || isFailure(host_code)) {
-        tDLogE("SyncedMemory::cloneFrom() Copy error: gpu({}), host({})",
+        tDLogE("SyncedMemory::copyFrom() Copy error: gpu({}), host({})",
                getErrName(gpu_code), getErrName(host_code));
         return Err::E_ECOPY;
     }
+
+    _head = obj._head;
     return Err::E_SUCCESS;
+}
+
+Err SyncedMemory::copyTo(SyncedMemory & obj) const
+{
+    if (this == &obj) {
+        return Err::E_SAMEOBJ;
+    }
+    return obj.copyFrom(*this);
+}
+
+Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
+{
+    if (this == &obj) {
+        return Err::E_SAMEOBJ;
+    }
+
+    _stream = obj._stream;
+    _event  = obj._event;
+    _type   = obj._type;
+    _flag   = obj._flag;
+    _async  = obj._async;
+
+    if (obj.empty()) {
+        free();
+        return Err::E_SUCCESS;
+    }
+
+    assert(obj.size() > 0);
+    Err const CODE = resize(obj._elem_size, obj._elem_count);
+    if (isFailure(CODE)) {
+        tDLogE("SyncedMemory::cloneFrom() Resize error: {}", getErrName(CODE));
+        return CODE;
+    }
+
+    return copyFrom(obj);
 }
 
 Err SyncedMemory::cloneTo(SyncedMemory & obj) const
@@ -350,6 +383,12 @@ Err SyncedMemory::resize(std::size_t size, std::size_t count)
     return alloc(size, count);
 }
 
+Err SyncedMemory::resize(TypeTable type, std::size_t count)
+{
+    _type = type;
+    return resize(type::getTypeSize(type), count);
+}
+
 Err SyncedMemory::assign(void const * data, std::size_t size)
 {
     if (this->size() < size) {
@@ -372,9 +411,10 @@ Err SyncedMemory::assignSync(void const * data, std::size_t size)
     if (isFailure(CODE)) {
         return CODE;
     }
-    return syncMemory();
+    return toSync();
 }
 
+} // namespace details
 } // namespace gpu
 
 // --------------------

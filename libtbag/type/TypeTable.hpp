@@ -165,6 +165,17 @@ inline char const * getTypeName(TypeTable t) TBAG_NOEXCEPT
     }
 }
 
+inline std::size_t getTypeSize(TypeTable t) TBAG_NOEXCEPT
+{
+    switch (t) {
+#define _TBAG_XX(name, symbol, type) case TypeTable::TT_##name: return sizeof(type);
+    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    case TypeTable::TT_UNKNOWN:
+    default: return 0;
+    }
+}
+
 } // namespace type
 
 // --------------------

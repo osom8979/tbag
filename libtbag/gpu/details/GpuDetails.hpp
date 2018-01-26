@@ -22,6 +22,7 @@
 #include <libtbag/gpu/details/GpuKernel.hpp>
 #include <libtbag/gpu/details/GpuMemory.hpp>
 #include <libtbag/gpu/details/GpuStream.hpp>
+#include <libtbag/gpu/details/SyncedMemory.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
