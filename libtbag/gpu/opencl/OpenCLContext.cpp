@@ -7,8 +7,12 @@
 
 #include <libtbag/gpu/opencl/OpenCLContext.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/string/Format.hpp>
+#include <libtbag/string/Environments.hpp>
 
 #include <cassert>
+#include <vector>
+#include <string>
 
 #if defined(USE_OPENCL)
 # if defined(TBAG_PLATFORM_MACOS)
@@ -34,6 +38,9 @@ namespace opencl {
 namespace __impl {
 // ---------------
 
+//TBAG_CONSTEXPR static char const * const OPENCL_DEFAULT_BUILD_OPTION = "-x clc++"; // AMD ONLY.
+TBAG_CONSTEXPR   static char const * const OPENCL_DEFAULT_BUILD_OPTION = "";
+
 TBAG_CONSTEXPR static bool isOpenCLBackendProfile() TBAG_NOEXCEPT
 {
 #if defined(TBAG_OPENCL_BACKEND_PROFILE)
@@ -41,6 +48,48 @@ TBAG_CONSTEXPR static bool isOpenCLBackendProfile() TBAG_NOEXCEPT
 #else
     return false;
 #endif
+}
+
+template <typename T>
+static std::string getOpenCLSource(std::string const & source)
+{
+    return string::Environments(string::fformat("type={}", GpuMemoryTypeSuffix<T>::getPrefix())).convert(source);
+}
+
+template <typename T>
+static std::string getOpenCLSymbol(std::string const & name)
+{
+    return string::fformat("{}_{}", name, GpuMemoryTypeSuffix<T>::getPrefix());
+}
+
+static std::string getBuildLog(cl_program program, cl_device_id device)
+{
+    std::size_t log_buffer_size = 0;
+    std::size_t opt_buffer_size = 0;
+    cl_int log_code = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG    , 0, nullptr, &log_buffer_size);
+    cl_int opt_code = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_OPTIONS, 0, nullptr, &opt_buffer_size);
+
+    if (log_code != CL_SUCCESS || opt_code != CL_SUCCESS) {
+        tDLogW("printBuildLog() OpenCL clGetProgramBuildInfo(nullptr) error: log({}), options({})",
+               log_code, opt_code);
+        return std::string();
+    }
+
+    std::vector<char> log_buffer(log_buffer_size, 0);
+    std::vector<char> opt_buffer(opt_buffer_size, 0);
+
+    log_code = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG    , log_buffer.size(), log_buffer.data(), nullptr);
+    opt_code = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_OPTIONS, opt_buffer.size(), opt_buffer.data(), nullptr);
+
+    if (log_code != CL_SUCCESS || opt_code != CL_SUCCESS) {
+        tDLogW("printBuildLog() OpenCL clGetProgramBuildInfo() error: log({}), options({})",
+               log_code, opt_code);
+        return std::string();
+    }
+
+    return string::fformat("ProgramId({}), DeviceId({}), Options({})\n{}",
+                           (std::size_t)program, (std::size_t)device,
+                           std::string(opt_buffer.data()), std::string(log_buffer.data()));
 }
 
 template <typename KernelType>
@@ -281,6 +330,7 @@ Err OpenCLContext::createStream(GpuStream & stream) const
     }
 
     stream.setId(native_stream);
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::createStream({})", getContextId(), stream.getId());
     return Err::E_SUCCESS;
 }
 
@@ -290,6 +340,7 @@ Err OpenCLContext::releaseStream(GpuStream & stream) const
         return Err::E_ILLARGS;
     }
 
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::releaseStream({})", getContextId(), stream.getId());
     cl_int code = clReleaseCommandQueue(stream.castId<cl_command_queue>());
     stream.clearId();
     if (code != CL_SUCCESS) {
@@ -306,6 +357,8 @@ Err OpenCLContext::createEvent(GpuStream const & stream, GpuEvent & event) const
     }
     event.setStart(0);
     event.setStop(0);
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::createEvent(s:{}, e:{})",
+             getContextId(), stream.getId(), event.getId());
     return Err::E_SUCCESS;
 }
 
@@ -350,6 +403,7 @@ Err OpenCLContext::releaseEvent(GpuEvent & event) const
     if (event.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::releaseEvent({})", getContextId(), event.getId());
     event.clearIds();
     return Err::E_SUCCESS;
 }
@@ -369,6 +423,7 @@ Err OpenCLContext::createProgram(std::string const & source, GpuProgram & progra
     }
 
     program.setId(native_program);
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::createProgram({})", getContextId(), program.getId());
     return Err::E_SUCCESS;
 }
 
@@ -379,9 +434,10 @@ Err OpenCLContext::buildProgram(GpuProgram & program) const
     }
 
     cl_int code = clBuildProgram(program.castId<cl_program>(), 1, (cl_device_id const *)&DEVICE_ID,
-                                 nullptr, nullptr, nullptr);
+                                 __impl::OPENCL_DEFAULT_BUILD_OPTION, nullptr, nullptr);
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::buildProgram() OpenCL clBuildProgram() error code: {}", code);
+        tDLogW("Build Log: {}", __impl::getBuildLog(program.castId<cl_program>(), castDeviceId<cl_device_id>()));
         return Err::E_OPENCL;
     }
     return Err::E_SUCCESS;
@@ -393,6 +449,7 @@ Err OpenCLContext::releaseProgram(GpuProgram & program) const
         return Err::E_ILLARGS;
     }
 
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::releaseProgram({})", getContextId(), program.getId());
     cl_int code = clReleaseProgram(program.castId<cl_program>());
     program.clearId();
     if (code != CL_SUCCESS) {
@@ -416,6 +473,8 @@ Err OpenCLContext::createKernel(GpuProgram const & program, std::string const & 
     }
 
     kernel.setId(native_kernel);
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::createKernel(p:{}, k:{}) Symbol: {}",
+             getContextId(), program.getId(), kernel.getId(), kernel_symbol);
     return Err::E_SUCCESS;
 }
 
@@ -425,6 +484,7 @@ Err OpenCLContext::releaseKernel(GpuKernel & kernel) const
         return Err::E_ILLARGS;
     }
 
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::releaseKernel({})", getContextId(), kernel.getId());
     cl_int code = clReleaseKernel(kernel.castId<cl_kernel>());
     kernel.clearId();
     if (code != CL_SUCCESS) {
@@ -434,9 +494,9 @@ Err OpenCLContext::releaseKernel(GpuKernel & kernel) const
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::malloc(GpuMemory & memory, std::size_t size) const
+Err OpenCLContext::malloc(GpuMemory & mem, std::size_t size) const
 {
-    if (memory.isSameContext(*this) == false) {
+    if (mem.isSameContext(*this) == false) {
         return Err::E_ILLARGS;
     }
 
@@ -447,23 +507,23 @@ Err OpenCLContext::malloc(GpuMemory & memory, std::size_t size) const
         return Err::E_OPENCL;
     }
 
-    memory.set((void*)native_memory, size, size);
-    tDLogIfD(isGpuVerbose(), "OpenCLContext::malloc({}) OpenCL clCreateBuffer() MEM:{} CAP:{} SIZE:{}",
-             size, memory.data(), memory.capacity(), memory.size());
+    mem.set((void*)native_memory, size, size);
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::malloc({}) OpenCL clCreateBuffer() MEM:{} CAP:{} SIZE:{}",
+             getContextId(), size, mem.data(), mem.capacity(), mem.size());
     return Err::E_SUCCESS;
 }
 
-Err OpenCLContext::free(GpuMemory & memory) const
+Err OpenCLContext::free(GpuMemory & mem) const
 {
-    if (memory.validate(*this) == false) {
+    if (mem.validate(*this) == false) {
         return Err::E_ILLARGS;
     }
 
-    tDLogIfD(isGpuVerbose(), "OpenCLContext::free() OpenCL clReleaseMemObject() MEM:{} CAP:{} SIZE:{}",
-             memory.data(), memory.capacity(), memory.size());
+    tDLogIfD(isGpuVerbose(), "OpenCLContext({})::free() OpenCL clReleaseMemObject() MEM:{} CAP:{} SIZE:{}",
+             getContextId(), mem.data(), mem.capacity(), mem.size());
 
-    cl_int code = clReleaseMemObject(memory.cast<cl_mem>());
-    memory.clear();
+    cl_int code = clReleaseMemObject(mem.cast<cl_mem>());
+    mem.clear();
     if (code != CL_SUCCESS) {
         tDLogE("OpenCLContext::free() OpenCL clReleaseMemObject() error code: {}", code);
         return Err::E_OPENCL;
@@ -569,8 +629,7 @@ Err OpenCLContext::finish(GpuStream const & stream) const
 }
 
 TBAG_CONSTEXPR static char const * const _TBAG_OPENCL_SOURCE_FILL = R"(
-template <class T>
-__kernel void fill(__global T * out, T const data)
+__kernel void fill_${type}(__global ${type} * out, ${type} data)
 {
     uint w = get_global_size(0);
     uint y = get_global_id(1);
@@ -578,11 +637,6 @@ __kernel void fill(__global T * out, T const data)
     uint i = y * w + x;
     out[i] = data;
 }
-
-template __attribute__((mangled_name(fill_i))) __kernel void fill(__global int      * out, int      data);
-template __attribute__((mangled_name(fill_u))) __kernel void fill(__global unsigned * out, unsigned data);
-template __attribute__((mangled_name(fill_f))) __kernel void fill(__global float    * out, float    data);
-template __attribute__((mangled_name(fill_d))) __kernel void fill(__global double   * out, double   data);
 )";
 
 template <typename T>
@@ -594,14 +648,14 @@ static Err fillByOpenCL(GpuContext const & context, GpuStream const & stream, Sh
     }
 
     if (static_cast<bool>(kernel) == false) {
-        GpuProgram program(context, _TBAG_OPENCL_SOURCE_FILL);
-        Err const BUILD_RESULT = program.build();
+        SharedGpuProgram program(GpuProgram::newInstance(context, __impl::getOpenCLSource<T>(_TBAG_OPENCL_SOURCE_FILL)));
+        Err const BUILD_RESULT = program->build();
         if (isFailure(BUILD_RESULT)) {
             return BUILD_RESULT;
         }
 
         try {
-            kernel.reset(new GpuKernel(program, std::string("fill_") + GpuMemoryTypeSuffix<T>::prefix));
+            kernel.reset(GpuKernel::newInstance(*program, __impl::getOpenCLSymbol<T>("fill")));
         } catch (std::bad_alloc & e) {
             return Err::E_BADALLOC;
         }
@@ -609,7 +663,7 @@ static Err fillByOpenCL(GpuContext const & context, GpuStream const & stream, Sh
 
     assert(static_cast<bool>(kernel));
 
-    cl_int c0 = clSetKernelArg(kernel->castId<cl_kernel>(), 0, sizeof(cl_mem), out);
+    cl_int c0 = clSetKernelArg(kernel->castId<cl_kernel>(), 0, sizeof(cl_mem), &out);
     cl_int c1 = clSetKernelArg(kernel->castId<cl_kernel>(), 1, sizeof(T), &data);
 
     if (c0 != CL_SUCCESS || c1 != CL_SUCCESS) {
@@ -628,6 +682,7 @@ static Err fillByOpenCL(GpuContext const & context, GpuStream const & stream, Sh
     return Err::E_SUCCESS;
 }
 
+// @formatter:off
 Err OpenCLContext::fill(GpuStream const & stream, int * out, int data, int count, GpuEvent * event) const
 { return fillByOpenCL(*this, stream, _fill.i, out, data, count, event); }
 Err OpenCLContext::fill(GpuStream const & stream, unsigned * out, unsigned data, int count, GpuEvent * event) const
@@ -636,10 +691,10 @@ Err OpenCLContext::fill(GpuStream const & stream, float * out, float data, int c
 { return fillByOpenCL(*this, stream, _fill.f, out, data, count, event); }
 Err OpenCLContext::fill(GpuStream const & stream, double * out, double data, int count, GpuEvent * event) const
 { return fillByOpenCL(*this, stream, _fill.d, out, data, count, event); }
+// @formatter:on
 
 TBAG_CONSTEXPR static char const * const _TBAG_OPENCL_SOURCE_ADD = R"(
-template <class T>
-__kernel void add(__global T * in1, __global T * in2, __global T * out)
+__kernel void add_${type}(__global ${type} * in1, __global ${type} * in2, __global ${type} * out)
 {
     uint w = get_global_size(0);
     uint y = get_global_id(1);
@@ -647,11 +702,6 @@ __kernel void add(__global T * in1, __global T * in2, __global T * out)
     uint i = y * w + x;
     out[i] = in1[i] + in2[i];
 }
-
-template __attribute__((mangled_name(add_i))) __kernel void add(__global int      * in1, __global int      * in2, __global int      * out);
-template __attribute__((mangled_name(add_u))) __kernel void add(__global unsigned * in1, __global unsigned * in2, __global unsigned * out);
-template __attribute__((mangled_name(add_f))) __kernel void add(__global float    * in1, __global float    * in2, __global float    * out);
-template __attribute__((mangled_name(add_d))) __kernel void add(__global double   * in1, __global double   * in2, __global double   * out);
 )";
 
 template <typename T>
@@ -663,14 +713,14 @@ static Err addByOpenCL(GpuContext const & context, GpuStream const & stream, Sha
     }
 
     if (static_cast<bool>(kernel) == false) {
-        GpuProgram program(context, _TBAG_OPENCL_SOURCE_ADD);
-        Err const BUILD_RESULT = program.build();
+        SharedGpuProgram program(GpuProgram::newInstance(context, __impl::getOpenCLSource<T>(_TBAG_OPENCL_SOURCE_ADD)));
+        Err const BUILD_RESULT = program->build();
         if (isFailure(BUILD_RESULT)) {
             return BUILD_RESULT;
         }
 
         try {
-            kernel.reset(new GpuKernel(program, std::string("add_") + GpuMemoryTypeSuffix<T>::prefix));
+            kernel.reset(GpuKernel::newInstance(*program, __impl::getOpenCLSymbol<T>("add")));
         } catch (std::bad_alloc & e) {
             return Err::E_BADALLOC;
         }
@@ -698,6 +748,7 @@ static Err addByOpenCL(GpuContext const & context, GpuStream const & stream, Sha
     return Err::E_SUCCESS;
 }
 
+// @formatter:off
 Err OpenCLContext::add(GpuStream const & stream, int const * in1, int const * in2, int * out, int count, GpuEvent * event) const
 { return addByOpenCL(*this, stream, _add.i, in1, in2, out, count, event); }
 Err OpenCLContext::add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const
@@ -706,6 +757,7 @@ Err OpenCLContext::add(GpuStream const & stream, float const * in1, float const 
 { return addByOpenCL(*this, stream, _add.f, in1, in2, out, count, event); }
 Err OpenCLContext::add(GpuStream const & stream, double const * in1, double const * in2, double * out, int count, GpuEvent * event) const
 { return addByOpenCL(*this, stream, _add.d, in1, in2, out, count, event); }
+// @formatter:on
 
 } // namespace opencl
 } // namespace gpu

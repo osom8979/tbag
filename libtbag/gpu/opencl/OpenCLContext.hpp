@@ -84,8 +84,8 @@ public:
     virtual Err  createKernel(GpuProgram const & program, std::string const & kernel_symbol, GpuKernel & kernel) const override;
     virtual Err releaseKernel(GpuKernel        & kernel) const override;
 
-    virtual Err malloc(GpuMemory & memory, std::size_t size) const override;
-    virtual Err   free(GpuMemory & memory) const override;
+    virtual Err malloc(GpuMemory & mem, std::size_t size) const override;
+    virtual Err   free(GpuMemory & mem) const override;
 
     virtual Err write(GpuStream const & stream, GpuMemory       & gpu_mem, HostMemory const & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;
     virtual Err  read(GpuStream const & stream, GpuMemory const & gpu_mem, HostMemory       & host_mem, std::size_t size, GpuEvent * event = nullptr) const override;

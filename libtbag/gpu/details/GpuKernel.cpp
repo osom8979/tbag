@@ -43,6 +43,11 @@ Err GpuProgram::build()
     return atContext().buildProgram(*this);
 }
 
+GpuProgram * GpuProgram::newInstance(GpuContext const & context, std::string const & source)
+{
+    return new GpuProgram(context, source);
+}
+
 // -------------------------
 // GpuKernel implementation.
 // -------------------------
@@ -58,6 +63,11 @@ GpuKernel::GpuKernel(GpuProgram const & program, std::string const & kernel_symb
 GpuKernel::~GpuKernel()
 {
     atContext().releaseKernel(*this);
+}
+
+GpuKernel * GpuKernel::newInstance(GpuProgram const & program, std::string const & kernel_symbol)
+{
+    return new GpuKernel(program, kernel_symbol);
 }
 
 } // namespace details

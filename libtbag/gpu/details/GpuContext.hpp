@@ -130,14 +130,10 @@ public:
     virtual Err fill(GpuStream const & stream, float    * out, float    data, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
     virtual Err fill(GpuStream const & stream, double   * out, double   data, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
 
-    Err fill(GpuStream const & stream, TypeTable type, GpuMemory & out, AnyPod data, int count, GpuEvent * event = nullptr);
-
     virtual Err add(GpuStream const & stream, int      const * in1, int      const * in2, int      * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
     virtual Err add(GpuStream const & stream, unsigned const * in1, unsigned const * in2, unsigned * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
     virtual Err add(GpuStream const & stream, float    const * in1, float    const * in2, float    * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
     virtual Err add(GpuStream const & stream, double   const * in1, double   const * in2, double   * out, int count, GpuEvent * event) const { return Err::E_UNSUPOP; }
-
-    Err add(GpuStream const & stream, TypeTable type, GpuMemory const & in1, GpuMemory const & in2, GpuMemory & out, int count, GpuEvent * event = nullptr);
 };
 
 using SharedGpuContext = std::shared_ptr<GpuContext>;

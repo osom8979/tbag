@@ -66,20 +66,22 @@ public:
     inline GpuStream const & atStream() const TBAG_NOEXCEPT { return _stream; }
     inline bool isSameStream(GpuStream const & stream) const TBAG_NOEXCEPT { return (&_stream) == (&stream); }
 
+public:
+    GpuContext const & atContext() const TBAG_NOEXCEPT;
+    bool isSameContext(GpuContext const & context) const TBAG_NOEXCEPT;
+
+public:
+    inline bool validate() const TBAG_NOEXCEPT { return _data != nullptr && _capacity > 0; }
+    inline bool validate(GpuContext const & context) const TBAG_NOEXCEPT { return isSameContext(context) && validate(); }
+    inline bool validate(GpuStream  const &  stream) const TBAG_NOEXCEPT { return  isSameStream( stream) && validate(); }
+
     inline std::size_t capacity() const TBAG_NOEXCEPT { return _capacity; }
     inline std::size_t     size() const TBAG_NOEXCEPT { return     _size; }
-
-    inline bool validate() const TBAG_NOEXCEPT { return _data != nullptr && _capacity > 0; }
-    inline bool validate(GpuStream const & stream) const TBAG_NOEXCEPT { return isSameStream(stream) && validate(); }
 
     inline void       * data()       TBAG_NOEXCEPT { return _data; }
     inline void const * data() const TBAG_NOEXCEPT { return _data; }
 
     template <typename T> inline T cast() const TBAG_NOEXCEPT { return (T)_data; }
-
-public:
-    GpuContext const & atContext() const TBAG_NOEXCEPT;
-    bool isSameContext(GpuContext const & context) const TBAG_NOEXCEPT;
 };
 
 /**

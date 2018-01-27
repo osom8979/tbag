@@ -44,8 +44,9 @@ private:
     GpuId _start;
     GpuId _stop;
 
-public:
+private:
     GpuEvent(GpuStream const & stream);
+public:
     ~GpuEvent();
 
 public:
@@ -81,6 +82,9 @@ public:
     Err sync();
     Err elapsed(float * millisec);
     float elapsed();
+
+public:
+    static GpuEvent * newInstance(GpuStream const & stream);
 };
 
 using SharedGpuEvent = std::shared_ptr<GpuEvent>;

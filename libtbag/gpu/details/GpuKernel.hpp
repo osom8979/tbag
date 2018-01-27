@@ -36,13 +36,20 @@ namespace details {
  */
 class TBAG_API GpuProgram : public GpuIdWrapper
 {
-public:
+private:
     GpuProgram(GpuContext const & context, std::string const & source);
+public:
     ~GpuProgram();
 
 public:
     Err build();
+
+public:
+    static GpuProgram * newInstance(GpuContext const & context, std::string const & source);
 };
+
+using SharedGpuProgram = std::shared_ptr<GpuProgram>;
+using WeakedGpuProgram = std::weak_ptr<GpuProgram>;
 
 /**
  * GpuKernel class prototype.
@@ -56,12 +63,16 @@ class TBAG_API GpuKernel : public GpuIdWrapper
 private:
     std::string _name;
 
-public:
+private:
     GpuKernel(GpuProgram const & program, std::string const & kernel_symbol);
+public:
     ~GpuKernel();
 
 public:
     inline std::string name() const { return _name; }
+
+public:
+    static GpuKernel * newInstance(GpuProgram const & program, std::string const & kernel_symbol);
 };
 
 using SharedGpuKernel = std::shared_ptr<GpuKernel>;

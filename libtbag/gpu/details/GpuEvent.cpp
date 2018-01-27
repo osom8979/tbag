@@ -75,6 +75,11 @@ float GpuEvent::elapsed()
     return 0.0f;
 }
 
+GpuEvent * GpuEvent::newInstance(GpuStream const & stream)
+{
+    return new GpuEvent(stream);
+}
+
 // -----------------------------
 // CpuEventGuard implementation.
 // -----------------------------

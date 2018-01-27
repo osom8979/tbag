@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/id/Id.hpp>
+#include <libtbag/type/TypeTable.hpp>
 
 #include <exception>
 #include <vector>
@@ -64,12 +65,25 @@ TBAG_API char const * getGpuTypeString(GpuType type) TBAG_NOEXCEPT;
 TBAG_API char const * getHostMemoryTypeString(HostMemoryFlag flag) TBAG_NOEXCEPT;
 
 // @formatter:off
-template <typename T> struct GpuMemoryTypeSuffix;
-template <> struct GpuMemoryTypeSuffix<     int> { TBAG_CONSTEXPR static char const * const prefix = "i"; };
-template <> struct GpuMemoryTypeSuffix<unsigned> { TBAG_CONSTEXPR static char const * const prefix = "u"; };
-template <> struct GpuMemoryTypeSuffix<   float> { TBAG_CONSTEXPR static char const * const prefix = "f"; };
-template <> struct GpuMemoryTypeSuffix<  double> { TBAG_CONSTEXPR static char const * const prefix = "d"; };
+template <typename T> struct GpuMemoryTypeSuffix; // Must be compatible with OpenCL type name.
+template <> struct GpuMemoryTypeSuffix<     int> { TBAG_CONSTEXPR static char const * const getPrefix() TBAG_NOEXCEPT { return "int";    } };
+template <> struct GpuMemoryTypeSuffix<unsigned> { TBAG_CONSTEXPR static char const * const getPrefix() TBAG_NOEXCEPT { return "uint";   } };
+template <> struct GpuMemoryTypeSuffix<   float> { TBAG_CONSTEXPR static char const * const getPrefix() TBAG_NOEXCEPT { return "float";  } };
+template <> struct GpuMemoryTypeSuffix<  double> { TBAG_CONSTEXPR static char const * const getPrefix() TBAG_NOEXCEPT { return "double"; } };
 // @formatter:on
+
+inline bool checkGpuTypeTable(type::TypeTable type) TBAG_NOEXCEPT
+{
+    switch (type) {
+    case type::TypeTable::TT_INT:
+    case type::TypeTable::TT_UINT:
+    case type::TypeTable::TT_FLOAT:
+    case type::TypeTable::TT_DOUBLE:
+        return true;
+    default:
+        return false;
+    }
+}
 
 struct GpuPlatform
 {

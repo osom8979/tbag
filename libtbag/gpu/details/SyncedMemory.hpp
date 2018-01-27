@@ -19,6 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/gpu/details/GpuCommon.hpp>
 #include <libtbag/type/TypeTable.hpp>
+#include <libtbag/container/AnyPod.hpp>
 
 #include <memory>
 
@@ -47,6 +48,7 @@ public:
     template <typename T>
     using TypeInfo  = type::TypeInfo<T>;
     using TypeTable = type::TypeTable;
+    using AnyPod    = container::AnyPod;
 
     using SharedGpuStream  = std::shared_ptr<GpuStream>;
     using WeakedGpuStream  = std::weak_ptr<GpuStream>;
@@ -63,6 +65,10 @@ public:
         SH_HEAD_AT_GPU,
         SH_SYNCED,
     };
+
+public:
+    TBAG_CONSTEXPR static std::size_t maxCount() TBAG_NOEXCEPT
+    { return static_cast<std::size_t>(TypeInfo<int>::maximum()); }
 
 private:
     WeakedGpuStream _stream;
@@ -124,14 +130,14 @@ public:
     void * getMutableHostData();
     void *  getMutableGpuData();
 
-    template <typename T> T * castMutableHostData() { return getMutableHostData(); }
-    template <typename T> T *  castMutableGpuData() { return  getMutableGpuData(); }
+    template <typename T> T * castMutableHostData() { return (T*)getMutableHostData(); }
+    template <typename T> T *  castMutableGpuData() { return (T*) getMutableGpuData(); }
 
     void const * getHostData() const;
     void const *  getGpuData() const;
 
-    template <typename T> T const * castHostData() const { return getHostData(); }
-    template <typename T> T const *  castGpuData() const { return  getGpuData(); }
+    template <typename T> T const * castHostData() const { return (T*)getHostData(); }
+    template <typename T> T const *  castGpuData() const { return (T*) getGpuData(); }
 
 // Event by-pass methods.
 public:
@@ -168,8 +174,19 @@ public:
     { return resize(TypeTable::TT_CHAR, size); }
 
 public:
-    Err assign(void const * data, std::size_t size);
-    Err assignSync(void const * data, std::size_t size);
+    Err set(void const * data, std::size_t data_size, std::size_t host_offset);
+
+public:
+    Err assign(void const * data, std::size_t elem_size, std::size_t elem_count);
+
+public:
+    template <typename T>
+    Err assign(T const * data, std::size_t elem_count)
+    { return assign((void const *)data, sizeof(T), elem_count); }
+
+public:
+    Err fillHost(AnyPod const & data);
+    Err fillGpu(AnyPod const & data);
 };
 
 } // namespace details

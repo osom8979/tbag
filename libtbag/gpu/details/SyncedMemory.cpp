@@ -389,29 +389,70 @@ Err SyncedMemory::resize(TypeTable type, std::size_t count)
     return resize(type::getTypeSize(type), count);
 }
 
-Err SyncedMemory::assign(void const * data, std::size_t size)
+Err SyncedMemory::set(void const * data, std::size_t data_size, std::size_t host_offset)
 {
-    if (this->size() < size) {
-        return Err::E_OORANGE;
+    if (empty()) {
+        return Err::E_ILLSTATE;
     }
-
-    void * host_data = getMutableHostData();
-    if (host_data == nullptr) {
-        return Err::E_NULLPTR;
+    if (data == nullptr || data_size == 0 || size() < host_offset + data_size) {
+        return Err::E_ILLARGS;
     }
-    assert(_head == SyncedMemory::SyncedHead::SH_HEAD_AT_HOST);
-
-    ::memcpy(host_data, data, size);
+    ::memcpy(castMutableHostData<char>() + (_elem_size * host_offset), data, data_size);
     return Err::E_SUCCESS;
 }
 
-Err SyncedMemory::assignSync(void const * data, std::size_t size)
+Err SyncedMemory::assign(void const * data, std::size_t elem_size, std::size_t elem_count)
 {
-    Err const CODE = assign(data, size);
-    if (isFailure(CODE)) {
-        return CODE;
+    Err code = Err::E_UNKNOWN;
+    for (std::size_t i = 0; i < elem_count; ++i) {
+        code = this->set((void const *)(((char const *)data) + (i * elem_size)), elem_size, i);
+        if (isFailure(code)) {
+            return code;
+        }
     }
-    return toSync();
+    return Err::E_SUCCESS;
+}
+
+template <typename T>
+static Err __fill_host(T * out, T data, std::size_t count)
+{
+    for (; count > 0; ++out, --count) {
+        *out = data;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err SyncedMemory::fillHost(AnyPod const & data)
+{
+    if (checkGpuTypeTable(_type) == false) {
+        return Err::E_ILLSTATE;
+    }
+
+    void * host_data = getMutableHostData();
+
+    // @formatter:off
+    switch (_type) {
+    case TypeTable::TT_INT:     return __fill_host((int     *)host_data, data.cast<int     >(), _elem_count);
+    case TypeTable::TT_UINT:    return __fill_host((unsigned*)host_data, data.cast<unsigned>(), _elem_count);
+    case TypeTable::TT_FLOAT:   return __fill_host((float   *)host_data, data.cast<float   >(), _elem_count);
+    case TypeTable::TT_DOUBLE:  return __fill_host((double  *)host_data, data.cast<double  >(), _elem_count);
+    default: return Err::E_UNSUPOP;
+    }
+    // @formatter:on
+}
+
+Err SyncedMemory::fillGpu(AnyPod const & data)
+{
+    if (checkGpuTypeTable(_type) == false) {
+        return Err::E_ILLSTATE;
+    }
+    if (_stream.expired()) {
+        return Err::E_EXPIRED;
+    }
+
+    auto stream = _stream.lock();
+    assert(static_cast<bool>(stream));
+    return stream->fill(*this, data, (int)_elem_count, (_event.expired() ? nullptr : _event.lock().get()));
 }
 
 } // namespace details

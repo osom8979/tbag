@@ -228,7 +228,7 @@ SharedGpuStream Gpu::newStream()
 {
     SharedGpuStream stream;
     try {
-        stream.reset(_gpu ? new GpuStream(*_gpu) : nullptr);
+        stream.reset(_gpu ? GpuStream::newInstance(*_gpu) : nullptr);
     } catch (std::bad_alloc & e) {
         tDLogE("Gpu::newStream() Bad allocation exception: {}", e.what());
     }
@@ -239,7 +239,7 @@ SharedGpuEvent Gpu::newEvent(GpuStream const & stream)
 {
     SharedGpuEvent event;
     try {
-        event.reset(_gpu ? new GpuEvent(stream) : nullptr);
+        event.reset(_gpu ? GpuEvent::newInstance(stream) : nullptr);
     } catch (std::bad_alloc & e) {
         tDLogE("Gpu::newEvent() Bad allocation exception: {}", e.what());
     }
