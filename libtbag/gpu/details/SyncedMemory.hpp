@@ -194,17 +194,44 @@ public:
             return Err::E_ILLARGS;
         }
 
-        void * mutable_host = getMutableHostData();
+        // @formatter:off
         switch (_type) {
-#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: return _assign(data, (t*)mutable_host, elem_count);
+#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: return _assign(data, (t*)getMutableHostData(), elem_count);
         TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
         default: return Err::E_UNSUPOP;
         }
+        // @formatter:on
+    }
+
+private:
+    template <typename DestinationType>
+    static Err _fill(DestinationType data, DestinationType * dest, std::size_t size)
+    {
+        for (; size > 0; ++dest, --size) {
+            *dest = data;
+        }
+        return Err::E_SUCCESS;
     }
 
 public:
-    Err fillHost(AnyPod const & data);
+    Err fillHost(AnyPod const & data)
+    {
+        if (empty()) {
+            return Err::E_ILLSTATE;
+        }
+
+        // @formatter:off
+        switch (_type) {
+#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: return _fill(data.cast<t>(), (t*)getMutableHostData(), _elem_count);
+        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+        default: return Err::E_UNSUPOP;
+        }
+        // @formatter:on
+    }
+
+public:
     Err fillGpu(AnyPod const & data);
 };
 

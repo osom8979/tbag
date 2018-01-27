@@ -50,12 +50,13 @@ TEST(GpuTest, SyncedMemory)
                   << ") Cxt("    << gpu.getContextId() << ")\n";
 
         using BaseType = int;
-        BaseType const TEST_HOST_VALUE = 1;
-        BaseType const  TEST_GPU_VALUE = 2;
+        BaseType const TEST_HOST_VALUE1 = 1;
+        BaseType const TEST_HOST_VALUE2 = 2;
+        BaseType const  TEST_GPU_VALUE  = 3;
 
         std::size_t const BUFFER_SIZE = 10 * MEGA_BYTE_TO_BYTE;
         std::size_t const MEM_SIZE = BUFFER_SIZE * sizeof(BaseType);
-        std::vector<int> buffer(BUFFER_SIZE, TEST_HOST_VALUE);
+        std::vector<int> buffer(BUFFER_SIZE, TEST_HOST_VALUE1);
 
         auto stream = gpu.newStream();
         auto event  = gpu.newEvent(stream);
@@ -71,6 +72,7 @@ TEST(GpuTest, SyncedMemory)
         ASSERT_EQ(sizeof(BaseType), mem.sizeOfElem());
         ASSERT_EQ(BUFFER_SIZE, mem.countOfElem());
         ASSERT_EQ(BUFFER_SIZE, buffer.size());
+        ASSERT_LT(0, BUFFER_SIZE);
 
         std::cout << "* Mem size: " << MEM_SIZE / MEGA_BYTE_TO_BYTE << "mb" << std::endl;
 
@@ -81,11 +83,11 @@ TEST(GpuTest, SyncedMemory)
         ASSERT_EQ(Err::E_SUCCESS, mem.syncEvent());
         std::cout << "* Mem sync Host -> Gpu: " << mem.elapsedEvent() << " millisec." << std::endl;
 
-        ASSERT_LT(0, BUFFER_SIZE);
         auto * host_data_01 = mem.castHostData<BaseType>();
         for (std::size_t i = 0; i < BUFFER_SIZE; ++i) {
-            ASSERT_EQ(TEST_HOST_VALUE, *(host_data_01 + i));
+            ASSERT_EQ(TEST_HOST_VALUE1, *(host_data_01 + i));
         }
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_SYNCED, mem.head());
 
         ASSERT_EQ(Err::E_SUCCESS, mem.fillGpu(TEST_GPU_VALUE));
         ASSERT_EQ(SyncedMemory::SyncedHead::SH_HEAD_AT_GPU, mem.head());
@@ -97,11 +99,23 @@ TEST(GpuTest, SyncedMemory)
         ASSERT_EQ(Err::E_SUCCESS, mem.syncEvent());
         std::cout << "* Mem sync Gpu -> Host: " << mem.elapsedEvent() << " millisec." << std::endl;
 
-        ASSERT_LT(0, BUFFER_SIZE);
         auto * host_data_02 = mem.castHostData<BaseType>();
         for (std::size_t i = 0; i < BUFFER_SIZE; ++i) {
             ASSERT_EQ(TEST_GPU_VALUE, *(host_data_02 + i));
         }
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_SYNCED, mem.head());
+
+        ASSERT_EQ(Err::E_SUCCESS, mem.fillHost(TEST_HOST_VALUE2));
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_HEAD_AT_HOST, mem.head());
+        ASSERT_EQ(Err::E_SUCCESS, mem.toSync());
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_SYNCED, mem.head());
+        ASSERT_EQ(Err::E_SUCCESS, mem.syncEvent());
+
+        auto * host_data_03 = mem.castHostData<BaseType>();
+        for (std::size_t i = 0; i < BUFFER_SIZE; ++i) {
+            ASSERT_EQ(TEST_HOST_VALUE2, *(host_data_03 + i));
+        }
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_SYNCED, mem.head());
     });
 }
 
