@@ -389,29 +389,29 @@ Err SyncedMemory::resize(TypeTable type, std::size_t count)
     return resize(type::getTypeSize(type), count);
 }
 
-Err SyncedMemory::set(void const * data, std::size_t data_size, std::size_t host_offset)
-{
-    if (empty()) {
-        return Err::E_ILLSTATE;
-    }
-    if (data == nullptr || data_size == 0 || size() < host_offset + data_size) {
-        return Err::E_ILLARGS;
-    }
-    ::memcpy(castMutableHostData<char>() + (_elem_size * host_offset), data, data_size);
-    return Err::E_SUCCESS;
-}
-
-Err SyncedMemory::assign(void const * data, std::size_t elem_size, std::size_t elem_count)
-{
-    Err code = Err::E_UNKNOWN;
-    for (std::size_t i = 0; i < elem_count; ++i) {
-        code = this->set((void const *)(((char const *)data) + (i * elem_size)), elem_size, i);
-        if (isFailure(code)) {
-            return code;
-        }
-    }
-    return Err::E_SUCCESS;
-}
+//Err SyncedMemory::set(void const * data, std::size_t data_size, std::size_t host_offset)
+//{
+//    if (empty()) {
+//        return Err::E_ILLSTATE;
+//    }
+//    if (data == nullptr || data_size == 0 || size() < host_offset + data_size) {
+//        return Err::E_ILLARGS;
+//    }
+//    ::memcpy(castMutableHostData<char>() + (_elem_size * host_offset), data, data_size);
+//    return Err::E_SUCCESS;
+//}
+//
+//Err SyncedMemory::assign(void const * data, std::size_t elem_size, std::size_t elem_count)
+//{
+//    Err code = Err::E_UNKNOWN;
+//    for (std::size_t i = 0; i < elem_count; ++i) {
+//        code = this->set((void const *)(((char const *)data) + (i * elem_size)), elem_size, i);
+//        if (isFailure(code)) {
+//            return code;
+//        }
+//    }
+//    return Err::E_SUCCESS;
+//}
 
 template <typename T>
 static Err __fill_host(T * out, T data, std::size_t count)

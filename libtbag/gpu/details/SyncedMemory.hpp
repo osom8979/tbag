@@ -173,16 +173,35 @@ public:
     Err resize(std::size_t size)
     { return resize(TypeTable::TT_CHAR, size); }
 
-public:
-    Err set(void const * data, std::size_t data_size, std::size_t host_offset);
+private:
+    template <typename SourceType, typename DestinationType>
+    static Err _assign(SourceType const * src, DestinationType * dest, std::size_t size)
+    {
+        for (; size > 0; ++src, ++dest, --size) {
+             *dest = static_cast<DestinationType>(*src);
+        }
+        return Err::E_SUCCESS;
+    }
 
 public:
-    Err assign(void const * data, std::size_t elem_size, std::size_t elem_count);
+    template <typename DataType>
+    Err assign(DataType const * data, std::size_t elem_count)
+    {
+        if (empty()) {
+            return Err::E_ILLSTATE;
+        }
+        if (data == nullptr || _elem_count < elem_count) {
+            return Err::E_ILLARGS;
+        }
 
-public:
-    template <typename T>
-    Err assign(T const * data, std::size_t elem_count)
-    { return assign((void const *)data, sizeof(T), elem_count); }
+        void * mutable_host = getMutableHostData();
+        switch (_type) {
+#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: return _assign(data, (t*)mutable_host, elem_count);
+        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+        default: return Err::E_UNSUPOP;
+        }
+    }
 
 public:
     Err fillHost(AnyPod const & data);
