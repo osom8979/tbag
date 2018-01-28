@@ -21,7 +21,9 @@
 #include <libtbag/type/TypeTable.hpp>
 #include <libtbag/container/AnyPod.hpp>
 
+#include <cassert>
 #include <memory>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -75,18 +77,15 @@ private:
     WeakedGpuEvent  _event;
 
 private:
-    TypeTable       _type;
-    HostMemoryFlag  _flag;
+    HostMemoryFlag  _flag;  ///< Host memory flags.
+    bool            _async; ///< Asynchronous of memory operation.
 
 private:
-    SyncedHead mutable _head;
-    SharedGpuMemory    _gpu;
-    SharedHostMemory   _host;
-
-private:
-    std::size_t _elem_size;
-    std::size_t _elem_count;
-    bool        _async;
+    TypeTable          _type;  ///< Base type.
+    SyncedHead mutable _head;  ///< Synchronization state.
+    SharedHostMemory   _host;  ///< Host memory.
+    SharedGpuMemory    _gpu;   ///< Gpu(Device) memory.
+    std::size_t        _count; ///< Count of element.
 
 public:
     SyncedMemory();
@@ -107,10 +106,11 @@ public:
 public:
     inline SyncedHead  head() const TBAG_NOEXCEPT { return _head; }
     inline TypeTable   type() const TBAG_NOEXCEPT { return _type; }
-    inline std::size_t size() const TBAG_NOEXCEPT { return _elem_size * _elem_count; }
 
-    inline std::size_t  sizeOfElem() const TBAG_NOEXCEPT { return _elem_size;  }
-    inline std::size_t countOfElem() const TBAG_NOEXCEPT { return _elem_count; }
+    inline std::size_t  sizeOfElem() const TBAG_NOEXCEPT { return type::getTypeSize(_type);  }
+    inline std::size_t countOfElem() const TBAG_NOEXCEPT { return _count; }
+
+    inline std::size_t size() const TBAG_NOEXCEPT { return sizeOfElem() * countOfElem(); }
 
     inline HostMemoryFlag getFlag() const TBAG_NOEXCEPT { return _flag; }
 
@@ -147,31 +147,47 @@ public:
 
 // State checker.
 public:
-    bool exists() const;
-    bool  empty() const;
+    bool validate() const;
+    bool   exists() const;
+    bool    empty() const;
 
 protected:
-    Err alloc(std::size_t size, std::size_t count);
+    Err alloc(TypeTable type, std::size_t count);
     Err free();
 
 public:
-    Err copyFrom(SyncedMemory const & obj);
-    Err copyTo(SyncedMemory & obj) const;
-
-    Err cloneFrom(SyncedMemory const & obj);
-    Err cloneTo(SyncedMemory & obj) const;
-
-public:
-    Err resize(std::size_t size, std::size_t count);
     Err resize(TypeTable type, std::size_t count);
 
-public:
     template <typename T>
     Err resize(std::size_t size)
     { return resize(TypeInfo<T>::table(), size); }
 
-    Err resize(std::size_t size)
-    { return resize(TypeTable::TT_CHAR, size); }
+public:
+    Err cloneFrom(SyncedMemory const & obj);
+    Err cloneTo(SyncedMemory & obj) const;
+
+public:
+    template <typename Predicated>
+    Err autoSync(Predicated predicated)
+    {
+        if (_event.expired()) {
+            return Err::E_UNSUPOP;
+        }
+        if (empty()) {
+            return Err::E_ILLSTATE;
+        }
+
+        Err code = predicated();
+        if (isFailure(code)) {
+            return code;
+        }
+
+        code = toSync();
+        if (isFailure(code)) {
+            return code;
+        }
+        return syncEvent();
+    }
 
 private:
     template <typename SourceType, typename DestinationType>
@@ -185,18 +201,19 @@ private:
 
 public:
     template <typename DataType>
-    Err assign(DataType const * data, std::size_t elem_count)
+    Err assign(DataType const * data, std::size_t count)
     {
+        static_assert(std::is_void<DataType>::value == false, "void type is not supported.");
         if (empty()) {
             return Err::E_ILLSTATE;
         }
-        if (data == nullptr || _elem_count < elem_count) {
+        if (data == nullptr || _count < count) {
             return Err::E_ILLARGS;
         }
 
         // @formatter:off
         switch (_type) {
-#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: return _assign(data, (t*)getMutableHostData(), elem_count);
+#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: return _assign(data, (t*)getMutableHostData(), count);
         TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
         default: return Err::E_UNSUPOP;
@@ -204,35 +221,19 @@ public:
         // @formatter:on
     }
 
-private:
-    template <typename DestinationType>
-    static Err _fill(DestinationType data, DestinationType * dest, std::size_t size)
+    template <typename DataType>
+    Err assignSync(DataType const * data, std::size_t count)
     {
-        for (; size > 0; ++dest, --size) {
-            *dest = data;
-        }
-        return Err::E_SUCCESS;
+        return autoSync([this, data, count]() -> Err { return this->assign(data, count); });
     }
 
 public:
-    Err fillHost(AnyPod const & data)
-    {
-        if (empty()) {
-            return Err::E_ILLSTATE;
-        }
-
-        // @formatter:off
-        switch (_type) {
-#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: return _fill(data.cast<t>(), (t*)getMutableHostData(), _elem_count);
-        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-        default: return Err::E_UNSUPOP;
-        }
-        // @formatter:on
-    }
+    Err fillHost(AnyPod const & data);
+    Err fillHostSync(AnyPod const & data);
 
 public:
     Err fillGpu(AnyPod const & data);
+    Err fillGpuSync(AnyPod const & data);
 };
 
 } // namespace details

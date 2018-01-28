@@ -40,6 +40,36 @@ TEST(GpuTest, Information)
     });
 }
 
+TEST(GpuTest, SyncedMemory_Default)
+{
+    runAllIfSupported([](Gpu & gpu){
+        auto stream = gpu.newStream();
+        auto event  = gpu.newEvent(stream);
+        SyncedMemory mem(stream, event);
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_UNINITIALIZED, mem.head());
+
+        ASSERT_EQ(Err::E_SUCCESS, mem.resize<char>(8));
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_SYNCED, mem.head());
+        ASSERT_EQ(type::TypeTable::TT_CHAR, mem.type());
+        ASSERT_EQ(sizeof(char), mem.sizeOfElem());
+        ASSERT_EQ(8, mem.countOfElem());
+        ASSERT_EQ(sizeof(char) * 8, mem.size());
+
+        ASSERT_EQ(Err::E_SUCCESS, mem.resize<int>(4));
+        ASSERT_EQ(SyncedMemory::SyncedHead::SH_SYNCED, mem.head());
+        ASSERT_EQ(type::TypeTable::TT_INT, mem.type());
+        ASSERT_EQ(sizeof(int), mem.sizeOfElem());
+        ASSERT_EQ(4, mem.countOfElem());
+        ASSERT_EQ(sizeof(int) * 4, mem.size());
+
+        // Shallow copy.
+        SyncedMemory mem2 = mem;
+        ASSERT_EQ(mem.getHostData(), mem2.getHostData());
+        ASSERT_EQ(mem.getGpuData(), mem2.getGpuData());
+        ASSERT_EQ(mem.size(), mem2.size());
+    });
+}
+
 TEST(GpuTest, SyncedMemory)
 {
     runAllIfSupported([](Gpu & gpu){
@@ -52,11 +82,15 @@ TEST(GpuTest, SyncedMemory)
         using BaseType = int;
         BaseType const TEST_HOST_VALUE1 = 1;
         BaseType const TEST_HOST_VALUE2 = 2;
-        BaseType const  TEST_GPU_VALUE  = 3;
+        BaseType const TEST_GPU_VALUE   = 3;
 
-        std::size_t const BUFFER_SIZE = 10 * MEGA_BYTE_TO_BYTE;
+        std::size_t const BUFFER_SIZE = 1 * MEGA_BYTE_TO_BYTE;
         std::size_t const MEM_SIZE = BUFFER_SIZE * sizeof(BaseType);
-        std::vector<int> buffer(BUFFER_SIZE, TEST_HOST_VALUE1);
+        std::vector<BaseType> buffer(BUFFER_SIZE, TEST_HOST_VALUE1);
+
+        ASSERT_LT(0, BUFFER_SIZE);
+        ASSERT_EQ(BUFFER_SIZE, buffer.size());
+        std::cout << "* Mem size: " << MEM_SIZE / MEGA_BYTE_TO_BYTE << "mb" << std::endl;
 
         auto stream = gpu.newStream();
         auto event  = gpu.newEvent(stream);
@@ -68,13 +102,10 @@ TEST(GpuTest, SyncedMemory)
         ASSERT_EQ(type::TypeTable::TT_INT, mem.type());
 
         ASSERT_TRUE(mem.exists());
+        ASSERT_FALSE(mem.empty());
         ASSERT_EQ(MEM_SIZE, mem.size());
         ASSERT_EQ(sizeof(BaseType), mem.sizeOfElem());
         ASSERT_EQ(BUFFER_SIZE, mem.countOfElem());
-        ASSERT_EQ(BUFFER_SIZE, buffer.size());
-        ASSERT_LT(0, BUFFER_SIZE);
-
-        std::cout << "* Mem size: " << MEM_SIZE / MEGA_BYTE_TO_BYTE << "mb" << std::endl;
 
         ASSERT_EQ(Err::E_SUCCESS, mem.assign(buffer.data(), buffer.size()));
         ASSERT_EQ(SyncedMemory::SyncedHead::SH_HEAD_AT_HOST, mem.head());

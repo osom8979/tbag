@@ -13,7 +13,6 @@
 #include <libtbag/gpu/details/GpuEvent.hpp>
 #include <libtbag/gpu/details/GpuMemory.hpp>
 
-#include <cassert>
 #include <cstring>
 #include <utility>
 #include <algorithm>
@@ -37,9 +36,8 @@ SyncedMemory::SyncedMemory(SharedGpuStream const & stream, SharedGpuEvent const 
 }
 
 SyncedMemory::SyncedMemory(WeakedGpuStream const & stream, WeakedGpuEvent const & event, bool async)
-        : _stream(stream), _event(event), _type(TypeTable::TT_UNKNOWN),
-          _flag(HostMemoryFlag::HMF_DEFAULT), _head(SyncedHead::SH_UNINITIALIZED),
-          _gpu(), _host(), _elem_size(0), _elem_count(0), _async(async)
+        : _stream(stream), _event(event), _flag(HostMemoryFlag::HMF_DEFAULT), _async(async),
+          _type(TypeTable::TT_UNKNOWN), _head(SyncedHead::SH_UNINITIALIZED), _host(), _gpu(), _count(0)
 {
     if (auto shared_stream = stream.lock()) {
         if (shared_stream->atContext().getType() == GpuType::GT_CUDA) {
@@ -67,16 +65,15 @@ SyncedMemory & SyncedMemory::operator =(SyncedMemory const & obj)
 {
     if (this != &obj) {
         // @formatter:off
-        _stream     = obj._stream;
-        _event      = obj._event;
-        _type       = obj._type;
-        _flag       = obj._flag;
-        _head       = obj._head;
-        _gpu        = obj._gpu;
-        _host       = obj._host;
-        _elem_size  = obj._elem_size;
-        _elem_count = obj._elem_count;
-        _async      = obj._async;
+        _stream = obj._stream;
+        _event  = obj._event;
+        _flag   = obj._flag;
+        _async  = obj._async;
+        _type   = obj._type;
+        _head   = obj._head;
+        _host   = obj._host;
+        _gpu    = obj._gpu;
+        _count  = obj._count;
         // @formatter:on
     }
     return *this;
@@ -93,15 +90,14 @@ void SyncedMemory::swap(SyncedMemory & obj)
     if (this != &obj) {
         // @formatter:off
         _stream.swap(obj._stream);
-        _event .swap(obj._event);
-        std::swap(_type, obj._type);
-        std::swap(_flag, obj._flag);
-        std::swap(_head, obj._head);
+        _event .swap(obj._event );
+        std::swap(_flag , obj._flag );
+        std::swap(_async, obj._async);
+        std::swap(_type , obj._type );
+        std::swap(_head , obj._head );
         _gpu .swap(obj._gpu);
         _host.swap(obj._host);
-        std::swap(_elem_size,  obj._elem_size);
-        std::swap(_elem_count, obj._elem_count);
-        std::swap(_async, obj._async);
+        std::swap(_count, obj._count);
         // @formatter:on
     }
 }
@@ -158,14 +154,15 @@ Err SyncedMemory::toGpu() const
 
 Err SyncedMemory::toSync() const
 {
-    if (_head == SyncedHead::SH_HEAD_AT_HOST) {
-        return toGpu();
-    } else if (_head == SyncedHead::SH_HEAD_AT_GPU) {
-        return toHost();
-    } else {
-        return Err::E_ILLSTATE;
+    // @formatter:off
+    switch (_head) {
+    case SyncedHead::SH_HEAD_AT_HOST:           return toGpu();
+    case SyncedHead::SH_HEAD_AT_GPU:            return toHost();
+    case SyncedHead::SH_SYNCED:                 return Err::E_ALREADY;
+    case SyncedHead::SH_UNINITIALIZED:          return Err::E_ILLSTATE;
+    default: TBAG_INACCESSIBLE_BLOCK_ASSERT();  return Err::E_UNKNOWN;
     }
-    return Err::E_ALREADY;
+    // @formatter:on
 }
 
 void * SyncedMemory::getMutableHostData()
@@ -221,9 +218,14 @@ float SyncedMemory::elapsedEvent() const
     return (_event.expired() ? 0.0f : _event.lock()->elapsed());
 }
 
+bool SyncedMemory::validate() const
+{
+    return !_stream.expired() && _gpu && _host;
+}
+
 bool SyncedMemory::exists() const
 {
-    return !_stream.expired() && _gpu && _host && size() > 0U;
+    return validate() && size() > 0U;
 }
 
 bool SyncedMemory::empty() const
@@ -231,9 +233,10 @@ bool SyncedMemory::empty() const
     return !exists();
 }
 
-Err SyncedMemory::alloc(std::size_t size, std::size_t count)
+Err SyncedMemory::alloc(TypeTable type, std::size_t count)
 {
-    if (size == 0 || count == 0) {
+    std::size_t const SIZE = type::getTypeSize(type);
+    if (SIZE == 0 || count == 0) {
         return Err::E_ILLARGS;
     }
 
@@ -249,16 +252,17 @@ Err SyncedMemory::alloc(std::size_t size, std::size_t count)
     }
 
     try {
-        _gpu.reset(new GpuMemory(*stream, size * count));
-        _host.reset(new HostMemory(*stream, size * count, _flag));
+        _gpu .reset(new  GpuMemory(*stream, SIZE * count));
+        _host.reset(new HostMemory(*stream, SIZE * count, _flag));
     } catch (std::bad_alloc & e) {
         _gpu.reset();
         _host.reset();
         return Err::E_BADALLOC;
     }
 
-    _elem_size  = size;
-    _elem_count = count;
+    _type = type;
+    _head = SyncedHead::SH_SYNCED;
+    _count = count;
     return Err::E_SUCCESS;
 }
 
@@ -270,21 +274,54 @@ Err SyncedMemory::free()
     if (_host) {
         _host.reset();
     }
-    _elem_size  = 0;
-    _elem_count = 0;
+
+    _type = TypeTable::TT_UNKNOWN;
+    _head = SyncedHead::SH_UNINITIALIZED;
+    _count = 0;
     return Err::E_SUCCESS;
 }
 
-Err SyncedMemory::copyFrom(SyncedMemory const & obj)
+Err SyncedMemory::resize(TypeTable type, std::size_t count)
+{
+    Err const CODE = SyncedMemory::free();
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+
+    std::size_t const TYPE_SIZE = type::getTypeSize(type);
+    if (TYPE_SIZE == 0 || count == 0) {
+        return Err::E_SUCCESS;
+    }
+
+    assert(TYPE_SIZE > 0);
+    assert(count > 0);
+    return SyncedMemory::alloc(type, count);
+}
+
+Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
 {
     if (this == &obj) {
         return Err::E_SAMEOBJ;
     }
+
+    // First of all, Remove old context memory.
+    // [WARNING] Don't change operation order.
+    SyncedMemory::free();
+    _stream = obj._stream;
+    _event  = obj._event;
+    _type   = obj._type;
+    _flag   = obj._flag;
+    _async  = obj._async;
+
     if (obj.empty()) {
-        return Err::E_ILLARGS;
+        return Err::E_SUCCESS;
     }
-    if (size() < obj.size()) {
-        return Err::E_SMALLBUF;
+
+    assert(obj.size() > 0);
+    Err const CODE = resize(obj._type, obj._count);
+    if (isFailure(CODE)) {
+        tDLogE("SyncedMemory::cloneFrom() Resize error: {}", getErrName(CODE));
+        return CODE;
     }
 
     assert(obj.size() > 0);
@@ -304,20 +341,20 @@ Err SyncedMemory::copyFrom(SyncedMemory const & obj)
         event = event_lock.get();
     }
 
-    Err  gpu_code = Err::E_UNKNOWN;
     Err host_code = Err::E_UNKNOWN;
+    Err  gpu_code = Err::E_UNKNOWN;
 
     if (_async) {
-        gpu_code  = obj._gpu->copy(*_gpu, obj.size(), event);
         host_code = obj._host->copy(*_host, obj.size(), event);
+        gpu_code  = obj._gpu->copy(*_gpu, obj.size(), event);
     } else {
-        gpu_code  = obj._gpu->copyAsync(*_gpu, obj.size(), event);
         host_code = obj._host->copyAsync(*_host, obj.size(), event);
+        gpu_code  = obj._gpu->copyAsync(*_gpu, obj.size(), event);
     }
 
-    if (isFailure(gpu_code) || isFailure(host_code)) {
-        tDLogE("SyncedMemory::copyFrom() Copy error: gpu({}), host({})",
-               getErrName(gpu_code), getErrName(host_code));
+    if (isFailure(host_code) || isFailure(gpu_code)) {
+        tDLogE("SyncedMemory::copyFrom() Copy error: host({}), gpu({})",
+               getErrName(host_code), getErrName(gpu_code));
         return Err::E_ECOPY;
     }
 
@@ -325,68 +362,43 @@ Err SyncedMemory::copyFrom(SyncedMemory const & obj)
     return Err::E_SUCCESS;
 }
 
-Err SyncedMemory::copyTo(SyncedMemory & obj) const
-{
-    if (this == &obj) {
-        return Err::E_SAMEOBJ;
-    }
-    return obj.copyFrom(*this);
-}
-
-Err SyncedMemory::cloneFrom(SyncedMemory const & obj)
-{
-    if (this == &obj) {
-        return Err::E_SAMEOBJ;
-    }
-
-    _stream = obj._stream;
-    _event  = obj._event;
-    _type   = obj._type;
-    _flag   = obj._flag;
-    _async  = obj._async;
-
-    if (obj.empty()) {
-        free();
-        return Err::E_SUCCESS;
-    }
-
-    assert(obj.size() > 0);
-    Err const CODE = resize(obj._elem_size, obj._elem_count);
-    if (isFailure(CODE)) {
-        tDLogE("SyncedMemory::cloneFrom() Resize error: {}", getErrName(CODE));
-        return CODE;
-    }
-
-    return copyFrom(obj);
-}
-
 Err SyncedMemory::cloneTo(SyncedMemory & obj) const
 {
     return obj.cloneFrom(*this);
 }
 
-Err SyncedMemory::resize(std::size_t size, std::size_t count)
+template <typename DestinationType>
+static Err _fillSyncedMemory(DestinationType data, DestinationType * dest, std::size_t size)
 {
-    if (size == 0 || count == 0) {
-        free();
-        return Err::E_SUCCESS;
+    for (; size > 0; ++dest, --size) {
+        *dest = data;
     }
-
-    assert(size > 0);
-    assert(count > 0);
-
-    if (exists() && _elem_size == size && _elem_count == count) {
-        return Err::E_ALREADY;
-    }
-
-    free();
-    return alloc(size, count);
+    return Err::E_SUCCESS;
 }
 
-Err SyncedMemory::resize(TypeTable type, std::size_t count)
+Err SyncedMemory::fillHost(AnyPod const & data)
 {
-    _type = type;
-    return resize(type::getTypeSize(type), count);
+    if (empty()) {
+        return Err::E_ILLSTATE;
+    }
+
+    // @formatter:off
+    switch (_type) {
+#define _TBAG_XX(n, s, t)   \
+    case TypeTable::TT_##n: \
+        return _fillSyncedMemory(data.cast<t>(), (t*)getMutableHostData(), _count);
+    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return Err::E_UNSUPOP;
+    }
+    // @formatter:on
+}
+
+Err SyncedMemory::fillHostSync(AnyPod const & data)
+{
+    return autoSync([this, data]() -> Err { return this->fillHost(data); });
 }
 
 Err SyncedMemory::fillGpu(AnyPod const & data)
@@ -400,7 +412,12 @@ Err SyncedMemory::fillGpu(AnyPod const & data)
 
     auto stream = _stream.lock();
     assert(static_cast<bool>(stream));
-    return stream->fill(*this, data, (int)_elem_count, (_event.expired() ? nullptr : _event.lock().get()));
+    return stream->fill(*this, data, (int)_count, (_event.expired() ? nullptr : _event.lock().get()));
+}
+
+Err SyncedMemory::fillGpuSync(AnyPod const & data)
+{
+    return autoSync([this, data]() -> Err { return this->fillGpu(data); });
 }
 
 } // namespace details
