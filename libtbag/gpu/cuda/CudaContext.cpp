@@ -262,6 +262,29 @@ CudaContext::~CudaContext()
     // EMPTY.
 }
 
+Err CudaContext::calcOccupancy(int thread_per_block,
+                               int registers_per_thread,
+                               int shared_memory_per_block,
+                               OccupancyInfo & result)
+{
+    // Streaming Processor (SP) == {CUDA CORE}
+    // Streaming Multiprocessors (SM) == Multiple SP
+    // GPC (Graphics Processing Clusters) == Multiple SM
+    // Graphic Card == Multiple SM
+
+    cudaDeviceProp prop;
+    cudaError_t code = cudaGetDeviceProperties(&prop, castDeviceId<int>());
+    if (code != cudaSuccess) {
+        tDLogE("CudaContext::calcOccupancy() CUDA cudaGetDeviceProperties() error: {}", cudaGetErrorString(code));
+        return Err::E_CUDA;
+    }
+
+    int const NUMBER_OF_SM = prop.multiProcessorCount;
+    int const NUMBER_OF_SP = 0; // Number of CUDA cores.
+
+    return Err::E_SUCCESS;
+}
+
 // @formatter:off
 bool CudaContext::isSupport() const TBAG_NOEXCEPT { return cuda::isSupport(); }
 bool CudaContext::isHost   () const TBAG_NOEXCEPT { return false; }

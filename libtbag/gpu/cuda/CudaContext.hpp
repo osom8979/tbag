@@ -114,6 +114,23 @@ public:
     virtual ~CudaContext();
 
 public:
+    /**
+     * Maximum Thread Blocks Per Multiprocessor.
+     */
+    struct OccupancyInfo
+    {
+        std::size_t max_group;     ///< Limited by Max Warps or Max Blocks per Multiprocessor.
+        std::size_t registers;     ///< Limited by Registers per Multiprocessor.
+        std::size_t shared_memory; ///< Limited by Shared Memory per Multiprocessor.
+    };
+
+public:
+    Err calcOccupancy(int thread_per_block,
+                      int registers_per_thread,
+                      int shared_memory_per_block,
+                      OccupancyInfo & result);
+
+public:
     virtual bool isSupport() const TBAG_NOEXCEPT override;
     virtual bool    isHost() const TBAG_NOEXCEPT override;
     virtual bool  isDevice() const TBAG_NOEXCEPT override;

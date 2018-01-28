@@ -177,6 +177,17 @@ static ResultType getDeviceInfo(cl_device_id id, cl_device_info info, ResultType
     return default_value;
 }
 
+static std::size_t getMaxPotentialBlockSize(cl_kernel kernel, cl_device_id device)
+{
+    size_t group_size = 0;
+    cl_int code = clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_WORK_GROUP_SIZE,
+                                           sizeof(size_t), &group_size, nullptr);
+    if (code != CL_SUCCESS) {
+        group_size = __impl::getDeviceInfo<size_t, size_t>(device, CL_DEVICE_MAX_WORK_GROUP_SIZE);
+    }
+    return group_size;
+}
+
 // ------------------
 } // namespace __impl
 // ------------------
@@ -748,6 +759,8 @@ static Err fillByOpenCL(GpuContext const & context, GpuStream const & stream, Sh
     }
 
     std::size_t global_work_size[1] = { static_cast<std::size_t>(count) };
+    // local_work_size can also be a NULL value in which case the OpenCL implementation
+    // will determine how to be break the global work-items into appropriate work-group instances.
     cl_int code = clEnqueueNDRangeKernel(stream.castId<cl_command_queue>(), kernel->castId<cl_kernel>(),
                                          1, nullptr, global_work_size, nullptr, 0, nullptr,
                                          (cl_event*)(event == nullptr ? nullptr : &event->atId()));
@@ -773,9 +786,9 @@ TBAG_CONSTEXPR static char const * const _TBAG_OPENCL_SOURCE_ADD = R"(
 __kernel void add_${type}(__global ${type} * in1, __global ${type} * in2, __global ${type} * out)
 {
     uint w = get_global_size(0);
-    uint y = get_global_id(1);
     uint x = get_global_id(0);
-    uint i = y * w + x;
+    uint y = get_global_id(1);
+    uint i = (y * w) + x;
     out[i] = in1[i] + in2[i];
 }
 )";
@@ -800,6 +813,8 @@ static Err addByOpenCL(GpuContext const & context, GpuStream const & stream, Sha
     }
 
     std::size_t global_work_size[1] = { static_cast<std::size_t>(count) };
+    // local_work_size can also be a NULL value in which case the OpenCL implementation
+    // will determine how to be break the global work-items into appropriate work-group instances.
     cl_int code = clEnqueueNDRangeKernel(stream.castId<cl_command_queue>(), kernel->castId<cl_kernel>(),
                                          1, nullptr, global_work_size, nullptr, 0, nullptr,
                                          (cl_event*)(event == nullptr ? nullptr : &event->atId()));
