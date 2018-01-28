@@ -24,6 +24,31 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gpu    {
 namespace opencl {
 
+/** The number of parallel compute cores on the OpenCL device. The minimum value is 1. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_COMPUTE_UNITS = "max_compute_units";
+/** Maximum number of work-items in a work-group executing a kernel using the data parallel execution model. @n
+ * (Refer to clEnqueueNDRangeKernel). The minimum value is 1. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_WORK_GROUP_SIZE = "max_work_group_size";
+/** Maximum dimensions that specify the global and local work-item IDs used by the data parallel execution model. @n
+ * (Refer to clEnqueueNDRangeKernel). The minimum value is 3. */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_WORK_ITEM_DIMENSIONS = "max_work_item_dimensions";
+/** Maximum number of work-items that can be specified in each dimension of the work-group to clEnqueueNDRangeKernel. @n
+ * Returns n size_t entries, where n is the value returned by the query for CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS. @n
+ * The minimum value is (1, 1, 1). */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_INFO_MAX_WORK_ITEM_SIZES = "max_work_item_sizes";
+
+/** The OpenCL device type. Currently supported values are one of or a combination of:
+ * - CL_DEVICE_TYPE_CPU
+ * - CL_DEVICE_TYPE_GPU
+ * - CL_DEVICE_TYPE_ACCELERATOR
+ * - CL_DEVICE_TYPE_DEFAULT
+ */
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_TYPE             = "type";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_TYPE_CPU         = "cpu";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_TYPE_GPU         = "gpu";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_TYPE_ACCELERATOR = "accelerator";
+TBAG_CONSTEXPR char const * const TBAG_GPU_DEVICE_TYPE_DEFAULT     = "default";
+
 TBAG_API bool isSupport() TBAG_NOEXCEPT;
 
 TBAG_API int             getPlatformCount();

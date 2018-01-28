@@ -155,6 +155,28 @@ static bool setKernelArguments(KernelType kernel, Args && ... mems)
     return setKernelMemories(kernel, {std::forward<Args>(mems) ...});
 }
 
+static std::string getDeviceInfoByString(cl_device_id id, cl_device_info info)
+{
+    size_t value_size = 0;
+    if (clGetDeviceInfo(id, info, 0, nullptr, &value_size) == CL_SUCCESS) {
+        std::vector<char> buffer(value_size, '\0');
+        if (clGetDeviceInfo(id, info, buffer.size(), buffer.data(), nullptr) == CL_SUCCESS) {
+            return std::string(buffer.data());
+        }
+    }
+    return std::string();
+}
+
+template <typename NativeType, typename ResultType>
+static ResultType getDeviceInfo(cl_device_id id, cl_device_info info, ResultType default_value = ResultType())
+{
+    NativeType value;
+    if (clGetDeviceInfo(id, info, sizeof(NativeType), &value, nullptr) == CL_SUCCESS) {
+        return static_cast<ResultType>(value);
+    }
+    return default_value;
+}
+
 // ------------------
 } // namespace __impl
 // ------------------
@@ -254,29 +276,43 @@ GpuDeviceInfo getDeviceInfo(GpuDevice const & device)
 {
     checkOpenCLGpuType(device);
     GpuDeviceInfo info;
-    auto get_device_info_str = [](cl_device_id id, cl_device_info info) -> std::string {
-        size_t value_size = 0;
-        if (clGetDeviceInfo(id, info, 0, nullptr, &value_size) == CL_SUCCESS) {
-            std::vector<char> buffer(value_size, '\0');
-            if (clGetDeviceInfo(id, info, buffer.size(), buffer.data(), nullptr) == CL_SUCCESS) {
-                return std::string(buffer.data());
-            }
-        }
-        return std::string();
-    };
 
-    auto get_device_info_ulong = [](cl_device_id id, cl_device_info info) -> std::size_t {
-        cl_ulong value;
-        if (clGetDeviceInfo(id, info, sizeof(cl_ulong), &value, nullptr) == CL_SUCCESS) {
-            return static_cast<std::size_t>(value);
-        }
-        return 0;
-    };
+    cl_device_id const DEVICE_ID = (cl_device_id)device.DEVICE_ID;
+    info.name           = __impl::getDeviceInfoByString(DEVICE_ID, CL_DEVICE_NAME);
+    info.device_version = __impl::getDeviceInfoByString(DEVICE_ID, CL_DEVICE_VERSION);
+    info.driver_version = __impl::getDeviceInfoByString(DEVICE_ID, CL_DRIVER_VERSION);
+    info.global_memory  = __impl::getDeviceInfo<cl_ulong, std::size_t>(DEVICE_ID, CL_DEVICE_GLOBAL_MEM_SIZE);
 
-    info.name           = get_device_info_str  ((cl_device_id)device.DEVICE_ID, CL_DEVICE_NAME);
-    info.device_version = get_device_info_str  ((cl_device_id)device.DEVICE_ID, CL_DEVICE_VERSION);
-    info.driver_version = get_device_info_str  ((cl_device_id)device.DEVICE_ID, CL_DRIVER_VERSION);
-    info.global_memory  = get_device_info_ulong((cl_device_id)device.DEVICE_ID, CL_DEVICE_GLOBAL_MEM_SIZE);
+    auto max_compute_units        = __impl::getDeviceInfo<cl_uint, unsigned>(DEVICE_ID, CL_DEVICE_MAX_COMPUTE_UNITS);
+    auto max_work_group_size      = __impl::getDeviceInfo< size_t, size_t>(DEVICE_ID, CL_DEVICE_MAX_WORK_GROUP_SIZE);
+    auto max_work_item_dimensions = __impl::getDeviceInfo<cl_uint, unsigned>(DEVICE_ID, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS);
+
+    info.insert(TBAG_GPU_DEVICE_INFO_MAX_COMPUTE_UNITS       , max_compute_units);
+    info.insert(TBAG_GPU_DEVICE_INFO_MAX_WORK_GROUP_SIZE     , max_work_group_size);
+    info.insert(TBAG_GPU_DEVICE_INFO_MAX_WORK_ITEM_DIMENSIONS, max_work_item_dimensions);
+
+    std::vector<size_t> max_work_item_sizes(max_work_item_dimensions);
+    if (clGetDeviceInfo(DEVICE_ID, CL_DEVICE_MAX_WORK_ITEM_SIZES,
+                        sizeof(size_t) * max_work_item_dimensions,
+                        max_work_item_sizes.data(), nullptr) == CL_SUCCESS) {
+        for (unsigned i = 0; i < max_work_item_dimensions; ++i) {
+            std::string const key = std::string(TBAG_GPU_DEVICE_INFO_MAX_WORK_ITEM_SIZES) + "_" + std::to_string(i);
+            info.insert(key, std::to_string(max_work_item_sizes[i]));
+        }
+    }
+
+    auto type = __impl::getDeviceInfo<cl_device_type, cl_device_type>(DEVICE_ID, CL_DEVICE_TYPE);
+    if (type == CL_DEVICE_TYPE_CPU) {
+        info.insert(TBAG_GPU_DEVICE_TYPE, TBAG_GPU_DEVICE_TYPE_CPU);
+    } else if (type == CL_DEVICE_TYPE_GPU) {
+        info.insert(TBAG_GPU_DEVICE_TYPE, TBAG_GPU_DEVICE_TYPE_GPU);
+    } else if (type == CL_DEVICE_TYPE_ACCELERATOR) {
+        info.insert(TBAG_GPU_DEVICE_TYPE, TBAG_GPU_DEVICE_TYPE_ACCELERATOR);
+    } else {
+        assert(type == CL_DEVICE_TYPE_DEFAULT);
+        info.insert(TBAG_GPU_DEVICE_TYPE, TBAG_GPU_DEVICE_TYPE_DEFAULT);
+    }
+
     return info;
 }
 
@@ -342,12 +378,26 @@ Err OpenCLContext::_read(GpuStream const & stream, GpuMemory const & gpu_mem, Ho
     return Err::E_SUCCESS;
 }
 
-// @formatter:off
-bool OpenCLContext::isSupport() const TBAG_NOEXCEPT { return opencl::isSupport(); }
-bool OpenCLContext::isHost   () const TBAG_NOEXCEPT { return true; }
-bool OpenCLContext::isDevice () const TBAG_NOEXCEPT { return true; }
-bool OpenCLContext::isStream () const TBAG_NOEXCEPT { return true; }
-// @formatter:on
+bool OpenCLContext::isSupport() const TBAG_NOEXCEPT
+{
+    return opencl::isSupport();
+}
+
+bool OpenCLContext::isHost() const TBAG_NOEXCEPT
+{
+    return !isDevice();
+}
+
+bool OpenCLContext::isDevice() const TBAG_NOEXCEPT
+{
+    return __impl::getDeviceInfo<cl_device_type, cl_device_type>((cl_device_id)getDeviceId(),
+                                                                 CL_DEVICE_TYPE, CL_DEVICE_TYPE_DEFAULT) == CL_DEVICE_TYPE_GPU;
+}
+
+bool OpenCLContext::isStream() const TBAG_NOEXCEPT
+{
+    return true;
+}
 
 Err OpenCLContext::createStream(GpuStream & stream) const
 {
