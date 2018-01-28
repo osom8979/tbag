@@ -62,6 +62,28 @@ static std::string getOpenCLSymbol(std::string const & name)
     return string::fformat("{}_{}", name, GpuMemoryTypeSuffix<T>::getPrefix());
 }
 
+template <typename T>
+static Err testKernelOrInit(GpuContext const & context, SharedGpuKernel & kernel,
+                            std::string const & source_template, std::string const & symbol_name)
+{
+    if (static_cast<bool>(kernel)) {
+        return Err::E_SUCCESS;
+    }
+
+    SharedGpuProgram program(GpuProgram::newInstance(context, getOpenCLSource<T>(source_template)));
+    Err const BUILD_RESULT = program->build();
+    if (isFailure(BUILD_RESULT)) {
+        return BUILD_RESULT;
+    }
+
+    try {
+        kernel.reset(GpuKernel::newInstance(*program, getOpenCLSymbol<T>(symbol_name)));
+    } catch (std::bad_alloc & e) {
+        return Err::E_BADALLOC;
+    }
+    return Err::E_SUCCESS;
+}
+
 static std::string getBuildLog(cl_program program, cl_device_id device)
 {
     std::size_t log_buffer_size = 0;
@@ -93,17 +115,34 @@ static std::string getBuildLog(cl_program program, cl_device_id device)
 }
 
 template <typename KernelType>
-static bool setKernelMemories(KernelType kernel, GpuMemories const & mems)
+static bool setKernelMemories(KernelType kernel, std::vector<container::AnyPod> const & mems)
 {
     if (mems.empty()) {
         return false;
     }
 
-    auto const SIZE = (cl_uint)mems.size();
-    for (cl_uint i = 0; i < SIZE; ++i) {
-        cl_int code = clSetKernelArg(kernel, i, mems[i].size(), mems[i].data());
+    using TypeTable = type::TypeTable;
+
+    cl_uint const MEMS_SIZE = (cl_uint)mems.size();
+    cl_int code;
+
+    for (cl_uint i = 0; i < MEMS_SIZE; ++i) {
+        // @formatter:off
+        switch (mems[i].type()) {
+#define _TBAG_XX(n, s, t) case TypeTable::TT_##n: code = clSetKernelArg(kernel, i, mems[i].size(), &(mems[i].data().s)); break;
+        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+        case TypeTable::TT_UNKNOWN:
+            code = clSetKernelArg(kernel, i, sizeof(cl_mem), (void const *)&(mems[i].data().vp));
+            break;
+        default:
+            code = CL_INVALID_VALUE;
+            break;
+        }
+        // @formatter:on
+
         if (code != CL_SUCCESS) {
-            tDLogE("setKernelMemories() OpenCL clSetKernelArg() error code: {}", code);
+            tDLogE("setKernelMemories() OpenCL clSetKernelArg() index({}) error code: {}", (unsigned)i, code);
             return false;
         }
     }
@@ -647,27 +686,14 @@ static Err fillByOpenCL(GpuContext const & context, GpuStream const & stream, Sh
         return Err::E_ILLARGS;
     }
 
-    if (static_cast<bool>(kernel) == false) {
-        SharedGpuProgram program(GpuProgram::newInstance(context, __impl::getOpenCLSource<T>(_TBAG_OPENCL_SOURCE_FILL)));
-        Err const BUILD_RESULT = program->build();
-        if (isFailure(BUILD_RESULT)) {
-            return BUILD_RESULT;
-        }
-
-        try {
-            kernel.reset(GpuKernel::newInstance(*program, __impl::getOpenCLSymbol<T>("fill")));
-        } catch (std::bad_alloc & e) {
-            return Err::E_BADALLOC;
-        }
+    Err const INIT_CODE = __impl::testKernelOrInit<T>(context, kernel, _TBAG_OPENCL_SOURCE_FILL, "fill");
+    if (isFailure(INIT_CODE)) {
+        return INIT_CODE;
     }
-
     assert(static_cast<bool>(kernel));
 
-    cl_int c0 = clSetKernelArg(kernel->castId<cl_kernel>(), 0, sizeof(cl_mem), &out);
-    cl_int c1 = clSetKernelArg(kernel->castId<cl_kernel>(), 1, sizeof(T), &data);
-
-    if (c0 != CL_SUCCESS || c1 != CL_SUCCESS) {
-        tDLogE("OpenCLContext::fillByOpenCL() OpenCL clSetKernelArg() error: c0({}), c1({})", c0, c1);
+    if (__impl::setKernelArguments(kernel->castId<cl_kernel>(), out, data) == false) {
+        tDLogE("OpenCLContext::fillByOpenCL() OpenCL argument error.");
         return Err::E_OPENCL;
     }
 
@@ -712,28 +738,14 @@ static Err addByOpenCL(GpuContext const & context, GpuStream const & stream, Sha
         return Err::E_ILLARGS;
     }
 
-    if (static_cast<bool>(kernel) == false) {
-        SharedGpuProgram program(GpuProgram::newInstance(context, __impl::getOpenCLSource<T>(_TBAG_OPENCL_SOURCE_ADD)));
-        Err const BUILD_RESULT = program->build();
-        if (isFailure(BUILD_RESULT)) {
-            return BUILD_RESULT;
-        }
-
-        try {
-            kernel.reset(GpuKernel::newInstance(*program, __impl::getOpenCLSymbol<T>("add")));
-        } catch (std::bad_alloc & e) {
-            return Err::E_BADALLOC;
-        }
+    Err const INIT_CODE = __impl::testKernelOrInit<T>(context, kernel, _TBAG_OPENCL_SOURCE_ADD, "add");
+    if (isFailure(INIT_CODE)) {
+        return INIT_CODE;
     }
-
     assert(static_cast<bool>(kernel));
 
-    cl_int c0 = clSetKernelArg(kernel->castId<cl_kernel>(), 0, sizeof(cl_mem), in1);
-    cl_int c1 = clSetKernelArg(kernel->castId<cl_kernel>(), 1, sizeof(cl_mem), in2);
-    cl_int c2 = clSetKernelArg(kernel->castId<cl_kernel>(), 2, sizeof(cl_mem), out);
-
-    if (c0 != CL_SUCCESS || c1 != CL_SUCCESS || c2 != CL_SUCCESS) {
-        tDLogE("OpenCLContext::addByOpenCL() OpenCL clSetKernelArg() error: c0({}), c1({}), c2({})", c0, c1, c2);
+    if (__impl::setKernelArguments(kernel->castId<cl_kernel>(), in1, in2, out) == false) {
+        tDLogE("OpenCLContext::fillByOpenCL() OpenCL argument error.");
         return Err::E_OPENCL;
     }
 
