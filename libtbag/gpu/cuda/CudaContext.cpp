@@ -285,6 +285,29 @@ Err CudaContext::calcOccupancy(int thread_per_block,
     return Err::E_SUCCESS;
 }
 
+double CudaContext::calcTheoreticalBandwidth(double memory_clock_rate_ghz,
+                                             int    memory_interface_bit,
+                                             int    memory_interface_lane,
+                                             bool   enable_ecc)
+{
+    double const MEMORY_CLOCK_RATE_HZ  = memory_clock_rate_ghz * 10e+9; // GHz -> Hz
+    double const MEMORY_INTERFACE_BYTE = memory_interface_bit / (double)8; // Bit -> Byte
+    double const BANDWIDTH_BYTE        = MEMORY_CLOCK_RATE_HZ * MEMORY_INTERFACE_BYTE * memory_interface_lane;
+    double const BANDWIDTH_GBYTE       = BANDWIDTH_BYTE / 10e+9; // Byte -> GByte
+    if (enable_ecc) {
+        return BANDWIDTH_GBYTE * 0.75; // Reduced by approximately 20%
+    } else {
+        return BANDWIDTH_GBYTE;
+    }
+}
+
+double CudaContext::calcEffectiveBandwidth(int read_byte_by_kernel, int write_byte_by_kernel, int seconds)
+{
+    int    const RW_BYTE  = read_byte_by_kernel + write_byte_by_kernel;
+    double const RW_GBYTE = RW_BYTE / (double)10e+9; // Byte -> GByte
+    return RW_GBYTE / seconds;
+}
+
 // @formatter:off
 bool CudaContext::isSupport() const TBAG_NOEXCEPT { return cuda::isSupport(); }
 bool CudaContext::isHost   () const TBAG_NOEXCEPT { return false; }

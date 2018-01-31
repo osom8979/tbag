@@ -131,6 +131,47 @@ public:
                       OccupancyInfo & result);
 
 public:
+    /**
+     * Theoretical bandwidth can be calculated using hardware specifications available in the product literature.
+     *
+     * @return
+     *  Theoretical bandwidth (GByte/s).
+     *
+     * @remarks
+     *  - Note: Some calculations use 10243 instead of 109 for the final calculation. @n
+     *          In such a case, the bandwidth would be 165.4GB/s. It is important to  @n
+     *          use the same divisor when calculating theoretical and effective       @n
+     *          bandwidth so that the comparison is valid. @n
+     *  - Note: When ECC is enabled, the effective maximum bandwidth is reduced by    @n
+     *          approximately 20% due to the additional traffic for the memory        @n
+     *          checksums, though the exact impact of ECC on bandwidth depends on the @n
+     *          memory access pattern.
+     *
+     * @see <http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#theoretical-bandwidth-calculation>
+     */
+    static double calcTheoreticalBandwidth(double memory_clock_rate_ghz,
+                                           int    memory_interface_bit,
+                                           int    memory_interface_lane,
+                                           bool   enable_ecc = false);
+
+    /**
+     * Effective bandwidth is calculated by timing specific program activities
+     * and by knowing how data is accessed by the program.
+     *
+     * @return
+     *  Effective bandwidth (GByte/s).
+     *
+     * @remarks
+     *  - Note: Some calculations use 10243 instead of 109 for the final calculation. @n
+     *          In such a case, the bandwidth would be 165.4GB/s. It is important to  @n
+     *          use the same divisor when calculating theoretical and effective       @n
+     *          bandwidth so that the comparison is valid. @n
+     *
+     * @see <http://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#theoretical-bandwidth-calculation>
+     */
+    static double calcEffectiveBandwidth(int read_byte_by_kernel, int write_byte_by_kernel, int seconds);
+
+public:
     virtual bool isSupport() const TBAG_NOEXCEPT override;
     virtual bool    isHost() const TBAG_NOEXCEPT override;
     virtual bool  isDevice() const TBAG_NOEXCEPT override;
