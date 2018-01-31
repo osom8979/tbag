@@ -31,6 +31,10 @@
 #define TB_CUDA_INLINE  __forceinline__
 #endif
 
+#ifndef TB_CU_SYNC_THREADS
+#define TB_CU_SYNC_THREADS() __syncthreads()
+#endif
+
 static bool isTbagCudaRawVerbose()
 {
 #if defined(TBAG_CUDA_RAW_VERBOSE)

@@ -308,6 +308,21 @@ double CudaContext::calcEffectiveBandwidth(int read_byte_by_kernel, int write_by
     return RW_GBYTE / seconds;
 }
 
+bool CudaContext::setBankSizeByDefault()
+{
+    return cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeDefault) == cudaSuccess;
+}
+
+bool CudaContext::setBankSizeBy4Byte()
+{
+    return cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeFourByte) == cudaSuccess;
+}
+
+bool CudaContext::setBankSizeBy8Byte()
+{
+    return cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeEightByte) == cudaSuccess;
+}
+
 // @formatter:off
 bool CudaContext::isSupport() const TBAG_NOEXCEPT { return cuda::isSupport(); }
 bool CudaContext::isHost   () const TBAG_NOEXCEPT { return false; }

@@ -172,6 +172,11 @@ public:
     static double calcEffectiveBandwidth(int read_byte_by_kernel, int write_byte_by_kernel, int seconds);
 
 public:
+    static bool setBankSizeByDefault();
+    static bool setBankSizeBy4Byte();
+    static bool setBankSizeBy8Byte();
+
+public:
     virtual bool isSupport() const TBAG_NOEXCEPT override;
     virtual bool    isHost() const TBAG_NOEXCEPT override;
     virtual bool  isDevice() const TBAG_NOEXCEPT override;

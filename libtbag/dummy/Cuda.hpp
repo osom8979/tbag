@@ -648,6 +648,9 @@ CUDARTAPI cudaError_t cudaOccupancyMaxPotentialBlockSizeVariableSMem(
         int * minGridSize, int * blockSize, T func, UnaryFunction blockSizeToDynamicSMemSize, int blockSizeLimit = 0)
 { return cudaErrorNotSupported; }
 
+CUDARTAPI cudaError_t cudaDeviceSetSharedMemConfig(cudaSharedMemConfig config)
+{ return cudaErrorNotSupported; }
+
 } // namespace cuda
 } // namespace dummy
 
