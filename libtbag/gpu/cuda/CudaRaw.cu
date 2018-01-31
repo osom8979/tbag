@@ -27,6 +27,10 @@
 #define TB_CUDA_GLOBAL  __global__
 #endif
 
+#ifndef TB_CUDA_RESTRICT
+#define TB_CUDA_RESTRICT  __restrict__
+#endif
+
 #ifndef TB_CUDA_INLINE
 #define TB_CUDA_INLINE  __forceinline__
 #endif

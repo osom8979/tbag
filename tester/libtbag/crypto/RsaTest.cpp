@@ -16,7 +16,7 @@ TEST(RsaTest, Default)
     std::string public_key;
     std::string private_key;
 
-    ASSERT_TRUE(Rsa::generate(public_key, private_key));
+    ASSERT_TRUE(Rsa::generatePem(public_key, private_key));
     ASSERT_FALSE(public_key.empty());
     ASSERT_FALSE(private_key.empty());
 

@@ -200,7 +200,7 @@ bool Rsa::gen(std::string const & name, int key_length)
 // Static methods.
 // ---------------
 
-bool Rsa::generate(std::string & public_key, std::string & private_key, int key_length)
+bool Rsa::generatePem(std::string & public_key, std::string & private_key, int key_length)
 {
     Rsa rsa;
     if (rsa.gen(key_length)) {
@@ -211,7 +211,7 @@ bool Rsa::generate(std::string & public_key, std::string & private_key, int key_
     return false;
 }
 
-bool Rsa::generate(std::string & public_key, std::string & private_key, CipherAlgorithm algorithm, int key_length)
+bool Rsa::generatePem(std::string & public_key, std::string & private_key, CipherAlgorithm algorithm, int key_length)
 {
     Rsa rsa;
     if (rsa.gen(algorithm, key_length)) {
@@ -222,7 +222,7 @@ bool Rsa::generate(std::string & public_key, std::string & private_key, CipherAl
     return false;
 }
 
-bool Rsa::generate(std::string & public_key, std::string & private_key, std::string const & name, int key_length)
+bool Rsa::generatePem(std::string & public_key, std::string & private_key, std::string const & name, int key_length)
 {
     Rsa rsa;
     if (rsa.gen(name, key_length)) {

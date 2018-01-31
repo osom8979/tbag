@@ -94,11 +94,12 @@ public:
     bool gen(std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
 
 public:
-    static bool generate(std::string & public_key, std::string & private_key,
+    /** Generate PEM(Privacy Enhanced Mail) format string. */
+    static bool generatePem(std::string & public_key, std::string & private_key,
                          int key_length = DEFAULT_KEY_LENGTH);
-    static bool generate(std::string & public_key, std::string & private_key,
+    static bool generatePem(std::string & public_key, std::string & private_key,
                          CipherAlgorithm algorithm, int key_length = DEFAULT_KEY_LENGTH);
-    static bool generate(std::string & public_key, std::string & private_key,
+    static bool generatePem(std::string & public_key, std::string & private_key,
                          std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
 };
 
