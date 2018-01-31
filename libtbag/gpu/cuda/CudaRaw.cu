@@ -104,9 +104,9 @@ bool tbCudaGetMaxPotentialBlockSizeOfTheoretical(float * result_occupancy, T fun
         return false;
     }
 
-    float const OCCUPANCY = (maxActiveBlocks * block_size / props.warpSize)
+    float const OCCUPANCY = (max_active_blocks * block_size / props.warpSize)
                             / (float)(props.maxThreadsPerMultiProcessor / props.warpSize);
-    if (result_occupancy != nullptr) {
+    if (result_occupancy != TB_NULL) {
         *result_occupancy = OCCUPANCY;
     }
     return true;
@@ -158,13 +158,13 @@ bool tbCudaFill(T * out, T data, int count, StreamType stream)
     assert(grid_size  > 0);
     assert(block_size > 0);
 
-    tbCudaRawVerbose("tbCudaFill() GRID: %d, BLOCK: %d\n", round_up_grid, block_size);
+    tbCudaRawVerbose("tbCudaFill() GRID: %d, BLOCK: %d\n", grid_size, block_size);
 
     tbCudaFillKernel<T><<<grid_size, block_size, 0, stream>>>(out, data, count);
 
     if (isTbagCudaRawVerbose()) {
         float occupancy = 0;
-        if (tbCudaGetMaxPotentialBlockSizeOfTheoretical(nullptr, tbCudaFillKernel<T>, block_size)) {
+        if (tbCudaGetMaxPotentialBlockSizeOfTheoretical(&occupancy, tbCudaFillKernel<T>, block_size)) {
             tbCudaRawVerbose("tbCudaFill() Launched blocks of size %d -> Theoretical occupancy: %f\n",
                              block_size, occupancy);
         }
