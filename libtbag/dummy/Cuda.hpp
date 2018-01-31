@@ -633,6 +633,14 @@ CUDARTAPI cudaError_t cudaMemcpy(void * dst, const void * src, size_t count, enu
 CUDARTAPI cudaError_t cudaMemcpyAsync(void * dst, const void * src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream = 0)
 { return cudaErrorNotSupported; }
 
+CUDARTAPI cudaError_t cudaMemcpyToSymbol(const char * symbol, const void * src, size_t count,
+                                         size_t offset = 0, enum cudaMemcpyKind kind = cudaMemcpyHostToDevice)
+{ return cudaErrorNotSupported; }
+
+CUDARTAPI cudaError_t cudaMemcpyFromSymbol(void * dst, const char * symbol, size_t count,
+                                           size_t offset = 0, enum cudaMemcpyKind kind = cudaMemcpyDeviceToHost)
+{ return cudaErrorNotSupported; }
+
 CUDARTAPI cudaError_t cudaStreamSynchronize(cudaStream_t stream)
 { return cudaErrorNotSupported; }
 

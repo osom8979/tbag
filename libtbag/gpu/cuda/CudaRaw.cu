@@ -35,6 +35,10 @@
 #define TB_CU_SYNC_THREADS() __syncthreads()
 #endif
 
+#ifndef TB_CU_CLOCK
+#define TB_CU_CLOCK() clock()
+#endif
+
 static bool isTbagCudaRawVerbose()
 {
 #if defined(TBAG_CUDA_RAW_VERBOSE)
