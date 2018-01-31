@@ -41,8 +41,10 @@ static bool isTbagCudaRawVerbose()
 }
 
 #ifndef tbCudaRawVerbose
-#define tbCudaRawVerbose(condition, ...) \
-    if (condition) { printf(__VA_ARGS__); }
+#define tbCudaRawVerbose(...)     \
+    if (isTbagCudaRawVerbose()) { \
+        printf(__VA_ARGS__);      \
+    } /* -- END -- */
 #endif
 
 // ---------------
@@ -62,14 +64,50 @@ bool tbCudaGetMaxPotentialBlockSize(int * result_grid_size, int * result_block_s
     if (code != cudaSuccess) {
         return false;
     }
+
     round_up_grid = (array_count + block_size - 1) / block_size; // Round up according to array size.
     round_up_grid = (round_up_grid > min_grid_size ? round_up_grid : min_grid_size);
-    tbCudaRawVerbose(isTbagCudaRawVerbose(), "tbCudaGetMaxPotentialBlockSize() GRID: %d, BLOCK: %d", round_up_grid, block_size);
+
     if (result_grid_size != TB_NULL) {
         *result_grid_size = round_up_grid;
     }
     if (result_block_size != TB_NULL) {
         *result_block_size = block_size;
+    }
+    return true;
+}
+
+/** Calculate theoretical occupancy. */
+template <typename T>
+bool tbCudaGetMaxPotentialBlockSizeOfTheoretical(float * result_occupancy, T func, int block_size,
+                                                 std::size_t dynamic_shared_mem_size = 0)
+{
+    cudaError_t code;
+
+    int max_active_blocks = 0; // Returned occupancy.
+    code = ::cudaOccupancyMaxActiveBlocksPerMultiprocessor(&max_active_blocks, func,
+                                                           block_size, dynamic_shared_mem_size);
+    if (code != cudaSuccess) {
+        return false;
+    }
+
+    int device = 0;
+    cudaDeviceProp props;
+
+    code = cudaGetDevice(&device);
+    if (code != cudaSuccess) {
+        return false;
+    }
+
+    code = cudaGetDeviceProperties(&props, device);
+    if (code != cudaSuccess) {
+        return false;
+    }
+
+    float const OCCUPANCY = (maxActiveBlocks * block_size / props.warpSize)
+                            / (float)(props.maxThreadsPerMultiProcessor / props.warpSize);
+    if (result_occupancy != nullptr) {
+        *result_occupancy = OCCUPANCY;
     }
     return true;
 }
@@ -120,7 +158,17 @@ bool tbCudaFill(T * out, T data, int count, StreamType stream)
     assert(grid_size  > 0);
     assert(block_size > 0);
 
+    tbCudaRawVerbose("tbCudaFill() GRID: %d, BLOCK: %d\n", round_up_grid, block_size);
+
     tbCudaFillKernel<T><<<grid_size, block_size, 0, stream>>>(out, data, count);
+
+    if (isTbagCudaRawVerbose()) {
+        float occupancy = 0;
+        if (tbCudaGetMaxPotentialBlockSizeOfTheoretical(nullptr, tbCudaFillKernel<T>, block_size)) {
+            tbCudaRawVerbose("tbCudaFill() Launched blocks of size %d -> Theoretical occupancy: %f\n",
+                             block_size, occupancy);
+        }
+    }
     return TB_TRUE;
 }
 
