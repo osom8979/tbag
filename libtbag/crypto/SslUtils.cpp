@@ -30,6 +30,9 @@ void initializeSsl()
     SSL_library_init();
     OpenSSL_add_all_algorithms();
     OPENSSL_config(nullptr);
+
+    ERR_load_crypto_strings();
+    ERR_load_BIO_strings();
 }
 
 void releaseSsl()
