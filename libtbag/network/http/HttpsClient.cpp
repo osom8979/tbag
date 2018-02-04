@@ -15,7 +15,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-HttpsClient::HttpsClient(Loop & loop, StreamType type) : Parent(loop, type), _reader(this)
+HttpsClient::HttpsClient(Loop & loop, StreamType type)
+        : Parent(loop, type), _reader(this), _tls(), _state(TlsState::TS_NOT_READY)
 {
     // EMPTY.
 }
@@ -40,9 +41,13 @@ Err HttpsClient::writeRequest(HttpRequest const & request)
     HttpRequest update_request = request;
     update_request.updateDefaultRequest();
     std::string const & REQUEST_STRING = update_request.toRequestString();
+    return writeTls(REQUEST_STRING.data(), REQUEST_STRING.size());
+}
 
+Err HttpsClient::writeTls(void const * data, std::size_t size)
+{
     Err encode_code = Err::E_UNKNOWN;
-    auto encode_result = _tls.decode(REQUEST_STRING.data(), REQUEST_STRING.size(), &encode_code);
+    auto encode_result = _tls.decode(data, size, &encode_code);
     if (isFailure(encode_code)) {
         return encode_code;
     }

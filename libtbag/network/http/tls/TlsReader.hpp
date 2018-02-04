@@ -54,6 +54,9 @@ public:
     virtual ~TlsReader();
 
 public:
+    bool isFinished() const;
+
+public:
     void accept();
     void connect();
 

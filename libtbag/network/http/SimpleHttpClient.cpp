@@ -23,13 +23,13 @@ namespace __impl {
 
 template <typename ClientType>
 Err requestWithSync(Uri const & uri,
+                    int port,
                     HttpRequest const & request,
                     HttpResponse & response,
                     uint64_t timeout,
                     typename ClientType::StreamType type)
 {
     std::string host;
-    int port = DEFAULT_HTTP_PORT;
 
     if (type == ClientType::StreamType::PIPE) {
         host = uri.toString();
@@ -108,7 +108,7 @@ Err requestWithSync(Uri const & uri,
                     uint64_t timeout,
                     HttpClient::StreamType type)
 {
-    return __impl::requestWithSync<HttpClient>(uri, request, response, timeout, type);
+    return __impl::requestWithSync<HttpClient>(uri, DEFAULT_HTTP_PORT, request, response, timeout, type);
 }
 
 Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout)
@@ -127,7 +127,7 @@ Err requestWithTlsSync(Uri const & uri,
                        uint64_t timeout,
                        HttpsClient::StreamType type)
 {
-    return __impl::requestWithSync<HttpsClient>(uri, request, response, timeout, type);
+    return __impl::requestWithSync<HttpsClient>(uri, DEFAULT_HTTPS_PORT, request, response, timeout, type);
 }
 
 Err requestWithTlsSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout)

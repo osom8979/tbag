@@ -40,6 +40,16 @@ TEST(NetworkHttpTest, HttpClient)
     ASSERT_EQ(200, response.code);
 }
 
+TEST(NetworkHttpTest, HttpsClient)
+{
+    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
+
+    HttpResponse response;
+    //auto result = http::requestWithTlsSync("https://www.random.org/cgi-bin/randbyte?nbytes=32&format=h", response, 10000);
+    //ASSERT_EQ(Err::E_SUCCESS, result);
+    //ASSERT_EQ(200, response.code);
+}
+
 static bool runSimpleServerTest(HttpServer::StreamType type, std::string const & bind, std::string const & method)
 {
     uvpp::Loop loop;

@@ -92,7 +92,7 @@ struct TlsReader::Impl : private Noncopyable
         }
     }
 
-    bool isInit() const
+    bool isFinished() const
     {
         return SSL_is_init_finished(ssl);
     }
@@ -173,14 +173,23 @@ struct TlsReader::Impl : private Noncopyable
             // The TLS/SSL handshake was not successful
             // but was shut down controlled and by the specifications of the TLS/SSL protocol.
             // Call SSL_get_error() with the return value ret to find out the reason.
-            return Err::E_SSL;
+            tDLogE("TlsReader::Impl::handshake() OpenSSL SSL_do_handshake() error: Ret({}), Err({})",
+                   CODE, SSL_get_error(ssl, CODE));
+            return Err::E_SSL_WTRD;
         } else if (CODE < 0) {
             // The TLS/SSL handshake was not successful
             // because a fatal error occurred either at the protocol level or a connection failure occurred.
             // The shutdown was not clean.
             // It can also occur of action is need to continue the operation for non-blocking BIOs.
             // Call SSL_get_error() with the return value ret to find out the reason.
-            return Err::E_SSL;
+            int const SSL_ERROR = SSL_get_error(ssl, CODE);
+            if (SSL_ERROR == SSL_ERROR_WANT_READ) {
+                return Err::E_SSL_WTRD;
+            } else {
+                tDLogE("TlsReader::Impl::handshake() OpenSSL SSL_do_handshake() error: Ret({}), Err({})",
+                       CODE, SSL_ERROR);
+                return Err::E_SSL;
+            }
         } else {
             return Err::E_UNKNOWN;
         }
@@ -274,6 +283,12 @@ TlsReader::TlsReader() : _impl(new Impl(this))
 TlsReader::~TlsReader()
 {
     // EMPTY.
+}
+
+bool TlsReader::isFinished() const
+{
+    assert(_impl != nullptr);
+    return _impl->isFinished();
 }
 
 void TlsReader::accept()

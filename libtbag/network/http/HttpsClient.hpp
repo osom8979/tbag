@@ -43,9 +43,18 @@ public:
     using Loop       = uvpp::Loop;
     using TlsReader  = tls::TlsReader;
 
+public:
+    enum class TlsState
+    {
+        TS_NOT_READY,
+        TS_HANDSHAKING,
+        TS_FINISH,
+    };
+
 private:
     HttpReaderForCallback<HttpsClient> _reader;
     TlsReader _tls;
+    TlsState  _state;
 
 public:
     HttpsClient(Loop & loop, StreamType type = StreamType::TCP);
@@ -57,6 +66,7 @@ public:
 public:
     Err writeRequest();
     Err writeRequest(HttpRequest const & request);
+    Err writeTls(void const * data, std::size_t size);
 
 public:
     // README:
@@ -70,11 +80,7 @@ public:
         }
 
         _tls.connect();
-        Err const HANDSHAKE_CODE = _tls.handshake();
-        if (isFailure(HANDSHAKE_CODE)) {
-            onError(EventType::ET_START, HANDSHAKE_CODE);
-            return;
-        }
+        _state = TlsState::TS_HANDSHAKING;
 
         Err const START_CODE = start();
         if (isFailure(START_CODE)) {
@@ -97,7 +103,22 @@ public:
             if (isFailure(decode_code)) {
                 onError(EventType::ET_READ, decode_code);
             } else {
-                _reader.parse(decode_result.data(), decode_result.size());
+                if (_tls.isFinished() == false) {
+                    if (isSuccess(_tls.handshake())) {
+                        // Recheck if handshake is complete now.
+                        _state = TlsState::TS_FINISH;
+                        return;
+                    }
+                }
+
+                if (_state == TlsState::TS_HANDSHAKING) {
+                    Err const WRITE_CODE = writeTls(decode_result.data(), decode_result.size());
+                    if (isFailure(WRITE_CODE)) {
+                        // Handshaking error.
+                    }
+                } else if (_state == TlsState::TS_FINISH) {
+                    _reader.parse(decode_result.data(), decode_result.size());
+                }
             }
         }
     }

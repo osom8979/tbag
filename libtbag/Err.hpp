@@ -71,6 +71,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_HTTP_5XX, "Server Error (HTTP 5xx)" ) \
     _TBAG_XX(_EXIT    , "Exit process"            ) \
     _TBAG_XX(_SSL     , "SSL error"               ) \
+    _TBAG_XX(_SSL_WTRD, "SSL want read"           ) \
     _TBAG_XX(_OPENCL  , "OpenCL error"            ) \
     _TBAG_XX(_CUDA    , "CUDA error"              ) \
     /* Locale */ \
