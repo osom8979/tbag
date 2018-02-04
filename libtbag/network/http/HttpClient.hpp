@@ -43,13 +43,6 @@ public:
     using Loop       = uvpp::Loop;
     using Masking    = random::MaskingDevice;
 
-    enum class EventType
-    {
-        ET_CONNECT,
-        ET_START,
-        ET_READ
-    };
-
 private:
     HttpReaderForCallback<HttpClient> _reader;
     Masking _device;

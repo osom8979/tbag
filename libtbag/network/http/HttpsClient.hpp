@@ -43,13 +43,6 @@ public:
     using Loop       = uvpp::Loop;
     using TlsReader  = tls::TlsReader;
 
-    enum class EventType
-    {
-        ET_CONNECT,
-        ET_START,
-        ET_READ
-    };
-
 private:
     HttpReaderForCallback<HttpsClient> _reader;
     TlsReader _tls;

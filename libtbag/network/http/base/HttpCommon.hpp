@@ -95,6 +95,13 @@ TBAG_CONSTEXPR char const * const WEBSOCKET_HANDSHAKE_GUID = "258EAFA5-E914-47DA
 
 TBAG_CONSTEXPR uint8_t const WEBSOCKET_MINIMUM_HEADER_BYTE_SIZE = 2;
 
+enum class EventType
+{
+    ET_CONNECT,
+    ET_START,
+    ET_READ
+};
+
 } // namespace base
 
 using namespace libtbag::network::http::base;

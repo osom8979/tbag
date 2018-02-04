@@ -329,7 +329,7 @@ TEST(NetworkHttpTest, WebSocketEcho)
         }
     });
 
-    client.set_onError([&](HttpClient::EventType from, Err code){
+    client.set_onError([&](EventType from, Err code){
         ws_error_counter++;
         client.close();
     });
@@ -497,7 +497,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
             }
         });
 
-        client->set_onError([&, i](HttpClient::EventType from, Err code){
+        client->set_onError([&, i](EventType from, Err code){
             auto shared_client = clients[i];
             if (static_cast<bool>(shared_client)) {
                 ++(ws_error_counter.at(i));

@@ -44,7 +44,6 @@ public:
     using Loop       = HttpClient::Loop;
     using StreamType = HttpClient::StreamType;
     using ReadPacket = HttpClient::ReadPacket;
-    using EventType  = HttpClient::EventType;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(HttpClient, Parent);
 

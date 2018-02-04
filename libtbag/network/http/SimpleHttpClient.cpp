@@ -17,109 +17,21 @@ NAMESPACE_LIBTBAG_OPEN
 namespace network {
 namespace http    {
 
-SimpleHttpClient::SimpleHttpClient(Loop & loop, StreamType type)
-        : HttpClient(loop, type)
-{
-    // EMPTY.
-}
+// ---------------
+namespace __impl {
+// ---------------
 
-SimpleHttpClient::~SimpleHttpClient()
-{
-    // EMPTY.
-}
-
-void SimpleHttpClient::callOnErrorAndClose(Err code)
-{
-    if (static_cast<bool>(_error_cb)) {
-        _error_cb(code);
-    }
-    close();
-}
-
-void SimpleHttpClient::onShutdown(Err code)
-{
-    callOnErrorAndClose(Err::E_INACCES);
-}
-
-void SimpleHttpClient::onWrite(Err code)
-{
-    if (isFailure(code)) {
-        callOnErrorAndClose(code);
-    }
-}
-
-void SimpleHttpClient::onClose()
-{
-    // EMPTY.
-}
-
-void SimpleHttpClient::onTimer()
-{
-    callOnErrorAndClose(Err::E_TIMEOUT);
-}
-
-void SimpleHttpClient::onContinue(void * arg)
-{
-    // EMPTY.
-}
-
-bool SimpleHttpClient::onSwitchingProtocol(HttpProperty const & property, void * arg)
-{
-    callOnErrorAndClose(Err::E_INACCES);
-    return false;
-}
-
-void SimpleHttpClient::onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg)
-{
-    callOnErrorAndClose(Err::E_INACCES);
-}
-
-void SimpleHttpClient::onRegularHttp(HttpProperty const & property, void * arg)
-{
-    if (static_cast<bool>(_response_cb)) {
-        _response_cb(property);
-    }
-    stopTimer();
-    close();
-}
-
-void SimpleHttpClient::onParseError(Err code, void * arg)
-{
-    callOnErrorAndClose(code);
-}
-
-void SimpleHttpClient::onOpen()
-{
-    Err const WRITE_CODE = writeRequest(_request);
-    if (isFailure(WRITE_CODE)) {
-        callOnErrorAndClose(WRITE_CODE);
-    }
-}
-
-void SimpleHttpClient::onEof()
-{
-    close();
-}
-
-void SimpleHttpClient::onError(EventType from, Err code)
-{
-    callOnErrorAndClose(code);
-}
-
-// ----------
-// Utilities.
-// ----------
-
+template <typename ClientType>
 Err requestWithSync(Uri const & uri,
                     HttpRequest const & request,
                     HttpResponse & response,
                     uint64_t timeout,
-                    HttpClient::StreamType type)
+                    typename ClientType::StreamType type)
 {
     std::string host;
     int port = DEFAULT_HTTP_PORT;
 
-    if (type == HttpClient::StreamType::PIPE) {
+    if (type == ClientType::StreamType::PIPE) {
         host = uri.toString();
         port = 0;
     } else {
@@ -129,10 +41,12 @@ Err requestWithSync(Uri const & uri,
         }
     }
 
+    using Simple = SimpleClient<ClientType>;
+
     uvpp::Loop loop;
-    std::shared_ptr<SimpleHttpClient> http;
+    std::shared_ptr<Simple> http;
     try {
-        http.reset(new SimpleHttpClient(loop, type));
+        http.reset(new Simple(loop, type));
     } catch (...) {
         return Err::E_BADALLOC;
     }
@@ -165,7 +79,7 @@ Err requestWithSync(Uri const & uri,
     }
     builder.updateDefaultRequest();
 
-    tDLogI("requestWithSync() Request {}: {}", builder.method, uri.toString());
+    tDLogI("request() Request {}: {}", builder.method, uri.toString());
     Err code = Err::E_UNKNOWN;
     http->setRequest(builder);
     http->setOnResponse([&](HttpResponse const & r){
@@ -184,6 +98,19 @@ Err requestWithSync(Uri const & uri,
     return code;
 }
 
+// ------------------
+} // namespace __impl
+// ------------------
+
+Err requestWithSync(Uri const & uri,
+                    HttpRequest const & request,
+                    HttpResponse & response,
+                    uint64_t timeout,
+                    HttpClient::StreamType type)
+{
+    return __impl::requestWithSync<HttpClient>(uri, request, response, timeout, type);
+}
+
 Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout)
 {
     return requestWithSync(Uri(uri), request, response, timeout);
@@ -192,6 +119,25 @@ Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpRe
 Err requestWithSync(std::string const & uri, HttpResponse & response, uint64_t timeout)
 {
     return requestWithSync(Uri(uri), HttpProperty(), response, timeout);
+}
+
+Err requestWithTlsSync(Uri const & uri,
+                       HttpRequest const & request,
+                       HttpResponse & response,
+                       uint64_t timeout,
+                       HttpsClient::StreamType type)
+{
+    return __impl::requestWithSync<HttpsClient>(uri, request, response, timeout, type);
+}
+
+Err requestWithTlsSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout)
+{
+    return requestWithTlsSync(Uri(uri), request, response, timeout);
+}
+
+Err requestWithTlsSync(std::string const & uri, HttpResponse & response, uint64_t timeout)
+{
+    return requestWithTlsSync(Uri(uri), HttpProperty(), response, timeout);
 }
 
 } // namespace http
