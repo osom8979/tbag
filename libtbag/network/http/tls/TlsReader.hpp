@@ -15,7 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/uvpp/UvCommon.hpp>
+
+#include <memory>
+#include <vector>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,28 +32,37 @@ namespace http    {
 namespace tls     {
 
 /**
- * TlsReader interface.
- *
- * @author zer0
- * @date   2017-11-11
- */
-struct TlsReaderInterface
-{
-};
-
-/**
  * TlsReader class prototype.
  *
  * @author zer0
  * @date   2017-11-11
  */
-class TBAG_API TlsReader : public TlsReaderInterface
+class TBAG_API TlsReader
 {
+public:
+    struct Impl;
+    friend struct Impl;
+
+public:
+    using UniqueImpl = std::unique_ptr<Impl>;
+
+private:
+    UniqueImpl _impl;
+
 public:
     TlsReader();
     virtual ~TlsReader();
 
 public:
+    void accept();
+    void connect();
+
+public:
+    Err handshake();
+
+public:
+    std::vector<char> encode(void const * data, std::size_t size, Err * code);
+    std::vector<char> decode(void const * data, std::size_t size, Err * code);
 };
 
 } // namespace tls

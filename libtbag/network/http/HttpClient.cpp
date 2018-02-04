@@ -8,8 +8,6 @@
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/log/Log.hpp>
 
-//#define TBAG_WS_CLIENT_CHECK_BUFFER
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
