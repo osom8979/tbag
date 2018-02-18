@@ -57,11 +57,16 @@ public:
     bool isFinished() const;
 
 public:
+    std::string getCipherName() const;
+
+public:
     void accept();
     void connect();
 
 public:
     Err handshake();
+    Err readFromWriteBuffer(std::vector<char> & result);
+    Err writeToReadBuffer(void const * data, std::size_t size, std::size_t * write_size = nullptr);
 
 public:
     std::vector<char> encode(void const * data, std::size_t size, Err * code);

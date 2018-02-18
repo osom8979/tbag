@@ -47,7 +47,8 @@ public:
     enum class TlsState
     {
         TS_NOT_READY,
-        TS_HANDSHAKING,
+        TS_HELLO,
+        TS_EXCHANGE_KEY,
         TS_FINISH,
     };
 
@@ -69,70 +70,20 @@ public:
     Err writeTls(void const * data, std::size_t size);
 
 public:
-    // README:
-    // The reason for writing the callback in the header is to verify the logic when redefining the virtual function.
+    virtual void onConnect(Err code) override;
+    virtual void onRead(Err code, ReadPacket const & packet) override;
+    virtual void onParseError(Err code, void * arg) override;
 
-    virtual void onConnect(Err code) override
-    {
-        if (isFailure(code)) {
-            onError(EventType::ET_CONNECT, code);
-            return;
-        }
-
-        _tls.connect();
-        _state = TlsState::TS_HANDSHAKING;
-
-        Err const START_CODE = start();
-        if (isFailure(START_CODE)) {
-            onError(EventType::ET_START, START_CODE);
-            return;
-        }
-
-        onOpen();
-    }
-
-    virtual void onRead(Err code, ReadPacket const & packet) override
-    {
-        if (code == Err::E_EOF) {
-            onEof();
-        } else if (code != Err::E_SUCCESS) {
-            onError(EventType::ET_READ, code);
-        } else {
-            Err decode_code = Err::E_UNKNOWN;
-            auto decode_result = _tls.decode(packet.buffer, packet.size, &decode_code);
-            if (isFailure(decode_code)) {
-                onError(EventType::ET_READ, decode_code);
-            } else {
-                if (_tls.isFinished() == false) {
-                    if (isSuccess(_tls.handshake())) {
-                        // Recheck if handshake is complete now.
-                        _state = TlsState::TS_FINISH;
-                        return;
-                    }
-                }
-
-                if (_state == TlsState::TS_HANDSHAKING) {
-                    Err const WRITE_CODE = writeTls(decode_result.data(), decode_result.size());
-                    if (isFailure(WRITE_CODE)) {
-                        // Handshaking error.
-                    }
-                } else if (_state == TlsState::TS_FINISH) {
-                    _reader.parse(decode_result.data(), decode_result.size());
-                }
-            }
-        }
-    }
-
-    virtual void onParseError(Err code, void * arg) override
-    {
-        close();
-    }
+private:
+    void onHandshakeHello(ReadPacket const & packet);
+    void onHandshakeExchangeKey(ReadPacket const & packet);
+    void onApplication(ReadPacket const & packet);
 
 // Extension callback methods.
 public:
-    virtual void onOpen() { /* EMPTY. */ }
-    virtual void onEof() { close(); }
-    virtual void onError(EventType from, Err code) { close(); }
+    virtual void onOpen();
+    virtual void onEof();
+    virtual void onError(EventType from, Err code);
 };
 
 } // namespace http

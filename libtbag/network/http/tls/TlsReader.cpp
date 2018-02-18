@@ -60,6 +60,8 @@ struct TlsReader::Impl : private Noncopyable
             return false;
         }
 
+        SSL_CTX_set_verify(context, SSL_VERIFY_NONE, nullptr);
+
         ssl = SSL_new(context);
         if (ssl == nullptr) {
             tDLogE("TlsReader::Impl::init() OpenSSL SSL error.");
@@ -74,14 +76,14 @@ struct TlsReader::Impl : private Noncopyable
 
     void release()
     {
-        if (read_bio != nullptr) {
-            BIO_free(read_bio);
-            read_bio = nullptr;
-        }
-        if (write_bio != nullptr) {
-            BIO_free(write_bio);
-            write_bio = nullptr;
-        }
+        //if (read_bio != nullptr) {
+        //    BIO_free(read_bio);
+        //    read_bio = nullptr;
+        //}
+        //if (write_bio != nullptr) {
+        //    BIO_free(write_bio);
+        //    write_bio = nullptr;
+        //}
         if (ssl != nullptr) {
             SSL_free(ssl);
             ssl = nullptr;
@@ -173,49 +175,31 @@ struct TlsReader::Impl : private Noncopyable
             // The TLS/SSL handshake was not successful
             // but was shut down controlled and by the specifications of the TLS/SSL protocol.
             // Call SSL_get_error() with the return value ret to find out the reason.
-            tDLogE("TlsReader::Impl::handshake() OpenSSL SSL_do_handshake() error: Ret({}), Err({})",
-                   CODE, SSL_get_error(ssl, CODE));
-            return Err::E_SSL_WTRD;
         } else if (CODE < 0) {
             // The TLS/SSL handshake was not successful
             // because a fatal error occurred either at the protocol level or a connection failure occurred.
             // The shutdown was not clean.
-            // It can also occur of action is need to continue the operation for non-blocking BIOs.
-            // Call SSL_get_error() with the return value ret to find out the reason.
-            int const SSL_ERROR = SSL_get_error(ssl, CODE);
-            if (SSL_ERROR == SSL_ERROR_WANT_READ) {
-                return Err::E_SSL_WTRD;
-            } else {
-                tDLogE("TlsReader::Impl::handshake() OpenSSL SSL_do_handshake() error: Ret({}), Err({})",
-                       CODE, SSL_ERROR);
-                return Err::E_SSL;
-            }
         } else {
             return Err::E_UNKNOWN;
         }
-    }
 
-    /**
-     * @remarks
-     *  <pre>
-     *   Input data -> SSL_write() -> BIO(Write) -> Result buffer.
-     *  </pre>
-     */
-    Err encode(void const * data, std::size_t size, std::vector<char> & result)
-    {
-        int const WRITE_RESULT = SSL_write(ssl, data, size);
-        if (WRITE_RESULT <= 0) {
-            // The write operation was not successful,
-            // because either the connection was closed,
-            // an error occurred or action must be taken by the calling process.
-            // Call SSL_get_error() with the return value ret to find out the reason.
+        // @formatter:off
+        auto const REASON = SSL_get_error(ssl, CODE);
+        switch (REASON) {
+        case SSL_ERROR_NONE:              return Err::E_SSL;
+        case SSL_ERROR_SSL:               return Err::E_SSL;
+        case SSL_ERROR_WANT_READ:         return Err::E_SSLWREAD;
+        case SSL_ERROR_WANT_WRITE:        return Err::E_SSLWWRITE;
+        case SSL_ERROR_WANT_X509_LOOKUP:  return Err::E_SSLWX509;
+        default:
+            tDLogE("TlsReader::Impl::handshake() OpenSSL SSL_do_handshake() error: code({}) reason({})", CODE, REASON);
             return Err::E_SSL;
         }
+        // @formatter:on
+    }
 
-        assert(WRITE_RESULT > 0);
-
-        // The write operation was successful,
-        // the return value is the number of bytes actually written to the TLS/SSL connection.
+    Err readFromWriteBuffer(std::vector<char> & result)
+    {
         int const PENDING = BIO_pending(write_bio);
         if (PENDING <= 0) {
             return Err::E_SSL;
@@ -239,10 +223,28 @@ struct TlsReader::Impl : private Noncopyable
     /**
      * @remarks
      *  <pre>
-     *   Input data -> BIO(read) -> SSL_read() -> Result buffer.
+     *   Input data -> SSL_write() -> BIO(Write) -> Result buffer.
      *  </pre>
      */
-    Err decode(void const * data, std::size_t size, std::vector<char> & result)
+    Err encode(void const * data, std::size_t size, std::vector<char> & result)
+    {
+        int const WRITE_RESULT = SSL_write(ssl, data, size);
+        if (WRITE_RESULT <= 0) {
+            // The write operation was not successful,
+            // because either the connection was closed,
+            // an error occurred or action must be taken by the calling process.
+            tDLogE("TlsReader::Impl::encode() OpenSSL SSL_write() error: reason({})",
+                   SSL_get_error(ssl, WRITE_RESULT));
+            return Err::E_SSL;
+        }
+
+        // The write operation was successful,
+        // the return value is the number of bytes actually written to the TLS/SSL connection.
+        assert(WRITE_RESULT > 0);
+        return readFromWriteBuffer(result);
+    }
+
+    Err writeToReadBuffer(void const * data, std::size_t size, std::size_t * write_size)
     {
         int const BIO_WRITE_RESULT = BIO_write(read_bio, data, size);
         if (BIO_WRITE_RESULT == -2) {
@@ -251,24 +253,89 @@ struct TlsReader::Impl : private Noncopyable
             return Err::E_SSL;
         }
 
-        assert(BIO_WRITE_RESULT > 0);
-        result.resize(static_cast<std::size_t>(BIO_WRITE_RESULT));
-
-        int const READ_RESULT = SSL_read(ssl, result.data(), BIO_WRITE_RESULT);
-        if (READ_RESULT <= 0) {
-            // The read operation was not successful, because either the connection was closed,
-            // an error occurred or action must be taken by the calling process.
-            // Call SSL_get_error(3) with the return value ret to find out the reason.
-            return Err::E_SSL;
+        if (write_size != nullptr) {
+            *write_size = static_cast<std::size_t>(BIO_WRITE_RESULT);
         }
-
-        // The read operation was successful.
-        // The return value is the number of bytes
-        // actually read from the TLS/SSL connection.
-        assert(READ_RESULT > 0);
-        assert(READ_RESULT == result.size());
         return Err::E_SUCCESS;
     }
+
+    /**
+     * @remarks
+     *  <pre>
+     *   Input data -> BIO(read) -> SSL_read() -> Result buffer.
+     *  </pre>
+     */
+    Err decode(void const * data, std::size_t size, std::vector<char> & result)
+    {
+        std::size_t write_size = 0;
+        Err const WRITE_CODE = writeToReadBuffer(data, size, &write_size);
+        if (WRITE_CODE != Err::E_SUCCESS) {
+            return WRITE_CODE;
+        }
+
+        assert(WRITE_CODE == Err::E_SUCCESS);
+
+        // Maximum record size of 16kB for SSLv3/TLSv1
+        // https://wiki.openssl.org/index.php/Manual:SSL_read(3)
+        std::size_t const BYTE_STEP = 1024;
+        std::size_t const MAX_STEP_COUNT = 16;
+
+        std::vector<char> buffer;
+        int read_result = 0;
+        Err code = Err::E_UNKNOWN;
+
+        for (std::size_t i = 1; i <= MAX_STEP_COUNT; ++i) {
+            buffer.resize(BYTE_STEP * i);
+
+            read_result = SSL_read(ssl, buffer.data(), buffer.size());
+            if (read_result > 0) {
+                // The read operation was successful.
+                // The return value is the number of bytes
+                // actually read from the TLS/SSL connection.
+                result.assign(buffer.begin(), buffer.begin() + read_result);
+                code = Err::E_SUCCESS;
+                break;
+            } else {
+                // The read operation was not successful, because either the connection was closed,
+                // an error occurred or action must be taken by the calling process.
+                int const SSL_ERROR = SSL_get_error(ssl, read_result);
+                if (SSL_ERROR == SSL_ERROR_WANT_READ) {
+                    code = Err::E_SSLWREAD;
+                } else {
+                    code = Err::E_SSL;
+                    break;
+                }
+            }
+        }
+
+        return code;
+    }
+
+//    int krx_ssl_handle_traffic(krx* from, krx* to)
+//    {
+//        int pending = BIO_ctrl_pending(from->out_bio);
+//
+//        if(pending > 0) {
+//            read = BIO_read(from->out_bio, outbuf, sizeof(outbuf));
+//        }
+//        printf("%s Pending %d, and read: %d\n", from->name, pending, read);
+//
+//        if(read > 0) {
+//            written = BIO_write(to->in_bio, outbuf, read);
+//        }
+//
+//        if(written > 0) {
+//            if(!SSL_is_init_finished(to->ssl)) {
+//                SSL_do_handshake(to->ssl);
+//            }
+//            else {
+//                read = SSL_read(to->ssl, outbuf, sizeof(outbuf));
+//                printf("%s read: %s\n", to->name, outbuf);
+//            }
+//        }
+//
+//        return 0;
+//    }
 };
 
 // -------------------------
@@ -291,6 +358,12 @@ bool TlsReader::isFinished() const
     return _impl->isFinished();
 }
 
+std::string TlsReader::getCipherName() const
+{
+    assert(_impl != nullptr);
+    return _impl->getCipherName();
+}
+
 void TlsReader::accept()
 {
     assert(_impl != nullptr);
@@ -307,6 +380,18 @@ Err TlsReader::handshake()
 {
     assert(_impl != nullptr);
     return _impl->handshake();
+}
+
+Err TlsReader::readFromWriteBuffer(std::vector<char> & result)
+{
+    assert(_impl != nullptr);
+    return _impl->readFromWriteBuffer(result);
+}
+
+Err TlsReader::writeToReadBuffer(void const * data, std::size_t size, std::size_t * write_size)
+{
+    assert(_impl != nullptr);
+    return _impl->writeToReadBuffer(data, size, write_size);
 }
 
 std::vector<char> TlsReader::encode(void const * data, std::size_t size, Err * code)

@@ -103,6 +103,16 @@ enum class EventType
     ET_READ
 };
 
+inline char const * const getEventTypeName(EventType type) TBAG_NOEXCEPT
+{
+    switch (type) {
+    case EventType::ET_CONNECT: return "ET_CONNECT";
+    case EventType::ET_START:   return "ET_START";
+    case EventType::ET_READ:    return "ET_READ";
+    default:                    return "ET_UNKNOWN";
+    }
+}
+
 } // namespace base
 
 using namespace libtbag::network::http::base;
