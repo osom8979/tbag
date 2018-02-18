@@ -23,6 +23,7 @@
 #include <vector>
 #include <initializer_list>
 #include <type_traits>
+#include <ostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -268,21 +269,21 @@ public:
 TBAG_API Err checkPrepareFiles(std::string const & source_path, std::string const & destination_path, bool check_dir = true);
 TBAG_API Err checkPrepareFiles(Path const & source_path, Path const & destination_path, bool check_dir = true);
 
+// --------------
+// Output Stream.
+// --------------
+
+template <class CharT, class TraitsT>
+std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, Path const & path)
+{
+    return os << path.toString();
+}
+
 } // namespace filesystem
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
-#include <ostream>
-
-template <class CharT, class TraitsT>
-std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os,
-                                                libtbag::filesystem::Path const & path)
-{
-    os << path.toString();
-    return os;
-}
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_PATH_HPP__
 
