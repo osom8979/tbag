@@ -17,6 +17,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <ostream>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -24,56 +26,58 @@ NAMESPACE_LIBTBAG_OPEN
 #ifndef TBAG_ERROR_INFO_MAP
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX) \
     /* Common error codes (Success Anyway). */ \
-    _TBAG_XX(_SUCCESS , "No error"                ) \
-    _TBAG_XX(_WARNING , "Success, but warning"    ) \
-    _TBAG_XX(_CONTINUE, "Wait for the next"       ) \
-    _TBAG_XX(_ASYNCREQ, "Async request"           ) \
-    _TBAG_XX(_ENQASYNC, "Enqueue and async"       ) \
+    _TBAG_XX(_SUCCESS  , "No error"                ) \
+    _TBAG_XX(_WARNING  , "Success, but warning"    ) \
+    _TBAG_XX(_CONTINUE , "Wait for the next"       ) \
+    _TBAG_XX(_ASYNCREQ , "Async request"           ) \
+    _TBAG_XX(_ENQASYNC , "Enqueue and async"       ) \
     /* Common error codes. */ \
-    _TBAG_XX(_ILLARGS , "Illegal arguments"       ) \
-    _TBAG_XX(_ILLSTATE, "Illegal state"           ) \
-    _TBAG_XX(_EOPEN   , "Open error"              ) \
-    _TBAG_XX(_EINDEX  , "Index error"             ) \
-    _TBAG_XX(_ALREADY , "Already state"           ) \
-    _TBAG_XX(_SAMEOBJ , "Same object"             ) \
-    _TBAG_XX(_BADALLOC, "Bad allocation"          ) \
-    _TBAG_XX(_OORANGE , "Out of range"            ) \
-    _TBAG_XX(_NULLPTR , "Null pointer exception"  ) \
-    _TBAG_XX(_EBUFFER , "Empty buffer"            ) \
-    _TBAG_XX(_EQUEUE  , "Empty queue"             ) \
-    _TBAG_XX(_NREADY  , "Not ready"               ) \
-    _TBAG_XX(_UNSUPOP , "Unsupported operation"   ) \
-    _TBAG_XX(_EINIT   , "Initialize error"        ) \
-    _TBAG_XX(_RDERR   , "Unknown Read error"      ) \
-    _TBAG_XX(_WRERR   , "Unknown Write error"     ) \
-    _TBAG_XX(_SHUTDOWN, "Shutdown error"          ) \
-    _TBAG_XX(_ENFOUND , "Not found error"         ) \
-    _TBAG_XX(_TIMEOUT , "Timeout error"           ) \
-    _TBAG_XX(_PARSING , "Parsing error"           ) \
-    _TBAG_XX(_VERIFIER, "Verifier error"          ) \
-    _TBAG_XX(_EXPIRED , "Expired object error"    ) \
-    _TBAG_XX(_INSERT  , "Insert error"            ) \
-    _TBAG_XX(_CLOSING , "Closing object"          ) \
-    _TBAG_XX(_CLOSED  , "Closed object"           ) \
-    _TBAG_XX(_EQUERY  , "Query error"             ) \
-    _TBAG_XX(_SMALLBUF, "Buffer size is small"    ) \
-    _TBAG_XX(_KEYGEN  , "Key generator error"     ) \
-    _TBAG_XX(_UNKEXCP , "Unknown exception"       ) \
-    _TBAG_XX(_UNKSIG  , "Unknown signal"          ) \
-    _TBAG_XX(_ECOPY   , "Copy error"              ) \
-    _TBAG_XX(_EPUSH   , "Push error"              ) \
-    _TBAG_XX(_ESEND   , "Send error"              ) \
-    _TBAG_XX(_EPOP    , "Pop error"               ) \
-    _TBAG_XX(_INACCES , "Inaccessible error"      ) \
-    _TBAG_XX(_HTTP_1XX, "Informational (HTTP 1xx)") \
-    _TBAG_XX(_HTTP_3XX, "Redirection (HTTP 3xx)"  ) \
-    _TBAG_XX(_HTTP_4XX, "Client Error (HTTP 4xx)" ) \
-    _TBAG_XX(_HTTP_5XX, "Server Error (HTTP 5xx)" ) \
-    _TBAG_XX(_EXIT    , "Exit process"            ) \
-    _TBAG_XX(_SSL     , "SSL error"               ) \
-    _TBAG_XX(_SSL_WTRD, "SSL want read"           ) \
-    _TBAG_XX(_OPENCL  , "OpenCL error"            ) \
-    _TBAG_XX(_CUDA    , "CUDA error"              ) \
+    _TBAG_XX(_ILLARGS  , "Illegal arguments"       ) \
+    _TBAG_XX(_ILLSTATE , "Illegal state"           ) \
+    _TBAG_XX(_EOPEN    , "Open error"              ) \
+    _TBAG_XX(_EINDEX   , "Index error"             ) \
+    _TBAG_XX(_ALREADY  , "Already state"           ) \
+    _TBAG_XX(_SAMEOBJ  , "Same object"             ) \
+    _TBAG_XX(_BADALLOC , "Bad allocation"          ) \
+    _TBAG_XX(_OORANGE  , "Out of range"            ) \
+    _TBAG_XX(_NULLPTR  , "Null pointer exception"  ) \
+    _TBAG_XX(_EBUFFER  , "Empty buffer"            ) \
+    _TBAG_XX(_EQUEUE   , "Empty queue"             ) \
+    _TBAG_XX(_NREADY   , "Not ready"               ) \
+    _TBAG_XX(_UNSUPOP  , "Unsupported operation"   ) \
+    _TBAG_XX(_EINIT    , "Initialize error"        ) \
+    _TBAG_XX(_RDERR    , "Unknown Read error"      ) \
+    _TBAG_XX(_WRERR    , "Unknown Write error"     ) \
+    _TBAG_XX(_SHUTDOWN , "Shutdown error"          ) \
+    _TBAG_XX(_ENFOUND  , "Not found error"         ) \
+    _TBAG_XX(_TIMEOUT  , "Timeout error"           ) \
+    _TBAG_XX(_PARSING  , "Parsing error"           ) \
+    _TBAG_XX(_VERIFIER , "Verifier error"          ) \
+    _TBAG_XX(_EXPIRED  , "Expired object error"    ) \
+    _TBAG_XX(_INSERT   , "Insert error"            ) \
+    _TBAG_XX(_CLOSING  , "Closing object"          ) \
+    _TBAG_XX(_CLOSED   , "Closed object"           ) \
+    _TBAG_XX(_EQUERY   , "Query error"             ) \
+    _TBAG_XX(_SMALLBUF , "Buffer size is small"    ) \
+    _TBAG_XX(_KEYGEN   , "Key generator error"     ) \
+    _TBAG_XX(_UNKEXCP  , "Unknown exception"       ) \
+    _TBAG_XX(_UNKSIG   , "Unknown signal"          ) \
+    _TBAG_XX(_ECOPY    , "Copy error"              ) \
+    _TBAG_XX(_EPUSH    , "Push error"              ) \
+    _TBAG_XX(_ESEND    , "Send error"              ) \
+    _TBAG_XX(_EPOP     , "Pop error"               ) \
+    _TBAG_XX(_INACCES  , "Inaccessible error"      ) \
+    _TBAG_XX(_HTTP_1XX , "Informational (HTTP 1xx)") \
+    _TBAG_XX(_HTTP_3XX , "Redirection (HTTP 3xx)"  ) \
+    _TBAG_XX(_HTTP_4XX , "Client Error (HTTP 4xx)" ) \
+    _TBAG_XX(_HTTP_5XX , "Server Error (HTTP 5xx)" ) \
+    _TBAG_XX(_EXIT     , "Exit process"            ) \
+    _TBAG_XX(_SSL      , "SSL error"               ) \
+    _TBAG_XX(_SSLWREAD , "SSL want read"           ) \
+    _TBAG_XX(_SSLWWRITE, "SSL want write"          ) \
+    _TBAG_XX(_SSLWX509 , "SSL want x509 loopup"    ) \
+    _TBAG_XX(_OPENCL   , "OpenCL error"            ) \
+    _TBAG_XX(_CUDA     , "CUDA error"              ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
@@ -233,6 +237,16 @@ TBAG_API char const * getUvErrorDetail(int uv_error_code);
  */
 TBAG_API char const * getUvErrorName(int uv_error_code);
 
+// --------------
+// Output Stream.
+// --------------
+
+template <class CharT, class TraitsT>
+std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, Err const & err)
+{
+    return os << libtbag::getErrName(err);
+}
+
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
@@ -262,18 +276,6 @@ inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
 inline bool isFailureAnyway(libtbag::Err err) TBAG_NOEXCEPT
 {
     return !isSuccessAnyway(err);
-}
-
-// --------------
-// Output Stream.
-// --------------
-
-#include <ostream>
-
-inline std::ostream & operator << (std::ostream & os, libtbag::Err const & err)
-{
-    os << libtbag::getErrName(err);
-    return os;
 }
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_ERR_HPP__
