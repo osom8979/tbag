@@ -17,6 +17,32 @@
 #include <libtbag/predef.hpp>
 
 #include <type_traits>
+#include <cmath>
+
+#ifndef TBAG_INT_HALF
+#define TBAG_INT_HALF(x)   ((x)>>1)
+#endif
+
+#ifndef TBAG_INT_DOUBLE
+#define TBAG_INT_DOUBLE(x) ((x)<<1)
+#endif
+
+// Integer division and modulo operations are particularly costly
+// and should be avoided or replaced with bitwise operations whenever possible:
+// If n is a power of 2, ( i / n ) is equivalent to ( i >> log2(n) )
+// and ( i % n ) is equivalent to ( i & n - 1 ).
+
+#ifndef TBAG_INT_DIVISION
+#define TBAG_INT_DIVISION(x, n/*Power of 2*/) ((x)>>log2(n))
+#endif
+
+/**
+ * @def TBAG_INT_MODULO
+ * @see <https://en.wikipedia.org/wiki/Remainder>
+ */
+#ifndef TBAG_INT_MODULO
+#define TBAG_INT_MODULO(x, n/*Power of 2*/) (((x)&(n))-1)
+#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
