@@ -79,7 +79,7 @@ Err requestWithSync(Uri const & uri,
     }
     builder.updateDefaultRequest();
 
-    tDLogI("request() Request {}: {}", builder.method, uri.toString());
+    tDLogI("requestWithSync() Request {}: {}", builder.method, uri.toString());
     Err code = Err::E_UNKNOWN;
     http->setRequest(builder);
     http->setOnResponse([&](HttpResponse const & r){

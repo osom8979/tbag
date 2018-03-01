@@ -76,14 +76,6 @@ struct TlsReader::Impl : private Noncopyable
 
     void release()
     {
-        //if (read_bio != nullptr) {
-        //    BIO_free(read_bio);
-        //    read_bio = nullptr;
-        //}
-        //if (write_bio != nullptr) {
-        //    BIO_free(write_bio);
-        //    write_bio = nullptr;
-        //}
         if (ssl != nullptr) {
             SSL_free(ssl);
             ssl = nullptr;
@@ -285,7 +277,7 @@ struct TlsReader::Impl : private Noncopyable
         Err code = Err::E_UNKNOWN;
 
         for (std::size_t i = 1; i <= MAX_STEP_COUNT; ++i) {
-            buffer.resize(BYTE_STEP * i);
+            buffer.resize(write_size + (BYTE_STEP * i));
 
             read_result = SSL_read(ssl, buffer.data(), buffer.size());
             if (read_result > 0) {
@@ -310,32 +302,6 @@ struct TlsReader::Impl : private Noncopyable
 
         return code;
     }
-
-//    int krx_ssl_handle_traffic(krx* from, krx* to)
-//    {
-//        int pending = BIO_ctrl_pending(from->out_bio);
-//
-//        if(pending > 0) {
-//            read = BIO_read(from->out_bio, outbuf, sizeof(outbuf));
-//        }
-//        printf("%s Pending %d, and read: %d\n", from->name, pending, read);
-//
-//        if(read > 0) {
-//            written = BIO_write(to->in_bio, outbuf, read);
-//        }
-//
-//        if(written > 0) {
-//            if(!SSL_is_init_finished(to->ssl)) {
-//                SSL_do_handshake(to->ssl);
-//            }
-//            else {
-//                read = SSL_read(to->ssl, outbuf, sizeof(outbuf));
-//                printf("%s read: %s\n", to->name, outbuf);
-//            }
-//        }
-//
-//        return 0;
-//    }
 };
 
 // -------------------------

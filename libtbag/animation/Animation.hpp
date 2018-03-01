@@ -138,6 +138,7 @@ public:
 
 public:
     inline int getType() const TBAG_NOEXCEPT { return TYPE; }
+
     inline AnimationType getAnimationType() const TBAG_NOEXCEPT
     {
         if (getFirstAnimationTypeNumber() <= COMPARE_AND(TYPE) <= getLastAnimationTypeNumber()) {
