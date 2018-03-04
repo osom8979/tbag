@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/id/Id.hpp>
+#include <libtbag/debug/Assert.hpp>
 
 #include <libtbag/uvpp/Tcp.hpp>
 #include <libtbag/uvpp/Pipe.hpp>
@@ -57,6 +58,20 @@ enum class StreamType : int
     TCP,
     PIPE,
 };
+
+inline char const * const getStreamName(StreamType type) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (type) {
+    case StreamType::TCP:       return "TCP";
+    case StreamType::PIPE:      return "PIPE";
+    case StreamType::UNKNOWN:   return "UNKNOWN";
+    default: break;
+    }
+    // @formatter:on
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    return "UNKNOWN";
+}
 
 template <typename T> struct IsNetworkType : public std::false_type
 {
