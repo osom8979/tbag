@@ -1,6 +1,6 @@
 ## VERSION
 
-- FlatBuffers 1.4.0
+- FlatBuffers 1.7.1
 
 ## LICENSE
 
