@@ -72,12 +72,17 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_HTTP_4XX , "Client Error (HTTP 4xx)" ) \
     _TBAG_XX(_HTTP_5XX , "Server Error (HTTP 5xx)" ) \
     _TBAG_XX(_EXIT     , "Exit process"            ) \
+    /* SSL */ \
     _TBAG_XX(_SSL      , "SSL error"               ) \
     _TBAG_XX(_SSLWREAD , "SSL want read"           ) \
     _TBAG_XX(_SSLWWRITE, "SSL want write"          ) \
     _TBAG_XX(_SSLWX509 , "SSL want x509 loopup"    ) \
+    /* OpenCL */ \
     _TBAG_XX(_OPENCL   , "OpenCL error"            ) \
+    /* CUDA */ \
     _TBAG_XX(_CUDA     , "CUDA error"              ) \
+    /* LMDB */ \
+    _TBAG_XX(_LMDB     , "LMDB error"              ) \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
