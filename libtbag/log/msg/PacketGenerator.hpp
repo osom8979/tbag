@@ -45,9 +45,6 @@ public:
     };
 
 public:
-    TBAG_CONSTEXPR static char const * const WINDOWS_NEW_LINE = "\r\n";
-    TBAG_CONSTEXPR static char const * const    UNIX_NEW_LINE = "\n";
-
     TBAG_CONSTEXPR static char const * const DATE_MSG_SEVERITY_PREFIX = "[";
     TBAG_CONSTEXPR static char const * const DATE_MSG_SEVERITY_SUFFIX = "]";
     TBAG_CONSTEXPR static char const * const DATE_MSG_THREAD_PREFIX   = "@";
@@ -70,8 +67,6 @@ public:
     // @formatter:off
     inline void setType(MakeType type) TBAG_NOEXCEPT { _type = type; }
     inline MakeType getType() const TBAG_NOEXCEPT { return _type; }
-    inline void setNewLineForUnixStyle() { _endl = UNIX_NEW_LINE; }
-    inline void setNewLineForWindowsStyle() { _endl = WINDOWS_NEW_LINE; }
     inline String getNewLine() const { return _endl; }
     // @formatter:on
 

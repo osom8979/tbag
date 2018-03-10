@@ -8,6 +8,7 @@
 #include <libtbag/log/msg/PacketGenerator.hpp>
 #include <libtbag/time/TimePoint.hpp>
 #include <libtbag/tty/Tces.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <sstream>
 #include <thread>
@@ -19,12 +20,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 namespace msg {
 
-PacketGenerator::PacketGenerator() : _type(MakeType::DEFAULT), _endl(UNIX_NEW_LINE)
+PacketGenerator::PacketGenerator() : _type(MakeType::DEFAULT), _endl(string::NEW_LINE)
 {
     // EMPTY.
 }
 
-PacketGenerator::PacketGenerator(MakeType type) : _type(type), _endl(UNIX_NEW_LINE)
+PacketGenerator::PacketGenerator(MakeType type) : _type(type), _endl(string::NEW_LINE)
 {
     // EMPTY.
 }

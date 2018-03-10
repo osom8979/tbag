@@ -36,6 +36,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+TBAG_CONSTEXPR char const * const WINDOWS_NEW_LINE = "\r\n";
+TBAG_CONSTEXPR char const * const    UNIX_NEW_LINE = "\n";
+
+#if defined(TBAG_PLATFORM_WINDOWS)
+TBAG_CONSTEXPR char const * const NEW_LINE = WINDOWS_NEW_LINE;
+#else
+TBAG_CONSTEXPR char const * const NEW_LINE = UNIX_NEW_LINE;
+#endif
+
 TBAG_CONSTEXPR char const CHAR_SPACE  = ' ';
 TBAG_CONSTEXPR char const CHAR_TAB    = '\t';
 TBAG_CONSTEXPR char const CHAR_RETURN = '\n';
