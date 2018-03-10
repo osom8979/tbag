@@ -24,6 +24,19 @@ namespace network {
 namespace http    {
 namespace tls     {
 
+/**
+ * Use the OpenSSL-TLS.
+ *
+ * @author zer0
+ * @date 2018-02-04
+ *
+ * @remarks
+ *  <pre>
+ *          |-> DATA/TLS/Encode -> SSL_write() -> BIO(Write) -> readFromWriteBuffer() ->|
+ *   [USER] |                                                                           | [SOCKET]
+ *          |<- DATA/TLS/Decode ->  SSL_read() <-  BIO(Read) <-   writeToReadBuffer() <-|
+ *  </pre>
+ */
 struct TlsReader::Impl : private Noncopyable
 {
     TlsReader * parent;
@@ -190,9 +203,19 @@ struct TlsReader::Impl : private Noncopyable
         // @formatter:on
     }
 
+    inline int pendingWriteBio() const
+    {
+        return BIO_pending(write_bio);
+    }
+
+    inline int pendingReadBio() const
+    {
+        return BIO_pending(read_bio);
+    }
+
     Err readFromWriteBuffer(std::vector<char> & result)
     {
-        int const PENDING = BIO_pending(write_bio);
+        int const PENDING = pendingWriteBio();
         if (PENDING <= 0) {
             return Err::E_SSL;
         }
@@ -251,6 +274,36 @@ struct TlsReader::Impl : private Noncopyable
         return Err::E_SUCCESS;
     }
 
+    // Maximum record size of 16kB for SSLv3/TLSv1
+    // https://wiki.openssl.org/index.php/Manual:SSL_read(3)
+    TBAG_CONSTEXPR static std::size_t const MAX_BYTE   = 1024 * 16;
+    TBAG_CONSTEXPR static std::size_t const FIRST_BYTE = 1024;
+    TBAG_CONSTEXPR static std::size_t const BYTE_STEP  = 1024;
+
+    Err read(std::vector<char> & result, std::size_t buffer_size = FIRST_BYTE)
+    {
+        std::vector<char> buffer(buffer_size);
+        int const READ_RESULT = SSL_read(ssl, buffer.data(), buffer.size());
+        if (READ_RESULT <= 0) {
+            // The read operation was not successful, because either the connection was closed,
+            // an error occurred or action must be taken by the calling process.
+            int const SSL_ERROR = SSL_get_error(ssl, READ_RESULT);
+            if (SSL_ERROR == SSL_ERROR_WANT_READ) {
+                if (buffer_size >= MAX_BYTE) {
+                    return Err::E_SSLWREAD;
+                } else {
+                    return read(result, buffer_size + BYTE_STEP);
+                }
+            } else {
+                return Err::E_SSL;
+            }
+        }
+
+        assert(READ_RESULT > 0);
+        result.assign(buffer.begin(), buffer.begin() + READ_RESULT);
+        return Err::E_SUCCESS;
+    }
+
     /**
      * @remarks
      *  <pre>
@@ -264,43 +317,19 @@ struct TlsReader::Impl : private Noncopyable
         if (WRITE_CODE != Err::E_SUCCESS) {
             return WRITE_CODE;
         }
-
         assert(WRITE_CODE == Err::E_SUCCESS);
+        return read(result, write_size);
+    }
 
-        // Maximum record size of 16kB for SSLv3/TLSv1
-        // https://wiki.openssl.org/index.php/Manual:SSL_read(3)
-        std::size_t const BYTE_STEP = 1024;
-        std::size_t const MAX_STEP_COUNT = 16;
-
-        std::vector<char> buffer;
-        int read_result = 0;
-        Err code = Err::E_UNKNOWN;
-
-        for (std::size_t i = 1; i <= MAX_STEP_COUNT; ++i) {
-            buffer.resize(write_size + (BYTE_STEP * i));
-
-            read_result = SSL_read(ssl, buffer.data(), buffer.size());
-            if (read_result > 0) {
-                // The read operation was successful.
-                // The return value is the number of bytes
-                // actually read from the TLS/SSL connection.
-                result.assign(buffer.begin(), buffer.begin() + read_result);
-                code = Err::E_SUCCESS;
-                break;
-            } else {
-                // The read operation was not successful, because either the connection was closed,
-                // an error occurred or action must be taken by the calling process.
-                int const SSL_ERROR = SSL_get_error(ssl, read_result);
-                if (SSL_ERROR == SSL_ERROR_WANT_READ) {
-                    code = Err::E_SSLWREAD;
-                } else {
-                    code = Err::E_SSL;
-                    break;
-                }
-            }
+    /** Read & decode from pending data. */
+    Err decode(std::vector<char> & result)
+    {
+        int const PENDING_SIZE = pendingReadBio();
+        if (PENDING_SIZE <= 0) {
+            return Err::E_SSL;
         }
-
-        return code;
+        assert(PENDING_SIZE > 0);
+        return read(result, static_cast<std::size_t>(PENDING_SIZE));
     }
 };
 
@@ -360,6 +389,18 @@ Err TlsReader::writeToReadBuffer(void const * data, std::size_t size, std::size_
     return _impl->writeToReadBuffer(data, size, write_size);
 }
 
+int TlsReader::pendingOfEncodeBufferSize() const
+{
+    assert(_impl != nullptr);
+    return _impl->pendingWriteBio();
+}
+
+int TlsReader::pendingOfDecodeBufferSize() const
+{
+    assert(_impl != nullptr);
+    return _impl->pendingReadBio();
+}
+
 std::vector<char> TlsReader::encode(void const * data, std::size_t size, Err * code)
 {
     assert(_impl != nullptr);
@@ -376,6 +417,17 @@ std::vector<char> TlsReader::decode(void const * data, std::size_t size, Err * c
     assert(_impl != nullptr);
     std::vector<char> result;
     Err const ENCODE_CODE = _impl->decode(data, size, result);
+    if (code != nullptr) {
+        *code = ENCODE_CODE;
+    }
+    return result;
+}
+
+std::vector<char> TlsReader::decode(Err * code)
+{
+    assert(_impl != nullptr);
+    std::vector<char> result;
+    Err const ENCODE_CODE = _impl->decode(result);
     if (code != nullptr) {
         *code = ENCODE_CODE;
     }

@@ -8,6 +8,7 @@
 #include <libtbag/network/http/SimpleHttpClient.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <libtbag/filesystem/details/FsTypes.hpp>
 #include <cassert>
 
 // -------------------
@@ -83,6 +84,7 @@ Err requestWithSync(Uri const & uri,
     Err code = Err::E_UNKNOWN;
     http->setRequest(builder);
     http->setOnResponse([&](HttpResponse const & r){
+        tDLogD("requestWithSync()::OnResponse() HTTP_CODE: {}", r.code);
         code = Err::E_SUCCESS;
         response = r;
     });

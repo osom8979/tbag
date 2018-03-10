@@ -40,12 +40,22 @@ TEST(NetworkHttpTest, HttpClient)
     ASSERT_EQ(200, response.code);
 }
 
-TEST(NetworkHttpTest, HttpsClient)
+TEST(NetworkHttpTest, HttpsClient_01)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
 
     HttpResponse response;
     auto result = http::requestWithTlsSync("https://raw.githubusercontent.com/osom8979/tbag/master/INFORMATION", response, 10000);
+    ASSERT_EQ(Err::E_SUCCESS, result);
+    ASSERT_EQ(200, response.code);
+}
+
+TEST(NetworkHttpTest, HttpsClient_02)
+{
+    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
+
+    HttpResponse response;
+    auto result = http::requestWithTlsSync("https://osom8979.github.io/", response, 10000);
     ASSERT_EQ(Err::E_SUCCESS, result);
     ASSERT_EQ(200, response.code);
 }

@@ -69,8 +69,15 @@ public:
     Err writeToReadBuffer(void const * data, std::size_t size, std::size_t * write_size = nullptr);
 
 public:
+    int pendingOfEncodeBufferSize() const;
+    int pendingOfDecodeBufferSize() const;
+
+public:
     std::vector<char> encode(void const * data, std::size_t size, Err * code);
     std::vector<char> decode(void const * data, std::size_t size, Err * code);
+
+    /** Read & decode from pending data. */
+    std::vector<char> decode(Err * code);
 };
 
 } // namespace tls
