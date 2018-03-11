@@ -22,6 +22,7 @@
 #include <libtbag/log/msg/MsgPacket.hpp>
 
 #include <libtbag/3rd/fmt/format.h>
+#include <libtbag/3rd/fmt/ostream.h>
 
 #include <string>
 #include <memory>
