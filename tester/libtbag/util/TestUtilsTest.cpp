@@ -31,8 +31,17 @@ TEST(TestUtilsTest, Default)
             ASSERT_TRUE(true);
         }
     }
-    TBAG_SCENARIO("Scenario2", "tester") {
+    TBAG_SCENARIO("Scenario2") {
         ASSERT_TRUE(true);
+    }
+    TBAG_SCENARIO("Scenario3") {
+        TBAG_GIVEN("Given3") {
+            TBAG_WHEN("When3") {
+                TBAG_THEN("Then3") {
+                    ASSERT_TRUE(true);
+                }
+            }
+        }
     }
 }
 

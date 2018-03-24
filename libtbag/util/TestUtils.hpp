@@ -34,6 +34,7 @@ struct Scenario
     std::string const NAME;
     std::string const TAG;
 
+    Scenario(std::string const & name);
     Scenario(std::string const & name, std::string const & tag);
     ~Scenario();
 
@@ -79,7 +80,7 @@ struct Then
 #define TBAG_THEN_NAME      __require_then__
 
 #ifndef TBAG_SCENARIO
-#define TBAG_SCENARIO(name, tag) if (auto TBAG_SCENARIO_NAME = ::libtbag::util::test::behaviour::Scenario(name, tag))
+#define TBAG_SCENARIO(.../*name, tag*/) if (auto TBAG_SCENARIO_NAME = ::libtbag::util::test::behaviour::Scenario(__VA_ARGS__))
 #endif
 
 #ifndef TBAG_GIVEN
