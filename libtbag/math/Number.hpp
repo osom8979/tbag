@@ -32,8 +32,12 @@
 // If n is a power of 2, ( i / n ) is equivalent to ( i >> log2(n) )
 // and ( i % n ) is equivalent to ( i & n - 1 ).
 
+#ifndef TBAG_INT_DIVISION_IMPL
+#define TBAG_INT_DIVISION_IMPL(x, __power_of_2__) ((x)>>((int)::log2(__power_of_2__)))
+#endif
+
 #ifndef TBAG_INT_DIVISION
-#define TBAG_INT_DIVISION(x, n/*Power of 2*/) ((x)>>log2(n))
+#define TBAG_INT_DIVISION(x, __log2_power_of_2__) ((x)>>(__log2_power_of_2__))
 #endif
 
 /**
@@ -41,7 +45,7 @@
  * @see <https://en.wikipedia.org/wiki/Remainder>
  */
 #ifndef TBAG_INT_MODULO
-#define TBAG_INT_MODULO(x, n/*Power of 2*/) (((x)&(n))-1)
+#define TBAG_INT_MODULO(x, __power_of_2__) (((x)&((__power_of_2__)-(1))))
 #endif
 
 // -------------------
