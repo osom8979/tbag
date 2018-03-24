@@ -1,6 +1,6 @@
 /**
  * @file   TestUtils.hpp
- * @brief  TestUtils class prototype.
+ * @brief  Google-test utilities.
  * @author zer0
  * @date   2016-06-30
  * @date   2018-03-24 (Rename: tester/DemoAsset -> libtbag/util/TestUtils)
@@ -16,16 +16,86 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/filesystem/TempDirGuard.hpp>
+
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace util {
+namespace util      {
+namespace test      {
+namespace behaviour {
 
-// EMPTY.
+struct Scenario
+{
+    std::string const NAME;
+    std::string const TAG;
 
+    Scenario(std::string const & name, std::string const & tag);
+    ~Scenario();
+
+    inline operator bool() const TBAG_NOEXCEPT { return true; }
+};
+
+struct Given
+{
+    Scenario const & SCENARIO;
+    std::string const NAME;
+
+    Given(Scenario & parent, std::string const & name);
+    ~Given();
+
+    inline operator bool() const TBAG_NOEXCEPT { return true; }
+};
+
+struct When
+{
+    Given const & GIVEN;
+    std::string const NAME;
+
+    When(Given & parent, std::string const & name);
+    ~When();
+
+    inline operator bool() const TBAG_NOEXCEPT { return true; }
+};
+
+struct Then
+{
+    When const & WHEN;
+    std::string const NAME;
+
+    Then(When const & parent, std::string const & name);
+    ~Then();
+
+    inline operator bool() const TBAG_NOEXCEPT { return true; }
+};
+
+#define TBAG_SCENARIO_NAME  __require_scenario__
+#define TBAG_GIVEN_NAME     __require_given__
+#define TBAG_WHEN_NAME      __require_when__
+#define TBAG_THEN_NAME      __require_then__
+
+#ifndef TBAG_SCENARIO
+#define TBAG_SCENARIO(name, tag) if (auto TBAG_SCENARIO_NAME = ::libtbag::util::test::behaviour::Scenario(name, tag))
+#endif
+
+#ifndef TBAG_GIVEN
+#define TBAG_GIVEN(name) if (auto TBAG_GIVEN_NAME = ::libtbag::util::test::behaviour::Given(TBAG_SCENARIO_NAME, name))
+#endif
+
+#ifndef TBAG_WHEN
+#define TBAG_WHEN(name) if (auto TBAG_WHEN_NAME = ::libtbag::util::test::behaviour::When(TBAG_GIVEN_NAME, name))
+#endif
+
+#ifndef TBAG_THEN
+#define TBAG_THEN(name) if (auto TBAG_THEN_NAME = ::libtbag::util::test::behaviour::Then(TBAG_WHEN_NAME, name))
+#endif
+
+} // namespace behaviour
+} // namespace test
 } // namespace util
 
 // --------------------
