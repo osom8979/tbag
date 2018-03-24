@@ -34,7 +34,7 @@ TEST(ImageTest, ReadImage)
 
     {   // Save & Load.
         tttDir(true, true);
-        auto const SAVE_PATH = tttDirGet() / "save.png";
+        auto const SAVE_PATH = tttDir_Get() / "save.png";
         ASSERT_EQ(Err::E_SUCCESS, saveImage(SAVE_PATH.getString(), image));
 
         Image reload;

@@ -91,7 +91,7 @@ TEST(XmlModelTest, Default)
     auto * node = static_cast<ModelNode*>(shared.get());
     ASSERT_NE(nullptr, node);
 
-    auto const CONFIG_PATH = tttDirGet() / model.getFileName();
+    auto const CONFIG_PATH = tttDir_Get() / model.getFileName();
     namespace fs = ::libtbag::filesystem::details;
 
     ASSERT_EQ(0, node->call_setup);
@@ -136,7 +136,7 @@ TEST(XmlModelTest, Resource)
     auto * node = static_cast<ModelNode*>(shared.get());
     ASSERT_NE(nullptr, node);
 
-    node->setRootDirectory(tttDirGet().toString());
+    node->setRootDirectory(tttDir_Get().toString());
     ASSERT_FALSE(node->getDynamicAsset().empty());
 
     std::string const TAG1 = "tag1";

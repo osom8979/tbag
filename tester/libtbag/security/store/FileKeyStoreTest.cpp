@@ -19,7 +19,7 @@ using namespace libtbag::security::store;
 TEST(FileKeyStoreTest, Default)
 {
     tttDir(true, true);
-    auto const FILE_PATH = tttDirGet() / "store";
+    auto const FILE_PATH = tttDir_Get() / "store";
 
     std::string const KEY1 = "key1";
     std::string const VAL1 = "value1";
@@ -54,7 +54,7 @@ TEST(FileKeyStoreTest, Default)
 TEST(FileKeyStoreTest, Encrypt)
 {
     tttDir(true, true);
-    auto const FILE_PATH = tttDirGet() / "store";
+    auto const FILE_PATH = tttDir_Get() / "store";
 
     std::string const KEY1 = "key1";
     std::string const VAL1 = "value1";

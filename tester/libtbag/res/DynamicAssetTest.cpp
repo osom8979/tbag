@@ -19,7 +19,7 @@ TEST(DynamicAssetTest, Default)
     char const * const KEY = "KEY";
     using Path = DynamicAsset::Path;
     DynamicAsset asset;
-    Path path = tttDirGet() / "dynamic_asset";
+    Path path = tttDir_Get() / "dynamic_asset";
 
     ASSERT_TRUE(asset.add(KEY, path));
     ASSERT_TRUE(asset.init());

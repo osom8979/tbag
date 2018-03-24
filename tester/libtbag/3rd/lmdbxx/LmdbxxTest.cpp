@@ -17,7 +17,7 @@ using namespace libtbag;
 TEST(LmdbxxTest, Default)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet();
+    auto const PATH = tttDir_Get();
 
     auto env = lmdb::env::create();
     env.set_mapsize(1UL * GIGA_BYTE_TO_BYTE);

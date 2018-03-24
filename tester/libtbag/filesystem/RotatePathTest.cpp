@@ -17,7 +17,7 @@ using namespace libtbag::filesystem;
 TEST(RotatePathTest, Default)
 {
     tttDir(true, true);
-    auto const file_path = tttDirGet() / "test.log";
+    auto const file_path = tttDir_Get() / "test.log";
 
     auto rotate = RotatePath::createDefault(file_path);
     ASSERT_TRUE(rotate.update());

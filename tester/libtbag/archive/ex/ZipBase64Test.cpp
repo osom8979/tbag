@@ -22,8 +22,8 @@ TEST(ZipBase64Test, FileToFile)
 {
     tttDir(true, true);
     auto const IMAGE_PATH = DemoAsset::get_tester_dir_image() / "lena.png";
-    auto const ENCODE_PATH = tttDirGet() / "lena.png.zb";
-    auto const DECODE_PATH = tttDirGet() / "lena.png";
+    auto const ENCODE_PATH = tttDir_Get() / "lena.png.zb";
+    auto const DECODE_PATH = tttDir_Get() / "lena.png";
 
     ASSERT_TRUE(encodeZipBase64FileToFile(IMAGE_PATH.toString(), ENCODE_PATH.toString()));
     ASSERT_TRUE(decodeZipBase64FileToFile(ENCODE_PATH.toString(), DECODE_PATH.toString()));
@@ -50,8 +50,8 @@ TEST(ZipBase64Test, FileToFile)
     ASSERT_EQ(ENCODE_MD5, FROM_FILE_ENCODE_MD5);
     ASSERT_EQ(DECODE_MD5, FROM_FILE_DECODE_MD5);
 
-    auto const ENCODE2_PATH = tttDirGet() / "lena2.png.zb";
-    auto const DECODE2_PATH = tttDirGet() / "lena2.png";
+    auto const ENCODE2_PATH = tttDir_Get() / "lena2.png.zb";
+    auto const DECODE2_PATH = tttDir_Get() / "lena2.png";
     ASSERT_TRUE(encodeZipBase64ToFile(decode, ENCODE2_PATH.toString()));
     ASSERT_TRUE(decodeZipBase64ToFile(encode, DECODE2_PATH.toString()));
     std::string const TO_FILE_ENCODE_MD5 = crypto::getMd5FromFile(ENCODE2_PATH.toString());

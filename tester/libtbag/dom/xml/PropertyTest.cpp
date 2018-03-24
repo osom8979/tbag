@@ -34,7 +34,7 @@ public:
 TEST(PropertyTest, Default)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet() / "property.xml";
+    auto const PATH = tttDir_Get() / "property.xml";
 
     DemoProperty property;
     property.loadOrCreate(PATH.toString());

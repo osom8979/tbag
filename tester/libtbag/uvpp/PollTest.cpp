@@ -42,7 +42,7 @@ TEST(PollTest, Default)
 #else
     char const * const TEST_FILENAME = "test.file";
     tttDir(true, true);
-    auto path = tttDirGet() / TEST_FILENAME;
+    auto path = tttDir_Get() / TEST_FILENAME;
 
     filesystem::File f;
     ASSERT_TRUE(f.open(path));

@@ -16,7 +16,7 @@ using namespace libtbag::database;
 TEST(SqliteTest, Default)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet() / "db.sqlite";
+    auto const PATH = tttDir_Get() / "db.sqlite";
 
     std::string const CREATE_TABLE =
             "CREATE TABLE IF NOT EXISTS test (id INT PRIMARY KEY, name CHAR(20));";

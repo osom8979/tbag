@@ -172,13 +172,13 @@ struct LogXmlNodeTest : public LogXmlNode
 TEST(LogXmlNodeTest, Default)
 {
     tttDir(true, true);
-    auto const CONFIG_PATH  = tttDirGet() / "config.xml";
-    auto const LOGFILE_PATH = tttDirGet() / "test.log";
+    auto const CONFIG_PATH  = tttDir_Get() / "config.xml";
+    auto const LOGFILE_PATH = tttDir_Get() / "test.log";
 
     {   // Create xml file.
         using namespace libtbag::dom::xml;
         XmlModel model;
-        model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDirGet().getString())));
+        model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDir_Get().getString())));
         model.setup();
         ASSERT_TRUE(model.save(CONFIG_PATH));
     }
@@ -187,7 +187,7 @@ TEST(LogXmlNodeTest, Default)
     // Read xml file.
     using namespace libtbag::dom::xml;
     XmlModel model;
-    model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDirGet().getString())));
+    model.add(XmlModel::SharedNode(new LogXmlNodeTest(tttDir_Get().getString())));
     ASSERT_TRUE(model.load(CONFIG_PATH));
 
     LogXmlNodeTest * node = model.getPointer<LogXmlNodeTest>();

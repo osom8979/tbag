@@ -24,7 +24,7 @@ using namespace libtbag::network::stream;
 TEST(NetworkPipeTest, MultiEcho)
 {
     tttDir(true, true);
-    auto path = tttDirGet() / "temp.pipe";
+    auto path = tttDir_Get() / "temp.pipe";
 
     log::SeverityGuard guard;
 

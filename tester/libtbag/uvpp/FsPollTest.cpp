@@ -45,7 +45,7 @@ TEST(FsPollTest, Default)
 #endif
     char const * const TEST_FILENAME = "test.file";
     tttDir(true, true);
-    auto path = tttDirGet() / TEST_FILENAME;
+    auto path = tttDir_Get() / TEST_FILENAME;
 
     Loop loop;
     auto fs = loop.newHandle<FsPollTest>(loop);

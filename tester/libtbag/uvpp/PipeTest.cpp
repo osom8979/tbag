@@ -206,7 +206,7 @@ TEST(PipeTest, Default)
 #else
     char const * const TEST_FILENAME = "echo.sock";
     tttDir(true, true);
-    auto const PATH = tttDirGet() / TEST_FILENAME;
+    auto const PATH = tttDir_Get() / TEST_FILENAME;
 #endif
 
     Loop server;

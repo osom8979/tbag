@@ -152,7 +152,7 @@ TEST(NetworkHttpTest, PipeHttpServer)
 #else
     char const * const TEST_FILENAME = "http.sock";
     tttDir(true, true);
-    auto const PATH = tttDirGet() / TEST_FILENAME;
+    auto const PATH = tttDir_Get() / TEST_FILENAME;
 #endif
 
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);

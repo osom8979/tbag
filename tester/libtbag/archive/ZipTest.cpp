@@ -90,7 +90,7 @@ TEST(ZipTest, ZipAndUnzip)
     std::string const ZIP_NAME     = "temp.zip";
 
     tttDir(true, true);
-    auto const TEMP_DIR   = tttDirGet();
+    auto const TEMP_DIR   = tttDir_Get();
     auto const TEMP_PATH  = TEMP_DIR / TEMP_NAME;
     auto const ZIP_PATH   = TEMP_DIR / ZIP_NAME;
     auto const OUT_PATH   = TEMP_DIR / "output";

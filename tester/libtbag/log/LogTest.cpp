@@ -53,7 +53,7 @@ TEST(LogTest, Stdout)
 TEST(LogTest, FileSink)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet() / "file.log";
+    auto const PATH = tttDir_Get() / "file.log";
     std::string const LOGGER_NAME = "LogTest.FileSink";
 
     createFileLogger(LOGGER_NAME, PATH.toString());
@@ -77,7 +77,7 @@ TEST(LogTest, FileSink)
 TEST(LogTest, RotateFileSink)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet() / "rotate.log";
+    auto const PATH = tttDir_Get() / "rotate.log";
     std::string const LOGGER_NAME = "LogTest.RotateFileSink";
     std::size_t const MAX_SIZE = 128;
     std::size_t const MAX_FILE_COUNT = 2;

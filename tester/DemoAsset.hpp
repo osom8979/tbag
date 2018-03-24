@@ -18,6 +18,8 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/res/Asset.hpp>
 #include <libtbag/locale/Convert.hpp>
+#include <libtbag/filesystem/TempDirGuard.hpp>
+#include <libtbag/util/TestUtils.hpp>
 
 #include <string>
 
@@ -51,77 +53,17 @@ struct DemoAsset : public libtbag::res::Asset
     { return Path(__FILE__).getParent() / "asset"; }
 
     static Path getBinaryTempDir()
-    { return getExeDirPath() / "tester.dir"; }
+    { return libtbag::filesystem::TempDirGuard::getDefaultPrefix(); }
 
     CREATE_ASSET_PATH(temp_dir        , getBinaryTempDir());
     CREATE_ASSET_PATH(tester_dir      , getTesterAssetDir());
     CREATE_ASSET_PATH(tester_dir_image, getTesterAssetDir() / "image");
 };
 
-/**
- * Create & Remove temp directory.
- *
- * @author zer0
- * @date   2017-03-20
- */
-struct TempDirGenerator : private Noncopyable
-{
-    using Path = libtbag::res::Asset::Path;
-
-    bool remove;
-    Path dir;
-
-    TempDirGenerator(std::string const & case_name, std::string const & name, bool is_create = true, bool is_remove = true)
-            : remove(is_remove)
-    {
-        dir = DemoAsset().get_temp_dir() / (case_name + std::string("-") + name);
-        if (is_create) {
-            dir.createDir();
-        }
-    }
-
-    ~TempDirGenerator()
-    {
-        if (remove) {
-            dir.removeAll();
-        }
-    }
-
-    inline Path getDir() const
-    {
-        return dir;
-    }
-};
-
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#ifndef TBAG_TEST_TEMP_DIR_NAME
-#define TBAG_TEST_TEMP_DIR_NAME __tbag_tester_temp_dir__
-#endif
-
-#ifndef TBAG_TEST_TEMP_DIR
-#define TBAG_TEST_TEMP_DIR(is_first_create, is_last_remove) \
-    ::libtbag::TempDirGenerator TBAG_TEST_TEMP_DIR_NAME( \
-            test_info_->test_case_name(), \
-            test_info_->name(), \
-            is_first_create, \
-            is_last_remove); \
-    ASSERT_TRUE(TBAG_TEST_TEMP_DIR_NAME.getDir().isDirectory());
-#endif
-
-#ifndef TBAG_TEST_TEMP_DIR_GET
-#define TBAG_TEST_TEMP_DIR_GET() TBAG_TEST_TEMP_DIR_NAME.getDir()
-#endif
-
-#ifndef tttDir
-#define tttDir(c, r) TBAG_TEST_TEMP_DIR(c, r)
-#endif
-
-#ifndef tttDirGet
-#define tttDirGet() TBAG_TEST_TEMP_DIR_GET()
-#endif
 
 #endif // __INCLUDE_LIBTBAG__TESTER_DEMOASSET_HPP__
 

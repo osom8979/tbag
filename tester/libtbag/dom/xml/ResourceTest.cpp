@@ -32,7 +32,7 @@ TEST(ResourceTest, Utf8)
     char const * const TEST_TAG = "utf8";
 
     tttDir(true, true);
-    auto const PATH = tttDirGet() / "utf8.xml";
+    auto const PATH = tttDir_Get() / "utf8.xml";
 
     Resource res;
     res.set(TEST_NAME, (char*)hangul);
@@ -139,7 +139,7 @@ TEST_F(ResourceFixtureTest, ReadFromXmlString)
 TEST_F(ResourceFixtureTest, Save)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet() / "utf8.xml";
+    auto const PATH = tttDir_Get() / "utf8.xml";
 
     Resource::Map map;
     map = Resource::readFromXmlString(xml, tag);

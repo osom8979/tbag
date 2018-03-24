@@ -28,7 +28,7 @@ using namespace __impl;
 TEST(SqliteOrmTest, Insert)
 {
     tttDir(true, true);
-    auto const PATH = tttDirGet();
+    auto const PATH = tttDir_Get();
 
     auto stor = make_storage((PATH / "test.db").toString(),
                              make_table("COMPANY",
