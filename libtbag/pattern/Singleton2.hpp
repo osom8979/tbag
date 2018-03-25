@@ -20,6 +20,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#include <utility>
 #include <new>
 
 // -------------------
@@ -48,10 +49,11 @@ protected:
     ~Singleton2() { /* EMPTY. */ }
 
 public:
-    inline static void createInstance() TBAG_NOEXCEPT
+    template <typename ... Args>
+    inline static void createInstance(Args && ... args) TBAG_NOEXCEPT
     {
         if (__instance == nullptr) {
-            __instance = new (std::nothrow) BaseType();
+            __instance = new (std::nothrow) BaseType(std::forward<Args>(args) ...);
         }
     }
 
@@ -65,9 +67,6 @@ public:
 
     inline static BaseType * getInstance() TBAG_NOEXCEPT
     {
-        if (__instance == nullptr) {
-            createInstance();
-        }
         return __instance;
     }
 };
