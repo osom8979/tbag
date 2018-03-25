@@ -29,7 +29,7 @@ namespace util      {
 namespace test      {
 namespace behaviour {
 
-struct Scenario
+struct TBAG_API Scenario
 {
     std::string const NAME;
     std::string const TAG;
@@ -41,7 +41,7 @@ struct Scenario
     inline operator bool() const TBAG_NOEXCEPT { return true; }
 };
 
-struct Given
+struct TBAG_API Given
 {
     Scenario const & SCENARIO;
     std::string const NAME;
@@ -52,7 +52,7 @@ struct Given
     inline operator bool() const TBAG_NOEXCEPT { return true; }
 };
 
-struct When
+struct TBAG_API When
 {
     Given const & GIVEN;
     std::string const NAME;
@@ -63,7 +63,7 @@ struct When
     inline operator bool() const TBAG_NOEXCEPT { return true; }
 };
 
-struct Then
+struct TBAG_API Then
 {
     When const & WHEN;
     std::string const NAME;
