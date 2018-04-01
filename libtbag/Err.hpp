@@ -35,6 +35,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ILLARGS  , "Illegal arguments"       ) \
     _TBAG_XX(_ILLSTATE , "Illegal state"           ) \
     _TBAG_XX(_EOPEN    , "Open error"              ) \
+    _TBAG_XX(_ECLOSE   , "Close error"             ) \
     _TBAG_XX(_ECREATE  , "Create error"            ) \
     _TBAG_XX(_EINDEX   , "Index error"             ) \
     _TBAG_XX(_ALREADY  , "Already state"           ) \

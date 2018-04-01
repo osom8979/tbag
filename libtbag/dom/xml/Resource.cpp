@@ -160,7 +160,7 @@ std::string Resource::getString(std::string const & key, std::string default_val
 
 std::string Resource::getString(std::string const & key) const
 {
-    return this->getString(key, std::string(""));
+    return this->getString(key, std::string());
 }
 
 auto Resource::get(std::string const & key
