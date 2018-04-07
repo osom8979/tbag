@@ -17,6 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <exception>
 #include <ostream>
 
 // -------------------
@@ -221,6 +222,23 @@ TBAG_API Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_co
 
 TBAG_API Err convertSystemErrorToErr(int system_error);
 TBAG_API Err getGlobalSystemError();
+
+/**
+ * Err exception.
+ *
+ * @author zer0
+ * @date   2018-04-07
+ */
+struct ErrException : public std::exception
+{
+    Err const CODE;
+
+    ErrException(Err c) : CODE(c) { /* EMPTY. */ }
+    virtual ~ErrException() { /* EMPTY. */ }
+
+    virtual const char * what() const TBAG_NOEXCEPT
+    { return getErrName(CODE); }
+};
 
 // ----------------
 // libuv debugging.
