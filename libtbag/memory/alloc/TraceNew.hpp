@@ -16,7 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#ifndef TBAG_MEMORY_TRACE_LEVEL
 #define TBAG_MEMORY_TRACE_LEVEL 2
+#endif
 #include <libtbag/memory/alloc/TraceDyMem.hpp>
 
 // -------------------
