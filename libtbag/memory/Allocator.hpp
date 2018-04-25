@@ -28,8 +28,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace memory {
 
+/**
+ * Allocator interface class template prototype.
+ *
+ * @author zer0
+ * @date   2017-01-04
+ */
 template <typename Type>
-struct AllocatorTypse
+struct Allocator
 {
     using value_type      = Type;
     using pointer         = typename std::add_pointer<value_type>::type;
@@ -38,42 +44,22 @@ struct AllocatorTypse
     using const_reference = typename std::add_const<reference>::type;
     using size_type       = std::size_t;
     using difference_type = std::ptrdiff_t;
-};
 
-#ifndef TBAG_ALLOCATOR_TYPES
-#define TBAG_ALLOCATOR_TYPES(type, parent) \
-    public:                                                            \
-        using parent_type     = parent<type>;                          \
-        using value_type      = typename parent_type::value_type;      \
-        using pointer         = typename parent_type::pointer;         \
-        using const_pointer   = typename parent_type::const_pointer;   \
-        using reference       = typename parent_type::reference;       \
-        using const_reference = typename parent_type::const_reference; \
-        using size_type       = typename parent_type::size_type;       \
-        using difference_type = typename parent_type::difference_type; \
-    /* -- END -- */
-#endif
+    template <typename Up>
+    struct rebind
+    {
+        typedef Allocator<Up> other;
+    };
 
-#ifndef TBAG_ALLOCATOR_REBIND
-#define TBAG_ALLOCATOR_REBIND(self)     \
-    public:                                  \
-        template <typename Up> struct rebind \
-        { typedef self<Up> other; };         \
-    /* -- END -- */
-#endif
+    TBAG_CONSTEXPR Allocator() TBAG_NOEXCEPT
+    { /* EMPTY. */ }
 
-#ifndef TBAG_ALLOCATOR_BASE
-#define TBAG_ALLOCATOR_BASE(self, type, parent) \
-    TBAG_ALLOCATOR_TYPES(type, parent)          \
-    TBAG_ALLOCATOR_REBIND(self)                 \
-    /* -- END -- */
-#endif
+    template <typename Up>
+    Allocator(Allocator<Up> const & obj) TBAG_NOEXCEPT
+    { /* EMPTY. */ }
 
-
-template <typename Type>
-struct BaseAllocator : public AllocatorTypse<Type>
-{
-    TBAG_ALLOCATOR_TYPES(Type, AllocatorTypse);
+    ~Allocator()
+    { /* EMPTY. */ }
 
     /** returns the largest supported allocation size. */
     TBAG_CONSTEXPR static size_type max_size() TBAG_NOEXCEPT
@@ -85,6 +71,20 @@ struct BaseAllocator : public AllocatorTypse<Type>
     const_pointer address(const_reference val) const TBAG_NOEXCEPT
     {
         return ::libtbag::memory::alloc::addressof(val);
+    }
+
+    /** allocates uninitialized storage. */
+    pointer allocate(size_type size, void const * hint = 0)
+    {
+        assert(size > 0);
+        return static_cast<pointer>(::libtbag::memory::alloc::allocate(size * sizeof(value_type)));
+    }
+
+    /** deallocates storage. */
+    void deallocate(pointer ptr, size_type allocated_size)
+    {
+        assert(ptr != nullptr);
+        ::libtbag::memory::alloc::deallocate((void*)ptr);
     }
 
     /** constructs an object in allocated storage. */
@@ -101,42 +101,6 @@ struct BaseAllocator : public AllocatorTypse<Type>
     {
         assert(ptr != nullptr);
         ptr->~U();
-    }
-};
-
-/**
- * Allocator interface class template prototype.
- *
- * @author zer0
- * @date   2017-01-04
- */
-template <typename Type>
-struct Allocator : public BaseAllocator<Type>
-{
-    TBAG_ALLOCATOR_BASE(Allocator, Type, BaseAllocator);
-
-    TBAG_CONSTEXPR Allocator() TBAG_NOEXCEPT
-    { /* EMPTY. */ }
-
-    template <typename Up>
-    Allocator(Allocator<Up> const & obj) TBAG_NOEXCEPT
-    { /* EMPTY. */ }
-
-    ~Allocator()
-    { /* EMPTY. */ }
-
-    /** allocates uninitialized storage. */
-    pointer allocate(size_type size, void const * hint = 0)
-    {
-        assert(size > 0);
-        return static_cast<pointer>(::libtbag::memory::alloc::allocate(size * sizeof(value_type)));
-    }
-
-    /** deallocates storage. */
-    void deallocate(pointer ptr, size_type allocated_size)
-    {
-        assert(ptr != nullptr);
-        ::libtbag::memory::alloc::deallocate((void*)ptr);
     }
 };
 
