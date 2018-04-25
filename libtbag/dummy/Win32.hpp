@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <cstdint>
 
 #if !defined(TBAG_PLATFORM_WINDOWS)
 # ifndef far
@@ -45,6 +46,30 @@
 # define _Inout_
 # endif
 
+# ifndef CALLBACK
+# define CALLBACK __stdcall
+# endif
+
+# ifndef WINAPI
+# define WINAPI __stdcall
+# endif
+
+# ifndef WINAPIV
+# define WINAPIV __cdecl
+# endif
+
+# ifndef APIENTRY
+# define APIENTRY WINAPI
+# endif
+
+# ifndef APIPRIVATE
+# define APIPRIVATE __stdcall
+# endif
+
+# ifndef PASCAL
+# define PASCAL __stdcall
+# endif
+
 # ifndef TRUE
 # define TRUE 1
 # endif
@@ -65,6 +90,22 @@
 # define WCHAR wchar_t
 # endif
 
+# ifndef SHORT
+# define SHORT short
+# endif
+
+# ifndef PSHORT
+# define PSHORT SHORT *
+# endif
+
+# ifndef USHORT
+# define USHORT unsigned short
+# endif
+
+# ifndef PUSHORT
+# define PUSHORT USHORT *
+# endif
+
 # ifndef UINT
 # define UINT unsigned int
 # endif
@@ -73,8 +114,48 @@
 # define LONG long
 # endif
 
+# ifndef PLONG
+# define PLONG LONG *
+# endif
+
+# ifndef ULONG
+# define ULONG unsigned long
+# endif
+
+# ifndef PULONG
+# define PULONG ULONG *
+# endif
+
 # ifndef DWORD
 # define DWORD unsigned long
+# endif
+
+# ifndef PDWORD
+# define PDWORD DWORD *
+# endif
+
+# ifndef LONG64
+# define LONG64 int64_t
+# endif
+
+# ifndef PLONG64
+# define PLONG64 LONG64 *
+# endif
+
+# ifndef ULONG64
+# define ULONG64 uint64_t
+# endif
+
+# ifndef PULONG64
+# define PULONG64 ULONG64 *
+# endif
+
+# ifndef DWORD64
+# define DWORD64 uint64_t
+# endif
+
+# ifndef PDWORD64
+# define PDWORD64 DWORD64 *
 # endif
 
 # ifndef PBOOL
@@ -177,6 +258,10 @@
 # define PSECURITY_DESCRIPTOR PVOID
 # endif
 
+# ifndef NOERROR
+# define NOERROR 0
+# endif
+
 # ifndef S_OK
 # define S_OK 0x00000000 // Operation successful.
 # endif
@@ -185,28 +270,44 @@
 # define S_FALSE 0x000000001
 # endif
 
-# ifndef E_ACCESSDENIED
-# define E_ACCESSDENIED 0x80070005 // Access denied.
-# endif
-
 # ifndef E_FAIL
 # define E_FAIL 0x80004005 // Unspecified failure.
 # endif
 
-# ifndef E_INVALIDARG
-# define E_INVALIDARG 0x80070057 // Invalid parameter value.
+# ifndef E_UNEXPECTED
+# define E_UNEXPECTED 0x8000FFFF // Unexpected condition.
+# endif
+
+# ifndef E_NOTIMPL
+# define E_NOTIMPL 0x80004001 // Not implemented
 # endif
 
 # ifndef E_OUTOFMEMORY
-# define E_OUTOFMEMORY 0x8007000E // Out of memory.
+# define E_OUTOFMEMORY 0x8007000E // Ran out of memory.
+# endif
+
+# ifndef E_INVALIDARG
+# define E_INVALIDARG 0x80070057 // One or more arguments are invalid.
+# endif
+
+# ifndef E_NOINTERFACE
+# define E_NOINTERFACE 0x80004002 // No such interface supported.
 # endif
 
 # ifndef E_POINTER
 # define E_POINTER 0x80004003 // NULL was passed incorrectly for a pointer value.
 # endif
 
-# ifndef E_UNEXPECTED
-# define E_UNEXPECTED 0x8000FFFF // Unexpected condition.
+# ifndef E_HANDLE
+# define E_HANDLE 0x80070006 // Invalid handle
+# endif
+
+# ifndef E_ABORT
+# define E_ABORT 0x80004004 // Operation aborted
+# endif
+
+# ifndef E_ACCESSDENIED
+# define E_ACCESSDENIED 0x80070005 // General access denied error.
 # endif
 
 # ifndef ERROR_INVALID_FUNCTION
@@ -385,6 +486,14 @@
 # define CSIDL_PROFILE 0x0028 // USERPROFILE
 # endif
 
+# ifndef IGNORE
+# define IGNORE 0 // Ignore signal
+# endif
+
+# ifndef INFINITE
+# define INFINITE 0xFFFFFFFF // Infinite timeout
+# endif
+
 # ifndef SUCCEEDED
 # define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
 # endif
@@ -464,6 +573,37 @@ typedef struct _WIN32_FIND_DATAW {
 #endif
 } WIN32_FIND_DATAW, *PWIN32_FIND_DATAW, *LPWIN32_FIND_DATAW;
 
+typedef struct _GUID {
+    unsigned long  Data1;
+    unsigned short Data2;
+    unsigned short Data3;
+    unsigned char  Data4[8];
+} GUID;
+
+# ifndef IID
+# define IID GUID
+# endif
+
+# ifndef REFGUID
+# define REFGUID const GUID &
+# endif
+
+# ifndef REFIID
+# define REFIID const IID &
+# endif
+
+# ifndef REFCLSID
+# define REFCLSID const IID &
+# endif
+
+# ifndef REFFMTID
+# define REFFMTID const IID &
+# endif
+
+# ifndef WIN32_DUMMY_INLINE
+# define WIN32_DUMMY_INLINE inline
+# endif
+
 /**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms679360(v=vs.85).aspx>
  *
@@ -471,7 +611,7 @@ typedef struct _WIN32_FIND_DATAW {
  *  - WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline DWORD GetLastError(void)
+WIN32_DUMMY_INLINE DWORD GetLastError(void)
 { return ERROR_INVALID_FUNCTION; }
 
 /**
@@ -484,7 +624,7 @@ inline DWORD GetLastError(void)
  *  - Header: Stringapiset.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline int MultiByteToWideChar(_In_      UINT   CodePage,
+WIN32_DUMMY_INLINE int MultiByteToWideChar(_In_      UINT   CodePage,
                                _In_      DWORD  dwFlags,
                                _In_      LPCSTR lpMultiByteStr,
                                _In_      int    cbMultiByte,
@@ -502,7 +642,7 @@ inline int MultiByteToWideChar(_In_      UINT   CodePage,
  *  - Header: Stringapiset.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline int WideCharToMultiByte(_In_      UINT    CodePage,
+WIN32_DUMMY_INLINE int WideCharToMultiByte(_In_      UINT    CodePage,
                                _In_      DWORD   dwFlags,
                                _In_      LPCWSTR lpWideCharStr,
                                _In_      int     cchWideChar,
@@ -522,7 +662,7 @@ inline int WideCharToMultiByte(_In_      UINT    CodePage,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
+WIN32_DUMMY_INLINE DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
 { return INVALID_FILE_ATTRIBUTES; }
 
 /**
@@ -535,7 +675,7 @@ inline DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
+WIN32_DUMMY_INLINE DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
                               _Out_ LPWSTR  lpszLongPath,
                               _In_  DWORD   cchBuffer)
 { return 0; }
@@ -550,7 +690,7 @@ inline DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-inline BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
+WIN32_DUMMY_INLINE BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
                              _In_      SECURITY_INFORMATION RequestedInformation,
                              _Out_opt_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
                              _In_      DWORD                nLength,
@@ -567,7 +707,7 @@ inline BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-inline BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
+WIN32_DUMMY_INLINE BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
                              _In_  DWORD   DesiredAccess,
                              _Out_ PHANDLE TokenHandle)
 { return FALSE; }
@@ -582,7 +722,7 @@ inline BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
  *  - Header: WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline HANDLE GetCurrentProcess(void)
+WIN32_DUMMY_INLINE HANDLE GetCurrentProcess(void)
 { return nullptr; }
 
 /**
@@ -595,7 +735,7 @@ inline HANDLE GetCurrentProcess(void)
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline BOOL CloseHandle(_In_ HANDLE hObject)
+WIN32_DUMMY_INLINE BOOL CloseHandle(_In_ HANDLE hObject)
 { return FALSE; }
 
 /**
@@ -608,7 +748,7 @@ inline BOOL CloseHandle(_In_ HANDLE hObject)
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-inline BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandle,
+WIN32_DUMMY_INLINE BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandle,
                            _In_  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
                            _Out_ PHANDLE                      DuplicateTokenHandle)
 { return FALSE; }
@@ -620,7 +760,7 @@ inline BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandl
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-inline void MapGenericMask(_Inout_ PDWORD           AccessMask,
+WIN32_DUMMY_INLINE void MapGenericMask(_Inout_ PDWORD           AccessMask,
                            _In_    PGENERIC_MAPPING GenericMapping)
 { /* EMPTY. */ }
 
@@ -631,7 +771,7 @@ inline void MapGenericMask(_Inout_ PDWORD           AccessMask,
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Advapi32.lib
  */
-inline BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
+WIN32_DUMMY_INLINE BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
                         _In_      HANDLE               ClientToken,
                         _In_      DWORD                DesiredAccess,
                         _In_      PGENERIC_MAPPING     GenericMapping,
@@ -651,7 +791,7 @@ inline BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline DWORD GetTempPathA(_In_  DWORD nBufferLength,
+WIN32_DUMMY_INLINE DWORD GetTempPathA(_In_  DWORD nBufferLength,
                           _Out_ LPSTR lpBuffer)
 { return 0; }
 
@@ -665,7 +805,7 @@ inline DWORD GetTempPathA(_In_  DWORD nBufferLength,
  *  - Header: WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
+WIN32_DUMMY_INLINE DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
                                   _Out_ LPSTR lpBuffer)
 { return 0; }
 
@@ -679,12 +819,12 @@ inline DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
  *  - Header: Shlobj.h
  *  - Library: Shell32.lib
  */
-inline HRESULT SHGetFolderPathA(_In_  HWND   hwndOwner,
+WIN32_DUMMY_INLINE HRESULT SHGetFolderPathA(_In_  HWND   hwndOwner,
                                 _In_  int    nFolder,
                                 _In_  HANDLE hToken,
                                 _In_  DWORD  dwFlags,
                                 _Out_ LPSTR  pszPath)
-{ return E_FAIL; }
+{ return E_NOTIMPL; }
 
 /**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms683197(v=vs.85).aspx>
@@ -696,7 +836,7 @@ inline HRESULT SHGetFolderPathA(_In_  HWND   hwndOwner,
  *  - Header: Winbase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline DWORD GetModuleFileNameA(_In_opt_ HMODULE hModule,
+WIN32_DUMMY_INLINE DWORD GetModuleFileNameA(_In_opt_ HMODULE hModule,
                                 _Out_    LPSTR   lpFilename,
                                 _In_     DWORD   nSize)
 { return 0; }
@@ -711,7 +851,7 @@ inline DWORD GetModuleFileNameA(_In_opt_ HMODULE hModule,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline DWORD GetFullPathNameW(_In_  LPCWSTR  lpFileName,
+WIN32_DUMMY_INLINE DWORD GetFullPathNameW(_In_  LPCWSTR  lpFileName,
                               _In_  DWORD    nBufferLength,
                               _Out_ LPWSTR   lpBuffer,
                               _Out_ LPWSTR  *lpFilePart)
@@ -727,7 +867,7 @@ inline DWORD GetFullPathNameW(_In_  LPCWSTR  lpFileName,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline BOOL CreateDirectoryW(_In_     LPCWSTR               lpPathName,
+WIN32_DUMMY_INLINE BOOL CreateDirectoryW(_In_     LPCWSTR               lpPathName,
                              _In_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 { return FALSE; }
 
@@ -741,7 +881,7 @@ inline BOOL CreateDirectoryW(_In_     LPCWSTR               lpPathName,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline BOOL RemoveDirectoryW(_In_ LPCWSTR lpPathName)
+WIN32_DUMMY_INLINE BOOL RemoveDirectoryW(_In_ LPCWSTR lpPathName)
 { return FALSE; }
 
 /**
@@ -754,7 +894,7 @@ inline BOOL RemoveDirectoryW(_In_ LPCWSTR lpPathName)
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline BOOL DeleteFileW(_In_ LPCWSTR lpFileName)
+WIN32_DUMMY_INLINE BOOL DeleteFileW(_In_ LPCWSTR lpFileName)
 { return FALSE; }
 
 /**
@@ -767,7 +907,7 @@ inline BOOL DeleteFileW(_In_ LPCWSTR lpFileName)
  *  - Header: WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline BOOL MoveFileW(_In_ LPCWSTR lpExistingFileName,
+WIN32_DUMMY_INLINE BOOL MoveFileW(_In_ LPCWSTR lpExistingFileName,
                       _In_ LPCWSTR lpNewFileName)
 { return FALSE; }
 
@@ -781,7 +921,7 @@ inline BOOL MoveFileW(_In_ LPCWSTR lpExistingFileName,
  *  - Header: Shlwapi.h
  *  - Library: Shlwapi.lib
  */
-inline BOOL PathFileExistsW(_In_ LPCWSTR pszPath)
+WIN32_DUMMY_INLINE BOOL PathFileExistsW(_In_ LPCWSTR pszPath)
 { return FALSE; }
 
 /**
@@ -790,10 +930,10 @@ inline BOOL PathFileExistsW(_In_ LPCWSTR pszPath)
  * @remarks
  *  - Header: Strsafe.h
  */
-inline HRESULT StringCchLengthW(_In_  LPCWSTR   psz,
+WIN32_DUMMY_INLINE HRESULT StringCchLengthW(_In_  LPCWSTR   psz,
                                 _In_  size_t    cchMax,
                                 _Out_ size_t  * pcch)
-{ return E_FAIL; }
+{ return E_NOTIMPL; }
 
 /**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647527(v=vs.85).aspx>
@@ -801,10 +941,10 @@ inline HRESULT StringCchLengthW(_In_  LPCWSTR   psz,
  * @remarks
  *  - Header: Strsafe.h
  */
-inline HRESULT StringCchCopyW(_Out_ LPWSTR  pszDest,
+WIN32_DUMMY_INLINE HRESULT StringCchCopyW(_Out_ LPWSTR  pszDest,
                               _In_  size_t  cchDest,
                               _In_  LPCWSTR pszSrc)
-{ return E_FAIL; }
+{ return E_NOTIMPL; }
 
 /**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms647518(v=vs.85).aspx>
@@ -812,10 +952,10 @@ inline HRESULT StringCchCopyW(_Out_ LPWSTR  pszDest,
  * @remarks
  *  - Header: Strsafe.h
  */
-inline HRESULT StringCchCatW(_Inout_ LPWSTR  pszDest,
+WIN32_DUMMY_INLINE HRESULT StringCchCatW(_Inout_ LPWSTR  pszDest,
                              _In_    size_t  cchDest,
                              _In_    LPCWSTR pszSrc)
-{ return E_FAIL; }
+{ return E_NOTIMPL; }
 
 /**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb759938(v=vs.85).aspx>
@@ -824,7 +964,7 @@ inline HRESULT StringCchCatW(_Inout_ LPWSTR  pszDest,
  *  - Header: Shlwapi.h
  *  - Library: Shlwapi.lib
  */
-inline int StrCmpW(_In_ PCWSTR psz1,
+WIN32_DUMMY_INLINE int StrCmpW(_In_ PCWSTR psz1,
                    _In_ PCWSTR psz2)
 { return 0; }
 
@@ -839,7 +979,7 @@ inline int StrCmpW(_In_ PCWSTR psz1,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline HANDLE FindFirstFileW(_In_  LPCWSTR            lpFileName,
+WIN32_DUMMY_INLINE HANDLE FindFirstFileW(_In_  LPCWSTR            lpFileName,
                              _Out_ LPWIN32_FIND_DATAW lpFindFileData)
 { return INVALID_HANDLE_VALUE; }
 
@@ -853,7 +993,7 @@ inline HANDLE FindFirstFileW(_In_  LPCWSTR            lpFileName,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline BOOL FindNextFileW(_In_  HANDLE             hFindFile,
+WIN32_DUMMY_INLINE BOOL FindNextFileW(_In_  HANDLE             hFindFile,
                           _Out_ LPWIN32_FIND_DATAW lpFindFileData)
 { return FALSE; }
 
@@ -867,8 +1007,42 @@ inline BOOL FindNextFileW(_In_  HANDLE             hFindFile,
  *  - Header: FileAPI.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-inline BOOL FindClose(_Inout_ HANDLE hFindFile)
+WIN32_DUMMY_INLINE BOOL FindClose(_Inout_ HANDLE hFindFile)
 { return FALSE; }
+
+/**
+ * Retrieves the process identifier of the calling process.
+ *
+ * @see <https://msdn.microsoft.com/en-us/library/windows/desktop/ms683180(v=vs.85).aspx>
+ *
+ * @return
+ *  The return value is the process identifier of the calling process.
+ *
+ * @remarks
+ *  - Header: WinBase.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+WIN32_DUMMY_INLINE DWORD GetCurrentProcessId(void)
+{ return 0; }
+
+/**
+ * Captures a stack back trace by walking up the stack and recording the information for each frame.
+ *
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/bb204633(v=vs.85).aspx>
+ *
+ * @return
+ *  The number of captured frames.
+ *
+ * @remarks
+ *  - Header: WinBase.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+WIN32_DUMMY_INLINE USHORT CaptureStackBackTrace(
+        _In_      ULONG  FramesToSkip,
+        _In_      ULONG  FramesToCapture,
+        _Out_     PVOID  *BackTrace,
+        _Out_opt_ PULONG BackTraceHash)
+{ return 0; }
 
 /**
  * Initializes the COM library for use by the calling thread, sets the thread's concurrency model,
@@ -884,8 +1058,8 @@ inline BOOL FindClose(_Inout_ HANDLE hFindFile)
  *  - Header: Objbase.h
  *  - Library: Ole32.lib
  */
-inline HRESULT CoInitializeEx(_In_opt_ LPVOID pvReserved, _In_ DWORD dwCoInit)
-{ return E_UNEXPECTED; }
+WIN32_DUMMY_INLINE HRESULT CoInitializeEx(_In_opt_ LPVOID pvReserved, _In_ DWORD dwCoInit)
+{ return E_NOTIMPL; }
 
 /**
  * Closes the COM library on the current thread,
@@ -899,8 +1073,138 @@ inline HRESULT CoInitializeEx(_In_opt_ LPVOID pvReserved, _In_ DWORD dwCoInit)
  *  - Header: Objbase.h
  *  - Library: Ole32.lib
  */
-inline void CoUninitialize(void)
+WIN32_DUMMY_INLINE void CoUninitialize(void)
 { /* EMPTY. */ }
+
+/**
+ * The DebugCreate function creates a new client object and returns an interface pointer to it.
+ *
+ * @see <https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/dbgeng/nf-dbgeng-debugcreate>
+ */
+WIN32_DUMMY_INLINE HRESULT DebugCreate(REFIID InterfaceId, PVOID * Interface)
+{ return E_NOTIMPL; }
+
+# ifndef __uuidof
+# define __uuidof(i) _GUID{0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}}
+# endif
+
+// -------------
+// COM INTERFACE
+// -------------
+
+/** IUnknown interface
+ *
+ * Enables clients to get pointers to other interfaces on a given object through the QueryInterface method,
+ * and manage the existence of the object through the AddRef and Release methods.
+ * All other COM interfaces are inherited, directly or indirectly, from IUnknown.
+ * Therefore, the three methods in IUnknown are the first entries in the VTable for every interface.
+ *
+ * @see <https://msdn.microsoft.com/en-us/library/windows/desktop/ms680509(v=vs.85).aspx>
+ */
+struct IUnknown
+{
+    /** Increments the reference count for an interface on an object. */
+    WIN32_DUMMY_INLINE ULONG AddRef()
+    { return 0; }
+
+    /** Retrieves pointers to the supported interfaces on an object. */
+    WIN32_DUMMY_INLINE HRESULT QueryInterface(_In_  REFIID riid,
+                                              _Out_ void   **ppvObject)
+    { return E_NOTIMPL; }
+
+    /** Decrements the reference count for an interface on an object. */
+    WIN32_DUMMY_INLINE ULONG Release()
+    { return 0; }
+};
+
+/**
+ * IDebugSymbols interface.
+ *
+ * @see <https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/dbgeng/nn-dbgeng-idebugsymbols>
+ */
+struct IDebugSymbols : public IUnknown
+{
+    /**
+     * The GetNameByOffset method returns the name of the symbol
+     * at the specified location in the target's virtual address space.
+     */
+    WIN32_DUMMY_INLINE HRESULT GetNameByOffset(ULONG64  Offset,
+                                               PSTR     NameBuffer,
+                                               ULONG    NameBufferSize,
+                                               PULONG   NameSize,
+                                               PULONG64 Displacement)
+    { return E_NOTIMPL; }
+
+    /**
+     * The GetLineByOffset method returns the source filename and
+     * the line number within the source file of an instruction in the target.
+     */
+    WIN32_DUMMY_INLINE HRESULT GetLineByOffset(ULONG64  Offset,
+                                               PULONG   Line,
+                                               PSTR     FileBuffer,
+                                               ULONG    FileBufferSize,
+                                               PULONG   FileSize,
+                                               PULONG64 Displacement)
+    { return E_NOTIMPL; }
+};
+
+# ifndef DEBUG_ATTACH_DEFAULT
+# define DEBUG_ATTACH_DEFAULT                   0x00000000
+# endif
+
+# ifndef DEBUG_ATTACH_NONINVASIVE
+# define DEBUG_ATTACH_NONINVASIVE               0x00000001
+# endif
+
+# ifndef DEBUG_ATTACH_EXISTING
+# define DEBUG_ATTACH_EXISTING                  0x00000002
+# endif
+
+# ifndef DEBUG_ATTACH_NONINVASIVE_NO_SUSPEND
+# define DEBUG_ATTACH_NONINVASIVE_NO_SUSPEND    0x00000004
+# endif
+
+# ifndef DEBUG_ATTACH_INVASIVE_NO_INITIAL_BREAK
+# define DEBUG_ATTACH_INVASIVE_NO_INITIAL_BREAK 0x00000008
+# endif
+
+# ifndef DEBUG_ATTACH_INVASIVE_RESUME_PROCESS
+# define DEBUG_ATTACH_INVASIVE_RESUME_PROCESS   0x00000010
+# endif
+
+# ifndef DEBUG_ATTACH_NONINVASIVE_ALLOW_PARTIAL
+# define DEBUG_ATTACH_NONINVASIVE_ALLOW_PARTIAL 0x00000020
+# endif
+
+/**
+ * IDebugClient interface.
+ *
+ * @see <https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/dbgeng/nn-dbgeng-idebugclient>
+ */
+struct IDebugClient : public IUnknown
+{
+    /** The AttachProcess method connects the debugger engine to a user-modeprocess. */
+    WIN32_DUMMY_INLINE HRESULT AttachProcess(ULONG64 Server,
+                                             ULONG   ProcessId,
+                                             ULONG   AttachFlags)
+    { return E_NOTIMPL; }
+};
+
+# ifndef DEBUG_WAIT_DEFAULT
+# define DEBUG_WAIT_DEFAULT 0x00000000 // Wait flags.
+# endif
+
+/**
+ * IDebugControl interface.
+ *
+ * @see <https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/dbgeng/nn-dbgeng-idebugcontrol>
+ */
+struct IDebugControl : public IUnknown
+{
+    /** The WaitForEvent method waits for an event that breaks into the debugger engine application. */
+    WIN32_DUMMY_INLINE HRESULT WaitForEvent(ULONG Flags, ULONG Timeout)
+    { return E_NOTIMPL; }
+};
 
 } // namespace win32
 } // namespace dummy

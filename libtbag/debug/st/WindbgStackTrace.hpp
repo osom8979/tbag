@@ -18,6 +18,7 @@
 #include <libtbag/debug/st/StFrame.hpp>
 
 #include <vector>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -27,7 +28,15 @@ namespace debug {
 namespace st    {
 
 TBAG_API bool isWindbgSupport() TBAG_NOEXCEPT;
-TBAG_API std::vector<void*> getWindbgStackTrace(int max_depth = DEFAULT_MAX_DEPTH_OF_STACKTRACE);
+TBAG_API std::vector<void*> getWindbgStackTrace(int skip = 0, int max_depth = DEFAULT_MAX_DEPTH_OF_STACKTRACE);
+
+// @formatter:off
+TBAG_API std::string getWindbgName  (void const * addr);
+TBAG_API std::string getWindbgSource(void const * addr);
+TBAG_API std::size_t getWindbgLine  (void const * addr);
+// @formatter:on
+
+TBAG_API std::vector<std::string> getWindbgSymbolize(std::vector<void*> const & stack);
 
 } // namespace st
 } // namespace debug

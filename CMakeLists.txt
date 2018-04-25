@@ -140,7 +140,6 @@ check_include_file (libunwind.h    HAVE_LIBUNWIND_H)
 check_include_file (Windows.h      HAVE_WINDOWS_H) ## Win32
 check_include_file (Objbase.h      HAVE_OBJBASE_H) ## Win32
 check_include_file (Dbgeng.h       HAVE_DBGENG_H)  ## Win32
-check_include_file (Dbgeng.h       HAVE_DBGENG_H)  ## Win32
 check_include_file (intrin.h       HAVE_INTRIN_H)  ## Win32
 check_include_file (cpuid.h        HAVE_CPUID_H)   ## GCC or CLANG
 
