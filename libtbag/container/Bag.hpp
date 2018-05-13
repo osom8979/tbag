@@ -299,6 +299,100 @@ public:
     static_assert(!std::is_reference<Value>::value, "Value must not be a reference type");
 
 public:
+    using value_type        = Value;
+    using allocator_type    = Allocator;
+    using reference         = typename std::add_lvalue_reference<value_type>::type;
+    using const_reference   = typename std::add_const<reference>::type;
+    using size_type         = DimValue;
+    using difference_type   = std::ptrdiff_t;
+    using pointer           = typename std::add_pointer<value_type>::type;
+    using const_pointer     = typename std::add_const<pointer>::type;
+
+public:
+    template <typename V, typename R = reference, typename P = pointer, typename D = difference_type>
+    class BagIterator : public std::iterator<std::bidirectional_iterator_tag, V, D, P, R>
+    {
+    public:
+        using Self = BagIterator<V, R, P>;
+        using Base = std::iterator<std::bidirectional_iterator_tag, V, std::ptrdiff_t, P, R>;
+
+    public:
+        using value_type        = typename Base::value_type;
+        using difference_type   = typename Base::difference_type;
+        using pointer           = typename Base::pointer;
+        using reference         = typename Base::reference;
+        using iterator_category = typename Base::iterator_category;
+
+    private:
+        pointer          _cursor;
+        difference_type  _step;
+
+    public:
+        BagIterator(pointer cursor = nullptr, difference_type step = 1) TBAG_NOEXCEPT
+                : _cursor(cursor), _step(step)
+        { /* EMPTY. */ }
+
+        BagIterator(BagIterator const & obj) TBAG_NOEXCEPT
+                : _cursor(obj._cursor), _step(obj._step)
+        { /* EMPTY. */ }
+
+        ~BagIterator()
+        { /* EMPTY. */ }
+
+    public:
+        inline reference operator  *() const TBAG_NOEXCEPT { return *_cursor; }
+        inline pointer   operator ->() const TBAG_NOEXCEPT { return  _cursor; }
+
+    public:
+        BagIterator & operator =(BagIterator const & obj) TBAG_NOEXCEPT
+        {
+            if (this != &obj) {
+                _cursor = obj._cursor;
+                _step = obj._step;
+            }
+            return *this;
+        }
+
+    public:
+        inline bool operator ==(BagIterator const & obj) const TBAG_NOEXCEPT
+        { return _cursor == obj._cursor; }
+        inline bool operator !=(BagIterator const & obj) const TBAG_NOEXCEPT
+        { return _cursor != obj._cursor; }
+
+    public:
+        inline BagIterator & operator ++() TBAG_NOEXCEPT
+        {
+            _cursor += _step;
+            return *this;
+        }
+
+        inline BagIterator & operator --() TBAG_NOEXCEPT
+        {
+            _cursor -= _step;
+            return *this;
+        }
+
+    public:
+        inline BagIterator operator ++(int) TBAG_NOEXCEPT
+        {
+            BagIterator itr(*this);
+            _cursor += _step;
+            return itr;
+        }
+
+        inline BagIterator operator --(int) TBAG_NOEXCEPT
+        {
+            BagIterator itr(*this);
+            _cursor -= _step;
+            return itr;
+        }
+    };
+
+public:
+    using       iterator = BagIterator<value_type,       reference,       pointer>;
+    using const_iterator = BagIterator<value_type, const_reference, const_pointer>;
+
+public:
     Bag() : BaseContainer(), BaseDimenstions()
     { /* EMPTY. */ }
 
@@ -355,6 +449,27 @@ public:
     {
         lh.swap(rh);
     }
+
+public:
+    Value * data() TBAG_NOEXCEPT_SP_OP(BaseContainer::data())
+    {
+        return BaseContainer::data();
+    }
+
+    Value const * data() const TBAG_NOEXCEPT_SP_OP(BaseContainer::data())
+    {
+        return BaseContainer::data();
+    }
+
+public:
+    iterator        begin(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data(), step); }
+    const_iterator  begin(difference_type step = 1) const TBAG_NOEXCEPT { return const_iterator(data(), step); }
+    iterator          end(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data() + size(), step); }
+    const_iterator    end(difference_type step = 1) const TBAG_NOEXCEPT { return const_iterator(data() + size(), step); }
+
+public:
+    const_iterator cbegin(difference_type step = 1) const TBAG_NOEXCEPT { return begin(); }
+    const_iterator   cend(difference_type step = 1) const TBAG_NOEXCEPT { return   end(); }
 
 public:
     void resize(DimValue const * dims, DimValue size)

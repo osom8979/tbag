@@ -169,6 +169,48 @@ TYPED_TEST(BagTest, Elements)
     ASSERT_EQ(23, b.atOffset(1, 2, 3));
 }
 
+TYPED_TEST(BagTest, ForEachIterator)
+{
+    auto & b = this->bag;
+    int i = 0;
+    for (auto & cursor : b) {
+        ++i;
+    }
+    ASSERT_EQ(2*3*4, i);
+}
+
+TYPED_TEST(BagTest, Iterator)
+{
+    auto & b = this->bag;
+    auto itr = b.begin();
+    // @formatter:off
+    ASSERT_EQ( 0, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 1, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 2, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 3, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 4, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 5, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 6, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 7, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 8, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ( 9, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(10, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(11, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(12, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(13, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(14, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(15, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(16, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(17, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(18, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(19, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(20, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(21, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(22, *itr++); ASSERT_NE(b.end(), itr);
+    ASSERT_EQ(23, *itr++); ASSERT_EQ(b.end(), itr);
+    // @formatter:on
+}
+
 TEST(BagTest_NoTyped, Default)
 {
     using TestBag = Bag<int>;
