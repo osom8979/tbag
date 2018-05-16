@@ -71,7 +71,7 @@ TEST(BagDimensions, Default)
     ASSERT_EQ(0, dims.total());
     ASSERT_TRUE(dims.empty());
 
-    dims.resize(2, 3, 4, 5);
+    dims.resize({2, 3, 4, 5});
     ASSERT_EQ(2, dims.at(0));
     ASSERT_EQ(3, dims.at(1));
     ASSERT_EQ(4, dims.at(2));
@@ -92,7 +92,7 @@ TEST(BagDimensions, Default)
     ASSERT_TRUE(dims.empty());
 
     TestBagDimensions dims2;
-    dims2.resize(2, 3);
+    dims2.resize({2, 3});
     ASSERT_EQ(2, dims2.size());
 
     dims.swap(dims2);
@@ -179,6 +179,26 @@ TYPED_TEST(BagTest, ForEachIterator)
     ASSERT_EQ(2*3*4, i);
 }
 
+TYPED_TEST(BagTest, ConstIterator)
+{
+    auto & b = this->bag;
+    int i = 0;
+    for (auto itr = b.cbegin(); itr != b.cend(); ++itr) {
+        ++i;
+    }
+    ASSERT_EQ(2*3*4, i);
+}
+
+TYPED_TEST(BagTest, ConstReverseIterator)
+{
+    auto & b = this->bag;
+    int i = 0;
+    for (auto itr = b.crbegin(); itr != b.crend(); ++itr) {
+        ++i;
+    }
+    ASSERT_EQ(2*3*4, i);
+}
+
 TYPED_TEST(BagTest, Iterator)
 {
     auto & b = this->bag;
@@ -208,6 +228,38 @@ TYPED_TEST(BagTest, Iterator)
     ASSERT_EQ(21, *itr++); ASSERT_NE(b.end(), itr);
     ASSERT_EQ(22, *itr++); ASSERT_NE(b.end(), itr);
     ASSERT_EQ(23, *itr++); ASSERT_EQ(b.end(), itr);
+    // @formatter:on
+}
+
+TYPED_TEST(BagTest, ReverseIterator)
+{
+    auto & b = this->bag;
+    auto itr = b.rbegin();
+    // @formatter:off
+    ASSERT_EQ(23, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(22, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(21, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(20, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(19, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(18, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(17, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(16, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(15, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(14, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(13, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(12, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(11, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ(10, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 9, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 8, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 7, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 6, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 5, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 4, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 3, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 2, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 1, *itr++); ASSERT_NE(b.rend(), itr);
+    ASSERT_EQ( 0, *itr++); ASSERT_EQ(b.rend(), itr);
     // @formatter:on
 }
 

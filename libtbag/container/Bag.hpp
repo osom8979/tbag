@@ -60,7 +60,17 @@ class BagContainer<T, A, std::vector<T, A<T> > >
 public:
     using Value     = T;
     using Allocator = A<Value>;
-    using Container = std::vector<T, Allocator>;
+    using Container = std::vector<Value, Allocator>;
+
+public:
+    using value_type        = typename Container::value_type;
+    using allocator_type    = typename Container::allocator_type;
+    using reference         = typename Container::reference;
+    using const_reference   = typename Container::const_reference;
+    using size_type         = typename Container::size_type;
+    using difference_type   = typename Container::difference_type;
+    using pointer           = typename Container::pointer;
+    using const_pointer     = typename Container::const_pointer;
 
 private:
     Container _container;
@@ -78,7 +88,7 @@ public:
         _container.clear();
     }
 
-    void resize(std::size_t size) TBAG_NOEXCEPT_SP_OP(_container.resize(size))
+    void resize(size_type size) TBAG_NOEXCEPT_SP_OP(_container.resize(size))
     {
         _container.resize(size);
     }
@@ -93,27 +103,27 @@ public:
         _container = obj._container;
     }
 
-    Value & at(std::size_t index) TBAG_NOEXCEPT_SP_OP(_container.operator[](index))
+    reference at(size_type index) TBAG_NOEXCEPT_SP_OP(_container.operator[](index))
     {
         return _container.operator[](index);
     }
 
-    Value const & at(std::size_t index) const TBAG_NOEXCEPT_SP_OP(_container.operator[](index))
+    const_reference at(std::size_t index) const TBAG_NOEXCEPT_SP_OP(_container.operator[](index))
     {
         return _container.operator[](index);
     }
 
-    Value * data() TBAG_NOEXCEPT_SP_OP(_container.data())
+    pointer data() TBAG_NOEXCEPT_SP_OP(_container.data())
     {
         return _container.data();
     }
 
-    Value const * data() const TBAG_NOEXCEPT_SP_OP(_container.data())
+    const_pointer data() const TBAG_NOEXCEPT_SP_OP(_container.data())
     {
         return _container.data();
     }
 
-    std::size_t size() const TBAG_NOEXCEPT_SP_OP(_container.size())
+    size_type size() const TBAG_NOEXCEPT_SP_OP(_container.size())
     {
         return _container.size();
     }
@@ -140,8 +150,8 @@ public:
     TBAG_CONSTEXPR static DimValue const NOT_FOUND = -1;
 
 public:
-    TBAG_CONSTEXPR static DimValue const maxDimSize() TBAG_NOEXCEPT { return ELEMENTS_BUFFER_SIZE; }
-    TBAG_CONSTEXPR static DimValue const getNotFound() TBAG_NOEXCEPT  { return NOT_FOUND; }
+    TBAG_CONSTEXPR static DimValue const  maxDimSize() TBAG_NOEXCEPT { return ELEMENTS_BUFFER_SIZE; }
+    TBAG_CONSTEXPR static DimValue const getNotFound() TBAG_NOEXCEPT { return NOT_FOUND; }
 
 private:
     DimValue _dims[ELEMENTS_BUFFER_SIZE];
@@ -157,12 +167,11 @@ public:
 public:
     void clear() TBAG_NOEXCEPT
     {
-        for (DimValue i = 0; i < ELEMENTS_BUFFER_SIZE; ++i) {
-            _dims[i] = 0;
-        }
+        std::fill(_dims, _dims + ELEMENTS_BUFFER_SIZE, 0);
         _size = 0;
     }
 
+public:
     void resize(DimValue const * dims, DimValue size)
     {
         assert(0 < COMPARE_AND(size) <= maxDimSize());
@@ -173,18 +182,13 @@ public:
         _size = size;
     }
 
-    template <typename T>
-    void resize(std::initializer_list<T> list)
+    template <typename Tp>
+    void resize(std::initializer_list<Tp> list)
     {
         resize((DimValue const *)list.begin(), (DimValue)list.size());
     }
 
-    template <typename ... Args>
-    void resize(Args && ... list)
-    {
-        resize({std::forward<Args>(list) ...});
-    }
-
+public:
     void swap(BagDimensions & obj) TBAG_NOEXCEPT
     {
         for (DimValue i = 0; i < maxDimSize(); ++i) {
@@ -201,6 +205,7 @@ public:
         _size = obj._size;
     }
 
+public:
     DimValue & at(DimValue index)
     {
         assert(0 <= COMPARE_AND(index) < maxDimSize());
@@ -280,36 +285,32 @@ template <typename T,
           template <typename Tp> class A = std::allocator,
           typename C = std::vector<T, A<T> >,
           unsigned L = DEFAULT_ELEMENTS_BUFFER_SIZE_OF_BAG>
-class Bag : protected BagContainer<T, A, C>,
-            protected BagDimensions<L>
+class Bag
 {
 public:
     using Self = Bag<T, A, C, L>;
-    using BaseContainer   = BagContainer<T, A, C>;
-    using BaseDimenstions = BagDimensions<L>;
+    using Container   = BagContainer<T, A, C>;
+    using Dimenstions = BagDimensions<L>;
 
 public:
-    using Value     = typename BaseContainer::Value;
-    using Allocator = typename BaseContainer::Allocator;
-    using Container = typename BaseContainer::Container;
-    using DimValue  = typename BaseDimenstions::DimValue;
+    using value_type        = typename Container::value_type;
+    using allocator_type    = typename Container::allocator_type;
+    using reference         = typename Container::reference;
+    using const_reference   = typename Container::const_reference;
+    using size_type         = typename Dimenstions::DimValue;
+    using difference_type   = typename Container::difference_type;
+    using pointer           = typename Container::pointer;
+    using const_pointer     = typename Container::const_pointer;
 
 public:
-    static_assert(!std::is_pointer  <Value>::value, "Value must not be a pointer type");
-    static_assert(!std::is_reference<Value>::value, "Value must not be a reference type");
+    static_assert(!std::is_pointer  <value_type>::value, "value_type must not be a pointer type");
+    static_assert(!std::is_reference<value_type>::value, "value_type must not be a reference type");
 
 public:
-    using value_type        = Value;
-    using allocator_type    = Allocator;
-    using reference         = typename std::add_lvalue_reference<value_type>::type;
-    using const_reference   = typename std::add_const<reference>::type;
-    using size_type         = DimValue;
-    using difference_type   = std::ptrdiff_t;
-    using pointer           = typename std::add_pointer<value_type>::type;
-    using const_pointer     = typename std::add_const<pointer>::type;
-
-public:
-    template <typename V, typename R = reference, typename P = pointer, typename D = difference_type>
+    template <typename V,
+              typename R = reference,
+              typename P = pointer,
+              typename D = difference_type>
     class BagIterator : public std::iterator<std::bidirectional_iterator_tag, V, D, P, R>
     {
     public:
@@ -392,14 +393,24 @@ public:
     using       iterator = BagIterator<value_type,       reference,       pointer>;
     using const_iterator = BagIterator<value_type, const_reference, const_pointer>;
 
+    using       reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+private:
+    Dimenstions  _dimenstions;
+    Container    _container;
+
 public:
-    Bag() : BaseContainer(), BaseDimenstions()
+    Bag() TBAG_NOEXCEPT_SPECIFIER(
+            std::is_nothrow_default_constructible<Dimenstions>::value &&
+            std::is_nothrow_default_constructible<Container>::value)
+            : _dimenstions(), _container()
     { /* EMPTY. */ }
 
     template <typename Tp>
     Bag(std::initializer_list<Tp> list) : Bag()
     {
-        Self::resize(list);
+        resize(list);
     }
 
     Bag(Bag const & obj) : Bag()
@@ -432,16 +443,16 @@ public:
     void copy(Bag const & obj)
     {
         if (this != &obj) {
-            BaseDimenstions::copy(obj);
-            BaseContainer::copy(obj);
+            _dimenstions.copy(obj._dimenstions);
+            _container.copy(obj._container);
         }
     }
 
     void swap(Bag & obj)
     {
         if (this != &obj) {
-            BaseDimenstions::swap(obj);
-            BaseContainer::swap(obj);
+            _dimenstions.swap(obj._dimenstions);
+            _container.swap(obj._container);
         }
     }
 
@@ -451,88 +462,109 @@ public:
     }
 
 public:
-    Value * data() TBAG_NOEXCEPT_SP_OP(BaseContainer::data())
+    pointer data() TBAG_NOEXCEPT_SP_OP(_container.data())
     {
-        return BaseContainer::data();
+        return _container.data();
     }
 
-    Value const * data() const TBAG_NOEXCEPT_SP_OP(BaseContainer::data())
+    const_pointer data() const TBAG_NOEXCEPT_SP_OP(_container.data())
     {
-        return BaseContainer::data();
+        return _container.data();
     }
 
 public:
-    iterator        begin(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data(), step); }
+    // @formatter:off
+          iterator  begin(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data(), step); }
     const_iterator  begin(difference_type step = 1) const TBAG_NOEXCEPT { return const_iterator(data(), step); }
-    iterator          end(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data() + size(), step); }
+          iterator    end(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data() + size(), step); }
     const_iterator    end(difference_type step = 1) const TBAG_NOEXCEPT { return const_iterator(data() + size(), step); }
+    // @formatter:on
 
 public:
-    const_iterator cbegin(difference_type step = 1) const TBAG_NOEXCEPT { return begin(); }
-    const_iterator   cend(difference_type step = 1) const TBAG_NOEXCEPT { return   end(); }
+    // @formatter:off
+          reverse_iterator rbegin(difference_type step = 1)       TBAG_NOEXCEPT { return       reverse_iterator(  end(step)); }
+    const_reverse_iterator rbegin(difference_type step = 1) const TBAG_NOEXCEPT { return const_reverse_iterator(  end(step)); }
+          reverse_iterator   rend(difference_type step = 1)       TBAG_NOEXCEPT { return       reverse_iterator(begin(step)); }
+    const_reverse_iterator   rend(difference_type step = 1) const TBAG_NOEXCEPT { return const_reverse_iterator(begin(step)); }
+    // @formatter:on
 
 public:
-    void resize(DimValue const * dims, DimValue size)
+    // @formatter:off
+            const_iterator  cbegin(difference_type step = 1) const TBAG_NOEXCEPT { return  begin(step); }
+            const_iterator    cend(difference_type step = 1) const TBAG_NOEXCEPT { return    end(step); }
+    const_reverse_iterator crbegin(difference_type step = 1) const TBAG_NOEXCEPT { return rbegin(step); }
+    const_reverse_iterator   crend(difference_type step = 1) const TBAG_NOEXCEPT { return   rend(step); }
+    // @formatter:on
+
+public:
+    void resize(size_type const * dims, size_type size)
     {
-        BaseDimenstions::resize(dims, size);
-        BaseContainer::resize(BaseDimenstions::total());
+        _dimenstions.resize(dims, size);
+        _container.resize(_dimenstions.total());
     }
 
     template <typename Tp>
     void resize(std::initializer_list<Tp> list)
     {
-        Self::resize((DimValue const *)list.begin(), (DimValue)list.size());
+        static_assert(std::is_integral<typename std::initializer_list<Tp>::value_type>::value,
+                      "Only integers are supported.");
+        resize((size_type const *)list.begin(), (size_type)list.size());
     }
 
     template <typename ... Args>
     void resize(Args && ... list)
     {
-        Self::resize({std::forward<Args>(list) ...});
+        resize({std::forward<Args>(list) ...});
     }
 
     void clear()
     {
-        BaseDimenstions::clear();
-        BaseContainer::clear();
+        _dimenstions.clear();
+        _container.clear();
     }
 
 public:
-    DimValue size() const TBAG_NOEXCEPT_SP_OP(BaseDimenstions::total())
+    size_type max_size() const TBAG_NOEXCEPT
     {
-        return BaseDimenstions::total();
+        return Dimenstions::maxDimSize();
     }
 
-    DimValue size(DimValue index) const TBAG_NOEXCEPT_SP_OP(BaseDimenstions::at(index))
+    size_type size() const TBAG_NOEXCEPT_SP_OP(_dimenstions.total())
     {
-        return BaseDimenstions::at(index);
+        return _dimenstions.total();
     }
 
-    bool empty() const TBAG_NOEXCEPT_SP_OP(BaseDimenstions::empty())
+    size_type size(size_type index) const TBAG_NOEXCEPT_SP_OP(_dimenstions.at(index))
     {
-        return BaseDimenstions::empty();
+        return _dimenstions.at(index);
+    }
+
+    bool empty() const TBAG_NOEXCEPT_SP_OP(_dimenstions.empty())
+    {
+        return _dimenstions.empty();
     }
 
 public:
-    Value & at(DimValue index) TBAG_NOEXCEPT_SP_OP(BaseContainer::at(index))
+    reference at(size_type index) TBAG_NOEXCEPT_SP_OP(_container.at(index))
     {
-        return BaseContainer::at(index);
+        return _container.at(index);
     }
 
-    Value const & at(DimValue index) const TBAG_NOEXCEPT_SP_OP(BaseContainer::at(index))
+    const_reference at(size_type index) const TBAG_NOEXCEPT_SP_OP(_container.at(index))
     {
-        return BaseContainer::at(index);
-    }
-
-    template <typename ... Args>
-    Value & atOffset(Args && ... args)
-    {
-        return BaseContainer::at(BaseDimenstions::offset({std::forward<Args>(args) ...}));
+        return _container.at(index);
     }
 
     template <typename ... Args>
-    Value const & atOffset(Args && ... args) const
+    reference atOffset(Args && ... args)
     {
-        return BaseContainer::at(BaseDimenstions::offset({std::forward<Args>(args) ...}));
+        return _container.at(_dimenstions.offset({std::forward<Args>(args) ...}));
+    }
+
+    template <typename ... Args>
+    const_reference atOffset(Args && ... args) const
+    {
+        return _container.at(_dimenstions.offset({std::forward<Args>(args) ...}));
     }
 };
 
