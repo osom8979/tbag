@@ -72,6 +72,10 @@ public:
     using pointer           = typename Container::pointer;
     using const_pointer     = typename Container::const_pointer;
 
+public:
+    static_assert(std::is_same<typename allocator_type::value_type, value_type>::value,
+                  "allocator_type::value_type must be same type as value_type");
+
 private:
     Container _container;
 
@@ -103,14 +107,14 @@ public:
         _container = obj._container;
     }
 
-    reference at(size_type index) TBAG_NOEXCEPT_SP_OP(_container.operator[](index))
+    reference at(size_type index)
     {
-        return _container.operator[](index);
+        return _container[index];
     }
 
-    const_reference at(std::size_t index) const TBAG_NOEXCEPT_SP_OP(_container.operator[](index))
+    const_reference at(size_type index) const
     {
-        return _container.operator[](index);
+        return _container[index];
     }
 
     pointer data() TBAG_NOEXCEPT_SP_OP(_container.data())
@@ -158,7 +162,7 @@ private:
     DimValue _size;
 
 public:
-    BagDimensions() TBAG_NOEXCEPT : _dims{0,}, _size(0)
+    BagDimensions() TBAG_NOEXCEPT : _dims{1,}, _size(0)
     { /* EMPTY */ }
 
     ~BagDimensions()
@@ -167,23 +171,27 @@ public:
 public:
     void clear() TBAG_NOEXCEPT
     {
-        std::fill(_dims, _dims + ELEMENTS_BUFFER_SIZE, 0);
+        std::fill(_dims, _dims + ELEMENTS_BUFFER_SIZE, 1);
         _size = 0;
     }
 
 public:
-    void resize(DimValue const * dims, DimValue size)
+    void resize(DimValue const * dims, DimValue size) TBAG_NOEXCEPT_ONLY_RELEASE
     {
         assert(0 < COMPARE_AND(size) <= maxDimSize());
-        DimValue const MIN_SIZE = libtbag::algorithm::getMin(size, maxDimSize());
-        for (DimValue i = 0; i < MIN_SIZE; ++i) {
+        DimValue const SIZE = libtbag::algorithm::getMin(size, maxDimSize());
+        DimValue i = 0;
+        for (; i < SIZE; ++i) {
             _dims[i] = dims[i];
+        }
+        for (; i < maxDimSize(); ++i) {
+            _dims[i] = 1;
         }
         _size = size;
     }
 
     template <typename Tp>
-    void resize(std::initializer_list<Tp> list)
+    void resize(std::initializer_list<Tp> list) TBAG_NOEXCEPT_ONLY_RELEASE
     {
         resize((DimValue const *)list.begin(), (DimValue)list.size());
     }
@@ -191,17 +199,13 @@ public:
 public:
     void swap(BagDimensions & obj) TBAG_NOEXCEPT
     {
-        for (DimValue i = 0; i < maxDimSize(); ++i) {
-            std::swap(_dims[i], obj._dims[i]);
-        }
+        std::swap_ranges(_dims, _dims + ELEMENTS_BUFFER_SIZE, obj._dims);
         std::swap(_size, obj._size);
     }
 
     void copy(BagDimensions const & obj) TBAG_NOEXCEPT
     {
-        for (DimValue i = 0; i < maxDimSize(); ++i) {
-            _dims[i] = obj._dims[i];
-        }
+        std::copy(obj._dims, obj._dims + ELEMENTS_BUFFER_SIZE, _dims);
         _size = obj._size;
     }
 
@@ -228,6 +232,7 @@ public:
         return _size == 0;
     }
 
+public:
     static DimValue calcTotal(DimValue const * dims, DimValue size)
     {
         if (size == 0) {
@@ -247,6 +252,7 @@ public:
         return calcTotal(_dims, _size);
     }
 
+public:
     DimValue offset(DimValue const * offsets, DimValue size)
     {
         assert(0 < COMPARE_AND(size) <= _size);
@@ -262,8 +268,8 @@ public:
         return result;
     }
 
-    template <typename T>
-    DimValue offset(std::initializer_list<T> list)
+    template <typename Tp>
+    DimValue offset(std::initializer_list<Tp> list)
     {
         return offset((DimValue const *)list.begin(), (DimValue)list.size());
     }
@@ -288,7 +294,7 @@ template <typename T,
 class Bag
 {
 public:
-    using Self = Bag<T, A, C, L>;
+    using Self        = Bag<T, A, C, L>;
     using Container   = BagContainer<T, A, C>;
     using Dimenstions = BagDimensions<L>;
 
@@ -303,8 +309,12 @@ public:
     using const_pointer     = typename Container::const_pointer;
 
 public:
-    static_assert(!std::is_pointer  <value_type>::value, "value_type must not be a pointer type");
-    static_assert(!std::is_reference<value_type>::value, "value_type must not be a reference type");
+    static_assert(!std::is_pointer<value_type>::value,
+                  "value_type must not be a pointer type");
+    static_assert(!std::is_reference<value_type>::value,
+                  "value_type must not be a reference type");
+    static_assert(std::is_same<typename allocator_type::value_type, value_type>::value,
+                  "allocator_type::value_type must be same type as value_type");
 
 public:
     template <typename V,
