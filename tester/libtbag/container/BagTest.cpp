@@ -81,10 +81,10 @@ TEST(BagDimensions, Default)
     ASSERT_EQ(2*3*4*5, dims.total());
     ASSERT_FALSE(dims.empty());
 
-    ASSERT_EQ(0, dims.offset(0));
-    ASSERT_EQ(1, dims.offset(1));
-    ASSERT_EQ((2)+(1), dims.offset(1, 1));
-    ASSERT_EQ((2*3)+(2)+(1), dims.offset(1, 1, 1));
+    ASSERT_EQ(0, dims.offset({0}));
+    ASSERT_EQ(1, dims.offset({1}));
+    ASSERT_EQ((2)+(1), dims.offset({1, 1}));
+    ASSERT_EQ((2*3)+(2)+(1), dims.offset({1, 1, 1}));
 
     dims.clear();
     ASSERT_EQ(0, dims.size());
@@ -140,33 +140,33 @@ TYPED_TEST(BagTest, Elements)
 {
     auto & b = this->bag;
 
-    ASSERT_EQ( 0, b.atOffset(0, 0, 0));
-    ASSERT_EQ( 1, b.atOffset(1, 0, 0));
-    ASSERT_EQ( 2, b.atOffset(0, 1, 0));
-    ASSERT_EQ( 3, b.atOffset(1, 1, 0));
-    ASSERT_EQ( 4, b.atOffset(0, 2, 0));
-    ASSERT_EQ( 5, b.atOffset(1, 2, 0));
+    ASSERT_EQ( 0, b.atDims(0, 0, 0));
+    ASSERT_EQ( 1, b.atDims(1, 0, 0));
+    ASSERT_EQ( 2, b.atDims(0, 1, 0));
+    ASSERT_EQ( 3, b.atDims(1, 1, 0));
+    ASSERT_EQ( 4, b.atDims(0, 2, 0));
+    ASSERT_EQ( 5, b.atDims(1, 2, 0));
 
-    ASSERT_EQ( 6, b.atOffset(0, 0, 1));
-    ASSERT_EQ( 7, b.atOffset(1, 0, 1));
-    ASSERT_EQ( 8, b.atOffset(0, 1, 1));
-    ASSERT_EQ( 9, b.atOffset(1, 1, 1));
-    ASSERT_EQ(10, b.atOffset(0, 2, 1));
-    ASSERT_EQ(11, b.atOffset(1, 2, 1));
+    ASSERT_EQ( 6, b.atDims(0, 0, 1));
+    ASSERT_EQ( 7, b.atDims(1, 0, 1));
+    ASSERT_EQ( 8, b.atDims(0, 1, 1));
+    ASSERT_EQ( 9, b.atDims(1, 1, 1));
+    ASSERT_EQ(10, b.atDims(0, 2, 1));
+    ASSERT_EQ(11, b.atDims(1, 2, 1));
 
-    ASSERT_EQ(12, b.atOffset(0, 0, 2));
-    ASSERT_EQ(13, b.atOffset(1, 0, 2));
-    ASSERT_EQ(14, b.atOffset(0, 1, 2));
-    ASSERT_EQ(15, b.atOffset(1, 1, 2));
-    ASSERT_EQ(16, b.atOffset(0, 2, 2));
-    ASSERT_EQ(17, b.atOffset(1, 2, 2));
+    ASSERT_EQ(12, b.atDims(0, 0, 2));
+    ASSERT_EQ(13, b.atDims(1, 0, 2));
+    ASSERT_EQ(14, b.atDims(0, 1, 2));
+    ASSERT_EQ(15, b.atDims(1, 1, 2));
+    ASSERT_EQ(16, b.atDims(0, 2, 2));
+    ASSERT_EQ(17, b.atDims(1, 2, 2));
 
-    ASSERT_EQ(18, b.atOffset(0, 0, 3));
-    ASSERT_EQ(19, b.atOffset(1, 0, 3));
-    ASSERT_EQ(20, b.atOffset(0, 1, 3));
-    ASSERT_EQ(21, b.atOffset(1, 1, 3));
-    ASSERT_EQ(22, b.atOffset(0, 2, 3));
-    ASSERT_EQ(23, b.atOffset(1, 2, 3));
+    ASSERT_EQ(18, b.atDims(0, 0, 3));
+    ASSERT_EQ(19, b.atDims(1, 0, 3));
+    ASSERT_EQ(20, b.atDims(0, 1, 3));
+    ASSERT_EQ(21, b.atDims(1, 1, 3));
+    ASSERT_EQ(22, b.atDims(0, 2, 3));
+    ASSERT_EQ(23, b.atDims(1, 2, 3));
 }
 
 TYPED_TEST(BagTest, ForEachIterator)

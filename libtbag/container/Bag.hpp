@@ -80,7 +80,8 @@ private:
     Container _container;
 
 public:
-    BagContainer() TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_default_constructible<Container>::value) : _container()
+    BagContainer() TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_default_constructible<Container>::value)
+            : _container()
     { /* EMPTY. */ }
 
     ~BagContainer()
@@ -193,7 +194,7 @@ public:
     template <typename Tp>
     void resize(std::initializer_list<Tp> list) TBAG_NOEXCEPT_ONLY_RELEASE
     {
-        resize((DimValue const *)list.begin(), (DimValue)list.size());
+        return resize((DimValue const *)list.begin(), (DimValue)list.size());
     }
 
 public:
@@ -247,9 +248,20 @@ public:
         return result;
     }
 
+    template <typename Tp>
+    static DimValue calcTotal(std::initializer_list<Tp> list)
+    {
+        return calcTotal((DimValue const *)list.begin(), (DimValue)list.size());
+    }
+
+    DimValue total(DimValue size) const
+    {
+        return calcTotal(_dims, size);
+    }
+
     DimValue total() const
     {
-        return calcTotal(_dims, _size);
+        return total(_size);
     }
 
 public:
@@ -272,12 +284,6 @@ public:
     DimValue offset(std::initializer_list<Tp> list)
     {
         return offset((DimValue const *)list.begin(), (DimValue)list.size());
-    }
-
-    template <typename ... Args>
-    DimValue offset(Args && ... list)
-    {
-        return offset({std::forward<Args>(list) ...});
     }
 };
 
@@ -369,6 +375,18 @@ public:
         { return _cursor == obj._cursor; }
         inline bool operator !=(BagIterator const & obj) const TBAG_NOEXCEPT
         { return _cursor != obj._cursor; }
+
+    public:
+        inline bool operator <(BagIterator const & obj) const TBAG_NOEXCEPT
+        { return _cursor < obj._cursor; }
+        inline bool operator >(BagIterator const & obj) const TBAG_NOEXCEPT
+        { return _cursor > obj._cursor; }
+
+    public:
+        inline bool operator <=(BagIterator const & obj) const TBAG_NOEXCEPT
+        { return _cursor <= obj._cursor; }
+        inline bool operator >=(BagIterator const & obj) const TBAG_NOEXCEPT
+        { return _cursor >= obj._cursor; }
 
     public:
         inline BagIterator & operator ++() TBAG_NOEXCEPT
@@ -484,26 +502,26 @@ public:
 
 public:
     // @formatter:off
-          iterator  begin(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data(), step); }
-    const_iterator  begin(difference_type step = 1) const TBAG_NOEXCEPT { return const_iterator(data(), step); }
-          iterator    end(difference_type step = 1)       TBAG_NOEXCEPT { return       iterator(data() + size(), step); }
-    const_iterator    end(difference_type step = 1) const TBAG_NOEXCEPT { return const_iterator(data() + size(), step); }
+          iterator  begin()       TBAG_NOEXCEPT { return       iterator(data()); }
+    const_iterator  begin() const TBAG_NOEXCEPT { return const_iterator(data()); }
+          iterator    end()       TBAG_NOEXCEPT { return       iterator(data() + size()); }
+    const_iterator    end() const TBAG_NOEXCEPT { return const_iterator(data() + size()); }
     // @formatter:on
 
 public:
     // @formatter:off
-          reverse_iterator rbegin(difference_type step = 1)       TBAG_NOEXCEPT { return       reverse_iterator(  end(step)); }
-    const_reverse_iterator rbegin(difference_type step = 1) const TBAG_NOEXCEPT { return const_reverse_iterator(  end(step)); }
-          reverse_iterator   rend(difference_type step = 1)       TBAG_NOEXCEPT { return       reverse_iterator(begin(step)); }
-    const_reverse_iterator   rend(difference_type step = 1) const TBAG_NOEXCEPT { return const_reverse_iterator(begin(step)); }
+          reverse_iterator rbegin()       TBAG_NOEXCEPT { return       reverse_iterator(  end()); }
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT { return const_reverse_iterator(  end()); }
+          reverse_iterator   rend()       TBAG_NOEXCEPT { return       reverse_iterator(begin()); }
+    const_reverse_iterator   rend() const TBAG_NOEXCEPT { return const_reverse_iterator(begin()); }
     // @formatter:on
 
 public:
     // @formatter:off
-            const_iterator  cbegin(difference_type step = 1) const TBAG_NOEXCEPT { return  begin(step); }
-            const_iterator    cend(difference_type step = 1) const TBAG_NOEXCEPT { return    end(step); }
-    const_reverse_iterator crbegin(difference_type step = 1) const TBAG_NOEXCEPT { return rbegin(step); }
-    const_reverse_iterator   crend(difference_type step = 1) const TBAG_NOEXCEPT { return   rend(step); }
+            const_iterator  cbegin() const TBAG_NOEXCEPT { return  begin(); }
+            const_iterator    cend() const TBAG_NOEXCEPT { return    end(); }
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT { return rbegin(); }
+    const_reverse_iterator   crend() const TBAG_NOEXCEPT { return   rend(); }
     // @formatter:on
 
 public:
@@ -566,16 +584,18 @@ public:
     }
 
     template <typename ... Args>
-    reference atOffset(Args && ... args)
+    reference atDims(Args && ... args)
     {
         return _container.at(_dimenstions.offset({std::forward<Args>(args) ...}));
     }
 
     template <typename ... Args>
-    const_reference atOffset(Args && ... args) const
+    const_reference atDims(Args && ... args) const
     {
         return _container.at(_dimenstions.offset({std::forward<Args>(args) ...}));
     }
+
+public:
 };
 
 } // namespace container
