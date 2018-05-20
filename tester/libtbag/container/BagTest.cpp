@@ -64,7 +64,7 @@ TEST(BagContainerTest, Default)
 TEST(BagDimensions, Default)
 {
     using TestBagDimensions = BagDimensions<8>;
-    ASSERT_EQ(8, TestBagDimensions::maxDimSize());
+    ASSERT_EQ(8, TestBagDimensions::getBufferSize());
 
     TestBagDimensions dims;
     ASSERT_EQ(0, dims.size());

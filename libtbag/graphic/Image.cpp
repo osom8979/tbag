@@ -69,14 +69,13 @@ Err readImage(std::string const & path, Image & image)
             image[i].g = *(data + (2 * i));
             image[i].b = *(data + (2 * i));
         }
-    } else if (channel == 3) {
-        image.assign(data, static_cast<std::size_t>(width * height * channel));
-    } else if (channel == 4) {
+    } else if (channel == 3 || channel == 4) {
         std::size_t const SIZE = static_cast<std::size_t>(width * height);
         for (std::size_t i = 0; i < SIZE; ++i) {
             image[i].r = *(data + (channel * i) + 0);
             image[i].g = *(data + (channel * i) + 1);
             image[i].b = *(data + (channel * i) + 2);
+            /* image[i].a = *(data + (channel * i) + 3); */
         }
     } else {
         assert(false && "Inaccessible block.");

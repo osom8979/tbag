@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/algorithm/MinMax.hpp>
+#include <libtbag/type/TypeTable.hpp>
 
 #include <cstdint>
 #include <cassert>
@@ -148,22 +149,25 @@ template <unsigned L = DEFAULT_ELEMENTS_BUFFER_SIZE_OF_BAG>
 class BagDimensions
 {
 public:
-    using DimValue = unsigned;
+    using DimValue = unsigned int;
+    using DimValueInfo = libtbag::type::TypeInfo<DimValue>;
 
 public:
-    TBAG_CONSTEXPR static DimValue const ELEMENTS_BUFFER_SIZE = L;
-    TBAG_CONSTEXPR static DimValue const NOT_FOUND = -1;
+    TBAG_CONSTEXPR static DimValue const MAX_DIM_VALUE = DimValueInfo::maximum();
+    TBAG_CONSTEXPR static DimValue const BUFFER_SIZE   = L;
+    TBAG_CONSTEXPR static DimValue const NOT_FOUND     = -1;
 
 public:
-    TBAG_CONSTEXPR static DimValue const  maxDimSize() TBAG_NOEXCEPT { return ELEMENTS_BUFFER_SIZE; }
-    TBAG_CONSTEXPR static DimValue const getNotFound() TBAG_NOEXCEPT { return NOT_FOUND; }
+    TBAG_CONSTEXPR static DimValue const getMaxDimValue() TBAG_NOEXCEPT { return MAX_DIM_VALUE; }
+    TBAG_CONSTEXPR static DimValue const  getBufferSize() TBAG_NOEXCEPT { return BUFFER_SIZE; }
+    TBAG_CONSTEXPR static DimValue const    getNotFound() TBAG_NOEXCEPT { return NOT_FOUND; }
 
 private:
-    DimValue _dims[ELEMENTS_BUFFER_SIZE];
+    DimValue _dims[BUFFER_SIZE];
     DimValue _size;
 
 public:
-    BagDimensions() TBAG_NOEXCEPT : _dims{1,}, _size(0)
+    BagDimensions() TBAG_NOEXCEPT : _dims{0,}, _size(0)
     { /* EMPTY */ }
 
     ~BagDimensions()
@@ -172,21 +176,21 @@ public:
 public:
     void clear() TBAG_NOEXCEPT
     {
-        std::fill(_dims, _dims + ELEMENTS_BUFFER_SIZE, 1);
+        std::fill(_dims, _dims + BUFFER_SIZE, 0);
         _size = 0;
     }
 
 public:
     void resize(DimValue const * dims, DimValue size) TBAG_NOEXCEPT_ONLY_RELEASE
     {
-        assert(0 < COMPARE_AND(size) <= maxDimSize());
-        DimValue const SIZE = libtbag::algorithm::getMin(size, maxDimSize());
+        assert(0 < COMPARE_AND(size) <= getBufferSize());
+        DimValue const SIZE = libtbag::algorithm::getMin(size, getBufferSize());
         DimValue i = 0;
         for (; i < SIZE; ++i) {
             _dims[i] = dims[i];
         }
-        for (; i < maxDimSize(); ++i) {
-            _dims[i] = 1;
+        for (; i < getBufferSize(); ++i) {
+            _dims[i] = 0;
         }
         _size = size;
     }
@@ -200,26 +204,26 @@ public:
 public:
     void swap(BagDimensions & obj) TBAG_NOEXCEPT
     {
-        std::swap_ranges(_dims, _dims + ELEMENTS_BUFFER_SIZE, obj._dims);
+        std::swap_ranges(_dims, _dims + BUFFER_SIZE, obj._dims);
         std::swap(_size, obj._size);
     }
 
     void copy(BagDimensions const & obj) TBAG_NOEXCEPT
     {
-        std::copy(obj._dims, obj._dims + ELEMENTS_BUFFER_SIZE, _dims);
+        std::copy(obj._dims, obj._dims + BUFFER_SIZE, _dims);
         _size = obj._size;
     }
 
 public:
     DimValue & at(DimValue index)
     {
-        assert(0 <= COMPARE_AND(index) < maxDimSize());
+        assert(0 <= COMPARE_AND(index) < getBufferSize());
         return _dims[index];
     }
 
     DimValue const & at(DimValue index) const
     {
-        assert(0 <= COMPARE_AND(index) < maxDimSize());
+        assert(0 <= COMPARE_AND(index) < getBufferSize());
         return _dims[index];
     }
 
@@ -527,8 +531,10 @@ public:
 public:
     void resize(size_type const * dims, size_type size)
     {
+        assert(size <= max_size());
         _dimenstions.resize(dims, size);
         _container.resize(_dimenstions.total());
+        assert(_container.size() == _dimenstions.total());
     }
 
     template <typename Tp>
@@ -554,12 +560,12 @@ public:
 public:
     size_type max_size() const TBAG_NOEXCEPT
     {
-        return Dimenstions::maxDimSize();
+        return Dimenstions::getMaxDimValue();
     }
 
-    size_type size() const TBAG_NOEXCEPT_SP_OP(_dimenstions.total())
+    size_type size() const TBAG_NOEXCEPT_SP_OP(_container.size())
     {
-        return _dimenstions.total();
+        return static_cast<size_type>(_container.size());
     }
 
     size_type size(size_type index) const TBAG_NOEXCEPT_SP_OP(_dimenstions.at(index))
@@ -583,6 +589,16 @@ public:
         return _container.at(index);
     }
 
+    reference operator[](size_type index) TBAG_NOEXCEPT_SP_OP(_container.at(index))
+    {
+        return _container.at(index);
+    }
+
+    const_reference operator[](size_type index) const TBAG_NOEXCEPT_SP_OP(_container.at(index))
+    {
+        return _container.at(index);
+    }
+
     template <typename ... Args>
     reference atDims(Args && ... args)
     {
@@ -596,6 +612,10 @@ public:
     }
 
 public:
+    void assign(const_pointer data, size_type size)
+    {
+        std::copy(data, libtbag::algorithm::getMin(size, size()), _container.data());
+    }
 };
 
 } // namespace container

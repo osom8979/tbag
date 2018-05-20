@@ -46,26 +46,11 @@ TEST(Array2dTest, Index)
     int const VALUE1 = 10;
 
     Array2d<int> a1(TEST1, TEST1);
-    a1.at(0, 0) = VALUE1;
+    a1.atDims(0, 0) = VALUE1;
 
-    ASSERT_EQ(VALUE1, *a1.data()   );
-    ASSERT_EQ(VALUE1,  a1[0]       );
-    ASSERT_EQ(VALUE1,  a1.at(0)    );
-    ASSERT_EQ(VALUE1,  a1.get(0)   );
-    ASSERT_EQ(VALUE1,  a1.get(0, 0));
-
-    ASSERT_THROW(a1.at(TEST1 * TEST1) , std::out_of_range);
-    ASSERT_THROW(a1.get(TEST1 * TEST1), std::out_of_range);
-
-    ASSERT_THROW(a1.at(-1,  0)  , std::out_of_range);
-    ASSERT_THROW(a1.at( 0, -1)  , std::out_of_range);
-    ASSERT_THROW(a1.at(TEST1, 0), std::out_of_range);
-    ASSERT_THROW(a1.at(0, TEST1), std::out_of_range);
-
-    ASSERT_THROW(a1.get(-1,  0)  , std::out_of_range);
-    ASSERT_THROW(a1.get( 0, -1)  , std::out_of_range);
-    ASSERT_THROW(a1.get(TEST1, 0), std::out_of_range);
-    ASSERT_THROW(a1.get(0, TEST1), std::out_of_range);
+    ASSERT_EQ(VALUE1, *a1.data());
+    ASSERT_EQ(VALUE1, a1[0]);
+    ASSERT_EQ(VALUE1, a1.at(0));
 }
 
 TEST(Array2dTest, ConstIterator)
@@ -74,11 +59,7 @@ TEST(Array2dTest, ConstIterator)
     Array2d<int> const a1;
     Array2d<int>::const_iterator itr1 = a1.cbegin();
     Array2d<int>::const_iterator end1 = a1.cend();
-    Array2d<int>::const_iterator itr2 = a1.cbeginWithHeight();
-    Array2d<int>::const_iterator end2 = a1.cendWithHeight();
-
     ASSERT_TRUE(itr1 == end1);
-    ASSERT_TRUE(itr2 == end2);
 }
 
 TEST(Array2dTest, Iterator)
@@ -88,39 +69,22 @@ TEST(Array2dTest, Iterator)
     Array2d<int>::iterator end = a1.end();
 
     *itr = 10;
-    ASSERT_EQ(10, a1.at(0, 0));
+    ASSERT_EQ(10, a1.atDims(0, 0));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 20;
-    ASSERT_EQ(20, a1.at(1, 0));
+    ASSERT_EQ(20, a1.atDims(1, 0));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 30;
-    ASSERT_EQ(30, a1.at(0, 1));
+    ASSERT_EQ(30, a1.atDims(0, 1));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 40;
-    ASSERT_EQ(40, a1.at(1, 1));
-    itr++;
-    ASSERT_TRUE(itr == end);
-}
-
-TEST(Array2dTest, HeightIterator)
-{
-    Array2d<int> a1(2, 2);
-    Array2d<int>::iterator itr = a1.beginWithHeight();
-    Array2d<int>::iterator end = a1.endWithHeight();
-
-    *itr = 10;
-    ASSERT_EQ(10, a1.at(0, 0));
-    itr++;
-    ASSERT_TRUE(itr != end);
-
-    *itr = 20;
-    ASSERT_EQ(20, a1.at(0, 1));
+    ASSERT_EQ(40, a1.atDims(1, 1));
     itr++;
     ASSERT_TRUE(itr == end);
 }
