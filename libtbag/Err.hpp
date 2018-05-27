@@ -37,6 +37,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ILLSTATE , "Illegal state"           ) \
     _TBAG_XX(_EOPEN    , "Open error"              ) \
     _TBAG_XX(_ECLOSE   , "Close error"             ) \
+    _TBAG_XX(_EGET     , "Getter error"             ) \
+    _TBAG_XX(_ESET     , "Setter error"             ) \
     _TBAG_XX(_ECREATE  , "Create error"            ) \
     _TBAG_XX(_EINDEX   , "Index error"             ) \
     _TBAG_XX(_ALREADY  , "Already state"           ) \
@@ -67,8 +69,9 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_UNKSIG   , "Unknown signal"          ) \
     _TBAG_XX(_ECOPY    , "Copy error"              ) \
     _TBAG_XX(_EPUSH    , "Push error"              ) \
-    _TBAG_XX(_ESEND    , "Send error"              ) \
     _TBAG_XX(_EPOP     , "Pop error"               ) \
+    _TBAG_XX(_ESEND    , "Send error"              ) \
+    _TBAG_XX(_ERECV    , "Recv error"              ) \
     _TBAG_XX(_INACCES  , "Inaccessible error"      ) \
     _TBAG_XX(_HTTP_1XX , "Informational (HTTP 1xx)") \
     _TBAG_XX(_HTTP_3XX , "Redirection (HTTP 3xx)"  ) \
