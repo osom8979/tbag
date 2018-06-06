@@ -135,15 +135,24 @@ struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
 
     using Limits = std::numeric_limits<Number>;
 
-    TBAG_CONSTEXPR static Number        maximum() TBAG_NOEXCEPT { return Limits::max();           }
-    TBAG_CONSTEXPR static Number        minimum() TBAG_NOEXCEPT { return Limits::min();           }
-    TBAG_CONSTEXPR static Number         lowest() TBAG_NOEXCEPT { return Limits::lowest();        }
-    TBAG_CONSTEXPR static Number        epsilon() TBAG_NOEXCEPT { return Limits::epsilon();       }
-    TBAG_CONSTEXPR static Number    round_error() TBAG_NOEXCEPT { return Limits::round_error();   }
-    TBAG_CONSTEXPR static Number       infinity() TBAG_NOEXCEPT { return Limits::infinity();      }
-    TBAG_CONSTEXPR static Number      quiet_NaN() TBAG_NOEXCEPT { return Limits::quiet_NaN();     }
-    TBAG_CONSTEXPR static Number  signaling_NaN() TBAG_NOEXCEPT { return Limits::signaling_NaN(); }
-    TBAG_CONSTEXPR static Number     denorm_min() TBAG_NOEXCEPT { return Limits::denorm_min();    }
+    /** returns the largest finite value of the given type */
+    TBAG_CONSTEXPR static Number maximum() TBAG_NOEXCEPT { return Limits::max(); }
+    /** returns the smallest finite value of the given type */
+    TBAG_CONSTEXPR static Number minimum() TBAG_NOEXCEPT { return Limits::min(); }
+    /** returns the lowest finite value of the given type */
+    TBAG_CONSTEXPR static Number lowest() TBAG_NOEXCEPT { return Limits::lowest(); }
+    /** returns the difference between 1.0 and the next representable value of the given floating-point type */
+    TBAG_CONSTEXPR static Number epsilon() TBAG_NOEXCEPT { return Limits::epsilon(); }
+    /** returns the maximum rounding error of the given floating-point type */
+    TBAG_CONSTEXPR static Number round_error() TBAG_NOEXCEPT { return Limits::round_error(); }
+    /** returns the positive infinity value of the given floating-point type */
+    TBAG_CONSTEXPR static Number infinity() TBAG_NOEXCEPT { return Limits::infinity(); }
+    /** returns a quiet NaN value of the given floating-point type */
+    TBAG_CONSTEXPR static Number quiet_NaN() TBAG_NOEXCEPT { return Limits::quiet_NaN(); }
+    /** returns a signaling NaN value of the given floating-point type */
+    TBAG_CONSTEXPR static Number signaling_NaN() TBAG_NOEXCEPT { return Limits::signaling_NaN(); }
+    /** returns the smallest positive subnormal value of the given floating-point type */
+    TBAG_CONSTEXPR static Number denorm_min() TBAG_NOEXCEPT { return Limits::denorm_min(); }
 
     TBAG_CONSTEXPR static int index() TBAG_NOEXCEPT { return static_cast<int>(Base::table()); }
 };
