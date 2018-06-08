@@ -199,8 +199,8 @@ void HttpsClient::onApplication(ReadPacket const & packet)
     Err code = Err::E_UNKNOWN;
 
     auto cursor = _tls.decode(packet.buffer, packet.size, &code);
-    if (code == Err::E_SSLWREAD) {
-        tDLogD("HttpsClient::onApplication() SSL_ERROR_WANT_READ");
+    if (code == Err::E_SSLWREAD || code == Err::E_SSLEREAD) {
+        tDLogD("HttpsClient::onApplication() Decode #1 result: {}", getErrName(code));
         return;
     } else if (isFailure(code)) {
         onError(EventType::ET_READ, code);
@@ -212,8 +212,8 @@ void HttpsClient::onApplication(ReadPacket const & packet)
 
     while (code == Err::E_CONTINUE) {
         cursor = _tls.decode(&code);
-        if (code == Err::E_SSLWREAD) {
-            tDLogD("HttpsClient::onApplication() Pending result: SSL_ERROR_WANT_READ");
+        if (code == Err::E_SSLWREAD || code == Err::E_SSLEREAD) {
+            tDLogD("HttpsClient::onApplication() Decode #2 result: {}", getErrName(code));
             return;
         } else if (isFailure(code)) {
             onError(EventType::ET_READ, code);

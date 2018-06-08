@@ -278,7 +278,6 @@ struct TlsReader::Impl : private Noncopyable
     // https://wiki.openssl.org/index.php/Manual:SSL_read(3)
     TBAG_CONSTEXPR static std::size_t const MAX_BYTE   = 1024 * 16;
     TBAG_CONSTEXPR static std::size_t const FIRST_BYTE = 1024;
-    TBAG_CONSTEXPR static std::size_t const BYTE_STEP  = 1024;
 
     Err read(std::vector<char> & result, std::size_t buffer_size = FIRST_BYTE)
     {
@@ -292,13 +291,15 @@ struct TlsReader::Impl : private Noncopyable
                 if (buffer_size >= MAX_BYTE) {
                     return Err::E_SSLWREAD;
                 } else {
-                    return read(result, buffer_size + BYTE_STEP);
+                    buffer.reserve(0);
+                    return read(result, MAX_BYTE);
                 }
             } else {
                 return Err::E_SSL;
             }
         }
 
+        tDLogD("TlsReader::Impl::read({}) SSL_read() result: {}", buffer_size, READ_RESULT);
         assert(READ_RESULT > 0);
         result.assign(buffer.begin(), buffer.begin() + READ_RESULT);
         return Err::E_SUCCESS;
@@ -326,7 +327,7 @@ struct TlsReader::Impl : private Noncopyable
     {
         int const PENDING_SIZE = pendingReadBio();
         if (PENDING_SIZE <= 0) {
-            return Err::E_SSL;
+            return Err::E_SSLEREAD;
         }
         assert(PENDING_SIZE > 0);
         return read(result, static_cast<std::size_t>(PENDING_SIZE));

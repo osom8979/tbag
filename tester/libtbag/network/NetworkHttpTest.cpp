@@ -54,8 +54,12 @@ TEST(NetworkHttpTest, HttpsClient_02)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
 
+    char const * const TEST_URL_01 = "https://osom8979.github.io";
+    char const * const TEST_URL_02 = "https://www.mediawiki.org/wiki/MediaWiki";
+
     HttpResponse response;
-    auto result = http::requestWithTlsSync("https://osom8979.github.io/", response, 10000);
+    auto result = http::requestWithTlsSync(TEST_URL_01, response, 10000);
+    tDLogD("Response result:\n{}", response.toBodyString());
     ASSERT_EQ(Err::E_SUCCESS, result);
     ASSERT_EQ(200, response.code);
 }

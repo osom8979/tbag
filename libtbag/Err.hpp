@@ -81,7 +81,9 @@ NAMESPACE_LIBTBAG_OPEN
     /* SSL */ \
     _TBAG_XX(_SSL      , "SSL error"               ) \
     _TBAG_XX(_SSLWREAD , "SSL want read"           ) \
+    _TBAG_XX(_SSLEREAD , "SSL empty read buffer"   ) \
     _TBAG_XX(_SSLWWRITE, "SSL want write"          ) \
+    _TBAG_XX(_SSLEWRITE, "SSL empty write buffer"  ) \
     _TBAG_XX(_SSLWX509 , "SSL want x509 loopup"    ) \
     /* OpenCL */ \
     _TBAG_XX(_OPENCL   , "OpenCL error"            ) \
