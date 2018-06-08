@@ -132,6 +132,33 @@ inline T getMax(std::initializer_list<T> t)
  * @}
  */
 
+template <typename ForwardIterator, typename Compare>
+void getMinMax(ForwardIterator first, ForwardIterator last,
+               typename std::iterator_traits<ForwardIterator>::reference min,
+               typename std::iterator_traits<ForwardIterator>::reference max,
+               Compare comp)
+{
+    min = *first;
+    max = *first;
+
+    for (; first != last; ++first) {
+        if (comp(*first, min)) {
+            min = *first;
+        }
+        if (comp(max, *first)) {
+            max = *first;
+        }
+    }
+}
+
+template <typename ForwardIterator>
+void getMinMax(ForwardIterator first, ForwardIterator last,
+               typename std::iterator_traits<ForwardIterator>::reference min,
+               typename std::iterator_traits<ForwardIterator>::reference max)
+{
+    return getMinMax(first, last, min, max, std::less<typename std::iterator_traits<ForwardIterator>::value_type>());
+}
+
 } // namespace algorithm
 
 // --------------------

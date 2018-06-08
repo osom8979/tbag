@@ -23,3 +23,27 @@ TEST(MinMaxTest, Default)
     ASSERT_EQ(9, getMax(9, 5));
 }
 
+TEST(MinMaxTest, getMinMax_01)
+{
+    std::vector<int> temp = {20, 10, 90, 80};
+    int min(0), max(0);
+
+    getMinMax(temp.begin(), temp.end(), min, max);
+    ASSERT_EQ(10, min);
+    ASSERT_EQ(90, max);
+
+    getMinMax(temp.begin(), temp.begin(), min, max);
+    ASSERT_EQ(20, min);
+    ASSERT_EQ(20, max);
+}
+
+TEST(MinMaxTest, getMinMax_02)
+{
+    std::vector<float> temp = {0.1f, -0.009f, 10.0f, -200.0f, 2000.0f};
+    float min(0), max(0);
+
+    getMinMax(temp.begin(), temp.end(), min, max);
+    ASSERT_FLOAT_EQ(-200.0f, min);
+    ASSERT_FLOAT_EQ(2000.0f, max);
+}
+
