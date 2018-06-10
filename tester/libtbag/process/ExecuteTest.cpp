@@ -55,8 +55,8 @@ TEST(ExecuteTest, TestLink)
         return;
     }
 
-    TBAG_TEST_TEMP_DIR(true, true);
-    auto link_path = TBAG_TEST_TEMP_DIR_GET() / "link";
+    tttDir(true, true);
+    auto link_path = tttDir_Get() / "link";
 
     using namespace filesystem;
     ASSERT_FALSE(link_path.exists());

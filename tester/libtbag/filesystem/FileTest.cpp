@@ -15,8 +15,8 @@ using namespace libtbag::filesystem;
 
 TEST(FileTest, Default)
 {
-    TBAG_TEST_TEMP_DIR(true, true);
-    auto path = TBAG_TEST_TEMP_DIR_GET() / "test_file";
+    tttDir(true, true);
+    auto path = tttDir_Get() / "test_file";
     std::string const WRITE_CONTENT = "TEST_CONTENT";
 
     ASSERT_FALSE(path.exists());

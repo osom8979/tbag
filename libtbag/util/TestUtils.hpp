@@ -112,13 +112,17 @@ NAMESPACE_LIBTBAG_CLOSE
  * @breif Tbag Test Temp Directory.
  */
 #ifndef TBAG_TEST_TEMP_DIR
-#define TBAG_TEST_TEMP_DIR(is_first_create, is_last_remove) \
-    ::libtbag::filesystem::TempDirGuard TBAG_TEST_TEMP_DIR_NAME( \
-            test_info_->test_case_name(), \
-            test_info_->name(), \
-            is_first_create, \
-            is_last_remove); \
+#define TBAG_TEST_TEMP_DIR(case_name, name, first_create, last_remove)  \
+    ::libtbag::filesystem::TempDirGuard TBAG_TEST_TEMP_DIR_NAME(        \
+            case_name, name, first_create, last_remove);                \
     ASSERT_TRUE(TBAG_TEST_TEMP_DIR_NAME.getDir().isDirectory());
+#endif
+
+#ifndef TBAG_TEST_TEMP_DIR2
+#define TBAG_TEST_TEMP_DIR2(first_create, last_remove)  \
+    TBAG_TEST_TEMP_DIR(test_info_->test_case_name(),    \
+                       test_info_->name(),              \
+                       first_create, last_remove)
 #endif
 
 /**
@@ -130,7 +134,7 @@ NAMESPACE_LIBTBAG_CLOSE
 #endif
 
 #ifndef tttDir
-#define tttDir(c, r) TBAG_TEST_TEMP_DIR(c, r)
+#define tttDir(c, r) TBAG_TEST_TEMP_DIR2(c, r)
 #endif
 
 #ifndef tttDir_Automatic
