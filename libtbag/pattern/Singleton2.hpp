@@ -49,25 +49,39 @@ protected:
     ~Singleton2() { /* EMPTY. */ }
 
 public:
+    inline static bool exists() TBAG_NOEXCEPT
+    {
+        return __instance != nullptr;
+    }
+
     template <typename ... Args>
     inline static void createInstance(Args && ... args) TBAG_NOEXCEPT
     {
-        if (__instance == nullptr) {
+        if (!exists()) {
             __instance = new (std::nothrow) BaseType(std::forward<Args>(args) ...);
         }
     }
 
     inline static void releaseInstance() TBAG_NOEXCEPT
     {
-        if (__instance != nullptr) {
+        if (exists()) {
             delete __instance;
             __instance = nullptr;
         }
     }
 
-    inline static BaseType * getInstance() TBAG_NOEXCEPT
+    inline static BaseType * getInstanceOfNoSafe() TBAG_NOEXCEPT
     {
         return __instance;
+    }
+
+    template <typename ... Args>
+    inline static BaseType * getInstance(Args && ... args) TBAG_NOEXCEPT
+    {
+        //if (!exists()) {
+        createInstance(std::forward<Args>(args) ...);
+        //}
+        return getInstanceOfNoSafe();
     }
 };
 
