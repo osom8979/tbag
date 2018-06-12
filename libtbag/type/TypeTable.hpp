@@ -95,17 +95,6 @@ template <> struct BaseTypeInfo<t> : public std::true_type {                    
 TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
 
-#if defined(TBAG_COMP_MSVC)
-# if defined(__RESTORE_MIN__)
-TBAG_POP_MACRO(min);
-# undef __RESTORE_MIN__
-# endif // defined(__RESTORE_MIN__)
-# if defined(__RESTORE_MAX__)
-TBAG_POP_MACRO(max);
-# undef __RESTORE_MAX__
-# endif // defined(__RESTORE_MAX__)
-#endif // defined(TBAG_COMP_MSVC)
-
 template <typename T>
 struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
 {
@@ -156,6 +145,17 @@ struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
 
     TBAG_CONSTEXPR static int index() TBAG_NOEXCEPT { return static_cast<int>(Base::table()); }
 };
+
+#if defined(TBAG_COMP_MSVC)
+# if defined(__RESTORE_MIN__)
+TBAG_POP_MACRO(min);
+# undef __RESTORE_MIN__
+# endif // defined(__RESTORE_MIN__)
+# if defined(__RESTORE_MAX__)
+TBAG_POP_MACRO(max);
+# undef __RESTORE_MAX__
+# endif // defined(__RESTORE_MAX__)
+#endif // defined(TBAG_COMP_MSVC)
 
 template <typename T>
 inline TypeTable getTypeTable() TBAG_NOEXCEPT

@@ -78,10 +78,10 @@ public:
     template <typename ... Args>
     inline static BaseType * getInstance(Args && ... args) TBAG_NOEXCEPT
     {
-        //if (!exists()) {
-        createInstance(std::forward<Args>(args) ...);
-        //}
-        return getInstanceOfNoSafe();
+        if (!exists()) {
+            __instance = new (std::nothrow) BaseType(std::forward<Args>(args) ...);
+        }
+        return __instance;
     }
 };
 
