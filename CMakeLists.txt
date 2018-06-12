@@ -93,15 +93,6 @@ endif ()
 ## Thread settings.
 tbag_config__find_thread ()
 
-## SFML settings.
-tbag_config__set_library_option (USE_SFML TbagSFML SFML_FOUND)
-
-## OpenCL settings.
-tbag_config__set_library_option (USE_OPENCL OpenCL OpenCL_FOUND)
-if (OpenCL_FOUND)
-    message (STATUS "Found OpenCL: ${OpenCL_LIBRARY}")
-endif ()
-
 ## CUDA settings.
 tbag_config__set_library_option (USE_CUDA TbagCUDA CUDA_FOUND)
 
