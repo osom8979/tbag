@@ -62,6 +62,13 @@ public:
         }
     }
 
+    inline static void createInstance() TBAG_NOEXCEPT
+    {
+        if (!exists()) {
+            __instance = new (std::nothrow) BaseType();
+        }
+    }
+
     inline static void releaseInstance() TBAG_NOEXCEPT
     {
         if (exists()) {
@@ -78,10 +85,14 @@ public:
     template <typename ... Args>
     inline static BaseType * getInstance(Args && ... args) TBAG_NOEXCEPT
     {
-        if (!exists()) {
-            __instance = new (std::nothrow) BaseType(std::forward<Args>(args) ...);
-        }
-        return __instance;
+        createInstance(std::forward<Args>(args) ...);
+        return getInstanceOfNoSafe();
+    }
+
+    inline static BaseType * getInstance() TBAG_NOEXCEPT
+    {
+        createInstance();
+        return getInstanceOfNoSafe();
     }
 };
 
