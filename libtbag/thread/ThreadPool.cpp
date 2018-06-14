@@ -69,7 +69,7 @@ private:
 // ThreadPool implementation.
 // --------------------------
 
-ThreadPool::ThreadPool(std::size_t size) : _exit(false)
+ThreadPool::ThreadPool(std::size_t size) : _exit(false), _active(0)
 {
     if (createThreads(size) == false) {
         throw std::bad_alloc();
@@ -79,7 +79,7 @@ ThreadPool::ThreadPool(std::size_t size) : _exit(false)
 ThreadPool::~ThreadPool()
 {
     exit();
-    clearThreads();
+    _threads.clear();
 }
 
 bool ThreadPool::createThreads(std::size_t size)
@@ -91,7 +91,7 @@ bool ThreadPool::createThreads(std::size_t size)
         _threads.resize(size);
 
         for (std::size_t i = 0; i < size; ++i) {
-            _threads[i] = SharedThread(new ThreadPimpl(this));
+            _threads[i] = SharedThread(new (std::nothrow) ThreadPimpl(this));
             if (static_cast<bool>(_threads[i]) == false) {
                 result = false;
                 break;
@@ -100,7 +100,7 @@ bool ThreadPool::createThreads(std::size_t size)
 
         if (result == false) {
             tDLogE("ThreadPool::createThreads({}) ThreadPimpl constructor error.", size);
-            clearThreads();
+            _threads.clear();
             _exit = true;
         }
         _signal.broadcast();
@@ -110,11 +110,6 @@ bool ThreadPool::createThreads(std::size_t size)
     _mutex.unlock();
 
     return result;
-}
-
-void ThreadPool::clearThreads()
-{
-    _threads.clear();
 }
 
 void ThreadPool::runner()
@@ -142,6 +137,7 @@ void ThreadPool::runner()
                 find_task = true;
                 current_task = _task.front();
                 _task.pop();
+                ++_active;
             }
             _mutex.unlock();
 
@@ -153,6 +149,10 @@ void ThreadPool::runner()
                 } catch (...) {
                     // EMPTY.
                 }
+
+                _mutex.lock();
+                --_active;
+                _mutex.unlock();
             }
         }
 
@@ -219,7 +219,9 @@ bool ThreadPool::isEmptyOfTasks() const
 {
     bool is_empty = false;
     _mutex.lock();
-    is_empty = _task.empty();
+    if (_task.empty() && _active == 0) {
+        is_empty = true;
+    }
     _mutex.unlock();
     return is_empty;
 }
@@ -233,7 +235,7 @@ std::size_t ThreadPool::sizeOfTasks() const
 {
     std::size_t size = 0;
     _mutex.lock();
-    size = _task.size();
+    size = _task.size() + _active;
     _mutex.unlock();
     return size;
 }

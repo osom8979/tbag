@@ -57,6 +57,7 @@ private:
     mutable Mutex _mutex;
 
     bool   _exit;
+    int    _active;
     Signal _signal;
 
     ThreadGroup _threads;
@@ -68,7 +69,6 @@ public:
 
 private:
     bool createThreads(std::size_t size);
-    void clearThreads();
     void runner();
 
 public:
