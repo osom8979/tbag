@@ -30,15 +30,16 @@ namespace thread {
  */
 struct ThreadPool::ThreadPimpl
 {
+    std::size_t const INDEX;
     ThreadPool * parent;
     uv_thread_t  thread;
 
-    ThreadPimpl(ThreadPool * p) : parent(p)
+    ThreadPimpl(ThreadPool * p, std::size_t i) : parent(p), INDEX(i)
     {
         assert(parent != nullptr);
         int const ERROR_CODE = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
         if (ERROR_CODE != 0) {
-            tDLogE("ThreadPimpl::ThreadPimpl() error[{}] {}", ERROR_CODE, getUvErrorName(ERROR_CODE));
+            tDLogE("ThreadPimpl::ThreadPimpl({}) error[{}] {}", INDEX, ERROR_CODE, getUvErrorName(ERROR_CODE));
             throw std::bad_alloc();
         }
     }
@@ -60,7 +61,7 @@ private:
         assert(thread != nullptr);
         assert(thread->parent != nullptr);
         thread->parent->setUp();
-        thread->parent->runner();
+        thread->parent->runner(thread->INDEX);
         thread->parent->tearDown();
     }
 };
@@ -91,7 +92,7 @@ bool ThreadPool::createThreads(std::size_t size)
         _threads.resize(size);
 
         for (std::size_t i = 0; i < size; ++i) {
-            _threads[i] = SharedThread(new (std::nothrow) ThreadPimpl(this));
+            _threads[i] = SharedThread(new (std::nothrow) ThreadPimpl(this, i));
             if (static_cast<bool>(_threads[i]) == false) {
                 result = false;
                 break;
@@ -112,11 +113,12 @@ bool ThreadPool::createThreads(std::size_t size)
     return result;
 }
 
-void ThreadPool::runner()
+void ThreadPool::runner(std::size_t index)
 {
     bool is_exit   = false;
     bool find_task = true;
     SharedTask current_task;
+    std::exception_ptr exception;
 
     while (is_exit == false) {
         // WAIT SIGNAL LOOP.
@@ -147,13 +149,24 @@ void ThreadPool::runner()
                         (*current_task.get())();
                     }
                 } catch (...) {
-                    // EMPTY.
+                    exception = std::current_exception();
                 }
-
-                _mutex.lock();
-                --_active;
-                _mutex.unlock();
             }
+
+            _mutex.lock();
+            if (find_task) {
+                assert(_active >= 1);
+                --_active;
+            }
+            if (exception && !_exception) {
+                _exception = exception;
+                _exit = true;
+            }
+            if (_exception) {
+                // Forcibly terminates the current loop !!
+                find_task = false;
+            }
+            _mutex.unlock();
         }
 
         // CHECK THREAD END.
@@ -180,14 +193,6 @@ void ThreadPool::exit()
     _mutex.unlock();
 }
 
-void ThreadPool::join()
-{
-    for (auto & thread : _threads) {
-        assert(static_cast<bool>(thread));
-        thread->join();
-    }
-}
-
 bool ThreadPool::isExit() const
 {
     bool result;
@@ -208,6 +213,29 @@ bool ThreadPool::push(Task const & task)
     _signal.signal();
     _mutex.unlock();
     return result;
+}
+
+void ThreadPool::join(bool rethrow)
+{
+    for (auto & thread : _threads) {
+        assert(static_cast<bool>(thread));
+        thread->join();
+    }
+
+    if (rethrow) {
+        std::exception_ptr exception;
+
+        _mutex.lock();
+        if (_exception) {
+            exception = _exception;
+            _exception = std::exception_ptr();
+        }
+        _mutex.unlock();
+
+        if (exception) {
+            std::rethrow_exception(exception);
+        }
+    }
 }
 
 bool ThreadPool::isEmptyOfThreads() const
@@ -240,12 +268,22 @@ std::size_t ThreadPool::sizeOfTasks() const
     return size;
 }
 
+std::size_t ThreadPool::sizeOfActiveTasks() const
+{
+    std::size_t size = 0;
+    _mutex.lock();
+    size = _active;
+    _mutex.unlock();
+    return size;
+}
+
 bool ThreadPool::waitTask(ThreadPool & pool, Task const & task)
 {
     Mutex  mutex;
     Signal signal;
-    bool   result;
-    bool   task_end = false;
+
+    bool result   = false;
+    bool task_end = false;
 
     result = pool.push([&](){
         task(); // RUN TASK!!

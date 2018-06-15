@@ -21,7 +21,7 @@ TEST(ThreadPoolTest, Default)
     int t1 = 0;
     int t2 = 0;
 
-    {
+    BRACE("THREAD POOL GUARD") {
         ThreadPool pool(2U);
 
         ASSERT_TRUE(pool.push([&](){ t1 = TEST_NUMBER; }));
@@ -162,5 +162,23 @@ TEST(ThreadPoolTest, WaitTask)
     pool.exit();
     ASSERT_FALSE(ThreadPool::waitTask(pool, [&](){ test += 600000; }));
     ASSERT_EQ(54321, test);
+}
+
+TEST(ThreadPoolTest, Exception)
+{
+    ThreadPool pool;
+    pool.push([&](){
+        throw std::runtime_error("ERROR");
+    });
+    ASSERT_THROW(pool.join(), std::runtime_error);
+}
+
+TEST(ThreadPoolTest, NoException)
+{
+    ThreadPool pool;
+    pool.push([&](){
+        throw std::runtime_error("ERROR");
+    });
+    ASSERT_NO_THROW(pool.join(false));
 }
 

@@ -23,7 +23,8 @@
 #include <memory>
 #include <vector>
 #include <queue>
-#include <map>
+#include <exception>
+#include <stdexcept>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -56,27 +57,32 @@ public:
 private:
     mutable Mutex _mutex;
 
-    bool   _exit;
-    int    _active;
-    Signal _signal;
+    bool        _exit;
+    std::size_t _active;
+    Signal      _signal;
 
     ThreadGroup _threads;
     TaskQueue   _task;
 
+private:
+    std::exception_ptr _exception;
+
 public:
-    ThreadPool(std::size_t size);
+    ThreadPool(std::size_t size = 1U);
     ~ThreadPool();
 
 private:
     bool createThreads(std::size_t size);
-    void runner();
+    void runner(std::size_t index);
 
 public:
     void clear();
     void exit();
-    void join();
     bool isExit() const;
     bool push(Task const & task);
+
+public:
+    void join(bool rethrow = true);
 
 public:
     bool isEmptyOfThreads() const;
@@ -84,6 +90,7 @@ public:
 
     std::size_t sizeOfThreads() const;
     std::size_t sizeOfTasks() const;
+    std::size_t sizeOfActiveTasks() const;
 
 public:
     virtual void setUp   () { /* EMPTY. */ }
