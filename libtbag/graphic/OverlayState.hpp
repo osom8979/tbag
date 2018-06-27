@@ -31,7 +31,6 @@ enum class OverlayState
     OS_NORMAL,
     OS_HOVER,
     OS_ACTIVE,
-    OS_DISABLE,
 };
 
 enum class MouseEvent
@@ -70,8 +69,6 @@ std::pair<OverlayState, IsOnClick> calcOverlayState(T x, T y, T w, T h, T mouse_
     } else {
         result.first = OverlayState::OS_NORMAL;
     }
-
-    assert(result.first != OverlayState::OS_DISABLE);
     return result;
 }
 
