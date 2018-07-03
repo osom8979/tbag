@@ -51,7 +51,7 @@ TBAG_API std::string getAsciiImage(util::Buffer const & true_type, std::string c
  * @author zer0
  * @date   2018-07-03
  */
-class TrueType : private Noncopyable
+class TBAG_API TrueType : private Noncopyable
 {
 public:
     struct Impl;
