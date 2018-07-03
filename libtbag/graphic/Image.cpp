@@ -24,7 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graphic {
 
-Err readImage(std::string const & path, Image & image)
+Err readImage(std::string const & path, ImageRgb24 & image)
 {
     if (filesystem::Path(path).exists() == false) {
         return Err::E_EEXIST;
@@ -85,11 +85,16 @@ Err readImage(std::string const & path, Image & image)
     return Err::E_SUCCESS;
 }
 
-TBAG_CONSTEXPR static char const * const PNG_EXT = ".png";
-TBAG_CONSTEXPR static char const * const BMP_EXT = ".bmp";
-TBAG_CONSTEXPR static char const * const TGA_EXT = ".tga";
+// ---------------
+namespace __impl {
+// ---------------
 
-Err saveImage(std::string const & path, Image const & image)
+TBAG_CONSTEXPR static char const * const PNG_LOWER_EXT = ".png";
+TBAG_CONSTEXPR static char const * const BMP_LOWER_EXT = ".bmp";
+TBAG_CONSTEXPR static char const * const TGA_LOWER_EXT = ".tga";
+
+template <typename ImageType>
+static Err __saveImage(std::string const & path, ImageType const & image, int channels)
 {
     auto const PATH = filesystem::Path(path);
     if (PATH.exists() == true) {
@@ -97,17 +102,55 @@ Err saveImage(std::string const & path, Image const & image)
     }
 
     int result = 0;
-    if (string::lower(PATH.getExtensionName()) == PNG_EXT) {
-        result = stbi_write_png(path.c_str(), image.width(), image.height(), 3, image.data(), image.width() * 3);
-    } else if (string::lower(PATH.getExtensionName()) == BMP_EXT) {
-        result = stbi_write_bmp(path.c_str(), image.width(), image.height(), 3, image.data());
-    } else if (string::lower(PATH.getExtensionName()) == TGA_EXT) {
-        result = stbi_write_tga(path.c_str(), image.width(), image.height(), 3, image.data());
+    if (string::lower(PATH.getExtensionName()) == PNG_LOWER_EXT) {
+        result = stbi_write_png(path.c_str(), image.width(), image.height(), channels, image.data(), image.width() * channels);
+    } else if (string::lower(PATH.getExtensionName()) == BMP_LOWER_EXT) {
+        result = stbi_write_bmp(path.c_str(), image.width(), image.height(), channels, image.data());
+    } else if (string::lower(PATH.getExtensionName()) == TGA_LOWER_EXT) {
+        result = stbi_write_tga(path.c_str(), image.width(), image.height(), channels, image.data());
     } else {
         return Err::E_ILLARGS;
     }
 
     return result != 0 ? Err::E_SUCCESS : Err::E_UNKNOWN;
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
+Err saveImage(std::string const & path, ImageRgb24 const & image)
+{
+    return __impl::__saveImage(path, image, 3);
+}
+
+Err saveImage(std::string const & path, ImageGray const & image)
+{
+    return __impl::__saveImage(path, image, 1);
+}
+
+Err convert(ImageRgb24 const & source, ImageGray & destination)
+{
+    destination.resize(source.width(), source.height());
+    auto const ITR = std::transform(source.begin(), source.end(), destination.begin(), [](Color const & color) -> Channel {
+        return static_cast<Channel>((color.r + color.g + color.b) / 3);
+    });
+    if (ITR == destination.begin()) {
+        return Err::E_ILLARGS;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err convert(ImageGray const & source, ImageRgb24 & destination)
+{
+    destination.resize(source.width(), source.height());
+    auto const ITR = std::transform(source.begin(), source.end(), destination.begin(), [](Channel const & channel) -> Color {
+        return Color{channel, channel, channel};
+    });
+    if (ITR == destination.begin()) {
+        return Err::E_ILLARGS;
+    }
+    return Err::E_SUCCESS;
 }
 
 } // namespace graphic
