@@ -94,24 +94,70 @@ TBAG_CONSTEXPR static char const * const BMP_LOWER_EXT = ".bmp";
 TBAG_CONSTEXPR static char const * const TGA_LOWER_EXT = ".tga";
 
 template <typename ImageType>
-static Err __saveImage(std::string const & path, ImageType const & image, int channels)
+static Err saveImage(std::string const & path, ImageType const & image)
 {
     auto const PATH = filesystem::Path(path);
     if (PATH.exists() == true) {
         return Err::E_ALREADY;
     }
 
+    auto const WIDTH     = image.width();
+    auto const HEIGHT    = image.height();
+    auto const CHANNELS  = GetChannels<ImageType>::channels;
+    auto const * DATA    = image.data();
+    auto const LOWER_EXT = string::lower(PATH.getExtensionName());
+
     int result = 0;
-    if (string::lower(PATH.getExtensionName()) == PNG_LOWER_EXT) {
-        result = stbi_write_png(path.c_str(), image.width(), image.height(), channels, image.data(), image.width() * channels);
-    } else if (string::lower(PATH.getExtensionName()) == BMP_LOWER_EXT) {
-        result = stbi_write_bmp(path.c_str(), image.width(), image.height(), channels, image.data());
-    } else if (string::lower(PATH.getExtensionName()) == TGA_LOWER_EXT) {
-        result = stbi_write_tga(path.c_str(), image.width(), image.height(), channels, image.data());
+    if (LOWER_EXT == PNG_LOWER_EXT) {
+        result = stbi_write_png(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
+    } else if (LOWER_EXT == BMP_LOWER_EXT) {
+        result = stbi_write_bmp(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
+    } else if (LOWER_EXT == TGA_LOWER_EXT) {
+        result = stbi_write_tga(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
     } else {
         return Err::E_ILLARGS;
     }
 
+    return result != 0 ? Err::E_SUCCESS : Err::E_UNKNOWN;
+}
+
+static void __save_image_cb(void * context, void * data, int size)
+{
+    assert(context != nullptr);
+    assert(data != nullptr);
+    assert(size > 0);
+
+    auto * buffer = static_cast<util::Buffer*>(context);
+    assert(buffer != nullptr);
+
+    buffer->resize(static_cast<std::size_t>(size));
+    for (int i = 0; i < size; ++i) {
+        (*buffer)[i] = ((util::Buffer::const_pointer)data)[i];
+    }
+}
+
+template <typename ImageType>
+static Err saveImageToBuffer(util::Buffer & buffer, ImageType const & image, ImageFileFormat format)
+{
+    auto const WIDTH    = image.width();
+    auto const HEIGHT   = image.height();
+    auto const CHANNELS = GetChannels<ImageType>::channels;
+    auto const * DATA   = image.data();
+
+    int result = 0;
+    switch (format) {
+    case ImageFileFormat::IFF_PNG:
+        result = stbi_write_png_to_func(&__save_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
+        break;
+    case ImageFileFormat::IFF_BMP:
+        result = stbi_write_bmp_to_func(&__save_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
+        break;
+    case ImageFileFormat::IFF_TGA:
+        result = stbi_write_tga_to_func(&__save_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
+        break;
+    default:
+        return Err::E_ILLARGS;
+    }
     return result != 0 ? Err::E_SUCCESS : Err::E_UNKNOWN;
 }
 
@@ -121,12 +167,22 @@ static Err __saveImage(std::string const & path, ImageType const & image, int ch
 
 Err saveImage(std::string const & path, ImageRgb24 const & image)
 {
-    return __impl::__saveImage(path, image, 3);
+    return __impl::saveImage(path, image);
 }
 
 Err saveImage(std::string const & path, ImageGray const & image)
 {
-    return __impl::__saveImage(path, image, 1);
+    return __impl::saveImage(path, image);
+}
+
+Err saveImage(util::Buffer & buffer, ImageRgb24 const & image, ImageFileFormat format)
+{
+    return __impl::saveImageToBuffer(buffer, image, format);
+}
+
+Err saveImage(util::Buffer & buffer, ImageGray const & image, ImageFileFormat format)
+{
+    return __impl::saveImageToBuffer(buffer, image, format);
 }
 
 Err convert(ImageRgb24 const & source, ImageGray & destination)

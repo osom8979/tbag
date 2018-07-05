@@ -19,10 +19,12 @@
 
 #include <libtbag/graphic/Color.hpp>
 #include <libtbag/container/Array2d.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -34,6 +36,24 @@ using ImageGray  = container::Array2d<Channel>;
 using ImageRgb24 = container::Array2d<Color>;
 
 using Image = ImageRgb24;
+
+// @formatter:off
+template <typename ImageType> struct GetChannels : public std::false_type
+{ TBAG_CONSTEXPR static int const channels = 0; };
+
+template <> struct GetChannels<ImageGray> : public std::true_type
+{ TBAG_CONSTEXPR static int const channels = 1; };
+
+template <> struct GetChannels<ImageRgb24> : public std::true_type
+{ TBAG_CONSTEXPR static int const channels = 3; };
+// @formatter:off
+
+enum class ImageFileFormat
+{
+    IFF_PNG,
+    IFF_BMP,
+    IFF_TGA,
+};
 
 /**
  * Read image file.
@@ -48,6 +68,12 @@ TBAG_API Err saveImage(std::string const & path, ImageRgb24 const & image);
 
 /** Save GRAY image file. */
 TBAG_API Err saveImage(std::string const & path, ImageGray const & image);
+
+/** Save RGB24 image buffer. */
+TBAG_API Err saveImage(util::Buffer & buffer, ImageRgb24 const & image, ImageFileFormat format = ImageFileFormat::IFF_PNG);
+
+/** Save GRAY image buffer. */
+TBAG_API Err saveImage(util::Buffer & buffer, ImageGray const & image, ImageFileFormat format = ImageFileFormat::IFF_PNG);
 
 /** Convert RBG24 to GRAY. */
 TBAG_API Err convert(ImageRgb24 const & source, ImageGray & destination);
