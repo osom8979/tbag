@@ -36,7 +36,7 @@ TEST(ResourceTest, Utf8)
 
     Resource res;
     res.set(TEST_NAME, (char*)hangul);
-    res.set_tag(TEST_TAG);
+    res.setTag(TEST_TAG);
     ASSERT_TRUE(res.save(PATH.toString()));
 
     res.clear();
@@ -122,7 +122,7 @@ TEST_F(ResourceFixtureTest, Clear)
 
 TEST_F(ResourceFixtureTest, GetTag)
 {
-    ASSERT_EQ(tag, res.get_tag());
+    ASSERT_EQ(tag, res.getTag());
 }
 
 TEST_F(ResourceFixtureTest, ReadFromXmlString)
@@ -210,5 +210,11 @@ TEST_F(ResourceFixtureTest, At)
     std::string const TEST = "TEST";
     res.at(attribute1) = TEST;
     ASSERT_EQ(TEST, res.at(attribute1));
+}
+
+TEST_F(ResourceFixtureTest, ToXmlString)
+{
+    auto const XML_STRING = res.getXmlString();
+    ASSERT_FALSE(XML_STRING.empty());
 }
 

@@ -25,7 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace dom {
 namespace xml {
 
-inline TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
+TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
 {
     return false;
 }
@@ -39,18 +39,20 @@ inline TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
 class TBAG_API Resource
 {
 public:
-    static TBAG_CONSTEXPR char const * const getRootTagName() TBAG_NOEXCEPT
-    { return "resource"; }
-    static TBAG_CONSTEXPR char const * const getAttributeName() TBAG_NOEXCEPT
-    { return "name"; }
+    TBAG_CONSTEXPR static char const * const ROOT_TAG_NAME  = "resource";
+    TBAG_CONSTEXPR static char const * const ATTRIBUTE_NAME = "name";
+
+public:
+    TBAG_CONSTEXPR static char const * const getRootTagName  () TBAG_NOEXCEPT { return ROOT_TAG_NAME;  }
+    TBAG_CONSTEXPR static char const * const getAttributeName() TBAG_NOEXCEPT { return ATTRIBUTE_NAME; }
 
 public:
     using String = std::string;
     using Map = std::unordered_map<String, String>;
 
 private:
-    String _tag;
-    Map _map;
+    String  _tag;
+    Map     _map;
 
 public:
     Resource();
@@ -67,18 +69,25 @@ public:
     void swap(Resource & obj);
 
 public:
-    void clear() TBAG_NOEXCEPT;
-    std::size_t size() const TBAG_NOEXCEPT;
+    void clear();
+    std::size_t size() const;
 
 public:
-    void set_tag(std::string const & tag) TBAG_NOEXCEPT;
-    std::string get_tag() const TBAG_NOEXCEPT;
+    TBAG_ATTRIBUTE_DEPRECATED inline std::string get_tag() const { return _tag; }
+    TBAG_ATTRIBUTE_DEPRECATED inline void set_tag(std::string const & tag) { _tag = tag; }
+
+public:
+    inline std::string getTag() const { return _tag; }
+    inline void setTag(std::string const & tag) { _tag = tag; }
 
 // XML.
 public:
     bool readFile(std::string const & path, std::string const & tag);
     bool readString(std::string const & xml, std::string const & tag);
     bool save(std::string const & path) const;
+
+public:
+    std::string getXmlString() const;
 
 // Accessor.
 public:
@@ -110,38 +119,36 @@ public:
     std::string getString(std::string const & key) const;
 
 public:
-    auto get(std::string const & key
-           , std::string default_value) const -> decltype(default_value);
+    auto get(std::string const & key, std::string default_value) const -> decltype(default_value);
 
 #ifndef __RESOURCE_ACCESSOR_IMPLEMENT
-#define __RESOURCE_ACCESSOR_IMPLEMENT(name, type, func, value)      \
-public:                                                             \
-    bool get##name(std::string const & key, type * result) const {  \
-        return getValue(key, result                                 \
-                , [](std::string const & str) -> type {             \
-                    return func(str);                               \
-                });                                                 \
-    }                                                               \
-    type get##name(std::string const & key                          \
-                 , type default_value = value) const {              \
-        type result = 0;                                            \
-        if (get##name(key, &result)) {                              \
-            return result;                                          \
-        }                                                           \
-        return default_value;                                       \
-    }                                                               \
-    auto get(std::string const & key                                \
-           , type default_value = value) const                      \
-           -> decltype(default_value) {                             \
-        return this->get##name(key, default_value);                 \
+#define __RESOURCE_ACCESSOR_IMPLEMENT(name, type, func, value)                                      \
+public:                                                                                             \
+    bool get##name(std::string const & key, type * result) const                                    \
+    {                                                                                               \
+        return getValue(key, result, [](std::string const & str) -> type {                          \
+            return func(str);                                                                       \
+        });                                                                                         \
+    }                                                                                               \
+    type get##name(std::string const & key, type default_value = value) const                       \
+    {                                                                                               \
+        type result = 0;                                                                            \
+        if (get##name(key, &result)) {                                                              \
+            return result;                                                                          \
+        }                                                                                           \
+        return default_value;                                                                       \
+    }                                                                                               \
+    auto get(std::string const & key, type default_value = value) const -> decltype(default_value)  \
+    {                                                                                               \
+        return this->get##name(key, default_value);                                                 \
     }
 #endif
 
 public:
-    __RESOURCE_ACCESSOR_IMPLEMENT(Integer,    int,                   std::stoi,   0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(UnInteger,  unsigned int,          std::stoul,  0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(LongLong,   long long,             std::stoll,  0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(UnLongLong, unsigned long long,    std::stoull, 0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(Integer,    int,                std::stoi,   0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(UnInteger,  unsigned int,       std::stoul,  0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(LongLong,   long long,          std::stoll,  0);
+    __RESOURCE_ACCESSOR_IMPLEMENT(UnLongLong, unsigned long long, std::stoull, 0);
 
     __RESOURCE_ACCESSOR_IMPLEMENT(Float,      float,       std::stof,  0.0);
     __RESOURCE_ACCESSOR_IMPLEMENT(Double,     double,      std::stod,  0.0);
@@ -154,7 +161,8 @@ public:
 #ifndef __RESOURCE_MUTATOR_IMPLEMENT
 #define __RESOURCE_MUTATOR_IMPLEMENT(type)                  \
 public:                                                     \
-    void set(std::string const & key, type const & value) { \
+    void set(std::string const & key, type const & value)   \
+    {                                                       \
         this->set(key, std::to_string(value));              \
     }
 #endif
@@ -177,6 +185,7 @@ public:
     static Map readFromXmlString(std::string const & xml, std::string const & tag);
     static Map readFromXmlFile(std::string const & path, std::string const & tag);
     static bool save(std::string const & path, std::string const & tag, Map const & map);
+    static std::string getXmlString(std::string const & tag, Map const & map);
 };
 
 } // namespace xml

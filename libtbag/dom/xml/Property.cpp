@@ -17,7 +17,7 @@ namespace xml {
 
 Property::Property()
 {
-    _res.set_tag(getDefaultTagName());
+    _res.setTag(getDefaultTagName());
 }
 
 Property::~Property()
@@ -28,7 +28,7 @@ Property::~Property()
 void Property::setDefault()
 {
     _res.clear();
-    _res.set_tag(getDefaultTagName());
+    _res.setTag(getDefaultTagName());
     updateDefault();
 }
 
