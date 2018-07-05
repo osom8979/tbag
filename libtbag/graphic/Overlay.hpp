@@ -20,6 +20,8 @@
 #include <libtbag/graphic/OverlayState.hpp>
 
 #include <cassert>
+#include <string>
+#include <sstream>
 #include <type_traits>
 
 // -------------------
@@ -102,6 +104,27 @@ struct Overlay
             return true;
         }
         return false;
+    }
+
+    std::string toString() const
+    {
+        std::stringstream ss;
+        // @formatter:off
+        switch (state) {
+        case OverlayState::OS_NORMAL: ss << "NORMAL"; break;
+        case OverlayState::OS_HOVER:  ss << "HOVER";  break;
+        case OverlayState::OS_ACTIVE: ss << "ACTIVE"; break;
+        }
+        switch (event) {
+        case MouseEvent::ME_NONE: ss << ",NONE"; break;
+        case MouseEvent::ME_DOWN: ss << ",DOWN"; break;
+        case MouseEvent::ME_UP:   ss << ",UP";   break;
+        }
+        if (pressed)  { ss << ",PRESSED";  }
+        if (clicked)  { ss << ",CLICKED";  }
+        if (on_event) { ss << ",ON_EVENT"; }
+        // @formatter:on
+        return ss.str();
     }
 };
 
