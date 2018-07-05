@@ -48,9 +48,9 @@ struct Overlay
     State state = OverlayState::OS_NORMAL;  ///< Current overlay state.
     Event event = Event::ME_NONE;           ///< Current mouse state.
 
-    bool pressed  = false;  ///< Pressed the mouse button?
-    bool clicked  = false;  ///< Was it clicked in the area?
-    bool on_event = false;  ///< Is the OnClick() event enabled?
+    bool momentarily_pressed = false; ///< Did you pressed for a while?
+    bool save_inside_clicked = false; ///< Was it clicked in the area?
+    bool on_click_event      = false; ///< Is the OnClick() event enabled?
 
     Rect area;  ///< Overlay area.
 
@@ -78,15 +78,13 @@ struct Overlay
      */
     bool update(Value mouse_x, Value mouse_y, bool button_pressed)
     {
-        if (button_pressed) {
-            pressed = true;
+        if (button_pressed && momentarily_pressed == false) {
+            momentarily_pressed = true;
             event = Event::ME_DOWN;
-        } else if (pressed) {
-            pressed = false;
+        } else if (button_pressed == false && momentarily_pressed) {
+            momentarily_pressed = false;
             event = Event::ME_UP;
         } else {
-            assert(button_pressed == false);
-            assert(pressed == false);
             event = Event::ME_NONE;
         }
 
@@ -96,9 +94,9 @@ struct Overlay
                 POS.x, POS.y,
                 SIZE.width, SIZE.height,
                 mouse_x, mouse_y,
-                event, clicked);
+                event, save_inside_clicked);
 
-        on_event = RESULT.second;
+        on_click_event = RESULT.second;
         if (state != RESULT.first) {
             state = RESULT.first;
             return true;
@@ -120,9 +118,9 @@ struct Overlay
         case MouseEvent::ME_DOWN: ss << ",DOWN"; break;
         case MouseEvent::ME_UP:   ss << ",UP";   break;
         }
-        if (pressed)  { ss << ",PRESSED";  }
-        if (clicked)  { ss << ",CLICKED";  }
-        if (on_event) { ss << ",ON_EVENT"; }
+        if (momentarily_pressed) { ss << ",PRESSED"; }
+        if (save_inside_clicked) { ss << ",CLICKED"; }
+        if (on_click_event) { ss << ",EVENT"; }
         // @formatter:on
         return ss.str();
     }

@@ -44,24 +44,24 @@ using IsOnClick = bool;
 
 template <typename T>
 std::pair<OverlayState, IsOnClick> calcOverlayState(T x, T y, T w, T h, T mouse_x, T mouse_y, MouseEvent mouse_event,
-                                                    bool & save_clicked) TBAG_NOEXCEPT
+                                                    bool & save_inside_clicked) TBAG_NOEXCEPT
 {
     auto const IS_CONTAINS = libtbag::geometry::BaseRect<T>(x, y, w, h).contains(mouse_x, mouse_y);
     auto result = std::make_pair(OverlayState::OS_NORMAL, false);
 
     // Check the OnClick event.
     if (mouse_event == MouseEvent::ME_DOWN && IS_CONTAINS) {
-        save_clicked = true;
+        save_inside_clicked = true;
     } else if (mouse_event == MouseEvent::ME_UP) {
-        if (save_clicked) {
+        if (IS_CONTAINS && save_inside_clicked) {
             result.second = true;
         }
-        save_clicked = false;
+        save_inside_clicked = false;
     }
 
     // Check the overlay state.
     if (IS_CONTAINS) {
-        if (save_clicked) {
+        if (save_inside_clicked) {
             result.first = OverlayState::OS_ACTIVE;
         } else {
             result.first = OverlayState::OS_HOVER;

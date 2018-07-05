@@ -42,36 +42,36 @@ TEST(OverlayTest, Default)
                     ASSERT_FALSE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_NORMAL, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 2 (OUT & CLICK)") {
                     ASSERT_FALSE(overlay.update(TEST_X, TEST_Y, true));
                     ASSERT_EQ(OverlayState::OS_NORMAL, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_DOWN, overlay.event);
-                    ASSERT_TRUE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_TRUE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 3 (OUT)") {
                     ASSERT_FALSE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_NORMAL, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_UP, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 4 (OUT // STAY)") {
                     ASSERT_FALSE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_NORMAL, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
             }
 
@@ -83,18 +83,18 @@ TEST(OverlayTest, Default)
                     ASSERT_TRUE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_HOVER, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 6 (IN & CLICK)") {
                     ASSERT_TRUE(overlay.update(TEST_X, TEST_Y, true));
                     ASSERT_EQ(OverlayState::OS_ACTIVE, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_DOWN, overlay.event);
-                    ASSERT_TRUE(overlay.pressed);
-                    ASSERT_TRUE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_TRUE(overlay.momentarily_pressed);
+                    ASSERT_TRUE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
             }
 
@@ -105,10 +105,10 @@ TEST(OverlayTest, Default)
                 TBAG_THEN("TEST 7 (IN -> OUT & CLICK)") {
                     ASSERT_TRUE(overlay.update(TEST_X, TEST_Y, true));
                     ASSERT_EQ(OverlayState::OS_NORMAL, overlay.state);
-                    ASSERT_EQ(MouseEvent::ME_DOWN, overlay.event);
-                    ASSERT_TRUE(overlay.pressed);
-                    ASSERT_TRUE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
+                    ASSERT_TRUE(overlay.momentarily_pressed);
+                    ASSERT_TRUE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
             }
 
@@ -119,37 +119,37 @@ TEST(OverlayTest, Default)
                 TBAG_THEN("TEST 8 (OUT -> IN & CLICK)") {
                     ASSERT_TRUE(overlay.update(TEST_X, TEST_Y, true));
                     ASSERT_EQ(OverlayState::OS_ACTIVE, overlay.state);
-                    ASSERT_EQ(MouseEvent::ME_DOWN, overlay.event);
-                    ASSERT_TRUE(overlay.pressed);
-                    ASSERT_TRUE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
+                    ASSERT_TRUE(overlay.momentarily_pressed);
+                    ASSERT_TRUE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 9 (IN & CLICK)") {
                     ASSERT_FALSE(overlay.update(TEST_X, TEST_Y, true));
                     ASSERT_EQ(OverlayState::OS_ACTIVE, overlay.state);
-                    ASSERT_EQ(MouseEvent::ME_DOWN, overlay.event);
-                    ASSERT_TRUE(overlay.pressed);
-                    ASSERT_TRUE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
+                    ASSERT_TRUE(overlay.momentarily_pressed);
+                    ASSERT_TRUE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 10 (IN)") {
                     ASSERT_TRUE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_HOVER, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_UP, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_TRUE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_TRUE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 11 (IN // STAY)") {
                     ASSERT_FALSE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_HOVER, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
             }
 
@@ -161,18 +161,18 @@ TEST(OverlayTest, Default)
                     ASSERT_TRUE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_NORMAL, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
 
                 TBAG_THEN("TEST 13 (OUT // STAY)") {
                     ASSERT_FALSE(overlay.update(TEST_X, TEST_Y, false));
                     ASSERT_EQ(OverlayState::OS_NORMAL, overlay.state);
                     ASSERT_EQ(MouseEvent::ME_NONE, overlay.event);
-                    ASSERT_FALSE(overlay.pressed);
-                    ASSERT_FALSE(overlay.clicked);
-                    ASSERT_FALSE(overlay.on_event);
+                    ASSERT_FALSE(overlay.momentarily_pressed);
+                    ASSERT_FALSE(overlay.save_inside_clicked);
+                    ASSERT_FALSE(overlay.on_click_event);
                 }
             }
         }
