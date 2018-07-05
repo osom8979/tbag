@@ -109,7 +109,7 @@ NAMESPACE_LIBTBAG_CLOSE
 
 /**
  * @def TBAG_TEST_TEMP_DIR
- * @breif Tbag Test Temp Directory.
+ * @brief Tbag Test Temp Directory.
  */
 #ifndef TBAG_TEST_TEMP_DIR
 #define TBAG_TEST_TEMP_DIR(case_name, name, first_create, last_remove)  \
@@ -127,7 +127,7 @@ NAMESPACE_LIBTBAG_CLOSE
 
 /**
  * @def TBAG_TEST_TEMP_DIR_GET
- * @breif Obtain the current temp directory.
+ * @brief Obtain the current temp directory.
  */
 #ifndef TBAG_TEST_TEMP_DIR_GET
 #define TBAG_TEST_TEMP_DIR_GET() TBAG_TEST_TEMP_DIR_NAME.getDir()
