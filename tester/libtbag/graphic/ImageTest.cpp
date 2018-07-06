@@ -34,13 +34,13 @@ TEST(ImageTest, ReadImage)
     ASSERT_EQ( 81, image[image.size() - 1].b);
 
     util::Buffer buffer;
-    ASSERT_EQ(Err::E_SUCCESS, saveImage(buffer, image, ImageFileFormat::IFF_PNG));
+    ASSERT_EQ(Err::E_SUCCESS, writeImage(buffer, image, ImageFileFormat::IFF_PNG));
     ASSERT_FALSE(buffer.empty());
 
     // Save & Load.
     tttDir(true, true);
     auto const SAVE_PATH = tttDir_Get() / "save.png";
-    ASSERT_EQ(Err::E_SUCCESS, saveImage(SAVE_PATH.getString(), image));
+    ASSERT_EQ(Err::E_SUCCESS, writeImage(SAVE_PATH.getString(), image));
     ASSERT_EQ(buffer.size(), SAVE_PATH.getState().size);
 
     Image reload;

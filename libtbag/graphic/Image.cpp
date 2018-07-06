@@ -94,7 +94,7 @@ TBAG_CONSTEXPR static char const * const BMP_LOWER_EXT = ".bmp";
 TBAG_CONSTEXPR static char const * const TGA_LOWER_EXT = ".tga";
 
 template <typename ImageType>
-static Err saveImage(std::string const & path, ImageType const & image)
+static Err writeImageToFile(std::string const & path, ImageType const & image)
 {
     auto const PATH = filesystem::Path(path);
     if (PATH.exists() == true) {
@@ -121,7 +121,7 @@ static Err saveImage(std::string const & path, ImageType const & image)
     return result != 0 ? Err::E_SUCCESS : Err::E_UNKNOWN;
 }
 
-static void __save_image_cb(void * context, void * data, int size)
+static void __write_image_cb__(void * context, void * data, int size)
 {
     assert(context != nullptr);
     assert(data != nullptr);
@@ -137,7 +137,7 @@ static void __save_image_cb(void * context, void * data, int size)
 }
 
 template <typename ImageType>
-static Err saveImageToBuffer(util::Buffer & buffer, ImageType const & image, ImageFileFormat format)
+static Err writeImageToBuffer(util::Buffer & buffer, ImageType const & image, ImageFileFormat format)
 {
     auto const WIDTH    = image.width();
     auto const HEIGHT   = image.height();
@@ -147,13 +147,13 @@ static Err saveImageToBuffer(util::Buffer & buffer, ImageType const & image, Ima
     int result = 0;
     switch (format) {
     case ImageFileFormat::IFF_PNG:
-        result = stbi_write_png_to_func(&__save_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
+        result = stbi_write_png_to_func(&__write_image_cb__, &buffer, WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
         break;
     case ImageFileFormat::IFF_BMP:
-        result = stbi_write_bmp_to_func(&__save_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
+        result = stbi_write_bmp_to_func(&__write_image_cb__, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
         break;
     case ImageFileFormat::IFF_TGA:
-        result = stbi_write_tga_to_func(&__save_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
+        result = stbi_write_tga_to_func(&__write_image_cb__, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
         break;
     default:
         return Err::E_ILLARGS;
@@ -165,24 +165,24 @@ static Err saveImageToBuffer(util::Buffer & buffer, ImageType const & image, Ima
 } // namespace __impl
 // ------------------
 
-Err saveImage(std::string const & path, ImageRgb24 const & image)
+Err writeImage(std::string const & path, ImageRgb24 const & image)
 {
-    return __impl::saveImage(path, image);
+    return __impl::writeImageToFile(path, image);
 }
 
-Err saveImage(std::string const & path, ImageGray const & image)
+Err writeImage(std::string const & path, ImageGray const & image)
 {
-    return __impl::saveImage(path, image);
+    return __impl::writeImageToFile(path, image);
 }
 
-Err saveImage(util::Buffer & buffer, ImageRgb24 const & image, ImageFileFormat format)
+Err writeImage(util::Buffer & buffer, ImageRgb24 const & image, ImageFileFormat format)
 {
-    return __impl::saveImageToBuffer(buffer, image, format);
+    return __impl::writeImageToBuffer(buffer, image, format);
 }
 
-Err saveImage(util::Buffer & buffer, ImageGray const & image, ImageFileFormat format)
+Err writeImage(util::Buffer & buffer, ImageGray const & image, ImageFileFormat format)
 {
-    return __impl::saveImageToBuffer(buffer, image, format);
+    return __impl::writeImageToBuffer(buffer, image, format);
 }
 
 Err convert(ImageRgb24 const & source, ImageGray & destination)

@@ -48,6 +48,6 @@ TEST(FontTest, ExportImage)
     std::string const DRAW_TEXT = "A";
     libtbag::graphic::ImageGray gray;
     ASSERT_EQ(Err::E_SUCCESS, tt.drawAscii(DRAW_TEXT, gray, LINE_HEIGHT));
-    ASSERT_EQ(Err::E_SUCCESS, libtbag::graphic::saveImage(IMAGE_PATH, gray));
+    ASSERT_EQ(Err::E_SUCCESS, libtbag::graphic::writeImage(IMAGE_PATH, gray));
 }
 

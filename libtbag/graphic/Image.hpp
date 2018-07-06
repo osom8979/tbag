@@ -63,17 +63,17 @@ enum class ImageFileFormat
  */
 TBAG_API Err readImage(std::string const & path, ImageRgb24 & image);
 
-/** Save RGB24 image file. */
-TBAG_API Err saveImage(std::string const & path, ImageRgb24 const & image);
+/** Write RGB24 image file. */
+TBAG_API Err writeImage(std::string const & path, ImageRgb24 const & image);
 
-/** Save GRAY image file. */
-TBAG_API Err saveImage(std::string const & path, ImageGray const & image);
+/** Write GRAY image file. */
+TBAG_API Err writeImage(std::string const & path, ImageGray const & image);
 
-/** Save RGB24 image buffer. */
-TBAG_API Err saveImage(util::Buffer & buffer, ImageRgb24 const & image, ImageFileFormat format = ImageFileFormat::IFF_PNG);
+/** Write RGB24 image buffer. */
+TBAG_API Err writeImage(util::Buffer & buffer, ImageRgb24 const & image, ImageFileFormat format = ImageFileFormat::IFF_PNG);
 
-/** Save GRAY image buffer. */
-TBAG_API Err saveImage(util::Buffer & buffer, ImageGray const & image, ImageFileFormat format = ImageFileFormat::IFF_PNG);
+/** Write GRAY image buffer. */
+TBAG_API Err writeImage(util::Buffer & buffer, ImageGray const & image, ImageFileFormat format = ImageFileFormat::IFF_PNG);
 
 /** Convert RBG24 to GRAY. */
 TBAG_API Err convert(ImageRgb24 const & source, ImageGray & destination);
