@@ -44,6 +44,26 @@ bool compareMap(MapType & lh, MapType & rh)
     return compareMap(lh.begin(), lh.end(), rh.begin(), rh.end());
 }
 
+template <typename Iterator>
+bool compareVector(Iterator first1, Iterator last1, Iterator first2, Iterator last2)
+{
+    if (std::distance(first1, last1) != std::distance(first2, last2)) {
+        return false;
+    }
+    for (; first1 != last1; ++first1, (void) ++first2) {
+        if (*first1 != *first2) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <typename VectorType>
+bool compareVector(VectorType & lh, VectorType & rh)
+{
+    return compareVector(lh.begin(), lh.end(), rh.begin(), rh.end());
+}
+
 } // namespace algorithm
 
 // --------------------

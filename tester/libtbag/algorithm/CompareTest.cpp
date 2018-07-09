@@ -30,3 +30,21 @@ TEST(CompareTest, CompareMap)
     ASSERT_FALSE(compareMap(map5, map6));
 }
 
+TEST(CompareTest, CompareVector)
+{
+    std::vector<std::string> vec1, vec2;
+    vec1.push_back("vec1");
+    vec2.push_back("vec1");
+    ASSERT_TRUE(compareVector(vec1, vec2));
+
+    std::vector<std::string> vec3, vec4;
+    vec3.push_back("vec1");
+    vec4.push_back("vec2");
+    ASSERT_FALSE(compareVector(vec3, vec4));
+
+    std::vector<std::string> vec5, vec6;
+    vec5.push_back("vec2");
+    vec6.push_back("vec1");
+    ASSERT_FALSE(compareVector(vec5, vec6));
+}
+
