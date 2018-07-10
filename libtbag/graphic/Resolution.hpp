@@ -82,8 +82,8 @@ namespace graphic {
     _XX(HD  , HD_PLUS        , HD+     , 1600,  900, HD Plus                      ) \
     _XX(HD  , FHD_720P       , FHD     , 1920, 1080, Full HD 1080p                ) \
     _XX(HD  , FHD_720I       , FHD     , 1920, 1080, Full HD 1080i                ) \
-    _XX(HD  , WQHD_1440p     , WQHD/QHD, 2560, 1440, Wide Quad HD/Quad HD 1440p   ) \
-    _XX(HD  , WQHD_1440i     , WQHD/QHD, 2560, 1440, Wide Quad HD/Quad HD 1440i   ) \
+    _XX(HD  , WQHD_1440P     , WQHD/QHD, 2560, 1440, Wide Quad HD/Quad HD 1440p   ) \
+    _XX(HD  , WQHD_1440I     , WQHD/QHD, 2560, 1440, Wide Quad HD/Quad HD 1440i   ) \
     _XX(HD  , QHD_PLUS       , QHD+    , 3200, 1800, Quad HD Plus                 ) \
     _XX(HD  , UHD            , UHD     , 3840, 2160, Ultra HD/4K                  ) \
     _XX(HD  , UHD_PLUS       , UHD+    , 5120, 2880, Ultra HD Plus/5K             ) \
