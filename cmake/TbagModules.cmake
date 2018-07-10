@@ -198,6 +198,27 @@ macro (tbag_modules__text_to_cpp11string __target __output_path __name __delimit
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
 
+#/// Write Binary to String C++11 header file.
+#///
+#/// @param __target      [in] Target name.
+#/// @param __output_path [in] Output header file path.
+#/// @param __name        [in] Variable name.
+#/// @param __delimiter   [in] Delimiter of C++11 string literal.
+#/// @param __binary_path [in] Binary file path.
+macro (tbag_modules__binary_to_cpp11string __target __output_path __name __delimiter __binary_path)
+    add_custom_command (
+            OUTPUT  "${__output_path}"
+            COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
+            "-DNAME=${__name}"
+            "-DDELIMITER=${__delimiter}"
+            "-DBINARY_PATH=${__binary_path}"
+            -P "${TBAG_SCRIPT_DIR}/TbagBinary2Cpp11String.cmake"
+            DEPENDS ${__binary_path}
+            COMMENT "Text to Cpp11String: ${__output_path}" VERBATIM)
+    add_custom_target (${__target} SOURCES "${__output_path}")
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
+endmacro ()
+
 #/// Copy raw files.
 #///
 #/// @param __target             [in] Target name.
