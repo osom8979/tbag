@@ -232,11 +232,21 @@ macro (tbag_modules__copy_file __target __source_prefix __destination_prefix __g
     foreach (__cursor ${__glob_files})
         set (__cursor_src  "${__source_prefix}${__cursor}")
         set (__cursor_dest "${__destination_prefix}${__cursor}")
-        tbag_debug (tbag_modules__copy_file "Target(${__target}) copy info: ${__cursor_src} -> ${__cursor_dest}")
-        add_custom_command (
-                OUTPUT  "${__cursor_dest}"
-                COMMAND ${CMAKE_COMMAND} -E copy "${__cursor_src}" "${__cursor_dest}"
-                DEPENDS "${__cursor_src}")
+
+        if (IS_DIRECTORY "${__cursor_src}")
+            tbag_debug (tbag_modules__copy_dir "Target(${__target}) copy info: ${__cursor_src} -> ${__cursor_dest}")
+            add_custom_command (
+                    OUTPUT  "${__cursor_dest}"
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory "${__cursor_src}" "${__cursor_dest}"
+                    DEPENDS "${__cursor_src}")
+        else ()
+            tbag_debug (tbag_modules__copy_file "Target(${__target}) copy info: ${__cursor_src} -> ${__cursor_dest}")
+            add_custom_command (
+                    OUTPUT  "${__cursor_dest}"
+                    COMMAND ${CMAKE_COMMAND} -E copy "${__cursor_src}" "${__cursor_dest}"
+                    DEPENDS "${__cursor_src}")
+        endif ()
+
         list (APPEND __copy_files "${__cursor_dest}")
         unset (__cursor_src)
         unset (__cursor_dest)
