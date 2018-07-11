@@ -133,6 +133,41 @@ struct RoundingCast<long long int> : public RoundingCastCommon<long long int>
     // @formatter:on
 };
 
+template <typename ResultType, typename T>
+inline ResultType round(T v)
+{
+    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    return RoundingCast<ResultType>::round(v);
+}
+
+template <typename ResultType, typename T>
+inline ResultType rint(T v)
+{
+    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    return RoundingCast<ResultType>::rint(v);
+}
+
+template <typename ResultType, typename T>
+inline ResultType ceil(T v)
+{
+    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    return RoundingCast<ResultType>::up(v);
+}
+
+template <typename ResultType, typename T>
+inline ResultType floor(T v)
+{
+    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    return RoundingCast<ResultType>::down(v);
+}
+
+template <typename ResultType, typename T>
+inline ResultType trunc(T v)
+{
+    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    return RoundingCast<ResultType>::zero(v);
+}
+
 } // namespace math
 
 // --------------------
