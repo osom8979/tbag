@@ -431,6 +431,40 @@ void upperSelf(std::string & str)
     try { to = func(str, index); } catch (...) { return false; } return true;
 #endif
 
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR1 =   "on";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR2 = "true";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR3 =   "ok";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR4 =  "yes";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR5 =    "y";
+
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR1 =   "off";
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR2 = "false";
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR3 =    "no";
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR4 =     "n";
+
+bool toVal(std::string const & str, bool & to, std::size_t * index, int base)
+{
+    // @formatter:off
+    auto const TRIMMED_LOWER_STRING = lower(trim(str));
+    if (TRIMMED_LOWER_STRING ==  TRUE_LOWER_STR1) { to =  true; return true; }
+    if (TRIMMED_LOWER_STRING ==  TRUE_LOWER_STR2) { to =  true; return true; }
+    if (TRIMMED_LOWER_STRING ==  TRUE_LOWER_STR3) { to =  true; return true; }
+    if (TRIMMED_LOWER_STRING ==  TRUE_LOWER_STR4) { to =  true; return true; }
+    if (TRIMMED_LOWER_STRING ==  TRUE_LOWER_STR5) { to =  true; return true; }
+    if (TRIMMED_LOWER_STRING == FALSE_LOWER_STR1) { to = false; return true; }
+    if (TRIMMED_LOWER_STRING == FALSE_LOWER_STR2) { to = false; return true; }
+    if (TRIMMED_LOWER_STRING == FALSE_LOWER_STR3) { to = false; return true; }
+    if (TRIMMED_LOWER_STRING == FALSE_LOWER_STR4) { to = false; return true; }
+    // @formatter:on
+
+    int temp = 0;
+    bool const RESULT = toVal(str, temp, index, base);
+    if (RESULT) {
+        to = (temp ? true : false);
+    }
+    return RESULT;
+}
+
 // @formatter:off
 bool toVal(std::string const & str,               char & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stol  , index, base); }
 bool toVal(std::string const & str, unsigned      char & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoul , index, base); }

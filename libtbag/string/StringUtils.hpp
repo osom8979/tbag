@@ -189,6 +189,7 @@ TBAG_API std::string upper(std::string const & str);
 TBAG_API void lowerSelf(std::string & str);
 TBAG_API void upperSelf(std::string & str);
 
+TBAG_API bool toVal(std::string const & str,               bool & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str,               char & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str, unsigned      char & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str,              short & to, std::size_t * index = nullptr, int base = 10);
@@ -207,6 +208,11 @@ template <typename T>
 inline std::string toString(T val)
 {
     return std::to_string(val);
+}
+
+inline std::string toString(bool val)
+{
+    return std::to_string(val ? 1 : 0);
 }
 
 template <typename T>
