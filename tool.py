@@ -30,12 +30,14 @@ CONFIG_COMMAND = 'cmake -L -P' + CONFIG_CMAKE_PATH
 
 CMD_HELP  = 'help'
 CMD_CLASS = 'class'
+CMD_FULL  = 'full'
 CMD_TEST  = 'test'
 CMD_UUID  = 'uuid'
 
 CMD_MAP = {
     CMD_HELP  : 'Show this help message and exit.',
     CMD_CLASS : 'Generate default c++ source/header files.',
+    CMD_FULL  : 'Generate default c++ full-class source/header files.',
     CMD_TEST  : 'Generate default gtest tester file.',
     CMD_UUID  : 'Make a random UUID.',
 }
@@ -87,6 +89,12 @@ def main_class(options):
         exit(1)
     tools.genClass(sys.argv[1])
 
+def main_full(options):
+    if len(sys.argv) <= 1:
+        print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_FULL))
+        exit(1)
+    tools.genFullClass(sys.argv[1])
+
 def main_test(options):
     if len(sys.argv) <= 1:
         print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_TEST))
@@ -103,6 +111,8 @@ def main():
         return
     elif command == CMD_CLASS:
         main_class(options)
+    elif command == CMD_FULL:
+        main_full(options)
     elif command == CMD_TEST:
         main_test(options)
     elif command == CMD_UUID:
