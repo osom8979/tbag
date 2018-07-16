@@ -76,3 +76,4 @@ TEST(RoundingTest, Default)
     ASSERT_EQ(-2, libtbag::math::rint<int>(-2.5));
     ASSERT_EQ(-4, libtbag::math::rint<int>(-3.8));
 }
+

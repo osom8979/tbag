@@ -70,15 +70,15 @@ struct RoundingCastCommon : public RoundingDirectionMode
     using ResultType = T;
 
     // @formatter:off
-    static ResultType   up(      float v) { return static_cast<ResultType>(std::ceilf (v)); }
-    static ResultType   up(     double v) { return static_cast<ResultType>(std::ceil  (v)); }
-    static ResultType   up(long double v) { return static_cast<ResultType>(std::ceill (v)); }
-    static ResultType down(      float v) { return static_cast<ResultType>(std::floorf(v)); }
-    static ResultType down(     double v) { return static_cast<ResultType>(std::floor (v)); }
-    static ResultType down(long double v) { return static_cast<ResultType>(std::floorl(v)); }
-    static ResultType zero(      float v) { return static_cast<ResultType>(std::truncf(v)); }
-    static ResultType zero(     double v) { return static_cast<ResultType>(std::trunc (v)); }
-    static ResultType zero(long double v) { return static_cast<ResultType>(std::truncl(v)); }
+    static ResultType   up(      float v) { return static_cast<ResultType>(ceilf (v)); }
+    static ResultType   up(     double v) { return static_cast<ResultType>(ceil  (v)); }
+    static ResultType   up(long double v) { return static_cast<ResultType>(ceill (v)); }
+    static ResultType down(      float v) { return static_cast<ResultType>(floorf(v)); }
+    static ResultType down(     double v) { return static_cast<ResultType>(floor (v)); }
+    static ResultType down(long double v) { return static_cast<ResultType>(floorl(v)); }
+    static ResultType zero(      float v) { return static_cast<ResultType>(truncf(v)); }
+    static ResultType zero(     double v) { return static_cast<ResultType>(trunc (v)); }
+    static ResultType zero(long double v) { return static_cast<ResultType>(truncl(v)); }
     // @formatter:on
 };
 
