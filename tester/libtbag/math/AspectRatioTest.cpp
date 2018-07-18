@@ -22,3 +22,27 @@ TEST(AspectRatioTest, Default)
     ASSERT_EQ(9, test.second);
 }
 
+TEST(AspectRatioTest, ScaleUp)
+{
+    geometry::Sizei size;
+    size = scaleUpAspectRatio(geometry::Sizei(1024, 576),
+                              geometry::Sizei(1024, 763));
+    ASSERT_EQ(1024, size.width);
+    ASSERT_EQ( 576, size.height);
+
+    size = scaleUpAspectRatio(geometry::Sizei(200, 400),
+                              geometry::Sizei(400, 800));
+    ASSERT_EQ(400, size.width);
+    ASSERT_EQ(800, size.height);
+
+    size = scaleUpAspectRatio(geometry::Sizei(200, 400),
+                              geometry::Sizei(300, 800));
+    ASSERT_EQ(300, size.width);
+    ASSERT_EQ(600, size.height);
+
+    size = scaleUpAspectRatio(geometry::Sizei(200, 400),
+                              geometry::Sizei(800, 800));
+    ASSERT_EQ(400, size.width);
+    ASSERT_EQ(800, size.height);
+}
+

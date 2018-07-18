@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/geometry/Size.hpp>
 #include <libtbag/math/Euclidean.hpp>
 
 #include <utility>
@@ -39,6 +40,19 @@ std::pair<T, T> calcAspectRatio(T a, T b)
     std::pair<T, T> result;
     calcAspectRatio(a, b, result.first, result.second);
     return result;
+}
+
+template <typename T>
+geometry::BaseSize<T> scaleUpAspectRatio(geometry::BaseSize<T> const & src,
+                                         geometry::BaseSize<T> const & scale_up)
+{
+    auto const SCALE_X = (double)scale_up.width  / (double)src.width;
+    auto const SCALE_Y = (double)scale_up.height / (double)src.height;
+    if (SCALE_X < SCALE_Y) {
+        return {src.width * SCALE_X, src.height * SCALE_X};
+    } else {
+        return {src.width * SCALE_Y, src.height * SCALE_Y};
+    }
 }
 
 } // namespace math
