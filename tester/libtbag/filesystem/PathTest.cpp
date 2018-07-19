@@ -158,3 +158,15 @@ TEST(PathTest, SpecialDirectories)
     ASSERT_FALSE(Path::getExeDir ().getString().empty());
 }
 
+TEST(PathTest, ScanDir)
+{
+    auto const FILES = DemoAsset::get_tester_dir_image().scanDir();
+    ASSERT_FALSE(FILES.empty());
+}
+
+TEST(PathTest, ScanRecurrentDir)
+{
+    auto const FILES = DemoAsset::get_tester_dir().scanRecurrentDir();
+    ASSERT_FALSE(FILES.empty());
+}
+
