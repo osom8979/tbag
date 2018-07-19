@@ -121,8 +121,8 @@ TEST(PathTest, GetExtensionName)
 
 TEST(PathTest, SplitNodes_Canonical1)
 {
-    std::string home = Path::getHomeDir().getString();
-    std::string work = Path::getWorkDir().getString();
+    std::string home = Path::getHomeDir();
+    std::string work = Path::getWorkDir();
 
     char const * const TEMP1 = "~/TEMP1/TEMP2/../TEMP3/./../../TEMP4";
     char const * const TEMP2 = "TEMP2/.";

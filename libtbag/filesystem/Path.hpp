@@ -94,8 +94,11 @@ public:
     Path & operator =(Path && obj);
 
 public:
-    bool operator ==(Path const & path);
-    bool operator ==(std::string const & path);
+    bool operator ==(Path const & path) const;
+    bool operator !=(Path const & path) const;
+
+    bool operator ==(std::string const & path) const;
+    bool operator !=(std::string const & path) const;
 
 public:
     // @formatter:off
@@ -179,8 +182,8 @@ public:
 
 // Casting
 public:
-    inline operator std::string  () const { return _path; }
-    inline operator char const * () const { return _path.c_str(); }
+    operator char const * () const TBAG_NOEXCEPT_SP_OP(_path.c_str()) { return _path.c_str(); }
+    operator std::string  () const { return _path; }
 
 // Parent.
 public:
@@ -252,8 +255,20 @@ public:
     TBAG_CONSTEXPR static DirentType const DIRENT_ALL     = details::DIRENT_ALL;
 
 public:
+    /** Scan for child nodes (name only). */
+    std::vector<std::string> scanNameOnly(DirentType type = DIRENT_ALL) const;
+    std::vector<std::string> scanRecurrentNameOnly(DirentType type = DIRENT_ALL) const;
+
+public:
     /** Scan for child nodes. */
     std::vector<Path> scanDir(DirentType type = DIRENT_ALL) const;
+    std::vector<Path> scanRecurrentDir(DirentType type = DIRENT_ALL) const;
+
+public:
+    static void scanRecurrentNameOnly(DirentType type,
+                                      Path const & parent_dir,
+                                      Path const & node,
+                                      std::vector<std::string> & result);
 
 public:
     static Path getWorkDir();

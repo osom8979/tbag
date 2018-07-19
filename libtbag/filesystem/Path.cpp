@@ -165,14 +165,24 @@ Path & Path::operator =(Path && obj)
     return *this;
 }
 
-bool Path::operator ==(Path const & path)
+bool Path::operator ==(Path const & path) const
 {
     return getCanonicalString() == path.getCanonicalString();
 }
 
-bool Path::operator ==(std::string const & path)
+bool Path::operator !=(Path const & path) const
+{
+    return !((*this) == path);
+}
+
+bool Path::operator ==(std::string const & path) const
 {
     return getCanonicalString() == Path(path).getCanonicalString();
+}
+
+bool Path::operator !=(std::string const & path) const
+{
+    return !((*this) == path);
 }
 
 Path & Path::copy(Path const & obj)
@@ -429,13 +439,48 @@ bool Path::removeAll() const
     return details::removeAll(_path);
 }
 
+std::vector<std::string> Path::scanNameOnly(DirentType type) const
+{
+    return details::scanDir(_path, type);
+}
+
+std::vector<std::string> Path::scanRecurrentNameOnly(DirentType type) const
+{
+    std::vector<std::string> result;
+    scanRecurrentNameOnly(type, Path(_path), Path(), result);
+    return result;
+}
+
 std::vector<Path> Path::scanDir(DirentType type) const
 {
     std::vector<Path> result;
-    for (auto & path : details::scanDir(_path, type)) {
-        result.push_back(Path(_path) / path);
+    for (auto & cursor : scanNameOnly(type)) {
+        result.push_back(Path(_path) / cursor);
     }
     return result;
+}
+
+std::vector<Path> Path::scanRecurrentDir(DirentType type) const
+{
+    auto const PARENT_DIR = Path(_path);
+    std::vector<Path> result;
+    for (auto & cursor : scanRecurrentNameOnly(type)) {
+        result.push_back(PARENT_DIR / cursor);
+    }
+    return result;
+}
+
+void Path::scanRecurrentNameOnly(DirentType type,
+                                 Path const & parent_dir,
+                                 Path const & node,
+                                 std::vector<std::string> & result)
+{
+    for (auto & dir_name : details::scanDir(parent_dir, Path::DIRENT_DIR)) {
+        scanRecurrentNameOnly(type, parent_dir / dir_name, node / dir_name, result);
+    }
+    for (auto & cursor : details::scanDir(parent_dir, type)) {
+        result.push_back(node / cursor);
+    }
 }
 
 Path Path::getWorkDir()
