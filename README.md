@@ -21,7 +21,6 @@ Tea-bag is Third party extension utility project.
 - simdpp 2.1 (Boost Software License, Version 1.0)
 - sqlite 3.13.0 (Public Domain)
 - stb master-c711058 (Public Domain or MIT license)
-- libuv 1.9.1 (MIT license)
 - date master-4f27361 (MIT license)
 - demangle (google-glog) 0.3.4 (BSD 3-clause license)
 - fmt 3.0.1 (BSD license)
@@ -33,10 +32,13 @@ Tea-bag is Third party extension utility project.
 - sqlite_orm master-fecdc19 (BSD 3-clause license)
 
 ### External projects
+
 - libressl 2.5.1 (Dual license; OpenSSL & SSLeay)
 - zlib 1.2.11 (zlib license)
+- libuv 1.22.0 (MIT license)
 
 ### Resources
+
 - ProggyClean.ttf (MIT license)
 
 ## Programming rules.

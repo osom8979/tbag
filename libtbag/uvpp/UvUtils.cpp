@@ -13,7 +13,6 @@
 #include <cstring>
 #include <cassert>
 #include <uv.h>
-#include <dep/uv/include/uv.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

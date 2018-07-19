@@ -23,6 +23,7 @@ if (USE_TBAG_DEBUGGING_LOGGER)
 endif ()
 
 ## External.
+tbag_modules__apply_ext_uv    ()
 tbag_modules__apply_ext_z     ()
 tbag_modules__apply_ext_ressl ()
 
@@ -30,7 +31,6 @@ tbag_modules__apply_ext_ressl ()
 tbag_modules__apply_dep_http_parser ()
 tbag_modules__apply_dep_icu         ()
 tbag_modules__apply_dep_minizip     () ## And apply_dep_z
-tbag_modules__apply_dep_uv          ()
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_flatbuffers ()
 tbag_modules__apply_dep_simdpp      ()

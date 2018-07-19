@@ -467,6 +467,12 @@ endmacro ()
 ## External libraries.
 ## -------------------
 
+macro (tbag_modules__apply_ext_uv)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES uv)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${uv_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${uv_EXT_STATIC_LIB})
+endmacro ()
+
 macro (tbag_modules__apply_ext_z)
     list (APPEND TBAG_PROJECT_DEPENDENCIES zlib)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${zlib_EXT_INCLUDE_DIR})

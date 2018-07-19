@@ -40,6 +40,49 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL
     set (EXT_C_FLAGS   "-w -fPIC")
 endif ()
 
+###########
+## LIBUV ##
+###########
+
+set (uv_EXT_DEBUG_NAME)
+set (uv_EXT_STATIC_LIB_NAME uv_a)
+
+set (uv_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/uv")
+set (uv_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (uv_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${uv_EXT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (uv_EXT_LIBRARIES    "${uv_EXT_STATIC_LIB}")
+set (uv_EXT_DEPENDENCIES  ${uv_EXT_LIBRARIES})
+exists_libraries (uv_EXT_EXISTS "${uv_EXT_LIBRARIES}")
+
+if (uv_EXT_EXISTS)
+    message (STATUS "Skip external/uv (Exists: ${uv_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/uv")
+    ExternalProject_Add (uv_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Download step--------------
+            #URL "https://dist.libuv.org/dist/v1.22.0/libuv-v1.22.0.tar.gz"
+            #URL_MD5 "02ddfadb2a061618e87018a4e84610c0"
+            #--Configure step-------------
+            SOURCE_DIR "${uv_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+            "-DBUILD_SHARED_LIBS=OFF"
+            "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+            "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+            "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+            "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output logging-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    list (APPEND uv_EXT_DEPENDENCIES uv_ext)
+endif ()
+
+add_custom_target (uv DEPENDS ${uv_EXT_DEPENDENCIES})
+
 ##########
 ## ZLIB ##
 ##########
