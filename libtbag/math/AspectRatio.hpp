@@ -19,6 +19,7 @@
 #include <libtbag/math/Euclidean.hpp>
 
 #include <utility>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,16 +43,16 @@ std::pair<T, T> calcAspectRatio(T a, T b)
     return result;
 }
 
-template <typename T>
-geometry::BaseSize<T> scaleUpAspectRatio(geometry::BaseSize<T> const & src,
-                                         geometry::BaseSize<T> const & scale_up)
+template <typename T, typename ScaleType = typename std::conditional<std::is_floating_point<T>::value, T, double>::type>
+libtbag::geometry::BaseSize<T> scaleUpAspectRatio(libtbag::geometry::BaseSize<T> const & src,
+                                                  libtbag::geometry::BaseSize<T> const & scale_up)
 {
-    auto const SCALE_X = (double)scale_up.width  / (double)src.width;
-    auto const SCALE_Y = (double)scale_up.height / (double)src.height;
+    auto const SCALE_X = scale_up.width / static_cast<ScaleType>(src.width);
+    auto const SCALE_Y = scale_up.height / static_cast<ScaleType>(src.height);
     if (SCALE_X < SCALE_Y) {
-        return {src.width * SCALE_X, src.height * SCALE_X};
+        return libtbag::geometry::BaseSize<T>(src.width * SCALE_X, src.height * SCALE_X);
     } else {
-        return {src.width * SCALE_Y, src.height * SCALE_Y};
+        return libtbag::geometry::BaseSize<T>(src.width * SCALE_Y, src.height * SCALE_Y);
     }
 }
 
