@@ -505,28 +505,28 @@ public:
     }
 
 public:
-    // @formatter:off
-          iterator  begin()       TBAG_NOEXCEPT { return       iterator(data()); }
-    const_iterator  begin() const TBAG_NOEXCEPT { return const_iterator(data()); }
-          iterator    end()       TBAG_NOEXCEPT { return       iterator(data() + size()); }
-    const_iterator    end() const TBAG_NOEXCEPT { return const_iterator(data() + size()); }
-    // @formatter:on
+    iterator begin() TBAG_NOEXCEPT { return iterator(data()); }
+    iterator   end() TBAG_NOEXCEPT { return iterator(data() + size()); }
 
 public:
-    // @formatter:off
-          reverse_iterator rbegin()       TBAG_NOEXCEPT { return       reverse_iterator(  end()); }
+    const_iterator begin() const TBAG_NOEXCEPT { return const_iterator(data()); }
+    const_iterator   end() const TBAG_NOEXCEPT { return const_iterator(data() + size()); }
+
+public:
+    reverse_iterator rbegin() TBAG_NOEXCEPT { return reverse_iterator(  end()); }
+    reverse_iterator   rend() TBAG_NOEXCEPT { return reverse_iterator(begin()); }
+
+public:
     const_reverse_iterator rbegin() const TBAG_NOEXCEPT { return const_reverse_iterator(  end()); }
-          reverse_iterator   rend()       TBAG_NOEXCEPT { return       reverse_iterator(begin()); }
     const_reverse_iterator   rend() const TBAG_NOEXCEPT { return const_reverse_iterator(begin()); }
-    // @formatter:on
 
 public:
-    // @formatter:off
-            const_iterator  cbegin() const TBAG_NOEXCEPT { return  begin(); }
-            const_iterator    cend() const TBAG_NOEXCEPT { return    end(); }
+    const_iterator cbegin() const TBAG_NOEXCEPT { return  begin(); }
+    const_iterator   cend() const TBAG_NOEXCEPT { return    end(); }
+
+public:
     const_reverse_iterator crbegin() const TBAG_NOEXCEPT { return rbegin(); }
     const_reverse_iterator   crend() const TBAG_NOEXCEPT { return   rend(); }
-    // @formatter:on
 
 public:
     void resize(size_type const * dims, size_type size)
