@@ -425,25 +425,6 @@ macro (tbag_modules__apply_dep_sqlite3)
     tbag_modules__add_whole_archive ($<TARGET_FILE:sqlite3>)
 endmacro ()
 
-macro (tbag_modules__apply_dep_uv)
-    list (APPEND TBAG_PROJECT_DEPENDENCIES uv)
-    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/uv/include)
-    tbag_modules__add_whole_archive ($<TARGET_FILE:uv>)
-
-    ## external libraries.
-    if (WIN32)
-        list (APPEND TBAG_PROJECT_LDFLAGS advapi32.lib iphlpapi.lib psapi.lib shell32.lib
-                                          user32.lib userenv.lib winmm.lib ws2_32.lib)
-    else ()
-        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
-        if (APPLE)
-            list (APPEND TBAG_PROJECT_LDFLAGS -ldl)
-        else ()
-            list (APPEND TBAG_PROJECT_LDFLAGS -lnsl -ldl -lrt)
-        endif ()
-    endif ()
-endmacro ()
-
 macro (tbag_modules__apply_dep_z)
     list (APPEND TBAG_PROJECT_DEPENDENCIES z)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/zlib)
@@ -477,11 +458,12 @@ macro (tbag_modules__apply_ext_uv)
         list (APPEND TBAG_PROJECT_LDFLAGS advapi32.lib iphlpapi.lib psapi.lib shell32.lib
                                           user32.lib userenv.lib ws2_32.lib)
     else ()
-        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread -dl)
-    endif ()
-
-    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        list (APPEND TBAG_PROJECT_LDFLAGS -lrt)
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+        if (APPLE)
+            list (APPEND TBAG_PROJECT_LDFLAGS -ldl)
+        else ()
+            list (APPEND TBAG_PROJECT_LDFLAGS -lnsl -ldl -lrt)
+        endif ()
     endif ()
 endmacro ()
 
