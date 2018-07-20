@@ -471,6 +471,16 @@ macro (tbag_modules__apply_ext_uv)
     list (APPEND TBAG_PROJECT_DEPENDENCIES uv)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${uv_EXT_INCLUDE_DIR})
     tbag_modules__add_whole_archive (${uv_EXT_STATIC_LIB})
+
+    ## external libraries.
+    if (WIN32)
+        list (APPEND TBAG_PROJECT_LDFLAGS advapi32 iphlpapi psapi shell32 user32 userenv ws2_32)
+    else ()
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread -dl)
+    endif ()
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lrt)
+    endif ()
 endmacro ()
 
 macro (tbag_modules__apply_ext_z)
