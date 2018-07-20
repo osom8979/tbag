@@ -474,10 +474,12 @@ macro (tbag_modules__apply_ext_uv)
 
     ## external libraries.
     if (WIN32)
-        list (APPEND TBAG_PROJECT_LDFLAGS advapi32 iphlpapi psapi shell32 user32 userenv ws2_32)
+        list (APPEND TBAG_PROJECT_LDFLAGS advapi32.lib iphlpapi.lib psapi.lib shell32.lib
+                                          user32.lib userenv.lib ws2_32.lib)
     else ()
         list (APPEND TBAG_PROJECT_LDFLAGS -lpthread -dl)
     endif ()
+
     if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         list (APPEND TBAG_PROJECT_LDFLAGS -lrt)
     endif ()
