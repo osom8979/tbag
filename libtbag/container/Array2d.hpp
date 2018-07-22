@@ -34,14 +34,15 @@ namespace container {
  * @date   2017-06-10 (Restore this class)
  * @date   2018-05-19 (Inherits the Bag class template)
  */
-template <typename T, template <typename Tp> class A = std::allocator>
-class Array2d : public Bag<T, A, std::vector<T, A<T> >, 2>
+template <typename T, typename A = std::allocator<T> >
+class Array2d : public Bag<T, A, std::vector<T, A>, 2>
 {
 public:
     using Self = Array2d<T, A>;
-    using Base = Bag<T, A, std::vector<T, A<T> >, 2>;
+    using Base = Bag<T, A, std::vector<T, A>, 2>;
 
 public:
+    using self_type       = Self;
     using value_type      = typename Base::value_type;
     using allocator_type  = typename Base::allocator_type;
     using reference       = typename Base::reference;
@@ -108,6 +109,23 @@ public:
 public:
     inline size_type  width() const TBAG_NOEXCEPT { return Base::size(0); }
     inline size_type height() const TBAG_NOEXCEPT { return Base::size(1); }
+
+public:
+    self_type sub(difference_type x, difference_type y, difference_type w, difference_type h) const
+    {
+        self_type result(w, h);
+        auto result_itr = result.begin();
+        auto y_itr = begin_step(y * width() + x, width());
+        auto y_end = begin_step(y * width() * h + x, height());
+        for (; y_itr != y_end; ++y_itr) {
+            auto x_itr = y_itr.sub(1);
+            auto x_end = y_itr + w;
+            for (; x_itr != x_end; ++x_itr) {
+                *result_itr = *x_itr;
+            }
+        }
+        return result;
+    }
 };
 
 } // namespace container

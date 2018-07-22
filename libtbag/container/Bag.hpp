@@ -44,9 +44,7 @@ namespace container {
  * @tparam A  Base allocator.
  * @tparam C  Base container.
  */
-template <typename T,
-          template <typename Tp> class A,
-          typename C>
+template <typename T, typename A, typename C>
 class BagContainer;
 
 /**
@@ -55,12 +53,12 @@ class BagContainer;
  * @tparam T  Base type.
  * @tparam A  Base allocator.
  */
-template <typename T, template <typename Tp> class A>
-class BagContainer<T, A, std::vector<T, A<T> > >
+template <typename T, typename A>
+class BagContainer<T, A, std::vector<T, A> >
 {
 public:
     using Value     = T;
-    using Allocator = A<Value>;
+    using Allocator = A;
     using Container = std::vector<Value, Allocator>;
 
 public:
@@ -170,8 +168,45 @@ public:
     BagDimensions() TBAG_NOEXCEPT : _dims{0,}, _size(0)
     { /* EMPTY */ }
 
+    BagDimensions(BagDimensions const & obj) TBAG_NOEXCEPT
+    {
+        (*this) = obj;
+    }
+
     ~BagDimensions()
     { /* EMPTY */ }
+
+public:
+    BagDimensions & operator =(BagDimensions const & obj) TBAG_NOEXCEPT
+    {
+        if (this != obj) {
+            std::memcpy(_dims, obj._dims, BUFFER_SIZE);
+            _size = obj._size;
+        }
+        return *this;
+    }
+
+public:
+    bool operator ==(BagDimensions const & obj) const TBAG_NOEXCEPT
+    {
+        if (this == &obj) {
+            return true;
+        }
+        if (_size != obj._size) {
+            return false;
+        }
+        for (auto i = 0; i < _size; ++i) {
+            if (_dims[i] != obj[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator !=(BagDimensions const & obj) const TBAG_NOEXCEPT
+    {
+        return !(this->operator==(obj));
+    }
 
 public:
     void clear() TBAG_NOEXCEPT
@@ -238,12 +273,12 @@ public:
     }
 
 public:
-    static DimValue calcTotal(DimValue const * dims, DimValue size)
+    static DimValue calcTotal(DimValue const * dims, DimValue size, DimValue begin = 0)
     {
         if (size == 0) {
             return 0;
         }
-        DimValue result = dims[0];
+        DimValue result = dims[begin];
         assert(dims[0] > 0);
         for (DimValue i = 1; i < size; ++i) {
             assert(dims[i] > 0);
@@ -258,9 +293,10 @@ public:
         return calcTotal((DimValue const *)list.begin(), (DimValue)list.size());
     }
 
-    DimValue total(DimValue size) const
+public:
+    DimValue total(DimValue size, DimValue begin = 0) const
     {
-        return calcTotal(_dims, size);
+        return calcTotal(_dims, size, begin);
     }
 
     DimValue total() const
@@ -298,8 +334,8 @@ public:
  * @date   2018-04-25
  */
 template <typename T,
-          template <typename Tp> class A = std::allocator,
-          typename C = std::vector<T, A<T> >,
+          typename A = std::allocator<T>,
+          typename C = std::vector<T, A>,
           unsigned L = DEFAULT_ELEMENTS_BUFFER_SIZE_OF_BAG>
 class Bag
 {
@@ -309,6 +345,7 @@ public:
     using Dimenstions = BagDimensions<L>;
 
 public:
+    using self_type         = Self;
     using value_type        = typename Container::value_type;
     using allocator_type    = typename Container::allocator_type;
     using reference         = typename Container::reference;
@@ -338,6 +375,7 @@ public:
         using Base = std::iterator<std::bidirectional_iterator_tag, V, std::ptrdiff_t, P, R>;
 
     public:
+        using salf_type         = Self;
         using value_type        = typename Base::value_type;
         using difference_type   = typename Base::difference_type;
         using pointer           = typename Base::pointer;
@@ -419,6 +457,17 @@ public:
             _cursor -= _step;
             return itr;
         }
+
+    public:
+        inline BagIterator sub(difference_type step) TBAG_NOEXCEPT
+        {
+            return BagIterator(_cursor, step);
+        }
+
+        inline BagIterator sub() TBAG_NOEXCEPT
+        {
+            return sub(_step);
+        }
     };
 
 public:
@@ -443,6 +492,11 @@ public:
     Bag(std::initializer_list<Tp> list) : Bag()
     {
         resize(list);
+    }
+
+    Bag(Dimenstions const & dims)
+    {
+        resize(dims);
     }
 
     Bag(Bag const & obj) : Bag()
@@ -505,28 +559,54 @@ public:
     }
 
 public:
-    iterator begin() TBAG_NOEXCEPT { return iterator(data()); }
-    iterator   end() TBAG_NOEXCEPT { return iterator(data() + size()); }
+    iterator begin_step(difference_type offset = 0, difference_type step = 1) TBAG_NOEXCEPT
+    { return iterator(data() + offset, step); }
+    iterator end_step(difference_type offset = 0, difference_type step = 1) TBAG_NOEXCEPT
+    { return iterator(data() + size() - offset, step); }
+
+    const_iterator begin_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return const_iterator(data() + offset, step); }
+    const_iterator end_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return const_iterator(data() + size() - offset, step); }
+
+    reverse_iterator rbegin_step(difference_type offset = 0, difference_type step = 1) TBAG_NOEXCEPT
+    { return reverse_iterator(end_step(offset, step)); }
+    reverse_iterator rend_step(difference_type offset = 0, difference_type step = 1) TBAG_NOEXCEPT
+    { return reverse_iterator(begin_step(offset, step)); }
+
+    const_reverse_iterator rbegin_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return const_reverse_iterator(end_step(offset, step)); }
+    const_reverse_iterator rend_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return const_reverse_iterator(begin_step(offset, step)); }
+
+    const_iterator cbegin_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return begin_step(offset, step); }
+    const_iterator cend_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return end_step(offset, step); }
+
+    const_reverse_iterator crbegin_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return rbegin_step(offset, step); }
+    const_reverse_iterator crend_step(difference_type offset = 0, difference_type step = 1) const TBAG_NOEXCEPT
+    { return rend_step(offset, step); }
 
 public:
-    const_iterator begin() const TBAG_NOEXCEPT { return const_iterator(data()); }
-    const_iterator   end() const TBAG_NOEXCEPT { return const_iterator(data() + size()); }
+    iterator begin() TBAG_NOEXCEPT { return begin_step(); }
+    iterator   end() TBAG_NOEXCEPT { return   end_step(); }
 
-public:
-    reverse_iterator rbegin() TBAG_NOEXCEPT { return reverse_iterator(  end()); }
-    reverse_iterator   rend() TBAG_NOEXCEPT { return reverse_iterator(begin()); }
+    const_iterator begin() const TBAG_NOEXCEPT { return begin_step(); }
+    const_iterator   end() const TBAG_NOEXCEPT { return   end_step(); }
 
-public:
-    const_reverse_iterator rbegin() const TBAG_NOEXCEPT { return const_reverse_iterator(  end()); }
-    const_reverse_iterator   rend() const TBAG_NOEXCEPT { return const_reverse_iterator(begin()); }
+    reverse_iterator rbegin() TBAG_NOEXCEPT { return rbegin_step(); }
+    reverse_iterator   rend() TBAG_NOEXCEPT { return   rend_step(); }
 
-public:
-    const_iterator cbegin() const TBAG_NOEXCEPT { return  begin(); }
-    const_iterator   cend() const TBAG_NOEXCEPT { return    end(); }
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT { return rbegin_step(); }
+    const_reverse_iterator   rend() const TBAG_NOEXCEPT { return   rend_step(); }
 
-public:
-    const_reverse_iterator crbegin() const TBAG_NOEXCEPT { return rbegin(); }
-    const_reverse_iterator   crend() const TBAG_NOEXCEPT { return   rend(); }
+    const_iterator cbegin() const TBAG_NOEXCEPT { return  cbegin_step(); }
+    const_iterator   cend() const TBAG_NOEXCEPT { return    cend_step(); }
+
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT { return crbegin_step(); }
+    const_reverse_iterator   crend() const TBAG_NOEXCEPT { return   crend_step(); }
 
 public:
     void resize(size_type const * dims, size_type size)
@@ -535,6 +615,11 @@ public:
         _dimenstions.resize(dims, size);
         _container.resize(_dimenstions.total());
         assert(_container.size() == _dimenstions.total());
+    }
+
+    void resize(Dimenstions const & dims)
+    {
+        return resize(dims.data(), dims.size());
     }
 
     template <typename Tp>
@@ -558,6 +643,11 @@ public:
     }
 
 public:
+    TBAG_CONSTEXPR static size_type elem_size() TBAG_NOEXCEPT
+    {
+        return sizeof(value_type);
+    }
+
     size_type max_size() const TBAG_NOEXCEPT
     {
         return Dimenstions::getMaxDimValue();

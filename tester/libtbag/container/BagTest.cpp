@@ -15,7 +15,7 @@ TEST(BagContainerTest, Default)
 {
     using TestBagAllocator = std::allocator<int>;
     using TestBagVector    = std::vector<int, TestBagAllocator>;
-    using TestBagContainer = BagContainer<int, std::allocator, TestBagVector>;
+    using TestBagContainer = BagContainer<int, TestBagAllocator, TestBagVector>;
 
     TestBagContainer container;
     ASSERT_EQ(0, container.size());
