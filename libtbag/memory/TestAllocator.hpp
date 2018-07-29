@@ -1,12 +1,12 @@
 /**
- * @file   Allocator.hpp
- * @brief  Allocator class prototype.
+ * @file   TestAllocator.hpp
+ * @brief  TestAllocator class prototype.
  * @author zer0
- * @date   2017-01-04
+ * @date   2018-07-29
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOCATOR_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOCATOR_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_TESTALLOCATOR_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_TESTALLOCATOR_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -29,13 +29,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace memory {
 
 /**
- * Allocator interface class template prototype.
+ * TestAllocator class prototype.
  *
  * @author zer0
- * @date   2017-01-04
+ * @date   2018-07-29
  */
 template <typename Type>
-struct Allocator
+struct TestAllocator
 {
     using value_type      = Type;
     using pointer         = typename std::add_pointer<value_type>::type;
@@ -45,23 +45,29 @@ struct Allocator
     using size_type       = std::size_t;
     using difference_type = std::ptrdiff_t;
 
+    size_type   allocate_count = 0;
+    size_type deallocate_count = 0;
+    size_type   allocate_elem_size = 0;
+    size_type deallocate_elem_size = 0;
+    size_type  construct_count = 0;
+    size_type    destroy_count = 0;
+
     template <typename Up>
     struct rebind
     {
-        typedef Allocator<Up> other;
+        typedef TestAllocator<Up> other;
     };
 
-    TBAG_CONSTEXPR Allocator() TBAG_NOEXCEPT
+    TestAllocator() TBAG_NOEXCEPT
     { /* EMPTY. */ }
 
     template <typename Up>
-    Allocator(Allocator<Up> const & obj) TBAG_NOEXCEPT
+    TestAllocator(Allocator<Up> const & obj) TBAG_NOEXCEPT
     { /* EMPTY. */ }
 
-    ~Allocator()
+    ~TestAllocator()
     { /* EMPTY. */ }
 
-    /** returns the largest supported allocation size. */
     TBAG_CONSTEXPR static size_type max_size() TBAG_NOEXCEPT
     {
 #if defined(max)
@@ -76,40 +82,55 @@ struct Allocator
 #endif
     }
 
-    /** obtains the address of an object. */
     const_pointer address(const_reference val) const TBAG_NOEXCEPT
     {
         return ::libtbag::memory::alloc::addressof(val);
     }
 
-    /** allocates uninitialized storage. */
     pointer allocate(size_type size, void const * hint = 0)
     {
         assert(size > 0);
+        ++allocate_count;
+        allocate_elem_size += size;
         return static_cast<pointer>(::libtbag::memory::alloc::allocate(size * sizeof(value_type)));
     }
 
-    /** deallocates storage. */
     void deallocate(pointer ptr, size_type allocated_size)
     {
         assert(ptr != nullptr);
+        ++deallocate_count;
+        deallocate_elem_size += allocated_size;
         ::libtbag::memory::alloc::deallocate((void*)ptr);
     }
 
-    /** constructs an object in allocated storage. */
     template <typename U, typename ... Args>
     void construct(U * ptr, Args && ... args)
     {
         assert(ptr != nullptr);
+        ++construct_count;
         ::new ((void*)ptr) U(std::forward<Args>(args) ...);
     }
 
-    /** destructs an object in allocated storage. */
     template <class U>
     void destroy(U * ptr)
     {
         assert(ptr != nullptr);
+        ++destroy_count;
         ptr->~U();
+    }
+
+    // ------------------
+    // Extension methods.
+    // ------------------
+
+    void clear() TBAG_NOEXCEPT
+    {
+        allocate_count = 0;
+        deallocate_count = 0;
+        allocate_elem_size = 0;
+        deallocate_elem_size = 0;
+        construct_count = 0;
+        destroy_count = 0;
     }
 };
 
@@ -119,5 +140,5 @@ struct Allocator
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOCATOR_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_TESTALLOCATOR_HPP__
 

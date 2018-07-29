@@ -57,8 +57,7 @@ public:
     using DimValueInfo = libtbag::type::TypeInfo<DimValue>;
 
 public:
-    TBAG_CONSTEXPR static DimValue const NOT_FOUND   = DimValueInfo::maximum();
-    TBAG_CONSTEXPR static DimValue const MAX_VALUE   = DimValueInfo::maximum() - 1;
+    TBAG_CONSTEXPR static DimValue const MAX_VALUE   = DimValueInfo::maximum();
     TBAG_CONSTEXPR static DimValue const BUFFER_SIZE = L;
 
 private:
@@ -116,6 +115,9 @@ public:
 
     void swap(Dimension & obj) TBAG_NOEXCEPT
     {
+        if (this == &obj) {
+            return;
+        }
         std::swap_ranges(_dims, _dims + buffer_size(), obj._dims);
         std::swap(_size, obj._size);
     }
