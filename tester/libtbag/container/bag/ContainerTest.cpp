@@ -113,6 +113,8 @@ TEST(ContainerTest, Default)
 
     ASSERT_EQ(0, con.allocator().allocate_count);
     ASSERT_EQ(0, con.allocator().deallocate_count);
+    ASSERT_EQ(0, con.allocator().allocate_elem_size);
+    ASSERT_EQ(0, con.allocator().deallocate_elem_size);
     ASSERT_EQ(0, con.allocator().construct_count);
     ASSERT_EQ(0, con.allocator().destroy_count);
 
@@ -215,7 +217,7 @@ TEST(ContainerTest, Coverage)
     // @formatter:on
 }
 
-TEST(ContainerTest, Reserve)
+TEST(ContainerTest, ClearUtility)
 {
     __clear_container_element();
     Container<ContainerElementTest, ElementAllocator> con;
@@ -227,7 +229,6 @@ TEST(ContainerTest, Reserve)
     ASSERT_NE(nullptr, con.data());
     ASSERT_EQ(0, con.size());
     ASSERT_EQ(2, con.capacity());
-
     ASSERT_EQ(1, con.allocator().allocate_count);
     ASSERT_EQ(0, con.allocator().deallocate_count);
     ASSERT_EQ(2, con.allocator().allocate_elem_size);
@@ -255,7 +256,23 @@ TEST(ContainerTest, Reserve)
     ASSERT_EQ(0, ContainerElementTest::move_constructor);
     ASSERT_EQ(0, ContainerElementTest::copy);
     ASSERT_EQ(0, ContainerElementTest::move);
+}
 
+TEST(ContainerTest, Reserve)
+{
+    __clear_container_element();
+    Container<ContainerElementTest, ElementAllocator> con;
+    ASSERT_EQ(nullptr, con.data());
+    ASSERT_EQ(0, con.size());
+    ASSERT_EQ(0, con.capacity());
+
+    con.reserve(2);
+    ASSERT_NE(nullptr, con.data());
+    ASSERT_EQ(0, con.size());
+    ASSERT_EQ(2, con.capacity());
+
+    __clear_container_element();
+    con.allocator().clear();
     con.resize(1);
     ASSERT_NE(nullptr, con.data());
     ASSERT_EQ(1, con.size());
@@ -273,6 +290,14 @@ TEST(ContainerTest, Reserve)
     ASSERT_EQ(0, ContainerElementTest::move_constructor);
     ASSERT_EQ(0, ContainerElementTest::copy);
     ASSERT_EQ(0, ContainerElementTest::move);
+}
+
+TEST(ContainerTest, Reserve_Minus)
+{
+    __clear_container_element();
+    Container<ContainerElementTest, ElementAllocator> con;
+    con.reserve(2);
+    con.resize(1);
 
     __clear_container_element();
     con.allocator().clear();
@@ -313,6 +338,14 @@ TEST(ContainerTest, Reserve)
     ASSERT_EQ(0, ContainerElementTest::move_constructor);
     ASSERT_EQ(0, ContainerElementTest::copy);
     ASSERT_EQ(0, ContainerElementTest::move);
+}
+
+TEST(ContainerTest, Reserve_Plus)
+{
+    __clear_container_element();
+    Container<ContainerElementTest, ElementAllocator> con;
+    con.reserve(2);
+    con.resize(0);
 
     __clear_container_element();
     con.allocator().clear();
@@ -377,23 +410,13 @@ TEST(ContainerTest, Resize)
     ASSERT_EQ(0, ContainerElementTest::move_constructor);
     ASSERT_EQ(0, ContainerElementTest::copy);
     ASSERT_EQ(0, ContainerElementTest::move);
+}
 
+TEST(ContainerTest, Resize_0)
+{
+    __clear_container_element();
+    Container<ContainerElementTest, ElementAllocator> con;
     con.resize(2);
-    ASSERT_NE(nullptr, con.data());
-    ASSERT_EQ(2, con.size());
-    ASSERT_EQ(2, con.capacity());
-    ASSERT_EQ(0, con.allocator().allocate_count);
-    ASSERT_EQ(0, con.allocator().deallocate_count);
-    ASSERT_EQ(0, con.allocator().allocate_elem_size);
-    ASSERT_EQ(0, con.allocator().deallocate_elem_size);
-    ASSERT_EQ(0, con.allocator().construct_count);
-    ASSERT_EQ(0, con.allocator().destroy_count);
-    ASSERT_EQ(0, ContainerElementTest::constructor);
-    ASSERT_EQ(0, ContainerElementTest::destructor);
-    ASSERT_EQ(0, ContainerElementTest::copy_constructor);
-    ASSERT_EQ(0, ContainerElementTest::move_constructor);
-    ASSERT_EQ(0, ContainerElementTest::copy);
-    ASSERT_EQ(0, ContainerElementTest::move);
 
     __clear_container_element();
     con.allocator().clear();
@@ -413,25 +436,14 @@ TEST(ContainerTest, Resize)
     ASSERT_EQ(0, ContainerElementTest::move_constructor);
     ASSERT_EQ(0, ContainerElementTest::copy);
     ASSERT_EQ(0, ContainerElementTest::move);
+}
 
+TEST(ContainerTest, Resize_MinusPlus)
+{
     __clear_container_element();
-    con.allocator().clear();
+    Container<ContainerElementTest, ElementAllocator> con;
+    con.resize(2);
     con.resize(1);
-    ASSERT_NE(nullptr, con.data());
-    ASSERT_EQ(1, con.size());
-    ASSERT_EQ(2, con.capacity());
-    ASSERT_EQ(0, con.allocator().allocate_count);
-    ASSERT_EQ(0, con.allocator().deallocate_count);
-    ASSERT_EQ(0, con.allocator().allocate_elem_size);
-    ASSERT_EQ(0, con.allocator().deallocate_elem_size);
-    ASSERT_EQ(1, con.allocator().construct_count);
-    ASSERT_EQ(0, con.allocator().destroy_count);
-    ASSERT_EQ(1, ContainerElementTest::constructor);
-    ASSERT_EQ(0, ContainerElementTest::destructor);
-    ASSERT_EQ(0, ContainerElementTest::copy_constructor);
-    ASSERT_EQ(0, ContainerElementTest::move_constructor);
-    ASSERT_EQ(0, ContainerElementTest::copy);
-    ASSERT_EQ(0, ContainerElementTest::move);
 
     __clear_container_element();
     con.allocator().clear();
@@ -508,6 +520,13 @@ TEST(ContainerTest, Resize)
     ASSERT_EQ(0, ContainerElementTest::move_constructor);
     ASSERT_EQ(0, ContainerElementTest::copy);
     ASSERT_EQ(2, ContainerElementTest::move);
+}
+
+TEST(ContainerTest, Clear)
+{
+    __clear_container_element();
+    Container<ContainerElementTest, ElementAllocator> con;
+    con.resize(4);
 
     __clear_container_element();
     con.allocator().clear();
