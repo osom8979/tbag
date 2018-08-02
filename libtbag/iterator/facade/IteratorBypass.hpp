@@ -1,12 +1,13 @@
 /**
- * @file   StdContainerFacade.hpp
- * @brief  StdContainerFacade class prototype.
+ * @file   IteratorBypass.hpp
+ * @brief  IteratorBypass class prototype.
  * @author zer0
  * @date   2018-07-15
+ * @date   2018-07-31 (Rename: StdContainerFacade -> IteratorBypass)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PATTERN_STDCONTAINERFACADE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_PATTERN_STDCONTAINERFACADE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_ITERATOR_FACADE_ITERATORBYPASS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_ITERATOR_FACADE_ITERATORBYPASS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,17 +16,17 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-
 #include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace pattern {
+namespace iterator {
+namespace facade   {
 
 template <typename T>
-struct HasStdReverseIterator
+struct HasReverseIterator
 {
     typedef char Yes;
     typedef long No;
@@ -37,10 +38,10 @@ struct HasStdReverseIterator
 };
 
 template <typename T, bool enable_reverse>
-struct StdContainerFacadeBackend;
+struct IteratorBypassFacade;
 
 template <typename T>
-struct StdContainerFacadeBackend<T, false>
+struct IteratorBypassFacade<T, false>
 {
     using Container = T;
 
@@ -62,8 +63,8 @@ struct StdContainerFacadeBackend<T, false>
 
     Container & _c;
 
-    StdContainerFacadeBackend(Container & c) TBAG_NOEXCEPT : _c(c) { /* EMPTY. */ }
-    ~StdContainerFacadeBackend() { /* EMPTY. */ }
+    IteratorBypassFacade(Container & c) TBAG_NOEXCEPT : _c(c) { /* EMPTY. */ }
+    ~IteratorBypassFacade() { /* EMPTY. */ }
 
     size_type max_size() const TBAG_NOEXCEPT_SP_OP(_c.max_size()) { return _c.max_size(); }
     size_type     size() const TBAG_NOEXCEPT_SP_OP(_c.    size()) { return _c.    size(); }
@@ -84,13 +85,13 @@ struct StdContainerFacadeBackend<T, false>
 };
 
 template <typename T>
-struct StdContainerFacadeBackend<T, true> : public StdContainerFacadeBackend<T, false>
+struct IteratorBypassFacade<T, true> : public IteratorBypassFacade<T, false>
 {
-    using Parent    = StdContainerFacadeBackend<T, false>;
+    using Parent    = IteratorBypassFacade<T, false>;
     using Container = typename Parent::Container;
 
-    StdContainerFacadeBackend(Container & c) TBAG_NOEXCEPT : Parent(c) { /* EMPTY. */ }
-    ~StdContainerFacadeBackend() { /* EMPTY. */ }
+    IteratorBypassFacade(Container & c) TBAG_NOEXCEPT : Parent(c) { /* EMPTY. */ }
+    ~IteratorBypassFacade() { /* EMPTY. */ }
 
     using       reverse_iterator = typename Parent::Container::reverse_iterator;
     using const_reverse_iterator = typename Parent::Container::const_reverse_iterator;
@@ -106,28 +107,30 @@ struct StdContainerFacadeBackend<T, true> : public StdContainerFacadeBackend<T, 
 };
 
 /**
- * StdContainerFacade class prototype.
+ * IteratorBypass class prototype.
  *
  * @author zer0
  * @date   2018-07-15
+ * @date   2018-07-31 (Rename: StdContainerFacade -> IteratorBypass)
  */
 template <typename T>
-struct StdContainerFacade : public StdContainerFacadeBackend<T, HasStdReverseIterator<T>::value>
+struct IteratorBypass : public IteratorBypassFacade<T, HasReverseIterator<T>::value>
 {
-    TBAG_CONSTEXPR static bool const has_reverse_iterator = HasStdReverseIterator<T>::value;
+    TBAG_CONSTEXPR static bool const has_reverse_iterator = HasReverseIterator<T>::value;
 
-    using Parent    = StdContainerFacadeBackend<T, has_reverse_iterator>;
+    using Parent    = IteratorBypassFacade<T, has_reverse_iterator>;
     using Container = typename Parent::Container;
 
-    StdContainerFacade(Container & c) TBAG_NOEXCEPT : Parent(c) { /* EMPTY. */ }
-    ~StdContainerFacade() { /* EMPTY. */ }
+    IteratorBypass(Container & c) TBAG_NOEXCEPT : Parent(c) { /* EMPTY. */ }
+    ~IteratorBypass() { /* EMPTY. */ }
 };
 
-} // namespace pattern
+} // namespace facade
+} // namespace iterator
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_PATTERN_STDCONTAINERFACADE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_ITERATOR_FACADE_ITERATORBYPASS_HPP__
 
