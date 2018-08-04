@@ -40,7 +40,7 @@ struct RoundingCastTest : public testing::Test
     }
 };
 
-using RoundingCastTypes = testing::Types<int, unsigned int, long int, long long int>;
+using RoundingCastTypes = testing::Types<int, long int, long long int>;
 TYPED_TEST_CASE(RoundingCastTest, RoundingCastTypes);
 
 TYPED_TEST(RoundingCastTest, RoundAndRint)

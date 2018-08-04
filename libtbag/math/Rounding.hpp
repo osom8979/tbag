@@ -69,6 +69,8 @@ struct RoundingCastCommon : public RoundingDirectionMode
 {
     using ResultType = T;
 
+    static_assert(!std::is_unsigned<ResultType>::value, "ResultType must not be a unsigned type.");
+
     // @formatter:off
     static ResultType   up(      float v) { return static_cast<ResultType>(ceilf (v)); }
     static ResultType   up(     double v) { return static_cast<ResultType>(ceil  (v)); }
@@ -136,35 +138,35 @@ struct RoundingCast<long long int> : public RoundingCastCommon<long long int>
 template <typename ResultType, typename T>
 inline ResultType round(T v)
 {
-    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    static_assert(std::is_floating_point<T>::value, "T must be floating point.");
     return RoundingCast<ResultType>::round(v);
 }
 
 template <typename ResultType, typename T>
 inline ResultType rint(T v)
 {
-    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    static_assert(std::is_floating_point<T>::value, "T must be floating point.");
     return RoundingCast<ResultType>::rint(v);
 }
 
 template <typename ResultType, typename T>
 inline ResultType ceil(T v)
 {
-    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    static_assert(std::is_floating_point<T>::value, "T must be floating point.");
     return RoundingCast<ResultType>::up(v);
 }
 
 template <typename ResultType, typename T>
 inline ResultType floor(T v)
 {
-    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    static_assert(std::is_floating_point<T>::value, "T must be floating point.");
     return RoundingCast<ResultType>::down(v);
 }
 
 template <typename ResultType, typename T>
 inline ResultType trunc(T v)
 {
-    static_assert(std::is_floating_point<T>::value, "T must be an floating point.");
+    static_assert(std::is_floating_point<T>::value, "T must be floating point.");
     return RoundingCast<ResultType>::zero(v);
 }
 
