@@ -31,7 +31,6 @@ typedef uint8_t Channel;
 
 static_assert(std::is_pod<Channel>::value, "Channel is not POD type.");
 
-
 /**
  * Minimum channel value.
  */

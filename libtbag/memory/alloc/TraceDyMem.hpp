@@ -21,7 +21,7 @@
 #include <cstdio>
 
 #ifndef TBAG_MEMORY_TRACE_LEVEL
-#define TBAG_MEMORY_TRACE_LEVEL 2
+#define TBAG_MEMORY_TRACE_LEVEL 0
 #endif
 
 // -------------------

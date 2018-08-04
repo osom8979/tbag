@@ -145,6 +145,13 @@ public:
     }
 
 public:
+    DimValue * begin() TBAG_NOEXCEPT { return _dims; }
+    DimValue *   end() TBAG_NOEXCEPT { return _dims + _size; }
+
+    DimValue const * begin() const TBAG_NOEXCEPT { return _dims; }
+    DimValue const *   end() const TBAG_NOEXCEPT { return _dims + _size; }
+
+public:
     void clear() TBAG_NOEXCEPT
     {
         _size = 0;
