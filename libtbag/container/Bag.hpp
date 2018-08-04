@@ -20,6 +20,7 @@
 #include <libtbag/type/TypeTable.hpp>
 
 #include <cstdint>
+#include <cstring>
 #include <cassert>
 
 #include <memory>
@@ -180,7 +181,7 @@ public:
     BagDimensions & operator =(BagDimensions const & obj) TBAG_NOEXCEPT
     {
         if (this != obj) {
-            std::memcpy(_dims, obj._dims, BUFFER_SIZE);
+            memcpy(_dims, obj._dims, BUFFER_SIZE);
             _size = obj._size;
         }
         return *this;
