@@ -9,6 +9,37 @@ include (TbagProject)
 include (TbagInformation)
 include (TbagPreview)
 
+## -----------
+## Environment
+## -----------
+
+#/// Check compiler.
+macro (tbag_config__check_compiler)
+    set (TBAG_GCC        0)
+    set (TBAG_CLANG      0)
+    set (TBAG_MSVC       0)
+    set (TBAG_INTEL      0)
+    set (TBAG_MSVC_INTEL 0)
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set (TBAG_CLANG 1)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "Apple")
+        set (TBAG_CLANG 1)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        set (TBAG_GCC 1)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+        if (MSVC)
+            set (TBAG_MSVC_INTEL 1)
+        else ()
+            set (TBAG_INTEL 1)
+        endif ()
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        set (TBAG_MSVC 1)
+    else ()
+        message (FATAL_ERROR "Compiler '${CMAKE_CXX_COMPILER_ID}' not recognized")
+    endif ()
+endmacro ()
+
 ## -----------------
 ## Main information.
 ## -----------------
