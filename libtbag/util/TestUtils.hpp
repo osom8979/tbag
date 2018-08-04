@@ -157,5 +157,34 @@ NAMESPACE_LIBTBAG_CLOSE
 #define tttDir_Get() TBAG_TEST_TEMP_DIR_GET()
 #endif
 
+#ifndef TEST_DEFAULT_CONSTRUCTOR
+#define TEST_DEFAULT_CONSTRUCTOR(class_name, value_prefix)              \
+    /* Default constructor. */                                          \
+    class_name value_prefix##_default;                                  \
+                                                                        \
+    /* Copy constructor. */                                             \
+    class_name value_prefix##_copied;                                   \
+    class_name value_prefix##_copy = value_prefix##_copied;             \
+                                                                        \
+    /* Move constructor. */                                             \
+    class_name value_prefix##_moved;                                    \
+    class_name value_prefix##_move = std::move(value_prefix##_moved);   \
+    /* -- END -- */
+#endif
+
+#ifndef TEST_DEFAULT_ASSIGNMENT
+#define TEST_DEFAULT_ASSIGNMENT(class_name, value_prefix)                   \
+    /* Copy assignment. */                                                  \
+    class_name value_prefix##_copied_assign;                                \
+    class_name value_prefix##_copy_assign;                                  \
+    value_prefix##_copy_assign = value_prefix##_copied_assign;              \
+                                                                            \
+    /* Move assignment. */                                                  \
+    class_name value_prefix##_moved_assign;                                 \
+    class_name value_prefix##_move_assign;                                  \
+    value_prefix##_move_assign = std::move(value_prefix##_moved_assign);    \
+    /* -- END -- */
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_UTIL_TESTUTILS_HPP__
 
