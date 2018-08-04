@@ -1,6 +1,6 @@
 ## VERSION
 
-- SQLite 3.13.0
+- SQLite 3.24.0
 
 ## LICENSE
 
