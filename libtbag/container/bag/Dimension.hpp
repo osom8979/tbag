@@ -18,6 +18,8 @@
 #include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/type/TypeTable.hpp>
 
+#include <cassert>
+
 #include <initializer_list>
 #include <algorithm>
 #include <utility>
