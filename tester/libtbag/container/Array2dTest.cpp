@@ -42,11 +42,12 @@ TEST(Array2dTest, Default)
 
 TEST(Array2dTest, Index)
 {
-    int const TEST1  = 2;
+    int const WIDTH  = 2;
+    int const HEIGHT = 2;
     int const VALUE1 = 10;
 
-    Array2d<int> a1(TEST1, TEST1);
-    a1.index(0, 0) = VALUE1;
+    Array2d<int> a1(WIDTH, HEIGHT);
+    a1.at(0, 0) = VALUE1;
 
     ASSERT_EQ(VALUE1, *a1.data());
     ASSERT_EQ(VALUE1, a1[0]);
@@ -69,22 +70,22 @@ TEST(Array2dTest, Iterator)
     Array2d<int>::iterator end = a1.end();
 
     *itr = 10;
-    ASSERT_EQ(10, a1.index(0, 0));
+    ASSERT_EQ(10, a1.at(0, 0));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 20;
-    ASSERT_EQ(20, a1.index(0, 1));
+    ASSERT_EQ(20, a1.at(1, 0));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 30;
-    ASSERT_EQ(30, a1.index(1, 0));
+    ASSERT_EQ(30, a1.at(0, 1));
     itr++;
     ASSERT_TRUE(itr != end);
 
     *itr = 40;
-    ASSERT_EQ(40, a1.index(1, 1)); itr++;
+    ASSERT_EQ(40, a1.at(1, 1)); itr++;
     ASSERT_TRUE(itr == end);
 }
 

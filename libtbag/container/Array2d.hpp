@@ -16,8 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/container/Bag.hpp>
+#include <libtbag/iterator/IteratorBypass.hpp>
 
 #include <exception>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,55 +37,58 @@ namespace container {
  * @date   2018-05-19 (Inherits the Bag class template)
  */
 template <typename T, typename A = std::allocator<T> >
-class Array2d : public Bag<T, A, std::vector<T, A>, 2>
+class Array2d
 {
 public:
-    using Self = Array2d<T, A>;
-    using Base = Bag<T, A, std::vector<T, A>, 2>;
+    using self_type = Array2d;
+    using bag_type = Bag<T, A, 2>;
+
+private:
+    bag_type _bag;
 
 public:
-    using self_type       = Self;
-    using value_type      = typename Base::value_type;
-    using allocator_type  = typename Base::allocator_type;
-    using reference       = typename Base::reference;
-    using const_reference = typename Base::const_reference;
-    using size_type       = typename Base::size_type;
-    using difference_type = typename Base::difference_type;
-    using pointer         = typename Base::pointer;
-    using const_pointer   = typename Base::const_pointer;
-
-    using       iterator = typename Base::iterator;
-    using const_iterator = typename Base::const_iterator;
-
-    using       reverse_iterator = typename Base::reverse_iterator;
-    using const_reverse_iterator = typename Base::const_reverse_iterator;
+    TBAG_ITERATOR_TYPES_BYPASS(bag_type);
+    TBAG_ITERATOR_SIZER_BYPASS(_bag);
+    TBAG_ITERATOR_CLEAR_BYPASS(_bag);
+    TBAG_ITERATOR_FORWARD_BYPASS(bag_type, _bag);
+    TBAG_ITERATOR_REVERSE_BYPASS(bag_type, _bag);
 
 public:
-    Array2d()
-    { /* EMPTY. */ }
+    Array2d() : _bag()
+    {
+        // EMPTY.
+    }
 
     Array2d(size_type w, size_type h) : Array2d()
-    { Base::resize(w, h); }
+    {
+        resize(w, h);
+    }
 
     Array2d(Array2d const & obj) : Array2d()
-    { (*this) = obj; }
+    {
+        (*this) = obj;
+    }
 
     Array2d(Array2d && obj) : Array2d()
-    { (*this) = std::move(obj); }
+    {
+        (*this) = std::move(obj);
+    }
 
-    virtual ~Array2d()
-    { /* EMPTY. */ }
+    ~Array2d()
+    {
+        // EMPTY.
+    }
 
 public:
     Array2d & operator =(Array2d const & obj)
     {
-        Self::copy(obj);
-        return copy(obj);
+        copy(obj);
+        return *this;
     }
 
     Array2d & operator =(Array2d && obj)
     {
-        Self::swap(obj);
+        swap(obj);
         return *this;
     }
 
@@ -91,27 +96,78 @@ public:
     Array2d & copy(Array2d const & obj)
     {
         if (this != &obj) {
-            Base::copy(obj);
+            _bag = obj._bag;
         }
         return *this;
     }
 
     void swap(Array2d & obj)
     {
-        Base::swap(obj);
+        if (this != &obj) {
+            _bag.swap(obj._bag);
+        }
     }
 
-    friend void swap(Array2d & lh, Array2d & rh)
+    friend void swap(Array2d & lh, Array2d & rh) { lh.swap(rh); }
+
+public:
+    inline       pointer data()       TBAG_NOEXCEPT_SP_OP(_bag.data()) { return _bag.data(); }
+    inline const_pointer data() const TBAG_NOEXCEPT_SP_OP(_bag.data()) { return _bag.data(); }
+
+public:
+    size_type  width() const TBAG_NOEXCEPT_SP_OP(_bag.size(1)) { return _bag.size(1); }
+    size_type height() const TBAG_NOEXCEPT_SP_OP(_bag.size(0)) { return _bag.size(0); }
+
+public:
+    reference at(size_type width, size_type height) TBAG_NOEXCEPT_SP_OP(_bag.index(height, width))
     {
-        lh.swap(rh);
+        return _bag.index(height, width);
+    }
+
+    const_reference at(size_type width, size_type height) const TBAG_NOEXCEPT_SP_OP(_bag.index(height, width))
+    {
+        return _bag.index(height, width);
+    }
+
+    reference at(size_type index) TBAG_NOEXCEPT_SP_OP(_bag.at(index))
+    {
+        return _bag.at(index);
+    }
+
+    const_reference at(size_type index) const TBAG_NOEXCEPT_SP_OP(_bag.at(index))
+    {
+        return _bag.at(index);
+    }
+
+    reference operator [](size_type index) TBAG_NOEXCEPT_SP_OP(_bag.operator[](index))
+    {
+        return _bag[index];
+    }
+
+    const_reference operator [](size_type index) const TBAG_NOEXCEPT_SP_OP(_bag.operator[](index))
+    {
+        return _bag[index];
     }
 
 public:
-    inline size_type  width() const TBAG_NOEXCEPT { return Base::size(0); }
-    inline size_type height() const TBAG_NOEXCEPT { return Base::size(1); }
+    void resize(size_type width, size_type height)
+    {
+        _bag.resize(height, width);
+    }
 
 public:
-    self_type sub(difference_type x, difference_type y, difference_type w, difference_type h) const
+    iterator height_begin(size_type x, size_type y = 0)
+    {
+        return begin_step(y * width() + x, width());
+    }
+
+    iterator height_end(size_type x, size_type y = 0)
+    {
+        return begin_step(y * width() + x, width());
+    }
+
+public:
+    self_type sub(size_type x, size_type y, size_type w, size_type h) const
     {
         self_type result(w, h);
         auto result_itr = result.begin();

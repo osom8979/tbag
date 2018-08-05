@@ -72,6 +72,12 @@ public:
         // EMPTY.
     }
 
+    template <typename Iterator>
+    Dimension(Iterator begin, Iterator end) TBAG_NOEXCEPT : Dimension()
+    {
+        resize(begin, end);
+    }
+
     template <typename Tp>
     Dimension(std::initializer_list<Tp> list) TBAG_NOEXCEPT : Dimension()
     {

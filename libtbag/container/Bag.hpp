@@ -49,7 +49,6 @@ namespace container {
  */
 template <typename T,
           typename A = std::allocator<T>,
-          typename C = std::vector<T, A>,
           unsigned L = DEFAULT_ELEMENTS_BUFFER_SIZE_OF_BAG>
 class Bag
 {
@@ -141,6 +140,48 @@ public:
         { return _cursor <= obj._cursor; }
         inline bool operator >=(BagIterator const & obj) const TBAG_NOEXCEPT
         { return _cursor >= obj._cursor; }
+
+    public:
+        inline BagIterator & operator +=(difference_type offset) TBAG_NOEXCEPT
+        {
+            _cursor += (_step * offset);
+            return *this;
+        }
+
+        inline BagIterator & operator -=(difference_type offset) TBAG_NOEXCEPT
+        {
+            _cursor -= (_step * offset);
+            return *this;
+        }
+
+    public:
+        inline friend BagIterator operator +(BagIterator const & lh, difference_type offset) TBAG_NOEXCEPT
+        {
+            BagIterator result = lh;
+            result += offset;
+            return result;
+        }
+
+        inline friend BagIterator operator -(BagIterator const & lh, difference_type offset) TBAG_NOEXCEPT
+        {
+            BagIterator result = lh;
+            result -= offset;
+            return result;
+        }
+
+        inline friend BagIterator operator +(difference_type offset, BagIterator const & rh) TBAG_NOEXCEPT
+        {
+            BagIterator result = rh;
+            result += offset;
+            return result;
+        }
+
+        inline friend BagIterator operator -(difference_type offset, BagIterator const & rh) TBAG_NOEXCEPT
+        {
+            BagIterator result = rh;
+            result -= offset;
+            return result;
+        }
 
     public:
         inline BagIterator & operator ++() TBAG_NOEXCEPT
