@@ -84,7 +84,7 @@ TEST(NetworkPipeTest, MultiEcho)
     server.set_onServerClose([&](){
         server_close++;
     });
-    server.init(path, 0);
+    server.init(path.c_str(), 0);
 
     std::thread thread_server([&](){
         server_result = loop_server.run();

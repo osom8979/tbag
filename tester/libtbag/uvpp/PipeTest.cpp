@@ -211,7 +211,7 @@ TEST(PipeTest, Default)
 
     Loop server;
     auto server_pipe = server.newHandle<PipeServerTest>(server);
-    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH));
+    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH.c_str()));
     ASSERT_EQ(Err::E_SUCCESS, server_pipe->listen());
 
     std::cout << "Sock name: " << server_pipe->getSockName() << std::endl;
@@ -222,7 +222,7 @@ TEST(PipeTest, Default)
 
     Loop client;
     auto client_pipe = client.newHandle<PipeClientTest>(client);
-    client_pipe->connect(PATH);
+    client_pipe->connect(PATH.c_str());
 
     std::thread thread2 = std::thread([&](){
         client.run();

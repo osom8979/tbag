@@ -54,7 +54,7 @@ TEST(FsPollTest, Default)
     ASSERT_TRUE(f.open(path));
     ASSERT_TRUE(f.isOpen());
 
-    ASSERT_EQ(Err::E_SUCCESS, fs->start(path, 10));
+    ASSERT_EQ(Err::E_SUCCESS, fs->start(path.c_str(), 10));
 
     std::thread thread = std::thread([&loop](){
         loop.run();

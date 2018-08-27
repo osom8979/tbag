@@ -55,7 +55,7 @@ TEST(FsEventTest, Default)
     ASSERT_TRUE(f.open(path));
     ASSERT_TRUE(f.isOpen());
 
-    ASSERT_EQ(Err::E_SUCCESS, fs->start(path));
+    ASSERT_EQ(Err::E_SUCCESS, fs->start(path.c_str()));
 
     std::thread thread = std::thread([&loop](){
         loop.run();

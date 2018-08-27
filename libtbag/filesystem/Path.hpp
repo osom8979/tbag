@@ -182,8 +182,18 @@ public:
 
 // Casting
 public:
-    operator char const * () const TBAG_NOEXCEPT_SP_OP(_path.c_str()) { return _path.c_str(); }
-    operator std::string  () const { return _path; }
+    operator std::string() const { return _path; }
+
+public:
+    /**
+     * @warning
+     *  Don't use the  cast overloading of <code>char const * () const</code>. @n
+     *  Casting can result in undesirable implicit results.
+     */
+    char const * c_str() const TBAG_NOEXCEPT_SP_OP(_path.c_str())
+    {
+        return _path.c_str();
+    }
 
 // Parent.
 public:
