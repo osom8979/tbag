@@ -41,12 +41,20 @@ public:
     using Mutex  = typename Parent::Mutex;
 
 public:
+    TBAG_CONSTEXPR static char const * const TYPE_NAME = "COUT_SINK";
+
+public:
     CoutSink(bool force_flush = false) : Parent(force_flush)
     { /* EMPTY. */ }
     virtual ~CoutSink()
     { /* EMPTY. */ }
 
 public:
+    virtual char const * const name() const override
+    {
+        return TYPE_NAME;
+    }
+
     virtual void write(String const & message) override
     {
         ::fwrite(message.c_str(), message.size(), 1, stdout);

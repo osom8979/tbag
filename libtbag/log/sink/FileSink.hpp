@@ -40,7 +40,10 @@ public:
     using Parent = Sink<MutexType>;
     using String = typename Parent::String;
     using Mutex  = typename Parent::Mutex;
-    using File   = filesystem::File;
+    using File   = libtbag::filesystem::File;
+
+public:
+    TBAG_CONSTEXPR static char const * const TYPE_NAME = "FILE_SINK";
 
 private:
     File _file;
@@ -59,6 +62,11 @@ public:
     }
 
 public:
+    virtual char const * const name() const override
+    {
+        return TYPE_NAME;
+    }
+
     virtual void write(String const & message) override
     {
         if (_file.isOpen()) {

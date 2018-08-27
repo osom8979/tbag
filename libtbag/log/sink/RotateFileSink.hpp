@@ -44,10 +44,10 @@ public:
     using Parent = Sink<MutexType>;
     using String = typename Parent::String;
     using Mutex  = typename Parent::Mutex;
-    using Path   = filesystem::Path;
-    using File   = filesystem::File;
+    using Path   = libtbag::filesystem::Path;
+    using File   = libtbag::filesystem::File;
 
-    using RotatePath    = filesystem::RotatePath;
+    using RotatePath    = libtbag::filesystem::RotatePath;
     using SharedChecker = RotatePath::SharedChecker;
     using WeakChecker   = RotatePath::WeakChecker;
     using SharedUpdater = RotatePath::SharedUpdater;
@@ -60,6 +60,8 @@ public:
     using PathQueue = std::queue<Path>;
 
 public:
+    TBAG_CONSTEXPR static char const * const TYPE_NAME = "ROTATE_FILE_SINK";
+
     TBAG_CONSTEXPR static std::size_t const DONT_REMOVE_HISTORY =  0;
     TBAG_CONSTEXPR static std::size_t const DEFAULT_MAX_HISTORY = 10;
 
@@ -174,13 +176,17 @@ private:
         return update() && reopen();
     }
 
-public:
     bool isOpen() const
     {
         return _file.isOpen();
     }
 
 public:
+    virtual char const * const name() const override
+    {
+        return TYPE_NAME;
+    }
+
     virtual void write(String const & message) override
     {
         if (_rotate_path.next(message.data(), message.size())) {
@@ -208,6 +214,28 @@ public:
     virtual void flush() override
     {
         // EMPTY.
+    }
+
+public:
+    TBAG_CONSTEXPR static char const * const MAX_HISTORY_KEY = "MAX_HISTORY";
+
+public:
+    virtual void set(std::string const & key, std::string const & val) override
+    {
+        if (key == MAX_HISTORY_KEY) {
+            int change_value = 0;
+            if (libtbag::string::toVal(val, change_value)) {
+                _max_history = change_value;
+            }
+        }
+    }
+
+    virtual std::string get(std::string const & key) const override
+    {
+        if (key == MAX_HISTORY_KEY) {
+            return libtbag::string::toString(_max_history);
+        }
+        return std::string();
     }
 };
 

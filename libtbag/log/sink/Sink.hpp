@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/lock/FakeLock.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <string>
 #include <type_traits>
@@ -34,11 +35,16 @@ struct SinkInterface
     SinkInterface() { /* EMPTY. */ }
     virtual ~SinkInterface() { /* EMPTY. */ }
 
+    virtual char const * const name() const = 0;
+
     virtual void safeWrite(String const & message) = 0;
     virtual void safeFlush() = 0;
 
     virtual void write(String const & message) = 0;
     virtual void flush() = 0;
+
+    virtual void set(std::string const & key, std::string const & val) = 0;
+    virtual std::string get(std::string const & key) const = 0;
 };
 
 /**
@@ -59,6 +65,9 @@ private:
     bool   _force_flush;
 
 public:
+    TBAG_CONSTEXPR static char const * const TYPE_NAME = "SINK";
+
+public:
     TBAG_CONSTEXPR inline bool isLocking() const TBAG_NOEXCEPT
     { return std::is_same<MutexType, lock::FakeLock>::value; }
 
@@ -74,6 +83,11 @@ public:
     inline bool isForceFlush() const TBAG_NOEXCEPT { return _force_flush; }
 
 public:
+    virtual char const * const name() const override
+    {
+        return TYPE_NAME;
+    }
+
     virtual void safeWrite(String const & message) override
     {
         _mutex.lock();
@@ -89,6 +103,16 @@ public:
         _mutex.lock();
         this->flush();
         _mutex.unlock();
+    }
+
+    virtual void set(std::string const & key, std::string const & val) override
+    {
+        // EMPTY.
+    }
+
+    virtual std::string get(std::string const & key) const override
+    {
+        return std::string();
     }
 };
 

@@ -36,14 +36,21 @@ public:
     using Parent = Sink<lock::FakeLock>;
 
 public:
+    TBAG_CONSTEXPR static char const * const TYPE_NAME = "NULL_SINK";
+
+public:
     NullSink(bool force_flush = false) : Parent(force_flush)
     { /* EMPTY. */ }
     virtual ~NullSink()
     { /* EMPTY. */ }
 
-protected:
+public:
+    virtual char const * const name() const override
+    { return TYPE_NAME; }
+
     virtual void write(String const & msg) override
     { /* EMPTY. */ }
+
     virtual void flush() override
     { /* EMPTY. */ }
 };
