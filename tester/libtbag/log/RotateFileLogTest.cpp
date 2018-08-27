@@ -20,8 +20,7 @@
 using namespace libtbag;
 using namespace libtbag::log;
 using namespace libtbag::log::node;
-
-using Path = libtbag::filesystem::Path;
+using namespace libtbag::filesystem;
 
 // ---------------
 namespace __impl {
@@ -30,7 +29,6 @@ namespace __impl {
 static std::vector<Path> ignoreHistoryPath(std::vector<Path> const & scans)
 {
     using namespace libtbag::string;
-    using namespace libtbag::filesystem;
     using namespace libtbag::log::sink;
 
     auto const MATCH_REGEX = replaceRegex(RotateFileSink<>::HISTORY_SUFFIX, R"(\.)", R"(.*\.)") + "$";
@@ -72,14 +70,14 @@ TEST(RotateFileLogTest, Default)
     ASSERT_EQ(1, rotate_sink->atHistory().size());
 
     tLogM(LOGGER_NAME, message1);
-    filesystem::Path log_01 = rotate_sink->atRotatePath().getPath();
+    Path log_01 = rotate_sink->atRotatePath().getPath();
     ASSERT_EQ(MAX_SIZE, log_01.getState().size);
     ASSERT_EQ(1, rotate_sink->atHistory().size());
     ASSERT_EQ(log_01.toString(), rotate_sink->atHistory().front().toString());
     std::cout << "Log file 01: " << log_01 << std::endl;
 
     tLogM(LOGGER_NAME, message2);
-    filesystem::Path log_02 = rotate_sink->atRotatePath().getPath();
+    Path log_02 = rotate_sink->atRotatePath().getPath();
     ASSERT_EQ(MAX_SIZE, log_02.getState().size);
     ASSERT_EQ(2, rotate_sink->atHistory().size());
     ASSERT_EQ(log_01.toString(), rotate_sink->atHistory().front().toString());
@@ -87,7 +85,7 @@ TEST(RotateFileLogTest, Default)
 
     tLogM(LOGGER_NAME, "1");
     tLogM(LOGGER_NAME, "2");
-    filesystem::Path log_03 = rotate_sink->atRotatePath().getPath();
+    Path log_03 = rotate_sink->atRotatePath().getPath();
     ASSERT_EQ(2, log_03.getState().size);
     ASSERT_EQ(2, rotate_sink->atHistory().size());
     ASSERT_EQ(log_02.toString(), rotate_sink->atHistory().front().toString());
@@ -169,7 +167,6 @@ TEST(RotateFileLogTest, LoadXml)
     auto second_scane = __impl::ignoreHistoryPath(DIR.scanDir());
     ASSERT_EQ(10, second_scane.size());
 
-    using namespace libtbag::filesystem;
     std::sort(second_scane.begin(), second_scane.end(), [](Path const & p1, Path const & p2) -> bool {
         return p1.toString().compare(p2.toString()) < 0;
     });
@@ -180,7 +177,7 @@ TEST(RotateFileLogTest, LoadXml)
     ASSERT_EQ(1, second_scane.back().getState().size);
 
     std::string content;
-    ASSERT_EQ(Err::E_SUCCESS, libtbag::filesystem::readFile(oldest_file, content));
+    ASSERT_EQ(Err::E_SUCCESS, readFile(oldest_file, content));
     ASSERT_EQ(MESSAGE_02_CHAR, content[0]);
 
     removeLogger(LOGGER_NAME);

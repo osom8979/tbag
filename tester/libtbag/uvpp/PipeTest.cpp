@@ -202,16 +202,17 @@ struct PipeServerTest : public Pipe
 TEST(PipeTest, Default)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
-    char const * const PATH = "\\\\.\\pipe\\PIPE_TEST";
+    char const * PATH = "\\\\.\\pipe\\PIPE_TEST";
 #else
     char const * const TEST_FILENAME = "echo.sock";
     tttDir(true, true);
-    auto const PATH = tttDir_Get() / TEST_FILENAME;
+    auto const TEST_FILE_PATH = tttDir_Get() / TEST_FILENAME;
+    char const * PATH = TEST_FILE_PATH.c_str();
 #endif
 
     Loop server;
     auto server_pipe = server.newHandle<PipeServerTest>(server);
-    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH.c_str()));
+    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH));
     ASSERT_EQ(Err::E_SUCCESS, server_pipe->listen());
 
     std::cout << "Sock name: " << server_pipe->getSockName() << std::endl;
@@ -222,7 +223,7 @@ TEST(PipeTest, Default)
 
     Loop client;
     auto client_pipe = client.newHandle<PipeClientTest>(client);
-    client_pipe->connect(PATH.c_str());
+    client_pipe->connect(PATH);
 
     std::thread thread2 = std::thread([&](){
         client.run();
