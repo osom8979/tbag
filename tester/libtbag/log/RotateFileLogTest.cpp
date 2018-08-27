@@ -21,6 +21,32 @@ using namespace libtbag;
 using namespace libtbag::log;
 using namespace libtbag::log::node;
 
+using Path = libtbag::filesystem::Path;
+
+// ---------------
+namespace __impl {
+// ---------------
+
+static std::vector<Path> ignoreHistoryPath(std::vector<Path> const & scans)
+{
+    using namespace libtbag::string;
+    using namespace libtbag::filesystem;
+    using namespace libtbag::log::sink;
+
+    auto const MATCH_REGEX = replaceRegex(RotateFileSink<>::HISTORY_SUFFIX, R"(\.)", R"(.*\.)") + "$";
+    std::vector<Path> result;
+    for (auto & path : scans) {
+        if (isMatch(path.toString(), MATCH_REGEX) == false) {
+            result.push_back(path);
+        }
+    }
+    return result;
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
 TEST(RotateFileLogTest, Default)
 {
     tttDir(true, true);
@@ -115,14 +141,14 @@ TEST(RotateFileLogTest, LoadXml)
     for (int i = 0; i < 1024; ++i) {
         tLogM(LOGGER_NAME, "{}", MESSAGE_01_1024); // 1KB * 1024 = 1MB
     }
-    ASSERT_EQ(1, DIR.scanDir().size());
+    ASSERT_EQ(1, __impl::ignoreHistoryPath(DIR.scanDir()).size());
 
     char const MESSAGE_02_CHAR = '2';
     auto const MESSAGE_02_1024 = std::string(1024, MESSAGE_02_CHAR);
     for (int i = 0; i < 1024; ++i) {
         tLogM(LOGGER_NAME, "{}", MESSAGE_02_1024); // 1KB * 1024 = 1MB
     }
-    ASSERT_EQ(2, DIR.scanDir().size());
+    ASSERT_EQ(2, __impl::ignoreHistoryPath(DIR.scanDir()).size());
 
     char const MESSAGE_03_CHAR = '3';
     auto const MESSAGE_03_1024 = std::string(1024, MESSAGE_03_CHAR);
@@ -132,15 +158,16 @@ TEST(RotateFileLogTest, LoadXml)
         }
     }
 
-    auto first_scane = DIR.scanDir();
+    auto first_scane = __impl::ignoreHistoryPath(DIR.scanDir());
     ASSERT_EQ(10, first_scane.size());
     for (auto & file : first_scane) {
         ASSERT_EQ(libtbag::MEGA_BYTE_TO_BYTE, file.getState().size);
     }
 
     tLogM(LOGGER_NAME, "!");
-    ASSERT_EQ(10, DIR.scanDir().size());
-    auto second_scane = DIR.scanDir();
+
+    auto second_scane = __impl::ignoreHistoryPath(DIR.scanDir());
+    ASSERT_EQ(10, second_scane.size());
 
     using namespace libtbag::filesystem;
     std::sort(second_scane.begin(), second_scane.end(), [](Path const & p1, Path const & p2) -> bool {

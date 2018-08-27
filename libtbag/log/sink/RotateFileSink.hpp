@@ -22,6 +22,7 @@
 #include <libtbag/time/TimePoint.hpp>
 
 #include <iostream>
+#include <sstream>
 #include <queue>
 
 // -------------------
@@ -61,12 +62,16 @@ public:
 
 public:
     TBAG_CONSTEXPR static char const * const TYPE_NAME = "ROTATE_FILE_SINK";
+    TBAG_CONSTEXPR static char const * const HISTORY_SUFFIX = ".history";
 
     TBAG_CONSTEXPR static std::size_t const DONT_REMOVE_HISTORY =  0;
     TBAG_CONSTEXPR static std::size_t const DEFAULT_MAX_HISTORY = 10;
 
     TBAG_CONSTEXPR static std::size_t getDontRemoveHistory() TBAG_NOEXCEPT { return DONT_REMOVE_HISTORY; }
     TBAG_CONSTEXPR static std::size_t getDefaultMaxHistory() TBAG_NOEXCEPT { return DEFAULT_MAX_HISTORY; }
+
+public:
+    Path const HISTORY_PATH;
 
 private:
     PathQueue   _history;
@@ -76,18 +81,29 @@ private:
     File        _file;
 
 public:
-    RotateFileSink(std::string const & path, SharedChecker const & checker, SharedUpdater const & updater,
-                   std::size_t max_history = getDefaultMaxHistory(), bool force_flush = false)
-            : Parent(force_flush), _rotate_path(Path(path), checker, updater), _max_history(max_history)
+    RotateFileSink(std::string const & path,
+                   SharedChecker const & checker,
+                   SharedUpdater const & updater,
+                   std::size_t max_history = getDefaultMaxHistory(),
+                   bool force_flush = false)
+            : Parent(force_flush),
+              HISTORY_PATH(path + HISTORY_SUFFIX),
+              _rotate_path(Path(path), checker, updater),
+              _max_history(max_history)
     {
         if (init() == false) {
             throw std::bad_exception();
         }
     }
 
-    RotateFileSink(std::string const & path, std::size_t size = SizeChecker::getDefaultMaxSize(),
-                   std::size_t max_history = getDefaultMaxHistory(), bool force_flush = false)
-            : Parent(force_flush), _rotate_path(Path(path), size), _max_history(max_history)
+    RotateFileSink(std::string const & path,
+                   std::size_t size = SizeChecker::getDefaultMaxSize(),
+                   std::size_t max_history = getDefaultMaxHistory(),
+                   bool force_flush = false)
+            : Parent(force_flush),
+              HISTORY_PATH(path + HISTORY_SUFFIX),
+              _rotate_path(Path(path), size),
+              _max_history(max_history)
     {
         if (init() == false) {
             throw std::bad_exception();
@@ -112,10 +128,41 @@ public:
     inline File const & atFile() const TBAG_NOEXCEPT { return _file; }
 
 private:
-    bool updateHistory(std::string const & path)
+    void readHistoryFile()
+    {
+        using namespace libtbag::filesystem;
+        auto const PATH = Path(HISTORY_PATH);
+        if (PATH.isRegularFile() == false) {
+            return;
+        }
+
+        std::string content;
+        if (isSuccess(readFile(HISTORY_PATH, content))) {
+            using namespace libtbag::string;
+            auto list = splitTokens(content, NEW_LINE);
+            for (auto & path : list) {
+                updateHistory(path);
+            }
+        }
+    }
+
+    bool saveHistoryFile() const
+    {
+        auto history_clone = _history;
+        std::stringstream ss;
+        while (history_clone.empty() == false) {
+            using namespace libtbag::string;
+            ss << history_clone.front().toString() << NEW_LINE;
+            history_clone.pop();
+        }
+        return isSuccess(libtbag::filesystem::writeFile(HISTORY_PATH, ss.str()));
+    }
+
+public:
+    void updateHistory(std::string const & path)
     {
         if (isEnableHistory() == false) {
-            return true;
+            return;
         }
 
         assert(_max_history >= 1);
@@ -126,9 +173,7 @@ private:
             }
             _history.pop();
         }
-
         _history.push(Path(path));
-        return true;
     }
 
     bool reopen(std::string const & path)
@@ -158,6 +203,10 @@ private:
 
         assert(_file.isOpen());
         updateHistory(path);
+
+        if (isEnableHistory()) {
+            saveHistoryFile();
+        }
         return true;
     }
 
@@ -173,6 +222,9 @@ private:
 
     bool init()
     {
+        if (isEnableHistory()) {
+            readHistoryFile();
+        }
         return update() && reopen();
     }
 
