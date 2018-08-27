@@ -186,3 +186,73 @@ TEST(RotateFileLogTest, LoadXml)
     removeLogger(LOGGER_NAME);
 }
 
+TEST(RotateFileLogTest, HistoryFile)
+{
+    tttDir(true, true);
+    auto const DIR = tttDir_Get();
+    auto const PATH = DIR / "rotate.log";
+    std::string const LOGGER_NAME = "RotateFileLogTest.HistoryFile";
+    int const MAX_FILE_COUNT = 2;
+
+    char const * const XML_STRING0 = R"XML(
+        <tlog>
+            <logger>
+                <name>@NAME@</name>
+                <sink>rotate_file</sink>
+                <destination>@DESTINATION@</destination>
+                <max_size>1024</max_size>
+                <max_file_count>@MAX_FILE_COUNT@</max_file_count>
+                <auto_flush>1</auto_flush>
+                <multithread>0</multithread>
+                <mutex>1</mutex>
+                <severity>INFO</severity>
+                <generator>raw</generator>
+            </logger>
+        </tlog>)XML";
+
+    using namespace libtbag::string;
+    auto const XML_STRING1 = replaceRegex(XML_STRING0, R"(@NAME@)", LOGGER_NAME);
+    auto const XML_STRING2 = replaceRegex(XML_STRING1, R"(@DESTINATION@)", PATH.toString());
+    auto const XML_STRING3 = replaceRegex(XML_STRING2, R"(@MAX_FILE_COUNT@)", libtbag::string::toString(MAX_FILE_COUNT));
+    ASSERT_EQ(1, createLoggerWithXmlString(XML_STRING3));
+
+    auto * logger = log::getLogger(LOGGER_NAME);
+    ASSERT_NE(nullptr, logger);
+    ASSERT_EQ(log::INFO_SEVERITY, logger->getSeverity());
+
+    auto * sink = logger->getSink();
+    ASSERT_NE(nullptr, sink);
+
+    auto const max_history_val = sink->get(libtbag::log::sink::RotateFileSink<>::MAX_HISTORY_KEY);
+    ASSERT_EQ(MAX_FILE_COUNT, libtbag::string::toValue<int>(max_history_val));
+
+    char const MESSAGE_CHAR = '1';
+    auto const MESSAGE_1024 = std::string(1024, MESSAGE_CHAR);
+    tLogM(LOGGER_NAME, "{}", MESSAGE_1024); // 1KB
+    ASSERT_EQ(2, DIR.scanDir().size()); // history & log file
+
+    tLogM(LOGGER_NAME, "{}", MESSAGE_1024); // 1KB
+    ASSERT_EQ(3, DIR.scanDir().size()); // history & two log file
+
+    tLogM(LOGGER_NAME, "{}", MESSAGE_1024); // 1KB
+    ASSERT_EQ(3, DIR.scanDir().size()); // history & two log file (remove oldest)
+
+    removeLogger(LOGGER_NAME);
+    logger = log::getLogger(LOGGER_NAME);
+    ASSERT_EQ(nullptr, logger);
+
+    COMMENT("NEXT, RELOAD LOGGER") {
+        ASSERT_EQ(1, createLoggerWithXmlString(XML_STRING3));
+        ASSERT_NE(nullptr, log::getLogger(LOGGER_NAME));
+        ASSERT_EQ(3, DIR.scanDir().size()); // Previous state.
+
+        tLogM(LOGGER_NAME, "{}", MESSAGE_1024); // 1KB
+        ASSERT_EQ(3, DIR.scanDir().size()); // history & two log file (remove oldest)
+
+        tLogM(LOGGER_NAME, "{}", MESSAGE_1024); // 1KB
+        ASSERT_EQ(3, DIR.scanDir().size()); // history & two log file (remove oldest)
+
+        removeLogger(LOGGER_NAME);
+    }
+}
+
