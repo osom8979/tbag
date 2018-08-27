@@ -96,7 +96,6 @@ tbag_config__find_thread ()
 tbag_config__set_library_option (USE_CUDA TbagCUDA CUDA_FOUND)
 
 ## Doxygen settings.
-tbag_config__set_library_prefix (Doxygen_ROOT)
 tbag_config__set_library_option (USE_DOXYGEN Doxygen DOXYGEN_FOUND)
 
 if (USE_DOXYGEN)
