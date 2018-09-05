@@ -156,14 +156,17 @@ private:
                                     // TIME_LAG는 항상 양수를 보장받아야 한다.
 
             __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
-                    "START LOOP: PRE[%09lld] NOW[%09lld] LAG[%09lld] DUR[%09lld] STEP[%09lld]\n"
-                    , _pre_start.time_since_epoch().count()
-                    , _now_start.time_since_epoch().count()
-                    , _time_lag.count()
-                    , _duration.count()
-                    , _time_step.count());
+                    "START LOOP: PRE[%09lld] NOW[%09lld] LAG[%09lld] DUR[%09lld] STEP[%09lld]\n",
+                    _pre_start.time_since_epoch().count(),
+                    _now_start.time_since_epoch().count(),
+                    _time_lag.count(),
+                    _duration.count(),
+                    _time_step.count());
 
+#if (defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION > 50401)) || !defined(TBAG_COMP_GNUC_CXX) || defined(TBAG_COMP_CLANG)
+            // Unknown std::chrono bug (GCC<=50401): {cmp rax, rbx}
             assert(_pre_start.time_since_epoch().count() <= _now_start.time_since_epoch().count());
+#endif
             assert(_duration.count() >= 0);
             assert(_time_lag.count() >= 0);
 
@@ -174,9 +177,9 @@ private:
                 _time_lag -= _time_step;
 
                 __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
-                        "UPDATE LOOP: LAG[%09lld] DUR[%09lld]\n"
-                        , _time_lag.count()
-                        , _duration.count());
+                        "UPDATE LOOP: LAG[%09lld] DUR[%09lld]\n",
+                        _time_lag.count(),
+                        _duration.count());
 
                 // 만약 이벤트 확보를 위한 EVENT 콜백이 필요하다면 UPDATE 콜백에 추가한다.
                 _callback.update(*this);
@@ -185,9 +188,9 @@ private:
             assert(_time_lag.count() >= 0);
 
             __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
-                    "RENDER: LAG[%09lld] DURA[%09lld]\n"
-                    , _time_lag.count()
-                    , _duration.count());
+                    "RENDER: LAG[%09lld] DURA[%09lld]\n",
+                    _time_lag.count(),
+                    _duration.count());
 
             _callback.render(*this);
 
@@ -198,7 +201,8 @@ private:
                 if (sleep_time < _time_step) {
 
                     __RENDERING_LOOP_DEBUG_VERBOSE_LOG(
-                            "SLEEP TIME: %09lld\n", sleep_time.count());
+                            "SLEEP TIME: %09lld\n",
+                            sleep_time.count());
 
                     // std::this_thread::yield();
                     std::this_thread::sleep_for(_time_step - sleep_time);
