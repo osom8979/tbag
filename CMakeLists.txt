@@ -160,7 +160,7 @@ install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
 
 ## Packaging.
 set (CPACK_SYSTEM_NAME                  "${CMAKE_SYSTEM_NAME}")
-set (CPACK_PACKAGE_NAME                 "tbag")
+set (CPACK_PACKAGE_NAME                 "${MAIN_NAME}")
 set (CPACK_PACKAGE_VENDOR               "${MAIN_AUTHOR}")
 set (CPACK_PACKAGE_CONTACT              "${MAIN_EMAIL}")
 set (CPACK_PACKAGE_VERSION_MAJOR        "${VERSION_MAJOR}")
