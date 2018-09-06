@@ -2,6 +2,10 @@
 ## HISTORY OF LIBTBAG PROJECT ##
 ################################
 
+VERSION=0.8.0-0.1-0
+- Create CPack configuration.
+- Fixed some bugs.
+
 VERSION=0.7.0-0.1-0
 - Updated to c++14.
 
