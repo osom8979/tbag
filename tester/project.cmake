@@ -28,5 +28,4 @@ endif ()
 ## Final process.
 tbag_modules__add_target ()
 tbag_modules__update_all_properties ()
-tbag_modules__install_target ()
 
