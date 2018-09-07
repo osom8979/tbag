@@ -187,6 +187,11 @@ set (CPACK_DEBIAN_PACKAGE_CONFLICTS     "")
 
 include (CPack)
 
+## Enable output of compile commands during generation.
+## For the YouCompleteMe
+## Check the ${CMAKE_BINARY_DIR}/compile_commands.json file.
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 ## Print result messages.
 tbag_preview ()
 

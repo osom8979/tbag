@@ -144,6 +144,9 @@ cscope.out
 # vim-python
 .ropeproject/
 
+# YouCompleteMe
+compile_commands.json
+
 ################
 ### Intellij ###
 
