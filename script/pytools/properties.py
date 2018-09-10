@@ -22,6 +22,9 @@ FULL_SOURCE_TEMPLATE = os.path.join(TEMPLATE_DIR, 'full-class.cpp.in')
 TEST_TEMPLATE        = os.path.join(TEMPLATE_DIR, 'test.cpp.in')
 CONFIG_CMAKE         = os.path.join(PROJECT_DIR,  'INFORMATION')
 
+PROJECT_TYPE_LIB = 'lib'
+PROJECT_TYPE_EXE = 'exe'
+
 def getProjectName():
     result = ''
     output = subprocess.check_output(['cat', CONFIG_CMAKE])
@@ -68,6 +71,13 @@ addGlobalString('NAMESPACE_CLOSE_COMMENT')
 addGlobalString('NAMESPACE_LIST_BEGIN')
 addGlobalString('NAMESPACE_LIST_END')
 addGlobalString('NAMESPACE_LIST_USING')
+addGlobalString('ROOT_CLASSPATH')
+addGlobalString('ROOT_CLASSPATH_LOWER')
+addGlobalString('ROOT_CLASSPATH_UPPER')
+addGlobalString('SUBPROJECT_NAME')
+addGlobalString('SUBPROJECT_NAME_LOWER')
+addGlobalString('SUBPROJECT_NAME_UPPER')
+addGlobalString('SUBPROJECT_TYPE')
 
 def getDate():
     today = datetime.date.today()
@@ -194,6 +204,19 @@ def createDefaultDictionary(classpath):
     dic[NAMESPACE_CLOSE] = 'NAMESPACE_' + dic[PROJECT_NAMESPACE].upper() + '_CLOSE'
     dic[NAMESPACE_OPEN_COMMENT]  = getDefaultFillString(dic[NAMESPACE_OPEN])
     dic[NAMESPACE_CLOSE_COMMENT] = getDefaultFillString(dic[NAMESPACE_CLOSE])
+
+    dic[ROOT_CLASSPATH] = classpath.split('/')[0]
+    dic[ROOT_CLASSPATH_LOWER] = dic[ROOT_CLASSPATH].lower()
+    dic[ROOT_CLASSPATH_UPPER] = dic[ROOT_CLASSPATH].upper()
+
+    if dic[ROOT_CLASSPATH_LOWER][0:3] == 'lib':
+        dic[SUBPROJECT_NAME] = dic[ROOT_CLASSPATH_LOWER][3:]
+        dif[SUBPROJECT_TYPE] = PROJECT_TYPE_LIB
+    else:
+        dic[SUBPROJECT_NAME] = dic[ROOT_CLASSPATH_LOWER]
+        dif[SUBPROJECT_TYPE] = PROJECT_TYPE_EXE
+    dic[SUBPROJECT_NAME_LOWER] = dic[SUBPROJECT_NAME].lower()
+    dic[SUBPROJECT_NAME_UPPER] = dic[SUBPROJECT_NAME].upper()
     return dic
 
 if __name__ == '__main__':
