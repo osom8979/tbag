@@ -211,10 +211,10 @@ def createDefaultDictionary(classpath):
 
     if dic[ROOT_CLASSPATH_LOWER][0:3] == 'lib':
         dic[SUBPROJECT_NAME] = dic[ROOT_CLASSPATH_LOWER][3:]
-        dif[SUBPROJECT_TYPE] = PROJECT_TYPE_LIB
+        dic[SUBPROJECT_TYPE] = PROJECT_TYPE_LIB
     else:
         dic[SUBPROJECT_NAME] = dic[ROOT_CLASSPATH_LOWER]
-        dif[SUBPROJECT_TYPE] = PROJECT_TYPE_EXE
+        dic[SUBPROJECT_TYPE] = PROJECT_TYPE_EXE
     dic[SUBPROJECT_NAME_LOWER] = dic[SUBPROJECT_NAME].lower()
     dic[SUBPROJECT_NAME_UPPER] = dic[SUBPROJECT_NAME].upper()
     return dic
