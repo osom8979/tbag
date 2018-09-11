@@ -13,8 +13,8 @@ endif ()
 #    cmake_policy (SET CMP0026 NEW)
 #endif ()
 
-enable_language (C)
-enable_language (CXX)
+#enable_language (C)
+#enable_language (CXX)
 
 ## Find tbag module path.
 set (TBAG_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake"                 CACHE PATH "libtbag cmake module directory.")
@@ -56,8 +56,12 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
-## Debugging logger settings.
 option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    option (USE_PCH_COMPILE "Enable PCH compile." ON)
+else ()
+    option (USE_PCH_COMPILE "Enable PCH compile." OFF)
+endif ()
 
 ## Configure settings.
 tbag_config__use_ccache ()
@@ -73,6 +77,9 @@ include (${CMAKE_SOURCE_DIR}/dep/simdpp/cmake/SimdppMultiarch.cmake)
 message (STATUS "Checking instruction sets to run tests for on this host...")
 simdpp_get_runnable_archs (SIMDPP_RUNNABLE_ARCHS)
 message (STATUS "Simdpp runnable archs: ${SIMDPP_RUNNABLE_ARCHS}")
+foreach (__arch_cursor ${SIMDPP_RUNNABLE_ARCHS})
+    set (SIMDPP_RUNNABLE_ARCH_${__arch_cursor} 1)
+endforeach ()
 
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
@@ -194,4 +201,9 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ## Print result messages.
 tbag_preview ()
+
+if (USE_PCH_COMPILE)
+    set (CMAKE_CXXPCH_FLAGS ${CMAKE_CXX_FLAGS})
+    target_precompiled_header (tbag libtbag/pch.h)
+endif ()
 

@@ -36,7 +36,8 @@ macro (tbag_utils__append_find_package_path)
     if (NOT IS_DIRECTORY "${TBAG_FIND_PACKAGE_DIR}")
         message (FATAL_ERROR "Not found directory: ${TBAG_FIND_PACKAGE_DIR}")
     endif()
-    list (APPEND CMAKE_MODULE_PATH "${TBAG_FIND_PACKAGE_DIR}")
+    list (APPEND CMAKE_MODULE_PATH "${TBAG_FIND_PACKAGE_DIR}"
+                                   "${TBAG_FIND_PACKAGE_DIR}/CMakePCHCompiler")
 endmacro ()
 
 ## -------------------
