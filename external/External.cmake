@@ -51,11 +51,11 @@ set (uv_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/uv")
 set (uv_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (uv_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${uv_EXT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (uv_EXT_LIBRARIES    "${uv_EXT_STATIC_LIB}")
-set (uv_EXT_DEPENDENCIES  ${uv_EXT_LIBRARIES})
 exists_libraries (uv_EXT_EXISTS "${uv_EXT_LIBRARIES}")
 
 if (uv_EXT_EXISTS)
     message (STATUS "Skip external/uv (Exists: ${uv_EXT_STATIC_LIB})")
+    add_custom_target (uv DEPENDS ${uv_EXT_LIBRARIES})
 else ()
     message (STATUS "Add external/uv")
     ExternalProject_Add (uv_ext
@@ -66,11 +66,11 @@ else ()
             #--Configure step-------------
             SOURCE_DIR "${uv_EXT_SOURCE_DIR}"
             CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
-            "-DBUILD_SHARED_LIBS=OFF"
-            "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
-            "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
-            "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
-            "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
             #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
@@ -78,10 +78,8 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
-    list (APPEND uv_EXT_DEPENDENCIES uv_ext)
+    add_custom_target (uv DEPENDS uv_ext)
 endif ()
-
-add_custom_target (uv DEPENDS ${uv_EXT_DEPENDENCIES})
 
 ##########
 ## ZLIB ##
@@ -101,11 +99,11 @@ set (zlib_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/zlib")
 set (zlib_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (zlib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlib_EXT_STATIC_LIB_NAME}${zlib_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (zlib_EXT_LIBRARIES    "${zlib_EXT_STATIC_LIB}")
-set (zlib_EXT_DEPENDENCIES  ${zlib_EXT_LIBRARIES})
 exists_libraries (zlib_EXT_EXISTS "${zlib_EXT_LIBRARIES}")
 
 if (zlib_EXT_EXISTS)
     message (STATUS "Skip external/zlib (Exists: ${zlib_EXT_STATIC_LIB})")
+    add_custom_target (zlib DEPENDS ${zlib_EXT_LIBRARIES})
 else ()
     message (STATUS "Add external/zlib")
     ExternalProject_Add (zlib_ext
@@ -118,7 +116,7 @@ else ()
             CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
                        "-DBUILD_SHARED_LIBS=OFF"
                        "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
-                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       #"-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}" ## [WARNING] Don't use this flag.
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
             #--Output logging-------------
@@ -128,10 +126,8 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
-    list (APPEND zlib_EXT_DEPENDENCIES zlib_ext)
+    add_custom_target (zlib DEPENDS zlib_ext)
 endif ()
-
-add_custom_target (zlib DEPENDS ${zlib_EXT_DEPENDENCIES})
 
 ##############
 ## LIBRESSL ##
@@ -145,13 +141,13 @@ set (ressl_tls_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_
 set (ressl_EXT_LIBRARIES         "${ressl_crypto_EXT_STATIC_LIB}"
                                  "${ressl_ssl_EXT_STATIC_LIB}"
                                  "${ressl_tls_EXT_STATIC_LIB}")
-set (ressl_EXT_DEPENDENCIES       ${ressl_EXT_LIBRARIES})
 exists_libraries (ressl_EXT_EXISTS "${ressl_EXT_LIBRARIES}")
 
 if (ressl_EXT_EXISTS)
     message (STATUS "Skip external/ressl_crypto (Exists: ${ressl_crypto_EXT_STATIC_LIB})")
     message (STATUS "Skip external/ressl_ssl (Exists: ${ressl_ssl_EXT_STATIC_LIB})")
     message (STATUS "Skip external/ressl_tls (Exists: ${ressl_tls_EXT_STATIC_LIB})")
+    add_custom_target (ressl DEPENDS ${ressl_EXT_LIBRARIES})
 else ()
     message (STATUS "Add external/ressl")
     ExternalProject_Add (ressl_ext
@@ -174,8 +170,6 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
-    list (APPEND ressl_EXT_DEPENDENCIES ressl_ext)
+    add_custom_target (ressl DEPENDS ressl_ext)
 endif ()
-
-add_custom_target (ressl DEPENDS ${ressl_EXT_DEPENDENCIES})
 
