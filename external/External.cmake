@@ -20,6 +20,17 @@ function (exists_libraries __result __libs)
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 
+#/// A fake function to inject dependencies into the output file of ExternalProject.
+#///
+#/// @param __name [in] Print name.
+#/// @param __deps [in] Dependencies.
+#/// @param __libs [in] Libraries.
+function (fake_output_library __name __deps __libs)
+    add_custom_command (OUTPUT  ${__libs}
+                        COMMAND ${CMAKE_COMMAND} -E echo "Fake output: ${__name}"
+                        DEPENDS ${__deps})
+endfunction ()
+
 string (TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
 if (CMAKE_BUILD_TYPE_LOWER STREQUAL "")
@@ -55,7 +66,6 @@ exists_libraries (uv_EXT_EXISTS "${uv_EXT_LIBRARIES}")
 
 if (uv_EXT_EXISTS)
     message (STATUS "Skip external/uv (Exists: ${uv_EXT_STATIC_LIB})")
-    add_custom_target (uv DEPENDS ${uv_EXT_LIBRARIES})
 else ()
     message (STATUS "Add external/uv")
     ExternalProject_Add (uv_ext
@@ -78,8 +88,9 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
-    add_custom_target (uv DEPENDS uv_ext)
+    fake_output_library (uv_ext_output uv_ext "${uv_EXT_LIBRARIES}")
 endif ()
+add_custom_target (uv DEPENDS ${uv_EXT_LIBRARIES})
 
 ##########
 ## ZLIB ##
@@ -103,7 +114,6 @@ exists_libraries (zlib_EXT_EXISTS "${zlib_EXT_LIBRARIES}")
 
 if (zlib_EXT_EXISTS)
     message (STATUS "Skip external/zlib (Exists: ${zlib_EXT_STATIC_LIB})")
-    add_custom_target (zlib DEPENDS ${zlib_EXT_LIBRARIES})
 else ()
     message (STATUS "Add external/zlib")
     ExternalProject_Add (zlib_ext
@@ -126,8 +136,9 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
-    add_custom_target (zlib DEPENDS zlib_ext)
+    fake_output_library (zlib_ext_output zlib_ext "${zlib_EXT_LIBRARIES}")
 endif ()
+add_custom_target (zlib DEPENDS ${zlib_EXT_LIBRARIES})
 
 ##############
 ## LIBRESSL ##
@@ -147,7 +158,6 @@ if (ressl_EXT_EXISTS)
     message (STATUS "Skip external/ressl_crypto (Exists: ${ressl_crypto_EXT_STATIC_LIB})")
     message (STATUS "Skip external/ressl_ssl (Exists: ${ressl_ssl_EXT_STATIC_LIB})")
     message (STATUS "Skip external/ressl_tls (Exists: ${ressl_tls_EXT_STATIC_LIB})")
-    add_custom_target (ressl DEPENDS ${ressl_EXT_LIBRARIES})
 else ()
     message (STATUS "Add external/ressl")
     ExternalProject_Add (ressl_ext
@@ -170,6 +180,7 @@ else ()
             LOG_BUILD     0
             LOG_TEST      1
             LOG_INSTALL   1)
-    add_custom_target (ressl DEPENDS ressl_ext)
+    fake_output_library (ressl_ext_output ressl_ext "${ressl_EXT_LIBRARIES}")
 endif ()
+add_custom_target (ressl DEPENDS ${ressl_EXT_LIBRARIES})
 
