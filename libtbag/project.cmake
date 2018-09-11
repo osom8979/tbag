@@ -33,8 +33,6 @@ tbag_modules__apply_dep_icu         ()
 tbag_modules__apply_dep_minizip     () ## And apply_dep_z
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_flatbuffers ()
-tbag_modules__apply_dep_simdpp      ()
-tbag_modules__update_simd_objects   ()
 
 set (TPOT_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
 set (TPOT_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot_t2s.h")
@@ -56,8 +54,6 @@ endif ()
 if (WITH_COVERAGE)
     tbag_modules__apply_gcov ()
 endif ()
-
-#tbag_modules__apply_pch (${CMAKE_SOURCE_DIR}/libtbag/config.h)
 
 ## Final process.
 tbag_modules__add_target ()

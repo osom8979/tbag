@@ -20,8 +20,6 @@
 #include <cstdint>
 #include <string>
 
-TBAG_API std::uint32_t tbGetSimdArch();
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -36,6 +34,33 @@ namespace system {
  */
 class TBAG_API SimdArch : private Noncopyable
 {
+public:
+    enum class Arch : std::uint32_t
+    {
+        NONE_NULL,
+        X86_SSE2,
+        X86_SSE3,
+        X86_SSSE3,
+        X86_SSE4_1,
+        X86_POPCNT_INSN,
+        X86_AVX,
+        X86_AVX2,
+        X86_FMA3,
+        X86_FMA4,
+        X86_AVX512F,
+        X86_AVX512BW,
+        X86_AVX512DQ,
+        X86_AVX512VL,
+        X86_XOP,
+        ARM_NEON,
+        ARM_NEON_FLT_SP,
+        ARM64_NEON,
+        MIPS_MSA,
+        POWER_ALTIVEC,
+        POWER_VSX_206,
+        POWER_VSX_207
+    };
+
 private:
     std::uint32_t _flags;
 
@@ -46,32 +71,6 @@ public:
 
 public:
     inline std::uint32_t getFlags() const TBAG_NOEXCEPT { return _flags; }
-
-public:
-    bool isNULL           () const TBAG_NOEXCEPT;
-    bool isX86_SSE2       () const TBAG_NOEXCEPT;
-    bool isX86_SSE3       () const TBAG_NOEXCEPT;
-    bool isX86_SSSE3      () const TBAG_NOEXCEPT;
-    bool isX86_SSE4_1     () const TBAG_NOEXCEPT;
-    bool isX86_POPCNT_INSN() const TBAG_NOEXCEPT;
-    bool isX86_AVX        () const TBAG_NOEXCEPT;
-    bool isX86_AVX2       () const TBAG_NOEXCEPT;
-    bool isX86_FMA3       () const TBAG_NOEXCEPT;
-    bool isX86_FMA4       () const TBAG_NOEXCEPT;
-    bool isX86_XOP        () const TBAG_NOEXCEPT;
-    bool isX86_AVX512F    () const TBAG_NOEXCEPT;
-    bool isX86_AVX512BW   () const TBAG_NOEXCEPT;
-    bool isX86_AVX512DQ   () const TBAG_NOEXCEPT;
-    bool isX86_AVX512VL   () const TBAG_NOEXCEPT;
-    bool isARM_NEON       () const TBAG_NOEXCEPT;
-    bool isARM_NEON_FLT_SP() const TBAG_NOEXCEPT;
-    bool isPOWER_ALTIVEC  () const TBAG_NOEXCEPT;
-    bool isPOWER_VSX_206  () const TBAG_NOEXCEPT;
-    bool isPOWER_VSX_207  () const TBAG_NOEXCEPT;
-    bool isMIPS_MSA       () const TBAG_NOEXCEPT;
-
-public:
-    std::string toString() const;
 };
 
 } // namespace system

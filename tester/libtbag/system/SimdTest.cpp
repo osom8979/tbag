@@ -14,6 +14,6 @@ using namespace libtbag::system;
 TEST(SimdTest, Default)
 {
     SimdArch arch;
-    std::cout << "SIMD INFO: " << arch.toString() << "(" << arch.getFlags() << ")" << std::endl;
+    std::cout << "SIMD INFO: " << "[SIMD STRING]" << "(" << arch.getFlags() << ")" << std::endl;
 }
 
