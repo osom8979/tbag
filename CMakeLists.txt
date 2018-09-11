@@ -46,8 +46,6 @@ elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
 elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     #set (CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE}   -O3 -DNDEBUG") ## Default
     set  (CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE}   -march=native")
-    set  (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -fuse-ld=gold")
-    set  (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
 endif ()
 
 # Setup the THIRD_PREFIX variable.
@@ -59,10 +57,18 @@ else ()
 endif ()
 
 option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
-option (USE_PCH_COMPILE "Enable PCH compile." OFF)
+option (USE_CCACHE "Enable ccache compile." ON)
+option (USE_PCH "Enable PCH compile." OFF)
+option (USE_GOLD "Enable ld.gold linker if gcc compiler." ON)
 
 ## Configure settings.
-tbag_config__use_ccache ()
+if (USE_CCACHE)
+    tbag_config__use_ccache ()
+endif ()
+if (USE_GOLD AND "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -fuse-ld=gold")
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
+endif ()
 tbag_config__default_generate_c_header ()
 
 ## External project.
@@ -157,7 +163,7 @@ set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")
 configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
 
 ## Run project.
-tbag_project2 (tea-bag)
+tbag_project2 (tea-bag C CXX CXXPCH)
 
 ## libtbag-cmake build packages.
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
@@ -200,7 +206,7 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ## Print result messages.
 tbag_preview ()
 
-if (USE_PCH_COMPILE)
+if (USE_PCH)
     set (CMAKE_CXXPCH_FLAGS ${CMAKE_CXX_FLAGS})
     target_precompiled_header (tbag libtbag/pch.h)
 endif ()

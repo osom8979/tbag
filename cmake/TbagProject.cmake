@@ -154,11 +154,12 @@ endfunction ()
 #///
 #/// @param __root_dir          [in] Find root directory (Source code directory).
 #/// @param __project_dir_name  [in] Project directory name.
+#/// @param ...                 [in] Languages.
 macro (tbag_project__build __root_dir __project_dir_name)
     tbag_project__clear_property ()
     tbag_project__set_const_property ("${__root_dir}" "${__project_dir_name}")
 
-    project (${TBAG_PROJECT_CONST_NAME} CXX CXXPCH)
+    project (${TBAG_PROJECT_CONST_NAME} ${ARGN})
     if (EXISTS "${TBAG_PROJECT_CONST_CMAKE_PATH}")
         include ("${TBAG_PROJECT_CONST_CMAKE_PATH}") # Read project.cmake files.
     else ()
@@ -185,10 +186,11 @@ endmacro ()
 #/// run tbag project.
 #///
 #/// @param __root_project_name [in] Root project name.
+#/// @param ...                 [in] Languages.
 macro (tbag_project2 __root_project_name)
     tbag_project ()
 
-    project (${__root_project_name} C CXX CXXPCH)
+    project (${__root_project_name} ${ARGN})
     tbag_project__find (__libs __exes "${__root_dir}")
     add_custom_target (${__root_project_name} DEPENDS ${__libs} ${__exes})
 endmacro ()
