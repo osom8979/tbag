@@ -44,8 +44,10 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     # EMPTY.
 elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    #set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG") ## Default
-    set  (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+    #set (CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE}   -O3 -DNDEBUG") ## Default
+    set  (CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE}   -march=native")
+    set  (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -fuse-ld=gold")
+    set  (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
 endif ()
 
 # Setup the THIRD_PREFIX variable.
@@ -57,11 +59,7 @@ else ()
 endif ()
 
 option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    option (USE_PCH_COMPILE "Enable PCH compile." ON)
-else ()
-    option (USE_PCH_COMPILE "Enable PCH compile." OFF)
-endif ()
+option (USE_PCH_COMPILE "Enable PCH compile." OFF)
 
 ## Configure settings.
 tbag_config__use_ccache ()
