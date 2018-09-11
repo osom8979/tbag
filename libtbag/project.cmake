@@ -33,6 +33,7 @@ tbag_modules__apply_dep_icu         ()
 tbag_modules__apply_dep_minizip     () ## And apply_dep_z
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_flatbuffers ()
+tbag_modules__apply_dep_lemon       ()
 
 set (TPOT_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
 set (TPOT_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot_t2s.h")

@@ -444,6 +444,18 @@ macro (tbag_modules__build_dep_simdpp)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_dep_lemon)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lemon)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lemon/include)
+
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lemon>)
+
+    ## external libraries.
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------

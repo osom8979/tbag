@@ -35,6 +35,12 @@ set (LEMON_SRCS src/arg_parser.cc
                 src/random.cc
                 src/bits/windows.cc)
 
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options (/w)
+elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    add_compile_options (-w)
+endif ()
+
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}")
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
