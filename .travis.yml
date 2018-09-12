@@ -9,8 +9,7 @@ cache:
   apt: true
   directories:
     - $HOME/tparty
-    - $TRAVIS_BUILD_DIR/cmake_build/external/local
-    - $TRAVIS_BUILD_DIR/cmake_build/dep
+    - $TRAVIS_BUILD_DIR/cmake_build
 
 compiler: g++
 
@@ -38,9 +37,6 @@ before_install:
   - export TPARTY_HOME=$HOME/tparty
   - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
   - export CXX=g++-5
-
-install:
-  - bash script/travis_install.sh
 
 script:
   - if [[ ! -d cmake_build ]]; then mkdir cmake_build; fi
