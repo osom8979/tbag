@@ -105,7 +105,38 @@ TEST(AsyncTest, Thread)
     // BUSY WAITING...
     while (is_idle == false) {
         if (is_end) {
-            assert(false && "loop error.");
+            assert(false && "loop error."); // <------ TRAVIS ERROR !!
+//[ RUN      ]AsyncTest.Thread
+//2018-09-12T01:28:53.322409851 @139789366672256 [DEBUG] Loop::insertChildHandle(@0x32fa000[UV_ASYNC]) Success (Handles: 1)
+//2018-09-12T01:28:53.322443244 @139789366672256 [DEBUG] Loop::insertChildHandle(@0x32f07b0[UV_IDLE]) Success (Handles: 2)
+//2018-09-12T01:28:53.353540433 @139788426045184 [DEBUG] Loop::eraseChildHandle(@0x32fa000[UV_ASYNC]) Success (Handles: 1)
+//2018-09-12T01:28:53.353595076 @139788426045184 [DEBUG] Loop::eraseChildHandle(@0x32f07b0[UV_IDLE]) Success (Handles: 0)
+//tester: /home/travis/build/osom8979/tbag/tester/libtbag/uvpp/AsyncTest.cpp:108: virtual void AsyncTest_Thread_Test::TestBody(): Assertion `false && "loop error."' failed.
+//2018-09-12T01:28:53.361887378 @139789366672256 [ALERT] Abort signal. (SIGABRT):
+// #00 0x00007F233D80B8ED libtbag::debug::getStackTraceString()+136 [libtbag.so.0]
+// #01 0x00007F233DA36F2A libtbag::signal::__impl::DefaultAbortHandler::run()+86 [libtbag.so.0]
+// #02 0x00007F233DA35E39 libtbag::signal::__impl::SignalObservable::notifyImplement()+1117 [libtbag.so.0]
+// #03 0x00007F233DA360D2 libtbag::signal::__impl::SignalObservable::notify()+50 [libtbag.so.0]
+// #04 0x00007F233DA33A7A +15551098 [libtbag.so.0]
+// #05 0x00007F233BF98CB0 +224432 [/lib/x86_64-linux-gnu/libc.so.6]
+// #06 0x00007F233BF98C37 gsignal+55 [/lib/x86_64-linux-gnu/libc.so.6]
+// #07 0x00007F233BF9C028 abort+328 [/lib/x86_64-linux-gnu/libc.so.6]
+// #08 0x00007F233BF91BF6 +195574 [/lib/x86_64-linux-gnu/libc.so.6]
+// #09 0x00007F233BF91CA2 +195746 [/lib/x86_64-linux-gnu/libc.so.6]
+// #10 0x0000000000E07B99 AsyncTest_Thread_Test::TestBody()+1691 [./tester]
+// #11 0x0000000000E76DC4 testing::internal::HandleSehExceptionsInMethodIfSupported<>()+101 [./tester]
+// #12 0x0000000000E73766 testing::internal::HandleExceptionsInMethodIfSupported<>()+75 [./tester]
+// #13 0x0000000000E64FBA testing::Test::Run()+212 [./tester]
+// #14 0x0000000000E6575A testing::TestInfo::Run()+260 [./tester]
+// #15 0x0000000000E65DBD testing::TestCase::Run()+263 [./tester]
+// #16 0x0000000000E6C443 testing::internal::UnitTestImpl::RunAllTests()+707 [./tester]
+// #17 0x0000000000E77AEF testing::internal::HandleSehExceptionsInMethodIfSupported<>()+101 [./tester]
+// #18 0x0000000000E74362 testing::internal::HandleExceptionsInMethodIfSupported<>()+75 [./tester]
+// #19 0x0000000000E6B183 testing::UnitTest::Run()+183 [./tester]
+// #20 0x0000000000E5F5B6 RUN_ALL_TESTS()+56 [./tester]
+// #21 0x0000000000E5E8AA main+718 [./tester]
+// #22 0x00007F233BF83F45 __libc_start_main+245 [/lib/x86_64-linux-gnu/libc.so.6]
+// #23 0x000000000078D879 +0 [./tester]
             break;
         }
     }
