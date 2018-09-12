@@ -9,17 +9,14 @@ tbag_modules__update_default_objects ()
 tbag_modules__apply_dep_gtest ()
 tbag_modules__apply_dep_lua_import_macros ()
 
-## libtbag library.
-list (APPEND TBAG_PROJECT_DEPENDENCIES tbag)
-list (APPEND TBAG_PROJECT_LDFLAGS      tbag)
+## tbag targets.
+tbag_modules__append_dependencies (tbag tbshare tbproc)
+tbag_modules__append_ldflags (tbag)
+tbag_modules__append_definitions ("DEMO_ASSET_DIR=\"${TBAG_PROJECT_CONST_DIR_PATH}/asset\"")
 
 if (NOT BUILD_SHARED_LIBS)
     tbag_modules__apply_tbag_static_api ()
 endif ()
-
-## Test project.
-list (APPEND TBAG_PROJECT_DEPENDENCIES tbshare)
-list (APPEND TBAG_PROJECT_DEPENDENCIES tbproc)
 
 if (WITH_COVERAGE)
     tbag_modules__apply_gcov ()

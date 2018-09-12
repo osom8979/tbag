@@ -50,7 +50,13 @@ std::string const UTF8_SOURCE = UTF8_GA + UTF8_NA + UTF8_DA;
 struct DemoAsset : public libtbag::res::Asset
 {
     static Path getTesterAssetDir()
-    { return Path(__FILE__).getParent() / "asset"; }
+    {
+#if defined(DEMO_ASSET_DIR)
+        return Path(DEMO_ASSET_DIR);
+#else
+        return Path(__FILE__).getParent() / "asset";
+#endif
+    }
 
     static Path getBinaryTempDir()
     { return libtbag::filesystem::TempDirGuard::getDefaultPrefix(); }
