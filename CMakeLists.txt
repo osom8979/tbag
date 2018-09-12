@@ -69,6 +69,7 @@ if (USE_GOLD AND "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -fuse-ld=gold")
     set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
 endif ()
+tbag_config__find_thread ()
 tbag_config__default_generate_c_header ()
 
 ## External project.
@@ -100,9 +101,6 @@ tbag_config__set_option (SKIP_FINDPATH_TESTER  OFF)
 if (WITH_COVERAGE)
     message (STATUS "Enable coverage.")
 endif ()
-
-## Thread settings.
-tbag_config__find_thread ()
 
 ## CUDA settings.
 tbag_config__set_library_option (USE_CUDA TbagCUDA CUDA_FOUND)
@@ -158,6 +156,10 @@ if (WIN32 AND HAVE_OBJBASE_H)
         int main() { return ::CoInitializeEx(NULL, COINIT_MULTITHREADED) == S_OK ? 0 : 1; }
         " HAVE_COINITIALIZEEX_FUNC)
 endif ()
+
+## Type checker.
+include (CheckTypeSize)
+check_type_size ("long long" LONG_LONG)
 
 set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
 set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")

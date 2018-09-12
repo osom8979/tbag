@@ -19,12 +19,10 @@ endif ()
 
 include (FindThreads)
 
-if (NOT LEMON_THREADING)
-    if (CMAKE_USE_PTHREADS_INIT)
-        add_definitions (-DLEMON_USE_PTHREAD=1)
-    elseif (CMAKE_USE_WIN32_THREADS_INIT)
-        add_definitions (-DLEMON_USE_WIN32_THREADS=1)
-    endif ()
+if (CMAKE_USE_PTHREADS_INIT)
+    add_definitions (-DLEMON_USE_PTHREAD=1)
+elseif (CMAKE_USE_WIN32_THREADS_INIT)
+    add_definitions (-DLEMON_USE_WIN32_THREADS=1)
 endif ()
 
 set (LEMON_SRCS src/arg_parser.cc

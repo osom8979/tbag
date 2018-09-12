@@ -277,9 +277,6 @@ endmacro ()
 #/// @param ... [in] message arguments.
 macro (tbag_config__find_thread)
     find_package (Threads)
-    if (CMAKE_THREAD_LIBS_INIT)
-        message (STATUS "Thread flags: ${CMAKE_THREAD_LIBS_INIT}")
-    endif ()
 endmacro ()
 
 #/// Find thread package.

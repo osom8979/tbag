@@ -162,6 +162,32 @@ macro (tbag_modules__apply_module_library)
     set (TBAG_PROJECT_LIB_TYPE MODULE)
 endmacro ()
 
+macro (tbag_modules__append_objects)
+    list (APPEND TBAG_PROJECT_OBJECTS ${ARGN})
+endmacro ()
+
+macro (tbag_modules__append_dependencies)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${ARGN})
+endmacro ()
+
+macro (tbag_modules__append_definitions)
+    list (APPEND TBAG_PROJECT_DEFINITIONS ${ARGN})
+endmacro ()
+
+macro (tbag_modules__append_include_dirs)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${ARGN})
+endmacro ()
+
+macro (tbag_modules__append_cxxflags)
+    list (APPEND TBAG_PROJECT_CXXFLAGS ${ARGN})
+endmacro ()
+
+macro (tbag_modules__append_ldflags)
+    list (APPEND TBAG_PROJECT_LDFLAGS ${ARGN})
+endmacro ()
+
+list (APPEND TBAG_PROJECT_DEFINITIONS SQLITE_EXPORT_API)
+
 macro (tbag_modules__apply_window_subsystem)
     if (WIN32)
         if (MSVC)
@@ -170,6 +196,18 @@ macro (tbag_modules__apply_window_subsystem)
             list (APPEND TBAG_PROJECT_CXXFLAGS -Wno-deprecated-declarations)
             list (APPEND TBAG_PROJECT_LDFLAGS  -mwindows)
         endif ()
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_thread)
+    if (CMAKE_USE_SPROC_INIT)
+    endif ()
+    if (CMAKE_USE_WIN32_THREADS_INIT)
+    endif ()
+    if (CMAKE_USE_PTHREADS_INIT)
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+    if (CMAKE_HP_PTHREADS_INIT)
     endif ()
 endmacro ()
 
@@ -449,6 +487,15 @@ macro (tbag_modules__apply_dep_lemon)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lemon/include)
 
     tbag_modules__add_whole_archive ($<TARGET_FILE:lemon>)
+
+    if (HAVE_LONG_LONG)
+        list (APPEND TBAG_PROJECT_DEFINITIONS LEMON_HAVE_LONG_LONG=1)
+    endif ()
+    if (CMAKE_USE_PTHREADS_INIT)
+        list (APPEND TBAG_PROJECT_DEFINITIONS LEMON_USE_PTHREAD=1)
+    elseif (CMAKE_USE_WIN32_THREADS_INIT)
+        list (APPEND TBAG_PROJECT_DEFINITIONS LEMON_USE_WIN32_THREADS=1)
+    endif ()
 
     ## external libraries.
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

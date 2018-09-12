@@ -6,20 +6,21 @@ tbag_modules__apply_default ()
 tbag_modules__update_default_objects ()
 
 ## TBAG EXPORT API.
-list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_EXPORT_API)
-list (APPEND TBAG_PROJECT_DEFINITIONS U_COMBINED_IMPLEMENTATION)
-list (APPEND TBAG_PROJECT_DEFINITIONS JSON_DLL_BUILD)
-list (APPEND TBAG_PROJECT_DEFINITIONS TINYXML2_EXPORT)
-list (APPEND TBAG_PROJECT_DEFINITIONS LMDB_EXPORT_API)
-list (APPEND TBAG_PROJECT_DEFINITIONS SQLITE_EXPORT_API)
+tbag_modules__append_definitions (
+    TBAG_EXPORT_API
+    U_COMBINED_IMPLEMENTATION
+    JSON_DLL_BUILD
+    TINYXML2_EXPORT
+    LMDB_EXPORT_API
+    SQLITE_EXPORT_API)
 tbag_modules__apply_dep_lua_export_macros ()
 
 ## Thread settings.
-list (APPEND TBAG_PROJECT_LDFLAGS ${CMAKE_THREAD_LIBS_INIT})
+tbag_modules__apply_thread ()
 
 ## Tbag debugging logger.
 if (USE_TBAG_DEBUGGING_LOGGER)
-    list (APPEND TBAG_PROJECT_DEFINITIONS ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
+    tbag_modules__append_definitions (ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
 endif ()
 
 ## External.
@@ -49,7 +50,7 @@ if (CUDA_FOUND)
 endif ()
 
 if (WIN32)
-    list (APPEND TBAG_PROJECT_LDFLAGS shlwapi.lib) # filesystem with windows.
+    tbag_modules__append_ldflags (shlwapi.lib) # filesystem with windows.
 endif ()
 
 if (WITH_COVERAGE)
