@@ -92,7 +92,6 @@ Err StdProcess::spawn(Loop & loop,
     });
     _out->setOnRead([&](Err code, char const * buffer, std::size_t size){
         if (code == Err::E_SUCCESS) {
-            assert(size > 0);
             onOutRead(buffer, size);
         } else if (code == Err::E_EOF) {
             _out->close();
@@ -112,7 +111,6 @@ Err StdProcess::spawn(Loop & loop,
     });
     _err->setOnRead([&](Err code, char const * buffer, std::size_t size){
         if (code == Err::E_SUCCESS) {
-            assert(size > 0);
             onErrRead(buffer, size);
         } else if (code == Err::E_EOF) {
             _err->close();
