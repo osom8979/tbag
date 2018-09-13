@@ -138,6 +138,11 @@ bool existsLogger(std::string const & name)
     return getLogger(name) != nullptr;
 }
 
+void setLevel(std::string const & name, int level)
+{
+    setSeverity(name, libtbag::log::level::getSeverityWithLevelStep(level));
+}
+
 void setSeverity(std::string const & name, Severity level)
 {
     Logger * logger = getLogger(name);

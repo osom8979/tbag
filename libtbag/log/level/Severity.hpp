@@ -98,15 +98,36 @@ public:
     inline int getLevel() const TBAG_NOEXCEPT { return _level; }
 };
 
-Severity const           OFF_SEVERITY("OFF"      ,   0); // Hide all messages.
-Severity const     EMERGENCY_SEVERITY("EMERGENCY", 100); // System is unusable.
-Severity const         ALERT_SEVERITY("ALERT"    , 200); // Action must be taken immediately.
-Severity const      CRITICAL_SEVERITY("CRITICAL" , 300); // Critical conditions.
-Severity const         ERROR_SEVERITY("ERROR"    , 400); // Error conditions.
-Severity const       WARNING_SEVERITY("WARNING"  , 500); // Warning conditions.
-Severity const        NOTICE_SEVERITY("NOTICE"   , 600); // Normal but significant condition.
-Severity const INFORMATIONAL_SEVERITY("INFO"     , 700); // Informational messages.
-Severity const         DEBUG_SEVERITY("DEBUG"    , 800); // Debug-level messages.
+TBAG_CONSTEXPR int LEVEL_STEP = 100;
+
+Severity const           OFF_SEVERITY("OFF"      , 0 * LEVEL_STEP); // Hide all messages.
+Severity const     EMERGENCY_SEVERITY("EMERGENCY", 1 * LEVEL_STEP); // System is unusable.
+Severity const         ALERT_SEVERITY("ALERT"    , 2 * LEVEL_STEP); // Action must be taken immediately.
+Severity const      CRITICAL_SEVERITY("CRITICAL" , 3 * LEVEL_STEP); // Critical conditions.
+Severity const         ERROR_SEVERITY("ERROR"    , 4 * LEVEL_STEP); // Error conditions.
+Severity const       WARNING_SEVERITY("WARNING"  , 5 * LEVEL_STEP); // Warning conditions.
+Severity const        NOTICE_SEVERITY("NOTICE"   , 6 * LEVEL_STEP); // Normal but significant condition.
+Severity const INFORMATIONAL_SEVERITY("INFO"     , 7 * LEVEL_STEP); // Informational messages.
+Severity const         DEBUG_SEVERITY("DEBUG"    , 8 * LEVEL_STEP); // Debug-level messages.
+Severity const       UNKNOWN_SEVERITY("UNKNOWN"  , 9 * LEVEL_STEP); // Unknown level.
+
+inline Severity getSeverityWithLevelStep(int level) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (level) {
+    case 0:  return           OFF_SEVERITY;
+    case 1:  return     EMERGENCY_SEVERITY;
+    case 2:  return         ALERT_SEVERITY;
+    case 3:  return      CRITICAL_SEVERITY;
+    case 4:  return         ERROR_SEVERITY;
+    case 5:  return       WARNING_SEVERITY;
+    case 6:  return        NOTICE_SEVERITY;
+    case 7:  return INFORMATIONAL_SEVERITY;
+    case 8:  return         DEBUG_SEVERITY;
+    default: return       UNKNOWN_SEVERITY;
+    }
+    // @formatter:on
+}
 
 } // namespace level
 } // namespace log
