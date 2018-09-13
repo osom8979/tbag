@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <functional>
+#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -34,34 +35,35 @@ namespace functional {
 class ReleaseCallback : private Noncopyable
 {
 public:
-    using Callback = std::function<void(void)>;
+    using Task = std::function<void(void)>;
+    using Flag = std::atomic_bool;
 
 private:
-    bool _cancel;
-    Callback _cb;
+    Flag _cancel;
+    Task _cb;
 
 public:
-    ReleaseCallback(Callback const & cb, bool cancel = false) : _cancel(cancel), _cb(cb)
+    ReleaseCallback(Task const & cb, bool cancel = false) : _cancel(cancel), _cb(cb)
     {
         // EMPTY.
     }
 
     ~ReleaseCallback()
     {
-        if (_cancel == false && _cb) {
+        if (!_cancel && _cb) {
             _cb();
         }
     }
 
 public:
-    inline void cancel() TBAG_NOEXCEPT
+    inline void cancel() TBAG_NOEXCEPT_SP_OP(_cancel.store(true))
     {
-        _cancel = true;
+        _cancel.store(true);
     }
 
-    inline void restore() TBAG_NOEXCEPT
+    inline void restore() TBAG_NOEXCEPT_SP_OP(_cancel.store(false))
     {
-        _cancel = false;
+        _cancel.store(false);
     }
 };
 

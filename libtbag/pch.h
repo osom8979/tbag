@@ -43,10 +43,10 @@
 # include <random>
 # include <regex>
 # include <new>
-
 # include <thread>
 # include <chrono>
 # include <mutex>
+# include <functional>
 #endif /* __cplusplus */
 
 #endif /* __INCLUDE_LIBTBAG__LIBTBAG_PCH_H__ */
