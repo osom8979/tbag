@@ -220,3 +220,7 @@ fabric.properties
 /**/config.h
 /**/config-ex.h
 
+#############
+### OPVIM ###
+opvim.json
+
