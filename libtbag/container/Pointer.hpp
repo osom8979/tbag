@@ -86,6 +86,9 @@ struct Pointer
     inline Type const * operator ->() const TBAG_NOEXCEPT
     { return ptr; }
 
+    typename std::add_lvalue_reference<Type>::type operator *() const TBAG_NOEXCEPT
+    { return *ptr; }
+
     inline friend void swap(Pointer & lh, Pointer & rh) TBAG_NOEXCEPT
     { std::swap(lh.ptr, rh.ptr); }
 
