@@ -24,9 +24,11 @@
 // Where is 'timeval' structure?
 // [WARNING] Don't change include order.
 #if defined(TBAG_PLATFORM_WINDOWS)
-# include <winsock2.h>
+# include <Windows.h>
 #else
 # include <sys/time.h>
+# include <libtbag/dummy/Win32.hpp>
+using namespace ::libtbag::dummy::win32;
 #endif
 
 // -------------------
@@ -359,13 +361,69 @@ std::string getLocalTimeZoneAbbreviation()
     return std::string();
 }
 
+#ifndef UINT64CONST
+#define UINT64CONST(x) ((uint64_t)(x##ULL))
+#endif
+
+// FILETIME of Jan 1 1970 00:00:00.
+TBAG_CONSTEXPR const ULONGLONG WIN32_FILETIME_EPOCH = UINT64CONST(116444736000000000);
+
+static void __win32_gettimeofday(long * sec, long * micro)
+{
+    FILETIME        file_time;
+    SYSTEMTIME      system_time;
+    ULARGE_INTEGER  ularge;
+
+    GetSystemTime(&system_time);
+    SystemTimeToFileTime(&system_time, &file_time);
+
+    ularge.LowPart  = file_time.dwLowDateTime;
+    ularge.HighPart = file_time.dwHighDateTime;
+
+    if (sec != nullptr) {
+        *sec = (long) ((ularge.QuadPart - WIN32_FILETIME_EPOCH) / 10000000L);
+    }
+    if (micro != nullptr) {
+        *micro = (long) (system_time.wMilliseconds * 1000);
+    }
+}
+
+static int __win32_gettimeofday(struct timeval * tp)
+{
+    FILETIME        file_time;
+    SYSTEMTIME      system_time;
+    ULARGE_INTEGER  ularge;
+
+    GetSystemTime(&system_time);
+    SystemTimeToFileTime(&system_time, &file_time);
+
+    ularge.LowPart  = file_time.dwLowDateTime;
+    ularge.HighPart = file_time.dwHighDateTime;
+
+    if (tp != nullptr) {
+        tp->tv_sec  = (long) ((ularge.QuadPart - WIN32_FILETIME_EPOCH) / 10000000L);
+        tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
+    }
+    return 0;
+}
+
+static int _gettimeofday(struct timeval * tp)
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return __win32_gettimeofday(tp);
+#else
+    return ::gettimeofday(tp, nullptr);
+#endif
+}
+
 Err getTimeOfDay(long * sec, long * micro)
 {
     timeval tp = {0,};
-    if (::gettimeofday(&tp, nullptr) != 0) {
+
+    // timezone information is stored outside the kernel so tzp isn't used anymore.
+    if (_gettimeofday(&tp) != 0) {
         return libtbag::getGlobalSystemError();
     }
-
     if (sec != nullptr) {
         *sec = tp.tv_sec;
     }

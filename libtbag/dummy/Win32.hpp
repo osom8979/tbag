@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
+#include <cstddef>
 #include <cstdint>
 
 #if !defined(TBAG_PLATFORM_WINDOWS)
@@ -126,12 +128,12 @@
 # define PULONG ULONG *
 # endif
 
-# ifndef DWORD
-# define DWORD unsigned long
+# ifndef WORD
+# define WORD unsigned short
 # endif
 
-# ifndef PDWORD
-# define PDWORD DWORD *
+# ifndef DWORD
+# define DWORD unsigned long
 # endif
 
 # ifndef LONG64
@@ -164,6 +166,14 @@
 
 # ifndef LPBOOL
 # define LPBOOL BOOL far *
+# endif
+
+# ifndef PWORD
+# define PWORD WORD near *
+# endif
+
+# ifndef LPWORD
+# define LPWORD WORD far *
 # endif
 
 # ifndef PDWORD
@@ -216,6 +226,14 @@
 
 # ifndef LONG_PTR
 # define LONG_PTR long long
+# endif
+
+# ifndef __int64
+# define __int64 int64_t
+# endif
+
+# ifndef ULONGLONG
+# define ULONGLONG uint64_t
 # endif
 
 # ifndef HRESULT
@@ -555,6 +573,29 @@ typedef struct _FILETIME {
     DWORD dwHighDateTime;
 } FILETIME, *PFILETIME, *LPFILETIME;
 
+typedef struct _SYSTEMTIME {
+    WORD wYear;
+    WORD wMonth;
+    WORD wDayOfWeek;
+    WORD wDay;
+    WORD wHour;
+    WORD wMinute;
+    WORD wSecond;
+    WORD wMilliseconds;
+} SYSTEMTIME, *PSYSTEMTIME, *LPSYSTEMTIME;
+
+typedef union _ULARGE_INTEGER {
+    struct {
+        DWORD LowPart;
+        DWORD HighPart;
+    };
+    struct {
+        DWORD LowPart;
+        DWORD HighPart;
+    } u;
+    ULONGLONG QuadPart;
+} ULARGE_INTEGER, *PULARGE_INTEGER;
+
 typedef struct _WIN32_FIND_DATAW {
     DWORD    dwFileAttributes;
     FILETIME ftCreationTime;
@@ -615,6 +656,27 @@ WIN32_DUMMY_INLINE DWORD GetLastError(void)
 { return ERROR_INVALID_FUNCTION; }
 
 /**
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms724390(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Winbase.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+WIN32_DUMMY_INLINE void GetSystemTime(_Out_ LPSYSTEMTIME lpSystemTime)
+{ /* EMPTY. */ }
+
+/**
+ * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms724948(v=vs.85).aspx>
+ *
+ * @remarks
+ *  - Winbase.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+WIN32_DUMMY_INLINE BOOL SystemTimeToFileTime(_In_  const SYSTEMTIME *lpSystemTime,
+                                             _Out_       LPFILETIME  lpFileTime)
+{ return FALSE; }
+
+/**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/dd319072(v=vs.85).aspx>
  *
  * @return
@@ -625,11 +687,11 @@ WIN32_DUMMY_INLINE DWORD GetLastError(void)
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE int MultiByteToWideChar(_In_      UINT   CodePage,
-                               _In_      DWORD  dwFlags,
-                               _In_      LPCSTR lpMultiByteStr,
-                               _In_      int    cbMultiByte,
-                               _Out_opt_ LPWSTR lpWideCharStr,
-                               _In_      int    cchWideChar)
+                                           _In_      DWORD  dwFlags,
+                                           _In_      LPCSTR lpMultiByteStr,
+                                           _In_      int    cbMultiByte,
+                                           _Out_opt_ LPWSTR lpWideCharStr,
+                                           _In_      int    cchWideChar)
 { return 0; }
 
 /**
@@ -643,13 +705,13 @@ WIN32_DUMMY_INLINE int MultiByteToWideChar(_In_      UINT   CodePage,
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE int WideCharToMultiByte(_In_      UINT    CodePage,
-                               _In_      DWORD   dwFlags,
-                               _In_      LPCWSTR lpWideCharStr,
-                               _In_      int     cchWideChar,
-                               _Out_opt_ LPSTR   lpMultiByteStr,
-                               _In_      int     cbMultiByte,
-                               _In_opt_  LPCSTR  lpDefaultChar,
-                               _Out_opt_ LPBOOL  lpUsedDefaultChar)
+                                           _In_      DWORD   dwFlags,
+                                           _In_      LPCWSTR lpWideCharStr,
+                                           _In_      int     cchWideChar,
+                                           _Out_opt_ LPSTR   lpMultiByteStr,
+                                           _In_      int     cbMultiByte,
+                                           _In_opt_  LPCSTR  lpDefaultChar,
+                                           _Out_opt_ LPBOOL  lpUsedDefaultChar)
 { return 0; }
 
 /**
@@ -676,8 +738,8 @@ WIN32_DUMMY_INLINE DWORD GetFileAttributesW(_In_ LPCWSTR lpFileName)
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
-                              _Out_ LPWSTR  lpszLongPath,
-                              _In_  DWORD   cchBuffer)
+                                          _Out_ LPWSTR  lpszLongPath,
+                                          _In_  DWORD   cchBuffer)
 { return 0; }
 
 /**
@@ -691,10 +753,10 @@ WIN32_DUMMY_INLINE DWORD GetLongPathNameW(_In_  LPCWSTR lpszShortPath,
  *  - Library: Advapi32.lib
  */
 WIN32_DUMMY_INLINE BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileName,
-                             _In_      SECURITY_INFORMATION RequestedInformation,
-                             _Out_opt_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                             _In_      DWORD                nLength,
-                             _Out_     LPDWORD              lpnLengthNeeded)
+                                         _In_      SECURITY_INFORMATION RequestedInformation,
+                                         _Out_opt_ PSECURITY_DESCRIPTOR pSecurityDescriptor,
+                                         _In_      DWORD                nLength,
+                                         _Out_     LPDWORD              lpnLengthNeeded)
 { return FALSE; }
 
 /**
@@ -708,8 +770,8 @@ WIN32_DUMMY_INLINE BOOL GetFileSecurityW(_In_      LPCWSTR              lpFileNa
  *  - Library: Advapi32.lib
  */
 WIN32_DUMMY_INLINE BOOL OpenProcessToken(_In_  HANDLE  ProcessHandle,
-                             _In_  DWORD   DesiredAccess,
-                             _Out_ PHANDLE TokenHandle)
+                                         _In_  DWORD   DesiredAccess,
+                                         _Out_ PHANDLE TokenHandle)
 { return FALSE; }
 
 /**
@@ -749,8 +811,8 @@ WIN32_DUMMY_INLINE BOOL CloseHandle(_In_ HANDLE hObject)
  *  - Library: Advapi32.lib
  */
 WIN32_DUMMY_INLINE BOOL DuplicateToken(_In_  HANDLE                       ExistingTokenHandle,
-                           _In_  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
-                           _Out_ PHANDLE                      DuplicateTokenHandle)
+                                       _In_  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
+                                       _Out_ PHANDLE                      DuplicateTokenHandle)
 { return FALSE; }
 
 /**
@@ -761,7 +823,7 @@ WIN32_DUMMY_INLINE BOOL DuplicateToken(_In_  HANDLE                       Existi
  *  - Library: Advapi32.lib
  */
 WIN32_DUMMY_INLINE void MapGenericMask(_Inout_ PDWORD           AccessMask,
-                           _In_    PGENERIC_MAPPING GenericMapping)
+                                       _In_    PGENERIC_MAPPING GenericMapping)
 { /* EMPTY. */ }
 
 /**
@@ -772,13 +834,13 @@ WIN32_DUMMY_INLINE void MapGenericMask(_Inout_ PDWORD           AccessMask,
  *  - Library: Advapi32.lib
  */
 WIN32_DUMMY_INLINE BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                        _In_      HANDLE               ClientToken,
-                        _In_      DWORD                DesiredAccess,
-                        _In_      PGENERIC_MAPPING     GenericMapping,
-                        _Out_opt_ PPRIVILEGE_SET       PrivilegeSet,
-                        _Inout_   LPDWORD              PrivilegeSetLength,
-                        _Out_     LPDWORD              GrantedAccess,
-                        _Out_     LPBOOL               AccessStatus)
+                                    _In_      HANDLE               ClientToken,
+                                    _In_      DWORD                DesiredAccess,
+                                    _In_      PGENERIC_MAPPING     GenericMapping,
+                                    _Out_opt_ PPRIVILEGE_SET       PrivilegeSet,
+                                    _Inout_   LPDWORD              PrivilegeSetLength,
+                                    _Out_     LPDWORD              GrantedAccess,
+                                    _Out_     LPBOOL               AccessStatus)
 { return FALSE; }
 
 /**
@@ -792,7 +854,7 @@ WIN32_DUMMY_INLINE BOOL AccessCheck(_In_      PSECURITY_DESCRIPTOR pSecurityDesc
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE DWORD GetTempPathA(_In_  DWORD nBufferLength,
-                          _Out_ LPSTR lpBuffer)
+                                      _Out_ LPSTR lpBuffer)
 { return 0; }
 
 /**
@@ -806,7 +868,7 @@ WIN32_DUMMY_INLINE DWORD GetTempPathA(_In_  DWORD nBufferLength,
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
-                                  _Out_ LPSTR lpBuffer)
+                                              _Out_ LPSTR lpBuffer)
 { return 0; }
 
 /**
@@ -820,10 +882,10 @@ WIN32_DUMMY_INLINE DWORD GetCurrentDirectoryA(_In_  DWORD nBufferLength,
  *  - Library: Shell32.lib
  */
 WIN32_DUMMY_INLINE HRESULT SHGetFolderPathA(_In_  HWND   hwndOwner,
-                                _In_  int    nFolder,
-                                _In_  HANDLE hToken,
-                                _In_  DWORD  dwFlags,
-                                _Out_ LPSTR  pszPath)
+                                            _In_  int    nFolder,
+                                            _In_  HANDLE hToken,
+                                            _In_  DWORD  dwFlags,
+                                            _Out_ LPSTR  pszPath)
 { return E_NOTIMPL; }
 
 /**
@@ -837,8 +899,8 @@ WIN32_DUMMY_INLINE HRESULT SHGetFolderPathA(_In_  HWND   hwndOwner,
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE DWORD GetModuleFileNameA(_In_opt_ HMODULE hModule,
-                                _Out_    LPSTR   lpFilename,
-                                _In_     DWORD   nSize)
+                                            _Out_    LPSTR   lpFilename,
+                                            _In_     DWORD   nSize)
 { return 0; }
 
 /**
@@ -852,9 +914,9 @@ WIN32_DUMMY_INLINE DWORD GetModuleFileNameA(_In_opt_ HMODULE hModule,
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE DWORD GetFullPathNameW(_In_  LPCWSTR  lpFileName,
-                              _In_  DWORD    nBufferLength,
-                              _Out_ LPWSTR   lpBuffer,
-                              _Out_ LPWSTR  *lpFilePart)
+                                          _In_  DWORD    nBufferLength,
+                                          _Out_ LPWSTR   lpBuffer,
+                                          _Out_ LPWSTR  *lpFilePart)
 { return 0; }
 
 /**
@@ -868,7 +930,7 @@ WIN32_DUMMY_INLINE DWORD GetFullPathNameW(_In_  LPCWSTR  lpFileName,
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE BOOL CreateDirectoryW(_In_     LPCWSTR               lpPathName,
-                             _In_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+                                         _In_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 { return FALSE; }
 
 /**
@@ -908,7 +970,7 @@ WIN32_DUMMY_INLINE BOOL DeleteFileW(_In_ LPCWSTR lpFileName)
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE BOOL MoveFileW(_In_ LPCWSTR lpExistingFileName,
-                      _In_ LPCWSTR lpNewFileName)
+                                  _In_ LPCWSTR lpNewFileName)
 { return FALSE; }
 
 /**
@@ -931,8 +993,8 @@ WIN32_DUMMY_INLINE BOOL PathFileExistsW(_In_ LPCWSTR pszPath)
  *  - Header: Strsafe.h
  */
 WIN32_DUMMY_INLINE HRESULT StringCchLengthW(_In_  LPCWSTR   psz,
-                                _In_  size_t    cchMax,
-                                _Out_ size_t  * pcch)
+                                            _In_  size_t    cchMax,
+                                            _Out_ size_t  * pcch)
 { return E_NOTIMPL; }
 
 /**
@@ -942,8 +1004,8 @@ WIN32_DUMMY_INLINE HRESULT StringCchLengthW(_In_  LPCWSTR   psz,
  *  - Header: Strsafe.h
  */
 WIN32_DUMMY_INLINE HRESULT StringCchCopyW(_Out_ LPWSTR  pszDest,
-                              _In_  size_t  cchDest,
-                              _In_  LPCWSTR pszSrc)
+                                          _In_  size_t  cchDest,
+                                          _In_  LPCWSTR pszSrc)
 { return E_NOTIMPL; }
 
 /**
@@ -953,8 +1015,8 @@ WIN32_DUMMY_INLINE HRESULT StringCchCopyW(_Out_ LPWSTR  pszDest,
  *  - Header: Strsafe.h
  */
 WIN32_DUMMY_INLINE HRESULT StringCchCatW(_Inout_ LPWSTR  pszDest,
-                             _In_    size_t  cchDest,
-                             _In_    LPCWSTR pszSrc)
+                                         _In_    size_t  cchDest,
+                                         _In_    LPCWSTR pszSrc)
 { return E_NOTIMPL; }
 
 /**
@@ -965,7 +1027,7 @@ WIN32_DUMMY_INLINE HRESULT StringCchCatW(_Inout_ LPWSTR  pszDest,
  *  - Library: Shlwapi.lib
  */
 WIN32_DUMMY_INLINE int StrCmpW(_In_ PCWSTR psz1,
-                   _In_ PCWSTR psz2)
+                               _In_ PCWSTR psz2)
 { return 0; }
 
 /**
@@ -980,7 +1042,7 @@ WIN32_DUMMY_INLINE int StrCmpW(_In_ PCWSTR psz1,
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE HANDLE FindFirstFileW(_In_  LPCWSTR            lpFileName,
-                             _Out_ LPWIN32_FIND_DATAW lpFindFileData)
+                                         _Out_ LPWIN32_FIND_DATAW lpFindFileData)
 { return INVALID_HANDLE_VALUE; }
 
 /**
@@ -994,7 +1056,7 @@ WIN32_DUMMY_INLINE HANDLE FindFirstFileW(_In_  LPCWSTR            lpFileName,
  *  - Library: Kernel32.lib
  */
 WIN32_DUMMY_INLINE BOOL FindNextFileW(_In_  HANDLE             hFindFile,
-                          _Out_ LPWIN32_FIND_DATAW lpFindFileData)
+                                      _Out_ LPWIN32_FIND_DATAW lpFindFileData)
 { return FALSE; }
 
 /**
@@ -1037,11 +1099,10 @@ WIN32_DUMMY_INLINE DWORD GetCurrentProcessId(void)
  *  - Header: WinBase.h (include Windows.h)
  *  - Library: Kernel32.lib
  */
-WIN32_DUMMY_INLINE USHORT CaptureStackBackTrace(
-        _In_      ULONG  FramesToSkip,
-        _In_      ULONG  FramesToCapture,
-        _Out_     PVOID  *BackTrace,
-        _Out_opt_ PULONG BackTraceHash)
+WIN32_DUMMY_INLINE USHORT CaptureStackBackTrace(_In_      ULONG  FramesToSkip,
+                                                _In_      ULONG  FramesToCapture,
+                                                _Out_     PVOID  *BackTrace,
+                                                _Out_opt_ PULONG BackTraceHash)
 { return 0; }
 
 /**
