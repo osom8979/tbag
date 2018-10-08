@@ -100,7 +100,7 @@ int File::write(binf const * infos, std::size_t infos_size)
 int File::write(char const * buffer, std::size_t size)
 {
     binf const info(const_cast<char*>(buffer), size);
-    return read(&info, 1U);
+    return write(&info, 1U);
 }
 
 File::FileState File::getState() const
