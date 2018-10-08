@@ -388,7 +388,7 @@ static void __win32_gettimeofday(long * sec, long * micro)
     }
 }
 
-static int __win32_gettimeofday(struct timeval * tp)
+static int __win32_gettimeofday(long & sec, long & micro)
 {
     FILETIME        file_time;
     SYSTEMTIME      system_time;
@@ -400,35 +400,36 @@ static int __win32_gettimeofday(struct timeval * tp)
     ularge.LowPart  = file_time.dwLowDateTime;
     ularge.HighPart = file_time.dwHighDateTime;
 
-    if (tp != nullptr) {
-        tp->tv_sec  = (long) ((ularge.QuadPart - WIN32_FILETIME_EPOCH) / 10000000L);
-        tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
-    }
+    sec = (long) ((ularge.QuadPart - WIN32_FILETIME_EPOCH) / 10000000L);
+    micro = (long) (system_time.wMilliseconds * 1000);
     return 0;
 }
 
-static int _gettimeofday(struct timeval * tp)
+static int _gettimeofday(long & sec, long & micro)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
     return __win32_gettimeofday(tp);
 #else
-    return ::gettimeofday(tp, nullptr);
+    timeval tp = {0,};
+    // timezone information is stored outside the kernel so tzp isn't used anymore.
+    int const CODE = gettimeofday(&tp, nullptr);
+    sec = tp.tv_sec;
+    micro = tp.tv_usec;
+    return CODE;
 #endif
 }
 
 Err getTimeOfDay(long * sec, long * micro)
 {
-    timeval tp = {0,};
-
-    // timezone information is stored outside the kernel so tzp isn't used anymore.
-    if (_gettimeofday(&tp) != 0) {
+    long s, u;
+    if (_gettimeofday(s, u) != 0) {
         return libtbag::getGlobalSystemError();
     }
     if (sec != nullptr) {
-        *sec = tp.tv_sec;
+        *sec = s;
     }
     if (micro != nullptr) {
-        *micro = tp.tv_usec;
+        *micro = u;
     }
     return Err::E_SUCCESS;
 }
