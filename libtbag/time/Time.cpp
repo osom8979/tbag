@@ -21,6 +21,14 @@
 #include <atomic>
 #include <type_traits>
 
+// Where is 'timeval' structure?
+// [WARNING] Don't change include order.
+#if defined(TBAG_PLATFORM_WINDOWS)
+# include <winsock2.h>
+#else
+# include <sys/time.h>
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -351,11 +359,20 @@ std::string getLocalTimeZoneAbbreviation()
     return std::string();
 }
 
-timeval getTimeOfDay()
+Err getTimeOfDay(long * sec, long * micro)
 {
     timeval tp = {0,};
-    gettimeofday(&tp, nullptr);
-    return tp;
+    if (::gettimeofday(&tp, nullptr) != 0) {
+        return libtbag::getGlobalSystemError();
+    }
+
+    if (sec != nullptr) {
+        *sec = tp.tv_sec;
+    }
+    if (micro != nullptr) {
+        *micro = tp.tv_usec;
+    }
+    return Err::E_SUCCESS;
 }
 
 } // namespace time

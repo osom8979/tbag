@@ -61,7 +61,9 @@ TEST(TimeTest, GetMillisec)
 
 TEST(TimeTest, GetTime)
 {
-    auto const TIME_POINT = time::getTimeOfDay();
-    ASSERT_NE(TIME_POINT.tv_sec, 0);
+    long sec = 0;
+    auto const CODE = time::getTimeOfDay(&sec);
+    ASSERT_TRUE(isSuccess(CODE));
+    ASSERT_NE(sec, 0);
 }
 

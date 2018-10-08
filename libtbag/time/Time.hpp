@@ -15,17 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 
 #include <ctime>
 #include <string>
 #include <chrono>
-
-// Where is 'timeval' structure?
-#if defined(TBAG_PLATFORM_WINDOWS)
-# include <winsock2.h>
-#else
-# include <sys/time.h>
-#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -110,7 +104,7 @@ TBAG_API std::string getFormatString(std::string  const & format, tm const * t, 
 TBAG_API std::string getLocalTimeZoneAbbreviation();
 
 /** get the date and time. */
-TBAG_API timeval getTimeOfDay();
+TBAG_API Err getTimeOfDay(long * sec, long * micro = nullptr);
 
 } // namespace time
 
