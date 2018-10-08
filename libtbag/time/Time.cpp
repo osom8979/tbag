@@ -351,6 +351,13 @@ std::string getLocalTimeZoneAbbreviation()
     return std::string();
 }
 
+timeval getTimeOfDay()
+{
+    timeval tp = {0,};
+    gettimeofday(&tp, nullptr);
+    return tp;
+}
+
 } // namespace time
 
 // --------------------

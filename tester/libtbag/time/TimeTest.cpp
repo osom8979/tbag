@@ -59,3 +59,9 @@ TEST(TimeTest, GetMillisec)
     ASSERT_EQ(5, time::getMillisec(tp));
 }
 
+TEST(TimeTest, GetTime)
+{
+    auto const TIME_POINT = time::getTimeOfDay();
+    ASSERT_NE(TIME_POINT.tv_sec, 0);
+}
+
