@@ -368,26 +368,6 @@ std::string getLocalTimeZoneAbbreviation()
 // FILETIME of Jan 1 1970 00:00:00.
 TBAG_CONSTEXPR const ULONGLONG WIN32_FILETIME_EPOCH = UINT64CONST(116444736000000000);
 
-static void __win32_gettimeofday(long * sec, long * micro)
-{
-    FILETIME        file_time;
-    SYSTEMTIME      system_time;
-    ULARGE_INTEGER  ularge;
-
-    GetSystemTime(&system_time);
-    SystemTimeToFileTime(&system_time, &file_time);
-
-    ularge.LowPart  = file_time.dwLowDateTime;
-    ularge.HighPart = file_time.dwHighDateTime;
-
-    if (sec != nullptr) {
-        *sec = (long) ((ularge.QuadPart - WIN32_FILETIME_EPOCH) / 10000000L);
-    }
-    if (micro != nullptr) {
-        *micro = (long) (system_time.wMilliseconds * 1000);
-    }
-}
-
 static int __win32_gettimeofday(long & sec, long & micro)
 {
     FILETIME        file_time;
@@ -408,7 +388,7 @@ static int __win32_gettimeofday(long & sec, long & micro)
 static int _gettimeofday(long & sec, long & micro)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
-    return __win32_gettimeofday(tp);
+    return __win32_gettimeofday(src, micro);
 #else
     timeval tp = {0,};
     // timezone information is stored outside the kernel so tzp isn't used anymore.
