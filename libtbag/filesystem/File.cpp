@@ -106,15 +106,20 @@ int File::write(char const * buffer, std::size_t size)
 File::FileState File::getState() const
 {
     FileState state = {0};
-    if (details::getStateWithFile(_file, &state) == false) {
+    if (!details::getStateWithFile(_file, &state)) {
         tDLogE("File::getState() result error.");
     }
     return state;
 }
 
+uint64_t File::getSize() const
+{
+    return getState().size;
+}
+
 bool File::isEof() const
 {
-    return _offset >= getState().size;
+    return _offset >= getSize();
 }
 
 // -------------

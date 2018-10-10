@@ -63,6 +63,9 @@ public:
     inline ufile getFd() const TBAG_NOEXCEPT
     { return _file; }
 
+    inline int64_t offset() const TBAG_NOEXCEPT
+    { return _offset; }
+
     inline void seek(int64_t offset) TBAG_NOEXCEPT
     { _offset = offset; }
 
@@ -86,6 +89,7 @@ public:
 
 public:
     FileState getState() const;
+    uint64_t  getSize() const;
 
 public:
     bool isEof() const;
