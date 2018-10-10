@@ -388,7 +388,7 @@ static int __win32_gettimeofday(long & sec, long & micro)
 static int _gettimeofday(long & sec, long & micro)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
-    return __win32_gettimeofday(src, micro);
+    return __win32_gettimeofday(sec, micro);
 #else
     timeval tp = {0,};
     // timezone information is stored outside the kernel so tzp isn't used anymore.
