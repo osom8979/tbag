@@ -62,6 +62,15 @@ inline TBAG_CONSTEXPR bool isUnixLikePlatform() TBAG_NOEXCEPT
 #endif
 }
 
+inline TBAG_CONSTEXPR bool isMacPlatform() TBAG_NOEXCEPT
+{
+#if defined(TBAG_PLATFORM_MACOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
 enum class PlatformType : int
 {
     PT_WINDOWS,
