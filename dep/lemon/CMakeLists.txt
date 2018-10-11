@@ -8,6 +8,8 @@ if (POLICY CMP0054)
     cmake_policy (SET CMP0054 NEW)
 endif ()
 
+enable_language (CXX)
+
 project (LEMON)
 add_definitions (-DLEMON_VERSION=1.3.1)
 
@@ -33,9 +35,9 @@ set (LEMON_SRCS src/arg_parser.cc
                 src/random.cc
                 src/bits/windows.cc)
 
-if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     add_compile_options (/w)
-elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_compile_options (-w)
 endif ()
 

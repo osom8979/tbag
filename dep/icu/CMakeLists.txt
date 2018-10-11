@@ -12,12 +12,12 @@ endif ()
 enable_language (C)
 enable_language (CXX)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     add_compile_options (/wd4244) ## conversion from 'type1' to 'type2', possible loss of data.
     add_compile_options (/wd4251) ## class 'type' needs to have dll-interface to be used by clients of class 'type2'.
     add_compile_options (/wd4267) ## conversion from 'size_t' to 'type', possible loss of data.
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif ()
 

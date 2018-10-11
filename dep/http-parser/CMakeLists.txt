@@ -11,9 +11,9 @@ endif ()
 
 enable_language (C)
 
-if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     add_compile_options (/w)
-elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_compile_options (-w)
 endif ()
 
