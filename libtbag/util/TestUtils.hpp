@@ -97,6 +97,15 @@ struct TBAG_API Then
 
 } // namespace behaviour
 } // namespace test
+
+TBAG_API bool writeInformation(std::string const & prefix,
+                               std::string const & case_name,
+                               std::string const & name,
+                               std::string const & content);
+TBAG_API bool writeInformation(std::string const & case_name,
+                               std::string const & name,
+                               std::string const & content);
+
 } // namespace util
 
 // --------------------
@@ -184,6 +193,11 @@ NAMESPACE_LIBTBAG_CLOSE
     class_name value_prefix##_move_assign;                                  \
     value_prefix##_move_assign = std::move(value_prefix##_moved_assign);    \
     /* -- END -- */
+#endif
+
+#ifndef TBAG_WRITE_INFORMATION
+#define TBAG_WRITE_INFORMATION(content) \
+    ::libtbag::util::writeInformation(test_info_->test_case_name(), test_info_->name(), content)
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_UTIL_TESTUTILS_HPP__

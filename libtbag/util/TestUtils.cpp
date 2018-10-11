@@ -8,6 +8,8 @@
 #include <libtbag/util/TestUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/Format.hpp>
+#include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/File.hpp>
 #include <iostream>
 
 // -------------------
@@ -102,6 +104,28 @@ Then::~Then()
 
 } // namespace behaviour
 } // namespace test
+
+bool writeInformation(std::string const & prefix,
+                      std::string const & case_name,
+                      std::string const & name,
+                      std::string const & content)
+{
+    using namespace libtbag::filesystem;
+    Path const FILE_PATH = Path(prefix) / (case_name + "." + name + ".info");
+    if (FILE_PATH.exists()) {
+        FILE_PATH.remove();
+    }
+    return writeFile(FILE_PATH, content) == Err::E_SUCCESS;
+}
+
+bool writeInformation(std::string const & case_name,
+                      std::string const & name,
+                      std::string const & content)
+{
+    using namespace libtbag::filesystem;
+    return writeInformation(Path::getExeDir().toString(), case_name, name, content);
+}
+
 } // namespace util
 
 // --------------------
