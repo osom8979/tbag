@@ -62,6 +62,27 @@ inline TBAG_CONSTEXPR bool isUnixLikePlatform() TBAG_NOEXCEPT
 #endif
 }
 
+enum class PlatformType : int
+{
+    PT_WINDOWS,
+    PT_MACOS,
+    PT_UNIX,
+    PT_UNKNOWN,
+};
+
+inline PlatformType getPlatformType() TBAG_NOEXCEPT
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return PlatformType::PT_WINDOWS;
+#elif defined(TBAG_PLATFORM_MACOS)
+    return PlatformType::PT_MACOS;
+#elif defined(TBAG_PLATFORM_UNIX_LIKE)
+    return PlatformType::PT_UNIX;
+#else
+    return PlatformType::PT_UNKNOWN;
+#endif
+}
+
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
