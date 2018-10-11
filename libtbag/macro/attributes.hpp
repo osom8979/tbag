@@ -70,21 +70,27 @@
 # define TBAG_ALIGNMENT_DEFAULT_PAGE_SIZE        TBAG_ALIGNMENT_SIZE_4096BYTE
 #endif
 
-#ifndef TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED
-# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 40600)
-#  define TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED(code)                     \
+#ifndef TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED
+# if defined(TBAG_COMP_GNUC_CXX) /*&& (TBAG_COMP_GNUC_VERSION >= 40600)*/
+#  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED                 \
     _Pragma("GCC diagnostic push")                                  \
-    _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
-    code;                                                           \
-    _Pragma("GCC diagnostic pop")
+    _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
 # elif defined(TBAG_COMP_MSVC)
-#  define TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED(code) \
-    __pragma(warning(push))                     \
-    __pragma(warning(disable : 4996))           \
-    code;                                       \
-    __pragma(warning(pop))
+#  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED \
+    __pragma(warning(push))                         \
+    __pragma(warning(disable : 4996))
 # else
-#  define TBAG_ATTRIBUTE_NO_WARNING_DEPRECATED(code)
+#  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED
+# endif
+#endif
+
+#ifndef TBAG_ATTRIBUTE_DIAGNOSTIC_POP
+# if defined(TBAG_COMP_GNUC_CXX)
+#  define TBAG_ATTRIBUTE_DIAGNOSTIC_POP  _Pragma("GCC diagnostic pop")
+# elif defined(TBAG_COMP_MSVC)
+#  define TBAG_ATTRIBUTE_DIAGNOSTIC_POP  __pragma(warning(pop))
+# else
+#  define TBAG_ATTRIBUTE_DIAGNOSTIC_POP
 # endif
 #endif
 
