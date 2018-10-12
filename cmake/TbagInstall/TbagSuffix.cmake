@@ -1,6 +1,3 @@
-## Run project.
-tbag_project2 (CyclopsCloud)
-
 ## Packaging.
 set (CPACK_SYSTEM_NAME                  "${CMAKE_SYSTEM_NAME}")
 set (CPACK_PACKAGE_NAME                 "${MAIN_NAME}")
@@ -28,6 +25,11 @@ set (CPACK_DEBIAN_PACKAGE_SUGGESTS      "")
 set (CPACK_DEBIAN_PACKAGE_CONFLICTS     "")
 
 include (CPack)
+
+## Enable output of compile commands during generation.
+## For the YouCompleteMe
+## Check the ${CMAKE_BINARY_DIR}/compile_commands.json file.
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ## Print result messages.
 tbag_preview ()

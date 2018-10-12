@@ -29,7 +29,7 @@ endif ()
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4146") ## unary minus operator applied to unsigned type, result still unsigned.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244") ## conversion from 'type1' to 'type2', possible loss of data.
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251") ## class 'type' needs to have dll-interface to be used by clients of class 'type2'.
@@ -41,9 +41,9 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") ## declared deprecated warning.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")      ## Disables all compiler warnings.
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-delete-non-virtual-dtor")
-elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     #set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG") ## Default
     set  (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 endif ()
@@ -65,7 +65,7 @@ option (USE_GOLD "Enable ld.gold linker if gcc compiler." ON)
 if (USE_CCACHE)
     tbag_config__use_ccache ()
 endif ()
-if (USE_GOLD AND "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+if (USE_GOLD AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -fuse-ld=gold")
     set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
 endif ()
