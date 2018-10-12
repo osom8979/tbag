@@ -7,6 +7,13 @@
 #///  The following variables are optionally searched for defaults:
 #///    - ${SFML_ROOT}
 
+cmake_policy (PUSH)
+
+# Policy CMP0074 is not set: find_package uses <PackageName>_ROOT variables.
+if (POLICY CMP0074)
+    cmake_policy (SET CMP0074 NEW)
+endif ()
+
 if (NOT DEFINED SFML_ROOT)
     if (IS_DIRECTORY "${THIRD_PREFIX}")
         set (SFML_ROOT "${THIRD_PREFIX}")
@@ -42,4 +49,6 @@ endif ()
 if (SFML_FOUND)
     message (STATUS "Found SFML: ${SFML_LIBRARIES}")
 endif ()
+
+cmake_policy (POP)
 
