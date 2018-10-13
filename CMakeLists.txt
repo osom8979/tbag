@@ -92,7 +92,6 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/flatbuffers)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/http-parser)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/minizip)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/nng)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lemon)
 
 tbag_config__set_option (WITH_COVERAGE         OFF)
