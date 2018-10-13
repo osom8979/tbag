@@ -295,15 +295,15 @@ add_definitions(-DSIZEOF_TIME_T=${SIZEOF_TIME_T})
 
 add_subdirectory(crypto)
 add_subdirectory(ssl)
-add_subdirectory(apps)
+#add_subdirectory(apps)
 add_subdirectory(tls)
 add_subdirectory(include)
-if(NOT MSVC)
-	add_subdirectory(man)
-endif()
-if(NOT MSVC OR ENABLE_VSTEST)
-	add_subdirectory(tests)
-endif()
+#if(NOT MSVC)
+#	add_subdirectory(man)
+#endif()
+#if(NOT MSVC OR ENABLE_VSTEST)
+#	add_subdirectory(tests)
+#endif()
 
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
