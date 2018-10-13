@@ -503,6 +503,18 @@ macro (tbag_modules__apply_dep_lemon)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_dep_nng)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES nng)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/nng/src)
+
+    tbag_modules__add_whole_archive ($<TARGET_FILE:nng>)
+
+    ## external libraries.
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
