@@ -81,6 +81,7 @@ else ()
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DBUILD_TESTING=OFF"
             #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
