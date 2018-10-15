@@ -340,7 +340,7 @@ public:
         if (_active.empty()) {
             return false;
         }
-        result = _active.front();
+        result = *_active.front();
         _ready.push_back(_active.front());
         _active.pop_front();
         return true;
