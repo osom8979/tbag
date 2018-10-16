@@ -178,9 +178,8 @@ template <typename ValueType>
 class ReuseQueue
 {
 public:
-    using Value       = ValueType;
-    using SharedValue = std::shared_ptr<Value>;
-    using Queue       = std::deque<SharedValue>;
+    using Value = ValueType;
+    using Queue = std::deque<Value>;
 
     using value_type             = typename Queue::value_type;
     using allocator_type         = typename Queue::allocator_type;
@@ -195,10 +194,8 @@ public:
     using reverse_iterator       = typename Queue::reverse_iterator;
     using const_reverse_iterator = typename Queue::const_reverse_iterator;
 
-    static_assert(is_shared_ptr<Value>::value == false,
-                  "Value should not be std::shared_ptr type.");
-    static_assert(std::is_same<SharedValue, value_type>::value,
-                  "SharedValue must be the same type as value_type");
+    static_assert(std::is_default_constructible<value_type>::value,
+                  "The default constructor is required.");
 
 private:
     Queue _active;
@@ -211,7 +208,7 @@ public:
     ReuseQueue(ReuseQueue const & obj) : ReuseQueue()
     { (*this) = obj; }
 
-    ReuseQueue(ReuseQueue && obj) : ReuseQueue()
+    ReuseQueue(ReuseQueue && obj) TBAG_NOEXCEPT : ReuseQueue()
     { (*this) = std::move(obj); }
 
     ~ReuseQueue()
@@ -227,14 +224,14 @@ public:
         return *this;
     }
 
-    ReuseQueue & operator =(ReuseQueue && obj)
+    ReuseQueue & operator =(ReuseQueue && obj) TBAG_NOEXCEPT
     {
         swap(obj);
         return *this;
     }
 
 public:
-    void swap(ReuseQueue & obj)
+    void swap(ReuseQueue & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
             _active.swap(obj._active);
@@ -242,7 +239,7 @@ public:
         }
     }
 
-    friend void swap(ReuseQueue & lh, ReuseQueue & rh)
+    friend void swap(ReuseQueue & lh, ReuseQueue & rh) TBAG_NOEXCEPT
     {
         lh.swap(rh);
     }
@@ -251,23 +248,24 @@ public:
     inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_active.size()) { return _active.size(); }
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(_active.empty()) { return _active.empty(); }
 
-public:
     inline std::size_t sizeOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.size()) { return _ready.size(); }
     inline bool emptyOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.empty()) { return _ready.empty(); }
 
 public:
-    inline Value       & front()       { return *(_active.front()); }
-    inline Value const & front() const { return *(_active.front()); }
+    inline std::size_t sizeOfTotal() const
+    TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(size()) && TBAG_NOEXCEPT_OPERATOR(sizeOfReady()))
+    { return size() + sizeOfReady(); }
 
-    inline Value       & back()       { return *(_active.back()); }
-    inline Value const & back() const { return *(_active.back()); }
+    inline bool emptyOfTotal() const
+    TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(empty()) && TBAG_NOEXCEPT_OPERATOR(emptyOfReady()))
+    { return empty() && emptyOfReady(); }
 
 public:
-    Value       * frontPointer()       { if (_active.empty()) { return nullptr; } return _active.front().get(); }
-    Value const * frontPointer() const { if (_active.empty()) { return nullptr; } return _active.front().get(); }
+    inline Value       & front()       { return _active.front(); }
+    inline Value const & front() const { return _active.front(); }
 
-    Value       * backPointer()       { if (_active.empty()) { return nullptr; } return _active.back().get(); }
-    Value const * backPointer() const { if (_active.empty()) { return nullptr; } return _active.back().get(); }
+    inline Value       & back()       { return _active.back(); }
+    inline Value const & back() const { return _active.back(); }
 
 public:
     // @formatter:off
@@ -288,17 +286,16 @@ public:
     // @formatter:on
 
 public:
-    template <typename ... Args>
-    void push(Args && ... args)
+    template <typename Predicated>
+    void push(Predicated predicated)
     {
-        if (_ready.empty()) {
-            _active.emplace_back(new Value(std::forward<Args>(args) ...));
-        } else {
-            SharedValue temp = _ready.front();
+        Value temp;
+        if (!_ready.empty()) {
+            temp = _ready.front();
             _ready.pop_front();
-            *temp = Value(std::forward<Args>(args) ...);
-            _active.push_back(temp);
         }
+        predicated(temp);
+        _active.push_back(temp);
     }
 
     bool pop()
@@ -311,39 +308,39 @@ public:
         return true;
     }
 
-    void clear()
+    void popAll()
     {
         while (isSuccess(pop())) {
             // EMPTY.
         }
     }
 
+    void clear()
+    {
+        _ready.clear();
+        _active.clear();
+    }
+
     // ------------------
     // Extension methods.
     // ------------------
 
-    template <typename Predicated>
-    void pushWithNewCallback(Predicated if_new_callback)
-    {
-        SharedValue value;
-        if (_ready.empty()) {
-            value = SharedValue(if_new_callback());
-        } else {
-            value = _ready.front();
-            _ready.pop_front();
-        }
-        _active.push_back(value);
-    }
-
-    bool frontAndPop(Value & result)
+    bool frontAndPop(Value * result = nullptr)
     {
         if (_active.empty()) {
             return false;
         }
-        result = *_active.front();
+        if (result != nullptr) {
+            *result = _active.front();
+        }
         _ready.push_back(_active.front());
         _active.pop_front();
         return true;
+    }
+
+    bool frontAndPop(Value & result)
+    {
+        return frontAndPop(&result);
     }
 };
 

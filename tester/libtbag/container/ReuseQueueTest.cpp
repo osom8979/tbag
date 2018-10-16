@@ -88,3 +88,62 @@ TEST(ReuseQueueTest, EmplacePush)
     ASSERT_EQ(TEST_VALUE, result);
 }
 
+TEST(ReuseQueueTest, TR)
+{
+    int const TEST_VALUE1 = 100;
+    int const TEST_VALUE2 = 200;
+    tr::ReuseQueue<int> q1;
+
+    ASSERT_EQ(0, q1.size());
+    ASSERT_EQ(0, q1.sizeOfReady());
+    ASSERT_EQ(0, q1.sizeOfTotal());
+    ASSERT_TRUE(q1.empty());
+    ASSERT_TRUE(q1.emptyOfReady());
+    ASSERT_TRUE(q1.emptyOfTotal());
+
+    q1.push([&](int & v){ v = TEST_VALUE1; });
+    ASSERT_EQ(TEST_VALUE1, q1.front());
+    ASSERT_EQ(TEST_VALUE1, q1.back());
+
+    q1.push([&](int & v){ v = TEST_VALUE2; });
+    ASSERT_EQ(TEST_VALUE1, q1.front());
+    ASSERT_EQ(TEST_VALUE2, q1.back());
+
+    ASSERT_EQ(2, q1.size());
+    ASSERT_EQ(0, q1.sizeOfReady());
+    ASSERT_EQ(2, q1.sizeOfTotal());
+    ASSERT_FALSE(q1.empty());
+    ASSERT_TRUE(q1.emptyOfReady());
+    ASSERT_FALSE(q1.emptyOfTotal());
+
+    q1.pop();
+    ASSERT_EQ(TEST_VALUE2, q1.front());
+    ASSERT_EQ(TEST_VALUE2, q1.back());
+
+    ASSERT_EQ(1, q1.size());
+    ASSERT_EQ(1, q1.sizeOfReady());
+    ASSERT_EQ(2, q1.sizeOfTotal());
+    ASSERT_FALSE(q1.empty());
+    ASSERT_FALSE(q1.emptyOfReady());
+    ASSERT_FALSE(q1.emptyOfTotal());
+
+    int result;
+    ASSERT_TRUE(q1.frontAndPop(result));
+    ASSERT_EQ(TEST_VALUE2, result);
+
+    ASSERT_EQ(0, q1.size());
+    ASSERT_EQ(2, q1.sizeOfReady());
+    ASSERT_EQ(2, q1.sizeOfTotal());
+    ASSERT_TRUE(q1.empty());
+    ASSERT_FALSE(q1.emptyOfReady());
+    ASSERT_FALSE(q1.emptyOfTotal());
+
+    q1.clear();
+    ASSERT_EQ(0, q1.size());
+    ASSERT_EQ(0, q1.sizeOfReady());
+    ASSERT_EQ(0, q1.sizeOfTotal());
+    ASSERT_TRUE(q1.empty());
+    ASSERT_TRUE(q1.emptyOfReady());
+    ASSERT_TRUE(q1.emptyOfTotal());
+}
+
