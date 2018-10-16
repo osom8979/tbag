@@ -245,20 +245,29 @@ public:
     }
 
 public:
-    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_active.size()) { return _active.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_active.empty()) { return _active.empty(); }
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_active.size())
+    { return _active.size(); }
 
-    inline std::size_t sizeOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.size()) { return _ready.size(); }
-    inline bool emptyOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.empty()) { return _ready.empty(); }
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_active.empty())
+    { return _active.empty(); }
+
+public:
+    inline std::size_t sizeOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.size())
+    { return _ready.size(); }
+
+    inline bool emptyOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.empty())
+    { return _ready.empty(); }
 
 public:
     inline std::size_t sizeOfTotal() const
-    TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(size()) && TBAG_NOEXCEPT_OPERATOR(sizeOfReady()))
-    { return size() + sizeOfReady(); }
+    TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_active.size()) &&
+                            TBAG_NOEXCEPT_OPERATOR(_ready.size()))
+    { return _active.size() + _ready.size(); }
 
     inline bool emptyOfTotal() const
-    TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(empty()) && TBAG_NOEXCEPT_OPERATOR(emptyOfReady()))
-    { return empty() && emptyOfReady(); }
+    TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_active.empty()) &&
+                            TBAG_NOEXCEPT_OPERATOR(_ready.empty()))
+    { return _active.empty() && _ready.empty(); }
 
 public:
     inline Value       & front()       { return _active.front(); }
