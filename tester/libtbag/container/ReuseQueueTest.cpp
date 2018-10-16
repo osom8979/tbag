@@ -145,5 +145,12 @@ TEST(ReuseQueueTest, TR)
     ASSERT_TRUE(q1.empty());
     ASSERT_TRUE(q1.emptyOfReady());
     ASSERT_TRUE(q1.emptyOfTotal());
+
+    q1.push([&](int & v){ v = TEST_VALUE1; });
+    q1.push([&](int & v){ v = TEST_VALUE2; });
+    ASSERT_EQ(2, q1.size());
+
+    q1.popAll();
+    ASSERT_EQ(0, q1.size());
 }
 

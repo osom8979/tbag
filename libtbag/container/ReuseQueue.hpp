@@ -310,7 +310,7 @@ public:
 
     void popAll()
     {
-        while (isSuccess(pop())) {
+        while (pop()) {
             // EMPTY.
         }
     }
