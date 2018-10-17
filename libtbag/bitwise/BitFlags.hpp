@@ -16,6 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#ifndef TBAG_BIT_FLAG_CHECK
+#define TBAG_BIT_FLAG_CHECK(original, flag) ((bool)((original) & (flag)))
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

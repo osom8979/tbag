@@ -34,3 +34,10 @@ TEST(BitFlagsTest, Default)
     ASSERT_TRUE(true);
 }
 
+TEST(BitFlagsTest, CheckFlag)
+{
+    uint32_t original  = 27; // 0001 1011
+    uint32_t test_flag =  4; // 0000 0100
+    ASSERT_FALSE(libtbag::bitwise::checkFlag(original, test_flag));
+}
+
