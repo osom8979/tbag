@@ -71,3 +71,40 @@ TEST(UriTest, AddrInfo)
     ASSERT_EQ(80, port);
 }
 
+TEST(UriTest, QueryMap)
+{
+    char const * const TEST_URI = "https://www.google.co.kr/search?q=SPS+PPS+IDR&oq=SPS+PPS+IDR+&chrome&&ie=UTF-8";
+    Uri uri(TEST_URI);
+    ASSERT_STREQ("https", uri.getSchema().c_str());
+    ASSERT_STREQ("www.google.co.kr", uri.getHost().c_str());
+    ASSERT_STREQ("/search", uri.getPath().c_str());
+    ASSERT_TRUE(uri.getPort().empty());
+    ASSERT_TRUE(uri.getUserinfo().empty());
+    ASSERT_TRUE(uri.getFragment().empty());
+
+    ASSERT_STREQ("q=SPS+PPS+IDR&oq=SPS+PPS+IDR+&chrome&&ie=UTF-8", uri.getQuery().c_str());
+    auto const QUERY_MAP = uri.getQueryMap();
+    ASSERT_EQ(4, QUERY_MAP.size());
+
+    auto itr = QUERY_MAP.find("q");
+    ASSERT_STREQ("q", itr->first.c_str());
+    ASSERT_STREQ("SPS+PPS+IDR", itr->second.c_str());
+
+    itr = QUERY_MAP.find("oq");
+    ASSERT_STREQ("oq", itr->first.c_str());
+    ASSERT_STREQ("SPS+PPS+IDR+", itr->second.c_str());
+
+    itr = QUERY_MAP.find("chrome");
+    ASSERT_STREQ("chrome", itr->first.c_str());
+    ASSERT_TRUE(itr->second.empty());
+
+    itr = QUERY_MAP.find("ie");
+    ASSERT_STREQ("ie", itr->first.c_str());
+    ASSERT_STREQ("UTF-8", itr->second.c_str());
+}
+
+TEST(UriTest, DISABLE_HTTP_PARSER_URL_FIELDS)
+{
+    __check_error__http_parser_url_fields();
+}
+

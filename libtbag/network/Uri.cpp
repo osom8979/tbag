@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/network/Uri.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/bitwise/BitFlags.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -15,6 +16,8 @@
 #include <http_parser.h>
 #include <cassert>
 #include <utility>
+
+#define DISABLE_HTTP_PARSER_URL_FIELDS
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -182,15 +185,21 @@ bool Uri::parse(std::string const & uri, bool is_connect)
     }
 
     auto updateField = [&](http_parser_url_fields field, FieldInfo & info){
-        if (bitwise::checkFlag<uint16_t>(parser.field_set, field)) {
+#if !defined(DISABLE_HTTP_PARSER_URL_FIELDS)
+        if (bitwise::checkFlag<uint16_t>(parser.field_set, field))
+#endif
+        {
             bool enable = true;
             if (parser.field_data[field].off == 0 && parser.field_data[field].len == 0) {
                 enable = false;
             }
             info.set(parser.field_data[field].off, parser.field_data[field].len, enable);
-        } else {
+        }
+#if !defined(DISABLE_HTTP_PARSER_URL_FIELDS)
+        else {
             info.clear();
         }
+#endif
     };
 
     updateField(UF_SCHEMA  , _schema  );
@@ -254,6 +263,30 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
     return Err::E_SUCCESS;
 }
 
+// ------------------
+// Extension methods.
+// ------------------
+
+std::map<std::string, std::string> Uri::getQueryMap() const
+{
+    std::map<std::string, std::string> result;
+    for (auto & item : libtbag::string::splitTokens(getQuery(), "&")) {
+        auto const key_value = libtbag::string::splitTokens(item, "=");
+        switch (key_value.size()) {
+        case 1:
+            result.insert(std::make_pair(key_value[0], std::string())); // key only
+            break;
+        case 2:
+            result.insert(std::make_pair(key_value[0], key_value[1])); // key & value
+            break;
+        default:
+            // Unknown case.
+            break;
+        }
+    }
+    return result;
+}
+
 // ---------------
 // Static methods.
 // ---------------
@@ -261,6 +294,23 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
 std::string Uri::getFieldString(std::string const & original, FieldInfo const & info)
 {
     return original.substr(info.offset, info.length);
+}
+
+// *****************************************
+// ************* ERROR CHECKER *************
+// *****************************************
+
+bool __check_error__http_parser_url_fields()
+{
+    std::string const TEST_URI = "https://www.google.co.kr/search?q=SPS+PPS+IDR&oq=SPS+PPS+IDR+&chrome&&ie=UTF-8";
+    http_parser_url parser;
+    ::http_parser_url_init(&parser);
+    int const code = ::http_parser_parse_url(TEST_URI.c_str(), TEST_URI.size(), 0, &parser);
+    assert(code == 0);
+    bool const test_result = libtbag::bitwise::checkFlag<uint16_t>(parser.field_set, UF_QUERY);
+    tDLogIfA(!test_result, "__check_error__http_parser_url_fields() Not found UF_QUERY({:#b}) field: {:#b}",
+             UF_QUERY, parser.field_set);
+    return test_result;
 }
 
 } // namespace network

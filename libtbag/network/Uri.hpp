@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <string>
+#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -156,10 +157,20 @@ public:
 
     Err requestAddrInfo(std::string & host, int & port, AddrFlags flags = AddrFlags::MOST_IPV4) const;
 
+// Extension methods.
+public:
+    std::map<std::string, std::string> getQueryMap() const;
+
 // Static methods.
 public:
     static std::string getFieldString(std::string const & original, FieldInfo const & info);
 };
+
+/**
+ * @warning
+ *  This method checks for errors that are found.
+ */
+TBAG_API bool __check_error__http_parser_url_fields();
 
 } // namespace network
 
