@@ -48,6 +48,48 @@ public:
     void unlock();
 };
 
+/**
+ * UvLock guard class template.
+ *
+ * @author zer0
+ * @date   2018-10-19
+ */
+template <typename MutexType>
+class UvLockGuard : private Noncopyable
+{
+public:
+    struct AdoptLock { /* EMPTY. */ };
+
+public:
+    using Mutex = MutexType;
+
+private:
+    Mutex & _mutex;
+
+public:
+    explicit UvLockGuard(MutexType & mutex) : _mutex(mutex)
+    {
+        _mutex.lock();
+    }
+
+    explicit UvLockGuard(MutexType & mutex, AdoptLock UNUSED_PARAM(lock)) : _mutex(mutex)
+    {
+        // EMPTY.
+    }
+
+    explicit UvLockGuard(MutexType & mutex, bool lock) : _mutex(mutex)
+    {
+        if (lock) {
+            _mutex.lock();
+        }
+    }
+
+    ~UvLockGuard()
+    {
+        _mutex.unlock();
+    }
+};
+
 } // namespace lock
 
 // --------------------
