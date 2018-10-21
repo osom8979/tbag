@@ -34,6 +34,8 @@ struct ThreadPool::ThreadPimpl
     ThreadPool * parent;
     uv_thread_t  thread;
 
+    std::thread::id id;
+
     ThreadPimpl(ThreadPool * p, std::size_t i) : parent(p), INDEX(i)
     {
         assert(parent != nullptr);
@@ -60,6 +62,7 @@ private:
         ThreadPool::ThreadPimpl * thread = static_cast<ThreadPool::ThreadPimpl*>(arg);
         assert(thread != nullptr);
         assert(thread->parent != nullptr);
+        thread->id = std::this_thread::get_id();
         thread->parent->setUp();
         thread->parent->runner(thread->INDEX);
         thread->parent->tearDown();
@@ -275,6 +278,17 @@ std::size_t ThreadPool::sizeOfActiveTasks() const
     size = _active;
     _mutex.unlock();
     return size;
+}
+
+std::thread::id ThreadPool::getThreadId(int i) const
+{
+    std::thread::id id;
+    _mutex.lock();
+    if (0 <= COMPARE_AND(i) < _threads.size() && _threads[i]) {
+        id = _threads[i]->id;
+    }
+    _mutex.unlock();
+    return id;
 }
 
 bool ThreadPool::waitTask(ThreadPool & pool, Task const & task)

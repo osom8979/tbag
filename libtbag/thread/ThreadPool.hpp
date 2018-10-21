@@ -25,6 +25,7 @@
 #include <queue>
 #include <exception>
 #include <stdexcept>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -91,6 +92,8 @@ public:
     std::size_t sizeOfThreads() const;
     std::size_t sizeOfTasks() const;
     std::size_t sizeOfActiveTasks() const;
+
+    std::thread::id getThreadId(int i) const;
 
 public:
     virtual void setUp   () { /* EMPTY. */ }

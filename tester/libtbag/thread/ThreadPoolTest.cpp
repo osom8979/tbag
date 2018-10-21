@@ -182,3 +182,15 @@ TEST(ThreadPoolTest, NoException)
     ASSERT_NO_THROW(pool.join(false));
 }
 
+TEST(ThreadPoolTest, ThreadId)
+{
+    ThreadPool pool(2);
+    auto const ID1 = pool.getThreadId(0);
+    auto const ID2 = pool.getThreadId(1);
+    ASSERT_NE(std::thread::id(), ID1);
+    ASSERT_NE(std::thread::id(), ID2);
+    ASSERT_NE(std::this_thread::get_id(), ID1);
+    ASSERT_NE(std::this_thread::get_id(), ID2);
+    ASSERT_NE(ID1, ID2);
+}
+
