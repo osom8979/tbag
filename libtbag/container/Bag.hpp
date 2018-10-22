@@ -457,7 +457,7 @@ public:
 public:
     void assign(const_pointer data, size_type size)
     {
-        std::copy(data, libtbag::algorithm::getMin(size, size()), _container.data());
+        std::copy(data, libtbag::algorithm::getMin(size, this->size()), _container.data());
     }
 };
 
