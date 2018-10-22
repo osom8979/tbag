@@ -159,8 +159,7 @@ std::string Resource::getString(std::string const & key) const
     return getString(key, std::string());
 }
 
-auto Resource::get(std::string const & key
-                 , std::string default_value) const -> decltype(default_value)
+std::string Resource::get(std::string const & key, std::string const & default_value) const
 {
     return getString(key, default_value);
 }

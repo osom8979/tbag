@@ -119,7 +119,7 @@ public:
     std::string getString(std::string const & key) const;
 
 public:
-    auto get(std::string const & key, std::string default_value) const -> decltype(default_value);
+    std::string get(std::string const & key, std::string const & default_value) const;
 
 #ifndef __RESOURCE_ACCESSOR_IMPLEMENT
 #define __RESOURCE_ACCESSOR_IMPLEMENT(name, type, func, value)                                      \
