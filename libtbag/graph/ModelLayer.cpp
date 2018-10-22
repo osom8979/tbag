@@ -18,44 +18,32 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graph {
 
-/**
- * Pointer implementation.
- *
- * @author zer0
- * @date   2018-10-22
- */
-struct ModelLayer::Impl : private Noncopyable
+ModelLayer::ModelLayer(LayerType type) TBAG_NOEXCEPT : ModelLayer(std::make_shared<LayerBase>(type))
 {
-private:
-    ModelLayer * _parent = nullptr;
-
-public:
-    Impl(ModelLayer * parent) : _parent(parent)
-    {
-        assert(_parent != nullptr);
-    }
-
-    ~Impl()
-    {
-        // EMPTY.
-    }
-};
-
-// --------------------------
-// ModelLayer implementation.
-// --------------------------
-
-ModelLayer::ModelLayer() TBAG_NOEXCEPT : _impl(std::make_shared<Impl>(this))
-{
-    assert(static_cast<bool>(_impl));
+    assert(static_cast<bool>(_base));
 }
 
-ModelLayer::ModelLayer(ModelLayer const & obj) TBAG_NOEXCEPT : ModelLayer()
+ModelLayer::ModelLayer(std::nullptr_t) TBAG_NOEXCEPT : _base(nullptr)
+{
+    // EMPTY.
+}
+
+ModelLayer::ModelLayer(LayerBase * base) TBAG_NOEXCEPT : ModelLayer(SharedBase(base))
+{
+    assert(static_cast<bool>(_base));
+}
+
+ModelLayer::ModelLayer(SharedBase const & base) TBAG_NOEXCEPT : _base(base)
+{
+    assert(static_cast<bool>(_base));
+}
+
+ModelLayer::ModelLayer(ModelLayer const & obj) TBAG_NOEXCEPT : ModelLayer(nullptr)
 {
     (*this) = obj;
 }
 
-ModelLayer::ModelLayer(ModelLayer && obj) TBAG_NOEXCEPT : ModelLayer()
+ModelLayer::ModelLayer(ModelLayer && obj) TBAG_NOEXCEPT : ModelLayer(nullptr)
 {
     (*this) = std::move(obj);
 }
@@ -80,14 +68,14 @@ ModelLayer & ModelLayer::operator =(ModelLayer && obj) TBAG_NOEXCEPT
 void ModelLayer::copy(ModelLayer const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _impl = obj._impl;
+        _base = obj._base;
     }
 }
 
 void ModelLayer::swap(ModelLayer & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _impl.swap(obj._impl);
+        _base.swap(obj._base);
     }
 }
 

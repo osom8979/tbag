@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 
 #include <memory>
 #include <string>
@@ -43,6 +44,7 @@ private:
 
 public:
     ModelNet() TBAG_NOEXCEPT;
+    explicit ModelNet(std::nullptr_t) TBAG_NOEXCEPT;
     ModelNet(ModelNet const & obj) TBAG_NOEXCEPT;
     ModelNet(ModelNet && obj) TBAG_NOEXCEPT;
     ~ModelNet();
@@ -57,6 +59,13 @@ public:
 
 public:
     inline friend void swap(ModelNet & lh, ModelNet & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+
+public:
+    void clear();
+
+public:
+    Err  forward();
+    Err backward();
 
 public:
     std::string toString() const;

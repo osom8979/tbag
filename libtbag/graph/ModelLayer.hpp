@@ -34,15 +34,33 @@ namespace graph {
 class TBAG_API ModelLayer
 {
 public:
-    struct Impl;
-    friend struct Impl;
-    using SharedImpl = std::shared_ptr<Impl>;
+    enum class LayerType : int
+    {
+        LT_NORMAL,
+        LT_FIRST,
+        LT_LAST,
+    };
+
+    struct LayerBase
+    {
+        LayerType type;
+
+        LayerBase(LayerType t = LayerType::LT_NORMAL) : type(t)
+        { /* EMPTY. */ }
+        virtual ~LayerBase()
+        { /* EMPTY. */ }
+    };
+
+    using SharedBase = std::shared_ptr<LayerBase>;
 
 private:
-    SharedImpl _impl;
+    SharedBase _base;
 
 public:
-    ModelLayer() TBAG_NOEXCEPT;
+    ModelLayer(LayerType type = LayerType::LT_NORMAL) TBAG_NOEXCEPT;
+    explicit ModelLayer(std::nullptr_t) TBAG_NOEXCEPT;
+    explicit ModelLayer(LayerBase * base) TBAG_NOEXCEPT;
+    explicit ModelLayer(SharedBase const & base) TBAG_NOEXCEPT;
     ModelLayer(ModelLayer const & obj) TBAG_NOEXCEPT;
     ModelLayer(ModelLayer && obj) TBAG_NOEXCEPT;
     ~ModelLayer();

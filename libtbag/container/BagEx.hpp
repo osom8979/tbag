@@ -82,10 +82,10 @@ public:
     explicit BagEx(SharedBag const & bag, SharedUser const & user) TBAG_NOEXCEPT : _bag(bag), _user(user)
     { /* EMPTY. */ }
 
-    BagEx(BagEx const & obj) TBAG_NOEXCEPT : BagEx()
+    BagEx(BagEx const & obj) TBAG_NOEXCEPT : BagEx(nullptr)
     { (*this) = obj; }
 
-    BagEx(BagEx && obj) TBAG_NOEXCEPT : BagEx()
+    BagEx(BagEx && obj) TBAG_NOEXCEPT : BagEx(nullptr)
     { (*this) = std::move(obj); }
 
     ~BagEx()
