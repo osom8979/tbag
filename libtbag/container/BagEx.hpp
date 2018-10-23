@@ -15,10 +15,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/type/TypeTable.hpp>
 #include <libtbag/container/Bag.hpp>
 
 #include <cassert>
+#include <string>
 #include <memory>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,10 +35,32 @@ namespace container {
  *
  * @author zer0
  * @date   2018-10-22
+ *
+ * @remarks
+ *  Only primary types are supported.
  */
-template <typename T, typename A = std::allocator<T> >
 class TBAG_API BagEx
 {
+public:
+    using TypeTable = libtbag::type::TypeTable;
+
+public:
+    TBAG_CONSTEXPR static unsigned int const MAX_ELEMENTS_BUFFER_SIZE = 8;
+
+public:
+    template <typename T>
+    using Allocator = std::allocator<T>;
+
+    template <typename T>
+    using BaseBagType = libtbag::container::Bag<T, Allocator<T>, MAX_ELEMENTS_BUFFER_SIZE>;
+
+#define _TBAG_XX(name, symbol, type) \
+    using BAG_##name##_TYPE = BaseBagType<type>;
+    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+
+    struct FakeBag { /* EMPTY. */ };
+
 public:
     struct User
     {
@@ -43,96 +69,30 @@ public:
     };
 
 public:
-    using BagType    = libtbag::container::Bag<T, A>;
-    using SharedBag  = std::shared_ptr<BagType>;
+    using SharedBag  = std::shared_ptr<FakeBag>;
     using SharedUser = std::shared_ptr<User>;
 
-    using value_type        = typename BagType::value_type;
-    using allocator_type    = typename BagType::allocator_type;
-    using reference         = typename BagType::reference;
-    using const_reference   = typename BagType::const_reference;
-    using size_type         = typename BagType::size_type;
-    using difference_type   = typename BagType::difference_type;
-    using pointer           = typename BagType::pointer;
-    using const_pointer     = typename BagType::const_pointer;
-
-    using       iterator = typename BagType::iterator;
-    using const_iterator = typename BagType::const_iterator;
-
-    using       reverse_iterator = typename BagType::reverse_iterator;
-    using const_reverse_iterator = typename BagType::const_reverse_iterator;
-
 private:
+    TypeTable  _type;
     SharedBag  _bag;
     SharedUser _user;
 
 public:
-    BagEx() TBAG_NOEXCEPT : _bag(std::make_shared<BagType>()), _user(nullptr)
-    { /* EMPTY. */ }
-
-    explicit BagEx(std::nullptr_t) TBAG_NOEXCEPT : _bag(nullptr), _user(nullptr)
-    { /* EMPTY. */ }
-
-    explicit BagEx(SharedBag const & bag) TBAG_NOEXCEPT : _bag(bag), _user(nullptr)
-    { /* EMPTY. */ }
-
-    explicit BagEx(SharedUser const & user) TBAG_NOEXCEPT : _bag(nullptr), _user(user)
-    { /* EMPTY. */ }
-
-    explicit BagEx(SharedBag const & bag, SharedUser const & user) TBAG_NOEXCEPT : _bag(bag), _user(user)
-    { /* EMPTY. */ }
-
-    BagEx(BagEx const & obj) TBAG_NOEXCEPT : BagEx(nullptr)
-    { (*this) = obj; }
-
-    BagEx(BagEx && obj) TBAG_NOEXCEPT : BagEx(nullptr)
-    { (*this) = std::move(obj); }
-
-    ~BagEx()
-    { /* EMPTY. */ }
+    BagEx() TBAG_NOEXCEPT;
+    BagEx(BagEx const & obj) TBAG_NOEXCEPT;
+    BagEx(BagEx && obj) TBAG_NOEXCEPT;
+    ~BagEx();
 
 public:
-    BagEx & operator =(BagEx const & obj) TBAG_NOEXCEPT
-    {
-        copy(obj);
-        return *this;
-    }
-
-    BagEx & operator =(BagEx && obj) TBAG_NOEXCEPT
-    {
-        swap(obj);
-        return *this;
-    }
+    BagEx & operator =(BagEx const & obj) TBAG_NOEXCEPT;
+    BagEx & operator =(BagEx && obj) TBAG_NOEXCEPT;
 
 public:
-    void copy(BagEx const & obj) TBAG_NOEXCEPT
-    {
-        if (this != &obj) {
-            _bag = obj._bag;
-            _user = obj._user;;
-        }
-    }
-
-    void swap(BagEx & obj) TBAG_NOEXCEPT
-    {
-        if (this != &obj) {
-            _bag.swap(obj._bag);
-            _user.swap(obj._user);
-        }
-    }
+    void copy(BagEx const & obj) TBAG_NOEXCEPT;
+    void swap(BagEx & obj) TBAG_NOEXCEPT;
 
 public:
     inline friend void swap(BagEx & lh, BagEx & rh) TBAG_NOEXCEPT { lh.swap(rh); }
-
-public:
-    inline BagType       * get()       TBAG_NOEXCEPT { return _bag.get(); }
-    inline BagType const * get() const TBAG_NOEXCEPT { return _bag.get(); }
-
-    inline BagType       & operator *()       TBAG_NOEXCEPT { return *_bag; }
-    inline BagType const & operator *() const TBAG_NOEXCEPT { return *_bag; }
-
-    inline BagType       * operator ->()       TBAG_NOEXCEPT { return get(); }
-    inline BagType const * operator ->() const TBAG_NOEXCEPT { return get(); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -142,115 +102,94 @@ public:
     { return exists(); }
 
 public:
-    SharedBag       & bag()       TBAG_NOEXCEPT { return _bag; }
-    SharedBag const & bag() const TBAG_NOEXCEPT { return _bag; }
+    inline SharedBag       & atBag()       TBAG_NOEXCEPT { return _bag; }
+    inline SharedBag const & atBag() const TBAG_NOEXCEPT { return _bag; }
+
+    inline SharedUser       & atUser()       TBAG_NOEXCEPT { return _user; }
+    inline SharedUser const & atUser() const TBAG_NOEXCEPT { return _user; }
 
 public:
-    SharedUser       & user()       TBAG_NOEXCEPT { return _user; }
-    SharedUser const & user() const TBAG_NOEXCEPT { return _user; }
-
-public:
-    template <typename CastType>
-    std::shared_ptr<CastType> castUser() const TBAG_NOEXCEPT
+    template <typename Type, typename _CastBagType = BaseBagType<Type> >
+    std::shared_ptr<_CastBagType> bag() const TBAG_NOEXCEPT
     {
-        return std::static_pointer_cast<CastType>(_user);
+        assert(static_cast<bool>(_bag));
+
+        bool is_same = false;
+        switch (_type) {
+#define _TBAG_XX(name, symbol, type) \
+        case TypeTable::TT_##name:   \
+            is_same = std::is_same<Type, type>::value; \
+            break;
+        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+        case TypeTable::TT_UNKNOWN:
+        default:
+            assert(false && "Unknown type.");
+        }
+        assert(is_same);
+
+        return std::shared_ptr<_CastBagType>(_bag, (_CastBagType*)(_bag.get()));
     }
 
-public:
-    pointer data()
+    template <typename  CastUserType,
+              typename _CastUserType = typename std::enable_if<std::is_base_of<User, CastUserType>::value, CastUserType>::type>
+    std::shared_ptr<_CastUserType> user() const TBAG_NOEXCEPT
     {
-        assert(exists());
-        return _bag->data();
+        return std::static_pointer_cast<_CastUserType>(_user);
     }
 
-    const_pointer data() const
+    template <typename UserType>
+    void createUser(UserType * user)
     {
-        assert(exists());
-        return _bag->data();
-    }
-
-public:
-    template <typename ... Args>
-    void resize(Args && ... list)
-    {
-        assert(exists());
-        ((BagType*)get())->resize(std::forward<Args>(list) ...);
-    }
-
-    void clear()
-    {
-        assert(exists());
-        _bag->clear();
-    }
-
-public:
-    TBAG_CONSTEXPR static size_type elem_size() TBAG_NOEXCEPT
-    {
-        return BagType::elem_size();
-    }
-
-    size_type max_size() const
-    {
-        assert(exists());
-        return _bag->max_size();
-    }
-
-    size_type size() const
-    {
-        assert(exists());
-        return _bag->size();
-    }
-
-    size_type size(size_type index) const
-    {
-        assert(exists());
-        return _bag->size(index);
-    }
-
-    bool empty() const
-    {
-        assert(exists());
-        return _bag->empty();
+        _user.reset(user, [](UserType * u){ delete ((UserType*)u); });
     }
 
 public:
-    reference at(size_type index)
+    inline TypeTable getType() const TBAG_NOEXCEPT
+    { return _type; }
+
+    inline char const * getTypeName() const TBAG_NOEXCEPT
+    { return libtbag::type::getTypeName(_type); }
+
+    inline std::size_t getTypeSize() const TBAG_NOEXCEPT
+    { return libtbag::type::getTypeSize(_type); }
+
+public:
+    void clear();
+
+public:
+    Err create(TypeTable type);
+
+    template <typename Type>
+    Err create()
     {
-        assert(exists());
-        return _bag->at(index);
+        return create(libtbag::type::getTypeTable<Type>());
     }
 
-    const_reference at(size_type index) const
-    {
-        assert(exists());
-        return _bag->at(index);
-    }
+public:
+    Err resize(std::size_t i0/**/, std::size_t i1 = 0, std::size_t i2 = 0, std::size_t i3 = 0,
+               std::size_t i4 = 0, std::size_t i5 = 0, std::size_t i6 = 0, std::size_t i7 = 0);
 
-    reference operator[](size_type index)
-    {
-        assert(exists());
-        return _bag->at(index);
-    }
+public:
+    // @formatter:off
+    void       * data();
+    void const * data() const;
+    // @formatter:on
 
-    const_reference operator[](size_type index) const
-    {
-        assert(exists());
-        return _bag->at(index);
-    }
+public:
+    // @formatter:off
+    template <typename CastType> CastType       * castData()       { return (CastType       *)data(); }
+    template <typename CastType> CastType const * castData() const { return (CastType const *)data(); }
+    // @formatter:on
 
-    template <typename ... Args>
-    reference index(Args && ... args)
-    {
-        assert(exists());
-        return _bag->index(std::forward<Args>(args) ...);
-    }
+public:
+    std::size_t size() const;
+    std::size_t size(std::size_t index) const;
+    std::size_t dims() const;
+    bool empty() const;
 
-    template <typename ... Args>
-    const_reference index(Args && ... args) const
-    {
-        assert(exists());
-        return _bag->index(std::forward<Args>(args) ...);
-    }
+public:
+    std::string toString() const;
 };
 
 } // namespace container

@@ -416,6 +416,11 @@ public:
         return _dimenstions.at(index);
     }
 
+    size_type dims() const TBAG_NOEXCEPT_SP_OP(_dimenstions.size())
+    {
+        return _dimenstions.size();
+    }
+
     bool empty() const TBAG_NOEXCEPT_SP_OP(_dimenstions.empty())
     {
         return _dimenstions.empty();

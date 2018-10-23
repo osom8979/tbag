@@ -179,7 +179,12 @@ public:
         auto const DEST_END = _dims + buffer_size();
         auto dest = _dims;
         for (; begin != end && dest != DEST_END; ++begin, ++dest) {
-            *dest = *begin;
+            if (*begin > 0) {
+                *dest = *begin;
+            } else {
+                assert(*begin <= 0);
+                break;
+            }
         }
         _size = std::distance(_dims, dest);
     }
