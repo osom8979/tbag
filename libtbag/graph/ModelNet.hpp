@@ -16,9 +16,13 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
+#include <libtbag/graph/ModelLayer.hpp>
 
 #include <memory>
 #include <string>
+#include <vector>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -61,10 +65,23 @@ public:
     inline friend void swap(ModelNet & lh, ModelNet & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
+    inline bool exists() const TBAG_NOEXCEPT
+    { return static_cast<bool>(_impl); }
+
+    inline operator bool() const TBAG_NOEXCEPT
+    { return exists(); }
+
+public:
     void clear();
 
 public:
-    Err  forward();
+    Err addFirst(ModelLayer & layer);
+    Err addNode(ModelLayer & layer);
+    Err addLast(ModelLayer & layer);
+    Err addArc(ModelLayer const & source, ModelLayer const & target);
+
+public:
+    Err forward();
     Err backward();
 
 public:

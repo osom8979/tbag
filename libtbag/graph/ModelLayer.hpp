@@ -20,12 +20,16 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace graph {
+
+// Forward declarations.
+class ModelNet;
 
 /**
  * ModelLayer class prototype.
@@ -36,25 +40,46 @@ namespace graph {
 class TBAG_API ModelLayer
 {
 public:
+    friend class ModelNet;
+
+public:
+    using BagEx  = libtbag::container::BagEx;
+    using BagExs = std::vector<BagEx>;
+
+public:
+    TBAG_CONSTEXPR static int const UNKNOWN_ID = -1;
+
+public:
     class LayerBase : public Noncopyable
     {
+    public:
+        using BagEx  = ModelLayer::BagEx;
+        using BagExs = ModelLayer::BagExs;
+
     public:
         friend class ModelLayer;
 
     private:
-        int  _id       = 0;
+        int  _id       = UNKNOWN_ID;
         bool _complete = false;
 
-    private:
-        std::string _name;
+    public:
+        std::string name;
+        BagExs input;
+        BagExs weight;
+        BagExs output;
 
     public:
-        LayerBase()
-        { /* EMPTY. */ }
-        virtual ~LayerBase()
-        { /* EMPTY. */ }
+        LayerBase() { /* EMPTY. */ }
+        virtual ~LayerBase() { /* EMPTY. */ }
 
     public:
+        virtual bool    setup() { return true; }
+        virtual bool teardown() { return true; }
+
+    public:
+        virtual bool  forward() { return true; }
+        virtual bool backward() { return true; }
     };
 
     using SharedBase = std::shared_ptr<LayerBase>;
@@ -100,12 +125,37 @@ public:
     { return exists(); }
 
 public:
+    int getId() const;
+
+private:
+    void setId(int id);
+
+public:
     bool isComplete() const;
+
+private:
     void complete();
     void incomplete();
 
 public:
+    Err forward(std::vector<ModelLayer> const & input);
+    Err backward(std::vector<ModelLayer> const & input);
+
+public:
     std::string toString() const;
+
+public:
+    template <typename LayerType, typename ... Args>
+    ModelLayer create(Args && ... args)
+    {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(LayerBase, LayerType);
+        typedef typename remove_cr<LayerType>::type ResultLayerType;
+        auto shared = std::make_shared<ResultLayerType>(std::forward<Args>(args) ...);
+        if (static_cast<bool>(shared)) {
+            return ModelLayer(std::static_pointer_cast<ModelLayer::LayerBase>(shared));
+        }
+        return ModelLayer(nullptr);
+    }
 };
 
 } // namespace graph

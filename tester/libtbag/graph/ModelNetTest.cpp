@@ -14,6 +14,6 @@ using namespace libtbag::graph;
 TEST(ModelNetTest, Default)
 {
     ModelNet object;
-    ASSERT_TRUE(true);
+    object.forward();
 }
 

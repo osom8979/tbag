@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/type/TypeTable.hpp>
 #include <libtbag/container/Bag.hpp>
 
@@ -131,11 +132,11 @@ public:
         return std::shared_ptr<_CastBagType>(_bag, (_CastBagType*)(_bag.get()));
     }
 
-    template <typename  CastUserType,
-              typename _CastUserType = typename std::enable_if<std::is_base_of<User, CastUserType>::value, CastUserType>::type>
-    std::shared_ptr<_CastUserType> user() const TBAG_NOEXCEPT
+    template <typename CastUserType>
+    std::shared_ptr<CastUserType> user() const TBAG_NOEXCEPT
     {
-        return std::static_pointer_cast<_CastUserType>(_user);
+        STATIC_ASSERT_CHECK_IS_BASE_OF(User, CastUserType);
+        return std::static_pointer_cast<CastUserType>(_user);
     }
 
     template <typename UserType>

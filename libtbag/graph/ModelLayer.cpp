@@ -79,6 +79,18 @@ void ModelLayer::swap(ModelLayer & obj) TBAG_NOEXCEPT
     }
 }
 
+int ModelLayer::getId() const
+{
+    assert(exists());
+    return _base->_id;
+}
+
+void ModelLayer::setId(int id)
+{
+    assert(exists());
+    _base->_id = id;
+}
+
 bool ModelLayer::isComplete() const
 {
     assert(exists());
@@ -97,10 +109,20 @@ void ModelLayer::incomplete()
     _base->_complete = false;
 }
 
+Err ModelLayer::forward(std::vector<ModelLayer> const & input)
+{
+    return Err::E_UNSUPOP;
+}
+
+Err ModelLayer::backward(std::vector<ModelLayer> const & input)
+{
+    return Err::E_UNSUPOP;
+}
+
 std::string ModelLayer::toString() const
 {
     assert(exists());
-    return _base->_name + (_base->_complete ? "{Y}@" : "{N}@") + std::to_string(_base->_id);
+    return _base->name + (_base->_complete ? "{Y}@" : "{N}@") + std::to_string(_base->_id);
 }
 
 } // namespace graph
