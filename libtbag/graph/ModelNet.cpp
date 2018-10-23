@@ -48,13 +48,33 @@ public:
         first = graph.addNode();
         last  = graph.addNode();
 
-        layers[first] = ModelLayer(ModelLayer::LayerType::LT_FIRST);
-        layers[last]  = ModelLayer(ModelLayer::LayerType::LT_LAST);
+        layers[first] = ModelLayer();
+        layers[last]  = ModelLayer();
     }
 
     ~Impl()
     {
         // EMPTY.
+    }
+
+    /** Unplug the finished flags. */
+    void updateIncomplete()
+    {
+        for (lemon::ListGraph::NodeIt n(graph); n != lemon::INVALID; ++n) {
+            layers[n].complete();
+        }
+    }
+
+    Err forward()
+    {
+        updateIncomplete();
+        return Err::E_UNSUPOP;
+    }
+
+    Err backward()
+    {
+        updateIncomplete();
+        return Err::E_UNSUPOP;
     }
 };
 

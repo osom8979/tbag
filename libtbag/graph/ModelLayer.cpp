@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graph {
 
-ModelLayer::ModelLayer(LayerType type) TBAG_NOEXCEPT : ModelLayer(std::make_shared<LayerBase>(type))
+ModelLayer::ModelLayer() : ModelLayer(std::make_shared<LayerBase>())
 {
     assert(static_cast<bool>(_base));
 }
@@ -79,9 +79,28 @@ void ModelLayer::swap(ModelLayer & obj) TBAG_NOEXCEPT
     }
 }
 
+bool ModelLayer::isComplete() const
+{
+    assert(exists());
+    return _base->_complete;
+}
+
+void ModelLayer::complete()
+{
+    assert(exists());
+    _base->_complete = true;
+}
+
+void ModelLayer::incomplete()
+{
+    assert(exists());
+    _base->_complete = false;
+}
+
 std::string ModelLayer::toString() const
 {
-    return std::string();
+    assert(exists());
+    return _base->_name + (_base->_complete ? "{Y}@" : "{N}@") + std::to_string(_base->_id);
 }
 
 } // namespace graph

@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/container/BagEx.hpp>
 
 #include <memory>
 #include <string>
@@ -34,21 +36,25 @@ namespace graph {
 class TBAG_API ModelLayer
 {
 public:
-    enum class LayerType : int
+    class LayerBase : public Noncopyable
     {
-        LT_NORMAL,
-        LT_FIRST,
-        LT_LAST,
-    };
+    public:
+        friend class ModelLayer;
 
-    struct LayerBase
-    {
-        LayerType type;
+    private:
+        int  _id       = 0;
+        bool _complete = false;
 
-        LayerBase(LayerType t = LayerType::LT_NORMAL) : type(t)
+    private:
+        std::string _name;
+
+    public:
+        LayerBase()
         { /* EMPTY. */ }
         virtual ~LayerBase()
         { /* EMPTY. */ }
+
+    public:
     };
 
     using SharedBase = std::shared_ptr<LayerBase>;
@@ -57,7 +63,7 @@ private:
     SharedBase _base;
 
 public:
-    ModelLayer(LayerType type = LayerType::LT_NORMAL) TBAG_NOEXCEPT;
+    ModelLayer();
     explicit ModelLayer(std::nullptr_t) TBAG_NOEXCEPT;
     explicit ModelLayer(LayerBase * base) TBAG_NOEXCEPT;
     explicit ModelLayer(SharedBase const & base) TBAG_NOEXCEPT;
@@ -75,6 +81,28 @@ public:
 
 public:
     inline friend void swap(ModelLayer & lh, ModelLayer & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+
+public:
+    inline LayerBase       * get()       TBAG_NOEXCEPT { return _base.get(); }
+    inline LayerBase const * get() const TBAG_NOEXCEPT { return _base.get(); }
+
+    inline LayerBase       & operator *()       TBAG_NOEXCEPT { return *_base; }
+    inline LayerBase const & operator *() const TBAG_NOEXCEPT { return *_base; }
+
+    inline LayerBase       * operator ->()       TBAG_NOEXCEPT { return get(); }
+    inline LayerBase const * operator ->() const TBAG_NOEXCEPT { return get(); }
+
+public:
+    inline bool exists() const TBAG_NOEXCEPT
+    { return static_cast<bool>(_base); }
+
+    inline operator bool() const TBAG_NOEXCEPT
+    { return exists(); }
+
+public:
+    bool isComplete() const;
+    void complete();
+    void incomplete();
 
 public:
     std::string toString() const;
