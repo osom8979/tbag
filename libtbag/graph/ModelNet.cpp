@@ -12,6 +12,7 @@
 #include <cassert>
 #include <algorithm>
 #include <utility>
+#include <sstream>
 
 #include <lemon/list_graph.h>
 
@@ -29,15 +30,15 @@ namespace graph {
  */
 struct ModelNet::Impl : private Noncopyable
 {
-private:
-    ModelNet * _parent = nullptr;
-
 public:
     using Digraph  = lemon::ListDigraph;
     using LayerMap = lemon::ListDigraph::NodeMap<ModelLayer>;
 
     using Node = Digraph::Node;
     using Arc  = Digraph::Arc;
+
+private:
+    ModelNet * _parent = nullptr;
 
 private:
     Digraph  _graph;
@@ -67,6 +68,7 @@ public:
         // EMPTY.
     }
 
+public:
     Err addFirst(ModelLayer & layer)
     {
         _first = _graph.addNode();
@@ -97,6 +99,41 @@ public:
         return Err::E_SUCCESS;
     }
 
+public:
+    void clear()
+    {
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            _layers[n] = ModelLayer(nullptr);
+        }
+        _graph.clear();
+        _first = Node();
+        _last = Node();
+    }
+
+public:
+    enum class ArcOrder
+    {
+        AO_SOURCE,
+        AO_TARGET,
+    };
+
+    enum class Direction
+    {
+        D_FORWARD,
+        D_BACKWARD,
+    };
+
+    inline static char const * getDirectionName(Direction direction) TBAG_NOEXCEPT
+    {
+        if (direction == Direction::D_FORWARD) {
+            return "FORWARD";
+        } else {
+            assert(direction == Direction::D_BACKWARD);
+            return "BACKWARD";
+        }
+    }
+
+public:
     std::vector<int> getSourceNodeIds(int node_id) const
     {
         std::vector<int> result;
@@ -115,6 +152,17 @@ public:
         return result;
     }
 
+    std::vector<int> getNodeIds(int node_id, ArcOrder order) const
+    {
+        if (order == ArcOrder::AO_SOURCE) {
+            return getSourceNodeIds(node_id);
+        } else {
+            assert(order == ArcOrder::AO_TARGET);
+            return getTargetNodeIds(node_id);
+        }
+    }
+
+public:
     /** Unplug the finished flags. */
     void updateIncomplete()
     {
@@ -125,114 +173,118 @@ public:
         }
     }
 
-    Err forward()
+public:
+    TBAG_CONSTEXPR static std::size_t const MAX_RUN_DEPTH = 1024;
+
+public:
+    std::vector<ModelLayer> getInputLayers(int node_id, ArcOrder order)
+    {
+        std::vector<ModelLayer> input_layers;
+        for (auto & source_id : getNodeIds(node_id, order)) {
+            input_layers.push_back(_layers[getNode(source_id)]);
+        }
+        return input_layers;
+    }
+
+    bool isReady(int node_id, ArcOrder order)
+    {
+        for (auto & source_id : getNodeIds(node_id, order)) {
+            if (!_layers[getNode(source_id)].isComplete()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    Err run(int start_node_id, Direction direction, std::size_t max_depth = MAX_RUN_DEPTH)
     {
         updateIncomplete();
 
-        using namespace lemon;
-
-        std::set<int> current = {getId(_first)};
+        std::set<int> current = {start_node_id};
         std::set<int> children;
 
-        std::size_t max_depth = 100;
         for (std::size_t current_depth = 0; current_depth < max_depth; ++current_depth) {
-            // Forward current list.
-            for (auto & current_id : current) {
-                std::vector<ModelLayer> input_layers;
-                for (auto & source_id : getSourceNodeIds(current_id)) {
-                    input_layers.push_back(_layers[getNode(source_id)]);
+            // Run current list.
+            for (int current_id : current) {
+                Err code;
+
+                if (direction == Direction::D_FORWARD) {
+                    code = _layers[getNode(current_id)].forward(getInputLayers(current_id, ArcOrder::AO_SOURCE));
+                } else {
+                    assert(direction == Direction::D_BACKWARD);
+                    code = _layers[getNode(current_id)].backward(getInputLayers(current_id, ArcOrder::AO_TARGET));
                 }
 
-                auto const CODE = _layers[getNode(current_id)].forward(input_layers);
-                if (isSuccess(CODE)) {
+                if (isSuccess(code)) {
                     _layers[getNode(current_id)].complete();
+                } else {
+                    tDLogE("ModelNet::Impl::run({}) Layer({}) error: {}",
+                           getDirectionName(direction), current_id, code);
+                    return code;
                 }
             }
 
             // Update children list.
             children.clear();
-            for (auto & current_id : current) {
-                for (auto & target_id : getTargetNodeIds(current_id)) {
-
-                    bool ready = true;
-                    for (auto & source_id : getSourceNodeIds(target_id)) {
-                        if (!_layers[getNode(source_id)].isComplete()) {
-                            ready = false;
-                            break;
+            for (int current_id : current) {
+                if (direction == Direction::D_FORWARD) {
+                    for (auto & next_node_id : getTargetNodeIds(current_id)) {
+                        if (isReady(next_node_id, ArcOrder::AO_SOURCE)) {
+                            children.insert(next_node_id);
                         }
                     }
-
-                    if (ready) {
-                        children.insert(target_id);
+                } else {
+                    assert(direction == Direction::D_BACKWARD);
+                    for (auto & next_node_id : getSourceNodeIds(current_id)) {
+                        if (isReady(next_node_id, ArcOrder::AO_TARGET)) {
+                            children.insert(next_node_id);
+                        }
                     }
                 }
             }
 
             if (children.empty()) {
-                // No more children exist.
-                break;
+                break; // No more children exist.
             }
 
-            // Flip
+            // Flip for next iteration.
             current.swap(children);
         }
 
         return Err::E_SUCCESS;
     }
 
+    Err forward()
+    {
+        if (_first == Node()) {
+            return Err::E_NREADY;
+        }
+        return run(getId(_first), Direction::D_FORWARD);
+    }
+
     Err backward()
     {
-        updateIncomplete();
-
-        using namespace lemon;
-
-        std::set<int> current = {getId(_last)};
-        std::set<int> children;
-
-        std::size_t max_depth = 100;
-        for (std::size_t current_depth = 0; current_depth < max_depth; ++current_depth) {
-            // Forward current list.
-            for (auto & current_id : current) {
-                std::vector<ModelLayer> input_layers;
-                for (auto & target_id : getTargetNodeIds(current_id)) {
-                    input_layers.push_back(_layers[getNode(target_id)]);
-                }
-
-                auto const CODE = _layers[getNode(current_id)].backward(input_layers);
-                if (isSuccess(CODE)) {
-                    _layers[getNode(current_id)].complete();
-                }
-            }
-
-            // Update children list.
-            children.clear();
-            for (auto & current_id : current) {
-                for (auto & source_id : getSourceNodeIds(current_id)) {
-
-                    bool ready = true;
-                    for (auto & target_id : getTargetNodeIds(source_id)) {
-                        if (!_layers[getNode(target_id)].isComplete()) {
-                            ready = false;
-                            break;
-                        }
-                    }
-
-                    if (ready) {
-                        children.insert(source_id);
-                    }
-                }
-            }
-
-            if (children.empty()) {
-                // No more children exist.
-                break;
-            }
-
-            // Flip
-            current.swap(children);
+        if (_last == Node()) {
+            return Err::E_NREADY;
         }
+        return run(getId(_last), Direction::D_BACKWARD);
+    }
 
-        return Err::E_SUCCESS;
+    std::string toString() const
+    {
+        std::stringstream ss;
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            ss << "Layer(" << getId(n) << ") IN(";
+            for (Digraph::InArcIt in(_graph, n); in != lemon::INVALID; ++in) {
+                ss << "," << getId(_graph.source(in));
+            }
+            ss << ") OUT(";
+            for (Digraph::OutArcIt out(_graph, n); out != lemon::INVALID; ++out) {
+                ss << "," << getId(_graph.target(out));
+            }
+            ss << ")" << std::endl;
+        }
+        return ss.str();
     }
 };
 
@@ -294,7 +346,7 @@ void ModelNet::swap(ModelNet & obj) TBAG_NOEXCEPT
 void ModelNet::clear()
 {
     assert(exists());
-    _impl.reset();
+    _impl->clear();
 }
 
 Err ModelNet::addFirst(ModelLayer & layer)
@@ -335,7 +387,8 @@ Err ModelNet::backward()
 
 std::string ModelNet::toString() const
 {
-    return std::string();
+    assert(exists());
+    return _impl->toString();
 }
 
 } // namespace graph
