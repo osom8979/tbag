@@ -41,6 +41,11 @@ set (TPOT_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot_t2s.h")
 tbag_modules__build_dep_flatc_cpp (tpot_fbs "${TPOT_FBS_SRC}")
 tbag_modules__text_to_cpp11string (tpot_t2s "${TPOT_T2S_PATH}" tpot __tpot__ "${TPOT_FBS_SRC}")
 
+set (TBAG_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tbag.fbs")
+set (TBAG_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tbag_t2s.h")
+tbag_modules__build_dep_flatc_cpp (tbag_fbs "${TBAG_FBS_SRC}")
+tbag_modules__text_to_cpp11string (tbag_t2s "${TBAG_T2S_PATH}" tbag __tbag__ "${TBAG_FBS_SRC}")
+
 if (CUDA_FOUND)
     tbag_modules__check_cuda ()
     tbag_modules__apply_cuda ()

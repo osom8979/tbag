@@ -1,0 +1,75 @@
+// tbag packet protocols.
+
+namespace libtbag.proto.fbs.tbag;
+
+table   ByteData { data : byte   ; } //  8 BIT
+table  UbyteData { data : ubyte  ; } //  8 BIT
+table   BoolData { data : bool   ; } //  8 BIT
+table  ShortData { data : short  ; } // 16 BIT
+table UshortData { data : ushort ; } // 16 BIT
+table    IntData { data : int    ; } // 32 BIT
+table   UintData { data : uint   ; } // 32 BIT
+table  FloatData { data : float  ; } // 32 BIT
+table   LongData { data : long   ; } // 64 BIT
+table  UlongData { data : ulong  ; } // 64 BIT
+table DoubleData { data : double ; } // 64 BIT
+table StringData { data : string ; } // STRING
+
+table   ByteArray { data : [byte]  ; }
+table  UbyteArray { data : [ubyte] ; }
+table   BoolArray { data : [bool]  ; }
+table  ShortArray { data : [short] ; }
+table UshortArray { data : [ushort]; }
+table    IntArray { data : [int]   ; }
+table   UintArray { data : [uint]  ; }
+table  FloatArray { data : [float] ; }
+table   LongArray { data : [long]  ; }
+table  UlongArray { data : [ulong] ; }
+table DoubleArray { data : [double]; }
+table StringArray { data : [string]; }
+
+union AnyValue
+{
+    ByteData,
+    UbyteData,
+    BoolData,
+    ShortData,
+    UshortData,
+    IntData,
+    UintData,
+    FloatData,
+    LongData,
+    UlongData,
+    DoubleData,
+    StringData,
+
+    ByteArray,
+    UbyteArray,
+    BoolArray,
+    ShortArray,
+    UshortArray,
+    IntArray,
+    UintArray,
+    FloatArray,
+    LongArray,
+    UlongArray,
+    DoubleArray,
+    StringArray,
+}
+
+table Pair
+{
+    key : string;
+    val : AnyValue;
+}
+
+table TbagPacket
+{
+    id    : ulong;
+    type  : int;
+    code  : int;
+    pairs : [Pair];
+}
+
+root_type TbagPacket;
+
