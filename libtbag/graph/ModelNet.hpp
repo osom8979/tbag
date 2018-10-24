@@ -75,9 +75,9 @@ public:
     void clear();
 
 public:
-    Err addFirst(ModelLayer & layer);
-    Err addNode(ModelLayer & layer);
-    Err addLast(ModelLayer & layer);
+    Err addFirst(ModelLayer const & layer);
+    Err addNode(ModelLayer const & layer);
+    Err addLast(ModelLayer const & layer);
     Err addArc(ModelLayer const & source, ModelLayer const & target);
 
 public:

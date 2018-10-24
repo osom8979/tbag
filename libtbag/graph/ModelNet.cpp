@@ -45,8 +45,8 @@ private:
     LayerMap _layers;
 
 private:
-    Node _first;
-    Node _last;
+    std::set<int> _first_ids;
+    std::set<int> _last_ids;
 
 public:
     // @formatter:off
@@ -69,27 +69,31 @@ public:
     }
 
 public:
-    Err addFirst(ModelLayer & layer)
+    Err addFirst(ModelLayer const & layer)
     {
-        _first = _graph.addNode();
-        layer.setId(getId(_first));
-        _layers[_first] = layer;
+        auto const NODE = _graph.addNode();
+        auto const ID = getId(NODE);
+        _first_ids.insert(ID);
+        _layers[NODE] = layer;
+        _layers[NODE].setId(ID);
         return Err::E_SUCCESS;
     }
 
-    Err addNode(ModelLayer & layer)
+    Err addNode(ModelLayer const & layer)
     {
         auto node = _graph.addNode();
-        layer.setId(getId(node));
         _layers[node] = layer;
+        _layers[node].setId(getId(node));
         return Err::E_SUCCESS;
     }
 
-    Err addLast(ModelLayer & layer)
+    Err addLast(ModelLayer const & layer)
     {
-        _last = _graph.addNode();
-        layer.setId(getId(_last));
-        _layers[_last] = layer;
+        auto const NODE = _graph.addNode();
+        auto const ID = getId(NODE);
+        _last_ids.insert(ID);
+        _layers[NODE] = layer;
+        _layers[NODE].setId(ID);
         return Err::E_SUCCESS;
     }
 
@@ -106,8 +110,8 @@ public:
             _layers[n] = ModelLayer(nullptr);
         }
         _graph.clear();
-        _first = Node();
-        _last = Node();
+        _first_ids.clear();
+        _last_ids.clear();
     }
 
 public:
@@ -196,14 +200,18 @@ public:
         return true;
     }
 
-    Err run(int start_node_id, Direction direction, std::size_t max_depth = MAX_RUN_DEPTH)
+    Err run(std::set<int> const & start_node_ids, Direction direction, std::size_t max_depth = MAX_RUN_DEPTH)
     {
         updateIncomplete();
 
-        std::set<int> current = {start_node_id};
+        std::set<int> current = start_node_ids;
         std::set<int> children;
 
         for (std::size_t current_depth = 0; current_depth < max_depth; ++current_depth) {
+            if (current.empty()) {
+                break; // No more current node exist.
+            }
+
             // Run current list.
             for (int current_id : current) {
                 Err code;
@@ -243,10 +251,6 @@ public:
                 }
             }
 
-            if (children.empty()) {
-                break; // No more children exist.
-            }
-
             // Flip for next iteration.
             current.swap(children);
         }
@@ -256,34 +260,65 @@ public:
 
     Err forward()
     {
-        if (_first == Node()) {
+        if (_first_ids.empty()) {
+            tDLogE("ModelNet::Impl::forward() Not found first nodes.");
             return Err::E_NREADY;
         }
-        return run(getId(_first), Direction::D_FORWARD);
+        return run(_first_ids, Direction::D_FORWARD);
     }
 
     Err backward()
     {
-        if (_last == Node()) {
+        if (_last_ids.empty()) {
+            tDLogE("ModelNet::Impl::forward() Not found last nodes.");
             return Err::E_NREADY;
         }
-        return run(getId(_last), Direction::D_BACKWARD);
+        return run(_last_ids, Direction::D_BACKWARD);
     }
 
     std::string toString() const
     {
+        bool first_node  = true;
+        int  layer_count = 0;
         std::stringstream ss;
-        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
-            ss << "Layer(" << getId(n) << ") IN(";
+
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n, ++layer_count) {
+            if (first_node) {
+                first_node = false;
+            } else {
+                ss << std::endl;
+            }
+
+            ss << "Layer #" << layer_count << ": " << _layers[n].toString();
+            auto const CURRENT_NODE_ID = getId(n);
+
+            if (_first_ids.find(CURRENT_NODE_ID) != _first_ids.end()) {
+                ss << " [FIRST]";
+            } else if (_last_ids.find(CURRENT_NODE_ID) != _last_ids.end()) {
+                ss << " [LAST]";
+            }
+
+            bool first_arc = true;
             for (Digraph::InArcIt in(_graph, n); in != lemon::INVALID; ++in) {
-                ss << "," << getId(_graph.source(in));
+                if (first_arc) {
+                    ss << std::endl << " - in: " << getId(_graph.source(in));
+                    first_arc = false;
+                } else {
+                    ss << ", " << getId(_graph.source(in));
+                }
             }
-            ss << ") OUT(";
+
+            first_arc = true;
             for (Digraph::OutArcIt out(_graph, n); out != lemon::INVALID; ++out) {
-                ss << "," << getId(_graph.target(out));
+                if (first_arc) {
+                    ss << std::endl << " - out: " << getId(_graph.target(out));
+                    first_arc = false;
+                } else {
+                    ss << ", " << getId(_graph.target(out));
+                }
             }
-            ss << ")" << std::endl;
         }
+
         return ss.str();
     }
 };
@@ -350,7 +385,7 @@ void ModelNet::clear()
     }
 }
 
-Err ModelNet::addFirst(ModelLayer & layer)
+Err ModelNet::addFirst(ModelLayer const & layer)
 {
     if (exists()) {
         return _impl->addFirst(layer);
@@ -358,7 +393,7 @@ Err ModelNet::addFirst(ModelLayer & layer)
     return Err::E_NREADY;
 }
 
-Err ModelNet::addNode(ModelLayer & layer)
+Err ModelNet::addNode(ModelLayer const & layer)
 {
     if (exists()) {
         return _impl->addNode(layer);
@@ -366,7 +401,7 @@ Err ModelNet::addNode(ModelLayer & layer)
     return Err::E_NREADY;
 }
 
-Err ModelNet::addLast(ModelLayer & layer)
+Err ModelNet::addLast(ModelLayer const & layer)
 {
     if (exists()) {
         return _impl->addLast(layer);
