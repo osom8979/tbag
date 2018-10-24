@@ -185,7 +185,7 @@ TEST(ThreadPoolTest, NoException)
 TEST(ThreadPoolTest, ThreadId)
 {
 #if defined(SKIP_THREAD_ID_TESTER)
-    std::cout << "Skip this test. (The SKIP_THREAD_ID_TESTER macro has been defined)\n";
+    std::cout << "Skip this test. (The SKIP_THREAD_ID_TESTER macro has been defined)" << std::endl;
     return;
 #endif
     ThreadPool pool(2);

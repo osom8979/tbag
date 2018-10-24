@@ -26,7 +26,7 @@ TEST(FindPathTest, FindUtf8File)
 TEST(FindPathTest, FindUtf8ExecuteFile)
 {
 #if defined(SKIP_FINDPATH_TESTER)
-    std::cout << "Skip this test. (The SKIP_FINDPATH_TESTER macro has been defined)\n";
+    std::cout << "Skip this test. (The SKIP_FINDPATH_TESTER macro has been defined)" << std::endl;
     return;
 #endif
     std::string exe_file;

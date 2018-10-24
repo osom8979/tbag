@@ -38,7 +38,7 @@ struct PollTest : public Poll
 TEST(PollTest, Default)
 {
 #if defined(TBAG_PLATFORM_WINDOWS) || defined(TBAG_PLATFORM_LINUX)
-    std::cout << "Skip this test in Windows/Linux Platform.\n";
+    std::cout << "Skip this test in Windows/Linux Platform." << std::endl;
 #else
     char const * const TEST_FILENAME = "test.file";
     tttDir(true, true);
