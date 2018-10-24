@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/BagEx.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
@@ -51,6 +52,12 @@ public:
     TBAG_CONSTEXPR static int const UNKNOWN_ID = -1;
 
 public:
+    /**
+     * LayerBase class prototype.
+     *
+     * @author zer0
+     * @date   2018-10-23
+     */
     class LayerBase : public Noncopyable
     {
     public:
@@ -70,6 +77,7 @@ public:
 
     public:
         LayerBase() { /* EMPTY. */ }
+        LayerBase(std::string const & name) : _name(name) { /* EMPTY. */ }
         virtual ~LayerBase() { /* EMPTY. */ }
 
     public:
@@ -98,6 +106,35 @@ public:
     };
 
     using SharedBase = std::shared_ptr<LayerBase>;
+
+public:
+    /**
+     * LogLayer class prototype.
+     *
+     * @author zer0
+     * @date   2018-10-24
+     */
+    class TBAG_API LogLayer : public LayerBase
+    {
+    private:
+        bool _verbose;
+
+    public:
+        LogLayer(bool verbose = false);
+        virtual ~LogLayer();
+
+    public:
+        inline bool isVerbose() const TBAG_NOEXCEPT { return _verbose; }
+        inline void setVerbose(bool enable = true) TBAG_NOEXCEPT { _verbose = enable; }
+
+    public:
+        virtual Err setup(std::string const & data) override;
+        virtual Err teardown() override;
+
+    public:
+        virtual Err forward() override;
+        virtual Err backward() override;
+    };
 
 private:
     SharedBase _base;
@@ -181,6 +218,11 @@ public:
             return ModelLayer(std::static_pointer_cast<ModelLayer::LayerBase>(shared));
         }
         return ModelLayer(nullptr);
+    }
+
+    static ModelLayer createLog(bool verbose = true)
+    {
+        return create<LogLayer>(verbose);
     }
 };
 

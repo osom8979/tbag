@@ -18,6 +18,48 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graph {
 
+// ------------------------------------
+// ModelLayer::LogLayer implementation.
+// ------------------------------------
+
+ModelLayer::LogLayer::LogLayer(bool verbose) : LayerBase("LogLayer"), _verbose(verbose)
+{
+    // EMPTY.
+}
+
+ModelLayer::LogLayer::~LogLayer()
+{
+    // EMPTY.
+}
+
+Err ModelLayer::LogLayer::setup(std::string const & data)
+{
+    tDLogIfD(_verbose, "LogLayer[{}@{}]::setup()", getName(), getId());
+    return Err::E_SUCCESS;
+}
+
+Err ModelLayer::LogLayer::teardown()
+{
+    tDLogIfD(_verbose, "LogLayer[{}@{}]::teardown()", getName(), getId());
+    return Err::E_SUCCESS;
+}
+
+Err ModelLayer::LogLayer::forward()
+{
+    tDLogIfD(_verbose, "LogLayer[{}@{}]::forward()", getName(), getId());
+    return Err::E_SUCCESS;
+}
+
+Err ModelLayer::LogLayer::backward()
+{
+    tDLogIfD(_verbose, "LogLayer[{}@{}]::backward()", getName(), getId());
+    return Err::E_SUCCESS;
+}
+
+// --------------------------
+// ModelLayer implementation.
+// --------------------------
+
 ModelLayer::ModelLayer() : ModelLayer(std::make_shared<LayerBase>())
 {
     assert(static_cast<bool>(_base));
@@ -130,13 +172,13 @@ Err ModelLayer::teardown()
 Err ModelLayer::forward(std::vector<ModelLayer> const & input)
 {
     assert(exists());
-    return Err::E_UNSUPOP;
+    return _base->forward();
 }
 
 Err ModelLayer::backward(std::vector<ModelLayer> const & input)
 {
     assert(exists());
-    return Err::E_UNSUPOP;
+    return _base->backward();
 }
 
 Err ModelLayer::toData(Buffer & output) const
