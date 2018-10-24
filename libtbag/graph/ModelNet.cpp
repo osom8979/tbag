@@ -345,50 +345,65 @@ void ModelNet::swap(ModelNet & obj) TBAG_NOEXCEPT
 
 void ModelNet::clear()
 {
-    assert(exists());
-    _impl->clear();
+    if (_impl) {
+        _impl->clear();
+    }
 }
 
 Err ModelNet::addFirst(ModelLayer & layer)
 {
-    assert(exists());
-    return _impl->addFirst(layer);
+    if (exists()) {
+        return _impl->addFirst(layer);
+    }
+    return Err::E_NREADY;
 }
 
 Err ModelNet::addNode(ModelLayer & layer)
 {
-    assert(exists());
-    return _impl->addNode(layer);
+    if (exists()) {
+        return _impl->addNode(layer);
+    }
+    return Err::E_NREADY;
 }
 
 Err ModelNet::addLast(ModelLayer & layer)
 {
-    assert(exists());
-    return _impl->addLast(layer);
+    if (exists()) {
+        return _impl->addLast(layer);
+    }
+    return Err::E_NREADY;
 }
 
 Err ModelNet::addArc(ModelLayer const & source, ModelLayer const & target)
 {
-    assert(exists());
-    return _impl->addArc(source, target);
+    if (exists()) {
+        return _impl->addArc(source, target);
+    }
+    return Err::E_NREADY;
 }
 
 Err ModelNet::forward()
 {
-    assert(exists());
-    return _impl->forward();
+    if (exists()) {
+        return _impl->forward();
+    }
+    return Err::E_NREADY;
 }
 
 Err ModelNet::backward()
 {
-    assert(exists());
-    return _impl->backward();
+    if (exists()) {
+        return _impl->backward();
+    }
+    return Err::E_NREADY;
 }
 
 std::string ModelNet::toString() const
 {
-    assert(exists());
-    return _impl->toString();
+    if (exists()) {
+        return _impl->toString();
+    }
+    return std::string();
 }
 
 } // namespace graph
