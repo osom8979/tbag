@@ -184,6 +184,10 @@ TEST(ThreadPoolTest, NoException)
 
 TEST(ThreadPoolTest, ThreadId)
 {
+#if defined(SKIP_THREAD_ID_TESTER)
+    std::cout << "Skip this test. (The SKIP_THREAD_ID_TESTER macro has been defined)\n";
+    return;
+#endif
     ThreadPool pool(2);
     auto const ID1 = pool.getThreadId(0);
     auto const ID2 = pool.getThreadId(1);

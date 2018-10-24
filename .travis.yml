@@ -41,7 +41,7 @@ before_install:
 script:
   - if [[ ! -d cmake_build ]]; then mkdir cmake_build; fi
   - cd cmake_build
-  - cmake -DSKIP_FSPOLL_TESTER=ON -DSKIP_FINDPATH_TESTER=ON -DWITH_COVERAGE=ON ..
+  - cmake -DRUN_TRAVIS=ON ..
   - make
   - ./tester --gtest_filter=*
 

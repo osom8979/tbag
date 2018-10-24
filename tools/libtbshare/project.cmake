@@ -4,7 +4,7 @@ include (TbagModules)
 
 tbag_modules__apply_default ()
 tbag_modules__update_default_objects ()
-tbag_modules__apply_shared_library ()
+tbag_modules__apply_module_library ()
 
 list (APPEND TBAG_PROJECT_DEFINITIONS USE_LIBTEST_EXPORT)
 

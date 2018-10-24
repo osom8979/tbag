@@ -61,8 +61,8 @@ before_build:
   - cmd: echo Running before build...
   - cmd: if not exist "%TBAG_BUILD%" mkdir "%TBAG_BUILD%"
   - cmd: cd "%TBAG_BUILD%"
-  - cmd: if "%platform%" == "Win32" cmake -G "Visual Studio 14 2015"       -DCMAKE_BUILD_TYPE=Debug "%TBAG_HOME%"
-  - cmd: if "%platform%" == "x64"   cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug "%TBAG_HOME%"
+  - cmd: if "%platform%" == "Win32" cmake -G "Visual Studio 14 2015"       -DCMAKE_BUILD_TYPE=Debug -DRUN_APPVEYOR=ON "%TBAG_HOME%"
+  - cmd: if "%platform%" == "x64"   cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug -DRUN_APPVEYOR=ON "%TBAG_HOME%"
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
