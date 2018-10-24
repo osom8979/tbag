@@ -11,9 +11,28 @@
 using namespace libtbag;
 using namespace libtbag::graph;
 
+TEST(ModelLayerTest, Constructor)
+{
+    ModelLayer obj1;
+    ModelLayer obj2(nullptr);
+
+    ASSERT_TRUE(static_cast<bool>(obj1));
+    ASSERT_FALSE(static_cast<bool>(obj2));
+
+    ModelLayer obj3 = obj2;
+    ASSERT_FALSE(static_cast<bool>(obj3));
+    ASSERT_FALSE(static_cast<bool>(obj2));
+
+    ModelLayer obj4;
+    ASSERT_TRUE(static_cast<bool>(obj4));
+    ModelLayer obj5 = std::move(obj4);
+    ASSERT_FALSE(static_cast<bool>(obj4));
+    ASSERT_TRUE(static_cast<bool>(obj5));
+}
+
 TEST(ModelLayerTest, Default)
 {
-    ModelLayer object;
-    ASSERT_TRUE(true);
+    ModelLayer net;
+    std::cout << net.toString() << std::endl;
 }
 

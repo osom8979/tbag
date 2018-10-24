@@ -15,8 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/BagEx.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <memory>
 #include <string>
@@ -43,6 +43,7 @@ public:
     friend class ModelNet;
 
 public:
+    using Buffer = libtbag::util::Buffer;
     using BagEx  = libtbag::container::BagEx;
     using BagExs = std::vector<BagEx>;
 
@@ -53,33 +54,47 @@ public:
     class LayerBase : public Noncopyable
     {
     public:
+        using Buffer = ModelLayer::Buffer;
         using BagEx  = ModelLayer::BagEx;
         using BagExs = ModelLayer::BagExs;
 
     public:
         friend class ModelLayer;
 
-    private:
+    protected:
         int  _id       = UNKNOWN_ID;
         bool _complete = false;
 
-    public:
-        std::string name;
-        BagExs input;
-        BagExs weight;
-        BagExs output;
+    private:
+        std::string _name;
 
     public:
         LayerBase() { /* EMPTY. */ }
         virtual ~LayerBase() { /* EMPTY. */ }
 
     public:
-        virtual bool    setup() { return true; }
-        virtual bool teardown() { return true; }
+        inline int getId() const TBAG_NOEXCEPT { return _id; }
+        inline bool isComplete() const TBAG_NOEXCEPT { return _complete; }
 
     public:
-        virtual bool  forward() { return true; }
-        virtual bool backward() { return true; }
+        std::string getName() const { return _name; }
+        void setName(std::string const & name) { _name = name; }
+
+    public:
+        virtual Err setup(std::string const & data) { return Err::E_SUCCESS; }
+        virtual Err teardown() { return Err::E_SUCCESS; }
+
+    public:
+        virtual Err forward() { return Err::E_SUCCESS; }
+        virtual Err backward() { return Err::E_SUCCESS; }
+
+    public:
+        virtual Err toData(Buffer & output) const { return Err::E_SUCCESS; }
+        virtual Err fromData(Buffer const & input) { return Err::E_SUCCESS; }
+
+    public:
+        virtual std::string get(std::string const & key) const { return std::string(); }
+        virtual void set(std::string const & key, std::string const & val) { /* EMPTY. */ }
     };
 
     using SharedBase = std::shared_ptr<LayerBase>;
@@ -126,30 +141,41 @@ public:
 
 public:
     int getId() const;
-
-private:
-    void setId(int id);
-
-public:
     bool isComplete() const;
+    std::string getName() const;
 
-private:
+protected:
+    void setId(int id);
     void complete();
     void incomplete();
+
+public:
+    Err setup(std::string const & data);
+    Err teardown();
 
 public:
     Err forward(std::vector<ModelLayer> const & input);
     Err backward(std::vector<ModelLayer> const & input);
 
 public:
+    Err toData(Buffer & output) const;
+    Err fromData(Buffer const & input);
+
+public:
+    std::string get(std::string const & key) const;
+    void set(std::string const & key, std::string const & val);
+
+public:
     std::string toString() const;
 
 public:
     template <typename LayerType, typename ... Args>
-    ModelLayer create(Args && ... args)
+    static ModelLayer create(Args && ... args)
     {
         STATIC_ASSERT_CHECK_IS_BASE_OF(LayerBase, LayerType);
+        STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE(LayerType);
         typedef typename remove_cr<LayerType>::type ResultLayerType;
+
         auto shared = std::make_shared<ResultLayerType>(std::forward<Args>(args) ...);
         if (static_cast<bool>(shared)) {
             return ModelLayer(std::static_pointer_cast<ModelLayer::LayerBase>(shared));

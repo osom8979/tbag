@@ -82,7 +82,7 @@ void ModelLayer::swap(ModelLayer & obj) TBAG_NOEXCEPT
 int ModelLayer::getId() const
 {
     assert(exists());
-    return _base->_id;
+    return _base->getId();
 }
 
 void ModelLayer::setId(int id)
@@ -94,7 +94,13 @@ void ModelLayer::setId(int id)
 bool ModelLayer::isComplete() const
 {
     assert(exists());
-    return _base->_complete;
+    return _base->isComplete();
+}
+
+std::string ModelLayer::getName() const
+{
+    assert(exists());
+    return _base->getName();
 }
 
 void ModelLayer::complete()
@@ -109,20 +115,57 @@ void ModelLayer::incomplete()
     _base->_complete = false;
 }
 
+Err ModelLayer::setup(std::string const & data)
+{
+    assert(exists());
+    return _base->setup(data);
+}
+
+Err ModelLayer::teardown()
+{
+    assert(exists());
+    return _base->teardown();
+}
+
 Err ModelLayer::forward(std::vector<ModelLayer> const & input)
 {
+    assert(exists());
     return Err::E_UNSUPOP;
 }
 
 Err ModelLayer::backward(std::vector<ModelLayer> const & input)
 {
+    assert(exists());
     return Err::E_UNSUPOP;
+}
+
+Err ModelLayer::toData(Buffer & output) const
+{
+    assert(exists());
+    return _base->toData(output);
+}
+
+Err ModelLayer::fromData(Buffer const & input)
+{
+    assert(exists());
+    return _base->fromData(input);
+}
+
+std::string ModelLayer::get(std::string const & key) const
+{
+    assert(exists());
+    return _base->get(key);
+}
+
+void ModelLayer::set(std::string const & key, std::string const & val)
+{
+    assert(exists());
+    _base->set(key, val);
 }
 
 std::string ModelLayer::toString() const
 {
-    assert(exists());
-    return _base->name + (_base->_complete ? "{Y}@" : "{N}@") + std::to_string(_base->_id);
+    return getName() + (isComplete() ? "{Y}@" : "{N}@") + std::to_string(getId());
 }
 
 } // namespace graph
