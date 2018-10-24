@@ -44,15 +44,15 @@ Err ModelLayer::LogLayer::teardown()
     return Err::E_SUCCESS;
 }
 
-Err ModelLayer::LogLayer::forward()
+Err ModelLayer::LogLayer::forward(Layers const & input)
 {
-    tDLogIfD(_verbose, "LogLayer[{}@{}]::forward()", getName(), getId());
+    tDLogIfD(_verbose, "LogLayer[{}@{}]::forward(in:{})", getName(), getId(), input.size());
     return Err::E_SUCCESS;
 }
 
-Err ModelLayer::LogLayer::backward()
+Err ModelLayer::LogLayer::backward(Layers const & input)
 {
-    tDLogIfD(_verbose, "LogLayer[{}@{}]::backward()", getName(), getId());
+    tDLogIfD(_verbose, "LogLayer[{}@{}]::backward(in:{})", getName(), getId(), input.size());
     return Err::E_SUCCESS;
 }
 
@@ -63,6 +63,11 @@ Err ModelLayer::LogLayer::backward()
 ModelLayer::ModelLayer() : ModelLayer(std::make_shared<LayerBase>())
 {
     assert(static_cast<bool>(_base));
+}
+
+ModelLayer::ModelLayer(int id) : ModelLayer()
+{
+    setId(id);
 }
 
 ModelLayer::ModelLayer(std::nullptr_t) TBAG_NOEXCEPT : _base(nullptr)
@@ -169,16 +174,16 @@ Err ModelLayer::teardown()
     return _base->teardown();
 }
 
-Err ModelLayer::forward(std::vector<ModelLayer> const & input)
+Err ModelLayer::forward(Layers const & input)
 {
     assert(exists());
-    return _base->forward();
+    return _base->forward(input);
 }
 
-Err ModelLayer::backward(std::vector<ModelLayer> const & input)
+Err ModelLayer::backward(Layers const & input)
 {
     assert(exists());
-    return _base->backward();
+    return _base->backward(input);
 }
 
 Err ModelLayer::toData(Buffer & output) const

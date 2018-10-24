@@ -47,6 +47,7 @@ public:
     using Buffer = libtbag::util::Buffer;
     using BagEx  = libtbag::container::BagEx;
     using BagExs = std::vector<BagEx>;
+    using Layers = std::vector<ModelLayer>;
 
 public:
     TBAG_CONSTEXPR static int const UNKNOWN_ID = -1;
@@ -64,6 +65,7 @@ public:
         using Buffer = ModelLayer::Buffer;
         using BagEx  = ModelLayer::BagEx;
         using BagExs = ModelLayer::BagExs;
+        using Layers = ModelLayer::Layers;
 
     public:
         friend class ModelLayer;
@@ -93,8 +95,8 @@ public:
         virtual Err teardown() { return Err::E_SUCCESS; }
 
     public:
-        virtual Err forward() { return Err::E_SUCCESS; }
-        virtual Err backward() { return Err::E_SUCCESS; }
+        virtual Err  forward(Layers const & input) { return Err::E_SUCCESS; }
+        virtual Err backward(Layers const & input) { return Err::E_SUCCESS; }
 
     public:
         virtual Err toData(Buffer & output) const { return Err::E_SUCCESS; }
@@ -132,8 +134,8 @@ public:
         virtual Err teardown() override;
 
     public:
-        virtual Err forward() override;
-        virtual Err backward() override;
+        virtual Err  forward(Layers const & input) override;
+        virtual Err backward(Layers const & input) override;
     };
 
 private:
@@ -141,6 +143,7 @@ private:
 
 public:
     ModelLayer();
+    explicit ModelLayer(int id);
     explicit ModelLayer(std::nullptr_t) TBAG_NOEXCEPT;
     explicit ModelLayer(LayerBase * base) TBAG_NOEXCEPT;
     explicit ModelLayer(SharedBase const & base) TBAG_NOEXCEPT;
@@ -177,6 +180,25 @@ public:
     { return exists(); }
 
 public:
+    /**
+     * Implemented for std::less<> compatibility.
+     *
+     * @see std::set
+     * @see std::map
+     * @see std::less
+     */
+    friend bool operator <(ModelLayer const & x, ModelLayer const & y)
+    {
+        return x.getId() < y.getId();
+    }
+
+public:
+    bool operator ==(ModelLayer const & obj) const TBAG_NOEXCEPT
+    {
+        return _base.get() == obj.get();
+    }
+
+public:
     int getId() const;
     bool isComplete() const;
     std::string getName() const;
@@ -191,8 +213,8 @@ public:
     Err teardown();
 
 public:
-    Err forward(std::vector<ModelLayer> const & input);
-    Err backward(std::vector<ModelLayer> const & input);
+    Err  forward(Layers const & input);
+    Err backward(Layers const & input);
 
 public:
     Err toData(Buffer & output) const;

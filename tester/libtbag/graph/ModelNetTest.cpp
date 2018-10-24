@@ -83,6 +83,26 @@ TEST(ModelNetTest, Default)
     ASSERT_EQ(Err::E_SUCCESS, net.addLast(log7));
     ASSERT_EQ(Err::E_SUCCESS, net.addFirst(log8));
 
+    auto const LOG0_ID = log0.getId();
+    auto const LOG1_ID = log1.getId();
+    auto const LOG2_ID = log2.getId();
+    auto const LOG3_ID = log3.getId();
+    auto const LOG4_ID = log4.getId();
+    auto const LOG5_ID = log5.getId();
+    auto const LOG6_ID = log6.getId();
+    auto const LOG7_ID = log7.getId();
+    auto const LOG8_ID = log8.getId();
+
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG0_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG1_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG2_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG3_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG4_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG5_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG6_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG7_ID);
+    ASSERT_NE(int(ModelLayer::UNKNOWN_ID), LOG8_ID);
+
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     /* (F) = First                   */
     /* (L) = Last                    */
@@ -131,5 +151,27 @@ TEST(ModelNetTest, Default)
     ASSERT_TRUE(log8.isComplete());
 
     std::cout << net.toString() << std::endl;
+
+    auto const LAYERS = net.getLayers();
+    auto const LAYER_LOG0 = net.getLayer(LOG0_ID);
+    auto const LAYER_LOG1 = net.getLayer(LOG1_ID);
+    auto const LAYER_LOG2 = net.getLayer(LOG2_ID);
+    auto const LAYER_LOG3 = net.getLayer(LOG3_ID);
+    auto const LAYER_LOG4 = net.getLayer(LOG4_ID);
+    auto const LAYER_LOG5 = net.getLayer(LOG5_ID);
+    auto const LAYER_LOG6 = net.getLayer(LOG6_ID);
+    auto const LAYER_LOG7 = net.getLayer(LOG7_ID);
+    auto const LAYER_LOG8 = net.getLayer(LOG8_ID);
+
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG0));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG1));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG2));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG3));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG4));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG5));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG6));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG7));
+    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG8));
+    ASSERT_EQ(9, LAYERS.size());
 }
 

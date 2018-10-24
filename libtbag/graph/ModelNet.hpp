@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <set>
 #include <type_traits>
 
 // -------------------
@@ -42,6 +43,10 @@ public:
     struct Impl;
     friend struct Impl;
     using SharedImpl = std::shared_ptr<Impl>;
+
+public:
+    using Buffer = libtbag::util::Buffer;
+    using Layers = std::vector<ModelLayer>;
 
 private:
     SharedImpl _impl;
@@ -75,14 +80,35 @@ public:
     void clear();
 
 public:
+    bool empty() const;
+    std::size_t size() const;
+
+public:
+    void updateIncomplete();
+    void updateComplete();
+
+public:
     Err addFirst(ModelLayer const & layer);
     Err addNode(ModelLayer const & layer);
     Err addLast(ModelLayer const & layer);
     Err addArc(ModelLayer const & source, ModelLayer const & target);
 
 public:
+    std::vector<int> getLayerIds() const;
+    std::set<ModelLayer> getLayers() const;
+    ModelLayer getLayer(int id) const;
+
+public:
+    Err setup(std::string const & data);
+    Err teardown();
+
+public:
     Err forward();
     Err backward();
+
+public:
+    Err toData(Buffer & output) const;
+    Err fromData(Buffer const & input);
 
 public:
     std::string toString() const;

@@ -104,6 +104,30 @@ public:
     }
 
 public:
+    std::vector<int> getLayerIds() const
+    {
+        std::vector<int> result;
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            result.push_back(getId(n));
+        }
+        return result;
+    }
+
+    std::set<ModelLayer> getLayers() const
+    {
+        std::set<ModelLayer> result;
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            result.insert(_layers[n]);
+        }
+        return result;
+    }
+
+    ModelLayer getLayer(int id) const
+    {
+        return _layers[getNode(id)];
+    }
+
+public:
     void clear()
     {
         for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
@@ -112,6 +136,20 @@ public:
         _graph.clear();
         _first_ids.clear();
         _last_ids.clear();
+    }
+
+    bool empty() const
+    {
+        return Digraph::NodeIt(_graph) == lemon::INVALID;
+    }
+
+    std::size_t size() const
+    {
+        std::size_t result = 0;
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            ++result;
+        }
+        return result;
     }
 
 public:
@@ -177,11 +215,45 @@ public:
         }
     }
 
+    void updateComplete()
+    {
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            if (_layers[n]) {
+                _layers[n].complete();
+            }
+        }
+    }
+
+public:
+    Err setup(std::string const & data)
+    {
+        // TODO: SetUp self network.
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            std::string layer_data;
+            // TODO: Splits the data into layer_data.
+            if (_layers[n]) {
+                _layers[n].setup(layer_data);
+            }
+        }
+        return Err::E_SUCCESS;
+    }
+
+    Err teardown()
+    {
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            if (_layers[n]) {
+                _layers[n].teardown();
+            }
+        }
+        // TODO: TearDown self network.
+        return Err::E_SUCCESS;
+    }
+
 public:
     TBAG_CONSTEXPR static std::size_t const MAX_RUN_DEPTH = 1024;
 
 public:
-    std::vector<ModelLayer> getInputLayers(int node_id, ArcOrder order)
+    Layers getInputLayers(int node_id, ArcOrder order)
     {
         std::vector<ModelLayer> input_layers;
         for (auto & source_id : getNodeIds(node_id, order)) {
@@ -276,6 +348,32 @@ public:
         return run(_last_ids, Direction::D_BACKWARD);
     }
 
+public:
+    Err toData(Buffer & output) const
+    {
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            if (_layers[n]) {
+                Buffer current_data;
+                auto const CODE = _layers[n].toData(current_data);
+                if (isSuccess(CODE)) {
+                    // TODO: Output append
+                }
+            }
+        }
+        return Err::E_SUCCESS;
+    }
+
+    Err fromData(Buffer const & input)
+    {
+        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
+            if (_layers[n]) {
+                _layers[n].fromData(input);
+            }
+        }
+        return Err::E_SUCCESS;
+    }
+
+public:
     std::string toString() const
     {
         bool first_node  = true;
@@ -380,8 +478,38 @@ void ModelNet::swap(ModelNet & obj) TBAG_NOEXCEPT
 
 void ModelNet::clear()
 {
-    if (_impl) {
+    if (exists()) {
         _impl->clear();
+    }
+}
+
+bool ModelNet::empty() const
+{
+    if (exists()) {
+        return _impl->empty();
+    }
+    return true;
+}
+
+std::size_t ModelNet::size() const
+{
+    if (exists()) {
+        return _impl->size();
+    }
+    return 0;
+}
+
+void ModelNet::updateIncomplete()
+{
+    if (exists()) {
+        _impl->updateIncomplete();
+    }
+}
+
+void ModelNet::updateComplete()
+{
+    if (exists()) {
+        _impl->updateComplete();
     }
 }
 
@@ -417,6 +545,46 @@ Err ModelNet::addArc(ModelLayer const & source, ModelLayer const & target)
     return Err::E_NREADY;
 }
 
+std::vector<int> ModelNet::getLayerIds() const
+{
+    if (exists()) {
+        return _impl->getLayerIds();
+    }
+    return std::vector<int>();
+}
+
+std::set<ModelLayer> ModelNet::getLayers() const
+{
+    if (exists()) {
+        return _impl->getLayers();
+    }
+    return std::set<ModelLayer>();
+}
+
+ModelLayer ModelNet::getLayer(int id) const
+{
+    if (0 <= id && exists()) {
+        return _impl->getLayer(id);
+    }
+    return ModelLayer(nullptr);
+}
+
+Err ModelNet::setup(std::string const & data)
+{
+    if (exists()) {
+        return _impl->setup(data);
+    }
+    return Err::E_NREADY;
+}
+
+Err ModelNet::teardown()
+{
+    if (exists()) {
+        return _impl->teardown();
+    }
+    return Err::E_NREADY;
+}
+
 Err ModelNet::forward()
 {
     if (exists()) {
@@ -429,6 +597,22 @@ Err ModelNet::backward()
 {
     if (exists()) {
         return _impl->backward();
+    }
+    return Err::E_NREADY;
+}
+
+Err ModelNet::toData(Buffer & output) const
+{
+    if (exists()) {
+        return _impl->toData(output);
+    }
+    return Err::E_NREADY;
+}
+
+Err ModelNet::fromData(Buffer const & input)
+{
+    if (exists()) {
+        return _impl->fromData(input);
     }
     return Err::E_NREADY;
 }
