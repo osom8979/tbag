@@ -40,8 +40,8 @@
     STATIC_ASSERT_CHECK_TRAIT1(std::has_virtual_destructor  , type)
 
 #ifndef STATIC_ASSERT_CHECK_IS_BASE_OF
-#define STATIC_ASSERT_CHECK_IS_BASE_OF(base, derived) \
-    static_assert(std::is_base_of<base, derived>::value, "Not Derived " #base " to " #derived)
+#define STATIC_ASSERT_CHECK_IS_BASE_OF(parent, derived) \
+    static_assert(std::is_base_of<parent, derived>::value, "Not Derived " #parent " to " #derived)
 #endif
 
 #ifndef STATIC_ASSERT_CHECK_IS_SAME
@@ -52,6 +52,12 @@
 #ifndef STATIC_ASSERT_CHECK_IS_EQUALS
 #define STATIC_ASSERT_CHECK_IS_EQUALS(value1, value2) \
     static_assert(value1 == value2, #value1 " and " #value2 " should be the same.")
+#endif
+
+#ifndef STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE
+#define STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE(class_name)    \
+    static_assert(std::is_default_constructible<class_name>::value, \
+            "The " #class_name " class must support the default constructor.")
 #endif
 
 // -------------------
