@@ -18,9 +18,14 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
+#include <libtbag/Type.hpp>
+#include <libtbag/container/BagEx.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
+#include <cstdint>
 #include <string>
+#include <map>
+#include <unordered_map>
 #include <memory>
 
 // -------------------
@@ -31,7 +36,13 @@ namespace proto {
 
 struct TbagPacketTypes : private Noncopyable
 {
-    // EMPTY.
+    using TypeTable = libtbag::type::TypeTable;
+    using BagEx     = libtbag::container::BagEx;
+#if !defined(NDEBUG) && defined(TBAG_PLATFORM_MACOS)
+    using BagExMap  = std::map<std::string, BagEx>;
+#else
+    using BagExMap  = std::unordered_map<std::string, BagEx>;
+#endif
 };
 
 /**
@@ -76,8 +87,9 @@ public:
     std::string toJsonString() const;
 
 public:
-    void clear();
-    void finish();
+    Err build(uint64_t id = 0, int32_t type = 0, int32_t code = 0);
+    Err build(BagExMap const & bags, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
+    Err build(std::string const & content, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
 };
 
 /**

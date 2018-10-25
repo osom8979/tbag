@@ -4,31 +4,35 @@ namespace libtbag.proto.fbs.tbag;
 
 table   ByteArr { data : [byte]  ; } //  8 BIT ARRAY
 table  UbyteArr { data : [ubyte] ; } //  8 BIT ARRAY
-table   BoolArr { data : [bool]  ; } //  8 BIT ARRAY
+
 table  ShortArr { data : [short] ; } // 16 BIT ARRAY
 table UshortArr { data : [ushort]; } // 16 BIT ARRAY
+
 table    IntArr { data : [int]   ; } // 32 BIT ARRAY
 table   UintArr { data : [uint]  ; } // 32 BIT ARRAY
-table  FloatArr { data : [float] ; } // 32 BIT ARRAY
+
 table   LongArr { data : [long]  ; } // 64 BIT ARRAY
 table  UlongArr { data : [ulong] ; } // 64 BIT ARRAY
+
+table  FloatArr { data : [float] ; } // 32 BIT ARRAY
 table DoubleArr { data : [double]; } // 64 BIT ARRAY
-table StringArr { data : [string]; } // STRING ARRAY
 
 union AnyArr
 {
     ByteArr,
     UbyteArr,
-    BoolArr,
+
     ShortArr,
     UshortArr,
+
     IntArr,
     UintArr,
-    FloatArr,
+
     LongArr,
     UlongArr,
+
+    FloatArr,
     DoubleArr,
-    StringArr,
 }
 
 table Pair
