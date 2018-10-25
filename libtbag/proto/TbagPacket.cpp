@@ -220,7 +220,7 @@ public:
     {
         using namespace libtbag::proto::fbs::tbag;
         clear();
-        finish(builder.CreateVector(buffer, size));
+        builder.PushFlatBuffer(buffer, size);
         return Err::E_SUCCESS;
     }
 
@@ -369,6 +369,11 @@ Err TbagPacketBuilder::assign(uint8_t const * buffer, std::size_t size)
     return _impl->assign(buffer, size);
 }
 
+Err TbagPacketBuilder::assign(Buffer const & buffer)
+{
+    return assign((uint8_t const *)buffer.data(), buffer.size());
+}
+
 std::string TbagPacketBuilder::toJsonString() const
 {
     assert(static_cast<bool>(_impl));
@@ -397,6 +402,11 @@ Err TbagPacketBuilder::build(std::string const & key, std::string const & val, u
 {
     assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code, key, val);
+}
+
+TbagPacketBuilder::Buffer TbagPacketBuilder::toBuffer() const
+{
+    return Buffer(point(), point() + size());
 }
 
 /**
@@ -443,7 +453,13 @@ public:
             return Err::E_SUCCESS;
         }
 
-        auto const FIND_KEY = std::string(key);
+        auto const * PAIRS = PACKET->pairs();
+        if (PAIRS == nullptr) {
+            // Not exists 'pairs'.
+            return Err::E_SUCCESS;
+        }
+
+        auto const FIND_KEY = (key != nullptr ? std::string(key) : std::string());
         auto const END = PACKET->pairs()->end();
         for (auto itr = PACKET->pairs()->begin(); itr != END; ++itr) {
             if (!FIND_KEY.empty() && FIND_KEY != itr->key()->str()) {
@@ -453,6 +469,12 @@ public:
             auto const VAL_TYPE = itr->val_type();
             if (!(AnyArr_MIN <= COMPARE_AND(VAL_TYPE) <= AnyArr_MAX)) {
                 return Err::E_ENOMSG;
+            }
+
+            auto const VAL = itr->val();
+            if (!VerifyAnyArr(verifier, VAL, VAL_TYPE)) {
+                // Use 'Verifier error' to distinguish it from 'Parsing error' at the top.
+                return Err::E_VERIFIER;
             }
 
             BagEx bag;
@@ -521,6 +543,11 @@ Err TbagPacketParser::parse(char const * buffer, std::size_t size, void * arg)
         tDLogE("TbagPacketParser::parse() parsing error: {}", CODE);
     }
     return CODE;
+}
+
+Err TbagPacketParser::parse(Buffer const & buffer, void * arg)
+{
+    return parse(buffer.data(), buffer.size(), arg);
 }
 
 Err TbagPacketParser::parseOnlyHeader(char const * buffer, std::size_t size, void * arg)
@@ -616,14 +643,19 @@ void TbagPacket::clear()
     _bags.clear();
 }
 
-Err TbagPacket::parseSelf(char const * buffer, std::size_t size)
+Err TbagPacket::update(char const * buffer, std::size_t size)
 {
     return parse(buffer, size, this);
 }
 
-Err TbagPacket::parseSelf()
+Err TbagPacket::update(Buffer const & buffer)
 {
-    return parse((char const *)point(), size(), this);
+    return update(buffer.data(), buffer.size());
+}
+
+Err TbagPacket::update()
+{
+    return update((char const *)point(), size());
 }
 
 TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
@@ -637,12 +669,12 @@ TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std
     return result;
 }
 
-TbagPacket::BagEx TbagPacket::findKeySelf(std::string const & key, Err * code)
+TbagPacket::BagEx TbagPacket::findKey(std::string const & key, Err * code)
 {
     return findKey((char const *)point(), size(), key, code);
 }
 
-Err TbagPacket::buildSelf()
+Err TbagPacket::buildFromSelf()
 {
     return build(_bags, _id, _type, _code);
 }
@@ -659,7 +691,7 @@ Err TbagPacket::loadFile(std::string const & path)
     Buffer buffer;
     auto const CODE = readFile(path, buffer);
     if (isSuccess(CODE)) {
-        return parseSelf(buffer.data(), buffer.size());
+        return update(buffer);
     }
     return CODE;
 }

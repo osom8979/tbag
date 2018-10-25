@@ -38,6 +38,7 @@ namespace proto {
 struct TbagPacketTypes : private Noncopyable
 {
     using TypeTable = libtbag::type::TypeTable;
+    using Buffer    = libtbag::util::Buffer;
     using BagEx     = libtbag::container::BagEx;
 #if !defined(NDEBUG) && defined(TBAG_PLATFORM_MACOS)
     using BagExMap  = std::map<std::string, BagEx>;
@@ -80,6 +81,7 @@ public:
 
 public:
     Err assign(uint8_t const * buffer, std::size_t size);
+    Err assign(Buffer const & buffer);
 
 public:
     std::string toJsonString() const;
@@ -89,6 +91,9 @@ public:
     Err build(BagExMap const & bags, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(std::string const & content, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(std::string const & key, std::string const & val, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
+
+public:
+    Buffer toBuffer() const;
 };
 
 /**
@@ -118,6 +123,7 @@ public:
 
 public:
     Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
+    Err parse(Buffer const & buffer, void * arg = nullptr);
     Err parseOnlyHeader(char const * buffer, std::size_t size, void * arg = nullptr);
     Err parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg = nullptr);
 
@@ -134,9 +140,6 @@ protected:
  */
 class TBAG_API TbagPacket : public TbagPacketBuilder, public TbagPacketParser
 {
-public:
-    using Buffer = libtbag::util::Buffer;
-
 private:
     uint64_t _id;
     int32_t  _type;
@@ -183,15 +186,16 @@ public:
     void clear();
 
 public:
-    Err parseSelf(char const * buffer, std::size_t size);
-    Err parseSelf();
+    Err update(char const * buffer, std::size_t size);
+    Err update(Buffer const & buffer);
+    Err update();
 
 public:
     BagEx findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
-    BagEx findKeySelf(std::string const & key, Err * code = nullptr);
+    BagEx findKey(std::string const & key, Err * code = nullptr);
 
 public:
-    Err buildSelf();
+    Err buildFromSelf();
 
 public:
     Err saveFile(std::string const & path);
