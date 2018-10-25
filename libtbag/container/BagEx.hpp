@@ -51,6 +51,11 @@ public:
 public:
     TBAG_CONSTEXPR static unsigned int const MAX_ELEMENTS_BUFFER_SIZE = 8;
 
+    TBAG_CONSTEXPR static unsigned int getMaxDims() TBAG_NOEXCEPT
+    {
+        return MAX_ELEMENTS_BUFFER_SIZE;
+    }
+
 public:
     template <typename T>
     using Allocator = std::allocator<T>;
