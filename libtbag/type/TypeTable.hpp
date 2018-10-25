@@ -95,20 +95,6 @@ template <> struct BaseTypeInfo<t> : public std::true_type {                    
 TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
 
-#ifndef _STATIC_ASSERT_CHECK_PRIMARY_TYPE
-#define _STATIC_ASSERT_CHECK_PRIMARY_TYPE(type_name) \
-    static_assert(BaseTypeInfo<type_name>::value, "The " #type_name " type is not a primary type.")
-#endif
-
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE(  int8_t);
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE( uint8_t);
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int16_t);
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint16_t);
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int32_t);
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint32_t);
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int64_t);
-_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint64_t);
-
 template <typename T>
 struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
 {
@@ -172,10 +158,33 @@ TBAG_POP_MACRO(max);
 #endif // defined(TBAG_COMP_MSVC)
 
 template <typename T>
-inline TypeTable getTypeTable() TBAG_NOEXCEPT
+TBAG_CONSTEXPR inline TypeTable getTypeTable() TBAG_NOEXCEPT
 {
     return TypeInfo<T>::table();
 }
+
+#ifndef _STATIC_ASSERT_CHECK_PRIMARY_TYPE
+#define _STATIC_ASSERT_CHECK_PRIMARY_TYPE(type_name) \
+    static_assert(BaseTypeInfo<type_name>::value, "The " #type_name " type is not a primary type.")
+#endif
+
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(  int8_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( uint8_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int16_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint16_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int32_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint32_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int64_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint64_t);
+
+TBAG_CONSTEXPR TypeTable const   TT_INT8 = getTypeTable<  int8_t>();
+TBAG_CONSTEXPR TypeTable const  TT_UINT8 = getTypeTable< uint8_t>();
+TBAG_CONSTEXPR TypeTable const  TT_INT16 = getTypeTable< int16_t>();
+TBAG_CONSTEXPR TypeTable const TT_UINT16 = getTypeTable<uint16_t>();
+TBAG_CONSTEXPR TypeTable const  TT_INT32 = getTypeTable< int32_t>();
+TBAG_CONSTEXPR TypeTable const TT_UINT32 = getTypeTable<uint32_t>();
+TBAG_CONSTEXPR TypeTable const  TT_INT64 = getTypeTable< int64_t>();
+TBAG_CONSTEXPR TypeTable const TT_UINT64 = getTypeTable<uint64_t>();
 
 inline char const * getTypeName(TypeTable t) TBAG_NOEXCEPT
 {
