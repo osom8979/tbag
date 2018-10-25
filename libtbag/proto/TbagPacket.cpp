@@ -203,9 +203,9 @@ TbagPacketParser::~TbagPacketParser()
     // EMPTY.
 }
 
-Err TbagPacketParser::parse(char const * buffer, std::size_t size, void * arg)
+void TbagPacketParser::set(char const * buffer, std::size_t size)
 {
-    return Err::E_SUCCESS;
+    _buffer.assign(buffer, buffer + size);
 }
 
 } // namespace proto

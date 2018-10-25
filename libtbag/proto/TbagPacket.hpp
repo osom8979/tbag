@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <string>
 #include <memory>
@@ -92,15 +93,21 @@ public:
     friend class Impl;
     using UniqueImpl = std::unique_ptr<Impl>;
 
+public:
+    using Buffer = libtbag::util::Buffer;
+
 private:
     UniqueImpl _impl;
+    Buffer   _buffer;
 
 public:
     TbagPacketParser();
     virtual ~TbagPacketParser();
 
 public:
-    Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
+    void set(char const * buffer, std::size_t size);
+
+public:
 };
 
 /**
