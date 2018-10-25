@@ -95,6 +95,20 @@ template <> struct BaseTypeInfo<t> : public std::true_type {                    
 TBAG_TYPE_TABLE_MAP(_TBAG_XX)
 #undef _TBAG_XX
 
+#ifndef _STATIC_ASSERT_CHECK_PRIMARY_TYPE
+#define _STATIC_ASSERT_CHECK_PRIMARY_TYPE(type_name) \
+    static_assert(BaseTypeInfo<type_name>::value, "The " #type_name " type is not a primary type.")
+#endif
+
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(  int8_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( uint8_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int16_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint16_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int32_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint32_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE( int64_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(uint64_t);
+
 template <typename T>
 struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
 {
