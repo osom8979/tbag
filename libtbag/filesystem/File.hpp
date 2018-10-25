@@ -100,6 +100,7 @@ TBAG_API Err readFile(std::string const & path, util::Buffer & result, uint64_t 
 TBAG_API Err readFile(std::string const & path, std::string  & result);
 TBAG_API Err readFile(std::string const & path, util::Buffer & result);
 
+TBAG_API Err writeFile(std::string const & path, char const * buffer, std::size_t size);
 TBAG_API Err writeFile(std::string const & path, std::string const & content);
 TBAG_API Err writeFile(std::string const & path, util::Buffer const & content);
 

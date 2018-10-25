@@ -144,9 +144,24 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
         result.resize(SIZE);
     }
 
-    int READ_SIZE = f.read((char*)&result[0], SIZE, 0);
+    int const READ_SIZE = f.read((char*)&result[0], SIZE, 0);
     if (SIZE != static_cast<uint64_t>(READ_SIZE)) {
         tDLogW("readToBuffer() Read size is not the same: {}/{}.", READ_SIZE, SIZE);
+    }
+
+    return Err::E_SUCCESS;
+}
+
+static Err writeFromBuffer(std::string const & path, char const * buffer, std::size_t size)
+{
+    File f(path, File::Flags().clear().creat().wronly());
+    if (f.isOpen() == false) {
+        return Err::E_ENOENT;
+    }
+
+    int const WRITE_SIZE = f.write(buffer, size, 0);
+    if (size != static_cast<uint64_t>(WRITE_SIZE)) {
+        tDLogW("writeFromBuffer() Read size is not the same: {}/{}.", WRITE_SIZE, size);
     }
 
     return Err::E_SUCCESS;
@@ -155,17 +170,7 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 template <typename StlContainerType>
 static Err writeFromBuffer(std::string const & path, StlContainerType const & content)
 {
-    File f(path, File::Flags().clear().creat().wronly());
-    if (f.isOpen() == false) {
-        return Err::E_ENOENT;
-    }
-
-    int WRITE_SIZE = f.write((char*)&content[0], content.size(), 0);
-    if (content.size() != static_cast<uint64_t>(WRITE_SIZE)) {
-        tDLogW("writeFromBuffer() Read size is not the same: {}/{}.", WRITE_SIZE, content.size());
-    }
-
-    return Err::E_SUCCESS;
+    return writeFromBuffer(path, (char const *)&content[0], content.size());
 }
 
 // ----------------
@@ -192,6 +197,11 @@ Err readFile(std::string const & path, util::Buffer & result)
 {
     Path const READ_FILE_PATH(path);
     return readFile(path, result, READ_FILE_PATH.getState().size);
+}
+
+Err writeFile(std::string const & path, char const * buffer, std::size_t size)
+{
+    return impl::writeFromBuffer(path, buffer, size);
 }
 
 Err writeFile(std::string const & path, std::string const & content)
