@@ -9,7 +9,6 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
 
-#include <algorithm>
 #include <utility>
 #include <sstream>
 
@@ -22,6 +21,13 @@ namespace container {
 BagEx::BagEx() TBAG_NOEXCEPT : _type(TypeTable::TT_UNKNOWN), _bag(nullptr), _user(nullptr)
 {
     // EMPTY.
+}
+
+BagEx::BagEx(std::string const & content) : BagEx()
+{
+    if (isFailure(fromString(content))) {
+        throw std::bad_alloc();
+    }
 }
 
 BagEx::BagEx(BagEx const & obj) TBAG_NOEXCEPT : BagEx()
@@ -48,6 +54,12 @@ BagEx & BagEx::operator =(BagEx const & obj) TBAG_NOEXCEPT
 BagEx & BagEx::operator =(BagEx && obj) TBAG_NOEXCEPT
 {
     swap(obj);
+    return *this;
+}
+
+BagEx & BagEx::operator =(std::string const & content)
+{
+    fromString(content);
     return *this;
 }
 
@@ -232,6 +244,24 @@ bool BagEx::empty() const
 
 std::string BagEx::toString() const
 {
+    auto const * BUFFER = castData<char>();
+    return std::string(BUFFER, BUFFER + size());
+}
+
+std::string BagEx::toHexString() const
+{
+    using namespace libtbag::string;
+    return convertByteArrayToHexString(castData<uint8_t>(), size(), STRING_EMPTY);
+}
+
+std::string BagEx::toHexBoxString(int line_width) const
+{
+    using namespace libtbag::string;
+    return convertByteArrayToHexStringBox(castData<uint8_t>(), size(), line_width);
+}
+
+std::string BagEx::toInfoString() const
+{
     if (!_bag) {
         return "BagEx[0x00]{NULL}(0)";
     }
@@ -252,6 +282,28 @@ std::string BagEx::toString() const
     }
 
     return ss.str();
+}
+
+std::string BagEx::toAutoString() const
+{
+    if (exists() && dims() == 1 && _type == TypeTable::TT_CHAR) {
+        return toString();
+    }
+    return toInfoString();
+}
+
+Err BagEx::fromString(std::string const & content)
+{
+    auto code = create<char>();
+    if (isFailure(code)) {
+        return code;
+    }
+    code = resize(content.size());
+    if (isFailure(code)) {
+        return code;
+    }
+    std::copy(content.begin(), content.end(), castData<char>());
+    return Err::E_SUCCESS;
 }
 
 } // namespace container
