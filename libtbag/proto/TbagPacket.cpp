@@ -38,8 +38,11 @@ TBAG_POP_MACRO(max);
 #include <libtbag/proto/TbagPacket.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
+#include <libtbag/filesystem/File.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 #include <cassert>
+#include <algorithm>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -213,6 +216,14 @@ public:
         builder.Clear();
     }
 
+    Err assign(uint8_t const * buffer, std::size_t size)
+    {
+        using namespace libtbag::proto::fbs::tbag;
+        clear();
+        finish(builder.CreateVector(buffer, size));
+        return Err::E_SUCCESS;
+    }
+
     std::string toJsonString() const
     {
         std::string result;
@@ -352,6 +363,12 @@ std::size_t TbagPacketBuilder::size() const
     return _impl->size();
 }
 
+Err TbagPacketBuilder::assign(uint8_t const * buffer, std::size_t size)
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->assign(buffer, size);
+}
+
 std::string TbagPacketBuilder::toJsonString() const
 {
     assert(static_cast<bool>(_impl));
@@ -473,7 +490,7 @@ public:
                 bag.resize(I0, I1, I2, I3, I4, I5, I6, I7);
             }
 
-            _parent->onPair(std::string(itr->key()->str()), bag, arg);
+            _parent->onPair(std::string(itr->key()->str()), std::move(bag), arg);
         }
 
         return Err::E_SUCCESS;
@@ -484,7 +501,7 @@ public:
 // TbagPacketParser implementation.
 // --------------------------------
 
-TbagPacketParser::TbagPacketParser() : _impl(std::make_unique<Impl>(this))
+TbagPacketParser::TbagPacketParser() : _impl(std::make_unique<Impl>(this)), _parsing(false)
 {
     assert(static_cast<bool>(_impl));
 }
@@ -494,16 +511,157 @@ TbagPacketParser::~TbagPacketParser()
     // EMPTY.
 }
 
-void TbagPacketParser::set(char const * buffer, std::size_t size)
+Err TbagPacketParser::parse(char const * buffer, std::size_t size, void * arg)
 {
     assert(static_cast<bool>(_impl));
-    _buffer.assign(buffer, buffer + size);
+    _parsing = true;
+    auto const CODE = _impl->parse(buffer, size, arg, false, nullptr);
+    _parsing = false;
+    if (isFailure(CODE)) {
+        tDLogE("TbagPacketParser::parse() parsing error: {}", CODE);
+    }
+    return CODE;
 }
 
-Err TbagPacketParser::parse(void * arg)
+Err TbagPacketParser::parseOnlyHeader(char const * buffer, std::size_t size, void * arg)
 {
     assert(static_cast<bool>(_impl));
-    return _impl->parse(_buffer.data(), _buffer.size(), arg);
+    _parsing = true;
+    auto const CODE = _impl->parse(buffer, size, arg, true, nullptr);
+    _parsing = false;
+    if (isFailure(CODE)) {
+        tDLogE("TbagPacketParser::parseOnlyHeader() parsing error: {}", CODE);
+    }
+    return CODE;
+}
+
+Err TbagPacketParser::parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg)
+{
+    assert(static_cast<bool>(_impl));
+    _parsing = true;
+    auto const CODE = _impl->parse(buffer, size, arg, false, key.c_str());
+    _parsing = false;
+    if (isFailure(CODE)) {
+        tDLogE("TbagPacketParser::parseFindKey() parsing error: {}", CODE);
+    }
+    return CODE;
+}
+
+// --------------------------
+// TbagPacket implementation.
+// --------------------------
+
+TbagPacket::TbagPacket(std::size_t capacity) : TbagPacketBuilder(capacity), TbagPacketParser()
+{
+    // EMPTY.
+}
+
+TbagPacket::~TbagPacket()
+{
+    // EMPTY.
+}
+
+void TbagPacket::onHeader(uint64_t id, int32_t type, int32_t code, void * arg)
+{
+    if (arg == nullptr) {
+        return;
+    }
+
+    if (this == arg) {
+        _id = id;
+        _type = type;
+        _code = code;
+        return;
+    }
+
+    auto * user_arg = (UserArg*)arg;
+    assert(user_arg != nullptr);
+
+    if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
+        BagEx * bag = (BagEx*)user_arg->user;
+        assert(bag != nullptr);
+    } else {
+        // Unknown types.
+    }
+}
+
+void TbagPacket::onPair(std::string && key, BagEx && val, void * arg)
+{
+    if (arg == nullptr) {
+        return;
+    }
+
+    if (this == arg) {
+        _bags.insert(std::make_pair(key, val));
+        return;
+    }
+
+    auto * user_arg = (UserArg*)arg;
+    assert(user_arg != nullptr);
+
+    if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
+        BagEx * bag = (BagEx*)user_arg->user;
+        assert(bag != nullptr);
+        *bag = std::move(val);
+    } else {
+        // Unknown types.
+    }
+}
+
+void TbagPacket::clear()
+{
+    _id = 0;
+    _type = 0;
+    _code = 0;
+    _bags.clear();
+}
+
+Err TbagPacket::parseSelf(char const * buffer, std::size_t size)
+{
+    return parse(buffer, size, this);
+}
+
+Err TbagPacket::parseSelf()
+{
+    return parse((char const *)point(), size(), this);
+}
+
+TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
+{
+    BagEx result;
+    UserArg arg{static_cast<int>(UserArgType::UAT_BAG_EX), &result};
+    Err const PARSE_RESULT = parseFindKey(buffer, size, key, &arg);
+    if (code != nullptr) {
+        *code = PARSE_RESULT;
+    }
+    return result;
+}
+
+TbagPacket::BagEx TbagPacket::findKeySelf(std::string const & key, Err * code)
+{
+    return findKey((char const *)point(), size(), key, code);
+}
+
+Err TbagPacket::buildSelf()
+{
+    return build(_bags, _id, _type, _code);
+}
+
+Err TbagPacket::saveFile(std::string const & path)
+{
+    using namespace libtbag::filesystem;
+    return writeFile(path, (char const *)point(), size());
+}
+
+Err TbagPacket::loadFile(std::string const & path)
+{
+    using namespace libtbag::filesystem;
+    Buffer buffer;
+    auto const CODE = readFile(path, buffer);
+    if (isSuccess(CODE)) {
+        return parseSelf(buffer.data(), buffer.size());
+    }
+    return CODE;
 }
 
 } // namespace proto

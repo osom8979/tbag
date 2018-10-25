@@ -27,6 +27,7 @@
 #include <map>
 #include <unordered_map>
 #include <memory>
+#include <atomic>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -43,6 +44,7 @@ struct TbagPacketTypes : private Noncopyable
 #else
     using BagExMap  = std::unordered_map<std::string, BagEx>;
 #endif
+    static_assert(BagEx::getMaxDims() == 8, "FlatBuffers compatibility check. (table Pair)");
 };
 
 /**
@@ -77,6 +79,9 @@ public:
     std::size_t size() const;
 
 public:
+    Err assign(uint8_t const * buffer, std::size_t size);
+
+public:
     std::string toJsonString() const;
 
 public:
@@ -99,26 +104,26 @@ public:
     friend class Impl;
     using UniqueImpl = std::unique_ptr<Impl>;
 
-public:
-    using Buffer = libtbag::util::Buffer;
-
 private:
     UniqueImpl _impl;
-    Buffer   _buffer;
+    std::atomic_bool _parsing;
 
 public:
     TbagPacketParser();
     virtual ~TbagPacketParser();
 
 public:
-    void set(char const * buffer, std::size_t size);
+    inline bool isParsing() const TBAG_NOEXCEPT
+    { return _parsing; }
 
 public:
-    Err parse(void * arg = nullptr);
+    Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
+    Err parseOnlyHeader(char const * buffer, std::size_t size, void * arg = nullptr);
+    Err parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg = nullptr);
 
-public:
+protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) { /* EMPTY. */ }
-    virtual void onPair(std::string const & key, BagEx const & val, void * arg) { /* EMPTY. */ }
+    virtual void onPair(std::string && key, BagEx && val, void * arg) { /* EMPTY. */ }
 };
 
 /**
@@ -130,16 +135,67 @@ public:
 class TBAG_API TbagPacket : public TbagPacketBuilder, public TbagPacketParser
 {
 public:
-    TbagPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY)
-            : TbagPacketBuilder(capacity), TbagPacketParser()
-    {
-        // EMPTY.
-    }
+    using Buffer = libtbag::util::Buffer;
 
-    virtual ~TbagPacket()
+private:
+    uint64_t _id;
+    int32_t  _type;
+    int32_t  _code;
+    BagExMap _bags;
+
+public:
+    enum class UserArgType : int
     {
-        // EMPTY.
-    }
+        UAT_UNKNOWN = -1,
+        UAT_BAG_EX = -2,
+    };
+
+public:
+    struct UserArg
+    {
+        int type = static_cast<int>(UserArgType::UAT_UNKNOWN);
+        void * user = nullptr;
+    };
+
+public:
+    TbagPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    virtual ~TbagPacket();
+
+protected:
+    virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) override;
+    virtual void onPair(std::string && key, BagEx && val, void * arg) override;
+
+public:
+    inline uint64_t   id() const TBAG_NOEXCEPT { return   _id; }
+    inline uint32_t type() const TBAG_NOEXCEPT { return _type; }
+    inline uint32_t code() const TBAG_NOEXCEPT { return _code; }
+
+public:
+    inline void   setId(uint64_t value) TBAG_NOEXCEPT {   _id = value; }
+    inline void setType(uint32_t value) TBAG_NOEXCEPT { _type = value; }
+    inline void setCode(uint32_t value) TBAG_NOEXCEPT { _code = value; }
+
+public:
+    inline BagExMap       & bags()       TBAG_NOEXCEPT { return _bags; }
+    inline BagExMap const & bags() const TBAG_NOEXCEPT { return _bags; }
+
+public:
+    void clear();
+
+public:
+    Err parseSelf(char const * buffer, std::size_t size);
+    Err parseSelf();
+
+public:
+    BagEx findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
+    BagEx findKeySelf(std::string const & key, Err * code = nullptr);
+
+public:
+    Err buildSelf();
+
+public:
+    Err saveFile(std::string const & path);
+    Err loadFile(std::string const & path);
 };
 
 } // namespace proto
