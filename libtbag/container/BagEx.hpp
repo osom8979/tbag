@@ -214,8 +214,8 @@ public:
     }
 
 public:
-    Err resize(std::size_t i0/**/, std::size_t i1 = 0, std::size_t i2 = 0, std::size_t i3 = 0,
-               std::size_t i4 = 0, std::size_t i5 = 0, std::size_t i6 = 0, std::size_t i7 = 0);
+    Err resize(unsigned i0/**/, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
+               unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0);
 
 public:
     // @formatter:off

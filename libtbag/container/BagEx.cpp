@@ -115,8 +115,8 @@ Err BagEx::create(TypeTable type)
     return Err::E_BADALLOC;
 }
 
-Err BagEx::resize(std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
-                  std::size_t i4, std::size_t i5, std::size_t i6, std::size_t i7)
+Err BagEx::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
+                  unsigned i4, unsigned i5, unsigned i6, unsigned i7)
 {
     if (!_bag) {
         return Err::E_NREADY;

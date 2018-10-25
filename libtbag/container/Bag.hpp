@@ -411,9 +411,13 @@ public:
         return static_cast<size_type>(_container.size());
     }
 
-    size_type size(size_type index) const TBAG_NOEXCEPT_SP_OP(_dimenstions.at(index))
+    size_type size(size_type index) const TBAG_NOEXCEPT_SPECIFIER((
+            TBAG_NOEXCEPT_OPERATOR(_dimenstions.size()) && TBAG_NOEXCEPT_OPERATOR(_dimenstions.at(index)) ))
     {
-        return _dimenstions.at(index);
+        if (index < _dimenstions.size()) {
+            return _dimenstions.at(index);
+        }
+        return 0;
     }
 
     size_type dims() const TBAG_NOEXCEPT_SP_OP(_dimenstions.size())

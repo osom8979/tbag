@@ -38,6 +38,14 @@ union AnyArr
 table Pair
 {
     key : string;
+    i0  : uint;
+    i1  : uint;
+    i2  : uint;
+    i3  : uint;
+    i4  : uint;
+    i5  : uint;
+    i6  : uint;
+    i7  : uint;
     val : AnyArr;
 }
 

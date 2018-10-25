@@ -73,13 +73,6 @@ public:
     virtual ~TbagPacketBuilder();
 
 public:
-    inline bool exists() const TBAG_NOEXCEPT
-    { return static_cast<bool>(_impl); }
-
-    inline operator bool() const TBAG_NOEXCEPT
-    { return exists(); }
-
-public:
     uint8_t * point() const;
     std::size_t size() const;
 
@@ -90,6 +83,7 @@ public:
     Err build(uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(BagExMap const & bags, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(std::string const & content, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
+    Err build(std::string const & key, std::string const & val, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
 };
 
 /**
@@ -120,6 +114,11 @@ public:
     void set(char const * buffer, std::size_t size);
 
 public:
+    Err parse(void * arg = nullptr);
+
+public:
+    virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) { /* EMPTY. */ }
+    virtual void onPair(std::string const & key, BagEx const & val, void * arg) { /* EMPTY. */ }
 };
 
 /**

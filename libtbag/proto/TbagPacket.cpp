@@ -252,6 +252,14 @@ public:
         return Err::E_SUCCESS;
     }
 
+    Err build(uint64_t id, int32_t type, int32_t code, std::string const & key, std::string const & val)
+    {
+        using namespace libtbag::proto::fbs::tbag;
+        clear();
+        finish(CreateTbagPacket(builder, id, type, code, createPairs(key, val)));
+        return Err::E_SUCCESS;
+    }
+
     PairOffsetVectorOffset createPairs(BagExMap const bags)
     {
         std::vector<PairOffset> offsets;
@@ -268,6 +276,13 @@ public:
         return builder.CreateVector(offsets);
     }
 
+    PairOffsetVectorOffset createPairs(std::string const & key, std::string const & val)
+    {
+        std::vector<PairOffset> offsets;
+        offsets.push_back(createPair(key, BagEx(val)));
+        return builder.CreateVector(offsets);
+    }
+
     PairOffset createPair(std::string const & key, BagEx const & bag)
     {
         using namespace libtbag::proto::fbs::tbag;
@@ -276,7 +291,16 @@ public:
         if (VALUE_TYPE == AnyArr_NONE) {
             return CreatePair(builder, builder.CreateString(key));
         }
-        return CreatePair(builder, builder.CreateString(key), VALUE_TYPE, createAnyArr(VALUE_TYPE, bag));
+        auto const I0 = bag.size(0);
+        auto const I1 = bag.size(1);
+        auto const I2 = bag.size(2);
+        auto const I3 = bag.size(3);
+        auto const I4 = bag.size(4);
+        auto const I5 = bag.size(5);
+        auto const I6 = bag.size(6);
+        auto const I7 = bag.size(7);
+        return CreatePair(builder, builder.CreateString(key), I0, I1, I2, I3, I4, I5, I6, I7,
+                          VALUE_TYPE, createAnyArr(VALUE_TYPE, bag));
     }
 
     flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, BagEx const & bag)
@@ -318,38 +342,44 @@ TbagPacketBuilder::~TbagPacketBuilder()
 
 uint8_t * TbagPacketBuilder::point() const
 {
-    assert(exists());
+    assert(static_cast<bool>(_impl));
     return _impl->point();
 }
 
 std::size_t TbagPacketBuilder::size() const
 {
-    assert(exists());
+    assert(static_cast<bool>(_impl));
     return _impl->size();
 }
 
 std::string TbagPacketBuilder::toJsonString() const
 {
-    assert(exists());
+    assert(static_cast<bool>(_impl));
     return _impl->toJsonString();
 }
 
 Err TbagPacketBuilder::build(uint64_t id, int32_t type, int32_t code)
 {
-    assert(exists());
+    assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code);
 }
 
 Err TbagPacketBuilder::build(BagExMap const & bags, uint64_t id, int32_t type, int32_t code)
 {
-    assert(exists());
+    assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code, bags);
 }
 
 Err TbagPacketBuilder::build(std::string const & content, uint64_t id, int32_t type, int32_t code)
 {
-    assert(exists());
+    assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code, content);
+}
+
+Err TbagPacketBuilder::build(std::string const & key, std::string const & val, uint64_t id, int32_t type, int32_t code)
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->build(id, type, code, key, val);
 }
 
 /**
@@ -366,7 +396,7 @@ private:
 public:
     Impl(TbagPacketParser * parent) : _parent(parent)
     {
-        // EMPTY.
+        assert(_parent != nullptr);
     }
 
     ~Impl()
@@ -375,8 +405,77 @@ public:
     }
 
 public:
-    Err parse(char const * buffer, std::size_t size, void * arg)
+    Err parse(char const * buffer, std::size_t size,
+              void * arg = nullptr,
+              bool only_header = false,
+              char const * key = nullptr)
     {
+        using namespace flatbuffers;
+        using namespace libtbag::proto::fbs::tbag;
+
+        assert(_parent != nullptr);
+
+        Verifier verifier((uint8_t const *)buffer, size);
+        if (!VerifyTbagPacketBuffer(verifier)) {
+            return Err::E_PARSING;
+        }
+
+        auto const * PACKET = GetTbagPacket(buffer);
+        _parent->onHeader(PACKET->id(), PACKET->type(), PACKET->code(), arg);
+        if (only_header) {
+            return Err::E_SUCCESS;
+        }
+
+        auto const FIND_KEY = std::string(key);
+        auto const END = PACKET->pairs()->end();
+        for (auto itr = PACKET->pairs()->begin(); itr != END; ++itr) {
+            if (!FIND_KEY.empty() && FIND_KEY != itr->key()->str()) {
+                continue;
+            }
+
+            auto const VAL_TYPE = itr->val_type();
+            if (!(AnyArr_MIN <= COMPARE_AND(VAL_TYPE) <= AnyArr_MAX)) {
+                return Err::E_ENOMSG;
+            }
+
+            BagEx bag;
+            Err code;
+
+            switch (VAL_TYPE) {
+            // @formatter:off
+            case AnyArr_ByteArr:    code = bag.create<  int8_t>();  break;
+            case AnyArr_UbyteArr:   code = bag.create< uint8_t>();  break;
+            case AnyArr_ShortArr:   code = bag.create< int16_t>();  break;
+            case AnyArr_UshortArr:  code = bag.create<uint16_t>();  break;
+            case AnyArr_IntArr:     code = bag.create< int32_t>();  break;
+            case AnyArr_UintArr:    code = bag.create<uint32_t>();  break;
+            case AnyArr_LongArr:    code = bag.create< int64_t>();  break;
+            case AnyArr_UlongArr:   code = bag.create<uint64_t>();  break;
+            case AnyArr_FloatArr:   code = bag.create<   float>();  break;
+            case AnyArr_DoubleArr:  code = bag.create<  double>();  break;
+            case AnyArr_NONE:       code = Err::E_SUCCESS;          break;
+            default:                code = Err::E_ILLSTATE;         break;
+            // @formatter:on
+            }
+
+            if (isFailure(code)) {
+                return code;
+            }
+            if (VAL_TYPE != AnyArr_NONE) {
+                auto const I0 = itr->i0();
+                auto const I1 = itr->i1();
+                auto const I2 = itr->i2();
+                auto const I3 = itr->i3();
+                auto const I4 = itr->i4();
+                auto const I5 = itr->i5();
+                auto const I6 = itr->i6();
+                auto const I7 = itr->i7();
+                bag.resize(I0, I1, I2, I3, I4, I5, I6, I7);
+            }
+
+            _parent->onPair(std::string(itr->key()->str()), bag, arg);
+        }
+
         return Err::E_SUCCESS;
     }
 };
@@ -397,7 +496,14 @@ TbagPacketParser::~TbagPacketParser()
 
 void TbagPacketParser::set(char const * buffer, std::size_t size)
 {
+    assert(static_cast<bool>(_impl));
     _buffer.assign(buffer, buffer + size);
+}
+
+Err TbagPacketParser::parse(void * arg)
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->parse(_buffer.data(), _buffer.size(), arg);
 }
 
 } // namespace proto
