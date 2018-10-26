@@ -457,6 +457,8 @@ public:
             return Err::E_SUCCESS;
         }
 
+        _parent->onPairSize(PACKET->pairs()->size(), arg);
+
         auto const FIND_KEY = (key != nullptr ? std::string(key) : std::string());
         auto const END = PACKET->pairs()->end();
         for (auto itr = PACKET->pairs()->begin(); itr != END; ++itr) {

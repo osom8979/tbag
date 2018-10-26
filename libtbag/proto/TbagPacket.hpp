@@ -129,6 +129,7 @@ public:
 
 protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) { /* EMPTY. */ }
+    virtual void onPairSize(std::size_t size, void * arg) { /* EMPTY. */ }
     virtual void onPair(std::string && key, BagEx && val, void * arg) { /* EMPTY. */ }
 };
 
