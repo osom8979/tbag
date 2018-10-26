@@ -667,7 +667,10 @@ Err TbagPacket::update()
 TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
 {
     BagEx result;
-    UserArg arg = { static_cast<int>(UserArgType::UAT_BAG_EX), &result };
+    UserArg arg;
+    arg.type = static_cast<int>(UserArgType::UAT_BAG_EX);
+    arg.user = &result;
+
     Err const PARSE_RESULT = parseFindKey(buffer, size, key, &arg);
     if (code != nullptr) {
         *code = PARSE_RESULT;
