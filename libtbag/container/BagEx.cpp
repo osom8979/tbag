@@ -90,6 +90,10 @@ void BagEx::clear()
 
 Err BagEx::create(TypeTable type)
 {
+    if (_type == type) {
+        return Err::E_ALREADY;
+    }
+
     switch (type) {
 #define _TBAG_XX(name, symbol, type) \
     case TypeTable::TT_##name:       \
@@ -138,6 +142,16 @@ Err BagEx::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
     } catch (...) {
         return Err::E_UNKEXCP;
     }
+}
+
+Err BagEx::createResize(TypeTable type, unsigned i0, unsigned i1, unsigned i2, unsigned i3,
+                        unsigned i4, unsigned i5, unsigned i6, unsigned i7)
+{
+    Err const CODE = create(type);
+    if (CODE != Err::E_ALREADY && CODE != Err::E_SUCCESS) {
+        return CODE;
+    }
+    return resize(i0, i1, i2, i3, i4, i5, i6, i7);
 }
 
 void * BagEx::data()
@@ -294,14 +308,11 @@ std::string BagEx::toAutoString() const
 
 Err BagEx::fromString(std::string const & content)
 {
-    auto code = create<char>();
-    if (isFailure(code)) {
-        return code;
+    Err const CODE = createResize<char>(content.size());
+    if (isFailure(CODE)) {
+        return CODE;
     }
-    code = resize(content.size());
-    if (isFailure(code)) {
-        return code;
-    }
+    assert(_type == TypeTable::TT_CHAR);
     std::copy(content.begin(), content.end(), castData<char>());
     return Err::E_SUCCESS;
 }

@@ -27,6 +27,7 @@
 #include <ostream>
 #include <algorithm>
 #include <type_traits>
+#include <iterator>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -212,6 +213,7 @@ public:
 public:
     Err create(TypeTable type);
 
+public:
     template <typename Type>
     Err create()
     {
@@ -221,6 +223,18 @@ public:
 public:
     Err resize(unsigned i0/**/, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
                unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0);
+
+public:
+    Err createResize(TypeTable type, unsigned i0, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
+                     unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0);
+
+public:
+    template <typename Type>
+    Err createResize(unsigned i0/**/, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
+                     unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0)
+    {
+        return createResize(libtbag::type::getTypeTable<Type>(), i0, i1, i2, i3, i4, i5, i6, i7);
+    }
 
 public:
     // @formatter:off
@@ -241,35 +255,57 @@ public:
     bool empty() const;
 
 public:
+    template <typename InputType>
+    void copyFrom(InputType const * data, std::size_t size, std::size_t offset = 0)
+    {
+        assert(static_cast<bool>(_bag));
+        switch (_type) {
+#define _TBAG_XX(name, symbol, type) \
+        case TypeTable::TT_##name:   \
+            std::copy(data, data + size, castData<type>() + offset); break;
+        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+        case TypeTable::TT_UNKNOWN:
+        default: assert(false && "Unknown type.");
+        }
+    }
+
+public:
     std::string toString() const;
     std::string toHexString() const;
     std::string toHexBoxString(int line_width = 2*8) const;
     std::string toInfoString() const;
     std::string toAutoString() const;
 
+public:
     template <typename Type>
     std::vector<Type> toVector() const
     {
-        auto const * BUFFER = castData<Type>();
-        return std::vector<Type>(BUFFER, BUFFER + size());
+        assert(static_cast<bool>(_bag));
+        switch (_type) {
+#define _TBAG_XX(name, symbol, type) \
+        case TypeTable::TT_##name:   \
+            return std::vector<Type>(castData<type>(), castData<type>() + size());
+        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+        case TypeTable::TT_UNKNOWN:
+        default: assert(false && "Unknown type.");
+        }
+        return std::vector<Type>();
     }
 
 public:
     Err fromString(std::string const & content);
 
+public:
     template <typename Type>
     Err fromVector(std::vector<Type> const & content)
     {
-        static_assert(std::is_pod<Type>::value, "Only primary types are supported.");
-
-        auto code = create<Type>();
-        if (isFailure(code)) {
-            return code;
+        Err const CODE = createResize<Type>(content.size());
+        if (isFailure(CODE)) {
+            return CODE;
         }
-        code = resize(content.size());
-        if (isFailure(code)) {
-            return code;
-        }
+        assert(_type == libtbag::type::getTypeTable<Type>());
         std::copy(content.begin(), content.end(), castData<Type>());
         return Err::E_SUCCESS;
     }
