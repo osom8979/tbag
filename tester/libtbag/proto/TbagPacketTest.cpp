@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/proto/TbagPacket.hpp>
 
 using namespace libtbag;
@@ -112,5 +113,61 @@ TEST(TbagPacketTest, Assign)
     auto const BUILD_BUFFER2 = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER2.empty());
     ASSERT_TRUE(std::equal(BUILD_BUFFER1.begin(), BUILD_BUFFER1.end(), BUILD_BUFFER2.begin(), BUILD_BUFFER2.end()));
+}
+
+TEST(TbagPacketTest, FileSaveLoad)
+{
+    tttDir(true, true);
+    auto const FILE_PATH = tttDir_Get() / "mats";
+
+    using namespace libtbag::container;
+    std::string const BAG1_KEY = "bag1";
+    std::string const BAG1_VAL = "Test";
+    std::string const BAG2_KEY = "bag2";
+    std::vector<int> const BAG2_VAL = {1, 2, 3, 4};
+
+    BagEx bag1 = BAG1_VAL;
+    BagEx bag2 = BAG2_VAL;
+    ASSERT_EQ(BagEx::TypeTable::TT_CHAR, bag1.getType());
+    ASSERT_EQ(BagEx::TypeTable::TT_INT, bag2.getType());
+
+    uint64_t const TEST_ID   = 1;
+    int32_t  const TEST_TYPE = 2;
+    int32_t  const TEST_CODE = 3;
+
+    TbagPacket::BagExMap map;
+    map.insert(std::make_pair(BAG1_KEY, bag1));
+    map.insert(std::make_pair(BAG2_KEY, bag2));
+    ASSERT_EQ(2, map.size());
+
+    TbagPacket packet1;
+    ASSERT_EQ(Err::E_SUCCESS, packet1.build(map, TEST_ID, TEST_TYPE, TEST_CODE));
+    ASSERT_FALSE(FILE_PATH.exists());
+    ASSERT_EQ(Err::E_SUCCESS, packet1.saveFile(FILE_PATH));
+    ASSERT_TRUE(FILE_PATH.exists());
+
+    TbagPacket packet2;
+    ASSERT_EQ(Err::E_SUCCESS, packet2.loadFile(FILE_PATH));
+
+    ASSERT_EQ(TEST_ID, packet2.id());
+    ASSERT_EQ(TEST_TYPE, packet2.type());
+    ASSERT_EQ(TEST_CODE, packet2.code());
+    ASSERT_FALSE(packet2.bags().empty());
+    ASSERT_EQ(2, packet2.bags().size());
+
+    auto bag1_result = packet2.bags()[BAG1_KEY];
+    auto bag2_result = packet2.bags()[BAG2_KEY];
+
+    ASSERT_EQ(BagEx::TypeTable::TT_CHAR, bag1_result.getType());
+    ASSERT_EQ(BAG1_VAL.size(), bag1_result.size());
+    ASSERT_EQ(1, bag1_result.dims());
+    ASSERT_EQ(BAG1_VAL, bag1_result.toString());
+
+    ASSERT_EQ(BagEx::TypeTable::TT_INT, bag2_result.getType());
+    ASSERT_EQ(BAG2_VAL.size(), bag2_result.size());
+    ASSERT_EQ(1, bag2_result.dims());
+    auto * bag2_begin = bag2_result.castData<int>();
+    auto * bag2_end = bag2_result.castData<int>() + bag2_result.size();
+    ASSERT_TRUE(std::equal(BAG2_VAL.begin(), BAG2_VAL.end(), bag2_begin, bag2_end));
 }
 

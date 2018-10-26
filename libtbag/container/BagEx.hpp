@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <type_traits>
 #include <iterator>
+#include <initializer_list>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -52,6 +53,7 @@ public:
 public:
     TBAG_CONSTEXPR static unsigned int const MAX_ELEMENTS_BUFFER_SIZE = 8;
 
+public:
     TBAG_CONSTEXPR static unsigned int getMaxDims() TBAG_NOEXCEPT
     {
         return MAX_ELEMENTS_BUFFER_SIZE;
@@ -90,13 +92,14 @@ private:
 public:
     BagEx() TBAG_NOEXCEPT;
     BagEx(std::string const & content);
+    BagEx(char const * content);
     BagEx(BagEx const & obj) TBAG_NOEXCEPT;
     BagEx(BagEx && obj) TBAG_NOEXCEPT;
     ~BagEx();
 
 public:
     template <typename Type>
-    explicit BagEx(std::vector<Type> const & content) : BagEx()
+    BagEx(std::vector<Type> const & content) : BagEx()
     {
         if (isFailure(fromVector<Type>(content))) {
             throw std::bad_alloc();
@@ -107,6 +110,7 @@ public:
     BagEx & operator =(BagEx const & obj) TBAG_NOEXCEPT;
     BagEx & operator =(BagEx && obj) TBAG_NOEXCEPT;
     BagEx & operator =(std::string const & content);
+    BagEx & operator =(char const * content);
 
 public:
     template <typename Type>
@@ -225,15 +229,14 @@ public:
                unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0);
 
 public:
-    Err createResize(TypeTable type, unsigned i0, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
-                     unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0);
-
-public:
-    template <typename Type>
-    Err createResize(unsigned i0/**/, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
-                     unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0)
+    template <typename Type, typename ... Args>
+    Err createResize(Args && ... args)
     {
-        return createResize(libtbag::type::getTypeTable<Type>(), i0, i1, i2, i3, i4, i5, i6, i7);
+        Err const CODE = create<Type>();
+        if (CODE != Err::E_ALREADY && CODE != Err::E_SUCCESS) {
+            return CODE;
+        }
+        return resize(std::forward<Args>(args) ...);
     }
 
 public:

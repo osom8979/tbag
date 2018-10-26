@@ -87,7 +87,7 @@ public:
     std::string toJsonString() const;
 
 public:
-    Err build(uint64_t id = 0, int32_t type = 0, int32_t code = 0);
+    Err build(uint64_t id, int32_t type = 0, int32_t code = 0);
     Err build(BagExMap const & bags, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(std::string const & content, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(std::string const & key, std::string const & val, uint64_t id = 0, int32_t type = 0, int32_t code = 0);

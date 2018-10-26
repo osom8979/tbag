@@ -494,7 +494,7 @@ public:
         using namespace libtbag::proto::fbs::tbag;
         switch (arr_type) {
         // @formatter:off
-        case AnyArr_ByteArr:    return createBagEx<PairItr,   ByteArr,   int8_t>(itr);
+        case AnyArr_ByteArr:    return createBagEx<PairItr,   ByteArr,     char>(itr);
         case AnyArr_UbyteArr:   return createBagEx<PairItr,  UbyteArr,  uint8_t>(itr);
         case AnyArr_ShortArr:   return createBagEx<PairItr,  ShortArr,  int16_t>(itr);
         case AnyArr_UshortArr:  return createBagEx<PairItr, UshortArr, uint16_t>(itr);

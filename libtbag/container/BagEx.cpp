@@ -30,6 +30,11 @@ BagEx::BagEx(std::string const & content) : BagEx()
     }
 }
 
+BagEx::BagEx(char const * content) : BagEx(std::string(content))
+{
+    // EMPTY.
+}
+
 BagEx::BagEx(BagEx const & obj) TBAG_NOEXCEPT : BagEx()
 {
     (*this) = obj;
@@ -58,6 +63,12 @@ BagEx & BagEx::operator =(BagEx && obj) TBAG_NOEXCEPT
 }
 
 BagEx & BagEx::operator =(std::string const & content)
+{
+    fromString(content);
+    return *this;
+}
+
+BagEx & BagEx::operator =(char const * content)
 {
     fromString(content);
     return *this;
@@ -142,16 +153,6 @@ Err BagEx::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
     } catch (...) {
         return Err::E_UNKEXCP;
     }
-}
-
-Err BagEx::createResize(TypeTable type, unsigned i0, unsigned i1, unsigned i2, unsigned i3,
-                        unsigned i4, unsigned i5, unsigned i6, unsigned i7)
-{
-    Err const CODE = create(type);
-    if (CODE != Err::E_ALREADY && CODE != Err::E_SUCCESS) {
-        return CODE;
-    }
-    return resize(i0, i1, i2, i3, i4, i5, i6, i7);
 }
 
 void * BagEx::data()
