@@ -475,8 +475,16 @@ public:
             }
 
             _parent->onPair(std::string(itr->key()->str()), createBagEx(itr, VAL_TYPE), arg);
+            if (!FIND_KEY.empty() && FIND_KEY == itr->key()->str()) {
+                // Found the key !! Exit the loop.
+                return Err::E_SUCCESS;
+            }
         }
 
+        if (!FIND_KEY.empty()) {
+            // Not found the key.
+            return Err::E_ENFOUND;
+        }
         return Err::E_SUCCESS;
     }
 
@@ -544,9 +552,6 @@ Err TbagPacketParser::parse(char const * buffer, std::size_t size, void * arg)
     _parsing = true;
     auto const CODE = _impl->parse(buffer, size, arg, false, nullptr);
     _parsing = false;
-    if (isFailure(CODE)) {
-        tDLogE("TbagPacketParser::parse() parsing error: {}", CODE);
-    }
     return CODE;
 }
 
@@ -561,9 +566,6 @@ Err TbagPacketParser::parseOnlyHeader(char const * buffer, std::size_t size, voi
     _parsing = true;
     auto const CODE = _impl->parse(buffer, size, arg, true, nullptr);
     _parsing = false;
-    if (isFailure(CODE)) {
-        tDLogE("TbagPacketParser::parseOnlyHeader() parsing error: {}", CODE);
-    }
     return CODE;
 }
 
@@ -573,9 +575,6 @@ Err TbagPacketParser::parseFindKey(char const * buffer, std::size_t size, std::s
     _parsing = true;
     auto const CODE = _impl->parse(buffer, size, arg, false, key.c_str());
     _parsing = false;
-    if (isFailure(CODE)) {
-        tDLogE("TbagPacketParser::parseFindKey() parsing error: {}", CODE);
-    }
     return CODE;
 }
 
@@ -672,6 +671,11 @@ TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std
         *code = PARSE_RESULT;
     }
     return result;
+}
+
+TbagPacket::BagEx TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
+{
+    return findKey(buffer.data(), buffer.size(), key, code);
 }
 
 TbagPacket::BagEx TbagPacket::findKey(std::string const & key, Err * code)

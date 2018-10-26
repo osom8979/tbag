@@ -75,6 +75,28 @@ TEST(TbagPacketTest, UpdateSelf_KeyValue)
     ASSERT_EQ(TEST_VAL, packet.bags().begin()->second.toString());
 }
 
+TEST(TbagPacketTest, FindKey)
+{
+    std::string const TEST_KEY = "TbagPacketTest";
+    std::string const TEST_VAL = "FindKey";
+
+    TbagPacket packet;
+    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_KEY, TEST_VAL));
+    auto const BUILD_BUFFER = packet.toBuffer();
+    ASSERT_FALSE(BUILD_BUFFER.empty());
+
+    Err code = Err::E_UNKNOWN;
+    auto bag1 = packet.findKey(BUILD_BUFFER, TEST_KEY, &code);
+    ASSERT_EQ(Err::E_SUCCESS, code);
+    ASSERT_TRUE(bag1.exists());
+    ASSERT_EQ(TEST_VAL, bag1.toString());
+
+    code = Err::E_UNKNOWN;
+    auto bag2 = packet.findKey(BUILD_BUFFER, "NotFoundKey", &code);
+    ASSERT_EQ(Err::E_ENFOUND, code);
+    ASSERT_FALSE(bag2.exists());
+}
+
 TEST(TbagPacketTest, Assign)
 {
     uint64_t const TEST_ID   = 1;

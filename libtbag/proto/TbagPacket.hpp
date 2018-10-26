@@ -192,6 +192,7 @@ public:
 
 public:
     BagEx findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
+    BagEx findKey(Buffer const & buffer, std::string const & key, Err * code = nullptr);
     BagEx findKey(std::string const & key, Err * code = nullptr);
 
 public:
