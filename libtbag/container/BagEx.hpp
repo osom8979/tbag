@@ -106,6 +106,15 @@ public:
         }
     }
 
+    template <typename Type>
+    BagEx(std::initializer_list<Type> list) : BagEx()
+    {
+        if (isFailure(resize<Type>(list.size()))) {
+            throw std::bad_alloc();
+        }
+        std::copy(list.begin(), list.end(), castData<Type>());
+    }
+
 public:
     BagEx & operator =(BagEx const & obj) TBAG_NOEXCEPT;
     BagEx & operator =(BagEx && obj) TBAG_NOEXCEPT;
@@ -165,8 +174,8 @@ public:
     }
 
 public:
-    template <typename Type, typename _CastBagType = BaseBagType<Type> >
-    std::shared_ptr<_CastBagType> bag() const TBAG_NOEXCEPT
+    template <typename Type>
+    std::shared_ptr< BaseBagType<Type> > bag() const TBAG_NOEXCEPT
     {
         assert(static_cast<bool>(_bag));
 
@@ -184,7 +193,7 @@ public:
         }
         assert(is_same);
 
-        return std::shared_ptr<_CastBagType>(_bag, (_CastBagType*)(_bag.get()));
+        return std::shared_ptr< BaseBagType<Type> >(_bag, (BaseBagType<Type>*)(_bag.get()));
     }
 
     template <typename CastUserType>
@@ -230,7 +239,7 @@ public:
 
 public:
     template <typename Type, typename ... Args>
-    Err createResize(Args && ... args)
+    Err resize(Args && ... args)
     {
         Err const CODE = create<Type>();
         if (CODE != Err::E_ALREADY && CODE != Err::E_SUCCESS) {
@@ -240,16 +249,8 @@ public:
     }
 
 public:
-    // @formatter:off
-    void       * data();
+    void * data();
     void const * data() const;
-    // @formatter:on
-
-public:
-    // @formatter:off
-    template <typename CastType> CastType       * castData()       { return (CastType       *)data(); }
-    template <typename CastType> CastType const * castData() const { return (CastType const *)data(); }
-    // @formatter:on
 
 public:
     std::size_t size() const;
@@ -304,13 +305,66 @@ public:
     template <typename Type>
     Err fromVector(std::vector<Type> const & content)
     {
-        Err const CODE = createResize<Type>(content.size());
+        Err const CODE = resize<Type>(content.size());
         if (isFailure(CODE)) {
             return CODE;
         }
         assert(_type == libtbag::type::getTypeTable<Type>());
         std::copy(content.begin(), content.end(), castData<Type>());
         return Err::E_SUCCESS;
+    }
+
+public:
+    template <typename ... Args>
+    std::size_t offset(Args && ... args) const
+    {
+        assert(static_cast<bool>(_bag));
+        switch (_type) {
+#define _TBAG_XX(name, symbol, type) \
+        case TypeTable::TT_##name:   \
+            return ((BAG_##name##_TYPE*)_bag.get())->offset(std::forward<Args>(args) ...);
+        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+        case TypeTable::TT_UNKNOWN:
+        default: assert(false && "Unknown type.");
+        }
+        return 0;
+    }
+
+    template <typename CastType>
+    CastType * castData()
+    {
+        return (CastType*)data();
+    }
+
+    template <typename CastType>
+    CastType const * castData() const
+    {
+        return (CastType const *)data();
+    }
+
+    template <typename CastType, typename ... Args>
+    CastType * castData(Args && ... args)
+    {
+        return castData<CastType>() + offset(std::forward<Args>(args) ...);
+    }
+
+    template <typename CastType, typename ... Args>
+    CastType const * castData(Args && ... args) const
+    {
+        return castData<CastType>() + offset(std::forward<Args>(args) ...);
+    }
+
+    template <typename CastType, typename ... Args>
+    CastType & at(Args && ... args)
+    {
+        return *castData<CastType>(std::forward<Args>(args) ...);
+    }
+
+    template <typename CastType, typename ... Args>
+    CastType const & at(Args && ... args) const
+    {
+        return *castData<CastType>(std::forward<Args>(args) ...);
     }
 };
 

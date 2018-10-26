@@ -30,6 +30,47 @@ TEST(TbagPacketTest, UpdateSelf)
     ASSERT_TRUE(packet.bags().empty());
 }
 
+TEST(TbagPacketTest, UpdateSelf_BagEx)
+{
+    using namespace libtbag::container;
+    std::string const BAG_KEY = "bag";
+    BagEx bag;
+    bag.resize<int>(2, 3);
+    ASSERT_EQ(BagEx::TypeTable::TT_INT, bag.getType());
+    ASSERT_EQ(2*3, bag.size());
+    ASSERT_EQ(2, bag.size(0));
+    ASSERT_EQ(3, bag.size(1));
+    for (int i = 0; i < bag.size(); ++i) {
+        *(bag.castData<int>() + i) = i;
+    }
+
+    TbagPacket::BagExMap map;
+    map.insert(std::make_pair(BAG_KEY, bag));
+    ASSERT_EQ(1, map.size());
+
+    TbagPacket packet1;
+    ASSERT_EQ(Err::E_SUCCESS, packet1.build(map));
+    auto const BUILD_BUFFER = packet1.toBuffer();
+    ASSERT_FALSE(BUILD_BUFFER.empty());
+
+    TbagPacket packet2;
+    ASSERT_EQ(Err::E_SUCCESS, packet2.update(BUILD_BUFFER));
+    ASSERT_FALSE(packet2.bags().empty());
+    ASSERT_EQ(1, packet2.bags().size());
+
+    auto bag_result = packet2.bags()[BAG_KEY];
+    ASSERT_EQ(BagEx::TypeTable::TT_INT, bag_result.getType());
+    ASSERT_EQ(2*3, bag_result.size());
+    ASSERT_EQ(2, bag_result.size(0));
+    ASSERT_EQ(3, bag_result.size(1));
+    ASSERT_EQ(0, bag_result.at<int>(0, 0));
+    ASSERT_EQ(1, bag_result.at<int>(0, 1));
+    ASSERT_EQ(2, bag_result.at<int>(0, 2));
+    ASSERT_EQ(3, bag_result.at<int>(1, 0));
+    ASSERT_EQ(4, bag_result.at<int>(1, 1));
+    ASSERT_EQ(5, bag_result.at<int>(1, 2));
+}
+
 TEST(TbagPacketTest, UpdateSelf_String)
 {
     std::string const TEST_TEXT = "TbagPacketTest.UpdateSelf_BagEx";

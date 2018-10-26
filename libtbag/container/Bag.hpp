@@ -452,15 +452,21 @@ public:
     }
 
     template <typename ... Args>
+    size_type offset(Args && ... args) const
+    {
+        return _dimenstions.offset({std::forward<Args>(args) ...});
+    }
+
+    template <typename ... Args>
     reference index(Args && ... args)
     {
-        return _container.at(_dimenstions.offset({std::forward<Args>(args) ...}));
+        return _container.at(offset(std::forward<Args>(args) ...));
     }
 
     template <typename ... Args>
     const_reference index(Args && ... args) const
     {
-        return _container.at(_dimenstions.offset({std::forward<Args>(args) ...}));
+        return _container.at(offset(std::forward<Args>(args) ...));
     }
 
 public:

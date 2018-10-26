@@ -309,7 +309,7 @@ std::string BagEx::toAutoString() const
 
 Err BagEx::fromString(std::string const & content)
 {
-    Err const CODE = createResize<char>(content.size());
+    Err const CODE = resize<char>(content.size());
     if (isFailure(CODE)) {
         return CODE;
     }
