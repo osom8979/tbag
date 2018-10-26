@@ -39,19 +39,19 @@ private:
 public:
     ${CLASSNAME}();
     ${CLASSNAME}(${CLASSNAME} const & obj);
-    ${CLASSNAME}(${CLASSNAME} && obj);
+    ${CLASSNAME}(${CLASSNAME} && obj) TBAG_NOEXCEPT;
     ~${CLASSNAME}();
 
 public:
     ${CLASSNAME} & operator =(${CLASSNAME} const & obj);
-    ${CLASSNAME} & operator =(${CLASSNAME} && obj);
+    ${CLASSNAME} & operator =(${CLASSNAME} && obj) TBAG_NOEXCEPT;
 
 public:
     void copy(${CLASSNAME} const & obj);
-    void swap(${CLASSNAME} & obj);
+    void swap(${CLASSNAME} & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(${CLASSNAME} & lh, ${CLASSNAME} & rh) { lh.swap(rh); }
+    inline friend void swap(${CLASSNAME} & lh, ${CLASSNAME} & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 };
 
 ${NAMESPACE_LIST_END}

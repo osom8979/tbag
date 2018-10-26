@@ -8,19 +8,21 @@ import subprocess
 import re
 
 ## Path & Directory setting.
-#THIS_FILE_PATH      = os.path.abspath(main.__file__) # import __main__ as main
-THIS_FILE_PATH       = os.path.realpath(__file__)
-SCRIPT_DIR           = os.path.dirname(THIS_FILE_PATH)
-PROJECT_DIR          = os.path.normpath(SCRIPT_DIR + '/../..')
-SOURCE_DIR           = os.path.normpath(PROJECT_DIR + '/')
-TEST_DIR             = os.path.normpath(PROJECT_DIR + '/tester')
-TEMPLATE_DIR         = os.path.normpath(PROJECT_DIR + '/template')
-HEADER_TEMPLATE      = os.path.join(TEMPLATE_DIR, 'class.hpp.in')
-SOURCE_TEMPLATE      = os.path.join(TEMPLATE_DIR, 'class.cpp.in')
-FULL_HEADER_TEMPLATE = os.path.join(TEMPLATE_DIR, 'full-class.hpp.in')
-FULL_SOURCE_TEMPLATE = os.path.join(TEMPLATE_DIR, 'full-class.cpp.in')
-TEST_TEMPLATE        = os.path.join(TEMPLATE_DIR, 'test.cpp.in')
-CONFIG_CMAKE         = os.path.join(PROJECT_DIR,  'INFORMATION')
+#THIS_FILE_PATH       = os.path.abspath(main.__file__) # import __main__ as main
+THIS_FILE_PATH        = os.path.realpath(__file__)
+SCRIPT_DIR            = os.path.dirname(THIS_FILE_PATH)
+PROJECT_DIR           = os.path.normpath(SCRIPT_DIR + '/../..')
+SOURCE_DIR            = os.path.normpath(PROJECT_DIR + '/')
+TEST_DIR              = os.path.normpath(PROJECT_DIR + '/tester')
+TEMPLATE_DIR          = os.path.normpath(PROJECT_DIR + '/template')
+HEADER_TEMPLATE       = os.path.join(TEMPLATE_DIR, 'class.hpp.in')
+SOURCE_TEMPLATE       = os.path.join(TEMPLATE_DIR, 'class.cpp.in')
+FULL_HEADER_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'full-class.hpp.in')
+FULL_SOURCE_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'full-class.cpp.in')
+PIMPL_HEADER_TEMPLATE = os.path.join(TEMPLATE_DIR, 'pimpl-class.hpp.in')
+PIMPL_SOURCE_TEMPLATE = os.path.join(TEMPLATE_DIR, 'pimpl-class.cpp.in')
+TEST_TEMPLATE         = os.path.join(TEMPLATE_DIR, 'test.cpp.in')
+CONFIG_CMAKE          = os.path.join(PROJECT_DIR,  'INFORMATION')
 
 PROJECT_TYPE_LIB = 'lib'
 PROJECT_TYPE_EXE = 'exe'

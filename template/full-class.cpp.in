@@ -27,7 +27,7 @@ ${CLASSNAME}::${CLASSNAME}(${CLASSNAME} const & obj) : ${CLASSNAME}()
     (*this) = obj;
 }
 
-${CLASSNAME}::${CLASSNAME}(${CLASSNAME} && obj) : ${CLASSNAME}()
+${CLASSNAME}::${CLASSNAME}(${CLASSNAME} && obj) TBAG_NOEXCEPT : ${CLASSNAME}()
 {
     (*this) = std::move(obj);
 }
@@ -43,7 +43,7 @@ ${CLASSNAME} & ${CLASSNAME}::operator =(${CLASSNAME} const & obj)
     return *this;
 }
 
-${CLASSNAME} & ${CLASSNAME}::operator =(${CLASSNAME} && obj)
+${CLASSNAME} & ${CLASSNAME}::operator =(${CLASSNAME} && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
@@ -56,7 +56,7 @@ void ${CLASSNAME}::copy(${CLASSNAME} const & obj)
     }
 }
 
-void ${CLASSNAME}::swap(${CLASSNAME} & obj)
+void ${CLASSNAME}::swap(${CLASSNAME} & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         // TODO: Swap object.
