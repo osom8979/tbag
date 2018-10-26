@@ -433,9 +433,7 @@ public:
 
 public:
     Err parse(char const * buffer, std::size_t size,
-              void * arg = nullptr,
-              bool only_header = false,
-              char const * key = nullptr)
+              void * arg = nullptr, bool only_header = false, char const * key = nullptr)
     {
         using namespace flatbuffers;
         using namespace libtbag::proto::fbs::tbag;
@@ -471,51 +469,58 @@ public:
                 return Err::E_ENOMSG;
             }
 
-            auto const VAL = itr->val();
-            if (!VerifyAnyArr(verifier, VAL, VAL_TYPE)) {
+            if (!VerifyAnyArr(verifier, itr->val(), VAL_TYPE)) {
                 // Use 'Verifier error' to distinguish it from 'Parsing error' at the top.
                 return Err::E_VERIFIER;
             }
 
-            BagEx bag;
-            Err code;
-
-            switch (VAL_TYPE) {
-            // @formatter:off
-            case AnyArr_ByteArr:    code = bag.create<  int8_t>();  break;
-            case AnyArr_UbyteArr:   code = bag.create< uint8_t>();  break;
-            case AnyArr_ShortArr:   code = bag.create< int16_t>();  break;
-            case AnyArr_UshortArr:  code = bag.create<uint16_t>();  break;
-            case AnyArr_IntArr:     code = bag.create< int32_t>();  break;
-            case AnyArr_UintArr:    code = bag.create<uint32_t>();  break;
-            case AnyArr_LongArr:    code = bag.create< int64_t>();  break;
-            case AnyArr_UlongArr:   code = bag.create<uint64_t>();  break;
-            case AnyArr_FloatArr:   code = bag.create<   float>();  break;
-            case AnyArr_DoubleArr:  code = bag.create<  double>();  break;
-            case AnyArr_NONE:       code = Err::E_SUCCESS;          break;
-            default:                code = Err::E_ILLSTATE;         break;
-            // @formatter:on
-            }
-
-            if (isFailure(code)) {
-                return code;
-            }
-            if (VAL_TYPE != AnyArr_NONE) {
-                auto const I0 = itr->i0();
-                auto const I1 = itr->i1();
-                auto const I2 = itr->i2();
-                auto const I3 = itr->i3();
-                auto const I4 = itr->i4();
-                auto const I5 = itr->i5();
-                auto const I6 = itr->i6();
-                auto const I7 = itr->i7();
-                bag.resize(I0, I1, I2, I3, I4, I5, I6, I7);
-            }
-
-            _parent->onPair(std::string(itr->key()->str()), std::move(bag), arg);
+            _parent->onPair(std::string(itr->key()->str()), createBagEx(itr, VAL_TYPE), arg);
         }
 
         return Err::E_SUCCESS;
+    }
+
+    template <typename PairItr>
+    BagEx createBagEx(PairItr itr, tbag::AnyArr arr_type) const
+    {
+        using namespace libtbag::proto::fbs::tbag;
+        switch (arr_type) {
+        // @formatter:off
+        case AnyArr_ByteArr:    return createBagEx<PairItr,   ByteArr,   int8_t>(itr);
+        case AnyArr_UbyteArr:   return createBagEx<PairItr,  UbyteArr,  uint8_t>(itr);
+        case AnyArr_ShortArr:   return createBagEx<PairItr,  ShortArr,  int16_t>(itr);
+        case AnyArr_UshortArr:  return createBagEx<PairItr, UshortArr, uint16_t>(itr);
+        case AnyArr_IntArr:     return createBagEx<PairItr,    IntArr,  int32_t>(itr);
+        case AnyArr_UintArr:    return createBagEx<PairItr,   UintArr, uint32_t>(itr);
+        case AnyArr_LongArr:    return createBagEx<PairItr,   LongArr,  int64_t>(itr);
+        case AnyArr_UlongArr:   return createBagEx<PairItr,  UlongArr, uint64_t>(itr);
+        case AnyArr_FloatArr:   return createBagEx<PairItr,  FloatArr,    float>(itr);
+        case AnyArr_DoubleArr:  return createBagEx<PairItr, DoubleArr,   double>(itr);
+        case AnyArr_NONE:       return BagEx();
+        default: TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        // @formatter:on
+        }
+        return BagEx();
+    }
+
+    template <typename PairItr, typename TbagArrType, typename ValueType>
+    BagEx createBagEx(PairItr itr) const
+    {
+        BagEx bag;
+
+        Err code = bag.create<ValueType>();
+        if (isFailure(code)) {
+            return BagEx();
+        }
+
+        code = bag.resize(itr->i0(), itr->i1(), itr->i2(), itr->i3(), itr->i4(), itr->i5(), itr->i6(), itr->i7());
+        if (isFailure(code)) {
+            return BagEx();
+        }
+
+        auto val = (TbagArrType const *)itr->val();
+        bag.copyFrom(val->data()->data(), val->data()->size());
+        return bag;
     }
 };
 
@@ -661,7 +666,7 @@ Err TbagPacket::update()
 TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
 {
     BagEx result;
-    UserArg arg{static_cast<int>(UserArgType::UAT_BAG_EX), &result};
+    UserArg arg = { static_cast<int>(UserArgType::UAT_BAG_EX), &result };
     Err const PARSE_RESULT = parseFindKey(buffer, size, key, &arg);
     if (code != nullptr) {
         *code = PARSE_RESULT;
