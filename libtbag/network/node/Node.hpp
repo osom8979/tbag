@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 
 #include <memory>
 
@@ -38,10 +39,38 @@ public:
     friend struct Impl;
 
 public:
-    using SharedImpl = std::shared_ptr<Impl>;
+    enum class NodeType : int
+    {
+        NT_NONE,
+        NT_MASTER,
+        NT_SLAVE,
+    };
+
+public:
+    struct Event
+    {
+        // @formatter:off
+        virtual void onOpen(Err code){};
+        virtual void onClose(Err code){};
+
+        virtual void onLogin(std::string const & client_name, Err code){};
+        virtual void onLogout(std::string const & client_name, Err code){};
+
+        virtual void onConnect(std::string const & server_name, Err code){};
+        virtual void onDisconnect(std::string const & server_name, Err code){};
+
+        virtual void onServerRecv(std::string const & client_name, char const * buffer, std::size_t size, Err code){};
+        virtual void onClientRecv(std::string const & server_name, char const * buffer, std::size_t size, Err code){};
+        // @formatter:on
+    };
+
+public:
+    using SharedImpl  = std::shared_ptr<Impl>;
+    using SharedEvent = std::shared_ptr<Event>;
 
 private:
-    SharedImpl _impl;
+    SharedImpl  _impl;
+    SharedEvent _event;
 
 public:
     Node();
@@ -89,6 +118,18 @@ public:
     {
         return get() == obj.get();
     }
+
+public:
+    Err open(std::string const & uri);
+    Err close();
+
+public:
+    Err connect(std::string const & server_name, std::string const & uri);
+    Err disconnect(std::string const & server_name);
+
+public:
+    Err c2s(std::string const & server_name, char const * buffer, std::size_t size);
+    Err s2c(std::string const & client_name, char const * buffer, std::size_t size);
 };
 
 } // namespace node
