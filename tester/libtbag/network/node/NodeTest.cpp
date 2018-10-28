@@ -15,6 +15,5 @@ using namespace libtbag::network::node;
 TEST(NodeTest, Default)
 {
     Node object;
-    ASSERT_TRUE(true);
 }
 

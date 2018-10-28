@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 
+#include <map>
+#include <unordered_map>
 #include <memory>
 
 // -------------------
@@ -39,12 +41,29 @@ public:
     friend struct Impl;
 
 public:
-    enum class NodeType : int
+    enum class NodeState : int
     {
-        NT_NONE,
-        NT_MASTER,
-        NT_SLAVE,
+        NS_CLOSING,
+        NS_CLOSED,
+
+        NS_OPENING,
+        NS_OPENED,
+
+        NS_WORKING,
     };
+
+public:
+    inline static char const * const getNodeStateName(NodeState state) TBAG_NOEXCEPT
+    {
+        switch (state) {
+        case NodeState::NS_CLOSING: return "CLOSING";
+        case NodeState::NS_CLOSED:  return "CLOSED";
+        case NodeState::NS_OPENING: return "OPENING";
+        case NodeState::NS_OPENED:  return "OPENED";
+        case NodeState::NS_WORKING: return "WORKING";
+        default:                    return "UNKNOWN";
+        }
+    }
 
 public:
     struct Event
@@ -64,6 +83,12 @@ public:
         // @formatter:on
     };
 
+    struct Param
+    {
+        uint64_t timeout = 0;
+        bool     verbose = false;
+    };
+
 public:
     using SharedImpl  = std::shared_ptr<Impl>;
     using SharedEvent = std::shared_ptr<Event>;
@@ -74,7 +99,6 @@ private:
 
 public:
     Node();
-    Node(std::nullptr_t) TBAG_NOEXCEPT;
     Node(Node const & obj) TBAG_NOEXCEPT;
     Node(Node && obj) TBAG_NOEXCEPT;
     ~Node();
@@ -101,6 +125,9 @@ public:
     inline Impl       * get()       TBAG_NOEXCEPT { return _impl.get(); }
     inline Impl const * get() const TBAG_NOEXCEPT { return _impl.get(); }
 
+    inline SharedEvent       & event()       TBAG_NOEXCEPT { return _event; }
+    inline SharedEvent const & event() const TBAG_NOEXCEPT { return _event; }
+
 public:
     /**
      * Implemented for std::less<> compatibility.
@@ -120,12 +147,15 @@ public:
     }
 
 public:
+    static Param getDefaultParam();
+
+public:
     Err open(std::string const & uri);
     Err close();
 
 public:
-    Err connect(std::string const & server_name, std::string const & uri);
-    Err disconnect(std::string const & server_name);
+    Err connect(std::string const & client_name, std::string const & server_uri);
+    Err disconnect(std::string const & client_name);
 
 public:
     Err c2s(std::string const & server_name, char const * buffer, std::size_t size);
