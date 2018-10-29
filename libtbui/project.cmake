@@ -10,11 +10,11 @@ include (TbagModules)
 tbag_modules__apply_default ()
 tbag_modules__update_default_objects ()
 
-set (TBUI_MAJOR_VERSION 0)
-set (TBUI_MINOR_VERSION 0)
+set (TBUI_MAJOR_VERSION ${VERSION_MAJOR})
+set (TBUI_MINOR_VERSION ${VERSION_MINOR})
 
 set (TBUI_VERSION   "${TBUI_MAJOR_VERSION}.${TBUI_MINOR_VERSION}")
-set (TBUI_SOVERSION "${TBUI_VERSION}")
+set (TBUI_SOVERSION "${SOVERSION}")
 
 tbag_modules__append_definitions (
         TBUI_MAJOR_VERSION=${TBUI_MAJOR_VERSION}
