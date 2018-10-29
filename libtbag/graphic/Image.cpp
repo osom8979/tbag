@@ -12,15 +12,10 @@
 
 #include <cassert>
 
-// Fixed duplicate symbols.
-#if !defined(USE_TBAG_GAME)
 #define STB_IMAGE_IMPLEMENTATION
-#endif
 #include <stb_image.h>
 
-#if !defined(USE_TBAG_GAME)
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#endif
 #include <stb_image_write.h>
 
 // -------------------

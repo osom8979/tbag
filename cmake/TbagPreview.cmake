@@ -135,6 +135,7 @@ function (tbag_preview)
     tbag_preview__print_variable (VERSION_TWEAK)
     tbag_preview__print ("PACKET VERSION: ${VERSION_PACKET_MAJOR}.${VERSION_PACKET_MINOR}")
     tbag_preview__print ("RELEASE VERSION: ${VERSION_RELEASE}")
+    tbag_preview__print_variable (SOVERSION)
     tbag_preview__print ("")
 
     tbag_preview__print_variable (CMAKE_C_FLAGS)

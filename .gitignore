@@ -218,6 +218,7 @@ fabric.properties
 /Doxyfile
 /**/prefix.h
 /**/config.h
+/**/export.h
 /**/config-ex.h
 
 #############
