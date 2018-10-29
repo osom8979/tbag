@@ -350,7 +350,7 @@ add_custom_target (vorbis DEPENDS ${vorbis_EXT_LIBRARIES})
 ## SFML ##
 ##########
 
-if ("${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "debug")
+if ("${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "" OR "${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "debug")
     set (sfml_POSTFIX -d)
 else ()
     set (sfml_POSTFIX)
