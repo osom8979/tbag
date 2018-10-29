@@ -24,9 +24,13 @@ if (USE_TBAG_DEBUGGING_LOGGER)
 endif ()
 
 ## External.
-tbag_modules__apply_ext_uv    ()
-tbag_modules__apply_ext_z     ()
-tbag_modules__apply_ext_ressl ()
+tbag_modules__apply_ext_uv       ()
+tbag_modules__apply_ext_z        ()
+tbag_modules__apply_ext_ressl    ()
+tbag_modules__apply_ext_ogg      ()
+tbag_modules__apply_ext_flac     ()
+tbag_modules__apply_ext_vorbis   ()
+tbag_modules__apply_ext_freetype ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()

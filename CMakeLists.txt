@@ -118,6 +118,9 @@ if (WITH_COVERAGE)
     message (STATUS "Enable coverage.")
 endif ()
 
+tbag_config__set_library_option (USE_OPENGL OpenGL OPENGL_FOUND)
+tbag_config__set_library_option (USE_OPENAL OpenAL OPENAL_FOUND)
+
 ## CUDA settings.
 tbag_config__set_library_option (USE_CUDA TbagCUDA CUDA_FOUND)
 

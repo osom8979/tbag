@@ -185,3 +185,164 @@ else ()
 endif ()
 add_custom_target (ressl DEPENDS ${ressl_EXT_LIBRARIES})
 
+##############
+## FREETYPE ##
+##############
+
+set (freetype_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/freetype")
+set (freetype_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (freetype_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (freetype_EXT_LIBRARIES    "${freetype_EXT_STATIC_LIB}")
+exists_libraries (freetype_EXT_EXISTS "${freetype_EXT_LIBRARIES}")
+
+if (freetype_EXT_EXISTS)
+    message (STATUS "Skip external/freetype (Exists: ${freetype_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/freetype")
+    ExternalProject_Add (freetype_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${freetype_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DCMAKE_INSTALL_LIBDIR=lib"
+                       "-DCMAKE_INSTALL_INCLUDEDIR=include"
+                       "-DDISABLE_FORCE_DEBUG_POSTFIX=ON"
+                       "-DBUILD_FRAMEWORK=OFF"
+                       "-DFT_WITH_HARFBUZZ=OFF"
+                       "-DFT_WITH_PNG=OFF"
+                       "-DFT_WITH_ZLIB=OFF"
+                       "-DFT_WITH_BZIP2=OFF"
+            #--Output lfreetypeing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (freetype_ext_output freetype_ext "${freetype_EXT_LIBRARIES}")
+endif ()
+add_custom_target (freetype DEPENDS ${freetype_EXT_LIBRARIES})
+
+#########
+## OGG ##
+#########
+
+set (ogg_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/ogg")
+set (ogg_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (ogg_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}ogg${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (ogg_EXT_LIBRARIES    "${ogg_EXT_STATIC_LIB}")
+exists_libraries (ogg_EXT_EXISTS "${ogg_EXT_LIBRARIES}")
+
+if (ogg_EXT_EXISTS)
+    message (STATUS "Skip external/ogg (Exists: ${ogg_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/ogg")
+    ExternalProject_Add (ogg_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${ogg_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output logging-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (ogg_ext_output ogg_ext "${ogg_EXT_LIBRARIES}")
+endif ()
+add_custom_target (ogg DEPENDS ${ogg_EXT_LIBRARIES})
+
+##########
+## FLAC ##
+##########
+
+set (flac_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/flac")
+set (flac_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (flac_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}FLAC${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (flacxx_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}FLACXX${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (flac_EXT_LIBRARIES    "${flac_EXT_STATIC_LIB}"
+                           "${flacxx_EXT_STATIC_LIB}")
+exists_libraries (flac_EXT_EXISTS "${flac_EXT_LIBRARIES}")
+
+if (flac_EXT_EXISTS)
+    message (STATUS "Skip external/flac (Exists: ${flac_EXT_STATIC_LIB})")
+    message (STATUS "Skip external/flacxx (Exists: ${flacxx_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/flac")
+    ExternalProject_Add (flac_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${flac_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DOGG_LIBRARY_DIR=${EXT_INSTALL_DIR}/lib"
+                       "-DOGG_INCLUDE_DIR=${EXT_INSTALL_DIR}/include"
+            #--Output logging-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1
+            #--Dependencies---------------
+            DEPENDS ogg)
+    fake_output_library (flac_ext_output flac_ext "${flac_EXT_LIBRARIES}")
+endif ()
+add_custom_target (flac DEPENDS ${flac_EXT_LIBRARIES})
+
+############
+## VORBIS ##
+############
+
+set (vorbis_EXT_SOURCE_DIR      "${CMAKE_SOURCE_DIR}/external/vorbis")
+set (vorbis_EXT_INCLUDE_DIR     "${EXT_INSTALL_DIR}/include")
+set (vorbis_EXT_STATIC_LIB      "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}vorbis${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (vorbisenc_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}vorbisenc${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (vorbisfile_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}vorbisfile${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (vorbis_EXT_LIBRARIES       "${vorbis_EXT_STATIC_LIB}"
+                                "${vorbisenc_EXT_STATIC_LIB}"
+                                "${vorbisfile_EXT_STATIC_LIB}")
+exists_libraries (vorbis_EXT_EXISTS "${vorbis_EXT_LIBRARIES}")
+
+if (vorbis_EXT_EXISTS)
+    message (STATUS "Skip external/vorbis (Exists: ${vorbis_EXT_STATIC_LIB})")
+    message (STATUS "Skip external/vorbisenc (Exists: ${vorbisenc_EXT_STATIC_LIB})")
+    message (STATUS "Skip external/vorbisfile (Exists: ${vorbisfile_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/vorbis")
+    ExternalProject_Add (vorbis_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${vorbis_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DOGG_ROOT=${EXT_INSTALL_DIR}"
+            #--Output logging-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1
+            #--Dependencies---------------
+            DEPENDS ogg)
+    fake_output_library (vorbis_ext_output vorbis_ext "${vorbis_EXT_LIBRARIES}")
+endif ()
+add_custom_target (vorbis DEPENDS ${vorbis_EXT_LIBRARIES})
+

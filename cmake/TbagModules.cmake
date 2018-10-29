@@ -575,6 +575,33 @@ macro (tbag_modules__build_ext_capnp_cpp __target __capnp)
     unset (__capnp_result)
 endmacro ()
 
+macro (tbag_modules__apply_ext_ogg)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ogg)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${ogg_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${ogg_EXT_STATIC_LIB})
+endmacro ()
+
+macro (tbag_modules__apply_ext_flac)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES flac)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${flac_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${flac_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${flacxx_EXT_STATIC_LIB})
+endmacro ()
+
+macro (tbag_modules__apply_ext_vorbis)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES vorbis)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${vorbis_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${vorbis_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${vorbisenc_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${vorbisfile_EXT_STATIC_LIB})
+endmacro ()
+
+macro (tbag_modules__apply_ext_freetype)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES freetype)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${freetype_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${freetype_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------
