@@ -31,16 +31,17 @@ Tea-bag is Third party extension utility project.
 - lmdb++ master-0b43ca8 (0.9.14.1) (Public Domain)
 - sqlite_orm master-fecdc19 (BSD 3-clause license)
 - lemon 1.3.1 (Boost Software License, Version 1.0)
-- freetype 2.9.1 (FreeType License)
-- ogg 1.3.3 (BSD license)
-- flac 1.3.2 (BSD license)
-- vorbis 1.3.6 (BSD license)
 
 ### External projects
 
 - libressl 2.5.1 (Dual license; OpenSSL & SSLeay)
 - zlib 1.2.11 (zlib license)
 - libuv 1.22.0 (MIT license)
+- freetype 2.9.1 (FreeType License)
+- ogg 1.3.3 (BSD license)
+- flac 1.3.2 (BSD license)
+- vorbis 1.3.6 (BSD license)
+- sfml 2.5.1 (zlib/png license)
 
 ### Resources
 
