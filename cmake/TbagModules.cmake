@@ -602,6 +602,46 @@ macro (tbag_modules__apply_ext_freetype)
     tbag_modules__add_whole_archive (${freetype_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_sfml)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES sfml)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${sfml_EXT_INCLUDE_DIR})
+
+    list (APPEND TBAG_PROJECT_DEFINITIONS OV_EXCLUDE_STATIC_CALLBACKS) ## Vorbis flag
+    list (APPEND TBAG_PROJECT_DEFINITIONS FLAC__NO_DLL) ## Flac flag
+
+    tbag_modules__add_whole_archive (${sfml_system_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${sfml_window_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${sfml_graphics_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${sfml_audio_EXT_STATIC_LIB})
+
+    if (OPENGL_FOUND)
+        list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+        list (APPEND TBAG_PROJECT_LDFLAGS ${OPENGL_LIBRARIES})
+    endif ()
+    if (OPENAL_FOUND)
+        list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OPENAL_INCLUDE_DIR})
+        list (APPEND TBAG_PROJECT_LDFLAGS ${OPENAL_LIBRARY})
+    endif ()
+
+    if (WIN32)
+        # TODO: Windows
+    elseif (UNIX)
+        if (APPLE)
+            list (APPEND TBAG_PROJECT_LDFLAGS -ObjC
+                    -Wl,-framework,Foundation
+                    -Wl,-framework,AppKit
+                    -Wl,-framework,IOKit
+                    -Wl,-framework,Carbon)
+        else ()
+            # TODO: Linux
+        endif ()
+    endif ()
+
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

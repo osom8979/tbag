@@ -56,10 +56,11 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
-option (USE_TBAG_DEBUGGING_LOGGER "Enable tbag debugging logger." ON)
-option (USE_CCACHE "Enable ccache compile." ON)
-option (USE_PCH "Enable PCH compile." OFF)
-option (USE_GOLD "Enable ld.gold linker if gcc compiler." ON)
+tbag_config__set_option (USE_TBAG_GAME              ON) ## Enable game engine framework.
+tbag_config__set_option (USE_TBAG_DEBUGGING_LOGGER  ON) ## Enable tbag debugging logger.
+tbag_config__set_option (USE_CCACHE                 ON) ## Enable ccache compile.
+tbag_config__set_option (USE_PCH                    ON) ## Enable PCH compile.
+tbag_config__set_option (USE_GOLD                   ON) ## Enable ld.gold linker if gcc compiler.
 
 ## Configure settings.
 if (USE_CCACHE)
@@ -118,8 +119,10 @@ if (WITH_COVERAGE)
     message (STATUS "Enable coverage.")
 endif ()
 
-tbag_config__set_library_option (USE_OPENGL OpenGL OPENGL_FOUND)
-tbag_config__set_library_option (USE_OPENAL OpenAL OPENAL_FOUND)
+if (USE_TBAG_GAME)
+    tbag_config__set_library_option (USE_OPENGL OpenGL OPENGL_FOUND)
+    tbag_config__set_library_option (USE_OPENAL OpenAL OPENAL_FOUND)
+endif ()
 
 ## CUDA settings.
 tbag_config__set_library_option (USE_CUDA TbagCUDA CUDA_FOUND)

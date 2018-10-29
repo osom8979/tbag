@@ -31,6 +31,9 @@ tbag_modules__apply_ext_ogg      ()
 tbag_modules__apply_ext_flac     ()
 tbag_modules__apply_ext_vorbis   ()
 tbag_modules__apply_ext_freetype ()
+if (USE_TBAG_GAME)
+    tbag_modules__apply_ext_sfml ()
+endif ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
