@@ -20,7 +20,7 @@ Tea-bag is Third party extension utility project.
 - minizip 1.1 (zlib license)
 - simdpp 2.1 (Boost Software License, Version 1.0)
 - sqlite 3.24.0 (Public Domain)
-- stb master-c711058 (Public Domain or MIT license)
+- stb master-e6afb9c (Public Domain or MIT license)
 - date master-4f27361 (MIT license)
 - demangle (google-glog) 0.3.4 (BSD 3-clause license)
 - fmt 3.0.1 (BSD license)
