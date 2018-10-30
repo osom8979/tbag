@@ -47,6 +47,35 @@ Tea-bag is Third party extension utility project.
 
 - ProggyClean.ttf (MIT license)
 
+### SFML Dependencies
+
+- freetype (embedded)
+- x11
+- xrandr
+- udev
+- opengl
+- flac (embedded)
+- ogg (embedded)
+- vorbis (embedded)
+- vorbisenc (embedded)
+- vorbisfile (embedded)
+- openal (On Windows platforms, it is embedded)
+- pthread (os/compiler supported)
+
+```bash
+## OpenAL
+sudo apt-get install libalut-dev ## or libalut-dev
+
+## OpenGL
+sudo apt-get install libglu1-mesa-dev
+
+## UDev
+sudo apt-get install libudev-dev
+
+## x11, xRandr
+sudo apt-get install xorg-dev
+```
+
 ## Programming rules.
 
 - Do not use exception expressions.
