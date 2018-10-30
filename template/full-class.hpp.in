@@ -31,7 +31,7 @@ ${NAMESPACE_LIST_BEGIN}
  * @author ${AUTHOR}
  * @date   ${DATE}
  */
-class TBAG_API ${CLASSNAME}
+class ${EXPORT_SYMBOL} ${CLASSNAME}
 {
 private:
     // Insert member variables.

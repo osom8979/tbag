@@ -80,6 +80,7 @@ addGlobalString('SUBPROJECT_NAME')
 addGlobalString('SUBPROJECT_NAME_LOWER')
 addGlobalString('SUBPROJECT_NAME_UPPER')
 addGlobalString('SUBPROJECT_TYPE')
+addGlobalString('EXPORT_SYMBOL')
 
 def getDate():
     today = datetime.date.today()
@@ -219,6 +220,14 @@ def createDefaultDictionary(classpath):
         dic[SUBPROJECT_TYPE] = PROJECT_TYPE_EXE
     dic[SUBPROJECT_NAME_LOWER] = dic[SUBPROJECT_NAME].lower()
     dic[SUBPROJECT_NAME_UPPER] = dic[SUBPROJECT_NAME].upper()
+
+    if dic[ROOT_CLASSPATH] == 'libtbag':
+        dic[EXPORT_SYMBOL] = 'TBAG_API'
+    elif dic[ROOT_CLASSPATH] == 'libtbui':
+        dic[EXPORT_SYMBOL] = 'TBUI_API'
+    else:
+        dic[EXPORT_SYMBOL] = ''
+
     return dic
 
 if __name__ == '__main__':
