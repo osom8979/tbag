@@ -51,9 +51,19 @@ template <> struct GetChannels<ImageRgb24> : public std::true_type
 enum class ImageFileFormat
 {
     IFF_PNG,
+    IFF_JPG,
     IFF_BMP,
     IFF_TGA,
 };
+
+TBAG_CONSTEXPR char const * const PNG_LOWER_EXT = ".png";
+TBAG_CONSTEXPR char const * const JPG_LOWER_EXT = ".jpg";
+TBAG_CONSTEXPR char const * const BMP_LOWER_EXT = ".bmp";
+TBAG_CONSTEXPR char const * const TGA_LOWER_EXT = ".tga";
+
+TBAG_CONSTEXPR int const MAX_JPG_QUALITY = 100;
+TBAG_CONSTEXPR int const MIN_JPG_QUALITY = 1;
+TBAG_CONSTEXPR int const DEFAULT_JPG_QUALITY = 80;
 
 /**
  * Read image file.

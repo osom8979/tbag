@@ -89,12 +89,8 @@ Err readImage(std::string const & path, ImageRgb24 & image)
 namespace __impl {
 // ---------------
 
-TBAG_CONSTEXPR static char const * const PNG_LOWER_EXT = ".png";
-TBAG_CONSTEXPR static char const * const BMP_LOWER_EXT = ".bmp";
-TBAG_CONSTEXPR static char const * const TGA_LOWER_EXT = ".tga";
-
 template <typename ImageType>
-static Err writeImageToFile(std::string const & path, ImageType const & image)
+static Err writeImageToFile(std::string const & path, ImageType const & image, int if_jpeg_quality)
 {
     auto const PATH = filesystem::Path(path);
     if (PATH.exists() == true) {
@@ -110,6 +106,8 @@ static Err writeImageToFile(std::string const & path, ImageType const & image)
     int result = 0;
     if (LOWER_EXT == PNG_LOWER_EXT) {
         result = stbi_write_png(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
+    } else if (LOWER_EXT == JPG_LOWER_EXT) {
+        result = stbi_write_jpg(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA, if_jpeg_quality);
     } else if (LOWER_EXT == BMP_LOWER_EXT) {
         result = stbi_write_bmp(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
     } else if (LOWER_EXT == TGA_LOWER_EXT) {
@@ -137,7 +135,7 @@ static void __write_image_cb__(void * context, void * data, int size)
 }
 
 template <typename ImageType>
-static Err writeImageToBuffer(util::Buffer & buffer, ImageType const & image, ImageFileFormat format)
+static Err writeImageToBuffer(util::Buffer & buffer, ImageType const & image, ImageFileFormat format, int if_jpeg_quality)
 {
     auto const WIDTH    = image.width();
     auto const HEIGHT   = image.height();
@@ -148,6 +146,9 @@ static Err writeImageToBuffer(util::Buffer & buffer, ImageType const & image, Im
     switch (format) {
     case ImageFileFormat::IFF_PNG:
         result = stbi_write_png_to_func(&__write_image_cb__, &buffer, WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
+        break;
+    case ImageFileFormat::IFF_JPG:
+        result = stbi_write_jpg_to_func(&__write_image_cb__, &buffer, WIDTH, HEIGHT, CHANNELS, DATA, if_jpeg_quality);
         break;
     case ImageFileFormat::IFF_BMP:
         result = stbi_write_bmp_to_func(&__write_image_cb__, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
@@ -167,22 +168,22 @@ static Err writeImageToBuffer(util::Buffer & buffer, ImageType const & image, Im
 
 Err writeImage(std::string const & path, ImageRgb24 const & image)
 {
-    return __impl::writeImageToFile(path, image);
+    return __impl::writeImageToFile(path, image, DEFAULT_JPG_QUALITY);
 }
 
 Err writeImage(std::string const & path, ImageGray const & image)
 {
-    return __impl::writeImageToFile(path, image);
+    return __impl::writeImageToFile(path, image, DEFAULT_JPG_QUALITY);
 }
 
 Err writeImage(util::Buffer & buffer, ImageRgb24 const & image, ImageFileFormat format)
 {
-    return __impl::writeImageToBuffer(buffer, image, format);
+    return __impl::writeImageToBuffer(buffer, image, format, DEFAULT_JPG_QUALITY);
 }
 
 Err writeImage(util::Buffer & buffer, ImageGray const & image, ImageFileFormat format)
 {
-    return __impl::writeImageToBuffer(buffer, image, format);
+    return __impl::writeImageToBuffer(buffer, image, format, DEFAULT_JPG_QUALITY);
 }
 
 Err convert(ImageRgb24 const & source, ImageGray & destination)

@@ -38,7 +38,7 @@ TEST(ImageTest, ReadImage)
     ASSERT_FALSE(buffer.empty());
 
     // Save & Load.
-    tttDir(true, true);
+    tttDir_Automatic();
     auto const SAVE_PATH = tttDir_Get() / "save.png";
     ASSERT_EQ(Err::E_SUCCESS, writeImage(SAVE_PATH.getString(), image));
     ASSERT_EQ(buffer.size(), SAVE_PATH.getState().size);
@@ -58,5 +58,25 @@ TEST(ImageTest, ReadImage)
     ASSERT_EQ(185, reload[reload.size() - 1].r);
     ASSERT_EQ( 74, reload[reload.size() - 1].g);
     ASSERT_EQ( 81, reload[reload.size() - 1].b);
+}
+
+TEST(ImageTest, UseJpeg)
+{
+    auto path = DemoAsset::get_tester_dir_image() / "lena.png";
+
+    Image image;
+    ASSERT_EQ(Err::E_SUCCESS, readImage(path.getString(), image));
+
+    // Save & Load.
+    tttDir_Automatic();
+    auto const JPEG_PATH = tttDir_Get() / "save.jpg";
+    ASSERT_EQ(Err::E_SUCCESS, writeImage(JPEG_PATH.getString(), image));
+    ASSERT_TRUE(JPEG_PATH.isRegularFile());
+
+    Image reload;
+    ASSERT_EQ(Err::E_SUCCESS, readImage(JPEG_PATH.getString(), reload));
+
+    ASSERT_EQ(512, reload.width());
+    ASSERT_EQ(512, reload.height());
 }
 
