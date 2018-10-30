@@ -29,7 +29,13 @@ tbag_modules__apply_ext_ogg      ()
 tbag_modules__apply_ext_flac     ()
 tbag_modules__apply_ext_vorbis   ()
 tbag_modules__apply_ext_freetype ()
-tbag_modules__apply_ext_sfml     ()
+tbag_modules__apply_ext_sfml_ignore_gl_al ()
+
+tbag_modules__check_opengl ()
+tbag_modules__apply_opengl ()
+
+tbag_modules__check_openal ()
+tbag_modules__apply_openal ()
 
 ## Dependencies.
 tbag_modules__apply_dep_lua_import_macros ()

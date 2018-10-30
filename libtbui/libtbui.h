@@ -22,7 +22,8 @@ extern "C" {
 TBUI_API int tbuiGetMajorVersion();
 TBUI_API int tbuiGetMinorVersion();
 
-TBUI_API int tbuiMain(int argc, char ** argv, char ** envs);
+TBUI_API int tbuiExternalMain(int argc, char ** argv, char ** envs);
+TBUI_API int tbuiAppMain(int argc, char ** argv, char ** envs);
 
 #if defined(__cplusplus)
 } /* extern "C" */

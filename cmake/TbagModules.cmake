@@ -602,7 +602,7 @@ macro (tbag_modules__apply_ext_freetype)
     tbag_modules__add_whole_archive (${freetype_EXT_STATIC_LIB})
 endmacro ()
 
-macro (tbag_modules__apply_ext_sfml)
+macro (tbag_modules__apply_ext_sfml_ignore_gl_al)
     list (APPEND TBAG_PROJECT_DEPENDENCIES sfml)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${sfml_EXT_INCLUDE_DIR})
 
@@ -613,15 +613,6 @@ macro (tbag_modules__apply_ext_sfml)
     tbag_modules__add_whole_archive (${sfml_window_EXT_STATIC_LIB})
     tbag_modules__add_whole_archive (${sfml_graphics_EXT_STATIC_LIB})
     tbag_modules__add_whole_archive (${sfml_audio_EXT_STATIC_LIB})
-
-    if (OPENGL_FOUND)
-        list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
-        list (APPEND TBAG_PROJECT_LDFLAGS ${OPENGL_LIBRARIES})
-    endif ()
-    if (OPENAL_FOUND)
-        list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OPENAL_INCLUDE_DIR})
-        list (APPEND TBAG_PROJECT_LDFLAGS ${OPENAL_LIBRARY})
-    endif ()
 
     if (WIN32)
         # TODO: Windows
@@ -645,6 +636,28 @@ endmacro ()
 ## ----------------
 ## Other libraries.
 ## ----------------
+
+macro (tbag_modules__check_opengl)
+    if (NOT OPENGL_FOUND)
+        message (WARNING "Not found OpenGL.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_opengl)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+    list (APPEND TBAG_PROJECT_LDFLAGS ${OPENGL_LIBRARIES})
+endmacro ()
+
+macro (tbag_modules__check_openal)
+    if (NOT OPENAL_FOUND)
+        message (WARNING "Not found OpenAL.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_openal)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OPENAL_INCLUDE_DIR})
+    list (APPEND TBAG_PROJECT_LDFLAGS ${OPENAL_LIBRARY})
+endmacro ()
 
 macro (tbag_modules__check_cxx_obfuscator)
     if (EXISTS "${TBAG_OBFUS_CONFIG_PATH}")

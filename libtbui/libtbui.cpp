@@ -17,8 +17,12 @@ int tbuiGetMinorVersion()
     return 0;
 }
 
-int tbuiMain(int argc, char ** argv, char ** envs)
+int tbuiExternalMain(int argc, char ** argv, char ** envs)
 {
     return 0;
+}
+
+int tbuiAppMain(int argc, char ** argv, char ** envs)
+{
 }
 
