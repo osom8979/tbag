@@ -633,6 +633,12 @@ macro (tbag_modules__apply_ext_sfml_ignore_gl_al)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_ext_luajit)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES luajit)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${luajit_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${luajit_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

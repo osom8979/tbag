@@ -13,7 +13,6 @@ tbag_modules__append_definitions (
     TINYXML2_EXPORT
     LMDB_EXPORT_API
     SQLITE_EXPORT_API)
-tbag_modules__apply_dep_lua_export_macros ()
 
 ## Thread settings.
 tbag_modules__apply_thread ()

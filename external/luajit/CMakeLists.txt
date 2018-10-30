@@ -303,13 +303,13 @@ set ( LJCORE_C
   ${LJLIB_C}
 )
 
-add_library ( liblua SHARED ${LJCORE_C} ${DEPS} )
+add_library ( liblua ${LJCORE_C} ${DEPS} )
 target_link_libraries ( liblua ${LIBS} )
 set_target_properties ( liblua PROPERTIES OUTPUT_NAME lua CLEAN_DIRECT_OUTPUT 1 )
 
 ## LuaJIT Executable
-add_executable ( luajit src/luajit.c src/luajit.rc )
-target_link_libraries ( luajit liblua )
+#add_executable ( luajit src/luajit.c src/luajit.rc )
+#target_link_libraries ( luajit liblua )
 
 # On Windows build a no-console variant also
 if ( LUA_BUILD_WLUA )
@@ -319,10 +319,10 @@ if ( LUA_BUILD_WLUA )
 endif ()
 
 ## INSTALL
-install_executable( luajit )
+#install_executable( luajit )
 install_library( liblua )
 install_header( src/lua.h src/luajit.h src/lua.hpp ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h src/lualib.h src/lauxlib.h )
 
-install_doc ( doc/ )
-install_foo ( etc/ )
-install_data ( COPYRIGHT README.md )
+#install_doc ( doc/ )
+#install_foo ( etc/ )
+#install_data ( COPYRIGHT README.md )

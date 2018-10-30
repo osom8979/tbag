@@ -16,7 +16,6 @@ Tea-bag is Third party extension utility project.
 - http-parser 2.8.1 (MIT license)
 - icu4c 57.1 (ICU license; http://source.icu-project.org/repos/icu/icu/trunk/LICENSE)
 - lmdb bbc15ab (The OpenLDAP Public License)
-- lua 5.3.3 (MIT license)
 - minizip 1.1 (zlib license)
 - simdpp 2.1 (Boost Software License, Version 1.0)
 - sqlite 3.24.0 (Public Domain)
@@ -42,6 +41,7 @@ Tea-bag is Third party extension utility project.
 - flac 1.3.2 (BSD license)
 - vorbis 1.3.6 (BSD license)
 - sfml 2.5.1 (zlib/png license)
+- LuaDist/LuaJIT 2.0.3 (MIT license)
 
 ### Resources
 
