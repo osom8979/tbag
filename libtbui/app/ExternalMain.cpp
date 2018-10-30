@@ -6,12 +6,15 @@
  */
 
 #include <libtbui/app/ExternalMain.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbui/log/TbuiLog.hpp>
+
+#include <cstdlib>
 
 namespace libtbui {
 namespace app     {
 
-ExternalMain::ExternalMain()
+ExternalMain::ExternalMain(int argc, char ** argv, char ** envs)
+        : TbuiApp(argc, argv, envs, true, libtbui::log::DEFAULT_LOGGER_NAME)
 {
     // EMPTY.
 }

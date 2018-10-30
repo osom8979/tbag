@@ -15,8 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
+
 #include <libtbui/export.h>
+#include <libtbui/app/TbuiApp.hpp>
 
 namespace libtbui {
 namespace app     {
@@ -27,13 +28,10 @@ namespace app     {
  * @author zer0
  * @date   2018-10-30
  */
-class TBUI_API ExternalMain : private libtbag::Noncopyable
+class TBUI_API ExternalMain : public TbuiApp
 {
-private:
-    // Insert member variables.
-
 public:
-    ExternalMain();
+    ExternalMain(int argc = 0, char ** argv = nullptr, char ** envs = nullptr);
     virtual ~ExternalMain();
 };
 

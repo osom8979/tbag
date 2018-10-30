@@ -6,23 +6,22 @@
  */
 
 #include <libtbui/libtbui.h>
+#include <libtbui/util/TbuiVersion.hpp>
 
 int tbuiGetMajorVersion()
 {
-    return 0;
+    return libtbui::util::getMajorVersion();
 }
 
 int tbuiGetMinorVersion()
 {
-    return 0;
+    return libtbui::util::getMinorVersion();
 }
+
+#include <libtbui/app/ExternalMain.hpp>
 
 int tbuiExternalMain(int argc, char ** argv, char ** envs)
 {
-    return 0;
-}
-
-int tbuiAppMain(int argc, char ** argv, char ** envs)
-{
+    return libtbui::app::ExternalMain(argc, argv, envs).run();
 }
 
