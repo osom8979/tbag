@@ -1141,7 +1141,27 @@ endmacro ()
 
 macro (tbag_modules__install_default_cxx_headers)
     install (DIRECTORY "${TBAG_PROJECT_CONST_DIR_PATH}"
-            DESTINATION include
-            FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+             DESTINATION include
+             FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+endmacro ()
+
+macro (tbag_modules__install_default_cxx_headers_ref_ignore_list)
+    set (__install_subdirs)
+    tbag_utils__subdirs (__subdirs "${TBAG_PROJECT_CONST_DIR_PATH}")
+    foreach (__cursor ${__subdirs})
+        tbag_utils__is_contained (__is_contain ${__cursor} ${ARGN})
+        if (NOT __is_contain)
+            list (APPEND __install_subdirs ${__cursor})
+        endif ()
+        unset (__is_contain)
+    endforeach ()
+    unset (__subdirs)
+
+    foreach (__cursor ${__install_subdirs})
+        install (DIRECTORY "${TBAG_PROJECT_CONST_DIR_PATH}/${__cursor}"
+                 DESTINATION "include/${TBAG_PROJECT_CONST_DIR_NAME}/${__cursor}"
+                 FILES_MATCHING REGEX ".*\\.[Hh]([Pp][Pp]|[Xx][Xx])?")
+    endforeach ()
+    unset (__install_subdirs)
 endmacro ()
 

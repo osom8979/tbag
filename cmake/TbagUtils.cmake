@@ -117,6 +117,25 @@ endfunction ()
 ## String & List.
 ## --------------
 
+#/// Check the list has elements.
+#///
+#/// @param __result  [out] Output value name.
+#/// @param __element [in]  element.
+#/// @param ...       [in]  list.
+function (tbag_utils__is_contained __result __element)
+    set (${__result} OFF)
+
+    foreach (__args_cursor ${ARGN})
+        if ("${__args_cursor}" STREQUAL "${__element}")
+            set (${__result} ON)
+            break ()
+        endif ()
+    endforeach ()
+
+    # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
 #/// size of arguments.
 #///
 #/// @param __result [out] Output value name.
@@ -189,6 +208,21 @@ function (tbag_utils__list_of_regex __result __regex)
     endforeach ()
 
     # update result.
+    set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
+#/// List of subdirectories.
+#///
+#/// @param __result  [out] output value name.
+#/// @param __dir     [in]  Find directory.
+function (tbag_utils__subdirs __result __dir)
+    set (${__result})
+    file (GLOB __nodes RELATIVE "${__dir}" "${__dir}/*")
+    foreach (__cursor ${__nodes})
+        if (IS_DIRECTORY ${__dir}/${__cursor})
+            list (APPEND ${__result} ${__cursor})
+        endif()
+    endforeach()
     set (${__result} ${${__result}} PARENT_SCOPE)
 endfunction ()
 

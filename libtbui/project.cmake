@@ -52,4 +52,5 @@ tbag_modules__add_target ()
 tbag_modules__update_all_properties ()
 tbag_modules__update_version (${TBUI_VERSION} ${TBUI_SOVERSION})
 tbag_modules__install_target ()
+tbag_modules__install_default_cxx_headers_ref_ignore_list (3rd)
 
