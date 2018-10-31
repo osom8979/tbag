@@ -43,24 +43,18 @@ public:
 public:
     enum class NodeState : int
     {
-        NS_CLOSING,
-        NS_CLOSED,
-
         NS_OPENING,
         NS_OPENED,
-
-        NS_WORKING,
+        NS_CLOSING,
     };
 
 public:
     inline static char const * const getNodeStateName(NodeState state) TBAG_NOEXCEPT
     {
         switch (state) {
-        case NodeState::NS_CLOSING: return "CLOSING";
-        case NodeState::NS_CLOSED:  return "CLOSED";
         case NodeState::NS_OPENING: return "OPENING";
         case NodeState::NS_OPENED:  return "OPENED";
-        case NodeState::NS_WORKING: return "WORKING";
+        case NodeState::NS_CLOSING: return "CLOSING";
         default:                    return "UNKNOWN";
         }
     }
@@ -81,12 +75,6 @@ public:
         virtual void onServerRecv(std::string const & client_name, char const * buffer, std::size_t size, Err code){};
         virtual void onClientRecv(std::string const & server_name, char const * buffer, std::size_t size, Err code){};
         // @formatter:on
-    };
-
-    struct Param
-    {
-        uint64_t timeout = 0;
-        bool     verbose = false;
     };
 
 public:
@@ -147,11 +135,8 @@ public:
     }
 
 public:
-    static Param getDefaultParam();
-
-public:
     Err open(std::string const & uri);
-    Err close();
+    void close();
 
 public:
     Err connect(std::string const & client_name, std::string const & server_uri);

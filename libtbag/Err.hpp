@@ -62,6 +62,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_VERIFIER , "Verifier error"          ) \
     _TBAG_XX(_EXPIRED  , "Expired object error"    ) \
     _TBAG_XX(_INSERT   , "Insert error"            ) \
+    _TBAG_XX(_ERASE    , "Erase error"             ) \
     _TBAG_XX(_CLOSING  , "Closing object"          ) \
     _TBAG_XX(_CLOSED   , "Closed object"           ) \
     _TBAG_XX(_EQUERY   , "Query error"             ) \
@@ -79,7 +80,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_HTTP_3XX , "Redirection (HTTP 3xx)"  ) \
     _TBAG_XX(_HTTP_4XX , "Client Error (HTTP 4xx)" ) \
     _TBAG_XX(_HTTP_5XX , "Server Error (HTTP 5xx)" ) \
-    _TBAG_XX(_EXIT     , "Exit process"            ) \
+    _TBAG_XX(_EXITPROC , "Exit process"            ) \
+    _TBAG_XX(_EXCHANGE , "Error exchange"          ) \
     /* SSL */ \
     _TBAG_XX(_SSL      , "SSL error"               ) \
     _TBAG_XX(_SSLWREAD , "SSL want read"           ) \
