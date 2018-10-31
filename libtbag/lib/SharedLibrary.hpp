@@ -16,7 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <string>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -47,7 +49,10 @@ public:
 public:
     bool open(std::string const & path);
     void close();
-    void * symbol(std::string const & name);
+
+public:
+    void * symbol(char const * name) const;
+    void * symbol(std::string const & name) const;
 
 public:
     std::string getError() const;
@@ -58,24 +63,14 @@ public:
 
 public:
     template <typename ReturnType, typename ... Arg>
-    ReturnType call(std::string const & name, Arg ... args)
+    ReturnType call(char const * name, Arg && ... args) const
     {
         typedef ReturnType (*Signature) (Arg ...);
-        Signature func = (Signature) symbol(name.c_str());
+        Signature func = (Signature)symbol(name);
         if (func != nullptr) {
-            return func(args ...);
+            return func(std::forward<Arg>(args) ...);
         }
         return ReturnType();
-    }
-
-    template <typename ... Arg>
-    void callVoid(std::string const & name, Arg ... args)
-    {
-        typedef void (*Signature) (Arg ...);
-        Signature func = (Signature) symbol(name.c_str());
-        if (func != nullptr) {
-            func(args ...);
-        }
     }
 };
 

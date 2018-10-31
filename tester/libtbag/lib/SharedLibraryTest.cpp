@@ -15,9 +15,9 @@ using namespace libtbag::lib;
 
 TEST(SharedLibraryTest, Default)
 {
-    char const * const LIBRARY_NAME = "tbshare";
-    char const * const FUNC1_NAME   = "tbshare_add";
-    char const * const FUNC2_NAME   = "tbshare_add2";
+    std::string const LIBRARY_NAME = "tbshare";
+    std::string const FUNC1_NAME   = "tbshare_add";
+    std::string const FUNC2_NAME   = "tbshare_add2";
 
     using Path = filesystem::Path;
     Path const PATH = Path::getExeDir() / filesystem::getModuleName(LIBRARY_NAME);
@@ -32,10 +32,10 @@ TEST(SharedLibraryTest, Default)
     ASSERT_EQ(200, (*func)(100, 100));
     ASSERT_EQ( 33, (*func)( 11,  22));
 
-    ASSERT_EQ(20, lib.call<int>(FUNC1_NAME, 10, 10));
+    ASSERT_EQ(20, lib.call<int>(FUNC1_NAME.c_str(), 10, 10));
 
     int add2_result = 0;
-    lib.callVoid(FUNC2_NAME, 40, 15, &add2_result);
+    lib.call<void>(FUNC2_NAME.c_str(), 40, 15, &add2_result);
     ASSERT_EQ(55, add2_result);
 }
 

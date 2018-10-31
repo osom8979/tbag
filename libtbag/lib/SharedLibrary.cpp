@@ -62,15 +62,20 @@ void SharedLibrary::close()
     }
 }
 
-void * SharedLibrary::symbol(std::string const & name)
+void * SharedLibrary::symbol(char const * name) const
 {
     if (_open == true) {
         void * result = nullptr;
-        if (::uv_dlsym(uv_lib_cast(_lib), name.c_str(), &result) == 0) {
+        if (::uv_dlsym(uv_lib_cast(_lib), name, &result) == 0) {
             return result;
         }
     }
     return nullptr;
+}
+
+void * SharedLibrary::symbol(std::string const & name) const
+{
+    return symbol(name.c_str());
 }
 
 std::string SharedLibrary::getError() const
