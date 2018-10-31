@@ -9,7 +9,7 @@
 
 Tea-bag is Third party extension utility project.
 
-## Dependencies
+## Dependencies (TBAG)
 
 - flatbuffers 1.7.1 (Apache License, Version 2.0)
 - gtest 1.7.0 (BSD 3-clause license)
@@ -31,7 +31,12 @@ Tea-bag is Third party extension utility project.
 - sqlite_orm master-fecdc19 (BSD 3-clause license)
 - lemon 1.3.1 (Boost Software License, Version 1.0)
 
-### External projects
+## Dependencies (TBUI)
+
+- imgui 1.6.5 (MIT license)
+- imgui-sfml master-995b873 (MIT license)
+
+## External projects
 
 - libressl 2.5.1 (Dual license; OpenSSL & SSLeay)
 - zlib 1.2.11 (zlib license)
@@ -43,7 +48,7 @@ Tea-bag is Third party extension utility project.
 - sfml 2.5.1 (zlib/png license)
 - LuaDist/LuaJIT 2.0.3 (MIT license)
 
-### Resources
+## Resources
 
 - ProggyClean.ttf (MIT license)
 
