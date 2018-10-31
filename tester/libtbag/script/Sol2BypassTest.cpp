@@ -1,14 +1,17 @@
 /**
- * @file   Sol2Test.cpp
- * @brief  Sol2 library tester.
+ * @file   Sol2BypassTest.cpp
+ * @brief  Sol2Bypass class tester.
  * @author zer0
- * @date   2017-11-11
+ * @date   2018-10-30
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/3rd/sol2/sol.hpp>
+#include <libtbag/script/Sol2Bypass.hpp>
 
-TEST(Sol2Test, Default)
+using namespace libtbag;
+using namespace libtbag::script;
+
+TEST(Sol2BypassTest, Default)
 {
     sol::state lua;
     int value = 0;
@@ -22,7 +25,7 @@ struct Sol2TestClass
     int var = 0;
 };
 
-TEST(Sol2Test, LuaClass)
+TEST(Sol2BypassTest, LuaClass)
 {
     sol::state lua;
     lua.new_usertype<Sol2TestClass>("Sol2TestClass", "var", &Sol2TestClass::var);

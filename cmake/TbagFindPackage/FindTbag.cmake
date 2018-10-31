@@ -33,5 +33,15 @@ tbag_simple_find_library_with_module_prefix ("${__headers}" "${__libs}")
 
 if (Tbag_FOUND)
     message (STATUS "Found Tbag: ${Tbag_LIBRARIES}")
+
+    if (UNIX AND APPLE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+        # If you're building a 64 bit application on OSX which links directly or indirectly against LuaJIT,
+        # you need to link your main executable with these flags:
+        # Reference (Embedding LuaJIT): http://luajit.org/install.html
+        set (__update_exe_flags -Wl,-pagezero_size,10000 -Wl,-image_base,100000000)
+        message (STATUS "Update EXE linker flags (Embedding LuaJIT): ${__update_exe_flags}")
+        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${__update_exe_flags}")
+        unset (__update_exe_flags)
+    endif()
 endif ()
 

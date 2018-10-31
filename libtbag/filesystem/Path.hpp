@@ -31,9 +31,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-TBAG_API std::string getLibraryPrefix();
-TBAG_API std::string getLibrarySuffix();
+TBAG_API char const * getLibraryPrefix();
+TBAG_API char const * getLibrarySuffix();
+TBAG_API char const * getModuleSuffix();
+
 TBAG_API std::string getLibraryName(std::string const & name);
+TBAG_API std::string getModuleName(std::string const & name);
 
 TBAG_API std::string getExecutablePrefix();
 TBAG_API std::string getExecutableSuffix();

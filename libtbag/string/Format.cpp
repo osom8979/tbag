@@ -17,18 +17,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-std::string format(char const * f, ...)
-{
-    std::string result;
-    TBAG_FORMAT_VA_LIST(result, f, f, DEFAULT_FORMAT_BUFFER_SIZE);
-    return result;
-}
-
-std::string vformat(char const * f, std::size_t buffer_size, va_list & l)
+std::string vformat(char const * f, std::size_t buffer_size_step, va_list & l)
 {
     std::size_t step = 1;
     while (step <= MAX_FORMAT_RESIZE_LOOP_COUNT) {
-        std::vector<char> buffer(buffer_size * step);
+        std::vector<char> buffer(buffer_size_step * step);
         int const WRITE_SIZE = std::vsnprintf(&buffer[0], buffer.size(), f, l);
 
         if (WRITE_SIZE <= 0) {
@@ -39,6 +32,13 @@ std::string vformat(char const * f, std::size_t buffer_size, va_list & l)
         ++step;
     }
     return std::string();
+}
+
+std::string format(char const * f, ...)
+{
+    std::string result;
+    TBAG_FORMAT_VA_LIST(result, f, f, DEFAULT_FORMAT_BUFFER_SIZE);
+    return result;
 }
 
 // ----------------------

@@ -20,7 +20,7 @@ TEST(SharedLibraryTest, Default)
     char const * const FUNC2_NAME   = "tbshare_add2";
 
     using Path = filesystem::Path;
-    Path const PATH = Path::getExeDir() / filesystem::getLibraryName(LIBRARY_NAME);
+    Path const PATH = Path::getExeDir() / filesystem::getModuleName(LIBRARY_NAME);
 
     SharedLibrary lib;
     ASSERT_TRUE(lib.open(PATH.getNativeString()));

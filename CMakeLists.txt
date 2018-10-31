@@ -88,6 +88,9 @@ foreach (__arch_cursor ${SIMDPP_RUNNABLE_ARCHS})
     set (SIMDPP_RUNNABLE_ARCH_${__arch_cursor} 1)
 endforeach ()
 
+# Embedding LuaJIT
+tbag_modules__luajit_embedding ()
+
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/flatbuffers)

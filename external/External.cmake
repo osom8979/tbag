@@ -5,11 +5,11 @@ include (ExternalProject)
 #/// Check exists libraries.
 #///
 #/// @param __result  [out] value name of output result.
-#/// @param __libs    [in]  Libraries.
-function (exists_libraries __result __libs)
+#/// @param __files   [in]  Files.
+function (exists_files __result __files)
     set (${__result} ON)
 
-    foreach (__lib_cursor ${__libs})
+    foreach (__lib_cursor ${__files})
         if (NOT EXISTS "${__lib_cursor}")
             set (${__result} OFF)
             break ()
@@ -22,11 +22,11 @@ endfunction ()
 
 #/// A fake function to inject dependencies into the output file of ExternalProject.
 #///
-#/// @param __name [in] Print name.
-#/// @param __deps [in] Dependencies.
-#/// @param __libs [in] Libraries.
-function (fake_output_library __name __deps __libs)
-    add_custom_command (OUTPUT  ${__libs}
+#/// @param __name  [in] Print name.
+#/// @param __deps  [in] Dependencies.
+#/// @param __files [in] Output files.
+function (fake_output_library __name __deps __files)
+    add_custom_command (OUTPUT  ${__files}
                         COMMAND ${CMAKE_COMMAND} -E echo "Fake output: ${__name}"
                         DEPENDS ${__deps})
 endfunction ()
@@ -62,7 +62,7 @@ set (uv_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/uv")
 set (uv_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (uv_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${uv_EXT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (uv_EXT_LIBRARIES    "${uv_EXT_STATIC_LIB}")
-exists_libraries (uv_EXT_EXISTS "${uv_EXT_LIBRARIES}")
+exists_files (uv_EXT_EXISTS "${uv_EXT_LIBRARIES}")
 
 if (uv_EXT_EXISTS)
     message (STATUS "Skip external/uv (Exists: ${uv_EXT_STATIC_LIB})")
@@ -111,7 +111,7 @@ set (zlib_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/zlib")
 set (zlib_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (zlib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlib_EXT_STATIC_LIB_NAME}${zlib_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (zlib_EXT_LIBRARIES    "${zlib_EXT_STATIC_LIB}")
-exists_libraries (zlib_EXT_EXISTS "${zlib_EXT_LIBRARIES}")
+exists_files (zlib_EXT_EXISTS "${zlib_EXT_LIBRARIES}")
 
 if (zlib_EXT_EXISTS)
     message (STATUS "Skip external/zlib (Exists: ${zlib_EXT_STATIC_LIB})")
@@ -153,7 +153,7 @@ set (ressl_tls_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_
 set (ressl_EXT_LIBRARIES         "${ressl_crypto_EXT_STATIC_LIB}"
                                  "${ressl_ssl_EXT_STATIC_LIB}"
                                  "${ressl_tls_EXT_STATIC_LIB}")
-exists_libraries (ressl_EXT_EXISTS "${ressl_EXT_LIBRARIES}")
+exists_files (ressl_EXT_EXISTS "${ressl_EXT_LIBRARIES}")
 
 if (ressl_EXT_EXISTS)
     message (STATUS "Skip external/ressl_crypto (Exists: ${ressl_crypto_EXT_STATIC_LIB})")
@@ -193,7 +193,7 @@ set (freetype_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/freetype")
 set (freetype_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (freetype_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (freetype_EXT_LIBRARIES    "${freetype_EXT_STATIC_LIB}")
-exists_libraries (freetype_EXT_EXISTS "${freetype_EXT_LIBRARIES}")
+exists_files (freetype_EXT_EXISTS "${freetype_EXT_LIBRARIES}")
 
 if (freetype_EXT_EXISTS)
     message (STATUS "Skip external/freetype (Exists: ${freetype_EXT_STATIC_LIB})")
@@ -235,7 +235,7 @@ set (ogg_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/ogg")
 set (ogg_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (ogg_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}ogg${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (ogg_EXT_LIBRARIES    "${ogg_EXT_STATIC_LIB}")
-exists_libraries (ogg_EXT_EXISTS "${ogg_EXT_LIBRARIES}")
+exists_files (ogg_EXT_EXISTS "${ogg_EXT_LIBRARIES}")
 
 if (ogg_EXT_EXISTS)
     message (STATUS "Skip external/ogg (Exists: ${ogg_EXT_STATIC_LIB})")
@@ -271,7 +271,7 @@ set (flac_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX
 set (flacxx_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}FLACXX${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (flac_EXT_LIBRARIES    "${flac_EXT_STATIC_LIB}"
                            "${flacxx_EXT_STATIC_LIB}")
-exists_libraries (flac_EXT_EXISTS "${flac_EXT_LIBRARIES}")
+exists_files (flac_EXT_EXISTS "${flac_EXT_LIBRARIES}")
 
 if (flac_EXT_EXISTS)
     message (STATUS "Skip external/flac (Exists: ${flac_EXT_STATIC_LIB})")
@@ -315,7 +315,7 @@ set (vorbisfile_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_P
 set (vorbis_EXT_LIBRARIES       "${vorbis_EXT_STATIC_LIB}"
                                 "${vorbisenc_EXT_STATIC_LIB}"
                                 "${vorbisfile_EXT_STATIC_LIB}")
-exists_libraries (vorbis_EXT_EXISTS "${vorbis_EXT_LIBRARIES}")
+exists_files (vorbis_EXT_EXISTS "${vorbis_EXT_LIBRARIES}")
 
 if (vorbis_EXT_EXISTS)
     message (STATUS "Skip external/vorbis (Exists: ${vorbis_EXT_STATIC_LIB})")
@@ -366,7 +366,7 @@ set (sfml_EXT_LIBRARIES             "${sfml_system_EXT_STATIC_LIB}"
                                     "${sfml_window_EXT_STATIC_LIB}"
                                     "${sfml_graphics_EXT_STATIC_LIB}"
                                     "${sfml_audio_EXT_STATIC_LIB}")
-exists_libraries (sfml_EXT_EXISTS   "${sfml_EXT_LIBRARIES}")
+exists_files (sfml_EXT_EXISTS   "${sfml_EXT_LIBRARIES}")
 
 if (sfml_EXT_EXISTS)
     message (STATUS "Skip external/sfml_system (Exists: ${sfml_system_EXT_STATIC_LIB})")
@@ -416,9 +416,11 @@ add_custom_target (sfml DEPENDS ${sfml_EXT_LIBRARIES})
 
 set (luajit_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/luajit")
 set (luajit_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
-set (luajit_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}luajit${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (luajit_EXT_LIBRARIES    "${luajit_EXT_STATIC_LIB}")
-exists_libraries (luajit_EXT_EXISTS "${luajit_EXT_LIBRARIES}")
+set (luajit_EXT_CONF_HEADER  "${luajit_EXT_INCLUDE_DIR}/luaconf.h")
+set (luajit_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}lua${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (luajit_EXT_LIBRARIES    "${luajit_EXT_STATIC_LIB}"
+                             "${luajit_EXT_CONF_HEADER}")
+exists_files (luajit_EXT_EXISTS "${luajit_EXT_LIBRARIES}")
 
 if (luajit_EXT_EXISTS)
     message (STATUS "Skip external/luajit (Exists: ${luajit_EXT_STATIC_LIB})")

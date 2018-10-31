@@ -23,9 +23,11 @@ if (USE_TBAG_DEBUGGING_LOGGER)
 endif ()
 
 ## External.
-tbag_modules__apply_ext_uv    ()
-tbag_modules__apply_ext_z     ()
-tbag_modules__apply_ext_ressl ()
+tbag_modules__apply_ext_uv     ()
+tbag_modules__apply_ext_z      ()
+tbag_modules__apply_ext_ressl  ()
+tbag_modules__apply_ext_luajit ()
+tbag_modules__apply_ext_luajit_install_conf (luaconf_copy "${CMAKE_SOURCE_DIR}/libtbag/script/luajit-2.0.3/luaconf.h")
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()

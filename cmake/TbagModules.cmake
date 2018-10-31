@@ -637,6 +637,30 @@ macro (tbag_modules__apply_ext_luajit)
     list (APPEND TBAG_PROJECT_DEPENDENCIES luajit)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${luajit_EXT_INCLUDE_DIR})
     tbag_modules__add_whole_archive (${luajit_EXT_STATIC_LIB})
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lm -ldl)
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_ext_luajit_install_conf __target __output)
+    add_custom_command (
+            OUTPUT ${__output}
+            COMMAND ${CMAKE_COMMAND} -E copy "${luajit_EXT_CONF_HEADER}" "${__output}"
+            DEPENDS "${luajit_EXT_CONF_HEADER}")
+    add_custom_target (${__target} ALL DEPENDS ${__output})
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
+endmacro ()
+
+macro (tbag_modules__luajit_embedding)
+    if (UNIX AND APPLE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+        # If you're building a 64 bit application on OSX which links directly or indirectly against LuaJIT,
+        # you need to link your main executable with these flags:
+        # Reference (Embedding LuaJIT): http://luajit.org/install.html
+        set (__update_exe_flags -Wl,-pagezero_size,10000 -Wl,-image_base,100000000 -Wl,-image_base,7fff04c4a000)
+        message (STATUS "Update EXE linker flags (Embedding LuaJIT): ${__update_exe_flags}")
+        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${__update_exe_flags}")
+        unset (__update_exe_flags)
+    endif()
 endmacro ()
 
 ## ----------------

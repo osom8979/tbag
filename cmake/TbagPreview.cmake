@@ -127,6 +127,9 @@ function (tbag_preview)
     tbag_preview__print_variable (CMAKE_INSTALL_PREFIX)
     tbag_preview__print ("")
 
+    tbag_preview__print_variable (CMAKE_SIZEOF_VOID_P)
+    tbag_preview__print ("")
+
     tbag_preview__print_variable (MAIN_NAME)
     tbag_preview__print_variable (MAIN_AUTHOR)
     tbag_preview__print_variable (MAIN_EMAIL)

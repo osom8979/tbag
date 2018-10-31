@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
-std::string getLibraryPrefix()
+char const * getLibraryPrefix()
 {
 #if defined(TBAG_PLATFORM_WINDOWS) && !defined(TBAG_PLATFORM_MINGW)
     return details::WINDOWS_SHARED_LIBRARY_PREFIX;
@@ -27,7 +27,7 @@ std::string getLibraryPrefix()
 #endif
 }
 
-std::string getLibrarySuffix()
+char const * getLibrarySuffix()
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
 # if defined(TBAG_PLATFORM_MINGW)
@@ -42,9 +42,27 @@ std::string getLibrarySuffix()
 #endif
 }
 
+char const * getModuleSuffix()
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+# if defined(TBAG_PLATFORM_MINGW)
+    return details::MINGW_SHARED_LIBRARY_SUFFIX;
+# else  // if defined(TBAG_PLATFORM_MINGW)
+    return details::WINDOWS_SHARED_LIBRARY_SUFFIX;
+# endif // if defined(TBAG_PLATFORM_MINGW)
+#else
+    return details::ELF_SHARED_LIBRARY_SUFFIX;
+#endif
+}
+
 std::string getLibraryName(std::string const & name)
 {
-    return getLibraryPrefix() + name + getLibrarySuffix();
+    return std::string(getLibraryPrefix()) + name + getLibrarySuffix();
+}
+
+std::string getModuleName(std::string const & name)
+{
+    return std::string(getLibraryPrefix()) + name + getModuleSuffix();
 }
 
 std::string getExecutablePrefix()

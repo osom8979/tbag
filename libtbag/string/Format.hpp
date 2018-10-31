@@ -31,6 +31,11 @@ namespace string {
 TBAG_CONSTEXPR std::size_t const DEFAULT_FORMAT_BUFFER_SIZE = 1024;
 TBAG_CONSTEXPR std::size_t const MAX_FORMAT_RESIZE_LOOP_COUNT = 5;
 
+/**
+ * Variable-arguments style formatting string.
+ */
+TBAG_API std::string vformat(char const * f, std::size_t buffer_size_step, va_list & l);
+
 #ifndef TBAG_FORMAT_VA_LIST
 #define TBAG_FORMAT_VA_LIST(result, format_string, last_argument_name, buffer_size)     \
     do {                                                                                \
@@ -45,11 +50,6 @@ TBAG_CONSTEXPR std::size_t const MAX_FORMAT_RESIZE_LOOP_COUNT = 5;
  * Printf style formatting string.
  */
 TBAG_API std::string format(char const * f, ...);
-
-/**
- * Variable-arguments style formatting string.
- */
-TBAG_API std::string vformat(char const * f, std::size_t buffer_size, va_list & l);
 
 /**
  * Fmt style formatting string.
