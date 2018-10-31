@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -64,7 +64,7 @@ void SharedLibrary::close()
 
 void * SharedLibrary::symbol(char const * name) const
 {
-    if (_open == true) {
+    if (_open) {
         void * result = nullptr;
         if (::uv_dlsym(uv_lib_cast(_lib), name, &result) == 0) {
             return result;
