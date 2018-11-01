@@ -8,21 +8,27 @@ import subprocess
 import re
 
 ## Path & Directory setting.
-#THIS_FILE_PATH       = os.path.abspath(main.__file__) # import __main__ as main
-THIS_FILE_PATH        = os.path.realpath(__file__)
-SCRIPT_DIR            = os.path.dirname(THIS_FILE_PATH)
-PROJECT_DIR           = os.path.normpath(SCRIPT_DIR + '/../..')
-SOURCE_DIR            = os.path.normpath(PROJECT_DIR + '/')
-TEST_DIR              = os.path.normpath(PROJECT_DIR + '/tester')
-TEMPLATE_DIR          = os.path.normpath(PROJECT_DIR + '/template')
-HEADER_TEMPLATE       = os.path.join(TEMPLATE_DIR, 'class.hpp.in')
-SOURCE_TEMPLATE       = os.path.join(TEMPLATE_DIR, 'class.cpp.in')
-FULL_HEADER_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'full-class.hpp.in')
-FULL_SOURCE_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'full-class.cpp.in')
-PIMPL_HEADER_TEMPLATE = os.path.join(TEMPLATE_DIR, 'pimpl-class.hpp.in')
-PIMPL_SOURCE_TEMPLATE = os.path.join(TEMPLATE_DIR, 'pimpl-class.cpp.in')
-TEST_TEMPLATE         = os.path.join(TEMPLATE_DIR, 'test.cpp.in')
-CONFIG_CMAKE          = os.path.join(PROJECT_DIR,  'INFORMATION')
+#THIS_FILE_PATH        = os.path.abspath(main.__file__) # import __main__ as main
+THIS_FILE_PATH         = os.path.realpath(__file__)
+SCRIPT_DIR             = os.path.dirname(THIS_FILE_PATH)
+PROJECT_DIR            = os.path.normpath(SCRIPT_DIR + '/../..')
+SOURCE_DIR             = os.path.normpath(PROJECT_DIR + '/')
+TEST_DIR               = os.path.normpath(PROJECT_DIR + '/tester')
+TEMPLATE_DIR           = os.path.normpath(PROJECT_DIR + '/template')
+HEADER_TEMPLATE        = os.path.join(TEMPLATE_DIR, 'class.hpp.in')
+SOURCE_TEMPLATE        = os.path.join(TEMPLATE_DIR, 'class.cpp.in')
+HEADER2_TEMPLATE       = os.path.join(TEMPLATE_DIR, 'class2.hpp.in')
+SOURCE2_TEMPLATE       = os.path.join(TEMPLATE_DIR, 'class2.cpp.in')
+FULL_HEADER_TEMPLATE   = os.path.join(TEMPLATE_DIR, 'full-class.hpp.in')
+FULL_SOURCE_TEMPLATE   = os.path.join(TEMPLATE_DIR, 'full-class.cpp.in')
+FULL_HEADER2_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'full-class.hpp.in')
+FULL_SOURCE2_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'full-class.cpp.in')
+PIMPL_HEADER_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'pimpl-class.hpp.in')
+PIMPL_SOURCE_TEMPLATE  = os.path.join(TEMPLATE_DIR, 'pimpl-class.cpp.in')
+PIMPL_HEADER2_TEMPLATE = os.path.join(TEMPLATE_DIR, 'pimpl-class.hpp.in')
+PIMPL_SOURCE2_TEMPLATE = os.path.join(TEMPLATE_DIR, 'pimpl-class.cpp.in')
+TEST_TEMPLATE          = os.path.join(TEMPLATE_DIR, 'test.cpp.in')
+CONFIG_CMAKE           = os.path.join(PROJECT_DIR,  'INFORMATION')
 
 PROJECT_TYPE_LIB = 'lib'
 PROJECT_TYPE_EXE = 'exe'
@@ -70,6 +76,9 @@ addGlobalString('NAMESPACE_OPEN')
 addGlobalString('NAMESPACE_CLOSE')
 addGlobalString('NAMESPACE_OPEN_COMMENT')
 addGlobalString('NAMESPACE_CLOSE_COMMENT')
+addGlobalString('NAMESPACE_FULL_LIST_BEGIN')
+addGlobalString('NAMESPACE_FULL_LIST_END')
+addGlobalString('NAMESPACE_FULL_LIST_USING')
 addGlobalString('NAMESPACE_LIST_BEGIN')
 addGlobalString('NAMESPACE_LIST_END')
 addGlobalString('NAMESPACE_LIST_USING')
@@ -114,8 +123,8 @@ def getMaxLength(names):
             maxlen = len(name)
     return maxlen
 
-def getNamespaceListBegin(classpath):
-    names = classpath.split('/')[1:-1]
+def getNamespaceListBegin(classpath, strip=0):
+    names = classpath.split('/')[strip:-1]
     if len(names) == 0:
         return ''
     maxlen = getMaxLength(names)
@@ -125,8 +134,8 @@ def getNamespaceListBegin(classpath):
         result += "namespace {}{} {{\n".format(name, ' ' * more_space)
     return result.strip()
 
-def getNamespaceListEnd(classpath):
-    names = classpath.split('/')[1:-1]
+def getNamespaceListEnd(classpath, strip=0):
+    names = classpath.split('/')[strip:-1]
     names.reverse()
     if len(names) == 0:
         return ''
@@ -135,8 +144,8 @@ def getNamespaceListEnd(classpath):
         result += "}} // namespace {}\n".format(name)
     return result.strip()
 
-def getNamespaceListUsing(classpath):
-    names = classpath.split('/')[0:-1]
+def getNamespaceListUsing(classpath, strip=0):
+    names = classpath.split('/')[strip:-1]
     if len(names) == 0:
         return ''
     result = ''
@@ -178,8 +187,12 @@ def createDefaultDictionary(classpath):
     dic[DATE]      = getDate()
     dic[CLASSNAME] = dic[CLASSPATH][dic[CLASSPATH].rfind('/') + 1:]
 
-    dic[NAMESPACE_LIST_BEGIN] = getNamespaceListBegin(classpath)
-    dic[NAMESPACE_LIST_END]   = getNamespaceListEnd(classpath)
+    dic[NAMESPACE_FULL_LIST_BEGIN] = getNamespaceListBegin(classpath)
+    dic[NAMESPACE_FULL_LIST_END]   = getNamespaceListEnd(classpath)
+    dic[NAMESPACE_FULL_LIST_USING] = getNamespaceListUsing(classpath)
+
+    dic[NAMESPACE_LIST_BEGIN] = getNamespaceListBegin(classpath, 1)
+    dic[NAMESPACE_LIST_END]   = getNamespaceListEnd(classpath, 1)
     dic[NAMESPACE_LIST_USING] = getNamespaceListUsing(classpath)
 
     dic[TEST_SUFFIX] = 'Test'

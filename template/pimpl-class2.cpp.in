@@ -6,18 +6,13 @@
  */
 
 #include <${INCLUDE_PAIR}>
-#include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
 #include <algorithm>
 #include <utility>
 
-// ${NAMESPACE_OPEN_COMMENT}
-${NAMESPACE_OPEN}
-// ${NAMESPACE_OPEN_COMMENT}
-
-${NAMESPACE_LIST_BEGIN}
+${NAMESPACE_FULL_LIST_BEGIN}
 
 /**
  * ${CLASSNAME}::Impl class implementation.
@@ -102,9 +97,5 @@ void ${CLASSNAME}::reset()
     _impl.reset();
 }
 
-${NAMESPACE_LIST_END}
-
-// ${NAMESPACE_CLOSE_COMMENT}
-${NAMESPACE_CLOSE}
-// ${NAMESPACE_CLOSE_COMMENT}
+${NAMESPACE_FULL_LIST_END}
 

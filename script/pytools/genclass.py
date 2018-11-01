@@ -17,8 +17,12 @@ def generateCppClass(classpath):
         print('Exists header file: ' + dic[SOURCE_FILEPATH])
         exit(1)
 
-    HEADER_CONTENT = readFile(HEADER_TEMPLATE)
-    SOURCE_CONTENT = readFile(SOURCE_TEMPLATE)
+    if dic[ROOT_CLASSPATH] == 'libtbag':
+        HEADER_CONTENT = readFile(HEADER_TEMPLATE)
+        SOURCE_CONTENT = readFile(SOURCE_TEMPLATE)
+    else:
+        HEADER_CONTENT = readFile(HEADER2_TEMPLATE)
+        SOURCE_CONTENT = readFile(SOURCE2_TEMPLATE)
 
     saveFile(dic[HEADER_FILEPATH], replaceContent(HEADER_CONTENT, dic))
     saveFile(dic[SOURCE_FILEPATH], replaceContent(SOURCE_CONTENT, dic))

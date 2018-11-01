@@ -1,0 +1,23 @@
+/**
+ * @file   ${SOURCE_FILENAME}
+ * @brief  ${CLASSNAME} class implementation.
+ * @author ${AUTHOR}
+ * @date   ${DATE}
+ */
+
+#include <${INCLUDE_PAIR}>
+
+${NAMESPACE_FULL_LIST_BEGIN}
+
+${CLASSNAME}::${CLASSNAME}()
+{
+    // EMPTY.
+}
+
+${CLASSNAME}::~${CLASSNAME}()
+{
+    // EMPTY.
+}
+
+${NAMESPACE_FULL_LIST_END}
+

@@ -1,0 +1,42 @@
+/**
+ * @file   ${HEADER_FILENAME}
+ * @brief  ${CLASSNAME} class prototype.
+ * @author ${AUTHOR}
+ * @date   ${DATE}
+ */
+
+#ifndef ${INCLUDE_GUARD}
+#define ${INCLUDE_GUARD}
+
+// MS compatible compilers support #pragma once
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#pragma once
+#endif
+
+#include <${CONFIG_HEADER_PATH}>
+#include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <${ROOT_CLASSPATH}/export.h>
+
+${NAMESPACE_FULL_LIST_BEGIN}
+
+/**
+ * ${CLASSNAME} class prototype.
+ *
+ * @author ${AUTHOR}
+ * @date   ${DATE}
+ */
+class ${EXPORT_SYMBOL} ${CLASSNAME} : private ::libtbag::Noncopyable
+{
+private:
+    // Insert member variables.
+
+public:
+    ${CLASSNAME}();
+    virtual ~${CLASSNAME}();
+};
+
+${NAMESPACE_FULL_LIST_END}
+
+#endif // ${INCLUDE_GUARD}
+
