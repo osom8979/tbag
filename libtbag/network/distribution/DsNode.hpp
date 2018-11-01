@@ -18,8 +18,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 
-#include <map>
-#include <unordered_map>
+#include <vector>
+#include <string>
 #include <memory>
 
 // -------------------
@@ -43,30 +43,30 @@ public:
     friend struct Impl;
 
 public:
-    enum class NodeState : int
+    enum class State : int
     {
-        NS_OPENING,
-        NS_OPENED,
-        NS_CLOSING,
+        S_OPENING,
+        S_OPENED,
+        S_CLOSING,
     };
 
 public:
-    inline static char const * const getNodeStateName(NodeState state) TBAG_NOEXCEPT
+    inline static char const * const getStateName(State state) TBAG_NOEXCEPT
     {
         switch (state) {
-        case NodeState::NS_OPENING: return "OPENING";
-        case NodeState::NS_OPENED:  return "OPENED";
-        case NodeState::NS_CLOSING: return "CLOSING";
-        default:                    return "UNKNOWN";
+        case State::S_OPENING: return "OPENING";
+        case State::S_OPENED:  return "OPENED";
+        case State::S_CLOSING: return "CLOSING";
+        default:               return "UNKNOWN";
         }
     }
 
 public:
     struct Event
     {
-        virtual void onConnect(std::string const & name, Err code) = 0;
-        virtual void onDisconnect(std::string const & name, Err code) = 0;
-        virtual void onRecv(std::string const & name, char const * buffer, std::size_t size, Err code) = 0;
+        virtual void onConnect(std::string const & name) = 0;
+        virtual void onDisconnect(std::string const & name) = 0;
+        virtual void onRecv(std::string const & name, char const * buffer, std::size_t size) = 0;
     };
 
 public:
@@ -136,6 +136,10 @@ public:
              std::string const & host, int port, bool verbose = false);
     Err open(std::string const & uri);
     void close();
+
+public:
+    std::vector<std::string> nodes() const;
+    bool isConnected(std::string const & name) const;
 
 public:
     Err connect(std::string const & name, std::string const & uri);

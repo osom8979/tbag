@@ -48,6 +48,7 @@
 #define UNUSED_PARAM(x)
 #define NAMELESS(x)
 #define COMMENT(x)
+#define STEP(n,x)
 #define BRACE(x)
 
 #ifndef REMOVE_UNUSED_DECLARATION
