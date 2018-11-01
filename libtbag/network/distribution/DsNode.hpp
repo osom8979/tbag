@@ -1,12 +1,13 @@
 /**
- * @file   Node.hpp
- * @brief  Node class prototype.
+ * @file   DsNode.hpp
+ * @brief  DsNode class prototype.
  * @author zer0
  * @date   2018-10-26
+ * @date   2018-11-01 (Rename: Node -> DsNode)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_NODE_NODE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_NODE_NODE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DISTRIBUTION_DSNODE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DISTRIBUTION_DSNODE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,16 +26,17 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace node    {
+namespace network      {
+namespace distribution {
 
 /**
- * Node class prototype.
+ * Distribution Node class prototype.
  *
  * @author zer0
  * @date   2018-10-26
+ * @date   2018-11-01 (Rename: Node -> DsNode)
  */
-class TBAG_API Node
+class TBAG_API DsNode
 {
 public:
     struct Impl;
@@ -62,19 +64,9 @@ public:
 public:
     struct Event
     {
-        // @formatter:off
-        virtual void onOpen(Err code){};
-        virtual void onClose(Err code){};
-
-        virtual void onLogin(std::string const & client_name, Err code){};
-        virtual void onLogout(std::string const & client_name, Err code){};
-
-        virtual void onConnect(std::string const & server_name, Err code){};
-        virtual void onDisconnect(std::string const & server_name, Err code){};
-
-        virtual void onServerRecv(std::string const & client_name, char const * buffer, std::size_t size, Err code){};
-        virtual void onClientRecv(std::string const & server_name, char const * buffer, std::size_t size, Err code){};
-        // @formatter:on
+        virtual void onConnect(std::string const & name, Err code) = 0;
+        virtual void onDisconnect(std::string const & name, Err code) = 0;
+        virtual void onRecv(std::string const & name, char const * buffer, std::size_t size, Err code) = 0;
     };
 
 public:
@@ -86,21 +78,21 @@ private:
     SharedEvent _event;
 
 public:
-    Node();
-    Node(Node const & obj) TBAG_NOEXCEPT;
-    Node(Node && obj) TBAG_NOEXCEPT;
-    ~Node();
+    DsNode();
+    DsNode(DsNode const & obj) TBAG_NOEXCEPT;
+    DsNode(DsNode && obj) TBAG_NOEXCEPT;
+    ~DsNode();
 
 public:
-    Node & operator =(Node const & obj) TBAG_NOEXCEPT;
-    Node & operator =(Node && obj) TBAG_NOEXCEPT;
+    DsNode & operator =(DsNode const & obj) TBAG_NOEXCEPT;
+    DsNode & operator =(DsNode && obj) TBAG_NOEXCEPT;
 
 public:
-    void copy(Node const & obj) TBAG_NOEXCEPT;
-    void swap(Node & obj) TBAG_NOEXCEPT;
+    void copy(DsNode const & obj) TBAG_NOEXCEPT;
+    void swap(DsNode & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(Node & lh, Node & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(DsNode & lh, DsNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -124,35 +116,41 @@ public:
      * @see std::map
      * @see std::less
      */
-    friend inline bool operator <(Node const & x, Node const & y) TBAG_NOEXCEPT
+    friend inline bool operator <(DsNode const & x, DsNode const & y) TBAG_NOEXCEPT
     {
         return x.get() < y.get();
     }
 
-    inline bool operator ==(Node const & obj) const TBAG_NOEXCEPT
+    inline bool operator ==(DsNode const & obj) const TBAG_NOEXCEPT
     {
         return get() == obj.get();
     }
 
+    inline bool operator !=(DsNode const & obj) const TBAG_NOEXCEPT
+    {
+        return get() != obj.get();
+    }
+
 public:
+    Err open(std::string const & name, std::string const & schema,
+             std::string const & host, int port, bool verbose = false);
     Err open(std::string const & uri);
     void close();
 
 public:
-    Err connect(std::string const & client_name, std::string const & server_uri);
-    Err disconnect(std::string const & client_name);
+    Err connect(std::string const & name, std::string const & uri);
+    Err disconnect(std::string const & name);
 
 public:
-    Err c2s(std::string const & server_name, char const * buffer, std::size_t size);
-    Err s2c(std::string const & client_name, char const * buffer, std::size_t size);
+    Err write(std::string const & name, char const * buffer, std::size_t size);
 };
 
-} // namespace node
+} // namespace distribution
 } // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_NODE_NODE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DISTRIBUTION_DSNODE_HPP__
 

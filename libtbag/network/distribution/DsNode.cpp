@@ -1,11 +1,12 @@
 /**
- * @file   Node.cpp
- * @brief  Node class implementation.
+ * @file   DsNode.cpp
+ * @brief  DsNode class implementation.
  * @author zer0
  * @date   2018-10-26
+ * @date   2018-11-01 (Rename: Node -> DsNode)
  */
 
-#include <libtbag/network/node/Node.hpp>
+#include <libtbag/network/distribution/DsNode.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/thread/ThreadPool.hpp>
@@ -21,6 +22,7 @@
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Format.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/util/Version.hpp>
 #include <libtbag/lock/RwLock.hpp>
@@ -36,19 +38,19 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace node    {
+namespace network      {
+namespace distribution {
 
 /** @warning Don't change this variable. */
 TBAG_CONSTEXPR static unsigned int const _POOL_SIZE = 1U;
 
 /**
- * Node::Impl class implementation.
+ * DsNode::Impl class implementation.
  *
  * @author zer0
  * @date   2018-10-26
  */
-struct Node::Impl : private Noncopyable
+struct DsNode::Impl : private Noncopyable
 {
 public:
     using ThreadPool    = libtbag::thread::ThreadPool;
@@ -82,191 +84,7 @@ public:
 
 public:
     /**
-     * Node::Impl::ClientNode class implementation.
-     *
-     * @author zer0
-     * @date   2018-10-31
-     */
-    struct ClientNode : public HttpNode
-    {
-    public:
-        using Base = HttpNode;
-
-    public:
-        std::string name;
-
-    public:
-        ClientNode(Loop & loop, StreamType type, HttpServer * parent) : Base(loop, type, parent)
-        {
-            // EMPTY.
-        }
-
-        virtual ~ClientNode()
-        {
-            // EMPTY.
-        }
-    };
-
-
-    /**
-     * Node::Impl::Server class implementation.
-     *
-     * @author zer0
-     * @date   2018-10-26
-     */
-    struct Server : public HttpServer
-    {
-    public:
-        using Base = HttpServer;
-
-    private:
-        Impl * _impl = nullptr;
-
-    public:
-        Server(Impl * i, Loop & loop, StreamType type) : Base(loop, type), _impl(i)
-        {
-            assert(_impl != nullptr);
-        }
-
-        virtual ~Server()
-        {
-            // EMPTY.
-        }
-
-        // -----------------------
-        // ServerInterface events.
-        // -----------------------
-
-        virtual void onConnection(Err code) override
-        {
-            Base::onConnection(code);
-        }
-
-        virtual void onClientShutdown(WeakClient node, Err code) override
-        {
-            // EMPTY.
-        }
-
-        virtual void onClientWrite(WeakClient node, Err code) override
-        {
-            // EMPTY.
-        }
-
-        // Don't implement this method.
-        // virtual void onClientRead(WeakClient node, Err code, ReadPacket const & packet) override
-        // { /* EMPTY. */ }
-
-        virtual void onClientClose(WeakClient node) override
-        {
-            auto shared = std::static_pointer_cast<ClientNode>(node.lock());
-            assert(static_cast<bool>(shared));
-            assert(_impl != nullptr);
-
-            WriteGuard const GUARD(_impl->_nodes_lock);
-            auto itr = _impl->_nodes.find(shared->name);
-            if (itr != _impl->_nodes.end()) {
-                _impl->_nodes.erase(itr);
-                tDLogI("Node::Impl::Server::onClientClose() Erase node: {}", shared->name);
-            }
-        }
-
-        virtual void onClientTimer(WeakClient node) override
-        {
-            // EMPTY.
-        }
-
-        virtual void onServerClose() override
-        {
-            // EMPTY.
-        }
-
-        // ------------------
-        // HttpServer events.
-        // ------------------
-
-        SharedStreamNode createClient(StreamType type, Loop & loop, SharedStream & server) override
-        {
-            assert(static_cast<bool>(server));
-            return SharedStreamNode(new (std::nothrow) ClientNode(loop, type, this));
-        }
-
-        virtual void onClientEof(WeakClient node) override
-        {
-            Base::onClientEof(node);
-        }
-
-        virtual void onClientReadError(WeakClient node, Err code) override
-        {
-            Base::onClientReadError(node, code);
-        }
-
-        virtual void onClientParseError(WeakClient node, Err code) override
-        {
-            Base::onClientParseError(node, code);
-        }
-
-        virtual bool onClientSwitchingProtocol(WeakClient node, HttpRequest const & request) override
-        {
-            auto shared = std::static_pointer_cast<ClientNode>(node.lock());
-            assert(static_cast<bool>(shared));
-            assert(_impl != nullptr);
-
-            bool result = false;
-            auto itr = request.find(HEADER_HOST);
-            if (itr != request.end()) {
-                if (itr->second.empty()) {
-                    tDLogE("Node::Impl::Server::onClientSwitchingProtocol() Empty hostname");
-                } else {
-                    WriteGuard const GUARD(_impl->_nodes_lock);
-                    if (_impl->_nodes.find(itr->second) != _impl->_nodes.end()) {
-                        tDLogE("Node::Impl::Server::onClientSwitchingProtocol() Exists hostname: {}", itr->second);
-                    } else {
-                        result = _impl->_nodes.insert(std::make_pair(itr->second, shared)).second;
-                        if (result) {
-                            shared->name = itr->second;
-                        }
-                    }
-                }
-            } else {
-                tDLogE("Node::Impl::Server::onClientSwitchingProtocol() Not found hostname");
-            }
-
-            if (result) {
-                tDLogI("Node::Impl::Server::onClientSwitchingProtocol() Create new node: {}", shared->name);
-                return Base::onClientSwitchingProtocol(node, request); // Write WebSocket Response.
-            } else {
-                shared->close();
-                return false;
-            }
-        }
-
-        // ----------------------------
-        // HttpServer extension events.
-        // ----------------------------
-
-        virtual void onClientOpen(WeakClient node) override
-        {
-            // EMPTY.
-        }
-
-        virtual void onClientContinue(WeakClient node) override
-        {
-            // EMPTY.
-        }
-
-        virtual void onClientWsMessage(WeakClient node, WsOpCode opcode, Buffer const & payload) override
-        {
-            // EMPTY.
-        }
-
-        virtual void onClientRequest(WeakClient node, HttpRequest const & request) override
-        {
-            // EMPTY.
-        }
-    };
-
-    /**
-     * Node::Impl::Client class implementation.
+     * DsNode::Impl::Client class implementation.
      *
      * @author zer0
      * @date   2018-10-26
@@ -296,7 +114,7 @@ public:
             auto itr = _impl->_clients.find(_name);
             if (itr != _impl->_clients.end()) {
                 _impl->_clients.erase(itr);
-                tDLogI("Node::Impl::Client::~Client() Erase client: {}", _name);
+                tDLogI("DsNode::Impl::Client::~Client() Erase client: {}", _name);
             }
         }
 
@@ -388,7 +206,190 @@ public:
     };
 
     /**
-     * Node::Impl::Idle class implementation.
+     * DsNode::Impl::ClientNode class implementation.
+     *
+     * @author zer0
+     * @date   2018-10-31
+     */
+    struct ClientNode : public HttpNode
+    {
+    public:
+        using Base = HttpNode;
+
+    public:
+        std::string name;
+
+    public:
+        ClientNode(Loop & loop, StreamType type, HttpServer * parent) : Base(loop, type, parent)
+        {
+            // EMPTY.
+        }
+
+        virtual ~ClientNode()
+        {
+            // EMPTY.
+        }
+    };
+
+    /**
+     * DsNode::Impl::Server class implementation.
+     *
+     * @author zer0
+     * @date   2018-10-26
+     */
+    struct Server : public HttpServer
+    {
+    public:
+        using Base = HttpServer;
+
+    private:
+        Impl * _impl = nullptr;
+
+    public:
+        Server(Impl * i, Loop & loop, StreamType type) : Base(loop, type), _impl(i)
+        {
+            assert(_impl != nullptr);
+        }
+
+        virtual ~Server()
+        {
+            // EMPTY.
+        }
+
+        // -----------------------
+        // ServerInterface events.
+        // -----------------------
+
+        virtual void onConnection(Err code) override
+        {
+            Base::onConnection(code);
+        }
+
+        virtual void onClientShutdown(WeakClient node, Err code) override
+        {
+            // EMPTY.
+        }
+
+        virtual void onClientWrite(WeakClient node, Err code) override
+        {
+            // EMPTY.
+        }
+
+        // Don't implement this method.
+        // virtual void onClientRead(WeakClient node, Err code, ReadPacket const & packet) override
+        // { /* EMPTY. */ }
+
+        virtual void onClientClose(WeakClient node) override
+        {
+            auto shared = std::static_pointer_cast<ClientNode>(node.lock());
+            assert(static_cast<bool>(shared));
+            assert(_impl != nullptr);
+
+            WriteGuard const GUARD(_impl->_nodes_lock);
+            auto itr = _impl->_nodes.find(shared->name);
+            if (itr != _impl->_nodes.end()) {
+                _impl->_nodes.erase(itr);
+                tDLogI("DsNode::Impl::Server::onClientClose() Erase node: {}", shared->name);
+            }
+        }
+
+        virtual void onClientTimer(WeakClient node) override
+        {
+            // EMPTY.
+        }
+
+        virtual void onServerClose() override
+        {
+            // EMPTY.
+        }
+
+        // ------------------
+        // HttpServer events.
+        // ------------------
+
+        SharedStreamNode createClient(StreamType type, Loop & loop, SharedStream & server) override
+        {
+            assert(static_cast<bool>(server));
+            return SharedStreamNode(new (std::nothrow) ClientNode(loop, type, this));
+        }
+
+        virtual void onClientEof(WeakClient node) override
+        {
+            Base::onClientEof(node);
+        }
+
+        virtual void onClientReadError(WeakClient node, Err code) override
+        {
+            Base::onClientReadError(node, code);
+        }
+
+        virtual void onClientParseError(WeakClient node, Err code) override
+        {
+            Base::onClientParseError(node, code);
+        }
+
+        virtual bool onClientSwitchingProtocol(WeakClient node, HttpRequest const & request) override
+        {
+            auto shared = std::static_pointer_cast<ClientNode>(node.lock());
+            assert(static_cast<bool>(shared));
+            assert(_impl != nullptr);
+
+            bool result = false;
+            auto itr = request.find(HEADER_HOST);
+            if (itr != request.end()) {
+                if (itr->second.empty()) {
+                    tDLogE("DsNode::Impl::Server::onClientSwitchingProtocol() Empty hostname");
+                } else {
+                    WriteGuard const GUARD(_impl->_nodes_lock);
+                    if (_impl->_nodes.find(itr->second) != _impl->_nodes.end()) {
+                        tDLogE("DsNode::Impl::Server::onClientSwitchingProtocol() Exists hostname: {}", itr->second);
+                    } else {
+                        result = _impl->_nodes.insert(std::make_pair(itr->second, shared)).second;
+                        if (result) {
+                            shared->name = itr->second;
+                        }
+                    }
+                }
+            } else {
+                tDLogE("DsNode::Impl::Server::onClientSwitchingProtocol() Not found hostname");
+            }
+
+            if (result) {
+                tDLogI("DsNode::Impl::Server::onClientSwitchingProtocol() Create new node: {}", shared->name);
+                return Base::onClientSwitchingProtocol(node, request); // Write WebSocket Response.
+            } else {
+                shared->close();
+                return false;
+            }
+        }
+
+        // ----------------------------
+        // HttpServer extension events.
+        // ----------------------------
+
+        virtual void onClientOpen(WeakClient node) override
+        {
+            // EMPTY.
+        }
+
+        virtual void onClientContinue(WeakClient node) override
+        {
+            // EMPTY.
+        }
+
+        virtual void onClientWsMessage(WeakClient node, WsOpCode opcode, Buffer const & payload) override
+        {
+            // EMPTY.
+        }
+
+        virtual void onClientRequest(WeakClient node, HttpRequest const & request) override
+        {
+            // EMPTY.
+        }
+    };
+
+    /**
+     * DsNode::Impl::Idle class implementation.
      *
      * @author zer0
      * @date   2018-10-27
@@ -433,11 +434,9 @@ public:
     TBAG_CONSTEXPR static unsigned int WAIT_OPERATIONS_MILLISEC = 16 * 1000;
     TBAG_CONSTEXPR static char const * const PIPE_SCHEMA = "pipe";
 
-private:
-    Node * _parent;
-
-private:
-    struct Params {
+public:
+    struct Params
+    {
         std::string uri;
 
         TBAG_CONSTEXPR static char const * const QUERY_NAME = "name";
@@ -445,7 +444,11 @@ private:
 
         TBAG_CONSTEXPR static char const * const QUERY_VERBOSE = "verbose";
         bool verbose = false;   ///< Verbose logging.
-    } _params;
+    };
+
+private:
+    DsNode * _parent;
+    Params   _params;
 
 private:
     Loop         _loop;
@@ -466,15 +469,14 @@ private:
 
 public:
     std::atomic<NodeState> _state;
-    std::atomic_int  _c2s_counter;
-    std::atomic_int  _s2c_counter;
+    std::atomic_int _write_counter;
 
 private:
     SharedThread _pool;
 
 public:
-    Impl(Node * parent, std::string const & uri)
-            : _parent(parent), _state(NodeState::NS_OPENING), _c2s_counter(0), _s2c_counter(0)
+    Impl(DsNode * parent, std::string const & uri)
+            : _parent(parent), _state(NodeState::NS_OPENING), _write_counter(0)
     {
         assert(_parent != nullptr);
 
@@ -575,9 +577,9 @@ public:
         auto const CLOSE_TIMEOUT = milliseconds(WAIT_OPERATIONS_MILLISEC);
 
         // STEP 02. Wait c2s & s2c operations ...
-        while (_c2s_counter == 0 && _s2c_counter == 0) {
+        while (_write_counter == 0) {
             if (WAIT_OPERATIONS_MILLISEC != 0 && (system_clock::now() - CLOSE_BEGIN) >= CLOSE_TIMEOUT) {
-                tDLogW("Node::Impl::~Impl() Close timeout!");
+                tDLogW("DsNode::Impl::~Impl() Close timeout!");
                 break;
             }
         }
@@ -585,6 +587,9 @@ public:
         // STEP 03. Close uv handles ...
         if (_idle && !_idle->isClosing()) {
             _idle->close();
+        }
+        if (_prepare && !_prepare->isClosing()) {
+            _prepare->close();
         }
         if (_async && !_async->isClosing()) {
             _async->close();
@@ -601,12 +606,13 @@ public:
         // STEP 04. Join thread.
         assert(static_cast<bool>(_pool));
         if (!_pool->waitPush([this](){ _pool->exit(); })) {
-            tDLogW("Node::Impl::~Impl() Task push error.");
+            tDLogW("DsNode::Impl::~Impl() Task push error.");
         }
         _pool.reset();
 
         // STEP 05. Memory clear
         _idle.reset();
+        _prepare.reset();
         _async.reset();
         _server.reset();
         _clients.clear();
@@ -617,7 +623,7 @@ private:
     {
         Err const CODE = _loop.run();
         if (isFailure(CODE)) {
-            tDLogE("Node::Impl::runMain() loop run error: {}", CODE);
+            tDLogE("DsNode::Impl::runMain() loop run error: {}", CODE);
         }
     }
 
@@ -650,9 +656,9 @@ public:
             auto const CODE = connectMain(name, uri);
             if (isFailure(CODE)) {
                 if (name == uri) {
-                    tDLogE("Node::Impl::connect({})@async() Open error: {}", name, CODE);
+                    tDLogE("DsNode::Impl::connect({})@async() Open error: {}", name, CODE);
                 } else {
-                    tDLogE("Node::Impl::connect({}, {})@async() Open error: {}", name, uri, CODE);
+                    tDLogE("DsNode::Impl::connect({}, {})@async() Open error: {}", name, uri, CODE);
                 }
             }
         });
@@ -667,33 +673,21 @@ public:
         auto const JOB = _async->newSendFunc([this, name](){
             auto const CODE = disconnectMain(name);
             if (isFailure(CODE)) {
-                tDLogE("Node::Impl::disconnect({})@async() Open error: {}", name, CODE);
+                tDLogE("DsNode::Impl::disconnect({})@async() Open error: {}", name, CODE);
             }
         });
         return static_cast<bool>(JOB) ? Err::E_SUCCESS : Err::E_EPUSH;
     }
 
-    Err c2s(std::string const & name, char const * buffer, std::size_t size)
+    Err write(std::string const & name, char const * buffer, std::size_t size)
     {
         if (_state != NodeState::NS_OPENED) {
             return Err::E_EBUSY;
         }
         Err code;
-        ++_c2s_counter;
+        ++_write_counter;
         code = c2sMain(name, buffer, size);
-        --_c2s_counter;
-        return code;
-    }
-
-    Err s2c(std::string const & client_name, char const * buffer, std::size_t size)
-    {
-        if (_state != NodeState::NS_OPENED) {
-            return Err::E_EBUSY;
-        }
-        Err code;
-        ++_s2c_counter;
-        code = s2cMain(client_name, buffer, size);
-        --_s2c_counter;
+        --_write_counter;
         return code;
     }
 
@@ -726,7 +720,7 @@ public:
         try {
             client = std::make_shared<Client>(this, _loop, type, name);
         } catch (...) {
-            tDLogE("Node::Impl::connectMain() Bad allocation.");
+            tDLogE("DsNode::Impl::connectMain() Bad allocation.");
             return Err::E_BADALLOC;
         }
 
@@ -745,7 +739,7 @@ public:
 
         Err const INIT_CODE = client->init(host.c_str(), port);
         if (isFailure(INIT_CODE)) {
-            tDLogE("Node::Impl::connectMain() Server init error: {}", INIT_CODE);
+            tDLogE("DsNode::Impl::connectMain() Server init error: {}", INIT_CODE);
             return INIT_CODE;
         }
         return Err::E_SUCCESS;
@@ -835,43 +829,43 @@ public:
     }
 };
 
-// --------------------
-// Node implementation.
-// --------------------
+// ----------------------
+// DsNode implementation.
+// ----------------------
 
-Node::Node() : _impl(nullptr), _event(nullptr)
+DsNode::DsNode() : _impl(nullptr), _event(nullptr)
 {
     // EMPTY.
 }
 
-Node::Node(Node const & obj) TBAG_NOEXCEPT : Node()
+DsNode::DsNode(DsNode const & obj) TBAG_NOEXCEPT : DsNode()
 {
     (*this) = obj;
 }
 
-Node::Node(Node && obj) TBAG_NOEXCEPT : Node()
+DsNode::DsNode(DsNode && obj) TBAG_NOEXCEPT : DsNode()
 {
     (*this) = std::move(obj);
 }
 
-Node::~Node()
+DsNode::~DsNode()
 {
-    // EMPTY.
+    close();
 }
 
-Node & Node::operator =(Node const & obj) TBAG_NOEXCEPT
+DsNode & DsNode::operator =(DsNode const & obj) TBAG_NOEXCEPT
 {
     copy(obj);
     return *this;
 }
 
-Node & Node::operator =(Node && obj) TBAG_NOEXCEPT
+DsNode & DsNode::operator =(DsNode && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void Node::copy(Node const & obj) TBAG_NOEXCEPT
+void DsNode::copy(DsNode const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _impl = obj._impl;
@@ -879,7 +873,7 @@ void Node::copy(Node const & obj) TBAG_NOEXCEPT
     }
 }
 
-void Node::swap(Node & obj) TBAG_NOEXCEPT
+void DsNode::swap(DsNode & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _impl.swap(obj._impl);
@@ -887,7 +881,17 @@ void Node::swap(Node & obj) TBAG_NOEXCEPT
     }
 }
 
-Err Node::open(std::string const & uri)
+Err DsNode::open(std::string const & name, std::string const & schema,
+                 std::string const & host, int port, bool verbose)
+{
+    using namespace libtbag::string;
+    auto const URI = fformat("{}://{}:{}?{}={}&{}={}", schema, host, port,
+                             std::string(Impl::Params::QUERY_NAME), name,
+                             std::string(Impl::Params::QUERY_VERBOSE), verbose ? 1 : 0);
+    return open(URI);
+}
+
+Err DsNode::open(std::string const & uri)
 {
     try {
         _impl = std::make_shared<Impl>(this, uri);
@@ -901,12 +905,12 @@ Err Node::open(std::string const & uri)
     return Err::E_SUCCESS;
 }
 
-void Node::close()
+void DsNode::close()
 {
     _impl.reset();
 }
 
-Err Node::connect(std::string const & client_name, std::string const & server_uri)
+Err DsNode::connect(std::string const & client_name, std::string const & server_uri)
 {
     if (!exists()) {
         return Err::E_NREADY;
@@ -914,7 +918,7 @@ Err Node::connect(std::string const & client_name, std::string const & server_ur
     return _impl->connect(client_name, server_uri);
 }
 
-Err Node::disconnect(std::string const & client_name)
+Err DsNode::disconnect(std::string const & client_name)
 {
     if (!exists()) {
         return Err::E_NREADY;
@@ -922,23 +926,15 @@ Err Node::disconnect(std::string const & client_name)
     return _impl->disconnect(client_name);
 }
 
-Err Node::c2s(std::string const & server_name, char const * buffer, std::size_t size)
+Err DsNode::write(std::string const & name, char const * buffer, std::size_t size)
 {
     if (!exists()) {
         return Err::E_NREADY;
     }
-    return _impl->c2s(server_name, buffer, size);
+    return _impl->write(name, buffer, size);
 }
 
-Err Node::s2c(std::string const & client_name, char const * buffer, std::size_t size)
-{
-    if (!exists()) {
-        return Err::E_NREADY;
-    }
-    return _impl->c2s(client_name, buffer, size);
-}
-
-} // namespace node
+} // namespace distribution
 } // namespace network
 
 // --------------------
