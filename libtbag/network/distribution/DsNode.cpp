@@ -98,7 +98,6 @@ public:
     TBAG_CONSTEXPR static char const * const HEADER_HOST   = libtbag::network::http::base::HEADER_HOST;
     TBAG_CONSTEXPR static char const * const HEADER_ORIGIN = libtbag::network::http::base::HEADER_ORIGIN;
     TBAG_CONSTEXPR static char const * const PIPE_SCHEMA   = "pipe";
-    TBAG_CONSTEXPR static unsigned int WAIT_OPERATIONS_MILLISEC = 16 * 1000;
 
 public:
     enum class NodeType
@@ -651,14 +650,10 @@ private:
 
         using namespace std::chrono;
         auto const CLOSE_BEGIN = system_clock::now();
-        auto const CLOSE_TIMEOUT = milliseconds(WAIT_OPERATIONS_MILLISEC);
 
         STEP(02, "Wait operations");
-        while (_write_counter == 0) {
-            if ((system_clock::now() - CLOSE_BEGIN) >= CLOSE_TIMEOUT) {
-                tDLogW("DsNode::Impl::close() Close timeout!");
-                break;
-            }
+        while (_write_counter != 0) {
+            // Busy-Wait...
         }
 
         STEP(03, "Close uv handles");
