@@ -9,7 +9,6 @@
 #include <libtbag/container/Global.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/string/Environments.hpp>
 #include <libtbag/util/Version.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -55,11 +54,12 @@ TBAG_CONSTEXPR static char const * const SERVICE_APP_MAIN_REMARKS = "\n"
 ServiceApp::ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs)
         : app::Service(argc, argv, envs),
           _options(SERVICE_APP_OPTIONS_PREFIX, SERVICE_APP_OPTIONS_DELIMITER),
+          _envs(envs), _version(), _config_path(), _config(),
           _enable_help(false), _enable_verbose(false), _enable_version(false)
 {
     using namespace libtbag::container;
-    auto config = newGlobalObject<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY, config_name);
-    assert(static_cast<bool>(config));
+    _config = newGlobalObject<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY, config_name);
+    assert(static_cast<bool>(_config));
 }
 
 ServiceApp::~ServiceApp()
@@ -192,17 +192,17 @@ int ServiceApp::run()
     // REQUEST OPTIONS.
     // ----------------
 
-    bool enable_unknown = false;
+    std::string unknown_command;
     std::vector<std::string> cmds;
 
     _options.setDefaultCallback([&](Arguments const & args){
-        if (args.getName().empty() == false) {
+        if (!args.getName().empty()) {
             // This block comes when an unknown option is hit.
-            enable_unknown = true;
+            unknown_command = args.getName();
             return;
         }
 
-        if (args.empty() == false) {
+        if (!args.empty()) {
             // Command arguments.
             cmds.push_back(args.getOriginalArgumentString());
         }
@@ -218,8 +218,8 @@ int ServiceApp::run()
     // CHECK OPTIONS.
     // --------------
 
-    if (enable_unknown) {
-        std::cerr << "Found the unknown commands." << std::endl;
+    if (!unknown_command.empty()) {
+        std::cerr << "Found the unknown commands: " << unknown_command << std::endl;
         return EXIT_FAILURE;
     }
 

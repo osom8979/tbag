@@ -19,6 +19,7 @@
 
 #include <libtbag/app/Service.hpp>
 #include <libtbag/string/HelpCommander.hpp>
+#include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/xml/DefaultXmlModel.hpp>
 #include <libtbag/dom/xml/node/ServerXmlNode.hpp>
 #include <libtbag/log/node/DefaultLogXmlNode.hpp>
@@ -46,9 +47,11 @@ class TBAG_API ServiceApp : public Service
 public:
     using Version = util::Version;
 
-    using HelpCommander   = string::HelpCommander;
-    using DefaultXmlModel = dom::xml::DefaultXmlModel;
+    using HelpCommander   = libtbag::string::HelpCommander;
+    using Environments    = libtbag::string::Environments;
+    using DefaultXmlModel = libtbag::dom::xml::DefaultXmlModel;
     using ConfigScope     = DefaultXmlModel::Scope;
+    using SharedModel     = std::shared_ptr<DefaultXmlModel>;
     using WeakModel       = std::weak_ptr<DefaultXmlModel>;
 
 public:
@@ -57,8 +60,10 @@ public:
 
 protected:
     HelpCommander _options;
-    std::string   _config_path;
+    Environments  _envs;
     Version       _version;
+    std::string   _config_path;
+    SharedModel   _config;
 
 protected:
     bool _enable_help;
@@ -72,6 +77,12 @@ public:
 public:
     inline HelpCommander       & atOptions()       TBAG_NOEXCEPT { return _options; }
     inline HelpCommander const & atOptions() const TBAG_NOEXCEPT { return _options; }
+
+    inline Environments       & envs()       TBAG_NOEXCEPT { return _envs; }
+    inline Environments const & envs() const TBAG_NOEXCEPT { return _envs; }
+
+    inline SharedModel       & config()       TBAG_NOEXCEPT { return _config; }
+    inline SharedModel const & config() const TBAG_NOEXCEPT { return _config; }
 
     inline std::string getConfigPath() const TBAG_NOEXCEPT_SPECIFIER(std::is_nothrow_copy_assignable<std::string>::value)
     { return _config_path; }
