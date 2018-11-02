@@ -97,6 +97,7 @@ public:
 public:
     TBAG_CONSTEXPR static char const * const HEADER_HOST   = libtbag::network::http::base::HEADER_HOST;
     TBAG_CONSTEXPR static char const * const HEADER_ORIGIN = libtbag::network::http::base::HEADER_ORIGIN;
+    TBAG_CONSTEXPR static char const * const HTTP_SCHEMA   = "http";
     TBAG_CONSTEXPR static char const * const PIPE_SCHEMA   = "pipe";
 
 public:
@@ -241,7 +242,7 @@ public:
             auto itr = nodes.find(_name);
             if (itr != nodes.end()) {
                 nodes.erase(itr);
-                tDLogI("DsNode::I::C::onClose() Erase node: {}", _name);
+                tDLogI("DsNode[{}]::I::C::onClose() Erase node: {}", _impl->_params.name, _name);
             } else {
                 // Not found node. Do not print log message.
             }
@@ -384,7 +385,7 @@ public:
             if (itr != nodes.end()) {
                 itr->second->setDisconnected();
                 nodes.erase(itr);
-                tDLogI("DsNode::I::S::onClientClose() Erase node: {}", NAME);
+                tDLogI("DsNode[{}]::I::S::onClientClose() Erase node: {}", _impl->_params.name, NAME);
             } else {
                 // Not found node. Do not print log message.
             }
@@ -417,16 +418,18 @@ public:
             bool result = false;
             auto shared = std::static_pointer_cast<ServerNode>(node.lock());
             assert(static_cast<bool>(shared));
+            assert(_impl != nullptr);
+            assert(_impl->_parent != nullptr);
 
             auto itr = request.find(HEADER_HOST);
             std::string host_name;
 
             if (itr == request.end()) {
-                tDLogE("DsNode::I::S::oCSP() Not found hostname");
+                tDLogE("DsNode[{}]::I::S::oCSP() Not found hostname", _impl->_params.name);
             } else {
                 host_name = itr->second;
                 if (host_name.empty()) {
-                    tDLogE("DsNode::I::S::oCSP() Empty hostname");
+                    tDLogE("DsNode[{}]::I::S::oCSP() Empty hostname", _impl->_params.name);
                 } else {
                     assert(_impl != nullptr);
                     auto & lock  = _impl->_nodes_lock;
@@ -434,7 +437,7 @@ public:
 
                     WriteGuard const GUARD(lock);
                     if (nodes.find(host_name) != nodes.end()) {
-                        tDLogE("DsNode::I::S::oCSP() Exists hostname: {}", host_name);
+                        tDLogE("DsNode[{}]::I::S::oCSP() Exists hostname: {}", _impl->_params.name, host_name);
                     } else {
                         result = nodes.insert(std::make_pair(host_name, shared)).second;
                         if (result) {
@@ -446,13 +449,11 @@ public:
             }
 
             if (result) {
-                assert(_impl != nullptr);
-                assert(_impl->_parent != nullptr);
                 auto & event = _impl->_parent->event();
                 if (event) {
                     event->onConnect(host_name);
                 }
-                tDLogI("DsNode::I::S::oCSP() Create new node: {}", host_name);
+                tDLogI("DsNode[{}]::I::S::oCSP() Create new node: {}", _impl->_params.name, host_name);
                 return Base::onClientSwitchingProtocol(node, request); // Write WebSocket Response.
             } else {
                 shared->close();
@@ -553,7 +554,7 @@ public:
         auto const SCHEMA = libtbag::string::lower(uri_parser.getSchema());
         if (SCHEMA == PIPE_SCHEMA) {
             type = StreamType::PIPE;
-            host = uri_parser.getHost();
+            host = uri_parser.getPath();
             port = 0;
         } else {
             type = StreamType::TCP;
@@ -617,9 +618,10 @@ public:
                 if (_params.verbose) {
                     loggingSelfInformation();
                 }
+                assert(_state == State::S_OPENING || _state == State::S_CLOSING);
                 _state = State::S_OPENED; // ==[[ OPENING DONE ]]==
             } else {
-                tDLogE("DsNode::Impl::Impl()@prepare() Server is not active!");
+                tDLogE("DsNode[{}]::Impl::Impl()@prepare() Server is not active!", _params.name);
                 close();
             }
         });
@@ -646,6 +648,7 @@ private:
     void close()
     {
         STEP(01, "Update CLOSING state");
+        assert(_state == State::S_OPENING || _state == State::S_OPENED);
         _state = State::S_CLOSING;
 
         using namespace std::chrono;
@@ -682,7 +685,7 @@ private:
         STEP(04, "Join background thread");
         assert(static_cast<bool>(_pool));
         if (!_pool->waitPush([this](){ _pool->exit(); })) {
-            tDLogW("DsNode::Impl::close() Task push error.");
+            tDLogW("DsNode[{}]::Impl::close() Task push error.", _params.name);
         }
         _pool.reset();
 
@@ -700,12 +703,16 @@ private:
 
     void runner()
     {
-        tDLogI("DsNode::Impl::runner() Start.");
+        using namespace libtbag::signal;
+        registerDefaultStdTerminateHandler();
+        registerDefaultHandler();
+
+        tDLogI("DsNode[{}]::Impl::runner() Start.", _params.name);
         Err const CODE = _loop.run();
         if (isSuccess(CODE)) {
-            tDLogI("DsNode::Impl::runner() Done.");
+            tDLogI("DsNode[{}]::Impl::runner() Done.", _params.name);
         } else {
-            tDLogE("DsNode::Impl::runner() Done, error: {}", CODE);
+            tDLogE("DsNode[{}]::Impl::runner() Done, error: {}", _params.name, CODE);
         }
     }
 
@@ -720,6 +727,63 @@ public:
 
         assert(static_cast<bool>(_server));
         tDLogI("* Server: {}:{})", _server->dest(), _server->port());
+    }
+
+    State getState() const
+    {
+        assert(_state != State::S_NONE);
+        return _state;
+    }
+
+    bool busyWaitingUntilOpened(int timeout_millisec = INFINITE_TIMEOUT) const
+    {
+        auto const BEGIN   = std::chrono::system_clock::now();
+        auto const TIMEOUT = std::chrono::milliseconds(timeout_millisec);
+        while (_state == State::S_OPENING) {
+            if (timeout_millisec > INFINITE_TIMEOUT && (std::chrono::system_clock::now() - BEGIN) >= TIMEOUT) {
+                return false;
+            }
+            // busy waiting...
+        }
+        return _state == State::S_OPENED ? true : false;
+    }
+
+    bool busyWaitingUntilConnected(std::string const & name, int timeout_millisec = INFINITE_TIMEOUT) const
+    {
+        SharedNode node;
+        COMMENT("NODES READ LOCK") {
+            ReadGuard const GUARD(_nodes_lock);
+            auto itr = _nodes.find(name);
+            if (itr == _nodes.end()) {
+                return false;
+            }
+            if (!static_cast<bool>(itr->second)) {
+                return false;
+            }
+            node = itr->second;
+        }
+
+        auto const BEGIN   = std::chrono::system_clock::now();
+        auto const TIMEOUT = std::chrono::milliseconds(timeout_millisec);
+        while (!node->isConnected()) {
+            if (timeout_millisec > INFINITE_TIMEOUT && (std::chrono::system_clock::now() - BEGIN) >= TIMEOUT) {
+                return false;
+            }
+            // busy waiting...
+        }
+        return true;
+    }
+
+    std::string host() const
+    {
+        assert(static_cast<bool>(_server));
+        return _server->dest();
+    }
+
+    int port() const
+    {
+        assert(static_cast<bool>(_server));
+        return _server->port();
     }
 
     std::vector<std::string> nodes() const
@@ -747,58 +811,13 @@ public:
     }
 
 public:
-    Err connect(std::string const & uri)
-    {
-        return connect(uri, uri);
-    }
-
     Err connect(std::string const & name, std::string const & uri)
     {
+        assert(_state != State::S_NONE);
         if (_state != State::S_OPENED) {
             return Err::E_EBUSY;
         }
-        auto const JOB = _async->newSendFunc([this, name, uri](){
-            auto const CODE = connectMain(name, uri);
-            if (isFailure(CODE)) {
-                if (name == uri) {
-                    tDLogE("DsNode::Impl::connect({})@async() Open error: {}", name, CODE);
-                } else {
-                    tDLogE("DsNode::Impl::connect({}, {})@async() Open error: {}", name, uri, CODE);
-                }
-            }
-        });
-        return static_cast<bool>(JOB) ? Err::E_SUCCESS : Err::E_EPUSH;
-    }
 
-    Err disconnect(std::string const & name)
-    {
-        if (_state != State::S_OPENED) {
-            return Err::E_EBUSY;
-        }
-        auto const JOB = _async->newSendFunc([this, name](){
-            auto const CODE = disconnectMain(name);
-            if (isFailure(CODE)) {
-                tDLogE("DsNode::Impl::disconnect({})@async() Open error: {}", name, CODE);
-            }
-        });
-        return static_cast<bool>(JOB) ? Err::E_SUCCESS : Err::E_EPUSH;
-    }
-
-    Err write(std::string const & name, char const * buffer, std::size_t size)
-    {
-        if (_state != State::S_OPENED) {
-            return Err::E_EBUSY;
-        }
-        Err code;
-        ++_write_counter;
-        code = writeMain(name, buffer, size);
-        --_write_counter;
-        return code;
-    }
-
-public:
-    Err connectMain(std::string const & name, std::string const & uri)
-    {
         StreamType  type;
         std::string host;
         int         port;
@@ -811,7 +830,7 @@ public:
         auto const SCHEMA = libtbag::string::lower(uri_parser.getSchema());
         if (SCHEMA == PIPE_SCHEMA) {
             type = StreamType::PIPE;
-            host = uri_parser.getHost();
+            host = uri_parser.getPath();
             port = 0;
         } else {
             type = StreamType::TCP;
@@ -825,7 +844,7 @@ public:
         try {
             client = std::make_shared<ClientNode>(this, _loop, type, name);
         } catch (...) {
-            tDLogE("DsNode::Impl::connectMain() Bad allocation.");
+            tDLogE("DsNode[{}]::Impl::connectMain() Bad allocation.", _params.name);
             return Err::E_BADALLOC;
         }
 
@@ -844,7 +863,7 @@ public:
 
         Err const INIT_CODE = client->init(host.c_str(), port);
         if (isFailure(INIT_CODE)) {
-            tDLogE("DsNode::Impl::connectMain() Server init error: {}", INIT_CODE);
+            tDLogE("DsNode[{}]::Impl::connectMain() Server init error: {}", _params.name, INIT_CODE);
             auto const ERASE_RESULT = _nodes.erase(name);
             assert(ERASE_RESULT == 1);
             return INIT_CODE;
@@ -852,8 +871,13 @@ public:
         return Err::E_SUCCESS;
     }
 
-    Err disconnectMain(std::string const & name)
+    Err disconnect(std::string const & name)
     {
+        assert(_state != State::S_NONE);
+        if (_state != State::S_OPENED) {
+            return Err::E_EBUSY;
+        }
+
         SharedNode node;
         COMMENT("NODES READ LOCK") {
             ReadGuard const GUARD(_nodes_lock);
@@ -869,6 +893,20 @@ public:
         return node->castedClose();
     }
 
+    Err write(std::string const & name, char const * buffer, std::size_t size)
+    {
+        assert(_state != State::S_NONE);
+        if (_state != State::S_OPENED) {
+            return Err::E_EBUSY;
+        }
+        Err code;
+        ++_write_counter;
+        code = writeMain(name, buffer, size);
+        --_write_counter;
+        return code;
+    }
+
+private:
     Err writeMain(std::string const & name, char const * buffer, std::size_t size)
     {
         SharedNode node;
@@ -944,11 +982,39 @@ void DsNode::swap(DsNode & obj) TBAG_NOEXCEPT
     }
 }
 
+DsNode::SharedFuncEvent DsNode::updateFunctionalEvent()
+{
+    auto shared = std::make_shared<FuncEvent>();
+    _event = std::static_pointer_cast<Event>(shared);
+    return shared;
+}
+
+Err DsNode::openTcp(std::string const & name, std::string const & host, int port, bool verbose)
+{
+    using namespace libtbag::string;
+    return open(name, Impl::HTTP_SCHEMA, host, port, verbose);
+}
+
+Err DsNode::openPipe(std::string const & name, std::string const & path, bool verbose)
+{
+    using namespace libtbag::string;
+    return open(name, Impl::PIPE_SCHEMA, path, verbose);
+}
+
 Err DsNode::open(std::string const & name, std::string const & schema,
                  std::string const & host, int port, bool verbose)
 {
     using namespace libtbag::string;
     auto const URI = fformat("{}://{}:{}?{}={}&{}={}", schema, host, port,
+                             std::string(Impl::Params::QUERY_NAME), name,
+                             std::string(Impl::Params::QUERY_VERBOSE), verbose ? 1 : 0);
+    return open(URI);
+}
+
+Err DsNode::open(std::string const & name, std::string const & schema, std::string const & host, bool verbose)
+{
+    using namespace libtbag::string;
+    auto const URI = fformat("{}://{}?{}={}&{}={}", schema, host,
                              std::string(Impl::Params::QUERY_NAME), name,
                              std::string(Impl::Params::QUERY_VERBOSE), verbose ? 1 : 0);
     return open(URI);
@@ -973,6 +1039,46 @@ void DsNode::close()
     _impl.reset();
 }
 
+DsNode::State DsNode::getState() const
+{
+    if (!exists()) {
+        return State::S_NONE;
+    }
+    return _impl->getState();
+}
+
+bool DsNode::busyWaitingUntilOpened(int timeout_millisec) const
+{
+    if (!exists()) {
+        return false;
+    }
+    return _impl->busyWaitingUntilOpened(timeout_millisec);
+}
+
+bool DsNode::busyWaitingUntilConnected(std::string const & name, int timeout_millisec) const
+{
+    if (!exists()) {
+        return false;
+    }
+    return _impl->busyWaitingUntilConnected(name, timeout_millisec);
+}
+
+std::string DsNode::host() const
+{
+    if (!exists()) {
+        return std::string();
+    }
+    return _impl->host();
+}
+
+int DsNode::port() const
+{
+    if (!exists()) {
+        return 0;
+    }
+    return _impl->port();
+}
+
 std::vector<std::string> DsNode::nodes() const
 {
     if (!exists()) {
@@ -993,12 +1099,41 @@ bool DsNode::isConnected(std::string const & name) const
     return false;
 }
 
+Err DsNode::connectTcp(std::string const & name, std::string const & host, int port)
+{
+    using namespace libtbag::string;
+    return connect(name, Impl::HTTP_SCHEMA, host, port);
+}
+
+Err DsNode::connectPipe(std::string const & name, std::string const & path)
+{
+    using namespace libtbag::string;
+    return connect(name, Impl::PIPE_SCHEMA, path);
+}
+
+Err DsNode::connect(std::string const & name, std::string const & schema, std::string const & host, int port)
+{
+    using namespace libtbag::string;
+    return connect(name, fformat("{}://{}:{}", schema, host, port));
+}
+
+Err DsNode::connect(std::string const & name, std::string const & schema, std::string const & host)
+{
+    using namespace libtbag::string;
+    return connect(name, fformat("{}://{}", schema, host));
+}
+
 Err DsNode::connect(std::string const & client_name, std::string const & server_uri)
 {
     if (!exists()) {
         return Err::E_EOPEN;
     }
     return _impl->connect(client_name, server_uri);
+}
+
+Err DsNode::connect(std::string const & uri)
+{
+    return connect(uri, uri);
 }
 
 Err DsNode::disconnect(std::string const & client_name)
@@ -1015,6 +1150,11 @@ Err DsNode::write(std::string const & name, char const * buffer, std::size_t siz
         return Err::E_EOPEN;
     }
     return _impl->write(name, buffer, size);
+}
+
+Err DsNode::write(std::string const & name, std::string const & message)
+{
+    return write(name, message.data(), message.size());
 }
 
 } // namespace distribution
