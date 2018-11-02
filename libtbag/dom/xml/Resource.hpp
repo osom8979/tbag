@@ -39,34 +39,38 @@ TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
 class TBAG_API Resource
 {
 public:
-    TBAG_CONSTEXPR static char const * const ROOT_TAG_NAME  = "resource";
-    TBAG_CONSTEXPR static char const * const ATTRIBUTE_NAME = "name";
+    TBAG_CONSTEXPR static char const * const ROOT_TAG_NAME      = "resource";
+    TBAG_CONSTEXPR static char const * const PROPERTY_TAG_NAME  = "property";
+    TBAG_CONSTEXPR static char const * const ATTRIBUTE_NAME     = "name";
 
 public:
-    TBAG_CONSTEXPR static char const * const getRootTagName  () TBAG_NOEXCEPT { return ROOT_TAG_NAME;  }
-    TBAG_CONSTEXPR static char const * const getAttributeName() TBAG_NOEXCEPT { return ATTRIBUTE_NAME; }
+    TBAG_CONSTEXPR static char const * const getRootTagName    () TBAG_NOEXCEPT { return ROOT_TAG_NAME;  }
+    TBAG_CONSTEXPR static char const * const getPropertyTagName() TBAG_NOEXCEPT { return ROOT_TAG_NAME;  }
+    TBAG_CONSTEXPR static char const * const getAttributeName  () TBAG_NOEXCEPT { return ATTRIBUTE_NAME; }
 
 public:
-    using String = std::string;
-    using Map = std::unordered_map<String, String>;
+    using Map = std::unordered_map<std::string, std::string>;
 
 private:
-    String  _tag;
-    Map     _map;
+    std::string _root;
+    std::string _tag;
+    Map         _map;
 
 public:
     Resource();
+    Resource(std::string const & root);
+    Resource(std::string const & root, std::string const & tag);
     Resource(Resource const & obj);
-    Resource(Resource && obj);
+    Resource(Resource && obj) TBAG_NOEXCEPT;
     virtual ~Resource();
 
 public:
     Resource & operator =(Resource const & obj);
-    Resource & operator =(Resource && obj);
+    Resource & operator =(Resource && obj) TBAG_NOEXCEPT;
 
 public:
     Resource & copy(Resource const & obj);
-    void swap(Resource & obj);
+    void swap(Resource & obj) TBAG_NOEXCEPT;
 
 public:
     void clear();
@@ -80,10 +84,15 @@ public:
     inline std::string getTag() const { return _tag; }
     inline void setTag(std::string const & tag) { _tag = tag; }
 
+    inline std::string getRoot() const { return _root; }
+    inline void setRoot(std::string const & root) { _root = root; }
+
 // XML.
 public:
-    bool readFile(std::string const & path, std::string const & tag);
-    bool readString(std::string const & xml, std::string const & tag);
+    bool readFile(std::string const & path);
+    bool readString(std::string const & xml);
+
+public:
     bool save(std::string const & path) const;
 
 public:
@@ -182,10 +191,10 @@ public:
     std::string const & at(std::string const & key) const;
 
 public:
-    static Map readFromXmlString(std::string const & xml, std::string const & tag);
-    static Map readFromXmlFile(std::string const & path, std::string const & tag);
-    static bool save(std::string const & path, std::string const & tag, Map const & map);
-    static std::string getXmlString(std::string const & tag, Map const & map);
+    static Map readFromXmlString(std::string const & xml, std::string const & root, std::string const & tag);
+    static Map readFromXmlFile(std::string const & path, std::string const & root, std::string const & tag);
+    static bool save(std::string const & path, std::string const & root, std::string const & tag, Map const & map);
+    static std::string getXmlString(std::string const & root, std::string const & tag, Map const & map);
 };
 
 } // namespace xml

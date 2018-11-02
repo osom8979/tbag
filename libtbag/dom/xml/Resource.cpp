@@ -23,9 +23,9 @@ using Printer  = tinyxml2::XMLPrinter;
 using Element  = tinyxml2::XMLElement;
 using Node     = tinyxml2::XMLNode;
 
-static Resource::Map readFromXmlDocument(Document const & doc, std::string const & tag)
+static Resource::Map readFromXmlDocument(Document const & doc, std::string const & root_name, std::string const & tag)
 {
-    Element const * root = doc.FirstChildElement(Resource::getRootTagName());
+    Element const * root = doc.FirstChildElement(root_name.c_str());
     if (root == nullptr) {
         return Resource::Map();
     }
@@ -48,17 +48,28 @@ static Resource::Map readFromXmlDocument(Document const & doc, std::string const
 // Resource implementation.
 // ------------------------
 
-Resource::Resource()
+Resource::Resource() : Resource(getRootTagName())
 {
     // EMPTY.
 }
 
-Resource::Resource(Resource const & obj)
+Resource::Resource(std::string const & root) : Resource(root, getPropertyTagName())
+{
+    // EMPTY.
+}
+
+Resource::Resource(std::string const & root, std::string const & tag)
+        : _root(root), _tag(tag), _map()
+{
+    // EMPTY.
+}
+
+Resource::Resource(Resource const & obj) : Resource()
 {
     copy(obj);
 }
 
-Resource::Resource(Resource && obj)
+Resource::Resource(Resource && obj) TBAG_NOEXCEPT
 {
     swap(obj);
 }
@@ -73,7 +84,7 @@ Resource & Resource::operator =(Resource const & obj)
     return copy(obj);
 }
 
-Resource & Resource::operator =(Resource && obj)
+Resource & Resource::operator =(Resource && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
@@ -82,15 +93,17 @@ Resource & Resource::operator =(Resource && obj)
 Resource & Resource::copy(Resource const & obj)
 {
     if (this != &obj) {
+        _root = obj._root;
         _tag = obj._tag;
         _map = obj._map;
     }
     return *this;
 }
 
-void Resource::swap(Resource & obj)
+void Resource::swap(Resource & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
+        _root.swap(obj._root);
         _tag.swap(obj._tag);
         _map.swap(obj._map);
     }
@@ -98,7 +111,6 @@ void Resource::swap(Resource & obj)
 
 void Resource::clear()
 {
-    _tag.clear();
     _map.clear();
 }
 
@@ -107,28 +119,26 @@ std::size_t Resource::size() const
     return _map.size();
 }
 
-bool Resource::readFile(std::string const & path, std::string const & tag)
+bool Resource::readFile(std::string const & path)
 {
-    _tag = tag;
-    _map = readFromXmlFile(path, tag);
+    _map = readFromXmlFile(path, _root, _tag);
     return (_map.empty() == false);
 }
 
-bool Resource::readString(std::string const & xml, std::string const & tag)
+bool Resource::readString(std::string const & xml)
 {
-    _tag = tag;
-    _map = readFromXmlString(xml, tag);
+    _map = readFromXmlString(xml, _root, _tag);
     return (_map.empty() == false);
 }
 
 bool Resource::save(std::string const & path) const
 {
-    return save(path, _tag, _map);
+    return save(path, _root, _tag, _map);
 }
 
 std::string Resource::getXmlString() const
 {
-    return getXmlString(_tag, _map);
+    return getXmlString(_root, _tag, _map);
 }
 
 bool Resource::getString(std::string const & key, std::string * result) const
@@ -188,30 +198,28 @@ std::string const & Resource::at(std::string const & key) const
 // static methods.
 // ---------------
 
-Resource::Map Resource::readFromXmlString(std::string const & xml, std::string const & tag)
+Resource::Map Resource::readFromXmlString(std::string const & xml, std::string const & root, std::string const & tag)
 {
     __impl::Document doc;
     if (doc.Parse(xml.c_str()) == tinyxml2::XML_NO_ERROR) {
-        return __impl::readFromXmlDocument(doc, tag);
+        return __impl::readFromXmlDocument(doc, root, tag);
     }
-
     return Map();
 }
 
-Resource::Map Resource::readFromXmlFile(std::string const & path, std::string const & tag)
+Resource::Map Resource::readFromXmlFile(std::string const & path, std::string const & root, std::string const & tag)
 {
     __impl::Document doc;
     if (doc.LoadFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
-        return __impl::readFromXmlDocument(doc, tag);
+        return __impl::readFromXmlDocument(doc, root, tag);
     }
-
     return Map();
 }
 
-bool Resource::save(std::string const & path, std::string const & tag, Map const & map)
+bool Resource::save(std::string const & path, std::string const & root, std::string const & tag, Map const & map)
 {
     __impl::Document doc;
-    __impl::Node * node = doc.InsertFirstChild(doc.NewElement(getRootTagName()));
+    __impl::Node * node = doc.InsertFirstChild(doc.NewElement(root.c_str()));
 
     for (auto & cursor : map) {
         __impl::Element * element = doc.NewElement(tag.c_str());
@@ -223,10 +231,10 @@ bool Resource::save(std::string const & path, std::string const & tag, Map const
     return (doc.SaveFile(path.c_str(), isCompactXmlFile()) == tinyxml2::XML_NO_ERROR);
 }
 
-std::string Resource::getXmlString(std::string const & tag, Map const & map)
+std::string Resource::getXmlString(std::string const & root, std::string const & tag, Map const & map)
 {
     __impl::Document doc;
-    __impl::Node * node = doc.InsertFirstChild(doc.NewElement(getRootTagName()));
+    __impl::Node * node = doc.InsertFirstChild(doc.NewElement(root.c_str()));
 
     for (auto & cursor : map) {
         __impl::Element * element = doc.NewElement(tag.c_str());

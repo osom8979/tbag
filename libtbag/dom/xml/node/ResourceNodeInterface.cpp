@@ -74,8 +74,9 @@ ResourceNodeInterface::Resource ResourceNodeInterface::readResource(
     }
 
     Resource res;
+    res.setTag(tag);
     if (path.isRegularFile()) {
-        res.readFile(path, tag);
+        res.readFile(path);
     } else {
         res.setTag(tag);
         res.save(path);

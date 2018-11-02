@@ -28,13 +28,14 @@ Property::~Property()
 void Property::setDefault()
 {
     _res.clear();
+    _res.setRoot(getDefaultRootName());
     _res.setTag(getDefaultTagName());
     updateDefault();
 }
 
 bool Property::load(std::string const & path)
 {
-    return _res.readFile(path, getDefaultTagName());
+    return _res.readFile(path);
 }
 
 bool Property::save(std::string const & path)

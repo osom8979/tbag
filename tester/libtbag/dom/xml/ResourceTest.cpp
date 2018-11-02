@@ -40,7 +40,7 @@ TEST(ResourceTest, Utf8)
     ASSERT_TRUE(res.save(PATH.toString()));
 
     res.clear();
-    ASSERT_TRUE(res.readFile(PATH.toString(), TEST_TAG));
+    ASSERT_TRUE(res.readFile(PATH.toString()));
     ASSERT_EQ(HANGUL_UTF8, res.getString(TEST_NAME));
 }
 
@@ -48,6 +48,7 @@ class ResourceFixtureTest : public ::testing::Test
 {
 public:
     std::string xml;
+    std::string root;
     std::string tag;
 
     std::string attribute1;
@@ -95,16 +96,30 @@ public:
         value4_2 = 50;
         value5_2 = 55.555555f;
 
-        xml = std::string() + "<?xml version=\"1.0\"?>" + "<resource>"
-              + "<property name=\"" + attribute1 + "\">" + value1 + "</property>"
-              + "<property name=\"" + attribute2 + "\">" + value2 + "</property>"
-              + "<property name=\"" + attribute3 + "\">" + value3 + "</property>"
-              + "<property name=\"" + attribute4 + "\">" + value4 + "</property>"
-              + "<property name=\"" + attribute5 + "\">" + value5 + "</property>"
-              + "</resource>";
-        tag = "property";
+        xml = std::string() + "<?xml version=\"1.0\"?>" + "<root>"
+              + "<unknown1 name=\"unknown1\">text1</unknown1>"
+              + "<value name=\"" + attribute1 + "\">" + value1 + "</value>"
+              + "<value name=\"" + attribute2 + "\">" + value2 + "</value>"
+              + "<unknown2 name=\"unknown2\">text2</unknown2>"
+              + "<value name=\"" + attribute3 + "\">" + value3 + "</value>"
+              + "<value name=\"" + attribute4 + "\">" + value4 + "</value>"
+              + "<value name=\"" + attribute5 + "\">" + value5 + "</value>"
+              + "<unknown3 name=\"unknown3\">text3</unknown3>"
+              + "</root>"
+              + "<!-- The following attributes are not used. -->"
+              + "<property>"
+              + "<value name=\"" + attribute1 + "\">" + value1 + "</value>"
+              + "<value name=\"" + attribute3 + "\">" + value3 + "</value>"
+              + "<value name=\"" + attribute4 + "\">" + value4 + "</value>"
+              + "<value name=\"" + attribute5 + "\">" + value5 + "</value>"
+              + "</property>"
+              ;
+        root = "root";
+        tag = "value";
 
-        res.readString(xml, tag);
+        res.setRoot(root);
+        res.setTag(tag);
+        res.readString(xml);
     }
 
     virtual void TearDown() override
@@ -125,10 +140,15 @@ TEST_F(ResourceFixtureTest, GetTag)
     ASSERT_EQ(tag, res.getTag());
 }
 
+TEST_F(ResourceFixtureTest, GetRoot)
+{
+    ASSERT_EQ(root, res.getRoot());
+}
+
 TEST_F(ResourceFixtureTest, ReadFromXmlString)
 {
     Resource::Map map;
-    map = Resource::readFromXmlString(xml, tag);
+    map = Resource::readFromXmlString(xml, root, tag);
 
     ASSERT_EQ(4U, map.size());
     ASSERT_EQ(value1_2, map.find(attribute1)->second);
@@ -142,8 +162,8 @@ TEST_F(ResourceFixtureTest, Save)
     auto const PATH = tttDir_Get() / "utf8.xml";
 
     Resource::Map map;
-    map = Resource::readFromXmlString(xml, tag);
-    ASSERT_TRUE(Resource::save(PATH.toString(), tag, map));
+    map = Resource::readFromXmlString(xml, root, tag);
+    ASSERT_TRUE(Resource::save(PATH.toString(), root, tag, map));
 }
 
 TEST_F(ResourceFixtureTest, GetValue)

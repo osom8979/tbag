@@ -34,6 +34,9 @@ namespace xml {
 class TBAG_API Property : private Noncopyable
 {
 public:
+    static TBAG_CONSTEXPR char const * const getDefaultRootName() TBAG_NOEXCEPT
+    { return "resource"; }
+
     static TBAG_CONSTEXPR char const * const getDefaultTagName() TBAG_NOEXCEPT
     { return "property"; }
 
