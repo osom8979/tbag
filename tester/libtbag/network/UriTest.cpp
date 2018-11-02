@@ -12,6 +12,48 @@
 using namespace libtbag;
 using namespace libtbag::network;
 
+TEST(UriTest, _is_triple_slash)
+{
+    int const ERR = _uri_state_result_error;
+    int const NO = _uri_state_result_no_slash;
+
+    ASSERT_EQ(ERR, _is_triple_slash2(nullptr));
+    ASSERT_EQ(ERR, _is_triple_slash2(""));
+    ASSERT_EQ( NO, _is_triple_slash2("test"));
+    ASSERT_EQ( NO, _is_triple_slash2("test:"));
+    ASSERT_EQ( NO, _is_triple_slash2("test://"));
+    ASSERT_EQ(ERR, _is_triple_slash2("test_://"));
+    ASSERT_EQ(ERR, _is_triple_slash2("test_:///"));
+    ASSERT_EQ(  7, _is_triple_slash2("test:///"));
+    ASSERT_EQ( NO, _is_triple_slash2("http://"));
+    ASSERT_EQ( NO, _is_triple_slash2("http://hoho"));
+    ASSERT_EQ(  7, _is_triple_slash2("http:///hoho"));
+    ASSERT_EQ(  8, _is_triple_slash2("https:///hoho"));
+    ASSERT_EQ(  8, _is_triple_slash2("https:/// "));
+    ASSERT_EQ(ERR, _is_triple_slash2("https:// /"));
+    ASSERT_EQ(  3, _is_triple_slash2(":///"));
+    ASSERT_EQ( NO, _is_triple_slash2("://"));
+    ASSERT_EQ(ERR, _is_triple_slash2(" ://"));
+}
+
+TEST(UriTest, EnableTripleSlash)
+{
+    Uri uri;
+    bool const PARSE_RESULT = uri.parse("http:///hoho?q1=a1&q2=a2#fragment");
+#if defined(ENABLE_TRIPLE_SLASH_FAKER)
+    ASSERT_TRUE(PARSE_RESULT);
+    auto const QUERIES = uri.getQueryMap();
+    ASSERT_STREQ("a1", QUERIES.at("q1").c_str());
+    ASSERT_STREQ("a2", QUERIES.at("q2").c_str());
+    ASSERT_STREQ("fragment", uri.getFragment().c_str());
+    ASSERT_STREQ("http", uri.getSchema().c_str());
+    ASSERT_STREQ("/hoho", uri.getPath().c_str());
+    ASSERT_TRUE(uri.getHost().empty());
+#else
+    ASSERT_FALSE(PARSE_RESULT);
+#endif
+}
+
 TEST(UriTest, Default)
 {
     char const * const TEST_URI = "http://a:b@host.com:8080/p/a/t/h?query=string#hash";

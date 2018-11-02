@@ -15,6 +15,8 @@
 
 #include <http_parser.h>
 #include <cassert>
+#include <ctype.h>
+#include <cstring>
 #include <utility>
 
 #define DISABLE_HTTP_PARSER_URL_FIELDS
@@ -24,6 +26,63 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
+
+int _is_triple_slash(char const * buffer, int size)
+{
+    if (buffer == nullptr || size == 0) {
+        return _uri_state_result_error;
+    }
+
+    _uri_state s = _uri_state_schema;
+    for (int i = 0; i < size; ++i) {
+        switch (buffer[i]) {
+        case ':':
+            if (s == _uri_state_schema) {
+                s = _uri_state_schema_colon;
+            } else {
+                return _uri_state_result_error;
+            }
+            break;
+        case '/':
+            if (s == _uri_state_schema_colon) {
+                s = _uri_state_schema_slash;
+            } else if (s == _uri_state_schema_slash) {
+                s = _uri_state_schema_slash_slash;
+            } else if (s == _uri_state_schema_slash_slash) {
+                return i;
+            } else {
+                return _uri_state_result_error;
+            }
+            break;
+        default:
+            if (isalnum(buffer[i])) {
+                if (s == _uri_state_schema) {
+                    // OK.
+                } else if (s == _uri_state_schema_slash_slash) {
+                    return _uri_state_result_no_slash;
+                } else {
+                    return _uri_state_result_error;
+                }
+            } else {
+                return _uri_state_result_error;
+            }
+            break;
+        }
+    }
+    return _uri_state_result_no_slash;
+}
+
+int _is_triple_slash2(char const * buffer)
+{
+    if (buffer == nullptr) {
+        return _uri_state_result_error;
+    }
+    return _is_triple_slash(buffer, strlen(buffer));
+}
+
+// -------------------
+// Uri implementation.
+// -------------------
 
 Uri::Uri()
 {
@@ -169,6 +228,49 @@ void Uri::clear()
     _userinfo.clear();
 }
 
+// ---------------
+namespace __impl {
+// ---------------
+
+static bool triple_slash_parse(std::string const & uri, bool is_connect, http_parser_url & parser)
+{
+    // host must be present if there is a schema parsing "http:///toto" will fail.
+    int const triple_slash_result = _is_triple_slash(uri.c_str(), uri.size());
+    if (triple_slash_result < _uri_state_result_success_min) {
+        return false;
+    }
+
+    assert(triple_slash_result >= _uri_state_result_success_min);
+    char const TRIPLE_SLASH_FAKER = 'f';
+
+    // Update host name.
+    // e.g. "http:///toto" -> "http://f/toto"
+    std::string const TEMP_URI = uri.substr(0, triple_slash_result) + TRIPLE_SLASH_FAKER + uri.substr(triple_slash_result);
+    assert(uri.size() + 1 == TEMP_URI.size());
+
+    ::http_parser_url_init(&parser);
+    if (::http_parser_parse_url(TEMP_URI.c_str(), TEMP_URI.size(), (is_connect ? 1 : 0), &parser) != 0) {
+        return false;
+    }
+
+    parser.field_data[UF_HOST].len = 0;
+    parser.field_data[UF_HOST].off = 0;
+    if (parser.field_data[UF_PATH].len >= 1) {
+        parser.field_data[UF_PATH].off--;
+    }
+    if (parser.field_data[UF_QUERY].len >= 1) {
+        parser.field_data[UF_QUERY].off--;
+    }
+    if (parser.field_data[UF_FRAGMENT].len >= 1) {
+        parser.field_data[UF_FRAGMENT].off--;
+    }
+    return true;
+}
+
+// ------------------
+} // namespace __impl
+// ------------------
+
 bool Uri::parse(std::string const & uri, bool is_connect)
 {
     _uri = uri;
@@ -181,7 +283,13 @@ bool Uri::parse(std::string const & uri, bool is_connect)
 
     // Parse a URL; return nonzero on failure.
     if (::http_parser_parse_url(_uri.c_str(), _uri.size(), (is_connect ? 1 : 0), &parser) != 0) {
+#if defined(ENABLE_TRIPLE_SLASH_FAKER)
+        if (!__impl::triple_slash_parse(uri, is_connect, parser)) {
+            return false;
+        }
+#else
         return false;
+#endif
     }
 
     auto updateField = [&](http_parser_url_fields field, FieldInfo & info){

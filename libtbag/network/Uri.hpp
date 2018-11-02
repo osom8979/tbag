@@ -22,11 +22,50 @@
 #include <string>
 #include <map>
 
+/**
+ * Successfully parse triple slashes.
+ */
+#define ENABLE_TRIPLE_SLASH_FAKER
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace network {
+
+enum _uri_state
+{
+    _uri_state_schema,
+    _uri_state_schema_colon,
+    _uri_state_schema_slash,
+    _uri_state_schema_slash_slash,
+};
+
+// @formatter:off
+TBAG_CONSTEXPR int const _uri_state_result_error       = -1;
+TBAG_CONSTEXPR int const _uri_state_result_no_slash    = 0;
+TBAG_CONSTEXPR int const _uri_state_result_success_min = sizeof((char[]){":///"}) - (2/* remove null char & size to index */);
+static_assert(_uri_state_result_success_min == 3, "Why not?");
+// @formatter:on
+
+/**
+ * Make sure that the slashes appear three times in succession.
+ *
+ * @param[in] buffer
+ *  string buffer.
+ * @param[in] size
+ *  string length.
+ *
+ * @return
+ *  >=_uri_state_result_success_min is index searched.
+ *
+ * @retval _uri_state_result_error
+ *  parsing error.
+ * @retval _uri_state_result_no_slash
+ *  Not found.
+ */
+TBAG_API int _is_triple_slash(char const * buffer, int size);
+TBAG_API int _is_triple_slash2(char const * buffer);
 
 /**
  * Uri class prototype.
