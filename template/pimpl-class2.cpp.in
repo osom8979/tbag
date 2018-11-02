@@ -20,7 +20,7 @@ ${NAMESPACE_FULL_LIST_BEGIN}
  * @author ${AUTHOR}
  * @date   ${DATE}
  */
-struct ${CLASSNAME}::Impl : private Noncopyable
+struct ${CLASSNAME}::Impl : private libtbag::Noncopyable
 {
 private:
     ${CLASSNAME} * _parent;
