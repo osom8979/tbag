@@ -23,40 +23,47 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace app {
 
-Application::Application(int argc, char ** argv, char ** envs)
+Application::Application(int argc, char ** argv, char ** envs, bool init_tbag)
+        : _initialize_tbag(init_tbag)
 {
-    tbInitialize();
-    _property = Global::getInstance()->insertNewObject<Property>(PROPERTY_NAME);
-    assert(static_cast<bool>(_property));
-    _property->argc = argc;
-    _property->argv = argv;
-    _property->envs = envs;
+    if (init_tbag) {
+        tbInitialize();
+    }
+    _main_arguments = Global::getInstance()->insertNewObject<MainArguments>(MAIN_ARGUMENTS_NAME);
+    assert(static_cast<bool>(_main_arguments));
+    _main_arguments->argc = argc;
+    _main_arguments->argv = argv;
+    _main_arguments->envs = envs;
 }
 
-Application::Application(int argc, char ** argv) : Application(argc, argv, nullptr)
+Application::Application(int argc, char ** argv, bool init_tbag)
+        : Application(argc, argv, nullptr, init_tbag)
 {
     // EMPTY.
 }
 
-Application::Application() : Application(0, nullptr)
+Application::Application(bool init_tbag)
+        : Application(0, nullptr, init_tbag)
 {
     // EMPTY.
 }
 
 Application::~Application()
 {
-    _property.reset();
-    tbRelease();
+    _main_arguments.reset();
+    if (_initialize_tbag) {
+        tbRelease();
+    }
 }
 
-Application::WeakProperty Application::getProperty()
+Application::WeakMainArguments Application::getMainArguments()
 {
-    return Global::getInstance()->find<Property>(PROPERTY_NAME);
+    return Global::getInstance()->find<MainArguments>(MAIN_ARGUMENTS_NAME);
 }
 
 int Application::getArgc()
 {
-    if (auto shared = getProperty().lock()) {
+    if (auto shared = getMainArguments().lock()) {
         return shared->argc;
     }
     assert(false && "Expired properties.");
@@ -65,7 +72,7 @@ int Application::getArgc()
 
 char ** Application::getArgv()
 {
-    if (auto shared = getProperty().lock()) {
+    if (auto shared = getMainArguments().lock()) {
         return shared->argv;
     }
     assert(false && "Expired properties.");
@@ -74,7 +81,7 @@ char ** Application::getArgv()
 
 char ** Application::getEnvs()
 {
-    if (auto shared = getProperty().lock()) {
+    if (auto shared = getMainArguments().lock()) {
         return shared->envs;
     }
     assert(false && "Expired properties.");

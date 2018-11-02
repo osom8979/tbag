@@ -70,6 +70,8 @@ struct SignalHandler
     virtual void run(int signal) = 0;
 };
 
+using SignalCallback = std::function<void(int)>;
+
 /**
  * FunctionalSignalHandler handler interface.
  *
@@ -78,16 +80,30 @@ struct SignalHandler
  */
 struct FunctionalSignalHandler : public SignalHandler
 {
-    using Callback = std::function<void(int)>;
+public:
+    SignalCallback signal_cb;
 
-    Callback on_run_cb;
+public:
+    FunctionalSignalHandler() : signal_cb()
+    { /* EMPTY. */ }
+    FunctionalSignalHandler(SignalCallback const & cb) : signal_cb(cb)
+    { /* EMPTY. */ }
 
-    FunctionalSignalHandler() { /* EMPTY. */ }
-    FunctionalSignalHandler(Callback const & cb) : on_run_cb(cb) { /* EMPTY. */ }
-    virtual ~FunctionalSignalHandler() { /* EMPTY. */ }
+public:
+    virtual ~FunctionalSignalHandler()
+    { /* EMPTY. */ }
 
-    void setRun(Callback const & cb) { on_run_cb = cb; }
-    virtual void run(int signal) override { if (on_run_cb) { on_run_cb(signal); } }
+public:
+    void setRun(SignalCallback const & cb)
+    { signal_cb = cb; }
+
+public:
+    virtual void run(int signal) override
+    {
+        if (signal_cb) {
+            signal_cb(signal);
+        }
+    }
 };
 
 /**
@@ -101,8 +117,9 @@ using FuncSignalHandler = FunctionalSignalHandler;
 TBAG_API std::string getSignalName(int signal_number);
 
 TBAG_API void registerStdTerminateHandler(SignalHandler * handler, int order = 0);
+TBAG_API void registerStdTerminateFunctionalHandler(SignalCallback const & cb, int order = 0);
 TBAG_API void registerHandler(int signal, SignalHandler * handler, int order = 0);
-TBAG_API void registerFunctionalHandler(int signal, FuncSignalHandler::Callback const & cb, int order = 0);
+TBAG_API void registerFunctionalHandler(int signal, SignalCallback const & cb, int order = 0);
 
 TBAG_API void registerDefaultStdTerminateHandler(std::string const & logger_name = "");
 TBAG_API void registerDefaultErrorHandler(std::string const & logger_name = "");

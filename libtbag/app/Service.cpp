@@ -26,18 +26,20 @@ using RealService = details::UnixService;
 using RealService = details::FakeService;
 #endif
 
-Service::Service(int argc, char ** argv, char ** envs)
-        : Application(argc, argv, envs), _is_start(false)
+Service::Service(int argc, char ** argv, char ** envs, bool init_tbag)
+        : Application(argc, argv, envs, init_tbag), _is_start(false)
 {
     // EMPTY.
 }
 
-Service::Service(int argc, char ** argv) : Service(argc, argv, nullptr)
+Service::Service(int argc, char ** argv, bool init_tbag)
+        : Service(argc, argv, nullptr, init_tbag)
 {
     // EMPTY.
 }
 
-Service::Service() : Service(0, nullptr, nullptr)
+Service::Service(bool init_tbag)
+        : Service(0, nullptr, nullptr, init_tbag)
 {
     // EMPTY.
 }

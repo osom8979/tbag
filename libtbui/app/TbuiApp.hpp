@@ -15,7 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/app/SimpleApp.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/app/ex/DefaultApp.hpp>
 #include <libtbui/export.h>
 
 namespace libtbui {
@@ -27,27 +28,26 @@ namespace app     {
  * @author zer0
  * @date   2018-10-30
  */
-class TBUI_API TbuiApp : public libtbag::app::SimpleApp
+class TBUI_API TbuiApp : private libtbag::Noncopyable
 {
 public:
-    using Base    = libtbag::app::SimpleApp;
-    using Param   = Base::Param;
-    using Version = Base::Version;
+    using DefaultApp    = libtbag::app::ex::DefaultApp;
+    using Params        = DefaultApp::Params;
+    using RunnerParams  = DefaultApp::RunnerParams;
+
+private:
+    Params      _params;
+    DefaultApp  _app;
 
 public:
-    TbuiApp(int argc = 0, char ** argv = nullptr, char ** envs = nullptr,
-            bool init = true, char const * name = nullptr);
+    TbuiApp(int argc = 0, char ** argv = nullptr, char ** envs = nullptr);
     virtual ~TbuiApp();
 
-protected:
-    virtual bool onCreate() override;
-    virtual void onDestroy() override;
+public:
+    int run();
 
-protected:
-    virtual Version getVersion() override;
-
-protected:
-    virtual int onMain(Commands const & commands) override;
+private:
+    virtual int run(RunnerParams const & params);
 };
 
 } // namespace app

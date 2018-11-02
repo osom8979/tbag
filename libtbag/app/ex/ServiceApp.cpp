@@ -16,17 +16,18 @@
 #include <iostream>
 #include <sstream>
 
-#define SERVICE_APP_OPTIONS_PREFIX    "--"
-#define SERVICE_APP_OPTIONS_DELIMITER "="
+#define SERVICE_APP_OPTIONS_PREFIX         "--"
+#define SERVICE_APP_OPTIONS_DELIMITER      "="
 
-#define SERVICE_APP_OPTIONS_GLOBAL    "global"
-#define SERVICE_APP_OPTIONS_HOME      "home"
-#define SERVICE_APP_OPTIONS_LOCAL     "local"
-#define SERVICE_APP_OPTIONS_CONFIG    "config"
-#define SERVICE_APP_OPTIONS_VERBOSE   "verbose"
-#define SERVICE_APP_OPTIONS_VERSION   "version"
+#define SERVICE_APP_OPTIONS_GLOBAL         "global"
+#define SERVICE_APP_OPTIONS_HOME           "home"
+#define SERVICE_APP_OPTIONS_LOCAL          "local"
+#define SERVICE_APP_OPTIONS_CONFIG         "config"
+#define SERVICE_APP_OPTIONS_VERBOSE        "verbose"
+#define SERVICE_APP_OPTIONS_VERSION        "version"
+#define SERVICE_APP_OPTIONS_CREATE_CONFIG  "create_config"
 
-#define SERVICE_APP_ENVIRONMENT_TITLE "TITLE"
+#define SERVICE_APP_ENVIRONMENT_TITLE      "TITLE"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -51,11 +52,11 @@ TBAG_CONSTEXPR static char const * const SERVICE_APP_MAIN_REMARKS = "\n"
         "  can be used to tell the command to read from only that location"
         ""/* -- END -- */;
 
-ServiceApp::ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs)
-        : app::Service(argc, argv, envs),
+ServiceApp::ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs, bool init_tbag)
+        : libtbag::app::Service(argc, argv, envs, init_tbag),
           _options(SERVICE_APP_OPTIONS_PREFIX, SERVICE_APP_OPTIONS_DELIMITER),
-          _envs(envs), _version(), _config_path(), _config(),
-          _enable_help(false), _enable_verbose(false), _enable_version(false)
+          _envs(envs), _version(), _config(), _config_path(),
+          _enable_help(false), _enable_verbose(false), _enable_version(false), _enable_create_config(false)
 {
     using namespace libtbag::container;
     _config = newGlobalObject<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY, config_name);
@@ -163,19 +164,22 @@ void ServiceApp::installVersionOptions(int major, int minor, int patch)
     }, "print the version number and exit.");
 }
 
-bool ServiceApp::loadOrDefaultSaveConfig()
+void ServiceApp::installCreateConfig()
 {
-    bool const CREATE_PARENT_DIR = true;
-    return loadOrDefaultSaveConfig(_config_path, CREATE_PARENT_DIR);
+    _options.insertDefault(SERVICE_APP_OPTIONS_CREATE_CONFIG, &_enable_create_config, true,
+                           "If the config file does not exist, create it.");
 }
 
-bool ServiceApp::loadOrDefaultSaveConfig(std::string const & path, bool create_parent_dir)
+bool ServiceApp::updateConfig()
 {
+    using namespace libtbag::filesystem;
     auto config = getConfig().lock();
     assert(static_cast<bool>(config));
-
-    auto const PATH = filesystem::Path(path);
-    return config->loadOrDefaultSave(PATH, create_parent_dir);
+    if (_enable_create_config) {
+        return config->loadOrDefaultSave(Path(_config_path), true/*Create parent dir*/);
+    } else {
+        return config->load(Path(_config_path));
+    }
 }
 
 int ServiceApp::run()
@@ -242,13 +246,10 @@ int ServiceApp::run()
             std::cout << "Empty config path (Disable onLoad event).\n";
         }
     } else {
-        if (loadOrDefaultSaveConfig() == false) {
-            std::cerr << "Load or save failed: " << _config_path << std::endl;
-            return EXIT_FAILURE;
-        }
-
+        bool const UPDATE_CONFIG_RESULT = updateConfig();
         if (_enable_verbose) {
-            std::cout << "Load or save config file: " << _config_path << std::endl;
+            std::cout << "Update config " << (UPDATE_CONFIG_RESULT ? "success" : "failed")
+                      << ": " << _config_path << std::endl;
             std::cout << "Command Line Arguments: " << getCommandLineArgumentsString() << std::endl;
         }
 

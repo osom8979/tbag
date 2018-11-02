@@ -38,33 +38,34 @@ namespace app {
 class TBAG_API Application : private Noncopyable
 {
 public:
-    struct Property
+    struct MainArguments
     {
         int argc;
         char ** argv;
         char ** envs;
     };
 
-    using SharedProperty = std::shared_ptr<Property>;
-    using   WeakProperty =   std::weak_ptr<Property>;
+    using SharedMainArguments = std::shared_ptr<MainArguments>;
+    using   WeakMainArguments =   std::weak_ptr<MainArguments>;
 
     using Global = container::Global;
 
 public:
-    TBAG_CONSTEXPR static char const * const PROPERTY_NAME
-            = "libtbag.app.Application.Property";
+    TBAG_CONSTEXPR static char const * const MAIN_ARGUMENTS_NAME
+            = "libtbag.app.Application.MainArguments";
 
 private:
-    SharedProperty _property;
+    bool _initialize_tbag;
+    SharedMainArguments _main_arguments;
 
 public:
-    Application(int argc, char ** argv, char ** envs);
-    Application(int argc, char ** argv);
-    Application();
+    Application(int argc, char ** argv, char ** envs, bool init_tbag = false);
+    Application(int argc, char ** argv, bool init_tbag = false);
+    Application(bool init_tbag = false);
     virtual ~Application();
 
 public:
-    static WeakProperty getProperty();
+    static WeakMainArguments getMainArguments();
 
 public:
     static int getArgc();

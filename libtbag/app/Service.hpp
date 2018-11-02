@@ -45,9 +45,9 @@ private:
     bool _is_start;
 
 public:
-    Service(int argc, char ** argv, char ** envs);
-    Service(int argc, char ** argv);
-    Service();
+    Service(int argc, char ** argv, char ** envs, bool init_tbag = false);
+    Service(int argc, char ** argv, bool init_tbag = false);
+    Service(bool init_tbag = false);
     virtual ~Service();
 
 public:

@@ -87,6 +87,10 @@ public:
     inline std::string getRoot() const { return _root; }
     inline void setRoot(std::string const & root) { _root = root; }
 
+public:
+    inline Map       & map()       TBAG_NOEXCEPT { return _map; }
+    inline Map const & map() const TBAG_NOEXCEPT { return _map; }
+
 // XML.
 public:
     bool readFile(std::string const & path);

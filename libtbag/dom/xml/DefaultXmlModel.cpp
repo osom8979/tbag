@@ -85,15 +85,22 @@ DefaultXmlModel::InitParams DefaultXmlModel::getDefaultParams(std::string const 
 
 DefaultXmlModel::InitParams DefaultXmlModel::getDefaultParams(std::string const & root_name, std::string const & file_name)
 {
+    return getDefaultParams(root_name, root_name, file_name);
+}
+
+DefaultXmlModel::InitParams DefaultXmlModel::getDefaultParams(std::string const & root_name,
+                                                              std::string const & app_dir_name,
+                                                              std::string const & file_name)
+{
     XmlModel model;
     InitParams params;
     params.root_name  = root_name;
     params.file_name  = file_name;
     // @formatter:off
-    params.work_dir   = (model.getWorkDir  ()   / root_name  ).getString();
-    params.exe_dir    = (model.getExeDir   () /*/ root_name*/).getString();
-    params.home_dir   = (model.getHomeDir  ()   / root_name  ).getString();
-    params.global_dir = (model.getGlobalDir()   / root_name  ).getString();
+    params.work_dir   = (model.getWorkDir  () / app_dir_name).getString();
+    params.exe_dir    = (model.getExeDir   () /* ~~~~~~~~ */).getString();
+    params.home_dir   = (model.getHomeDir  () / app_dir_name).getString();
+    params.global_dir = (model.getGlobalDir() / app_dir_name).getString();
     // @formatter:on
     return params;
 }

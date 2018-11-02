@@ -238,6 +238,11 @@ void registerStdTerminateHandler(SignalHandler * handler, int order)
     std::set_terminate(__std_terminate_dispatcher__);
 }
 
+void registerStdTerminateFunctionalHandler(SignalCallback const & cb, int order)
+{
+    libtbag::signal::registerStdTerminateHandler(new FuncSignalHandler(cb), order);
+}
+
 void registerHandler(int signal, SignalHandler * handler, int order)
 {
     using Observable = __impl::SignalObservable;
@@ -248,9 +253,9 @@ void registerHandler(int signal, SignalHandler * handler, int order)
     std::signal(signal, __signal_dispatcher__);
 }
 
-void registerFunctionalHandler(int signal, FuncSignalHandler::Callback const & cb, int order)
+void registerFunctionalHandler(int signal, SignalCallback const & cb, int order)
 {
-    signal::registerHandler(signal, new FuncSignalHandler(cb), order);
+    libtbag::signal::registerHandler(signal, new FuncSignalHandler(cb), order);
 }
 
 void registerDefaultStdTerminateHandler(std::string const & logger_name)

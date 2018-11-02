@@ -19,10 +19,12 @@
 namespace libtbui {
 namespace app     {
 
-TbuiApp::TbuiApp(int argc, char ** argv, char ** envs, bool init, char const * name)
-        : Base(argc, argv, envs, init, name)
+TbuiApp::TbuiApp(int argc, char ** argv, char ** envs)
 {
-    // EMPTY.
+    _params.argc = argc;
+    _params.argv = argv;
+    _params.envs = envs;
+    _params.init_tbag = true;
 }
 
 TbuiApp::~TbuiApp()
@@ -30,22 +32,14 @@ TbuiApp::~TbuiApp()
     // EMPTY.
 }
 
-bool TbuiApp::onCreate()
+int TbuiApp::run()
 {
-    return Base::onCreate();
+    return _app.run([this](RunnerParams const & runner_params) -> int{
+        return run(runner_params);
+    }, _params);
 }
 
-void TbuiApp::onDestroy()
-{
-    Base::onDestroy();
-}
-
-TbuiApp::Version TbuiApp::getVersion()
-{
-    return libtbui::util::getVersion();
-}
-
-int TbuiApp::onMain(Commands const & commands)
+int TbuiApp::run(RunnerParams const & params)
 {
     sf::RenderWindow window(sf::VideoMode(640, 480), "ImGui + SFML = <3");
     window.setFramerateLimit(60);

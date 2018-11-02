@@ -62,16 +62,17 @@ protected:
     HelpCommander _options;
     Environments  _envs;
     Version       _version;
-    std::string   _config_path;
     SharedModel   _config;
+    std::string   _config_path;
 
 protected:
     bool _enable_help;
     bool _enable_verbose;
     bool _enable_version;
+    bool _enable_create_config;
 
 public:
-    ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs);
+    ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs, bool init_tbag = false);
     virtual ~ServiceApp();
 
 public:
@@ -118,13 +119,14 @@ protected:
     void installVersionOptions(Version const & version);
     void installVersionOptions(int major, int minor = 0, int patch = 0);
 
+    void installCreateConfig();
+
     /**
      * @}
      */
 
 private:
-    bool loadOrDefaultSaveConfig();
-    bool loadOrDefaultSaveConfig(std::string const & path, bool create_parent_dir = false);
+    bool updateConfig();
 
 public:
     virtual int run() override;

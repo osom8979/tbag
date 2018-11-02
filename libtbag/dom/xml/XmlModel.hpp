@@ -77,11 +77,11 @@ public:
 
         virtual std::string name() const = 0;
 
-        virtual void setup() = 0;
-        virtual void teardown() = 0;
+        virtual void setup() { /* EMPTY. */ }
+        virtual void teardown() { /* EMPTY. */ }
 
-        virtual void load(Element const & element) = 0;
-        virtual void save(Element & element) const = 0;
+        virtual void load(Element const & element) { /* EMPTY. */ };
+        virtual void save(Element & element) const { /* EMPTY. */ };
     };
 
 public:

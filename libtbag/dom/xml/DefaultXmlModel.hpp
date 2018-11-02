@@ -78,6 +78,7 @@ public:
     static InitParams getDefaultParams();
     static InitParams getDefaultParams(std::string const & root_name);
     static InitParams getDefaultParams(std::string const & root_name, std::string const & file_name);
+    static InitParams getDefaultParams(std::string const & root_name, std::string const & app_dir_name, std::string const & file_name);
 };
 
 } // namespace xml

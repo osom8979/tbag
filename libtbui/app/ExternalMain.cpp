@@ -14,7 +14,7 @@ namespace libtbui {
 namespace app     {
 
 ExternalMain::ExternalMain(int argc, char ** argv, char ** envs)
-        : TbuiApp(argc, argv, envs, true, libtbui::log::DEFAULT_LOGGER_NAME)
+        : TbuiApp(argc, argv, envs)
 {
     // EMPTY.
 }
