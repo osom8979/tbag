@@ -34,7 +34,7 @@ TbuiApp::~TbuiApp()
 
 int TbuiApp::run()
 {
-    return _app.run([this](RunnerParams const & runner_params) -> int{
+    return _app.run([this](RunnerParams const & runner_params) -> int {
         return run(runner_params);
     }, _params);
 }
