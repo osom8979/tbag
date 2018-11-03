@@ -61,7 +61,7 @@ void DynamicAsset::swap(DynamicAsset & obj) TBAG_NOEXCEPT
     }
 }
 
-std::size_t DynamicAsset::createLeyouts()
+std::size_t DynamicAsset::createLayouts()
 {
     std::size_t count = 0;
     for (auto & path : _paths) {

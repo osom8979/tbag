@@ -77,7 +77,7 @@ public:
     { _paths.clear(); }
 
 public:
-    std::size_t createLeyouts();
+    std::size_t createLayouts();
 
 public:
     bool add(std::string const & key, Path const & path);
