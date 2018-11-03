@@ -37,64 +37,66 @@ namespace res {
 class TBAG_API DynamicAsset
 {
 public:
-    using Value  = char;
-    using String = std::basic_string<Value>;
-    using Path   = libtbag::filesystem::Path;
-
-    using StringVector = std::vector<String>;
-    using PathVector   = std::vector<Path>;
-    using PathMap      = std::map<String, Path>;
-    using PathMapPair  = PathMap::value_type;
-
-    static_assert(std::is_same<Value, char>::value
-            , "Value must be the same type as char");
-    static_assert(std::is_same<Value, typename String::value_type>::value
-            , "Value must be the same type as String::value_type");
+    using Path    = libtbag::filesystem::Path;
+    using Strings = std::vector<std::string>;
+    using Paths   = std::vector<Path>;
+    using PathMap = std::map<std::string, Path>;
 
 private:
-    PathMap _paths; ///< Parent directories.
+    PathMap _paths; ///< Layout & Directories.
 
 public:
     DynamicAsset();
     DynamicAsset(DynamicAsset const & obj);
-    DynamicAsset(DynamicAsset && obj);
+    DynamicAsset(DynamicAsset && obj) TBAG_NOEXCEPT;
     ~DynamicAsset();
 
 public:
     DynamicAsset & operator =(DynamicAsset const & obj);
-    DynamicAsset & operator =(DynamicAsset && obj);
+    DynamicAsset & operator =(DynamicAsset && obj) TBAG_NOEXCEPT;
 
 public:
-    // @formatter:off
+    void copy(DynamicAsset const & obj);
+    void swap(DynamicAsset & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(DynamicAsset & lh, DynamicAsset & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+
+public:
+    inline PathMap       & paths()       TBAG_NOEXCEPT { return _paths; }
+    inline PathMap const & paths() const TBAG_NOEXCEPT { return _paths; }
+
+public:
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(_paths.empty())
     { return _paths.empty(); }
+
     inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_paths.size())
     { return _paths.size(); }
+
     inline void clear() TBAG_NOEXCEPT_SP_OP(_paths.clear())
     { _paths.clear(); }
-    // @formatter:on
 
 public:
-    bool init();
+    std::size_t createLeyouts();
 
 public:
-    bool add(String const & key, Path const & path);
-    Path get(String const & key) const;
+    bool add(std::string const & key, Path const & path);
+    Path get(std::string const & key) const;
 
 public:
     /** Obtain the list of key. */
-    StringVector getKeys() const;
+    Strings getKeys() const;
 
     /** Obtain the list of path. */
-    PathVector getPaths() const;
+    Paths getPaths() const;
 
 public:
-    bool exists(String const & key) const;
-    bool createDir(String const & key) const;
-    bool removeAll(String const & key) const;
+    bool exists(std::string const & key) const;
+    bool createDir(std::string const & key) const;
+    bool removeAll(std::string const & key) const;
 
 public:
-    PathVector scan(String const & key) const;
+    Paths scan(std::string const & key) const;
 };
 
 // ------------------------
@@ -136,19 +138,24 @@ TBAG_CONSTEXPR char const * const DEFAULT_ASSET_LAYOUT[] = {
 TBAG_CONSTEXPR std::size_t const DEFAULT_ASSET_LAYOUT_SIZE =
         sizeof(DEFAULT_ASSET_LAYOUT) / sizeof(DEFAULT_ASSET_LAYOUT[0]);
 
-inline std::vector<std::string> getDefaultLayout()
-{
-    std::vector<std::string> result;
-    for (std::size_t i = 0; i < DEFAULT_ASSET_LAYOUT_SIZE; ++i) {
-        result.emplace_back(DEFAULT_ASSET_LAYOUT[i]);
-    }
-    return result;
-}
+TBAG_API std::vector<std::string> getDefaultLayout();
 
+// @formatter:off
 TBAG_API DynamicAsset getDynamicAsset(filesystem::Path const & path, std::vector<std::string> const & layouts);
 TBAG_API DynamicAsset getDynamicAsset(std::string      const & path, std::vector<std::string> const & layouts);
 TBAG_API DynamicAsset getDynamicAsset(filesystem::Path const & path);
 TBAG_API DynamicAsset getDynamicAsset(std::string      const & path);
+// @formatter:on
+
+/**
+ * Default dynamic asset.
+ *
+ * @remarks
+ *  @code
+ *   ${EXE_DIR}/${EXE_NAME}/${LAYOUTS...}
+ *  @endcode
+ */
+TBAG_API DynamicAsset getDynamicAsset();
 
 } // namespace res
 

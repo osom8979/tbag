@@ -24,7 +24,7 @@ DynamicAsset::DynamicAsset(DynamicAsset const & obj)
     (*this) = obj;
 }
 
-DynamicAsset::DynamicAsset(DynamicAsset && obj)
+DynamicAsset::DynamicAsset(DynamicAsset && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }
@@ -36,78 +36,91 @@ DynamicAsset::~DynamicAsset()
 
 DynamicAsset & DynamicAsset::operator =(DynamicAsset const & obj)
 {
+    copy(obj);
+    return *this;
+}
+
+DynamicAsset & DynamicAsset::operator =(DynamicAsset && obj) TBAG_NOEXCEPT
+{
+    swap(obj);
+    return *this;
+}
+
+void DynamicAsset::copy(DynamicAsset const & obj)
+{
     if (this != &obj) {
         _paths.clear();
         _paths.insert(obj._paths.begin(), obj._paths.end());
     }
-    return *this;
 }
 
-DynamicAsset & DynamicAsset::operator =(DynamicAsset && obj)
+void DynamicAsset::swap(DynamicAsset & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _paths.swap(obj._paths);
     }
-    return *this;
 }
 
-bool DynamicAsset::init()
+std::size_t DynamicAsset::createLeyouts()
 {
-    bool all_success = true;
+    std::size_t count = 0;
     for (auto & path : _paths) {
-        if (path.second.exists() == false) {
-            all_success &= path.second.createDir();
-        } else if (path.second.isDirectory() == false) {
-            all_success = false;
+        if (!path.second.exists()) {
+            if (path.second.createDir()) {
+                ++count;
+            }
         }
+        //else if (!path.second.isDirectory()) {
+        //    // Error!
+        //}
     }
-    return all_success;
+    return count;
 }
 
-bool DynamicAsset::add(String const & key, Path const & path)
+bool DynamicAsset::add(std::string const & key, Path const & path)
 {
     return _paths.insert(PathMap::value_type(key, path)).second;
 }
 
-DynamicAsset::Path DynamicAsset::get(String const & key) const
+DynamicAsset::Path DynamicAsset::get(std::string const & key) const
 {
     return _paths.at(key);
 }
 
-DynamicAsset::StringVector DynamicAsset::getKeys() const
+DynamicAsset::Strings DynamicAsset::getKeys() const
 {
-    StringVector result;
+    Strings result;
     for (auto & path : _paths) {
         result.push_back(path.first);
     }
     return result;
 }
 
-DynamicAsset::PathVector DynamicAsset::getPaths() const
+DynamicAsset::Paths DynamicAsset::getPaths() const
 {
-    PathVector result;
+    Paths result;
     for (auto & path : _paths) {
         result.push_back(path.second);
     }
     return result;
 }
 
-bool DynamicAsset::exists(String const & key) const
+bool DynamicAsset::exists(std::string const & key) const
 {
     return _paths.at(key).exists();
 }
 
-bool DynamicAsset::createDir(String const & key) const
+bool DynamicAsset::createDir(std::string const & key) const
 {
     return _paths.at(key).createDir();
 }
 
-bool DynamicAsset::removeAll(String const & key) const
+bool DynamicAsset::removeAll(std::string const & key) const
 {
     return _paths.at(key).removeAll();
 }
 
-DynamicAsset::PathVector DynamicAsset::scan(String const & key) const
+DynamicAsset::Paths DynamicAsset::scan(std::string const & key) const
 {
     return _paths.at(key).scanDir();
 }
@@ -115,6 +128,15 @@ DynamicAsset::PathVector DynamicAsset::scan(String const & key) const
 // ------------------------
 // Miscellaneous utilities.
 // ------------------------
+
+std::vector<std::string> getDefaultLayout()
+{
+    std::vector<std::string> result;
+    for (std::size_t i = 0; i < DEFAULT_ASSET_LAYOUT_SIZE; ++i) {
+        result.emplace_back(DEFAULT_ASSET_LAYOUT[i]);
+    }
+    return result;
+}
 
 DynamicAsset getDynamicAsset(filesystem::Path const & path, std::vector<std::string> const & layouts)
 {
@@ -138,6 +160,11 @@ DynamicAsset getDynamicAsset(filesystem::Path const & path)
 DynamicAsset getDynamicAsset(std::string const & path)
 {
     return getDynamicAsset(filesystem::Path(path));
+}
+
+DynamicAsset getDynamicAsset()
+{
+    return getDynamicAsset(filesystem::Path::getExeDir() / filesystem::Path::getExePath().getName());
 }
 
 } // namespace res

@@ -54,16 +54,16 @@ public:
 
 public:
     // @formatter:off
-    TBAG_CONSTEXPR Asset() { /* EMPTY. */ }
-    Asset(Asset const & obj) { /* EMPTY. */ }
-    Asset(Asset && obj) { /* EMPTY. */ }
-    virtual ~Asset() { /* EMPTY. */ }
+    TBAG_CONSTEXPR Asset() TBAG_NOEXCEPT { /* EMPTY. */ }
+    Asset(Asset const & obj) TBAG_NOEXCEPT { /* EMPTY. */ }
+    Asset(Asset && obj) TBAG_NOEXCEPT { /* EMPTY. */ }
+    ~Asset() { /* EMPTY. */ }
     // @formatter:on
 
 public:
     // @formatter:off
-    inline Asset & operator =(Asset const & obj) { return *this; }
-    inline Asset & operator =(Asset && obj) { return *this; }
+    inline Asset & operator =(Asset const & obj) TBAG_NOEXCEPT { return *this; }
+    inline Asset & operator =(Asset && obj) TBAG_NOEXCEPT { return *this; }
     // @formatter:on
 
 public:
@@ -99,7 +99,6 @@ public:
         return Path("/var");
 #endif
     }
-
 };
 
 #ifndef CREATE_ASSET_PATH

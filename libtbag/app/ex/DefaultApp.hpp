@@ -52,14 +52,9 @@ namespace ex  {
  *       <!-- insert your logger -->
  *       <logger>
  *         <name>test-logger-file</name>
- *         <sink>file</sink>
- *         <destination>${EXE_DIR}/tbag-logger-test.log</destination>
- *         <multithread>false</multithread>
- *         <mutex>false</mutex>
- *         <generator>default</generator>
- *         <severity>critical</severity>
- *         <auto_flush>true</auto_flush>
+ *         <sink>stdout</sink>
  *       </logger>
+ *       <!-- ... -->
  *     </loggers>
  *
  *     <values>
@@ -74,6 +69,11 @@ namespace ex  {
  *       <!-- insert your custom xml -->
  *       <!-- ... -->
  *     </properties>
+ *
+ *     <assets default_root='directory_path'>
+ *       <config>path</config>
+ *       <!-- ... -->
+ *     </assets>
  *   </application>
  *  @endcode
  */
