@@ -7,6 +7,7 @@
 
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <climits>
@@ -73,7 +74,7 @@ Environments::Environments(Environments const & obj)
     (*this) = obj;
 }
 
-Environments::Environments(Environments && obj)
+Environments::Environments(Environments && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }
@@ -91,7 +92,7 @@ Environments & Environments::operator =(Environments const & obj)
     return *this;
 }
 
-Environments & Environments::operator =(Environments && obj)
+Environments & Environments::operator =(Environments && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _flags = std::move(obj._flags);
@@ -190,6 +191,18 @@ std::size_t Environments::getEnvsSize(char ** envs)
         ++count;
     } while (*(envs + count) != nullptr);
     return count;
+}
+
+Environments Environments::createDefaultEnvironments()
+{
+    using namespace libtbag::filesystem;
+    Environments envs;
+    envs.push(EXE_PATH, Path::getExePath());
+    envs.push(EXE_NAME, Path::getExePath().getName());
+    envs.push(EXE_DIR , Path::getExeDir());
+    envs.push(WORK_DIR, Path::getWorkDir());
+    envs.push(HOME_DIR, Path::getHomeDir());
+    return envs;
 }
 
 } // namespace string

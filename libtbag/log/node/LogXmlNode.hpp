@@ -110,17 +110,15 @@ namespace node {
  *   </tlog>
  *  @endcode
  */
-class TBAG_API LogXmlNode : public dom::xml::XmlModel::NodeInterface
+class TBAG_API LogXmlNode : public libtbag::dom::xml::XmlModel::NodeInterface
 {
 public:
-    using Severity = log::level::Severity;
-    using MakeType = log::msg::PacketGenerator::MakeType;
-    using Logger   = log::mgr::Logger;
-    using Element  = dom::xml::XmlModel::Element;
-
-    using Environments = string::Environments;
-    using EnvFlag      = Environments::Flag;
-
+    using Base         = libtbag::dom::xml::XmlModel::NodeInterface;
+    using Severity     = libtbag::log::level::Severity;
+    using MakeType     = libtbag::log::msg::PacketGenerator::MakeType;
+    using Logger       = libtbag::log::mgr::Logger;
+    using Element      = libtbag::dom::xml::XmlModel::Element;
+    using Environments = libtbag::string::Environments;
     using StringVector = std::vector<std::string>;
 
 public:
@@ -157,13 +155,6 @@ public:
     TBAG_CONSTEXPR static char const * const SINK_STDOUT      = "stdout";
     TBAG_CONSTEXPR static char const * const SINK_FILE        = "file";
     TBAG_CONSTEXPR static char const * const SINK_ROTATE_FILE = "rotate_file";
-
-public:
-    TBAG_CONSTEXPR static char const * const ENVS_EXE_PATH = "EXE_PATH";
-    TBAG_CONSTEXPR static char const * const ENVS_EXE_NAME = "EXE_NAME";
-    TBAG_CONSTEXPR static char const * const ENVS_EXE_DIR  = "EXE_DIR";
-    TBAG_CONSTEXPR static char const * const ENVS_WORK_DIR = "WORK_DIR";
-    TBAG_CONSTEXPR static char const * const ENVS_HOME_DIR = "HOME_DIR";
 
 public:
     struct LogInfo

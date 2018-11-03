@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/res/node/StorageNode.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <algorithm>
@@ -62,6 +63,35 @@ void StorageNode::swap(StorageNode & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         // TODO: Swap object.
     }
+}
+
+std::string StorageNode::name() const
+{
+    return std::string(TAG_STORAGE);
+}
+
+void StorageNode::setup()
+{
+}
+
+void StorageNode::teardown()
+{
+}
+
+void StorageNode::load(Element const & element)
+{
+//    std::string default_root;
+//    if (isSuccess(optAttr(element, ATT_DEFAULT_ROOT, default_root))) {
+//    } else {
+//        default_root =
+//    }
+//
+//    ATT_DEFAULT_ROOT
+//    'directory_path' archive='dir' absolute='true'>
+}
+
+void StorageNode::save(Element & element) const
+{
 }
 
 } // namespace node

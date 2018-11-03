@@ -21,7 +21,7 @@ namespace node {
 // LogXmlNode implementation.
 // --------------------------
 
-LogXmlNode::LogXmlNode() : _envs(createDefaultEnvironments())
+LogXmlNode::LogXmlNode() : _envs(Environments::createDefaultEnvironments())
 {
     // EMPTY.
 }
@@ -387,7 +387,7 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfoVector const & infos)
 
 LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, bool recreate_if_exists)
 {
-    return createLogger(info, createDefaultEnvironments(), recreate_if_exists);
+    return createLogger(info, Environments::createDefaultEnvironments(), recreate_if_exists);
 }
 
 LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments const & envs, bool recreate_if_exists)
@@ -423,17 +423,6 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
         logger->setSeverity(info.severity);
     }
     return logger;
-}
-
-LogXmlNode::Environments LogXmlNode::createDefaultEnvironments()
-{
-    Environments envs;
-    envs.push(EnvFlag(ENVS_EXE_PATH, libtbag::filesystem::Path::getExePath()));
-    envs.push(EnvFlag(ENVS_EXE_NAME, libtbag::filesystem::Path::getExePath().getName()));
-    envs.push(EnvFlag(ENVS_EXE_DIR , libtbag::filesystem::Path::getExeDir()));
-    envs.push(EnvFlag(ENVS_WORK_DIR, libtbag::filesystem::Path::getWorkDir()));
-    envs.push(EnvFlag(ENVS_HOME_DIR, libtbag::filesystem::Path::getHomeDir()));
-    return envs;
 }
 
 // ------------------------

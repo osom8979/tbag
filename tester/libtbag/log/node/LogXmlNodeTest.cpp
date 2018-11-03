@@ -153,7 +153,7 @@ struct LogXmlNodeTest : public LogXmlNode
 
     LogXmlNodeTest(std::string const & test_dir)
     {
-        atEnvs().push(LogXmlNode::EnvFlag(ENV_TEST_DIR, test_dir));
+        atEnvs().push(ENV_TEST_DIR, test_dir);
     }
 
     virtual std::string name() const override

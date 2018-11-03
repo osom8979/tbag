@@ -34,6 +34,7 @@ namespace node {
  *  XML format:
  *  @code{.xml}
  *   <!-- If 'default_root' attribute is exists, all layouts are sub-paths.       -->
+ *   <!-- If 'absolute' attribute is not exists, It is set a working directory.   -->
  *   <!-- If 'archive' attribute is exists, The file system works with that type. -->
  *   <!--  'dir': Default filesystem. [DEFAULT]                                   -->
  *   <!--  'zip': ZIP archive.                                                    -->
@@ -209,6 +210,15 @@ public:
 
 public:
     inline friend void swap(StorageNode & lh, StorageNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+
+public:
+    virtual std::string name() const override;
+
+    virtual void setup() override;
+    virtual void teardown() override;
+
+    virtual void load(Element const & element) override;
+    virtual void save(Element & element) const override;
 };
 
 } // namespace node

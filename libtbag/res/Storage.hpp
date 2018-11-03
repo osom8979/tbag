@@ -15,6 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/res/DynamicAsset.hpp>
+#include <libtbag/string/Environments.hpp>
 
 #include <memory>
 
@@ -33,8 +36,22 @@ namespace res {
 class TBAG_API Storage
 {
 public:
-    struct Impl;
-    friend struct Impl;
+    using Environments = libtbag::string::Environments;
+
+public:
+    /**
+     * Storage::Impl class implementation.
+     *
+     * @author zer0
+     * @date   2018-11-03
+     */
+    struct Impl : private Noncopyable
+    {
+        Environments envs;
+
+        Impl() { /* EMPTY. */ }
+        ~Impl() { /* EMPTY. */ }
+    };
 
 public:
     using SharedImpl = std::shared_ptr<Impl>;
@@ -58,7 +75,8 @@ public:
     void swap(Storage & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(Storage & lh, Storage & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(Storage & lh, Storage & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -70,6 +88,12 @@ public:
 public:
     inline Impl       * get()       TBAG_NOEXCEPT { return _impl.get(); }
     inline Impl const * get() const TBAG_NOEXCEPT { return _impl.get(); }
+
+    inline Impl       & operator *()       TBAG_NOEXCEPT { return *get(); }
+    inline Impl const & operator *() const TBAG_NOEXCEPT { return *get(); }
+
+    inline Impl       * operator ->()       TBAG_NOEXCEPT { return get(); }
+    inline Impl const * operator ->() const TBAG_NOEXCEPT { return get(); }
 
 public:
     /**
@@ -96,6 +120,8 @@ public:
 
 public:
     void reset();
+
+public:
 };
 
 } // namespace res

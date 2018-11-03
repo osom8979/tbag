@@ -82,6 +82,26 @@ public:
 
         virtual void load(Element const & element) { /* EMPTY. */ };
         virtual void save(Element & element) const { /* EMPTY. */ };
+
+        bool loadFile(std::string const & path)
+        {
+            Document doc;
+            if (doc.LoadFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
+                Element const * root = doc.FirstChildElement(name().c_str());
+                if (root != nullptr) {
+                    load(*root);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool saveFile(std::string const & path, bool compact = false) const
+        {
+            Document doc;
+            doc.InsertFirstChild(doc.NewElement(name().c_str()));
+            return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_NO_ERROR;
+        }
     };
 
 public:

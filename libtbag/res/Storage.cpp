@@ -7,7 +7,6 @@
 
 #include <libtbag/res/Storage.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -19,34 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace res {
 
-/**
- * Storage::Impl class implementation.
- *
- * @author zer0
- * @date   2018-11-03
- */
-struct Storage::Impl : private Noncopyable
-{
-private:
-    Storage * _parent;
-
-public:
-    Impl(Storage * parent) : _parent(parent)
-    {
-        assert(_parent != nullptr);
-    }
-
-    ~Impl()
-    {
-        // EMPTY.
-    }
-};
-
-// ----------------------------
-// Storage implementation.
-// ----------------------------
-
-Storage::Storage() : _impl(std::make_shared<Impl>(this))
+Storage::Storage() : _impl(std::make_shared<Impl>())
 {
     assert(static_cast<bool>(_impl));
 }

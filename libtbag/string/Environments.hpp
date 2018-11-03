@@ -56,13 +56,13 @@ public:
     explicit Environments(Flags && flags);
 
     Environments(Environments const & obj);
-    Environments(Environments && obj);
+    Environments(Environments && obj) TBAG_NOEXCEPT;
 
     virtual ~Environments();
 
 public:
     Environments & operator =(Environments const & obj);
-    Environments & operator =(Environments && obj);
+    Environments & operator =(Environments && obj) TBAG_NOEXCEPT;
     Environments & operator =(Flags const & flags);
     Environments & operator =(Flags && flags);
 
@@ -99,6 +99,16 @@ public:
 
 public:
     static std::size_t getEnvsSize(char ** envs);
+
+public:
+    TBAG_CONSTEXPR static char const * const EXE_PATH = "EXE_PATH";
+    TBAG_CONSTEXPR static char const * const EXE_NAME = "EXE_NAME";
+    TBAG_CONSTEXPR static char const * const EXE_DIR  = "EXE_DIR";
+    TBAG_CONSTEXPR static char const * const WORK_DIR = "WORK_DIR";
+    TBAG_CONSTEXPR static char const * const HOME_DIR = "HOME_DIR";
+
+public:
+    static Environments createDefaultEnvironments();
 };
 
 } // namespace string

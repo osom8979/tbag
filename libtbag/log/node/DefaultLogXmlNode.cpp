@@ -88,7 +88,7 @@ DefaultLogXmlNode::InitParams DefaultLogXmlNode::getDefaultParams(std::string co
     params.max_file_count = std::to_string(DEFAULT_LOG_FILE_COUNT);
 
     std::stringstream ss;
-    ss << "${" << ENVS_EXE_DIR << "}" << filesystem::details::PATH_SEPARATOR
+    ss << "${" << Environments::EXE_DIR << "}" << filesystem::details::PATH_SEPARATOR
        << file_name << DEFAULT_LOGGER_FILE_EXTENSION;
     params.destination = ss.str();
 
