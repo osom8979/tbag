@@ -35,6 +35,79 @@ namespace node {
  *
  * @author zer0
  * @date   2017-04-25
+ *
+ * @remarks
+ *  XML format:
+ *  @code{.xml}
+ *   <tlog>
+ *     <!-- insert your logger -->
+ *     <logger>
+ *       <!-- Log name -->
+ *       <name>your_logger_name</name>
+ *
+ *       <!-- Select the sink to which you want to send log messages -->
+ *       <!--  cout         (Console/Standard output)                -->
+ *       <!--  stdout       (== cout)                                -->
+ *       <!--  console      (Console output                          -->
+ *       <!--  file         (File output                             -->
+ *       <!--  rotate_file  (Rotate file output                      -->
+ *       <sink>file</sink>
+ *
+ *       <!-- Specify the detailed path of the sink                 -->
+ *       <!--  <sink: cout>        case: Not used                   -->
+ *       <!--  <sink: stdout>      case: Not used                   -->
+ *       <!--  <sink: console>     case: 'stdout' or 'stderr', if not exists use the 'stdout' [CURRENTLY NOT SUPPORTED] -->
+ *       <!--  <sink: file>        case: log file location path     -->
+ *       <!--  <sink: rotate_file> case: log file location prefix   -->
+ *       <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+ *       <!-- Special exchange variable:          -->
+ *       <!-- ${EXE_PATH} : EXE file path         -->
+ *       <!-- ${EXE_DIR}  : EXE directory         -->
+ *       <!-- ${WORK_DIR} : Working directory     -->
+ *       <!-- ${HOME_DIR} : User's HOME directory -->
+ *       <destination>${EXE_DIR}/tbag-logger-test.log</destination>
+ *
+ *       <!-- File size limit           -->
+ *       <!-- [CURRENTLY NOT SUPPORTED] -->
+ *       <max_size>1024MByte</max_size>
+ *
+ *       <!-- Destination size limit    -->
+ *       <!-- [CURRENTLY NOT SUPPORTED] -->
+ *       <max_file_count>10</max_file_count>
+ *
+ *       <!-- Multi-thread logger       -->
+ *       <!-- [CURRENTLY NOT SUPPORTED] -->
+ *       <multithread>false</multithread>
+ *
+ *       <!-- Use the mutex locking: 'true' or 'false' -->
+ *       <mutex>true</mutex>
+ *
+ *       <!-- Log message generator                                 -->
+ *       <!--  default        (Default log message)                 -->
+ *       <!--  default_color  (Default+TCES coloring log message)   -->
+ *       <!--  raw            (Raw log message)                     -->
+ *       <generator>default</generator>
+ *
+ *       <!-- Log level: 'true' or 'false'                           -->
+ *       <!--  level 0: off       (Hide all messages)                -->
+ *       <!--  level 1: emergency (System is unusable)               -->
+ *       <!--  level 2: alert     (Action must be taken immediately) -->
+ *       <!--  level 3: critical  (Critical conditions)              -->
+ *       <!--  level 4: error     (Error conditions)                 -->
+ *       <!--  level 5: warning   (Warning conditions)               -->
+ *       <!--  level 6: notice    (Normal but significant condition) -->
+ *       <!--  level 7: info      (Informational messages)           -->
+ *       <!--  level 8: debug     (Debug-level messages)             -->
+ *       <!--  level 9: unknown   (Unknown level)                    -->
+ *       <severity>critical</severity>
+ *
+ *       <!-- Auto flush flag: 'true' or 'false' -->
+ *       <auto_flush>true</auto_flush>
+ *     </logger>
+ *
+ *     <!-- More logger information ... -->
+ *   </tlog>
+ *  @endcode
  */
 class TBAG_API LogXmlNode : public dom::xml::XmlModel::NodeInterface
 {
