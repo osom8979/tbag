@@ -70,10 +70,10 @@ namespace ex  {
  *       <!-- ... -->
  *     </properties>
  *
- *     <assets default_root='directory_path'>
+ *     <storage default_root='directory_path'>
  *       <config>path</config>
  *       <!-- ... -->
- *     </assets>
+ *     </storage>
  *   </application>
  *  @endcode
  */
