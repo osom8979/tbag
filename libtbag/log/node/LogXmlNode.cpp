@@ -428,10 +428,11 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
 LogXmlNode::Environments LogXmlNode::createDefaultEnvironments()
 {
     Environments envs;
-    envs.push(EnvFlag(ENVS_EXE_PATH, filesystem::Path::getExePath()));
-    envs.push(EnvFlag(ENVS_EXE_DIR , filesystem::Path::getExeDir()));
-    envs.push(EnvFlag(ENVS_WORK_DIR, filesystem::Path::getWorkDir()));
-    envs.push(EnvFlag(ENVS_HOME_DIR, filesystem::Path::getHomeDir()));
+    envs.push(EnvFlag(ENVS_EXE_PATH, libtbag::filesystem::Path::getExePath()));
+    envs.push(EnvFlag(ENVS_EXE_NAME, libtbag::filesystem::Path::getExePath().getName()));
+    envs.push(EnvFlag(ENVS_EXE_DIR , libtbag::filesystem::Path::getExeDir()));
+    envs.push(EnvFlag(ENVS_WORK_DIR, libtbag::filesystem::Path::getWorkDir()));
+    envs.push(EnvFlag(ENVS_HOME_DIR, libtbag::filesystem::Path::getHomeDir()));
     return envs;
 }
 

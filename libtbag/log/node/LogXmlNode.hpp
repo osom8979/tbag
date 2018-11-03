@@ -62,6 +62,7 @@ namespace node {
  *       <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *       <!-- Special exchange variable:          -->
  *       <!-- ${EXE_PATH} : EXE file path         -->
+ *       <!-- ${EXE_NAME} : EXE file name         -->
  *       <!-- ${EXE_DIR}  : EXE directory         -->
  *       <!-- ${WORK_DIR} : Working directory     -->
  *       <!-- ${HOME_DIR} : User's HOME directory -->
@@ -159,6 +160,7 @@ public:
 
 public:
     TBAG_CONSTEXPR static char const * const ENVS_EXE_PATH = "EXE_PATH";
+    TBAG_CONSTEXPR static char const * const ENVS_EXE_NAME = "EXE_NAME";
     TBAG_CONSTEXPR static char const * const ENVS_EXE_DIR  = "EXE_DIR";
     TBAG_CONSTEXPR static char const * const ENVS_WORK_DIR = "WORK_DIR";
     TBAG_CONSTEXPR static char const * const ENVS_HOME_DIR = "HOME_DIR";
