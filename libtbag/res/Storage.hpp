@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/res/DynamicAsset.hpp>
 #include <libtbag/string/Environments.hpp>
+#include <libtbag/dom/xml/Resource.hpp>
 
 #include <memory>
 
@@ -36,7 +37,9 @@ namespace res {
 class TBAG_API Storage
 {
 public:
+    using DynamicAsset = libtbag::res::DynamicAsset;
     using Environments = libtbag::string::Environments;
+    using Resource     = libtbag::dom::xml::Resource;
 
 public:
     /**
@@ -47,7 +50,9 @@ public:
      */
     struct Impl : private Noncopyable
     {
-        Environments envs;
+        DynamicAsset  asset;
+        Environments  envs;
+        Resource      config;
 
         Impl() { /* EMPTY. */ }
         ~Impl() { /* EMPTY. */ }
@@ -122,6 +127,59 @@ public:
     void reset();
 
 public:
+    DynamicAsset       & asset()       TBAG_NOEXCEPT { return _impl->asset; }
+    DynamicAsset const & asset() const TBAG_NOEXCEPT { return _impl->asset; }
+
+public:
+    TBAG_CONSTEXPR static char const * const LAYOUT_ENV = "env";
+    TBAG_CONSTEXPR static char const * const ENV_UPDATE_ALL = "*";
+
+    Environments       & envs()       TBAG_NOEXCEPT { return _impl->envs; }
+    Environments const & envs() const TBAG_NOEXCEPT { return _impl->envs; }
+
+    /**
+     * Set env layout.
+     *
+     * @param[in] dir
+     *      layout directory.
+     * @param[in] set
+     *      assign default env filename. '*' is update all env files.
+     * @param[in] default_set
+     *      Update default envs?
+     */
+    bool setEnv(std::string const & dir, std::string const & set, bool default_set = false);
+
+public:
+    TBAG_CONSTEXPR static char const * const LAYOUT_CONFIG = "config";
+
+    bool setConfig(std::string const & dir);
+    bool readConfig(std::string const & group, std::string const & key, std::string & value);
+    bool saveConfig(std::string const & group, std::string const & key, std::string const & value);
+
+public:
+    TBAG_CONSTEXPR static char const * const LAYOUT_MODULE    = "module";
+    TBAG_CONSTEXPR static char const * const LAYOUT_TEXT      = "text";
+    TBAG_CONSTEXPR static char const * const LAYOUT_IMAGE     = "image";
+    TBAG_CONSTEXPR static char const * const LAYOUT_DRAWABLE  = "drawable";
+    TBAG_CONSTEXPR static char const * const LAYOUT_ANIMATION = "animation";
+    TBAG_CONSTEXPR static char const * const LAYOUT_SPRITE    = "sprite";
+    TBAG_CONSTEXPR static char const * const LAYOUT_LMDB      = "lmdb";
+    TBAG_CONSTEXPR static char const * const LAYOUT_SQLITE    = "sqlite";
+    TBAG_CONSTEXPR static char const * const LAYOUT_TEMP      = "temp";
+    TBAG_CONSTEXPR static char const * const LAYOUT_KEYSTORE  = "keystore";
+    TBAG_CONSTEXPR static char const * const LAYOUT_LUA       = "lua";
+    TBAG_CONSTEXPR static char const * const LAYOUT_RAW       = "raw";
+    TBAG_CONSTEXPR static char const * const LAYOUT_BAGEX     = "bagex";
+    TBAG_CONSTEXPR static char const * const LAYOUT_EXE       = "exe";
+    TBAG_CONSTEXPR static char const * const LAYOUT_FONT      = "font";
+    TBAG_CONSTEXPR static char const * const LAYOUT_MUSIC     = "music";
+    TBAG_CONSTEXPR static char const * const LAYOUT_SOUND     = "sound";
+    TBAG_CONSTEXPR static char const * const LAYOUT_SHADER    = "shader";
+    TBAG_CONSTEXPR static char const * const LAYOUT_LAYOUT    = "layout";
+    TBAG_CONSTEXPR static char const * const LAYOUT_STYLE     = "style";
+    TBAG_CONSTEXPR static char const * const LAYOUT_COLOR     = "color";
+    TBAG_CONSTEXPR static char const * const LAYOUT_RLOG      = "rlog";
+    TBAG_CONSTEXPR static char const * const LAYOUT_USER      = "user";
 };
 
 } // namespace res

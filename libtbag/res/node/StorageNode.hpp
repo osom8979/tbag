@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/dom/xml/XmlModel.hpp>
+#include <libtbag/string/Environments.hpp>
 #include <libtbag/res/Storage.hpp>
 
 // -------------------
@@ -38,108 +39,113 @@ namespace node {
  *   <!-- If 'archive' attribute is exists, The file system works with that type. -->
  *   <!--  'dir': Default filesystem. [DEFAULT]                                   -->
  *   <!--  'zip': ZIP archive.                                                    -->
- *   <!-- If 'absolute' attribute is 'true', Use an absolute path.                -->
- *   <!-- If 'absolute' attribute is not exists, It is set a 'false'.             -->
- *   <!-- You can set the 'absolute' attribute on any <tag>.                      -->
  *   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
- *   <!-- Special exchange variable:          -->
+ *   <!-- Special exchange variables:         -->
  *   <!-- ${EXE_PATH} : EXE file path         -->
  *   <!-- ${EXE_NAME} : EXE file name         -->
  *   <!-- ${EXE_DIR}  : EXE directory         -->
  *   <!-- ${WORK_DIR} : Working directory     -->
  *   <!-- ${HOME_DIR} : User's HOME directory -->
- *   <storage default_root='directory_path' archive='dir' absolute='true'>
+ *   <storage default_root='dir' archive='dir'>
  *
- *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
- *     <!-- Used for special purposes.                             -->
- *     <!-- The special tag uses the tag name if there is no path. -->
- *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+ *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+ *     <!-- Used for special purposes.                                  -->
+ *     <!-- The special tag uses the tag name if there is no path.      -->
+ *     <!-- If 'absolute' attribute is 'true', Use an absolute path.    -->
+ *     <!-- If 'absolute' attribute is not exists, It is set a 'false'. -->
+ *     <!-- You can set the 'absolute' attribute on any <tag>.          -->
+ *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *
- *     <!-- Set environment variables that affect the all XML text. -->
- *     <!-- If 'set' attribute is exists, Apply only those files.   -->
- *     <!-- If the 'set' attribute is '*', load all files.          -->
- *     <!-- If the 'system' attribute is 'true', load system env.   -->
- *     <env set='env1' system='true' absolute='false'>path</env>
+ *     <!-- Set environment variables that affect the all XML text.                        -->
+ *     <!-- If 'set' attribute is exists, Apply only those files.                          -->
+ *     <!-- If the 'set' attribute is '*', load all files.                                 -->
+ *     <!-- If the 'default_set' attribute is 'true', Update 'Special exchange variables'. -->
+ *     <!-- If 'default_set' attribute is not exists, It is set a 'true'.                  -->
+ *     <env set='env1.xml' default_set='true' absolute='false'>dir</env>
  *
- *     <!-- Contains simple 'namespace(filename)'/'key'/'value' information for configuration. -->
- *     <config absolute='false'>path</config>
+ *     <!-- If 'raw' attribute is 'true', Do not apply environment variables. -->
+ *     <!-- If 'raw' attribute is not exists, It is set a 'false'.            -->
+ *     <!-- You can set the 'env' attribute on any <tag>.                     -->
+ *
+ *     <!-- Contains simple 'group(filename)'/'key'/'value' information for configuration. -->
+ *     <config absolute='false' raw='true'>dir</config>
  *
  *     <!-- A set of dynamic modules. (e.g. '*.dll') -->
- *     <module absolute='false'>path</module>
+ *     <module absolute='false'>dir</module>
  *
  *     <!-- String for localization. -->
  *     <!-- If 'default' attribute is exists, Apply only those files. (e.g. 'en' -> 'en.xml') -->
- *     <text default='en' absolute='false'>path</text>
+ *     <text default='en' absolute='false'>dir</text>
  *
  *     <!-- PNG/JPG/BMP image storage. -->
- *     <image absolute='false'>path</image>
+ *     <image absolute='false'>dir</image>
  *
  *     <!-- Obtain individual images referring to <image>. -->
- *     <drawable absolute='false'>path</drawable>
+ *     <drawable absolute='false'>dir</drawable>
  *
  *     <!-- A set of animation definition files. -->
- *     <animation absolute='false'>path</animation>
+ *     <animation absolute='false'>dir</animation>
  *
  *     <!-- A set of sprite definition files. -->
- *     <sprite absolute='false'>path</sprite>
+ *     <sprite absolute='false'>dir</sprite>
  *
  *     <!-- Single LMDB storage. -->
- *     <lmdb absolute='false'>path</lmdb>
+ *     <lmdb absolute='false'>dir</lmdb>
  *
  *     <!-- sqlite database storages. -->
  *     <!-- If 'set' attribute is exists, Apply only those files. -->
- *     <sqlite set='file.sqlite' absolute='false'>path</sqlite>
+ *     <sqlite set='file.sqlite' absolute='false'>dir</sqlite>
  *
  *     <!-- Temporary directory. -->
  *     <!-- If 'autoclear' attribute is 'true', All files are removed when the object is deleted. -->
- *     <temp autoclear='true' absolute='false'>path</sqlite>
+ *     <temp autoclear='true' absolute='false'>dir</sqlite>
  *
  *     <!-- The file to which the encryption applies. A password is required. -->
  *     <!-- If 'set' attribute is exists, Apply only those files.             -->
- *     <keystore set='file.key' absolute='false'>path</keystore>
+ *     <keystore set='file.key' absolute='false'>dir</keystore>
  *
  *     <!-- Directory containing the lua script package. -->
  *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
- *     <lua dynasm='true' absolute='false'>path</lua>
+ *     <lua dynasm='true' absolute='false'>dir</lua>
  *
  *     <!-- A set of data from which raw buffers can be obtained. -->
- *     <raw absolute='false'>path</raw>
+ *     <raw absolute='false'>dir</raw>
  *
  *     <!-- BagEx 'key(filename)'/'value(BagEx)' serialization. -->
- *     <bagex absolute='false'>path</bagex>
+ *     <bagex absolute='false'>dir</bagex>
  *
  *     <!-- Executable/Libraries files. -->
- *     <exe absolute='false'>path</exe>
+ *     <exe absolute='false'>dir</exe>
  *
  *     <!-- Font files. -->
- *     <font absolute='false'>path</font>
+ *     <font absolute='false'>dir</font>
  *
  *     <!-- Music files. -->
- *     <music absolute='false'>path</music>
+ *     <music absolute='false'>dir</music>
  *
  *     <!-- Sound (effect) files. -->
- *     <sound absolute='false'>path</sound>
+ *     <sound absolute='false'>dir</sound>
  *
  *     <!-- OpenGL Shader files. -->
- *     <shader absolute='false'>path</shader>
+ *     <shader absolute='false'>dir</shader>
  *
  *     <!-- Layout(Widgets) files. -->
- *     <layout absolute='false'>path</layout>
+ *     <layout absolute='false'>dir</layout>
  *
  *     <!-- Style/Theme files. -->
- *     <style absolute='false'>path</style>
+ *     <style absolute='false'>dir</style>
  *
  *     <!-- List color names and values. -->
- *     <color absolute='false'>path</color>
+ *     <color absolute='false'>dir</color>
  *
  *     <!-- Log files. -->
  *     <!-- If 'name' attribute is exists, A rotation-logger is created. -->
- *     <rlog name='logger_name' absolute='false'>path</rlog>
+ *     <rlog name='logger_name' absolute='false'>dir</rlog>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
- *     <user name='name1' absolute='true'>path1</user>
- *     <user name='name2' absolute='false'>path2</user>
- *     <user name='name3'>path3</layout>
+ *     <user name='name1' absolute='true' raw='true'>dir1</user>
+ *     <user name='name2' absolute='false'>dir2</user>
+ *     <user name='name3'>dir3</layout>
  *     <!-- ... -->
  *   </storage>
  *  @endcode
@@ -147,42 +153,48 @@ namespace node {
 class TBAG_API StorageNode : public libtbag::dom::xml::XmlModel::NodeInterface
 {
 public:
-    using Base    = libtbag::dom::xml::XmlModel::NodeInterface;
-    using Storage = libtbag::res::Storage;
+    using Base         = libtbag::dom::xml::XmlModel::NodeInterface;
+    using Environments = libtbag::string::Environments;
+    using Storage      = libtbag::res::Storage;
 
 public:
     TBAG_CONSTEXPR static char const * const TAG_STORAGE   = "storage";
-    TBAG_CONSTEXPR static char const * const TAG_ENV       = "env";
-    TBAG_CONSTEXPR static char const * const TAG_CONFIG    = "config";
-    TBAG_CONSTEXPR static char const * const TAG_MODULE    = "module";
-    TBAG_CONSTEXPR static char const * const TAG_TEXT      = "text";
-    TBAG_CONSTEXPR static char const * const TAG_IMAGE     = "image";
-    TBAG_CONSTEXPR static char const * const TAG_DRAWABLE  = "drawable";
-    TBAG_CONSTEXPR static char const * const TAG_ANIMATION = "animation";
-    TBAG_CONSTEXPR static char const * const TAG_SPRITE    = "sprite";
-    TBAG_CONSTEXPR static char const * const TAG_LMDB      = "lmdb";
-    TBAG_CONSTEXPR static char const * const TAG_SQLITE    = "sqlite";
-    TBAG_CONSTEXPR static char const * const TAG_TEMP      = "temp";
-    TBAG_CONSTEXPR static char const * const TAG_KEYSTORE  = "keystore";
-    TBAG_CONSTEXPR static char const * const TAG_LUA       = "lua";
-    TBAG_CONSTEXPR static char const * const TAG_RAW       = "raw";
-    TBAG_CONSTEXPR static char const * const TAG_BAGEX     = "bagex";
-    TBAG_CONSTEXPR static char const * const TAG_EXE       = "exe";
-    TBAG_CONSTEXPR static char const * const TAG_FONT      = "font";
-    TBAG_CONSTEXPR static char const * const TAG_MUSIC     = "music";
-    TBAG_CONSTEXPR static char const * const TAG_SOUND     = "sound";
-    TBAG_CONSTEXPR static char const * const TAG_SHADER    = "shader";
-    TBAG_CONSTEXPR static char const * const TAG_LAYOUT    = "layout";
-    TBAG_CONSTEXPR static char const * const TAG_STYLE     = "style";
-    TBAG_CONSTEXPR static char const * const TAG_COLOR     = "color";
-    TBAG_CONSTEXPR static char const * const TAG_RLOG      = "rlog";
-    TBAG_CONSTEXPR static char const * const TAG_USER      = "user";
+
+public:
+    // @formatter:off
+    TBAG_CONSTEXPR static char const * const TAG_ENV       = Storage::LAYOUT_ENV      ;
+    TBAG_CONSTEXPR static char const * const TAG_CONFIG    = Storage::LAYOUT_CONFIG   ;
+    TBAG_CONSTEXPR static char const * const TAG_MODULE    = Storage::LAYOUT_MODULE   ;
+    TBAG_CONSTEXPR static char const * const TAG_TEXT      = Storage::LAYOUT_TEXT     ;
+    TBAG_CONSTEXPR static char const * const TAG_IMAGE     = Storage::LAYOUT_IMAGE    ;
+    TBAG_CONSTEXPR static char const * const TAG_DRAWABLE  = Storage::LAYOUT_DRAWABLE ;
+    TBAG_CONSTEXPR static char const * const TAG_ANIMATION = Storage::LAYOUT_ANIMATION;
+    TBAG_CONSTEXPR static char const * const TAG_SPRITE    = Storage::LAYOUT_SPRITE   ;
+    TBAG_CONSTEXPR static char const * const TAG_LMDB      = Storage::LAYOUT_LMDB     ;
+    TBAG_CONSTEXPR static char const * const TAG_SQLITE    = Storage::LAYOUT_SQLITE   ;
+    TBAG_CONSTEXPR static char const * const TAG_TEMP      = Storage::LAYOUT_TEMP     ;
+    TBAG_CONSTEXPR static char const * const TAG_KEYSTORE  = Storage::LAYOUT_KEYSTORE ;
+    TBAG_CONSTEXPR static char const * const TAG_LUA       = Storage::LAYOUT_LUA      ;
+    TBAG_CONSTEXPR static char const * const TAG_RAW       = Storage::LAYOUT_RAW      ;
+    TBAG_CONSTEXPR static char const * const TAG_BAGEX     = Storage::LAYOUT_BAGEX    ;
+    TBAG_CONSTEXPR static char const * const TAG_EXE       = Storage::LAYOUT_EXE      ;
+    TBAG_CONSTEXPR static char const * const TAG_FONT      = Storage::LAYOUT_FONT     ;
+    TBAG_CONSTEXPR static char const * const TAG_MUSIC     = Storage::LAYOUT_MUSIC    ;
+    TBAG_CONSTEXPR static char const * const TAG_SOUND     = Storage::LAYOUT_SOUND    ;
+    TBAG_CONSTEXPR static char const * const TAG_SHADER    = Storage::LAYOUT_SHADER   ;
+    TBAG_CONSTEXPR static char const * const TAG_LAYOUT    = Storage::LAYOUT_LAYOUT   ;
+    TBAG_CONSTEXPR static char const * const TAG_STYLE     = Storage::LAYOUT_STYLE    ;
+    TBAG_CONSTEXPR static char const * const TAG_COLOR     = Storage::LAYOUT_COLOR    ;
+    TBAG_CONSTEXPR static char const * const TAG_RLOG      = Storage::LAYOUT_RLOG     ;
+    TBAG_CONSTEXPR static char const * const TAG_USER      = Storage::LAYOUT_USER     ;
+    // @formatter:on
 
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT_ROOT = "default_root";
     TBAG_CONSTEXPR static char const * const ATT_ARCHIVE      = "archive";
     TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE     = "absolute";
+    TBAG_CONSTEXPR static char const * const ATT_RAW          = "raw";
     TBAG_CONSTEXPR static char const * const ATT_SET          = "set";
-    TBAG_CONSTEXPR static char const * const ATT_SYSTEM       = "system";
+    TBAG_CONSTEXPR static char const * const ATT_DEFAULT_SET  = "default_set";
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT      = "default";
     TBAG_CONSTEXPR static char const * const ATT_AUTOCLEAR    = "autoclear";
     TBAG_CONSTEXPR static char const * const ATT_DYNASM       = "dynasm";
@@ -210,6 +222,13 @@ public:
 
 public:
     inline friend void swap(StorageNode & lh, StorageNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+
+public:
+    static std::string getPath(Element const & element,
+                               std::string const & default_root);
+    static std::string getPath(Element const & element,
+                               std::string const & default_root,
+                               Environments const & env);
 
 public:
     virtual std::string name() const override;

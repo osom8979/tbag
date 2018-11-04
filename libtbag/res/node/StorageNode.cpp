@@ -7,6 +7,7 @@
 
 #include <libtbag/res/node/StorageNode.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <algorithm>
@@ -78,16 +79,148 @@ void StorageNode::teardown()
 {
 }
 
+std::string StorageNode::getPath(Element const & element, std::string const & default_root)
+{
+    return getPath(element, default_root, Environments());
+}
+
+std::string StorageNode::getPath(Element const & element, std::string const & default_root, Environments const & env)
+{
+    bool absolute = false;
+    optAttr(element, ATT_ABSOLUTE, absolute, false);
+
+    bool raw = false;
+    optAttr(element, ATT_RAW, raw, false);
+
+    std::string path;
+    if (raw) {
+        path = text(element);
+    } else {
+        path = env.convert(text(element));
+    }
+
+    using namespace libtbag::filesystem;
+    if (path.empty()) {
+        path = Path(default_root) / std::string(TAG_ENV);
+    } else if (!absolute) {
+        path = Path(default_root) / path;
+    }
+    return path;
+}
+
 void StorageNode::load(Element const & element)
 {
-//    std::string default_root;
-//    if (isSuccess(optAttr(element, ATT_DEFAULT_ROOT, default_root))) {
-//    } else {
-//        default_root =
-//    }
-//
-//    ATT_DEFAULT_ROOT
-//    'directory_path' archive='dir' absolute='true'>
+    using namespace libtbag::filesystem;
+    using namespace libtbag::string;
+
+    Storage result;
+
+    std::string default_root;
+    if (isSuccess(optAttr(element, ATT_DEFAULT_ROOT, default_root, Path::getWorkDir().toString()))) {
+        default_root = Environments::createDefaultEnvironments().convert(default_root);
+    }
+
+    std::string archive;
+    if (isSuccess(optAttr(element, ATT_ARCHIVE, archive, VAL_DIR))) {
+        archive = lower(archive);
+        if (archive != VAL_DIR && archive != VAL_ZIP) {
+            tDLogW("StorageNode::load() {} attribute error: {}", std::string(ATT_ARCHIVE), archive);
+            archive = VAL_DIR;
+        }
+    }
+
+    if (auto * env = element.FirstChildElement(TAG_ENV)) {
+        std::string set;
+        optAttr(*env, ATT_SET, set);
+
+        bool default_set;
+        optAttr(*env, ATT_DEFAULT_SET, default_set, false);
+
+        result.setEnv(getPath(*env, default_root), set, default_set);
+    }
+
+    /*
+     *     <!-- Contains simple 'namespace(filename)'/'key'/'value' information for configuration. -->
+     *     <config absolute='false' raw='true'>dir</config>
+     *
+     *     <!-- A set of dynamic modules. (e.g. '*.dll') -->
+     *     <module absolute='false'>dir</module>
+     *
+     *     <!-- String for localization. -->
+     *     <!-- If 'default' attribute is exists, Apply only those files. (e.g. 'en' -> 'en.xml') -->
+     *     <text default='en' absolute='false'>dir</text>
+     *
+     *     <!-- PNG/JPG/BMP image storage. -->
+     *     <image absolute='false'>dir</image>
+     *
+     *     <!-- Obtain individual images referring to <image>. -->
+     *     <drawable absolute='false'>dir</drawable>
+     *
+     *     <!-- A set of animation definition files. -->
+     *     <animation absolute='false'>dir</animation>
+     *
+     *     <!-- A set of sprite definition files. -->
+     *     <sprite absolute='false'>dir</sprite>
+     *
+     *     <!-- Single LMDB storage. -->
+     *     <lmdb absolute='false'>dir</lmdb>
+     *
+     *     <!-- sqlite database storages. -->
+     *     <!-- If 'set' attribute is exists, Apply only those files. -->
+     *     <sqlite set='file.sqlite' absolute='false'>dir</sqlite>
+     *
+     *     <!-- Temporary directory. -->
+     *     <!-- If 'autoclear' attribute is 'true', All files are removed when the object is deleted. -->
+     *     <temp autoclear='true' absolute='false'>dir</sqlite>
+     *
+     *     <!-- The file to which the encryption applies. A password is required. -->
+     *     <!-- If 'set' attribute is exists, Apply only those files.             -->
+     *     <keystore set='file.key' absolute='false'>dir</keystore>
+     *
+     *     <!-- Directory containing the lua script package. -->
+     *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
+     *     <lua dynasm='true' absolute='false'>dir</lua>
+     *
+     *     <!-- A set of data from which raw buffers can be obtained. -->
+     *     <raw absolute='false'>dir</raw>
+     *
+     *     <!-- BagEx 'key(filename)'/'value(BagEx)' serialization. -->
+     *     <bagex absolute='false'>dir</bagex>
+     *
+     *     <!-- Executable/Libraries files. -->
+     *     <exe absolute='false'>dir</exe>
+     *
+     *     <!-- Font files. -->
+     *     <font absolute='false'>dir</font>
+     *
+     *     <!-- Music files. -->
+     *     <music absolute='false'>dir</music>
+     *
+     *     <!-- Sound (effect) files. -->
+     *     <sound absolute='false'>dir</sound>
+     *
+     *     <!-- OpenGL Shader files. -->
+     *     <shader absolute='false'>dir</shader>
+     *
+     *     <!-- Layout(Widgets) files. -->
+     *     <layout absolute='false'>dir</layout>
+     *
+     *     <!-- Style/Theme files. -->
+     *     <style absolute='false'>dir</style>
+     *
+     *     <!-- List color names and values. -->
+     *     <color absolute='false'>dir</color>
+     *
+     *     <!-- Log files. -->
+     *     <!-- If 'name' attribute is exists, A rotation-logger is created. -->
+     *     <rlog name='logger_name' absolute='false'>dir</rlog>
+     *
+     *     <!-- Specify the Layout name and path to hold the data. -->
+     *     <user name='name1' absolute='true' raw='true'>dir1</user>
+     *     <user name='name2' absolute='false'>dir2</user>
+     *     <user name='name3'>dir3</layout>
+     *     <!-- ... -->
+     */
 }
 
 void StorageNode::save(Element & element) const
