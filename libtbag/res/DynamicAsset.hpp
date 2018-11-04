@@ -81,6 +81,7 @@ public:
 
 public:
     bool add(std::string const & key, Path const & path);
+    void set(std::string const & key, Path const & path);
     Path get(std::string const & key) const;
 
 public:

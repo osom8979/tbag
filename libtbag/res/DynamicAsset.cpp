@@ -82,9 +82,23 @@ bool DynamicAsset::add(std::string const & key, Path const & path)
     return _paths.insert(PathMap::value_type(key, path)).second;
 }
 
+void DynamicAsset::set(std::string const & key, Path const & path)
+{
+    auto itr = _paths.find(key);
+    if (itr == _paths.end()) {
+        add(key, path);
+    } else {
+        itr->second = path;
+    }
+}
+
 DynamicAsset::Path DynamicAsset::get(std::string const & key) const
 {
-    return _paths.at(key);
+    auto itr = _paths.find(key);
+    if (itr == _paths.end()) {
+        return Path();
+    }
+    return itr->second;
 }
 
 DynamicAsset::Strings DynamicAsset::getKeys() const
@@ -107,22 +121,34 @@ DynamicAsset::Paths DynamicAsset::getPaths() const
 
 bool DynamicAsset::exists(std::string const & key) const
 {
-    return _paths.at(key).exists();
+    return _paths.find(key) != _paths.end();
 }
 
 bool DynamicAsset::createDir(std::string const & key) const
 {
-    return _paths.at(key).createDir();
+    auto itr = _paths.find(key);
+    if (itr == _paths.end()) {
+        return false;
+    }
+    return itr->second.createDir();
 }
 
 bool DynamicAsset::removeAll(std::string const & key) const
 {
-    return _paths.at(key).removeAll();
+    auto itr = _paths.find(key);
+    if (itr == _paths.end()) {
+        return false;
+    }
+    return itr->second.removeAll();
 }
 
 DynamicAsset::Paths DynamicAsset::scan(std::string const & key) const
 {
-    return _paths.at(key).scanDir();
+    auto itr = _paths.find(key);
+    if (itr == _paths.end()) {
+        return Paths();
+    }
+    return itr->second.scanDir();
 }
 
 // ------------------------

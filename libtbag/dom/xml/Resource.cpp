@@ -137,6 +137,15 @@ std::size_t Resource::size() const
     return _map.size();
 }
 
+std::vector<std::string> Resource::keys() const
+{
+    std::vector<std::string> result;
+    for (auto & cursor : _map) {
+        result.push_back(cursor.first);
+    }
+    return result;
+}
+
 bool Resource::readFile(std::string const & path)
 {
     _map = readMapFromXmlFile(path, _root, _tag, _attr);

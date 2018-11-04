@@ -75,40 +75,38 @@ void Storage::reset()
     _impl.reset();
 }
 
-bool Storage::setEnv(std::string const & dir, std::string const & set, bool default_set)
+void Storage::clear()
 {
-    if (asset().exists(LAYOUT_ENV)) {
-        return false;
-    }
-    if (!asset().add(LAYOUT_ENV, libtbag::filesystem::Path(dir))) {
-        return false;
-    }
+    _impl = std::make_shared<Impl>();
+}
 
-    Environments temp_envs;
+void Storage::setEnv(std::string const & dir, std::string const & set, char ** envs, bool default_set)
+{
+    Environments temp;
     if (default_set) {
-        temp_envs = Environments::createDefaultEnvironments();
+        temp = Environments::createDefaultEnvironments();
+    }
+    if (envs != nullptr) {
+        temp.parse(envs);
     }
 
     if (!set.empty()) {
         if (set == ENV_UPDATE_ALL) {
             for (auto & file_path : libtbag::filesystem::Path(dir).scanDir()) {
-                temp_envs.readResourceXmlFile(file_path);
+                temp.readResourceXmlFile(file_path);
             }
         } else {
-            temp_envs.readResourceXmlFile(libtbag::filesystem::Path(dir) / set);
+            temp.readResourceXmlFile(libtbag::filesystem::Path(dir) / set);
         }
     }
 
-    envs() = temp_envs;
-    return true;
+    _impl->envs = temp;
+    asset().set(LAYOUT_ENV, libtbag::filesystem::Path(dir));
 }
 
-bool Storage::setConfig(std::string const & dir)
+void Storage::setConfig(std::string const & dir)
 {
-    if (asset().exists(LAYOUT_CONFIG)) {
-        return false;
-    }
-    return asset().add(LAYOUT_CONFIG, libtbag::filesystem::Path(dir));
+    asset().set(LAYOUT_CONFIG, libtbag::filesystem::Path(dir));
 }
 
 bool Storage::readConfig(std::string const & group, std::string const & key, std::string & value)
@@ -134,6 +132,43 @@ bool Storage::saveConfig(std::string const & group, std::string const & key, std
     res.readFile(PATH);
     res.set(key, value);
     return res.saveFile(PATH);
+}
+
+std::vector<std::string> Storage::getConfigGroups() const
+{
+    std::vector<std::string> result;
+    if (asset().exists(LAYOUT_CONFIG)) {
+        for (auto & cursor : asset().get(LAYOUT_CONFIG).scanDir()) {
+            result.push_back(cursor);
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> Storage::getConfigKeys(std::string const & group) const
+{
+    std::vector<std::string> result;
+    if (asset().exists(LAYOUT_CONFIG)) {
+        Resource res;
+        if (res.readFile(asset().get(LAYOUT_CONFIG) / group)) {
+            return res.keys();
+        }
+    }
+    return result;
+}
+
+void Storage::removeConfig(std::string const & group)
+{
+    if (asset().exists(LAYOUT_CONFIG)) {
+        (asset().get(LAYOUT_CONFIG) / group).remove();
+    }
+}
+
+void Storage::removeAllConfig()
+{
+    for (auto & group : getConfigGroups()) {
+        libtbag::filesystem::Path(group).remove();
+    }
 }
 
 } // namespace res

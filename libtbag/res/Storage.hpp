@@ -20,6 +20,8 @@
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/xml/Resource.hpp>
 
+#include <string>
+#include <vector>
 #include <memory>
 
 // -------------------
@@ -127,6 +129,9 @@ public:
     void reset();
 
 public:
+    void clear();
+
+public:
     DynamicAsset       & asset()       TBAG_NOEXCEPT { return _impl->asset; }
     DynamicAsset const & asset() const TBAG_NOEXCEPT { return _impl->asset; }
 
@@ -144,17 +149,25 @@ public:
      *      layout directory.
      * @param[in] set
      *      assign default env filename. '*' is update all env files.
+     * @param[in] envs
+     *      Update extension envs.
      * @param[in] default_set
      *      Update default envs?
      */
-    bool setEnv(std::string const & dir, std::string const & set, bool default_set = false);
+    void setEnv(std::string const & dir, std::string const & set, char ** envs = nullptr, bool default_set = false);
 
 public:
     TBAG_CONSTEXPR static char const * const LAYOUT_CONFIG = "config";
 
-    bool setConfig(std::string const & dir);
+    void setConfig(std::string const & dir);
     bool readConfig(std::string const & group, std::string const & key, std::string & value);
     bool saveConfig(std::string const & group, std::string const & key, std::string const & value);
+
+    std::vector<std::string> getConfigGroups() const;
+    std::vector<std::string> getConfigKeys(std::string const & group) const;
+
+    void removeConfig(std::string const & group);
+    void removeAllConfig();
 
 public:
     TBAG_CONSTEXPR static char const * const LAYOUT_MODULE    = "module";

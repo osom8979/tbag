@@ -17,8 +17,9 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
-#include <unordered_map>
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -94,6 +95,9 @@ public:
 public:
     inline Map       & map()       TBAG_NOEXCEPT { return _map; }
     inline Map const & map() const TBAG_NOEXCEPT { return _map; }
+
+public:
+    std::vector<std::string> keys() const;
 
 // XML.
 public:

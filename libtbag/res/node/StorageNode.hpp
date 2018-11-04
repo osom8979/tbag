@@ -57,11 +57,13 @@ namespace node {
  *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *
  *     <!-- Set environment variables that affect the all XML text.                        -->
- *     <!-- If 'set' attribute is exists, Apply only those files.                          -->
+ *     <!-- If 'set' attribute is exists, apply only those files.                          -->
  *     <!-- If the 'set' attribute is '*', load all files.                                 -->
- *     <!-- If the 'default_set' attribute is 'true', Update 'Special exchange variables'. -->
- *     <!-- If 'default_set' attribute is not exists, It is set a 'true'.                  -->
- *     <env set='env1.xml' default_set='true' absolute='false'>dir</env>
+ *     <!-- If the 'default_set' attribute is 'true', update 'special exchange variables'. -->
+ *     <!-- If 'default_set' attribute is not exists, it is set a 'true'.                  -->
+ *     <!-- If the 'system' attribute is 'true', use the '_envs' member.                   -->
+ *     <!-- If 'system' attribute is not exists, it is set a 'true'.                       -->
+ *     <env set='env1.xml' default_set='true' system='true' absolute='false'>dir</env>
  *
  *     <!-- If 'raw' attribute is 'true', Do not apply environment variables. -->
  *     <!-- If 'raw' attribute is not exists, It is set a 'false'.            -->
@@ -195,6 +197,7 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_RAW          = "raw";
     TBAG_CONSTEXPR static char const * const ATT_SET          = "set";
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT_SET  = "default_set";
+    TBAG_CONSTEXPR static char const * const ATT_SYSTEM       = "system";
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT      = "default";
     TBAG_CONSTEXPR static char const * const ATT_AUTOCLEAR    = "autoclear";
     TBAG_CONSTEXPR static char const * const ATT_DYNASM       = "dynasm";
@@ -206,8 +209,11 @@ public:
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
     TBAG_CONSTEXPR static char const * const VAL_ALL   = "*";
 
+private:
+    char ** _envs;
+
 public:
-    StorageNode();
+    StorageNode(char ** envs = nullptr);
     StorageNode(StorageNode const & obj);
     StorageNode(StorageNode && obj) TBAG_NOEXCEPT;
     ~StorageNode();

@@ -20,7 +20,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace res  {
 namespace node {
 
-StorageNode::StorageNode()
+StorageNode::StorageNode(char ** envs) : _envs(envs)
 {
     // EMPTY.
 }
@@ -55,14 +55,14 @@ StorageNode & StorageNode::operator =(StorageNode && obj) TBAG_NOEXCEPT
 void StorageNode::copy(StorageNode const & obj)
 {
     if (this != &obj) {
-        // TODO: Copy object.
+        _envs = obj._envs;
     }
 }
 
 void StorageNode::swap(StorageNode & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        // TODO: Swap object.
+        std::swap(_envs, obj._envs);
     }
 }
 
@@ -129,6 +129,7 @@ void StorageNode::load(Element const & element)
         }
     }
 
+    Environments envs;
     if (auto * env = element.FirstChildElement(TAG_ENV)) {
         std::string set;
         optAttr(*env, ATT_SET, set);
@@ -136,13 +137,20 @@ void StorageNode::load(Element const & element)
         bool default_set;
         optAttr(*env, ATT_DEFAULT_SET, default_set, false);
 
-        result.setEnv(getPath(*env, default_root), set, default_set);
+        bool system;
+        optAttr(*env, ATT_SYSTEM, system, false);
+
+        result.setEnv(getPath(*env, default_root), set, (system ? _envs : nullptr), default_set);
+        envs = result.envs();
+    } else {
+        envs = Environments::createDefaultEnvironments();
+    }
+
+    if (auto * config = element.FirstChildElement(TAG_CONFIG)) {
+        result.setConfig(getPath(*config, default_root, envs));
     }
 
     /*
-     *     <!-- Contains simple 'namespace(filename)'/'key'/'value' information for configuration. -->
-     *     <config absolute='false' raw='true'>dir</config>
-     *
      *     <!-- A set of dynamic modules. (e.g. '*.dll') -->
      *     <module absolute='false'>dir</module>
      *
