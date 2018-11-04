@@ -89,7 +89,7 @@ bool Storage::readEnv()
     if (_impl->envs_filename.empty()) {
         return false;
     }
-    if (!asset().exists(LAYOUT_CONFIG)) {
+    if (!asset().exists(LAYOUT_ENV)) {
         return false;
     }
     _impl->envs.readResourceXmlFile(asset().get(LAYOUT_ENV) / _impl->envs_filename);
@@ -113,7 +113,7 @@ bool Storage::saveEnv()
     if (_impl->envs_filename.empty()) {
         return false;
     }
-    if (!asset().exists(LAYOUT_CONFIG)) {
+    if (!asset().exists(LAYOUT_ENV)) {
         return false;
     }
     return _impl->envs.saveResourceXmlFile(asset().get(LAYOUT_ENV) / _impl->envs_filename);

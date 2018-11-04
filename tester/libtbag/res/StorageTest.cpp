@@ -9,27 +9,82 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/res/Storage.hpp>
 #include <libtbag/filesystem/File.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
 using namespace libtbag::res;
 
-TEST(StorageTest, Config)
+TEST(StorageTest, Envs)
 {
-    std::string const DIR1 = "dir1";
-    std::string const DIR2 = "dir2";
+    tttDir_Automatic();
+    auto const PATH = tttDir_Get();
 
-    std::string const NAME1 = "grp1";
-    std::string const NAME2 = "grp2";
-    std::string const NAME3 = "grp3";
+    std::string const NAME1 = "name1";
+    std::string const NAME2 = "name2";
 
     std::string const KEY1 = "key1";
     std::string const KEY2 = "key2";
     std::string const KEY3 = "key3";
 
     std::string const VAL1 = "val1";
-    std::string const VAL1_2 = "val1_2";
     std::string const VAL2 = "val2";
     std::string const VAL3 = "val3";
+
+    Storage storage;
+    storage.setLayoutEnv(PATH);
+    storage.setEnvFilename(NAME1);
+    storage.setEnv(KEY1, VAL1);
+    storage.setEnv(KEY2, VAL2);
+    ASSERT_TRUE(storage.saveEnv());
+
+    storage.clear();
+    storage.setLayoutEnv(PATH);
+    storage.setEnvFilename(NAME2);
+    storage.setEnv(KEY3, VAL3);
+    ASSERT_TRUE(storage.saveEnv());
+
+    ASSERT_TRUE((PATH / NAME1).isRegularFile());
+    ASSERT_TRUE((PATH / NAME2).isRegularFile());
+    ASSERT_EQ(2, PATH.scanDir().size());
+
+    storage.clear();
+    storage.setLayoutEnv(PATH);
+    storage.setEnvFilename(NAME1);
+    ASSERT_TRUE(storage.readEnv());
+
+    std::string read;
+    ASSERT_TRUE(storage.getEnv(KEY1, read));
+    ASSERT_EQ(VAL1, read);
+
+    ASSERT_TRUE(storage.getEnv(KEY2, read));
+    ASSERT_EQ(VAL2, read);
+
+    ASSERT_EQ(2, storage.envs().size());
+
+    storage.clear();
+    storage.setLayoutEnv(PATH);
+    storage.setEnvFilename(NAME2);
+    ASSERT_TRUE(storage.readEnv());
+
+    ASSERT_TRUE(storage.getEnv(KEY3, read));
+    ASSERT_EQ(VAL3, read);
+    ASSERT_EQ(1, storage.envs().size());
+}
+
+TEST(StorageTest, Config)
+{
+    std::string const NAME1 = "name1";
+    std::string const NAME2 = "name2";
+    std::string const NAME3 = "name3";
+
+    std::string const KEY1 = "key1";
+    std::string const KEY2 = "key2";
+    std::string const KEY3 = "key3";
+
+    std::string const VAL1   = "val1";
+    std::string const VAL1_2 = "val1_2";
+    std::string const VAL2   = "val2";
+    std::string const VAL3   = "val3";
 
     tttDir_Automatic();
     auto const PATH = tttDir_Get();

@@ -172,7 +172,8 @@ bool Environments::parse(std::vector<std::string> const & envs, std::string cons
 void Environments::readResourceXmlString(std::string const & xml)
 {
     using namespace libtbag::dom::xml;
-    for (auto & cursor : Resource::createFromXmlString(xml).map()) {
+    auto const XML_RESOURCE = Resource::createFromXmlString(xml);
+    for (auto & cursor : XML_RESOURCE.map()) {
         push(cursor.first, cursor.second);
     }
 }
@@ -180,7 +181,8 @@ void Environments::readResourceXmlString(std::string const & xml)
 void Environments::readResourceXmlFile(std::string const & path)
 {
     using namespace libtbag::dom::xml;
-    for (auto & cursor : Resource::createFromXmlFile(path).map()) {
+    auto const XML_RESOURCE = Resource::createFromXmlFile(path);
+    for (auto & cursor : XML_RESOURCE.map()) {
         push(cursor.first, cursor.second);
     }
 }

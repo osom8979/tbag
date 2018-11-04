@@ -318,7 +318,7 @@ Resource Resource::createFromXmlString(std::string const & xml, std::string cons
         name_attribute = attr;
     }
 
-    Resource res(root, tag, attr);
+    Resource res(root_tag, property_tag, name_attribute);
     res.readString(xml);
     return res;
 }
