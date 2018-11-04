@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/string/Environments.hpp>
-#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -158,6 +158,24 @@ bool Environments::parse(std::string const & envs, std::string const & delimiter
 bool Environments::parse(std::vector<std::string> const & envs, std::string const & delimiter)
 {
     return _flags.parse(envs, ENVIRONMENTS_FLAGS_PREFIX, delimiter);
+}
+
+void Environments::readResourceXmlString(std::string const & xml, std::string const & root,
+                                         std::string const & tag, std::string const & attr)
+{
+    using namespace libtbag::dom::xml;
+    for (auto & cursor : Resource::createFromXmlString(xml, root, tag, attr).map()) {
+        push(cursor.first, cursor.second);
+    }
+}
+
+void Environments::readResourceXmlFile(std::string const & path, std::string const & root,
+                                       std::string const & tag, std::string const & attr)
+{
+    using namespace libtbag::dom::xml;
+    for (auto & cursor : Resource::createFromXmlFile(path, root, tag, attr).map()) {
+        push(cursor.first, cursor.second);
+    }
 }
 
 std::string Environments::convert(std::string const & source) const
