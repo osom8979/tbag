@@ -189,6 +189,17 @@ TBAG_API std::string upper(std::string const & str);
 TBAG_API void lowerSelf(std::string & str);
 TBAG_API void upperSelf(std::string & str);
 
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR1 =   "on";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR2 = "true";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR3 =   "ok";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR4 =  "yes";
+TBAG_CONSTEXPR char const * const TRUE_LOWER_STR5 =    "y";
+
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR1 =   "off";
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR2 = "false";
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR3 =    "no";
+TBAG_CONSTEXPR char const * const FALSE_LOWER_STR4 =     "n";
+
 TBAG_API bool toVal(std::string const & str,               bool & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str,               char & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str, unsigned      char & to, std::size_t * index = nullptr, int base = 10);

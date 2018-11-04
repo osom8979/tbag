@@ -431,17 +431,6 @@ void upperSelf(std::string & str)
     try { to = func(str, index); } catch (...) { return false; } return true;
 #endif
 
-TBAG_CONSTEXPR char const * const TRUE_LOWER_STR1 =   "on";
-TBAG_CONSTEXPR char const * const TRUE_LOWER_STR2 = "true";
-TBAG_CONSTEXPR char const * const TRUE_LOWER_STR3 =   "ok";
-TBAG_CONSTEXPR char const * const TRUE_LOWER_STR4 =  "yes";
-TBAG_CONSTEXPR char const * const TRUE_LOWER_STR5 =    "y";
-
-TBAG_CONSTEXPR char const * const FALSE_LOWER_STR1 =   "off";
-TBAG_CONSTEXPR char const * const FALSE_LOWER_STR2 = "false";
-TBAG_CONSTEXPR char const * const FALSE_LOWER_STR3 =    "no";
-TBAG_CONSTEXPR char const * const FALSE_LOWER_STR4 =     "n";
-
 bool toVal(std::string const & str, bool & to, std::size_t * index, int base)
 {
     // @formatter:off
