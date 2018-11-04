@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/string/StringUtils.hpp>
+
 #include <unordered_map>
 #include <string>
 
@@ -44,9 +46,9 @@ public:
     TBAG_CONSTEXPR static char const * const ATTRIBUTE_NAME     = "name";
 
 public:
-    TBAG_CONSTEXPR static char const * const getRootTagName    () TBAG_NOEXCEPT { return ROOT_TAG_NAME;  }
-    TBAG_CONSTEXPR static char const * const getPropertyTagName() TBAG_NOEXCEPT { return ROOT_TAG_NAME;  }
-    TBAG_CONSTEXPR static char const * const getAttributeName  () TBAG_NOEXCEPT { return ATTRIBUTE_NAME; }
+    TBAG_CONSTEXPR static char const * const getRootTagName    () TBAG_NOEXCEPT { return ROOT_TAG_NAME;     }
+    TBAG_CONSTEXPR static char const * const getPropertyTagName() TBAG_NOEXCEPT { return PROPERTY_TAG_NAME; }
+    TBAG_CONSTEXPR static char const * const getAttributeName  () TBAG_NOEXCEPT { return ATTRIBUTE_NAME;    }
 
 public:
     using Map = std::unordered_map<std::string, std::string>;
@@ -54,12 +56,14 @@ public:
 private:
     std::string _root;
     std::string _tag;
+    std::string _attr;
     Map         _map;
 
 public:
     Resource();
-    Resource(std::string const & root);
-    Resource(std::string const & root, std::string const & tag);
+    explicit Resource(std::string const & root);
+    explicit Resource(std::string const & root, std::string const & tag);
+    explicit Resource(std::string const & root, std::string const & tag, std::string const & attr);
     Resource(Resource const & obj);
     Resource(Resource && obj) TBAG_NOEXCEPT;
     virtual ~Resource();
@@ -97,7 +101,7 @@ public:
     bool readString(std::string const & xml);
 
 public:
-    bool save(std::string const & path) const;
+    bool saveFile(std::string const & path) const;
 
 public:
     std::string getXmlString() const;
@@ -195,10 +199,36 @@ public:
     std::string const & at(std::string const & key) const;
 
 public:
-    static Map readFromXmlString(std::string const & xml, std::string const & root, std::string const & tag);
-    static Map readFromXmlFile(std::string const & path, std::string const & root, std::string const & tag);
-    static bool save(std::string const & path, std::string const & root, std::string const & tag, Map const & map);
-    static std::string getXmlString(std::string const & root, std::string const & tag, Map const & map);
+    static Map readMapFromXmlString(std::string const & xml,
+                                    std::string const & root,
+                                    std::string const & tag,
+                                    std::string const & attr);
+    static Map readMapFromXmlFile(std::string const & path,
+                                  std::string const & root,
+                                  std::string const & tag,
+                                  std::string const & attr);
+    static bool saveToXmlFile(std::string const & path,
+                              std::string const & root,
+                              std::string const & tag,
+                              std::string const & attr,
+                              Map const & map);
+    static std::string getXmlString(std::string const & root,
+                                    std::string const & tag,
+                                    std::string const & attr,
+                                    Map const & map);
+
+public:
+    TBAG_CONSTEXPR static char const * const STRING_EMPTY = libtbag::string::STRING_EMPTY;
+
+public:
+    static Resource createFromXmlString(std::string const & xml,
+                                        std::string const & root = STRING_EMPTY,
+                                        std::string const & tag = STRING_EMPTY,
+                                        std::string const & attr = STRING_EMPTY);
+    static Resource createFromXmlFile(std::string const & path,
+                                      std::string const & root = STRING_EMPTY,
+                                      std::string const & tag = STRING_EMPTY,
+                                      std::string const & attr = STRING_EMPTY);
 };
 
 } // namespace xml

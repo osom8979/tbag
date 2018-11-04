@@ -86,6 +86,14 @@ static Err queryAttribute(XmlHelper::Element const & element,
 // XmlHelper implementation.
 // -------------------------
 
+std::string XmlHelper::text(Element const & element)
+{
+    if (element.GetText() != nullptr) {
+        return std::string(element.GetText());
+    }
+    return std::string();
+}
+
 Err XmlHelper::opt(Element const & element, std::string const & key, std::string & result, std::string const & default_value)
 {
     auto * node = element.FirstChildElement(key.c_str());

@@ -37,6 +37,8 @@ struct TBAG_API XmlHelper
     using Document = tinyxml2::XMLDocument;
     using Element  = tinyxml2::XMLElement;
 
+    static std::string text(Element const & element);
+
     static Err opt(Element const & element, std::string const & key, std::string & result, std::string const & default_value = std::string());
     static Err opt(Element const & element, std::string const & key, bool & result, bool default_value = false);
     static Err opt(Element const & element, std::string const & key, int & result, int default_value = 0);

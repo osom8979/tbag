@@ -40,7 +40,7 @@ bool Property::load(std::string const & path)
 
 bool Property::save(std::string const & path)
 {
-    return _res.save(path);
+    return _res.saveFile(path);
 }
 
 bool Property::loadOrCreate(std::string const & path)

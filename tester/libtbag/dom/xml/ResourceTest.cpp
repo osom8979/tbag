@@ -37,7 +37,7 @@ TEST(ResourceTest, Utf8)
     Resource res;
     res.set(TEST_NAME, (char*)hangul);
     res.setTag(TEST_TAG);
-    ASSERT_TRUE(res.save(PATH.toString()));
+    ASSERT_TRUE(res.saveFile(PATH.toString()));
 
     res.clear();
     ASSERT_TRUE(res.readFile(PATH.toString()));
@@ -50,6 +50,7 @@ public:
     std::string xml;
     std::string root;
     std::string tag;
+    std::string attr;
 
     std::string attribute1;
     std::string attribute2;
@@ -116,6 +117,7 @@ public:
               ;
         root = "root";
         tag = "value";
+        attr = "name";
 
         res.setRoot(root);
         res.setTag(tag);
@@ -148,7 +150,7 @@ TEST_F(ResourceFixtureTest, GetRoot)
 TEST_F(ResourceFixtureTest, ReadFromXmlString)
 {
     Resource::Map map;
-    map = Resource::readFromXmlString(xml, root, tag);
+    map = Resource::readMapFromXmlString(xml, root, tag, attr);
 
     ASSERT_EQ(4U, map.size());
     ASSERT_EQ(value1_2, map.find(attribute1)->second);
@@ -162,8 +164,8 @@ TEST_F(ResourceFixtureTest, Save)
     auto const PATH = tttDir_Get() / "utf8.xml";
 
     Resource::Map map;
-    map = Resource::readFromXmlString(xml, root, tag);
-    ASSERT_TRUE(Resource::save(PATH.toString(), root, tag, map));
+    map = Resource::readMapFromXmlString(xml, root, tag, attr);
+    ASSERT_TRUE(Resource::saveToXmlFile(PATH.toString(), root, tag, attr, map));
 }
 
 TEST_F(ResourceFixtureTest, GetValue)
