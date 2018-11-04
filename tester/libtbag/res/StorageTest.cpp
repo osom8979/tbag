@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/res/Storage.hpp>
+#include <libtbag/filesystem/File.hpp>
 
 using namespace libtbag;
 using namespace libtbag::res;
@@ -35,7 +36,7 @@ TEST(StorageTest, Config)
     auto const PATH = tttDir_Get();
 
     Storage storage;
-    storage.setConfig(PATH);
+    storage.setLayoutConfig(PATH);
 
     ASSERT_TRUE(storage.getConfigGroups().empty());
     ASSERT_TRUE(storage.saveConfig(GRP1, KEY1, VAL1));

@@ -108,7 +108,7 @@ Environments & Environments::operator =(Flags const & flags)
     return *this;
 }
 
-Environments & Environments::operator =(Flags && flags)
+Environments & Environments::operator =(Flags && flags) TBAG_NOEXCEPT
 {
     if (&_flags != &flags) {
         assign(std::move(flags));
@@ -116,12 +116,22 @@ Environments & Environments::operator =(Flags && flags)
     return *this;
 }
 
+bool Environments::get(std::string const & key, std::string & val) const
+{
+    return _flags.get(key, val);
+}
+
+void Environments::set(std::string const & key, std::string const & val)
+{
+    _flags.set(key, val);
+}
+
 void Environments::assign(Flags const & flags)
 {
     _flags = flags;
 }
 
-void Environments::assign(Flags && flags)
+void Environments::assign(Flags && flags) TBAG_NOEXCEPT
 {
     _flags = std::move(flags);
 }
@@ -176,6 +186,19 @@ void Environments::readResourceXmlFile(std::string const & path, std::string con
     for (auto & cursor : Resource::createFromXmlFile(path, root, tag, attr).map()) {
         push(cursor.first, cursor.second);
     }
+}
+
+bool Environments::saveResourceXmlFile(std::string const & path, std::string const & root,
+                                       std::string const & tag, std::string const & attr)
+{
+    using namespace libtbag::dom::xml;
+    Resource res(root, tag, attr);
+    std::size_t const SIZE = _flags.size();
+    for (std::size_t i = 0; i < SIZE; ++i) {
+        auto const & flag = _flags.at(i);
+        res.set(flag.key, flag.value);
+    }
+    return res.saveFile(path);
 }
 
 std::string Environments::convert(std::string const & source) const

@@ -75,7 +75,10 @@ Resource::Resource(std::string const & root, std::string const & tag)
 }
 
 Resource::Resource(std::string const & root, std::string const & tag, std::string const & attr)
-        : _root(root), _tag(tag), _map(), _attr(attr)
+        : _root(root.empty() ? getRootTagName() : root),
+          _tag(tag.empty() ? getPropertyTagName() : tag),
+          _attr(attr.empty() ? getAttributeName() : attr),
+          _map()
 {
     // EMPTY.
 }

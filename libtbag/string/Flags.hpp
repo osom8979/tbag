@@ -101,13 +101,13 @@ public:
     explicit Flags(std::string const & args);
 
     Flags(Flags const & obj);
-    Flags(Flags && obj);
+    Flags(Flags && obj) TBAG_NOEXCEPT;
 
     ~Flags();
 
 public:
     Flags & operator =(Flags const & obj);
-    Flags & operator =(Flags && obj);
+    Flags & operator =(Flags && obj) TBAG_NOEXCEPT;
 
 public:
     inline void        clear()       TBAG_NOEXCEPT_SP_OP(_flags.clear()) {        _flags.clear(); }
@@ -122,12 +122,19 @@ public:
     inline Flag const & at(std::size_t index) const { return _flags.at(index); }
 
 public:
-    void swap(Flags & obj);
+    void swap(Flags & obj) TBAG_NOEXCEPT;
+
+public:
+    friend void swap(Flags & lh, Flags & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
     Flag find(FlagVector::const_iterator itr) const;
     Flag findWithKey(std::string const & key) const;
     Flag findWithValue(std::string const & value) const;
+
+public:
+    bool get(std::string const & key, std::string & val) const;
+    void set(std::string const & key, std::string const & val);
 
 public:
     bool remove(std::size_t index);

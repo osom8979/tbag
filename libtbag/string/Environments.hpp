@@ -65,7 +65,7 @@ public:
     Environments & operator =(Environments const & obj);
     Environments & operator =(Environments && obj) TBAG_NOEXCEPT;
     Environments & operator =(Flags const & flags);
-    Environments & operator =(Flags && flags);
+    Environments & operator =(Flags && flags) TBAG_NOEXCEPT;
 
 public:
     inline void        clear()       TBAG_NOEXCEPT_SP_OP(_flags.clear()) {        _flags.clear(); }
@@ -81,8 +81,12 @@ public:
     inline Flag const & at(std::size_t index) const { return _flags.at(index); }
 
 public:
+    bool get(std::string const & key, std::string & val) const;
+    void set(std::string const & key, std::string const & val);
+
+public:
     void assign(Flags const & flags);
-    void assign(Flags && flags);
+    void assign(Flags && flags) TBAG_NOEXCEPT;
 
 public:
     void swap(Environments & obj);
@@ -97,11 +101,15 @@ public:
 public:
     void readResourceXmlString(std::string const & xml,
                                std::string const & root = STRING_EMPTY,
-                               std::string const & tag = STRING_EMPTY,
+                               std::string const & tag  = STRING_EMPTY,
                                std::string const & attr = STRING_EMPTY);
     void readResourceXmlFile(std::string const & path,
                              std::string const & root = STRING_EMPTY,
-                             std::string const & tag = STRING_EMPTY,
+                             std::string const & tag  = STRING_EMPTY,
+                             std::string const & attr = STRING_EMPTY);
+    bool saveResourceXmlFile(std::string const & path,
+                             std::string const & root = STRING_EMPTY,
+                             std::string const & tag  = STRING_EMPTY,
                              std::string const & attr = STRING_EMPTY);
 
 public:

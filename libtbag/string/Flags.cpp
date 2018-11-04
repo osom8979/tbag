@@ -39,7 +39,7 @@ Flags::Flags(Flags const & obj)
     (*this) = obj;
 }
 
-Flags::Flags(Flags && obj)
+Flags::Flags(Flags && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }
@@ -57,7 +57,7 @@ Flags & Flags::operator =(Flags const & obj)
     return *this;
 }
 
-Flags & Flags::operator =(Flags && obj)
+Flags & Flags::operator =(Flags && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _flags.swap(obj._flags);
@@ -65,7 +65,7 @@ Flags & Flags::operator =(Flags && obj)
     return *this;
 }
 
-void Flags::swap(Flags & obj)
+void Flags::swap(Flags & obj) TBAG_NOEXCEPT
 {
     _flags.swap(obj._flags);
 }
@@ -90,6 +90,30 @@ Flags::Flag Flags::findWithValue(std::string const & value) const
     return find(std::find_if(_flags.begin(), _flags.end(), [&value](Flag const & flag) -> bool {
         return (flag.value == value);
     }));
+}
+
+bool Flags::get(std::string const & key, std::string & val) const
+{
+    auto itr = std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
+        return (flag.key == key);
+    });
+    if (itr != _flags.end()) {
+        val = itr->value;
+        return true;
+    }
+    return false;
+}
+
+void Flags::set(std::string const & key, std::string const & val)
+{
+    auto itr = std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
+        return (flag.key == key);
+    });
+    if (itr == _flags.end()) {
+        push(Flag(key, val));
+    } else {
+        itr->value = val;
+    }
 }
 
 bool Flags::remove(std::size_t index)

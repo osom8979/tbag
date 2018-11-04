@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/res/Storage.hpp>
-#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -80,33 +79,55 @@ void Storage::clear()
     _impl = std::make_shared<Impl>();
 }
 
-void Storage::setEnv(std::string const & dir, std::string const & set, char ** envs, bool default_set)
+bool Storage::updateEnvSet(std::string const & set)
 {
-    Environments temp;
-    if (default_set) {
-        temp = Environments::createDefaultEnvironments();
+    if (set.empty()) {
+        return false;
     }
-    if (envs != nullptr) {
-        temp.parse(envs);
+    if (!asset().exists(LAYOUT_CONFIG)) {
+        return false;
     }
-
-    if (!set.empty()) {
-        if (set == ENV_UPDATE_ALL) {
-            for (auto & file_path : libtbag::filesystem::Path(dir).scanDir()) {
-                temp.readResourceXmlFile(file_path);
-            }
-        } else {
-            temp.readResourceXmlFile(libtbag::filesystem::Path(dir) / set);
+    auto const ENV_DIR = asset().get(LAYOUT_ENV);
+    if (set == ENV_UPDATE_ALL) {
+        for (auto & file_path : ENV_DIR.scanDir()) {
+            _impl->envs.readResourceXmlFile(file_path);
         }
+    } else {
+        _impl->envs.readResourceXmlFile(ENV_DIR / set);
     }
-
-    _impl->envs = temp;
-    asset().set(LAYOUT_ENV, libtbag::filesystem::Path(dir));
+    return true;
 }
 
-void Storage::setConfig(std::string const & dir)
+void Storage::updateDefaultEnv()
 {
-    asset().set(LAYOUT_CONFIG, libtbag::filesystem::Path(dir));
+    _impl->envs = Environments::createDefaultEnvironments();
+}
+
+void Storage::updateEnvParams(char ** envs)
+{
+    if (envs != nullptr) {
+        _impl->envs.parse(envs);
+    }
+}
+
+void Storage::clearEnv()
+{
+    _impl->envs.clear();
+}
+
+void Storage::setEnv(std::string const & key, std::string const & value)
+{
+    _impl->envs.set(key, value);
+}
+
+bool Storage::getEnv(std::string const & key, std::string & value) const
+{
+    return _impl->envs.get(key, value);
+}
+
+std::string Storage::convert(std::string const & value) const
+{
+    return _impl->envs.convert(value);
 }
 
 bool Storage::readConfig(std::string const & group, std::string const & key, std::string & value)

@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/res/DynamicAsset.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/xml/Resource.hpp>
@@ -42,6 +43,7 @@ public:
     using DynamicAsset = libtbag::res::DynamicAsset;
     using Environments = libtbag::string::Environments;
     using Resource     = libtbag::dom::xml::Resource;
+    using Path         = libtbag::filesystem::Path;
 
 public:
     /**
@@ -136,40 +138,9 @@ public:
     DynamicAsset const & asset() const TBAG_NOEXCEPT { return _impl->asset; }
 
 public:
-    TBAG_CONSTEXPR static char const * const LAYOUT_ENV = "env";
-    TBAG_CONSTEXPR static char const * const ENV_UPDATE_ALL = "*";
-
-    Environments       & envs()       TBAG_NOEXCEPT { return _impl->envs; }
-    Environments const & envs() const TBAG_NOEXCEPT { return _impl->envs; }
-
-    /**
-     * Set env layout.
-     *
-     * @param[in] dir
-     *      layout directory.
-     * @param[in] set
-     *      assign default env filename. '*' is update all env files.
-     * @param[in] envs
-     *      Update extension envs.
-     * @param[in] default_set
-     *      Update default envs?
-     */
-    void setEnv(std::string const & dir, std::string const & set, char ** envs = nullptr, bool default_set = false);
-
-public:
-    TBAG_CONSTEXPR static char const * const LAYOUT_CONFIG = "config";
-
-    void setConfig(std::string const & dir);
-    bool readConfig(std::string const & group, std::string const & key, std::string & value);
-    bool saveConfig(std::string const & group, std::string const & key, std::string const & value);
-
-    std::vector<std::string> getConfigGroups() const;
-    std::vector<std::string> getConfigKeys(std::string const & group) const;
-
-    void removeConfig(std::string const & group);
-    void removeAllConfig();
-
-public:
+    // @formatter:off
+    TBAG_CONSTEXPR static char const * const LAYOUT_ENV       = "env";
+    TBAG_CONSTEXPR static char const * const LAYOUT_CONFIG    = "config";
     TBAG_CONSTEXPR static char const * const LAYOUT_MODULE    = "module";
     TBAG_CONSTEXPR static char const * const LAYOUT_TEXT      = "text";
     TBAG_CONSTEXPR static char const * const LAYOUT_IMAGE     = "image";
@@ -193,6 +164,69 @@ public:
     TBAG_CONSTEXPR static char const * const LAYOUT_COLOR     = "color";
     TBAG_CONSTEXPR static char const * const LAYOUT_RLOG      = "rlog";
     TBAG_CONSTEXPR static char const * const LAYOUT_USER      = "user";
+    // @formatter:on
+
+public:
+    // @formatter:off
+    void setLayoutEnv      (std::string const & dir) { asset().set(LAYOUT_ENV      , Path(dir)); }
+    void setLayoutConfig   (std::string const & dir) { asset().set(LAYOUT_CONFIG   , Path(dir)); }
+    void setLayoutModule   (std::string const & dir) { asset().set(LAYOUT_MODULE   , Path(dir)); }
+    void setLayoutText     (std::string const & dir) { asset().set(LAYOUT_TEXT     , Path(dir)); }
+    void setLayoutImage    (std::string const & dir) { asset().set(LAYOUT_IMAGE    , Path(dir)); }
+    void setLayoutDrawable (std::string const & dir) { asset().set(LAYOUT_DRAWABLE , Path(dir)); }
+    void setLayoutAnimation(std::string const & dir) { asset().set(LAYOUT_ANIMATION, Path(dir)); }
+    void setLayoutSprite   (std::string const & dir) { asset().set(LAYOUT_SPRITE   , Path(dir)); }
+    void setLayoutLmdb     (std::string const & dir) { asset().set(LAYOUT_LMDB     , Path(dir)); }
+    void setLayoutSqlite   (std::string const & dir) { asset().set(LAYOUT_SQLITE   , Path(dir)); }
+    void setLayoutTemp     (std::string const & dir) { asset().set(LAYOUT_TEMP     , Path(dir)); }
+    void setLayoutKeystore (std::string const & dir) { asset().set(LAYOUT_KEYSTORE , Path(dir)); }
+    void setLayoutLua      (std::string const & dir) { asset().set(LAYOUT_LUA      , Path(dir)); }
+    void setLayoutRaw      (std::string const & dir) { asset().set(LAYOUT_RAW      , Path(dir)); }
+    void setLayoutBagex    (std::string const & dir) { asset().set(LAYOUT_BAGEX    , Path(dir)); }
+    void setLayoutExe      (std::string const & dir) { asset().set(LAYOUT_EXE      , Path(dir)); }
+    void setLayoutFont     (std::string const & dir) { asset().set(LAYOUT_FONT     , Path(dir)); }
+    void setLayoutMusic    (std::string const & dir) { asset().set(LAYOUT_MUSIC    , Path(dir)); }
+    void setLayoutSound    (std::string const & dir) { asset().set(LAYOUT_SOUND    , Path(dir)); }
+    void setLayoutShader   (std::string const & dir) { asset().set(LAYOUT_SHADER   , Path(dir)); }
+    void setLayoutLayout   (std::string const & dir) { asset().set(LAYOUT_LAYOUT   , Path(dir)); }
+    void setLayoutStyle    (std::string const & dir) { asset().set(LAYOUT_STYLE    , Path(dir)); }
+    void setLayoutColor    (std::string const & dir) { asset().set(LAYOUT_COLOR    , Path(dir)); }
+    void setLayoutRlog     (std::string const & dir) { asset().set(LAYOUT_RLOG     , Path(dir)); }
+    void setLayoutUser     (std::string const & dir) { asset().set(LAYOUT_USER     , Path(dir)); }
+    // @formatter:on
+
+public:
+    TBAG_CONSTEXPR static char const * const ENV_UPDATE_ALL = "*";
+
+    Environments       & envs()       TBAG_NOEXCEPT { return _impl->envs; }
+    Environments const & envs() const TBAG_NOEXCEPT { return _impl->envs; }
+
+    /**
+     * Update environment variables.
+     *
+     * @param[in] set
+     *      assign default env filename. '*' is update all env files.
+     */
+    bool updateEnvSet(std::string const & set);
+    void updateDefaultEnv();
+    void updateEnvParams(char ** envs);
+
+    void clearEnv();
+
+    void setEnv(std::string const & key, std::string const & value);
+    bool getEnv(std::string const & key, std::string & value) const;
+
+    std::string convert(std::string const & value) const;
+
+public:
+    bool readConfig(std::string const & group, std::string const & key, std::string & value);
+    bool saveConfig(std::string const & group, std::string const & key, std::string const & value);
+
+    std::vector<std::string> getConfigGroups() const;
+    std::vector<std::string> getConfigKeys(std::string const & group) const;
+
+    void removeConfig(std::string const & group);
+    void removeAllConfig();
 };
 
 } // namespace res
