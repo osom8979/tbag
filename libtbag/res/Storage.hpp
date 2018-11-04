@@ -56,6 +56,7 @@ public:
     {
         DynamicAsset  asset;
         Environments  envs;
+        std::string   envs_filename;
         Resource      config;
 
         Impl() { /* EMPTY. */ }
@@ -196,20 +197,15 @@ public:
     // @formatter:on
 
 public:
-    TBAG_CONSTEXPR static char const * const ENV_UPDATE_ALL = "*";
-
     Environments       & envs()       TBAG_NOEXCEPT { return _impl->envs; }
     Environments const & envs() const TBAG_NOEXCEPT { return _impl->envs; }
 
-    /**
-     * Update environment variables.
-     *
-     * @param[in] set
-     *      assign default env filename. '*' is update all env files.
-     */
-    bool updateEnvSet(std::string const & set);
-    void updateDefaultEnv();
-    void updateEnvParams(char ** envs);
+    void setEnvFilename(std::string const & filename);
+
+    bool readEnv();
+    void readEnvDefault();
+    void readEnvParams(char ** envs);
+    bool saveEnv();
 
     void clearEnv();
 
@@ -219,13 +215,13 @@ public:
     std::string convert(std::string const & value) const;
 
 public:
-    bool readConfig(std::string const & group, std::string const & key, std::string & value);
-    bool saveConfig(std::string const & group, std::string const & key, std::string const & value);
+    bool readConfig(std::string const & filename, std::string const & key, std::string & value);
+    bool saveConfig(std::string const & filename, std::string const & key, std::string const & value);
 
-    std::vector<std::string> getConfigGroups() const;
-    std::vector<std::string> getConfigKeys(std::string const & group) const;
+    std::vector<std::string> getConfigFilenames() const;
+    std::vector<std::string> getConfigKeys(std::string const & filename) const;
 
-    void removeConfig(std::string const & group);
+    void removeConfig(std::string const & filename);
     void removeAllConfig();
 };
 

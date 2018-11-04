@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/string/Environments.hpp>
-#include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -170,29 +169,25 @@ bool Environments::parse(std::vector<std::string> const & envs, std::string cons
     return _flags.parse(envs, ENVIRONMENTS_FLAGS_PREFIX, delimiter);
 }
 
-void Environments::readResourceXmlString(std::string const & xml, std::string const & root,
-                                         std::string const & tag, std::string const & attr)
+void Environments::readResourceXmlString(std::string const & xml)
 {
     using namespace libtbag::dom::xml;
-    for (auto & cursor : Resource::createFromXmlString(xml, root, tag, attr).map()) {
+    for (auto & cursor : Resource::createFromXmlString(xml).map()) {
         push(cursor.first, cursor.second);
     }
 }
 
-void Environments::readResourceXmlFile(std::string const & path, std::string const & root,
-                                       std::string const & tag, std::string const & attr)
+void Environments::readResourceXmlFile(std::string const & path)
 {
     using namespace libtbag::dom::xml;
-    for (auto & cursor : Resource::createFromXmlFile(path, root, tag, attr).map()) {
+    for (auto & cursor : Resource::createFromXmlFile(path).map()) {
         push(cursor.first, cursor.second);
     }
 }
 
-bool Environments::saveResourceXmlFile(std::string const & path, std::string const & root,
-                                       std::string const & tag, std::string const & attr)
+bool Environments::saveResourceXmlFile(std::string const & path)
 {
-    using namespace libtbag::dom::xml;
-    Resource res(root, tag, attr);
+    libtbag::dom::xml::Resource res;
     std::size_t const SIZE = _flags.size();
     for (std::size_t i = 0; i < SIZE; ++i) {
         auto const & flag = _flags.at(i);

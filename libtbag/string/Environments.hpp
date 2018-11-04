@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Flags.hpp>
 
@@ -99,18 +100,9 @@ public:
     bool parse(std::vector<std::string> const & envs, std::string const & delimiter);
 
 public:
-    void readResourceXmlString(std::string const & xml,
-                               std::string const & root = STRING_EMPTY,
-                               std::string const & tag  = STRING_EMPTY,
-                               std::string const & attr = STRING_EMPTY);
-    void readResourceXmlFile(std::string const & path,
-                             std::string const & root = STRING_EMPTY,
-                             std::string const & tag  = STRING_EMPTY,
-                             std::string const & attr = STRING_EMPTY);
-    bool saveResourceXmlFile(std::string const & path,
-                             std::string const & root = STRING_EMPTY,
-                             std::string const & tag  = STRING_EMPTY,
-                             std::string const & attr = STRING_EMPTY);
+    void readResourceXmlString(std::string const & xml);
+    void readResourceXmlFile(std::string const & path);
+    bool saveResourceXmlFile(std::string const & path);
 
 public:
     std::string convert(std::string const & source) const;

@@ -79,35 +79,44 @@ void Storage::clear()
     _impl = std::make_shared<Impl>();
 }
 
-bool Storage::updateEnvSet(std::string const & set)
+void Storage::setEnvFilename(std::string const & filename)
 {
-    if (set.empty()) {
+    _impl->envs_filename = filename;
+}
+
+bool Storage::readEnv()
+{
+    if (_impl->envs_filename.empty()) {
         return false;
     }
     if (!asset().exists(LAYOUT_CONFIG)) {
         return false;
     }
-    auto const ENV_DIR = asset().get(LAYOUT_ENV);
-    if (set == ENV_UPDATE_ALL) {
-        for (auto & file_path : ENV_DIR.scanDir()) {
-            _impl->envs.readResourceXmlFile(file_path);
-        }
-    } else {
-        _impl->envs.readResourceXmlFile(ENV_DIR / set);
-    }
+    _impl->envs.readResourceXmlFile(asset().get(LAYOUT_ENV) / _impl->envs_filename);
     return true;
 }
 
-void Storage::updateDefaultEnv()
+void Storage::readEnvDefault()
 {
     _impl->envs = Environments::createDefaultEnvironments();
 }
 
-void Storage::updateEnvParams(char ** envs)
+void Storage::readEnvParams(char ** envs)
 {
     if (envs != nullptr) {
         _impl->envs.parse(envs);
     }
+}
+
+bool Storage::saveEnv()
+{
+    if (_impl->envs_filename.empty()) {
+        return false;
+    }
+    if (!asset().exists(LAYOUT_CONFIG)) {
+        return false;
+    }
+    return _impl->envs.saveResourceXmlFile(asset().get(LAYOUT_ENV) / _impl->envs_filename);
 }
 
 void Storage::clearEnv()
@@ -130,12 +139,12 @@ std::string Storage::convert(std::string const & value) const
     return _impl->envs.convert(value);
 }
 
-bool Storage::readConfig(std::string const & group, std::string const & key, std::string & value)
+bool Storage::readConfig(std::string const & filename, std::string const & key, std::string & value)
 {
     if (!asset().exists(LAYOUT_CONFIG)) {
         return false;
     }
-    auto const PATH = asset().get(LAYOUT_CONFIG) / group;
+    auto const PATH = asset().get(LAYOUT_CONFIG) / filename;
     Resource res;
     if (!res.readFile(PATH)) {
         return false;
@@ -143,19 +152,19 @@ bool Storage::readConfig(std::string const & group, std::string const & key, std
     return res.getString(key, &value);
 }
 
-bool Storage::saveConfig(std::string const & group, std::string const & key, std::string const & value)
+bool Storage::saveConfig(std::string const & filename, std::string const & key, std::string const & value)
 {
     if (!asset().exists(LAYOUT_CONFIG)) {
         return false;
     }
-    auto const PATH = asset().get(LAYOUT_CONFIG) / group;
+    auto const PATH = asset().get(LAYOUT_CONFIG) / filename;
     Resource res;
     res.readFile(PATH);
     res.set(key, value);
     return res.saveFile(PATH);
 }
 
-std::vector<std::string> Storage::getConfigGroups() const
+std::vector<std::string> Storage::getConfigFilenames() const
 {
     std::vector<std::string> result;
     if (asset().exists(LAYOUT_CONFIG)) {
@@ -166,29 +175,29 @@ std::vector<std::string> Storage::getConfigGroups() const
     return result;
 }
 
-std::vector<std::string> Storage::getConfigKeys(std::string const & group) const
+std::vector<std::string> Storage::getConfigKeys(std::string const & filename) const
 {
     std::vector<std::string> result;
     if (asset().exists(LAYOUT_CONFIG)) {
         Resource res;
-        if (res.readFile(asset().get(LAYOUT_CONFIG) / group)) {
+        if (res.readFile(asset().get(LAYOUT_CONFIG) / filename)) {
             return res.keys();
         }
     }
     return result;
 }
 
-void Storage::removeConfig(std::string const & group)
+void Storage::removeConfig(std::string const & filename)
 {
     if (asset().exists(LAYOUT_CONFIG)) {
-        (asset().get(LAYOUT_CONFIG) / group).remove();
+        (asset().get(LAYOUT_CONFIG) / filename).remove();
     }
 }
 
 void Storage::removeAllConfig()
 {
-    for (auto & group : getConfigGroups()) {
-        libtbag::filesystem::Path(group).remove();
+    for (auto & filename : getConfigFilenames()) {
+        libtbag::filesystem::Path(filename).remove();
     }
 }
 

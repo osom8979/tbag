@@ -133,18 +133,23 @@ void StorageNode::load(Element const & element)
     if (auto * env = element.FirstChildElement(TAG_ENV)) {
         result.setLayoutEnv(getPath(*env, default_root));
 
-        std::string set;
-        optAttr(*env, ATT_SET, set);
-        result.updateEnvSet(set);
+        std::string name;
+        optAttr(*env, ATT_NAME, name);
+        if (!name.empty()) {
+            result.setEnvFilename(name);
+            result.readEnv();
+        }
 
-        bool default_set;
-        optAttr(*env, ATT_DEFAULT_SET, default_set, false);
-        result.updateDefaultEnv();
+        bool default_flag;
+        optAttr(*env, ATT_DEFAULT, default_flag, false);
+        if (default_flag) {
+            result.readEnvDefault();
+        }
 
-        bool system;
-        optAttr(*env, ATT_SYSTEM, system, false);
-        if (system && _envs != nullptr) {
-            result.updateEnvParams(_envs);
+        bool system_flag;
+        optAttr(*env, ATT_SYSTEM, system_flag, false);
+        if (system_flag && _envs != nullptr) {
+            result.readEnvParams(_envs);
         }
 
         envs = result.envs();

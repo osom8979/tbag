@@ -222,17 +222,14 @@ public:
                                     Map const & map);
 
 public:
-    TBAG_CONSTEXPR static char const * const STRING_EMPTY = libtbag::string::STRING_EMPTY;
-
-public:
     static Resource createFromXmlString(std::string const & xml,
-                                        std::string const & root = STRING_EMPTY,
-                                        std::string const & tag = STRING_EMPTY,
-                                        std::string const & attr = STRING_EMPTY);
+                                        std::string const & root = getRootTagName(),
+                                        std::string const & tag = getPropertyTagName(),
+                                        std::string const & attr = getAttributeName());
     static Resource createFromXmlFile(std::string const & path,
-                                      std::string const & root = STRING_EMPTY,
-                                      std::string const & tag = STRING_EMPTY,
-                                      std::string const & attr = STRING_EMPTY);
+                                      std::string const & root = getRootTagName(),
+                                      std::string const & tag = getPropertyTagName(),
+                                      std::string const & attr = getAttributeName());
 };
 
 } // namespace xml
