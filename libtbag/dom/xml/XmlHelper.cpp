@@ -94,6 +94,36 @@ std::string XmlHelper::text(Element const & element)
     return std::string();
 }
 
+void XmlHelper::text(Element & element, std::string const & value)
+{
+    element.SetText(value.c_str());
+}
+
+void XmlHelper::text(Element & element, bool value)
+{
+    element.SetText(value);
+}
+
+void XmlHelper::text(Element & element, int value)
+{
+    element.SetText(value);
+}
+
+void XmlHelper::text(Element & element, unsigned int value)
+{
+    element.SetText(value);
+}
+
+void XmlHelper::text(Element & element, float value)
+{
+    element.SetText(value);
+}
+
+void XmlHelper::text(Element & element, double value)
+{
+    element.SetText(value);
+}
+
 Err XmlHelper::opt(Element const & element, std::string const & key, std::string & result, std::string const & default_value)
 {
     auto * node = element.FirstChildElement(key.c_str());
