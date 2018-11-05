@@ -19,6 +19,8 @@
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/res/Storage.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -208,6 +210,11 @@ public:
 
 private:
     char ** _envs;
+    Storage _storage;
+
+private:
+    std::string _default_root;
+    std::string _archive;
 
 public:
     StorageNode(char ** envs = nullptr);
@@ -227,11 +234,12 @@ public:
     inline friend void swap(StorageNode & lh, StorageNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
-    static std::string getPath(Element const & element,
-                               std::string const & default_root);
-    static std::string getPath(Element const & element,
-                               std::string const & default_root,
-                               Environments const & env);
+    inline Storage       & storage()       TBAG_NOEXCEPT { return _storage; }
+    inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
+
+public:
+    static std::string getPath(Element const & element, std::string const & default_root);
+    static std::string getPath(Element const & element, std::string const & default_root, Environments const & env);
 
 public:
     virtual std::string name() const override;

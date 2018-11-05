@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/filesystem/File.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/res/node/StorageNode.hpp>
 
 using namespace libtbag;
@@ -23,11 +24,20 @@ TBAG_CONSTEXPR static char const * const STORAGE_NODE_XML = R"(
 
 TEST(StorageNodeTest, Default)
 {
-    tttDir_Automatic();
+    //tttDir_Automatic();
+    tttDir(true, false);
     auto const PATH = tttDir_Get() / "filename.xml";
-    ASSERT_EQ(Err::E_SUCCESS, libtbag::filesystem::writeFile(PATH.toString(), STORAGE_NODE_XML));
+
+    using namespace libtbag::filesystem;
+    ASSERT_EQ(Err::E_SUCCESS, writeFile(PATH.toString(), STORAGE_NODE_XML));
+    ASSERT_TRUE(PATH.isRegularFile());
 
     StorageNode node;
     ASSERT_TRUE(node.loadFile(PATH));
+    ASSERT_TRUE(PATH.remove());
+    ASSERT_FALSE(PATH.isRegularFile());
+
+    ASSERT_TRUE(node.saveFile(PATH));
+    ASSERT_TRUE(PATH.isRegularFile());
 }
 

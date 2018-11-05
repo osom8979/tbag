@@ -113,52 +113,50 @@ void StorageNode::load(Element const & element)
     using namespace libtbag::filesystem;
     using namespace libtbag::string;
 
-    Storage result;
+    _storage.clear();
 
-    std::string default_root;
-    if (isSuccess(optAttr(element, ATT_DEFAULT_ROOT, default_root, Path::getWorkDir().toString()))) {
-        default_root = Environments::createDefaultEnvironments().convert(default_root);
+    if (isSuccess(optAttr(element, ATT_DEFAULT_ROOT, _default_root, Path::getWorkDir().toString()))) {
+        _default_root = Environments::createDefaultEnvironments().convert(_default_root);
     }
 
-    std::string archive;
-    if (isSuccess(optAttr(element, ATT_ARCHIVE, archive, VAL_DIR))) {
-        archive = lower(archive);
-        if (archive != VAL_DIR && archive != VAL_ZIP) {
-            tDLogW("StorageNode::load() {} attribute error: {}", std::string(ATT_ARCHIVE), archive);
-            archive = VAL_DIR;
+    if (isSuccess(optAttr(element, ATT_ARCHIVE, _archive, VAL_DIR))) {
+        _archive = lower(_archive);
+        if (_archive != VAL_DIR && _archive != VAL_ZIP) {
+            tDLogW("StorageNode::load() {} attribute error: {}", std::string(ATT_ARCHIVE), _archive);
+            _archive = VAL_DIR;
         }
     }
 
     Environments envs;
     if (auto * env = element.FirstChildElement(TAG_ENV)) {
-        result.setLayoutEnv(getPath(*env, default_root));
+        _storage.setLayoutEnv(getPath(*env, _default_root));
 
         std::string name;
         optAttr(*env, ATT_NAME, name);
         if (!name.empty()) {
-            result.setEnvFilename(name);
-            result.readEnv();
+            _storage.setEnvFilename(name);
+            _storage.readEnv();
         }
 
         bool default_flag;
         optAttr(*env, ATT_DEFAULT, default_flag, false);
         if (default_flag) {
-            result.readEnvDefault();
+            _storage.readEnvDefault();
         }
 
         bool system_flag;
         optAttr(*env, ATT_SYSTEM, system_flag, false);
         if (system_flag && _envs != nullptr) {
-            result.readEnvParams(_envs);
+            _storage.readEnvParams(_envs);
         }
 
-        envs = result.envs();
+        envs = _storage.envs();
     } else {
         envs = Environments::createDefaultEnvironments();
     }
 
     if (auto * config = element.FirstChildElement(TAG_CONFIG)) {
-        result.setLayoutConfig(getPath(*config, default_root, envs));
+        _storage.setLayoutConfig(getPath(*config, _default_root, envs));
     }
 
     /*
