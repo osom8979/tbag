@@ -204,106 +204,73 @@ public:
 public:
     struct Property
     {
-        std::string root;
+        using str = std::string;
 
-        std::string env_text;
-        std::string env_name;
-        bool        env_default;
-        bool        env_system;
-        bool        env_absolute;
+        struct env_layout
+        {
+            str  text;
+            str  name;
+            bool def = false;
+            bool sys = false;
+            bool abs = false;
+        };
 
-        std::string config_text;
-        bool        config_absolute;
-        bool        config_raw;
+        struct def_layout
+        {
+            str  text;
+            bool abs = false;
+            bool raw = false;
+        };
 
-        std::string module_text;
-        bool        module_absolute;
-        bool        module_raw;
+        struct txt_layout : public def_layout
+        {
+            str name;
+        };
 
-        std::string text_text;
-        std::string text_name;
-        bool        text_absolute;
-        bool        text_raw;
+        struct sql_layout : public txt_layout
+        {
+            // EMPTY.
+        };
 
-        std::string image_text;
-        bool        image_absolute;
-        bool        image_raw;
+        struct tmp_layout : public def_layout
+        {
+            bool autoclear = false;
+        };
 
-        std::string drawable_text;
-        bool        drawable_absolute;
-        bool        drawable_raw;
+        struct key_layout : public txt_layout
+        {
+            // EMPTY.
+        };
 
-        std::string animation_text;
-        bool        animation_absolute;
-        bool        animation_raw;
+        struct lua_layout : public def_layout
+        {
+            bool dynasm = false;
+        };
 
-        std::string sprite_text;
-        bool        sprite_absolute;
-        bool        sprite_raw;
-
-        std::string lmdb_text;
-        bool        lmdb_absolute;
-        bool        lmdb_raw;
-
-        std::string sqlite_text;
-        std::string sqlite_name;
-        bool        sqlite_absolute;
-        bool        sqlite_raw;
-
-        std::string temp_text;
-        bool        temp_autoclear;
-        bool        temp_absolute;
-        bool        temp_raw;
-
-        std::string keystore_text;
-        std::string keystore_name;
-        bool        keystore_absolute;
-        bool        keystore_raw;
-
-        std::string lua_text;
-        bool        lua_dynasm;
-        bool        lua_absolute;
-        bool        lua_raw;
-
-        std::string raw_text;
-        bool        raw_absolute;
-        bool        raw_raw;
-
-        std::string bagex_text;
-        bool        bagex_absolute;
-        bool        bagex_raw;
-
-        std::string exe_text;
-        bool        exe_absolute;
-        bool        exe_raw;
-
-        std::string font_text;
-        bool        font_absolute;
-        bool        font_raw;
-
-        std::string music_text;
-        bool        music_absolute;
-        bool        music_raw;
-
-        std::string sound_text;
-        bool        sound_absolute;
-        bool        sound_raw;
-
-        std::string shader_text;
-        bool        shader_absolute;
-        bool        shader_raw;
-
-        std::string layout_text;
-        bool        layout_absolute;
-        bool        layout_raw;
-
-        std::string style_text;
-        bool        style_absolute;
-        bool        style_raw;
-
-        std::string color_text;
-        bool        color_absolute;
-        bool        color_raw;
+        std::string  root;
+        env_layout   env;
+        def_layout   config;
+        def_layout   module;
+        txt_layout   text;
+        def_layout   image;
+        def_layout   drawable;
+        def_layout   animation;
+        def_layout   sprite;
+        def_layout   lmdb;
+        sql_layout   sqlite;
+        tmp_layout   temp;
+        key_layout   keystore;
+        lua_layout   lua;
+        def_layout   raw;
+        def_layout   bagex;
+        def_layout   exe;
+        def_layout   font;
+        def_layout   music;
+        def_layout   sound;
+        def_layout   shader;
+        def_layout   layout;
+        def_layout   style;
+        def_layout   color;
     };
 
 private:
