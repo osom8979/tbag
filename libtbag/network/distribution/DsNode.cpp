@@ -203,7 +203,10 @@ public:
         // -----------------------
 
         virtual void onConnect(Err code) override
-        { Base::onConnect(code); }
+        {
+            tDLogI("DsNode[{}]::I::C::onConnect({}) {}", _impl->_params.name, code, _name);
+            Base::onConnect(code);
+        }
 
         virtual void onShutdown(Err code) override
         { /* EMPTY. */ }
@@ -254,7 +257,14 @@ public:
             request.path = "ws://tbag/node/";
             request.insert(HEADER_HOST, _impl->_params.name);
             request.insert(HEADER_ORIGIN, _impl->_params.name);
-            writeWsRequest(request);
+
+            auto const CODE = writeWsRequest(request);
+            if (isSuccessAnyway(CODE)) {
+                tDLogI("DsNode[{}]::I::C::onOpen() Write WS request to {}", _impl->_params.name, _name);
+            } else {
+                tDLogE("DsNode[{}]::I::C::onOpen() Write WS request error: {}", _impl->_params.name, CODE);
+                close();
+            }
         }
 
         virtual void onEof() override
@@ -674,22 +684,25 @@ public:
 
     bool busyWaitingUntilConnected(std::string const & name, int timeout_millisec = INFINITE_TIMEOUT) const
     {
-        SharedNode node;
-        COMMENT("NODES READ LOCK") {
-            ReadGuard const GUARD(_nodes_lock);
-            auto itr = _nodes.find(name);
-            if (itr == _nodes.end()) {
-                return false;
-            }
-            if (!static_cast<bool>(itr->second)) {
-                return false;
-            }
-            node = itr->second;
-        }
-
         auto const BEGIN   = std::chrono::system_clock::now();
         auto const TIMEOUT = std::chrono::milliseconds(timeout_millisec);
-        while (!node->isConnected()) {
+
+        while (true) {
+            bool connected = false;
+            COMMENT("NODES READ LOCK") {
+                ReadGuard const GUARD(_nodes_lock);
+                auto itr = _nodes.find(name);
+                if (itr == _nodes.end()) {
+                    return false;
+                }
+                if (!static_cast<bool>(itr->second)) {
+                    return false;
+                }
+                connected = itr->second->isConnected();
+            }
+            if (connected) {
+                break;
+            }
             if (timeout_millisec > INFINITE_TIMEOUT && (std::chrono::system_clock::now() - BEGIN) >= TIMEOUT) {
                 return false;
             }
