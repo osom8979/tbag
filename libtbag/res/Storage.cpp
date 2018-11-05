@@ -84,6 +84,15 @@ void Storage::setEnvFilename(std::string const & filename)
     _impl->envs_filename = filename;
 }
 
+void Storage::setLayoutEnv(std::string const & dir, std::string const & filename, bool auto_load)
+{
+    setLayoutEnv(dir);
+    setEnvFilename(filename);
+    if (auto_load && !readEnv()) {
+        tDLogE("Storage::setLayoutEnv() auto load failure: {}", libtbag::filesystem::Path(dir) / filename);
+    }
+}
+
 bool Storage::readEnv()
 {
     if (_impl->envs_filename.empty()) {

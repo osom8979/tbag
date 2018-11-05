@@ -201,6 +201,7 @@ public:
     Environments const & envs() const TBAG_NOEXCEPT { return _impl->envs; }
 
     void setEnvFilename(std::string const & filename);
+    void setLayoutEnv(std::string const & dir, std::string const & filename, bool auto_load = false);
 
     bool readEnv();
     void readEnvDefault();

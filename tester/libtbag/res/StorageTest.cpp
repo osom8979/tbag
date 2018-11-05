@@ -26,20 +26,21 @@ TEST(StorageTest, Envs)
     std::string const KEY2 = "key2";
     std::string const KEY3 = "key3";
 
-    std::string const VAL1 = "val1";
-    std::string const VAL2 = "val2";
-    std::string const VAL3 = "val3";
+    std::string const VAL1   = "val1";
+    std::string const VAL2   = "val2";
+    std::string const VAL2_2 = "val2_2";
+    std::string const VAL3   = "val3";
 
+    std::string read;
     Storage storage;
-    storage.setLayoutEnv(PATH);
-    storage.setEnvFilename(NAME1);
+
+    storage.setLayoutEnv(PATH, NAME1);
     storage.setEnv(KEY1, VAL1);
     storage.setEnv(KEY2, VAL2);
     ASSERT_TRUE(storage.saveEnv());
 
     storage.clear();
-    storage.setLayoutEnv(PATH);
-    storage.setEnvFilename(NAME2);
+    storage.setLayoutEnv(PATH, NAME2);
     storage.setEnv(KEY3, VAL3);
     ASSERT_TRUE(storage.saveEnv());
 
@@ -48,27 +49,38 @@ TEST(StorageTest, Envs)
     ASSERT_EQ(2, PATH.scanDir().size());
 
     storage.clear();
-    storage.setLayoutEnv(PATH);
-    storage.setEnvFilename(NAME1);
+    storage.setLayoutEnv(PATH, NAME1);
     ASSERT_TRUE(storage.readEnv());
-
-    std::string read;
+    ASSERT_EQ(2, storage.envs().size());
     ASSERT_TRUE(storage.getEnv(KEY1, read));
     ASSERT_EQ(VAL1, read);
-
     ASSERT_TRUE(storage.getEnv(KEY2, read));
     ASSERT_EQ(VAL2, read);
 
-    ASSERT_EQ(2, storage.envs().size());
-
     storage.clear();
-    storage.setLayoutEnv(PATH);
-    storage.setEnvFilename(NAME2);
+    storage.setLayoutEnv(PATH, NAME2);
     ASSERT_TRUE(storage.readEnv());
-
+    ASSERT_EQ(1, storage.envs().size());
     ASSERT_TRUE(storage.getEnv(KEY3, read));
     ASSERT_EQ(VAL3, read);
-    ASSERT_EQ(1, storage.envs().size());
+
+    storage.clearEnv();
+    ASSERT_EQ(0, storage.envs().size());
+
+    storage.setLayoutEnv(PATH, NAME1, true);
+    ASSERT_EQ(2, storage.envs().size());
+    storage.setEnv(KEY2, VAL2_2);
+    ASSERT_EQ(2, storage.envs().size());
+    ASSERT_TRUE(storage.saveEnv());
+
+    storage.clear();
+    storage.setLayoutEnv(PATH, NAME1, true);
+    ASSERT_EQ(2, storage.envs().size());
+    ASSERT_TRUE(storage.getEnv(KEY1, read));
+    ASSERT_EQ(VAL1, read);
+    ASSERT_TRUE(storage.getEnv(KEY2, read));
+    ASSERT_EQ(VAL2_2, read);
+    ASSERT_EQ(VAL2_2, storage.convert(std::string("${") + KEY2 + std::string("}")));
 }
 
 TEST(StorageTest, Config)
