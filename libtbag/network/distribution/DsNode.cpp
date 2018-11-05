@@ -16,9 +16,6 @@
 #include <libtbag/network/http/HttpClient.hpp>
 
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
-#include <libtbag/uvpp/func/FunctionalPrepare.hpp>
-#include <libtbag/uvpp/Idle.hpp>
-#include <libtbag/uvpp/Signal.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <libtbag/string/StringUtils.hpp>
@@ -65,7 +62,6 @@ public:
     using EventType     = libtbag::network::http::EventType;
     using Loop          = libtbag::uvpp::Loop;
     using SafetyAsync   = libtbag::uvpp::ex::SafetyAsync;
-    using FuncPrepare   = libtbag::uvpp::func::FuncPrepare;
     using RwLock        = libtbag::lock::RwLock;
     using ReadGuard     = libtbag::lock::ReadLockGuard;
     using WriteGuard    = libtbag::lock::WriteLockGuard;
@@ -76,20 +72,16 @@ public:
     struct ServerNode;
     struct ClientNode;
     struct Server;
-    struct Idle;
 
     friend struct NodeInterface;
     friend struct ServerNode;
     friend struct ClientNode;
     friend struct Server;
-    friend struct Idle;
 
     using SharedServerNode = std::shared_ptr<ServerNode>;
     using SharedClientNode = std::shared_ptr<ClientNode>;
     using SharedServer     = std::shared_ptr<Server>;
-    using SharedIdle       = std::shared_ptr<Idle>;
     using SharedAsync      = std::shared_ptr<SafetyAsync>;
-    using SharedPrepare    = std::shared_ptr<FuncPrepare>;
     using SharedThread     = std::shared_ptr<ThreadPool>;
     using SharedNode       = std::shared_ptr<NodeInterface>;
     using NodeMap          = std::unordered_map<std::string, SharedNode>;
@@ -487,39 +479,12 @@ public:
         { /* EMPTY. */ }
     };
 
-    /**
-     * DsNode::Impl::Idle class implementation.
-     *
-     * @author zer0
-     * @date   2018-10-27
-     */
-    struct Idle : public libtbag::uvpp::Idle
-    {
-    public:
-        using Base = libtbag::uvpp::Idle;
-
-    private:
-        Impl * _impl = nullptr;
-
-    public:
-        Idle(Impl * i, Loop & loop) : Base(loop), _impl(i)
-        { assert(_impl != nullptr); }
-        virtual ~Idle()
-        { /* EMPTY. */ }
-
-    public:
-        virtual void onIdle() override
-        { /* EMPTY. */ }
-    };
-
 private:
     DsNode * _parent;
     Params   _params;
 
 private:
     Loop          _loop;
-    SharedIdle    _idle;
-    SharedPrepare _prepare;
     SharedAsync   _async;
     SharedServer  _server;
 
@@ -587,17 +552,13 @@ public:
 
         STEP(04, "Create uv handles");
         try {
-            _prepare = _loop.newHandle<FuncPrepare>(_loop);
             _async = _loop.newHandle<SafetyAsync>(_loop);
-            _idle = _loop.newHandle<Idle>(this, _loop);
             _server = std::make_shared<Server>(this, _loop, type);
         } catch (...) {
             _server.reset();
             throw ErrException(Err::E_BADALLOC);
         }
-        assert(static_cast<bool>(_prepare));
         assert(static_cast<bool>(_async));
-        assert(static_cast<bool>(_idle));
         assert(static_cast<bool>(_server));
 
         STEP(05, "Server initialize");
@@ -607,27 +568,7 @@ public:
             throw ErrException(INIT_CODE);
         }
 
-        STEP(06, "Update callback");
-        _prepare->setOnPrepare([this](){
-            _prepare->close();
-            _prepare.reset();
-
-            auto server = _server->getServer().lock();
-            assert(static_cast<bool>(server));
-            if (server->isActive()) {
-                if (_params.verbose) {
-                    loggingSelfInformation();
-                }
-                assert(_state == State::S_OPENING || _state == State::S_CLOSING);
-                _state = State::S_OPENED; // ==[[ OPENING DONE ]]==
-            } else {
-                tDLogE("DsNode[{}]::Impl::Impl()@prepare() Server is not active!", _params.name);
-                close();
-            }
-        });
-        _prepare->start();
-
-        STEP(07, "Create thread");
+        STEP(06, "Create thread");
         _pool = std::make_shared<ThreadPool>(_POOL_SIZE);
         assert(static_cast<bool>(_pool));
         assert(_pool->sizeOfThreads() == _POOL_SIZE);
@@ -635,8 +576,12 @@ public:
             throw ErrException(Err::E_EPUSH);
         }
 
-        STEP(08, "Update member variables");
+        STEP(07, "Update member variables");
         _params = params;
+        if (_params.verbose) {
+            loggingSelfInformation();
+        }
+        _state = State::S_OPENED;
     }
 
     ~Impl()
@@ -672,12 +617,6 @@ private:
         if (_server) {
             _server->close();
         }
-        if (_idle && !_idle->isClosing()) {
-            _idle->close();
-        }
-        if (_prepare && !_prepare->isClosing()) {
-            _prepare->close();
-        }
         if (_async && !_async->isClosing()) {
             _async->close();
         }
@@ -690,8 +629,6 @@ private:
         _pool.reset();
 
         STEP(05, "Clear memory");
-        _idle.reset();
-        _prepare.reset();
         _async.reset();
         _server.reset();
         // {{~~
@@ -720,7 +657,7 @@ public:
     void loggingSelfInformation() const
     {
         using namespace libtbag::util;
-        tDLogI("===== DsNoD INFORMATION =====");
+        tDLogI("===== DsNoD[{}] INFORMATION =====", _params.name);
         tDLogI("* Tbag version: {}", getTbagVersion().toString());
         tDLogI("* Packet version: {}", getTbagPacketVersion().toString());
         tDLogI("* Release version: {}", getTbagReleaseVersion().toString());
@@ -733,19 +670,6 @@ public:
     {
         assert(_state != State::S_NONE);
         return _state;
-    }
-
-    bool busyWaitingUntilOpened(int timeout_millisec = INFINITE_TIMEOUT) const
-    {
-        auto const BEGIN   = std::chrono::system_clock::now();
-        auto const TIMEOUT = std::chrono::milliseconds(timeout_millisec);
-        while (_state == State::S_OPENING) {
-            if (timeout_millisec > INFINITE_TIMEOUT && (std::chrono::system_clock::now() - BEGIN) >= TIMEOUT) {
-                return false;
-            }
-            // busy waiting...
-        }
-        return _state == State::S_OPENED ? true : false;
     }
 
     bool busyWaitingUntilConnected(std::string const & name, int timeout_millisec = INFINITE_TIMEOUT) const
@@ -1045,14 +969,6 @@ DsNode::State DsNode::getState() const
         return State::S_NONE;
     }
     return _impl->getState();
-}
-
-bool DsNode::busyWaitingUntilOpened(int timeout_millisec) const
-{
-    if (!exists()) {
-        return false;
-    }
-    return _impl->busyWaitingUntilOpened(timeout_millisec);
 }
 
 bool DsNode::busyWaitingUntilConnected(std::string const & name, int timeout_millisec) const

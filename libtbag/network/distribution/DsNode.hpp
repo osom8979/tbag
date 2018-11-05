@@ -190,7 +190,6 @@ public:
 
 public:
     State getState() const;
-    bool busyWaitingUntilOpened(int timeout_millisec = INFINITE_TIMEOUT) const;
     bool busyWaitingUntilConnected(std::string const & name, int timeout_millisec = INFINITE_TIMEOUT) const;
 
 public:
