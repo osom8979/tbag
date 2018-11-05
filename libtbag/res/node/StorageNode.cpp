@@ -79,12 +79,22 @@ void StorageNode::teardown()
 {
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & default_root)
+std::string StorageNode::getPath(Element const & element)
 {
-    return getPath(element, default_root, Environments());
+    return getPath(element, _root, Environments());
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & default_root, Environments const & env)
+std::string StorageNode::getPath(Element const & element, Environments const & env)
+{
+    return getPath(element, _root, env);
+}
+
+std::string StorageNode::getPath(Element const & element, std::string const & root)
+{
+    return getPath(element, root, Environments());
+}
+
+std::string StorageNode::getPath(Element const & element, std::string const & root, Environments const & env)
 {
     bool absolute = false;
     optAttr(element, ATT_ABSOLUTE, absolute, false);
@@ -101,9 +111,9 @@ std::string StorageNode::getPath(Element const & element, std::string const & de
 
     using namespace libtbag::filesystem;
     if (path.empty()) {
-        path = Path(default_root) / std::string(TAG_ENV);
+        path = Path(root) / std::string(TAG_ENV);
     } else if (!absolute) {
-        path = Path(default_root) / path;
+        path = Path(root) / path;
     }
     return path;
 }
@@ -115,21 +125,12 @@ void StorageNode::load(Element const & element)
 
     _storage.clear();
 
-    if (isSuccess(optAttr(element, ATT_DEFAULT_ROOT, _default_root, Path::getWorkDir().toString()))) {
-        _default_root = Environments::createDefaultEnvironments().convert(_default_root);
+    if (isSuccess(optAttr(element, ATT_ROOT, _root, Path::getWorkDir().toString()))) {
+        _root = Environments::createDefaultEnvironments().convert(_root);
     }
 
-    if (isSuccess(optAttr(element, ATT_ARCHIVE, _archive, VAL_DIR))) {
-        _archive = lower(_archive);
-        if (_archive != VAL_DIR && _archive != VAL_ZIP) {
-            tDLogW("StorageNode::load() {} attribute error: {}", std::string(ATT_ARCHIVE), _archive);
-            _archive = VAL_DIR;
-        }
-    }
-
-    Environments envs;
     if (auto * env = element.FirstChildElement(TAG_ENV)) {
-        _storage.setLayoutEnv(getPath(*env, _default_root));
+        _storage.setLayoutEnv(getPath(*env, _root));
 
         std::string name;
         optAttr(*env, ATT_NAME, name);
@@ -149,14 +150,16 @@ void StorageNode::load(Element const & element)
         if (system_flag && _envs != nullptr) {
             _storage.readEnvParams(_envs);
         }
-
-        envs = _storage.envs();
     } else {
-        envs = Environments::createDefaultEnvironments();
+        _storage.readEnvDefault();
     }
 
+    // -----------------------------------------
+    auto const & ENVIRONMENTS = _storage.envs();
+    // -----------------------------------------
+
     if (auto * config = element.FirstChildElement(TAG_CONFIG)) {
-        _storage.setLayoutConfig(getPath(*config, _default_root, envs));
+        _storage.setLayoutConfig(getPath(*config, _root, ENVIRONMENTS));
     }
 
     /*

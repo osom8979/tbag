@@ -24,8 +24,7 @@ TBAG_CONSTEXPR static char const * const STORAGE_NODE_XML = R"(
 
 TEST(StorageNodeTest, Default)
 {
-    //tttDir_Automatic();
-    tttDir(true, false);
+    tttDir_Automatic();
     auto const PATH = tttDir_Get() / "filename.xml";
 
     using namespace libtbag::filesystem;

@@ -33,14 +33,12 @@ namespace node {
  *
  * @author zer0
  * @date   2018-11-03
+ *
  * @remarks
  *  XML format:
  *  @code{.xml}
- *   <!-- If 'default_root' attribute is exists, all layouts are sub-paths.       -->
- *   <!-- If 'absolute' attribute is not exists, It is set a working directory.   -->
- *   <!-- If 'archive' attribute is exists, The file system works with that type. -->
- *   <!--  'dir': Default filesystem. [DEFAULT]                                   -->
- *   <!--  'zip': ZIP archive.                                                    -->
+ *   <!-- If 'root' attribute is exists, all layouts are sub-paths.         -->
+ *   <!-- If 'root' attribute is not exists, It is set a working directory. -->
  *   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *   <!-- Special exchange variables:         -->
  *   <!-- ${EXE_PATH} : EXE file path         -->
@@ -48,7 +46,7 @@ namespace node {
  *   <!-- ${EXE_DIR}  : EXE directory         -->
  *   <!-- ${WORK_DIR} : Working directory     -->
  *   <!-- ${HOME_DIR} : User's HOME directory -->
- *   <storage default_root='dir' archive='dir'>
+ *   <storage root='dir'>
  *
  *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *     <!-- Used for special purposes.                                  -->
@@ -192,29 +190,24 @@ public:
     TBAG_CONSTEXPR static char const * const TAG_USER      = Storage::LAYOUT_USER     ;
     // @formatter:on
 
-    TBAG_CONSTEXPR static char const * const ATT_DEFAULT_ROOT = "default_root";
-    TBAG_CONSTEXPR static char const * const ATT_ARCHIVE      = "archive";
-    TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE     = "absolute";
-    TBAG_CONSTEXPR static char const * const ATT_RAW          = "raw";
-    TBAG_CONSTEXPR static char const * const ATT_NAME         = "name";
-    TBAG_CONSTEXPR static char const * const ATT_DEFAULT      = "default";
-    TBAG_CONSTEXPR static char const * const ATT_SYSTEM       = "system";
-    TBAG_CONSTEXPR static char const * const ATT_AUTOCLEAR    = "autoclear";
-    TBAG_CONSTEXPR static char const * const ATT_DYNASM       = "dynasm";
+    TBAG_CONSTEXPR static char const * const ATT_ROOT      = "root";
+    TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE  = "absolute";
+    TBAG_CONSTEXPR static char const * const ATT_RAW       = "raw";
+    TBAG_CONSTEXPR static char const * const ATT_NAME      = "name";
+    TBAG_CONSTEXPR static char const * const ATT_DEFAULT   = "default";
+    TBAG_CONSTEXPR static char const * const ATT_SYSTEM    = "system";
+    TBAG_CONSTEXPR static char const * const ATT_AUTOCLEAR = "autoclear";
+    TBAG_CONSTEXPR static char const * const ATT_DYNASM    = "dynasm";
 
-    TBAG_CONSTEXPR static char const * const VAL_DIR   = "dir";
-    TBAG_CONSTEXPR static char const * const VAL_ZIP   = "zip";
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
-    TBAG_CONSTEXPR static char const * const VAL_ALL   = "*";
 
 private:
     char ** _envs;
     Storage _storage;
 
 private:
-    std::string _default_root;
-    std::string _archive;
+    std::string _root;
 
 public:
     StorageNode(char ** envs = nullptr);
@@ -238,8 +231,12 @@ public:
     inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
 
 public:
-    static std::string getPath(Element const & element, std::string const & default_root);
-    static std::string getPath(Element const & element, std::string const & default_root, Environments const & env);
+    std::string getPath(Element const & element);
+    std::string getPath(Element const & element, Environments const & env);
+
+public:
+    static std::string getPath(Element const & element, std::string const & root);
+    static std::string getPath(Element const & element, std::string const & root, Environments const & env);
 
 public:
     virtual std::string name() const override;
