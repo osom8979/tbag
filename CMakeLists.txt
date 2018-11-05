@@ -59,7 +59,7 @@ endif ()
 tbag_config__set_option (USE_TBAG_UI                ON) ## Enable game engine framework.
 tbag_config__set_option (USE_TBAG_DEBUGGING_LOGGER  ON) ## Enable tbag debugging logger.
 tbag_config__set_option (USE_CCACHE                 ON) ## Enable ccache compile.
-tbag_config__set_option (USE_PCH                    ON) ## Enable PCH compile.
+tbag_config__set_option (USE_PCH                   OFF) ## Enable PCH compile.
 tbag_config__set_option (USE_GOLD                   ON) ## Enable ld.gold linker if gcc compiler.
 
 ## Configure settings.
