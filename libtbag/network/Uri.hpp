@@ -43,9 +43,8 @@ enum _uri_state
 
 // @formatter:off
 TBAG_CONSTEXPR int const _uri_state_result_error       = -1;
-TBAG_CONSTEXPR int const _uri_state_result_no_slash    = 0;
-TBAG_CONSTEXPR int const _uri_state_result_success_min = sizeof((char[]){":///"}) - (2/* remove null char & size to index */);
-static_assert(_uri_state_result_success_min == 3, "Why not?");
+TBAG_CONSTEXPR int const _uri_state_result_no_slash    =  0;
+TBAG_CONSTEXPR int const _uri_state_result_success_min =  3; // The last character index of ":///"
 // @formatter:on
 
 /**
