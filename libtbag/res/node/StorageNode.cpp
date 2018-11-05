@@ -81,12 +81,12 @@ void StorageNode::teardown()
 
 std::string StorageNode::getPath(Element const & element, std::string const & tag)
 {
-    return getPath(element, _root, tag, Environments());
+    return getPath(element, _property.root, tag, Environments());
 }
 
 std::string StorageNode::getPath(Element const & element, std::string const & tag, Environments const & env)
 {
-    return getPath(element, _root, tag, env);
+    return getPath(element, _property.root, tag, env);
 }
 
 std::string StorageNode::getPath(Element const & element, std::string const & root, std::string const & tag)
@@ -132,12 +132,12 @@ void StorageNode::load(Element const & element)
 
     _storage.clear();
 
-    if (isSuccess(optAttr(element, ATT_ROOT, _root, Path::getWorkDir().toString()))) {
-        _root = Environments::createDefaultEnvironments().convert(_root);
+    if (isSuccess(optAttr(element, ATT_ROOT, _property.root, Path::getWorkDir().toString()))) {
+        _property.root = Environments::createDefaultEnvironments().convert(_property.root);
     }
 
     if (auto * env = element.FirstChildElement(TAG_ENV)) {
-        _storage.setLayoutEnv(getPath(*env, _root, TAG_ENV));
+        _storage.setLayoutEnv(getPath(*env, _property.root, TAG_ENV));
 
         std::string name;
         optAttr(*env, ATT_NAME, name);
@@ -166,7 +166,7 @@ void StorageNode::load(Element const & element)
     // -----------------------------------------
 
     if (auto * config = element.FirstChildElement(TAG_CONFIG)) {
-        _storage.setLayoutConfig(getPath(*config, _root, ENVIRONMENTS));
+        _storage.setLayoutConfig(getPath(*config, _property.root, ENVIRONMENTS));
     }
 
     /*
@@ -252,7 +252,7 @@ void StorageNode::load(Element const & element)
 
 void StorageNode::save(Element & element) const
 {
-    setAttr(element, ATT_ROOT, _root);
+    setAttr(element, ATT_ROOT, _property.root);
     newElement(element, TAG_ENV, [&](Element & child){
         //setAttr(child, ATT_DEFAULT, );
         //setAttr(child, ATT_SYSTEM, );

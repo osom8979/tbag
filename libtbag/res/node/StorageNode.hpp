@@ -62,86 +62,85 @@ namespace node {
  *     <!-- If 'default' attribute is not exists, it is set a 'true'.                  -->
  *     <!-- If the 'system' attribute is 'true', use the '_envs' member.               -->
  *     <!-- If 'system' attribute is not exists, it is set a 'true'.                   -->
+ *     <!-- [IMPORTANT] The 'env' tag does not have a 'raw' attribute.                 -->
  *     <env name='env1.xml' default='true' system='true' absolute='false'>dir</env>
  *
  *     <!-- If 'raw' attribute is 'true', Do not apply environment variables. -->
  *     <!-- If 'raw' attribute is not exists, It is set a 'false'.            -->
  *     <!-- You can set the 'env' attribute on any <tag>.                     -->
  *
+ *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+ *
  *     <!-- Contains simple 'group(filename)'/'key'/'value' information for configuration. -->
- *     <config absolute='false' raw='true'>dir</config>
+ *     <config>dir</config>
  *
  *     <!-- A set of dynamic modules. (e.g. '*.dll') -->
- *     <module absolute='false'>dir</module>
+ *     <module>dir</module>
  *
  *     <!-- String for localization. -->
- *     <!-- If 'default' attribute is exists, Apply only those files. (e.g. 'en' -> 'en.xml') -->
- *     <text default='en' absolute='false'>dir</text>
+ *     <!-- If 'name' attribute is exists, Apply only those files. -->
+ *     <text name='en.xml'>dir</text>
  *
  *     <!-- PNG/JPG/BMP image storage. -->
- *     <image absolute='false'>dir</image>
+ *     <image>dir</image>
  *
  *     <!-- Obtain individual images referring to <image>. -->
- *     <drawable absolute='false'>dir</drawable>
+ *     <drawable>dir</drawable>
  *
  *     <!-- A set of animation definition files. -->
- *     <animation absolute='false'>dir</animation>
+ *     <animation>dir</animation>
  *
  *     <!-- A set of sprite definition files. -->
- *     <sprite absolute='false'>dir</sprite>
+ *     <sprite>dir</sprite>
  *
  *     <!-- Single LMDB storage. -->
- *     <lmdb absolute='false'>dir</lmdb>
+ *     <lmdb>dir</lmdb>
  *
  *     <!-- sqlite database storages. -->
- *     <!-- If 'set' attribute is exists, Apply only those files. -->
- *     <sqlite set='file.sqlite' absolute='false'>dir</sqlite>
+ *     <!-- If 'name' attribute is exists, Apply only those files. -->
+ *     <sqlite name='file.sqlite'>dir</sqlite>
  *
  *     <!-- Temporary directory. -->
  *     <!-- If 'autoclear' attribute is 'true', All files are removed when the object is deleted. -->
- *     <temp autoclear='true' absolute='false'>dir</sqlite>
+ *     <temp autoclear='true'>dir</sqlite>
  *
  *     <!-- The file to which the encryption applies. A password is required. -->
- *     <!-- If 'set' attribute is exists, Apply only those files.             -->
- *     <keystore set='file.key' absolute='false'>dir</keystore>
+ *     <!-- If 'name' attribute is exists, Apply only those files.            -->
+ *     <keystore name='file.key'>dir</keystore>
  *
  *     <!-- Directory containing the lua script package. -->
  *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
- *     <lua dynasm='true' absolute='false'>dir</lua>
+ *     <lua dynasm='true'>dir</lua>
  *
  *     <!-- A set of data from which raw buffers can be obtained. -->
- *     <raw absolute='false'>dir</raw>
+ *     <raw>dir</raw>
  *
  *     <!-- BagEx 'key(filename)'/'value(BagEx)' serialization. -->
- *     <bagex absolute='false'>dir</bagex>
+ *     <bagex>dir</bagex>
  *
  *     <!-- Executable/Libraries files. -->
- *     <exe absolute='false'>dir</exe>
+ *     <exe>dir</exe>
  *
  *     <!-- Font files. -->
- *     <font absolute='false'>dir</font>
+ *     <font>dir</font>
  *
  *     <!-- Music files. -->
- *     <music absolute='false'>dir</music>
+ *     <music>dir</music>
  *
  *     <!-- Sound (effect) files. -->
- *     <sound absolute='false'>dir</sound>
+ *     <sound>dir</sound>
  *
  *     <!-- OpenGL Shader files. -->
- *     <shader absolute='false'>dir</shader>
+ *     <shader>dir</shader>
  *
  *     <!-- Layout(Widgets) files. -->
- *     <layout absolute='false'>dir</layout>
+ *     <layout>dir</layout>
  *
  *     <!-- Style/Theme files. -->
- *     <style absolute='false'>dir</style>
+ *     <style>dir</style>
  *
  *     <!-- List color names and values. -->
- *     <color absolute='false'>dir</color>
- *
- *     <!-- Log files. -->
- *     <!-- If 'name' attribute is exists, A rotation-logger is created. -->
- *     <rlog name='logger_name' absolute='false'>dir</rlog>
+ *     <color>dir</color>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
@@ -202,12 +201,117 @@ public:
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
 
+public:
+    struct Property
+    {
+        std::string root;
+
+        std::string env_text;
+        std::string env_name;
+        bool        env_default;
+        bool        env_system;
+        bool        env_absolute;
+
+        std::string config_text;
+        bool        config_absolute;
+        bool        config_raw;
+
+        std::string module_text;
+        bool        module_absolute;
+        bool        module_raw;
+
+        std::string text_text;
+        std::string text_name;
+        bool        text_absolute;
+        bool        text_raw;
+
+        std::string image_text;
+        bool        image_absolute;
+        bool        image_raw;
+
+        std::string drawable_text;
+        bool        drawable_absolute;
+        bool        drawable_raw;
+
+        std::string animation_text;
+        bool        animation_absolute;
+        bool        animation_raw;
+
+        std::string sprite_text;
+        bool        sprite_absolute;
+        bool        sprite_raw;
+
+        std::string lmdb_text;
+        bool        lmdb_absolute;
+        bool        lmdb_raw;
+
+        std::string sqlite_text;
+        std::string sqlite_name;
+        bool        sqlite_absolute;
+        bool        sqlite_raw;
+
+        std::string temp_text;
+        bool        temp_autoclear;
+        bool        temp_absolute;
+        bool        temp_raw;
+
+        std::string keystore_text;
+        std::string keystore_name;
+        bool        keystore_absolute;
+        bool        keystore_raw;
+
+        std::string lua_text;
+        bool        lua_dynasm;
+        bool        lua_absolute;
+        bool        lua_raw;
+
+        std::string raw_text;
+        bool        raw_absolute;
+        bool        raw_raw;
+
+        std::string bagex_text;
+        bool        bagex_absolute;
+        bool        bagex_raw;
+
+        std::string exe_text;
+        bool        exe_absolute;
+        bool        exe_raw;
+
+        std::string font_text;
+        bool        font_absolute;
+        bool        font_raw;
+
+        std::string music_text;
+        bool        music_absolute;
+        bool        music_raw;
+
+        std::string sound_text;
+        bool        sound_absolute;
+        bool        sound_raw;
+
+        std::string shader_text;
+        bool        shader_absolute;
+        bool        shader_raw;
+
+        std::string layout_text;
+        bool        layout_absolute;
+        bool        layout_raw;
+
+        std::string style_text;
+        bool        style_absolute;
+        bool        style_raw;
+
+        std::string color_text;
+        bool        color_absolute;
+        bool        color_raw;
+    };
+
 private:
     char ** _envs;
     Storage _storage;
 
 private:
-    std::string _root;
+    Property _property;
 
 public:
     StorageNode(char ** envs = nullptr);
@@ -227,6 +331,9 @@ public:
     inline friend void swap(StorageNode & lh, StorageNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
+    inline Property       & property()       TBAG_NOEXCEPT { return _property; }
+    inline Property const & property() const TBAG_NOEXCEPT { return _property; }
+
     inline Storage       & storage()       TBAG_NOEXCEPT { return _storage; }
     inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
 
