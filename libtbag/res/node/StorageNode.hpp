@@ -231,12 +231,12 @@ public:
     inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
 
 public:
-    std::string getPath(Element const & element);
-    std::string getPath(Element const & element, Environments const & env);
+    std::string getPath(Element const & element, std::string const & tag);
+    std::string getPath(Element const & element, std::string const & tag, Environments const & env);
 
 public:
-    static std::string getPath(Element const & element, std::string const & root);
-    static std::string getPath(Element const & element, std::string const & root, Environments const & env);
+    static std::string getPath(Element const & element, std::string const & root, std::string const & tag);
+    static std::string getPath(Element const & element, std::string const & root, std::string const & tag, Environments const & env);
 
 public:
     virtual std::string name() const override;

@@ -36,6 +36,7 @@ struct TBAG_API XmlHelper
 {
     using Document = tinyxml2::XMLDocument;
     using Element  = tinyxml2::XMLElement;
+    using Node     = tinyxml2::XMLNode;
 
     static std::string text(Element const & element);
     static void text(Element & element, std::string const & value);
@@ -71,6 +72,20 @@ struct TBAG_API XmlHelper
     static Element & setAttr(Element & element, std::string const & key, int value);
     static Element & setAttr(Element & element, std::string const & key, float value);
     static Element & setAttr(Element & element, std::string const & key, double value);
+
+    static Element * newElement(Element & element, std::string const & tag);
+    static Node * insertElement(Element & element, Node * node);
+
+    template <typename Predicated>
+    static Node * newElement(Element & element, std::string const & tag, Predicated predicated)
+    {
+        Element * child = newElement(element, tag);
+        if (child != nullptr) {
+            predicated(*child);
+            return insertElement(element, child);
+        }
+        return child;
+    }
 };
 
 } // namespace xml

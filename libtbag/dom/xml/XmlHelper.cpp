@@ -200,6 +200,16 @@ XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & k
 { element.SetAttribute(key.c_str(), value); return element; }
 // @formatter:on
 
+XmlHelper::Element * XmlHelper::newElement(Element & element, std::string const & tag)
+{
+    return element.GetDocument()->NewElement(tag.c_str());
+}
+
+XmlHelper::Node * XmlHelper::insertElement(Element & element, Node * node)
+{
+    return element.InsertEndChild(node);
+}
+
 } // namespace xml
 } // namespace dom
 

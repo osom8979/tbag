@@ -79,26 +79,23 @@ void StorageNode::teardown()
 {
 }
 
-std::string StorageNode::getPath(Element const & element)
+std::string StorageNode::getPath(Element const & element, std::string const & tag)
 {
-    return getPath(element, _root, Environments());
+    return getPath(element, _root, tag, Environments());
 }
 
-std::string StorageNode::getPath(Element const & element, Environments const & env)
+std::string StorageNode::getPath(Element const & element, std::string const & tag, Environments const & env)
 {
-    return getPath(element, _root, env);
+    return getPath(element, _root, tag, env);
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & root)
+std::string StorageNode::getPath(Element const & element, std::string const & root, std::string const & tag)
 {
-    return getPath(element, root, Environments());
+    return getPath(element, root, tag, Environments());
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & root, Environments const & env)
+std::string StorageNode::getPath(Element const & element, std::string const & root, std::string const & tag, Environments const & env)
 {
-    bool absolute = false;
-    optAttr(element, ATT_ABSOLUTE, absolute, false);
-
     bool raw = false;
     optAttr(element, ATT_RAW, raw, false);
 
@@ -109,13 +106,23 @@ std::string StorageNode::getPath(Element const & element, std::string const & ro
         path = env.convert(text(element));
     }
 
-    using namespace libtbag::filesystem;
     if (path.empty()) {
-        path = Path(root) / std::string(TAG_ENV);
-    } else if (!absolute) {
-        path = Path(root) / path;
+        path = tag;
     }
-    return path;
+
+    bool absolute = false;
+    optAttr(element, ATT_ABSOLUTE, absolute, false);
+
+    if (absolute) {
+        return path;
+    }
+
+    assert(!absolute);
+    using namespace libtbag::filesystem;
+    if (root.empty()) {
+        return Path::getWorkDir() / path;
+    }
+    return Path(root) / path;
 }
 
 void StorageNode::load(Element const & element)
@@ -130,7 +137,7 @@ void StorageNode::load(Element const & element)
     }
 
     if (auto * env = element.FirstChildElement(TAG_ENV)) {
-        _storage.setLayoutEnv(getPath(*env, _root));
+        _storage.setLayoutEnv(getPath(*env, _root, TAG_ENV));
 
         std::string name;
         optAttr(*env, ATT_NAME, name);
@@ -245,6 +252,12 @@ void StorageNode::load(Element const & element)
 
 void StorageNode::save(Element & element) const
 {
+    setAttr(element, ATT_ROOT, _root);
+    newElement(element, TAG_ENV, [&](Element & child){
+        //setAttr(child, ATT_DEFAULT, );
+        //setAttr(child, ATT_SYSTEM, );
+        //setAttr(child, ATT_ABSOLUTE, );
+    });
 }
 
 } // namespace node
