@@ -10,7 +10,9 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 
 #include <cassert>
+#include <atomic>
 #include <exception>
+#include <chrono>
 #include <uv.h>
 
 // -------------------
@@ -30,13 +32,15 @@ namespace thread {
  */
 struct ThreadPool::ThreadPimpl
 {
+public:
     std::size_t const INDEX;
     ThreadPool * parent;
     uv_thread_t  thread;
 
-    std::thread::id id;
+    std::atomic_bool  active;
+    std::thread::id   id;
 
-    ThreadPimpl(ThreadPool * p, std::size_t i) : parent(p), INDEX(i)
+    ThreadPimpl(ThreadPool * p, std::size_t i) : parent(p), INDEX(i), active(false)
     {
         assert(parent != nullptr);
         int const ERROR_CODE = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
@@ -62,10 +66,18 @@ private:
         ThreadPool::ThreadPimpl * thread = static_cast<ThreadPool::ThreadPimpl*>(arg);
         assert(thread != nullptr);
         assert(thread->parent != nullptr);
+
+        // Initialize.
         thread->id = std::this_thread::get_id();
+        thread->active = true;
+
+        // Start.
         thread->parent->setUp();
         thread->parent->runner(thread->INDEX);
         thread->parent->tearDown();
+
+        // Cleanup.
+        thread->active = false;
     }
 };
 
@@ -73,9 +85,9 @@ private:
 // ThreadPool implementation.
 // --------------------------
 
-ThreadPool::ThreadPool(std::size_t size) : _exit(false), _active(0)
+ThreadPool::ThreadPool(std::size_t size, bool wait_active) : _exit(false), _active(0)
 {
-    if (createThreads(size) == false) {
+    if (createThreads(size, wait_active) == false) {
         throw std::bad_alloc();
     }
 }
@@ -86,7 +98,7 @@ ThreadPool::~ThreadPool()
     _threads.clear();
 }
 
-bool ThreadPool::createThreads(std::size_t size)
+bool ThreadPool::createThreads(std::size_t size, bool wait_active)
 {
     bool result = true;
 
@@ -112,6 +124,31 @@ bool ThreadPool::createThreads(std::size_t size)
         tDLogE("ThreadPool::createThreads({}) IllegalArgumentException: pool size is 0.", size);
     }
     _mutex.unlock();
+
+    if (result && wait_active) {
+        std::size_t active_count = 0;
+
+        auto const BEGIN   = std::chrono::system_clock::now();
+        auto const TIMEOUT = std::chrono::milliseconds(static_cast<unsigned long>(WAIT_TIMEOUT_MILLISEC));
+
+        // Wait for all threads to become active.
+        while (active_count != size) {
+            active_count = 0;
+            _mutex.lock();
+            for (std::size_t i = 0; i < size; ++i) {
+                assert(static_cast<bool>(_threads[i]));
+                if (_threads[i]->active) {
+                    ++active_count;
+                }
+            }
+            _mutex.unlock();
+
+            if ((WAIT_TIMEOUT_MILLISEC > WAIT_INFINITE_TIMEOUT) && (std::chrono::system_clock::now() - BEGIN) >= TIMEOUT) {
+                tDLogE("ThreadPool::createThreads({}) Active wait timeout.");
+                return false;
+            }
+        }
+    }
 
     return result;
 }

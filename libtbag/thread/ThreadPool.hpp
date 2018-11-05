@@ -45,6 +45,10 @@ public:
     struct ThreadPimpl;
 
 public:
+    TBAG_CONSTEXPR static unsigned long const WAIT_INFINITE_TIMEOUT = 0;
+    TBAG_CONSTEXPR static unsigned long const WAIT_TIMEOUT_MILLISEC = 16 * 1000;
+
+public:
     using SharedThread = std::shared_ptr<ThreadPimpl>;
     using ThreadGroup  = std::vector<SharedThread>;
 
@@ -69,11 +73,11 @@ private:
     std::exception_ptr _exception;
 
 public:
-    ThreadPool(std::size_t size = 1U);
+    ThreadPool(std::size_t size = 1U, bool wait_active = true);
     ~ThreadPool();
 
 private:
-    bool createThreads(std::size_t size);
+    bool createThreads(std::size_t size, bool wait_active = true);
     void runner(std::size_t index);
 
 public:
