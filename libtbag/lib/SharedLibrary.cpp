@@ -2,17 +2,16 @@
  * @file   SharedLibrary.cpp
  * @brief  SharedLibrary class implementation.
  * @author zer0
- * @date   2016-07-7
+ * @date   2018-11-06
  */
 
 #include <libtbag/lib/SharedLibrary.hpp>
-#include <libtbag/predef.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
-#include <cstring>
-#include <string>
-
-#include <uv.h>
+#include <algorithm>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -20,67 +19,112 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace lib {
 
-template <typename T>
-inline uv_lib_t * uv_lib_cast(T * object)
+SharedLibrary::SharedLibrary() : _module(std::make_shared<DynamicModule>())
 {
-    return static_cast<uv_lib_t*>(object);
+    assert(static_cast<bool>(_module));
 }
 
-// -----------------------------
-// SharedLibrary implementation.
-// -----------------------------
-
-SharedLibrary::SharedLibrary() : _open(false), _lib(new uv_lib_t)
+SharedLibrary::SharedLibrary(std::string const & path) : _module(std::make_shared<DynamicModule>(path))
 {
-    ::memset(_lib, 0x00, sizeof(uv_lib_t));
+    assert(static_cast<bool>(_module));
 }
 
-SharedLibrary::SharedLibrary(std::string const & path) : SharedLibrary()
+SharedLibrary::SharedLibrary(std::nullptr_t) TBAG_NOEXCEPT : _module(nullptr)
 {
-    this->open(path);
+    // EMPTY.
+}
+
+SharedLibrary::SharedLibrary(SharedLibrary const & obj) TBAG_NOEXCEPT : SharedLibrary(nullptr)
+{
+    (*this) = obj;
+}
+
+SharedLibrary::SharedLibrary(SharedLibrary && obj) TBAG_NOEXCEPT : SharedLibrary(nullptr)
+{
+    (*this) = std::move(obj);
 }
 
 SharedLibrary::~SharedLibrary()
 {
-    this->close();
+    // EMPTY.
+}
 
-    assert(_lib != nullptr);
-    delete uv_lib_cast(_lib);
+SharedLibrary & SharedLibrary::operator =(SharedLibrary const & obj) TBAG_NOEXCEPT
+{
+    copy(obj);
+    return *this;
+}
+
+SharedLibrary & SharedLibrary::operator =(SharedLibrary && obj) TBAG_NOEXCEPT
+{
+    swap(obj);
+    return *this;
+}
+
+void SharedLibrary::copy(SharedLibrary const & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _module = obj._module;
+    }
+}
+
+void SharedLibrary::swap(SharedLibrary & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _module.swap(obj._module);
+    }
+}
+
+void SharedLibrary::reset()
+{
+    _module.reset();
 }
 
 bool SharedLibrary::open(std::string const & path)
 {
-    _open = (::uv_dlopen(path.c_str(), uv_lib_cast(_lib)) == 0);
-    return _open;
+    if (_module) {
+        return _module->open(path);
+    }
+    return false;
 }
 
 void SharedLibrary::close()
 {
-    if (_open) {
-        ::uv_dlclose(uv_lib_cast(_lib));
-        _open = false;
+    if (_module) {
+        _module->close();
     }
 }
 
 void * SharedLibrary::symbol(char const * name) const
 {
-    if (_open) {
-        void * result = nullptr;
-        if (::uv_dlsym(uv_lib_cast(_lib), name, &result) == 0) {
-            return result;
-        }
+    if (_module) {
+        return _module->symbol(name);
     }
     return nullptr;
 }
 
 void * SharedLibrary::symbol(std::string const & name) const
 {
-    return symbol(name.c_str());
+    if (_module) {
+        return _module->symbol(name);
+    }
+    return nullptr;
 }
 
 std::string SharedLibrary::getError() const
 {
-    return std::string(uv_dlerror(uv_lib_cast(_lib)));
+    if (_module) {
+        return _module->getError();
+    }
+    return std::string();
+}
+
+bool SharedLibrary::isOpen() const TBAG_NOEXCEPT
+{
+    if (_module) {
+        return _module->isOpen();
+    }
+    return false;
 }
 
 } // namespace lib

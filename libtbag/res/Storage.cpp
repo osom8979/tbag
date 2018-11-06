@@ -79,6 +79,17 @@ void Storage::clear()
     _impl = std::make_shared<Impl>();
 }
 
+std::vector<std::string> Storage::getFilenames(std::string const & key) const
+{
+    std::vector<std::string> result;
+    if (asset().exists(key)) {
+        for (auto & cursor : asset().get(key).scanDir()) {
+            result.push_back(cursor);
+        }
+    }
+    return result;
+}
+
 void Storage::setEnvFilename(std::string const & filename)
 {
     _impl->envs_filename = filename;
@@ -188,13 +199,7 @@ bool Storage::saveConfig(std::string const & filename, std::string const & key, 
 
 std::vector<std::string> Storage::getConfigFilenames() const
 {
-    std::vector<std::string> result;
-    if (asset().exists(LAYOUT_CONFIG)) {
-        for (auto & cursor : asset().get(LAYOUT_CONFIG).scanDir()) {
-            result.push_back(cursor);
-        }
-    }
-    return result;
+    return getFilenames(LAYOUT_CONFIG);
 }
 
 std::vector<std::string> Storage::getConfigKeys(std::string const & filename) const
@@ -221,6 +226,11 @@ void Storage::removeAllConfig()
     for (auto & filename : getConfigFilenames()) {
         libtbag::filesystem::Path(filename).remove();
     }
+}
+
+std::vector<std::string> Storage::getModuleFilenames() const
+{
+    return getFilenames(LAYOUT_MODULE);
 }
 
 } // namespace res

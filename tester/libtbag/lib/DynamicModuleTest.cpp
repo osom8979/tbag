@@ -1,18 +1,20 @@
 /**
- * @file   SharedLibraryTest.cpp
- * @brief  SharedLibrary class tester.
+ * @file   RandomTest.cpp
+ * @brief  Random class tester.
  * @author zer0
- * @date   2018-11-06
+ * @date   2016-04-07
+ * @date   2018-11-06 (Rename: SharedLibrary -> DynamicModule)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/lib/SharedLibrary.hpp>
+#include <libtbag/predef.hpp>
+#include <libtbag/lib/DynamicModule.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
 using namespace libtbag::lib;
 
-TEST(SharedLibraryTest, Default)
+TEST(DynamicModuleTest, Default)
 {
     std::string const LIBRARY_NAME = "tbshare";
     std::string const FUNC1_NAME   = "tbshare_add";
@@ -21,7 +23,7 @@ TEST(SharedLibraryTest, Default)
     using Path = filesystem::Path;
     Path const PATH = Path::getExeDir() / filesystem::getModuleName(LIBRARY_NAME);
 
-    SharedLibrary lib;
+    DynamicModule lib;
     ASSERT_TRUE(lib.open(PATH.getNativeString()));
 
     typedef int (*AddFunction)(int,int);

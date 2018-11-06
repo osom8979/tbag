@@ -20,6 +20,7 @@
 #include <libtbag/res/DynamicAsset.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/xml/Resource.hpp>
+#include <libtbag/lib/SharedLibrary.hpp>
 
 #include <string>
 #include <vector>
@@ -40,10 +41,10 @@ namespace res {
 class TBAG_API Storage
 {
 public:
-    using DynamicAsset = libtbag::res::DynamicAsset;
-    using Environments = libtbag::string::Environments;
-    using Resource     = libtbag::dom::xml::Resource;
-    using Path         = libtbag::filesystem::Path;
+    using DynamicAsset  = libtbag::res::DynamicAsset;
+    using Environments  = libtbag::string::Environments;
+    using Resource      = libtbag::dom::xml::Resource;
+    using Path          = libtbag::filesystem::Path;
 
 public:
     /**
@@ -197,6 +198,9 @@ public:
     // @formatter:on
 
 public:
+    std::vector<std::string> getFilenames(std::string const & key) const;
+
+public:
     Environments       & envs()       TBAG_NOEXCEPT { return _impl->envs; }
     Environments const & envs() const TBAG_NOEXCEPT { return _impl->envs; }
 
@@ -224,6 +228,9 @@ public:
 
     void removeConfig(std::string const & filename);
     void removeAllConfig();
+
+public:
+    std::vector<std::string> getModuleFilenames() const;
 };
 
 } // namespace res
