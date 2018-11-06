@@ -9,6 +9,7 @@
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/app/ex/ServiceApp.hpp>
 #include <libtbag/log/node/LogXmlNode.hpp>
+#include <libtbag/res/node/StorageNode.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 #include <cassert>
@@ -36,6 +37,7 @@ public:
     using Resource      = libtbag::dom::xml::Resource;
     using NodeInterface = libtbag::dom::xml::XmlModel::NodeInterface;
     using LogXmlNode    = libtbag::log::node::LogXmlNode;
+    using StorageNode   = libtbag::res::node::StorageNode;
 
 public:
     /**
@@ -124,10 +126,28 @@ public:
         }
     };
 
+    /**
+     * DefaultApp::Impl::Storage class implementation.
+     *
+     * @author zer0
+     * @date   2018-11-06
+     */
+    struct Storages : public StorageNode
+    {
+        Storages(char ** envs) : StorageNode(envs)
+        { /* EMPTY. */ }
+        virtual ~Storages()
+        { /* EMPTY. */ }
+
+        virtual std::string name() const override
+        { return std::string(STORAGE_TAG); }
+    };
+
 public:
     using SharedLoggers    = std::shared_ptr<Loggers>;
     using SharedValues     = std::shared_ptr<Values>;
     using SharedProperties = std::shared_ptr<Properties>;
+    using SharedStorages   = std::shared_ptr<Storages>;
 
 private:
     Runner  _runner;
@@ -137,6 +157,7 @@ private:
     SharedLoggers    _loggers;
     SharedValues     _values;
     SharedProperties _properties;
+    SharedStorages   _storages;
 
 public:
     Impl(Runner const & cb) : Impl(cb, Params{})
@@ -210,12 +231,14 @@ public:
 
         auto config = getConfig().lock();
         assert(static_cast<bool>(config));
-        _loggers = config->newAdd<Loggers>();
-        _values = config->newAdd<Values>(this);
+        _loggers    = config->newAdd<Loggers>();
+        _values     = config->newAdd<Values>(this);
         _properties = config->newAdd<Properties>(this);
+        _storages   = config->newAdd<Storages>(_params.envs);
         assert(static_cast<bool>(_loggers));
         assert(static_cast<bool>(_values));
         assert(static_cast<bool>(_properties));
+        assert(static_cast<bool>(_storages));
 
         return true;
     }
@@ -271,6 +294,7 @@ public:
         params.envs    = envs();
         params.args    = args;
         params.values  = _values->resource.map();
+        params.storage = _storages->storage();
         params.verbose = isEnableVerbose();
         if (_runner) {
             return _runner(params);

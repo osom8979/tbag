@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/util/Version.hpp>
 #include <libtbag/dom/xml/XmlModel.hpp>
+#include <libtbag/res/Storage.hpp>
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
@@ -70,7 +71,7 @@ namespace ex  {
  *       <!-- ... -->
  *     </properties>
  *
- *     <storage default_root='directory_path'>
+ *     <storage root='directory_path'>
  *       <config>path</config>
  *       <!-- ... -->
  *     </storage>
@@ -89,6 +90,7 @@ public:
     TBAG_CONSTEXPR static char const * const VALUES_TAG         = "values";
     TBAG_CONSTEXPR static char const * const VALUE_TAG          = "value";
     TBAG_CONSTEXPR static char const * const PROPERTIES_TAG     = "properties";
+    TBAG_CONSTEXPR static char const * const STORAGE_TAG        = "storage";
 
 public:
     using SignalCallback = libtbag::signal::SignalCallback;
@@ -96,6 +98,7 @@ public:
     using ConfigScope    = libtbag::dom::xml::XmlModel::Scope;
     using HelpCommander  = libtbag::string::HelpCommander;
     using Environments   = libtbag::string::Environments;
+    using Storage        = libtbag::res::Storage;
     using Version        = libtbag::util::Version;
 
     using Arguments = std::vector<std::string>;
@@ -106,8 +109,9 @@ public:
     {
         Environments envs;
         Arguments    args;
-        ValueMap     values;
-        bool         verbose;
+        ValueMap   values;
+        Storage   storage;
+        bool      verbose;
     };
 
     using SignalMap       = std::map<int, SignalCallback>;
