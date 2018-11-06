@@ -104,6 +104,8 @@ TBAG_API Err writeFile(std::string const & path, char const * buffer, std::size_
 TBAG_API Err writeFile(std::string const & path, std::string const & content);
 TBAG_API Err writeFile(std::string const & path, util::Buffer const & content);
 
+TBAG_API Err copyFile(std::string const & source_path, std::string const & destination_path);
+
 } // namespace filesystem
 
 // --------------------

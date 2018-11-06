@@ -214,6 +214,16 @@ Err writeFile(std::string const & path, util::Buffer const & content)
     return impl::writeFromBuffer(path, content);
 }
 
+Err copyFile(std::string const & source_path, std::string const & destination_path)
+{
+    libtbag::util::Buffer buffer;
+    auto const CODE = readFile(source_path, buffer);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+    return writeFile(destination_path, buffer);
+}
+
 } // namespace filesystem
 
 // --------------------
