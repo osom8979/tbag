@@ -125,7 +125,14 @@ bool Storage::saveEnv()
     if (!asset().exists(LAYOUT_ENV)) {
         return false;
     }
-    return _impl->envs.saveResourceXmlFile(asset().get(LAYOUT_ENV) / _impl->envs_filename);
+    auto const ENV_DIR = asset().get(LAYOUT_ENV);
+    if (!ENV_DIR.exists()) {
+        ENV_DIR.createDir();
+    }
+    if (!ENV_DIR.isDirectory() || !ENV_DIR.isWritable()) {
+        return false;
+    }
+    return _impl->envs.saveResourceXmlFile(ENV_DIR / _impl->envs_filename);
 }
 
 void Storage::clearEnv()
@@ -153,9 +160,8 @@ bool Storage::readConfig(std::string const & filename, std::string const & key, 
     if (!asset().exists(LAYOUT_CONFIG)) {
         return false;
     }
-    auto const PATH = asset().get(LAYOUT_CONFIG) / filename;
     Resource res;
-    if (!res.readFile(PATH)) {
+    if (!res.readFile(asset().get(LAYOUT_CONFIG) / filename)) {
         return false;
     }
     return res.getString(key, &value);
@@ -166,7 +172,14 @@ bool Storage::saveConfig(std::string const & filename, std::string const & key, 
     if (!asset().exists(LAYOUT_CONFIG)) {
         return false;
     }
-    auto const PATH = asset().get(LAYOUT_CONFIG) / filename;
+    auto const CONFIG_DIR = asset().get(LAYOUT_CONFIG);
+    if (!CONFIG_DIR.exists()) {
+        CONFIG_DIR.createDir();
+    }
+    if (!CONFIG_DIR.isDirectory() || !CONFIG_DIR.isWritable()) {
+        return false;
+    }
+    auto const PATH = CONFIG_DIR / filename;
     Resource res;
     res.readFile(PATH);
     res.set(key, value);

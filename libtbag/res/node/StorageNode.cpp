@@ -72,6 +72,30 @@ void StorageNode::swap(StorageNode & obj) TBAG_NOEXCEPT
     }
 }
 
+void StorageNode::update()
+{
+    _storage = loadStorage(_root, _prop, _envs);
+}
+
+void StorageNode::update(std::string const & root)
+{
+    _root = root;
+    _storage = loadStorage(root, _prop, _envs);
+}
+
+void StorageNode::update(Property const & prop)
+{
+    _prop = prop;
+    _storage = loadStorage(_root, prop, _envs);
+}
+
+void StorageNode::update(std::string const & root, Property const & prop)
+{
+    _root = root;
+    _prop = prop;
+    _storage = loadStorage(root, prop, _envs);
+}
+
 std::string StorageNode::name() const
 {
     return std::string(TAG_STORAGE);
@@ -133,9 +157,7 @@ void StorageNode::setup()
     prop.color    .exists = true;
     // @formatter:on
 
-    _root = libtbag::filesystem::Path::getWorkDir();
-    _prop = prop;
-    _storage = loadStorage(_root, _prop, _envs);
+    update(libtbag::filesystem::Path::getWorkDir(), prop);
 }
 
 void StorageNode::teardown()
@@ -147,41 +169,43 @@ void StorageNode::teardown()
 
 void StorageNode::load(Element const & element)
 {
-    optAttr(element, ATT_ROOT, _root);
+    std::string root;
+    optAttr(element, ATT_ROOT, root);
 
+    Property prop;
     // @formatter:off
-    readElement(element, TAG_ENV      , _prop.env);
-    readElement(element, TAG_CONFIG   , _prop.config);
-    readElement(element, TAG_MODULE   , _prop.module);
-    readElement(element, TAG_TEXT     , _prop.text);
-    readElement(element, TAG_IMAGE    , _prop.image);
-    readElement(element, TAG_DRAWABLE , _prop.drawable);
-    readElement(element, TAG_ANIMATION, _prop.animation);
-    readElement(element, TAG_SPRITE   , _prop.sprite);
-    readElement(element, TAG_LMDB     , _prop.lmdb);
-    readElement(element, TAG_SQLITE   , _prop.sqlite);
-    readElement(element, TAG_TEMP     , _prop.temp);
-    readElement(element, TAG_KEYSTORE , _prop.keystore);
-    readElement(element, TAG_LUA      , _prop.lua);
-    readElement(element, TAG_RAW      , _prop.raw);
-    readElement(element, TAG_BAGEX    , _prop.bagex);
-    readElement(element, TAG_EXE      , _prop.exe);
-    readElement(element, TAG_FONT     , _prop.font);
-    readElement(element, TAG_MUSIC    , _prop.music);
-    readElement(element, TAG_SOUND    , _prop.sound);
-    readElement(element, TAG_SHADER   , _prop.shader);
-    readElement(element, TAG_LAYOUT   , _prop.layout);
-    readElement(element, TAG_STYLE    , _prop.style);
-    readElement(element, TAG_COLOR    , _prop.color);
+    readElement(element, TAG_ENV      , prop.env);
+    readElement(element, TAG_CONFIG   , prop.config);
+    readElement(element, TAG_MODULE   , prop.module);
+    readElement(element, TAG_TEXT     , prop.text);
+    readElement(element, TAG_IMAGE    , prop.image);
+    readElement(element, TAG_DRAWABLE , prop.drawable);
+    readElement(element, TAG_ANIMATION, prop.animation);
+    readElement(element, TAG_SPRITE   , prop.sprite);
+    readElement(element, TAG_LMDB     , prop.lmdb);
+    readElement(element, TAG_SQLITE   , prop.sqlite);
+    readElement(element, TAG_TEMP     , prop.temp);
+    readElement(element, TAG_KEYSTORE , prop.keystore);
+    readElement(element, TAG_LUA      , prop.lua);
+    readElement(element, TAG_RAW      , prop.raw);
+    readElement(element, TAG_BAGEX    , prop.bagex);
+    readElement(element, TAG_EXE      , prop.exe);
+    readElement(element, TAG_FONT     , prop.font);
+    readElement(element, TAG_MUSIC    , prop.music);
+    readElement(element, TAG_SOUND    , prop.sound);
+    readElement(element, TAG_SHADER   , prop.shader);
+    readElement(element, TAG_LAYOUT   , prop.layout);
+    readElement(element, TAG_STYLE    , prop.style);
+    readElement(element, TAG_COLOR    , prop.color);
     // @formatter:on
 
     foreachElement(element, TAG_USER, [&](Element const & node){
-        Property::def_layout user;
-        readElement(node, TAG_USER, user);
-        _prop.users.push_back(user);
+        Property::usr_layout user;
+        readElement(node, user);
+        prop.users.push_back(user);
     });
 
-    _storage = loadStorage(_root, _prop, _envs);
+    update(root, prop);
 }
 
 void StorageNode::save(Element & element) const
@@ -294,6 +318,15 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
     }
 }
 
+void StorageNode::readElement(Element const & element, Property::usr_layout & layout)
+{
+    layout.exists = true;
+    layout.text = text(element);
+    optAttr(element, ATT_NAME    , layout.name);
+    optAttr(element, ATT_ABSOLUTE, layout.abs);
+    optAttr(element, ATT_RAW     , layout.raw);
+}
+
 void StorageNode::addNewElement(Element & element, std::string const & tag, Property::env_layout const & layout)
 {
     if (layout.exists) {
@@ -362,6 +395,11 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
             setAttr(child, ATT_RAW     , layout.raw);
         });
     }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::usr_layout const & layout)
+{
+    addNewElement(element, tag, (Property::txt_layout const &)(layout));
 }
 
 std::string StorageNode::getPath(std::string const & root, std::string const & tag, std::string const & text,

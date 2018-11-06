@@ -249,6 +249,11 @@ public:
             bool dynasm = false;
         };
 
+        struct usr_layout : public txt_layout
+        {
+            // EMPTY.
+        };
+
         env_layout   env;
         def_layout   config;
         def_layout   module;
@@ -273,9 +278,9 @@ public:
         def_layout   style;
         def_layout   color;
 
-        using def_layouts = std::vector<def_layout>;
+        using usr_layouts = std::vector<usr_layout>;
 
-        def_layouts  users;
+        usr_layouts  users;
     };
 
 private:
@@ -304,11 +309,24 @@ public:
     inline friend void swap(StorageNode & lh, StorageNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
+    inline Storage       & storage()       TBAG_NOEXCEPT { return _storage; }
+    inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
+
+    inline std::string       & root()       TBAG_NOEXCEPT { return _root; }
+    inline std::string const & root() const TBAG_NOEXCEPT { return _root; }
+
     inline Property       & property()       TBAG_NOEXCEPT { return _prop; }
     inline Property const & property() const TBAG_NOEXCEPT { return _prop; }
 
-    inline Storage       & storage()       TBAG_NOEXCEPT { return _storage; }
-    inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
+public:
+    inline void setEnvs(char ** envs) TBAG_NOEXCEPT { _envs = envs; }
+    inline char ** getEnvs() const TBAG_NOEXCEPT { return _envs; }
+
+public:
+    void update();
+    void update(std::string const & root);
+    void update(Property const & prop);
+    void update(std::string const & root, Property const & prop);
 
 public:
     virtual std::string name() const override;
@@ -327,6 +345,7 @@ public:
     static void readElement(Element const & element, std::string const & tag, Property::tmp_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::key_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::lua_layout & layout);
+    static void readElement(Element const & element, Property::usr_layout & layout);
 
 public:
     static void addNewElement(Element & element, std::string const & tag, Property::env_layout const & layout);
@@ -336,6 +355,7 @@ public:
     static void addNewElement(Element & element, std::string const & tag, Property::tmp_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::key_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::lua_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::usr_layout const & layout);
 
 public:
     static std::string getPath(std::string const & root, std::string const & tag, std::string const & text,

@@ -99,7 +99,12 @@ public:
         bool saveFile(std::string const & path, bool compact = false) const
         {
             Document doc;
-            doc.InsertFirstChild(doc.NewElement(name().c_str()));
+            auto * element = doc.NewElement(name().c_str());
+            if (element == nullptr) {
+                return false;
+            }
+            save(*element);
+            doc.InsertFirstChild(element);
             return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_NO_ERROR;
         }
     };
