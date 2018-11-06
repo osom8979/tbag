@@ -7,6 +7,7 @@
 
 #include <libtbag/res/Storage.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -83,7 +84,7 @@ std::vector<std::string> Storage::getFilenames(std::string const & key) const
 {
     std::vector<std::string> result;
     if (asset().exists(key)) {
-        for (auto & cursor : asset().get(key).scanDir()) {
+        for (auto & cursor : asset().get(key).scanNameOnly()) {
             result.push_back(cursor);
         }
     }
@@ -223,14 +224,47 @@ void Storage::removeConfig(std::string const & filename)
 
 void Storage::removeAllConfig()
 {
-    for (auto & filename : getConfigFilenames()) {
-        libtbag::filesystem::Path(filename).remove();
+    for (auto const & filename : getConfigFilenames()) {
+        removeConfig(filename);
     }
+}
+
+void Storage::setModuleExtension(std::string const & extension)
+{
+    _impl->module_extension = extension;
+}
+
+void Storage::setLayoutModule(std::string const & dir, std::string const & extension)
+{
+    setLayoutModule(dir);
+    setModuleExtension(extension);
 }
 
 std::vector<std::string> Storage::getModuleFilenames() const
 {
-    return getFilenames(LAYOUT_MODULE);
+    using namespace libtbag::filesystem;
+    using namespace libtbag::string;
+
+    auto const LOWER_EXTENSION = lower(_impl->module_extension);
+    if (LOWER_EXTENSION.empty()) {
+        return getFilenames(LAYOUT_MODULE);
+    }
+
+    std::vector<std::string> result;
+    for (auto & cursor : getFilenames(LAYOUT_MODULE)) {
+        if (LOWER_EXTENSION == lower(Path(cursor).getExtensionName())) {
+            result.push_back(cursor);
+        }
+    }
+    return result;
+}
+
+Storage::SharedLibrary Storage::getModule(std::string const & filename) const
+{
+    if (asset().exists(LAYOUT_MODULE)) {
+        return SharedLibrary(asset().get(LAYOUT_MODULE) / filename);
+    }
+    return SharedLibrary(nullptr);
 }
 
 } // namespace res

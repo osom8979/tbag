@@ -75,8 +75,10 @@ namespace node {
  *     <!-- Contains simple 'group(filename)'/'key'/'value' information for configuration. -->
  *     <config>dir</config>
  *
- *     <!-- A set of dynamic modules. (e.g. '*.dll') -->
- *     <module>dir</module>
+ *     <!-- A set of dynamic modules. (e.g. '*.dll' files)          -->
+ *     <!-- If 'ext' attribute is exists, File extension filtering. -->
+ *     <!-- If 'ext' attribute is not exists, No filtering.         -->
+ *     <module ext='.so'>dir</module>
  *
  *     <!-- String for localization. -->
  *     <!-- If 'name' attribute is exists, Apply only those files. -->
@@ -192,6 +194,7 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_ROOT       = "root";
     TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE   = "absolute";
     TBAG_CONSTEXPR static char const * const ATT_RAW        = "raw";
+    TBAG_CONSTEXPR static char const * const ATT_EXTENSION  = "ext";
     TBAG_CONSTEXPR static char const * const ATT_NAME       = "name";
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT    = "default";
     TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
@@ -222,6 +225,11 @@ public:
             bool exists = false;
             bool abs    = false;
             bool raw    = false;
+        };
+
+        struct mod_layout : public def_layout
+        {
+            str ext;
         };
 
         struct txt_layout : public def_layout
@@ -256,7 +264,7 @@ public:
 
         env_layout   env;
         def_layout   config;
-        def_layout   module;
+        mod_layout   module;
         txt_layout   text;
         def_layout   image;
         def_layout   drawable;
@@ -340,6 +348,7 @@ public:
 public:
     static void readElement(Element const & element, std::string const & tag, Property::env_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::def_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::mod_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::txt_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::sql_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::tmp_layout & layout);
@@ -350,6 +359,7 @@ public:
 public:
     static void addNewElement(Element & element, std::string const & tag, Property::env_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::def_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::mod_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::txt_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::sql_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::tmp_layout const & layout);

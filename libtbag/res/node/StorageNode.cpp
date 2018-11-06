@@ -269,6 +269,19 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
     }
 }
 
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::mod_layout & layout)
+{
+    if (auto * child = element.FirstChildElement(tag.c_str())) {
+        layout.exists = true;
+        layout.text = text(*child);
+        optAttr(*child, ATT_EXTENSION, layout.ext);
+        optAttr(*child, ATT_ABSOLUTE , layout.abs);
+        optAttr(*child, ATT_RAW      , layout.raw);
+    } else {
+        layout.exists = false;
+    }
+}
+
 void StorageNode::readElement(Element const & element, std::string const & tag, Property::txt_layout & layout)
 {
     if (auto * child = element.FirstChildElement(tag.c_str())) {
@@ -347,6 +360,18 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
             text(child, layout.text);
             setAttr(child, ATT_ABSOLUTE, layout.abs);
             setAttr(child, ATT_RAW     , layout.raw);
+        });
+    }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::mod_layout const & layout)
+{
+    if (layout.exists) {
+        newElement(element, tag.c_str(), [&](Element & child){
+            text(child, layout.text);
+            setAttr(child, ATT_EXTENSION, layout.ext);
+            setAttr(child, ATT_ABSOLUTE , layout.abs);
+            setAttr(child, ATT_RAW      , layout.raw);
         });
     }
 }

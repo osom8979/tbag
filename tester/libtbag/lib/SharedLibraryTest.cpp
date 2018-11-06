@@ -18,8 +18,8 @@ TEST(SharedLibraryTest, Default)
     std::string const FUNC1_NAME   = "tbshare_add";
     std::string const FUNC2_NAME   = "tbshare_add2";
 
-    using Path = filesystem::Path;
-    Path const PATH = Path::getExeDir() / filesystem::getModuleName(LIBRARY_NAME);
+    using namespace libtbag::filesystem;
+    auto const PATH = Path::getExeDir() / getModuleName(LIBRARY_NAME);
 
     SharedLibrary lib;
     ASSERT_TRUE(lib.open(PATH.getNativeString()));

@@ -152,3 +152,29 @@ TEST(StorageTest, Config)
     ASSERT_TRUE(storage.getConfigFilenames().empty());
 }
 
+TEST(StorageTest, Module)
+{
+    tttDir_Automatic();
+    auto const PATH = tttDir_Get();
+
+    using namespace libtbag::filesystem;
+    auto const MODULE_EXTENSION = getModuleSuffix();
+    auto const MODULE_NAME      = getModuleName("tbshare");
+    auto const ORIGINAL_PATH    = Path::getExeDir() / MODULE_NAME;
+    auto const DESTINATION_PATH = tttDir_Get() / MODULE_NAME;
+
+    ASSERT_EQ(Err::E_SUCCESS, copyFile(ORIGINAL_PATH, DESTINATION_PATH));
+    ASSERT_TRUE(DESTINATION_PATH.isRegularFile());
+
+    Storage storage;
+    storage.setLayoutModule(PATH, MODULE_EXTENSION);
+    auto const MODULES = storage.getModuleFilenames();
+    ASSERT_EQ(1, MODULES.size());
+
+    auto lib = storage.getModule(MODULES[0]);
+    ASSERT_TRUE(lib.exists());
+    ASSERT_TRUE(lib.isOpen());
+    ASSERT_EQ(23, lib.call<int>("tbshare_add", 11, 12));
+    lib.reset();
+}
+

@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/res/DynamicAsset.hpp>
 #include <libtbag/string/Environments.hpp>
@@ -45,6 +46,7 @@ public:
     using Environments  = libtbag::string::Environments;
     using Resource      = libtbag::dom::xml::Resource;
     using Path          = libtbag::filesystem::Path;
+    using SharedLibrary = libtbag::lib::SharedLibrary;
 
 public:
     /**
@@ -53,15 +55,13 @@ public:
      * @author zer0
      * @date   2018-11-03
      */
-    struct Impl : private Noncopyable
+    struct Impl
     {
         DynamicAsset  asset;
         Environments  envs;
         std::string   envs_filename;
         Resource      config;
-
-        Impl() { /* EMPTY. */ }
-        ~Impl() { /* EMPTY. */ }
+        std::string   module_extension;
     };
 
 public:
@@ -230,7 +230,12 @@ public:
     void removeAllConfig();
 
 public:
+    void setModuleExtension(std::string const & extension);
+    void setLayoutModule(std::string const & dir, std::string const & extension);
+
     std::vector<std::string> getModuleFilenames() const;
+
+    SharedLibrary getModule(std::string const & filename) const;
 };
 
 } // namespace res
