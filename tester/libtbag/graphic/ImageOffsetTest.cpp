@@ -1,24 +1,25 @@
 /**
- * @file   ImageOffsetDomTest.cpp
- * @brief  ImageOffsetDom class tester.
+ * @file   ImageOffsetTest.cpp
+ * @brief  ImageOffset class tester.
  * @author zer0
  * @date   2018-08-04
+ * @date   2018-11-06 (Rename: ImageOffsetDom -> ImageOffset)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/graphic/ImageOffsetDom.hpp>
+#include <libtbag/graphic/ImageOffset.hpp>
 #include <libtbag/util/TestUtils.hpp>
 
 using namespace libtbag;
 using namespace libtbag::graphic;
 
-TEST(ImageOffsetDomDefault, Coverage)
+TEST(ImageOffsetDefault, Coverage)
 {
-    TEST_DEFAULT_CONSTRUCTOR(ImageOffsetDom, obj);
-    TEST_DEFAULT_ASSIGNMENT(ImageOffsetDom, obj);
+    TEST_DEFAULT_CONSTRUCTOR(ImageOffset, obj);
+    TEST_DEFAULT_ASSIGNMENT(ImageOffset, obj);
 }
 
-struct ImageOffsetDomTest : public testing::Test
+struct ImageOffsetTest : public testing::Test
 {
     TBAG_CONSTEXPR static char const * const TEST_XML =
 R"<xml>(
@@ -31,7 +32,7 @@ R"<xml>(
 </images>
 )<xml>";
 
-    ImageOffsetDom dom;
+    ImageOffset dom;
 
     virtual void SetUp() override
     {
@@ -44,11 +45,11 @@ R"<xml>(
     }
 };
 
-TEST_F(ImageOffsetDomTest, Default)
+TEST_F(ImageOffsetTest, Default)
 {
     ASSERT_EQ(2, dom.size());
 
-    ImageOffsetDom::Item item1;
+    ImageOffset::Item item1;
     ASSERT_TRUE(dom.find("a1", &item1));
     ASSERT_STREQ("a.png", item1.file.c_str());
     ASSERT_EQ(10, item1.x);
@@ -60,7 +61,7 @@ TEST_F(ImageOffsetDomTest, Default)
     ASSERT_EQ( 1, item1.weight);
     ASSERT_TRUE(item1.body.empty());
 
-    ImageOffsetDom::Item item2;
+    ImageOffset::Item item2;
     ASSERT_TRUE(dom.find("b1", &item2));
     ASSERT_STREQ("b.png", item2.file.c_str());
     ASSERT_EQ(50, item2.x);
@@ -73,9 +74,9 @@ TEST_F(ImageOffsetDomTest, Default)
     ASSERT_FALSE(item2.body.empty());
 }
 
-TEST_F(ImageOffsetDomTest, ToXmlString)
+TEST_F(ImageOffsetTest, ToXmlString)
 {
-    auto temp = ImageOffsetDom::readXml(dom.toXmlString());
+    auto temp = ImageOffset::readXml(dom.toXmlString());
     ASSERT_EQ(2, temp.size());
 }
 

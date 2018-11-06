@@ -1,12 +1,13 @@
 /**
- * @file   ImageOffsetDom.hpp
- * @brief  ImageOffsetDom class prototype.
+ * @file   ImageOffset.hpp
+ * @brief  ImageOffset class prototype.
  * @author zer0
  * @date   2018-08-04
+ * @date   2018-11-06 (Rename: ImageOffsetDom -> ImageOffset)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEOFFSETDOM_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEOFFSETDOM_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEOFFSET_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEOFFSET_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -36,12 +37,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace graphic {
 
 /**
- * ImageOffsetDom class prototype.
+ * ImageOffset class prototype.
  *
  * @author zer0
  * @date   2018-08-04
+ * @date   2018-11-06 (Rename: ImageOffsetDom -> ImageOffset)
  */
-class TBAG_API ImageOffsetDom
+class TBAG_API ImageOffset
 {
 public:
     using Document = tinyxml2::XMLDocument;
@@ -94,27 +96,27 @@ public:
     TBAG_ITERATOR_MAP_BYPASS(Items, _items);
 
 public:
-    ImageOffsetDom();
-    explicit ImageOffsetDom(std::string const & path);
-    explicit ImageOffsetDom(std::string const & xml, load_from_memory const & UNUSED_PARAM(v));
-    ImageOffsetDom(ImageOffsetDom const & obj);
-    ImageOffsetDom(ImageOffsetDom && obj);
-    ~ImageOffsetDom();
+    ImageOffset();
+    explicit ImageOffset(std::string const & path);
+    explicit ImageOffset(std::string const & xml, load_from_memory const & UNUSED_PARAM(v));
+    ImageOffset(ImageOffset const & obj);
+    ImageOffset(ImageOffset && obj) TBAG_NOEXCEPT;
+    ~ImageOffset();
 
 public:
-    ImageOffsetDom & operator =(ImageOffsetDom const & obj);
-    ImageOffsetDom & operator =(ImageOffsetDom && obj);
+    ImageOffset & operator =(ImageOffset const & obj);
+    ImageOffset & operator =(ImageOffset && obj) TBAG_NOEXCEPT;
 
 public:
-    void copy(ImageOffsetDom const & obj);
-    void swap(ImageOffsetDom & obj);
+    void copy(ImageOffset const & obj);
+    void swap(ImageOffset & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(ImageOffsetDom & lh, ImageOffsetDom & rh) { lh.swap(rh); }
+    inline friend void swap(ImageOffset & lh, ImageOffset & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
-    inline Items       & atItems()       TBAG_NOEXCEPT { return _items; }
-    inline Items const & atItems() const TBAG_NOEXCEPT { return _items; }
+    inline Items       & items()       TBAG_NOEXCEPT { return _items; }
+    inline Items const & items() const TBAG_NOEXCEPT { return _items; }
 
 public:
     bool find(std::string const & name, Item * result = nullptr) const;
@@ -130,8 +132,8 @@ public:
     bool loadFromFile(std::string const & path);
 
 public:
-    static ImageOffsetDom readFile(std::string const & path);
-    static ImageOffsetDom readXml(std::string const & xml);
+    static ImageOffset readFile(std::string const & path);
+    static ImageOffset readXml(std::string const & xml);
 };
 
 } // namespace graphic
@@ -140,5 +142,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEOFFSETDOM_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEOFFSET_HPP__
 

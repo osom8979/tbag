@@ -1,11 +1,12 @@
 /**
- * @file   ImageOffsetDom.cpp
- * @brief  ImageOffsetDom class implementation.
+ * @file   ImageOffset.cpp
+ * @brief  ImageOffset class implementation.
  * @author zer0
  * @date   2018-08-04
+ * @date   2018-11-06 (Rename: ImageOffsetDom -> ImageOffset)
  */
 
-#include <libtbag/graphic/ImageOffsetDom.hpp>
+#include <libtbag/graphic/ImageOffset.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
@@ -20,68 +21,68 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graphic {
 
-ImageOffsetDom::ImageOffsetDom()
+ImageOffset::ImageOffset()
 {
     // EMPTY.
 }
 
-ImageOffsetDom::ImageOffsetDom(std::string const & path) : ImageOffsetDom()
+ImageOffset::ImageOffset(std::string const & path) : ImageOffset()
 {
     if (!loadFromFile(path)) {
         throw std::bad_alloc();
     }
 }
 
-ImageOffsetDom::ImageOffsetDom(std::string const & xml, load_from_memory const & UNUSED_PARAM(v))
-        : ImageOffsetDom()
+ImageOffset::ImageOffset(std::string const & xml, load_from_memory const & UNUSED_PARAM(v))
+        : ImageOffset()
 {
     if (!loadFromMemory(xml)) {
         throw std::bad_alloc();
     }
 }
 
-ImageOffsetDom::ImageOffsetDom(ImageOffsetDom const & obj) : ImageOffsetDom()
+ImageOffset::ImageOffset(ImageOffset const & obj) : ImageOffset()
 {
     (*this) = obj;
 }
 
-ImageOffsetDom::ImageOffsetDom(ImageOffsetDom && obj) : ImageOffsetDom()
+ImageOffset::ImageOffset(ImageOffset && obj) TBAG_NOEXCEPT : ImageOffset()
 {
     (*this) = std::move(obj);
 }
 
-ImageOffsetDom::~ImageOffsetDom()
+ImageOffset::~ImageOffset()
 {
     // EMPTY.
 }
 
-ImageOffsetDom & ImageOffsetDom::operator =(ImageOffsetDom const & obj)
+ImageOffset & ImageOffset::operator =(ImageOffset const & obj)
 {
     copy(obj);
     return *this;
 }
 
-ImageOffsetDom & ImageOffsetDom::operator =(ImageOffsetDom && obj)
+ImageOffset & ImageOffset::operator =(ImageOffset && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void ImageOffsetDom::copy(ImageOffsetDom const & obj)
+void ImageOffset::copy(ImageOffset const & obj)
 {
     if (this != &obj) {
         _items = _items;
     }
 }
 
-void ImageOffsetDom::swap(ImageOffsetDom & obj)
+void ImageOffset::swap(ImageOffset & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _items.swap(_items);
     }
 }
 
-bool ImageOffsetDom::find(std::string const & name, Item * result) const
+bool ImageOffset::find(std::string const & name, Item * result) const
 {
     auto itr = _items.find(name);
     if (itr == _items.end()) {
@@ -93,7 +94,7 @@ bool ImageOffsetDom::find(std::string const & name, Item * result) const
     return true;
 }
 
-std::string ImageOffsetDom::toXmlString() const
+std::string ImageOffset::toXmlString() const
 {
     Document doc;
     Node * node = doc.InsertFirstChild(doc.NewElement(IMAGES_KEY));
@@ -131,12 +132,12 @@ std::string ImageOffsetDom::toXmlString() const
     }
 }
 
-bool ImageOffsetDom::saveToFile(std::string const & path) const
+bool ImageOffset::saveToFile(std::string const & path) const
 {
     return isSuccess(libtbag::filesystem::writeFile(path, toXmlString()));
 }
 
-bool ImageOffsetDom::loadFromMemory(std::string const & xml)
+bool ImageOffset::loadFromMemory(std::string const & xml)
 {
     using namespace libtbag::dom::xml;
 
@@ -177,7 +178,7 @@ bool ImageOffsetDom::loadFromMemory(std::string const & xml)
     return true;
 }
 
-bool ImageOffsetDom::loadFromFile(std::string const & path)
+bool ImageOffset::loadFromFile(std::string const & path)
 {
     std::string content;
     if (isSuccess(libtbag::filesystem::readFile(path, content))) {
@@ -186,14 +187,14 @@ bool ImageOffsetDom::loadFromFile(std::string const & path)
     return false;
 }
 
-ImageOffsetDom ImageOffsetDom::readFile(std::string const & path)
+ImageOffset ImageOffset::readFile(std::string const & path)
 {
-    return ImageOffsetDom(path);
+    return ImageOffset(path);
 }
 
-ImageOffsetDom ImageOffsetDom::readXml(std::string const & xml)
+ImageOffset ImageOffset::readXml(std::string const & xml)
 {
-    return ImageOffsetDom(xml, ImageOffsetDom::load_from_memory{});
+    return ImageOffset(xml, ImageOffset::load_from_memory{});
 }
 
 } // namespace graphic
