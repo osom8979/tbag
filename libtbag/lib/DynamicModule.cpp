@@ -38,13 +38,14 @@ DynamicModule::DynamicModule() : _open(false), _lib(new uv_lib_t)
 
 DynamicModule::DynamicModule(std::string const & path) : DynamicModule()
 {
-    this->open(path);
+    if (!open(path)) {
+        throw std::bad_alloc();
+    }
 }
 
 DynamicModule::~DynamicModule()
 {
-    this->close();
-
+    close();
     assert(_lib != nullptr);
     delete uv_lib_cast(_lib);
 }

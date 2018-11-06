@@ -42,7 +42,7 @@ private:
 
 public:
     SharedLibrary();
-    SharedLibrary(std::string const & path);
+    explicit SharedLibrary(std::string const & path);
     SharedLibrary(std::nullptr_t) TBAG_NOEXCEPT;
     SharedLibrary(SharedLibrary const & obj) TBAG_NOEXCEPT;
     SharedLibrary(SharedLibrary && obj) TBAG_NOEXCEPT;

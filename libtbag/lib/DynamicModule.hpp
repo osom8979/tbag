@@ -45,7 +45,7 @@ private:
 
 public:
     DynamicModule();
-    DynamicModule(std::string const & path);
+    explicit DynamicModule(std::string const & path);
     ~DynamicModule();
 
 public:
