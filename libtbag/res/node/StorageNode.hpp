@@ -20,6 +20,7 @@
 #include <libtbag/res/Storage.hpp>
 
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -185,18 +186,17 @@ public:
     TBAG_CONSTEXPR static char const * const TAG_LAYOUT    = Storage::LAYOUT_LAYOUT   ;
     TBAG_CONSTEXPR static char const * const TAG_STYLE     = Storage::LAYOUT_STYLE    ;
     TBAG_CONSTEXPR static char const * const TAG_COLOR     = Storage::LAYOUT_COLOR    ;
-    TBAG_CONSTEXPR static char const * const TAG_RLOG      = Storage::LAYOUT_RLOG     ;
     TBAG_CONSTEXPR static char const * const TAG_USER      = Storage::LAYOUT_USER     ;
     // @formatter:on
 
-    TBAG_CONSTEXPR static char const * const ATT_ROOT      = "root";
-    TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE  = "absolute";
-    TBAG_CONSTEXPR static char const * const ATT_RAW       = "raw";
-    TBAG_CONSTEXPR static char const * const ATT_NAME      = "name";
-    TBAG_CONSTEXPR static char const * const ATT_DEFAULT   = "default";
-    TBAG_CONSTEXPR static char const * const ATT_SYSTEM    = "system";
-    TBAG_CONSTEXPR static char const * const ATT_AUTOCLEAR = "autoclear";
-    TBAG_CONSTEXPR static char const * const ATT_DYNASM    = "dynasm";
+    TBAG_CONSTEXPR static char const * const ATT_ROOT       = "root";
+    TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE   = "absolute";
+    TBAG_CONSTEXPR static char const * const ATT_RAW        = "raw";
+    TBAG_CONSTEXPR static char const * const ATT_NAME       = "name";
+    TBAG_CONSTEXPR static char const * const ATT_DEFAULT    = "default";
+    TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
+    TBAG_CONSTEXPR static char const * const ATT_AUTO_CLEAR = "autoclear";
+    TBAG_CONSTEXPR static char const * const ATT_DYNASM     = "dynasm";
 
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
@@ -210,16 +210,18 @@ public:
         {
             str  text;
             str  name;
-            bool def = false;
-            bool sys = false;
-            bool abs = false;
+            bool exists = false;
+            bool def    = false;
+            bool sys    = false;
+            bool abs    = false;
         };
 
         struct def_layout
         {
             str  text;
-            bool abs = false;
-            bool raw = false;
+            bool exists = false;
+            bool abs    = false;
+            bool raw    = false;
         };
 
         struct txt_layout : public def_layout
@@ -234,7 +236,7 @@ public:
 
         struct tmp_layout : public def_layout
         {
-            bool autoclear = false;
+            bool auto_clear = false;
         };
 
         struct key_layout : public txt_layout
@@ -247,7 +249,6 @@ public:
             bool dynasm = false;
         };
 
-        std::string  root;
         env_layout   env;
         def_layout   config;
         def_layout   module;
@@ -271,6 +272,10 @@ public:
         def_layout   layout;
         def_layout   style;
         def_layout   color;
+
+        using def_layouts = std::vector<def_layout>;
+
+        def_layouts  users;
     };
 
 private:
@@ -278,7 +283,8 @@ private:
     Storage _storage;
 
 private:
-    Property _property;
+    std::string _root;
+    Property    _prop;
 
 public:
     StorageNode(char ** envs = nullptr);
@@ -298,19 +304,11 @@ public:
     inline friend void swap(StorageNode & lh, StorageNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
-    inline Property       & property()       TBAG_NOEXCEPT { return _property; }
-    inline Property const & property() const TBAG_NOEXCEPT { return _property; }
+    inline Property       & property()       TBAG_NOEXCEPT { return _prop; }
+    inline Property const & property() const TBAG_NOEXCEPT { return _prop; }
 
     inline Storage       & storage()       TBAG_NOEXCEPT { return _storage; }
     inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
-
-public:
-    std::string getPath(Element const & element, std::string const & tag);
-    std::string getPath(Element const & element, std::string const & tag, Environments const & env);
-
-public:
-    static std::string getPath(Element const & element, std::string const & root, std::string const & tag);
-    static std::string getPath(Element const & element, std::string const & root, std::string const & tag, Environments const & env);
 
 public:
     virtual std::string name() const override;
@@ -320,6 +318,31 @@ public:
 
     virtual void load(Element const & element) override;
     virtual void save(Element & element) const override;
+
+public:
+    static void readElement(Element const & element, std::string const & tag, Property::env_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::def_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::txt_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::sql_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::tmp_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::key_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::lua_layout & layout);
+
+public:
+    static void addNewElement(Element & element, std::string const & tag, Property::env_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::def_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::txt_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::sql_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::tmp_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::key_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::lua_layout const & layout);
+
+public:
+    static std::string getPath(std::string const & root, std::string const & tag, std::string const & text,
+                               Environments const & env, bool abs = false, bool raw = false);
+    static std::string getPath(std::string const & root, std::string const & tag,
+                               Property::def_layout const & layout, Environments const & env);
+    static Storage loadStorage(std::string const & root, Property const & prop, char ** envs = nullptr);
 };
 
 } // namespace node

@@ -86,6 +86,18 @@ struct TBAG_API XmlHelper
         }
         return child;
     }
+
+    template <typename Predicated>
+    static std::size_t foreachElement(Element const & element, std::string const & tag, Predicated predicated)
+    {
+        std::size_t count = 0;
+        Element const * cursor = element.FirstChildElement(tag.c_str());
+        while (cursor != nullptr) {
+            predicated(*cursor);
+            cursor = cursor->NextSiblingElement();
+        }
+        return count;
+    }
 };
 
 } // namespace xml

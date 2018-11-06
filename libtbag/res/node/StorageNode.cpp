@@ -55,7 +55,10 @@ StorageNode & StorageNode::operator =(StorageNode && obj) TBAG_NOEXCEPT
 void StorageNode::copy(StorageNode const & obj)
 {
     if (this != &obj) {
-        _envs = obj._envs;
+        _envs    = obj._envs;
+        _storage = obj.storage();
+        _root    = obj._root;
+        _prop    = obj._prop;
     }
 }
 
@@ -63,6 +66,9 @@ void StorageNode::swap(StorageNode & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         std::swap(_envs, obj._envs);
+        _storage.swap(obj._storage);
+        _root.swap(obj._root);
+        std::swap(_prop, obj._prop);
     }
 }
 
@@ -73,191 +79,362 @@ std::string StorageNode::name() const
 
 void StorageNode::setup()
 {
+    Property prop;
+
+    // @formatter:off
+    prop.env      .text = TAG_ENV      ;
+    prop.config   .text = TAG_CONFIG   ;
+    prop.module   .text = TAG_MODULE   ;
+    prop.text     .text = TAG_TEXT     ;
+    prop.image    .text = TAG_IMAGE    ;
+    prop.drawable .text = TAG_DRAWABLE ;
+    prop.animation.text = TAG_ANIMATION;
+    prop.sprite   .text = TAG_SPRITE   ;
+    prop.lmdb     .text = TAG_LMDB     ;
+    prop.sqlite   .text = TAG_SQLITE   ;
+    prop.temp     .text = TAG_TEMP     ;
+    prop.keystore .text = TAG_KEYSTORE ;
+    prop.lua      .text = TAG_LUA      ;
+    prop.raw      .text = TAG_RAW      ;
+    prop.bagex    .text = TAG_BAGEX    ;
+    prop.exe      .text = TAG_EXE      ;
+    prop.font     .text = TAG_FONT     ;
+    prop.music    .text = TAG_MUSIC    ;
+    prop.sound    .text = TAG_SOUND    ;
+    prop.shader   .text = TAG_SHADER   ;
+    prop.layout   .text = TAG_LAYOUT   ;
+    prop.style    .text = TAG_STYLE    ;
+    prop.color    .text = TAG_COLOR    ;
+    // @formatter:on
+
+    // @formatter:off
+    prop.env      .exists = true;
+    prop.config   .exists = true;
+    prop.module   .exists = true;
+    prop.text     .exists = true;
+    prop.image    .exists = true;
+    prop.drawable .exists = true;
+    prop.animation.exists = true;
+    prop.sprite   .exists = true;
+    prop.lmdb     .exists = true;
+    prop.sqlite   .exists = true;
+    prop.temp     .exists = true;
+    prop.keystore .exists = true;
+    prop.lua      .exists = true;
+    prop.raw      .exists = true;
+    prop.bagex    .exists = true;
+    prop.exe      .exists = true;
+    prop.font     .exists = true;
+    prop.music    .exists = true;
+    prop.sound    .exists = true;
+    prop.shader   .exists = true;
+    prop.layout   .exists = true;
+    prop.style    .exists = true;
+    prop.color    .exists = true;
+    // @formatter:on
+
+    _root = libtbag::filesystem::Path::getWorkDir();
+    _prop = prop;
+    _storage = loadStorage(_root, _prop, _envs);
 }
 
 void StorageNode::teardown()
 {
+    _storage.clear();
+    _root.clear();
+    _prop = Property{};
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & tag)
+void StorageNode::load(Element const & element)
 {
-    return getPath(element, _property.root, tag, Environments());
+    optAttr(element, ATT_ROOT, _root);
+
+    // @formatter:off
+    readElement(element, TAG_ENV      , _prop.env);
+    readElement(element, TAG_CONFIG   , _prop.config);
+    readElement(element, TAG_MODULE   , _prop.module);
+    readElement(element, TAG_TEXT     , _prop.text);
+    readElement(element, TAG_IMAGE    , _prop.image);
+    readElement(element, TAG_DRAWABLE , _prop.drawable);
+    readElement(element, TAG_ANIMATION, _prop.animation);
+    readElement(element, TAG_SPRITE   , _prop.sprite);
+    readElement(element, TAG_LMDB     , _prop.lmdb);
+    readElement(element, TAG_SQLITE   , _prop.sqlite);
+    readElement(element, TAG_TEMP     , _prop.temp);
+    readElement(element, TAG_KEYSTORE , _prop.keystore);
+    readElement(element, TAG_LUA      , _prop.lua);
+    readElement(element, TAG_RAW      , _prop.raw);
+    readElement(element, TAG_BAGEX    , _prop.bagex);
+    readElement(element, TAG_EXE      , _prop.exe);
+    readElement(element, TAG_FONT     , _prop.font);
+    readElement(element, TAG_MUSIC    , _prop.music);
+    readElement(element, TAG_SOUND    , _prop.sound);
+    readElement(element, TAG_SHADER   , _prop.shader);
+    readElement(element, TAG_LAYOUT   , _prop.layout);
+    readElement(element, TAG_STYLE    , _prop.style);
+    readElement(element, TAG_COLOR    , _prop.color);
+    // @formatter:on
+
+    foreachElement(element, TAG_USER, [&](Element const & node){
+        Property::def_layout user;
+        readElement(node, TAG_USER, user);
+        _prop.users.push_back(user);
+    });
+
+    _storage = loadStorage(_root, _prop, _envs);
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & tag, Environments const & env)
+void StorageNode::save(Element & element) const
 {
-    return getPath(element, _property.root, tag, env);
+    setAttr(element, ATT_ROOT, _root);
+
+    // @formatter:off
+    addNewElement(element, TAG_ENV      , _prop.env);
+    addNewElement(element, TAG_CONFIG   , _prop.config);
+    addNewElement(element, TAG_MODULE   , _prop.module);
+    addNewElement(element, TAG_TEXT     , _prop.text);
+    addNewElement(element, TAG_IMAGE    , _prop.image);
+    addNewElement(element, TAG_DRAWABLE , _prop.drawable);
+    addNewElement(element, TAG_ANIMATION, _prop.animation);
+    addNewElement(element, TAG_SPRITE   , _prop.sprite);
+    addNewElement(element, TAG_LMDB     , _prop.lmdb);
+    addNewElement(element, TAG_SQLITE   , _prop.sqlite);
+    addNewElement(element, TAG_TEMP     , _prop.temp);
+    addNewElement(element, TAG_KEYSTORE , _prop.keystore);
+    addNewElement(element, TAG_LUA      , _prop.lua);
+    addNewElement(element, TAG_RAW      , _prop.raw);
+    addNewElement(element, TAG_BAGEX    , _prop.bagex);
+    addNewElement(element, TAG_EXE      , _prop.exe);
+    addNewElement(element, TAG_FONT     , _prop.font);
+    addNewElement(element, TAG_MUSIC    , _prop.music);
+    addNewElement(element, TAG_SOUND    , _prop.sound);
+    addNewElement(element, TAG_SHADER   , _prop.shader);
+    addNewElement(element, TAG_LAYOUT   , _prop.layout);
+    addNewElement(element, TAG_STYLE    , _prop.style);
+    addNewElement(element, TAG_COLOR    , _prop.color);
+    // @formatter:on
+
+    for (auto & user : _prop.users) {
+        addNewElement(element, TAG_USER, user);
+    }
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & root, std::string const & tag)
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::env_layout & layout)
 {
-    return getPath(element, root, tag, Environments());
+    if (auto * child = element.FirstChildElement(tag.c_str())) {
+        layout.exists = true;
+        layout.text = text(*child);
+        optAttr(*child, ATT_NAME    , layout.name);
+        optAttr(*child, ATT_DEFAULT , layout.def);
+        optAttr(*child, ATT_SYSTEM  , layout.sys);
+        optAttr(*child, ATT_ABSOLUTE, layout.abs);
+    } else {
+        layout.exists = false;
+    }
 }
 
-std::string StorageNode::getPath(Element const & element, std::string const & root, std::string const & tag, Environments const & env)
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::def_layout & layout)
 {
-    bool raw = false;
-    optAttr(element, ATT_RAW, raw, false);
+    if (auto * child = element.FirstChildElement(tag.c_str())) {
+        layout.exists = true;
+        layout.text = text(*child);
+        optAttr(*child, ATT_ABSOLUTE, layout.abs);
+        optAttr(*child, ATT_RAW     , layout.raw);
+    } else {
+        layout.exists = false;
+    }
+}
 
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::txt_layout & layout)
+{
+    if (auto * child = element.FirstChildElement(tag.c_str())) {
+        layout.exists = true;
+        layout.text = text(*child);
+        optAttr(*child, ATT_NAME    , layout.name);
+        optAttr(*child, ATT_ABSOLUTE, layout.abs);
+        optAttr(*child, ATT_RAW     , layout.raw);
+    } else {
+        layout.exists = false;
+    }
+}
+
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::sql_layout & layout)
+{
+    readElement(element, tag, (Property::txt_layout &)layout);
+}
+
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::tmp_layout & layout)
+{
+    if (auto * child = element.FirstChildElement(tag.c_str())) {
+        layout.exists = true;
+        layout.text = text(*child);
+        optAttr(*child, ATT_AUTO_CLEAR, layout.auto_clear);
+        optAttr(*child, ATT_ABSOLUTE  , layout.abs);
+        optAttr(*child, ATT_RAW       , layout.raw);
+    } else {
+        layout.exists = false;
+    }
+}
+
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::key_layout & layout)
+{
+    readElement(element, tag, (Property::txt_layout &)layout);
+}
+
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::lua_layout & layout)
+{
+    if (auto * child = element.FirstChildElement(tag.c_str())) {
+        layout.exists = true;
+        layout.text = text(*child);
+        optAttr(*child, ATT_DYNASM  , layout.dynasm);
+        optAttr(*child, ATT_ABSOLUTE, layout.abs);
+        optAttr(*child, ATT_RAW     , layout.raw);
+    } else {
+        layout.exists = false;
+    }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::env_layout const & layout)
+{
+    if (layout.exists) {
+        newElement(element, tag.c_str(), [&](Element & child){
+            text(child, layout.text);
+            setAttr(child, ATT_NAME    , layout.name);
+            setAttr(child, ATT_DEFAULT , layout.def);
+            setAttr(child, ATT_SYSTEM  , layout.sys);
+            setAttr(child, ATT_ABSOLUTE, layout.abs);
+        });
+    }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::def_layout const & layout)
+{
+    if (layout.exists) {
+        newElement(element, tag.c_str(), [&](Element & child){
+            text(child, layout.text);
+            setAttr(child, ATT_ABSOLUTE, layout.abs);
+            setAttr(child, ATT_RAW     , layout.raw);
+        });
+    }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::txt_layout const & layout)
+{
+    if (layout.exists) {
+        newElement(element, tag.c_str(), [&](Element & child){
+            text(child, layout.text);
+            setAttr(child, ATT_NAME    , layout.name);
+            setAttr(child, ATT_ABSOLUTE, layout.abs);
+            setAttr(child, ATT_RAW     , layout.raw);
+        });
+    }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::sql_layout const & layout)
+{
+    addNewElement(element, tag, (Property::txt_layout const &)(layout));
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::tmp_layout const & layout)
+{
+    if (layout.exists) {
+        newElement(element, tag.c_str(), [&](Element & child){
+            text(child, layout.text);
+            setAttr(child, ATT_AUTO_CLEAR, layout.auto_clear);
+            setAttr(child, ATT_ABSOLUTE  , layout.abs);
+            setAttr(child, ATT_RAW       , layout.raw);
+        });
+    }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::key_layout const & layout)
+{
+    addNewElement(element, tag, (Property::txt_layout const &)(layout));
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::lua_layout const & layout)
+{
+    if (layout.exists) {
+        newElement(element, tag.c_str(), [&](Element & child){
+            text(child, layout.text);
+            setAttr(child, ATT_DYNASM  , layout.dynasm);
+            setAttr(child, ATT_ABSOLUTE, layout.abs);
+            setAttr(child, ATT_RAW     , layout.raw);
+        });
+    }
+}
+
+std::string StorageNode::getPath(std::string const & root, std::string const & tag, std::string const & text,
+                                 Environments const & env, bool abs, bool raw)
+{
     std::string path;
     if (raw) {
-        path = text(element);
+        path = text;
     } else {
-        path = env.convert(text(element));
+        path = env.convert(text);
     }
 
     if (path.empty()) {
         path = tag;
     }
 
-    bool absolute = false;
-    optAttr(element, ATT_ABSOLUTE, absolute, false);
-
-    if (absolute) {
+    if (abs) {
         return path;
     }
 
-    assert(!absolute);
-    using namespace libtbag::filesystem;
+    assert(!abs);
     if (root.empty()) {
-        return Path::getWorkDir() / path;
+        return libtbag::filesystem::Path::getWorkDir() / path;
     }
-    return Path(root) / path;
+    return libtbag::filesystem::Path(root) / path;
 }
 
-void StorageNode::load(Element const & element)
+std::string StorageNode::getPath(std::string const & root, std::string const & tag,
+                                 Property::def_layout const & layout, Environments const & env)
 {
-    using namespace libtbag::filesystem;
-    using namespace libtbag::string;
+    return getPath(root, tag, layout.text, env, layout.abs, layout.raw);
+}
 
-    _storage.clear();
+StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property const & prop, char ** envs)
+{
+    auto const DEFAULT_ENVS = Environments::createDefaultEnvironments();
+    Storage storage;
 
-    if (isSuccess(optAttr(element, ATT_ROOT, _property.root, Path::getWorkDir().toString()))) {
-        _property.root = Environments::createDefaultEnvironments().convert(_property.root);
+    std::string updated_root;
+    if (root.empty()) {
+        updated_root = libtbag::filesystem::Path::getWorkDir();
+    } else {
+        updated_root = DEFAULT_ENVS.convert(root);
     }
 
-    if (auto * env = element.FirstChildElement(TAG_ENV)) {
-        _storage.setLayoutEnv(getPath(*env, _property.root, TAG_ENV));
+    if (prop.env.exists) {
+        storage.setLayoutEnv(getPath(updated_root, TAG_ENV, prop.env.text, DEFAULT_ENVS, prop.env.abs));
 
-        std::string name;
-        optAttr(*env, ATT_NAME, name);
-        if (!name.empty()) {
-            _storage.setEnvFilename(name);
-            _storage.readEnv();
+        if (!prop.env.name.empty()) {
+            storage.setEnvFilename(prop.env.name);
+            storage.readEnv();
         }
 
-        bool default_flag;
-        optAttr(*env, ATT_DEFAULT, default_flag, false);
-        if (default_flag) {
-            _storage.readEnvDefault();
+        if (prop.env.def) {
+            storage.readEnvDefault();
         }
 
-        bool system_flag;
-        optAttr(*env, ATT_SYSTEM, system_flag, false);
-        if (system_flag && _envs != nullptr) {
-            _storage.readEnvParams(_envs);
+        if (prop.env.sys && envs != nullptr) {
+            storage.readEnvParams(envs);
         }
     } else {
-        _storage.readEnvDefault();
+        storage.readEnvDefault();
     }
 
     // -----------------------------------------
-    auto const & ENVIRONMENTS = _storage.envs();
+    auto const & ENVIRONMENTS = storage.envs();
     // -----------------------------------------
 
-    if (auto * config = element.FirstChildElement(TAG_CONFIG)) {
-        _storage.setLayoutConfig(getPath(*config, _property.root, ENVIRONMENTS));
+    if (prop.config.exists) {
+        storage.setLayoutConfig(getPath(updated_root, TAG_CONFIG, prop.config.text, ENVIRONMENTS, prop.config.abs, prop.config.raw));
     }
 
-    /*
-     *     <!-- A set of dynamic modules. (e.g. '*.dll') -->
-     *     <module absolute='false'>dir</module>
-     *
-     *     <!-- String for localization. -->
-     *     <!-- If 'default' attribute is exists, Apply only those files. (e.g. 'en' -> 'en.xml') -->
-     *     <text default='en' absolute='false'>dir</text>
-     *
-     *     <!-- PNG/JPG/BMP image storage. -->
-     *     <image absolute='false'>dir</image>
-     *
-     *     <!-- Obtain individual images referring to <image>. -->
-     *     <drawable absolute='false'>dir</drawable>
-     *
-     *     <!-- A set of animation definition files. -->
-     *     <animation absolute='false'>dir</animation>
-     *
-     *     <!-- A set of sprite definition files. -->
-     *     <sprite absolute='false'>dir</sprite>
-     *
-     *     <!-- Single LMDB storage. -->
-     *     <lmdb absolute='false'>dir</lmdb>
-     *
-     *     <!-- sqlite database storages. -->
-     *     <!-- If 'set' attribute is exists, Apply only those files. -->
-     *     <sqlite set='file.sqlite' absolute='false'>dir</sqlite>
-     *
-     *     <!-- Temporary directory. -->
-     *     <!-- If 'autoclear' attribute is 'true', All files are removed when the object is deleted. -->
-     *     <temp autoclear='true' absolute='false'>dir</sqlite>
-     *
-     *     <!-- The file to which the encryption applies. A password is required. -->
-     *     <!-- If 'set' attribute is exists, Apply only those files.             -->
-     *     <keystore set='file.key' absolute='false'>dir</keystore>
-     *
-     *     <!-- Directory containing the lua script package. -->
-     *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
-     *     <lua dynasm='true' absolute='false'>dir</lua>
-     *
-     *     <!-- A set of data from which raw buffers can be obtained. -->
-     *     <raw absolute='false'>dir</raw>
-     *
-     *     <!-- BagEx 'key(filename)'/'value(BagEx)' serialization. -->
-     *     <bagex absolute='false'>dir</bagex>
-     *
-     *     <!-- Executable/Libraries files. -->
-     *     <exe absolute='false'>dir</exe>
-     *
-     *     <!-- Font files. -->
-     *     <font absolute='false'>dir</font>
-     *
-     *     <!-- Music files. -->
-     *     <music absolute='false'>dir</music>
-     *
-     *     <!-- Sound (effect) files. -->
-     *     <sound absolute='false'>dir</sound>
-     *
-     *     <!-- OpenGL Shader files. -->
-     *     <shader absolute='false'>dir</shader>
-     *
-     *     <!-- Layout(Widgets) files. -->
-     *     <layout absolute='false'>dir</layout>
-     *
-     *     <!-- Style/Theme files. -->
-     *     <style absolute='false'>dir</style>
-     *
-     *     <!-- List color names and values. -->
-     *     <color absolute='false'>dir</color>
-     *
-     *     <!-- Log files. -->
-     *     <!-- If 'name' attribute is exists, A rotation-logger is created. -->
-     *     <rlog name='logger_name' absolute='false'>dir</rlog>
-     *
-     *     <!-- Specify the Layout name and path to hold the data. -->
-     *     <user name='name1' absolute='true' raw='true'>dir1</user>
-     *     <user name='name2' absolute='false'>dir2</user>
-     *     <user name='name3'>dir3</layout>
-     *     <!-- ... -->
-     */
-}
-
-void StorageNode::save(Element & element) const
-{
-    setAttr(element, ATT_ROOT, _property.root);
-    newElement(element, TAG_ENV, [&](Element & child){
-        //setAttr(child, ATT_DEFAULT, );
-        //setAttr(child, ATT_SYSTEM, );
-        //setAttr(child, ATT_ABSOLUTE, );
-    });
+    return storage;
 }
 
 } // namespace node
