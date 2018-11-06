@@ -178,3 +178,36 @@ TEST(StorageTest, Module)
     lib.reset();
 }
 
+TEST(StorageTest, Text)
+{
+    tttDir_Automatic();
+    auto const PATH = tttDir_Get();
+
+    std::string const EN_NAME = "en";
+    std::string const KO_NAME = "ko";
+
+    std::string const KEY = "test";
+    std::string const VAL_EN = "val_en";
+    std::string const VAL_KO = "val_ko";
+
+    Storage storage;
+    storage.setLayoutText(PATH, EN_NAME);
+
+    ASSERT_TRUE(storage.getTextFilenames().empty());
+    ASSERT_TRUE(PATH.scanDir().empty());
+
+    storage.setText(EN_NAME, KEY, VAL_EN);
+    storage.setText(KO_NAME, KEY, VAL_KO);
+    ASSERT_TRUE(storage.saveText());
+    ASSERT_TRUE((PATH / EN_NAME).isRegularFile());
+    ASSERT_TRUE((PATH / KO_NAME).isRegularFile());
+    ASSERT_EQ(2, PATH.scanDir().size());
+
+    Storage storage2;
+    storage2.setLayoutText(PATH, EN_NAME);
+    ASSERT_TRUE(storage2.loadText());
+    ASSERT_EQ(VAL_EN, storage2.getText(KEY));
+    ASSERT_EQ(VAL_EN, storage2.getText(EN_NAME, KEY));
+    ASSERT_EQ(VAL_KO, storage2.getText(KO_NAME, KEY));
+}
+

@@ -52,7 +52,7 @@ TEST(GetTextTest, Read)
 
     GetText text;
     ASSERT_TRUE(text.empty());
-    ASSERT_TRUE(text.read(PATH));
+    ASSERT_TRUE(text.load(PATH));
     ASSERT_FALSE(text.empty());
     ASSERT_EQ(2, text.size());
     ASSERT_TRUE(text.getLanguage().empty());
@@ -95,7 +95,7 @@ TEST(GetTextTest, Save)
     ASSERT_TRUE(text.save(PATH));
 
     GetText text2;
-    ASSERT_TRUE(text2.read(PATH));
+    ASSERT_TRUE(text2.load(PATH));
     ASSERT_FALSE(text2.empty());
     ASSERT_EQ(2, text2.size());
     ASSERT_EQ(VAL_EN, text.get(EN_NAME, KEY));

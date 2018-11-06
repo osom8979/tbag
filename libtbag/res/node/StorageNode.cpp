@@ -521,9 +521,12 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     if (prop.module.exists) {
         storage.setModuleExtension(prop.module.ext);
     }
+    if (prop.text.exists) {
+        storage.setTextLanguage(prop.text.name);
+        storage.loadText();
+    }
 
     // TODO LIST
-    // text;
     // image;
     // drawable;
     // animation;

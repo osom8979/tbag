@@ -122,7 +122,7 @@ std::vector<std::string> GetText::getLanguages() const
     return result;
 }
 
-bool GetText::read(std::string const & dir)
+bool GetText::load(std::string const & dir, bool auto_update)
 {
     assert(_impl != nullptr);
     auto const ROOT_DIR = libtbag::filesystem::Path(dir);
@@ -131,6 +131,9 @@ bool GetText::read(std::string const & dir)
     }
     for (auto const & cursor : ROOT_DIR.scanNameOnly()) {
         _impl->map.insert(std::make_pair(cursor, Resource::createFromXmlFile(ROOT_DIR / cursor, ROOT_TAG, PROP_TAG, NAME_ATT)));
+    }
+    if (auto_update && !_impl->language.empty()) {
+        updateCache();
     }
     return true;
 }

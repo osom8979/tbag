@@ -22,6 +22,7 @@
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/lib/SharedLibrary.hpp>
+#include <libtbag/res/GetText.hpp>
 
 #include <string>
 #include <vector>
@@ -47,6 +48,7 @@ public:
     using Resource      = libtbag::dom::xml::Resource;
     using Path          = libtbag::filesystem::Path;
     using SharedLibrary = libtbag::lib::SharedLibrary;
+    using GetText       = libtbag::res::GetText;
 
 public:
     /**
@@ -62,6 +64,7 @@ public:
         std::string   envs_filename;
         Resource      config;
         std::string   module_extension;
+        GetText       text;
     };
 
 public:
@@ -164,7 +167,6 @@ public:
     TBAG_CONSTEXPR static char const * const LAYOUT_LAYOUT    = "layout";
     TBAG_CONSTEXPR static char const * const LAYOUT_STYLE     = "style";
     TBAG_CONSTEXPR static char const * const LAYOUT_COLOR     = "color";
-    TBAG_CONSTEXPR static char const * const LAYOUT_RLOG      = "rlog";
     TBAG_CONSTEXPR static char const * const LAYOUT_USER      = "user";
     // @formatter:on
 
@@ -193,8 +195,6 @@ public:
     void setLayoutLayout   (std::string const & dir) { asset().set(LAYOUT_LAYOUT   , Path(dir)); }
     void setLayoutStyle    (std::string const & dir) { asset().set(LAYOUT_STYLE    , Path(dir)); }
     void setLayoutColor    (std::string const & dir) { asset().set(LAYOUT_COLOR    , Path(dir)); }
-    void setLayoutRlog     (std::string const & dir) { asset().set(LAYOUT_RLOG     , Path(dir)); }
-    void setLayoutUser     (std::string const & dir) { asset().set(LAYOUT_USER     , Path(dir)); }
     // @formatter:on
 
 public:
@@ -236,6 +236,21 @@ public:
     std::vector<std::string> getModuleFilenames() const;
 
     SharedLibrary getModule(std::string const & filename) const;
+
+public:
+    void setTextLanguage(std::string const & language);
+    void setLayoutText(std::string const & dir, std::string const & language);
+
+    std::vector<std::string> getTextFilenames() const;
+
+    std::string getText(std::string const & language, std::string const & name) const;
+    std::string getText(std::string const & name) const;
+
+    void setText(std::string const & language, std::string const & name, std::string const & text);
+    void setText(std::string const & name, std::string const & text);
+
+    bool loadText();
+    bool saveText();
 };
 
 } // namespace res

@@ -267,6 +267,52 @@ Storage::SharedLibrary Storage::getModule(std::string const & filename) const
     return SharedLibrary(nullptr);
 }
 
+void Storage::setTextLanguage(std::string const & language)
+{
+    _impl->text.setLanguage(language);
+}
+
+void Storage::setLayoutText(std::string const & dir, std::string const & language)
+{
+    setLayoutText(dir);
+    setTextLanguage(language);
+}
+
+std::vector<std::string> Storage::getTextFilenames() const
+{
+    return getFilenames(LAYOUT_TEXT);
+}
+
+std::string Storage::getText(std::string const & language, std::string const & name) const
+{
+    return _impl->text.get(language, name);
+}
+
+std::string Storage::getText(std::string const & name) const
+{
+    return _impl->text.get(name);
+}
+
+void Storage::setText(std::string const & language, std::string const & name, std::string const & text)
+{
+    _impl->text.set(language, name, text);
+}
+
+void Storage::setText(std::string const & name, std::string const & text)
+{
+    _impl->text.set(name, text);
+}
+
+bool Storage::loadText()
+{
+    return _impl->text.load(asset().get(LAYOUT_TEXT));
+}
+
+bool Storage::saveText()
+{
+    return _impl->text.save(asset().get(LAYOUT_TEXT));
+}
+
 } // namespace res
 
 // --------------------

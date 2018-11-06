@@ -137,7 +137,7 @@ public:
     std::vector<std::string> getLanguages() const;
 
 public:
-    bool read(std::string const & dir);
+    bool load(std::string const & dir, bool auto_update = true);
     bool save(std::string const & dir) const;
 
 public:
