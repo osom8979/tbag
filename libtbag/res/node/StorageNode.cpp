@@ -489,13 +489,60 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.readEnvDefault();
     }
 
-    // -----------------------------------------
+    // ----------------------------------------
     auto const & ENVIRONMENTS = storage.envs();
-    // -----------------------------------------
+    // ----------------------------------------
 
-    if (prop.config.exists) {
-        storage.setLayoutConfig(getPath(updated_root, TAG_CONFIG, prop.config.text, ENVIRONMENTS, prop.config.abs, prop.config.raw));
+    // @formatter:off
+    if (prop.config   .exists) { storage.setLayoutConfig   (getPath(updated_root, TAG_CONFIG   , prop.config   , ENVIRONMENTS)); }
+    if (prop.module   .exists) { storage.setLayoutModule   (getPath(updated_root, TAG_MODULE   , prop.module   , ENVIRONMENTS)); }
+    if (prop.text     .exists) { storage.setLayoutText     (getPath(updated_root, TAG_TEXT     , prop.text     , ENVIRONMENTS)); }
+    if (prop.image    .exists) { storage.setLayoutImage    (getPath(updated_root, TAG_IMAGE    , prop.image    , ENVIRONMENTS)); }
+    if (prop.drawable .exists) { storage.setLayoutDrawable (getPath(updated_root, TAG_DRAWABLE , prop.drawable , ENVIRONMENTS)); }
+    if (prop.animation.exists) { storage.setLayoutAnimation(getPath(updated_root, TAG_ANIMATION, prop.animation, ENVIRONMENTS)); }
+    if (prop.sprite   .exists) { storage.setLayoutSprite   (getPath(updated_root, TAG_SPRITE   , prop.sprite   , ENVIRONMENTS)); }
+    if (prop.lmdb     .exists) { storage.setLayoutLmdb     (getPath(updated_root, TAG_LMDB     , prop.lmdb     , ENVIRONMENTS)); }
+    if (prop.sqlite   .exists) { storage.setLayoutSqlite   (getPath(updated_root, TAG_SQLITE   , prop.sqlite   , ENVIRONMENTS)); }
+    if (prop.temp     .exists) { storage.setLayoutTemp     (getPath(updated_root, TAG_TEMP     , prop.temp     , ENVIRONMENTS)); }
+    if (prop.keystore .exists) { storage.setLayoutKeystore (getPath(updated_root, TAG_KEYSTORE , prop.keystore , ENVIRONMENTS)); }
+    if (prop.lua      .exists) { storage.setLayoutLua      (getPath(updated_root, TAG_LUA      , prop.lua      , ENVIRONMENTS)); }
+    if (prop.raw      .exists) { storage.setLayoutRaw      (getPath(updated_root, TAG_RAW      , prop.raw      , ENVIRONMENTS)); }
+    if (prop.bagex    .exists) { storage.setLayoutBagex    (getPath(updated_root, TAG_BAGEX    , prop.bagex    , ENVIRONMENTS)); }
+    if (prop.exe      .exists) { storage.setLayoutExe      (getPath(updated_root, TAG_EXE      , prop.exe      , ENVIRONMENTS)); }
+    if (prop.font     .exists) { storage.setLayoutFont     (getPath(updated_root, TAG_FONT     , prop.font     , ENVIRONMENTS)); }
+    if (prop.music    .exists) { storage.setLayoutMusic    (getPath(updated_root, TAG_MUSIC    , prop.music    , ENVIRONMENTS)); }
+    if (prop.sound    .exists) { storage.setLayoutSound    (getPath(updated_root, TAG_SOUND    , prop.sound    , ENVIRONMENTS)); }
+    if (prop.shader   .exists) { storage.setLayoutShader   (getPath(updated_root, TAG_SHADER   , prop.shader   , ENVIRONMENTS)); }
+    if (prop.layout   .exists) { storage.setLayoutLayout   (getPath(updated_root, TAG_LAYOUT   , prop.layout   , ENVIRONMENTS)); }
+    if (prop.style    .exists) { storage.setLayoutStyle    (getPath(updated_root, TAG_STYLE    , prop.style    , ENVIRONMENTS)); }
+    if (prop.color    .exists) { storage.setLayoutColor    (getPath(updated_root, TAG_COLOR    , prop.color    , ENVIRONMENTS)); }
+    // @formatter:on
+
+    if (prop.module.exists) {
+        storage.setModuleExtension(prop.module.ext);
     }
+
+    // TODO LIST
+    // text;
+    // image;
+    // drawable;
+    // animation;
+    // sprite;
+    // lmdb;
+    // sqlite;
+    // temp;
+    // keystore;
+    // lua;
+    // raw;
+    // bagex;
+    // exe;
+    // font;
+    // music;
+    // sound;
+    // shader;
+    // layout;
+    // style;
+    // color;
 
     return storage;
 }
