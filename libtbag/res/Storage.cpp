@@ -313,6 +313,21 @@ bool Storage::saveText()
     return _impl->text.save(asset().get(LAYOUT_TEXT));
 }
 
+std::vector<std::string> Storage::getImageFilenames() const
+{
+    return getFilenames(LAYOUT_IMAGE);
+}
+
+bool Storage::loadImage(std::string const & filename, Image & image)
+{
+    return libtbag::graphic::readImage(asset().get(LAYOUT_IMAGE) / filename, image) == Err::E_SUCCESS;
+}
+
+bool Storage::saveImage(std::string const & filename, Image const & image)
+{
+    return libtbag::graphic::writeImage(asset().get(LAYOUT_IMAGE) / filename, image) == Err::E_SUCCESS;
+}
+
 } // namespace res
 
 // --------------------

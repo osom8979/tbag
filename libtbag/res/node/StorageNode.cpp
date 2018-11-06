@@ -526,26 +526,25 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.loadText();
     }
 
-    // TODO LIST
-    // image;
-    // drawable;
-    // animation;
-    // sprite;
-    // lmdb;
-    // sqlite;
-    // temp;
-    // keystore;
-    // lua;
-    // raw;
-    // bagex;
-    // exe;
-    // font;
-    // music;
-    // sound;
-    // shader;
-    // layout;
-    // style;
-    // color;
+    // drawable
+    // animation
+    // sprite
+
+    // lmdb
+    // sqlite
+    // temp
+    // keystore
+    // lua
+    // raw
+    // bagex
+    // exe
+    // font
+    // music
+    // sound
+    // shader
+    // layout
+    // style
+    // color
 
     return storage;
 }

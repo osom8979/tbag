@@ -23,6 +23,8 @@
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/lib/SharedLibrary.hpp>
 #include <libtbag/res/GetText.hpp>
+#include <libtbag/graphic/Image.hpp>
+#include <libtbag/graphic/ImageOffset.hpp>
 
 #include <string>
 #include <vector>
@@ -49,6 +51,8 @@ public:
     using Path          = libtbag::filesystem::Path;
     using SharedLibrary = libtbag::lib::SharedLibrary;
     using GetText       = libtbag::res::GetText;
+    using Image         = libtbag::graphic::Image;
+    using ImageOffset   = libtbag::graphic::ImageOffset;
 
 public:
     /**
@@ -251,6 +255,12 @@ public:
 
     bool loadText();
     bool saveText();
+
+public:
+    std::vector<std::string> getImageFilenames() const;
+
+    bool loadImage(std::string const & filename, Image & image);
+    bool saveImage(std::string const & filename, Image const & image);
 };
 
 } // namespace res

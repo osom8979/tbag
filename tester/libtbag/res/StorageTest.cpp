@@ -160,10 +160,10 @@ TEST(StorageTest, Module)
     using namespace libtbag::filesystem;
     auto const MODULE_EXTENSION = getModuleSuffix();
     auto const MODULE_NAME      = getModuleName("tbshare");
-    auto const ORIGINAL_PATH    = Path::getExeDir() / MODULE_NAME;
+    auto const SOURCE_PATH      = Path::getExeDir() / MODULE_NAME;
     auto const DESTINATION_PATH = tttDir_Get() / MODULE_NAME;
 
-    ASSERT_EQ(Err::E_SUCCESS, copyFile(ORIGINAL_PATH, DESTINATION_PATH));
+    ASSERT_EQ(Err::E_SUCCESS, copyFile(SOURCE_PATH, DESTINATION_PATH));
     ASSERT_TRUE(DESTINATION_PATH.isRegularFile());
 
     Storage storage;
@@ -209,5 +209,36 @@ TEST(StorageTest, Text)
     ASSERT_EQ(VAL_EN, storage2.getText(KEY));
     ASSERT_EQ(VAL_EN, storage2.getText(EN_NAME, KEY));
     ASSERT_EQ(VAL_KO, storage2.getText(KO_NAME, KEY));
+}
+
+TEST(StorageTest, Image)
+{
+    tttDir_Automatic();
+    auto const PATH = tttDir_Get();
+
+    using namespace libtbag::filesystem;
+    using namespace libtbag::graphic;
+
+    auto const IMAGE1_NAME = "lena.png";
+    auto const IMAGE2_NAME = "lena2.png";
+    auto const SOURCE_PATH = DemoAsset::get_tester_dir_image() / IMAGE1_NAME;
+    auto const DESTINATION_PATH = PATH / IMAGE1_NAME;
+
+    ASSERT_EQ(Err::E_SUCCESS, copyFile(SOURCE_PATH, DESTINATION_PATH));
+    ASSERT_TRUE(DESTINATION_PATH.isRegularFile());
+
+    Storage storage;
+    storage.setLayoutImage(PATH);
+    auto const IMAGES = storage.getImageFilenames();
+    ASSERT_EQ(1, IMAGES.size());
+    ASSERT_EQ(IMAGE1_NAME, IMAGES[0]);
+
+    Image image1;
+    ASSERT_TRUE(storage.loadImage(IMAGES[0], image1));
+    ASSERT_TRUE(storage.saveImage(IMAGE2_NAME, image1));
+    ASSERT_EQ(2, storage.getImageFilenames().size());
+
+    Image image2;
+    ASSERT_TRUE(storage.loadImage(IMAGE2_NAME, image2));
 }
 
