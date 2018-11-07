@@ -77,14 +77,22 @@ public:
 LibtbagInitializer::Mutex LibtbagInitializer::_mutex;
 bool LibtbagInitializer::_init = false;
 
-static bool setUp()
+static bool setUp(tbInitParam * param = nullptr)
 {
-    return true;
+    if (LibtbagInitializer::isInit()) {
+        __tbag_debug("It has already been initialized.");
+        return true;
+    }
+    return LibtbagInitializer::init(param);
 }
 
 static bool tearDown()
 {
-    return true;
+    if (!libtbag::LibtbagInitializer::isInit()) {
+        __tbag_debug("It has already been release.");
+        return true;
+    }
+    return libtbag::LibtbagInitializer::release();
 }
 
 // --------------------
@@ -107,9 +115,9 @@ static void TBAG_DESTRUCTOR __tbag_destructor(void)
 
 #if defined(TBAG_PLATFORM_WINDOWS)
 #include <windows.h>
-BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL
-                  , _In_ DWORD     fdwReason
-                  , _In_ LPVOID    lpvReserved)
+BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL,
+                    _In_ DWORD     fdwReason,
+                    _In_ LPVOID    lpvReserved)
 {
     bool result = false;
     switch (fdwReason) {
@@ -141,22 +149,19 @@ int tbGetPatchVersion()
     return LIBTBAG_VERSION_PATCH;
 }
 
-tbBOOL tbInitialize(tbInitParam * param)
+tbBOOL tbIsInit()
 {
-    if (libtbag::LibtbagInitializer::isInit()) {
-        __tbag_debug("It has already been initialized.");
-        return TB_TRUE;
-    }
-    return libtbag::LibtbagInitializer::init(param) ? TB_TRUE : TB_FALSE;
+    return libtbag::LibtbagInitializer::isInit() ? TB_TRUE : TB_FALSE;
 }
 
-tbBOOL tbRelease()
+void tbInitialize(tbInitParam * param)
 {
-    if (libtbag::LibtbagInitializer::isInit() == false) {
-        __tbag_debug("It has already been release.");
-        return TB_TRUE;
-    }
-    return libtbag::LibtbagInitializer::release() ? TB_TRUE : TB_FALSE;
+    libtbag::setUp(param);
+}
+
+void tbRelease()
+{
+    libtbag::tearDown();
 }
 
 // -----------------

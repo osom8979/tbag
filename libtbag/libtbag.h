@@ -32,8 +32,10 @@ TBAG_API int tbGetMajorVersion();
 TBAG_API int tbGetMinorVersion();
 TBAG_API int tbGetPatchVersion();
 
-TBAG_API tbBOOL tbInitialize(tbInitParam * param = TB_NULL);
-TBAG_API tbBOOL tbRelease();
+TBAG_API tbBOOL tbIsInit();
+
+TBAG_API void tbInitialize(tbInitParam * param = TB_NULL);
+TBAG_API void tbRelease();
 
 TBAG_API int tbPotMain(int argc, char ** argv, char ** envs);
 
