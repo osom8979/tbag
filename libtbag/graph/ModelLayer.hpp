@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/container/BagEx.hpp>
+#include <libtbag/container/Bex.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <memory>
@@ -45,8 +45,8 @@ public:
 
 public:
     using Buffer = libtbag::util::Buffer;
-    using BagEx  = libtbag::container::BagEx;
-    using BagExs = std::vector<BagEx>;
+    using Bex  = libtbag::container::Bex;
+    using BagExs = std::vector<Bex>;
     using Layers = std::vector<ModelLayer>;
 
 public:
@@ -63,7 +63,7 @@ public:
     {
     public:
         using Buffer = ModelLayer::Buffer;
-        using BagEx  = ModelLayer::BagEx;
+        using Bex    = ModelLayer::Bex;
         using BagExs = ModelLayer::BagExs;
         using Layers = ModelLayer::Layers;
 

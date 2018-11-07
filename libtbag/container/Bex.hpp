@@ -1,12 +1,13 @@
 /**
- * @file   BagEx.hpp
- * @brief  BagEx class prototype.
+ * @file   Bex.hpp
+ * @brief  Bex class prototype.
  * @author zer0
  * @date   2018-10-22
+ * @date   2018-11-07 (Rename: BagEx -> Bex)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_BAGEX_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_BAGEX_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_BEX_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_BEX_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -19,6 +20,7 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/type/TypeTable.hpp>
 #include <libtbag/container/Bag.hpp>
+#include <libtbag/memory/Allocator.hpp>
 
 #include <cassert>
 #include <string>
@@ -26,9 +28,10 @@
 #include <memory>
 #include <ostream>
 #include <algorithm>
-#include <type_traits>
 #include <iterator>
 #include <initializer_list>
+#include <utility>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,15 +40,16 @@ NAMESPACE_LIBTBAG_OPEN
 namespace container {
 
 /**
- * BagEx class prototype.
+ * Bex Extend class prototype.
  *
  * @author zer0
  * @date   2018-10-22
+ * @date   2018-11-07 (Rename: BagEx -> Bex)
  *
  * @remarks
  *  Only primary types are supported.
  */
-class TBAG_API BagEx
+class TBAG_API Bex
 {
 public:
     using TypeTable = libtbag::type::TypeTable;
@@ -61,7 +65,7 @@ public:
 
 public:
     template <typename T>
-    using Allocator = std::allocator<T>;
+    using Allocator = libtbag::memory::Allocator<T>;
 
     template <typename T>
     using BaseBagType = libtbag::container::Bag<T, Allocator<T>, MAX_ELEMENTS_BUFFER_SIZE>;
@@ -90,16 +94,16 @@ private:
     SharedUser _user;
 
 public:
-    BagEx() TBAG_NOEXCEPT;
-    BagEx(std::string const & content);
-    BagEx(char const * content);
-    BagEx(BagEx const & obj) TBAG_NOEXCEPT;
-    BagEx(BagEx && obj) TBAG_NOEXCEPT;
-    ~BagEx();
+    Bex() TBAG_NOEXCEPT;
+    Bex(std::string const & content);
+    Bex(char const * content);
+    Bex(Bex const & obj) TBAG_NOEXCEPT;
+    Bex(Bex && obj) TBAG_NOEXCEPT;
+    ~Bex();
 
 public:
     template <typename Type>
-    BagEx(std::vector<Type> const & content) : BagEx()
+    Bex(std::vector<Type> const & content) : Bex()
     {
         if (isFailure(fromVector<Type>(content))) {
             throw std::bad_alloc();
@@ -107,7 +111,7 @@ public:
     }
 
     template <typename Type>
-    BagEx(std::initializer_list<Type> list) : BagEx()
+    Bex(std::initializer_list<Type> list) : Bex()
     {
         if (isFailure(resize<Type>(list.size()))) {
             throw std::bad_alloc();
@@ -116,14 +120,16 @@ public:
     }
 
 public:
-    BagEx & operator =(BagEx const & obj) TBAG_NOEXCEPT;
-    BagEx & operator =(BagEx && obj) TBAG_NOEXCEPT;
-    BagEx & operator =(std::string const & content);
-    BagEx & operator =(char const * content);
+    Bex & operator =(Bex const & obj) TBAG_NOEXCEPT;
+    Bex & operator =(Bex && obj) TBAG_NOEXCEPT;
+
+public:
+    Bex & operator =(std::string const & content);
+    Bex & operator =(char const * content);
 
 public:
     template <typename Type>
-    BagEx & operator =(std::vector<Type> const & content)
+    Bex & operator =(std::vector<Type> const & content)
     {
         if (isFailure(fromVector<Type>(content))) {
             throw std::bad_alloc();
@@ -132,11 +138,11 @@ public:
     }
 
 public:
-    void copy(BagEx const & obj) TBAG_NOEXCEPT;
-    void swap(BagEx & obj) TBAG_NOEXCEPT;
+    void copy(Bex const & obj) TBAG_NOEXCEPT;
+    void swap(Bex & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(BagEx & lh, BagEx & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(Bex & lh, Bex & rh) TBAG_NOEXCEPT { lh.swap(rh); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -163,12 +169,12 @@ public:
      * @see std::map
      * @see std::less
      */
-    friend inline bool operator <(BagEx const & x, BagEx const & y) TBAG_NOEXCEPT
+    friend inline bool operator <(Bex const & x, Bex const & y) TBAG_NOEXCEPT
     {
         return x.get() < y.get();
     }
 
-    inline bool operator ==(BagEx const & obj) const TBAG_NOEXCEPT
+    inline bool operator ==(Bex const & obj) const TBAG_NOEXCEPT
     {
         return get() == obj.get();
     }
@@ -373,7 +379,7 @@ public:
 // --------------
 
 template <class CharT, class TraitsT>
-std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, BagEx const & obj)
+std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, Bex const & obj)
 {
     return os << obj.toAutoString();
 }
@@ -384,5 +390,5 @@ std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, Traits
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_BAGEX_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_CONTAINER_BEX_HPP__
 

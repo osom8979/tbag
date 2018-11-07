@@ -1,11 +1,12 @@
 /**
- * @file   BagEx.cpp
- * @brief  BagEx class implementation.
+ * @file   Bex.cpp
+ * @brief  Bex class implementation.
  * @author zer0
  * @date   2018-10-23
+ * @date   2018-11-07 (Rename: BagEx -> Bex)
  */
 
-#include <libtbag/container/BagEx.hpp>
+#include <libtbag/container/Bex.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
 
@@ -18,63 +19,63 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace container {
 
-BagEx::BagEx() TBAG_NOEXCEPT : _type(TypeTable::TT_UNKNOWN), _bag(nullptr), _user(nullptr)
+Bex::Bex() TBAG_NOEXCEPT : _type(TypeTable::TT_UNKNOWN), _bag(nullptr), _user(nullptr)
 {
     // EMPTY.
 }
 
-BagEx::BagEx(std::string const & content) : BagEx()
+Bex::Bex(std::string const & content) : Bex()
 {
     if (isFailure(fromString(content))) {
         throw std::bad_alloc();
     }
 }
 
-BagEx::BagEx(char const * content) : BagEx(std::string(content))
+Bex::Bex(char const * content) : Bex(std::string(content == nullptr ? "" : content))
 {
     // EMPTY.
 }
 
-BagEx::BagEx(BagEx const & obj) TBAG_NOEXCEPT : BagEx()
+Bex::Bex(Bex const & obj) TBAG_NOEXCEPT : Bex()
 {
     (*this) = obj;
 }
 
-BagEx::BagEx(BagEx && obj) TBAG_NOEXCEPT : BagEx()
+Bex::Bex(Bex && obj) TBAG_NOEXCEPT : Bex()
 {
     (*this) = std::move(obj);
 }
 
-BagEx::~BagEx()
+Bex::~Bex()
 {
     clear();
 }
 
-BagEx & BagEx::operator =(BagEx const & obj) TBAG_NOEXCEPT
+Bex & Bex::operator =(Bex const & obj) TBAG_NOEXCEPT
 {
     copy(obj);
     return *this;
 }
 
-BagEx & BagEx::operator =(BagEx && obj) TBAG_NOEXCEPT
+Bex & Bex::operator =(Bex && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-BagEx & BagEx::operator =(std::string const & content)
+Bex & Bex::operator =(std::string const & content)
 {
     fromString(content);
     return *this;
 }
 
-BagEx & BagEx::operator =(char const * content)
+Bex & Bex::operator =(char const * content)
 {
     fromString(content);
     return *this;
 }
 
-void BagEx::copy(BagEx const & obj) TBAG_NOEXCEPT
+void Bex::copy(Bex const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _type = obj._type;
@@ -83,7 +84,7 @@ void BagEx::copy(BagEx const & obj) TBAG_NOEXCEPT
     }
 }
 
-void BagEx::swap(BagEx & obj) TBAG_NOEXCEPT
+void Bex::swap(Bex & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         std::swap(_type, obj._type);
@@ -92,14 +93,14 @@ void BagEx::swap(BagEx & obj) TBAG_NOEXCEPT
     }
 }
 
-void BagEx::clear()
+void Bex::clear()
 {
     _type = TypeTable::TT_UNKNOWN;
     _bag.reset();
     _user.reset();
 }
 
-Err BagEx::create(TypeTable type)
+Err Bex::create(TypeTable type)
 {
     if (_type == type) {
         return Err::E_ALREADY;
@@ -130,7 +131,7 @@ Err BagEx::create(TypeTable type)
     return Err::E_BADALLOC;
 }
 
-Err BagEx::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
+Err Bex::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
                   unsigned i4, unsigned i5, unsigned i6, unsigned i7)
 {
     if (!_bag) {
@@ -155,7 +156,7 @@ Err BagEx::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
     }
 }
 
-void * BagEx::data()
+void * Bex::data()
 {
     if (!_bag) {
         return nullptr;
@@ -172,7 +173,7 @@ void * BagEx::data()
     }
 }
 
-void const * BagEx::data() const
+void const * Bex::data() const
 {
     if (!_bag) {
         return nullptr;
@@ -189,7 +190,7 @@ void const * BagEx::data() const
     }
 }
 
-std::size_t BagEx::size() const
+std::size_t Bex::size() const
 {
     if (!_bag) {
         return 0;
@@ -206,7 +207,7 @@ std::size_t BagEx::size() const
     }
 }
 
-std::size_t BagEx::size(std::size_t index) const
+std::size_t Bex::size(std::size_t index) const
 {
     if (!_bag) {
         return 0;
@@ -223,7 +224,7 @@ std::size_t BagEx::size(std::size_t index) const
     }
 }
 
-std::size_t BagEx::dims() const
+std::size_t Bex::dims() const
 {
     if (!_bag) {
         return 0;
@@ -240,7 +241,7 @@ std::size_t BagEx::dims() const
     }
 }
 
-bool BagEx::empty() const
+bool Bex::empty() const
 {
     if (!_bag) {
         return true;
@@ -257,32 +258,32 @@ bool BagEx::empty() const
     }
 }
 
-std::string BagEx::toString() const
+std::string Bex::toString() const
 {
     auto const * BUFFER = castData<char>();
     return std::string(BUFFER, BUFFER + size());
 }
 
-std::string BagEx::toHexString() const
+std::string Bex::toHexString() const
 {
     using namespace libtbag::string;
     return convertByteArrayToHexString(castData<uint8_t>(), size(), STRING_EMPTY);
 }
 
-std::string BagEx::toHexBoxString(int line_width) const
+std::string Bex::toHexBoxString(int line_width) const
 {
     using namespace libtbag::string;
     return convertByteArrayToHexStringBox(castData<uint8_t>(), size(), line_width);
 }
 
-std::string BagEx::toInfoString() const
+std::string Bex::toInfoString() const
 {
     if (!_bag) {
-        return "BagEx[0x00]{NULL}(0)";
+        return "Bex[0x00]{NULL}(0)";
     }
 
     std::stringstream ss;
-    ss << "BagEx[" << string::convertAddressToString(data())
+    ss << "Bex[" << string::convertAddressToString(data())
        << "]{" << getTypeName() << '}';
 
     std::size_t const DIMS = dims();
@@ -299,7 +300,7 @@ std::string BagEx::toInfoString() const
     return ss.str();
 }
 
-std::string BagEx::toAutoString() const
+std::string Bex::toAutoString() const
 {
     if (exists() && dims() == 1 && _type == TypeTable::TT_CHAR) {
         return toString();
@@ -307,7 +308,7 @@ std::string BagEx::toAutoString() const
     return toInfoString();
 }
 
-Err BagEx::fromString(std::string const & content)
+Err Bex::fromString(std::string const & content)
 {
     Err const CODE = resize<char>(content.size());
     if (isFailure(CODE)) {

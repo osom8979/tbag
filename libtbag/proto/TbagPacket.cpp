@@ -283,18 +283,18 @@ public:
     PairOffsetVectorOffset createPairs(std::string const & content)
     {
         std::vector<PairOffset> offsets;
-        offsets.push_back(createPair(content, BagEx()));
+        offsets.push_back(createPair(content, Bex()));
         return builder.CreateVector(offsets);
     }
 
     PairOffsetVectorOffset createPairs(std::string const & key, std::string const & val)
     {
         std::vector<PairOffset> offsets;
-        offsets.push_back(createPair(key, BagEx(val)));
+        offsets.push_back(createPair(key, Bex(val)));
         return builder.CreateVector(offsets);
     }
 
-    PairOffset createPair(std::string const & key, BagEx const & bag)
+    PairOffset createPair(std::string const & key, Bex const & bag)
     {
         using namespace libtbag::proto::fbs::tbag;
         AnyArr const VALUE_TYPE = getAnyArr(bag.getType());
@@ -314,7 +314,7 @@ public:
                           VALUE_TYPE, createAnyArr(VALUE_TYPE, bag));
     }
 
-    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, BagEx const & bag)
+    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, Bex const & bag)
     {
         using namespace libtbag::proto::fbs::tbag;
         switch (value_type) {
@@ -491,7 +491,7 @@ public:
     }
 
     template <typename PairItr>
-    BagEx createBagEx(PairItr itr, tbag::AnyArr arr_type) const
+    Bex createBagEx(PairItr itr, tbag::AnyArr arr_type) const
     {
         using namespace libtbag::proto::fbs::tbag;
         switch (arr_type) {
@@ -506,26 +506,26 @@ public:
         case AnyArr_UlongArr:   return createBagEx<PairItr,  UlongArr, uint64_t>(itr);
         case AnyArr_FloatArr:   return createBagEx<PairItr,  FloatArr,    float>(itr);
         case AnyArr_DoubleArr:  return createBagEx<PairItr, DoubleArr,   double>(itr);
-        case AnyArr_NONE:       return BagEx();
+        case AnyArr_NONE:       return Bex();
         default: TBAG_INACCESSIBLE_BLOCK_ASSERT();
         // @formatter:on
         }
-        return BagEx();
+        return Bex();
     }
 
     template <typename PairItr, typename TbagArrType, typename ValueType>
-    BagEx createBagEx(PairItr itr) const
+    Bex createBagEx(PairItr itr) const
     {
-        BagEx bag;
+        Bex bag;
 
         Err code = bag.create<ValueType>();
         if (isFailure(code)) {
-            return BagEx();
+            return Bex();
         }
 
         code = bag.resize(itr->i0(), itr->i1(), itr->i2(), itr->i3(), itr->i4(), itr->i5(), itr->i6(), itr->i7());
         if (isFailure(code)) {
-            return BagEx();
+            return Bex();
         }
 
         auto val = (TbagArrType const *)itr->val();
@@ -611,14 +611,14 @@ void TbagPacket::onHeader(uint64_t id, int32_t type, int32_t code, void * arg)
     assert(user_arg != nullptr);
 
     if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
-        BagEx * bag = (BagEx*)user_arg->user;
+        Bex * bag = (Bex*)user_arg->user;
         assert(bag != nullptr);
     } else {
         // Unknown types.
     }
 }
 
-void TbagPacket::onPair(std::string && key, BagEx && val, void * arg)
+void TbagPacket::onPair(std::string && key, Bex && val, void * arg)
 {
     if (arg == nullptr) {
         return;
@@ -633,7 +633,7 @@ void TbagPacket::onPair(std::string && key, BagEx && val, void * arg)
     assert(user_arg != nullptr);
 
     if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
-        BagEx * bag = (BagEx*)user_arg->user;
+        Bex * bag = (Bex*)user_arg->user;
         assert(bag != nullptr);
         *bag = std::move(val);
     } else {
@@ -664,9 +664,9 @@ Err TbagPacket::update()
     return update((char const *)point(), size());
 }
 
-TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
+TbagPacket::Bex TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
 {
-    BagEx result;
+    Bex result;
     UserArg arg;
     arg.type = static_cast<int>(UserArgType::UAT_BAG_EX);
     arg.user = &result;
@@ -678,12 +678,12 @@ TbagPacket::BagEx TbagPacket::findKey(char const * buffer, std::size_t size, std
     return result;
 }
 
-TbagPacket::BagEx TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
+TbagPacket::Bex TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
 {
     return findKey(buffer.data(), buffer.size(), key, code);
 }
 
-TbagPacket::BagEx TbagPacket::findKey(std::string const & key, Err * code)
+TbagPacket::Bex TbagPacket::findKey(std::string const & key, Err * code)
 {
     return findKey((char const *)point(), size(), key, code);
 }

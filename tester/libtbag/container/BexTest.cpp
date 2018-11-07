@@ -1,20 +1,20 @@
 /**
- * @file   BagExTest.cpp
- * @brief  BagEx class tester.
+ * @file   BexTest.cpp
+ * @brief  Bex class tester.
  * @author zer0
  * @date   2018-10-22
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/container/BagEx.hpp>
+#include <libtbag/container/Bex.hpp>
 
 using namespace libtbag;
 using namespace libtbag::container;
 
-TEST(BagExTest, Default)
+TEST(BexTest, Default)
 {
-    BagEx obj1;
-    BagEx obj2;
+    Bex obj1;
+    Bex obj2;
 
     ASSERT_FALSE(static_cast<bool>(obj1));
     ASSERT_FALSE(static_cast<bool>(obj2));
@@ -56,7 +56,7 @@ TEST(BagExTest, Default)
     ASSERT_EQ(10   , obj2_bag->size(0));
     ASSERT_EQ(20   , obj2_bag->size(1));
 
-    BagEx obj3 = std::move(obj2);
+    Bex obj3 = std::move(obj2);
     ASSERT_TRUE(static_cast<bool>(obj1));
     ASSERT_FALSE(static_cast<bool>(obj2));
     ASSERT_TRUE(static_cast<bool>(obj3));
@@ -65,8 +65,8 @@ TEST(BagExTest, Default)
     std::cout << "Obj2: " << obj2 << std::endl;
     std::cout << "Obj3: " << obj3 << std::endl;
 
-    BagEx obj4("BagExTest.Default");
-    BagEx obj5(std::vector<int>{0, 1, 2, 3, 4});
+    Bex obj4("BexTest.Default");
+    Bex obj5(std::vector<int>{0, 1, 2, 3, 4});
     std::cout << "Obj4: " << obj4 << std::endl;
     std::cout << "Obj5: " << obj5 << std::endl;
 
@@ -75,14 +75,14 @@ TEST(BagExTest, Default)
     std::cout << "Update Obj4: " << obj4 << std::endl;
     std::cout << "Update Obj5: " << obj5 << std::endl;
 
-    BagEx obj6 = obj5;
+    Bex obj6 = obj5;
     ASSERT_EQ(obj6, obj5);
 }
 
-TEST(BagExTest, InitializerList)
+TEST(BexTest, InitializerList)
 {
-    BagEx obj = { 0, 1, 2, 3, 4 };
-    ASSERT_EQ(BagEx::TypeTable::TT_INT, obj.getType());
+    Bex obj = { 0, 1, 2, 3, 4 };
+    ASSERT_EQ(Bex::TypeTable::TT_INT, obj.getType());
     ASSERT_EQ(5, obj.size());
     ASSERT_EQ(0, obj.at<int>(0));
     ASSERT_EQ(1, obj.at<int>(1));
@@ -91,11 +91,11 @@ TEST(BagExTest, InitializerList)
     ASSERT_EQ(4, obj.at<int>(4));
 }
 
-TEST(BagExTest, Offset)
+TEST(BexTest, Offset)
 {
-    BagEx bag;
+    Bex bag;
     bag.resize<int>(2, 3, 4);
-    ASSERT_EQ(BagEx::TypeTable::TT_INT, bag.getType());
+    ASSERT_EQ(Bex::TypeTable::TT_INT, bag.getType());
     ASSERT_EQ(2*3*4, bag.size());
     ASSERT_EQ(2, bag.size(0));
     ASSERT_EQ(3, bag.size(1));
@@ -136,7 +136,7 @@ TEST(BagExTest, Offset)
     ASSERT_EQ(23, bag.at<int>(1, 2, 3));
 }
 
-struct TestBagExUser : public BagEx::User
+struct TestBagExUser : public Bex::User
 {
     bool & call_destructor;
     int value;
@@ -150,12 +150,12 @@ struct TestBagExUser : public BagEx::User
     }
 };
 
-TEST(BagExTest, User)
+TEST(BexTest, User)
 {
     int const TEST_VALUE = 10;
     bool call_destructor = false;
 
-    BagEx test;
+    Bex test;
     test.createUser<TestBagExUser>(TEST_VALUE, call_destructor);
     auto shared_user = test.user<TestBagExUser>();
     ASSERT_EQ(TEST_VALUE, shared_user->value);
@@ -164,10 +164,10 @@ TEST(BagExTest, User)
     ASSERT_TRUE(call_destructor);
 }
 
-TEST(BagExTest, StringConvert)
+TEST(BexTest, StringConvert)
 {
-    std::string const TEST_STRING = "BagExTest.StringConvert";
-    BagEx const TEST_BAG(TEST_STRING);
+    std::string const TEST_STRING = "BexTest.StringConvert";
+    Bex const TEST_BAG(TEST_STRING);
     ASSERT_TRUE(TEST_BAG.exists());
     ASSERT_FALSE(TEST_BAG.empty());
     ASSERT_EQ(TEST_STRING.size(), TEST_BAG.size());
@@ -176,10 +176,10 @@ TEST(BagExTest, StringConvert)
     ASSERT_EQ(TEST_STRING, TEST_BAG.toString());
 }
 
-TEST(BagExTest, VectorConvert)
+TEST(BexTest, VectorConvert)
 {
     std::vector<int> const TEST_VECTOR = {10, 20, 30};
-    BagEx const TEST_BAG(TEST_VECTOR);
+    Bex const TEST_BAG(TEST_VECTOR);
     ASSERT_TRUE(TEST_BAG.exists());
     ASSERT_FALSE(TEST_BAG.empty());
     ASSERT_EQ(TEST_VECTOR.size(), TEST_BAG.size());
@@ -192,10 +192,10 @@ TEST(BagExTest, VectorConvert)
     ASSERT_EQ(TEST_VECTOR[2], RESULT_VECTOR[2]);
 }
 
-TEST(BagExTest, HexConvert)
+TEST(BexTest, HexConvert)
 {
     std::string const TEST_STRING = "0123456789";
-    BagEx const TEST_BAG(TEST_STRING);
+    Bex const TEST_BAG(TEST_STRING);
     ASSERT_TRUE(TEST_BAG.exists());
 
     auto const HEX = TEST_BAG.toHexString();
